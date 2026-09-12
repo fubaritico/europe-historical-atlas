@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ReviewReport",
+  "description": "Output schema for the multi-agent code review skill",
+  "type": "object",
+  "required": [
+    "timestamp",
+    "scope",
+    "files_reviewed",
+    "findings",
+    "score",
+    "verdict"
+  ],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of the review"
+    },
+    "scope": {
+      "type": "string",
+      "description": "Description of what was reviewed (branch diff, staged files, directory)"
+    },
+    "files_reviewed": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of files analyzed"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/finding"
+      }
+    },
+    "score": {
+      "$ref": "#/$defs/score"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["ready", "needs-attention", "needs-work"],
+      "description": "Overall verdict based on score thresholds"
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "required": [
+        "id",
+        "severity",
+        "category",
+        "file",
+        "lines",
+        "rule",
+        "problem",
+        "suggestion"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(SEC|ARCH|QUAL|A11Y)-\\d{3}$",
+          "description": "Unique rule identifier with domain prefix"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low"]
+        },
+        "category": {
+          "type": "string",
+          "enum": ["security", "architecture", "quality", "accessibility"]
+        },
+        "file": {
+          "type": "string",
+          "description": "Relative file path from project root"
+        },
+        "lines": {
+          "type": "string",
+          "description": "Line number or range (e.g. '45' or '45-67')"
+        },
+        "rule": {
+          "type": "string",
+          "description": "Short rule name from reference guide"
+        },
+        "problem": {
+          "type": "string",
+          "description": "Clear description of the violation found"
+        },
+        "suggestion": {
+          "type": "string",
+          "description": "Actionable fix instruction"
+        },
+        "fix_prompt": {
+          "type": "string",
+          "description": "Optional copy-pasteable instruction for the fixing agent"
+        },
+        "needs_verification": {
+          "type": "boolean",
+          "default": false,
+          "description": "When true, the finding is ambiguous and must be confirmed via opensrc/ source or the web before fixing (e.g., deprecated three.js API, changed method signature)"
+        },
+        "verification_query": {
+          "type": "string",
+          "description": "The query to run against opensrc/ or the web when needs_verification is true (e.g., 'three.js Raycaster intersectObject recursive default')"
+        }
+      }
+    },
+    "score": {
+      "type": "object",
+      "required": [
+        "security",
+        "architecture",
+        "quality",
+        "accessibility",
+        "overall"
+      ],
+      "properties": {
+        "security": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "architecture": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "quality": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "accessibility": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "overall": { "type": "integer", "minimum": 0, "maximum": 100 }
+      }
+    }
+  }
+}

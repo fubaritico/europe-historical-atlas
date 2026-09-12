@@ -1,0 +1,8 @@
+node_modules
+dist
+build
+coverage
+files
+.claude
+.husky
+pnpm-lock.yaml

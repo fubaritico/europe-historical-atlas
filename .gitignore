@@ -1,0 +1,22 @@
+# OS
+.DS_Store
+**/.DS_Store
+
+# IDE
+.idea
+.vscode
+
+# Dependencies
+node_modules
+
+# Build
+dist
+build
+coverage
+*.tsbuildinfo
+
+# Tooling caches
+.nx
+
+# Project plans and resources
+files
