@@ -38,6 +38,9 @@ When the dev proposes something:
 - **Review → Test → Commit** per change — no accumulation; fix pre-existing issues a review surfaces in
   files you touch (no deferred tech debt).
 - **Risky actions** (`reset --hard`, `rm -rf`): explicit permission EVERY TIME.
+- **Announce every command (IMPORTANT)** — before running ANY script/command, state three things: the
+  **cause** (what triggered it), the **reason** (why this command), the **action** (what it does). Never
+  run a command silently.
 - **Never hallucinate** — when uncertain, read the code first, search, bring sources via `opensrc`.
   **Verify three.js APIs against source** (`opensrc/`) or the web — never guess.
 - **Secrets** — in `.env*`, never in rules, memory, or code.
