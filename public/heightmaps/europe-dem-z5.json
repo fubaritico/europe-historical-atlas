@@ -1,0 +1,14 @@
+{
+  "width": 1024,
+  "height": 896,
+  "zoom": 5,
+  "bbox": {
+    "west": -33.75,
+    "south": 31.952162238024968,
+    "east": 56.25,
+    "north": 74.01954331150228
+  },
+  "min": -6246,
+  "max": 4441,
+  "encoding": "int16-le-metres"
+}

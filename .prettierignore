@@ -4,6 +4,7 @@ build
 coverage
 files
 opensrc
+public/heightmaps
 .claude
 .husky
 pnpm-lock.yaml
