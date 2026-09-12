@@ -26,6 +26,7 @@ export default tseslint.config(
       '**/build/**',
       '**/coverage/**',
       '**/files/**',
+      '**/opensrc/**',
       'pnpm-lock.yaml',
       'pnpm-workspace.yaml',
     ],

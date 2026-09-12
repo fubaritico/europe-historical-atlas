@@ -18,5 +18,8 @@ coverage
 # Tooling caches
 .nx
 
+# Vendored dependency sources (opensrc skill) — for study only
+opensrc
+
 # Project plans and resources
 files
