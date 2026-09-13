@@ -11,3 +11,10 @@ Put here the know issues to avoid cluttering the context window.
   `sessionStorage.clear()` (map camera key `europe-map:map-camera`) for the framed default.
 - **Relief orientation** assumed north = −Z, east = +X; verified visually as correct. If a future DEM looks
   mirrored/upside-down, flip `u`/`v` in `reliefMesh` sampling.
+- **A11y backlog (M2 HTML-overlay milestone)**: the map is a bare WebGL canvas with no DOM-accessible
+  equivalent. Deferred to when the HTML UI overlay lands (roadmap 03): (a) `mapControls` binds arrow/zoom
+  keys on `window` and `preventDefault`s them app-wide (only exempting form fields via `isEditableFocused`)
+  → scope to a focusable canvas with `role`/`tabindex` and gate on focus; (b) `<canvas>` needs an
+  accessible name/role + a keyboard-reachable region list for picking (M1.4/M2); (c) Stats overlay is
+  mouse-only. Keyboard zoom (`+`/`-`/PageUp/Down), `prefers-reduced-motion`, and ctrl+wheel passthrough are
+  already handled.

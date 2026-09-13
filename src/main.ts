@@ -13,9 +13,10 @@ import Stats from 'three/addons/libs/stats.module.js'
 import { createSessionStorageMapCameraStore } from './controls/mapCameraStore'
 import { createMapControls } from './controls/mapControls'
 import { createFetchHeightmapSource, smoothHeightmap } from './data/heightmap'
+import { createDebugRect } from './scene/debugRect'
 import { createReliefMesh } from './scene/reliefMesh'
 
-import type { MapControlsBounds } from './controls/mapControls'
+import type { MapRect } from './controls/mapControls'
 import type { Heightmap } from './data/heightmap'
 
 /**
@@ -50,22 +51,49 @@ function bootstrap(): () => void {
   const scene = new Scene()
   scene.background = new Color('#efe6d2') // parchment placeholder (vintage palette)
 
-  const camera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200)
+  // Respect the OS "reduce motion" setting: near-zero inertia so pan/zoom stop immediately (no coasting).
+  const reduceMotion =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-  // EU4-style map camera (arrow-key pan + wheel zoom, yaw locked north). Bounds are provisional here and
-  // refined to the true map extent once the DEM aspect is known (see rebuildRelief).
-  const provisionalBounds: MapControlsBounds = { minX: -5, maxX: 5, minZ: -5, maxZ: 5 }
+  // Camera perspective, tuned live: lower fov = flatter, less perspective (more map-like).
+  const framing = { fov: 35 }
+
+  const camera = new PerspectiveCamera(
+    framing.fov,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    300
+  )
+
+  // EU4-style map camera (arrow-key pan + wheel zoom, yaw locked north). `extent` is the world rectangle
+  // the view must stay within; the frustum-aware clamp derives the pannable range from it (grows when
+  // zoomed in, shrinks/re-centres when zoomed out, adapts on resize). Tuned live via centre + half-size.
+  const extentParams = { centerX: 0, centerZ: 0, halfWidth: 5.8, halfDepth: 5.2 }
+  const toExtent = (): MapRect => ({
+    minX: extentParams.centerX - extentParams.halfWidth,
+    maxX: extentParams.centerX + extentParams.halfWidth,
+    minZ: extentParams.centerZ - extentParams.halfDepth,
+    maxZ: extentParams.centerZ + extentParams.halfDepth,
+  })
   const controls = createMapControls(camera, renderer.domElement, {
-    bounds: provisionalBounds,
-    minDistance: 2.5,
-    maxDistance: 16,
-    minPitchDeg: 45,
-    maxPitchDeg: 72,
+    extent: toExtent(),
+    minDistance: 1,
+    maxDistance: 6,
+    minPitchDeg: 30,
+    maxPitchDeg: 55,
     panSpeed: 8,
     zoomSpeed: 0.08,
-    smoothingTau: 0.12,
-    initialZoom: 0.12,
+    smoothingTau: reduceMotion ? 0.02 : 0.12,
+    initialZoom: 0,
+    enableDrag: true,
+    enableEdgeScroll: true,
+    edgeScrollMargin: 24,
+    edgeScrollSpeed: 8,
   })
+  const applyExtent = (): void => {
+    controls.setExtent(toExtent())
+  }
 
   // Restore the persisted viewpoint BEFORE the first render → zero camera transition on reload/HMR.
   const cameraStore = createSessionStorageMapCameraStore()
@@ -82,6 +110,12 @@ function bootstrap(): () => void {
   sun.position.set(5, 10, 3)
   scene.add(sun)
 
+  // Debug overlay — the map extent (red) + the live frustum ground footprint (blue), toggled in the panel.
+  const debug = { showFrustum: false }
+  const extentRect = createDebugRect('#c0392b')
+  const footprintRect = createDebugRect('#2980b9')
+  scene.add(extentRect.object, footprintRect.object)
+
   const params: DevParams = {
     exaggeration: 1,
     smoothing: 0,
@@ -90,14 +124,13 @@ function bootstrap(): () => void {
     wireframe: true,
   }
 
-  // World-space width of the map plane (X axis); shared by the mesh build and the camera pan bounds.
+  // World-space width of the map plane (X axis), consumed by the mesh build.
   const WORLD_WIDTH = 12
-  // Fraction of the map inset from the true edge for the pan bounds, so the plane edge/void never shows.
-  const BOUNDS_INSET = 0.12
 
   // Europe relief — rebuilt from the loaded heightmap; the height curve requires a geometry rebuild.
   let heightmap: Heightmap | null = null
   let relief: ReturnType<typeof createReliefMesh> | null = null
+  let disposed = false // guards the async heightmap load from building a mesh after teardown (HMR mid-load)
 
   const rebuildRelief = (): void => {
     if (!heightmap) return
@@ -116,18 +149,13 @@ function bootstrap(): () => void {
     })
     relief.scale.setY(params.exaggeration)
     scene.add(relief)
-
-    // Refine the camera pan bounds to the true map extent (inset so the plane edge/void never shows).
-    const worldDepth = WORLD_WIDTH / (heightmap.meta.width / heightmap.meta.height)
-    const halfW = (WORLD_WIDTH / 2) * (1 - BOUNDS_INSET)
-    const halfD = (worldDepth / 2) * (1 - BOUNDS_INSET)
-    controls.setBounds({ minX: -halfW, maxX: halfW, minZ: -halfD, maxZ: halfD })
   }
 
   const heightmapSource = createFetchHeightmapSource('/heightmaps/europe-dem-z5')
   void heightmapSource
     .load()
     .then((loaded) => {
+      if (disposed) return // teardown ran mid-load → don't add an orphan mesh to a dead scene
       heightmap = loaded
       rebuildRelief()
     })
@@ -156,10 +184,43 @@ function bootstrap(): () => void {
   const camFolder = gui.addFolder('camera')
   camFolder.add(controls.options, 'panSpeed', 1, 30, 0.5).name('pan speed')
   camFolder.add(controls.options, 'zoomSpeed', 0.01, 0.3, 0.01).name('zoom speed')
-  camFolder.add(controls.options, 'minDistance', 1, 10, 0.5).name('min distance (in)')
-  camFolder.add(controls.options, 'maxDistance', 8, 30, 0.5).name('max distance (out)')
+  camFolder.add(controls.options, 'smoothingTau', 0.02, 0.5, 0.01).name('inertia (s)')
+  camFolder.add(controls.options, 'enableDrag').name('drag-pan')
+  camFolder.add(controls.options, 'enableEdgeScroll').name('edge-scroll')
+  camFolder.add(controls.options, 'edgeScrollSpeed', 1, 30, 0.5).name('edge speed')
+  camFolder.add(controls.options, 'minDistance', 0.5, 8, 0.25).name('min distance (in)')
+  camFolder.add(controls.options, 'maxDistance', 2, 15, 0.25).name('max distance (out)')
   camFolder.add(controls.options, 'minPitchDeg', 20, 89, 1).name('pitch in (oblique)')
   camFolder.add(controls.options, 'maxPitchDeg', 20, 89, 1).name('pitch out (top-down)')
+  camFolder
+    .add(framing, 'fov', 15, 60, 1)
+    .name('fov (lower = flatter)')
+    .onChange((value: number) => {
+      camera.fov = value
+      camera.updateProjectionMatrix()
+    })
+  const extentFolder = camFolder.addFolder('extent (view limit)')
+  extentFolder.add(extentParams, 'centerX', -6, 6, 0.05).name('centre X').onChange(applyExtent)
+  extentFolder.add(extentParams, 'centerZ', -6, 6, 0.05).name('centre Z').onChange(applyExtent)
+  extentFolder.add(extentParams, 'halfWidth', 0.5, 6, 0.05).name('half width').onChange(applyExtent)
+  extentFolder.add(extentParams, 'halfDepth', 0.5, 6, 0.05).name('half depth').onChange(applyExtent)
+  camFolder
+    .add(debug, 'showFrustum')
+    .name('show extent + footprint')
+    .onChange((value: boolean) => {
+      extentRect.setVisible(value)
+      footprintRect.setVisible(value)
+    })
+  camFolder
+    .add(
+      {
+        logState: (): void => {
+          console.warn('camera state:', JSON.stringify(controls.getState()))
+        },
+      },
+      'logState'
+    )
+    .name('log camera state')
   camFolder.close()
 
   const stats = new Stats()
@@ -177,6 +238,10 @@ function bootstrap(): () => void {
   const tick = (): void => {
     timer.update()
     controls.update(timer.getDelta())
+    if (debug.showFrustum) {
+      extentRect.update(controls.getExtent(), 0.05)
+      footprintRect.update(controls.getFootprint(), 0.05)
+    }
     renderer.render(scene, camera)
     stats.update()
     frame = requestAnimationFrame(tick)
@@ -184,6 +249,7 @@ function bootstrap(): () => void {
   tick()
 
   return (): void => {
+    disposed = true // stop any in-flight heightmap load from building an orphan mesh
     saveCamera() // capture the exact current viewpoint before we tear down
     cancelAnimationFrame(frame)
     window.removeEventListener('beforeunload', saveCamera)
@@ -191,6 +257,8 @@ function bootstrap(): () => void {
     controls.dispose()
     gui.destroy()
     stats.dom.remove()
+    extentRect.dispose()
+    footprintRect.dispose()
     if (relief) {
       relief.geometry.dispose()
       relief.material.dispose()
