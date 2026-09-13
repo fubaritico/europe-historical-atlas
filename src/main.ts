@@ -23,8 +23,10 @@ import type { Heightmap } from './data/heightmap'
  * Dev-tunable parameters, exposed live through the lil-gui panel.
  */
 interface DevParams {
-  /** Vertical exaggeration of the relief (applied via `mesh.scale.y`). */
+  /** Vertical exaggeration of the relief at full zoom-out (applied via `mesh.scale.y`). */
   exaggeration: number
+  /** Exaggeration multiplier at full zoom-in (relief flattens as you zoom in); 1 = no flattening. */
+  exaggZoomIn: number
   /** Box-blur radius (grid cells); kills isolated DEM outliers. Keep low to stay crisp. */
   smoothing: number
   /** Elevations up to this (metres) stay 1:1 — plains keep their relief. */
@@ -118,6 +120,7 @@ function bootstrap(): () => void {
 
   const params: DevParams = {
     exaggeration: 1,
+    exaggZoomIn: 0.5,
     smoothing: 0,
     plainsCeiling: 575,
     peakTarget: 1900,
@@ -164,12 +167,10 @@ function bootstrap(): () => void {
     })
 
   const gui = new GUI({ title: 'europe-map · dev' })
-  gui
-    .add(params, 'exaggeration', 0, 4, 0.05)
-    .name('vertical exaggeration')
-    .onChange((value: number) => {
-      relief?.scale.setY(value)
-    })
+  // Exaggeration follows the zoom (applied every frame in the loop): full at zoom-out, × exaggZoomIn at
+  // zoom-in. This is a cheap scale.y transform — no geometry rebuild.
+  gui.add(params, 'exaggeration', 0, 4, 0.05).name('exaggeration (zoom-out)')
+  gui.add(params, 'exaggZoomIn', 0.1, 1, 0.05).name('exaggeration @ zoom-in')
   gui.add(params, 'smoothing', 0, 8, 1).name('smoothing (outliers)').onFinishChange(rebuildRelief)
   gui
     .add(params, 'plainsCeiling', 0, 1000, 25)
@@ -238,6 +239,9 @@ function bootstrap(): () => void {
   const tick = (): void => {
     timer.update()
     controls.update(timer.getDelta())
+    // Zoom-linked vertical exaggeration: full at zoom-out (z=0), × exaggZoomIn at zoom-in (z=1).
+    if (relief)
+      relief.scale.setY(params.exaggeration * (1 - (1 - params.exaggZoomIn) * controls.zoom))
     if (debug.showFrustum) {
       extentRect.update(controls.getExtent(), 0.05)
       footprintRect.update(controls.getFootprint(), 0.05)
