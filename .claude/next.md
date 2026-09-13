@@ -23,8 +23,11 @@ layers, per-century). Details: roadmap chapters 02 (relief/picking), 03 (camera/
 - **Relief tuning = a VALUE-REMAP easing, NOT blur** (hard-won): plains ≤ `plainsCeiling` stay 1:1; peaks
   ease toward `peakTarget` (sharp ridges kept). Defaults: exag 1.0, ceiling 575, peak-target 1900, smoothing
   0; `worldPerMetre = 1/10000` in `reliefMesh`. Exaggeration slider is intentionally low-sensitivity.
-- **DEM**: `public/heightmaps/europe-dem-z5.{bin,json}` (Int16 metres, Web Mercator, bbox
-  W−33.75/S31.95/E56.25/N74.02). Regenerate via `files/spikes/fetch-dem` (gitignored tool).
+- **DEM**: `public/heightmaps/europe-dem-z5.{bin,json}` (1280×1164, Int16 metres, Web Mercator, ~3 MB,
+  bbox W−45/S11.18/E78.75/N76.84 — widened to a **hors-champ frame** à la Total War: Europe is the focus,
+  the surround (Iceland/SE-Greenland tip, Atlantic, Sahara, Caucasus→Karakoram) is context to render as a
+  uniform parchment out-of-frame. North capped ~77° to bound Web-Mercator stretch. Regenerate via
+  `files/spikes/fetch-dem` (gitignored): `--west -45 --south 18 --east 70 --north 76 --zoom 5 --grid 1280`.
 - **Camera persistence**: sessionStorage key `europe-map:camera`; `sessionStorage.clear()` for a framed default.
 
 ## Conventions (this project)
