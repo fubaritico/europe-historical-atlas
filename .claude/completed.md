@@ -22,3 +22,29 @@ Repurposed the repo from the old `fubaritico-ds` design system into a **3D histo
 - **Milestone 1.1** (`1580921`) — Europe relief from the DEM: `heightmap` port + `reliefMesh` (CPU
   displacement). Height **easing** (plains 1:1, peaks eased toward a target — sharp, NOT blur) → game-map
   look. lil-gui defaults: exag 1.0, ceiling 575, peak-target 1900, smoothing 0. 29 tests.
+
+### 2026-09-13 — Euratlas data decision, import boundaries, DEM widening, Milestone 1.3 (grand-strategy camera)
+
+Big camera session. Commits `3dea0d6`..`7d1b20f` on `master`, full gate (type-check/lint/test/husky), **63 tests**.
+
+- **Euratlas research + decision** (memory [[euratlas-data-and-licensing]]) — the local
+  `files/resources/euratlas` samples ARE real vector shapefiles (21 centuries) but geographically cropped
+  to the Alps; the Simple License forbids redistributing the vectors / reconstituting an atlas → for the
+  published portfolio demo, M2 geometry = free **historical-basemaps** (CC-BY), Euratlas kept as a
+  **private toponymy reference** (facts, de minimis, never the geometry). No regen needed.
+- **Import boundaries** (`3dea0d6`) — ESLint `no-restricted-imports` per layer (data leaf; scene→data;
+  camera independent; controls→camera; main root). Modularity enforced without splitting packages.
+- **DEM widened** (`be5ebf2`) — regenerated to a Total-War **hors-champ frame** (bbox W−45/S11/E78.75/N76.84,
+  1280×1164, ~3 MB); no code change (data-driven mesh). See `next.md` for the regen command.
+- **EU4 map camera** (`b2142ad`, `9a32fa6`) — new pluggable `controls/mapControls` replacing OrbitControls:
+  arrow pan, wheel zoom, yaw locked north, zoom-linked distance + tilt. **Frustum-aware clamp**: the target
+  is bounded so the frustum's ground footprint (raycast of the 4 corners onto `y=0`) stays within a world
+  `extent` → pannable area grows when zoomed in, re-centres when out, **adapts to resize**. **Drag-pan +
+  edge-scroll**. **Inertia** = velocity + ease-out decay (snappy start, gliding release), factored into
+  exported `easeOutDecay`/`driveOrGlide`. Debug overlay `scene/debugRect` (extent + live footprint).
+  Persistence `{target, zoom}` on `europe-map:map-camera`.
+- **Zoom-linked exaggeration** (`7d1b20f`) — relief flattens as you zoom in (× `exaggZoomIn`, default 0.5),
+  cheap `scale.y` transform (no geometry rebuild).
+- Multi-agent `/review` each step. A11y deferred to the **M2 HTML-overlay backlog** (window-scoped key
+  capture, canvas role/semantics) — keyboard zoom (`+/-/PageUp/Down`), `prefers-reduced-motion`, and
+  ctrl+wheel passthrough are already handled.
