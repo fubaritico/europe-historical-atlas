@@ -93,5 +93,68 @@ export default tseslint.config(
         },
       ],
     },
+  },
+
+  // Architecture boundaries — enforce the layer dependency direction inside src/ without
+  // splitting into packages. Matching is on the import source string (no resolver needed).
+  // Direction: data/ (leaf domain/ports) <- scene/ (rendering) ; camera/ is independent ;
+  // main.ts is the composition root and may be imported by nobody.
+  {
+    files: ['src/data/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '**/scene',
+                '**/scene/**',
+                '**/camera',
+                '**/camera/**',
+                '**/main',
+                '**/main.ts',
+              ],
+              message:
+                'Architecture boundary: data/ is the leaf domain/ports layer — it must not import from scene/, camera/, or main.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/scene/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/camera', '**/camera/**', '**/main', '**/main.ts'],
+              message:
+                'Architecture boundary: scene/ may depend on data/ but not on camera/ or main.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/camera/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/scene', '**/scene/**', '**/data', '**/data/**', '**/main', '**/main.ts'],
+              message:
+                'Architecture boundary: camera/ is independent — it must not import from scene/, data/, or main.',
+            },
+          ],
+        },
+      ],
+    },
   }
 )
