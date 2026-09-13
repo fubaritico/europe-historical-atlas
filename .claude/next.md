@@ -28,7 +28,9 @@ layers, per-century). Details: roadmap chapters 02 (relief/picking), 03 (camera/
   the surround (Iceland/SE-Greenland tip, Atlantic, Sahara, Caucasus→Karakoram) is context to render as a
   uniform parchment out-of-frame. North capped ~77° to bound Web-Mercator stretch. Regenerate via
   `files/spikes/fetch-dem` (gitignored): `--west -45 --south 18 --east 70 --north 76 --zoom 5 --grid 1280`.
-- **Camera persistence**: sessionStorage key `europe-map:camera`; `sessionStorage.clear()` for a framed default.
+- **Camera persistence**: map camera (`controls/mapControls`) persists `{target, zoom}` under sessionStorage
+  key `europe-map:map-camera`; `sessionStorage.clear()` for a framed default. (The pose-based
+  `camera/cameraState` store on key `europe-map:camera` is reserved/unused, kept for M1.4 fly-to.)
 
 ## Conventions (this project)
 

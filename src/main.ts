@@ -8,17 +8,14 @@ import {
   Timer,
   WebGLRenderer,
 } from 'three'
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import Stats from 'three/addons/libs/stats.module.js'
 
-import {
-  applyCameraState,
-  createSessionStorageCameraStore,
-  readCameraState,
-} from './camera/cameraState'
+import { createSessionStorageMapCameraStore } from './controls/mapCameraStore'
+import { createMapControls } from './controls/mapControls'
 import { createFetchHeightmapSource, smoothHeightmap } from './data/heightmap'
 import { createReliefMesh } from './scene/reliefMesh'
 
+import type { MapControlsBounds } from './controls/mapControls'
 import type { Heightmap } from './data/heightmap'
 
 /**
@@ -53,21 +50,31 @@ function bootstrap(): () => void {
   const scene = new Scene()
   scene.background = new Color('#efe6d2') // parchment placeholder (vintage palette)
 
-  const camera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100)
-  camera.position.set(0, 7, 9)
+  const camera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200)
 
-  const controls = new OrbitControls(camera, renderer.domElement)
-  controls.enableDamping = true
+  // EU4-style map camera (arrow-key pan + wheel zoom, yaw locked north). Bounds are provisional here and
+  // refined to the true map extent once the DEM aspect is known (see rebuildRelief).
+  const provisionalBounds: MapControlsBounds = { minX: -5, maxX: 5, minZ: -5, maxZ: 5 }
+  const controls = createMapControls(camera, renderer.domElement, {
+    bounds: provisionalBounds,
+    minDistance: 2.5,
+    maxDistance: 16,
+    minPitchDeg: 45,
+    maxPitchDeg: 72,
+    panSpeed: 8,
+    zoomSpeed: 0.08,
+    smoothingTau: 0.12,
+    initialZoom: 0.12,
+  })
 
   // Restore the persisted viewpoint BEFORE the first render → zero camera transition on reload/HMR.
-  const cameraStore = createSessionStorageCameraStore()
+  const cameraStore = createSessionStorageMapCameraStore()
   const persisted = cameraStore.load()
-  if (persisted) applyCameraState(camera, controls, persisted)
+  if (persisted) controls.setState(persisted)
 
   const saveCamera = (): void => {
-    cameraStore.save(readCameraState(camera, controls))
+    cameraStore.save(controls.getState())
   }
-  controls.addEventListener('end', saveCamera)
   window.addEventListener('beforeunload', saveCamera)
 
   scene.add(new AmbientLight(0xffffff, 0.6))
@@ -83,6 +90,11 @@ function bootstrap(): () => void {
     wireframe: true,
   }
 
+  // World-space width of the map plane (X axis); shared by the mesh build and the camera pan bounds.
+  const WORLD_WIDTH = 12
+  // Fraction of the map inset from the true edge for the pan bounds, so the plane edge/void never shows.
+  const BOUNDS_INSET = 0.12
+
   // Europe relief — rebuilt from the loaded heightmap; the height curve requires a geometry rebuild.
   let heightmap: Heightmap | null = null
   let relief: ReturnType<typeof createReliefMesh> | null = null
@@ -96,7 +108,7 @@ function bootstrap(): () => void {
     }
     const source = smoothHeightmap(heightmap, params.smoothing)
     relief = createReliefMesh(source, {
-      worldWidth: 12,
+      worldWidth: WORLD_WIDTH,
       segments: 512,
       plainsCeiling: params.plainsCeiling,
       peakTarget: params.peakTarget,
@@ -104,6 +116,12 @@ function bootstrap(): () => void {
     })
     relief.scale.setY(params.exaggeration)
     scene.add(relief)
+
+    // Refine the camera pan bounds to the true map extent (inset so the plane edge/void never shows).
+    const worldDepth = WORLD_WIDTH / (heightmap.meta.width / heightmap.meta.height)
+    const halfW = (WORLD_WIDTH / 2) * (1 - BOUNDS_INSET)
+    const halfD = (worldDepth / 2) * (1 - BOUNDS_INSET)
+    controls.setBounds({ minX: -halfW, maxX: halfW, minZ: -halfD, maxZ: halfD })
   }
 
   const heightmapSource = createFetchHeightmapSource('/heightmaps/europe-dem-z5')
@@ -134,6 +152,16 @@ function bootstrap(): () => void {
     if (relief) relief.material.wireframe = value
   })
 
+  // Camera feel — tune the EU4-style pan/zoom live (read every frame by the controls).
+  const camFolder = gui.addFolder('camera')
+  camFolder.add(controls.options, 'panSpeed', 1, 30, 0.5).name('pan speed')
+  camFolder.add(controls.options, 'zoomSpeed', 0.01, 0.3, 0.01).name('zoom speed')
+  camFolder.add(controls.options, 'minDistance', 1, 10, 0.5).name('min distance (in)')
+  camFolder.add(controls.options, 'maxDistance', 8, 30, 0.5).name('max distance (out)')
+  camFolder.add(controls.options, 'minPitchDeg', 20, 89, 1).name('pitch in (oblique)')
+  camFolder.add(controls.options, 'maxPitchDeg', 20, 89, 1).name('pitch out (top-down)')
+  camFolder.close()
+
   const stats = new Stats()
   document.body.appendChild(stats.dom)
 
@@ -148,7 +176,7 @@ function bootstrap(): () => void {
   let frame = 0
   const tick = (): void => {
     timer.update()
-    controls.update()
+    controls.update(timer.getDelta())
     renderer.render(scene, camera)
     stats.update()
     frame = requestAnimationFrame(tick)
@@ -158,7 +186,6 @@ function bootstrap(): () => void {
   return (): void => {
     saveCamera() // capture the exact current viewpoint before we tear down
     cancelAnimationFrame(frame)
-    controls.removeEventListener('end', saveCamera)
     window.removeEventListener('beforeunload', saveCamera)
     window.removeEventListener('resize', onResize)
     controls.dispose()

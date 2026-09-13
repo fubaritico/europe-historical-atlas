@@ -12,6 +12,13 @@ export interface CameraControls {
 }
 
 /**
+ * NOTE: everything below (CameraState, CameraStatePort, readCameraState, applyCameraState,
+ * createSessionStorageCameraStore) is a pose-based viewpoint store, currently NOT wired in production —
+ * the live camera is `controls/mapControls` (target + zoom). It is retained for the Milestone 1.4 fly-to
+ * feature (push/pop a viewpoint stack). Only `CameraControls` above is consumed today (by mapControls).
+ */
+
+/**
  * Serializable snapshot of a viewpoint — enough to restore it byte-for-byte before the first render.
  */
 export interface CameraState {

@@ -112,11 +112,13 @@ export default tseslint.config(
                 '**/scene/**',
                 '**/camera',
                 '**/camera/**',
+                '**/controls',
+                '**/controls/**',
                 '**/main',
                 '**/main.ts',
               ],
               message:
-                'Architecture boundary: data/ is the leaf domain/ports layer — it must not import from scene/, camera/, or main.',
+                'Architecture boundary: data/ is the leaf domain/ports layer — it must not import from scene/, camera/, controls/, or main.',
             },
           ],
         },
@@ -131,9 +133,16 @@ export default tseslint.config(
         {
           patterns: [
             {
-              group: ['**/camera', '**/camera/**', '**/main', '**/main.ts'],
+              group: [
+                '**/camera',
+                '**/camera/**',
+                '**/controls',
+                '**/controls/**',
+                '**/main',
+                '**/main.ts',
+              ],
               message:
-                'Architecture boundary: scene/ may depend on data/ but not on camera/ or main.',
+                'Architecture boundary: scene/ may depend on data/ but not on camera/, controls/, or main.',
             },
           ],
         },
@@ -148,9 +157,35 @@ export default tseslint.config(
         {
           patterns: [
             {
-              group: ['**/scene', '**/scene/**', '**/data', '**/data/**', '**/main', '**/main.ts'],
+              group: [
+                '**/scene',
+                '**/scene/**',
+                '**/data',
+                '**/data/**',
+                '**/controls',
+                '**/controls/**',
+                '**/main',
+                '**/main.ts',
+              ],
               message:
-                'Architecture boundary: camera/ is independent — it must not import from scene/, data/, or main.',
+                'Architecture boundary: camera/ is independent — it must not import from scene/, data/, controls/, or main.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/controls/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/scene', '**/scene/**', '**/main', '**/main.ts'],
+              message:
+                'Architecture boundary: controls/ may depend on camera/ (the CameraControls contract) but not on scene/ or main.',
             },
           ],
         },
