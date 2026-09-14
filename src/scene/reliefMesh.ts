@@ -1,7 +1,7 @@
-import { Mesh, MeshStandardMaterial, PlaneGeometry } from 'three'
+import { Mesh, MeshBasicMaterial, PlaneGeometry } from 'three'
 
 import type { Heightmap } from '../data/heightmap'
-import type { BufferAttribute } from 'three'
+import type { BufferAttribute, Texture } from 'three'
 
 /**
  * Options controlling the relief mesh build.
@@ -21,22 +21,29 @@ export interface ReliefOptions {
   peakTarget: number
   /** Wireframe render (validate the geometry before texturing). */
   wireframe: boolean
+  /**
+   * Baked terrain texture (parchment + tint + hillshade) applied to the unlit material's `map`. Omit for
+   * a flat brown fallback. Aligned with the geometry UVs by construction (see `terrainTexture`).
+   */
+  map?: Texture
 }
 
 /**
  * Build a relief mesh by displacing a subdivided plane from a {@link Heightmap} (CPU displacement, so
- * raycasting hits the real relief). Elevation is normalized to `[0, 1]` (peak = max); apply vertical
- * exaggeration at the call site via `mesh.scale.y` for live tuning. Sea (elevation ≤ 0) is flat (y = 0).
+ * raycasting hits the real relief). Heights are in absolute metres remapped by an ease-out curve
+ * (elevations ≤ `plainsCeiling` pass through 1:1, higher ones ease toward `peakTarget`) then scaled into
+ * world units by a fixed `worldPerMetre` factor; sea (elevation ≤ 0) is flat (y = 0). Apply vertical
+ * exaggeration at the call site via `mesh.scale.y` for live tuning.
  *
  * The plane lies in the XZ ground plane (+Y up); north (grid top row) faces −Z, east faces +X.
  * @param heightmap - the elevation source
  * @param options - build options
- * @returns the relief mesh (normalized heights; scale Y at the call site for exaggeration)
+ * @returns the relief mesh (metres × `worldPerMetre`; scale Y at the call site for exaggeration)
  */
 export function createReliefMesh(
   heightmap: Heightmap,
   options: ReliefOptions
-): Mesh<PlaneGeometry, MeshStandardMaterial> {
+): Mesh<PlaneGeometry, MeshBasicMaterial> {
   const { worldWidth, segments, plainsCeiling, peakTarget, wireframe } = options
   const aspect = heightmap.meta.width / heightmap.meta.height
   const worldDepth = worldWidth / aspect
@@ -69,6 +76,13 @@ export function createReliefMesh(
   position.needsUpdate = true
   geometry.computeVertexNormals()
 
-  const material = new MeshStandardMaterial({ color: '#8a5a2b', wireframe }) // brown (vintage palette)
+  // Unlit: the hillshade is baked into `map`, so the relief reads the same at any camera angle (the
+  // painted "old map" look). White base when textured so the map's colours show unmodulated; brown
+  // fallback otherwise.
+  const material = new MeshBasicMaterial({
+    color: options.map ? '#ffffff' : '#8a5a2b',
+    map: options.map ?? null,
+    wireframe,
+  })
   return new Mesh(geometry, material)
 }

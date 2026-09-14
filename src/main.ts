@@ -1,23 +1,20 @@
 import GUI from 'lil-gui'
-import {
-  AmbientLight,
-  Color,
-  DirectionalLight,
-  PerspectiveCamera,
-  Scene,
-  Timer,
-  WebGLRenderer,
-} from 'three'
+import { Color, PerspectiveCamera, Scene, Timer, WebGLRenderer } from 'three'
 import Stats from 'three/addons/libs/stats.module.js'
 
 import { createSessionStorageMapCameraStore } from './controls/mapCameraStore'
 import { createMapControls } from './controls/mapControls'
+import { createDemCoastlineSource } from './data/coastlineSource'
 import { createFetchHeightmapSource, smoothHeightmap } from './data/heightmap'
+import { createCoastlineLayer } from './scene/coastlineLayer'
 import { createDebugRect } from './scene/debugRect'
 import { createReliefMesh } from './scene/reliefMesh'
+import { DEFAULT_TERRAIN_OPTIONS, createTerrainTexture } from './scene/terrainTexture'
 
 import type { MapRect } from './controls/mapControls'
 import type { Heightmap } from './data/heightmap'
+import type { TerrainTextureOptions } from './scene/terrainTexture'
+import type { DataTexture } from 'three'
 
 /**
  * Dev-tunable parameters, exposed live through the lil-gui panel.
@@ -107,10 +104,8 @@ function bootstrap(): () => void {
   }
   window.addEventListener('beforeunload', saveCamera)
 
-  scene.add(new AmbientLight(0xffffff, 0.6))
-  const sun = new DirectionalLight(0xffffff, 1.4)
-  sun.position.set(5, 10, 3)
-  scene.add(sun)
+  // No lights: the relief uses an unlit material with the hillshade baked into its texture (see
+  // `terrainTexture`), and every overlay (coastline, debug rects) is line-based / unlit.
 
   // Debug overlay — the map extent (red) + the live frustum ground footprint (blue), toggled in the panel.
   const debug = { showFrustum: false }
@@ -119,28 +114,84 @@ function bootstrap(): () => void {
   scene.add(extentRect.object, footprintRect.object)
 
   const params: DevParams = {
-    exaggeration: 1,
-    exaggZoomIn: 0.5,
+    exaggeration: 0.75,
+    exaggZoomIn: 0.35,
     smoothing: 0,
     plainsCeiling: 575,
     peakTarget: 1900,
-    wireframe: true,
+    wireframe: false,
   }
 
   // World-space width of the map plane (X axis), consumed by the mesh build.
   const WORLD_WIDTH = 12
 
+  // Baked terrain look (parchment + hypsometric tint + DEM hillshade), tuned live. Regenerating the
+  // DataTexture is independent of the geometry rebuild (cheap material swap, no new geometry).
+  const textureOptions: TerrainTextureOptions = { ...DEFAULT_TERRAIN_OPTIONS }
+  // Coastline drawn as draped 3D lines (crisp, unlike a baked texture). A LIGHT jitter over a few
+  // overlaid strokes at low opacity gives the soft pencil look. Follows `textureOptions.seaLevel`.
+  const coastParams = {
+    color: '#4a3424',
+    opacity: 0.2, // at full zoom-out (controls.zoom = 0)
+    opacityZoomIn: 0.1, // at full zoom-in (controls.zoom = 1); lerped every frame like the exaggeration
+    yLift: 0.002,
+    jitter: 0.002,
+    strokes: 5,
+  }
+
   // Europe relief — rebuilt from the loaded heightmap; the height curve requires a geometry rebuild.
   let heightmap: Heightmap | null = null
   let relief: ReturnType<typeof createReliefMesh> | null = null
+  let terrainTexture: DataTexture | null = null
+  let coastline: ReturnType<typeof createCoastlineLayer> | null = null
   let disposed = false // guards the async heightmap load from building a mesh after teardown (HMR mid-load)
+
+  // Project a normalized grid coordinate (u: west→east, v: north→south) to world XZ, matching the relief
+  // mesh mapping. The coastline sits at a small fixed lift above the flat sea (y=0), independent of the
+  // zoom-linked exaggeration (the shoreline is at sea level, so exaggeration barely moves it).
+  const projectToWorld = (u: number, v: number): [number, number, number] => {
+    if (!heightmap) return [0, coastParams.yLift, 0]
+    const aspect = heightmap.meta.width / heightmap.meta.height
+    const worldDepth = WORLD_WIDTH / aspect
+    return [(u - 0.5) * WORLD_WIDTH, coastParams.yLift, (v - 0.5) * worldDepth]
+  }
+
+  const rebuildTexture = (): void => {
+    if (!heightmap) return
+    terrainTexture?.dispose()
+    terrainTexture = createTerrainTexture(heightmap, textureOptions)
+    if (relief) {
+      relief.material.map = terrainTexture
+      relief.material.color.set('#ffffff')
+      relief.material.needsUpdate = true
+    }
+  }
+
+  const rebuildCoastline = (): void => {
+    if (!heightmap) return
+    if (coastline) {
+      scene.remove(coastline.object)
+      coastline.dispose()
+    }
+    const segments = createDemCoastlineSource(heightmap, {
+      seaLevel: textureOptions.seaLevel,
+    }).load()
+    coastline = createCoastlineLayer(segments, {
+      project: projectToWorld,
+      color: coastParams.color,
+      opacity: coastParams.opacity,
+      jitter: coastParams.jitter,
+      strokes: coastParams.strokes,
+    })
+    scene.add(coastline.object)
+  }
 
   const rebuildRelief = (): void => {
     if (!heightmap) return
     if (relief) {
       scene.remove(relief)
       relief.geometry.dispose()
-      relief.material.dispose()
+      relief.material.dispose() // Material.dispose leaves `map` alone — the texture is managed separately
     }
     const source = smoothHeightmap(heightmap, params.smoothing)
     relief = createReliefMesh(source, {
@@ -149,6 +200,7 @@ function bootstrap(): () => void {
       plainsCeiling: params.plainsCeiling,
       peakTarget: params.peakTarget,
       wireframe: params.wireframe,
+      ...(terrainTexture ? { map: terrainTexture } : {}),
     })
     relief.scale.setY(params.exaggeration)
     scene.add(relief)
@@ -160,13 +212,52 @@ function bootstrap(): () => void {
     .then((loaded) => {
       if (disposed) return // teardown ran mid-load → don't add an orphan mesh to a dead scene
       heightmap = loaded
+      rebuildTexture()
       rebuildRelief()
+      rebuildCoastline()
     })
     .catch((error: unknown) => {
       console.error('relief load failed', error)
     })
 
   const gui = new GUI({ title: 'europe-map · dev' })
+  // Dump every tunable value at once (relief + texture + coastline + camera) so a tuned look can be
+  // pasted back as defaults. `console.warn` (never `console.log`).
+  gui
+    .add(
+      {
+        logAll: (): void => {
+          console.warn(
+            'ALL settings:\n' +
+              JSON.stringify(
+                {
+                  relief: params,
+                  texture: textureOptions,
+                  coastline: coastParams,
+                  camera: { ...controls.getState(), fov: framing.fov },
+                  controls: {
+                    panSpeed: controls.options.panSpeed,
+                    zoomSpeed: controls.options.zoomSpeed,
+                    smoothingTau: controls.options.smoothingTau,
+                    enableDrag: controls.options.enableDrag,
+                    enableEdgeScroll: controls.options.enableEdgeScroll,
+                    edgeScrollSpeed: controls.options.edgeScrollSpeed,
+                    minDistance: controls.options.minDistance,
+                    maxDistance: controls.options.maxDistance,
+                    minPitchDeg: controls.options.minPitchDeg,
+                    maxPitchDeg: controls.options.maxPitchDeg,
+                  },
+                  extent: extentParams,
+                },
+                null,
+                2
+              )
+          )
+        },
+      },
+      'logAll'
+    )
+    .name('⤓ log ALL settings')
   // Exaggeration follows the zoom (applied every frame in the loop): full at zoom-out, × exaggZoomIn at
   // zoom-in. This is a cheap scale.y transform — no geometry rebuild.
   gui.add(params, 'exaggeration', 0, 4, 0.05).name('exaggeration (zoom-out)')
@@ -180,6 +271,96 @@ function bootstrap(): () => void {
   gui.add(params, 'wireframe').onChange((value: boolean) => {
     if (relief) relief.material.wireframe = value
   })
+
+  // Terrain look — parchment base, hypsometric tint, DEM hillshade. Regenerating the texture is a full
+  // pixel pass (heavy), so numeric tuning fires on release; colours fire when the picker closes.
+  const texFolder = gui.addFolder('texture (parchment)')
+  texFolder
+    .add(textureOptions, 'seaLevel', -200, 500, 10)
+    .name('sea level (m)')
+    .onFinishChange(() => {
+      rebuildTexture()
+      rebuildCoastline() // coastline is the same seaLevel iso-line → follows
+    })
+  texFolder
+    .add(textureOptions, 'lightAzimuthDeg', 0, 360, 1)
+    .name('light azimuth')
+    .onFinishChange(rebuildTexture)
+  texFolder
+    .add(textureOptions, 'lightAltitudeDeg', 5, 85, 1)
+    .name('light altitude')
+    .onFinishChange(rebuildTexture)
+  texFolder
+    .add(textureOptions, 'hillshadeStrength', 0, 1, 0.05)
+    .name('hillshade')
+    .onFinishChange(rebuildTexture)
+  texFolder
+    .add(textureOptions, 'hillshadeMode', ['multiply', 'overlay', 'softLight', 'normal'])
+    .name('shade blend')
+    .onFinishChange(rebuildTexture)
+  texFolder
+    .add(textureOptions, 'zFactor', 0.0002, 0.006, 0.0002)
+    .name('relief strength')
+    .onFinishChange(rebuildTexture)
+  texFolder
+    .add(textureOptions, 'tintStrength', 0, 1, 0.05)
+    .name('tint')
+    .onFinishChange(rebuildTexture)
+  texFolder
+    .add(textureOptions, 'tintMode', ['multiply', 'overlay', 'softLight', 'normal'])
+    .name('tint blend')
+    .onFinishChange(rebuildTexture)
+  texFolder
+    .add(textureOptions, 'peakReference', 500, 5000, 100)
+    .name('peak ref (m)')
+    .onFinishChange(rebuildTexture)
+  texFolder
+    .add(textureOptions, 'grain', 0, 1, 0.05)
+    .name('grain (vellum)')
+    .onFinishChange(rebuildTexture)
+  texFolder
+    .add(textureOptions, 'grainScale', 1, 40, 1)
+    .name('grain scale (px)')
+    .onFinishChange(rebuildTexture)
+  texFolder
+    .addColor(textureOptions, 'parchment', 255)
+    .name('parchment')
+    .onFinishChange(rebuildTexture)
+  texFolder.addColor(textureOptions, 'sea', 255).name('sea').onFinishChange(rebuildTexture)
+  texFolder
+    .addColor(textureOptions, 'lowland', 255)
+    .name('lowland tint')
+    .onFinishChange(rebuildTexture)
+  texFolder
+    .addColor(textureOptions, 'highland', 255)
+    .name('highland tint')
+    .onFinishChange(rebuildTexture)
+  texFolder.close()
+
+  // Coastline — draped 3D lines; light jitter over a few low-opacity strokes = soft pencil. Colour and
+  // opacity update the live material; jitter/strokes rebuild the geometry.
+  const coastFolder = gui.addFolder('coastline')
+  coastFolder
+    .addColor(coastParams, 'color')
+    .name('colour')
+    .onChange(() => {
+      if (coastline) coastline.object.material.color.set(coastParams.color)
+    })
+  coastFolder.add(coastParams, 'opacity', 0, 1, 0.05).name('opacity (zoom-out)')
+  coastFolder.add(coastParams, 'opacityZoomIn', 0, 1, 0.05).name('opacity @ zoom-in')
+  coastFolder
+    .add(coastParams, 'jitter', 0, 0.02, 0.0005)
+    .name('jitter (light)')
+    .onFinishChange(rebuildCoastline)
+  coastFolder
+    .add(coastParams, 'strokes', 1, 6, 1)
+    .name('strokes (overdraw)')
+    .onFinishChange(rebuildCoastline)
+  coastFolder
+    .add(coastParams, 'yLift', 0, 0.02, 0.001)
+    .name('lift')
+    .onFinishChange(rebuildCoastline)
+  coastFolder.close()
 
   // Camera feel — tune the EU4-style pan/zoom live (read every frame by the controls).
   const camFolder = gui.addFolder('camera')
@@ -242,6 +423,10 @@ function bootstrap(): () => void {
     // Zoom-linked vertical exaggeration: full at zoom-out (z=0), × exaggZoomIn at zoom-in (z=1).
     if (relief)
       relief.scale.setY(params.exaggeration * (1 - (1 - params.exaggZoomIn) * controls.zoom))
+    // Zoom-linked coastline opacity: `opacity` at zoom-out (z=0) → `opacityZoomIn` at zoom-in (z=1).
+    if (coastline)
+      coastline.object.material.opacity =
+        coastParams.opacity + (coastParams.opacityZoomIn - coastParams.opacity) * controls.zoom
     if (debug.showFrustum) {
       extentRect.update(controls.getExtent(), 0.05)
       footprintRect.update(controls.getFootprint(), 0.05)
@@ -264,9 +449,15 @@ function bootstrap(): () => void {
     extentRect.dispose()
     footprintRect.dispose()
     if (relief) {
+      scene.remove(relief)
       relief.geometry.dispose()
       relief.material.dispose()
     }
+    if (coastline) {
+      scene.remove(coastline.object)
+      coastline.dispose()
+    }
+    terrainTexture?.dispose()
     renderer.dispose()
   }
 }

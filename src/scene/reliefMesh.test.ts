@@ -1,4 +1,4 @@
-import { Mesh, PlaneGeometry } from 'three'
+import { DataTexture, Mesh, PlaneGeometry } from 'three'
 import { describe, expect, it } from 'vitest'
 
 import { createHeightmap } from '../data/heightmap'
@@ -66,6 +66,19 @@ describe('createReliefMesh', () => {
       const low = createReliefMesh(heightmap, { ...OPTS, peakTarget: 500 })
       const high = createReliefMesh(heightmap, { ...OPTS, peakTarget: 1500 })
       expect(maxY(low)).toBeLessThan(maxY(high))
+    })
+
+    it('applies an injected texture to the (unlit) material and whitens the base colour', () => {
+      const texture = new DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1)
+      const mesh = createReliefMesh(heightmap, { ...OPTS, map: texture })
+      expect(mesh.material.map).toBe(texture)
+      expect(mesh.material.color.getHexString()).toBe('ffffff')
+    })
+
+    it('falls back to a flat brown material when no texture is given', () => {
+      const mesh = createReliefMesh(heightmap, OPTS)
+      expect(mesh.material.map).toBeNull()
+      expect(mesh.material.color.getHexString()).toBe('8a5a2b')
     })
   })
 
