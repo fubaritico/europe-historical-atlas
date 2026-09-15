@@ -1,108 +1,73 @@
 import GUI from 'lil-gui'
 
+import {
+  CAMERA_CONTROLS,
+  CAMERA_CONTROL_ORDER,
+  COASTLINE_CONTROLS,
+  COASTLINE_CONTROL_ORDER,
+  EXTENT_CONTROLS,
+  EXTENT_CONTROL_ORDER,
+  RELIEF_CONTROLS,
+  RELIEF_CONTROL_ORDER,
+  RHUMB_CONTROLS,
+  RHUMB_CONTROL_ORDER,
+  ROSE_CONTROLS,
+  ROSE_CONTROL_ORDER,
+} from './devParams'
 import { TERRAIN_CONTROLS, TERRAIN_CONTROL_GROUPS } from './scene/terrainTexture'
 
 import type { MapControlsOptions } from './controls/mapControls'
+import type {
+  CoastlineDevParams,
+  ExtentDevParams,
+  ReliefDevParams,
+  RhumbDevParams,
+  RoseDevParams,
+} from './devParams'
 import type { TerrainTextureOptions } from './scene/terrainTexture'
+import type { ControlSpec } from './utils/controlSpec'
+
+export type {
+  CameraTuningParams,
+  CoastlineDevParams,
+  ExtentDevParams,
+  ReliefDevParams,
+  RhumbDevParams,
+  RoseDevParams,
+} from './devParams'
 
 /**
- * Relief geometry / displacement tuning, exposed live through the dev panel.
+ * Render one declared control into a lil-gui folder. The spec says what the control *is*; the caller
+ * says what it *does* — ranges are domain knowledge, side effects are wiring, and they stay apart.
+ * @param folder - the lil-gui folder to add to
+ * @param target - the live object the control mutates in place
+ * @param key - the field to bind
+ * @param spec - how that field should be presented
+ * @param onChange - the side effect to run, on release for anything that rebuilds
+ * @param live - bind to `onChange` instead of `onFinishChange` (cheap updates that should track the drag)
+ * @returns nothing; the control is added to `folder`
  */
-export interface ReliefDevParams {
-  /** Vertical exaggeration of the relief at full zoom-out (applied via `mesh.scale.y`). */
-  exaggeration: number
-  /** Exaggeration multiplier at full zoom-in (relief flattens as you zoom in); 1 = no flattening. */
-  exaggZoomIn: number
-  /** Box-blur radius (grid cells); kills isolated DEM outliers. Keep low to stay crisp. */
-  smoothing: number
-  /** Elevations up to this (metres) stay 1:1 — plains keep their relief. */
-  plainsCeiling: number
-  /** Apparent height (metres) the highest peaks ease toward (e.g. 4441 m → ~700 m). Lower = flatter. */
-  peakTarget: number
-  /** Render the relief as a wireframe. */
-  wireframe: boolean
-}
-
-/**
- * Coastline styling exposed through the dev panel (draped 3D lines; opacity is zoom-linked in the loop).
- */
-export interface CoastlineDevParams {
-  /** Line colour (hex string). */
-  color: string
-  /** Opacity at full zoom-out (`controls.zoom = 0`). */
-  opacity: number
-  /** Opacity at full zoom-in (`controls.zoom = 1`); lerped every frame. */
-  opacityZoomIn: number
-  /** World-space lift above the flat sea (avoids z-fighting). */
-  yLift: number
-  /** Hand-drawn wobble amplitude in world units (keep light). */
-  jitter: number
-  /** Number of overlaid strokes (overdraw → soft pencil band). */
-  strokes: number
-}
-
-/**
- * Portolan rhumb-network styling + layout exposed through the dev panel (opacity is zoom-linked in the
- * loop; the network is regenerated when the layout changes).
- */
-export interface RhumbDevParams {
-  /** Rose centre — normalized U (west→east). */
-  centerU: number
-  /** Rose centre — normalized V (north→south). */
-  centerV: number
-  /** Radius (normalized) of the ring of secondary compass centres. */
-  circleRadius: number
-  /** Number of secondary centres on the ring. */
-  nodeCount: number
-  /** Compass directions per centre (unique lines = directions / 2). */
-  directions: number
-  /** Line colour (hex string). */
-  color: string
-  /** Opacity at full zoom-out. */
-  opacity: number
-  /** Opacity at full zoom-in (fades to reduce clutter). */
-  opacityZoomIn: number
-  /** Sampling step along each line for the sea-clip (smaller = finer at the coast, slower to build). */
-  clipStep: number
-}
-
-/**
- * Compass-rose styling exposed through the dev panel (colours + labels are baked into the SVG, so any
- * change regenerates the rose; it is positioned at the rhumb-network centre).
- */
-export interface RoseDevParams {
-  /** Rose centre — normalized U (west→east). */
-  centerU: number
-  /** Rose centre — normalized V (north→south). */
-  centerV: number
-  /** Side length of the rose quad in world units. */
-  size: number
-  /** Overall opacity `[0, 1]`. */
-  opacity: number
-  /** Draw the French 8-wind labels. */
-  showLabels: boolean
-  /** Principal winds / rings / labels colour (sepia ink). */
-  ink: string
-  /** Half-wind colour (vert anglais). */
-  halfWind: string
-  /** Quarter-wind colour (rouge bordeaux). */
-  quarterWind: string
-  /** World-space lift above the sea. */
-  lift: number
-}
-
-/**
- * The world rectangle the camera view is clamped within, tuned by centre + half-size.
- */
-export interface ExtentDevParams {
-  /** Extent centre X. */
-  centerX: number
-  /** Extent centre Z. */
-  centerZ: number
-  /** Extent half-width (X). */
-  halfWidth: number
-  /** Extent half-depth (Z). */
-  halfDepth: number
+function addControl<T extends object>(
+  folder: GUI,
+  target: T,
+  key: keyof T & string,
+  spec: ControlSpec,
+  onChange: () => void,
+  live = false
+): void {
+  const controller =
+    spec.kind === 'number'
+      ? folder.add(target, key, spec.min, spec.max, spec.step)
+      : spec.kind === 'color'
+        ? folder.addColor(target, key, 255)
+        : spec.kind === 'hexColor'
+          ? folder.addColor(target, key)
+          : spec.kind === 'choice'
+            ? folder.add(target, key, [...spec.options])
+            : folder.add(target, key)
+  controller.name(spec.label)
+  if (live) controller.onChange(onChange)
+  else controller.onFinishChange(onChange)
 }
 
 /**
@@ -188,9 +153,6 @@ function cameraTuningOf(o: MapControlsOptions): Partial<MapControlsOptions> {
   }
 }
 
-/** The compositing blend modes accepted by `TerrainTextureOptions.hillshadeMode` / `tintMode` (drives the two GUI dropdowns). */
-const BLEND_MODES = ['multiply', 'overlay', 'softLight', 'normal'] as const
-
 /**
  * Build the lil-gui dev panel (relief / texture / coastline / camera folders + a global "log all"
  * button), wiring each control to its param object and side-effect callback. The panel is a keeper: a
@@ -212,6 +174,9 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     callbacks,
   } = deps
   const gui = new GUI({ title: 'europe-map · dev' })
+
+  // Some controls need no side effect at all: the render loop already reads their value every frame.
+  const noEffect = (): void => undefined
 
   // Snapshot the defaults NOW — the live objects still hold their initial values — so "reset to
   // defaults" can restore them after any amount of tuning. Camera tuning is a subset of the controls
@@ -257,176 +222,98 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
   gui.add({ resetToDefaults }, 'resetToDefaults').name('↺ reset to defaults')
 
   // Relief — exaggeration is applied every frame in the loop (cheap scale.y, no geometry rebuild); the
-  // height-curve knobs require a geometry rebuild.
-  gui.add(relief, 'exaggeration', 0, 4, 0.05).name('exaggeration (zoom-out)')
-  gui.add(relief, 'exaggZoomIn', 0.1, 1, 0.05).name('exaggeration @ zoom-in')
-  gui
-    .add(relief, 'smoothing', 0, 8, 1)
-    .name('smoothing (outliers)')
-    .onFinishChange(callbacks.rebuildRelief)
-  gui
-    .add(relief, 'plainsCeiling', 0, 1000, 25)
-    .name('plains ceiling (m)')
-    .onFinishChange(callbacks.rebuildRelief)
-  gui
-    .add(relief, 'peakTarget', 200, 3000, 25)
-    .name('peak target (m)')
-    .onFinishChange(callbacks.rebuildRelief)
-  gui.add(relief, 'wireframe').onChange(callbacks.setWireframe)
+  // height-curve knobs require a geometry rebuild, and the wireframe flips the live material.
+  const reliefEffect = (key: keyof ReliefDevParams): (() => void) =>
+    key === 'wireframe'
+      ? (): void => {
+          callbacks.setWireframe(relief.wireframe)
+        }
+      : key === 'exaggeration' || key === 'exaggZoomIn'
+        ? noEffect
+        : callbacks.rebuildRelief
+  for (const key of RELIEF_CONTROL_ORDER)
+    addControl(gui, relief, key, RELIEF_CONTROLS[key], reliefEffect(key), key === 'wireframe')
 
   // Terrain look. Regenerating the texture is a full pixel pass (heavy), so tuning fires on release.
-  //
-  // Every control below is declared once in `TERRAIN_CONTROLS` / `TERRAIN_CONTROL_GROUPS`, next to the
-  // defaults it bounds — this loop only renders that declaration. Ranges and defaults therefore cannot
-  // drift apart, and a new option is a compile error until it has a spec.
+  // The shoreline is shared: the coastline and the sea-clipped rhumbs sit on the same iso-line, so
+  // changing it has to rebuild them too.
   const texFolder = gui.addFolder('texture (parchment)')
-  const rebuild = callbacks.rebuildTexture
-
-  // The shoreline is shared: the coastline and the sea-clipped rhumbs are drawn at this same iso-line,
-  // so they have to be rebuilt alongside the texture.
   const onSeaLevelChange = (): void => {
-    rebuild()
+    callbacks.rebuildTexture()
     callbacks.rebuildCoastline()
     callbacks.rebuildRhumb()
   }
-
   for (const group of TERRAIN_CONTROL_GROUPS) {
     const folder = texFolder.addFolder(group.title)
     for (const key of group.keys) {
-      const spec = TERRAIN_CONTROLS[key]
-      const onChange = key === 'seaLevel' ? onSeaLevelChange : rebuild
-      const controller =
-        spec.kind === 'number'
-          ? folder.add(texture, key, spec.min, spec.max, spec.step)
-          : spec.kind === 'color'
-            ? folder.addColor(texture, key, 255)
-            : spec.kind === 'blend'
-              ? folder.add(texture, key, BLEND_MODES)
-              : folder.add(texture, key)
-      controller.name(spec.label).onFinishChange(onChange)
+      const onChange = key === 'seaLevel' ? onSeaLevelChange : callbacks.rebuildTexture
+      addControl(folder, texture, key, TERRAIN_CONTROLS[key], onChange)
     }
     folder.close()
   }
   texFolder.close()
 
-  // Coastline — draped 3D lines; light jitter over a few low-opacity strokes = soft pencil. Colour
-  // updates the live material; jitter/strokes rebuild the geometry (opacity is applied in the loop).
+  // Coastline — draped 3D lines. Colour updates the live material; jitter/strokes/lift rebuild the
+  // geometry; opacity is applied every frame in the loop, so it needs no callback at all.
   const coastFolder = gui.addFolder('coastline')
-  coastFolder
-    .addColor(coast, 'color')
-    .name('colour')
-    .onChange(() => {
-      callbacks.setCoastColor(coast.color)
-    })
-  coastFolder.add(coast, 'opacity', 0, 1, 0.05).name('opacity (zoom-out)')
-  coastFolder.add(coast, 'opacityZoomIn', 0, 1, 0.05).name('opacity @ zoom-in')
-  coastFolder
-    .add(coast, 'jitter', 0, 0.02, 0.0005)
-    .name('jitter (light)')
-    .onFinishChange(callbacks.rebuildCoastline)
-  coastFolder
-    .add(coast, 'strokes', 1, 6, 1)
-    .name('strokes (overdraw)')
-    .onFinishChange(callbacks.rebuildCoastline)
-  coastFolder
-    .add(coast, 'yLift', 0, 0.02, 0.001)
-    .name('lift')
-    .onFinishChange(callbacks.rebuildCoastline)
+  const coastEffect = (key: keyof CoastlineDevParams): (() => void) =>
+    key === 'color'
+      ? (): void => {
+          callbacks.setCoastColor(coast.color)
+        }
+      : key === 'opacity' || key === 'opacityZoomIn'
+        ? noEffect
+        : callbacks.rebuildCoastline
+  for (const key of COASTLINE_CONTROL_ORDER)
+    addControl(coastFolder, coast, key, COASTLINE_CONTROLS[key], coastEffect(key), key === 'color')
   coastFolder.close()
 
   // Decor — portolan rhumb network (sea-only). Centre/layout regenerate the network; colour updates the
   // live material; opacity is applied in the loop (fades on zoom-in).
   const rhumbFolder = gui.addFolder('decor (rhumbs)')
-  rhumbFolder
-    .addColor(rhumb, 'color')
-    .name('colour')
-    .onChange(() => {
-      callbacks.setRhumbColor(rhumb.color)
-    })
-  rhumbFolder.add(rhumb, 'opacity', 0, 0.6, 0.02).name('opacity (zoom-out)')
-  rhumbFolder.add(rhumb, 'opacityZoomIn', 0, 0.6, 0.02).name('opacity @ zoom-in')
-  rhumbFolder
-    .add(rhumb, 'centerU', 0, 1, 0.01)
-    .name('centre U (E–W)')
-    .onFinishChange(callbacks.rebuildRhumb)
-  rhumbFolder
-    .add(rhumb, 'centerV', 0, 1, 0.01)
-    .name('centre V (N–S)')
-    .onFinishChange(callbacks.rebuildRhumb)
-  rhumbFolder
-    .add(rhumb, 'circleRadius', 0, 0.8, 0.01)
-    .name('ring radius')
-    .onFinishChange(callbacks.rebuildRhumb)
-  rhumbFolder
-    .add(rhumb, 'nodeCount', 1, 32, 1)
-    .name('centres')
-    .onFinishChange(callbacks.rebuildRhumb)
-  rhumbFolder
-    .add(rhumb, 'directions', 4, 32, 4)
-    .name('directions')
-    .onFinishChange(callbacks.rebuildRhumb)
-  rhumbFolder
-    .add(rhumb, 'clipStep', 0.001, 0.02, 0.001)
-    .name('sea-clip step')
-    .onFinishChange(callbacks.rebuildRhumb)
+  const rhumbEffect = (key: keyof RhumbDevParams): (() => void) =>
+    key === 'color'
+      ? (): void => {
+          callbacks.setRhumbColor(rhumb.color)
+        }
+      : key === 'opacity' || key === 'opacityZoomIn'
+        ? noEffect
+        : callbacks.rebuildRhumb
+  for (const key of RHUMB_CONTROL_ORDER)
+    addControl(rhumbFolder, rhumb, key, RHUMB_CONTROLS[key], rhumbEffect(key), key === 'color')
   rhumbFolder.close()
 
-  // Compass rose — colours/labels/size are baked into the SVG, so each change regenerates the rose (it
-  // sits at the rhumb-network centre). Portolan code: principal ink, half-winds green, quarters red.
+  // Compass rose — colours/labels/size are baked into the SVG, so each change regenerates the rose.
+  // Opacity is the exception: it is a live material tweak.
   const roseFolder = gui.addFolder('compass rose')
-  roseFolder
-    .add(rose, 'centerU', 0, 1, 0.01)
-    .name('centre U (E–W)')
-    .onFinishChange(callbacks.rebuildRose)
-  roseFolder
-    .add(rose, 'centerV', 0, 1, 0.01)
-    .name('centre V (N–S)')
-    .onFinishChange(callbacks.rebuildRose)
-  roseFolder.add(rose, 'size', 0.5, 6, 0.1).name('size').onFinishChange(callbacks.rebuildRose)
-  roseFolder
-    .add(rose, 'opacity', 0, 1, 0.05)
-    .name('opacity')
-    .onChange(() => {
-      callbacks.setRoseOpacity(rose.opacity)
-    })
-  roseFolder.add(rose, 'showLabels').name('labels (N · NE · …)').onChange(callbacks.rebuildRose)
-  roseFolder.addColor(rose, 'ink').name('ink (principal)').onFinishChange(callbacks.rebuildRose)
-  roseFolder
-    .addColor(rose, 'halfWind')
-    .name('half-winds (green)')
-    .onFinishChange(callbacks.rebuildRose)
-  roseFolder
-    .addColor(rose, 'quarterWind')
-    .name('quarter-winds (red)')
-    .onFinishChange(callbacks.rebuildRose)
-  roseFolder.add(rose, 'lift', 0, 0.05, 0.002).name('lift').onFinishChange(callbacks.rebuildRose)
+  const roseEffect = (key: keyof RoseDevParams): (() => void) =>
+    key === 'opacity'
+      ? (): void => {
+          callbacks.setRoseOpacity(rose.opacity)
+        }
+      : callbacks.rebuildRose
+  for (const key of ROSE_CONTROL_ORDER)
+    addControl(
+      roseFolder,
+      rose,
+      key,
+      ROSE_CONTROLS[key],
+      roseEffect(key),
+      key === 'opacity' || key === 'showLabels'
+    )
   roseFolder.close()
 
-  // Camera feel — tune the EU4-style pan/zoom live (read every frame by the controls).
+  // Camera feel — tune the EU4-style pan/zoom live (read every frame by the controls, so no callback).
   const camFolder = gui.addFolder('camera')
-  camFolder.add(controlsOptions, 'panSpeed', 1, 30, 0.5).name('pan speed')
-  camFolder.add(controlsOptions, 'zoomSpeed', 0.005, 0.02, 0.001).name('zoom speed')
-  camFolder.add(controlsOptions, 'smoothingTau', 0.02, 0.5, 0.01).name('inertia (s)')
-  camFolder.add(controlsOptions, 'enableDrag').name('drag-pan')
-  camFolder.add(controlsOptions, 'enableEdgeScroll').name('edge-scroll')
-  camFolder.add(controlsOptions, 'edgeScrollSpeed', 1, 30, 0.5).name('edge speed')
-  camFolder.add(controlsOptions, 'minDistance', 0.5, 8, 0.25).name('min distance (in)')
-  camFolder.add(controlsOptions, 'maxDistance', 2, 15, 0.25).name('max distance (out)')
-  camFolder.add(controlsOptions, 'minPitchDeg', 20, 89, 1).name('pitch in (oblique)')
-  camFolder.add(controlsOptions, 'maxPitchDeg', 20, 89, 1).name('pitch out (top-down)')
+  for (const key of CAMERA_CONTROL_ORDER)
+    addControl(camFolder, controlsOptions, key, CAMERA_CONTROLS[key], noEffect)
   camFolder.add(framing, 'fov', 15, 60, 1).name('fov (lower = flatter)').onChange(callbacks.setFov)
+
+  // Extent — the world rectangle the frustum-aware clamp keeps the view inside.
   const extentFolder = camFolder.addFolder('extent (view limit)')
-  extentFolder.add(extent, 'centerX', -6, 6, 0.05).name('centre X').onChange(callbacks.applyExtent)
-  extentFolder.add(extent, 'centerZ', -6, 6, 0.05).name('centre Z').onChange(callbacks.applyExtent)
+  for (const key of EXTENT_CONTROL_ORDER)
+    addControl(extentFolder, extent, key, EXTENT_CONTROLS[key], callbacks.applyExtent, true)
   extentFolder
-    .add(extent, 'halfWidth', 0.5, 6, 0.05)
-    .name('half width')
-    .onChange(callbacks.applyExtent)
-  extentFolder
-    .add(extent, 'halfDepth', 0.5, 6, 0.05)
-    .name('half depth')
-    .onChange(callbacks.applyExtent)
-  camFolder
     .add(debug, 'showFrustum')
     .name('show extent + footprint')
     .onChange(callbacks.setFrustumDebug)

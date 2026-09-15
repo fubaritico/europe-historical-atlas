@@ -11,6 +11,7 @@ import { verticalToLatitude } from '../geo/mercator'
 import { hashInts } from '../utils/hash'
 
 import type { Heightmap } from '../data/heightmap'
+import type { ControlGroup, ControlTable } from '../utils/controlSpec'
 
 /**
  * A layer blend mode, applied per colour channel on normalized `[0, 1]` values (Photoshop-style).
@@ -135,70 +136,24 @@ export const DEFAULT_TERRAIN_OPTIONS: TerrainTextureOptions = {
   supersample: 2,
 }
 
-/**
- * How one tunable should be exposed by a control surface. Kept here rather than in the panel so a
- * value's valid range lives beside its default: they are two halves of the same statement, and when
- * they sit in different files nothing stops a default from drifting outside its own slider.
- */
-export type ControlSpec =
-  | {
-      /** A numeric slider. */
-      kind: 'number'
-      /** Lowest selectable value. */
-      min: number
-      /** Highest selectable value. */
-      max: number
-      /** Slider increment. */
-      step: number
-      /** Text shown next to the control. */
-      label: string
-    }
-  | {
-      /** A checkbox. */
-      kind: 'boolean'
-      /** Text shown next to the control. */
-      label: string
-    }
-  | {
-      /** An RGB colour picker. */
-      kind: 'color'
-      /** Text shown next to the control. */
-      label: string
-    }
-  | {
-      /** A {@link BlendMode} dropdown. */
-      kind: 'blend'
-      /** Text shown next to the control. */
-      label: string
-    }
-
-/** Pick the {@link ControlSpec} variant that matches a tunable's type. */
-type SpecFor<T> = T extends number
-  ? Extract<ControlSpec, { kind: 'number' }>
-  : T extends boolean
-    ? Extract<ControlSpec, { kind: 'boolean' }>
-    : T extends RgbColor
-      ? Extract<ControlSpec, { kind: 'color' }>
-      : Extract<ControlSpec, { kind: 'blend' }>
+/** The blend modes a {@link BlendMode} dropdown offers, in panel order. */
+export const BLEND_MODES = ['multiply', 'overlay', 'softLight', 'normal'] as const
 
 /**
- * The range, step and label of every {@link TerrainTextureOptions} field. The mapped type is the point:
- * adding an option without describing it here is a compile error, so a new tunable can never silently
- * miss its control.
+ * The range, step and label of every {@link TerrainTextureOptions} field. Declared beside the defaults
+ * it bounds, so the two cannot drift apart; the mapped type makes an undescribed option a compile error.
  */
-export const TERRAIN_CONTROLS: {
-  [K in keyof TerrainTextureOptions]: SpecFor<TerrainTextureOptions[K]>
-} = {
+export const TERRAIN_CONTROLS: ControlTable<TerrainTextureOptions> = {
   seaLevel: { kind: 'number', min: -200, max: 500, step: 10, label: 'sea level (m)' },
   parchment: { kind: 'color', label: 'parchment' },
   sea: { kind: 'color', label: 'sea' },
   tintStrength: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'strength' },
-  tintMode: { kind: 'blend', label: 'blend' },
+  tintMode: { kind: 'choice', options: BLEND_MODES, label: 'blend' },
   peakReference: { kind: 'number', min: 500, max: 5000, step: 100, label: 'peak ref (m)' },
   lowland: { kind: 'color', label: 'lowland' },
   highland: { kind: 'color', label: 'highland' },
   elevationStrength: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'strength' },
-  elevationMode: { kind: 'blend', label: 'blend' },
+  elevationMode: { kind: 'choice', options: BLEND_MODES, label: 'blend' },
   elevationFloor: { kind: 'number', min: -8000, max: 2000, step: 100, label: 'black at (m)' },
   elevationCeiling: { kind: 'number', min: 500, max: 7000, step: 100, label: 'white at (m)' },
   elevationIncludesSea: { kind: 'boolean', label: 'over sea too' },
@@ -206,24 +161,16 @@ export const TERRAIN_CONTROLS: {
   snowStart: { kind: 'number', min: 0, max: 5000, step: 50, label: 'starts at (m)' },
   snowFull: { kind: 'number', min: 0, max: 6000, step: 50, label: 'full at (m)' },
   snow: { kind: 'color', label: 'tone' },
-  snowLatitudeDrop: { kind: 'number', min: 0, max: 120, step: 5, label: 'line tilt (m/°)' },
-  snowLatitudeRef: { kind: 'number', min: 0, max: 80, step: 1, label: 'line ref (°N)' },
+  snowLatitudeDrop: { kind: 'number', min: 0, max: 120, step: 5, label: 'line tilt (m/\u00b0)' },
+  snowLatitudeRef: { kind: 'number', min: 0, max: 80, step: 1, label: 'line ref (\u00b0N)' },
   hillshadeStrength: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'strength' },
-  hillshadeMode: { kind: 'blend', label: 'blend' },
+  hillshadeMode: { kind: 'choice', options: BLEND_MODES, label: 'blend' },
   lightAzimuthDeg: { kind: 'number', min: 0, max: 360, step: 1, label: 'light azimuth' },
   lightAltitudeDeg: { kind: 'number', min: 5, max: 85, step: 1, label: 'light altitude' },
   zFactor: { kind: 'number', min: 0.0002, max: 0.006, step: 0.0002, label: 'relief strength' },
   grain: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'grain (vellum)' },
   grainScale: { kind: 'number', min: 1, max: 40, step: 1, label: 'grain scale (px)' },
-  supersample: { kind: 'number', min: 1, max: 3, step: 1, label: 'resolution (×DEM)' },
-}
-
-/** A named set of tunables presented together. */
-export interface ControlGroup {
-  /** The group's heading. */
-  title: string
-  /** The options it contains, in display order. */
-  keys: (keyof TerrainTextureOptions)[]
+  supersample: { kind: 'number', min: 1, max: 3, step: 1, label: 'resolution (\u00d7DEM)' },
 }
 
 /**
@@ -231,14 +178,14 @@ export interface ControlGroup {
  * A panel built from this reads as the rendering stack, which is what makes the effect of any one
  * slider predictable: everything in a later group is composited on top of the earlier ones.
  */
-export const TERRAIN_CONTROL_GROUPS: ControlGroup[] = [
-  { title: '1 · base', keys: ['seaLevel', 'parchment', 'sea'] },
+export const TERRAIN_CONTROL_GROUPS: ControlGroup<TerrainTextureOptions>[] = [
+  { title: '1 \u00b7 base', keys: ['seaLevel', 'parchment', 'sea'] },
   {
-    title: '2 · hypsometric tint',
+    title: '2 \u00b7 hypsometric tint',
     keys: ['tintStrength', 'tintMode', 'peakReference', 'lowland', 'highland'],
   },
   {
-    title: '3 · heightmap (B&W)',
+    title: '3 \u00b7 heightmap (B&W)',
     keys: [
       'elevationStrength',
       'elevationMode',
@@ -248,14 +195,14 @@ export const TERRAIN_CONTROL_GROUPS: ControlGroup[] = [
     ],
   },
   {
-    title: '4 · snow',
+    title: '4 \u00b7 snow',
     keys: ['snowStrength', 'snowStart', 'snowFull', 'snow', 'snowLatitudeDrop', 'snowLatitudeRef'],
   },
   {
-    title: '5 · hillshade',
+    title: '5 \u00b7 hillshade',
     keys: ['hillshadeStrength', 'hillshadeMode', 'lightAzimuthDeg', 'lightAltitudeDeg', 'zFactor'],
   },
-  { title: '6 · paper & bake', keys: ['grain', 'grainScale', 'supersample'] },
+  { title: '6 \u00b7 paper & bake', keys: ['grain', 'grainScale', 'supersample'] },
 ]
 
 /**

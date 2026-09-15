@@ -2,8 +2,10 @@ import { DataTexture, SRGBColorSpace } from 'three'
 import { describe, expect, it } from 'vitest'
 
 import { createHeightmap } from '../data/heightmap'
+import { findControlInconsistencies, findGroupingProblems } from '../utils/controlSpec'
 
 import {
+  BLEND_MODES,
   DEFAULT_TERRAIN_OPTIONS,
   TERRAIN_CONTROLS,
   TERRAIN_CONTROL_GROUPS,
@@ -42,43 +44,21 @@ const OPTS: TerrainTextureOptions = { ...DEFAULT_TERRAIN_OPTIONS, supersample: 1
 describe('terrainTexture controls', () => {
   describe('happy path', () => {
     it('keeps every numeric default inside its own declared range', () => {
-      // The whole reason the range lives beside the default: a value that its own slider cannot reach
-      // is invisible in the panel and silently clamped on the first tweak.
-      for (const [key, spec] of Object.entries(TERRAIN_CONTROLS)) {
-        if (spec.kind !== 'number') continue
-        const value = DEFAULT_TERRAIN_OPTIONS[key as keyof typeof DEFAULT_TERRAIN_OPTIONS]
-        expect(typeof value, key).toBe('number')
-        expect(value as number, `${key} below its minimum`).toBeGreaterThanOrEqual(spec.min)
-        expect(value as number, `${key} above its maximum`).toBeLessThanOrEqual(spec.max)
-      }
+      expect(findControlInconsistencies(TERRAIN_CONTROLS, DEFAULT_TERRAIN_OPTIONS)).toEqual([])
     })
   })
 
   describe('variants', () => {
-    it('describes every option exactly once across the groups', () => {
-      // A missing spec is a compile error, but a spec missing from a group would just quietly vanish
-      // from the panel — only a test catches that.
-      const grouped = TERRAIN_CONTROL_GROUPS.flatMap((group) => group.keys)
-      expect([...grouped].sort()).toEqual(Object.keys(TERRAIN_CONTROLS).sort())
-      expect(new Set(grouped).size, 'a key appears in two groups').toBe(grouped.length)
-    })
-
-    it('gives every control a non-empty label', () => {
-      for (const [key, spec] of Object.entries(TERRAIN_CONTROLS)) {
-        expect(spec.label.length, `${key} has no label`).toBeGreaterThan(0)
-      }
+    it('shows every declared option exactly once across the groups', () => {
+      expect(findGroupingProblems(TERRAIN_CONTROL_GROUPS, TERRAIN_CONTROLS)).toEqual([])
     })
   })
 
   describe('managed errors', () => {
-    it('declares a usable step for every slider', () => {
+    it('offers every blend dropdown the full set of modes', () => {
       for (const [key, spec] of Object.entries(TERRAIN_CONTROLS)) {
-        if (spec.kind !== 'number') continue
-        expect(spec.step, `${key} has a non-positive step`).toBeGreaterThan(0)
-        expect(spec.max, `${key} has an inverted range`).toBeGreaterThan(spec.min)
-        expect(spec.step, `${key} steps past its own range`).toBeLessThanOrEqual(
-          spec.max - spec.min
-        )
+        if (spec.kind !== 'choice') continue
+        expect([...spec.options], key).toEqual([...BLEND_MODES])
       }
     })
   })
@@ -90,12 +70,12 @@ describe('terrainTexture controls', () => {
       // The panel's numbering is load-bearing: it tells you what covers what. Guard the order so a
       // future reshuffle cannot quietly make it lie.
       expect(TERRAIN_CONTROL_GROUPS.map((group) => group.title)).toEqual([
-        '1 · base',
-        '2 · hypsometric tint',
-        '3 · heightmap (B&W)',
-        '4 · snow',
-        '5 · hillshade',
-        '6 · paper & bake',
+        '1 \u00b7 base',
+        '2 \u00b7 hypsometric tint',
+        '3 \u00b7 heightmap (B&W)',
+        '4 \u00b7 snow',
+        '5 \u00b7 hillshade',
+        '6 \u00b7 paper & bake',
       ])
     })
   })

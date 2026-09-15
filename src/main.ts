@@ -6,6 +6,14 @@ import { createMapControls } from './controls/mapControls'
 import { createDemCoastlineSource } from './data/coastlineSource'
 import { createFetchHeightmapSource, smoothHeightmap } from './data/heightmap'
 import { createDevPanel } from './devPanel'
+import {
+  DEFAULT_CAMERA_TUNING,
+  DEFAULT_COASTLINE_PARAMS,
+  DEFAULT_EXTENT_PARAMS,
+  DEFAULT_RELIEF_PARAMS,
+  DEFAULT_RHUMB_PARAMS,
+  DEFAULT_ROSE_PARAMS,
+} from './devParams'
 import { createCompassRose } from './scene/compassRose'
 import { createDebugRect } from './scene/debugRect'
 import { createLineLayer } from './scene/lineLayer'
@@ -22,7 +30,7 @@ import type {
   ReliefDevParams,
   RhumbDevParams,
   RoseDevParams,
-} from './devPanel'
+} from './devParams'
 import type { TerrainTextureOptions } from './scene/terrainTexture'
 import type { DataTexture, Object3D } from 'three'
 
@@ -60,7 +68,7 @@ function bootstrap(): () => void {
   // EU4-style map camera (arrow-key pan + wheel zoom, yaw locked north). `extent` is the world rectangle
   // the view must stay within; the frustum-aware clamp derives the pannable range from it (grows when
   // zoomed in, shrinks/re-centres when zoomed out, adapts on resize). Tuned live via centre + half-size.
-  const extentParams: ExtentDevParams = { centerX: 0, centerZ: 0, halfWidth: 5.8, halfDepth: 5.2 }
+  const extentParams: ExtentDevParams = { ...DEFAULT_EXTENT_PARAMS }
   const toExtent = (): MapRect => ({
     minX: extentParams.centerX - extentParams.halfWidth,
     maxX: extentParams.centerX + extentParams.halfWidth,
@@ -68,19 +76,12 @@ function bootstrap(): () => void {
     maxZ: extentParams.centerZ + extentParams.halfDepth,
   })
   const controls = createMapControls(camera, renderer.domElement, {
+    ...DEFAULT_CAMERA_TUNING,
     extent: toExtent(),
-    minDistance: 1,
-    maxDistance: 6,
-    minPitchDeg: 30,
-    maxPitchDeg: 55,
-    panSpeed: 8,
-    zoomSpeed: 0.01,
-    smoothingTau: reduceMotion ? 0.02 : 0.12,
+    // Honour prefers-reduced-motion by collapsing the inertia rather than disabling the controls.
+    smoothingTau: reduceMotion ? 0.02 : DEFAULT_CAMERA_TUNING.smoothingTau,
     initialZoom: 0,
-    enableDrag: true,
-    enableEdgeScroll: true,
     edgeScrollMargin: 24,
-    edgeScrollSpeed: 8,
   })
   const applyExtent = (): void => {
     controls.setExtent(toExtent())
@@ -105,14 +106,7 @@ function bootstrap(): () => void {
   const footprintRect = createDebugRect('#2980b9')
   scene.add(extentRect.object, footprintRect.object)
 
-  const params: ReliefDevParams = {
-    exaggeration: 0.75,
-    exaggZoomIn: 0.35,
-    smoothing: 0,
-    plainsCeiling: 575,
-    peakTarget: 1900,
-    wireframe: false,
-  }
+  const params: ReliefDevParams = { ...DEFAULT_RELIEF_PARAMS }
 
   // World-space width of the map plane (X axis), consumed by the mesh build.
   const WORLD_WIDTH = 12
@@ -122,40 +116,15 @@ function bootstrap(): () => void {
   const textureOptions: TerrainTextureOptions = { ...DEFAULT_TERRAIN_OPTIONS }
   // Coastline drawn as draped 3D lines (crisp, unlike a baked texture). A LIGHT jitter over a few
   // overlaid strokes at low opacity gives the soft pencil look. Follows `textureOptions.seaLevel`.
-  const coastParams: CoastlineDevParams = {
-    color: '#4a3424',
-    opacity: 0.2, // at full zoom-out (controls.zoom = 0)
-    opacityZoomIn: 0.1, // at full zoom-in (controls.zoom = 1); lerped every frame like the exaggeration
-    yLift: 0.002,
-    jitter: 0.002,
-    strokes: 5,
-  }
+  const coastParams: CoastlineDevParams = { ...DEFAULT_COASTLINE_PARAMS }
+
   // Portolan rhumb network — straight lines radiating from a ring of compass centres over the Atlantic,
   // clipped to the sea (drawn only over water). Centre defaults to open ocean west of Iberia.
-  const rhumbParams: RhumbDevParams = {
-    centerU: 0.2,
-    centerV: 0.52,
-    circleRadius: 0.34,
-    nodeCount: 12,
-    directions: 32,
-    color: '#6a4a2b',
-    opacity: 0.16, // at full zoom-out
-    opacityZoomIn: 0.06, // fades as you zoom in (less clutter)
-    clipStep: 0.004, // sampling step along each line (smaller = finer sea-clip at the coast)
-  }
+  const rhumbParams: RhumbDevParams = { ...DEFAULT_RHUMB_PARAMS }
+
   // Compass rose (variant D) — sits at the rhumb-network centre, portolan colour code (principal winds
   // inked, half-winds green, quarter-winds red).
-  const roseParams: RoseDevParams = {
-    centerU: 0.2, // Atlantic, west of Iberia/Morocco
-    centerV: 0.64, // pushed south into open ocean
-    size: 1.9,
-    opacity: 0.65,
-    showLabels: true,
-    ink: '#4a3424',
-    halfWind: '#3f5e3a', // vert anglais
-    quarterWind: '#7a2230', // rouge bordeaux
-    lift: 0.01,
-  }
+  const roseParams: RoseDevParams = { ...DEFAULT_ROSE_PARAMS }
 
   // Europe relief — rebuilt from the loaded heightmap; the height curve requires a geometry rebuild.
   let heightmap: Heightmap | null = null
