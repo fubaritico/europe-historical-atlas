@@ -13,6 +13,7 @@ import { hashInts } from '../utils/hash'
 
 import type { Heightmap } from '../data/heightmap'
 import type { LandMask } from '../data/landMask'
+import type { RgbColor } from '../utils/color'
 import type { ControlGroup, ControlTable } from '../utils/controlSpec'
 
 /**
@@ -22,14 +23,23 @@ import type { ControlGroup, ControlTable } from '../utils/controlSpec'
  */
 export type BlendMode = 'normal' | 'multiply' | 'overlay' | 'softLight'
 
-/** An 8-bit sRGB colour (channels in `[0, 255]`). */
-export interface RgbColor {
-  /** Red channel `[0, 255]`. */
-  r: number
-  /** Green channel `[0, 255]`. */
-  g: number
-  /** Blue channel `[0, 255]`. */
-  b: number
+export type { RgbColor } from '../utils/color'
+
+/**
+ * A colour claimed over part of the map — the seam through which a political layer reaches the
+ * compositor.
+ *
+ * Declared here, by the consumer, rather than in the data layer: the terrain compositor needs to know
+ * that *some* area carries *some* tint, and nothing about polities, dates or borders.
+ */
+export interface AreaTint {
+  /**
+   * The tint at a normalized coordinate, or `null` where nothing claims it.
+   * @param u - horizontal coordinate `[0, 1]` (0 = west edge)
+   * @param v - vertical coordinate `[0, 1]` (0 = north edge)
+   * @returns the tint, or `null`
+   */
+  at(u: number, v: number): RgbColor | null
 }
 
 /**
@@ -66,6 +76,10 @@ export interface TerrainTextureOptions {
   snowLatitudeRef: number
   /** Metres the snow line drops per degree of latitude north of `snowLatitudeRef` (0 = no tilt). */
   snowLatitudeDrop: number
+  /** How the political tint blends over the ground colour. */
+  politicalMode: BlendMode
+  /** Political tint amount `[0, 1]` (0 = no political layer at all). */
+  politicalStrength: number
   /** Elevation (metres) mapped to pure black in the greyscale heightmap layer. */
   elevationFloor: number
   /** Elevation (metres) mapped to pure white in the greyscale heightmap layer; higher samples clamp. */
@@ -121,6 +135,11 @@ export const DEFAULT_TERRAIN_OPTIONS: TerrainTextureOptions = {
   // Scandinavia and Iceland under snow from ~400 m while keeping the Atlas bare below ~2100 m.
   snowLatitudeRef: 46,
   snowLatitudeDrop: 55,
+  // `normal` rather than `multiply`: multiply can only darken, so on pale parchment every polity slid
+  // toward the same muddy olive. A straight interpolation keeps the hue, and the hillshade applied
+  // afterwards is what keeps the relief legible under the colour.
+  politicalMode: 'normal',
+  politicalStrength: 0.62,
   elevationFloor: 0,
   // Low ceiling on purpose: Europe is mostly under 1500 m, so a high reference (say 4000) crushes the
   // whole continent into the darkest few percent of the ramp and the valley detail disappears.
@@ -156,6 +175,8 @@ export const TERRAIN_CONTROLS: ControlTable<TerrainTextureOptions> = {
   highland: { kind: 'color', label: 'highland' },
   elevationStrength: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'strength' },
   elevationMode: { kind: 'choice', options: BLEND_MODES, label: 'blend' },
+  politicalStrength: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'strength' },
+  politicalMode: { kind: 'choice', options: BLEND_MODES, label: 'blend' },
   elevationFloor: { kind: 'number', min: -8000, max: 2000, step: 100, label: 'black at (m)' },
   elevationCeiling: { kind: 'number', min: 500, max: 7000, step: 100, label: 'white at (m)' },
   elevationIncludesSea: { kind: 'boolean', label: 'over sea too' },
@@ -200,11 +221,12 @@ export const TERRAIN_CONTROL_GROUPS: ControlGroup<TerrainTextureOptions>[] = [
     title: '4 \u00b7 snow',
     keys: ['snowStrength', 'snowStart', 'snowFull', 'snow', 'snowLatitudeDrop', 'snowLatitudeRef'],
   },
+  { title: '5 \u00b7 political', keys: ['politicalStrength', 'politicalMode'] },
   {
-    title: '5 \u00b7 hillshade',
+    title: '6 \u00b7 hillshade',
     keys: ['hillshadeStrength', 'hillshadeMode', 'lightAzimuthDeg', 'lightAltitudeDeg', 'zFactor'],
   },
-  { title: '6 \u00b7 paper & bake', keys: ['grain', 'grainScale', 'supersample'] },
+  { title: '7 \u00b7 paper & bake', keys: ['grain', 'grainScale', 'supersample'] },
 ]
 
 /**
@@ -444,6 +466,7 @@ export function computeHillshade(
  * @param shade - hillshade intensity `[0, 1]` at this pixel
  * @param options - the texture options
  * @param snowDrop - metres to lower the snow band at this pixel's latitude ({@link snowLineDrop})
+ * @param political - the political tint claimed here, or `null`
  * @returns nothing; `out` holds the result
  */
 function landColorInto(
@@ -451,7 +474,8 @@ function landColorInto(
   elevation: number,
   shade: number,
   options: TerrainTextureOptions,
-  snowDrop: number
+  snowDrop: number,
+  political: RgbColor | null
 ): void {
   const tint = hypsometricTint(elevation, options)
   const parchment = [
@@ -480,6 +504,17 @@ function landColorInto(
     out[1] += (options.snow.g / 255 - out[1]) * snow
     out[2] += (options.snow.b / 255 - out[2]) * snow
   }
+  // The political tint covers the ground colour but still sits BELOW the hillshade: a country painted
+  // over the shading would flatten into a sticker, where under it the relief keeps reading through.
+  if (political && options.politicalStrength > 0) {
+    const tint = [political.r / 255, political.g / 255, political.b / 255] as const
+    for (let k = 0; k < 3; k++) {
+      const base = out[k] ?? 0
+      out[k] =
+        base +
+        (blendChannel(base, tint[k] ?? 0, options.politicalMode) - base) * options.politicalStrength
+    }
+  }
   blendGreyInto(out, out, shade, options.hillshadeMode, options.hillshadeStrength)
 }
 
@@ -494,12 +529,14 @@ function landColorInto(
  * @param heightmap - the elevation source
  * @param options - the texture options
  * @param landMask - which cells are land; falls back to thresholding elevation when omitted
+ * @param areaTint - an optional colour claimed over part of the map (the political layer)
  * @returns an `RGBA` `Uint8Array` of length `width * height * 4`
  */
 export function composeTerrainRgba(
   heightmap: Heightmap,
   options: TerrainTextureOptions,
-  landMask?: LandMask
+  landMask?: LandMask,
+  areaTint?: AreaTint
 ): Uint8Array {
   // The elevation fallback is a documented degraded mode, not an equivalent: it drowns land lying below
   // sea level and dries out every lake above it.
@@ -566,7 +603,8 @@ export function composeTerrainRgba(
           seaC[2] = baseSea[2]
         }
       }
-      if (coverage > 0) landColorInto(landC, e, shadeAt(fx, fy), options, snowDrop)
+      if (coverage > 0)
+        landColorInto(landC, e, shadeAt(fx, fy), options, snowDrop, areaTint?.at(u, v) ?? null)
 
       // Vellum grain: a final multiplicative paper mottling over land AND sea, so the parchment fibre
       // reads uniformly across continents and ocean alike (centred on 1 → lightens/darkens patches).
@@ -592,15 +630,17 @@ export function composeTerrainRgba(
  * @param heightmap - the elevation source
  * @param options - the texture options
  * @param landMask - which cells are land; falls back to thresholding elevation when omitted
+ * @param areaTint - an optional colour claimed over part of the map (the political layer)
  * @returns the terrain texture (sRGB, mipmapped, sized by `supersample`)
  */
 export function createTerrainTexture(
   heightmap: Heightmap,
   options: TerrainTextureOptions,
-  landMask?: LandMask
+  landMask?: LandMask,
+  areaTint?: AreaTint
 ): DataTexture {
   const { width, height } = terrainTextureSize(heightmap, options)
-  const rgba = composeTerrainRgba(heightmap, options, landMask)
+  const rgba = composeTerrainRgba(heightmap, options, landMask, areaTint)
   const texture = new DataTexture(rgba, width, height, RGBAFormat, UnsignedByteType)
   texture.flipY = true // buffer row 0 = north; UV v=1 (north vertex) must sample it
   texture.colorSpace = SRGBColorSpace

@@ -1,0 +1,297 @@
+import { hslToRgb } from '../utils/color'
+import { hashInts } from '../utils/hash'
+
+import type { Region } from './regionSource'
+import type { RgbColor } from '../utils/color'
+
+/**
+ * Which polity occupies each cell of a grid.
+ */
+export interface RegionRaster {
+  /** Grid width in cells. */
+  width: number
+  /** Grid height in cells. */
+  height: number
+  /** The raw per-cell indices, row-major, `-1` where unclaimed. */
+  cells: Int16Array
+  /**
+   * The index into the region list at a normalized coordinate, or `-1` where no polity claims it.
+   * @param u - horizontal coordinate `[0, 1]` (0 = west edge)
+   * @param v - vertical coordinate `[0, 1]` (0 = north edge)
+   * @returns the region index, or `-1`
+   */
+  indexAt(u: number, v: number): number
+}
+
+/**
+ * Rasterise dated polities into a per-cell index grid by even-odd scanline fill.
+ *
+ * Rasterised in the browser rather than shipped per year: the geometry is small (a few thousand
+ * vertices), whereas an index grid is one byte per cell per year, which would make switching centuries
+ * an asset download instead of a millisecond of work.
+ *
+ * Later polities win on overlap, which keeps enclaves drawn on top of the power surrounding them.
+ * @param regions - the polities, in normalized grid coordinates
+ * @param width - grid width in cells
+ * @param height - grid height in cells
+ * @returns the index grid
+ */
+export function rasteriseRegions(
+  regions: readonly Region[],
+  width: number,
+  height: number
+): RegionRaster {
+  const cells = new Int16Array(width * height).fill(-1)
+  if (width >= 2 && height >= 2) {
+    // Edges bucketed by the rows they span, so each row only tests the edges that actually cross it.
+    const crossings: number[] = []
+    for (let index = 0; index < regions.length; index++) {
+      const region = regions[index]
+      if (!region) continue
+      const table = new Map<number, number[]>()
+      for (const ring of region.rings) {
+        for (let i = 0; i < ring.length; i++) {
+          const a = ring[i]
+          const b = ring[(i + 1) % ring.length]
+          if (!a || !b || a.v === b.v) continue // horizontal edges contribute no crossing
+          const from = Math.max(0, Math.ceil(Math.min(a.v, b.v) * (height - 1)))
+          const to = Math.min(height - 1, Math.floor(Math.max(a.v, b.v) * (height - 1)))
+          for (let row = from; row <= to; row++) {
+            const bucket = table.get(row)
+            if (bucket) bucket.push(a.u, a.v, b.u, b.v)
+            else table.set(row, [a.u, a.v, b.u, b.v])
+          }
+        }
+      }
+
+      for (const [row, bucket] of table) {
+        const v = row / (height - 1)
+        crossings.length = 0
+        for (let i = 0; i < bucket.length; i += 4) {
+          const au = bucket[i] ?? 0
+          const av = bucket[i + 1] ?? 0
+          const bu = bucket[i + 2] ?? 0
+          const bv = bucket[i + 3] ?? 0
+          // Half-open, so a vertex shared by two edges is counted exactly once.
+          if (v >= Math.min(av, bv) && v < Math.max(av, bv)) {
+            crossings.push(au + ((bu - au) * (v - av)) / (bv - av))
+          }
+        }
+        if (crossings.length < 2) continue
+        crossings.sort((a, b) => a - b)
+        for (let i = 0; i + 1 < crossings.length; i += 2) {
+          const start = Math.max(0, Math.ceil((crossings[i] ?? 0) * (width - 1)))
+          const end = Math.min(width - 1, Math.floor((crossings[i + 1] ?? 0) * (width - 1)))
+          for (let col = start; col <= end; col++) cells[row * width + col] = index
+        }
+      }
+    }
+  }
+
+  return {
+    width,
+    height,
+    cells,
+    indexAt(u: number, v: number): number {
+      const col = Math.round(Math.min(width - 1, Math.max(0, u * (width - 1))))
+      const row = Math.round(Math.min(height - 1, Math.max(0, v * (height - 1))))
+      return cells[row * width + col] ?? -1
+    },
+  }
+}
+
+/**
+ * Pick a stable colour for a polity from its name.
+ *
+ * Keyed on the name rather than the index so a power keeps its colour from one century to the next —
+ * indices shuffle as polities appear and vanish, and a France that changes hue between 1500 and 1600
+ * reads as a different country. Saturation and lightness stay in a narrow band so the tint sits on
+ * parchment without fighting it.
+ * @param name - the polity's name, or `null`
+ * @returns the tint
+ */
+export function regionColor(name: string | null): RgbColor {
+  let seed = 0
+  const key = name ?? ''
+  for (let i = 0; i < key.length; i++) seed = (seed * 31 + key.charCodeAt(i)) % 1_000_003
+  const hue = hashInts(seed, 1) * 360
+  const saturation = 0.34 + hashInts(seed, 2) * 0.22
+  const lightness = 0.55 + hashInts(seed, 3) * 0.12
+  return hslToRgb(hue, saturation, lightness)
+}
+
+/**
+ * Grow the claimed areas into any land cell no polity reached, each taking its nearest claim.
+ *
+ * The political geometry and the coastline come from different sources at very different levels of
+ * generalisation: the historical polygons are schematic, so where one falls short of the real shoreline
+ * the land is left bare and the colour appears to stop before the coast. Since a tint can never spill
+ * *into* the sea — the compositor only paints where the mask says land — the visible symptom is an
+ * apparent offset, which no coordinate fix would address.
+ *
+ * Growing the claims settles it the way historical atlases do: the coastline is the modern one, and only
+ * the internal divisions come from the historical source, which is exactly where its approximation is
+ * legitimate. A breadth-first expansion from every claimed cell at once makes each unclaimed cell take
+ * its nearest neighbour's polity.
+ * @param raster - the rasterised claims
+ * @param isLand - whether a normalized coordinate is land
+ * @param maxCells - how far a claim may grow, in cells; keeps an island from adopting a distant power
+ * @returns a new raster with the land gaps filled
+ */
+export function expandRegionsOverLand(
+  raster: RegionRaster,
+  isLand: (u: number, v: number) => boolean,
+  maxCells: number
+): RegionRaster {
+  const { width, height } = raster
+  const cells = Int16Array.from(raster.cells)
+  const uAt = (col: number): number => (width > 1 ? col / (width - 1) : 0)
+  const vAt = (row: number): number => (height > 1 ? row / (height - 1) : 0)
+
+  let frontier: number[] = []
+  for (let i = 0; i < cells.length; i++) if ((cells[i] ?? -1) >= 0) frontier.push(i)
+
+  for (let step = 0; step < Math.max(0, Math.floor(maxCells)) && frontier.length > 0; step++) {
+    const next: number[] = []
+    for (const index of frontier) {
+      const claim = cells[index] ?? -1
+      const col = index % width
+      const row = (index - col) / width
+      for (const [dc, dr] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1],
+      ] as const) {
+        const nc = col + dc
+        const nr = row + dr
+        if (nc < 0 || nc >= width || nr < 0 || nr >= height) continue
+        const target = nr * width + nc
+        if ((cells[target] ?? -1) >= 0) continue
+        if (!isLand(uAt(nc), vAt(nr))) continue
+        cells[target] = claim
+        next.push(target)
+      }
+    }
+    frontier = next
+  }
+
+  return {
+    width,
+    height,
+    cells,
+    indexAt(u: number, v: number): number {
+      const col = Math.round(Math.min(width - 1, Math.max(0, u * (width - 1))))
+      const row = Math.round(Math.min(height - 1, Math.max(0, v * (height - 1))))
+      return cells[row * width + col] ?? -1
+    },
+  }
+}
+
+/**
+ * Assign each polity a colour from a palette so that no two that share a border get the same one.
+ *
+ * A hash of the name spreads colours evenly over the wheel but has no idea what touches what, so two
+ * neighbours regularly land on near-identical tints and the border between them stops reading. A map is
+ * legible because adjacent areas contrast — the four-colour theorem is the formal version of the same
+ * observation — so adjacency is what the assignment has to respect, not variety for its own sake.
+ *
+ * Adjacency is read off the raster rather than the geometry: polygons that merely look neighbourly may
+ * not touch, and after the claims have grown over the coast the raster is the truth anyway. Polities are
+ * coloured most-connected first, which is the greedy order that needs fewest colours.
+ * Polities with a pinned colour take it and are skipped: an editorial choice outranks the automatic
+ * one, and since the pinned colours sit outside the palette they cannot collide with it either.
+ * @param raster - the rasterised claims
+ * @param regions - the polities, in index order
+ * @param palette - the colours to choose from, in preference order
+ * @param pinnedFor - an editorial colour for a polity, or `null` to let the palette decide
+ * @returns one colour per region index
+ */
+export function assignRegionColors(
+  raster: RegionRaster,
+  regions: readonly { name: string | null }[],
+  palette: readonly RgbColor[],
+  pinnedFor: (name: string | null) => RgbColor | null = () => null
+): RgbColor[] {
+  const regionCount = regions.length
+  const fallback: RgbColor = { r: 200, g: 190, b: 170 }
+  if (palette.length === 0) return Array.from({ length: regionCount }, () => fallback)
+
+  const { width, height, cells } = raster
+  const neighbours: Set<number>[] = Array.from({ length: regionCount }, () => new Set<number>())
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      const here = cells[row * width + col] ?? -1
+      if (here < 0) continue
+      // Right and down only: every pair is still seen once, at half the work.
+      for (const [dc, dr] of [
+        [1, 0],
+        [0, 1],
+      ] as const) {
+        const nc = col + dc
+        const nr = row + dr
+        if (nc >= width || nr >= height) continue
+        const other = cells[nr * width + nc] ?? -1
+        if (other < 0 || other === here) continue
+        neighbours[here]?.add(other)
+        neighbours[other]?.add(here)
+      }
+    }
+  }
+
+  const pinned = regions.map((region) => pinnedFor(region.name))
+  const order = Array.from({ length: regionCount }, (_, i) => i)
+    .filter((index) => !pinned[index])
+    .sort((a, b) => (neighbours[b]?.size ?? 0) - (neighbours[a]?.size ?? 0))
+  const chosen = new Int16Array(regionCount).fill(-1)
+  for (const index of order) {
+    const taken = new Set<number>()
+    for (const neighbour of neighbours[index] ?? []) {
+      const colour = chosen[neighbour] ?? -1
+      if (colour >= 0) taken.add(colour)
+    }
+    let pick = 0
+    while (pick < palette.length && taken.has(pick)) pick++
+    // More neighbours than colours: fall back to the least-used rather than leaving a hole.
+    chosen[index] = pick < palette.length ? pick : index % palette.length
+  }
+
+  return Array.from(
+    { length: regionCount },
+    (_, i) => pinned[i] ?? palette[chosen[i] ?? 0] ?? fallback
+  )
+}
+
+/**
+ * Whether a segment separates two different polities, rather than facing the sea or its own hinterland.
+ *
+ * The test a border line needs is not "is this on land" but "is this shared". A polity's outline
+ * includes its coast, and since the historical outlines are smaller than the real shoreline that coastal
+ * run falls *inland*, passing any land test and drawing a second line parallel to the shore. Probing
+ * both sides settles all three cases at once: two different claims is a real border, a claim facing
+ * nothing is a coast, and a claim facing itself is the strip its own outline failed to reach.
+ * @param raster - the rasterised claims, after any expansion
+ * @param a - one endpoint, in normalized grid coordinates
+ * @param b - the other endpoint
+ * @param probe - how far to sample either side, in normalized grid units
+ * @returns `true` when the two sides are claimed by different polities
+ */
+export function separatesRegions(
+  raster: RegionRaster,
+  a: { u: number; v: number },
+  b: { u: number; v: number },
+  probe: number
+): boolean {
+  const du = b.u - a.u
+  const dv = b.v - a.v
+  const length = Math.hypot(du, dv)
+  if (length === 0) return false
+  // Perpendicular to the segment, normalized.
+  const nu = -dv / length
+  const nv = du / length
+  const mu = (a.u + b.u) / 2
+  const mv = (a.v + b.v) / 2
+  const left = raster.indexAt(mu + nu * probe, mv + nv * probe)
+  const right = raster.indexAt(mu - nu * probe, mv - nv * probe)
+  return left >= 0 && right >= 0 && left !== right
+}

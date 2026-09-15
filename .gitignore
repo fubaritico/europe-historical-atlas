@@ -23,3 +23,6 @@ opensrc
 
 # Project plans and resources
 files
+
+# Historical borders — GPL-3.0 source, spike only (see files/spikes/fetch-borders)
+public/borders/

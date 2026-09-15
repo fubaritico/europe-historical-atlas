@@ -6,6 +6,14 @@ import { createMapControls } from './controls/mapControls'
 import { createMaskCoastlineSource } from './data/coastlineSource'
 import { createFetchHeightmapSource, smoothHeightmap } from './data/heightmap'
 import { createElevationLandMask, createFetchLandMaskSource } from './data/landMask'
+import { pinnedRegionColor } from './data/regionPalette'
+import {
+  assignRegionColors,
+  expandRegionsOverLand,
+  rasteriseRegions,
+  separatesRegions,
+} from './data/regionRaster'
+import { createFetchRegionSource } from './data/regionSource'
 import {
   DEFAULT_RIVER_EXTENSION,
   createFetchRiverSource,
@@ -16,10 +24,12 @@ import {
   DEFAULT_CAMERA_TUNING,
   DEFAULT_COASTLINE_PARAMS,
   DEFAULT_EXTENT_PARAMS,
+  DEFAULT_POLITICAL_PARAMS,
   DEFAULT_RELIEF_PARAMS,
   DEFAULT_RHUMB_PARAMS,
   DEFAULT_RIVER_PARAMS,
   DEFAULT_ROSE_PARAMS,
+  politicalPalette,
 } from './devParams'
 import { createCompassRose } from './scene/compassRose'
 import { createDebugRect } from './scene/debugRect'
@@ -28,6 +38,7 @@ import { createReliefMesh, reliefWorldY } from './scene/reliefMesh'
 import { generateRhumbSegments } from './scene/rhumbNetwork'
 import { createRiverLayer } from './scene/riverLayer'
 import { DEFAULT_TERRAIN_OPTIONS, createTerrainTexture } from './scene/terrainTexture'
+import { hexToRgb } from './utils/color'
 import { lerp } from './utils/math'
 
 import type { MapRect } from './controls/mapControls'
@@ -36,12 +47,14 @@ import type { LandMask } from './data/landMask'
 import type {
   CoastlineDevParams,
   ExtentDevParams,
+  PoliticalDevParams,
   ReliefDevParams,
   RhumbDevParams,
   RiverDevParams,
   RoseDevParams,
 } from './devParams'
-import type { TerrainTextureOptions } from './scene/terrainTexture'
+import type { AreaTint, TerrainTextureOptions } from './scene/terrainTexture'
+import type { RgbColor } from './utils/color'
 import type { DataTexture, Object3D } from 'three'
 
 /**
@@ -148,8 +161,13 @@ function bootstrap(): () => void {
   // Rivers — Natural Earth centrelines (public domain), draped on the relief and revealed by zoom.
   const riverParams: RiverDevParams = { ...DEFAULT_RIVER_PARAMS }
 
+  // Historical political overlay — GPL-3.0 source, kept out of git (see files/spikes/fetch-borders).
+  const politicalParams: PoliticalDevParams = { ...DEFAULT_POLITICAL_PARAMS }
+
   // Europe relief — rebuilt from the loaded heightmap; the height curve requires a geometry rebuild.
   let heightmap: Heightmap | null = null
+  let regionSet: Awaited<ReturnType<ReturnType<typeof createFetchRegionSource>['load']>> | null =
+    null
   let reliefSource: Heightmap | null = null // the (possibly smoothed) grid the mesh was actually built from
   // Which cells are land. A DEM cannot answer this — a polder is dry below sea level, a lake is wet
   // above it — so it comes from its own asset, with an elevation threshold as the degraded fallback.
@@ -159,6 +177,16 @@ function bootstrap(): () => void {
   let coastline: ReturnType<typeof createLineLayer> | null = null
   let rhumb: ReturnType<typeof createLineLayer> | null = null
   let rivers: ReturnType<typeof createRiverLayer> | null = null
+  let borders: ReturnType<typeof createLineLayer> | null = null
+  let regionRaster: ReturnType<typeof rasteriseRegions> | null = null
+  let regionTints: RgbColor[] = []
+  // The seam the compositor sees: a colour claimed at a coordinate, and nothing about history.
+  const areaTint: AreaTint = {
+    at: (u, v) => {
+      const index = regionRaster?.indexAt(u, v) ?? -1
+      return index < 0 ? null : (regionTints[index] ?? null)
+    },
+  }
   let riverData: Awaited<ReturnType<ReturnType<typeof createFetchRiverSource>['load']>> = []
   let compass: ReturnType<typeof createCompassRose> | null = null
   let disposed = false // guards the async heightmap load from building a mesh after teardown (HMR mid-load)
@@ -213,7 +241,8 @@ function bootstrap(): () => void {
     terrainTexture = createTerrainTexture(
       heightmap,
       textureOptions,
-      landMask ?? createElevationLandMask(heightmap, textureOptions.seaLevel)
+      landMask ?? createElevationLandMask(heightmap, textureOptions.seaLevel),
+      areaTint
     )
     if (relief) {
       relief.material.map = terrainTexture
@@ -242,6 +271,7 @@ function bootstrap(): () => void {
   const rebuildRhumb = (): void => {
     if (!heightmap) return
     disposeHandle(rhumb)
+    disposeHandle(borders)
     if (rivers) {
       scene.remove(rivers.object)
       rivers.dispose()
@@ -300,6 +330,81 @@ function bootstrap(): () => void {
     scene.add(rivers.object)
   }
 
+  const rebuildBorders = (): void => {
+    disposeHandle(borders)
+    borders = null
+    if (!heightmap || !regionSet || !politicalParams.showBorders) return
+    const raster = regionRaster
+    // Probe a couple of DEM cells either side — far enough to clear the polygon's own edge, close
+    // enough not to jump a narrow neighbour.
+    const probe = 2 / (heightmap.meta.width - 1)
+    const segments: [{ u: number; v: number }, { u: number; v: number }][] = []
+    for (const region of regionSet.regions) {
+      for (const ring of region.rings) {
+        for (let i = 0; i < ring.length; i++) {
+          const a = ring[i]
+          const b = ring[(i + 1) % ring.length]
+          if (!a || !b) continue
+          // Only the stretches actually shared with another polity: the rest is coastline, which the
+          // map already draws once, from a far better source.
+          if (raster && !separatesRegions(raster, a, b, probe)) continue
+          segments.push([a, b])
+        }
+      }
+    }
+    if (segments.length === 0) return
+    borders = createLineLayer(segments, {
+      project: projectDraped,
+      color: politicalParams.borderColor,
+      opacity: politicalParams.borderOpacity,
+      width: politicalParams.borderWidth,
+    })
+    borders.setResolution(window.innerWidth, window.innerHeight)
+    scene.add(borders.object)
+  }
+
+  const regionSourcePort = createFetchRegionSource((year) => `/borders/europe-${String(year)}.json`)
+
+  const rebuildPolitical = (): void => {
+    if (!heightmap) return
+    const year = Math.round(politicalParams.year / 100) * 100
+    void regionSourcePort
+      .load(year)
+      .then((loaded) => {
+        if (disposed) return
+        regionSet = loaded
+        // Rasterised at the DEM's own grid: political areas are large, and the crisp edge the eye reads
+        // is the border line drawn on top, not the boundary of the tint underneath.
+        const claimed = rasteriseRegions(
+          loaded.regions,
+          heightmap?.meta.width ?? 1,
+          heightmap?.meta.height ?? 1
+        )
+        // Grow the claims over any land the schematic polygons missed, so the coloured areas end on our
+        // coastline rather than on theirs.
+        const mask = landMask
+        regionRaster = mask
+          ? expandRegionsOverLand(claimed, (u, v) => mask.isLand(u, v), politicalParams.snapToCoast)
+          : claimed
+        // Colouring reads adjacency off the raster, so it has to run after the claims have grown: two
+        // polities may only become neighbours once they both reach the coast.
+        const named = loaded.regions.map((region) => ({
+          name: politicalParams.colorBySuzerain ? (region.subjectTo ?? region.name) : region.name,
+        }))
+        regionTints = assignRegionColors(
+          regionRaster,
+          named,
+          politicalPalette(politicalParams).map(hexToRgb),
+          pinnedRegionColor
+        )
+        rebuildTexture()
+        rebuildBorders()
+      })
+      .catch((error: unknown) => {
+        console.error(`political layer ${String(year)} failed to load`, error)
+      })
+  }
+
   // World position of the compass rose (its own centre, independent of the rhumb network), lifted above
   // the sea.
   const roseWorldPosition = (): [number, number, number] => {
@@ -356,6 +461,7 @@ function bootstrap(): () => void {
       rebuildRhumb()
       rebuildRivers() // no-op until the river payload lands; whichever finishes last draws them
       rebuildRose()
+      rebuildPolitical()
     })
     .catch((error: unknown) => {
       console.error('relief load failed', error)
@@ -373,6 +479,9 @@ function bootstrap(): () => void {
       rebuildCoastline()
       rebuildRhumb()
       rebuildRivers()
+      // The borders drop their maritime stretches using this mask; built before it arrived, they still
+      // carry every coastal segment.
+      rebuildBorders()
     })
     .catch((error: unknown) => {
       console.error('land mask load failed — falling back to the 0 m contour', error)
@@ -397,6 +506,7 @@ function bootstrap(): () => void {
     coast: coastParams,
     rhumb: rhumbParams,
     river: riverParams,
+    political: politicalParams,
     rose: roseParams,
     controlsOptions: controls.options,
     framing,
@@ -408,6 +518,8 @@ function bootstrap(): () => void {
       rebuildCoastline,
       rebuildRhumb,
       rebuildRivers,
+      rebuildPolitical,
+      rebuildBorders,
       rebuildRose,
       setWireframe: (value: boolean): void => {
         if (relief) relief.material.wireframe = value
@@ -443,6 +555,7 @@ function bootstrap(): () => void {
                 coastline: coastParams,
                 rhumb: rhumbParams,
                 river: riverParams,
+                political: politicalParams,
                 rose: roseParams,
                 camera: { ...controls.getState(), fov: framing.fov },
                 controls: {
@@ -480,6 +593,7 @@ function bootstrap(): () => void {
     // Fat lines size their stroke in screen pixels, so the shader needs the new viewport or the width
     // distorts with the aspect ratio.
     rivers?.setResolution(window.innerWidth, window.innerHeight)
+    borders?.setResolution(window.innerWidth, window.innerHeight)
   }
   window.addEventListener('resize', onResize)
 
@@ -493,9 +607,15 @@ function bootstrap(): () => void {
       relief.scale.setY(params.exaggeration * (1 - (1 - params.exaggZoomIn) * controls.zoom))
     // Rivers follow the relief's live exaggeration (same surface), and reveal their finer ranks as the
     // camera comes in — opacity only, so no geometry is rebuilt while zooming.
-    if (rivers && relief) {
-      rivers.object.scale.setY(relief.scale.y)
-      rivers.setZoom(controls.zoom)
+    // Anything draped is built against an unexaggerated surface, so it has to track the relief's live
+    // scale.y. Miss it and the overlay floats by the exaggeration ratio — nothing on a plain, glaringly
+    // wrong along a mountain crest, where a border is precisely where the terrain is highest.
+    if (relief) {
+      if (rivers) {
+        rivers.object.scale.setY(relief.scale.y)
+        rivers.setZoom(controls.zoom)
+      }
+      if (borders) borders.object.scale.setY(relief.scale.y)
     }
     // Zoom-linked opacity: `opacity` at zoom-out (z=0) → `opacityZoomIn` at zoom-in (z=1).
     if (coastline)

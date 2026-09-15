@@ -300,6 +300,123 @@ export const RIVER_CONTROL_ORDER: (keyof RiverDevParams)[] = [
 ]
 
 /**
+ * The historical political overlay: which year is shown, and how its borders are drawn. The tint
+ * strength and blend mode live with the other texture layers, since that is where they are composited.
+ */
+export interface PoliticalDevParams {
+  /** The year to show. The loader picks the nearest century the dataset actually provides. */
+  year: number
+  /** Draw the border lines on top of the tinted areas. */
+  showBorders: boolean
+  /** Border line colour (hex string). */
+  borderColor: string
+  /** Border line opacity. */
+  borderOpacity: number
+  /** Border stroke width in CSS pixels. */
+  borderWidth: number
+  /** Colour areas by the power they answer to (`SUBJECTO`) rather than by polity. */
+  colorBySuzerain: boolean
+  /**
+   * How far, in DEM cells, a polity's claim may grow to reach land its schematic outline missed. 0
+   * leaves the raw polygons and their bare coastal strips.
+   */
+  snapToCoast: number
+  /** Palette slot 1 — muted tints chosen to sit on parchment rather than fight it. */
+  palette1: string
+  /** Palette slot 2. */
+  palette2: string
+  /** Palette slot 3. */
+  palette3: string
+  /** Palette slot 4. */
+  palette4: string
+  /** Palette slot 5. */
+  palette5: string
+  /** Palette slot 6. */
+  palette6: string
+  /** Palette slot 7. */
+  palette7: string
+  /** Palette slot 8. */
+  palette8: string
+}
+
+/**
+ * Read the eight palette slots as a list.
+ * @param params - the political params
+ * @returns the palette, in preference order
+ */
+export function politicalPalette(params: PoliticalDevParams): string[] {
+  return [
+    params.palette1,
+    params.palette2,
+    params.palette3,
+    params.palette4,
+    params.palette5,
+    params.palette6,
+    params.palette7,
+    params.palette8,
+  ]
+}
+
+/** Opens on 1500 — a Europe recognisable enough to judge the rendering against. */
+export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
+  year: 1500,
+  showBorders: true,
+  borderColor: '#5c3a2e',
+  borderOpacity: 0.7,
+  borderWidth: 1.4,
+  colorBySuzerain: false,
+  snapToCoast: 12,
+  // Eight is comfortably above what a political map of Europe needs: four colours suffice in theory,
+  // and the surplus keeps neighbours-of-neighbours from echoing each other.
+  palette1: '#b8554a',
+  palette2: '#6f8a52',
+  palette3: '#54719b',
+  palette4: '#c29646',
+  palette5: '#8f6a9c',
+  palette6: '#468a83',
+  palette7: '#c46b42',
+  palette8: '#87825c',
+}
+
+/** Range, step and label of every {@link PoliticalDevParams} field. */
+export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
+  year: { kind: 'number', min: 100, max: 2000, step: 100, label: 'year (CE)' },
+  showBorders: { kind: 'boolean', label: 'draw borders' },
+  borderColor: { kind: 'hexColor', label: 'border colour' },
+  borderOpacity: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'border opacity' },
+  borderWidth: { kind: 'number', min: 0.5, max: 5, step: 0.05, label: 'border width (px)' },
+  colorBySuzerain: { kind: 'boolean', label: 'colour by suzerain' },
+  snapToCoast: { kind: 'number', min: 0, max: 40, step: 1, label: 'snap to coast (cells)' },
+  palette1: { kind: 'hexColor', label: 'palette 1' },
+  palette2: { kind: 'hexColor', label: 'palette 2' },
+  palette3: { kind: 'hexColor', label: 'palette 3' },
+  palette4: { kind: 'hexColor', label: 'palette 4' },
+  palette5: { kind: 'hexColor', label: 'palette 5' },
+  palette6: { kind: 'hexColor', label: 'palette 6' },
+  palette7: { kind: 'hexColor', label: 'palette 7' },
+  palette8: { kind: 'hexColor', label: 'palette 8' },
+}
+
+/** Display order of the political controls. */
+export const POLITICAL_CONTROL_ORDER: (keyof PoliticalDevParams)[] = [
+  'year',
+  'snapToCoast',
+  'colorBySuzerain',
+  'showBorders',
+  'borderColor',
+  'borderOpacity',
+  'borderWidth',
+  'palette1',
+  'palette2',
+  'palette3',
+  'palette4',
+  'palette5',
+  'palette6',
+  'palette7',
+  'palette8',
+]
+
+/**
  * The world rectangle the camera view is clamped within, tuned by centre + half-size.
  */
 export interface ExtentDevParams {
@@ -434,6 +551,12 @@ export const ALL_CONTROL_TABLES = [
     controls: RIVER_CONTROLS,
     defaults: DEFAULT_RIVER_PARAMS,
     order: RIVER_CONTROL_ORDER,
+  },
+  {
+    name: 'political',
+    controls: POLITICAL_CONTROLS,
+    defaults: DEFAULT_POLITICAL_PARAMS,
+    order: POLITICAL_CONTROL_ORDER,
   },
   {
     name: 'extent',

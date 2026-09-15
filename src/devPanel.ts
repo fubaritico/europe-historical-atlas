@@ -7,6 +7,8 @@ import {
   COASTLINE_CONTROL_ORDER,
   EXTENT_CONTROLS,
   EXTENT_CONTROL_ORDER,
+  POLITICAL_CONTROLS,
+  POLITICAL_CONTROL_ORDER,
   RELIEF_CONTROLS,
   RELIEF_CONTROL_ORDER,
   RHUMB_CONTROLS,
@@ -22,6 +24,7 @@ import type { MapControlsOptions } from './controls/mapControls'
 import type {
   CoastlineDevParams,
   ExtentDevParams,
+  PoliticalDevParams,
   ReliefDevParams,
   RhumbDevParams,
   RiverDevParams,
@@ -33,6 +36,7 @@ import type { ControlSpec } from './utils/controlSpec'
 export type {
   CameraTuningParams,
   CoastlineDevParams,
+  PoliticalDevParams,
   ExtentDevParams,
   ReliefDevParams,
   RhumbDevParams,
@@ -89,6 +93,10 @@ export interface DevPanelCallbacks {
   rebuildRhumb: () => void
   /** Rebuild the river network (lake filter / jitter changed). */
   rebuildRivers: () => void
+  /** Reload and re-rasterise the political overlay (year or colouring changed). */
+  rebuildPolitical: () => void
+  /** Rebuild the border lines only (styling changed). */
+  rebuildBorders: () => void
   /** Update the live river material colour. */
   setRiverColor: (color: string) => void
   /** Rebuild the compass rose (colours / labels / size / lift changed). */
@@ -128,6 +136,8 @@ export interface DevPanelDeps {
   rhumb: RhumbDevParams
   /** River-network styling + level of detail. */
   river: RiverDevParams
+  /** Historical political overlay params. */
+  political: PoliticalDevParams
   /** Compass-rose styling params. */
   rose: RoseDevParams
   /** The live controls options object (mutated in place, read every frame). */
@@ -177,6 +187,7 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     coast,
     rhumb,
     river,
+    political,
     rose,
     controlsOptions,
     framing,
@@ -198,6 +209,7 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     coast: clonePlain(coast),
     rhumb: clonePlain(rhumb),
     river: clonePlain(river),
+    political: clonePlain(political),
     rose: clonePlain(rose),
     extent: clonePlain(extent),
     fov: framing.fov,
@@ -212,6 +224,7 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     Object.assign(coast, clonePlain(defaults.coast))
     Object.assign(rhumb, clonePlain(defaults.rhumb))
     Object.assign(river, clonePlain(defaults.river))
+    Object.assign(political, clonePlain(defaults.political))
     Object.assign(rose, clonePlain(defaults.rose))
     Object.assign(extent, clonePlain(defaults.extent))
     Object.assign(controlsOptions, clonePlain(defaults.camera))
@@ -228,6 +241,7 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     callbacks.rebuildCoastline()
     callbacks.rebuildRhumb()
     callbacks.rebuildRivers()
+    callbacks.rebuildPolitical()
     callbacks.rebuildRose()
     gui.controllersRecursive().forEach((controller) => controller.updateDisplay())
   }
@@ -314,6 +328,18 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
   for (const key of RIVER_CONTROL_ORDER)
     addControl(riverFolder, river, key, RIVER_CONTROLS[key], riverEffect(key), key === 'color')
   riverFolder.close()
+
+  // Historical political overlay. The year and the colouring reload and re-rasterise the polities; the
+  // border styling only rebuilds the lines. The tint's strength and blend mode live in the texture
+  // folder, with the other layers it is composited among.
+  const politicalFolder = gui.addFolder('political (historical)')
+  const politicalEffect = (key: keyof PoliticalDevParams): (() => void) =>
+    key === 'year' || key === 'colorBySuzerain'
+      ? callbacks.rebuildPolitical
+      : callbacks.rebuildBorders
+  for (const key of POLITICAL_CONTROL_ORDER)
+    addControl(politicalFolder, political, key, POLITICAL_CONTROLS[key], politicalEffect(key))
+  politicalFolder.close()
 
   // Compass rose — colours/labels/size are baked into the SVG, so each change regenerates the rose.
   // Opacity is the exception: it is a live material tweak.

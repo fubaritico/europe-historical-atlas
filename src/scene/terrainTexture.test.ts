@@ -82,8 +82,9 @@ describe('terrainTexture controls', () => {
         '2 \u00b7 hypsometric tint',
         '3 \u00b7 heightmap (B&W)',
         '4 \u00b7 snow',
-        '5 \u00b7 hillshade',
-        '6 \u00b7 paper & bake',
+        '5 \u00b7 political',
+        '6 \u00b7 hillshade',
+        '7 \u00b7 paper & bake',
       ])
     })
   })
