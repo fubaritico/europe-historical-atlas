@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import { createHeightmap } from '../data/heightmap'
 
-import { createReliefMesh } from './reliefMesh'
+import { WORLD_PER_METRE, createReliefMesh, reliefWorldY } from './reliefMesh'
 
 import type { HeightmapMeta } from '../data/heightmap'
 
@@ -103,6 +103,65 @@ describe('createReliefMesh', () => {
     it('produces a flat sheet for an all-sea heightmap', () => {
       const sea = createHeightmap(meta(2, 2, 0), new Int16Array([0, 0, 0, 0]))
       expect(maxY(createReliefMesh(sea, OPTS))).toBe(0)
+    })
+  })
+})
+
+describe('reliefWorldY', () => {
+  const CURVE = { plainsCeiling: 575, peakTarget: 1900 }
+
+  describe('happy path', () => {
+    it('passes plains through 1:1, scaled into world units', () => {
+      expect(reliefWorldY(400, CURVE)).toBeCloseTo(400 * WORLD_PER_METRE, 12)
+      expect(reliefWorldY(CURVE.plainsCeiling, CURVE)).toBeCloseTo(
+        CURVE.plainsCeiling * WORLD_PER_METRE,
+        12
+      )
+    })
+  })
+
+  describe('variants', () => {
+    it('eases peaks toward the target instead of letting them spike', () => {
+      const alps = reliefWorldY(4441, CURVE) / WORLD_PER_METRE
+      expect(alps).toBeGreaterThan(CURVE.plainsCeiling)
+      expect(alps).toBeLessThan(CURVE.peakTarget)
+    })
+
+    it('stays monotonic, so a higher sample never sits lower', () => {
+      let previous = -1
+      for (const elevation of [0, 100, 575, 800, 1500, 3000, 6000]) {
+        const y = reliefWorldY(elevation, CURVE)
+        expect(y).toBeGreaterThanOrEqual(previous)
+        previous = y
+      }
+    })
+
+    it('joins plains and mountains without a kink at the threshold', () => {
+      // The slope is 1 either side of the ceiling; a discontinuity there would show as a terrace.
+      const below = reliefWorldY(CURVE.plainsCeiling - 1, CURVE)
+      const at = reliefWorldY(CURVE.plainsCeiling, CURVE)
+      const above = reliefWorldY(CURVE.plainsCeiling + 1, CURVE)
+      expect(above - at).toBeCloseTo(at - below, 6)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('flattens the sea rather than sinking it', () => {
+      expect(reliefWorldY(0, CURVE)).toBe(0)
+      expect(reliefWorldY(-7328, CURVE)).toBe(0)
+    })
+
+    it('does not divide by zero when the curve has no reach', () => {
+      const y = reliefWorldY(3000, { plainsCeiling: 1900, peakTarget: 1900 })
+      expect(Number.isFinite(y)).toBe(true)
+    })
+  })
+
+  // L4 (unmanaged errors): N/A — a pure arithmetic remap with no I/O and no async path.
+
+  describe('edge cases', () => {
+    it('never exceeds the peak target however high the sample', () => {
+      expect(reliefWorldY(1e6, CURVE) / WORLD_PER_METRE).toBeLessThanOrEqual(CURVE.peakTarget)
     })
   })
 })

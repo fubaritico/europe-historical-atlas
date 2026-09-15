@@ -40,6 +40,42 @@ export interface ReliefOptions {
  * @param options - build options
  * @returns the relief mesh (metres × `worldPerMetre`; scale Y at the call site for exaggeration)
  */
+/**
+ * Base world scale per metre of elevation; `mesh.scale.y` (exaggeration) multiplies this. Chosen so the
+ * exaggeration slider sits around ~1 rather than ~0.1, which keeps it low-sensitivity and usable.
+ */
+export const WORLD_PER_METRE = 1 / 10000
+
+/**
+ * Place an elevation on the relief surface, in world units.
+ *
+ * A value remap, deliberately not a blur, so ridges stay sharp: plains up to `plainsCeiling` pass
+ * through 1:1, higher elevations ease out toward `peakTarget` (mountains collapse smoothly instead of
+ * spiking). The slope is 1 at the threshold, so plains and mountains join without a kink. Sea (elevation
+ * ≤ 0) is flat.
+ *
+ * Exported because anything draped on the terrain — rivers, borders, future labels — has to land on the
+ * exact same surface. Duplicating this curve at the call site is how overlays silently detach from the
+ * relief the first time it is retuned.
+ * @param elevation - the sample elevation in metres
+ * @param options - the height curve (`plainsCeiling`, `peakTarget`)
+ * @returns the surface height in world units, before the live `scale.y` exaggeration
+ */
+export function reliefWorldY(
+  elevation: number,
+  options: Pick<ReliefOptions, 'plainsCeiling' | 'peakTarget'>
+): number {
+  const { plainsCeiling, peakTarget } = options
+  const reach = Math.max(1, peakTarget - plainsCeiling)
+  const metres =
+    elevation > plainsCeiling
+      ? plainsCeiling + (1 - Math.exp(-(elevation - plainsCeiling) / reach)) * reach
+      : elevation > 0
+        ? elevation
+        : 0
+  return metres * WORLD_PER_METRE
+}
+
 export function createReliefMesh(
   heightmap: Heightmap,
   options: ReliefOptions
@@ -56,21 +92,10 @@ export function createReliefMesh(
   const position = geometry.getAttribute('position') as BufferAttribute
   const cols = segX + 1
   const rows = segY + 1
-  // Per-vertex value remap (no blur → ridges stay sharp): plains ≤ ceiling are 1:1; higher elevations
-  // ease-out toward `peakTarget` (mountains collapse smoothly instead of spiking). Slope is 1 at the
-  // threshold, so plains and mountains join without a kink.
-  const reach = Math.max(1, peakTarget - plainsCeiling)
-  // Base world scale per metre; `mesh.scale.y` (exaggeration) multiplies this. Chosen so exaggeration
-  // sits around ~1 (not ~0.1) for a usable, low-sensitivity slider.
-  const worldPerMetre = 1 / 10000
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       const e = heightmap.sample(col / segX, row / segY)
-      let metres = 0
-      if (e > plainsCeiling)
-        metres = plainsCeiling + (1 - Math.exp(-(e - plainsCeiling) / reach)) * reach
-      else if (e > 0) metres = e
-      position.setY(row * cols + col, metres * worldPerMetre)
+      position.setY(row * cols + col, reliefWorldY(e, { plainsCeiling, peakTarget }))
     }
   }
   position.needsUpdate = true
