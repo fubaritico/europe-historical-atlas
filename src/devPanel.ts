@@ -434,7 +434,7 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
   // Camera feel — tune the EU4-style pan/zoom live (read every frame by the controls).
   const camFolder = gui.addFolder('camera')
   camFolder.add(controlsOptions, 'panSpeed', 1, 30, 0.5).name('pan speed')
-  camFolder.add(controlsOptions, 'zoomSpeed', 0.01, 0.3, 0.01).name('zoom speed')
+  camFolder.add(controlsOptions, 'zoomSpeed', 0.005, 0.02, 0.001).name('zoom speed')
   camFolder.add(controlsOptions, 'smoothingTau', 0.02, 0.5, 0.01).name('inertia (s)')
   camFolder.add(controlsOptions, 'enableDrag').name('drag-pan')
   camFolder.add(controlsOptions, 'enableEdgeScroll').name('edge-scroll')

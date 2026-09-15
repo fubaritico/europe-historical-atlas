@@ -74,7 +74,7 @@ function bootstrap(): () => void {
     minPitchDeg: 30,
     maxPitchDeg: 55,
     panSpeed: 8,
-    zoomSpeed: 0.08,
+    zoomSpeed: 0.01,
     smoothingTau: reduceMotion ? 0.02 : 0.12,
     initialZoom: 0,
     enableDrag: true,
