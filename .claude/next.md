@@ -5,61 +5,74 @@
 
 ## Where we are
 
-**Phase 0** + **M1.1** (relief) + **M1.3** (camera) + **M1.2** (parchment terrain + drawn coastline) +
-**portolan decor** (sea-clipped rhumb network + compass rose) are **DONE**; dev-panel extracted to
-`src/devPanel.ts` with reset-to-defaults. ~12 commits on `master` (`9dea60e`..`fb50948`), full gate
-(type-check / lint / test / format + husky). **120 tests**. See `completed.md` (2026-09-15 entry) +
-memory [[portolan-decor-and-line-rendering]].
+Phase 0, M1.1 (relief), M1.2 (parchment terrain), M1.3 (camera), portolan decor — all done. This session
+added **rivers**, the **land mask**, **fat lines**, the **declarative tunables**, and a **work-in-progress
+political overlay**. `master` at `beb24fc`, **245 tests**, full gate green. See `completed.md`
+(2026-09-16 entry).
 
-## ▶ NEXT — render polish BEFORE placing elements (dev's explicit priority)
+The map now carries: relief + parchment/hypsometric/snow terrain, a land mask that knows a polder from a
+lake, a vector coastline traced through that mask, Natural Earth rivers with zoom LOD, the portolan
+decor, and filled historical polities with borders for any century from 100 to 2000.
 
-Get the map render to its best first (see [[next-render-backlog]]):
+## ▶ NEXT — finish the political overlay (dev's list, in his order)
 
-1. **Rivers** — main rivers' traced paths, **more rivers as you zoom** (LOD). Source = **Natural Earth**
-   rivers (PD), reprojected via a new **`geo/mercator`** util (lon/lat ↔ Web Mercator ↔ DEM-bbox `(u,v)`),
-   drawn via the shared **`scene/lineLayer`**. (`geo/mercator` is also needed for a true graticule + M2
-   `historical-basemaps` borders.)
-2. **Snow-capped hypsometry** — extend `terrainTexture`'s hypsometric ramp with a high-elevation
-   **white/snow band** so peaks read snowy via the multiply composite (currently only lowland→highland
-   brown).
+It works end to end and looks the part, but the edges are rough. **Four open items**, and the first has a
+diagnosis already:
 
-Then: **deferred QUAL-007 refactors** (split `createDevPanel` per-folder builders; extract `main.ts` decor
-wiring → `scene/portolanDecor.ts`). Then **M1.4** click picking (`PickingService` → `{point, faceIndex}`) +
-fly-to arc + Escape-to-return (reuse reserved `camera/cameraState`). Then **elements**: city 3D models
-(capitals/towns, era-versioned), country/place **labels**, **typography** choice. Then **M2**
-(historical/political layers per century, `historical-basemaps`). Roadmap chapters 02–04.
+1. **Borders are interrupted.** The dev noticed the gaps cluster in mountains and are almost absent
+   across Poland and Russia, and read it as relief cutting the lines. It is not the relief — it is
+   **polity size**. `separatesRegions` probes the region raster two DEM cells either side of a segment;
+   where states are small and interlocking (the Alps in 1500) the probe lands in a *third* polity or in
+   nothing, and the segment is dropped. Plains carry huge blocks, so the probe is reliable there.
+   **Fix to try**: derive the borders from the raster itself — emit a segment between any two adjacent
+   cells holding different indices — instead of from the polygon rings. Gapless by construction, and it
+   follows the fills exactly. Cost: cell-aligned stair-stepping (~7 km) unless smoothed, so compare
+   against the current smooth-but-gappy lines before committing to it.
+2. **A complete colour set.** `data/regionPalette.ts` is a flat table, one line per power
+   (`pattern → color`). Eight powers pinned so far. The dev will bring a real colour code taken from
+   historical atlases and strategy games, where the conventions are stable (France blue, England red,
+   Spain gold, Austria white, Ottomans green, Russia dark green). Purely a data edit.
+3. **Islands are left uncoloured** — the Balearics, the Aegean. `expandRegionsOverLand` is a
+   breadth-first walk **over land**, so an island no polygon claims is never reached: BFS cannot cross
+   the sea. Needs either a nearest-claim pass that may jump water within a bounded radius, or an
+   explicit island-adoption step.
+4. **The GPL-3.0 licence decision**, before any of this can ship. See Known Issues.
+
+## Then
+
+- **Vector coastline** (`ne_10m_coastline` through the rivers pipeline) — the last open render complaint;
+  a vector line is crisp at *any* zoom, where the current one still inherits a grid.
+- **M1.4 picking** — `PickingService` → `{point, faceIndex}`, fly-to arc, Escape to return. The milestone
+  that turns the scenery into an atlas. `camera/cameraState` is reserved for it.
+- Then labels/typography (a subsystem of its own: SDF fonts, sprite atlas or HTML overlay).
 
 ## Key facts to reload
 
-- **Dev panel is a KEEPER** (dev decision): the lil-gui + Stats overlay stays as a **toggleable, extensible
-  debug tool** — grow it with more tools, add an on/off toggle; do NOT strip it for prod. See [[dev-tools-panel]].
-- **Relief tuning = a VALUE-REMAP easing, NOT blur** (hard-won): plains ≤ `plainsCeiling` stay 1:1; peaks
-  ease toward `peakTarget` (sharp ridges kept). Defaults: exag 1.0, ceiling 575, peak-target 1900, smoothing
-  0; `worldPerMetre = 1/10000` in `reliefMesh`. Exaggeration slider is intentionally low-sensitivity.
-- **DEM**: `public/heightmaps/europe-dem-z5.{bin,json}` (1280×1164, Int16 metres, Web Mercator, ~3 MB,
-  bbox W−45/S11.18/E78.75/N76.84 — widened to a **hors-champ frame** à la Total War: Europe is the focus,
-  the surround (Iceland/SE-Greenland tip, Atlantic, Sahara, Caucasus→Karakoram) is context to render as a
-  uniform parchment out-of-frame. North capped ~77° to bound Web-Mercator stretch. Regenerate via
-  `files/spikes/fetch-dem` (gitignored): `--west -45 --south 18 --east 70 --north 76 --zoom 5 --grid 1280`.
-- **Camera persistence**: map camera (`controls/mapControls`) persists `{target, zoom}` under sessionStorage
-  key `europe-map:map-camera`; `sessionStorage.clear()` for a framed default. (The pose-based
-  `camera/cameraState` store on key `europe-map:camera` is reserved/unused, kept for M1.4 fly-to.)
-- **Camera model** (`controls/mapControls`, EU4-style): **frustum-aware clamp** — the target is bounded so
-  the frustum's ground footprint (raycast of the 4 corners onto `y=0`, live fov+aspect) stays inside a world
-  **`extent`** → pannable area grows zoomed-in, re-centres zoomed-out, **adapts to resize** (no fixed
-  bounds). Zoom-linked distance+tilt, **inertia** (velocity + ease-out via exported `easeOutDecay`/
-  `driveOrGlide`), drag-pan + edge-scroll, keyboard zoom `+/-/PageUp-Down`. Pointer move/up on `window` (drag
-  continues off-canvas — intentional). All tunable in the dev-panel `camera` + `extent` folders + debug
-  overlay. Defaults: minDist 1 / maxDist 6, pitch 30(in)→55(out), extent centre 0/0 half 5.8×5.2, τ 0.12.
-- **Open idea (not done)**: a **fixed-aspect render + resolution set** (letterbox, console-style) for a
-  constant framing regardless of window size — the frustum clamp already makes any aspect safe underneath.
-- **`let`-const-ify gotcha**: the eslint `--fix` (prefer-const) hook runs after each edit; a freshly-added
-  `let` whose reassignment lands in a *later* edit gets const-ified → next edit fails. Add the `let` and its
-  first reassignment together, or re-`let` it. (Hit 3× this session.)
+- **A DEM answers "how high", not "wet or dry"** (the session's hard-won lesson). `data/landMask` is the
+  port; `createElevationLandMask` is a *documented degraded mode*, not an equivalent. Measured:
+  connectivity flood-fill leaves the Netherlands 52% drowned (dikes are narrower than a cell) **and**
+  turns the Caspian and Dead Sea into plains.
+- **`ne_10m_land` carves no inland lakes** — the mask is land *minus* `ne_10m_lakes`, or the Caspian
+  reads as a plain.
+- **Anything draped must track `relief.scale.y`** every frame, and must sample the **mesh's** vertex grid
+  (`RELIEF_SEGMENTS`, 512) rather than the raw DEM (1280). Miss the scale and it floats by the
+  exaggeration ratio; sample the DEM and it sinks below the drawn valley floor.
+- **`LineBasicMaterial.linewidth` is 1 px, always** (WebGL). Any controlled width goes through
+  `LineSegments2` + `LineMaterial`, whose `resolution` must be updated on every resize.
+- **Tunables are declared, not restated**: `TERRAIN_CONTROLS` / `devParams.ts` hold range + step + label
+  beside each default, mapped over `keyof T`. Adding an option without describing it **fails
+  type-check**. Never hand-write a slider range in `devPanel`.
+- **`sea level (m)` no longer moves the coastline** — the mask does. It only sets the hypsometric ramp's
+  origin now. Rename or retire it.
+- **Assets**: `public/heightmaps/europe-dem-z5.{bin,json}` (committed), `public/masks/europe-land.{bin,json}`
+  (committed), `public/rivers/europe-rivers.json` (committed), `public/borders/*.json`
+  (**git-ignored, GPL-3.0**). Spikes in gitignored `files/spikes/`.
+- **`let`-const-ify gotcha**: the eslint `--fix` hook runs after each edit; add a `let` and its first
+  reassignment together.
 
 ## Conventions (this project)
 
 Docs/config in **English**, chat in **French**. Plans split into chapters (`files/plans/roadmap/`). Spikes
 cataloged in `files/spikes/`. Commit subjects lowercase (commitlint). **Announce every command**
-(cause / reason / action). Monorepo-ready but single-package (→ pnpm workspaces + Turbo, pure-TS `core`
-first, only when a real seam needs it).
+(cause / reason / action). **`rm -rf` needs explicit permission every time** (refused once this session,
+rightly).

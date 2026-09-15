@@ -73,3 +73,35 @@ See memory [[portolan-decor-and-line-rendering]] + [[next-render-backlog]].
   half-winds green, quarter-winds red). `utils/math` (clamp/lerp) + `disposeHandle` de-dup. Multi-agent
   `/review`: fixed SEC/ARCH/QUAL; **deferred** QUAL-007 (split `createDevPanel` per-folder, extract
   `scene/portolanDecor.ts`).
+
+### 2026-09-16 — Rivers, land mask, fat lines, declarative tunables, political overlay (WIP)
+
+Long session, **120 → 245 tests**, commits `8783364`..`beb24fc` on `master`, full gate each step.
+
+- **Declarative tunables** (`4b9c95a`, `81f32e7`) — `utils/controlSpec.ts` + `devParams.ts`: every option's
+  range/step/label declared beside its default, mapped over `keyof T` so an undescribed option fails
+  type-check (**verified**: it raises two errors). `devPanel` renders the declaration; `main.ts` seeds
+  from the defaults. Tests assert defaults sit inside their own slider and groups cover the table.
+  Texture folder split into 7 numbered sub-folders mirroring the compositing order.
+- **Fat lines** (`8783364`) — `LineBasicMaterial.linewidth` is pinned to 1 px by WebGL, so any controlled
+  width needs `LineSegments2` + `LineMaterial`. Chosen by the caller *asking* for a width (a `> 1`
+  threshold silently ignored sub-pixel values). `setOpacity`/`setColor`/`setResolution` replace callers
+  reaching into `object.material`.
+- **Rivers** (`f6e3921`) — Natural Earth 10m, 591 polylines / 537 KB, simplified to 500 m (just under a
+  screen pixel at max zoom). One layer per `scalerank`; reveal + width interpolate across ranks, opacity
+  only, never a geometry rebuild. `extendRiversToSea` bridges mouths (NE stops at the estuary head);
+  only *free* endpoints extend — a tip another polyline passes is a confluence (129 → 96 extensions).
+- **Land mask** (`462bed2`, `d6dead5`) — **the session's key correction**: a DEM answers "how high", not
+  "wet or dry". Measured: connectivity flood-fill does *not* rescue the Netherlands (dikes are narrower
+  than a cell) and turns the Caspian/Dead Sea into plains. Asset = `ne_10m_land` minus `ne_10m_lakes`
+  (the land layer carves no lakes), baked at 4× the DEM, 2.9 MB raw / 152 KB gzipped. 16/16 spot checks.
+  Killed `coastCoverage` + `gradientAt`: the mask's bilinear coverage supersedes them.
+- **Draping** (`8c584f4`, `50731ac`) — `reliefWorldY` exported from `reliefMesh`; overlays sample the
+  *mesh's* vertex grid (512 segments vs a 1280 DEM), else a river read at its true elevation sits below
+  the drawn valley floor. Every draped layer must track `relief.scale.y` or it floats by the
+  exaggeration ratio — invisible on a plain, glaring on a crest.
+- **Political overlay, WIP** (`beb24fc`) — `historical-basemaps`, 20 centuries, **GPL-3.0 so git-ignored**.
+  Rings rasterised in-browser into an index grid; tint is a terrain-bake layer between ground colour and
+  hillshade. Claims grow over land the schematic outlines missed; borders keep only stretches separating
+  two polities. Colours pinned per power by name pattern, rest from an editable palette, no two
+  neighbours alike.
