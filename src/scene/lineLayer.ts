@@ -1,4 +1,7 @@
 import { BufferGeometry, Float32BufferAttribute, LineBasicMaterial, LineSegments } from 'three'
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
+import { LineSegments2 } from 'three/addons/lines/LineSegments2.js'
+import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js'
 
 import { hashInts } from '../utils/hash'
 
@@ -41,12 +44,44 @@ export interface LineLayerOptions {
    * sketchy pencil overdraw. Combine with a low `opacity`.
    */
   strokes?: number
+  /**
+   * Stroke width in CSS pixels. Setting it at all switches to three's fat-line pipeline:
+   * `LineBasicMaterial.linewidth` is pinned to 1 px on virtually every platform, a WebGL limitation, so
+   * any controlled width — thicker *or* thinner — has to be built from instanced quads instead. Because
+   * the width is in screen pixels, it stays constant as the camera zooms. Omit it for a plain 1 px line.
+   */
+  width?: number
 }
 
-/** A renderable line layer plus its teardown. */
+/**
+ * A renderable line layer plus its teardown.
+ *
+ * The styling setters exist so callers never reach into `object.material`: a layer may be drawn with
+ * either the thin or the fat pipeline, and which one it is must not leak into the code that styles it.
+ */
 export interface LineLayer {
   /** The renderable object to add to the scene. */
-  readonly object: LineSegments<BufferGeometry, LineBasicMaterial>
+  readonly object: LineSegments<BufferGeometry, LineBasicMaterial> | LineSegments2
+  /**
+   * Set the stroke opacity on the live material.
+   * @param value - opacity in `[0, 1]`
+   * @returns nothing
+   */
+  setOpacity(value: number): void
+  /**
+   * Set the stroke colour on the live material.
+   * @param color - the new colour
+   * @returns nothing
+   */
+  setColor(color: string): void
+  /**
+   * Tell a fat-line layer the viewport size, which its shader needs to convert a pixel width into clip
+   * space. A no-op for thin lines. Call on every resize or the stroke width distorts.
+   * @param width - viewport width in pixels
+   * @param height - viewport height in pixels
+   * @returns nothing
+   */
+  setResolution(width: number, height: number): void
   /** Free the GPU resources (geometry + material). */
   dispose(): void
 }
@@ -100,6 +135,43 @@ export function createLineLayer(
     }
   }
 
+  // The fat pipeline is chosen by the caller *asking* for a width, not by the value crossing a
+  // threshold. Keying it on `width > 1` meant a sub-pixel width silently fell back to thin lines, which
+  // are exactly 1 px — so the requested value was ignored and dragging the slider across 1 produced a
+  // visible jump instead of a smooth change.
+  const width = options.width
+  if (width !== undefined) {
+    const geometry = new LineSegmentsGeometry()
+    geometry.setPositions(positions)
+    const material = new LineMaterial({
+      color: options.color,
+      linewidth: width, // CSS pixels: `worldUnits` stays false, so the stroke holds its screen weight
+      transparent: true,
+      opacity,
+      depthWrite: false,
+    })
+    const object = new LineSegments2(geometry, material)
+    // Fat lines are instanced quads, so three cannot infer their extent for frustum culling from the
+    // position attribute alone; computing it up front avoids the layer vanishing at oblique angles.
+    object.computeLineDistances()
+    return {
+      object,
+      setOpacity(value: number): void {
+        material.opacity = value
+      },
+      setColor(color: string): void {
+        material.color.set(color)
+      },
+      setResolution(viewportWidth: number, viewportHeight: number): void {
+        material.resolution.set(viewportWidth, viewportHeight)
+      },
+      dispose(): void {
+        geometry.dispose()
+        material.dispose()
+      },
+    }
+  }
+
   const geometry = new BufferGeometry()
   geometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
   const material = new LineBasicMaterial({
@@ -112,6 +184,15 @@ export function createLineLayer(
 
   return {
     object,
+    setOpacity(value: number): void {
+      material.opacity = value
+    },
+    setColor(color: string): void {
+      material.color.set(color)
+    },
+    setResolution(): void {
+      // Thin lines are 1 px by definition — the viewport size does not enter into it.
+    },
     dispose(): void {
       geometry.dispose()
       material.dispose()

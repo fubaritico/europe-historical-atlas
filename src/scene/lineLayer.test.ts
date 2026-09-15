@@ -91,4 +91,68 @@ describe('createLineLayer', () => {
       expect(matSpy).toHaveBeenCalledOnce()
     })
   })
+
+  describe('fat lines', () => {
+    it('keeps the thin pipeline at the default width', () => {
+      const layer = createLineLayer(ONE_SEGMENT, { project, color: '#000' })
+      expect((layer.object as { isLineSegments2?: boolean }).isLineSegments2).toBeUndefined()
+      layer.dispose()
+    })
+
+    it('switches to the fat pipeline whenever a width is asked for, since linewidth is pinned in WebGL', () => {
+      for (const width of [0.6, 1, 3]) {
+        const layer = createLineLayer(ONE_SEGMENT, { project, color: '#000', width })
+        expect((layer.object as { isLineSegments2?: boolean }).isLineSegments2).toBe(true)
+        expect((layer.object.material as { linewidth?: number }).linewidth).toBe(width)
+        layer.dispose()
+      }
+    })
+
+    it('honours a sub-pixel width instead of rounding it up to a thin line', () => {
+      // The trap this guards: a threshold of `width > 1` sent 0.95 back to the 1 px pipeline, so the
+      // requested value was ignored and the slider jumped as it crossed 1.
+      const layer = createLineLayer(ONE_SEGMENT, { project, color: '#000', width: 0.95 })
+      expect((layer.object.material as { linewidth?: number }).linewidth).toBe(0.95)
+      layer.dispose()
+    })
+
+    it('styles both pipelines through the same setters', () => {
+      for (const width of [undefined, 3]) {
+        const layer = createLineLayer(ONE_SEGMENT, {
+          project,
+          color: '#000',
+          ...(width !== undefined ? { width } : {}),
+        })
+        layer.setOpacity(0.25)
+        layer.setColor('#ff0000')
+        expect(layer.object.material.opacity).toBe(0.25)
+        expect(layer.object.material.color.getHexString()).toBe('ff0000')
+        layer.dispose()
+      }
+    })
+
+    it('passes the viewport to a fat layer and ignores it on a thin one', () => {
+      const fat = createLineLayer(ONE_SEGMENT, { project, color: '#000', width: 2 })
+      fat.setResolution(1280, 720)
+      const resolution = (fat.object.material as { resolution: { x: number; y: number } })
+        .resolution
+      expect([resolution.x, resolution.y]).toEqual([1280, 720])
+      fat.dispose()
+
+      const thin = createLineLayer(ONE_SEGMENT, { project, color: '#000' })
+      expect(() => {
+        thin.setResolution(1280, 720)
+      }).not.toThrow()
+      thin.dispose()
+    })
+
+    it('frees the fat geometry and material on dispose', () => {
+      const layer = createLineLayer(ONE_SEGMENT, { project, color: '#000', width: 4 })
+      const geomSpy = vi.spyOn(layer.object.geometry, 'dispose')
+      const matSpy = vi.spyOn(layer.object.material, 'dispose')
+      layer.dispose()
+      expect(geomSpy).toHaveBeenCalledOnce()
+      expect(matSpy).toHaveBeenCalledOnce()
+    })
+  })
 })
