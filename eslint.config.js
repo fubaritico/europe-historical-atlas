@@ -97,8 +97,36 @@ export default tseslint.config(
 
   // Architecture boundaries — enforce the layer dependency direction inside src/ without
   // splitting into packages. Matching is on the import source string (no resolver needed).
-  // Direction: data/ (leaf domain/ports) <- scene/ (rendering) ; camera/ is independent ;
-  // main.ts is the composition root and may be imported by nobody.
+  // Direction: geo/ (pure projection maths) and data/ (domain/ports) are leaves <- scene/ (rendering) ;
+  // camera/ is independent ; main.ts is the composition root and may be imported by nobody.
+  {
+    files: ['src/geo/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '**/scene',
+                '**/scene/**',
+                '**/camera',
+                '**/camera/**',
+                '**/controls',
+                '**/controls/**',
+                '**/data',
+                '**/data/**',
+                '**/main',
+                '**/main.ts',
+              ],
+              message:
+                'Architecture boundary: geo/ is pure projection maths — it must not import from any other layer.',
+            },
+          ],
+        },
+      ],
+    },
+  },
   {
     files: ['src/data/**/*.ts'],
     rules: {
