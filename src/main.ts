@@ -3,8 +3,14 @@ import Stats from 'three/addons/libs/stats.module.js'
 
 import { createSessionStorageMapCameraStore } from './controls/mapCameraStore'
 import { createMapControls } from './controls/mapControls'
-import { createDemCoastlineSource } from './data/coastlineSource'
+import { createMaskCoastlineSource } from './data/coastlineSource'
 import { createFetchHeightmapSource, smoothHeightmap } from './data/heightmap'
+import { createElevationLandMask, createFetchLandMaskSource } from './data/landMask'
+import {
+  DEFAULT_RIVER_EXTENSION,
+  createFetchRiverSource,
+  extendRiversToSea,
+} from './data/riverSource'
 import { createDevPanel } from './devPanel'
 import {
   DEFAULT_CAMERA_TUNING,
@@ -12,23 +18,27 @@ import {
   DEFAULT_EXTENT_PARAMS,
   DEFAULT_RELIEF_PARAMS,
   DEFAULT_RHUMB_PARAMS,
+  DEFAULT_RIVER_PARAMS,
   DEFAULT_ROSE_PARAMS,
 } from './devParams'
 import { createCompassRose } from './scene/compassRose'
 import { createDebugRect } from './scene/debugRect'
 import { createLineLayer } from './scene/lineLayer'
-import { createReliefMesh } from './scene/reliefMesh'
+import { createReliefMesh, reliefWorldY } from './scene/reliefMesh'
 import { generateRhumbSegments } from './scene/rhumbNetwork'
+import { createRiverLayer } from './scene/riverLayer'
 import { DEFAULT_TERRAIN_OPTIONS, createTerrainTexture } from './scene/terrainTexture'
 import { lerp } from './utils/math'
 
 import type { MapRect } from './controls/mapControls'
 import type { Heightmap } from './data/heightmap'
+import type { LandMask } from './data/landMask'
 import type {
   CoastlineDevParams,
   ExtentDevParams,
   ReliefDevParams,
   RhumbDevParams,
+  RiverDevParams,
   RoseDevParams,
 } from './devParams'
 import type { TerrainTextureOptions } from './scene/terrainTexture'
@@ -111,6 +121,15 @@ function bootstrap(): () => void {
   // World-space width of the map plane (X axis), consumed by the mesh build.
   const WORLD_WIDTH = 12
 
+  // Lift applied to draped lines before the exaggeration scale, so they clear the terrain they sit on
+  // instead of z-fighting with it. Scaled down with the relief, hence deliberately generous.
+  const RIVER_LIFT = 0.004
+
+  // Relief subdivision. Draped overlays must land on the surface this produces, not on the raw DEM:
+  // at 512 segments against a 1280-wide grid the mesh interpolates straight across ~17 km of terrain,
+  // so a river read at its true DEM elevation sits *below* the drawn valley floor and is occluded.
+  const RELIEF_SEGMENTS = 512
+
   // Baked terrain look (parchment + hypsometric tint + DEM hillshade), tuned live. Regenerating the
   // DataTexture is independent of the geometry rebuild (cheap material swap, no new geometry).
   const textureOptions: TerrainTextureOptions = { ...DEFAULT_TERRAIN_OPTIONS }
@@ -126,12 +145,21 @@ function bootstrap(): () => void {
   // inked, half-winds green, quarter-winds red).
   const roseParams: RoseDevParams = { ...DEFAULT_ROSE_PARAMS }
 
+  // Rivers — Natural Earth centrelines (public domain), draped on the relief and revealed by zoom.
+  const riverParams: RiverDevParams = { ...DEFAULT_RIVER_PARAMS }
+
   // Europe relief — rebuilt from the loaded heightmap; the height curve requires a geometry rebuild.
   let heightmap: Heightmap | null = null
+  let reliefSource: Heightmap | null = null // the (possibly smoothed) grid the mesh was actually built from
+  // Which cells are land. A DEM cannot answer this — a polder is dry below sea level, a lake is wet
+  // above it — so it comes from its own asset, with an elevation threshold as the degraded fallback.
+  let landMask: LandMask | null = null
   let relief: ReturnType<typeof createReliefMesh> | null = null
   let terrainTexture: DataTexture | null = null
   let coastline: ReturnType<typeof createLineLayer> | null = null
   let rhumb: ReturnType<typeof createLineLayer> | null = null
+  let rivers: ReturnType<typeof createRiverLayer> | null = null
+  let riverData: Awaited<ReturnType<ReturnType<typeof createFetchRiverSource>['load']>> = []
   let compass: ReturnType<typeof createCompassRose> | null = null
   let disposed = false // guards the async heightmap load from building a mesh after teardown (HMR mid-load)
 
@@ -145,6 +173,33 @@ function bootstrap(): () => void {
     return [(u - 0.5) * WORLD_WIDTH, coastParams.yLift, (v - 0.5) * worldDepth]
   }
 
+  // Same XZ mapping, but with Y sampled off the terrain: a river runs over the ground, not at sea level.
+  // It goes through `reliefWorldY` — the relief mesh's own height curve — so the two cannot disagree;
+  // the group's scale.y then tracks the mesh's live exaggeration every frame.
+  const projectDraped = (u: number, v: number): [number, number, number] => {
+    const [x, , z] = projectToWorld(u, v)
+    const source = reliefSource
+    if (!source) return [x, 0, z]
+    const curve = { plainsCeiling: params.plainsCeiling, peakTarget: params.peakTarget }
+    // Evaluate the height on the mesh's own vertex grid and interpolate between those nodes — the same
+    // surface the triangles draw. Reading the DEM directly would place rivers on a finer terrain than
+    // the one on screen, and bury them wherever the mesh spans a valley.
+    const aspect = source.meta.width / source.meta.height
+    const segX = RELIEF_SEGMENTS
+    const segY = Math.max(1, Math.round(RELIEF_SEGMENTS / aspect))
+    const fx = Math.min(segX, Math.max(0, u * segX))
+    const fy = Math.min(segY, Math.max(0, v * segY))
+    const x0 = Math.min(segX - 1, Math.floor(fx))
+    const y0 = Math.min(segY - 1, Math.floor(fy))
+    const tx = fx - x0
+    const ty = fy - y0
+    const nodeY = (col: number, row: number): number =>
+      reliefWorldY(source.sample(col / segX, row / segY), curve)
+    const top = nodeY(x0, y0) * (1 - tx) + nodeY(x0 + 1, y0) * tx
+    const bottom = nodeY(x0, y0 + 1) * (1 - tx) + nodeY(x0 + 1, y0 + 1) * tx
+    return [x, top * (1 - ty) + bottom * ty + RIVER_LIFT, z]
+  }
+
   // Remove a layer handle from the scene and free its GPU resources (shared by every rebuild + teardown).
   const disposeHandle = (handle: { object: Object3D; dispose(): void } | null): void => {
     if (!handle) return
@@ -155,7 +210,11 @@ function bootstrap(): () => void {
   const rebuildTexture = (): void => {
     if (!heightmap) return
     terrainTexture?.dispose()
-    terrainTexture = createTerrainTexture(heightmap, textureOptions)
+    terrainTexture = createTerrainTexture(
+      heightmap,
+      textureOptions,
+      landMask ?? createElevationLandMask(heightmap, textureOptions.seaLevel)
+    )
     if (relief) {
       relief.material.map = terrainTexture
       relief.material.color.set('#ffffff')
@@ -166,9 +225,10 @@ function bootstrap(): () => void {
   const rebuildCoastline = (): void => {
     if (!heightmap) return
     disposeHandle(coastline)
-    const segments = createDemCoastlineSource(heightmap, {
-      seaLevel: textureOptions.seaLevel,
-    }).load()
+    const mask = landMask ?? createElevationLandMask(heightmap, textureOptions.seaLevel)
+    // Traced at twice the DEM rather than at the mask's full four times: the extra fidelity is invisible
+    // at the zooms the coastline is drawn at, and marching 23 million cells is not.
+    const segments = createMaskCoastlineSource(mask, heightmap.meta.width * 2).load()
     coastline = createLineLayer(segments, {
       project: projectToWorld,
       color: coastParams.color,
@@ -182,21 +242,62 @@ function bootstrap(): () => void {
   const rebuildRhumb = (): void => {
     if (!heightmap) return
     disposeHandle(rhumb)
-    const segments = generateRhumbSegments(heightmap, {
-      center: { u: rhumbParams.centerU, v: rhumbParams.centerV },
-      circleRadius: rhumbParams.circleRadius,
-      nodeCount: rhumbParams.nodeCount,
-      includeCenter: true,
-      directions: rhumbParams.directions,
-      seaLevel: textureOptions.seaLevel,
-      step: rhumbParams.clipStep,
-    })
+    if (rivers) {
+      scene.remove(rivers.object)
+      rivers.dispose()
+      rivers = null
+    }
+    const segments = generateRhumbSegments(
+      heightmap,
+      {
+        center: { u: rhumbParams.centerU, v: rhumbParams.centerV },
+        circleRadius: rhumbParams.circleRadius,
+        nodeCount: rhumbParams.nodeCount,
+        includeCenter: true,
+        directions: rhumbParams.directions,
+        seaLevel: textureOptions.seaLevel,
+        step: rhumbParams.clipStep,
+      },
+      landMask ?? undefined
+    )
     rhumb = createLineLayer(segments, {
       project: projectToWorld,
       color: rhumbParams.color,
       opacity: rhumbParams.opacity,
     })
     scene.add(rhumb.object)
+  }
+
+  const rebuildRivers = (): void => {
+    if (!heightmap) return
+    if (rivers) {
+      scene.remove(rivers.object)
+      rivers.dispose()
+      rivers = null
+    }
+    if (riverData.length === 0) return
+    // Natural Earth stops its centrelines at the estuary head, so bridge each mouth to the shoreline we
+    // actually draw. Done here, not baked into the asset, because it keys off the live `seaLevel`.
+    const connected = extendRiversToSea(
+      riverData,
+      landMask ?? createElevationLandMask(heightmap, textureOptions.seaLevel),
+      DEFAULT_RIVER_EXTENSION
+    )
+    rivers = createRiverLayer(connected, {
+      project: projectDraped,
+      color: riverParams.color,
+      opacity: riverParams.opacity,
+      revealStart: riverParams.revealStart,
+      revealEnd: riverParams.revealEnd,
+      fade: riverParams.fade,
+      includeLakeCenterlines: riverParams.includeLakeCenterlines,
+      jitter: riverParams.jitter,
+      widthMajor: riverParams.widthMajor,
+      widthMinor: riverParams.widthMinor,
+    })
+    rivers.setZoom(controls.zoom)
+    rivers.setResolution(window.innerWidth, window.innerHeight)
+    scene.add(rivers.object)
   }
 
   // World position of the compass rose (its own centre, independent of the rhumb network), lifted above
@@ -230,9 +331,10 @@ function bootstrap(): () => void {
       relief.material.dispose() // Material.dispose leaves `map` alone — the texture is managed separately
     }
     const source = smoothHeightmap(heightmap, params.smoothing)
+    reliefSource = source // overlays must drape on the same data the mesh was built from
     relief = createReliefMesh(source, {
       worldWidth: WORLD_WIDTH,
-      segments: 512,
+      segments: RELIEF_SEGMENTS,
       plainsCeiling: params.plainsCeiling,
       peakTarget: params.peakTarget,
       wireframe: params.wireframe,
@@ -252,10 +354,41 @@ function bootstrap(): () => void {
       rebuildRelief()
       rebuildCoastline()
       rebuildRhumb()
+      rebuildRivers() // no-op until the river payload lands; whichever finishes last draws them
       rebuildRose()
     })
     .catch((error: unknown) => {
       console.error('relief load failed', error)
+    })
+
+  // The land mask loads independently too. If it fails the app still runs, on the elevation threshold —
+  // visibly wrong in the Netherlands, but running beats a blank canvas.
+  void createFetchLandMaskSource('/masks/europe-land')
+    .load()
+    .then((loaded) => {
+      if (disposed) return
+      landMask = loaded
+      if (!heightmap) return
+      rebuildTexture()
+      rebuildCoastline()
+      rebuildRhumb()
+      rebuildRivers()
+    })
+    .catch((error: unknown) => {
+      console.error('land mask load failed — falling back to the 0 m contour', error)
+    })
+
+  // Rivers load independently of the DEM: neither blocks the other, and the second to arrive triggers
+  // the build (the rebuild needs both the terrain to drape on and the centrelines to drape).
+  void createFetchRiverSource('/rivers/europe-rivers.json')
+    .load()
+    .then((loaded) => {
+      if (disposed) return
+      riverData = loaded
+      rebuildRivers()
+    })
+    .catch((error: unknown) => {
+      console.error('river load failed', error)
     })
 
   const gui = createDevPanel({
@@ -263,6 +396,7 @@ function bootstrap(): () => void {
     texture: textureOptions,
     coast: coastParams,
     rhumb: rhumbParams,
+    river: riverParams,
     rose: roseParams,
     controlsOptions: controls.options,
     framing,
@@ -273,15 +407,19 @@ function bootstrap(): () => void {
       rebuildTexture,
       rebuildCoastline,
       rebuildRhumb,
+      rebuildRivers,
       rebuildRose,
       setWireframe: (value: boolean): void => {
         if (relief) relief.material.wireframe = value
       },
       setCoastColor: (color: string): void => {
-        if (coastline) coastline.object.material.color.set(color)
+        coastline?.setColor(color)
+      },
+      setRiverColor: (color: string): void => {
+        rivers?.setColor(color)
       },
       setRhumbColor: (color: string): void => {
-        if (rhumb) rhumb.object.material.color.set(color)
+        rhumb?.setColor(color)
       },
       setRoseOpacity: (value: number): void => {
         if (compass) compass.object.material.opacity = value
@@ -304,6 +442,7 @@ function bootstrap(): () => void {
                 texture: textureOptions,
                 coastline: coastParams,
                 rhumb: rhumbParams,
+                river: riverParams,
                 rose: roseParams,
                 camera: { ...controls.getState(), fov: framing.fov },
                 controls: {
@@ -338,6 +477,9 @@ function bootstrap(): () => void {
     camera.aspect = window.innerWidth / window.innerHeight
     camera.updateProjectionMatrix()
     renderer.setSize(window.innerWidth, window.innerHeight)
+    // Fat lines size their stroke in screen pixels, so the shader needs the new viewport or the width
+    // distorts with the aspect ratio.
+    rivers?.setResolution(window.innerWidth, window.innerHeight)
   }
   window.addEventListener('resize', onResize)
 
@@ -349,20 +491,17 @@ function bootstrap(): () => void {
     // Zoom-linked vertical exaggeration: full at zoom-out (z=0), × exaggZoomIn at zoom-in (z=1).
     if (relief)
       relief.scale.setY(params.exaggeration * (1 - (1 - params.exaggZoomIn) * controls.zoom))
+    // Rivers follow the relief's live exaggeration (same surface), and reveal their finer ranks as the
+    // camera comes in — opacity only, so no geometry is rebuilt while zooming.
+    if (rivers && relief) {
+      rivers.object.scale.setY(relief.scale.y)
+      rivers.setZoom(controls.zoom)
+    }
     // Zoom-linked opacity: `opacity` at zoom-out (z=0) → `opacityZoomIn` at zoom-in (z=1).
     if (coastline)
-      coastline.object.material.opacity = lerp(
-        coastParams.opacity,
-        coastParams.opacityZoomIn,
-        controls.zoom
-      )
+      coastline.setOpacity(lerp(coastParams.opacity, coastParams.opacityZoomIn, controls.zoom))
     // Rhumb network fades as you zoom in (less clutter over the terrain).
-    if (rhumb)
-      rhumb.object.material.opacity = lerp(
-        rhumbParams.opacity,
-        rhumbParams.opacityZoomIn,
-        controls.zoom
-      )
+    if (rhumb) rhumb.setOpacity(lerp(rhumbParams.opacity, rhumbParams.opacityZoomIn, controls.zoom))
     if (debug.showFrustum) {
       extentRect.update(controls.getExtent(), 0.05)
       footprintRect.update(controls.getFootprint(), 0.05)
@@ -391,6 +530,11 @@ function bootstrap(): () => void {
     }
     disposeHandle(coastline)
     disposeHandle(rhumb)
+    if (rivers) {
+      scene.remove(rivers.object)
+      rivers.dispose()
+      rivers = null
+    }
     disposeHandle(compass)
     terrainTexture?.dispose()
     renderer.dispose()

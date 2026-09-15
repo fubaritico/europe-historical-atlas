@@ -11,6 +11,8 @@ import {
   RELIEF_CONTROL_ORDER,
   RHUMB_CONTROLS,
   RHUMB_CONTROL_ORDER,
+  RIVER_CONTROLS,
+  RIVER_CONTROL_ORDER,
   ROSE_CONTROLS,
   ROSE_CONTROL_ORDER,
 } from './devParams'
@@ -22,6 +24,7 @@ import type {
   ExtentDevParams,
   ReliefDevParams,
   RhumbDevParams,
+  RiverDevParams,
   RoseDevParams,
 } from './devParams'
 import type { TerrainTextureOptions } from './scene/terrainTexture'
@@ -33,6 +36,7 @@ export type {
   ExtentDevParams,
   ReliefDevParams,
   RhumbDevParams,
+  RiverDevParams,
   RoseDevParams,
 } from './devParams'
 
@@ -83,6 +87,10 @@ export interface DevPanelCallbacks {
   rebuildCoastline: () => void
   /** Rebuild the rhumb network (centre / layout / seaLevel changed). */
   rebuildRhumb: () => void
+  /** Rebuild the river network (lake filter / jitter changed). */
+  rebuildRivers: () => void
+  /** Update the live river material colour. */
+  setRiverColor: (color: string) => void
   /** Rebuild the compass rose (colours / labels / size / lift changed). */
   rebuildRose: () => void
   /** Update the live compass-rose opacity. */
@@ -118,6 +126,8 @@ export interface DevPanelDeps {
   coast: CoastlineDevParams
   /** Rhumb-network styling + layout params. */
   rhumb: RhumbDevParams
+  /** River-network styling + level of detail. */
+  river: RiverDevParams
   /** Compass-rose styling params. */
   rose: RoseDevParams
   /** The live controls options object (mutated in place, read every frame). */
@@ -166,6 +176,7 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     texture,
     coast,
     rhumb,
+    river,
     rose,
     controlsOptions,
     framing,
@@ -186,6 +197,7 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     texture: clonePlain(texture),
     coast: clonePlain(coast),
     rhumb: clonePlain(rhumb),
+    river: clonePlain(river),
     rose: clonePlain(rose),
     extent: clonePlain(extent),
     fov: framing.fov,
@@ -199,6 +211,7 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     Object.assign(texture, clonePlain(defaults.texture))
     Object.assign(coast, clonePlain(defaults.coast))
     Object.assign(rhumb, clonePlain(defaults.rhumb))
+    Object.assign(river, clonePlain(defaults.river))
     Object.assign(rose, clonePlain(defaults.rose))
     Object.assign(extent, clonePlain(defaults.extent))
     Object.assign(controlsOptions, clonePlain(defaults.camera))
@@ -206,6 +219,7 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     callbacks.setWireframe(relief.wireframe)
     callbacks.setCoastColor(coast.color)
     callbacks.setRhumbColor(rhumb.color)
+    callbacks.setRiverColor(river.color)
     callbacks.setRoseOpacity(rose.opacity)
     callbacks.setFov(framing.fov)
     callbacks.applyExtent()
@@ -213,6 +227,7 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     callbacks.rebuildRelief()
     callbacks.rebuildCoastline()
     callbacks.rebuildRhumb()
+    callbacks.rebuildRivers()
     callbacks.rebuildRose()
     gui.controllersRecursive().forEach((controller) => controller.updateDisplay())
   }
@@ -282,6 +297,23 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
   for (const key of RHUMB_CONTROL_ORDER)
     addControl(rhumbFolder, rhumb, key, RHUMB_CONTROLS[key], rhumbEffect(key), key === 'color')
   rhumbFolder.close()
+
+  // Rivers — Natural Earth centrelines, draped on the terrain and revealed by zoom (one layer per
+  // scalerank). Colour is a live material tweak; the reveal thresholds are read every frame; only the
+  // lake filter and the jitter change the geometry.
+  const riverFolder = gui.addFolder('rivers')
+  // Everything but the colour is baked into the layer when it is built — the reveal thresholds and the
+  // opacity are read from the options the layer captured, and a stroke width is fixed at material
+  // construction. So every one of them needs a rebuild; only the colour has a live setter.
+  const riverEffect = (key: keyof RiverDevParams): (() => void) =>
+    key === 'color'
+      ? (): void => {
+          callbacks.setRiverColor(river.color)
+        }
+      : callbacks.rebuildRivers
+  for (const key of RIVER_CONTROL_ORDER)
+    addControl(riverFolder, river, key, RIVER_CONTROLS[key], riverEffect(key), key === 'color')
+  riverFolder.close()
 
   // Compass rose — colours/labels/size are baked into the SVG, so each change regenerates the rose.
   // Opacity is the exception: it is a live material tweak.
