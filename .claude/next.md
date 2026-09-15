@@ -5,18 +5,29 @@
 
 ## Where we are
 
-**Phase 0** + **Milestone 1.1** (relief from DEM) + **Milestone 1.3** (grand-strategy camera) are **DONE**,
-plus the DEM widened to a hors-champ frame and per-layer import boundaries. ~9 commits on `master`
-(`9dea60e`..`7d1b20f`), single-package, full gate (type-check / lint / test / format + husky). **63 tests**.
-See `completed.md` (2026-09-13 entry) for the camera details.
+**Phase 0** + **M1.1** (relief) + **M1.3** (camera) + **M1.2** (parchment terrain + drawn coastline) +
+**portolan decor** (sea-clipped rhumb network + compass rose) are **DONE**; dev-panel extracted to
+`src/devPanel.ts` with reset-to-defaults. ~12 commits on `master` (`9dea60e`..`fb50948`), full gate
+(type-check / lint / test / format + husky). **120 tests**. See `completed.md` (2026-09-15 entry) +
+memory [[portolan-decor-and-line-rendering]].
 
-## ▶ NEXT — Milestone 1.2: parchment texture (still pending — we jumped to 1.3)
+## ▶ NEXT — render polish BEFORE placing elements (dev's explicit priority)
 
-Hypsometric tint × hillshade **derived from the DEM** (no external asset — aligned by construction) → drop
-the wireframe for the vintage "old map" look; apply the **hors-champ** treatment (uniform parchment outside
-the focus). Then **1.4** click picking (`PickingService` → `{point, faceIndex}`) + fly-to arc + Escape-to-
-return (reuse the reserved `camera/cameraState` pose store). Then **M2** (historical/political layers per
-century, geometry from free `historical-basemaps`). Roadmap chapters 02 (relief/picking), 03, 04.
+Get the map render to its best first (see [[next-render-backlog]]):
+
+1. **Rivers** — main rivers' traced paths, **more rivers as you zoom** (LOD). Source = **Natural Earth**
+   rivers (PD), reprojected via a new **`geo/mercator`** util (lon/lat ↔ Web Mercator ↔ DEM-bbox `(u,v)`),
+   drawn via the shared **`scene/lineLayer`**. (`geo/mercator` is also needed for a true graticule + M2
+   `historical-basemaps` borders.)
+2. **Snow-capped hypsometry** — extend `terrainTexture`'s hypsometric ramp with a high-elevation
+   **white/snow band** so peaks read snowy via the multiply composite (currently only lowland→highland
+   brown).
+
+Then: **deferred QUAL-007 refactors** (split `createDevPanel` per-folder builders; extract `main.ts` decor
+wiring → `scene/portolanDecor.ts`). Then **M1.4** click picking (`PickingService` → `{point, faceIndex}`) +
+fly-to arc + Escape-to-return (reuse reserved `camera/cameraState`). Then **elements**: city 3D models
+(capitals/towns, era-versioned), country/place **labels**, **typography** choice. Then **M2**
+(historical/political layers per century, `historical-basemaps`). Roadmap chapters 02–04.
 
 ## Key facts to reload
 

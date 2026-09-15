@@ -48,3 +48,28 @@ Big camera session. Commits `3dea0d6`..`7d1b20f` on `master`, full gate (type-ch
 - Multi-agent `/review` each step. A11y deferred to the **M2 HTML-overlay backlog** (window-scoped key
   capture, canvas role/semantics) — keyboard zoom (`+/-/PageUp/Down`), `prefers-reduced-motion`, and
   ctrl+wheel passthrough are already handled.
+
+### 2026-09-15 — Milestone 1.2 (parchment terrain + drawn coastline), dev-panel extraction, portolan decor
+
+Long render-craft session. Commits `50485c0`..`fb50948` on `master`, full gate each step, **120 tests**.
+See memory [[portolan-decor-and-line-rendering]] + [[next-render-backlog]].
+
+- **M1.2 terrain** (`50485c0`) — `scene/terrainTexture`: pure compositor (parchment × hypsometric tint ×
+  DEM hillshade × **vellum fBm grain**) baked into a `DataTexture` on an **unlit** `MeshBasicMaterial`
+  (painted "old map" look, camera-independent). Scene lights removed. `data/coastlineSource`
+  (marching-squares 0 m contour → normalized `(u,v)` segments). Coastline drawn as **draped 3D lines** with
+  light jitter + overdraw + zoom-linked opacity. `utils/hash` shared. Dev-tuned defaults baked via a
+  `⤓ log ALL settings` button.
+- **Coastline reversal** (hard-won) — first baked the shoreline INTO the texture; too blurry
+  (DataTexture 1280px + LinearFilter resolution ceiling) → reverted to 3D lines. Don't re-try baked lines.
+- **Dev-panel extraction** (`44cf533`) — all lil-gui wiring → `src/devPanel.ts` (`createDevPanel(deps)`,
+  root-level because it imports controls+scene types the `scene/` boundary forbids). Added
+  **`↺ reset to defaults`** (snapshots defaults at build, one rebuild per system — not lil-gui's
+  per-controller `reset()` storm).
+- **Portolan decor** (`fb50948`) — generalized `coastlineLayer` → **`scene/lineLayer`** (shared uv→3D
+  lines). **`scene/rhumbNetwork`**: multi-centre portolan web, each line **walked over the DEM, kept only
+  over water** (stops at the coast). **Compass rose D** (`scene/compassRose` + pure `scene/compassRoseSvg`,
+  hex-validated) as an SVG→texture quad on the Atlantic, **portolan colour code** (principal ink,
+  half-winds green, quarter-winds red). `utils/math` (clamp/lerp) + `disposeHandle` de-dup. Multi-agent
+  `/review`: fixed SEC/ARCH/QUAL; **deferred** QUAL-007 (split `createDevPanel` per-folder, extract
+  `scene/portolanDecor.ts`).

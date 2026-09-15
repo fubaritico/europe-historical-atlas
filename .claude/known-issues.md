@@ -2,6 +2,13 @@
 
 Put here the know issues to avoid cluttering the context window.
 
+- **SVG-as-texture needs explicit `width`/`height`** (not just `viewBox`): loaded as an `<img>` for a
+  three texture, a viewBox-only SVG rasterises to 0×0 → blank/invisible. `compassRoseSvg` sets both.
+- **Compass rose loads async** (SVG → Image → texture via `TextureLoader`): it appears a frame or two after
+  the relief. No `onError` wired yet; if it silently fails to show, check the data-URL / SVG validity.
+- **Texture regen is a full pixel pass** (~1.5M px): heavy dev-panel tweaks (`terrainTexture`) fire on
+  release. Kept snappy by a trig-free integer hash (`utils/hash`); a supersample option was considered
+  and declined (memory [[portolan-decor-and-line-rendering]] — baked lines hit the same resolution ceiling).
 - **DEM asset committed** (`public/heightmaps/europe-dem-z5.bin`, 2.98 MB) so the app runs after a clone;
   its generator (`files/spikes/fetch-dem`) lives in gitignored `files/` — regenerating needs it.
 - **Camera reframing after the DEM widening**: the extent changed (bbox now W−45…E78.75), so a persisted
