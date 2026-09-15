@@ -5,6 +5,8 @@ import { createHeightmap } from '../data/heightmap'
 
 import {
   DEFAULT_TERRAIN_OPTIONS,
+  TERRAIN_CONTROLS,
+  TERRAIN_CONTROL_GROUPS,
   blendChannel,
   coastCoverage,
   composeTerrainRgba,
@@ -36,6 +38,68 @@ function meta(width: number, height: number, max: number): HeightmapMeta {
 // Most assertions below index individual pixels, so they bake 1:1 with the DEM. Supersampling has its
 // own tests; it must not silently shift every other test's pixel indices.
 const OPTS: TerrainTextureOptions = { ...DEFAULT_TERRAIN_OPTIONS, supersample: 1 }
+
+describe('terrainTexture controls', () => {
+  describe('happy path', () => {
+    it('keeps every numeric default inside its own declared range', () => {
+      // The whole reason the range lives beside the default: a value that its own slider cannot reach
+      // is invisible in the panel and silently clamped on the first tweak.
+      for (const [key, spec] of Object.entries(TERRAIN_CONTROLS)) {
+        if (spec.kind !== 'number') continue
+        const value = DEFAULT_TERRAIN_OPTIONS[key as keyof typeof DEFAULT_TERRAIN_OPTIONS]
+        expect(typeof value, key).toBe('number')
+        expect(value as number, `${key} below its minimum`).toBeGreaterThanOrEqual(spec.min)
+        expect(value as number, `${key} above its maximum`).toBeLessThanOrEqual(spec.max)
+      }
+    })
+  })
+
+  describe('variants', () => {
+    it('describes every option exactly once across the groups', () => {
+      // A missing spec is a compile error, but a spec missing from a group would just quietly vanish
+      // from the panel — only a test catches that.
+      const grouped = TERRAIN_CONTROL_GROUPS.flatMap((group) => group.keys)
+      expect([...grouped].sort()).toEqual(Object.keys(TERRAIN_CONTROLS).sort())
+      expect(new Set(grouped).size, 'a key appears in two groups').toBe(grouped.length)
+    })
+
+    it('gives every control a non-empty label', () => {
+      for (const [key, spec] of Object.entries(TERRAIN_CONTROLS)) {
+        expect(spec.label.length, `${key} has no label`).toBeGreaterThan(0)
+      }
+    })
+  })
+
+  describe('managed errors', () => {
+    it('declares a usable step for every slider', () => {
+      for (const [key, spec] of Object.entries(TERRAIN_CONTROLS)) {
+        if (spec.kind !== 'number') continue
+        expect(spec.step, `${key} has a non-positive step`).toBeGreaterThan(0)
+        expect(spec.max, `${key} has an inverted range`).toBeGreaterThan(spec.min)
+        expect(spec.step, `${key} steps past its own range`).toBeLessThanOrEqual(
+          spec.max - spec.min
+        )
+      }
+    })
+  })
+
+  // L4 (unmanaged errors): N/A — static declarations, no I/O and no runtime input to mishandle.
+
+  describe('edge cases', () => {
+    it('orders the groups so each layer is composited over the ones before it', () => {
+      // The panel's numbering is load-bearing: it tells you what covers what. Guard the order so a
+      // future reshuffle cannot quietly make it lie.
+      expect(TERRAIN_CONTROL_GROUPS.map((group) => group.title)).toEqual([
+        '1 · base',
+        '2 · hypsometric tint',
+        '3 · heightmap (B&W)',
+        '4 · snow',
+        '5 · hillshade',
+        '6 · paper & bake',
+      ])
+    })
+  })
+})
 
 describe('terrainTexture', () => {
   describe('happy path', () => {
