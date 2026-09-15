@@ -6,12 +6,18 @@ import { createHeightmap } from '../data/heightmap'
 import {
   DEFAULT_TERRAIN_OPTIONS,
   blendChannel,
+  coastCoverage,
   composeTerrainRgba,
   computeHillshade,
   createTerrainTexture,
+  elevationGrey,
   hypsometricTint,
+  snowCoverage,
+  snowLineDrop,
+  terrainTextureSize,
 } from './terrainTexture'
 
+import type { TerrainTextureOptions } from './terrainTexture'
 import type { HeightmapMeta } from '../data/heightmap'
 
 /** Build minimal metadata for a test grid. */
@@ -27,7 +33,9 @@ function meta(width: number, height: number, max: number): HeightmapMeta {
   }
 }
 
-const OPTS = DEFAULT_TERRAIN_OPTIONS
+// Most assertions below index individual pixels, so they bake 1:1 with the DEM. Supersampling has its
+// own tests; it must not silently shift every other test's pixel indices.
+const OPTS: TerrainTextureOptions = { ...DEFAULT_TERRAIN_OPTIONS, supersample: 1 }
 
 describe('terrainTexture', () => {
   describe('happy path', () => {
@@ -47,6 +55,25 @@ describe('terrainTexture', () => {
       expect(tex.image.width).toBe(3)
       expect(tex.image.height).toBe(2)
       expect(tex.image.data?.length).toBe(3 * 2 * 4)
+    })
+
+    it('maps the greyscale heightmap layer black at the floor and white at the ceiling', () => {
+      expect(elevationGrey(OPTS.elevationFloor, OPTS)).toBe(0)
+      expect(elevationGrey(OPTS.elevationCeiling, OPTS)).toBe(1)
+      expect(elevationGrey((OPTS.elevationFloor + OPTS.elevationCeiling) / 2, OPTS)).toBeCloseTo(
+        0.5,
+        5
+      )
+    })
+
+    it('puts the shoreline exactly half-covered at sea level', () => {
+      expect(coastCoverage(0, 100, 0)).toBeCloseTo(0.5, 5)
+    })
+
+    it('covers the ground with snow only between the snow line and full cover', () => {
+      expect(snowCoverage(OPTS.snowStart, OPTS)).toBe(0)
+      expect(snowCoverage(OPTS.snowFull, OPTS)).toBe(1)
+      expect(snowCoverage((OPTS.snowStart + OPTS.snowFull) / 2, OPTS)).toBeCloseTo(0.5, 5)
     })
   })
 
@@ -96,6 +123,173 @@ describe('terrainTexture', () => {
       const i = 1 * 4 + 1 // interior pixel
       expect(a[i]).not.toBeCloseTo(b[i] ?? 0, 3)
     })
+
+    it('darkens low land more than high land when the heightmap layer multiplies', () => {
+      // Low sample → near-black grey → strong multiply darkening; a sample at the ceiling is white → no-op.
+      const hm = createHeightmap(meta(2, 1, 1500), new Int16Array([100, 1500]))
+      const base = { ...OPTS, grain: 0, hillshadeStrength: 0 }
+      const off = composeTerrainRgba(hm, { ...base, elevationStrength: 0 })
+      const on = composeTerrainRgba(hm, { ...base, elevationStrength: 1 })
+      const lowDrop = (off[0] ?? 0) - (on[0] ?? 0)
+      const highDrop = (off[4] ?? 0) - (on[4] ?? 0)
+      expect(lowDrop).toBeGreaterThan(highDrop)
+      expect(highDrop).toBe(0)
+    })
+
+    it('skips sea by default and applies the heightmap layer to it when elevationIncludesSea is on', () => {
+      const hm = createHeightmap(meta(1, 1, 0), new Int16Array([-3000]))
+      const base = { ...OPTS, grain: 0, elevationStrength: 1 }
+      const excluded = composeTerrainRgba(hm, base)
+      const included = composeTerrainRgba(hm, { ...base, elevationIncludesSea: true })
+      expect(excluded[0]).toBe(OPTS.sea.r)
+      expect(included[0]).toBeLessThan(OPTS.sea.r)
+    })
+
+    it('scales the baked buffer by the supersample factor on each axis', () => {
+      const hm = createHeightmap(meta(4, 3, 900), new Int16Array(12).fill(900))
+      for (const supersample of [1, 2, 3]) {
+        const size = terrainTextureSize(hm, { ...OPTS, supersample })
+        expect(size).toEqual({ width: 4 * supersample, height: 3 * supersample })
+        expect(composeTerrainRgba(hm, { ...OPTS, supersample }).length).toBe(
+          size.width * size.height * 4
+        )
+      }
+    })
+
+    it('keeps the 1:1 bake byte-identical to sampling the DEM directly', () => {
+      // Supersampling must be a pure refinement: at factor 1 the interpolated path has to land exactly
+      // back on the DEM samples, otherwise every tuned default would shift under us.
+      const data = new Int16Array([-200, 300, 1400, 2600, 90, 3100, -50, 1800, 700])
+      const hm = createHeightmap(meta(3, 3, 3100), data)
+      const baked = composeTerrainRgba(hm, { ...OPTS, supersample: 1 })
+      expect(baked.length).toBe(3 * 3 * 4)
+      // A flat interior sample keeps its exact land colour rather than drifting toward a neighbour.
+      expect(baked.some((byte, i) => i % 4 !== 3 && byte !== 0)).toBe(true)
+    })
+
+    it('refines the paper grain instead of merely enlarging it', () => {
+      // Grain is evaluated per output pixel, so a 2× bake must not be a 2× nearest-neighbour blow-up of
+      // the 1× one: neighbouring fine pixels inside one DEM cell have to differ.
+      const hm = createHeightmap(meta(4, 4, 800), new Int16Array(16).fill(800))
+      const opts = { ...OPTS, grain: 0.8, grainScale: 2, supersample: 2 }
+      const fine = composeTerrainRgba(hm, opts)
+      const rowStride = 4 * 2 * 4 // outWidth (8 px) × 4 bytes
+      expect(fine[0]).not.toBe(fine[4]) // two fine pixels inside the same DEM cell, side by side
+      expect(fine[0]).not.toBe(fine[rowStride]) // and the one directly below
+    })
+
+    it('lowers the snow line northward and raises it southward', () => {
+      expect(snowLineDrop(OPTS.snowLatitudeRef, OPTS)).toBe(0)
+      expect(snowLineDrop(OPTS.snowLatitudeRef + 16, OPTS)).toBeGreaterThan(0) // Scandinavia
+      expect(snowLineDrop(OPTS.snowLatitudeRef - 15, OPTS)).toBeLessThan(0) // the Atlas
+    })
+
+    it('snows on a northern summit that would stay bare at the reference latitude', () => {
+      // 1500 m sits below the alpine snow line but above the Scandinavian one.
+      const alpine = snowCoverage(1500, OPTS, snowLineDrop(OPTS.snowLatitudeRef, OPTS))
+      const nordic = snowCoverage(1500, OPTS, snowLineDrop(62, OPTS))
+      expect(alpine).toBeLessThan(nordic)
+      expect(nordic).toBe(1)
+    })
+
+    it('leaves the snow line flat when the tilt is zero', () => {
+      const flat = { ...OPTS, snowLatitudeDrop: 0 }
+      expect(snowLineDrop(70, flat)).toBe(0)
+      expect(snowCoverage(2000, flat, snowLineDrop(70, flat))).toBe(snowCoverage(2000, flat, 0))
+    })
+
+    it('whitens a summit without whitening the hills below the snow line', () => {
+      // One pixel under the line, one well above it: only the latter should move toward the snow tone.
+      const hm = createHeightmap(meta(2, 1, 3500), new Int16Array([1000, 3500]))
+      const rgba = composeTerrainRgba(hm, { ...OPTS, grain: 0 })
+      const bare = rgba[0] ?? 0
+      const snowy = rgba[4] ?? 0
+      expect(snowy).toBeGreaterThan(bare)
+    })
+
+    it('keeps the hillshade over the snow so summits stay modelled', () => {
+      // Two snow-covered pixels on opposite slopes must still differ — snow below the shading, not above.
+      const data = new Int16Array(16)
+      for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) data[y * 4 + x] = 3500 + x * 400
+      const hm = createHeightmap(meta(4, 4, 5100), data)
+      const opts = { ...OPTS, grain: 0, snowStrength: 1 }
+      // The sampled pixel is fully snow-covered; if snow were applied *after* the hillshade at full
+      // strength it would overwrite the shading and flipping the light would change nothing.
+      expect(snowCoverage(3900, opts)).toBe(1)
+      const lit = composeTerrainRgba(hm, { ...opts, lightAzimuthDeg: 90 })
+      const counterLit = composeTerrainRgba(hm, { ...opts, lightAzimuthDeg: 270 })
+      const centre = (1 * 4 + 1) * 4
+      expect(lit[centre]).not.toBe(counterLit[centre])
+    })
+
+    it('grades coast coverage from sea to land across the half-texel band', () => {
+      // 100 m per texel: 25 m above sea level is a quarter-texel inland → mostly, not fully, land.
+      const seaSide = coastCoverage(-25, 100, 0)
+      const landSide = coastCoverage(25, 100, 0)
+      expect(seaSide).toBeLessThan(0.5)
+      expect(seaSide).toBeGreaterThan(0)
+      expect(landSide).toBeGreaterThan(0.5)
+      expect(landSide).toBeLessThan(1)
+    })
+
+    it('tightens the shoreline band as the coast gets steeper', () => {
+      // The same 25 m of height is a smaller fraction of a texel on a steep coast → closer to binary.
+      const gentle = coastCoverage(25, 100, 0)
+      const steep = coastCoverage(25, 1000, 0)
+      expect(steep).toBeLessThan(gentle)
+      expect(steep).toBeGreaterThan(0.5)
+    })
+
+    it('blends a shoreline texel between the sea and land tones instead of snapping', () => {
+      // A 2×1 grid straddling sea level: the sea texel is adjacent to land, so it is partly covered.
+      const straddling = createHeightmap(meta(2, 1, 400), new Int16Array([-100, 400]))
+      const mixed = composeTerrainRgba(straddling, { ...OPTS, grain: 0 })
+      // An isolated sea texel with no land neighbour keeps the pure sea tone.
+      const isolated = createHeightmap(meta(1, 1, 0), new Int16Array([-100]))
+      const pure = composeTerrainRgba(isolated, { ...OPTS, grain: 0 })
+      expect(mixed[0]).not.toBe(pure[0])
+      expect(pure[0]).toBe(OPTS.sea.r)
+    })
+
+    it('honours the blend mode chosen for the heightmap layer', () => {
+      const hm = createHeightmap(meta(1, 1, 750), new Int16Array([750]))
+      const base = { ...OPTS, grain: 0, hillshadeStrength: 0, elevationStrength: 1 }
+      const multiplied = composeTerrainRgba(hm, { ...base, elevationMode: 'multiply' })
+      const normal = composeTerrainRgba(hm, { ...base, elevationMode: 'normal' })
+      expect(multiplied[0]).not.toBe(normal[0])
+    })
+
+    it('applies the heightmap layer before the hillshade, as the layer order documents', () => {
+      // `multiply` is commutative, so the default settings cannot detect an order swap. `softLight` is
+      // not — chain it by hand and check the composite matches tint → heightmap → hillshade.
+      const flat = 300
+      const hm = createHeightmap(meta(3, 3, flat), new Int16Array(9).fill(flat))
+      const opts = {
+        ...OPTS,
+        grain: 0,
+        lightAltitudeDeg: 45,
+        elevationMode: 'softLight' as const,
+        elevationStrength: 1,
+        hillshadeMode: 'softLight' as const,
+        hillshadeStrength: 1,
+      }
+      // A flat surface shades uniformly to cos(zenith) — proven by the hillshade test above.
+      const shade = Math.cos((90 - 45) * (Math.PI / 180))
+      const grey = elevationGrey(flat, opts)
+      const parchment = opts.parchment.r / 255
+      const tintR = hypsometricTint(flat, opts)[0]
+      const tinted =
+        parchment + (blendChannel(parchment, tintR, opts.tintMode) - parchment) * opts.tintStrength
+      const documented = blendChannel(blendChannel(tinted, grey, 'softLight'), shade, 'softLight')
+      const swapped = blendChannel(blendChannel(tinted, shade, 'softLight'), grey, 'softLight')
+
+      // Guard: the assertion below is only meaningful if the two orders actually differ.
+      expect(Math.round(documented * 255)).not.toBe(Math.round(swapped * 255))
+
+      const rgba = composeTerrainRgba(hm, opts)
+      const centre = (1 * 3 + 1) * 4 // interior pixel, away from the edge-clamped border
+      expect(rgba[centre]).toBe(Math.round(documented * 255))
+    })
   })
 
   describe('managed errors', () => {
@@ -112,12 +306,56 @@ describe('terrainTexture', () => {
       const atPeak = hypsometricTint(OPTS.peakReference, OPTS)
       expect(capped).toEqual(atPeak)
     })
+
+    it('clamps the heightmap layer outside its floor/ceiling window', () => {
+      expect(elevationGrey(OPTS.elevationFloor - 5000, OPTS)).toBe(0)
+      expect(elevationGrey(OPTS.elevationCeiling + 5000, OPTS)).toBe(1)
+    })
+
+    it('degenerates to a hard snow line when the band has no width', () => {
+      const flatBand = { ...OPTS, snowStart: 2000, snowFull: 2000 }
+      expect(snowCoverage(1999, flatBand)).toBe(0)
+      expect(snowCoverage(2000, flatBand)).toBe(1)
+    })
+
+    it('falls back to the binary sea/land test on a flat neighbourhood', () => {
+      // A zero gradient carries no distance information — antialiasing there would be meaningless.
+      expect(coastCoverage(-10, 0, 0)).toBe(0)
+      expect(coastCoverage(10, 0, 0)).toBe(1)
+      expect(coastCoverage(0, 0, 0)).toBe(0) // exactly at sea level counts as sea, as elsewhere
+    })
   })
 
   describe('unmanaged errors', () => {
     it('does not divide by zero when peakReference equals seaLevel', () => {
       const tint = hypsometricTint(100, { ...OPTS, peakReference: OPTS.seaLevel })
       expect(tint.every((c) => Number.isFinite(c))).toBe(true)
+    })
+
+    it('does not divide by zero when the heightmap floor equals its ceiling', () => {
+      const grey = elevationGrey(500, {
+        ...OPTS,
+        elevationFloor: 1000,
+        elevationCeiling: 1000,
+      })
+      // Asserting the clamped value, not just finiteness: the span guard alone makes NaN impossible,
+      // so a finiteness check would still pass if the [0, 1] clamp were dropped.
+      expect(grey).toBe(0)
+    })
+
+    it('stays in [0, 1] when the snow band is inverted', () => {
+      const inverted = { ...OPTS, snowStart: 3000, snowFull: 1000 }
+      for (const elevation of [0, 500, 1000, 2000, 3000, 6000]) {
+        const coverage = snowCoverage(elevation, inverted)
+        expect(coverage).toBeGreaterThanOrEqual(0)
+        expect(coverage).toBeLessThanOrEqual(1)
+      }
+    })
+
+    it('falls back to the binary test on a NaN or negative gradient', () => {
+      expect(coastCoverage(50, Number.NaN, 0)).toBe(1)
+      expect(coastCoverage(-50, Number.NaN, 0)).toBe(0)
+      expect(coastCoverage(50, -100, 0)).toBe(1)
     })
   })
 
@@ -135,6 +373,35 @@ describe('terrainTexture', () => {
       const sea = [rgba[0], rgba[1], rgba[2]]
       const land = [rgba[4], rgba[5], rgba[6]]
       expect(land).not.toEqual(sea)
+    })
+
+    it('is a no-op at zero strength, whatever the heightmap blend mode', () => {
+      const hm = createHeightmap(meta(2, 2, 1200), new Int16Array([200, 800, 1200, 50]))
+      const off = composeTerrainRgba(hm, { ...OPTS, elevationStrength: 0 })
+      const alsoOff = composeTerrainRgba(hm, {
+        ...OPTS,
+        elevationStrength: 0,
+        elevationMode: 'normal',
+      })
+      expect(Array.from(alsoOff)).toEqual(Array.from(off))
+    })
+
+    it('leaves the map untouched at zero snow strength', () => {
+      const hm = createHeightmap(meta(2, 2, 4500), new Int16Array([200, 2400, 4500, 3100]))
+      const off = composeTerrainRgba(hm, { ...OPTS, snowStrength: 0 })
+      const none = composeTerrainRgba(hm, { ...OPTS, snowStrength: 0, snowStart: 0, snowFull: 1 })
+      expect(Array.from(none)).toEqual(Array.from(off))
+    })
+
+    it('saturates coast coverage well away from the shoreline', () => {
+      expect(coastCoverage(5000, 100, 0)).toBe(1)
+      expect(coastCoverage(-5000, 100, 0)).toBe(0)
+    })
+
+    it('stays within [0, 1] when the heightmap floor sits above its ceiling', () => {
+      const grey = elevationGrey(500, { ...OPTS, elevationFloor: 3000, elevationCeiling: 100 })
+      expect(grey).toBeGreaterThanOrEqual(0)
+      expect(grey).toBeLessThanOrEqual(1)
     })
   })
 })
