@@ -272,70 +272,94 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     .onFinishChange(callbacks.rebuildRelief)
   gui.add(relief, 'wireframe').onChange(callbacks.setWireframe)
 
-  // Terrain look — parchment base, hypsometric tint, DEM hillshade. Regenerating the texture is a full
-  // pixel pass (heavy), so numeric tuning fires on release; colours fire when the picker closes.
+  // Terrain look. Regenerating the texture is a full pixel pass (heavy), so numeric tuning fires on
+  // release; colours fire when the picker closes.
+  //
+  // The sub-folders below deliberately mirror the compositor's layer order in `terrainTexture.ts`
+  // (base → tint → heightmap → snow → hillshade → paper), so the panel reads as the rendering stack
+  // rather than as one flat wall of ~30 sliders where nothing says what belongs to what.
   const texFolder = gui.addFolder('texture (parchment)')
-  texFolder
+  const rebuild = callbacks.rebuildTexture
+
+  // 1 — Base: the paper under everything, and the sea/land threshold the whole map keys off.
+  const baseFolder = texFolder.addFolder('1 · base')
+  baseFolder
     .add(texture, 'seaLevel', -200, 500, 10)
     .name('sea level (m)')
     .onFinishChange(() => {
-      callbacks.rebuildTexture()
+      rebuild()
       callbacks.rebuildCoastline() // coastline is the same seaLevel iso-line → follows
       callbacks.rebuildRhumb() // rhumbs are sea-clipped at the same level → follow
     })
-  texFolder
-    .add(texture, 'lightAzimuthDeg', 0, 360, 1)
-    .name('light azimuth')
-    .onFinishChange(callbacks.rebuildTexture)
-  texFolder
-    .add(texture, 'lightAltitudeDeg', 5, 85, 1)
-    .name('light altitude')
-    .onFinishChange(callbacks.rebuildTexture)
-  texFolder
-    .add(texture, 'hillshadeStrength', 0, 1, 0.05)
-    .name('hillshade')
-    .onFinishChange(callbacks.rebuildTexture)
-  texFolder
-    .add(texture, 'hillshadeMode', BLEND_MODES)
-    .name('shade blend')
-    .onFinishChange(callbacks.rebuildTexture)
-  texFolder
-    .add(texture, 'zFactor', 0.0002, 0.006, 0.0002)
-    .name('relief strength')
-    .onFinishChange(callbacks.rebuildTexture)
-  texFolder
-    .add(texture, 'tintStrength', 0, 1, 0.05)
-    .name('tint')
-    .onFinishChange(callbacks.rebuildTexture)
-  texFolder
-    .add(texture, 'tintMode', BLEND_MODES)
-    .name('tint blend')
-    .onFinishChange(callbacks.rebuildTexture)
-  texFolder
+  baseFolder.addColor(texture, 'parchment', 255).name('parchment').onFinishChange(rebuild)
+  baseFolder.addColor(texture, 'sea', 255).name('sea').onFinishChange(rebuild)
+
+  // 2 — Hypsometric tint: ground colour by elevation, lowland → highland.
+  const tintFolder = texFolder.addFolder('2 · hypsometric tint')
+  tintFolder.add(texture, 'tintStrength', 0, 1, 0.05).name('strength').onFinishChange(rebuild)
+  tintFolder.add(texture, 'tintMode', BLEND_MODES).name('blend').onFinishChange(rebuild)
+  tintFolder
     .add(texture, 'peakReference', 500, 5000, 100)
     .name('peak ref (m)')
-    .onFinishChange(callbacks.rebuildTexture)
-  texFolder
-    .add(texture, 'grain', 0, 1, 0.05)
-    .name('grain (vellum)')
-    .onFinishChange(callbacks.rebuildTexture)
-  texFolder
-    .add(texture, 'grainScale', 1, 40, 1)
-    .name('grain scale (px)')
-    .onFinishChange(callbacks.rebuildTexture)
-  texFolder
-    .addColor(texture, 'parchment', 255)
-    .name('parchment')
-    .onFinishChange(callbacks.rebuildTexture)
-  texFolder.addColor(texture, 'sea', 255).name('sea').onFinishChange(callbacks.rebuildTexture)
-  texFolder
-    .addColor(texture, 'lowland', 255)
-    .name('lowland tint')
-    .onFinishChange(callbacks.rebuildTexture)
-  texFolder
-    .addColor(texture, 'highland', 255)
-    .name('highland tint')
-    .onFinishChange(callbacks.rebuildTexture)
+    .onFinishChange(rebuild)
+  tintFolder.addColor(texture, 'lowland', 255).name('lowland').onFinishChange(rebuild)
+  tintFolder.addColor(texture, 'highland', 255).name('highland').onFinishChange(rebuild)
+
+  // 3 — Greyscale heightmap: the raw elevation bitmap (low = black, high = white) as its own layer.
+  const heightFolder = texFolder.addFolder('3 · heightmap (B&W)')
+  heightFolder
+    .add(texture, 'elevationStrength', 0, 1, 0.05)
+    .name('strength')
+    .onFinishChange(rebuild)
+  heightFolder.add(texture, 'elevationMode', BLEND_MODES).name('blend').onFinishChange(rebuild)
+  heightFolder
+    .add(texture, 'elevationFloor', -8000, 2000, 100)
+    .name('black at (m)')
+    .onFinishChange(rebuild)
+  heightFolder
+    .add(texture, 'elevationCeiling', 500, 7000, 100)
+    .name('white at (m)')
+    .onFinishChange(rebuild)
+  heightFolder.add(texture, 'elevationIncludesSea').name('over sea too').onFinishChange(rebuild)
+
+  // 4 — Snow: a surface cover with its own line, tilted by latitude.
+  const snowFolder = texFolder.addFolder('4 · snow')
+  snowFolder.add(texture, 'snowStrength', 0, 1, 0.05).name('strength').onFinishChange(rebuild)
+  snowFolder.add(texture, 'snowStart', 0, 5000, 50).name('starts at (m)').onFinishChange(rebuild)
+  snowFolder.add(texture, 'snowFull', 0, 6000, 50).name('full at (m)').onFinishChange(rebuild)
+  snowFolder.addColor(texture, 'snow', 255).name('tone').onFinishChange(rebuild)
+  snowFolder
+    .add(texture, 'snowLatitudeDrop', 0, 120, 5)
+    .name('line tilt (m/°)')
+    .onFinishChange(rebuild)
+  snowFolder.add(texture, 'snowLatitudeRef', 0, 80, 1).name('line ref (°N)').onFinishChange(rebuild)
+
+  // 5 — Hillshade: the light modelling the relief, applied over every layer above.
+  const shadeFolder = texFolder.addFolder('5 · hillshade')
+  shadeFolder.add(texture, 'hillshadeStrength', 0, 1, 0.05).name('strength').onFinishChange(rebuild)
+  shadeFolder.add(texture, 'hillshadeMode', BLEND_MODES).name('blend').onFinishChange(rebuild)
+  shadeFolder
+    .add(texture, 'lightAzimuthDeg', 0, 360, 1)
+    .name('light azimuth')
+    .onFinishChange(rebuild)
+  shadeFolder
+    .add(texture, 'lightAltitudeDeg', 5, 85, 1)
+    .name('light altitude')
+    .onFinishChange(rebuild)
+  shadeFolder
+    .add(texture, 'zFactor', 0.0002, 0.006, 0.0002)
+    .name('relief strength')
+    .onFinishChange(rebuild)
+
+  // 6 — Paper & bake: the vellum fibre on top, and the resolution everything is painted at.
+  const paperFolder = texFolder.addFolder('6 · paper & bake')
+  paperFolder.add(texture, 'grain', 0, 1, 0.05).name('grain (vellum)').onFinishChange(rebuild)
+  paperFolder.add(texture, 'grainScale', 1, 40, 1).name('grain scale (px)').onFinishChange(rebuild)
+  // Bake resolution. Costs the square of this in bake time — drop to 1 while tuning, back up to look.
+  paperFolder.add(texture, 'supersample', 1, 3, 1).name('resolution (×DEM)').onFinishChange(rebuild)
+
+  for (const folder of [baseFolder, tintFolder, heightFolder, snowFolder, shadeFolder, paperFolder])
+    folder.close()
   texFolder.close()
 
   // Coastline — draped 3D lines; light jitter over a few low-opacity strokes = soft pencil. Colour
