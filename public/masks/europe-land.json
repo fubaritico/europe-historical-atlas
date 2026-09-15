@@ -1,0 +1,8 @@
+{
+  "source": "Natural Earth 10m land minus lakes (public domain)",
+  "width": 5120,
+  "height": 4656,
+  "scale": 4,
+  "bbox": { "west": -45, "south": 11.178401873711783, "east": 78.75, "north": 76.84081641443098 },
+  "encoding": "packed-bits-msb-first, 1 = land"
+}
