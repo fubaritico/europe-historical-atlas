@@ -1,4 +1,5 @@
 import type { Heightmap } from './heightmap'
+import type { LandMask } from './landMask'
 
 /** A point in normalized grid coordinates: `u` in `[0, 1]` (0 = west), `v` in `[0, 1]` (0 = north). */
 export interface UvPoint {
@@ -56,7 +57,45 @@ export function createDemCoastlineSource(
 ): CoastlineSource {
   const { width, height } = heightmap.meta
   const data = heightmap.data
-  const level = options.seaLevel
+  return createFieldCoastlineSource({
+    width,
+    height,
+    level: options.seaLevel,
+    valueAt: (x, y) => data[y * width + x] ?? 0,
+  })
+}
+
+/**
+ * The scalar field a shoreline is traced through.
+ */
+export interface FieldCoastlineOptions {
+  /** Grid width in samples. */
+  width: number
+  /** Grid height in samples. */
+  height: number
+  /** The iso-value that separates land (above) from water (at or below). */
+  level: number
+  /**
+   * The field value at a grid cell.
+   * @param x - grid column
+   * @param y - grid row
+   * @returns the value at that cell
+   */
+  valueAt: (x: number, y: number) => number
+}
+
+/**
+ * Create a {@link CoastlineSource} that traces the `level` iso-line of an arbitrary scalar field by
+ * marching squares.
+ *
+ * Kept independent of what the field *is* so the shoreline can be traced through a land/water mask
+ * rather than through elevation — the two are not the same question, and only the mask can tell a
+ * polder from the sea.
+ * @param options - the field, its grid and the iso-level
+ * @returns the coastline source
+ */
+export function createFieldCoastlineSource(options: FieldCoastlineOptions): CoastlineSource {
+  const { width, height, level } = options
 
   return {
     load(): CoastlineSegment[] {
@@ -64,7 +103,7 @@ export function createDemCoastlineSource(
       if (width < 2 || height < 2) return segments
       const uAt = (x: number): number => x / (width - 1)
       const vAt = (y: number): number => y / (height - 1)
-      const val = (x: number, y: number): number => data[y * width + x] ?? 0
+      const val = options.valueAt
 
       for (let y = 0; y < height - 1; y++) {
         for (let x = 0; x < width - 1; x++) {
@@ -127,4 +166,26 @@ export function createDemCoastlineSource(
       return segments
     },
   }
+}
+
+/**
+ * Trace the shoreline through a land/water mask instead of through elevation.
+ *
+ * `resolution` caps the grid marching squares walks: the shipped mask is four times finer than the DEM
+ * (23 million cells), and tracing every one of them costs far more than the extra fidelity is worth at
+ * the zoom levels the coastline is drawn at.
+ * @param mask - the land/water mask
+ * @param resolution - maximum grid width to trace at; defaults to the mask's own
+ * @returns the coastline source
+ */
+export function createMaskCoastlineSource(mask: LandMask, resolution?: number): CoastlineSource {
+  const cap = resolution ?? mask.meta.width
+  const width = Math.max(2, Math.min(mask.meta.width, Math.round(cap)))
+  const height = Math.max(2, Math.round((width * mask.meta.height) / mask.meta.width))
+  return createFieldCoastlineSource({
+    width,
+    height,
+    level: 0.5, // half-covered is the shore
+    valueAt: (x, y) => mask.coverage(x / (width - 1), y / (height - 1)),
+  })
 }

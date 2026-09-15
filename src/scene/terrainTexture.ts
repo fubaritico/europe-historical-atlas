@@ -7,10 +7,12 @@ import {
   UnsignedByteType,
 } from 'three'
 
+import { createElevationLandMask } from '../data/landMask'
 import { verticalToLatitude } from '../geo/mercator'
 import { hashInts } from '../utils/hash'
 
 import type { Heightmap } from '../data/heightmap'
+import type { LandMask } from '../data/landMask'
 import type { ControlGroup, ControlTable } from '../utils/controlSpec'
 
 /**
@@ -345,59 +347,6 @@ function blendGreyInto(
   }
 }
 
-/**
- * Estimate how much of a texel is land, by turning its height above `seaLevel` into a signed distance to
- * the shoreline (expressed in texels, via the local DEM gradient) and covering the ±½-texel band around
- * it. This is the CPU equivalent of a shader's `fwidth`-based antialiasing: it replaces the hard binary
- * sea/land test with a sub-texel coverage ratio, which removes the staircase along the coast. It does
- * NOT invent detail the DEM lacks — it only places the existing shoreline more precisely inside a texel.
- * @param elevation - the texel's elevation in metres
- * @param gradientPerTexel - local elevation gradient magnitude, in metres per texel
- * @param seaLevel - the shoreline elevation in metres
- * @returns land coverage in `[0, 1]` (0 = fully sea, 1 = fully land)
- */
-export function coastCoverage(
-  elevation: number,
-  gradientPerTexel: number,
-  seaLevel: number
-): number {
-  // A flat (or degenerate) neighbourhood gives no usable distance — fall back to the binary test.
-  if (!(gradientPerTexel > 0)) return elevation <= seaLevel ? 0 : 1
-  const t = (elevation - seaLevel) / gradientPerTexel + 0.5
-  if (t <= 0) return 0
-  if (t >= 1) return 1
-  return t * t * (3 - 2 * t) // smoothstep
-}
-
-/**
- * Horn 3×3 gradient magnitude at a grid cell, in metres per texel. Edge cells replicate their nearest
- * in-bounds neighbour (same convention as {@link computeHillshade}).
- * @param heightmap - the elevation source
- * @param x - grid column
- * @param y - grid row
- * @returns the gradient magnitude in metres per texel
- */
-function gradientAt(heightmap: Heightmap, x: number, y: number): number {
-  const { width, height } = heightmap.meta
-  const src = heightmap.data
-  const at = (gx: number, gy: number): number => {
-    const cx = gx < 0 ? 0 : gx >= width ? width - 1 : gx
-    const cy = gy < 0 ? 0 : gy >= height ? height - 1 : gy
-    return src[cy * width + cx] ?? 0
-  }
-  const a = at(x - 1, y - 1)
-  const b = at(x, y - 1)
-  const c = at(x + 1, y - 1)
-  const d = at(x - 1, y)
-  const f = at(x + 1, y)
-  const g = at(x - 1, y + 1)
-  const h = at(x, y + 1)
-  const i = at(x + 1, y + 1)
-  const dzdx = (c + 2 * f + i - (a + 2 * d + g)) / 8
-  const dzdy = (g + 2 * h + i - (a + 2 * b + c)) / 8
-  return Math.hypot(dzdx, dzdy)
-}
-
 /** Smoothstep-interpolated value noise in `[0, 1]` — smooth mottling, not per-pixel static. */
 function valueNoise(x: number, y: number): number {
   const ix = Math.floor(x)
@@ -538,23 +487,26 @@ function landColorInto(
  * Composite the terrain into an RGBA byte buffer: parchment base, hypsometric tint over land, the
  * greyscale heightmap layer, DEM hillshade multiplied on top (sea samples get the flat `sea` tone, and
  * the greyscale layer only if `elevationIncludesSea`), then a vellum paper grain modulated over
- * everything. Texels straddling the shoreline mix sea and land by sub-texel coverage
- * ({@link coastCoverage}) instead of snapping to one or the other, which removes the staircase along
- * the coast. Row 0 is the heightmap's north row (pair with `DataTexture.flipY = true` to align with
+ * everything. The shoreline comes from the injected {@link LandMask}, whose bilinear coverage mixes sea
+ * and land across the edge instead of snapping to one or the other — and because the mask can be baked
+ * finer than the DEM, the coast is no longer limited by the elevation grid. Row 0 is the heightmap's north row (pair with `DataTexture.flipY = true` to align with
  * `PlaneGeometry` UVs).
  * @param heightmap - the elevation source
  * @param options - the texture options
+ * @param landMask - which cells are land; falls back to thresholding elevation when omitted
  * @returns an `RGBA` `Uint8Array` of length `width * height * 4`
  */
 export function composeTerrainRgba(
   heightmap: Heightmap,
-  options: TerrainTextureOptions
+  options: TerrainTextureOptions,
+  landMask?: LandMask
 ): Uint8Array {
+  // The elevation fallback is a documented degraded mode, not an equivalent: it drowns land lying below
+  // sea level and dries out every lake above it.
+  const mask = landMask ?? createElevationLandMask(heightmap, options.seaLevel)
   const { width, height } = heightmap.meta
-  const src = heightmap.data
   const shade = computeHillshade(heightmap, options)
   const { width: outWidth, height: outHeight } = terrainTextureSize(heightmap, options)
-  const scale = outWidth / width
   const rgba = new Uint8Array(outWidth * outHeight * 4)
   const baseSea: [number, number, number] = [
     options.sea.r / 255,
@@ -564,28 +516,6 @@ export function composeTerrainRgba(
   // Scratch triplets reused across the whole grid — the loop must stay allocation-free.
   const seaC: [number, number, number] = [0, 0, 0]
   const landC: [number, number, number] = [0, 0, 0]
-
-  const elevationAt = (gx: number, gy: number): number => {
-    const cx = gx < 0 ? 0 : gx >= width ? width - 1 : gx
-    const cy = gy < 0 ? 0 : gy >= height ? height - 1 : gy
-    return src[cy * width + cx] ?? 0
-  }
-
-  // Which DEM cells straddle the shoreline. Resolved once on the source grid: the cheap 4-neighbour
-  // sign test gates the ~0.1 % of cells that sit on a coast, so only those pay for a gradient below.
-  const straddlesCoast = new Uint8Array(width * height)
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const isSea = elevationAt(x, y) <= options.seaLevel
-      straddlesCoast[y * width + x] =
-        elevationAt(x - 1, y) <= options.seaLevel !== isSea ||
-        elevationAt(x + 1, y) <= options.seaLevel !== isSea ||
-        elevationAt(x, y - 1) <= options.seaLevel !== isSea ||
-        elevationAt(x, y + 1) <= options.seaLevel !== isSea
-          ? 1
-          : 0
-    }
-  }
 
   // The snow line only depends on latitude, and latitude only on the row — so resolve it once per
   // output row. Web Mercator is non-linear in latitude, hence the projection round-trip, not a lerp.
@@ -610,27 +540,16 @@ export function composeTerrainRgba(
 
   for (let oy = 0; oy < outHeight; oy++) {
     const fy = outHeight > 1 ? (oy * (height - 1)) / (outHeight - 1) : 0
-    const cellY = Math.min(height - 1, Math.max(0, Math.round(fy)))
     const snowDrop = snowDropByRow[oy] ?? 0
 
     for (let ox = 0; ox < outWidth; ox++) {
       const fx = outWidth > 1 ? (ox * (width - 1)) / (outWidth - 1) : 0
-      const cellX = Math.min(width - 1, Math.max(0, Math.round(fx)))
       // Bilinear elevation: at scale 1 this lands exactly on the DEM samples, so the 1:1 bake is
       // unchanged; above 1 it interpolates between them.
-      const e = heightmap.sample(
-        width > 1 ? fx / (width - 1) : 0,
-        height > 1 ? fy / (height - 1) : 0
-      )
-      const isSea = e <= options.seaLevel
-      // The gradient is metres per DEM cell; the antialiasing band is half an *output* pixel, which is
-      // `scale` times smaller — so the coast stays a one-pixel edge however finely we bake.
-      const coverage =
-        straddlesCoast[cellY * width + cellX] === 1
-          ? coastCoverage(e, gradientAt(heightmap, cellX, cellY) / scale, options.seaLevel)
-          : isSea
-            ? 0
-            : 1
+      const u = width > 1 ? fx / (width - 1) : 0
+      const v = height > 1 ? fy / (height - 1) : 0
+      const e = heightmap.sample(u, v)
+      const coverage = mask.coverage(u, v)
 
       if (coverage < 1) {
         if (options.elevationIncludesSea) {
@@ -672,14 +591,16 @@ export function composeTerrainRgba(
  * `flipY` is set so the buffer's north-first rows align with `PlaneGeometry` UVs; caller disposes it.
  * @param heightmap - the elevation source
  * @param options - the texture options
+ * @param landMask - which cells are land; falls back to thresholding elevation when omitted
  * @returns the terrain texture (sRGB, mipmapped, sized by `supersample`)
  */
 export function createTerrainTexture(
   heightmap: Heightmap,
-  options: TerrainTextureOptions
+  options: TerrainTextureOptions,
+  landMask?: LandMask
 ): DataTexture {
   const { width, height } = terrainTextureSize(heightmap, options)
-  const rgba = composeTerrainRgba(heightmap, options)
+  const rgba = composeTerrainRgba(heightmap, options, landMask)
   const texture = new DataTexture(rgba, width, height, RGBAFormat, UnsignedByteType)
   texture.flipY = true // buffer row 0 = north; UV v=1 (north vertex) must sample it
   texture.colorSpace = SRGBColorSpace

@@ -2,6 +2,7 @@ import { DataTexture, SRGBColorSpace } from 'three'
 import { describe, expect, it } from 'vitest'
 
 import { createHeightmap } from '../data/heightmap'
+import { createLandMask } from '../data/landMask'
 import { findControlInconsistencies, findGroupingProblems } from '../utils/controlSpec'
 
 import {
@@ -10,7 +11,6 @@ import {
   TERRAIN_CONTROLS,
   TERRAIN_CONTROL_GROUPS,
   blendChannel,
-  coastCoverage,
   composeTerrainRgba,
   computeHillshade,
   createTerrainTexture,
@@ -40,6 +40,14 @@ function meta(width: number, height: number, max: number): HeightmapMeta {
 // Most assertions below index individual pixels, so they bake 1:1 with the DEM. Supersampling has its
 // own tests; it must not silently shift every other test's pixel indices.
 const OPTS: TerrainTextureOptions = { ...DEFAULT_TERRAIN_OPTIONS, supersample: 1 }
+
+/** A hand-written land mask over a small grid — row-major, `true` = land. */
+function maskOf(width: number, height: number, land: boolean[]): ReturnType<typeof createLandMask> {
+  return createLandMask(
+    { width, height, scale: 1, bbox: { west: 0, south: 0, east: 1, north: 1 } },
+    (col, row) => land[row * width + col] ?? false
+  )
+}
 
 describe('terrainTexture controls', () => {
   describe('happy path', () => {
@@ -108,10 +116,6 @@ describe('terrainTexture', () => {
         0.5,
         5
       )
-    })
-
-    it('puts the shoreline exactly half-covered at sea level', () => {
-      expect(coastCoverage(0, 100, 0)).toBeCloseTo(0.5, 5)
     })
 
     it('covers the ground with snow only between the snow line and full cover', () => {
@@ -266,33 +270,17 @@ describe('terrainTexture', () => {
       expect(lit[centre]).not.toBe(counterLit[centre])
     })
 
-    it('grades coast coverage from sea to land across the half-texel band', () => {
-      // 100 m per texel: 25 m above sea level is a quarter-texel inland → mostly, not fully, land.
-      const seaSide = coastCoverage(-25, 100, 0)
-      const landSide = coastCoverage(25, 100, 0)
-      expect(seaSide).toBeLessThan(0.5)
-      expect(seaSide).toBeGreaterThan(0)
-      expect(landSide).toBeGreaterThan(0.5)
-      expect(landSide).toBeLessThan(1)
-    })
-
-    it('tightens the shoreline band as the coast gets steeper', () => {
-      // The same 25 m of height is a smaller fraction of a texel on a steep coast → closer to binary.
-      const gentle = coastCoverage(25, 100, 0)
-      const steep = coastCoverage(25, 1000, 0)
-      expect(steep).toBeLessThan(gentle)
-      expect(steep).toBeGreaterThan(0.5)
-    })
-
     it('blends a shoreline texel between the sea and land tones instead of snapping', () => {
-      // A 2×1 grid straddling sea level: the sea texel is adjacent to land, so it is partly covered.
-      const straddling = createHeightmap(meta(2, 1, 400), new Int16Array([-100, 400]))
-      const mixed = composeTerrainRgba(straddling, { ...OPTS, grain: 0 })
-      // An isolated sea texel with no land neighbour keeps the pure sea tone.
-      const isolated = createHeightmap(meta(1, 1, 0), new Int16Array([-100]))
-      const pure = composeTerrainRgba(isolated, { ...OPTS, grain: 0 })
-      expect(mixed[0]).not.toBe(pure[0])
-      expect(pure[0]).toBe(OPTS.sea.r)
+      // Baked finer than the mask, so texels land *between* the water cell and the land cell — which is
+      // where the shore actually falls. Sampled only at cell centres there would be nothing to blend.
+      const grid = createHeightmap(meta(2, 1, 400), new Int16Array([-100, 400]))
+      const opts = { ...OPTS, grain: 0, supersample: 4 }
+      const baked = composeTerrainRgba(grid, opts, maskOf(2, 1, [false, true]))
+      const reds = [...Array.from({ length: 8 }, (_, i) => baked[i * 4] ?? 0)]
+      const sea = OPTS.sea.r
+      expect(reds[0]).toBe(sea) // the water end stays pure
+      expect(reds.some((red) => red !== sea && red !== reds[7])).toBe(true) // a graded edge exists
+      expect(new Set(reds).size).toBeGreaterThan(2) // and it is a ramp, not a single hard step
     })
 
     it('honours the blend mode chosen for the heightmap layer', () => {
@@ -362,15 +350,6 @@ describe('terrainTexture', () => {
       expect(snowCoverage(2000, flatBand)).toBe(1)
     })
 
-    it('falls back to the binary sea/land test on a flat neighbourhood', () => {
-      // A zero gradient carries no distance information — antialiasing there would be meaningless.
-      expect(coastCoverage(-10, 0, 0)).toBe(0)
-      expect(coastCoverage(10, 0, 0)).toBe(1)
-      expect(coastCoverage(0, 0, 0)).toBe(0) // exactly at sea level counts as sea, as elsewhere
-    })
-  })
-
-  describe('unmanaged errors', () => {
     it('does not divide by zero when peakReference equals seaLevel', () => {
       const tint = hypsometricTint(100, { ...OPTS, peakReference: OPTS.seaLevel })
       expect(tint.every((c) => Number.isFinite(c))).toBe(true)
@@ -396,14 +375,6 @@ describe('terrainTexture', () => {
       }
     })
 
-    it('falls back to the binary test on a NaN or negative gradient', () => {
-      expect(coastCoverage(50, Number.NaN, 0)).toBe(1)
-      expect(coastCoverage(-50, Number.NaN, 0)).toBe(0)
-      expect(coastCoverage(50, -100, 0)).toBe(1)
-    })
-  })
-
-  describe('edge cases', () => {
     it('handles a 1×1 heightmap (single pixel, edge-clamped neighbours)', () => {
       const hm = createHeightmap(meta(1, 1, 1000), new Int16Array([1000]))
       const rgba = composeTerrainRgba(hm, OPTS)
@@ -435,11 +406,6 @@ describe('terrainTexture', () => {
       const off = composeTerrainRgba(hm, { ...OPTS, snowStrength: 0 })
       const none = composeTerrainRgba(hm, { ...OPTS, snowStrength: 0, snowStart: 0, snowFull: 1 })
       expect(Array.from(none)).toEqual(Array.from(off))
-    })
-
-    it('saturates coast coverage well away from the shoreline', () => {
-      expect(coastCoverage(5000, 100, 0)).toBe(1)
-      expect(coastCoverage(-5000, 100, 0)).toBe(0)
     })
 
     it('stays within [0, 1] when the heightmap floor sits above its ceiling', () => {

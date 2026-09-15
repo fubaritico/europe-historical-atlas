@@ -3,6 +3,7 @@ import { clamp01 } from '../utils/math'
 import type { UvSegment } from './lineLayer'
 import type { UvPoint } from '../data/coastlineSource'
 import type { Heightmap } from '../data/heightmap'
+import type { LandMask } from '../data/landMask'
 
 /** Floor for the sampling step — guards against an absurdly slow (or non-terminating) walk if `step` ≈ 0. */
 const MIN_WALK_STEP = 0.0005
@@ -55,9 +56,14 @@ function clipToUnitSquare(pu: number, pv: number, du: number, dv: number): [numb
  */
 export function generateRhumbSegments(
   heightmap: Heightmap,
-  options: RhumbNetworkOptions
+  options: RhumbNetworkOptions,
+  mask?: LandMask
 ): UvSegment[] {
   const { center, circleRadius, nodeCount, includeCenter, directions, seaLevel, step } = options
+  // A polder is dry land below sea level and a lake is water above it, so where a mask is available it
+  // decides; thresholding elevation is the degraded fallback.
+  const isWater = (u: number, v: number): boolean =>
+    mask ? !mask.isLand(u, v) : heightmap.sample(u, v) <= seaLevel
   const nodes: UvPoint[] = []
   for (let i = 0; i < nodeCount; i++) {
     const phi = (i / nodeCount) * Math.PI * 2
@@ -87,7 +93,7 @@ export function generateRhumbSegments(
       for (let t = t0; t <= t1 + walk * 0.5; t += walk) {
         const tc = Math.min(t, t1)
         const p: UvPoint = { u: node.u + tc * du, v: node.v + tc * dv }
-        const underwater = heightmap.sample(clamp01(p.u), clamp01(p.v)) <= seaLevel
+        const underwater = isWater(clamp01(p.u), clamp01(p.v))
         if (underwater) {
           runStart ??= prev
         } else if (runStart) {
