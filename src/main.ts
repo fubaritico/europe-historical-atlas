@@ -6,16 +6,25 @@ import { createMapControls } from './controls/mapControls'
 import { createDemCoastlineSource } from './data/coastlineSource'
 import { createFetchHeightmapSource, smoothHeightmap } from './data/heightmap'
 import { createDevPanel } from './devPanel'
-import { createCoastlineLayer } from './scene/coastlineLayer'
+import { createCompassRose } from './scene/compassRose'
 import { createDebugRect } from './scene/debugRect'
+import { createLineLayer } from './scene/lineLayer'
 import { createReliefMesh } from './scene/reliefMesh'
+import { generateRhumbSegments } from './scene/rhumbNetwork'
 import { DEFAULT_TERRAIN_OPTIONS, createTerrainTexture } from './scene/terrainTexture'
+import { lerp } from './utils/math'
 
 import type { MapRect } from './controls/mapControls'
 import type { Heightmap } from './data/heightmap'
-import type { CoastlineDevParams, ExtentDevParams, ReliefDevParams } from './devPanel'
+import type {
+  CoastlineDevParams,
+  ExtentDevParams,
+  ReliefDevParams,
+  RhumbDevParams,
+  RoseDevParams,
+} from './devPanel'
 import type { TerrainTextureOptions } from './scene/terrainTexture'
-import type { DataTexture } from 'three'
+import type { DataTexture, Object3D } from 'three'
 
 /**
  * Bootstrap — renderer + scene + camera + loop + dev overlays, with a persisted camera viewpoint and the
@@ -121,12 +130,40 @@ function bootstrap(): () => void {
     jitter: 0.002,
     strokes: 5,
   }
+  // Portolan rhumb network — straight lines radiating from a ring of compass centres over the Atlantic,
+  // clipped to the sea (drawn only over water). Centre defaults to open ocean west of Iberia.
+  const rhumbParams: RhumbDevParams = {
+    centerU: 0.2,
+    centerV: 0.52,
+    circleRadius: 0.34,
+    nodeCount: 12,
+    directions: 32,
+    color: '#6a4a2b',
+    opacity: 0.16, // at full zoom-out
+    opacityZoomIn: 0.06, // fades as you zoom in (less clutter)
+    clipStep: 0.004, // sampling step along each line (smaller = finer sea-clip at the coast)
+  }
+  // Compass rose (variant D) — sits at the rhumb-network centre, portolan colour code (principal winds
+  // inked, half-winds green, quarter-winds red).
+  const roseParams: RoseDevParams = {
+    centerU: 0.2, // Atlantic, west of Iberia/Morocco
+    centerV: 0.64, // pushed south into open ocean
+    size: 1.9,
+    opacity: 0.65,
+    showLabels: true,
+    ink: '#4a3424',
+    halfWind: '#3f5e3a', // vert anglais
+    quarterWind: '#7a2230', // rouge bordeaux
+    lift: 0.01,
+  }
 
   // Europe relief — rebuilt from the loaded heightmap; the height curve requires a geometry rebuild.
   let heightmap: Heightmap | null = null
   let relief: ReturnType<typeof createReliefMesh> | null = null
   let terrainTexture: DataTexture | null = null
-  let coastline: ReturnType<typeof createCoastlineLayer> | null = null
+  let coastline: ReturnType<typeof createLineLayer> | null = null
+  let rhumb: ReturnType<typeof createLineLayer> | null = null
+  let compass: ReturnType<typeof createCompassRose> | null = null
   let disposed = false // guards the async heightmap load from building a mesh after teardown (HMR mid-load)
 
   // Project a normalized grid coordinate (u: west→east, v: north→south) to world XZ, matching the relief
@@ -137,6 +174,13 @@ function bootstrap(): () => void {
     const aspect = heightmap.meta.width / heightmap.meta.height
     const worldDepth = WORLD_WIDTH / aspect
     return [(u - 0.5) * WORLD_WIDTH, coastParams.yLift, (v - 0.5) * worldDepth]
+  }
+
+  // Remove a layer handle from the scene and free its GPU resources (shared by every rebuild + teardown).
+  const disposeHandle = (handle: { object: Object3D; dispose(): void } | null): void => {
+    if (!handle) return
+    scene.remove(handle.object)
+    handle.dispose()
   }
 
   const rebuildTexture = (): void => {
@@ -152,14 +196,11 @@ function bootstrap(): () => void {
 
   const rebuildCoastline = (): void => {
     if (!heightmap) return
-    if (coastline) {
-      scene.remove(coastline.object)
-      coastline.dispose()
-    }
+    disposeHandle(coastline)
     const segments = createDemCoastlineSource(heightmap, {
       seaLevel: textureOptions.seaLevel,
     }).load()
-    coastline = createCoastlineLayer(segments, {
+    coastline = createLineLayer(segments, {
       project: projectToWorld,
       color: coastParams.color,
       opacity: coastParams.opacity,
@@ -167,6 +208,49 @@ function bootstrap(): () => void {
       strokes: coastParams.strokes,
     })
     scene.add(coastline.object)
+  }
+
+  const rebuildRhumb = (): void => {
+    if (!heightmap) return
+    disposeHandle(rhumb)
+    const segments = generateRhumbSegments(heightmap, {
+      center: { u: rhumbParams.centerU, v: rhumbParams.centerV },
+      circleRadius: rhumbParams.circleRadius,
+      nodeCount: rhumbParams.nodeCount,
+      includeCenter: true,
+      directions: rhumbParams.directions,
+      seaLevel: textureOptions.seaLevel,
+      step: rhumbParams.clipStep,
+    })
+    rhumb = createLineLayer(segments, {
+      project: projectToWorld,
+      color: rhumbParams.color,
+      opacity: rhumbParams.opacity,
+    })
+    scene.add(rhumb.object)
+  }
+
+  // World position of the compass rose (its own centre, independent of the rhumb network), lifted above
+  // the sea.
+  const roseWorldPosition = (): [number, number, number] => {
+    const [x, , z] = projectToWorld(roseParams.centerU, roseParams.centerV)
+    return [x, roseParams.lift, z]
+  }
+
+  const rebuildRose = (): void => {
+    disposeHandle(compass)
+    compass = createCompassRose({
+      colors: {
+        ink: roseParams.ink,
+        halfWind: roseParams.halfWind,
+        quarterWind: roseParams.quarterWind,
+      },
+      labels: roseParams.showLabels,
+      size: roseParams.size,
+      opacity: roseParams.opacity,
+      position: roseWorldPosition(),
+    })
+    scene.add(compass.object)
   }
 
   const rebuildRelief = (): void => {
@@ -198,6 +282,8 @@ function bootstrap(): () => void {
       rebuildTexture()
       rebuildRelief()
       rebuildCoastline()
+      rebuildRhumb()
+      rebuildRose()
     })
     .catch((error: unknown) => {
       console.error('relief load failed', error)
@@ -207,6 +293,8 @@ function bootstrap(): () => void {
     relief: params,
     texture: textureOptions,
     coast: coastParams,
+    rhumb: rhumbParams,
+    rose: roseParams,
     controlsOptions: controls.options,
     framing,
     extent: extentParams,
@@ -215,11 +303,19 @@ function bootstrap(): () => void {
       rebuildRelief,
       rebuildTexture,
       rebuildCoastline,
+      rebuildRhumb,
+      rebuildRose,
       setWireframe: (value: boolean): void => {
         if (relief) relief.material.wireframe = value
       },
       setCoastColor: (color: string): void => {
         if (coastline) coastline.object.material.color.set(color)
+      },
+      setRhumbColor: (color: string): void => {
+        if (rhumb) rhumb.object.material.color.set(color)
+      },
+      setRoseOpacity: (value: number): void => {
+        if (compass) compass.object.material.opacity = value
       },
       setFov: (value: number): void => {
         camera.fov = value
@@ -238,6 +334,8 @@ function bootstrap(): () => void {
                 relief: params,
                 texture: textureOptions,
                 coastline: coastParams,
+                rhumb: rhumbParams,
+                rose: roseParams,
                 camera: { ...controls.getState(), fov: framing.fov },
                 controls: {
                   panSpeed: controls.options.panSpeed,
@@ -282,10 +380,20 @@ function bootstrap(): () => void {
     // Zoom-linked vertical exaggeration: full at zoom-out (z=0), × exaggZoomIn at zoom-in (z=1).
     if (relief)
       relief.scale.setY(params.exaggeration * (1 - (1 - params.exaggZoomIn) * controls.zoom))
-    // Zoom-linked coastline opacity: `opacity` at zoom-out (z=0) → `opacityZoomIn` at zoom-in (z=1).
+    // Zoom-linked opacity: `opacity` at zoom-out (z=0) → `opacityZoomIn` at zoom-in (z=1).
     if (coastline)
-      coastline.object.material.opacity =
-        coastParams.opacity + (coastParams.opacityZoomIn - coastParams.opacity) * controls.zoom
+      coastline.object.material.opacity = lerp(
+        coastParams.opacity,
+        coastParams.opacityZoomIn,
+        controls.zoom
+      )
+    // Rhumb network fades as you zoom in (less clutter over the terrain).
+    if (rhumb)
+      rhumb.object.material.opacity = lerp(
+        rhumbParams.opacity,
+        rhumbParams.opacityZoomIn,
+        controls.zoom
+      )
     if (debug.showFrustum) {
       extentRect.update(controls.getExtent(), 0.05)
       footprintRect.update(controls.getFootprint(), 0.05)
@@ -312,10 +420,9 @@ function bootstrap(): () => void {
       relief.geometry.dispose()
       relief.material.dispose()
     }
-    if (coastline) {
-      scene.remove(coastline.object)
-      coastline.dispose()
-    }
+    disposeHandle(coastline)
+    disposeHandle(rhumb)
+    disposeHandle(compass)
     terrainTexture?.dispose()
     renderer.dispose()
   }

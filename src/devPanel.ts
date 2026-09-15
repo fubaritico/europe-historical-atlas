@@ -40,6 +40,56 @@ export interface CoastlineDevParams {
 }
 
 /**
+ * Portolan rhumb-network styling + layout exposed through the dev panel (opacity is zoom-linked in the
+ * loop; the network is regenerated when the layout changes).
+ */
+export interface RhumbDevParams {
+  /** Rose centre — normalized U (west→east). */
+  centerU: number
+  /** Rose centre — normalized V (north→south). */
+  centerV: number
+  /** Radius (normalized) of the ring of secondary compass centres. */
+  circleRadius: number
+  /** Number of secondary centres on the ring. */
+  nodeCount: number
+  /** Compass directions per centre (unique lines = directions / 2). */
+  directions: number
+  /** Line colour (hex string). */
+  color: string
+  /** Opacity at full zoom-out. */
+  opacity: number
+  /** Opacity at full zoom-in (fades to reduce clutter). */
+  opacityZoomIn: number
+  /** Sampling step along each line for the sea-clip (smaller = finer at the coast, slower to build). */
+  clipStep: number
+}
+
+/**
+ * Compass-rose styling exposed through the dev panel (colours + labels are baked into the SVG, so any
+ * change regenerates the rose; it is positioned at the rhumb-network centre).
+ */
+export interface RoseDevParams {
+  /** Rose centre — normalized U (west→east). */
+  centerU: number
+  /** Rose centre — normalized V (north→south). */
+  centerV: number
+  /** Side length of the rose quad in world units. */
+  size: number
+  /** Overall opacity `[0, 1]`. */
+  opacity: number
+  /** Draw the French 8-wind labels. */
+  showLabels: boolean
+  /** Principal winds / rings / labels colour (sepia ink). */
+  ink: string
+  /** Half-wind colour (vert anglais). */
+  halfWind: string
+  /** Quarter-wind colour (rouge bordeaux). */
+  quarterWind: string
+  /** World-space lift above the sea. */
+  lift: number
+}
+
+/**
  * The world rectangle the camera view is clamped within, tuned by centre + half-size.
  */
 export interface ExtentDevParams {
@@ -64,10 +114,18 @@ export interface DevPanelCallbacks {
   rebuildTexture: () => void
   /** Rebuild the coastline geometry (jitter / strokes / seaLevel changed). */
   rebuildCoastline: () => void
+  /** Rebuild the rhumb network (centre / layout / seaLevel changed). */
+  rebuildRhumb: () => void
+  /** Rebuild the compass rose (colours / labels / size / lift changed). */
+  rebuildRose: () => void
+  /** Update the live compass-rose opacity. */
+  setRoseOpacity: (value: number) => void
   /** Toggle the relief wireframe on the live material. */
   setWireframe: (value: boolean) => void
   /** Update the live coastline material colour. */
   setCoastColor: (color: string) => void
+  /** Update the live rhumb-network material colour. */
+  setRhumbColor: (color: string) => void
   /** Apply a new camera field of view. */
   setFov: (value: number) => void
   /** Re-apply the extent to the controls (centre / half-size changed). */
@@ -91,6 +149,10 @@ export interface DevPanelDeps {
   texture: TerrainTextureOptions
   /** Coastline styling params. */
   coast: CoastlineDevParams
+  /** Rhumb-network styling + layout params. */
+  rhumb: RhumbDevParams
+  /** Compass-rose styling params. */
+  rose: RoseDevParams
   /** The live controls options object (mutated in place, read every frame). */
   controlsOptions: MapControlsOptions
   /** The camera framing (fov). */
@@ -124,6 +186,7 @@ function cameraTuningOf(o: MapControlsOptions): Partial<MapControlsOptions> {
   }
 }
 
+/** The compositing blend modes accepted by `TerrainTextureOptions.hillshadeMode` / `tintMode` (drives the two GUI dropdowns). */
 const BLEND_MODES = ['multiply', 'overlay', 'softLight', 'normal'] as const
 
 /**
@@ -134,7 +197,18 @@ const BLEND_MODES = ['multiply', 'overlay', 'softLight', 'normal'] as const
  * @returns the `GUI` instance (caller calls `gui.destroy()` on teardown)
  */
 export function createDevPanel(deps: DevPanelDeps): GUI {
-  const { relief, texture, coast, controlsOptions, framing, extent, debug, callbacks } = deps
+  const {
+    relief,
+    texture,
+    coast,
+    rhumb,
+    rose,
+    controlsOptions,
+    framing,
+    extent,
+    debug,
+    callbacks,
+  } = deps
   const gui = new GUI({ title: 'europe-map · dev' })
 
   // Snapshot the defaults NOW — the live objects still hold their initial values — so "reset to
@@ -144,6 +218,8 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     relief: clonePlain(relief),
     texture: clonePlain(texture),
     coast: clonePlain(coast),
+    rhumb: clonePlain(rhumb),
+    rose: clonePlain(rose),
     extent: clonePlain(extent),
     fov: framing.fov,
     camera: cameraTuningOf(controlsOptions),
@@ -155,16 +231,22 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     Object.assign(relief, clonePlain(defaults.relief))
     Object.assign(texture, clonePlain(defaults.texture))
     Object.assign(coast, clonePlain(defaults.coast))
+    Object.assign(rhumb, clonePlain(defaults.rhumb))
+    Object.assign(rose, clonePlain(defaults.rose))
     Object.assign(extent, clonePlain(defaults.extent))
     Object.assign(controlsOptions, clonePlain(defaults.camera))
     framing.fov = defaults.fov
     callbacks.setWireframe(relief.wireframe)
     callbacks.setCoastColor(coast.color)
+    callbacks.setRhumbColor(rhumb.color)
+    callbacks.setRoseOpacity(rose.opacity)
     callbacks.setFov(framing.fov)
     callbacks.applyExtent()
     callbacks.rebuildTexture()
     callbacks.rebuildRelief()
     callbacks.rebuildCoastline()
+    callbacks.rebuildRhumb()
+    callbacks.rebuildRose()
     gui.controllersRecursive().forEach((controller) => controller.updateDisplay())
   }
 
@@ -199,6 +281,7 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     .onFinishChange(() => {
       callbacks.rebuildTexture()
       callbacks.rebuildCoastline() // coastline is the same seaLevel iso-line → follows
+      callbacks.rebuildRhumb() // rhumbs are sea-clipped at the same level → follow
     })
   texFolder
     .add(texture, 'lightAzimuthDeg', 0, 360, 1)
@@ -279,6 +362,74 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     .name('lift')
     .onFinishChange(callbacks.rebuildCoastline)
   coastFolder.close()
+
+  // Decor — portolan rhumb network (sea-only). Centre/layout regenerate the network; colour updates the
+  // live material; opacity is applied in the loop (fades on zoom-in).
+  const rhumbFolder = gui.addFolder('decor (rhumbs)')
+  rhumbFolder
+    .addColor(rhumb, 'color')
+    .name('colour')
+    .onChange(() => {
+      callbacks.setRhumbColor(rhumb.color)
+    })
+  rhumbFolder.add(rhumb, 'opacity', 0, 0.6, 0.02).name('opacity (zoom-out)')
+  rhumbFolder.add(rhumb, 'opacityZoomIn', 0, 0.6, 0.02).name('opacity @ zoom-in')
+  rhumbFolder
+    .add(rhumb, 'centerU', 0, 1, 0.01)
+    .name('centre U (E–W)')
+    .onFinishChange(callbacks.rebuildRhumb)
+  rhumbFolder
+    .add(rhumb, 'centerV', 0, 1, 0.01)
+    .name('centre V (N–S)')
+    .onFinishChange(callbacks.rebuildRhumb)
+  rhumbFolder
+    .add(rhumb, 'circleRadius', 0, 0.8, 0.01)
+    .name('ring radius')
+    .onFinishChange(callbacks.rebuildRhumb)
+  rhumbFolder
+    .add(rhumb, 'nodeCount', 1, 32, 1)
+    .name('centres')
+    .onFinishChange(callbacks.rebuildRhumb)
+  rhumbFolder
+    .add(rhumb, 'directions', 4, 32, 4)
+    .name('directions')
+    .onFinishChange(callbacks.rebuildRhumb)
+  rhumbFolder
+    .add(rhumb, 'clipStep', 0.001, 0.02, 0.001)
+    .name('sea-clip step')
+    .onFinishChange(callbacks.rebuildRhumb)
+  rhumbFolder.close()
+
+  // Compass rose — colours/labels/size are baked into the SVG, so each change regenerates the rose (it
+  // sits at the rhumb-network centre). Portolan code: principal ink, half-winds green, quarters red.
+  const roseFolder = gui.addFolder('compass rose')
+  roseFolder
+    .add(rose, 'centerU', 0, 1, 0.01)
+    .name('centre U (E–W)')
+    .onFinishChange(callbacks.rebuildRose)
+  roseFolder
+    .add(rose, 'centerV', 0, 1, 0.01)
+    .name('centre V (N–S)')
+    .onFinishChange(callbacks.rebuildRose)
+  roseFolder.add(rose, 'size', 0.5, 6, 0.1).name('size').onFinishChange(callbacks.rebuildRose)
+  roseFolder
+    .add(rose, 'opacity', 0, 1, 0.05)
+    .name('opacity')
+    .onChange(() => {
+      callbacks.setRoseOpacity(rose.opacity)
+    })
+  roseFolder.add(rose, 'showLabels').name('labels (N · NE · …)').onChange(callbacks.rebuildRose)
+  roseFolder.addColor(rose, 'ink').name('ink (principal)').onFinishChange(callbacks.rebuildRose)
+  roseFolder
+    .addColor(rose, 'halfWind')
+    .name('half-winds (green)')
+    .onFinishChange(callbacks.rebuildRose)
+  roseFolder
+    .addColor(rose, 'quarterWind')
+    .name('quarter-winds (red)')
+    .onFinishChange(callbacks.rebuildRose)
+  roseFolder.add(rose, 'lift', 0, 0.05, 0.002).name('lift').onFinishChange(callbacks.rebuildRose)
+  roseFolder.close()
 
   // Camera feel — tune the EU4-style pan/zoom live (read every frame by the controls).
   const camFolder = gui.addFolder('camera')

@@ -2,25 +2,28 @@ import { BufferGeometry, Float32BufferAttribute, LineBasicMaterial, LineSegments
 
 import { hashInts } from '../utils/hash'
 
-import type { CoastlineSegment } from '../data/coastlineSource'
+import type { UvPoint } from '../data/coastlineSource'
 
 /** Fixed-point scale for hashing normalized `[0, 1]` coordinates: two shared endpoints must quantize to
  * the same integer key so their jitter matches (welds); 1e5 ≈ 5 decimals is finer than the DEM grid. */
 const HASH_QUANTIZATION = 100000
 
+/** A line segment in normalized grid coordinates (two endpoints). */
+export type UvSegment = readonly [UvPoint, UvPoint]
+
 /**
- * Options for building the coastline line layer.
+ * Options for building a draped line layer.
  */
-export interface CoastlineLayerOptions {
+export interface LineLayerOptions {
   /**
    * Project a normalized grid coordinate to a world position. Inject the same mapping the relief mesh
-   * uses so the coastline aligns with the terrain.
+   * uses so the lines align with the terrain.
    * @param u - horizontal coordinate `[0, 1]` (0 = west)
    * @param v - vertical coordinate `[0, 1]` (0 = north)
    * @returns the world position `[x, y, z]`
    */
   project(u: number, v: number): [number, number, number]
-  /** Line colour (vintage brown coastline). */
+  /** Line colour. */
   color: string
   /**
    * Per-stroke opacity `[0, 1]` (default 1). Keep it low with `strokes > 1`: the overlaid, slightly
@@ -28,20 +31,20 @@ export interface CoastlineLayerOptions {
    */
   opacity?: number
   /**
-   * Hand-drawn wobble amplitude in world units (default 0 = crisp). Keep it LIGHT — each endpoint is
-   * nudged by a deterministic offset keyed on its grid coordinate, so points shared between adjacent
-   * segments move together (no gaps) while the line trembles like a pencil. Large values scribble.
+   * Hand-drawn wobble amplitude in world units (default 0 = crisp). Each endpoint is nudged by a
+   * deterministic offset keyed on its grid coordinate, so points shared between adjacent segments move
+   * together (no gaps) while the line trembles like a pencil. Large values scribble.
    */
   jitter?: number
   /**
-   * Number of overlaid strokes (default 1). Values > 1 redraw the coastline with independent jitter per
-   * pass — a sketchy pencil overdraw. Combine with a low `opacity`.
+   * Number of overlaid strokes (default 1). Values > 1 redraw with independent jitter per pass — a
+   * sketchy pencil overdraw. Combine with a low `opacity`.
    */
   strokes?: number
 }
 
-/** A renderable coastline layer plus its teardown. */
-export interface CoastlineLayer {
+/** A renderable line layer plus its teardown. */
+export interface LineLayer {
   /** The renderable object to add to the scene. */
   readonly object: LineSegments<BufferGeometry, LineBasicMaterial>
   /** Free the GPU resources (geometry + material). */
@@ -49,22 +52,22 @@ export interface CoastlineLayer {
 }
 
 /**
- * Build a {@link CoastlineLayer} from coastline segments, drawn as draped 3D line segments (crisp at any
+ * Build a {@link LineLayer} from normalized-grid segments, drawn as draped 3D line segments (crisp at any
  * zoom, unlike a rasterised line). Endpoints are projected via the injected `project`, optionally nudged
- * by a light deterministic `jitter` and redrawn over `strokes` passes for a soft pencil look. The same
- * layer accepts any {@link CoastlineSource} output (DEM-derived now, vector later).
+ * by a light deterministic `jitter` and redrawn over `strokes` passes for a soft pencil look. Reused for
+ * coastlines, rhumb lines, graticules — anything expressed as `(u, v)` segments.
  *
- * The material is transparent with `depthWrite` off so the overlaid strokes blend into a soft band while
- * the terrain still occludes them (`depthTest` on). Note: `LineBasicMaterial.linewidth` is 1px on most
+ * The material is transparent with `depthWrite` off so overlaid strokes blend into a soft band while the
+ * terrain still occludes them (`depthTest` on). Note: `LineBasicMaterial.linewidth` is 1px on most
  * platforms (a WebGL limitation) — for thicker strokes, swap in fat lines (`Line2`) later.
- * @param segments - the coastline segments (normalized grid coordinates)
+ * @param segments - the segments (normalized grid coordinates)
  * @param options - projection + styling
- * @returns the coastline layer handle
+ * @returns the line layer handle
  */
-export function createCoastlineLayer(
-  segments: readonly CoastlineSegment[],
-  options: CoastlineLayerOptions
-): CoastlineLayer {
+export function createLineLayer(
+  segments: readonly UvSegment[],
+  options: LineLayerOptions
+): LineLayer {
   const jitter = options.jitter ?? 0
   const strokes = Math.max(1, Math.round(options.strokes ?? 1))
   const opacity = options.opacity ?? 1
@@ -103,7 +106,7 @@ export function createCoastlineLayer(
     color: options.color,
     transparent: true,
     opacity,
-    depthWrite: false, // let the overlaid strokes blend into a soft band
+    depthWrite: false, // let overlaid strokes blend into a soft band
   })
   const object = new LineSegments(geometry, material)
 
