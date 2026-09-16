@@ -103,6 +103,16 @@ export interface LineLayer {
    */
   setColor(color: string): void
   /**
+   * Set the stroke width on the live material, in CSS pixels.
+   *
+   * `linewidth` is a shader uniform, so this costs nothing and needs no rebuild — which is what lets a
+   * width follow the camera's zoom every frame instead of being frozen when the layer was built.
+   * A no-op on the thin pipeline, where the width is 1 px by definition.
+   * @param value - the width in CSS pixels
+   * @returns nothing
+   */
+  setWidth(value: number): void
+  /**
    * Tell a fat-line layer the viewport size, which its shader needs to convert a pixel width into clip
    * space. A no-op for thin lines. Call on every resize or the stroke width distorts.
    * @param width - viewport width in pixels
@@ -196,6 +206,9 @@ export function createLineLayer(
       setColor(color: string): void {
         material.color.set(color)
       },
+      setWidth(value: number): void {
+        material.linewidth = value
+      },
       setResolution(viewportWidth: number, viewportHeight: number): void {
         material.resolution.set(viewportWidth, viewportHeight)
       },
@@ -225,6 +238,9 @@ export function createLineLayer(
     },
     setColor(color: string): void {
       material.color.set(color)
+    },
+    setWidth(): void {
+      // Thin lines are 1 px by definition — there is no width to set.
     },
     setResolution(): void {
       // Thin lines are 1 px by definition — the viewport size does not enter into it.

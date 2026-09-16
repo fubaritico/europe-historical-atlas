@@ -2,12 +2,13 @@ import { describe, expect, it } from 'vitest'
 
 import {
   buildBorderStrokes,
+  casingOpacityScale,
   createComposedLineLayer,
   offsetPolyline,
   polylinesToSegments,
 } from './composedLineLayer'
 
-import type { BorderStrokeStyle, ComposedStroke } from './composedLineLayer'
+import type { BorderStrokeStyle, ComposedLineLayer, ComposedStroke } from './composedLineLayer'
 import type { UvPoint } from '../data/coastlineSource'
 import type { RegionBorders } from '../data/regionRaster'
 
@@ -47,6 +48,15 @@ const STYLE: BorderStrokeStyle = {
 
 /** Project a grid coordinate onto a flat plane — the collaborator, mocked. */
 const project = (u: number, v: number): [number, number, number] => [u, 0, v]
+
+/** The live material property named on each pass — what the zoom link actually drives. */
+function liveValues(layer: ComposedLineLayer, property: 'linewidth' | 'opacity'): number[] {
+  return layer.object.children.map((child: object) => {
+    // Fat lines carry a LineMaterial; reading it back is the only way to prove the setter reached it.
+    const { material } = child as unknown as { material: Record<string, number> }
+    return material[property] ?? Number.NaN
+  })
+}
 
 describe('composedLineLayer', () => {
   describe('happy path', () => {
@@ -97,11 +107,25 @@ describe('composedLineLayer', () => {
     })
 
     it('doubles a border by drawing the run shifted either way', () => {
-      const single = buildBorderStrokes(borders(1, 0), STYLE)
+      const solid = buildBorderStrokes(borders(1, 0), STYLE)
       const doubled = buildBorderStrokes(borders(1, 0), STYLE, () => 'double')
-      // Same number of passes, twice the geometry: two runs where there was one.
-      expect(doubled).toHaveLength(single.length)
-      expect(doubled[0]?.segments.length).toBe((single[0]?.segments.length ?? 0) * 2)
+      // Twice the geometry: two runs where there was one. The solid line's core is its second pass.
+      expect(doubled[0]?.segments.length).toBe((solid[1]?.segments.length ?? 0) * 2)
+    })
+
+    it('gives a patterned border no casing, only a plain one', () => {
+      // A border that carries a pattern says what it means through the pattern; casing a dashed union
+      // turns a legible convention into brown-cream-brown confetti.
+      expect(buildBorderStrokes(borders(1, 0), STYLE).map((s) => s.role)).toEqual([
+        'casing',
+        'core',
+      ])
+      expect(buildBorderStrokes(borders(1, 0), STYLE, () => 'dashed').map((s) => s.role)).toEqual([
+        'core',
+      ])
+      expect(buildBorderStrokes(borders(1, 0), STYLE, () => 'double').map((s) => s.role)).toEqual([
+        'core',
+      ])
     })
 
     it('keeps one pass per pattern rather than one per pair', () => {
@@ -128,8 +152,9 @@ describe('composedLineLayer', () => {
       const strokes = buildBorderStrokes(mixed, { ...STYLE, showFrontier: false }, (pair) =>
         pair[0] === 0 ? 'solid' : 'dashed'
       )
-      expect(strokes).toHaveLength(4)
-      expect(strokes.map((stroke) => stroke.dashed === true)).toEqual([false, false, true, true])
+      // Solid gets casing + core; dashed gets a core alone.
+      expect(strokes.map((stroke) => stroke.role)).toEqual(['casing', 'core', 'core'])
+      expect(strokes.map((stroke) => stroke.dashed === true)).toEqual([false, false, true])
     })
 
     it('carries each pass its own colour, width and opacity', () => {
@@ -152,7 +177,13 @@ describe('composedLineLayer', () => {
     })
 
     it('omits a pass whose stretches are empty rather than building an empty geometry', () => {
-      const empty: ComposedStroke = { segments: [], color: '#ff0000', width: 2, opacity: 1 }
+      const empty: ComposedStroke = {
+        segments: [],
+        color: '#ff0000',
+        width: 2,
+        opacity: 1,
+        role: 'core',
+      }
       const layer = createComposedLineLayer([empty, ...buildBorderStrokes(borders(1, 0), STYLE)], {
         project,
       })
@@ -170,6 +201,69 @@ describe('composedLineLayer', () => {
     })
 
     // L4: no async work and no external resource — nothing else can fail unexpectedly here.
+  })
+
+  describe('zoom-linked styling', () => {
+    it('scales every pass from the width it was built with', () => {
+      const layer = createComposedLineLayer(buildBorderStrokes(borders(1, 1), STYLE), { project })
+      layer.setWidthScale(0.5)
+      expect(liveValues(layer, 'linewidth')).toEqual([
+        STYLE.frontierWidth * 0.5,
+        STYLE.edgeWidth * 0.5,
+        STYLE.coreWidth * 0.5,
+      ])
+      layer.dispose()
+    })
+
+    it('scales from the built width each time, never compounding', () => {
+      // The loop calls this every frame; reading the live value back would drift toward zero.
+      const layer = createComposedLineLayer(buildBorderStrokes(borders(1, 0), STYLE), { project })
+      layer.setWidthScale(0.5)
+      layer.setWidthScale(0.5)
+      layer.setWidthScale(1)
+      expect(liveValues(layer, 'linewidth')).toEqual([STYLE.edgeWidth, STYLE.coreWidth])
+      layer.dispose()
+    })
+
+    it('fades the casing alone, leaving the core and the frontier as built', () => {
+      const layer = createComposedLineLayer(buildBorderStrokes(borders(1, 1), STYLE), { project })
+      layer.setCasingOpacity(0)
+      expect(liveValues(layer, 'opacity')).toEqual([STYLE.frontierOpacity, 0, STYLE.opacity])
+      layer.dispose()
+    })
+
+    it('restores the casing when the scale returns to one', () => {
+      const layer = createComposedLineLayer(buildBorderStrokes(borders(1, 0), STYLE), { project })
+      layer.setCasingOpacity(0)
+      layer.setCasingOpacity(1)
+      expect(liveValues(layer, 'opacity')).toEqual([STYLE.opacity, STYLE.opacity])
+      layer.dispose()
+    })
+  })
+
+  describe('casingOpacityScale', () => {
+    it('ramps from nothing at full zoom-out to full strength at the threshold', () => {
+      expect(casingOpacityScale(0, 0.4)).toBe(0)
+      expect(casingOpacityScale(0.2, 0.4)).toBeCloseTo(0.5)
+      expect(casingOpacityScale(0.4, 0.4)).toBe(1)
+    })
+
+    it('holds at full strength beyond the threshold', () => {
+      expect(casingOpacityScale(1, 0.4)).toBe(1)
+    })
+
+    it('never fades when the threshold is zero, instead of dividing by it', () => {
+      // The slider goes down to 0. `0 / 0` is NaN, and `clamp01` passes NaN straight through since both
+      // its comparisons are false against it — a NaN opacity throws nothing and WebGL drops the draw, so
+      // the casing would vanish silently at the default camera position.
+      expect(casingOpacityScale(0, 0)).toBe(1)
+      expect(casingOpacityScale(0.5, 0)).toBe(1)
+      expect(Number.isNaN(casingOpacityScale(0, 0))).toBe(false)
+    })
+
+    it('clamps a negative threshold rather than inverting the ramp', () => {
+      expect(casingOpacityScale(0.5, -1)).toBe(1)
+    })
   })
 
   describe('offsetPolyline', () => {

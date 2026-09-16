@@ -354,6 +354,17 @@ export interface PoliticalDevParams {
   borderDashGap: number
   /** Half the distance between the two runs of a doubled border, in normalized grid units. */
   borderDoubleGap: number
+  /**
+   * Width multiplier at full zoom-out. A weight that reads as a drawn border close up becomes a rope
+   * across the continent from far away, so the whole line work thins as the camera pulls back.
+   */
+  borderWidthZoomOut: number
+  /**
+   * Zoom fraction below which the casing is gone entirely, fading in over the range above it. At small
+   * scale an edging either side of a hairline stops reading as one border and starts reading as an
+   * alternation of colours.
+   */
+  borderCasingZoom: number
   /** Colour areas by the power they answer to (`SUBJECTO`) rather than by polity. */
   colorBySuzerain: boolean
   /**
@@ -423,13 +434,18 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   showFrontier: true,
   frontierColor: '#5c3a2e',
   frontierOpacity: 0.45,
-  frontierWidth: 1,
+  // Thicker than a negotiated border: it is the edge of what the map knows, and reads as an outer limit
+  // rather than as a line between two named things.
+  frontierWidth: 2.4,
   // World units: the map plane is 12 across, so 0.03 is roughly a 30 km dash — long enough to read as a
   // deliberate break rather than a dotted line at any zoom the camera allows.
-  borderDashSize: 0.03,
-  borderDashGap: 0.024,
+  // Tight enough to read as one broken line rather than as a row of marks.
+  borderDashSize: 0.018,
+  borderDashGap: 0.009,
   // Normalized grid units: about two DEM cells apart, which separates without reading as two borders.
   borderDoubleGap: 0.0016,
+  borderWidthZoomOut: 0.4,
+  borderCasingZoom: 0.35,
   colorBySuzerain: false,
   snapToCoast: 12,
   // Eight is comfortably above what a political map of Europe needs: four colours suffice in theory,
@@ -475,6 +491,8 @@ export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
     step: 0.0002,
     label: 'double-line spacing',
   },
+  borderWidthZoomOut: { kind: 'number', min: 0.1, max: 1, step: 0.05, label: 'width @ zoom-out' },
+  borderCasingZoom: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'casing appears at zoom' },
   colorBySuzerain: { kind: 'boolean', label: 'colour by suzerain' },
   snapToCoast: { kind: 'number', min: 0, max: 40, step: 1, label: 'snap to coast (cells)' },
   palette1: { kind: 'hexColor', label: 'palette 1' },
@@ -505,6 +523,8 @@ export const POLITICAL_CONTROL_ORDER: (keyof PoliticalDevParams)[] = [
   'frontierColor',
   'frontierWidth',
   'frontierOpacity',
+  'borderWidthZoomOut',
+  'borderCasingZoom',
   'borderDashSize',
   'borderDashGap',
   'borderDoubleGap',

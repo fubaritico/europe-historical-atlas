@@ -352,6 +352,8 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     'borderDashSize',
     'borderDashGap',
     'borderDoubleGap',
+    'borderWidthZoomOut',
+    'borderCasingZoom',
   ])
   const politicalFolder = gui.addFolder('political (historical)')
   const politicalEffect = (key: keyof PoliticalDevParams): (() => void) =>

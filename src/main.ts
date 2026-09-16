@@ -34,7 +34,11 @@ import {
   politicalPalette,
 } from './devParams'
 import { createCompassRose } from './scene/compassRose'
-import { buildBorderStrokes, createComposedLineLayer } from './scene/composedLineLayer'
+import {
+  buildBorderStrokes,
+  casingOpacityScale,
+  createComposedLineLayer,
+} from './scene/composedLineLayer'
 import { createDebugRect } from './scene/debugRect'
 import { createLineLayer } from './scene/lineLayer'
 import { createReliefMesh, reliefWorldY } from './scene/reliefMesh'
@@ -436,6 +440,8 @@ function bootstrap(): () => void {
       project: projectDraped,
       depthTest: !politicalParams.borderOnTop,
       renderOrderBase: BORDER_RENDER_ORDER,
+      dashSize: politicalParams.borderDashSize,
+      gapSize: politicalParams.borderDashGap,
     })
     borders.setResolution(window.innerWidth, window.innerHeight)
     scene.add(borders.object)
@@ -694,6 +700,14 @@ function bootstrap(): () => void {
         rivers.setZoom(controls.zoom)
       }
       if (borders) borders.object.scale.setY(relief.scale.y)
+    }
+    // Zoom-linked line work. A weight that reads as a drawn border close up becomes a rope across the
+    // continent from far away, and an edging either side of a hairline reads as an alternation rather
+    // than as one border — so the whole thing thins out and the casing fades away as the camera pulls
+    // back. Both are live material uniforms, so nothing is rebuilt while zooming.
+    if (borders) {
+      borders.setWidthScale(lerp(politicalParams.borderWidthZoomOut, 1, controls.zoom))
+      borders.setCasingOpacity(casingOpacityScale(controls.zoom, politicalParams.borderCasingZoom))
     }
     // Zoom-linked opacity: `opacity` at zoom-out (z=0) → `opacityZoomIn` at zoom-in (z=1).
     if (coastline)

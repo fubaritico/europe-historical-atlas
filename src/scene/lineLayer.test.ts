@@ -125,10 +125,27 @@ describe('createLineLayer', () => {
         })
         layer.setOpacity(0.25)
         layer.setColor('#ff0000')
+        // `setWidth` too: a caller styles a layer without knowing which pipeline drew it, so the setter
+        // has to be callable on both. On the thin one it does nothing, and must not throw for it.
+        layer.setWidth(2.5)
         expect(layer.object.material.opacity).toBe(0.25)
         expect(layer.object.material.color.getHexString()).toBe('ff0000')
         layer.dispose()
       }
+    })
+
+    it('sets the width on a fat layer and ignores it on a thin one', () => {
+      // The width is a live shader uniform, which is what lets it follow the camera every frame.
+      const fat = createLineLayer(ONE_SEGMENT, { project, color: '#000', width: 2 })
+      fat.setWidth(0.8)
+      expect((fat.object.material as { linewidth?: number }).linewidth).toBe(0.8)
+      fat.dispose()
+
+      const thin = createLineLayer(ONE_SEGMENT, { project, color: '#000' })
+      expect(() => {
+        thin.setWidth(0.8)
+      }).not.toThrow()
+      thin.dispose()
     })
 
     it('passes the viewport to a fat layer and ignores it on a thin one', () => {

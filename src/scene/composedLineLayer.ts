@@ -1,5 +1,7 @@
 import { Group } from 'three'
 
+import { clamp01 } from '../utils/math'
+
 import { createLineLayer } from './lineLayer'
 
 import type { LineLayerOptions, UvSegment } from './lineLayer'
@@ -22,6 +24,12 @@ export interface ComposedStroke {
   opacity: number
   /** Break this pass into dashes. */
   dashed?: boolean
+  /**
+   * What this pass is for. `casing` is the wide under-stroke that shows as an edging; it is the one a
+   * caller may want to fade out on its own, since at small scale an alternating edging reads as noise
+   * rather than as a border.
+   */
+  role: 'casing' | 'core' | 'frontier'
 }
 
 /**
@@ -173,10 +181,48 @@ export interface ComposedLineLayer {
    */
   setResolution(viewportWidth: number, viewportHeight: number): void
   /**
+   * Rescale every pass's width by a factor of the width it was built with.
+   *
+   * Live, because `linewidth` is a shader uniform — which is what lets the line thin out as the camera
+   * pulls back without a single geometry rebuild. Relative weights are preserved, so a casing stays
+   * proportionally wider than its core at every scale.
+   * @param scale - multiplier on each pass's built width
+   * @returns nothing
+   */
+  setWidthScale(scale: number): void
+  /**
+   * Scale the opacity of the casing passes alone, leaving cores and frontiers as built.
+   *
+   * At small scale an edging either side of a hairline stops reading as one border and starts reading as
+   * an alternation; fading it out returns a plain line without rebuilding anything.
+   * @param scale - multiplier on the casing passes' built opacity, 0 hiding them entirely
+   * @returns nothing
+   */
+  setCasingOpacity(scale: number): void
+  /**
    * Free the GPU resources of every pass.
    * @returns nothing
    */
   dispose(): void
+}
+
+/**
+ * How strongly the casing shows at a given zoom.
+ *
+ * Ramps from nothing at full zoom-out to full strength at `fadeThreshold`, because at small scale an
+ * edging either side of a hairline stops reading as one border and starts reading as an alternation of
+ * colours.
+ *
+ * The zero-threshold branch is **load-bearing, not defensive**: the dev-panel slider for this value goes
+ * down to 0, and `0 / 0` is `NaN`, which `clamp01` passes straight through — both its comparisons are
+ * false against `NaN`. A `NaN` opacity throws nothing and makes WebGL drop the draw, so the casing would
+ * vanish silently at the default camera position.
+ * @param zoom - the camera zoom, 0 at full zoom-out and 1 at full zoom-in
+ * @param fadeThreshold - the zoom at which the casing reaches full strength; 0 means never fade it
+ * @returns a multiplier in `[0, 1]` for the casing passes' opacity
+ */
+export function casingOpacityScale(zoom: number, fadeThreshold: number): number {
+  return fadeThreshold > 0 ? clamp01(zoom / fadeThreshold) : 1
 }
 
 /**
@@ -221,6 +267,7 @@ export function buildBorderStrokes(
       color: style.frontierColor,
       width: style.frontierWidth,
       opacity: style.frontierOpacity,
+      role: 'frontier',
     })
   for (const [pattern, segments] of byPattern) {
     if (segments.length === 0) continue
@@ -228,13 +275,16 @@ export function buildBorderStrokes(
     // An edging no wider than the core would be hidden by it entirely — skip the pass rather than pay
     // for an invisible one. It sits immediately before its own core, so the render order still pairs
     // them however many patterns are in play.
-    if (style.edgeWidth > style.coreWidth)
+    // Only a plain border gets an edging. A border that carries a *pattern* says what it means through
+    // that pattern: casing a dashed union turns a legible convention into brown-cream-brown confetti.
+    if (pattern === 'solid' && style.edgeWidth > style.coreWidth)
       strokes.push({
         segments,
         color: style.edgeColor,
         width: style.edgeWidth,
         opacity: style.opacity,
         dashed,
+        role: 'casing',
       })
     strokes.push({
       segments,
@@ -242,6 +292,7 @@ export function buildBorderStrokes(
       width: style.coreWidth,
       opacity: style.opacity,
       dashed,
+      role: 'core',
     })
   }
   return strokes
@@ -270,16 +321,25 @@ export function createComposedLineLayer(
         dashed: stroke.dashed ?? false,
       })
       group.add(layer.object)
-      return layer
+      // The stroke is kept beside its layer so the live setters can scale from the *built* value rather
+      // than compounding on whatever the previous frame left behind.
+      return { layer, stroke }
     })
 
   return {
     object: group,
     setResolution(viewportWidth: number, viewportHeight: number): void {
-      for (const layer of layers) layer.setResolution(viewportWidth, viewportHeight)
+      for (const { layer } of layers) layer.setResolution(viewportWidth, viewportHeight)
+    },
+    setWidthScale(scale: number): void {
+      for (const { layer, stroke } of layers) layer.setWidth(stroke.width * scale)
+    },
+    setCasingOpacity(scale: number): void {
+      for (const { layer, stroke } of layers)
+        if (stroke.role === 'casing') layer.setOpacity(stroke.opacity * scale)
     },
     dispose(): void {
-      for (const layer of layers) {
+      for (const { layer } of layers) {
         group.remove(layer.object)
         layer.dispose()
       }
