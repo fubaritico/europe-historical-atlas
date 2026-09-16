@@ -339,6 +339,7 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     'showBorders',
     'borderSource',
     'borderSmoothing',
+    'borderSimplify',
     'borderOnTop',
     'borderColor',
     'borderOpacity',

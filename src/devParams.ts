@@ -318,6 +318,23 @@ export interface PoliticalDevParams {
   /** Chaikin rounds applied to raster-derived borders — 0 shows the raw ~7 km cell staircase. */
   borderSmoothing: number
   /**
+   * How far a border run may be moved to drop the vertices that say nothing, **in DEM cells**.
+   *
+   * A grid-derived border runs along cell edges, so a diagonal comes out as a staircase. Dropping those
+   * steps is the only thing that removes the artefact — smoothing shrinks its wiggle but never its
+   * amplitude. The catch: it moves the *line* and not the coloured area, so the two come apart unless
+   * {@link tintEdgeSoftness} widens the colour boundary by at least as much.
+   */
+  borderSimplify: number
+  /**
+   * How wide the colour boundary between two polities is, **in DEM cells** (0 = a hard cell edge).
+   *
+   * The companion to {@link borderSimplify}: a line allowed to wander half a cell must have half a cell
+   * of soft colour to wander inside, or it visibly leaves the country it bounds. Above one cell a
+   * one-cell territory starts dissolving, which is the failure to watch for on a fragmented year.
+   */
+  tintEdgeSoftness: number
+  /**
    * Draw the borders over the terrain instead of letting it occlude them. The relief is triangulated
    * while draped points are placed by bilinear interpolation between the same vertices, so on a ridge the
    * surface rises above the line and eats it — short cuts in mountains, none on plains. The price is that
@@ -421,6 +438,8 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   // Two rounds is where the cell staircase stops reading as pixels and starts reading as a drawn line;
   // a third gains almost nothing and rounds real corners off.
   borderSmoothing: 2,
+  borderSimplify: 0,
+  tintEdgeSoftness: 0,
   borderOnTop: true,
   // A cream core inside a dark brown edging. The pairing is not decoration: **no single ink can contrast
   // with every fill**, because the palette spans a wide lightness range — an ink dark enough to read on
@@ -475,6 +494,14 @@ export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
   showBorders: { kind: 'boolean', label: 'draw borders' },
   borderSource: { kind: 'choice', options: ['raster', 'rings'], label: 'border source' },
   borderSmoothing: { kind: 'number', min: 0, max: 4, step: 1, label: 'border smoothing' },
+  borderSimplify: { kind: 'number', min: 0, max: 2, step: 0.1, label: 'simplify line (cells)' },
+  tintEdgeSoftness: {
+    kind: 'number',
+    min: 0,
+    max: 1.5,
+    step: 0.05,
+    label: 'soften colour edge (cells)',
+  },
   borderOnTop: { kind: 'boolean', label: 'borders over relief' },
   borderColor: { kind: 'hexColor', label: 'border core colour' },
   borderOpacity: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'border opacity' },
@@ -560,7 +587,7 @@ export const POLITICAL_CONTROL_GROUPS: ControlGroup<PoliticalDevParams>[] = [
   },
   {
     title: '6 \u00b7 geometry',
-    keys: ['borderSource', 'borderSmoothing'],
+    keys: ['borderSource', 'borderSmoothing', 'borderSimplify', 'tintEdgeSoftness'],
   },
   {
     title: '7 \u00b7 palette',
@@ -584,6 +611,8 @@ export const POLITICAL_CONTROL_ORDER: (keyof PoliticalDevParams)[] = [
   'colorBySuzerain',
   'showBorders',
   'borderSource',
+  'borderSimplify',
+  'tintEdgeSoftness',
   'borderSmoothing',
   'borderOnTop',
   'borderColor',

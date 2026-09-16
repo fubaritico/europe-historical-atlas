@@ -17,6 +17,18 @@ Put here the know issues to avoid cluttering the context window.
   `extractRegionBorders` now derives the line from the raster itself, so it *is* the boundary of the
   fills — gapless by construction. The ring path survives behind the `border source` dev toggle only long
   enough to compare the two on screen; **delete it once the comparison is settled.**
+- **The border staircase is a *resolution* problem, and the two knobs shipped for it are off by design.**
+  A grid-derived border runs along cell edges, so a diagonal comes out as a staircase one DEM cell high
+  (~7.6 km at 45°N). Smoothing cannot remove it: corner-cutting shrinks the wiggle but the amplitude
+  belongs to the shape being smoothed. `simplify line (cells)` drops the steps, but it moves the *line*
+  and not the coloured area, so the two visibly come apart — observed on screen, and it is the same
+  two-sources-of-truth failure the raster derivation was built to abolish. `soften colour edge (cells)`
+  widens the colour boundary so the line has somewhere to wander, at the cost of dissolving any territory
+  narrower than it. **Both default to 0** and are kept only as exploration.
+  **The fix with no trade-off is to rasterise the political layer finer**: the fill and the line both come
+  out of that grid, so they stay together by construction. Cost is roughly 4× the rebuild at 2× the DEM —
+  measured at 31–37 ms today, so ~120–150 ms. It also answers the Cartographer's grid-resolution question
+  in roadmap chapter 06.
 - **Islands no polygon claims stay uncoloured** (Balearics, Aegean): `expandRegionsOverLand` walks over
   land only, and BFS cannot cross the sea to reach them.
 - **Changing the political year re-bakes the whole texture** (seconds at supersample 2). Scrubbing

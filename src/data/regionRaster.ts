@@ -1,5 +1,6 @@
 import { hslToRgb } from '../utils/color'
 import { hashInts } from '../utils/hash'
+import { simplifyPolyline } from '../utils/polyline'
 
 import type { UvPoint } from './coastlineSource'
 import type { Region } from './regionSource'
@@ -336,6 +337,15 @@ export interface RegionBorderOptions {
   /** Chaikin rounds to apply (0 = raw cell edges; 2 reads as a drawn line). Capped at four. */
   smoothing?: number
   /**
+   * How far a run may be moved to drop the vertices that say nothing, **in cells**.
+   *
+   * Cells because the artefact it removes is measured in cells: a grid-derived border runs along cell
+   * edges, so a diagonal comes out as a staircase whose every step sits within half a cell of the line it
+   * approximates. It moves the line off the boundary of the fill, so it is only safe while the colour
+   * boundary is at least as soft as this is wide.
+   */
+  simplifyCells?: number
+  /**
    * Whether a normalized coordinate is land. Supplying it turns on the **frontier** line — the boundary
    * between a polity and land nobody claims. Without it only shared borders are traced, because a raster
    * of claims cannot tell unclaimed land from open sea, and drawing over the sea would double the
@@ -641,6 +651,8 @@ export function extractRegionBorders(
   // panel's slider stops at 4, but a port must be safe on its own rather than trusting a widget to clamp
   // its input — a caller can hold the params object and set anything.
   const rounds = Math.min(MAX_SMOOTHING_ROUNDS, Math.max(0, Math.floor(options.smoothing ?? 0)))
+  // Cells → normalized units, the space the runs are expressed in.
+  const tolerance = width > 1 ? Math.max(0, options.simplifyCells ?? 0) / (width - 1) : 0
 
   /**
    * Chain and smooth one bucket of edges into drawable chains.
@@ -659,12 +671,19 @@ export function extractRegionBorders(
     let affordable = rounds
     while (affordable > 0 && kind.from.length * 2 ** affordable > MAX_SMOOTHED_POINTS) affordable--
     for (const line of chainPolylines(kind)) {
-      // A loop repeats its first key at the end; drop the repeat so smoothing wraps cleanly, restore it
-      // after, and the ring closes on itself.
-      const closed = line.length > 3 && line[0] === line[line.length - 1]
-      let points = (closed ? line.slice(0, -1) : line).map((key) =>
-        decodeLatticeKey(key, stride, width, height)
+      // Simplify *before* smoothing. Corner-cutting can only shrink a staircase's wiggle, never remove
+      // it, because the staircase belongs to the shape being smoothed — so rounding first and hoping is
+      // how a grid artefact survives four rounds of it.
+      let points = simplifyPolyline(
+        line.map((key) => decodeLatticeKey(key, stride, width, height)),
+        tolerance
       )
+      // A loop repeats its first point at the end; drop the repeat so smoothing wraps cleanly and restore
+      // it after. Read off coordinates, not lattice keys — simplification has already replaced them.
+      const head = points[0]
+      const tail = points[points.length - 1]
+      const closed = points.length > 3 && head?.u === tail?.u && head?.v === tail?.v
+      if (closed) points = points.slice(0, -1)
       for (let i = 0; i < affordable; i++) points = chaikin(points, closed)
       if (closed) {
         const head = points[0]
