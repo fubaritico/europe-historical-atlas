@@ -199,7 +199,7 @@ function bootstrap(): () => void {
   let heightmap: Heightmap | null = null
   let regionSet: Awaited<ReturnType<ReturnType<typeof createFetchRegionSource>['load']>> | null =
     null
-  let reliefSource: Heightmap | null = null // the (possibly smoothed) grid the mesh was actually built from
+  let reliefSource: Heightmap | null = null // the (possibly smoothed) grid every draped overlay samples
   // Which cells are land. A DEM cannot answer this — a polder is dry below sea level, a lake is wet
   // above it — so it comes from its own asset, with an elevation threshold as the degraded fallback.
   let landMask: LandMask | null = null
@@ -352,6 +352,19 @@ function bootstrap(): () => void {
    * @param onProgress - where to announce the bake, when a caller is showing a panel
    * @returns once the new texture is on screen, or once a newer bake has superseded this one
    */
+  /**
+   * Re-derive the grid every draped overlay samples.
+   *
+   * Kept apart from the mesh build so that draping stops depending on build order: an overlay created
+   * before the relief mesh exists would otherwise be laid flat at sea level and stay there. That order
+   * dependency was latent until the bake became asynchronous and the mesh stopped being first.
+   * @returns the grid, or `null` before the elevation has loaded
+   */
+  const refreshReliefSource = (): Heightmap | null => {
+    reliefSource = heightmap ? smoothHeightmap(heightmap, params.smoothing) : null
+    return reliefSource
+  }
+
   const rebuildTexture = async (onProgress?: ProgressReport): Promise<void> => {
     if (!heightmap) return
     const isCurrent = bakeGate.begin()
@@ -648,8 +661,8 @@ function bootstrap(): () => void {
       relief.geometry.dispose()
       relief.material.dispose() // Material.dispose leaves `map` alone — the texture is managed separately
     }
-    const source = smoothHeightmap(heightmap, params.smoothing)
-    reliefSource = source // overlays must drape on the same data the mesh was built from
+    const source = refreshReliefSource()
+    if (!source) return
     relief = createReliefMesh(source, {
       worldWidth: WORLD_WIDTH,
       segments: RELIEF_SEGMENTS,
@@ -662,49 +675,58 @@ function bootstrap(): () => void {
     scene.add(relief)
   }
 
-  const heightmapSource = createFetchHeightmapSource('/heightmaps/europe-dem-z5')
-  void heightmapSource
-    .load()
-    .then(async (loaded) => {
-      if (disposed) return // teardown ran mid-load → don't add an orphan mesh to a dead scene
-      heightmap = loaded
-      // The compute has to hold the elevation before anything asks it to bake with it.
-      await pushSources()
-      if (isDisposed()) return
-      requestTexture()
-      rebuildRelief()
-      rebuildCoastline()
-      rebuildRhumb()
-      rebuildRivers() // no-op until the river payload lands; whichever finishes last draws them
-      rebuildRose()
-      await rebuildPolitical()
-    })
-    .catch((error: unknown) => {
-      console.error('relief load failed', error)
-    })
+  /**
+   * Bring the map up in a single appearance.
+   *
+   * The relief and the mask used to load independently, each triggering its own bake, and the political
+   * layer a third — so the map arrived in three visible instalments, each one throwing away the last.
+   * Worse, once the bake became asynchronous the mesh stopped waiting for its texture and appeared
+   * untextured first: four states for one map.
+   *
+   * Sequenced instead. Both fetches still run together; what changed is that nothing is *drawn* until
+   * there is one finished image to draw. It also does one bake rather than three, which is the expensive
+   * part — roughly 1.5 million pixels, twice discarded.
+   * @returns once the map is on screen
+   */
+  const startup = async (): Promise<void> => {
+    // The mask is optional by design: without it the shoreline falls back to an elevation threshold,
+    // visibly wrong in the Dutch polders, but a degraded map beats a blank canvas.
+    const [dem, mask] = await Promise.all([
+      heightmapSource.load(),
+      landMaskSource.load().catch((error: unknown) => {
+        console.error('land mask load failed — falling back to the 0 m contour', error)
+        return null
+      }),
+    ])
+    if (isDisposed()) return // teardown ran mid-load → don't add an orphan mesh to a dead scene
+    heightmap = dem
+    landMask = mask
+    refreshReliefSource() // draping is correct from here on, mesh or no mesh
+    await pushSources()
+    if (isDisposed()) return
 
-  // The land mask loads independently too. If it fails the app still runs, on the elevation threshold —
-  // visibly wrong in the Netherlands, but running beats a blank canvas.
-  void createFetchLandMaskSource('/masks/europe-land')
-    .load()
-    .then(async (loaded) => {
-      if (disposed) return
-      landMask = loaded
-      if (!heightmap) return
-      await pushSources()
-      if (isDisposed()) return
-      requestTexture()
-      rebuildCoastline()
-      rebuildRhumb()
-      rebuildRivers()
-      // The mask is what lets the borders tell open sea from land nobody claims: without it there is no
-      // frontier line at all. The lines have to be traced again, not merely redrawn — the compute traced
-      // the ones it has while it was still mask-blind.
-      await rebuildBorderGeometry()
-    })
-    .catch((error: unknown) => {
-      console.error('land mask load failed — falling back to the 0 m contour', error)
-    })
+    // The political layer bakes the texture on its way through, so the first image already has the
+    // countries in it — there is no bare-terrain state to flash past.
+    await rebuildPolitical()
+    if (isDisposed()) return
+    // Unless the year could not be loaded at all: `public/borders/` is git-ignored, so a fresh clone has
+    // none. Nothing has baked in that case, and the terrain still has to appear.
+    if (!terrainTexture) await rebuildTexture()
+    if (isDisposed()) return
+
+    rebuildRelief()
+    rebuildCoastline()
+    rebuildRhumb()
+    rebuildRivers() // no-op until the river payload lands; whichever finishes last draws them
+    rebuildRose()
+  }
+
+  const heightmapSource = createFetchHeightmapSource('/heightmaps/europe-dem-z5')
+  const landMaskSource = createFetchLandMaskSource('/masks/europe-land')
+
+  void startup().catch((error: unknown) => {
+    console.error('the map could not be brought up', error)
+  })
 
   // Rivers load independently of the DEM: neither blocks the other, and the second to arrive triggers
   // the build (the rebuild needs both the terrain to drape on and the centrelines to drape).
