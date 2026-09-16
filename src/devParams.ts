@@ -317,12 +317,34 @@ export interface PoliticalDevParams {
   borderSource: 'raster' | 'rings'
   /** Chaikin rounds applied to raster-derived borders — 0 shows the raw ~7 km cell staircase. */
   borderSmoothing: number
-  /** Border line colour (hex string). */
+  /**
+   * Draw the borders over the terrain instead of letting it occlude them. The relief is triangulated
+   * while draped points are placed by bilinear interpolation between the same vertices, so on a ridge the
+   * surface rises above the line and eats it — short cuts in mountains, none on plains. The price is that
+   * a border behind a summit stays visible at an oblique angle, as on most strategy-game maps.
+   */
+  borderOnTop: boolean
+  /** Border core colour (hex string) — the inner stroke of the composed line. */
   borderColor: string
-  /** Border line opacity. */
+  /** Border line opacity, applied to every stroke of the composed line. */
   borderOpacity: number
-  /** Border stroke width in CSS pixels. */
+  /** Border core stroke width in CSS pixels. */
   borderWidth: number
+  /**
+   * Colour of the wider stroke drawn *under* the core, which shows as an edging either side of it — the
+   * casing technique every map renderer uses, since it needs no offset geometry at all.
+   */
+  borderEdgeColor: string
+  /** Width of that under-stroke in CSS pixels. Anything at or below the core width hides it. */
+  borderEdgeWidth: number
+  /** Draw the frontier between a polity and land nobody claims. */
+  showFrontier: boolean
+  /** Frontier line colour (hex string). */
+  frontierColor: string
+  /** Frontier line opacity — usually below the borders', since it is a limit rather than an agreement. */
+  frontierOpacity: number
+  /** Frontier stroke width in CSS pixels. */
+  frontierWidth: number
   /** Colour areas by the power they answer to (`SUBJECTO`) rather than by polity. */
   colorBySuzerain: boolean
   /**
@@ -374,9 +396,25 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   // Two rounds is where the cell staircase stops reading as pixels and starts reading as a drawn line;
   // a third gains almost nothing and rounds real corners off.
   borderSmoothing: 2,
-  borderColor: '#5c3a2e',
-  borderOpacity: 0.7,
+  borderOnTop: true,
+  // A cream core inside a dark brown edging. The pairing is not decoration: **no single ink can contrast
+  // with every fill**, because the palette spans a wide lightness range — an ink dark enough to read on
+  // gold Spain (#d4b24a) is too dark to read on the blue slot (#54719b), and vice versa. A casing solves
+  // it structurally: whichever fill the line crosses, one of its two strokes always separates from it.
+  // That only works if the two sit at *opposite ends* of the lightness scale, which is exactly what an
+  // earlier gold-core-in-brown failed to do — and it landed within four units of pinned Spain, drawing a
+  // gold border on a gold country.
+  borderColor: '#f3e7cd',
+  // At 0.7 each stroke is 30 % of whatever lies under it, which collapses the casing back toward the
+  // fill it is meant to separate from. 0.9 is what makes the line read as a border rather than a scratch.
+  borderOpacity: 0.9,
   borderWidth: 1.4,
+  borderEdgeColor: '#5c3a2e',
+  borderEdgeWidth: 3.2,
+  showFrontier: true,
+  frontierColor: '#5c3a2e',
+  frontierOpacity: 0.45,
+  frontierWidth: 1,
   colorBySuzerain: false,
   snapToCoast: 12,
   // Eight is comfortably above what a political map of Europe needs: four colours suffice in theory,
@@ -397,9 +435,22 @@ export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
   showBorders: { kind: 'boolean', label: 'draw borders' },
   borderSource: { kind: 'choice', options: ['raster', 'rings'], label: 'border source' },
   borderSmoothing: { kind: 'number', min: 0, max: 4, step: 1, label: 'border smoothing' },
-  borderColor: { kind: 'hexColor', label: 'border colour' },
+  borderOnTop: { kind: 'boolean', label: 'borders over relief' },
+  borderColor: { kind: 'hexColor', label: 'border core colour' },
   borderOpacity: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'border opacity' },
-  borderWidth: { kind: 'number', min: 0.5, max: 5, step: 0.05, label: 'border width (px)' },
+  borderWidth: { kind: 'number', min: 0.5, max: 5, step: 0.05, label: 'border core width (px)' },
+  borderEdgeColor: { kind: 'hexColor', label: 'border edging colour' },
+  borderEdgeWidth: {
+    kind: 'number',
+    min: 0,
+    max: 8,
+    step: 0.05,
+    label: 'border edging width (px)',
+  },
+  showFrontier: { kind: 'boolean', label: 'draw frontier (unclaimed land)' },
+  frontierColor: { kind: 'hexColor', label: 'frontier colour' },
+  frontierOpacity: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'frontier opacity' },
+  frontierWidth: { kind: 'number', min: 0.5, max: 5, step: 0.05, label: 'frontier width (px)' },
   colorBySuzerain: { kind: 'boolean', label: 'colour by suzerain' },
   snapToCoast: { kind: 'number', min: 0, max: 40, step: 1, label: 'snap to coast (cells)' },
   palette1: { kind: 'hexColor', label: 'palette 1' },
@@ -420,9 +471,16 @@ export const POLITICAL_CONTROL_ORDER: (keyof PoliticalDevParams)[] = [
   'showBorders',
   'borderSource',
   'borderSmoothing',
+  'borderOnTop',
   'borderColor',
-  'borderOpacity',
   'borderWidth',
+  'borderEdgeColor',
+  'borderEdgeWidth',
+  'borderOpacity',
+  'showFrontier',
+  'frontierColor',
+  'frontierWidth',
+  'frontierOpacity',
   'palette1',
   'palette2',
   'palette3',

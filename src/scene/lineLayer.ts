@@ -51,6 +51,20 @@ export interface LineLayerOptions {
    * the width is in screen pixels, it stays constant as the camera zooms. Omit it for a plain 1 px line.
    */
   width?: number
+  /**
+   * Depth-test the strokes against the rest of the scene (default `true`). Turn it **off** to draw the
+   * line over the terrain whatever the terrain's depth: the relief is a triangulated surface while draped
+   * points are placed by bilinear interpolation between the same vertices, and the two only agree on a
+   * quad's edges — on a ridge the triangle rises above the interpolation and eats the line, which shows
+   * up as short cuts in mountains and none on plains. The cost is honest: a line that should be hidden
+   * behind a summit stays visible at an oblique angle, as on most strategy-game maps.
+   */
+  depthTest?: boolean
+  /**
+   * Draw order within the transparent pass (default 0). Worth setting whenever `depthTest` is off, since
+   * depth no longer arbitrates between overlays and only this does.
+   */
+  renderOrder?: number
 }
 
 /**
@@ -149,8 +163,10 @@ export function createLineLayer(
       transparent: true,
       opacity,
       depthWrite: false,
+      depthTest: options.depthTest ?? true,
     })
     const object = new LineSegments2(geometry, material)
+    object.renderOrder = options.renderOrder ?? 0
     // Fat lines are instanced quads, so three cannot infer their extent for frustum culling from the
     // position attribute alone; computing it up front avoids the layer vanishing at oblique angles.
     object.computeLineDistances()
@@ -179,8 +195,10 @@ export function createLineLayer(
     transparent: true,
     opacity,
     depthWrite: false, // let overlaid strokes blend into a soft band
+    depthTest: options.depthTest ?? true,
   })
   const object = new LineSegments(geometry, material)
+  object.renderOrder = options.renderOrder ?? 0
 
   return {
     object,

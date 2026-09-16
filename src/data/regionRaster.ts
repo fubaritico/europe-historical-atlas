@@ -25,6 +25,31 @@ export interface RegionRaster {
 }
 
 /**
+ * Wrap a cell grid as a {@link RegionRaster}.
+ *
+ * The nearest-neighbour lookup lives here alone: every raster in the module is built through this, so a
+ * future change to the sampling rule — bilinear, say — cannot be applied to one producer and missed on
+ * another. Tests build their fixtures through it too, so a fixture cannot silently drift from the real
+ * lookup either.
+ * @param width - grid width in cells
+ * @param height - grid height in cells
+ * @param cells - the per-cell indices, row-major, `-1` where unclaimed
+ * @returns the raster
+ */
+export function createRegionRaster(width: number, height: number, cells: Int16Array): RegionRaster {
+  return {
+    width,
+    height,
+    cells,
+    indexAt(u: number, v: number): number {
+      const col = Math.round(Math.min(width - 1, Math.max(0, u * (width - 1))))
+      const row = Math.round(Math.min(height - 1, Math.max(0, v * (height - 1))))
+      return cells[row * width + col] ?? -1
+    },
+  }
+}
+
+/**
  * Rasterise dated polities into a per-cell index grid by even-odd scanline fill.
  *
  * Rasterised in the browser rather than shipped per year: the geometry is small (a few thousand
@@ -89,16 +114,7 @@ export function rasteriseRegions(
     }
   }
 
-  return {
-    width,
-    height,
-    cells,
-    indexAt(u: number, v: number): number {
-      const col = Math.round(Math.min(width - 1, Math.max(0, u * (width - 1))))
-      const row = Math.round(Math.min(height - 1, Math.max(0, v * (height - 1))))
-      return cells[row * width + col] ?? -1
-    },
-  }
+  return createRegionRaster(width, height, cells)
 }
 
 /**
@@ -177,16 +193,7 @@ export function expandRegionsOverLand(
     frontier = next
   }
 
-  return {
-    width,
-    height,
-    cells,
-    indexAt(u: number, v: number): number {
-      const col = Math.round(Math.min(width - 1, Math.max(0, u * (width - 1))))
-      const row = Math.round(Math.min(height - 1, Math.max(0, v * (height - 1))))
-      return cells[row * width + col] ?? -1
-    },
-  }
+  return createRegionRaster(width, height, cells)
 }
 
 /**
@@ -307,6 +314,50 @@ export type RegionBorderSegment = readonly [UvPoint, UvPoint]
 const MAX_SMOOTHING_ROUNDS = 4
 
 /**
+ * Ceiling on the points one kind of border may hold once smoothed.
+ *
+ * The raster's dimensions are bounded (they come from the DEM), but *how many* of its adjacent cell pairs
+ * disagree is decided by the political payload, and the theoretical worst case — an interlocking
+ * checkerboard — is about `2 × width × height`, some three million edges on the current grid. Chaikin
+ * then multiplies that by up to sixteen, which is how a single JSON file could ask for gigabytes.
+ *
+ * The budget spends **smoothing rounds**, never edges. Dropping edges to fit would reintroduce exactly
+ * the interrupted borders this whole derivation exists to abolish; a border that is merely more angular
+ * is still a border. In practice the cap does not bite — 1700 derives ~7 000 edges, 2 % of the budget at
+ * four rounds — but it will start to matter if the political raster is ever taken above the DEM's own
+ * resolution to shorten the staircase.
+ */
+const MAX_SMOOTHED_POINTS = 400_000
+
+/**
+ * How to derive the border lines.
+ */
+export interface RegionBorderOptions {
+  /** Chaikin rounds to apply (0 = raw cell edges; 2 reads as a drawn line). Capped at four. */
+  smoothing?: number
+  /**
+   * Whether a normalized coordinate is land. Supplying it turns on the **frontier** line — the boundary
+   * between a polity and land nobody claims. Without it only shared borders are traced, because a raster
+   * of claims cannot tell unclaimed land from open sea, and drawing over the sea would double the
+   * shoreline the map already renders from a better source.
+   */
+  isLand?: (u: number, v: number) => boolean
+}
+
+/**
+ * The border lines, split by kind so each can be drawn in its own hand.
+ */
+export interface RegionBorders {
+  /** Stretches separating two different polities — a negotiated border. */
+  between: RegionBorderSegment[]
+  /**
+   * Stretches where a polity meets land nobody claims. Empty unless `isLand` was supplied. Drawing this
+   * is what frees a map from having to declare nations all the way to its own edge.
+   */
+  frontier: RegionBorderSegment[]
+}
+
+/**
  * One round of Chaikin corner cutting: every segment is replaced by its middle half, which rounds each
  * corner without moving the line off its own hull. Two rounds turn a staircase into a curve.
  * @param points - the polyline's vertices
@@ -375,42 +426,96 @@ function decodeLatticeKey(key: number, stride: number, width: number, height: nu
   }
 }
 
+/** The shared edges, split by what lies on either side of them. */
+interface ClassifiedEdges {
+  /** Edges with a different polity on each side — a negotiated border. */
+  between: SharedEdges
+  /** Edges where a polity meets land nobody claims — the edge of the mapped world. */
+  frontier: SharedEdges
+}
+
 /**
- * Collect the cell edge shared by every pair of adjacent cells held by different polities.
+ * Collect the cell edge shared by every pair of adjacent cells that are not held by the same polity, and
+ * sort those edges into the two kinds a map draws differently.
+ *
+ * A claim facing an *unclaimed* neighbour is the interesting case, and it is two situations at once: the
+ * neighbour may be open sea, or it may be land nobody has claimed. Only `isLand` can tell them apart — a
+ * raster of claims cannot. The sea side is left silent, because the shoreline is already drawn once from
+ * a far better source; the land side becomes a frontier, which is what lets a map stop declaring nations
+ * before it runs out of paper.
  * @param raster - the rasterised claims, after any expansion
  * @param stride - the lattice row length
- * @returns the edges, as parallel endpoint-key lists
+ * @param isLand - whether a normalized coordinate is land; omit to trace shared borders only
+ * @returns the edges of each kind, as parallel endpoint-key lists
  */
-function sharedEdges(raster: RegionRaster, stride: number): SharedEdges {
+function sharedEdges(
+  raster: RegionRaster,
+  stride: number,
+  isLand?: (u: number, v: number) => boolean
+): ClassifiedEdges {
   const { width, height, cells } = raster
   const keyOf = (doubledX: number, doubledY: number): number =>
     (doubledY + 1) * stride + (doubledX + 1)
-  const from: number[] = []
-  const to: number[] = []
+  const uAt = (col: number): number => (width > 1 ? col / (width - 1) : 0)
+  const vAt = (row: number): number => (height > 1 ? row / (height - 1) : 0)
+  const between: SharedEdges = { from: [], to: [] }
+  const frontier: SharedEdges = { from: [], to: [] }
+
+  /**
+   * File one shared edge under the kind its two sides call for.
+   * @param here - the polity on this side, `-1` when unclaimed
+   * @param other - the polity on the far side, `-1` when unclaimed
+   * @param bare - the unclaimed cell's column and row, when exactly one side is unclaimed
+   * @param a - one endpoint key of the shared edge
+   * @param b - the other endpoint key
+   * @returns nothing
+   */
+  const file = (
+    here: number,
+    other: number,
+    bare: readonly [number, number],
+    a: number,
+    b: number
+  ): void => {
+    if (here === other) return // same polity, or unclaimed on both sides
+    const target =
+      here >= 0 && other >= 0
+        ? between
+        : isLand?.(uAt(bare[0]), vAt(bare[1])) === true
+          ? frontier
+          : null
+    if (!target) return
+    target.from.push(a)
+    target.to.push(b)
+  }
+
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const here = cells[row * width + col] ?? -1
-      if (here < 0) continue
       // Right and down only: every adjacent pair is still seen once, at half the work.
       if (col + 1 < width) {
         const other = cells[row * width + col + 1] ?? -1
-        // Both sides must be claimed: a polity facing nothing is a coast, and the map already draws the
-        // shoreline once, from a far better source.
-        if (other >= 0 && other !== here) {
-          from.push(keyOf(2 * col + 1, 2 * row - 1))
-          to.push(keyOf(2 * col + 1, 2 * row + 1))
-        }
+        file(
+          here,
+          other,
+          here < 0 ? [col, row] : [col + 1, row],
+          keyOf(2 * col + 1, 2 * row - 1),
+          keyOf(2 * col + 1, 2 * row + 1)
+        )
       }
       if (row + 1 < height) {
         const other = cells[(row + 1) * width + col] ?? -1
-        if (other >= 0 && other !== here) {
-          from.push(keyOf(2 * col - 1, 2 * row + 1))
-          to.push(keyOf(2 * col + 1, 2 * row + 1))
-        }
+        file(
+          here,
+          other,
+          here < 0 ? [col, row] : [col, row + 1],
+          keyOf(2 * col - 1, 2 * row + 1),
+          keyOf(2 * col + 1, 2 * row + 1)
+        )
       }
     }
   }
-  return { from, to }
+  return { between, frontier }
 }
 
 /**
@@ -487,37 +592,54 @@ function chainPolylines(edges: SharedEdges): number[][] {
  * The cost is that the raw line follows cell edges — a ~7 km staircase at the DEM's grid — which is what
  * `smoothing` is for.
  * @param raster - the rasterised claims, after any expansion
- * @param smoothing - Chaikin rounds to apply (0 = raw cell edges; 2 reads as a drawn line)
- * @returns the border stretches, in normalized grid coordinates
+ * @param options - smoothing, and the land test that enables the frontier line
+ * @returns the border stretches of each kind, in normalized grid coordinates
  */
-export function extractRegionBorders(raster: RegionRaster, smoothing = 0): RegionBorderSegment[] {
+export function extractRegionBorders(
+  raster: RegionRaster,
+  options: RegionBorderOptions = {}
+): RegionBorders {
   const { width, height } = raster
-  if (width < 2 || height < 2) return []
+  if (width < 2 || height < 2) return { between: [], frontier: [] }
   const stride = latticeStride(width)
-  const edges = sharedEdges(raster, stride)
-  if (edges.from.length === 0) return []
+  const edges = sharedEdges(raster, stride, options.isLand)
   // Each round roughly doubles the point count, so an unbounded value allocates exponentially. The dev
   // panel's slider stops at 4, but a port must be safe on its own rather than trusting a widget to clamp
   // its input — a caller can hold the params object and set anything.
-  const rounds = Math.min(MAX_SMOOTHING_ROUNDS, Math.max(0, Math.floor(smoothing)))
-  const segments: RegionBorderSegment[] = []
-  for (const line of chainPolylines(edges)) {
-    // A loop repeats its first key at the end; drop the repeat so smoothing wraps cleanly, restore it
-    // after, and the ring closes on itself.
-    const closed = line.length > 3 && line[0] === line[line.length - 1]
-    let points = (closed ? line.slice(0, -1) : line).map((key) =>
-      decodeLatticeKey(key, stride, width, height)
-    )
-    for (let i = 0; i < rounds; i++) points = chaikin(points, closed)
-    if (closed) {
-      const head = points[0]
-      if (head) points.push(head)
+  const rounds = Math.min(MAX_SMOOTHING_ROUNDS, Math.max(0, Math.floor(options.smoothing ?? 0)))
+
+  /**
+   * Chain, smooth and explode one kind of edge into drawable stretches.
+   * @param kind - the edges of a single kind
+   * @returns the stretches, in normalized grid coordinates
+   */
+  const trace = (kind: SharedEdges): RegionBorderSegment[] => {
+    const segments: RegionBorderSegment[] = []
+    if (kind.from.length === 0) return segments
+    // Spend the budget in smoothing rounds, never in edges: a rougher line is still a line, whereas a
+    // dropped edge is the interrupted border this derivation exists to abolish.
+    let affordable = rounds
+    while (affordable > 0 && kind.from.length * 2 ** affordable > MAX_SMOOTHED_POINTS) affordable--
+    for (const line of chainPolylines(kind)) {
+      // A loop repeats its first key at the end; drop the repeat so smoothing wraps cleanly, restore it
+      // after, and the ring closes on itself.
+      const closed = line.length > 3 && line[0] === line[line.length - 1]
+      let points = (closed ? line.slice(0, -1) : line).map((key) =>
+        decodeLatticeKey(key, stride, width, height)
+      )
+      for (let i = 0; i < affordable; i++) points = chaikin(points, closed)
+      if (closed) {
+        const head = points[0]
+        if (head) points.push(head)
+      }
+      for (let i = 0; i + 1 < points.length; i++) {
+        const a = points[i]
+        const b = points[i + 1]
+        if (a && b) segments.push([a, b])
+      }
     }
-    for (let i = 0; i + 1 < points.length; i++) {
-      const a = points[i]
-      const b = points[i + 1]
-      if (a && b) segments.push([a, b])
-    }
+    return segments
   }
-  return segments
+
+  return { between: trace(edges.between), frontier: trace(edges.frontier) }
 }

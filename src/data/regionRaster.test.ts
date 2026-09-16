@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   assignRegionColors,
+  createRegionRaster,
   expandRegionsOverLand,
   extractRegionBorders,
   rasteriseRegions,
@@ -20,19 +21,9 @@ import type { RgbColor } from '../utils/color'
  * @returns the raster
  */
 function grid(rows: number[][]): RegionRaster {
-  const height = rows.length
-  const width = rows[0]?.length ?? 0
-  const cells = Int16Array.from(rows.flat())
-  return {
-    width,
-    height,
-    cells,
-    indexAt(u: number, v: number): number {
-      const col = Math.round(Math.min(width - 1, Math.max(0, u * (width - 1))))
-      const row = Math.round(Math.min(height - 1, Math.max(0, v * (height - 1))))
-      return cells[row * width + col] ?? -1
-    },
-  }
+  // Built through the real factory rather than a hand-rolled copy of the lookup, so a fixture cannot
+  // drift from the implementation it is meant to exercise.
+  return createRegionRaster(rows[0]?.length ?? 0, rows.length, Int16Array.from(rows.flat()))
 }
 
 /** A polity covering a rectangle of the unit square. */
@@ -50,6 +41,11 @@ function box(u0: number, v0: number, u1: number, v1: number): Region {
       ],
     ],
   }
+}
+
+/** The shared-border stretches alone — the kind most of these tests are about. */
+function between(raster: RegionRaster, smoothing?: number): RegionBorderSegment[] {
+  return extractRegionBorders(raster, smoothing === undefined ? {} : { smoothing }).between
 }
 
 /** Total length of a border, in normalized units — a shape-independent way to compare smoothings. */
@@ -72,7 +68,7 @@ describe('regionRaster', () => {
     })
 
     it('derives a border between two polities that touch', () => {
-      const segments = extractRegionBorders(
+      const segments = between(
         grid([
           [0, 1],
           [0, 1],
@@ -103,7 +99,7 @@ describe('regionRaster', () => {
 
   describe('variants', () => {
     it('emits horizontal edges when the polities are stacked', () => {
-      const segments = extractRegionBorders(
+      const segments = between(
         grid([
           [0, 0],
           [1, 1],
@@ -123,9 +119,9 @@ describe('regionRaster', () => {
         [0, 1, 1],
         [1, 1, 1],
       ])
-      const raw = totalLength(extractRegionBorders(raster, 0))
-      const once = totalLength(extractRegionBorders(raster, 1))
-      const twice = totalLength(extractRegionBorders(raster, 2))
+      const raw = totalLength(between(raster, 0))
+      const once = totalLength(between(raster, 1))
+      const twice = totalLength(between(raster, 2))
       expect(once).toBeLessThan(raw)
       expect(twice).toBeLessThan(once)
     })
@@ -136,7 +132,7 @@ describe('regionRaster', () => {
         [0, 1],
       ])
       // Two cell edges stacked, chained into one polyline of length 1 in v.
-      expect(totalLength(extractRegionBorders(raster, 0))).toBeCloseTo(1)
+      expect(totalLength(between(raster, 0))).toBeCloseTo(1)
     })
 
     it('grows a claim over land the outline missed, but no further than allowed', () => {
@@ -148,6 +144,38 @@ describe('regionRaster', () => {
     it('never grows a claim into water', () => {
       const raster = expandRegionsOverLand(grid([[0, -1]]), () => false, 5)
       expect(raster.cells[1]).toBe(-1)
+    })
+
+    it('traces a frontier where a polity meets land nobody claims', () => {
+      // What lets a map stop declaring nations before it runs out of paper.
+      const borders = extractRegionBorders(
+        grid([
+          [0, -1],
+          [0, -1],
+        ]),
+        { isLand: () => true }
+      )
+      expect(borders.between).toEqual([])
+      expect(borders.frontier.length).toBeGreaterThan(0)
+      for (const [a, b] of borders.frontier) {
+        expect(a.u).toBeCloseTo(0.5)
+        expect(b.u).toBeCloseTo(0.5)
+      }
+    })
+
+    it('keeps the frontier out of the shared borders', () => {
+      // Two polities and a void: the negotiated border and the edge of the map are different objects and
+      // must stay separable, or they cannot be drawn in different hands.
+      const borders = extractRegionBorders(
+        grid([
+          [0, 1],
+          [-1, -1],
+        ]),
+        { isLand: () => true }
+      )
+      expect(borders.between.length).toBeGreaterThan(0)
+      expect(borders.frontier.length).toBeGreaterThan(0)
+      expect(borders.between).not.toEqual(borders.frontier)
     })
 
     it('pins an editorial colour ahead of the palette', () => {
@@ -163,14 +191,45 @@ describe('regionRaster', () => {
   })
 
   describe('managed errors', () => {
-    it('draws no border where a polity faces unclaimed ground', () => {
-      // The coastline is drawn from a far better source, so an edge with only one claimant is dropped.
-      expect(extractRegionBorders(grid([[0, -1]]))).toEqual([])
+    it('draws no shared border where a polity faces unclaimed ground', () => {
+      // One claimant is not a border between two states, whatever lies on the far side.
+      expect(
+        between(
+          grid([
+            [0, -1],
+            [0, -1],
+          ])
+        )
+      ).toEqual([])
+    })
+
+    it('traces no frontier at all without a land test', () => {
+      // A raster of claims cannot tell unclaimed land from open sea, so it must not guess: drawing over
+      // the sea would double the shoreline the map already renders from a better source.
+      const borders = extractRegionBorders(
+        grid([
+          [0, -1],
+          [0, -1],
+        ])
+      )
+      expect(borders.frontier).toEqual([])
+    })
+
+    it('stays silent where a polity meets open sea', () => {
+      const borders = extractRegionBorders(
+        grid([
+          [0, -1],
+          [0, -1],
+        ]),
+        { isLand: () => false }
+      )
+      expect(borders.frontier).toEqual([])
+      expect(borders.between).toEqual([])
     })
 
     it('draws no border inside a single polity', () => {
       expect(
-        extractRegionBorders(
+        between(
           grid([
             [0, 0],
             [0, 0],
@@ -220,13 +279,13 @@ describe('regionRaster', () => {
 
   describe('edge cases', () => {
     it('returns no border for a grid too small to have an interior edge', () => {
-      expect(extractRegionBorders(grid([[0]]))).toEqual([])
+      expect(between(grid([[0]]))).toEqual([])
     })
 
     it('closes the loop around an enclave', () => {
       // Polity 1 fully surrounded by polity 0: the border must come back on itself, so every endpoint
       // is shared by exactly two segments — the property that proves there is no gap.
-      const segments = extractRegionBorders(
+      const segments = between(
         grid([
           [0, 0, 0],
           [0, 1, 0],
@@ -246,7 +305,7 @@ describe('regionRaster', () => {
     it('breaks the line at a tripoint rather than guessing a continuation', () => {
       // Three polities meeting at one corner: the shared point carries three stretches, so it cannot be
       // walked through — each branch has to end there.
-      const segments = extractRegionBorders(
+      const segments = between(
         grid([
           [0, 1],
           [2, 2],
@@ -269,7 +328,7 @@ describe('regionRaster', () => {
         [0, 1, 0],
         [0, 0, 0],
       ])
-      expect(totalLength(extractRegionBorders(raster, 0))).toBeCloseTo(2)
+      expect(totalLength(between(raster, 0))).toBeCloseTo(2)
     })
 
     it('clips a border that would run past the frame edge', () => {
@@ -279,7 +338,7 @@ describe('regionRaster', () => {
         [0, 1],
         [1, 0],
       ])
-      expect(totalLength(extractRegionBorders(raster, 0))).toBeCloseTo(2)
+      expect(totalLength(between(raster, 0))).toBeCloseTo(2)
     })
 
     it('leaves a two-point stretch untouched by smoothing', () => {
@@ -287,11 +346,11 @@ describe('regionRaster', () => {
         [0, 1],
         [-1, -1],
       ])
-      expect(extractRegionBorders(raster, 0)).toEqual(extractRegionBorders(raster, 3))
+      expect(between(raster, 0)).toEqual(between(raster, 3))
     })
 
     it('keeps every point inside the frame after smoothing', () => {
-      const segments = extractRegionBorders(
+      const segments = between(
         grid([
           [0, 1],
           [1, 0],
@@ -315,7 +374,7 @@ describe('regionRaster', () => {
         [0, 1, 0],
         [0, 0, 0],
       ])
-      expect(extractRegionBorders(raster, 1000)).toEqual(extractRegionBorders(raster, 4))
+      expect(between(raster, 1000)).toEqual(between(raster, 4))
     })
 
     it('ignores a negative smoothing count instead of looping', () => {
@@ -323,7 +382,7 @@ describe('regionRaster', () => {
         [0, 1],
         [0, 1],
       ])
-      expect(extractRegionBorders(raster, -2)).toEqual(extractRegionBorders(raster, 0))
+      expect(between(raster, -2)).toEqual(between(raster, 0))
     })
 
     it('rasterises nothing into a grid with no interior', () => {

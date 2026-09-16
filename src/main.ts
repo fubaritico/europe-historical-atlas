@@ -33,6 +33,7 @@ import {
   politicalPalette,
 } from './devParams'
 import { createCompassRose } from './scene/compassRose'
+import { buildBorderStrokes, createComposedLineLayer } from './scene/composedLineLayer'
 import { createDebugRect } from './scene/debugRect'
 import { createLineLayer } from './scene/lineLayer'
 import { createReliefMesh, reliefWorldY } from './scene/reliefMesh'
@@ -151,6 +152,10 @@ function bootstrap(): () => void {
   // comparison with the raster-derived borders is settled.
   const RING_BORDER_PROBE_CELLS = 2
 
+  // Draw order of the political line work. It only matters once `borderOnTop` switches depth testing
+  // off: with no depth to arbitrate, this is the sole thing keeping a core stroke above its own edging.
+  const BORDER_RENDER_ORDER = 10
+
   // Baked terrain look (parchment + hypsometric tint + DEM hillshade), tuned live. Regenerating the
   // DataTexture is independent of the geometry rebuild (cheap material swap, no new geometry).
   const textureOptions: TerrainTextureOptions = { ...DEFAULT_TERRAIN_OPTIONS }
@@ -185,7 +190,12 @@ function bootstrap(): () => void {
   let coastline: ReturnType<typeof createLineLayer> | null = null
   let rhumb: ReturnType<typeof createLineLayer> | null = null
   let rivers: ReturnType<typeof createRiverLayer> | null = null
-  let borders: ReturnType<typeof createLineLayer> | null = null
+  // Every stroke of the political line work: the frontier against unclaimed land, then the casing and
+  // core of the shared borders. A list rather than one handle because a composed line is the *same*
+  // geometry drawn several times — and each draw needs the resize, the exaggeration tracking and the
+  // teardown just like a layer of its own.
+  // The political line work — frontier, casing and core — behind one handle, like every other overlay.
+  let borders: ReturnType<typeof createComposedLineLayer> | null = null
   let regionRaster: ReturnType<typeof rasteriseRegions> | null = null
   let regionTints: RgbColor[] = []
   // The seam the compositor sees: a colour claimed at a coordinate, and nothing about history.
@@ -372,18 +382,35 @@ function bootstrap(): () => void {
     borders = null
     if (!heightmap || !regionSet || !politicalParams.showBorders) return
     const raster = regionRaster
+    const mask = landMask
     // Derived from the fills, a border *is* their boundary — it cannot disagree with the colour and it
-    // cannot be interrupted. The ring path below only exists to compare the two.
-    const segments =
+    // cannot be interrupted. The ring path below only exists to compare the two, and has no notion of a
+    // frontier. The mask is what separates "faces the open sea" (say nothing, the shoreline is already
+    // drawn from a better source) from "faces land nobody claims" (draw the edge of the mapped world).
+    const derived =
       raster && politicalParams.borderSource === 'raster'
-        ? extractRegionBorders(raster, politicalParams.borderSmoothing)
-        : ringBorderSegments()
-    if (segments.length === 0) return
-    borders = createLineLayer(segments, {
-      project: projectDraped,
-      color: politicalParams.borderColor,
+        ? extractRegionBorders(raster, {
+            smoothing: politicalParams.borderSmoothing,
+            ...(mask ? { isLand: (u: number, v: number) => mask.isLand(u, v) } : {}),
+          })
+        : { between: ringBorderSegments(), frontier: [] }
+
+    const strokes = buildBorderStrokes(derived, {
+      coreColor: politicalParams.borderColor,
+      coreWidth: politicalParams.borderWidth,
+      edgeColor: politicalParams.borderEdgeColor,
+      edgeWidth: politicalParams.borderEdgeWidth,
       opacity: politicalParams.borderOpacity,
-      width: politicalParams.borderWidth,
+      showFrontier: politicalParams.showFrontier,
+      frontierColor: politicalParams.frontierColor,
+      frontierWidth: politicalParams.frontierWidth,
+      frontierOpacity: politicalParams.frontierOpacity,
+    })
+    if (strokes.length === 0) return
+    borders = createComposedLineLayer(strokes, {
+      project: projectDraped,
+      depthTest: !politicalParams.borderOnTop,
+      renderOrderBase: BORDER_RENDER_ORDER,
     })
     borders.setResolution(window.innerWidth, window.innerHeight)
     scene.add(borders.object)
@@ -505,8 +532,8 @@ function bootstrap(): () => void {
       rebuildCoastline()
       rebuildRhumb()
       rebuildRivers()
-      // The borders drop their maritime stretches using this mask; built before it arrived, they still
-      // carry every coastal segment.
+      // The mask is what lets the borders tell open sea from land nobody claims: without it there is no
+      // frontier line at all, and the ring path still carries every coastal segment.
       rebuildBorders()
     })
     .catch((error: unknown) => {

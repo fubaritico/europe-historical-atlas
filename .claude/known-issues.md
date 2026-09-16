@@ -40,16 +40,22 @@ Put here the know issues to avoid cluttering the context window.
   camera-controls layer. Worked around by renaming to `utils/controlSpec`; the config flaw remains and
   will catch the next `something/controls`.
 - **`composeTerrainRgba` is long** (~90 lines) and grew again with the political layer.
-- **The border ink barely reads against two palette slots** (A11Y-101, surfaced 2026-09-16). `borderColor`
-  `#5c3a2e` drawn at `borderOpacity` 0.7 over `palette1` `#b8554a` gives about **1.6:1** — computed with
-  the blend in *linear* space, which is how three composites with colour management on; the naive sRGB
-  arithmetic gives 1.7:1, so neither rescues it. WCAG 1.4.11 asks 3:1 for graphical objects. `palette7`
-  `#c46b42` is the other weak one — both are brownish-reds, like the ink. `assignRegionColors` only
-  guarantees two adjacent *fills* differ from each other; it has no notion of the border ink, so a pair of
-  neighbours can land on the two worst slots. Now that `extractRegionBorders` guarantees a line exists at
-  every boundary, geometric completeness is done but **visual** completeness is not. Deliberately **not**
-  fixed: border colour and opacity are an approved aesthetic. Cheapest options, dev's call — raise the
-  opacity, darken the ink, or teach `assignRegionColors` to reject slots too close to `borderColor`.
+- **Border contrast: why the line is a casing, and what is left** (A11Y-101). The original single brown
+  ink `#5c3a2e` at 0.7 opacity gave ~1.6:1 against `palette1` `#b8554a` (blend computed in *linear* space,
+  as three composites with colour management on; naive sRGB gives 1.7:1 — neither rescues it), against a
+  WCAG 1.4.11 floor of 3:1. **The structural point: no single ink can clear 3:1 against this palette**,
+  because it spans a wide lightness range — an ink dark enough to read on gold Spain `#d4b24a` (L≈0.46)
+  is too light-starved to read on the blue slot `#54719b` (L≈0.16), and the converse for a light ink.
+  A **casing** answers it: whichever fill the line crosses, one of its two strokes separates from it —
+  but only if the two sit at opposite ends of the lightness scale. Hence cream core `#f3e7cd` inside dark
+  brown `#5c3a2e` at 0.9 opacity. *(An intermediate gold core `#d8b24a` was wrong on both counts: same
+  lightness band as the casing, and four units from pinned Spain — a gold border on a gold country.)*
+  **Still open**: `assignRegionColors` knows nothing about either stroke, so it cannot avoid a fill that
+  sits between them; and a guard test asserting every palette slot and pinned colour clears 3:1 against at
+  least one stroke would stop a future palette edit reintroducing the problem silently.
+- **The frontier line is deliberately faint** (`frontierOpacity` 0.45 over parchment ≈ 1.6:1). It marks
+  where the mapped world ends, which is illustrative rather than load-bearing — the coastline and the
+  borders carry the functional information. Revisit if it ever becomes the only cue for something.
 - **No asset payload is validated, and no failure reaches the user** (SEC-001, widened by the dev into a
   roadmap chapter — see `files/plans/roadmap/07-robustness.md`). All four loaders check the HTTP status
   and throw, then **cast blindly**: `heightmap.ts:88`, `landMask.ts:140`, `regionSource.ts:104`,
