@@ -106,12 +106,23 @@ Put here the know issues to avoid cluttering the context window.
 - **The frontier line is deliberately faint** (`frontierOpacity` 0.45 over parchment ≈ 1.6:1). It marks
   where the mapped world ends, which is illustrative rather than load-bearing — the coastline and the
   borders carry the functional information. Revisit if it ever becomes the only cue for something.
-- **No asset payload is validated, and no failure reaches the user** (SEC-001, widened by the dev into a
-  roadmap chapter — see `files/plans/roadmap/07-robustness.md`). All four loaders check the HTTP status
-  and throw, then **cast blindly**: `heightmap.ts:88`, `landMask.ts:140`, `regionSource.ts:104`,
-  `riverSource.ts:79`. The one existing shape check is `landMask.ts:149` (declared size vs actual bytes) —
-  the precedent to generalise. Every failure then ends in `console.error` only (`main.ts:430, 493, 513,
-  526`), so a failed relief load shows a blank canvas with no explanation.
+- ~~**No asset payload is validated, and no failure reaches the user**~~ (SEC-001) — **DONE 2026-09-17**,
+  following `files/plans/roadmap/07-robustness.md`. All four payloads now go through hand-written readers
+  (`data/assetError.ts`) behind one shared helper, as the chapter recommended over a schema library. The
+  taxonomy it asked for is real and load-bearing: `transport | schema | consistency | semantic`, carried
+  on the error as fields rather than only in a string.
+  **What the chapter left open, and how it was settled**: a missing relief is **blocking** — its own
+  degraded-mode policy already said "relief missing → there is no map", so the splash stays up and the
+  message lands on it. Validation runs **always**, not only in dev, on the chapter's own argument that
+  production is when a corrupt asset most deserves a message.
+  **Still open from chapter 07**: nothing validates the compass SVG; the contribution tooling (chapter
+  06) will need the same readers pointed at hand-imported files, which is the case the chapter says
+  justifies revisiting the schema-library question.
+- **Two error-surface details worth knowing.** A `role="alert"` on a degraded failure would shout about a
+  missing river; a `role="status"` on a blocking one would stay silent about a missing map — the severity
+  is declared per asset in `assetMessages.ts`, never inferred from how it failed. And a blocking notice
+  deliberately has **no dismiss button**: there is nothing behind it to go back to, and a close button
+  would promise otherwise.
 - **The political tint's black point sits at 0 m** (A11Y-005): with the heightmap layer at default
   strength the coastal contrast against the coastline ink drops from ~6:1 to ~2.7:1. An aesthetic call
   now that the render has been approved.
