@@ -683,9 +683,16 @@ function bootstrap(): () => void {
    * Worse, once the bake became asynchronous the mesh stopped waiting for its texture and appeared
    * untextured first: four states for one map.
    *
-   * Sequenced instead. Both fetches still run together; what changed is that nothing is *drawn* until
-   * there is one finished image to draw. It also does one bake rather than three, which is the expensive
-   * part — roughly 1.5 million pixels, twice discarded.
+   * Sequenced instead, into **two** deliberate stages rather than three accidental ones:
+   *
+   * 1. the terrain — sea, continents, relief — as soon as the elevation and the mask are in;
+   * 2. the same map with the countries and their borders, once the political layer has been computed.
+   *
+   * Two stages and not one is the dev's call, made on screen: waiting for everything meant a blank
+   * parchment for the whole load, and Europe appearing at once late reads worse than Europe appearing
+   * early and then being coloured in. The cost is real and worth stating — **it bakes twice**, roughly
+   * 1.5 million pixels each, and the two bakes serialise in the worker, so the *finished* map lands later
+   * than it would have. What was removed is only the waste: the third bake, and the untextured mesh.
    * @returns once the map is on screen
    */
   const startup = async (): Promise<void> => {
@@ -705,13 +712,10 @@ function bootstrap(): () => void {
     await pushSources()
     if (isDisposed()) return
 
-    // The political layer bakes the texture on its way through, so the first image already has the
-    // countries in it — there is no bare-terrain state to flash past.
-    await rebuildPolitical()
-    if (isDisposed()) return
-    // Unless the year could not be loaded at all: `public/borders/` is git-ignored, so a fresh clone has
-    // none. Nothing has baked in that case, and the terrain still has to appear.
-    if (!terrainTexture) await rebuildTexture()
+    // Stage one: the terrain alone. Awaited before the mesh is built, never fired and forgotten — a
+    // relief built while the texture is still in the worker takes no map at all and shows as bare
+    // material colour, which is exactly the flash this sequencing exists to remove.
+    await rebuildTexture()
     if (isDisposed()) return
 
     rebuildRelief()
@@ -719,6 +723,11 @@ function bootstrap(): () => void {
     rebuildRhumb()
     rebuildRivers() // no-op until the river payload lands; whichever finishes last draws them
     rebuildRose()
+
+    // Stage two: the same map with the countries painted in and their borders drawn over it. It bakes
+    // again — the tint is composited into the texture, not laid over it — and announces itself through
+    // the progress panel, so the wait is visible rather than mysterious.
+    await rebuildPolitical()
   }
 
   const heightmapSource = createFetchHeightmapSource('/heightmaps/europe-dem-z5')
