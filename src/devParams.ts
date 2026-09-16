@@ -345,6 +345,15 @@ export interface PoliticalDevParams {
   frontierOpacity: number
   /** Frontier stroke width in CSS pixels. */
   frontierWidth: number
+  /**
+   * Dash length in world units for the borders `data/borderStyles` marks as broken — a personal union is
+   * a border the map should admit is a fiction.
+   */
+  borderDashSize: number
+  /** Gap length in world units for those same broken borders. */
+  borderDashGap: number
+  /** Half the distance between the two runs of a doubled border, in normalized grid units. */
+  borderDoubleGap: number
   /** Colour areas by the power they answer to (`SUBJECTO`) rather than by polity. */
   colorBySuzerain: boolean
   /**
@@ -415,6 +424,12 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   frontierColor: '#5c3a2e',
   frontierOpacity: 0.45,
   frontierWidth: 1,
+  // World units: the map plane is 12 across, so 0.03 is roughly a 30 km dash — long enough to read as a
+  // deliberate break rather than a dotted line at any zoom the camera allows.
+  borderDashSize: 0.03,
+  borderDashGap: 0.024,
+  // Normalized grid units: about two DEM cells apart, which separates without reading as two borders.
+  borderDoubleGap: 0.0016,
   colorBySuzerain: false,
   snapToCoast: 12,
   // Eight is comfortably above what a political map of Europe needs: four colours suffice in theory,
@@ -451,6 +466,15 @@ export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
   frontierColor: { kind: 'hexColor', label: 'frontier colour' },
   frontierOpacity: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'frontier opacity' },
   frontierWidth: { kind: 'number', min: 0.5, max: 5, step: 0.05, label: 'frontier width (px)' },
+  borderDashSize: { kind: 'number', min: 0.005, max: 0.2, step: 0.005, label: 'dash length' },
+  borderDashGap: { kind: 'number', min: 0.005, max: 0.2, step: 0.005, label: 'dash gap' },
+  borderDoubleGap: {
+    kind: 'number',
+    min: 0.0002,
+    max: 0.01,
+    step: 0.0002,
+    label: 'double-line spacing',
+  },
   colorBySuzerain: { kind: 'boolean', label: 'colour by suzerain' },
   snapToCoast: { kind: 'number', min: 0, max: 40, step: 1, label: 'snap to coast (cells)' },
   palette1: { kind: 'hexColor', label: 'palette 1' },
@@ -481,6 +505,9 @@ export const POLITICAL_CONTROL_ORDER: (keyof PoliticalDevParams)[] = [
   'frontierColor',
   'frontierWidth',
   'frontierOpacity',
+  'borderDashSize',
+  'borderDashGap',
+  'borderDoubleGap',
   'palette1',
   'palette2',
   'palette3',

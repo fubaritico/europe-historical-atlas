@@ -65,6 +65,20 @@ export interface LineLayerOptions {
    * depth no longer arbitrates between overlays and only this does.
    */
   renderOrder?: number
+  /**
+   * Break the stroke into dashes. Needs {@link width} — dashing is a fat-line feature — and is ignored
+   * on the thin pipeline.
+   *
+   * The dash pattern runs along the buffer in the order the segments were handed over, because three
+   * accumulates line distance continuously across every instance without checking that consecutive ones
+   * actually touch. Feed the segments run by run and the dashes flow along each run; the only artefact is
+   * that the pattern does not restart between runs, which reads as continuous rather than wrong.
+   */
+  dashed?: boolean
+  /** Dash length in world units (default 0.02). Only read when {@link dashed} is set. */
+  dashSize?: number
+  /** Gap length in world units (default 0.02). Only read when {@link dashed} is set. */
+  gapSize?: number
 }
 
 /**
@@ -164,11 +178,15 @@ export function createLineLayer(
       opacity,
       depthWrite: false,
       depthTest: options.depthTest ?? true,
+      dashed: options.dashed ?? false,
+      dashSize: options.dashSize ?? 0.02,
+      gapSize: options.gapSize ?? 0.02,
     })
     const object = new LineSegments2(geometry, material)
     object.renderOrder = options.renderOrder ?? 0
-    // Fat lines are instanced quads, so three cannot infer their extent for frustum culling from the
-    // position attribute alone; computing it up front avoids the layer vanishing at oblique angles.
+    // Walks the buffer accumulating each instance's length into the `instanceDistance` attribute the dash
+    // shader reads. Unconditional because it is cheap and a layer can be switched to dashed later; note
+    // it has nothing to do with bounding volumes, which `setPositions` already computed.
     object.computeLineDistances()
     return {
       object,

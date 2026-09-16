@@ -345,17 +345,45 @@ export interface RegionBorderOptions {
 }
 
 /**
+ * A run of border, as a chain of points in normalized grid coordinates.
+ *
+ * Kept as a chain rather than exploded into segments because the two things a map wants to do with a
+ * border need its continuity: a dash pattern must run *along* it instead of restarting on every cell
+ * edge, and a parallel offset needs each vertex's neighbours to know which way is sideways.
+ */
+export type RegionBorderLine = UvPoint[]
+
+/**
+ * Every run of border shared by one pair of polities.
+ */
+export interface RegionBorderGroup {
+  /** The two region indices it separates, lower index first. */
+  pair: readonly [number, number]
+  /** The runs themselves. */
+  lines: RegionBorderLine[]
+}
+
+/**
  * The border lines, split by kind so each can be drawn in its own hand.
  */
 export interface RegionBorders {
-  /** Stretches separating two different polities — a negotiated border. */
-  between: RegionBorderSegment[]
   /**
-   * Stretches where a polity meets land nobody claims. Empty unless `isLand` was supplied. Drawing this
-   * is what frees a map from having to declare nations all the way to its own edge.
+   * Runs separating two different polities, grouped by which pair they separate — which is what lets a
+   * union be dashed while a contested line is doubled, without either becoming a second geometry.
    */
-  frontier: RegionBorderSegment[]
+  between: RegionBorderGroup[]
+  /**
+   * Runs where a polity meets land nobody claims. Empty unless `isLand` was supplied. Drawing this is
+   * what frees a map from having to declare nations all the way to its own edge.
+   */
+  frontier: RegionBorderLine[]
 }
+
+/**
+ * Radix packing two region indices into one map key. Indices come from an `Int16Array`, so they cannot
+ * reach this.
+ */
+const PAIR_RADIX = 1 << 15
 
 /**
  * One round of Chaikin corner cutting: every segment is replaced by its middle half, which rounds each
@@ -428,8 +456,11 @@ function decodeLatticeKey(key: number, stride: number, width: number, height: nu
 
 /** The shared edges, split by what lies on either side of them. */
 interface ClassifiedEdges {
-  /** Edges with a different polity on each side — a negotiated border. */
-  between: SharedEdges
+  /**
+   * Edges with a different polity on each side, bucketed by which pair — keyed `low * PAIR_RADIX + high`.
+   * Bucketing here rather than later is what keeps a chain from ever spanning two different borders.
+   */
+  between: Map<number, SharedEdges>
   /** Edges where a polity meets land nobody claims — the edge of the mapped world. */
   frontier: SharedEdges
 }
@@ -458,7 +489,7 @@ function sharedEdges(
     (doubledY + 1) * stride + (doubledX + 1)
   const uAt = (col: number): number => (width > 1 ? col / (width - 1) : 0)
   const vAt = (row: number): number => (height > 1 ? row / (height - 1) : 0)
-  const between: SharedEdges = { from: [], to: [] }
+  const between = new Map<number, SharedEdges>()
   const frontier: SharedEdges = { from: [], to: [] }
 
   /**
@@ -478,12 +509,15 @@ function sharedEdges(
     b: number
   ): void => {
     if (here === other) return // same polity, or unclaimed on both sides
-    const target =
-      here >= 0 && other >= 0
-        ? between
-        : isLand?.(uAt(bare[0]), vAt(bare[1])) === true
-          ? frontier
-          : null
+    let target: SharedEdges | null = null
+    if (here >= 0 && other >= 0) {
+      // Keyed low-index-first, so the France|Spain border is one bucket however the scan met it.
+      const key = Math.min(here, other) * PAIR_RADIX + Math.max(here, other)
+      target = between.get(key) ?? { from: [], to: [] }
+      between.set(key, target)
+    } else if (isLand?.(uAt(bare[0]), vAt(bare[1])) === true) {
+      target = frontier
+    }
     if (!target) return
     target.from.push(a)
     target.to.push(b)
@@ -609,13 +643,17 @@ export function extractRegionBorders(
   const rounds = Math.min(MAX_SMOOTHING_ROUNDS, Math.max(0, Math.floor(options.smoothing ?? 0)))
 
   /**
-   * Chain, smooth and explode one kind of edge into drawable stretches.
-   * @param kind - the edges of a single kind
-   * @returns the stretches, in normalized grid coordinates
+   * Chain and smooth one bucket of edges into drawable chains.
+   *
+   * Chains, not segments: a dash pattern has to run *along* a border rather than restart on every cell
+   * edge, and a parallel offset needs each vertex's neighbours to work out which way is sideways. Both
+   * are impossible once the line has been exploded into unrelated pairs of points.
+   * @param kind - the edges of a single bucket
+   * @returns the chains, in normalized grid coordinates
    */
-  const trace = (kind: SharedEdges): RegionBorderSegment[] => {
-    const segments: RegionBorderSegment[] = []
-    if (kind.from.length === 0) return segments
+  const trace = (kind: SharedEdges): RegionBorderLine[] => {
+    const traced: RegionBorderLine[] = []
+    if (kind.from.length === 0) return traced
     // Spend the budget in smoothing rounds, never in edges: a rougher line is still a line, whereas a
     // dropped edge is the interrupted border this derivation exists to abolish.
     let affordable = rounds
@@ -632,14 +670,16 @@ export function extractRegionBorders(
         const head = points[0]
         if (head) points.push(head)
       }
-      for (let i = 0; i + 1 < points.length; i++) {
-        const a = points[i]
-        const b = points[i + 1]
-        if (a && b) segments.push([a, b])
-      }
+      if (points.length >= 2) traced.push(points)
     }
-    return segments
+    return traced
   }
 
-  return { between: trace(edges.between), frontier: trace(edges.frontier) }
+  const between: RegionBorderGroup[] = []
+  for (const [key, kind] of edges.between) {
+    const lines = trace(kind)
+    if (lines.length === 0) continue
+    between.push({ pair: [Math.floor(key / PAIR_RADIX), key % PAIR_RADIX], lines })
+  }
+  return { between, frontier: trace(edges.frontier) }
 }

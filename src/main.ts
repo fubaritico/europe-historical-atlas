@@ -3,6 +3,7 @@ import Stats from 'three/addons/libs/stats.module.js'
 
 import { createSessionStorageMapCameraStore } from './controls/mapCameraStore'
 import { createMapControls } from './controls/mapControls'
+import { borderPatternFor } from './data/borderStyles'
 import { createMaskCoastlineSource } from './data/coastlineSource'
 import { createFetchHeightmapSource, smoothHeightmap } from './data/heightmap'
 import { createElevationLandMask, createFetchLandMaskSource } from './data/landMask'
@@ -44,9 +45,10 @@ import { hexToRgb } from './utils/color'
 import { lerp } from './utils/math'
 
 import type { MapRect } from './controls/mapControls'
+import type { BorderPattern } from './data/borderStyles'
 import type { Heightmap } from './data/heightmap'
 import type { LandMask } from './data/landMask'
-import type { RegionBorderSegment } from './data/regionRaster'
+import type { RegionBorderLine } from './data/regionRaster'
 import type {
   CoastlineDevParams,
   ExtentDevParams,
@@ -356,8 +358,8 @@ function bootstrap(): () => void {
    * same polity and the stretch is discarded.
    * @returns the border stretches, in normalized grid coordinates
    */
-  const ringBorderSegments = (): RegionBorderSegment[] => {
-    const out: RegionBorderSegment[] = []
+  const ringBorderLines = (): RegionBorderLine[] => {
+    const out: RegionBorderLine[] = []
     if (!heightmap || !regionSet) return out
     const raster = regionRaster
     const probe = RING_BORDER_PROBE_CELLS / (heightmap.meta.width - 1)
@@ -370,11 +372,22 @@ function bootstrap(): () => void {
           // Only the stretches actually shared with another polity: the rest is coastline, which the
           // map already draws once, from a far better source.
           if (raster && !separatesRegions(raster, a, b, probe)) continue
-          out.push([a, b])
+          out.push([a, b]) // a two-point chain: the ring path has no runs to speak of
         }
       }
     }
     return out
+  }
+
+  /**
+   * How the border between two polities is drawn, looked up by name in the editorial style table.
+   * @param pair - the two region indices the stretch separates
+   * @returns the drawing pattern
+   */
+  const patternForPair = (pair: readonly [number, number]): BorderPattern => {
+    const regions = regionSet?.regions
+    if (!regions) return 'solid'
+    return borderPatternFor(regions[pair[0]]?.name ?? null, regions[pair[1]]?.name ?? null)
   }
 
   const rebuildBorders = (): void => {
@@ -393,19 +406,31 @@ function bootstrap(): () => void {
             smoothing: politicalParams.borderSmoothing,
             ...(mask ? { isLand: (u: number, v: number) => mask.isLand(u, v) } : {}),
           })
-        : { between: ringBorderSegments(), frontier: [] }
+        : {
+            // The ring path knows nothing about which polities a stretch separates, so it all goes in
+            // one bucket under a pair no rule can match — drawn solid, which is all it ever was.
+            between: [{ pair: [-1, -1] as const, lines: ringBorderLines() }],
+            frontier: [],
+          }
 
-    const strokes = buildBorderStrokes(derived, {
-      coreColor: politicalParams.borderColor,
-      coreWidth: politicalParams.borderWidth,
-      edgeColor: politicalParams.borderEdgeColor,
-      edgeWidth: politicalParams.borderEdgeWidth,
-      opacity: politicalParams.borderOpacity,
-      showFrontier: politicalParams.showFrontier,
-      frontierColor: politicalParams.frontierColor,
-      frontierWidth: politicalParams.frontierWidth,
-      frontierOpacity: politicalParams.frontierOpacity,
-    })
+    const strokes = buildBorderStrokes(
+      derived,
+      {
+        coreColor: politicalParams.borderColor,
+        coreWidth: politicalParams.borderWidth,
+        edgeColor: politicalParams.borderEdgeColor,
+        edgeWidth: politicalParams.borderEdgeWidth,
+        opacity: politicalParams.borderOpacity,
+        showFrontier: politicalParams.showFrontier,
+        frontierColor: politicalParams.frontierColor,
+        frontierWidth: politicalParams.frontierWidth,
+        frontierOpacity: politicalParams.frontierOpacity,
+        dashSize: politicalParams.borderDashSize,
+        gapSize: politicalParams.borderDashGap,
+        doubleGap: politicalParams.borderDoubleGap,
+      },
+      patternForPair
+    )
     if (strokes.length === 0) return
     borders = createComposedLineLayer(strokes, {
       project: projectDraped,

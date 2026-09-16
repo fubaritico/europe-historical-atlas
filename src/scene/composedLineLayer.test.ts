@@ -1,24 +1,32 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildBorderStrokes, createComposedLineLayer } from './composedLineLayer'
+import {
+  buildBorderStrokes,
+  createComposedLineLayer,
+  offsetPolyline,
+  polylinesToSegments,
+} from './composedLineLayer'
 
 import type { BorderStrokeStyle, ComposedStroke } from './composedLineLayer'
-import type { UvSegment } from './lineLayer'
+import type { UvPoint } from '../data/coastlineSource'
 import type { RegionBorders } from '../data/regionRaster'
 
-/** A one-segment stretch, enough to make a stroke non-empty. */
-function stretch(u: number): UvSegment {
+/** A vertical two-point run, enough to make a pass non-empty. */
+function run(u: number): UvPoint[] {
   return [
     { u, v: 0 },
     { u, v: 1 },
   ]
 }
 
-/** Derived borders with whichever kinds the test needs. */
+/** Derived borders with whichever kinds the test needs, all under one pair. */
 function borders(between: number, frontier: number): RegionBorders {
   return {
-    between: Array.from({ length: between }, (_, i) => stretch(i / 10)),
-    frontier: Array.from({ length: frontier }, (_, i) => stretch(0.5 + i / 10)),
+    between:
+      between === 0
+        ? []
+        : [{ pair: [0, 1], lines: Array.from({ length: between }, (_, i) => run(i / 10)) }],
+    frontier: Array.from({ length: frontier }, (_, i) => run(0.5 + i / 10)),
   }
 }
 
@@ -32,6 +40,9 @@ const STYLE: BorderStrokeStyle = {
   frontierColor: '#888888',
   frontierWidth: 1,
   frontierOpacity: 0.45,
+  dashSize: 0.03,
+  gapSize: 0.024,
+  doubleGap: 0.002,
 }
 
 /** Project a grid coordinate onto a flat plane — the collaborator, mocked. */
@@ -79,6 +90,48 @@ describe('composedLineLayer', () => {
       layer.dispose()
     })
 
+    it('dashes only the passes the style table marks as broken', () => {
+      const strokes = buildBorderStrokes(borders(2, 0), STYLE, () => 'dashed')
+      expect(strokes.every((stroke) => stroke.dashed === true)).toBe(true)
+      expect(buildBorderStrokes(borders(2, 0), STYLE).every((s) => s.dashed !== true)).toBe(true)
+    })
+
+    it('doubles a border by drawing the run shifted either way', () => {
+      const single = buildBorderStrokes(borders(1, 0), STYLE)
+      const doubled = buildBorderStrokes(borders(1, 0), STYLE, () => 'double')
+      // Same number of passes, twice the geometry: two runs where there was one.
+      expect(doubled).toHaveLength(single.length)
+      expect(doubled[0]?.segments.length).toBe((single[0]?.segments.length ?? 0) * 2)
+    })
+
+    it('keeps one pass per pattern rather than one per pair', () => {
+      const many: RegionBorders = {
+        between: [
+          { pair: [0, 1], lines: [run(0.1)] },
+          { pair: [1, 2], lines: [run(0.2)] },
+          { pair: [2, 3], lines: [run(0.3)] },
+        ],
+        frontier: [],
+      }
+      // Three pairs, all solid: two passes total, not six. A century holds hundreds of pairs.
+      expect(buildBorderStrokes(many, { ...STYLE, showFrontier: false })).toHaveLength(2)
+    })
+
+    it('separates the patterns into their own passes', () => {
+      const mixed: RegionBorders = {
+        between: [
+          { pair: [0, 1], lines: [run(0.1)] },
+          { pair: [1, 2], lines: [run(0.2)] },
+        ],
+        frontier: [],
+      }
+      const strokes = buildBorderStrokes(mixed, { ...STYLE, showFrontier: false }, (pair) =>
+        pair[0] === 0 ? 'solid' : 'dashed'
+      )
+      expect(strokes).toHaveLength(4)
+      expect(strokes.map((stroke) => stroke.dashed === true)).toEqual([false, false, true, true])
+    })
+
     it('carries each pass its own colour, width and opacity', () => {
       const strokes = buildBorderStrokes(borders(1, 1), STYLE)
       expect(strokes[0]).toMatchObject({ width: 1, opacity: 0.45 })
@@ -119,7 +172,73 @@ describe('composedLineLayer', () => {
     // L4: no async work and no external resource — nothing else can fail unexpectedly here.
   })
 
+  describe('offsetPolyline', () => {
+    it('shifts a straight run sideways by exactly the distance asked', () => {
+      const shifted = offsetPolyline(run(0.5), 0.01)
+      // The run goes south; its left-hand normal points west, so the copy lands at u = 0.49.
+      for (const point of shifted) expect(point.u).toBeCloseTo(0.49)
+    })
+
+    it('shifts the other way for a negative distance', () => {
+      const shifted = offsetPolyline(run(0.5), -0.01)
+      for (const point of shifted) expect(point.u).toBeCloseTo(0.51)
+    })
+
+    it('keeps a closed run closed', () => {
+      const square: UvPoint[] = [
+        { u: 0.4, v: 0.4 },
+        { u: 0.6, v: 0.4 },
+        { u: 0.6, v: 0.6 },
+        { u: 0.4, v: 0.6 },
+        { u: 0.4, v: 0.4 },
+      ]
+      const shifted = offsetPolyline(square, 0.01)
+      const head = shifted[0]
+      const tail = shifted[shifted.length - 1]
+      expect(head).toEqual(tail)
+    })
+
+    it('clamps a hairpin instead of throwing the vertex off the map', () => {
+      // Two segments doubling back on each other: the exact mitre is at infinity.
+      const hairpin: UvPoint[] = [
+        { u: 0.5, v: 0.4 },
+        { u: 0.5, v: 0.5 },
+        { u: 0.5001, v: 0.4 },
+      ]
+      for (const point of offsetPolyline(hairpin, 0.01)) {
+        expect(Number.isFinite(point.u)).toBe(true)
+        expect(Math.abs(point.u - 0.5)).toBeLessThan(0.05)
+      }
+    })
+
+    it('returns the run untouched for a zero distance', () => {
+      const original = run(0.5)
+      expect(offsetPolyline(original, 0)).toEqual(original)
+    })
+
+    it('returns a single point untouched, having no direction to offset along', () => {
+      const lone: UvPoint[] = [{ u: 0.5, v: 0.5 }]
+      expect(offsetPolyline(lone, 0.01)).toEqual(lone)
+    })
+  })
+
   describe('edge cases', () => {
+    it('explodes a run into one fewer segment than it has points', () => {
+      expect(
+        polylinesToSegments([
+          [
+            { u: 0, v: 0 },
+            { u: 0, v: 1 },
+            { u: 0, v: 2 },
+          ],
+        ])
+      ).toHaveLength(2)
+    })
+
+    it('yields nothing for a run of a single point', () => {
+      expect(polylinesToSegments([[{ u: 0, v: 0 }]])).toEqual([])
+    })
+
     it('frees every pass on teardown', () => {
       const layer = createComposedLineLayer(buildBorderStrokes(borders(2, 2), STYLE), { project })
       layer.dispose()

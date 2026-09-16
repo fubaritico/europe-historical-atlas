@@ -43,9 +43,24 @@ function box(u0: number, v0: number, u1: number, v1: number): Region {
   }
 }
 
+/** Explode chains into point pairs, the shape most of these assertions are written against. */
+function toSegments(
+  lines: readonly (readonly { u: number; v: number }[])[]
+): RegionBorderSegment[] {
+  const segments: RegionBorderSegment[] = []
+  for (const line of lines)
+    for (let i = 0; i + 1 < line.length; i++) {
+      const a = line[i]
+      const b = line[i + 1]
+      if (a && b) segments.push([a, b])
+    }
+  return segments
+}
+
 /** The shared-border stretches alone — the kind most of these tests are about. */
 function between(raster: RegionRaster, smoothing?: number): RegionBorderSegment[] {
-  return extractRegionBorders(raster, smoothing === undefined ? {} : { smoothing }).between
+  const derived = extractRegionBorders(raster, smoothing === undefined ? {} : { smoothing })
+  return toSegments(derived.between.flatMap((group) => group.lines))
 }
 
 /** Total length of a border, in normalized units — a shape-independent way to compare smoothings. */
@@ -157,7 +172,7 @@ describe('regionRaster', () => {
       )
       expect(borders.between).toEqual([])
       expect(borders.frontier.length).toBeGreaterThan(0)
-      for (const [a, b] of borders.frontier) {
+      for (const [a, b] of toSegments(borders.frontier)) {
         expect(a.u).toBeCloseTo(0.5)
         expect(b.u).toBeCloseTo(0.5)
       }
@@ -175,7 +190,9 @@ describe('regionRaster', () => {
       )
       expect(borders.between.length).toBeGreaterThan(0)
       expect(borders.frontier.length).toBeGreaterThan(0)
-      expect(borders.between).not.toEqual(borders.frontier)
+      expect(toSegments(borders.between.flatMap((group) => group.lines))).not.toEqual(
+        toSegments(borders.frontier)
+      )
     })
 
     it('pins an editorial colour ahead of the palette', () => {
