@@ -1,85 +1,68 @@
-import { DataTexture, LinearMipmapLinearFilter, SRGBColorSpace } from 'three'
+import { DataTexture, LinearFilter, LinearMipmapLinearFilter, SRGBColorSpace } from 'three'
 import { describe, expect, it } from 'vitest'
 
-import { createHeightmap } from '../data/heightmap'
-import { DEFAULT_TERRAIN_OPTIONS } from '../pipeline/terrainCompose'
+import { wrapTerrainTexture } from './terrainTexture'
 
-import { createTerrainTexture, wrapTerrainTexture } from './terrainTexture'
-
-import type { HeightmapMeta } from '../data/heightmap'
-import type { TerrainTextureOptions } from '../pipeline/terrainCompose'
-
-/** Build minimal metadata for a test grid. */
-function meta(width: number, height: number, max: number): HeightmapMeta {
-  return {
-    width,
-    height,
-    zoom: 5,
-    bbox: { west: 0, south: 0, east: 1, north: 1 },
-    min: 0,
-    max,
-    encoding: 'int16-le-metres',
-  }
+/** An opaque RGBA buffer of the given size. */
+function pixels(width: number, height: number): Uint8Array {
+  return new Uint8Array(width * height * 4).fill(200)
 }
 
-const OPTS: TerrainTextureOptions = { ...DEFAULT_TERRAIN_OPTIONS, supersample: 1 }
-
-describe('terrainTexture', () => {
+describe('wrapTerrainTexture', () => {
   describe('happy path', () => {
     it('builds an sRGB DataTexture with flipY set and matching dimensions', () => {
-      const hm = createHeightmap(meta(3, 2, 800), new Int16Array([0, 0, 0, 800, 800, 800]))
-      const tex = createTerrainTexture(hm, OPTS)
-      expect(tex).toBeInstanceOf(DataTexture)
-      expect(tex.flipY).toBe(true)
-      expect(tex.colorSpace).toBe(SRGBColorSpace)
-      expect(tex.image.width).toBe(3)
-      expect(tex.image.height).toBe(2)
-      expect(tex.image.data?.length).toBe(3 * 2 * 4)
+      const texture = wrapTerrainTexture(pixels(3, 2), 3, 2)
+      expect(texture).toBeInstanceOf(DataTexture)
+      expect(texture.flipY).toBe(true)
+      expect(texture.colorSpace).toBe(SRGBColorSpace)
+      expect(texture.image.width).toBe(3)
+      expect(texture.image.height).toBe(2)
     })
 
-    it('wraps a buffer computed elsewhere — the seam a worker bake returns through', () => {
-      const rgba = new Uint8Array(2 * 2 * 4).fill(200)
-      const tex = wrapTerrainTexture(rgba, 2, 2)
-      expect(tex.image.data).toBe(rgba) // wrapped, never copied: the bytes are transferred in
-      expect(tex.minFilter).toBe(LinearMipmapLinearFilter)
-      expect(tex.generateMipmaps).toBe(true)
+    it('wraps the buffer rather than copying it — the bytes were transferred in', () => {
+      const rgba = pixels(2, 2)
+      expect(wrapTerrainTexture(rgba, 2, 2).image.data).toBe(rgba)
+    })
+
+    it('schedules the upload and asks for mipmaps', () => {
+      const texture = wrapTerrainTexture(pixels(2, 2), 2, 2)
+      expect(texture.magFilter).toBe(LinearFilter)
+      expect(texture.minFilter).toBe(LinearMipmapLinearFilter)
+      expect(texture.generateMipmaps).toBe(true)
       // `needsUpdate` is a write-only accessor (three's Texture.js): reading it yields undefined, and
       // the upload it schedules is observable through the version counter instead.
-      expect(tex.version).toBeGreaterThan(0)
+      expect(texture.version).toBeGreaterThan(0)
     })
   })
 
   describe('variants', () => {
-    it('sizes the texture by supersample, matching the buffer it wraps', () => {
-      const hm = createHeightmap(meta(3, 2, 800), new Int16Array([0, 0, 0, 800, 800, 800]))
-      const tex = createTerrainTexture(hm, { ...OPTS, supersample: 2 })
-      expect(tex.image.width).toBe(6)
-      expect(tex.image.height).toBe(4)
-      expect(tex.image.data?.length).toBe(6 * 4 * 4)
+    it('takes whatever size the bake produced, supersampled or not', () => {
+      const texture = wrapTerrainTexture(pixels(6, 4), 6, 4)
+      expect(texture.image.width).toBe(6)
+      expect(texture.image.height).toBe(4)
+      expect(texture.image.data?.length).toBe(6 * 4 * 4)
     })
   })
 
-  // L3: N/A — the wrapper has no branch to take. Its only input is a buffer the compositor sized, and
-  // `composeTerrainRgba` (tested next door) is what validates the elevation source.
-  // L4: N/A — nothing async, nothing thrown; a mismatched buffer is a three.js-level programming error
-  // that no fallback here could make safe.
+  // L3: N/A — the wrapper has no branch to take. Its input is a buffer the compositor sized, and
+  // `composeTerrainRgba` (tested in pipeline/) is what validates the elevation source.
+  // L4: N/A — nothing async, nothing thrown. A buffer whose length disagrees with the dimensions is a
+  // programming error inside three.js that no fallback here could make safe.
 
   describe('edge cases', () => {
-    it('handles a 1x1 grid', () => {
-      const hm = createHeightmap(meta(1, 1, 100), new Int16Array([50]))
-      const tex = createTerrainTexture(hm, OPTS)
-      expect(tex.image.width).toBe(1)
-      expect(tex.image.height).toBe(1)
-      expect(tex.image.data?.length).toBe(4)
+    it('handles a single pixel', () => {
+      const texture = wrapTerrainTexture(pixels(1, 1), 1, 1)
+      expect(texture.image.width).toBe(1)
+      expect(texture.image.data?.length).toBe(4)
     })
 
     it('frees its GPU handle on dispose without touching the buffer', () => {
-      const rgba = new Uint8Array(4).fill(1)
-      const tex = wrapTerrainTexture(rgba, 1, 1)
+      const rgba = pixels(1, 1)
+      const texture = wrapTerrainTexture(rgba, 1, 1)
       expect(() => {
-        tex.dispose()
+        texture.dispose()
       }).not.toThrow()
-      expect(rgba[0]).toBe(1)
+      expect(rgba[0]).toBe(200)
     })
   })
 })

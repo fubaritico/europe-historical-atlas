@@ -1,20 +1,14 @@
 import { Color, PerspectiveCamera, Scene, Timer, WebGLRenderer } from 'three'
 import Stats from 'three/addons/libs/stats.module.js'
 
+import { COMPUTE_PHASE_LABELS } from './computeLabels'
 import { createSessionStorageMapCameraStore } from './controls/mapCameraStore'
 import { createMapControls } from './controls/mapControls'
 import { borderPatternFor } from './data/borderStyles'
 import { createMaskCoastlineSource } from './data/coastlineSource'
 import { createFetchHeightmapSource, smoothHeightmap } from './data/heightmap'
 import { createElevationLandMask, createFetchLandMaskSource } from './data/landMask'
-import { pinnedRegionColor } from './data/regionPalette'
-import {
-  assignRegionColors,
-  expandRegionsOverLand,
-  extractRegionBorders,
-  rasteriseRegions,
-  separatesRegions,
-} from './data/regionRaster'
+import { separatesRegions } from './data/regionRaster'
 import { createFetchRegionSource } from './data/regionSource'
 import {
   DEFAULT_RIVER_EXTENSION,
@@ -33,7 +27,13 @@ import {
   DEFAULT_ROSE_PARAMS,
   politicalPalette,
 } from './devParams'
+// Vite resolves `?worker` into a constructor for the bundled worker module. It is the one
+// bundler-specific line in the compute, and it lives here on purpose: the client that talks to the
+// worker takes it as an injected `spawn`, so nothing below the composition root depends on Vite.
+import ComputeWorker from './pipeline/computeWorker?worker'
+import { createInlineMapCompute, rasterFromResult, scaleProgress } from './pipeline/inlineCompute'
 import { DEFAULT_TERRAIN_OPTIONS } from './pipeline/terrainCompose'
+import { createWorkerMapCompute } from './pipeline/workerCompute'
 import { createCompassRose } from './scene/compassRose'
 import {
   buildBorderStrokes,
@@ -45,16 +45,17 @@ import { createLineLayer } from './scene/lineLayer'
 import { createReliefMesh, reliefWorldY } from './scene/reliefMesh'
 import { generateRhumbSegments } from './scene/rhumbNetwork'
 import { createRiverLayer } from './scene/riverLayer'
-import { createTerrainTexture } from './scene/terrainTexture'
+import { wrapTerrainTexture } from './scene/terrainTexture'
 import { createProgressOverlay } from './ui/progressOverlay'
 import { hexToRgb } from './utils/color'
+import { createLatestOnly } from './utils/latestOnly'
 import { lerp } from './utils/math'
 
 import type { MapRect } from './controls/mapControls'
 import type { BorderPattern } from './data/borderStyles'
 import type { Heightmap } from './data/heightmap'
 import type { LandMask } from './data/landMask'
-import type { RegionBorderLine } from './data/regionRaster'
+import type { RegionBorderLine, RegionBorders } from './data/regionRaster'
 import type {
   CoastlineDevParams,
   ExtentDevParams,
@@ -64,8 +65,8 @@ import type {
   RiverDevParams,
   RoseDevParams,
 } from './devParams'
-import type { AreaTint, TerrainTextureOptions } from './pipeline/terrainCompose'
-import type { RgbColor } from './utils/color'
+import type { MapCompute, ProgressReport } from './pipeline/mapCompute'
+import type { TerrainTextureOptions } from './pipeline/terrainCompose'
 import type { DataTexture, Object3D } from 'three'
 
 /**
@@ -164,6 +165,11 @@ function bootstrap(): () => void {
   // comparison with the raster-derived borders is settled.
   const RING_BORDER_PROBE_CELLS = 2
 
+  // How a change of year divides the progress bar. Measured rather than chosen: at the raster's 2× scale
+  // the compute costs ~215 ms against a bake that is longer still, and the fetch is a local file. The
+  // remainder above `bake` is the border geometry, which is this thread's own work and quick.
+  const POLITICAL_SPLIT = { fetch: 0.1, compute: 0.65, bake: 0.95 }
+
   // Draw order of the political line work. It only matters once `borderOnTop` switches depth testing
   // off: with no depth to arbitrate, this is the sole thing keeping a core stroke above its own edging.
   const BORDER_RENDER_ORDER = 10
@@ -208,18 +214,87 @@ function bootstrap(): () => void {
   // teardown just like a layer of its own.
   // The political line work — frontier, casing and core — behind one handle, like every other overlay.
   let borders: ReturnType<typeof createComposedLineLayer> | null = null
-  let regionRaster: ReturnType<typeof rasteriseRegions> | null = null
-  let regionTints: RgbColor[] = []
-  // The seam the compositor sees: a colour claimed at a coordinate, and nothing about history.
-  const areaTint: AreaTint = {
-    at: (u, v) => {
-      const index = regionRaster?.indexAt(u, v) ?? -1
-      return index < 0 ? null : (regionTints[index] ?? null)
-    },
-  }
+  // The main thread's copy of the political grid. The compute keeps its own — it is what the next bake
+  // tints from — and this one exists for the things only this thread can do: the ring-path comparison
+  // today, a click landing on a polity tomorrow.
+  let regionRaster: ReturnType<typeof rasterFromResult> | null = null
+  // The border lines as the compute derived them, kept so that restyling a stroke redraws rather than
+  // re-traces. Only the smoothing changes the geometry, and it asks for a fresh derivation.
+  let derivedBorders: RegionBorders | null = null
   let riverData: Awaited<ReturnType<ReturnType<typeof createFetchRiverSource>['load']>> = []
   let compass: ReturnType<typeof createCompassRose> | null = null
   let disposed = false // guards the async heightmap load from building a mesh after teardown (HMR mid-load)
+
+  // Read through a call, not the binding: across an `await`, control-flow analysis still believes the
+  // flag it narrowed cannot have changed — which is precisely what teardown does, and would turn every
+  // guard below into dead code the compiler is happy to prove.
+  const isDisposed = (): boolean => disposed
+
+  const nextFrame = (): Promise<void> =>
+    new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        resolve()
+      })
+    })
+
+  /**
+   * The map's CPU work, off this thread when the browser allows it.
+   *
+   * The worker is what unfreezes the texture bake: it is one indivisible synchronous block, so no amount
+   * of yielding between phases could keep the tab alive through it. The inline compute stays as the
+   * fallback, and needs the frame wait the worker has no use for — on this thread, a flag raised before a
+   * synchronous block is a flag nobody sees.
+   */
+  let compute: MapCompute
+
+  /** The main-thread implementation, used when no worker can be had and when one dies. */
+  const inlineCompute = (): MapCompute => createInlineMapCompute({ yieldControl: nextFrame })
+
+  /**
+   * Carry on after the worker dies, on this thread.
+   *
+   * The fallback starts empty — it holds neither the sources nor the year the dead worker was holding —
+   * so recovering means redoing the setup, not just retrying the call that failed. A frozen map with one
+   * console line is the outcome this exists to avoid.
+   */
+  const failoverToInline = (error: Error): void => {
+    console.warn('map compute worker died — continuing on the main thread', error)
+    if (isDisposed()) return
+    compute = inlineCompute()
+    void pushSources()
+      .then(() => rebuildPolitical())
+      .catch((failure: unknown) => {
+        console.error('main-thread fallback could not restore the map', failure)
+      })
+  }
+
+  try {
+    compute = createWorkerMapCompute({
+      spawn: () => new ComputeWorker(),
+      onFatal: failoverToInline,
+    })
+  } catch (error: unknown) {
+    console.warn('map compute worker unavailable — computing on the main thread instead', error)
+    compute = inlineCompute()
+  }
+
+  /**
+   * Hand the compute the sources it reads. Called again whenever one of them lands, since the relief and
+   * the mask load independently and whichever arrives second must not leave the other behind.
+   *
+   * Copied across, never transferred: this thread keeps drawing the relief and draping overlays from the
+   * very same buffers.
+   * @returns once the compute holds them
+   */
+  const pushSources = async (): Promise<void> => {
+    const dem = heightmap
+    if (!dem) return
+    const mask = landMask
+    await compute.setSources({
+      heightmap: { meta: dem.meta, data: dem.data },
+      landMask: mask ? { meta: mask.meta, bits: mask.pack() } : null,
+    })
+  }
 
   // Project a normalized grid coordinate (u: west→east, v: north→south) to world XZ, matching the relief
   // mesh mapping. The coastline sits at a small fixed lift above the flat sea (y=0), independent of the
@@ -265,20 +340,37 @@ function bootstrap(): () => void {
     handle.dispose()
   }
 
-  const rebuildTexture = (): void => {
+  // Two gates, because two independent results race: a dev-panel slider fires a bake per change, and a
+  // change of year fires a whole political rebuild. Without them the answer to an old drag position can
+  // arrive after the answer to the current one and paint the map back to where it was. One gate each —
+  // sharing a single one would have a bake needlessly cancel a year.
+  const bakeGate = createLatestOnly()
+  const politicalGate = createLatestOnly()
+
+  /**
+   * Re-bake the terrain texture and hang it on the relief.
+   * @param onProgress - where to announce the bake, when a caller is showing a panel
+   * @returns once the new texture is on screen, or once a newer bake has superseded this one
+   */
+  const rebuildTexture = async (onProgress?: ProgressReport): Promise<void> => {
     if (!heightmap) return
+    const isCurrent = bakeGate.begin()
+    const baked = await compute.bakeTerrain(textureOptions, onProgress)
+    if (isDisposed() || !isCurrent()) return
     terrainTexture?.dispose()
-    terrainTexture = createTerrainTexture(
-      heightmap,
-      textureOptions,
-      landMask ?? createElevationLandMask(heightmap, textureOptions.seaLevel),
-      areaTint
-    )
+    terrainTexture = wrapTerrainTexture(baked.rgba, baked.width, baked.height)
     if (relief) {
       relief.material.map = terrainTexture
       relief.material.color.set('#ffffff')
       relief.material.needsUpdate = true
     }
+  }
+
+  /** Fire a texture rebuild from a caller that cannot await — a dev-panel control, or a load handler. */
+  const requestTexture = (): void => {
+    void rebuildTexture().catch((error: unknown) => {
+      console.error('terrain bake failed', error)
+    })
   }
 
   const rebuildCoastline = (): void => {
@@ -404,18 +496,13 @@ function bootstrap(): () => void {
     disposeHandle(borders)
     borders = null
     if (!heightmap || !regionSet || !politicalParams.showBorders) return
-    const raster = regionRaster
-    const mask = landMask
     // Derived from the fills, a border *is* their boundary — it cannot disagree with the colour and it
-    // cannot be interrupted. The ring path below only exists to compare the two, and has no notion of a
-    // frontier. The mask is what separates "faces the open sea" (say nothing, the shoreline is already
-    // drawn from a better source) from "faces land nobody claims" (draw the edge of the mapped world).
+    // cannot be interrupted. The tracing happens in the compute, beside the grid it reads; what is kept
+    // here is its result, so restyling a stroke redraws without re-tracing anything. The ring path below
+    // only exists to compare the two, and has no notion of a frontier.
     const derived =
-      raster && politicalParams.borderSource === 'raster'
-        ? extractRegionBorders(raster, {
-            smoothing: politicalParams.borderSmoothing,
-            ...(mask ? { isLand: (u: number, v: number) => mask.isLand(u, v) } : {}),
-          })
+      derivedBorders && politicalParams.borderSource === 'raster'
+        ? derivedBorders
         : {
             // The ring path knows nothing about which polities a stretch separates, so it all goes in
             // one bucket under a pair no rule can match — drawn solid, which is all it ever was.
@@ -455,96 +542,79 @@ function bootstrap(): () => void {
 
   const regionSourcePort = createFetchRegionSource((year) => `/borders/europe-${String(year)}.json`)
 
-  // Yield to the browser so the progress panel can actually paint. A flag set before a synchronous
-  // block is a flag nobody sees: the frame only lands once the block is over, which is exactly when the
-  // panel is no longer wanted. Awaiting a frame between phases is what makes the bar honest.
-  // Read through a call, not the binding: across an `await`, control-flow analysis still believes the
-  // flag it narrowed cannot have changed — which is precisely what teardown does, and would turn every
-  // guard below into dead code the compiler is happy to prove.
-  const isDisposed = (): boolean => disposed
-
-  const nextFrame = (): Promise<void> =>
-    new Promise((resolve) => {
-      requestAnimationFrame(() => {
-        resolve()
-      })
-    })
-
   /**
-   * The political pipeline, phase by phase, reporting as it goes.
+   * A change of year, end to end: fetch the polities, hand them to the compute, hang the result on the
+   * map.
    *
-   * Sequenced rather than run in one block because it is the one thing in this app that takes longer
-   * than a frame: at the raster's 2× scale a change of year costs ~215 ms before the texture bake, and
-   * the bake is longer still. Each phase is announced *before* it runs, so the label names what the map
-   * is about to spend time on rather than what it has just finished.
+   * The panel is honest now because the work is genuinely elsewhere. The texture bake is one indivisible
+   * synchronous block — no amount of yielding could have kept this thread alive through it — so the bar
+   * used to stall at seventy per cent and the tab with it. What is left here is a fetch, a wait, and the
+   * two things only this thread can do: wrapping pixels into a texture and building line geometry.
    * @returns nothing; resolves once the year is on screen
    */
   const rebuildPolitical = async (): Promise<void> => {
-    const dem = heightmap
-    if (!dem) return
+    if (!heightmap) return
+    // Every await below is a place a second rebuild can start — the palette pickers fire continuously,
+    // and a year fetched from cache can overtake one still in flight. Checked before *every* side effect,
+    // not only before the state write: a stale call whose raster was correctly suppressed would otherwise
+    // still go on to overwrite the live texture and the border layer underneath the newer one.
+    const isCurrent = politicalGate.begin()
     const year = Math.round(politicalParams.year / 100) * 100
     progress.begin(`Chargement de l'année ${String(year)}…`)
     try {
       const loaded = await regionSourcePort.load(year)
-      if (isDisposed()) return
+      if (isDisposed() || !isCurrent()) return
       regionSet = loaded
 
-      // The political grid can be finer than the DEM. Anything measured in *cells* has to scale with it
-      // or it silently changes meaning — `snapToCoast` above all, whose reach in kilometres would halve
-      // and leave the colours stopping short of the coastline again.
-      const scale = Math.max(1, Math.round(politicalParams.rasterScale))
-      progress.report(0.15, 'Tracé des territoires…')
-      await nextFrame()
-      if (isDisposed()) return
-      const claimed = rasteriseRegions(
-        loaded.regions,
-        dem.meta.width * scale,
-        dem.meta.height * scale
+      // The panel spans two jobs, so each reports into its own slice of the bar rather than being told
+      // where it sits in a sequence it knows nothing about.
+      const report: ProgressReport = (fraction, phase) => {
+        progress.report(fraction, COMPUTE_PHASE_LABELS[phase])
+      }
+
+      const result = await compute.computePolitical(
+        {
+          regions: loaded.regions,
+          rasterScale: politicalParams.rasterScale,
+          snapToCoast: politicalParams.snapToCoast,
+          colorBySuzerain: politicalParams.colorBySuzerain,
+          palette: politicalPalette(politicalParams).map(hexToRgb),
+          borderSmoothing: politicalParams.borderSmoothing,
+        },
+        scaleProgress(report, POLITICAL_SPLIT.fetch, POLITICAL_SPLIT.compute)
       )
+      if (isDisposed() || !isCurrent()) return
+      regionRaster = rasterFromResult(result)
+      derivedBorders = result.borders
 
-      // Grow the claims over any land the schematic polygons missed, so the coloured areas end on our
-      // coastline rather than on theirs. The longest phase by far: it walks every land cell.
-      const mask = landMask
-      progress.report(0.3, 'Extension jusqu’aux côtes…')
-      await nextFrame()
-      if (isDisposed()) return
-      regionRaster = mask
-        ? expandRegionsOverLand(
-            claimed,
-            (u, v) => mask.isLand(u, v),
-            politicalParams.snapToCoast * scale
-          )
-        : claimed
+      await rebuildTexture(scaleProgress(report, POLITICAL_SPLIT.compute, POLITICAL_SPLIT.bake))
+      if (isDisposed() || !isCurrent()) return
 
-      // Colouring reads adjacency off the raster, so it has to run after the claims have grown: two
-      // polities may only become neighbours once they both reach the coast.
-      progress.report(0.55, 'Attribution des couleurs…')
-      await nextFrame()
-      if (isDisposed()) return
-      const named = loaded.regions.map((region) => ({
-        name: politicalParams.colorBySuzerain ? (region.subjectTo ?? region.name) : region.name,
-      }))
-      regionTints = assignRegionColors(
-        regionRaster,
-        named,
-        politicalPalette(politicalParams).map(hexToRgb),
-        pinnedRegionColor
-      )
-
-      progress.report(0.7, 'Composition de la texture…')
-      await nextFrame()
-      if (isDisposed()) return
-      rebuildTexture()
-
-      progress.report(0.92, 'Tracé des frontières…')
-      await nextFrame()
-      if (isDisposed()) return
       rebuildBorders()
       progress.report(1)
     } catch (error: unknown) {
       console.error(`political layer ${String(year)} failed to load`, error)
     } finally {
       progress.end()
+    }
+  }
+
+  /**
+   * Re-trace the border lines from the grid the compute already holds, then redraw them.
+   *
+   * The one border tunable that changes geometry rather than paint. It costs a trace, not a year: the
+   * raster is not touched.
+   * @returns once the lines are back on screen
+   */
+  const rebuildBorderGeometry = async (): Promise<void> => {
+    if (!regionSet) return
+    try {
+      const traced = await compute.deriveBorders(politicalParams.borderSmoothing)
+      if (isDisposed()) return
+      derivedBorders = traced
+      rebuildBorders()
+    } catch (error: unknown) {
+      console.error('border derivation failed', error)
     }
   }
 
@@ -595,16 +665,19 @@ function bootstrap(): () => void {
   const heightmapSource = createFetchHeightmapSource('/heightmaps/europe-dem-z5')
   void heightmapSource
     .load()
-    .then((loaded) => {
+    .then(async (loaded) => {
       if (disposed) return // teardown ran mid-load → don't add an orphan mesh to a dead scene
       heightmap = loaded
-      rebuildTexture()
+      // The compute has to hold the elevation before anything asks it to bake with it.
+      await pushSources()
+      if (isDisposed()) return
+      requestTexture()
       rebuildRelief()
       rebuildCoastline()
       rebuildRhumb()
       rebuildRivers() // no-op until the river payload lands; whichever finishes last draws them
       rebuildRose()
-      void rebuildPolitical()
+      await rebuildPolitical()
     })
     .catch((error: unknown) => {
       console.error('relief load failed', error)
@@ -614,17 +687,20 @@ function bootstrap(): () => void {
   // visibly wrong in the Netherlands, but running beats a blank canvas.
   void createFetchLandMaskSource('/masks/europe-land')
     .load()
-    .then((loaded) => {
+    .then(async (loaded) => {
       if (disposed) return
       landMask = loaded
       if (!heightmap) return
-      rebuildTexture()
+      await pushSources()
+      if (isDisposed()) return
+      requestTexture()
       rebuildCoastline()
       rebuildRhumb()
       rebuildRivers()
       // The mask is what lets the borders tell open sea from land nobody claims: without it there is no
-      // frontier line at all, and the ring path still carries every coastal segment.
-      rebuildBorders()
+      // frontier line at all. The lines have to be traced again, not merely redrawn — the compute traced
+      // the ones it has while it was still mask-blind.
+      await rebuildBorderGeometry()
     })
     .catch((error: unknown) => {
       console.error('land mask load failed — falling back to the 0 m contour', error)
@@ -657,7 +733,7 @@ function bootstrap(): () => void {
     debug,
     callbacks: {
       rebuildRelief,
-      rebuildTexture,
+      rebuildTexture: requestTexture,
       rebuildCoastline,
       rebuildRhumb,
       rebuildRivers,
@@ -665,6 +741,9 @@ function bootstrap(): () => void {
         void rebuildPolitical()
       },
       rebuildBorders,
+      rebuildBorderGeometry: () => {
+        void rebuildBorderGeometry()
+      },
       rebuildRose,
       setWireframe: (value: boolean): void => {
         if (relief) relief.material.wireframe = value
@@ -799,6 +878,9 @@ function bootstrap(): () => void {
     window.removeEventListener('beforeunload', saveCamera)
     window.removeEventListener('resize', onResize)
     controls.dispose()
+    // Terminate the worker before anything else: it is the only part of this that outlives the page's
+    // own teardown if left alone, and a bake in flight has nothing left to hand its pixels to.
+    compute.dispose()
     gui.destroy()
     progress.dispose()
     stats.dom.remove()

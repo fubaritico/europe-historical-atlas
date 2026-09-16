@@ -27,6 +27,9 @@ function transferable(view: { buffer: ArrayBufferLike }): Transferable[] {
 export function serveCompute(scope: WorkerScope, compute: MapCompute): void {
   scope.addEventListener('message', (event: MessageEvent<ComputeCommand>) => {
     const command = event.data
+    // Captured before the switch narrows it away: in the unreachable tail below, `command` is `never`,
+    // which is precisely the type that has nothing left to name in an error message.
+    const kind: string = command.kind
     const onProgress: ProgressReport = (fraction, phase) => {
       scope.postMessage({ kind: 'progress', id: command.id, fraction, phase })
     }
@@ -62,6 +65,12 @@ export function serveCompute(scope: WorkerScope, compute: MapCompute): void {
           compute.dispose()
           return { payload: { kind: 'ack' }, transfer: [] }
       }
+      // Unreachable while both sides share `computeProtocol`. A worker bundle that had drifted out of
+      // step would land here, and falling off the end of the switch is the worst of the three possible
+      // outcomes: `run()` would resolve to `undefined`, the destructuring below would throw *inside* the
+      // success handler where the rejection handler cannot see it, and the caller's promise would stay
+      // pending for the life of the page. Failing loudly is what makes that a caught error instead.
+      throw new Error(`map compute: unknown command ${kind}`)
     }
 
     void run().then(

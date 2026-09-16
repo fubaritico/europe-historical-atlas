@@ -14,12 +14,6 @@ import {
   UnsignedByteType,
 } from 'three'
 
-import { composeTerrainRgba, terrainTextureSize } from '../pipeline/terrainCompose'
-
-import type { Heightmap } from '../data/heightmap'
-import type { LandMask } from '../data/landMask'
-import type { AreaTint, TerrainTextureOptions } from '../pipeline/terrainCompose'
-
 /**
  * Wrap an already-composited RGBA buffer as a {@link DataTexture} ready to drop onto an unlit material's
  * `map`. This is the seam a worker bake returns through: the worker produces the bytes, the renderer owns
@@ -40,27 +34,4 @@ export function wrapTerrainTexture(rgba: Uint8Array, width: number, height: numb
   texture.generateMipmaps = true
   texture.needsUpdate = true
   return texture
-}
-
-/**
- * Composite the terrain on the calling thread and wrap it as a texture. The synchronous path — kept for
- * callers with no worker to hand, and the reference the worker bake is checked against.
- * @param heightmap - the elevation source
- * @param options - the texture options
- * @param landMask - which cells are land; falls back to thresholding elevation when omitted
- * @param areaTint - an optional colour claimed over part of the map (the political layer)
- * @returns the terrain texture (sRGB, mipmapped, sized by `supersample`)
- */
-export function createTerrainTexture(
-  heightmap: Heightmap,
-  options: TerrainTextureOptions,
-  landMask?: LandMask,
-  areaTint?: AreaTint
-): DataTexture {
-  const { width, height } = terrainTextureSize(heightmap, options)
-  return wrapTerrainTexture(
-    composeTerrainRgba(heightmap, options, landMask, areaTint),
-    width,
-    height
-  )
 }

@@ -797,3 +797,58 @@ export function asGroup(
 ): { title: string; keys: PropertyKey[] } {
   return { title, keys: [...keys] }
 }
+
+/**
+ * What changing a political tunable actually costs.
+ *
+ * - `redraw` — the lines are rebuilt from geometry already traced. Paint only.
+ * - `trace` — the lines are traced again from the political grid already held. No year is refetched.
+ * - `full`  — the year is fetched, rasterised, grown, coloured and baked again.
+ */
+export type PoliticalRebuild = 'redraw' | 'trace' | 'full'
+
+/**
+ * Tunables that only change how the border lines are *painted*.
+ *
+ * Written as what may take the cheap path rather than what must not, so a tunable added later defaults
+ * to correct-but-slower instead of silently doing nothing. That default is not theoretical: this table
+ * has failed twice — once leaving the river sliders inert, once routing `snapToCoast` and the palette
+ * slots to a rebuild that re-rasterises nothing.
+ */
+const POLITICAL_REDRAW_ONLY: readonly (keyof PoliticalDevParams)[] = [
+  'showBorders',
+  'borderSource',
+  'borderOnTop',
+  'borderColor',
+  'borderOpacity',
+  'borderWidth',
+  'borderEdgeColor',
+  'borderEdgeWidth',
+  'showFrontier',
+  'frontierColor',
+  'frontierOpacity',
+  'frontierWidth',
+  'borderDashSize',
+  'borderDashGap',
+  'borderDoubleGap',
+  'borderWidthZoomOut',
+  'borderOpacityZoomOut',
+  'borderInlayZoom',
+]
+
+/** Tunables that change the border *geometry*, but not the grid it is traced from. */
+const POLITICAL_TRACE_ONLY: readonly (keyof PoliticalDevParams)[] = ['borderSmoothing']
+
+/**
+ * The rebuild a political tunable needs.
+ *
+ * A pure lookup rather than a dispatch buried in the panel, so a test can walk every key of
+ * {@link PoliticalDevParams} and see where each one lands — which is the check that was missing both
+ * times this routing broke.
+ * @param key - the tunable that changed
+ * @returns the cheapest rebuild that is still correct for it
+ */
+export function politicalRebuildFor(key: keyof PoliticalDevParams): PoliticalRebuild {
+  if (POLITICAL_TRACE_ONLY.includes(key)) return 'trace'
+  return POLITICAL_REDRAW_ONLY.includes(key) ? 'redraw' : 'full'
+}

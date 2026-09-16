@@ -4,10 +4,13 @@ import {
   ALL_CONTROL_TABLES,
   POLITICAL_CONTROLS,
   POLITICAL_CONTROL_GROUPS,
+  POLITICAL_CONTROL_ORDER,
   asGroup,
+  politicalRebuildFor,
 } from './devParams'
 import { findControlInconsistencies, findGroupingProblems } from './utils/controlSpec'
 
+import type { PoliticalDevParams } from './devParams'
 import type { ControlSpec } from './utils/controlSpec'
 
 describe('devParams control tables', () => {
@@ -106,5 +109,68 @@ describe('POLITICAL_CONTROL_GROUPS', () => {
   it('keeps every group small enough to read at a glance', () => {
     // The whole point of splitting was that a flat list of twenty-odd knobs is a haystack.
     for (const group of POLITICAL_CONTROL_GROUPS) expect(group.keys.length).toBeLessThanOrEqual(8)
+  })
+})
+
+describe('politicalRebuildFor', () => {
+  describe('happy path', () => {
+    it('gives every political tunable a rebuild', () => {
+      for (const key of POLITICAL_CONTROL_ORDER) {
+        expect(['redraw', 'trace', 'full']).toContain(politicalRebuildFor(key))
+      }
+    })
+  })
+
+  describe('variants', () => {
+    it('sends the year, the colouring and the grid all the way through', () => {
+      // The 2026-09-16 regression in one assertion: `snapToCoast` and the palette slots were routed to a
+      // rebuild that re-rasterises nothing, so they did nothing at all.
+      const mustRecompute: (keyof PoliticalDevParams)[] = [
+        'year',
+        'snapToCoast',
+        'colorBySuzerain',
+        'rasterScale',
+        'palette1',
+        'palette2',
+        'palette3',
+        'palette4',
+        'palette5',
+        'palette6',
+        'palette7',
+        'palette8',
+      ]
+      for (const key of mustRecompute) expect(politicalRebuildFor(key)).toBe('full')
+    })
+
+    it('traces again for smoothing, which moves the line without touching the grid', () => {
+      expect(politicalRebuildFor('borderSmoothing')).toBe('trace')
+    })
+
+    it('only repaints for a stroke colour or width', () => {
+      for (const key of ['borderColor', 'borderWidth', 'frontierOpacity'] as const) {
+        expect(politicalRebuildFor(key)).toBe('redraw')
+      }
+    })
+  })
+
+  // L3/L4: N/A — a total lookup over a key union; an unknown key cannot be constructed.
+
+  describe('edge cases', () => {
+    it('defaults an unlisted tunable to the full rebuild, not to doing nothing', () => {
+      // The safe default is the whole point: a tunable added later must come out correct-but-slower
+      // rather than silently inert, which is how two sets of sliders were lost.
+      const unlisted = 'aTunableNobodyHasWrittenYet' as keyof PoliticalDevParams
+      expect(politicalRebuildFor(unlisted)).toBe('full')
+    })
+
+    it('never routes a key to two different rebuilds', () => {
+      const seen = new Map<string, string>()
+      for (const key of POLITICAL_CONTROL_ORDER) {
+        const rebuild = politicalRebuildFor(key)
+        expect(seen.get(key) ?? rebuild).toBe(rebuild)
+        seen.set(key, rebuild)
+      }
+      expect(seen.size).toBe(new Set(POLITICAL_CONTROL_ORDER).size)
+    })
   })
 })

@@ -244,6 +244,34 @@ describe('createWorkerMapCompute', () => {
       expect(onFatal).toHaveBeenCalledTimes(1)
     })
 
+    it('answers a command it does not recognise, rather than leaving the caller waiting', async () => {
+      const held: { listener: ((event: MessageEvent<ComputeCommand>) => void) | null } = {
+        listener: null,
+      }
+      const posted: ComputeEvent[] = []
+      serveCompute(
+        {
+          addEventListener: (_type, next): void => {
+            held.listener = next
+          },
+          postMessage: (event): void => {
+            posted.push(event)
+          },
+        },
+        createInlineMapCompute()
+      )
+      // A worker bundle that has drifted from this one: a command kind this build has never heard of.
+      const strange = { kind: 'resample', id: 1 } as unknown as ComputeCommand
+      held.listener?.({ data: strange } as MessageEvent<ComputeCommand>)
+
+      await vi.waitFor(() => {
+        expect(posted).toHaveLength(1)
+      })
+      // Falling off the end of the switch would have resolved `run()` to undefined, thrown inside the
+      // success handler where no rejection handler can see it, and left the caller pending forever.
+      expect(posted[0]).toMatchObject({ kind: 'failed', id: 1 })
+    })
+
     it('ignores an answer to a call it is not waiting for', async () => {
       const link = loopback(createInlineMapCompute())
       const client = createWorkerMapCompute({ spawn: () => link.handle })

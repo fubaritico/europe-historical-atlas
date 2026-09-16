@@ -17,6 +17,7 @@ import {
   RIVER_CONTROL_ORDER,
   ROSE_CONTROLS,
   ROSE_CONTROL_ORDER,
+  politicalRebuildFor,
 } from './devParams'
 import { TERRAIN_CONTROLS, TERRAIN_CONTROL_GROUPS } from './pipeline/terrainCompose'
 
@@ -25,6 +26,7 @@ import type {
   CoastlineDevParams,
   ExtentDevParams,
   PoliticalDevParams,
+  PoliticalRebuild,
   ReliefDevParams,
   RhumbDevParams,
   RiverDevParams,
@@ -95,8 +97,10 @@ export interface DevPanelCallbacks {
   rebuildRivers: () => void
   /** Reload and re-rasterise the political overlay (year or colouring changed). */
   rebuildPolitical: () => void
-  /** Rebuild the border lines only (styling changed). */
+  /** Redraw the border lines from the geometry already traced (styling changed). */
   rebuildBorders: () => void
+  /** Trace the border lines again from the political grid already held (smoothing changed). */
+  rebuildBorderGeometry: () => void
   /** Update the live river material colour. */
   setRiverColor: (color: string) => void
   /** Rebuild the compass rose (colours / labels / size / lift changed). */
@@ -329,36 +333,17 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     addControl(riverFolder, river, key, RIVER_CONTROLS[key], riverEffect(key), key === 'color')
   riverFolder.close()
 
-  // Historical political overlay. Only the line styling can get away with rebuilding the lines alone;
-  // everything else — the year, the colouring, how far claims grow, the palette — changes the raster or
-  // the tints and has to go all the way through. The list is written as what *may* take the cheap path
-  // rather than what must not, so a tunable added later defaults to the correct-but-slower effect
-  // instead of silently doing nothing (the hole the inert river sliders went through). The tint's
-  // strength and blend mode live in the texture folder, with the layers they are composited among.
-  const borderOnly = new Set<keyof PoliticalDevParams>([
-    'showBorders',
-    'borderSource',
-    'borderSmoothing',
-    'borderOnTop',
-    'borderColor',
-    'borderOpacity',
-    'borderWidth',
-    'borderEdgeColor',
-    'borderEdgeWidth',
-    'showFrontier',
-    'frontierColor',
-    'frontierOpacity',
-    'frontierWidth',
-    'borderDashSize',
-    'borderDashGap',
-    'borderDoubleGap',
-    'borderWidthZoomOut',
-    'borderOpacityZoomOut',
-    'borderInlayZoom',
-  ])
+  // Historical political overlay. Which rebuild each tunable needs is declared in `devParams`, beside the
+  // control table itself, so it can be walked key by key in a test — this panel has no tests, and this
+  // routing is exactly what broke silently twice. Here we only turn that answer into a callback.
   const politicalFolder = gui.addFolder('political (historical)')
+  const politicalEffects: Record<PoliticalRebuild, () => void> = {
+    redraw: callbacks.rebuildBorders,
+    trace: callbacks.rebuildBorderGeometry,
+    full: callbacks.rebuildPolitical,
+  }
   const politicalEffect = (key: keyof PoliticalDevParams): (() => void) =>
-    borderOnly.has(key) ? callbacks.rebuildBorders : callbacks.rebuildPolitical
+    politicalEffects[politicalRebuildFor(key)]
   // Grouped like the texture folder: a flat list of twenty-odd tunables stops being a panel and becomes
   // a haystack, and the first thing lost is knowing which knob to reach for.
   for (const group of POLITICAL_CONTROL_GROUPS) {
