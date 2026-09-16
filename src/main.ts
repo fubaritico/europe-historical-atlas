@@ -459,16 +459,24 @@ function bootstrap(): () => void {
         regionSet = loaded
         // Rasterised at the DEM's own grid: political areas are large, and the crisp edge the eye reads
         // is the border line drawn on top, not the boundary of the tint underneath.
+        // The political grid can be finer than the DEM. Anything measured in *cells* has to scale with
+        // it or it silently changes meaning — `snapToCoast` above all, whose reach in kilometres would
+        // halve and leave the colours stopping short of the coastline again.
+        const scale = Math.max(1, Math.round(politicalParams.rasterScale))
         const claimed = rasteriseRegions(
           loaded.regions,
-          heightmap?.meta.width ?? 1,
-          heightmap?.meta.height ?? 1
+          (heightmap?.meta.width ?? 1) * scale,
+          (heightmap?.meta.height ?? 1) * scale
         )
         // Grow the claims over any land the schematic polygons missed, so the coloured areas end on our
         // coastline rather than on theirs.
         const mask = landMask
         regionRaster = mask
-          ? expandRegionsOverLand(claimed, (u, v) => mask.isLand(u, v), politicalParams.snapToCoast)
+          ? expandRegionsOverLand(
+              claimed,
+              (u, v) => mask.isLand(u, v),
+              politicalParams.snapToCoast * scale
+            )
           : claimed
         // Colouring reads adjacency off the raster, so it has to run after the claims have grown: two
         // polities may only become neighbours once they both reach the coast.

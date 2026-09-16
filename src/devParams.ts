@@ -315,6 +315,18 @@ export interface PoliticalDevParams {
    * switch only long enough to compare the two on screen.
    */
   borderSource: 'raster' | 'rings'
+  /**
+   * How fine the political grid is, as a multiple of the DEM.
+   *
+   * This is the resolution of the staircase, and the only lever that flattens it without a trade-off:
+   * the coloured areas and the border lines both come out of this one grid, so they stay together by
+   * construction. A DEM cell is ~7.6 km at 45°N, so 2 halves the step and 4 quarters it — at four and
+   * sixteen times the cells to rasterise, expand, colour and walk.
+   *
+   * The same number decides the Cartographer's painting grid (roadmap chapter 06): one grid, asked about
+   * in two places, and a cell is the finest border either can express.
+   */
+  rasterScale: number
   /** Chaikin rounds applied to raster-derived borders — 0 shows the raw ~7 km cell staircase. */
   borderSmoothing: number
   /**
@@ -418,6 +430,7 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   year: 1500,
   showBorders: true,
   borderSource: 'raster',
+  rasterScale: 2,
   // Two rounds is where the cell staircase stops reading as pixels and starts reading as a drawn line;
   // a third gains almost nothing and rounds real corners off.
   borderSmoothing: 2,
@@ -474,6 +487,7 @@ export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
   year: { kind: 'number', min: 100, max: 2000, step: 100, label: 'year (CE)' },
   showBorders: { kind: 'boolean', label: 'draw borders' },
   borderSource: { kind: 'choice', options: ['raster', 'rings'], label: 'border source' },
+  rasterScale: { kind: 'number', min: 1, max: 4, step: 1, label: 'raster scale (× DEM)' },
   borderSmoothing: { kind: 'number', min: 0, max: 4, step: 1, label: 'border smoothing' },
   borderOnTop: { kind: 'boolean', label: 'borders over relief' },
   borderColor: { kind: 'hexColor', label: 'border core colour' },
@@ -560,7 +574,7 @@ export const POLITICAL_CONTROL_GROUPS: ControlGroup<PoliticalDevParams>[] = [
   },
   {
     title: '6 \u00b7 geometry',
-    keys: ['borderSource', 'borderSmoothing'],
+    keys: ['borderSource', 'rasterScale', 'borderSmoothing'],
   },
   {
     title: '7 \u00b7 palette',
@@ -584,6 +598,7 @@ export const POLITICAL_CONTROL_ORDER: (keyof PoliticalDevParams)[] = [
   'colorBySuzerain',
   'showBorders',
   'borderSource',
+  'rasterScale',
   'borderSmoothing',
   'borderOnTop',
   'borderColor',

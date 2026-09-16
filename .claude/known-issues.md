@@ -28,7 +28,15 @@ Put here the know issues to avoid cluttering the context window.
   is exactly what must survive. Both knobs were removed rather than left off.
   **The fix with no trade-off is a finer political raster**: the fill and the line both come out of that
   grid, so they stay together by construction. It also answers the Cartographer's grid-resolution
-  question in roadmap chapter 06 — one grid, asked about in two places.
+  question in roadmap chapter 06 — one grid, asked about in two places. Measured on 1700 (rasterise +
+  expand + derive borders), which is what a change of year costs:
+  | scale | grid | step | time | segments |
+  |---|---|---|---|---|
+  | 1× | 1280×1164, 1.5 M cells | 7.6 km | 95 ms | 29 418 |
+  | 2× | 2560×2328, 6.0 M cells | 3.8 km | 215 ms | 62 459 |
+  | 4× | 5120×4656, 23.8 M cells | 1.9 km | 825 ms | 130 877 |
+  The expansion dominates, not the rasterising — it is a breadth-first walk over every land cell, so it
+  grows with the area while the rasterising grows with the perimeter.
   **Gotcha when changing it**: everything measured in *cells* must scale with it, `snapToCoast` above
   all, or its reach in kilometres silently halves and the colours stop short of the coastline again.
 - **Islands no polygon claims stay uncoloured** (Balearics, Aegean): `expandRegionsOverLand` walks over
