@@ -46,7 +46,7 @@ import { generateRhumbSegments } from './scene/rhumbNetwork'
 import { createRiverLayer } from './scene/riverLayer'
 import { DEFAULT_TERRAIN_OPTIONS, createTerrainTexture } from './scene/terrainTexture'
 import { hexToRgb } from './utils/color'
-import { clamp01, lerp } from './utils/math'
+import { lerp } from './utils/math'
 
 import type { MapRect } from './controls/mapControls'
 import type { BorderPattern } from './data/borderStyles'
@@ -207,46 +207,8 @@ function bootstrap(): () => void {
   // The seam the compositor sees: a colour claimed at a coordinate, and nothing about history.
   const areaTint: AreaTint = {
     at: (u, v) => {
-      const raster = regionRaster
-      if (!raster) return null
-      const softness = politicalParams.tintEdgeSoftness
-      if (softness <= 0) {
-        const index = raster.indexAt(u, v)
-        return index < 0 ? null : (regionTints[index] ?? null)
-      }
-      // Soften the colour boundary over the same width the line is allowed to wander, so the two stay
-      // together. The ramp is the bilinear weight sharpened by `softness`: at 0 it is a step and the
-      // boundary is the raw cell edge, at 1 it spans a full cell. Anything narrower than that keeps a
-      // one-cell territory readable, which is the whole risk here.
-      const fx = Math.min(raster.width - 1, Math.max(0, u * (raster.width - 1)))
-      const fy = Math.min(raster.height - 1, Math.max(0, v * (raster.height - 1)))
-      const x0 = Math.min(raster.width - 2, Math.floor(fx))
-      const y0 = Math.min(raster.height - 2, Math.floor(fy))
-      const ramp = (t: number): number => clamp01((t - 0.5) / softness + 0.5)
-      const tx = ramp(fx - x0)
-      const ty = ramp(fy - y0)
-      let r = 0
-      let g = 0
-      let b = 0
-      let total = 0
-      for (const [dx, dy, weight] of [
-        [0, 0, (1 - tx) * (1 - ty)],
-        [1, 0, tx * (1 - ty)],
-        [0, 1, (1 - tx) * ty],
-        [1, 1, tx * ty],
-      ] as const) {
-        if (weight <= 0) continue
-        const index = raster.cells[(y0 + dy) * raster.width + (x0 + dx)] ?? -1
-        const tint = index < 0 ? null : (regionTints[index] ?? null)
-        if (!tint) continue
-        r += tint.r * weight
-        g += tint.g * weight
-        b += tint.b * weight
-        total += weight
-      }
-      // Unclaimed neighbours contribute nothing rather than pulling the colour toward the parchment:
-      // a coast would otherwise wash out exactly where the tint should stay firm.
-      return total > 0 ? { r: r / total, g: g / total, b: b / total } : null
+      const index = regionRaster?.indexAt(u, v) ?? -1
+      return index < 0 ? null : (regionTints[index] ?? null)
     },
   }
   let riverData: Awaited<ReturnType<ReturnType<typeof createFetchRiverSource>['load']>> = []
@@ -446,7 +408,6 @@ function bootstrap(): () => void {
       raster && politicalParams.borderSource === 'raster'
         ? extractRegionBorders(raster, {
             smoothing: politicalParams.borderSmoothing,
-            simplifyCells: politicalParams.borderSimplify,
             ...(mask ? { isLand: (u: number, v: number) => mask.isLand(u, v) } : {}),
           })
         : {
