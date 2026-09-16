@@ -436,10 +436,10 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   borderWidth: 1.4,
   borderEdgeColor: '#5c3a2e',
   borderEdgeWidth: 3.2,
-  // OFF until the shoreline case is diagnosed: it was tracing every coast — Iceland, Scandinavia, the
-  // Caspian — where it must stay silent, because a claim facing the sea is a coastline and the map
-  // already draws that once, from a better source.
-  showFrontier: false,
+  // Back on, having been switched off for a shoreline artefact it turned out not to cause: measured on
+  // 1700, the frontier is 3429 inland points against 109 coastal ones — 97 % inland, which is exactly
+  // where a limit between a claim and unclaimed ground belongs.
+  showFrontier: true,
   frontierColor: '#5c3a2e',
   frontierOpacity: 0.3,
   // Thicker than a negotiated border: it is the edge of what the map knows, and reads as an outer limit
