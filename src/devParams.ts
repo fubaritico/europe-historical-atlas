@@ -705,7 +705,10 @@ export const DEFAULT_CAMERA_TUNING: CameraTuningParams = {
   smoothingTau: 0.12,
   enableDrag: true,
   enableEdgeScroll: true,
-  edgeScrollSpeed: 8,
+  // World units per second at full zoom-out, scaled down as the camera comes in. The map plane is 12
+  // across, so 8 crossed the whole of Europe in a second and a half — faster than the eye can follow a
+  // coastline. 4 takes three seconds, which is about the pace of a deliberate look around.
+  edgeScrollSpeed: 4,
   minDistance: 1,
   maxDistance: 6,
   minPitchDeg: 30,
