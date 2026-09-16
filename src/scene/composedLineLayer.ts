@@ -190,10 +190,13 @@ export interface ComposedLineLayer {
    * Live, because `linewidth` is a shader uniform — which is what lets the line thin out as the camera
    * pulls back without a single geometry rebuild. Relative weights are preserved, so a casing stays
    * proportionally wider than its core at every scale.
+   * A patterned pass takes its own multiplier, because it does not want the same relationship to the
+   * camera as a plain line: it has to hold its weight at continent scale and thin out close up.
    * @param scale - multiplier on each pass's built width
+   * @param patternScale - multiplier for the patterned passes; defaults to `scale`
    * @returns nothing
    */
-  setWidthScale(scale: number): void
+  setWidthScale(scale: number, patternScale?: number): void
   /**
    * Scale the opacity of the light inlay passes alone, leaving edges, patterns and frontiers as built.
    *
@@ -296,9 +299,10 @@ export function buildBorderStrokes(
       strokes.push({
         segments,
         color: style.edgeColor,
-        // The core's weight, not the edge's: a broken line reads heavier than a continuous one at the
-        // same width, because each dash carries its own two ends.
-        width: style.coreWidth,
+        // Built at the edge's weight so it matches a plain border at continent scale; the caller thins it
+        // as the camera comes in, where a broken line reads heavier than a continuous one of the same
+        // width because every dash carries its own two ends.
+        width: style.edgeWidth,
         opacity: style.opacity,
         dashed,
         role: 'pattern',
@@ -363,8 +367,9 @@ export function createComposedLineLayer(
     setResolution(viewportWidth: number, viewportHeight: number): void {
       for (const { layer } of layers) layer.setResolution(viewportWidth, viewportHeight)
     },
-    setWidthScale(scale: number): void {
-      for (const { layer, stroke } of layers) layer.setWidth(stroke.width * scale)
+    setWidthScale(scale: number, patternScale?: number): void {
+      for (const { layer, stroke } of layers)
+        layer.setWidth(stroke.width * (stroke.role === 'pattern' ? (patternScale ?? scale) : scale))
     },
     setInlayOpacity(scale: number): void {
       for (const { layer, stroke } of layers)

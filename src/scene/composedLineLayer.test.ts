@@ -122,8 +122,8 @@ describe('composedLineLayer', () => {
       expect(dashedStrokes.map((s) => s.role)).toEqual(['pattern'])
       // Brown, not cream: the same ink as a plain border's edge, at every scale.
       expect(dashedStrokes[0]?.color).toBe(STYLE.edgeColor)
-      // But the core's weight — a broken line reads heavier than a continuous one at the same width.
-      expect(dashedStrokes[0]?.width).toBe(STYLE.coreWidth)
+      // Built at the edge's weight, so it matches a plain border at continent scale.
+      expect(dashedStrokes[0]?.width).toBe(STYLE.edgeWidth)
       expect(buildBorderStrokes(borders(1, 0), STYLE, () => 'double').map((s) => s.role)).toEqual([
         'pattern',
       ])
@@ -213,6 +213,28 @@ describe('composedLineLayer', () => {
         STYLE.edgeWidth * 0.5,
         STYLE.coreWidth * 0.5,
       ])
+      layer.dispose()
+    })
+
+    it('gives a patterned pass its own relationship to the camera', () => {
+      // A plain border grows with the zoom; a patterned one has to hold its weight at continent scale
+      // and thin out close up, or the dashes read as blocks.
+      const layer = createComposedLineLayer(
+        buildBorderStrokes(borders(1, 0), STYLE, () => 'dashed'),
+        { project }
+      )
+      layer.setWidthScale(1, 0.5)
+      expect(liveValues(layer, 'linewidth')).toEqual([STYLE.edgeWidth * 0.5])
+      layer.dispose()
+    })
+
+    it('falls back to the shared scale when no pattern scale is given', () => {
+      const layer = createComposedLineLayer(
+        buildBorderStrokes(borders(1, 0), STYLE, () => 'dashed'),
+        { project }
+      )
+      layer.setWidthScale(0.25)
+      expect(liveValues(layer, 'linewidth')).toEqual([STYLE.edgeWidth * 0.25])
       layer.dispose()
     })
 

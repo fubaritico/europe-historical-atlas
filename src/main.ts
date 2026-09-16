@@ -706,7 +706,13 @@ function bootstrap(): () => void {
     // than as one border — so the whole thing thins out and the casing fades away as the camera pulls
     // back. Both are live material uniforms, so nothing is rebuilt while zooming.
     if (borders) {
-      borders.setWidthScale(lerp(politicalParams.borderWidthZoomOut, 1, controls.zoom))
+      // A patterned border holds a plain border's weight at continent scale, then thins to the core's
+      // weight close up — hence the ratio rather than a knob: it is the same 1.4 px the inlay uses.
+      const patternAtZoomIn = politicalParams.borderWidth / politicalParams.borderEdgeWidth
+      borders.setWidthScale(
+        lerp(politicalParams.borderWidthZoomOut, 1, controls.zoom),
+        lerp(politicalParams.borderWidthZoomOut, patternAtZoomIn, controls.zoom)
+      )
       borders.setOpacityScale(lerp(politicalParams.borderOpacityZoomOut, 1, controls.zoom))
       borders.setInlayOpacity(inlayOpacityScale(controls.zoom, politicalParams.borderInlayZoom))
     }
