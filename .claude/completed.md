@@ -2,6 +2,48 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-09-16 (midi + soirée) — Frontières dérivées du raster, types de frontières, doctrine de revue, overlay
+
+18 commits `df3390d`..`b8eeaa8`, **245 → 351 tests**, gate verte à chaque pas. Deux plages : une à midi
+(1 commit), une de **21:14 à 23:53 — 2 h 40, 17 commits**, coupure de 8 h 28 entre les deux. *Durées
+tirées de git : le journal d'activité a été installé en fin de session et ne la couvre pas.*
+
+- **Cause racine des frontières interrompues** (`df3390d`) — ni la taille des polities, ni le relief, ni
+  le diagnostic consigné la veille. `separatesRegions` sondait **2 cellules** de part et d'autre d'un ring
+  pendant que `snapToCoast` faisait croître chaque revendication de **5 à 12**. Le vrai défaut : **deux
+  sources de vérité pour un seul objet** — aplats venant du raster, traits venant des rings.
+- **`extractRegionBorders`** — arêtes partagées entre cellules d'indices différents, chaînées sur un
+  **treillis d'entiers doublés** (les coins coïncident exactement, aucun epsilon), puis lissées par
+  Chaikin. **Sans trou par construction.** Mesuré à 1700 : 6 960 segments bruts, 28 329 après deux tours,
+  7–30 ms, contre ~42 661 sommets pour l'ancien chemin.
+- **Groupées par couple de polities et rendues en chaînes** (`61fbd52`) — pas en segments : un pointillé
+  doit courir *le long* d'une frontière, un décalage parallèle a besoin des voisins de chaque sommet.
+- **Types de frontière** — `data/borderStyles` (`solid | dashed | double`), table éditoriale à côté des
+  couleurs. Piège attrapé sur données réelles : `Poland-Lithuania` satisfait **les deux moitiés** de sa
+  propre règle, donc deux fragments homonymes auraient été séparés d'un pointillé absurde.
+- **`scene/composedLineLayer`** — rôles `edge`/`inlay`/`pattern`/`frontier`, poignée unique (un `Group`)
+  au lieu d'une liste itérée au redimensionnement, à la frame et au teardown.
+- **Coupures en montagne diagnostiquées** (`7d96cb0`) — le relief est **triangulé** alors que les points
+  drapés sont posés par interpolation **bilinéaire** entre les mêmes sommets : sur une crête la surface
+  passe au-dessus de la ligne et le test de profondeur la mange. D'où `depthTest` désactivé.
+- **Frontière contre les terres non revendiquées** — `isLand` injecté. Éteinte à tort après une
+  régression côtière, **rallumée après mesure** : 3 429 points inland contre 109 côtiers, 97 % inland.
+- **Liaison au zoom** — largeur, opacité, apparition de l'inlay, et une rampe propre au trait à motif.
+  **Le brun est la constante, le crème le raffinement**, ce qui résout au passage le finding de contraste
+  (crème seul sur l'or espagnol ≈ 1,6:1 ; brun ≈ 4,9:1) sans toucher à la palette.
+- **Résolution du raster politique réglable, défaut 2×** (`bafb315`) — marche 7,6 → 3,8 km. Le seul levier
+  sans contrepartie : aplats et traits sortent de la même grille. Simplifier la ligne seule a été essayé
+  **et rejeté à l'œil** — elle quitte le pays qu'elle borde. Tableau de coûts mesuré dans known-issues.
+- **Doctrine de revue reconstruite depuis ses propres échecs** (`db2f304`) — rayon d'explosion, sévérités
+  ancrées, constat séparé du remède avec `what_breaks_if_fixed_naively`, résultat nul crédible. Plus la
+  règle qui manquait : **`bootstrap()` est le puits de modularité** de cette base (ARCH-012).
+- **Overlay de progression + pipeline séquencé** (`b8eeaa8`) — nouvelle couche `src/ui` avec sa frontière
+  ESLint, accessible dès la première ligne. Un drapeau levé avant un bloc synchrone est un drapeau que
+  personne ne voit.
+- **OpenHistoricalMap est CC0** (et non ODbL), exploitable dès ~1700 — mesuré en couverture de surface,
+  pas en nombre de polities. Chapitres de roadmap **06** (outils de contribution) et **07** (robustesse)
+  écrits.
+
 ### 2026-09-16 — Sense of time: activity log + work spans (ported from fubaritico-ds)
 
 Tooling only — **no project code touched**. Ported so this repo gets the same temporal awareness.

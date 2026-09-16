@@ -41,9 +41,14 @@ Put here the know issues to avoid cluttering the context window.
   all, or its reach in kilometres silently halves and the colours stop short of the coastline again.
 - **Islands no polygon claims stay uncoloured** (Balearics, Aegean): `expandRegionsOverLand` walks over
   land only, and BFS cannot cross the sea to reach them.
-- **Changing the political year re-bakes the whole texture** (seconds at supersample 2). Scrubbing
-  centuries smoothly would need a second transparent surface above the relief — at the cost of losing
-  `overlay` and `softLight`, which only exist in the CPU compositor.
+- **The texture bake is one indivisible synchronous block, and it is where the tab still freezes.**
+  Changing the political year now shows a progress panel and yields a frame between its five phases, so
+  the bar moves — until the bake, which cannot be split without reworking `terrainTexture` into something
+  row-wise. **It stalls at 70 %** and the page is unresponsive there. This is the case the worker exists
+  to solve (see `next.md`); until then it also caps the political raster at 2×, since 4× measured 825 ms
+  of blocking. Scrubbing centuries *smoothly* remains a separate problem: it would need a second
+  transparent surface above the relief, at the cost of `overlay` and `softLight`, which only exist in the
+  CPU compositor.
 - **`sea level (m)` no longer moves the coastline.** The land mask decides it now; the slider only sets
   the hypsometric ramp's origin. Rename or retire it before it wastes someone's afternoon.
 - **The Elbe is not bridged to its mouth** — cause unidentified (confluence wrongly detected, or the sea
