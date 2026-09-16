@@ -45,6 +45,7 @@ import { createReliefMesh, reliefWorldY } from './scene/reliefMesh'
 import { generateRhumbSegments } from './scene/rhumbNetwork'
 import { createRiverLayer } from './scene/riverLayer'
 import { DEFAULT_TERRAIN_OPTIONS, createTerrainTexture } from './scene/terrainTexture'
+import { createProgressOverlay } from './ui/progressOverlay'
 import { hexToRgb } from './utils/color'
 import { lerp } from './utils/math'
 
@@ -137,6 +138,10 @@ function bootstrap(): () => void {
   const extentRect = createDebugRect('#c0392b')
   const footprintRect = createDebugRect('#2980b9')
   scene.add(extentRect.object, footprintRect.object)
+
+  // The only DOM the app owns besides the canvas. It is also the surface roadmap chapter 07 wants for
+  // load failures — built once, for both.
+  const progress = createProgressOverlay({ host: document.body })
 
   const params: ReliefDevParams = { ...DEFAULT_RELIEF_PARAMS }
 
@@ -449,52 +454,97 @@ function bootstrap(): () => void {
 
   const regionSourcePort = createFetchRegionSource((year) => `/borders/europe-${String(year)}.json`)
 
-  const rebuildPolitical = (): void => {
-    if (!heightmap) return
+  // Yield to the browser so the progress panel can actually paint. A flag set before a synchronous
+  // block is a flag nobody sees: the frame only lands once the block is over, which is exactly when the
+  // panel is no longer wanted. Awaiting a frame between phases is what makes the bar honest.
+  // Read through a call, not the binding: across an `await`, control-flow analysis still believes the
+  // flag it narrowed cannot have changed — which is precisely what teardown does, and would turn every
+  // guard below into dead code the compiler is happy to prove.
+  const isDisposed = (): boolean => disposed
+
+  const nextFrame = (): Promise<void> =>
+    new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        resolve()
+      })
+    })
+
+  /**
+   * The political pipeline, phase by phase, reporting as it goes.
+   *
+   * Sequenced rather than run in one block because it is the one thing in this app that takes longer
+   * than a frame: at the raster's 2× scale a change of year costs ~215 ms before the texture bake, and
+   * the bake is longer still. Each phase is announced *before* it runs, so the label names what the map
+   * is about to spend time on rather than what it has just finished.
+   * @returns nothing; resolves once the year is on screen
+   */
+  const rebuildPolitical = async (): Promise<void> => {
+    const dem = heightmap
+    if (!dem) return
     const year = Math.round(politicalParams.year / 100) * 100
-    void regionSourcePort
-      .load(year)
-      .then((loaded) => {
-        if (disposed) return
-        regionSet = loaded
-        // Rasterised at the DEM's own grid: political areas are large, and the crisp edge the eye reads
-        // is the border line drawn on top, not the boundary of the tint underneath.
-        // The political grid can be finer than the DEM. Anything measured in *cells* has to scale with
-        // it or it silently changes meaning — `snapToCoast` above all, whose reach in kilometres would
-        // halve and leave the colours stopping short of the coastline again.
-        const scale = Math.max(1, Math.round(politicalParams.rasterScale))
-        const claimed = rasteriseRegions(
-          loaded.regions,
-          (heightmap?.meta.width ?? 1) * scale,
-          (heightmap?.meta.height ?? 1) * scale
-        )
-        // Grow the claims over any land the schematic polygons missed, so the coloured areas end on our
-        // coastline rather than on theirs.
-        const mask = landMask
-        regionRaster = mask
-          ? expandRegionsOverLand(
-              claimed,
-              (u, v) => mask.isLand(u, v),
-              politicalParams.snapToCoast * scale
-            )
-          : claimed
-        // Colouring reads adjacency off the raster, so it has to run after the claims have grown: two
-        // polities may only become neighbours once they both reach the coast.
-        const named = loaded.regions.map((region) => ({
-          name: politicalParams.colorBySuzerain ? (region.subjectTo ?? region.name) : region.name,
-        }))
-        regionTints = assignRegionColors(
-          regionRaster,
-          named,
-          politicalPalette(politicalParams).map(hexToRgb),
-          pinnedRegionColor
-        )
-        rebuildTexture()
-        rebuildBorders()
-      })
-      .catch((error: unknown) => {
-        console.error(`political layer ${String(year)} failed to load`, error)
-      })
+    progress.begin(`Chargement de l'année ${String(year)}…`)
+    try {
+      const loaded = await regionSourcePort.load(year)
+      if (isDisposed()) return
+      regionSet = loaded
+
+      // The political grid can be finer than the DEM. Anything measured in *cells* has to scale with it
+      // or it silently changes meaning — `snapToCoast` above all, whose reach in kilometres would halve
+      // and leave the colours stopping short of the coastline again.
+      const scale = Math.max(1, Math.round(politicalParams.rasterScale))
+      progress.report(0.15, 'Tracé des territoires…')
+      await nextFrame()
+      if (isDisposed()) return
+      const claimed = rasteriseRegions(
+        loaded.regions,
+        dem.meta.width * scale,
+        dem.meta.height * scale
+      )
+
+      // Grow the claims over any land the schematic polygons missed, so the coloured areas end on our
+      // coastline rather than on theirs. The longest phase by far: it walks every land cell.
+      const mask = landMask
+      progress.report(0.3, 'Extension jusqu’aux côtes…')
+      await nextFrame()
+      if (isDisposed()) return
+      regionRaster = mask
+        ? expandRegionsOverLand(
+            claimed,
+            (u, v) => mask.isLand(u, v),
+            politicalParams.snapToCoast * scale
+          )
+        : claimed
+
+      // Colouring reads adjacency off the raster, so it has to run after the claims have grown: two
+      // polities may only become neighbours once they both reach the coast.
+      progress.report(0.55, 'Attribution des couleurs…')
+      await nextFrame()
+      if (isDisposed()) return
+      const named = loaded.regions.map((region) => ({
+        name: politicalParams.colorBySuzerain ? (region.subjectTo ?? region.name) : region.name,
+      }))
+      regionTints = assignRegionColors(
+        regionRaster,
+        named,
+        politicalPalette(politicalParams).map(hexToRgb),
+        pinnedRegionColor
+      )
+
+      progress.report(0.7, 'Composition de la texture…')
+      await nextFrame()
+      if (isDisposed()) return
+      rebuildTexture()
+
+      progress.report(0.92, 'Tracé des frontières…')
+      await nextFrame()
+      if (isDisposed()) return
+      rebuildBorders()
+      progress.report(1)
+    } catch (error: unknown) {
+      console.error(`political layer ${String(year)} failed to load`, error)
+    } finally {
+      progress.end()
+    }
   }
 
   // World position of the compass rose (its own centre, independent of the rhumb network), lifted above
@@ -553,7 +603,7 @@ function bootstrap(): () => void {
       rebuildRhumb()
       rebuildRivers() // no-op until the river payload lands; whichever finishes last draws them
       rebuildRose()
-      rebuildPolitical()
+      void rebuildPolitical()
     })
     .catch((error: unknown) => {
       console.error('relief load failed', error)
@@ -610,7 +660,9 @@ function bootstrap(): () => void {
       rebuildCoastline,
       rebuildRhumb,
       rebuildRivers,
-      rebuildPolitical,
+      rebuildPolitical: () => {
+        void rebuildPolitical()
+      },
       rebuildBorders,
       rebuildRose,
       setWireframe: (value: boolean): void => {
@@ -747,6 +799,7 @@ function bootstrap(): () => void {
     window.removeEventListener('resize', onResize)
     controls.dispose()
     gui.destroy()
+    progress.dispose()
     stats.dom.remove()
     extentRect.dispose()
     footprintRect.dispose()

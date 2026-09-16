@@ -128,6 +128,34 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/ui/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '**/scene',
+                '**/scene/**',
+                '**/camera',
+                '**/camera/**',
+                '**/controls',
+                '**/controls/**',
+                '**/data',
+                '**/data/**',
+                '**/main',
+                '**/main.ts',
+              ],
+              message:
+                'Architecture boundary: ui/ is plain DOM over the canvas — it must know nothing of the scene, the data or what is being computed. The composition root drives it.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['src/data/**/*.ts'],
     rules: {
       'no-restricted-imports': [
