@@ -41,14 +41,34 @@ Put here the know issues to avoid cluttering the context window.
   all, or its reach in kilometres silently halves and the colours stop short of the coastline again.
 - **Islands no polygon claims stay uncoloured** (Balearics, Aegean): `expandRegionsOverLand` walks over
   land only, and BFS cannot cross the sea to reach them.
-- **The texture bake is one indivisible synchronous block, and it is where the tab still freezes.**
-  Changing the political year now shows a progress panel and yields a frame between its five phases, so
-  the bar moves — until the bake, which cannot be split without reworking `terrainTexture` into something
-  row-wise. **It stalls at 70 %** and the page is unresponsive there. This is the case the worker exists
-  to solve (see `next.md`); until then it also caps the political raster at 2×, since 4× measured 825 ms
-  of blocking. Scrubbing centuries *smoothly* remains a separate problem: it would need a second
-  transparent surface above the relief, at the cost of `overlay` and `softLight`, which only exist in the
-  CPU compositor.
+- ~~**The texture bake is one indivisible synchronous block, and it is where the tab still freezes**~~ —
+  **FIXED 2026-09-17** by moving the whole compute into a worker (`src/pipeline/`). The bake was never
+  splittable; it had to leave the thread. Two ports rather than one, because **the bake is not political**
+  — it is what the relief load, the mask load and the texture tunables trigger, and folding it into a
+  political port would have left a second bake behind for the other four callers. Consequence worth
+  keeping: **the texture sliders stopped freezing the tab too.**
+  The enabling fact was that `composeTerrainRgba` is pure — extracting it out of `scene/` into a
+  three-free `pipeline/` layer is what keeps the worker chunk at **12.6 kB with no three.js in it**
+  (measured on `pnpm build`; without the split, three ships twice).
+  **Still true**: scrubbing centuries *smoothly* is a separate problem, needing a second transparent
+  surface above the relief at the cost of `overlay` and `softLight`, which only exist in the CPU
+  compositor. And **4× is no longer ruled out** — it was rejected for blocking 825 ms, which is no longer
+  this thread's problem. Not yet tried.
+- **Only the newest call may write back, and it must be checked after *every* `await`.** Once the compute
+  went async, two overlapping rebuilds could resolve out of order and settle the map on a position the
+  reader had already left — silently, with no error. `utils/latestOnly` gates both rebuilds. The subtlety
+  that cost a review finding: guarding only the final state write is not enough, because a stale call
+  goes on to rebuild the texture and the border layer afterwards. **One gate per result** — sharing one
+  would have a bake needlessly cancel a year.
+- **A worker that dies mid-session falls back to the main thread**, but recovering means redoing the
+  setup: the inline compute starts holding neither the sources nor the year. `failoverToInline` re-pushes
+  the sources and recomputes the year. Untested against a real worker crash — only against a simulated
+  `onerror`.
+- **`colorBySuzerain` does not merge two vassals unless the suzerain is pinned.** `assignRegionColors`
+  colours by *index* against adjacency and never reads a name; the option only changes which name is
+  offered to the editorial pinning rules. So two princes under an unpinned crown still come out in
+  different colours. Found while testing the compute port, 2026-09-17 — the option half-works, and the
+  panel label promises more than it delivers.
 - **`sea level (m)` no longer moves the coastline.** The land mask decides it now; the slider only sets
   the hypsometric ramp's origin. Rename or retire it before it wastes someone's afternoon.
 - **The Elbe is not bridged to its mouth** — cause unidentified (confluence wrongly detected, or the sea
@@ -60,9 +80,12 @@ Put here the know issues to avoid cluttering the context window.
   river sliders went through: the widths and reveal thresholds are captured when a layer is built, so
   wiring only some of them left the rest doing nothing, and nothing caught it. **It swallowed a second
   set**: `snapToCoast` and the eight `palette*` slots were routed to `rebuildBorders`, which re-rasterises
-  nothing — they did nothing at all. Now fixed by inverting the rule (an explicit allow-list of
-  border-only keys, everything else takes the full rebuild), so a tunable added later defaults to
-  correct-but-slower instead of silently inert. The missing tests remain the underlying hole.
+  nothing — they did nothing at all. Fixed by inverting the rule (an explicit allow-list of border-only
+  keys, everything else takes the full rebuild), so a tunable added later defaults to correct-but-slower
+  instead of silently inert. **2026-09-17**: the political half of that dispatch now lives in
+  `devParams.politicalRebuildFor`, beside the control table it describes, and is walked key by key in a
+  test — including an assertion that an unlisted key comes out `full`. The panel itself still has no
+  tests; the remaining untested dispatches are relief, coast, rhumb and river.
 - **The ESLint boundary glob `**/controls` is too broad** — it matched `utils/controls` as if it were the
   camera-controls layer. Worked around by renaming to `utils/controlSpec`; the config flaw remains and
   will catch the next `something/controls`.
