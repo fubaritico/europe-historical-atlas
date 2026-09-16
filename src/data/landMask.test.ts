@@ -36,6 +36,18 @@ describe('landMask', () => {
       expect(mask.coverage(0, 0)).toBe(0)
       expect(mask.coverage(1, 0)).toBe(1)
     })
+
+    it('packs and unpacks to the same mask — the round trip a worker boundary is', () => {
+      const original = createLandMask(meta(5, 3), (col, row) => (col + row) % 3 === 0)
+      const restored = createPackedLandMask(meta(5, 3), original.pack())
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 5; col++) {
+          const u = col / 4
+          const v = row / 2
+          expect(restored.isLand(u, v)).toBe(original.isLand(u, v))
+        }
+      }
+    })
   })
 
   describe('variants', () => {
@@ -56,6 +68,16 @@ describe('landMask', () => {
       const mask = createPackedLandMask(meta(16, 1), new Uint8Array([0x00, 0b0000_0001]))
       expect(mask.isLand(15 / 15, 0)).toBe(true)
       expect(mask.isLand(14 / 15, 0)).toBe(false)
+    })
+
+    it('hands an already-packed mask its own storage back, rather than walking the grid again', () => {
+      const bits = new Uint8Array([0b1010_0000])
+      expect(createPackedLandMask(meta(4, 1), bits).pack()).toBe(bits)
+    })
+
+    it('packs a predicate mask most-significant first', () => {
+      const mask = createLandMask(meta(4, 1), (col) => col % 2 === 0)
+      expect(Array.from(mask.pack())).toEqual([0b1010_0000])
     })
 
     it('derives a mask from elevation, with the documented blind spots', () => {
@@ -149,6 +171,13 @@ describe('landMask', () => {
     it('reads a missing byte as water rather than throwing', () => {
       const mask = createPackedLandMask(meta(8, 1), new Uint8Array(0))
       expect(mask.isLand(0, 0)).toBe(false)
+    })
+
+    it('packs a grid whose cell count is not a whole number of bytes', () => {
+      // 5 cells → one byte, the last three bits unused and left at zero.
+      const bits = createLandMask(meta(5, 1), () => true).pack()
+      expect(bits.length).toBe(1)
+      expect(bits[0]).toBe(0b1111_1000)
     })
   })
 })

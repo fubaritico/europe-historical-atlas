@@ -43,6 +43,15 @@ export interface LandMask {
    * @returns the land fraction in `[0, 1]` (0 = all water, 1 = all land)
    */
   coverage(u: number, v: number): number
+  /**
+   * The mask as a packed bitfield (MSB first, row-major, 1 = land) — the only form of itself a mask can
+   * cross a worker boundary in, since neither a closure nor a predicate survives a `postMessage`.
+   *
+   * A packed mask hands back its own storage rather than copying it, so **transferring the result
+   * detaches the mask you took it from**. Copy it first if the buffer is going to be transferred.
+   * @returns the packed bits, `ceil(width * height / 8)` bytes
+   */
+  pack(): Uint8Array
 }
 
 /**
@@ -90,6 +99,17 @@ export function createLandMask(
       const bottom = clampedAt(x0, y0 + 1) * (1 - tx) + clampedAt(x0 + 1, y0 + 1) * tx
       return top * (1 - ty) + bottom * ty
     },
+    pack(): Uint8Array {
+      const bits = new Uint8Array(Math.ceil((width * height) / 8))
+      for (let row = 0; row < height; row++) {
+        for (let col = 0; col < width; col++) {
+          if (!at(col, row)) continue
+          const index = row * width + col
+          bits[index >> 3] = (bits[index >> 3] ?? 0) | (1 << (7 - (index & 7)))
+        }
+      }
+      return bits
+    },
   }
 }
 
@@ -101,10 +121,14 @@ export function createLandMask(
  */
 export function createPackedLandMask(meta: LandMaskMeta, bits: Uint8Array): LandMask {
   const { width } = meta
-  return createLandMask(meta, (col, row) => {
-    const index = row * width + col
-    return ((bits[index >> 3] ?? 0) >> (7 - (index & 7))) % 2 === 1
-  })
+  return {
+    ...createLandMask(meta, (col, row) => {
+      const index = row * width + col
+      return ((bits[index >> 3] ?? 0) >> (7 - (index & 7))) % 2 === 1
+    }),
+    // Already packed — hand back the storage rather than walking 23 million cells to rebuild it.
+    pack: () => bits,
+  }
 }
 
 /**
