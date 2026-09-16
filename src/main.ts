@@ -36,8 +36,8 @@ import {
 import { createCompassRose } from './scene/compassRose'
 import {
   buildBorderStrokes,
-  casingOpacityScale,
   createComposedLineLayer,
+  inlayOpacityScale,
 } from './scene/composedLineLayer'
 import { createDebugRect } from './scene/debugRect'
 import { createLineLayer } from './scene/lineLayer'
@@ -707,7 +707,7 @@ function bootstrap(): () => void {
     // back. Both are live material uniforms, so nothing is rebuilt while zooming.
     if (borders) {
       borders.setWidthScale(lerp(politicalParams.borderWidthZoomOut, 1, controls.zoom))
-      borders.setCasingOpacity(casingOpacityScale(controls.zoom, politicalParams.borderCasingZoom))
+      borders.setInlayOpacity(inlayOpacityScale(controls.zoom, politicalParams.borderInlayZoom))
     }
     // Zoom-linked opacity: `opacity` at zoom-out (z=0) → `opacityZoomIn` at zoom-in (z=1).
     if (coastline)

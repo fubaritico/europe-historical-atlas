@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 
 import {
   buildBorderStrokes,
-  casingOpacityScale,
   createComposedLineLayer,
+  inlayOpacityScale,
   offsetPolyline,
   polylinesToSegments,
 } from './composedLineLayer'
@@ -85,10 +85,12 @@ describe('composedLineLayer', () => {
       expect(strokes.map((stroke) => stroke.color)).toEqual(['#000000', '#ffffff'])
     })
 
-    it('skips an edging no wider than the core, which would be hidden by it', () => {
+    it('skips an inlay no narrower than the edge, which would cover it entirely', () => {
       const strokes = buildBorderStrokes(borders(2, 0), { ...STYLE, edgeWidth: STYLE.coreWidth })
       expect(strokes).toHaveLength(1)
-      expect(strokes[0]?.color).toBe(STYLE.coreColor)
+      // What survives is the dark edge — a border is dark at every scale.
+      expect(strokes[0]?.color).toBe(STYLE.edgeColor)
+      expect(strokes[0]?.role).toBe('edge')
     })
 
     it('gives each pass the next render order, so the core stays above its own edging', () => {
@@ -109,22 +111,19 @@ describe('composedLineLayer', () => {
     it('doubles a border by drawing the run shifted either way', () => {
       const solid = buildBorderStrokes(borders(1, 0), STYLE)
       const doubled = buildBorderStrokes(borders(1, 0), STYLE, () => 'double')
-      // Twice the geometry: two runs where there was one. The solid line's core is its second pass.
-      expect(doubled[0]?.segments.length).toBe((solid[1]?.segments.length ?? 0) * 2)
+      // Twice the geometry: two runs where there was one.
+      expect(doubled[0]?.segments.length).toBe((solid[0]?.segments.length ?? 0) * 2)
     })
 
-    it('gives a patterned border no casing, only a plain one', () => {
-      // A border that carries a pattern says what it means through the pattern; casing a dashed union
-      // turns a legible convention into brown-cream-brown confetti.
-      expect(buildBorderStrokes(borders(1, 0), STYLE).map((s) => s.role)).toEqual([
-        'casing',
-        'core',
-      ])
-      expect(buildBorderStrokes(borders(1, 0), STYLE, () => 'dashed').map((s) => s.role)).toEqual([
-        'core',
-      ])
+    it('draws a patterned border as one dark stroke, and a plain one as edge plus inlay', () => {
+      // A patterned border says what it means through its shape; a light inlay would break the shape up.
+      expect(buildBorderStrokes(borders(1, 0), STYLE).map((s) => s.role)).toEqual(['edge', 'inlay'])
+      const dashedStrokes = buildBorderStrokes(borders(1, 0), STYLE, () => 'dashed')
+      expect(dashedStrokes.map((s) => s.role)).toEqual(['pattern'])
+      // Brown, not cream: the same ink as a plain border's edge, at every scale.
+      expect(dashedStrokes[0]?.color).toBe(STYLE.edgeColor)
       expect(buildBorderStrokes(borders(1, 0), STYLE, () => 'double').map((s) => s.role)).toEqual([
-        'core',
+        'pattern',
       ])
     })
 
@@ -152,8 +151,8 @@ describe('composedLineLayer', () => {
       const strokes = buildBorderStrokes(mixed, { ...STYLE, showFrontier: false }, (pair) =>
         pair[0] === 0 ? 'solid' : 'dashed'
       )
-      // Solid gets casing + core; dashed gets a core alone.
-      expect(strokes.map((stroke) => stroke.role)).toEqual(['casing', 'core', 'core'])
+      // Solid gets edge + inlay; dashed gets a single dark stroke.
+      expect(strokes.map((stroke) => stroke.role)).toEqual(['edge', 'inlay', 'pattern'])
       expect(strokes.map((stroke) => stroke.dashed === true)).toEqual([false, false, true])
     })
 
@@ -182,7 +181,7 @@ describe('composedLineLayer', () => {
         color: '#ff0000',
         width: 2,
         opacity: 1,
-        role: 'core',
+        role: 'inlay',
       }
       const layer = createComposedLineLayer([empty, ...buildBorderStrokes(borders(1, 0), STYLE)], {
         project,
@@ -225,44 +224,45 @@ describe('composedLineLayer', () => {
       layer.dispose()
     })
 
-    it('fades the casing alone, leaving the core and the frontier as built', () => {
+    it('fades the inlay alone, leaving the dark edge and the frontier as built', () => {
       const layer = createComposedLineLayer(buildBorderStrokes(borders(1, 1), STYLE), { project })
-      layer.setCasingOpacity(0)
-      expect(liveValues(layer, 'opacity')).toEqual([STYLE.frontierOpacity, 0, STYLE.opacity])
+      layer.setInlayOpacity(0)
+      // Passes are frontier, edge, inlay: only the last goes dark, so a plain brown line remains.
+      expect(liveValues(layer, 'opacity')).toEqual([STYLE.frontierOpacity, STYLE.opacity, 0])
       layer.dispose()
     })
 
-    it('restores the casing when the scale returns to one', () => {
+    it('restores the inlay when the scale returns to one', () => {
       const layer = createComposedLineLayer(buildBorderStrokes(borders(1, 0), STYLE), { project })
-      layer.setCasingOpacity(0)
-      layer.setCasingOpacity(1)
+      layer.setInlayOpacity(0)
+      layer.setInlayOpacity(1)
       expect(liveValues(layer, 'opacity')).toEqual([STYLE.opacity, STYLE.opacity])
       layer.dispose()
     })
   })
 
-  describe('casingOpacityScale', () => {
+  describe('inlayOpacityScale', () => {
     it('ramps from nothing at full zoom-out to full strength at the threshold', () => {
-      expect(casingOpacityScale(0, 0.4)).toBe(0)
-      expect(casingOpacityScale(0.2, 0.4)).toBeCloseTo(0.5)
-      expect(casingOpacityScale(0.4, 0.4)).toBe(1)
+      expect(inlayOpacityScale(0, 0.4)).toBe(0)
+      expect(inlayOpacityScale(0.2, 0.4)).toBeCloseTo(0.5)
+      expect(inlayOpacityScale(0.4, 0.4)).toBe(1)
     })
 
     it('holds at full strength beyond the threshold', () => {
-      expect(casingOpacityScale(1, 0.4)).toBe(1)
+      expect(inlayOpacityScale(1, 0.4)).toBe(1)
     })
 
     it('never fades when the threshold is zero, instead of dividing by it', () => {
       // The slider goes down to 0. `0 / 0` is NaN, and `clamp01` passes NaN straight through since both
       // its comparisons are false against it — a NaN opacity throws nothing and WebGL drops the draw, so
       // the casing would vanish silently at the default camera position.
-      expect(casingOpacityScale(0, 0)).toBe(1)
-      expect(casingOpacityScale(0.5, 0)).toBe(1)
-      expect(Number.isNaN(casingOpacityScale(0, 0))).toBe(false)
+      expect(inlayOpacityScale(0, 0)).toBe(1)
+      expect(inlayOpacityScale(0.5, 0)).toBe(1)
+      expect(Number.isNaN(inlayOpacityScale(0, 0))).toBe(false)
     })
 
     it('clamps a negative threshold rather than inverting the ramp', () => {
-      expect(casingOpacityScale(0.5, -1)).toBe(1)
+      expect(inlayOpacityScale(0.5, -1)).toBe(1)
     })
   })
 

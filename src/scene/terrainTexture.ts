@@ -138,7 +138,7 @@ export const DEFAULT_TERRAIN_OPTIONS: TerrainTextureOptions = {
   // `normal` rather than `multiply`: multiply can only darken, so on pale parchment every polity slid
   // toward the same muddy olive. A straight interpolation keeps the hue, and the hillshade applied
   // afterwards is what keeps the relief legible under the colour.
-  politicalMode: 'normal',
+  politicalMode: 'overlay',
   politicalStrength: 0.62,
   elevationFloor: 0,
   // Low ceiling on purpose: Europe is mostly under 1500 m, so a high reference (say 4000) crushes the

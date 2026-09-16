@@ -25,11 +25,15 @@ export interface ComposedStroke {
   /** Break this pass into dashes. */
   dashed?: boolean
   /**
-   * What this pass is for. `casing` is the wide under-stroke that shows as an edging; it is the one a
-   * caller may want to fade out on its own, since at small scale an alternating edging reads as noise
-   * rather than as a border.
+   * What this pass is for.
+   *
+   * `edge` is the dark stroke that carries a plain border at every scale; `inlay` is the light stroke
+   * laid inside it, which a caller fades out as the camera pulls back — at small scale a light core
+   * inside a dark edging stops reading as one line and starts reading as an alternation. `pattern` is a
+   * border whose meaning is in its shape (a union, a contested limit), drawn as a single dark stroke so
+   * the shape stays legible.
    */
-  role: 'casing' | 'core' | 'frontier'
+  role: 'edge' | 'inlay' | 'pattern' | 'frontier'
 }
 
 /**
@@ -191,14 +195,14 @@ export interface ComposedLineLayer {
    */
   setWidthScale(scale: number): void
   /**
-   * Scale the opacity of the casing passes alone, leaving cores and frontiers as built.
+   * Scale the opacity of the light inlay passes alone, leaving edges, patterns and frontiers as built.
    *
-   * At small scale an edging either side of a hairline stops reading as one border and starts reading as
-   * an alternation; fading it out returns a plain line without rebuilding anything.
-   * @param scale - multiplier on the casing passes' built opacity, 0 hiding them entirely
+   * Fading it to nothing leaves a plain dark line — which is what a border should be at continent scale,
+   * and what separates best from the lighter fills. Nothing is rebuilt.
+   * @param scale - multiplier on the inlay passes' built opacity, 0 hiding them entirely
    * @returns nothing
    */
-  setCasingOpacity(scale: number): void
+  setInlayOpacity(scale: number): void
   /**
    * Free the GPU resources of every pass.
    * @returns nothing
@@ -207,21 +211,22 @@ export interface ComposedLineLayer {
 }
 
 /**
- * How strongly the casing shows at a given zoom.
+ * How strongly the light inlay shows at a given zoom.
  *
- * Ramps from nothing at full zoom-out to full strength at `fadeThreshold`, because at small scale an
- * edging either side of a hairline stops reading as one border and starts reading as an alternation of
- * colours.
+ * Ramps from nothing at full zoom-out to full strength at `fadeThreshold`. The dark edge is the constant
+ * — a border is brown at every scale — and the light inlay is the refinement that appears as the camera
+ * comes in. Below the threshold a plain dark line is all that remains, which is both what reads at
+ * continent scale and what separates best from the lighter fills.
  *
  * The zero-threshold branch is **load-bearing, not defensive**: the dev-panel slider for this value goes
  * down to 0, and `0 / 0` is `NaN`, which `clamp01` passes straight through — both its comparisons are
  * false against `NaN`. A `NaN` opacity throws nothing and makes WebGL drop the draw, so the casing would
  * vanish silently at the default camera position.
  * @param zoom - the camera zoom, 0 at full zoom-out and 1 at full zoom-in
- * @param fadeThreshold - the zoom at which the casing reaches full strength; 0 means never fade it
- * @returns a multiplier in `[0, 1]` for the casing passes' opacity
+ * @param fadeThreshold - the zoom at which the inlay reaches full strength; 0 means never fade it
+ * @returns a multiplier in `[0, 1]` for the inlay passes' opacity
  */
-export function casingOpacityScale(zoom: number, fadeThreshold: number): number {
+export function inlayOpacityScale(zoom: number, fadeThreshold: number): number {
   return fadeThreshold > 0 ? clamp01(zoom / fadeThreshold) : 1
 }
 
@@ -275,25 +280,37 @@ export function buildBorderStrokes(
     // An edging no wider than the core would be hidden by it entirely — skip the pass rather than pay
     // for an invisible one. It sits immediately before its own core, so the render order still pairs
     // them however many patterns are in play.
-    // Only a plain border gets an edging. A border that carries a *pattern* says what it means through
-    // that pattern: casing a dashed union turns a legible convention into brown-cream-brown confetti.
-    if (pattern === 'solid' && style.edgeWidth > style.coreWidth)
+    // A border is dark at every scale. A patterned one stays a single dark stroke, because its meaning
+    // is in its shape and a light inlay would break the shape up; a plain one takes the light inlay on
+    // top, which the caller fades back out as the camera pulls away.
+    if (pattern !== 'solid') {
       strokes.push({
         segments,
         color: style.edgeColor,
         width: style.edgeWidth,
         opacity: style.opacity,
         dashed,
-        role: 'casing',
+        role: 'pattern',
       })
+      continue
+    }
     strokes.push({
       segments,
-      color: style.coreColor,
-      width: style.coreWidth,
+      color: style.edgeColor,
+      width: style.edgeWidth,
       opacity: style.opacity,
-      dashed,
-      role: 'core',
+      role: 'edge',
     })
+    // An inlay no narrower than the edge would cover it entirely — skip the pass rather than pay for
+    // one that hides the very thing it sits inside.
+    if (style.coreWidth < style.edgeWidth)
+      strokes.push({
+        segments,
+        color: style.coreColor,
+        width: style.coreWidth,
+        opacity: style.opacity,
+        role: 'inlay',
+      })
   }
   return strokes
 }
@@ -334,9 +351,9 @@ export function createComposedLineLayer(
     setWidthScale(scale: number): void {
       for (const { layer, stroke } of layers) layer.setWidth(stroke.width * scale)
     },
-    setCasingOpacity(scale: number): void {
+    setInlayOpacity(scale: number): void {
       for (const { layer, stroke } of layers)
-        if (stroke.role === 'casing') layer.setOpacity(stroke.opacity * scale)
+        if (stroke.role === 'inlay') layer.setOpacity(stroke.opacity * scale)
     },
     dispose(): void {
       for (const { layer } of layers) {

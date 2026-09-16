@@ -360,11 +360,11 @@ export interface PoliticalDevParams {
    */
   borderWidthZoomOut: number
   /**
-   * Zoom fraction below which the casing is gone entirely, fading in over the range above it. At small
-   * scale an edging either side of a hairline stops reading as one border and starts reading as an
-   * alternation of colours.
+   * Zoom fraction below which the light inlay is gone entirely, fading in over the range above it. The
+   * dark edge carries the border at every scale; the inlay is the refinement that appears close up,
+   * because at continent scale a light core inside a dark edging reads as an alternation, not a line.
    */
-  borderCasingZoom: number
+  borderInlayZoom: number
   /** Colour areas by the power they answer to (`SUBJECTO`) rather than by polity. */
   colorBySuzerain: boolean
   /**
@@ -445,7 +445,7 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   // Normalized grid units: about two DEM cells apart, which separates without reading as two borders.
   borderDoubleGap: 0.0016,
   borderWidthZoomOut: 0.4,
-  borderCasingZoom: 0.35,
+  borderInlayZoom: 0.35,
   colorBySuzerain: false,
   snapToCoast: 12,
   // Eight is comfortably above what a political map of Europe needs: four colours suffice in theory,
@@ -492,7 +492,13 @@ export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
     label: 'double-line spacing',
   },
   borderWidthZoomOut: { kind: 'number', min: 0.1, max: 1, step: 0.05, label: 'width @ zoom-out' },
-  borderCasingZoom: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'casing appears at zoom' },
+  borderInlayZoom: {
+    kind: 'number',
+    min: 0,
+    max: 1,
+    step: 0.05,
+    label: 'cream inlay appears at zoom',
+  },
   colorBySuzerain: { kind: 'boolean', label: 'colour by suzerain' },
   snapToCoast: { kind: 'number', min: 0, max: 40, step: 1, label: 'snap to coast (cells)' },
   palette1: { kind: 'hexColor', label: 'palette 1' },
@@ -524,7 +530,7 @@ export const POLITICAL_CONTROL_ORDER: (keyof PoliticalDevParams)[] = [
   'frontierWidth',
   'frontierOpacity',
   'borderWidthZoomOut',
-  'borderCasingZoom',
+  'borderInlayZoom',
   'borderDashSize',
   'borderDashGap',
   'borderDoubleGap',
