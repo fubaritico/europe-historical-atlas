@@ -47,6 +47,7 @@ import { generateRhumbSegments } from './scene/rhumbNetwork'
 import { createRiverLayer } from './scene/riverLayer'
 import { wrapTerrainTexture } from './scene/terrainTexture'
 import { createProgressOverlay } from './ui/progressOverlay'
+import { createSplash } from './ui/splash'
 import { hexToRgb } from './utils/color'
 import { createLatestOnly } from './utils/latestOnly'
 import { lerp } from './utils/math'
@@ -144,6 +145,11 @@ function bootstrap(): () => void {
   // The only DOM the app owns besides the canvas. It is also the surface roadmap chapter 07 wants for
   // load failures — built once, for both.
   const progress = createProgressOverlay({ host: document.body })
+
+  // Mounted before a single byte is fetched, and taken down the moment there is a map underneath it.
+  // The relief and the mask are three megabytes each; without this the reader gets a blank page for as
+  // long as that takes, which reads as broken rather than as loading.
+  const splash = createSplash({ host: document.body, background: '#efe6d2' })
 
   const params: ReliefDevParams = { ...DEFAULT_RELIEF_PARAMS }
 
@@ -723,6 +729,9 @@ function bootstrap(): () => void {
     rebuildRhumb()
     rebuildRivers() // no-op until the river payload lands; whichever finishes last draws them
     rebuildRose()
+    // There is a map to look at now, so the silhouette has done its job. The countries arriving later is
+    // the progress panel's business, not the splash's.
+    splash.dismiss()
 
     // Stage two: the same map with the countries painted in and their borders drawn over it. It bakes
     // again — the tint is composited into the texture, not laid over it — and announces itself through
@@ -914,6 +923,7 @@ function bootstrap(): () => void {
     compute.dispose()
     gui.destroy()
     progress.dispose()
+    splash.dispose() // a load abandoned mid-flight must not leave the silhouette over a dead canvas
     stats.dom.remove()
     extentRect.dispose()
     footprintRect.dispose()
