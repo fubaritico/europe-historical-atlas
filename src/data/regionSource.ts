@@ -1,5 +1,17 @@
 import { latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
 
+import {
+  assetError,
+  expectArray,
+  expectBounds,
+  expectLonLat,
+  expectNullableString,
+  expectNumber,
+  expectString,
+  field,
+  parseAsset,
+} from './assetError'
+
 import type { UvPoint } from './coastlineSource'
 import type { GeoBounds } from '../geo/mercator'
 
@@ -100,9 +112,46 @@ export function createFetchRegionSource(pathForYear: (year: number) => string): 
     async load(year: number): Promise<RegionSet> {
       const path = pathForYear(year)
       const response = await fetch(path)
-      if (!response.ok) throw new Error(`regions ${path} → HTTP ${String(response.status)}`)
-      const payload = (await response.json()) as RegionPayload
-      return projectRegions(payload)
+      if (!response.ok)
+        throw assetError('regions', 'transport', path, `HTTP ${String(response.status)}`)
+      return projectRegions(parseRegionPayload(await response.json(), path))
     },
   }
+}
+
+/**
+ * Read a fetched value as a {@link RegionPayload}, or fail naming the field that is wrong.
+ *
+ * Rings are checked pair by pair rather than trusted wholesale: a single string where a longitude should
+ * be turns into `NaN` on projection, and a `NaN` coordinate rasterises as a polity that claims nothing
+ * anywhere — a country silently missing from the map, which is precisely the failure nobody notices.
+ * @param value - the parsed JSON, of no known shape
+ * @param source - where it came from, for the message
+ * @returns the payload
+ */
+export function parseRegionPayload(value: unknown, source: string): RegionPayload {
+  return parseAsset('regions', source, () => {
+    const at = field(value, 'payload')
+    const regions = expectArray(at('regions'), 'payload.regions').map((region, index) => {
+      const path = `payload.regions[${String(index)}]`
+      const on = field(region, path)
+      return {
+        name: expectNullableString(on('name'), `${path}.name`),
+        subjectTo: expectNullableString(on('subjectTo'), `${path}.subjectTo`),
+        partOf: expectNullableString(on('partOf'), `${path}.partOf`),
+        rings: expectArray(on('rings'), `${path}.rings`).map((ring, r) =>
+          expectArray(ring, `${path}.rings[${String(r)}]`).map((point, p) =>
+            expectLonLat(point, `${path}.rings[${String(r)}][${String(p)}]`)
+          )
+        ),
+      }
+    })
+    return {
+      source: expectString(at('source'), 'payload.source'),
+      year: expectNumber(at('year'), 'payload.year'),
+      bbox: expectBounds(at('bbox'), 'payload.bbox'),
+      tolerance: expectNumber(at('tolerance'), 'payload.tolerance'),
+      regions,
+    }
+  })
 }

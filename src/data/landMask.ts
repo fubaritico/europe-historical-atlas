@@ -1,3 +1,5 @@
+import { assetError, expectBounds, expectInteger, field, parseAsset } from './assetError'
+
 import type { Heightmap } from './heightmap'
 import type { GeoBounds } from '../geo/mercator'
 
@@ -158,22 +160,45 @@ export function createElevationLandMask(heightmap: Heightmap, seaLevel: number):
 export function createFetchLandMaskSource(basePath: string): LandMaskSource {
   return {
     async load(): Promise<LandMask> {
-      const metaResponse = await fetch(`${basePath}.json`)
+      const metaPath = `${basePath}.json`
+      const metaResponse = await fetch(metaPath)
       if (!metaResponse.ok)
-        throw new Error(`land mask meta ${basePath}.json → HTTP ${String(metaResponse.status)}`)
-      const meta = (await metaResponse.json()) as LandMaskMeta
+        throw assetError('landMask', 'transport', metaPath, `HTTP ${String(metaResponse.status)}`)
+      const meta = parseLandMaskMeta(await metaResponse.json(), metaPath)
 
-      const binResponse = await fetch(`${basePath}.bin`)
+      const binPath = `${basePath}.bin`
+      const binResponse = await fetch(binPath)
       if (!binResponse.ok)
-        throw new Error(`land mask bin ${basePath}.bin → HTTP ${String(binResponse.status)}`)
+        throw assetError('landMask', 'transport', binPath, `HTTP ${String(binResponse.status)}`)
       const bits = new Uint8Array(await binResponse.arrayBuffer())
 
       const expected = Math.ceil((meta.width * meta.height) / 8)
       if (bits.byteLength < expected)
-        throw new Error(
-          `land mask ${basePath}.bin: ${String(bits.byteLength)} bytes for a ${String(meta.width)}x${String(meta.height)} grid, expected ${String(expected)}`
+        throw assetError(
+          'landMask',
+          'consistency',
+          binPath,
+          `${String(bits.byteLength)} bytes for a ${String(meta.width)}×${String(meta.height)} grid, expected ${String(expected)}`
         )
       return createPackedLandMask(meta, bits)
     },
   }
+}
+
+/**
+ * Read a fetched value as {@link LandMaskMeta}, or fail naming the field that is wrong.
+ * @param value - the parsed JSON, of no known shape
+ * @param source - where it came from, for the message
+ * @returns the metadata
+ */
+export function parseLandMaskMeta(value: unknown, source: string): LandMaskMeta {
+  return parseAsset('landMask', source, () => {
+    const at = field(value, 'meta')
+    return {
+      width: expectInteger(at('width'), 'meta.width', 1),
+      height: expectInteger(at('height'), 'meta.height', 1),
+      scale: expectInteger(at('scale'), 'meta.scale', 1),
+      bbox: expectBounds(at('bbox'), 'meta.bbox'),
+    }
+  })
 }

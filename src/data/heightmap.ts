@@ -1,3 +1,13 @@
+import {
+  assetError,
+  expectBounds,
+  expectInteger,
+  expectNumber,
+  expectString,
+  field,
+  parseAsset,
+} from './assetError'
+
 /**
  * Metadata sidecar for a raw elevation grid (matches the `.json` emitted by `files/spikes/fetch-dem`).
  */
@@ -82,19 +92,53 @@ export function createHeightmap(meta: HeightmapMeta, data: Int16Array | Float32A
 export function createFetchHeightmapSource(basePath: string): HeightmapSource {
   return {
     async load(): Promise<Heightmap> {
-      const metaRes = await fetch(`${basePath}.json`)
+      const metaPath = `${basePath}.json`
+      const metaRes = await fetch(metaPath)
       if (!metaRes.ok)
-        throw new Error(`heightmap meta ${basePath}.json → HTTP ${String(metaRes.status)}`)
-      const meta = (await metaRes.json()) as HeightmapMeta
+        throw assetError('heightmap', 'transport', metaPath, `HTTP ${String(metaRes.status)}`)
+      const meta = parseHeightmapMeta(await metaRes.json(), metaPath)
 
-      const binRes = await fetch(`${basePath}.bin`)
+      const binPath = `${basePath}.bin`
+      const binRes = await fetch(binPath)
       if (!binRes.ok)
-        throw new Error(`heightmap bin ${basePath}.bin → HTTP ${String(binRes.status)}`)
+        throw assetError('heightmap', 'transport', binPath, `HTTP ${String(binRes.status)}`)
       const data = new Int16Array(await binRes.arrayBuffer())
+
+      // The grid says how many samples it holds; the file has to hold that many. Short of it, the map
+      // renders as a plain with a cliff where the data ran out — and says nothing.
+      const expected = meta.width * meta.height
+      if (data.length < expected)
+        throw assetError(
+          'heightmap',
+          'consistency',
+          binPath,
+          `${String(data.length)} samples for a ${String(meta.width)}×${String(meta.height)} grid, expected ${String(expected)}`
+        )
 
       return createHeightmap(meta, data)
     },
   }
+}
+
+/**
+ * Read a fetched value as {@link HeightmapMeta}, or fail naming the field that is wrong.
+ * @param value - the parsed JSON, of no known shape
+ * @param source - where it came from, for the message
+ * @returns the metadata
+ */
+export function parseHeightmapMeta(value: unknown, source: string): HeightmapMeta {
+  return parseAsset('heightmap', source, () => {
+    const at = field(value, 'meta')
+    return {
+      width: expectInteger(at('width'), 'meta.width', 1),
+      height: expectInteger(at('height'), 'meta.height', 1),
+      zoom: expectInteger(at('zoom'), 'meta.zoom', 0),
+      bbox: expectBounds(at('bbox'), 'meta.bbox'),
+      min: expectNumber(at('min'), 'meta.min'),
+      max: expectNumber(at('max'), 'meta.max'),
+      encoding: expectString(at('encoding'), 'meta.encoding'),
+    }
+  })
 }
 
 /**

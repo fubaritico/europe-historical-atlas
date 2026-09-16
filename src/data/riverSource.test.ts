@@ -145,7 +145,7 @@ describe('riverSource', () => {
     it('surfaces a failed fetch instead of returning an empty network', async () => {
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 404 }))
       await expect(createFetchRiverSource('/rivers/missing.json').load()).rejects.toThrow(
-        'rivers /rivers/missing.json → HTTP 404'
+        /rivers \(transport\) \/rivers\/missing\.json: HTTP 404/
       )
       vi.unstubAllGlobals()
     })

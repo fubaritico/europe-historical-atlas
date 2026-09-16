@@ -1,5 +1,17 @@
 import { type GeoBounds, latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
 
+import {
+  assetError,
+  expectArray,
+  expectBounds,
+  expectLonLat,
+  expectNullableString,
+  expectNumber,
+  expectString,
+  field,
+  parseAsset,
+} from './assetError'
+
 import type { UvPoint } from './coastlineSource'
 import type { LandMask } from './landMask'
 
@@ -75,9 +87,9 @@ export function createFetchRiverSource(path: string): RiverSource {
   return {
     async load(): Promise<River[]> {
       const response = await fetch(path)
-      if (!response.ok) throw new Error(`rivers ${path} → HTTP ${String(response.status)}`)
-      const payload = (await response.json()) as RiverPayload
-      return projectRivers(payload)
+      if (!response.ok)
+        throw assetError('rivers', 'transport', path, `HTTP ${String(response.status)}`)
+      return projectRivers(parseRiverPayload(await response.json(), path))
     },
   }
 }
@@ -221,5 +233,36 @@ export function extendRiversToSea(
     const forward = extend([...river.points], index)
     const both = extend([...forward].reverse(), index)
     return { ...river, points: both.reverse() }
+  })
+}
+
+/**
+ * Read a fetched value as a {@link RiverPayload}, or fail naming the field that is wrong.
+ * @param value - the parsed JSON, of no known shape
+ * @param source - where it came from, for the message
+ * @returns the payload
+ */
+export function parseRiverPayload(value: unknown, source: string): RiverPayload {
+  return parseAsset('rivers', source, () => {
+    const at = field(value, 'payload')
+    const rivers = expectArray(at('rivers'), 'payload.rivers').map((river, index) => {
+      const path = `payload.rivers[${String(index)}]`
+      const on = field(river, path)
+      return {
+        rank: expectNumber(on('rank'), `${path}.rank`),
+        kind: expectString(on('kind'), `${path}.kind`),
+        name: expectNullableString(on('name'), `${path}.name`),
+        points: expectArray(on('points'), `${path}.points`).map((point, p) =>
+          expectLonLat(point, `${path}.points[${String(p)}]`)
+        ),
+      }
+    })
+    return {
+      source: expectString(at('source'), 'payload.source'),
+      bbox: expectBounds(at('bbox'), 'payload.bbox'),
+      precision: expectNumber(at('precision'), 'payload.precision'),
+      tolerance: expectNumber(at('tolerance'), 'payload.tolerance'),
+      rivers,
+    }
   })
 }

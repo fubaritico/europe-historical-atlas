@@ -107,7 +107,7 @@ describe('landMask', () => {
     it('surfaces a missing sidecar rather than guessing a grid', async () => {
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 404 }))
       await expect(createFetchLandMaskSource('/masks/x').load()).rejects.toThrow(
-        'land mask meta /masks/x.json → HTTP 404'
+        /landMask \(transport\) \/masks\/x\.json: HTTP 404/
       )
       vi.unstubAllGlobals()
     })
@@ -121,7 +121,7 @@ describe('landMask', () => {
           .mockResolvedValueOnce({ ok: false, status: 500 })
       )
       await expect(createFetchLandMaskSource('/masks/x').load()).rejects.toThrow(
-        'land mask bin /masks/x.bin → HTTP 500'
+        /landMask \(transport\) \/masks\/x\.bin: HTTP 500/
       )
       vi.unstubAllGlobals()
     })
@@ -139,7 +139,7 @@ describe('landMask', () => {
           })
       )
       await expect(createFetchLandMaskSource('/masks/x').load()).rejects.toThrow(
-        '4 bytes for a 64x64 grid, expected 512'
+        /landMask \(consistency\).*4 bytes for a 64×64 grid, expected 512/
       )
       vi.unstubAllGlobals()
     })
