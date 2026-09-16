@@ -2,6 +2,28 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-09-16 — Sense of time: activity log + work spans (ported from fubaritico-ds)
+
+Tooling only — **no project code touched**. Ported so this repo gets the same temporal awareness.
+Done from the fubaritico-ds session; the four changed `.claude/` files below are **uncommitted**.
+
+- **Why** — sessions here are weeks apart. Without this, the agent has no idea whether you are
+  continuing yesterday's work or coming back after two months, so it reopens everything from scratch.
+- **Hooks** (in the gitignored `.claude/settings.local.json`, existing hooks untouched): `SessionStart`
+  injects a temporal bearing straight into the agent's context **before it speaks**; `SessionEnd`,
+  plus `PostToolUse` on `Edit|Write` and `Bash` (all async), feed the log.
+- **Log** — `files/session-log.jsonl`, one JSON line per event (`files/` is already gitignored here).
+  Local to this machine, never committed. Script is global: `~/.claude/hooks/session-log.sh`.
+- **Temporal model** — the technical session (process start/end) is logged but **measures nothing**
+  (a terminal left open overnight would read as 14 h of work). Real figures come from **spans**
+  (actions < 90 min apart) grouped into **chantiers** (spans < 48 h apart, so a chantier can run
+  across several days). Both are derived from action timestamps.
+- **Skills** — `/start-session` (v1.1) situates itself in time first and opens differently for a
+  continuation vs a long interruption; `/end-session` (v1.1) must write **real** durations into this
+  file instead of guessing; new **`/timeline`** answers "how long / since when / how much time on X",
+  and falls back to `git log` for history predating the hooks.
+- **Caveat** — the log only knows what happened since tonight. Anything earlier lives in git only.
+
 ### 2026-09-12 — Genesis: fubaritico-ds → europe-map, Phase 0 + Milestone 1.1
 
 Repurposed the repo from the old `fubaritico-ds` design system into a **3D historical atlas of Europe**
@@ -84,20 +106,20 @@ Long session, **120 → 245 tests**, commits `8783364`..`beb24fc` on `master`, f
   from the defaults. Tests assert defaults sit inside their own slider and groups cover the table.
   Texture folder split into 7 numbered sub-folders mirroring the compositing order.
 - **Fat lines** (`8783364`) — `LineBasicMaterial.linewidth` is pinned to 1 px by WebGL, so any controlled
-  width needs `LineSegments2` + `LineMaterial`. Chosen by the caller *asking* for a width (a `> 1`
+  width needs `LineSegments2` + `LineMaterial`. Chosen by the caller _asking_ for a width (a `> 1`
   threshold silently ignored sub-pixel values). `setOpacity`/`setColor`/`setResolution` replace callers
   reaching into `object.material`.
 - **Rivers** (`f6e3921`) — Natural Earth 10m, 591 polylines / 537 KB, simplified to 500 m (just under a
   screen pixel at max zoom). One layer per `scalerank`; reveal + width interpolate across ranks, opacity
   only, never a geometry rebuild. `extendRiversToSea` bridges mouths (NE stops at the estuary head);
-  only *free* endpoints extend — a tip another polyline passes is a confluence (129 → 96 extensions).
+  only _free_ endpoints extend — a tip another polyline passes is a confluence (129 → 96 extensions).
 - **Land mask** (`462bed2`, `d6dead5`) — **the session's key correction**: a DEM answers "how high", not
-  "wet or dry". Measured: connectivity flood-fill does *not* rescue the Netherlands (dikes are narrower
+  "wet or dry". Measured: connectivity flood-fill does _not_ rescue the Netherlands (dikes are narrower
   than a cell) and turns the Caspian/Dead Sea into plains. Asset = `ne_10m_land` minus `ne_10m_lakes`
   (the land layer carves no lakes), baked at 4× the DEM, 2.9 MB raw / 152 KB gzipped. 16/16 spot checks.
   Killed `coastCoverage` + `gradientAt`: the mask's bilinear coverage supersedes them.
 - **Draping** (`8c584f4`, `50731ac`) — `reliefWorldY` exported from `reliefMesh`; overlays sample the
-  *mesh's* vertex grid (512 segments vs a 1280 DEM), else a river read at its true elevation sits below
+  _mesh's_ vertex grid (512 segments vs a 1280 DEM), else a river read at its true elevation sits below
   the drawn valley floor. Every draped layer must track `relief.scale.y` or it floats by the
   exaggeration ratio — invisible on a plain, glaring on a crest.
 - **Political overlay, WIP** (`beb24fc`) — `historical-basemaps`, 20 centuries, **GPL-3.0 so git-ignored**.

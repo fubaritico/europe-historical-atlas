@@ -15,6 +15,7 @@
 | Feed / query the knowledge base      | `memory-*` skills |
 | Start a work session                 | `/start-session`  |
 | End a work session                   | `/end-session`    |
+| Answer "how long / since when"       | `/timeline`       |
 | Fetch the SonarCloud report          | `/sonar`          |
 
 > DS skills (React/Stencil/Storybook/monorepo/BEM) were archived under `files/claude-archive/` —
