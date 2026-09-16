@@ -176,6 +176,15 @@ describe('createWorkerMapCompute', () => {
       expect(Array.from(tinted.rgba)).not.toEqual(Array.from(bare.rgba))
     })
 
+    it('re-derives borders without sending the year back across', async () => {
+      const link = loopback(createInlineMapCompute())
+      const client = createWorkerMapCompute({ spawn: () => link.handle })
+      await client.setSources(sources())
+      const computed = await client.computePolitical(REQUEST)
+      const again = await client.deriveBorders(0)
+      expect(again.between).toHaveLength(computed.borders.between.length)
+    })
+
     it('keeps two calls apart', async () => {
       const link = loopback(createInlineMapCompute())
       const client = createWorkerMapCompute({ spawn: () => link.handle })

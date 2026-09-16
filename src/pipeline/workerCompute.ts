@@ -17,6 +17,7 @@ import type {
   TerrainBakeResult,
 } from './mapCompute'
 import type { TerrainTextureOptions } from './terrainCompose'
+import type { RegionBorders } from '../data/regionRaster'
 
 /**
  * The slice of a `Worker` this client touches — narrow enough for a test to stand one up literally.
@@ -157,6 +158,14 @@ export function createWorkerMapCompute(options: WorkerComputeOptions): MapComput
         throw new Error(`map compute: answered a political request with ${done.payload.kind}`)
       }
       return done.payload.result
+    },
+
+    async deriveBorders(smoothing: number): Promise<RegionBorders> {
+      const done = unwrap(await send((id) => ({ kind: 'deriveBorders', id, smoothing })))
+      if (done.payload.kind !== 'borders') {
+        throw new Error(`map compute: answered a border request with ${done.payload.kind}`)
+      }
+      return done.payload.borders
     },
 
     async bakeTerrain(

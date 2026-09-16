@@ -15,12 +15,14 @@ import type {
   TerrainBakeResult,
 } from './mapCompute'
 import type { TerrainTextureOptions } from './terrainCompose'
+import type { RegionBorders } from '../data/regionRaster'
 
 /** What the main thread asks the worker to do. `id` pairs an answer back to its question. */
 export type ComputeCommand =
   | { kind: 'setSources'; id: number; sources: ComputeSources }
   | { kind: 'clearPolitical'; id: number }
   | { kind: 'computePolitical'; id: number; request: PoliticalRequest }
+  | { kind: 'deriveBorders'; id: number; smoothing: number }
   | { kind: 'bakeTerrain'; id: number; options: TerrainTextureOptions }
   | { kind: 'dispose'; id: number }
 
@@ -31,6 +33,7 @@ export type ComputeCommand =
 export type ComputePayload =
   | { kind: 'ack' }
   | { kind: 'political'; result: PoliticalResult }
+  | { kind: 'borders'; borders: RegionBorders }
   | { kind: 'bake'; result: TerrainBakeResult }
 
 /** What the worker sends back. */

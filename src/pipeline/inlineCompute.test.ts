@@ -170,6 +170,20 @@ describe('createInlineMapCompute', () => {
       expect(Array.from(again.rgba)).toEqual(Array.from(bare.rgba))
     })
 
+    it('re-derives the borders from the installed raster, without rasterising again', async () => {
+      const compute = createInlineMapCompute()
+      await compute.setSources(sources(ALL_LAND))
+      const computed = await compute.computePolitical(REQUEST)
+      const rough = await compute.deriveBorders(0)
+      const smooth = await compute.deriveBorders(2)
+
+      expect(rough.between).toHaveLength(computed.borders.between.length)
+      // Smoothing spends points on corners, so the same border comes back with more of them.
+      const count = (groups: typeof rough.between): number =>
+        groups.reduce((n, group) => n + group.lines.reduce((m, line) => m + line.length, 0), 0)
+      expect(count(smooth.between)).toBeGreaterThan(count(rough.between))
+    })
+
     it('scales the grid by rasterScale', async () => {
       const compute = createInlineMapCompute()
       await compute.setSources(sources(ALL_LAND))
@@ -305,6 +319,12 @@ describe('createInlineMapCompute', () => {
       expect(result.tints).toEqual([])
       expect(result.borders.between).toEqual([])
       expect(result.cells.every((cell) => cell === -1)).toBe(true)
+    })
+
+    it('derives no borders when no political layer is installed', async () => {
+      const compute = createInlineMapCompute()
+      await compute.setSources(sources(ALL_LAND))
+      await expect(compute.deriveBorders(2)).resolves.toEqual({ between: [], frontier: [] })
     })
 
     it('clamps a rasterScale below 1 to the DEM’s own grid', async () => {

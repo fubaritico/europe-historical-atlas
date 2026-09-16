@@ -105,6 +105,15 @@ export interface PoliticalCompute {
    * @returns the raster, the colours and the borders
    */
   computePolitical(request: PoliticalRequest, onProgress?: ProgressReport): Promise<PoliticalResult>
+  /**
+   * Re-derive the border lines from the installed political layer, without rasterising anything.
+   *
+   * This is what a smoothing tunable costs: tracing the boundary of a grid that already exists, rather
+   * than the whole year again. Empty when no political layer is installed.
+   * @param smoothing - Chaikin rounds to apply
+   * @returns the border lines
+   */
+  deriveBorders(smoothing: number): Promise<RegionBorders>
 }
 
 /** Composite the terrain image on the CPU. */

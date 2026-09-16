@@ -31,7 +31,7 @@ import type {
 import type { AreaTint, TerrainTextureOptions } from './terrainCompose'
 import type { Heightmap } from '../data/heightmap'
 import type { LandMask } from '../data/landMask'
-import type { RegionRaster } from '../data/regionRaster'
+import type { RegionBorders, RegionRaster } from '../data/regionRaster'
 import type { RgbColor } from '../utils/color'
 
 /**
@@ -161,6 +161,18 @@ export function createInlineMapCompute(options: InlineComputeOptions = {}): MapC
 
       political = { raster, tints }
       return { width: raster.width, height: raster.height, cells: raster.cells, tints, borders }
+    },
+
+    deriveBorders(smoothing: number): Promise<RegionBorders> {
+      const installed = political
+      if (!installed) return Promise.resolve({ between: [], frontier: [] })
+      const mask = landMask
+      return Promise.resolve(
+        extractRegionBorders(installed.raster, {
+          smoothing,
+          ...(mask ? { isLand: (u: number, v: number): boolean => mask.isLand(u, v) } : {}),
+        })
+      )
     },
 
     async bakeTerrain(

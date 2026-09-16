@@ -49,6 +49,10 @@ export function serveCompute(scope: WorkerScope, compute: MapCompute): void {
             transfer: transferable(cells),
           }
         }
+        case 'deriveBorders': {
+          const borders = await compute.deriveBorders(command.smoothing)
+          return { payload: { kind: 'borders', borders }, transfer: [] }
+        }
         case 'bakeTerrain': {
           const result = await compute.bakeTerrain(command.options, onProgress)
           // The pixels are nobody's afterwards: hand the buffer over rather than copy megabytes.
