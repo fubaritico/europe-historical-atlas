@@ -129,8 +129,6 @@ describe('createWorkerMapCompute', () => {
       await client.setSources(sources())
       const result = await client.computePolitical(REQUEST)
 
-      expect(result.width).toBe(4)
-      expect(result.cells.length).toBe(16)
       expect(result.tints).toHaveLength(2)
       expect(result.tints[0]).not.toEqual(result.tints[1])
     })
@@ -163,16 +161,18 @@ describe('createWorkerMapCompute', () => {
       expect(link.transfers.at(-1)).toEqual([bake.rgba.buffer])
     })
 
-    it('copies the political raster, because the worker keeps painting from its own', async () => {
+    it('leaves the political grid in the worker, and keeps painting from it', async () => {
+      // The grid used to come back as raw cells — 45 MB a year at the 4x raster, for one caller that has
+      // since been deleted. Nothing is transferred for a political result now; what proves the worker
+      // still holds its own is that the next bake can tint with it.
       const link = loopback(createInlineMapCompute())
       const client = createWorkerMapCompute({ spawn: () => link.handle })
       await client.setSources(sources())
-      const first = await client.computePolitical(REQUEST)
-      // Had the worker transferred its own grid away, the next bake would have nothing to tint with.
+      await client.computePolitical(REQUEST)
+      expect(link.transfers.at(-1)).toEqual([])
       const tinted = await client.bakeTerrain(OPTIONS)
       await client.clearPolitical()
       const bare = await client.bakeTerrain(OPTIONS)
-      expect(first.cells.length).toBe(16)
       expect(Array.from(tinted.rgba)).not.toEqual(Array.from(bare.rgba))
     })
 
@@ -193,7 +193,7 @@ describe('createWorkerMapCompute', () => {
         client.computePolitical(REQUEST),
         client.bakeTerrain(OPTIONS),
       ])
-      expect(political.cells.length).toBe(16)
+      expect(political.tints).toHaveLength(2)
       expect(bake.rgba.length).toBe(4 * 4 * 4)
     })
   })

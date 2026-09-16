@@ -270,40 +270,6 @@ export function assignRegionColors(
   )
 }
 
-/**
- * Whether a segment separates two different polities, rather than facing the sea or its own hinterland.
- *
- * The test a border line needs is not "is this on land" but "is this shared". A polity's outline
- * includes its coast, and since the historical outlines are smaller than the real shoreline that coastal
- * run falls *inland*, passing any land test and drawing a second line parallel to the shore. Probing
- * both sides settles all three cases at once: two different claims is a real border, a claim facing
- * nothing is a coast, and a claim facing itself is the strip its own outline failed to reach.
- * @param raster - the rasterised claims, after any expansion
- * @param a - one endpoint, in normalized grid coordinates
- * @param b - the other endpoint
- * @param probe - how far to sample either side, in normalized grid units
- * @returns `true` when the two sides are claimed by different polities
- */
-export function separatesRegions(
-  raster: RegionRaster,
-  a: { u: number; v: number },
-  b: { u: number; v: number },
-  probe: number
-): boolean {
-  const du = b.u - a.u
-  const dv = b.v - a.v
-  const length = Math.hypot(du, dv)
-  if (length === 0) return false
-  // Perpendicular to the segment, normalized.
-  const nu = -dv / length
-  const nv = du / length
-  const mu = (a.u + b.u) / 2
-  const mv = (a.v + b.v) / 2
-  const left = raster.indexAt(mu + nu * probe, mv + nv * probe)
-  const right = raster.indexAt(mu - nu * probe, mv - nv * probe)
-  return left >= 0 && right >= 0 && left !== right
-}
-
 /** A border stretch between two polities, in normalized grid coordinates. */
 export type RegionBorderSegment = readonly [UvPoint, UvPoint]
 

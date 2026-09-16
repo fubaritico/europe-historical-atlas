@@ -7,7 +7,6 @@ import {
   extractRegionBorders,
   rasteriseRegions,
   regionColor,
-  separatesRegions,
 } from './regionRaster'
 
 import type { RegionBorderSegment, RegionRaster } from './regionRaster'
@@ -259,11 +258,6 @@ describe('regionRaster', () => {
       const colors = assignRegionColors(grid([[0]]), [{ name: 'a' }], [])
       expect(colors).toHaveLength(1)
       expect(colors[0]).toBeDefined()
-    })
-
-    it('reports no separation for a degenerate segment', () => {
-      const point = { u: 0.5, v: 0.5 }
-      expect(separatesRegions(grid([[0, 1]]), point, point, 0.5)).toBe(false)
     })
   })
 

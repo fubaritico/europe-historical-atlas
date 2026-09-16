@@ -43,14 +43,9 @@ export function serveCompute(scope: WorkerScope, compute: MapCompute): void {
           await compute.clearPolitical()
           return { payload: { kind: 'ack' }, transfer: [] }
         case 'computePolitical': {
+          // Only the colours and the lines come back; the grid stays here, where the next bake reads it.
           const result = await compute.computePolitical(command.request, onProgress)
-          // The worker keeps its own raster — the next bake paints from it — so what goes back is a
-          // copy. Transferring the original would detach the grid this worker is still holding.
-          const cells = Int16Array.from(result.cells)
-          return {
-            payload: { kind: 'political', result: { ...result, cells } },
-            transfer: transferable(cells),
-          }
+          return { payload: { kind: 'political', result }, transfer: [] }
         }
         case 'deriveBorders': {
           const borders = await compute.deriveBorders(command.smoothing)

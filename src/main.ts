@@ -10,7 +10,6 @@ import { borderPatternFor } from './data/borderStyles'
 import { createMaskCoastlineSource } from './data/coastlineSource'
 import { createFetchHeightmapSource, smoothHeightmap } from './data/heightmap'
 import { createElevationLandMask, createFetchLandMaskSource } from './data/landMask'
-import { separatesRegions } from './data/regionRaster'
 import { createFetchRegionSource } from './data/regionSource'
 import {
   DEFAULT_RIVER_EXTENSION,
@@ -33,7 +32,7 @@ import {
 // bundler-specific line in the compute, and it lives here on purpose: the client that talks to the
 // worker takes it as an injected `spawn`, so nothing below the composition root depends on Vite.
 import ComputeWorker from './pipeline/computeWorker?worker'
-import { createInlineMapCompute, rasterFromResult, scaleProgress } from './pipeline/inlineCompute'
+import { createInlineMapCompute, scaleProgress } from './pipeline/inlineCompute'
 import { DEFAULT_TERRAIN_OPTIONS } from './pipeline/terrainCompose'
 import { createWorkerMapCompute } from './pipeline/workerCompute'
 import { createCompassRose } from './scene/compassRose'
@@ -60,7 +59,7 @@ import type { AssetKind } from './data/assetError'
 import type { BorderPattern } from './data/borderStyles'
 import type { Heightmap } from './data/heightmap'
 import type { LandMask } from './data/landMask'
-import type { RegionBorderLine, RegionBorders } from './data/regionRaster'
+import type { RegionBorders } from './data/regionRaster'
 import type {
   CoastlineDevParams,
   ExtentDevParams,
@@ -192,12 +191,6 @@ function bootstrap(): () => void {
   // so a river read at its true DEM elevation sits *below* the drawn valley floor and is occluded.
   const RELIEF_SEGMENTS = 512
 
-  // How far either side of a source ring the legacy border path samples, in DEM cells. It is the value
-  // that breaks that path: `snapToCoast` grows each claim by up to its own value (5–12), so past two
-  // cells both samples land in the same polity and the stretch is dropped. Kept only until the on-screen
-  // comparison with the raster-derived borders is settled.
-  const RING_BORDER_PROBE_CELLS = 2
-
   // How far the land mask's frame may differ from the relief's before the two are declared to be about
   // different parts of the world. A JSON round trip rounds; a different crop does not miss by a degree.
   const BBOX_TOLERANCE_DEG = 1e-6
@@ -251,10 +244,6 @@ function bootstrap(): () => void {
   // teardown just like a layer of its own.
   // The political line work — frontier, casing and core — behind one handle, like every other overlay.
   let borders: ReturnType<typeof createComposedLineLayer> | null = null
-  // The main thread's copy of the political grid. The compute keeps its own — it is what the next bake
-  // tints from — and this one exists for the things only this thread can do: the ring-path comparison
-  // today, a click landing on a polity tomorrow.
-  let regionRaster: ReturnType<typeof rasterFromResult> | null = null
   // The border lines as the compute derived them, kept so that restyling a stroke redraws rather than
   // re-traces. Only the smoothing changes the geometry, and it asks for a fresh derivation.
   let derivedBorders: RegionBorders | null = null
@@ -501,37 +490,6 @@ function bootstrap(): () => void {
   }
 
   /**
-   * The original border path: trace the source rings, keeping only the stretches a fixed probe says
-   * separate two polities.
-   *
-   * Kept behind `borderSource` purely to compare it on screen — it is the one that leaves gaps. The probe
-   * reaches two DEM cells either side, while `snapToCoast` grows each claim by up to its own value, so
-   * wherever the expansion moved the frontier further than the probe reaches, both samples land in the
-   * same polity and the stretch is discarded.
-   * @returns the border stretches, in normalized grid coordinates
-   */
-  const ringBorderLines = (): RegionBorderLine[] => {
-    const out: RegionBorderLine[] = []
-    if (!heightmap || !regionSet) return out
-    const raster = regionRaster
-    const probe = RING_BORDER_PROBE_CELLS / (heightmap.meta.width - 1)
-    for (const region of regionSet.regions) {
-      for (const ring of region.rings) {
-        for (let i = 0; i < ring.length; i++) {
-          const a = ring[i]
-          const b = ring[(i + 1) % ring.length]
-          if (!a || !b) continue
-          // Only the stretches actually shared with another polity: the rest is coastline, which the
-          // map already draws once, from a far better source.
-          if (raster && !separatesRegions(raster, a, b, probe)) continue
-          out.push([a, b]) // a two-point chain: the ring path has no runs to speak of
-        }
-      }
-    }
-    return out
-  }
-
-  /**
    * How the border between two polities is drawn, looked up by name in the editorial style table.
    * @param pair - the two region indices the stretch separates
    * @returns the drawing pattern
@@ -545,23 +503,12 @@ function bootstrap(): () => void {
   const rebuildBorders = (): void => {
     disposeHandle(borders)
     borders = null
-    if (!heightmap || !regionSet || !politicalParams.showBorders) return
+    if (!heightmap || !regionSet || !derivedBorders || !politicalParams.showBorders) return
     // Derived from the fills, a border *is* their boundary — it cannot disagree with the colour and it
     // cannot be interrupted. The tracing happens in the compute, beside the grid it reads; what is kept
-    // here is its result, so restyling a stroke redraws without re-tracing anything. The ring path below
-    // only exists to compare the two, and has no notion of a frontier.
-    const derived =
-      derivedBorders && politicalParams.borderSource === 'raster'
-        ? derivedBorders
-        : {
-            // The ring path knows nothing about which polities a stretch separates, so it all goes in
-            // one bucket under a pair no rule can match — drawn solid, which is all it ever was.
-            between: [{ pair: [-1, -1] as const, lines: ringBorderLines() }],
-            frontier: [],
-          }
-
+    // here is its result, so restyling a stroke redraws without re-tracing anything.
     const strokes = buildBorderStrokes(
-      derived,
+      derivedBorders,
       {
         coreColor: politicalParams.borderColor,
         coreWidth: politicalParams.borderWidth,
@@ -634,7 +581,6 @@ function bootstrap(): () => void {
         scaleProgress(report, POLITICAL_SPLIT.fetch, POLITICAL_SPLIT.compute)
       )
       if (isDisposed() || !isCurrent()) return
-      regionRaster = rasterFromResult(result)
       derivedBorders = result.borders
 
       await rebuildTexture(scaleProgress(report, POLITICAL_SPLIT.compute, POLITICAL_SPLIT.bake))

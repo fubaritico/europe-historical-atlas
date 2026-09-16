@@ -12,7 +12,6 @@ import { createElevationLandMask, createPackedLandMask } from '../data/landMask'
 import { pinnedRegionColor } from '../data/regionPalette'
 import {
   assignRegionColors,
-  createRegionRaster,
   expandRegionsOverLand,
   extractRegionBorders,
   rasteriseRegions,
@@ -160,7 +159,7 @@ export function createInlineMapCompute(options: InlineComputeOptions = {}): MapC
       })
 
       political = { raster, tints }
-      return { width: raster.width, height: raster.height, cells: raster.cells, tints, borders }
+      return { tints, borders }
     },
 
     deriveBorders(smoothing: number): Promise<RegionBorders> {
@@ -207,17 +206,4 @@ export function createInlineMapCompute(options: InlineComputeOptions = {}): MapC
       political = null
     },
   }
-}
-
-/**
- * Rebuild a {@link RegionRaster} from the parts a {@link PoliticalResult} carries.
- *
- * The lookup is a closure, so it cannot cross a worker boundary; what crosses is the grid it closes
- * over. Going back through `createRegionRaster` is what keeps the worker's raster and the main thread's
- * answering with the same sampling rule.
- * @param result - a computed political year
- * @returns the raster
- */
-export function rasterFromResult(result: PoliticalResult): RegionRaster {
-  return createRegionRaster(result.width, result.height, result.cells)
 }

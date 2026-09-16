@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { createLandMask } from '../data/landMask'
 
-import { createInlineMapCompute, rasterFromResult, scaleProgress } from './inlineCompute'
+import { createInlineMapCompute, scaleProgress } from './inlineCompute'
 import { DEFAULT_TERRAIN_OPTIONS } from './terrainCompose'
 
 import type { ComputePhase, ComputeSources, PoliticalRequest, ProgressReport } from './mapCompute'
@@ -123,9 +123,6 @@ describe('createInlineMapCompute', () => {
       await compute.setSources(sources(ALL_LAND))
       const result = await compute.computePolitical(REQUEST)
 
-      expect(result.width).toBe(8)
-      expect(result.height).toBe(8)
-      expect(result.cells.length).toBe(64)
       expect(result.tints).toHaveLength(2)
       // Two polities side by side over land: they must be told apart, and the line between them drawn.
       expect(result.tints[0]).not.toEqual(result.tints[1])
@@ -184,24 +181,45 @@ describe('createInlineMapCompute', () => {
       expect(count(smooth.between)).toBeGreaterThan(count(rough.between))
     })
 
-    it('scales the grid by rasterScale', async () => {
-      const compute = createInlineMapCompute()
-      await compute.setSources(sources(ALL_LAND))
-      const result = await compute.computePolitical({ ...REQUEST, rasterScale: 2 })
-      expect(result.width).toBe(16)
-      expect(result.height).toBe(16)
+    it('traces a finer border when the raster is finer', async () => {
+      // The grid itself is the compute's business; what a caller can see is the line it produces, and a
+      // grid at twice the resolution walks twice as many cell edges along the same frontier.
+      // Adjacent, not merely near: the shared REQUEST leaves a gap between 0.45 and 0.55, and a finer
+      // grid is precisely what reveals such a gap — at eight cells the two polities touch, at sixteen
+      // they do not, and there is no border at all to count.
+      const touching = [box('Alpha', 0, 0, 0.5, 1), box('Beta', 0.5, 0, 1, 1)]
+      const points = async (rasterScale: number): Promise<number> => {
+        const compute = createInlineMapCompute()
+        await compute.setSources(sources(ALL_LAND))
+        const result = await compute.computePolitical({
+          ...REQUEST,
+          regions: touching,
+          rasterScale,
+        })
+        return result.borders.between.reduce(
+          (n, group) => n + group.lines.reduce((m, line) => m + line.length, 0),
+          0
+        )
+      }
+      expect(await points(2)).toBeGreaterThan(await points(1))
     })
 
     it('scales snapToCoast with the grid, so its reach in kilometres holds', async () => {
-      const expanded = async (rasterScale: number): Promise<number> => {
+      // Measured where it is meant to be seen: the tinted pixels. One DEM cell of reach must colour the
+      // same share of the map whichever grid it was walked on — otherwise the colours stop short of the
+      // coastline the moment the raster gets finer.
+      const tinted = async (rasterScale: number): Promise<number> => {
         const compute = createInlineMapCompute()
         await compute.setSources(sources(ALL_LAND))
-        const result = await compute.computePolitical({ ...REQUEST, rasterScale, snapToCoast: 1 })
-        const claimed = result.cells.reduce((n, cell) => (cell >= 0 ? n + 1 : n), 0)
-        return claimed / result.cells.length
+        const bare = await compute.bakeTerrain(OPTIONS)
+        await compute.computePolitical({ ...REQUEST, rasterScale, snapToCoast: 1 })
+        const painted = await compute.bakeTerrain(OPTIONS)
+        let differing = 0
+        for (let i = 0; i < painted.rgba.length; i += 4)
+          if (painted.rgba[i] !== bare.rgba[i]) differing++
+        return differing / (painted.rgba.length / 4)
       }
-      // One DEM cell of reach covers the same fraction of the map whichever grid it is walked on.
-      expect(await expanded(2)).toBeCloseTo(await expanded(1), 1)
+      expect(await tinted(2)).toBeCloseTo(await tinted(1), 1)
     })
 
     it('offers the suzerain’s name to the pinning rule when colouring by suzerain', async () => {
@@ -318,7 +336,7 @@ describe('createInlineMapCompute', () => {
       const result = await compute.computePolitical({ ...REQUEST, regions: [] })
       expect(result.tints).toEqual([])
       expect(result.borders.between).toEqual([])
-      expect(result.cells.every((cell) => cell === -1)).toBe(true)
+      expect(result.borders.frontier).toEqual([])
     })
 
     it('derives no borders when no political layer is installed', async () => {
@@ -330,8 +348,14 @@ describe('createInlineMapCompute', () => {
     it('clamps a rasterScale below 1 to the DEM’s own grid', async () => {
       const compute = createInlineMapCompute()
       await compute.setSources(sources(ALL_LAND))
-      const result = await compute.computePolitical({ ...REQUEST, rasterScale: 0 })
-      expect(result.width).toBe(8)
+      const floored = await compute.computePolitical({ ...REQUEST, rasterScale: 0 })
+      const one = await compute.computePolitical({ ...REQUEST, rasterScale: 1 })
+      const points = (result: typeof floored): number =>
+        result.borders.between.reduce(
+          (n, group) => n + group.lines.reduce((m, line) => m + line.length, 0),
+          0
+        )
+      expect(points(floored)).toBe(points(one))
     })
 
     it('drops everything it holds on dispose', async () => {
@@ -339,35 +363,6 @@ describe('createInlineMapCompute', () => {
       await compute.setSources(sources(ALL_LAND))
       compute.dispose()
       await expect(compute.bakeTerrain(OPTIONS)).rejects.toThrow(/heightmap/)
-    })
-  })
-})
-
-describe('rasterFromResult', () => {
-  describe('happy path', () => {
-    it('answers indexAt the same way the compute’s own raster did', async () => {
-      const compute = createInlineMapCompute()
-      await compute.setSources(sources(ALL_LAND))
-      const result = await compute.computePolitical(REQUEST)
-      const raster = rasterFromResult(result)
-      expect(raster.indexAt(0.1, 0.5)).toBe(result.cells[4 * 8 + 1])
-      expect(raster.indexAt(0.9, 0.5)).toBe(result.cells[4 * 8 + 7])
-    })
-  })
-
-  // L2/L3/L4: N/A — a two-line rebuild over `createRegionRaster`, whose own branches are covered next
-  // door in `regionRaster.test.ts`.
-
-  describe('edge cases', () => {
-    it('handles an empty grid', () => {
-      const raster = rasterFromResult({
-        width: 0,
-        height: 0,
-        cells: new Int16Array(0),
-        tints: [],
-        borders: { between: [], frontier: [] },
-      })
-      expect(raster.indexAt(0.5, 0.5)).toBe(-1)
     })
   })
 })

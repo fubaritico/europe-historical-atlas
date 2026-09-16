@@ -309,13 +309,6 @@ export interface PoliticalDevParams {
   /** Draw the border lines on top of the tinted areas. */
   showBorders: boolean
   /**
-   * Where the border lines come from. `raster` derives them from the boundary between filled cells, so
-   * they follow the colours exactly and cannot be interrupted; `rings` traces the source polygons, which
-   * is smoother but drops every stretch the claim expansion moved away from its own outline. Kept as a
-   * switch only long enough to compare the two on screen.
-   */
-  borderSource: 'raster' | 'rings'
-  /**
    * How fine the political grid is, as a multiple of the DEM.
    *
    * This is the resolution of the staircase, and the only lever that flattens it without a trade-off:
@@ -429,7 +422,6 @@ export function politicalPalette(params: PoliticalDevParams): string[] {
 export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   year: 1500,
   showBorders: true,
-  borderSource: 'raster',
   // 4× the DEM: 1.9 km cells against the DEM's own 7.6 km, on a 5120×4656 grid of 23.8 million cells.
   // It was held at 2× only because it blocked the main thread for 825 ms; the compute runs in a worker
   // now, so the staircase — which is a *resolution* problem and nothing else — gets the one fix that has
@@ -490,7 +482,6 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
 export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
   year: { kind: 'number', min: 100, max: 2000, step: 100, label: 'year (CE)' },
   showBorders: { kind: 'boolean', label: 'draw borders' },
-  borderSource: { kind: 'choice', options: ['raster', 'rings'], label: 'border source' },
   rasterScale: { kind: 'number', min: 1, max: 4, step: 1, label: 'raster scale (× DEM)' },
   borderSmoothing: { kind: 'number', min: 0, max: 4, step: 1, label: 'border smoothing' },
   borderOnTop: { kind: 'boolean', label: 'borders over relief' },
@@ -578,7 +569,7 @@ export const POLITICAL_CONTROL_GROUPS: ControlGroup<PoliticalDevParams>[] = [
   },
   {
     title: '6 \u00b7 geometry',
-    keys: ['borderSource', 'rasterScale', 'borderSmoothing'],
+    keys: ['rasterScale', 'borderSmoothing'],
   },
   {
     title: '7 \u00b7 palette',
@@ -601,7 +592,6 @@ export const POLITICAL_CONTROL_ORDER: (keyof PoliticalDevParams)[] = [
   'snapToCoast',
   'colorBySuzerain',
   'showBorders',
-  'borderSource',
   'rasterScale',
   'borderSmoothing',
   'borderOnTop',
@@ -821,7 +811,6 @@ export type PoliticalRebuild = 'redraw' | 'trace' | 'full'
  */
 const POLITICAL_REDRAW_ONLY: readonly (keyof PoliticalDevParams)[] = [
   'showBorders',
-  'borderSource',
   'borderOnTop',
   'borderColor',
   'borderOpacity',

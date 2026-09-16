@@ -66,16 +66,14 @@ export interface PoliticalRequest {
 }
 
 /**
- * A computed political year. The raster comes back as its raw parts rather than as a `RegionRaster`,
- * for the same reason the sources go out that way: a closure does not cross a worker boundary.
+ * A computed political year.
+ *
+ * The grid stays in the compute. It used to come back as raw parts, which costs 45 MB a year at the 4×
+ * raster and served one caller only — the legacy ring-path comparison, now deleted. When picking lands it
+ * should ask the compute *what is at this point* rather than hold a copy to answer that here: a click is
+ * one query, and a query is a message.
  */
 export interface PoliticalResult {
-  /** Political grid width in cells. */
-  width: number
-  /** Political grid height in cells. */
-  height: number
-  /** Per-cell region indices, row-major, `-1` where unclaimed. */
-  cells: Int16Array
   /** The colour each region takes, indexed as `regions` was. */
   tints: RgbColor[]
   /** The border lines, derived from the cells above so the two cannot disagree. */

@@ -14,9 +14,11 @@ Put here the know issues to avoid cluttering the context window.
   Wherever the expansion moved the frontier further than the probe reaches, both samples land in the same
   polity and the stretch is discarded — structural, and guaranteed, not a tuning matter. The real defect
   was having **two sources of truth for one object**: fills from the raster, borders from the rings.
-  `extractRegionBorders` now derives the line from the raster itself, so it *is* the boundary of the
-  fills — gapless by construction. The ring path survives behind the `border source` dev toggle only long
-  enough to compare the two on screen; **delete it once the comparison is settled.**
+  `extractRegionBorders` derives the line from the raster itself, so it *is* the boundary of the
+  fills — gapless by construction. **The ring path and its `border source` toggle were deleted on
+  2026-09-17**, the comparison having been settled on screen. With them went `separatesRegions` and, more
+  usefully, the political grid's trip back to the main thread: nothing on this side read it any more, and
+  at the 4× raster that copy cost **45 MB a year**.
 - **The border staircase is a *resolution* problem — do not try to fix it on the line alone.** A
   grid-derived border runs along cell edges, so a diagonal comes out as a staircase one cell high
   (~7.6 km at the DEM's own resolution, 45°N). Smoothing cannot remove it: corner-cutting shrinks the
@@ -48,11 +50,24 @@ Put here the know issues to avoid cluttering the context window.
   the worker, another 45.5 MB for the copy sent back to the main thread, and 45.5 MB more transiently
   while `expandRegionsOverLand` copies to grow the claims — a peak around **136 MB** during a change of
   year. Workable, but no longer negligible; watch it if a finer grid is ever considered.
-- **The 45.5 MB raster copy on the main thread currently serves only the ring path.** `regionRaster` is
-  read by `ringBorderLines`/`separatesRegions` (the legacy comparison behind the `border source` toggle,
-  which this file already says to delete) and by nothing else — the tint lives in the worker now. Deleting
-  the ring path would let the copy stop being sent until **M1.4 picking** genuinely needs `indexAt`, at
-  which point it is worth its weight. Until then it is 45 MB held for a debug toggle.
+- **4× is a desktop default, and the resolution should eventually adapt — to the *machine*, not the
+  network.** Raised by the dev on 2026-09-17 as "different resolutions depending on network speed", which
+  is the wrong axis and worth stating plainly: the political raster is computed in the browser from a DEM
+  and a mask that are downloaded at the same size whatever the setting. Changing `rasterScale` costs CPU
+  and memory and **not one byte on the wire**. Two genuinely separate questions hide behind the one idea:
+  - **Machine capability → `rasterScale`.** 825 ms and a 136 MB peak is a different proposition on a
+    phone than on a laptop. Do not guess it from `navigator.deviceMemory` / `navigator.connection` —
+    both are Chromium-only as far as is known here, and unverified. **Time the first political compute
+    and step the scale down if it is slow**: a measurement works everywhere and tells the truth.
+  - **Bandwidth → asset size.** The real network cost is the DEM (3 MB) and the mask (3 MB), both fixed
+    today. Adapting that means generating tiers of each asset, which does not exist — `fetch-dem` takes a
+    zoom, so it is possible, but it is a data-pipeline job, not a runtime toggle.
+- **The political grid no longer leaves the worker, and picking should keep it that way.** A
+  `PoliticalResult` carries the colours and the border lines, nothing else. When **M1.4 picking** lands,
+  the reflex will be to ask for the grid back so a click can be answered here — resist it: a click is one
+  query, a query is a message, and a round trip costs a millisecond against 45 MB held for the session.
+  The port should grow a `regionAt(u, v)` rather than a getter for the cells, which also fits the design
+  constraint already recorded — a click must return a **list** from a spatial query, not a single hit.
 - **Islands no polygon claims stay uncoloured** (Balearics, Aegean): `expandRegionsOverLand` walks over
   land only, and BFS cannot cross the sea to reach them.
 - ~~**The texture bake is one indivisible synchronous block, and it is where the tab still freezes**~~ —
