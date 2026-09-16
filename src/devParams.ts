@@ -430,7 +430,11 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   year: 1500,
   showBorders: true,
   borderSource: 'raster',
-  rasterScale: 2,
+  // 4× the DEM: 1.9 km cells against the DEM's own 7.6 km, on a 5120×4656 grid of 23.8 million cells.
+  // It was held at 2× only because it blocked the main thread for 825 ms; the compute runs in a worker
+  // now, so the staircase — which is a *resolution* problem and nothing else — gets the one fix that has
+  // no trade-off. Fills and lines come out of the same grid, so they cannot disagree.
+  rasterScale: 4,
   // Two rounds is where the cell staircase stops reading as pixels and starts reading as a drawn line;
   // a third gains almost nothing and rounds real corners off.
   borderSmoothing: 2,

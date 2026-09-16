@@ -39,6 +39,20 @@ Put here the know issues to avoid cluttering the context window.
   grows with the area while the rasterising grows with the perimeter.
   **Gotcha when changing it**: everything measured in *cells* must scale with it, `snapToCoast` above
   all, or its reach in kilometres silently halves and the colours stop short of the coastline again.
+  **Now held by construction** — the multiplication happens once, inside `inlineCompute.computePolitical`,
+  rather than at each call site.
+  **Default raised to 4× on 2026-09-17**, once the compute moved off the main thread: the 825 ms it costs
+  is nobody's freeze any more. Cells go from 3.8 km to **1.9 km**. What it buys is the only fix to the
+  staircase with no trade-off, since fills and lines come out of the same grid.
+  **What it costs, measured**: a 5120×4656 grid is 23.8 M cells, so **45.5 MB** for the `Int16Array` in
+  the worker, another 45.5 MB for the copy sent back to the main thread, and 45.5 MB more transiently
+  while `expandRegionsOverLand` copies to grow the claims — a peak around **136 MB** during a change of
+  year. Workable, but no longer negligible; watch it if a finer grid is ever considered.
+- **The 45.5 MB raster copy on the main thread currently serves only the ring path.** `regionRaster` is
+  read by `ringBorderLines`/`separatesRegions` (the legacy comparison behind the `border source` toggle,
+  which this file already says to delete) and by nothing else — the tint lives in the worker now. Deleting
+  the ring path would let the copy stop being sent until **M1.4 picking** genuinely needs `indexAt`, at
+  which point it is worth its weight. Until then it is 45 MB held for a debug toggle.
 - **Islands no polygon claims stay uncoloured** (Balearics, Aegean): `expandRegionsOverLand` walks over
   land only, and BFS cannot cross the sea to reach them.
 - ~~**The texture bake is one indivisible synchronous block, and it is where the tab still freezes**~~ —
