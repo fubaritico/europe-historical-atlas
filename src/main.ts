@@ -1,9 +1,11 @@
 import { Color, PerspectiveCamera, Scene, Timer, WebGLRenderer } from 'three'
 import Stats from 'three/addons/libs/stats.module.js'
 
+import { assetNotice } from './assetMessages'
 import { COMPUTE_PHASE_LABELS } from './computeLabels'
 import { createSessionStorageMapCameraStore } from './controls/mapCameraStore'
 import { createMapControls } from './controls/mapControls'
+import { assetError, boundsMatch } from './data/assetError'
 import { borderPatternFor } from './data/borderStyles'
 import { createMaskCoastlineSource } from './data/coastlineSource'
 import { createFetchHeightmapSource, smoothHeightmap } from './data/heightmap'
@@ -46,6 +48,7 @@ import { createReliefMesh, reliefWorldY } from './scene/reliefMesh'
 import { generateRhumbSegments } from './scene/rhumbNetwork'
 import { createRiverLayer } from './scene/riverLayer'
 import { wrapTerrainTexture } from './scene/terrainTexture'
+import { createNoticeBoard } from './ui/notice'
 import { createProgressOverlay } from './ui/progressOverlay'
 import { createSplash } from './ui/splash'
 import { hexToRgb } from './utils/color'
@@ -53,6 +56,7 @@ import { createLatestOnly } from './utils/latestOnly'
 import { lerp } from './utils/math'
 
 import type { MapRect } from './controls/mapControls'
+import type { AssetKind } from './data/assetError'
 import type { BorderPattern } from './data/borderStyles'
 import type { Heightmap } from './data/heightmap'
 import type { LandMask } from './data/landMask'
@@ -151,6 +155,29 @@ function bootstrap(): () => void {
   // long as that takes, which reads as broken rather than as loading.
   const splash = createSplash({ host: document.body, background: '#efe6d2' })
 
+  // Where a failure is told to the reader. Until now every one of them ended in `console.error` and
+  // nothing else, so a relief that failed to load showed a blank canvas and no explanation.
+  const notices = createNoticeBoard({ host: document.body })
+
+  /**
+   * Tell the reader an asset failed, and keep the console line for whoever is looking at one.
+   *
+   * Whether it blocks or merely degrades is declared in `assetMessages`, not decided here: which layers
+   * the map cannot do without is a product decision, not an accident of which catch this happens to be.
+   * @param asset - which asset family failed
+   * @param error - whatever was caught
+   */
+  const reportAssetFailure = (asset: AssetKind, error: unknown): void => {
+    console.error(`asset ${asset} failed`, error)
+    if (isDisposed()) return
+    const notice = assetNotice(asset, error)
+    notices.show(notice)
+    // A blocking failure means there is no map behind the splash, so the splash stays and the message
+    // lands on it. Dismissing it would reveal an empty canvas and call that an improvement.
+    if (notice.severity !== 'blocking') return
+    progress.end()
+  }
+
   const params: ReliefDevParams = { ...DEFAULT_RELIEF_PARAMS }
 
   // World-space width of the map plane (X axis), consumed by the mesh build.
@@ -170,6 +197,10 @@ function bootstrap(): () => void {
   // cells both samples land in the same polity and the stretch is dropped. Kept only until the on-screen
   // comparison with the raster-derived borders is settled.
   const RING_BORDER_PROBE_CELLS = 2
+
+  // How far the land mask's frame may differ from the relief's before the two are declared to be about
+  // different parts of the world. A JSON round trip rounds; a different crop does not miss by a degree.
+  const BBOX_TOLERANCE_DEG = 1e-6
 
   // How a change of year divides the progress bar. Measured rather than chosen: at the raster's 2× scale
   // the compute costs ~215 ms against a bake that is longer still, and the fetch is a local file. The
@@ -612,7 +643,7 @@ function bootstrap(): () => void {
       rebuildBorders()
       progress.report(1)
     } catch (error: unknown) {
-      console.error(`political layer ${String(year)} failed to load`, error)
+      reportAssetFailure('regions', error)
     } finally {
       progress.end()
     }
@@ -707,13 +738,28 @@ function bootstrap(): () => void {
     const [dem, mask] = await Promise.all([
       heightmapSource.load(),
       landMaskSource.load().catch((error: unknown) => {
-        console.error('land mask load failed — falling back to the 0 m contour', error)
+        reportAssetFailure('landMask', error)
         return null
       }),
     ])
     if (isDisposed()) return // teardown ran mid-load → don't add an orphan mesh to a dead scene
     heightmap = dem
-    landMask = mask
+    // A mask cropped to a different part of the world than the relief is internally valid and completely
+    // wrong: every coastline would land somewhere it is not, with nothing anywhere to say so.
+    if (mask && !boundsMatch(mask.meta.bbox, dem.meta.bbox, BBOX_TOLERANCE_DEG)) {
+      reportAssetFailure(
+        'landMask',
+        assetError(
+          'landMask',
+          'semantic',
+          '/masks/europe-land.json',
+          'the mask covers a different frame from the relief'
+        )
+      )
+      landMask = null
+    } else {
+      landMask = mask
+    }
     refreshReliefSource() // draping is correct from here on, mesh or no mesh
     await pushSources()
     if (isDisposed()) return
@@ -743,7 +789,9 @@ function bootstrap(): () => void {
   const landMaskSource = createFetchLandMaskSource('/masks/europe-land')
 
   void startup().catch((error: unknown) => {
-    console.error('the map could not be brought up', error)
+    // Anything escaping `startup` got past the mask's own catch, so it is the relief — the one asset the
+    // map cannot do without. The splash stays up underneath the message.
+    reportAssetFailure('heightmap', error)
   })
 
   // Rivers load independently of the DEM: neither blocks the other, and the second to arrive triggers
@@ -756,7 +804,7 @@ function bootstrap(): () => void {
       rebuildRivers()
     })
     .catch((error: unknown) => {
-      console.error('river load failed', error)
+      reportAssetFailure('rivers', error)
     })
 
   const gui = createDevPanel({
@@ -924,6 +972,7 @@ function bootstrap(): () => void {
     gui.destroy()
     progress.dispose()
     splash.dispose() // a load abandoned mid-flight must not leave the silhouette over a dead canvas
+    notices.dispose()
     stats.dom.remove()
     extentRect.dispose()
     footprintRect.dispose()
