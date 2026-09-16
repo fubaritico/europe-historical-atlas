@@ -139,7 +139,7 @@ export const DEFAULT_TERRAIN_OPTIONS: TerrainTextureOptions = {
   // toward the same muddy olive. A straight interpolation keeps the hue, and the hillshade applied
   // afterwards is what keeps the relief legible under the colour.
   politicalMode: 'overlay',
-  politicalStrength: 0.62,
+  politicalStrength: 1,
   elevationFloor: 0,
   // Low ceiling on purpose: Europe is mostly under 1500 m, so a high reference (say 4000) crushes the
   // whole continent into the darkest few percent of the ramp and the valley detail disappears.

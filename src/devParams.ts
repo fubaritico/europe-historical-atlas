@@ -438,7 +438,7 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   borderEdgeWidth: 3.2,
   showFrontier: true,
   frontierColor: '#5c3a2e',
-  frontierOpacity: 0.45,
+  frontierOpacity: 0.3,
   // Thicker than a negotiated border: it is the edge of what the map knows, and reads as an outer limit
   // rather than as a line between two named things.
   frontierWidth: 2.4,
