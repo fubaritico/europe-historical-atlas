@@ -10,6 +10,7 @@ import { pinnedRegionColor } from './data/regionPalette'
 import {
   assignRegionColors,
   expandRegionsOverLand,
+  extractRegionBorders,
   rasteriseRegions,
   separatesRegions,
 } from './data/regionRaster'
@@ -44,6 +45,7 @@ import { lerp } from './utils/math'
 import type { MapRect } from './controls/mapControls'
 import type { Heightmap } from './data/heightmap'
 import type { LandMask } from './data/landMask'
+import type { RegionBorderSegment } from './data/regionRaster'
 import type {
   CoastlineDevParams,
   ExtentDevParams,
@@ -142,6 +144,12 @@ function bootstrap(): () => void {
   // at 512 segments against a 1280-wide grid the mesh interpolates straight across ~17 km of terrain,
   // so a river read at its true DEM elevation sits *below* the drawn valley floor and is occluded.
   const RELIEF_SEGMENTS = 512
+
+  // How far either side of a source ring the legacy border path samples, in DEM cells. It is the value
+  // that breaks that path: `snapToCoast` grows each claim by up to its own value (5–12), so past two
+  // cells both samples land in the same polity and the stretch is dropped. Kept only until the on-screen
+  // comparison with the raster-derived borders is settled.
+  const RING_BORDER_PROBE_CELLS = 2
 
   // Baked terrain look (parchment + hypsometric tint + DEM hillshade), tuned live. Regenerating the
   // DataTexture is independent of the geometry rebuild (cheap material swap, no new geometry).
@@ -270,13 +278,11 @@ function bootstrap(): () => void {
 
   const rebuildRhumb = (): void => {
     if (!heightmap) return
+    // Only the rhumb decor. It used to tear down the rivers and the borders as well without rebuilding
+    // either: moving any rhumb slider made the rivers vanish for good (nulled, never rebuilt) and left
+    // `borders` pointing at a handle whose GPU resources were already freed, so the next border rebuild
+    // disposed them a second time. The rhumb layout has no bearing on either layer.
     disposeHandle(rhumb)
-    disposeHandle(borders)
-    if (rivers) {
-      scene.remove(rivers.object)
-      rivers.dispose()
-      rivers = null
-    }
     const segments = generateRhumbSegments(
       heightmap,
       {
@@ -330,15 +336,21 @@ function bootstrap(): () => void {
     scene.add(rivers.object)
   }
 
-  const rebuildBorders = (): void => {
-    disposeHandle(borders)
-    borders = null
-    if (!heightmap || !regionSet || !politicalParams.showBorders) return
+  /**
+   * The original border path: trace the source rings, keeping only the stretches a fixed probe says
+   * separate two polities.
+   *
+   * Kept behind `borderSource` purely to compare it on screen — it is the one that leaves gaps. The probe
+   * reaches two DEM cells either side, while `snapToCoast` grows each claim by up to its own value, so
+   * wherever the expansion moved the frontier further than the probe reaches, both samples land in the
+   * same polity and the stretch is discarded.
+   * @returns the border stretches, in normalized grid coordinates
+   */
+  const ringBorderSegments = (): RegionBorderSegment[] => {
+    const out: RegionBorderSegment[] = []
+    if (!heightmap || !regionSet) return out
     const raster = regionRaster
-    // Probe a couple of DEM cells either side — far enough to clear the polygon's own edge, close
-    // enough not to jump a narrow neighbour.
-    const probe = 2 / (heightmap.meta.width - 1)
-    const segments: [{ u: number; v: number }, { u: number; v: number }][] = []
+    const probe = RING_BORDER_PROBE_CELLS / (heightmap.meta.width - 1)
     for (const region of regionSet.regions) {
       for (const ring of region.rings) {
         for (let i = 0; i < ring.length; i++) {
@@ -348,10 +360,24 @@ function bootstrap(): () => void {
           // Only the stretches actually shared with another polity: the rest is coastline, which the
           // map already draws once, from a far better source.
           if (raster && !separatesRegions(raster, a, b, probe)) continue
-          segments.push([a, b])
+          out.push([a, b])
         }
       }
     }
+    return out
+  }
+
+  const rebuildBorders = (): void => {
+    disposeHandle(borders)
+    borders = null
+    if (!heightmap || !regionSet || !politicalParams.showBorders) return
+    const raster = regionRaster
+    // Derived from the fills, a border *is* their boundary — it cannot disagree with the colour and it
+    // cannot be interrupted. The ring path below only exists to compare the two.
+    const segments =
+      raster && politicalParams.borderSource === 'raster'
+        ? extractRegionBorders(raster, politicalParams.borderSmoothing)
+        : ringBorderSegments()
     if (segments.length === 0) return
     borders = createLineLayer(segments, {
       project: projectDraped,
@@ -650,6 +676,7 @@ function bootstrap(): () => void {
     }
     disposeHandle(coastline)
     disposeHandle(rhumb)
+    disposeHandle(borders)
     if (rivers) {
       scene.remove(rivers.object)
       rivers.dispose()

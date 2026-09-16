@@ -8,10 +8,15 @@ Put here the know issues to avoid cluttering the context window.
   a spike to look at, not an asset to ship. Publishing needs one of: accepting GPL-3.0 for the project,
   fetching from upstream at runtime rather than redistributing, or a permissive source. The earlier
   session note claiming "historical-basemaps (CC-BY)" was **wrong**.
-- **Political borders are interrupted where states are small** — diagnosed, not fixed. `separatesRegions`
-  probes 2 DEM cells either side; in a fragmented region the probe lands in a third polity and the
-  segment is dropped. Looks like relief cutting the lines (mountains are fragmented, plains are not) but
-  is not. See `next.md` for the raster-derived fix.
+- ~~**Political borders are interrupted where states are small**~~ — **FIXED**, and the recorded cause was
+  wrong. It was never about polity size: `separatesRegions` probes **2** DEM cells either side of a ring,
+  while `snapToCoast` lets `expandRegionsOverLand` grow every claim by up to **its own value** (5–12).
+  Wherever the expansion moved the frontier further than the probe reaches, both samples land in the same
+  polity and the stretch is discarded — structural, and guaranteed, not a tuning matter. The real defect
+  was having **two sources of truth for one object**: fills from the raster, borders from the rings.
+  `extractRegionBorders` now derives the line from the raster itself, so it *is* the boundary of the
+  fills — gapless by construction. The ring path survives behind the `border source` dev toggle only long
+  enough to compare the two on screen; **delete it once the comparison is settled.**
 - **Islands no polygon claims stay uncoloured** (Balearics, Aegean): `expandRegionsOverLand` walks over
   land only, and BFS cannot cross the sea to reach them.
 - **Changing the political year re-bakes the whole texture** (seconds at supersample 2). Scrubbing
@@ -26,11 +31,31 @@ Put here the know issues to avoid cluttering the context window.
   `renderer.capabilities.maxTextureSize` if it ever bites.
 - **`devPanel.ts` has no tests** (it imports lil-gui and would need a DOM). This is the hole the inert
   river sliders went through: the widths and reveal thresholds are captured when a layer is built, so
-  wiring only some of them left the rest doing nothing, and nothing caught it.
+  wiring only some of them left the rest doing nothing, and nothing caught it. **It swallowed a second
+  set**: `snapToCoast` and the eight `palette*` slots were routed to `rebuildBorders`, which re-rasterises
+  nothing — they did nothing at all. Now fixed by inverting the rule (an explicit allow-list of
+  border-only keys, everything else takes the full rebuild), so a tunable added later defaults to
+  correct-but-slower instead of silently inert. The missing tests remain the underlying hole.
 - **The ESLint boundary glob `**/controls` is too broad** — it matched `utils/controls` as if it were the
   camera-controls layer. Worked around by renaming to `utils/controlSpec`; the config flaw remains and
   will catch the next `something/controls`.
 - **`composeTerrainRgba` is long** (~90 lines) and grew again with the political layer.
+- **The border ink barely reads against two palette slots** (A11Y-101, surfaced 2026-09-16). `borderColor`
+  `#5c3a2e` drawn at `borderOpacity` 0.7 over `palette1` `#b8554a` gives about **1.6:1** — computed with
+  the blend in *linear* space, which is how three composites with colour management on; the naive sRGB
+  arithmetic gives 1.7:1, so neither rescues it. WCAG 1.4.11 asks 3:1 for graphical objects. `palette7`
+  `#c46b42` is the other weak one — both are brownish-reds, like the ink. `assignRegionColors` only
+  guarantees two adjacent *fills* differ from each other; it has no notion of the border ink, so a pair of
+  neighbours can land on the two worst slots. Now that `extractRegionBorders` guarantees a line exists at
+  every boundary, geometric completeness is done but **visual** completeness is not. Deliberately **not**
+  fixed: border colour and opacity are an approved aesthetic. Cheapest options, dev's call — raise the
+  opacity, darken the ink, or teach `assignRegionColors` to reject slots too close to `borderColor`.
+- **No asset payload is validated, and no failure reaches the user** (SEC-001, widened by the dev into a
+  roadmap chapter — see `files/plans/roadmap/07-robustness.md`). All four loaders check the HTTP status
+  and throw, then **cast blindly**: `heightmap.ts:88`, `landMask.ts:140`, `regionSource.ts:104`,
+  `riverSource.ts:79`. The one existing shape check is `landMask.ts:149` (declared size vs actual bytes) —
+  the precedent to generalise. Every failure then ends in `console.error` only (`main.ts:430, 493, 513,
+  526`), so a failed relief load shows a blank canvas with no explanation.
 - **The political tint's black point sits at 0 m** (A11Y-005): with the heightmap layer at default
   strength the coastal contrast against the coastline ink drops from ~6:1 to ~2.7:1. An aesthetic call
   now that the render has been approved.

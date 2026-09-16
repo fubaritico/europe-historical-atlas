@@ -329,14 +329,23 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     addControl(riverFolder, river, key, RIVER_CONTROLS[key], riverEffect(key), key === 'color')
   riverFolder.close()
 
-  // Historical political overlay. The year and the colouring reload and re-rasterise the polities; the
-  // border styling only rebuilds the lines. The tint's strength and blend mode live in the texture
-  // folder, with the other layers it is composited among.
+  // Historical political overlay. Only the line styling can get away with rebuilding the lines alone;
+  // everything else — the year, the colouring, how far claims grow, the palette — changes the raster or
+  // the tints and has to go all the way through. The list is written as what *may* take the cheap path
+  // rather than what must not, so a tunable added later defaults to the correct-but-slower effect
+  // instead of silently doing nothing (the hole the inert river sliders went through). The tint's
+  // strength and blend mode live in the texture folder, with the layers they are composited among.
+  const borderOnly = new Set<keyof PoliticalDevParams>([
+    'showBorders',
+    'borderSource',
+    'borderSmoothing',
+    'borderColor',
+    'borderOpacity',
+    'borderWidth',
+  ])
   const politicalFolder = gui.addFolder('political (historical)')
   const politicalEffect = (key: keyof PoliticalDevParams): (() => void) =>
-    key === 'year' || key === 'colorBySuzerain'
-      ? callbacks.rebuildPolitical
-      : callbacks.rebuildBorders
+    borderOnly.has(key) ? callbacks.rebuildBorders : callbacks.rebuildPolitical
   for (const key of POLITICAL_CONTROL_ORDER)
     addControl(politicalFolder, political, key, POLITICAL_CONTROLS[key], politicalEffect(key))
   politicalFolder.close()

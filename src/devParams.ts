@@ -308,6 +308,15 @@ export interface PoliticalDevParams {
   year: number
   /** Draw the border lines on top of the tinted areas. */
   showBorders: boolean
+  /**
+   * Where the border lines come from. `raster` derives them from the boundary between filled cells, so
+   * they follow the colours exactly and cannot be interrupted; `rings` traces the source polygons, which
+   * is smoother but drops every stretch the claim expansion moved away from its own outline. Kept as a
+   * switch only long enough to compare the two on screen.
+   */
+  borderSource: 'raster' | 'rings'
+  /** Chaikin rounds applied to raster-derived borders — 0 shows the raw ~7 km cell staircase. */
+  borderSmoothing: number
   /** Border line colour (hex string). */
   borderColor: string
   /** Border line opacity. */
@@ -361,6 +370,10 @@ export function politicalPalette(params: PoliticalDevParams): string[] {
 export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   year: 1500,
   showBorders: true,
+  borderSource: 'raster',
+  // Two rounds is where the cell staircase stops reading as pixels and starts reading as a drawn line;
+  // a third gains almost nothing and rounds real corners off.
+  borderSmoothing: 2,
   borderColor: '#5c3a2e',
   borderOpacity: 0.7,
   borderWidth: 1.4,
@@ -382,6 +395,8 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
 export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
   year: { kind: 'number', min: 100, max: 2000, step: 100, label: 'year (CE)' },
   showBorders: { kind: 'boolean', label: 'draw borders' },
+  borderSource: { kind: 'choice', options: ['raster', 'rings'], label: 'border source' },
+  borderSmoothing: { kind: 'number', min: 0, max: 4, step: 1, label: 'border smoothing' },
   borderColor: { kind: 'hexColor', label: 'border colour' },
   borderOpacity: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'border opacity' },
   borderWidth: { kind: 'number', min: 0.5, max: 5, step: 0.05, label: 'border width (px)' },
@@ -403,6 +418,8 @@ export const POLITICAL_CONTROL_ORDER: (keyof PoliticalDevParams)[] = [
   'snapToCoast',
   'colorBySuzerain',
   'showBorders',
+  'borderSource',
+  'borderSmoothing',
   'borderColor',
   'borderOpacity',
   'borderWidth',
@@ -572,7 +589,12 @@ export const ALL_CONTROL_TABLES = [
   },
 ] as const
 
-/** A flat control list rendered as one group — the shape the grouping check expects. */
+/**
+ * A flat control list rendered as one group — the shape the grouping check expects.
+ * @param title - the group's heading
+ * @param keys - the fields it contains, in display order
+ * @returns the group
+ */
 export function asGroup(
   title: string,
   keys: readonly PropertyKey[]

@@ -1,6 +1,7 @@
 import { hslToRgb } from '../utils/color'
 import { hashInts } from '../utils/hash'
 
+import type { UvPoint } from './coastlineSource'
 import type { Region } from './regionSource'
 import type { RgbColor } from '../utils/color'
 
@@ -294,4 +295,229 @@ export function separatesRegions(
   const left = raster.indexAt(mu + nu * probe, mv + nv * probe)
   const right = raster.indexAt(mu - nu * probe, mv - nv * probe)
   return left >= 0 && right >= 0 && left !== right
+}
+
+/** A border stretch between two polities, in normalized grid coordinates. */
+export type RegionBorderSegment = readonly [UvPoint, UvPoint]
+
+/**
+ * Ceiling on Chaikin rounds. Each round roughly doubles the point count, so the cost is exponential and
+ * an unclamped caller could allocate without bound. Four already turns a cell staircase into a curve.
+ */
+const MAX_SMOOTHING_ROUNDS = 4
+
+/**
+ * One round of Chaikin corner cutting: every segment is replaced by its middle half, which rounds each
+ * corner without moving the line off its own hull. Two rounds turn a staircase into a curve.
+ * @param points - the polyline's vertices
+ * @param closed - whether the polyline is a loop (the last vertex must not repeat the first)
+ * @returns the subdivided polyline
+ */
+function chaikin(points: readonly UvPoint[], closed: boolean): UvPoint[] {
+  const count = points.length
+  if (count < 3) return points.slice()
+  const first = points[0]
+  const last = points[count - 1]
+  if (!first || !last) return points.slice()
+  const out: UvPoint[] = []
+  // An open line keeps its ends pinned, or the border would retract from the tripoints it must reach.
+  if (!closed) out.push(first)
+  const limit = closed ? count : count - 1
+  for (let i = 0; i < limit; i++) {
+    const a = points[i]
+    const b = points[(i + 1) % count]
+    if (!a || !b) continue
+    out.push(
+      { u: a.u * 0.75 + b.u * 0.25, v: a.v * 0.75 + b.v * 0.25 },
+      { u: a.u * 0.25 + b.u * 0.75, v: a.v * 0.25 + b.v * 0.75 }
+    )
+  }
+  if (!closed) out.push(last)
+  return out
+}
+
+/**
+ * The endpoint keys of every cell edge shared by two different polities, as two parallel lists.
+ */
+interface SharedEdges {
+  /** One endpoint key per edge. */
+  from: number[]
+  /** The other endpoint key of the same edge, at the matching position. */
+  to: number[]
+}
+
+/**
+ * Row length of the doubled integer lattice endpoints are keyed on.
+ *
+ * Endpoints live on a doubled lattice so two edges meeting at a grid corner produce the *identical* key
+ * and chain together exactly — no epsilon, no welding tolerance. A cell centre sits at `(2col, 2row)`;
+ * the boundary between two cells falls on the odd coordinate between them, and a corner can reach −1,
+ * hence the `+ 2` of headroom.
+ * @param width - the raster's width in cells
+ * @returns the lattice row length
+ */
+function latticeStride(width: number): number {
+  return 2 * width + 2
+}
+
+/**
+ * Turn a lattice key back into a normalized coordinate.
+ * @param key - the endpoint key
+ * @param stride - the lattice row length
+ * @param width - the raster's width in cells
+ * @param height - the raster's height in cells
+ * @returns the grid coordinate, clamped to the frame so a border never runs off the map
+ */
+function decodeLatticeKey(key: number, stride: number, width: number, height: number): UvPoint {
+  return {
+    u: Math.min(1, Math.max(0, ((key % stride) - 1) / 2 / (width - 1))),
+    v: Math.min(1, Math.max(0, (Math.floor(key / stride) - 1) / 2 / (height - 1))),
+  }
+}
+
+/**
+ * Collect the cell edge shared by every pair of adjacent cells held by different polities.
+ * @param raster - the rasterised claims, after any expansion
+ * @param stride - the lattice row length
+ * @returns the edges, as parallel endpoint-key lists
+ */
+function sharedEdges(raster: RegionRaster, stride: number): SharedEdges {
+  const { width, height, cells } = raster
+  const keyOf = (doubledX: number, doubledY: number): number =>
+    (doubledY + 1) * stride + (doubledX + 1)
+  const from: number[] = []
+  const to: number[] = []
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      const here = cells[row * width + col] ?? -1
+      if (here < 0) continue
+      // Right and down only: every adjacent pair is still seen once, at half the work.
+      if (col + 1 < width) {
+        const other = cells[row * width + col + 1] ?? -1
+        // Both sides must be claimed: a polity facing nothing is a coast, and the map already draws the
+        // shoreline once, from a far better source.
+        if (other >= 0 && other !== here) {
+          from.push(keyOf(2 * col + 1, 2 * row - 1))
+          to.push(keyOf(2 * col + 1, 2 * row + 1))
+        }
+      }
+      if (row + 1 < height) {
+        const other = cells[(row + 1) * width + col] ?? -1
+        if (other >= 0 && other !== here) {
+          from.push(keyOf(2 * col - 1, 2 * row + 1))
+          to.push(keyOf(2 * col + 1, 2 * row + 1))
+        }
+      }
+    }
+  }
+  return { from, to }
+}
+
+/**
+ * Chain the shared edges into polylines, walking corner to corner until the line ends or branches.
+ *
+ * Every edge lands in exactly one polyline, which is what makes the result gapless: a stretch can only
+ * be split, never dropped.
+ * @param edges - the shared edges
+ * @returns one list of endpoint keys per polyline
+ */
+function chainPolylines(edges: SharedEdges): number[][] {
+  const { from, to } = edges
+  const count = from.length
+  const adjacency = new Map<number, number[]>()
+  for (let i = 0; i < count; i++) {
+    for (const key of [from[i] ?? 0, to[i] ?? 0]) {
+      const bucket = adjacency.get(key)
+      if (bucket) bucket.push(i)
+      else adjacency.set(key, [i])
+    }
+  }
+
+  const used = new Uint8Array(count)
+  /**
+   * Follow unused edges from an endpoint, appending each one's far end.
+   * @param start - the endpoint key to leave from
+   * @param into - the key list to append to
+   * @returns nothing
+   */
+  const walk = (start: number, into: number[]): void => {
+    let key = start
+    for (;;) {
+      const bucket = adjacency.get(key)
+      // Degree 1 is an open end; 3 or 4 is a tripoint, where a border legitimately branches and the
+      // polyline must stop rather than pick an arbitrary continuation.
+      if (bucket?.length !== 2) return
+      const next = bucket.find((edge) => used[edge] === 0)
+      if (next === undefined) return
+      used[next] = 1
+      const other = (from[next] ?? 0) === key ? (to[next] ?? 0) : (from[next] ?? 0)
+      into.push(other)
+      key = other
+    }
+  }
+
+  const polylines: number[][] = []
+  for (let seed = 0; seed < count; seed++) {
+    if (used[seed] === 1) continue
+    used[seed] = 1
+    const a = from[seed] ?? 0
+    const b = to[seed] ?? 0
+    const forward: number[] = []
+    walk(b, forward)
+    const backward: number[] = []
+    walk(a, backward)
+    backward.reverse()
+    polylines.push([...backward, a, b, ...forward])
+  }
+  return polylines
+}
+
+/**
+ * Derive the border lines from the raster itself: emit the shared edge of any two adjacent cells held by
+ * different polities, chain those edges into polylines, and round the staircase away.
+ *
+ * **Why this rather than tracing the source polygons.** The fills come from the raster, so taking the
+ * borders from the polygon rings means drawing geometry A while the eye compares it to geometry B — and
+ * {@link expandRegionsOverLand} guarantees the two differ, since it deliberately grows each claim past its
+ * ring to reach our coastline. A ring segment then sits *inside* the grown territory, a fixed-distance
+ * probe reads the same polity on both sides, and the stretch is dropped: interrupted borders, worst
+ * wherever the expansion moved the frontier furthest. Deriving the line from the fills makes it the
+ * boundary of what is drawn, so it is gapless by construction and can never disagree with the colour.
+ *
+ * The cost is that the raw line follows cell edges — a ~7 km staircase at the DEM's grid — which is what
+ * `smoothing` is for.
+ * @param raster - the rasterised claims, after any expansion
+ * @param smoothing - Chaikin rounds to apply (0 = raw cell edges; 2 reads as a drawn line)
+ * @returns the border stretches, in normalized grid coordinates
+ */
+export function extractRegionBorders(raster: RegionRaster, smoothing = 0): RegionBorderSegment[] {
+  const { width, height } = raster
+  if (width < 2 || height < 2) return []
+  const stride = latticeStride(width)
+  const edges = sharedEdges(raster, stride)
+  if (edges.from.length === 0) return []
+  // Each round roughly doubles the point count, so an unbounded value allocates exponentially. The dev
+  // panel's slider stops at 4, but a port must be safe on its own rather than trusting a widget to clamp
+  // its input — a caller can hold the params object and set anything.
+  const rounds = Math.min(MAX_SMOOTHING_ROUNDS, Math.max(0, Math.floor(smoothing)))
+  const segments: RegionBorderSegment[] = []
+  for (const line of chainPolylines(edges)) {
+    // A loop repeats its first key at the end; drop the repeat so smoothing wraps cleanly, restore it
+    // after, and the ring closes on itself.
+    const closed = line.length > 3 && line[0] === line[line.length - 1]
+    let points = (closed ? line.slice(0, -1) : line).map((key) =>
+      decodeLatticeKey(key, stride, width, height)
+    )
+    for (let i = 0; i < rounds; i++) points = chaikin(points, closed)
+    if (closed) {
+      const head = points[0]
+      if (head) points.push(head)
+    }
+    for (let i = 0; i + 1 < points.length; i++) {
+      const a = points[i]
+      const b = points[i + 1]
+      if (a && b) segments.push([a, b])
+    }
+  }
+  return segments
 }
