@@ -18,7 +18,7 @@ import {
   ROSE_CONTROLS,
   ROSE_CONTROL_ORDER,
 } from './devParams'
-import { TERRAIN_CONTROLS, TERRAIN_CONTROL_GROUPS } from './scene/terrainTexture'
+import { TERRAIN_CONTROLS, TERRAIN_CONTROL_GROUPS } from './pipeline/terrainCompose'
 
 import type { MapControlsOptions } from './controls/mapControls'
 import type {
@@ -30,7 +30,7 @@ import type {
   RiverDevParams,
   RoseDevParams,
 } from './devParams'
-import type { TerrainTextureOptions } from './scene/terrainTexture'
+import type { TerrainTextureOptions } from './pipeline/terrainCompose'
 import type { ControlSpec } from './utils/controlSpec'
 
 export type {

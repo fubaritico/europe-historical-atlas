@@ -33,6 +33,7 @@ import {
   DEFAULT_ROSE_PARAMS,
   politicalPalette,
 } from './devParams'
+import { DEFAULT_TERRAIN_OPTIONS } from './pipeline/terrainCompose'
 import { createCompassRose } from './scene/compassRose'
 import {
   buildBorderStrokes,
@@ -44,7 +45,7 @@ import { createLineLayer } from './scene/lineLayer'
 import { createReliefMesh, reliefWorldY } from './scene/reliefMesh'
 import { generateRhumbSegments } from './scene/rhumbNetwork'
 import { createRiverLayer } from './scene/riverLayer'
-import { DEFAULT_TERRAIN_OPTIONS, createTerrainTexture } from './scene/terrainTexture'
+import { createTerrainTexture } from './scene/terrainTexture'
 import { createProgressOverlay } from './ui/progressOverlay'
 import { hexToRgb } from './utils/color'
 import { lerp } from './utils/math'
@@ -63,7 +64,7 @@ import type {
   RiverDevParams,
   RoseDevParams,
 } from './devParams'
-import type { AreaTint, TerrainTextureOptions } from './scene/terrainTexture'
+import type { AreaTint, TerrainTextureOptions } from './pipeline/terrainCompose'
 import type { RgbColor } from './utils/color'
 import type { DataTexture, Object3D } from 'three'
 

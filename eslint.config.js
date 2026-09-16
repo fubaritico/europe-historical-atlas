@@ -97,8 +97,9 @@ export default tseslint.config(
 
   // Architecture boundaries — enforce the layer dependency direction inside src/ without
   // splitting into packages. Matching is on the import source string (no resolver needed).
-  // Direction: geo/ (pure projection maths) and data/ (domain/ports) are leaves <- scene/ (rendering) ;
-  // camera/ is independent ; main.ts is the composition root and may be imported by nobody.
+  // Direction: geo/ (pure projection maths) and data/ (domain/ports) are leaves <- pipeline/ (the CPU
+  // work, three-free so a worker can run it) <- scene/ (rendering) ; camera/ is independent ;
+  // ui/ is plain DOM ; main.ts is the composition root and may be imported by nobody.
   {
     files: ['src/geo/**/*.ts'],
     rules: {
@@ -116,6 +117,8 @@ export default tseslint.config(
                 '**/controls/**',
                 '**/data',
                 '**/data/**',
+                '**/pipeline',
+                '**/pipeline/**',
                 '**/main',
                 '**/main.ts',
               ],
@@ -144,11 +147,48 @@ export default tseslint.config(
                 '**/controls/**',
                 '**/data',
                 '**/data/**',
+                '**/pipeline',
+                '**/pipeline/**',
                 '**/main',
                 '**/main.ts',
               ],
               message:
                 'Architecture boundary: ui/ is plain DOM over the canvas — it must know nothing of the scene, the data or what is being computed. The composition root drives it.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/pipeline/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'three',
+              message:
+                'Architecture boundary: pipeline/ runs inside a Web Worker, where three.js and the DOM do not exist. Return plain buffers; let scene/ wrap them.',
+            },
+          ],
+          patterns: [
+            {
+              group: [
+                '**/scene',
+                '**/scene/**',
+                '**/camera',
+                '**/camera/**',
+                '**/controls',
+                '**/controls/**',
+                '**/ui',
+                '**/ui/**',
+                '**/main',
+                '**/main.ts',
+              ],
+              message:
+                'Architecture boundary: pipeline/ is the CPU work the map costs — it may read data/, geo/ and utils/, and must know nothing of the renderer, the camera or the DOM.',
             },
           ],
         },
@@ -170,6 +210,8 @@ export default tseslint.config(
                 '**/camera/**',
                 '**/controls',
                 '**/controls/**',
+                '**/pipeline',
+                '**/pipeline/**',
                 '**/main',
                 '**/main.ts',
               ],
@@ -220,6 +262,8 @@ export default tseslint.config(
                 '**/data/**',
                 '**/controls',
                 '**/controls/**',
+                '**/pipeline',
+                '**/pipeline/**',
                 '**/main',
                 '**/main.ts',
               ],
@@ -239,7 +283,14 @@ export default tseslint.config(
         {
           patterns: [
             {
-              group: ['**/scene', '**/scene/**', '**/main', '**/main.ts'],
+              group: [
+                '**/scene',
+                '**/scene/**',
+                '**/pipeline',
+                '**/pipeline/**',
+                '**/main',
+                '**/main.ts',
+              ],
               message:
                 'Architecture boundary: controls/ may depend on camera/ (the CameraControls contract) but not on scene/ or main.',
             },
