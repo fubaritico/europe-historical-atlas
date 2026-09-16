@@ -436,7 +436,10 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   borderWidth: 1.4,
   borderEdgeColor: '#5c3a2e',
   borderEdgeWidth: 3.2,
-  showFrontier: true,
+  // OFF until the shoreline case is diagnosed: it was tracing every coast — Iceland, Scandinavia, the
+  // Caspian — where it must stay silent, because a claim facing the sea is a coastline and the map
+  // already draws that once, from a better source.
+  showFrontier: false,
   frontierColor: '#5c3a2e',
   frontierOpacity: 0.3,
   // Thicker than a negotiated border: it is the edge of what the map knows, and reads as an outer limit
