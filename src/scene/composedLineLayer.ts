@@ -296,7 +296,9 @@ export function buildBorderStrokes(
       strokes.push({
         segments,
         color: style.edgeColor,
-        width: style.edgeWidth,
+        // The core's weight, not the edge's: a broken line reads heavier than a continuous one at the
+        // same width, because each dash carries its own two ends.
+        width: style.coreWidth,
         opacity: style.opacity,
         dashed,
         role: 'pattern',

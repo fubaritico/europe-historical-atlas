@@ -122,6 +122,8 @@ describe('composedLineLayer', () => {
       expect(dashedStrokes.map((s) => s.role)).toEqual(['pattern'])
       // Brown, not cream: the same ink as a plain border's edge, at every scale.
       expect(dashedStrokes[0]?.color).toBe(STYLE.edgeColor)
+      // But the core's weight — a broken line reads heavier than a continuous one at the same width.
+      expect(dashedStrokes[0]?.width).toBe(STYLE.coreWidth)
       expect(buildBorderStrokes(borders(1, 0), STYLE, () => 'double').map((s) => s.role)).toEqual([
         'pattern',
       ])
