@@ -707,6 +707,7 @@ function bootstrap(): () => void {
     // back. Both are live material uniforms, so nothing is rebuilt while zooming.
     if (borders) {
       borders.setWidthScale(lerp(politicalParams.borderWidthZoomOut, 1, controls.zoom))
+      borders.setOpacityScale(lerp(politicalParams.borderOpacityZoomOut, 1, controls.zoom))
       borders.setInlayOpacity(inlayOpacityScale(controls.zoom, politicalParams.borderInlayZoom))
     }
     // Zoom-linked opacity: `opacity` at zoom-out (z=0) → `opacityZoomIn` at zoom-in (z=1).

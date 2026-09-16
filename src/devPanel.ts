@@ -8,7 +8,7 @@ import {
   EXTENT_CONTROLS,
   EXTENT_CONTROL_ORDER,
   POLITICAL_CONTROLS,
-  POLITICAL_CONTROL_ORDER,
+  POLITICAL_CONTROL_GROUPS,
   RELIEF_CONTROLS,
   RELIEF_CONTROL_ORDER,
   RHUMB_CONTROLS,
@@ -353,13 +353,20 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     'borderDashGap',
     'borderDoubleGap',
     'borderWidthZoomOut',
+    'borderOpacityZoomOut',
     'borderInlayZoom',
   ])
   const politicalFolder = gui.addFolder('political (historical)')
   const politicalEffect = (key: keyof PoliticalDevParams): (() => void) =>
     borderOnly.has(key) ? callbacks.rebuildBorders : callbacks.rebuildPolitical
-  for (const key of POLITICAL_CONTROL_ORDER)
-    addControl(politicalFolder, political, key, POLITICAL_CONTROLS[key], politicalEffect(key))
+  // Grouped like the texture folder: a flat list of twenty-odd tunables stops being a panel and becomes
+  // a haystack, and the first thing lost is knowing which knob to reach for.
+  for (const group of POLITICAL_CONTROL_GROUPS) {
+    const folder = politicalFolder.addFolder(group.title)
+    for (const key of group.keys)
+      addControl(folder, political, key, POLITICAL_CONTROLS[key], politicalEffect(key))
+    folder.close()
+  }
   politicalFolder.close()
 
   // Compass rose — colours/labels/size are baked into the SVG, so each change regenerates the rose.

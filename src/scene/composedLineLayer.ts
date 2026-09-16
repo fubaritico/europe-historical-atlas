@@ -204,6 +204,15 @@ export interface ComposedLineLayer {
    */
   setInlayOpacity(scale: number): void
   /**
+   * Rescale every pass's opacity by a factor of the opacity it was built with.
+   *
+   * Composes with {@link setInlayOpacity}, which is applied on top for the inlay passes alone — so a
+   * caller can ease the whole line back at continent scale *and* drop the inlay entirely.
+   * @param scale - multiplier on each pass's built opacity
+   * @returns nothing
+   */
+  setOpacityScale(scale: number): void
+  /**
    * Free the GPU resources of every pass.
    * @returns nothing
    */
@@ -343,6 +352,10 @@ export function createComposedLineLayer(
       return { layer, stroke }
     })
 
+  // The whole-line opacity scale, remembered so the inlay's own scale composes with it rather than
+  // replacing it. The two are applied from different places in the same frame and must not fight.
+  let globalOpacityScale = 1
+
   return {
     object: group,
     setResolution(viewportWidth: number, viewportHeight: number): void {
@@ -353,7 +366,11 @@ export function createComposedLineLayer(
     },
     setInlayOpacity(scale: number): void {
       for (const { layer, stroke } of layers)
-        if (stroke.role === 'inlay') layer.setOpacity(stroke.opacity * scale)
+        if (stroke.role === 'inlay') layer.setOpacity(stroke.opacity * globalOpacityScale * scale)
+    },
+    setOpacityScale(scale: number): void {
+      globalOpacityScale = scale
+      for (const { layer, stroke } of layers) layer.setOpacity(stroke.opacity * scale)
     },
     dispose(): void {
       for (const { layer } of layers) {

@@ -7,7 +7,7 @@
  * Keeping the three apart is what previously allowed a default to sit outside its own slider unnoticed.
  */
 
-import type { ControlTable } from './utils/controlSpec'
+import type { ControlGroup, ControlTable } from './utils/controlSpec'
 
 /**
  * Relief geometry / displacement tuning, exposed live through the dev panel.
@@ -360,6 +360,11 @@ export interface PoliticalDevParams {
    */
   borderWidthZoomOut: number
   /**
+   * Opacity multiplier at full zoom-out. At continent scale a border at full strength competes with the
+   * fills it is meant to divide; easing it back lets the colours carry the map and the line support it.
+   */
+  borderOpacityZoomOut: number
+  /**
    * Zoom fraction below which the light inlay is gone entirely, fading in over the range above it. The
    * dark edge carries the border at every scale; the inlay is the refinement that appears close up,
    * because at continent scale a light core inside a dark edging reads as an alternation, not a line.
@@ -444,7 +449,8 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   borderDashGap: 0.009,
   // Normalized grid units: about two DEM cells apart, which separates without reading as two borders.
   borderDoubleGap: 0.0016,
-  borderWidthZoomOut: 0.4,
+  borderWidthZoomOut: 0.3,
+  borderOpacityZoomOut: 0.55,
   borderInlayZoom: 0.35,
   colorBySuzerain: false,
   snapToCoast: 12,
@@ -492,6 +498,13 @@ export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
     label: 'double-line spacing',
   },
   borderWidthZoomOut: { kind: 'number', min: 0.1, max: 1, step: 0.05, label: 'width @ zoom-out' },
+  borderOpacityZoomOut: {
+    kind: 'number',
+    min: 0.1,
+    max: 1,
+    step: 0.05,
+    label: 'opacity @ zoom-out',
+  },
   borderInlayZoom: {
     kind: 'number',
     min: 0,
@@ -511,7 +524,57 @@ export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
   palette8: { kind: 'hexColor', label: 'palette 8' },
 }
 
-/** Display order of the political controls. */
+/**
+ * The political controls, split the way the texture folder is — because a flat list of twenty-odd
+ * tunables stops being a panel and becomes a haystack. Grouped by *what you are trying to change*
+ * rather than by which module reads the value.
+ */
+export const POLITICAL_CONTROL_GROUPS: ControlGroup<PoliticalDevParams>[] = [
+  { title: '1 \u00b7 what is shown', keys: ['year', 'snapToCoast', 'colorBySuzerain'] },
+  {
+    title: '2 \u00b7 border line',
+    keys: [
+      'showBorders',
+      'borderOnTop',
+      'borderColor',
+      'borderWidth',
+      'borderEdgeColor',
+      'borderEdgeWidth',
+      'borderOpacity',
+    ],
+  },
+  {
+    title: '3 \u00b7 border at distance',
+    keys: ['borderWidthZoomOut', 'borderOpacityZoomOut', 'borderInlayZoom'],
+  },
+  {
+    title: '4 \u00b7 border types',
+    keys: ['borderDashSize', 'borderDashGap', 'borderDoubleGap'],
+  },
+  {
+    title: '5 \u00b7 frontier (unclaimed land)',
+    keys: ['showFrontier', 'frontierColor', 'frontierWidth', 'frontierOpacity'],
+  },
+  {
+    title: '6 \u00b7 geometry',
+    keys: ['borderSource', 'borderSmoothing'],
+  },
+  {
+    title: '7 \u00b7 palette',
+    keys: [
+      'palette1',
+      'palette2',
+      'palette3',
+      'palette4',
+      'palette5',
+      'palette6',
+      'palette7',
+      'palette8',
+    ],
+  },
+]
+
+/** Display order of the political controls (flat — the grouping above is what the panel renders). */
 export const POLITICAL_CONTROL_ORDER: (keyof PoliticalDevParams)[] = [
   'year',
   'snapToCoast',
@@ -530,6 +593,7 @@ export const POLITICAL_CONTROL_ORDER: (keyof PoliticalDevParams)[] = [
   'frontierWidth',
   'frontierOpacity',
   'borderWidthZoomOut',
+  'borderOpacityZoomOut',
   'borderInlayZoom',
   'borderDashSize',
   'borderDashGap',

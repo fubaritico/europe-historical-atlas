@@ -232,6 +232,28 @@ describe('composedLineLayer', () => {
       layer.dispose()
     })
 
+    it('eases the whole line back without touching the relative weights', () => {
+      const layer = createComposedLineLayer(buildBorderStrokes(borders(1, 1), STYLE), { project })
+      layer.setOpacityScale(0.5)
+      expect(liveValues(layer, 'opacity')).toEqual([
+        STYLE.frontierOpacity * 0.5,
+        STYLE.opacity * 0.5,
+        STYLE.opacity * 0.5,
+      ])
+      layer.dispose()
+    })
+
+    it('composes the two opacity scales instead of letting them fight', () => {
+      // Both are applied in the same frame from different places: the whole line eases back at
+      // continent scale, and the inlay drops out on top of that. If the second overwrote the first, the
+      // inlay would flash back to full strength at exactly the zoom where it should be gone.
+      const layer = createComposedLineLayer(buildBorderStrokes(borders(0, 1), STYLE), { project })
+      layer.setOpacityScale(0.5)
+      layer.setInlayOpacity(0.5)
+      expect(liveValues(layer, 'opacity')).toEqual([STYLE.frontierOpacity * 0.5])
+      layer.dispose()
+    })
+
     it('restores the inlay when the scale returns to one', () => {
       const layer = createComposedLineLayer(buildBorderStrokes(borders(1, 0), STYLE), { project })
       layer.setInlayOpacity(0)

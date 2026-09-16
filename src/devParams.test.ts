@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { ALL_CONTROL_TABLES, asGroup } from './devParams'
+import {
+  ALL_CONTROL_TABLES,
+  POLITICAL_CONTROLS,
+  POLITICAL_CONTROL_GROUPS,
+  asGroup,
+} from './devParams'
 import { findControlInconsistencies, findGroupingProblems } from './utils/controlSpec'
 
 import type { ControlSpec } from './utils/controlSpec'
@@ -88,5 +93,18 @@ describe('devParams control tables', () => {
       expect(findControlInconsistencies(controls, { t: 0 })).toEqual([])
       expect(findControlInconsistencies(controls, { t: 1 })).toEqual([])
     })
+  })
+})
+
+describe('POLITICAL_CONTROL_GROUPS', () => {
+  it('covers every political tunable exactly once', () => {
+    // The panel renders the groups, not the flat order, so a tunable missing from them is a tunable the
+    // dev can no longer reach — the same silent-inertness failure as an unwired slider.
+    expect(findGroupingProblems([...POLITICAL_CONTROL_GROUPS], POLITICAL_CONTROLS)).toEqual([])
+  })
+
+  it('keeps every group small enough to read at a glance', () => {
+    // The whole point of splitting was that a flat list of twenty-odd knobs is a haystack.
+    for (const group of POLITICAL_CONTROL_GROUPS) expect(group.keys.length).toBeLessThanOrEqual(8)
   })
 })
