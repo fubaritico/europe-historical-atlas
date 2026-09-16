@@ -41,6 +41,50 @@ and test it — at 10k / 100k rows, check/uncheck, immediate update — without 
 - **D — Dependency inversion:** consumers depend on **abstractions (the injected port)**, and the
   concrete (real service / SDK client / store) is provided from outside. This is the whole rule's spine.
 
+## The erosion vector in THIS codebase: the composition root
+
+> Added 2026-09-16, from what actually eroded rather than from theory.
+
+The layer boundaries are enforced by ESLint, and they work — nothing has crossed them. **The erosion goes
+somewhere the import rules cannot see: `bootstrap()` in `main.ts`.** It is the only place that holds every
+collaborator at once, so anything needing two of them lands there, and the function grows without ever
+breaking a rule.
+
+Worked example, 2026-09-16: choosing which strokes dress a border — frontier? edging? core? in what
+order? — is **pure logic, data in and data out**. It was written inside `bootstrap()`. It violated no
+import boundary, no layer rule, no SOLID principle as stated above. It was simply untestable without a
+WebGL context, and it took a review to notice. Same day, same cause: a cell lookup copied three times
+because no module owned it, and a lifecycle bug that survived because three separate loops had to be kept
+in step by hand.
+
+**The rule:**
+
+> **Pure logic that lands in a `bootstrap()` closure is a module that was not written.** Before adding a
+> line to the composition root, ask: does this take data and return data? If yes, it belongs in a module
+> that can be exercised with a literal. The composition root holds **wiring only** — create, inject,
+> connect, tear down.
+
+The counter-move when a unit "needs the params object": do not import it. **Declare the shape you need
+structurally, in your own layer**, and let the root adapt its params to it. That is what keeps a module
+inside its layer *and* testable with a literal — no boundary question ever arises.
+
+## Tripwires (mechanical, not aspirational)
+
+Principles do not catch erosion; these questions do. Run them on any diff:
+
+1. **Can it be exercised with literals?** If reaching a line requires a renderer, a canvas or a fetch, it
+   is in the wrong place — unless it is genuinely wiring.
+2. **What did this diff copy instead of share?** Three occurrences of the same four lines means the module
+   that owns them does not exist yet. A copy in a *test* is worse than a copy in source: it can drift from
+   the thing it is meant to verify and nothing will fail.
+3. **How many places must be kept in step by hand?** A handle that must be disposed here, resized there
+   and scaled every frame is a handle that wants to be one object with three methods.
+4. **Does the new branch/tunable have a test?** An option nobody asserts is an option that will quietly
+   stop working — this project has lost two sets of dev-panel sliders that way.
+5. **Is the default the safe one?** When wiring a dispatch (which rebuild does this trigger?), write it as
+   an allow-list of the cheap path, so anything added later takes the correct-but-slower branch instead of
+   silently doing nothing.
+
 ## How to verify a unit is compliant (checklist)
 
 - [ ] Can I instantiate / render it in a test or story with **only mocks** for its collaborators?

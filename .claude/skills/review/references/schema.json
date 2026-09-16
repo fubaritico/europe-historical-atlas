@@ -37,7 +37,11 @@
     },
     "verdict": {
       "type": "string",
-      "enum": ["ready", "needs-attention", "needs-work"],
+      "enum": [
+        "ready",
+        "needs-attention",
+        "needs-work"
+      ],
       "description": "Overall verdict based on score thresholds"
     }
   },
@@ -52,7 +56,8 @@
         "lines",
         "rule",
         "problem",
-        "suggestion"
+        "evidence",
+        "confidence"
       ],
       "properties": {
         "id": {
@@ -62,11 +67,22 @@
         },
         "severity": {
           "type": "string",
-          "enum": ["critical", "high", "medium", "low"]
+          "enum": [
+            "critical",
+            "high",
+            "medium",
+            "low"
+          ],
+          "description": "critical: the app is broken or unsafe for every user, now. high: wrong runtime behaviour in a reachable case, or a resource leak. medium: correct today but will erode \u2014 duplication, a missing seam, an untested branch. low: readability, naming, documentation. A documentation or naming gap can NEVER be high: it cannot change what the program does."
         },
         "category": {
           "type": "string",
-          "enum": ["security", "architecture", "quality", "accessibility"]
+          "enum": [
+            "security",
+            "architecture",
+            "quality",
+            "accessibility"
+          ]
         },
         "file": {
           "type": "string",
@@ -82,11 +98,11 @@
         },
         "problem": {
           "type": "string",
-          "description": "Clear description of the violation found"
+          "description": "What is wrong. State the defect, not the remedy."
         },
         "suggestion": {
           "type": "string",
-          "description": "Actionable fix instruction"
+          "description": "OPTIONAL. A remedy you have actually thought through. Omit it rather than guess: a wrong remedy is worse than none, because it gets applied. Two remedies were wrong on 2026-09-16 while both findings were right."
         },
         "fix_prompt": {
           "type": "string",
@@ -100,6 +116,27 @@
         "verification_query": {
           "type": "string",
           "description": "The query to run against opensrc/ or the web when needs_verification is true (e.g., 'three.js Raycaster intersectObject recursive default')"
+        },
+        "evidence": {
+          "type": "string",
+          "description": "How you know. Quote the line, name the two places that disagree, or show the arithmetic. Any computed figure (a contrast ratio, a size, a count) MUST show its working so it can be re-derived."
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "confirmed",
+            "likely",
+            "speculative"
+          ],
+          "description": "confirmed: read it in the code and it cannot be otherwise. likely: strong inference, one assumption. speculative: worth a look, may be nothing. Say speculative rather than inflating."
+        },
+        "what_breaks_if_fixed_naively": {
+          "type": "string",
+          "description": "The trap in the obvious fix. Required whenever `suggestion` is present. Example from 2026-09-16: capping border segments to bound memory would have reintroduced the interrupted-border bug the code existed to abolish."
+        },
+        "blast_radius": {
+          "type": "string",
+          "description": "What else reads or writes the state this finding touches, and whether you checked it. The two worst bugs of 2026-09-16 were both outside the diff."
         }
       }
     },
@@ -113,11 +150,52 @@
         "overall"
       ],
       "properties": {
-        "security": { "type": "integer", "minimum": 0, "maximum": 100 },
-        "architecture": { "type": "integer", "minimum": 0, "maximum": 100 },
-        "quality": { "type": "integer", "minimum": 0, "maximum": 100 },
-        "accessibility": { "type": "integer", "minimum": 0, "maximum": 100 },
-        "overall": { "type": "integer", "minimum": 0, "maximum": 100 }
+        "security": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "architecture": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "quality": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "accessibility": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "overall": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "clean": {
+      "type": "object",
+      "required": [
+        "checked",
+        "verdict"
+      ],
+      "description": "A null result, stated so it can be trusted. A reviewer that never reports 'nothing' will eventually invent something.",
+      "properties": {
+        "checked": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "What was actually examined and found sound."
+        },
+        "verdict": {
+          "type": "string",
+          "description": "One line on the overall state of the dimension."
+        }
       }
     }
   }
