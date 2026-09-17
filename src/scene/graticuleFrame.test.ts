@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildFrameQuads, createGraticuleFrame, degreeIndices, graduations } from './graticuleFrame'
+import {
+  FRAME_RENDER_ORDER,
+  buildFrameQuads,
+  createGraticuleFrame,
+  degreeIndices,
+  graduations,
+} from './graticuleFrame'
+import { PAPER_SHEET_RENDER_ORDER } from './paperSheet'
 
 import type { GraticuleFrameOptions } from './graticuleFrame'
 
@@ -276,6 +283,26 @@ describe('createGraticuleFrame', () => {
       expect(() => {
         frame.dispose()
       }).not.toThrow()
+    })
+  })
+})
+
+describe('frame draw order', () => {
+  describe('happy path', () => {
+    it('draws after the map, whatever the band opacity is', () => {
+      // The defect this exists for: the frame writes no depth, so anything drawn after it paints over
+      // it. At an opacity of 1 the material leaves the transparent queue, the mesh is sorted
+      // front-to-back among the opaque ones, and the map's cut edge — further from the camera, so drawn
+      // later — erased the entire band. An explicit order takes the question away from the slider.
+      for (const bandOpacity of [0.5, 0.92, 1]) {
+        const frame = createGraticuleFrame({ ...OPTIONS, bandOpacity })
+        expect(frame.object.renderOrder).toBe(FRAME_RENDER_ORDER)
+        frame.dispose()
+      }
+    })
+
+    it('sits above the sheet it is printed on', () => {
+      expect(FRAME_RENDER_ORDER).toBeGreaterThan(PAPER_SHEET_RENDER_ORDER)
     })
   })
 })

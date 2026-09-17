@@ -13,6 +13,14 @@ import { Mesh, MeshBasicMaterial, PlaneGeometry } from 'three'
 
 import type { DataTexture, Object3D } from 'three'
 
+/**
+ * Draw order of the sheet: before everything, because it is the page and not a surface on it.
+ *
+ * It takes no part in the depth buffer at all, so nothing can ever be behind it and nothing it draws
+ * can occlude what comes next.
+ */
+export const PAPER_SHEET_RENDER_ORDER = -1000
+
 /** How the sheet is laid. */
 export interface PaperSheetOptions {
   /** Half its width on X, in world units. */
@@ -54,7 +62,7 @@ export function createPaperSheet(options: PaperSheetOptions): PaperSheet {
   })
   const mesh = new Mesh(geometry, material)
   mesh.position.y = -options.drop
-  mesh.renderOrder = -1000
+  mesh.renderOrder = PAPER_SHEET_RENDER_ORDER
   return {
     object: mesh,
     dispose(): void {

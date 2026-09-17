@@ -230,6 +230,14 @@ export function labelLane(options: GraticuleFrameOptions): {
   }
 }
 
+/**
+ * Draw order of the frame, above the terrain and its cut edge.
+ *
+ * The frame is printed on the sheet: nothing belonging to the map is ever meant to cover it, and its
+ * appearing or not must not depend on which queue an opacity slider happens to put it in.
+ */
+export const FRAME_RENDER_ORDER = 5
+
 /** A mounted frame. */
 export interface GraticuleFrame {
   /** The mesh, to add to a scene. */
@@ -288,8 +296,16 @@ export function createGraticuleFrame(options: GraticuleFrameOptions): GraticuleF
     opacity: options.bandOpacity,
     depthWrite: false,
   })
+  const mesh = new Mesh(geometry, material)
+  // **Drawn after the map's own solids, explicitly.** The frame writes no depth (it would z-fight with
+  // the sheet a few thousandths below it), so anything drawn *after* it and passing the depth test
+  // paints straight over it. At `bandOpacity` 1 the material stops being transparent, the mesh moves
+  // into the opaque queue — which three sorts front-to-back — and the map's cut edge, being further
+  // away, was drawn afterwards and erased the whole band. Nothing said so: the band simply was not
+  // there, while the degree labels, still transparent at 0.88, survived. Found on screen 2026-09-18.
+  mesh.renderOrder = FRAME_RENDER_ORDER
   return {
-    object: new Mesh(geometry, material),
+    object: mesh,
     dispose(): void {
       geometry.dispose()
       material.dispose()
