@@ -25,7 +25,7 @@ export interface LineLayerOptions {
    * @param v - vertical coordinate `[0, 1]` (0 = north)
    * @returns the world position `[x, y, z]`
    */
-  project(u: number, v: number): [number, number, number]
+  project: (u: number, v: number) => [number, number, number]
   /** Line colour. */
   color: string
   /**
@@ -125,27 +125,23 @@ export interface LineLayer {
 }
 
 /**
- * Build a {@link LineLayer} from normalized-grid segments, drawn as draped 3D line segments (crisp at any
- * zoom, unlike a rasterised line). Endpoints are projected via the injected `project`, optionally nudged
- * by a light deterministic `jitter` and redrawn over `strokes` passes for a soft pencil look. Reused for
- * coastlines, rhumb lines, graticules — anything expressed as `(u, v)` segments.
+ * Project every segment endpoint into a flat position buffer, redrawn once per stroke.
  *
- * The material is transparent with `depthWrite` off so overlaid strokes blend into a soft band while the
- * terrain still occludes them (`depthTest` on). Note: `LineBasicMaterial.linewidth` is 1px on most
- * platforms (a WebGL limitation) — for thicker strokes, swap in fat lines (`Line2`) later.
- * @param segments - the segments (normalized grid coordinates)
- * @param options - projection + styling
- * @returns the line layer handle
+ * The jitter is deterministic and keyed on the grid coordinate, so points shared by two segments move
+ * together within a pass — the line stays welded, with no gaps at the joins — while each pass wobbles
+ * differently, which is what makes overdraw read as a soft pencil band rather than as a thicker line.
+ * @param segments - the segments, in normalized grid coordinates
+ * @param project - where a grid coordinate lands in the world
+ * @param jitter - how far an endpoint may be nudged, in world units; zero disables it
+ * @param strokes - how many times the whole set is redrawn
+ * @returns the positions, three floats per vertex
  */
-export function createLineLayer(
+export function buildSegmentPositions(
   segments: readonly UvSegment[],
-  options: LineLayerOptions
-): LineLayer {
-  const jitter = options.jitter ?? 0
-  const strokes = Math.max(1, Math.round(options.strokes ?? 1))
-  const opacity = options.opacity ?? 1
-  // Nudge an endpoint by a deterministic offset keyed on its grid coordinate + stroke → shared points
-  // move together within a pass (welded, no gaps); each pass wobbles differently (overdraw → soft band).
+  project: (u: number, v: number) => [number, number, number],
+  jitter: number,
+  strokes: number
+): Float32Array {
   const nudge = (u: number, v: number, pass: number, world: [number, number, number]): void => {
     if (jitter === 0) return
     const qu = Math.round(u * HASH_QUANTIZATION)
@@ -157,74 +153,88 @@ export function createLineLayer(
   const positions = new Float32Array(segments.length * strokes * 2 * 3)
   let o = 0
   for (let pass = 0; pass < strokes; pass++) {
-    for (const seg of segments) {
-      const [a, b] = seg
-      const pa = options.project(a.u, a.v)
-      const pb = options.project(b.u, b.v)
+    for (const [a, b] of segments) {
+      const pa = project(a.u, a.v)
+      const pb = project(b.u, b.v)
       nudge(a.u, a.v, pass, pa)
       nudge(b.u, b.v, pass, pb)
-      positions[o] = pa[0]
-      positions[o + 1] = pa[1]
-      positions[o + 2] = pa[2]
-      positions[o + 3] = pb[0]
-      positions[o + 4] = pb[1]
-      positions[o + 5] = pb[2]
+      positions.set(pa, o)
+      positions.set(pb, o + 3)
       o += 6
     }
   }
+  return positions
+}
 
-  // The fat pipeline is chosen by the caller *asking* for a width, not by the value crossing a
-  // threshold. Keying it on `width > 1` meant a sub-pixel width silently fell back to thin lines, which
-  // are exactly 1 px — so the requested value was ignored and dragging the slider across 1 produced a
-  // visible jump instead of a smooth change.
-  const width = options.width
-  if (width !== undefined) {
-    const geometry = new LineSegmentsGeometry()
-    geometry.setPositions(positions)
-    const material = new LineMaterial({
-      color: options.color,
-      linewidth: width, // CSS pixels: `worldUnits` stays false, so the stroke holds its screen weight
-      transparent: true,
-      opacity,
-      depthWrite: false,
-      depthTest: options.depthTest ?? true,
-      dashed: options.dashed ?? false,
-      dashSize: options.dashSize ?? 0.02,
-      gapSize: options.gapSize ?? 0.02,
-    })
-    const object = new LineSegments2(geometry, material)
-    object.renderOrder = options.renderOrder ?? 0
-    // Walks the buffer accumulating each instance's length into the `instanceDistance` attribute the dash
-    // shader reads. Unconditional because it is cheap and a layer can be switched to dashed later; note
-    // it has nothing to do with bounding volumes, which `setPositions` already computed.
-    object.computeLineDistances()
-    return {
-      object,
-      setOpacity(value: number): void {
-        material.opacity = value
-      },
-      setColor(color: string): void {
-        material.color.set(color)
-      },
-      setWidth(value: number): void {
-        material.linewidth = value
-      },
-      setResolution(viewportWidth: number, viewportHeight: number): void {
-        material.resolution.set(viewportWidth, viewportHeight)
-      },
-      dispose(): void {
-        geometry.dispose()
-        material.dispose()
-      },
-    }
+/**
+ * The fat-line implementation: `LineSegments2`, whose stroke weight is honoured.
+ *
+ * Chosen by the caller *asking* for a width, never by the value crossing a threshold — keying it on
+ * `width > 1` meant a sub-pixel width silently fell back to thin lines, which are exactly 1 px, so the
+ * requested value was ignored and dragging the slider across 1 produced a jump instead of a change.
+ * @param positions - the projected endpoints
+ * @param width - the stroke weight in CSS pixels
+ * @param options - projection and styling
+ * @returns the layer handle
+ */
+function createFatLineLayer(
+  positions: Float32Array,
+  width: number,
+  options: LineLayerOptions
+): LineLayer {
+  const geometry = new LineSegmentsGeometry()
+  geometry.setPositions(positions)
+  const material = new LineMaterial({
+    color: options.color,
+    linewidth: width, // CSS pixels: `worldUnits` stays false, so the stroke holds its screen weight
+    transparent: true,
+    opacity: options.opacity ?? 1,
+    depthWrite: false,
+    depthTest: options.depthTest ?? true,
+    dashed: options.dashed ?? false,
+    dashSize: options.dashSize ?? 0.02,
+    gapSize: options.gapSize ?? 0.02,
+  })
+  const object = new LineSegments2(geometry, material)
+  object.renderOrder = options.renderOrder ?? 0
+  // Walks the buffer accumulating each instance's length into the `instanceDistance` attribute the dash
+  // shader reads. Unconditional because it is cheap and a layer can be switched to dashed later; note it
+  // has nothing to do with bounding volumes, which `setPositions` already computed.
+  object.computeLineDistances()
+  return {
+    object,
+    setOpacity(value: number): void {
+      material.opacity = value
+    },
+    setColor(color: string): void {
+      material.color.set(color)
+    },
+    setWidth(value: number): void {
+      material.linewidth = value
+    },
+    setResolution(viewportWidth: number, viewportHeight: number): void {
+      material.resolution.set(viewportWidth, viewportHeight)
+    },
+    dispose(): void {
+      geometry.dispose()
+      material.dispose()
+    },
   }
+}
 
+/**
+ * The thin-line implementation: `LineSegments`, pinned to one pixel by WebGL itself.
+ * @param positions - the projected endpoints
+ * @param options - projection and styling
+ * @returns the layer handle
+ */
+function createThinLineLayer(positions: Float32Array, options: LineLayerOptions): LineLayer {
   const geometry = new BufferGeometry()
   geometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
   const material = new LineBasicMaterial({
     color: options.color,
     transparent: true,
-    opacity,
+    opacity: options.opacity ?? 1,
     depthWrite: false, // let overlaid strokes blend into a soft band
     depthTest: options.depthTest ?? true,
   })
@@ -250,4 +260,32 @@ export function createLineLayer(
       material.dispose()
     },
   }
+}
+
+/**
+ * Build a {@link LineLayer} from normalized-grid segments, drawn as draped 3D line segments (crisp at any
+ * zoom, unlike a rasterised line). Endpoints are projected via the injected `project`, optionally nudged
+ * by a light deterministic `jitter` and redrawn over `strokes` passes for a soft pencil look. Reused for
+ * coastlines, rhumb lines, graticules — anything expressed as `(u, v)` segments.
+ *
+ * The material is transparent with `depthWrite` off so overlaid strokes blend into a soft band while the
+ * terrain still occludes them (`depthTest` on).
+ * @param segments - the segments (normalized grid coordinates)
+ * @param options - projection + styling
+ * @returns the line layer handle
+ */
+export function createLineLayer(
+  segments: readonly UvSegment[],
+  options: LineLayerOptions
+): LineLayer {
+  const positions = buildSegmentPositions(
+    segments,
+    options.project,
+    options.jitter ?? 0,
+    Math.max(1, Math.round(options.strokes ?? 1))
+  )
+  const width = options.width
+  return width === undefined
+    ? createThinLineLayer(positions, options)
+    : createFatLineLayer(positions, width, options)
 }

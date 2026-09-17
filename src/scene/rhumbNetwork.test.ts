@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { createHeightmap } from '../data/heightmap'
 import { clamp01 } from '../utils/math'
 
-import { generateRhumbSegments } from './rhumbNetwork'
+import { generateRhumbSegments, rhumbCentres, waterRunsAlong } from './rhumbNetwork'
 
 import type { RhumbNetworkOptions } from './rhumbNetwork'
 import type { HeightmapMeta } from '../data/heightmap'
@@ -98,6 +98,102 @@ describe('generateRhumbSegments', () => {
           expect(p.v).toBeLessThanOrEqual(1.001)
         }
       }
+    })
+  })
+})
+
+describe('rhumbCentres', () => {
+  describe('happy path', () => {
+    it('puts the first centre due north of the ring centre', () => {
+      const [first] = rhumbCentres({ u: 0.5, v: 0.5 }, 0.1, 4, false)
+      expect(first?.u).toBeCloseTo(0.5)
+      expect(first?.v).toBeCloseTo(0.4)
+    })
+  })
+
+  describe('variants', () => {
+    it('gives one centre per node', () => {
+      expect(rhumbCentres({ u: 0.5, v: 0.5 }, 0.1, 6, false)).toHaveLength(6)
+    })
+
+    it('adds the ring centre itself when asked', () => {
+      const nodes = rhumbCentres({ u: 0.5, v: 0.5 }, 0.1, 4, true)
+      expect(nodes).toHaveLength(5)
+      expect(nodes[4]).toEqual({ u: 0.5, v: 0.5 })
+    })
+
+    it('spreads the ring clockwise from north', () => {
+      const nodes = rhumbCentres({ u: 0.5, v: 0.5 }, 0.1, 4, false)
+      expect(nodes[1]?.u).toBeCloseTo(0.6)
+      expect(nodes[1]?.v).toBeCloseTo(0.5)
+    })
+  })
+
+  // L3 (managed errors): N/A — it is arithmetic over already-validated dev-panel values.
+
+  describe('unmanaged errors', () => {
+    it('returns nothing for a ring of no nodes rather than dividing by zero', () => {
+      expect(rhumbCentres({ u: 0.5, v: 0.5 }, 0.1, 0, false)).toHaveLength(0)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('collapses every node onto the centre at zero radius', () => {
+      for (const node of rhumbCentres({ u: 0.5, v: 0.5 }, 0, 4, false)) {
+        expect(node.u).toBeCloseTo(0.5)
+        expect(node.v).toBeCloseTo(0.5)
+      }
+    })
+  })
+})
+
+describe('waterRunsAlong', () => {
+  const from = { u: 0, v: 0.5 }
+
+  describe('happy path', () => {
+    it('emits one run across open water', () => {
+      expect(waterRunsAlong(from, 1, 0, 0, 1, 0.25, () => true)).toHaveLength(1)
+    })
+  })
+
+  describe('variants', () => {
+    it('stops at the coast and picks up on the far side', () => {
+      // Land in the middle third: two runs, one either side of it.
+      const runs = waterRunsAlong(from, 1, 0, 0, 1, 0.1, (u) => u < 0.3 || u > 0.7)
+      expect(runs.length).toBeGreaterThanOrEqual(2)
+    })
+
+    it('emits nothing over land from end to end', () => {
+      expect(waterRunsAlong(from, 1, 0, 0, 1, 0.25, () => false)).toHaveLength(0)
+    })
+
+    it('walks down v as readily as across u', () => {
+      expect(waterRunsAlong({ u: 0.5, v: 0 }, 0, 1, 0, 1, 0.25, () => true)).toHaveLength(1)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('closes an open run at the end of the chord rather than dropping it', () => {
+      const runs = waterRunsAlong(from, 1, 0, 0, 1, 0.25, () => true)
+      expect(runs[0]?.[1].u).toBeCloseTo(1)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('clamps the sampled coordinate, so a chord ending on the edge reads inside the map', () => {
+      const seen: number[] = []
+      waterRunsAlong(from, 1, 0, 0, 1, 0.25, (u) => {
+        seen.push(u)
+        return true
+      })
+      for (const u of seen) expect(u).toBeGreaterThanOrEqual(0)
+      for (const u of seen) expect(u).toBeLessThanOrEqual(1)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('handles a chord shorter than one step', () => {
+      expect(waterRunsAlong(from, 1, 0, 0, 0.01, 0.25, () => true)).toHaveLength(1)
     })
   })
 })

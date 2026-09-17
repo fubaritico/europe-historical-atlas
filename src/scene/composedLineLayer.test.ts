@@ -3,9 +3,14 @@ import { describe, expect, it } from 'vitest'
 import {
   buildBorderStrokes,
   createComposedLineLayer,
+  groupSegmentsByPattern,
   inlayOpacityScale,
+  isClosedChain,
+  mitreAt,
   offsetPolyline,
+  patternStrokes,
   polylinesToSegments,
+  ringNeighbours,
 } from './composedLineLayer'
 
 import type { BorderStrokeStyle, ComposedLineLayer, ComposedStroke } from './composedLineLayer'
@@ -407,6 +412,244 @@ describe('composedLineLayer', () => {
       // One handle, one scale: the reason the composed line is a group rather than a list of layers.
       expect(layer.object.scale.y).toBe(0.5)
       layer.dispose()
+    })
+  })
+})
+
+describe('isClosedChain', () => {
+  describe('happy path', () => {
+    it('recognises a ring by its repeated point', () => {
+      expect(
+        isClosedChain([
+          { u: 0, v: 0 },
+          { u: 1, v: 0 },
+          { u: 1, v: 1 },
+          { u: 0, v: 0 },
+        ])
+      ).toBe(true)
+    })
+  })
+
+  describe('variants', () => {
+    it('reads an open chain as open', () => {
+      expect(
+        isClosedChain([
+          { u: 0, v: 0 },
+          { u: 1, v: 0 },
+          { u: 1, v: 1 },
+          { u: 1, v: 2 },
+        ])
+      ).toBe(false)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('refuses a triangle too short to enclose anything once the repeat is discounted', () => {
+      expect(
+        isClosedChain([
+          { u: 0, v: 0 },
+          { u: 1, v: 0 },
+          { u: 0, v: 0 },
+        ])
+      ).toBe(false)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('reads an empty chain as open rather than throwing', () => {
+      expect(isClosedChain([])).toBe(false)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('reads a single point as open', () => {
+      expect(isClosedChain([{ u: 0, v: 0 }])).toBe(false)
+    })
+  })
+})
+
+describe('ringNeighbours', () => {
+  const ring = [
+    { u: 0, v: 0 },
+    { u: 1, v: 0 },
+    { u: 1, v: 1 },
+  ]
+
+  describe('happy path', () => {
+    it('gives the points either side of a middle vertex', () => {
+      expect(ringNeighbours(ring, 1, false)).toEqual({ previous: ring[0], next: ring[2] })
+    })
+  })
+
+  describe('variants', () => {
+    it('wraps around the end of a ring', () => {
+      expect(ringNeighbours(ring, 0, true)?.previous).toEqual(ring[2])
+    })
+
+    it('clamps at the end of an open chain, so an endpoint is its own neighbour', () => {
+      expect(ringNeighbours(ring, 0, false)?.previous).toEqual(ring[0])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('reports nothing where the chain is too short to have neighbours', () => {
+      expect(ringNeighbours([], 0, false)).toBeNull()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('reports nothing for an index past the end rather than reading undefined', () => {
+      expect(ringNeighbours(ring, 99, false)).toBeNull()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('makes a single point its own neighbour on both sides', () => {
+      const one = [{ u: 0, v: 0 }]
+      expect(ringNeighbours(one, 0, true)).toEqual({ previous: one[0], next: one[0] })
+    })
+  })
+})
+
+describe('mitreAt', () => {
+  describe('happy path', () => {
+    it('offsets a straight run along the edge normal, with no mitre stretch', () => {
+      const m = mitreAt({ u: 0, v: 0 }, { u: 1, v: 0 }, { u: 2, v: 0 })
+      expect(m.scale).toBeCloseTo(1)
+      expect(Math.hypot(m.u, m.v)).toBeCloseTo(1)
+    })
+  })
+
+  describe('variants', () => {
+    it('stretches the offset through a corner, so the shifted line stays parallel', () => {
+      expect(mitreAt({ u: 0, v: 0 }, { u: 1, v: 0 }, { u: 1, v: 1 }).scale).toBeGreaterThan(1)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('clamps a hairpin instead of throwing the vertex across the map', () => {
+      const m = mitreAt({ u: 0, v: 0 }, { u: 1, v: 0 }, { u: 0, v: 0 })
+      expect(Number.isFinite(m.scale)).toBe(true)
+      expect(m.scale).toBeLessThanOrEqual(4)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('falls back on the one live normal when an edge has no length', () => {
+      const m = mitreAt({ u: 0, v: 0 }, { u: 1, v: 0 }, { u: 1, v: 0 })
+      expect(Math.hypot(m.u, m.v)).toBeCloseTo(1)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('stays finite when both edges are degenerate', () => {
+      const m = mitreAt({ u: 1, v: 0 }, { u: 1, v: 0 }, { u: 1, v: 0 })
+      expect(Number.isFinite(m.scale)).toBe(true)
+    })
+  })
+})
+
+describe('groupSegmentsByPattern', () => {
+  const line = [
+    { u: 0, v: 0 },
+    { u: 1, v: 0 },
+  ]
+  const between = [
+    { pair: [0, 1] as const, lines: [line] },
+    { pair: [1, 2] as const, lines: [line] },
+  ]
+
+  describe('happy path', () => {
+    it('puts every pair drawn the same way into one bucket', () => {
+      const grouped = groupSegmentsByPattern(between, () => 'solid', 0.001)
+      expect(grouped.size).toBe(1)
+      expect(grouped.get('solid')).toHaveLength(2)
+    })
+  })
+
+  describe('variants', () => {
+    it('keeps patterns apart, since each is its own draw call', () => {
+      const grouped = groupSegmentsByPattern(
+        between,
+        (p) => (p[0] === 0 ? 'dashed' : 'solid'),
+        0.001
+      )
+      expect([...grouped.keys()].sort()).toEqual(['dashed', 'solid'])
+    })
+
+    it('doubles the geometry of a doubled border, shifting each half either way', () => {
+      const grouped = groupSegmentsByPattern(between, () => 'double', 0.001)
+      expect(grouped.get('double')).toHaveLength(4)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('returns nothing for a year with no shared borders', () => {
+      expect(groupSegmentsByPattern([], () => 'solid', 0.001).size).toBe(0)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('drops a chain too short to make a segment rather than emitting a degenerate one', () => {
+      const grouped = groupSegmentsByPattern(
+        [{ pair: [0, 1] as const, lines: [[{ u: 0, v: 0 }]] }],
+        () => 'solid',
+        0.001
+      )
+      expect(grouped.get('solid')).toHaveLength(0)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('leaves a doubled border on its true line at zero gap', () => {
+      const grouped = groupSegmentsByPattern(between, () => 'double', 0)
+      expect(grouped.get('double')?.[0]?.[0]).toEqual({ u: 0, v: 0 })
+    })
+  })
+})
+
+describe('patternStrokes', () => {
+  const segments = [
+    [
+      { u: 0, v: 0 },
+      { u: 1, v: 0 },
+    ],
+  ] as unknown as Parameters<typeof patternStrokes>[1]
+
+  describe('happy path', () => {
+    it('dresses a plain border as an edging with a core inside it', () => {
+      expect(patternStrokes('solid', segments, STYLE).map((s) => s.role)).toEqual(['edge', 'inlay'])
+    })
+  })
+
+  describe('variants', () => {
+    it('leaves a patterned border as one dark stroke, its meaning being its shape', () => {
+      expect(patternStrokes('dashed', segments, STYLE).map((s) => s.role)).toEqual(['pattern'])
+    })
+
+    it('marks a dashed pattern dashed and a doubled one not', () => {
+      expect(patternStrokes('dashed', segments, STYLE)[0]?.dashed).toBe(true)
+      expect(patternStrokes('double', segments, STYLE)[0]?.dashed).toBe(false)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('skips an inlay that would cover the edging it sits inside', () => {
+      const wide = { ...STYLE, coreWidth: 3, edgeWidth: 3 }
+      expect(patternStrokes('solid', segments, wide).map((s) => s.role)).toEqual(['edge'])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('still emits its passes for an empty set, the caller deciding what is worth drawing', () => {
+      expect(patternStrokes('solid', [], STYLE)).toHaveLength(2)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('draws the edging first, so the core lands on top of it', () => {
+      const [first, second] = patternStrokes('solid', segments, STYLE)
+      expect(first?.width).toBeGreaterThan(second?.width ?? 0)
     })
   })
 })

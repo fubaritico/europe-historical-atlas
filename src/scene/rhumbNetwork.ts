@@ -46,12 +46,80 @@ function clipToUnitSquare(pu: number, pv: number, du: number, dv: number): [numb
 }
 
 /**
+ * The compass centres a portolan web radiates from: a ring around a point, and optionally the point.
+ * @param center - the ring's centre in normalized grid coordinates
+ * @param circleRadius - the ring's radius
+ * @param nodeCount - how many centres sit on the ring
+ * @param includeCenter - whether the centre itself is also one
+ * @returns the centres
+ */
+export function rhumbCentres(
+  center: UvPoint,
+  circleRadius: number,
+  nodeCount: number,
+  includeCenter: boolean
+): UvPoint[] {
+  const nodes: UvPoint[] = []
+  for (let i = 0; i < nodeCount; i++) {
+    const phi = (i / nodeCount) * Math.PI * 2
+    nodes.push({
+      u: center.u + circleRadius * Math.sin(phi),
+      v: center.v - circleRadius * Math.cos(phi),
+    })
+  }
+  if (includeCenter) nodes.push({ u: center.u, v: center.v })
+  return nodes
+}
+
+/**
+ * Walk a chord and emit a segment for each contiguous run of water.
+ *
+ * This is what makes the web read as a sea chart rather than as a grid drawn over Europe: a rhumb stops
+ * at the coastline and picks up again on the far side of the landmass.
+ * @param from - where the chord starts
+ * @param du - the chord's direction on u
+ * @param dv - the chord's direction on v
+ * @param t0 - the chord's entry parameter
+ * @param t1 - its exit parameter
+ * @param walk - the sampling step along it
+ * @param isWater - whether a normalized coordinate is water
+ * @returns the underwater stretches
+ */
+export function waterRunsAlong(
+  from: UvPoint,
+  du: number,
+  dv: number,
+  t0: number,
+  t1: number,
+  walk: number,
+  isWater: (u: number, v: number) => boolean
+): UvSegment[] {
+  const runs: UvSegment[] = []
+  let runStart: UvPoint | null = null
+  let prev: UvPoint = { u: from.u + t0 * du, v: from.v + t0 * dv }
+  for (let t = t0; t <= t1 + walk * 0.5; t += walk) {
+    const tc = Math.min(t, t1)
+    const p: UvPoint = { u: from.u + tc * du, v: from.v + tc * dv }
+    if (isWater(clamp01(p.u), clamp01(p.v))) {
+      runStart ??= prev
+    } else if (runStart) {
+      runs.push([runStart, prev])
+      runStart = null
+    }
+    prev = p
+  }
+  if (runStart) runs.push([runStart, prev])
+  return runs
+}
+
+/**
  * Generate the portolan rhumb network as sea-only line segments in normalized grid coordinates. From each
  * centre (a ring of `nodeCount` around `center`, plus `center` itself when `includeCenter`), a straight
  * line is cast in every unique compass orientation, clipped to the map, then walked over the heightmap so
  * only the stretches over water (elevation ≤ `seaLevel`) are emitted — the lines stop at the coastline.
  * @param heightmap - the elevation source (same DEM as the coastline → aligned by construction)
  * @param options - the network layout + sea clip
+ * @param mask - which cells are land, when it is known
  * @returns the sea-clipped rhumb segments
  */
 export function generateRhumbSegments(
@@ -64,45 +132,19 @@ export function generateRhumbSegments(
   // decides; thresholding elevation is the degraded fallback.
   const isWater = (u: number, v: number): boolean =>
     mask ? !mask.isLand(u, v) : heightmap.sample(u, v) <= seaLevel
-  const nodes: UvPoint[] = []
-  for (let i = 0; i < nodeCount; i++) {
-    const phi = (i / nodeCount) * Math.PI * 2
-    nodes.push({
-      u: center.u + circleRadius * Math.sin(phi),
-      v: center.v - circleRadius * Math.cos(phi),
-    })
-  }
-  if (includeCenter) nodes.push({ u: center.u, v: center.v })
 
   const walk = Math.max(MIN_WALK_STEP, step)
   const orientations = Math.max(1, Math.floor(directions / 2))
   const segments: UvSegment[] = []
 
-  for (const node of nodes) {
+  for (const node of rhumbCentres(center, circleRadius, nodeCount, includeCenter)) {
     for (let o = 0; o < orientations; o++) {
       const a = (o / orientations) * Math.PI // unique orientations over [0, π)
       const du = Math.sin(a)
       const dv = -Math.cos(a)
       const range = clipToUnitSquare(node.u, node.v, du, dv)
       if (!range) continue
-      const [t0, t1] = range
-
-      // Walk the chord, emitting a segment for each contiguous run of underwater samples.
-      let runStart: UvPoint | null = null
-      let prev: UvPoint = { u: node.u + t0 * du, v: node.v + t0 * dv }
-      for (let t = t0; t <= t1 + walk * 0.5; t += walk) {
-        const tc = Math.min(t, t1)
-        const p: UvPoint = { u: node.u + tc * du, v: node.v + tc * dv }
-        const underwater = isWater(clamp01(p.u), clamp01(p.v))
-        if (underwater) {
-          runStart ??= prev
-        } else if (runStart) {
-          segments.push([runStart, prev])
-          runStart = null
-        }
-        prev = p
-      }
-      if (runStart) segments.push([runStart, prev])
+      segments.push(...waterRunsAlong(node, du, dv, range[0], range[1], walk, isWater))
     }
   }
   return segments

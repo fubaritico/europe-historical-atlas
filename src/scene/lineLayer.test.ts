@@ -1,7 +1,7 @@
 import { LineSegments } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
-import { createLineLayer } from './lineLayer'
+import { buildSegmentPositions, createLineLayer } from './lineLayer'
 
 import type { UvSegment } from './lineLayer'
 
@@ -170,6 +170,80 @@ describe('createLineLayer', () => {
       layer.dispose()
       expect(geomSpy).toHaveBeenCalledOnce()
       expect(matSpy).toHaveBeenCalledOnce()
+    })
+  })
+})
+
+describe('buildSegmentPositions', () => {
+  const seg = [
+    [
+      { u: 0, v: 0 },
+      { u: 1, v: 1 },
+    ],
+  ] as const
+  const flat = (u: number, v: number): [number, number, number] => [u, 0, v]
+
+  describe('happy path', () => {
+    it('writes six floats for one segment', () => {
+      expect(buildSegmentPositions(seg, flat, 0, 1)).toHaveLength(6)
+    })
+
+    it('writes the projected endpoints in order', () => {
+      expect([...buildSegmentPositions(seg, flat, 0, 1)]).toEqual([0, 0, 0, 1, 0, 1])
+    })
+  })
+
+  describe('variants', () => {
+    it('redraws the whole set once per stroke', () => {
+      expect(buildSegmentPositions(seg, flat, 0, 3)).toHaveLength(18)
+    })
+
+    it('moves a jittered endpoint off its projected position', () => {
+      const jittered = buildSegmentPositions(seg, flat, 0.1, 1)
+      expect(jittered[0]).not.toBe(0)
+    })
+
+    it('moves a point shared by two segments the same way, so the line stays welded', () => {
+      const chain = [
+        [
+          { u: 0, v: 0 },
+          { u: 0.5, v: 0.5 },
+        ],
+        [
+          { u: 0.5, v: 0.5 },
+          { u: 1, v: 1 },
+        ],
+      ] as const
+      const p = buildSegmentPositions(chain, flat, 0.1, 1)
+      expect(p[3]).toBeCloseTo(p[6] ?? 0)
+      expect(p[5]).toBeCloseTo(p[8] ?? 0)
+    })
+
+    it('wobbles each pass differently, which is what makes overdraw read as a soft band', () => {
+      const p = buildSegmentPositions(seg, flat, 0.1, 2)
+      expect(p[0]).not.toBeCloseTo(p[6] ?? 0, 6)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('leaves the height alone, jitter being a plan-view wobble', () => {
+      const p = buildSegmentPositions(seg, (u, v) => [u, 7, v], 0.5, 1)
+      expect(p[1]).toBe(7)
+      expect(p[4]).toBe(7)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('returns an empty buffer for no segments rather than a malformed one', () => {
+      expect(buildSegmentPositions([], flat, 0, 1)).toHaveLength(0)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('leaves every position untouched at zero jitter', () => {
+      expect([...buildSegmentPositions(seg, flat, 0, 2)]).toEqual([
+        0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1,
+      ])
     })
   })
 })

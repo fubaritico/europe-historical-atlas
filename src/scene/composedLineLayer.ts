@@ -60,47 +60,95 @@ function normalOf(from: UvPoint, to: UvPoint): UvPoint {
 }
 
 /**
+ * Whether a chain closes on itself — its last point repeating its first.
+ *
+ * Three points cannot enclose anything once the repeat is discounted, so a ring needs more than that.
+ * @param points - the chain
+ * @returns `true` when it is a ring
+ */
+export function isClosedChain(points: readonly UvPoint[]): boolean {
+  const head = points[0]
+  const tail = points[points.length - 1]
+  return points.length > 3 && !!head && !!tail && head.u === tail.u && head.v === tail.v
+}
+
+/**
+ * The two points either side of a vertex — wrapping around a ring, clamped at the end of an open chain.
+ * @param ring - the chain, without its repeated closing point
+ * @param index - the vertex
+ * @param closed - whether the chain wraps
+ * @returns the neighbours, or `null` where the chain is too short to have them
+ */
+export function ringNeighbours(
+  ring: readonly UvPoint[],
+  index: number,
+  closed: boolean
+): { previous: UvPoint; next: UvPoint } | null {
+  const count = ring.length
+  const previous = ring[closed ? (index - 1 + count) % count : Math.max(0, index - 1)]
+  const next = ring[closed ? (index + 1) % count : Math.min(count - 1, index + 1)]
+  return previous && next ? { previous, next } : null
+}
+
+/**
+ * The direction and reach of the mitre at one vertex.
+ *
+ * The vertex moves along the bisector of its two edges, scaled so the offset line stays parallel to the
+ * original through the corner, and clamped by {@link MAX_MITER} so a hairpin cannot throw the vertex
+ * across the map. At the end of an open chain one normal is zero, so the other one decides alone.
+ * @param previous - the point before
+ * @param here - the vertex
+ * @param next - the point after
+ * @returns the unit bisector and the mitre scale
+ */
+export function mitreAt(
+  previous: UvPoint,
+  here: UvPoint,
+  next: UvPoint
+): { u: number; v: number; scale: number } {
+  const before = normalOf(previous, here)
+  const after = normalOf(here, next)
+  let mu = before.u + after.u
+  let mv = before.v + after.v
+  const length = Math.hypot(mu, mv)
+  const flat = after.u === 0 && after.v === 0
+  if (length < 1e-9) {
+    // An end of an open chain (one normal is zero), or a reversal: take whichever normal exists.
+    const only = flat ? before : after
+    mu = only.u
+    mv = only.v
+  } else {
+    mu /= length
+    mv /= length
+  }
+  const reference = flat ? before : after
+  const cosine = mu * reference.u + mv * reference.v
+  return { u: mu, v: mv, scale: cosine > 1e-6 ? Math.min(MAX_MITER, 1 / cosine) : MAX_MITER }
+}
+
+/**
  * Shift a chain of points sideways by a fixed distance — the geometry behind a doubled border.
  *
- * Each vertex moves along the bisector of its two edges, scaled so the offset line stays parallel to the
- * original through the corner (a mitre), and clamped by {@link MAX_MITER} so a hairpin cannot throw the
- * vertex across the map. Endpoints of an open chain use their single edge's normal; a closed chain is
- * offset cyclically, or its seam would show.
+ * Endpoints of an open chain use their single edge's normal; a closed chain is offset cyclically, or its
+ * seam would show.
  * @param points - the chain
  * @param distance - how far to shift, in normalized grid units; negative shifts the other way
  * @returns the shifted chain
  */
 export function offsetPolyline(points: readonly UvPoint[], distance: number): UvPoint[] {
-  const head = points[0]
-  const tail = points[points.length - 1]
-  if (points.length < 2 || distance === 0 || !head || !tail) return [...points]
-  const closed = points.length > 3 && head.u === tail.u && head.v === tail.v
+  if (points.length < 2 || distance === 0) return [...points]
+  const closed = isClosedChain(points)
   const ring = closed ? points.slice(0, -1) : points
-  const count = ring.length
   const out: UvPoint[] = []
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < ring.length; i++) {
     const here = ring[i]
-    const previous = ring[closed ? (i - 1 + count) % count : Math.max(0, i - 1)]
-    const next = ring[closed ? (i + 1) % count : Math.min(count - 1, i + 1)]
-    if (!here || !previous || !next) continue
-    const before = normalOf(previous, here)
-    const after = normalOf(here, next)
-    let mu = before.u + after.u
-    let mv = before.v + after.v
-    const length = Math.hypot(mu, mv)
-    if (length < 1e-9) {
-      // An end of an open chain (one normal is zero), or a reversal: take whichever normal exists.
-      const only = after.u === 0 && after.v === 0 ? before : after
-      mu = only.u
-      mv = only.v
-    } else {
-      mu /= length
-      mv /= length
-    }
-    const reference = after.u === 0 && after.v === 0 ? before : after
-    const cosine = mu * reference.u + mv * reference.v
-    const scale = cosine > 1e-6 ? Math.min(MAX_MITER, 1 / cosine) : MAX_MITER
-    out.push({ u: here.u + mu * distance * scale, v: here.v + mv * distance * scale })
+    const pair = ringNeighbours(ring, i, closed)
+    if (!here || !pair) continue
+    const mitre = mitreAt(pair.previous, here, pair.next)
+    out.push({
+      u: here.u + mitre.u * distance * mitre.scale,
+      v: here.v + mitre.v * distance * mitre.scale,
+    })
   }
   const first = out[0]
   if (closed && first) out.push(first)
@@ -243,6 +291,93 @@ export function inlayOpacityScale(zoom: number, fadeThreshold: number): number {
 }
 
 /**
+ * Gather every stretch by the pattern it is drawn with, rather than by the pair it separates.
+ *
+ * A century can hold hundreds of pairs, and one draw call per pair would trade a rendering problem for a
+ * worse one. Three patterns means at most six passes, whatever the year.
+ * @param groups - the stretches, grouped by the pair of polities they separate
+ * @param patternFor - the pattern a pair is drawn with
+ * @param doubleGap - how far either half of a doubled border sits from the true line
+ * @returns the segments, by pattern
+ */
+export function groupSegmentsByPattern(
+  groups: RegionBorders['between'],
+  patternFor: (pair: readonly [number, number]) => BorderPattern,
+  doubleGap: number
+): Map<BorderPattern, UvSegment[]> {
+  const byPattern = new Map<BorderPattern, UvSegment[]>()
+  for (const group of groups) {
+    const pattern = patternFor(group.pair)
+    // A doubled border is the one pattern that needs new geometry: the same run shifted either way.
+    const lines =
+      pattern === 'double'
+        ? group.lines.flatMap((line) => [
+            offsetPolyline(line, doubleGap),
+            offsetPolyline(line, -doubleGap),
+          ])
+        : group.lines
+    const bucket = byPattern.get(pattern) ?? []
+    for (const segment of polylinesToSegments(lines)) bucket.push(segment)
+    byPattern.set(pattern, bucket)
+  }
+  return byPattern
+}
+
+/**
+ * The passes one pattern is drawn with.
+ *
+ * A border is dark at every scale. A patterned one stays a single dark stroke, because its meaning is in
+ * its shape and a light inlay would break that shape up; a plain one takes the light inlay on top, which
+ * the caller fades back out as the camera pulls away.
+ * @param pattern - how this group is drawn
+ * @param segments - its stretches
+ * @param style - how to dress them
+ * @returns the passes, in draw order
+ */
+export function patternStrokes(
+  pattern: BorderPattern,
+  segments: UvSegment[],
+  style: BorderStrokeStyle
+): ComposedStroke[] {
+  if (pattern !== 'solid') {
+    return [
+      {
+        segments,
+        color: style.edgeColor,
+        // Built at the edge's weight so it matches a plain border at continent scale; the caller thins it
+        // as the camera comes in, where a broken line reads heavier than a continuous one of the same
+        // width because every dash carries its own two ends.
+        width: style.edgeWidth,
+        opacity: style.opacity,
+        dashed: pattern === 'dashed',
+        role: 'pattern',
+      },
+    ]
+  }
+  const strokes: ComposedStroke[] = [
+    {
+      segments,
+      color: style.edgeColor,
+      width: style.edgeWidth,
+      opacity: style.opacity,
+      role: 'edge',
+    },
+  ]
+  // An inlay no narrower than the edge would cover it entirely — skip the pass rather than pay for one
+  // that hides the very thing it sits inside.
+  if (style.coreWidth < style.edgeWidth) {
+    strokes.push({
+      segments,
+      color: style.coreColor,
+      width: style.coreWidth,
+      opacity: style.opacity,
+      role: 'inlay',
+    })
+  }
+  return strokes
+}
+
+/**
  * Choose the passes that dress a set of derived borders.
  *
  * Pure, and separated from the drawing precisely so it can be exercised without a renderer: the ordering
@@ -251,6 +386,7 @@ export function inlayOpacityScale(zoom: number, fadeThreshold: number): number {
  * border is obtained without any parallel-offset geometry at all.
  * @param borders - the derived stretches, by kind
  * @param style - how to dress them
+ * @param patternFor - the pattern a pair of polities is drawn with
  * @returns the passes, in draw order
  */
 export function buildBorderStrokes(
@@ -258,27 +394,9 @@ export function buildBorderStrokes(
   style: BorderStrokeStyle,
   patternFor: (pair: readonly [number, number]) => BorderPattern = () => 'solid'
 ): ComposedStroke[] {
-  // Gathered by pattern rather than by pair: a century can hold hundreds of pairs, and one draw call per
-  // pair would trade a rendering problem for a worse one. Three patterns means at most six passes.
-  const byPattern = new Map<BorderPattern, UvSegment[]>()
-  for (const group of borders.between) {
-    const pattern = patternFor(group.pair)
-    // A doubled border is the one pattern that needs new geometry: the same run shifted either way.
-    const lines =
-      pattern === 'double'
-        ? group.lines.flatMap((line) => [
-            offsetPolyline(line, style.doubleGap),
-            offsetPolyline(line, -style.doubleGap),
-          ])
-        : group.lines
-    const bucket = byPattern.get(pattern) ?? []
-    for (const segment of polylinesToSegments(lines)) bucket.push(segment)
-    byPattern.set(pattern, bucket)
-  }
-
   const strokes: ComposedStroke[] = []
   // The frontier goes down first so a negotiated border always wins where the two meet.
-  if (style.showFrontier && borders.frontier.length > 0)
+  if (style.showFrontier && borders.frontier.length > 0) {
     strokes.push({
       segments: polylinesToSegments(borders.frontier),
       color: style.frontierColor,
@@ -286,46 +404,10 @@ export function buildBorderStrokes(
       opacity: style.frontierOpacity,
       role: 'frontier',
     })
+  }
+  const byPattern = groupSegmentsByPattern(borders.between, patternFor, style.doubleGap)
   for (const [pattern, segments] of byPattern) {
-    if (segments.length === 0) continue
-    const dashed = pattern === 'dashed'
-    // An edging no wider than the core would be hidden by it entirely — skip the pass rather than pay
-    // for an invisible one. It sits immediately before its own core, so the render order still pairs
-    // them however many patterns are in play.
-    // A border is dark at every scale. A patterned one stays a single dark stroke, because its meaning
-    // is in its shape and a light inlay would break the shape up; a plain one takes the light inlay on
-    // top, which the caller fades back out as the camera pulls away.
-    if (pattern !== 'solid') {
-      strokes.push({
-        segments,
-        color: style.edgeColor,
-        // Built at the edge's weight so it matches a plain border at continent scale; the caller thins it
-        // as the camera comes in, where a broken line reads heavier than a continuous one of the same
-        // width because every dash carries its own two ends.
-        width: style.edgeWidth,
-        opacity: style.opacity,
-        dashed,
-        role: 'pattern',
-      })
-      continue
-    }
-    strokes.push({
-      segments,
-      color: style.edgeColor,
-      width: style.edgeWidth,
-      opacity: style.opacity,
-      role: 'edge',
-    })
-    // An inlay no narrower than the edge would cover it entirely — skip the pass rather than pay for
-    // one that hides the very thing it sits inside.
-    if (style.coreWidth < style.edgeWidth)
-      strokes.push({
-        segments,
-        color: style.coreColor,
-        width: style.coreWidth,
-        opacity: style.opacity,
-        role: 'inlay',
-      })
+    if (segments.length > 0) strokes.push(...patternStrokes(pattern, segments, style))
   }
   return strokes
 }

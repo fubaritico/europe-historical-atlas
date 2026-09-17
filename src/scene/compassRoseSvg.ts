@@ -99,6 +99,82 @@ function label(
 }
 
 /**
+ * The graduated bezel: two rings and 64 ticks, every eighth one longer.
+ * @param ringR - the outer ring's radius
+ * @param ink - the principal ink
+ * @returns the markup
+ */
+export function graduatedRing(ringR: number, ink: string): string {
+  let out = ring(ringR, 1, ink) + ring(ringR - 6, 0.6, ink)
+  // 64 ticks (every 360/64 = 5.625°), longer every 8th (major, every 45°).
+  for (let i = 0; i < 64; i++) {
+    const major = i % 8 === 0
+    out += lineSeg(
+      ringR - 6,
+      i * 5.625,
+      major ? ringR - 16 : ringR - 10,
+      i * 5.625,
+      ink,
+      major ? 1 : 0.5
+    )
+  }
+  return out
+}
+
+/**
+ * The 16 quarter-wind rays, drawn in the portolan red and only on the quarter bearings.
+ * @param quarterWind - the quarter-wind colour
+ * @returns the markup
+ */
+export function quarterWindRays(quarterWind: string): string {
+  let out = ''
+  for (let i = 0; i < 16; i++) {
+    if (i % 2 === 1 && i % 4 !== 2)
+      out += lineSeg(0, i * 22.5, QUARTER_RAY_R, i * 22.5, quarterWind, 0.8)
+  }
+  return out
+}
+
+/**
+ * The 8 half-winds, in the portolan green, offset 22.5° from the principals.
+ * @param halfWind - the half-wind colour
+ * @returns the markup
+ */
+export function halfWindSpikes(halfWind: string): string {
+  let out = ''
+  for (let i = 0; i < 8; i++) out += slimSpike(22.5 + i * 45, HALF_WIND_R, halfWind, halfWind)
+  return out
+}
+
+/**
+ * The 8 principal winds in two tones, cardinals reaching further than intercardinals.
+ * @param ink - the principal ink
+ * @returns the markup
+ */
+export function principalSpikes(ink: string): string {
+  let out = ''
+  for (let i = 0; i < 8; i++) {
+    const cardinal = i % 2 === 0
+    out += spike(i * 45, cardinal ? PRINCIPAL_R : PRINCIPAL_R_INTER, ink, cardinal ? 7 : 6, 15)
+  }
+  return out
+}
+
+/** The eight wind names, in French, cardinals set larger than intercardinals. */
+const WIND_NAMES = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO']
+
+/**
+ * The wind names around the bezel.
+ * @param ink - the lettering colour
+ * @returns the markup
+ */
+export function windLabels(ink: string): string {
+  return WIND_NAMES.map((text, i) =>
+    label(text, LABEL_R, i * 45, i % 2 === 0 ? 15 : 11, i % 2 === 0, ink)
+  ).join('')
+}
+
+/**
  * Build the procedural portolan compass rose (variant D — ornate 32-wind with French labels) as an SVG
  * string, colour-coded: principal winds inked, half-winds green, quarter-wind rays red. Colours are
  * validated to hex; the SVG carries explicit width/height (needed for `<img>`/texture rasterisation).
@@ -110,35 +186,17 @@ export function buildCompassRoseSvg(options: CompassRoseSvgOptions): string {
   const halfWind = safeColor(options.colors.halfWind)
   const quarterWind = safeColor(options.colors.quarterWind)
   const ringR = options.labels ? RING_R_LABELED : RING_R
-  let s = ''
-  s += ring(ringR, 1, ink) + ring(ringR - 6, 0.6, ink)
-  // 64 ticks (every 360/64 = 5.625°), longer every 8th (major, every 45°).
-  for (let i = 0; i < 64; i++)
-    s += lineSeg(
-      ringR - 6,
-      i * 5.625,
-      i % 8 === 0 ? ringR - 16 : ringR - 10,
-      i * 5.625,
-      ink,
-      i % 8 === 0 ? 1 : 0.5
-    )
-  s += ring(INNER_RING_R, 0.6, ink)
-  // 16 quarter-wind rays (red)
-  for (let i = 0; i < 16; i++)
-    if (i % 2 === 1 && i % 4 !== 2)
-      s += lineSeg(0, i * 22.5, QUARTER_RAY_R, i * 22.5, quarterWind, 0.8)
-  // 8 half-winds (green), offset 22.5° from the principals
-  for (let i = 0; i < 8; i++) s += slimSpike(22.5 + i * 45, HALF_WIND_R, halfWind, halfWind)
-  // 8 principal winds (two-tone ink): cardinals longer than intercardinals
-  for (let i = 0; i < 8; i++)
-    s += spike(i * 45, i % 2 === 0 ? PRINCIPAL_R : PRINCIPAL_R_INTER, ink, i % 2 === 0 ? 7 : 6, 15)
-  s += ring(HUB_R, 1, ink, HUB_FILL) + ring(HUB_CORE_R, 1, ink, ink)
-  s += fleur(C, C - FLEUR_R, 1.1, ink)
-  if (options.labels) {
-    const fr = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO']
-    fr.forEach((t, i) => (s += label(t, LABEL_R, i * 45, i % 2 === 0 ? 15 : 11, i % 2 === 0, ink)))
-  }
+  const body =
+    graduatedRing(ringR, ink) +
+    ring(INNER_RING_R, 0.6, ink) +
+    quarterWindRays(quarterWind) +
+    halfWindSpikes(halfWind) +
+    principalSpikes(ink) +
+    ring(HUB_R, 1, ink, HUB_FILL) +
+    ring(HUB_CORE_R, 1, ink, ink) +
+    fleur(C, C - FLEUR_R, 1.1, ink) +
+    (options.labels ? windLabels(ink) : '')
   // Explicit width/height (not just viewBox): an SVG loaded as an <img> for a texture needs intrinsic
   // dimensions, else it rasterises to 0×0 (blank texture).
-  return `<svg width="${numStr(SIZE)}" height="${numStr(SIZE)}" viewBox="0 0 ${numStr(SIZE)} ${numStr(SIZE)}" xmlns="http://www.w3.org/2000/svg">${s}</svg>`
+  return `<svg width="${numStr(SIZE)}" height="${numStr(SIZE)}" viewBox="0 0 ${numStr(SIZE)} ${numStr(SIZE)}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`
 }
