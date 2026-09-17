@@ -127,6 +127,13 @@ Put here the know issues to avoid cluttering the context window.
   is now 32×32 with the glyph centred. **Note the criterion**: the familiar 44×44 is WCAG 2.5.5, which is
   **AAA**. The AA bar is 2.5.8 (WCAG 2.2) at **24×24** — the old box failed that too. Both are guarded by
   tests, so a restyle cannot quietly undo them.
+- **The frame's three rules have no matter in them** (raised by the dev, 2026-09-18). They are geometry
+  — perfect rectangles — while everything beside them has been given a broken edge: the degrees are
+  displaced by the browser's own turbulence, the band reads through to the fibre beneath it. Two ways
+  out, and they are not equivalent: rasterise the rules as SVG with the same turbulence (coherent with
+  the numbers, but they lose their crispness at maximum zoom, which is the one thing geometry buys), or
+  irregularise their edges in geometry (crisp, and a different piece of work — a rule is four vertices
+  today and would become a strip). Not decided.
 - **The ESLint boundary glob `**/controls` is too broad** — it matched `utils/controls` as if it were the
   camera-controls layer. Worked around by renaming to `utils/controlSpec`; the config flaw remains and
   will catch the next `something/controls`.

@@ -42,6 +42,18 @@ export interface FrameDevParams {
   labelOpacity: number
   /** How far above the sea the whole frame sits, clear of the terrain it abuts. */
   lift: number
+  /** Cut the map's edge into a wall, so it reads as a slab rather than a surface. */
+  edgeShow: boolean
+  /** How far below sea level the sheet's own thickness reaches, in world units. */
+  edgeDepth: number
+  /** The soil just under the land's surface. */
+  edgeSoil: string
+  /** The soil at sea level, deeper and darker. */
+  edgeDeep: string
+  /** The sheet's cut edge, below sea level. */
+  edgeBase: string
+  /** How many bands of strata show in the cut. Zero leaves a clean gradient. */
+  edgeStrata: number
 }
 
 /**
@@ -71,6 +83,13 @@ export const DEFAULT_FRAME_PARAMS: FrameDevParams = {
   labelRoughness: 1.1,
   labelOpacity: 0.88,
   lift: 0.004,
+  edgeShow: true,
+  // About a third of the tallest peak's world height, so the board reads as a board and not a plinth.
+  edgeDepth: 0.06,
+  edgeSoil: '#a8875c',
+  edgeDeep: '#6b5136',
+  edgeBase: '#c9bb9c',
+  edgeStrata: 5,
 }
 
 /** Range, step and label of every {@link FrameDevParams} field. */
@@ -88,6 +107,12 @@ export const FRAME_CONTROLS: ControlTable<FrameDevParams> = {
   labelRoughness: { kind: 'number', min: 0, max: 4, step: 0.1, label: 'number roughness' },
   labelOpacity: { kind: 'number', min: 0.2, max: 1, step: 0.01, label: 'number opacity' },
   lift: { kind: 'number', min: 0, max: 0.05, step: 0.001, label: 'lift above sea' },
+  edgeShow: { kind: 'boolean', label: 'cut the edge' },
+  edgeDepth: { kind: 'number', min: 0, max: 0.4, step: 0.005, label: 'board thickness' },
+  edgeSoil: { kind: 'color', label: 'soil (surface)' },
+  edgeDeep: { kind: 'color', label: 'soil (deep)' },
+  edgeBase: { kind: 'color', label: 'board edge' },
+  edgeStrata: { kind: 'number', min: 0, max: 16, step: 1, label: 'strata' },
 }
 
 /** Display order of the frame controls. */
@@ -105,4 +130,10 @@ export const FRAME_CONTROL_ORDER: (keyof FrameDevParams)[] = [
   'labelRoughness',
   'labelOpacity',
   'lift',
+  'edgeShow',
+  'edgeDepth',
+  'edgeSoil',
+  'edgeDeep',
+  'edgeBase',
+  'edgeStrata',
 ]

@@ -94,8 +94,17 @@ describe('createMapLayers', () => {
       expect(build().scene.children).toHaveLength(0)
     })
 
-    it('adds the relief to the scene', () => {
+    it('adds the relief to the scene, with the wall that gives it thickness', () => {
+      // Two objects, not one: the wall meets the same surface vertex for vertex, so it is built from
+      // the same grid at the same moment. Rebuilt apart it would drift the first time the curve moved.
       const { scene, layers } = build()
+      layers.rebuildRelief()
+      expect(scene.children).toHaveLength(2)
+    })
+
+    it('leaves the relief alone when the edge is not cut', () => {
+      const { scene, dev, layers } = build()
+      dev.frame.edgeShow = false
       layers.rebuildRelief()
       expect(scene.children).toHaveLength(1)
     })
@@ -106,7 +115,8 @@ describe('createMapLayers', () => {
       layers.rebuildCoastline()
       layers.rebuildRhumb()
       layers.rebuildBorders()
-      expect(scene.children).toHaveLength(4)
+      // The relief brings its wall, so five objects for four rebuilds.
+      expect(scene.children).toHaveLength(5)
     })
   })
 
@@ -150,8 +160,9 @@ describe('createMapLayers', () => {
       layers.rebuildRelief()
       layers.rebuildBorders()
       layers.frame(0)
+      // The relief adds its wall between itself and the borders, so the borders are the third child.
       const relief = scene.children[0]?.scale.y ?? 0
-      const borders = scene.children[1]?.scale.y ?? 0
+      const borders = scene.children[2]?.scale.y ?? 0
       expect(borders).toBeCloseTo(relief)
     })
 

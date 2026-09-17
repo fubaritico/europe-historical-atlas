@@ -144,6 +144,7 @@ function frameRelief(context: LayerContext, zoom: number): void {
   if (!relief) return
   // Zoom-linked vertical exaggeration: full at zoom-out, × `exaggZoomIn` at zoom-in.
   relief.scale.setY(dev.relief.exaggeration * (1 - (1 - dev.relief.exaggZoomIn) * zoom))
+  handles.edge?.setReliefScale(relief.scale.y)
   if (handles.rivers) handles.rivers.object.scale.setY(relief.scale.y)
   if (handles.borders) handles.borders.object.scale.setY(relief.scale.y)
 }
@@ -279,6 +280,7 @@ function layerLifecycle(
     },
     dispose(): void {
       disposeRelief(scene, handles.relief)
+      disposeHandle(scene, handles.edge)
       disposeHandle(scene, handles.coastline)
       disposeHandle(scene, handles.rhumb)
       disposeHandle(scene, handles.rivers)
@@ -304,6 +306,7 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
     projection: createLayerProjection(deps.dev, deps.sources),
     handles: {
       relief: null,
+      edge: null,
       texture: null,
       coastline: null,
       rhumb: null,

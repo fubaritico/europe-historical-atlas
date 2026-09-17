@@ -16,6 +16,7 @@ import type { DrapeProjection } from './scene/drapeProjection'
 import type { FrameLabels } from './scene/frameLabels'
 import type { GraticuleFrame } from './scene/graticuleFrame'
 import type { LineLayer } from './scene/lineLayer'
+import type { MapEdge } from './scene/mapEdge'
 import type { PaperSheet } from './scene/paperSheet'
 import type { RiverLayer } from './scene/riverLayer'
 import type { DataTexture, Mesh, MeshBasicMaterial, Object3D, PlaneGeometry, Scene } from 'three'
@@ -51,6 +52,8 @@ export type ReliefMesh = Mesh<PlaneGeometry, MeshBasicMaterial>
 export interface LayerHandles {
   /** The terrain itself. */
   relief: ReliefMesh | null
+  /** The wall around its edge, which makes it a slab rather than a surface. */
+  edge: MapEdge | null
   /** The baked look hanging on it, managed apart from the mesh: a retune is a texture swap, not a rebuild. */
   texture: DataTexture | null
   /** The drawn shoreline. */

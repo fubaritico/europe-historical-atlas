@@ -25,6 +25,7 @@ import { buildBorderStrokes, createComposedLineLayer } from './scene/composedLin
 import { createFrameLabels } from './scene/frameLabels'
 import { createGraticuleFrame } from './scene/graticuleFrame'
 import { createLineLayer } from './scene/lineLayer'
+import { createMapEdge } from './scene/mapEdge'
 import { createPaperSheet } from './scene/paperSheet'
 import { createReliefMesh, meshWorldDepth } from './scene/reliefMesh'
 import { generateRhumbSegments } from './scene/rhumbNetwork'
@@ -73,6 +74,24 @@ export function rebuildRelief(context: LayerContext): void {
   relief.scale.setY(dev.relief.exaggeration)
   handles.relief = relief
   scene.add(relief)
+
+  // The wall is part of the relief: it meets the same surface, vertex for vertex, so it is built from
+  // the same grid at the same moment. Rebuilt apart it would drift the first time the curve was tuned.
+  disposeHandle(scene, handles.edge)
+  handles.edge = null
+  if (!dev.frame.edgeShow) return
+  handles.edge = createMapEdge({
+    source: sources.reliefSource,
+    worldWidth: WORLD_WIDTH,
+    segments: RELIEF_SEGMENTS,
+    curve: { plainsCeiling: dev.relief.plainsCeiling, peakTarget: dev.relief.peakTarget },
+    depth: dev.frame.edgeDepth,
+    soil: dev.frame.edgeSoil,
+    deep: dev.frame.edgeDeep,
+    base: dev.frame.edgeBase,
+    strata: dev.frame.edgeStrata,
+  })
+  scene.add(handles.edge.object)
 }
 
 /**
