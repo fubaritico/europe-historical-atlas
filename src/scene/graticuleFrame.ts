@@ -1,9 +1,15 @@
 /**
  * The graduated border that tells the reader they are looking at a map.
  *
- * The alternating band of old charts and Ordnance Survey sheets: one dark segment per degree, ticks
- * every few. It is not decoration for its own sake — it is the one element that says *this is a
- * projection of the world, and here is its scale*, which nothing else on the map says.
+ * The alternating band of old charts: one dark block per degree, closed by a fine rule either side. It
+ * is not decoration for its own sake — it is the one element that says *this is a projection of the
+ * world, and here is its scale*, which nothing else on the map says.
+ *
+ * Proportions taken from Ortelius, *Galliae Veteris Typus*, 1594: the band is **thin**, its blocks two
+ * or three times wider than it is thick, and **nothing protrudes from it**. The first attempt here had
+ * that backwards — blocks taller than wide, with separate ticks hanging off the outside — and read as a
+ * zebra crossing rather than as a chart. The checker *is* the graduation; a tick beside it says the
+ * same thing twice.
  *
  * The graduations fall on **real degrees**, which is why the side bands are not evenly spaced: Web
  * Mercator stretches latitude toward the poles, so a degree takes steadily *more* room as it goes north
@@ -43,14 +49,14 @@ export interface GraticuleFrameOptions {
   worldWidth: number
   /** World-space depth on Z. */
   worldDepth: number
-  /** Width of the band, in world units. */
+  /** Thickness of the checkered band, in world units. */
   bandWidth: number
   /** Degrees per alternation. */
   bandStepDeg: number
-  /** Length of a graduation tick beyond the band; zero draws none. */
-  tickLength: number
-  /** Degrees between ticks. */
-  tickStepDeg: number
+  /** Thickness of the fine rules that close the band on both sides; zero draws none. */
+  ruleWidth: number
+  /** Width of the lane beyond the band where the degree labels sit. */
+  labelLaneWidth: number
   /** The band's dark ink, as a hex string. */
   ink: string
   /**
@@ -144,55 +150,77 @@ function segmentsBetween(
 export function buildFrameQuads(options: GraticuleFrameOptions): FrameQuad[] {
   const halfWidth = options.worldWidth / 2
   const halfDepth = options.worldDepth / 2
-  const outerX = halfWidth + options.bandWidth
-  const outerZ = halfDepth + options.bandWidth
+  const rule = Math.max(0, options.ruleWidth)
+  // Outward from the map: a fine rule, the checkered band, a second fine rule, then the label lane.
+  const bandFromX = halfWidth + rule
+  const bandToX = bandFromX + options.bandWidth
+  const bandFromZ = halfDepth + rule
+  const bandToZ = bandFromZ + options.bandWidth
+  const outerX = bandToX + rule
+  const outerZ = bandToZ + rule
   const quads: FrameQuad[] = []
 
-  // North and south bands run the full width, corners included, so the corners are never empty.
+  // A closed rectangular ring. The map is not square, so X and Z carry their own extents — taking one
+  // for the other would put the side rules in the sea.
+  const ring = (fromX: number, toX: number, fromZ: number, toZ: number): void => {
+    // The horizontal runs carry the corners, so no corner is ever left empty.
+    quads.push({ x0: -toX, x1: toX, z0: -toZ, z1: -fromZ, ink: true })
+    quads.push({ x0: -toX, x1: toX, z0: fromZ, z1: toZ, ink: true })
+    quads.push({ x0: -toX, x1: -fromX, z0: -fromZ, z1: fromZ, ink: true })
+    quads.push({ x0: fromX, x1: toX, z0: -fromZ, z1: fromZ, ink: true })
+  }
+
+  if (rule > 0) {
+    ring(halfWidth, bandFromX, halfDepth, bandFromZ)
+    ring(bandToX, outerX, bandToZ, outerZ)
+  }
+
+  // North and south bands run the full width, corners included.
   for (const segment of segmentsBetween(
     graduations(options, 'x', options.bandStepDeg),
-    -outerX,
-    outerX
+    -bandToX,
+    bandToX
   )) {
     const { from, to, ink } = segment
-    quads.push({ x0: from, x1: to, z0: -outerZ, z1: -halfDepth, ink })
-    quads.push({ x0: from, x1: to, z0: halfDepth, z1: outerZ, ink })
+    quads.push({ x0: from, x1: to, z0: -bandToZ, z1: -bandFromZ, ink })
+    quads.push({ x0: from, x1: to, z0: bandFromZ, z1: bandToZ, ink })
   }
   // East and west bands run only between them.
   for (const segment of segmentsBetween(
     graduations(options, 'z', options.bandStepDeg),
-    -halfDepth,
-    halfDepth
+    -bandFromZ,
+    bandFromZ
   )) {
     const { from, to, ink } = segment
-    quads.push({ x0: -outerX, x1: -halfWidth, z0: from, z1: to, ink })
-    quads.push({ x0: halfWidth, x1: outerX, z0: from, z1: to, ink })
-  }
-
-  if (options.tickLength <= 0) return quads
-  const tick = options.tickLength
-  const thin = Math.max(1e-4, options.bandWidth * 0.06)
-  for (const mark of graduations(options, 'x', options.tickStepDeg)) {
-    quads.push({
-      x0: mark.at - thin,
-      x1: mark.at + thin,
-      z0: -outerZ - tick,
-      z1: -outerZ,
-      ink: true,
-    })
-    quads.push({ x0: mark.at - thin, x1: mark.at + thin, z0: outerZ, z1: outerZ + tick, ink: true })
-  }
-  for (const mark of graduations(options, 'z', options.tickStepDeg)) {
-    quads.push({
-      x0: -outerX - tick,
-      x1: -outerX,
-      z0: mark.at - thin,
-      z1: mark.at + thin,
-      ink: true,
-    })
-    quads.push({ x0: outerX, x1: outerX + tick, z0: mark.at - thin, z1: mark.at + thin, ink: true })
+    quads.push({ x0: -bandToX, x1: -bandFromX, z0: from, z1: to, ink })
+    quads.push({ x0: bandFromX, x1: bandToX, z0: from, z1: to, ink })
   }
   return quads
+}
+
+/**
+ * Where the degree labels belong, in world units from the map's centre.
+ *
+ * Outside the band and its outer rule, in a lane of their own — as on Ortelius, where the numbers sit
+ * in the margin rather than on the graduation they name.
+ * @param options - the frame's settings
+ * @returns the lane's inner and outer edges on each axis
+ */
+export function labelLane(options: GraticuleFrameOptions): {
+  fromX: number
+  toX: number
+  fromZ: number
+  toZ: number
+} {
+  const rule = Math.max(0, options.ruleWidth)
+  const fromX = options.worldWidth / 2 + rule * 2 + options.bandWidth
+  const fromZ = options.worldDepth / 2 + rule * 2 + options.bandWidth
+  return {
+    fromX,
+    toX: fromX + options.labelLaneWidth,
+    fromZ,
+    toZ: fromZ + options.labelLaneWidth,
+  }
 }
 
 /** A mounted frame. */

@@ -9,10 +9,10 @@ const OPTIONS: GraticuleFrameOptions = {
   bounds: { west: -45, south: 11, east: 78.75, north: 76.84 },
   worldWidth: 12,
   worldDepth: 10.91,
-  bandWidth: 0.16,
+  bandWidth: 0.06,
   bandStepDeg: 1,
-  tickLength: 0.07,
-  tickStepDeg: 5,
+  ruleWidth: 0.008,
+  labelLaneWidth: 0.16,
   ink: '#3d2c20',
   paper: { r: 196, g: 206, b: 202 },
   lift: 0.004,
@@ -155,22 +155,25 @@ describe('buildFrameQuads', () => {
       expect(covered).toBe(true)
     })
 
-    it('adds ticks beyond the band, and only inked ones', () => {
-      const withTicks = buildFrameQuads(OPTIONS).length
-      const without = buildFrameQuads({ ...OPTIONS, tickLength: 0 }).length
-      expect(withTicks).toBeGreaterThan(without)
+    it('closes the band with a fine rule on each side', () => {
+      const withRules = buildFrameQuads(OPTIONS).length
+      const without = buildFrameQuads({ ...OPTIONS, ruleWidth: 0 }).length
+      // Two rings of four runs each.
+      expect(withRules - without).toBe(8)
     })
 
     it('widens with the band', () => {
-      const wide = buildFrameQuads({ ...OPTIONS, bandWidth: 0.5, tickLength: 0 })
+      const wide = buildFrameQuads({ ...OPTIONS, bandWidth: 0.5, ruleWidth: 0 })
       const outer = Math.max(...wide.map((q) => q.x1))
       expect(outer).toBeCloseTo(OPTIONS.worldWidth / 2 + 0.5)
     })
   })
 
   describe('managed errors', () => {
-    it('draws no ticks when none were asked for', () => {
-      const quads = buildFrameQuads({ ...OPTIONS, tickLength: 0 })
+    it('nothing protrudes from the band, the checker being the graduation itself', () => {
+      // The first attempt hung separate ticks off the outside. No chart does that: it says the same
+      // thing twice and reads as a zebra crossing.
+      const quads = buildFrameQuads({ ...OPTIONS, ruleWidth: 0 })
       const outer = Math.max(...quads.map((q) => q.x1))
       expect(outer).toBeCloseTo(OPTIONS.worldWidth / 2 + OPTIONS.bandWidth)
     })
@@ -179,7 +182,7 @@ describe('buildFrameQuads', () => {
   describe('unmanaged errors', () => {
     it('still frames the map when the graduation is coarser than the map', () => {
       // No boundary falls inside, so the band is one long segment per side rather than nothing.
-      const quads = buildFrameQuads({ ...OPTIONS, bandStepDeg: 500, tickStepDeg: 500 })
+      const quads = buildFrameQuads({ ...OPTIONS, bandStepDeg: 500 })
       expect(quads.length).toBeGreaterThan(0)
     })
   })
@@ -235,7 +238,7 @@ describe('createGraticuleFrame', () => {
       const frame = createGraticuleFrame({
         ...OPTIONS,
         bandWidth: 0,
-        tickLength: 0,
+        ruleWidth: 0,
         bandStepDeg: 500,
       })
       expect(frame.object).toBeDefined()
