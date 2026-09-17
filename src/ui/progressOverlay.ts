@@ -32,21 +32,21 @@ export interface ProgressOverlay {
    * @param label - what the map is doing, in the user's language
    * @returns nothing
    */
-  begin(label: string): void
+  begin: (label: string) => void
   /**
    * Move the bar, optionally renaming the step.
    * @param fraction - progress in `[0, 1]`; values outside are clamped
    * @param label - the step now running, when it has changed
    * @returns nothing
    */
-  report(fraction: number, label?: string): void
+  report: (fraction: number, label?: string) => void
   /**
    * Hide the panel. Safe to call when it is already hidden.
    * @returns nothing
    */
-  end(): void
+  end: () => void
   /** Unmount and release the element. */
-  dispose(): void
+  dispose: () => void
 }
 
 /**

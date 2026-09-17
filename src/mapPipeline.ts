@@ -25,7 +25,10 @@ import { wrapTerrainTexture } from './scene/terrainTexture'
 import { hexToRgb } from './utils/color'
 import { createLatestOnly } from './utils/latestOnly'
 
-import type { RegionSet } from './data/regionSource'
+import type { HeightmapSource } from './data/heightmap'
+import type { LandMaskSource } from './data/landMask'
+import type { RegionSet, RegionSource } from './data/regionSource'
+import type { RiverSource } from './data/riverSource'
 import type { DevState } from './devState'
 import type { MapLayers } from './mapLayers'
 import type { MapSources } from './mapSources'
@@ -52,6 +55,34 @@ const HEIGHTMAP_URL = '/heightmaps/europe-dem-z5'
 const LAND_MASK_URL = '/masks/europe-land'
 const RIVERS_URL = '/rivers/europe-rivers.json'
 
+/** Where the map's four payloads come from. */
+export interface MapAssetSources {
+  /** The elevation grid. */
+  heightmap: HeightmapSource
+  /** Which cells are land. */
+  landMask: LandMaskSource
+  /** The river centrelines. */
+  rivers: RiverSource
+  /** The polities of a year. */
+  regions: RegionSource
+}
+
+/**
+ * The real sources, fetched from the public directory.
+ *
+ * A function rather than a constant so nothing is created until a pipeline asks, and so a test that
+ * replaces one port still gets working implementations of the other three.
+ * @returns the four ports
+ */
+export function createFetchAssets(): MapAssetSources {
+  return {
+    heightmap: createFetchHeightmapSource(HEIGHTMAP_URL),
+    landMask: createFetchLandMaskSource(LAND_MASK_URL),
+    rivers: createFetchRiverSource(RIVERS_URL),
+    regions: createFetchRegionSource((year) => `/borders/europe-${String(year)}.json`),
+  }
+}
+
 /** What the pipeline needs from its host. */
 export interface MapPipelineDeps {
   /** The live tunables. */
@@ -73,6 +104,11 @@ export interface MapPipelineDeps {
    * @returns `true` once teardown has run
    */
   isDisposed: () => boolean
+  /**
+   * Where the payloads come from. Each port has a working default, so a test can replace one at a time
+   * — which is the only way the two-stage startup and the freshness gates can be driven at all.
+   */
+  assets?: Partial<MapAssetSources>
 }
 
 /** Everything a pipeline call reads, including the compute it may have had to replace. */
@@ -83,12 +119,8 @@ interface PipelineContext extends MapPipelineDeps {
   bakeGate: LatestOnly
   /** Only the newest year may write back — its own gate, or a bake would needlessly cancel a year. */
   politicalGate: LatestOnly
-  /**
-   * Fetch a year's polities.
-   * @param year - the year to load
-   * @returns the polities
-   */
-  loadYear: (year: number) => Promise<RegionSet>
+  /** The four payload ports, defaults filled in. */
+  assets: MapAssetSources
 }
 
 /** The map's compute, sequenced. */
@@ -97,27 +129,27 @@ export interface MapPipeline {
    * Bring the map up: the terrain first, then the same map with its countries.
    * @returns once the year is on screen
    */
-  start(): Promise<void>
+  start: () => Promise<void>
   /**
    * Re-bake the terrain texture and hang it on the relief.
    * @param onProgress - where to announce the bake, when a caller is showing a panel
    * @returns once the new texture is on screen, or once a newer bake has superseded this one
    */
-  rebuildTexture(onProgress?: ProgressReport): Promise<void>
+  rebuildTexture: (onProgress?: ProgressReport) => Promise<void>
   /**
    * A change of year, end to end: fetch the polities, hand them to the compute, hang the result up.
    * @returns once the year is on screen
    */
-  rebuildPolitical(): Promise<void>
+  rebuildPolitical: () => Promise<void>
   /**
    * Re-trace the border lines from the grid the compute already holds, then redraw them.
    *
    * The one border tunable that changes geometry rather than paint. It costs a trace, not a year.
    * @returns once the lines are back on screen
    */
-  rebuildBorderGeometry(): Promise<void>
+  rebuildBorderGeometry: () => Promise<void>
   /** Stop the worker and release what it holds. */
-  dispose(): void
+  dispose: () => void
 }
 
 /**
@@ -172,7 +204,7 @@ async function rebuildPolitical(context: PipelineContext): Promise<void> {
   const year = Math.round(dev.political.year / 100) * 100
   ui.progress.begin(`Chargement de l'année ${String(year)}…`)
   try {
-    const loaded = await context.loadYear(year)
+    const loaded = await context.assets.regions.load(year)
     if (context.isDisposed() || !isCurrent()) return
     sources.regionSet = loaded
 
@@ -236,13 +268,11 @@ function politicalRequest(
 async function loadTerrain(context: PipelineContext): Promise<void> {
   const { sources, ui } = context
   const [dem, mask] = await Promise.all([
-    createFetchHeightmapSource(HEIGHTMAP_URL).load(),
-    createFetchLandMaskSource(LAND_MASK_URL)
-      .load()
-      .catch((error: unknown) => {
-        ui.reportAssetFailure('landMask', error)
-        return null
-      }),
+    context.assets.heightmap.load(),
+    context.assets.landMask.load().catch((error: unknown) => {
+      ui.reportAssetFailure('landMask', error)
+      return null
+    }),
   ])
   if (context.isDisposed()) return
   sources.heightmap = dem
@@ -307,7 +337,7 @@ async function startup(context: PipelineContext): Promise<void> {
  * @returns nothing; it settles on its own
  */
 function loadRivers(context: PipelineContext): void {
-  void createFetchRiverSource(RIVERS_URL)
+  void context.assets.rivers
     .load()
     .then((loaded) => {
       if (context.isDisposed()) return
@@ -377,15 +407,14 @@ function createCompute(context: PipelineContext): MapCompute {
  * @returns the pipeline
  */
 export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
-  const regionPort = createFetchRegionSource((year) => `/borders/europe-${String(year)}.json`)
   const context: PipelineContext = {
     ...deps,
+    assets: { ...createFetchAssets(), ...deps.assets },
     // Two gates, because two independent results race: a dev-panel slider fires a bake per change, and a
     // change of year fires a whole political rebuild. Sharing one would have a bake cancel a year.
     bakeGate: createLatestOnly(),
     politicalGate: createLatestOnly(),
     box: { compute: null as unknown as MapCompute },
-    loadYear: (year: number) => regionPort.load(year),
   }
   context.box.compute = createCompute(context)
 

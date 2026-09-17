@@ -30,6 +30,48 @@ const REDUCED_MOTION_TAU = 0.02
 /** How close to the window edge the pointer starts scrolling the map, in CSS pixels. */
 const EDGE_SCROLL_MARGIN = 24
 
+/**
+ * The slice of a `WebGLRenderer` this module touches — narrow enough for a test to stand one up.
+ *
+ * Declared rather than depended on whole, for the same reason as `ComputeWorkerHandle`: a real
+ * renderer needs a WebGL context, which no test environment has, and a module that constructs one
+ * unconditionally cannot be exercised at all. A real `WebGLRenderer` satisfies this shape, which is the
+ * direction that matters.
+ */
+export interface RendererHandle {
+  /** The canvas the renderer draws into, and the element pointer events are read from. */
+  readonly domElement: HTMLElement
+  /**
+   * Set the device pixel ratio.
+   * @param ratio - the ratio
+   */
+  setPixelRatio(ratio: number): void
+  /**
+   * Match the drawing buffer to a size in CSS pixels.
+   * @param width - the width
+   * @param height - the height
+   */
+  setSize(width: number, height: number): void
+  /**
+   * Draw one frame.
+   * @param scene - what to draw
+   * @param camera - where from
+   */
+  render(scene: Scene, camera: PerspectiveCamera): void
+  /** Free the GPU resources. */
+  dispose(): void
+}
+
+/** What a viewport may have swapped out. */
+export interface ViewportOptions {
+  /**
+   * How the renderer is made. Defaults to a real `WebGLRenderer`.
+   * @param canvas - the canvas to render into
+   * @returns the renderer
+   */
+  createRenderer?: (canvas: HTMLCanvasElement) => RendererHandle
+}
+
 /** A mounted viewport. */
 export interface Viewport {
   /** The scene every layer is added to. */
@@ -74,16 +116,28 @@ export interface Viewport {
 }
 
 /**
+/**
+ * A real renderer, antialiased and capped at two device pixels per CSS pixel.
+ * @param canvas - the canvas to render into
+ * @returns the renderer
+ */
+function defaultRenderer(canvas: HTMLCanvasElement): RendererHandle {
+  return new WebGLRenderer({ canvas, antialias: true })
+}
+
+/**
  * The three things three.js needs before anything can be drawn.
  * @param canvas - the canvas to render into
  * @param fov - the camera's vertical field of view in degrees
+ * @param createRenderer - how the renderer is made
  * @returns the renderer, the scene and the camera
  */
 export function createRenderTarget(
   canvas: HTMLCanvasElement,
-  fov: number
-): { renderer: WebGLRenderer; scene: Scene; camera: PerspectiveCamera } {
-  const renderer = new WebGLRenderer({ canvas, antialias: true })
+  fov: number,
+  createRenderer: (canvas: HTMLCanvasElement) => RendererHandle = defaultRenderer
+): { renderer: RendererHandle; scene: Scene; camera: PerspectiveCamera } {
+  const renderer = createRenderer(canvas)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   renderer.setSize(window.innerWidth, window.innerHeight)
 
@@ -137,10 +191,19 @@ export function createNavigation(
  * Build the viewport and restore the persisted viewpoint before the first frame.
  * @param canvas - the canvas to render into
  * @param dev - the live tunables the camera reads
+ * @param options - collaborators to swap out; the renderer has a working default
  * @returns the viewport
  */
-export function createViewport(canvas: HTMLCanvasElement, dev: DevState): Viewport {
-  const { renderer, scene, camera } = createRenderTarget(canvas, dev.framing.fov)
+export function createViewport(
+  canvas: HTMLCanvasElement,
+  dev: DevState,
+  options: ViewportOptions = {}
+): Viewport {
+  const { renderer, scene, camera } = createRenderTarget(
+    canvas,
+    dev.framing.fov,
+    options.createRenderer
+  )
   const { controls, saveCamera } = createNavigation(camera, renderer.domElement, dev)
   window.addEventListener('beforeunload', saveCamera)
 

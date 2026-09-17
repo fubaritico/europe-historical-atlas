@@ -106,83 +106,83 @@ export interface MapLayers {
    * Rebuild the terrain mesh. Needed whenever the height curve changes, since that is geometry.
    * @returns nothing
    */
-  rebuildRelief(): void
+  rebuildRelief: () => void
   /**
    * Hang a freshly baked texture on the relief.
    * @param texture - the baked look; the previous one is disposed
    * @returns nothing
    */
-  setTexture(texture: DataTexture): void
+  setTexture: (texture: DataTexture) => void
   /**
    * Retrace and redraw the shoreline.
    * @returns nothing
    */
-  rebuildCoastline(): void
+  rebuildCoastline: () => void
   /**
    * Regenerate and redraw the rhumb web.
    * @returns nothing
    */
-  rebuildRhumb(): void
+  rebuildRhumb: () => void
   /**
    * Redrape the rivers. A no-op until the centrelines land.
    * @returns nothing
    */
-  rebuildRivers(): void
+  rebuildRivers: () => void
   /**
    * Redraw the political line work from the borders the compute derived.
    * @returns nothing
    */
-  rebuildBorders(): void
+  rebuildBorders: () => void
   /**
    * Rebuild the compass rose, whose colours and labels are baked into its SVG.
    * @returns nothing
    */
-  rebuildRose(): void
+  rebuildRose: () => void
   /**
    * Show the relief as a wireframe.
    * @param value - whether to draw wires instead of the painted surface
    * @returns nothing
    */
-  setWireframe(value: boolean): void
+  setWireframe: (value: boolean) => void
   /**
    * Repaint the coastline without retracing it.
    * @param color - the new ink
    * @returns nothing
    */
-  setCoastColor(color: string): void
+  setCoastColor: (color: string) => void
   /**
    * Repaint the rivers without redraping them.
    * @param color - the new ink
    * @returns nothing
    */
-  setRiverColor(color: string): void
+  setRiverColor: (color: string) => void
   /**
    * Repaint the rhumb web without regenerating it.
    * @param color - the new ink
    * @returns nothing
    */
-  setRhumbColor(color: string): void
+  setRhumbColor: (color: string) => void
   /**
    * Fade the compass rose.
    * @param value - the new opacity
    * @returns nothing
    */
-  setRoseOpacity(value: number): void
+  setRoseOpacity: (value: number) => void
   /**
    * Tell every fat-line layer the viewport size, which its shader needs to size a stroke in pixels.
    * @param width - viewport width in CSS pixels
    * @param height - viewport height in CSS pixels
    * @returns nothing
    */
-  setResolution(width: number, height: number): void
+  setResolution: (width: number, height: number) => void
   /**
    * Bring every layer up to date for this frame's zoom.
    * @param zoom - the camera's zoom in `[0, 1]`, zoomed out at zero
    * @returns nothing
    */
-  frame(zoom: number): void
+  frame: (zoom: number) => void
   /** Remove every layer from the scene and free its GPU resources. */
-  dispose(): void
+  dispose: () => void
 }
 
 /**

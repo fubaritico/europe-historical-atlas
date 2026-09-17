@@ -25,7 +25,7 @@ export interface MapUi {
    * Take the splash down. Safe to call twice.
    * @returns nothing
    */
-  dismissSplash(): void
+  dismissSplash: () => void
   /**
    * Tell the reader an asset failed, and keep the console line for whoever is looking at one.
    *
@@ -35,9 +35,9 @@ export interface MapUi {
    * @param error - whatever was caught
    * @returns nothing
    */
-  reportAssetFailure(asset: AssetKind, error: unknown): void
+  reportAssetFailure: (asset: AssetKind, error: unknown) => void
   /** Unmount everything. */
-  dispose(): void
+  dispose: () => void
 }
 
 /** What the interface needs from its host. */
