@@ -9,6 +9,8 @@
  * dismissed; the composition root decides when.
  */
 
+import { prefersReducedMotion } from '../utils/motion'
+
 import {
   EUROPE_SILHOUETTE_HEIGHT,
   EUROPE_SILHOUETTE_PATH,
@@ -72,26 +74,15 @@ export function withLambdaForA(text: string): string {
 }
 
 /**
- * Build the splash and mount it.
- * @param options - where to mount, what to draw, and in what ink
- * @returns the mounted splash
+ * Build the full-screen panel the splash lives in.
+ *
+ * Takes the fade duration rather than reading the motion preference itself, so the caller settles that
+ * question once and a test can build either variant without touching `matchMedia`.
+ * @param background - the page colour behind it, so dismissing shows no seam
+ * @param fadeMs - how long the opacity transition lasts; zero for reduced motion
+ * @returns the panel, announced politely as a live region
  */
-export function createSplash(options: SplashOptions): Splash {
-  const silhouette = options.silhouette ?? {
-    path: EUROPE_SILHOUETTE_PATH,
-    width: EUROPE_SILHOUETTE_WIDTH,
-    height: EUROPE_SILHOUETTE_HEIGHT,
-  }
-  const size = options.size ?? 300
-  const ink = options.ink ?? '#5c3a2e'
-  const background = options.background ?? '#efe6d2'
-  const title = options.title ?? 'Historical atlas'
-
-  const reduceMotion =
-    typeof window !== 'undefined' &&
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
+export function buildSplashPanel(background: string, fadeMs: number): HTMLElement {
   const element = document.createElement('div')
   // A live region rather than a silent picture: someone who cannot see the silhouette still needs to be
   // told the map is loading, and told once.
@@ -107,9 +98,23 @@ export function createSplash(options: SplashOptions): Splash {
     'gap:28px',
     `background:${background}`,
     'z-index:20',
-    `transition:opacity ${reduceMotion ? '0' : String(FADE_MS)}ms ease-out`,
+    `transition:opacity ${String(fadeMs)}ms ease-out`,
   ].join(';')
+  return element
+}
 
+/**
+ * Draw the outline, at the asked-for width and in the asked-for ink.
+ * @param silhouette - the path and its coordinate system
+ * @param size - the drawn width in CSS pixels
+ * @param ink - the fill colour
+ * @returns the SVG figure, hidden from assistive technology
+ */
+export function buildSplashFigure(
+  silhouette: SplashSilhouette,
+  size: number,
+  ink: string
+): SVGSVGElement {
   const figure = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   figure.setAttribute('width', String(size))
   // Height follows the outline's own aspect: the silhouette must not be stretched to fit a round number.
@@ -122,7 +127,16 @@ export function createSplash(options: SplashOptions): Splash {
   // Even-odd, so an inland sea traced as its own ring reads as a hole rather than filling in.
   shape.setAttribute('fill-rule', 'evenodd')
   figure.appendChild(shape)
+  return figure
+}
 
+/**
+ * Set the title, lettered for the eye and named in plain words for everyone else.
+ * @param title - the title, in plain words
+ * @param ink - the text colour
+ * @returns the caption element
+ */
+export function buildSplashCaption(title: string, ink: string): HTMLParagraphElement {
   const caption = document.createElement('p')
   caption.textContent = withLambdaForA(title).toUpperCase()
   // The plain word is what gets announced; the lambdas are a glyph game and would be spelled out.
@@ -137,8 +151,28 @@ export function createSplash(options: SplashOptions): Splash {
     'text-indent:0.42em', // the tracking adds a trailing gap; this puts the block back on centre
     'text-transform:uppercase',
   ].join(';')
+  return caption
+}
 
-  element.append(figure, caption)
+/**
+ * Build the splash and mount it.
+ * @param options - where to mount, what to draw, and in what ink
+ * @returns the mounted splash
+ */
+export function createSplash(options: SplashOptions): Splash {
+  const silhouette = options.silhouette ?? {
+    path: EUROPE_SILHOUETTE_PATH,
+    width: EUROPE_SILHOUETTE_WIDTH,
+    height: EUROPE_SILHOUETTE_HEIGHT,
+  }
+  const size = options.size ?? 300
+  const ink = options.ink ?? '#5c3a2e'
+  const background = options.background ?? '#efe6d2'
+  const title = options.title ?? 'Historical atlas'
+  const reduceMotion = prefersReducedMotion()
+
+  const element = buildSplashPanel(background, reduceMotion ? 0 : FADE_MS)
+  element.append(buildSplashFigure(silhouette, size, ink), buildSplashCaption(title, ink))
   options.host.appendChild(element)
 
   let gone = false
