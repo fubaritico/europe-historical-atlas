@@ -65,6 +65,17 @@ describe('graduations', () => {
       expect(marks[0]?.at).toBeLessThan(marks[marks.length - 1]?.at ?? 0)
     })
 
+    it('runs in order along the axis, whichever way the degrees do', () => {
+      // North is v = 0, so ascending latitudes descend in Z. Taken unsorted the side bands came out as
+      // two enormous segments spanning the whole map, which is what the border actually looked like.
+      for (const axis of ['x', 'z'] as const) {
+        const marks = graduations(OPTIONS, axis, 5)
+        for (let i = 1; i < marks.length; i++) {
+          expect(marks[i]?.at ?? 0).toBeGreaterThan(marks[i - 1]?.at ?? 0)
+        }
+      }
+    })
+
     it('spans the map without leaving it', () => {
       for (const mark of graduations(OPTIONS, 'x', 10)) {
         expect(Math.abs(mark.at)).toBeLessThanOrEqual(OPTIONS.worldWidth / 2)
@@ -86,8 +97,8 @@ describe('graduations', () => {
       // held a chart.
       const marks = graduations(OPTIONS, 'z', 10)
       const gaps = marks.slice(1).map((m, i) => m.at - (marks[i]?.at ?? 0))
-      // Marks ascend in latitude, so they run south (positive Z) to north: the last gaps are northern.
-      expect(Math.abs(gaps[0] ?? 0)).toBeLessThan(Math.abs(gaps[gaps.length - 1] ?? 0))
+      // Sorted by position, and north is negative Z: the first gaps are the northern ones.
+      expect(gaps[0] ?? 0).toBeGreaterThan(gaps[gaps.length - 1] ?? 0)
     })
 
     it('gives more marks for a finer step', () => {
@@ -136,6 +147,13 @@ describe('buildFrameQuads', () => {
   })
 
   describe('variants', () => {
+    it('cuts both side bands into as many blocks as the map has degrees', () => {
+      // The east and west runs, which were two segments each before the graduations were sorted.
+      const halfWidth = OPTIONS.worldWidth / 2
+      const west = buildFrameQuads(OPTIONS).filter((q) => q.x1 <= -halfWidth + 1e-6)
+      expect(west.length).toBeGreaterThan(20)
+    })
+
     it('leaves the map itself untouched — every rectangle is outside it', () => {
       const halfWidth = OPTIONS.worldWidth / 2
       const halfDepth = OPTIONS.worldDepth / 2
@@ -157,10 +175,11 @@ describe('buildFrameQuads', () => {
     })
 
     it('closes the band with a fine rule on each side', () => {
-      const withRules = buildFrameQuads(OPTIONS).length
-      const without = buildFrameQuads({ ...OPTIONS, ruleWidth: 0 }).length
-      // Two rings of four runs each.
-      expect(withRules - without).toBe(8)
+      // Measured by where the frame ends: a rule inside the band and another outside it push the
+      // outer edge out by twice their thickness.
+      const outer = Math.max(...buildFrameQuads(OPTIONS).map((q) => q.x1))
+      const bare = Math.max(...buildFrameQuads({ ...OPTIONS, ruleWidth: 0 }).map((q) => q.x1))
+      expect(outer - bare).toBeCloseTo(OPTIONS.ruleWidth * 2)
     })
 
     it('widens with the band', () => {

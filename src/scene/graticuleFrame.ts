@@ -83,10 +83,15 @@ export function degreeIndices(from: number, to: number, step: number): number[] 
 
 /**
  * Where each graduation of one axis falls, in world units along it.
+ *
+ * **Sorted by position, not by degree.** North is `v = 0`, so ascending latitudes come out descending
+ * in Z — and a band cut from marks running backwards is not cut at all: it comes out as two enormous
+ * segments spanning the whole side, which is exactly what the east and west borders did until this
+ * sort existed. The longitudes never showed it, because they happen to ascend both ways.
  * @param options - the frame's settings
  * @param axis - `x` reads longitudes across the map, `z` reads latitudes down it
  * @param step - the spacing in degrees
- * @returns the positions, paired with the degree index that produced them
+ * @returns the positions, ascending, paired with the degree index that produced them
  */
 export function graduations(
   options: GraticuleFrameOptions,
@@ -98,11 +103,15 @@ export function graduations(
   const from = alongX ? bounds.west : bounds.south
   const to = alongX ? bounds.east : bounds.north
   const span = alongX ? options.worldWidth : options.worldDepth
-  return degreeIndices(from, to, step).map((index) => {
-    const degrees = index * step
-    const t = alongX ? longitudeToHorizontal(degrees, bounds) : latitudeToVertical(degrees, bounds)
-    return { at: (t - 0.5) * span, index }
-  })
+  return degreeIndices(from, to, step)
+    .map((index) => {
+      const degrees = index * step
+      const t = alongX
+        ? longitudeToHorizontal(degrees, bounds)
+        : latitudeToVertical(degrees, bounds)
+      return { at: (t - 0.5) * span, index }
+    })
+    .sort((a, b) => a.at - b.at)
 }
 
 /**

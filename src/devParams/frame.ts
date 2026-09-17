@@ -43,12 +43,14 @@ export const DEFAULT_FRAME_PARAMS: FrameDevParams = {
   // Just past the extent the camera is clamped within, and no further: every extra unit of paper is
   // spread over the same texture, so the fibre coarsens for margin nobody can reach.
   sheetMargin: 1,
-  // Thin: at one degree per block the longitude blocks are 0.097 wide, so this leaves them about two
-  // and a half times wider than the band is thick — the proportion the reference holds all the way
-  // round, and the one the first attempt had inverted.
+  // Thin, with long blocks: at two degrees each the longitude blocks are 0.194 wide against a band
+  // 0.04 thick, so they run about five times longer than the band is deep. The reference's blocks are
+  // elongated, and one degree came out too square on a map this wide.
   bandWidth: 0.04,
-  bandStepDeg: 1,
-  ink: '#2e2119',
+  bandStepDeg: 2,
+  // Nearly black, as an engraving is. The light blocks are the paper showing through, so the band's
+  // whole reading rests on how far the dark ones are from it.
+  ink: '#1c130c',
   ruleWidth: 0.008,
   labelLaneWidth: 0.16,
   lift: 0.004,
