@@ -312,6 +312,36 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/picking/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '**/scene',
+                '**/scene/**',
+                '**/camera',
+                '**/camera/**',
+                '**/controls',
+                '**/controls/**',
+                '**/pipeline',
+                '**/pipeline/**',
+                '**/ui',
+                '**/ui/**',
+                '**/main',
+                '**/main.ts',
+              ],
+              message:
+                'Architecture boundary: picking/ answers WHERE, never WHAT. It takes a camera and an object to cast against, and must know nothing of the scene that built them, of what is being computed, or of the DOM around it.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['src/controls/**/*.ts'],
     rules: {
       'no-restricted-imports': [

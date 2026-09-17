@@ -105,6 +105,8 @@ function build(): {
       enableDrag: true,
       enableEdgeScroll: true,
       edgeScrollSpeed: 1,
+      flyDurationMs: 700,
+      flyZoomIn: 0.35,
       edgeScrollMargin: 24,
       minDistance: 1,
       maxDistance: 10,

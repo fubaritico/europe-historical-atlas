@@ -30,6 +30,10 @@ export interface CameraTuningParams {
   minPitchDeg: number
   /** Pitch in degrees at full zoom-out (top-down). */
   maxPitchDeg: number
+  /** How long a fly-to lasts, in milliseconds. Zero arrives at once, which is what reduced motion asks. */
+  flyDurationMs: number
+  /** How much closer a fly-to settles, as a step in the `[0, 1]` zoom. */
+  flyZoomIn: number
 }
 
 /** Range, step and label of every {@link CameraTuningParams} field. */
@@ -44,6 +48,8 @@ export const CAMERA_CONTROLS: ControlTable<CameraTuningParams> = {
   maxDistance: { kind: 'number', min: 2, max: 15, step: 0.25, label: 'max distance (out)' },
   minPitchDeg: { kind: 'number', min: 20, max: 89, step: 1, label: 'pitch in (oblique)' },
   maxPitchDeg: { kind: 'number', min: 20, max: 89, step: 1, label: 'pitch out (top-down)' },
+  flyDurationMs: { kind: 'number', min: 0, max: 2000, step: 50, label: 'fly-to duration (ms)' },
+  flyZoomIn: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'fly-to zoom step' },
 }
 
 /** Display order of the camera-feel controls. */
@@ -58,6 +64,8 @@ export const CAMERA_CONTROL_ORDER: (keyof CameraTuningParams)[] = [
   'maxDistance',
   'minPitchDeg',
   'maxPitchDeg',
+  'flyDurationMs',
+  'flyZoomIn',
 ]
 
 /** Camera-feel defaults (the inertia is overridden to near-zero under `prefers-reduced-motion`). */
@@ -75,4 +83,8 @@ export const DEFAULT_CAMERA_TUNING: CameraTuningParams = {
   maxDistance: 6,
   minPitchDeg: 30,
   maxPitchDeg: 55,
+  // Long enough to read as a move rather than a cut, short enough not to make the reader wait.
+  flyDurationMs: 700,
+  // A third of the range: close enough to feel like an approach, far enough to keep the surroundings.
+  flyZoomIn: 0.35,
 }

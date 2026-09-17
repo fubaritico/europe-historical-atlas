@@ -181,6 +181,14 @@ export interface MapLayers {
    * @returns nothing
    */
   frame: (zoom: number) => void
+  /**
+   * What a click raycasts against — the terrain itself, or `null` before it is built.
+   *
+   * A call rather than a handle, because the mesh is replaced whenever the height curve changes: a
+   * picker holding the old one would answer about a surface no longer on screen.
+   * @returns the relief mesh
+   */
+  pickTarget: () => Object3D | null
   /** Remove every layer from the scene and free its GPU resources. */
   dispose: () => void
 }
@@ -597,7 +605,7 @@ function layerSetters(
  */
 function layerLifecycle(
   context: LayerContext
-): Pick<MapLayers, 'setResolution' | 'frame' | 'dispose'> {
+): Pick<MapLayers, 'setResolution' | 'frame' | 'dispose' | 'pickTarget'> {
   const { scene, handles } = context
   return {
     setResolution(width: number, height: number): void {
@@ -609,6 +617,9 @@ function layerLifecycle(
     frame(zoom: number): void {
       frameRelief(context, zoom)
       frameLineWork(context, zoom)
+    },
+    pickTarget(): Object3D | null {
+      return handles.relief
     },
     dispose(): void {
       disposeRelief(scene, handles.relief)

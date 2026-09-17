@@ -1,8 +1,23 @@
-import { Vector3 } from 'three'
+import { clamp } from '../utils/math'
 
+import { advanceFlight, beginFlight, interrupt } from './cameraFlight'
+import { clampTarget, footprintOffsets, placeCamera } from './cameraFraming'
+import {
+  createControlsState,
+  degToRad,
+  distanceForZoom,
+  viewportHeight,
+  viewportWidth,
+} from './controlsState'
+
+// The options and the rectangle they clamp within live with the state every part of this reads, and
+// are re-exported here so no call site had to move.
+export type { MapControlsOptions, MapRect } from './controlsState'
+
+import type { ControlsState, MapControlsOptions, MapRect } from './controlsState'
 import type { MapCameraState } from './mapCameraStore'
 import type { CameraControls } from '../camera/cameraState'
-import type { PerspectiveCamera } from 'three'
+import type { PerspectiveCamera, Vector3 } from 'three'
 
 /** Keys that pan the map (arrow keys). Held keys accumulate a continuous pan. */
 const PAN_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])
@@ -15,9 +30,6 @@ const ZOOM_OUT_KEYS = new Set(['-', '_', 'PageDown'])
 /** Form-control tags whose own arrow-key handling must not be hijacked by the map pan. */
 const EDITABLE_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT'])
 
-/** World up axis (+Y), shared by the footprint math (read-only). */
-const WORLD_UP = new Vector3(0, 1, 0)
-
 /**
  * Whether the focused element is an editable/form control (so arrow keys should reach it, not pan the map).
  * @returns `true` when a text field, select, or contenteditable element currently has focus
@@ -26,37 +38,6 @@ function isEditableFocused(): boolean {
   if (typeof document === 'undefined') return false
   const el = document.activeElement
   return el instanceof HTMLElement && (el.isContentEditable || EDITABLE_TAGS.has(el.tagName))
-}
-
-/**
- * Clamp a number to `[lo, hi]`.
- * @param v - value
- * @param lo - lower bound
- * @param hi - upper bound
- * @returns the clamped value
- */
-function clamp(v: number, lo: number, hi: number): number {
-  return Math.min(hi, Math.max(lo, v))
-}
-
-/**
- * Linear interpolation.
- * @param a - value at `t = 0`
- * @param b - value at `t = 1`
- * @param t - interpolation factor
- * @returns the interpolated value
- */
-function lerp(a: number, b: number, t: number): number {
-  return a + (b - a) * t
-}
-
-/**
- * Degrees → radians.
- * @param deg - angle in degrees
- * @returns angle in radians
- */
-function degToRad(deg: number): number {
-  return (deg * Math.PI) / 180
 }
 
 /**
@@ -80,58 +61,6 @@ export function easeOutDecay(dt: number, tau: number): number {
  */
 export function driveOrGlide(velocity: number, drive: number, decay: number): number {
   return drive !== 0 ? drive : velocity * decay
-}
-
-/**
- * An axis-aligned rectangle in the world ground plane (XZ). Used both for the map `extent` (the region the
- * camera view must stay within) and for reporting the frustum's ground footprint.
- */
-export interface MapRect {
-  /** Minimum X (west). */
-  minX: number
-  /** Maximum X (east). */
-  maxX: number
-  /** Minimum Z (north, since north faces −Z). */
-  minZ: number
-  /** Maximum Z (south). */
-  maxZ: number
-}
-
-/**
- * Live-tunable options for {@link createMapControls}. Distance and pitch interpolate with the zoom level
- * (`0` = fully zoomed out / top-down-ish and far, `1` = fully zoomed in / oblique and close).
- */
-export interface MapControlsOptions {
-  /**
-   * The world rectangle the camera's ground **view** must stay within (invariant to zoom and window
-   * aspect). The pannable target range is derived from this minus the current frustum footprint, so it
-   * grows as you zoom in and shrinks as you zoom out — and adapts on window resize.
-   */
-  extent: MapRect
-  /** Camera→target distance at full zoom-in (`zoom = 1`). */
-  minDistance: number
-  /** Camera→target distance at full zoom-out (`zoom = 0`). */
-  maxDistance: number
-  /** Pitch above the ground plane (degrees) at full zoom-in — smaller = more oblique (EU4 feel). */
-  minPitchDeg: number
-  /** Pitch above the ground plane (degrees) at full zoom-out — larger = more top-down. */
-  maxPitchDeg: number
-  /** Pan speed (world units/second) at full zoom-out; scaled down as the camera gets closer. */
-  panSpeed: number
-  /** Zoom change per wheel notch, in normalized zoom units. */
-  zoomSpeed: number
-  /** Exponential smoothing time constant (seconds); lower = snappier, higher = more inertia. */
-  smoothingTau: number
-  /** Initial zoom level in `[0, 1]`. */
-  initialZoom: number
-  /** Enable grab-and-drag panning with the pointer (hold and drag the map). */
-  enableDrag: boolean
-  /** Enable RTS-style edge scrolling (pan when the pointer nears a screen edge). */
-  enableEdgeScroll: boolean
-  /** Edge-scroll trigger margin in pixels from each screen edge. */
-  edgeScrollMargin: number
-  /** Edge-scroll speed (world units/second at full zoom-out; scaled down as the camera gets closer). */
-  edgeScrollSpeed: number
 }
 
 /**
@@ -178,181 +107,20 @@ export interface MapControls extends CameraControls {
    * @param delta - frame time in seconds (values ≤ 0 re-place the camera without integrating input)
    */
   update(delta?: number): void
+  /**
+   * Fly the camera to a point on the ground, easing in and out and settling closer than it started.
+   *
+   * Any input from the reader cancels it. A map that keeps flying while someone is trying to steer has
+   * taken their camera away from them, which is worse than never having moved it.
+   * @param x - where to look, on X
+   * @param z - the same on Z
+   * @returns nothing
+   */
+  flyTo: (x: number, z: number) => void
+  /** Whether a flight is in progress. */
+  readonly flying: boolean
   /** Remove all input listeners — call on teardown (no leak). */
   dispose(): void
-}
-
-/** Everything the controls hold and mutate, passed explicitly rather than captured in a closure. */
-interface ControlsState {
-  /** The camera being driven. */
-  camera: PerspectiveCamera
-  /** The element wheel and pointer events are read from, and whose size the viewport follows. */
-  domElement: HTMLElement
-  /** Tuned live by the dev panel, so read on every use rather than destructured once. */
-  opts: MapControlsOptions
-  /** What the camera looks at, on the ground plane. */
-  target: Vector3
-  /** Zoom in `[0, 1]`, zoomed out at zero. */
-  zoom: number
-  /** Pan inertia on X, in world units per second. */
-  velX: number
-  /** Pan inertia on Z. */
-  velZ: number
-  /** Zoom inertia, per second. */
-  velZoom: number
-  /** World movement applied by an in-progress drag this frame, turned into release momentum. */
-  dragMovedX: number
-  /** The same on Z. */
-  dragMovedZ: number
-  /** Which pan keys are held. */
-  pressed: Set<string>
-  /** Whether the map is being dragged. */
-  dragging: boolean
-  /** Last pointer position during a drag. */
-  lastX: number
-  /** The same on Y. */
-  lastY: number
-  /** Live pointer position, `NaN` until the pointer has moved once. */
-  pointerX: number
-  /** The same on Y. */
-  pointerY: number
-  /** Reused vectors for the footprint maths — this runs every frame and must not allocate. */
-  scratch: { f: Vector3; r: Vector3; u: Vector3; dir: Vector3 }
-}
-
-/**
- * Viewport width, falling back to the window where the element has not been laid out yet.
- * @param state - the controls' state
- * @returns the width in CSS pixels
- */
-function viewportWidth(state: ControlsState): number {
-  return state.domElement.clientWidth || window.innerWidth
-}
-
-/**
- * Viewport height, same fallback.
- * @param state - the controls' state
- * @returns the height in CSS pixels
- */
-function viewportHeight(state: ControlsState): number {
-  return state.domElement.clientHeight || window.innerHeight
-}
-
-/**
- * Camera-to-target distance for a zoom level — the single source of truth for that curve.
- * @param opts - the tuning
- * @param z - zoom in `[0, 1]`
- * @returns the distance in world units
- */
-function distanceForZoom(opts: MapControlsOptions, z: number): number {
-  return lerp(opts.maxDistance, opts.minDistance, z)
-}
-
-/**
- * Camera pitch for a zoom level — likewise.
- * @param opts - the tuning
- * @param z - zoom in `[0, 1]`
- * @returns the pitch in radians
- */
-function pitchForZoom(opts: MapControlsOptions, z: number): number {
-  return degToRad(lerp(opts.maxPitchDeg, opts.minPitchDeg, z))
-}
-
-/**
- * Ground footprint of the frustum at a given zoom, as an AABB **offset from the target**.
- *
- * Yaw is locked, so the shape is translation-invariant in XZ and can be computed once per zoom rather
- * than per position. The four frustum corners are raycast onto `y = 0` using the live fov and aspect,
- * which is what makes the pannable range follow a resize without anyone having to recompute it.
- * @param state - the controls' state
- * @param z - zoom in `[0, 1]`
- * @returns the offsets, or `null` when a corner overshoots the horizon and the footprint is unbounded
- */
-function footprintOffsets(
-  state: ControlsState,
-  z: number
-): { dxMin: number; dxMax: number; dzMin: number; dzMax: number } | null {
-  const { camera, scratch } = state
-  const distance = distanceForZoom(state.opts, z)
-  const pitch = pitchForZoom(state.opts, z)
-  const camY = distance * Math.sin(pitch)
-  const camZ = distance * Math.cos(pitch) // camera sits at (0, camY, camZ) relative to the target
-  scratch.f.set(0, -camY, -camZ).normalize() // forward: from camera toward the target (origin)
-  scratch.r.crossVectors(scratch.f, WORLD_UP).normalize() // right (east)
-  scratch.u.crossVectors(scratch.r, scratch.f).normalize() // camera up
-  const halfH = Math.tan(degToRad(camera.fov) / 2)
-  const halfW = halfH * camera.aspect
-  let dxMin = Infinity
-  let dxMax = -Infinity
-  let dzMin = Infinity
-  let dzMax = -Infinity
-  for (const sx of [-1, 1]) {
-    for (const sy of [-1, 1]) {
-      scratch.dir
-        .copy(scratch.f)
-        .addScaledVector(scratch.r, sx * halfW)
-        .addScaledVector(scratch.u, sy * halfH)
-        .normalize()
-      if (scratch.dir.y > -1e-3) return null // the ray misses the ground → the footprint is unbounded
-      const t = -camY / scratch.dir.y
-      const hx = t * scratch.dir.x // camera x is 0 relative to the target
-      const hz = camZ + t * scratch.dir.z
-      dxMin = Math.min(dxMin, hx)
-      dxMax = Math.max(dxMax, hx)
-      dzMin = Math.min(dzMin, hz)
-      dzMax = Math.max(dzMax, hz)
-    }
-  }
-  return { dxMin, dxMax, dzMin, dzMax }
-}
-
-/**
- * Clamp the target so the frustum footprint stays within the extent.
- *
- * Bounding the *footprint* rather than the target is what makes the pannable area grow as you zoom in
- * and re-centre as you pull out. Where the footprint is wider than the extent on an axis, or unbounded,
- * the target locks to the extent's centre — there is no position that satisfies the constraint.
- * @param state - the controls' state
- * @returns nothing
- */
-function clampTarget(state: ControlsState): void {
-  const ext = state.opts.extent
-  const cx = (ext.minX + ext.maxX) / 2
-  const cz = (ext.minZ + ext.maxZ) / 2
-  const fp = footprintOffsets(state, state.zoom)
-  let minX = cx
-  let maxX = cx
-  let minZ = cz
-  let maxZ = cz
-  if (fp) {
-    minX = ext.minX - fp.dxMin
-    maxX = ext.maxX - fp.dxMax
-    minZ = ext.minZ - fp.dzMin
-    maxZ = ext.maxZ - fp.dzMax
-    if (minX > maxX) minX = maxX = cx
-    if (minZ > maxZ) minZ = maxZ = cz
-  }
-  state.target.x = clamp(state.target.x, minX, maxX)
-  state.target.z = clamp(state.target.z, minZ, maxZ)
-  state.target.y = 0
-}
-
-/**
- * Put the camera where the current target and zoom say it belongs.
- *
- * Yaw locked north (north faces −Z): the camera sits south of and above the target, looking north-down.
- * @param state - the controls' state
- * @returns nothing
- */
-function placeCamera(state: ControlsState): void {
-  const distance = distanceForZoom(state.opts, state.zoom)
-  const pitch = pitchForZoom(state.opts, state.zoom)
-  state.camera.position.set(
-    state.target.x,
-    state.target.y + distance * Math.sin(pitch),
-    state.target.z + distance * Math.cos(pitch)
-  )
-  state.camera.lookAt(state.target)
 }
 
 /**
@@ -445,6 +213,29 @@ function driveTarget(state: ControlsState, distance: number, delta: number): voi
 }
 
 /**
+ * Move the target by whatever the reader is asking for this frame.
+ * @param state - the controls' state
+ * @param delta - the frame time in seconds
+ * @returns nothing
+ */
+function driveFrame(state: ControlsState, delta: number): void {
+  // Distance scales pan and edge speed, so the map moves the same apparent amount at every zoom.
+  const distance = distanceForZoom(state.opts, state.zoom)
+  if (state.dragging) {
+    // A drag moves the target directly (grab-the-map); its velocity becomes release momentum.
+    state.velX = state.dragMovedX / delta
+    state.velZ = state.dragMovedZ / delta
+    state.dragMovedX = 0
+    state.dragMovedZ = 0
+  } else {
+    driveTarget(state, distance, delta)
+  }
+  // Zoom inertia: the wheel injects velocity, which eases out; integrate then clamp.
+  state.velZoom *= easeOutDecay(delta, state.opts.smoothingTau)
+  state.zoom = clamp(state.zoom + state.velZoom * delta, 0, 1)
+}
+
+/**
  * Advance the camera by one frame.
  * @param state - the controls' state
  * @param delta - the frame time in seconds
@@ -452,20 +243,9 @@ function driveTarget(state: ControlsState, distance: number, delta: number): voi
  */
 function stepControls(state: ControlsState, delta: number): void {
   if (delta > 0) {
-    // Distance scales pan and edge speed, so the map moves the same apparent amount at every zoom.
-    const distance = distanceForZoom(state.opts, state.zoom)
-    if (state.dragging) {
-      // A drag moves the target directly (grab-the-map); its velocity becomes release momentum.
-      state.velX = state.dragMovedX / delta
-      state.velZ = state.dragMovedZ / delta
-      state.dragMovedX = 0
-      state.dragMovedZ = 0
-    } else {
-      driveTarget(state, distance, delta)
-    }
-    // Zoom inertia: the wheel injects velocity, which eases out; integrate then clamp.
-    state.velZoom *= easeOutDecay(delta, state.opts.smoothingTau)
-    state.zoom = clamp(state.zoom + state.velZoom * delta, 0, 1)
+    const flight = state.flight
+    if (flight) advanceFlight(state, flight, delta)
+    else driveFrame(state, delta)
   }
   clampTarget(state)
   placeCamera(state)
@@ -484,6 +264,9 @@ function createKeyListeners(state: ControlsState): {
     keydown: (e: Event): void => {
       const ke = e as KeyboardEvent
       if (isEditableFocused()) return // don't hijack keys while a form field (e.g. lil-gui) has focus
+      if (PAN_KEYS.has(ke.key) || ZOOM_IN_KEYS.has(ke.key) || ZOOM_OUT_KEYS.has(ke.key)) {
+        interrupt(state)
+      }
       if (PAN_KEYS.has(ke.key)) {
         state.pressed.add(ke.key)
         ke.preventDefault() // stop the page from scrolling on arrow keys
@@ -516,12 +299,14 @@ function createPointerListeners(state: ControlsState): {
     wheel: (e: Event): void => {
       const we = e as WheelEvent
       if (we.ctrlKey) return // let the browser's ctrl+wheel page zoom through (WCAG 1.4.4)
+      interrupt(state)
       we.preventDefault() // stop the page from scrolling on wheel
       state.velZoom += zoomImpulse(state.opts, -Math.sign(we.deltaY)) // wheel up = zoom in
     },
     pointerdown: (e: Event): void => {
       const pe = e as PointerEvent
       if (!state.opts.enableDrag || pe.button !== 0) return
+      interrupt(state)
       state.dragging = true
       state.lastX = pe.clientX
       state.lastY = pe.clientY
@@ -562,7 +347,7 @@ function createPointerListeners(state: ControlsState): {
  */
 function controlsView(
   state: ControlsState
-): Omit<MapControls, 'update' | 'dispose' | 'options' | 'target' | 'zoom'> {
+): Omit<MapControls, 'update' | 'dispose' | 'options' | 'target' | 'zoom' | 'flyTo' | 'flying'> {
   return {
     setExtent(extent: MapRect): void {
       state.opts.extent = { ...extent } // cloned, so later caller mutations cannot bypass the API
@@ -584,47 +369,10 @@ function controlsView(
       state.target.set(restored.target[0], 0, restored.target[2])
       state.zoom = clamp(restored.zoom, 0, 1)
       state.velX = state.velZ = state.velZoom = 0 // no residual inertia after a restore
+      interrupt(state) // nor a flight left over from before the restore
       clampTarget(state)
       placeCamera(state)
     },
-  }
-}
-
-/**
- * The controls' state, at rest.
- * @param camera - the camera to drive
- * @param domElement - the element events are read from
- * @param options - the tuning, held by reference because the dev panel mutates it in place
- * @returns the state
- */
-function createControlsState(
-  camera: PerspectiveCamera,
-  domElement: HTMLElement,
-  options: MapControlsOptions
-): ControlsState {
-  return {
-    camera,
-    domElement,
-    opts: options,
-    target: new Vector3(
-      (options.extent.minX + options.extent.maxX) / 2,
-      0,
-      (options.extent.minZ + options.extent.maxZ) / 2
-    ),
-    zoom: clamp(options.initialZoom, 0, 1),
-    velX: 0,
-    velZ: 0,
-    velZoom: 0,
-    dragMovedX: 0,
-    dragMovedZ: 0,
-    pressed: new Set<string>(),
-    dragging: false,
-    lastX: 0,
-    lastY: 0,
-    // NaN until the pointer has moved once, so edge-scroll cannot fire before it is anywhere.
-    pointerX: Number.NaN,
-    pointerY: Number.NaN,
-    scratch: { f: new Vector3(), r: new Vector3(), u: new Vector3(), dir: new Vector3() },
   }
 }
 
@@ -693,6 +441,13 @@ export function createMapControls(
     },
     update(delta = 0): void {
       stepControls(state, delta)
+    },
+    flyTo(x: number, z: number): void {
+      beginFlight(state, x, z)
+    },
+    // Defined here rather than in `controlsView`: an accessor cannot survive an object spread.
+    get flying(): boolean {
+      return state.flight !== null
     },
     dispose: detach,
   }

@@ -52,6 +52,10 @@ When the dev proposes something:
   **pluggable/replaceable**, and depend on a **mock** for any collaborator. Dependency injection always;
   contracts at the seams; no hard coupling, no global singletons. See `rules/modular-architecture.md`.
   Concrete 3D seams: heightmap/data port, injected camera store, injected controls, injectable renderer.
+- **Error handling is a decision, never an implementation detail** — a fallback, a swallowed `catch`, a
+  `?? default` standing in for a value that failed to arrive: **stop and discuss it before writing it**.
+  Bring what breaks, who learns that it happened, and what the alternative costs. See
+  `rules/error-handling.md`. Touching a file re-opens the error handling already in it.
 - **Always write tests** after any module/util/hook/fix (see `rules/tests.md`).
 - **Always run** the checks after every change (once tooling is in place: Phase 0.1) —
   `pnpm type-check && pnpm lint && pnpm test` — then `/review`.
@@ -101,6 +105,7 @@ Read @known-issues.md
 | `architecture.md`         | Stack, project structure, scripts, 3D pipeline     |
 | `modular-architecture.md` | SOLID/pluggable/standalone rule — any module       |
 | `decision-tree.md`        | Skill triggers — check before coding               |
+| `error-handling.md`       | Any fallback, `catch`, or default covering a failure |
 | `tests.md`                | Writing tests — 5-level policy                     |
 | `troubleshooting.md`      | Debug three.js/Vite/WebGL, architectural decisions |
 

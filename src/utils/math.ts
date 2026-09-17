@@ -28,3 +28,17 @@ export function clamp01(value: number): number {
 export function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t
 }
+
+/**
+ * Smoothstep easing: still at both ends, quickest in the middle.
+ *
+ * Deliberately not the ease-OUT the inertia uses. Inertia answers an input that has just happened, so it
+ * must snap and then glide; a flight is a move the reader did not make by hand, so it has to start
+ * gently too or the map appears to be yanked out from under them.
+ * @param t - progress in `[0, 1]`; values outside are clamped
+ * @returns the eased progress
+ */
+export function easeInOut(t: number): number {
+  const x = clamp01(t)
+  return x * x * (3 - 2 * x)
+}

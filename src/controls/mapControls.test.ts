@@ -25,6 +25,8 @@ function baseOptions(): MapControlsOptions {
     enableEdgeScroll: false,
     edgeScrollMargin: 24,
     edgeScrollSpeed: 10,
+    flyDurationMs: 700,
+    flyZoomIn: 0.35,
   }
 }
 
@@ -316,6 +318,113 @@ describe('MapControls', () => {
       window.dispatchEvent(makeMouse('pointermove', 220, 100))
       window.dispatchEvent(makeMouse('pointerup', 220, 100))
       expect(controls.target.x).toBe(x0)
+    })
+  })
+})
+
+describe('MapControls fly-to', () => {
+  describe('happy path', () => {
+    it('reaches the point it was sent to', () => {
+      const { controls } = setup()
+      controls.flyTo(3, -2)
+      controls.update(1) // longer than the flight
+      expect(controls.target.x).toBeCloseTo(3)
+      expect(controls.target.z).toBeCloseTo(-2)
+    })
+
+    it('settles closer than it started', () => {
+      const { controls } = setup()
+      const before = controls.zoom
+      controls.flyTo(0, 0)
+      controls.update(1)
+      expect(controls.zoom).toBeGreaterThan(before)
+    })
+  })
+
+  describe('variants', () => {
+    it('reports that it is flying, and stops reporting once it lands', () => {
+      const { controls } = setup()
+      controls.flyTo(3, -2)
+      expect(controls.flying).toBe(true)
+      controls.update(1)
+      expect(controls.flying).toBe(false)
+    })
+
+    it('takes several frames rather than jumping', () => {
+      const { controls } = setup()
+      controls.flyTo(5, 0)
+      controls.update(0.1)
+      expect(controls.target.x).toBeLessThan(5)
+      expect(controls.flying).toBe(true)
+    })
+
+    it('places the camera along the way, not only at the end', () => {
+      const { camera, controls } = setup()
+      controls.flyTo(5, 0)
+      const before = camera.position.x
+      controls.update(0.2)
+      expect(camera.position.x).not.toBeCloseTo(before)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('is cancelled by an arrow key, the reader taking the camera back', () => {
+      const { controls, keyTarget } = setup()
+      controls.flyTo(5, 0)
+      keyDown(keyTarget, 'ArrowLeft')
+      expect(controls.flying).toBe(false)
+    })
+
+    it('is cancelled by the wheel', () => {
+      const { controls, dom } = setup()
+      controls.flyTo(5, 0)
+      wheel(dom, -100)
+      expect(controls.flying).toBe(false)
+    })
+
+    it('is cancelled by a drag', () => {
+      const { controls, dom } = setup()
+      controls.flyTo(5, 0)
+      dom.dispatchEvent(makeMouse('pointerdown', 10, 10))
+      expect(controls.flying).toBe(false)
+    })
+
+    it('is cancelled by restoring a persisted viewpoint', () => {
+      const { controls } = setup()
+      controls.flyTo(5, 0)
+      controls.setState({ target: [0, 0, 0], zoom: 0.5 })
+      expect(controls.flying).toBe(false)
+    })
+
+    it('stays inside the extent, however far it was sent', () => {
+      // The clamp runs every frame, so a flight cannot carry the view off the map.
+      const { controls } = setup()
+      controls.flyTo(9999, 9999)
+      controls.update(1)
+      const extent = controls.getExtent()
+      expect(controls.target.x).toBeLessThanOrEqual(extent.maxX)
+      expect(controls.target.z).toBeLessThanOrEqual(extent.maxZ)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('leaves the camera where the flight had reached when it is cancelled', () => {
+      const { controls, dom } = setup()
+      controls.flyTo(5, 0)
+      controls.update(0.2)
+      const partway = controls.target.x
+      wheel(dom, -100)
+      controls.update(0.016)
+      expect(controls.target.x).toBeCloseTo(partway, 1)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('arrives at once when the duration is zero, which is what reduced motion asks', () => {
+      const { controls } = setup({ ...baseOptions(), flyDurationMs: 0 })
+      controls.flyTo(3, -2)
+      expect(controls.flying).toBe(false)
+      expect(controls.target.x).toBeCloseTo(3)
     })
   })
 })

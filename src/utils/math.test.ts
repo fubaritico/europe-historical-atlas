@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { clamp, clamp01, lerp } from './math'
+import { clamp, clamp01, easeInOut, lerp } from './math'
 
 describe('math utils', () => {
   describe('happy path', () => {
@@ -36,6 +36,70 @@ describe('math utils', () => {
     it('returns the bound when the value equals it', () => {
       expect(clamp(0, 0, 10)).toBe(0)
       expect(clamp(10, 0, 10)).toBe(10)
+    })
+  })
+})
+
+describe('easeInOut', () => {
+  describe('happy path', () => {
+    it('is still at both ends', () => {
+      expect(easeInOut(0)).toBe(0)
+      expect(easeInOut(1)).toBe(1)
+    })
+
+    it('is exactly halfway at halfway', () => {
+      expect(easeInOut(0.5)).toBeCloseTo(0.5)
+    })
+  })
+
+  describe('variants', () => {
+    it('starts gently, unlike the ease-out the inertia uses', () => {
+      // A flight is a move the reader did not make by hand, so it must not look yanked.
+      expect(easeInOut(0.1)).toBeLessThan(0.1)
+    })
+
+    it('finishes gently too', () => {
+      expect(easeInOut(0.9)).toBeGreaterThan(0.9)
+    })
+
+    it('never goes backwards', () => {
+      let previous = -1
+      for (let i = 0; i <= 20; i++) {
+        const value = easeInOut(i / 20)
+        expect(value).toBeGreaterThanOrEqual(previous)
+        previous = value
+      }
+    })
+
+    it('is symmetric about the middle', () => {
+      expect(easeInOut(0.3) + easeInOut(0.7)).toBeCloseTo(1)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('clamps progress past the ends rather than overshooting', () => {
+      expect(easeInOut(-5)).toBe(0)
+      expect(easeInOut(5)).toBe(1)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('propagates a non-finite progress rather than inventing one', () => {
+      // Recorded, and the right failure mode: a NaN comes back as a NaN, which shows up at once as a
+      // camera that has gone nowhere visible. Compare `reliefWorldY`, which reads a NaN elevation as
+      // sea level — a plausible answer, and therefore a silent one. No caller can produce this: the
+      // duration is guarded away from zero and the frame time comes from three's own Timer.
+      expect(easeInOut(Number.NaN)).toBeNaN()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('stays inside [0, 1] across the range', () => {
+      for (let i = 0; i <= 20; i++) {
+        const value = easeInOut(i / 20)
+        expect(value).toBeGreaterThanOrEqual(0)
+        expect(value).toBeLessThanOrEqual(1)
+      }
     })
   })
 })

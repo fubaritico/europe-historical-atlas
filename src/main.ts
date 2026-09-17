@@ -14,6 +14,7 @@ import { createDevPanel } from './devPanel'
 import { panelDepsFor } from './devPanelCallbacks'
 import { createDevState } from './devState'
 import { startFrameLoop } from './frameLoop'
+import { createMapInteraction } from './mapInteraction'
 import { createMapLayers } from './mapLayers'
 import { createMapPipeline } from './mapPipeline'
 import { createMapSources } from './mapSources'
@@ -21,6 +22,7 @@ import { createMapUi } from './mapUi'
 // Vite resolves `?worker` into a constructor for the bundled worker module. It is the one
 // bundler-specific line in the compute, and it lives here on purpose: the client that talks to the
 // worker takes it as an injected `spawn`, so nothing below the composition root depends on Vite.
+import { createSurfacePicker } from './picking/surfacePicker'
 import ComputeWorker from './pipeline/computeWorker?worker'
 import { createViewport } from './viewport'
 
@@ -51,6 +53,11 @@ function bootstrap(): () => void {
     spawn: () => new ComputeWorker(),
     isDisposed,
   })
+  const interaction = createMapInteraction({
+    element: canvas,
+    picker: createSurfacePicker({ camera: view.camera, target: layers.pickTarget }),
+    controls: view.controls,
+  })
   const gui = createDevPanel(panelDepsFor({ dev, layers, pipeline, view }))
 
   const stats = new Stats()
@@ -72,6 +79,7 @@ function bootstrap(): () => void {
     // The worker first: it is the only part of this that outlives the page's own teardown if left
     // alone, and a bake in flight has nothing left to hand its pixels to.
     pipeline.dispose()
+    interaction.dispose()
     gui.destroy()
     stats.dom.remove()
     ui.dispose()
