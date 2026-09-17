@@ -50,7 +50,14 @@ HTML overlay (roadmap 03) is the other half of it.
    or a palette per era (period flavour, at the cost of that recognition). A11Y-101 should close in the
    same pass.
 2. **Cities** — graphic elements, and nothing exists for them yet.
-3. **Contribution tooling** (roadmap 06), designed against the century that was actually finished.
+3. **Contribution tooling** (roadmap 06) — the **Cartographer**, and it is now specified end to end:
+   a georeferenced public-domain atlas plate as a **watermark** under the canvas, traced over, snapping to
+   the rivers and coastline we already own. **Century chosen: 1500, at sovereign-state level** (the Holy
+   Roman Empire as one block — its several hundred principalities are months, not a POC). Not the 18th:
+   OHM already covers 1700 at 93.8 %. First deliverable is the spike `files/spikes/fetch-atlas`, flagged
+   **ultra important** by the dev. One decision to take on day one: full shared topology, or the pragmatic
+   v1 of independent polygons snapping to existing vertices — the second is cheaper and makes subdividing
+   the Empire later a redraw.
 4. **Sources / provider per era** — deferred by the dev, but **still blocking for publication**:
    `historical-basemaps` is GPL-3.0 and cannot ship, OHM is CC0 and can, and today 1700 quietly holds an
    OHM payload while every other year holds GPL. The provider table *is* the "what may we publish" table.
