@@ -177,52 +177,50 @@ function cameraTuningOf(o: MapControlsOptions): Partial<MapControlsOptions> {
   }
 }
 
+/** Some controls need no side effect: the render loop already reads their value every frame. */
+const noEffect = (): void => undefined
+
+/** Every tunable as it stood when the panel was built. */
+type PanelDefaults = ReturnType<typeof snapshotDefaults>
+
 /**
- * Build the lil-gui dev panel (relief / texture / coastline / camera folders + a global "log all"
- * button), wiring each control to its param object and side-effect callback. The panel is a keeper: a
- * toggleable, extensible debug tool — grow it here, not inline in the composition root.
- * @param deps - the param objects + side-effect callbacks
- * @returns the `GUI` instance (caller calls `gui.destroy()` on teardown)
+ * Snapshot the defaults while the live objects still hold them.
+ *
+ * Taken at build time rather than re-imported from `devParams`, so "reset" restores what this session
+ * actually started from — which is the same thing today and would not be if a caller ever seeded the
+ * panel from a saved look.
+ * @param deps - what the panel binds to
+ * @returns the snapshot
  */
-export function createDevPanel(deps: DevPanelDeps): GUI {
-  const {
-    relief,
-    texture,
-    coast,
-    rhumb,
-    river,
-    political,
-    rose,
-    controlsOptions,
-    framing,
-    extent,
-    debug,
-    callbacks,
-  } = deps
-  const gui = new GUI({ title: 'europe-map · dev' })
-
-  // Some controls need no side effect at all: the render loop already reads their value every frame.
-  const noEffect = (): void => undefined
-
-  // Snapshot the defaults NOW — the live objects still hold their initial values — so "reset to
-  // defaults" can restore them after any amount of tuning. Camera tuning is a subset of the controls
-  // options (extent / zoom state are left alone).
-  const defaults = {
-    relief: clonePlain(relief),
-    texture: clonePlain(texture),
-    coast: clonePlain(coast),
-    rhumb: clonePlain(rhumb),
-    river: clonePlain(river),
-    political: clonePlain(political),
-    rose: clonePlain(rose),
-    extent: clonePlain(extent),
-    fov: framing.fov,
-    camera: cameraTuningOf(controlsOptions),
+function snapshotDefaults(deps: DevPanelDeps) {
+  return {
+    relief: clonePlain(deps.relief),
+    texture: clonePlain(deps.texture),
+    coast: clonePlain(deps.coast),
+    rhumb: clonePlain(deps.rhumb),
+    river: clonePlain(deps.river),
+    political: clonePlain(deps.political),
+    rose: clonePlain(deps.rose),
+    extent: clonePlain(deps.extent),
+    fov: deps.framing.fov,
+    // Camera tuning is a subset of the controls options; extent and zoom state are left alone.
+    camera: cameraTuningOf(deps.controlsOptions),
   }
+}
 
-  // Restore every tunable to its default, then apply once (a single rebuild per system — not one per
-  // controller, which lil-gui's own `reset()` would trigger) and refresh all widget displays.
-  const resetToDefaults = (): void => {
+/**
+ * Put every tunable back to its default, in one pass.
+ *
+ * One rebuild per system rather than one per controller: lil-gui's own `reset()` fires each control's
+ * `onChange` in turn, which on this panel means dozens of full texture bakes in a row.
+ * @param gui - the panel, whose widgets are refreshed at the end
+ * @param deps - what the panel binds to
+ * @param defaults - the snapshot to restore
+ * @returns the reset action
+ */
+function createResetAction(gui: GUI, deps: DevPanelDeps, defaults: PanelDefaults): () => void {
+  const { relief, texture, coast, rhumb, river, political, rose, extent, callbacks } = deps
+  return (): void => {
     Object.assign(relief, clonePlain(defaults.relief))
     Object.assign(texture, clonePlain(defaults.texture))
     Object.assign(coast, clonePlain(defaults.coast))
@@ -231,14 +229,14 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     Object.assign(political, clonePlain(defaults.political))
     Object.assign(rose, clonePlain(defaults.rose))
     Object.assign(extent, clonePlain(defaults.extent))
-    Object.assign(controlsOptions, clonePlain(defaults.camera))
-    framing.fov = defaults.fov
+    Object.assign(deps.controlsOptions, clonePlain(defaults.camera))
+    deps.framing.fov = defaults.fov
     callbacks.setWireframe(relief.wireframe)
     callbacks.setCoastColor(coast.color)
     callbacks.setRhumbColor(rhumb.color)
     callbacks.setRiverColor(river.color)
     callbacks.setRoseOpacity(rose.opacity)
-    callbacks.setFov(framing.fov)
+    callbacks.setFov(defaults.fov)
     callbacks.applyExtent()
     callbacks.rebuildTexture()
     callbacks.rebuildRelief()
@@ -249,14 +247,20 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
     callbacks.rebuildRose()
     gui.controllersRecursive().forEach((controller) => controller.updateDisplay())
   }
+}
 
-  // Dump every tunable value at once so a tuned look can be pasted back as defaults.
-  gui.add({ logAll: callbacks.logAll }, 'logAll').name('⤓ log ALL settings')
-  gui.add({ resetToDefaults }, 'resetToDefaults').name('↺ reset to defaults')
-
-  // Relief — exaggeration is applied every frame in the loop (cheap scale.y, no geometry rebuild); the
-  // height-curve knobs require a geometry rebuild, and the wireframe flips the live material.
-  const reliefEffect = (key: keyof ReliefDevParams): (() => void) =>
+/**
+ * Relief, at the top level rather than in a folder: it is what the reader is looking at.
+ *
+ * Exaggeration is applied every frame in the loop (a cheap `scale.y`, no geometry); the height-curve
+ * knobs need a geometry rebuild; the wireframe flips the live material.
+ * @param gui - where to add the controls
+ * @param deps - what the panel binds to
+ * @returns nothing
+ */
+function addReliefControls(gui: GUI, deps: DevPanelDeps): void {
+  const { relief, callbacks } = deps
+  const effect = (key: keyof ReliefDevParams): (() => void) =>
     key === 'wireframe'
       ? (): void => {
           callbacks.setWireframe(relief.wireframe)
@@ -265,31 +269,48 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
         ? noEffect
         : callbacks.rebuildRelief
   for (const key of RELIEF_CONTROL_ORDER)
-    addControl(gui, relief, key, RELIEF_CONTROLS[key], reliefEffect(key), key === 'wireframe')
+    addControl(gui, relief, key, RELIEF_CONTROLS[key], effect(key), key === 'wireframe')
+}
 
-  // Terrain look. Regenerating the texture is a full pixel pass (heavy), so tuning fires on release.
-  // The shoreline is shared: the coastline and the sea-clipped rhumbs sit on the same iso-line, so
-  // changing it has to rebuild them too.
-  const texFolder = gui.addFolder('texture (parchment)')
+/**
+ * The terrain look, in sub-folders mirroring the compositing order.
+ *
+ * Regenerating the texture is a full pixel pass, so tuning fires on release. The shoreline is shared:
+ * the coastline and the sea-clipped rhumbs sit on the same iso-line, so moving it rebuilds them too.
+ * @param gui - where to add the folder
+ * @param deps - what the panel binds to
+ * @returns nothing
+ */
+function addTextureFolder(gui: GUI, deps: DevPanelDeps): void {
+  const { texture, callbacks } = deps
+  const folder = gui.addFolder('texture (parchment)')
   const onSeaLevelChange = (): void => {
     callbacks.rebuildTexture()
     callbacks.rebuildCoastline()
     callbacks.rebuildRhumb()
   }
   for (const group of TERRAIN_CONTROL_GROUPS) {
-    const folder = texFolder.addFolder(group.title)
+    const sub = folder.addFolder(group.title)
     for (const key of group.keys) {
       const onChange = key === 'seaLevel' ? onSeaLevelChange : callbacks.rebuildTexture
-      addControl(folder, texture, key, TERRAIN_CONTROLS[key], onChange)
+      addControl(sub, texture, key, TERRAIN_CONTROLS[key], onChange)
     }
-    folder.close()
+    sub.close()
   }
-  texFolder.close()
+  folder.close()
+}
 
-  // Coastline — draped 3D lines. Colour updates the live material; jitter/strokes/lift rebuild the
-  // geometry; opacity is applied every frame in the loop, so it needs no callback at all.
-  const coastFolder = gui.addFolder('coastline')
-  const coastEffect = (key: keyof CoastlineDevParams): (() => void) =>
+/**
+ * The drawn shoreline. Colour is a live material tweak; jitter and strokes rebuild the geometry;
+ * opacity is read every frame, so it needs no callback at all.
+ * @param gui - where to add the folder
+ * @param deps - what the panel binds to
+ * @returns nothing
+ */
+function addCoastlineFolder(gui: GUI, deps: DevPanelDeps): void {
+  const { coast, callbacks } = deps
+  const folder = gui.addFolder('coastline')
+  const effect = (key: keyof CoastlineDevParams): (() => void) =>
     key === 'color'
       ? (): void => {
           callbacks.setCoastColor(coast.color)
@@ -298,13 +319,20 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
         ? noEffect
         : callbacks.rebuildCoastline
   for (const key of COASTLINE_CONTROL_ORDER)
-    addControl(coastFolder, coast, key, COASTLINE_CONTROLS[key], coastEffect(key), key === 'color')
-  coastFolder.close()
+    addControl(folder, coast, key, COASTLINE_CONTROLS[key], effect(key), key === 'color')
+  folder.close()
+}
 
-  // Decor — portolan rhumb network (sea-only). Centre/layout regenerate the network; colour updates the
-  // live material; opacity is applied in the loop (fades on zoom-in).
-  const rhumbFolder = gui.addFolder('decor (rhumbs)')
-  const rhumbEffect = (key: keyof RhumbDevParams): (() => void) =>
+/**
+ * The portolan rhumb web. Centre and layout regenerate it; colour is live; opacity fades in the loop.
+ * @param gui - where to add the folder
+ * @param deps - what the panel binds to
+ * @returns nothing
+ */
+function addRhumbFolder(gui: GUI, deps: DevPanelDeps): void {
+  const { rhumb, callbacks } = deps
+  const folder = gui.addFolder('decor (rhumbs)')
+  const effect = (key: keyof RhumbDevParams): (() => void) =>
     key === 'color'
       ? (): void => {
           callbacks.setRhumbColor(rhumb.color)
@@ -313,51 +341,76 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
         ? noEffect
         : callbacks.rebuildRhumb
   for (const key of RHUMB_CONTROL_ORDER)
-    addControl(rhumbFolder, rhumb, key, RHUMB_CONTROLS[key], rhumbEffect(key), key === 'color')
-  rhumbFolder.close()
+    addControl(folder, rhumb, key, RHUMB_CONTROLS[key], effect(key), key === 'color')
+  folder.close()
+}
 
-  // Rivers — Natural Earth centrelines, draped on the terrain and revealed by zoom (one layer per
-  // scalerank). Colour is a live material tweak; the reveal thresholds are read every frame; only the
-  // lake filter and the jitter change the geometry.
-  const riverFolder = gui.addFolder('rivers')
-  // Everything but the colour is baked into the layer when it is built — the reveal thresholds and the
-  // opacity are read from the options the layer captured, and a stroke width is fixed at material
-  // construction. So every one of them needs a rebuild; only the colour has a live setter.
-  const riverEffect = (key: keyof RiverDevParams): (() => void) =>
+/**
+ * The river network.
+ *
+ * Everything but the colour is baked into the layer when it is built — the reveal thresholds and the
+ * opacity are read from the options the layer captured, and a stroke width is fixed at material
+ * construction. So every one of them needs a rebuild; only the colour has a live setter. This is the
+ * hole a previous session's inert sliders went through.
+ * @param gui - where to add the folder
+ * @param deps - what the panel binds to
+ * @returns nothing
+ */
+function addRiverFolder(gui: GUI, deps: DevPanelDeps): void {
+  const { river, callbacks } = deps
+  const folder = gui.addFolder('rivers')
+  const effect = (key: keyof RiverDevParams): (() => void) =>
     key === 'color'
       ? (): void => {
           callbacks.setRiverColor(river.color)
         }
       : callbacks.rebuildRivers
   for (const key of RIVER_CONTROL_ORDER)
-    addControl(riverFolder, river, key, RIVER_CONTROLS[key], riverEffect(key), key === 'color')
-  riverFolder.close()
+    addControl(folder, river, key, RIVER_CONTROLS[key], effect(key), key === 'color')
+  folder.close()
+}
 
-  // Historical political overlay. Which rebuild each tunable needs is declared in `devParams`, beside the
-  // control table itself, so it can be walked key by key in a test — this panel has no tests, and this
-  // routing is exactly what broke silently twice. Here we only turn that answer into a callback.
-  const politicalFolder = gui.addFolder('political (historical)')
-  const politicalEffects: Record<PoliticalRebuild, () => void> = {
+/**
+ * The historical political overlay.
+ *
+ * Which rebuild each tunable needs is declared in `devParams`, beside the control table itself, so it
+ * can be walked key by key in a test — this panel has none, and that routing is exactly what broke
+ * silently twice. Here we only turn that answer into a callback.
+ *
+ * Grouped like the texture folder: a flat list of twenty-odd tunables stops being a panel and becomes a
+ * haystack, and the first thing lost is knowing which knob to reach for.
+ * @param gui - where to add the folder
+ * @param deps - what the panel binds to
+ * @returns nothing
+ */
+function addPoliticalFolder(gui: GUI, deps: DevPanelDeps): void {
+  const { political, callbacks } = deps
+  const folder = gui.addFolder('political (historical)')
+  const effects: Record<PoliticalRebuild, () => void> = {
     redraw: callbacks.rebuildBorders,
     trace: callbacks.rebuildBorderGeometry,
     full: callbacks.rebuildPolitical,
   }
-  const politicalEffect = (key: keyof PoliticalDevParams): (() => void) =>
-    politicalEffects[politicalRebuildFor(key)]
-  // Grouped like the texture folder: a flat list of twenty-odd tunables stops being a panel and becomes
-  // a haystack, and the first thing lost is knowing which knob to reach for.
   for (const group of POLITICAL_CONTROL_GROUPS) {
-    const folder = politicalFolder.addFolder(group.title)
+    const sub = folder.addFolder(group.title)
     for (const key of group.keys)
-      addControl(folder, political, key, POLITICAL_CONTROLS[key], politicalEffect(key))
-    folder.close()
+      addControl(sub, political, key, POLITICAL_CONTROLS[key], effects[politicalRebuildFor(key)])
+    sub.close()
   }
-  politicalFolder.close()
+  folder.close()
+}
 
-  // Compass rose — colours/labels/size are baked into the SVG, so each change regenerates the rose.
-  // Opacity is the exception: it is a live material tweak.
-  const roseFolder = gui.addFolder('compass rose')
-  const roseEffect = (key: keyof RoseDevParams): (() => void) =>
+/**
+ * The compass rose. Colours, labels and size are baked into its SVG, so each change regenerates it;
+ * opacity is the exception, being a live material tweak.
+ * @param gui - where to add the folder
+ * @param deps - what the panel binds to
+ * @returns nothing
+ */
+function addRoseFolder(gui: GUI, deps: DevPanelDeps): void {
+  const { rose, callbacks } = deps
+  const folder = gui.addFolder('compass rose')
+  const effect = (key: keyof RoseDevParams): (() => void) =>
     key === 'opacity'
       ? (): void => {
           callbacks.setRoseOpacity(rose.opacity)
@@ -365,31 +418,68 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
       : callbacks.rebuildRose
   for (const key of ROSE_CONTROL_ORDER)
     addControl(
-      roseFolder,
+      folder,
       rose,
       key,
       ROSE_CONTROLS[key],
-      roseEffect(key),
+      effect(key),
       key === 'opacity' || key === 'showLabels'
     )
-  roseFolder.close()
+  folder.close()
+}
 
-  // Camera feel — tune the EU4-style pan/zoom live (read every frame by the controls, so no callback).
-  const camFolder = gui.addFolder('camera')
+/**
+ * The camera feel, and the extent its clamp works from.
+ *
+ * The controls read their options every frame, so none of these needs a callback — except the extent,
+ * which the frustum clamp has to be told about.
+ * @param gui - where to add the folder
+ * @param deps - what the panel binds to
+ * @returns nothing
+ */
+function addCameraFolder(gui: GUI, deps: DevPanelDeps): void {
+  const { controlsOptions, framing, extent, debug, callbacks } = deps
+  const folder = gui.addFolder('camera')
   for (const key of CAMERA_CONTROL_ORDER)
-    addControl(camFolder, controlsOptions, key, CAMERA_CONTROLS[key], noEffect)
-  camFolder.add(framing, 'fov', 15, 60, 1).name('fov (lower = flatter)').onChange(callbacks.setFov)
+    addControl(folder, controlsOptions, key, CAMERA_CONTROLS[key], noEffect)
+  folder.add(framing, 'fov', 15, 60, 1).name('fov (lower = flatter)').onChange(callbacks.setFov)
 
-  // Extent — the world rectangle the frustum-aware clamp keeps the view inside.
-  const extentFolder = camFolder.addFolder('extent (view limit)')
+  const extentFolder = folder.addFolder('extent (view limit)')
   for (const key of EXTENT_CONTROL_ORDER)
     addControl(extentFolder, extent, key, EXTENT_CONTROLS[key], callbacks.applyExtent, true)
   extentFolder
     .add(debug, 'showFrustum')
     .name('show extent + footprint')
     .onChange(callbacks.setFrustumDebug)
-  camFolder.add({ logState: callbacks.logCameraState }, 'logState').name('log camera state')
-  camFolder.close()
+  folder.add({ logState: callbacks.logCameraState }, 'logState').name('log camera state')
+  folder.close()
+}
 
+/**
+ * Build the lil-gui dev panel, wiring each control to its param object and side-effect callback.
+ *
+ * The panel is a keeper: a toggleable, extensible debug tool. Grow it here — one function per folder —
+ * not inline in the composition root.
+ * @param deps - the param objects + side-effect callbacks
+ * @returns the `GUI` instance (caller calls `gui.destroy()` on teardown)
+ */
+export function createDevPanel(deps: DevPanelDeps): GUI {
+  const gui = new GUI({ title: 'europe-map · dev' })
+  const defaults = snapshotDefaults(deps)
+
+  // Dump every tunable value at once so a tuned look can be pasted back as defaults.
+  gui.add({ logAll: deps.callbacks.logAll }, 'logAll').name('⤓ log ALL settings')
+  gui
+    .add({ resetToDefaults: createResetAction(gui, deps, defaults) }, 'resetToDefaults')
+    .name('↺ reset to defaults')
+
+  addReliefControls(gui, deps)
+  addTextureFolder(gui, deps)
+  addCoastlineFolder(gui, deps)
+  addRhumbFolder(gui, deps)
+  addRiverFolder(gui, deps)
+  addPoliticalFolder(gui, deps)
+  addRoseFolder(gui, deps)
+  addCameraFolder(gui, deps)
   return gui
 }
