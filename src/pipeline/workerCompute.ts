@@ -67,6 +67,83 @@ interface PendingCall {
 }
 
 /**
+ * Post a command and wait for its answer — all a {@link mapComputeOver} facade needs from a transport.
+ */
+export type SendCommand = (
+  build: (id: number) => ComputeCommand,
+  onProgress?: ProgressReport
+) => Promise<ComputeEvent>
+
+/**
+ * Unwrap a finished event, turning a worker-side failure back into a rejection.
+ * @param event - whatever came back for this call
+ * @returns the same event, narrowed to a completion
+ */
+export function unwrapDone(event: ComputeEvent): ComputeEvent & { kind: 'done' } {
+  if (event.kind === 'failed') throw new Error(event.message)
+  if (event.kind !== 'done') throw new Error(`map compute: unexpected ${event.kind} event`)
+  return event
+}
+
+/**
+ * The typed {@link MapCompute} surface, over any transport that can send a command and answer it.
+ *
+ * Separated from the worker wiring because the two fail for unrelated reasons and are read for
+ * unrelated questions: this is where "a bake request came back as borders" is caught, and it needs no
+ * worker, no `postMessage` and no lifecycle to be exercised — a function returning a literal is enough.
+ * @param send - post a command and wait for its answer
+ * @param dispose - stop the transport, whatever it is in the middle of
+ * @returns the compute
+ */
+export function mapComputeOver(send: SendCommand, dispose: () => void): MapCompute {
+  return {
+    async setSources(sources: ComputeSources): Promise<void> {
+      unwrapDone(await send((id) => ({ kind: 'setSources', id, sources })))
+    },
+
+    async clearPolitical(): Promise<void> {
+      unwrapDone(await send((id) => ({ kind: 'clearPolitical', id })))
+    },
+
+    async computePolitical(
+      request: PoliticalRequest,
+      onProgress?: ProgressReport
+    ): Promise<PoliticalResult> {
+      const done = unwrapDone(
+        await send((id) => ({ kind: 'computePolitical', id, request }), onProgress)
+      )
+      if (done.payload.kind !== 'political') {
+        throw new Error(`map compute: answered a political request with ${done.payload.kind}`)
+      }
+      return done.payload.result
+    },
+
+    async deriveBorders(smoothing: number): Promise<RegionBorders> {
+      const done = unwrapDone(await send((id) => ({ kind: 'deriveBorders', id, smoothing })))
+      if (done.payload.kind !== 'borders') {
+        throw new Error(`map compute: answered a border request with ${done.payload.kind}`)
+      }
+      return done.payload.borders
+    },
+
+    async bakeTerrain(
+      textureOptions: TerrainTextureOptions,
+      onProgress?: ProgressReport
+    ): Promise<TerrainBakeResult> {
+      const done = unwrapDone(
+        await send((id) => ({ kind: 'bakeTerrain', id, options: textureOptions }), onProgress)
+      )
+      if (done.payload.kind !== 'bake') {
+        throw new Error(`map compute: answered a bake request with ${done.payload.kind}`)
+      }
+      return done.payload.result
+    },
+
+    dispose,
+  }
+}
+
+/**
  * Build a {@link MapCompute} backed by a worker.
  *
  * Sources are **copied** across, never transferred: the main thread keeps drawing the relief from the
@@ -131,61 +208,10 @@ export function createWorkerMapCompute(options: WorkerComputeOptions): MapComput
       worker.postMessage(build(id))
     })
 
-  /** Unwrap a finished event, turning a worker-side failure back into a rejection. */
-  const unwrap = (event: ComputeEvent): ComputeEvent & { kind: 'done' } => {
-    if (event.kind === 'failed') throw new Error(event.message)
-    if (event.kind !== 'done') throw new Error(`map compute: unexpected ${event.kind} event`)
-    return event
-  }
-
-  return {
-    async setSources(sources: ComputeSources): Promise<void> {
-      unwrap(await send((id) => ({ kind: 'setSources', id, sources })))
-    },
-
-    async clearPolitical(): Promise<void> {
-      unwrap(await send((id) => ({ kind: 'clearPolitical', id })))
-    },
-
-    async computePolitical(
-      request: PoliticalRequest,
-      onProgress?: ProgressReport
-    ): Promise<PoliticalResult> {
-      const done = unwrap(
-        await send((id) => ({ kind: 'computePolitical', id, request }), onProgress)
-      )
-      if (done.payload.kind !== 'political') {
-        throw new Error(`map compute: answered a political request with ${done.payload.kind}`)
-      }
-      return done.payload.result
-    },
-
-    async deriveBorders(smoothing: number): Promise<RegionBorders> {
-      const done = unwrap(await send((id) => ({ kind: 'deriveBorders', id, smoothing })))
-      if (done.payload.kind !== 'borders') {
-        throw new Error(`map compute: answered a border request with ${done.payload.kind}`)
-      }
-      return done.payload.borders
-    },
-
-    async bakeTerrain(
-      textureOptions: TerrainTextureOptions,
-      onProgress?: ProgressReport
-    ): Promise<TerrainBakeResult> {
-      const done = unwrap(
-        await send((id) => ({ kind: 'bakeTerrain', id, options: textureOptions }), onProgress)
-      )
-      if (done.payload.kind !== 'bake') {
-        throw new Error(`map compute: answered a bake request with ${done.payload.kind}`)
-      }
-      return done.payload.result
-    },
-
-    dispose(): void {
-      // Terminate outright rather than waiting on a courteous `dispose` command: a worker mid-bake is
-      // exactly the one that will not answer, and teardown cannot be made to wait for it.
-      worker.terminate()
-      die(new Error('map compute disposed'), false)
-    },
-  }
+  return mapComputeOver(send, () => {
+    // Terminate outright rather than waiting on a courteous `dispose` command: a worker mid-bake is
+    // exactly the one that will not answer, and teardown cannot be made to wait for it.
+    worker.terminate()
+    die(new Error('map compute disposed'), false)
+  })
 }

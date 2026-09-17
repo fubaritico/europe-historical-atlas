@@ -11,223 +11,14 @@ import { createElevationLandMask } from '../data/landMask'
 import { verticalToLatitude } from '../geo/mercator'
 import { hashInts } from '../utils/hash'
 
+// Re-exported so the split changed no call site: the options and the compositor that consumes them are
+// still one import away from each other.
+export * from './terrainOptions'
+
+import type { AreaTint, BlendMode, TerrainTextureOptions } from './terrainOptions'
 import type { Heightmap } from '../data/heightmap'
 import type { LandMask } from '../data/landMask'
 import type { RgbColor } from '../utils/color'
-import type { ControlGroup, ControlTable } from '../utils/controlSpec'
-
-/**
- * A layer blend mode, applied per colour channel on normalized `[0, 1]` values (Photoshop-style).
- * `normal` = replace, `multiply` = darken (the cartographic hillshade blend), `overlay`/`softLight` =
- * contrast-preserving.
- */
-export type BlendMode = 'normal' | 'multiply' | 'overlay' | 'softLight'
-
-export type { RgbColor } from '../utils/color'
-
-/**
- * A colour claimed over part of the map — the seam through which a political layer reaches the
- * compositor.
- *
- * Declared here, by the consumer, rather than in the data layer: the terrain compositor needs to know
- * that *some* area carries *some* tint, and nothing about polities, dates or borders.
- */
-export interface AreaTint {
-  /**
-   * The tint at a normalized coordinate, or `null` where nothing claims it.
-   * @param u - horizontal coordinate `[0, 1]` (0 = west edge)
-   * @param v - vertical coordinate `[0, 1]` (0 = north edge)
-   * @returns the tint, or `null`
-   */
-  at(u: number, v: number): RgbColor | null
-}
-
-/**
- * Options controlling the baked terrain texture: a parchment base, an elevation (hypsometric) tint, a
- * greyscale heightmap layer, and a DEM-derived hillshade composited over it — the "old map" look, painted
- * into the bitmap so it reads the same regardless of camera angle or scene lights.
- */
-export interface TerrainTextureOptions {
-  /** Elevation (metres) at/below which a sample is sea — flat parchment `sea` tone, no hillshade. */
-  seaLevel: number
-  /** Land base tone (the parchment paper colour under the tint). */
-  parchment: RgbColor
-  /** Sea/out-of-frame tone (uniform, no relief) — the hors-champ parchment. */
-  sea: RgbColor
-  /** Hypsometric tint at land start (just above `seaLevel`). */
-  lowland: RgbColor
-  /** Hypsometric tint at `peakReference` and above. */
-  highland: RgbColor
-  /** Elevation (metres) mapped to the full `highland` tint; higher samples clamp to it. */
-  peakReference: number
-  /** How the hypsometric tint blends over the parchment base. */
-  tintMode: BlendMode
-  /** Tint blend amount `[0, 1]` (0 = pure parchment, 1 = full blended tint). */
-  tintStrength: number
-  /** Elevation (metres) where snow starts to appear. */
-  snowStart: number
-  /** Elevation (metres) where snow fully covers the ground; smoothstepped up from `snowStart`. */
-  snowFull: number
-  /** The snow colour (a warm white reads better on parchment than a pure white). */
-  snow: RgbColor
-  /** Snow amount `[0, 1]` at full coverage (0 = no snow band at all). */
-  snowStrength: number
-  /** Latitude (degrees) at which `snowStart`/`snowFull` apply unmodified. */
-  snowLatitudeRef: number
-  /** Metres the snow line drops per degree of latitude north of `snowLatitudeRef` (0 = no tilt). */
-  snowLatitudeDrop: number
-  /** How the political tint blends over the ground colour. */
-  politicalMode: BlendMode
-  /** Political tint amount `[0, 1]` (0 = no political layer at all). */
-  politicalStrength: number
-  /** Elevation (metres) mapped to pure black in the greyscale heightmap layer. */
-  elevationFloor: number
-  /** Elevation (metres) mapped to pure white in the greyscale heightmap layer; higher samples clamp. */
-  elevationCeiling: number
-  /** How the greyscale heightmap layer blends over the tinted land. */
-  elevationMode: BlendMode
-  /** Greyscale heightmap blend amount `[0, 1]` (0 = layer off, 1 = full). */
-  elevationStrength: number
-  /** Whether the greyscale heightmap layer also applies to sea samples (else sea stays a flat tone). */
-  elevationIncludesSea: boolean
-  /** How the hillshade blends over the tinted land (usually `multiply`). */
-  hillshadeMode: BlendMode
-  /** Hillshade blend amount `[0, 1]` (0 = no shading, 1 = full shading). */
-  hillshadeStrength: number
-  /** Light source azimuth in degrees, clockwise from north (cartographic convention; 315 = NW). */
-  lightAzimuthDeg: number
-  /** Light source altitude in degrees above the horizon (45 = default cartographic sun). */
-  lightAltitudeDeg: number
-  /** Vertical exaggeration applied to slopes for shading only (higher = more pronounced relief). */
-  zFactor: number
-  /** Vellum grain amount `[0, 1]` (0 = flat colour; higher = more pronounced paper mottling). */
-  grain: number
-  /** Vellum grain spatial scale in pixels (larger = coarser, larger paper mottling). */
-  grainScale: number
-  /**
-   * How many texture pixels to bake per DEM sample, per axis (1 = one-to-one, 2 = double resolution).
-   * This buys no new terrain detail — the DEM caps that — but the grain, the snow line and the coast
-   * antialiasing are all evaluated per output pixel, so they get genuinely finer. Costs the square of
-   * this factor in bake time, so drop it to 1 while tuning.
-   */
-  supersample: number
-}
-
-/**
- * Sensible vintage defaults for {@link TerrainTextureOptions} — a warm parchment, a warm-brown highland
- * tint, an NW light. Tunable live via the dev panel.
- */
-export const DEFAULT_TERRAIN_OPTIONS: TerrainTextureOptions = {
-  seaLevel: 0,
-  parchment: { r: 228, g: 210, b: 172 },
-  sea: { r: 210, g: 200, b: 174 },
-  lowland: { r: 228, g: 212, b: 176 },
-  highland: { r: 206, g: 182, b: 140 },
-  peakReference: 3000,
-  tintMode: 'multiply',
-  tintStrength: 0.3,
-  snowStart: 1300,
-  snowFull: 2300,
-  snow: { r: 250, g: 248, b: 242 },
-  snowStrength: 0.9,
-  // Referenced on the Alps: the thresholds above are the alpine snow line, and every other latitude is
-  // offset from it. ~55 m per degree tracks the real snow line closely enough across the frame — it puts
-  // Scandinavia and Iceland under snow from ~400 m while keeping the Atlas bare below ~2100 m.
-  snowLatitudeRef: 46,
-  snowLatitudeDrop: 55,
-  // `normal` rather than `multiply`: multiply can only darken, so on pale parchment every polity slid
-  // toward the same muddy olive. A straight interpolation keeps the hue, and the hillshade applied
-  // afterwards is what keeps the relief legible under the colour.
-  politicalMode: 'overlay',
-  politicalStrength: 1,
-  elevationFloor: 0,
-  // Low ceiling on purpose: Europe is mostly under 1500 m, so a high reference (say 4000) crushes the
-  // whole continent into the darkest few percent of the ramp and the valley detail disappears.
-  elevationCeiling: 1500,
-  elevationMode: 'multiply',
-  elevationStrength: 0.25,
-  elevationIncludesSea: false,
-  hillshadeMode: 'multiply',
-  hillshadeStrength: 0.42,
-  lightAzimuthDeg: 315,
-  lightAltitudeDeg: 55,
-  zFactor: 0.002,
-  grain: 0.05,
-  grainScale: 4,
-  supersample: 2,
-}
-
-/** The blend modes a {@link BlendMode} dropdown offers, in panel order. */
-export const BLEND_MODES = ['multiply', 'overlay', 'softLight', 'normal'] as const
-
-/**
- * The range, step and label of every {@link TerrainTextureOptions} field. Declared beside the defaults
- * it bounds, so the two cannot drift apart; the mapped type makes an undescribed option a compile error.
- */
-export const TERRAIN_CONTROLS: ControlTable<TerrainTextureOptions> = {
-  seaLevel: { kind: 'number', min: -200, max: 500, step: 10, label: 'sea level (m)' },
-  parchment: { kind: 'color', label: 'parchment' },
-  sea: { kind: 'color', label: 'sea' },
-  tintStrength: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'strength' },
-  tintMode: { kind: 'choice', options: BLEND_MODES, label: 'blend' },
-  peakReference: { kind: 'number', min: 500, max: 5000, step: 100, label: 'peak ref (m)' },
-  lowland: { kind: 'color', label: 'lowland' },
-  highland: { kind: 'color', label: 'highland' },
-  elevationStrength: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'strength' },
-  elevationMode: { kind: 'choice', options: BLEND_MODES, label: 'blend' },
-  politicalStrength: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'strength' },
-  politicalMode: { kind: 'choice', options: BLEND_MODES, label: 'blend' },
-  elevationFloor: { kind: 'number', min: -8000, max: 2000, step: 100, label: 'black at (m)' },
-  elevationCeiling: { kind: 'number', min: 500, max: 7000, step: 100, label: 'white at (m)' },
-  elevationIncludesSea: { kind: 'boolean', label: 'over sea too' },
-  snowStrength: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'strength' },
-  snowStart: { kind: 'number', min: 0, max: 5000, step: 50, label: 'starts at (m)' },
-  snowFull: { kind: 'number', min: 0, max: 6000, step: 50, label: 'full at (m)' },
-  snow: { kind: 'color', label: 'tone' },
-  snowLatitudeDrop: { kind: 'number', min: 0, max: 120, step: 5, label: 'line tilt (m/\u00b0)' },
-  snowLatitudeRef: { kind: 'number', min: 0, max: 80, step: 1, label: 'line ref (\u00b0N)' },
-  hillshadeStrength: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'strength' },
-  hillshadeMode: { kind: 'choice', options: BLEND_MODES, label: 'blend' },
-  lightAzimuthDeg: { kind: 'number', min: 0, max: 360, step: 1, label: 'light azimuth' },
-  lightAltitudeDeg: { kind: 'number', min: 5, max: 85, step: 1, label: 'light altitude' },
-  zFactor: { kind: 'number', min: 0.0002, max: 0.006, step: 0.0002, label: 'relief strength' },
-  grain: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'grain (vellum)' },
-  grainScale: { kind: 'number', min: 1, max: 40, step: 1, label: 'grain scale (px)' },
-  supersample: { kind: 'number', min: 1, max: 3, step: 1, label: 'resolution (\u00d7DEM)' },
-}
-
-/**
- * The tunables grouped by the layer they drive, in the order {@link composeTerrainRgba} applies them.
- * A panel built from this reads as the rendering stack, which is what makes the effect of any one
- * slider predictable: everything in a later group is composited on top of the earlier ones.
- */
-export const TERRAIN_CONTROL_GROUPS: ControlGroup<TerrainTextureOptions>[] = [
-  { title: '1 \u00b7 base', keys: ['seaLevel', 'parchment', 'sea'] },
-  {
-    title: '2 \u00b7 hypsometric tint',
-    keys: ['tintStrength', 'tintMode', 'peakReference', 'lowland', 'highland'],
-  },
-  {
-    title: '3 \u00b7 heightmap (B&W)',
-    keys: [
-      'elevationStrength',
-      'elevationMode',
-      'elevationFloor',
-      'elevationCeiling',
-      'elevationIncludesSea',
-    ],
-  },
-  {
-    title: '4 \u00b7 snow',
-    keys: ['snowStrength', 'snowStart', 'snowFull', 'snow', 'snowLatitudeDrop', 'snowLatitudeRef'],
-  },
-  { title: '5 \u00b7 political', keys: ['politicalStrength', 'politicalMode'] },
-  {
-    title: '6 \u00b7 hillshade',
-    keys: ['hillshadeStrength', 'hillshadeMode', 'lightAzimuthDeg', 'lightAltitudeDeg', 'zFactor'],
-  },
-  { title: '7 \u00b7 paper & bake', keys: ['grain', 'grainScale', 'supersample'] },
-]
 
 /**
  * The pixel dimensions {@link composeTerrainRgba} will produce for a given heightmap and supersample
@@ -358,7 +149,7 @@ export function snowLineDrop(latitudeDeg: number, options: TerrainTextureOptions
  */
 function blendGreyInto(
   out: [number, number, number],
-  base: [number, number, number],
+  base: readonly [number, number, number],
   grey: number,
   mode: BlendMode,
   strength: number
@@ -532,6 +323,200 @@ function landColorInto(
  * @param areaTint - an optional colour claimed over part of the map (the political layer)
  * @returns an `RGBA` `Uint8Array` of length `width * height * 4`
  */
+
+/** Everything a row of the composite needs that does not change from one row to the next. */
+interface TerrainRowContext {
+  /** The elevation source. */
+  heightmap: Heightmap
+  /** Which cells are land — its bilinear coverage is what mixes sea and land across the shore. */
+  mask: LandMask
+  /** The look being composited. */
+  options: TerrainTextureOptions
+  /** A colour claimed over part of the map (the political layer), or `null`. */
+  areaTint: AreaTint | null
+  /**
+   * The hillshade, bilinearly sampled at a fractional DEM position.
+   * @param fx - fractional column
+   * @param fy - fractional row
+   * @returns the shading multiplier
+   */
+  shadeAt: (fx: number, fy: number) => number
+  /** The flat sea tone, in `[0, 1]` channels. */
+  baseSea: readonly [number, number, number]
+  /** Scratch sea triplet, reused across the whole grid — the loop must stay allocation-free. */
+  seaC: [number, number, number]
+  /** Scratch land triplet, likewise. */
+  landC: [number, number, number]
+  /** Width of the output image in pixels. */
+  outWidth: number
+}
+
+/**
+ * How far the snow line drops, for each output row.
+ *
+ * Resolved once per row because it depends only on latitude, and latitude only on the row. Web Mercator
+ * is non-linear in latitude, hence the projection round trip rather than a lerp down the image.
+ * @param heightmap - the elevation source, for its geographic bounds
+ * @param options - the snow-line settings
+ * @param outHeight - the output image height in pixels
+ * @returns one drop per output row
+ */
+export function snowLineDropByRow(
+  heightmap: Heightmap,
+  options: TerrainTextureOptions,
+  outHeight: number
+): Float32Array {
+  const drops = new Float32Array(outHeight)
+  for (let oy = 0; oy < outHeight; oy++) {
+    const v = outHeight > 1 ? oy / (outHeight - 1) : 0
+    drops[oy] = snowLineDrop(verticalToLatitude(v, heightmap.meta.bbox), options)
+  }
+  return drops
+}
+
+/**
+ * Bilinearly sample a DEM-resolution greyscale field at a fractional grid position.
+ *
+ * A sampler rather than a per-call function so the grid dimensions are bound once: this is read once per
+ * output pixel, which is over twenty million times at the 4x bake.
+ * @param field - the field, row-major, length `width * height`
+ * @param width - the field's width in samples
+ * @param height - the field's height in samples
+ * @returns the sampler
+ */
+export function createShadeSampler(
+  field: Float32Array,
+  width: number,
+  height: number
+): (fx: number, fy: number) => number {
+  return (fx: number, fy: number): number => {
+    // Clamp the POSITION, not just the indices it lands on. Clamping only the indices looks like a
+    // guard and is not one: the interpolation weight stays `fx - x0`, so a position outside the field
+    // extrapolates away from it instead of stopping at the edge. Identical for any position inside.
+    const cx = Math.min(width - 1, Math.max(0, fx))
+    const cy = Math.min(height - 1, Math.max(0, fy))
+    const x0 = Math.floor(cx)
+    const y0 = Math.floor(cy)
+    const x1 = Math.min(width - 1, x0 + 1)
+    const y1 = Math.min(height - 1, y0 + 1)
+    const tx = cx - x0
+    const ty = cy - y0
+    const top = (field[y0 * width + x0] ?? 1) * (1 - tx) + (field[y0 * width + x1] ?? 1) * tx
+    const bottom = (field[y1 * width + x0] ?? 1) * (1 - tx) + (field[y1 * width + x1] ?? 1) * tx
+    return top * (1 - ty) + bottom * ty
+  }
+}
+
+/**
+ * The sea tone at a sample — flat, or carrying the greyscale elevation layer when asked.
+ * @param out - the triplet to write into
+ * @param baseSea - the flat sea tone
+ * @param elevation - the sample elevation in metres
+ * @param options - the texture options
+ * @returns nothing; `out` is written in place
+ */
+export function seaColorInto(
+  out: [number, number, number],
+  baseSea: readonly [number, number, number],
+  elevation: number,
+  options: TerrainTextureOptions
+): void {
+  if (!options.elevationIncludesSea) {
+    out[0] = baseSea[0]
+    out[1] = baseSea[1]
+    out[2] = baseSea[2]
+    return
+  }
+  blendGreyInto(
+    out,
+    baseSea,
+    elevationGrey(elevation, options),
+    options.elevationMode,
+    options.elevationStrength
+  )
+}
+
+/**
+ * Mix sea and land by coverage, apply the paper grain, and write one RGBA pixel.
+ * @param rgba - the output buffer
+ * @param offset - the pixel's byte offset
+ * @param seaC - the sea tone, valid when coverage is below one
+ * @param landC - the land tone, valid when coverage is above zero
+ * @param coverage - how much of the sample is land, in `[0, 1]`
+ * @param modulation - the grain multiplier, centred on one
+ * @returns nothing; `rgba` is written in place
+ */
+export function writeTerrainPixel(
+  rgba: Uint8Array,
+  offset: number,
+  seaC: readonly [number, number, number],
+  landC: readonly [number, number, number],
+  coverage: number,
+  modulation: number
+): void {
+  for (let k = 0; k < 3; k++) {
+    const sea = coverage < 1 ? (seaC[k] ?? 0) : 0
+    const land = coverage > 0 ? (landC[k] ?? 0) : 0
+    const mixed = sea + (land - sea) * coverage
+    rgba[offset + k] = Math.round(Math.min(1, Math.max(0, mixed * modulation)) * 255)
+  }
+  rgba[offset + 3] = 255
+}
+
+/**
+ * Composite one output row.
+ * @param rgba - the output buffer
+ * @param context - everything that does not change from row to row
+ * @param oy - the output row
+ * @param fy - that row's fractional position in the DEM
+ * @param snowDrop - how far the snow line drops at this latitude
+ * @returns nothing; `rgba` is written in place
+ */
+function composeTerrainRow(
+  rgba: Uint8Array,
+  context: TerrainRowContext,
+  oy: number,
+  fy: number,
+  snowDrop: number
+): void {
+  const { heightmap, mask, options, outWidth } = context
+  const { width, height } = heightmap.meta
+  for (let ox = 0; ox < outWidth; ox++) {
+    const fx = outWidth > 1 ? (ox * (width - 1)) / (outWidth - 1) : 0
+    // Bilinear elevation: at scale 1 this lands exactly on the DEM samples, so the 1:1 bake is
+    // unchanged; above 1 it interpolates between them.
+    const u = width > 1 ? fx / (width - 1) : 0
+    const v = height > 1 ? fy / (height - 1) : 0
+    const e = heightmap.sample(u, v)
+    const coverage = mask.coverage(u, v)
+
+    if (coverage < 1) seaColorInto(context.seaC, context.baseSea, e, options)
+    if (coverage > 0) {
+      landColorInto(
+        context.landC,
+        e,
+        context.shadeAt(fx, fy),
+        options,
+        snowDrop,
+        context.areaTint?.at(u, v) ?? null
+      )
+    }
+
+    // Vellum grain: a final multiplicative paper mottling over land AND sea, so the parchment fibre
+    // reads uniformly across continents and ocean alike (centred on 1 -> lightens/darkens patches).
+    // Sampled in output pixels, so a finer bake buys finer fibre — the point of supersampling.
+    const modulation = 1 + (paperNoise(ox, oy, options.grainScale) - 0.5) * options.grain
+    writeTerrainPixel(
+      rgba,
+      (oy * outWidth + ox) * 4,
+      context.seaC,
+      context.landC,
+      coverage,
+      modulation
+    )
+  }
+}
+
 export function composeTerrainRgba(
   heightmap: Heightmap,
   options: TerrainTextureOptions,
@@ -542,84 +527,25 @@ export function composeTerrainRgba(
   // sea level and dries out every lake above it.
   const mask = landMask ?? createElevationLandMask(heightmap, options.seaLevel)
   const { width, height } = heightmap.meta
-  const shade = computeHillshade(heightmap, options)
   const { width: outWidth, height: outHeight } = terrainTextureSize(heightmap, options)
   const rgba = new Uint8Array(outWidth * outHeight * 4)
-  const baseSea: [number, number, number] = [
-    options.sea.r / 255,
-    options.sea.g / 255,
-    options.sea.b / 255,
-  ]
-  // Scratch triplets reused across the whole grid — the loop must stay allocation-free.
-  const seaC: [number, number, number] = [0, 0, 0]
-  const landC: [number, number, number] = [0, 0, 0]
-
-  // The snow line only depends on latitude, and latitude only on the row — so resolve it once per
-  // output row. Web Mercator is non-linear in latitude, hence the projection round-trip, not a lerp.
-  const snowDropByRow = new Float32Array(outHeight)
-  for (let oy = 0; oy < outHeight; oy++) {
-    const v = outHeight > 1 ? oy / (outHeight - 1) : 0
-    snowDropByRow[oy] = snowLineDrop(verticalToLatitude(v, heightmap.meta.bbox), options)
-  }
-
-  /** Bilinearly sample the DEM-resolution hillshade at a fractional grid position. */
-  const shadeAt = (fx: number, fy: number): number => {
-    const x0 = Math.min(width - 1, Math.max(0, Math.floor(fx)))
-    const y0 = Math.min(height - 1, Math.max(0, Math.floor(fy)))
-    const x1 = Math.min(width - 1, x0 + 1)
-    const y1 = Math.min(height - 1, y0 + 1)
-    const tx = fx - x0
-    const ty = fy - y0
-    const top = (shade[y0 * width + x0] ?? 1) * (1 - tx) + (shade[y0 * width + x1] ?? 1) * tx
-    const bottom = (shade[y1 * width + x0] ?? 1) * (1 - tx) + (shade[y1 * width + x1] ?? 1) * tx
-    return top * (1 - ty) + bottom * ty
+  const snowDropByRow = snowLineDropByRow(heightmap, options, outHeight)
+  const context: TerrainRowContext = {
+    heightmap,
+    mask,
+    options,
+    areaTint: areaTint ?? null,
+    shadeAt: createShadeSampler(computeHillshade(heightmap, options), width, height),
+    baseSea: [options.sea.r / 255, options.sea.g / 255, options.sea.b / 255],
+    // Scratch triplets reused across the whole grid — the loop must stay allocation-free.
+    seaC: [0, 0, 0],
+    landC: [0, 0, 0],
+    outWidth,
   }
 
   for (let oy = 0; oy < outHeight; oy++) {
     const fy = outHeight > 1 ? (oy * (height - 1)) / (outHeight - 1) : 0
-    const snowDrop = snowDropByRow[oy] ?? 0
-
-    for (let ox = 0; ox < outWidth; ox++) {
-      const fx = outWidth > 1 ? (ox * (width - 1)) / (outWidth - 1) : 0
-      // Bilinear elevation: at scale 1 this lands exactly on the DEM samples, so the 1:1 bake is
-      // unchanged; above 1 it interpolates between them.
-      const u = width > 1 ? fx / (width - 1) : 0
-      const v = height > 1 ? fy / (height - 1) : 0
-      const e = heightmap.sample(u, v)
-      const coverage = mask.coverage(u, v)
-
-      if (coverage < 1) {
-        if (options.elevationIncludesSea) {
-          blendGreyInto(
-            seaC,
-            baseSea,
-            elevationGrey(e, options),
-            options.elevationMode,
-            options.elevationStrength
-          )
-        } else {
-          seaC[0] = baseSea[0]
-          seaC[1] = baseSea[1]
-          seaC[2] = baseSea[2]
-        }
-      }
-      if (coverage > 0)
-        landColorInto(landC, e, shadeAt(fx, fy), options, snowDrop, areaTint?.at(u, v) ?? null)
-
-      // Vellum grain: a final multiplicative paper mottling over land AND sea, so the parchment fibre
-      // reads uniformly across continents and ocean alike (centred on 1 → lightens/darkens patches).
-      // Sampled in output pixels, so a finer bake buys finer fibre — the point of supersampling.
-      const modulation = 1 + (paperNoise(ox, oy, options.grainScale) - 0.5) * options.grain
-
-      const o = (oy * outWidth + ox) * 4
-      for (let k = 0; k < 3; k++) {
-        const sea = coverage < 1 ? (seaC[k] ?? 0) : 0
-        const land = coverage > 0 ? (landC[k] ?? 0) : 0
-        const mixed = sea + (land - sea) * coverage
-        rgba[o + k] = Math.round(Math.min(1, Math.max(0, mixed * modulation)) * 255)
-      }
-      rgba[o + 3] = 255
-    }
+    composeTerrainRow(rgba, context, oy, fy, snowDropByRow[oy] ?? 0)
   }
   return rgba
 }

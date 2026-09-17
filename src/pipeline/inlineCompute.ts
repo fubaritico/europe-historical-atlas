@@ -74,6 +74,191 @@ export interface InlineComputeOptions {
   pinnedFor?: (name: string | null) => RgbColor | null
 }
 
+/** Announce a phase, then let the host paint before it starts. */
+export type Announce = (fraction: number, phase: Parameters<ProgressReport>[1]) => Promise<void>
+
+/**
+ * Bind a progress callback and a yield into the one call a phase makes before it starts.
+ *
+ * The yield is what makes the flag visible: on the main thread a report raised immediately before a
+ * synchronous block is a report nobody paints.
+ * @param report - where to announce, when a caller is showing a panel
+ * @param yieldControl - hand control back to the host
+ * @returns the announce call the phases use
+ */
+export function announcer(
+  report: ProgressReport | undefined,
+  yieldControl: () => Promise<void>
+): Announce {
+  return async (fraction, phase) => {
+    report?.(fraction, phase)
+    await yieldControl()
+  }
+}
+
+/**
+ * How to trace borders out of a raster, with the land test attached when there is a mask.
+ *
+ * Shared rather than spelled out at each call site: without the mask a raster of claims cannot tell
+ * unclaimed land from open sea, so the frontier line has to stay off rather than double the shoreline —
+ * and a copy of that rule that drifted would put a second coastline on the map.
+ * @param mask - which cells are land, when it is known
+ * @param smoothing - how many corner-cutting rounds to apply to the traced line
+ * @returns the options for `extractRegionBorders`
+ */
+export function borderTraceOptions(
+  mask: LandMask | null,
+  smoothing: number
+): Parameters<typeof extractRegionBorders>[1] {
+  return {
+    smoothing,
+    ...(mask ? { isLand: (u: number, v: number): boolean => mask.isLand(u, v) } : {}),
+  }
+}
+
+/** A year rasterised, grown, coloured and traced. */
+export interface PoliticalRaster {
+  /** One polity index per cell. */
+  raster: RegionRaster
+  /** The colour each polity was given, by index. */
+  tints: RgbColor[]
+  /** The border lines derived from that very grid. */
+  borders: RegionBorders
+}
+
+/**
+ * Turn a year's polygons into a coloured grid and the borders that are its own edges.
+ *
+ * The whole cost of changing year, and the reason it lives off the main thread. Written as a function of
+ * its inputs rather than as a method on the compute so that a test can drive it with a literal raster
+ * and no installed sources at all.
+ * @param dem - the elevation grid, which sizes the political raster
+ * @param mask - which cells are land, when it is known
+ * @param request - the year and how to draw it
+ * @param pinnedFor - the editorial colour for a polity, if it has one
+ * @param announce - where each phase reports
+ * @returns the grid, its colours and its borders
+ */
+export async function rasterisePolitical(
+  dem: Heightmap,
+  mask: LandMask | null,
+  request: PoliticalRequest,
+  pinnedFor: (name: string | null) => RgbColor | null,
+  announce: Announce
+): Promise<PoliticalRaster> {
+  // The political grid can be finer than the DEM, so everything measured in cells scales with it here,
+  // once — `snapToCoast` above all, whose reach in kilometres would otherwise halve with the grid and
+  // leave the colours stopping short of the coastline again.
+  const scale = Math.max(1, Math.round(request.rasterScale))
+
+  await announce(0, 'rasterise')
+  const claimed = rasteriseRegions(request.regions, dem.meta.width * scale, dem.meta.height * scale)
+
+  // Grow the claims over any land the schematic polygons missed, so the coloured areas end on our
+  // coastline rather than on theirs. The longest phase by far: it walks every land cell.
+  await announce(0.2, 'expand')
+  const raster = mask
+    ? expandRegionsOverLand(claimed, (u, v) => mask.isLand(u, v), request.snapToCoast * scale)
+    : claimed
+
+  // Colouring reads adjacency off the raster, so it has to run after the claims have grown: two
+  // polities may only become neighbours once they both reach the coast.
+  await announce(0.7, 'colours')
+  const named = request.regions.map((region) => ({
+    name: request.colorBySuzerain ? (region.subjectTo ?? region.name) : region.name,
+  }))
+  const tints = assignRegionColors(raster, named, request.palette, pinnedFor)
+
+  await announce(0.9, 'borders')
+  return {
+    raster,
+    tints,
+    borders: extractRegionBorders(raster, borderTraceOptions(mask, request.borderSmoothing)),
+  }
+}
+
+/**
+ * Bake the terrain pixels, tinted by the installed year when there is one.
+ * @param dem - the elevation grid
+ * @param mask - which cells are land, or `null` to fall back on an elevation threshold
+ * @param textureOptions - the look being composited
+ * @param political - the installed year, or `null` for bare terrain
+ * @returns the pixels and the size they were baked at
+ */
+export function bakeTerrainPixels(
+  dem: Heightmap,
+  mask: LandMask | null,
+  textureOptions: TerrainTextureOptions,
+  political: Pick<PoliticalRaster, 'raster' | 'tints'> | null
+): TerrainBakeResult {
+  // The seam the compositor sees: a colour claimed at a coordinate, and nothing about history.
+  const tint: AreaTint | undefined = political
+    ? {
+        at: (u: number, v: number): RgbColor | null => {
+          const index = political.raster.indexAt(u, v)
+          return index < 0 ? null : (political.tints[index] ?? null)
+        },
+      }
+    : undefined
+
+  // The elevation fallback is a documented degraded mode, not an equivalent — it drowns land below sea
+  // level and dries out every lake above it.
+  const rgba = composeTerrainRgba(
+    dem,
+    textureOptions,
+    mask ?? createElevationLandMask(dem, textureOptions.seaLevel),
+    tint
+  )
+  const { width, height } = terrainTextureSize(dem, textureOptions)
+  return { rgba, width, height }
+}
+
+/**
+ * Rebuild the live sources from the plain buffers that crossed the wire.
+ * @param sources - the elevation grid, and the packed land mask when there is one
+ * @returns the sources in the form the compute reads them
+ */
+export function installSources(sources: ComputeSources): {
+  heightmap: Heightmap
+  landMask: LandMask | null
+} {
+  return {
+    heightmap: createHeightmap(sources.heightmap.meta, sources.heightmap.data),
+    landMask: sources.landMask
+      ? createPackedLandMask(sources.landMask.meta, sources.landMask.bits)
+      : null,
+  }
+}
+
+/**
+ * The elevation source, or a stated failure — never a silent no-op that leaves a blank map.
+ * @param heightmap - what has been installed so far
+ * @returns the elevation grid
+ */
+export function requireHeightmap(heightmap: Heightmap | null): Heightmap {
+  if (!heightmap) throw new Error('map compute: no heightmap installed — call setSources first')
+  return heightmap
+}
+
+/**
+ * Re-trace the borders of the installed year, or none when no year is installed.
+ *
+ * Empty rather than a failure: asking for borders before a year has been computed is what a dev-panel
+ * slider does on a bare map, and it is not a mistake — there is simply nothing to draw yet.
+ * @param political - the installed year, or `null`
+ * @param mask - which cells are land, when it is known
+ * @param smoothing - how many corner-cutting rounds to apply
+ * @returns the border lines
+ */
+export function deriveInstalledBorders(
+  political: Pick<PoliticalRaster, 'raster'> | null,
+  mask: LandMask | null,
+  smoothing: number
+): RegionBorders {
+  if (!political) return { between: [], frontier: [] }
+  return extractRegionBorders(political.raster, borderTraceOptions(mask, smoothing))
+}
+
 /**
  * Build a {@link MapCompute} that runs on the calling thread.
  * @param options - collaborators to swap out; every one has a working default
@@ -85,30 +270,11 @@ export function createInlineMapCompute(options: InlineComputeOptions = {}): MapC
 
   let heightmap: Heightmap | null = null
   let landMask: LandMask | null = null
-  let political: { raster: RegionRaster; tints: RgbColor[] } | null = null
-
-  /** Announce a phase, then let the host paint before it starts. */
-  const announce = async (
-    report: ProgressReport | undefined,
-    fraction: number,
-    phase: Parameters<ProgressReport>[1]
-  ): Promise<void> => {
-    report?.(fraction, phase)
-    await yieldControl()
-  }
-
-  /** The elevation source, or a stated failure — never a silent no-op that leaves a blank map. */
-  const requireHeightmap = (): Heightmap => {
-    if (!heightmap) throw new Error('map compute: no heightmap installed — call setSources first')
-    return heightmap
-  }
+  let political: PoliticalRaster | null = null
 
   return {
     setSources(sources: ComputeSources): Promise<void> {
-      heightmap = createHeightmap(sources.heightmap.meta, sources.heightmap.data)
-      landMask = sources.landMask
-        ? createPackedLandMask(sources.landMask.meta, sources.landMask.bits)
-        : null
+      ;({ heightmap, landMask } = installSources(sources))
       return Promise.resolve()
     },
 
@@ -121,83 +287,28 @@ export function createInlineMapCompute(options: InlineComputeOptions = {}): MapC
       request: PoliticalRequest,
       onProgress?: ProgressReport
     ): Promise<PoliticalResult> {
-      const dem = requireHeightmap()
-      // The political grid can be finer than the DEM, so everything measured in cells scales with it
-      // here, once — `snapToCoast` above all, whose reach in kilometres would otherwise halve with the
-      // grid and leave the colours stopping short of the coastline again.
-      const scale = Math.max(1, Math.round(request.rasterScale))
-
-      await announce(onProgress, 0, 'rasterise')
-      const claimed = rasteriseRegions(
-        request.regions,
-        dem.meta.width * scale,
-        dem.meta.height * scale
+      const computed = await rasterisePolitical(
+        requireHeightmap(heightmap),
+        landMask,
+        request,
+        pinnedFor,
+        announcer(onProgress, yieldControl)
       )
-
-      // Grow the claims over any land the schematic polygons missed, so the coloured areas end on our
-      // coastline rather than on theirs. The longest phase by far: it walks every land cell.
-      const mask = landMask
-      await announce(onProgress, 0.2, 'expand')
-      const raster = mask
-        ? expandRegionsOverLand(claimed, (u, v) => mask.isLand(u, v), request.snapToCoast * scale)
-        : claimed
-
-      // Colouring reads adjacency off the raster, so it has to run after the claims have grown: two
-      // polities may only become neighbours once they both reach the coast.
-      await announce(onProgress, 0.7, 'colours')
-      const named = request.regions.map((region) => ({
-        name: request.colorBySuzerain ? (region.subjectTo ?? region.name) : region.name,
-      }))
-      const tints = assignRegionColors(raster, named, request.palette, pinnedFor)
-
-      await announce(onProgress, 0.9, 'borders')
-      const borders = extractRegionBorders(raster, {
-        smoothing: request.borderSmoothing,
-        // Without the mask a raster of claims cannot tell unclaimed land from open sea, and the
-        // frontier line has to stay off rather than double the shoreline.
-        ...(mask ? { isLand: (u: number, v: number): boolean => mask.isLand(u, v) } : {}),
-      })
-
-      political = { raster, tints }
-      return { tints, borders }
+      political = computed
+      return { tints: computed.tints, borders: computed.borders }
     },
 
     deriveBorders(smoothing: number): Promise<RegionBorders> {
-      const installed = political
-      if (!installed) return Promise.resolve({ between: [], frontier: [] })
-      const mask = landMask
-      return Promise.resolve(
-        extractRegionBorders(installed.raster, {
-          smoothing,
-          ...(mask ? { isLand: (u: number, v: number): boolean => mask.isLand(u, v) } : {}),
-        })
-      )
+      return Promise.resolve(deriveInstalledBorders(political, landMask, smoothing))
     },
 
     async bakeTerrain(
       textureOptions: TerrainTextureOptions,
       onProgress?: ProgressReport
     ): Promise<TerrainBakeResult> {
-      const dem = requireHeightmap()
-      await announce(onProgress, 0, 'bake')
-
-      const installed = political
-      // The seam the compositor sees: a colour claimed at a coordinate, and nothing about history.
-      const tint: AreaTint | undefined = installed
-        ? {
-            at: (u: number, v: number): RgbColor | null => {
-              const index = installed.raster.indexAt(u, v)
-              return index < 0 ? null : (installed.tints[index] ?? null)
-            },
-          }
-        : undefined
-
-      // The elevation fallback is a documented degraded mode, not an equivalent — it drowns land below
-      // sea level and dries out every lake above it.
-      const mask = landMask ?? createElevationLandMask(dem, textureOptions.seaLevel)
-      const rgba = composeTerrainRgba(dem, textureOptions, mask, tint)
-      const { width, height } = terrainTextureSize(dem, textureOptions)
-      return { rgba, width, height }
+      const dem = requireHeightmap(heightmap)
+      await announcer(onProgress, yieldControl)(0, 'bake')
+      return bakeTerrainPixels(dem, landMask, textureOptions, political)
     },
 
     dispose(): void {
