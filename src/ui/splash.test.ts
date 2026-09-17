@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { MAP_TYPEFACE } from '../utils/lettering'
+
 import {
   buildSplashCaption,
   buildSplashFigure,
@@ -265,6 +267,16 @@ describe('buildSplashCaption', () => {
   describe('happy path', () => {
     it('letters the title for the eye', () => {
       expect(buildSplashCaption('Atlas', '#5c3a2e').textContent).toBe('ΛTLΛS')
+    })
+
+    it('sets it in the shared face, the one the map title uses', () => {
+      // Pinned to the constant rather than to a font name: `scene/mapTitle` asserts the same thing
+      // against the same constant, which is what keeps the two screens from drifting apart.
+      // Compared stripped of quotes and spaces: jsdom renormalises a family list the way it
+      // renormalises a hex colour into `rgb()`, so the raw strings never match.
+      const bare = (list: string): string => list.replace(/['" ]/g, '')
+      const caption = buildSplashCaption('Atlas', '#5c3a2e')
+      expect(bare(caption.style.fontFamily)).toBe(bare(MAP_TYPEFACE))
     })
 
     it('names it in plain words for a screen reader', () => {

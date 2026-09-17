@@ -204,7 +204,10 @@ describe('createDevPanel', () => {
         if (total(calls) === 0 && !READ_EVERY_FRAME.has(match.property)) inert.push(match.property)
       }
       expect(inert).toEqual([])
-    })
+      // Quadratic on purpose: the panel is rebuilt once per control, so a callback fired by one cannot
+      // be credited to another. Six new title controls took it past the five-second default; the cost
+      // is the price of the guard, not a slow test to fix.
+    }, 30_000)
 
     it('routes a border paint to a redraw, not to a whole year', () => {
       const { calls, controls } = build()

@@ -9,6 +9,7 @@
  * dismissed; the composition root decides when.
  */
 
+import { MAP_TYPEFACE, withLambdaForA } from '../utils/lettering'
 import { prefersReducedMotion } from '../utils/motion'
 
 import {
@@ -57,21 +58,10 @@ export interface Splash {
   dispose(): void
 }
 
+export { withLambdaForA } from '../utils/lettering'
+
 /** How long the splash takes to fade, in milliseconds. */
 const FADE_MS = 420
-
-/**
- * Swap every `A` for a capital lambda.
- *
- * A borrowed Greek letter is the oldest trick in cartographic lettering, and it costs nothing here
- * because the accessible name carries the real word — the play is in the glyphs, never in the text a
- * screen reader reads out.
- * @param text - the title, in plain words
- * @returns the same text with `A` and `a` rendered as `Λ`
- */
-export function withLambdaForA(text: string): string {
-  return text.replace(/[Aa]/g, 'Λ')
-}
 
 /**
  * Build the full-screen panel the splash lives in.
@@ -144,7 +134,7 @@ export function buildSplashCaption(title: string, ink: string): HTMLParagraphEle
   caption.style.cssText = [
     'margin:0',
     `color:${ink}`,
-    "font-family:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif",
+    `font-family:${MAP_TYPEFACE}`,
     'font-size:15px',
     'font-weight:500',
     'letter-spacing:0.42em',
