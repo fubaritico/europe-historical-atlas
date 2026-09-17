@@ -17,6 +17,7 @@ import type { FrameLabels } from './scene/frameLabels'
 import type { GraticuleFrame } from './scene/graticuleFrame'
 import type { LineLayer } from './scene/lineLayer'
 import type { MapEdge } from './scene/mapEdge'
+import type { MapTitle } from './scene/mapTitle'
 import type { PaperSheet } from './scene/paperSheet'
 import type { RiverLayer } from './scene/riverLayer'
 import type { DataTexture, Mesh, MeshBasicMaterial, Object3D, PlaneGeometry, Scene } from 'three'
@@ -72,6 +73,8 @@ export interface LayerHandles {
   frame: GraticuleFrame | null
   /** The degrees written in the margin, or `null` when the frame carries none. */
   labels: FrameLabels | null
+  /** The atlas's name, printed in the margin below the map. */
+  title: MapTitle | null
   /** The sheet's baked vellum, managed apart from the mesh it hangs on. */
   sheetTexture: DataTexture | null
 }

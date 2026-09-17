@@ -23,9 +23,10 @@ import { terrainTextureSize } from './pipeline/terrainCompose'
 import { createCompassRose } from './scene/compassRose'
 import { buildBorderStrokes, createComposedLineLayer } from './scene/composedLineLayer'
 import { createFrameLabels } from './scene/frameLabels'
-import { createGraticuleFrame } from './scene/graticuleFrame'
+import { createGraticuleFrame, labelLane } from './scene/graticuleFrame'
 import { createLineLayer } from './scene/lineLayer'
 import { createMapEdge } from './scene/mapEdge'
+import { MAP_TITLE, createMapTitle } from './scene/mapTitle'
 import { createPaperSheet } from './scene/paperSheet'
 import { createReliefMesh, meshWorldDepth } from './scene/reliefMesh'
 import { generateRhumbSegments } from './scene/rhumbNetwork'
@@ -37,6 +38,7 @@ import type { BorderPattern } from './data/borderStyles'
 import type { DevState } from './devState'
 import type { LayerContext } from './mapLayerContext'
 import type { GraticuleFrameOptions } from './scene/graticuleFrame'
+import type { MapTitle } from './scene/mapTitle'
 import type { DataTexture } from 'three'
 
 /**
@@ -344,6 +346,31 @@ function frameSettings(context: LayerContext, worldDepth: number): GraticuleFram
 }
 
 /**
+ * Print the atlas's name in the margin, below everything the border carries.
+ *
+ * Placed from the border's own outermost edge rather than from the map's, so the name keeps its distance
+ * from the frame when the band thickens or the label lane widens instead of drifting into them.
+ * @param context - the layers and what they read
+ * @param settings - the frame the title sits below
+ * @returns the title, or `null` when it is switched off
+ */
+function buildTitle(context: LayerContext, settings: GraticuleFrameOptions): MapTitle | null {
+  const { dev } = context
+  if (!dev.frame.titleShow) return null
+  const outerEdge = labelLane(settings).toZ + Math.max(0, dev.frame.ruleWidth)
+  return createMapTitle({
+    text: MAP_TITLE,
+    size: dev.frame.titleSize,
+    z: outerEdge + dev.frame.titleOffset,
+    lift: dev.frame.lift + LABEL_LIFT,
+    ink: dev.frame.titleInk,
+    opacity: dev.frame.titleOpacity,
+    roughness: dev.frame.titleRoughness,
+    loadTexture: svgToTexture,
+  })
+}
+
+/**
  * Rebuild the sheet, the border that frames the map, and the degrees written in its margin.
  *
  * The three are one thing: the border's place is decided by the map's own edge, the sheet is what it is
@@ -357,9 +384,11 @@ export function rebuildFrame(context: LayerContext): void {
   disposeHandle(scene, handles.sheet)
   disposeHandle(scene, handles.frame)
   disposeHandle(scene, handles.labels)
+  disposeHandle(scene, handles.title)
   handles.sheet = null
   handles.frame = null
   handles.labels = null
+  handles.title = null
   if (!sources.heightmap || !dev.frame.show) return
 
   const worldDepth = meshWorldDepth(sources.heightmap.meta, WORLD_WIDTH)
@@ -386,6 +415,8 @@ export function rebuildFrame(context: LayerContext): void {
     labelOpacity: dev.frame.labelOpacity,
     loadTexture: svgToTexture,
   })
+  handles.title = buildTitle(context, settings)
   scene.add(handles.sheet.object, handles.frame.object)
   if (handles.labels) scene.add(handles.labels.object)
+  if (handles.title) scene.add(handles.title.object)
 }

@@ -54,6 +54,18 @@ export interface FrameDevParams {
   edgeBase: string
   /** How many bands of strata show in the cut. Zero leaves a clean gradient. */
   edgeStrata: number
+  /** Print the atlas's name in the margin below the map. */
+  titleShow: boolean
+  /** Height of the title's own block, in world units. The lettering fills about half of it. */
+  titleSize: number
+  /** How far below the border's outer rule the title's centre sits. */
+  titleOffset: number
+  /** The title's ink. */
+  titleInk: string
+  /** How opaque it is. */
+  titleOpacity: number
+  /** How far its outlines are eaten by the paper, in atlas pixels. Zero prints them clean. */
+  titleRoughness: number
 }
 
 /**
@@ -70,29 +82,49 @@ export const DEFAULT_FRAME_PARAMS: FrameDevParams = {
   // elongated, and one degree came out too square on a map this wide.
   bandWidth: 0.04,
   bandStepDeg: 2,
-  // Nearly black, as an engraving is. The light blocks are the paper showing through, so the band's
-  // whole reading rests on how far the dark ones are from it.
-  ink: '#1c130c',
-  bandOpacity: 0.92,
+  // Nearly black, as an engraving is, and **opaque**: the light blocks are the paper showing through,
+  // so the band's whole reading rests on how far the dark ones are from it. Letting the fibre read
+  // through the ink as well was tried and dropped on screen — it cost the contrast and bought nothing
+  // the light blocks were not already giving.
+  ink: '#1a120b',
+  bandOpacity: 1,
   ruleWidth: 0.008,
   labelLaneWidth: 0.16,
   // Thirteen numbers across and seven down. Every ten degrees, as the reference does.
   labelStepDeg: 10,
-  // Brown where the band is nearly black: a ruled line and a written number are not the same mark.
-  labelInk: '#4a3424',
+  // The band's own ink. A browner number was tried — a ruled line and a written number are not the same
+  // mark — and read as faded rather than as a different hand; the roughness below is what separates
+  // them instead.
+  labelInk: '#1a120b',
   labelRoughness: 1.1,
   labelOpacity: 0.88,
   lift: 0.004,
   edgeShow: true,
-  // About a third of the tallest peak's world height, so the board reads as a board and not a plinth.
-  edgeDepth: 0.06,
-  // Dark. A cut through ground is in shadow by definition — it faces sideways, away from the light
-  // the hillshade is baked from, and a section the same value as the parchment reads as a fold in the
-  // paper rather than as depth.
-  edgeSoil: '#7d5f3c',
-  edgeDeep: '#33251a',
-  edgeBase: '#8a7a61',
-  edgeStrata: 5,
+  // **Set on screen, and it is the knob to suspect if the band's light blocks stop being paper.**
+  // `createMapEdge` builds two walls. The *section* — sea level up to the land's surface — exists only
+  // where there is land at the map's boundary, which is where a thickness should read. The *board* is
+  // this one: a uniform skirt below sea level running the whole way round, open ocean included. On
+  // screen "downward" and "outward" are the same direction as soon as the camera tilts, so the board
+  // projects across the margin; measured 2026-09-18, 0.06 of depth covered 23 px against a 17 px band
+  // and turned its transparent blocks into a flat slab. The clean answer is to carry the thickness on
+  // the *sheet's* outer edge instead of the map's, which is not built yet.
+  edgeDepth: 0,
+  // Dark. A cut through ground is in shadow by definition — it faces sideways, away from the light the
+  // hillshade is baked from, and a section the same value as the parchment reads as a fold in the paper.
+  edgeSoil: '#54402a',
+  edgeDeep: '#1a120b',
+  edgeBase: '#5f5342',
+  edgeStrata: 3,
+  titleShow: true,
+  // The margin is about 0.78 deep between the outer rule and the sheet's edge; a block a third of that
+  // leaves paper either side of the name rather than filling the margin with it.
+  titleSize: 0.34,
+  titleOffset: 0.22,
+  // Darker than the numbers and darker than the band's brown was: a title is set, not ruled, and it is
+  // the one thing in the margin that should read at a glance.
+  titleInk: '#2a1d14',
+  titleOpacity: 0.9,
+  titleRoughness: 1.4,
 }
 
 /** Range, step and label of every {@link FrameDevParams} field. */
@@ -111,11 +143,23 @@ export const FRAME_CONTROLS: ControlTable<FrameDevParams> = {
   labelOpacity: { kind: 'number', min: 0.2, max: 1, step: 0.01, label: 'number opacity' },
   lift: { kind: 'number', min: 0, max: 0.05, step: 0.001, label: 'lift above sea' },
   edgeShow: { kind: 'boolean', label: 'cut the edge' },
-  edgeDepth: { kind: 'number', min: 0, max: 0.4, step: 0.005, label: 'board thickness' },
+  edgeDepth: {
+    kind: 'number',
+    min: 0,
+    max: 0.4,
+    step: 0.005,
+    label: 'board thickness (eats the band)',
+  },
   edgeSoil: { kind: 'color', label: 'soil (surface)' },
   edgeDeep: { kind: 'color', label: 'soil (deep)' },
   edgeBase: { kind: 'color', label: 'board edge' },
   edgeStrata: { kind: 'number', min: 0, max: 16, step: 1, label: 'strata' },
+  titleShow: { kind: 'boolean', label: 'print the title' },
+  titleSize: { kind: 'number', min: 0.05, max: 1.2, step: 0.01, label: 'title size' },
+  titleOffset: { kind: 'number', min: 0, max: 2, step: 0.01, label: 'title offset' },
+  titleInk: { kind: 'color', label: 'title ink' },
+  titleOpacity: { kind: 'number', min: 0.2, max: 1, step: 0.01, label: 'title opacity' },
+  titleRoughness: { kind: 'number', min: 0, max: 6, step: 0.1, label: 'title roughness' },
 }
 
 /** Display order of the frame controls. */
@@ -139,4 +183,10 @@ export const FRAME_CONTROL_ORDER: (keyof FrameDevParams)[] = [
   'edgeDeep',
   'edgeBase',
   'edgeStrata',
+  'titleShow',
+  'titleSize',
+  'titleOffset',
+  'titleInk',
+  'titleOpacity',
+  'titleRoughness',
 ]
