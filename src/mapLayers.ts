@@ -286,6 +286,7 @@ function layerLifecycle(
       disposeHandle(scene, handles.compass)
       disposeHandle(scene, handles.sheet)
       disposeHandle(scene, handles.frame)
+      disposeHandle(scene, handles.labels)
       handles.texture?.dispose()
       handles.sheetTexture?.dispose()
     },
@@ -311,6 +312,7 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
       compass: null,
       sheet: null,
       frame: null,
+      labels: null,
       sheetTexture: null,
     },
   }

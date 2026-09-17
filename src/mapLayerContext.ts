@@ -13,6 +13,7 @@ import type { MapSources } from './mapSources'
 import type { CompassRose } from './scene/compassRose'
 import type { ComposedLineLayer } from './scene/composedLineLayer'
 import type { DrapeProjection } from './scene/drapeProjection'
+import type { FrameLabels } from './scene/frameLabels'
 import type { GraticuleFrame } from './scene/graticuleFrame'
 import type { LineLayer } from './scene/lineLayer'
 import type { PaperSheet } from './scene/paperSheet'
@@ -66,6 +67,8 @@ export interface LayerHandles {
   sheet: PaperSheet | null
   /** The graduated border between the map and its margin. */
   frame: GraticuleFrame | null
+  /** The degrees written in the margin, or `null` when the frame carries none. */
+  labels: FrameLabels | null
   /** The sheet's baked vellum, managed apart from the mesh it hangs on. */
   sheetTexture: DataTexture | null
 }

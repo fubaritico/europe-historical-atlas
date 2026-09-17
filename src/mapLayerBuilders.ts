@@ -17,21 +17,25 @@ import {
   disposeRelief,
   maskOrFallback,
 } from './mapLayerContext'
+import { requireHeightmap } from './pipeline/inlineCompute'
 import { composeSheetRgba } from './pipeline/sheetCompose'
 import { terrainTextureSize } from './pipeline/terrainCompose'
 import { createCompassRose } from './scene/compassRose'
 import { buildBorderStrokes, createComposedLineLayer } from './scene/composedLineLayer'
+import { createFrameLabels } from './scene/frameLabels'
 import { createGraticuleFrame } from './scene/graticuleFrame'
 import { createLineLayer } from './scene/lineLayer'
 import { createPaperSheet } from './scene/paperSheet'
 import { createReliefMesh, meshWorldDepth } from './scene/reliefMesh'
 import { generateRhumbSegments } from './scene/rhumbNetwork'
 import { createRiverLayer } from './scene/riverLayer'
+import { svgToTexture } from './scene/svgTexture'
 import { wrapTerrainTexture } from './scene/terrainTexture'
 
 import type { BorderPattern } from './data/borderStyles'
 import type { DevState } from './devState'
 import type { LayerContext } from './mapLayerContext'
+import type { GraticuleFrameOptions } from './scene/graticuleFrame'
 import type { DataTexture } from 'three'
 
 /**
@@ -258,30 +262,30 @@ export function rebuildRose(context: LayerContext): void {
  */
 const SHEET_TEXTURE_SIZE = 1024
 
-/**
- * Rebuild the sheet and the border that frames the map.
- *
- * The two are one thing: the border's place is decided by the map's own edge, and the sheet is what it
- * is drawn on. Rebuilding one without the other is how a frame ends up floating over nothing.
- * @param context - the layers and what they read
- * @returns nothing
- */
-export function rebuildFrame(context: LayerContext): void {
-  const { scene, dev, sources, handles } = context
-  disposeHandle(scene, handles.sheet)
-  disposeHandle(scene, handles.frame)
-  handles.sheet = null
-  handles.frame = null
-  if (!sources.heightmap || !dev.frame.show) return
+/** How far the numbers sit above the band, so the two never contend for a pixel. */
+const LABEL_LIFT = 0.0005
 
-  const worldDepth = meshWorldDepth(sources.heightmap.meta, WORLD_WIDTH)
-  const halfWidth = WORLD_WIDTH / 2 + dev.frame.sheetMargin
-  const halfDepth = worldDepth / 2 + dev.frame.sheetMargin
-  // The terrain's own texture is the reference grid the fibre is sampled in, so the sheet has to be
-  // told where it sits inside it and how much of it one of its own pixels covers.
-  const terrain = terrainTextureSize(sources.heightmap, dev.texture)
-  handles.sheetTexture?.dispose()
-  handles.sheetTexture = wrapTerrainTexture(
+/**
+ * Bake the vellum the map is printed on.
+ *
+ * The fibre is sampled from the TERRAIN's own noise field, at its origin and its scale, so the paper
+ * runs on across the map's edge without a seam. Sharing the function is not enough: sampled in its own
+ * pixels the grain comes out a different size in world terms, measured at 23x coarser before this.
+ * @param context - the layers and what they read
+ * @param halfWidth - half the sheet's width in world units
+ * @param halfDepth - half its depth
+ * @param worldDepth - the map's own depth, which anchors the sampling
+ * @returns the baked texture
+ */
+function bakeSheetTexture(
+  context: LayerContext,
+  halfWidth: number,
+  halfDepth: number,
+  worldDepth: number
+): DataTexture {
+  const { dev, sources } = context
+  const terrain = terrainTextureSize(requireHeightmap(sources.heightmap), dev.texture)
+  return wrapTerrainTexture(
     composeSheetRgba(SHEET_TEXTURE_SIZE, {
       paper: dev.texture.sea,
       grain: dev.texture.grain,
@@ -296,14 +300,18 @@ export function rebuildFrame(context: LayerContext): void {
     SHEET_TEXTURE_SIZE,
     SHEET_TEXTURE_SIZE
   )
-  handles.sheet = createPaperSheet({
-    halfWidth,
-    halfDepth,
-    drop: dev.frame.lift,
-    texture: handles.sheetTexture,
-  })
-  handles.frame = createGraticuleFrame({
-    bounds: sources.heightmap.meta.bbox,
+}
+
+/**
+ * How the border is drawn, gathered from the live tunables.
+ * @param context - the layers and what they read
+ * @param worldDepth - the map's depth in world units
+ * @returns the frame's settings
+ */
+function frameSettings(context: LayerContext, worldDepth: number): GraticuleFrameOptions {
+  const { dev, sources } = context
+  return {
+    bounds: requireHeightmap(sources.heightmap).meta.bbox,
     worldWidth: WORLD_WIDTH,
     worldDepth,
     bandWidth: dev.frame.bandWidth,
@@ -312,6 +320,49 @@ export function rebuildFrame(context: LayerContext): void {
     labelLaneWidth: dev.frame.labelLaneWidth,
     ink: dev.frame.ink,
     lift: dev.frame.lift,
+  }
+}
+
+/**
+ * Rebuild the sheet, the border that frames the map, and the degrees written in its margin.
+ *
+ * The three are one thing: the border's place is decided by the map's own edge, the sheet is what it is
+ * drawn on, and the numbers name the graduations it carries. Rebuilding one without the others is how a
+ * frame ends up floating over nothing.
+ * @param context - the layers and what they read
+ * @returns nothing
+ */
+export function rebuildFrame(context: LayerContext): void {
+  const { scene, dev, sources, handles } = context
+  disposeHandle(scene, handles.sheet)
+  disposeHandle(scene, handles.frame)
+  disposeHandle(scene, handles.labels)
+  handles.sheet = null
+  handles.frame = null
+  handles.labels = null
+  if (!sources.heightmap || !dev.frame.show) return
+
+  const worldDepth = meshWorldDepth(sources.heightmap.meta, WORLD_WIDTH)
+  const halfWidth = WORLD_WIDTH / 2 + dev.frame.sheetMargin
+  const halfDepth = worldDepth / 2 + dev.frame.sheetMargin
+  handles.sheetTexture?.dispose()
+  handles.sheetTexture = bakeSheetTexture(context, halfWidth, halfDepth, worldDepth)
+  handles.sheet = createPaperSheet({
+    halfWidth,
+    halfDepth,
+    drop: dev.frame.lift,
+    texture: handles.sheetTexture,
+  })
+
+  const settings = frameSettings(context, worldDepth)
+  handles.frame = createGraticuleFrame(settings)
+  handles.labels = createFrameLabels({
+    ...settings,
+    // A hair above the band, so the two never contend for a pixel where a number overhangs a block.
+    lift: settings.lift + LABEL_LIFT,
+    labelStepDeg: dev.frame.labelStepDeg,
+    loadTexture: svgToTexture,
   })
   scene.add(handles.sheet.object, handles.frame.object)
+  if (handles.labels) scene.add(handles.labels.object)
 }

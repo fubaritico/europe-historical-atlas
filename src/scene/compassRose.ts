@@ -1,14 +1,7 @@
-import {
-  DoubleSide,
-  Mesh,
-  MeshBasicMaterial,
-  PlaneGeometry,
-  SRGBColorSpace,
-  Texture,
-  TextureLoader,
-} from 'three'
+import { DoubleSide, Mesh, MeshBasicMaterial, PlaneGeometry, Texture } from 'three'
 
 import { buildCompassRoseSvg } from './compassRoseSvg'
+import { svgToTexture } from './svgTexture'
 
 import type { CompassRoseSvgOptions } from './compassRoseSvg'
 
@@ -37,14 +30,6 @@ export interface CompassRose {
   dispose(): void
 }
 
-/** Default SVG → texture: an `image/svg+xml` data URL through a {@link TextureLoader}. */
-function defaultLoadTexture(svg: string): Texture {
-  const url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
-  const texture = new TextureLoader().load(url)
-  texture.colorSpace = SRGBColorSpace
-  return texture
-}
-
 /**
  * Build a {@link CompassRose} scene object: the procedural rose (see {@link buildCompassRoseSvg})
  * rasterised onto a flat quad in the XZ plane (north = −Z, matching the relief), unlit and transparent so
@@ -54,7 +39,7 @@ function defaultLoadTexture(svg: string): Texture {
  */
 export function createCompassRose(options: CompassRoseOptions): CompassRose {
   const svg = buildCompassRoseSvg({ colors: options.colors, labels: options.labels })
-  const load = options.loadTexture ?? defaultLoadTexture
+  const load = options.loadTexture ?? svgToTexture
   const texture = load(svg)
   const geometry = new PlaneGeometry(options.size, options.size)
   geometry.rotateX(-Math.PI / 2) // lie flat in XZ, texture top → −Z (north)

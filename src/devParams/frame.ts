@@ -28,8 +28,10 @@ export interface FrameDevParams {
   ink: string
   /** Thickness of the fine rules closing the band on both sides. Zero draws none. */
   ruleWidth: number
-  /** Width of the lane beyond the band where the degree labels will sit. */
+  /** Width of the lane beyond the band where the degree labels sit. */
   labelLaneWidth: number
+  /** Degrees between written numbers. Crowding is the risk: this map spans 124 degrees of longitude. */
+  labelStepDeg: number
   /** How far above the sea the whole frame sits, clear of the terrain it abuts. */
   lift: number
 }
@@ -53,6 +55,8 @@ export const DEFAULT_FRAME_PARAMS: FrameDevParams = {
   ink: '#1c130c',
   ruleWidth: 0.008,
   labelLaneWidth: 0.16,
+  // Thirteen numbers across and seven down. Every ten degrees, as the reference does.
+  labelStepDeg: 10,
   lift: 0.004,
 }
 
@@ -65,6 +69,7 @@ export const FRAME_CONTROLS: ControlTable<FrameDevParams> = {
   ink: { kind: 'color', label: 'band ink' },
   ruleWidth: { kind: 'number', min: 0, max: 0.05, step: 0.001, label: 'rule thickness' },
   labelLaneWidth: { kind: 'number', min: 0, max: 0.5, step: 0.01, label: 'label lane' },
+  labelStepDeg: { kind: 'number', min: 1, max: 30, step: 1, label: 'degrees per number' },
   lift: { kind: 'number', min: 0, max: 0.05, step: 0.001, label: 'lift above sea' },
 }
 
@@ -77,5 +82,6 @@ export const FRAME_CONTROL_ORDER: (keyof FrameDevParams)[] = [
   'ink',
   'ruleWidth',
   'labelLaneWidth',
+  'labelStepDeg',
   'lift',
 ]
