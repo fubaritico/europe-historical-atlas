@@ -24,7 +24,6 @@ import { latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
 import { hexToRgb } from '../utils/color'
 
 import type { GeoBounds } from '../geo/mercator'
-import type { RgbColor } from '../utils/color'
 import type { Object3D } from 'three'
 
 /** One rectangle of the frame, in world XZ. */
@@ -59,13 +58,6 @@ export interface GraticuleFrameOptions {
   labelLaneWidth: number
   /** The band's dark ink, as a hex string. */
   ink: string
-  /**
-   * The paper between the dark segments.
-   *
-   * The sea's own tone, read from the terrain options rather than tuned apart: the margin continues the
-   * water it abuts, so the reader sees one sheet with a map drawn on it rather than two surfaces.
-   */
-  paper: RgbColor
   /** How far above the sea the frame sits. */
   lift: number
 }
@@ -240,14 +232,15 @@ export interface GraticuleFrame {
  * @returns the mounted frame
  */
 export function createGraticuleFrame(options: GraticuleFrameOptions): GraticuleFrame {
-  const quads = buildFrameQuads(options)
+  // Only the inked blocks are drawn. The light ones are the paper itself, left to show through — which
+  // is both fewer triangles and the only way they can carry exactly the sheet's own fibre.
+  const quads = buildFrameQuads(options).filter((quad) => quad.ink)
   const ink = hexToRgb(options.ink)
-  const paper = options.paper
   const positions = new Float32Array(quads.length * 6 * 3)
   const colors = new Float32Array(quads.length * 6 * 3)
   let o = 0
   for (const quad of quads) {
-    const tone = quad.ink ? ink : paper
+    const tone = ink
     // Wound so the face normal points UP. Taken the other way round the whole frame is back-facing and
     // a `FrontSide` material draws nothing at all — which is exactly what happened, and what the sheet
     // did not suffer because three winds its own `PlaneGeometry`.

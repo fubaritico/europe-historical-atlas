@@ -14,7 +14,6 @@ const OPTIONS: GraticuleFrameOptions = {
   ruleWidth: 0.008,
   labelLaneWidth: 0.16,
   ink: '#3d2c20',
-  paper: { r: 196, g: 206, b: 202 },
   lift: 0.004,
 }
 
@@ -128,6 +127,8 @@ describe('buildFrameQuads', () => {
     })
 
     it('alternates ink and paper rather than inking everything', () => {
+      // The anatomy still describes both, and only the inked ones are drawn: a light block is the
+      // sheet showing through, which is the only way it can carry exactly the sheet's own fibre.
       const quads = buildFrameQuads(OPTIONS)
       expect(quads.some((q) => q.ink)).toBe(true)
       expect(quads.some((q) => !q.ink)).toBe(true)

@@ -32,6 +32,9 @@ export function wrapTerrainTexture(rgba: Uint8Array, width: number, height: numb
   // of them makes the grain and the coastline shimmer as the camera moves.
   texture.minFilter = LinearMipmapLinearFilter
   texture.generateMipmaps = true
+  // The map is looked at from a low angle, where a mipmap chosen for the steepest axis blurs one
+  // direction and aliases the other. three clamps this to whatever the GPU actually offers.
+  texture.anisotropy = 16
   texture.needsUpdate = true
   return texture
 }

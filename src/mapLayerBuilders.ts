@@ -18,6 +18,7 @@ import {
   maskOrFallback,
 } from './mapLayerContext'
 import { composeSheetRgba } from './pipeline/sheetCompose'
+import { terrainTextureSize } from './pipeline/terrainCompose'
 import { createCompassRose } from './scene/compassRose'
 import { buildBorderStrokes, createComposedLineLayer } from './scene/composedLineLayer'
 import { createGraticuleFrame } from './scene/graticuleFrame'
@@ -274,19 +275,30 @@ export function rebuildFrame(context: LayerContext): void {
   if (!sources.heightmap || !dev.frame.show) return
 
   const worldDepth = meshWorldDepth(sources.heightmap.meta, WORLD_WIDTH)
+  const halfWidth = WORLD_WIDTH / 2 + dev.frame.sheetMargin
+  const halfDepth = worldDepth / 2 + dev.frame.sheetMargin
+  // The terrain's own texture is the reference grid the fibre is sampled in, so the sheet has to be
+  // told where it sits inside it and how much of it one of its own pixels covers.
+  const terrain = terrainTextureSize(sources.heightmap, dev.texture)
   handles.sheetTexture?.dispose()
   handles.sheetTexture = wrapTerrainTexture(
     composeSheetRgba(SHEET_TEXTURE_SIZE, {
       paper: dev.texture.sea,
-      grain: dev.frame.grain,
-      grainScale: dev.frame.grainScale,
+      grain: dev.texture.grain,
+      grainScale: dev.texture.grainScale,
+      frame: {
+        originX: ((WORLD_WIDTH / 2 - halfWidth) / WORLD_WIDTH) * terrain.width,
+        originY: ((worldDepth / 2 - halfDepth) / worldDepth) * terrain.height,
+        ratioX: ((halfWidth * 2) / WORLD_WIDTH) * (terrain.width / SHEET_TEXTURE_SIZE),
+        ratioY: ((halfDepth * 2) / worldDepth) * (terrain.height / SHEET_TEXTURE_SIZE),
+      },
     }),
     SHEET_TEXTURE_SIZE,
     SHEET_TEXTURE_SIZE
   )
   handles.sheet = createPaperSheet({
-    halfWidth: WORLD_WIDTH / 2 + dev.frame.sheetMargin,
-    halfDepth: worldDepth / 2 + dev.frame.sheetMargin,
+    halfWidth,
+    halfDepth,
     drop: dev.frame.lift,
     texture: handles.sheetTexture,
   })
@@ -299,7 +311,6 @@ export function rebuildFrame(context: LayerContext): void {
     ruleWidth: dev.frame.ruleWidth,
     labelLaneWidth: dev.frame.labelLaneWidth,
     ink: dev.frame.ink,
-    paper: dev.texture.sea,
     lift: dev.frame.lift,
   })
   scene.add(handles.sheet.object, handles.frame.object)
