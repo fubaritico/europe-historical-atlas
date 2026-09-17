@@ -58,6 +58,8 @@ export interface GraticuleFrameOptions {
   labelLaneWidth: number
   /** The band's dark ink, as a hex string. */
   ink: string
+  /** How opaque the dark blocks are. Below one the vellum reads through them, softening the band. */
+  bandOpacity: number
   /** How far above the sea the frame sits. */
   lift: number
 }
@@ -159,6 +161,9 @@ export function buildFrameQuads(options: GraticuleFrameOptions): FrameQuad[] {
   const bandToZ = bandFromZ + options.bandWidth
   const outerX = bandToX + rule
   const outerZ = bandToZ + rule
+  // Beyond the numbers, a last rule closing the whole margin — the outermost line of the reference.
+  const edgeFromX = outerX + options.labelLaneWidth
+  const edgeFromZ = outerZ + options.labelLaneWidth
   const quads: FrameQuad[] = []
 
   // A closed rectangular ring. The map is not square, so X and Z carry their own extents — taking one
@@ -174,6 +179,7 @@ export function buildFrameQuads(options: GraticuleFrameOptions): FrameQuad[] {
   if (rule > 0) {
     ring(halfWidth, bandFromX, halfDepth, bandFromZ)
     ring(bandToX, outerX, bandToZ, outerZ)
+    ring(edgeFromX, edgeFromX + rule, edgeFromZ, edgeFromZ + rule)
   }
 
   // North and south bands run the full width, corners included.
@@ -274,7 +280,14 @@ export function createGraticuleFrame(options: GraticuleFrameOptions): GraticuleF
   const geometry = new BufferGeometry()
   geometry.setAttribute('position', new BufferAttribute(positions, 3))
   geometry.setAttribute('color', new BufferAttribute(colors, 3))
-  const material = new MeshBasicMaterial({ vertexColors: true })
+  // Transparent by intent, not by accident: below one the vellum reads through the dark blocks and the
+  // band settles into the paper instead of sitting on it.
+  const material = new MeshBasicMaterial({
+    vertexColors: true,
+    transparent: options.bandOpacity < 1,
+    opacity: options.bandOpacity,
+    depthWrite: false,
+  })
   return {
     object: new Mesh(geometry, material),
     dispose(): void {

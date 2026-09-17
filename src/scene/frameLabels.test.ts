@@ -14,6 +14,7 @@ const OPTIONS: GraticuleFrameOptions = {
   ruleWidth: 0.008,
   labelLaneWidth: 0.16,
   ink: '#1c130c',
+  bandOpacity: 0.92,
   lift: 0.004,
 }
 
@@ -188,6 +189,9 @@ describe('createFrameLabels', () => {
     createFrameLabels({
       ...OPTIONS,
       labelStepDeg: 10,
+      labelInk: '#4a3424',
+      labelRoughness: 1.1,
+      labelOpacity: 0.88,
       loadTexture: vi.fn(() => new Texture()),
       ...over,
     })

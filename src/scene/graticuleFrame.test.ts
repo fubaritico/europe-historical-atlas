@@ -14,6 +14,7 @@ const OPTIONS: GraticuleFrameOptions = {
   ruleWidth: 0.008,
   labelLaneWidth: 0.16,
   ink: '#3d2c20',
+  bandOpacity: 0.92,
   lift: 0.004,
 }
 
@@ -174,12 +175,15 @@ describe('buildFrameQuads', () => {
       expect(covered).toBe(true)
     })
 
-    it('closes the band with a fine rule on each side', () => {
-      // Measured by where the frame ends: a rule inside the band and another outside it push the
-      // outer edge out by twice their thickness.
+    it('rules the band on both sides, and closes the whole margin beyond the numbers', () => {
+      // Three rings, as the reference has: one either side of the checker, and a last one outside the
+      // lane the numbers are written in.
       const outer = Math.max(...buildFrameQuads(OPTIONS).map((q) => q.x1))
       const bare = Math.max(...buildFrameQuads({ ...OPTIONS, ruleWidth: 0 }).map((q) => q.x1))
-      expect(outer - bare).toBeCloseTo(OPTIONS.ruleWidth * 2)
+      expect(bare).toBeCloseTo(OPTIONS.worldWidth / 2 + OPTIONS.bandWidth)
+      expect(outer).toBeCloseTo(
+        OPTIONS.worldWidth / 2 + OPTIONS.bandWidth + OPTIONS.labelLaneWidth + OPTIONS.ruleWidth * 3
+      )
     })
 
     it('widens with the band', () => {

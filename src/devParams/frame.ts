@@ -26,12 +26,20 @@ export interface FrameDevParams {
   bandStepDeg: number
   /** The band's dark ink. */
   ink: string
+  /** How opaque the dark blocks are. Below one the vellum reads through and the band settles into it. */
+  bandOpacity: number
   /** Thickness of the fine rules closing the band on both sides. Zero draws none. */
   ruleWidth: number
   /** Width of the lane beyond the band where the degree labels sit. */
   labelLaneWidth: number
   /** Degrees between written numbers. Crowding is the risk: this map spans 124 degrees of longitude. */
   labelStepDeg: number
+  /** The numbers' own ink, browner than the band's — they are written, not ruled. */
+  labelInk: string
+  /** How far the glyph outlines are eaten by the paper, in atlas pixels. Zero prints them clean. */
+  labelRoughness: number
+  /** How opaque the numbers are. */
+  labelOpacity: number
   /** How far above the sea the whole frame sits, clear of the terrain it abuts. */
   lift: number
 }
@@ -53,10 +61,15 @@ export const DEFAULT_FRAME_PARAMS: FrameDevParams = {
   // Nearly black, as an engraving is. The light blocks are the paper showing through, so the band's
   // whole reading rests on how far the dark ones are from it.
   ink: '#1c130c',
+  bandOpacity: 0.92,
   ruleWidth: 0.008,
   labelLaneWidth: 0.16,
   // Thirteen numbers across and seven down. Every ten degrees, as the reference does.
   labelStepDeg: 10,
+  // Brown where the band is nearly black: a ruled line and a written number are not the same mark.
+  labelInk: '#4a3424',
+  labelRoughness: 1.1,
+  labelOpacity: 0.88,
   lift: 0.004,
 }
 
@@ -67,9 +80,13 @@ export const FRAME_CONTROLS: ControlTable<FrameDevParams> = {
   bandWidth: { kind: 'number', min: 0.01, max: 0.4, step: 0.005, label: 'band thickness' },
   bandStepDeg: { kind: 'number', min: 0.5, max: 10, step: 0.5, label: 'degrees per block' },
   ink: { kind: 'color', label: 'band ink' },
+  bandOpacity: { kind: 'number', min: 0.2, max: 1, step: 0.01, label: 'band opacity' },
   ruleWidth: { kind: 'number', min: 0, max: 0.05, step: 0.001, label: 'rule thickness' },
   labelLaneWidth: { kind: 'number', min: 0, max: 0.5, step: 0.01, label: 'label lane' },
   labelStepDeg: { kind: 'number', min: 1, max: 30, step: 1, label: 'degrees per number' },
+  labelInk: { kind: 'color', label: 'number ink' },
+  labelRoughness: { kind: 'number', min: 0, max: 4, step: 0.1, label: 'number roughness' },
+  labelOpacity: { kind: 'number', min: 0.2, max: 1, step: 0.01, label: 'number opacity' },
   lift: { kind: 'number', min: 0, max: 0.05, step: 0.001, label: 'lift above sea' },
 }
 
@@ -80,8 +97,12 @@ export const FRAME_CONTROL_ORDER: (keyof FrameDevParams)[] = [
   'bandWidth',
   'bandStepDeg',
   'ink',
+  'bandOpacity',
   'ruleWidth',
   'labelLaneWidth',
   'labelStepDeg',
+  'labelInk',
+  'labelRoughness',
+  'labelOpacity',
   'lift',
 ]

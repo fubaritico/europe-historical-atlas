@@ -319,6 +319,7 @@ function frameSettings(context: LayerContext, worldDepth: number): GraticuleFram
     ruleWidth: dev.frame.ruleWidth,
     labelLaneWidth: dev.frame.labelLaneWidth,
     ink: dev.frame.ink,
+    bandOpacity: dev.frame.bandOpacity,
     lift: dev.frame.lift,
   }
 }
@@ -361,6 +362,9 @@ export function rebuildFrame(context: LayerContext): void {
     // A hair above the band, so the two never contend for a pixel where a number overhangs a block.
     lift: settings.lift + LABEL_LIFT,
     labelStepDeg: dev.frame.labelStepDeg,
+    labelInk: dev.frame.labelInk,
+    labelRoughness: dev.frame.labelRoughness,
+    labelOpacity: dev.frame.labelOpacity,
     loadTexture: svgToTexture,
   })
   scene.add(handles.sheet.object, handles.frame.object)

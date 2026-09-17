@@ -100,13 +100,19 @@ export function frameLabelLayout(
 
 /**
  * Lay the numbers out in a grid and draw them as one SVG.
+ *
+ * The roughness is the browser's own turbulence, displacing each glyph's outline by a pixel or so. A
+ * number printed with a clean vector edge sits ON the vellum; one whose edge is eaten a little settles
+ * INTO it, which is the difference between a label and an impression.
  * @param texts - the distinct numbers, in atlas order
  * @param ink - the colour to write them in
+ * @param roughness - how far the outline is displaced, in atlas pixels; zero leaves it clean
  * @returns the markup, and the grid it was laid out on
  */
 export function buildLabelAtlasSvg(
   texts: readonly string[],
-  ink: string
+  ink: string,
+  roughness = 0
 ): { svg: string; columns: number; rows: number } {
   const columns = ATLAS_COLUMNS
   const rows = Math.max(1, Math.ceil(texts.length / columns))
@@ -119,9 +125,14 @@ export function buildLabelAtlasSvg(
       return `<text x="${String(x)}" y="${String(y)}" font-family="Georgia, 'Times New Roman', serif" font-size="66" fill="${ink}" text-anchor="middle" dominant-baseline="central">${text}</text>`
     })
     .join('')
+  const rough =
+    roughness > 0
+      ? `<filter id="grain" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="${String(roughness)}" xChannelSelector="R" yChannelSelector="G"/></filter>`
+      : ''
+  const body = roughness > 0 ? `<g filter="url(#grain)">${cells}</g>` : cells
   // Explicit width and height, not just a viewBox: loaded as an `<img>` for a texture, a viewBox-only
   // SVG rasterises to 0x0 and the whole atlas comes out blank.
-  const svg = `<svg width="${String(width)}" height="${String(height)}" viewBox="0 0 ${String(width)} ${String(height)}" xmlns="http://www.w3.org/2000/svg">${cells}</svg>`
+  const svg = `<svg width="${String(width)}" height="${String(height)}" viewBox="0 0 ${String(width)} ${String(height)}" xmlns="http://www.w3.org/2000/svg">${rough}${body}</svg>`
   return { svg, columns, rows }
 }
 
@@ -129,6 +140,12 @@ export function buildLabelAtlasSvg(
 export interface FrameLabelsOptions extends GraticuleFrameOptions {
   /** Degrees between numbers. */
   labelStepDeg: number
+  /** The numbers' own ink — browner than the band's, which is nearly black. */
+  labelInk: string
+  /** How far the glyph outlines are eaten, in atlas pixels. Zero prints them clean. */
+  labelRoughness: number
+  /** How opaque the numbers are. */
+  labelOpacity: number
   /**
    * Turn the atlas markup into a texture. Injected so a test needs no `Image` and no decoder.
    * @param svg - the markup
@@ -146,18 +163,19 @@ export interface FrameLabels {
 }
 
 /**
- * Write the degrees into the margin.
- * @param options - the frame's settings, the spacing, and how to rasterise
- * @returns the mounted numbers, or `null` when the frame carries none
+ * Turn the placements into a buffer of quads, each pointing at its own cell of the atlas.
+ * @param layout - the numbers and where they are written
+ * @param atlas - the grid they were laid out on
+ * @param size - half the width and half the height of one number, in world units
+ * @param lift - how far above the sea they sit
+ * @returns the geometry
  */
-export function createFrameLabels(options: FrameLabelsOptions): FrameLabels | null {
-  const layout = frameLabelLayout(options, options.labelStepDeg)
-  if (layout.placements.length === 0) return null
-  const atlas = buildLabelAtlasSvg(layout.texts, options.ink)
-  const height = options.labelLaneWidth * 0.72
-  const halfH = height / 2
-  const halfW = (height * CELL_WIDTH) / CELL_HEIGHT / 2
-
+function buildLabelGeometry(
+  layout: FrameLabelLayout,
+  atlas: { columns: number; rows: number },
+  size: { halfW: number; halfH: number },
+  lift: number
+): BufferGeometry {
   const positions = new Float32Array(layout.placements.length * 6 * 3)
   const uvs = new Float32Array(layout.placements.length * 6 * 2)
   let p = 0
@@ -167,20 +185,20 @@ export function createFrameLabels(options: FrameLabelsOptions): FrameLabels | nu
     const row = Math.floor(placement.cell / atlas.columns)
     const u0 = column / atlas.columns
     const u1 = (column + 1) / atlas.columns
-    // The atlas is decoded as an image, so its first row is the TOP and v = 1 with it.
+    // The atlas is decoded as an image, so its first row is the TOP and v = 1 goes with it.
     const v1 = 1 - row / atlas.rows
     const v0 = 1 - (row + 1) / atlas.rows
     const corners = [
-      [-halfW, -halfH, u0, v1],
-      [halfW, halfH, u1, v0],
-      [halfW, -halfH, u1, v1],
-      [-halfW, -halfH, u0, v1],
-      [-halfW, halfH, u0, v0],
-      [halfW, halfH, u1, v0],
+      [-size.halfW, -size.halfH, u0, v1],
+      [size.halfW, size.halfH, u1, v0],
+      [size.halfW, -size.halfH, u1, v1],
+      [-size.halfW, -size.halfH, u0, v1],
+      [-size.halfW, size.halfH, u0, v0],
+      [size.halfW, size.halfH, u1, v0],
     ] as const
     for (const [dx, dz, u, v] of corners) {
       positions[p] = placement.x + dx
-      positions[p + 1] = options.lift
+      positions[p + 1] = lift
       positions[p + 2] = placement.z + dz
       uvs[t] = u
       uvs[t + 1] = v
@@ -188,12 +206,35 @@ export function createFrameLabels(options: FrameLabelsOptions): FrameLabels | nu
       t += 2
     }
   }
-
   const geometry = new BufferGeometry()
   geometry.setAttribute('position', new BufferAttribute(positions, 3))
   geometry.setAttribute('uv', new BufferAttribute(uvs, 2))
+  return geometry
+}
+
+/**
+ * Write the degrees into the margin.
+ * @param options - the frame's settings, the spacing, and how to rasterise
+ * @returns the mounted numbers, or `null` when the frame carries none
+ */
+export function createFrameLabels(options: FrameLabelsOptions): FrameLabels | null {
+  const layout = frameLabelLayout(options, options.labelStepDeg)
+  if (layout.placements.length === 0) return null
+  const atlas = buildLabelAtlasSvg(layout.texts, options.labelInk, options.labelRoughness)
+  const height = options.labelLaneWidth * 0.72
+  const geometry = buildLabelGeometry(
+    layout,
+    atlas,
+    { halfH: height / 2, halfW: (height * CELL_WIDTH) / CELL_HEIGHT / 2 },
+    options.lift
+  )
   const texture = options.loadTexture(atlas.svg)
-  const material = new MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false })
+  const material = new MeshBasicMaterial({
+    map: texture,
+    transparent: true,
+    opacity: options.labelOpacity,
+    depthWrite: false,
+  })
   return {
     object: new Mesh(geometry, material),
     dispose(): void {
