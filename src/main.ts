@@ -42,8 +42,9 @@ import {
   inlayOpacityScale,
 } from './scene/composedLineLayer'
 import { createDebugRect } from './scene/debugRect'
+import { createDrapeProjection } from './scene/drapeProjection'
 import { createLineLayer } from './scene/lineLayer'
-import { createReliefMesh, reliefWorldY } from './scene/reliefMesh'
+import { createReliefMesh } from './scene/reliefMesh'
 import { generateRhumbSegments } from './scene/rhumbNetwork'
 import { createRiverLayer } from './scene/riverLayer'
 import { wrapTerrainTexture } from './scene/terrainTexture'
@@ -322,42 +323,19 @@ function bootstrap(): () => void {
     })
   }
 
-  // Project a normalized grid coordinate (u: west→east, v: north→south) to world XZ, matching the relief
-  // mesh mapping. The coastline sits at a small fixed lift above the flat sea (y=0), independent of the
-  // zoom-linked exaggeration (the shoreline is at sea level, so exaggeration barely moves it).
-  const projectToWorld = (u: number, v: number): [number, number, number] => {
-    if (!heightmap) return [0, coastParams.yLift, 0]
-    const aspect = heightmap.meta.width / heightmap.meta.height
-    const worldDepth = WORLD_WIDTH / aspect
-    return [(u - 0.5) * WORLD_WIDTH, coastParams.yLift, (v - 0.5) * worldDepth]
-  }
-
-  // Same XZ mapping, but with Y sampled off the terrain: a river runs over the ground, not at sea level.
-  // It goes through `reliefWorldY` — the relief mesh's own height curve — so the two cannot disagree;
-  // the group's scale.y then tracks the mesh's live exaggeration every frame.
-  const projectDraped = (u: number, v: number): [number, number, number] => {
-    const [x, , z] = projectToWorld(u, v)
-    const source = reliefSource
-    if (!source) return [x, 0, z]
-    const curve = { plainsCeiling: params.plainsCeiling, peakTarget: params.peakTarget }
-    // Evaluate the height on the mesh's own vertex grid and interpolate between those nodes — the same
-    // surface the triangles draw. Reading the DEM directly would place rivers on a finer terrain than
-    // the one on screen, and bury them wherever the mesh spans a valley.
-    const aspect = source.meta.width / source.meta.height
-    const segX = RELIEF_SEGMENTS
-    const segY = Math.max(1, Math.round(RELIEF_SEGMENTS / aspect))
-    const fx = Math.min(segX, Math.max(0, u * segX))
-    const fy = Math.min(segY, Math.max(0, v * segY))
-    const x0 = Math.min(segX - 1, Math.floor(fx))
-    const y0 = Math.min(segY - 1, Math.floor(fy))
-    const tx = fx - x0
-    const ty = fy - y0
-    const nodeY = (col: number, row: number): number =>
-      reliefWorldY(source.sample(col / segX, row / segY), curve)
-    const top = nodeY(x0, y0) * (1 - tx) + nodeY(x0 + 1, y0) * tx
-    const bottom = nodeY(x0, y0 + 1) * (1 - tx) + nodeY(x0 + 1, y0 + 1) * tx
-    return [x, top * (1 - ty) + bottom * ty + RIVER_LIFT, z]
-  }
+  // How a normalized grid coordinate (u: west→east, v: north→south) becomes a world position: flat on
+  // the sea for the shoreline and the rhumbs, draped on the terrain for the rivers and the borders. One
+  // implementation injected into every overlay, so none of them can drift off the relief. Read through
+  // accessors because all of it is retuned live — the grid reloads, the height curve is dragged.
+  const projection = createDrapeProjection({
+    worldWidth: WORLD_WIDTH,
+    segments: RELIEF_SEGMENTS,
+    frame: () => heightmap?.meta ?? null,
+    source: () => reliefSource,
+    curve: () => ({ plainsCeiling: params.plainsCeiling, peakTarget: params.peakTarget }),
+    flatLift: () => coastParams.yLift,
+    drapedLift: RIVER_LIFT,
+  })
 
   // Remove a layer handle from the scene and free its GPU resources (shared by every rebuild + teardown).
   const disposeHandle = (handle: { object: Object3D; dispose(): void } | null): void => {
@@ -420,7 +398,7 @@ function bootstrap(): () => void {
     // at the zooms the coastline is drawn at, and marching 23 million cells is not.
     const segments = createMaskCoastlineSource(mask, heightmap.meta.width * 2).load()
     coastline = createLineLayer(segments, {
-      project: projectToWorld,
+      project: projection.toWorld,
       color: coastParams.color,
       opacity: coastParams.opacity,
       jitter: coastParams.jitter,
@@ -450,7 +428,7 @@ function bootstrap(): () => void {
       landMask ?? undefined
     )
     rhumb = createLineLayer(segments, {
-      project: projectToWorld,
+      project: projection.toWorld,
       color: rhumbParams.color,
       opacity: rhumbParams.opacity,
     })
@@ -473,7 +451,7 @@ function bootstrap(): () => void {
       DEFAULT_RIVER_EXTENSION
     )
     rivers = createRiverLayer(connected, {
-      project: projectDraped,
+      project: projection.draped,
       color: riverParams.color,
       opacity: riverParams.opacity,
       revealStart: riverParams.revealStart,
@@ -527,7 +505,7 @@ function bootstrap(): () => void {
     )
     if (strokes.length === 0) return
     borders = createComposedLineLayer(strokes, {
-      project: projectDraped,
+      project: projection.draped,
       depthTest: !politicalParams.borderOnTop,
       renderOrderBase: BORDER_RENDER_ORDER,
       dashSize: politicalParams.borderDashSize,
@@ -617,7 +595,7 @@ function bootstrap(): () => void {
   // World position of the compass rose (its own centre, independent of the rhumb network), lifted above
   // the sea.
   const roseWorldPosition = (): [number, number, number] => {
-    const [x, , z] = projectToWorld(roseParams.centerU, roseParams.centerV)
+    const [x, , z] = projection.toWorld(roseParams.centerU, roseParams.centerV)
     return [x, roseParams.lift, z]
   }
 

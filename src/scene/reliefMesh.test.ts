@@ -3,7 +3,13 @@ import { describe, expect, it } from 'vitest'
 
 import { createHeightmap } from '../data/heightmap'
 
-import { WORLD_PER_METRE, createReliefMesh, reliefWorldY } from './reliefMesh'
+import {
+  WORLD_PER_METRE,
+  createReliefMesh,
+  meshVertexGrid,
+  meshWorldDepth,
+  reliefWorldY,
+} from './reliefMesh'
 
 import type { HeightmapMeta } from '../data/heightmap'
 
@@ -162,6 +168,100 @@ describe('reliefWorldY', () => {
   describe('edge cases', () => {
     it('never exceeds the peak target however high the sample', () => {
       expect(reliefWorldY(1e6, CURVE) / WORLD_PER_METRE).toBeLessThanOrEqual(CURVE.peakTarget)
+    })
+  })
+})
+
+describe('meshVertexGrid', () => {
+  describe('happy path', () => {
+    it('keeps the requested subdivision on X', () => {
+      expect(meshVertexGrid({ width: 100, height: 100 }, 64).segX).toBe(64)
+    })
+
+    it('matches the rows to the columns on a square grid', () => {
+      expect(meshVertexGrid({ width: 100, height: 100 }, 64).segY).toBe(64)
+    })
+  })
+
+  describe('variants', () => {
+    it('halves the rows on a grid twice as wide as it is tall', () => {
+      expect(meshVertexGrid({ width: 200, height: 100 }, 64).segY).toBe(32)
+    })
+
+    it('doubles the rows on a grid twice as tall as it is wide', () => {
+      expect(meshVertexGrid({ width: 100, height: 200 }, 64).segY).toBe(128)
+    })
+
+    it('reports the aspect it laid the grid out from', () => {
+      expect(meshVertexGrid({ width: 1280, height: 1164 }, 512).aspect).toBeCloseTo(1280 / 1164)
+    })
+
+    it('rounds the row count rather than truncating it', () => {
+      // 64 / (100/60) = 38.4 → 38; 64 / (100/70) = 44.8 → 45. Truncation would give 38 and 44.
+      expect(meshVertexGrid({ width: 100, height: 60 }, 64).segY).toBe(38)
+      expect(meshVertexGrid({ width: 100, height: 70 }, 64).segY).toBe(45)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('keeps one row on a grid so wide the row count would round to zero', () => {
+      // A zero-row plane has no surface at all, so nothing draped on it could land anywhere.
+      expect(meshVertexGrid({ width: 4000, height: 1 }, 4).segY).toBe(1)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('surfaces a zero-height grid as a non-finite aspect rather than a plausible layout', () => {
+      expect(meshVertexGrid({ width: 100, height: 0 }, 64).aspect).toBe(Number.POSITIVE_INFINITY)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('holds up on a 1x1 grid', () => {
+      expect(meshVertexGrid({ width: 1, height: 1 }, 8)).toMatchObject({ segX: 8, segY: 8 })
+    })
+
+    it('holds up on a single-segment request', () => {
+      expect(meshVertexGrid({ width: 100, height: 100 }, 1)).toMatchObject({ segX: 1, segY: 1 })
+    })
+  })
+})
+
+describe('meshWorldDepth', () => {
+  describe('happy path', () => {
+    it('makes a square grid a square plane', () => {
+      expect(meshWorldDepth({ width: 100, height: 100 }, 12)).toBeCloseTo(12)
+    })
+  })
+
+  describe('variants', () => {
+    it('shortens the plane for a grid wider than it is tall', () => {
+      expect(meshWorldDepth({ width: 200, height: 100 }, 12)).toBeCloseTo(6)
+    })
+
+    it('lengthens the plane for a grid taller than it is wide', () => {
+      expect(meshWorldDepth({ width: 100, height: 200 }, 12)).toBeCloseTo(24)
+    })
+
+    it('agrees with the aspect the vertex grid reports', () => {
+      // The two must not drift: the plane's proportions and its vertex rows come from the same shape.
+      const frame = { width: 1280, height: 1164 }
+      expect(meshWorldDepth(frame, 12)).toBeCloseTo(12 / meshVertexGrid(frame, 512).aspect)
+    })
+  })
+
+  // L3 (managed errors): N/A — a pure ratio handles no failure of its own; a degenerate frame is not
+  // caught here but carried, and that is asserted just below.
+
+  describe('unmanaged errors', () => {
+    it('surfaces a zero-width grid as a non-finite depth', () => {
+      expect(meshWorldDepth({ width: 0, height: 100 }, 12)).toBe(Number.POSITIVE_INFINITY)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('collapses to nothing for a zero-width plane', () => {
+      expect(meshWorldDepth({ width: 100, height: 100 }, 0)).toBe(0)
     })
   })
 })

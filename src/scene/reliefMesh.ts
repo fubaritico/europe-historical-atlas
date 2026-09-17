@@ -76,15 +76,61 @@ export function reliefWorldY(
   return metres * WORLD_PER_METRE
 }
 
+/**
+ * The dimensions of a source grid — all the mesh layout needs from one.
+ *
+ * Declared structurally rather than as `HeightmapMeta` so that anything with a width and a height can
+ * ask where the mesh puts its vertices, without dragging in the data layer.
+ */
+export interface GridFrame {
+  /** Grid width in samples. */
+  readonly width: number
+  /** Grid height in samples. */
+  readonly height: number
+}
+
+/** How the subdivided plane's vertices are laid out over a source grid. */
+export interface MeshVertexGrid {
+  /** Source grid aspect, width / height. */
+  aspect: number
+  /** Subdivisions along X (west→east) — the requested count, unchanged. */
+  segX: number
+  /** Subdivisions along Z (north→south), never below one so the plane always has a surface. */
+  segY: number
+}
+
+/**
+ * Where the relief mesh puts its vertices over a source grid.
+ *
+ * Exported for the same reason as {@link reliefWorldY}: anything draped on the terrain lands on the
+ * surface these nodes define, so recomputing the layout at the call site is how an overlay silently
+ * keeps an old subdivision after the mesh has changed its own.
+ * @param frame - the source grid's dimensions
+ * @param segments - the requested subdivision count along X
+ * @returns the vertex grid the mesh will build
+ */
+export function meshVertexGrid(frame: GridFrame, segments: number): MeshVertexGrid {
+  const aspect = frame.width / frame.height
+  return { aspect, segX: segments, segY: Math.max(1, Math.round(segments / aspect)) }
+}
+
+/**
+ * How deep the map plane is on Z, for a given width — the grid's aspect, applied.
+ * @param frame - the source grid's dimensions
+ * @param worldWidth - the plane's world-space width on X
+ * @returns the plane's world-space depth on Z
+ */
+export function meshWorldDepth(frame: GridFrame, worldWidth: number): number {
+  return worldWidth / (frame.width / frame.height)
+}
+
 export function createReliefMesh(
   heightmap: Heightmap,
   options: ReliefOptions
 ): Mesh<PlaneGeometry, MeshBasicMaterial> {
   const { worldWidth, segments, plainsCeiling, peakTarget, wireframe } = options
-  const aspect = heightmap.meta.width / heightmap.meta.height
-  const worldDepth = worldWidth / aspect
-  const segX = segments
-  const segY = Math.max(1, Math.round(segments / aspect))
+  const { segX, segY } = meshVertexGrid(heightmap.meta, segments)
+  const worldDepth = meshWorldDepth(heightmap.meta, worldWidth)
 
   const geometry = new PlaneGeometry(worldWidth, worldDepth, segX, segY)
   geometry.rotateX(-Math.PI / 2) // lay flat in the XZ plane, +Y up
