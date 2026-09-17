@@ -11,7 +11,7 @@
  */
 
 import type { MapControls } from './controls/mapControls'
-import type { DevPanelCallbacks } from './devPanel'
+import type { DevPanelCallbacks, DevPanelDeps } from './devPanel'
 import type { DevState } from './devState'
 import type { MapLayers } from './mapLayers'
 import type { MapPipeline } from './mapPipeline'
@@ -175,5 +175,33 @@ export function createPanelCallbacks(deps: PanelCallbackDeps): DevPanelCallbacks
     logCameraState: (): void => {
       console.warn('camera state:', JSON.stringify(deps.view.controls.getState()))
     },
+  }
+}
+
+/**
+ * Everything the dev panel renders against: the live tunables, and what each control does.
+ *
+ * Assembled here rather than in the composition root because it is the same wiring question, and the
+ * root's job is to create and connect, not to spell out a dozen field names.
+ * @param deps - what the panel drives
+ * @returns the panel's dependencies
+ */
+export function panelDepsFor(deps: PanelCallbackDeps): DevPanelDeps {
+  const { dev, view } = deps
+  return {
+    relief: dev.relief,
+    texture: dev.texture,
+    coast: dev.coast,
+    rhumb: dev.rhumb,
+    river: dev.river,
+    political: dev.political,
+    rose: dev.rose,
+    // The camera folder writes straight into the controls' own options: they are the live values, and
+    // a copy here would give the panel two places to write and the camera one to read.
+    controlsOptions: view.controls.options,
+    framing: dev.framing,
+    extent: dev.extent,
+    debug: dev.debug,
+    callbacks: createPanelCallbacks(deps),
   }
 }
