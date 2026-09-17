@@ -131,65 +131,6 @@ export default tseslint.config(
     },
   },
 
-  // ⚠ LEGACY EXEMPTIONS — opened 2026-09-17, and they must shrink to nothing.
-  // The budgets above are switched on before the codebase complies, so that they guide the work rather
-  // than rubber-stamp it afterwards. Each file listed here is debt with a name. Removing a line is the
-  // definition of done for one step of files/plans/readability-budgets.md; this whole section
-  // disappearing is the definition of done for the plan.
-  // Known and accepted risk: `off` is not a ratchet — an exempted file could grow while it waits.
-  {
-    // 642 code lines, of which `bootstrap()` alone is 567. Nothing else in the file comes close: the
-    // largest nested function is 37 lines, so decomposing the root is the whole of the remaining work.
-    // (`devParams.ts` left this list on 2026-09-17, split into `devParams/` — one module per panel folder.)
-    files: ['src/main.ts'],
-    rules: { 'max-lines': 'off' },
-  },
-  {
-    // 16 functions over 50 code lines. Nine of them are `createX` factories whose length is nested
-    // methods — precisely the pure logic modular-architecture.md wants lifted out of the closure.
-    files: [
-      'src/main.ts',
-      'src/devPanel.ts',
-      'src/controls/mapControls.ts',
-      'src/data/coastlineSource.ts',
-      'src/data/regionRaster.ts',
-      'src/data/riverSource.ts',
-      'src/pipeline/inlineCompute.ts',
-      'src/pipeline/terrainCompose.ts',
-      'src/pipeline/workerCompute.ts',
-      'src/scene/composedLineLayer.ts',
-      'src/scene/lineLayer.ts',
-      'src/ui/notice.ts',
-      'src/ui/progressOverlay.ts',
-      'src/ui/splash.ts',
-    ],
-    rules: { 'max-lines-per-function': 'off' },
-  },
-  {
-    // 15 functions over a cyclomatic complexity of 10; the worst are the genuinely dense algorithms
-    // (marching squares 25, region rasterising 25, colour assignment 23, polyline offsetting 22).
-    files: [
-      'src/devPanel.ts',
-      'src/controls/mapControls.ts',
-      'src/data/coastlineSource.ts',
-      'src/data/heightmap.ts',
-      'src/data/regionRaster.ts',
-      'src/data/riverSource.ts',
-      'src/pipeline/terrainCompose.ts',
-      'src/scene/compassRoseSvg.ts',
-      'src/scene/composedLineLayer.ts',
-      'src/scene/lineLayer.ts',
-      'src/scene/rhumbNetwork.ts',
-    ],
-    rules: { complexity: 'off' },
-  },
-  {
-    // 6 spots: the scanline fill and the BFS in regionRaster (one at depth 6), edge-scroll in
-    // mapControls (depth 5).
-    files: ['src/controls/mapControls.ts', 'src/data/regionRaster.ts'],
-    rules: { 'max-depth': 'off' },
-  },
-
   // Architecture boundaries — enforce the layer dependency direction inside src/ without
   // splitting into packages. Matching is on the import source string (no resolver needed).
   // Direction: geo/ (pure projection maths) and data/ (domain/ports) are leaves <- pipeline/ (the CPU
