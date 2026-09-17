@@ -5,75 +5,94 @@
 
 ## Where we are
 
-`master` at `b8eeaa8` (plus the sense-of-time tooling commit), **351 tests**, full gate green, tree clean.
-See `completed.md`, entry **2026-09-16 (midi + soirée)**.
+`master` at `4f14b69`, **482 tests**, full gate green, tree clean. See `completed.md`, entry
+**2026-09-17 (nuit)**.
 
-The political borders are finished as a rendering problem: derived from the raster so they cannot
-disagree with the colours, gapless by construction, grouped by polity pair, with three drawing patterns
-and a different appearance close up than at continent scale. The dev signed it off on screen.
+The map computes off the main thread, comes up in two deliberate stages behind a splash screen, says so
+when an asset fails, and draws its borders on a 1.9 km grid. All of it signed off on screen.
 
-## ▶ NEXT — move the political pipeline into a worker
+## ▶ THE METHOD — one century, built like a structural bay
 
-**Asked for explicitly at the end of the session**, and the seam is already built: the progress overlay
-(`src/ui/progressOverlay.ts`) knows nothing of what is being computed, and `rebuildPolitical` is already
-sequenced into five announced phases.
+**The dev's framing, and it governs the order of everything below**: rather than tooling the whole atlas
+and then filling it, **take one century and carry it all the way up** — cities, colours, and the act of
+contributing it. A *travée*: one complete bay of the building, foundation to roof, then repeated along
+its length.
 
-**The reason it matters**: the texture bake is a single indivisible synchronous block, so **the bar stalls
-at 70 %** and the tab freezes there. Everything before it already yields. A worker is what unfreezes the
-one phase that cannot be split on the main thread.
+What that buys, in the dev's words: *"ça nous permettra de dérouler pour les événements"*. The century
+that is finished is what **tells us what contribution actually requires** — which is the opposite of
+chapter 06's original assumption that the tools come first. Tools designed against a real, completed
+century will fit; tools designed in the abstract will not.
 
-**What makes it tractable** — checked during the session: `createPackedLandMask(meta, bits)` and
-`createHeightmap(meta, data)` both rebuild from *plain metadata + a typed array*, which is exactly what a
-worker receives as a transferable. No port has to be reshaped.
+It also names what is genuinely ahead and unbuilt: **clicking, landing on a place, showing an event's
+details, and deciding how any of that is presented.** None of it exists.
 
-**How to do it, in order:**
+## ▶ NEXT — user experience
 
-1. Define the port first — `PoliticalCompute { compute(input, onProgress): Promise<Output> }` — with an
-   **inline implementation** (today's code) alongside the worker one. The inline one stays the test
-   double and the fallback; the worker must be unpluggable.
-2. Move rasterise → expand → colours → **texture bake** → border geometry into it. The bake is the point;
-   stopping before it leaves the freeze in place.
-3. Transfer, do not copy: the mask is 3 MB, the raster 12 MB at 2×, the baked RGBA larger still.
-4. `DataTexture` is owned by the renderer — the worker returns the pixels, the main thread wraps them.
-5. Then reconsider **4×** (825 ms, 1.9 km cells): it was ruled out only because it blocked.
+**Asked for explicitly**: advance the user experience before touching colours or sources.
 
-## Then
+The obvious first piece is **M1.4 picking** — click a region, see something — because it is the
+interaction the whole project exists for, and nothing downstream (events, details, presentation) can be
+designed until a click means something. Two constraints already established, both load-bearing:
 
-- **The brown/cream stroke on two screenshots** — never explained. Two hypotheses left: the panel values
-  were not what the code defaults to, or the wide stroke is amplifying the staircase into blocks. Ask for
-  `⤓ log ALL settings` next time it shows.
-- **The coastal band** (Iceland, Scandinavia, the Caspian) — a one-click test settles it: drop the
-  `coastline` layer opacity to 0 and see whether the band goes with it.
+- **A click returns a *list*, from a spatial query — never a single polygon hit.** Several events of
+  different kinds share a place, and a design that assumes one hit cannot be widened later.
+- **Ask the compute, do not repatriate the grid.** The port should grow a `regionAt(u, v)`; a click is
+  one query and a query is a message. At the 4× raster, holding the grid here would cost 45 MB for the
+  session against a millisecond per round trip.
+
+**Confirm the scope at session start** — "user experience" was given as a direction, not a spec, and the
+HTML overlay (roadmap 03) is the other half of it.
+
+## Then, in this order
+
+1. **Colours, once the century is chosen** — and the fork to settle first is recorded in roadmap 04:
+   more pinned colours stable across the centuries (what EU4 does, and what makes a power recognisable),
+   or a palette per era (period flavour, at the cost of that recognition). A11Y-101 should close in the
+   same pass.
+2. **Cities** — graphic elements, and nothing exists for them yet.
+3. **Contribution tooling** (roadmap 06), designed against the century that was actually finished.
+4. **Sources / provider per era** — deferred by the dev, but **still blocking for publication**:
+   `historical-basemaps` is GPL-3.0 and cannot ship, OHM is CC0 and can, and today 1700 quietly holds an
+   OHM payload while every other year holds GPL. The provider table *is* the "what may we publish" table.
+5. **Sea decor** — explicitly last. Note it may force the interval temporal model (a drakkar is right
+   from ~700 to ~1100; a polity today is a dated snapshot).
+
+## Waiting on something else
+
+- **Retry after a blocking failure** — no way out but a page reload, and nothing says so. Recorded in
+  roadmap 07 with the insight that matters: the taxonomy already says only `transport` is worth retrying.
+  Build the **action seam** first (independent of the DS), then the automatic retry.
+- **The design system** (`../fubaritico-ds`) — `packages/variants` emits BEM class strings and
+  `packages/styles` ships the CSS, so it is consumable from vanilla TS with no React. The obstacle is
+  publication: both are `0.0.0` in a separate repo.
+
+## Small things never picked up
+
+- **The brown/cream stroke on two screenshots**, from 2026-09-16 — never explained.
+- **The coastal band** (Iceland, Scandinavia, the Caspian) — one click settles it: drop the `coastline`
+  layer opacity to 0 and see whether the band goes with it.
 - **`double` borders are implemented, tested, and produced by no rule.** All four entries in
-  `data/borderStyles` ask for `dashed`. One line of data whenever a pair deserves it.
+  `data/borderStyles` ask for `dashed`.
 - **Vector coastline** (`ne_10m_coastline` through the rivers pipeline) — the last open render complaint.
-- **M1.4 picking** — and note the design constraint found this session: a click must return a **list**
-  from a spatial query, not a single polygon hit, because several events of different types share a place.
+- **The compass SVG is validated by nothing** — the fifth asset, missed by chapter 07's own audit.
 
 ## Key facts to reload
 
-- **A border is not an object, it is a relation** — the place where two territories touch. Derive it from
-  the fills; never author it separately. Two geometries for one object is what produced the gaps, and
-  simplifying the line alone reproduced the same failure in a subtler form (rejected on sight).
-- **The staircase is a *resolution* problem.** Smoothing shrinks its wiggle, never its amplitude. Only a
-  finer raster fixes fill and line together. Measured table in `known-issues.md`.
-- **Anything measured in cells must scale with the raster** — `snapToCoast` above all, or its reach in
-  kilometres halves silently and the colours stop short of the coastline again.
-- **`bootstrap()` is this codebase's modularity sink** (ARCH-012). Layer boundaries police *imports*, not
-  *where logic lives*. Pure logic landing in a `bootstrap()` closure is a module that was not written.
-- **A flag raised before a synchronous block is a flag nobody sees.** Yield a frame between phases.
-- **Across an `await`, control-flow analysis still believes a narrowed flag cannot have changed** — read
-  teardown guards through a call, or the linter proves them dead and a refactor removes them.
-- **`LineMaterial.linewidth` is a live uniform**, so a width can follow the camera with no rebuild.
-  Dash distances are in **world units** and accumulate across the whole buffer without checking that
-  consecutive segments touch — so emit segments run by run.
-- **OpenHistoricalMap is CC0** (not ODbL), and usable from ~1700: 93.8 % of Europe covered then, 61.8 % at
-  1500. Measure coverage by **surface**, never by counting polities.
+- **A border is not an object, it is a relation** — derive it from the fills; never author it separately.
+- **The staircase is a *resolution* problem.** Now at 4× (1.9 km cells, ~136 MB peak, ~825 ms in the
+  worker). A finer grid also **reveals gaps a coarser one hid**: polities that touched at 2× may not at
+  4×, and the remedy is `snapToCoast`, not a retreat on resolution.
+- **The bake is not political** — it has five callers. Two ports, one implementation.
+- **A worker boundary is a bundle boundary**: pure logic under a `three`-importing header ships three
+  twice. Hence `pipeline/`, whose ESLint rule refuses it.
+- **Only the newest call may write back**, checked after *every* await before *every* side effect — not
+  just the state write (`utils/latestOnly`).
+- **`bootstrap()` is this codebase's modularity sink** (ARCH-012).
 - **Assets**: `public/heightmaps/`, `public/masks/`, `public/rivers/` committed; `public/borders/*.json`
-  git-ignored. **1700 currently holds the OHM payload**, with the `historical-basemaps` original backed up
-  at `files/spikes/fetch-ohm/out/europe-1700.hb-backup.json`.
+  git-ignored (GPL). **1700 holds the OHM payload**, original backed up at
+  `files/spikes/fetch-ohm/out/europe-1700.hb-backup.json`.
 - **`let`-const-ify gotcha**: the eslint `--fix` hook runs after each edit; add a `let` and its first
-  reassignment together.
+  reassignment together. Bit twice this session.
 
 ## Conventions (this project)
 

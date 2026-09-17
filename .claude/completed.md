@@ -2,6 +2,43 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-09-17 (nuit) — Le calcul dans un worker, l'écran d'attente, SEC-001, le raster 4×
+
+Une seule plage : **23:55 → 01:55, 2 h 00, 277 actions, 14 commits** `0027343`..`4f14b69`.
+**351 → 482 tests**, gate verte à chaque pas, build de production vérifié à chaque étape.
+
+- **Le pipeline politique tourne dans un worker** — le gel à 70 % traité à sa cause : la cuisson de
+  texture n'était pas *découpable*, elle devait quitter le thread. **Deux ports et non un**, contre le
+  plan consigné : la cuisson a cinq appelants et le politique n'en est qu'un ; un port unique aurait
+  laissé une seconde cuisson pour les quatre autres. Bénéfice non prévu — **les curseurs de texture ont
+  cessé de geler l'onglet**.
+- **L'extraction du compositeur était nécessaire, pas cosmétique.** Une frontière de worker est aussi une
+  frontière de *bundle* : `composeTerrainRgba` était pure mais sous un en-tête important `three`. Nouvelle
+  couche `pipeline/`, dont la règle ESLint **refuse `three`** — vérifiée en la faisant échouer exprès.
+  Chunk worker : **12,6 ko, zéro three.js**, contre 648 ko côté principal.
+- **Démarrage en deux temps voulus** au lieu de trois subis. La grille marron était **ma régression** :
+  `rebuildTexture` devenu asynchrone, `rebuildRelief` ne l'attendait plus et le maillage naissait sans
+  carte. Les deux autres étapes étaient du travail jeté — trois cuissons de 1,5 M pixels, deux écrasées.
+- **Écran d'attente** (`ui/splash`) — silhouette d'Europe **tracée depuis notre propre masque** par un
+  générateur de spike, jamais dessinée à la main. Relue avant livraison en **redessinant le chemin émis**
+  en ASCII. Cadrage trouvé au troisième essai (Mercator étire le nord : 300×384, puis 454, puis 299).
+  `HISTORICΛL ΛTLΛS`, nom accessible en clair. +4,3 ko gzippés.
+- **SEC-001 fermé, ses deux moitiés** (chapitre 07). Taxonomie porteuse — `transport | schema |
+  consistency | semantic` en **champs**, pas en chaîne — gardes écrites à la main, `boundsMatch` comme
+  contrôle sémantique inter-assets, politique de mode dégradé **déclarée** (le relief est la carte),
+  `role="alert"` bloquant / `role="status"` dégradé.
+- **Raster politique à 4× par défaut** — 1,9 km au lieu de 3,8. Écarté jusque-là pour 825 ms de blocage,
+  qui ne sont plus payés par le thread principal. Coût mesuré : ~136 Mo de pic. Le piège des unités en
+  cellules est **tenu par construction** — la multiplication se fait une fois, dans le calcul.
+- **Chemin ring supprimé** avec son toggle, et avec lui l'aller-retour du raster : **45 Mo par changement
+  d'année** que plus rien ne lisait.
+- **Revue à 4 dimensions** : sécurité et accessibilité vierges ; QUAL-101 (high) réel et de moi — j'avais
+  donné une garde de fraîcheur à `rebuildTexture` et **pas** à `rebuildPolitical`, que les palettes
+  déclenchent en continu. Corrigé par `utils/latestOnly`, avec la subtilité qui la rendait vicieuse :
+  garder la seule écriture d'état ne suffit pas.
+- **Établi sur le DS voisin** : `fubaritico-ds/packages/variants` rend des **chaînes de classes BEM** et
+  `packages/styles` livre le CSS — consommable en TS vanille, sans React. Le blocage est la publication.
+
 ### 2026-09-16 (midi + soirée) — Frontières dérivées du raster, types de frontières, doctrine de revue, overlay
 
 18 commits `df3390d`..`b8eeaa8`, **245 → 351 tests**, gate verte à chaque pas. Deux plages : une à midi
