@@ -138,8 +138,10 @@ export default tseslint.config(
   // disappearing is the definition of done for the plan.
   // Known and accepted risk: `off` is not a ratchet — an exempted file could grow while it waits.
   {
-    // 658 and 558 code lines. `bootstrap()` alone is 584 of main.ts's 658.
-    files: ['src/main.ts', 'src/devParams.ts'],
+    // 642 code lines, of which `bootstrap()` alone is 567. Nothing else in the file comes close: the
+    // largest nested function is 37 lines, so decomposing the root is the whole of the remaining work.
+    // (`devParams.ts` left this list on 2026-09-17, split into `devParams/` — one module per panel folder.)
+    files: ['src/main.ts'],
     rules: { 'max-lines': 'off' },
   },
   {
