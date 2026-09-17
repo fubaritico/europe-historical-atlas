@@ -57,7 +57,10 @@ HTML overlay (roadmap 03) is the other half of it.
    OHM already covers 1700 at 93.8 %. First deliverable is the spike `files/spikes/fetch-atlas`, flagged
    **ultra important** by the dev. One decision to take on day one: full shared topology, or the pragmatic
    v1 of independent polygons snapping to existing vertices — the second is cheaper and makes subdividing
-   the Empire later a redraw.
+   the Empire later a redraw. **Acceptance case: Alsace-Lorraine around 1680** — enclaves and exclaves,
+   not merely small neighbours, and already this codebase's reference counter-example (it is why
+   colour-softening was rejected). Note the hard limit it exposes: `RegionRaster.cells` holds **one polity
+   per cell**, so shared sovereignty is not representable.
 4. **Sources / provider per era** — deferred by the dev, but **still blocking for publication**:
    `historical-basemaps` is GPL-3.0 and cannot ship, OHM is CC0 and can, and today 1700 quietly holds an
    OHM payload while every other year holds GPL. The provider table *is* the "what may we publish" table.
