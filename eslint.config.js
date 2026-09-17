@@ -95,6 +95,99 @@ export default tseslint.config(
     },
   },
 
+  // Readability budgets — size and complexity ceilings, so that "I cannot re-read this" is caught by
+  // the gate instead of by a human months later. The layer boundaries below police *where* code lives;
+  // these police *how much of it* may sit in one place. Thresholds were measured against this codebase
+  // before being chosen (see files/plans/readability-budgets.md), not taken from a style guide.
+  {
+    rules: {
+      // Counts CODE only. This project mandates JSDoc everywhere and comments the *why* densely: if
+      // comments counted, deleting one would be the cheapest way to pass the gate, and the rule would
+      // destroy the readability it exists to protect. 400 lines of pure code is already a lot.
+      'max-lines': ['error', { max: 400, skipBlankLines: true, skipComments: true }],
+      // The ESLint default. Note it counts NESTED functions, so a `createX` factory is measured with
+      // its methods — which is the point: pure logic trapped in a closure is a module not yet written
+      // (ARCH-012). Where a factory genuinely cannot comply, disable it by name with a reason.
+      'max-lines-per-function': ['error', { max: 50, skipBlankLines: true, skipComments: true }],
+      // Nesting depth of blocks (if/for/while/try) — the "too much indentation" rule. NOT `complexity`,
+      // which counts execution paths and would leave a flat function with six sequential `if`s alone.
+      'max-depth': ['error', { max: 4 }],
+      // Cyclomatic complexity: half the ESLint default of 20. Deliberately not 5 — each `case`, `&&`
+      // and `?:` counts, so the 16-case marching-squares switch in coastlineSource scores 25 while
+      // being the clearest way to write that algorithm.
+      complexity: ['error', { max: 10 }],
+    },
+  },
+  {
+    // Test suites are exempt from the two LINE budgets, for a mechanical reason rather than a lenient
+    // one: `max-lines-per-function` counts nested functions, so the arrow passed to `describe()` is
+    // measured as a single function (the suites here score 289 / 279 / 258). The 5-level policy in
+    // rules/tests.md inflates suites by design. They remain subject to `complexity` and `max-depth`,
+    // where they were measured at zero violations.
+    files: ['**/*.test.ts'],
+    rules: {
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+    },
+  },
+
+  // ⚠ LEGACY EXEMPTIONS — opened 2026-09-17, and they must shrink to nothing.
+  // The budgets above are switched on before the codebase complies, so that they guide the work rather
+  // than rubber-stamp it afterwards. Each file listed here is debt with a name. Removing a line is the
+  // definition of done for one step of files/plans/readability-budgets.md; this whole section
+  // disappearing is the definition of done for the plan.
+  // Known and accepted risk: `off` is not a ratchet — an exempted file could grow while it waits.
+  {
+    // 658 and 558 code lines. `bootstrap()` alone is 584 of main.ts's 658.
+    files: ['src/main.ts', 'src/devParams.ts'],
+    rules: { 'max-lines': 'off' },
+  },
+  {
+    // 16 functions over 50 code lines. Nine of them are `createX` factories whose length is nested
+    // methods — precisely the pure logic modular-architecture.md wants lifted out of the closure.
+    files: [
+      'src/main.ts',
+      'src/devPanel.ts',
+      'src/controls/mapControls.ts',
+      'src/data/coastlineSource.ts',
+      'src/data/regionRaster.ts',
+      'src/data/riverSource.ts',
+      'src/pipeline/inlineCompute.ts',
+      'src/pipeline/terrainCompose.ts',
+      'src/pipeline/workerCompute.ts',
+      'src/scene/composedLineLayer.ts',
+      'src/scene/lineLayer.ts',
+      'src/ui/notice.ts',
+      'src/ui/progressOverlay.ts',
+      'src/ui/splash.ts',
+    ],
+    rules: { 'max-lines-per-function': 'off' },
+  },
+  {
+    // 15 functions over a cyclomatic complexity of 10; the worst are the genuinely dense algorithms
+    // (marching squares 25, region rasterising 25, colour assignment 23, polyline offsetting 22).
+    files: [
+      'src/devPanel.ts',
+      'src/controls/mapControls.ts',
+      'src/data/coastlineSource.ts',
+      'src/data/heightmap.ts',
+      'src/data/regionRaster.ts',
+      'src/data/riverSource.ts',
+      'src/pipeline/terrainCompose.ts',
+      'src/scene/compassRoseSvg.ts',
+      'src/scene/composedLineLayer.ts',
+      'src/scene/lineLayer.ts',
+      'src/scene/rhumbNetwork.ts',
+    ],
+    rules: { complexity: 'off' },
+  },
+  {
+    // 6 spots: the scanline fill and the BFS in regionRaster (one at depth 6), edge-scroll in
+    // mapControls (depth 5).
+    files: ['src/controls/mapControls.ts', 'src/data/regionRaster.ts'],
+    rules: { 'max-depth': 'off' },
+  },
+
   // Architecture boundaries — enforce the layer dependency direction inside src/ without
   // splitting into packages. Matching is on the import source string (no resolver needed).
   // Direction: geo/ (pure projection maths) and data/ (domain/ports) are leaves <- pipeline/ (the CPU
