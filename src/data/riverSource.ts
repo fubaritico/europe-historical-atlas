@@ -149,6 +149,113 @@ function marchToSea(
 }
 
 /**
+ * Index every river vertex so a tip can be told from a confluence.
+ *
+ * Natural Earth splits its polylines at confluences, so an endpoint another river runs past is a
+ * junction, not a mouth. Without this, every tributary ending within reach of the coast is handed its
+ * own invented channel to the sea.
+ *
+ * Proximity, not equality: a tributary does not always end exactly on a vertex of the river it joins, so
+ * an exact match under-detects junctions, while a plain bucket lookup misses the pair that straddles a
+ * bucket edge. Hence a spatial hash searched over its 3×3 neighbourhood.
+ * @param rivers - the centrelines
+ * @param junctionRadius - how close two polylines must come to count as joined
+ * @returns a test for whether a tip is shared with another polyline
+ */
+export function buildJunctionTest(
+  rivers: readonly River[],
+  junctionRadius: number
+): (tip: UvPoint, owner: number) => boolean {
+  const radius = Math.max(1e-9, junctionRadius)
+  const buckets = new Map<string, number[]>()
+  rivers.forEach((river, index) => {
+    for (const point of river.points) {
+      const cell = `${String(Math.floor(point.u / radius))}:${String(Math.floor(point.v / radius))}`
+      const bucket = buckets.get(cell)
+      if (bucket) bucket.push(index)
+      else buckets.set(cell, [index])
+    }
+  })
+  return (tip: UvPoint, owner: number): boolean => {
+    const cu = Math.floor(tip.u / radius)
+    const cv = Math.floor(tip.v / radius)
+    for (let du = -1; du <= 1; du++) {
+      for (let dv = -1; dv <= 1; dv++) {
+        for (const index of buckets.get(`${String(cu + du)}:${String(cv + dv)}`) ?? []) {
+          // Its own vertices always sit within the radius; only another polyline marks a junction.
+          if (index !== owner) return true
+        }
+      }
+    }
+    return false
+  }
+}
+
+/**
+ * The shortest walk to open water within an arc around a heading.
+ *
+ * Swept symmetrically around the river's own course, shortest hit winning, which keeps the stub close to
+ * the natural channel instead of cutting across a headland.
+ * @param mask - the land/water mask
+ * @param tip - where the river currently ends
+ * @param heading - the river's own bearing at the tip, in radians
+ * @param arc - half the sweep, in radians
+ * @param samples - how many bearings to try across it
+ * @param options - the search bounds
+ * @returns the stub to append, or `null` when no bearing reached water
+ */
+export function bestSeaStub(
+  mask: LandMask,
+  tip: UvPoint,
+  heading: number,
+  arc: number,
+  samples: number,
+  options: RiverExtensionOptions
+): UvPoint[] | null {
+  let best: UvPoint[] | null = null
+  for (let i = 0; i < samples; i++) {
+    const offset = samples === 1 ? 0 : -arc + (2 * arc * i) / (samples - 1)
+    const angle = heading + offset
+    const found = marchToSea(mask, tip, [Math.cos(angle), Math.sin(angle)], options)
+    if (found && (!best || found.length < best.length)) best = found
+  }
+  return best
+}
+
+/**
+ * Extend one chain's last point to the sea, when that point is a mouth at all.
+ * @param points - the chain, mouth last
+ * @param owner - which river it belongs to, so its own vertices do not read as a junction
+ * @param mask - the land/water mask
+ * @param isJunction - whether a tip is shared with another polyline
+ * @param arc - half the search sweep, in radians
+ * @param samples - how many bearings to try
+ * @param options - the search bounds
+ * @returns the chain, extended where a short walk found the sea
+ */
+export function extendMouth(
+  points: UvPoint[],
+  owner: number,
+  mask: LandMask,
+  isJunction: (tip: UvPoint, owner: number) => boolean,
+  arc: number,
+  samples: number,
+  options: RiverExtensionOptions
+): UvPoint[] {
+  const tip = points[points.length - 1]
+  const previous = points[points.length - 2]
+  if (!tip || !previous) return points
+  if (!mask.isLand(tip.u, tip.v)) return points // already in the water
+  if (isJunction(tip, owner)) return points // another river runs past: a confluence, not a mouth
+
+  const du = tip.u - previous.u
+  const dv = tip.v - previous.v
+  if (Math.hypot(du, dv) === 0) return points
+  const stub = bestSeaStub(mask, tip, Math.atan2(dv, du), arc, samples, options)
+  return stub ? [...points, ...stub] : points
+}
+
+/**
  * Close the gap at river mouths by extending each endpoint that still sits on land until it meets the
  * sea.
  *
@@ -173,65 +280,13 @@ export function extendRiversToSea(
 ): River[] {
   const arc = (options.searchArcDeg * Math.PI) / 180
   const samples = Math.max(1, Math.floor(options.arcSamples))
-
-  // Natural Earth splits its polylines at confluences, so an endpoint another river runs past is a
-  // junction, not a mouth. Without this, every tributary ending within `maxDistance` of the coast is
-  // handed its own invented channel to the sea.
-  //
-  // Proximity, not equality: a tributary does not always end exactly on a vertex of the river it joins,
-  // so an exact match under-detects junctions, while a plain bucket lookup misses the pair that
-  // straddles a bucket edge. Hence a spatial hash searched over its 3×3 neighbourhood.
-  const radius = Math.max(1e-9, options.junctionRadius)
-  const buckets = new Map<string, number[]>()
-  rivers.forEach((river, index) => {
-    for (const point of river.points) {
-      const cell = `${String(Math.floor(point.u / radius))}:${String(Math.floor(point.v / radius))}`
-      const bucket = buckets.get(cell)
-      if (bucket) bucket.push(index)
-      else buckets.set(cell, [index])
-    }
-  })
-  const isJunction = (tip: UvPoint, owner: number): boolean => {
-    const cu = Math.floor(tip.u / radius)
-    const cv = Math.floor(tip.v / radius)
-    for (let du = -1; du <= 1; du++)
-      for (let dv = -1; dv <= 1; dv++)
-        for (const index of buckets.get(`${String(cu + du)}:${String(cv + dv)}`) ?? [])
-          // Its own vertices always sit within the radius; only another polyline marks a junction.
-          if (index !== owner) return true
-    return false
-  }
-
-  const extend = (points: UvPoint[], owner: number): UvPoint[] => {
-    const tip = points[points.length - 1]
-    const previous = points[points.length - 2]
-    if (!tip || !previous) return points
-    if (!mask.isLand(tip.u, tip.v)) return points // already in the water
-    if (isJunction(tip, owner)) return points // another river runs past: a confluence, not a mouth
-
-    const du = tip.u - previous.u
-    const dv = tip.v - previous.v
-    const length = Math.hypot(du, dv)
-    if (length === 0) return points
-    const base = Math.atan2(dv, du)
-
-    let best: UvPoint[] | null = null
-    for (let i = 0; i < samples; i++) {
-      // Sweep the arc symmetrically around the river's own heading; the shortest hit wins, which keeps
-      // the stub close to the natural course instead of cutting across a headland.
-      const offset = samples === 1 ? 0 : -arc + (2 * arc * i) / (samples - 1)
-      const angle = base + offset
-      const found = marchToSea(mask, tip, [Math.cos(angle), Math.sin(angle)], options)
-      if (found && (!best || found.length < best.length)) best = found
-    }
-    return best ? [...points, ...best] : points
-  }
+  const isJunction = buildJunctionTest(rivers, options.junctionRadius)
 
   return rivers.map((river, index) => {
     // Either end can be the mouth: the dataset does not guarantee an upstream-to-downstream order, and
     // a headwater simply never finds the sea within the cap, so trying both is self-selecting.
-    const forward = extend([...river.points], index)
-    const both = extend([...forward].reverse(), index)
+    const forward = extendMouth([...river.points], index, mask, isJunction, arc, samples, options)
+    const both = extendMouth([...forward].reverse(), index, mask, isJunction, arc, samples, options)
     return { ...river, points: both.reverse() }
   })
 }

@@ -142,6 +142,49 @@ export function parseHeightmapMeta(value: unknown, source: string): HeightmapMet
 }
 
 /**
+ * One axis of a separable box blur.
+ *
+ * Written once and run twice rather than spelled out per axis: the two passes differ only in how far
+ * apart their taps sit in the buffer, and a copy of this that drifted would blur the map more in one
+ * direction than the other — which reads as a smeared relief, not as a bug.
+ *
+ * The axis is named rather than inferred from the tap spacing. On a one-column grid both axes step by
+ * one, so a stride cannot tell them apart, and the column pass would silently blur along rows instead.
+ * @param src - the samples to read
+ * @param out - where the blurred samples are written
+ * @param width - the grid width
+ * @param height - the grid height
+ * @param radius - taps either side of each sample
+ * @param axis - `row` to blur across, `column` to blur down
+ * @returns nothing; `out` is written in place
+ */
+export function boxBlurAxis(
+  src: ArrayLike<number>,
+  out: Float32Array,
+  width: number,
+  height: number,
+  radius: number,
+  axis: 'row' | 'column'
+): void {
+  const alongRow = axis === 'row'
+  const stride = alongRow ? 1 : width
+  const limit = alongRow ? width : height
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const position = alongRow ? x : y
+      const index = y * width + x
+      // Bounded rather than tested tap by tap, so a sample near an edge averages what actually exists
+      // there instead of a repeated edge value pulling it outward.
+      const from = Math.max(0, position - radius)
+      const to = Math.min(limit - 1, position + radius)
+      let sum = 0
+      for (let at = from; at <= to; at++) sum += src[index + (at - position) * stride] ?? 0
+      out[index] = sum / (to - from + 1)
+    }
+  }
+}
+
+/**
  * Return a smoothed copy of a heightmap using a separable box blur of the given radius. Rounds off
  * high-frequency spikes / DEM outliers (needles) into coherent hills. `radius <= 0` returns the source.
  * @param source - the heightmap to smooth
@@ -151,38 +194,10 @@ export function parseHeightmapMeta(value: unknown, source: string): HeightmapMet
 export function smoothHeightmap(source: Heightmap, radius: number): Heightmap {
   if (radius <= 0) return source
   const { width, height } = source.meta
-  const src = source.data
   const r = Math.floor(radius)
   const horizontal = new Float32Array(width * height)
   const out = new Float32Array(width * height)
-
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      let sum = 0
-      let count = 0
-      for (let dx = -r; dx <= r; dx++) {
-        const xx = x + dx
-        if (xx < 0 || xx >= width) continue
-        sum += src[y * width + xx] ?? 0
-        count++
-      }
-      horizontal[y * width + x] = sum / count
-    }
-  }
-
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      let sum = 0
-      let count = 0
-      for (let dy = -r; dy <= r; dy++) {
-        const yy = y + dy
-        if (yy < 0 || yy >= height) continue
-        sum += horizontal[yy * width + x] ?? 0
-        count++
-      }
-      out[y * width + x] = sum / count
-    }
-  }
-
+  boxBlurAxis(source.data, horizontal, width, height, r, 'row')
+  boxBlurAxis(horizontal, out, width, height, r, 'column')
   return createHeightmap(source.meta, out)
 }
