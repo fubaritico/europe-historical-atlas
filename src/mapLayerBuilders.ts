@@ -27,7 +27,6 @@ import { createReliefMesh, meshWorldDepth } from './scene/reliefMesh'
 import { generateRhumbSegments } from './scene/rhumbNetwork'
 import { createRiverLayer } from './scene/riverLayer'
 import { wrapTerrainTexture } from './scene/terrainTexture'
-import { hexToRgb } from './utils/color'
 
 import type { BorderPattern } from './data/borderStyles'
 import type { DevState } from './devState'
@@ -278,7 +277,7 @@ export function rebuildFrame(context: LayerContext): void {
   handles.sheetTexture?.dispose()
   handles.sheetTexture = wrapTerrainTexture(
     composeSheetRgba(SHEET_TEXTURE_SIZE, {
-      paper: hexToRgb(dev.frame.paper),
+      paper: dev.texture.sea,
       grain: dev.frame.grain,
       grainScale: dev.frame.grainScale,
     }),
@@ -300,7 +299,7 @@ export function rebuildFrame(context: LayerContext): void {
     tickLength: dev.frame.tickLength,
     tickStepDeg: dev.frame.tickStepDeg,
     ink: dev.frame.ink,
-    paper: dev.frame.paper,
+    paper: dev.texture.sea,
     lift: dev.frame.lift,
   })
   scene.add(handles.sheet.object, handles.frame.object)

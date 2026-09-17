@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildFrameQuads, degreeIndices, graduations } from './graticuleFrame'
+import { buildFrameQuads, createGraticuleFrame, degreeIndices, graduations } from './graticuleFrame'
 
 import type { GraticuleFrameOptions } from './graticuleFrame'
 
@@ -14,7 +14,7 @@ const OPTIONS: GraticuleFrameOptions = {
   tickLength: 0.07,
   tickStepDeg: 5,
   ink: '#3d2c20',
-  paper: '#efe6d2',
+  paper: { r: 196, g: 206, b: 202 },
   lift: 0.004,
 }
 
@@ -190,6 +190,65 @@ describe('buildFrameQuads', () => {
         expect(q.x1).toBeGreaterThan(q.x0)
         expect(q.z1).toBeGreaterThan(q.z0)
       }
+    })
+  })
+})
+
+describe('createGraticuleFrame', () => {
+  describe('happy path', () => {
+    it('faces up, so a front-facing material draws it', () => {
+      // The bug this exists for: hand-wound triangles taken the other way round point their normal at
+      // the ground, the whole frame is back-facing, and a `FrontSide` material draws nothing at all.
+      // Nothing about the scene says so — it simply is not there.
+      const frame = createGraticuleFrame(OPTIONS)
+      const mesh = frame.object as unknown as {
+        geometry: { getAttribute: (name: string) => { array: Float32Array } }
+      }
+      const p = mesh.geometry.getAttribute('position').array
+      const ax = p[0] ?? 0
+      const az = p[2] ?? 0
+      const bx = (p[3] ?? 0) - ax
+      const bz = (p[5] ?? 0) - az
+      const cx = (p[6] ?? 0) - ax
+      const cz = (p[8] ?? 0) - az
+      // The Y component of (AB x AC) for two vectors lying in the XZ plane.
+      expect(bz * cx - bx * cz).toBeGreaterThan(0)
+      frame.dispose()
+    })
+  })
+
+  describe('variants', () => {
+    it('carries a colour per vertex, so the whole frame is one draw call', () => {
+      const frame = createGraticuleFrame(OPTIONS)
+      const mesh = frame.object as unknown as {
+        geometry: { getAttribute: (name: string) => { array: Float32Array } | undefined }
+      }
+      expect(mesh.geometry.getAttribute('color')).toBeDefined()
+      frame.dispose()
+    })
+  })
+
+  // L3 (managed errors): N/A — it turns rectangles into triangles and handles no failure of its own.
+
+  describe('unmanaged errors', () => {
+    it('builds an empty mesh rather than throwing when nothing is graduated', () => {
+      const frame = createGraticuleFrame({
+        ...OPTIONS,
+        bandWidth: 0,
+        tickLength: 0,
+        bandStepDeg: 500,
+      })
+      expect(frame.object).toBeDefined()
+      frame.dispose()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('frees its geometry and material on teardown', () => {
+      const frame = createGraticuleFrame(OPTIONS)
+      expect(() => {
+        frame.dispose()
+      }).not.toThrow()
     })
   })
 })

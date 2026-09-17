@@ -8,14 +8,17 @@
 
 import type { ControlTable } from '../utils/controlSpec'
 
-/** The paper around the map, and the neatline between the two. */
+/**
+ * The paper around the map, and the neatline between the two.
+ *
+ * There is no paper colour here on purpose: it is the sea's, read from the terrain options. The margin
+ * continues the water it abuts, so the sheet reads as one surface with a map drawn on it.
+ */
 export interface FrameDevParams {
   /** Draw the sheet and its border at all. */
   show: boolean
   /** How far the paper reaches beyond the map, in world units. */
   sheetMargin: number
-  /** The paper's own colour. Matches the page behind it, so the sheet has no visible edge of its own. */
-  paper: string
   /** How strongly the vellum fibre shows on the sheet. */
   grain: number
   /** Spatial scale of that fibre, in baked pixels. Larger is coarser. */
@@ -38,8 +41,6 @@ export interface FrameDevParams {
 export const DEFAULT_FRAME_PARAMS: FrameDevParams = {
   show: true,
   sheetMargin: 2.5,
-  // The same parchment as the page behind it: the sheet must not show an edge of its own, only the map's.
-  paper: '#efe6d2',
   grain: 0.16,
   grainScale: 26,
   bandWidth: 0.16,
@@ -54,7 +55,6 @@ export const DEFAULT_FRAME_PARAMS: FrameDevParams = {
 export const FRAME_CONTROLS: ControlTable<FrameDevParams> = {
   show: { kind: 'boolean', label: 'show sheet + border' },
   sheetMargin: { kind: 'number', min: 0, max: 8, step: 0.1, label: 'paper margin' },
-  paper: { kind: 'color', label: 'paper' },
   grain: { kind: 'number', min: 0, max: 0.6, step: 0.01, label: 'vellum grain' },
   grainScale: { kind: 'number', min: 4, max: 80, step: 1, label: 'grain scale (px)' },
   bandWidth: { kind: 'number', min: 0.02, max: 0.6, step: 0.01, label: 'band width' },
@@ -69,7 +69,6 @@ export const FRAME_CONTROLS: ControlTable<FrameDevParams> = {
 export const FRAME_CONTROL_ORDER: (keyof FrameDevParams)[] = [
   'show',
   'sheetMargin',
-  'paper',
   'grain',
   'grainScale',
   'bandWidth',

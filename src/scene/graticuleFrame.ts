@@ -18,6 +18,7 @@ import { latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
 import { hexToRgb } from '../utils/color'
 
 import type { GeoBounds } from '../geo/mercator'
+import type { RgbColor } from '../utils/color'
 import type { Object3D } from 'three'
 
 /** One rectangle of the frame, in world XZ. */
@@ -52,8 +53,13 @@ export interface GraticuleFrameOptions {
   tickStepDeg: number
   /** The band's dark ink, as a hex string. */
   ink: string
-  /** The paper between the dark segments, as a hex string. */
-  paper: string
+  /**
+   * The paper between the dark segments.
+   *
+   * The sea's own tone, read from the terrain options rather than tuned apart: the margin continues the
+   * water it abuts, so the reader sees one sheet with a map drawn on it rather than two surfaces.
+   */
+  paper: RgbColor
   /** How far above the sea the frame sits. */
   lift: number
 }
@@ -208,19 +214,22 @@ export interface GraticuleFrame {
 export function createGraticuleFrame(options: GraticuleFrameOptions): GraticuleFrame {
   const quads = buildFrameQuads(options)
   const ink = hexToRgb(options.ink)
-  const paper = hexToRgb(options.paper)
+  const paper = options.paper
   const positions = new Float32Array(quads.length * 6 * 3)
   const colors = new Float32Array(quads.length * 6 * 3)
   let o = 0
   for (const quad of quads) {
     const tone = quad.ink ? ink : paper
+    // Wound so the face normal points UP. Taken the other way round the whole frame is back-facing and
+    // a `FrontSide` material draws nothing at all — which is exactly what happened, and what the sheet
+    // did not suffer because three winds its own `PlaneGeometry`.
     const corners = [
       [quad.x0, quad.z0],
+      [quad.x1, quad.z1],
       [quad.x1, quad.z0],
-      [quad.x1, quad.z1],
       [quad.x0, quad.z0],
-      [quad.x1, quad.z1],
       [quad.x0, quad.z1],
+      [quad.x1, quad.z1],
     ] as const
     for (const [x, z] of corners) {
       positions[o] = x
