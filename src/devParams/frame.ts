@@ -86,9 +86,12 @@ export const DEFAULT_FRAME_PARAMS: FrameDevParams = {
   edgeShow: true,
   // About a third of the tallest peak's world height, so the board reads as a board and not a plinth.
   edgeDepth: 0.06,
-  edgeSoil: '#a8875c',
-  edgeDeep: '#6b5136',
-  edgeBase: '#c9bb9c',
+  // Dark. A cut through ground is in shadow by definition — it faces sideways, away from the light
+  // the hillshade is baked from, and a section the same value as the parchment reads as a fold in the
+  // paper rather than as depth.
+  edgeSoil: '#7d5f3c',
+  edgeDeep: '#33251a',
+  edgeBase: '#8a7a61',
   edgeStrata: 5,
 }
 
