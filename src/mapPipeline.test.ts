@@ -64,6 +64,7 @@ function fakeLayers(): MapLayers {
     'rebuildRivers',
     'rebuildBorders',
     'rebuildRose',
+    'rebuildFrame',
     'setWireframe',
     'setCoastColor',
     'setRiverColor',

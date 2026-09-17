@@ -13,6 +13,7 @@
 import {
   DEFAULT_COASTLINE_PARAMS,
   DEFAULT_EXTENT_PARAMS,
+  DEFAULT_FRAME_PARAMS,
   DEFAULT_POLITICAL_PARAMS,
   DEFAULT_RELIEF_PARAMS,
   DEFAULT_RHUMB_PARAMS,
@@ -25,6 +26,7 @@ import type { MapRect } from './controls/mapControls'
 import type {
   CoastlineDevParams,
   ExtentDevParams,
+  FrameDevParams,
   PoliticalDevParams,
   ReliefDevParams,
   RhumbDevParams,
@@ -63,6 +65,8 @@ export interface DevState {
   rose: RoseDevParams
   /** The world rectangle the camera is clamped within. */
   extent: ExtentDevParams
+  /** The sheet the map is printed on, and its graduated border. */
+  frame: FrameDevParams
   /** Camera framing. */
   framing: FramingState
   /** Debug overlays. */
@@ -83,6 +87,7 @@ export function createDevState(): DevState {
     political: { ...DEFAULT_POLITICAL_PARAMS },
     rose: { ...DEFAULT_ROSE_PARAMS },
     extent: { ...DEFAULT_EXTENT_PARAMS },
+    frame: { ...DEFAULT_FRAME_PARAMS },
     framing: { fov: 35 },
     debug: { showFrustum: false },
   }

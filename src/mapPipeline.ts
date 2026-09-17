@@ -315,6 +315,7 @@ async function startup(context: PipelineContext): Promise<void> {
   await rebuildTexture(context)
   if (context.isDisposed()) return
 
+  layers.rebuildFrame() // the sheet first: everything else is printed on it
   layers.rebuildRelief()
   layers.rebuildCoastline()
   layers.rebuildRhumb()

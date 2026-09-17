@@ -45,7 +45,7 @@ export const CAMERA_CONTROLS: ControlTable<CameraTuningParams> = {
   enableEdgeScroll: { kind: 'boolean', label: 'edge-scroll' },
   edgeScrollSpeed: { kind: 'number', min: 1, max: 30, step: 0.5, label: 'edge speed' },
   minDistance: { kind: 'number', min: 0.5, max: 8, step: 0.25, label: 'min distance (in)' },
-  maxDistance: { kind: 'number', min: 2, max: 15, step: 0.25, label: 'max distance (out)' },
+  maxDistance: { kind: 'number', min: 2, max: 24, step: 0.25, label: 'max distance (out)' },
   minPitchDeg: { kind: 'number', min: 20, max: 89, step: 1, label: 'pitch in (oblique)' },
   maxPitchDeg: { kind: 'number', min: 20, max: 89, step: 1, label: 'pitch out (top-down)' },
   flyDurationMs: { kind: 'number', min: 0, max: 2000, step: 50, label: 'fly-to duration (ms)' },

@@ -7,6 +7,8 @@ import {
   COASTLINE_CONTROL_ORDER,
   EXTENT_CONTROLS,
   EXTENT_CONTROL_ORDER,
+  FRAME_CONTROLS,
+  FRAME_CONTROL_ORDER,
   POLITICAL_CONTROLS,
   POLITICAL_CONTROL_GROUPS,
   RELIEF_CONTROLS,
@@ -25,6 +27,7 @@ import type { MapControlsOptions } from './controls/mapControls'
 import type {
   CoastlineDevParams,
   ExtentDevParams,
+  FrameDevParams,
   PoliticalDevParams,
   PoliticalRebuild,
   ReliefDevParams,
@@ -105,6 +108,8 @@ export interface DevPanelCallbacks {
   setRiverColor: (color: string) => void
   /** Rebuild the compass rose (colours / labels / size / lift changed). */
   rebuildRose: () => void
+  /** Rebuild the sheet and the graduated border framing the map. */
+  rebuildFrame: () => void
   /** Update the live compass-rose opacity. */
   setRoseOpacity: (value: number) => void
   /** Toggle the relief wireframe on the live material. */
@@ -144,6 +149,8 @@ export interface DevPanelDeps {
   political: PoliticalDevParams
   /** Compass-rose styling params. */
   rose: RoseDevParams
+  /** The sheet the map is printed on, and its graduated border. */
+  frame: FrameDevParams
   /** The live controls options object (mutated in place, read every frame). */
   controlsOptions: MapControlsOptions
   /** The camera framing (fov). */
@@ -201,6 +208,7 @@ function snapshotDefaults(deps: DevPanelDeps) {
     river: clonePlain(deps.river),
     political: clonePlain(deps.political),
     rose: clonePlain(deps.rose),
+    frame: clonePlain(deps.frame),
     extent: clonePlain(deps.extent),
     fov: deps.framing.fov,
     // Camera tuning is a subset of the controls options; extent and zoom state are left alone.
@@ -219,7 +227,7 @@ function snapshotDefaults(deps: DevPanelDeps) {
  * @returns the reset action
  */
 function createResetAction(gui: GUI, deps: DevPanelDeps, defaults: PanelDefaults): () => void {
-  const { relief, texture, coast, rhumb, river, political, rose, extent, callbacks } = deps
+  const { relief, texture, coast, rhumb, river, political, rose, frame, extent, callbacks } = deps
   return (): void => {
     Object.assign(relief, clonePlain(defaults.relief))
     Object.assign(texture, clonePlain(defaults.texture))
@@ -228,6 +236,7 @@ function createResetAction(gui: GUI, deps: DevPanelDeps, defaults: PanelDefaults
     Object.assign(river, clonePlain(defaults.river))
     Object.assign(political, clonePlain(defaults.political))
     Object.assign(rose, clonePlain(defaults.rose))
+    Object.assign(frame, clonePlain(defaults.frame))
     Object.assign(extent, clonePlain(defaults.extent))
     Object.assign(deps.controlsOptions, clonePlain(defaults.camera))
     deps.framing.fov = defaults.fov
@@ -245,6 +254,7 @@ function createResetAction(gui: GUI, deps: DevPanelDeps, defaults: PanelDefaults
     callbacks.rebuildRivers()
     callbacks.rebuildPolitical()
     callbacks.rebuildRose()
+    callbacks.rebuildFrame()
     gui.controllersRecursive().forEach((controller) => controller.updateDisplay())
   }
 }
@@ -429,6 +439,22 @@ function addRoseFolder(gui: GUI, deps: DevPanelDeps): void {
 }
 
 /**
+ * The sheet and its graduated border.
+ *
+ * Every tunable rebuilds both: the border's place is decided by the map's own edge and the sheet is
+ * what it is drawn on, so there is no half of this that can change alone.
+ * @param gui - where to add the folder
+ * @param deps - what the panel binds to
+ * @returns nothing
+ */
+function addFrameFolder(gui: GUI, deps: DevPanelDeps): void {
+  const folder = gui.addFolder('sheet + border')
+  for (const key of FRAME_CONTROL_ORDER)
+    addControl(folder, deps.frame, key, FRAME_CONTROLS[key], deps.callbacks.rebuildFrame)
+  folder.close()
+}
+
+/**
  * The camera feel, and the extent its clamp works from.
  *
  * The controls read their options every frame, so none of these needs a callback — except the extent,
@@ -480,6 +506,7 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
   addRiverFolder(gui, deps)
   addPoliticalFolder(gui, deps)
   addRoseFolder(gui, deps)
+  addFrameFolder(gui, deps)
   addCameraFolder(gui, deps)
   return gui
 }

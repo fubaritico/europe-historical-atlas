@@ -13,6 +13,7 @@
 export * from './camera'
 export * from './coastline'
 export * from './extent'
+export * from './frame'
 export * from './political'
 export * from './relief'
 export * from './rhumb'

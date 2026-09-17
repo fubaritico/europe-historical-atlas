@@ -49,6 +49,7 @@ function logAllSettings(dev: DevState, controls: MapControls): void {
           river: dev.river,
           political: dev.political,
           rose: dev.rose,
+          frame: dev.frame,
           camera: { ...controls.getState(), fov: dev.framing.fov },
           controls: controls.options,
           extent: dev.extent,
@@ -169,6 +170,9 @@ export function createPanelCallbacks(deps: PanelCallbackDeps): DevPanelCallbacks
   return {
     ...rebuildCallbacks(deps),
     ...liveCallbacks(deps),
+    rebuildFrame: (): void => {
+      deps.layers.rebuildFrame()
+    },
     logAll: (): void => {
       logAllSettings(deps.dev, deps.view.controls)
     },
@@ -196,6 +200,7 @@ export function panelDepsFor(deps: PanelCallbackDeps): DevPanelDeps {
     river: dev.river,
     political: dev.political,
     rose: dev.rose,
+    frame: dev.frame,
     // The camera folder writes straight into the controls' own options: they are the live values, and
     // a copy here would give the panel two places to write and the camera one to read.
     controlsOptions: view.controls.options,

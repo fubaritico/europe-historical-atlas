@@ -64,6 +64,7 @@ function countingCallbacks(): { callbacks: DevPanelCallbacks; calls: Record<stri
     'rebuildBorders',
     'rebuildBorderGeometry',
     'rebuildRose',
+    'rebuildFrame',
     'setWireframe',
     'setCoastColor',
     'setRiverColor',
@@ -98,6 +99,7 @@ function build(): {
     river: dev.river,
     political: dev.political,
     rose: dev.rose,
+    frame: dev.frame,
     controlsOptions: {
       panSpeed: 1,
       zoomSpeed: 1,
