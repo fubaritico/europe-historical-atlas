@@ -105,16 +105,20 @@ Put here the know issues to avoid cluttering the context window.
 - **GPU max texture size is not checked.** The bake is 2560 px wide at supersample 2 and 3840 at 3, while
   WebGL2 only guarantees 2048. Fine on desktop, not guaranteed everywhere; clamp from
   `renderer.capabilities.maxTextureSize` if it ever bites.
-- **`devPanel.ts` has no tests** (it imports lil-gui and would need a DOM). This is the hole the inert
-  river sliders went through: the widths and reveal thresholds are captured when a layer is built, so
-  wiring only some of them left the rest doing nothing, and nothing caught it. **It swallowed a second
-  set**: `snapToCoast` and the eight `palette*` slots were routed to `rebuildBorders`, which re-rasterises
-  nothing — they did nothing at all. Fixed by inverting the rule (an explicit allow-list of border-only
-  keys, everything else takes the full rebuild), so a tunable added later defaults to correct-but-slower
-  instead of silently inert. **2026-09-17**: the political half of that dispatch now lives in
-  `devParams.politicalRebuildFor`, beside the control table it describes, and is walked key by key in a
-  test — including an assertion that an unlisted key comes out `full`. The panel itself still has no
-  tests; the remaining untested dispatches are relief, coast, rhumb and river.
+- ~~**`devPanel.ts` has no tests** (it imports lil-gui and would need a DOM)~~ — **WRONG, and fixed
+  2026-09-17.** The claim was never checked. lil-gui runs under jsdom; the only thing missing is
+  `window.matchMedia`, which is three lines to stub. Two sets of sliders were lost to a file that was
+  testable all along.
+  What now guards it: **every one of the 117 controls is moved and must trigger at least one callback**,
+  against an allow-list of the ones that are deliberately inert because the render loop reads them every
+  frame. Verified by breaking a wiring on purpose — the test named `revealStart`, the exact shape of
+  both past failures. The subtlety it cost: most controls bind `onFinishChange`, not `onChange`, since a
+  rebuild must not run on every drag frame — a test that fires only the first finds the panel inert and
+  is itself the thing that is wrong.
+  The dispatches are covered too: a border paint redraws, border smoothing re-traces, a change of year
+  rebuilds in full, and the sea level rebuilds the coastline and the rhumbs that share it.
+  **Still true**: the widths and reveal thresholds are captured when a layer is built, so every river
+  tunable needs a rebuild and only the colour has a live setter.
 - **The dismiss button's two accessibility defects are fixed** (A11Y-201, A11Y-202, found 2026-09-17).
   The glyph was drawn at `opacity:0.65`, compositing to **3.71:1** against the panel — under the 4.5:1
   floor of WCAG 1.4.3 for 19px non-bold text. Fixed by dropping the alpha entirely rather than picking a
