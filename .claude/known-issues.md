@@ -115,10 +115,24 @@ Put here the know issues to avoid cluttering the context window.
   `devParams.politicalRebuildFor`, beside the control table it describes, and is walked key by key in a
   test — including an assertion that an unlisted key comes out `full`. The panel itself still has no
   tests; the remaining untested dispatches are relief, coast, rhumb and river.
+- **The dismiss button's two accessibility defects are fixed** (A11Y-201, A11Y-202, found 2026-09-17).
+  The glyph was drawn at `opacity:0.65`, compositing to **3.71:1** against the panel — under the 4.5:1
+  floor of WCAG 1.4.3 for 19px non-bold text. Fixed by dropping the alpha entirely rather than picking a
+  better number: the ink is caller-supplied, so full ink means the control reads exactly as well as the
+  notice title above it, whatever ink is passed. The hit area was sized to the glyph, about 19×23 px; it
+  is now 32×32 with the glyph centred. **Note the criterion**: the familiar 44×44 is WCAG 2.5.5, which is
+  **AAA**. The AA bar is 2.5.8 (WCAG 2.2) at **24×24** — the old box failed that too. Both are guarded by
+  tests, so a restyle cannot quietly undo them.
 - **The ESLint boundary glob `**/controls` is too broad** — it matched `utils/controls` as if it were the
   camera-controls layer. Worked around by renaming to `utils/controlSpec`; the config flaw remains and
   will catch the next `something/controls`.
-- **`composeTerrainRgba` is long** (~90 lines) and grew again with the political layer.
+- ~~**`composeTerrainRgba` is long**~~ — **FIXED 2026-09-17**. Split into a row compositor over
+  `snowLineDropByRow`, `createShadeSampler`, `seaColorInto` and `writeTerrainPixel`; the declaration half
+  of the file moved to `pipeline/terrainOptions.ts`, re-exported so no call site changed.
+  **A real defect surfaced in the split**: `createShadeSampler` clamped the indices it read but not the
+  interpolation weight, so a position outside the field extrapolated away from it instead of stopping at
+  the edge. It looked like a guard and was not. No caller ever passes one, and the fix is bit-identical
+  inside the field — `meshSurfaceY` already got this right, which is how the contrast showed.
 - **Border contrast: why the line is a casing, and what is left** (A11Y-101). The original single brown
   ink `#5c3a2e` at 0.7 opacity gave ~1.6:1 against `palette1` `#b8554a` (blend computed in *linear* space,
   as three composites with colour management on; naive sRGB gives 1.7:1 — neither rescues it), against a
