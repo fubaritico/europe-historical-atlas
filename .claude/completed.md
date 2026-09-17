@@ -2,6 +2,59 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-09-17 → 18 — Budgets de lisibilité, fly-to, la carte comme feuille imprimée
+
+Trois plages : **11:28 → 12:59 (1 h 30)**, **16:00 → 16:14 (14 min)**, **22:10 → 01:13 (3 h 02)**.
+**31 commits** `e3cbb80`..`233adcb`, **482 → 1005 tests**, gate verte à chaque pas.
+
+- **Budgets de lisibilité, sans exemption** (`e7fb2e7`, `a4159f1`) — `max-lines` **400** (code seul),
+  `max-lines-per-function` **50**, `max-depth` 4, `complexity` 10. Déclenché par `main.ts` à 950 lignes :
+  *« je voulais relire la manière dont ça fonctionnait, ben on ne peut pas »*. **La liste d'exemptions
+  par fichier a été construite puis jetée** sur refus du dev — la règle s'applique partout sauf aux
+  tests, et seulement pour les deux budgets de lignes. Correction due : `complexity` compte les chemins
+  d'exécution, `max-depth` l'indentation ; le dev demandait la seconde en nommant la première.
+- **`main.ts` : 950 → 56 lignes de code**, `bootstrap()` à 40. Neuf modules de composition extraits
+  (`devState`, `mapSources`, `viewport`, `mapUi`, `mapLayers` puis re-découpé, `mapPipeline`,
+  `devPanelCallbacks`, `frameLoop`, `mapInteraction`). Rendre `mapPipeline` et `viewport` injectables
+  était la condition pour qu'ils soient testables du tout.
+- **`devPanel.ts` était testable depuis le début** — l'affirmation contraire, consignée dans
+  `known-issues`, n'avait jamais été vérifiée. lil-gui tourne sous jsdom, il manquait trois lignes de
+  `matchMedia`. D'où la garde des **123 contrôles**, chacun bougé et devant déclencher un callback,
+  vérifiée en cassant un câblage exprès. Deux jeux de curseurs avaient été perdus par ce trou.
+- **M1.4, moitié faite** (`22cf088`) — double-clic → `flyTo`, clic → sélection. `controls/` découpé en
+  quatre. `toNdc` refuse un rect de taille nulle **dans `pick`** : un rayon non fini ne rate pas, three
+  répond une intersection arbitraire — démontré par un test avant de retirer la garde. **Le dev a jugé
+  le fly-to mauvais en fin de session ; c'est le premier point de la reprise.**
+- **Règle de traitement d'erreur** (`rules/error-handling.md`) — *« tout traitement d'erreur doit être
+  sujet à une discussion »*. Distinction porteuse : mode dégradé **déclaré** / propagation bruyante /
+  **substitution silencieuse**, cette dernière étant la forme dangereuse parce que plausible.
+- **La carte est une feuille imprimée** (`c487144`..`565fe63`) — vélin, bordure graduée alternée sur les
+  quatre côtés, filets, degrés écrits dans la marge (français, `30°O` et jamais de signe moins), grain
+  SVG par `feTurbulence`, rose et titre par le même chemin SVG → texture.
+  Quatre défauts trouvés à l'œil par le dev et corrigés à leur cause : cadre **face au sol**
+  (triangles enroulés à l'envers, test de normale ajouté) ; marge qui **scintille** (la feuille écrivait
+  la profondeur à quatre millièmes de la mer) ; grain **23× trop fin** dans la marge (échantillonnage
+  en pixels, donc partager la fonction ne suffit pas — il faut partager le repère) ; **côtés en deux
+  blocs au lieu de 66** (`latitudeToVertical` descend en Z, `segmentsBetween` supposait l'ordre
+  croissant — **et mes tests prenaient la valeur absolue des écarts, ce qui masque exactement ça**).
+- **Titre `HISTORICΛL ΛTLΛS`** (`233adcb`) — lettrage partagé avec l'écran d'attente via
+  `utils/lettering`, puisque `scene/` ne peut pas importer `ui/`. Canevas **12:1 et non 8:1** (seize
+  capitales tracées avancent d'environ `16 × 1,04 × corps`) et ancre reculée d'une demi-chasse.
+- **Le bandeau disparaissait à `bandOpacity` 1** (`fadb389`) — vrai bug, trouvé parce que le dev l'a vu.
+  Le cadre n'écrit pas la profondeur ; à 1 le matériau quitte la file transparente, three trie les
+  opaques **du plus proche au plus lointain**, la tranche plus lointaine est dessinée après et l'efface.
+  **La preuve était dans le screenshot : les chiffres ont survécu, le bandeau non, et la seule
+  différence est leur opacité.** `FRAME_RENDER_ORDER` retire la question au curseur.
+- **La tranche est au mauvais endroit, et c'est mesuré.** La *planche* (jupon uniforme sous le niveau de
+  la mer, tout autour, océan compris) se projette dans la marge dès que la caméra s'incline : 0,06 de
+  profondeur couvraient **23 px contre 17 px de bandeau**. Elle remplissait les blocs clairs de sa
+  couleur. **Mes deux tours de « plus foncé » n'ont pas créé le problème, ils l'ont révélé** : à
+  `#c9bb9c` le mur tombait sur la valeur du vélin et restait invisible. `edgeDepth` est à 0 ; la
+  *section* (coupe dans la terre, là où il y a de la terre au bord) reste.
+- **Bug d'espace colorimétrique identifié, non corrigé** — les couleurs par sommet sont écrites en sRGB
+  dans un attribut que three lit en linéaire. Diagnostiqué en décodant le PNG du dev et en comparant :
+  `#5f5342` prédit à `(164,155,139)`, mesuré `(162,155,141)`.
+
 ### 2026-09-17 (nuit) — Le calcul dans un worker, l'écran d'attente, SEC-001, le raster 4×
 
 Une seule plage : **23:55 → 01:55, 2 h 00, 277 actions, 14 commits** `0027343`..`4f14b69`.

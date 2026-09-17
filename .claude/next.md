@@ -5,11 +5,46 @@
 
 ## Where we are
 
-`master` at `4f14b69`, **482 tests**, full gate green, tree clean. See `completed.md`, entry
-**2026-09-17 (nuit)**.
+`master` at `233adcb`, **1005 tests**, full gate green, tree clean. See `completed.md`, entry
+**2026-09-17 → 18**.
 
-The map computes off the main thread, comes up in two deliberate stages behind a splash screen, says so
-when an asset fails, and draws its borders on a 1.9 km grid. All of it signed off on screen.
+The map now reads as a printed sheet: vellum, a graduated border on all four sides, the degrees written
+in the margin in French, and `HISTORICΛL ΛTLΛS` at the bottom in the loading screen's own lettering.
+Readability budgets are enforced on all source with no exemptions, and `main.ts` is a 56-line
+composition root.
+
+## ▶ FIRST THING NEXT SESSION — the fly-to is not right
+
+**The dev's words, ending the session: "on revient directement sur le fly to, ça va pas."** No detail
+was given beyond that, so **ask what is wrong before changing anything** — duration, easing, the zoom it
+lands on, or the fact that it flies at all.
+
+What exists (`22cf088`): double-click raycasts the relief and calls `controls.flyTo(x, z)`; single click
+selects and does nothing visible yet. The flight eases in and out (`easeInOut` in `utils/math`), any
+input interrupts it (`interrupt(state)`), and a zero duration arrives instantly. The knobs are
+`flyDurationMs` 700 and `flyZoomIn` 0.35, both in `devParams/camera`.
+
+Candidates worth having ready, none of them chosen:
+
+- **It lands too close or not close enough** — `flyZoomIn` is a fixed target, so every flight ends at
+  the same zoom whatever it started from.
+- **It is too slow or too fast for the distance** — the duration is constant, so a flight across the
+  Atlantic and a flight across Belgium take the same 700 ms.
+- **It is not readable as a movement** — the camera pans and zooms at once; an arc, or zooming out
+  before zooming in, is the usual answer and is not implemented.
+- **Double-click is the wrong trigger** — the dev already said of the click that "plus ça va, plus je
+  trouve que cette histoire de clic c'est de la merde", and suggested a rollover instead.
+
+## Then, still open on the decor
+
+1. **Vertex colours are in the wrong colour space** (`known-issues`, first entry). It silently eats
+   every darkening on the frame and the cut edge, so **anything tuned by eye on those two modules was
+   tuned against the bug**. Fixing it means retuning them in the same pass; that is the work, not a
+   follow-up.
+2. **The thickness is cut at the map's edge instead of the sheet's**, which is why `edgeDepth` is at 0
+   and the board is gone. The dev's drawing showed the *paper* having a thickness. Moving the board's
+   outline to the sheet's boundary is contained in `createMapEdge`.
+3. **The frame's three rules have no matter in them** — raised, not decided.
 
 ## ▶ THE METHOD — one century, built like a structural bay
 

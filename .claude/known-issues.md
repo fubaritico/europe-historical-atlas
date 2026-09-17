@@ -2,6 +2,52 @@
 
 Put here the know issues to avoid cluttering the context window.
 
+- **Vertex colours are written in sRGB into an attribute three reads as linear.** `scene/graticuleFrame`
+  and `scene/mapEdge` are the only two users of `vertexColors`, and both do `tone.r / 255`. three
+  composites in a *linear* working space and converts to sRGB on output, so the value is brightened a
+  second time and every one of those surfaces renders far lighter than its hex.
+  **Measured on screen 2026-09-18, by decoding the dev's own screenshot**: `edgeBase` `#5f5342` predicted
+  at `(164, 155, 139)` treating sRGB as linear, observed `(162, 155, 141)`. The band's near-black ink
+  `#1a120b` is lightened the same way.
+  **Why it matters beyond the look**: it silently eats any darkening. Two rounds of "plus foncé" on the
+  cut edge moved the hex a long way and barely moved the screen — while brightening, in the same stroke,
+  a wall the dev could not see. Anything tuned by eye on those two modules was tuned against the bug.
+  **The fix** is a `srgbChannelToLinear` at the point the attribute is filled (written and reverted on
+  2026-09-18 — it was landing in the middle of a visual regression and made the change unreadable).
+  Mixing may stay in sRGB; only the last step converts. **Retuning the frame and the edge is part of the
+  fix, not a follow-up.**
+- **The map's thickness is cut at the wrong edge.** `createMapEdge` builds two walls and only one of them
+  belongs where it is:
+  - the **section** — sea level up to the land's surface — exists only where there is land at the map's
+    boundary. That is the "épaisseur de l'Afrique" the dev asked for, and it is correctly placed.
+  - the **board** — a uniform skirt below sea level, the whole way round, open ocean included. On screen
+    *downward* and *outward* are the same direction as soon as the camera tilts, so it projects across
+    the margin and fills the graduated band's transparent blocks with its own flat colour. **Measured:
+    0.06 of depth covered 23 px against a 17 px band; at 0.165 it swallowed the band and part of the
+    label lane.** Any positive depth intrudes — it is geometry, not tuning.
+  `edgeDepth` is therefore **0**. The board can only come back once the thickness is carried by the
+  **sheet's outer edge** instead of the map's — which is what the dev's own drawing showed: the *paper*
+  has a thickness, not the inner rectangle. Not built.
+- **The frame writes no depth, so anything drawn after it paints over it** — fixed 2026-09-18 by
+  `FRAME_RENDER_ORDER`, and worth keeping because the failure mode is invisible. It cannot write depth
+  (it would z-fight with the sheet four thousandths below it), so its visibility depended on landing in
+  the transparent queue, which depended on `bandOpacity < 1`. At exactly 1 the band disappeared
+  entirely with no error. The tell: the degree labels survived and the band did not, and the only
+  difference between them was opacity. **Any new layer printed on the sheet needs an explicit order.**
+- **The frame's three rules have no matter in them** (raised by the dev, 2026-09-18). They are geometry
+  — perfect rectangles — while everything beside them has been given a broken edge: the degrees are
+  displaced by the browser's own turbulence, the band reads through to the fibre beneath it. Two ways
+  out, and they are not equivalent: rasterise the rules as SVG with the same turbulence (coherent with
+  the numbers, but they lose their crispness at maximum zoom, which is the one thing geometry buys), or
+  irregularise their edges in geometry (crisp, and a different piece of work — a rule is four vertices
+  today and would become a strip). Not decided.
+- **The sheet is baked on the main thread** and costs ~278 ms at 1024 and ~988 ms at 2048, which is why
+  it is not baked at the terrain's density. The honest fix is to bake it in the worker, like the terrain.
+- **A test that takes `Math.abs` of a gap cannot see a reversed order.** How the side borders shipped as
+  two giant blocks instead of 66: `latitudeToVertical` descends in Z, `segmentsBetween` assumed
+  ascending, and every assertion about graduation spacing was written on absolute differences. The
+  graduations are now sorted, and two assertions check the ordering itself.
+
 - **`historical-basemaps` is GPL-3.0, with no separate data licence** (checked at the source: its
   `LICENSE` is the GPL and the README carves out nothing). A strict reading means redistributing those
   files puts the whole distributed work under GPL-3.0. `public/borders/` is therefore **git-ignored** —
@@ -127,13 +173,6 @@ Put here the know issues to avoid cluttering the context window.
   is now 32×32 with the glyph centred. **Note the criterion**: the familiar 44×44 is WCAG 2.5.5, which is
   **AAA**. The AA bar is 2.5.8 (WCAG 2.2) at **24×24** — the old box failed that too. Both are guarded by
   tests, so a restyle cannot quietly undo them.
-- **The frame's three rules have no matter in them** (raised by the dev, 2026-09-18). They are geometry
-  — perfect rectangles — while everything beside them has been given a broken edge: the degrees are
-  displaced by the browser's own turbulence, the band reads through to the fibre beneath it. Two ways
-  out, and they are not equivalent: rasterise the rules as SVG with the same turbulence (coherent with
-  the numbers, but they lose their crispness at maximum zoom, which is the one thing geometry buys), or
-  irregularise their edges in geometry (crisp, and a different piece of work — a rule is four vertices
-  today and would become a strip). Not decided.
 - **The ESLint boundary glob `**/controls` is too broad** — it matched `utils/controls` as if it were the
   camera-controls layer. Worked around by renaming to `utils/controlSpec`; the config flaw remains and
   will catch the next `something/controls`.
