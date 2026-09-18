@@ -67,6 +67,18 @@ describe('enterFocus', () => {
       expect(s.focusReturn).toEqual({ x: 4, z: 6, zoom: 0.25 })
     })
 
+    it('arcs, so one target to the next is not a slide at ground level', () => {
+      // The one flight that does: both ends can sit at maximum zoom.
+      const s = state()
+      s.zoom = 1
+      enterFocus(s, 5, 5)
+      land(s)
+      enterFocus(s, -40, 40)
+      const flight = s.flight
+      if (flight) advanceFlight(s, flight, flight.duration / 2)
+      expect(s.zoom).toBeCloseTo(0)
+    })
+
     it('honours a focus zoom that is not the maximum', () => {
       const s = state({ flyFocusZoom: 0.7 })
       enterFocus(s, 1, 1)
@@ -207,13 +219,19 @@ describe('leaveFocusTo', () => {
       expect(s.zoom).toBeCloseTo(0.6)
     })
 
-    it('keeps the arc, so a re-centring is not a lateral slide at ground level', () => {
+    it('flies straight, never pulling out past the zoom it is heading for', () => {
+      // Leaving a focus already carries its own pull-out — maximum zoom back to wherever the reader
+      // was. Arcing on top of that sends the camera out past its destination and back, which reads as
+      // a bounce rather than as coming home.
       const s = state()
-      s.zoom = 0.9
-      leaveFocusTo(s, 80, 0)
+      s.zoom = 1
+      enterFocus(s, 5, 5)
+      land(s)
+      leaveFocusTo(s, 30, -30)
       const flight = s.flight
       if (flight) advanceFlight(s, flight, flight.duration / 2)
-      expect(s.zoom).toBeCloseTo(0)
+      expect(s.zoom).toBeGreaterThan(0.25)
+      expect(s.flight?.peakZoom ?? null).toBeNull()
     })
   })
 

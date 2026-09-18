@@ -32,8 +32,26 @@ import type { ControlsState, Flight, FocusReturn } from './controlsState'
 export function flightZoom(flight: Flight, t: number): number {
   const progress = clamp01(t)
   const base = lerp(flight.fromZoom, flight.toZoom, easeInOut(progress))
+  if (flight.peakZoom === null) return base
   const dip = 4 * progress * (1 - progress)
   return lerp(base, flight.peakZoom, dip)
+}
+
+/**
+ * The top of the arc for a flight settling at a given zoom.
+ *
+ * Offered rather than applied: whether a flight arcs at all is a question about *what the flight is
+ * for*, which belongs to whoever is ordering it. Entering a focus arcs, because both ends can sit at
+ * maximum zoom and the trip would otherwise be a lateral slide at ground level; coming back out does
+ * not, because it already pulls out on its own.
+ * @param state - the controls' state
+ * @param toZoom - the zoom the flight will settle at
+ * @returns the arc's top, clamped below both ends of the flight
+ */
+export function arcPeak(state: ControlsState, toZoom: number): number {
+  // Clamped below both ends, so an arc zoom above either of them cannot make the middle of the trip
+  // closer than its extremities — which is not a flight, it is a bounce.
+  return Math.min(clamp01(state.opts.flyArcZoom), state.zoom, clamp01(toZoom))
 }
 
 /**
@@ -92,9 +110,16 @@ export function restPoint(state: ControlsState): FocusReturn {
  * @param x - where to look, on X
  * @param z - the same on Z
  * @param toZoom - the zoom to settle at, clamped to `[0, 1]`
+ * @param peakZoom - the top of the arc from {@link arcPeak}, or `null` to fly straight
  * @returns nothing
  */
-export function beginFlight(state: ControlsState, x: number, z: number, toZoom: number): void {
+export function beginFlight(
+  state: ControlsState,
+  x: number,
+  z: number,
+  toZoom: number,
+  peakZoom: number | null = null
+): void {
   // A flight must not fight the inertia it interrupts, or the ease is disturbed by a glide the reader
   // stopped asking for the moment they asked for this instead.
   state.velX = 0
@@ -116,9 +141,7 @@ export function beginFlight(state: ControlsState, x: number, z: number, toZoom: 
     toZ: z,
     fromZoom: state.zoom,
     toZoom: settled,
-    // Clamped below both ends, so an arc zoom above either of them cannot make the middle of the trip
-    // closer than its extremities — which is not a flight, it is a bounce.
-    peakZoom: Math.min(clamp01(state.opts.flyArcZoom), state.zoom, settled),
+    peakZoom,
     elapsed: 0,
     duration,
   }

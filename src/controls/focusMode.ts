@@ -13,7 +13,7 @@
  * reach without a DOM.
  */
 
-import { beginFlight, restPoint } from './cameraFlight'
+import { arcPeak, beginFlight, restPoint } from './cameraFlight'
 
 import type { ControlsState } from './controlsState'
 
@@ -50,7 +50,10 @@ export function clearFocus(state: ControlsState): void {
  */
 export function enterFocus(state: ControlsState, x: number, z: number): void {
   state.focusReturn ??= restPoint(state)
-  beginFlight(state, x, z, state.opts.flyFocusZoom)
+  const settled = state.opts.flyFocusZoom
+  // The one flight that arcs. Focus to focus runs from maximum zoom to maximum zoom, so a straight
+  // interpolation would slide across the map at ground level with nothing legible in between.
+  beginFlight(state, x, z, settled, arcPeak(state, settled))
 }
 
 /**
@@ -59,6 +62,9 @@ export function enterFocus(state: ControlsState, x: number, z: number): void {
  * Outside the mode there is nothing to restore, so the current zoom is the zoom to keep and this is
  * simply a re-centring. Both branches are ordinary states of the camera — neither stands in for a value
  * that failed to arrive.
+ *
+ * Flies straight: leaving a focus pulls out on its own, from the close-up back to wherever the reader
+ * was, and arcing on top of that would carry the camera past its destination and back.
  * @param state - the controls' state
  * @param x - where to look, on X
  * @param z - the same on Z
@@ -72,6 +78,8 @@ export function leaveFocusTo(state: ControlsState, x: number, z: number): void {
 
 /**
  * Leave the focus and fly back to where the camera stood before it was entered.
+ *
+ * Flies straight, for the same reason as {@link leaveFocusTo}: the pull-out is the trip itself.
  * @param state - the controls' state
  * @returns `true` if there was a focus to leave, `false` when the camera was already navigating
  */

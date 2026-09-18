@@ -1,7 +1,14 @@
 import { PerspectiveCamera } from 'three'
 import { describe, expect, it } from 'vitest'
 
-import { advanceFlight, beginFlight, flightZoom, interrupt, restPoint } from './cameraFlight'
+import {
+  advanceFlight,
+  arcPeak,
+  beginFlight,
+  flightZoom,
+  interrupt,
+  restPoint,
+} from './cameraFlight'
 import { createControlsState } from './controlsState'
 
 import type { ControlsState, Flight } from './controlsState'
@@ -76,6 +83,19 @@ describe('flightZoom', () => {
       const f = flight({ fromZoom: 0.5, toZoom: 0.5, peakZoom: 0.5 })
       expect(flightZoom(f, 0.3)).toBeCloseTo(0.5)
     })
+
+    it('interpolates straight when there is no arc', () => {
+      // What leaving a focus asks for: that trip already pulls out from the close-up on its own, and
+      // bending it as well would carry the camera out past its destination and back.
+      const f = flight({ fromZoom: 1, toZoom: 0.25, peakZoom: null })
+      expect(flightZoom(f, 0.5)).toBeCloseTo(0.625)
+    })
+
+    it('never goes below either end when there is no arc', () => {
+      const f = flight({ fromZoom: 1, toZoom: 0.25, peakZoom: null })
+      for (const t of [0.1, 0.25, 0.5, 0.75, 0.9])
+        expect(flightZoom(f, t)).toBeGreaterThanOrEqual(0.25)
+    })
   })
 
   // L3 (managed errors): N/A — it is arithmetic over three numbers and handles nothing.
@@ -102,6 +122,49 @@ describe('flightZoom', () => {
 
     it('clamps progress before the start', () => {
       expect(flightZoom(flight({ fromZoom: 0.2 }), -3)).toBeCloseTo(0.2)
+    })
+  })
+})
+
+describe('arcPeak', () => {
+  describe('happy path', () => {
+    it('is the tunable when it sits below both ends of the flight', () => {
+      const s = state({ flyArcZoom: 0.1 })
+      s.zoom = 0.6
+      expect(arcPeak(s, 1)).toBeCloseTo(0.1)
+    })
+  })
+
+  describe('variants', () => {
+    it('is zero by default, which pulls out to the whole sheet', () => {
+      const s = state()
+      s.zoom = 0.6
+      expect(arcPeak(s, 1)).toBe(0)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('clamps below both ends rather than bouncing over them', () => {
+      // An arc zoom above either end would make the middle of the trip CLOSER than its extremities,
+      // which is not a flight.
+      const s = state({ flyArcZoom: 0.9 })
+      s.zoom = 0.3
+      expect(arcPeak(s, 0.5)).toBeCloseTo(0.3)
+    })
+
+    it('clamps a tunable outside the zoom range', () => {
+      const s = state({ flyArcZoom: -2 })
+      expect(arcPeak(s, 1)).toBe(0)
+    })
+  })
+
+  // L4 (unmanaged errors): N/A — three numbers and a minimum.
+
+  describe('edge cases', () => {
+    it('is the shared value when both ends and the tunable agree', () => {
+      const s = state({ flyArcZoom: 0.4 })
+      s.zoom = 0.4
+      expect(arcPeak(s, 0.4)).toBeCloseTo(0.4)
     })
   })
 })
@@ -145,11 +208,17 @@ describe('beginFlight', () => {
       expect(s.flight?.toX).toBe(-10)
     })
 
-    it('takes the top of the arc from the tunable', () => {
-      const s = state({ flyArcZoom: 0.1 })
-      s.zoom = 0.6
-      beginFlight(s, 0, 0, 1)
+    it('carries the arc it was handed', () => {
+      const s = state()
+      beginFlight(s, 0, 0, 1, 0.1)
       expect(s.flight?.peakZoom).toBeCloseTo(0.1)
+    })
+
+    it('flies straight when it is handed no arc', () => {
+      // The default, and what leaving a focus asks for: that trip pulls out on its own.
+      const s = state()
+      beginFlight(s, 0, 0, 1)
+      expect(s.flight?.peakZoom).toBeNull()
     })
   })
 
@@ -168,15 +237,6 @@ describe('beginFlight', () => {
       const s = state()
       beginFlight(s, 0, 0, 5)
       expect(s.flight?.toZoom).toBe(1)
-    })
-
-    it('clamps the arc below both ends rather than bouncing over them', () => {
-      // An arc zoom above either end would make the middle of the trip CLOSER than its extremities,
-      // which is not a flight.
-      const s = state({ flyArcZoom: 0.9 })
-      s.zoom = 0.3
-      beginFlight(s, 0, 0, 0.5)
-      expect(s.flight?.peakZoom).toBeCloseTo(0.3)
     })
   })
 
@@ -232,10 +292,19 @@ describe('advanceFlight', () => {
     it('pulls the zoom out to the top of the arc halfway across', () => {
       const s = state()
       s.zoom = 0.5
-      beginFlight(s, 10, 0, 1)
+      beginFlight(s, 10, 0, 1, arcPeak(s, 1))
       const f = s.flight
       if (f) advanceFlight(s, f, 0.35)
       expect(s.zoom).toBeCloseTo(0)
+    })
+
+    it('goes straight from one zoom to the other when it has no arc', () => {
+      const s = state()
+      s.zoom = 0.5
+      beginFlight(s, 10, 0, 1)
+      const f = s.flight
+      if (f) advanceFlight(s, f, 0.35)
+      expect(s.zoom).toBeCloseTo(0.75)
     })
 
     it('carries the zoom to its destination by the end', () => {

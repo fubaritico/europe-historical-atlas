@@ -171,12 +171,17 @@ export interface Flight {
   /** The zoom it settles at. */
   toZoom: number
   /**
-   * The zoom at the top of the arc, reached halfway.
+   * The zoom at the top of the arc, reached halfway — or `null` for a flight that does not arc.
    *
-   * Resolved once when the flight begins rather than read per frame: it is clamped below both ends, and
-   * a tunable that moved mid-flight would bend the curve under a reader already watching it.
+   * `null` is not "no value": it is the flight going straight from one zoom to the other. **Leaving a
+   * focus already carries its own pull-out** (maximum zoom back to wherever the reader was), so bending
+   * it as well would send the camera out past the destination and back, which reads as a bounce rather
+   * than as coming home.
+   *
+   * Resolved once when the flight begins rather than read per frame: a tunable that moved mid-flight
+   * would bend the curve under a reader already watching it.
    */
-  peakZoom: number
+  peakZoom: number | null
   /** Seconds since it started. */
   elapsed: number
   /** How long it lasts, in seconds. Never zero — an instant arrival is not a flight at all. */
