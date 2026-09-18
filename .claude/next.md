@@ -5,142 +5,137 @@
 
 ## Where we are
 
-`master` at `233adcb`, **1005 tests**, full gate green, tree clean. See `completed.md`, entry
-**2026-09-17 → 18**.
+`master` at `69e4709`, **1108 tests**, full gate green, production build verified, tree clean. See
+`completed.md`, entry **2026-09-18 (nuit)**.
 
-The map now reads as a printed sheet: vellum, a graduated border on all four sides, the degrees written
-in the margin in French, and `HISTORICΛL ΛTLΛS` at the bottom in the loading screen's own lettering.
-Readability budgets are enforced on all source with no exemptions, and `main.ts` is a 56-line
-composition root.
+The camera has a **focus mode**: double-click arcs over and lands at maximum zoom, Escape flies back to
+where the reader was, a single click leaves the mode on the point it designated. The atlas is named —
+`EUROPE` above the splash silhouette, `HISTORICΛL ΛTLΛS` below it, both tracked to the silhouette's own
+measure, and `EUROPE HISTORICΛL ΛTLΛS` on one line along the sheet.
 
-## ▶ FIRST THING NEXT SESSION — the fly-to is not right
+## ▶ THE PLAN WAS TURNED AROUND — contribution comes first
 
-**The dev's words, ending the session: "on revient directement sur le fly to, ça va pas."** No detail
-was given beyond that, so **ask what is wrong before changing anything** — duration, easing, the zoom it
-lands on, or the fact that it flies at all.
+**The dev's correction, 2026-09-18, and it governs everything below.** The recorded order had colours,
+then cities, then tooling. That order is dead, for a structural reason rather than a change of mind:
 
-What exists (`22cf088`): double-click raycasts the relief and calls `controls.flyTo(x, z)`; single click
-selects and does nothing visible yet. The flight eases in and out (`easeInOut` in `utils/math`), any
-input interrupts it (`interrupt(state)`), and a zero duration arrives instantly. The knobs are
-`flyDurationMs` 700 and `flyZoomIn` 0.35, both in `devParams/camera`.
+> **Cities are not decor, they are content.** A place, a city, a battle, an event all come out of the
+> *second* contribution tool. "Do the cities" was never a graphics task — there would have been nothing
+> to place. *"Sans contribuer, on ne pourra pas remplir. Il faut donner à manger à la bête."*
 
-Candidates worth having ready, none of them chosen:
+**The agreed sequence, in the dev's own terms:**
 
-- **It lands too close or not close enough** — `flyZoomIn` is a fixed target, so every flight ends at
-  the same zoom whatever it started from.
-- **It is too slow or too fast for the distance** — the duration is constant, so a flight across the
-  Atlantic and a flight across Belgium take the same 700 ms.
-- **It is not readable as a movement** — the camera pans and zooms at once; an arc, or zooming out
-  before zooming in, is the usual answer and is not implemented.
-- **Double-click is the wrong trigger** — the dev already said of the click that "plus ça va, plus je
-  trouve que cette histoire de clic c'est de la merde", and suggested a rollover instead.
+1. **Tools able to contribute one century** — regions, borders, **their colour code**, and **how names
+   are displayed**. Note what that absorbs: the colour fork (roadmap 04) and labelling stop being
+   separate render chantiers and become part of what the Cartographer authors.
+2. **The content contributor** — geolocating cities, battles, events.
+3. **Define the format of all of it**, so it can be re-exploited rather than re-authored.
+4. **Re-exploit at two scales**: the Europe-wide map, and a **country focus presented as a slideshow in
+   steps of about ten years** — the step is open. The dev *has a design in mind* for the country focus:
+   **ask him, do not design it for him.**
 
-## Then, still open on the decor
+**Why this does not contradict the travée** (`files/plans/roadmap/06`, memory
+[[one-century-as-a-structural-bay]]): the method said a finished century teaches us what contribution
+requires. But **there is no century to finish** — OHM only covers from ~1700, `historical-basemaps` is
+schematic *and* unpublishable. Nothing can be finished until something can be drawn.
 
-1. **Vertex colours are in the wrong colour space** (`known-issues`, first entry). It silently eats
-   every darkening on the frame and the cut edge, so **anything tuned by eye on those two modules was
-   tuned against the bug**. Fixing it means retuning them in the same pass; that is the work, not a
-   follow-up.
-2. **The thickness is cut at the map's edge instead of the sheet's**, which is why `edgeDepth` is at 0
-   and the board is gone. The dev's drawing showed the *paper* having a thickness. Moving the board's
-   outline to the sheet's boundary is contained in `createMapEdge`.
+## ▶ NEXT SESSION — the Cartographer (roadmap 06)
+
+First deliverable, flagged **ultra important** by the dev: the spike **`files/spikes/fetch-atlas`** — a
+georeferenced public-domain atlas plate as a watermark under the canvas, traced over, snapping to the
+rivers and coastline we already own.
+
+**Chapter 06's order, with what is already stale:**
+
+1. ~~Spike: OHM ingest~~ — **DONE 2026-09-16** (`files/spikes/fetch-ohm`, 98.8 % at 1700).
+2. **PoC, one year only**: open → paint → save → re-open identical → the 3D atlas renders it. The chapter
+   says use **1700**, so the PoC tests the *editor* and not the source.
+3. Extract `packages/core` + move to pnpm workspaces.
+4. Stand up the Payload Studio — **schema first**, it is the real work and is tool-independent.
+5. ~~Derived borders replace the ring-based ones~~ — **DONE 2026-09-17**, the ring path was deleted.
+
+**Two decisions due on day one**: full shared topology or the pragmatic v1 of independent polygons
+snapping to existing vertices (cheaper, but subdividing later becomes a redraw); and **the century**.
+
+### The century is now contested — read this before assuming 1500
+
+Recorded decision: **1500, sovereign-state level, Holy Roman Empire as one block**, because its several
+hundred principalities are "months, not a POC".
+
+The dev then named a different target (2026-09-18): **a focus on France, 11th → 15th century**, *"avec le
+bordel que c'était… ce serait de l'ordre du miracle"*. Said as an ambition, not a decision — but it is
+the same problem the Empire's block-treatment dodged: a tiny royal domain, the Plantagenets straddling
+two crowns, homage and mouvance rather than borders. It hits the hard limit head-on:
+**`RegionRaster.cells` holds one polity per cell**, so layered sovereignty cannot be expressed at all.
+
+**Settle this at session start.** It may well be the best proving ground there is — a tool surviving
+feudal France survives anything — but it likely forces the data structure to change, and five centuries
+stepped by decade is roughly fifty authored states.
+
+### The sources, and the one that just arrived
+
+- **The dev owns the Atlas historique mondial directed by Georges Duby** (Larousse). **In copyright** —
+  not public domain. Memory [[duby-atlas-is-a-reference-not-a-tracing-source]].
+  **Copyright protects the drawing, not the fact**: where a frontier ran, which cities existed, when a
+  battle was fought are facts nobody owns. So it gets exactly the status Euratlas already has here — a
+  reference beside the keyboard, never a plate scanned under the canvas and traced for publication. Its
+  highest value is the **Studio registry** (identity, hierarchy, events), which has no free source at all.
+- **Provider per era is still blocking for publication**: `historical-basemaps` is GPL-3.0 and cannot
+  ship, OHM is CC0 and can, and today 1700 quietly holds an OHM payload while every other year holds GPL.
+
+## Left open by decision, not missed
+
+- **A11Y-301 — nothing enters the focus mode from the keyboard.** Escape leaves it; no key enters it.
+  The review said to wait for M2's region list; **that argument does not hold** — the arrow keys already
+  move the camera's ground target, so the centre of the view *is* the keyboard cursor. It is open because
+  it is **the dev's call**: he has said the trigger is provisional and the real entry will be a 3D button
+  driven by event importance, so deciding the gesture now decides it twice.
+- **QUAL-021 — `buildTitle` in `mapLayerBuilders.ts` is reached by no test.** `rebuildFrame` is never
+  called in the suite. Blast radius, not diff; already true before this session.
+
+## Still open on the decor (none urgent)
+
+1. **Vertex colours are written in sRGB into an attribute three reads as linear** (`known-issues`, first
+   entry). It silently eats every darkening on the frame and the cut edge, so anything tuned by eye on
+   those two modules was tuned against the bug. Retuning them is part of the fix, not a follow-up.
+2. **The thickness is cut at the map's edge instead of the sheet's** — why `edgeDepth` is 0.
 3. **The frame's three rules have no matter in them** — raised, not decided.
-
-## ▶ THE METHOD — one century, built like a structural bay
-
-**The dev's framing, and it governs the order of everything below**: rather than tooling the whole atlas
-and then filling it, **take one century and carry it all the way up** — cities, colours, and the act of
-contributing it. A *travée*: one complete bay of the building, foundation to roof, then repeated along
-its length.
-
-What that buys, in the dev's words: *"ça nous permettra de dérouler pour les événements"*. The century
-that is finished is what **tells us what contribution actually requires** — which is the opposite of
-chapter 06's original assumption that the tools come first. Tools designed against a real, completed
-century will fit; tools designed in the abstract will not.
-
-It also names what is genuinely ahead and unbuilt: **clicking, landing on a place, showing an event's
-details, and deciding how any of that is presented.** None of it exists.
-
-## ▶ NEXT — user experience
-
-**Asked for explicitly**: advance the user experience before touching colours or sources.
-
-The obvious first piece is **M1.4 picking** — click a region, see something — because it is the
-interaction the whole project exists for, and nothing downstream (events, details, presentation) can be
-designed until a click means something. Two constraints already established, both load-bearing:
-
-- **A click returns a *list*, from a spatial query — never a single polygon hit.** Several events of
-  different kinds share a place, and a design that assumes one hit cannot be widened later.
-- **Ask the compute, do not repatriate the grid.** The port should grow a `regionAt(u, v)`; a click is
-  one query and a query is a message. At the 4× raster, holding the grid here would cost 45 MB for the
-  session against a millisecond per round trip.
-
-**Confirm the scope at session start** — "user experience" was given as a direction, not a spec, and the
-HTML overlay (roadmap 03) is the other half of it.
-
-## Then, in this order
-
-1. **Colours, once the century is chosen** — and the fork to settle first is recorded in roadmap 04:
-   more pinned colours stable across the centuries (what EU4 does, and what makes a power recognisable),
-   or a palette per era (period flavour, at the cost of that recognition). A11Y-101 should close in the
-   same pass.
-2. **Cities** — graphic elements, and nothing exists for them yet.
-3. **Contribution tooling** (roadmap 06) — the **Cartographer**, and it is now specified end to end:
-   a georeferenced public-domain atlas plate as a **watermark** under the canvas, traced over, snapping to
-   the rivers and coastline we already own. **Century chosen: 1500, at sovereign-state level** (the Holy
-   Roman Empire as one block — its several hundred principalities are months, not a POC). Not the 18th:
-   OHM already covers 1700 at 93.8 %. First deliverable is the spike `files/spikes/fetch-atlas`, flagged
-   **ultra important** by the dev. One decision to take on day one: full shared topology, or the pragmatic
-   v1 of independent polygons snapping to existing vertices — the second is cheaper and makes subdividing
-   the Empire later a redraw. **Acceptance case: Alsace-Lorraine around 1680** — enclaves and exclaves,
-   not merely small neighbours, and already this codebase's reference counter-example (it is why
-   colour-softening was rejected). Note the hard limit it exposes: `RegionRaster.cells` holds **one polity
-   per cell**, so shared sovereignty is not representable.
-4. **Sources / provider per era** — deferred by the dev, but **still blocking for publication**:
-   `historical-basemaps` is GPL-3.0 and cannot ship, OHM is CC0 and can, and today 1700 quietly holds an
-   OHM payload while every other year holds GPL. The provider table *is* the "what may we publish" table.
-5. **Sea decor** — explicitly last. Note it may force the interval temporal model (a drakkar is right
-   from ~700 to ~1100; a polity today is a dated snapshot).
-
-## Waiting on something else
-
-- **Retry after a blocking failure** — no way out but a page reload, and nothing says so. Recorded in
-  roadmap 07 with the insight that matters: the taxonomy already says only `transport` is worth retrying.
-  Build the **action seam** first (independent of the DS), then the automatic retry.
-- **The design system** (`../fubaritico-ds`) — `packages/variants` emits BEM class strings and
-  `packages/styles` ships the CSS, so it is consumable from vanilla TS with no React. The obstacle is
-  publication: both are `0.0.0` in a separate repo.
 
 ## Small things never picked up
 
 - **The brown/cream stroke on two screenshots**, from 2026-09-16 — never explained.
 - **The coastal band** (Iceland, Scandinavia, the Caspian) — one click settles it: drop the `coastline`
   layer opacity to 0 and see whether the band goes with it.
-- **`double` borders are implemented, tested, and produced by no rule.** All four entries in
-  `data/borderStyles` ask for `dashed`.
+- **`double` borders are implemented, tested, and produced by no rule.**
 - **Vector coastline** (`ne_10m_coastline` through the rivers pipeline) — the last open render complaint.
 - **The compass SVG is validated by nothing** — the fifth asset, missed by chapter 07's own audit.
+- **Retry after a blocking failure** — no way out but a page reload, and nothing says so. The taxonomy
+  already says only `transport` is worth retrying. Build the **action seam** first.
 
 ## Key facts to reload
 
+- **Three camera modes are settled: normal, focus, country** — the gestures to reach them are not
+  ([[focus-mode-is-permanent]]). A **top-down country view is impossible as things stand**: `pitchForZoom`
+  ties pitch to zoom, so approaching always means grazing. Pitch must decouple from zoom during a focus.
+- **Only entering a focus arcs.** Leaving one already carries its own pull-out; bending it too sends the
+  camera past its destination and back.
+- **A `click` fires at the end of every drag**, with no movement threshold in the DOM — hence
+  `MapControls.pointerDragged`, decided once, where the drag lives. Never decide it a second time.
 - **A border is not an object, it is a relation** — derive it from the fills; never author it separately.
-- **The staircase is a *resolution* problem.** Now at 4× (1.9 km cells, ~136 MB peak, ~825 ms in the
-  worker). A finer grid also **reveals gaps a coarser one hid**: polities that touched at 2× may not at
-  4×, and the remedy is `snapToCoast`, not a retreat on resolution.
-- **The bake is not political** — it has five callers. Two ports, one implementation.
-- **A worker boundary is a bundle boundary**: pure logic under a `three`-importing header ships three
-  twice. Hence `pipeline/`, whose ESLint rule refuses it.
-- **Only the newest call may write back**, checked after *every* await before *every* side effect — not
-  just the state write (`utils/latestOnly`).
+- **The staircase is a *resolution* problem.** Now at 4× (1.9 km cells, ~136 MB peak, ~825 ms).
+- **The bake is not political** — five callers. Two ports, one implementation.
+- **A worker boundary is a bundle boundary**: hence `pipeline/`, whose ESLint rule refuses `three`.
+- **Only the newest call may write back**, checked after *every* await before *every* side effect.
 - **`bootstrap()` is this codebase's modularity sink** (ARCH-012).
+- **The atlas's name lives once**, in `utils/lettering` — the splash stacks the halves, the sheet runs
+  them together.
 - **Assets**: `public/heightmaps/`, `public/masks/`, `public/rivers/` committed; `public/borders/*.json`
   git-ignored (GPL). **1700 holds the OHM payload**, original backed up at
   `files/spikes/fetch-ohm/out/europe-1700.hb-backup.json`.
 - **`let`-const-ify gotcha**: the eslint `--fix` hook runs after each edit; add a `let` and its first
-  reassignment together. Bit twice this session.
+  reassignment together.
 
 ## Conventions (this project)
 
 Docs/config in **English**, chat in **French**. Plans split into chapters (`files/plans/roadmap/`). Spikes
-cataloged in `files/spikes/`. Commit subjects lowercase (commitlint). **Announce every command**
-(cause / reason / action). **`rm -rf` needs explicit permission every time.**
+cataloged in `files/spikes/`. Commit subjects lowercase, **body lines ≤ 100 chars** (commitlint).
+**Announce every command** (cause / reason / action). **`rm -rf` needs explicit permission every time.**

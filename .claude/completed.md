@@ -2,6 +2,57 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-09-18 (nuit) — Le mode focus, le nom de l'atlas, le plan retourné
+
+Reprise **01:17 → 02:49 (1 h 32)**, dans une plage continue depuis 22:10 la veille (4 h 38 au total,
+372 actions). **3 commits** `2d0e663`..`69e4709`, **1005 → 1108 tests**, gate verte et build de
+production vérifiés à chaque pas.
+
+- **Le fly-to n'était pas un réglage, c'était un mode qui manquait** (`2d0e663`). Le diagnostic consigné
+  dans `next.md` était **faux** : il affirmait que `flyZoomIn` était une cible fixe, alors que le code
+  faisait `clamp(state.zoom + flyZoomIn, 0, 1)` — un **pas relatif**, qui saturait à 1 après trois
+  double-clics et dégénérait ensuite en pan pur. Remplacé par `flyFocusZoom` (défaut 1) et `flyArcZoom`
+  (défaut 0). `controls/focusMode.ts` : `focusReturn` sur l'état, entrée par double-clic, sortie par
+  Échap (retour complet) ou par simple clic (le lieu désigné, au zoom d'avant). **Paner, draguer et
+  molette ne quittent pas le mode** — ce qui tient en une ligne parce qu'`interrupt` ne parle que du vol.
+- **Le retour est capturé depuis la destination du vol en cours, pas depuis la cible vive** — sinon
+  double-cliquer pendant le vol de retour mémorise un point à mi-chemin, et l'Échap suivant échoue le
+  lecteur quelque part où il n'a jamais été.
+- **L'arc, puis sa moitié retirée** (`ca68081`). Le dev l'a validé d'un focus à l'autre et refusé à la
+  sortie : ce trajet **porte déjà son propre dézoom** (zoom max → position d'avant), donc le courber en
+  plus envoyait la caméra sous sa destination et la faisait remonter. `peakZoom` devient `number | null`
+  et c'est **l'appelant** qui décide : seul `enterFocus` passe `arcPeak`.
+- **La courbe est une parabole `4p(1-p)` et non une sinusoïde**, pour une raison arithmétique :
+  `Math.sin(Math.PI)` vaut 1,22e-16, donc le vol se posait à 0,9999999999999999 du zoom visé. La
+  parabole est exacte à 0, 0,5 et 1 en flottant.
+- **QUAL-101, trouvé en revue avant de nuire** — le DOM émet un `click` dès que press et release
+  partagent un élément, **sans aucun seuil de distance**. Le simple clic venant de recevoir un sens,
+  chaque relâchement de drag-pan aurait déclenché un vol de 1400 ms. `pointerDragged` décide **une seule
+  fois, là où vit le drag**, sur le chemin parcouru en pixels contre 4 px de tolérance. Vérifié en
+  cassant la garde exprès. Corrige au passage un défaut antérieur : `mapControls` traitait *tout*
+  micro-mouvement comme un drag.
+- **`prefers-reduced-motion` n'effondrait pas `flyDurationMs`** alors que sa propre JSDoc l'affirmait.
+- **Trois autres findings de revue** : `mapInteraction` dépendait des quinze membres de `MapControls`
+  pour en appeler quatre (→ `Pick`, et le `as unknown as` du test disparaît) ; `utils/editableFocus`
+  extrait sans tests ; `READ_EVERY_FRAME` exemptait **tous** les contrôles caméra par un spread, y
+  compris ceux du vol qui ne sont pas lus chaque frame. Un finding **écarté à la vérification**
+  (ordre d'import : `pnpm lint` est vert).
+- **L'atlas s'appelle `EUROPE` / `HISTORICΛL ΛTLΛS`** (`69e4709`). Splash en trois blocs sur **une seule
+  laisse**, celle de la silhouette. Pas de `letter-spacing` : il ajoute un écart **fixe**, donc deux
+  lignes de longueurs différentes ne tomberaient jamais sur la même largeur — c'est **un span par lettre
+  en flex `space-between`**, et l'espace entre les mots est un item **vide**, qui achète deux écarts là
+  où il y en avait un. `EUROPE` à 42 px contre 15, non par emphase : à la même laisse, six lettres à
+  15 px se retrouveraient séparées d'un mot entier. Sur la feuille, une ligne, canevas 1440 → 1680 px.
+- **Le nom vivait en deux littéraux indépendants**, signalé par l'agent qualité *sans être filé* faute de
+  sévérité attribuable — et c'était le point le plus important des trois. `ATLAS_SUBJECT` /
+  `ATLAS_TITLE` / `ATLAS_FULL_NAME` dans `utils/lettering`, plus le test qui verrouille la
+  concaténation. C'est la forme qui a donné à ce projet des aplats et des frontières en désaccord.
+- **`aria-label` était posé sur un `<p>`**, qui n'offre aucun rôle auquel il s'applique de façon fiable.
+  Avec une lettre par span, un lecteur d'écran aurait épelé. Le nom est désormais *dans* l'élément.
+- **Le plan a été retourné par le dev** : les villes ne sont pas du décor, ce sont des **données**, donc
+  l'outillage de contribution passe **avant** tout le reste. Et **trois modes de caméra** sont acquis —
+  normal, focus, pays — les gestes d'accès non.
+
 ### 2026-09-17 → 18 — Budgets de lisibilité, fly-to, la carte comme feuille imprimée
 
 Trois plages : **11:28 → 12:59 (1 h 30)**, **16:00 → 16:14 (14 min)**, **22:10 → 01:13 (3 h 02)**.
