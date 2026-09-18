@@ -2,6 +2,36 @@
 
 Put here the know issues to avoid cluttering the context window.
 
+- **The focus mode has no keyboard way in** (A11Y-301, found 2026-09-18, **left open by decision**).
+  Escape *leaves* the focus, so half the feature is keyboard-operable; nothing enters it. A
+  keyboard-only reader can pan and zoom but can never reach the close-up the feature exists for, and
+  `MapControls.focused` is reflected nowhere in the DOM, so no screen reader learns the camera changed
+  mode.
+  **Why it was not fixed on the spot**, and the disagreement worth recording: the review's own remedy
+  says to wait for M2's keyboard-reachable region list, on the grounds that binding a key to "the
+  screen centre" would focus a point the reader cannot choose. **That argument does not hold here** —
+  the arrow keys already move the camera's ground target, so the centre of the view *is* the keyboard
+  cursor, and it is exactly the point the reader just chose. A key bound to `focusOn(target.x,
+  target.z)` would be coherent with the navigation that already exists.
+  It is open because it is **the dev's call, not an oversight**: the dev has already said the trigger
+  is provisional and that the real entry will be a 3D button driven by event importance
+  (`files/plans/focus-mode.md`). Deciding the keyboard gesture now would be deciding it twice. The
+  announcement half (`aria-live` on entering/leaving focus) genuinely does wait for the HTML overlay.
+- **A `click` fires at the end of every drag, and a map has to say so itself.** The DOM sends `click`
+  whenever press and release share an element, *however far the pointer travelled between them* —
+  there is no built-in movement threshold, which is why Leaflet and Mapbox suppress the post-drag
+  click explicitly. Caught in review on 2026-09-18, before it shipped: the single click had just been
+  given a meaning (`panTo`), so every release of a drag-pan would have been answered by a 1400 ms
+  flight with a full pull-out and dive.
+  The fix is `MapControls.pointerDragged`, decided **once, where the drag lives**, from the pixel path
+  walked during the press against a 4 px tolerance. **Do not let a second module decide it again**: a
+  threshold in the gestures and a threshold in the controls would disagree about a slightly imprecise
+  click, and no test could see the disagreement because it would live in two places. Note the
+  tolerance also fixes something that predated it — `mapControls` treated *any* movement during a
+  press as a drag, so a click that wobbled panned the map.
+  Guarded by two tests that were verified by breaking the guard on purpose, one against a stand-in and
+  one composing the real controls with the real gestures.
+
 - **Vertex colours are written in sRGB into an attribute three reads as linear.** `scene/graticuleFrame`
   and `scene/mapEdge` are the only two users of `vertexColors`, and both do `tone.r / 255`. three
   composites in a *linear* working space and converts to sRGB on output, so the value is brightened a

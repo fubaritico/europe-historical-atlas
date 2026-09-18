@@ -69,8 +69,21 @@ export interface MapControlsOptions {
    * the arc is the flourish. The composition root collapses it, the same way it collapses the inertia.
    */
   flyDurationMs: number
-  /** How much closer a fly-to settles, as a step in the `[0, 1]` zoom. */
-  flyZoomIn: number
+  /**
+   * The zoom the focus mode settles at, in `[0, 1]`.
+   *
+   * One depth for every flight, not a step from wherever the camera happened to be: entering focus is
+   * meant to put the reader at the same grazing close-up every time — the one the event text will be
+   * read at.
+   */
+  flyFocusZoom: number
+  /**
+   * The zoom at the top of a flight's arc, in `[0, 1]`.
+   *
+   * Zero pulls out until the whole sheet is in view before diving back in. It is clamped below both
+   * ends of the flight, so a value above either of them cannot turn the arc into a bounce.
+   */
+  flyArcZoom: number
 }
 
 /** Everything the controls hold and mutate, passed explicitly rather than captured in a closure. */
@@ -95,6 +108,17 @@ export interface ControlsState {
   dragMovedX: number
   /** The same on Z. */
   dragMovedZ: number
+  /** How far the pointer has travelled during the current press, in CSS pixels. */
+  pointerTravel: number
+  /**
+   * Whether the pointer gesture that just ended was a drag rather than a click.
+   *
+   * The browser sends a `click` after any press-and-release on the same element, however far the
+   * pointer travelled in between — which is why a map has to decide for itself. It is decided **here**,
+   * once, because this is where the drag lives: a second threshold elsewhere would be free to disagree
+   * with this one about a slightly imprecise click, and nothing would fail.
+   */
+  pointerDragged: boolean
   /** Which pan keys are held. */
   pressed: Set<string>
   /** Whether the map is being dragged. */
@@ -111,6 +135,25 @@ export interface ControlsState {
   scratch: { f: Vector3; r: Vector3; u: Vector3; dir: Vector3 }
   /** The flight in progress, or `null` when the reader is driving. */
   flight: Flight | null
+  /**
+   * Where the camera stood before it entered focus, or `null` when it is not focused.
+   *
+   * Its presence *is* the mode: nothing else records that the reader is looking closely at something
+   * rather than navigating. Note what does **not** clear it — panning, dragging and wheeling all go
+   * through {@link interrupt}, which ends the flight and says nothing about the mode, so a look around
+   * the target keeps the way back.
+   */
+  focusReturn: FocusReturn | null
+}
+
+/** A camera position to come back to, remembered when the focus mode is entered. */
+export interface FocusReturn {
+  /** Where the target stood, on X. */
+  x: number
+  /** The same on Z. */
+  z: number
+  /** The zoom it stood at. */
+  zoom: number
 }
 
 /** A camera move the reader did not make by hand. */
@@ -127,6 +170,13 @@ export interface Flight {
   fromZoom: number
   /** The zoom it settles at. */
   toZoom: number
+  /**
+   * The zoom at the top of the arc, reached halfway.
+   *
+   * Resolved once when the flight begins rather than read per frame: it is clamped below both ends, and
+   * a tunable that moved mid-flight would bend the curve under a reader already watching it.
+   */
+  peakZoom: number
   /** Seconds since it started. */
   elapsed: number
   /** How long it lasts, in seconds. Never zero — an instant arrival is not a flight at all. */
@@ -198,6 +248,8 @@ export function createControlsState(
     velZoom: 0,
     dragMovedX: 0,
     dragMovedZ: 0,
+    pointerTravel: 0,
+    pointerDragged: false,
     pressed: new Set<string>(),
     dragging: false,
     lastX: 0,
@@ -207,6 +259,7 @@ export function createControlsState(
     pointerY: Number.NaN,
     scratch: { f: new Vector3(), r: new Vector3(), u: new Vector3(), dir: new Vector3() },
     flight: null,
+    focusReturn: null,
   }
 }
 

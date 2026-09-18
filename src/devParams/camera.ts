@@ -32,8 +32,10 @@ export interface CameraTuningParams {
   maxPitchDeg: number
   /** How long a fly-to lasts, in milliseconds. Zero arrives at once, which is what reduced motion asks. */
   flyDurationMs: number
-  /** How much closer a fly-to settles, as a step in the `[0, 1]` zoom. */
-  flyZoomIn: number
+  /** The zoom the focus mode settles at — one depth for every flight, not a step. */
+  flyFocusZoom: number
+  /** The zoom at the top of a flight's arc; zero pulls out to the whole sheet before diving back in. */
+  flyArcZoom: number
 }
 
 /** Range, step and label of every {@link CameraTuningParams} field. */
@@ -48,8 +50,9 @@ export const CAMERA_CONTROLS: ControlTable<CameraTuningParams> = {
   maxDistance: { kind: 'number', min: 2, max: 24, step: 0.25, label: 'max distance (out)' },
   minPitchDeg: { kind: 'number', min: 20, max: 89, step: 1, label: 'pitch in (oblique)' },
   maxPitchDeg: { kind: 'number', min: 20, max: 89, step: 1, label: 'pitch out (top-down)' },
-  flyDurationMs: { kind: 'number', min: 0, max: 2000, step: 50, label: 'fly-to duration (ms)' },
-  flyZoomIn: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'fly-to zoom step' },
+  flyDurationMs: { kind: 'number', min: 0, max: 4000, step: 50, label: 'fly-to duration (ms)' },
+  flyFocusZoom: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'focus zoom (land at)' },
+  flyArcZoom: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'arc zoom (top of flight)' },
 }
 
 /** Display order of the camera-feel controls. */
@@ -65,7 +68,8 @@ export const CAMERA_CONTROL_ORDER: (keyof CameraTuningParams)[] = [
   'minPitchDeg',
   'maxPitchDeg',
   'flyDurationMs',
-  'flyZoomIn',
+  'flyFocusZoom',
+  'flyArcZoom',
 ]
 
 /** Camera-feel defaults (the inertia is overridden to near-zero under `prefers-reduced-motion`). */
@@ -83,8 +87,14 @@ export const DEFAULT_CAMERA_TUNING: CameraTuningParams = {
   maxDistance: 6,
   minPitchDeg: 30,
   maxPitchDeg: 55,
-  // Long enough to read as a move rather than a cut, short enough not to make the reader wait.
-  flyDurationMs: 700,
-  // A third of the range: close enough to feel like an approach, far enough to keep the surroundings.
-  flyZoomIn: 0.35,
+  // The trip has three phases — pull out, cross, dive in — so it needs room the old 700 ms did not
+  // give it: at that length the whole arc reads as a flicker rather than a movement.
+  flyDurationMs: 1400,
+  // Maximum zoom. Entering focus is meant to land at the grazing close-up, the same one every time,
+  // and it is the depth the event text will later be read at.
+  flyFocusZoom: 1,
+  // Fully out: the whole sheet is in view at the top of the arc. The cost is that the arc does not
+  // shrink with the distance, so a neighbouring target is visited the same way as a far one — raise
+  // this to soften that without touching the code.
+  flyArcZoom: 0,
 }

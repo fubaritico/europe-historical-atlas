@@ -165,12 +165,17 @@ export function createNavigation(
   domElement: HTMLElement,
   dev: DevState
 ): { controls: MapControls; saveCamera: () => void } {
+  const reduceMotion = prefersReducedMotion()
   const controls = createMapControls(camera, domElement, {
     ...DEFAULT_CAMERA_TUNING,
     extent: extentRect(dev.extent),
     // Honour prefers-reduced-motion by collapsing the inertia rather than disabling the controls:
     // the map still pans and zooms, it simply stops the instant the input does.
-    smoothingTau: prefersReducedMotion() ? REDUCED_MOTION_TAU : DEFAULT_CAMERA_TUNING.smoothingTau,
+    smoothingTau: reduceMotion ? REDUCED_MOTION_TAU : DEFAULT_CAMERA_TUNING.smoothingTau,
+    // The same, for the flight: a zero duration arrives at once, so the reader still lands where they
+    // asked to land. The arc is the part that goes — and a full pull-out and dive is precisely the
+    // motion this setting exists to remove.
+    flyDurationMs: reduceMotion ? 0 : DEFAULT_CAMERA_TUNING.flyDurationMs,
     initialZoom: 0,
     edgeScrollMargin: EDGE_SCROLL_MARGIN,
   })

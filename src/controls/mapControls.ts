@@ -1,6 +1,7 @@
+import { isEditableFocused } from '../utils/editableFocus'
 import { clamp } from '../utils/math'
 
-import { advanceFlight, beginFlight, interrupt } from './cameraFlight'
+import { advanceFlight, interrupt } from './cameraFlight'
 import { clampTarget, footprintOffsets, placeCamera } from './cameraFraming'
 import {
   createControlsState,
@@ -9,6 +10,7 @@ import {
   viewportHeight,
   viewportWidth,
 } from './controlsState'
+import { clearFocus, enterFocus, isFocused, leaveFocus, leaveFocusTo } from './focusMode'
 
 // The options and the rectangle they clamp within live with the state every part of this reads, and
 // are re-exported here so no call site had to move.
@@ -19,6 +21,14 @@ import type { MapCameraState } from './mapCameraStore'
 import type { CameraControls } from '../camera/cameraState'
 import type { PerspectiveCamera, Vector3 } from 'three'
 
+/**
+ * How far the pointer may travel during a press and still count as a click, in CSS pixels.
+ *
+ * A hand holding a mouse button down moves a pixel or two, so a map that called any movement a drag
+ * would answer almost no clicks. Four is the usual tolerance across map libraries.
+ */
+const DRAG_CLICK_TOLERANCE_PX = 4
+
 /** Keys that pan the map (arrow keys). Held keys accumulate a continuous pan. */
 const PAN_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])
 
@@ -26,19 +36,6 @@ const PAN_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])
 const ZOOM_IN_KEYS = new Set(['+', '=', 'PageUp'])
 /** Keys that zoom out (keyboard equivalent of wheel-down). */
 const ZOOM_OUT_KEYS = new Set(['-', '_', 'PageDown'])
-
-/** Form-control tags whose own arrow-key handling must not be hijacked by the map pan. */
-const EDITABLE_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT'])
-
-/**
- * Whether the focused element is an editable/form control (so arrow keys should reach it, not pan the map).
- * @returns `true` when a text field, select, or contenteditable element currently has focus
- */
-function isEditableFocused(): boolean {
-  if (typeof document === 'undefined') return false
-  const el = document.activeElement
-  return el instanceof HTMLElement && (el.isContentEditable || EDITABLE_TAGS.has(el.tagName))
-}
 
 /**
  * Frame-rate-independent ease-out decay factor: multiply a velocity by this each frame to glide it toward
@@ -108,17 +105,44 @@ export interface MapControls extends CameraControls {
    */
   update(delta?: number): void
   /**
-   * Fly the camera to a point on the ground, easing in and out and settling closer than it started.
+   * Look closely at a point: fly there along an arc and settle at
+   * {@link MapControlsOptions.flyFocusZoom}, remembering where to come back to.
    *
-   * Any input from the reader cancels it. A map that keeps flying while someone is trying to steer has
-   * taken their camera away from them, which is worse than never having moved it.
+   * Any input from the reader cancels the flight but **not** the mode. A map that keeps flying while
+   * someone is trying to steer has taken their camera away from them, which is worse than never having
+   * moved it — but losing the way back for having looked around is a different and worse loss.
    * @param x - where to look, on X
    * @param z - the same on Z
    * @returns nothing
    */
-  flyTo: (x: number, z: number) => void
+  focusOn: (x: number, z: number) => void
+  /**
+   * Fly to a point at the zoom held before the focus was entered, and leave the focus.
+   *
+   * Outside the focus it is simply a re-centring at the current zoom.
+   * @param x - where to look, on X
+   * @param z - the same on Z
+   * @returns nothing
+   */
+  panTo: (x: number, z: number) => void
+  /**
+   * Leave the focus and fly back to where the camera stood before it was entered.
+   * @returns `true` if there was a focus to leave, `false` when the camera was already navigating
+   */
+  exitFocus: () => boolean
   /** Whether a flight is in progress. */
   readonly flying: boolean
+  /** Whether the camera is looking closely at something rather than navigating. */
+  readonly focused: boolean
+  /**
+   * Whether the pointer gesture that just ended was a drag rather than a click.
+   *
+   * The browser sends a `click` after any press-and-release on the same element, however far the
+   * pointer travelled in between — so without this, every drag-pan would end in whatever a click does.
+   * Owned here because this is where the drag lives; asking a second module to decide it again is how
+   * two definitions of the same fact come to disagree.
+   */
+  readonly pointerDragged: boolean
   /** Remove all input listeners — call on teardown (no leak). */
   dispose(): void
 }
@@ -305,6 +329,9 @@ function createPointerListeners(state: ControlsState): {
     },
     pointerdown: (e: Event): void => {
       const pe = e as PointerEvent
+      // Reset before the early return, so a press that cannot drag still reports itself as a click.
+      state.pointerTravel = 0
+      state.pointerDragged = false
       if (!state.opts.enableDrag || pe.button !== 0) return
       interrupt(state)
       state.dragging = true
@@ -316,6 +343,7 @@ function createPointerListeners(state: ControlsState): {
       state.pointerX = pe.clientX
       state.pointerY = pe.clientY
       if (!state.dragging) return
+      state.pointerTravel += Math.hypot(pe.clientX - state.lastX, pe.clientY - state.lastY)
       // Grab-the-map: the ground follows the cursor, so the target moves opposite to the drag. The
       // amount moved is accumulated too, so a frame can turn it into release momentum.
       const distance = distanceForZoom(state.opts, state.zoom)
@@ -331,6 +359,8 @@ function createPointerListeners(state: ControlsState): {
       state.lastY = pe.clientY
     },
     pointerup: (): void => {
+      // Settled before the `click` the browser is about to send, which is what lets the gestures ask.
+      state.pointerDragged = state.pointerTravel > DRAG_CLICK_TOLERANCE_PX
       state.dragging = false
     },
   }
@@ -347,7 +377,20 @@ function createPointerListeners(state: ControlsState): {
  */
 function controlsView(
   state: ControlsState
-): Omit<MapControls, 'update' | 'dispose' | 'options' | 'target' | 'zoom' | 'flyTo' | 'flying'> {
+): Omit<
+  MapControls,
+  | 'update'
+  | 'dispose'
+  | 'options'
+  | 'target'
+  | 'zoom'
+  | 'focusOn'
+  | 'panTo'
+  | 'exitFocus'
+  | 'flying'
+  | 'focused'
+  | 'pointerDragged'
+> {
   return {
     setExtent(extent: MapRect): void {
       state.opts.extent = { ...extent } // cloned, so later caller mutations cannot bypass the API
@@ -370,6 +413,7 @@ function controlsView(
       state.zoom = clamp(restored.zoom, 0, 1)
       state.velX = state.velZ = state.velZoom = 0 // no residual inertia after a restore
       interrupt(state) // nor a flight left over from before the restore
+      clearFocus(state) // nor a way back to a viewpoint the reader has just been taken away from
       clampTarget(state)
       placeCamera(state)
     },
@@ -442,12 +486,26 @@ export function createMapControls(
     update(delta = 0): void {
       stepControls(state, delta)
     },
-    flyTo(x: number, z: number): void {
-      beginFlight(state, x, z)
+    focusOn(x: number, z: number): void {
+      enterFocus(state, x, z)
+    },
+    panTo(x: number, z: number): void {
+      leaveFocusTo(state, x, z)
+    },
+    exitFocus(): boolean {
+      return leaveFocus(state)
     },
     // Defined here rather than in `controlsView`: an accessor cannot survive an object spread.
     get flying(): boolean {
       return state.flight !== null
+    },
+    // Likewise.
+    get focused(): boolean {
+      return isFocused(state)
+    },
+    // Likewise.
+    get pointerDragged(): boolean {
+      return state.pointerDragged
     },
     dispose: detach,
   }

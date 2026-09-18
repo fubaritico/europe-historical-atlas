@@ -2,9 +2,9 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import { createDevPanel } from './devPanel'
-import { CAMERA_CONTROL_ORDER } from './devParams'
 import { createDevState } from './devState'
 
+import type { MapControlsOptions } from './controls/mapControls'
 import type { DevPanelCallbacks } from './devPanel'
 import type { DevState } from './devState'
 import type GUI from 'lil-gui'
@@ -88,9 +88,30 @@ function build(): {
   dev: DevState
   calls: Record<string, number>
   controls: ControllerProbe[]
+  controlsOptions: MapControlsOptions
 } {
   const dev = createDevState()
   const { callbacks, calls } = countingCallbacks()
+  // Held in a variable and handed back: the camera folder writes straight into this object rather than
+  // through a callback, so it is the only place a camera control's effect can be observed.
+  const controlsOptions: MapControlsOptions = {
+    panSpeed: 1,
+    zoomSpeed: 1,
+    smoothingTau: 0.1,
+    enableDrag: true,
+    enableEdgeScroll: true,
+    edgeScrollSpeed: 1,
+    flyDurationMs: 700,
+    flyFocusZoom: 1,
+    flyArcZoom: 0,
+    edgeScrollMargin: 24,
+    minDistance: 1,
+    maxDistance: 10,
+    minPitchDeg: 30,
+    maxPitchDeg: 55,
+    initialZoom: 0,
+    extent: { minX: -1, maxX: 1, minZ: -1, maxZ: 1 },
+  }
   const gui = createDevPanel({
     relief: dev.relief,
     texture: dev.texture,
@@ -100,23 +121,7 @@ function build(): {
     political: dev.political,
     rose: dev.rose,
     frame: dev.frame,
-    controlsOptions: {
-      panSpeed: 1,
-      zoomSpeed: 1,
-      smoothingTau: 0.1,
-      enableDrag: true,
-      enableEdgeScroll: true,
-      edgeScrollSpeed: 1,
-      flyDurationMs: 700,
-      flyZoomIn: 0.35,
-      edgeScrollMargin: 24,
-      minDistance: 1,
-      maxDistance: 10,
-      minPitchDeg: 30,
-      maxPitchDeg: 55,
-      initialZoom: 0,
-      extent: { minX: -1, maxX: 1, minZ: -1, maxZ: 1 },
-    },
+    controlsOptions,
     framing: dev.framing,
     extent: dev.extent,
     debug: dev.debug,
@@ -125,7 +130,7 @@ function build(): {
   // Through `unknown`: `_callOnFinishChange` is protected on lil-gui's own `Controller`, so the two
   // types do not overlap however narrow the probe is.
   const controls = gui.controllersRecursive() as unknown as ControllerProbe[]
-  return { gui, dev, calls, controls }
+  return { gui, dev, calls, controls, controlsOptions }
 }
 
 /** A number inside the control's own range, and different from the one it holds. */
@@ -172,8 +177,30 @@ const READ_EVERY_FRAME = new Set([
   'exaggZoomIn',
   'opacity',
   'opacityZoomIn',
-  ...CAMERA_CONTROL_ORDER,
+  // The camera folder writes straight into the live options object, and the drive reads these on every
+  // rendered frame. Spelled out rather than spread from `CAMERA_CONTROL_ORDER`: a blanket exemption
+  // would hand the same free pass to a camera option added later and captured by value, which is the
+  // exact shape of both failures this guard exists for.
+  'panSpeed',
+  'zoomSpeed',
+  'smoothingTau',
+  'enableDrag',
+  'enableEdgeScroll',
+  'edgeScrollSpeed',
+  'minDistance',
+  'maxDistance',
+  'minPitchDeg',
+  'maxPitchDeg',
 ])
+
+/**
+ * The flight controls, read once when a flight begins rather than every frame.
+ *
+ * Exempt from the callback guard for the same reason — they trigger no rebuild — but the exemption is
+ * only honest because {@link FLIGHT_CONTROLS} are asserted directly below, against the options object
+ * the camera actually reads.
+ */
+const FLIGHT_CONTROLS = ['flyDurationMs', 'flyFocusZoom', 'flyArcZoom'] as const
 
 describe('createDevPanel', () => {
   describe('happy path', () => {
@@ -201,13 +228,30 @@ describe('createDevPanel', () => {
         )
         if (!match) continue
         nudge(match)
-        if (total(calls) === 0 && !READ_EVERY_FRAME.has(match.property)) inert.push(match.property)
+        const exempt =
+          READ_EVERY_FRAME.has(match.property) ||
+          (FLIGHT_CONTROLS as readonly string[]).includes(match.property)
+        if (total(calls) === 0 && !exempt) inert.push(match.property)
       }
       expect(inert).toEqual([])
       // Quadratic on purpose: the panel is rebuilt once per control, so a callback fired by one cannot
       // be credited to another. Six new title controls took it past the five-second default; the cost
       // is the price of the guard, not a slow test to fix.
     }, 30_000)
+
+    it('writes each flight control into the options object the camera reads', () => {
+      // These fire no callback, so the guard above cannot see them. Without this they would be exempt
+      // on trust — and a flight tunable captured by value would go inert with nothing to say so.
+      for (const property of FLIGHT_CONTROLS) {
+        const { controls, controlsOptions } = build()
+        const control = controls.find((c) => c.property === property)
+        expect(control, `no control for ${property}`).toBeDefined()
+        if (!control) continue
+        const before = controlsOptions[property]
+        nudge(control)
+        expect(controlsOptions[property], property).not.toBe(before)
+      }
+    })
 
     it('routes a border paint to a redraw, not to a whole year', () => {
       const { calls, controls } = build()
