@@ -5,6 +5,21 @@
  * itself — and two typefaces for one title would say the two were different things.
  */
 
+/** What the atlas is of, set above the outline on the splash and first on the sheet. */
+export const ATLAS_SUBJECT = 'Europe'
+
+/** What it is, set below the outline on the splash and second on the sheet. */
+export const ATLAS_TITLE = 'Historical atlas'
+
+/**
+ * The whole name on one line, for the sheet, which stacks nothing.
+ *
+ * Derived rather than written out again: the splash stacks the two halves and the map runs them
+ * together, and two literals that merely happen to agree today are the shape this codebase has already
+ * been burned by once — fills and borders, each with their own idea of where a country ended.
+ */
+export const ATLAS_FULL_NAME = `${ATLAS_SUBJECT} ${ATLAS_TITLE}`
+
 /**
  * The map's face: an old-style serif, with the fallbacks that actually ship on the machines it runs on.
  *

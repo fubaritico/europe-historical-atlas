@@ -10,21 +10,27 @@
 
 import { BufferAttribute, BufferGeometry, Mesh, MeshBasicMaterial } from 'three'
 
-import { MAP_TYPEFACE, withLambdaForA } from '../utils/lettering'
+import { ATLAS_FULL_NAME, MAP_TYPEFACE, withLambdaForA } from '../utils/lettering'
 
 import type { Object3D, Texture } from 'three'
 
-/** The atlas's own name, in plain words. What a screen reader would be given. */
-export const MAP_TITLE = 'Historical atlas'
+/**
+ * The atlas's own name, in plain words. What a screen reader would be given.
+ *
+ * One line here, where the splash stacks it: the sheet has width and no height to spare below the map,
+ * and a second line would push the name off the paper.
+ */
+export const MAP_TITLE = ATLAS_FULL_NAME
 
 /**
  * The title canvas, in its own pixels.
  *
- * Twelve to one, and the ratio is measured rather than chosen: sixteen tracked capitals advance about
- * `16 × (0.62 + 0.42) × fontSize`, so at a font size of half the height the lettering needs some ten
- * heights of width. Eight to one clipped it at both ends.
+ * Fourteen to one, and the ratio is measured rather than chosen: twenty-three tracked capitals advance
+ * about `23 × (0.62 + 0.42) × fontSize`, so at a font size of half the height the lettering needs some
+ * twelve heights of width, and the rest is margin. It was twelve to one for the sixteen letters of
+ * `Historical atlas` alone, which the subject would now overrun at both ends.
  */
-const TITLE_WIDTH = 1440
+const TITLE_WIDTH = 1680
 const TITLE_HEIGHT = 120
 
 /** Tracking, as a fraction of the font size — the splash's own 0.42em. */
@@ -66,8 +72,9 @@ export interface MapTitle {
  * Set the name as SVG.
  *
  * The centring compensates for the tracking: letter-spacing adds a gap after the LAST letter too, so a
- * text anchored at the middle sits half a gap to the left of where it looks like it should. The splash
- * answers this with `text-indent`; SVG has no such thing, so the anchor moves instead.
+ * text anchored at the middle sits half a gap to the left of where it looks like it should, and the
+ * anchor moves to answer it. The splash has no such correction to make — it spreads one span per letter
+ * across a known width, and a `space-between` row has no trailing gap in the first place.
  * @param text - the name, in plain words
  * @param ink - the colour
  * @param roughness - how far the outline is displaced, in canvas pixels

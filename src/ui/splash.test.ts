@@ -4,8 +4,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { MAP_TYPEFACE } from '../utils/lettering'
 
 import {
-  buildSplashCaption,
   buildSplashFigure,
+  buildSplashLine,
   buildSplashPanel,
   createSplash,
   withLambdaForA,
@@ -15,6 +15,31 @@ import type { SplashSilhouette } from './splash'
 
 /** A two-triangle stand-in, so a test never depends on the real coastline. */
 const SHAPE: SplashSilhouette = { path: 'M0 0L10 0L10 10Z', width: 10, height: 20 }
+
+/**
+ * What the eye is given, per line: the glyph spans joined back into a word.
+ * @param host - the element the splash was mounted into
+ * @returns one lettered string per line, in document order
+ */
+function eyeLines(host: HTMLElement): string[] {
+  // An empty glyph is the word gap, read back as the space it draws.
+  return [...host.querySelectorAll('p')].map((line) =>
+    [...line.querySelectorAll('span[aria-hidden]')]
+      .map((s) => (s.textContent === '' ? ' ' : s.textContent))
+      .join('')
+  )
+}
+
+/**
+ * What a screen reader is given, per line.
+ * @param host - the element the splash was mounted into
+ * @returns one plain string per line, in document order
+ */
+function spokenLines(host: HTMLElement): string[] {
+  return [...host.querySelectorAll('p')].map(
+    (line) => line.querySelector('span:not([aria-hidden])')?.textContent ?? ''
+  )
+}
 
 /** Mount a splash into a fresh host. */
 function mount(overrides: Partial<Parameters<typeof createSplash>[0]> = {}): {
@@ -60,17 +85,31 @@ describe('withLambdaForA', () => {
 
 describe('createSplash', () => {
   describe('happy path', () => {
-    it('mounts a filled outline and a title', () => {
+    it('mounts a filled outline between its two lines', () => {
       const { host } = mount()
       const path = host.querySelector('path')
       expect(path?.getAttribute('d')).toBe(SHAPE.path)
-      expect(host.querySelector('p')?.textContent).toBe('HISTORICΛL ΛTLΛS')
+      expect(eyeLines(host)).toEqual(['EUROPE', 'HISTORICΛL ΛTLΛS'])
+    })
+
+    it('puts the subject above the outline and the title below it', () => {
+      const { host } = mount()
+      const panel = host.firstElementChild
+      expect([...(panel?.children ?? [])].map((c) => c.tagName)).toEqual(['P', 'svg', 'P'])
+    })
+
+    it('gives all three blocks one measure', () => {
+      // The whole point of the layout: the two lines are tracked out to the width the outline is drawn
+      // at, so the block reads as a single rectangle.
+      const { host } = mount({ size: 264 })
+      for (const line of host.querySelectorAll('p')) expect(line.style.width).toBe('264px')
+      expect(host.querySelector('svg')?.getAttribute('width')).toBe('264')
     })
 
     it('announces the plain words, not the glyph game', () => {
       const { host } = mount()
       // A screen reader spelling out "HISTORICΛL" would be worse than no lettering at all.
-      expect(host.querySelector('p')?.getAttribute('aria-label')).toBe('Historical atlas')
+      expect(spokenLines(host)).toEqual(['Europe', 'Historical atlas'])
       expect(host.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
     })
 
@@ -98,8 +137,14 @@ describe('createSplash', () => {
 
     it('takes a different title', () => {
       const { host } = mount({ title: 'Atlas' })
-      expect(host.querySelector('p')?.textContent).toBe('ΛTLΛS')
-      expect(host.querySelector('p')?.getAttribute('aria-label')).toBe('Atlas')
+      expect(eyeLines(host)[1]).toBe('ΛTLΛS')
+      expect(spokenLines(host)[1]).toBe('Atlas')
+    })
+
+    it('takes a different subject', () => {
+      const { host } = mount({ subject: 'Asia' })
+      expect(eyeLines(host)[0]).toBe('ΛSIΛ')
+      expect(spokenLines(host)[0]).toBe('Asia')
     })
 
     it('fills even-odd, so an inland sea reads as a hole', () => {
@@ -263,10 +308,18 @@ describe('buildSplashFigure', () => {
   })
 })
 
-describe('buildSplashCaption', () => {
+describe('buildSplashLine', () => {
+  /** What the eye gets: the glyph spans, joined back into a word. */
+  const lettered = (line: HTMLElement): string =>
+    [...line.querySelectorAll('span[aria-hidden]')].map((s) => s.textContent).join('')
+
+  /** What a screen reader gets: the one span that is read but not seen. */
+  const spoken = (line: HTMLElement): string =>
+    line.querySelector('span:not([aria-hidden])')?.textContent ?? ''
+
   describe('happy path', () => {
     it('letters the title for the eye', () => {
-      expect(buildSplashCaption('Atlas', '#5c3a2e').textContent).toBe('ΛTLΛS')
+      expect(lettered(buildSplashLine('Atlas', '#5c3a2e', 300, 15))).toBe('ΛTLΛS')
     })
 
     it('sets it in the shared face, the one the map title uses', () => {
@@ -275,24 +328,45 @@ describe('buildSplashCaption', () => {
       // Compared stripped of quotes and spaces: jsdom renormalises a family list the way it
       // renormalises a hex colour into `rgb()`, so the raw strings never match.
       const bare = (list: string): string => list.replace(/['" ]/g, '')
-      const caption = buildSplashCaption('Atlas', '#5c3a2e')
-      expect(bare(caption.style.fontFamily)).toBe(bare(MAP_TYPEFACE))
+      const line = buildSplashLine('Atlas', '#5c3a2e', 300, 15)
+      expect(bare(line.style.fontFamily)).toBe(bare(MAP_TYPEFACE))
     })
 
     it('names it in plain words for a screen reader', () => {
-      expect(buildSplashCaption('Atlas', '#5c3a2e').getAttribute('aria-label')).toBe('Atlas')
+      // In the element, not on it: `aria-label` on a `<p>` has no role to attach to, and the glyph
+      // spans on their own would be spelled out letter by letter.
+      expect(spoken(buildSplashLine('Atlas', '#5c3a2e', 300, 15))).toBe('Atlas')
     })
   })
 
   describe('variants', () => {
     it('takes the ink it was given', () => {
-      expect(buildSplashCaption('Atlas', '#abcdef').style.color).toBe('rgb(171, 205, 239)')
+      expect(buildSplashLine('Atlas', '#abcdef', 300, 15).style.color).toBe('rgb(171, 205, 239)')
     })
 
-    it('offsets the block by the tracking it adds, so it stays centred', () => {
-      const caption = buildSplashCaption('Atlas', '#5c3a2e')
-      expect(caption.style.letterSpacing).toBe('0.42em')
-      expect(caption.style.textIndent).toBe('0.42em')
+    it('fills exactly the measure it was given, so every block shares one', () => {
+      const line = buildSplashLine('Atlas', '#5c3a2e', 264, 15)
+      expect(line.style.width).toBe('264px')
+      expect(line.style.justifyContent).toBe('space-between')
+    })
+
+    it('takes the cap size it was given', () => {
+      expect(buildSplashLine('Europe', '#000', 300, 42).style.fontSize).toBe('42px')
+    })
+
+    it('spends a space on an empty item, buying two gaps where there was one', () => {
+      // `space-between` puts an equal gap between every pair, so a wider item would do nothing; an
+      // extra one is what separates the words.
+      const line = buildSplashLine('Ab c', '#000', 300, 15)
+      const glyphs = [...line.querySelectorAll('span[aria-hidden]')]
+      expect(glyphs).toHaveLength(4)
+      expect(glyphs[2]?.textContent).toBe('')
+    })
+
+    it('keeps the glyphs away from assistive technology', () => {
+      const line = buildSplashLine('Atlas', '#000', 300, 15)
+      for (const glyph of line.querySelectorAll('span[aria-hidden]'))
+        expect(glyph.getAttribute('aria-hidden')).toBe('true')
     })
   })
 
@@ -300,15 +374,26 @@ describe('buildSplashCaption', () => {
 
   describe('unmanaged errors', () => {
     it('keeps the accessible name even when the lettering swallows every letter', () => {
-      expect(buildSplashCaption('aaa', '#000').getAttribute('aria-label')).toBe('aaa')
+      expect(spoken(buildSplashLine('aaa', '#000', 300, 15))).toBe('aaa')
+    })
+
+    it('keeps the hidden name out of the layout, so it takes no share of the tracking', () => {
+      const line = buildSplashLine('Atlas', '#000', 300, 15)
+      expect(line.querySelector<HTMLElement>('span:not([aria-hidden])')?.style.position).toBe(
+        'absolute'
+      )
     })
   })
 
   describe('edge cases', () => {
-    it('survives an empty title without losing its accessible name attribute', () => {
-      const caption = buildSplashCaption('', '#000')
-      expect(caption.textContent).toBe('')
-      expect(caption.getAttribute('aria-label')).toBe('')
+    it('survives an empty title without losing its accessible name', () => {
+      const line = buildSplashLine('', '#000', 300, 15)
+      expect(lettered(line)).toBe('')
+      expect(spoken(line)).toBe('')
+    })
+
+    it('sets a single letter without it going anywhere', () => {
+      expect(lettered(buildSplashLine('E', '#000', 300, 42))).toBe('E')
     })
   })
 })

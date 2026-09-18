@@ -1,11 +1,20 @@
 import { Texture } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
-import { MAP_TYPEFACE } from '../utils/lettering'
+import { ATLAS_SUBJECT, ATLAS_TITLE, MAP_TYPEFACE } from '../utils/lettering'
 
 import { MAP_TITLE, buildMapTitleSvg, createMapTitle } from './mapTitle'
 
 import type { MapTitleOptions } from './mapTitle'
+
+/**
+ * The canvas width the markup declares, read back rather than restated.
+ * @param svg - the markup
+ * @returns the width in canvas pixels
+ */
+function canvasWidth(svg: string): number {
+  return Number(/<svg width="(\d+)"/.exec(svg)?.[1])
+}
 
 const OPTIONS: MapTitleOptions = {
   text: MAP_TITLE,
@@ -77,20 +86,33 @@ describe('buildMapTitleSvg', () => {
   describe('edge cases', () => {
     it('pulls the anchor back by half the tracking, so the block sits on centre', () => {
       // Letter-spacing adds a gap after the LAST letter too, so text anchored at the middle sits half a
-      // gap left of where it looks like it should. The splash answers this with `text-indent`; SVG has
-      // no such property, so the anchor moves instead.
+      // gap left of where it looks like it should, and the anchor moves to answer it. The splash has no
+      // such correction to make: a `space-between` row has no trailing gap in the first place.
       const svg = buildMapTitleSvg(MAP_TITLE, '#000000', 0)
       const x = Number(/<text x="([\d.]+)"/.exec(svg)?.[1])
       const tracking = Number(/letter-spacing="(\d+)"/.exec(svg)?.[1])
-      expect(x).toBeCloseTo(1440 / 2 - tracking / 2, 0)
+      expect(x).toBeCloseTo(canvasWidth(svg) / 2 - tracking / 2, 0)
     })
 
     it('leaves room for the lettering it sets', () => {
-      // Sixteen tracked capitals advance about 16 x (0.62 + 0.42) x fontSize. At eight to one the name
-      // ran off both ends of the canvas and was cut.
+      // Tracked capitals advance about (0.62 + 0.42) x fontSize each. Read off the canvas rather than
+      // written down here: a title that grows must widen the canvas, and a test holding its own copy of
+      // the old width would pass while the name ran off both ends.
       const svg = buildMapTitleSvg(MAP_TITLE, '#000000', 0)
       const fontSize = Number(/font-size="(\d+)"/.exec(svg)?.[1])
-      expect(MAP_TITLE.length * 1.04 * fontSize).toBeLessThan(1440)
+      expect(MAP_TITLE.length * 1.04 * fontSize).toBeLessThan(canvasWidth(svg))
+    })
+
+    it('holds the subject and the atlas on one line', () => {
+      const svg = buildMapTitleSvg(MAP_TITLE, '#000000', 0)
+      expect(svg.match(/<text /g)).toHaveLength(1)
+      expect(svg).toContain('EUROPE HISTORICΛL ΛTLΛS')
+    })
+
+    it('runs together the two halves the splash stacks', () => {
+      // One source for the name. Two literals agreeing today is the shape that gave this codebase
+      // fills and borders with separate ideas of where a country ended.
+      expect(MAP_TITLE).toBe(`${ATLAS_SUBJECT} ${ATLAS_TITLE}`)
     })
   })
 })

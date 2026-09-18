@@ -2,6 +2,13 @@
 
 Put here the know issues to avoid cluttering the context window.
 
+- **`buildTitle` in `mapLayerBuilders.ts` is reached by no test** (QUAL-021, found 2026-09-18, **left
+  open**). It is the only code turning the `frame.title*` tunables and `MAP_TITLE` into the mesh laid on
+  the sheet, and it is reachable only through `rebuildFrame`, which `mapLayers.test.ts` never calls.
+  `mapTitle.test.ts` covers `buildMapTitleSvg` and `createMapTitle` in isolation, so what is untested is
+  the **wiring** — the outer edge, the offset, the lift. Open rather than fixed because the file is in
+  the blast radius of the rename, not in its diff; it was already untested before. The atlas's name
+  growing from 16 to 23 characters passed through it with no test exercising the path.
 - **The focus mode has no keyboard way in** (A11Y-301, found 2026-09-18, **left open by decision**).
   Escape *leaves* the focus, so half the feature is keyboard-operable; nothing enters it. A
   keyboard-only reader can pan and zoom but can never reach the close-up the feature exists for, and

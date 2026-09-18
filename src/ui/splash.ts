@@ -9,7 +9,7 @@
  * dismissed; the composition root decides when.
  */
 
-import { MAP_TYPEFACE, withLambdaForA } from '../utils/lettering'
+import { ATLAS_SUBJECT, ATLAS_TITLE, MAP_TYPEFACE, withLambdaForA } from '../utils/lettering'
 import { prefersReducedMotion } from '../utils/motion'
 
 import {
@@ -40,8 +40,10 @@ export interface SplashOptions {
   ink?: string
   /** The page behind it — the scene's own background, so dismissing it shows no seam. */
   background?: string
-  /** The title, in plain words. This is what a screen reader announces. */
+  /** The title, in plain words, set below the outline. This is what a screen reader announces. */
   title?: string
+  /** What the atlas is of, set above the outline on the same measure. */
+  subject?: string
 }
 
 /** A mounted splash. */
@@ -62,6 +64,26 @@ export { withLambdaForA } from '../utils/lettering'
 
 /** How long the splash takes to fade, in milliseconds. */
 const FADE_MS = 420
+
+/**
+ * Cap size of the subject line, in CSS pixels.
+ *
+ * Far larger than the title's, and not for emphasis: both lines are tracked out to the *same* measure,
+ * so the six letters of the subject would stand a whole word apart at the title's size. The bigger cap
+ * is what keeps them reading as one word.
+ */
+const SUBJECT_FONT_PX = 42
+
+/** Cap size of the title line, in CSS pixels. Sixteen letters need no help filling the measure. */
+const TITLE_FONT_PX = 15
+
+/**
+ * Space between the three blocks, in CSS pixels.
+ *
+ * Tighter than it looks: `line-height: 1` boxes the lettering at its own cap size, and capitals fill
+ * about seven tenths of that, so each line already carries some air of its own below the glyphs.
+ */
+const BLOCK_GAP_PX = 14
 
 /**
  * Build the full-screen panel the splash lives in.
@@ -85,7 +107,7 @@ export function buildSplashPanel(background: string, fadeMs: number): HTMLElemen
     'flex-direction:column',
     'align-items:center',
     'justify-content:center',
-    'gap:28px',
+    `gap:${String(BLOCK_GAP_PX)}px`,
     `background:${background}`,
     'z-index:20',
     `transition:opacity ${String(fadeMs)}ms ease-out`,
@@ -121,27 +143,71 @@ export function buildSplashFigure(
 }
 
 /**
- * Set the title, lettered for the eye and named in plain words for everyone else.
- * @param title - the title, in plain words
- * @param ink - the text colour
- * @returns the caption element
+ * The real words, for anyone who is not looking at the glyphs.
+ *
+ * A `<p>` has no role that `aria-label` reliably applies to, so the name has to be *in* the element
+ * rather than attached to it — and once the glyphs are one span per letter, a reader left to them would
+ * spell the title out.
+ * @param text - the title, in plain words
+ * @returns a span that is read but not seen, and takes no part in the layout
  */
-export function buildSplashCaption(title: string, ink: string): HTMLParagraphElement {
-  const caption = document.createElement('p')
-  caption.textContent = withLambdaForA(title).toUpperCase()
-  // The plain word is what gets announced; the lambdas are a glyph game and would be spelled out.
-  caption.setAttribute('aria-label', title)
-  caption.style.cssText = [
+function buildScreenReaderText(text: string): HTMLSpanElement {
+  const sr = document.createElement('span')
+  sr.textContent = text
+  // Absolute, so it is out of the flex flow and cannot take a share of the tracking.
+  sr.style.cssText = [
+    'position:absolute',
+    'width:1px',
+    'height:1px',
+    'overflow:hidden',
+    'clip-path:inset(50%)',
+    'white-space:nowrap',
+  ].join(';')
+  return sr
+}
+
+/**
+ * Set one line of the title, tracked out to an exact width.
+ *
+ * One span per letter, spread by `space-between`. Letter-spacing could not do this: it adds a fixed gap
+ * whatever the width, so two lines of different lengths would never agree — and here all three blocks,
+ * both lines and the silhouette between them, have to share one measure.
+ *
+ * A space in the text becomes an **empty** item rather than a wider one: `space-between` puts an equal
+ * gap between every pair, so an empty item at that point simply buys two of them.
+ * @param text - the line, in plain words
+ * @param ink - the text colour
+ * @param width - the measure to fill, in CSS pixels
+ * @param fontSize - the cap size, in CSS pixels
+ * @returns the line element
+ */
+export function buildSplashLine(
+  text: string,
+  ink: string,
+  width: number,
+  fontSize: number
+): HTMLParagraphElement {
+  const line = document.createElement('p')
+  line.style.cssText = [
     'margin:0',
+    'display:flex',
+    'justify-content:space-between',
+    `width:${String(width)}px`,
     `color:${ink}`,
     `font-family:${MAP_TYPEFACE}`,
-    'font-size:15px',
+    `font-size:${String(fontSize)}px`,
     'font-weight:500',
-    'letter-spacing:0.42em',
-    'text-indent:0.42em', // the tracking adds a trailing gap; this puts the block back on centre
-    'text-transform:uppercase',
+    'line-height:1',
   ].join(';')
-  return caption
+  for (const character of withLambdaForA(text).toUpperCase()) {
+    const glyph = document.createElement('span')
+    // The lambdas are a glyph game; the word itself is carried by the hidden span below.
+    glyph.setAttribute('aria-hidden', 'true')
+    glyph.textContent = character === ' ' ? '' : character
+    line.appendChild(glyph)
+  }
+  line.appendChild(buildScreenReaderText(text))
+  return line
 }
 
 /**
@@ -158,11 +224,17 @@ export function createSplash(options: SplashOptions): Splash {
   const size = options.size ?? 300
   const ink = options.ink ?? '#5c3a2e'
   const background = options.background ?? '#efe6d2'
-  const title = options.title ?? 'Historical atlas'
+  const title = options.title ?? ATLAS_TITLE
+  const subject = options.subject ?? ATLAS_SUBJECT
   const reduceMotion = prefersReducedMotion()
 
   const element = buildSplashPanel(background, reduceMotion ? 0 : FADE_MS)
-  element.append(buildSplashFigure(silhouette, size, ink), buildSplashCaption(title, ink))
+  // Three blocks on one measure: the subject above the outline, the outline, the title below it.
+  element.append(
+    buildSplashLine(subject, ink, size, SUBJECT_FONT_PX),
+    buildSplashFigure(silhouette, size, ink),
+    buildSplashLine(title, ink, size, TITLE_FONT_PX)
+  )
   options.host.appendChild(element)
 
   let gone = false
