@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # Manual re-run. Needed more often than it looks: a job can fail on something outside the
+  # code — a secret that was wrong, a service that was down — and without this the only way to
+  # retry is an empty commit.
+  workflow_dispatch:
 
 jobs:
   validate:
