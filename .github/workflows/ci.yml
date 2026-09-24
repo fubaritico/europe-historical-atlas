@@ -37,3 +37,45 @@ jobs:
             exit 1
           fi
           echo "✅ Quality gate passed (sonarqube=${{ needs.sonarqube.result }})"
+
+  # Deploys the artefact the build job produced — never a rebuild. That is the whole point: the
+  # build asserts that the worker chunk carries no three.js and that no GPL-3.0 geometry reached
+  # `dist/`, and those assertions only mean something if the bytes that were checked are the bytes
+  # that get served. `_headers` and `_redirects` travel inside the artefact for the same reason.
+  #
+  # Self-skips while the Netlify secrets are absent, so the pipeline is green before the site exists.
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [quality-gate]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Check Netlify secrets presence
+        id: check
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: echo "has=$([ -n "$NETLIFY_AUTH_TOKEN" ] && [ -n "$NETLIFY_SITE_ID" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Download the artefact the gate approved
+        if: steps.check.outputs.has == 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: atlas-${{ github.sha }}
+          path: site
+
+      - name: Deploy to Netlify
+        if: steps.check.outputs.has == 'true'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          npx --yes netlify-cli@latest deploy \
+            --prod \
+            --no-build \
+            --dir=site \
+            --site="$NETLIFY_SITE_ID" \
+            --message "${{ github.sha }} — ${{ github.event.head_commit.message }}"
+
+      - name: Skip notice
+        if: steps.check.outputs.has != 'true'
+        run: echo "ℹ️ NETLIFY_AUTH_TOKEN / NETLIFY_SITE_ID absent — deploy skipped. Add both secrets to enable it."

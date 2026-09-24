@@ -1,0 +1,19 @@
+# Netlify headers, carried INSIDE the published directory on purpose.
+#
+# The site is deployed with `netlify deploy --no-build` from a CI artefact, not built by Netlify.
+# In that mode `netlify.toml` is resolved from whatever directory the CLI runs in, which is easy to
+# get wrong and impossible to notice — a missing header is silent. `_headers` and `_redirects` live
+# in the publish directory itself, so they travel with the artefact and always apply.
+
+# Vite fingerprints what it emits: safe to cache forever.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# The physical payloads are NOT fingerprinted — their names are stable, so a regenerated DEM keeps
+# the same URL. One day helps a returning reader without making a replaced asset invisible forever.
+/heightmaps/*
+  Cache-Control: public, max-age=86400
+/masks/*
+  Cache-Control: public, max-age=86400
+/rivers/*
+  Cache-Control: public, max-age=86400
