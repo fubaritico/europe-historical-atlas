@@ -111,6 +111,33 @@ Separate because it touches every ESLint boundary glob, `vite`, `vitest`, `tscon
 safety net is those tests: the split is finished when they are all green and `pnpm build` still produces
 a worker chunk with no three.js in it.
 
+### No Turbo, no Lerna — settled 2026-09-24 with a threshold, not a feeling
+
+**Lerna is a category mismatch.** Its job is versioning and publishing packages to npm. We publish
+nothing; our packages are consumed only by our own application.
+
+**Most of what Turbo is credited with, pnpm already does.** `pnpm -r --filter` runs tasks in topological
+order and in parallel where they are independent. What Turbo adds is the **cache**: skip a task whose
+inputs are unchanged, and share that cache across machines.
+
+**Measured 2026-09-24**: `type-check` 1.4 s · `build` 1.7 s · `test` 9.0 s — the whole gate is ~12 s. At
+two packages where `atlas` depends on `core`, touching `core` invalidates everything downstream, and
+`core` is where most changes land. Expected saving today: **a few seconds, sometimes.**
+
+**Add it when either of these is true, whichever comes first:**
+
+1. **a CI exists** — that is where remote caching is unbeatable, and there is none today;
+2. **the gate passes ~30 s** — not for the time itself, but because a slow gate is a gate people start
+   bypassing with `--no-verify`, and that is the real cost.
+
+**The risk to remember when we do add it**: `turbo.json` declares each task's `inputs`. Declare them
+wrong — one file forgotten — and you get a **stale cache hit**: the gate goes green on code it never
+tested. Silent, and worse than having no cache.
+
+**What to do instead, right now and for free**: once the packages exist, have the pre-commit hook test
+only the _affected_ packages using pnpm's changed-since filter. That captures most of the benefit with
+no configuration file to keep in sync. (Verify the exact filter syntax when wiring it.)
+
 ## P3 — `registry.json` · _short, and everything downstream needs it_
 
 The 51 identities at 1100 — names, ranks, Q-ids, `name:fr` on 81 % — sit in `fetch-ohm`'s cached

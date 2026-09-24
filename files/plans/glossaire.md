@@ -6,6 +6,12 @@
 > **Règle de travail, posée par le dev le 2026-09-22 : tout mot nouveau atterrit ici, tout de suite.**
 > Ce document est ce qui permet qu'on se comprenne. Un terme employé en réponse et absent d'ici est une
 > dette — l'ajouter fait partie de la réponse, pas d'un rangement ultérieur.
+>
+> **Ce qui entre, précisé par le dev le 2026-09-24 :** de la **cartographie** et du **logiciel lui-même**
+> — ses objets, ses gestes, ses écrans, ses formats. Rien d'autre. Le vocabulaire d'outillage général
+> (build, paquets, cache, CI) **n'y a pas sa place** : il est connu, il ne nous est pas propre, et le
+> noyer dedans ferait perdre au glossaire ce qui le rend lisible. Dans le doute : _est-ce qu'un
+> développeur qui arrive comprendrait ce mot sans nous ?_ Si oui, il n'entre pas.
 
 ## Les sources de données
 
