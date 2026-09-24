@@ -1,0 +1,37 @@
+name: SonarQube Analysis
+
+on:
+  workflow_call:
+
+# Self-skips while SONAR_TOKEN is absent, so the first push is green before the SonarCloud project
+# exists. The scan turns itself on the day the secret is added — nothing to edit here.
+jobs:
+  sonarqube:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # full history, or Sonar cannot tell new code from old
+
+      - uses: ./.github/actions/setup
+
+      - name: Check SONAR_TOKEN presence
+        id: check
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: echo "has=$([ -n "$SONAR_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Generate coverage (lcov for Sonar)
+        if: steps.check.outputs.has == 'true'
+        run: pnpm coverage
+
+      - name: SonarQube Scan
+        if: steps.check.outputs.has == 'true'
+        uses: SonarSource/sonarqube-scan-action@v8
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Skip notice
+        if: steps.check.outputs.has != 'true'
+        run: echo "ℹ️ SONAR_TOKEN absent — Sonar scan skipped. Add the secret to enable it."

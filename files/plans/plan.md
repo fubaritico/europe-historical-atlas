@@ -96,6 +96,26 @@ applies from the start.
 `gh repo create europe-historical-atlas --private`, then push `master`. `gh` is authenticated as
 `stefcot`. **Nothing outward-facing happens without the dev saying so.**
 
+### 1.7b Continuous integration — **done 2026-09-24**, runs on the first push
+
+Ported from `fubaritico-ds` and adapted rather than copied. `ci.yml` orchestrates `validate` (lint,
+type-check and test as three parallel jobs), `build`, then `sonarqube`, and closes on a `quality-gate`
+job. Three adaptations worth knowing:
+
+- **his action versions were one major behind** on three of four — checked against the registry rather
+  than copied: `checkout@v7`, `setup-node@v7`, `action-setup@v6`, `upload-artifact@v7`, `sonar scan@v8`;
+- **no pre-build step.** His `validate` needs a task runner to build dependencies first because
+  cross-package types come from `dist/*.d.ts`. Ours reads `core` as TypeScript source, so the three jobs
+  start cold and in parallel with nothing to wait on;
+- **one lcov instead of one per package**, because a single vitest run covers both.
+
+The build job also **asserts the worker chunk carries no three.js**. A bundle boundary is invisible in a
+diff, and it is the one property here that could be lost in silence.
+
+**Sonar self-skips while `SONAR_TOKEN` is absent**, so the first push is green before the SonarCloud
+project exists. Two things only the dev can do: create the project (confirming `projectKey` and
+`organization`), and add the secret. Then `sonar-init.yml`, once, by hand.
+
 ### 1.8 Deploy
 
 `netlify.toml` (`build = "pnpm build"`, `publish = "dist"`) and `.nvmrc` pinning Node 22. Connecting the
@@ -134,7 +154,11 @@ two packages where `atlas` depends on `core`, touching `core` invalidates everyt
 
 **Add it when either of these is true, whichever comes first:**
 
-1. **a CI exists** — that is where remote caching is unbeatable, and there is none today;
+1. ~~a CI exists~~ — **amended 2026-09-24, the same day the CI landed.** That wording was mine and it
+   was too coarse. In CI the dominant cost is `pnpm install` in each job, which Turbo does not touch at
+   all; our whole gate is 12 s against an install that is longer. The real trigger is **enough packages
+   that skipping the unaffected ones is worth something** — at two, a change in `core` invalidates
+   everything downstream anyway;
 2. **the gate passes ~30 s** — not for the time itself, but because a slow gate is a gate people start
    bypassing with `--no-verify`, and that is the real cost.
 

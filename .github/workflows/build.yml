@@ -1,0 +1,33 @@
+name: Build
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+
+      - name: Build the atlas
+        run: pnpm build
+
+      # The property this project cannot afford to lose silently: the compute worker must ship
+      # without three.js in it. A bundle boundary is invisible in a diff, so it is asserted here.
+      - name: The worker chunk must not contain three.js
+        run: |
+          worker=$(ls packages/atlas/dist/assets/computeWorker-*.js)
+          echo "worker chunk: $worker ($(wc -c < "$worker") bytes)"
+          if grep -q "WebGLRenderer" "$worker"; then
+            echo "::error::three.js leaked into the compute worker chunk"
+            exit 1
+          fi
+          echo "✅ no renderer in the worker chunk"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: atlas-${{ github.sha }}
+          path: packages/atlas/dist
+          retention-days: 7
+          if-no-files-found: error

@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate.yml
+
+  build:
+    needs: [validate]
+    uses: ./.github/workflows/build.yml
+
+  sonarqube:
+    needs: [build]
+    uses: ./.github/workflows/sonarqube.yml
+    secrets: inherit
+
+  quality-gate:
+    runs-on: ubuntu-latest
+    needs: [validate, build, sonarqube]
+    if: always()
+    steps:
+      - name: Check every gate
+        run: |
+          if [ "${{ needs.validate.result }}" != "success" ] || \
+             [ "${{ needs.build.result }}" != "success" ]; then
+            echo "❌ Quality gate failed (validate=${{ needs.validate.result }}, build=${{ needs.build.result }})"
+            exit 1
+          fi
+          # Sonar self-skips without a token, so "skipped" is tolerated; only a real failure blocks.
+          if [ "${{ needs.sonarqube.result }}" == "failure" ]; then
+            echo "❌ Quality gate failed (sonarqube=failure)"
+            exit 1
+          fi
+          echo "✅ Quality gate passed (sonarqube=${{ needs.sonarqube.result }})"

@@ -1,0 +1,31 @@
+name: Validate
+
+on:
+  workflow_call:
+
+# Three independent jobs, in parallel. They need no pre-build and no task runner: `@…/core` is
+# imported through subpath exports that point at its TypeScript sources, so there is no `dist/`
+# for anything to wait on.
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: pnpm lint
+
+  type-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      # Two invocations, one per package: `core` compiles without the DOM lib, which is what makes
+      # "no document in core" a compiler error rather than a convention.
+      - run: pnpm type-check
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: pnpm test
