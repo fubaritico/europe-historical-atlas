@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#1a1917}a{color:#e8e3d8}a:hover{color:#1f5bff}button{font:inherit;color:inherit}input[type=range]{accent-color:#5b93d6}input[type=checkbox]{accent-color:#5b93d6;margin:0}</style>
+</helmet>
+<div style="width:100%;height:100dvh;display:grid;grid-template-rows:36px minmax(0,1fr) 28px;background:#22201d;font-family:'IBM Plex Sans',sans-serif;color:#e8e3d8;font-size:13px;overflow:hidden">
+
+  <header style="display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid #45403a;background:#2b2926">
+    <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+      <span style="font-weight:600">Cartographer</span><span style="color:#a49a8c">—</span><span>europe-1100.json</span><span style="color:#a49a8c">—</span><span style="font-family:'IBM Plex Mono',monospace">1100</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px">
+      <button style="height:24px;padding:0 10px;border:1px solid #45403a;background:#35322e;border-radius:3px">Open…</button>
+      <button disabled="{{ gpl }}" title="{{ saveTitle }}" style="height:24px;padding:0 10px;border:1px solid #45403a;background:#35322e;border-radius:3px;color:{{ saveColor }}">Save</button>
+      <button style="height:24px;padding:0 10px;border:1px solid #45403a;background:#35322e;border-radius:3px">Save as…</button>
+      <button style="height:24px;padding:0 10px;border:1px solid #45403a;background:#35322e;border-radius:3px">Export for the atlas…</button>
+      <span style="width:1px;height:18px;background:#45403a;margin:0 4px"></span>
+      <button style="height:24px;padding:0 10px;border:1px solid #45403a;background:#35322e;border-radius:3px">Registry</button>
+      <button style="height:24px;padding:0 10px;border:1px solid #e8e3d8;background:#e8e3d8;color:#22201d;border-radius:3px">Check this year</button>
+    </div>
+  </header>
+
+  <div style="display:grid;grid-template-columns:208px minmax(0,1fr) 312px;min-height:0">
+
+    <aside style="border-right:1px solid #45403a;background:#2b2926;display:flex;flex-direction:column;min-height:0">
+      <section style="padding:12px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid #45403a">
+        <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#a49a8c;font-weight:500">Tools</div>
+        <div role="toolbar" aria-label="Tools" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px">
+          <button aria-pressed="true" aria-label="Navigate" title="Navigate (Space)" style="display:flex;align-items:center;justify-content:center;height:32px;min-width:24px;border:1px solid #e8e3d8;border-radius:3px;background:#e8e3d8;color:#22201d"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 11V4.5a1.2 1.2 0 0 1 2.4 0V9.5M9.4 9V3.4a1.2 1.2 0 0 1 2.4 0V9.5M11.8 9.5V5a1.2 1.2 0 0 1 2.4 0v6c0 3-2 5-5 5H9c-2 0-3-1-4-2.5L3 10.6a1.2 1.2 0 0 1 2-1.3L7 11"></path></svg></button>
+          <button aria-pressed="false" aria-label="Draw" title="Draw (P)" style="display:flex;align-items:center;justify-content:center;height:32px;min-width:24px;border:1px solid #45403a;border-radius:3px;background:#35322e;color:#e8e3d8" style-hover="background:#403b35"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2l5 7-3.5 7h-3L4 9z"></path><path d="M9 2v7"></path><circle cx="9" cy="10.5" r="1.2"></circle></svg></button>
+          <button aria-pressed="false" aria-label="Edit" title="Edit (A)" style="display:flex;align-items:center;justify-content:center;height:32px;min-width:24px;border:1px solid #45403a;border-radius:3px;background:#35322e;color:#e8e3d8" style-hover="background:#403b35"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 2v13l3.4-3.4 2.4 5 2-1-2.4-5H14.5z"></path></svg></button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+          <button disabled="{{ true }}" aria-label="Undo — nothing to undo" title="Undo — nothing to undo (Ctrl+Z, ⌘Z on Mac)" style="display:flex;align-items:center;gap:6px;min-height:36px;padding:4px 6px;border:1px solid #3c3833;border-radius:3px;background:transparent;color:#7d7468;text-align:left"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4L2.5 7.5 6 11"></path><path d="M2.5 7.5H11a4 4 0 0 1 0 8H8"></path></svg><span style="font-size:11px;line-height:1.2">nothing to undo</span></button>
+          <button disabled="{{ true }}" aria-label="Redo — nothing to redo" title="Redo — nothing to redo (Ctrl+Shift+Z, ⌘⇧Z on Mac)" style="display:flex;align-items:center;gap:6px;min-height:36px;padding:4px 6px;border:1px solid #3c3833;border-radius:3px;background:transparent;color:#7d7468;text-align:left"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l3.5 3.5L12 11"></path><path d="M15.5 7.5H7a4 4 0 0 0 0 8h3"></path></svg><span style="font-size:11px;line-height:1.2">nothing to redo</span></button>
+        </div>
+      </section>
+      <section style="padding:12px;display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#a49a8c;font-weight:500">Layers</div>
+        <sc-for list="{{ layers }}" as="l" hint-placeholder-count="9">
+          <div style="display:grid;grid-template-columns:24px minmax(0,1fr) 52px 30px;align-items:center;gap:8px;height:28px;font-size:12.5px">
+            <button aria-pressed="{{ l.on }}" aria-label="{{ l.aria }}" title="{{ l.aria }}" style="width:24px;height:24px;padding:0;display:flex;align-items:center;justify-content:center;border:none;border-radius:3px;background:transparent;color:{{ l.eyeColor }}" style-hover="background:#403b35">
+              <sc-if value="{{ l.on }}" hint-placeholder-val="{{ true }}"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 9C4 4.6 14 4.6 16.5 9 14 13.4 4 13.4 1.5 9z"></path><circle cx="9" cy="9" r="2.2"></circle></svg></sc-if>
+              <sc-if value="{{ l.off }}" hint-placeholder-val="{{ false }}"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 9C4 4.6 14 4.6 16.5 9 14 13.4 4 13.4 1.5 9z"></path><path d="M3 15L15 3"></path></svg></sc-if>
+            </button>
+            <span>{{ l.name }}</span>
+            <input type="range" min="0" max="100" defaultValue="{{ l.op }}" aria-label="{{ l.opAria }}" style="width:52px;margin:0">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#a49a8c;text-align:right">{{ l.op }}%</span>
+          </div>
+        </sc-for>
+      </section>
+    </aside>
+
+    <main style="position:relative;overflow:hidden;background-color:#d9ccad;background-image:url(assets/europe-terrain.png);background-size:1567px auto;background-position:-392px -256px">
+      <sc-if value="{{ gpl }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;top:0;left:0;right:0;padding:8px 14px;background:#6b2a1c;color:#fbf4ee;font-size:13px;display:flex;gap:10px;align-items:center">
+          <span style="font-weight:600">GPL-3.0 source — reference only.</span><span>Editing it would make the result GPL-3.0.</span>
+        </div>
+      </sc-if>
+      <div style="position:absolute;inset:10px;border:1px dashed rgba(42,38,31,.45);pointer-events:none"></div>
+      <div role="group" aria-label="Zoom" style="position:absolute;right:18px;bottom:18px;display:flex;flex-direction:column;border:1px solid #45403a;border-radius:3px;background:#35322e;box-shadow:0 1px 6px rgba(42,38,31,.2);overflow:hidden">
+        <button aria-label="Zoom in" title="Zoom in (+ or PageUp)" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;border-bottom:1px solid #3c3833;background:transparent" style-hover="background:#403b35"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3.5v11M3.5 9h11"></path></svg></button>
+        <button aria-label="Zoom out" title="Zoom out (− or PageDown)" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;border-bottom:1px solid #3c3833;background:transparent" style-hover="background:#403b35"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9h11"></path></svg></button>
+        <button aria-label="Fit to frame" title="Fit to frame" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;background:transparent" style-hover="background:#403b35"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V3h4M11 3h4v4M15 11v4h-4M7 15H3v-4"></path></svg></button>
+      </div>
+      <div style="position:absolute;left:18px;bottom:18px;max-width:380px;padding:8px 10px;background:rgba(42,38,31,.88);color:#f3eee4;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.5">CANVAS — code, not design. The editor draws the fills, derived borders, coastline, rivers, graticule, cities and cursors here, over this terrain.</div>
+    </main>
+
+    <aside style="border-left:1px solid #45403a;background:#2b2926;display:grid;grid-template-rows:minmax(0,1fr) 200px;min-height:0">
+      <section style="display:flex;flex-direction:column;min-height:0;border-bottom:1px solid #45403a">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px 8px">
+          <div style="display:flex;gap:8px;align-items:baseline"><span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#a49a8c;font-weight:500">Polities</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#a49a8c">51</span></div>
+          <button style="height:24px;padding:0 10px;border:1px solid #45403a;background:#35322e;border-radius:3px;font-size:12px">+ New polity</button>
+        </div>
+        <div style="overflow:auto;padding:0 6px 8px;min-height:0">
+          <sc-for list="{{ polities }}" as="p" hint-placeholder-count="20">
+            <div style="display:grid;grid-template-columns:12px minmax(0,1fr) auto;align-items:center;gap:8px;height:28px;padding:0 6px;border-radius:3px;background:{{ p.bg }}" style-hover="background:#403b35">
+              <span style="width:12px;height:12px;border-radius:2px;background:{{ p.color }};box-shadow:inset 0 0 0 1px rgba(255,250,240,.35)"></span>
+              <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.name }}</span>
+              <span style="display:flex;gap:6px;align-items:center;font-size:11.5px;color:#c4bcae">
+                <sc-if value="{{ p.gplTag }}" hint-placeholder-val="{{ false }}"><span style="font-size:10.5px;padding:0 5px;border:1px solid #c86a52;color:#c86a52;border-radius:2px;line-height:16px">GPL-3.0</span></sc-if>
+                <sc-if value="{{ p.noTerritory }}" hint-placeholder-val="{{ false }}"><span style="font-size:10.5px;padding:0 5px;border:1px solid #8f8578;border-radius:2px;line-height:16px">no territory</span></sc-if>
+                <span>{{ p.rank }}</span>
+              </span>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+      <section style="padding:12px;display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#a49a8c;font-weight:500">Details</div>
+        <div style="color:#a49a8c;font-size:13px;text-wrap:pretty">No polity selected.</div>
+      </section>
+    </aside>
+  </div>
+
+  <footer style="display:flex;align-items:center;gap:14px;padding:0 12px;border-top:1px solid #45403a;background:#2b2926;font-size:12px;white-space:nowrap">
+    <span style="font-family:'IBM Plex Mono',monospace;min-width:130px">{{ coords }}</span>
+    <span style="min-width:200px">{{ holder }}</span>
+    <span style="color:#a49a8c">·</span>
+    <span style="font-family:'IBM Plex Mono',monospace">6.1 km/px</span>
+    <span style="flex:1"></span>
+    <span style="font-family:'IBM Plex Mono',monospace;color:#c4bcae">51 polities · 16 579 vertices · unclaimed land 55 %</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;pointerOver&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Bavaria&quot;,&quot;Île-de-France&quot;,&quot;off canvas&quot;],&quot;default&quot;:&quot;Bavaria&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;gplFile&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const over = this.props.pointerOver ?? 'Bavaria';
+    const gpl = this.props.gplFile ?? false;
+    const pal = ['#d4b24a','#c99a45','#b98545','#a8734c','#9b6b5c','#8b7a5a','#7b8659','#6b8a73','#5f7e8b','#54719b'];
+    const P = [
+      ['Almoravid Emirate','emirate'],['Byzantine Empire','empire'],['County of Barcelona','county'],['County of Edessa','county'],
+      ['County of Portugal','county'],['County of Sicily','county'],['Duchy of Apulia and Calabria','duchy'],['Duchy of Aquitaine','duchy',1],
+      ['Duchy of Normandy','duchy'],['Fatimid Caliphate','caliphate'],['Holy Roman Empire','empire'],['Kingdom of Aragon','kingdom'],
+      ['Kingdom of Croatia','kingdom'],['Kingdom of Dublin','kingdom'],['Kingdom of England','kingdom'],['Kingdom of France','kingdom',1],
+      ['Kingdom of Georgia','kingdom'],['Kingdom of Hungary','kingdom'],['Kingdom of Jerusalem','kingdom'],['Kingdom of Navarre','kingdom'],
+      ['Kingdom of Norway','kingdom'],['Kingdom of Poland','kingdom'],['Kingdom of Scotland','kingdom'],['Kingdom of Sweden','kingdom'],
+      ['Principality of Antioch','principality'],['Republic of Venice','republic'],['Sultanate of Rum','sultanate'],['Volga Bulgaria','state']
+    ];
+    const hover = over === 'Bavaria' ? 'Holy Roman Empire' : null;
+    const polities = P.map(([name, rank, nt], i) => ({
+      name, rank, noTerritory: !!nt, gplTag: gpl,
+      color: pal[(i * 3) % pal.length],
+      bg: name === hover ? '#3c3833' : 'transparent'
+    }));
+    const L = [['backdrop',1,100],['coastline',1,100],['rivers',1,100],['graticule',0,60],['cities',1,100],['fills',1,70],['borders',1,100],['unclaimed',0,100],['diff',0,100]];
+    const layers = L.map(([name,on,op]) => ({ name, on: !!on, op, off: !on, aria: (on ? 'Hide ' : 'Show ') + name, eyeColor: on ? '#e8e3d8' : '#7d7468', opAria: name + ' opacity' }));
+    const read = {
+      'Bavaria': ['11°34′E 48°08′N', 'Holy Roman Empire · empire'],
+      'Île-de-France': ['2°21′E 48°51′N', 'unclaimed'],
+      'off canvas': ['—', '']
+    }[over] || ['—',''];
+    return {
+      polities, layers, gpl,
+      saveColor: gpl ? '#8f8578' : '#2a261f',
+      saveTitle: gpl ? 'Save is disabled on a GPL-3.0 source' : 'Save',
+      coords: read[0], holder: read[1]
+    };
+  }
+}
+</script>
+</body>
+</html>

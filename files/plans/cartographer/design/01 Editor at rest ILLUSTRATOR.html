@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cartographer — 01 editor at rest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="chrome.css">
+</head>
+<body>
+<div class="app">
+  <header class="appbar" data-shell="appbar"></header>
+  <div class="docbar" data-shell="docbar"></div>
+
+  <div class="body">
+    <aside class="rail" data-shell="rail"></aside>
+
+    <main class="canvas">
+      <div class="artboard-label">1100 — editorial zone</div>
+      <div class="artboard"></div>
+      <div class="zoombox" role="group" aria-label="Zoom" data-zoombox></div>
+      <div class="canvas-note mono">CANVAS — code, not design. The editor draws the fills, derived borders, coastline, rivers, graticule, cities and cursors here, over this terrain.</div>
+    </main>
+
+    <aside class="dock">
+      <section class="group" data-collapsed="false" data-panel-name="Polities">
+        <div class="tabs" role="tablist" aria-label="Document panels">
+          <button class="collapse hoverable" aria-expanded="true" aria-controls="panel-polities" aria-label="Collapse the Polities panel" title="Collapse the Polities panel"></button>
+          <button role="tab" aria-selected="true">Polities</button>
+          <button role="tab" aria-selected="false" class="hoverable">Registry</button>
+          <span class="grow"></span>
+          <button class="tab-action hoverable" aria-label="New polity" title="New polity"></button>
+        </div>
+        <div class="panel" id="panel-polities" role="tabpanel" aria-label="Polities">
+          <div class="subhead"><span>Drawn at 1100</span><span class="mono">51</span></div>
+          <div id="polity-list"></div>
+        </div>
+      </section>
+
+      <div class="splitter" role="separator" tabindex="0" aria-orientation="horizontal"
+           aria-label="Resize the lower panel" title="Drag, or use the arrow keys"
+           aria-valuemin="24" aria-valuemax="600" aria-valuenow="216"></div>
+
+      <section class="group" data-collapsed="false" data-panel-name="Layers" data-height="216">
+        <div class="tabs" role="tablist" aria-label="Inspector panels">
+          <button class="collapse hoverable" aria-expanded="true" aria-controls="panel-layers" aria-label="Collapse the Layers panel" title="Collapse the Layers panel"></button>
+          <button role="tab" aria-selected="true">Layers</button>
+          <button role="tab" aria-selected="false" class="hoverable" title="Details — no polity selected">Details</button>
+        </div>
+        <div class="panel" id="panel-layers" role="tabpanel" aria-label="Layers"><div id="layer-list"></div></div>
+      </section>
+
+      <div class="dock-spacer"></div>
+    </aside>
+  </div>
+
+  <footer class="status" data-shell="status"></footer>
+</div>
+
+<script src="chrome.js"></script>
+<script src="mock-data.js"></script>
+<script src="screen.js"></script>
+<script>
+  Screen.build({
+    file: 'europe-1100.json', year: 1100, zoom: '48 %', zoomStatus: '48 %',
+    tool: 'navigate', swatch: null, undo: null, redo: null,
+    coords: '11°34′E 48°08′N', holder: 'Holy Roman Empire · empire', scale: '6.1 km/px',
+    totals: '51 polities · 16 579 vertices · unclaimed land 55 %'
+  })
+  Mock.renderPolities(document.getElementById('polity-list'))
+  Mock.renderLayers(document.getElementById('layer-list'))
+</script>
+</body>
+</html>

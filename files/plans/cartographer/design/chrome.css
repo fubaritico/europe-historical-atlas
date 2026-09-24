@@ -1,0 +1,763 @@
+/*
+ * Cartographer — the editor's chrome.
+ *
+ * The form is Illustrator's, the gamut is the atlas's: warm dark, not neutral grey.
+ * Three rules carry the whole look, and breaking any one of them puts the screen back
+ * into "web app" territory:
+ *   1. nothing is rounded — no `border-radius`, anywhere, ever;
+ *   2. surfaces are separated by a 1px hairline, never by a gutter and never by a shadow;
+ *   3. type is small and dense — 11 to 12px, figures in mono.
+ *
+ * This file is meant to survive into `@europe-map/cartographer` almost verbatim.
+ * The mock data and the markup around it will not.
+ */
+
+:root {
+  --bg: #22201d; /* app background, gutters, inset fields              */
+  --panel: #2b2926; /* every panel body, the rail, the bars               */
+  --raised: #35322e; /* raised surface                                     */
+  --hover: #403b35; /* hover fill                                         */
+  --line: #45403a; /* structural hairline, between surfaces              */
+  --line-soft: #3c3833; /* separation inside one surface                      */
+  --ink: #e8e3d8; /* primary text                                       */
+  --ink-dim: #a49a8c; /* secondary text — 5.25:1 on --panel                 */
+  --ink-off: #7d7468; /* disabled only; 3.16:1, which 1.4.3 exempts         */
+  --accent: #5b93d6; /* selection blue — RESERVED, never served to a polity */
+  --warn: #c86a52; /* refusal, and the "none" slash on the swatch        */
+  --block: #6b2a1c; /* a blocking condition, e.g. a GPL-3.0 provenance    */
+  --block-ink: #fbf4ee; /* 9.75:1 on --block                                  */
+  --tab: 24px; /* a collapsed group is exactly its tab strip         */
+  --rail: 38px;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: #1a1917;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 12px;
+  color: var(--ink);
+  overflow: hidden;
+}
+
+/* Rule 1, stated once so no component has to remember it. */
+button,
+input,
+select,
+textarea,
+.swatch,
+.chip,
+.tile {
+  border-radius: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+button:disabled {
+  color: var(--ink-off);
+}
+button:focus-visible,
+[role='separator']:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[role='button']:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.mono {
+  font-family: 'IBM Plex Mono', monospace;
+}
+.hoverable:hover:not(:disabled) {
+  background: var(--hover);
+}
+.dim {
+  color: var(--ink-dim);
+}
+.grow {
+  flex: 1;
+}
+
+/* ---------------------------------------------------------------- shell -- */
+
+.app {
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: 30px 26px minmax(0, 1fr) 24px;
+  background: var(--bg);
+}
+
+.appbar {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+.appbar .brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+}
+.appbar .brand .sep {
+  color: #6f675c;
+}
+/* Both bars run their buttons full height; nothing else must set a height on them. */
+.appbar .actions,
+.docbar .actions {
+  display: flex;
+  align-items: stretch;
+}
+.appbar .actions button {
+  padding: 0 11px;
+  border-left: 1px solid var(--line-soft);
+}
+
+/* the "modified" dot — the only circle in the whole chrome, because it is a dot */
+.modified {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 4px;
+  color: var(--ink-dim);
+}
+.modified::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.docbar {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+.doctab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px 0 3px;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  font-size: 11.5px;
+}
+.docbar .actions button {
+  border-left: 1px solid var(--line-soft);
+}
+.icon-btn {
+  width: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The one inversion: an element that must not sink into the panel goes dark-on-light. */
+.primary {
+  padding: 0 11px;
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 500;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: var(--rail) minmax(0, 1fr) var(--dock-w, 280px);
+  min-height: 0;
+}
+
+/* ------------------------------------------------------------- tool rail -- */
+
+.rail {
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+.rail .tools {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.tool {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tool[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--bg);
+}
+.rail .foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+}
+.rail .foot hr {
+  width: 100%;
+  height: 1px;
+  margin: 0;
+  border: none;
+  background: var(--line-soft);
+}
+
+/* Illustrator keeps fill/stroke here; we keep the ink the Pen is about to lay down. */
+.swatch-active {
+  width: 22px;
+  height: 22px;
+  box-shadow: inset 0 0 0 1px rgba(255, 250, 240, 0.35);
+}
+.swatch-active[data-empty='true'] {
+  background: var(--raised);
+  background-image: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 1px),
+    var(--warn) calc(50% - 1px),
+    var(--warn) calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+}
+
+/* ---------------------------------------------------------------- canvas -- */
+
+.canvas {
+  position: relative;
+  overflow: hidden;
+  background: #d9ccad url(assets/europe-terrain.png) -392px -256px / 1567px auto;
+}
+.artboard-label {
+  position: absolute;
+  left: 14px;
+  top: 10px;
+  font-size: 11px;
+  color: #4a4238;
+}
+.artboard {
+  position: absolute;
+  inset: 24px 14px 14px 14px;
+  border: 1px solid rgba(42, 38, 31, 0.5);
+  pointer-events: none;
+}
+.zoombox {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+.zoombox button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.zoombox button + button {
+  border-top: 1px solid var(--line-soft);
+}
+.canvas-note {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  max-width: 380px;
+  padding: 7px 9px;
+  background: rgba(42, 38, 31, 0.88);
+  color: #f3eee4;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------------ dock -- */
+
+.dock {
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.group {
+  display: flex;
+  flex-direction: column;
+  min-height: var(--tab);
+  overflow: hidden;
+}
+/* A dock holding one group has nothing to redistribute: that group simply takes it all. */
+.dock > .group:only-of-type {
+  flex: 1 1 auto;
+}
+.group[data-collapsed='true'] .panel {
+  display: none;
+}
+.group[data-collapsed='true'] .collapse svg {
+  transform: rotate(-90deg);
+}
+
+.tabs {
+  display: flex;
+  align-items: stretch;
+  height: var(--tab);
+  flex: 0 0 var(--tab);
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+.tabs [role='tab'] {
+  padding: 0 10px;
+  border-right: 1px solid var(--line);
+  color: var(--ink-dim);
+  font-size: 11.5px;
+}
+/* the active tab takes the panel's own colour and melts into it — that is the idiom */
+.tabs [role='tab'][aria-selected='true'] {
+  background: var(--panel);
+  color: var(--ink);
+  font-weight: 500;
+}
+.tabs .collapse,
+.tabs .tab-action {
+  width: var(--tab);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-dim);
+}
+.tabs .collapse {
+  border-right: 1px solid var(--line);
+}
+.tabs .tab-action {
+  border-left: 1px solid var(--line);
+}
+
+.panel {
+  overflow: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+/* Collapsing is not a second mechanism: it is this resize at its lower bound. */
+.splitter {
+  flex: 0 0 5px;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  cursor: row-resize;
+  position: relative;
+}
+.splitter::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 1px;
+  width: 22px;
+  height: 1px;
+  margin-left: -11px;
+  background: var(--ink-off);
+}
+.splitter[aria-disabled='true'] {
+  cursor: default;
+}
+.splitter[aria-disabled='true']::after {
+  background: var(--line);
+}
+.dock-spacer {
+  flex: 1 1 auto;
+  display: none;
+}
+body.resizing {
+  user-select: none;
+  cursor: row-resize;
+}
+
+/* ------------------------------------------------------------------ rows -- */
+
+.subhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 11px;
+  color: var(--ink-dim);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.row {
+  display: grid;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  font-size: 11.5px;
+}
+.row:hover {
+  background: var(--hover);
+}
+.row.polity {
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.row.layer {
+  grid-template-columns: 24px minmax(0, 1fr) 54px 32px;
+  gap: 6px;
+  padding: 0 6px 0 2px;
+}
+.row[aria-selected='true'] {
+  background: var(--raised);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+.swatch {
+  width: 11px;
+  height: 11px;
+  box-shadow: inset 0 0 0 1px rgba(255, 250, 240, 0.35);
+}
+.name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tags {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 11px;
+  color: #c4bcae;
+}
+.chip {
+  font-size: 10.5px;
+  padding: 0 4px;
+  line-height: 15px;
+  border: 1px solid #8f8578;
+  color: var(--ink-dim);
+}
+.chip.warn {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+.eye {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+input[type='range'] {
+  accent-color: var(--accent);
+  width: 54px;
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------ form -- */
+/* Illustrator's panel rows: the label sits left, the control right, both on one line. */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  overflow: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+.field {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+.field > label {
+  color: var(--ink-dim);
+  font-size: 11.5px;
+}
+.field.stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.pair .field {
+  grid-template-columns: 62px minmax(0, 1fr);
+}
+
+input[type='text'],
+input:not([type]),
+select {
+  height: 22px;
+  padding: 0 6px;
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  font: inherit;
+}
+select {
+  height: 22px;
+}
+input::placeholder {
+  color: var(--ink-dim);
+} /* 5.94:1 — a placeholder that carries meaning must read */
+
+fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+legend {
+  padding: 0;
+  margin-bottom: 2px;
+  color: var(--ink-dim);
+  font-size: 11.5px;
+}
+.radios {
+  display: flex;
+  gap: 14px;
+}
+.radios label {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+input[type='radio'],
+input[type='checkbox'] {
+  accent-color: var(--accent);
+  margin: 0;
+}
+
+.palette {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+/* These are buttons, not decoration, so they answer to the 24×24 floor of WCAG 2.5.8. */
+.palette .swatch {
+  width: 24px;
+  height: 24px;
+}
+.palette .swatch[aria-checked='true'] {
+  box-shadow:
+    0 0 0 1px var(--panel),
+    0 0 0 2.5px var(--accent);
+}
+
+.readout {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: var(--bg);
+  font-size: 11.5px;
+  color: var(--ink-dim);
+  line-height: 1.45;
+}
+.readout .line {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.readout .line > :last-child {
+  color: var(--ink);
+}
+
+/*
+ * Named `form-actions`, not `actions`: the bars have an action group too, and a shared name let
+ * the form's border, its 24px height and its `margin-top:auto` rain down on the application bar.
+ */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+.form-actions button {
+  height: 24px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  background: var(--raised);
+}
+.form-actions button.primary {
+  border-color: var(--ink);
+  padding: 0 20px;
+}
+
+.ghost {
+  height: 26px;
+  border: 1px dashed var(--ink-off);
+  background: transparent;
+  font-size: 11.5px;
+}
+.inset-list {
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+.inset-list > .entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.inset-list > .entry:last-of-type {
+  border-bottom: none;
+}
+
+/* ---------------------------------------------------------------- report -- */
+
+.verdict {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 11px;
+  color: var(--block-ink);
+  background: var(--block);
+}
+.verdict[data-publishable='true'] {
+  background: var(--ink);
+  color: var(--bg);
+}
+.verdict .word {
+  font-size: 14px;
+  font-weight: 500;
+}
+.verdict .reason {
+  font-size: 11.5px;
+  text-wrap: pretty;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.tile {
+  background: var(--panel);
+  padding: 7px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.tile .label {
+  font-size: 11px;
+  color: var(--ink-dim);
+}
+.tile .value {
+  font-size: 13px;
+}
+
+.finding-group > .head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 9px 12px 5px;
+  background: var(--panel);
+}
+.finding-group > .head .title {
+  font-weight: 600;
+  font-size: 12.5px;
+}
+.finding-group > .head .note {
+  font-size: 11px;
+  color: var(--ink-dim);
+}
+.finding {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 140px auto;
+  gap: 3px 12px;
+  align-items: start;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.finding:hover {
+  background: var(--hover);
+}
+.finding[aria-selected='true'] {
+  background: var(--raised);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+.finding .what {
+  font-size: 12px;
+  text-wrap: pretty;
+}
+.finding .fix {
+  font-size: 11px;
+  color: var(--ink-dim);
+  text-wrap: pretty;
+}
+.finding .where {
+  font-size: 11px;
+  padding-top: 1px;
+}
+.finding button {
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  background: var(--raised);
+  font-size: 11px;
+}
+
+/* ---------------------------------------------------------------- status -- */
+
+.status {
+  display: flex;
+  align-items: stretch;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.status > * {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 10px;
+}
+.status .zoom {
+  gap: 5px;
+  border-right: 1px solid var(--line-soft);
+  color: var(--ink-dim);
+}
+.status .reads {
+  border-right: 1px solid var(--line-soft);
+}
+.status .totals {
+  margin-left: auto;
+  border-left: 1px solid var(--line-soft);
+  color: #c4bcae;
+}

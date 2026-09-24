@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cartographer — 03 polity form</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="chrome.css">
+</head>
+<body>
+<div class="app">
+  <header class="appbar" data-shell="appbar"></header>
+  <div class="docbar" data-shell="docbar"></div>
+
+  <div class="body" style="--dock-w:320px">
+    <aside class="rail" data-shell="rail"></aside>
+
+    <main class="canvas" style="background-position:-440px -256px">
+      <div class="artboard-label">1100 — editorial zone</div>
+      <div class="artboard"></div>
+      <div class="zoombox" role="group" aria-label="Zoom" data-zoombox></div>
+      <div class="canvas-note mono">CANVAS — code. The Kingdom of France’s fill is outlined; no handles, since selecting is reading, not editing.</div>
+    </main>
+
+    <aside class="dock">
+      <section class="group" data-collapsed="false" data-panel-name="Polities">
+        <div class="tabs" role="tablist" aria-label="Document panels">
+          <button class="collapse hoverable" aria-expanded="true" aria-controls="panel-polities" aria-label="Collapse the Polities panel" title="Collapse the Polities panel"></button>
+          <button role="tab" aria-selected="true">Polities</button>
+          <button role="tab" aria-selected="false" class="hoverable">Registry</button>
+          <span class="grow"></span>
+          <button class="tab-action hoverable" aria-label="New polity" title="New polity"></button>
+        </div>
+        <div class="panel" id="panel-polities" role="tabpanel" aria-label="Polities">
+          <div class="subhead"><span>Drawn at 1100</span><span class="mono">52</span></div>
+          <div id="polity-list"></div>
+        </div>
+      </section>
+
+      <div class="splitter" role="separator" tabindex="0" aria-orientation="horizontal"
+           aria-label="Resize the lower panel" title="Drag, or use the arrow keys"
+           aria-valuemin="24" aria-valuemax="700" aria-valuenow="452"></div>
+
+      <section class="group" data-collapsed="false" data-panel-name="Details" data-height="452">
+        <div class="tabs" role="tablist" aria-label="Inspector panels">
+          <button class="collapse hoverable" aria-expanded="true" aria-controls="panel-details" aria-label="Collapse the Details panel" title="Collapse the Details panel"></button>
+          <button role="tab" aria-selected="true">Details</button>
+          <button role="tab" aria-selected="false" class="hoverable">Layers</button>
+          <span class="grow"></span>
+          <span class="mono dim" style="display:flex;align-items:center;padding:0 8px;font-size:11px">fr-couronne</span>
+        </div>
+
+        <form class="form panel" id="panel-details" role="tabpanel" aria-label="Details">
+
+          <div class="field">
+            <label for="f-name">Name</label>
+            <input id="f-name" type="text" value="Kingdom of France">
+          </div>
+          <div class="dim" style="margin-top:-6px;padding-left:96px;font-size:11px">as shown in 1100</div>
+
+          <div class="field stack">
+            <span class="dim" style="font-size:11.5px">Names over time</span>
+            <div class="inset-list">
+              <div class="entry"><span>Kingdom of France <span class="dim">— shown in 1100</span></span><span class="mono dim">from 987</span></div>
+              <div class="entry"><span>France</span><span class="mono dim">from 1500</span></div>
+              <div style="padding:5px 8px"><button type="button" class="ghost" style="padding:0 9px">Add a name…</button></div>
+            </div>
+          </div>
+
+          <div class="pair">
+            <div class="field">
+              <label for="f-rank">Rank</label>
+              <select id="f-rank">
+                <option>empire</option><option selected>kingdom</option><option>principality</option><option>duchy</option><option>county</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-status">Status</label>
+              <select id="f-status"><option selected>country</option><option>personal union</option><option>condominium</option></select>
+            </div>
+            <div class="field">
+              <label for="f-from">Exists from</label>
+              <input id="f-from" type="text" class="mono" inputmode="numeric" value="987">
+            </div>
+            <div class="field">
+              <label for="f-to">Exists to</label>
+              <input id="f-to" type="text" class="mono" inputmode="numeric" placeholder="still exists">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="f-suz">Suzerain</label>
+            <select id="f-suz"><option selected value="">none</option><option>Holy Roman Empire</option><option>Byzantine Empire</option></select>
+          </div>
+
+          <fieldset>
+            <legend>Colour</legend>
+            <div class="radios">
+              <label><input type="radio" name="colour" checked>automatic</label>
+              <label><input type="radio" name="colour">chosen</label>
+            </div>
+            <div class="palette" role="radiogroup" aria-label="Palette" id="palette"></div>
+            <div class="dim" style="font-size:11px;text-wrap:pretty">Automatic takes a palette colour no neighbour is using.</div>
+          </fieldset>
+
+          <div class="field">
+            <label for="f-wd">Wikidata id</label>
+            <input id="f-wd" type="text" class="mono" value="Q70972" placeholder="Q…">
+          </div>
+
+          <div class="readout">
+            <div class="line"><span>Reads in Polities as</span><span class="mono">Kingdom of France · kingdom · 987–</span></div>
+            <div class="line"><span>Identity</span><span>OpenHistoricalMap (CC0)</span></div>
+            <div class="line"><span>Appears in</span><span class="mono">1100 · 1110</span></div>
+            <div style="text-wrap:pretty;margin-top:2px">Saved to the registry, not to this year: every year using this polity follows.</div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button">Cancel</button>
+            <button type="button" class="primary">OK</button>
+          </div>
+        </form>
+      </section>
+
+      <div class="dock-spacer"></div>
+    </aside>
+  </div>
+
+  <footer class="status" data-shell="status"></footer>
+</div>
+
+<script src="chrome.js"></script>
+<script src="mock-data.js"></script>
+<script src="screen.js"></script>
+<script>
+  Screen.build({
+    file: 'europe-1100.json', year: 1100, zoom: '48 %', zoomStatus: '48 %', modified: true,
+    tool: 'navigate', swatch: '#c99a45', undo: 'move anchor', redo: null,
+    coords: '—', holder: 'Kingdom of France · kingdom', scale: '6.1 km/px',
+    totals: '52 polities · 17 104 vertices · unclaimed land 41 %'
+  })
+  Mock.renderPolities(document.getElementById('polity-list'), { selected: 'Kingdom of France' })
+
+  // The palette is a set of one: picking a colour is choosing, not toggling.
+  document.getElementById('palette').innerHTML = Mock.PALETTE
+    .map((hex) => `<button type="button" role="radio" class="swatch" aria-checked="${hex === '#c99a45'}" aria-label="Colour ${hex}" title="${hex}" style="background:${hex}"></button>`)
+    .join('')
+</script>
+</body>
+</html>

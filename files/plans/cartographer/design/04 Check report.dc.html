@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#cfc6b4}a{color:#2a261f}a:hover{color:#1f5bff}button,input{font:inherit;color:inherit}input[type=range]{accent-color:#2a261f}input[type=checkbox]{accent-color:#2a261f;margin:0}</style>
+</helmet>
+<div style="width:1440px;height:900px;display:grid;grid-template-rows:36px minmax(0,1fr) 28px;background:#efe9dc;font-family:'IBM Plex Sans',sans-serif;color:#2a261f;font-size:13px;overflow:hidden">
+
+  <header style="display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid #d8cfbd;background:#f7f3eb">
+    <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+      <span style="font-weight:600">Cartographer</span><span style="color:#6a6255">—</span><span>europe-1100.json</span><span style="color:#6a6255">—</span><span style="font-family:'IBM Plex Mono',monospace">1100</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px">
+      <button style="height:24px;padding:0 10px;border:1px solid #cfc5b2;background:#fbf9f4;border-radius:3px">Open…</button>
+      <button style="height:24px;padding:0 10px;border:1px solid #cfc5b2;background:#fbf9f4;border-radius:3px">Save</button>
+      <button style="height:24px;padding:0 10px;border:1px solid #cfc5b2;background:#fbf9f4;border-radius:3px">Save as…</button>
+      <button style="height:24px;padding:0 10px;border:1px solid #cfc5b2;background:#fbf9f4;border-radius:3px">Export for the atlas…</button>
+      <span style="width:1px;height:18px;background:#d8cfbd;margin:0 4px"></span>
+      <button style="height:24px;padding:0 10px;border:1px solid #cfc5b2;background:#fbf9f4;border-radius:3px">Registry</button>
+      <button aria-pressed="true" style="height:24px;padding:0 10px;border:1px solid #2a261f;background:#2a261f;color:#f7f3eb;border-radius:3px">Check this year</button>
+    </div>
+  </header>
+
+  <div style="display:grid;grid-template-columns:208px minmax(0,1fr) 600px;min-height:0">
+
+    <aside style="border-right:1px solid #d8cfbd;background:#f7f3eb;display:flex;flex-direction:column;min-height:0">
+      <section style="padding:12px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid #d8cfbd">
+        <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6a6255;font-weight:500">Tools</div>
+        <div role="toolbar" aria-label="Tools" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px">
+          <button aria-pressed="true" aria-label="Navigate" title="Navigate (Space)" style="display:flex;align-items:center;justify-content:center;height:32px;min-width:24px;border:1px solid #2a261f;border-radius:3px;background:#2a261f;color:#f7f3eb"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 11V4.5a1.2 1.2 0 0 1 2.4 0V9.5M9.4 9V3.4a1.2 1.2 0 0 1 2.4 0V9.5M11.8 9.5V5a1.2 1.2 0 0 1 2.4 0v6c0 3-2 5-5 5H9c-2 0-3-1-4-2.5L3 10.6a1.2 1.2 0 0 1 2-1.3L7 11"></path></svg></button>
+          <button aria-pressed="false" aria-label="Draw" title="Draw (P)" style="display:flex;align-items:center;justify-content:center;height:32px;min-width:24px;border:1px solid #cfc5b2;border-radius:3px;background:#fbf9f4;color:#2a261f" style-hover="background:#fff"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2l5 7-3.5 7h-3L4 9z"></path><path d="M9 2v7"></path><circle cx="9" cy="10.5" r="1.2"></circle></svg></button>
+          <button aria-pressed="false" aria-label="Edit" title="Edit (A)" style="display:flex;align-items:center;justify-content:center;height:32px;min-width:24px;border:1px solid #cfc5b2;border-radius:3px;background:#fbf9f4;color:#2a261f" style-hover="background:#fff"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 2v13l3.4-3.4 2.4 5 2-1-2.4-5H14.5z"></path></svg></button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+          <button disabled="{{ true }}" aria-label="Undo — nothing to undo" title="Undo — nothing to undo (Ctrl+Z, ⌘Z on Mac)" style="display:flex;align-items:center;gap:6px;min-height:36px;padding:4px 6px;border:1px solid #ddd4c3;border-radius:3px;background:transparent;color:#8a8171;text-align:left"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4L2.5 7.5 6 11"></path><path d="M2.5 7.5H11a4 4 0 0 1 0 8H8"></path></svg><span style="font-size:11px;line-height:1.2">nothing to undo</span></button>
+          <button disabled="{{ true }}" aria-label="Redo — nothing to redo" title="Redo — nothing to redo (Ctrl+Shift+Z, ⌘⇧Z on Mac)" style="display:flex;align-items:center;gap:6px;min-height:36px;padding:4px 6px;border:1px solid #ddd4c3;border-radius:3px;background:transparent;color:#8a8171;text-align:left"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l3.5 3.5L12 11"></path><path d="M15.5 7.5H7a4 4 0 0 0 0 8h3"></path></svg><span style="font-size:11px;line-height:1.2">nothing to redo</span></button>
+        </div>
+      </section>
+      <section style="padding:12px;display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6a6255;font-weight:500">Layers</div>
+        <sc-for list="{{ layers }}" as="l" hint-placeholder-count="9">
+          <div style="display:grid;grid-template-columns:24px minmax(0,1fr) 52px 30px;align-items:center;gap:8px;height:28px;font-size:12.5px">
+            <button aria-pressed="{{ l.on }}" aria-label="{{ l.aria }}" title="{{ l.aria }}" style="width:24px;height:24px;padding:0;display:flex;align-items:center;justify-content:center;border:none;border-radius:3px;background:transparent;color:{{ l.eyeColor }}" style-hover="background:#e8e0cf">
+              <sc-if value="{{ l.on }}" hint-placeholder-val="{{ true }}"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 9C4 4.6 14 4.6 16.5 9 14 13.4 4 13.4 1.5 9z"></path><circle cx="9" cy="9" r="2.2"></circle></svg></sc-if>
+              <sc-if value="{{ l.off }}" hint-placeholder-val="{{ false }}"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 9C4 4.6 14 4.6 16.5 9 14 13.4 4 13.4 1.5 9z"></path><path d="M3 15L15 3"></path></svg></sc-if>
+            </button>
+            <span>{{ l.name }}</span>
+            <input type="range" min="0" max="100" defaultValue="{{ l.op }}" aria-label="{{ l.opAria }}" style="width:52px;margin:0">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6a6255;text-align:right">{{ l.op }}%</span>
+          </div>
+        </sc-for>
+      </section>
+    </aside>
+
+    <main style="position:relative;overflow:hidden;background-color:#d9ccad;background-image:url(assets/europe-terrain.png);background-size:4000px auto;background-position:-1280px -1906px">
+      <div style="position:absolute;inset:10px;border:1px dashed rgba(42,38,31,.45);pointer-events:none"></div>
+      <div role="group" aria-label="Zoom" style="position:absolute;right:18px;bottom:18px;display:flex;flex-direction:column;border:1px solid #bfb49f;border-radius:3px;background:#fbf9f4;box-shadow:0 1px 6px rgba(42,38,31,.2);overflow:hidden">
+        <button aria-label="Zoom in" title="Zoom in (+ or PageUp)" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;border-bottom:1px solid #ddd4c3;background:transparent" style-hover="background:#fff"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3.5v11M3.5 9h11"></path></svg></button>
+        <button aria-label="Zoom out" title="Zoom out (− or PageDown)" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;border-bottom:1px solid #ddd4c3;background:transparent" style-hover="background:#fff"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9h11"></path></svg></button>
+        <button aria-label="Fit to frame" title="Fit to frame" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;background:transparent" style-hover="background:#fff"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V3h4M11 3h4v4M15 11v4h-4M7 15H3v-4"></path></svg></button>
+      </div>
+      <div style="position:absolute;left:18px;bottom:18px;max-width:380px;padding:8px 10px;background:rgba(42,38,31,.88);color:#f3eee4;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.5">CANVAS — code. Framed on the selected row: Lyon, with the Kingdom of France’s and the Holy Roman Empire’s borders both visible.</div>
+    </main>
+
+    <aside aria-label="Check report" style="border-left:1px solid #d8cfbd;background:#f7f3eb;display:flex;flex-direction:column;min-height:0">
+      <div style="padding:12px 16px 10px;border-bottom:1px solid #d8cfbd;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6a6255;font-weight:500">Check · 1100</span>
+          <span style="font-size:12px;color:#6a6255">checked just now · compared with yesterday</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:3px;background:{{ pubBg }};color:{{ pubFg }}">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:500">publishable: {{ pubWord }}</span>
+          <span style="font-size:12.5px;text-wrap:pretty">{{ pubReason }}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:#d8cfbd;border:1px solid #d8cfbd;border-radius:3px;overflow:hidden">
+          <sc-for list="{{ figures }}" as="f" hint-placeholder-count="3">
+            <div style="background:#fbf9f4;padding:8px 10px;display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:11.5px;color:#4a443a">{{ f.label }}</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:14px">{{ f.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="flex:1;min-height:0;overflow:auto;padding:4px 0 12px">
+        <sc-for list="{{ groups }}" as="g" hint-placeholder-count="5">
+          <section style="display:flex;flex-direction:column">
+            <div style="position:sticky;top:0;z-index:1;display:flex;align-items:baseline;gap:8px;padding:10px 16px 6px;background:#f7f3eb">
+              <span style="font-weight:600;font-size:13px">{{ g.title }}</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#4a443a">{{ g.count }}</span>
+              <span style="flex:1"></span>
+              <span style="font-size:11.5px;color:#4a443a">{{ g.note }}</span>
+            </div>
+            <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="2">
+              <div role="button" tabindex="0" title="Frame on the canvas" style="display:grid;grid-template-columns:minmax(0,1fr) 150px auto;gap:4px 14px;align-items:start;margin:0 8px;padding:7px 8px;border-radius:3px;background:{{ r.bg }};box-shadow:{{ r.ring }};cursor:pointer" style-hover="background:#ebe3d3">
+                <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                  <span style="font-size:13px;text-wrap:pretty">{{ r.what }}</span>
+                  <span style="font-size:12px;color:#4a443a;text-wrap:pretty">{{ r.fix }}</span>
+                </div>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#2a261f;padding-top:1px">{{ r.where }}</span>
+                <sc-if value="{{ r.canAccept }}" hint-placeholder-val="{{ false }}">
+                  <button style="height:24px;padding:0 9px;border:1px solid #cfc5b2;background:#fbf9f4;border-radius:3px;font-size:12px">Accept</button>
+                </sc-if>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+
+        <div style="margin:12px 16px 0;padding-top:10px;border-top:1px solid #d8cfbd;font-size:12px;color:#4a443a">Nothing found: {{ clean }}</div>
+
+        <section style="margin-top:16px;display:flex;flex-direction:column">
+          <div style="display:flex;align-items:baseline;gap:8px;padding:0 16px 6px">
+            <span style="font-weight:600;font-size:13px">Accepted</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#4a443a">1</span>
+            <span style="flex:1"></span><span style="font-size:11.5px;color:#4a443a">not reported again</span>
+          </div>
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:2px 14px;margin:0 8px;padding:7px 8px;border:1px dashed #cfc5b2;border-radius:3px">
+            <span>Brittany unclaimed</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">31 200 km²</span>
+            <span style="font-size:12px;color:#4a443a">Reason: “historically correct in 1100”</span>
+          </div>
+        </section>
+      </div>
+    </aside>
+  </div>
+
+  <footer style="display:flex;align-items:center;gap:14px;padding:0 12px;border-top:1px solid #d8cfbd;background:#f7f3eb;font-size:12px;white-space:nowrap">
+    <span style="font-family:'IBM Plex Mono',monospace;min-width:130px">4°50′E 45°45′N</span>
+    <span>Kingdom of France · kingdom</span>
+    <span style="color:#6a6255">·</span>
+    <span style="font-family:'IBM Plex Mono',monospace">3.2 km/px</span>
+    <span style="flex:1"></span>
+    <span style="font-family:'IBM Plex Mono',monospace;color:#4a443a">52 polities · 17 104 vertices · unclaimed land 41 %</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;publishable&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const pub = this.props.publishable ?? false;
+    const L = [['backdrop',1,100],['coastline',1,100],['rivers',1,100],['graticule',0,60],['cities',1,100],['fills',1,70],['borders',1,100],['unclaimed',1,100],['diff',0,100]];
+    const layers = L.map(([name,on,op]) => ({ name, on: !!on, op, off: !on, aria: (on ? 'Hide ' : 'Show ') + name, eyeColor: on ? '#2a261f' : '#6a6255', opAria: name + ' opacity' }));
+    const row = (what, where, fix, o = {}) => ({ what, where, fix, canAccept: !!o.accept,
+      bg: o.sel ? '#fbf9f4' : 'transparent', ring: o.sel ? 'inset 0 0 0 1.5px #1f5bff' : 'none' });
+    let groups = [
+      { key: 'gpl', title: 'Derived from a GPL-3.0 geometry', note: 'blocks publishing', rows: [
+        row('Byzantine Empire — stretch taken from historical-basemaps', 'Thrace coast · 42 anchors', 'Redraw it: snap to the coast, or report it by eye.'),
+        row('Kingdom of Hungary — stretch taken from historical-basemaps', 'Carpathians · 118 anchors', 'Redraw it by eye from a reference you may use.')
+      ]},
+      { title: 'Cities on the wrong side', note: 'witness list', rows: [
+        row('Lyon — expected Holy Roman Empire, drawn in Kingdom of France', '4°50′E 45°45′N', 'Move France’s eastern limit west of Lyon, onto the Saône.', { sel: true }),
+        row('Besançon — expected Holy Roman Empire, drawn in unclaimed', '6°01′E 47°14′N', 'Extend the Empire’s outline over Besançon.')
+      ]},
+      { title: 'Overlaps', note: 'between peers', rows: [
+        row('Kingdom of Poland and Holy Roman Empire claim the same ground', 'Lusatia · 640 km²', 'Take the ground, leave it, or adjust one outline.', { accept: true })
+      ]},
+      { title: 'Broken geometry', note: '', rows: [
+        row('Kingdom of Dublin — ring 3 has 3 vertices', '6°15′W 53°21′N', 'A ring needs at least 4 anchors: add one, or delete the ring.'),
+        row('Principality of Antioch — ring 1 crosses itself', '36°12′E 36°10′N', 'Move the crossing anchors apart.')
+      ]},
+      { title: 'Slivers', note: 'narrower than two cells', rows: [
+        row('Unclaimed strip between Kingdom of France and Holy Roman Empire', 'Meuse · 48 km long', 'Duplicate the Empire’s path along the Meuse into France.')
+      ]},
+      { title: 'Stretches with no provenance', note: '6.2 % of border length', rows: [
+        row('Kingdom of Hungary — 14 stretches', '310 km', 'Record a source for each, or redraw by snapping.'),
+        row('Kingdom of Croatia — 5 stretches', '96 km', 'Record a source for each, or redraw by snapping.')
+      ]},
+      { title: 'No name in French', note: 'the atlas would fall back to English', rows: [
+        row('Volga Bulgaria', 'registry', 'Add a French name in the polity form.'),
+        row('Sultanate of Rum', 'registry', 'Add a French name in the polity form.')
+      ]},
+      { title: 'Unclaimed land', note: '41 % of land, by surface · biggest first', rows: [
+        row('Castile and León', '94 800 km²', 'Draw the polity that held it, or accept it as unclaimed.', { accept: true }),
+        row('Kievan Rus’, northern half', '88 300 km²', 'Draw the polity that held it, or accept it as unclaimed.', { accept: true }),
+        row('Bohemia', '52 100 km²', 'Draw the polity that held it, or accept it as unclaimed.', { accept: true }),
+        row('Denmark', '43 000 km²', 'Draw the polity that held it, or accept it as unclaimed.', { accept: true })
+      ]}
+    ];
+    if (pub) groups = groups.filter(g => g.key !== 'gpl');
+    groups = groups.map(g => ({ ...g, count: String(g.rows.length) }));
+    return {
+      layers, groups,
+      pubWord: pub ? 'yes' : 'no',
+      pubReason: pub ? 'No stretch is derived from a GPL-3.0 geometry. The rows below do not block publishing.' : '2 stretches are derived from a GPL-3.0 geometry. Nothing else below blocks publishing.',
+      pubBg: pub ? '#2a261f' : '#6b2a1c', pubFg: '#fbf4ee',
+      figures: [
+        { label: 'unclaimed land', value: '55 % → 41 %' },
+        { label: 'no provenance', value: '11.8 % → 6.2 %' },
+        { label: 'fixed since yesterday', value: '14' }
+      ],
+      clean: 'polities outside their existence interval · rings outside the frame.'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -21,8 +21,15 @@ coverage
 # Vendored dependency sources (opensrc skill) — for study only
 opensrc
 
-# Project plans and resources
-files
+# Project material. Plans and spikes are the portfolio and DO ship; the rest must not.
+#   resources/  — 170 MB, proprietary Euratlas vectors
+#   spikes/*/out/ — the 21 GPL-3.0 world_*.geojson and other generated payloads
+#   session-log.jsonl — this machine's activity log
+#   claude-archive/ — dead design-system skills
+files/*
+!files/plans/
+!files/spikes/
+files/spikes/*/out/
 
 # Historical borders — GPL-3.0 source, spike only (see files/spikes/fetch-borders)
 public/borders/
