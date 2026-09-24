@@ -22,7 +22,7 @@ we know of and the design corpus is the valuable part; public where it counts �
 | -------- | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **dev**  | **Name**                                                  | `europe-historical-atlas`. `package.json` already carries it; the splash already reads `EUROPE / HISTORICΛL ΛTLΛS`.                                                                                   |
 | **dev**  | **`regionAt` waits for the Cartographer**                 | And the reason is stronger than the preference: today's political data is `historical-basemaps`, GPL-3.0 and git-ignored, so the atlas's central gesture would be built on data we can never publish. |
-| **dev**  | **The contribution tool ships in the repo; going online is suspended** | Its code is committed, never git-ignored, and it uses the common design system. **Online is postponed, not refused**: online means accounts, login and a security layer we are not building now, and the tool has to be bulletproof first — we are still testing it. Until then it runs locally and the atlas reads its output over a relative URL. |
+| **dev**  | **The contribution tools run locally first, and go online after** | Their code is committed like any other, and they use the common design system. **Online is the next step, not a cancelled one** — the dev's wording, corrected here on 2026-09-24: *make it work, then think about having it online*. Going online brings accounts, login and a security layer, so the editor has to be proven first. Until then they run locally and the atlas reads their output over a relative URL. |
 | **dev**  | **Contribution has three surfaces**                       | territory (Cartographer) · identity (`registry.json`) · places and events (Payload). None absorbs another.                                                                                            |
 | inferred | **Volume is a partitioning question, not a database one** | An event ≈ 1 KB. Ten thousand ≈ 10 MB, split by century ≈ 500 KB each — less than the rivers file already shipped. Revisit if one century passes ~2 MB, or if search must cross all centuries.        |
 | inferred | **Ship without the political layer first**                | Everything finished today is ours or public domain. Waiting for contributed data would cost months of having no link. Tacitly accepted when P1 was approved, never argued on its own.                 |
@@ -230,11 +230,11 @@ has its input.
 
 ## P7 — Places and events
 
-**Its code ships; the tool itself stays local for now** — the dev's call, 2026-09-24.
+**Its code ships; the tool runs locally first and goes online after** — the dev's call, 2026-09-24.
 
 *Not the constraint removed at the top of this file.* That one was **mine**, permanent, and argued from
-hosting convenience. This one is the dev's, **staged**, argued from security and maturity, and it names
-what would lift it: *"si c'est en ligne, il faut pouvoir se loguer, il faut que ce soit sécurisé"*, and
+hosting convenience. This one is the dev's, and it is a **sequence rather than a suspension** — "make it
+work, then think about having it online". What the online step brings with it: *"si c'est en ligne, il faut pouvoir se loguer, il faut que ce soit sécurisé"*, and
 *"il faut un outil de contribution éprouvé, bulletproof"*. Putting a public write endpoint on the
 internet before the editor is trustworthy buys risk and no reader.
 
@@ -300,6 +300,22 @@ volume row at the top — it has not moved.
 pattern and the port exist.
 
 ---
+
+
+### Sentry arrives with the online step, not before
+
+Asked 2026-09-24. Its value is **errors happening where you cannot look** — not "this code matters".
+While the contribution tools run on the dev's own machine with the console open, Sentry would report
+what he can already see.
+
+**It becomes worth it the day a contribution tool is online**, because then a silent failure costs
+*someone else's* work: a lost gesture, a corrupted history stack, a half-written save. It belongs to the
+same step as authentication and the security layer — they are one milestone, not three.
+
+**Left open, deliberately**: the deployed atlas is public today, and a WebGL failure on a stranger's
+machine is invisible to us — the bake is 2560 px wide where WebGL2 only guarantees 2048
+(`known-issues.md`). Whether that alone justifies ~30 kB of SDK and a privacy notice is the dev's call,
+and he has not made it.
 
 ## P8 — Languages · *two systems, and mixing them is the classic mistake*
 
