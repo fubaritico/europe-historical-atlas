@@ -7,29 +7,55 @@
 | Category  | Technology          | Version      |
 | --------- | ------------------- | ------------ |
 | Language  | TypeScript (strict) | via tsconfig |
-| 3D engine | three.js            | to install   |
-| Bundler   | Vite (+ HMR)        | to install   |
-| Package   | pnpm                | 10.7.1       |
-| Tests     | Vitest              | to install   |
+| 3D engine | three.js            | ^0.186       |
+| Bundler   | Vite (+ HMR)        | ^8.3         |
+| Package   | pnpm workspaces     | 10.7.1       |
+| Tests     | Vitest              | ^5.0         |
 
-> No dependency is installed yet (fresh repo). Roadmap Phase 0.1 sets up the tooling.
+> No Turbo and no Lerna — measured and refused 2026-09-24. See `files/plans/plan.md` (P2) for
+> the two thresholds that would change that: a CI, or a gate past ~30 s.
 
-## Project Structure (target)
+## Project Structure
+
+> Split into a pnpm workspace on **2026-09-24**. Two packages, and the boundary between them is a
+> contract, not a folder: **`core` contains no three.js**, enforced by ESLint and proved by breaking it.
+> That is what keeps the worker chunk at 13.5 kB with no renderer in it.
 
 ```
-index.html              # Vite entry point (canvas)
-src/
-├── main.ts             # bootstrap: renderer, scene, camera, loop
-├── scene/              # pluggable scene modules (relief, lights…)
-├── camera/             # camera + CameraStateStore (hot-reload persistence)
-├── controls/           # navigation (arrow keys, pan/zoom)
-├── picking/            # raycasting click → polygon/region
-├── data/               # ports: heightmap, texture, historical regions
-└── assets/ (or public/) # B&W heightmap, textures
-files/plans/            # .md plans (gitignored)
+pnpm-workspace.yaml
+package.json            # workspace root: tooling only, scripts delegate with --filter
+tsconfig.json           # one type-check across both packages
+vitest.config.ts        # one test run across both packages
+eslint.config.js        # layer boundaries as a table, applied to both packages
+
+packages/
+├── core/               # @europe-atlas/core — pure TypeScript, NO three.js
+│   └── src/
+│       ├── utils/      # leaf: small pure helpers, importing nothing
+│       ├── geo/        # leaf: projection maths
+│       ├── data/       # domain + ports (heightmap, land mask, regions, rivers); reads geo/ + utils/
+│       └── pipeline/   # the CPU work, worker-safe; reads data/, geo/, utils/
+└── atlas/              # @europe-atlas/atlas — the application
+    ├── index.html      # Vite entry point (canvas)
+    ├── public/         # DEM, land mask, rivers
+    ├── vite.config.ts
+    └── src/
+        ├── main.ts     # composition root: renderer, scene, camera, loop
+        ├── scene/      # pluggable scene modules
+        ├── camera/     # camera + CameraStateStore (independent of everything else)
+        ├── controls/   # navigation; depends on camera/ only
+        ├── picking/    # raycasting: answers WHERE, never WHAT
+        └── ui/         # plain DOM over the canvas
+
+files/plans/            # the plans — shipped since 2026-09-24
+files/spikes/           # runnable experiments; their out/ stays ignored
 ```
 
-## Scripts (target, to define in Phase 0.1)
+**Cross-package imports use subpath exports**: `@europe-atlas/core/utils/math`, never a barrel. A single
+barrel would flatten the four layers into one namespace and put `pipeline/` behind the same entry as the
+rest — which is exactly what would smuggle three.js into the worker chunk.
+
+## Scripts
 
 ```bash
 pnpm dev          # Vite server + HMR

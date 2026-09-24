@@ -45,10 +45,11 @@ and `eslint-plugin-import` requires `eslint ≤9` → unmet peer warnings, typed
 
 ### Quality tooling layout (single package, monorepo-ready)
 ESLint 9 flat config (`eslint.config.js`) + Prettier (`.prettierrc`) + commitlint + husky (`pre-commit`
-= lint-staged + type-check; `commit-msg` = commitlint) + lint-staged. **Decision: stay single-package**;
-go monorepo (pnpm workspaces + **Turbo**, not Lerna/Nx) only when a real seam needs it — the first
-candidate is a **pure-TS `@europe-map/core`** (data model, projection/geo math, region/ID-map logic)
-reusable/testable without three.js. Prettier ignores `.claude`, `files`, `.husky`.
+= lint-staged + type-check; `commit-msg` = commitlint) + lint-staged. ~~**Decision: stay single-package**~~ — **split 2026-09-24** into
+`@europe-atlas/core` (pure TS: `data/`, `pipeline/`, `geo/`, `utils/`) and `@europe-atlas/atlas`.
+**pnpm workspaces alone, no Turbo**: pnpm already runs tasks in dependency order, and Turbo would only
+add a cache worth a few seconds on a 12 s gate. Measured, with the thresholds that would reverse it, in
+`files/plans/plan.md`. Prettier ignores `.claude`, `files`, `.husky`.
 
 ## History (to fill in)
 

@@ -1,0 +1,21 @@
+{
+  "name": "@europe-atlas/atlas",
+  "version": "1.0.0",
+  "description": "The 3D atlas: renderer, scene modules, camera, controls, DOM overlay, and the composition root.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@europe-atlas/core": "workspace:^",
+    "lil-gui": "^0.21.0",
+    "three": "^0.186.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.186.0",
+    "vite": "^8.3.0"
+  }
+}
