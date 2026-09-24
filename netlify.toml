@@ -1,0 +1,39 @@
+# Netlify build for the pnpm workspace.
+#
+# The build runs at the repository root: `pnpm build` type-checks both packages, then builds the
+# atlas through the workspace filter. Only the atlas produces a site — `core` is never built, and
+# the cartographer and the contribution tool are not deployed from here.
+#
+# Node comes from `.nvmrc` (22), which the CI reads too, so local, CI and Netlify agree on one number.
+
+[build]
+  command = "pnpm build"
+  publish = "packages/atlas/dist"
+
+[build.environment]
+  # Netlify detects pnpm from the lockfile; this pins the major it installs.
+  PNPM_VERSION = "10"
+
+# Vite fingerprints what it emits, so the hashed assets are safe to cache forever.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# The physical payloads are NOT fingerprinted — their names are stable, so a regenerated DEM would
+# keep the same URL. A day is long enough to help a returning reader, short enough that replacing an
+# asset becomes visible the next day rather than never.
+[[headers]]
+  for = "/heightmaps/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/masks/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/rivers/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"

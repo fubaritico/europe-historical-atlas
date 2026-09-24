@@ -25,6 +25,18 @@ jobs:
           fi
           echo "✅ no renderer in the worker chunk"
 
+      # `public/` is copied wholesale into `dist/`, and `public/borders/` holds GPL-3.0 geometry.
+      # It is git-ignored, so it is absent here — but that makes the guarantee an absence rather
+      # than a check. If those files are ever committed, this turns red before anything ships.
+      - name: No GPL-3.0 geometry in the published site
+        run: |
+          if [ -d packages/atlas/dist/borders ]; then
+            echo "::error::GPL-3.0 border payloads reached the build output. Publishing them would put the whole distributed work under the GPL."
+            ls packages/atlas/dist/borders
+            exit 1
+          fi
+          echo "✅ no GPL geometry in the published site"
+
       - uses: actions/upload-artifact@v7
         with:
           name: atlas-${{ github.sha }}
