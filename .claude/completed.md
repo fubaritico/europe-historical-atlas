@@ -2,6 +2,83 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-09-24 — Le dépôt existe, l'atlas est en ligne, et 21 fichiers GPL en sont sortis
+
+Une seule plage : **14:56 → 23:48 (8 h 52, 278 actions)**, **30 commits**, **1108 → 1124 tests**, gate
+verte à chaque pas. Le chantier ouvert depuis le 22/09 totalise **16 h 16**. Livrable :
+**https://europe-historical-atlas.netlify.app**, et le dépôt `fubaritico/europe-historical-atlas`, privé.
+
+- **Le monorepo, et `core` sans three.js *par contrat*.** 139 fichiers déplacés, 106 specifiers réécrits,
+  zéro changement de comportement. La propriété n'a pas été créée, elle a été **relevée puis rendue
+  opposable** : les quatre dossiers de `core` étaient déjà three-free, tests compris. Câblage prouvé par
+  une **sonde jetable** avant de bouger quoi que ce soit — `exports: { "./*": "./src/*.ts" }`, pas de
+  build, et les trois résolveurs (tsc, Vite, Vitest) la suivent.
+- **Des sous-chemins plutôt qu'un baril, et c'est mesuré** : un baril mettrait `pipeline/` derrière la
+  même entrée que le reste, ce qui est exactement comment three.js entre dans le worker. **13,5 ko sans
+  renderer**, vérifié après le déplacement, et désormais **asserté par la CI**.
+- **Le `lib` par paquet a transformé une convention en erreur de compilation.** `document` type-checkait
+  dans `core` parce que le tsconfig racine donnait `DOM` à tout le workspace — ESLint n'était pas
+  l'autorité, `tsc` l'est. `core` compile contre `WebWorker`, **sans un changement de code**, et ça a
+  immédiatement démasqué `globalThis as unknown as WorkerScope` : un double `as unknown as` **fait taire
+  le contrôle qu'il a l'air d'effectuer**. Deux modules remis dans l'atlas au passage (`editableFocus`,
+  `motion`, préoccupations navigateur égarées dans `core`).
+- **Les frontières de couches deviennent une table**, pour une raison qui aurait mordu :
+  `no-restricted-imports` est **une règle unique**, donc un bloc « pas de three dans core » ajouté après
+  les huit blocs de couches les aurait **tous effacés en silence**. Les deux frontières prouvées en les
+  cassant exprès — et le second cas confirme que les motifs interceptent les specifiers inter-paquets.
+- **Les 21 fichiers GPL-3.0 sont partis sur GitHub, et la cause est une règle de gitignore.** Un motif
+  contenant une barre oblique est **ancré à la racine** : `public/borders/` a cessé de matcher le jour où
+  `public/` est passé sous `packages/atlas/`. Mon audit « rien d'interdit ne part » datait d'**avant** le
+  déplacement et n'a jamais été rejoué. Dépôt supprimé, historique réécrit (113 commits, zéro GPL),
+  dépôt recréé. Le dev a tranché B — la garantie catégorique — parce qu'elle ne coûtait rien à vingt
+  minutes de vie du dépôt.
+- **La CI portée depuis `fubaritico-ds`, adaptée et non recopiée.** Ses versions d'actions étaient **une
+  majeure en retard sur trois des quatre** (vérifiées contre le registre). Et la nôtre est **plus simple
+  que la sienne** : son `validate` a besoin d'un ordonnanceur parce que ses types inter-paquets viennent
+  de `dist/*.d.ts` ; `core` étant lu en source, nos trois jobs partent à froid sans rien attendre.
+- **Deux gardes que la CI ajoute, et qui portent sur l'invisible** : pas de three.js dans le chunk
+  worker, pas de géométrie GPL dans la sortie. Une frontière de bundle ne se voit pas dans un diff, et la
+  seconde a été écrite **juste avant** l'incident qu'elle aurait attrapé.
+- **Une injection de script, de moi.** Le message de commit interpolé brut dans le `run:` du déploiement.
+  Un backtick ou un `$(...)` dans un message aurait exécuté du code sur le runner — c'est l'injection
+  classique des GitHub Actions. Passé par l'environnement, sujet seul.
+- **Sonar opérationnel, après avoir cessé d'analyser des données.** `europe-rivers.json` pesait **33 352
+  lignes, 82 % de l'analyse**, et consommait à lui seul le quota de l'organisation. Le principe est écrit
+  dans le fichier plutôt que le chemin : *une donnée générée n'est pas du code source*. Et un token dédié
+  au projet a réglé un 403 que le token global ne passait pas.
+- **Les secrets d'organisation n'atteignent pas un dépôt privé en plan Free** — mur documenté, pas
+  réglage. Le piège est en aval : `SONAR_TOKEN` vide → le job se saute → **pipeline vert sans analyser
+  une ligne**. Ce qui sauve, c'est le *skip notice* qui le dit à voix haute.
+- **Netlify ne construit pas.** La CI construit une fois, contrôle la sortie, et déploie **ces octets-là**
+  — les deux gardes ne valent que si ce qui est contrôlé est ce qui est servi. Vérifié : l'empreinte du
+  bundle en ligne est celle du build local. `_headers` voyage **dans** l'artefact, parce qu'en
+  `--no-build` le `netlify.toml` est résolu depuis un répertoire facile à se tromper, et silencieusement.
+- **Le déploiement a coûté trois heures pour une cause triviale** : des jetons Netlify périmés. En chemin,
+  le dev a testé avec l'ID du site à la place du jeton — et c'était probablement le même mélange dans les
+  secrets. À retenir : un `Unauthorized` ne dit pas *lequel* des deux est en cause.
+- **La capture d'écran du README est différée à P5**, décision du dev avec sa raison : *un relief sans
+  couche politique se lit comme un rendu de terrain*. Ça donne un déclencheur au lieu d'une intention.
+- **Deux reproches du dev, tous deux justes.** J'ai inventé « Payload n'est jamais déployé » — qu'il n'a
+  jamais dit — et je l'ai inscrit sous « décisions non rouvrables ». Le tableau porte désormais une
+  colonne **`by`** : les lignes `dev` sont acquises, les lignes `inferred` sont mes arguments. Et le
+  glossaire n'accepte que **cartographie et logiciel**, pas l'outillage général : sa frontière est écrite
+  dans son propre en-tête avec le test qui la rend applicable.
+- **Décisions consignées** : ni Turbo ni Lerna (Lerna est une erreur de catégorie, on ne publie rien ;
+  Turbo n'ajoute qu'un cache sur une gate de 12 s) · JSON statique pour le contenu, avec ses limites
+  mesurées et la scission index/corps qui repousse le plafond de milliers à dizaines de milliers ·
+  `fubaritico-ds` comme design system, **multi-framework**, dont `tokens` + `styles` coûtent **zéro
+  JavaScript** à l'atlas · **ICU MessageFormat** dès le départ, ce qui renverse ma propre position d'une
+  heure plus tôt · **les dates historiques ne sont pas des dates** — ni `Intl` ni `Temporal` ne
+  connaissent le julien, et ce projet manipule des années, des intervalles et des approximations ·
+  **Sentry au palier de la mise en ligne** de la contribution, avec l'authentification.
+- **Le filet global d'erreurs**, qui manquait : `error` et `unhandledrejection` postent une notice
+  bloquante. Tout le système de notices n'écoutait que les échecs **anticipés**. Le titre ne dit rien de
+  la cause, volontairement — prétendre en savoir plus est ce qui a fait accuser le JSON pour un fichier
+  absent. Neuf tests, vérifiés en commentant l'écouteur : cinq sont tombés.
+- **L'accord grammatical des notices était faux partout**, découvert en production : *« Les frontières
+  historiques **a** échoué »*. Et **un test existant exigeait la faute** — c'est ainsi qu'elle a été
+  livrée avec une suite verte.
+
 ### 2026-09-22 (soir) — Dix trous fermés, le format écrit, les écrans du Cartographe
 
 Seconde plage du même chantier : **20:42 → 00:12 (3 h 30, 86 actions)**, après 2 h de coupure — donc

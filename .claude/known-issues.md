@@ -2,6 +2,35 @@
 
 Put here the know issues to avoid cluttering the context window.
 
+- **Un motif `.gitignore` qui contient une barre oblique est ancré à la racine du dépôt.** C'est la cause
+  du seul vrai incident du 24/09 : `public/borders/` a **cessé de matcher** le jour où le passage en
+  monorepo a mis `public/` sous `packages/atlas/`, et les 21 fichiers GPL-3.0 sont partis sur GitHub au
+  `git add` suivant. **Le motif ne dit rien quand il cesse de s'appliquer.**
+  **Remède appliqué** : `**/public/borders/`, qui matche à n'importe quelle profondeur et survit au
+  prochain déplacement. **Règle générale** : dans ce dépôt, un motif d'ignore s'écrit avec `**/` sauf
+  raison explicite, parce que l'arborescence bougera encore (le Cartographe et Payload arrivent).
+  **Et la leçon de procédure, qui vaut plus que la règle** : l'audit « rien d'interdit ne part » avait
+  été fait *avant* le déplacement et jamais rejoué après. Un audit d'ignore se refait **après** tout
+  déplacement de dossier, pas avant.
+  Résolu : historique réécrit, dépôt supprimé et recréé, et la CI **assère** désormais l'absence de
+  `dist/borders`.
+- **Le quota Sonar de l'organisation est presque plein, et le Cartographe le fera déborder.** Le palier
+  gratuit couvre **50 000 lignes de code privé par organisation**. Mesuré le 24/09 : **42 666 lignes**
+  consommées par les autres projets de `fubaritico`, **~7 500** par celui-ci une fois les données
+  générées exclues — soit **~50 200 au total**, sur le fil.
+  **Ce que ça veut dire** : chaque millier de lignes du Cartographe rapproche du mur, et l'échec prend la
+  forme d'un `403` au scan, pas d'un message clair.
+  **Trois issues, aucune urgente** : délier un vieux projet privé de l'organisation (deux clics, libère
+  largement) · rendre ce dépôt public, ce qui le sort entièrement du compteur (gratuit et illimité pour
+  le public) · payer. **Sévérité : à savoir, pas bloquant** — la *quality gate* a été corrigée le 24/09
+  pour que Sonar ne bloque plus une mise en ligne, un problème de quota n'étant pas un verdict sur le
+  code.
+- **`packages/core/README.md` décrit un paquet qui va changer.** Il annonce « le format, les lecteurs, le
+  compositeur, les maths ». Deux choses s'y ajouteront et n'y sont pas : le **type de date historique**
+  (`HistoricalDate`, plan P8) et les **tables de traduction** (ICU, même section). Cosmétique, à faire
+  quand l'un des deux arrive — mais un README de paquet est la première chose qu'un lecteur ouvre dans un
+  monorepo, donc il ne doit pas mentir longtemps.
+
 - ~~**The activity-log hook writes to a _relative_ path, so a `cd` splits the journal in two.**~~ —
   **FIXED 2026-09-24**, and it had cost more than the one stranded line this entry knew about.
   `~/.claude/hooks/session-log.sh` built its path from the payload's `cwd`, so any session working in a
