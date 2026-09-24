@@ -7,7 +7,7 @@
     "dev": "pnpm --filter @europe-historical-atlas/atlas dev",
     "build": "pnpm run type-check && pnpm --filter @europe-historical-atlas/atlas build",
     "preview": "pnpm --filter @europe-historical-atlas/atlas preview",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --noEmit -p packages/core && tsc --noEmit -p packages/atlas",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

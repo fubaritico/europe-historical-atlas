@@ -9,6 +9,7 @@
 import { serveCompute } from './computeServer'
 import { createInlineMapCompute } from './inlineCompute'
 
-import type { WorkerScope } from './computeProtocol'
-
-serveCompute(globalThis as unknown as WorkerScope, createInlineMapCompute())
+// No cast: this package compiles against `lib: ["ESNext", "WebWorker"]`, so `globalThis` is already a
+// worker scope and the compiler genuinely checks it against `WorkerScope`. The `as unknown as` that used
+// to sit here was compensating for a DOM lib this package never needed — and silencing that check.
+serveCompute(globalThis, createInlineMapCompute())

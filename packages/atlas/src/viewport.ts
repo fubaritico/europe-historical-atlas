@@ -8,13 +8,12 @@
 
 import { Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
 
-import { prefersReducedMotion } from '@europe-historical-atlas/core/utils/motion'
-
 import { createSessionStorageMapCameraStore } from './controls/mapCameraStore'
 import { createMapControls } from './controls/mapControls'
 import { DEFAULT_CAMERA_TUNING } from './devParams'
 import { extentRect } from './devState'
 import { createDebugRect } from './scene/debugRect'
+import { prefersReducedMotion } from './utils/motion'
 
 import type { MapControls } from './controls/mapControls'
 import type { DevState } from './devState'

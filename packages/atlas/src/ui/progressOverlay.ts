@@ -11,7 +11,7 @@
  * `prefers-reduced-motion` by not animating the fill.
  */
 
-import { prefersReducedMotion } from '@europe-historical-atlas/core/utils/motion'
+import { prefersReducedMotion } from '../utils/motion'
 
 /** How the panel presents itself. */
 export interface ProgressOverlayOptions {

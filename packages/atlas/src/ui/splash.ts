@@ -15,7 +15,8 @@ import {
   MAP_TYPEFACE,
   withLambdaForA,
 } from '@europe-historical-atlas/core/utils/lettering'
-import { prefersReducedMotion } from '@europe-historical-atlas/core/utils/motion'
+
+import { prefersReducedMotion } from '../utils/motion'
 
 import {
   EUROPE_SILHOUETTE_HEIGHT,
