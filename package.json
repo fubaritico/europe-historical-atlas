@@ -1,5 +1,5 @@
 {
-  "name": "europe-map",
+  "name": "europe-historical-atlas",
   "version": "1.0.0",
   "description": "Interactive 3D historical atlas of Europe (TypeScript + three.js + Vite)",
   "type": "module",
@@ -16,7 +16,13 @@
     "test:watch": "vitest",
     "prepare": "husky"
   },
-  "keywords": [],
+  "keywords": [
+    "three.js",
+    "typescript",
+    "vite",
+    "Historical Atlas",
+    "Europe"
+  ],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.7.1",
