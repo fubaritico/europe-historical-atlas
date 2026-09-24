@@ -81,27 +81,30 @@ spoken by the same adapter) or Postgres, and the auth layer with it.
 exports JSON that the atlas fetches like the DEM and the rivers, or the `.db` ships and is queried with
 `sqlite-wasm`. Open, and written up in `files/plans/plan.md` (P7).
 
-### The shared design system — decided; which implementation is not
+### The shared design system — decided, with two conditions before it lands
 
-**The dev's call, 2026-09-24: there is one design system, and all three use it** — the atlas, the
-cartographer and the Payload admin. So the question stopped being *whether* to extract one. The earlier
-argument against it (*one consumer, so no abstraction*) has expired: there are three.
+**The dev's call, 2026-09-24: it will be his own system, `fubaritico-ds`, as an external dependency**,
+used by the atlas, the cartographer and the Payload admin alike. That part is settled and there is no
+fork left in it.
 
-**The portable form is CSS plus class names, not components.** The atlas and the cartographer are
-vanilla TS; Payload's admin is React. A system that ships **BEM class strings and stylesheets** is
-consumable by both without either adopting the other's framework — which is exactly what the dev's
-`fubaritico-ds` does.
+**What is staged is the moment, and it has two conditions, both the dev's:**
 
-Two candidates, and the difference between them is availability, not quality:
+1. **the Cartographer is finished** and he is comfortable with it — the application genuinely works;
+2. **the design system is complete enough** to assemble these interfaces — roughly **ten components**
+   are still missing on his side.
 
-- **`packages/ui`**, grown from `chrome.css` — 14 tokens and the chrome, already written and running in
-  three screens;
-- **`fubaritico-ds`**, the white-label system the dev is building in a separate repository.
+**The consequence, and it is the useful part: do not create `packages/ui`.** Extracting a package we
+already know will be deleted would be building the wrong thing carefully. `chrome.css` stays **inside
+the cartographer**, where its single consumer lives. When both conditions are met the swap is one
+application's stylesheet, not a package to dismantle.
 
-**The blocker on the second is publication.** It is not on npm, and depending on an unpublished sibling
-repository would make this one un-buildable by anyone who clones it — the opposite of what a portfolio
-repository is for. So `packages/ui` carries the tokens meanwhile, sized to be replaced: keep it to
-tokens and chrome, and adopting `fubaritico-ds` later is a swap rather than a rewrite.
+**Why the external dependency works across three very different apps**: `fubaritico-ds` renders **BEM
+class strings and ships CSS**, so vanilla TypeScript and React consume it the same way. The atlas and
+the cartographer are vanilla; Payload's admin is React. A component library would have forced a
+framework on two of the three; class names and stylesheets force nothing.
+
+**The one thing to check when the moment comes**: it has to be *published*, or this repository stops
+being buildable by anyone who clones it — which is the opposite of what it is for.
 
 ## Scripts
 

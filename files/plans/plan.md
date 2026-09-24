@@ -26,6 +26,8 @@ we know of and the design corpus is the valuable part; public where it counts �
 | **dev**  | **Contribution has three surfaces**                       | territory (Cartographer) · identity (`registry.json`) · places and events (Payload). None absorbs another.                                                                                            |
 | inferred | **Volume is a partitioning question, not a database one** | An event ≈ 1 KB. Ten thousand ≈ 10 MB, split by century ≈ 500 KB each — less than the rivers file already shipped. Revisit if one century passes ~2 MB, or if search must cross all centuries.        |
 | inferred | **Ship without the political layer first**                | Everything finished today is ours or public domain. Waiting for contributed data would cost months of having no link. Tacitly accepted when P1 was approved, never argued on its own.                 |
+| **dev**  | **The design system is `fubaritico-ds`, as an external dependency** | Used by all three apps. Adopted only once **the Cartographer is finished and comfortable to use** and **the system is complete** (~10 components still missing). Until then `chrome.css` stays inside the cartographer — no `packages/ui`, since extracting a package we know will be deleted is building the wrong thing carefully. |
+| **dev**  | **Content ships as static JSON** | Not the SQLite file: a browser cannot query it over a relative URL. Limits measured, and the index/body split that lifts them, in P7. |
 
 ---
 
@@ -205,47 +207,52 @@ web by more than one person, which is what handing out access was about.
 Cities first: they are already the accuracy criterion for the borders themselves, so they earn their
 place twice.
 
-### The one thing "a database in a file, read over a relative URL" hides
+### Static JSON — chosen 2026-09-24, and where it actually breaks
 
-A browser cannot query a SQLite file over a relative URL. The file is Payload's own storage format; the
-atlas is a static bundle with `fetch`. Two shapes, and this is a question for the dev, not a decision:
+**A browser cannot query a SQLite file over a relative URL**, so the two shapes were: exported JSON, or
+shipping the `.db` and querying it with `sqlite-wasm`. **The dev chose JSON.** It is what every other
+asset in this project already is, and it costs nothing new to build.
 
-| | how it works | cost |
-|---|---|---|
-| **exported JSON** | Payload writes `content/events-1100.json` and friends; the atlas fetches them relatively, exactly as it already fetches the DEM, the mask and the rivers | an export step to run after editing — and the exports are committed, so the atlas never depends on a running Payload |
-| **the SQLite file itself** | ship the `.db` and query it in the browser with `sqlite-wasm` over HTTP range requests | a WASM layer and a query API to write; buys real querying across all centuries without loading everything |
+**Measured on this machine, on `europe-rivers.json` — the largest JSON the atlas loads today:**
 
-The first matches every other asset in this project and needs nothing new. The second only earns its
-keep the day search has to cross all centuries at once — the same threshold already written into the
-volume row above.
+| | |
+|---|---|
+| raw | 0.83 MB |
+| gzip | 0.20 MB — **76 % smaller** |
+| brotli | 0.12 MB — **86 % smaller** (Netlify serves brotli) |
+| `JSON.parse` | 4.6 ms → **182 MB/s** |
+| heap once parsed | **×2.7** the text size |
 
----
+**So the extrapolation, per century, loading the file whole.** An event with its text, actors and
+consequences is ~1–2 KB of JSON:
 
-## The README's screenshot — deferred on purpose, 2026-09-24
+| per century | raw | gzip | parse | heap | verdict |
+|---|---|---|---|---|---|
+| ~1 000 events | 1.5 MB | 0.36 MB | 8 ms | 4 MB | free |
+| ~5 000 events | 7 MB | 1.7 MB | 38 ms | 19 MB | fine |
+| ~20 000 events | 30 MB | 7 MB | 165 ms | 80 MB | a visible hitch on every change of year |
+| ~50 000 events | 75 MB | 18 MB | 410 ms | 200 MB | no |
 
-The root README opens with no image, and that is a decision rather than an omission. The dev's reason,
-and it is the right one: **as the atlas stands, a screenshot says very little.** A relief with no
-political layer reads as a pretty terrain render, which undersells a project whose subject is history.
+**The limit is not JSON and it is not the network** — brotli makes the transfer a non-issue. The limit
+is **loading a whole file to read one record**, and it bites at roughly **10 000 events per century**.
 
-**So the trigger is not "when someone has time" — it is P5.** The screenshot is worth taking the day a
-year is drawn and its fills and borders are ours: that image shows the relief, the sheet, the drawn
-coastline _and_ a political Europe that owes nothing to anyone. One picture then carries the whole
-argument; one picture now carries a landscape.
+**The fix that removes the worry, and it should be designed into the export from the first day:**
+**split each century in two.** An *index* — id, date, lon/lat, title, ~120 bytes an event — and the
+*bodies*, fetched one at a time when the reader clicks. The index carries everything the map needs to
+draw a pin:
 
-Only the dev can take it — it is his screen, `pnpm dev`. Two shots are probably wanted: the atlas
-itself, and the Cartographer mid-gesture, because the method is half the point.
+| index of | raw | gzip | parse |
+|---|---|---|---|
+| 5 000 events | 0.6 MB | 0.15 MB | 3 ms |
+| 50 000 events | 6 MB | 1.4 MB | 33 ms |
 
-## Carried, and not forgotten
+With that split, **50 000 events a century still costs 33 ms**, and a body is 2 KB fetched on demand.
+The ceiling moves from thousands to tens of thousands without any new machinery.
 
-Defects whose fix is due when their file is next opened: vertex colours written sRGB into a linear
-attribute · `buildTitle` unreached by any test (QUAL-021) · no keyboard way **into** the focus mode
-(A11Y-301) · the board cut at the map's edge instead of the sheet's (`edgeDepth` forced to 0) · the
-frame's three rules have no matter in them · `terrainOptions.ts`'s comment contradicting its own value.
+**What stays impossible with static files, and is the honest wall**: searching *across* all centuries at
+once. That needs either a prebuilt index shipped as its own file, or a server. Same threshold as the
+volume row at the top — it has not moved.
 
-## Open, for the dev
+**If it ever does hitch**: parse in the worker. The political pipeline already lives there, so the
+pattern and the port exist.
 
-- **Prior art** — research whether an interactive 3D historical atlas with dated borders and its own
-  contribution tooling exists elsewhere. Offered, not yet run.
-- **A trademark on the name** — only worth it if commercial use is intended. Otherwise €190 for nothing.
-- **H-23** (does the vassal hand weaken by degree), **H-26's other half**, Norse Greenland, and the
-  coordinate precision in the file.
