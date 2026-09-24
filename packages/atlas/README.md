@@ -3,6 +3,8 @@
 The map itself: a relief of Europe drawn as an old printed sheet, navigated like a grand-strategy game.
 This is the application that gets published.
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/b1945a8b-a372-41fc-8dbd-bfd0d79e33c4/deploy-status)](https://app.netlify.com/projects/europe-historical-atlas/deploys)
+
 ```bash
 pnpm dev       # from the workspace root — Vite + HMR, and the camera pose survives a reload
 pnpm build     # type-checks both packages, then builds this one into packages/atlas/dist
