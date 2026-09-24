@@ -81,30 +81,54 @@ spoken by the same adapter) or Postgres, and the auth layer with it.
 exports JSON that the atlas fetches like the DEM and the rivers, or the `.db` ships and is queried with
 `sqlite-wasm`. Open, and written up in `files/plans/plan.md` (P7).
 
-### The shared design system — decided, with two conditions before it lands
+### The shared design system — decided, and it costs the atlas nothing
 
-**The dev's call, 2026-09-24: it will be his own system, `fubaritico-ds`, as an external dependency**,
-used by the atlas, the cartographer and the Payload admin alike. That part is settled and there is no
-fork left in it.
+**The dev's call, 2026-09-24: it will be his own `fubaritico-ds`, as an external dependency**, used by
+the atlas, the cartographer and the Payload admin alike. It is a **multi-framework** system: a React
+component base today, a Stencil/web-component variant planned, Angular and Vue possible — and, crucially,
+**the styles are independent of all of them and shared between them**.
 
-**What is staged is the moment, and it has two conditions, both the dev's:**
+**Read from the repository on 2026-09-24, not assumed:**
 
-1. **the Cartographer is finished** and he is comfortable with it — the application genuinely works;
-2. **the design system is complete enough** to assemble these interfaces — roughly **ten components**
-   are still missing on his side.
+| package | what it ships | framework runtime |
+|---|---|---|
+| `@fubaritico-ds/tokens` | `./css` → `variables.css` (custom properties) + a TS token object | **none** |
+| `@fubaritico-ds/styles` | one `styles.css` | **none** |
+| `@fubaritico-ds/variants` | class-string builders over `class-variance-authority` | **none** (a couple of kB) |
+| `@fubaritico-ds/stencil` | Stencil components, output targets `dist` and `dist-custom-elements`, plus React and Angular wrappers | web components — no React |
+| `@fubaritico-ds/shared` | app-level React (router, query, testing-library) | React — **not a DS primitive** |
 
-**The consequence, and it is the useful part: do not create `packages/ui`.** Extracting a package we
-already know will be deleted would be building the wrong thing carefully. `chrome.css` stays **inside
-the cartographer**, where its single consumer lives. When both conditions are met the swap is one
-application's stylesheet, not a package to dismantle.
+**Three levels of consumption, and the atlas only ever needs the first:**
 
-**Why the external dependency works across three very different apps**: `fubaritico-ds` renders **BEM
-class strings and ships CSS**, so vanilla TypeScript and React consume it the same way. The atlas and
-the cartographer are vanilla; Payload's admin is React. A component library would have forced a
-framework on two of the three; class names and stylesheets force nothing.
+1. **tokens + styles (+ variants)** — the whole visual language for **zero JavaScript**. The atlas's DOM
+   is a splash, a progress overlay and, at M2, event panels. It does not need components; it needs the
+   same colours, type and spacing as the other two apps.
+2. **Stencil custom elements** — standard `HTMLElement`s, usable from vanilla TypeScript with no
+   framework. The fallback if the atlas ever wants a real component.
+3. **React components** — ~45 kB gzipped of React + ReactDOM on top of a 185 kB bundle, for an
+   application whose DOM is three elements. **Not for the atlas.**
 
-**The one thing to check when the moment comes**: it has to be *published*, or this repository stops
-being buildable by anyone who clones it — which is the opposite of what it is for.
+**The cartographer reaches the opposite conclusion, for the same reason.** Its chrome *is* the
+application — panels, tab strips, a 51-row list, forms, dialogues, a splitter. That is what a component
+library is for, and whichever variant is ready when it is built (React or Stencil) earns its place. The
+2D canvas stays imperative either way.
+
+**Because the styles are shared across variants, all three applications look identical whichever level
+each one consumes.** That is the whole point of a multi-framework system, and it is what makes "React
+design system" a non-problem here.
+
+#### The real risk, and it is not the framework
+
+Nothing a framework does costs frames in a WebGL application **as long as per-frame state never goes
+through it**. Camera position, zoom, hover, a drag in progress: route any of those through component
+state and reconciliation runs at 60 Hz, which is what actually kills these applications. Keep the canvas
+imperative and the document model in a plain store, render on commit rather than on `pointermove`, and
+the cost is zero — in either app.
+
+**Worth being accurate about why the atlas is fast today**: it is not that it is vanilla. It is that the
+CPU work runs in a worker, that no geometry is rebuilt per frame, and that exaggeration is a `scale.y`
+rather than a re-displacement. There is almost no DOM to be slow. What vanilla buys is that the wrong
+pattern is not available by default — which is worth keeping, but it is not the measurement.
 
 ## Scripts
 
