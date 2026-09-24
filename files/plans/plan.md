@@ -141,6 +141,9 @@ Draw 1100. Replace the GPL payload. **Then and only then** `public/borders/` can
 the deployed atlas gains its fills and borders. This is the step that turns the project from a consumer
 of someone else's dataset into its own source.
 
+**Also the day the README gets its picture** — see the section on the deferred screenshot below. Not a
+loose end: it is the first moment an image of this project shows history rather than terrain.
+
 ## P6 — `regionAt` and the country focus
 
 A query on the compute port, not a copy of the grid: `regionAt(u, v)` returns **a list**, since a vassal
@@ -153,6 +156,20 @@ Payload locally, SQLite file, static exports committed. Cities first — they ar
 criterion for the borders themselves, so they earn their place twice.
 
 ---
+
+## The README's screenshot — deferred on purpose, 2026-09-24
+
+The root README opens with no image, and that is a decision rather than an omission. The dev's reason,
+and it is the right one: **as the atlas stands, a screenshot says very little.** A relief with no
+political layer reads as a pretty terrain render, which undersells a project whose subject is history.
+
+**So the trigger is not "when someone has time" — it is P5.** The screenshot is worth taking the day a
+year is drawn and its fills and borders are ours: that image shows the relief, the sheet, the drawn
+coastline _and_ a political Europe that owes nothing to anyone. One picture then carries the whole
+argument; one picture now carries a landscape.
+
+Only the dev can take it — it is his screen, `pnpm dev`. Two shots are probably wanted: the atlas
+itself, and the Cartographer mid-gesture, because the method is half the point.
 
 ## Carried, and not forgotten
 
