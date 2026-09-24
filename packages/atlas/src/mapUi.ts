@@ -9,6 +9,7 @@
  */
 
 import { assetNotice } from './assetMessages'
+import { createErrorNet } from './ui/errorNet'
 import { createNoticeBoard } from './ui/notice'
 import { createProgressOverlay } from './ui/progressOverlay'
 import { createSplash } from './ui/splash'
@@ -66,6 +67,15 @@ export function createMapUi(options: MapUiOptions): MapUi {
   // Until this existed every failure ended in `console.error` and nothing else, so a relief that failed
   // to load showed a blank canvas and no explanation. A console is not a user interface.
   const notices = createNoticeBoard({ host: options.host })
+  // The board above only hears about failures someone thought to catch. This hears the rest: without
+  // it an uncaught error leaves a frozen canvas and not one word.
+  const errorNet = createErrorNet({
+    show: (notice) => {
+      if (options.isDisposed()) return
+      notices.show(notice)
+      progress.end()
+    },
+  })
 
   return {
     progress,
@@ -86,6 +96,7 @@ export function createMapUi(options: MapUiOptions): MapUi {
       progress.dispose()
       splash.dispose() // a load abandoned mid-flight must not leave the silhouette over a dead canvas
       notices.dispose()
+      errorNet.dispose()
     },
   }
 }
