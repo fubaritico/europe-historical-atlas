@@ -71,6 +71,22 @@ jobs:
           name: atlas-${{ github.sha }}
           path: site
 
+      # Diagnostic, never blocking. `Unauthorized: could not retrieve project` has two causes and
+      # they need opposite fixes: a wrong site id, or a token that belongs to another Netlify
+      # account/team than the one owning the site. This prints what the token can actually reach,
+      # so the next failure names its own cause instead of costing another round trip.
+      - name: What this token can reach
+        if: steps.check.outputs.has == 'true'
+        continue-on-error: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          echo "site id requested (first 8 chars): ${NETLIFY_SITE_ID:0:8}…"
+          echo "--- sites this token can administer ---"
+          npx --yes netlify-cli@latest sites:list --json \
+            | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{JSON.parse(d).forEach(s=>console.log(s.id,"",s.name))}catch(e){console.log("could not parse the list:",e.message)}})'
+
       - name: Deploy to Netlify
         if: steps.check.outputs.has == 'true'
         env:
