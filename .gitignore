@@ -31,5 +31,8 @@ files/*
 !files/spikes/
 files/spikes/*/out/
 
-# Historical borders — GPL-3.0 source, spike only (see files/spikes/fetch-borders)
-public/borders/
+# Historical borders — GPL-3.0 source, spike only (see files/spikes/fetch-borders).
+# NOT `public/borders/`: a gitignore pattern containing a slash is anchored to the repository root,
+# so that form silently stopped matching the day `public/` moved into `packages/atlas/`. The 21 GPL
+# payloads were committed as a result. `**/` matches at any depth and survives the next move.
+**/public/borders/
