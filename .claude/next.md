@@ -1,141 +1,199 @@
 # Next — current actionable state
 
-> Loaded at session start (CLAUDE.md `### Next` → `@next.md`). Full plan: `files/plans/roadmap.md` (chapters).
-> This repo is **europe-map** (3D historical atlas, TS + three.js + Vite) — NOT the old fubaritico-ds DS.
+> Loaded at session start (CLAUDE.md `### Next` → `@next.md`). Full plan: `files/plans/roadmap.md`.
+> This repo is **europe-map** (3D historical atlas, TS + three.js + Vite).
 
 ## Where we are
 
-`master` at `69e4709`, **1108 tests**, full gate green, production build verified, tree clean. See
-`completed.md`, entry **2026-09-18 (nuit)**.
+`master` at `8487136`, **1108 tests**, gate green. **No `src/` file has been touched since 2026-09-18** —
+the 22nd was two full sessions of design, 7 h 12 across two spans. See `completed.md`, entries
+**2026-09-22** and **2026-09-22 (soir)**.
 
-The camera has a **focus mode**: double-click arcs over and lands at maximum zoom, Escape flies back to
-where the reader was, a single click leaves the mode on the point it designated. The atlas is named —
-`EUROPE` above the splash silhouette, `HISTORICΛL ΛTLΛS` below it, both tracked to the silhouette's own
-measure, and `EUROPE HISTORICΛL ΛTLΛS` on one line along the sheet.
+**The design phase is over. The next session writes code.**
 
-## ▶ THE PLAN WAS TURNED AROUND — contribution comes first
+| document                                   | what it is                                                          |
+| ------------------------------------------ | ------------------------------------------------------------------- |
+| `files/plans/cartographer/format.md`       | **the working format, field by field** — the last lock, now written |
+| `files/plans/cartographer/ui-inventory.md` | panels, dialogues, buttons, cursors, zoom — the design brief        |
+| `files/plans/cartographer/scenarii/`       | 13 Gherkin files, gesture by gesture. `s99-holes.md` is the ledger  |
+| `files/plans/cartographer/design/`         | 5 screens + 10 cursors, live HTML. Its README says what to keep     |
+| `files/plans/glossaire.md`                 | the shared vocabulary. **Every new term goes in, immediately**      |
 
-**The dev's correction, 2026-09-18, and it governs everything below.** The recorded order had colours,
-then cities, then tooling. That order is dead, for a structural reason rather than a change of mind:
+## ▶ NEXT SESSION — tidy the repo into a monorepo, BEFORE any Cartographer code
 
-> **Cities are not decor, they are content.** A place, a city, a battle, an event all come out of the
-> *second* contribution tool. "Do the cities" was never a graphics task — there would have been nothing
-> to place. *"Sans contribuer, on ne pourra pas remplir. Il faut donner à manger à la bête."*
+**The dev's call, 2026-09-23**: _"ce qu'il faut, c'est avoir quelque chose de publiable dans le Git qui
+soit crédible sous la forme d'un monorepo rangé. Ça, c'est la prochaine étape avant de coder quoi que ce
+soit pour la contribution."_
 
-**The agreed sequence, in the dev's own terms:**
+The repo goes public as a portfolio, and it now holds two applications plus shared code. **The seam
+`rules/troubleshooting.md` said to wait for has arrived** — it named a pure-TS `@europe-map/core` as the
+first candidate, and that is exactly what `data/`, `pipeline/`, `geo/` and `utils/` already are. The split
+is not guesswork: the boundaries are enforced by ESLint today and covered by 1108 tests.
 
-1. **Tools able to contribute one century** — regions, borders, **their colour code**, and **how names
-   are displayed**. Note what that absorbs: the colour fork (roadmap 04) and labelling stop being
-   separate render chantiers and become part of what the Cartographer authors.
-2. **The content contributor** — geolocating cities, battles, events.
-3. **Define the format of all of it**, so it can be re-exploited rather than re-authored.
-4. **Re-exploit at two scales**: the Europe-wide map, and a **country focus presented as a slideshow in
-   steps of about ten years** — the step is open. The dev *has a design in mind* for the country focus:
-   **ask him, do not design it for him.**
+**Three packages, and no more:**
 
-**Why this does not contradict the travée** (`files/plans/roadmap/06`, memory
-[[one-century-as-a-structural-bay]]): the method said a finished century teaches us what contribution
-requires. But **there is no century to finish** — OHM only covers from ~1700, `historical-basemaps` is
-schematic *and* unpublishable. Nothing can be finished until something can be drawn.
+| package        | holds                                                                            | three.js       |
+| -------------- | -------------------------------------------------------------------------------- | -------------- |
+| `core`         | `data/`, `pipeline/`, `geo/`, `utils/` — the format, the readers, the compositor | **no**         |
+| `atlas`        | `scene/`, `camera/`, `controls/`, `ui/`, the bootstrap                           | yes            |
+| `cartographer` | the editor — not written yet                                                     | no (2D canvas) |
 
-## ▶ NEXT SESSION — the Cartographer (roadmap 06)
+**Two decisions taken with it, both to avoid paying for nothing:**
 
-First deliverable, flagged **ultra important** by the dev: the spike **`files/spikes/fetch-atlas`** — a
-georeferenced public-domain atlas plate as a watermark under the canvas, traced over, snapping to the
-rivers and coastline we already own.
+- **No design-system package yet.** It would have one consumer, which `rules/modular-architecture.md`
+  calls abstraction for its own sake. The tokens from Claude Design live in the cartographer until the
+  atlas needs them; extracting them later is mechanical. _(The white-label `fubaritico-ds` renders BEM
+  class strings and ships CSS, so it is usable from vanilla TS — but its blocker is publication, and what
+  we would share here is tokens, not components.)_
+- **pnpm workspaces alone, no Turbo.** At three packages it accelerates nothing and adds a config to
+  explain. Add it when a build is measurably slow.
 
-**Chapter 06's order, with what is already stale:**
+### `files/` stops being gitignored — same session, same job
 
-1. ~~Spike: OHM ingest~~ — **DONE 2026-09-16** (`files/spikes/fetch-ohm`, 98.8 % at 1700).
-2. **PoC, one year only**: open → paint → save → re-open identical → the 3D atlas renders it. The chapter
-   says use **1700**, so the PoC tests the *editor* and not the source.
-3. Extract `packages/core` + move to pnpm workspaces.
-4. Stand up the Payload Studio — **schema first**, it is the real work and is tool-independent.
-5. ~~Derived borders replace the ring-based ones~~ — **DONE 2026-09-17**, the ring path was deleted.
+Tidying the code without tidying `files/` would publish a monorepo with no design material in it, and the
+design material **is** the portfolio piece. Four steps, in order:
 
-**Two decisions due on day one**: full shared topology or the pragmatic v1 of independent polygons
-snapping to existing vertices (cheaper, but subdividing later becomes a redraw); and **the century**.
+1. **Invert the ignore rule** rather than delete anything:
 
-### The century is now contested — read this before assuming 1500
+   ```gitignore
+   files/*
+   !files/plans/
+   !files/spikes/
+   files/spikes/*/out/
+   ```
 
-Recorded decision: **1500, sovereign-state level, Holy Roman Empire as one block**, because its several
-hundred principalities are "months, not a POC".
+   What stays ignored, deliberately: **`files/resources/`** (163 MB, proprietary Euratlas — confirmed by
+   the dev 2026-09-23 as staying out), `files/spikes/*/out/` (the 21 raw GPL-3.0 `world_*.geojson`),
+   `files/session-log.jsonl` (local activity log), `files/claude-archive/` (964 KB of dead design-system
+   skills).
 
-The dev then named a different target (2026-09-18): **a focus on France, 11th → 15th century**, *"avec le
-bordel que c'était… ce serait de l'ordre du miracle"*. Said as an ambition, not a decision — but it is
-the same problem the Empire's block-treatment dodged: a tiny royal domain, the Plantagenets straddling
-two crowns, homage and mouvance rather than borders. It hits the hard limit head-on:
-**`RegionRaster.cells` holds one polity per cell**, so layered sovereignty cannot be expressed at all.
+2. ~~**Move the design folder out of `resources/`**~~ — **done 2026-09-24**:
+   `files/resources/cartographer-design/` → `files/plans/cartographer/design/`. It is _our_ work, 7 MB,
+   and the strongest thread of the portfolio; it was sitting in the one folder that must never ship.
 
-**Settle this at session start.** It may well be the best proving ground there is — a tool surviving
-feudal France survives anything — but it likely forces the data structure to change, and five centuries
-stepped by decade is roughly fifty authored states.
+3. **Split `files/plans/`**, which still mixes two projects — asked for on 2026-09-22 and never done:
 
-### The sources, and the one that just arrived
+   ```
+   files/plans/
+   ├── README.md          reading levels: 2 min · 20 min · everything
+   ├── glossaire.md
+   ├── atlas/             roadmap chapters 01–05 and 07, focus-mode.md
+   └── cartographer/      groundwork, format, ui-inventory, chapter 06, scenarii/, design/
+   ```
 
-- **The dev owns the Atlas historique mondial directed by Georges Duby** (Larousse). **In copyright** —
-  not public domain. Memory [[duby-atlas-is-a-reference-not-a-tracing-source]].
-  **Copyright protects the drawing, not the fact**: where a frontier ran, which cities existed, when a
-  battle was fought are facts nobody owns. So it gets exactly the status Euratlas already has here — a
-  reference beside the keyboard, never a plate scanned under the canvas and traced for publication. Its
-  highest value is the **Studio registry** (identity, hierarchy, events), which has no free source at all.
-- **Provider per era is still blocking for publication**: `historical-basemaps` is GPL-3.0 and cannot
-  ship, OHM is CC0 and can, and today 1700 quietly holds an OHM payload while every other year holds GPL.
+4. **Write the two READMEs** — a root one and `files/plans/README.md`, offering reading levels: **2
+   minutes** (what the project is, one screenshot), **20 minutes** (the groundwork's decisions),
+   **everything**. Nobody reads a 900-line document cold. The root README leads with the _method_, not a
+   feature list — see the framing at the bottom of this file.
 
-## Left open by decision, not missed
+**Check before pushing**: `git count-objects -vH` and a `git status` that shows no 6 MB PNG arriving by
+accident. The terrain bitmap exists in two places (spike output and design assets) and one of them is
+inside an ignored folder today — after step 2 it will not be.
 
-- **A11Y-301 — nothing enters the focus mode from the keyboard.** Escape leaves it; no key enters it.
-  The review said to wait for M2's region list; **that argument does not hold** — the arrow keys already
-  move the camera's ground target, so the centre of the view *is* the keyboard cursor. It is open because
-  it is **the dev's call**: he has said the trigger is provisional and the real entry will be a 3D button
-  driven by event importance, so deciding the gesture now decides it twice.
-- **QUAL-021 — `buildTitle` in `mapLayerBuilders.ts` is reached by no test.** `rebuildFrame` is never
-  called in the suite. Blast radius, not diff; already true before this session.
+## ▶ THEN — start the Cartographer, in this order
 
-## Still open on the decor (none urgent)
+**First, a data task that is not a hole**: `registry.json` does not exist. The identities of the 51
+polities at 1100 — names, ranks, Q-ids, `name:fr` on 81 % of them — sit in the `fetch-ohm` spike's cached
+`relations.json`. A spike has to emit the registry before the editor can open anything.
 
-1. **Vertex colours are written in sRGB into an attribute three reads as linear** (`known-issues`, first
-   entry). It silently eats every darkening on the frame and the cut edge, so anything tuned by eye on
-   those two modules was tuned against the bug. Retuning them is part of the fix, not a follow-up.
-2. **The thickness is cut at the map's edge instead of the sheet's** — why `edgeDepth` is 0.
-3. **The frame's three rules have no matter in them** — raised, not decided.
+Then, dependency-driven rather than by preference:
 
-## Small things never picked up
+1. **The format, as types and readers** — `registry.json` + `<year>.json` from
+   `cartographer/format.md`, with hand-written readers behind `data/assetError.ts` (same taxonomy:
+   `transport | schema | consistency | semantic`), and the adapter down to today's `RegionPayload` so the
+   atlas does not change by a line. Pure, testable with literals, no canvas.
+2. **The geometry model** — anchors stored once, rings as lists of indices, _duplicate the list never the
+   anchors_. The test that must be written by breaking it on purpose: a round trip through save/load
+   **keeps the sharing**. Restored naïvely, two rings that referenced one anchor each get their own copy,
+   the screen looks identical, and the sliver appears three gestures later.
+3. **The history manager** — snapshot per step, ~265 KB each, one gesture = one step. The trap is the same
+   one: a snapshot must restore _the sharing_, not just the coordinates. Document state only — never the
+   active tool, the zoom or the pan.
+4. **The canvas** — 2D, not WebGL. Decided 2026-09-22: `globalCompositeOperation = 'overlay'` gives the
+   bake's own blend mode natively, plus easy handles, easy text, and no `linewidth` ceiling.
+   Hit-testing, marquee, rubber band: all pure arithmetic, testable with literals.
 
-- **The brown/cream stroke on two screenshots**, from 2026-09-16 — never explained.
-- **The coastal band** (Iceland, Scandinavia, the Caspian) — one click settles it: drop the `coastline`
-  layer opacity to 0 and see whether the band goes with it.
-- **`double` borders are implemented, tested, and produced by no rule.**
-- **Vector coastline** (`ne_10m_coastline` through the rivers pipeline) — the last open render complaint.
-- **The compass SVG is validated by nothing** — the fifth asset, missed by chapter 07's own audit.
-- **Retry after a blocking failure** — no way out but a page reload, and nothing says so. The taxonomy
-  already says only `transport` is worth retrying. Build the **action seam** first.
+**The chrome comes last and is already designed.** Port the dark variant's values, not its markup.
 
-## Key facts to reload
+## Still open on the screens — small, and not blocking
 
-- **Three camera modes are settled: normal, focus, country** — the gestures to reach them are not
-  ([[focus-mode-is-permanent]]). A **top-down country view is impossible as things stand**: `pitchForZoom`
-  ties pitch to zoom, so approaching always means grazing. Pitch must decouple from zoom during a focus.
-- **Only entering a focus arcs.** Leaving one already carries its own pull-out; bending it too sends the
-  camera past its destination and back.
-- **A `click` fires at the end of every drag**, with no movement threshold in the DOM — hence
-  `MapControls.pointerDragged`, decided once, where the drag lives. Never decide it a second time.
-- **A border is not an object, it is a relation** — derive it from the fills; never author it separately.
-- **The staircase is a *resolution* problem.** Now at 4× (1.9 km cells, ~136 MB peak, ~825 ms).
-- **The bake is not political** — five callers. Two ports, one implementation.
-- **A worker boundary is a bundle boundary**: hence `pipeline/`, whose ESLint rule refuses `three`.
-- **Only the newest call may write back**, checked after *every* await before *every* side effect.
-- **`bootstrap()` is this codebase's modularity sink** (ARCH-012).
-- **The atlas's name lives once**, in `utils/lettering` — the splash stacks the halves, the sheet runs
-  them together.
-- **Assets**: `public/heightmaps/`, `public/masks/`, `public/rivers/` committed; `public/borders/*.json`
-  git-ignored (GPL). **1700 holds the OHM payload**, original backed up at
-  `files/spikes/fetch-ohm/out/europe-1700.hb-backup.json`.
-- **`let`-const-ify gotcha**: the eslint `--fix` hook runs after each edit; add a `let` and its first
-  reassignment together.
+- **The dark variant is the reference**, confirmed by the dev 2026-09-23: _"on garde la version Dark que
+  tu as corrigée."_ Build from its values, not from the light original.
+- Screens **02, 03, 04 are still light and fixed-size**. Either re-run Claude Design with the dark palette
+  from `01 Editor at rest DARK.dc.html`, or apply the same fifteen substitutions by hand (the `sed` is in
+  that folder's README).
+- The polity list holds **28 entries while the counter says 51**. The list under real load is the thing
+  worth judging.
 
-## Conventions (this project)
+## The three holes left, and they are decided by coding, not before
 
-Docs/config in **English**, chat in **French**. Plans split into chapters (`files/plans/roadmap/`). Spikes
-cataloged in `files/spikes/`. Commit subjects lowercase, **body lines ≤ 100 chars** (commitlint).
-**Announce every command** (cause / reason / action). **`rm -rf` needs explicit permission every time.**
+- **H-03** — how many vertex handles, and from what zoom? 894 for the Empire, 2 258 for Byzantium.
+- **H-05b** — two _peers_ claiming the same ground. A vassal inside its suzerain is settled (H-05a); two
+  equals over Lorraine is a fact nobody can guess, so it must be reported and offered.
+- **H-08** — the raster costs ~825 ms, so the fill lags the vector outline while drawing. Two
+  representations on screen at once, and it has to be designed rather than discovered. _Worth
+  considering: the editor may not need the raster at all — only the atlas does._
+
+## Decided 2026-09-22 — do not reopen
+
+- **Two tools only**: the Pen ‹P› and the white arrow ‹A›, plus ‹space› to pan. No Bézier, no Selection
+  tool, no transform box.
+- **A path is a list of references to anchors. Duplicate the list, never the anchors.**
+- **Every drawn year is independent**; deriving one is `[Save as…]`, which asks for the year.
+- **The registry is shared**, with dated names and stable ids (the Wikidata `Q…` where there is one).
+- **Containment decides** hole versus exclave. A hole is given an owner when it closes — or declared empty
+  on purpose.
+- **A vassal inside its suzerain is not an overlap.** The more specific polity paints; the vassal hand
+  falls out of the registry. `subjectTo` says the law, not the power.
+- **A border's hand is data, its geometry never is.** Explicit beats derived.
+- **Every rule is a default, never a law.** Only two constraints are real: shared anchors, and no GPL.
+- **Cities are the accuracy criterion** — a city on the wrong side is the error that matters, not 20 km of
+  line. Hence witness cities, and showing who holds each city while drawing.
+- **The editing stroke is not the map's border**: thin, crisp, selection blue, no casing.
+- **The selection blue is a reserved ink**, never served to a polity.
+
+## Left for the dev to settle
+
+- **H-23** — does the vassal hand weaken by degree? In feudal France the rear-vassal is the rule.
+- **H-26's other half** — a hole _discovered_ later, surrounded by two or more polities.
+- The Norse Greenland colony, outside the editorial zone to the _west_. A subject question, not a zone one.
+- Coordinate precision in the file: 6 decimals is 10 cm against a 1.9 km cell.
+
+## Measurements worth reloading
+
+- **OHM at 1100**: 51/52 assembled, 98.1 %, **45.2 % of Europe**, median **108 vertices** per polity.
+  **France has no geometry at all** — identity only.
+- **Two `×4` exist and are unrelated**: `rasterScale` 4 is the political grid (1.9 km cells);
+  `supersample` **2** is the texture. Changing one does not touch the other.
+- The baked texture is 7.6 km/px at supersample 1, 2.7 at 4 — and **4 is the useful ceiling**, because the
+  land mask is baked at 4× the DEM.
+- **Rivers**: Scheldt = `Schelde`, Meuse = `Maas`, **Saône absent**. Names are in the local language.
+- Coverage is measured **by surface**, never by counting polities.
+
+## ▶ THE POINT OF PUBLISHING — the framing to lead with
+
+The mechanics are in the monorepo section above; this is what the README has to say.
+
+**The method is the portfolio piece**, more than any single file: behaviour first — 13 Gherkin scenario
+files, 26 holes found by trying to describe a gesture, ten of them closed in one evening — then the
+screens, then the code. Few portfolios show measured figures, decisions with their rejected alternatives,
+and mistakes corrected in writing.
+
+Said honestly, because the contrast is worth stating rather than hiding: **the atlas itself was not built
+that way.** The Cartographer is where the method is applied from the start.
+
+The dev's own words, 2026-09-22: _"Tu as vu tout le travail de décorticage sur la mécanique de l'outil de
+contribution. Ça montre comment on travaille : d'abord on regarde le comportement, après la forme des
+écrans, puis ensuite le code."_
+
+**Language, decided 2026-09-22**: anything not already in English may be rewritten in it, on one
+condition — plain international English, readable by a non-native engineer on first pass. `completed.md`,
+`next.md` and `known-issues.md` are the French ones, and they are **low priority**: the dev calls them
+tracking, not the argument.
+
+## How to answer, in this project
+
+- **Every problem ships with a remedy and a stated severity.** Never a list of risks without decisions.
+- **Any new term goes into `glossaire.md`** in the same breath.
+- Docs/config in **English**, chat in **French**. Announce every command (cause / reason / action).
+  `rm -rf` needs explicit permission every time.

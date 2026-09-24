@@ -2,6 +2,150 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-09-22 (soir) — Dix trous fermés, le format écrit, les écrans du Cartographe
+
+Seconde plage du même chantier : **20:42 → 00:12 (3 h 30, 86 actions)**, après 2 h de coupure — donc
+**7 h 12 sur la journée**. **Toujours aucun fichier de `src/` touché.** Livrables : `cartographer/format.md`,
+`cartographer-ui-inventory.md`, le spike `terrain-bitmap`, et `files/plans/cartographer/design/`
+(5 écrans + 10 curseurs).
+
+- **Le dev a reconnu Illustrator dans les scénarios** — *« la flèche blanche qui sélectionne des points (A)
+  et l'outil plume (P) »* — et le Cartographe n'a plus que **deux outils**. Pas de Bézier, pas d'outil V,
+  **pas de boîte de transformation** : *« nous ne voulons juste que dessiner »*. Une ancre est **blanche à
+  bord bleu, pleine en bleu quand sélectionnée** ; la marquise ne laisse **aucun cadre** au relâchement.
+- **H-06 fermé par un geste, pas par un modèle.** *« On duplique un tracé et on aura des tracés
+  concomitants, c'est tout. »* La condition d'implémentation est tout : **on duplique la liste, jamais les
+  points**. Un tracé est une liste ordonnée de références vers des ancres ; deux tracés sur les mêmes
+  indices *sont* collés. Copier les ancres ferait revenir le liseré que `extractRegionBorders` avait
+  aboli au rendu.
+- **Ma formulation « ça devient impossible » l'a fait tiquer, à raison** : rien n'est interdit, c'est le
+  **défaut** qui devient impossible. Corrigé dans les docs.
+- **Neuf autres trous tombés.** H-04 (fermeture par proximité, tolérance **en pixels écran** — 50 km à
+  l'échelle continentale, et c'est juste) · H-05a (**un vassal dans son suzerain n'est pas un
+  chevauchement**, le plus spécifique peint, ce qui remplace le « dernier index gagne » et répare
+  `colorBySuzerain`) · H-07 (**la containment décide** : contenu = trou, disjoint = exclave, plus aucune
+  question) · H-09 (supprimé : on déplace des points, pas des tracés) · H-10 (un geste = un pas ; *« les
+  412 points disparaissent d'un coup »*) · H-11 (**chaque année dessinée est indépendante**) · H-14 (une
+  année, un fichier) · H-22 (plus de parent, donc plus d'arbre) · H-26 (à moitié : le trou est attribué
+  **au moment où il naît**).
+- **H-12 écrit** — `files/plans/cartographer/format.md`. Deux fichiers : `registry.json` (identités,
+  partagé) + `<year>.json` (géométrie, indépendant). **Une seule idée dedans** : un anneau est une **liste
+  d'index d'ancres**, pas de coordonnées. J'avais esquissé une table de tracés, des arcs et une table de
+  nœuds — **aucun des trois ne servait**.
+- **Le format est petit parce que ses décisions l'ont vidé** : H-11 retire les références croisées, H-06
+  le modèle topologique, le registre partagé les noms répétés dans 21 fichiers.
+- **Le registre est séparé, avec des noms datés** — *regnum Francorum* → *regnum Franciae* vers 1190, une
+  polity, un identifiant. Ça ne contredit pas H-11 : *« chaque année **dessinée** est indépendante »*, et
+  un nom n'est pas dessiné. Retire les deux entrées `Spain` de 1700, les 9 regex de couleur et l'ordre
+  Royaume-Uni-avant-Irlande.
+- **Le scénario le plus banal manquait** : sélectionner un pays et rouvrir son formulaire. Trouvé par le
+  dev en lisant s05.
+- **« Enregistrer sous » est tout le mécanisme de déclinaison** — ferme le fichier, charge la copie,
+  **demande l'année** (sinon un fichier nommé 1110 se déclare 1100). Ça a **réécrit s05 aux trois quarts**.
+  Et l'écrasement d'une année existante **renomme l'ancienne** plutôt que de la détruire.
+- **Deux reprises du dev, toutes deux justes.** *« Pourquoi 50 corrections, ça sort d'où ? »* — de moi, et
+  le chiffre était faux (21 cartes, pas 50) et mon exemple aussi (la côte vient de Natural Earth, elle
+  n'est pas dans les fichiers). *« Tes règles, c'est des contraintes »* — vrai : elles sont des **défauts
+  surchargeables**, écrit en tête de `s00`. Il ne reste que **deux contraintes réelles** : les ancres
+  partagées et la licence.
+- **Le critère de justesse de l'atlas a changé de nature**, et c'est de lui : *« ce qui serait gênant,
+  c'est qu'une ville ne soit pas du bon côté »*. Donc **les villes sont l'instrument de mesure**, pas un
+  confort — ce qui rend l'absence de la Saône sans conséquence. Le remède le moins cher est gratuit :
+  afficher chaque ville avec le pays qui la tient, le raster sait déjà répondre.
+- **La main d'une frontière est une donnée, sa géométrie jamais** — `{ between, hand }`, zéro coordonnée,
+  donc aucune seconde source de vérité. **L'explicite bat la règle dérivée.**
+- **Le spike `terrain-bitmap`** cuit la texture peinte hors navigateur : 2560×2328 en 1,8 s, **479 fleuves
+  rastérisés**, `extendRiversToSea` appliqué comme dans l'app. Possible parce que `composeTerrainRgba` est
+  pur — ce que l'extraction dans `pipeline/` avait acheté sans qu'on l'ait prévu pour ça. Vérifié plutôt
+  que supposé : `SRGBColorSpace` est posé, donc **le PNG est les pixels de l'écran**. Le supersample par
+  défaut est **2, pas 4** — le ×4 est `rasterScale`, sans rapport.
+- **La couverture est accumulée puis composée une fois** : composer segment par segment assombrit chaque
+  jointure et transforme un fleuve en chapelet de perles.
+- **Claude Design a livré 5 écrans et 10 curseurs.** Le code était meilleur que les captures : `aria-label`
+  sur chaque bouton à icône, `role="toolbar"`, cibles 32×32 et 24×24, `{Details}` sur un rail de 200 px,
+  et les chiffres réels des scénarios dans la barre de statut.
+- **Mon diagnostic du débordement était faux** — j'avais accusé `min-height`, qu'il avait bien géré. La
+  cause était `width:1440px;height:900px` **en dur** à la racine.
+- **Le thème sombre appliqué à la main**, après deux refus de l'outil. Quinze valeurs et une ligne. **Les
+  deux inversions comptent plus que la palette** : l'outil actif passe en clair sur sombre, et le **liseré
+  des pastilles s'inverse** — sans ça le bleu ardoise `#54719b` tombe à **2,86:1** sur `#2b2926`. Même
+  argument que la gaine des frontières.
+- **Les curseurs ont trouvé le même remède tout seuls** : un **halo blanc sous l'encre**, pour qu'un seul
+  curseur lise sur terre, mer et aplats. Quatre questions laissées ouvertes par le handoff, tranchées :
+  précédence confirmée · plume sans cible → `not-allowed` · **le curseur ne change pas pendant un drag** ·
+  le nom du fleuve est une étiquette canvas, pas un curseur.
+- **Le canvas 2D est tranché** — `globalCompositeOperation = 'overlay'` donne nativement le mode de la
+  cuisson (`politicalMode: 'overlay'`), qu'un WebGL demanderait d'écrire en shader.
+- **Le trait d'édition n'est pas le trait de la carte** : fin, net, bleu, sans gaine. Sinon on ne sait plus
+  si on regarde son brouillon ou le résultat.
+
+### 2026-09-22 — Le Cartographe : du pipeline aux scénarios (conception, zéro code)
+
+Une seule plage : **14:56 → 18:20 (3 h 24, 69 actions)**, après **4 jours d'interruption**. **Aucun
+fichier de `src/` touché** — session entièrement de conception. Livrables : `cartographer-groundwork.md`,
+`glossaire.md`, et **11 fichiers de scénarios** dans `files/plans/cartographer/scenarii/`.
+
+- **Le repère temporel injecté au démarrage était faux** — le hook annonçait « chantier EN COURS,
+  02:54 » alors que le rapport réel disait 4 jours de coupure. Vérifier le rapport, pas le hook.
+- **Le pipeline politique relevé du code, de bout en bout** (9 étapes, `file:line`), parce que le dev
+  demandait *« qu'est-ce que consomme la couche qui affiche les frontières, comment on génère ça »*. Le
+  chapitre 06 conçoit les outils ; personne n'avait écrit ce que la machine mange aujourd'hui.
+- **Quatre manques du format, dont un que le chapitre 06 ne nommait pas** : une polity **est** sa chaîne
+  de caractères. D'où les 9 regex de `REGION_COLOR_RULES`, l'ordre porteur qui teste le Royaume-Uni avant
+  l'Irlande, la garde `a === b` de `borderPatternFor`, et **deux entrées `Spain`** dans le payload 1700.
+  *« Le code couleur ne peut pas être contribué tant que la clé est un nom d'affichage. »*
+- **Décidé : format B, aligné sur OHM.** Une région porte son **rang**, **de qui elle dépend**, son
+  **nom**, sa **couleur**. Le moment est le moins cher possible : 20 payloads sur 21 sont GPL et déjà
+  condamnés, le 21e est régénérable par un spike.
+- **Notre propre relevé de tags OHM avait manqué l'essentiel.** Le README du spike conclut « pas de
+  rang » parce qu'il a regardé `admin_level` — qui est notre propre filtre. Mesuré : **`border_type`
+  (46,8 %) porte le rang** — kingdom 423, empire 205, duchy 56 — et **`place` (52,5 %) porte le statut**,
+  dont `personal_union` et `condominium`. **OHM sépare déjà rang et dépendance**, ce que ce document
+  avait argumenté de son côté.
+- **Rang et dépendance sont orthogonaux**, et le siècle du dev le prouve : le roi d'Angleterre est duc
+  d'Aquitaine, donc vassal. Résolution gratuite : **une polity par titre**.
+- **Le vassal aura sa propre main de trait**, distincte de l'union personnelle (décision du dev). Le gain
+  dépasse le trait : la **relation se dérive** du registre, la **main** reste une table éditoriale de
+  quatre lignes. Plus de regex, plus d'ordre porteur. Coût mesuré : `ComposedStroke.dashed` est un
+  booléen et la cadence est globale à la couche → **option (c) validée**, cadence par passe.
+- **1100 comme première carte contribuée**, et la mesure a retourné la prémisse. OHM y assemble
+  **51 polities sur 52 à 98,1 %, zéro chaîne ouverte** — aussi propre qu'à 1700 — mais ne couvre que
+  **45 % de l'Europe** (contre 55 % à 1500, 89 % à 1700, même méthode). **Et le Royaume de France n'a
+  aucune géométrie** : il existe en relation *label-only*, avec son nom, son rang et son Q-id.
+  **Pour le siècle et le pays au cœur du projet, OHM donne l'identité et rien de la géographie.**
+- **L'édition au point est praticable** — médiane **108 sommets** par polity, 36 sur 51 sous 300. Les
+  cinq au-dessus de 1000 sont Byzance, Seldjoukides, Abbassides, Norvège, Fatimides, dont **trois sont
+  hors-champ**.
+- **Le décalque est mort, remplacé par le report à vue** (décision du dev). Ça **retourne le chapitre
+  06**, qui dit du filigrane géoréférencé *« c'est ça, le Cartographe »*, et sort le spike `fetch-atlas`
+  du chemin critique après qu'il ait été flagué ultra important le 17/09. **Ce que ça débloque est plus
+  grand que ce que ça supprime : Duby et Euratlas redeviennent utilisables**, puisque reporter ce qu'on
+  lit est de l'extraction de faits. Et c'est mesuré : une planche 1:10M calée tombe à 3–5 km quand nos
+  cellules font 1,9 km — **le filigrane est plus grossier que la grille**.
+- **Le fond par défaut est la texture cuite de l'atlas** — le seul fond **géoréférencé par construction**
+  (zéro calage, erreur nulle), et littéralement l'image de sortie. Trois pièges relevés : elle contient
+  déjà le tint politique (`clearPolitical` d'abord) ; elle lâche à **7,6 km/px** quand la cellule fait
+  1,9 ; et les épaisseurs doivent être en pixels écran.
+- **Les fleuves mesurés contre le tracé de 1100** : l'Escaut est là sous `Schelde`, la Meuse sous `Maas`,
+  le Rhône est là — **la Saône est absente** (coupée par `scalerank`). Et chercher un fleuve par son nom
+  français ne donne rien : les noms sont en langue locale.
+- **Onze fichiers de scénarios Gherkin**, au niveau du bouton : ouvrir · créer la France 1100 · améliorer
+  une frontière · round-trip · **dériver 1110 de 1100** · remplacer une année GPL · registre · vassalité
+  · labels · contrôle avant publication · îles · hors-champ. Leur livrable est **`s99-holes.md`, 26 trous**.
+- **Ce qui sort des scénarios** : rien n'est dupliqué entre années (les tronçons sont partagés, sinon
+  50 cartes = 50 corrections) ; le copy-on-write demande *« la ligne était mal tracée »* ou *« la
+  frontière a bougé »*, et seul l'auteur sait ; un liseré est un **défaut**, la Bretagne non revendiquée
+  un **fait** ; la taille d'un label suit le **rang** et jamais la surface, ce qui règle le Saint-Empire.
+- **Zone éditoriale décidée** (lon −45…60, lat 20…76), **distincte de la bbox de rendu** : 45 polities
+  dedans à 1100, 6 dehors. Fatimides, Abbassides et Zirides **dedans**, ce qui est juste pour les
+  Croisades. La zone est **datée** — élargie à partir du XVIIIe. Jamais de découpe de géométrie à la
+  limite : ça inventerait une frontière.
+- **Deux reproches du dev, tous deux gravés.** *« Tes doutes, j'en ai rien à foutre »* → réponses en
+  solutions, criticité exprimée, remède attaché — dans `CLAUDE.md` et en mémoire. Et *« fais-moi un
+  glossaire »* après qu'il ait décroché sur du vocabulaire non défini → `files/plans/glossaire.md`,
+  **tout mot nouveau y atterrit désormais**. La collision « chapitre 06 » / « scénario 06 » était de moi :
+  les scénarios sont préfixés `s`.
+
 ### 2026-09-18 (nuit) — Le mode focus, le nom de l'atlas, le plan retourné
 
 Reprise **01:17 → 02:49 (1 h 32)**, dans une plage continue depuis 22:10 la veille (4 h 38 au total,
@@ -217,7 +361,7 @@ Repurposed the repo from the old `fubaritico-ds` design system into a **3D histo
   retooled `/review` to 4 dimensions. `grep fubaritico` → only intentional reminders remain.
 - **Quality tooling** (`9dea60e`) — ESLint 9 flat (typed, no React) + Prettier + commitlint + husky
   (lint-staged + type-check + test) + lint-staged. Pinned ESLint 9 / TS 5.7 / tseslint 8.
-- **Plans** — roadmap split into `files/plans/roadmap/` chapters; spikes cataloged in `files/spikes/`.
+- **Plans** — roadmap split into `files/plans/atlas/` chapters; spikes cataloged in `files/spikes/`.
 - **DEM spike** (`files/spikes/fetch-dem`) — georeferenced heightmap from AWS Terrarium tiles (no key,
   Web Mercator); emits Int16-metres `.bin` + `.json`.
 - **Phase 0.1** (`0934783`) — Vite + three.js bootstrap (renderer/scene/camera/loop/resize, Stats + lil-gui).

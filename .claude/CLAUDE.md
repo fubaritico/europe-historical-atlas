@@ -31,9 +31,20 @@ When the dev proposes something:
 ## Critical Workflow Rules
 
 - **Be concise** — no recap, no enumerations, no unsolicited explanations. Act, then report briefly if needed.
+- **Every problem ships with a remedy and a stated severity (IMPORTANT)** — the dev reads everything
+  alone and the chantier is large, so an unqualified alarm is a cost he pays for nothing. Say **how bad
+  it is** (blocking / worth knowing / cosmetic) and **the way out**, in the same breath, short. Never
+  hand back a list of risks without decisions; take the call and say what it costs. A caveat earns its
+  place only if it changes what we do next.
+- **Any new term goes straight into `files/plans/glossaire.md`** — the shared vocabulary is what makes
+  the rest legible. Using a word that is not in there yet is a debt; adding it is part of the answer.
 - **Discuss the approach FIRST, then execute the whole block** — confirm the _approach_ once. Once agreed
   (or "go"/"fais-le"), execute end-to-end without re-asking on each sub-step. Only stop again for a
   genuinely undecided fork or an irreversible/outward-facing action.
+- **A pasted `Screenshot …` name means `~/Desktop`** — the dev's screenshots always land there, so read
+  `~/Desktop/<the name>.png` directly instead of asking for the file again. The name alone is the path.
+- **Never `cd` — always absolute paths.** The activity-log hook appends relative to `$PWD`, so any `cd`
+  forks the journal into a second file and the work spans are under-reported (see `known-issues.md`).
 - **Plans = `.md` in `files/plans/`** (gitignored) — do NOT use the harness "plan mode".
 - **Review → Test → Commit** per change — no accumulation; fix pre-existing issues a review surfaces in
   files you touch (no deferred tech debt).
@@ -100,13 +111,13 @@ Read @known-issues.md
 
 ## Reference Files (load on demand — NOT auto-loaded)
 
-| File                      | When to load                                       |
-| ------------------------- | -------------------------------------------------- |
-| `architecture.md`         | Stack, project structure, scripts, 3D pipeline     |
-| `modular-architecture.md` | SOLID/pluggable/standalone rule — any module       |
-| `decision-tree.md`        | Skill triggers — check before coding               |
+| File                      | When to load                                         |
+| ------------------------- | ---------------------------------------------------- |
+| `architecture.md`         | Stack, project structure, scripts, 3D pipeline       |
+| `modular-architecture.md` | SOLID/pluggable/standalone rule — any module         |
+| `decision-tree.md`        | Skill triggers — check before coding                 |
 | `error-handling.md`       | Any fallback, `catch`, or default covering a failure |
-| `tests.md`                | Writing tests — 5-level policy                     |
-| `troubleshooting.md`      | Debug three.js/Vite/WebGL, architectural decisions |
+| `tests.md`                | Writing tests — 5-level policy                       |
+| `troubleshooting.md`      | Debug three.js/Vite/WebGL, architectural decisions   |
 
 **Before coding**: ask which reference files are needed — do NOT start without the relevant files loaded.
