@@ -14,12 +14,12 @@
 
 import { BufferAttribute, BufferGeometry, DoubleSide, Group, Mesh, MeshBasicMaterial } from 'three'
 
-import { hexToRgb } from '@europe-atlas/core/utils/color'
+import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
 
 import { meshVertexGrid, reliefWorldY } from './reliefMesh'
 
 import type { DrapeSource, HeightCurve } from './drapeProjection'
-import type { RgbColor } from '@europe-atlas/core/utils/color'
+import type { RgbColor } from '@europe-historical-atlas/core/utils/color'
 import type { Object3D } from 'three'
 
 /** How the edge is cut. */

@@ -9,7 +9,7 @@
  * reaching a user as a blank step.
  */
 
-import type { ComputePhase } from '@europe-atlas/core/pipeline/mapCompute'
+import type { ComputePhase } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
 /** The label shown while each phase runs. Written as what the map is *about to* spend time on. */
 export const COMPUTE_PHASE_LABELS: Record<ComputePhase, string> = {

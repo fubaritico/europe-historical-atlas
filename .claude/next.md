@@ -26,7 +26,7 @@ soit crédible sous la forme d'un monorepo rangé. Ça, c'est la prochaine étap
 soit pour la contribution."_
 
 The repo goes public as a portfolio, and it now holds two applications plus shared code. **The seam
-`rules/troubleshooting.md` said to wait for has arrived** — it named a pure-TS `@europe-map/core` as the
+`rules/troubleshooting.md` said to wait for has arrived** — it named a pure-TS `@europe-historical-atlas/core` as the
 first candidate, and that is exactly what `data/`, `pipeline/`, `geo/` and `utils/` already are. The split
 is not guesswork: the boundaries are enforced by ESLint today and covered by 1108 tests.
 

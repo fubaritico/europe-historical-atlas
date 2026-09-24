@@ -15,7 +15,7 @@ import { createSplash } from './ui/splash'
 import { PARCHMENT } from './viewport'
 
 import type { ProgressOverlay } from './ui/progressOverlay'
-import type { AssetKind } from '@europe-atlas/core/data/assetError'
+import type { AssetKind } from '@europe-historical-atlas/core/data/assetError'
 
 /** The map's surrounding interface. */
 export interface MapUi {

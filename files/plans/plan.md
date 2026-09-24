@@ -10,16 +10,22 @@ A private monorepo named **`europe-historical-atlas`**, holding the atlas and th
 content, with **a public Netlify URL fit to put on a CV**. Private because the concept has no equivalent
 we know of and the design corpus is the valuable part; public where it counts — the running application.
 
-## Decisions taken 2026-09-24, not to be reopened
+## Decisions taken 2026-09-24
 
-|                                                           |                                                                                                                                                                                                                                                                   |
-| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Name**                                                  | `europe-historical-atlas`. `package.json` already carries it; the splash already reads `EUROPE / HISTORICΛL ΛTLΛS`. Only the local folder and the future remote differ, and neither is visible to a reader.                                                       |
-| **`regionAt` waits**                                      | Not a preference — today's political data is `historical-basemaps`, GPL-3.0 and git-ignored. Building the atlas's central gesture on data we can never publish would be building it twice.                                                                        |
-| **Payload is an authoring tool, never deployed**          | It runs locally, writes to its own SQLite file (`@payloadcms/db-sqlite`, Drizzle + libSQL), and the atlas reads **static exports**. That removes the "it needs a server" objection entirely.                                                                      |
-| **Volume is a partitioning question, not a database one** | An event ≈ 1 KB. Ten thousand ≈ 10 MB, split by century ≈ 500 KB each — less than the rivers file already shipped. Revisit only if one century passes ~2 MB, or if search must cross all centuries; the answer then is SQLite-over-HTTP in WASM, still no server. |
-| **Contribution has three surfaces**                       | territory (Cartographer) · identity (`registry.json`) · places and events (Payload). None absorbs another.                                                                                                                                                        |
-| **Ship without the political layer first**                | Everything finished today is ours or public domain. Waiting for contributed data would cost months of having no link.                                                                                                                                             |
+> **Who decided what is part of the record.** A conclusion I reached on my own is not a decision the dev
+> made, and filing the two under one heading is how an assumption becomes law without anyone agreeing to
+> it. It happened here on 2026-09-24 — I invented "Payload is never deployed", wrote it into this table
+> as unreopenable, and the dev had never said it. **Dev** rows are settled. **Inferred** rows are mine:
+> arguments, open to being overturned by a sentence.
+
+| by       |                                                           |                                                                                                                                                                                                       |
+| -------- | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **dev**  | **Name**                                                  | `europe-historical-atlas`. `package.json` already carries it; the splash already reads `EUROPE / HISTORICΛL ΛTLΛS`.                                                                                   |
+| **dev**  | **`regionAt` waits for the Cartographer**                 | And the reason is stronger than the preference: today's political data is `historical-basemaps`, GPL-3.0 and git-ignored, so the atlas's central gesture would be built on data we can never publish. |
+| **dev**  | **The contribution tool ships in the repo; going online is suspended** | Its code is committed, never git-ignored, and it uses the common design system. **Online is postponed, not refused**: online means accounts, login and a security layer we are not building now, and the tool has to be bulletproof first — we are still testing it. Until then it runs locally and the atlas reads its output over a relative URL. |
+| **dev**  | **Contribution has three surfaces**                       | territory (Cartographer) · identity (`registry.json`) · places and events (Payload). None absorbs another.                                                                                            |
+| inferred | **Volume is a partitioning question, not a database one** | An event ≈ 1 KB. Ten thousand ≈ 10 MB, split by century ≈ 500 KB each — less than the rivers file already shipped. Revisit if one century passes ~2 MB, or if search must cross all centuries.        |
+| inferred | **Ship without the political layer first**                | Everything finished today is ours or public domain. Waiting for contributed data would cost months of having no link. Tacitly accepted when P1 was approved, never argued on its own.                 |
 
 ---
 
@@ -179,8 +185,39 @@ has its input.
 
 ## P7 — Places and events
 
-Payload locally, SQLite file, static exports committed. Cities first — they are already the accuracy
-criterion for the borders themselves, so they earn their place twice.
+**Its code ships; the tool itself stays local for now** — the dev's call, 2026-09-24.
+
+*Not the constraint removed at the top of this file.* That one was **mine**, permanent, and argued from
+hosting convenience. This one is the dev's, **staged**, argued from security and maturity, and it names
+what would lift it: *"si c'est en ligne, il faut pouvoir se loguer, il faut que ce soit sécurisé"*, and
+*"il faut un outil de contribution éprouvé, bulletproof"*. Putting a public write endpoint on the
+internet before the editor is trustworthy buys risk and no reader.
+
+So: the package is committed like any other, runs on the dev's machine, keeps its database in a file,
+and the atlas reads what it produces over a **relative URL**.
+
+**When it does go online** — and it is meant to — the shape is known: Payload is a Next application, so
+it needs a server runtime and a reachable database. A SQLite *file* does not survive a serverless
+filesystem, so that day means network SQLite (libSQL / Turso, spoken by the same
+`@payloadcms/db-sqlite` adapter) or Postgres, plus the auth layer. What it buys is contribution from the
+web by more than one person, which is what handing out access was about.
+
+Cities first: they are already the accuracy criterion for the borders themselves, so they earn their
+place twice.
+
+### The one thing "a database in a file, read over a relative URL" hides
+
+A browser cannot query a SQLite file over a relative URL. The file is Payload's own storage format; the
+atlas is a static bundle with `fetch`. Two shapes, and this is a question for the dev, not a decision:
+
+| | how it works | cost |
+|---|---|---|
+| **exported JSON** | Payload writes `content/events-1100.json` and friends; the atlas fetches them relatively, exactly as it already fetches the DEM, the mask and the rivers | an export step to run after editing — and the exports are committed, so the atlas never depends on a running Payload |
+| **the SQLite file itself** | ship the `.db` and query it in the browser with `sqlite-wasm` over HTTP range requests | a WASM layer and a query API to write; buys real querying across all centuries without loading everything |
+
+The first matches every other asset in this project and needs nothing new. The second only earns its
+keep the day search has to cross all centuries at once — the same threshold already written into the
+volume row above.
 
 ---
 

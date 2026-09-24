@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { createHeightmap } from '@europe-atlas/core/data/heightmap'
-import { clamp01 } from '@europe-atlas/core/utils/math'
+import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
+import { clamp01 } from '@europe-historical-atlas/core/utils/math'
 
 import { generateRhumbSegments, rhumbCentres, waterRunsAlong } from './rhumbNetwork'
 
 import type { RhumbNetworkOptions } from './rhumbNetwork'
-import type { HeightmapMeta } from '@europe-atlas/core/data/heightmap'
+import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
 
 /** Build minimal metadata for a test grid. */
 function meta(width: number, height: number): HeightmapMeta {

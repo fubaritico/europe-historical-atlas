@@ -4,9 +4,9 @@
   "description": "Interactive 3D historical atlas of Europe (TypeScript + three.js + Vite)",
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @europe-atlas/atlas dev",
-    "build": "pnpm run type-check && pnpm --filter @europe-atlas/atlas build",
-    "preview": "pnpm --filter @europe-atlas/atlas preview",
+    "dev": "pnpm --filter @europe-historical-atlas/atlas dev",
+    "build": "pnpm run type-check && pnpm --filter @europe-historical-atlas/atlas build",
+    "preview": "pnpm --filter @europe-historical-atlas/atlas preview",
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

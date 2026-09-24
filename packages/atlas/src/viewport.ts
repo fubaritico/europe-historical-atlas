@@ -8,7 +8,7 @@
 
 import { Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
 
-import { prefersReducedMotion } from '@europe-atlas/core/utils/motion'
+import { prefersReducedMotion } from '@europe-historical-atlas/core/utils/motion'
 
 import { createSessionStorageMapCameraStore } from './controls/mapCameraStore'
 import { createMapControls } from './controls/mapControls'

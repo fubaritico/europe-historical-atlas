@@ -5,7 +5,7 @@
  * other: this holds the state and the few helpers every rebuild needs, and nothing that draws.
  */
 
-import { createElevationLandMask } from '@europe-atlas/core/data/landMask'
+import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
 
 import { createDrapeProjection } from './scene/drapeProjection'
 

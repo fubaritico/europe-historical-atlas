@@ -3,9 +3,9 @@ import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 import { LineSegments2 } from 'three/addons/lines/LineSegments2.js'
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js'
 
-import { hashInts } from '@europe-atlas/core/utils/hash'
+import { hashInts } from '@europe-historical-atlas/core/utils/hash'
 
-import type { UvPoint } from '@europe-atlas/core/data/coastlineSource'
+import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
 
 /** Fixed-point scale for hashing normalized `[0, 1]` coordinates: two shared endpoints must quantize to
  * the same integer key so their jitter matches (welds); 1e5 ≈ 5 decimals is finer than the DEM grid. */

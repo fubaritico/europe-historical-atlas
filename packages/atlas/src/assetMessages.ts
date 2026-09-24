@@ -10,10 +10,10 @@
  * roadmap's robustness chapter names it as one of the four things to build.
  */
 
-import { isAssetError } from '@europe-atlas/core/data/assetError'
+import { isAssetError } from '@europe-historical-atlas/core/data/assetError'
 
 import type { Notice } from './ui/notice'
-import type { AssetKind } from '@europe-atlas/core/data/assetError'
+import type { AssetKind } from '@europe-historical-atlas/core/data/assetError'
 
 /** What the reader loses when an asset fails. */
 export interface AssetPolicy {

@@ -1,5 +1,5 @@
 {
-  "name": "@europe-atlas/atlas",
+  "name": "@europe-historical-atlas/atlas",
   "version": "1.0.0",
   "description": "The 3D atlas: renderer, scene modules, camera, controls, DOM overlay, and the composition root.",
   "type": "module",
@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@europe-atlas/core": "workspace:^",
+    "@europe-historical-atlas/core": "workspace:^",
     "lil-gui": "^0.21.0",
     "three": "^0.186.0"
   },

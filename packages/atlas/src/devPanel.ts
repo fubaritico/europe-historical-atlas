@@ -3,7 +3,7 @@ import GUI from 'lil-gui'
 import {
   TERRAIN_CONTROLS,
   TERRAIN_CONTROL_GROUPS,
-} from '@europe-atlas/core/pipeline/terrainCompose'
+} from '@europe-historical-atlas/core/pipeline/terrainCompose'
 
 import {
   CAMERA_CONTROLS,
@@ -39,8 +39,8 @@ import type {
   RiverDevParams,
   RoseDevParams,
 } from './devParams'
-import type { TerrainTextureOptions } from '@europe-atlas/core/pipeline/terrainCompose'
-import type { ControlSpec } from '@europe-atlas/core/utils/controlSpec'
+import type { TerrainTextureOptions } from '@europe-historical-atlas/core/pipeline/terrainCompose'
+import type { ControlSpec } from '@europe-historical-atlas/core/utils/controlSpec'
 
 export type {
   CameraTuningParams,

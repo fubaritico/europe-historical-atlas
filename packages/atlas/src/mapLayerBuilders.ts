@@ -6,12 +6,15 @@
  * twice — which is what happened when the rhumb rebuild tore down the rivers without rebuilding them.
  */
 
-import { borderPatternFor } from '@europe-atlas/core/data/borderStyles'
-import { createMaskCoastlineSource } from '@europe-atlas/core/data/coastlineSource'
-import { DEFAULT_RIVER_EXTENSION, extendRiversToSea } from '@europe-atlas/core/data/riverSource'
-import { requireHeightmap } from '@europe-atlas/core/pipeline/inlineCompute'
-import { composeSheetRgba } from '@europe-atlas/core/pipeline/sheetCompose'
-import { terrainTextureSize } from '@europe-atlas/core/pipeline/terrainCompose'
+import { borderPatternFor } from '@europe-historical-atlas/core/data/borderStyles'
+import { createMaskCoastlineSource } from '@europe-historical-atlas/core/data/coastlineSource'
+import {
+  DEFAULT_RIVER_EXTENSION,
+  extendRiversToSea,
+} from '@europe-historical-atlas/core/data/riverSource'
+import { requireHeightmap } from '@europe-historical-atlas/core/pipeline/inlineCompute'
+import { composeSheetRgba } from '@europe-historical-atlas/core/pipeline/sheetCompose'
+import { terrainTextureSize } from '@europe-historical-atlas/core/pipeline/terrainCompose'
 
 import {
   BORDER_RENDER_ORDER,
@@ -39,7 +42,7 @@ import type { DevState } from './devState'
 import type { LayerContext } from './mapLayerContext'
 import type { GraticuleFrameOptions } from './scene/graticuleFrame'
 import type { MapTitle } from './scene/mapTitle'
-import type { BorderPattern } from '@europe-atlas/core/data/borderStyles'
+import type { BorderPattern } from '@europe-historical-atlas/core/data/borderStyles'
 import type { DataTexture } from 'three'
 
 /**

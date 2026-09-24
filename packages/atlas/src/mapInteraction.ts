@@ -18,7 +18,7 @@
  * reader the way back.
  */
 
-import { isEditableFocused } from '@europe-atlas/core/utils/editableFocus'
+import { isEditableFocused } from '@europe-historical-atlas/core/utils/editableFocus'
 
 import type { MapControls } from './controls/mapControls'
 import type { SurfaceHit, SurfacePicker } from './picking/surfacePicker'

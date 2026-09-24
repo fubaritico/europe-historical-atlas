@@ -1,6 +1,6 @@
 import { Mesh, MeshBasicMaterial, PlaneGeometry } from 'three'
 
-import type { Heightmap } from '@europe-atlas/core/data/heightmap'
+import type { Heightmap } from '@europe-historical-atlas/core/data/heightmap'
 import type { BufferAttribute, Texture } from 'three'
 
 /**

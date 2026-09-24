@@ -14,8 +14,8 @@ import {
   ATLAS_TITLE,
   MAP_TYPEFACE,
   withLambdaForA,
-} from '@europe-atlas/core/utils/lettering'
-import { prefersReducedMotion } from '@europe-atlas/core/utils/motion'
+} from '@europe-historical-atlas/core/utils/lettering'
+import { prefersReducedMotion } from '@europe-historical-atlas/core/utils/motion'
 
 import {
   EUROPE_SILHOUETTE_HEIGHT,
@@ -65,7 +65,7 @@ export interface Splash {
   dispose(): void
 }
 
-export { withLambdaForA } from '@europe-atlas/core/utils/lettering'
+export { withLambdaForA } from '@europe-historical-atlas/core/utils/lettering'
 
 /** How long the splash takes to fade, in milliseconds. */
 const FADE_MS = 420

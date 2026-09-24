@@ -1,7 +1,7 @@
 import { DataTexture, Mesh, PlaneGeometry } from 'three'
 import { describe, expect, it } from 'vitest'
 
-import { createHeightmap } from '@europe-atlas/core/data/heightmap'
+import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 
 import {
   WORLD_PER_METRE,
@@ -11,7 +11,7 @@ import {
   reliefWorldY,
 } from './reliefMesh'
 
-import type { HeightmapMeta } from '@europe-atlas/core/data/heightmap'
+import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
 
 /** Build minimal metadata for a test grid. */
 function meta(width: number, height: number, max: number): HeightmapMeta {

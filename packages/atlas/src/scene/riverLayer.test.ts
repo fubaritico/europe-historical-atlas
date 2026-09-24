@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { createRiverLayer, rankOpacity, rankRevealZoom, rankWidth } from './riverLayer'
 
 import type { RiverLayerOptions } from './riverLayer'
-import type { River } from '@europe-atlas/core/data/riverSource'
+import type { River } from '@europe-historical-atlas/core/data/riverSource'
 
 /** A flat projection — the layer under test is about grouping and reveal, not about terrain. */
 const project = (u: number, v: number): [number, number, number] => [u, 0, v]

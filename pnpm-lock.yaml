@@ -65,7 +65,7 @@ importers:
 
   packages/atlas:
     dependencies:
-      '@europe-atlas/core':
+      '@europe-historical-atlas/core':
         specifier: workspace:^
         version: link:../core
       lil-gui:

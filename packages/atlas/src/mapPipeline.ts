@@ -11,15 +11,18 @@
  * last. Two deliberate stages replace them: the terrain, then the same map with its countries.
  */
 
-import { assetError, boundsMatch } from '@europe-atlas/core/data/assetError'
-import { createFetchHeightmapSource } from '@europe-atlas/core/data/heightmap'
-import { createFetchLandMaskSource } from '@europe-atlas/core/data/landMask'
-import { createFetchRegionSource } from '@europe-atlas/core/data/regionSource'
-import { createFetchRiverSource } from '@europe-atlas/core/data/riverSource'
-import { createInlineMapCompute, scaleProgress } from '@europe-atlas/core/pipeline/inlineCompute'
-import { createWorkerMapCompute } from '@europe-atlas/core/pipeline/workerCompute'
-import { hexToRgb } from '@europe-atlas/core/utils/color'
-import { createLatestOnly } from '@europe-atlas/core/utils/latestOnly'
+import { assetError, boundsMatch } from '@europe-historical-atlas/core/data/assetError'
+import { createFetchHeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
+import { createFetchLandMaskSource } from '@europe-historical-atlas/core/data/landMask'
+import { createFetchRegionSource } from '@europe-historical-atlas/core/data/regionSource'
+import { createFetchRiverSource } from '@europe-historical-atlas/core/data/riverSource'
+import {
+  createInlineMapCompute,
+  scaleProgress,
+} from '@europe-historical-atlas/core/pipeline/inlineCompute'
+import { createWorkerMapCompute } from '@europe-historical-atlas/core/pipeline/workerCompute'
+import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
+import { createLatestOnly } from '@europe-historical-atlas/core/utils/latestOnly'
 
 import { COMPUTE_PHASE_LABELS } from './computeLabels'
 import { politicalPalette } from './devParams'
@@ -30,13 +33,13 @@ import type { DevState } from './devState'
 import type { MapLayers } from './mapLayers'
 import type { MapSources } from './mapSources'
 import type { MapUi } from './mapUi'
-import type { HeightmapSource } from '@europe-atlas/core/data/heightmap'
-import type { LandMaskSource } from '@europe-atlas/core/data/landMask'
-import type { RegionSet, RegionSource } from '@europe-atlas/core/data/regionSource'
-import type { RiverSource } from '@europe-atlas/core/data/riverSource'
-import type { MapCompute, ProgressReport } from '@europe-atlas/core/pipeline/mapCompute'
-import type { ComputeWorkerHandle } from '@europe-atlas/core/pipeline/workerCompute'
-import type { LatestOnly } from '@europe-atlas/core/utils/latestOnly'
+import type { HeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
+import type { LandMaskSource } from '@europe-historical-atlas/core/data/landMask'
+import type { RegionSet, RegionSource } from '@europe-historical-atlas/core/data/regionSource'
+import type { RiverSource } from '@europe-historical-atlas/core/data/riverSource'
+import type { MapCompute, ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
+import type { ComputeWorkerHandle } from '@europe-historical-atlas/core/pipeline/workerCompute'
+import type { LatestOnly } from '@europe-historical-atlas/core/utils/latestOnly'
 
 /**
  * How far the land mask's frame may differ from the relief's before the two are declared to be about

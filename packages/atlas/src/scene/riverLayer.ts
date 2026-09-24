@@ -3,8 +3,8 @@ import { Group } from 'three'
 import { createLineLayer } from './lineLayer'
 
 import type { LineLayer, UvSegment } from './lineLayer'
-import type { UvPoint } from '@europe-atlas/core/data/coastlineSource'
-import type { River } from '@europe-atlas/core/data/riverSource'
+import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
+import type { River } from '@europe-historical-atlas/core/data/riverSource'
 
 /**
  * Options for the level-of-detail river network.

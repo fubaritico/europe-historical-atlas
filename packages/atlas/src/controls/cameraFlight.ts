@@ -10,7 +10,7 @@
  * lateral travelling shot at ground level across a map twelve units wide, and unreadable.
  */
 
-import { clamp01, easeInOut, lerp } from '@europe-atlas/core/utils/math'
+import { clamp01, easeInOut, lerp } from '@europe-historical-atlas/core/utils/math'
 
 import type { ControlsState, Flight, FocusReturn } from './controlsState'
 

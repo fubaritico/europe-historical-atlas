@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { assetError } from '@europe-atlas/core/data/assetError'
+import { assetError } from '@europe-historical-atlas/core/data/assetError'
 
 import { ASSET_POLICY, assetNotice } from './assetMessages'
 
-import type { AssetKind } from '@europe-atlas/core/data/assetError'
+import type { AssetKind } from '@europe-historical-atlas/core/data/assetError'
 
 /** Every asset family the taxonomy knows. */
 const ASSETS: AssetKind[] = ['heightmap', 'landMask', 'regions', 'rivers']

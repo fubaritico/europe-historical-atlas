@@ -14,8 +14,8 @@ import {
 } from './composedLineLayer'
 
 import type { BorderStrokeStyle, ComposedLineLayer, ComposedStroke } from './composedLineLayer'
-import type { UvPoint } from '@europe-atlas/core/data/coastlineSource'
-import type { RegionBorders } from '@europe-atlas/core/data/regionRaster'
+import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
+import type { RegionBorders } from '@europe-historical-atlas/core/data/regionRaster'
 
 /** A vertical two-point run, enough to make a pass non-empty. */
 function run(u: number): UvPoint[] {

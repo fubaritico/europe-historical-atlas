@@ -6,7 +6,7 @@
  * own slider without failing type-check.
  */
 
-import type { ControlTable } from '@europe-atlas/core/utils/controlSpec'
+import type { ControlTable } from '@europe-historical-atlas/core/utils/controlSpec'
 
 /**
  * Portolan rhumb-network styling + layout exposed through the dev panel (opacity is zoom-linked in the

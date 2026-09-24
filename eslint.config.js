@@ -7,7 +7,7 @@ import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 /**
  * Import patterns that name a layer, whatever the specifier looks like. Matching is on the import
  * source string, so one entry covers a relative path inside a package (`../data/x`) and a cross-package
- * subpath export (`@europe-atlas/core/data/x`) alike — no resolver needed.
+ * subpath export (`@europe-historical-atlas/core/data/x`) alike — no resolver needed.
  */
 const LAYER = {
   scene: ['**/scene', '**/scene/**'],
@@ -99,7 +99,7 @@ const boundaryConfig = ({ dir, forbid, why }) => {
                   {
                     name: 'three',
                     message:
-                      'Package boundary: @europe-atlas/core is three-free by contract. Return plain buffers and numbers; let the atlas wrap them.',
+                      'Package boundary: @europe-historical-atlas/core is three-free by contract. Return plain buffers and numbers; let the atlas wrap them.',
                   },
                 ],
               }
@@ -183,7 +183,7 @@ export default tseslint.config(
           // Workspace packages sort before relative imports.
           pathGroups: [
             {
-              pattern: '@europe-atlas/**',
+              pattern: '@europe-historical-atlas/**',
               group: 'internal',
               position: 'before',
             },

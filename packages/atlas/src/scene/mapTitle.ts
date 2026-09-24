@@ -10,7 +10,11 @@
 
 import { BufferAttribute, BufferGeometry, Mesh, MeshBasicMaterial } from 'three'
 
-import { ATLAS_FULL_NAME, MAP_TYPEFACE, withLambdaForA } from '@europe-atlas/core/utils/lettering'
+import {
+  ATLAS_FULL_NAME,
+  MAP_TYPEFACE,
+  withLambdaForA,
+} from '@europe-historical-atlas/core/utils/lettering'
 
 import type { Object3D, Texture } from 'three'
 

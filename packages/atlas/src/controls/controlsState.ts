@@ -8,7 +8,7 @@
 
 import { Vector3 } from 'three'
 
-import { clamp, lerp } from '@europe-atlas/core/utils/math'
+import { clamp, lerp } from '@europe-historical-atlas/core/utils/math'
 
 import type { PerspectiveCamera } from 'three'
 

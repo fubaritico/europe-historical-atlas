@@ -6,7 +6,7 @@
  * own slider without failing type-check.
  */
 
-import type { ControlGroup, ControlTable } from '@europe-atlas/core/utils/controlSpec'
+import type { ControlGroup, ControlTable } from '@europe-historical-atlas/core/utils/controlSpec'
 
 /**
  * The historical political overlay: which year is shown, and how its borders are drawn. The tint

@@ -8,7 +8,7 @@
 
 import { Vector3 } from 'three'
 
-import { clamp } from '@europe-atlas/core/utils/math'
+import { clamp } from '@europe-historical-atlas/core/utils/math'
 
 import { degToRad, distanceForZoom, pitchForZoom } from './controlsState'
 

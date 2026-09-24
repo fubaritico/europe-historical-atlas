@@ -10,7 +10,7 @@
 
 import Stats from 'three/addons/libs/stats.module.js'
 
-import ComputeWorker from '@europe-atlas/core/pipeline/computeWorker?worker'
+import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?worker'
 
 import { createDevPanel } from './devPanel'
 import { panelDepsFor } from './devPanelCallbacks'

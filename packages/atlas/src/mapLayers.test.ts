@@ -2,17 +2,17 @@
 import { Scene } from 'three'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { createHeightmap } from '@europe-atlas/core/data/heightmap'
-import { createElevationLandMask } from '@europe-atlas/core/data/landMask'
+import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
+import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
 
 import { createDevState } from './devState'
 import { createMapLayers } from './mapLayers'
 import { createMapSources, refreshReliefSource } from './mapSources'
 
 import type { MapSources } from './mapSources'
-import type { HeightmapMeta } from '@europe-atlas/core/data/heightmap'
-import type { RegionBorders } from '@europe-atlas/core/data/regionRaster'
-import type { RegionSet } from '@europe-atlas/core/data/regionSource'
+import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
+import type { RegionBorders } from '@europe-historical-atlas/core/data/regionRaster'
+import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 
 const META: HeightmapMeta = {
   width: 8,

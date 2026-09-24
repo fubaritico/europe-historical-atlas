@@ -6,7 +6,7 @@
  * own slider without failing type-check.
  */
 
-import type { ControlTable } from '@europe-atlas/core/utils/controlSpec'
+import type { ControlTable } from '@europe-historical-atlas/core/utils/controlSpec'
 
 /**
  * Coastline styling exposed through the dev panel (draped 3D lines; opacity is zoom-linked in the loop).

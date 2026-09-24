@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { createHeightmap } from '@europe-atlas/core/data/heightmap'
+import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 
 import { createMapSources, refreshReliefSource } from './mapSources'
 
-import type { HeightmapMeta } from '@europe-atlas/core/data/heightmap'
+import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
 
 const META: HeightmapMeta = {
   width: 4,

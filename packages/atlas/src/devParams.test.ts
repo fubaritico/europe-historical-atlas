@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   findControlInconsistencies,
   findGroupingProblems,
-} from '@europe-atlas/core/utils/controlSpec'
+} from '@europe-historical-atlas/core/utils/controlSpec'
 
 import {
   ALL_CONTROL_TABLES,
@@ -15,7 +15,7 @@ import {
 } from './devParams'
 
 import type { PoliticalDevParams } from './devParams'
-import type { ControlSpec } from '@europe-atlas/core/utils/controlSpec'
+import type { ControlSpec } from '@europe-historical-atlas/core/utils/controlSpec'
 
 describe('devParams control tables', () => {
   describe('happy path', () => {

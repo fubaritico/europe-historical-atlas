@@ -20,10 +20,13 @@
 
 import { BufferAttribute, BufferGeometry, Mesh, MeshBasicMaterial } from 'three'
 
-import { latitudeToVertical, longitudeToHorizontal } from '@europe-atlas/core/geo/mercator'
-import { hexToRgb } from '@europe-atlas/core/utils/color'
+import {
+  latitudeToVertical,
+  longitudeToHorizontal,
+} from '@europe-historical-atlas/core/geo/mercator'
+import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
 
-import type { GeoBounds } from '@europe-atlas/core/geo/mercator'
+import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
 import type { Object3D } from 'three'
 
 /** One rectangle of the frame, in world XZ. */

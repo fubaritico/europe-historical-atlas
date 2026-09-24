@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { COMPUTE_PHASE_LABELS } from './computeLabels'
 
-import type { ComputePhase } from '@europe-atlas/core/pipeline/mapCompute'
+import type { ComputePhase } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
 /** Every phase the protocol declares, listed here so a new one has to be labelled deliberately. */
 const PHASES: ComputePhase[] = ['rasterise', 'expand', 'colours', 'bake', 'borders']

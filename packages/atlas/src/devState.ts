@@ -10,7 +10,7 @@
  * the defaults say what a control *is*, this says what it currently *holds*.
  */
 
-import { DEFAULT_TERRAIN_OPTIONS } from '@europe-atlas/core/pipeline/terrainCompose'
+import { DEFAULT_TERRAIN_OPTIONS } from '@europe-historical-atlas/core/pipeline/terrainCompose'
 
 import {
   DEFAULT_COASTLINE_PARAMS,
@@ -34,7 +34,7 @@ import type {
   RiverDevParams,
   RoseDevParams,
 } from './devParams'
-import type { TerrainTextureOptions } from '@europe-atlas/core/pipeline/terrainCompose'
+import type { TerrainTextureOptions } from '@europe-historical-atlas/core/pipeline/terrainCompose'
 
 /** The camera's own framing, which is not a map-controls option. */
 export interface FramingState {

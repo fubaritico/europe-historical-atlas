@@ -10,7 +10,7 @@
  * layer without any of them holding a stale copy.
  */
 
-import { lerp } from '@europe-atlas/core/utils/math'
+import { lerp } from '@europe-historical-atlas/core/utils/math'
 
 import {
   rebuildBorders,

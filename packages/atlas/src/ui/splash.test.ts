@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { MAP_TYPEFACE } from '@europe-atlas/core/utils/lettering'
+import { MAP_TYPEFACE } from '@europe-historical-atlas/core/utils/lettering'
 
 import {
   buildSplashFigure,

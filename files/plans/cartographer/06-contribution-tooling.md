@@ -127,7 +127,7 @@ editing would mean re-tracing the coast for every coastal polity, and it would n
 **Ingredients**
 
 - Vite + TS, **2D canvas, no three.js** — a flat Mercator editing surface needs no 3D.
-- Shared from `@europe-map/core`: `geo/mercator`, the land-mask and DEM loaders, `coastlineSource`,
+- Shared from `@europe-historical-atlas/core`: `geo/mercator`, the land-mask and DEM loaders, `coastlineSource`,
   the region raster operations.
 - **Backdrop layers** (toggleable): land/sea from the mask, the coastline, a faint DEM hillshade, a
   graticule, and an optional **reference overlay** — an imported dataset shown underneath while painting.
@@ -163,7 +163,7 @@ self-describing so it survives a change of extent.
 ## Monorepo — the trigger has arrived
 
 `rules/troubleshooting.md` recorded the rule: stay single-package, go **pnpm workspaces + Turbo** (not
-Lerna/Nx) "only when a real seam needs it — the first candidate is a pure-TS `@europe-map/core`
+Lerna/Nx) "only when a real seam needs it — the first candidate is a pure-TS `@europe-historical-atlas/core`
 reusable/testable without three.js". Three apps sharing projection and data logic **is** that seam.
 
 ```

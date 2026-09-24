@@ -9,13 +9,13 @@
  * DEM, so the smoothed copy is derived here and read from here rather than recomputed per layer.
  */
 
-import { smoothHeightmap } from '@europe-atlas/core/data/heightmap'
+import { smoothHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 
-import type { Heightmap } from '@europe-atlas/core/data/heightmap'
-import type { LandMask } from '@europe-atlas/core/data/landMask'
-import type { RegionBorders } from '@europe-atlas/core/data/regionRaster'
-import type { RegionSet } from '@europe-atlas/core/data/regionSource'
-import type { River } from '@europe-atlas/core/data/riverSource'
+import type { Heightmap } from '@europe-historical-atlas/core/data/heightmap'
+import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
+import type { RegionBorders } from '@europe-historical-atlas/core/data/regionRaster'
+import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
+import type { River } from '@europe-historical-atlas/core/data/riverSource'
 
 /** Everything loaded, and everything derived from it. */
 export interface MapSources {

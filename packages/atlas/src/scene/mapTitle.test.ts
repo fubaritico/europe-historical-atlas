@@ -1,7 +1,11 @@
 import { Texture } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
-import { ATLAS_SUBJECT, ATLAS_TITLE, MAP_TYPEFACE } from '@europe-atlas/core/utils/lettering'
+import {
+  ATLAS_SUBJECT,
+  ATLAS_TITLE,
+  MAP_TYPEFACE,
+} from '@europe-historical-atlas/core/utils/lettering'
 
 import { MAP_TITLE, buildMapTitleSvg, createMapTitle } from './mapTitle'
 

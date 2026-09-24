@@ -6,7 +6,7 @@
  * own slider without failing type-check.
  */
 
-import type { ControlTable } from '@europe-atlas/core/utils/controlSpec'
+import type { ControlTable } from '@europe-historical-atlas/core/utils/controlSpec'
 
 /**
  * The paper around the map, and the neatline between the two.

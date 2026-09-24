@@ -8,7 +8,7 @@
 
 import { DEFAULT_COASTLINE_PARAMS } from './coastline'
 
-import type { ControlTable } from '@europe-atlas/core/utils/controlSpec'
+import type { ControlTable } from '@europe-historical-atlas/core/utils/controlSpec'
 
 /**
  * River-network styling and level of detail. The reveal thresholds are zoom values: minor tributaries

@@ -1,9 +1,9 @@
-import { clamp01 } from '@europe-atlas/core/utils/math'
+import { clamp01 } from '@europe-historical-atlas/core/utils/math'
 
 import type { UvSegment } from './lineLayer'
-import type { UvPoint } from '@europe-atlas/core/data/coastlineSource'
-import type { Heightmap } from '@europe-atlas/core/data/heightmap'
-import type { LandMask } from '@europe-atlas/core/data/landMask'
+import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
+import type { Heightmap } from '@europe-historical-atlas/core/data/heightmap'
+import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 
 /** Floor for the sampling step — guards against an absurdly slow (or non-terminating) walk if `step` ≈ 0. */
 const MIN_WALK_STEP = 0.0005

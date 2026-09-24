@@ -1,5 +1,5 @@
-import { isEditableFocused } from '@europe-atlas/core/utils/editableFocus'
-import { clamp } from '@europe-atlas/core/utils/math'
+import { isEditableFocused } from '@europe-historical-atlas/core/utils/editableFocus'
+import { clamp } from '@europe-historical-atlas/core/utils/math'
 
 import { advanceFlight, interrupt } from './cameraFlight'
 import { clampTarget, footprintOffsets, placeCamera } from './cameraFraming'

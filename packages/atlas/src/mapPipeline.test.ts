@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createHeightmap } from '@europe-atlas/core/data/heightmap'
-import { createElevationLandMask } from '@europe-atlas/core/data/landMask'
+import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
+import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
 
 import { createDevState } from './devState'
 import { createMapPipeline } from './mapPipeline'
@@ -12,8 +12,8 @@ import type { DevState } from './devState'
 import type { MapLayers } from './mapLayers'
 import type { MapAssetSources, MapPipelineDeps } from './mapPipeline'
 import type { MapUi } from './mapUi'
-import type { HeightmapMeta } from '@europe-atlas/core/data/heightmap'
-import type { RegionSet } from '@europe-atlas/core/data/regionSource'
+import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
+import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { Mock } from 'vitest'
 
 const META: HeightmapMeta = {

@@ -1,13 +1,13 @@
 import { Group } from 'three'
 
-import { clamp01 } from '@europe-atlas/core/utils/math'
+import { clamp01 } from '@europe-historical-atlas/core/utils/math'
 
 import { createLineLayer } from './lineLayer'
 
 import type { LineLayerOptions, UvSegment } from './lineLayer'
-import type { BorderPattern } from '@europe-atlas/core/data/borderStyles'
-import type { UvPoint } from '@europe-atlas/core/data/coastlineSource'
-import type { RegionBorders } from '@europe-atlas/core/data/regionRaster'
+import type { BorderPattern } from '@europe-historical-atlas/core/data/borderStyles'
+import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
+import type { RegionBorders } from '@europe-historical-atlas/core/data/regionRaster'
 import type { Object3D } from 'three'
 
 /**

@@ -1,5 +1,5 @@
 {
-  "name": "@europe-atlas/core",
+  "name": "@europe-historical-atlas/core",
   "version": "1.0.0",
   "description": "Pure TypeScript core of the atlas: data ports, compositing pipeline, geo maths, utilities. No three.js.",
   "type": "module",
