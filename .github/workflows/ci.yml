@@ -72,13 +72,20 @@ jobs:
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          # Through the environment, never interpolated into the script. A commit message is
+          # attacker-controlled text: `${{ ... }}` pastes it raw into the shell, so a backtick or a
+          # `$(...)` in a message would execute. Multi-line messages also simply broke the command.
+          # Only the subject line is kept — a deploy label wants one line.
+          COMMIT_SUBJECT: ${{ github.event.head_commit.message }}
+          COMMIT_SHA: ${{ github.sha }}
         run: |
+          subject=${COMMIT_SUBJECT%%$'\n'*}
           npx --yes netlify-cli@latest deploy \
             --prod \
             --no-build \
             --dir=site \
             --site="$NETLIFY_SITE_ID" \
-            --message "${{ github.sha }} — ${{ github.event.head_commit.message }}"
+            --message "${COMMIT_SHA:0:7} — $subject"
 
       - name: Skip notice
         if: steps.check.outputs.has != 'true'
