@@ -116,6 +116,25 @@ diff, and it is the one property here that could be lost in silence.
 project exists. Two things only the dev can do: create the project (confirming `projectKey` and
 `organization`), and add the secret. Then `sonar-init.yml`, once, by hand.
 
+### 1.8b Secrets must be declared on the repository, never on the organisation
+
+**Measured 2026-09-24, and it is a paywall rather than a setting.** GitHub's own documentation:
+*"Organization-level secrets and variables are not accessible by private repositories for GitHub
+Free."* The `fubaritico` organisation is on Free and this repository is private, so an organisation
+secret arrives **empty**.
+
+The trap is what that does downstream: `SONAR_TOKEN` empty → the Sonar job self-skips → **the pipeline
+stays green while analysing nothing**. The API is no help either — it lists the secret as shared with
+the repository, because it reports the configured *policy*, not runtime availability.
+
+What makes it survivable is the skip notice: the job says out loud that it skipped and why. A silent
+skip would have looked exactly like a passing build. Any future guarded-by-a-secret job should print
+the same kind of line.
+
+**So: `SONAR_TOKEN`, `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` are repository secrets.** Repository
+secrets work on every plan. Upgrading the organisation to Team would also fix it and would be paying a
+subscription to avoid three copy-pastes.
+
 ### 1.8 Deploy
 
 `netlify.toml` (`build = "pnpm build"`, `publish = "dist"`) and `.nvmrc` pinning Node 22. Connecting the
