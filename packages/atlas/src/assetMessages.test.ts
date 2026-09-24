@@ -94,8 +94,10 @@ describe('assetNotice', () => {
   describe('managed errors', () => {
     it('still says something useful for a failure that is not an AssetError', () => {
       // A caller that cannot say which asset broke still has to say that something did.
+      // `ont`, not `a`: this assertion used to read `toContain('a échoué')`, which is how a
+      // grammatical defect reached production with a green suite — the guard agreed with the bug.
       const notice = assetNotice('rivers', new Error('offline'))
-      expect(notice.title).toContain('a échoué')
+      expect(notice.title).toContain('Les fleuves ont échoué')
       expect(notice.detail).toBe('offline')
     })
   })
@@ -112,6 +114,59 @@ describe('assetNotice', () => {
   describe('edge cases', () => {
     it('omits the detail rather than showing an empty line', () => {
       expect(assetNotice('rivers', undefined).detail).toBeUndefined()
+    })
+  })
+
+  describe('French agreement', () => {
+    // Found in production on 2026-09-24: the deployed atlas announced *"Les frontières historiques
+    // a échoué"*. Every phrase was written in the masculine singular while half the labels are
+    // plural, so the defect was systemic rather than one bad string.
+    it('agrees with a feminine plural subject', () => {
+      const notice = assetNotice('regions', new Error('boom'))
+      expect(notice.title).toContain('Les frontières historiques ont échoué')
+      expect(notice.title).not.toContain('historiques a échoué')
+    })
+
+    it('agrees with a masculine plural subject', () => {
+      const notice = assetNotice('rivers', new Error('boom'))
+      expect(notice.title).toContain('Les fleuves ont échoué')
+    })
+
+    it('leaves a masculine singular subject alone', () => {
+      const notice = assetNotice('heightmap', new Error('boom'))
+      expect(notice.title).toContain('Le relief a échoué')
+    })
+
+    it('agrees the participle of a transport failure, not only the verb', () => {
+      const failed = Object.assign(new Error('404'), {
+        name: 'AssetError',
+        asset: 'regions',
+        failure: 'transport',
+      })
+      const notice = assetNotice('regions', failed)
+      // `chargées`, not `chargé`: the participle follows the subject too.
+      expect(notice.title).toMatch(/n’ont pas pu être chargées|ont échoué/)
+    })
+  })
+
+  describe('French agreement', () => {
+    // Found in production on 2026-09-24: the deployed atlas announced *"Les frontières historiques
+    // a échoué"*. Every phrase was written in the masculine singular while half the labels are
+    // plural, so the defect was systemic rather than one bad string.
+    it('agrees with a feminine plural subject', () => {
+      const notice = assetNotice('regions', new Error('boom'))
+      expect(notice.title).toContain('Les frontières historiques ont échoué')
+      expect(notice.title).not.toContain('historiques a échoué')
+    })
+
+    it('agrees with a masculine plural subject', () => {
+      const notice = assetNotice('rivers', new Error('boom'))
+      expect(notice.title).toContain('Les fleuves ont échoué')
+    })
+
+    it('leaves a masculine singular subject alone', () => {
+      const notice = assetNotice('heightmap', new Error('boom'))
+      expect(notice.title).toContain('Le relief a échoué')
     })
   })
 })
