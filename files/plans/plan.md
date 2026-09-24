@@ -308,7 +308,7 @@ language it had never been designed to leave.
 
 | | what it is | where it lives |
 |---|---|---|
-| **interface strings** | notices, buttons, panel labels, the cartographer's chrome — about 24 today | **files in the repository**, versioned with the code that uses them |
+| **interface strings** | notices, buttons, panel labels, the cartographer's chrome — about 24 today | **files in the repository**, written in **ICU MessageFormat**, versioned with the code that uses them |
 | **content** | place names, event texts, polity names by century | **Payload**, which localises natively |
 
 ### Why the split is not a preference
@@ -347,6 +347,66 @@ already carries — OHM supplies `name:fr` on 81 % of the polities at 1100, and 
 in the local language (`Schelde`, `Maas`). Those are **content**: they belong with the events and the
 places, not in a code table. The export follows the pattern already chosen — one static file per locale,
 beside the year files.
+
+### Adopt ICU MessageFormat from the start — decided 2026-09-24
+
+The standard that handles placeholders, plurals and agreement is **ICU MessageFormat** (ICU =
+*International Components for Unicode*); the JavaScript implementation is `intl-messageformat` (12.1.2).
+
+```
+{count, plural, one{# frontière} other{# frontières}}
+{gender, select, feminine{chargée} other{chargé}}
+```
+
+**We adopt it even with one language**, reversing what was argued an hour earlier in this same session.
+What moved the decision: the `ms/fs/mp/fp` agreement table written by hand in `assetMessages.ts` the same
+evening is **a private dialect reimplementing a subset of ICU**. It grows with every asset kind and every
+sentence, and no translator or translation tool can read it — Crowdin, Lokalise and POEditor all speak
+ICU. Rewriting 24 strings now is an hour; rewriting two hundred in six months is not. The cost is ~10 kB
+on a 185 kB bundle.
+
+### Historical dates are not dates — and `Intl` is the wrong tool
+
+Raised by the dev on 2026-09-24, against a claim of mine that was **wrong for this project**: *"dates
+need no library, `Intl` does it"*. True for an ordinary application; false for a historical atlas.
+
+**The fact, verified**: neither `Intl.DateTimeFormat` nor `Temporal` ships a **Julian** calendar. Every
+calendar they offer is *proleptic Gregorian* — Gregorian rules projected indefinitely backwards. Europe
+in 1100 was Julian. Measured divergences: the Ides of March, **15 March 44 BC** Julian, fall on **13
+March** proleptic Gregorian; Washington's birth reads **11 February 1731** Julian and **22 February
+1732** Gregorian. Formatting an eleventh-century day with `Intl` prints a wrong day.
+
+**But the deeper point is that this project has almost no dates at all:**
+
+| what we hold | what it really is |
+|---|---|
+| `1100.json`, one map per century | an **integer** |
+| "battle of Hastings, 1066" | a year |
+| "Hundred Years' War, 1337–1453" | an **interval** |
+| "circa 1100" | an **approximate** year |
+| "14 October 1066" | the only day-precise case — and it is **Julian** |
+
+No `Date` type models that. It forces a day-level precision we do not have and imposes a calendar that is
+not the right one.
+
+**So: a domain type in `core`, not a library.**
+
+```ts
+type HistoricalDate = {
+  year: number            // signed; note there is no year zero in historical dating
+  month?: number
+  day?: number
+  calendar?: 'julian' | 'gregorian'   // only meaningful once a day is given
+  precision: 'exact' | 'circa' | 'range'
+  until?: number
+}
+```
+
+Display is **text, not date formatting**: `1100`, `1337–1453`, `vers 1100`. `Intl.DateTimeFormat` never
+runs. `Intl.NumberFormat` stays useful for areas and coordinates.
+
+If a day-precise event ever needs Julian↔Gregorian conversion, it goes through the **Julian Day Number** —
+about twenty lines of arithmetic, testable with literals. The Ides of March make the perfect test case.
 
 ### The rule to keep
 
