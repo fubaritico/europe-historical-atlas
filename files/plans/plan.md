@@ -299,3 +299,87 @@ volume row at the top — it has not moved.
 **If it ever does hitch**: parse in the worker. The political pipeline already lives there, so the
 pattern and the port exist.
 
+---
+
+## P8 — Languages · *two systems, and mixing them is the classic mistake*
+
+Asked for 2026-09-24, the evening the deployed atlas said *"Les frontières historiques a échoué"* in a
+language it had never been designed to leave.
+
+| | what it is | where it lives |
+|---|---|---|
+| **interface strings** | notices, buttons, panel labels, the cartographer's chrome — about 24 today | **files in the repository**, versioned with the code that uses them |
+| **content** | place names, event texts, polity names by century | **Payload**, which localises natively |
+
+### Why the split is not a preference
+
+**The argument that settles it is one we lived that same evening.** The interface strings include *the
+message shown when an asset fails to load*. If those strings came from the network, the sentence
+explaining that the network failed could not be displayed. The splash has the same property: it must
+render before anything is fetched. **A string that describes a failure must not be able to fail.**
+
+Two more, both concrete:
+
+- **a string is versioned with the code that uses it.** Rename a key in a deployed build while the CMS
+  still holds the old one and you get a blank label at runtime — a class of bug a repository file
+  cannot produce;
+- **the gate can check files, not a database.** Every key having every locale is a `tsc` error when the
+  table is typed. Nothing can check that a remote row exists at build time.
+
+### For the interface: typed tables, no library yet
+
+A `Record<Locale, Record<Key, string>>` with a typed lookup is about thirty lines, and **a missing
+translation becomes a compile error** rather than a runtime blank. At two dozen strings that is the
+whole job.
+
+**When a second language lands, revisit one thing**: the gender/number agreement table written by hand
+in `assetMessages.ts` on 2026-09-24 is a manual version of what **ICU MessageFormat** does natively
+(`{count, plural, …}`, `{gender, select, …}`). One language does not justify the dependency; two do, and
+the hand-written table is the exact shape to port. Nothing is wasted either way.
+
+**Dates, numbers and areas need no library at all**: `Intl.NumberFormat` and `Intl.DateTimeFormat` ship
+in every browser and already know that French writes `31 200 km²` with a narrow no-break space.
+
+### For the content: Payload's own localisation
+
+Fields marked `localized` give one value per locale, which is what a CMS is for. It fits what the data
+already carries — OHM supplies `name:fr` on 81 % of the polities at 1100, and Natural Earth's rivers come
+in the local language (`Schelde`, `Maas`). Those are **content**: they belong with the events and the
+places, not in a code table. The export follows the pattern already chosen — one static file per locale,
+beside the year files.
+
+### The rule to keep
+
+**If a string can be needed while the network is down, it lives in the repository.** Everything else is
+content.
+
+---
+
+## The README's screenshot — deferred on purpose, 2026-09-24
+
+The root README opens with no image, and that is a decision rather than an omission. The dev's reason,
+and it is the right one: **as the atlas stands, a screenshot says very little.** A relief with no
+political layer reads as a pretty terrain render, which undersells a project whose subject is history.
+
+**So the trigger is not "when someone has time" — it is P5.** The screenshot is worth taking the day a
+year is drawn and its fills and borders are ours: that image shows the relief, the sheet, the drawn
+coastline _and_ a political Europe that owes nothing to anyone. One picture then carries the whole
+argument; one picture now carries a landscape.
+
+Only the dev can take it — it is his screen, `pnpm dev`. Two shots are probably wanted: the atlas
+itself, and the Cartographer mid-gesture, because the method is half the point.
+
+## Carried, and not forgotten
+
+Defects whose fix is due when their file is next opened: vertex colours written sRGB into a linear
+attribute · `buildTitle` unreached by any test (QUAL-021) · no keyboard way **into** the focus mode
+(A11Y-301) · the board cut at the map's edge instead of the sheet's (`edgeDepth` forced to 0) · the
+frame's three rules have no matter in them · `terrainOptions.ts`'s comment contradicting its own value.
+
+## Open, for the dev
+
+- **Prior art** — research whether an interactive 3D historical atlas with dated borders and its own
+  contribution tooling exists elsewhere. Offered, not yet run.
+- **A trademark on the name** — only worth it if commercial use is intended. Otherwise €190 for nothing.
+- **H-23** (does the vassal hand weaken by degree), **H-26's other half**, Norse Greenland, and the
+  coordinate precision in the file.
