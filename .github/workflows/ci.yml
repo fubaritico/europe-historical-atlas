@@ -87,6 +87,23 @@ jobs:
           npx --yes netlify-cli@latest sites:list --json \
             | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{JSON.parse(d).forEach(s=>console.log(s.id,"",s.name))}catch(e){console.log("could not parse the list:",e.message)}})'
 
+      # Diagnostic, never blocking. `Unauthorized: could not retrieve project` has two causes that
+      # need opposite fixes — a site id that is wrong (or has whitespace in it), or a token that
+      # cannot reach that site. This prints both sides so the next failure names its own cause.
+      - name: What this token can reach
+        if: steps.check.outputs.has == 'true'
+        continue-on-error: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          echo "id length: ${#NETLIFY_SITE_ID} characters (a Netlify id is 36)"
+          echo "id starts with: ${NETLIFY_SITE_ID:0:8}"
+          echo "--- sites this token can administer ---"
+          npx --yes netlify-cli@latest sites:list --json > /tmp/sites.json 2>/dev/null || true
+          node -e 'const s=require("/tmp/sites.json");s.forEach(x=>console.log(x.id,x.name))' \
+            || echo "could not list the sites"
+
       - name: Deploy to Netlify
         if: steps.check.outputs.has == 'true'
         env:
