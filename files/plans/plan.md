@@ -36,9 +36,9 @@ we know of and the design corpus is the valuable part; public where it counts �
 Once the application is on a public URL, the **idea** is visible even though the documents are not.
 Depositing first costs €15 and settles the date.
 
-1. **e-Soleau at the INPI**, file mode, on `files/plans/` — the 13 scenarios, the groundwork, the format,
-   the UI inventory, the screens. ~8 MB against a 50 MB ceiling, so no hash-mode discipline needed.
-2. Record the deposit's date and reference in this file.
+1. **e-Soleau at the INPI**, file mode, on `files/plans/` — 80 files, **7.5 MB** against a 50 MB
+   ceiling, so no fingerprint-mode discipline needed. **Step by step: [`e-soleau.md`](e-soleau.md).**
+2. Record the deposit's date and reference here, so a later session knows it is done.
 
 **Done when** the INPI receipt exists. _An idea is protectable by nothing; this dates the expression, and
 confers no right. Not legal advice — confirm with the INPI._
