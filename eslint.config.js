@@ -18,6 +18,7 @@ const LAYER = {
   data: ['**/data', '**/data/**'],
   pipeline: ['**/pipeline', '**/pipeline/**'],
   geo: ['**/geo', '**/geo/**'],
+  editor: ['**/editor', '**/editor/**'],
   main: ['**/main', '**/main.ts'],
 }
 
@@ -32,23 +33,28 @@ const LAYER = {
 const BOUNDARIES = [
   {
     dir: 'packages/core/src/geo',
-    forbid: ['scene', 'camera', 'controls', 'ui', 'data', 'pipeline', 'main'],
+    forbid: ['scene', 'camera', 'controls', 'ui', 'data', 'pipeline', 'editor', 'main'],
     why: 'geo/ is pure projection maths — it must not import from any other layer.',
   },
   {
     dir: 'packages/core/src/utils',
-    forbid: ['scene', 'camera', 'controls', 'ui', 'data', 'pipeline', 'geo', 'main'],
+    forbid: ['scene', 'camera', 'controls', 'ui', 'data', 'pipeline', 'editor', 'geo', 'main'],
     why: 'utils/ is a leaf — small pure helpers, depending on nothing. Anything it would need to import belongs on the other side of the call.',
   },
   {
     dir: 'packages/core/src/data',
-    forbid: ['scene', 'camera', 'controls', 'ui', 'pipeline', 'main'],
-    why: 'data/ is the domain and ports layer — it may read geo/ and utils/, and must know nothing of the renderer, the camera, the DOM or what is being computed.',
+    forbid: ['scene', 'camera', 'controls', 'ui', 'pipeline', 'editor', 'main'],
+    why: 'data/ is the domain and ports layer — it may read geo/ and utils/, and must know nothing of the renderer, the camera, the DOM, what is being computed, or the editor that writes what it reads.',
   },
   {
     dir: 'packages/core/src/pipeline',
-    forbid: ['scene', 'camera', 'controls', 'ui', 'main'],
-    why: 'pipeline/ is the CPU work the map costs — it may read data/, geo/ and utils/, and must know nothing of the renderer, the camera or the DOM.',
+    forbid: ['scene', 'camera', 'controls', 'ui', 'editor', 'main'],
+    why: 'pipeline/ is the CPU work the map costs — it may read data/, geo/ and utils/, and must know nothing of the renderer, the camera, the DOM or the editor. The worker computes a finished year; it never edits one.',
+  },
+  {
+    dir: 'packages/core/src/editor',
+    forbid: ['scene', 'camera', 'controls', 'ui', 'pipeline', 'main'],
+    why: 'editor/ is the Cartographer\u2019s document model \u2014 mutable state and the operations on it. It may read data/, geo/ and utils/, and must know nothing of the renderer, the DOM, or the compute the atlas pays for. Nothing below it may reach back up: the map renders a finished year, it never edits one.',
   },
   {
     dir: 'packages/atlas/src/scene',

@@ -1,0 +1,178 @@
+/**
+ * The gestures, as operations on a {@link YearDocument}. Pure arithmetic over arrays — no canvas, no DOM,
+ * exercisable with literals.
+ *
+ * Every one of them respects the document's invariant: **the anchor table only grows.** Moving a point
+ * writes into it, deleting a ring or a polity writes only to the lists of indices, and the renumbering
+ * happens once at save.
+ */
+
+import { referencedAnchors } from './yearDocument'
+
+import type { YearDocument } from './yearDocument'
+import type { YearPolity } from '../data/yearFormat'
+
+/** What removing a polity touched, in the terms the status bar reports. */
+export interface RemovalReport {
+  /** How many rings the polity held. */
+  rings: number
+  /** Anchors still held by someone else — untouched, and the reason nothing moved. */
+  anchorsKept: number
+  /** Anchors nothing points at any more. They leave the file at save, not now. */
+  anchorsOrphaned: number
+  /** Pair borders that named it and went with it. */
+  bordersDropped: number
+}
+
+/**
+ * Add a point to the table and return its id, which is its index.
+ * @param doc - the document to edit
+ * @param point - the `[longitude, latitude]` pair
+ * @param sourceId - which declared provenance it came from
+ * @returns the new anchor's index
+ */
+export function addAnchor(doc: YearDocument, point: [number, number], sourceId: number): number {
+  doc.anchors.push([point[0], point[1]])
+  doc.anchorSource.push(sourceId)
+  return doc.anchors.length - 1
+}
+
+/**
+ * Move a point.
+ *
+ * Every ring holding this index follows, in this one write — which is the whole purpose of storing indices
+ * rather than coordinates. Two outlines over the same run cannot come apart, because there is nothing to
+ * come apart.
+ * @param doc - the document to edit
+ * @param index - the anchor to move
+ * @param point - where to put it
+ * @returns `true` when the anchor existed
+ */
+export function moveAnchor(doc: YearDocument, index: number, point: [number, number]): boolean {
+  if (index < 0 || index >= doc.anchors.length) return false
+  doc.anchors[index] = [point[0], point[1]]
+  return true
+}
+
+/**
+ * How many paths hold an anchor.
+ *
+ * What the status bar reports and what a delete confirmation needs: "96 anchors · 2 paths" is this count,
+ * and it is the difference between removing a line and moving someone else's border.
+ * @param doc - the document
+ * @param index - the anchor to count
+ * @returns the number of rings, declared gaps and dressed runs holding it
+ */
+export function pathsHolding(doc: YearDocument, index: number): number {
+  let held = 0
+  for (const claim of doc.claims)
+    for (const ring of claim.rings) if (ring.includes(index)) held += 1
+  for (const gap of doc.deliberateGaps) if (gap.ring.includes(index)) held += 1
+  for (const run of doc.runs) if (run.run.includes(index)) held += 1
+  return held
+}
+
+/**
+ * Add a polity to the year's registry, with no territory.
+ *
+ * Territory-less is the normal starting state, not a transient one: at 1100 OHM gives the Kingdom of France
+ * its identity and no geometry at all.
+ * @param doc - the document to edit
+ * @param polity - the identity to add
+ * @returns `false` when the id is already taken, which is refused rather than merged
+ */
+export function addPolity(doc: YearDocument, polity: YearPolity): boolean {
+  if (doc.polities.some((existing) => existing.id === polity.id)) return false
+  doc.polities.push({ ...polity })
+  return true
+}
+
+/**
+ * Close a ring for a polity, from a list of anchors already placed.
+ * @param doc - the document to edit
+ * @param polityId - who is drawing
+ * @param ring - the anchor indices, in order, closure implied
+ * @returns `false` when the polity is unknown or the ring cannot enclose an area
+ */
+export function closeRing(doc: YearDocument, polityId: string, ring: number[]): boolean {
+  if (ring.length < 3) return false
+  if (!doc.polities.some((polity) => polity.id === polityId)) return false
+  if (ring.some((index) => index < 0 || index >= doc.anchors.length)) return false
+  const claim = doc.claims.find((existing) => existing.polity === polityId)
+  if (claim) claim.rings.push([...ring])
+  else doc.claims.push({ polity: polityId, rings: [[...ring]] })
+  return true
+}
+
+/**
+ * Give one polity a path running over another's anchors.
+ *
+ * **The list is duplicated, the anchors are not** — the dev's own mechanism, and the condition the whole
+ * thing turns on. Reversed, because two owners walk their shared boundary in opposite directions. Copying
+ * the points instead would put the two outlines on independent geometry and bring back the sliver that
+ * deriving borders from the raster abolished at render time.
+ * @param doc - the document to edit
+ * @param run - the anchor indices to reuse, in the source's order
+ * @param intoPolity - who gains the path
+ * @returns `false` when the polity is unknown or the run cannot enclose anything
+ */
+export function duplicateRun(doc: YearDocument, run: number[], intoPolity: string): boolean {
+  if (run.length < 3) return false
+  if (!doc.polities.some((polity) => polity.id === intoPolity)) return false
+  if (run.some((index) => index < 0 || index >= doc.anchors.length)) return false
+  return closeRing(doc, intoPolity, [...run].reverse())
+}
+
+/**
+ * Split a removed claim's anchors into those someone else still holds and those nothing does.
+ * @param held - the anchors the removed claim used
+ * @param doc - the document, already without that claim
+ * @returns how many were kept, and how many are orphaned
+ */
+function accountForAnchors(
+  held: ReadonlySet<number>,
+  doc: YearDocument
+): { anchorsKept: number; anchorsOrphaned: number } {
+  const stillLive = referencedAnchors(doc)
+  let anchorsKept = 0
+  for (const index of held) if (stillLive.has(index)) anchorsKept += 1
+  return { anchorsKept, anchorsOrphaned: held.size - anchorsKept }
+}
+
+/**
+ * Remove a polity from the year: its identity, its claim, and the borders that named it.
+ *
+ * **It never touches the anchor table, and that is the point.** A vanished polity's coastline anchors are
+ * its neighbour's too; deleting them would move a border nobody edited, on screen, with no error — the
+ * sliver by the back door. What goes is the *claim*: the lists of indices. Anchors nothing holds any more
+ * leave at save, through the one renumbering, counted here so the author is told.
+ *
+ * Dressed **runs are left alone**, even when every anchor under them is now orphaned: a hand-set stroke is
+ * a decision, and dropping it here would undo it silently. It shows in `{Overrides}` as orphaned.
+ *
+ * A vassal of the removed polity is left **sovereign rather than dangling**: an id pointing at nothing is a
+ * consistency failure the file could not be reopened with.
+ * @param doc - the document to edit
+ * @param polityId - who to remove
+ * @returns what it touched, or `null` when the polity was not there
+ */
+export function removePolity(doc: YearDocument, polityId: string): RemovalReport | null {
+  const index = doc.polities.findIndex((polity) => polity.id === polityId)
+  if (index === -1) return null
+
+  const claim = doc.claims.find((existing) => existing.polity === polityId)
+  const held = new Set<number>()
+  if (claim) for (const ring of claim.rings) for (const i of ring) held.add(i)
+
+  doc.polities.splice(index, 1)
+  doc.claims = doc.claims.filter((existing) => existing.polity !== polityId)
+  const before = doc.pairs.length
+  doc.pairs = doc.pairs.filter((pair) => !pair.between.includes(polityId))
+  for (const polity of doc.polities) if (polity.suzerain === polityId) polity.suzerain = null
+
+  return {
+    rings: claim?.rings.length ?? 0,
+    ...accountForAnchors(held, doc),
+    bordersDropped: before - doc.pairs.length,
+  }
+}
