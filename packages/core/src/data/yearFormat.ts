@@ -18,35 +18,40 @@
  * nothing here can land in the 13.5 kB compute chunk the CI guards.
  *
  * **Types are declared, not inferred.** `z.infer` would drop every field's documentation, which this
- * codebase requires on any exported interface. Each schema is annotated `z.ZodType<T>` instead, so a
+ * codebase requires on any exported interface. Each schema is annotated `z.ZodMiniType<T>` instead, so a
  * schema that stops producing its type fails the build — drift prevented from the other direction.
  *
- * **Every object is `.strict()`**: an unrecognised key is an error, not something stripped in silence. A
+ * **Every object is strict**: an unrecognised key is an error, not something stripped in silence. A
  * hand-authored file with `colours` for `colour` would otherwise lose a pinned colour with nothing said,
  * which is the plausible-substitution failure `rules/error-handling.md` singles out.
+ *
+ * **`zod/mini` rather than the chained API, and it is measured.** Same validation, a functional shape —
+ * `z.string().check(z.minLength(1))` here, `z.string().min(1)` in the classic build; `z.nullable(x)` rather
+ * than `x.nullable()`, which is a function and not a method. Probed on 2026-09-27 by importing one schema
+ * into the atlas and building: the classic build costs **+25.10 kB gzipped**, mini **+5.82 kB**, against a
+ * 185.68 kB bundle. Verbosity for 19 kB is a trade this project takes — the splash screen's whole
+ * silhouette cost 4.3 kB.
  */
 
-import { z } from 'zod'
+import { z } from 'zod/mini'
 
 import type { GeoBounds } from '../geo/mercator'
 
 /** A pinned colour, as a six-digit hex string. */
-const hexColour = z
-  .string()
-  .regex(/^#[0-9a-fA-F]{6}$/, 'should be a #rrggbb hex colour')
-  .nullable()
+const hexColour = z.nullable(
+  z.string().check(z.regex(/^#[0-9a-fA-F]{6}$/, 'should be a #rrggbb hex colour'))
+)
 
 /** A Wikidata entity id. Checked in shape only — we never resolve it. */
-const wikidataId = z
-  .string()
-  .regex(/^Q\d+$/, 'should be a Wikidata id like Q70972')
-  .nullable()
+const wikidataId = z.nullable(
+  z.string().check(z.regex(/^Q\d+$/, 'should be a Wikidata id like Q70972'))
+)
 
 /** A year, negative for BCE. Whole, because this project authors years and not instants. */
-const year = z.number().int()
+const year = z.int()
 
 /** An index into a year's `anchors` array. */
-const anchorIndex = z.number().int().min(0)
+const anchorIndex = z.int().check(z.nonnegative())
 
 /**
  * One polity, valid for the year of the file it sits in.
@@ -98,19 +103,17 @@ export interface YearPolity {
 }
 
 /** {@link YearPolity}. */
-export const yearPolitySchema: z.ZodType<YearPolity> = z
-  .object({
-    id: z.string().min(1),
-    name: z.string().min(1),
-    rank: z.string().nullable(),
-    status: z.string().nullable(),
-    suzerain: z.string().nullable(),
-    existsFrom: year.nullable(),
-    existsTo: year.nullable(),
-    colour: hexColour,
-    wikidata: wikidataId,
-  })
-  .strict()
+export const yearPolitySchema: z.ZodMiniType<YearPolity> = z.strictObject({
+  id: z.string().check(z.minLength(1)),
+  name: z.string().check(z.minLength(1)),
+  rank: z.nullable(z.string()),
+  status: z.nullable(z.string()),
+  suzerain: z.nullable(z.string()),
+  existsFrom: z.nullable(year),
+  existsTo: z.nullable(year),
+  colour: hexColour,
+  wikidata: wikidataId,
+})
 
 /** `<year>/registry.json` — who exists that year. */
 export interface YearRegistry {
@@ -123,13 +126,11 @@ export interface YearRegistry {
 }
 
 /** {@link YearRegistry}. */
-export const yearRegistrySchema: z.ZodType<YearRegistry> = z
-  .object({
-    version: z.number().int().min(1),
-    year,
-    polities: z.array(yearPolitySchema),
-  })
-  .strict()
+export const yearRegistrySchema: z.ZodMiniType<YearRegistry> = z.strictObject({
+  version: z.int().check(z.gte(1)),
+  year,
+  polities: z.array(yearPolitySchema),
+})
 
 /** Where a stretch of geometry came from, and under what terms. */
 export interface YearProvenance {
@@ -142,13 +143,11 @@ export interface YearProvenance {
 }
 
 /** {@link YearProvenance}. */
-export const yearProvenanceSchema: z.ZodType<YearProvenance> = z
-  .object({
-    id: z.number().int().min(0),
-    name: z.string().min(1),
-    licence: z.string().min(1),
-  })
-  .strict()
+export const yearProvenanceSchema: z.ZodMiniType<YearProvenance> = z.strictObject({
+  id: z.int().check(z.nonnegative()),
+  name: z.string().check(z.minLength(1)),
+  licence: z.string().check(z.minLength(1)),
+})
 
 /** What one polity holds that year, as rings of anchor indices. */
 export interface YearClaim {
@@ -164,12 +163,10 @@ export interface YearClaim {
 }
 
 /** {@link YearClaim}. */
-export const yearClaimSchema: z.ZodType<YearClaim> = z
-  .object({
-    polity: z.string().min(1),
-    rings: z.array(z.array(anchorIndex).min(3)),
-  })
-  .strict()
+export const yearClaimSchema: z.ZodMiniType<YearClaim> = z.strictObject({
+  polity: z.string().check(z.minLength(1)),
+  rings: z.array(z.array(anchorIndex).check(z.minLength(3))),
+})
 
 /** Ground the author left unclaimed on purpose, so the pre-publication check stops reporting it. */
 export interface DeliberateGap {
@@ -180,12 +177,10 @@ export interface DeliberateGap {
 }
 
 /** {@link DeliberateGap}. */
-export const deliberateGapSchema: z.ZodType<DeliberateGap> = z
-  .object({
-    ring: z.array(anchorIndex).min(3),
-    reason: z.string().min(1),
-  })
-  .strict()
+export const deliberateGapSchema: z.ZodMiniType<DeliberateGap> = z.strictObject({
+  ring: z.array(anchorIndex).check(z.minLength(3)),
+  reason: z.string().check(z.minLength(1)),
+})
 
 /** `<year>/polities.json` — what was held that year. */
 export interface YearPolities {
@@ -213,30 +208,29 @@ export interface YearPolities {
  * The ordering check is what catches a north/south swap, which otherwise flips the whole map upside down
  * with no error anywhere — the same reasoning as `expectBounds` in the hand-written readers.
  */
-const geoBoundsSchema: z.ZodType<GeoBounds> = z
-  .object({
+const geoBoundsSchema: z.ZodMiniType<GeoBounds> = z
+  .strictObject({
     west: z.number(),
     south: z.number(),
     east: z.number(),
     north: z.number(),
   })
-  .strict()
-  .refine((box) => box.east > box.west, { error: 'east should be east of west' })
-  .refine((box) => box.north > box.south, { error: 'north should be north of south' })
+  .check(
+    z.refine((box) => box.east > box.west, 'east should be east of west'),
+    z.refine((box) => box.north > box.south, 'north should be north of south')
+  )
 
 /** {@link YearPolities}. The anchors/anchorSource length agreement is a consistency check, not a schema one. */
-export const yearPolitiesSchema: z.ZodType<YearPolities> = z
-  .object({
-    version: z.number().int().min(1),
-    year,
-    editorialZone: geoBoundsSchema,
-    sources: z.array(yearProvenanceSchema),
-    anchors: z.array(z.tuple([z.number(), z.number()])),
-    anchorSource: z.array(z.number().int().min(0)),
-    claims: z.array(yearClaimSchema),
-    deliberateGaps: z.array(deliberateGapSchema),
-  })
-  .strict()
+export const yearPolitiesSchema: z.ZodMiniType<YearPolities> = z.strictObject({
+  version: z.int().check(z.gte(1)),
+  year,
+  editorialZone: geoBoundsSchema,
+  sources: z.array(yearProvenanceSchema),
+  anchors: z.array(z.tuple([z.number(), z.number()])),
+  anchorSource: z.array(z.int().check(z.nonnegative())),
+  claims: z.array(yearClaimSchema),
+  deliberateGaps: z.array(deliberateGapSchema),
+})
 
 /**
  * What a limit *is*, as an editorial fact.
@@ -277,19 +271,17 @@ export interface PairBorder extends BorderDress {
 
 /** The three fields every dressed border carries. */
 const borderDressFields = {
-  hand: z.string().min(1).nullable(),
-  source: z.number().int().min(0).nullable(),
-  note: z.string().nullable(),
+  hand: z.nullable(z.string().check(z.minLength(1))),
+  source: z.nullable(z.int().check(z.nonnegative())),
+  note: z.nullable(z.string()),
 }
 
 /** {@link PairBorder}. */
-export const pairBorderSchema: z.ZodType<PairBorder> = z
-  .object({
-    ...borderDressFields,
-    between: z.tuple([z.string().min(1), z.string().min(1)]),
-    type: borderFactSchema,
-  })
-  .strict()
+export const pairBorderSchema: z.ZodMiniType<PairBorder> = z.strictObject({
+  ...borderDressFields,
+  between: z.tuple([z.string().check(z.minLength(1)), z.string().check(z.minLength(1))]),
+  type: borderFactSchema,
+})
 
 /**
  * A border dressed by naming a run of anchors — that stretch and nothing else, whatever it separates.
@@ -304,12 +296,10 @@ export interface RunBorder extends BorderDress {
 }
 
 /** {@link RunBorder}. */
-export const runBorderSchema: z.ZodType<RunBorder> = z
-  .object({
-    ...borderDressFields,
-    run: z.array(anchorIndex).min(2),
-  })
-  .strict()
+export const runBorderSchema: z.ZodMiniType<RunBorder> = z.strictObject({
+  ...borderDressFields,
+  run: z.array(anchorIndex).check(z.minLength(2)),
+})
 
 /** `<year>/borders.json` — how the year's limits are dressed. Never their geometry. */
 export interface YearBorders {
@@ -324,14 +314,12 @@ export interface YearBorders {
 }
 
 /** {@link YearBorders}. */
-export const yearBordersSchema: z.ZodType<YearBorders> = z
-  .object({
-    version: z.number().int().min(1),
-    year,
-    pairs: z.array(pairBorderSchema),
-    runs: z.array(runBorderSchema),
-  })
-  .strict()
+export const yearBordersSchema: z.ZodMiniType<YearBorders> = z.strictObject({
+  version: z.int().check(z.gte(1)),
+  year,
+  pairs: z.array(pairBorderSchema),
+  runs: z.array(runBorderSchema),
+})
 
 /** One authored year, its three files read together. */
 export interface AuthoredYear {
