@@ -31,11 +31,12 @@ Every control name below is **provisional**. It names an _intention_, not a deci
 | 05  | [derive a year](s05-derive-a-year.md)                     | 1100 → 1110: seed, add, remove, modify, and the diff                                |
 | 06  | [replace a GPL year](s06-replace-a-gpl-year.md)           | 1500: what may be taken from a map we cannot ship                                   |
 | 07  | [manage the registry](s07-manage-the-registry.md)         | identity without geography: rename, **merge duplicates**, hierarchy, delete         |
-| 08  | [vassalage](s08-vassalage.md)                             | declare a suzerain, the four hands of border, the empires view                      |
+| 08  | [vassalage](s08-vassalage.md)                             | declare a suzerain, the five hands, the weight by depth, the empires view           |
 | 09  | [place the names](s09-place-the-names.md)                 | anchors, typography by rank, semantic zoom, collisions                              |
 | 10  | [check before publishing](s10-check-before-publishing.md) | a lint for a map — and the only completion gauge                                    |
 | 11  | [islands](s11-islands.md)                                 | what the coastal expansion can never reach                                          |
 | 12  | [out of frame](s12-out-of-frame.md)                       | the editorial zone, separate from the render frame                                  |
+| 13  | [overrides](s13-overrides.md)                             | taking the hand on colours and lines, and the one place they are all visible        |
 
 ## The two tools — decided 2026-09-22
 
@@ -106,6 +107,20 @@ whatever fill is underneath.
 **A marquee leaves nothing behind.** The rectangle exists only while the pointer is down; once released,
 there is no bounding box, no frame, nothing but the anchors now drawn blue. Same decision as the refused
 transform box, and for the same reason: nothing here is ever rotated or scaled.
+
+## The application is a viewer, and the link is made by the reader
+
+**The dev, 2026-09-27** — the principle the data shape follows from
+([`format.md`](../format.md) states it in full):
+
+> _"Le lien entre les dates, ce sont les personnes qui s'y connaissent en histoire. L'application est une
+> visionneuse, avec une quantité d'informations que l'on peut consulter au clic."_
+
+**Nothing models continuity across time.** No entity says "this is the same polity two centuries later" —
+that is the reader's judgement, and it is what a reader of a historical atlas is better at than we are.
+Hence: a registry per year, no dated names, no derivation tree. And hence, on the other side,
+**repetition is free**: reloading a year reloads everything anyway, so anything that helps an author
+validate a polity is carried from year to year without a second thought.
 
 ## Every rule in these files is a default, not a law
 

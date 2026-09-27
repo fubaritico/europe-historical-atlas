@@ -43,7 +43,10 @@
 | **RegionPayload**         | **Notre** format. Les deux sources y sont converties. `{source, year, bbox, regions[]}`.                                                           |
 | **claim** / revendication | Ce qu'un pays tient une année donnée, sous forme d'anneaux fermés.                                                                                 |
 | **index d'ancre**         | La place d'un point dans la table commune des points. Un anneau est une liste d'index, pas de coordonnées — c'est ce qui rend le partage possible. |
-| **registry.json**         | Le fichier des identités, partagé par toutes les années. Voir `cartographer/format.md`.                                                            |
+| **bout partagé**          | Une suite d'ancres que deux tracés ont en commun. **C'est la frontière entre leurs deux pays**, trouvée en comptant combien de tracés tiennent chaque ancre. Tenue par 2 tracés, la paire est nommée sans autre question. Tenue par **1 seul**, il faut encore demander qui tient le sol de l'autre côté — voir **containment**. |
+| **containment**           | Le test « ce contour est-il à l'intérieur de celui-là ». Il sert deux fois : décider si un anneau est un trou ou une exclave, et nommer le voisin d'un bout tenu par un seul tracé — c'est ce qui rend sa frontière au vassal dessiné dans son suzerain.  |
+| **table des frontières**  | Le tableau qui dit ce qu'est chaque frontière : son type (convenue, de fait, contestée, indéterminée), sa **main**, sa source, une note. Une ligne par couple de pays. **Aucune coordonnée** — le bout partagé se désigne déjà tout seul. |
+| **registry.json**         | Le fichier des identités **d'une année** — `years/<année>/registry.json`. Rien n'est partagé entre années. Voir `cartographer/format.md`.          |
 | **ring** / anneau         | Une ligne fermée. Un pays = un ou plusieurs anneaux (ses morceaux et ses trous).                                                                   |
 | **stretch** / tronçon     | Un bout de frontière entre deux sommets. Porte sa propre provenance.                                                                               |
 | **vertex** / sommet       | Un point d'une ligne. C'est ce qu'on ajoute, déplace, supprime.                                                                                    |
@@ -65,7 +68,7 @@
 | **texture**             | L'image peinte qu'on pose sur le relief : parchemin, altitudes, ombrage, grain.           |
 | **bake** / cuisson      | Calculer cette image, pixel par pixel. ~1,5 million de pixels.                            |
 | **tint**                | La couleur d'un pays, appliquée dans la texture.                                          |
-| **derived border**      | La frontière **calculée** comme le bord des aplats. Jamais dessinée à part.               |
+| **derived border**      | La frontière **calculée**, jamais dessinée à part. Deux calculs selon l'endroit : dans **l'atlas**, le bord des aplats du raster (il n'a que des coordonnées à plat) ; dans le **Cartographe**, le **bout partagé** entre deux tracés — exact, au lieu d'une marche de 1,9 km. |
 | **worker**              | Un second fil d'exécution. Le calcul lourd y va, pour que l'écran ne gèle pas.            |
 | **drape** / draper      | Poser une ligne plate sur le relief pour qu'elle épouse les montagnes.                    |
 
@@ -79,13 +82,15 @@
 | **vassal**              | L'inverse. Aura sa propre main de frontière (pointillé).                                                                                                                                               |
 | **union personnelle**   | Deux couronnes sur une même tête, sans subordination. Castille + Aragon.                                                                                                                               |
 | **condominium**         | Deux souverains sur un même territoire, sans hiérarchie. Rare, et inexprimable aujourd'hui.                                                                                                            |
-| **registry** / registre | La liste des polities avec leur identité. Séparée de leur géographie.                                                                                                                                  |
+| **registry** / registre | La liste des polities d'**une** année avec leur identité : nom, rang, suzerain, couleur. Séparée de leur géographie, mais dans le même dossier d'année. Un registre par année, jamais partagé.          |
+| **catalogue**           | Le vivier des polities que le projet connaît, **à l'échelle du projet**. Il sert à **remplir des formulaires** — jamais à dessiner. Le perdre fait tomber l'autocomplétion, aucune carte. À ne pas confondre avec le **registre**, qui est la vérité d'une année. |
 | **ville-témoin**        | Une ville dont on sait à qui elle appartenait cette année-là. Sert à vérifier une frontière : la ville doit tomber du bon côté. Une vingtaine suffit par carte.                                        |
 | **main** / hand         | La façon dont un trait de frontière est dessiné : plein, pointillé, double, gras. Éditoriale, jamais déduite de la géométrie.                                                                          |
 | **lieu** / place        | Un point nommé sur la carte : ville, abbaye, champ de bataille. Porte une position, une icône, et un modèle 3D quand c'est une ville.                                                                  |
 | **événement** / event   | Ce qui s'est passé à une date et un lieu : bataille, décision, invention. Porte un texte, ses conséquences et ses acteurs. C'est la matière de M2.                                                     |
 | **Payload**             | CMS headless sous Next, envisagé pour contribuer lieux et événements. **Jamais appelé « Studio »** : ce nom était une invention de nos documents, pas du dev.                                          |
 | **requête spatiale**    | Poser une question au raster politique plutôt que rapatrier la grille : `regionAt(u, v)` → **la liste** des polities tenant ce point. Une liste, car un vassal et son suzerain y sont tous deux vrais. |
+| **visionneuse**         | Ce qu'est l'application : elle **présente** des informations au clic, elle ne déduit pas la continuité historique. Le lien entre deux dates est fait par l'usager qui s'y connaît. C'est de là que vient « un registre par année » et l'absence de tout modèle inter-années. |
 
 ## Les gestes de l'éditeur
 

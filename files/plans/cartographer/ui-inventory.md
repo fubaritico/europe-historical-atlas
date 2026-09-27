@@ -71,7 +71,7 @@ Plus a **drawing-target banner**, visible only while the Pen is active.
 | `{Tools}`           | ⟨navigate⟩ · ⟨draw⟩ ‹P› · ⟨edit⟩ ‹A› · `[↶ Undo]` `[↷ Redo]` (disabled states carry the undo stack's only visible reading, and each names its step: "Undo — move anchor") |
 | `{Tools}` sub-strip | shown under ⟨draw⟩ only: ⟨free point⟩ · ⟨snap to river⟩ · ⟨snap to coast⟩                                                                                                 |
 | `{Layers}`          | backdrop · coastline · rivers · graticule · cities · fills · borders · unclaimed · diff. Each with visibility and opacity                                                 |
-| `{Polities}`        | the year's polities, sorted by name: colour swatch, name, rank. Markers: "no territory", licence. Hover highlights the fill                                               |
+| `{Polities}`        | the year's polities as a **nested tree**, like Illustrator's layers: a vassal sits under its lord, and `[+ New polity inside]` is what creates one. Colour swatch, name, rank. Markers: "no territory", "ended 1104", "begins 1115", licence, personal union. A branch is labelled with its relation ("owes France"); dragging a row asks before changing homage. Hover highlights the fill |
 | `{Details}`         | the selected polity's card, and the creation/edit form (below)                                                                                                            |
 | `{Hands}`           | border hands set by hand, listed as exceptions to the derived rules                                                                                                       |
 | `{Reference}`       | a hand-placed reference image, when one is loaded                                                                                                                         |
@@ -186,9 +186,9 @@ Two ways to get the image, and the cheap one is enough:
 each saying what is wrong, where, and what it would take to fix; clicking frames it on the canvas. Plus one
 line: "publishable: yes / no". It is the contributor's to-do list and the only completion gauge.
 
-**The registry** ([s07](scenarii/s07-manage-the-registry.md)) — every polity across all years: name, rank,
-existence interval, suzerain, colour, and which years it appears in. Filterable, including "appears in no
-year".
+**The registry** ([s07](scenarii/s07-manage-the-registry.md)) — every polity **of the open year**: name,
+rank, existence dates, suzerain, colour, Wikidata id. Filterable by name and rank, with "no territory"
+marked. Corrected 2026-09-27: one registry per year, so there is no "which years it appears in".
 
 ## Screens worth mocking first
 
@@ -196,3 +196,22 @@ year".
 2. **Drawing** — Pen active, target banner up, sub-strip visible, status bar live.
 3. **The polity form** — used at creation and at edit, so it carries the identity model.
 4. **The check report** — the densest list, and the one that decides whether the tool feels finished.
+
+## To add to the existing mockups — 2026-09-27
+
+The five screens in `design/` predate three decisions and do not show them. None needs a redesign; each is
+an addition to a panel that already exists.
+
+1. **`{Polities}` becomes a nested tree** ([s08](scenarii/s08-vassalage.md)) — the dev's request, the one
+   that matters most because it changes a gesture rather than a display: a vassal is created *inside* its
+   lord, so the relation can no longer be forgotten in a form field. To show: the disclosure triangles, two
+   levels of indent (France → Aquitaine → Poitou), the relation label on the branch, and the confirmation
+   dialogue for a drag that changes homage. **Illustrator's look, not Illustrator's meaning** — nesting here
+   is homage, not stacking, and the mockup has to make that legible or the metaphor misleads.
+2. **The three marks on a derived year** ([s05](scenarii/s05-derive-a-year.md)) — "carried over", "ended
+   1104", "begins 1115", with the counts line and the filter. Plus the **dashed ghost** on canvas for an
+   ended polity: visible, not rendered.
+3. **`{Overrides}`** ([s13](scenarii/s13-overrides.md)) — a panel that does not exist in any screen yet:
+   rows grouped by kind, each with its target, the derived value it replaced, `[Clear]` and `[Show me]`, and
+   the count in the status bar. Plus the **style bar** that appears when a marquee has selected segments:
+   pattern, weight, ink, `[Clear]`.

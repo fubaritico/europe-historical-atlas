@@ -36,9 +36,18 @@ we know of and the design corpus is the valuable part; public where it counts �
 Once the application is on a public URL, the **idea** is visible even though the documents are not.
 Depositing first costs €15 and settles the date.
 
-1. **e-Soleau at the INPI**, file mode, on `files/plans/` — 80 files, **7.5 MB** against a 50 MB
-   ceiling, so no fingerprint-mode discipline needed. **Step by step: [`e-soleau.md`](e-soleau.md).**
-2. Record the deposit's date and reference here, so a later session knows it is done.
+**DONE — deposited around 2026-09-25**, reported by the dev on 2026-09-27. The reference and the exact date
+are his to paste in below when convenient; nothing else is pending, and **nobody should ask again.**
+
+> reference: _(to fill in)_ · date: _(to fill in)_
+
+A deposit is **sealed and immutable** — there is no such thing as updating one. Dating a later state means a
+**new deposit**, €15, independent of this one. The dev's call, 2026-09-27: **one more when the whole thing is
+finished**, and none in between.
+
+1. ~~**e-Soleau at the INPI**, file mode, on `files/plans/`~~ — done. Procedure kept for the next deposit:
+   [`e-soleau.md`](e-soleau.md).
+2. ~~Record the deposit's date and reference here~~ — above.
 
 **Done when** the INPI receipt exists. _An idea is protectable by nothing; this dates the expression, and
 confers no right. Not legal advice — confirm with the INPI._
@@ -189,26 +198,64 @@ tested. Silent, and worse than having no cache.
 only the _affected_ packages using pnpm's changed-since filter. That captures most of the benefit with
 no configuration file to keep in sync. (Verify the exact filter syntax when wiring it.)
 
-## P3 — `registry.json` · _short, and everything downstream needs it_
+## P3 — ~~`registry.json`~~ · **done 2026-09-27, and it changed the format**
 
-The 51 identities at 1100 — names, ranks, Q-ids, `name:fr` on 81 % — sit in `fetch-ohm`'s cached
-`relations.json`. A spike emits the registry. First because it is the one item whose difficulty is
-genuinely unknown.
+The spike ran: `files/spikes/build-registry/build-registry.mjs`, over `fetch-ohm`'s cached
+`relations.json`. **What it found is worth more than what it emitted.**
+
+- Grouping 2 059 relations by Wikidata id **split the Kingdom of France into four**, because OHM gives each
+  period its own Q-id. A Q-id identifies _a polity during a period_, not a polity.
+- `s02` was wrong on the central case: the France alive at 1100 (relation 2810170, "Reaume de France",
+  1050→1212) carries **no Q-id and no `name:fr`**. Its French name is `name` itself, in period spelling.
+- The `admin_level=2` catalogue reaches back to the Cernavodă culture at −4000: **748 polities**, of which
+  **52** are alive at 1100 (49 with a Q-id, 42 with `name:fr` — the recorded 81 % holds, 28 with a rank).
+
+**Hence the dev's decision, the same day: one registry per year, nothing shared** — which deletes dated
+names, dated relations and the whole grouping problem — while **keeping `existsFrom` / `existsTo`**, which
+are facts in the year's own file and are what warn that a polity was carried into a year it did not live in.
+`format.md` rewritten,
+`s04`/`s05`/`s07`/`s99` and the glossary corrected.
 
 ## P4 — The Cartographer
 
-1. **Format as types and readers** — `registry.json` + `<year>.json`, hand-written readers behind
-   `data/assetError.ts` (`transport | schema | consistency | semantic`), plus the adapter down to today's
-   `RegionPayload` so the atlas does not change by a line. Pure, testable with literals.
-2. **Geometry model** — anchors stored once, rings as index lists. The test to write by breaking it on
-   purpose: a save/load round trip **keeps the sharing**. Restored naïvely the screen looks identical and
-   the sliver appears three gestures later.
-3. **History manager** — snapshot per gesture, ~265 KB a step. Same trap: a snapshot must restore the
-   _sharing_. Document state only — never the active tool, the zoom or the pan.
-4. **Canvas** — 2D, `globalCompositeOperation = 'overlay'`. Hit-testing, marquee, rubber band: pure
-   arithmetic, testable with literals.
-5. **Chrome** — port the values from `design/chrome.css`, not the markup. `initDocks` becomes
-   `ui/panelDock.ts` with its five-level suite; its arithmetic (clamp, bounds, restore) is already pure.
+> **This table is the plan of record for P4**, at the dev's request, 2026-09-27 — _"ça c'était clair"_. It is
+> repeated in French at the top of `.claude/next.md`, so it is the first thing read at the start of every
+> session until P4 is done. **The order is dictated by dependencies, not by preference.**
+
+| #     | what it is                                                                                                                                                                                                  | what it delivers                                                                          | how we know it works                                                                                         |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **1** | The **types** of the three files + three hand-written **readers** in `packages/core/src/data/`, beside `heightmap.ts` and `landMask.ts`, behind `assetError.ts` (`transport \| schema \| consistency \| semantic`). Plus the **adapter** down to `RegionPayload` | **The atlas reads a hand-written year and renders it.** Not one line of `src/` changed    | write a `1100/` folder by hand, run `pnpm dev`, the map appears                                              |
+| **2** | The **document model**: anchors once, rings as index lists, and the operations — place, move, delete, **duplicate a path**, close a ring. Plus the **border derivation** (count owners, containment for single-owner runs) | A document that can be exercised in tests, with no screen                                 | a save/load round trip **keeps the sharing**: move an anchor afterwards and both outlines follow             |
+| **3** | The **history manager**: one snapshot per gesture                                                                                                                                                           | `ctrl+z`                                                                                  | same trap as 2 — a restore must restore the **sharing**, not the coordinates                                 |
+| **4** | The **2D canvas**, cut in two: the **arithmetic** (hit-test, marquee, rubber band, screen↔world) which is pure, and the **drawing**, a shell with no logic                                                   | Something on screen                                                                       | the arithmetic is tested with literals — and that cut is what makes it testable at all                       |
+| **5** | The **chrome**: `{Polities}` as a tree, the forms, `{Overrides}`, the three marks of a derived year                                                                                                          | The application                                                                           | values ported from `design/chrome.css`, never its markup; `initDocks` becomes `ui/panelDock.ts` with its suite |
+
+**Steps 4 and 5 create `packages/cartographer/`** — a third package, as the dev's own taxonomy in
+`architecture.md` has it: Payload is an app, the atlas is an app, `core` is a resource.
+
+**How it is done**, and it is not negotiable per step: each step is verified and **committed on its own**, no
+accumulation. `core` stays free of three.js and of the DOM — enforced by ESLint *and* by `tsc`
+(`lib: WebWorker`) — so steps 1, 2 and 3 are **entirely pure**: no canvas, no fetch, no browser. Every guard
+is tested **by breaking it on purpose**, which is what caught the post-drag `click` and the panel's 123
+controls. Gate after every change: `pnpm type-check && pnpm lint && pnpm test`, then `/review`, then
+`/commit`.
+
+**Why step 1 first**: it is the smallest, it is pure, it ends with something visible, and it **defines the
+types the other four use** — doing the geometry model first would mean inventing them twice.
+
+**The reservation, stated**: the blocking vulnerability — deleting a polity must not delete anchors its
+neighbours share ([s05](cartographer/scenarii/s05-derive-a-year.md)) — lives in **step 2**, and cannot be
+tested before the document model exists. It waits one step. Deliberate, not forgotten.
+
+### Step 1, broken down
+
+1. `data/yearFormat.ts` — the types for `registry.json`, `polities.json`, `borders.json`.
+2. `data/registrySource.ts` — the reader, with its five-level suite.
+3. `data/politiesSource.ts` + `data/bordersSource.ts` — same shape.
+4. One **cross-file consistency check**: `polities.json` naming an id `registry.json` lacks is a
+   `consistency` failure, not a schema one.
+5. `data/toRegionPayload.ts` — indices resolved to `[lon, lat]`, the name written flat, `subjectTo` from
+   `suzerain`.
 
 Three holes stay open on purpose — **H-03** (how many handles, from what zoom), **H-05b** (two peers over
 one ground), **H-08** (the raster lags the outline) — because they are decided by coding.

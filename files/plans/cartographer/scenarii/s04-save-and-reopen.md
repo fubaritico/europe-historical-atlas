@@ -32,7 +32,7 @@ Scenario: save as — and this is how a decade is derived
   And "1110" is loaded in its place, as the current file
   And the year recorded *inside* the file is 1110, not 1100
   And the undo history is emptied, because it belonged to the file just closed
-  And the registry is NOT copied — it is shared by every year
+  And the whole folder is copied, registry included — nothing is shared between years
   And the title bar reads "Cartographer — 1110"
 ```
 
@@ -152,8 +152,11 @@ Scenario: derived things are not saved as data
   And it contains no raster
 ```
 
-> A border is a relation, derived from the fills. Writing it down creates the second source of truth this
-> whole project spent a session abolishing. Only **pinned** colours are data; computed ones are not.
+> A border's **geometry** is derived — it is the run of anchors its two owners share, corrected
+> 2026-09-27 (see [`format.md`](../format.md)). Writing the line down as well creates the second source of
+> truth this whole project spent a session abolishing. Everything else about a border — its kind, its
+> stroke, the source its course was read from — **is** data, and lives in the `borders` table. Only
+> **pinned** colours are data; computed ones are not.
 
 ## A border's hand is data; its geometry is not
 
@@ -165,8 +168,23 @@ Scenario: draw one particular border differently
   And the file records { between: [france, empire], hand: "bold" }
   And the file records no coordinate for it
   When I reopen the file
-  Then the border is derived again from the fills, and drawn bold
+  Then the border is derived again from the anchors the two paths share, and drawn bold
 ```
+
+```gherkin
+Scenario: select a line and give it a style
+  Given the border between France and the Empire runs over 96 anchors
+  When I select a stretch of 20 of them with the white arrow
+  And I choose [Hand ▸ bold]
+  Then those 20 are drawn bold
+  And the other 76 keep the hand their rule derives
+  And the file records { run: [...], hand: "bold" }
+```
+
+> **The dev's requirement, 2026-09-27**: _"il faut que les traits soient sélectionnables. Comme dans
+> Illustrator."_ Keyed on the **run of anchors**, not on the pair of polities — otherwise half a boundary
+> cannot be dressed differently from the other half. The run is made of the anchors it dresses, so moving
+> one moves the styling with it.
 
 ```gherkin
 Scenario: an explicit hand beats the rule that would have applied
@@ -176,12 +194,36 @@ Scenario: an explicit hand beats the rule that would have applied
   And it appears in the {Hands} list as an exception to the vassal rule
 ```
 
+```gherkin
+Scenario: nothing recomputes an authored hand away
+  Given I have set the Aquitaine–France border to solid by hand
+  When I close the file and reopen it
+  Then it is still solid
+  When I move an anchor of that very border
+  Then it is still solid
+  When homage over Aquitaine ends in the registry and the vassal rule stops applying
+  Then it is still solid, and still listed as an exception
+  When I press [Clear hand] on it
+  Then it goes back to whatever the rule derives, and leaves the exception list
+```
+
+> **The one guarantee of the three that protects something, and the only one that has to be bullet proof.**
+> The dev, 2026-09-27: _"tu sélectionnes un trait, tu lui donnes un style, comme dans Illustrator."_ That
+> gesture is the law here; the derived hand is only the default underneath it.
+>
+> **Why this asymmetry and not the other**: a derivation that gets a hand wrong costs one click to override,
+> and the override is visible in a list. A recompute that silently restores a derived hand over an authored
+> one costs a wrong map nobody looks at twice — plausible, and therefore undetectable, which is the failure
+> shape `rules/error-handling.md` singles out. So the derivation may be approximate; **the override may
+> not**. [Clear hand] exists so that going back is a decision too, rather than something that happens.
+
 > The dev, 2026-09-22: _"il faudrait quelque chose pour les frontières, comme ça si on a envie de les
 > mettre en gros, on les met en gros… vu qu'ils seront toujours synchros."_
 >
 > **Exactly the right shape, and it costs nothing**: a hand is not a geometry, so recording it introduces
-> no second source of truth. The line stays derived from the fills and cannot come apart from them; only
-> its dress is authored. `data/borderStyles.ts` already does half of this — `solid | dashed | double`, per
+> no second source of truth. The line stays derived from the shared anchors and cannot come apart from the
+> territory, because it _is_ the territory's own points; only its dress is authored.
+> `data/borderStyles.ts` already does half of this — `solid | dashed | double`, per
 > pair of polities — but by matching **names with regular expressions**, which is why
 > `Poland-Lithuania` once satisfied both halves of its own rule. Keyed on ids from H-12, that class of bug
 > disappears.

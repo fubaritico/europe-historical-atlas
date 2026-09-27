@@ -67,7 +67,13 @@ take · leave · adjust. Nothing implements it.
 ### H-12 · Written out 2026-09-22 — [`cartographer/format.md`](../format.md)
 
 The hole was never _whether_ but _what exactly_. The fields are now written down, field by field, with the
-adapter back to `RegionPayload`. **Two files**: `registry.json` for identity, `<year>.json` for territory.
+adapter back to `RegionPayload`. **Rewritten 2026-09-27**: one folder per year, three files inside it —
+`registry.json` (who exists that year), `polities.json` (anchors and rings), `borders.json` (types and
+strokes). **Nothing is shared between years**, H-11 without exception. The earlier version shared one
+registry across all twenty-one centuries, which was my factoring and not the dev's decision, and it is what
+made the format hard: dated names and dated relations existed only to serve it. **`existsFrom` / `existsTo`
+are kept** — a date on a polity is a fact in its own file, not a reference to another one, and it is what
+warns that a polity was carried into a year it did not live in.
 
 **The one idea in it**: a ring is a **list of anchor indices**, not a list of coordinates. Two rings
 containing the same run of indices _are_ the same points — moving one moves both fills, and a sliver
@@ -350,18 +356,23 @@ neighbour to offer it to, and nobody remembers drawing it.
   reason: at 1100 OHM gives the Kingdom of France its identity and **no geometry**, and bulk identity
   import creates dozens at once — territory-less is the normal starting state, not a transient one.
   [s02](s02-create-france-1100.md).
-- **The registry is one shared `registry.json`; the year files carry ids, never names.** Decided
-  2026-09-22, which closes the _"Registry in Payload or a flat JSON"_ question. A polity has a stable id
-  (the Wikidata `Q…` where there is one, on 94 % of OHM polities) and **dated names** — "Royaume des
-  Francs" from 843, "Royaume de France" from 1190, one polity throughout. **This does not contradict
-  H-11**: what is independent is what is _drawn_, and a name is not drawn. It retires the two `Spain`
-  entries at 1700, the nine colour regexes, and the British-before-Irish ordering.
-  [s07](s07-manage-the-registry.md).
+- **There is one registry per year, and the territory file carries ids, never names.** Decided
+  **2026-09-27**, replacing the shared registry with dated names decided on 09-22 — which was my factoring,
+  not the dev's: _"une année c'est une année."_ A polity has a readable id, a name, a rank, a suzerain and a
+  colour, all valid for that year and written once in it. The Wikidata id is kept for **checking** that two
+  entries mean the same polity, never as the identity — measured by the `build-registry` spike, OHM gives
+  each period its own Q-id and grouping by it split the Kingdom of France into four. Ids still retire the two
+  `Spain` entries at 1700, the nine colour regexes and the British-before-Irish ordering.
+  [s07](s07-manage-the-registry.md), [`format.md`](../format.md).
 - **A border's hand is data; its geometry never is.** The dev, 2026-09-22 — any border can be given a hand
-  by hand ("that one in bold"), recorded as `{ between: [a, b], hand }` with **no coordinate**. The line
-  stays derived from the fills, so it cannot come apart from them. **An explicit hand beats a derived
-  rule**, and exceptions are listed. Keyed on ids from H-12, which retires the name-matching regexes in
-  `data/borderStyles.ts`. [s04](s04-save-and-reopen.md).
+  by hand ("that one in bold"), with **no coordinate**. **Widened 2026-09-27** into a `borders` table
+  carrying the limit's kind, its stroke, its source and a note: all of that is editorial fact, and none of
+  it is a place, so none of it can drift from a fill. The line itself stays derived — from the run of
+  anchors the two owners **share**, not from the rasterised fills, which is what makes it exact rather than
+  one cell wide, plus one **containment** test where the two are nested rather than side by side
+  ([`format.md`](../format.md)). **An explicit hand beats a derived rule**, and exceptions
+  are listed. Keyed on ids from H-12, which retires the name-matching regexes in `data/borderStyles.ts`.
+  [s04](s04-save-and-reopen.md).
 - **Roadmap chapter 06 must be corrected**: it says _"seed from year T−1 and paint only the delta"_, which
   is the sharing model now refused. Cosmetic-but-misleading — a document promising a mechanism we decided
   against will be read as the plan.

@@ -3,36 +3,43 @@
 > [Index](s00-index.md) · the registry holds _who exists_; the territory files hold _what they held, when_.
 > Nothing here touches a single vertex.
 
-## Where the registry lives — decided 2026-09-22
+## Where the registry lives — **one per year**, decided 2026-09-27
 
-**One `registry.json`, shared by every year. The year files hold geometry and references, never names.**
+**`years/<year>/registry.json`. Nothing is shared between years.** The territory file holds geometry and
+ids, never names.
 
 ```
-registry.json                          1100.json  (independent, one per map)
-  fr-couronne                            claims:
-    wikidata : Q70972                      - polity : fr-couronne     ← the id only
-    rank     : kingdom                       rings  : [ … points … ]
-    exists   : from 843
-    names    : "Royaume des Francs"  from 843
-               "Royaume de France"   from 1190
+years/1100/registry.json              years/1100/polities.json
+  fr-couronne                           claims:
+    name     : "Reaume de France"          - polity : fr-couronne     ← the id only
+    rank     : kingdom                       rings  : [ … indices … ]
+    suzerain : null
+    wikidata : Q237131
 ```
 
-The 1100 file **does not contain the name.** It carries `fr-couronne`, and the display name is whichever
-one the registry says was valid in 1100 — "Royaume des Francs". The same id in 1200 reads "Royaume de
-France".
+The territory file **does not contain the name.** It carries `fr-couronne`, and the name comes from the same
+year's registry. The 1659 folder holds its own registry, where the same id reads "Royaume de France".
 
-**Why this does not contradict H-11.** What is independent is the _geometry_: the dev said _"chaque année
-**dessinée** est indépendante"_, and a name is not drawn. So each fact is written once — identity in the
-registry, territory in the year. Rename once, and every map follows.
+**This replaces a shared registry with dated names, and the shared version was mine.** The dev's position,
+2026-09-27: _"une année c'est une année… la forme des données doit pouvoir représenter chaque date, quelle
+qu'elle soit."_ H-11 applies without exception, and the simplification is real — dated names, existence
+intervals and dated relations all existed only to serve the sharing. See
+[`format.md`](../format.md).
 
-**What it fixes, measured in the data we ship**: today a polity _is_ its string, which is why the 1700
+**Measured, and it is what settled it**: the `build-registry` spike (2026-09-27) grouped the 2 059 cached
+OHM relations by Wikidata id and split the **Kingdom of France into four**, because OHM gives each period
+its own Q-id. Per year the question does not arise — 52 relations are alive at 1100, each exactly once.
+
+**What ids still fix, measured in the data we ship**: today a polity _is_ its string, which is why the 1700
 payload holds **two entries named `Spain`** with no way to say they are one thing, why colours need nine
 regular expressions, and why the British rule must be tested before the Irish one. With ids, renaming
-breaks neither the colour, nor the border's hand, nor a vassal tie. **The Wikidata id does most of the
-work for free** — 94 % of OHM polities carry one; `fr-couronne` is only a readable alias.
+breaks neither the colour, nor the border's hand, nor a vassal tie. The Wikidata id is kept **for checking
+that two entries mean the same polity** — never as the identity, since it is per period rather than per
+polity.
 
-**The cost, stated**: two files instead of one, and losing the registry loses every name. It needs its own
-validation and its own backup, like any other asset.
+**The cost, stated**: a polity's name, rank and colour are written once per year rather than once in total,
+so a rename or a recolour across centuries is one edit per year. Deriving a year copies them
+([s05](s05-derive-a-year.md)), which covers the normal path; authoring a year from scratch does not.
 
 ## Editing a polity that already exists
 
@@ -68,9 +75,10 @@ Scenario: rename from the map, mid-century
 ```gherkin
 Scenario: open the registry
   When I press [Registry]
-  Then every polity the project knows is listed, across all years
-  And each row shows: name, rank, existence interval, suzerain, colour, and the years it appears in
-  And I can filter by name, by rank, and by "appears in no year"
+  Then every polity of the open year is listed
+  And each row shows: name, rank, suzerain, colour, and its Wikidata id
+  And I can filter by name and by rank
+  And a row is marked "no territory" when nothing in the year claims it
 ```
 
 ## Naming
@@ -134,10 +142,13 @@ Scenario: set a suzerain, with dates
 
 ```gherkin
 Scenario: refuse a cycle
-  Given Normandy owes France
-  When I try to make France owe Normandy over an overlapping interval
+  Given Normandy owes France in the open year
+  When I try to make France owe Normandy
   Then it is refused with "that would make a loop"
 ```
+
+> **A cycle is now a question about one file.** The chain of `suzerain` fields inside a year either loops or
+> it does not — no dates to overlap, nothing to compare across years.
 
 ```gherkin
 Scenario: see the tree
