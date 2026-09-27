@@ -8,8 +8,32 @@
 
 import type { GeoBounds } from '../geo/mercator'
 
+/**
+ * Every asset family the taxonomy knows, as a value rather than only as a type.
+ *
+ * **The list is the source of truth and {@link AssetKind} is derived from it**, so nothing downstream has to
+ * keep a second copy in step. That copy existed: `assetMessages.test.ts` held a hand-written array of the
+ * same names to prove the policy table covered them all, and on 2026-09-27 it drifted the moment the three
+ * `year*` kinds were added — a test guarding against drift, drifting. Exhaustiveness of the policy table is
+ * already held by `Record<AssetKind, …>` at compile time; what was missing was a way to *enumerate* the
+ * union at runtime, which is this.
+ *
+ * The three `year*` kinds are the Cartographer's format, one per file of a year's folder. Separate kinds
+ * rather than one because a reader has to be told *which* file broke: losing the registry loses every name,
+ * losing the polities loses the territory, losing the borders loses only the hand-set strokes.
+ */
+export const ASSET_KINDS = [
+  'heightmap',
+  'landMask',
+  'rivers',
+  'regions',
+  'yearRegistry',
+  'yearPolities',
+  'yearBorders',
+] as const
+
 /** Which asset family failed. An identifier, not a sentence — the wording belongs to whoever shows it. */
-export type AssetKind = 'heightmap' | 'landMask' | 'rivers' | 'regions'
+export type AssetKind = (typeof ASSET_KINDS)[number]
 
 /**
  * How it failed.

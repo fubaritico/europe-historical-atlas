@@ -1,13 +1,19 @@
 import { describe, expect, it } from 'vitest'
 
-import { assetError } from '@europe-historical-atlas/core/data/assetError'
+import { ASSET_KINDS, assetError } from '@europe-historical-atlas/core/data/assetError'
 
 import { ASSET_POLICY, assetNotice } from './assetMessages'
 
 import type { AssetKind } from '@europe-historical-atlas/core/data/assetError'
 
-/** Every asset family the taxonomy knows. */
-const ASSETS: AssetKind[] = ['heightmap', 'landMask', 'regions', 'rivers']
+/**
+ * Every asset family the taxonomy knows — **imported, never re-listed here.**
+ *
+ * This used to be a hand-written array of the same names, which drifted on 2026-09-27 the moment three
+ * kinds were added: a test guarding against drift, drifting. `ASSET_KINDS` is now the source of truth and
+ * `AssetKind` is derived from it, so adding a kind cannot leave this file behind.
+ */
+const ASSETS: readonly AssetKind[] = ASSET_KINDS
 
 describe('ASSET_POLICY', () => {
   describe('happy path', () => {

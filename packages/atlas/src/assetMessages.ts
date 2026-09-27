@@ -67,6 +67,26 @@ export const ASSET_POLICY: Record<AssetKind, AssetPolicy> = {
     agreement: 'mp',
     consequence: 'La carte s’affiche sans le réseau hydrographique.',
   },
+  yearRegistry: {
+    severity: 'degraded',
+    label: 'le registre de l’année',
+    agreement: 'ms',
+    consequence:
+      'Les pays s’affichent sans nom, sans rang et sans lien de vassalité : la géométrie est là, l’identité manque.',
+  },
+  yearPolities: {
+    severity: 'degraded',
+    label: 'les territoires de l’année',
+    agreement: 'mp',
+    consequence: 'La carte s’affiche sans les pays ni leurs frontières.',
+  },
+  yearBorders: {
+    severity: 'degraded',
+    label: 'le style des frontières',
+    agreement: 'ms',
+    consequence:
+      'Les frontières s’affichent avec leur style déduit : les traits posés à la main sont perdus.',
+  },
 }
 
 /** How each kind of failure reads, as the middle of a sentence, agreeing with its subject. */
