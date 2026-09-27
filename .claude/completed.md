@@ -2,6 +2,76 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-09-27 → 28 — Le format du Cartographe en code, et les deux premières étapes de P4
+
+Une seule plage : **20:46 → 01:17 (4 h 30, 236 actions)**, après 2 jours de coupure. **8 commits**
+`b06055f`..`9bd6a55`, **1124 → 1343 tests**, gate verte à chaque pas. Moitié conception, moitié code.
+
+- **Le registre par année, et c'est le dev qui a retourné ma factorisation.** `format.md` annonçait un
+  registre partagé par les 21 siècles avec des noms datés — **mon argument, inscrit comme sa décision**,
+  exactement ce que la colonne `by` existe pour empêcher. Sa position : *« une année c'est une année »*.
+  Ça **supprime** les noms datés, les relations datées et tout le problème d'identité inter-siècles.
+  Un dossier par année, trois fichiers dedans.
+- **Et la mesure l'a confirmé avant la discussion.** Le spike `build-registry` a regroupé les 2 059
+  relations OHM par Q-id et **éclaté le Royaume de France en quatre** — OHM donne un Q-id par période, donc
+  il identifie *une polity pendant une période*, pas une polity. Deux autres trouvailles : la France vivante
+  en 1100 (relation 2810170, *« Reaume de France »*) n'a **ni Q-id ni `name:fr`**, ce qui contredit `s02` sur
+  le cas central ; et le catalogue `admin_level=2` remonte à la culture de Cernavodă en −4000, soit **748
+  polities dont 52 vivantes en 1100**.
+- **La frontière se dérive des ancres partagées, et c'est sa déduction.** Je défendais le contraire en
+  citant notre propre document, qui disait « le bord des aplats ». Sa version est **exacte** au lieu d'une
+  marche de 1,9 km, et retire les 825 ms de raster entre « je ferme un anneau » et « je vois la frontière ».
+- **Son cas du vassal a cassé ma règle le jour même.** L'Aquitaine dessinée *dans* la France ne partage
+  aucune ancre, donc « tenue par un tracé », donc ma règle dessinait une frontière contre le vide au milieu
+  de la France. Ce qui répond est l'**inclusion** — ce contour est-il dans celui-là. Le compte répond au cas
+  côte à côte ; il ne répond pas au cas imbriqué.
+- **`containment` renommé `inclusion` partout**, à sa demande, avec sa raison : *« on comprend rien »*. Le
+  mot ne se lisait pas, et ce corpus est relu par une seule personne. `inclusion` marche dans les deux
+  langues, donc code et glossaire partagent enfin un vocabulaire. `dériver` ajouté au glossaire aussi —
+  employé pendant des heures sans jamais avoir été défini.
+- **Deux vassaux côte à côte : le poids suit la profondeur du plus proche suzerain commun.** Ferme **H-23**
+  avec la même arithmétique, et corrige le scénario « colorer par suzerain » qui donnait la main de vassal à
+  *toutes* les frontières internes — donc affirmait un hommage inexistant, au pire moment (couleurs
+  fusionnées, l'encre est tout ce qui reste au lecteur).
+- **L'arbre de vassalité dans `{Polities}`**, son idée : un vassal se crée *dans* son suzerain, comme un
+  sous-calque. Ça ferme la vulnérabilité du champ suzerain qu'on oublie — il n'y a plus de champ. Trois
+  garde-fous écrits : l'allure d'Illustrator mais pas son sens (imbriquer déclare un hommage, pas un ordre
+  d'empilement), l'union personnelle hors de l'arbre, et l'inclusion qui garde un rôle plus petit.
+- **`s13-overrides.md`, sa contrainte tenue entière** : *« je veux pouvoir surcharger. »* Précédence
+  complète — un **bout d'ancres** bat une paire de pays bat la règle déduite. Et sa correction sur la
+  sélection : **une marquise**, les segments viennent avec les ancres, le geste décide. J'avais inventé un
+  clic-sur-segment et une « unité naturelle de ligne » ; supprimés tous les deux.
+- **Zod, et la question qui valait 19 ko.** J'ai cité **8 Mo** — le paquet npm sur disque, dont rien n'est
+  embarqué — puis mesuré zéro, sans jamais poser sa question : *« n'y a-t-il pas moyen d'utiliser juste ce
+  qu'il faut ? »* Il y en a un, ça s'appelle `zod/mini`, et c'est mesuré : **+25,10 ko** pour l'API classique
+  contre **+6,39 ko** pour mini. Total du format entier câblé : **+9,15 ko gzip**, et le chunk worker
+  **identique à l'octet** (hash inchangé).
+- **Le manifeste plutôt qu'un 404.** `years/index.json` liste les années dessinées. Un 404 est aussi ce que
+  rend un serveur qui hoquette, donc y répondre par l'ancien payload afficherait les frontières du siècle
+  précédent sans un mot. **Une année absente du manifeste est un fait ; une année listée qui échoue est une
+  panne.** Vérifié en écrivant la version naïve : un `try/catch` qui retombe fait tomber six tests.
+- **La vulnérabilité bloquante est fermée par construction.** Une invariante : **le tableau d'ancres ne perd
+  jamais rien pendant l'édition.** Donc `removePolity` retire une revendication, jamais un point — les ancres
+  de côte de l'Empire sont aussi celles de la France. Ce qui n'est plus référencé part à l'enregistrement,
+  par une seule renumération.
+- **Une cinquième couche dans `core`** : `editor/`, avec sa ligne dans la table des frontières. Prouvée en
+  faisant importer `editor/` depuis `data/` — refusé. **Et ça a révélé un défaut** : le message d'erreur
+  parlait du renderer, parce que j'avais ajouté l'interdit sans toucher l'explication.
+- **Un bug de symétrie trouvé par un test qui contredisait mon code.** Le poids d'une frontière était compté
+  depuis *le premier argument*, donc la même frontière sortait à deux épaisseurs selon qui posait la
+  question. C'est la profondeur du suzerain commun désormais, symétrique par construction.
+- **Et la leçon qui vaut pour la suite : mes deux premiers sabotages n'ont pas fait tomber le test-vedette.**
+  Celui qui garantit que l'aller-retour conserve le partage passait alors que la sauvegarde était cassée.
+  Ce qui le fait tomber, c'est **l'implémentation naïve plausible** — chaque pays emportant sa propre copie
+  de ses points, ce que fait `RegionPayload`. Consigné en mémoire : pour vérifier un test, écrire le code
+  que quelqu'un écrirait vraiment, pas une casse arbitraire.
+- **Trois reproches du dev, tous justes.** *« Tu fais flipper, tu donnes pas de solution »* — j'ai cité une
+  règle au lieu d'expliquer un mécanisme. *« Tu vas t'arrêter ? »* — j'ai enchaîné des scénarios alors qu'il
+  demandait de s'arrêter. Et *« tu me donnes pas d'ordre »* — j'ai décidé de clore la session à sa place.
+- **Deux fautes de procédure, de moi.** J'ai utilisé `cd` alors que `CLAUDE.md` l'interdit, et c'est ce qui a
+  cassé la commande de renommage. Et j'ai laissé l'arbre **rouge** en étendant `AssetKind` sans lancer la
+  gate — la casse était prévisible et je l'ai annoncée *après*.
+
 ### 2026-09-24 — Le dépôt existe, l'atlas est en ligne, et 21 fichiers GPL en sont sortis
 
 Une seule plage : **14:56 → 23:48 (8 h 52, 278 actions)**, **30 commits**, **1108 → 1124 tests**, gate

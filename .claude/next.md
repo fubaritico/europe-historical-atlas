@@ -5,7 +5,7 @@
 
 ## Where we are
 
-`main` at `a21e534`, **1124 tests**, gate verte. Le dépôt existe, il est **en ligne et déployé** :
+`main` at `9bd6a55`, **1343 tests**, gate verte. Le dépôt est **en ligne et déployé** :
 
 |       |                                                                             |
 | ----- | --------------------------------------------------------------------------- |
@@ -15,7 +15,10 @@
 | Sonar | opérationnel, `europe-historical-atlas` sous l'organisation `fubaritico`    |
 
 Structure : **deux paquets**. `@europe-historical-atlas/core` (pure TS, ni three.js ni DOM, contrats
-tenus par ESLint et par `tsc`) et `@europe-historical-atlas/atlas` (l'application).
+tenus par ESLint et par `tsc`) et `@europe-historical-atlas/atlas` (l'application). `core` a désormais
+**cinq couches** — `utils`, `geo`, `data`, `pipeline`, et **`editor`** ajoutée le 27/09 avec sa ligne dans
+la table des frontières. `zod/mini` est une dépendance de `core` : **+9,15 ko gzip** pour tout le format,
+mesuré, et **zéro octet** dans le chunk worker (13 490 o, hash inchangé).
 
 ## ▶ P4, LE CARTOGRAPHE — les cinq étapes
 
@@ -25,9 +28,9 @@ tenus par ESLint et par `tsc`) et `@europe-historical-atlas/atlas` (l'applicatio
 
 | | c'est quoi | ça livre quoi | on sait que ça marche comment |
 | --- | --- | --- | --- |
-| **1** | Les **types** des trois fichiers + trois **lecteurs** écrits à la main, dans `packages/core/src/data/` à côté de `heightmap.ts` et `landMask.ts`, derrière `assetError.ts`. Plus l'**adaptateur** vers `RegionPayload` | **L'atlas lit une année écrite à la main et l'affiche.** Zéro ligne de `src/` modifiée | on écrit un dossier `1100/` à la main, `pnpm dev`, la carte s'affiche |
-| **2** | Le **modèle de document** : les ancres une fois, les anneaux en index, et les opérations — poser, déplacer, supprimer, **dupliquer un tracé**, fermer un anneau. Plus la **dérivation des frontières** | Un document qu'on manipule dans des tests, sans écran | un aller-retour sauvegarde/chargement **conserve le partage** : on bouge une ancre après, les deux contours suivent |
-| **3** | L'**historique** : un instantané par geste | `ctrl+z` | même piège : restaurer doit restaurer le **partage**, pas les coordonnées |
+| **1** ✅ | Les **types** des trois fichiers + trois **lecteurs** écrits à la main, dans `packages/core/src/data/` à côté de `heightmap.ts` et `landMask.ts`, derrière `assetError.ts`. Plus l'**adaptateur** vers `RegionPayload` | **L'atlas lit une année écrite à la main et l'affiche.** Zéro ligne de `src/` modifiée | on écrit un dossier `1100/` à la main, `pnpm dev`, la carte s'affiche |
+| **2** ✅ | Le **modèle de document** : les ancres une fois, les anneaux en index, et les opérations — poser, déplacer, supprimer, **dupliquer un tracé**, fermer un anneau. Plus la **dérivation des frontières** | Un document qu'on manipule dans des tests, sans écran | un aller-retour sauvegarde/chargement **conserve le partage** : on bouge une ancre après, les deux contours suivent |
+| **3** ◀ | L'**historique** : un instantané par geste | `ctrl+z` | même piège : restaurer doit restaurer le **partage**, pas les coordonnées |
 | **4** | Le **canevas 2D**, coupé en deux : l'**arithmétique** (hit-test, marquise, élastique, écran↔monde) qui est pure, et le **dessin**, une coquille sans logique | On dessine à l'écran | l'arithmétique se teste avec des littéraux — et c'est cette coupe qui la rend testable du tout |
 | **5** | Le **chrome** : `{Polities}` en arbre, les formulaires, `{Overrides}`, les trois marques d'année dérivée | L'application | les valeurs viennent de `design/chrome.css`, jamais son markup |
 
@@ -39,9 +42,26 @@ three.js et sans DOM, donc les étapes 1, 2 et 3 sont **entièrement pures**. Ch
 cassant exprès**. Gate à chaque fois : `pnpm type-check && pnpm lint && pnpm test`, puis `/review`, puis
 `/commit`.
 
-**La réserve, dite** : la vulnérabilité bloquante — supprimer un pays ne doit pas supprimer les ancres que
-son voisin partage — vit à l'**étape 2** et ne peut pas se tester avant le modèle de document. Elle attend
-une étape. Assumé, pas oublié.
+**La vulnérabilité bloquante est fermée** (27/09, étape 2). Une seule invariante y suffit : **le tableau
+d'ancres ne perd jamais rien pendant l'édition.** Donc `removePolity` retire une *revendication*, jamais un
+point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui n'est plus référencé disparaît
+à l'enregistrement, par une seule renumération. Vérifié en la cassant : 3 tests tombent.
+
+## ▶ ON REPREND ICI — étape 3, l'historique
+
+Un **instantané par geste**, ~265 Ko le pas. Le piège est le même qu'à l'étape 2, et il est nommé : un
+instantané doit restaurer **le partage**, pas seulement les coordonnées. Restauré naïvement, l'écran est
+identique et le liseré apparaît trois gestes plus tard.
+
+Ce qui existe déjà et sert de socle : `saveYearDocument` / `openYearDocument` font un aller-retour qui
+**conserve le partage**, avec son test. Un instantané est plus simple que ça — une copie profonde du
+document — mais il doit passer le même test.
+
+**Et la leçon de la veille s'applique directement** : pour vérifier ce test, ne pas casser au hasard.
+Écrire **l'implémentation naïve plausible** — ici, un instantané qui réécrit chaque anneau en coordonnées.
+Deux sabotages arbitraires n'avaient pas fait tomber le test équivalent à l'étape 2.
+
+L'état à ne **pas** mettre dans l'instantané, déjà tranché : ni l'outil actif, ni le zoom, ni le pan.
 
 ### P3 — fait le 27/09, et ça a retourné le format
 

@@ -2,6 +2,36 @@
 
 Put here the know issues to avoid cluttering the context window.
 
+- **Le manifeste des années déclare la bbox du rendu, et personne ne vérifie qu'elle correspond au DEM.**
+  `years/index.json` porte la boîte géographique contre laquelle les années dessinées se projettent, et elle
+  **doit** être celle du DEM : si elle diffère, chaque frontière glisse hors du terrain qu'elle borde, sans
+  erreur nulle part. Le choix de la déclarer plutôt que de la lire du relief était volontaire — la prendre du
+  relief chargé rendrait la source dépendante de l'ordre de chargement, ce dont `mapSources` met en garde.
+  **Le remède existe déjà et n'est pas branché** : `boundsMatch` dans `assetError.ts`, appelé là où les deux
+  boîtes sont en main, c'est-à-dire dans le pipeline. C'est le contrôle `semantic` de la taxonomie.
+  **Sévérité : à savoir, pas bloquant** — aucune année n'est encore dessinée (`years: []`), donc la boîte
+  n'est lue par rien. À brancher avant de publier 1100.
+- **Un override de bout survivant à la suppression d'un pays garde ses ancres en vie.** `referencedAnchors`
+  compte un `RunBorder` comme une référence, délibérément : un trait posé à la main est une décision, et
+  laisser tomber les points sous lui l'annulerait en silence (ce que `s13` interdit). Conséquence assumée :
+  supprimer un pays dont un tronçon était stylé laisse ces ancres dans le fichier, invisibles, sans aucun
+  contour qui les tienne. **Le remède est `{Overrides}`**, qui les liste comme orphelines avec son
+  `[Clear]` — mais ce panneau n'existe pas encore. **Cosmétique tant que l'éditeur n'a pas d'interface** ;
+  à ne pas « corriger » en supprimant l'override, ce serait le défaut inverse et plus grave.
+- **Un test vert du premier coup ne prouve rien, et une casse arbitraire ne le vérifie pas non plus.**
+  Découvert le 27/09 sur le test le plus important de l'étape 2 — celui qui garantit qu'un aller-retour
+  sauvegarde/chargement **conserve le partage des ancres**. Deux sabotages plausibles ne l'ont **pas** fait
+  tomber : une `Map` indexée sur l'ancien index fait converger les deux références par accident, donc le test
+  passait contre une sauvegarde cassée.
+  **Ce qui l'a fait tomber** : l'implémentation naïve que *quelqu'un écrirait vraiment* — chaque pays
+  emportant sa propre copie de ses points, ce que fait exactement `RegionPayload`.
+  **La règle qui en sort** : pour vérifier une garde, écrire le code qu'un développeur écrirait sans y penser,
+  pas une mutilation choisie au hasard. Consigné en mémoire [[verify-a-test-with-the-plausible-naive-code]].
+- **`commitlint` avertit `footer-leading-blank` sur tout message long.** Il prend un paragraphe contenant un
+  deux-points pour un footer. C'est un **warning**, il ne bloque pas, et il est revenu sur trois commits du
+  27/09. **Cosmétique** ; le remède serait de désactiver la règle ou d'éviter les deux-points en fin de
+  message, ce qui n'en vaut pas le prix.
+
 - **Un motif `.gitignore` qui contient une barre oblique est ancré à la racine du dépôt.** C'est la cause
   du seul vrai incident du 24/09 : `public/borders/` a **cessé de matcher** le jour où le passage en
   monorepo a mis `public/` sous `packages/atlas/`, et les 21 fichiers GPL-3.0 sont partis sur GitHub au
