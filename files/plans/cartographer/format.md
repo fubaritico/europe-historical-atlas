@@ -134,7 +134,7 @@ so it happens by itself. Nothing enforces it, and nothing breaks if it drifts: n
       "polity": "fr-couronne", // an id from this year's registry; no name here, ever
       "rings": [
         [0, 1, 2], // a ring is an ordered list of anchor indices
-        [7, 8, 9, 10], // a second ring: a hole or an exclave, by containment
+        [7, 8, 9, 10], // a second ring: a hole or an exclave, by inclusion
       ],
     },
   ],
@@ -206,7 +206,7 @@ out of the path between closing a ring and seeing its border, which is half of w
 **The single-owner row is the one that costs something**, and it was wrong in this section's first version
 (corrected the same day, by the dev's vassal case). A duchy drawn strictly inside the kingdom that holds it
 shares no anchor with it, so counting owners says "held by one path" and would have drawn a frontier against
-nothing across the middle of France. **What answers it is containment** — whose claim covers the ground on
+nothing across the middle of France. **What answers it is inclusion** — whose claim covers the ground on
 the far side, the same question H-05a already answers to decide who paints a cell. A point-in-polygon test
 over the rings, exact where the raster is one cell wide.
 

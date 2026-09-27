@@ -159,7 +159,7 @@ approach. The third risks lying about where the vertices are.
 
 ### H-07 · Settled 2026-09-22 — the drawing target answered it
 
-**Containment decides, and nothing is asked.** A new ring entirely inside one of the target's rings is a
+**Inclusion decides, and nothing is asked.** A new ring entirely inside one of the target's rings is a
 **hole**; a disjoint ring is a **second piece**. That is already what even-odd does at rest, so neither the
 format nor the rasteriser changes. The hole existed only because there was no drawing target: once the tool
 knows _who_ is being drawn for, "is this a hole or another country?" stops being a question.
@@ -369,7 +369,7 @@ neighbour to offer it to, and nobody remembers drawing it.
   carrying the limit's kind, its stroke, its source and a note: all of that is editorial fact, and none of
   it is a place, so none of it can drift from a fill. The line itself stays derived — from the run of
   anchors the two owners **share**, not from the rasterised fills, which is what makes it exact rather than
-  one cell wide, plus one **containment** test where the two are nested rather than side by side
+  one cell wide, plus one **inclusion** test where the two are nested rather than side by side
   ([`format.md`](../format.md)). **An explicit hand beats a derived rule**, and exceptions
   are listed. Keyed on ids from H-12, which retires the name-matching regexes in `data/borderStyles.ts`.
   [s04](s04-save-and-reopen.md).

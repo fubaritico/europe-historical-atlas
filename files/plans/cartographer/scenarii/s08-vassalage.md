@@ -48,7 +48,7 @@ Scenario: geometry does not declare the relation, and never did
   When I draw it entirely inside France's territory
   Then no vassalage is created and nothing is inferred
   And the limit between them is drawn sovereign
-  And no overlap is reported either, because containment with a non-vassal is a fact
+  And no overlap is reported either, because inclusion with a non-vassal is a fact
 ```
 
 ```gherkin
@@ -59,11 +59,11 @@ Scenario: a vassal drawn outside its lord stays a vassal
   And where they do not touch, there is simply no line between them
 ```
 
-> **Containment keeps a smaller job, and losing sight of that is the trap.** The tree says **that** two
-> polities are lord and vassal. Containment still answers **where** their shared limit runs, which is what
+> **Inclusion keeps a smaller job, and losing sight of that is the trap.** The tree says **that** two
+> polities are lord and vassal. Inclusion still answers **where** their shared limit runs, which is what
 > the single-owner run needs ([`format.md`](../format.md)). The dev's point stands exactly as stated: overlap
 > no longer *causes* vassalage — and a vassal holding ground away from its lord is ordinary medieval
-> geography, so requiring containment would forbid a fact.
+> geography, so requiring inclusion would forbid a fact.
 
 ```gherkin
 Scenario: moving a polity in the tree is a change of homage, and says so

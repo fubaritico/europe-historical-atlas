@@ -156,7 +156,7 @@ export interface YearClaim {
   /**
    * Every ring, outer and hole alike, each an ordered list of indices into {@link YearPolities.anchors}.
    *
-   * Which ring is a hole and which is a second piece is decided by containment, not declared — the same
+   * Which ring is a hole and which is a second piece is decided by inclusion, not declared — the same
    * even-odd contract the atlas already consumes. Fewer than three indices cannot enclose an area.
    */
   rings: number[][]

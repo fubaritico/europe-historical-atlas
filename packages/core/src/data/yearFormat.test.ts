@@ -121,7 +121,7 @@ describe('yearFormat schemas', () => {
       expect(borderFactSchema.safeParse('undefined').success).toBe(false)
     })
 
-    it('accepts several rings on one claim — a hole or an exclave, told apart by containment', () => {
+    it('accepts several rings on one claim — a hole or an exclave, told apart by inclusion', () => {
       const twoRings = {
         polity: 'pl-couronne',
         rings: [

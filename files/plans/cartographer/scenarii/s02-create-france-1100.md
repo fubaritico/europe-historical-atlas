@@ -302,7 +302,7 @@ Scenario: the geometry decides whether it is a hole or a second piece
 ```
 
 > **H-07 settled 2026-09-22.** The hole asked how the _user_ says "this ring is a hole" rather than "a
-> second piece of the same country". With a drawing target, the question disappears: **containment
+> second piece of the same country". With a drawing target, the question disappears: **inclusion
 > decides**. Contained → hole, disjoint → exclave. That is already what even-odd does at rest, so neither
 > the format nor the rasteriser changes.
 
