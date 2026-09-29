@@ -8,9 +8,9 @@
  *
  * **Linear: no branch.** The gestures dropped that way are gone, rather than surviving on a side limb the
  * reader could jump back to. The dev's call, 2026-09-29 — *"cela supprimera les actions se produisant
- * après"*. Photoshop offers the other behaviour under *Allow Non-Linear History* and Emacs under undo-tree;
- * neither is what a drawing tool leads with, and a limb nobody can see is a limb nobody uses. A **marker** is
- * what answers the need instead, deliberately, because it is visible and named.
+ * après"*. The other behaviour — keeping them on a side limb, with a way to jump between limbs — is refused
+ * here for one reason: a limb nobody can see is a limb nobody uses. A **marker** answers the same need
+ * instead, and answers it better, because it is visible and it is named.
  *
  * **Snapshots rather than commands**, decided 2026-09-22 and recorded in `files/plans/glossaire.md`: a
  * command that knows how to undo itself corrupts the history in silence the day it is wrong, while a whole
@@ -177,8 +177,8 @@ export interface History<T> {
   /**
    * Freeze the line from its origin up to where the cursor stands, under a name.
    *
-   * **It keeps the steps before it, not only the state** — the dev's requirement, 2026-09-29, and it differs
-   * from Photoshop, whose snapshot is a single image state. It costs nothing here because an entry, once
+   * **It keeps the steps before it, not only the state** — the dev's requirement, 2026-09-29: what comes back
+   * is a line one can step through, not a single frozen frame. It costs nothing because an entry, once
    * recorded, is never mutated: the marker holds references, not copies.
    *
    * What it buys is the only way back past a truncation. Without a branch, going back and drawing something

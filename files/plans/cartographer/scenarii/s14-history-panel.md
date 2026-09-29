@@ -1,21 +1,21 @@
 # 14 — The History panel
 
-> [Index](s00-index.md) · **the dev's request, 2026-09-29**, after showing Photoshop's History panel:
-> _"ce qui est à reprendre, c'est l'affichage en liste avec le nom de l'opération et l'icône de
-> l'opération, pas de case à cocher. Ça permet de naviguer plus vite à une opération sans avoir fait 10 fois
-> undo."_
+> [Index](s00-index.md) · **the dev's request, 2026-09-29**: _"ce qui est à reprendre, c'est l'affichage en
+> liste avec le nom de l'opération et l'icône de l'opération, pas de case à cocher. Ça permet de naviguer
+> plus vite à une opération sans avoir fait 10 fois undo."_
 >
 > [s03](s03-edit-existing-border.md) already has undo and redo as two arrows. This file is what replaces the
 > arrows as the **visible reading** of the history: the whole line, listed, and reachable in one click.
 
-## What is taken from Photoshop, and what is not
+## What the panel is, and what it is not
 
 | | |
 | --- | --- |
-| **taken** | the list, one row per gesture, oldest first · an icon and a name per row · the current row highlighted · a way to mark a point and come back to it |
-| **not taken** | the **checkbox column** — its tooltip is *"Sets the source for the History Brush"* ([Adobe](https://helpx.adobe.com/photoshop/desktop/get-started/set-up-toolbars-panels/paint-image-states.html)), and there is no painting-from-a-past-state tool here |
-| **not taken** | the **trash** — the dev, 2026-09-29: _"je pense que la poubelle est une mauvaise idée"_ |
-| **differs** | a **marker holds the run of steps up to it**, not only the state. Photoshop's snapshot is a single image state ([Adobe](https://helpx.adobe.com/photoshop/desktop/get-started/set-up-toolbars-panels/create-work-snapshots.html)); the dev asked for the run, _"ça permet de charger une pile pour essayer quelque chose"_ |
+| **a list** | one row per gesture, oldest first · an icon and a name on each · the current row highlighted |
+| **reachable** | clicking a row goes there, which is the whole reason it exists |
+| **markers** | a way to mark a point and come back to it. A marker holds **the run of steps up to it**, not only the state — the dev, _"ça permet de charger une pile pour essayer quelque chose"_, so what comes back is a line one can step through |
+| **no checkbox** | a per-row toggle would select a source for a tool that does not exist here: nothing paints from a past state |
+| **no trash** | the dev, 2026-09-29: _"je pense que la poubelle est une mauvaise idée"_ |
 
 > **Why the trash goes, and the honest nuance.** The dev's rule: _"le seul moyen d'enlever une action, c'est
 > de remonter dans la pile, puis de réessayer quelque chose, cela supprimera les actions se produisant
