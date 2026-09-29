@@ -119,6 +119,9 @@
 | **ligne d'historique**                      | La suite des états, et un **curseur** dedans. Annuler recule le curseur et ne détruit rien — c'est ce qui permet de refaire. L'ancien futur meurt au **geste suivant qu'on enregistre**, pas à l'annulation. Linéaire : pas de branche. |
 | **snapshot** / instantané                   | Copier l'état entier à chaque pas de la ligne. Notre choix : ~265 Ko le pas, aucun risque de corruption silencieuse.                          |
 | **command pattern**                         | L'autre façon : chaque opération sait se défaire. Moins de mémoire, mais une erreur corrompt l'historique sans prévenir. **Écarté.**          |
+| **branche** / historique en arbre           | Garder les actions abandonnées sur un rameau au lieu de les perdre. Remonter puis agir donnerait deux chemins et un moyen de sauter de l'un à l'autre — c'est l'*Allow Non-Linear History* de Photoshop, l'undo-tree d'Emacs. **Écarté** (dev, 29/09) : *« cela supprimera les actions se produisant après »*. Ce qui répond au besoin est le **jalon**, parce qu'il est visible et nommé. |
+| **jalon**                                   | Un point marqué, gardé **hors** de la ligne, qui survit donc à la troncature et au plafond. Il gèle **la suite des pas jusqu'à lui**, pas seulement l'état — demande du dev, 29/09, et ça diffère de Photoshop dont le snapshot est un seul état d'image. Gratuit chez nous : un pas enregistré n'est jamais muté, donc le jalon garde des références. |
+| **kind** (d'un pas)                         | L'identifiant stable d'une opération (`move-anchor`), à côté de son **label** affiché. L'icône du panneau s'indexe sur le `kind`, jamais sur le libellé — sinon une chaîne d'affichage redevient une clé, ce qui avait donné 9 regex de couleur. |
 
 ## Le chrome de l'éditeur
 
@@ -141,6 +144,7 @@
 | **active polity swatch**             | La pastille au pied du rail, qui montre l'encre que la plume va poser. Reprend la place du fill/stroke d'Illustrator. Barrée de rouge quand rien n'est choisi. |
 | **splitter** / poignée de séparation | La bande de 5 px entre deux groupes du dock. On la tire pour redistribuer la hauteur. `role="separator"`, donc manœuvrable aussi aux flèches.                  |
 | **collapse** / repli                 | Replier un groupe sur sa seule barre d'onglets. **Pas un second mécanisme** : c'est la borne basse du redimensionnement, le même nombre.                       |
+| **`{History}`**                      | Le panneau qui liste la **ligne d'historique** : un rang par geste, icône et nom, le rang courant surligné, les **jalons** au-dessus. Cliquer un rang y va directement, au lieu de dix ‹ctrl+z›. Ni case à cocher, ni poubelle — [s14](cartographer/scenarii/s14-history-panel.md). |
 
 ## Les outils et la méthode
 
