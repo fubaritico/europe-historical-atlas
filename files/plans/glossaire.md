@@ -115,8 +115,9 @@
 | **hit-test**                                | Décider quel point ou quel segment se trouve sous le curseur.                                                                                 |
 | **cible de dessin** / drawing target        | Le pays dans lequel les points vont atterrir. Affichée en permanence tant que la plume est active ; sans elle, la plume refuse de dessiner.   |
 | **sans territoire**                         | L'état d'un pays qui a une identité mais aucune géométrie. Normal : c'est ce qu'OHM donne pour la France en 1100.                             |
-| **history manager**                         | Le module qui tient la pile d'annulation. Undo ‹ctrl+z›, redo ‹ctrl+shift+z›, plus les deux flèches.                                          |
-| **snapshot**                                | Copier l'état entier à chaque pas d'historique. Notre choix : ~265 Ko le pas, aucun risque de corruption silencieuse.                         |
+| **history manager**                         | Le module qui tient l'annulation. Undo ‹ctrl+z›, redo ‹ctrl+shift+z›, plus les deux flèches.                                                  |
+| **ligne d'historique**                      | La suite des états, et un **curseur** dedans. Annuler recule le curseur et ne détruit rien — c'est ce qui permet de refaire. L'ancien futur meurt au **geste suivant qu'on enregistre**, pas à l'annulation. Linéaire : pas de branche. |
+| **snapshot** / instantané                   | Copier l'état entier à chaque pas de la ligne. Notre choix : ~265 Ko le pas, aucun risque de corruption silencieuse.                          |
 | **command pattern**                         | L'autre façon : chaque opération sait se défaire. Moins de mémoire, mais une erreur corrompt l'historique sans prévenir. **Écarté.**          |
 
 ## Le chrome de l'éditeur

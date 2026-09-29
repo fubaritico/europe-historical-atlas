@@ -57,6 +57,10 @@ export interface YearDocument {
 
 /**
  * An empty document — a year with nothing in it, which is how a year authored from scratch starts.
+ *
+ * **Both arguments are copied in**, like everything else in this file: held by reference, two documents
+ * built from one caller's zone would share it, so editing the zone of one would move the other's editorial
+ * window with nothing to see. The same hazard {@link cloneYearDocument} exists to close, one step earlier.
  * @param year - the year being drawn
  * @param editorialZone - the window to work in
  * @param sources - where geometry may be said to come from
@@ -69,8 +73,8 @@ export function createYearDocument(
 ): YearDocument {
   return {
     year,
-    editorialZone,
-    sources,
+    editorialZone: { ...editorialZone },
+    sources: sources.map((provenance) => ({ ...provenance })),
     anchors: [],
     anchorSource: [],
     polities: [],
@@ -82,32 +86,64 @@ export function createYearDocument(
 }
 
 /**
+ * Copy a document, sharing nothing with the original.
+ *
+ * **The one place that knows the document's shape**, which is why opening a file goes through it too: a
+ * field added to {@link YearDocument} and forgotten here would be *aliased* between copies rather than
+ * copied — two snapshots quietly editing each other, with nothing to see on screen. One function to forget
+ * it in, and one test walking the keys to say so.
+ *
+ * **What it preserves without trying, and it is the whole point of the format**: the sharing. An anchor held
+ * by two rings is the same *integer* in two lists, not a shared object, so any honest copy keeps it. The one
+ * implementation that loses it is the one that resolves rings back to coordinates — which is exactly what
+ * `RegionPayload` does, and why the guarantee is asserted rather than assumed.
+ * @param doc - the document to copy
+ * @returns a copy that can be mutated without touching the original
+ */
+export function cloneYearDocument(doc: YearDocument): YearDocument {
+  return {
+    year: doc.year,
+    editorialZone: { ...doc.editorialZone },
+    sources: doc.sources.map((provenance) => ({ ...provenance })),
+    anchors: doc.anchors.map(([lon, lat]) => [lon, lat]),
+    anchorSource: [...doc.anchorSource],
+    polities: doc.polities.map((polity) => ({ ...polity })),
+    claims: doc.claims.map((claim) => ({
+      polity: claim.polity,
+      rings: claim.rings.map((ring) => [...ring]),
+    })),
+    deliberateGaps: doc.deliberateGaps.map((gap) => ({
+      ring: [...gap.ring],
+      reason: gap.reason,
+    })),
+    pairs: doc.pairs.map((pair) => ({ ...pair, between: [...pair.between] })),
+    runs: doc.runs.map((run) => ({ ...run, run: [...run.run] })),
+  }
+}
+
+/**
  * Open a year that was read off disk.
  *
  * Everything is copied rather than aliased: a document is edited in place, and holding the parsed payload's
- * own arrays would mean an edit reaching back into what the reader returned.
+ * own arrays would mean an edit reaching back into what the reader returned. The copying is
+ * {@link cloneYearDocument}'s — the three files are flattened into the working shape by reference, and one
+ * function does the copying for both callers.
  * @param authored - the year, already cross-checked
  * @returns the document, ready to edit
  */
 export function openYearDocument(authored: AuthoredYear): YearDocument {
-  return {
+  return cloneYearDocument({
     year: authored.year,
-    editorialZone: { ...authored.polities.editorialZone },
-    sources: authored.polities.sources.map((provenance) => ({ ...provenance })),
-    anchors: authored.polities.anchors.map(([lon, lat]) => [lon, lat]),
-    anchorSource: [...authored.polities.anchorSource],
-    polities: authored.registry.polities.map((polity) => ({ ...polity })),
-    claims: authored.polities.claims.map((claim) => ({
-      polity: claim.polity,
-      rings: claim.rings.map((ring) => [...ring]),
-    })),
-    deliberateGaps: authored.polities.deliberateGaps.map((gap) => ({
-      ring: [...gap.ring],
-      reason: gap.reason,
-    })),
-    pairs: authored.borders.pairs.map((pair) => ({ ...pair, between: [...pair.between] })),
-    runs: authored.borders.runs.map((run) => ({ ...run, run: [...run.run] })),
-  }
+    editorialZone: authored.polities.editorialZone,
+    sources: authored.polities.sources,
+    anchors: authored.polities.anchors,
+    anchorSource: authored.polities.anchorSource,
+    polities: authored.registry.polities,
+    claims: authored.polities.claims,
+    deliberateGaps: authored.polities.deliberateGaps,
+    pairs: authored.borders.pairs,
+    runs: authored.borders.runs,
+  })
 }
 
 /**

@@ -4,6 +4,15 @@ import { assembleAuthoredYear } from '../data/yearConsistency'
 
 import { addAnchor, closeRing, moveAnchor } from './documentEdits'
 import {
+  FIXTURE_SOURCES,
+  FIXTURE_ZONE,
+  firstSharedAnchor,
+  ringOf,
+  sharedAnchorsBetween,
+  sharedBorderDocument,
+} from './documentFixtures'
+import {
+  cloneYearDocument,
   createYearDocument,
   openYearDocument,
   referencedAnchors,
@@ -12,62 +21,8 @@ import {
 
 import type { YearDocument } from './yearDocument'
 
-const zone = { west: -45, south: 20, east: 60, north: 76 }
-const source = [{ id: 0, name: 'reported by eye — Duby (reference)', licence: 'fact' }]
-
-/** Two polities sharing a run of anchors along their common limit, which is the case that matters. */
-function sharedBorderDocument(): YearDocument {
-  const doc = createYearDocument(1100, zone, source)
-  for (const point of [
-    [0, 48],
-    [2, 48],
-    [2, 46],
-    [0, 46],
-    [4, 48],
-    [4, 46],
-  ] as [number, number][])
-    addAnchor(doc, point, 0)
-
-  doc.polities.push(
-    {
-      id: 'fr-couronne',
-      name: 'Reaume de France',
-      rank: 'kingdom',
-      status: 'country',
-      suzerain: null,
-      existsFrom: 987,
-      existsTo: null,
-      colour: null,
-      wikidata: null,
-    },
-    {
-      id: 'hre',
-      name: 'Sacrum Imperium',
-      rank: 'empire',
-      status: 'country',
-      suzerain: null,
-      existsFrom: 962,
-      existsTo: null,
-      colour: null,
-      wikidata: null,
-    }
-  )
-  // France holds the western square; the Empire holds the eastern one. Anchors 1 and 2 are the shared
-  // limit — both rings run over them, and moving either moves both.
-  closeRing(doc, 'fr-couronne', [0, 1, 2, 3])
-  closeRing(doc, 'hre', [1, 4, 5, 2])
-  return doc
-}
-
-/** Resolve a claim's first ring into coordinates, the way a renderer would. */
-function ringOf(doc: YearDocument, polityId: string): [number, number][] {
-  const claim = doc.claims.find((existing) => existing.polity === polityId)
-  return (claim?.rings[0] ?? []).map((index) => {
-    const anchor = doc.anchors[index]
-    if (anchor === undefined) throw new Error(`anchor ${String(index)} missing`)
-    return [anchor[0], anchor[1]]
-  })
-}
+const zone = FIXTURE_ZONE
+const source = FIXTURE_SOURCES
 
 /** Save and reopen, which is what the round-trip guarantee is about. */
 function roundTrip(doc: YearDocument): YearDocument {
@@ -97,14 +52,8 @@ describe('YearDocument', () => {
       // Written to fail if a save ever resolved rings to coordinates and a load recreated one anchor per
       // ring. The screen would look identical and the sliver would appear three gestures later.
       const reopened = roundTrip(sharedBorderDocument())
-      const france = reopened.claims.find((claim) => claim.polity === 'fr-couronne')?.rings[0] ?? []
-      const empire = reopened.claims.find((claim) => claim.polity === 'hre')?.rings[0] ?? []
-      const shared = france.filter((index) => empire.includes(index))
-      expect(shared).toHaveLength(2)
-
-      const moved = shared[0]
-      if (moved === undefined) throw new Error('fixture')
-      moveAnchor(reopened, moved, [99, 99])
+      expect(sharedAnchorsBetween(reopened, 'fr-couronne', 'hre')).toHaveLength(2)
+      moveAnchor(reopened, firstSharedAnchor(reopened), [99, 99])
       expect(ringOf(reopened, 'fr-couronne')).toContainEqual([99, 99])
       expect(ringOf(reopened, 'hre')).toContainEqual([99, 99])
     })
@@ -233,6 +182,110 @@ describe('YearDocument', () => {
     it('produces files the readers accept, which is the only definition of saved', () => {
       const files = saveYearDocument(sharedBorderDocument())
       expect(() => assembleAuthoredYear(files, 'years/1100')).not.toThrow()
+    })
+  })
+})
+
+describe('cloneYearDocument', () => {
+  describe('happy path', () => {
+    it('copies every value across', () => {
+      const doc = sharedBorderDocument()
+      expect(cloneYearDocument(doc)).toEqual(doc)
+    })
+  })
+
+  describe('variants', () => {
+    it('SHARES NO FIELD with the document it copied — the forgotten-field guard', () => {
+      // A field added to YearDocument and forgotten in the clone would be *aliased* between snapshots,
+      // so two of them would quietly edit each other with nothing to see on screen. This walks the keys
+      // so the guard does not have to be remembered.
+      const doc = sharedBorderDocument()
+      const copy = cloneYearDocument(doc)
+      for (const key of Object.keys(doc) as (keyof YearDocument)[]) {
+        const original = doc[key]
+        if (typeof original !== 'object') continue
+        expect(copy[key], `the field "${key}" is aliased rather than copied`).not.toBe(original)
+      }
+    })
+
+    it('copies the nested lists too, not just the arrays holding them', () => {
+      const doc = sharedBorderDocument()
+      doc.runs.push({ run: [0, 1], hand: 'bold', source: null, note: null })
+      doc.pairs.push({
+        between: ['fr-couronne', 'hre'],
+        type: 'agreed',
+        hand: null,
+        source: null,
+        note: null,
+      })
+      doc.deliberateGaps.push({ ring: [0, 1, 2], reason: 'marches' })
+      const copy = cloneYearDocument(doc)
+      expect(copy.anchors[0]).not.toBe(doc.anchors[0])
+      expect(copy.claims[0]).not.toBe(doc.claims[0])
+      expect(copy.claims[0]?.rings[0]).not.toBe(doc.claims[0]?.rings[0])
+      expect(copy.deliberateGaps[0]?.ring).not.toBe(doc.deliberateGaps[0]?.ring)
+      expect(copy.pairs[0]?.between).not.toBe(doc.pairs[0]?.between)
+      expect(copy.runs[0]?.run).not.toBe(doc.runs[0]?.run)
+    })
+
+    it('KEEPS THE SHARING, because an anchor held twice is one integer and not one object', () => {
+      const copy = cloneYearDocument(sharedBorderDocument())
+      expect(sharedAnchorsBetween(copy, 'fr-couronne', 'hre')).toHaveLength(2)
+      moveAnchor(copy, firstSharedAnchor(copy), [99, 99])
+      expect(ringOf(copy, 'fr-couronne')).toContainEqual([99, 99])
+      expect(ringOf(copy, 'hre')).toContainEqual([99, 99])
+    })
+
+    it('leaves the original alone when the copy is edited', () => {
+      const doc = sharedBorderDocument()
+      const copy = cloneYearDocument(doc)
+      moveAnchor(copy, 0, [77, 77])
+      copy.polities.push({
+        id: 'later',
+        name: 'Later',
+        rank: null,
+        status: null,
+        suzerain: null,
+        existsFrom: null,
+        existsTo: null,
+        colour: null,
+        wikidata: null,
+      })
+      expect(ringOf(doc, 'fr-couronne')).not.toContainEqual([77, 77])
+      expect(doc.polities).toHaveLength(2)
+    })
+  })
+
+  describe('managed errors', () => {
+    // L3: N/A — a copy of a well-typed document has nothing to refuse. The malformed-state class is below.
+    it('copies a document whose parallel arrays have come apart, without inventing values', () => {
+      const doc = sharedBorderDocument()
+      doc.anchorSource = [0, 0, 0]
+      expect(cloneYearDocument(doc).anchorSource).toEqual([0, 0, 0])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // L4: N/A — pure, synchronous, no collaborator to fail.
+    it('copies a ring holding an index the anchor table does not, rather than silently pruning it', () => {
+      // Pruning here would be a repair nobody asked for; saving is where a dangling index is dropped.
+      const doc = sharedBorderDocument()
+      doc.claims.push({ polity: 'nowhere', rings: [[0, 1, 500]] })
+      expect(cloneYearDocument(doc).claims.at(-1)?.rings[0]).toEqual([0, 1, 500])
+    })
+  })
+
+  describe('edge cases', () => {
+    it('copies an empty document', () => {
+      const empty = createYearDocument(1100, zone, source)
+      const copy = cloneYearDocument(empty)
+      expect(copy).toEqual(empty)
+      expect(copy.anchors).not.toBe(empty.anchors)
+    })
+
+    it('survives being copied twice with no drift', () => {
+      const doc = sharedBorderDocument()
+      expect(cloneYearDocument(cloneYearDocument(doc))).toEqual(doc)
     })
   })
 })

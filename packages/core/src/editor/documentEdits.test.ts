@@ -9,13 +9,13 @@ import {
   pathsHolding,
   removePolity,
 } from './documentEdits'
+import { FIXTURE_SOURCES, FIXTURE_ZONE, sharedBorderDocument } from './documentFixtures'
 import { createYearDocument } from './yearDocument'
 
-import type { YearDocument } from './yearDocument'
 import type { YearPolity } from '../data/yearFormat'
 
-const zone = { west: -45, south: 20, east: 60, north: 76 }
-const source = [{ id: 0, name: 'reported by eye — Duby (reference)', licence: 'fact' }]
+const zone = FIXTURE_ZONE
+const source = FIXTURE_SOURCES
 
 /** An identity with nothing filled in beyond what it needs. */
 function polity(id: string, name: string, suzerain: string | null = null): YearPolity {
@@ -37,24 +37,11 @@ function polity(id: string, name: string, suzerain: string | null = null): YearP
  *
  * `0 1 2 3` is France's square, `1 4 5 2` is the Empire's. The two indices in the middle are one limit
  * held by two paths, which is the whole point of the model and the thing a deletion must not disturb.
+ *
+ * The shape itself lives in `documentFixtures` — three suites need it, and a fixture copied between them
+ * can drift from what it is meant to verify with nothing failing to say so.
  */
-function neighbours(): YearDocument {
-  const doc = createYearDocument(1100, zone, source)
-  for (const point of [
-    [0, 48],
-    [2, 48],
-    [2, 46],
-    [0, 46],
-    [4, 48],
-    [4, 46],
-  ] as [number, number][])
-    addAnchor(doc, point, 0)
-  addPolity(doc, polity('fr-couronne', 'Reaume de France'))
-  addPolity(doc, polity('hre', 'Sacrum Imperium'))
-  closeRing(doc, 'fr-couronne', [0, 1, 2, 3])
-  closeRing(doc, 'hre', [1, 4, 5, 2])
-  return doc
-}
+const neighbours = sharedBorderDocument
 
 describe('anchors', () => {
   describe('happy path', () => {
