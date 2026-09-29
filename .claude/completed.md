@@ -2,6 +2,107 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-09-29 — L'historique, le panneau, et l'outillage Zustand remis d'aplomb
+
+Une plage : **21:03 → 23:42 (2 h 38, 127 actions)**, après ~44 h de coupure. **3 commits**
+`f1be468`..`1cbe7b8`, **1343 → 1391 tests**, gate verte à chaque pas. Le chantier ouvert le 27/09 totalise
+**7 h 13**. Les 12 commits en attente ont été poussés par le dev en fin de session. La dernière heure n'a
+touché aucun code du projet : elle a réparé l'outillage avec lequel on va écrire l'étape 4.
+
+- **Le repère du hook était encore faux** — il annonçait « il y a 5 min » sur une coupure de 44 h. Deuxième
+  fois (déjà le 22/09). **Lire le rapport, jamais le hook.**
+- **L'étape 3 livrée** (`f1be468`) : une **ligne d'états et un curseur**, pas deux piles. Annuler déplace le
+  curseur et ne détruit rien — c'est ce qui rend le refaire possible ; l'ancien futur meurt au geste suivant
+  enregistré. La séquence du dev est le test nommé d'après lui.
+- **Générique sur l'état, et ce n'est pas de l'abstraction gratuite** : `s03` exige qu'un undo rende la
+  **sélection**, qui vivra dans le chrome. Une ligne qui connaîtrait `YearDocument` ne pourrait pas la
+  porter. C'est ce qui permet à l'étape 3 d'atterrir dans `core` **du tout**.
+- **Copie à l'entrée ET à la sortie.** La version plausible ne fait que la première, et alors *annuler →
+  éditer → refaire* rejoue un état que l'édition a réécrit en place. Vérifié en retirant les deux : trois
+  tests tombent, dont un non prévu (le test du copieur qui lève garde aussi l'entrée).
+- **`cloneYearDocument` est le seul endroit qui connaît la forme du document**, et `openYearDocument` lui
+  délègue sa copie. Un champ oublié dans un endroit au lieu de deux, gardé par un test qui parcourt les clés.
+  Possible parce que les types du format n'ont **aucun `readonly`** — vérifié, pas supposé.
+- **Cinq findings de revue, tous réels.** `commit` tronquait **avant** de copier, donc un copieur qui lève
+  détruisait la branche de refaire sans rien enregistrer · `createYearDocument` gardait ses deux arguments
+  par référence, seul de tout le fichier · j'avais créé une **troisième** copie de la fixture que le module
+  que j'ajoutais existe pour empêcher · le « premier ancrage partagé » écrit trois fois · le contrat
+  « l'appelant doit **adopter** l'état rendu » nulle part dans la JSDoc.
+- **Un remède de revue à moitié faux** : migrer les deux fixtures. `documentEdits.test.ts` était un doublon
+  exact — migré. `derivedBorders.test.ts` garde son échelle 0–20, qui rend ses assertions géométriques
+  lisibles ; la réécrire n'achèterait rien. Et une preuve citait le mauvais fichier.
+- **Le panneau historique, sur capture du dev** (`2487895`). Ce qu'il garde : la liste, nom + icône, le rang
+  courant, et **cliquer un rang y va** — *« naviguer plus vite sans avoir fait 10 fois undo »*. Ce qu'il
+  refuse : la case à cocher et **la poubelle**.
+- **Ma prémisse a été vérifiée contre la source et la sienne était fausse** : un instantané Photoshop est un
+  **seul état d'image**, pas une pile, et y revenir efface même les états listés. **Mais son idée est
+  meilleure pour nous et elle est gratuite** — les pas n'étant jamais mutés, un **jalon** garde des
+  références, pas des copies. Coût inverse consigné : ce qu'un jalon tient ne se libère plus.
+- **Sa justification de la poubelle ne tenait pas tout à fait**, et je l'ai dit : une poubelle ferait une
+  chose que « remonter puis agir » ne fait pas — jeter les rangs d'après **sans les remplacer**. Sa décision
+  tient ; c'est l'argument qui a été corrigé.
+- **`kind` à côté de `label`**, ma déduction : indexer l'icône sur le libellé referait une clé d'une chaîne
+  d'affichage — les 9 regex de couleur et l'ordre Royaume-Uni-avant-Irlande.
+- **« Branche » était un mot de moi, jamais défini**, et le dev a dû demander ce que ça voulait dire. Ajouté
+  au glossaire avec `jalon`, `kind` et `{History}`. La décision (pas d'arbre) est la sienne.
+- **Les références à l'autre logiciel retirées** (`1cbe7b8`), à sa demande : *« ça reprend pas tout
+  complètement »*. Les trois raisons réécrites sur leur propre fondement, et deux se lisent mieux.
+- **Zustand décidé, après que j'aie recommandé l'inverse.** Son critère — *« Jotai je connais, Zustand
+  non ; du code que je ne lis pas, je ne peux pas le corriger »* — était plus fort que mon argument
+  technique, et je l'ai dit. Il a lu le snippet puis la doc, et a tranché Zustand. Sources chargées dans
+  `opensrc` (v5.0.15) : le store entier fait **~30 lignes**, aucun Provider, et `create()` fait
+  `Object.assign(useBoundStore, api)` — le hook porte `getState`/`setState`/`subscribe`.
+- **Une collision que la source a confirmée** : le document est **muté en place** (décision de l'étape 2) et
+  Zustand détecte par identité de référence. Donc un **compteur de version** n'est pas une précaution, c'est
+  la seule chose qui marche.
+- **Trois reproches du dev, tous justes.** *« T'en as écrit des plâtrés »* / *« je voudrais répondre à une
+  chose à la fois »* — mes réponses étaient des murs et il a décroché. Et *« tu m'attaques rien du tout »*
+  quand j'ai commencé à explorer la config pour `4a` alors qu'il n'avait pas dit d'y aller.
+- **context7 existe sur sa machine mais n'était pas branché ici** — il l'était pour trois autres projets.
+  Ajouté par le dev en fin de session ; il faut un redémarrage pour que je le voie. **Vérifié au
+  redémarrage** : il répond, et il plafonne à **v5.0.12** quand notre clone `opensrc` est en **v5.0.15** —
+  donc la source vendue reste l'autorité sur un point de comportement fin, context7 sert aux patterns.
+- **Il existe une skill officielle pour Zustand, et c'est du routage, pas un mode d'emploi.** Poimandres
+  publie `pmndrs/claude-code-plugin` (MIT), qui embarque une skill `docs` et le serveur MCP
+  `docs.pmnd.rs/api/mcp`. Sa description nomme explicitement zustand, *« store patterns, migrations »*, et
+  ce qu'elle fait est d'**interdire la réponse de mémoire** : lire l'index, choisir la route, charger la
+  page. Prouvée de bout en bout avant d'y croire — `docs://zustand/index` rend 41 pages.
+- **Installée au niveau du dépôt, et c'était le bon choix.** Elle atterrit dans
+  `.claude/settings.local.json`, que le `.gitignore_global` du dev ignore : ce dépôt seulement, cette
+  machine seulement, jamais commitée. Le plugin embarque aussi une galerie de **167 démos
+  react-three-fiber**, inutile ici — l'atlas est du three.js vanille et le Cartographe n'a pas de three du
+  tout. Laissée en place : la retirer demanderait de forker le plugin, donc de perdre ses mises à jour,
+  pour économiser une ligne de description.
+- **Aucune des trois skills téléchargées n'était officielle**, contrairement à ce qu'on croyait : une
+  signée d'un tiers, une marquée `source: community`, une sans auteur. **Trois sont devenues une.**
+  `zustand-store-creator` n'avait aucun contenu (*« provides step-by-step guidance for zustand store
+  creator »*) ; `zustand-store-ts` renvoyait à un `assets/template.ts` **qui n'existe pas** et à
+  `src/frontend/src/store/`, l'arborescence de quelqu'un d'autre.
+- **L'erreur qui aurait mordu à `4a`.** La skill la plus fournie affirmait *« 5.x — improved type
+  inference »* et donnait `create((set, get) => ({...}))` sans paramètre de type. **Faux** : le currying
+  `create<T>()(...)` reste obligatoire — c'est un contournement de `microsoft/TypeScript#10571`, `T` étant
+  à la fois en position covariante et contravariante — et sans lui TS infère `unknown`. C'est exactement
+  la ligne que j'aurais appliquée en écrivant le store.
+- **Et j'en ai écrit une en la corrigeant, ce qui est la leçon du soir.** J'avais recommandé
+  `setState(initialState, true)` pour réinitialiser entre les tests. Lu ensuite à `vanilla.ts:76` : avec
+  `replace` vrai, l'état **devient** l'objet passé, donc un littéral de `YearState` **efface toutes les
+  actions** et l'appel suivant échoue. C'est la forme fusionnante qu'il faut. Écrire la règle ne suffit
+  pas — il faut lire la source *pendant* qu'on l'écrit.
+- **Trois faits tirés de la source v5.0.15, qu'aucune des trois skills ne portait** : `useShallow` vit à
+  `zustand/react/shallow` (`zustand/shallow` + second argument est la forme v4) · `subscribeWithSelector`
+  accepte `{ equalityFn, fireImmediately }`, et **`fireImmediately` est exactement ce que veut un canevas
+  impératif** — peindre au branchement plutôt qu'au premier changement · `setState` ne prévient les
+  écouteurs que si `!Object.is(nextState, state)`, ce qui redouble l'argument du compteur de version.
+- **Le pattern slices a une page officielle, et il coûte moins cher que ce que le dev imaginait.** Une
+  slice **n'est pas un store** : c'est une fonction `(set, get) => ({...})`, et toutes sont étalées dans
+  **un seul store lié**. Une slice appelle les actions d'une autre par `get()`. Et la contrainte qui nous
+  vise directement : **le middleware ne se pose que sur le store combiné**, jamais dans une slice.
+  Rien n'a été tranché du découpage réel, ni inscrit au glossaire — ce sera au moment où le premier état
+  existe.
+- **Ma récap de la session précédente était fausse sur un point, et je l'ai corrigé** : le dev me prêtait
+  la recommandation de Zustand. **J'avais recommandé Jotai** ; c'est lui qui a tranché Zustand, sur son
+  critère de lisibilité. Sans conséquence sur le travail, mais la colonne `by` existe pour ça.
+
 ### 2026-09-27 → 28 — Le format du Cartographe en code, et les deux premières étapes de P4
 
 Une seule plage : **20:46 → 01:17 (4 h 30, 236 actions)**, après 2 jours de coupure. **8 commits**

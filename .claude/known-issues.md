@@ -2,6 +2,63 @@
 
 Put here the know issues to avoid cluttering the context window.
 
+- **`CLAUDE.md` dit « No React, no monorepo, no design system », et les trois sont faux.** Le monorepo existe
+  depuis le 24/09, `fubaritico-ds` est décidé le même jour, et `architecture.md` **anticipe React pour le
+  Cartographe** (*« son chrome EST l'application… la variante prête le jour venu gagne sa place »*). Le dev a
+  confirmé React + Zustand le 29/09.
+  **Ce que ça coûte concrètement** : cette phrase est rechargée à chaque ouverture de session, donc je
+  contredis une décision déjà prise, et le dev paie l'argument à chaque fois.
+  **Sévérité : à savoir, et ça devient actif à l'étape 4a** — c'est le moment où React entre dans le dépôt.
+  **Remède : trois lignes**, dans le bloc « Project » de `CLAUDE.md`.
+- **Le canevas du Cartographe a deux boîtes géographiques et une seule image.** La **bbox de rendu** (celle
+  du DEM : W −45 / S 11 / E 78,75 / N 76,84) est ce à quoi la texture cuite est géoréférencée ; la **zone
+  éditoriale** déclarée par le document est lon −45…60, lat 20…76. Elles ne coïncident pas. Projeter contre
+  l'une en dessinant le fond contre l'autre fait **tout glisser, sans erreur nulle part** — même famille que
+  le manifeste dont la bbox n'est vérifiée par personne (entrée ci-dessous).
+  **Décidé le 29/09, avant d'écrire une ligne** : le repère du canevas est celui **du fond**, seul
+  géoréférencé par construction ; la zone éditoriale est un **cadre dessiné par-dessus**, ce que le glossaire
+  dit déjà d'elle (« la planche, nommée au-dessus de son cadre ») et ce que `s12` sépare.
+  **Sévérité : bloquant si oublié, réglé si appliqué.** À relire au début de `4b`.
+- **Zustand détecte un changement par identité de référence, et notre document est muté en place.**
+  `yearDocument.ts` dit « Mutable on purpose » et `moveAnchor` écrit dans le tableau d'ancres — donc après une
+  édition l'objet a **la même référence**, un sélecteur `s => s.document` ne voit rien, et l'écran ment.
+  Vérifié dans la source (`opensrc`, v5.0.15) : `setState` fait `Object.assign({}, state, partial)`, donc
+  l'objet d'état est neuf et les écouteurs sont prévenus, mais le document, lui, est identique.
+  **Remède, et c'est le seul qui marche** : un **compteur de version** incrémenté là où `history.commit` est
+  appelé. Rendre le document immuable annulerait l'étape 2 et rendrait chaque déplacement d'ancre en O(N).
+  **Sévérité : à savoir, avant d'écrire le store.**
+- **Recharger un jalon jette ce que la ligne tenait après lui, et rien ne le décide encore.** `restoreMarker`
+  remplace la ligne par ce que le jalon a gelé ; ce qui suivait le pas marqué disparaît. Le code **ne prend
+  aucune politique**, délibérément : le mécanisme est dans `core`, la décision appartient au chrome, et
+  `rules/error-handling.md` en fait une décision produit et non un détail d'implémentation.
+  **Les trois réponses sont écrites dans `s14-history-panel.md` avec leur coût.** Proposition : poser un
+  jalon automatiquement avant de recharger, donc rien n'est jamais perdu — au prix d'une liste qui grossit
+  seule. **Sévérité : à savoir, décision du dev, ne bloque pas l'étape 4.**
+- **Un jalon fait que le plafond de 50 pas cesse de borner la mémoire.** Il tient sa propre suite d'entrées
+  par référence, donc ce que la ligne laisse tomber reste vivant sous chaque jalon qui l'a gelé. C'est
+  **le but** d'un jalon, pas un défaut — mais ça veut dire qu'un éditeur laissé ouvert avec dix jalons profonds
+  tient dix lignes complètes. **Cosmétique aujourd'hui** (aucune interface), et le remède existe déjà :
+  `[Clear]` sur un jalon. À re-mesurer si l'usage réel montre des jalons nombreux.
+- **Le plugin `pmndrs` est activé dans un fichier gitignoré, donc il ne suit pas le dépôt.** Installé le
+  29/09 **au niveau du projet** (choix du dev, et c'est le bon : ailleurs, R3F et drei seraient du bruit),
+  il vit dans `.claude/settings.local.json`, que le `.gitignore_global` ignore. Conséquence : sur une autre
+  machine ou après un clone, les skills `pmndrs:docs` / `pmndrs:examples` et le MCP `docs.pmnd.rs`
+  **ne sont pas là**, et je répondrais de mémoire sur les API Zustand sans le signaler.
+  **Remède, deux lignes** : `/plugin marketplace add pmndrs/claude-code-plugin` puis
+  `/plugin install pmndrs@pmndrs`. **Cosmétique**, même famille que l'entrée `opensrc` juste en dessous —
+  et comme elle, c'est la raison pour laquelle « vérifié dans la doc officielle » n'est pas reproductible
+  ailleurs sans la commande.
+- **Un clone `opensrc` est local à la machine, jamais au dépôt.** `opensrc/` est gitignoré (ligne 22), ce qui
+  est voulu — three.js et Zustand (v5.0.15) y sont. Conséquence : sur une autre machine, il faut relancer
+  `npx opensrc@0.6 path <pkg>`, et un agent qui suppose les sources présentes lira du vide. **Cosmétique**,
+  mais c'est la raison pour laquelle une affirmation « vérifié dans la source » n'est pas reproductible
+  ailleurs sans la commande.
+- **Annuler un sabotage avec `git checkout --` sur un fichier modifié mais non commité le ramène à `HEAD`.**
+  Fait le 29/09 en vérifiant une garde : la restauration a emporté `cloneYearDocument`, qui n'était pas encore
+  commité. Rattrapé tout de suite, rien de perdu. **La règle** : pour défaire un sabotage de vérification,
+  copier le fichier avant (`cp`) ou éditer à la main — `git checkout` ne connaît que le dernier commit.
+  **Cosmétique**, mais ça coûte une réécriture à chaque fois.
+
 - **Le manifeste des années déclare la bbox du rendu, et personne ne vérifie qu'elle correspond au DEM.**
   `years/index.json` porte la boîte géographique contre laquelle les années dessinées se projettent, et elle
   **doit** être celle du DEM : si elle diffère, chaque frontière glisse hors du terrain qu'elle borde, sans

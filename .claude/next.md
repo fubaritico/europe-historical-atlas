@@ -5,7 +5,8 @@
 
 ## Where we are
 
-`main` at `9bd6a55`, **1343 tests**, gate verte. Le dépôt est **en ligne et déployé** :
+**1391 tests**, gate verte. `origin/main` est à `1cbe7b8` : **le commit de clôture du 29/09 est local et
+n'est pas poussé** — `git log origin/main..main` dit ce qui attend. Le dépôt est **en ligne et déployé** :
 
 |       |                                                                             |
 | ----- | --------------------------------------------------------------------------- |
@@ -30,8 +31,8 @@ mesuré, et **zéro octet** dans le chunk worker (13 490 o, hash inchangé).
 | --- | --- | --- | --- |
 | **1** ✅ | Les **types** des trois fichiers + trois **lecteurs** écrits à la main, dans `packages/core/src/data/` à côté de `heightmap.ts` et `landMask.ts`, derrière `assetError.ts`. Plus l'**adaptateur** vers `RegionPayload` | **L'atlas lit une année écrite à la main et l'affiche.** Zéro ligne de `src/` modifiée | on écrit un dossier `1100/` à la main, `pnpm dev`, la carte s'affiche |
 | **2** ✅ | Le **modèle de document** : les ancres une fois, les anneaux en index, et les opérations — poser, déplacer, supprimer, **dupliquer un tracé**, fermer un anneau. Plus la **dérivation des frontières** | Un document qu'on manipule dans des tests, sans écran | un aller-retour sauvegarde/chargement **conserve le partage** : on bouge une ancre après, les deux contours suivent |
-| **3** ◀ | L'**historique** : un instantané par geste | `ctrl+z` | même piège : restaurer doit restaurer le **partage**, pas les coordonnées |
-| **4** | Le **canevas 2D**, coupé en deux : l'**arithmétique** (hit-test, marquise, élastique, écran↔monde) qui est pure, et le **dessin**, une coquille sans logique | On dessine à l'écran | l'arithmétique se teste avec des littéraux — et c'est cette coupe qui la rend testable du tout |
+| **3** ✅ | L'**historique** : un instantané par geste, plus la ligne que `{History}` lit et les **jalons** | `ctrl+z`, et cliquer un rang | même piège : restaurer doit restaurer le **partage**, pas les coordonnées |
+| **4** ◀ | Le **canevas 2D**, coupé en deux : l'**arithmétique** (hit-test, marquise, élastique, écran↔monde) qui est pure, et le **dessin**, une coquille sans logique | On dessine à l'écran | l'arithmétique se teste avec des littéraux — et c'est cette coupe qui la rend testable du tout |
 | **5** | Le **chrome** : `{Polities}` en arbre, les formulaires, `{Overrides}`, les trois marques d'année dérivée | L'application | les valeurs viennent de `design/chrome.css`, jamais son markup |
 
 Les étapes **4 et 5 créent `packages/cartographer/`** — un troisième paquet, comme la taxonomie du dev
@@ -47,21 +48,67 @@ d'ancres ne perd jamais rien pendant l'édition.** Donc `removePolity` retire un
 point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui n'est plus référencé disparaît
 à l'enregistrement, par une seule renumération. Vérifié en la cassant : 3 tests tombent.
 
-## ▶ ON REPREND ICI — étape 3, l'historique
+## ▶ ON REPREND ICI — étape 4a, créer `packages/cartographer`
 
-Un **instantané par geste**, ~265 Ko le pas. Le piège est le même qu'à l'étape 2, et il est nommé : un
-instantané doit restaurer **le partage**, pas seulement les coordonnées. Restauré naïvement, l'écran est
-identique et le liseré apparaît trois gestes plus tard.
+> **Décision du dev, 29/09 en fin de session** : *« on va réattaquer demain… c'est par ça qu'on reprend »*.
+> Rien de `4a` n'a été commencé, et c'est délibéré — il était tard, pas bloqué.
 
-Ce qui existe déjà et sert de socle : `saveYearDocument` / `openYearDocument` font un aller-retour qui
-**conserve le partage**, avec son test. Un instantané est plus simple que ça — une copie profonde du
-document — mais il doit passer le même test.
+**Tout est prêt, et l'outillage l'est aussi.** Ce qui a été mis en place le 29/09 au soir, avant de
+s'arrêter :
 
-**Et la leçon de la veille s'applique directement** : pour vérifier ce test, ne pas casser au hasard.
-Écrire **l'implémentation naïve plausible** — ici, un instantané qui réécrit chaque anneau en coordonnées.
-Deux sabotages arbitraires n'avaient pas fait tomber le test équivalent à l'étape 2.
+| | état |
+| --- | --- |
+| skill officielle Zustand | `pmndrs@pmndrs` **installée** (dépôt seulement, `.claude/settings.local.json`), MCP `docs.pmnd.rs` branché, chaîne prouvée sur `docs://zustand/index` |
+| skill projet | `.claude/skills/zustand-react-pattern/` — **une au lieu de trois**, corrigée contre la source v5.0.15 |
+| context7 | branché, répond, **plafonne à v5.0.12** — `opensrc` (v5.0.15) reste l'autorité sur le comportement |
+| code du paquet | **aucun fichier n'existe** |
 
-L'état à ne **pas** mettre dans l'instantané, déjà tranché : ni l'outil actif, ni le zoom, ni le pan.
+**Rien n'a été commencé** : aucun fichier du paquet n'existe. La structure est **validée par le dev**
+(29/09), l'état est **Zustand** (sa décision, après avoir lu la source et la doc), l'apparence est **des
+composants React sur `chrome.css`** en attendant `fubaritico-ds` (sa décision aussi).
+
+**Trois choses à ne pas re-découvrir en écrivant le store** (vérifiées en source, pas déduites) :
+`create<T>()(...)` avec les parenthèses vides est **obligatoire** sinon TS infère `unknown` · une slice
+n'est pas un store, tout va dans **un seul store lié**, et le **middleware ne se pose que sur le combiné**
+· pour réinitialiser entre tests, `setState(initialState)` **sans** `replace`, qui effacerait les actions.
+Tout est dans la skill projet.
+
+`4a` livre : `package.json`, `vite.config.ts`, `tsconfig.json` (avec `jsx`), `index.html`, une entrée React
+minimale qui **prouve la chaîne**, React + Zustand en dépendances, et **la ligne du paquet dans la table des
+frontières ESLint** — testée **en la cassant**, comme les deux précédentes.
+
+**À étendre en même temps** : la garde `isCore` d'`eslint.config.js` n'interdit que `three` à `core`. Elle
+doit aussi interdire **`react`, `react-dom` et `zustand`** — même argument, même preuve.
+
+**Et `CLAUDE.md` est périmé**, ce qui devient actif au moment où React entre : il dit *« No React, no
+monorepo, no design system »*, et les trois sont faux depuis le 24/09. Trois lignes à corriger, sinon je
+contredis le dev à chaque session.
+
+### La suite de l'étape 4, découpée
+
+| | quoi | on sait que ça marche comment |
+| --- | --- | --- |
+| **4b** | `view/` — écran ↔ monde, pan, zoom, cadrer. **Pur**, un viewport est une donnée | zoomer sur le pointeur **laisse le point sous le pointeur** |
+| **4c** | `geometry/` — ancre la plus proche, marquise, élastique, fermeture. **Pur** | des littéraux : une ancre à 9 px n'est pas attrapée à 8 px de tolérance |
+| **4d** | `canvas/` (le peintre, zéro décision) + les deux outils câblés sur `documentEdits` et `history` | `pnpm dev`, et on dessine |
+
+### Trois choses décidées pour l'étape 4, à ne pas re-trancher
+
+1. **Le repère du canevas est celui du fond**, pas la zone éditoriale — voir `known-issues` (deux boîtes).
+2. **Deux canevas** : un statique redessiné au commit, un overlay redessiné au `pointermove`. La barre
+   d'état s'écrit **impérativement**, jamais par un rendu React.
+3. **Le fond est cuit par le Cartographe** avec `composeTerrainRgba` (pur, dans `core/pipeline`, déjà prouvé
+   hors navigateur par le spike `terrain-bitmap`), plutôt qu'une troisième copie du PNG de 6,6 Mo.
+
+### Ce que l'étape 3 a livré
+
+Deux commits : `f1be468` la ligne d'historique, `2487895` la surface que le panneau lit (`rows`, `goTo`,
+`mark`/`restoreMarker`/`dropMarker`) plus `s14-history-panel.md`. Un troisième, `1cbe7b8`, a retiré les
+références à l'autre logiciel à la demande du dev.
+
+**Une décision produit reste ouverte** : recharger un jalon **jette ce que la ligne tenait après lui**. Les
+trois réponses sont dans `s14` avec leur coût, et le code n'en prend aucune — le mécanisme est dans `core`,
+la politique appartient au chrome. Ne bloque pas l'étape 4.
 
 ### P3 — fait le 27/09, et ça a retourné le format
 
