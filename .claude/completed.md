@@ -2,6 +2,92 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-10-01 → 02 — Le dépôt passe à trois paquets, après une soirée que j'ai mal commencée
+
+Une plage : **22:21 → 00:34 (2 h 12, 214 actions)**, après ~46 h de coupure. **1 commit** `7f75624`,
+34 fichiers, **1392 → 1399 tests**. Le chantier ouvert le 27/09 totalise **9 h 34** sur 3 plages. La
+première heure a été perdue par ma faute et le dev a **tout remis à zéro** avant qu'on reprenne pas à pas.
+
+- **Ma faute principale, et elle est simple** : il a dit *« quand tu fais une surcharge, tu la crées dans le
+  paquet concerné »*. Je l'ai mise **dans la config racine**, puis j'ai argumenté la mesure au lieu de faire
+  ce qu'il demandait. Il a tout supprimé — l'arbre est revenu à `2690397` — et on a repris **étape par
+  étape, en s'arrêtant à chaque fois**, sur sa consigne.
+- **La cause de l'erreur est documentable, et c'est la leçon** : j'ai ouvert **un seul** de ses sept dépôts
+  voisins (`vite-mf-monorepo`), j'y ai vu **une** config à la racine, et j'ai généralisé. En cherchant
+  vraiment : `find` sur les sept rend **9 configs par paquet** dans `vite-mf-monorepo` et
+  `react-and-react-native-financial-app`. Les exemples étaient là. *Regarder un échantillon et conclure
+  n'est pas vérifier.*
+- **Trois autres reproches, tous justes.** J'ai posé **trois questions** qui n'avaient pas d'arbitrage (le
+  catalogue, `jest-dom`, le placement de la config) — *« qu'est-ce que t'as là ? »*. J'ai **réécrit des
+  fichiers que `4a` n'avait pas à toucher**. Et sur le `format:check` : *« c'est quoi la décision qu'il y a
+  à prendre là ? »* — il n'y en avait aucune, quatre lignes contre un trou réel.
+- **La surcharge, dans sa forme à lui** : `packages/cartographer/eslint.config.js` **réimporte** la racine
+  puis empile React, hooks, jsx-a11y et react-refresh — exactement ce que fait son `apps/home`. Mesuré
+  avant d'écrire : **flat config n'a aucune cascade**, ESLint résout **une** config depuis le **répertoire
+  courant**, et les `files` sont relatifs au dossier de la config chargée. D'où un `lint` par paquet.
+- **Deux formes de plugin qu'aucune doc ne donne et qui ont coûté un chargement en échec** : dans
+  `eslint-plugin-react-hooks@7`, **`configs.recommended` ET `configs['recommended-latest']` sont en
+  eslintrc** (leur `plugins` est un tableau, que flat config refuse) — les flat sont sous `configs.flat`.
+  Et `reactRefresh.configs.vite` est la variante à prendre. La v7 est la version « React Compiler » :
+  **17 règles**, dont `purity`, `immutability`, `set-state-in-render`.
+- **Le template de `create-vite` ne pose pas `strict`.** Son `tsconfig.app.json` ne règle que
+  `noUnusedLocals`/`noUnusedParameters`, et le linter l'a dit tout seul — quatre règles typées réclamant
+  `strictNullChecks`. Remplacé par un fichier unique qui étend la racine. Et son `typescript: ~6.0.2`
+  **aurait cassé `typescript-eslint@8`** pour tout le dépôt.
+- **`core` tourne sous `node`, et c'est le contrat rendu exécutable.** Il compile contre `WebWorker` ;
+  jsdom lui prêtait un `document` que la production n'a jamais. Le passage a **fait tomber 2 tests** — et
+  c'était le **test** qui construisait `new ErrorEvent(...)`, pas le code. Remplacé par un objet portant le
+  seul champ lu. 607 → **609 verts**.
+- **`@testing-library/jest-dom@7` ne type pas sous Vitest 5**, et c'est une incompatibilité amont vérifiée
+  en source : il déclare `interface Assertion<T>` quand Vitest 5 déclare `interface Assertion<R, T>`, et la
+  fusion de déclarations exige des listes identiques. Les matchers marchent à l'exécution et `tsc` les
+  refuse — **les deux moitiés de la gate se contrediraient**. Retiré ; les assertions passent par le DOM.
+- **Le nettoyage entre tests ne s'installait pas**, trouvé par le troisième test du harnais, écrit pour ça.
+  Lu en source : `@testing-library/react` n'enregistre son `afterEach` que **si les hooks sont globaux**, et
+  ce dépôt les importe. Les rendus s'empilaient et la requête trouvait deux boutons — l'erreur accuse le
+  sélecteur, pas la fuite. `vitest.setup.ts` le déclare, plutôt que d'activer `globals` dans un paquet sur
+  trois.
+- **Turbo, et la raison du retournement.** `plan.md` avait nommé les deux seuils qui renverseraient le
+  refus — une CI (livrée le 24/09) et une gate longue. Un **troisième paquet** les a franchis : chaque
+  paquet possède ses tâches, donc quelque chose doit faner. `build` dépend de `["^build", "type-check"]`,
+  le `type-check` **sans caret** visant le même paquet — sans lui, `turbo build` compilerait sans vérifier
+  les types, ce que l'ancien script racine faisait. Cache vérifié : **8 ms, FULL TURBO**.
+- **La fusion des lcov, et le zéro silencieux qu'elle évite.** Chaque paquet écrit `SF:src/…` ; Sonar
+  résout depuis la racine du dépôt, donc il ne trouverait rien et afficherait **0 % sans une erreur**.
+  Mesuré avant d'écrire : l'ancien rapport portait `SF:packages/atlas/src/…`, et `coverage.root` de Vitest
+  ne change rien. `scripts/merge-coverage.mjs` réécrit et concatène — **98 chemins, 98 résolus**. Sonar ne
+  change pas de configuration.
+- **Sept findings de revue, les sept réels**, plus un que la gate a trouvé seule. Le pire visait **ce que je
+  venais d'écrire** : `CLAUDE.md` et `architecture.md` affirmaient que `core` est interdit de React par
+  ESLint, et la garde ne connaissait que `three`. **Une doc qui promet une garde inexistante est pire que
+  pas de garde.** Fermé, prouvé en cassant.
+- **Celui que la gate a trouvé et que les quatre agents ont manqué** : l'exemption des tests est
+  `**/*.test.ts` et ne matche pas `.test.tsx`, donc une suite React se faisait mesurer par
+  `max-lines-per-function` dont les suites sont exemptées par construction. Même famille que les trois
+  autres globs `.ts` de la soirée (`.lintstagedrc.json`, la table des frontières, `vitest`).
+- **Un remède de revue remplacé** : ne traiter que `ENOENT` et relancer le reste rendrait `pnpm coverage`
+  **fatal** sur une lecture transitoire en CI — ça troque un mauvais chiffre contre aucun chiffre. Le cas
+  inattendu est **crié avec sa cause** et le run continue.
+- **L'entrée montait un arbre vide**, et `smoke.test.tsx` montait son **propre** composant : `4a` ne
+  prouvait rien à l'œil. Corrigé au plus petit, et `main.test.tsx` monte **la vraie entrée** —
+  5 tests dont **4 tombent** contre l'implémentation du template, vérifié en la réécrivant.
+- **Un bug de moi trouvé en vérifiant avant de committer** : `pnpm dev:cartographer` ne marchait pas, le
+  filtre visant le nom scopé quand le paquet s'appelait `cartographer`. Plus son `build` resté en
+  `tsc -b && vite build`, et son `index.html` en `lang="en"` — un défaut d'accessibilité réel.
+- **Le découpage en trois commits a été abandonné sur un fait, pas sur une préférence** : le lockfile liste
+  `packages/cartographer` comme importeur et la CI installe en `--frozen-lockfile`, donc les deux premiers
+  commits auraient échoué. Dit au dev plutôt que fait en silence.
+- **`AGENTS.md` est écrit par Turbo lui-même** quand il détecte un agent, et son contenu dit d'aller lire
+  les docs embarquées du paquet plutôt que de répondre de mémoire — la règle de ce dépôt. Committé, sur sa
+  décision.
+- **La skill Zustand se contredisait**, et je l'ai corrigée **deux fois** : sa table recommandait
+  `setState(initialState, true)` que son propre corps interdit trois paragraphes plus haut. La remise à
+  zéro du dev avait emporté la première correction.
+- **Mesures du soir** : worker **13,49 ko** (la garde tient), atlas 726 ko / 195 ko gzip, Cartographe
+  **219,65 ko / 68,63 ko gzip** avec rien dedans — c'est React + ReactDOM, c'est la base de référence.
+  Et `eslint@9.39.5` **est** la dernière 9.x : l'avertissement npm dit que **toute la ligne 9 est en fin de
+  support**, pas qu'une version plus haute existe.
+
 ### 2026-09-29 — L'historique, le panneau, et l'outillage Zustand remis d'aplomb
 
 Une plage : **21:03 → 23:42 (2 h 38, 127 actions)**, après ~44 h de coupure. **3 commits**

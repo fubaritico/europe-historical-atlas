@@ -5,8 +5,9 @@
 
 ## Where we are
 
-**1391 tests**, gate verte. `origin/main` est à `1cbe7b8` : **le commit de clôture du 29/09 est local et
-n'est pas poussé** — `git log origin/main..main` dit ce qui attend. Le dépôt est **en ligne et déployé** :
+**1399 tests**, gate verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`).
+**`7f75624` est local et n'est pas poussé** — `git log origin/main..main` dit ce qui attend. Le dépôt est
+**en ligne et déployé** :
 
 |       |                                                                             |
 | ----- | --------------------------------------------------------------------------- |
@@ -15,11 +16,23 @@ n'est pas poussé** — `git log origin/main..main` dit ce qui attend. Le dépô
 | CI    | sept jobs, tous verts — validate ×3, build, sonarqube, quality-gate, deploy |
 | Sonar | opérationnel, `europe-historical-atlas` sous l'organisation `fubaritico`    |
 
-Structure : **deux paquets**. `@europe-historical-atlas/core` (pure TS, ni three.js ni DOM, contrats
-tenus par ESLint et par `tsc`) et `@europe-historical-atlas/atlas` (l'application). `core` a désormais
-**cinq couches** — `utils`, `geo`, `data`, `pipeline`, et **`editor`** ajoutée le 27/09 avec sa ligne dans
-la table des frontières. `zod/mini` est une dépendance de `core` : **+9,15 ko gzip** pour tout le format,
-mesuré, et **zéro octet** dans le chunk worker (13 490 o, hash inchangé).
+Structure : **trois paquets**, orchestrés par **Turbo**, avec un **catalogue de versions** dans
+`pnpm-workspace.yaml`.
+
+| paquet | ce que c'est | lint | tests |
+| --- | --- | --- | --- |
+| `core` | pure TS, ni three.js ni DOM ni React ni zustand — **tenu par ESLint et par `tsc`**. Cinq couches : `utils`, `geo`, `data`, `pipeline`, `editor` | config racine | **`node`**, 609 |
+| `atlas` | l'application 3D, three.js vanille | config racine | `jsdom`, 782 |
+| `cartographer` | l'éditeur de territoires, React 19 + Vite 8 | **sa propre config**, qui réimporte la racine | `jsdom` + plugin React, 8 |
+
+**Trois faits de structure à ne pas re-découvrir** : *flat config n'a aucune cascade*, donc la config d'un
+paquet **réimporte** la racine et ESLint résout **une** config depuis le **répertoire courant** — d'où un
+`lint` par paquet · `core` tourne sous **`node`** parce que jsdom lui prêterait un `document` que la
+production n'a jamais · la **couverture est fusionnée** par `scripts/merge-coverage.mjs`, parce que chaque
+paquet écrit `SF:src/…` et que Sonar résout depuis la racine (sinon **0 % sans erreur**).
+
+`zod/mini` est une dépendance de `core` : **+9,15 ko gzip** pour tout le format, mesuré, et **zéro octet**
+dans le chunk worker (13 490 o, hash inchangé — toujours vérifié par la CI).
 
 ## ▶ P4, LE CARTOGRAPHE — les cinq étapes
 
@@ -48,41 +61,42 @@ d'ancres ne perd jamais rien pendant l'édition.** Donc `removePolity` retire un
 point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui n'est plus référencé disparaît
 à l'enregistrement, par une seule renumération. Vérifié en la cassant : 3 tests tombent.
 
-## ▶ ON REPREND ICI — étape 4a, créer `packages/cartographer`
+## ▶ ON REPREND ICI — finir `4a` : brancher `core` et Zustand sur l'entrée
 
-> **Décision du dev, 29/09 en fin de session** : *« on va réattaquer demain… c'est par ça qu'on reprend »*.
-> Rien de `4a` n'a été commencé, et c'est délibéré — il était tard, pas bloqué.
+> **Décision du dev, 01/10 en fin de session** : *« pour ce qui concerne core et zustand, on le fait après
+> le commit »*. Le paquet existe et est commité ; ces deux-là sont le reste de `4a`, et c'est petit.
 
-**Tout est prêt, et l'outillage l'est aussi.** Ce qui a été mis en place le 29/09 au soir, avant de
-s'arrêter :
+**Ce que `4a` a livré** (`7f75624`) :
 
 | | état |
 | --- | --- |
-| skill officielle Zustand | `pmndrs@pmndrs` **installée** (dépôt seulement, `.claude/settings.local.json`), MCP `docs.pmnd.rs` branché, chaîne prouvée sur `docs://zustand/index` |
-| skill projet | `.claude/skills/zustand-react-pattern/` — **une au lieu de trois**, corrigée contre la source v5.0.15 |
-| context7 | branché, répond, **plafonne à v5.0.12** — `opensrc` (v5.0.15) reste l'autorité sur le comportement |
-| code du paquet | **aucun fichier n'existe** |
+| le paquet | `@europe-historical-atlas/cartographer`, React 19 + Vite 8, entrée qui **monte et affiche**, ses `lint`/`type-check`/`test`/`build` |
+| sa surcharge ESLint | `packages/cartographer/eslint.config.js` — réimporte la racine, ajoute React + hooks + jsx-a11y + react-refresh, interdit `three`. **Prouvée en la cassant** |
+| la garde `core` | interdit désormais `react`, `react-dom`, `zustand` **et** `three`. **Prouvée en la cassant** |
+| `CLAUDE.md` | corrigé — il ne dit plus « No React, no monorepo, no design system » |
 
-**Rien n'a été commencé** : aucun fichier du paquet n'existe. La structure est **validée par le dev**
-(29/09), l'état est **Zustand** (sa décision, après avoir lu la source et la doc), l'apparence est **des
-composants React sur `chrome.css`** en attendant `fubaritico-ds` (sa décision aussi).
+**Ce qui manque, et c'est tout ce qui manque :**
+
+1. **`@europe-historical-atlas/core` n'est pas déclaré** par le Cartographe, donc **rien ne prouve encore
+   qu'un import inter-paquets par sous-chemin résout depuis un `.tsx`** — et c'est la seule chose de `4a`
+   qui pouvait réellement casser, `core` étant lu **en source** et devant donc type-checker sous les
+   options de ce paquet. L'entrée doit lire quelque chose de `core` (p. ex. `createYearDocument`).
+2. **`zustand` est au catalogue sans aucun lecteur.** Il faut le déclarer et écrire le premier store.
 
 **Trois choses à ne pas re-découvrir en écrivant le store** (vérifiées en source, pas déduites) :
 `create<T>()(...)` avec les parenthèses vides est **obligatoire** sinon TS infère `unknown` · une slice
-n'est pas un store, tout va dans **un seul store lié**, et le **middleware ne se pose que sur le combiné**
-· pour réinitialiser entre tests, `setState(initialState)` **sans** `replace`, qui effacerait les actions.
-Tout est dans la skill projet.
+n'est pas un store, tout va dans **un seul store lié**, et le **middleware ne se pose que sur le combiné** ·
+pour réinitialiser entre tests, `setState(initialState)` **sans** `replace`, qui effacerait les actions.
+Tout est dans `.claude/skills/zustand-react-pattern/`.
 
-`4a` livre : `package.json`, `vite.config.ts`, `tsconfig.json` (avec `jsx`), `index.html`, une entrée React
-minimale qui **prouve la chaîne**, React + Zustand en dépendances, et **la ligne du paquet dans la table des
-frontières ESLint** — testée **en la cassant**, comme les deux précédentes.
+**Et le compteur de version n'est pas une précaution** : le document est **muté en place** (décision de
+l'étape 2) et Zustand détecte par identité de référence, donc un sélecteur sur le document ne verrait rien.
+Voir `known-issues`.
 
-**À étendre en même temps** : la garde `isCore` d'`eslint.config.js` n'interdit que `three` à `core`. Elle
-doit aussi interdire **`react`, `react-dom` et `zustand`** — même argument, même preuve.
-
-**Et `CLAUDE.md` est périmé**, ce qui devient actif au moment où React entre : il dit *« No React, no
-monorepo, no design system »*, et les trois sont faux depuis le 24/09. Trois lignes à corriger, sinon je
-contredis le dev à chaque session.
+| | état |
+| --- | --- |
+| skill officielle Zustand | `pmndrs@pmndrs` installée (dépôt seulement, `.claude/settings.local.json`), MCP `docs.pmnd.rs` branché |
+| context7 | branché, **plafonne à v5.0.12** — `opensrc` (v5.0.15) reste l'autorité sur le comportement |
 
 ### La suite de l'étape 4, découpée
 
@@ -134,6 +148,23 @@ année, rien de partagé**. `format.md` réécrit, `s04`/`s05`/`s07`/`s08`/`s99`
 
 ## Comment répondre, dans ce projet
 
+- **Quand le dev nomme une convention, aller voir TOUS ses dépôts voisins, pas un.** C'est la faute du
+  01/10, qui a coûté la première heure de la session et une remise à zéro complète : il a dit que la
+  surcharge ESLint se met dans le paquet, j'ai ouvert **un seul** de ses sept dépôts, j'y ai vu une config
+  à la racine et j'ai généralisé. Un `find` sur les sept rend **9 configs par paquet**. Les dépôts sont au
+  même niveau que celui-ci, dans `~/Desktop/WebstormProjects/`.
+- **Avant de mesurer ce qu'un outil fait, lire comment il est appelé.** C'est le défaut sous le défaut, le
+  01/10 : j'ai mesuré correctement qu'une config ESLint imbriquée est ignorée par un `eslint .` lancé depuis
+  la racine — mais j'avais vérifié **la mauvaise proposition**. La question n'était pas « une config
+  imbriquée peut-elle marcher si je garde la commande de la racine ? », c'était « comment lance-t-il son
+  lint ? », et la réponse tenait dans une ligne de son `apps/home/package.json` : `"lint": "eslint ./src"`.
+  J'avais lu sa config, jamais les **scripts** qui la chargent. **Lire les `scripts` du `package.json`
+  avant de mesurer le comportement d'un outil** — de la rigueur dirigée vers la mauvaise question coûte
+  autant que pas de rigueur, et donne en plus de l'assurance.
+- **Quand il a tranché, exécuter — pas argumenter la mesure.** Même soir : il a redemandé deux fois, et
+  j'ai répondu par le détail technique au lieu de faire. *« Elle est où ma surcharge ? »*
+- **Ne pas poser une question qui n'a pas d'arbitrage.** Trois posées le 01/10, zéro nécessaire. Son test :
+  *« c'est quoi la décision qu'il y a à prendre là ? »* Si la réponse est « aucune », on fait et on le dit.
 - **Tout problème arrive avec son remède et sa criticité.** Jamais une liste de risques sans décision.
 - **Tout terme nouveau va dans `glossaire.md`** — mais seulement s'il relève de la **cartographie** ou du
   **logiciel lui-même**. L'outillage général (build, paquets, cache, CI) n'y entre pas.

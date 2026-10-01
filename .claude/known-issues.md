@@ -2,14 +2,67 @@
 
 Put here the know issues to avoid cluttering the context window.
 
-- **`CLAUDE.md` dit « No React, no monorepo, no design system », et les trois sont faux.** Le monorepo existe
-  depuis le 24/09, `fubaritico-ds` est décidé le même jour, et `architecture.md` **anticipe React pour le
-  Cartographe** (*« son chrome EST l'application… la variante prête le jour venu gagne sa place »*). Le dev a
-  confirmé React + Zustand le 29/09.
-  **Ce que ça coûte concrètement** : cette phrase est rechargée à chaque ouverture de session, donc je
-  contredis une décision déjà prise, et le dev paie l'argument à chaque fois.
-  **Sévérité : à savoir, et ça devient actif à l'étape 4a** — c'est le moment où React entre dans le dépôt.
-  **Remède : trois lignes**, dans le bloc « Project » de `CLAUDE.md`.
+- ~~**`CLAUDE.md` dit « No React, no monorepo, no design system »**~~ — **CORRIGÉ 2026-10-01** (`7f75624`),
+  au moment où React est entré dans le dépôt. `rules/architecture.md` et `rules/troubleshooting.md` ont été
+  corrigés dans le même commit : le premier affirmait encore « No Turbo and no Lerna », le second disait
+  « Plain three.js (no React/R3F) » **une section au-dessus** de l'édition Turbo qui venait d'y être faite.
+  **La leçon de procédure** : la revue a trouvé que `CLAUDE.md` et `architecture.md` affirmaient que `core`
+  est interdit de React **par ESLint** alors que la garde ne connaissait que `three`. Écrire la doc avant la
+  garde produit la pire des deux situations — **une promesse qu'aucun outil ne tient.** Ne jamais décrire une
+  garde au présent avant de l'avoir cassée exprès.
+
+- **Un glob `.ts` cesse d'être inoffensif le jour où un `.tsx` existe, et ce dépôt en avait quatre.**
+  Trouvés le 01/10 en ajoutant le Cartographe, tous **corrigés** : la table des frontières ESLint
+  (`files: '*.ts'`), l'exemption des budgets de lisibilité pour les tests (`**/*.test.ts`),
+  `.lintstagedrc.json`, et `vitest`'s `include`. Trois ont été trouvés par la revue ou la gate, **pas** en
+  les cherchant.
+  **Ce que chacun coûtait** : un lint ou un test **vert sur du code que rien n'avait lu** — la forme d'échec
+  la plus chère de ce dépôt, parce qu'elle ne se voit pas.
+  **La règle qui en sort** : dans ce dépôt, un glob qui nomme une extension s'écrit `{ts,tsx}` sauf raison
+  explicite. **Et le corollaire de procédure** : à l'arrivée d'une extension nouvelle, `grep -rn "\.ts'" `
+  sur la config AVANT d'écrire le premier fichier, pas après. **Cosmétique maintenant**, bloquant si on
+  ajoute un jour `.vue`, `.mts` ou des composants Stencil.
+
+- **`@testing-library/jest-dom@7` ne type pas sous Vitest 5**, et c'est amont, pas une erreur de config.
+  Vérifié dans les deux sources : jest-dom déclare `interface Assertion<T>`, Vitest 5.0.3 déclare
+  `interface Assertion<R extends void | Promise<void> = void, T = unknown>`. La fusion de déclarations exige
+  des **listes de paramètres identiques**, donc l'augmentation échoue en silence — les matchers fonctionnent
+  à l'exécution et `tsc` refuse chaque appel. **Les deux moitiés de la gate se contredisent.**
+  **Décision du 01/10 : jest-dom retiré**, assertions écrites contre le DOM (`getAttribute`, `textContent`).
+  `@testing-library/react` et `user-event` restent — ce sont eux qui portent le travail.
+  **Sévérité : à savoir.** Ne pas le réinstaller sans vérifier que l'arité a bougé d'un côté ou de l'autre ;
+  l'autre issue est une augmentation écrite à la main, donc une rustine sur un type tiers.
+
+- **Le nettoyage de `@testing-library/react` ne s'installe pas dans ce dépôt, et il faut le déclarer.**
+  Lu en source : il n'enregistre son `afterEach` que `if (typeof afterEach === 'function')`, donc **seulement
+  si les hooks du runner sont globaux**. Toutes nos configs les importent explicitement.
+  **Ce que ça coûte sans le remède** : les rendus s'empilent dans le même document et une requête par rôle
+  trouve l'élément du test précédent — l'erreur se lit *« Found multiple elements »*, ce qui **accuse le
+  sélecteur et pas la fuite**. Trouvé par un test écrit exprès pour ça.
+  **Remède en place** : `packages/cartographer/vitest.setup.ts`. **Tout nouveau paquet React devra avoir le
+  sien** — c'est la chose qu'on oubliera.
+
+- **`scripts/merge-coverage.mjs` n'est linté ni testé par rien** (ARCH-005 / QUAL-003, 01/10, **laissé
+  ouvert**). `turbo lint` ne fane que sur les paquets, le fichier est hors de tous les `tsconfig`, et il n'a
+  pas de suite. Il porte pourtant de la logique — la réécriture des chemins `SF:` — dont la régression ne
+  sortirait **nulle part** : le job Sonar est délibérément non bloquant.
+  **Pourquoi ouvert plutôt que corrigé** : les deux remèdes coûtent plus que le défaut aujourd'hui. Un 4e
+  paquet `tooling` est propre mais c'est une structure pour 60 lignes ; une invocation ESLint dédiée à
+  `scripts/` demande un bloc de config qui désactive le lint typé, le fichier étant hors tsconfig.
+  **Cosmétique**, et Prettier le couvre désormais au commit. À reprendre si `scripts/` grossit.
+
+- **Le cache de Turbo ne sert à rien en CI.** Chaque job part d'un runner neuf et `.turbo` n'est jamais
+  restauré, donc les trois jobs de `validate.yml` sont toujours froids. Localement il marche (mesuré :
+  8 ms, `FULL TURBO`, contre 8,4 s à froid). **Cosmétique** — le remède est un `actions/cache` sur `.turbo`
+  ou le cache distant, et ça gagnerait des secondes sur une gate qui se compte en secondes. Écrit en tête
+  de `validate.yml` pour que personne ne croie le contraire.
+
+- **Toute la ligne ESLint 9 est en fin de support.** `9.39.5` **est** la dernière 9.x — l'avertissement
+  `deprecated` de npm ne dit pas qu'une version plus haute existe, il dit que la 9 n'est plus maintenue
+  depuis la sortie de la 10. **Décision du dev, 01/10 : on reste en 9**, et le coût est qu'il n'y aura plus
+  de correctif de sécurité dessus. **À savoir**, à reconsidérer quand la 10 aura quelques mois — et noter
+  que la 10 change un comportement qui nous concerne : elle résout la config **par fichier** et non depuis
+  le répertoire courant, ce qui rendrait les configs par paquet lisibles sans lancer `eslint` depuis chacun.
 - **Le canevas du Cartographe a deux boîtes géographiques et une seule image.** La **bbox de rendu** (celle
   du DEM : W −45 / S 11 / E 78,75 / N 76,84) est ce à quoi la texture cuite est géoréférencée ; la **zone
   éditoriale** déclarée par le document est lon −45…60, lat 20…76. Elles ne coïncident pas. Projeter contre
