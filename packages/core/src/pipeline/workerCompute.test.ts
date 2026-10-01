@@ -115,7 +115,10 @@ function loopback(compute: MapCompute): Loopback {
     handle,
     transfers,
     crash: (message) => {
-      handle.onerror?.(new ErrorEvent('error', { message }))
+      // A stand-in carrying the one field the contract reads, in the same shape as the `onmessage` line
+      // above. `ErrorEvent` is a *type* this package has (it compiles against `WebWorker`) but not a
+      // runtime constructor — Node has none, and this package has deliberately no DOM to borrow one from.
+      handle.onerror?.({ message } as ErrorEvent)
     },
     terminated: () => terminated,
   }

@@ -6,10 +6,16 @@
 camera (arrow keys), with clickable polygons. End goal: one map per century (1st → 21st); clicking a
 region shows a historical event (battle, political decision, invention…), its consequences and its actors.
 
-- **Stack**: **TypeScript** + **three.js** + **Vite** (bundler + HMR). Web-only, WebGL canvas.
-- **No React, no monorepo, no design system.** This repo used to be `fubaritico-ds` — every reference to
-  Stencil / Storybook / Lerna / Nx / Tailwind / BEM / React is **obsolete** and must be ignored, then
-  removed if encountered.
+- **Stack**: **TypeScript** + **Vite** (bundler + HMR), web-only. **pnpm workspace of three packages**,
+  orchestrated by **Turbo**, with one declared version per dependency in `pnpm-workspace.yaml`'s catalogue.
+- **Two applications, and they do not render alike.** The **atlas** is a WebGL canvas in **vanilla
+  three.js** — no framework anywhere near the render loop. The **Cartographer** is a **2D canvas** with a
+  **React + Zustand** chrome (the dev's call, 2026-09-29): its chrome *is* the application, which is what a
+  component library is for. `@europe-historical-atlas/core` is a resource, pure TypeScript, and is forbidden
+  three.js, React, react-dom and zustand **by ESLint**.
+- **The design system is `fubaritico-ds`**, as an external dependency (decided 2026-09-24): its `tokens` and
+  `styles` cost the atlas **zero JavaScript**. `Lerna` and `Nx` remain refused; so do Storybook and Tailwind
+  here. A reference to Stencil is about that design system's web-component variant, not about this repo.
 - **Relief**: extracted from a black & white heightmap (elevation bitmap) → displacement of a subdivided plane.
 - **Historical borders**: a separate layer, versioned by date (relief is stable over time, the political
   partition is not).

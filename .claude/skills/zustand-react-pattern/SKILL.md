@@ -205,4 +205,4 @@ Follow `rules/tests.md` (5 levels) as for any other module.
 | Selector builds an object | Re-renders on every change | One selector per value, or `useShallow` |
 | Closure read after an `await` | Stale write over a newer one | `get()` after every `await` |
 | `subscribe` with a selector, no middleware | Type error, or the listener never fires | `subscribeWithSelector` |
-| Store not reset between tests | Tests pass or fail by order | `setState(initialState, true)` |
+| Store not reset between tests | Tests pass or fail by order | `setState(initialState)` — **without** `replace`, see above |

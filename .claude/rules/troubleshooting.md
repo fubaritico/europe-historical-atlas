@@ -29,8 +29,15 @@ the vertex shader (GPU); the CPU geometry stays flat → the `Raycaster` hits th
 
 ## Architectural decisions
 
-- **Plain three.js (no React/R3F)** — canvas + TS is enough, fewer layers. Revisit if a complex UI overlay
-  (historical event panels, M2) justifies a framework.
+- **Plain three.js in the atlas, and no framework near its render loop** — canvas + TS is enough there, and
+  the "revisit if a complex UI overlay justifies a framework" clause this entry used to carry **has been
+  answered, for the other application**: the Cartographer's chrome is **React + Zustand** (the dev's call,
+  2026-09-29) because its chrome *is* the application — panels, forms, a tree, a 51-row list. The atlas's own
+  DOM is a splash and a progress overlay, so it stays vanilla and takes only `fubaritico-ds`'s tokens and
+  styles, which cost it zero JavaScript. See `architecture.md`, "apps and resources".
+  **What makes that safe is not the framework choice but one rule**: per-frame state never goes through a
+  component. Camera, zoom, hover, a drag in progress — route any of those through component state and
+  reconciliation runs at 60 Hz. The 2D canvas stays imperative; the document model lives in a plain store.
 - **Two data layers**: physical relief (stable) vs historical regions (versioned by date).
 
 ## Tooling
@@ -47,9 +54,13 @@ and `eslint-plugin-import` requires `eslint ≤9` → unmet peer warnings, typed
 ESLint 9 flat config (`eslint.config.js`) + Prettier (`.prettierrc`) + commitlint + husky (`pre-commit`
 = lint-staged + type-check; `commit-msg` = commitlint) + lint-staged. ~~**Decision: stay single-package**~~ — **split 2026-09-24** into
 `@europe-historical-atlas/core` (pure TS: `data/`, `pipeline/`, `geo/`, `utils/`) and `@europe-historical-atlas/atlas`.
-**pnpm workspaces alone, no Turbo**: pnpm already runs tasks in dependency order, and Turbo would only
-add a cache worth a few seconds on a 12 s gate. Measured, with the thresholds that would reverse it, in
-`files/plans/plan.md`. Prettier ignores `.claude`, `files`, `.husky`.
+~~**pnpm workspaces alone, no Turbo**~~ — **Turbo added 2026-10-01**, and the refusal was not overturned so
+much as outgrown. It was refused when there were two packages, one lint run and one test run, where a cache
+would have saved seconds on a 12 s gate. What changed: a **third package** with its own ESLint config, and
+each package owning its `lint`, `type-check`, `test` and `coverage` — so something has to fan out across
+them, and `turbo <task>` is that something. Both thresholds `plan.md` named were crossed (a CI, shipped
+2026-09-24; and the gate). **Lerna stays refused** — it publishes, we publish nothing.
+Prettier ignores `.claude`, `files`, `.husky`.
 
 ## History (to fill in)
 

@@ -1,2 +1,64 @@
 packages:
   - 'packages/*'
+
+# One declared version per dependency, referenced as `catalog:` from each package.json. The reason that bites
+# here is React: the Cartographer needs it now and the Payload admin will need it next, and two Reacts at
+# different versions in one workspace give hook errors that read like application bugs.
+catalog:
+  # React
+  react: ^19.3.0
+  react-dom: ^19.3.0
+  '@types/react': ^19.3.0
+  '@types/react-dom': ^19.3.0
+
+  # State
+  zustand: ^5.0.15
+
+  # Vite
+  vite: ^8.3.0
+  '@vitejs/plugin-react': ^6.1.1
+
+  # TypeScript
+  typescript: ^5.7.3
+  '@types/node': ^24.13.3
+
+  # Linting
+  eslint: ^9.39.5
+  '@eslint/js': ^9.39.5
+  typescript-eslint: ^8.70.0
+  globals: ^17.12.0
+  prettier: ^3.9.6
+  eslint-config-prettier: ^10.1.8
+  eslint-plugin-prettier: ^5.5.6
+  eslint-plugin-import: ^2.32.0
+  eslint-plugin-react: ^7.37.5
+  eslint-plugin-react-hooks: ^7.1.1
+  eslint-plugin-jsx-a11y: ^6.10.2
+  eslint-plugin-react-refresh: ^0.5.7
+
+  # Testing
+  vitest: ^5.0.3
+  '@vitest/coverage-v8': ^5.0.3
+  jsdom: ^30.0.1
+  '@testing-library/react': ^16.3.3
+  '@testing-library/user-event': ^14.6.7
+
+  # 3D
+  three: ^0.186.0
+  '@types/three': ^0.186.0
+  lil-gui: ^0.21.0
+
+  # Validation
+  zod: ^4.6.5
+
+  # Task orchestration
+  turbo: ^2.11.6
+
+  # Commits and hooks
+  '@commitlint/cli': ^21.2.2
+  '@commitlint/config-conventional': ^21.2.2
+  husky: ^9.1.7
+  lint-staged: ^17.5.1
+
+  # Spike and asset tooling
+  pngjs: ^7.0.0

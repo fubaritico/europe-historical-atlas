@@ -36,3 +36,6 @@ files/spikes/*/out/
 # so that form silently stopped matching the day `public/` moved into `packages/atlas/`. The 21 GPL
 # payloads were committed as a result. `**/` matches at any depth and survives the next move.
 **/public/borders/
+
+# Turbo task cache
+.turbo

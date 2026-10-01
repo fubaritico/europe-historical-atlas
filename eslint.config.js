@@ -84,43 +84,64 @@ const BOUNDARIES = [
 ]
 
 /**
+ * Packages `core` may not import, with the reason each ban exists.
+ *
+ * `core` is read by three callers that have nothing in common — a web worker, the three.js atlas, and the
+ * Cartographer's React chrome — so anything it pulls in is paid for by all three. That is what keeps the
+ * worker chunk at 13.5 kB with no renderer in it, and what would let `core` run under Node with no canvas.
+ */
+const CORE_IS_PURE = [
+  {
+    name: 'three',
+    message:
+      'Package boundary: @europe-historical-atlas/core is three-free by contract. Return plain buffers and numbers; let the atlas wrap them.',
+  },
+  {
+    name: 'react',
+    message:
+      'Package boundary: core holds no UI framework. A document model that imports React cannot be exercised in a worker or a Node script — put the hook in the Cartographer and let it call core.',
+  },
+  {
+    name: 'react-dom',
+    message:
+      'Package boundary: core holds no UI framework, and react-dom additionally assumes a DOM that core compiles without.',
+  },
+  {
+    name: 'zustand',
+    message:
+      'Package boundary: core holds no store. Its modules take data and return data; who keeps the result is the application’s business, and a store imported by a pure module is the global singleton rules/modular-architecture.md forbids.',
+  },
+]
+
+/**
  * Turn one row of the table into a flat-config object.
+ *
+ * Matches `.tsx` as well as `.ts`. No row points inside the Cartographer today, so nothing is unenforced —
+ * but steps 4b and 4c put *pure* `view/` and `geometry/` layers in a React package, which is exactly what
+ * this table polices elsewhere, and a `*.ts` glob would skip their components in silence. Widening it while
+ * it is free costs nothing: no directory under an existing row holds a `.tsx` file.
  * @param {{dir: string, forbid: string[], why: string}} boundary - the layer and what it may not reach
  * @returns {object} an ESLint flat-config entry restricting that layer's imports
  */
-const boundaryConfig = ({ dir, forbid, why }) => {
-  const isCore = dir.startsWith('packages/core/')
-  return {
-    files: [`${dir}/**/*.ts`],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          // The core package is pure TypeScript by contract: no renderer, anywhere in it. That is what
-          // lets the worker chunk ship without three.js, measured at 12.6 kB, and what would let core
-          // run under Node or in a future editor that has no canvas at all.
-          ...(isCore
-            ? {
-                paths: [
-                  {
-                    name: 'three',
-                    message:
-                      'Package boundary: @europe-historical-atlas/core is three-free by contract. Return plain buffers and numbers; let the atlas wrap them.',
-                  },
-                ],
-              }
-            : {}),
-          patterns: [
-            {
-              group: forbid.flatMap((name) => LAYER[name]),
-              message: `Architecture boundary: ${why}`,
-            },
-          ],
-        },
-      ],
-    },
-  }
-}
+const boundaryConfig = ({ dir, forbid, why }) => ({
+  files: [`${dir}/**/*.{ts,tsx}`],
+  rules: {
+    'no-restricted-imports': [
+      'error',
+      {
+        // Gated on the package rather than applied to every row: the atlas may one day want React in its
+        // own DOM overlay, and forbidding it there would be a boundary nobody decided.
+        ...(dir.startsWith('packages/core/') ? { paths: CORE_IS_PURE } : {}),
+        patterns: [
+          {
+            group: forbid.flatMap((name) => LAYER[name]),
+            message: `Architecture boundary: ${why}`,
+          },
+        ],
+      },
+    ],
+  },
+})
 
 export default tseslint.config(
   // Plugins
@@ -242,7 +263,7 @@ export default tseslint.config(
     // measured as a single function (the suites here score 289 / 279 / 258). The 5-level policy in
     // rules/tests.md inflates suites by design. They remain subject to `complexity` and `max-depth`,
     // where they were measured at zero violations.
-    files: ['**/*.test.ts'],
+    files: ['**/*.test.{ts,tsx}'],
     rules: {
       'max-lines': 'off',
       'max-lines-per-function': 'off',

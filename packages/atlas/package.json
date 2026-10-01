@@ -7,15 +7,24 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@europe-historical-atlas/core": "workspace:^",
-    "lil-gui": "^0.21.0",
-    "three": "^0.186.0"
+    "lil-gui": "catalog:",
+    "three": "catalog:"
   },
   "devDependencies": {
-    "@types/three": "^0.186.0",
-    "vite": "^8.3.0"
+    "@types/three": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "jsdom": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
   }
 }

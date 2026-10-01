@@ -3,15 +3,25 @@ name: Validate
 on:
   workflow_call:
 
-# Three independent jobs, in parallel. They need no pre-build and no task runner: `@…/core` is
-# imported through subpath exports that point at its TypeScript sources, so there is no `dist/`
-# for anything to wait on.
+# Three independent jobs, in parallel, each starting from a cold checkout with nothing to wait for.
+# That is a property of the workspace rather than of this file: `@…/core` is imported through subpath
+# exports pointing at its TypeScript sources, so no package produces a `dist/` another one needs.
+#
+# Each script fans out across the three packages through Turbo (`pnpm lint` is `turbo lint`, and so
+# on), which is why the package names appear in the logs. Turbo's cache does nothing here — every job
+# is a fresh runner and `.turbo` is never restored — so these runs are always cold. Caching it is
+# possible (an `actions/cache` step on `.turbo`, or remote caching) and is not set up: it would save
+# seconds on a gate measured in seconds.
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
+      # One ESLint run per package, each resolving its own config. The Cartographer has its own
+      # `eslint.config.js` — it re-imports the root one and adds React — while `core` and `atlas`
+      # walk up to the root config. A single run from the root would lint the Cartographer's `.tsx`
+      # with no React rule at all: green over code nothing had read.
       - run: pnpm lint
 
   type-check:
@@ -19,8 +29,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
-      # Two invocations, one per package: `core` compiles without the DOM lib, which is what makes
-      # "no document in core" a compiler error rather than a convention.
+      # One `tsc` per package, three in all, because each declares the environment it compiles
+      # against: `core` has no DOM lib, which is what makes "no document in core" a compiler error
+      # rather than a convention, and the Cartographer adds `jsx`.
       - run: pnpm type-check
 
   test:
@@ -28,4 +39,18 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
+      # One Vitest per package, and their environments differ on purpose: `core` runs under **node**,
+      # so a module reaching for a `document` fails here instead of in the worker; the atlas and the
+      # Cartographer run under jsdom, where the DOM is genuinely the subject.
       - run: pnpm test
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      # Not a duplicate of the lint job: `lint-staged` formats what is *staged*, so it never sees a commit
+      # made with `--no-verify`, a merge resolved in a web editor, or a file changed by a tool. This is the
+      # only place formatting is checked over the whole tree. It is a single root invocation rather than a
+      # Turbo fan-out because Prettier's own ignore file already scopes it.
+      - run: pnpm format:check

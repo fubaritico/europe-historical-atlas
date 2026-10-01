@@ -10,7 +10,14 @@ jobs:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
 
-      - name: Build the atlas
+      # Builds every app, not only the atlas — `pnpm build` is `turbo build`, and each app's `build`
+      # waits on its own `type-check` first. Compiling the Cartographer here earns its seconds: `tsc`
+      # cannot see a missing asset, because `vite/client` declares `*.png` and `*.css` as ambient
+      # modules, so an import of a file that is not there type-checks green and only `vite build`
+      # says otherwise.
+      #
+      # The artefact below is still the atlas alone, because it is the only app that is deployed.
+      - name: Build the apps
         run: pnpm build
 
       # The property this project cannot afford to lose silently: the compute worker must ship

@@ -10,10 +10,21 @@
 | 3D engine | three.js            | ^0.186       |
 | Bundler   | Vite (+ HMR)        | ^8.3         |
 | Package   | pnpm workspaces     | 10.7.1       |
+| Tasks     | Turbo               | ^2.11        |
 | Tests     | Vitest              | ^5.0         |
+| Chrome    | React + Zustand     | 19 / 5       |
 
-> No Turbo and no Lerna — measured and refused 2026-09-24. See `files/plans/plan.md` (P2) for
-> the two thresholds that would change that: a CI, or a gate past ~30 s.
+> **Turbo arrived 2026-10-01**, on the dev's call, and the earlier entry here saying it was "measured and
+> refused" is superseded. What changed is the shape of the repo rather than anyone's mind: `plan.md` (P2)
+> recorded the two thresholds that would reverse the refusal — **a CI** (shipped 2026-09-24) and a gate
+> past ~30 s — and the third package pushed past them. Each package now owns its `lint`, `type-check`,
+> `test` and `coverage`, so *something* has to fan out across them; the root scripts are `turbo <task>`.
+> **Lerna is still refused**, and for a reason no threshold touches: it publishes, and we publish nothing.
+
+> **One declared version per dependency**, in `pnpm-workspace.yaml`'s `catalog:`, referenced as `catalog:`
+> from every `package.json`. The bar for an entry is *shared* **and** *dangerous to mismatch*, not merely
+> shared: React is in there because the Payload admin will want it next and two Reacts in one workspace
+> give hook errors that read like application bugs; `three` has one consumer and stays inline.
 
 ## Project Structure
 
@@ -22,34 +33,50 @@
 > That is what keeps the worker chunk at 13.5 kB with no renderer in it.
 
 ```
-pnpm-workspace.yaml
-package.json            # workspace root: tooling only, scripts delegate with --filter
-tsconfig.json           # one type-check across both packages
-vitest.config.ts        # one test run across both packages
-eslint.config.js        # layer boundaries as a table, applied to both packages
+pnpm-workspace.yaml     # the packages, and the dependency catalogue
+turbo.json              # the task graph: build waits on its own type-check and on ^build
+package.json            # workspace root: tooling only, scripts are `turbo <task>`
+tsconfig.json           # the strictness every package extends
+eslint.config.js        # layer boundaries as a table; each package may override it
+scripts/                # repo-level utilities (coverage merge)
+AGENTS.md               # written by Turbo itself for AI agents; kept committed, as it asks
 
 packages/
-├── core/               # @europe-historical-atlas/core — pure TypeScript, NO three.js
+├── core/               # @europe-historical-atlas/core — pure TypeScript. NO three.js, React or zustand
+│   ├── vitest.config.ts    # **node** environment: no DOM, so a stray `document` fails here
 │   └── src/
 │       ├── utils/      # leaf: small pure helpers, importing nothing
 │       ├── geo/        # leaf: projection maths
 │       ├── data/       # domain + ports (heightmap, land mask, regions, rivers); reads geo/ + utils/
-│       └── pipeline/   # the CPU work, worker-safe; reads data/, geo/, utils/
-└── atlas/              # @europe-historical-atlas/atlas — the application
-    ├── index.html      # Vite entry point (canvas)
-    ├── public/         # DEM, land mask, rivers
+│       ├── pipeline/   # the CPU work, worker-safe; reads data/, geo/, utils/
+│       └── editor/     # the Cartographer's document model: anchors, rings, edits, history
+├── atlas/              # @europe-historical-atlas/atlas — the 3D map
+│   ├── index.html      # Vite entry point (canvas)
+│   ├── public/         # DEM, land mask, rivers
+│   ├── vite.config.ts
+│   ├── vitest.config.ts    # jsdom: sessionStorage, lil-gui and ui/ are the subject
+│   └── src/
+│       ├── main.ts     # composition root: renderer, scene, camera, loop
+│       ├── scene/      # pluggable scene modules
+│       ├── camera/     # camera + CameraStateStore (independent of everything else)
+│       ├── controls/   # navigation; depends on camera/ only
+│       ├── picking/    # raycasting: answers WHERE, never WHAT
+│       └── ui/         # plain DOM over the canvas
+└── cartographer/       # @europe-historical-atlas/cartographer — the territory editor
+    ├── eslint.config.js    # re-imports the root config, then adds React; forbids `three`
     ├── vite.config.ts
-    └── src/
-        ├── main.ts     # composition root: renderer, scene, camera, loop
-        ├── scene/      # pluggable scene modules
-        ├── camera/     # camera + CameraStateStore (independent of everything else)
-        ├── controls/   # navigation; depends on camera/ only
-        ├── picking/    # raycasting: answers WHERE, never WHAT
-        └── ui/         # plain DOM over the canvas
+    ├── vitest.config.ts    # jsdom + the React plugin
+    ├── vitest.setup.ts     # unmounts after each test — testing-library cannot do it itself here
+    └── src/                # 2D canvas and React chrome (being built)
 
 files/plans/            # the plans — shipped since 2026-09-24
 files/spikes/           # runnable experiments; their out/ stays ignored
 ```
+
+**Flat config has no cascade**, so a package's `eslint.config.js` re-imports the root one rather than
+inheriting it, and ESLint resolves one config **from the current directory** — which is why every package
+owns a `lint` script. A single `eslint .` from the root would read the Cartographer's `.tsx` with no React
+rule at all: green over code nothing had checked.
 
 **Cross-package imports use subpath exports**: `@europe-historical-atlas/core/utils/math`, never a barrel. A single
 barrel would flatten the four layers into one namespace and put `pipeline/` behind the same entry as the
@@ -133,13 +160,23 @@ pattern is not available by default — which is worth keeping, but it is not th
 ## Scripts
 
 ```bash
-pnpm dev          # Vite server + HMR
-pnpm build        # production build (vite build)
-pnpm preview      # preview the build
-pnpm type-check   # tsc --noEmit
-pnpm lint         # eslint
-pnpm test         # vitest
+pnpm dev                # Vite server + HMR — the atlas
+pnpm dev:cartographer   # Vite server + HMR — the Cartographer
+pnpm build              # turbo build: every app, each waiting on its own type-check
+pnpm preview            # preview the atlas build
+pnpm type-check         # turbo type-check: one tsc per package
+pnpm lint               # turbo lint: one eslint per package, each with its own config
+pnpm test               # turbo test: one vitest per package, environments differ on purpose
+pnpm coverage           # turbo coverage, then merge the three lcov reports into one
 ```
+
+**`dev` is not `turbo dev`** on purpose: that would start both Vite servers at once, which is a surprise
+rather than a service. Each app is named explicitly.
+
+**`coverage` merges rather than produces.** Each package writes its own `lcov.info` with paths relative to
+*itself* (`SF:src/…`), and Sonar resolves them against the repository root — so pointed at them directly it
+would find nothing and report **0 % with no error**. `scripts/merge-coverage.mjs` rewrites every path and
+concatenates, so `sonar-project.properties` still reads one report. Verified: 98 paths, all resolving.
 
 ## 3D Pipeline (Milestone 1)
 

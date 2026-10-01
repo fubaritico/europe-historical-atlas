@@ -1,0 +1,30 @@
+{
+  // Extends the workspace root, which is where the strictness lives: `strict`, `noUncheckedIndexedAccess`,
+  // `exactOptionalPropertyTypes`, `verbatimModuleSyntax`. The template shipped a `tsconfig.app.json` that sets
+  // none of those — keeping it would have made this the one package in the repo where `undefined` goes
+  // unchecked, and the linter said so out loud: four typed rules reported "requires the `strictNullChecks`
+  // compiler option to be turned on".
+  //
+  // One file rather than the template's three. Its `tsconfig.json` was a solution-style stub for `tsc -b`
+  // with references to an app and a node config; here the type-check is `tsc --noEmit -p packages/<pkg>`, the
+  // same single pass `core` and `atlas` get, and nothing builds types.
+  //
+  // `lib` is restated rather than inherited, per the rule the monorepo split established: each package
+  // declares the environment it compiles against, so a browser API used in a worker-only package is a compile
+  // error rather than a convention. The Cartographer is a browser app — DOM, and a 2D canvas.
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    // Required by React 19's automatic runtime: the transform injects the import, which is why the ESLint
+    // config also switches `react/react-in-jsx-scope` off. Both halves have to agree or one of them lies.
+    "jsx": "react-jsx"
+  },
+  // `src`, so the *config* files at the package root are left out — the same boundary `core` and `atlas` draw.
+  // Test files are inside it and are checked, which is deliberate: a suite that no longer compiles is a suite
+  // that stopped testing what it claims.
+  //
+  // `vitest.setup.ts` joins them because it is test code, not configuration: it calls `cleanup()`. Left out,
+  // ESLint still reads it — it is a `.ts` file and `eslint .` finds it — but the project service cannot type
+  // it, which fails the lint with a parsing error rather than a rule.
+  "include": ["src", "vitest.setup.ts"]
+}
