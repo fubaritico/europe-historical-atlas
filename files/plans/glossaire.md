@@ -72,6 +72,9 @@
 | **derived border**      | La frontière **calculée**, jamais dessinée à part. Deux calculs selon l'endroit : dans **l'atlas**, le bord des aplats du raster (il n'a que des coordonnées à plat) ; dans le **Cartographe**, le **bout partagé** entre deux tracés — exact, au lieu d'une marche de 1,9 km. |
 | **worker**              | Un second fil d'exécution. Le calcul lourd y va, pour que l'écran ne gèle pas.            |
 | **drape** / draper      | Poser une ligne plate sur le relief pour qu'elle épouse les montagnes.                    |
+| **backdrop** / fond     | La texture cuite, posée **sous** le canevas du Cartographe. Le seul objet géoréférencé **par construction** — c'est littéralement l'image de sortie de l'atlas, donc zéro calage et erreur nulle. Son repère est celui du **DEM** (W −45 / S 11,18 / E 78,75 / N 76,84), **jamais** la zone éditoriale : confondre les deux fait tout glisser sans erreur nulle part. |
+| **viewport**            | Quelle part du fond est à l'écran, et à quelle taille — **trois nombres** (`scale`, `originX`, `originY`), pas un objet vivant. Une seule échelle suffit : les pixels du fond sont carrés dans l'espace projeté à **0,031 %** près, mesuré. L'unité est le **pixel de périphérique** du canevas, pas le pixel CSS. |
+| **km par pixel écran**  | Ce que la barre d'état affiche. Dépend de **où** on mesure, le fond étant en Mercator : 7,6 km/px à 45°N au zoom propre du fond, 10,8 à l'équateur. Le fond « lâche » quand `scale > 1` — un pixel de fond couvrant plus d'un pixel écran. **Ce n'est pas un seuil à régler.** |
 
 ## Les mots du contenu
 

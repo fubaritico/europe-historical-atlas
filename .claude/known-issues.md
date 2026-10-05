@@ -89,6 +89,18 @@ Put here the know issues to avoid cluttering the context window.
   fait ne casse **aucun test** — l'aplatissement se fait en aval de `snapshot`. Ce qui fait tomber la garde
   (9 tests) est un `publish` qui n'incrémente que le compteur sans relire la ligne.
 
+- **Le test-vedette d'un module peut être celui qui n'attrape rien, et `4b` en donne le cas le plus net.**
+  `s01` spécifie le zoom par une seule invariante — *« le point sous le pointeur y reste »* — donc c'est le
+  test qu'on écrit en premier. **L'implémentation naïve passe 88 tests sur 90, dont celui-là.** Elle fait
+  glisser l'origine du facteur *demandé* au lieu du facteur réellement appliqué, ce qui est juste tant que
+  le zoom ne bute pas sur ses limites et faux dès qu'il bute : la carte continue de glisser en refusant de
+  grossir, et se détache du pointeur.
+  **Ce qui l'attrape, ce sont les deux tests de butée**, écrits parce que `clampScale` existe. Même famille
+  que l'étape 2, où le test le plus important passait contre une sauvegarde cassée.
+  **La règle qui en sort** : quand une spécification tient en une invariante, le test de cette invariante
+  n'est **pas** la garde — la garde est le test du cas où l'implémentation plausible cesse d'y satisfaire.
+  Chercher ce cas explicitement. **Résolu ici**, mais à relire avant d'écrire la garde de `4c`.
+
 - **`favicon.svg` existe maintenant en deux exemplaires, et c'est un arbitrage, pas un oubli.**
   `packages/atlas/public/favicon.svg` et `packages/cartographer/public/favicon.svg`, 819 octets, **identiques
   à l'octet** (demande du dev, 05/10 : *« le même favicon que pour l'app »*).
@@ -105,16 +117,33 @@ Put here the know issues to avoid cluttering the context window.
   0,35 à **1,12 ko** — 770 octets de raisonnement livrés à chaque visiteur. Le raisonnement vit ici, le HTML
   garde une ligne. À se rappeler pour tout commentaire dans un `index.html`.
 
-- **Le Cartographe n'a aucune ligne dans la table des frontières ESLint, et il vient d'acquérir un module à
-  état.** `state/` est le premier coin impur du paquet ; les étapes 4b et 4c y posent des couches
-  **pures** (`view/`, `geometry/`), et rien n'empêcherait l'une d'elles d'`import`er le store — soit exactement
-  le singleton global que `rules/modular-architecture.md` interdit. Le commentaire de `boundaryConfig` dans
-  `eslint.config.js` l'anticipe déjà (« steps 4b and 4c put *pure* `view/` and `geometry/` layers in a React
-  package »), mais anticiper n'est pas garder.
-  **Pourquoi ouvert plutôt que fermé maintenant** : une ligne visant un répertoire qui n'existe pas ne peut
-  pas être **prouvée en la cassant**, et ce dépôt a déjà payé une fois le fait d'écrire la doc d'une garde
-  avant la garde (01/10). **Déclencheur nommé : la ligne s'ajoute au moment où `view/` est créé, à l'étape
-  4b, et se prouve en la cassant ce jour-là.** Sévérité : **à savoir**, rien ne peut la violer aujourd'hui.
+- ~~**Le Cartographe n'a aucune ligne dans la table des frontières ESLint.**~~ — **FERMÉ 2026-10-05** à
+  l'étape 4b, et la fermeture a trouvé **une cause plus grosse que le trou**.
+  **Un `files` de la config racine est résolu contre le répertoire de la config CHARGÉE, pas contre le
+  fichier où il est écrit.** Donc une ligne écrite dans `eslint.config.js` pour
+  `packages/cartographer/src/view` matche depuis la racine et **matche rien** depuis le paquet — qui est
+  exactement d'où son `lint` tourne. Mesuré à `--print-config`, pas déduit : avec la config racine seule et
+  `basePath` = le paquet, la règle est **absente**. C'est la sœur de « flat config n'a aucune cascade », un
+  cran plus loin : **une ligne de frontière ne se partage pas avec un paquet qui possède sa config.**
+  **Et une config morte est pire que pas de config, parce qu'elle a l'air d'une garde.** La première version
+  de cette ligne a été écrite dans la table racine et n'a **rien** attrapé — trouvé en la cassant, pas en la
+  relisant.
+  **Remède en place** : `eslint.config.js` **exporte** `layerBoundary` et `LAYER` ; le Cartographe compose
+  ses propres lignes avec des globs **relatifs au paquet**. Et chacune **recompose l'interdit `three`**,
+  parce que `no-restricted-imports` est une règle unique — un bloc paquet-large posé après les lignes de
+  répertoire les effacerait en silence, ce qui était **déjà le cas** avant cette correction.
+  Prouvé en cassant : `view/` → `state/`, `state/` → `main`, `three` dans `main.ts`, et `three` **dans**
+  `view/` — ce dernier étant la preuve que la composition tient. Le lint vert prouve l'autre moitié :
+  `view/` lit toujours `core/geo`, dont `resolution.ts` a besoin.
+  **Une direction a été relâchée après revue, et la faute est nommable** : ma première ligne interdisait
+  aussi `state/` → `view/`, soit **une symétrie là où le principe est une direction**. `view/` est une
+  **feuille** d'arithmétique pure, lue d'en haut exactement comme `geo/` et `utils/` le sont par `data/`
+  dans `core` ; et `4d` met le viewport **arrêté** dans une slice, que le canevas statique relit. La ligne
+  symétrique aurait bloqué le cas voulu, et l'aurait fait découvrir à `4d`. Ce qui tient le pan et le zoom
+  **par frame** hors du store est une règle sur *quand* on appelle `set` (`rules/troubleshooting.md`), pas
+  un interdit d'import — un interdit bloquerait aussi la valeur commitée.
+  **À refaire pour `geometry/` et `canvas/`** quand ces répertoires naîtront : ajouter leur ligne dans
+  `packages/cartographer/eslint.config.js`, et la casser exprès.
 - **Recharger un jalon jette ce que la ligne tenait après lui, et rien ne le décide encore.** `restoreMarker`
   remplace la ligne par ce que le jalon a gelé ; ce qui suivait le pas marqué disparaît. Le code **ne prend
   aucune politique**, délibérément : le mécanisme est dans `core`, la décision appartient au chrome, et

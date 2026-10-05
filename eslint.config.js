@@ -19,7 +19,17 @@ const LAYER = {
   pipeline: ['**/pipeline', '**/pipeline/**'],
   geo: ['**/geo', '**/geo/**'],
   editor: ['**/editor', '**/editor/**'],
-  main: ['**/main', '**/main.ts'],
+  // The Cartographer's own layers. `geo` above stays reachable from them on purpose: projection maths is
+  // a leaf of `core`, and `view/` reads it. Note `**/geo` cannot match `**/geometry` — a pattern segment
+  // is matched whole — so the two keys do not collide.
+  view: ['**/view', '**/view/**'],
+  geometry: ['**/geometry', '**/geometry/**'],
+  canvas: ['**/canvas', '**/canvas/**'],
+  state: ['**/state', '**/state/**'],
+  // `{ts,tsx}` rather than `.ts`: the Cartographer's entry is `main.tsx`, so the narrow glob would have
+  // let `./main.tsx` through a boundary that forbids the composition root. Fifth instance of the family
+  // known-issues records, and the reason the rule there is to write `{ts,tsx}` unless there is a reason.
+  main: ['**/main', '**/main.{ts,tsx}'],
 }
 
 /**
@@ -56,6 +66,9 @@ const BOUNDARIES = [
     forbid: ['scene', 'camera', 'controls', 'ui', 'pipeline', 'main'],
     why: 'editor/ is the Cartographer\u2019s document model \u2014 mutable state and the operations on it. It may read data/, geo/ and utils/, and must know nothing of the renderer, the DOM, or the compute the atlas pays for. Nothing below it may reach back up: the map renders a finished year, it never edits one.',
   },
+  // No row points inside `packages/cartographer`, and that is not an omission: a row here would never
+  // fire, its glob being resolved against whichever config ESLint loaded. The Cartographer's layers are
+  // policed by its own config, composed from LAYER through `layerBoundary`. See that function's header.
   {
     dir: 'packages/atlas/src/scene',
     forbid: ['camera', 'controls', 'main'],
@@ -114,34 +127,64 @@ const CORE_IS_PURE = [
 ]
 
 /**
- * Turn one row of the table into a flat-config object.
+ * Build a flat-config entry restricting one layer's imports.
  *
- * Matches `.tsx` as well as `.ts`. No row points inside the Cartographer today, so nothing is unenforced —
- * but steps 4b and 4c put *pure* `view/` and `geometry/` layers in a React package, which is exactly what
- * this table polices elsewhere, and a `*.ts` glob would skip their components in silence. Widening it while
- * it is free costs nothing: no directory under an existing row holds a `.tsx` file.
- * @param {{dir: string, forbid: string[], why: string}} boundary - the layer and what it may not reach
- * @returns {object} an ESLint flat-config entry restricting that layer's imports
+ * **It takes `files` rather than deriving it from a directory, and that is load-bearing.** ESLint resolves
+ * these patterns against the directory of the config file it **loaded**, not against the file they were
+ * written in — measured on 2026-10-05 with `--print-config`, after a boundary row authored here for
+ * `packages/cartographer/src/view` failed to fire. It matches when `eslint` runs from the repository root
+ * and matches **nothing** when it runs from inside the Cartographer, which is exactly how that package's
+ * `lint` script runs. This is the sister of "flat config has no cascade", one step further: a row cannot be
+ * shared with a package that owns its own config.
+ *
+ * **A dead row is worse than no row**, because it reads as a guard. So a package owning a config composes
+ * its own rows from {@link LAYER} with package-relative globs, which is what this signature is for. Prove
+ * every one of them by breaking it: the mechanism is invisible otherwise.
+ *
+ * `patterns` is omitted when nothing is forbidden, because `no-restricted-imports` rejects an empty group —
+ * which is how a paths-only row (a package-wide ban with no layer direction) is expressed.
+ * @param {{files: string[], forbid?: string[], why?: string, paths?: object[]}} boundary - the glob to
+ *   apply to, the layers it may not reach, why, and any whole-package bans to compose in
+ * @returns {object} an ESLint flat-config entry
  */
-const boundaryConfig = ({ dir, forbid, why }) => ({
-  files: [`${dir}/**/*.{ts,tsx}`],
+export const layerBoundary = ({ files, forbid = [], why = '', paths }) => ({
+  files,
   rules: {
     'no-restricted-imports': [
       'error',
       {
-        // Gated on the package rather than applied to every row: the atlas may one day want React in its
-        // own DOM overlay, and forbidding it there would be a boundary nobody decided.
-        ...(dir.startsWith('packages/core/') ? { paths: CORE_IS_PURE } : {}),
-        patterns: [
-          {
-            group: forbid.flatMap((name) => LAYER[name]),
-            message: `Architecture boundary: ${why}`,
-          },
-        ],
+        ...(paths === undefined ? {} : { paths }),
+        ...(forbid.length === 0
+          ? {}
+          : {
+              patterns: [
+                {
+                  group: forbid.flatMap((name) => LAYER[name]),
+                  message: `Architecture boundary: ${why}`,
+                },
+              ],
+            }),
       },
     ],
   },
 })
+
+/**
+ * Turn one row of this file's own table into a flat-config object.
+ *
+ * Matches `.tsx` as well as `.ts`, so a component under an existing row cannot slip past in silence.
+ * @param {{dir: string, forbid: string[], why: string}} boundary - the layer and what it may not reach
+ * @returns {object} an ESLint flat-config entry restricting that layer's imports
+ */
+const boundaryConfig = ({ dir, forbid, why }) =>
+  layerBoundary({
+    files: [`${dir}/**/*.{ts,tsx}`],
+    forbid,
+    why,
+    // Gated on the package rather than applied to every row: the atlas may one day want React in its
+    // own DOM overlay, and forbidding it there would be a boundary nobody decided.
+    ...(dir.startsWith('packages/core/') ? { paths: CORE_IS_PURE } : {}),
+  })
 
 export default tseslint.config(
   // Plugins

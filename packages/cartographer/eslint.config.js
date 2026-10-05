@@ -5,7 +5,50 @@ import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
-import rootEslintConfig from '../../eslint.config.js'
+import rootEslintConfig, { layerBoundary } from '../../eslint.config.js'
+
+/**
+ * The whole-package ban, composed into every boundary row below rather than declared once.
+ *
+ * `no-restricted-imports` is a **single rule**, so a later config object replaces its options wholesale
+ * for the files it matches — which is why this cannot be a standalone block: it would erase the layer
+ * directions under it, silently. Measured, not feared: a package-wide block carrying only this ban is
+ * exactly what used to make `--print-config` report no `patterns` at all on a `view/` file.
+ */
+const CARTOGRAPHER_IS_2D = [
+  {
+    name: 'three',
+    message:
+      'Package boundary: the Cartographer paints on a 2D canvas. If something here seems to need three.js, it belongs in the atlas.',
+  },
+]
+
+/**
+ * This package's layer directions, with **package-relative** globs.
+ *
+ * They live here and not in the root table for a measured reason (see `layerBoundary`'s header): ESLint
+ * resolves a `files` pattern against the directory of the config it loaded, and this package's `lint` runs
+ * from this directory — so a root-authored `packages/cartographer/src/view/**` row matches nothing. Every
+ * row was proved by breaking it.
+ *
+ * Order matters: the package-wide row comes first so the directory rows, which carry the same ban *plus* a
+ * direction, win for the files they match.
+ */
+const CARTOGRAPHER_BOUNDARIES = [
+  layerBoundary({ files: ['**/*.{ts,tsx}'], paths: CARTOGRAPHER_IS_2D }),
+  layerBoundary({
+    files: ['src/view/**/*.{ts,tsx}'],
+    forbid: ['state', 'geometry', 'canvas', 'main'],
+    paths: CARTOGRAPHER_IS_2D,
+    why: 'view/ is the screen↔backdrop arithmetic, and a viewport is data. It may read core’s geo/ for projection maths and nothing else: a pure layer reaching into the store would be the global singleton rules/modular-architecture.md forbids, and it could no longer be exercised with literals.',
+  }),
+  layerBoundary({
+    files: ['src/state/**/*.{ts,tsx}'],
+    forbid: ['geometry', 'canvas', 'main'],
+    paths: CARTOGRAPHER_IS_2D,
+    why: 'state/ owns what is being edited and must not know how it is *drawn*: the canvas and the tools read the store, never the reverse, which is what keeps the store exercisable without a canvas. `view/` is deliberately NOT on this list — it is a leaf of pure arithmetic, read from above exactly as core’s geo/ and utils/ are read by its data/, and step 4d puts the settled viewport in a slice. Forbidding it would have been a symmetry where the principle is a direction, and it would have blocked the case we want. What keeps per-frame pan and zoom out of the store is a rule about when `set` is called (rules/troubleshooting.md), not an import ban — a ban would equally block the committed value the static canvas reads.',
+  }),
+]
 
 /**
  * The Cartographer's ESLint config — the root config, plus React.
@@ -58,21 +101,12 @@ export default tseslint.config(
     rules: {
       // Prop types are the types. The rule exists for JavaScript React and only ever fires here as noise.
       'react/prop-types': 'off',
-      // The Cartographer paints on a 2D canvas, by decision: a 2D context gives the compositing mode the
-      // atlas's bake already uses (`overlay`) for free, where WebGL would need a shader. three.js in here
-      // would be a second renderer in the repository. See memory [[editor-canvas-is-2d]].
-      'no-restricted-imports': [
-        'error',
-        {
-          paths: [
-            {
-              name: 'three',
-              message:
-                'Package boundary: the Cartographer paints on a 2D canvas. If something here seems to need three.js, it belongs in the atlas.',
-            },
-          ],
-        },
-      ],
     },
-  }
+  },
+
+  // Architecture boundaries, last so nothing can replace the single `no-restricted-imports` rule after
+  // them. The 2D-canvas decision is composed into each one: a 2D context gives the compositing mode the
+  // atlas's bake already uses (`overlay`) for free, where WebGL would need a shader, and three.js in here
+  // would be a second renderer in the repository. See memory [[editor-canvas-is-2d]].
+  ...CARTOGRAPHER_BOUNDARIES
 )
