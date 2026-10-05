@@ -35,6 +35,17 @@ to `{Tools}` alone, so that one will be its own slice.
 composition root (`main.tsx`), which `rules/modular-architecture.md` requires — and which
 the edition slice needs anyway, since it has a collaborator to inject.
 
+**But not everything is a slice: the lightest sufficient tier wins.** Taken from the archived
+`state-storage` skill, and it refines the split rather than contradicting it — a piece of state
+with **one writer and one reader, both the same component**, has nothing to share, so it needs no
+slice and no store. `useState` is the answer: a panel's expanded rows, which form is open, a
+hover. **Escalate only on a named criterion**, and the criterion is *someone outside this component
+has to read it*.
+
+What that criterion decides, concretely: the open/expanded state of `{Polities}` stays local unless
+it must survive the panel being collapsed and remounted, or be saved with the file. That is a
+product question and the dev's to answer — **ask it before writing a `panelSlice`.**
+
 ---
 
 ## `create<T>()(...)` — the extra parentheses are mandatory
@@ -173,6 +184,13 @@ const version = store((s) => s.version)     // ✓
 **The only shape where both work**: keep the line in the slice's closure, and publish a
 **flat snapshot** of it plus a **version counter** at every action — including the actions
 that leave the document alone, since they change what the line *reads as*.
+
+**Confirmed from an independent source.** The archived `state-storage` skill, written for the design
+system long before any of this, names the same mechanism in one line: *"native `useSyncExternalStore`
+is zero-dep but a **derived** slice (new object each call) **loops**; use
+`useSyncExternalStoreWithSelector` or memoize. Whole/stable slice → native."* Zustand's React binding
+is that hook, which is why the rule lands on us unchanged — and why the remedy is to publish a stable
+value rather than to derive at read time.
 
 **The trap inside the trap, which cost a sabotage.** `Object.assign` and the object spread
 **evaluate getters and copy their values**. So putting getters in the state object works *by
