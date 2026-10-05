@@ -309,6 +309,35 @@ exactly one polity surrounds the ground and the author still knows why they drew
 **Still open**: a pocket _discovered_ later, surrounded by two or more polities. That one has no obvious
 neighbour to offer it to, and nobody remembers drawing it.
 
+### H-27 · What tells the editor that a published year is live?
+
+Surfaced by [s15](s15-offline-and-online.md), 2026-10-06. Saving online commits in a second and the site
+rebuilds in one or two minutes, so there is an honest intermediate state — **sent, not yet published** —
+and no control for it. Claiming the second while only the first is true is the one real lie available
+here. Polling the deployed manifest would work and costs a request; a webhook would need somewhere to
+receive it.
+
+### H-28 · How does an offline save actually write?
+
+[s04](s04-save-and-reopen.md) says a year is *"written on disk"* and never says how. A browser has two
+ways: a **download**, which works everywhere and makes the author move three files by hand, or the **File
+System Access API**, which writes straight into a chosen directory and lets ‹ctrl+s› overwrite in place.
+The second is far better for the author and is not in every browser. **Does not block drawing 1100.**
+
+### H-29 · Who may write online, and what happens with two authors?
+
+A single shared secret in a Netlify Function is enough for one author and answers nothing beyond that.
+Two authors is the ordinary case of tier B — accounts, review, conflicts — and `s15`'s "two saves of the
+same year" scenario resolves only the part git resolves by itself: nothing is destroyed. Who is allowed,
+and what the second author sees, is unspecified.
+
+### H-30 · Online, does overwriting a year still rename the old one?
+
+[s05](s05-derive-a-year.md) decided that replacing an existing year **renames the old one** rather than
+destroying it. Offline that is a file rename. Online, git already keeps every version, so the rename may
+be redundant — or may still be wanted, so the previous year stays *listed in the manifest* and remains
+reachable from the atlas. Not decided.
+
 ## Not holes — settled, recorded here so they are not reopened
 
 - **Every rule in these files is a default, never a law.** The dev, 2026-09-22: _"tes règles, en fait,

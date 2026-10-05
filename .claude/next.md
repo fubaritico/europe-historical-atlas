@@ -5,9 +5,9 @@
 
 ## Where we are
 
-**1399 tests**, gate verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`).
-**`7f75624` est local et n'est pas poussé** — `git log origin/main..main` dit ce qui attend. Le dépôt est
-**en ligne et déployé** :
+**1655 tests** (609 `core` · 782 atlas · 264 Cartographe), gate verte sur cinq contrôles (`lint`,
+`type-check`, `test`, `build`, `format:check`). Worker à **13 490 o**, toujours sans three.js.
+`git log origin/main..main` dit ce qui attend un push. Le dépôt est **en ligne et déployé** :
 
 |       |                                                                             |
 | ----- | --------------------------------------------------------------------------- |
@@ -61,68 +61,74 @@ d'ancres ne perd jamais rien pendant l'édition.** Donc `removePolity` retire un
 point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui n'est plus référencé disparaît
 à l'enregistrement, par une seule renumération. Vérifié en la cassant : 3 tests tombent.
 
-## ▶ ON REPREND ICI — finir `4a` : brancher `core` et Zustand sur l'entrée
+## ▶ ON REPREND ICI — deux lignes, et `4d-3` est fini
 
-> **Décision du dev, 01/10 en fin de session** : *« pour ce qui concerne core et zustand, on le fait après
-> le commit »*. Le paquet existe et est commité ; ces deux-là sont le reste de `4a`, et c'est petit.
+**L'étape 4 en est là** : `4a` (le store), `4b` (`view/`), `4c` (`geometry/`) et `4d-1` (le canevas qui
+dessine et navigue) sont **faits**. `4d-3` est **à moitié** : la cuisson du fond et son dessin sont écrits
+et testés, mais **personne ne les appelle** — mesuré, le bundle n'a pris que +0,37 ko gzip, le secouage
+d'arbre retirant une cuisson sans appelant.
 
-**Ce que `4a` a livré** (`7f75624`) :
+**Ce qui manque fait deux lignes, et elles sont décidées** (06/10) :
 
-| | état |
+1. `publicDir` du Cartographe → **`../atlas/public`**, dans son `vite.config.ts`. Zéro octet dupliqué :
+   Vite sert ce dossier en dev **et** le recopie dans `dist` au build. Ça lui donne le DEM, le masque et
+   les fleuves, et ça rend inutile la copie du favicon commitée le 05/10.
+2. la garde GPL de **`build.yml` élargie à n'importe quel `dist`**, pas seulement
+   `packages/atlas/dist/borders`. Aujourd'hui elle tient par une absence — les fichiers sont gitignorés
+   donc jamais dans le checkout CI — et le second paquet sortirait de sa surveillance.
+
+**Puis, dans le même pas, ce que `4d-3` doit finir** : prendre les métadonnées du DEM **dans son propre
+`.json`** (ce qui **ferme `ARCH-102`** et supprime `view/backdropFrame.ts`), et afficher un état d'attente
+— la cuisson coûte **~1,8 s** au supersample 2, et `H-08` est le trou ouvert voisin.
+
+**Ensuite `4d-2`** : les deux outils, qui auront alors du relief et des fleuves à viser — ce que `s02`
+exige pour reporter une frontière à vue.
+
+### Offline et online — tranché le 06/10, et c'est écrit
+
+| | |
 | --- | --- |
-| le paquet | `@europe-historical-atlas/cartographer`, React 19 + Vite 8, entrée qui **monte et affiche**, ses `lint`/`type-check`/`test`/`build` |
-| sa surcharge ESLint | `packages/cartographer/eslint.config.js` — réimporte la racine, ajoute React + hooks + jsx-a11y + react-refresh, interdit `three`. **Prouvée en la cassant** |
-| la garde `core` | interdit désormais `react`, `react-dom`, `zustand` **et** `three`. **Prouvée en la cassant** |
-| `CLAUDE.md` | corrigé — il ne dit plus « No React, no monorepo, no design system » |
+| **le geste ne change pas** | l'auteur fait ‹ctrl+s› dans les deux modes et n'a pas à savoir lequel. Seule la **destination** change — c'est ce qui fait des deux modes un choix de câblage et non deux produits |
+| **offline** (aujourd'hui) | trois fichiers par année (`registry`/`polities`/`borders.json`) + le manifeste `years/index.json`. Ils vont dans `packages/atlas/public/years/<année>/`, commités, et l'atlas les lit par **URL relative** comme le DEM |
+| **online** (plus tard) | une **Netlify Function** tenant le token **côté serveur** commite les fichiers ; la CI rebuild et redéploie. Plan payé, donc disponible |
+| **refusé** | un *blob store* lu à l'exécution pour les années publiées — la donnée sortirait du build, donc les deux gardes CI cesseraient de la couvrir, et git garde l'historique qu'un bucket ne garde pas |
+| **la coupe si autosave un jour** | brouillons dans un store, **années publiées dans git** |
 
-**Ce qui manque, et c'est tout ce qui manque :**
+Tout le flux est en **scénarios d'intégration** dans
+`files/plans/cartographer/scenarii/s15-offline-and-online.md` — les deux modes, les pannes qui décident
+réellement la conception, et **quatre trous neufs : H-27 à H-30**. Le plan porte le résumé (`plan.md`,
+section « Offline and online » sous P5).
 
-1. **`@europe-historical-atlas/core` n'est pas déclaré** par le Cartographe, donc **rien ne prouve encore
-   qu'un import inter-paquets par sous-chemin résout depuis un `.tsx`** — et c'est la seule chose de `4a`
-   qui pouvait réellement casser, `core` étant lu **en source** et devant donc type-checker sous les
-   options de ce paquet. L'entrée doit lire quelque chose de `core` (p. ex. `createYearDocument`).
-2. **`zustand` est au catalogue sans aucun lecteur.** Il faut le déclarer et écrire le premier store.
+### Un déclencheur à ne pas perdre
 
-**Trois choses à ne pas re-découvrir en écrivant le store** (vérifiées en source, pas déduites) :
-`create<T>()(...)` avec les parenthèses vides est **obligatoire** sinon TS infère `unknown` · une slice
-n'est pas un store, tout va dans **un seul store lié**, et le **middleware ne se pose que sur le combiné** ·
-pour réinitialiser entre tests, `setState(initialState)` **sans** `replace`, qui effacerait les actions.
-Tout est dans `.claude/skills/zustand-react-pattern/`.
+`mapPipeline.ts:97` lit **encore** `/borders/europe-<année>.json` — les 21 payloads GPL-3.0, présents sur
+la machine du dev (6,5 Mo, gitignorés, donc **jamais dans git ni en production**). Le jour où 1100 est
+dessiné, il faut **supprimer `borders/` et son lecteur `unauthored`**. C'est le moment où le dépôt cesse
+d'avoir du GPL *sur la machine*, pas seulement hors de git.
 
-**Et le compteur de version n'est pas une précaution** : le document est **muté en place** (décision de
-l'étape 2) et Zustand détecte par identité de référence, donc un sélecteur sur le document ne verrait rien.
-Voir `known-issues`.
+### La skill à ouvrir avant de coder
 
-| | état |
-| --- | --- |
-| skill officielle Zustand | `pmndrs@pmndrs` installée (dépôt seulement, `.claude/settings.local.json`), MCP `docs.pmnd.rs` branché |
-| context7 | branché, **plafonne à v5.0.12** — `opensrc` (v5.0.15) reste l'autorité sur le comportement |
+`/scenarii-to-code` (écrite le 06/10) : charger le `s00` du jeu, le scénario qui gouverne, et `s99` ;
+faire de chaque `Then` **une assertion ou un manque déclaré** ; et ne jamais écrire dans un commentaire
+une promesse qu'une étape ultérieure doit tenir — elle va dans `next.md` ou `known-issues.md`, les deux
+seuls fichiers relus à chaque session. Elle existe parce que `4d-1` a livré une JSDoc, écrite deux étapes
+plus tôt, promettant un cache que `4d-1` n'a pas construit.
 
 ### La suite de l'étape 4, découpée
 
 | | quoi | on sait que ça marche comment |
 | --- | --- | --- |
-| **4b** | `view/` — écran ↔ monde, pan, zoom, cadrer. **Pur**, un viewport est une donnée | zoomer sur le pointeur **laisse le point sous le pointeur** |
-| **4c** | `geometry/` — ancre la plus proche, marquise, élastique, fermeture. **Pur** | des littéraux : une ancre à 9 px n'est pas attrapée à 8 px de tolérance |
-| **4d** | `canvas/` (le peintre, zéro décision) + les deux outils câblés sur `documentEdits` et `history` | `pnpm dev`, et on dessine |
+| **4d-3** | les deux lignes ci-dessus, puis les métadonnées lues du DEM et l'état d'attente | `pnpm dev:cartographer` : on voit le relief et les fleuves |
+| **4d-2** | les deux outils câblés sur `documentEdits` et `history`, l'anneau en cours, la sélection | on dessine, `ctrl+z` défait le geste |
+| **5** | le chrome : `{Polities}` en arbre, les formulaires, `{Overrides}` | les valeurs viennent de `design/chrome.css` |
 
 ### Trois choses décidées pour l'étape 4, à ne pas re-trancher
 
 1. **Le repère du canevas est celui du fond**, pas la zone éditoriale — voir `known-issues` (deux boîtes).
-2. **Deux canevas** : un statique redessiné au commit, un overlay redessiné au `pointermove`. La barre
-   d'état s'écrit **impérativement**, jamais par un rendu React.
-3. **Le fond est cuit par le Cartographe** avec `composeTerrainRgba` (pur, dans `core/pipeline`, déjà prouvé
-   hors navigateur par le spike `terrain-bitmap`), plutôt qu'une troisième copie du PNG de 6,6 Mo.
-
-### Ce que l'étape 3 a livré
-
-Deux commits : `f1be468` la ligne d'historique, `2487895` la surface que le panneau lit (`rows`, `goTo`,
-`mark`/`restoreMarker`/`dropMarker`) plus `s14-history-panel.md`. Un troisième, `1cbe7b8`, a retiré les
-références à l'autre logiciel à la demande du dev.
-
-**Une décision produit reste ouverte** : recharger un jalon **jette ce que la ligne tenait après lui**. Les
-trois réponses sont dans `s14` avec leur coût, et le code n'en prend aucune — le mécanisme est dans `core`,
-la politique appartient au chrome. Ne bloque pas l'étape 4.
+2. **Deux canevas** : un statique redessiné au commit, un overlay au `pointermove`. La barre d'état
+   s'écrit **impérativement**. (`4d-1` n'en a qu'un : le second arrive avec l'élastique, à `4d-2`.)
+3. **Le fond est cuit par le Cartographe** avec `bakeTerrainPixels(…, null)` — le `null` est l'année
+   installée, donc le terrain nu, donc « tint politique retiré » sans rien à nettoyer.
 
 ### P3 — fait le 27/09, et ça a retourné le format
 

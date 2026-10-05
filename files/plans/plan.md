@@ -269,6 +269,79 @@ of someone else's dataset into its own source.
 **Also the day the README gets its picture** — see the section on the deferred screenshot below. Not a
 loose end: it is the first moment an image of this project shows history rather than terrain.
 
+### Offline and online — the two modes, and where the files live
+
+Added 2026-10-06 at the dev's request, because it decides where the two applications meet and nothing
+said so. **Both go on Netlify**, as separate static bundles.
+
+**Offline is the mode, and it is the mode for a while.** The Cartographer writes three files per year —
+`<year>/registry.json`, `<year>/polities.json`, `<year>/borders.json` — plus the one global
+`years/index.json` manifest. The author puts them under the atlas's `public/years/`, commits them, and
+the CI redeploys. The atlas reads them over a **relative URL**, exactly as it reads the DEM and the
+rivers, and the readers for this already exist (`core/data/yearSource.ts`, `yearManifest.ts`). Nothing
+has to be built for this but the drawing itself.
+
+**What "showable" costs, and it is the point of this section: nothing more than that.** A deployed
+Cartographer is a demonstration of the *tool* — one can draw, undo, close a ring, and see it work — and
+a deployed atlas showing a year drawn by us is a demonstration of the *result*. Neither needs a server,
+an account or a database. The result is shown without showing the code, which is what the exercise is
+for.
+
+**Online writing is a different tier, and it is deliberately later.** A deployed Cartographer cannot
+write into the deployed atlas: there is no filesystem and no server in a static bundle. So publishing a
+year stays *a commit and a deploy* until something exists to receive a POST. Three ways, with their real
+costs:
+
+| | what it is | verdict |
+| --- | --- | --- |
+| **commit and deploy** | the author commits the four files by hand; the CI rebuilds | **the mode today, and through P5.** Costs nothing; publishing is simply not instant |
+| **a Netlify Function that commits** | the editor POSTs the files; a function holding the token **server-side** commits them; the CI rebuilds and redeploys | **chosen 2026-10-06** for the online tier. The dev has a paid plan, so functions are available. One function, one environment variable, one to two minutes of rebuild |
+| a storage service read at runtime (Blobs, a bucket, Postgres) | the editor POSTs, the atlas fetches from that origin | **refused for published years** — see below. Right for *drafts*, if autosave is ever wanted |
+| the browser commits by itself | the editor calls the git API directly | **refused**: a token in a static bundle is a published secret |
+
+**Why published years go through the repository and not into a store**, which is the decision rather than
+the mechanism:
+
+- **the deployed bytes are the checked bytes.** The CI builds once, asserts — no three.js in the worker
+  chunk, no GPL geometry in the output — and deploys *those* bytes. A year read at runtime from a store
+  is outside the build, so neither guard covers it any more.
+- **provenance.** A drawn year is a contribution: who, when, against what. Git records that for free; a
+  bucket records the last write and no history. For a *historical* atlas that is not a detail.
+- **and a lost file is lost.** Git keeps every version; a store keeps the latest.
+
+**How a year is actually served, which is the part that confused nobody until it was written down.** Git
+is the archive and nothing in it is read by a browser; Netlify serves a *folder*; the **build** is what
+moves one into the other, copying `public/` wholesale into `dist/`. So:
+
+```
+in git                                               →  served at
+packages/atlas/public/heightmaps/europe-dem-z5.bin   →  /heightmaps/europe-dem-z5.bin
+packages/atlas/public/years/index.json               →  /years/index.json
+packages/atlas/public/years/1100/polities.json       →  /years/1100/polities.json
+```
+
+**One file already proves it**: `years/index.json` is committed today and `mapPipeline.ts` reads it at
+`'/years/index.json'`. It is empty — `"years": []` — so the path exists and there is only a year to put
+in it.
+
+**The whole flow is written as integration scenarios** in
+[`cartographer/scenarii/s15-offline-and-online.md`](cartographer/scenarii/s15-offline-and-online.md):
+both modes, the failures that actually decide the design (the function unreachable, the write refused,
+the build failing after the commit, two saves racing), and the four holes it surfaced — H-27 to H-30.
+
+**And it converges with a milestone already named.** P7 says of Sentry that it *"belongs to the same
+step as authentication and the security layer — they are one milestone, not three"*, and Payload going
+online needs exactly the same thing: a server runtime plus a database reachable from it. **Writing a year
+online is the fourth thing in that same milestone, not a fourth milestone.** Deciding them separately is
+how a project ends up with three half-built back ends.
+
+**Open, and the dev's call**: how the Cartographer writes a file *locally*. `s04` says a year is
+"written on disk" without naming the mechanism, and a browser has two — a **download** to the user's
+folder, which works everywhere and makes the author move the files by hand, or the **File System Access
+API**, which writes straight into a chosen directory and would let `[Save]` overwrite the year in place.
+The second is far better for the author and is not available in every browser. Not decided, and it does
+not block P5: a download is enough to draw 1100.
+
 ## P6 — `regionAt` and the country focus
 
 A query on the compute port, not a copy of the grid: `regionAt(u, v)` returns **a list**, since a vassal

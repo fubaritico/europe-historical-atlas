@@ -38,6 +38,7 @@ Every control name below is **provisional**. It names an _intention_, not a deci
 | 12  | [out of frame](s12-out-of-frame.md)                       | the editorial zone, separate from the render frame                                  |
 | 13  | [overrides](s13-overrides.md)                             | taking the hand on colours and lines, and the one place they are all visible        |
 | 14  | [the History panel](s14-history-panel.md)                 | the line listed, reached in one click, and the markers that survive a truncation    |
+| 15  | [offline and online](s15-offline-and-online.md)         | **integration, not interface** — where a saved year goes, and how the atlas reads it |
 
 ## The two tools — decided 2026-09-22
 
