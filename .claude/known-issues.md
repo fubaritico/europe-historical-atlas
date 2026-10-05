@@ -89,6 +89,27 @@ Put here the know issues to avoid cluttering the context window.
   fait ne casse **aucun test** — l'aplatissement se fait en aval de `snapshot`. Ce qui fait tomber la garde
   (9 tests) est un `publish` qui n'incrémente que le compteur sans relire la ligne.
 
+- **`4d-3` est à moitié livré, et ce qui manque est une décision, pas du code : où vivent les assets
+  partagés.** La cuisson (`canvas/backdrop.ts`) et le dessin du fond (le peintre, la scène) sont écrits et
+  testés ; **rien ne les appelle**, parce que le Cartographe ne reçoit ni le DEM (2,98 Mo) ni le masque de
+  terres (2,9 Mo) — ils vivent dans `packages/atlas/public/`. Mesuré : le bundle n'a pris que **+0,37 ko
+  gzip**, le secouage d'arbre retirant la cuisson que personne n'appelle.
+  **Le chargement, lui, n'est pas le problème** : `createFetchHeightmapSource(basePath)` et son homologue
+  pour le masque prennent déjà un **chemin injecté**, donc l'emplacement est une décision de câblage.
+  **Le raccourci d'une ligne a un danger GPL, et c'est ce qui le disqualifie.** Pointer le `publicDir` du
+  Cartographe sur `packages/atlas/public/` marche en dev **et** au build, Vite recopiant ce dossier dans
+  `dist` — mais il recopierait aussi **`public/borders/`**, les 21 fichiers GPL-3.0 gitignorés, dans un
+  `dist` que la garde CI ne surveille que pour l'atlas. C'est **exactement la forme de l'incident du
+  24/09**, où un motif d'ignore avait cessé de matcher en silence.
+  **Les deux vraies options**, à trancher par le dev : (a) copier les deux assets dans
+  `packages/cartographer/public/`, soit ~6 Mo commités deux fois ; (b) sortir les données **partagées**
+  (DEM, masque, fleuves) vers un `assets/` à la racine que les deux apps servent — propre, mais ça déplace
+  7 Mo, change le motif `**/public/borders/` du `.gitignore`, la garde GPL de la CI et le déploiement.
+  **Et deux choses que `4d-3` doit faire en même temps** : prendre les métadonnées du DEM dans le fichier
+  (ce qui **ferme `ARCH-102`** et retire `RENDER_FRAME`), et afficher un état d'attente — la cuisson coûte
+  **~1,8 s** au supersample 2 d'après le spike `terrain-bitmap`, et `H-08` est le trou ouvert voisin.
+  **Sévérité : bloquant pour `4d-3`**, rien d'autre.
+
 - **`RENDER_FRAME` déclare les métadonnées du DEM à la main, et rien ne vérifie qu'elles correspondent.**
   `packages/cartographer/src/view/backdropFrame.ts` écrit `1280×1164` et la bbox du DEM en littéral,
   parce que `4d-1` ne charge aucun asset. **Le mode d'échec est muet** : projeter contre une boîte en

@@ -9,8 +9,8 @@ import type { PixelSize, Point } from '../view/viewport'
 interface Call {
   /** The member called. */
   op: string
-  /** Its arguments. */
-  args: number[] | string[]
+  /** Its arguments — the backdrop passes an image source among them. */
+  args: (number | string | CanvasImageSource)[]
   /** The fill colour at the time. */
   fillStyle: string | CanvasGradient | CanvasPattern
   /** The stroke colour at the time. */
@@ -36,10 +36,10 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
   } = { fillStyle: '', strokeStyle: '', lineWidth: 0, font: '' }
   const record =
     (op: string) =>
-    (...args: (number | string)[]): void => {
+    (...args: (number | string | CanvasImageSource)[]): void => {
       calls.push({
         op,
-        args: args as number[] | string[],
+        args,
         fillStyle: state.fillStyle,
         strokeStyle: state.strokeStyle,
         lineWidth: state.lineWidth,
@@ -57,6 +57,7 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
     stroke: record('stroke'),
     fill: record('fill'),
     fillText: record('fillText'),
+    drawImage: record('drawImage'),
     get fillStyle(): string | CanvasGradient | CanvasPattern {
       return state.fillStyle
     },
@@ -115,6 +116,7 @@ const SQUARE: Point[] = [
  */
 function scene(overrides: Partial<CanvasScene> = {}): CanvasScene {
   return {
+    backdrop: null,
     editorialZone: { x: 50, y: 60, width: 400, height: 300 },
     zoneLabel: 'editorial zone',
     rings: [],
@@ -194,6 +196,33 @@ describe('painter', () => {
   })
 
   describe('variants', () => {
+    it('lays the terrain over the vellum and under the zone’s frame', () => {
+      const { ctx, calls } = recordingContext()
+      const image = {} as CanvasImageSource
+
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({ backdrop: { image, rect: { x: -40, y: -10, width: 1600, height: 1400 } } }),
+        STYLE
+      )
+      const order = ops(calls)
+      const drawn = calls.find((call) => call.op === 'drawImage')
+
+      expect(drawn?.args).toEqual([image, -40, -10, 1600, 1400])
+      expect(order.indexOf('fillRect')).toBeLessThan(order.indexOf('drawImage'))
+      expect(order.indexOf('drawImage')).toBeLessThan(order.indexOf('strokeRect'))
+    })
+
+    it('draws no terrain while there is none, rather than a flat colour that reads as land', () => {
+      const { ctx, calls } = recordingContext()
+
+      paintCanvas(ctx, SIZE, scene({ backdrop: null }), STYLE)
+
+      expect(ops(calls)).not.toContain('drawImage')
+      expect(ops(calls)).toContain('fillRect')
+    })
+
     it('fills a selected handle solid, in the same reserved blue', () => {
       const { ctx, calls } = recordingContext()
 

@@ -48,6 +48,14 @@ export interface Painter2D {
   fill: () => void
   /** Draw text. */
   fillText: (text: string, x: number, y: number) => void
+  /** Draw an image, scaled into a destination rectangle — the backdrop. */
+  drawImage: (
+    image: CanvasImageSource,
+    dx: number,
+    dy: number,
+    dWidth: number,
+    dHeight: number
+  ) => void
   /**
    * The current fill colour.
    *
@@ -94,6 +102,15 @@ export interface PaintStyle {
 
 /** What there is to draw, all of it already in screen pixels. */
 export interface CanvasScene {
+  /**
+   * The baked terrain, and where it goes on screen — `null` until it has been baked.
+   *
+   * **Null is the honest state, not a placeholder.** Baking reads two assets of about three megabytes
+   * each and composites 1.5 million pixels, so there is a real interval during which the editor has a
+   * canvas and no terrain. Drawing the vellum alone during it says "not loaded"; inventing a flat colour
+   * that looks like land would say something false.
+   */
+  backdrop: { image: CanvasImageSource; rect: Rect } | null
   /** The editorial zone's rectangle on screen — a frame drawn over the backdrop, never the reference. */
   editorialZone: Rect
   /** What to call it, written above its frame. */
@@ -177,8 +194,9 @@ function paintAnchors(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): vo
 /**
  * Paint the whole static scene, back to front.
  *
- * The order is the decision the painter *does* carry, and it is the only one: background, then the zone's
- * frame, then the outlines, then the handles on top — a handle under an outline could not be aimed at.
+ * The order is the decision the painter *does* carry, and it is the only one: the vellum, then the baked
+ * terrain, then the zone's frame, then the outlines, then the handles on top — a handle under an outline
+ * could not be aimed at, and a frame under the terrain could not be seen.
  * @param ctx - the context to draw into
  * @param size - the canvas, in the same pixels the scene is in
  * @param scene - what to draw
@@ -193,6 +211,12 @@ export function paintCanvas(
   ctx.clearRect(0, 0, size.width, size.height)
   ctx.fillStyle = style.background
   ctx.fillRect(0, 0, size.width, size.height)
+  // The terrain goes over the vellum and under everything else: it is the ground the reader reports
+  // against, and a handle beneath it could not be aimed at.
+  if (scene.backdrop !== null) {
+    const { rect } = scene.backdrop
+    ctx.drawImage(scene.backdrop.image, rect.x, rect.y, rect.width, rect.height)
+  }
   paintZone(ctx, scene, style)
   ctx.strokeStyle = style.pathStroke
   ctx.lineWidth = style.pathWidth

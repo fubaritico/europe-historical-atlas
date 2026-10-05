@@ -1,4 +1,5 @@
 import { lonLatToScreen, remapToScreen } from '../view/projection'
+import { backdropToScreen } from '../view/viewport'
 
 import type { CanvasScene } from './painter'
 import type { Rect } from '../geometry/marquee'
@@ -38,6 +39,24 @@ export interface SceneInputs {
   selected: ReadonlySet<number>
   /** What to call the editorial zone on screen. */
   zoneLabel: string
+  /** The baked terrain, or `null` while it is still being baked. */
+  backdropImage: CanvasImageSource | null
+}
+
+/**
+ * Where the whole backdrop sits on screen.
+ *
+ * The backdrop *is* the coordinate system, so its rectangle is simply its own grid through the view —
+ * corner (0, 0) to corner (width, height). Nothing projects, because nothing needs to: this is the one
+ * object whose pixels the viewport is defined against.
+ * @param frame - the backdrop's coordinate system
+ * @param inputs - the view
+ * @returns the rectangle in screen pixels
+ */
+export function backdropRect(frame: BackdropFrame, inputs: SceneInputs): Rect {
+  const [left, top] = backdropToScreen(inputs.viewport, [0, 0])
+  const [right, bottom] = backdropToScreen(inputs.viewport, [frame.size.width, frame.size.height])
+  return { x: left, y: top, width: right - left, height: bottom - top }
 }
 
 /**
@@ -96,6 +115,10 @@ export function projectedRings(document: YearDocument, anchors: readonly Point[]
 export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasScene {
   const anchors = remapToScreen(inputs.anchorsInBackdrop, inputs.viewport)
   return {
+    backdrop:
+      inputs.backdropImage === null
+        ? null
+        : { image: inputs.backdropImage, rect: backdropRect(inputs.frame, inputs) },
     editorialZone: editorialZoneRect(document, inputs),
     zoneLabel: inputs.zoneLabel,
     rings: projectedRings(document, anchors),

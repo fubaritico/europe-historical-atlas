@@ -9,7 +9,7 @@ import {
 import { RENDER_FRAME } from '../view/backdropFrame'
 import { lonLatToScreen, projectAnchors, projectToBackdrop } from '../view/projection'
 
-import { buildScene, editorialZoneRect, projectedRings } from './scene'
+import { backdropRect, buildScene, editorialZoneRect, projectedRings } from './scene'
 
 import type { SceneInputs } from './scene'
 import type { BackdropFrame } from '../view/projection'
@@ -34,6 +34,7 @@ const NATIVE: Viewport = { scale: 1, originX: 0, originY: 0 }
 function inputs(document: YearDocument, overrides: Partial<SceneInputs> = {}): SceneInputs {
   return {
     anchorsInBackdrop: projectToBackdrop(document.anchors, FRAME),
+    backdropImage: null,
     frame: FRAME,
     viewport: NATIVE,
     selected: new Set<number>(),
@@ -122,6 +123,38 @@ describe('scene', () => {
           selected.size
         )
       }
+    })
+  })
+
+  describe('variants — the backdrop', () => {
+    it('puts the whole grid on screen, which is the coordinate system itself', () => {
+      const document = sharedBorderDocument()
+
+      const rect = backdropRect(FRAME, inputs(document))
+
+      expect(rect).toEqual({ x: 0, y: 0, width: FRAME.size.width, height: FRAME.size.height })
+    })
+
+    it('scales and moves the grid with the view', () => {
+      const document = sharedBorderDocument()
+      const view: Viewport = { scale: 0.5, originX: 30, originY: -20 }
+
+      const rect = backdropRect(FRAME, inputs(document, { viewport: view }))
+
+      expect(rect.x).toBe(30)
+      expect(rect.y).toBe(-20)
+      expect(rect.width).toBeCloseTo(FRAME.size.width / 2, 9)
+      expect(rect.height).toBeCloseTo(FRAME.size.height / 2, 9)
+    })
+
+    it('carries an image into the scene, and nothing when there is none', () => {
+      const document = sharedBorderDocument()
+      const image = {} as CanvasImageSource
+
+      expect(buildScene(document, inputs(document)).backdrop).toBeNull()
+      expect(buildScene(document, inputs(document, { backdropImage: image })).backdrop?.image).toBe(
+        image
+      )
     })
   })
 

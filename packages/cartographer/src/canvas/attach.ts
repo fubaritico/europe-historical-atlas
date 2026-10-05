@@ -162,6 +162,9 @@ function repaint(it: Attachment): void {
   const state = it.deps.store.getState()
   const scene = buildScene(state.document, {
     anchorsInBackdrop: it.anchors.anchorsInBackdrop(state.document, state.version),
+    // `null` until the terrain is baked, which step 4d-3 finishes by serving the two assets to this
+    // package. The vellum alone reads as "not loaded"; a flat colour would read as land.
+    backdropImage: null,
     frame: it.deps.frame,
     viewport: state.viewport,
     selected: new Set<number>(),
