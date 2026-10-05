@@ -89,6 +89,23 @@ Put here the know issues to avoid cluttering the context window.
   fait ne casse **aucun test** — l'aplatissement se fait en aval de `snapshot`. Ce qui fait tomber la garde
   (9 tests) est un `publish` qui n'incrémente que le compteur sans relire la ligne.
 
+- **`RENDER_FRAME` déclare les métadonnées du DEM à la main, et rien ne vérifie qu'elles correspondent.**
+  `packages/cartographer/src/view/backdropFrame.ts` écrit `1280×1164` et la bbox du DEM en littéral,
+  parce que `4d-1` ne charge aucun asset. **Le mode d'échec est muet** : projeter contre une boîte en
+  peignant contre une autre fait glisser chaque frontière hors du terrain qu'elle borde, sans erreur
+  nulle part. Troisième occurrence de ce danger dans ce dépôt (voir les deux entrées « deux boîtes »).
+  **La moitié qui coûtait zéro est corrigée** (ARCH-102, revue du 06/10) : les quatre suites qui
+  redéclaraient le littéral l'importent désormais — *« une copie dans un test est la pire des deux »*.
+  **Le garde-fou disque a été écrit puis retiré, et la raison est structurelle.** Lire le `.json` du DEM
+  demande `node:fs`, donc `@types/node` dans un paquet navigateur : or **aucun des trois paquets ne les
+  déclare** et la racine fixe `"types": ["vite/client"]`. C'est le contrat de la scission — *chaque
+  paquet déclare l'environnement contre lequel il compile* — et c'est lui qui a démasqué le
+  `globalThis as unknown as WorkerScope` du 24/09. L'autre porte, `resolveJsonModule`, n'est activée
+  nulle part et ferait importer un asset à travers une frontière de paquet.
+  **Déclencheur nommé : `4d-3`**, qui cuit le terrain et doit prendre ces nombres du fichier lui-même.
+  Le remède existe déjà et n'est pas branché : `boundsMatch` dans `core/data/assetError.ts`, le contrôle
+  `semantic` de la taxonomie. **Sévérité : à savoir**, et la fenêtre est d'une étape.
+
 - **Le test-vedette d'un module peut être celui qui n'attrape rien, et `4b` en donne le cas le plus net.**
   `s01` spécifie le zoom par une seule invariante — *« le point sous le pointeur y reste »* — donc c'est le
   test qu'on écrit en premier. **L'implémentation naïve passe 88 tests sur 90, dont celui-là.** Elle fait

@@ -3,8 +3,12 @@ import { createRoot } from 'react-dom/client'
 
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
+import { CHROME_PAINT_STYLE } from './canvas/style'
+import { MapCanvas } from './components/MapCanvas'
 import { openEmptyYear } from './state/openEmptyYear'
 import { createCartographerStore } from './state/store'
+import { RENDER_FRAME } from './view/backdropFrame'
+import { UNFRAMED } from './view/viewport'
 
 /**
  * The Cartographer's entry point, and its composition root: it builds the store and mounts the page.
@@ -51,18 +55,42 @@ if (!container) {
 /** The year the editor opens on. 1100 is the first century to be contributed (P3, measured against OHM). */
 const FIRST_YEAR = 1100
 
+/**
+ * Off-screen but readable — the heading stays for a screen reader and leaves the canvas the whole surface.
+ *
+ * `display: none` would remove it from the accessibility tree, which is the opposite of the point: the
+ * canvas carries only a name, so this heading is the only thing announcing what the page *is*.
+ */
+const visuallyHidden = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  overflow: 'hidden',
+  clip: 'rect(0 0 0 0)',
+  whiteSpace: 'nowrap',
+} as const
+
 const store = createCartographerStore({
   edition: {
     document: openEmptyYear(FIRST_YEAR),
     clone: cloneYearDocument,
   },
+  // Opened unframed on purpose: nothing can know what fits until the canvas has a box, and the canvas
+  // replaces this at its first sizing. See `UNFRAMED`.
+  viewport: { viewport: UNFRAMED },
 })
 
 createRoot(container).render(
   <StrictMode>
-    <main>
-      <h1>Cartographe</h1>
-      <p>Année {store.getState().document.year}</p>
+    <main style={{ position: 'absolute', inset: 0 }}>
+      <h1 style={visuallyHidden}>Cartographe — année {store.getState().document.year}</h1>
+      <MapCanvas
+        store={store}
+        frame={RENDER_FRAME}
+        style={CHROME_PAINT_STYLE}
+        zoneLabel={`zone éditoriale — ${String(store.getState().document.year)}`}
+        label={`Carte de l'année ${String(store.getState().document.year)}, en cours d'édition`}
+      />
     </main>
   </StrictMode>
 )

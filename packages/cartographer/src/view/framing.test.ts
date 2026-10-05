@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
+import { RENDER_FRAME } from './backdropFrame'
 import { fitBox, fitScale, fitWhole } from './framing'
 import { backdropToScreen } from './viewport'
 
 import type { BackdropBox } from './framing'
 import type { PixelSize } from './viewport'
 
-/** The real backdrop: the DEM's own grid, from `europe-dem-z5.json`. */
-const BACKDROP: PixelSize = { width: 1280, height: 1164 }
+/** The real backdrop's grid, imported rather than re-declared — see `backdropFrame.ts`. */
+const BACKDROP: PixelSize = RENDER_FRAME.size
 
 /** A canvas wider than the backdrop's aspect, so height is the constraining axis. */
 const WIDE_CANVAS: PixelSize = { width: 1600, height: 900 }

@@ -13,6 +13,8 @@ import {
   createYearDocument,
 } from '@europe-historical-atlas/core/editor/yearDocument'
 
+import { UNFRAMED } from '../view/viewport'
+
 import { editionActions, snapshot } from './editionSlice'
 import { createCartographerStore } from './store'
 
@@ -65,6 +67,7 @@ function openStore(limit?: number) {
         clone: cloneYearDocument,
         ...(limit === undefined ? {} : { limit }),
       },
+      viewport: { viewport: UNFRAMED },
     }),
   }
 }
@@ -361,6 +364,7 @@ describe('editionSlice', () => {
             return cloneYearDocument(doc)
           },
         },
+        viewport: { viewport: UNFRAMED },
       })
       failing = true
 
@@ -457,7 +461,10 @@ describe('editionSlice', () => {
 
     it('opens on a year with nothing in it', () => {
       const document = createYearDocument(1100, { west: -45, south: 20, east: 60, north: 76 })
-      const store = createCartographerStore({ edition: { document, clone: cloneYearDocument } })
+      const store = createCartographerStore({
+        edition: { document, clone: cloneYearDocument },
+        viewport: { viewport: UNFRAMED },
+      })
 
       store.getState().commit({ kind: 'add-anchor', label: 'add anchor' })
       store.getState().undo()

@@ -74,6 +74,8 @@ const LAYERS = {
   view: 'src/view/viewport.ts',
   geometry: 'src/geometry/hitTest.ts',
   state: 'src/state/editionSlice.ts',
+  canvas: 'src/canvas/painter.ts',
+  components: 'src/components/MapCanvas.tsx',
   root: 'src/main.tsx',
 } as const
 
@@ -180,10 +182,22 @@ describe('architecture boundaries', () => {
     }, 120_000)
 
     it('forbids the composition root to be imported from anywhere that has a row', () => {
-      for (const layer of ['view', 'geometry', 'state']) {
+      for (const layer of ['view', 'geometry', 'state', 'canvas', 'components']) {
         const patterns = forbiddenPatterns(resolved.get(layer) ?? {})
 
         expect(patterns, `${layer} must not import main`).toContain('**/main.{ts,tsx}')
+      }
+    })
+
+    it('lets the painter and the components read the layers below them', () => {
+      // `canvas/` paints what the store holds, through `view/`'s arithmetic; `components/` wires them
+      // together. Forbidding either would be the symmetry mistake made once already on `state/`.
+      for (const layer of ['canvas', 'components']) {
+        const patterns = forbiddenPatterns(resolved.get(layer) ?? {})
+
+        expect(patterns, `${layer} must read view/`).not.toContain('**/view/**')
+        expect(patterns, `${layer} must read geometry/`).not.toContain('**/geometry/**')
+        expect(patterns, `${layer} must read state/`).not.toContain('**/state/**')
       }
     })
   })

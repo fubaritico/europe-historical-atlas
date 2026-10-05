@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { RENDER_FRAME } from './backdropFrame'
 import {
   EQUATORIAL_CIRCUMFERENCE_M,
   isBackdropExceeded,
@@ -10,14 +11,9 @@ import {
 import type { PixelSize, Viewport } from './viewport'
 import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
 
-/** The real backdrop and its bounds, from `europe-dem-z5.json`. */
-const BACKDROP: PixelSize = { width: 1280, height: 1164 }
-const BOUNDS: GeoBounds = {
-  west: -45,
-  south: 11.178401873711783,
-  east: 78.75,
-  north: 76.84081641443098,
-}
+/** The real backdrop and its bounds, imported rather than re-declared — see `backdropFrame.ts`. */
+const BACKDROP: PixelSize = RENDER_FRAME.size
+const BOUNDS: GeoBounds = RENDER_FRAME.bounds
 
 /** The backdrop drawn at its own resolution. */
 const NATIVE: Viewport = { scale: 1, originX: 0, originY: 0 }

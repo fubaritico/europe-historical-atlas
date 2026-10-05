@@ -52,6 +52,16 @@ export interface Viewport {
   originY: number
 }
 
+/**
+ * A view that has not been framed yet.
+ *
+ * Scale zero, which draws nothing — **deliberately not a plausible view**. The canvas cannot know what
+ * fits until it has a size, so the composition root opens the store on this and the first sizing replaces
+ * it with `fitWhole`. Handing over an arbitrary scale instead would show the reader a corner of the map
+ * for one frame and look like a bug in the framing rather than like a view nobody had chosen yet.
+ */
+export const UNFRAMED: Viewport = { scale: 0, originX: 0, originY: 0 }
+
 /** The range a zoom may move within, passed in rather than declared — see this module's header. */
 export interface ScaleLimits {
   /** The smallest allowed scale. */

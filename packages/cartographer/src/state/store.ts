@@ -2,17 +2,20 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 
 import { createEditionSlice } from './editionSlice'
+import { createViewportSlice } from './viewportSlice'
 
 import type { EditionDeps, EditionSlice } from './editionSlice'
+import type { ViewportDeps, ViewportSlice } from './viewportSlice'
 
 /**
  * Everything the Cartographer keeps, as one bound store built from slices.
  *
  * **One store, several slices**, which is the pattern's own rule rather than a taste: a slice is a
  * `(set, get) => ({...})` function, all of them spread into a single store, and a slice reads another
- * through `get()`. Today there is exactly one — the edition — because there is exactly one piece of state.
- * The rest join as they are built: the active tool and the viewport at step 4d, the visible layers and each
- * panel's own expanded rows at step 5.
+ * through `get()`. Two today: the **edition** — the document and its undo line — and the **viewport**,
+ * separate because an undo must never move the view.
+ * The rest join as they are built: the active tool at step 4d-2, the visible layers and each panel's own
+ * expanded rows at step 5.
  *
  * **The middleware lives here and can live nowhere else.** Applied inside a slice it would wrap that slice's
  * `set` instead of the store's, so the subscription it exists for would miss every other slice. That single
@@ -28,12 +31,14 @@ import type { EditionDeps, EditionSlice } from './editionSlice'
  * every store-level test drives it — including the two that are about this file rather than the slice: that
  * a selector subscription fires at wiring time, and that the store reads as a React hook.
  */
-export type CartographerStore = EditionSlice
+export type CartographerStore = EditionSlice & ViewportSlice
 
 /** What the store needs from the composition root, one entry per slice that has dependencies. */
 export interface CartographerStoreDeps {
   /** The document to open on, the copier, and how deep an undo line to keep. */
   edition: EditionDeps
+  /** The view to open on. */
+  viewport: ViewportDeps
 }
 
 /**
@@ -48,6 +53,7 @@ export function createCartographerStore(deps: CartographerStoreDeps) {
   return create<CartographerStore>()(
     subscribeWithSelector((...a) => ({
       ...createEditionSlice(deps.edition)(...a),
+      ...createViewportSlice(deps.viewport)(...a),
     }))
   )
 }

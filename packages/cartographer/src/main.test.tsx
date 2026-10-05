@@ -25,10 +25,10 @@ describe('the application entry', () => {
         await import('./main')
       })
 
-      expect(root.querySelector('h1')?.textContent).toBe('Cartographe')
+      expect(root.querySelector('h1')?.textContent).toBe('Cartographe — année 1100')
     })
 
-    it('shows the year the store was opened on, which is what proves the chain holds', async () => {
+    it('mounts the drawing surface, named for a screen reader', async () => {
       const root = document.createElement('div')
       root.id = 'root'
       document.body.append(root)
@@ -37,7 +37,28 @@ describe('the application entry', () => {
         await import('./main')
       })
 
-      expect(root.querySelector('main > p')?.textContent).toBe('Année 1100')
+      const canvas = root.querySelector('main > canvas')
+
+      expect(canvas).not.toBeNull()
+      expect(canvas?.getAttribute('aria-label')).toBe("Carte de l'année 1100, en cours d'édition")
+    })
+
+    it('keeps the heading in the accessibility tree while the canvas takes the surface', async () => {
+      const root = document.createElement('div')
+      root.id = 'root'
+      document.body.append(root)
+
+      await act(async () => {
+        await import('./main')
+      })
+
+      const heading = root.querySelector('h1')
+
+      // Off-screen, not `display: none` — the latter removes it from the tree, and it is the only thing
+      // telling a reader what the page is. The canvas carries a name and nothing else.
+      expect(heading).not.toBeNull()
+      expect(heading?.getAttribute('style')).not.toContain('display: none')
+      expect(heading?.getAttribute('style')).toContain('position: absolute')
     })
   })
 

@@ -49,6 +49,18 @@ const CARTOGRAPHER_BOUNDARIES = [
     why: 'geometry/ is the arithmetic of the gestures — nearest anchor, marquee, ring closure, snapping to a polyline. It works in screen pixels on flat arrays and answers questions; it never edits a document and never reads a store. It may read `view/`, which is the leaf that defines screen space, and core’s geo/ and utils/.',
   }),
   layerBoundary({
+    files: ['src/canvas/**/*.{ts,tsx}'],
+    forbid: ['main'],
+    paths: CARTOGRAPHER_IS_2D,
+    why: 'canvas/ is the painter, and it decides nothing: positions arrive already in screen pixels and colours arrive in a style object. It may read view/ and geometry/ for their types, and the store for what to draw — but never the composition root, which is what keeps it mountable in a harness. It takes a structural 2D context rather than CanvasRenderingContext2D, because jsdom has no 2D context and the alternative is not testing the painter at all.',
+  }),
+  layerBoundary({
+    files: ['src/components/**/*.{ts,tsx}'],
+    forbid: ['main'],
+    paths: CARTOGRAPHER_IS_2D,
+    why: 'components/ is the React chrome — it owns DOM elements and wires the layers together, so it may read all of them. It must not reach back into the composition root: a component that imports the entry would run the application to render itself.',
+  }),
+  layerBoundary({
     files: ['src/state/**/*.{ts,tsx}'],
     forbid: ['geometry', 'canvas', 'main'],
     paths: CARTOGRAPHER_IS_2D,
