@@ -151,8 +151,21 @@ Put here the know issues to avoid cluttering the context window.
   symétrique aurait bloqué le cas voulu, et l'aurait fait découvrir à `4d`. Ce qui tient le pan et le zoom
   **par frame** hors du store est une règle sur *quand* on appelle `set` (`rules/troubleshooting.md`), pas
   un interdit d'import — un interdit bloquerait aussi la valeur commitée.
-  **À refaire pour `geometry/` et `canvas/`** quand ces répertoires naîtront : ajouter leur ligne dans
-  `packages/cartographer/eslint.config.js`, et la casser exprès.
+  **`geometry/` a sa ligne depuis le 05/10** (étape 4c), prouvée en la cassant avant d'écrire une ligne de
+  code. **Reste `canvas/`**, à ajouter dans `packages/cartographer/eslint.config.js` quand le répertoire
+  naîtra.
+  **Et la preuve manuelle n'est plus la seule** : `packages/cartographer/src/boundaries.test.ts` interroge
+  la **résolution** de la config (`calculateConfigForFile`) sur un fichier réel de chaque couche et assère
+  les options auxquelles `no-restricted-imports` aboutit. C'est le bon niveau, parce que ce qui s'est cassé
+  n'était pas que la règle ne tirait pas — c'était qu'elle **ne s'appliquait pas**, résolue sans aucun
+  `patterns`. Vérifié en reproduisant l'état du soir : la ligne `view/` retirée du paquet fait tomber
+  **4 tests** là où la gate était verte, et le retour de `LAYER.main` à `'**/main.ts'` en fait tomber un.
+  **Deux approches écartées, et pourquoi** : `lintText` sur un chemin virtuel échoue avant la règle
+  (*« was not found by the project service »*, le lint typé refusant un fichier hors tsconfig) ; écrire des
+  fichiers jetables dans `src/` marcherait et a été refusé, parce qu'un run interrompu les laisserait là et
+  le `lint` suivant échouerait sur un fichier que personne n'a écrit.
+  **À savoir pour la suite** : `calculateConfigForFile` rend **`undefined`** pour un chemin ignoré, pas un
+  objet sans règles. « Aucune config » et « la règle est absente » sont deux faits différents.
 - **Recharger un jalon jette ce que la ligne tenait après lui, et rien ne le décide encore.** `restoreMarker`
   remplace la ligne par ce que le jalon a gelé ; ce qui suivait le pas marqué disparaît. Le code **ne prend
   aucune politique**, délibérément : le mécanisme est dans `core`, la décision appartient au chrome, et
