@@ -2,6 +2,110 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-10-05 → 06 — L'étape 4 presque entière, et trois fois où le plus visible n'était pas la cause
+
+Une plage : **20:33 → 01:24 (4 h 51, 317 actions)**, après 3 jours de coupure — donc un **nouveau
+chantier**. **12 commits** `32d714f`..`7b08cf0`, 56 fichiers, **6 951 insertions**, **1399 → 1655 tests**,
+gate verte à chaque pas, tout poussé. Livré : `4a` (le store), `4b` (`view/`), `4c` (`geometry/`), `4d-1`
+(le canevas dessine et navigue), `4d-3` à moitié, deux skills, et le test qui tient les frontières ESLint.
+
+- **La leçon de la soirée, et elle est arrivée trois fois : ce qu'on voit d'abord n'est pas la cause.**
+  Le test-vedette du zoom — *« le point reste sous le pointeur »*, toute la spec de `s01` — **laisse
+  passer l'implémentation naïve**, qui passe 88 tests sur 90 ; ce qui l'attrape, ce sont les deux tests de
+  butée. Mon test écrit **pour** le piège des polylignes ne l'attrapait pas (le pointeur était placé là où
+  la première ligne n'avait aucun sommet en portée) — c'est le test du cas dense qui l'a eu, par accident.
+  Et le message Sonar affiché en gros (*« compatibility criteria »*) n'était pas la cause, qui était
+  derrière *View details*. **La règle qui en sort** : vérifier que **ce** test-là tombe contre le code
+  naïf, pas que la suite tombe. Un sabotage attrapé par un autre test ne dit rien de qui garde quoi.
+- **ARCH-101, ma faute la plus coûteuse, et c'est elle qui a fait naître une skill.** Ma JSDoc de `4b`
+  affirmait que la projection *« tourne une fois par changement de viewport, en cache, et le cache
+  appartient à l'appelant (étape 4d) »*. **L'appelant de l'étape 4d, c'était moi**, et `4d-1` n'avait
+  aucun cache : chaque `pointermove` d'un pan reprojetait la table entière à travers un `log(tan())` par
+  ancre — 16 579 à 1100. **Une promesse écrite dans un commentaire que personne ne rouvre.** D'où la
+  demande du dev et `/scenarii-to-code`, dont c'est la règle centrale : une promesse va dans `next.md` ou
+  `known-issues.md`, les deux seuls fichiers relus à chaque session.
+- **Le dev a retourné le store, et il a attrapé le nom avant moi.** *« Si j'avais fait ça avec Redux il y
+  aurait une slice par zone »*, et *« YearStore c'est bizarre — une année, c'est toute l'app »*. Les deux
+  justes. **Ma correction au passage** : le découpage se fait par **propriétaire d'état**, pas par
+  panneau — le document est lu par le canevas **et** `{Polities}`, `{Details}`, `{Overrides}`, donc aucun
+  panneau ne le possède. Et une slice n'est pas toujours la réponse : un état avec un seul écrivain et un
+  seul lecteur n'a rien à partager, donc `useState` suffit — ce qui fait la différence entre six slices
+  et trois.
+- **Les deux moitiés du piège Zustand, mesurées.** Le document est muté en place, donc un sélecteur
+  dessus ne voit rien — c'était connu. **La moitié qui manquait** : le côté lecture de `History` est fait
+  de **getters** sur une cellule mutable, et `rows` appelle `.map()` à chaque lecture, donc un tableau
+  neuf à chaque fois ; React refuse. Et `History` lui-même est une référence **stable**, donc un sélecteur
+  dessus ne tire jamais. **Les deux échouent**, d'où l'instantané plat pris à l'action.
+- **Le piège dans le piège, qui a fait échouer un sabotage** : `Object.assign` et le spread **évaluent
+  les getters et en copient la valeur**. Donc mettre des getters dans l'état *marche par accident*, et le
+  sabotage qui le fait ne casse **aucun test**. Ce qui fait tomber la garde (9 tests), c'est un `publish`
+  qui n'incrémente que le compteur sans relire la ligne.
+- **La ligne ESLint qui ne gardait rien, et c'est le plus gros défaut de méthode du soir.** Une ligne de
+  frontière écrite dans la config racine pour `packages/cartographer/src/view` **ne matche rien** quand le
+  lint tourne depuis le paquet : ESLint résout un `files` contre le répertoire de la **config chargée**.
+  Mesuré à `--print-config`, pas déduit. **Une config morte est pire que pas de config : elle a l'air
+  d'une garde.** D'où `layerBoundary` exporté, les lignes composées dans la config du paquet — chacune
+  **recomposant** l'interdit `three`, parce que `no-restricted-imports` est une règle unique — et surtout
+  `boundaries.test.ts`, qui interroge la **résolution** plutôt que le tir. Rejoué contre l'état du soir :
+  **4 tests tombent** là où la gate entière passait.
+- **Une direction relâchée après revue, et la faute est nommable** : j'avais interdit à `state/` de lire
+  `view/`, soit **une symétrie là où le principe est une direction**. `view/` est une feuille, lue d'en
+  haut comme `geo/` l'est par `data/`. La ligne symétrique aurait bloqué le viewport arrêté de `4d`, et on
+  l'aurait découvert là-bas.
+- **Deux vrais bugs trouvés par les tests.** Le premier cran de molette **faisait sauter la vue** : le
+  cadrage d'ouverture laisse 24 px de marge et la borne basse était calculée **sans marge**, donc
+  l'éditeur ouvrait **sous son propre minimum**. Trouvé par un test qui attendait d'un dézoom qu'il
+  dézoome. Et l'accessibilité : **aucun clavier, aucun `tabIndex`** — alors que `design/CURSORS.md`
+  spécifie déjà `[+]/[−]` et PageUp/PageDown et que l'atlas livre ce jeu de touches. Lié **au nœud** et
+  pas à `window`, sinon les champs de texte de l'étape 5 se feraient manger leurs frappes.
+- **Les chiffres que la géométrie a décidés à ma place.** Les pixels du fond sont carrés dans l'espace
+  projeté à **0,031 %** (592,635 contre 592,820 px par unité Mercator, l'écart venant de la hauteur
+  arrondie de 1163,6 à 1164) — **donc une seule échelle scalaire**, et c'est mesuré. Et un chiffre magique
+  a disparu : `s01` parle d'un seuil à « 7,6 km par pixel », mais 7,6 km/px **est** la résolution propre du
+  fond à 45°N, donc la condition est `scale > 1`. Une constante aurait été fausse deux fois — latitude et
+  regénération du fond.
+- **Le fond se cuit sans rien nettoyer.** `bakeTerrainPixels(dem, mask, options, **null**)` : le dernier
+  argument est l'année installée, et un `null` cuit le terrain **nu**. Donc *« avec le tint politique
+  retiré »*, que `s99` liste parmi les choses tranchées, s'obtient **en ne l'installant jamais** — pas
+  d'état à nettoyer, pas de `clearPolitical` à oublier. Lu dans la signature.
+- **L'ajout du dev : offline et online**, et le principe qui rend les deux modes supportables — **le geste
+  est identique, seule la destination change**. L'auteur fait ‹ctrl+s› et n'a pas à savoir où il est, ce
+  qui en fait un **câblage** et non deux produits. Écriture en ligne par une **Netlify Function** qui
+  commite, et le refus argumenté d'un *blob store* pour les années publiées : la donnée sortirait du
+  build, donc les deux gardes CI cesseraient de la couvrir, et git porte la provenance qu'un bucket ne
+  porte pas. `s15-offline-and-online.md`, **14 scénarios d'intégration** — les premiers du jeu dont le
+  `Given` est un état du système — et **quatre trous neufs, H-27 à H-30**.
+- **Sa question qui a remis le sujet à l'endroit** : *« les borders, on n'est pas censé les générer grâce
+  à l'outil ? »* Oui — `public/borders/` est l'**entrée héritée** de l'atlas, 21 payloads GPL condamnés, et
+  le Cartographe n'en a **aucun besoin**. Ce qu'il lui faut est `heightmaps/`, `masks/`, `rivers/`, tous
+  propres. Déclencheur inscrit : le jour où 1100 est dessiné, `borders/` et son lecteur `unauthored`
+  partent — c'est le moment où le dépôt cesse d'avoir du GPL *sur la machine*.
+- **La licence, et trois positions successives dont deux fausses.** La skill React de Vercel n'est **pas**
+  commitée, et c'est le bon appel : aucun fichier de licence, la seule mention `MIT` étant une ligne de
+  frontmatter écrite par un empaqueteur inconnu. Mais sur le `publicDir`, j'ai d'abord affirmé que le
+  raccourci **publierait du GPL** — **faux** : les fichiers étant gitignorés, ils n'atteignent jamais le
+  checkout de la CI. Ce qu'il fait réellement, c'est **étendre une surface que la garde ne couvre pas**,
+  et le remède tient en une ligne. Et sa question *« on n'a plus rien sous licence ? »* appelait une
+  réponse en deux temps : vrai **du dépôt**, faux **de sa machine** — 21 fichiers, 6,5 Mo, gitignorés.
+- **Deux erreurs de moi corrigées en mesurant, sur l'archive des skills.** J'ai dit *« 3 810 lignes, trop
+  gros pour une skill »* — **mauvais fichier** : c'était son `AGENTS.md` généré, son `SKILL.md` fait 7 ko
+  sur **70 règles adressables**, soit exactement la forme que le dev décrivait. Et j'ai condamné
+  `state-storage` sur son **périmètre sans l'avoir lu**, alors qu'il porte le piège
+  `useSyncExternalStore`/slice dérivée qui **confirme de source indépendante** ma trouvaille sur
+  `History.rows`. Quatre des règles archivées s'appliquent telles quelles, deux sont des pièges ici —
+  dont `client-passive-event-listeners`, puisque notre molette **doit** `preventDefault`.
+- **Le budget de lisibilité a eu raison trois fois** : `subPathBetween` à une complexité de 11,
+  `attachCanvas` à 87 lignes puis encore 53. Décomposés en fonctions nommées, **jamais désactivés** — et
+  la décomposition de `attachCanvas` est celle qu'ARCH-012 demande, le câblage d'un côté, chaque geste
+  lisible seul de l'autre.
+- **Sonar a buté sur le quota, exactement comme prédit le 24/09** — *« Number of lines exceeded… the total
+  number of lines of code in **your organization** »*. **Non bloquant par décision** : `validate.yml` dit
+  lui-même qu'un échec Sonar est un problème de disponibilité et non un verdict sur le code. Le levier
+  n'est pas ce dépôt (~7 500 lignes contre 42 666 pour les autres projets de l'organisation).
+- **Trois `cd` de ma part**, que `CLAUDE.md` interdit parce que le hook du journal écrit relativement à
+  `$PWD`. Troisième récidive après le 27/09. Sans conséquence ce soir — le journal n'a pas forké — mais la
+  règle existe pour une raison mesurée.
+
 ### 2026-10-01 → 02 — Le dépôt passe à trois paquets, après une soirée que j'ai mal commencée
 
 Une plage : **22:21 → 00:34 (2 h 12, 214 actions)**, après ~46 h de coupure. **1 commit** `7f75624`,
