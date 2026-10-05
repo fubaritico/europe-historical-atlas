@@ -4,8 +4,9 @@
 
 ## Skill Triggers — NEVER bypass
 
-| I'm about to...                      | Invoke            |
-| ------------------------------------ | ----------------- |
+| I'm about to...                      | Invoke               |
+| ------------------------------------ | -------------------- |
+| **Write code a scenario governs**    | **`/scenarii-to-code`** |
 | Write tests                          | `/test`           |
 | Review code (after a set of changes) | `/review`         |
 | Commit                               | `/commit`         |
