@@ -278,7 +278,36 @@ Put here the know issues to avoid cluttering the context window.
   déplacement de dossier, pas avant.
   Résolu : historique réécrit, dépôt supprimé et recréé, et la CI **assère** désormais l'absence de
   `dist/borders`.
-- **Le quota Sonar de l'organisation est presque plein, et le Cartographe le fera déborder.** Le palier
+- ~~**Le quota Sonar de l'organisation est presque plein, et le Cartographe le fera déborder.**~~ —
+  **ARRIVÉ le 2026-10-06**, exactement comme prédit, au push qui a livré l'étape 4 du Cartographe
+  (~1 317 lignes de code hors tests). Le message de SonarCloud, mot pour mot : *« **Number of lines
+  exceeded** — Your analysis failed because the total number of lines of code in **your organization**
+  exceeds your current subscription limit. »*
+  **Ce que ça ne fait pas : ça ne bloque rien.** La CI a été écrite pour ce cas le 24/09 et le dit
+  elle-même dans `validate.yml` — *« Sonar did not complete. That is an availability problem (quota,
+  token, service), not a verdict on the code, so it does not stop the release. »* Le déploiement passe ;
+  ce qui est perdu, c'est l'analyse.
+  **Le piège de diagnostic, et c'est la partie qui vaut d'être relue.** La page d'onboarding affiche en
+  premier un message **visible, plausible et faux comme cause** : *« Automatic analysis… the last attempt
+  wasn't successful because this project didn't meet the **compatibility criteria** »* — ce qui ressemble
+  à un monorepo pnpm que l'analyse automatique ne sait pas lire. **J'ai affirmé cette cause.** La vraie
+  est derrière le bouton *View details*, et c'est le quota. **Deux messages, deux sujets : celui qu'on
+  voit d'abord n'est pas celui qui bloque.** Aller chercher *View details* / *Background Tasks* avant de
+  conclure.
+  **Le levier n'est pas ce projet.** Le message dit *« your organization »* : mesuré le 24/09, les autres
+  projets de `fubaritico` consomment **42 666 lignes** des 50 000 du palier gratuit, celui-ci **~7 500**.
+  Réduire ce dépôt ne rendrait presque rien.
+  **Les trois issues, inchangées** : délier un vieux projet privé de l'organisation (deux clics, et c'est
+  là qu'est la place) · **rendre ce dépôt public**, ce qui le sort entièrement du compteur — gratuit et
+  illimité pour le public, et c'est déjà la direction annoncée · payer.
+  **Et une seconde chose à faire, qui ne rendra aucune ligne** : l'« Automatic analysis » du projet est
+  sur **ON**, et SonarCloud demande de la couper avant une analyse par CI (*« Turn off automatic analysis
+  before configuring this project for CI-based analysis »*). À faire, mais ne pas en attendre le
+  déblocage.
+  **Sévérité : à savoir, non bloquant.** La *quality gate* avait été corrigée le 24/09 précisément pour
+  qu'un problème de quota ne soit jamais un verdict sur le code.
+
+- **L'historique de l'entrée précédente, gardé parce qu'il porte la mesure d'origine.** Le palier
   gratuit couvre **50 000 lignes de code privé par organisation**. Mesuré le 24/09 : **42 666 lignes**
   consommées par les autres projets de `fubaritico`, **~7 500** par celui-ci une fois les données
   générées exclues — soit **~50 200 au total**, sur le fil.
