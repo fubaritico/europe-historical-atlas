@@ -16,8 +16,10 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@europe-historical-atlas/core": "workspace:^",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "zustand": "catalog:"
   },
   "devDependencies": {
     "@testing-library/react": "catalog:",

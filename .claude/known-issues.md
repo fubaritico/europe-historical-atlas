@@ -72,14 +72,33 @@ Put here the know issues to avoid cluttering the context window.
   géoréférencé par construction ; la zone éditoriale est un **cadre dessiné par-dessus**, ce que le glossaire
   dit déjà d'elle (« la planche, nommée au-dessus de son cadre ») et ce que `s12` sépare.
   **Sévérité : bloquant si oublié, réglé si appliqué.** À relire au début de `4b`.
-- **Zustand détecte un changement par identité de référence, et notre document est muté en place.**
-  `yearDocument.ts` dit « Mutable on purpose » et `moveAnchor` écrit dans le tableau d'ancres — donc après une
-  édition l'objet a **la même référence**, un sélecteur `s => s.document` ne voit rien, et l'écran ment.
-  Vérifié dans la source (`opensrc`, v5.0.15) : `setState` fait `Object.assign({}, state, partial)`, donc
-  l'objet d'état est neuf et les écouteurs sont prévenus, mais le document, lui, est identique.
-  **Remède, et c'est le seul qui marche** : un **compteur de version** incrémenté là où `history.commit` est
-  appelé. Rendre le document immuable annulerait l'étape 2 et rendrait chaque déplacement d'ancre en O(N).
-  **Sévérité : à savoir, avant d'écrire le store.**
+- ~~**Zustand détecte un changement par identité de référence, et notre document est muté en place.**~~ —
+  **FERMÉ 2026-10-05** par `packages/cartographer/src/state/yearStore.ts`, et l'entrée ne connaissait que
+  **la moitié** du problème. La moitié écrite : le document est muté en place (`yearDocument.ts`, « Mutable on
+  purpose »), donc après une édition l'objet a la même référence et un sélecteur `s => s.document` ne voit
+  rien. Remède, le compteur de version — en place, incrémenté par **chaque** action.
+  **La moitié qui manquait, et elle casse dans l'autre sens** : le côté lecture de `History` est fait de
+  **getters sur une cellule mutable**, et `rows`/`markers` appellent `.map()` à chaque lecture — donc un
+  tableau **neuf** à chaque fois. Un sélecteur dessus fait que `getSnapshot` rend une valeur neuve à chaque
+  rendu, ce que React refuse ; `useShallow` ne sauve pas, les rangs étant eux aussi des objets neufs. Et
+  `History` lui-même est une référence **stable**, donc un sélecteur dessus ne se déclenche jamais.
+  **Les deux moitiés échouent** : d'où l'instantané plat pris à chaque action, la ligne vivant dans la
+  fermeture de la fabrique et non dans l'état.
+  **Le piège dans le piège, à ne pas re-découvrir** : `Object.assign` et le spread **évaluent les getters et
+  en copient la valeur**. Donc mettre des getters dans l'état *marche par accident*, et le sabotage qui le
+  fait ne casse **aucun test** — l'aplatissement se fait en aval de `snapshot`. Ce qui fait tomber la garde
+  (9 tests) est un `publish` qui n'incrémente que le compteur sans relire la ligne.
+
+- **Le Cartographe n'a aucune ligne dans la table des frontières ESLint, et il vient d'acquérir un module à
+  état.** `yearStore.ts` est le premier module impur du paquet ; les étapes 4b et 4c y posent des couches
+  **pures** (`view/`, `geometry/`), et rien n'empêcherait l'une d'elles d'`import`er le store — soit exactement
+  le singleton global que `rules/modular-architecture.md` interdit. Le commentaire de `boundaryConfig` dans
+  `eslint.config.js` l'anticipe déjà (« steps 4b and 4c put *pure* `view/` and `geometry/` layers in a React
+  package »), mais anticiper n'est pas garder.
+  **Pourquoi ouvert plutôt que fermé maintenant** : une ligne visant un répertoire qui n'existe pas ne peut
+  pas être **prouvée en la cassant**, et ce dépôt a déjà payé une fois le fait d'écrire la doc d'une garde
+  avant la garde (01/10). **Déclencheur nommé : la ligne s'ajoute au moment où `view/` est créé, à l'étape
+  4b, et se prouve en la cassant ce jour-là.** Sévérité : **à savoir**, rien ne peut la violer aujourd'hui.
 - **Recharger un jalon jette ce que la ligne tenait après lui, et rien ne le décide encore.** `restoreMarker`
   remplace la ligne par ce que le jalon a gelé ; ce qui suivait le pas marqué disparaît. Le code **ne prend
   aucune politique**, délibérément : le mécanisme est dans `core`, la décision appartient au chrome, et

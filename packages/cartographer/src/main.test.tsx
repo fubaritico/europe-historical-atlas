@@ -27,6 +27,18 @@ describe('the application entry', () => {
 
       expect(root.querySelector('h1')?.textContent).toBe('Cartographe')
     })
+
+    it('shows the year the store was opened on, which is what proves the chain holds', async () => {
+      const root = document.createElement('div')
+      root.id = 'root'
+      document.body.append(root)
+
+      await act(async () => {
+        await import('./main')
+      })
+
+      expect(root.querySelector('main > p')?.textContent).toBe('Année 1100')
+    })
   })
 
   describe('variants', () => {
