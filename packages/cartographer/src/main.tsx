@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { openEmptyYear } from './state/openEmptyYear'
-import { createYearStore } from './state/yearStore'
+import { createCartographerStore } from './state/store'
 
 /**
  * The Cartographer's entry point, and its composition root: it builds the store and mounts the page.
@@ -19,12 +19,17 @@ import { createYearStore } from './state/yearStore'
  * component declared in this file is one Fast Refresh cannot reload — that is what
  * `react-refresh/only-export-components` is for — and a hook needs a component to live in. So the value is
  * taken with `getState()`, which is also the honest shape for a value that cannot change before the first
- * paint. The hook itself is exercised under React in `state/yearStore.test.ts`, with `renderHook`.
+ * paint. The hook itself is exercised under React in `state/editionSlice.test.ts`, with `renderHook`.
  *
- * **The copier is injected here, and that is the whole point of the factory.** `createYearStore` never
- * imports `cloneYearDocument`; this root hands it over. A store reached by `import` from a pure module is the
- * global singleton `rules/modular-architecture.md` forbids, and the undo line needs a copier whatever we do —
- * so there was a seam to pass through regardless.
+ * **The copier is injected here, and that is the whole point of the factory.** Neither
+ * `createCartographerStore` nor the edition slice imports `cloneYearDocument`; this root hands it over. A
+ * store reached by `import` from a pure module is the global singleton `rules/modular-architecture.md`
+ * forbids, and the undo line needs a copier whatever we do — so there was a seam to pass through regardless.
+ *
+ * **The store is built from slices, one per owner of a piece of state**, combined in `state/store.ts` where
+ * the middleware also lives. Today the only slice is the edition — the document and its undo line; the
+ * active tool, the viewport, the visible layers and each panel's own rows join it as they are built. The
+ * `edition:` key here is that structure showing through, and it is why there is one.
  *
  * `StrictMode` is kept, and it is not free: it double-invokes renders and effects in development to surface
  * impure ones. That is the defect a canvas editor produces most easily, since painting is a side effect and
@@ -46,9 +51,11 @@ if (!container) {
 /** The year the editor opens on. 1100 is the first century to be contributed (P3, measured against OHM). */
 const FIRST_YEAR = 1100
 
-const store = createYearStore({
-  document: openEmptyYear(FIRST_YEAR),
-  clone: cloneYearDocument,
+const store = createCartographerStore({
+  edition: {
+    document: openEmptyYear(FIRST_YEAR),
+    clone: cloneYearDocument,
+  },
 })
 
 createRoot(container).render(

@@ -73,7 +73,7 @@ Put here the know issues to avoid cluttering the context window.
   dit déjà d'elle (« la planche, nommée au-dessus de son cadre ») et ce que `s12` sépare.
   **Sévérité : bloquant si oublié, réglé si appliqué.** À relire au début de `4b`.
 - ~~**Zustand détecte un changement par identité de référence, et notre document est muté en place.**~~ —
-  **FERMÉ 2026-10-05** par `packages/cartographer/src/state/yearStore.ts`, et l'entrée ne connaissait que
+  **FERMÉ 2026-10-05** par `packages/cartographer/src/state/editionSlice.ts`, et l'entrée ne connaissait que
   **la moitié** du problème. La moitié écrite : le document est muté en place (`yearDocument.ts`, « Mutable on
   purpose »), donc après une édition l'objet a la même référence et un sélecteur `s => s.document` ne voit
   rien. Remède, le compteur de version — en place, incrémenté par **chaque** action.
@@ -106,7 +106,7 @@ Put here the know issues to avoid cluttering the context window.
   garde une ligne. À se rappeler pour tout commentaire dans un `index.html`.
 
 - **Le Cartographe n'a aucune ligne dans la table des frontières ESLint, et il vient d'acquérir un module à
-  état.** `yearStore.ts` est le premier module impur du paquet ; les étapes 4b et 4c y posent des couches
+  état.** `state/` est le premier coin impur du paquet ; les étapes 4b et 4c y posent des couches
   **pures** (`view/`, `geometry/`), et rien n'empêcherait l'une d'elles d'`import`er le store — soit exactement
   le singleton global que `rules/modular-architecture.md` interdit. Le commentaire de `boundaryConfig` dans
   `eslint.config.js` l'anticipe déjà (« steps 4b and 4c put *pure* `view/` and `geometry/` layers in a React

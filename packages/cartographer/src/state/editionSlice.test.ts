@@ -13,7 +13,8 @@ import {
   createYearDocument,
 } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import { createYearStore, snapshot, yearActions } from './yearStore'
+import { editionActions, snapshot } from './editionSlice'
+import { createCartographerStore } from './store'
 
 import type { History, HistoryStep } from '@europe-historical-atlas/core/editor/history'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
@@ -27,7 +28,7 @@ const CLOSE: HistoryStep = { kind: 'close-ring', label: 'close ring' }
 /**
  * A line that answers whatever a test needs it to answer.
  *
- * The reason it exists: {@link yearActions} takes a line and a publisher, so the whole action set is
+ * The reason it exists: {@link editionActions} takes a line and a publisher, so the whole action set is
  * exercisable against literals — no store, no document, no React.
  * @param overrides - the members this test cares about
  * @returns a complete line, inert except where overridden
@@ -58,15 +59,17 @@ function openStore(limit?: number) {
   const document = sharedBorderDocument()
   return {
     document,
-    store: createYearStore({
-      document,
-      clone: cloneYearDocument,
-      ...(limit === undefined ? {} : { limit }),
+    store: createCartographerStore({
+      edition: {
+        document,
+        clone: cloneYearDocument,
+        ...(limit === undefined ? {} : { limit }),
+      },
     }),
   }
 }
 
-describe('yearStore', () => {
+describe('editionSlice', () => {
   describe('happy path', () => {
     it('opens on the document, with one row, no undo and no redo', () => {
       const { document, store } = openStore()
@@ -290,15 +293,15 @@ describe('yearStore', () => {
     })
 
     it('is readable as a React hook', () => {
-      // Named without the `use` prefix on purpose: `renderHook` is the only caller, and a `use…` name here
-      // makes the rules-of-hooks lint read this arrow as a component it is not.
-      const { store: yearStore } = openStore()
+      // The binding is deliberately not `use`-prefixed: `renderHook` is its only caller, and a `use…`
+      // name makes the rules-of-hooks lint read this arrow as a component it is not.
+      const { store } = openStore()
 
-      const { result } = renderHook(() => yearStore((state) => state.version))
+      const { result } = renderHook(() => store((state) => state.version))
       expect(result.current).toBe(0)
 
       act(() => {
-        yearStore.getState().commit(MOVE)
+        store.getState().commit(MOVE)
       })
       expect(result.current).toBe(1)
     })
@@ -350,11 +353,13 @@ describe('yearStore', () => {
     it('leaves the state exactly as it was when the copier throws', () => {
       const document = sharedBorderDocument()
       let failing = false
-      const store = createYearStore({
-        document,
-        clone: (doc: YearDocument): YearDocument => {
-          if (failing) throw new Error('copier failed')
-          return cloneYearDocument(doc)
+      const store = createCartographerStore({
+        edition: {
+          document,
+          clone: (doc: YearDocument): YearDocument => {
+            if (failing) throw new Error('copier failed')
+            return cloneYearDocument(doc)
+          },
         },
       })
       failing = true
@@ -391,7 +396,7 @@ describe('yearStore', () => {
     it('publishes nothing when a jump it was told to make finds nothing', () => {
       const publish = vi.fn()
       const document = sharedBorderDocument()
-      const actions = yearActions(stubLine(), publish, () => document)
+      const actions = editionActions(stubLine(), publish, () => document)
 
       expect(() => {
         actions.goTo(3)
@@ -452,7 +457,7 @@ describe('yearStore', () => {
 
     it('opens on a year with nothing in it', () => {
       const document = createYearDocument(1100, { west: -45, south: 20, east: 60, north: 76 })
-      const store = createYearStore({ document, clone: cloneYearDocument })
+      const store = createCartographerStore({ edition: { document, clone: cloneYearDocument } })
 
       store.getState().commit({ kind: 'add-anchor', label: 'add anchor' })
       store.getState().undo()
