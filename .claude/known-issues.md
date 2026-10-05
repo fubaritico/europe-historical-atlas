@@ -89,6 +89,22 @@ Put here the know issues to avoid cluttering the context window.
   fait ne casse **aucun test** — l'aplatissement se fait en aval de `snapshot`. Ce qui fait tomber la garde
   (9 tests) est un `publish` qui n'incrémente que le compteur sans relire la ligne.
 
+- **`favicon.svg` existe maintenant en deux exemplaires, et c'est un arbitrage, pas un oubli.**
+  `packages/atlas/public/favicon.svg` et `packages/cartographer/public/favicon.svg`, 819 octets, **identiques
+  à l'octet** (demande du dev, 05/10 : *« le même favicon que pour l'app »*).
+  **Pourquoi pas partagé** : Vite ne sert **qu'un seul `publicDir` par paquet**, et celui de l'atlas porte
+  aussi le DEM de 3 Mo et le masque de terres — pointer le Cartographe dessus lui ferait servir les assets de
+  l'atlas et couplerait les deux applications pour 819 octets. Les autres remèdes coûtent plus que le défaut :
+  un lien symbolique ne survit pas à Windows ni proprement à git, un plugin de copie est une dépendance pour
+  un fichier.
+  **Ce que ça coûte, et c'est tout** : si la marque est redessinée, **les deux copies doivent bouger**. Rien
+  ne le vérifie — aucun test de ce dépôt ne lit un `index.html`, et en inventer un pour un `<link>` statique
+  serait un motif neuf pour peu. **Cosmétique**, même famille que la double copie du PNG de terrain plus bas.
+  **Et un piège trouvé en le faisant** : **Vite ne retire pas les commentaires HTML**. Une première version de
+  l'explication, écrite dans `index.html` à la densité habituelle du dépôt, faisait passer le fichier servi de
+  0,35 à **1,12 ko** — 770 octets de raisonnement livrés à chaque visiteur. Le raisonnement vit ici, le HTML
+  garde une ligne. À se rappeler pour tout commentaire dans un `index.html`.
+
 - **Le Cartographe n'a aucune ligne dans la table des frontières ESLint, et il vient d'acquérir un module à
   état.** `yearStore.ts` est le premier module impur du paquet ; les étapes 4b et 4c y posent des couches
   **pures** (`view/`, `geometry/`), et rien n'empêcherait l'une d'elles d'`import`er le store — soit exactement
