@@ -99,7 +99,16 @@ Put here the know issues to avoid cluttering the context window.
   que l'étape 2, où le test le plus important passait contre une sauvegarde cassée.
   **La règle qui en sort** : quand une spécification tient en une invariante, le test de cette invariante
   n'est **pas** la garde — la garde est le test du cas où l'implémentation plausible cesse d'y satisfaire.
-  Chercher ce cas explicitement. **Résolu ici**, mais à relire avant d'écrire la garde de `4c`.
+  Chercher ce cas explicitement.
+  **Troisième occurrence le 05/10, à `4c`, et celle-ci est la plus instructive parce que le test fautif
+  était écrit *exprès* pour le piège.** « Chaque polyligne pesée contre les autres » : avec le pointeur là
+  où je l'avais mis, la première ligne n'avait **aucun** sommet en portée, donc la version naïve — rendre
+  la première ligne qui a une touche — enchaînait sur la seconde et répondait juste. Le sabotage était
+  attrapé par un *autre* test, celui du cas dense, **par accident**. Réécrit pour que les deux lignes aient
+  un sommet en portée, et le sabotage rejoué le fait tomber.
+  **Donc la règle se double d'une procédure** : après avoir écrit le test d'un piège, vérifier qu'il tombe
+  contre l'implémentation naïve — pas que la suite tombe, **que ce test-là tombe**. Un sabotage attrapé par
+  la suite entière ne dit pas lequel des tests garde quoi.
 
 - **`favicon.svg` existe maintenant en deux exemplaires, et c'est un arbitrage, pas un oubli.**
   `packages/atlas/public/favicon.svg` et `packages/cartographer/public/favicon.svg`, 819 octets, **identiques

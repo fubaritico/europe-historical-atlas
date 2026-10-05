@@ -43,6 +43,12 @@ const CARTOGRAPHER_BOUNDARIES = [
     why: 'view/ is the screen↔backdrop arithmetic, and a viewport is data. It may read core’s geo/ for projection maths and nothing else: a pure layer reaching into the store would be the global singleton rules/modular-architecture.md forbids, and it could no longer be exercised with literals.',
   }),
   layerBoundary({
+    files: ['src/geometry/**/*.{ts,tsx}'],
+    forbid: ['state', 'canvas', 'main'],
+    paths: CARTOGRAPHER_IS_2D,
+    why: 'geometry/ is the arithmetic of the gestures — nearest anchor, marquee, ring closure, snapping to a polyline. It works in screen pixels on flat arrays and answers questions; it never edits a document and never reads a store. It may read `view/`, which is the leaf that defines screen space, and core’s geo/ and utils/.',
+  }),
+  layerBoundary({
     files: ['src/state/**/*.{ts,tsx}'],
     forbid: ['geometry', 'canvas', 'main'],
     paths: CARTOGRAPHER_IS_2D,
