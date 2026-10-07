@@ -3,7 +3,7 @@ import { assetError, boundsMatch } from '@europe-historical-atlas/core/data/asse
 import type { BackdropFrame } from './view/projection'
 import type { AssetError } from '@europe-historical-atlas/core/data/assetError'
 import type { HeightmapMeta, HeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
-import type { LandMaskSource } from '@europe-historical-atlas/core/data/landMask'
+import type { LandMask, LandMaskSource } from '@europe-historical-atlas/core/data/landMask'
 import type {
   MapCompute,
   ProgressReport,
@@ -53,6 +53,15 @@ export interface Backdrop {
   frame: BackdropFrame
   /** The baked pixels, in a form the 2D context can blit. */
   image: CanvasImageSource
+  /**
+   * The land mask the bake read.
+   *
+   * **Handed back rather than dropped**, because the coastline is traced through it
+   * (`vectorLayers.ts`) and it is three megabytes: loading it twice for the same picture would double
+   * the startup download for nothing. It is the mask and not the relief because that is the one the
+   * shoreline comes from — elevation says how high, not wet or dry.
+   */
+  mask: LandMask
 }
 
 /** Everything {@link loadBackdrop} needs, every one of them injectable. */
@@ -154,7 +163,7 @@ export async function loadBackdrop(deps: BackdropDeps): Promise<Backdrop> {
   })
 
   const baked = await deps.compute.bakeTerrain(deps.options, deps.onProgress)
-  return { frame: frameFromHeightmap(dem.meta), image: await deps.toImage(baked) }
+  return { frame: frameFromHeightmap(dem.meta), image: await deps.toImage(baked), mask }
 }
 
 /**

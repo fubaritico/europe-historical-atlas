@@ -12,9 +12,11 @@ import { TEST_BACKDROP_FRAME } from '../view/testFrame'
 import { UNFRAMED } from '../view/viewport'
 
 import { BackdropFailure, BackdropWaiting, MapArea } from './MapArea'
+import { MapCanvas } from './MapCanvas'
 
 import type { BackdropLoad } from './MapArea'
-import type { Backdrop } from '../backdropSource'
+import type { EditorAssets } from './MapArea'
+import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
 /**
@@ -24,8 +26,19 @@ import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapC
  * would make the first framing degenerate and prove nothing about the wiring.
  * @returns a drawable backdrop
  */
-function readyBackdrop(): Backdrop {
-  return { frame: TEST_BACKDROP_FRAME, image: document.createElement('canvas') }
+function readyBackdrop(): EditorAssets {
+  return {
+    backdrop: {
+      frame: TEST_BACKDROP_FRAME,
+      image: document.createElement('canvas'),
+      // Never read by the canvas — it is the coastline's input, and these tests hand the vector layers
+      // over already traced. A stub of the one shape the type wants.
+      mask: {
+        meta: { width: 2, height: 2, scale: 1, bbox: TEST_BACKDROP_FRAME.bounds },
+      } as LandMask,
+    },
+    vectors: { coast: [], rivers: [] },
+  }
 }
 
 /**
@@ -366,6 +379,63 @@ describe('MapArea', () => {
       await inAct(() => {
         release?.()
       })
+    })
+  })
+})
+
+describe('MapCanvas, re-rendered', () => {
+  describe('edge cases', () => {
+    it('keeps the reader’s view when its parent re-renders for an unrelated reason', async () => {
+      const assets = readyBackdrop()
+      const shared = store()
+      // jsdom lays nothing out, so a canvas reports a zero box and `attachCanvas` never reaches its
+      // first-framing branch. Without this the test cannot see the defect at all — which is how its
+      // first version passed against it.
+      Object.defineProperty(HTMLCanvasElement.prototype, 'clientWidth', {
+        configurable: true,
+        value: 800,
+      })
+      Object.defineProperty(HTMLCanvasElement.prototype, 'clientHeight', {
+        configurable: true,
+        value: 600,
+      })
+      // Built fresh each time, which is what a parent re-render actually does: the inline `ref` arrow
+      // inside MapCanvas gets a new identity, and React tears the old one down. Re-rendering the *same*
+      // element object would prove nothing — React bails out, and the first version of this test did
+      // exactly that and passed against the defect.
+      const view = () => (
+        <MapCanvas
+          store={shared}
+          frame={assets.backdrop.frame}
+          backdropImage={assets.backdrop.image}
+          vectorLayers={assets.vectors}
+          style={CHROME_PAINT_STYLE}
+          zoneLabel="zone"
+          label="la carte"
+        />
+      )
+      const rendered = render(view())
+      // Pan somewhere, as a reader would.
+      await act(async () => {
+        shared.getState().setViewport({ ...shared.getState().viewport, originX: 123 })
+        await Promise.resolve()
+      })
+      const panned = shared.getState().viewport
+
+      // The same props, a new render — which is what any sibling state change in step 5's chrome will
+      // cause. A `ref` callback whose identity changes is torn down and re-run by React, and
+      // `attachCanvas` reframes on a fresh attachment: the pan would be silently thrown away.
+      await act(async () => {
+        rendered.rerender(view())
+        await Promise.resolve()
+      })
+
+      const after = shared.getState().viewport
+      Reflect.deleteProperty(HTMLCanvasElement.prototype, 'clientWidth')
+      Reflect.deleteProperty(HTMLCanvasElement.prototype, 'clientHeight')
+
+      expect(after.originX).toBe(panned.originX)
+      expect(after.scale).toBe(panned.scale)
     })
   })
 })

@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 
 import { createFetchHeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
 import { createFetchLandMaskSource } from '@europe-historical-atlas/core/data/landMask'
+import { createFetchRiverSource } from '@europe-historical-atlas/core/data/riverSource'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?worker'
 import { DEFAULT_TERRAIN_OPTIONS } from '@europe-historical-atlas/core/pipeline/terrainOptions'
@@ -13,6 +14,7 @@ import { CHROME_PAINT_STYLE } from './canvas/style'
 import { MapArea } from './components/MapArea'
 import { openEmptyYear } from './state/openEmptyYear'
 import { createCartographerStore } from './state/store'
+import { loadVectorLayers } from './vectorLayers'
 import { UNFRAMED } from './view/viewport'
 
 import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
@@ -120,8 +122,8 @@ const compute = createWorkerMapCompute({
  * rather than shared through `core`: a deployment path is not domain code, and the cost of them drifting
  * is a loud `transport` failure at startup, not a silent wrong picture. Worth a line, not a module.
  */
-const loadTheBackdrop = (onProgress: ProgressReport) =>
-  loadBackdrop({
+const loadTheBackdrop = async (onProgress: ProgressReport) => {
+  const backdrop = await loadBackdrop({
     heightmap: createFetchHeightmapSource('/heightmaps/europe-dem-z5'),
     landMask: createFetchLandMaskSource('/masks/europe-land'),
     compute,
@@ -129,6 +131,16 @@ const loadTheBackdrop = (onProgress: ProgressReport) =>
     options: DEFAULT_TERRAIN_OPTIONS,
     onProgress,
   })
+  // After the bake, and reusing its mask rather than fetching three megabytes again. The order is not
+  // arbitrary: the shoreline is traced through that mask, and the frame it is projected into is the one
+  // the DEM declared — so neither can be had before the backdrop is.
+  const vectors = await loadVectorLayers({
+    mask: backdrop.mask,
+    rivers: createFetchRiverSource('/rivers/europe-rivers.json'),
+    frame: backdrop.frame,
+  })
+  return { backdrop, vectors }
+}
 
 createRoot(container).render(
   <StrictMode>

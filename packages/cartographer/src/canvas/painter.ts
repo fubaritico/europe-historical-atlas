@@ -70,6 +70,14 @@ export interface Painter2D {
   lineWidth: number
   /** The current font, as CSS. */
   font: string
+  /**
+   * Replace the transform — used for the two layers that are **not** handed over in screen pixels.
+   *
+   * See {@link CanvasScene.vectors}: the coastline is 95 233 points, and letting the engine apply the
+   * affine costs nothing where doing it in JavaScript would allocate a fresh array of that size on every
+   * `pointermove` of a pan.
+   */
+  setTransform: (a: number, b: number, c: number, d: number, e: number, f: number) => void
 }
 
 /**
@@ -98,6 +106,14 @@ export interface PaintStyle {
   anchorStroke: string
   /** A handle's radius in screen pixels. `s02` wants about 8 across, at any zoom. */
   anchorRadius: number
+  /** The shoreline's ink. Darker than the terrain's own edge, so it reads over land and over sea. */
+  coastStroke: string
+  /** The shoreline's width in **screen** pixels, held constant as the view zooms. */
+  coastWidth: number
+  /** A river's ink. */
+  riverStroke: string
+  /** A river's width in screen pixels. */
+  riverWidth: number
 }
 
 /** What there is to draw, all of it already in screen pixels. */
@@ -121,6 +137,32 @@ export interface CanvasScene {
   anchors: readonly Point[]
   /** Which anchors are selected, by the same index. */
   selected: ReadonlySet<number>
+  /**
+   * The coastline and the rivers — **in backdrop pixels, not screen pixels**, with the view to apply.
+   *
+   * This is the one exception to "everything arrives already projected", and it is a measured one. The
+   * shoreline is 95 233 points and the rivers 29 207; `remapToScreen` would build a fresh array of
+   * ~125 000 pairs on **every `pointermove` of a pan**, which is roughly 2 MB of garbage per frame. The
+   * canvas's own transform does the same affine in the graphics engine, for nothing.
+   *
+   * It is still not a decision the painter takes: it receives the three numbers and applies them. What
+   * it must remember is to divide the stroke widths by `scale`, since they are specified in screen
+   * pixels and the transform would otherwise magnify them with the map.
+   *
+   * `null` until the layers have loaded — the same honest state as `backdrop`.
+   */
+  vectors: {
+    /** The shoreline, chained into contours. */
+    coast: readonly { points: readonly (readonly [number, number])[]; closed: boolean }[]
+    /** The river centrelines. */
+    rivers: readonly { points: readonly (readonly [number, number])[] }[]
+    /** Backdrop pixels to screen pixels: multiply by this. */
+    scale: number
+    /** Then add this horizontally. */
+    originX: number
+    /** And this vertically. */
+    originY: number
+  } | null
 }
 
 /** A full turn, for {@link Painter2D.arc}. */
@@ -202,6 +244,59 @@ function paintAnchors(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): vo
  * @param scene - what to draw
  * @param style - the colours and sizes
  */
+/**
+ * Stroke a set of runs that are already in the context's current units.
+ * @param ctx - the context, transformed to backdrop pixels
+ * @param runs - the runs to stroke
+ */
+function strokeRuns(
+  ctx: Painter2D,
+  runs: readonly { points: readonly (readonly [number, number])[]; closed?: boolean }[]
+): void {
+  ctx.beginPath()
+  for (const run of runs) {
+    let first = true
+    for (const [x, y] of run.points) {
+      if (first) {
+        ctx.moveTo(x, y)
+        first = false
+      } else ctx.lineTo(x, y)
+    }
+    if (run.closed === true) ctx.closePath()
+  }
+  // One path for every run of a layer, stroked once. Two thousand contours in a single `stroke()`
+  // rather than two thousand calls: a 2D context pays per stroke, not per sub-path.
+  ctx.stroke()
+}
+
+/**
+ * Draw the coastline and the rivers, under the view's transform.
+ *
+ * **The transform is set and reset here, never left behind.** Everything else on this canvas is handed
+ * over in screen pixels, so leaving the context scaled would silently magnify the handles and the
+ * zone's label — a defect that looks like a styling mistake and is not.
+ * @param ctx - the context
+ * @param scene - what to draw
+ * @param style - the colours and widths
+ */
+function paintVectors(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): void {
+  const vectors = scene.vectors
+  if (vectors === null || vectors.scale <= 0) return
+  ctx.setTransform(vectors.scale, 0, 0, vectors.scale, vectors.originX, vectors.originY)
+
+  ctx.strokeStyle = style.riverStroke
+  // Divided by the scale because the width is specified in screen pixels and the transform is about to
+  // magnify everything it draws. Without this, a river at zoom 8 would be eight times too thick.
+  ctx.lineWidth = style.riverWidth / vectors.scale
+  strokeRuns(ctx, vectors.rivers)
+
+  ctx.strokeStyle = style.coastStroke
+  ctx.lineWidth = style.coastWidth / vectors.scale
+  strokeRuns(ctx, vectors.coast)
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+}
+
 export function paintCanvas(
   ctx: Painter2D,
   size: PixelSize,
@@ -217,6 +312,7 @@ export function paintCanvas(
     const { rect } = scene.backdrop
     ctx.drawImage(scene.backdrop.image, rect.x, rect.y, rect.width, rect.height)
   }
+  paintVectors(ctx, scene, style)
   paintZone(ctx, scene, style)
   ctx.strokeStyle = style.pathStroke
   ctx.lineWidth = style.pathWidth

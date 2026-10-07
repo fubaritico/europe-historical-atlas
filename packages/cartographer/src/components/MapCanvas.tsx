@@ -4,6 +4,7 @@ import { attachCanvas } from '../canvas/attach'
 
 import type { PaintStyle } from '../canvas/painter'
 import type { CartographerStoreHook } from '../state/store'
+import type { VectorLayers } from '../vectorLayers'
 import type { BackdropFrame } from '../view/projection'
 
 /**
@@ -30,6 +31,8 @@ export interface MapCanvasProps {
   frame: BackdropFrame
   /** The baked terrain to draw under everything else. */
   backdropImage: CanvasImageSource
+  /** The coastline and the rivers, in backdrop pixels — what the Pen will snap to. */
+  vectorLayers: VectorLayers
   /** The colours and sizes, from `design/chrome.css`. */
   style: PaintStyle
   /** What to call the editorial zone on screen. */
@@ -84,6 +87,7 @@ export function MapCanvas({
   store,
   frame,
   backdropImage,
+  vectorLayers,
   style,
   zoneLabel,
   label,
@@ -106,7 +110,7 @@ export function MapCanvas({
         ref={(node) =>
           node === null
             ? undefined
-            : attachCanvas(node, { store, frame, backdropImage, style, zoneLabel })
+            : attachCanvas(node, { store, frame, backdropImage, vectorLayers, style, zoneLabel })
         }
       />
     </>

@@ -5,7 +5,7 @@
 
 ## Where we are
 
-**1691 tests** (609 `core` · 782 atlas · 300 Cartographe), gate verte sur cinq contrôles (`lint`,
+**1728 tests** (621 `core` · 782 atlas · 325 Cartographe), gate verte sur cinq contrôles (`lint`,
 `type-check`, `test`, `build`, `format:check`). Worker à **13 490 o**, toujours sans three.js — et depuis
 le 07/10 le Cartographe émet **le même chunk, au même hash**, le fond étant cuit par le même port.
 `git log origin/main..main` dit ce qui attend un push. Le dépôt est **en ligne et déployé** :
@@ -22,9 +22,9 @@ Structure : **trois paquets**, orchestrés par **Turbo**, avec un **catalogue de
 
 | paquet | ce que c'est | lint | tests |
 | --- | --- | --- | --- |
-| `core` | pure TS, ni three.js ni DOM ni React ni zustand — **tenu par ESLint et par `tsc`**. Cinq couches : `utils`, `geo`, `data`, `pipeline`, `editor` | config racine | **`node`**, 609 |
+| `core` | pure TS, ni three.js ni DOM ni React ni zustand — **tenu par ESLint et par `tsc`**. Cinq couches : `utils`, `geo`, `data`, `pipeline`, `editor` | config racine | **`node`**, 621 |
 | `atlas` | l'application 3D, three.js vanille | config racine | `jsdom`, 782 |
-| `cartographer` | l'éditeur de territoires, React 19 + Vite 8. Son `publicDir` **est** celui de l'atlas | **sa propre config**, qui réimporte la racine | `jsdom` + plugin React, 300 |
+| `cartographer` | l'éditeur de territoires, React 19 + Vite 8. Son `publicDir` **est** celui de l'atlas | **sa propre config**, qui réimporte la racine | `jsdom` + plugin React, 325 |
 
 **Trois faits de structure à ne pas re-découvrir** : *flat config n'a aucune cascade*, donc la config d'un
 paquet **réimporte** la racine et ESLint résout **une** config depuis le **répertoire courant** — d'où un
@@ -144,13 +144,22 @@ plus tôt, promettant un cache que `4d-1` n'a pas construit.
 | | quoi | on sait que ça marche comment |
 | --- | --- | --- |
 | **4d-3** ✅ | `publicDir` partagé, garde GPL élargie, fond cuit dans le worker, repère lu du DEM, état d'attente | `pnpm dev:cartographer` : on voit le relief **à faire confirmer par le dev** |
-| **4d-2** ◀ | les deux outils câblés sur `documentEdits` et `history`, l'anneau en cours, la sélection, le **second canevas** (l'overlay de l'élastique) | on dessine, `ctrl+z` défait le geste |
+| **4d-2 (a)** ✅ | la côte et les fleuves **en vecteurs** : `chainSegments` dans `core`, `vectorLayers.ts`, le dessin sous `setTransform` | `pnpm dev:cartographer` : le trait de côte épouse la limite terre/mer du relief |
+| **4d-2 (b)** ◀ | le **second canevas**, l'overlay redessiné au `pointermove` — l'élastique, la marquise, l'ancre surlignée | un geste en cours se voit sans redessiner le fond |
+| **4d-2 (c)** | `[+ New polity]`, la **bannière de cible**, et la plume qui **refuse** sans cible (`s02`) | on sait toujours pour qui on dessine |
+| **4d-2 (d)** | les deux outils câblés sur `documentEdits` et `history` | on dessine, `ctrl+z` défait le geste |
 | **5** | le chrome : `{Polities}` en arbre, les formulaires, `{Overrides}`, **et les contrôles désactivés tant que le fond n'est pas prêt** | les valeurs viennent de `design/chrome.css` |
 
-**Les fleuves ne sont pas encore dessinés**, et c'est à savoir avant d'ouvrir `4d-2` : `4d-3` sert le
-dossier qui les contient (`/rivers/`) et cuit le relief, mais la couche fleuves du `{Layers}` de `s00`
-n'est pas peinte. `s02` en a besoin — c'est ce à quoi une frontière s'accroche quand on la reporte à vue —
-donc c'est le premier morceau de `4d-2`, avant les outils.
+**Deux faits mesurés à `4d-2 (a)`, à ne pas re-découvrir.** La côte sort de marching squares en **segments
+indépendants** — 95 212 à la résolution de l'atlas — et il faut les **chaîner** : pas d'abord pour la
+vitesse, mais parce que `s02` insère *« le sous-chemin de côte entre les deux clics »*, ce qui n'a aucun
+sens dans un nuage. Chaînés : **2 029 contours**, 47× moins de sous-chemins et moitié moins de points. Et
+les jonctions coïncident **au bit près** (le producteur est déterministe), donc la clé est exacte : un
+epsilon souderait deux rives qui se frôlent dans un détroit. Chiffres et argument dans
+`files/spikes/coastline-volume/`.
+
+**Les fleuves sont tous dessinés, sans seuil de zoom** — palier le plus léger, `s00` ne demande pas de
+niveau de détail. Si c'est illisible au cadrage continental, c'est deux lignes et ça se décide à l'œil.
 
 ### Trois choses décidées pour l'étape 4, à ne pas re-trancher
 

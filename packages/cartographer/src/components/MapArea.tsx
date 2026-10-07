@@ -7,6 +7,7 @@ import { MapCanvas } from './MapCanvas'
 import type { Backdrop } from '../backdropSource'
 import type { PaintStyle } from '../canvas/painter'
 import type { CartographerStoreHook } from '../state/store'
+import type { VectorLayers } from '../vectorLayers'
 import type {
   ComputePhase,
   ProgressReport,
@@ -36,7 +37,21 @@ import type {
  * @param onProgress - announced before each phase of the bake
  * @returns the drawable backdrop and the frame it defines
  */
-export type BackdropLoad = (onProgress: ProgressReport) => Promise<Backdrop>
+export type BackdropLoad = (onProgress: ProgressReport) => Promise<EditorAssets>
+
+/**
+ * Everything the canvas needs before it can draw.
+ *
+ * **Declared here, structurally, rather than imported from whichever module produces it** — the shape
+ * this component needs, provided by the caller, as `rules/modular-architecture.md` prescribes. It is
+ * also what keeps a test able to hand over a literal.
+ */
+export interface EditorAssets {
+  /** The baked terrain and the frame it defines. */
+  backdrop: Backdrop
+  /** The coastline and the rivers, in backdrop pixels. */
+  vectors: VectorLayers
+}
 
 /** What {@link MapArea} needs. */
 export interface MapAreaProps {
@@ -178,9 +193,9 @@ export function BackdropFailure({ error }: BackdropFailureProps) {
  * @returns the waiting notice, the failure notice, or the canvas
  */
 export function MapArea({ store, load, style, zoneLabel, label }: MapAreaProps) {
-  const inFlight = useRef<Promise<Backdrop> | null>(null)
+  const inFlight = useRef<Promise<EditorAssets> | null>(null)
   const progress = useRef<ProgressReport>(() => undefined)
-  const [backdrop, setBackdrop] = useState<Backdrop | null>(null)
+  const [assets, setAssets] = useState<EditorAssets | null>(null)
   const [error, setError] = useState<unknown>(null)
   const [fraction, setFraction] = useState(0)
   const [phase, setPhase] = useState<ComputePhase | null>(null)
@@ -197,7 +212,7 @@ export function MapArea({ store, load, style, zoneLabel, label }: MapAreaProps) 
     })
     inFlight.current.then(
       (ready) => {
-        if (!ignore) setBackdrop(ready)
+        if (!ignore) setAssets(ready)
       },
       (failed: unknown) => {
         if (!ignore) setError(failed)
@@ -209,13 +224,14 @@ export function MapArea({ store, load, style, zoneLabel, label }: MapAreaProps) 
   }, [load])
 
   if (error !== null) return <BackdropFailure error={error} />
-  if (backdrop === null) return <BackdropWaiting fraction={fraction} phase={phase} />
+  if (assets === null) return <BackdropWaiting fraction={fraction} phase={phase} />
   return (
     <div style={FILL}>
       <MapCanvas
         store={store}
-        frame={backdrop.frame}
-        backdropImage={backdrop.image}
+        frame={assets.backdrop.frame}
+        backdropImage={assets.backdrop.image}
+        vectorLayers={assets.vectors}
         style={style}
         zoneLabel={zoneLabel}
         label={label}

@@ -61,6 +61,12 @@ const CARTOGRAPHER_BOUNDARIES = [
     why: 'components/ is the React chrome — it owns DOM elements and wires the layers together, so it may read all of them. It must not reach back into the composition root: a component that imports the entry would run the application to render itself.',
   }),
   layerBoundary({
+    files: ['src/backdropSource.ts', 'src/vectorLayers.ts'],
+    forbid: ['state', 'canvas', 'components', 'main'],
+    paths: CARTOGRAPHER_IS_2D,
+    why: 'The root-level loaders fetch, bake and project what the editor draws on. They sit beside the composition root rather than in a layer because they are what it wires together — but they are not it: they hold real logic and real tests, so they must not reach into the store, the painter, a component, or the entry. Found in review on 2026-10-07, when they had no row at all and only the package-wide three.js ban covered them; the atlas gets away with the same shape because nothing there interrogates its config, while this package has boundaries.test.ts precisely so a missing row cannot go quiet.',
+  }),
+  layerBoundary({
     files: ['src/state/**/*.{ts,tsx}'],
     forbid: ['geometry', 'canvas', 'main'],
     paths: CARTOGRAPHER_IS_2D,

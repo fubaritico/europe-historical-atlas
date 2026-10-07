@@ -1,0 +1,151 @@
+import { chainSegments } from '@europe-historical-atlas/core/data/coastlineChain'
+import { createMaskCoastlineSource } from '@europe-historical-atlas/core/data/coastlineSource'
+
+import type { BackdropFrame } from './view/projection'
+import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
+import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
+import type { River, RiverSource } from '@europe-historical-atlas/core/data/riverSource'
+
+/**
+ * The vector layers the author aims at: the coastline and the rivers.
+ *
+ * **Why they are vectors and not part of the baked backdrop.** `s00`'s Background says it outright —
+ * *"the coastline and rivers are drawn as vectors, sharp at any zoom"*. The backdrop gives out at its own
+ * resolution, and these two are what a frontier is reported against: `s02`'s eastern limit of the royal
+ * domain at 1100 runs along the Scheldt, the Meuse, the Saône and the Rhône, so it is *mostly a snapping
+ * job*. Something blurry cannot be snapped to.
+ *
+ * **They are projected once, into backdrop pixels, and never again.** This is the lesson of ARCH-101:
+ * `4d-1` shipped with a comment promising a cache nobody had built, and every `pointermove` of a pan
+ * reprojected the whole anchor table through a `log(tan())`. These layers are an order of magnitude
+ * larger — 95 233 coastline points — and, unlike anchors, they **never change**. So the conversion runs
+ * at load and the viewport is applied by the canvas's own transform at paint time.
+ */
+
+/** A run of points in backdrop pixels, ready to stroke. */
+export interface Polyline {
+  /** `[x, y]` pairs in the backdrop's own pixel grid. */
+  points: readonly (readonly [number, number])[]
+  /** Whether the run closes on itself — an island, a lake. */
+  closed: boolean
+}
+
+/** A river, with what the status bar needs to name it. */
+export interface NamedPolyline extends Polyline {
+  /** The river's name as the dataset holds it, or `null`. */
+  name: string | null
+  /** Natural Earth's `scalerank`, 1 (major) to 9 (minor). */
+  rank: number
+}
+
+/** Everything drawn as vectors over the backdrop. */
+export interface VectorLayers {
+  /** The shoreline, chained into contours, longest first. */
+  coast: readonly Polyline[]
+  /** The river centrelines. */
+  rivers: readonly NamedPolyline[]
+}
+
+/**
+ * The grid the shoreline is traced at, in pixels across.
+ *
+ * **2 560, which is the atlas's own choice and is taken rather than re-decided** — so the two
+ * applications agree on the shape of the coast, and an author reporting a frontier against it is
+ * reporting against the map that will be published. The atlas's reason holds here too: the shipped mask
+ * is 5 120 wide, and marching its 23 million cells costs 2 063 ms against 539 for half that, for
+ * fidelity invisible at the zooms this is drawn at.
+ *
+ * Measured in `files/spikes/coastline-volume`: 95 212 segments, chained into 2 029 contours.
+ */
+export const COASTLINE_TRACE_WIDTH = 2560
+
+/**
+ * Normalized grid coordinates into backdrop pixels.
+ *
+ * Multiplied by the full size rather than by `size - 1`, which is what `lonLatToBackdrop` does: the
+ * backdrop is a continuous domain from 0 to `width`, and `u = 0` is its west edge. Getting this wrong by
+ * one convention would slide every coast half a cell — invisible at a glance and wrong everywhere.
+ * @param points - the run in normalized coordinates
+ * @param frame - the backdrop's coordinate system
+ * @returns the same run in backdrop pixels
+ */
+export function toBackdropPixels(
+  points: readonly UvPoint[],
+  frame: BackdropFrame
+): [number, number][] {
+  return points.map((point) => [point.u * frame.size.width, point.v * frame.size.height])
+}
+
+/**
+ * Trace the shoreline through the mask and chain it into contours.
+ *
+ * **It takes the mask it is given rather than loading one.** The backdrop's own load already holds it —
+ * three megabytes that would otherwise be fetched and unpacked twice for the same picture.
+ * @param mask - the land/water mask, already loaded
+ * @param frame - the backdrop's coordinate system
+ * @param traceWidth - the grid to march; defaults to {@link COASTLINE_TRACE_WIDTH}
+ * @returns the contours, in backdrop pixels, longest first
+ */
+export function traceCoastline(
+  mask: LandMask,
+  frame: BackdropFrame,
+  traceWidth: number = COASTLINE_TRACE_WIDTH
+): Polyline[] {
+  const segments = createMaskCoastlineSource(mask, traceWidth).load()
+  return chainSegments(segments).map((contour) => ({
+    points: toBackdropPixels(contour.points, frame),
+    closed: contour.closed,
+  }))
+}
+
+/**
+ * The rivers, projected.
+ * @param rivers - the centrelines as the reader parsed them
+ * @param frame - the backdrop's coordinate system
+ * @returns the same rivers in backdrop pixels
+ */
+export function projectRiverLines(rivers: readonly River[], frame: BackdropFrame): NamedPolyline[] {
+  return rivers.map((river) => ({
+    points: toBackdropPixels(river.points, frame),
+    // A centreline is never a ring: it runs from source to mouth, or to the frame's edge.
+    closed: false,
+    name: river.name,
+    rank: river.rank,
+  }))
+}
+
+/** What {@link loadVectorLayers} needs. */
+export interface VectorLayersDeps {
+  /** The mask the backdrop already loaded — the shoreline is traced through it. */
+  mask: LandMask
+  /** Where the river centrelines come from. */
+  rivers: RiverSource
+  /** The backdrop's coordinate system, from the DEM itself. */
+  frame: BackdropFrame
+  /** The grid to march the shoreline at; defaults to {@link COASTLINE_TRACE_WIDTH}. */
+  traceWidth?: number
+}
+
+/**
+ * Load and project both vector layers.
+ *
+ * **The tracing is synchronous and costs about 660 ms** at the default width — 539 ms to march the grid
+ * and 124 to chain it, measured. That is a real freeze of the main thread, and it is accepted here
+ * rather than hidden: it happens once, at startup, behind the waiting notice, and moving it into the
+ * worker would mean widening the compute protocol for a job that runs one time. **If it ever needs to
+ * move, the remedy is a method on `MapCompute`, not a `setTimeout`** — which would only scatter the same
+ * freeze across frames.
+ *
+ * **A failing river load propagates**, like the backdrop's two assets: the dev's call of 2026-10-07 is
+ * that the canvas area shows nothing and says so rather than drawing a map that is quietly incomplete.
+ * A missing river is not cosmetic here — it is a stretch of frontier with nothing to snap to.
+ * @param deps - the mask, the river source, and the frame
+ * @returns both layers, in backdrop pixels
+ */
+export async function loadVectorLayers(deps: VectorLayersDeps): Promise<VectorLayers> {
+  const rivers = await deps.rivers.load()
+  return {
+    coast: traceCoastline(deps.mask, deps.frame, deps.traceWidth),
+    rivers: projectRiverLines(rivers, deps.frame),
+  }
+}

@@ -98,6 +98,7 @@ function attach(): {
     store,
     frame: TEST_BACKDROP_FRAME,
     backdropImage: backdropStandIn(),
+    vectorLayers: { coast: [], rivers: [] },
     style: CHROME_PAINT_STYLE,
     zoneLabel: 'zone',
   })
@@ -384,6 +385,7 @@ describe('attachCanvas', () => {
           store,
           frame: TEST_BACKDROP_FRAME,
           backdropImage: backdropStandIn(),
+          vectorLayers: { coast: [], rivers: [] },
           style: CHROME_PAINT_STYLE,
           zoneLabel: 'zone',
         })

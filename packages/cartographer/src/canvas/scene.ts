@@ -3,6 +3,7 @@ import { backdropToScreen } from '../view/viewport'
 
 import type { CanvasScene } from './painter'
 import type { Rect } from '../geometry/marquee'
+import type { VectorLayers } from '../vectorLayers'
 import type { BackdropFrame } from '../view/projection'
 import type { Point, Viewport } from '../view/viewport'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
@@ -41,6 +42,14 @@ export interface SceneInputs {
   zoneLabel: string
   /** The baked terrain, or `null` while it is still being baked. */
   backdropImage: CanvasImageSource | null
+  /**
+   * The coastline and the rivers, **already in backdrop pixels**, or `null` before they have loaded.
+   *
+   * Passed straight through rather than remapped like the anchors, and `painter.ts`'s `CanvasScene`
+   * header says why: at 125 000 points the affine belongs in the canvas's transform, not in a `map()`
+   * that allocates on every pointer move.
+   */
+  vectorLayers: VectorLayers | null
 }
 
 /**
@@ -124,5 +133,15 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
     rings: projectedRings(document, anchors),
     anchors,
     selected: inputs.selected,
+    vectors:
+      inputs.vectorLayers === null
+        ? null
+        : {
+            coast: inputs.vectorLayers.coast,
+            rivers: inputs.vectorLayers.rivers,
+            scale: inputs.viewport.scale,
+            originX: inputs.viewport.originX,
+            originY: inputs.viewport.originY,
+          },
   }
 }

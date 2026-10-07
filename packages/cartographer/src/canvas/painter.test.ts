@@ -58,6 +58,7 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
     fill: record('fill'),
     fillText: record('fillText'),
     drawImage: record('drawImage'),
+    setTransform: record('setTransform'),
     get fillStyle(): string | CanvasGradient | CanvasPattern {
       return state.fillStyle
     },
@@ -97,6 +98,10 @@ const STYLE: PaintStyle = {
   anchorFill: '#ffffff',
   anchorStroke: '#5b93d6',
   anchorRadius: 4,
+  coastStroke: 'rgba(60, 50, 38, 0.85)',
+  coastWidth: 1,
+  riverStroke: 'rgba(86, 107, 122, 0.75)',
+  riverWidth: 1,
 }
 
 const SIZE: PixelSize = { width: 800, height: 600 }
@@ -122,6 +127,7 @@ function scene(overrides: Partial<CanvasScene> = {}): CanvasScene {
     rings: [],
     anchors: [],
     selected: new Set<number>(),
+    vectors: null,
     ...overrides,
   }
 }
@@ -346,6 +352,115 @@ describe('painter', () => {
 
       expect(arcs).toHaveLength(4)
       expect(arcs.every((arc) => arc.fillStyle === '#ffffff')).toBe(true)
+    })
+  })
+  describe('the vector layers', () => {
+    /** A scene carrying one coast contour and one river, under a doubled view. */
+    const withVectors = (scale = 2) =>
+      scene({
+        vectors: {
+          coast: [
+            {
+              points: [
+                [0, 0],
+                [10, 0],
+                [10, 10],
+              ],
+              closed: true,
+            },
+          ],
+          rivers: [
+            {
+              points: [
+                [1, 1],
+                [5, 5],
+              ],
+            },
+          ],
+          scale,
+          originX: 7,
+          originY: 9,
+        },
+      })
+
+    it('draws them under the view’s transform instead of projecting them', () => {
+      const { ctx, calls } = recordingContext()
+
+      paintCanvas(ctx, SIZE, withVectors(), STYLE)
+
+      const transforms = calls.filter((call) => call.op === 'setTransform')
+
+      // Set once for the layers, and the coordinates go through untouched: 125 000 points remapped in
+      // JavaScript would allocate about 2 MB on every pointermove of a pan.
+      expect(transforms[0]?.args).toEqual([2, 0, 0, 2, 7, 9])
+      expect(calls.some((call) => call.op === 'moveTo' && call.args[0] === 0)).toBe(true)
+    })
+
+    it('puts the transform back, so nothing else is magnified', () => {
+      const { ctx, calls } = recordingContext()
+
+      paintCanvas(ctx, SIZE, withVectors(), STYLE)
+
+      const transforms = calls.filter((call) => call.op === 'setTransform')
+      const handles = calls.findIndex((call) => call.op === 'arc')
+      const lastTransform = calls.map((call) => call.op).lastIndexOf('setTransform')
+
+      // The trap this test exists for. Everything else on this canvas arrives in screen pixels, so a
+      // transform left in place would scale the handles, the zone's frame and its label — a defect that
+      // reads as a styling mistake and is not. Identity, and before anything else is drawn.
+      expect(transforms.at(-1)?.args).toEqual([1, 0, 0, 1, 0, 0])
+      if (handles !== -1) expect(lastTransform).toBeLessThan(handles)
+    })
+
+    it('divides the stroke widths by the scale, the widths being in screen pixels', () => {
+      const { ctx, calls } = recordingContext()
+
+      paintCanvas(ctx, SIZE, withVectors(4), STYLE)
+
+      const strokes = calls.filter((call) => call.op === 'stroke')
+
+      // Without this a river at zoom 8 is eight times too thick — and the error grows with the zoom, so
+      // it looks right in the opening view, which is the only one anyone checks.
+      expect(strokes.some((call) => call.lineWidth === STYLE.riverWidth / 4)).toBe(true)
+      expect(strokes.some((call) => call.lineWidth === STYLE.coastWidth / 4)).toBe(true)
+    })
+
+    it('strokes each layer once, not once per contour', () => {
+      const { ctx, calls } = recordingContext()
+      const many = scene({
+        vectors: {
+          coast: Array.from({ length: 50 }, () => ({ points: [[0, 0] as const], closed: false })),
+          rivers: [],
+          scale: 1,
+          originX: 0,
+          originY: 0,
+        },
+      })
+
+      paintCanvas(ctx, SIZE, many, STYLE)
+
+      // A 2D context pays per `stroke()`, not per sub-path: 2 029 contours in one call rather than
+      // 2 029 calls is the other half of what chaining bought.
+      expect(calls.filter((call) => call.op === 'stroke').length).toBeLessThan(6)
+    })
+
+    it('draws nothing and sets no transform when the layers have not loaded', () => {
+      const { ctx, calls } = recordingContext()
+
+      paintCanvas(ctx, SIZE, scene({ vectors: null }), STYLE)
+
+      expect(calls.some((call) => call.op === 'setTransform')).toBe(false)
+    })
+
+    it('refuses a scale of zero rather than collapsing the map to a point', () => {
+      const { ctx, calls } = recordingContext()
+
+      paintCanvas(ctx, SIZE, withVectors(0), STYLE)
+
+      // A zero scale would divide the stroke widths by zero and map every point onto the origin. It
+      // cannot arrive from the viewport, which clamps — this is the guard for the day something else
+      // writes one.
+      expect(calls.some((call) => call.op === 'setTransform')).toBe(false)
     })
   })
 })

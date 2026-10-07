@@ -35,6 +35,7 @@ function inputs(document: YearDocument, overrides: Partial<SceneInputs> = {}): S
   return {
     anchorsInBackdrop: projectToBackdrop(document.anchors, FRAME),
     backdropImage: null,
+    vectorLayers: null,
     frame: FRAME,
     viewport: NATIVE,
     selected: new Set<number>(),
@@ -235,6 +236,40 @@ describe('scene', () => {
 
       expect(rect.x).toBeLessThan(0)
       expect(rect.width).toBeGreaterThan(0)
+    })
+  })
+
+  describe('the vector layers', () => {
+    /** One contour and one river, as arrays whose identity can be checked. */
+    const COAST = [{ points: [[0, 0] as const, [10, 10] as const], closed: true }]
+    const RIVERS = [{ points: [[1, 2] as const], closed: false, name: 'Maas', rank: 3 }]
+
+    it('hands the layers through untouched, with the view to apply', () => {
+      const document = sharedBorderDocument()
+
+      const scene = buildScene(
+        document,
+        inputs(document, {
+          vectorLayers: { coast: COAST, rivers: RIVERS },
+          viewport: { scale: 2, originX: 5, originY: -3 },
+        })
+      )
+
+      // By reference, not by value: the whole point is that these 125 000 points are **not** copied or
+      // remapped per frame. A `toEqual` would pass against a `map()` rebuilding them on every repaint.
+      expect(scene.vectors?.coast).toBe(COAST)
+      expect(scene.vectors?.rivers).toBe(RIVERS)
+      // The view travels as three numbers the painter turns into a transform. Pinned rather than merely
+      // present: a wiring that swapped an origin for the scale would pass a presence check.
+      expect(scene.vectors?.scale).toBe(2)
+      expect(scene.vectors?.originX).toBe(5)
+      expect(scene.vectors?.originY).toBe(-3)
+    })
+
+    it('stays null before they have loaded', () => {
+      const document = sharedBorderDocument()
+
+      expect(buildScene(document, inputs(document, { vectorLayers: null })).vectors).toBeNull()
     })
   })
 })

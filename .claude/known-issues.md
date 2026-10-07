@@ -210,12 +210,18 @@ Put here the know issues to avoid cluttering the context window.
   **Les cinq couches ont leur ligne** : `view/` et `state/` (4b), `geometry/` (4c), `canvas/` et
   `components/` (4d-1) — la phrase qui disait *« reste `canvas/`, à ajouter quand le répertoire naîtra »*
   était périmée dès le 05/10 au soir.
-  **Ce qui n'a pas de ligne, et c'est un choix** : les modules de composition posés à la racine de `src/`
-  (`backdropSource.ts`, depuis le 07/10). Ils pourraient importer `main`. C'est le précédent de l'atlas,
-  qui en a neuf à la racine de son `src/` sans aucune ligne, et où ça n'a jamais mordu : la racine de
-  composition est le seul endroit qui a le droit de tout voir, et un module posé à côté d'elle est du
-  câblage. **Cosmétique** ; la ligne à écrire si ça change un jour est `files: ['src/*.{ts,tsx}']`,
-  `forbid: ['main']`.
+  **Les chargeurs de la racine ont la leur depuis le 07/10**, et mon arbitrage de deux heures plus tôt
+  était faible : j'avais écrit qu'ils s'en passaient « comme les neuf modules de composition de l'atlas ».
+  La revue a nommé ce qui rend la comparaison fausse — **l'atlas n'a pas de `boundaries.test.ts`**, et ce
+  paquet en a un justement pour qu'une ligne manquante ne redevienne pas silencieuse. Et
+  `backdropSource.ts` / `vectorLayers.ts` ne sont pas du câblage : ils portent de la logique et des tests.
+  Ligne posée (`forbid: ['state', 'canvas', 'components', 'main']`), prouvée en important le peintre dedans.
+  **Et la pose a révélé un défaut du test lui-même, plus grave que le trou.** `components` n'existait pas
+  dans la table `LAYER` racine, donc le `group` contenait un `null` et la config devenait **invalide** —
+  sur quoi `boundaries.test.ts` a affiché **13 tests “skipped”**, pas un échec. *Une garde qui se tait
+  quand elle casse* est exactement la forme contre laquelle elle est écrite. Fermé par un test qui assère
+  que la config a chargé et que chaque couche a bien été résolue ; vérifié en remettant une couche inconnue
+  dans un `forbid` — quatre tests tombent au lieu de se sauter.
   **Et la preuve manuelle n'est plus la seule** : `packages/cartographer/src/boundaries.test.ts` interroge
   la **résolution** de la config (`calculateConfigForFile`) sur un fichier réel de chaque couche et assère
   les options auxquelles `no-restricted-imports` aboutit. C'est le bon niveau, parce que ce qui s'est cassé
@@ -259,6 +265,22 @@ Put here the know issues to avoid cluttering the context window.
   commité. Rattrapé tout de suite, rien de perdu. **La règle** : pour défaire un sabotage de vérification,
   copier le fichier avant (`cp`) ou éditer à la main — `git checkout` ne connaît que le dernier commit.
   **Cosmétique**, mais ça coûte une réécriture à chaque fois.
+
+- **Les fleuves se projettent contre une boîte que personne ne vérifie — quatrième occurrence des « deux
+  boîtes ».** `projectRivers` (dans `core/data/riverSource.ts`) calcule ses `(u,v)` contre la **bbox du
+  payload des fleuves**, et `vectorLayers.ts` les multiplie ensuite par la taille du **fond**, donc par la
+  bbox du DEM. Les deux sont supposées égales, et **elles le sont** : vérifié le 07/10, les quatre nombres
+  de `europe-rivers.json` et de `europe-dem-z5.json` sont identiques.
+  **Le mode d'échec est muet**, comme les trois fois précédentes : régénérer les fleuves avec un cadrage
+  différent ferait glisser chaque rivière sur le relief, sans erreur nulle part — et ici c'est pire
+  qu'ailleurs, parce qu'une frontière reportée en s'accrochant à une rivière décalée est **fausse dans le
+  fichier publié**, pas seulement à l'écran.
+  **Pourquoi ce n'est pas corrigé tout de suite** : le remède demande d'exposer la bbox du payload hors de
+  `RiverSource`, dont `load()` ne rend aujourd'hui qu'un `River[]` déjà reprojeté — une signature de `core`
+  que **l'atlas consomme aussi**. Ce n'est pas un ajustement local, et le défaut est latent.
+  **Déclencheur nommé** : le jour où `files/spikes/fetch-rivers` est relancé (ce que `H-02` envisage déjà,
+  pour récupérer la Saône en abaissant le `scalerank`). À ce moment-là, brancher `boundsMatch` comme
+  `boundsDisagreement` le fait déjà pour le masque, en `semantic`. **Sévérité : à savoir**, trouvé en revue.
 
 - **Le manifeste des années déclare la bbox du rendu, et personne ne vérifie qu'elle correspond au DEM.**
   `years/index.json` porte la boîte géographique contre laquelle les années dessinées se projettent, et elle

@@ -8,6 +8,7 @@ import { buildScene } from './scene'
 import type { AnchorCache } from './anchorCache'
 import type { PaintStyle, Painter2D } from './painter'
 import type { CartographerStoreHook } from '../state/store'
+import type { VectorLayers } from '../vectorLayers'
 import type { BackdropFrame } from '../view/projection'
 import type { PixelSize, ScaleLimits } from '../view/viewport'
 
@@ -42,6 +43,14 @@ export interface AttachDeps {
   frame: BackdropFrame
   /** The baked terrain to blit under everything else. */
   backdropImage: CanvasImageSource
+  /**
+   * The coastline and the rivers, in backdrop pixels.
+   *
+   * Held here rather than in the store because they never change: they are loaded once and the view is
+   * applied at paint time. Putting them in a slice would invite a selector on an object of 125 000
+   * points, which is the shape `zustand-react-pattern` warns about.
+   */
+  vectorLayers: VectorLayers
   /** The colours and sizes, from the design. */
   style: PaintStyle
   /** What to call the editorial zone on screen. */
@@ -109,8 +118,6 @@ interface Attachment {
   pressAt: [number, number] | null
   /** Whether the press has travelled far enough to be a drag. */
   dragging: boolean
-  /** Whether a view has been chosen yet — see `UNFRAMED`. */
-  framed: boolean
   /** The anchors in backdrop pixels, recomputed only when an anchor moves. */
   anchors: AnchorCache
 }
@@ -170,6 +177,7 @@ function repaint(it: Attachment): void {
   const scene = buildScene(state.document, {
     anchorsInBackdrop: it.anchors.anchorsInBackdrop(state.document, state.version),
     backdropImage: it.deps.backdropImage,
+    vectorLayers: it.deps.vectorLayers,
     frame: it.deps.frame,
     viewport: state.viewport,
     selected: new Set<number>(),
@@ -181,10 +189,17 @@ function repaint(it: Attachment): void {
 /**
  * Match the backing store to the element's box, and frame the backdrop the first time it has one.
  *
- * **Framed once, not on every resize.** The store opens on `UNFRAMED` because nothing can know what fits
- * before the element has a box; re-framing afterwards would fight the reader, snapping the view back
- * whenever a panel is dragged. The first framing publishes a viewport, which repaints through the
- * subscription — hence no repaint here on that path.
+ * **"First time" is asked of the store, not of this attachment, and that distinction was a real bug.**
+ * The condition used to be a `framed` boolean on the `Attachment` — which is rebuilt by every call to
+ * `attachCanvas`, and React re-invokes a `ref` callback whenever its *identity* changes, which an inline
+ * arrow does on every render of the component. So any unrelated re-render of a parent tore the canvas
+ * down, rebuilt it unframed, and snapped the view back to `fitWhole`, silently discarding the reader's
+ * pan. Measured, not feared: a test that re-renders with identical props saw `originX` fall from 123 to
+ * 96.49. Found by review, twice independently, and it would have surfaced the moment step 5 put tool
+ * state above this canvas.
+ *
+ * `UNFRAMED` is `scale: 0`, so "nobody has chosen a view yet" is a question the shared state can answer
+ * and an ephemeral object cannot.
  * @param it - the attachment to resize
  */
 function resize(it: Attachment): void {
@@ -194,9 +209,9 @@ function resize(it: Attachment): void {
   it.size = { width, height }
   it.node.width = width
   it.node.height = height
-  if (!it.framed && width > 0 && height > 0) {
-    it.framed = true
-    it.deps.store.getState().setViewport(fitWhole(it.size, it.deps.frame.size, FRAME_MARGIN))
+  const state = it.deps.store.getState()
+  if (state.viewport.scale <= 0 && width > 0 && height > 0) {
+    state.setViewport(fitWhole(it.size, it.deps.frame.size, FRAME_MARGIN))
     return
   }
   repaint(it)
@@ -370,7 +385,6 @@ export function attachCanvas(node: HTMLCanvasElement, deps: AttachDeps): () => v
     size: { width: 0, height: 0 },
     pressAt: null,
     dragging: false,
-    framed: false,
     anchors: createAnchorCache(deps.frame),
   }
 

@@ -28,4 +28,11 @@ export const CHROME_PAINT_STYLE: PaintStyle = {
   anchorFill: '#ffffff',
   anchorStroke: '#5b93d6',
   anchorRadius: 4,
+  // The shoreline reads darker than the terrain's own painted edge, so it stays legible over land and
+  // over sea alike — the same reasoning as the atlas's coastline ink, which this takes.
+  coastStroke: 'rgba(60, 50, 38, 0.85)',
+  coastWidth: 1,
+  // Rivers sit a shade lighter and thinner: they are landmarks to aim at, not the subject.
+  riverStroke: 'rgba(86, 107, 122, 0.75)',
+  riverWidth: 1,
 }

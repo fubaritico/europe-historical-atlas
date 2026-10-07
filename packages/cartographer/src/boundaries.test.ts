@@ -76,16 +76,35 @@ const LAYERS = {
   state: 'src/state/editionSlice.ts',
   canvas: 'src/canvas/painter.ts',
   components: 'src/components/MapCanvas.tsx',
+  loaders: 'src/vectorLayers.ts',
   root: 'src/main.tsx',
 } as const
 
+/** Why the config could not be read, when it could not. Kept so the suite can fail rather than skip. */
+let loadFailure: unknown = null
+
 describe('architecture boundaries', () => {
   beforeAll(async () => {
-    const eslint = new ESLint()
-    for (const [layer, filePath] of Object.entries(LAYERS)) {
-      resolved.set(layer, await restrictionsFor(eslint, filePath))
+    try {
+      const eslint = new ESLint()
+      for (const [layer, filePath] of Object.entries(LAYERS)) {
+        resolved.set(layer, await restrictionsFor(eslint, filePath))
+      }
+    } catch (error: unknown) {
+      loadFailure = error
     }
   }, 120_000)
+
+  describe('the suite itself', () => {
+    it('loaded the config at all, rather than skipping quietly', () => {
+      // Found on 2026-10-07: an invalid config — a `forbid` naming a layer absent from the root
+      // LAYER table, which puts a `null` in the pattern group — makes every test here report
+      // **skipped**, not failed. A guard that goes quiet when it breaks is the exact failure shape it
+      // was written against. Thirteen tests skipped, the gate green.
+      expect(loadFailure).toBeNull()
+      expect(resolved.size).toBe(Object.keys(LAYERS).length)
+    })
+  })
 
   describe('happy path', () => {
     it('applies the rule to every layer, which is the thing that silently stopped being true', () => {
@@ -138,6 +157,18 @@ describe('architecture boundaries', () => {
 
         expect(patterns, `${layer} must still read geo/`).not.toContain('**/geo/**')
       }
+    })
+
+    it('holds the root-level loaders to a direction too, not just to the package ban', () => {
+      // They live beside the composition root, which has no row of its own — so without this they were
+      // covered by nothing but the three.js ban, and could have reached into the store or the painter
+      // with the gate green. Found in review, 2026-10-07.
+      const loaders = resolved.get('loaders') ?? {}
+
+      expect(forbiddenPatterns(loaders)).toContain('**/state/**')
+      expect(forbiddenPatterns(loaders)).toContain('**/canvas/**')
+      // And the package ban survives the composition, which is the single-rule trap.
+      expect(forbiddenPackages(loaders)).toContain('three')
     })
 
     it('carries a message that names the boundary and explains it', () => {
