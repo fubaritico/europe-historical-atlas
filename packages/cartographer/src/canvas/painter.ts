@@ -1,4 +1,7 @@
+import { boxesOverlap, detailThresholdSquared, visibleBox } from '../view/culling'
+
 import type { Rect } from '../geometry/marquee'
+import type { Box } from '../view/culling'
 import type { PixelSize, Point } from '../view/viewport'
 
 /**
@@ -116,6 +119,22 @@ export interface PaintStyle {
   riverWidth: number
 }
 
+/**
+ * One run of a vector layer: its points in **backdrop** pixels, and the box they occupy.
+ *
+ * The box travels with the run rather than being derived here, because deriving it means the traversal
+ * that carrying it exists to skip. Declared structurally — the painter never imports the module that
+ * produces these.
+ */
+export interface VectorRun {
+  /** `[x, y]` pairs in the backdrop's own pixel grid. */
+  points: readonly (readonly [number, number])[]
+  /** Whether the run closes on itself. */
+  closed?: boolean
+  /** The box it occupies, in the same units. */
+  bounds: Box
+}
+
 /** What there is to draw, all of it already in screen pixels. */
 export interface CanvasScene {
   /**
@@ -153,9 +172,9 @@ export interface CanvasScene {
    */
   vectors: {
     /** The shoreline, chained into contours. */
-    coast: readonly { points: readonly (readonly [number, number])[]; closed: boolean }[]
+    coast: readonly VectorRun[]
     /** The river centrelines. */
-    rivers: readonly { points: readonly (readonly [number, number])[] }[]
+    rivers: readonly VectorRun[]
     /** Backdrop pixels to screen pixels: multiply by this. */
     scale: number
     /** Then add this horizontally. */
@@ -245,28 +264,46 @@ function paintAnchors(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): vo
  * @param style - the colours and sizes
  */
 /**
- * Stroke a set of runs that are already in the context's current units.
+ * Add one run to the current path, dropping the points too close together to be told apart.
+ *
+ * **The decimation is the second half of what makes this affordable, and it only bites when zoomed
+ * out.** `minGapSquared` is one screen pixel expressed in backdrop units, so at the opening view the
+ * largest contour's 25 629 points — drawn across about 1 200 pixels — collapse to roughly one per
+ * pixel, and past scale 1 the threshold is a fraction and nothing is dropped at all. Which is right:
+ * magnified is exactly when the detail starts to show.
+ *
+ * **The last point is always kept**, whatever its distance from the one before. Dropping it would
+ * shorten an open coast by up to a pixel at every repaint and, worse, leave a closed ring's final
+ * segment to be invented by `closePath` across a gap that is not there.
  * @param ctx - the context, transformed to backdrop pixels
- * @param runs - the runs to stroke
+ * @param run - the run to add
+ * @param minGapSquared - the squared distance below which a point cannot move a screen pixel
  */
-function strokeRuns(
-  ctx: Painter2D,
-  runs: readonly { points: readonly (readonly [number, number])[]; closed?: boolean }[]
-): void {
-  ctx.beginPath()
-  for (const run of runs) {
-    let first = true
-    for (const [x, y] of run.points) {
-      if (first) {
-        ctx.moveTo(x, y)
-        first = false
-      } else ctx.lineTo(x, y)
+function addRunToPath(ctx: Painter2D, run: VectorRun, minGapSquared: number): void {
+  const points = run.points
+  const last = points.length - 1
+  let keptX = 0
+  let keptY = 0
+  let first = true
+  for (let i = 0; i <= last; i++) {
+    const point = points[i]
+    if (!point) continue
+    const [x, y] = point
+    if (first) {
+      ctx.moveTo(x, y)
+      keptX = x
+      keptY = y
+      first = false
+      continue
     }
-    if (run.closed === true) ctx.closePath()
+    const dx = x - keptX
+    const dy = y - keptY
+    if (i !== last && dx * dx + dy * dy < minGapSquared) continue
+    ctx.lineTo(x, y)
+    keptX = x
+    keptY = y
   }
-  // One path for every run of a layer, stroked once. Two thousand contours in a single `stroke()`
-  // rather than two thousand calls: a 2D context pays per stroke, not per sub-path.
-  ctx.stroke()
+  if (run.closed === true) ctx.closePath()
 }
 
 /**
@@ -279,20 +316,54 @@ function strokeRuns(
  * @param scene - what to draw
  * @param style - the colours and widths
  */
-function paintVectors(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): void {
+/**
+ * Stroke a layer: skip what is off screen, decimate what is too fine to see, stroke once.
+ * @param ctx - the context, transformed to backdrop pixels
+ * @param runs - the layer's runs
+ * @param view - the part of the backdrop on screen, in backdrop pixels
+ * @param minGapSquared - the decimation threshold
+ */
+function strokeLayer(
+  ctx: Painter2D,
+  runs: readonly VectorRun[],
+  view: Box,
+  minGapSquared: number
+): void {
+  ctx.beginPath()
+  for (const run of runs) {
+    // One comparison per contour instead of its whole traversal. Zoomed over France at scale 4, this
+    // is what skips the Baltic, the Aegean and the Caspian — each of them otherwise traced in full
+    // into a path that clips them away.
+    if (!boxesOverlap(run.bounds, view)) continue
+    addRunToPath(ctx, run, minGapSquared)
+  }
+  // One path for every run of a layer, stroked once. Two thousand contours in a single `stroke()`
+  // rather than two thousand calls: a 2D context pays per stroke, not per sub-path.
+  ctx.stroke()
+}
+
+function paintVectors(
+  ctx: Painter2D,
+  size: PixelSize,
+  scene: CanvasScene,
+  style: PaintStyle
+): void {
   const vectors = scene.vectors
   if (vectors === null || vectors.scale <= 0) return
+  const viewport = { scale: vectors.scale, originX: vectors.originX, originY: vectors.originY }
+  const view = visibleBox(viewport, size)
+  const minGapSquared = detailThresholdSquared(viewport)
   ctx.setTransform(vectors.scale, 0, 0, vectors.scale, vectors.originX, vectors.originY)
 
   ctx.strokeStyle = style.riverStroke
   // Divided by the scale because the width is specified in screen pixels and the transform is about to
   // magnify everything it draws. Without this, a river at zoom 8 would be eight times too thick.
   ctx.lineWidth = style.riverWidth / vectors.scale
-  strokeRuns(ctx, vectors.rivers)
+  strokeLayer(ctx, vectors.rivers, view, minGapSquared)
 
   ctx.strokeStyle = style.coastStroke
   ctx.lineWidth = style.coastWidth / vectors.scale
-  strokeRuns(ctx, vectors.coast)
+  strokeLayer(ctx, vectors.coast, view, minGapSquared)
 
   ctx.setTransform(1, 0, 0, 1, 0, 0)
 }
@@ -312,7 +383,7 @@ export function paintCanvas(
     const { rect } = scene.backdrop
     ctx.drawImage(scene.backdrop.image, rect.x, rect.y, rect.width, rect.height)
   }
-  paintVectors(ctx, scene, style)
+  paintVectors(ctx, size, scene, style)
   paintZone(ctx, scene, style)
   ctx.strokeStyle = style.pathStroke
   ctx.lineWidth = style.pathWidth

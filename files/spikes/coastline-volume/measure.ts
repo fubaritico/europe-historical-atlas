@@ -16,6 +16,14 @@ import { readFileSync } from 'node:fs'
 
 import { chainSegments } from '../../../packages/core/src/data/coastlineChain.ts'
 import { createFieldCoastlineSource } from '../../../packages/core/src/data/coastlineSource.ts'
+import {
+  boundsOf,
+  boxesOverlap,
+  detailThresholdSquared,
+  visibleBox,
+} from '../../../packages/cartographer/src/view/culling.ts'
+
+import type { Box } from '../../../packages/cartographer/src/view/culling.ts'
 
 const base = 'packages/atlas/public/masks/europe-land'
 const meta = JSON.parse(readFileSync(`${base}.json`, 'utf8')) as {
@@ -82,4 +90,78 @@ for (const width of [1280, 2560, 5120]) {
       `  sub-paths per repaint: ${String(segments.length)} -> ${String(contours.length)} ` +
       `(${(segments.length / Math.max(1, contours.length)).toFixed(0)}x fewer)`
   )
+}
+
+/**
+ * What a repaint actually traces, once culling and decimation are applied.
+ *
+ * The numbers above are what exists; these are what gets drawn, which is the figure the frame rate
+ * follows. Reproduces `painter.ts`'s two rules rather than importing them, the painter being tied to a
+ * canvas context this script has none of.
+ * @param runs - the runs, in backdrop pixels, with their boxes
+ * @param scale - the view's scale
+ * @param canvas - the canvas size in device pixels
+ * @returns how many points would be handed to the context
+ */
+function drawnPoints(
+  runs: { points: [number, number][]; bounds: Box }[],
+  scale: number,
+  canvas: { width: number; height: number }
+): number {
+  // Centred on the backdrop, as the opening view is.
+  const originX = (canvas.width - RENDER_WIDTH * scale) / 2
+  const originY = (canvas.height - RENDER_HEIGHT * scale) / 2
+  const view = visibleBox({ scale, originX, originY }, canvas)
+  const minGapSquared = detailThresholdSquared({ scale, originX, originY })
+  let drawn = 0
+  for (const run of runs) {
+    if (!boxesOverlap(run.bounds, view)) continue
+    let keptX = 0
+    let keptY = 0
+    let first = true
+    const last = run.points.length - 1
+    for (let i = 0; i <= last; i++) {
+      const [x, y] = run.points[i] as [number, number]
+      if (first) {
+        drawn += 1
+        keptX = x
+        keptY = y
+        first = false
+        continue
+      }
+      const dx = x - keptX
+      const dy = y - keptY
+      if (i !== last && dx * dx + dy * dy < minGapSquared) continue
+      drawn += 1
+      keptX = x
+      keptY = y
+    }
+  }
+  return drawn
+}
+
+const RENDER_WIDTH = 1280
+const RENDER_HEIGHT = 1164
+const CANVAS = { width: 1600, height: 1200 }
+
+const traced = createFieldCoastlineSource({
+  width: 2560,
+  height: 2328,
+  level: 0.5,
+  valueAt: (x, y) => coverage(x / (2560 - 1), y / (2328 - 1)),
+}).load()
+const runs = chainSegments(traced).map((contour) => {
+  const points: [number, number][] = contour.points.map((point) => [
+    point.u * RENDER_WIDTH,
+    point.v * RENDER_HEIGHT,
+  ])
+  return { points, bounds: boundsOf(points) }
+})
+const total = runs.reduce((sum, run) => sum + run.points.length, 0)
+
+console.warn(`\nwhat a repaint traces, from ${String(total)} coastline points:`)
+for (const scale of [0.9, 1, 2, 4, 8]) {
+  const drawn = drawnPoints(runs, scale, CANVAS)
+  const share = ((drawn / total) * 100).toFixed(1)
+  console.warn(`  scale ${String(scale).padStart(3)}: ${String(drawn).padStart(6)} points (${share} %)`)
 }

@@ -1,6 +1,9 @@
 import { chainSegments } from '@europe-historical-atlas/core/data/coastlineChain'
 import { createMaskCoastlineSource } from '@europe-historical-atlas/core/data/coastlineSource'
 
+import { boundsOf } from './view/culling'
+
+import type { Box } from './view/culling'
 import type { BackdropFrame } from './view/projection'
 import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
 import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
@@ -28,6 +31,14 @@ export interface Polyline {
   points: readonly (readonly [number, number])[]
   /** Whether the run closes on itself — an island, a lake. */
   closed: boolean
+  /**
+   * The box it occupies, so the painter can skip it without looking at its points.
+   *
+   * Computed once here, when the layers load. Recomputing it per frame would cost exactly the
+   * traversal that carrying it exists to avoid — which is most of the point: zoomed over France, the
+   * Baltic and the Caspian are skipped on one comparison each instead of 25 629 `lineTo` calls.
+   */
+  bounds: Box
 }
 
 /** A river, with what the status bar needs to name it. */
@@ -92,10 +103,10 @@ export function traceCoastline(
   traceWidth: number = COASTLINE_TRACE_WIDTH
 ): Polyline[] {
   const segments = createMaskCoastlineSource(mask, traceWidth).load()
-  return chainSegments(segments).map((contour) => ({
-    points: toBackdropPixels(contour.points, frame),
-    closed: contour.closed,
-  }))
+  return chainSegments(segments).map((contour) => {
+    const points = toBackdropPixels(contour.points, frame)
+    return { points, closed: contour.closed, bounds: boundsOf(points) }
+  })
 }
 
 /**
@@ -105,13 +116,17 @@ export function traceCoastline(
  * @returns the same rivers in backdrop pixels
  */
 export function projectRiverLines(rivers: readonly River[], frame: BackdropFrame): NamedPolyline[] {
-  return rivers.map((river) => ({
-    points: toBackdropPixels(river.points, frame),
-    // A centreline is never a ring: it runs from source to mouth, or to the frame's edge.
-    closed: false,
-    name: river.name,
-    rank: river.rank,
-  }))
+  return rivers.map((river) => {
+    const points = toBackdropPixels(river.points, frame)
+    return {
+      points,
+      // A centreline is never a ring: it runs from source to mouth, or to the frame's edge.
+      closed: false,
+      bounds: boundsOf(points),
+      name: river.name,
+      rank: river.rank,
+    }
+  })
 }
 
 /** What {@link loadVectorLayers} needs. */

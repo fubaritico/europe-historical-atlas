@@ -241,8 +241,22 @@ describe('scene', () => {
 
   describe('the vector layers', () => {
     /** One contour and one river, as arrays whose identity can be checked. */
-    const COAST = [{ points: [[0, 0] as const, [10, 10] as const], closed: true }]
-    const RIVERS = [{ points: [[1, 2] as const], closed: false, name: 'Maas', rank: 3 }]
+    const COAST = [
+      {
+        points: [[0, 0] as const, [10, 10] as const],
+        closed: true,
+        bounds: { left: 0, top: 0, right: 10, bottom: 10 },
+      },
+    ]
+    const RIVERS = [
+      {
+        points: [[1, 2] as const],
+        closed: false,
+        bounds: { left: 1, top: 2, right: 1, bottom: 2 },
+        name: 'Maas',
+        rank: 3,
+      },
+    ]
 
     it('hands the layers through untouched, with the view to apply', () => {
       const document = sharedBorderDocument()

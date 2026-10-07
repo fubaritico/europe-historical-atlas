@@ -367,6 +367,7 @@ describe('painter', () => {
                 [10, 10],
               ],
               closed: true,
+              bounds: { left: 0, top: 0, right: 10, bottom: 10 },
             },
           ],
           rivers: [
@@ -375,6 +376,7 @@ describe('painter', () => {
                 [1, 1],
                 [5, 5],
               ],
+              bounds: { left: 1, top: 1, right: 5, bottom: 5 },
             },
           ],
           scale,
@@ -429,7 +431,11 @@ describe('painter', () => {
       const { ctx, calls } = recordingContext()
       const many = scene({
         vectors: {
-          coast: Array.from({ length: 50 }, () => ({ points: [[0, 0] as const], closed: false })),
+          coast: Array.from({ length: 50 }, () => ({
+            points: [[0, 0] as const],
+            closed: false,
+            bounds: { left: 0, top: 0, right: 0, bottom: 0 },
+          })),
           rivers: [],
           scale: 1,
           originX: 0,
@@ -442,6 +448,182 @@ describe('painter', () => {
       // A 2D context pays per `stroke()`, not per sub-path: 2 029 contours in one call rather than
       // 2 029 calls is the other half of what chaining bought.
       expect(calls.filter((call) => call.op === 'stroke').length).toBeLessThan(6)
+    })
+
+    it('skips a contour whose box is off screen, without looking at its points', () => {
+      const { ctx, calls } = recordingContext()
+      const faraway = scene({
+        vectors: {
+          coast: [
+            {
+              points: Array.from({ length: 500 }, (_, i) => [9000 + i, 9000] as const),
+              closed: false,
+              bounds: { left: 9000, top: 9000, right: 9500, bottom: 9000 },
+            },
+          ],
+          rivers: [],
+          scale: 1,
+          originX: 0,
+          originY: 0,
+        },
+      })
+
+      paintCanvas(ctx, SIZE, faraway, STYLE)
+
+      // One comparison instead of 500 lineTo calls. Zoomed over France this is what skips the Baltic,
+      // the Aegean and the Caspian — each otherwise traced in full into a path that clips them away.
+      expect(calls.some((call) => call.op === 'lineTo')).toBe(false)
+      expect(calls.some((call) => call.op === 'moveTo')).toBe(false)
+    })
+
+    it('still draws a contour that only partly overlaps the view', () => {
+      const { ctx, calls } = recordingContext()
+      const straddling = scene({
+        vectors: {
+          coast: [
+            {
+              points: [
+                [-50, 10],
+                [50, 10],
+              ],
+              closed: false,
+              bounds: { left: -50, top: 10, right: 50, bottom: 10 },
+            },
+          ],
+          rivers: [],
+          scale: 1,
+          originX: 0,
+          originY: 0,
+        },
+      })
+
+      paintCanvas(ctx, SIZE, straddling, STYLE)
+
+      // Culling must be conservative: a coast running in from off screen is the normal case, and
+      // dropping it would make the map end at the window's edge.
+      expect(calls.some((call) => call.op === 'moveTo')).toBe(true)
+    })
+
+    it('drops points too close together to move a screen pixel, when zoomed out', () => {
+      const { ctx, calls } = recordingContext()
+      // Twenty points spread over two backdrop pixels, at a quarter scale: half a screen pixel in
+      // total. Nineteen of them cannot change a single pixel.
+      const dense = scene({
+        vectors: {
+          coast: [
+            {
+              points: Array.from({ length: 20 }, (_, i) => [i * 0.1, 0] as const),
+              closed: false,
+              bounds: { left: 0, top: 0, right: 2, bottom: 0 },
+            },
+          ],
+          rivers: [],
+          scale: 0.25,
+          originX: 0,
+          originY: 0,
+        },
+      })
+
+      paintCanvas(ctx, SIZE, dense, STYLE)
+
+      // The trap underneath this one: comparing each point to its **predecessor** rather than to the
+      // last point actually kept decimates almost nothing on a dense run — every step is small, but
+      // they accumulate. The comparison has to be against what was kept.
+      expect(calls.filter((call) => call.op === 'lineTo')).toHaveLength(1)
+    })
+
+    it('measures the gap from the last point kept, not from the one before', () => {
+      const { ctx, calls } = recordingContext()
+      // Twenty points one backdrop pixel apart, at a quarter scale: each step is a quarter of a screen
+      // pixel, but four of them make a whole one. So the run must keep roughly one point in four.
+      const marching = scene({
+        vectors: {
+          coast: [
+            {
+              points: Array.from({ length: 20 }, (_, i) => [i, 0] as const),
+              closed: false,
+              bounds: { left: 0, top: 0, right: 19, bottom: 0 },
+            },
+          ],
+          rivers: [],
+          scale: 0.25,
+          originX: 0,
+          originY: 0,
+        },
+      })
+
+      paintCanvas(ctx, SIZE, marching, STYLE)
+
+      const kept = calls.filter((call) => call.op === 'lineTo').length
+
+      // **This is the test that separates the two implementations**, and the obvious one does not:
+      // comparing each point to its predecessor drops everything here (no single step clears the
+      // threshold) and leaves a straight line from the first point to the last — a coast reduced to a
+      // chord. The neighbouring 'drops points too close together' case cannot see it, because there the
+      // *cumulative* span also stays under the threshold, so both versions answer the same. Verified by
+      // replaying the predecessor version: it passes that one and fails this.
+      expect(kept).toBeGreaterThan(3)
+      expect(kept).toBeLessThan(8)
+    })
+
+    it('keeps every point that is at least a screen pixel from the last one kept', () => {
+      const { ctx, calls } = recordingContext()
+      // One backdrop pixel apart at scale 8 is eight screen pixels apart: all distinguishable.
+      const spread = scene({
+        vectors: {
+          coast: [
+            {
+              points: Array.from({ length: 20 }, (_, i) => [i, 0] as const),
+              closed: false,
+              bounds: { left: 0, top: 0, right: 19, bottom: 0 },
+            },
+          ],
+          rivers: [],
+          scale: 8,
+          originX: 0,
+          originY: 0,
+        },
+      })
+
+      paintCanvas(ctx, SIZE, spread, STYLE)
+
+      // The threshold is a **screen** pixel, not a zoom level — a distinction the first version of this
+      // test got wrong, expecting magnification alone to keep everything. At scale 8 points a tenth of
+      // a backdrop pixel apart are still only eight tenths of a screen pixel apart, and the code was
+      // right to drop them. Decimating what the reader *can* separate is the real defect, and this is
+      // the case that catches it.
+      expect(calls.filter((call) => call.op === 'lineTo')).toHaveLength(19)
+    })
+
+    it('never drops the last point of a run', () => {
+      const { ctx, calls } = recordingContext()
+      const run = scene({
+        vectors: {
+          coast: [
+            {
+              points: [
+                [0, 0],
+                [100, 0],
+                [100.01, 0],
+              ],
+              closed: true,
+              bounds: { left: 0, top: 0, right: 100.01, bottom: 0 },
+            },
+          ],
+          rivers: [],
+          scale: 0.25,
+          originX: 0,
+          originY: 0,
+        },
+      })
+
+      paintCanvas(ctx, SIZE, run, STYLE)
+
+      const drawn = calls.filter((call) => call.op === 'lineTo').map((call) => call.args[0])
+
+      // Dropping it shortens an open coast by up to a pixel on every repaint and, worse, leaves a
+      // closed ring's final segment to be invented by `closePath` across a gap that is not there.
+      expect(drawn).toContain(100.01)
     })
 
     it('draws nothing and sets no transform when the layers have not loaded', () => {
