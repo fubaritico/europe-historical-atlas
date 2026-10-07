@@ -238,6 +238,11 @@ describe('attachCanvas', () => {
       // Height is the constraining axis here, and the margin is taken off both sides — the same margin
       // the first framing uses, or the opening view would fall outside its own limits.
       expect(limits.max).toBe(MAX_SCALE)
+      // Deep enough to place an anchor where no source could contradict it: at scale 32 one screen
+      // pixel is about 240 m of ground, against a backdrop whose own pixels are 7.6 km at 45°N. The
+      // ceiling used to be 8, on an argument about the atlas's 1.9 km raster cells — which this editor
+      // does not use: it stores degrees at six decimals and derives borders from shared anchors.
+      expect(MAX_SCALE).toBeGreaterThanOrEqual(32)
       expect(limits.min).toBeCloseTo(
         (BOX.height - FRAME_MARGIN * 2) / TEST_BACKDROP_FRAME.size.height,
         9

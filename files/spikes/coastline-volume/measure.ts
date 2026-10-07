@@ -160,7 +160,7 @@ const runs = chainSegments(traced).map((contour) => {
 const total = runs.reduce((sum, run) => sum + run.points.length, 0)
 
 console.warn(`\nwhat a repaint traces, from ${String(total)} coastline points:`)
-for (const scale of [0.9, 1, 2, 4, 8]) {
+for (const scale of [0.9, 1, 2, 4, 8, 16, 32]) {
   const drawn = drawnPoints(runs, scale, CANVAS)
   const share = ((drawn / total) * 100).toFixed(1)
   console.warn(`  scale ${String(scale).padStart(3)}: ${String(drawn).padStart(6)} points (${share} %)`)

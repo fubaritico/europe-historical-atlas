@@ -11,6 +11,25 @@ Put here the know issues to avoid cluttering the context window.
   garde produit la pire des deux situations — **une promesse qu'aucun outil ne tient.** Ne jamais décrire une
   garde au présent avant de l'avoir cassée exprès.
 
+- **Le zoom du Cartographe est « acceptable », pas fluide — et ce qui reste n'est plus les vecteurs.**
+  Jugé par le dev le 07/10 après deux corrections : la coalescence des repeintures sur
+  `requestAnimationFrame` (on peignait **dans** le gestionnaire, donc 60 à 120 fois par seconde) puis
+  l'élagage au viewport et la décimation au pixel écran. Mesuré : de **95 233 points** de côte, une
+  repeinture en trace **26 619** à la vue d'ouverture (28 %) et **45 574** au pire cas, l'échelle 2
+  (48 %) — assez zoomé pour que la décimation ne morde plus, pas assez pour que l'élagage écarte grand
+  chose. Donc **2 à 3,6×**, pas un ordre de grandeur.
+  **Ce qui reste, et c'est là qu'il faudra regarder** : chaque repeinture redimensionne aussi l'**image
+  du relief**, 2560×2328, vers la taille de la fenêtre. Une seule opération, mais sur 6 millions de
+  pixels, et elle ne dépend d'aucun des deux leviers déjà tirés. Remèdes possibles, non évalués :
+  pré-redimensionner le fond par palier de zoom (un `ImageBitmap` par octave), ou passer la couche de
+  fond à WebGL — ce qui rouvrirait la décision « le canevas est 2D », prise le 22/09 parce que le mode
+  `overlay` de la cuisson est natif en 2D et demanderait un shader.
+  **Un reste qui n'est pas de moi** : le zoom continue après la fin du geste, parce que macOS envoie des
+  événements `wheel` d'inertie pendant une seconde. Aucune API standard ne distingue l'inertie d'un vrai
+  geste ; ce que font les cartes en ligne est de **viser une échelle et s'y rendre en douceur**, ce qui
+  l'absorbe. Non fait.
+  **Sévérité : à savoir, accepté en l'état par le dev.**
+
 - **Un glob `.ts` cesse d'être inoffensif le jour où un `.tsx` existe, et ce dépôt en avait quatre.**
   Trouvés le 01/10 en ajoutant le Cartographe, tous **corrigés** : la table des frontières ESLint
   (`files: '*.ts'`), l'exemption des budgets de lisibilité pour les tests (`**/*.test.ts`),
