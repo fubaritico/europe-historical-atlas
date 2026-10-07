@@ -21,5 +21,6 @@
 | [`fetch-ohm`](fetch-ohm/) | Can **OpenHistoricalMap** (CC0) replace the GPL-3.0 border source — do OSM-style boundary relations assemble into rings, and is coverage sufficient? | **done** ✅ (assembly 98.8 %, no unclosed rings; coverage good from ~1700, unusable at 1500) |
 
 | [`terrain-bitmap`](terrain-bitmap/) | Can the atlas's **painted terrain texture** be baked outside the browser, so the Cartographer's interface can be designed over the real backdrop? | **done** ✅ (2560×2328 in 1.8 s, project defaults, no new dependency) |
+| [`coastline-volume`](coastline-volume/) | How many points must the Cartographer redraw on every `pointermove` of a pan — and does the coastline have to be **chained** into contours rather than drawn as loose segments? | **graduated** ✅ (95 212 segments → 2 029 contours at the atlas's resolution: 47× fewer sub-paths, half the points, and the prerequisite for `s02`'s sub-path insertion) |
 
 _(Add a row per new spike. Mark `done` / `graduated` / `dropped` as they evolve.)_

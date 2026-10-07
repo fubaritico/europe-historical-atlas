@@ -1,0 +1,85 @@
+/**
+ * How many points must a pan redraw?
+ *
+ * Written for step 4d-2(a): the Cartographer's static canvas is repainted on every `pointermove` of a
+ * pan, so the size of the vector layers is the number that decides whether they can be drawn plainly or
+ * need culling and decimation. `s02` says to measure before building; this is that measurement.
+ *
+ * It reaches into `coastlineSource.ts` rather than `createMaskCoastlineSource`, for a mechanical reason:
+ * that module has **type-only** imports, so Node's type stripping can load it as is, while `landMask.ts`
+ * imports `./assetError` without an extension and Node ESM refuses that. The mask is therefore unpacked
+ * here, reproducing exactly what `createMaskCoastlineSource` does — bilinear coverage, shore at 0.5.
+ *
+ * Run: node --experimental-strip-types files/spikes/coastline-volume/measure.ts
+ */
+import { readFileSync } from 'node:fs'
+
+import { chainSegments } from '../../../packages/core/src/data/coastlineChain.ts'
+import { createFieldCoastlineSource } from '../../../packages/core/src/data/coastlineSource.ts'
+
+const base = 'packages/atlas/public/masks/europe-land'
+const meta = JSON.parse(readFileSync(`${base}.json`, 'utf8')) as {
+  width: number
+  height: number
+  scale: number
+}
+const bits = new Uint8Array(readFileSync(`${base}.bin`))
+
+/**
+ * Whether a mask cell is land, out of the packed bitfield (MSB first, row-major, 1 = land).
+ * @param col - the column
+ * @param row - the row
+ * @returns 1 over land, 0 over water
+ */
+const at = (col: number, row: number): number => {
+  const index = row * meta.width + col
+  const byte = bits[index >> 3] ?? 0
+  return (byte >> (7 - (index & 7))) & 1
+}
+
+/**
+ * The land fraction around a normalized position, bilinear — what `LandMask.coverage` returns.
+ * @param u - horizontal coordinate in [0, 1]
+ * @param v - vertical coordinate in [0, 1]
+ * @returns the land fraction in [0, 1]
+ */
+const coverage = (u: number, v: number): number => {
+  const fx = Math.min(meta.width - 1, Math.max(0, u * (meta.width - 1)))
+  const fy = Math.min(meta.height - 1, Math.max(0, v * (meta.height - 1)))
+  const x0 = Math.floor(fx)
+  const y0 = Math.floor(fy)
+  const x1 = Math.min(meta.width - 1, x0 + 1)
+  const y1 = Math.min(meta.height - 1, y0 + 1)
+  const tx = fx - x0
+  const ty = fy - y0
+  const top = at(x0, y0) * (1 - tx) + at(x1, y0) * tx
+  const bottom = at(x0, y1) * (1 - tx) + at(x1, y1) * tx
+  return top * (1 - ty) + bottom * ty
+}
+
+console.warn(`mask: ${String(meta.width)}×${String(meta.height)}, scale ${String(meta.scale)}`)
+
+for (const width of [1280, 2560, 5120]) {
+  const height = Math.max(2, Math.round((width * meta.height) / meta.width))
+  const started = performance.now()
+  const segments = createFieldCoastlineSource({
+    width,
+    height,
+    level: 0.5,
+    valueAt: (x, y) => coverage(x / (width - 1), y / (height - 1)),
+  }).load()
+  const ms = Math.round(performance.now() - started)
+  const chainStarted = performance.now()
+  const contours = chainSegments(segments)
+  const chainMs = Math.round(performance.now() - chainStarted)
+  const points = contours.reduce((total, c) => total + c.points.length, 0)
+  const longest = contours[0]?.points.length ?? 0
+  const closed = contours.filter((c) => c.closed).length
+  console.warn(
+    `trace at ${String(width)}×${String(height)}: ${String(segments.length)} segments in ${String(ms)} ms\n` +
+      `  chained: ${String(contours.length)} contours (${String(closed)} closed), ` +
+      `${String(points)} points, longest ${String(longest)}, in ${String(chainMs)} ms\n` +
+      `  sub-paths per repaint: ${String(segments.length)} -> ${String(contours.length)} ` +
+      `(${(segments.length / Math.max(1, contours.length)).toFixed(0)}x fewer)`
+  )
+}
