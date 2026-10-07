@@ -409,6 +409,7 @@ describe('MapCanvas, re-rendered', () => {
           frame={assets.backdrop.frame}
           backdropImage={assets.backdrop.image}
           vectorLayers={assets.vectors}
+          onHover={() => undefined}
           style={CHROME_PAINT_STYLE}
           zoneLabel="zone"
           label="la carte"

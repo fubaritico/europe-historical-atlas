@@ -1,5 +1,6 @@
 import { fitScale, fitWhole } from '../view/framing'
-import { panBy, zoomAbout } from '../view/viewport'
+import { backdropToLonLat } from '../view/projection'
+import { panBy, screenToBackdrop, zoomAbout } from '../view/viewport'
 
 import { createAnchorCache } from './anchorCache'
 import { paintCanvas } from './painter'
@@ -51,6 +52,13 @@ export interface AttachDeps {
    * points, which is the shape `zustand-react-pattern` warns about.
    */
   vectorLayers: VectorLayers
+  /**
+   * Where the pointer is, in degrees — `null` when it is off the backdrop.
+   *
+   * Reported raw rather than formatted: turning a position into `2°21′E` is a presentation choice, and
+   * the wiring has no business holding one. `null` for the vellum around the map, which is not a place.
+   */
+  onHover: (lonLat: [number, number] | null) => void
   /** The colours and sizes, from the design. */
   style: PaintStyle
   /** What to call the editorial zone on screen. */
@@ -258,6 +266,22 @@ function onWheel(it: Attachment, event: WheelEvent): void {
 }
 
 /**
+ * Tell the caller what is under the pointer.
+ *
+ * **Off the backdrop is `null`, not a coordinate.** The vellum around the map is not a place, and a
+ * latitude extrapolated past the frame's edge would be arithmetic presented as a fact — the kind of
+ * plausible wrong answer `rules/error-handling.md` calls the dangerous shape.
+ * @param it - the attachment
+ * @param at - the pointer, in device pixels
+ */
+function report(it: Attachment, at: [number, number]): void {
+  const point = screenToBackdrop(it.deps.store.getState().viewport, at)
+  const { width, height } = it.deps.frame.size
+  const onMap = point[0] >= 0 && point[0] <= width && point[1] >= 0 && point[1] <= height
+  it.deps.onHover(onMap ? backdropToLonLat(point, it.deps.frame) : null)
+}
+
+/**
  * Begin a press.
  *
  * The pointer is captured so a drag that leaves the canvas keeps panning rather than stopping at the
@@ -277,9 +301,10 @@ function onPointerDown(it: Attachment, event: PointerEvent): void {
  * @param event - the pointer event
  */
 function onPointerMove(it: Attachment, event: PointerEvent): void {
+  const to = positionOf(event)
+  report(it, to)
   const from = it.pressAt
   if (from === null) return
-  const to = positionOf(event)
   if (!it.dragging && Math.hypot(to[0] - from[0], to[1] - from[1]) <= DRAG_TOLERANCE) return
   it.dragging = true
   const state = it.deps.store.getState()

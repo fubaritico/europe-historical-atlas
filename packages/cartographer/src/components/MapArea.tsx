@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 
 import { isAssetError } from '@europe-historical-atlas/core/data/assetError'
 
 import { MapCanvas } from './MapCanvas'
+import { STATUS_BAR, writePosition } from './statusBar'
+import { useEditorAssets } from './useEditorAssets'
 
 import type { Backdrop } from '../backdropSource'
 import type { PaintStyle } from '../canvas/painter'
@@ -167,61 +169,13 @@ export function BackdropFailure({ error }: BackdropFailureProps) {
 }
 
 /**
- * The area: load the backdrop once, then draw.
- *
- * **What is held once is the promise, not a boolean — and the difference is a bug this got wrong first.**
- * `StrictMode` runs setup → cleanup → setup synchronously on the first mount, and `main.tsx` wraps the
- * app in it on purpose. The first version kept a `started` flag: the second setup saw it and returned
- * immediately, so the only `.then` in existence stayed bound to the **first** invocation's closure — whose
- * cleanup had just cancelled it. The assets loaded, the terrain baked, and the answer was dropped on the
- * floor: the editor sat on *"Préparation du fond de carte…"* for ever. Found in review, and only because
- * the test was made to assert that the canvas actually appears — counting the calls could not see it.
- *
- * So: the **promise** lives in a ref, created on whichever invocation finds the ref empty, and **every**
- * invocation attaches its own listener to it with its own `ignore` flag. The throwaway first invocation
- * then cancels only its own redundant listener, and the surviving one still fires.
- *
- * **The progress sink goes through a ref for exactly the same reason.** It is handed to `load` once, at
- * creation, so a sink captured by the first invocation would be silenced by that invocation's cleanup —
- * the same defect, one level down, and invisible because a missing progress bar looks like a fast load.
- * Delegating to `progress.current` keeps it pointed at the live invocation.
- *
- * **A late answer is dropped rather than written**, which is cleanliness rather than necessity: React 18
- * and later make a state write on an unmounted tree a silent no-op. It is kept because the flag is the
- * same mechanism the correctness above needs, so there is nothing extra to carry.
+ * The area: wait for the backdrop, then draw.
  * @param props - the store, how to load, and the names
  * @returns the waiting notice, the failure notice, or the canvas
  */
 export function MapArea({ store, load, style, zoneLabel, label }: MapAreaProps) {
-  const inFlight = useRef<Promise<EditorAssets> | null>(null)
-  const progress = useRef<ProgressReport>(() => undefined)
-  const [assets, setAssets] = useState<EditorAssets | null>(null)
-  const [error, setError] = useState<unknown>(null)
-  const [fraction, setFraction] = useState(0)
-  const [phase, setPhase] = useState<ComputePhase | null>(null)
-
-  useEffect(() => {
-    let ignore = false
-    progress.current = (at, running) => {
-      if (ignore) return
-      setFraction(at)
-      setPhase(running)
-    }
-    inFlight.current ??= load((at, running) => {
-      progress.current(at, running)
-    })
-    inFlight.current.then(
-      (ready) => {
-        if (!ignore) setAssets(ready)
-      },
-      (failed: unknown) => {
-        if (!ignore) setError(failed)
-      }
-    )
-    return () => {
-      ignore = true
-    }
-  }, [load])
+  const status = useRef<HTMLParagraphElement | null>(null)
+  const { assets, error, fraction, phase } = useEditorAssets(load)
 
   if (error !== null) return <BackdropFailure error={error} />
   if (assets === null) return <BackdropWaiting fraction={fraction} phase={phase} />
@@ -232,10 +186,20 @@ export function MapArea({ store, load, style, zoneLabel, label }: MapAreaProps) 
         frame={assets.backdrop.frame}
         backdropImage={assets.backdrop.image}
         vectorLayers={assets.vectors}
+        onHover={(lonLat) => {
+          writePosition(status.current, lonLat)
+        }}
         style={style}
         zoneLabel={zoneLabel}
         label={label}
       />
+      {/*
+        No `aria-live`, and that is the accessibility decision rather than an omission: this text
+        changes on every pointer sample, so announcing it would make a screen reader unusable — the
+        very failure `role="status"` exists to avoid elsewhere. A keyboard reader gets nothing from it
+        today, which is honest; what will serve them is the anchor list of step 5, not a firehose.
+      */}
+      <p style={STATUS_BAR} ref={status} />
     </div>
   )
 }

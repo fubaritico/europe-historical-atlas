@@ -87,8 +87,10 @@ function keyEvent(key: string): KeyboardEvent {
 function attach(): {
   node: HTMLCanvasElement
   store: CartographerStoreHook
+  hovered: ReturnType<typeof vi.fn>
   dispose: () => void
 } {
+  const hovered = vi.fn()
   const store = createCartographerStore({
     edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
     viewport: { viewport: UNFRAMED },
@@ -99,10 +101,11 @@ function attach(): {
     frame: TEST_BACKDROP_FRAME,
     backdropImage: backdropStandIn(),
     vectorLayers: { coast: [], rivers: [] },
+    onHover: hovered,
     style: CHROME_PAINT_STYLE,
     zoneLabel: 'zone',
   })
-  return { node, store, dispose }
+  return { node, store, hovered, dispose }
 }
 
 afterEach(() => {
@@ -391,6 +394,7 @@ describe('attachCanvas', () => {
           frame: TEST_BACKDROP_FRAME,
           backdropImage: backdropStandIn(),
           vectorLayers: { coast: [], rivers: [] },
+          onHover: () => undefined,
           style: CHROME_PAINT_STYLE,
           zoneLabel: 'zone',
         })
@@ -509,6 +513,75 @@ describe('repaint coalescing', () => {
       // that is not hypothetical.
       expect(frames.cancelled()).toBe(1)
       vi.unstubAllGlobals()
+    })
+  })
+})
+
+describe('reporting what is under the pointer', () => {
+  describe('happy path', () => {
+    it('reports a position in degrees on every move, button or no button', () => {
+      const { node, hovered, dispose } = attach()
+
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 400, offsetY: 300 }))
+
+      // No press first: `s01`'s "identify what is under the pointer" is a hover, not a drag. The first
+      // version of this wiring returned early when no button was down, so the bar never moved.
+      const reported = hovered.mock.calls.at(-1)?.[0] as [number, number] | null
+
+      expect(reported).not.toBeNull()
+      // Somewhere inside the DEM's own box, since the pointer is over the middle of the framed map.
+      expect(reported?.[0]).toBeGreaterThan(TEST_BACKDROP_FRAME.bounds.west)
+      expect(reported?.[0]).toBeLessThan(TEST_BACKDROP_FRAME.bounds.east)
+      expect(reported?.[1]).toBeGreaterThan(TEST_BACKDROP_FRAME.bounds.south)
+      expect(reported?.[1]).toBeLessThan(TEST_BACKDROP_FRAME.bounds.north)
+      dispose()
+    })
+  })
+
+  describe('variants', () => {
+    it('keeps reporting while a drag is panning', () => {
+      const { node, hovered, dispose } = attach()
+      node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 100, offsetY: 100 }))
+      hovered.mockClear()
+
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 160, offsetY: 130 }))
+
+      // Dragging the map is still moving over it, and the bar going blank mid-pan would read as a
+      // fault rather than as a mode.
+      expect(hovered).toHaveBeenCalledTimes(1)
+      dispose()
+    })
+
+    it('moves with the view, so the same pixel is a different place after a pan', () => {
+      const { node, hovered, dispose } = attach()
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 400, offsetY: 300 }))
+      const before = hovered.mock.calls.at(-1)?.[0] as [number, number]
+
+      node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 400, offsetY: 300 }))
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 500, offsetY: 300 }))
+      node.dispatchEvent(pointerEvent('pointerup', { offsetX: 500, offsetY: 300 }))
+      hovered.mockClear()
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 400, offsetY: 300 }))
+      const after = hovered.mock.calls.at(-1)?.[0] as [number, number]
+
+      // Reading the viewport at report time rather than capturing it at wiring time: a stale
+      // conversion would be a coordinate that looks right and names the wrong place.
+      expect(after[0]).not.toBeCloseTo(before[0], 6)
+      dispose()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('reports nothing when the pointer is on the vellum, off the map', () => {
+      const { node, hovered, dispose } = attach()
+
+      // The opening view leaves a margin, so the very corner of the canvas is beside the backdrop.
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 0, offsetY: 0 }))
+
+      // A latitude extrapolated past the frame's edge is arithmetic presented as a fact — the
+      // plausible wrong answer `rules/error-handling.md` names as the dangerous shape.
+      expect(hovered.mock.calls.at(-1)?.[0]).toBeNull()
+      dispose()
     })
   })
 })

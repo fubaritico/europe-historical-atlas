@@ -5,7 +5,7 @@
 
 ## Where we are
 
-**1756 tests** (621 `core` · 782 atlas · 353 Cartographe), gate verte sur cinq contrôles (`lint`,
+**1771 tests** (621 `core` · 782 atlas · 368 Cartographe), gate verte sur cinq contrôles (`lint`,
 `type-check`, `test`, `build`, `format:check`). Worker à **13 490 o**, toujours sans three.js — et depuis
 le 07/10 le Cartographe émet **le même chunk, au même hash**, le fond étant cuit par le même port.
 `git log origin/main..main` dit ce qui attend un push. Le dépôt est **en ligne et déployé** :
@@ -24,7 +24,7 @@ Structure : **trois paquets**, orchestrés par **Turbo**, avec un **catalogue de
 | --- | --- | --- | --- |
 | `core` | pure TS, ni three.js ni DOM ni React ni zustand — **tenu par ESLint et par `tsc`**. Cinq couches : `utils`, `geo`, `data`, `pipeline`, `editor` | config racine | **`node`**, 621 |
 | `atlas` | l'application 3D, three.js vanille | config racine | `jsdom`, 782 |
-| `cartographer` | l'éditeur de territoires, React 19 + Vite 8. Son `publicDir` **est** celui de l'atlas | **sa propre config**, qui réimporte la racine | `jsdom` + plugin React, 353 |
+| `cartographer` | l'éditeur de territoires, React 19 + Vite 8. Son `publicDir` **est** celui de l'atlas | **sa propre config**, qui réimporte la racine | `jsdom` + plugin React, 368 |
 
 **Trois faits de structure à ne pas re-découvrir** : *flat config n'a aucune cascade*, donc la config d'un
 paquet **réimporte** la racine et ESLint résout **une** config depuis le **répertoire courant** — d'où un
@@ -145,7 +145,8 @@ plus tôt, promettant un cache que `4d-1` n'a pas construit.
 | --- | --- | --- |
 | **4d-3** ✅ | `publicDir` partagé, garde GPL élargie, fond cuit dans le worker, repère lu du DEM, état d'attente | `pnpm dev:cartographer` : on voit le relief **à faire confirmer par le dev** |
 | **4d-2 (a)** ✅ | la côte et les fleuves **en vecteurs** : `chainSegments` dans `core`, `vectorLayers.ts`, le dessin sous `setTransform` | `pnpm dev:cartographer` : le trait de côte épouse la limite terre/mer du relief |
-| **4d-2 (b)** ◀ | le **second canevas**, l'overlay redessiné au `pointermove` — l'élastique, la marquise, l'ancre surlignée | un geste en cours se voit sans redessiner le fond |
+| **4d-2 (b)** ✅ *à moitié* | la **barre d'état** : la position du pointeur en `2°21′E 48°51′N`, écrite **impérativement**, vide hors de la carte | on survole, la position suit |
+| **4d-2 (b′)** | le **second canevas**, l'overlay — **déplacé en tête de (d)**, parce qu'il n'a rien à peindre tant qu'aucun outil n'existe : l'élastique, la marquise et l'ancre surlignée sont tous des gestes d'outil, et le document est vide. Le livrer seul serait l'erreur du 06/10 (du code qu'aucun appelant n'atteint) | |
 
 **Traité en chemin le 07/10, à la demande du dev** : la fluidité du zoom (coalescence sur
 `requestAnimationFrame`, élagage au viewport, décimation au pixel écran) — jugée **acceptable**, le reste

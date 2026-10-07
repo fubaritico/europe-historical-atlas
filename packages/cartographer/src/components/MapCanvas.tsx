@@ -33,6 +33,8 @@ export interface MapCanvasProps {
   backdropImage: CanvasImageSource
   /** The coastline and the rivers, in backdrop pixels — what the Pen will snap to. */
   vectorLayers: VectorLayers
+  /** Where the pointer is, in degrees, or `null` off the map — written by the status bar. */
+  onHover: (lonLat: [number, number] | null) => void
   /** The colours and sizes, from `design/chrome.css`. */
   style: PaintStyle
   /** What to call the editorial zone on screen. */
@@ -88,6 +90,7 @@ export function MapCanvas({
   frame,
   backdropImage,
   vectorLayers,
+  onHover,
   style,
   zoneLabel,
   label,
@@ -110,7 +113,15 @@ export function MapCanvas({
         ref={(node) =>
           node === null
             ? undefined
-            : attachCanvas(node, { store, frame, backdropImage, vectorLayers, style, zoneLabel })
+            : attachCanvas(node, {
+                store,
+                frame,
+                backdropImage,
+                vectorLayers,
+                onHover,
+                style,
+                zoneLabel,
+              })
         }
       />
     </>
