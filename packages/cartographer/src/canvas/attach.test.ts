@@ -429,3 +429,81 @@ describe('attachCanvas', () => {
     })
   })
 })
+
+describe('repaint coalescing', () => {
+  /**
+   * Take over `requestAnimationFrame` so frames can be counted and run on demand.
+   * @returns the captured callbacks and how many times a frame was asked for
+   */
+  function frameControl(): { run: () => void; asked: () => number; cancelled: () => number } {
+    const queued: (() => void)[] = []
+    let cancels = 0
+    vi.stubGlobal('requestAnimationFrame', (fn: () => void) => {
+      queued.push(fn)
+      return queued.length
+    })
+    vi.stubGlobal('cancelAnimationFrame', () => {
+      cancels += 1
+    })
+    return {
+      run: () => {
+        const next = queued.shift()
+        next?.()
+      },
+      asked: () => queued.length,
+      cancelled: () => cancels,
+    }
+  }
+
+  describe('happy path', () => {
+    it('asks for one frame however many wheel events arrive between two', () => {
+      const frames = frameControl()
+      const { node, dispose } = attach()
+      frames.run() // the paint `fireImmediately` asked for at wiring time
+
+      for (let i = 0; i < 5; i++) {
+        node.dispatchEvent(pointerEvent('wheel', { offsetX: 100, offsetY: 100, deltaY: -1 }))
+      }
+
+      // The defect this test exists for: painting straight out of the handler redrew a 2 560 × 2 328
+      // image and 125 000 points once per event, and a trackpad emits 60 to 120 a second. One frame,
+      // five events — and the store still holds the newest viewport, so nothing is lost but the
+      // redundant drawing.
+      expect(frames.asked()).toBe(1)
+      vi.unstubAllGlobals()
+      dispose()
+    })
+
+    it('paints again on the next frame, rather than coalescing for ever', () => {
+      const frames = frameControl()
+      const { node, dispose } = attach()
+      frames.run()
+
+      node.dispatchEvent(pointerEvent('wheel', { offsetX: 100, offsetY: 100, deltaY: -1 }))
+      frames.run()
+      node.dispatchEvent(pointerEvent('wheel', { offsetX: 100, offsetY: 100, deltaY: -1 }))
+
+      // A latch that never reopens is the other way to get this wrong, and it looks identical until
+      // the map stops following the wheel entirely.
+      expect(frames.asked()).toBe(1)
+      vi.unstubAllGlobals()
+      dispose()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('cancels a frame it has already asked for when torn down', () => {
+      const frames = frameControl()
+      const { node, dispose } = attach()
+      frames.run()
+      node.dispatchEvent(pointerEvent('wheel', { offsetX: 100, offsetY: 100, deltaY: -1 }))
+
+      dispose()
+
+      // Otherwise the callback paints into a torn-down attachment — and `StrictMode` mounts twice, so
+      // that is not hypothetical.
+      expect(frames.cancelled()).toBe(1)
+      vi.unstubAllGlobals()
+    })
+  })
+})

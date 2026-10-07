@@ -388,8 +388,27 @@ export function attachCanvas(node: HTMLCanvasElement, deps: AttachDeps): () => v
     anchors: createAnchorCache(deps.frame),
   }
 
+  /**
+   * Ask for a repaint, at most one per displayed frame.
+   *
+   * **Painting straight out of the event was the defect, and it is a structural one.** A trackpad emits
+   * 60 to 120 `wheel` events a second and a drag emits a `pointermove` per device sample, so the canvas
+   * was repainted far more often than the screen could show — each paint redrawing a 2 560 × 2 328 image
+   * and 125 000 points of coastline and rivers, and each one delaying the next. The reader sees that as
+   * a zoom that stutters, which is what it is.
+   *
+   * Coalescing onto `requestAnimationFrame` costs nothing and has no counterpart: the browser calls back
+   * once per frame it is actually going to display, and three events arriving between two frames produce
+   * one paint of the **latest** state rather than three of stale ones. The store still holds the live
+   * viewport, so nothing is dropped — only the redundant drawing is.
+   */
+  let pending = 0
   const paint = (): void => {
-    repaint(it)
+    if (pending !== 0) return
+    pending = requestAnimationFrame(() => {
+      pending = 0
+      repaint(it)
+    })
   }
   const unlisten = listen(it)
   const observer = new ResizeObserver(() => {
@@ -412,5 +431,8 @@ export function attachCanvas(node: HTMLCanvasElement, deps: AttachDeps): () => v
     stopEdition()
     observer.disconnect()
     unlisten()
+    // A frame already requested would otherwise paint into a torn-down attachment — and under
+    // `StrictMode`, which mounts twice, that is not hypothetical.
+    if (pending !== 0) cancelAnimationFrame(pending)
   }
 }
