@@ -2,6 +2,94 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-10-07 → 08 — Le fond servi, la côte en vecteurs, et quatre gardes à moi qui ne gardaient rien
+
+Une plage : **22:04 → 01:14 (3 h 10, 284 actions)**, après 44 h de coupure. Le chantier ouvert le 05/10
+totalise **8 h 20 sur 2 plages**. **8 commits** `ac94ce4`..`d9d80a2`, 44 fichiers, **+4 164 lignes**,
+**1655 → 1771 tests**, gate verte à chaque pas. **Rien n'est poussé.** Livré : `4d-3` entier, `4d-2 (a)`,
+la moitié de `(b)`, et deux passes de performance demandées par le dev.
+
+- **La leçon du soir, et elle est arrivée quatre fois : une garde qui ne garde rien ressemble
+  exactement à une garde qui garde.** (1) Mon test « n'écrit pas d'état après démontage » reposait sur un
+  avertissement que **React 18 a retiré** — sabotage appliqué, 300 tests verts. (2) `boundaries.test.ts`
+  affiche **13 « skipped »** quand la config ESLint est invalide, pas un échec : une couche absente de la
+  table `LAYER` racine met un `null` dans le groupe, et la garde se tait au lieu de crier. (3) Mon test de
+  décimation, écrit **pour** son piège, ne le distinguait pas — dans ma fixture l'écart cumulé restait
+  aussi sous le seuil, donc les deux implémentations répondaient pareil. (4) Rendre le repaint asynchrone
+  n'a fait tomber **aucun** test. **La règle tient, et c'est sa quatrième et cinquième occurrence
+  documentée** : vérifier que *ce* test-là tombe, pas que la suite tombe.
+- **Le bug le plus coûteux, trouvé deux fois indépendamment par la revue (ARCH-014 = QUAL-203), et il
+  n'aurait mordu qu'en dev — donc là où le dev travaille.** Un garde « charger une seule fois » écrit
+  comme un **booléen** est faux sous `StrictMode` : le cycle *setup → cleanup → setup* est synchrone, le
+  second setup sort sur le drapeau sans rien enregistrer, et le seul `.then` reste lié à la fermeture que
+  le cleanup fantôme vient d'annuler. Les deux assets se chargeaient, le terrain cuisait, **et la réponse
+  partait à la poubelle** : « Préparation du fond de carte… » pour toujours. Mesuré : `originX` 123 → 96,49.
+  **Ce qu'il faut tenir dans le ref est la promesse**, chaque invocation attachant son propre écouteur.
+  Et le **sink de progression a le même défaut un cran plus bas**, pire à trouver — une barre qui ne bouge
+  pas se lit comme un chargement rapide.
+- **Les deux remèdes proposés par les agents étaient piégés, et ils le disaient eux-mêmes.** `useCallback`
+  avec `[]` gèle les valeurs ; avec les vraies dépendances, il re-déclenche le recadrage le jour où on
+  rouvre une année. La cause était ailleurs : **« quelqu'un a-t-il déjà choisi une vue ? » se demande au
+  store** (`UNFRAMED` est `scale: 0`), qui survit à un rattachement, et non à un drapeau porté par un objet
+  qu'un re-rendu recrée.
+- **Et mon test a mis deux essais à voir le défaut qu'il visait** : d'abord je rejouais le **même** élément
+  JSX (React court-circuite), puis jsdom rapportait une boîte nulle, donc la branche de recadrage ne
+  s'exécutait jamais. Il a fallu stubber `clientWidth`. Un test qui ne peut pas voir son sujet passe pour
+  une garde.
+- **`4d-3` fini, et le raccourci était le bon.** `publicDir` du Cartographe → `../atlas/public` : zéro
+  octet dupliqué, et c'est ce qui rend le fond identique à la texture publiée **par construction**. La
+  garde GPL de `build.yml` élargie à **`packages/*/dist`**, prouvée **en la faisant tirer** — localement,
+  où les fichiers GPL existent, elle trouve les deux `dist/borders`. L'entrée de `known-issues` qui
+  disqualifiait ce raccourci était **périmée depuis le 05/10** : la correction vivait dans `completed.md`
+  et personne n'avait rouvert l'entrée. **Une entrée corrigée ailleurs est pire qu'une entrée absente.**
+- **Le fond passe par le port, dans le worker** — même import que l'atlas, **même chunk au même hash**
+  (13 490 o). `canvas/backdrop.ts` a disparu : il cuisait sur le thread principal, ce qui aurait rendu
+  l'état d'attente invisible, « un drapeau levé avant un bloc synchrone » pour la seconde fois.
+- **`ARCH-102` fermé, et le cadrage de l'issue était faux.** Elle annonçait qu'il faudrait `node:fs`, donc
+  `@types/node` dans un paquet navigateur, donc rompre le contrat de la scission. **Non** : le fichier est
+  déjà lu, par `fetch`, au démarrage. Il n'y avait rien à ouvrir, seulement à cesser de re-déclarer ce que
+  le port rapportait. Le littéral survit en **fixture de test**, et un test interdit à la production de
+  l'importer.
+- **La décision du dev sur les assets, et ma question était trop large.** J'avais proposé « le relief
+  bloquant, le masque dégradé » ; il a tranché **les deux bloquants**, puis corrigé mon périmètre : *« ça
+  n'empêche pas l'application de se lancer »*. Seule la **zone canevas** est bloquée ; les autres zones
+  s'affichent à l'état de repos, ce que le `Background` de `s00` spécifie déjà. Et l'ordre qu'il a posé :
+  **le fond cuit d'abord, l'année posée dessus ensuite.**
+- **La côte sort en nuage et doit être chaînée — pas d'abord pour la vitesse.** `s02` insère *« le
+  sous-chemin de côte entre les deux clics »*, ce qui n'a aucun sens dans 95 212 segments sans ordre : il
+  n'y a pas de « entre ». Chaînés : **2 029 contours**, 47× moins de sous-chemins et moitié moins de
+  points. **Sans epsilon**, et c'est une propriété du producteur : deux cellules voisines calculent leur
+  arête partagée depuis les mêmes valeurs par la même expression, donc au bit près. Une tolérance
+  souderait deux rives qui se frôlent dans un détroit.
+- **Deux passes de performance, demandées par le dev, et la première cause était structurelle** : je
+  repeignais **dans le gestionnaire d'événement**, donc 60 à 120 fois par seconde. Coalescence sur
+  `requestAnimationFrame`. Puis l'élagage au viewport et la décimation au pixel écran : de 95 233 points,
+  une repeinture en trace **26 619** à l'ouverture (28 %) et **45 574** au pire cas, l'échelle 2 (48 %).
+  **2 à 3,6×, pas un ordre de grandeur** — dit tel quel. Verdict du dev : *« beaucoup mieux, acceptable »*.
+- **Le plafond de zoom reposait sur un argument emprunté à l'autre application.** Je l'avais calibré sur
+  les cellules de 1,9 km du raster politique — **qui est celui de l'atlas**. Le Cartographe stocke des
+  degrés à six décimales et dérive ses frontières des ancres *partagées*, exactement. Porté à **32**
+  (~240 m par pixel écran) à la demande du dev, et **mesuré** : c'est *moins cher* à dessiner que la vue
+  d'ouverture, l'élagage mordant d'autant plus qu'on est zoomé.
+- **Deux fois mon test a accusé du code qui avait raison.** Le critère de décimation est le **pixel
+  écran**, pas le niveau de zoom : à l'échelle 8, des points à un dixième de pixel de fond sont encore à
+  huit dixièmes de pixel écran. J'ai corrigé le test, pas le code.
+- **Mon découpage a bougé deux fois dans la soirée, et c'est ce qui a fait perdre le fil au dev** —
+  davantage que les digressions, qui venaient de lui et étaient de vraies trouvailles. `(b)` est passé du
+  second canevas à la barre d'état en cours de route, pour une bonne raison (l'overlay n'a rien à peindre
+  tant qu'aucun outil n'existe) mais annoncée **après** coup. Le découpage est désormais **figé dans
+  `next.md`**, avec la consigne de le dire avant d'y toucher.
+- **Le budget de lisibilité a eu raison quatre fois**, jamais désactivé : `attachCanvas`, `paintVectors`,
+  et `MapArea` deux fois — d'où `components/statusBar.ts` et `components/useEditorAssets.ts`, cette
+  dernière étant l'extraction qu'ARCH-012 demande. Fast Refresh poussait dans le même sens : un fichier de
+  composants n'a pas le droit d'exporter autre chose.
+- **Trois findings laissés ouverts, avec leur déclencheur** : la bbox des fleuves non vérifiée contre celle
+  du fond (**quatrième** occurrence des « deux boîtes » — remède au jour où `fetch-rivers` est relancé) ·
+  l'image du relief redimensionnée à chaque frame, ce qui reste du coût de la repeinture · et ce que la
+  barre d'état doit encore à `s01` (le pays sous le pointeur, les km/px, le résumé du document).
+- **Un `cd` de moi**, quatrième récidive après le 05/10. Sans conséquence — le journal n'a pas forké, les
+  chiffres ci-dessus le prouvent — mais la règle existe pour une raison mesurée.
+
 ### 2026-10-05 → 06 — L'étape 4 presque entière, et trois fois où le plus visible n'était pas la cause
 
 Une plage : **20:33 → 01:24 (4 h 51, 317 actions)**, après 3 jours de coupure — donc un **nouveau

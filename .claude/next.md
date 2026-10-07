@@ -62,38 +62,53 @@ d'ancres ne perd jamais rien pendant l'édition.** Donc `removePolity` retire un
 point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui n'est plus référencé disparaît
 à l'enregistrement, par une seule renumération. Vérifié en la cassant : 3 tests tombent.
 
-## ▶ ON REPREND ICI — `4d-3` est fini, la suite est `4d-2`
+## ▶ ON REPREND ICI — en trois lignes
 
-**L'étape 4 en est là** : `4a` (le store), `4b` (`view/`), `4c` (`geometry/`), `4d-1` (le canevas qui
-dessine et navigue) et **`4d-3` (le fond, servi et peint)** sont **faits**. Il reste **`4d-2`**, les deux
-outils.
+**Le Cartographe affiche la carte et on s'y déplace. On ne peut encore rien y dessiner.** Tout ce qui
+reste de l'étape 4 tient dans cet écart, et il porte un nom : **`4d-2 (d)`, les deux outils.**
 
-**Ce que `4d-3` a livré le 07/10**, et les quatre choses à ne pas re-découvrir :
+| | | |
+| --- | --- | --- |
+| **ce qui marche** | le relief cuit et servi, la côte et les fleuves en vecteurs, le pan, le zoom (jusqu'à ×32), la barre d'état qui suit le pointeur | ✅ |
+| **ce qui manque** | créer un pays, poser des ancres, fermer un anneau, déplacer un point, `ctrl+z` | ◀ |
+| **l'ordre** | **(c)** la cible de dessin, puis **(d)** les outils et le second canevas | |
 
-1. **`publicDir` du Cartographe → `../atlas/public`.** Zéro octet dupliqué, et c'est ce qui garantit que
-   le fond est *la* texture de l'atlas plutôt qu'une copie. La garde GPL de `build.yml` est élargie à
-   **`packages/*/dist`** — prouvée en la faisant tirer : localement, où les fichiers GPL existent, elle
-   trouve les deux `dist/borders`. Le favicon dupliqué du 05/10 est supprimé, il n'y a qu'un `public/`.
-2. **Le fond passe par le port `TerrainBake`, dans le worker** —
-   `core/pipeline/computeWorker?worker`, le même import que `atlas/src/main.ts`, même chunk, **même hash,
-   13 490 o**. Donc les ~1,8 s de cuisson ne gèlent rien, et `onProgress` donne une progression
-   **mesurée** au lieu d'une barre qui s'anime au chronomètre. `canvas/backdrop.ts` a disparu : il cuisait
-   sur le thread principal, ce qui aurait rendu invisible l'état d'attente qu'on affiche au-dessus.
-3. **Le terrain est nu parce que `computePolitical` n'est jamais appelé.** Pas de `clearPolitical` à
-   oublier — gardé par un test qui assère que ni l'un ni l'autre n'est appelé.
-4. **`ARCH-102` est fermé** : le repère vient de `dem.meta` (`frameFromHeightmap`), plus aucun littéral en
-   production. `view/backdropFrame.ts` est devenu `view/testFrame.ts` / `TEST_BACKDROP_FRAME`, **fixture
-   de test uniquement**, et un test interdit à la production de l'importer. `boundsMatch` est enfin
-   branché : un masque qui ne couvre pas le sol du relief est refusé en `semantic` avant toute cuisson.
+> **Le découpage `a/b/c/d` est figé — ne plus le re-trancher.** Il a bougé deux fois le 07/10, et c'est
+> ce qui a fait perdre le fil au dev, bien plus que les digressions. S'il paraît faux à la reprise, le
+> dire **avant** d'y toucher.
 
-**Mesuré** : Cartographe 219,65 → **241,22 ko / 76,44 ko gzip** (+7,81 ko pour tout le fond).
-**1655 → 1691 tests.**
+### Ce qu'il faut savoir avant d'écrire `(c)` et `(d)`
 
-**Le bug que la revue a trouvé, et qui n'aurait mordu qu'en dev** : un garde « charger une seule fois »
-écrit comme un **booléen** dans un ref est faux sous `StrictMode` — le cleanup fantôme annule la seule
-promesse en vol et l'éditeur reste en attente **pour toujours**. Ce qu'il faut tenir dans le ref est la
-**promesse**, chaque invocation attachant son propre écouteur. Détail et mécanisme dans `known-issues.md`,
-parce que l'étape 5 va charger d'autres choses.
+- **La cible de dessin est un acte séparé** (`s02`) : `[+ New polity]` crée l'identité **sans
+  territoire**, valider le formulaire **donne la plume**, une **bannière** montre la cible tant qu'elle
+  est active, et **sans cible la plume refuse de poser une ancre**. Créer un trait ne crée **jamais** une
+  polity — c'est la perche que le dev a tendue le 07/10, et `s99` en donne la raison mesurée : à 1100,
+  OHM donne au Royaume de France son nom et **aucune géométrie**, donc sans territoire est l'état de
+  départ **normal** de cette carte.
+- **Trois modules sont écrits, testés, et n'ont toujours aucun appelant** : `geometry/hitTest.ts`
+  (`nearestPoint`), `geometry/ringClosure.ts` et `geometry/polylineSnap.ts`, livrés à `4c`. `(d)` est
+  précisément ce qui leur en donne un — `(a)` a posé les polylignes qu'ils viseront, pas les gestes qui
+  les appellent.
+- **Le second canevas vient avec `(d)`, pas avant.** Il n'a rien à peindre tant qu'aucun outil n'existe,
+  et le livrer seul serait l'erreur du 06/10 : du code qu'aucun appelant n'atteint, que le secouage
+  d'arbre retire du bundle.
+- **Un geste = un pas d'historique** (H-10), posté à la **fin** du geste. Deux clics avec ⟨snap to
+  coast⟩ posent 412 ancres et `ctrl+z` les reprend toutes.
+
+### Ce que `4d-3` et `4d-2 (a)/(b)` ont livré le 07/10 — à ne pas re-découvrir
+
+1. **`publicDir` du Cartographe → `../atlas/public`**, donc le fond est *la* texture de l'atlas et non une
+   copie. Garde GPL de `build.yml` élargie à **`packages/*/dist`**, prouvée en la faisant tirer.
+2. **Le fond cuit dans le worker** (`core/pipeline/computeWorker?worker`) — même chunk, **même hash**,
+   13 490 o. `onProgress` donne une progression mesurée.
+3. **Le terrain est nu parce que `computePolitical` n'est jamais appelé.** Rien à nettoyer.
+4. **`ARCH-102` fermé** : le repère vient de `dem.meta`. `view/testFrame.ts` est une **fixture de test**,
+   et un test interdit à la production de l'importer. `boundsMatch` est branché.
+5. **La côte se chaîne** : 95 212 segments → **2 029 contours**, sans epsilon (le producteur est
+   déterministe). Nécessaire d'abord pour `s02`, qui insère *« le sous-chemin entre les deux clics »*.
+6. **Les vecteurs se dessinent sous `setTransform`**, élagués au viewport et décimés au pixel écran.
+
+**Mesuré** : Cartographe 219,65 → **247,36 ko / 78,65 ko gzip**. **1655 → 1771 tests.**
 
 ### La promesse de `4d-3` que l'étape 5 doit tenir
 
@@ -143,42 +158,12 @@ plus tôt, promettant un cache que `4d-1` n'a pas construit.
 
 | | quoi | on sait que ça marche comment |
 | --- | --- | --- |
-| **4d-3** ✅ | `publicDir` partagé, garde GPL élargie, fond cuit dans le worker, repère lu du DEM, état d'attente | `pnpm dev:cartographer` : on voit le relief **à faire confirmer par le dev** |
-| **4d-2 (a)** ✅ | la côte et les fleuves **en vecteurs** : `chainSegments` dans `core`, `vectorLayers.ts`, le dessin sous `setTransform` | `pnpm dev:cartographer` : le trait de côte épouse la limite terre/mer du relief |
-| **4d-2 (b)** ✅ *à moitié* | la **barre d'état** : la position du pointeur en `2°21′E 48°51′N`, écrite **impérativement**, vide hors de la carte | on survole, la position suit |
-
-**Ce que la barre d'état ne dit pas encore, et `s01` le demande** — déclaré plutôt que laissé croire fini :
-le **pays sous le pointeur** (`· unclaimed`, `· Holy Roman Empire · empire`), qui attend qu'une année soit
-dessinée · l'**échelle en km par pixel écran**, dont l'arithmétique existe déjà (`view/resolution.ts`,
-`kmPerScreenPixel`) et qu'il suffira de brancher · le **résumé du document** (`51 polities · 16 579
-vertices · unclaimed land 55 %`) · et l'avertissement `backdrop resolution exceeded` quand `scale > 1`
-(`isBackdropExceeded`, écrit et sans appelant). Son **placement et son style sont provisoires** : à
-l'étape 5 elle passe dans le chrome et ses valeurs viennent de `design/chrome.css`.
-
-| **4d-2 (b′)** | le **second canevas**, l'overlay — **déplacé en tête de (d)**, parce qu'il n'a rien à peindre tant qu'aucun outil n'existe : l'élastique, la marquise et l'ancre surlignée sont tous des gestes d'outil, et le document est vide. Le livrer seul serait l'erreur du 06/10 (du code qu'aucun appelant n'atteint) | |
-
-**Traité en chemin le 07/10, à la demande du dev** : la fluidité du zoom (coalescence sur
-`requestAnimationFrame`, élagage au viewport, décimation au pixel écran) — jugée **acceptable**, le reste
-étant l'image du relief redimensionnée par frame (`known-issues`). Et le **plafond de zoom passé de 8 à
-32**, parce que le 8 reposait sur les cellules de 1,9 km du raster **de l'atlas**, que le Cartographe
-n'utilise pas : il stocke des degrés à six décimales et dérive ses frontières des ancres *partagées*. À
-32, un pixel écran fait ~240 m de terrain — et c'est **moins cher** à dessiner que la vue d'ouverture,
-l'élagage mordant d'autant plus qu'on est zoomé.
-
-| **4d-2 (c)** | `[+ New polity]`, la **bannière de cible**, et la plume qui **refuse** sans cible (`s02`) | on sait toujours pour qui on dessine |
-| **4d-2 (d)** | les deux outils câblés sur `documentEdits` et `history` | on dessine, `ctrl+z` défait le geste |
+| **4d-3** ✅ | le fond servi, cuit dans le worker, le repère lu du DEM, l'état d'attente | le relief s'affiche |
+| **4d-2 (a)** ✅ | la côte et les fleuves en vecteurs | le trait de côte épouse la limite terre/mer |
+| **4d-2 (b)** ✅ | la barre d'état — *le second canevas est passé en tête de (d), voir plus haut* | la position suit le pointeur |
+| **4d-2 (c)** ◀ | `[+ New polity]`, la **bannière de cible**, la plume qui refuse sans cible | on sait toujours pour qui on dessine |
+| **4d-2 (d)** | le **second canevas**, les deux outils câblés sur `documentEdits` et `history` | on dessine, `ctrl+z` défait le geste |
 | **5** | le chrome : `{Polities}` en arbre, les formulaires, `{Overrides}`, **et les contrôles désactivés tant que le fond n'est pas prêt** | les valeurs viennent de `design/chrome.css` |
-
-**Deux faits mesurés à `4d-2 (a)`, à ne pas re-découvrir.** La côte sort de marching squares en **segments
-indépendants** — 95 212 à la résolution de l'atlas — et il faut les **chaîner** : pas d'abord pour la
-vitesse, mais parce que `s02` insère *« le sous-chemin de côte entre les deux clics »*, ce qui n'a aucun
-sens dans un nuage. Chaînés : **2 029 contours**, 47× moins de sous-chemins et moitié moins de points. Et
-les jonctions coïncident **au bit près** (le producteur est déterministe), donc la clé est exacte : un
-epsilon souderait deux rives qui se frôlent dans un détroit. Chiffres et argument dans
-`files/spikes/coastline-volume/`.
-
-**Les fleuves sont tous dessinés, sans seuil de zoom** — palier le plus léger, `s00` ne demande pas de
-niveau de détail. Si c'est illisible au cadrage continental, c'est deux lignes et ça se décide à l'œil.
 
 ### Trois choses décidées pour l'étape 4, à ne pas re-trancher
 
