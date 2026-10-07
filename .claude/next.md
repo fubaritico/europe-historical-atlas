@@ -146,6 +146,15 @@ plus tôt, promettant un cache que `4d-1` n'a pas construit.
 | **4d-3** ✅ | `publicDir` partagé, garde GPL élargie, fond cuit dans le worker, repère lu du DEM, état d'attente | `pnpm dev:cartographer` : on voit le relief **à faire confirmer par le dev** |
 | **4d-2 (a)** ✅ | la côte et les fleuves **en vecteurs** : `chainSegments` dans `core`, `vectorLayers.ts`, le dessin sous `setTransform` | `pnpm dev:cartographer` : le trait de côte épouse la limite terre/mer du relief |
 | **4d-2 (b)** ✅ *à moitié* | la **barre d'état** : la position du pointeur en `2°21′E 48°51′N`, écrite **impérativement**, vide hors de la carte | on survole, la position suit |
+
+**Ce que la barre d'état ne dit pas encore, et `s01` le demande** — déclaré plutôt que laissé croire fini :
+le **pays sous le pointeur** (`· unclaimed`, `· Holy Roman Empire · empire`), qui attend qu'une année soit
+dessinée · l'**échelle en km par pixel écran**, dont l'arithmétique existe déjà (`view/resolution.ts`,
+`kmPerScreenPixel`) et qu'il suffira de brancher · le **résumé du document** (`51 polities · 16 579
+vertices · unclaimed land 55 %`) · et l'avertissement `backdrop resolution exceeded` quand `scale > 1`
+(`isBackdropExceeded`, écrit et sans appelant). Son **placement et son style sont provisoires** : à
+l'étape 5 elle passe dans le chrome et ses valeurs viennent de `design/chrome.css`.
+
 | **4d-2 (b′)** | le **second canevas**, l'overlay — **déplacé en tête de (d)**, parce qu'il n'a rien à peindre tant qu'aucun outil n'existe : l'élastique, la marquise et l'ancre surlignée sont tous des gestes d'outil, et le document est vide. Le livrer seul serait l'erreur du 06/10 (du code qu'aucun appelant n'atteint) | |
 
 **Traité en chemin le 07/10, à la demande du dev** : la fluidité du zoom (coalescence sur
