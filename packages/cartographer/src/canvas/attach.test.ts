@@ -4,7 +4,7 @@ import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 
 import { openEmptyYear } from '../state/openEmptyYear'
 import { createCartographerStore } from '../state/store'
-import { RENDER_FRAME } from '../view/backdropFrame'
+import { TEST_BACKDROP_FRAME } from '../view/testFrame'
 import { UNFRAMED } from '../view/viewport'
 import { screenToBackdrop } from '../view/viewport'
 
@@ -22,6 +22,19 @@ import type { CartographerStoreHook } from '../state/store'
 
 /** The canvas box every test pretends to have, jsdom reporting every element as zero-sized. */
 const BOX = { width: 800, height: 600 }
+
+/**
+ * A stand-in for the baked terrain.
+ *
+ * A real `HTMLCanvasElement` rather than an object shaped like one: `CanvasImageSource` is a union of
+ * concrete DOM types, so a structural literal would need a cast — and a cast here would silence exactly
+ * the check that catches the painter being handed something it cannot draw. jsdom builds the element
+ * happily; nothing in these tests asks it to paint.
+ * @returns an image source the wiring accepts
+ */
+function backdropStandIn(): HTMLCanvasElement {
+  return document.createElement('canvas')
+}
 
 /**
  * A canvas element that reports a size and accepts pointer capture.
@@ -83,7 +96,8 @@ function attach(): {
   const node = canvasWithBox()
   const dispose = attachCanvas(node, {
     store,
-    frame: RENDER_FRAME,
+    frame: TEST_BACKDROP_FRAME,
+    backdropImage: backdropStandIn(),
     style: CHROME_PAINT_STYLE,
     zoneLabel: 'zone',
   })
@@ -163,7 +177,10 @@ describe('attachCanvas', () => {
     it('opens exactly on its lower bound, so zooming out of the first view does nothing', () => {
       const { node, store, dispose } = attach()
       const opening = store.getState().viewport.scale
-      const limits = scaleLimitsFor({ width: BOX.width, height: BOX.height }, RENDER_FRAME.size)
+      const limits = scaleLimitsFor(
+        { width: BOX.width, height: BOX.height },
+        TEST_BACKDROP_FRAME.size
+      )
 
       node.dispatchEvent(pointerEvent('wheel', { offsetX: 10, offsetY: 10, deltaY: 1 }))
 
@@ -212,12 +229,18 @@ describe('attachCanvas', () => {
     })
 
     it('bounds the zoom: out stops where the whole backdrop fits, in stops at the ceiling', () => {
-      const limits = scaleLimitsFor({ width: BOX.width, height: BOX.height }, RENDER_FRAME.size)
+      const limits = scaleLimitsFor(
+        { width: BOX.width, height: BOX.height },
+        TEST_BACKDROP_FRAME.size
+      )
 
       // Height is the constraining axis here, and the margin is taken off both sides — the same margin
       // the first framing uses, or the opening view would fall outside its own limits.
       expect(limits.max).toBe(MAX_SCALE)
-      expect(limits.min).toBeCloseTo((BOX.height - FRAME_MARGIN * 2) / RENDER_FRAME.size.height, 9)
+      expect(limits.min).toBeCloseTo(
+        (BOX.height - FRAME_MARGIN * 2) / TEST_BACKDROP_FRAME.size.height,
+        9
+      )
     })
   })
 
@@ -359,7 +382,8 @@ describe('attachCanvas', () => {
       expect(() =>
         attachCanvas(node, {
           store,
-          frame: RENDER_FRAME,
+          frame: TEST_BACKDROP_FRAME,
+          backdropImage: backdropStandIn(),
           style: CHROME_PAINT_STYLE,
           zoneLabel: 'zone',
         })

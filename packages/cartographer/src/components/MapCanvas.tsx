@@ -1,9 +1,10 @@
+import { useId } from 'react'
+
 import { attachCanvas } from '../canvas/attach'
 
 import type { PaintStyle } from '../canvas/painter'
 import type { CartographerStoreHook } from '../state/store'
 import type { BackdropFrame } from '../view/projection'
-import type { JSX } from 'react'
 
 /**
  * The component that owns the drawing surface.
@@ -25,8 +26,10 @@ import type { JSX } from 'react'
 export interface MapCanvasProps {
   /** The store to draw from and navigate. */
   store: CartographerStoreHook
-  /** The backdrop's coordinate system. */
+  /** The backdrop's coordinate system, as the DEM declared it. */
   frame: BackdropFrame
+  /** The baked terrain to draw under everything else. */
+  backdropImage: CanvasImageSource
   /** The colours and sizes, from `design/chrome.css`. */
   style: PaintStyle
   /** What to call the editorial zone on screen. */
@@ -36,29 +39,76 @@ export interface MapCanvasProps {
 }
 
 /**
+ * What a keyboard reader is told the surface can do.
+ *
+ * **It names only the keys `attach.ts` actually binds today**, which is what keeps it from going stale:
+ * the arrows, `+`/`−` and PageUp/PageDown exist now, and the tools of step 4d-2 will add their own keys
+ * and their own sentence. Promising a gesture before it is wired is the defect this repository keeps
+ * finding in its own comments.
+ */
+const CANVAS_INSTRUCTIONS =
+  'Flèches pour déplacer la carte, plus et moins ou Page haut et Page bas pour zoomer.'
+
+/** Off-screen but in the accessibility tree — the instruction text has nothing to show visually. */
+const offScreen = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  overflow: 'hidden',
+  clip: 'rect(0 0 0 0)',
+  whiteSpace: 'nowrap',
+} as const
+
+/**
  * The drawing surface.
  *
- * **Accessibility, stated rather than implied**: the canvas carries a name, and that is all it carries
- * today. It has no keyboard equivalent and no DOM shadow of what it shows — the same gap the atlas
- * records for its own canvas, deferred there to the HTML-overlay milestone. Here it waits on the tools
- * and `{Polities}`, which is what will give a keyboard reader a list of anchors to reach. Noted so that
- * nobody reads the `aria-label` as the job being done.
+ * **Accessibility, stated rather than implied, and corrected on 2026-10-07.** This comment used to say
+ * the canvas *"has no keyboard equivalent"* — which stopped being true in the same step that wrote it:
+ * `attach.ts` binds the arrows and the zoom keys, and the element carries `tabIndex` so they can fire.
+ * A comment contradicting the code three lines below it is worse than no comment, and a review caught
+ * exactly that.
+ *
+ * **What it now carries**: a name, and a description of the keys — because a focusable, named element
+ * that answers to arrow keys tells a reader nothing about them otherwise. **No `role`**, deliberately:
+ * `role="application"` is the obvious candidate and is contested, since several screen readers switch
+ * into a mode that suppresses their own navigation commands for the whole page — trading this gap for a
+ * larger one. A described, focusable surface is the part that is uncontested, so it is the part shipped.
+ *
+ * **The real remaining gap is narrower than it was**: there is no DOM shadow of the document itself, so a
+ * screen-reader user can move the view but cannot reach an anchor or hear what is under it. That waits on
+ * the tools and `{Polities}`, which is what will give a keyboard reader a list to walk.
  * @param props - the store, the frame, the style and the names
  * @returns the canvas element
  */
-export function MapCanvas({ store, frame, style, zoneLabel, label }: MapCanvasProps): JSX.Element {
+export function MapCanvas({
+  store,
+  frame,
+  backdropImage,
+  style,
+  zoneLabel,
+  label,
+}: MapCanvasProps) {
+  const instructionsId = useId()
   return (
-    <canvas
-      aria-label={label}
-      // `<canvas>` is not natively focusable, so without this the keyboard pan and zoom bound in
-      // `attach.ts` could never fire — nothing would ever focus the element. The two ship together or
-      // neither works. Zero and not a positive value: a positive `tabIndex` jumps the document's own
-      // order, which is the defect `jsx-a11y` has a rule against.
-      tabIndex={0}
-      style={{ display: 'block', width: '100%', height: '100%' }}
-      ref={(node) =>
-        node === null ? undefined : attachCanvas(node, { store, frame, style, zoneLabel })
-      }
-    />
+    <>
+      <span id={instructionsId} style={offScreen}>
+        {CANVAS_INSTRUCTIONS}
+      </span>
+      <canvas
+        aria-label={label}
+        aria-describedby={instructionsId}
+        // `<canvas>` is not natively focusable, so without this the keyboard pan and zoom bound in
+        // `attach.ts` could never fire — nothing would ever focus the element. The two ship together or
+        // neither works. Zero and not a positive value: a positive `tabIndex` jumps the document's own
+        // order, which is the defect `jsx-a11y` has a rule against.
+        tabIndex={0}
+        style={{ display: 'block', width: '100%', height: '100%' }}
+        ref={(node) =>
+          node === null
+            ? undefined
+            : attachCanvas(node, { store, frame, backdropImage, style, zoneLabel })
+        }
+      />
+    </>
   )
 }

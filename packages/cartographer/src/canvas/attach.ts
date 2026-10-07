@@ -33,8 +33,15 @@ import type { PixelSize, ScaleLimits } from '../view/viewport'
 export interface AttachDeps {
   /** The store: the document to draw, and the viewport to draw it through. */
   store: CartographerStoreHook
-  /** The backdrop's coordinate system. */
+  /**
+   * The backdrop's coordinate system.
+   *
+   * It arrives with the picture below, from the DEM's own metadata, so the box projected against and the
+   * box painted are the same object rather than two that agree today.
+   */
   frame: BackdropFrame
+  /** The baked terrain to blit under everything else. */
+  backdropImage: CanvasImageSource
   /** The colours and sizes, from the design. */
   style: PaintStyle
   /** What to call the editorial zone on screen. */
@@ -162,9 +169,7 @@ function repaint(it: Attachment): void {
   const state = it.deps.store.getState()
   const scene = buildScene(state.document, {
     anchorsInBackdrop: it.anchors.anchorsInBackdrop(state.document, state.version),
-    // `null` until the terrain is baked, which step 4d-3 finishes by serving the two assets to this
-    // package. The vellum alone reads as "not loaded"; a flat colour would read as land.
-    backdropImage: null,
+    backdropImage: it.deps.backdropImage,
     frame: it.deps.frame,
     viewport: state.viewport,
     selected: new Set<number>(),

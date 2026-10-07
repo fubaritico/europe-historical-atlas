@@ -5,8 +5,9 @@
 
 ## Where we are
 
-**1655 tests** (609 `core` · 782 atlas · 264 Cartographe), gate verte sur cinq contrôles (`lint`,
-`type-check`, `test`, `build`, `format:check`). Worker à **13 490 o**, toujours sans three.js.
+**1691 tests** (609 `core` · 782 atlas · 300 Cartographe), gate verte sur cinq contrôles (`lint`,
+`type-check`, `test`, `build`, `format:check`). Worker à **13 490 o**, toujours sans three.js — et depuis
+le 07/10 le Cartographe émet **le même chunk, au même hash**, le fond étant cuit par le même port.
 `git log origin/main..main` dit ce qui attend un push. Le dépôt est **en ligne et déployé** :
 
 |       |                                                                             |
@@ -23,7 +24,7 @@ Structure : **trois paquets**, orchestrés par **Turbo**, avec un **catalogue de
 | --- | --- | --- | --- |
 | `core` | pure TS, ni three.js ni DOM ni React ni zustand — **tenu par ESLint et par `tsc`**. Cinq couches : `utils`, `geo`, `data`, `pipeline`, `editor` | config racine | **`node`**, 609 |
 | `atlas` | l'application 3D, three.js vanille | config racine | `jsdom`, 782 |
-| `cartographer` | l'éditeur de territoires, React 19 + Vite 8 | **sa propre config**, qui réimporte la racine | `jsdom` + plugin React, 8 |
+| `cartographer` | l'éditeur de territoires, React 19 + Vite 8. Son `publicDir` **est** celui de l'atlas | **sa propre config**, qui réimporte la racine | `jsdom` + plugin React, 300 |
 
 **Trois faits de structure à ne pas re-découvrir** : *flat config n'a aucune cascade*, donc la config d'un
 paquet **réimporte** la racine et ESLint résout **une** config depuis le **répertoire courant** — d'où un
@@ -61,28 +62,52 @@ d'ancres ne perd jamais rien pendant l'édition.** Donc `removePolity` retire un
 point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui n'est plus référencé disparaît
 à l'enregistrement, par une seule renumération. Vérifié en la cassant : 3 tests tombent.
 
-## ▶ ON REPREND ICI — deux lignes, et `4d-3` est fini
+## ▶ ON REPREND ICI — `4d-3` est fini, la suite est `4d-2`
 
-**L'étape 4 en est là** : `4a` (le store), `4b` (`view/`), `4c` (`geometry/`) et `4d-1` (le canevas qui
-dessine et navigue) sont **faits**. `4d-3` est **à moitié** : la cuisson du fond et son dessin sont écrits
-et testés, mais **personne ne les appelle** — mesuré, le bundle n'a pris que +0,37 ko gzip, le secouage
-d'arbre retirant une cuisson sans appelant.
+**L'étape 4 en est là** : `4a` (le store), `4b` (`view/`), `4c` (`geometry/`), `4d-1` (le canevas qui
+dessine et navigue) et **`4d-3` (le fond, servi et peint)** sont **faits**. Il reste **`4d-2`**, les deux
+outils.
 
-**Ce qui manque fait deux lignes, et elles sont décidées** (06/10) :
+**Ce que `4d-3` a livré le 07/10**, et les quatre choses à ne pas re-découvrir :
 
-1. `publicDir` du Cartographe → **`../atlas/public`**, dans son `vite.config.ts`. Zéro octet dupliqué :
-   Vite sert ce dossier en dev **et** le recopie dans `dist` au build. Ça lui donne le DEM, le masque et
-   les fleuves, et ça rend inutile la copie du favicon commitée le 05/10.
-2. la garde GPL de **`build.yml` élargie à n'importe quel `dist`**, pas seulement
-   `packages/atlas/dist/borders`. Aujourd'hui elle tient par une absence — les fichiers sont gitignorés
-   donc jamais dans le checkout CI — et le second paquet sortirait de sa surveillance.
+1. **`publicDir` du Cartographe → `../atlas/public`.** Zéro octet dupliqué, et c'est ce qui garantit que
+   le fond est *la* texture de l'atlas plutôt qu'une copie. La garde GPL de `build.yml` est élargie à
+   **`packages/*/dist`** — prouvée en la faisant tirer : localement, où les fichiers GPL existent, elle
+   trouve les deux `dist/borders`. Le favicon dupliqué du 05/10 est supprimé, il n'y a qu'un `public/`.
+2. **Le fond passe par le port `TerrainBake`, dans le worker** —
+   `core/pipeline/computeWorker?worker`, le même import que `atlas/src/main.ts`, même chunk, **même hash,
+   13 490 o**. Donc les ~1,8 s de cuisson ne gèlent rien, et `onProgress` donne une progression
+   **mesurée** au lieu d'une barre qui s'anime au chronomètre. `canvas/backdrop.ts` a disparu : il cuisait
+   sur le thread principal, ce qui aurait rendu invisible l'état d'attente qu'on affiche au-dessus.
+3. **Le terrain est nu parce que `computePolitical` n'est jamais appelé.** Pas de `clearPolitical` à
+   oublier — gardé par un test qui assère que ni l'un ni l'autre n'est appelé.
+4. **`ARCH-102` est fermé** : le repère vient de `dem.meta` (`frameFromHeightmap`), plus aucun littéral en
+   production. `view/backdropFrame.ts` est devenu `view/testFrame.ts` / `TEST_BACKDROP_FRAME`, **fixture
+   de test uniquement**, et un test interdit à la production de l'importer. `boundsMatch` est enfin
+   branché : un masque qui ne couvre pas le sol du relief est refusé en `semantic` avant toute cuisson.
 
-**Puis, dans le même pas, ce que `4d-3` doit finir** : prendre les métadonnées du DEM **dans son propre
-`.json`** (ce qui **ferme `ARCH-102`** et supprime `view/backdropFrame.ts`), et afficher un état d'attente
-— la cuisson coûte **~1,8 s** au supersample 2, et `H-08` est le trou ouvert voisin.
+**Mesuré** : Cartographe 219,65 → **241,22 ko / 76,44 ko gzip** (+7,81 ko pour tout le fond).
+**1655 → 1691 tests.**
 
-**Ensuite `4d-2`** : les deux outils, qui auront alors du relief et des fleuves à viser — ce que `s02`
-exige pour reporter une frontière à vue.
+**Le bug que la revue a trouvé, et qui n'aurait mordu qu'en dev** : un garde « charger une seule fois »
+écrit comme un **booléen** dans un ref est faux sous `StrictMode` — le cleanup fantôme annule la seule
+promesse en vol et l'éditeur reste en attente **pour toujours**. Ce qu'il faut tenir dans le ref est la
+**promesse**, chaque invocation attachant son propre écouteur. Détail et mécanisme dans `known-issues.md`,
+parce que l'étape 5 va charger d'autres choses.
+
+### La promesse de `4d-3` que l'étape 5 doit tenir
+
+**Décision du dev, 07/10 : si un asset du fond manque, les deux sont bloquants — mais l'application
+s'ouvre quand même.** Seule la **zone canevas** est bloquée : pas de carte, le vélin nu, un message
+`role="alert"`. Les autres zones s'affichent **à l'état de repos**, ce que le `Background` de `s00`
+spécifie déjà (*« no file is loaded »*, `{Polities}` vide, Undo et Redo désactivés).
+
+**Ce qui n'est pas fait, parce que le chrome n'existe pas encore** : *« tout ce qui dépend du fond doit
+être désactivé »*. L'ordre qu'il a posé est **le fond cuit d'abord, l'année posée dessus ensuite** — sans
+le repère du DEM, une frontière n'a rien contre quoi se projeter. Donc à l'étape 5 : `[Open…]`, les deux
+outils et `[Save]` sont **désactivés tant que le fond n'est pas prêt**, et c'est `MapArea` qui sait s'il
+l'est. Le repli par altitude (`createElevationLandMask`) reste à l'atlas et **n'entre pas** ici : une côte
+discrètement fausse serait relue comme un mauvais tracé de l'auteur pendant toute la vie de l'année.
 
 ### Offline et online — tranché le 06/10, et c'est écrit
 
@@ -118,9 +143,14 @@ plus tôt, promettant un cache que `4d-1` n'a pas construit.
 
 | | quoi | on sait que ça marche comment |
 | --- | --- | --- |
-| **4d-3** | les deux lignes ci-dessus, puis les métadonnées lues du DEM et l'état d'attente | `pnpm dev:cartographer` : on voit le relief et les fleuves |
-| **4d-2** | les deux outils câblés sur `documentEdits` et `history`, l'anneau en cours, la sélection | on dessine, `ctrl+z` défait le geste |
-| **5** | le chrome : `{Polities}` en arbre, les formulaires, `{Overrides}` | les valeurs viennent de `design/chrome.css` |
+| **4d-3** ✅ | `publicDir` partagé, garde GPL élargie, fond cuit dans le worker, repère lu du DEM, état d'attente | `pnpm dev:cartographer` : on voit le relief **à faire confirmer par le dev** |
+| **4d-2** ◀ | les deux outils câblés sur `documentEdits` et `history`, l'anneau en cours, la sélection, le **second canevas** (l'overlay de l'élastique) | on dessine, `ctrl+z` défait le geste |
+| **5** | le chrome : `{Polities}` en arbre, les formulaires, `{Overrides}`, **et les contrôles désactivés tant que le fond n'est pas prêt** | les valeurs viennent de `design/chrome.css` |
+
+**Les fleuves ne sont pas encore dessinés**, et c'est à savoir avant d'ouvrir `4d-2` : `4d-3` sert le
+dossier qui les contient (`/rivers/`) et cuit le relief, mais la couche fleuves du `{Layers}` de `s00`
+n'est pas peinte. `s02` en a besoin — c'est ce à quoi une frontière s'accroche quand on la reporte à vue —
+donc c'est le premier morceau de `4d-2`, avant les outils.
 
 ### Trois choses décidées pour l'étape 4, à ne pas re-trancher
 

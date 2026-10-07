@@ -1,14 +1,21 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
+import { createFetchHeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
+import { createFetchLandMaskSource } from '@europe-historical-atlas/core/data/landMask'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?worker'
+import { DEFAULT_TERRAIN_OPTIONS } from '@europe-historical-atlas/core/pipeline/terrainOptions'
+import { createWorkerMapCompute } from '@europe-historical-atlas/core/pipeline/workerCompute'
 
+import { bakeToBitmap, loadBackdrop } from './backdropSource'
 import { CHROME_PAINT_STYLE } from './canvas/style'
-import { MapCanvas } from './components/MapCanvas'
+import { MapArea } from './components/MapArea'
 import { openEmptyYear } from './state/openEmptyYear'
 import { createCartographerStore } from './state/store'
-import { RENDER_FRAME } from './view/backdropFrame'
 import { UNFRAMED } from './view/viewport'
+
+import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
 /**
  * The Cartographer's entry point, and its composition root: it builds the store and mounts the page.
@@ -80,13 +87,56 @@ const store = createCartographerStore({
   viewport: { viewport: UNFRAMED },
 })
 
+/**
+ * The compute the backdrop is baked through — a worker, so the ~1.8 s bake is nobody's frozen tab.
+ *
+ * **One import, because `core/pipeline` already holds it**: the same `computeWorker` the atlas spawns
+ * (`atlas/src/main.ts`), reached with Vite's `?worker` suffix. Nothing here is Cartographer-specific,
+ * which is the point of the port — the editor bakes the atlas's texture with the atlas's code.
+ *
+ * **The political half is never called**, so the terrain comes out bare: a bake paints whichever
+ * political layer is installed, and none ever is. That is `s99`'s *"with the political tint cleared"*
+ * obtained by not installing one, rather than by remembering to clear it.
+ *
+ * `onFatal` only reports. A worker that dies has already had every call in flight rejected, so the
+ * author sees the failure in the canvas area; what this adds is the cause in the console, which the
+ * rejection does not carry. Falling back to an inline compute would be a degraded mode nobody decided —
+ * and it would be the 1.8 s freeze this worker exists to avoid.
+ */
+const compute = createWorkerMapCompute({
+  spawn: () => new ComputeWorker(),
+  onFatal: (error) => {
+    console.error('Cartographer: the compute worker died while baking the backdrop.', error)
+  },
+})
+
+/**
+ * The assets, served over a relative URL exactly as the atlas loads them.
+ *
+ * Both paths are the Cartographer's own `publicDir`, which *is* the atlas's (`vite.config.ts`) — so
+ * these are the same bytes the published map renders, not a copy of them.
+ *
+ * The atlas declares the same two strings in `mapPipeline.ts`, and they are left as two declarations
+ * rather than shared through `core`: a deployment path is not domain code, and the cost of them drifting
+ * is a loud `transport` failure at startup, not a silent wrong picture. Worth a line, not a module.
+ */
+const loadTheBackdrop = (onProgress: ProgressReport) =>
+  loadBackdrop({
+    heightmap: createFetchHeightmapSource('/heightmaps/europe-dem-z5'),
+    landMask: createFetchLandMaskSource('/masks/europe-land'),
+    compute,
+    toImage: bakeToBitmap,
+    options: DEFAULT_TERRAIN_OPTIONS,
+    onProgress,
+  })
+
 createRoot(container).render(
   <StrictMode>
     <main style={{ position: 'absolute', inset: 0 }}>
       <h1 style={visuallyHidden}>Cartographe — année {store.getState().document.year}</h1>
-      <MapCanvas
+      <MapArea
         store={store}
-        frame={RENDER_FRAME}
+        load={loadTheBackdrop}
         style={CHROME_PAINT_STYLE}
         zoneLabel={`zone éditoriale — ${String(store.getState().document.year)}`}
         label={`Carte de l'année ${String(store.getState().document.year)}, en cours d'édition`}

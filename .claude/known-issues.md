@@ -89,43 +89,63 @@ Put here the know issues to avoid cluttering the context window.
   fait ne casse **aucun test** — l'aplatissement se fait en aval de `snapshot`. Ce qui fait tomber la garde
   (9 tests) est un `publish` qui n'incrémente que le compteur sans relire la ligne.
 
-- **`4d-3` est à moitié livré, et ce qui manque est une décision, pas du code : où vivent les assets
-  partagés.** La cuisson (`canvas/backdrop.ts`) et le dessin du fond (le peintre, la scène) sont écrits et
-  testés ; **rien ne les appelle**, parce que le Cartographe ne reçoit ni le DEM (2,98 Mo) ni le masque de
-  terres (2,9 Mo) — ils vivent dans `packages/atlas/public/`. Mesuré : le bundle n'a pris que **+0,37 ko
-  gzip**, le secouage d'arbre retirant la cuisson que personne n'appelle.
-  **Le chargement, lui, n'est pas le problème** : `createFetchHeightmapSource(basePath)` et son homologue
-  pour le masque prennent déjà un **chemin injecté**, donc l'emplacement est une décision de câblage.
-  **Le raccourci d'une ligne a un danger GPL, et c'est ce qui le disqualifie.** Pointer le `publicDir` du
-  Cartographe sur `packages/atlas/public/` marche en dev **et** au build, Vite recopiant ce dossier dans
-  `dist` — mais il recopierait aussi **`public/borders/`**, les 21 fichiers GPL-3.0 gitignorés, dans un
-  `dist` que la garde CI ne surveille que pour l'atlas. C'est **exactement la forme de l'incident du
-  24/09**, où un motif d'ignore avait cessé de matcher en silence.
-  **Les deux vraies options**, à trancher par le dev : (a) copier les deux assets dans
-  `packages/cartographer/public/`, soit ~6 Mo commités deux fois ; (b) sortir les données **partagées**
-  (DEM, masque, fleuves) vers un `assets/` à la racine que les deux apps servent — propre, mais ça déplace
-  7 Mo, change le motif `**/public/borders/` du `.gitignore`, la garde GPL de la CI et le déploiement.
-  **Et deux choses que `4d-3` doit faire en même temps** : prendre les métadonnées du DEM dans le fichier
-  (ce qui **ferme `ARCH-102`** et retire `RENDER_FRAME`), et afficher un état d'attente — la cuisson coûte
-  **~1,8 s** au supersample 2 d'après le spike `terrain-bitmap`, et `H-08` est le trou ouvert voisin.
-  **Sévérité : bloquant pour `4d-3`**, rien d'autre.
+- ~~**`4d-3` est à moitié livré : où vivent les assets partagés ?**~~ — **FERMÉ 2026-10-07**, et l'entrée
+  contenait une **affirmation fausse qu'il faut avoir lue une fois** : elle disqualifiait le `publicDir`
+  partagé au motif qu'il « publierait du GPL ». **Faux**, et `completed.md` portait déjà la correction du
+  05/10 sans que cette entrée soit reprise : les 21 payloads sont **gitignorés**, donc ils n'atteignent
+  jamais le checkout de la CI et aucun build CI ne peut les copier. Ce que le raccourci fait réellement,
+  c'est **étendre une surface que la garde ne couvrait pas** — et le remède tient en une ligne.
+  **La leçon de procédure, qui vaut plus que le fait** : une entrée de `known-issues.md` qui a été
+  corrigée ailleurs est pire qu'une entrée absente, parce que ce fichier est relu à chaque session et
+  qu'elle fait re-trancher une décision déjà prise. Quand une correction atterrit dans `completed.md`,
+  **rouvrir l'entrée correspondante dans le même pas.**
+  **Ce qui est en place** : `publicDir: '../atlas/public'` dans `packages/cartographer/vite.config.ts` —
+  zéro octet dupliqué, Vite servant ce dossier en dev et le recopiant dans `dist` au build ; et la garde
+  GPL de `build.yml` **élargie à `packages/*/dist`** plutôt qu'au seul atlas. Prouvée en la faisant tirer :
+  localement, où les fichiers GPL existent, elle trouve **les deux** `dist/borders`.
+  **Mesuré** : Cartographe 219,65 → **240,74 ko / 76,30 ko gzip** (+7,67 ko pour tout le fond), et son
+  chunk worker sort à **13 490 o avec le même hash que celui de l'atlas** — donc littéralement le même
+  code, toujours sans three.js.
 
-- **`RENDER_FRAME` déclare les métadonnées du DEM à la main, et rien ne vérifie qu'elles correspondent.**
-  `packages/cartographer/src/view/backdropFrame.ts` écrit `1280×1164` et la bbox du DEM en littéral,
-  parce que `4d-1` ne charge aucun asset. **Le mode d'échec est muet** : projeter contre une boîte en
-  peignant contre une autre fait glisser chaque frontière hors du terrain qu'elle borde, sans erreur
-  nulle part. Troisième occurrence de ce danger dans ce dépôt (voir les deux entrées « deux boîtes »).
-  **La moitié qui coûtait zéro est corrigée** (ARCH-102, revue du 06/10) : les quatre suites qui
-  redéclaraient le littéral l'importent désormais — *« une copie dans un test est la pire des deux »*.
-  **Le garde-fou disque a été écrit puis retiré, et la raison est structurelle.** Lire le `.json` du DEM
-  demande `node:fs`, donc `@types/node` dans un paquet navigateur : or **aucun des trois paquets ne les
-  déclare** et la racine fixe `"types": ["vite/client"]`. C'est le contrat de la scission — *chaque
-  paquet déclare l'environnement contre lequel il compile* — et c'est lui qui a démasqué le
-  `globalThis as unknown as WorkerScope` du 24/09. L'autre porte, `resolveJsonModule`, n'est activée
-  nulle part et ferait importer un asset à travers une frontière de paquet.
-  **Déclencheur nommé : `4d-3`**, qui cuit le terrain et doit prendre ces nombres du fichier lui-même.
-  Le remède existe déjà et n'est pas branché : `boundsMatch` dans `core/data/assetError.ts`, le contrôle
-  `semantic` de la taxonomie. **Sévérité : à savoir**, et la fenêtre est d'une étape.
+- ~~**`RENDER_FRAME` déclare les métadonnées du DEM à la main**~~ — **FERMÉ 2026-10-07 (ARCH-102)**, au
+  déclencheur nommé, qui était `4d-3`. L'application prend désormais la taille de la grille et la bbox du
+  `.json` du DEM, par le lecteur qui le parse déjà : `frameFromHeightmap(dem.meta)` dans
+  `backdropSource.ts` — trois champs, aucun littéral.
+  **La question de `node:fs` ne s'est jamais posée**, et c'est le point à retenir : l'entrée disait qu'il
+  faudrait lire le fichier depuis le disque, donc `@types/node` dans un paquet navigateur, donc rompre le
+  contrat de la scission. **Faux cadrage.** Le fichier est déjà lu — par `fetch`, au démarrage, par le
+  port. Il n'y avait rien à ouvrir, seulement à ne pas re-déclarer ce que le port rapportait.
+  **Le littéral survit comme fixture de test** (`view/testFrame.ts`, `TEST_BACKDROP_FRAME`) : six suites
+  ont besoin du *vrai* repère pour que leurs assertions de projection veuillent dire quelque chose, et
+  les laisser le redéclarer est ce qu'ARCH-102 avait corrigé en premier. **Un test interdit à la
+  production de l'importer** — `backdropSource.test.ts`, par `import.meta.glob` sur les sources, avec un
+  second test qui vérifie que le glob voit bien les modules (sinon la garde passerait à vide, défaut de
+  tous les tests qui parcourent un arbre).
+  **Et `boundsMatch` est branché**, enfin : `boundsDisagreement` refuse un masque qui ne couvre pas le
+  même sol que le relief, en `semantic`, avant toute cuisson. C'était le remède écrit depuis le 17/09 et
+  jamais appelé.
+
+- **Un garde « une seule fois » sous `StrictMode` doit retenir la promesse, jamais un booléen — et le
+  test qui compte les appels ne voit pas la différence.** Trouvé en revue le 07/10, sur du code livré le
+  même soir, et c'est un **vrai bug qui aurait mordu en dev uniquement**, donc exactement là où le dev
+  travaille.
+  **Le mécanisme, à ne pas re-déduire** : `StrictMode` exécute *setup → cleanup → setup* **synchronement**
+  au premier montage, avant qu'aucune microtâche ne tourne. Avec un garde booléen (`if (started.current)
+  return`), le second setup sort immédiatement : il n'enregistre **aucun** nouvel écouteur. Or le cleanup
+  du **premier** setup a déjà basculé son drapeau `settled`. Le seul `.then` qui existe est donc lié à une
+  fermeture annulée. Les deux assets se chargent, le terrain se cuit, **et la réponse part à la poubelle** —
+  l'éditeur reste sur « Préparation du fond de carte… » pour toujours.
+  **La forme juste** : la **promesse** vit dans le ref (créée par l'invocation qui trouve le ref vide), et
+  **chaque** invocation attache son propre `.then` avec son propre drapeau. La première annule alors son
+  seul écouteur redondant, la survivante tire.
+  **Et le même défaut existe un cran plus bas, sur la progression** : un sink passé à `load` l'est **une
+  fois**, donc un sink capturé par la première invocation est muet. Il passe par un ref réinstallé à chaque
+  invocation. Celui-là est pire à trouver, parce qu'**une barre qui ne bouge pas se lit comme un
+  chargement rapide**, pas comme une panne.
+  **Ce que le test ratait, et c'est la leçon** : il assérait `load` appelé **une** fois — vrai, et
+  insuffisant. Charger une fois ne vaut rien si la réponse est jetée. Il faut **assérer le résultat**, pas
+  le compte d'appels. Les deux moitiés ont désormais leur test, chacun vérifié en rejouant son défaut.
+  **Sévérité : corrigé** ; à relire au premier composant de l'étape 5 qui charge quoi que ce soit.
 
 - **Le test-vedette d'un module peut être celui qui n'attrape rien, et `4b` en donne le cas le plus net.**
   `s01` spécifie le zoom par une seule invariante — *« le point sous le pointeur y reste »* — donc c'est le
@@ -148,21 +168,19 @@ Put here the know issues to avoid cluttering the context window.
   contre l'implémentation naïve — pas que la suite tombe, **que ce test-là tombe**. Un sabotage attrapé par
   la suite entière ne dit pas lequel des tests garde quoi.
 
-- **`favicon.svg` existe maintenant en deux exemplaires, et c'est un arbitrage, pas un oubli.**
-  `packages/atlas/public/favicon.svg` et `packages/cartographer/public/favicon.svg`, 819 octets, **identiques
-  à l'octet** (demande du dev, 05/10 : *« le même favicon que pour l'app »*).
-  **Pourquoi pas partagé** : Vite ne sert **qu'un seul `publicDir` par paquet**, et celui de l'atlas porte
-  aussi le DEM de 3 Mo et le masque de terres — pointer le Cartographe dessus lui ferait servir les assets de
-  l'atlas et couplerait les deux applications pour 819 octets. Les autres remèdes coûtent plus que le défaut :
-  un lien symbolique ne survit pas à Windows ni proprement à git, un plugin de copie est une dépendance pour
-  un fichier.
-  **Ce que ça coûte, et c'est tout** : si la marque est redessinée, **les deux copies doivent bouger**. Rien
-  ne le vérifie — aucun test de ce dépôt ne lit un `index.html`, et en inventer un pour un `<link>` statique
-  serait un motif neuf pour peu. **Cosmétique**, même famille que la double copie du PNG de terrain plus bas.
-  **Et un piège trouvé en le faisant** : **Vite ne retire pas les commentaires HTML**. Une première version de
-  l'explication, écrite dans `index.html` à la densité habituelle du dépôt, faisait passer le fichier servi de
-  0,35 à **1,12 ko** — 770 octets de raisonnement livrés à chaque visiteur. Le raisonnement vit ici, le HTML
-  garde une ligne. À se rappeler pour tout commentaire dans un `index.html`.
+- ~~**`favicon.svg` existe en deux exemplaires**~~ — **FERMÉ 2026-10-07**, et par l'inverse exact de
+  l'argument qui l'avait justifié. L'entrée disait : *« Vite ne sert qu'un seul `publicDir` par paquet, et
+  celui de l'atlas porte aussi le DEM — pointer le Cartographe dessus lui ferait servir les assets de
+  l'atlas »*. Le raisonnement était juste et **la conclusion est devenue fausse le jour où le Cartographe
+  a eu besoin de ces assets-là** : `4d-3` lui demande précisément le DEM, le masque et les fleuves, donc
+  ce qui était un couplage à éviter est devenu le câblage voulu. Un seul `publicDir`, donc un seul favicon,
+  et la copie du 05/10 est supprimée.
+  **La leçon, qui se répète dans ce fichier** : un arbitrage est daté par ses contraintes, pas par sa
+  qualité. Celui-ci a tenu deux jours et il était bon les deux jours.
+  **Le piège qui reste vrai, lui, et qui n'a rien à voir** : **Vite ne retire pas les commentaires HTML.**
+  Une première version de l'explication, écrite dans `index.html` à la densité habituelle du dépôt,
+  faisait passer le fichier servi de 0,35 à **1,12 ko** — 770 octets de raisonnement livrés à chaque
+  visiteur. Le raisonnement vit ici, le HTML garde une ligne.
 
 - ~~**Le Cartographe n'a aucune ligne dans la table des frontières ESLint.**~~ — **FERMÉ 2026-10-05** à
   l'étape 4b, et la fermeture a trouvé **une cause plus grosse que le trou**.
@@ -189,9 +207,15 @@ Put here the know issues to avoid cluttering the context window.
   symétrique aurait bloqué le cas voulu, et l'aurait fait découvrir à `4d`. Ce qui tient le pan et le zoom
   **par frame** hors du store est une règle sur *quand* on appelle `set` (`rules/troubleshooting.md`), pas
   un interdit d'import — un interdit bloquerait aussi la valeur commitée.
-  **`geometry/` a sa ligne depuis le 05/10** (étape 4c), prouvée en la cassant avant d'écrire une ligne de
-  code. **Reste `canvas/`**, à ajouter dans `packages/cartographer/eslint.config.js` quand le répertoire
-  naîtra.
+  **Les cinq couches ont leur ligne** : `view/` et `state/` (4b), `geometry/` (4c), `canvas/` et
+  `components/` (4d-1) — la phrase qui disait *« reste `canvas/`, à ajouter quand le répertoire naîtra »*
+  était périmée dès le 05/10 au soir.
+  **Ce qui n'a pas de ligne, et c'est un choix** : les modules de composition posés à la racine de `src/`
+  (`backdropSource.ts`, depuis le 07/10). Ils pourraient importer `main`. C'est le précédent de l'atlas,
+  qui en a neuf à la racine de son `src/` sans aucune ligne, et où ça n'a jamais mordu : la racine de
+  composition est le seul endroit qui a le droit de tout voir, et un module posé à côté d'elle est du
+  câblage. **Cosmétique** ; la ligne à écrire si ça change un jour est `files: ['src/*.{ts,tsx}']`,
+  `forbid: ['main']`.
   **Et la preuve manuelle n'est plus la seule** : `packages/cartographer/src/boundaries.test.ts` interroge
   la **résolution** de la config (`calculateConfigForFile`) sur un fichier réel de chaque couche et assère
   les options auxquelles `no-restricted-imports` aboutit. C'est le bon niveau, parce que ce qui s'est cassé

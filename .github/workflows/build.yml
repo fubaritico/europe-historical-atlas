@@ -35,14 +35,21 @@ jobs:
       # `public/` is copied wholesale into `dist/`, and `public/borders/` holds GPL-3.0 geometry.
       # It is git-ignored, so it is absent here — but that makes the guarantee an absence rather
       # than a check. If those files are ever committed, this turns red before anything ships.
-      - name: No GPL-3.0 geometry in the published site
+      #
+      # Every package's `dist`, not the atlas's alone: since 2026-10-07 the Cartographer's
+      # `publicDir` is the atlas's own, so it produces a second output carrying the same files. A
+      # guard naming one package would have gone quiet the moment a second one appeared — which is
+      # the exact shape of the 2026-09-24 incident, where an ignore pattern stopped matching in
+      # silence after a directory moved.
+      - name: No GPL-3.0 geometry in any build output
         run: |
-          if [ -d packages/atlas/dist/borders ]; then
-            echo "::error::GPL-3.0 border payloads reached the build output. Publishing them would put the whole distributed work under the GPL."
-            ls packages/atlas/dist/borders
+          found=$(find packages/*/dist -maxdepth 1 -type d -name borders 2>/dev/null)
+          if [ -n "$found" ]; then
+            echo "::error::GPL-3.0 border payloads reached a build output. Publishing them would put the whole distributed work under the GPL."
+            echo "$found"
             exit 1
           fi
-          echo "✅ no GPL geometry in the published site"
+          echo "✅ no GPL geometry in any build output"
 
       - uses: actions/upload-artifact@v7
         with:

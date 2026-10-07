@@ -6,8 +6,8 @@ import {
   sharedBorderDocument,
 } from '@europe-historical-atlas/core/editor/documentFixtures'
 
-import { RENDER_FRAME } from '../view/backdropFrame'
 import { lonLatToScreen, projectAnchors, projectToBackdrop } from '../view/projection'
+import { TEST_BACKDROP_FRAME } from '../view/testFrame'
 
 import { backdropRect, buildScene, editorialZoneRect, projectedRings } from './scene'
 
@@ -22,7 +22,7 @@ import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocu
  * A first version wrote the literal out here, which is the copy `rules/modular-architecture.md` calls the
  * worst kind: a fixture that can drift from the thing it is meant to verify, with nothing failing.
  */
-const FRAME: BackdropFrame = RENDER_FRAME
+const FRAME: BackdropFrame = TEST_BACKDROP_FRAME
 
 const NATIVE: Viewport = { scale: 1, originX: 0, originY: 0 }
 

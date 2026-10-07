@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 
 import { latitudeToVertical } from '@europe-historical-atlas/core/geo/mercator'
 
-import { RENDER_FRAME } from './backdropFrame'
 import { fitWhole } from './framing'
 import {
   backdropToLonLat,
@@ -11,15 +10,16 @@ import {
   projectAnchors,
   screenToLonLat,
 } from './projection'
+import { TEST_BACKDROP_FRAME } from './testFrame'
 
 import type { BackdropFrame } from './projection'
 import type { PixelSize, Viewport } from './viewport'
 
 /**
- * The real backdrop, imported rather than re-declared — see `backdropFrame.ts`, which is also the only
+ * The real backdrop, imported rather than re-declared — see `testFrame.ts`, which is also the only
  * place the numbers live and the only place a test checks them against the DEM's own metadata.
  */
-const FRAME: BackdropFrame = RENDER_FRAME
+const FRAME: BackdropFrame = TEST_BACKDROP_FRAME
 
 /** The backdrop drawn at its own resolution, origin at the canvas origin. */
 const NATIVE: Viewport = { scale: 1, originX: 0, originY: 0 }

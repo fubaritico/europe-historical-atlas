@@ -1,5 +1,5 @@
 import { act } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 /**
  * The entry point's own suite.
@@ -13,6 +13,33 @@ describe('the application entry', () => {
   beforeEach(() => {
     vi.resetModules()
     document.body.replaceChildren()
+
+    // Two environment gaps, neither of them about this code. jsdom implements no `Worker`, and the entry
+    // spawns one at module scope — where the composition root's side effects belong, exactly as the
+    // atlas's entry does. And `fetch` here would reach for a relative asset URL no server is serving.
+    vi.stubGlobal(
+      'Worker',
+      class {
+        onmessage: unknown = null
+        onerror: unknown = null
+        postMessage(): void {
+          // The entry never posts before a backdrop is asked for, and nothing here asks.
+        }
+        terminate(): void {
+          // Nothing to stop.
+        }
+      }
+    )
+    // A promise that never settles, so the canvas area stays in its waiting state for the whole test
+    // rather than racing to a failure on a microtask. Determinism, not optimism.
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => new Promise(() => undefined))
+    )
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
   })
 
   describe('happy path', () => {
@@ -28,7 +55,7 @@ describe('the application entry', () => {
       expect(root.querySelector('h1')?.textContent).toBe('Cartographe — année 1100')
     })
 
-    it('mounts the drawing surface, named for a screen reader', async () => {
+    it('mounts the canvas area, which waits for its backdrop before drawing', async () => {
       const root = document.createElement('div')
       root.id = 'root'
       document.body.append(root)
@@ -37,10 +64,35 @@ describe('the application entry', () => {
         await import('./main')
       })
 
-      const canvas = root.querySelector('main > canvas')
+      // The entry no longer mounts a canvas straight away, and that is the point of 4d-3: the frame
+      // everything projects against comes from the DEM's own metadata, so there is nothing to draw on
+      // until the relief has landed. What a reader gets meanwhile is a `status` — announced, not blank.
+      const waiting = root.querySelector('[role="status"]')
 
-      expect(canvas).not.toBeNull()
-      expect(canvas?.getAttribute('aria-label')).toBe("Carte de l'année 1100, en cours d'édition")
+      expect(waiting?.textContent).toContain('Préparation du fond de carte')
+      expect(root.querySelector('canvas')).toBeNull()
+    })
+
+    it('asks for the relief and the mask, at the shared public paths', async () => {
+      const root = document.createElement('div')
+      root.id = 'root'
+      document.body.append(root)
+
+      await act(async () => {
+        await import('./main')
+      })
+
+      // Only the string calls: `fetch` also accepts a `Request` or a `URL`, and stringifying one of
+      // those would read as `[object Object]` — which is what the typed lint objects to, correctly.
+      const asked = vi
+        .mocked(fetch)
+        .mock.calls.map((call) => call[0])
+        .filter((url): url is string => typeof url === 'string')
+
+      // Both live in the atlas's `public/`, which the Cartographer's `publicDir` now *is* — so these
+      // are the bytes the published map renders rather than a second copy of them.
+      expect(asked).toContain('/heightmaps/europe-dem-z5.json')
+      expect(asked).toContain('/masks/europe-land.json')
     })
 
     it('keeps the heading in the accessibility tree while the canvas takes the surface', async () => {

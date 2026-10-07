@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { RENDER_FRAME } from './backdropFrame'
 import { fitBox, fitScale, fitWhole } from './framing'
+import { TEST_BACKDROP_FRAME } from './testFrame'
 import { backdropToScreen } from './viewport'
 
 import type { BackdropBox } from './framing'
 import type { PixelSize } from './viewport'
 
-/** The real backdrop's grid, imported rather than re-declared — see `backdropFrame.ts`. */
-const BACKDROP: PixelSize = RENDER_FRAME.size
+/** The real backdrop's grid, imported rather than re-declared — see `testFrame.ts`. */
+const BACKDROP: PixelSize = TEST_BACKDROP_FRAME.size
 
 /** A canvas wider than the backdrop's aspect, so height is the constraining axis. */
 const WIDE_CANVAS: PixelSize = { width: 1600, height: 900 }

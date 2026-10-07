@@ -1,19 +1,19 @@
 import { describe, expect, it } from 'vitest'
 
-import { RENDER_FRAME } from './backdropFrame'
 import {
   EQUATORIAL_CIRCUMFERENCE_M,
   isBackdropExceeded,
   kmPerScreenPixel,
   metresPerBackdropPixel,
 } from './resolution'
+import { TEST_BACKDROP_FRAME } from './testFrame'
 
 import type { PixelSize, Viewport } from './viewport'
 import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
 
-/** The real backdrop and its bounds, imported rather than re-declared — see `backdropFrame.ts`. */
-const BACKDROP: PixelSize = RENDER_FRAME.size
-const BOUNDS: GeoBounds = RENDER_FRAME.bounds
+/** The real backdrop and its bounds, imported rather than re-declared — see `testFrame.ts`. */
+const BACKDROP: PixelSize = TEST_BACKDROP_FRAME.size
+const BOUNDS: GeoBounds = TEST_BACKDROP_FRAME.bounds
 
 /** The backdrop drawn at its own resolution. */
 const NATIVE: Viewport = { scale: 1, originX: 0, originY: 0 }

@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { moveAnchor } from '@europe-historical-atlas/core/editor/documentEdits'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
-import { RENDER_FRAME } from '../view/backdropFrame'
 import { projectToBackdrop } from '../view/projection'
+import { TEST_BACKDROP_FRAME } from '../view/testFrame'
 
 import { createAnchorCache } from './anchorCache'
 
@@ -12,16 +12,16 @@ describe('anchorCache', () => {
   describe('happy path', () => {
     it('projects the table into backdrop pixels', () => {
       const document = sharedBorderDocument()
-      const cache = createAnchorCache(RENDER_FRAME)
+      const cache = createAnchorCache(TEST_BACKDROP_FRAME)
 
       expect(cache.anchorsInBackdrop(document, 0)).toEqual(
-        projectToBackdrop(document.anchors, RENDER_FRAME)
+        projectToBackdrop(document.anchors, TEST_BACKDROP_FRAME)
       )
     })
 
     it('hands back the SAME array at the same version — the whole point', () => {
       const document = sharedBorderDocument()
-      const cache = createAnchorCache(RENDER_FRAME)
+      const cache = createAnchorCache(TEST_BACKDROP_FRAME)
 
       const first = cache.anchorsInBackdrop(document, 7)
       const second = cache.anchorsInBackdrop(document, 7)
@@ -34,7 +34,7 @@ describe('anchorCache', () => {
 
     it('recomputes when the version moves, because an anchor may have', () => {
       const document = sharedBorderDocument()
-      const cache = createAnchorCache(RENDER_FRAME)
+      const cache = createAnchorCache(TEST_BACKDROP_FRAME)
       const before = cache.anchorsInBackdrop(document, 0)
 
       moveAnchor(document, 0, [10, 50])
@@ -48,7 +48,7 @@ describe('anchorCache', () => {
   describe('variants', () => {
     it('holds whatever the last version asked for, not a history of them', () => {
       const document = sharedBorderDocument()
-      const cache = createAnchorCache(RENDER_FRAME)
+      const cache = createAnchorCache(TEST_BACKDROP_FRAME)
 
       const atZero = cache.anchorsInBackdrop(document, 0)
       cache.anchorsInBackdrop(document, 1)
@@ -63,15 +63,15 @@ describe('anchorCache', () => {
     it('answers for a document with no anchors', () => {
       const document = sharedBorderDocument()
       document.anchors = []
-      const cache = createAnchorCache(RENDER_FRAME)
+      const cache = createAnchorCache(TEST_BACKDROP_FRAME)
 
       expect(cache.anchorsInBackdrop(document, 0)).toEqual([])
     })
 
     it('keeps one table per cache, so two canvases cannot share a stale one', () => {
       const document = sharedBorderDocument()
-      const one = createAnchorCache(RENDER_FRAME)
-      const two = createAnchorCache(RENDER_FRAME)
+      const one = createAnchorCache(TEST_BACKDROP_FRAME)
+      const two = createAnchorCache(TEST_BACKDROP_FRAME)
 
       expect(two.anchorsInBackdrop(document, 0)).not.toBe(one.anchorsInBackdrop(document, 0))
     })
@@ -80,7 +80,7 @@ describe('anchorCache', () => {
   describe('managed errors', () => {
     it('misses on its very first call even at version zero', () => {
       const document = sharedBorderDocument()
-      const cache = createAnchorCache(RENDER_FRAME)
+      const cache = createAnchorCache(TEST_BACKDROP_FRAME)
 
       // Guarded by starting from `null` rather than an empty array: an empty document at version 0 must
       // not read as "already computed".
@@ -89,7 +89,7 @@ describe('anchorCache', () => {
 
     it('does not notice an anchor moved without the version moving, and that is the contract', () => {
       const document = sharedBorderDocument()
-      const cache = createAnchorCache(RENDER_FRAME)
+      const cache = createAnchorCache(TEST_BACKDROP_FRAME)
       const before = cache.anchorsInBackdrop(document, 3)
 
       moveAnchor(document, 0, [10, 50])
@@ -104,7 +104,7 @@ describe('anchorCache', () => {
     // L4: N/A for async — nothing here awaits or catches. Below is the hostile version number.
     it('treats a version that is not a number as a miss every time', () => {
       const document = sharedBorderDocument()
-      const cache = createAnchorCache(RENDER_FRAME)
+      const cache = createAnchorCache(TEST_BACKDROP_FRAME)
 
       const first = cache.anchorsInBackdrop(document, Number.NaN)
       const second = cache.anchorsInBackdrop(document, Number.NaN)
@@ -118,21 +118,22 @@ describe('anchorCache', () => {
   describe('edge cases', () => {
     it('projects through Mercator, not by proportion', () => {
       const document = sharedBorderDocument()
-      const cache = createAnchorCache(RENDER_FRAME)
-      const bounds = RENDER_FRAME.bounds
+      const cache = createAnchorCache(TEST_BACKDROP_FRAME)
+      const bounds = TEST_BACKDROP_FRAME.bounds
 
       const projected = cache.anchorsInBackdrop(document, 0)
       const first = document.anchors[0]
       if (first === undefined) throw new Error('fixture: the document has no anchors')
       const byProportion =
-        ((bounds.north - first[1]) / (bounds.north - bounds.south)) * RENDER_FRAME.size.height
+        ((bounds.north - first[1]) / (bounds.north - bounds.south)) *
+        TEST_BACKDROP_FRAME.size.height
 
       expect(projected[0]?.[1]).not.toBeCloseTo(byProportion, 0)
     })
 
     it('keeps the table parallel to the document’s, so an index means the same thing', () => {
       const document = sharedBorderDocument()
-      const cache = createAnchorCache(RENDER_FRAME)
+      const cache = createAnchorCache(TEST_BACKDROP_FRAME)
 
       expect(cache.anchorsInBackdrop(document, 0)).toHaveLength(document.anchors.length)
     })
