@@ -30,14 +30,3 @@ export function writePosition(
   // coordinate reads exactly like a live one.
   node.textContent = lonLat === null ? '' : formatLonLat(lonLat)
 }
-
-/** The status bar: bottom-left, over the canvas, out of the way of the drawing. */
-export const STATUS_BAR = {
-  position: 'absolute',
-  left: 8,
-  bottom: 6,
-  margin: 0,
-  font: '11px ui-monospace, monospace',
-  color: '#4a4238',
-  pointerEvents: 'none',
-} as const

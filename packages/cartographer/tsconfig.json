@@ -17,7 +17,15 @@
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     // Required by React 19's automatic runtime: the transform injects the import, which is why the ESLint
     // config also switches `react/react-in-jsx-scope` off. Both halves have to agree or one of them lies.
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    // `vite/client` declares what a non-JS import means to TypeScript — `*.css`, `*.svg`, and
+    // `import.meta.env`. It ships inside Vite, which is already a devDependency, so nothing is installed
+    // for it; without it `import './shell.css'` is a type error even though Vite resolves it fine.
+    //
+    // Naming `types` at all REPLACES the default, which is "every @types/* package in scope". That is
+    // safe here and checked: this package pulls React and Vitest through explicit imports, not ambient
+    // declarations, so there was nothing being picked up implicitly to lose.
+    "types": ["vite/client"]
   },
   // `src`, so the *config* files at the package root are left out — the same boundary `core` and `atlas` draw.
   // Test files are inside it and are checked, which is deliberate: a suite that no longer compiles is a suite

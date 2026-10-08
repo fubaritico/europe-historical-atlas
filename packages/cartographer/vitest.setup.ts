@@ -24,7 +24,7 @@ afterEach(() => {
  * A 2D context, because jsdom has none.
  *
  * `HTMLCanvasElement.prototype.getContext` returns `null` under jsdom unless the optional `canvas`
- * package is installed, and `attachCanvas` **throws** on a null context by decision — a browser that
+ * package is installed, and `startCanvasController` **throws** on a null context by decision — a browser that
  * cannot give one cannot run this editor. Without this stub, every test that mounts the real entry would
  * fail on an environment limitation rather than on anything about the application.
  *

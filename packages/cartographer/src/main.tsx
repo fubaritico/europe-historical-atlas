@@ -11,11 +11,13 @@ import { createWorkerMapCompute } from '@europe-historical-atlas/core/pipeline/w
 
 import { bakeToBitmap, loadBackdrop } from './backdropSource'
 import { CHROME_PAINT_STYLE } from './canvas/style'
-import { MapArea } from './components/MapArea'
+import { Editor } from './components/Editor'
 import { openEmptyYear } from './state/openEmptyYear'
 import { createCartographerStore } from './state/store'
 import { loadVectorLayers } from './vectorLayers'
 import { UNFRAMED } from './view/viewport'
+
+import './components/shell.css'
 
 import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
@@ -146,15 +148,13 @@ const loadTheBackdrop = async (onProgress: ProgressReport) => {
 
 createRoot(container).render(
   <StrictMode>
-    <main style={{ position: 'absolute', inset: 0 }}>
-      <h1 style={visuallyHidden}>Cartographer — year {store.getState().document.year}</h1>
-      <MapArea
-        store={store}
-        load={loadTheBackdrop}
-        style={CHROME_PAINT_STYLE}
-        zoneLabel={`editorial zone — ${String(store.getState().document.year)}`}
-        label={`Map of the year ${String(store.getState().document.year)}, being edited`}
-      />
-    </main>
+    <Editor
+      heading={<h1 style={visuallyHidden}>Cartographer — year {store.getState().document.year}</h1>}
+      store={store}
+      load={loadTheBackdrop}
+      style={CHROME_PAINT_STYLE}
+      zoneLabel={`editorial zone — ${String(store.getState().document.year)}`}
+      label={`Map of the year ${String(store.getState().document.year)}, being edited`}
+    />
   </StrictMode>
 )

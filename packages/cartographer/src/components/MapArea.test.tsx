@@ -56,9 +56,14 @@ function store() {
  * Mount the area with a given loader.
  * @param load - how the area gets its backdrop
  * @param strict - whether to wrap in `StrictMode`, as the entry does
- * @returns nothing; assertions go through the screen
+ * @returns the status bar's element, for the tests that assert what is written into it
  */
-function mount(load: BackdropLoad, strict = false): void {
+function mount(load: BackdropLoad, strict = false): HTMLParagraphElement {
+  // The status bar belongs to the shell, so the area is handed a node rather than creating one. A plain
+  // object is the whole of a ref: the tests that care about what gets written read `.textContent` off
+  // this element, and the ones that do not simply ignore it.
+  const bar = document.createElement('p')
+  const statusRef = { current: bar }
   const area = (
     <MapArea
       store={store()}
@@ -66,9 +71,11 @@ function mount(load: BackdropLoad, strict = false): void {
       style={CHROME_PAINT_STYLE}
       zoneLabel="zone"
       label="la carte"
+      statusRef={statusRef}
     />
   )
   render(strict ? <StrictMode>{area}</StrictMode> : area)
+  return bar
 }
 
 /** A loader that never settles, so the waiting state can be inspected. */

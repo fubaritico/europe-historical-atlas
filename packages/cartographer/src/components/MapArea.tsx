@@ -1,9 +1,7 @@
-import { useRef } from 'react'
-
 import { isAssetError } from '@europe-historical-atlas/core/data/assetError'
 
 import { MapCanvas } from './MapCanvas'
-import { STATUS_BAR, writePosition } from './statusBar'
+import { writePosition } from './statusBar'
 import { useEditorAssets } from './useEditorAssets'
 
 import type { Backdrop } from '../backdropSource'
@@ -14,6 +12,7 @@ import type {
   ComputePhase,
   ProgressReport,
 } from '@europe-historical-atlas/core/pipeline/mapCompute'
+import type { RefObject } from 'react'
 
 /**
  * The canvas area, and the three states it can be in: waiting for its backdrop, unable to get one, or
@@ -67,6 +66,15 @@ export interface MapAreaProps {
   zoneLabel: string
   /** What a screen reader is told the drawing surface is. */
   label: string
+  /**
+   * The status bar's node, owned by the shell and written into on every pointer sample.
+   *
+   * **Handed in rather than created here, because the bar is a row of the shell and not an overlay on
+   * the map** (2026-10-08, when the grid landed). It stays a ref rather than becoming state for the
+   * reason the whole area is imperative: a pointer emits a move per device sample, and reconciling at
+   * that rate is what kills canvas applications.
+   */
+  statusRef: RefObject<HTMLParagraphElement | null>
 }
 
 /** What each phase of a bake is called, for the waiting line. */
@@ -173,8 +181,7 @@ export function BackdropFailure({ error }: BackdropFailureProps) {
  * @param props - the store, how to load, and the names
  * @returns the waiting notice, the failure notice, or the canvas
  */
-export function MapArea({ store, load, style, zoneLabel, label }: MapAreaProps) {
-  const status = useRef<HTMLParagraphElement | null>(null)
+export function MapArea({ store, load, style, zoneLabel, label, statusRef }: MapAreaProps) {
   const { assets, error, fraction, phase } = useEditorAssets(load)
 
   if (error !== null) return <BackdropFailure error={error} />
@@ -187,19 +194,12 @@ export function MapArea({ store, load, style, zoneLabel, label }: MapAreaProps) 
         backdropImage={assets.backdrop.image}
         vectorLayers={assets.vectors}
         onHover={(lonLat) => {
-          writePosition(status.current, lonLat)
+          writePosition(statusRef.current, lonLat)
         }}
         style={style}
         zoneLabel={zoneLabel}
         label={label}
       />
-      {/*
-        No `aria-live`, and that is the accessibility decision rather than an omission: this text
-        changes on every pointer sample, so announcing it would make a screen reader unusable — the
-        very failure `role="status"` exists to avoid elsewhere. A keyboard reader gets nothing from it
-        today, which is honest; what will serve them is the anchor list of step 5, not a firehose.
-      */}
-      <p style={STATUS_BAR} ref={status} />
     </div>
   )
 }
