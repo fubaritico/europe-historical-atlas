@@ -61,6 +61,11 @@ there puts a point down, and the gesture that selects a drawing target is a clic
 So the rule is one line of scope: these cursors are set on the canvas element, never on `body`.
 [s02](../scenarii/s02-create-france-1100.md) has the scenario.
 
+**Verified in Illustrator itself, by the dev, 2026-10-08** — so this is no longer our inference about the
+program these tools are taken from: *"le curseur de l'outil sélectionné n'est affiché que sur la zone de
+travail. Dès que le curseur survole un des panneaux ou la barre de sélection d'outils, c'est le curseur
+par défaut."* Our canvas is that work area, and the chrome is those panels.
+
 ## Four questions the handoff left open — settled 2026-09-22, and one re-settled 2026-10-08
 
 **This section used to be headed "decide before building" and listed them as open.** They had been
