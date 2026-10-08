@@ -5,10 +5,14 @@
 
 ## Where we are
 
-**1771 tests** (621 `core` · 782 atlas · 368 Cartographe), gate verte sur cinq contrôles (`lint`,
+**1820 tests** (640 `core` · 782 atlas · 398 Cartographe), gate verte sur cinq contrôles (`lint`,
 `type-check`, `test`, `build`, `format:check`). Worker à **13 490 o**, toujours sans three.js — et depuis
 le 07/10 le Cartographe émet **le même chunk, au même hash**, le fond étant cuit par le même port.
-`git log origin/main..main` dit ce qui attend un push. Le dépôt est **en ligne et déployé** :
+
+`git log origin/main..main` dit ce qui attend un push — **mais il lit la référence de suivi locale, qui
+peut être périmée.** Le 08/10 elle annonçait neuf commits en attente qui étaient déjà en ligne depuis la
+veille ; un `git push` les a rafraîchis sans rien envoyer. Pour la vraie réponse :
+`git ls-remote origin main`. Le dépôt est **en ligne et déployé** :
 
 |       |                                                                             |
 | ----- | --------------------------------------------------------------------------- |
@@ -69,9 +73,9 @@ reste de l'étape 4 tient dans cet écart, et il porte un nom : **`4d-2 (d)`, le
 
 | | | |
 | --- | --- | --- |
-| **ce qui marche** | le relief cuit et servi, la côte et les fleuves en vecteurs, le pan, le zoom (jusqu'à ×32), la barre d'état qui suit le pointeur | ✅ |
-| **ce qui manque** | créer un pays, poser des ancres, fermer un anneau, déplacer un point, `ctrl+z` | ◀ |
-| **l'ordre** | **(c)** la cible de dessin, puis **(d)** les outils et le second canevas | |
+| **ce qui marche** | le relief cuit et servi, la côte et les fleuves en vecteurs, le pan, le zoom (jusqu'à ×32), la barre d'état qui suit le pointeur — et depuis le 08/10 **tout l'état de la cible de dessin**, créer un pays compris, undoable | ✅ |
+| **ce qui manque** | **l'écran** : le bouton, le formulaire, la bannière (`c2`, avec le design system) · puis poser des ancres, fermer un anneau, déplacer un point (`d`) | ◀ |
+| **l'ordre** | **(c2)** le markup de la cible quand le DS est là, puis **(d)** les outils et le second canevas | |
 
 > **Le découpage `a/b/c/d` est figé — ne plus le re-trancher.** Il a bougé deux fois le 07/10, et c'est
 > ce qui a fait perdre le fil au dev, bien plus que les digressions. S'il paraît faux à la reprise, le
@@ -80,11 +84,89 @@ reste de l'étape 4 tient dans cet écart, et il porte un nom : **`4d-2 (d)`, le
 ### Ce qu'il faut savoir avant d'écrire `(c)` et `(d)`
 
 - **La cible de dessin est un acte séparé** (`s02`) : `[+ New polity]` crée l'identité **sans
-  territoire**, valider le formulaire **donne la plume**, une **bannière** montre la cible tant qu'elle
-  est active, et **sans cible la plume refuse de poser une ancre**. Créer un trait ne crée **jamais** une
-  polity — c'est la perche que le dev a tendue le 07/10, et `s99` en donne la raison mesurée : à 1100,
-  OHM donne au Royaume de France son nom et **aucune géométrie**, donc sans territoire est l'état de
-  départ **normal** de cette carte.
+  territoire**, valider le formulaire **donne la plume**, et **sans cible la plume refuse de poser une
+  ancre**. Créer un trait ne crée **jamais** une polity — c'est la perche que le dev a tendue le 07/10, et
+  `s99` en donne la raison mesurée : à 1100, OHM donne au Royaume de France son nom et **aucune
+  géométrie**, donc sans territoire est l'état de départ **normal** de cette carte.
+
+- **Trois décisions du dev du 08/10 sur la cible, à ne pas re-trancher.**
+  1. **On choisit QUI, puis on agit.** La cible se prend dans `{Polities}` — sélectionner une polity, c'est
+     la désigner. *« Imagine qu'avec la flèche tu sélectionnes des points. Mais tu sélectionnes les points
+     de qui ? »* C'est **l'inversion délibérée d'Illustrator**, où sélectionner un point sélectionne
+     l'objet qui le tient. Conséquence : **la cible gouverne ⟨edit⟩ autant que ⟨draw⟩**, là où `s02` ne
+     parlait que de la plume. Il a ajouté *« peut-être que le fonctionnement changera, mais je pense que
+     c'est plus sage pour l'instant »* — donc c'est une décision, pas une loi.
+  2. **L'avis de cible est transitoire** : il apparaît à la sélection, reste ~5 s, se retire. Jamais collé
+     au curseur. Variante ouverte : se réduire tout petit dans un coin du canevas au lieu de disparaître.
+     **Non prioritaire** — et c'est la variante qui couvre le cas pour lequel l'avis a été écrit, puisque
+     l'autre laisse l'écran muet dès qu'on se remet à dessiner une minute plus tard.
+  3. **Tout ce qui se construit doit être substituable par un composant du design system.** Sa raison :
+     ses **tokens se surchargent**, et c'est ça qui donnera l'apparence « Illustrator moderne ». Il les
+     écrit en parallèle. La forme à tenir est celle de `react-canvas-and-panels` — **coquille / vue /
+     branchement** : la coquille est précisément ce que ses composants remplacent, et substituer devient un
+     changement d'import.
+  4. **Sans cible, l'outil se prend quand même — c'est le CURSEUR qui refuse**, en `not-allowed` sur le
+     canevas. Décidé le 22/09, et **réaffirmé le 08/10 après avoir repesé les deux options** : il a
+     d'abord dit *« la plume et la flèche doivent être désactivées »*, puis a reconnu la décision
+     antérieure et l'a gardée. La raison qui la rend meilleure : le curseur dit **où** le geste est
+     refusé, un bouton grisé dit **si** l'outil existe — et la plume n'a rien d'indisponible, il lui
+     manque un sujet. **Vaut pour ⟨edit⟩ autant que pour ⟨draw⟩** (son argument : les points de qui ?).
+     C'est aussi le curseur **après un `ctrl+z`** qui reprend la cible : il se dérive de « la cible
+     résout-elle ? », donc rien n'a à le surveiller.
+  5. **Les curseurs d'outil sont ceux du canevas, jamais du chrome.** Sur `{Polities}`, un formulaire ou un
+     bouton, le pointeur est celui de la plateforme — une flèche sur une ligne, un caret dans un champ.
+     Ce n'est pas un détail : **le geste qui choisit la cible est un clic dans `{Polities}`**, donc le
+     pointeur doit avoir l'air cliquable exactement là où le canevas le refuse. Posés sur l'élément
+     canvas, jamais sur `body`.
+
+  6. **La barre d'état nomme l'action ET sur qui elle porte** — *« Drawing in Polity »*, *« Selecting Path
+     from Policy »*, *« Moving Path from Policy »*, et les déclinaisons écrites dans `s02`. Le motif, pour
+     qu'un geste neuf ne demande aucune décision : **un verbe, et le pays sur qui il porte**, participe
+     présent, le nom verbatim jamais l'id. Sans sujet : *« Sélectionnez un pays pour dessiner »*.
+     **Et ça renverse laquelle des deux pièces porte la garantie** : l'avis de cible se retire au bout de
+     5 s, la barre d'état non. Donc la faute que tout ce dispositif existe pour éviter — quatre cents
+     ancres dans le mauvais pays — est gardée par la **barre**, en continu, et l'avis ne fait qu'annoncer
+     le changement de sujet. C'est pour ça que son caractère transitoire ne coûte rien.
+     **Un point non tranché, et c'est ma déduction** : la barre porte déjà des messages transitoires
+     (*« inserted 412 vertices »*). S'ils partagent le même emplacement, un résultat écrase la description
+     d'action au moment où elle compte le plus. Deux zones, ou le résultat rend la place. À décider quand
+     la barre se construit — `components/statusBar.ts` existe déjà.
+
+  7. **Qui parle quelle langue — tranché le 08/10, et consigné dans `plan.md` (P8).**
+     | | langues | |
+     | --- | --- | --- |
+     | **atlas** | **français ET anglais**, le français d'abord | c'est le produit publié, et c'est pour **ça** que l'ICU MessageFormat a été adopté le 24/09 |
+     | **Cartographe** | **anglais seulement** | outil d'auteur, un seul auteur. **Converti le 08/10** : dix chaînes, `lang="en"`, sept assertions de test — dont un test nommé *« names the phase in French »*. **Aucune table de traduction** |
+     | **outil de contenu** (Payload) | **EN et FR dans le même formulaire** | les deux champs côte à côte, pour qu'une entrée ne reste pas à moitié traduite sans que ça se voie |
+
+     **On contribuera DEUX choses** (sa décision, 08/10, tirée d'un projet précédent) : **le contenu**
+     *et* **les labels de l'application**. Donc un label cesse d'être un littéral de développeur, et
+     traduire l'atlas devient un acte éditorial au lieu d'une livraison. **La condition qui décide
+     comment ça s'embarque est déjà écrite dans P8** : *une chaîne qui décrit une panne ne doit pas
+     pouvoir échouer*. La chaîne complète, et ce n'est pas une conception mais **ce qu'il a déjà fait
+     tourner** : `Payload (EN+FR dans un formulaire) → des fichiers JSON → la couche de traduction de
+     l'application → ICU MessageFormat`. Le JSON est **généré, jamais chargé à l'exécution** (*« ce ne
+     sera pas chargé au runtime »*). Même forme que `s15` pour une année dessinée : ça atterrit dans git,
+     la CI reconstruit. **Reste à décider** : ce que l'atlas affiche pour un label pas encore traduit — le
+     français, ou la clé.
+
+     **La distinction à ne pas perdre** : le chrome est en anglais, le **contenu** ne l'est pas. Le nom
+     d'une polity est une donnée — *« Reaume de France »* est une graphie d'époque, et `name:fr` existe
+     pour ça. Donc la barre lit `Drawing in Reaume de France` : verbe anglais, nom verbatim. Et dans
+     Payload, EN/FR veut dire **deux textes rédigés**, pas la traduction de l'un par l'autre.
+  8. **L'action ET le résultat s'affichent en même temps**, deux zones côte à côte — *« je ne vois pas
+     pourquoi l'un prendrait la place de l'autre »*. Ça ferme la question que j'avais laissée ouverte une
+     heure plus tôt, et dans le bon sens : un résultat qui écraserait l'action effacerait le sujet
+     précisément quand quatre cents ancres descendent.
+     ```
+     Drawing in Reaume de France          inserted 412 vertices from the coastline
+     ```
+
+- **Ce que (1) demande au code, et c'est petit** : `toolSlice` ne sait poser la cible qu'en donnant la
+  plume dans le même geste (`aimAt`), ce qui est juste à la validation du formulaire et faux quand on
+  clique un pays dans `{Polities}`. Il faut **une action qui pose la cible sans toucher à l'outil**, et
+  `aimAt` devient sa composition avec `selectTool('draw')`. Une action à ajouter, pas une refonte — la
+  cible étant déjà un id dans le store, l'affichage ne tient à rien.
 - **Trois modules sont écrits, testés, et n'ont toujours aucun appelant** : `geometry/hitTest.ts`
   (`nearestPoint`), `geometry/ringClosure.ts` et `geometry/polylineSnap.ts`, livrés à `4c`. `(d)` est
   précisément ce qui leur en donne un — `(a)` a posé les polylignes qu'ils viseront, pas les gestes qui
@@ -94,6 +176,31 @@ reste de l'étape 4 tient dans cet écart, et il porte un nom : **`4d-2 (d)`, le
   d'arbre retire du bundle.
 - **Un geste = un pas d'historique** (H-10), posté à la **fin** du geste. Deux clics avec ⟨snap to
   coast⟩ posent 412 ancres et `ctrl+z` les reprend toutes.
+
+### Ce que `(c1)` a livré le 08/10, et ce qu'il laisse ouvert
+
+**Livré** : `state/toolSlice.ts` (l'outil en main + l'id de la cible, **hors de la ligne d'annulation**,
+`s99` l'exigeant) · `state/drawingTarget.ts`, le seul endroit qui résout « pour qui dessine-t-on ? » ·
+`createPolity` sur la slice d'édition, undoable, qui **rend `false`** sur id déjà pris au lieu de lever —
+c'est l'auteur qui a tapé cet id, donc le formulaire doit pouvoir pointer le champ ·
+`core/editor/polityId.ts`, le forgeage d'id tranché par le dev (**H-31**, trou non enregistré jusque-là).
+
+**La propriété qui porte le pas, et c'est elle qu'il faut garder en tête** : la cible est un **id**, pas
+un objet. Donc annuler la création d'un pays fait que la cible **cesse de résoudre** — la bannière
+disparaît et la plume refuse, sans écouteur, sans nettoyage, sans rien à penser dans `undo` / `goTo` /
+`restoreMarker`. Vérifié en écrivant la version qui tient l'objet : le test tombe.
+
+**Ce que `(c2)` doit faire, et rien de plus** : `[+ New polity]`, le formulaire à huit champs (le neuvième
+étant l'id proposé), et la bannière — **montés sur le design system**, décision du dev du 08/10 : les
+écrire en styles inline serait les écrire deux fois. Le câblage est `if (createPolity(p, step)) aimAt(p.id)`,
+deux lignes.
+
+**Une question que `s02` ne tranche pas, et qui n'a pas été décidée ici** : presser ‹P› **seul** doit-il
+garder une cible choisie il y a longtemps, ou l'oublier ? Aujourd'hui `selectTool` ne touche pas à la
+cible — ce qui rend vraie la phrase *« [Draw territory] me rend la plume, avec elle comme cible »* et
+évite de perdre l'aim chaque fois qu'on attrape ‹space› pour paner. Le cas gênant est l'inverse : revenir
+à la plume une heure plus tard et dessiner dans un pays qu'on avait oublié viser. **La bannière le dit**,
+ce qui est précisément pourquoi `s02` l'exige — donc ce n'est pas bloquant. À reprendre à `(d)`.
 
 ### Ce que `4d-3` et `4d-2 (a)/(b)` ont livré le 07/10 — à ne pas re-découvrir
 
@@ -161,7 +268,8 @@ plus tôt, promettant un cache que `4d-1` n'a pas construit.
 | **4d-3** ✅ | le fond servi, cuit dans le worker, le repère lu du DEM, l'état d'attente | le relief s'affiche |
 | **4d-2 (a)** ✅ | la côte et les fleuves en vecteurs | le trait de côte épouse la limite terre/mer |
 | **4d-2 (b)** ✅ | la barre d'état — *le second canevas est passé en tête de (d), voir plus haut* | la position suit le pointeur |
-| **4d-2 (c)** ◀ | `[+ New polity]`, la **bannière de cible**, la plume qui refuse sans cible | on sait toujours pour qui on dessine |
+| **4d-2 (c1)** ✅ | l'**état** de la cible : `toolSlice` (outil + cible, hors de la ligne d'annulation), `createPolity` undoable, `describeDrawingTarget`, et le forgeage d'id dans `core/editor/polityId.ts` | annuler la création fait **évaporer la cible** toute seule |
+| **4d-2 (c2)** ◀ | le **markup** : `[+ New polity]`, le formulaire à huit champs, la **bannière** — **avec le design system**, qui arrive | on sait toujours pour qui on dessine |
 | **4d-2 (d)** | le **second canevas**, les deux outils câblés sur `documentEdits` et `history` | on dessine, `ctrl+z` défait le geste |
 | **5** | le chrome : `{Polities}` en arbre, les formulaires, `{Overrides}`, **et les contrôles désactivés tant que le fond n'est pas prêt** | les valeurs viennent de `design/chrome.css` |
 

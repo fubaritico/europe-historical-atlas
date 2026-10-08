@@ -55,6 +55,13 @@ Scenario: pull the identity from OHM instead of typing it
 > and `name:fr` is present on 81 % of relations, in an atlas written in French. Retyping it would be
 > waste. **Hole H-01**: does this query OHM live, or read the cached `relations.json` the spike already
 > holds?
+>
+> **The chrome is English, the content is not, and nothing about the 2026-10-08 decision touches this.**
+> A polity's name is **data**: *"Reaume de France"* is period spelling, `name:fr` is why it reads in
+> French at all, and the atlas publishes it as written. What is English is the interface around it —
+> buttons, labels, the status bar, the notices. So the status bar reads `Drawing in Reaume de France`:
+> an English verb, and the name verbatim. Translating a polity's name would be editing a historical
+> record, which is the one thing this tool must never do.
 
 ## Drawing the territory
 
@@ -69,10 +76,9 @@ Scenario: validating the form hands me the Pen
 
 ```gherkin
 Scenario: I always know who I am drawing for
-  Given ⟨draw⟩ is active
-  Then a banner shows the drawing target for as long as the Pen is active:
-    "Drawing: Kingdom of France", with its colour swatch
-  And it stays visible while I pan, zoom and place anchors
+  Given I have selected a polity in {Polities}
+  Then a notice announces it — "Drawing: Kingdom of France", with its colour swatch
+  And the notice withdraws on its own after about five seconds
   When there is no drawing target
   Then the Pen refuses to place an anchor, and says which polity to select first
 ```
@@ -80,8 +86,168 @@ Scenario: I always know who I am drawing for
 > **The gap the dev found**, 2026-09-22 — and it is the sharper half of his question. You switch to the Pen
 > and place four hundred anchors, and **nothing on screen says which polity they land in**. Drawing an
 > entire frontier into the wrong country is a mistake noticed only afterwards, and undoing it is four
-> hundred steps or one, depending on nothing useful. The target is displayed, permanently, or the tool
-> lies by omission.
+> hundred steps or one, depending on nothing useful.
+>
+> **Revised by the dev, 2026-10-08: the notice is transient, not permanent.** *"C'est un petit peu comme
+> une sting bar — lorsque tu sélectionnes, ça apparaît, ça reste 5 secondes et ça s'en va."* It is not
+> pinned to the cursor either. **And it is explicitly not a priority** — the state behind it exists (step
+> 4d-2 (c1)), the display is whatever reads best.
+>
+> **The tension worth carrying into that decision, and nobody has settled it.** The paragraph above
+> justifies the notice by a mistake that is noticed *afterwards* — so an announcement that withdraws after
+> five seconds does not cover the case it was written for: start drawing a minute later and the screen is
+> silent again. The dev's own second variant does cover it — *"ça peut apparaître 5 secondes en haut, puis
+> ça se met en tout petit, en bas à gauche ou en bas à droite du viewport"* — because something stays.
+> Whichever is chosen, the **refusal** is unaffected: with no target the Pen does not place an anchor, and
+> that is the guarantee the state actually enforces.
+>
+> **Selecting the target is a gesture of `{Polities}`, not of the toolbar** (the dev, 2026-10-08): you pick
+> **who** first, then you act. That is the deliberate difference from Illustrator, where selecting a point
+> selects the object that holds it. Here the question *"whose points am I moving?"* is answered before the
+> gesture rather than deduced from it — which is why the target governs ⟨edit⟩ as much as ⟨draw⟩.
+
+## Picking a tool is always allowed — it is the cursor that refuses
+
+```gherkin
+Scenario: the Pen is in hand and nobody is selected
+  Given a year is open and no polity is selected
+  When I choose ⟨draw⟩
+  Then ⟨draw⟩ becomes the active tool
+  And over the canvas the cursor is `not-allowed`
+  And a click places nothing, and says which polity to select first
+```
+
+```gherkin
+Scenario: reach for a polity with the Pen in hand
+  Given ⟨draw⟩ is active and no polity is selected
+  When the pointer leaves the canvas and enters {Polities}
+  Then the cursor becomes the browser's own default arrow
+  When I click a polity in the list
+  Then it becomes the drawing target
+  And a notice announces it, and withdraws on its own after about five seconds
+  When the pointer returns to the canvas
+  Then the cursor is the Pen's cross
+  And a click places an anchor in that polity
+```
+
+```gherkin
+Scenario: the arrow waits for the same thing
+  Given ⟨edit⟩ is active and no polity is selected
+  Then over the canvas the cursor is `not-allowed`
+  And a click selects nothing — there is no polity whose points it could select
+```
+
+```gherkin
+Scenario: the target disappears under an undo
+  Given "Kingdom of France" is the drawing target and ⟨draw⟩ is active
+  When I press ‹ctrl+z› and the creation is taken back
+  Then no polity is selected
+  And the cursor becomes `not-allowed` without my touching the tool strip
+```
+
+> **Settled 2026-09-22 and re-affirmed by the dev on 2026-10-08**: a tool can always be picked up, and
+> the **cursor** carries the refusal. `CURSORS.md` records `not-allowed` as the answer.
+>
+> **Why the cursor rather than a disabled button.** Both were on the table on 2026-10-08 — the dev first
+> said *"la plume et la flèche doivent être désactivées"*, then recognised the earlier decision and kept
+> it. The cursor is the better of the two for a reason the canvas makes plain: it answers **where** the
+> gesture is refused rather than **whether** the tool exists. The Pen is perfectly usable the moment a
+> polity is selected, and nothing about the tool itself is unavailable; what is missing is a subject. A
+> greyed button says "this tool is broken"; `not-allowed` under the pointer says "not on this ground,
+> not yet", which is true.
+>
+> **And it applies to ⟨edit⟩ exactly as it does to ⟨draw⟩** — the dev's own argument, and it is the less
+> obvious half: selecting points with nobody selected is selecting *whose* points? The arrow has the same
+> missing subject, so it gets the same refusal.
+>
+> **The general rule this scenario establishes, and it belongs to the whole application**: the tool
+> cursors are the **canvas's** and nowhere else. The chrome is DOM — a list, a form, a button — and over
+> DOM the pointer is whatever the platform says: an arrow over a row, a caret over a field. That is not a
+> nicety here, it is load-bearing: **the gesture that chooses the target is a click in `{Polities}`**, so
+> the pointer has to be clickable-looking exactly where the canvas refuses it.
+>
+> **The last scenario is the one no interface produces** — the target is session state and the polity is
+> document state, so `ctrl+z` takes the subject away under a tool that was legitimate a second earlier.
+> Nothing needs to watch for it: the cursor is derived from whether the target resolves, and after the
+> undo it does not.
+
+## The status bar names the action and whose it is
+
+```gherkin
+Scenario: drawing, and the bar says in whose territory
+  Given ⟨draw⟩ is active and "Kingdom of France" is selected
+  When I place the first anchor
+  Then the status bar reads "Drawing in Kingdom of France"
+  And it keeps reading it while I place the rest
+```
+
+```gherkin
+Scenario: selecting points, and the bar says whose
+  Given "Kingdom of France" is selected and ⟨edit⟩ is active
+  When I select one or more of its anchors
+  Then the status bar reads "Selecting path from Kingdom of France"
+  When I start dragging the selected anchors
+  Then the status bar reads "Moving path from Kingdom of France"
+  When I release
+  Then the bar stops naming an action and shows what lies under the pointer again
+```
+
+```gherkin
+Scenario: the same sentence for every gesture that has a subject
+  Given "Kingdom of France" is selected
+  When ⟨draw⟩ is active and the pointer enters the snapping radius of the outline's first anchor
+  Then the status bar reads "Closing the outline of Kingdom of France"
+  When ⟨draw⟩ is active with ⟨snap to coast⟩ and the pointer is within range of the coastline
+  Then the status bar reads "Following the coastline for Kingdom of France"
+  When ⟨draw⟩ is active with ⟨snap to river⟩ within range of the Meuse
+  Then the status bar reads "Following the Maas for Kingdom of France"
+  When ⟨edit⟩ is active over a stretch away from any handle
+  Then the status bar reads "Inserting a point into Kingdom of France"
+  When ⟨draw⟩ hovers an anchor another outline also holds
+  Then the status bar reads "Branching from a shared anchor — held by 2 paths"
+```
+
+```gherkin
+Scenario: no subject, so the bar says what to do about it
+  Given no polity is selected
+  When ⟨draw⟩ or ⟨edit⟩ is active and the pointer is over the canvas
+  Then the status bar reads "Select a polity to draw in"
+  And the cursor is `not-allowed`
+```
+
+> **The dev's call, 2026-10-08**: *"dans la status bar on a une description de l'action — Drawing in
+> Polity · Selecting Path from Polity · Moving Path from Polity"*, with the principle stated and the
+> declensions left to be written out.
+>
+> **And it closes the hole the transient notice left open.** The notice withdraws after about five
+> seconds; the status bar does not. So the mistake this whole section exists to prevent — four hundred
+> anchors landing in the wrong country unnoticed — is guarded by the **bar**, continuously, while the
+> notice only announces the change of subject. That reverses which of the two is load-bearing, and it is
+> why the notice being transient costs nothing.
+>
+> **The pattern, so a new gesture needs no new decision**: a verb for what is happening, and the polity it
+> is happening to. Present participle, the polity's name verbatim, never its id. A gesture with no subject
+> gets no sentence of this kind.
+>
+> **Both are shown at once — settled by the dev, 2026-10-08**: *"toutes ces informations doivent être
+> affichées à la fois, l'action et le nombre de points insérés. Je ne vois pas pourquoi l'un prendrait la
+> place de l'autre."* So the action description and a transient result are **two zones side by side**, not
+> one slot taken in turn. That closes a question raised here an hour earlier as an open one, and it closes
+> it the right way round: a result that overwrote the action would blank the subject at the exact moment
+> four hundred anchors were going down.
+>
+> ```
+> Drawing in Kingdom of France          inserted 412 vertices from the coastline
+> ```
+>
+> **The interface is in English — the dev's call, 2026-10-08**: *"tous les textes seront en anglais."*
+> The strings above are therefore shipped as written, not translated. **That is the Cartographer only**;
+> the atlas stays French, being the published product whose margin degrees are already written `30°O`.
+> One consequence worth naming: the ICU MessageFormat layer decided for the atlas on 2026-09-24 is not
+> needed here, so this application carries no translation table at all.
+>
+> The ⟨edit⟩ gestures here are [s03](s03-edit-existing-border.md)'s subject; they are written beside the
+> Pen's because the sentence is the same shape for both, and the subject it names is this scenario's.
 
 ```gherkin
 Scenario: leave the Pen without having drawn anything

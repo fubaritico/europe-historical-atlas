@@ -62,7 +62,7 @@ otherwise: the drawing surface should appear in any screen as a grey rectangle w
 └────────────────────────────────────────────────────────────────┘
 ```
 
-Plus a **drawing-target banner**, visible only while the Pen is active.
+Plus a **drawing-target notice**, raised when a polity is selected and withdrawing on its own — see "Bars and banners".
 
 ## Panels
 
@@ -95,8 +95,8 @@ Plus a **drawing-target banner**, visible only while the Pen is active.
 |                           | content                                                                                                                                                                                                             |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **title bar**             | `Cartographer — <file> — <year>`, modified marker                                                                                                                                                                   |
-| **status bar**            | pointer coordinates · the polity holding that cell · scale in km/px · counts. Also carries transient messages: "inserted 412 vertices from the coastline", "no river within 12 km", "undone off screen — [show me]" |
-| **drawing-target banner** | "Drawing: Kingdom of France" + colour swatch. Visible for as long as the Pen is active. **Non-negotiable** — without it, four hundred anchors can land in the wrong country unnoticed                               |
+| **status bar**            | **At rest**: pointer coordinates · the polity holding that cell · scale in km/px · counts. **During a gesture, the action and whose it is** (the dev, 2026-10-08): "Drawing in Kingdom of France", "Selecting path from…", "Moving path from…", "Closing the outline of…", and "Select a polity to draw in" when there is no subject — see [s02](scenarii/s02-create-france-1100.md). This is the **continuous** guarantee that anchors land where the author thinks they do; the target notice only announces a change of subject and withdraws. **Plus transient results, shown at the same time and not instead**: "inserted 412 vertices from the coastline", "no river within 12 km", "undone off screen — [show me]". Two zones side by side (the dev, 2026-10-08: *"je ne vois pas pourquoi l’un prendrait la place de l’autre"*) — a result that blanked the action would hide the subject exactly when four hundred anchors are going down. **All of it in English**, this interface being English throughout |
+| **drawing-target notice** | "Drawing: Kingdom of France" + colour swatch, raised when a polity is selected in `{Polities}`. **Transient — about five seconds, then it withdraws** (the dev, 2026-10-08: *"un petit peu comme une sting bar"*), and never pinned to the cursor. It may instead shrink into a corner of the canvas viewport rather than vanish; **not decided, and not a priority**. What is non-negotiable is not the banner but the **refusal**: with no target the Pen places no anchor |
 | **GPL banner**            | persistent, on a read-only file: "GPL-3.0 source — reference only"                                                                                                                                                  |
 | **backdrop warning**      | "backdrop resolution exceeded — position from the vectors"                                                                                                                                                          |
 
@@ -193,7 +193,7 @@ marked. Corrected 2026-09-27: one registry per year, so there is no "which years
 ## Screens worth mocking first
 
 1. **The editor at rest** — a year open, polities listed, nothing selected. Establishes the whole layout.
-2. **Drawing** — Pen active, target banner up, sub-strip visible, status bar live.
+2. **Drawing** — Pen active, target notice up, sub-strip visible, status bar live. The mockup draws it as a permanent banner, which the dev revised on 2026-10-08: read it as the notice in the instant it is raised.
 3. **The polity form** — used at creation and at edit, so it carries the identity model.
 4. **The check report** — the densest list, and the one that decides whether the tool feels finished.
 

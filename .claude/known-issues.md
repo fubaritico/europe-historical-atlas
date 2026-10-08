@@ -166,6 +166,22 @@ Put here the know issues to avoid cluttering the context window.
   le compte d'appels. Les deux moitiés ont désormais leur test, chacun vérifié en rejouant son défaut.
   **Sévérité : corrigé** ; à relire au premier composant de l'étape 5 qui charge quoi que ce soit.
 
+- **Un geste modifie le document AVANT que l'historique l'enregistre : si la copie échoue entre les deux,
+  `ctrl+z` ne peut plus revenir dessus.** Relevé en écrivant `createPolity` (4d-2 (c1), 08/10), et **écrit
+  une fois ici plutôt qu'argumenté à chaque action** : les gestes de dessin de `(d)` — poser une ancre, en
+  déplacer une, fermer un anneau — auront tous cette forme.
+  **Dans l'ordre** : (1) le geste modifie le document, (2) l'historique en prend une copie pour pouvoir y
+  revenir, (3) l'état est publié. Si l'étape 2 échoue, le pays est **dans le document mais pas dans
+  l'historique** : rien ne sait le retirer. `canUndo` reste faux et aucun pas n'apparaît — c'est exactement
+  ce que le test « propagates a failing copier » vérifie.
+  **Pourquoi on ne le corrige pas** : les deux remèdes coûtent plus que le défaut. Copier *avant* de muter
+  doublerait le coût de chaque geste (~265 Ko le pas) pour couvrir un cas qui n'arrive pas —
+  `cloneYearDocument` sur un document valide ne lève pas, et un `RangeError` de mémoire aurait déjà tout
+  emporté. Rattraper et défaire serait un `catch` qui continue, ce que `rules/error-handling.md` demande de
+  discuter avant d'écrire : l'échec est **propagé bruyamment**, et c'est la branche choisie.
+  **Déclencheur** : le jour où un copieur peut légitimement échouer — si un pas se met à sérialiser, ou si
+  l'autosave de `s15` partage ce chemin. **Sévérité : à savoir, pas bloquant.**
+
 - **Le test-vedette d'un module peut être celui qui n'attrape rien, et `4b` en donne le cas le plus net.**
   `s01` spécifie le zoom par une seule invariante — *« le point sous le pointeur y reste »* — donc c'est le
   test qu'on écrit en premier. **L'implémentation naïve passe 88 tests sur 90, dont celui-là.** Elle fait

@@ -444,8 +444,50 @@ language it had never been designed to leave.
 
 | | what it is | where it lives |
 |---|---|---|
-| **interface strings** | notices, buttons, panel labels, the cartographer's chrome — about 24 today | **files in the repository**, written in **ICU MessageFormat**, versioned with the code that uses them |
+| **interface strings** | notices, buttons, panel labels — about 24 today | **files in the repository**, written in **ICU MessageFormat**, versioned with the code that uses them |
 | **content** | place names, event texts, polity names by century | **Payload**, which localises natively |
+
+### Which application speaks which language — decided 2026-10-08, by the dev
+
+| | languages | why |
+|---|---|---|
+| **atlas** | **French and English**, French first | it is the published product, and its readers are not all French. This is what ICU was adopted *for* |
+| **Cartographer** | **English only** | an authoring tool with one author. Its chrome was converted on 2026-10-08 — ten strings, `lang="en"` — and it carries **no translation table at all** |
+| **content tool** (Payload) | **EN and FR in the same form** | one form, both fields side by side, so an entry is never half-translated without anyone seeing it |
+
+**Two things this corrects in the row above**: the Cartographer's chrome is *not* part of the ICU
+surface — it is plain English literals, which is why the "about 24 today" count no longer includes it.
+And **content is never translated by us**: a polity's name is a historical fact in a period spelling
+(*"Reaume de France"*), so EN/FR in the Payload form means two authored texts, not a translation of one.
+
+### Two things get contributed, not one — the dev, 2026-10-08
+
+From a previous project of his, and he expects it to settle here the same way:
+
+1. **the content** — place names, event texts, what a region shows when clicked;
+2. **the application's labels** — the interface strings themselves, authored rather than hard-coded.
+
+So the contribution tool owns both, in the same EN/FR form, and a label stops being a developer's
+literal: translating the atlas becomes an editorial act rather than a release.
+
+**The chain, and it is not a design — it is what the dev already ran in a previous project**:
+
+```
+Payload (authoring, EN + FR in one form)  →  JSON files  →  the application's translation layer  →  ICU MessageFormat
+```
+
+**The JSON is generated, never fetched at runtime** — his words, 2026-10-08: *"ce ne sera pas chargé au
+runtime."* That is not a performance choice, it is the condition already written above: *a string that
+describes a failure must not be able to fail.* The splash renders before anything is fetched, and the
+asset-failure notice exists precisely because the network did not answer. So the labels are **authored in
+the tool, exported as JSON, and built into the bundle** — exactly as `s15` settles for a drawn year: the
+data lands in git, the CI rebuilds, and what the reader downloads is a static file. Authoring where it is
+convenient; shipping where it cannot fail.
+
+**What that leaves open**, and neither blocks anything: whether the export is a build step or a commit
+from a function (`s15` answers it for years, and the same answer probably serves), and what the atlas
+shows for a label an author has not translated yet — the French, or the key. The second is the one worth
+deciding before the first translator starts.
 
 ### Why the split is not a preference
 

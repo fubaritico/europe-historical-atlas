@@ -51,11 +51,42 @@ Precedence, highest first: ‹space› held (hand) › marquee drag › hover st
   - plus: 8 px
 - The cursors are monochrome on purpose. Selection blue (`#1f5bff`) belongs to the anchors and the editing stroke on the canvas, not to the pointer.
 
-## Not in the scenarios — no cursor drawn (decide before building)
+## The cursors are the canvas's, and nowhere else
+
+Added 2026-10-08, from the dev's own scenario. Over the **chrome** — `{Polities}`, a form, a button, the
+status bar — the pointer is whatever the platform says it is: an arrow over a row, a caret over a field.
+None of the ten images below ever appears there. A cross hovering over a list would claim that clicking
+there puts a point down, and the gesture that selects a drawing target is a click in exactly that list.
+
+So the rule is one line of scope: these cursors are set on the canvas element, never on `body`.
+[s02](../scenarii/s02-create-france-1100.md) has the scenario.
+
+## Four questions the handoff left open — settled 2026-09-22, and one re-settled 2026-10-08
+
+**This section used to be headed "decide before building" and listed them as open.** They had been
+answered the same day the handoff landed, in conversation, and this file was never reopened — the exact
+failure `.claude/known-issues.md` records about itself: *a decision taken elsewhere is worse than no
+decision, because the document someone opens to build from still asks the question.* Corrected here.
+
+- **Precedence: confirmed** as inferred above — ‹space› held › marquee drag › hover state › tool default.
+- **A cursor does not change during a drag.** Once the pointer is down the shape is fixed until release,
+  so a hover state crossed mid-drag cannot flicker the pointer.
+- **The snap feature's name** ("coast", "Seine") is a **canvas label** drawn beside the pointer in screen
+  pixels, not a cursor: a cursor image cannot carry live text.
+- **No drawing target → the CSS `not-allowed` cursor**, over the canvas, with no image of our own. A tool
+  can always be picked up; the cursor is what refuses. Re-affirmed by the dev on 2026-10-08 after both
+  options were weighed again, and the reason it wins: it says **where** the gesture is refused rather than
+  **whether** the tool exists. Nothing about the Pen is unavailable — a subject is missing.
+  **It applies to ⟨edit⟩ too**, which is the half the handoff never asked about: selecting points with
+  nobody selected is selecting *whose* points? Same missing subject, same refusal.
+  It is also the cursor after a **`ctrl+z`** takes the target's polity away under a tool already in hand —
+  derived from whether the target resolves, so nothing has to watch for it.
+  [s02](../scenarii/s02-create-france-1100.md) has the four scenarios.
+
+## Still not in the scenarios — no cursor drawn
+
 - **Zoom in / out:** zoom has no mode. It is the wheel about the pointer, the [+]/[−] buttons, or PageUp/PageDown, and the cursor stays the active tool's. A magnifier cursor needs a zoom tool or a held key, and the scenarios define neither.
-- **Pen with no drawing target:** s02 says the Pen refuses and says which polity to select first. No cursor is specified. The CSS `not-allowed` cursor is a candidate.
 - **⟨edit⟩ while dragging an anchor or a selection:** not listed.
-- **The snap feature's name** ("coast", "Seine"): a cursor image can't carry live text. Draw it as a canvas label next to the pointer, in screen pixels.
 
 ## Files
 - `05 Cursors.dc.html`: the reference sheet. It needs `support.js`, `cursors/` and `assets/` next to it.

@@ -85,7 +85,7 @@ period its own Wikidata id. Per year, the question does not arise: 52 relations 
   "year": 1100,
   "polities": [
     {
-      "id": "fr-couronne", // ours, readable, unique within this year. Never a display name.
+      "id": "fr-couronne", // ours, readable, unique within this year. Never a display name. See below.
       "name": "Reaume de France", // the name that year, as it was written
       "rank": "kingdom", // empire · kingdom · duchy · county … (OHM's border_type)
       "status": "country", // country · personal_union · condominium … (OHM's place)
@@ -105,6 +105,18 @@ a chain of these fields ([s08](scenarii/s08-vassalage.md)).
 
 **Ids should be kept the same from year to year** when it is the same polity — deriving a year copies them,
 so it happens by itself. Nothing enforces it, and nothing breaks if it drifts: no file refers to another.
+
+**Where an id comes from — the dev's call, 2026-10-08** (`H-31`, and it had never been written down). The
+creation form **proposes** one, slugged from the name, and the author may rewrite it: that is the only one
+of the three candidate rules under which `fr-couronne` above is reachable from *"Reaume de France"*. A
+frozen slug could only ever produce `reaume-de-france`; an opaque counter would put `"between":
+["polity-1", "polity-7"]` in `borders.json`, which is the unreadable key ids exist to retire.
+
+**The name is read once, at creation, and never again** — which is what makes [s07](scenarii/s07-manage-the-registry.md)'s
+rename possible: three places name an id (this file's `suzerain`, `borders.json`'s `between`, a colour
+override), and re-deriving it from the name would break all three at once. The proposal lives in
+`core/editor/polityId.ts`; a name in a non-latin script yields **no** proposal rather than a transliteration,
+and the only ids refused are the empty one and one already taken.
 
 ## `<year>/polities.json` — what they hold
 

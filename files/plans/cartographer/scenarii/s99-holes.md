@@ -179,6 +179,39 @@ writing down.
 
 ## Open questions the scenarios surfaced
 
+### H-31 · Where does a polity's id come from? — **settled 2026-10-08, by the dev**
+
+**A hole nobody had recorded**, found by trying to write `s02`'s creation form. Three documents pointed in
+three directions and none of them answered it: [`format.md`](../format.md) shows `"fr-couronne"` and says
+*"ours, readable, unique within this year. Never a display name"*; `s02`'s form asks for eight fields and
+an id is **not** one of them; and [s07](s07-manage-the-registry.md) requires that renaming a polity keep
+its id — *"it is the same polity, with the same id"*. So the id is neither typed in nor derivable on
+demand, and nothing said who mints one.
+
+**The dev's call: the form proposes one, and the author may rewrite it.** A slug of the name is offered
+(`reaume-de-france`), editable on the spot to `fr-couronne`.
+
+**Why the other two were refused, and the argument is `format.md`'s own example.** A *frozen* slug can
+never produce `fr-couronne` from *"Reaume de France"* — the id in our own format document would be
+unreachable by our own tool. An *opaque counter* (`polity-1`) contradicts the type's "readable" and would
+put `{"between": ["polity-1", "polity-7"]}` in `borders.json`, which is the illegible key the ids were
+introduced to retire.
+
+**The consequence that makes it safe**: the name is read **once**, at creation. After that the id is a
+key — `borders.json` names a pair of them, a vassal tie names one, a colour override names one — and
+nothing re-derives it, which is exactly what `s07` demands.
+
+**Built at 4d-2 (c)**: `core/editor/polityId.ts` — `slugifyPolityName` folds latin accents and collapses
+everything else into hyphens, `proposePolityId` steps past the ids already in the year, counting from 2 so
+a first entry never looks numbered.
+
+**Two sub-decisions worth not re-opening.** A name in a non-latin script (Byzantium, Rus') yields **no
+proposal at all** rather than a transliteration: romanising it would be inventing a spelling, and an empty
+required field asks the author instead of answering for them. And there is **no character whitelist** —
+`yearPolitySchema` asks only for a non-empty string, nothing downstream treats an id as a path or a URL,
+and refusing a space would be the tool manufacturing a law where `s00` says every rule here is a default.
+What is refused is what genuinely breaks a file: an empty id, and one already taken.
+
 ### H-01 · Where does the OHM identity import read from?
 
 Live Overpass query, or the `relations.json` the spike already caches? Live is current and slow; cached
@@ -378,9 +411,16 @@ reachable from the atlas. Not decided.
   and **asks for the year** so the file never declares a date its name contradicts. The dev, 2026-09-22.
   That is the entire mechanism; copy-on-write, shared stretches across years and the derivation tree
   (H-22) all disappear with it. [s04](s04-save-and-reopen.md), [s05](s05-derive-a-year.md).
-- **The Pen always shows its drawing target**, and refuses to place an anchor without one. Found by the dev
-  2026-09-22 while asking what becomes of a freshly created polity: nothing on screen said which polity an
-  anchor lands in, so four hundred points could go into the wrong country unnoticed.
+- **The Pen refuses to place an anchor with no drawing target.** Found by the dev 2026-09-22 while asking
+  what becomes of a freshly created polity: nothing on screen said which polity an anchor lands in, so four
+  hundred points could go into the wrong country unnoticed.
+  **Narrowed 2026-10-08, by the dev**: this line used to open with *"the Pen always shows its drawing
+  target"*, and the showing is no longer permanent — the notice is raised on selection and withdraws after
+  about five seconds, possibly shrinking into a corner instead. **The refusal is what remains
+  non-negotiable**, and it is the half the code enforces. Which display wins is open and not a priority
+  ([s02](s02-create-france-1100.md)).
+  **And the target is chosen in `{Polities}`, not by picking a tool** — you select *who*, then you act,
+  which is the deliberate inversion of Illustrator and the reason the target governs ⟨edit⟩ too.
 - **A polity with no territory is kept, never discarded.** Changing tool does not delete it. Measured
   reason: at 1100 OHM gives the Kingdom of France its identity and **no geometry**, and bulk identity
   import creates dozens at once — territory-less is the normal starting state, not a transient one.
