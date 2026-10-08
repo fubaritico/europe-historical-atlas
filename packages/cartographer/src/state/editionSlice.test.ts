@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { moveAnchor } from '@europe-historical-atlas/core/editor/documentEdits'
 import {
+  AQUITAINE_IDENTITY,
   firstSharedAnchor,
   ringOf,
   sharedAnchorsBetween,
@@ -486,6 +487,150 @@ describe('editionSlice', () => {
         'close-ring',
         'add-anchor',
       ])
+    })
+  })
+})
+
+/** The gesture `s02` creates with — its own, because `{History}`'s icon table is keyed on `kind`. */
+const CREATE: HistoryStep = { kind: 'create-polity', label: 'create polity' }
+
+describe('editionSlice.createPolity', () => {
+  describe('happy path', () => {
+    it('adds an identity with no territory, and records one step', () => {
+      const { store } = openStore()
+      const rowsBefore = store.getState().rows.length
+
+      expect(store.getState().createPolity(AQUITAINE_IDENTITY, CREATE)).toBe(true)
+
+      const state = store.getState()
+      expect(state.document.polities.map((polity) => polity.id)).toContain('aquitaine')
+      expect(state.document.claims.some((claim) => claim.polity === 'aquitaine')).toBe(false)
+      expect(state.rows).toHaveLength(rowsBefore + 1)
+      expect(state.undoLabel).toBe('create polity')
+    })
+  })
+
+  describe('variants', () => {
+    it('bumps the version, which is the only thing a selector can watch', () => {
+      const { store } = openStore()
+      const before = store.getState().version
+
+      store.getState().createPolity(AQUITAINE_IDENTITY, CREATE)
+
+      expect(store.getState().version).toBe(before + 1)
+    })
+
+    it('an undo takes the identity back, and a redo puts it there again', () => {
+      const { store } = openStore()
+
+      store.getState().createPolity(AQUITAINE_IDENTITY, CREATE)
+      store.getState().undo()
+      expect(store.getState().document.polities.map((p) => p.id)).not.toContain('aquitaine')
+
+      store.getState().redo()
+      expect(store.getState().document.polities.map((p) => p.id)).toContain('aquitaine')
+    })
+
+    it('keeps the suzerain tie, which is what the vassal hand is derived from', () => {
+      const { store } = openStore()
+
+      store.getState().createPolity(AQUITAINE_IDENTITY, CREATE)
+
+      const stored = store.getState().document.polities.find((p) => p.id === 'aquitaine')
+      expect(stored?.suzerain).toBe('fr-couronne')
+    })
+  })
+
+  describe('managed errors', () => {
+    // A taken id is something the **author** typed, so it is returned rather than thrown: the form has
+    // to be able to point at the id field. Unlike `goTo`, whose only caller renders from `rows` and can
+    // therefore only miss through a programming fault.
+    it('refuses a taken id and changes nothing at all', () => {
+      const { store } = openStore()
+      const before = store.getState()
+      const politiesBefore = before.document.polities.length
+      const rowsBefore = before.rows.length
+      const versionBefore = before.version
+
+      const taken = { ...AQUITAINE_IDENTITY, id: 'fr-couronne' }
+      expect(store.getState().createPolity(taken, CREATE)).toBe(false)
+
+      const after = store.getState()
+      expect(after.document.polities).toHaveLength(politiesBefore)
+      expect(after.rows).toHaveLength(rowsBefore)
+      expect(after.version).toBe(versionBefore)
+      expect(after.canUndo).toBe(false)
+    })
+
+    it('refusing one does not disturb a name that happens to repeat', () => {
+      const { store } = openStore()
+
+      const sameName = { ...AQUITAINE_IDENTITY, id: 'aquitaine-2', name: 'Duché d’Aquitaine' }
+      store.getState().createPolity(AQUITAINE_IDENTITY, CREATE)
+
+      expect(store.getState().createPolity(sameName, CREATE)).toBe(true)
+      expect(
+        store.getState().document.polities.filter((p) => p.name === 'Duché d’Aquitaine')
+      ).toHaveLength(2)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // The copier is made to fail only after the store is built: `createHistory` copies its baseline at
+    // construction, so a copier that always throws would never reach the action under test.
+    //
+    // **What this records is a real exposure, not a guarantee.** The document is mutated before the line
+    // is asked to record, so the polity is in the document and not in the line: an undo cannot take it
+    // back. Every geometric action at 4d-2 (d) will have the same shape, so it is written up once in
+    // `known-issues.md` rather than argued per action. The assertion here is the honest one — the line
+    // did not move, and the failure is loud.
+    it('propagates a failing copier, leaving the line where it was', () => {
+      const document = sharedBorderDocument()
+      let failing = false
+      const store = createCartographerStore({
+        edition: {
+          document,
+          clone: (doc: YearDocument): YearDocument => {
+            if (failing) throw new Error('copier refused')
+            return cloneYearDocument(doc)
+          },
+        },
+        viewport: { viewport: UNFRAMED },
+      })
+      failing = true
+
+      expect(() => store.getState().createPolity(AQUITAINE_IDENTITY, CREATE)).toThrow(
+        'copier refused'
+      )
+      expect(store.getState().rows).toHaveLength(1)
+      expect(store.getState().canUndo).toBe(false)
+      expect(store.getState().version).toBe(0)
+    })
+  })
+
+  describe('edge cases', () => {
+    // The caller's object must not stay wired to the document: `addPolity` copies what it keeps, so a
+    // form reusing its own draft object cannot rewrite a polity already recorded.
+    it('does not hold the caller’s object', () => {
+      const { store } = openStore()
+      const draft = { ...AQUITAINE_IDENTITY }
+
+      store.getState().createPolity(draft, CREATE)
+      draft.name = 'rewritten after the fact'
+
+      const stored = store.getState().document.polities.find((p) => p.id === 'aquitaine')
+      expect(stored?.name).toBe('Duché d’Aquitaine')
+    })
+
+    it('creates into a year that holds nothing yet', () => {
+      const document = createYearDocument(1100, { west: -45, south: 20, east: 60, north: 76 })
+      const store = createCartographerStore({
+        edition: { document, clone: cloneYearDocument },
+        viewport: { viewport: UNFRAMED },
+      })
+
+      expect(store.getState().createPolity(AQUITAINE_IDENTITY, CREATE)).toBe(true)
+      expect(store.getState().document.polities).toHaveLength(1)
     })
   })
 })

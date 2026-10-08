@@ -13,6 +13,7 @@ import { addAnchor, closeRing } from './documentEdits'
 import { createYearDocument } from './yearDocument'
 
 import type { YearDocument } from './yearDocument'
+import type { YearPolity } from '../data/yearFormat'
 import type { GeoBounds } from '../geo/mercator'
 
 /** The editorial window the author works in, distinct from the render frame. */
@@ -117,4 +118,34 @@ export function firstSharedAnchor(doc: YearDocument): number {
   const index = sharedAnchorsBetween(doc, 'fr-couronne', 'hre')[0]
   if (index === undefined) throw new Error('fixture: the two polities share no anchor')
   return index
+}
+
+/**
+ * An identity with no territory, for the suites that create one.
+ *
+ * **It lives here because it drifted when it did not.** Written out independently in two Cartographer
+ * suites on 2026-10-08, the two copies disagreed on `colour` within the hour and **no test failed** —
+ * neither asserts it. That is the exact failure this module's header names, so the copy came here rather
+ * than being tidied in place.
+ *
+ * **A plain `YearPolity` and not a store helper**, which is the line worth keeping: anything that calls
+ * `createCartographerStore` belongs to the Cartographer and cannot come down here. This is only the
+ * identity, so `core`'s own suites can use it too — `s07`'s bulk import will want exactly this shape.
+ *
+ * `colour` is **null**, like the two polities of {@link sharedBorderDocument}: the palette deciding is the
+ * normal state, and a suite needing a pinned one declares its own rather than making this one lie.
+ *
+ * It is deliberately **not** in {@link sharedBorderDocument} — `drawingTarget`'s suite asserts that
+ * `aquitaine` resolves to nobody in that document, which is how "the target stopped resolving" is tested.
+ */
+export const AQUITAINE_IDENTITY: YearPolity = {
+  id: 'aquitaine',
+  name: 'Duché d’Aquitaine',
+  rank: 'duchy',
+  status: 'country',
+  suzerain: 'fr-couronne',
+  existsFrom: 1058,
+  existsTo: null,
+  colour: null,
+  wikidata: null,
 }

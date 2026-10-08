@@ -1,6 +1,8 @@
+import { addPolity } from '@europe-historical-atlas/core/editor/documentEdits'
 import { createHistory } from '@europe-historical-atlas/core/editor/history'
 
 import type { CartographerStore } from './store'
+import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type {
   History,
   HistoryMarker,
@@ -68,12 +70,36 @@ export interface EditionState {
  * **No action takes a state.** The slice *is* the working document, so `commit` reads it rather than being
  * handed it — which is also what makes it impossible for a caller to record a document the slice is not on.
  *
- * Editing operations (`addAnchor`, `closeRing`, …) are deliberately absent: they arrive with the tools at
- * step 4d, mutate the document in place, and end in a {@link EditionActions.commit}.
+ * The geometric operations (`addAnchor`, `closeRing`, …) are still absent: they arrive with the tools at
+ * step 4d-2 (d), mutate the document in place, and end in a {@link EditionActions.commit}.
+ * {@link EditionActions.createPolity} is the first of the family to land, at 4d-2 (c), because a drawing
+ * target cannot exist before the thing it aims at does.
  */
 export interface EditionActions {
   /** Record a finished gesture. One gesture is one step — never one per pointer move. */
   commit: (step: HistoryStep) => void
+  /**
+   * Create an identity with no territory, as one undoable step.
+   *
+   * **Territory-less is the normal starting state of this map, not a transient one** — at 1100 OHM gives
+   * the Kingdom of France its name, its rank and its Wikidata id and **no geometry at all**, and `s07`'s
+   * bulk import creates dozens of such entries at once. `s02` settles the consequence: changing tool
+   * without having drawn keeps the polity.
+   *
+   * **It mutates and records together**, rather than leaving the caller to do both. The two-call shape —
+   * mutate the document, then `commit` — is available and is the one a caller forgets half of, and the
+   * half that gets forgotten is the commit, which leaves an edit no undo can take back.
+   *
+   * **A duplicate id is returned, not thrown**, and that is the decision rather than an oversight
+   * (`rules/error-handling.md`). Unlike {@link EditionActions.goTo}, whose only caller renders from
+   * {@link EditionState.rows} and so can only miss through a programming fault, a taken id is something
+   * the **author** typed: the form has to be able to point at the id field and say so. Nothing is recorded
+   * when it returns `false` — the document is untouched and the line has not moved.
+   * @param polity - the identity to add, its id already chosen (see `core/editor/polityId`)
+   * @param step - how `{History}` and `[↶ Undo]` will name the gesture
+   * @returns `false` when the id is already taken, and nothing happened
+   */
+  createPolity: (polity: YearPolity, step: HistoryStep) => boolean
   /** Take back the last gesture. Does nothing at the origin: `ctrl+z` at the end of the line is ordinary. */
   undo: () => void
   /** Apply an undone gesture again. Does nothing at the end of the line. */
@@ -202,6 +228,15 @@ export function editionActions(
     commit: (step: HistoryStep): void => {
       line.commit(step, current())
       publish(current())
+    },
+    createPolity: (polity: YearPolity, step: HistoryStep): boolean => {
+      const document = current()
+      // Checked before anything is recorded, so a refusal leaves both the document and the line as they
+      // were. `addPolity` copies what it keeps, so the caller's object cannot be mutated from here later.
+      if (!addPolity(document, polity)) return false
+      line.commit(step, document)
+      publish(document)
+      return true
     },
     undo: (): void => {
       const back = line.undo()

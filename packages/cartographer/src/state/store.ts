@@ -2,9 +2,11 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 
 import { createEditionSlice } from './editionSlice'
+import { createToolSlice } from './toolSlice'
 import { createViewportSlice } from './viewportSlice'
 
 import type { EditionDeps, EditionSlice } from './editionSlice'
+import type { ToolSlice } from './toolSlice'
 import type { ViewportDeps, ViewportSlice } from './viewportSlice'
 
 /**
@@ -12,10 +14,11 @@ import type { ViewportDeps, ViewportSlice } from './viewportSlice'
  *
  * **One store, several slices**, which is the pattern's own rule rather than a taste: a slice is a
  * `(set, get) => ({...})` function, all of them spread into a single store, and a slice reads another
- * through `get()`. Two today: the **edition** — the document and its undo line — and the **viewport**,
- * separate because an undo must never move the view.
- * The rest join as they are built: the active tool at step 4d-2, the visible layers and each panel's own
- * expanded rows at step 5.
+ * through `get()`. Three today: the **edition** — the document and its undo line — the **viewport**,
+ * separate because an undo must never move the view, and the **tools** — which tool is in hand and which
+ * polity the Pen draws for, separate for the same reason stated the other way round by `s99`: choosing a
+ * tool must never become a step to undo.
+ * The rest join as they are built: the visible layers and each panel's own expanded rows at step 5.
  *
  * **The middleware lives here and can live nowhere else.** Applied inside a slice it would wrap that slice's
  * `set` instead of the store's, so the subscription it exists for would miss every other slice. That single
@@ -31,9 +34,14 @@ import type { ViewportDeps, ViewportSlice } from './viewportSlice'
  * every store-level test drives it — including the two that are about this file rather than the slice: that
  * a selector subscription fires at wiring time, and that the store reads as a React hook.
  */
-export type CartographerStore = EditionSlice & ViewportSlice
+export type CartographerStore = EditionSlice & ViewportSlice & ToolSlice
 
-/** What the store needs from the composition root, one entry per slice that has dependencies. */
+/**
+ * What the store needs from the composition root, **one entry per slice that has dependencies**.
+ *
+ * The tool slice has none and therefore has no key here: `s00`'s Background fixes what it opens on
+ * (⟨navigate⟩, nothing aimed at), so a key with one possible value would be ceremony.
+ */
 export interface CartographerStoreDeps {
   /** The document to open on, the copier, and how deep an undo line to keep. */
   edition: EditionDeps
@@ -54,6 +62,7 @@ export function createCartographerStore(deps: CartographerStoreDeps) {
     subscribeWithSelector((...a) => ({
       ...createEditionSlice(deps.edition)(...a),
       ...createViewportSlice(deps.viewport)(...a),
+      ...createToolSlice(...a),
     }))
   )
 }
