@@ -52,7 +52,7 @@ describe('the application entry', () => {
         await import('./main')
       })
 
-      expect(root.querySelector('h1')?.textContent).toBe('Cartographe — année 1100')
+      expect(root.querySelector('h1')?.textContent).toBe('Cartographer — year 1100')
     })
 
     it('mounts the canvas area, which waits for its backdrop before drawing', async () => {
@@ -69,7 +69,7 @@ describe('the application entry', () => {
       // until the relief has landed. What a reader gets meanwhile is a `status` — announced, not blank.
       const waiting = root.querySelector('[role="status"]')
 
-      expect(waiting?.textContent).toContain('Préparation du fond de carte')
+      expect(waiting?.textContent).toContain('Preparing the backdrop')
       expect(root.querySelector('canvas')).toBeNull()
     })
 

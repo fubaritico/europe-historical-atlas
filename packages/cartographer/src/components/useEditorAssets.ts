@@ -23,7 +23,7 @@ export interface EditorAssetsState {
  * app in it on purpose. The first version kept a `started` flag: the second setup saw it and returned
  * immediately, so the only `.then` in existence stayed bound to the **first** invocation's closure — whose
  * cleanup had just cancelled it. The assets loaded, the terrain baked, and the answer was dropped on the
- * floor: the editor sat on *"Préparation du fond de carte…"* for ever. Found in review, and only because
+ * floor: the editor sat on *"Preparing the backdrop…"* for ever. Found in review, and only because
  * the test was made to assert that the canvas actually appears — counting the calls could not see it.
  *
  * So: the **promise** lives in a ref, created on whichever invocation finds the ref empty, and **every**

@@ -52,7 +52,7 @@ export interface MapCanvasProps {
  * finding in its own comments.
  */
 const CANVAS_INSTRUCTIONS =
-  'Flèches pour déplacer la carte, plus et moins ou Page haut et Page bas pour zoomer.'
+  'Arrow keys to pan the map, plus and minus or Page Up and Page Down to zoom.'
 
 /** Off-screen but in the accessibility tree — the instruction text has nothing to show visually. */
 const offScreen = {

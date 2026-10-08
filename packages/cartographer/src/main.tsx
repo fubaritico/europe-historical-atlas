@@ -39,10 +39,12 @@ import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapC
  * store reached by `import` from a pure module is the global singleton `rules/modular-architecture.md`
  * forbids, and the undo line needs a copier whatever we do — so there was a seam to pass through regardless.
  *
- * **The store is built from slices, one per owner of a piece of state**, combined in `state/store.ts` where
- * the middleware also lives. Today the only slice is the edition — the document and its undo line; the
- * active tool, the viewport, the visible layers and each panel's own rows join it as they are built. The
- * `edition:` key here is that structure showing through, and it is why there is one.
+ * **The store is built from slices, one per owner of a piece of state**, combined in `state/store.ts`, where
+ * the middleware also lives and where the inventory of slices is kept. It is deliberately **not** repeated
+ * here: this paragraph used to list them and was already wrong by two before anyone noticed, which is the
+ * `ARCH-101` shape — a fact written in a second place nobody reopens. What belongs here is only why this
+ * file has `edition:` and `viewport:` keys at all, and that is because those two slices have collaborators
+ * to inject; a slice with no dependencies gets no key.
  *
  * `StrictMode` is kept, and it is not free: it double-invokes renders and effects in development to surface
  * impure ones. That is the defect a canvas editor produces most easily, since painting is a side effect and
@@ -145,13 +147,13 @@ const loadTheBackdrop = async (onProgress: ProgressReport) => {
 createRoot(container).render(
   <StrictMode>
     <main style={{ position: 'absolute', inset: 0 }}>
-      <h1 style={visuallyHidden}>Cartographe — année {store.getState().document.year}</h1>
+      <h1 style={visuallyHidden}>Cartographer — year {store.getState().document.year}</h1>
       <MapArea
         store={store}
         load={loadTheBackdrop}
         style={CHROME_PAINT_STYLE}
-        zoneLabel={`zone éditoriale — ${String(store.getState().document.year)}`}
-        label={`Carte de l'année ${String(store.getState().document.year)}, en cours d'édition`}
+        zoneLabel={`editorial zone — ${String(store.getState().document.year)}`}
+        label={`Map of the year ${String(store.getState().document.year)}, being edited`}
       />
     </main>
   </StrictMode>

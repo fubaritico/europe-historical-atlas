@@ -99,7 +99,7 @@ describe('BackdropWaiting', () => {
       const status = screen.getByRole('status')
 
       // `status` and not `alert`: nothing has gone wrong, so a screen reader must not be interrupted.
-      expect(status.textContent).toContain('Préparation du fond de carte')
+      expect(status.textContent).toContain('Preparing the backdrop')
       expect(screen.getByRole('progressbar').getAttribute('value')).toBe('0.4')
     })
 
@@ -109,27 +109,27 @@ describe('BackdropWaiting', () => {
       render(<BackdropWaiting fraction={0.4} phase="bake" />)
 
       expect(screen.getByRole('progressbar').getAttribute('aria-label')).toBe(
-        'composition du relief'
+        'compositing the relief'
       )
 
       render(<BackdropWaiting fraction={0} phase={null} />)
 
       // Before the first announcement there is no phase, and the label must not read `undefined`.
       expect(screen.getAllByRole('progressbar').at(-1)?.getAttribute('aria-label')).toBe(
-        'Préparation du fond de carte'
+        'Preparing the backdrop'
       )
     })
   })
 
   describe('variants', () => {
-    it('names the phase in French, and says nothing before the first announcement', () => {
+    it('names the phase, and says nothing before the first announcement', () => {
       render(<BackdropWaiting fraction={0} phase={null} />)
 
       expect(screen.getByRole('status').textContent).not.toContain('composition')
 
       render(<BackdropWaiting fraction={0.1} phase="bake" />)
 
-      expect(screen.getAllByRole('status').at(-1)?.textContent).toContain('composition du relief')
+      expect(screen.getAllByRole('status').at(-1)?.textContent).toContain('compositing the relief')
     })
   })
 
@@ -138,7 +138,7 @@ describe('BackdropWaiting', () => {
       render(<BackdropWaiting fraction={1} phase="bake" />)
 
       expect(screen.getByRole('progressbar').getAttribute('value')).toBe('1')
-      expect(screen.getByRole('status').textContent).toContain('Préparation')
+      expect(screen.getByRole('status').textContent).toContain('Preparing')
     })
   })
 
@@ -165,7 +165,7 @@ describe('BackdropFailure', () => {
     it('says why no year can be opened, which is the part that is not obvious', () => {
       render(<BackdropFailure error={new Error('whatever')} />)
 
-      expect(screen.getByRole('alert').textContent).toContain('le repère géographique')
+      expect(screen.getByRole('alert').textContent).toContain('the coordinate system')
     })
   })
 
@@ -252,7 +252,7 @@ describe('MapArea', () => {
       })
 
       expect(screen.getByRole('progressbar').getAttribute('value')).toBe('0.75')
-      expect(screen.getByRole('status').textContent).toContain('composition du relief')
+      expect(screen.getByRole('status').textContent).toContain('compositing the relief')
 
       await inAct(() => {
         release?.()
@@ -284,8 +284,8 @@ describe('MapArea', () => {
 
       // A focusable, named element that answers to arrow keys says nothing about them on its own —
       // found in review, once `attach.ts` had made the canvas keyboard-operable.
-      expect(instructions?.textContent).toContain('Flèches')
-      expect(instructions?.textContent).toContain('zoomer')
+      expect(instructions?.textContent).toContain('Arrow keys')
+      expect(instructions?.textContent).toContain('to zoom')
       // No `role`, deliberately: `role="application"` would put several screen readers into a mode that
       // suppresses their own navigation for the whole page. See the component's own header.
       expect(canvas.getAttribute('role')).toBeNull()
@@ -327,7 +327,7 @@ describe('MapArea', () => {
       // alert with nothing in it — the author must learn that the backdrop is not coming.
       const alert = screen.getByRole('alert')
 
-      expect(alert.textContent).toContain('n’a pas pu être préparé')
+      expect(alert.textContent).toContain('could not be prepared')
       expect(screen.queryByRole('status')).toBeNull()
     })
   })

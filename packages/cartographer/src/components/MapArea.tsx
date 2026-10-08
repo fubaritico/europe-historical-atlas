@@ -69,13 +69,13 @@ export interface MapAreaProps {
   label: string
 }
 
-/** The French name of each phase a bake can announce, for the waiting line. */
+/** What each phase of a bake is called, for the waiting line. */
 const PHASE_LABELS: Record<ComputePhase, string> = {
-  rasterise: 'tracé des territoires',
-  expand: 'extension jusqu’aux côtes',
-  colours: 'attribution des couleurs',
-  bake: 'composition du relief',
-  borders: 'dérivation des frontières',
+  rasterise: 'tracing the territories',
+  expand: 'expanding to the coasts',
+  colours: 'assigning the colours',
+  bake: 'compositing the relief',
+  borders: 'deriving the borders',
 }
 
 /** How the area fills its parent, in all three states, so nothing jumps when one replaces another. */
@@ -121,10 +121,10 @@ export function BackdropWaiting({ fraction, phase }: BackdropWaitingProps) {
   // this must say what is progressing and not repeat the number. Derived per render rather than fixed:
   // a hard-coded phase would go stale, which is the same gap as no label, just later. Same pattern as
   // the atlas's own progress overlay, which keeps the `aria-label` in step with its caption.
-  const measuring = phase === null ? 'Préparation du fond de carte' : PHASE_LABELS[phase]
+  const measuring = phase === null ? 'Preparing the backdrop' : PHASE_LABELS[phase]
   return (
     <div style={NOTICE} role="status">
-      <p>Préparation du fond de carte…</p>
+      <p>Preparing the backdrop…</p>
       <progress value={fraction} max={1} aria-label={measuring}>
         {percent} %
       </progress>
@@ -161,9 +161,9 @@ export function BackdropFailure({ error }: BackdropFailureProps) {
       : String(error)
   return (
     <div style={NOTICE} role="alert">
-      <p>Le fond de carte n’a pas pu être préparé.</p>
+      <p>The backdrop could not be prepared.</p>
       <p>{detail}</p>
-      <p>Aucune année ne peut être ouverte sans lui : le relief porte le repère géographique.</p>
+      <p>No year can be opened without it: the relief carries the coordinate system.</p>
     </div>
   )
 }
