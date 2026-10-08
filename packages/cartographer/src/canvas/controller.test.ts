@@ -14,6 +14,7 @@ import {
   MAX_SCALE,
   scaleLimitsFor,
   startCanvasController,
+  wheelZoomFactor,
 } from './controller'
 import { CHROME_PAINT_STYLE } from './style'
 
@@ -154,7 +155,7 @@ describe('startCanvasController', () => {
       const at = [300, 220] as const
       const held = screenToBackdrop(before, at)
 
-      const event = pointerEvent('wheel', { offsetX: at[0], offsetY: at[1], deltaY: -1 })
+      const event = pointerEvent('wheel', { offsetX: at[0], offsetY: at[1], deltaY: -100 })
       node.dispatchEvent(event)
       const after = store.getState().viewport
 
@@ -186,10 +187,10 @@ describe('startCanvasController', () => {
       const { node, store, dispose } = attach()
       // Zoom in first: the editor opens exactly on its lower bound, so there is nothing to zoom out of
       // until it has zoomed in. That is the point of the bound.
-      node.dispatchEvent(pointerEvent('wheel', { offsetX: 10, offsetY: 10, deltaY: -1 }))
+      node.dispatchEvent(pointerEvent('wheel', { offsetX: 10, offsetY: 10, deltaY: -100 }))
       const zoomedIn = store.getState().viewport.scale
 
-      node.dispatchEvent(pointerEvent('wheel', { offsetX: 10, offsetY: 10, deltaY: 1 }))
+      node.dispatchEvent(pointerEvent('wheel', { offsetX: 10, offsetY: 10, deltaY: 100 }))
 
       expect(store.getState().viewport.scale).toBeLessThan(zoomedIn)
       dispose()
@@ -203,7 +204,7 @@ describe('startCanvasController', () => {
         TEST_BACKDROP_FRAME.size
       )
 
-      node.dispatchEvent(pointerEvent('wheel', { offsetX: 10, offsetY: 10, deltaY: 1 }))
+      node.dispatchEvent(pointerEvent('wheel', { offsetX: 10, offsetY: 10, deltaY: 100 }))
 
       // A first version computed the bound without the framing margin, which put the opening view
       // *below* the minimum — so the first notch in either direction snapped the map.
@@ -435,7 +436,7 @@ describe('startCanvasController', () => {
       dispose()
       const settled = store.getState().viewport
 
-      node.dispatchEvent(pointerEvent('wheel', { offsetX: 10, offsetY: 10, deltaY: -1 }))
+      node.dispatchEvent(pointerEvent('wheel', { offsetX: 10, offsetY: 10, deltaY: -100 }))
       node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 0, offsetY: 0 }))
       node.dispatchEvent(pointerEvent('pointermove', { offsetX: 200, offsetY: 0 }))
 
@@ -448,7 +449,7 @@ describe('startCanvasController', () => {
       const second = attach()
       const settled = second.store.getState().viewport
 
-      second.node.dispatchEvent(pointerEvent('wheel', { offsetX: 10, offsetY: 10, deltaY: -1 }))
+      second.node.dispatchEvent(pointerEvent('wheel', { offsetX: 10, offsetY: 10, deltaY: -100 }))
 
       expect(second.store.getState().viewport.scale).toBeGreaterThan(settled.scale)
       second.dispose()
@@ -498,7 +499,7 @@ describe('repaint coalescing', () => {
       frames.run() // the paint `fireImmediately` asked for at wiring time
 
       for (let i = 0; i < 5; i++) {
-        node.dispatchEvent(pointerEvent('wheel', { offsetX: 100, offsetY: 100, deltaY: -1 }))
+        node.dispatchEvent(pointerEvent('wheel', { offsetX: 100, offsetY: 100, deltaY: -100 }))
       }
 
       // The defect this test exists for: painting straight out of the handler redrew a 2 560 × 2 328
@@ -515,9 +516,9 @@ describe('repaint coalescing', () => {
       const { node, dispose } = attach()
       frames.run()
 
-      node.dispatchEvent(pointerEvent('wheel', { offsetX: 100, offsetY: 100, deltaY: -1 }))
+      node.dispatchEvent(pointerEvent('wheel', { offsetX: 100, offsetY: 100, deltaY: -100 }))
       frames.run()
-      node.dispatchEvent(pointerEvent('wheel', { offsetX: 100, offsetY: 100, deltaY: -1 }))
+      node.dispatchEvent(pointerEvent('wheel', { offsetX: 100, offsetY: 100, deltaY: -100 }))
 
       // A latch that never reopens is the other way to get this wrong, and it looks identical until
       // the map stops following the wheel entirely.
@@ -532,7 +533,7 @@ describe('repaint coalescing', () => {
       const frames = frameControl()
       const { node, dispose } = attach()
       frames.run()
-      node.dispatchEvent(pointerEvent('wheel', { offsetX: 100, offsetY: 100, deltaY: -1 }))
+      node.dispatchEvent(pointerEvent('wheel', { offsetX: 100, offsetY: 100, deltaY: -100 }))
 
       dispose()
 
@@ -744,6 +745,71 @@ describe('the tool keys and the cursor', () => {
       expect(node.style.cursor).not.toBe('')
       expect(document.body.style.cursor).toBe('')
       dispose()
+    })
+  })
+})
+
+describe('wheelZoomFactor', () => {
+  describe('happy path', () => {
+    it('keeps a mouse notch at the 1.1 it always was', () => {
+      // The one thing about the old behaviour that was right, so it is the calibration point.
+      expect(wheelZoomFactor(-100, 0)).toBeCloseTo(1.1, 6)
+      expect(wheelZoomFactor(100, 0)).toBeCloseTo(1 / 1.1, 6)
+    })
+  })
+
+  describe('variants', () => {
+    /*
+     * THE guard, and it is what makes a trackpad the same device as a mouse.
+     *
+     * The version this replaces multiplied by a fixed factor per EVENT and discarded `deltaY`. A mouse
+     * notch is one event; a trackpad swipe is sixty to a hundred and twenty a second — so the same
+     * gesture was 1.1 on one and 1.1³⁰ ≈ 17× on the other. No constant fixes that; only arithmetic
+     * that composes does.
+     */
+    it('is exponential, so many small events equal one large one', () => {
+      const inOneGo = wheelZoomFactor(-100, 0)
+      let stepped = 1
+      for (let i = 0; i < 50; i += 1) stepped *= wheelZoomFactor(-2, 0)
+
+      expect(stepped).toBeCloseTo(inOneGo, 9)
+    })
+
+    it('reads lines and pages as the travel they are, not as pixels', () => {
+      // `deltaMode` 1 is lines, and a mouse reporting them is ordinary rather than exotic. Read as a
+      // pixel, that mouse would be sixteen times gentler than the same mouse elsewhere.
+      expect(wheelZoomFactor(-3, 1)).toBeCloseTo(wheelZoomFactor(-48, 0), 9)
+      expect(wheelZoomFactor(-1, 2)).toBeCloseTo(wheelZoomFactor(-400, 0), 9)
+    })
+
+    it('is symmetrical: a swipe and its opposite return where they started', () => {
+      expect(wheelZoomFactor(-37, 0) * wheelZoomFactor(37, 0)).toBeCloseTo(1, 12)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('does nothing for no travel, rather than drifting', () => {
+      expect(wheelZoomFactor(0, 0)).toBe(1)
+    })
+
+    it('treats an unknown delta mode as pixels rather than refusing', () => {
+      // A mode we have never seen is likelier to be pixel-like than to be nothing, and the only other
+      // answer — zooming by zero — would be a dead wheel with no message.
+      expect(wheelZoomFactor(-100, 7)).toBeCloseTo(wheelZoomFactor(-100, 0), 9)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('stays finite for the enormous deltas a flung trackpad can report', () => {
+      expect(Number.isFinite(wheelZoomFactor(-100_000, 0))).toBe(true)
+      expect(wheelZoomFactor(100_000, 0)).toBeGreaterThan(0)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('never returns a negative factor, which would mirror the map', () => {
+      for (const delta of [-5000, -1, 0, 1, 5000])
+        expect(wheelZoomFactor(delta, 0)).toBeGreaterThan(0)
     })
   })
 })

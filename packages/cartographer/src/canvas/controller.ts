@@ -106,8 +106,50 @@ export const MAX_SCALE = 32
 /** Screen pixels left around the backdrop when it is first framed, so its edge is not flush. */
 export const FRAME_MARGIN = 24
 
-/** How much one wheel notch scales the view. */
-export const WHEEL_STEP = 1.1
+/** How much one press of a zoom key scales the view. A key is one discrete step, so it stays a factor. */
+export const KEY_ZOOM_STEP = 1.1
+
+/**
+ * How many device pixels of wheel travel double the scale — the wheel's zoom, in one number.
+ *
+ * **The wheel is not a key, and treating it as one is what made the zoom unusable.** Until 2026-10-09 a
+ * wheel event multiplied the scale by a fixed 1.1 and `deltaY`'s magnitude was thrown away. A mouse
+ * notch produces one event; a trackpad swipe produces sixty to a hundred and twenty a second. So the
+ * same gesture was 1.1 on a mouse and 1.1³⁰ ≈ 17× on a trackpad, which is the "trop sensible" the dev
+ * reported and is not a value that could have been tuned — the two devices needed different arithmetic,
+ * not a different constant.
+ *
+ * Scaling **exponentially in the distance travelled** makes it one device again: `exp(−Δ · k)` composes,
+ * so sixty small events and one large one of the same total travel land on exactly the same scale.
+ *
+ * Calibrated so a 100-pixel delta — one notch of a conventional mouse wheel — still gives the 1.1 it
+ * always gave, which is the one thing about the old behaviour that was right.
+ */
+export const ZOOM_PER_PIXEL = Math.log(1.1) / 100
+
+/**
+ * Device pixels of travel per unit of `deltaMode`, since a wheel does not report in one unit.
+ *
+ * `deltaMode` is 0 for pixels, 1 for lines and 2 for pages, and a mouse reporting lines is ordinary
+ * rather than exotic — Firefox on Windows does it. Reading a line as a pixel would make that mouse
+ * sixteen times gentler than the same mouse in another browser, which reads as "the zoom is broken
+ * here" and is in fact a unit never converted.
+ */
+const DELTA_UNIT: Record<number, number> = { 0: 1, 1: 16, 2: 400 }
+
+/**
+ * What one wheel event should multiply the scale by.
+ *
+ * Exported so a test can read it with a literal event rather than through the DOM, and so the two
+ * normalisations — the unit, and the exponential — are visible in one place.
+ * @param deltaY - the event's own travel, in its own unit
+ * @param deltaMode - 0 pixels, 1 lines, 2 pages
+ * @returns the factor to apply to the scale
+ */
+export function wheelZoomFactor(deltaY: number, deltaMode: number): number {
+  const pixels = deltaY * (DELTA_UNIT[deltaMode] ?? 1)
+  return Math.exp(-pixels * ZOOM_PER_PIXEL)
+}
 
 /**
  * How far the pointer must travel, in device pixels, before a press counts as a drag.
@@ -352,7 +394,7 @@ function settle(it: LiveCanvas, viewport: Viewport): void {
 function onWheel(it: LiveCanvas, event: WheelEvent): void {
   event.preventDefault()
   const state = it.deps.store.getState()
-  const factor = event.deltaY < 0 ? WHEEL_STEP : 1 / WHEEL_STEP
+  const factor = wheelZoomFactor(event.deltaY, event.deltaMode)
   settle(
     it,
     zoomAbout(
@@ -471,7 +513,7 @@ function onKeyDown(it: LiveCanvas, event: KeyboardEvent): void {
   if (!zoomIn && !ZOOM_OUT_KEYS.has(event.key)) return
   event.preventDefault()
   const centre: [number, number] = [it.size.width / 2, it.size.height / 2]
-  const factor = zoomIn ? WHEEL_STEP : 1 / WHEEL_STEP
+  const factor = zoomIn ? KEY_ZOOM_STEP : 1 / KEY_ZOOM_STEP
   settle(it, zoomAbout(state.viewport, centre, factor, scaleLimitsFor(it.size, it.deps.frame.size)))
 }
 
