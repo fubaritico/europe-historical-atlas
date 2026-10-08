@@ -48,7 +48,15 @@ export interface Painter2D {
   /** Stroke the current path. */
   stroke: () => void
   /** Fill the current path. */
-  fill: () => void
+  /**
+   * Fill the current path.
+   *
+   * It takes the fill rule because the veil needs it: the canvas minus the zone is one path with a
+   * hole, and a hole is `evenodd`. Optional, so every other call reads as before.
+   */
+  fill: (fillRule?: 'nonzero' | 'evenodd') => void
+  /** Add an axis-aligned rectangle to the current path — what the veil is made of. */
+  rect: (x: number, y: number, width: number, height: number) => void
   /** Draw text. */
   fillText: (text: string, x: number, y: number) => void
   /** Draw an image, scaled into a destination rectangle — the backdrop. */
@@ -95,10 +103,24 @@ export interface PaintStyle {
   background: string
   /** The editorial zone's frame. `rgba(42, 38, 31, 0.5)`, one pixel. */
   zoneStroke: string
-  /** The zone's name, written above its frame. `#4a4238`. */
+  /** How wide that frame is, in screen pixels. */
+  zoneWidth: number
+  /**
+   * What dims the ground **outside** the zone, so the planche reads as the planche.
+   *
+   * The dev's call, 2026-10-09, looking at a screenshot where the zone was a hairline nobody could
+   * find: *"il faut peut-être mettre ce qui est en dehors de la zone éditoriale derrière un voile noir
+   * 25%."* It also says something true — outside it, this year may not be drawn.
+   */
+  zoneVeil: string
+  /** The zone's name. `#4a4238`. */
   zoneLabel: string
-  /** The font of that name. `11px` in the design. */
-  labelFont: string
+  /** The size of that name, in screen pixels. `11px` in the design. */
+  labelSize: number
+  /** Its family, separate from its size so the size can be scaled. */
+  labelFamily: string
+  /** How far the name sits from the zone's corner, in screen pixels. */
+  labelPad: number
   /** The edit stroke: thin, crisp, blue, no casing (decided 2026-09-22). */
   pathStroke: string
   /** How wide that stroke is, in screen pixels. */
@@ -193,18 +215,32 @@ const FULL_TURN = Math.PI * 2
  * @param scene - what to draw
  * @param style - the colours and sizes
  */
-function paintZone(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): void {
+function paintZone(ctx: Painter2D, size: PixelSize, scene: CanvasScene, style: PaintStyle): void {
+  const zone = scene.editorialZone
+  // The veil, as one even-odd fill: the whole canvas, minus the zone. Two paths and one `fill` rather
+  // than four rectangles around the hole, which is the same picture and four chances to leave a seam.
+  ctx.fillStyle = style.zoneVeil
+  ctx.beginPath()
+  ctx.rect(0, 0, size.width, size.height)
+  ctx.rect(zone.x, zone.y, zone.width, zone.height)
+  ctx.fill('evenodd')
+
   ctx.strokeStyle = style.zoneStroke
-  ctx.lineWidth = 1
-  ctx.strokeRect(
-    scene.editorialZone.x,
-    scene.editorialZone.y,
-    scene.editorialZone.width,
-    scene.editorialZone.height
-  )
+  ctx.lineWidth = style.zoneWidth
+  ctx.strokeRect(zone.x, zone.y, zone.width, zone.height)
+
+  // Written INSIDE the zone, at the corner of whatever part of it is on screen.
+  //
+  // It sat above the frame until 2026-10-09, at `y - 6`, which put it off the top of the canvas as soon
+  // as the zone's northern limit was above the view — and flush against the edge the rest of the time,
+  // which is what the dev saw. Clamping to the visible corner keeps it where the thing it names is.
   ctx.fillStyle = style.zoneLabel
-  ctx.font = style.labelFont
-  ctx.fillText(scene.zoneLabel, scene.editorialZone.x, scene.editorialZone.y - 6)
+  ctx.font = `${String(style.labelSize)}px ${style.labelFamily}`
+  ctx.fillText(
+    scene.zoneLabel,
+    Math.max(zone.x, 0) + style.labelPad,
+    Math.max(zone.y, 0) + style.labelPad + style.labelSize
+  )
 }
 
 /**
@@ -384,7 +420,7 @@ export function paintCanvas(
     ctx.drawImage(scene.backdrop.image, rect.x, rect.y, rect.width, rect.height)
   }
   paintVectors(ctx, size, scene, style)
-  paintZone(ctx, scene, style)
+  paintZone(ctx, size, scene, style)
   ctx.strokeStyle = style.pathStroke
   ctx.lineWidth = style.pathWidth
   for (const ring of scene.rings) strokeRing(ctx, ring)

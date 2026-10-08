@@ -5,6 +5,7 @@ import { panBy, screenToBackdrop, zoomAbout } from '../view/viewport'
 import { createAnchorCache } from './anchorCache'
 import { paintCanvas } from './painter'
 import { buildScene } from './scene'
+import { inDevicePixels } from './style'
 
 import type { AnchorCache } from './anchorCache'
 import type { PaintStyle, Painter2D } from './painter'
@@ -144,6 +145,8 @@ interface LiveCanvas {
   ctx: Painter2D
   /** What to draw and how. */
   deps: CanvasControllerDeps
+  /** Device pixels per screen pixel, as of the last resize — what the style is scaled by. */
+  ratio: number
   /** The canvas size in device pixels, refreshed on resize. */
   size: PixelSize
   /** Where the pointer went down, in device pixels; `null` when no button is held. */
@@ -213,7 +216,7 @@ function repaint(it: LiveCanvas): void {
     selected: new Set<number>(),
     zoneLabel: it.deps.zoneLabel,
   })
-  paintCanvas(it.ctx, it.size, scene, it.deps.style)
+  paintCanvas(it.ctx, it.size, scene, inDevicePixels(it.deps.style, it.ratio))
 }
 
 /**
@@ -230,12 +233,21 @@ function repaint(it: LiveCanvas): void {
  *
  * `UNFRAMED` is `scale: 0`, so "nobody has chosen a view yet" is a question the shared state can answer
  * and an ephemeral object cannot.
+ * **This is the one paint that is NOT coalesced onto a frame, and the flicker is why.** Assigning
+ * `node.width` **clears the canvas immediately** — that is what the HTML spec says a size assignment
+ * does — while the subscription's paint waits for the next `requestAnimationFrame`. So every resize
+ * event showed one blank frame, which during a window drag is a continuous flicker. Coalescing is right
+ * for the wheel, where 120 events arrive per second and nothing is destroyed between them; it is wrong
+ * here, where the clear has already happened. Reported by the dev on 2026-10-09, and visible on screen
+ * rather than deduced.
  * @param it - the attachment to resize
  */
 function resize(it: LiveCanvas): void {
   const ratio = window.devicePixelRatio
   const width = Math.max(0, Math.round(it.node.clientWidth * ratio))
   const height = Math.max(0, Math.round(it.node.clientHeight * ratio))
+  // Read at every resize and never cached at mount: a window dragged to a second screen changes it.
+  it.ratio = ratio
   it.size = { width, height }
   it.node.width = width
   it.node.height = height
@@ -256,6 +268,7 @@ function resize(it: LiveCanvas): void {
         FRAME_MARGIN
       )
     )
+    repaint(it)
     return
   }
   // A view already chosen still has to be re-held: growing the window can leave a scale below the new
@@ -264,6 +277,7 @@ function resize(it: LiveCanvas): void {
     ...state.viewport,
     scale: Math.max(state.viewport.scale, scaleLimitsFor(it.size, it.deps.frame.size).min),
   })
+  repaint(it)
 }
 
 /**
@@ -464,6 +478,7 @@ export function startCanvasController(
     node,
     ctx,
     deps,
+    ratio: 1,
     size: { width: 0, height: 0 },
     pressAt: null,
     dragging: false,

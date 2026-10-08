@@ -10,7 +10,7 @@ interface Call {
   /** The member called. */
   op: string
   /** Its arguments — the backdrop passes an image source among them. */
-  args: (number | string | CanvasImageSource)[]
+  args: (number | string | CanvasImageSource | undefined)[]
   /** The fill colour at the time. */
   fillStyle: string | CanvasGradient | CanvasPattern
   /** The stroke colour at the time. */
@@ -36,7 +36,7 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
   } = { fillStyle: '', strokeStyle: '', lineWidth: 0, font: '' }
   const record =
     (op: string) =>
-    (...args: (number | string | CanvasImageSource)[]): void => {
+    (...args: (number | string | CanvasImageSource | undefined)[]): void => {
       calls.push({
         op,
         args,
@@ -56,6 +56,7 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
     arc: record('arc'),
     stroke: record('stroke'),
     fill: record('fill'),
+    rect: record('rect'),
     fillText: record('fillText'),
     drawImage: record('drawImage'),
     setTransform: record('setTransform'),
@@ -92,7 +93,11 @@ const STYLE: PaintStyle = {
   background: '#d9ccad',
   zoneStroke: 'rgba(42, 38, 31, 0.5)',
   zoneLabel: '#4a4238',
-  labelFont: '11px sans-serif',
+  zoneWidth: 1,
+  zoneVeil: 'rgba(0, 0, 0, 0.25)',
+  labelSize: 11,
+  labelFamily: 'sans-serif',
+  labelPad: 8,
   pathStroke: '#5b93d6',
   pathWidth: 1,
   anchorFill: '#ffffff',
@@ -150,7 +155,7 @@ describe('painter', () => {
       expect(calls[1]?.fillStyle).toBe('#d9ccad')
     })
 
-    it('frames the editorial zone and names it above the frame', () => {
+    it('frames the editorial zone and names it inside the frame', () => {
       const { ctx, calls } = recordingContext()
 
       paintCanvas(ctx, SIZE, scene(), STYLE)
@@ -160,8 +165,41 @@ describe('painter', () => {
 
       expect(frame?.args).toEqual([50, 60, 400, 300])
       expect(frame?.strokeStyle).toBe('rgba(42, 38, 31, 0.5)')
-      expect(label?.args).toEqual(['editorial zone', 50, 54])
+      // Inside, at the corner plus the padding, the baseline one line down. It was at `y - 6` until
+      // 2026-10-09 — above the frame, so off the canvas whenever the zone's north was above the view.
+      expect(label?.args).toEqual(['editorial zone', 50 + 8, 60 + 8 + 11])
       expect(label?.fillStyle).toBe('#4a4238')
+    })
+
+    it('veils everything outside the zone, as one path with a hole', () => {
+      const { ctx, calls } = recordingContext()
+
+      paintCanvas(ctx, SIZE, scene(), STYLE)
+
+      const veil = calls.find((call) => call.op === 'fill' && call.args[0] === 'evenodd')
+      const rects = calls.filter((call) => call.op === 'rect')
+
+      expect(veil?.fillStyle).toBe('rgba(0, 0, 0, 0.25)')
+      // The canvas, then the zone — the second is the hole, which is what `evenodd` makes of it.
+      expect(rects.map((call) => call.args)).toEqual([
+        [0, 0, SIZE.width, SIZE.height],
+        [50, 60, 400, 300],
+      ])
+    })
+
+    it('keeps the name on screen when the zone runs off the top left', () => {
+      const { ctx, calls } = recordingContext()
+
+      paintCanvas(
+        ctx,
+        SIZE,
+        { ...scene(), editorialZone: { x: -200, y: -150, width: 900, height: 800 } },
+        STYLE
+      )
+      const label = calls.find((call) => call.op === 'fillText')
+
+      // Clamped to the visible corner rather than drawn off-canvas at −192.
+      expect(label?.args).toEqual(['editorial zone', 8, 8 + 11])
     })
 
     it('strokes a ring as a closed path, in the edit ink', () => {
@@ -169,9 +207,15 @@ describe('painter', () => {
 
       paintCanvas(ctx, SIZE, scene({ rings: [SQUARE] }), STYLE)
 
-      const path = calls.filter((call) =>
-        ['beginPath', 'moveTo', 'lineTo', 'closePath', 'stroke'].includes(call.op)
-      )
+      // From the first `moveTo` on: the veil opens a path of its own before any ring is reached, and
+      // this test is about the ring. Taking the whole sequence made it fail for the veil's beginPath,
+      // which says nothing about how an outline is stroked.
+      const start = calls.findIndex((call) => call.op === 'moveTo')
+      const path = calls
+        .slice(start - 1)
+        .filter((call) =>
+          ['beginPath', 'moveTo', 'lineTo', 'closePath', 'stroke'].includes(call.op)
+        )
 
       expect(ops(path)).toEqual([
         'beginPath',
@@ -295,7 +339,9 @@ describe('painter', () => {
 
       paintCanvas(ctx, SIZE, scene({ rings: [[]] }), STYLE)
 
-      expect(ops(calls)).not.toContain('beginPath')
+      // No ring is drawn, so nothing moves the pen: `moveTo` is the honest marker here. `beginPath`
+      // stopped being one when the veil started opening a path before any ring exists.
+      expect(ops(calls)).not.toContain('moveTo')
     })
   })
 
