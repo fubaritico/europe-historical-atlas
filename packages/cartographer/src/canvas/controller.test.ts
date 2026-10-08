@@ -381,10 +381,13 @@ describe('startCanvasController', () => {
       const { node, store, dispose } = attach()
       const before = store.getState().viewport
 
-      const typed = keyEvent('a')
+      // 'q', not 'a': 'a' became ⟨edit⟩ on 2026-10-09, and 'p' the Pen. The test's point stands and
+      // its example had to move — which is the useful half of it failing.
+      const typed = keyEvent('q')
       node.dispatchEvent(typed)
 
       expect(store.getState().viewport).toEqual(before)
+      expect(store.getState().tool).toBe('navigate')
       expect(typed.defaultPrevented).toBe(false)
       dispose()
     })
@@ -609,6 +612,137 @@ describe('reporting what is under the pointer', () => {
       // A latitude extrapolated past the frame's edge is arithmetic presented as a fact — the
       // plausible wrong answer `rules/error-handling.md` names as the dangerous shape.
       expect(hovered.mock.calls.at(-1)?.[0]).toBeNull()
+      dispose()
+    })
+  })
+})
+
+describe('the tool keys and the cursor', () => {
+  describe('happy path', () => {
+    it('puts the Pen in hand on ‹P› and the arrow on ‹A›', () => {
+      const { node, store, dispose } = attach()
+
+      node.dispatchEvent(keyEvent('p'))
+      expect(store.getState().tool).toBe('draw')
+
+      node.dispatchEvent(keyEvent('a'))
+      expect(store.getState().tool).toBe('edit')
+      dispose()
+    })
+
+    it('opens showing the open hand, ⟨navigate⟩ being the opening tool', () => {
+      const { node, dispose } = attach()
+
+      expect(node.style.cursor).toContain('grab')
+      dispose()
+    })
+  })
+
+  describe('variants', () => {
+    it('answers a capital, a shifted key being the same key', () => {
+      const { node, store, dispose } = attach()
+
+      node.dispatchEvent(keyEvent('P'))
+
+      expect(store.getState().tool).toBe('draw')
+      dispose()
+    })
+
+    it('borrows the hand while ‹space› is held, and gives it back', () => {
+      const { node, store, dispose } = attach()
+      store.getState().selectTool('edit')
+      const withArrow = node.style.cursor
+
+      node.dispatchEvent(keyEvent(' '))
+      expect(node.style.cursor).toContain('grab')
+
+      node.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }))
+      expect(node.style.cursor).toBe(withArrow)
+      dispose()
+    })
+
+    it('shows the closed hand while the view is being dragged', () => {
+      const { node, dispose } = attach()
+
+      node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 100, offsetY: 100 }))
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 200, offsetY: 160 }))
+      expect(node.style.cursor).toContain('grabbing')
+
+      node.dispatchEvent(pointerEvent('pointerup', { offsetX: 200, offsetY: 160 }))
+      expect(node.style.cursor).not.toContain('grabbing')
+      dispose()
+    })
+  })
+
+  describe('managed errors', () => {
+    // THE guard of this rung. A tool can always be picked up; the cursor is what refuses, and it
+    // refuses for BOTH tools — selecting points with nobody selected is selecting whose points?
+    it('refuses under either tool while no polity is selected', () => {
+      const { node, store, dispose } = attach()
+
+      store.getState().selectTool('draw')
+      expect(node.style.cursor).toBe('not-allowed')
+
+      store.getState().selectTool('edit')
+      expect(node.style.cursor).toBe('not-allowed')
+      dispose()
+    })
+
+    it('stops refusing the moment a polity is aimed at, and refuses again after an undo', () => {
+      const { node, store, dispose } = attach()
+      store.getState().createPolity(
+        {
+          id: 'aquitaine',
+          name: 'Duché d’Aquitaine',
+          rank: 'duchy',
+          status: null,
+          suzerain: null,
+          existsFrom: null,
+          existsTo: null,
+          colour: null,
+          wikidata: null,
+        },
+        { kind: 'create-polity', label: 'create polity' }
+      )
+
+      store.getState().aimAt('aquitaine')
+      expect(node.style.cursor).toContain('crosshair')
+
+      // The target is session state and the polity is document state, so `ctrl+z` takes the subject
+      // away under a tool that was legitimate a second earlier. Nothing watches for it: the cursor is
+      // derived from whether the target resolves.
+      store.getState().undo()
+      expect(node.style.cursor).toBe('not-allowed')
+      dispose()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('does not leave the hand up when the canvas loses focus mid-space', () => {
+      const { node, dispose } = attach()
+      node.dispatchEvent(keyEvent(' '))
+      expect(node.style.cursor).toContain('grab')
+
+      node.dispatchEvent(new FocusEvent('blur'))
+
+      // Released on blur: a ‹space› let go over another window never reaches this node's keyup, and
+      // the hand would stay up for ever — the shape a missing release always has.
+      expect(node.style.cursor).toContain('grab')
+      expect(node.style.cursor).not.toContain('grabbing')
+      dispose()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('writes the cursor on the canvas and never on the body', () => {
+      const { node, store, dispose } = attach()
+
+      store.getState().selectTool('draw')
+
+      // The whole zone behaviour rests on this one line: `cursor` is an element's property, so the
+      // browser restores the platform's pointer over the chrome by itself.
+      expect(node.style.cursor).not.toBe('')
+      expect(document.body.style.cursor).toBe('')
       dispose()
     })
   })

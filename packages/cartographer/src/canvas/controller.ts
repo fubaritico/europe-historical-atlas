@@ -1,8 +1,10 @@
+import { describeDrawingTarget } from '../state/drawingTarget'
 import { backdropBoxOfBounds, clampToCover, coverScale, openingView } from '../view/framing'
 import { backdropToLonLat } from '../view/projection'
 import { panBy, screenToBackdrop, zoomAbout } from '../view/viewport'
 
 import { createAnchorCache } from './anchorCache'
+import { cursorCss, cursorFor } from './cursors'
 import { paintCanvas } from './painter'
 import { buildScene } from './scene'
 import { inDevicePixels } from './style'
@@ -10,6 +12,7 @@ import { inDevicePixels } from './style'
 import type { AnchorCache } from './anchorCache'
 import type { PaintStyle, Painter2D } from './painter'
 import type { CartographerStoreHook } from '../state/store'
+import type { EditorTool } from '../state/toolSlice'
 import type { VectorLayers } from '../vectorLayers'
 import type { BackdropFrame } from '../view/projection'
 import type { PixelSize, ScaleLimits, Viewport } from '../view/viewport'
@@ -131,6 +134,15 @@ const PAN_KEYS: Record<string, [number, number]> = {
   ArrowRight: [-KEY_PAN_STEP, 0],
 }
 
+/**
+ * The two tools, on the keys Illustrator uses — `s00`, settled 2026-09-22 from the dev's own reading.
+ *
+ * Lower-cased before the lookup, so ‹shift+P› still reaches the Pen: a capital is the same key.
+ * ⟨navigate⟩ is deliberately absent — it is reached by *holding* ‹space›, which is a borrow rather than
+ * a choice, and by its button in the rail at step 5.
+ */
+const TOOL_KEYS: Record<string, EditorTool> = { p: 'draw', a: 'edit' }
+
 /** Keys that zoom in — the atlas's own set, and what `design/CURSORS.md` specifies. */
 const ZOOM_IN_KEYS = new Set(['+', '=', 'PageUp'])
 
@@ -145,6 +157,10 @@ interface LiveCanvas {
   ctx: Painter2D
   /** What to draw and how. */
   deps: CanvasControllerDeps
+  /** Whether ‹space› is held, which borrows the hand under any tool. Not store state: it is a key. */
+  spaceHeld: boolean
+  /** The last value written to `style.cursor`, so an unchanged one costs no DOM write. */
+  cursor: string
   /** Device pixels per screen pixel, as of the last resize — what the style is scaled by. */
   ratio: number
   /** The canvas size in device pixels, refreshed on resize. */
@@ -281,6 +297,35 @@ function resize(it: LiveCanvas): void {
 }
 
 /**
+ * Show the cursor the current state calls for.
+ *
+ * **Written on the node, never on `body`** — that single fact is what makes the pointer a tool cursor
+ * over the canvas and the platform's everywhere else, with no enter/leave handling at all.
+ *
+ * **Only when it changes.** The decision is cheap, the DOM write is not: it is called from the wheel
+ * and from the pointer, which arrive faster than frames, and assigning the same string would have the
+ * browser re-resolve the image each time.
+ *
+ * ‹space› is not in the store, deliberately: it is a key being held, not a tool that was chosen, and
+ * `s99` keeps the session's keys out of anything an undo can reach.
+ * @param it - the attachment
+ */
+function showCursor(it: LiveCanvas): void {
+  const state = it.deps.store.getState()
+  const css = cursorCss(
+    cursorFor({
+      tool: state.tool,
+      hasTarget: describeDrawingTarget(state.document, state.target) !== null,
+      dragging: it.dragging,
+      spaceHeld: it.spaceHeld,
+    })
+  )
+  if (css === it.cursor) return
+  it.cursor = css
+  it.node.style.cursor = css
+}
+
+/**
  * Adopt a view, held so the backdrop never uncovers the canvas.
  *
  * **Every `setViewport` in this module goes through here, and that is the point.** A hold applied at
@@ -361,6 +406,7 @@ function onPointerMove(it: LiveCanvas, event: PointerEvent): void {
   if (from === null) return
   if (!it.dragging && Math.hypot(to[0] - from[0], to[1] - from[1]) <= DRAG_TOLERANCE) return
   it.dragging = true
+  showCursor(it)
   const state = it.deps.store.getState()
   settle(it, panBy(state.viewport, to[0] - from[0], to[1] - from[1]))
   it.pressAt = to
@@ -374,6 +420,7 @@ function onPointerMove(it: LiveCanvas, event: PointerEvent): void {
 function onPointerUp(it: LiveCanvas, event: PointerEvent): void {
   it.pressAt = null
   it.dragging = false
+  showCursor(it)
   if (it.node.hasPointerCapture(event.pointerId)) it.node.releasePointerCapture(event.pointerId)
 }
 
@@ -400,6 +447,20 @@ function onPointerUp(it: LiveCanvas, event: PointerEvent): void {
  */
 function onKeyDown(it: LiveCanvas, event: KeyboardEvent): void {
   const state = it.deps.store.getState()
+  // ‹space› borrows the hand for as long as it is held. `preventDefault` because a focusable element
+  // scrolls the page on space, which here would scroll the editor out from under the map.
+  if (event.key === ' ') {
+    event.preventDefault()
+    it.spaceHeld = true
+    showCursor(it)
+    return
+  }
+  const tool = TOOL_KEYS[event.key.toLowerCase()]
+  if (tool !== undefined) {
+    event.preventDefault()
+    state.selectTool(tool)
+    return
+  }
   const pan = PAN_KEYS[event.key]
   if (pan !== undefined) {
     event.preventDefault()
@@ -441,6 +502,17 @@ function listen(it: LiveCanvas): () => void {
   const key = (event: KeyboardEvent): void => {
     onKeyDown(it, event)
   }
+  // The release half of ‹space›. Without it the hand stays in place after the key is let go, which is
+  // the shape of bug a missing `keyup` always has: the state is entered correctly and never left.
+  const releaseSpace = (): void => {
+    if (!it.spaceHeld) return
+    it.spaceHeld = false
+    showCursor(it)
+  }
+  const keyUp = (event: KeyboardEvent): void => {
+    if (event.key !== ' ') return
+    releaseSpace()
+  }
   // Not passive: see `onWheel`. React would have attached it passively through an `onWheel` prop.
   it.node.addEventListener('wheel', wheel, { passive: false })
   it.node.addEventListener('pointerdown', down)
@@ -448,6 +520,9 @@ function listen(it: LiveCanvas): () => void {
   it.node.addEventListener('pointerup', up)
   it.node.addEventListener('pointercancel', up)
   it.node.addEventListener('keydown', key)
+  it.node.addEventListener('keyup', keyUp)
+  // Letting go outside the canvas would otherwise leave the hand up for ever.
+  it.node.addEventListener('blur', releaseSpace)
   return (): void => {
     it.node.removeEventListener('wheel', wheel)
     it.node.removeEventListener('pointerdown', down)
@@ -455,6 +530,8 @@ function listen(it: LiveCanvas): () => void {
     it.node.removeEventListener('pointerup', up)
     it.node.removeEventListener('pointercancel', up)
     it.node.removeEventListener('keydown', key)
+    it.node.removeEventListener('keyup', keyUp)
+    it.node.removeEventListener('blur', releaseSpace)
   }
 }
 
@@ -466,6 +543,40 @@ function listen(it: LiveCanvas): () => void {
  * @throws when the browser gives no 2D context — not a runtime condition but a browser that cannot run
  *   this application at all. Substituting anything would draw nothing and say nothing.
  */
+/**
+ * Subscribe to everything the canvas has to answer to, and hand back one way to stop.
+ *
+ * **Outside the factory because of the readability budget, and the split is the one ARCH-012 asks
+ * for**: what the factory keeps is wiring, and each decision lives somewhere it can be read alone.
+ * Five subscriptions with five stops was also five chances to forget one in the teardown.
+ *
+ * **Two things change what is drawn** — the view, and the edition's version counter, the document being
+ * mutated in place so nothing else would fire. `fireImmediately` paints at wiring time rather than at
+ * the first change, so an untouched editor is not a blank canvas.
+ *
+ * **Three change the cursor**: which tool is in hand, who is aimed at, and — through the version —
+ * whether that polity still exists. The last is not redundant: an undo takes the target's polity away
+ * without touching the target, so the refusal has to come back on its own.
+ * @param it - the attachment
+ * @param paint - the coalesced repaint
+ * @returns the one teardown
+ */
+function watchStore(it: LiveCanvas, paint: () => void): () => void {
+  const refreshCursor = (): void => {
+    showCursor(it)
+  }
+  const stops = [
+    it.deps.store.subscribe((state) => state.viewport, paint, { fireImmediately: true }),
+    it.deps.store.subscribe((state) => state.version, paint),
+    it.deps.store.subscribe((state) => state.tool, refreshCursor),
+    it.deps.store.subscribe((state) => state.target, refreshCursor),
+    it.deps.store.subscribe((state) => state.version, refreshCursor),
+  ]
+  return (): void => {
+    for (const stop of stops) stop()
+  }
+}
+
 export function startCanvasController(
   node: HTMLCanvasElement,
   deps: CanvasControllerDeps
@@ -478,6 +589,8 @@ export function startCanvasController(
     node,
     ctx,
     deps,
+    spaceHeld: false,
+    cursor: '',
     ratio: 1,
     size: { width: 0, height: 0 },
     pressAt: null,
@@ -513,19 +626,13 @@ export function startCanvasController(
   })
   observer.observe(node)
 
-  // `fireImmediately` paints at wiring time rather than at the first change, so an untouched editor is
-  // not a blank canvas. One subscription per thing that changes what is drawn: the view, and the
-  // edition's version counter — the document being mutated in place, nothing else would fire.
-  const stopViewport = deps.store.subscribe((state) => state.viewport, paint, {
-    fireImmediately: true,
-  })
-  const stopEdition = deps.store.subscribe((state) => state.version, paint)
+  const unsubscribe = watchStore(it, paint)
 
   resize(it)
+  showCursor(it)
 
   return (): void => {
-    stopViewport()
-    stopEdition()
+    unsubscribe()
     observer.disconnect()
     unlisten()
     // A frame already requested would otherwise paint into a torn-down attachment — and under
