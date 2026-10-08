@@ -55,7 +55,7 @@ Precedence, highest first: ‹space› held (hand) › marquee drag › hover st
 
 Added 2026-10-08, from the dev's own scenario. Over the **chrome** — `{Polities}`, a form, a button, the
 status bar — the pointer is whatever the platform says it is: an arrow over a row, a caret over a field.
-None of the ten images below ever appears there. A cross hovering over a list would claim that clicking
+None of the ten images in the table above ever appears there. A cross hovering over a list would claim that clicking
 there puts a point down, and the gesture that selects a drawing target is a click in exactly that list.
 
 So the rule is one line of scope: these cursors are set on the canvas element, never on `body`.
@@ -73,19 +73,26 @@ decision, because the document someone opens to build from still asks the questi
   so a hover state crossed mid-drag cannot flicker the pointer.
 - **The snap feature's name** ("coast", "Seine") is a **canvas label** drawn beside the pointer in screen
   pixels, not a cursor: a cursor image cannot carry live text.
-- **No drawing target → the CSS `not-allowed` cursor**, over the canvas, with no image of our own. A tool
-  can always be picked up; the cursor is what refuses. Re-affirmed by the dev on 2026-10-08 after both
-  options were weighed again, and the reason it wins: it says **where** the gesture is refused rather than
-  **whether** the tool exists. Nothing about the Pen is unavailable — a subject is missing.
-  **It applies to ⟨edit⟩ too**, which is the half the handoff never asked about: selecting points with
-  nobody selected is selecting *whose* points? Same missing subject, same refusal.
+- **No drawing target → the CSS `not-allowed` cursor, over the canvas, with no eleventh image.**
+  A tool can always be picked up; the cursor is what refuses. Settled 2026-09-22, and both options were
+  weighed again on 2026-10-08 before the same answer was kept — the dev first described a *badged* cross,
+  then dropped it on its cost (*"on ne va pas se faire chier à faire un autre curseur"*), and separately
+  weighed disabling the two tool buttons instead. The cursor wins for one reason: it says **where** the
+  gesture is refused rather than **whether** the tool exists. Nothing about the Pen is unavailable — a
+  subject is missing. So the cross *disappears* while there is no target, rather than being marked.
+  **It applies to ⟨edit⟩ too**, the half the handoff never asked about: selecting points with nobody
+  selected is selecting *whose* points? Same missing subject, same refusal.
   It is also the cursor after a **`ctrl+z`** takes the target's polity away under a tool already in hand —
   derived from whether the target resolves, so nothing has to watch for it.
-  [s02](../scenarii/s02-create-france-1100.md) has the four scenarios.
+  [s02](../scenarii/s02-create-france-1100.md) has the scenarios, including the walk across the zones.
 
 ## Still not in the scenarios — no cursor drawn
 
-- **Zoom in / out:** zoom has no mode. It is the wheel about the pointer, the [+]/[−] buttons, or PageUp/PageDown, and the cursor stays the active tool's. A magnifier cursor needs a zoom tool or a held key, and the scenarios define neither.
+- **Zoom in / out: confirmed 2026-10-08, no zoom tool and no magnifier.** Zoom has no mode — the wheel
+  about the pointer, the `[+]`/`[−]` buttons the mockups already carry, or PageUp/PageDown — and the
+  cursor stays the active tool's. The dev weighed a zoom tool the same day and dropped it: *"on s'en
+  fout pour l'instant… on a un bouton plus et un bouton moins sur les maquettes, c'est très bien."* So
+  `s00`'s **two tools and only two** stands, with ‹space› for the hand.
 - **⟨edit⟩ while dragging an anchor or a selection:** not listed.
 
 ## Files

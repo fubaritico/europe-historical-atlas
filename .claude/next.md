@@ -168,6 +168,16 @@ reste de l'étape 4 tient dans cet écart, et il porte un nom : **`4d-2 (d)`, le
      Drawing in Reaume de France          inserted 412 vertices from the coastline
      ```
 
+  9. **Les curseurs, trois frictions levées le 08/10.** *Pas d'outil de zoom* — les boutons `[+]`/`[−]`
+     des maquettes suffisent, donc `s00`'s « deux outils et seulement deux » tient · *pas d'onzième
+     curseur* — le refus est le `not-allowed` natif, la croix disparaît au lieu d'être marquée · *la
+     flèche blanche à bord noir existe déjà* (`arrow`, d'après la flèche blanche d'Illustrator).
+     **Le fait qui porte toute la séquence de zones** : `cursor` est une propriété d'**élément**, donc
+     posée sur le canvas elle ne s'applique que là, et le navigateur restitue le pointeur alentour tout
+     seul. « Quand je sors du canevas ça redevient la flèche » n'est **pas du code à écrire**. Et c'est
+     nécessaire, pas cosmétique : le geste qui donne un sujet à la plume est un **clic dans le chrome**.
+     **Le dev va vérifier le comportement d'Illustrator** avant qu'on aille plus loin.
+
 - **Ce que (1) demande au code, et c'est petit** : `toolSlice` ne sait poser la cible qu'en donnant la
   plume dans le même geste (`aimAt`), ce qui est juste à la validation du formulaire et faux quand on
   clique un pays dans `{Polities}`. Il faut **une action qui pose la cible sans toucher à l'outil**, et

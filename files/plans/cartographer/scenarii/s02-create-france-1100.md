@@ -171,6 +171,51 @@ Scenario: the target disappears under an undo
 > Nothing needs to watch for it: the cursor is derived from whether the target resolves, and after the
 > undo it does not.
 
+### The cursor belongs to the zone under the pointer
+
+Dictated by the dev as a walk across the screen, 2026-10-08, and written as the walk rather than as a
+table — the sequence is what makes it obvious.
+
+```gherkin
+Scenario: a walk from the toolbar to the canvas and back
+  Given ⟨draw⟩ is active and no polity is selected
+  And the pointer is over the {Tools} strip
+  Then the cursor is the browser's own default
+  When the pointer enters the canvas
+  Then the cursor says the Pen cannot be used: there is no polity to draw in
+  When the pointer leaves the canvas for {Polities}
+  Then the cursor is the browser's own default again
+  And I can see which row I am about to click
+  When I click a polity
+  Then it becomes the drawing target
+  When the pointer returns to the canvas
+  Then the cursor is the Pen's cross
+  And it adapts to what lies under it — starting an outline, extending one, closing one
+  When the pointer leaves the canvas to reach the {Tools} strip
+  Then the cursor is the browser's own default
+  And I can choose ⟨navigate⟩ or ⟨edit⟩ without a tool cursor in the way
+```
+
+```gherkin
+Scenario: the tools that need no subject
+  Given no polity is selected
+  When I choose ⟨navigate⟩
+  Then the pointer over the canvas is the open hand
+  And panning and zooming work, because they belong to no polity
+```
+
+> **The rule in one line**: a **tool** cursor exists only over the **canvas**. Everywhere else the pointer
+> is the platform's — an arrow over a row, a caret in a field, whatever a button gives.
+>
+> **And it costs no code, which is the part worth knowing.** `cursor` is a CSS property of an element, so
+> setting it on the canvas node applies it over the canvas and nowhere else; the browser restores the
+> surrounding pointer on its own. There is no "pointer left the canvas" handler to write and therefore
+> none to forget — the transitions in the walk above are satisfied by construction.
+>
+> **Why the walk had to be written down**: the gesture that gives the Pen a subject is a **click in the
+> chrome**. If a tool cursor leaked outside the canvas, the one pointer the author needs to aim with — on
+> the row of the polity they are about to select — would be the one saying "you cannot draw here".
+
 ## The status bar names the action and whose it is
 
 ```gherkin
