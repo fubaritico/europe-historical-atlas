@@ -473,8 +473,19 @@ literal: translating the atlas becomes an editorial act rather than a release.
 **The chain, and it is not a design — it is what the dev already ran in a previous project**:
 
 ```
-Payload (authoring, EN + FR in one form)  →  JSON files  →  the application's translation layer  →  ICU MessageFormat
+Payload (authoring, EN + FR in one form)  →  an export script  →  JSON files  →  the application's translation layer  →  ICU MessageFormat
 ```
+
+**The export script is a real piece of work and it was never named.** Payload keeps its data in a
+**database**, not in files — already recorded under P7, where a browser not being able to query a SQLite
+file over a URL is what made the dev choose JSON in the first place. So nothing produces the JSON by
+itself: a script reads the database and writes the files, and it is the same script for both things that
+get contributed — the content and the labels.
+
+**It belongs with the build, not with the runtime**, which follows from the condition below rather than
+from taste: run at authoring time, committed, and the CI rebuilds. That also means the script is the one
+place where a missing translation can be *reported* — it sees every key and both languages at once, which
+no runtime check can do without shipping the gap it is looking for.
 
 **The JSON is generated, never fetched at runtime** — his words, 2026-10-08: *"ce ne sera pas chargé au
 runtime."* That is not a performance choice, it is the condition already written above: *a string that

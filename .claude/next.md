@@ -144,9 +144,15 @@ reste de l'étape 4 tient dans cet écart, et il porte un nom : **`4d-2 (d)`, le
      traduire l'atlas devient un acte éditorial au lieu d'une livraison. **La condition qui décide
      comment ça s'embarque est déjà écrite dans P8** : *une chaîne qui décrit une panne ne doit pas
      pouvoir échouer*. La chaîne complète, et ce n'est pas une conception mais **ce qu'il a déjà fait
-     tourner** : `Payload (EN+FR dans un formulaire) → des fichiers JSON → la couche de traduction de
-     l'application → ICU MessageFormat`. Le JSON est **généré, jamais chargé à l'exécution** (*« ce ne
-     sera pas chargé au runtime »*). Même forme que `s15` pour une année dessinée : ça atterrit dans git,
+     tourner** : `Payload (EN+FR dans un formulaire) → un script d'export → des fichiers JSON → la couche
+     de traduction de l'application → ICU MessageFormat`. Le JSON est **généré, jamais chargé à
+     l'exécution** (*« ce ne sera pas chargé au runtime »*).
+     **Le script d'export est un vrai morceau de travail, et il n'avait jamais été nommé** : Payload garde
+     ses données **en base**, ce que P7 consigne déjà — c'est même la raison pour laquelle tu avais choisi
+     JSON (un navigateur ne peut pas interroger un SQLite par URL). Donc rien ne produit le JSON tout
+     seul. Un seul script pour les deux contributions, le contenu et les labels. Et c'est **le seul
+     endroit qui peut signaler une traduction manquante** : il voit toutes les clés et les deux langues à
+     la fois, ce qu'aucun contrôle à l'exécution ne peut faire sans embarquer le trou qu'il cherche. Même forme que `s15` pour une année dessinée : ça atterrit dans git,
      la CI reconstruit. **Reste à décider** : ce que l'atlas affiche pour un label pas encore traduit — le
      français, ou la clé.
 
