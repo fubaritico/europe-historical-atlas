@@ -1,6 +1,6 @@
 import { useId } from 'react'
 
-import { attachCanvas } from '../canvas/attach'
+import { startCanvasController } from '../canvas/controller'
 
 import type { PaintStyle } from '../canvas/painter'
 import type { CartographerStoreHook } from '../state/store'
@@ -12,7 +12,7 @@ import type { BackdropFrame } from '../view/projection'
  *
  * **Three lines of body, and that is the measure of whether this is right.** Everything that can go
  * wrong — a listener left behind, a repaint that misses a change, a wheel handler the browser ignores —
- * lives in `canvas/attach.ts`, where a test can dispatch events at it. A component is a bad place for
+ * lives in `canvas/controller.ts`, where a test can dispatch events at it. A component is a bad place for
  * any of that, because exercising it would mean rendering it.
  *
  * **The canvas is owned by a `ref` callback that returns its own cleanup.** Verified in the installed
@@ -113,7 +113,7 @@ export function MapCanvas({
         ref={(node) =>
           node === null
             ? undefined
-            : attachCanvas(node, {
+            : startCanvasController(node, {
                 store,
                 frame,
                 backdropImage,

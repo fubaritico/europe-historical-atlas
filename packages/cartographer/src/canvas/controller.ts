@@ -14,7 +14,15 @@ import type { BackdropFrame } from '../view/projection'
 import type { PixelSize, ScaleLimits } from '../view/viewport'
 
 /**
- * Wire a canvas element: size it, paint it, and let the reader navigate.
+ * What turns an inert `<canvas>` into a working map: this module owns the node for as long as it lives.
+ *
+ * It sizes it, paints it, and answers the pointer and the keyboard — so it is the one seam between React
+ * and everything imperative. {@link startCanvasController} takes the node and returns its `stop`; nothing
+ * else in the package touches a canvas element.
+ *
+ * **It was called `attach.ts` / `attachCanvas` until 2026-10-08, and the dev asked for a clearer name**:
+ * "attach" said that something was fastened to something and never what, or by whom. `start`/`stop` names
+ * the lifetime, which is the thing a reader needs to know first about a module that holds listeners.
  *
  * **Imperative on purpose, and in a module rather than in the component.** A component that held this
  * would be a component no test could exercise: the wiring is where the real defects live — a listener
@@ -25,14 +33,14 @@ import type { PixelSize, ScaleLimits } from '../view/viewport'
  * back. React 19 allows exactly that — a ref callback may return a cleanup function — so the canvas's
  * life is the node's life, with no dependency array to get wrong.
  *
- * **Each gesture is a named function over an {@link Attachment}, not a closure inside the factory.** The
+ * **Each gesture is a named function over an {@link LiveCanvas}, not a closure inside the factory.** The
  * readability budget said so (87 lines against a ceiling of 50) and the split is the one ARCH-012 asks
  * for: what the factory keeps is the wiring, and every decision sits in a function that can be read on
  * its own.
  */
 
 /** Everything the wiring needs from its caller. */
-export interface AttachDeps {
+export interface CanvasControllerDeps {
   /** The store: the document to draw, and the viewport to draw it through. */
   store: CartographerStoreHook
   /**
@@ -129,13 +137,13 @@ const ZOOM_IN_KEYS = new Set(['+', '=', 'PageUp'])
 const ZOOM_OUT_KEYS = new Set(['-', '_', 'PageDown'])
 
 /** One live attachment: the node, its context, the deps, and the little state a gesture needs. */
-interface Attachment {
+interface LiveCanvas {
   /** The element being driven. */
   node: HTMLCanvasElement
   /** Its 2D context. */
   ctx: Painter2D
   /** What to draw and how. */
-  deps: AttachDeps
+  deps: CanvasControllerDeps
   /** The canvas size in device pixels, refreshed on resize. */
   size: PixelSize
   /** Where the pointer went down, in device pixels; `null` when no button is held. */
@@ -196,7 +204,7 @@ function positionOf(event: { offsetX: number; offsetY: number }): [number, numbe
  * and nothing had built it.
  * @param it - the attachment to paint
  */
-function repaint(it: Attachment): void {
+function repaint(it: LiveCanvas): void {
   const state = it.deps.store.getState()
   const scene = buildScene(state.document, {
     anchorsInBackdrop: it.anchors.anchorsInBackdrop(state.document, state.version),
@@ -214,8 +222,8 @@ function repaint(it: Attachment): void {
  * Match the backing store to the element's box, and frame the backdrop the first time it has one.
  *
  * **"First time" is asked of the store, not of this attachment, and that distinction was a real bug.**
- * The condition used to be a `framed` boolean on the `Attachment` — which is rebuilt by every call to
- * `attachCanvas`, and React re-invokes a `ref` callback whenever its *identity* changes, which an inline
+ * The condition used to be a `framed` boolean on the `LiveCanvas` — which is rebuilt by every call to
+ * `startCanvasController`, and React re-invokes a `ref` callback whenever its *identity* changes, which an inline
  * arrow does on every render of the component. So any unrelated re-render of a parent tore the canvas
  * down, rebuilt it unframed, and snapped the view back to `fitWhole`, silently discarding the reader's
  * pan. Measured, not feared: a test that re-renders with identical props saw `originX` fall from 123 to
@@ -226,7 +234,7 @@ function repaint(it: Attachment): void {
  * and an ephemeral object cannot.
  * @param it - the attachment to resize
  */
-function resize(it: Attachment): void {
+function resize(it: LiveCanvas): void {
   const ratio = window.devicePixelRatio
   const width = Math.max(0, Math.round(it.node.clientWidth * ratio))
   const height = Math.max(0, Math.round(it.node.clientHeight * ratio))
@@ -251,7 +259,7 @@ function resize(it: Attachment): void {
  * @param it - the attachment
  * @param event - the wheel event
  */
-function onWheel(it: Attachment, event: WheelEvent): void {
+function onWheel(it: LiveCanvas, event: WheelEvent): void {
   event.preventDefault()
   const state = it.deps.store.getState()
   const factor = event.deltaY < 0 ? WHEEL_STEP : 1 / WHEEL_STEP
@@ -274,7 +282,7 @@ function onWheel(it: Attachment, event: WheelEvent): void {
  * @param it - the attachment
  * @param at - the pointer, in device pixels
  */
-function report(it: Attachment, at: [number, number]): void {
+function report(it: LiveCanvas, at: [number, number]): void {
   const point = screenToBackdrop(it.deps.store.getState().viewport, at)
   const { width, height } = it.deps.frame.size
   const onMap = point[0] >= 0 && point[0] <= width && point[1] >= 0 && point[1] <= height
@@ -289,7 +297,7 @@ function report(it: Attachment, at: [number, number]): void {
  * @param it - the attachment
  * @param event - the pointer event
  */
-function onPointerDown(it: Attachment, event: PointerEvent): void {
+function onPointerDown(it: LiveCanvas, event: PointerEvent): void {
   it.pressAt = positionOf(event)
   it.dragging = false
   it.node.setPointerCapture(event.pointerId)
@@ -300,7 +308,7 @@ function onPointerDown(it: Attachment, event: PointerEvent): void {
  * @param it - the attachment
  * @param event - the pointer event
  */
-function onPointerMove(it: Attachment, event: PointerEvent): void {
+function onPointerMove(it: LiveCanvas, event: PointerEvent): void {
   const to = positionOf(event)
   report(it, to)
   const from = it.pressAt
@@ -317,7 +325,7 @@ function onPointerMove(it: Attachment, event: PointerEvent): void {
  * @param it - the attachment
  * @param event - the pointer event
  */
-function onPointerUp(it: Attachment, event: PointerEvent): void {
+function onPointerUp(it: LiveCanvas, event: PointerEvent): void {
   it.pressAt = null
   it.dragging = false
   if (it.node.hasPointerCapture(event.pointerId)) it.node.releasePointerCapture(event.pointerId)
@@ -344,7 +352,7 @@ function onPointerUp(it: Attachment, event: PointerEvent): void {
  * @param it - the attachment
  * @param event - the key event
  */
-function onKeyDown(it: Attachment, event: KeyboardEvent): void {
+function onKeyDown(it: LiveCanvas, event: KeyboardEvent): void {
   const state = it.deps.store.getState()
   const pan = PAN_KEYS[event.key]
   if (pan !== undefined) {
@@ -373,7 +381,7 @@ function onKeyDown(it: Attachment, event: KeyboardEvent): void {
  * @param it - the attachment to bind to
  * @returns the remover
  */
-function listen(it: Attachment): () => void {
+function listen(it: LiveCanvas): () => void {
   const wheel = (event: WheelEvent): void => {
     onWheel(it, event)
   }
@@ -414,12 +422,15 @@ function listen(it: Attachment): () => void {
  * @throws when the browser gives no 2D context — not a runtime condition but a browser that cannot run
  *   this application at all. Substituting anything would draw nothing and say nothing.
  */
-export function attachCanvas(node: HTMLCanvasElement, deps: AttachDeps): () => void {
+export function startCanvasController(
+  node: HTMLCanvasElement,
+  deps: CanvasControllerDeps
+): () => void {
   const ctx = node.getContext('2d')
   if (ctx === null)
     throw new Error('Cartographer: the canvas gave no 2D context — there is nothing to draw on.')
 
-  const it: Attachment = {
+  const it: LiveCanvas = {
     node,
     ctx,
     deps,

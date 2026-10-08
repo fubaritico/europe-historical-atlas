@@ -388,7 +388,7 @@ describe('MapCanvas, re-rendered', () => {
     it('keeps the reader’s view when its parent re-renders for an unrelated reason', async () => {
       const assets = readyBackdrop()
       const shared = store()
-      // jsdom lays nothing out, so a canvas reports a zero box and `attachCanvas` never reaches its
+      // jsdom lays nothing out, so a canvas reports a zero box and `startCanvasController` never reaches its
       // first-framing branch. Without this the test cannot see the defect at all — which is how its
       // first version passed against it.
       Object.defineProperty(HTMLCanvasElement.prototype, 'clientWidth', {
@@ -425,7 +425,7 @@ describe('MapCanvas, re-rendered', () => {
 
       // The same props, a new render — which is what any sibling state change in step 5's chrome will
       // cause. A `ref` callback whose identity changes is torn down and re-run by React, and
-      // `attachCanvas` reframes on a fresh attachment: the pan would be silently thrown away.
+      // `startCanvasController` reframes on a fresh attachment: the pan would be silently thrown away.
       await act(async () => {
         rendered.rerender(view())
         await Promise.resolve()

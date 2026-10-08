@@ -13,9 +13,9 @@ import {
   FRAME_MARGIN,
   KEY_PAN_STEP,
   MAX_SCALE,
-  attachCanvas,
   scaleLimitsFor,
-} from './attach'
+  startCanvasController,
+} from './controller'
 import { CHROME_PAINT_STYLE } from './style'
 
 import type { CartographerStoreHook } from '../state/store'
@@ -96,7 +96,7 @@ function attach(): {
     viewport: { viewport: UNFRAMED },
   })
   const node = canvasWithBox()
-  const dispose = attachCanvas(node, {
+  const dispose = startCanvasController(node, {
     store,
     frame: TEST_BACKDROP_FRAME,
     backdropImage: backdropStandIn(),
@@ -112,7 +112,7 @@ afterEach(() => {
   document.body.replaceChildren()
 })
 
-describe('attachCanvas', () => {
+describe('startCanvasController', () => {
   describe('happy path', () => {
     it('sizes the backing store to the element’s box', () => {
       const { node, dispose } = attach()
@@ -389,7 +389,7 @@ describe('attachCanvas', () => {
       })
 
       expect(() =>
-        attachCanvas(node, {
+        startCanvasController(node, {
           store,
           frame: TEST_BACKDROP_FRAME,
           backdropImage: backdropStandIn(),
