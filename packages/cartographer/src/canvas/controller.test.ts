@@ -10,7 +10,6 @@ import { screenToBackdrop } from '../view/viewport'
 
 import {
   DRAG_TOLERANCE,
-  FRAME_MARGIN,
   KEY_PAN_STEP,
   MAX_SCALE,
   scaleLimitsFor,
@@ -112,6 +111,23 @@ afterEach(() => {
   document.body.replaceChildren()
 })
 
+/**
+ * Put the view in the MIDDLE of what the hold allows, so a pan is a pan and not a clamp.
+ *
+ * **Needed since the hold landed, 2026-10-08.** The opening view is pinned against the backdrop's
+ * western edge — the editorial zone begins at −45°, which is exactly where the backdrop begins — so a
+ * pan eastward from it moves nothing, and every pan test read as a failure of panning.
+ *
+ * **The middle, and the first version of this helper got that wrong**: at scale 1 the backdrop is
+ * 1280×1164 against an 800×600 canvas, so the origin may run from −480 to 0 and from −564 to 0. Placing
+ * it at (−480, −564) looked like "plenty of slack" and was in fact the far corner, where a pan outward
+ * is held — which is how a correct ArrowRight read as a dead key.
+ * @param store - the store to position
+ */
+function roomToPan(store: ReturnType<typeof createCartographerStore>): void {
+  store.getState().setViewport({ scale: 1, originX: -240, originY: -282 })
+}
+
 describe('startCanvasController', () => {
   describe('happy path', () => {
     it('sizes the backing store to the element’s box', () => {
@@ -151,6 +167,7 @@ describe('startCanvasController', () => {
 
     it('pans with a drag', () => {
       const { node, store, dispose } = attach()
+      roomToPan(store)
       const before = store.getState().viewport
 
       node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 100, offsetY: 100 }))
@@ -197,6 +214,7 @@ describe('startCanvasController', () => {
 
     it('keeps panning across several moves, each from where the last left off', () => {
       const { node, store, dispose } = attach()
+      roomToPan(store)
       const before = store.getState().viewport.originX
 
       node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 0, offsetY: 0 }))
@@ -232,24 +250,27 @@ describe('startCanvasController', () => {
       dispose()
     })
 
-    it('bounds the zoom: out stops where the whole backdrop fits, in stops at the ceiling', () => {
+    it('bounds the zoom: out stops at cover, in stops at the ceiling', () => {
       const limits = scaleLimitsFor(
         { width: BOX.width, height: BOX.height },
         TEST_BACKDROP_FRAME.size
       )
 
-      // Height is the constraining axis here, and the margin is taken off both sides — the same margin
-      // the first framing uses, or the opening view would fall outside its own limits.
+      // The floor is COVER, not fit: a reader may not pull back until the backdrop floats in a void,
+      // because there is no ground out there to draw on (the dev, 2026-10-08). Width is the constraining
+      // axis for covering, where height was the constraining one for fitting — the two are opposites, so
+      // they are decided by opposite edges. No margin: a margin is the gap you leave around a fitted
+      // box, and covering is the state where no gap exists.
       expect(limits.max).toBe(MAX_SCALE)
       // Deep enough to place an anchor where no source could contradict it: at scale 32 one screen
       // pixel is about 240 m of ground, against a backdrop whose own pixels are 7.6 km at 45°N. The
       // ceiling used to be 8, on an argument about the atlas's 1.9 km raster cells — which this editor
       // does not use: it stores degrees at six decimals and derives borders from shared anchors.
       expect(MAX_SCALE).toBeGreaterThanOrEqual(32)
-      expect(limits.min).toBeCloseTo(
-        (BOX.height - FRAME_MARGIN * 2) / TEST_BACKDROP_FRAME.size.height,
-        9
-      )
+      expect(limits.min).toBeCloseTo(BOX.width / TEST_BACKDROP_FRAME.size.width, 9)
+      // And the floor is above what fitting would have given, which is the whole change in one line:
+      // the view that used to be reachable — the backdrop entire, with gutters — no longer is.
+      expect(limits.min).toBeGreaterThan(BOX.height / TEST_BACKDROP_FRAME.size.height)
     })
   })
 
@@ -278,6 +299,7 @@ describe('startCanvasController', () => {
 
     it('does pan once the press passes the threshold', () => {
       const { node, store, dispose } = attach()
+      roomToPan(store)
       const before = store.getState().viewport.originX
 
       node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 100, offsetY: 100 }))
@@ -291,6 +313,7 @@ describe('startCanvasController', () => {
   describe('managed errors — the keyboard', () => {
     it('pans on the arrow keys, which is WCAG 2.1.1 and not a nicety', () => {
       const { node, store, dispose } = attach()
+      roomToPan(store)
       const before = store.getState().viewport
 
       node.dispatchEvent(keyEvent('ArrowRight'))
@@ -301,6 +324,7 @@ describe('startCanvasController', () => {
 
     it('pans in all four directions', () => {
       const { node, store, dispose } = attach()
+      roomToPan(store)
       const before = store.getState().viewport
 
       node.dispatchEvent(keyEvent('ArrowLeft'))
@@ -553,7 +577,8 @@ describe('reporting what is under the pointer', () => {
     })
 
     it('moves with the view, so the same pixel is a different place after a pan', () => {
-      const { node, hovered, dispose } = attach()
+      const { node, store, hovered, dispose } = attach()
+      roomToPan(store)
       node.dispatchEvent(pointerEvent('pointermove', { offsetX: 400, offsetY: 300 }))
       const before = hovered.mock.calls.at(-1)?.[0] as [number, number]
 
@@ -572,11 +597,14 @@ describe('reporting what is under the pointer', () => {
   })
 
   describe('edge cases', () => {
-    it('reports nothing when the pointer is on the vellum, off the map', () => {
+    it('reports nothing for a pointer that has left the map', () => {
       const { node, hovered, dispose } = attach()
 
-      // The opening view leaves a margin, so the very corner of the canvas is beside the backdrop.
-      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 0, offsetY: 0 }))
+      // **There is no vellum inside the canvas any more**, and that is the hold working: the backdrop
+      // covers the canvas at every reachable scale, so every point a reader can hover is a place. This
+      // branch is still reached, and by the case that matters — a drag keeps the pointer captured after
+      // it leaves the element, and the offsets then fall outside the box.
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: -40, offsetY: -40 }))
 
       // A latitude extrapolated past the frame's edge is arithmetic presented as a fact — the
       // plausible wrong answer `rules/error-handling.md` names as the dangerous shape.

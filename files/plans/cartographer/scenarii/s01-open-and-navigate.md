@@ -88,13 +88,21 @@ Scenario: select a polity from the list
 
 ```gherkin
 Scenario: zoom about the pointer
-  Given the whole frame is visible
+  Given the editor has just opened, framed on the editorial zone
   When I turn the wheel forward with the pointer over Reims
   Then the view scales up about the pointer, which stays on Reims
   And the backdrop, the vectors, the fills and the borders scale together
   And stroke widths and handle sizes stay constant in screen pixels
   And the status bar reads the new scale in "km per screen pixel"
 ```
+
+> **The `Given` used to read "the whole frame is visible", and it stopped being reachable on
+> 2026-10-08.** The zoom-out limit is now **cover** — the dev's call: *"le zoom maximal doit correspondre
+> au cover, à l'encombrement maximal que peut avoir la carte"* — so on any window wider than the backdrop
+> is tall there is no scale at which the whole frame fits with room to spare. Nothing in this scenario
+> depended on it: zooming about the pointer holds its invariant at every scale. The opening view frames
+> the **editorial zone** instead, which is the ground the author may draw in; a third of the backdrop
+> lies east of 60°E and is not.
 
 ```gherkin
 Scenario: the backdrop gives out before the grid does

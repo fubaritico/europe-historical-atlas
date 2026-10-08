@@ -1,4 +1,8 @@
+import { lonLatToBackdrop } from './projection'
+
+import type { BackdropFrame } from './projection'
 import type { PixelSize, Viewport } from './viewport'
+import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
 
 /**
  * Framing: the viewports that are *computed* rather than gestured — fit the whole backdrop, fit a box.
@@ -87,4 +91,121 @@ export function fitBox(canvas: PixelSize, box: BackdropBox, marginPx: number): V
  */
 export function fitWhole(canvas: PixelSize, backdrop: PixelSize, marginPx: number): Viewport {
   return fitBox(canvas, { x: 0, y: 0, width: backdrop.width, height: backdrop.height }, marginPx)
+}
+
+/**
+ * The scale at which a box **covers** the canvas, leaving no empty ground anywhere.
+ *
+ * The opposite choice from {@link fitScale}, and the dev's call of 2026-10-08 for the **zoom-out
+ * limit**: *"le zoom maximal doit correspondre au cover, à l'encombrement maximal que peut avoir la
+ * carte."* Fitting lets a reader pull back until the backdrop floats in a void, which is a view of
+ * nothing — every map on the web stops at cover instead, and this one has the same reason: there is no
+ * ground out there to draw on.
+ *
+ * **No margin argument, deliberately.** A margin is the gap you leave *around* a fitted box; covering is
+ * the state where no gap exists. Accepting one here would let a caller ask for a cover that does not
+ * cover.
+ * @param canvas - the canvas, in screen pixels
+ * @param box - the rectangle that must cover it, in backdrop pixels
+ * @returns the scale, or zero for a box with no extent
+ */
+export function coverScale(canvas: PixelSize, box: BackdropBox): number {
+  if (box.width <= 0 || box.height <= 0) return 0
+  return Math.max(canvas.width / box.width, canvas.height / box.height)
+}
+
+/**
+ * Hold a view so the backdrop never uncovers the canvas.
+ *
+ * **The half that makes a cover-scale floor mean anything.** A minimum scale alone only promises that
+ * the backdrop is *big enough* to cover; nothing stops a pan from sliding it off the side, and then the
+ * void the floor exists to forbid appears anyway. This is the clamp `view/viewport.ts` deliberately
+ * refused to invent — *"a clamp with invented numbers is a silent substitution, and the real ones belong
+ * to the caller"*. Here the numbers are real: the canvas, and the backdrop at the current scale.
+ *
+ * **It gives up rather than lies when the backdrop is too small.** Below the cover scale the two
+ * constraints contradict each other — the left edge wants to be at 0 and the right edge past the
+ * canvas, and no origin satisfies both. It centres instead, which shows the whole backdrop with equal
+ * gutters: visibly a smaller map, not a map shoved into a corner.
+ * @param viewport - the view to hold
+ * @param canvas - the canvas, in screen pixels
+ * @param backdrop - the backdrop's own size, in its pixels
+ * @returns the view, with its origin held inside the backdrop
+ */
+export function clampToCover(viewport: Viewport, canvas: PixelSize, backdrop: PixelSize): Viewport {
+  const painted = {
+    width: backdrop.width * viewport.scale,
+    height: backdrop.height * viewport.scale,
+  }
+  return {
+    scale: viewport.scale,
+    originX: holdAxis(viewport.originX, canvas.width, painted.width),
+    originY: holdAxis(viewport.originY, canvas.height, painted.height),
+  }
+}
+
+/**
+ * One axis of {@link clampToCover}.
+ * @param origin - where the backdrop's edge sits, in screen pixels
+ * @param canvas - the canvas's extent on this axis
+ * @param painted - the backdrop's extent on this axis, at the current scale
+ * @returns the held origin
+ */
+function holdAxis(origin: number, canvas: number, painted: number): number {
+  if (painted < canvas) return (canvas - painted) / 2
+  return Math.min(0, Math.max(canvas - painted, origin))
+}
+
+/**
+ * The view an editor opens on: the editorial zone framed, but never pulled back past cover.
+ *
+ * **Two requirements that can contradict each other, and the dev stated both** — frame the editorial
+ * zone, because that is the ground the author may draw on and a third of the backdrop lies outside it;
+ * and never show void. On a wide window the zone fits at a scale *below* the cover scale, so fitting it
+ * would open on exactly the emptiness the floor forbids. The larger of the two wins, which means the
+ * zone is framed when it can be and overflows the short axis when it cannot — the same compromise a
+ * photograph makes in a frame of the wrong shape.
+ *
+ * It is **recomputed on every resize** rather than stored, which is what makes the opening view
+ * responsive: the two scales move with the canvas, and so does which of them wins.
+ *
+ * **It centres the zone and then holds the result, which is not the same as centring it.** The zone's
+ * western limit is −45°, exactly where the backdrop begins, so centring it horizontally would ask for a
+ * positive origin — void down the left-hand side — and the hold refuses. In practice the zone opens
+ * flush with the canvas's left edge and centred vertically. Said here because the first version of this
+ * header claimed "centred" flatly, and a test written from that claim accused correct code.
+ * @param canvas - the canvas, in screen pixels
+ * @param backdrop - the backdrop's own size, in its pixels
+ * @param zone - the editorial zone, already projected into backdrop pixels
+ * @param marginPx - screen pixels to leave around the zone when it does fit
+ * @returns the view
+ */
+export function openingView(
+  canvas: PixelSize,
+  backdrop: PixelSize,
+  zone: BackdropBox,
+  marginPx: number
+): Viewport {
+  const scale = Math.max(
+    fitScale(canvas, zone, marginPx),
+    coverScale(canvas, { x: 0, y: 0, width: backdrop.width, height: backdrop.height })
+  )
+  return clampToCover(centred(canvas, zone, scale), canvas, backdrop)
+}
+
+/**
+ * A geographic box as a rectangle of the backdrop.
+ *
+ * **The two corners are projected, never the four numbers scaled.** Latitude is not linear in Mercator,
+ * so halving a span of degrees does not halve a span of pixels — `scene.ts` makes the same point about
+ * the same rectangle, one transform further along. Getting it wrong puts the southern edge in the wrong
+ * place, by more the taller the box is, which on the editorial zone is 56 degrees.
+ * @param bounds - the geographic box
+ * @param frame - the backdrop's own reference frame
+ * @returns the rectangle, in backdrop pixels
+ */
+export function backdropBoxOfBounds(bounds: GeoBounds, frame: BackdropFrame): BackdropBox {
+  const [left, top] = lonLatToBackdrop([bounds.west, bounds.north], frame)
+  const [right, bottom] = lonLatToBackdrop([bounds.east, bounds.south], frame)
+  return { x: left, y: top, width: right - left, height: bottom - top }
 }

@@ -17,6 +17,9 @@ import { createCartographerStore } from './state/store'
 import { loadVectorLayers } from './vectorLayers'
 import { UNFRAMED } from './view/viewport'
 
+// The preflight first: it zeroes every border width, so a sheet loaded after it keeps its hairlines
+// and a sheet loaded before it would lose them.
+import './styles/reset.css'
 import './components/shell.css'
 
 import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'

@@ -425,7 +425,16 @@ describe('MapCanvas, re-rendered', () => {
       const rendered = render(view())
       // Pan somewhere, as a reader would.
       await act(async () => {
-        shared.getState().setViewport({ ...shared.getState().viewport, originX: 123 })
+        // A reachable view, not a marker. `originX: 123` was used until 2026-10-08 and stopped meaning
+        // anything the day the view was held inside the backdrop: a positive origin puts the map's left
+        // edge inside the canvas, which is the void the hold forbids, so it was clamped to 0 and the
+        // test compared 0 with 0.
+        //
+        // And the scale has to be raised with it: at the opening scale the backdrop covers this canvas
+        // exactly on the width (800 ÷ 1280 = 0.625, and 1280 × 0.625 = 800), so there is no horizontal
+        // slack at all and *every* origin is held at 0. At scale 1 the painted width is 1280 against
+        // 800, which leaves 480 px — and −240 is the middle of it.
+        shared.getState().setViewport({ scale: 1, originX: -240, originY: -282 })
         await Promise.resolve()
       })
       const panned = shared.getState().viewport

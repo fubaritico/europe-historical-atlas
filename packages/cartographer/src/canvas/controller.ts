@@ -1,4 +1,4 @@
-import { fitScale, fitWhole } from '../view/framing'
+import { backdropBoxOfBounds, clampToCover, coverScale, openingView } from '../view/framing'
 import { backdropToLonLat } from '../view/projection'
 import { panBy, screenToBackdrop, zoomAbout } from '../view/viewport'
 
@@ -11,7 +11,7 @@ import type { PaintStyle, Painter2D } from './painter'
 import type { CartographerStoreHook } from '../state/store'
 import type { VectorLayers } from '../vectorLayers'
 import type { BackdropFrame } from '../view/projection'
-import type { PixelSize, ScaleLimits } from '../view/viewport'
+import type { PixelSize, ScaleLimits, Viewport } from '../view/viewport'
 
 /**
  * What turns an inert `<canvas>` into a working map: this module owns the node for as long as it lives.
@@ -171,12 +171,10 @@ interface LiveCanvas {
  * @returns the range a zoom may move within
  */
 export function scaleLimitsFor(canvas: PixelSize, backdrop: PixelSize): ScaleLimits {
-  const whole = fitScale(
-    canvas,
-    { x: 0, y: 0, width: backdrop.width, height: backdrop.height },
-    FRAME_MARGIN
-  )
-  return { min: whole, max: MAX_SCALE }
+  return {
+    min: coverScale(canvas, { x: 0, y: 0, width: backdrop.width, height: backdrop.height }),
+    max: MAX_SCALE,
+  }
 }
 
 /**
@@ -242,11 +240,44 @@ function resize(it: LiveCanvas): void {
   it.node.width = width
   it.node.height = height
   const state = it.deps.store.getState()
-  if (state.viewport.scale <= 0 && width > 0 && height > 0) {
-    state.setViewport(fitWhole(it.size, it.deps.frame.size, FRAME_MARGIN))
+  if (width <= 0 || height <= 0) {
+    repaint(it)
     return
   }
-  repaint(it)
+  if (state.viewport.scale <= 0) {
+    // The opening view frames the EDITORIAL ZONE, not the backdrop: a third of the backdrop lies east
+    // of 60°E, where the author may not draw. Read off the document, which is the only thing that
+    // declares the zone.
+    state.setViewport(
+      openingView(
+        it.size,
+        it.deps.frame.size,
+        backdropBoxOfBounds(state.document.editorialZone, it.deps.frame),
+        FRAME_MARGIN
+      )
+    )
+    return
+  }
+  // A view already chosen still has to be re-held: growing the window can leave a scale below the new
+  // cover, which is exactly the void the floor exists to forbid. This is what makes it responsive.
+  settle(it, {
+    ...state.viewport,
+    scale: Math.max(state.viewport.scale, scaleLimitsFor(it.size, it.deps.frame.size).min),
+  })
+}
+
+/**
+ * Adopt a view, held so the backdrop never uncovers the canvas.
+ *
+ * **Every `setViewport` in this module goes through here, and that is the point.** A hold applied at
+ * three of the four call sites is a hold that fails on the fourth, and the repository has already paid
+ * for a threshold decided in two places. The arithmetic is `clampToCover`'s; this only makes sure
+ * nothing reaches the store without it.
+ * @param it - the attachment
+ * @param viewport - the view the gesture produced
+ */
+function settle(it: LiveCanvas, viewport: Viewport): void {
+  it.deps.store.getState().setViewport(clampToCover(viewport, it.size, it.deps.frame.size))
 }
 
 /**
@@ -263,7 +294,8 @@ function onWheel(it: LiveCanvas, event: WheelEvent): void {
   event.preventDefault()
   const state = it.deps.store.getState()
   const factor = event.deltaY < 0 ? WHEEL_STEP : 1 / WHEEL_STEP
-  state.setViewport(
+  settle(
+    it,
     zoomAbout(
       state.viewport,
       positionOf(event),
@@ -316,7 +348,7 @@ function onPointerMove(it: LiveCanvas, event: PointerEvent): void {
   if (!it.dragging && Math.hypot(to[0] - from[0], to[1] - from[1]) <= DRAG_TOLERANCE) return
   it.dragging = true
   const state = it.deps.store.getState()
-  state.setViewport(panBy(state.viewport, to[0] - from[0], to[1] - from[1]))
+  settle(it, panBy(state.viewport, to[0] - from[0], to[1] - from[1]))
   it.pressAt = to
 }
 
@@ -357,7 +389,7 @@ function onKeyDown(it: LiveCanvas, event: KeyboardEvent): void {
   const pan = PAN_KEYS[event.key]
   if (pan !== undefined) {
     event.preventDefault()
-    state.setViewport(panBy(state.viewport, pan[0], pan[1]))
+    settle(it, panBy(state.viewport, pan[0], pan[1]))
     return
   }
   const zoomIn = ZOOM_IN_KEYS.has(event.key)
@@ -365,9 +397,7 @@ function onKeyDown(it: LiveCanvas, event: KeyboardEvent): void {
   event.preventDefault()
   const centre: [number, number] = [it.size.width / 2, it.size.height / 2]
   const factor = zoomIn ? WHEEL_STEP : 1 / WHEEL_STEP
-  state.setViewport(
-    zoomAbout(state.viewport, centre, factor, scaleLimitsFor(it.size, it.deps.frame.size))
-  )
+  settle(it, zoomAbout(state.viewport, centre, factor, scaleLimitsFor(it.size, it.deps.frame.size)))
 }
 
 /**
