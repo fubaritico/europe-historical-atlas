@@ -12,7 +12,17 @@ runs:
       with:
         node-version-file: '.nvmrc'
         cache: 'pnpm'
+        # Writes the GitHub Packages auth line for the `@fubaritico` scope, reading NODE_AUTH_TOKEN.
+        # The repository's own `.npmrc` only routes the scope and carries no token.
+        registry-url: 'https://npm.pkg.github.com'
+        scope: '@fubaritico'
 
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
       shell: bash
+      # `@fubaritico/*` comes from GitHub Packages, which wants a token even for public packages;
+      # the auth line setup-node wrote reads it from here. `github.token`, not `secrets.GITHUB_TOKEN`:
+      # a composite action has no `secrets` context. It works because each package grants this
+      # repository Read access.
+      env:
+        NODE_AUTH_TOKEN: ${{ github.token }}

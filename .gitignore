@@ -39,3 +39,6 @@ files/spikes/*/out/
 
 # Turbo task cache
 .turbo
+
+# NPM
+.npmrc

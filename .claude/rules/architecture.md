@@ -115,15 +115,20 @@ the atlas, the cartographer and the Payload admin alike. It is a **multi-framewo
 component base today, a Stencil/web-component variant planned, Angular and Vue possible — and, crucially,
 **the styles are independent of all of them and shared between them**.
 
-**Read from the repository on 2026-09-24, not assumed:**
+**Published on GitHub Packages since 2026-10-09** (`0.2.0`), under the `@fubaritico` scope, all five
+packages at one version. Read from its `INTEGRATION.md`, not assumed:
 
 | package | what it ships | framework runtime |
 |---|---|---|
-| `@fubaritico-ds/tokens` | `./css` → `variables.css` (custom properties) + a TS token object | **none** |
-| `@fubaritico-ds/styles` | one `styles.css` | **none** |
-| `@fubaritico-ds/variants` | class-string builders over `class-variance-authority` | **none** (a couple of kB) |
-| `@fubaritico-ds/stencil` | Stencil components, output targets `dist` and `dist-custom-elements`, plus React and Angular wrappers | web components — no React |
-| `@fubaritico-ds/shared` | app-level React (router, query, testing-library) | React — **not a DS primitive** |
+| `@fubaritico/tokens` | `./css` → `variables.css` (custom properties) + a TS token object | **none** |
+| `@fubaritico/styles` | one `styles.css`, inside `@layer ui.components` | **none** |
+| `@fubaritico/variants` | class-string builders over `class-variance-authority` | **none** (a couple of kB) |
+| `@fubaritico/behaviors` | behaviour services (`TabsService`, colour conversions) | **none** |
+| `@fubaritico/react` | the React components — what the Cartographer installs | React |
+
+The Stencil variant recorded here on 2026-09-24 is not published; it stays the design system's
+long-term plan, not something this repository can consume. Installing needs a token even though
+the packages are public — see `known-issues.md`.
 
 **Three levels of consumption, and the atlas only ever needs the first:**
 

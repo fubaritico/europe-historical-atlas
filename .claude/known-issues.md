@@ -11,6 +11,28 @@ Put here the know issues to avoid cluttering the context window.
   garde produit la pire des deux situations — **une promesse qu'aucun outil ne tient.** Ne jamais décrire une
   garde au présent avant de l'avoir cassée exprès.
 
+- **Le design system vient de GitHub Packages, et GitHub exige un token même pour l'installer.**
+  `@fubaritico/{tokens,styles,react}` en `^0.2.0` (09/10). Le `.npmrc` du dépôt ne fait que **router**
+  le scope, sans aucun token : une ligne `${NODE_AUTH_TOKEN}` y faisait **ignorer tout le fichier** en
+  local (variable absente), donc la requête partait sur npmjs et revenait en 404 — mesuré. Le token vit
+  dans `~/.npmrc` en local, et `setup-node` (`registry-url` + `scope`) l'écrit en CI. Le vendoring en tarballs n'a vécu qu'une heure, jamais commité : le DS a publié le
+  jour même, et a renommé son scope (`@fubaritico-ds/*` → `@fubaritico/*`, `reference` → `react`).
+  **Trois choses à tenir** :
+  1. **En local, sans token, `pnpm install` échoue** — pour tout le workspace, atlas compris. Le token
+     est un **PAT classic avec le seul scope `read:packages`**, dans `~/.npmrc` (fichier utilisateur,
+     jamais commité). **Pas `$(gh auth token)` exporté dans `.zshrc`**, que la passation du DS proposait :
+     ce jeton porte `repo` et `workflow`, et il serait dans l'environnement de chaque `postinstall`.
+  2. **En CI, c'est `${{ github.token }}` dans l'action composite `setup`, pas `secrets.GITHUB_TOKEN`** —
+     une action composite n'a pas de contexte `secrets`. Ça marche parce que chacun des **cinq** paquets
+     accorde Read à `europe-historical-atlas` (« Manage Actions access »). Un 403/404 sur un seul paquet
+     à l'install veut dire que son accès n'a pas été accordé, pas que le token est faux.
+  3. **Le jour où le dépôt devient public, un visiteur qui le clone ne pourra pas l'installer** sans un
+     token GitHub à lui. La sortie est de publier le DS sur npmjs. **À décider à ce moment-là.**
+  **Monter de version** : le DS sort ses cinq paquets à la même version, et un composant neuf est une
+  mineure. En `0.x` le caret ne franchit pas une mineure, donc `^0.2.0` ne prendra jamais `0.3.0` seul —
+  il faut bumper les trois lignes ensemble. **Le ColorPicker arrive en `0.3.0`.**
+  **Sévérité : à savoir.**
+
 - **Le zoom du Cartographe est « acceptable », pas fluide — et ce qui reste n'est plus les vecteurs.**
   Jugé par le dev le 07/10 après deux corrections : la coalescence des repeintures sur
   `requestAnimationFrame` (on peignait **dans** le gestionnaire, donc 60 à 120 fois par seconde) puis

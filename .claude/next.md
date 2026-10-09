@@ -86,8 +86,8 @@ dessiner.**
 
 ### Le design system est livré, et le plan est écrit
 
-Le dev a produit les quatre tarballs le 08/10 au soir, dans
-`~/Desktop/WebstormProjects/fubaritico-ds/dist-tarballs/`. **Le plan détaillé est dans
+**Publié sur GitHub Packages le 09/10** en `0.2.0`, scope `@fubaritico/*` — les tarballs du 08/10 n'ont
+vécu qu'une heure. Le ColorPicker arrive en `0.3.0`. **Le plan détaillé est dans
 `files/plans/cartographer/design-system-integration.md`** — cinq pas, chacun avec ce qu'il doit
 prouver. Les trois faits à ne pas re-découvrir :
 

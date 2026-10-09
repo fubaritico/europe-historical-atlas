@@ -9,6 +9,10 @@ on:
 jobs:
   init:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v7
         with:

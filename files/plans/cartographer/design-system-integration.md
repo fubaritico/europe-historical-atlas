@@ -6,15 +6,27 @@
 >
 > Source: `~/Desktop/WebstormProjects/fubaritico-ds/dist-tarballs/` — `INSTALL.md`, `INTEGRATION.md`
 > and four `.tgz` at version `0.1.0`.
+>
+> **Revised 2026-10-09 afternoon**: the design system is now **published on GitHub Packages** at
+> `0.2.0`, under a new scope — `@fubaritico/*`, with `reference` renamed `@fubaritico/react`. The
+> tarballs are gone; step 1 below is rewritten. Its own `INTEGRATION.md`, at the root of
+> `fubaritico-ds`, is the current reference.
 
 ## What the design system actually ships — read, not assumed
 
 | package | what it is | needed |
 | --- | --- | --- |
-| `@fubaritico-ds/tokens` | tokens as CSS custom properties, plus a TS object. `./css` and `./tailwind` subpaths | **yes** |
-| `@fubaritico-ds/styles` | the native BEM skin, plain CSS inside `@layer ui.components` | **yes** |
-| `@fubaritico-ds/variants` | CVA resolvers, pure TS, no React and no DOM | pulled in by `reference` |
-| `@fubaritico-ds/reference` | 31 React components, **no Tailwind** | **yes** |
+| `@fubaritico/tokens` | tokens as CSS custom properties, plus a TS object. `./css` and `./tailwind` subpaths | **yes** |
+| `@fubaritico/styles` | the native BEM skin, plain CSS inside `@layer ui.components` | **yes** |
+| `@fubaritico/variants` | CVA resolvers, pure TS, no React and no DOM | pulled in by `react` |
+| `@fubaritico/behaviors` | behaviour services (`TabsService`, colour conversions), pure TS | pulled in by `react` |
+| `@fubaritico/react` | the React components, **no Tailwind** | **yes** |
+
+**One API change from the 0.1.0 tarballs worth knowing before using `Tabs`**: it runs on
+`TabsService` now — `useTabsContext` is gone (→ `useTabsController()`), the ARIA attributes it owns are
+no longer accepted as props, and a `defaultValue` matching no tab selects the first. Per-component
+READMEs ship in `node_modules/@fubaritico/react/dist/components/<Name>/README.md`; read their
+**Notes** before using a component.
 
 **Every component the polity form needs is there**: `Modal`, `Input`, `Dropdown`, `Listbox`,
 `Checkbox`, `Button`, `IconButton`, `Typography`, `Tabs`, `Tooltip`, `Alert`.
@@ -80,29 +92,26 @@ fields they sit under, not like a foreign widget.
 
 Each one verifies and commits alone, as every step of P4 has.
 
-### 1 · Install the four packages
+### 1 · Install the three packages from GitHub Packages
 
-Copy the tarballs to `vendor/fubaritico-ds/` in this repository, declare them as `file:` dependencies
-of `packages/cartographer/package.json`, `pnpm install`.
-
-**Committed, deliberately.** A `file:` tarball resolved from outside the repository would make the
-install depend on the dev's desktop, and the CI would fail on a clone. ~355 kB of vendored tarball
-against a build that works anywhere.
+`@fubaritico/{tokens,styles,react}` at `^0.2.0` in `packages/cartographer/package.json`; a root
+`.npmrc` routing the `@fubaritico` scope to `npm.pkg.github.com` and reading `NODE_AUTH_TOKEN`; the
+CI's `setup` action passing `github.token`, and `packages: read` on the installing jobs.
 
 **What it must prove**: `pnpm install --frozen-lockfile` succeeds, and `pnpm build` still produces
 the worker chunk at 13 490 bytes.
 
-**The trap to watch**: a `file:` tarball is cached by path, so a later version of the design system
-needs a new filename or `pnpm install --force`. Write that in `known-issues.md` the day it bites,
-not before.
+**What it costs**: a token, locally and in CI, even though the packages are public — GitHub Packages
+requires one to install. The details, and why the local one is a `read:packages`-only PAT rather than
+the `gh` login, are in `known-issues.md`.
 
 ### 2 · The two CSS imports, and the order
 
 In `main.tsx`, before `shell.css`:
 
 ```ts
-import '@fubaritico-ds/tokens/css'
-import '@fubaritico-ds/styles'
+import '@fubaritico/tokens/css'
+import '@fubaritico/styles'
 ```
 
 The order is not cosmetic: the skin resolves `var(--color-*)` out of the tokens sheet.

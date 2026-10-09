@@ -10,12 +10,22 @@ on:
   # retry is an empty commit.
   workflow_dispatch:
 
+# Every job that installs reads `@fubaritico/*` from GitHub Packages, so it needs `packages: read`.
+# The repository's default token is write-all, which already covers it — these blocks narrow each
+# installing job to what it uses instead. A called workflow cannot exceed its caller's permissions,
+# which is why they sit here and not in the called files.
 jobs:
   validate:
+    permissions:
+      contents: read
+      packages: read
     uses: ./.github/workflows/validate.yml
 
   build:
     needs: [validate]
+    permissions:
+      contents: read
+      packages: read
     uses: ./.github/workflows/build.yml
 
   # Informational, never blocking. Sonar fails for reasons that have nothing to do with the code —
@@ -24,6 +34,10 @@ jobs:
   # When the analysis does run, its own quality gate is read on the platform, not here.
   sonarqube:
     needs: [build]
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: read
     uses: ./.github/workflows/sonarqube.yml
     secrets: inherit
 
