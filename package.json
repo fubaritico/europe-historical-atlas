@@ -35,6 +35,7 @@
     "@commitlint/cli": "catalog:",
     "@commitlint/config-conventional": "catalog:",
     "@eslint/js": "catalog:",
+    "@types/node": "catalog:",
     "@types/three": "catalog:",
     "eslint": "catalog:",
     "eslint-config-prettier": "catalog:",

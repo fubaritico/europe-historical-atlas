@@ -1,6 +1,14 @@
 packages:
   - 'packages/*'
 
+# Peers are not installed on their own. `@fubaritico/react` declares `next` and `react-router-dom` as
+# optional peers, but GitHub Packages drops `peerDependenciesMeta` from what it serves, so pnpm saw two
+# required peers and installed Next (206 MB) and React Router for nothing. Here rather than in `.npmrc`,
+# which is git-ignored and so would never reach the CI. A peer we genuinely need is declared as a
+# dependency of the package that needs it: `@testing-library/dom` for the Cartographer's component tests,
+# `@types/node` at the root for commitlint's TypeScript config loader.
+autoInstallPeers: false
+
 # One declared version per dependency, referenced as `catalog:` from each package.json. The reason that bites
 # here is React: the Cartographer needs it now and the Payload admin will need it next, and two Reacts at
 # different versions in one workspace give hook errors that read like application bugs.
@@ -40,6 +48,7 @@ catalog:
   vitest: ^5.0.3
   '@vitest/coverage-v8': ^5.0.3
   jsdom: ^30.0.1
+  '@testing-library/dom': ^10.4.2
   '@testing-library/react': ^16.3.3
   '@testing-library/user-event': ^14.6.7
 
