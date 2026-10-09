@@ -17,6 +17,10 @@ export default defineConfig({
     // Vitest empties every stylesheet by default, `?raw` included — so a test reading a sheet as text
     // reads `''`, and a guard over it passes on nothing. Opened for our own sheets only.
     css: { include: [/src\/.*\.css/] },
+    // WORKAROUND, remove with the design system's next release: `@fubaritico/react@0.2.0` emits relative
+    // imports without `.js`, which Node's ESM loader refuses — and Vitest loads `node_modules` through
+    // Node. Inlined, the package goes through Vite, which resolves them. See known-issues.md.
+    server: { deps: { inline: [/@fubaritico/] } },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],

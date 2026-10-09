@@ -41,10 +41,14 @@
   --color-input-border: var(--ink-off);
   --color-ring: var(--accent);
 
-  /* The design system's primary is neutral — near-black on white. Here it is the ink on the dark. */
-  --color-primary: var(--ink);
+  /*
+   * The primary button is filled with the secondary's hairline colour, edge and all, with the ink as its
+   * text — the dev's call, 2026-10-09, read off the workbench. The design system's other uses of
+   * `primary` (a checked box, the active tab) follow, so they stay of a piece with the button.
+   */
+  --color-primary: var(--ink-off);
   --color-primary-hover: var(--ink-dim);
-  --color-primary-foreground: var(--bg);
+  --color-primary-foreground: var(--ink);
 
   --color-secondary: var(--raised);
   --color-secondary-hover: var(--hover);
@@ -54,6 +58,19 @@
   --color-accent-foreground: var(--ink);
   --color-card: var(--panel);
   --color-card-foreground: var(--ink);
+
+  /*
+   * The design's first rule: nothing is rounded. Every corner radius the skin reads goes to zero here,
+   * once, rather than component by component. `--radius-full` stays: it draws circles — a slider's
+   * thumb, a dot — which are shapes, not rounded corners.
+   */
+  --radius-sm: 0;
+  --radius-default: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
 
   --color-destructive: var(--warn);
   /* The error message under a field. 3.89:1 on --panel, under the 4.5:1 text needs — see known-issues. */

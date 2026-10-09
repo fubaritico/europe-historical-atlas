@@ -77,6 +77,7 @@ const LAYERS = {
   canvas: 'src/canvas/painter.ts',
   components: 'src/components/MapCanvas.tsx',
   loaders: 'src/vectorLayers.ts',
+  workbench: 'src/workbench/Workbench.tsx',
   root: 'src/main.tsx',
 } as const
 
@@ -213,11 +214,15 @@ describe('architecture boundaries', () => {
     }, 120_000)
 
     it('forbids the composition root to be imported from anywhere that has a row', () => {
-      for (const layer of ['view', 'geometry', 'state', 'canvas', 'components']) {
+      for (const layer of ['view', 'geometry', 'state', 'canvas', 'components', 'workbench']) {
         const patterns = forbiddenPatterns(resolved.get(layer) ?? {})
 
         expect(patterns, `${layer} must not import main`).toContain('**/main.{ts,tsx}')
       }
+    })
+
+    it('keeps the workbench out of the production chrome, so a fixture cannot ship as data', () => {
+      expect(forbiddenPatterns(resolved.get('components') ?? {})).toContain('**/workbench/**')
     })
 
     it('lets the painter and the components read the layers below them', () => {

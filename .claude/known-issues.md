@@ -33,6 +33,21 @@ Put here the know issues to avoid cluttering the context window.
   il faut bumper les trois lignes ensemble. **Le ColorPicker arrive en `0.3.0`.**
   **Sévérité : à savoir.**
 
+- **Deux défauts de `@fubaritico/react@0.2.0`, signalés au DS le 09/10 (passation à la racine de
+  `fubaritico-ds`), à retirer à la release qui les corrige.**
+  1. **Imports relatifs sans `.js` dans son `dist`** (312 dans le JS, 324 dans les `.d.ts` ; `variants`,
+     `behaviors` et `tokens` en ont zéro). Vite et le navigateur passent outre ; **Node refuse**, et Vitest
+     charge `node_modules` par Node — donc aucun composant du DS ne se chargeait dans un test.
+     **Contournement en place** : `server.deps.inline: [/@fubaritico/]` dans `vitest.config.ts` du
+     Cartographe. **Bloquant sans lui.**
+  2. **Le registre GitHub sert ses métadonnées sans `peerDependenciesMeta`** — le tarball les a, le
+     document complet et l'abrégé non (mesuré par `curl`). pnpm résout depuis ces métadonnées, donc
+     **Next 16.4 (206 Mo) et React Router 7.18 sont installés** pour rien : rien ne les importe, le bundle
+     n'a pas bougé. **Pas de contournement** : un `pnpm.packageExtensions` a bien posé `optional: true`
+     dans le lockfile, et pnpm les a gardés quand même — retiré. **À savoir.**
+  **Déclencheur** : la prochaine release du DS (`0.3.0` avec le ColorPicker, ou une `0.2.1`). Alors :
+  monter les trois `^0.2.0`, retirer `server.deps.inline`, vérifier que Next sort du lockfile.
+
 - **Le texte d'erreur sous un champ n'atteint pas 4,5:1 — la palette n'a pas d'encre d'alerte assez claire.**
   Relevé au pas 3 du design system (09/10). Le DS colore le message d'erreur d'un champ avec
   `--color-destructive-hover`, et notre seule teinte d'alerte est `--warn #c86a52` : **3,89:1** sur
@@ -42,7 +57,9 @@ Put here the know issues to avoid cluttering the context window.
   texte. `theme.test.ts` porte ce manque en **manque déclaré** — le test tombe le jour où une teinte
   assez claire est posée, et il faut alors basculer la paire dans `TEXT_PAIRS`.
   **Déclencheur** : le premier message d'erreur affiché, au formulaire de `(c2)` — *« id déjà pris »*.
-  **Sévérité : à savoir aujourd'hui, bloquant au formulaire.**
+  **Déclassé le 09/10 par le dev** : le contraste n'est pas une contrainte qu'il tient pour l'éditeur
+  (*« on s'en fout des contrastes »*). Le manque reste mesuré et déclaré, plus rien n'en dépend.
+  **Sévérité : cosmétique.**
 
 - **Le zoom du Cartographe est « acceptable », pas fluide — et ce qui reste n'est plus les vecteurs.**
   Jugé par le dev le 07/10 après deux corrections : la coalescence des repeintures sur

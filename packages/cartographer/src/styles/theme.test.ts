@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 
 import shell from '../components/shell.css?raw'
 import main from '../main.tsx?raw'
+import workbench from '../workbench/entry.tsx?raw'
 
+import sheets from './sheets.ts?raw'
 import theme from './theme.css?raw'
 
 /** The theme's code, comments removed and whitespace collapsed — a formatter may wrap a value. */
@@ -47,7 +49,8 @@ const TEXT_PAIRS: readonly (readonly [string, string])[] = [
   ['--color-foreground', '--color-card'], // a label on the panel
   ['--color-foreground-muted', '--color-card'], // a dimmed label, as Illustrator sets them
   ['--color-muted-foreground', '--color-background'], // a placeholder
-  ['--color-primary-foreground', '--color-primary'], // a filled button's caption
+  // Not the primary button's caption: the ink on the hairline colour, chosen on sight by the dev on
+  // 2026-10-09 — contrast is not a constraint he holds this tool to.
   ['--color-secondary-foreground', '--color-secondary'],
   ['--color-accent-foreground', '--color-accent'], // a button under the pointer
 ]
@@ -76,10 +79,21 @@ describe('theme.css', () => {
     // Both sheets set the same properties on `:root`, unlayered, so the later wins: swapped, the
     // design system's light values would come back over ours.
     it('is imported after the tokens sheet', () => {
-      const tokens = main.indexOf("import '@fubaritico/tokens/css'")
-      const ours = main.indexOf("import './styles/theme.css'")
+      const tokens = sheets.indexOf("import '@fubaritico/tokens/css'")
+      const ours = sheets.indexOf("import './theme.css'")
       expect(tokens).toBeGreaterThan(-1)
       expect(ours).toBeGreaterThan(tokens)
+    })
+
+    // One module carries the order, so the application and the workbench cannot show two cascades —
+    // which only holds if both go through it and neither imports a sheet of its own.
+    it.each([
+      ['the application', main, "import './styles/sheets'"],
+      ['the workbench', workbench, "import '../styles/sheets'"],
+    ])('reaches the sheets through styles/sheets only — %s', (_, source, entry) => {
+      expect(source).toContain(entry)
+      expect(source).not.toMatch(/import '[^']*\.css'/)
+      expect(source).not.toContain("import '@fubaritico/")
     })
 
     it('declares every colour the shell reads, so the palette lives in one place', () => {

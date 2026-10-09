@@ -17,16 +17,8 @@ import { createCartographerStore } from './state/store'
 import { loadVectorLayers } from './vectorLayers'
 import { UNFRAMED } from './view/viewport'
 
-// Precedence is decided by cascade layers, not by this order: the reset sits in `ui.reset`, the design
-// system's skin in `ui.components`, which wins over it, and our own sheets are unlayered, so they win over
-// both. The one order that matters is the design system's own: the skin reads `var(--color-*)` from the
-// tokens sheet, so the tokens come first — and our theme after them, since both declare those tokens on
-// `:root`, unlayered, and the later declaration wins.
-import '@fubaritico/tokens/css'
-import '@fubaritico/styles'
-import './styles/theme.css'
-import './styles/reset.css'
-import './components/shell.css'
+// Every sheet, in order, through one module the workbench imports too — see `styles/sheets.ts`.
+import './styles/sheets'
 
 import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 

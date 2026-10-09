@@ -180,6 +180,15 @@ Illustrator reading lands:
 test, not by looking — the whole point of `@layer` is that precedence is not obvious, and a rule
 that quietly loses is this repository's most expensive shape of defect.
 
+**Done 2026-10-09, on a workbench rather than in the app** — `/workbench.html`, the dev's call after
+weighing a private Storybook (`src/workbench/`, lit by the same `styles/sheets.ts` as the app). The
+rules live in `styles/editor-chrome.css`; every size is `design/chrome.css`'s and every colour a palette
+variable. Fields 22px / 12px, labels left and dimmed; the secondary button drawn like a field on the
+panel, the primary filled with the hairline colour; the dialogue is a `Card` with a title bar in the
+fields' fill and ink and a close cross aligned on the 10px padding. **The proof is the computed style
+read in a real browser**, not jsdom, which has no cascade layers. The form is a dialogue now (the dev's
+reading of the screens), not the `{Details}` panel `design/03` drew.
+
 ### 5 · Then, and only then, `4d-2 (c2)`
 
 The polity form itself, which is what all of the above exists for: `[+ New polity]`, the eight

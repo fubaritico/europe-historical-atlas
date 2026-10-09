@@ -1,0 +1,67 @@
+/*
+ * The workbench's own layout — never the chrome's. Everything a plate shows is lit by the application's
+ * sheets (`styles/sheets.ts`); this file only places the list and the stage around it.
+ */
+.workbench {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-inter);
+  font-size: 12px;
+}
+
+.workbench__nav {
+  padding: 16px 12px;
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.workbench__title {
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.workbench__link {
+  display: block;
+  padding: 4px 8px;
+  border-radius: 0;
+  color: var(--ink-dim);
+  text-decoration: none;
+}
+
+.workbench__link:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+.workbench__link[aria-current='page'] {
+  background: var(--raised);
+  color: var(--ink);
+}
+
+.workbench__main {
+  padding: 24px;
+}
+
+.workbench__heading {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.workbench__note {
+  max-width: 60ch;
+  margin-top: 4px;
+  color: var(--ink-dim);
+}
+
+/* A panel's surface at the dock's width, unless a plate asks for another. */
+.workbench__stage {
+  width: var(--dock-w);
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}

@@ -1,0 +1,162 @@
+/*
+ * The fineness pass: the design system's components brought to the editor's proportions.
+ *
+ * **Every number here is `design/chrome.css`'s**, the handoff the dev approved — none is chosen in
+ * this file. Its three rules: nothing rounded (done in `theme.css`, on the radius tokens), surfaces
+ * separated by a 1px hairline, type small and dense — 11 to 12px. The Illustrator screenshots guide the
+ * proportions, never the colours: those are the theme's.
+ *
+ * **Unlayered on purpose**: the skin lives in `@layer ui.components`, so any rule here wins without a
+ * specificity contest or `!important`. Where the skin exposes a `--ui-*` variable, it is set rather than
+ * the property — the component then keeps computing from it (an icon's inset follows the padding).
+ *
+ * Buttons are not touched yet: the dev's call, 2026-10-09 — Cancel/OK come last.
+ */
+
+/*
+ * A field reads as Illustrator's panel rows: the label left, right-aligned and dimmed, the control on the
+ * same line, the message under the control. The skin stacks them in a column; a two-column grid puts
+ * them on one line without touching the markup.
+ */
+.ui-field {
+  --ui-field-label-size: 11.5px;
+  --ui-field-label-weight: 400;
+  --ui-field-label-color: var(--ink-dim);
+  --ui-field-message-size: 11px;
+  --ui-field-font-family: inherit;
+
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 3px;
+}
+
+.ui-field__label {
+  grid-column: 1;
+  text-align: right;
+}
+
+/* The control and its message both sit in the second column, whatever the skin wraps the control in. */
+.ui-field > :not(.ui-field__label) {
+  grid-column: 2;
+}
+
+/* A field is a line of text with a hairline around it — 22px, not a padded 40px box. */
+.ui-input {
+  --ui-input-height: 22px;
+  --ui-input-padding-inline: 6px;
+  --ui-input-font-size: 12px;
+  --ui-input-font-family: inherit;
+  --ui-input-icon-reserve: 18px;
+}
+
+/* The focus ring, inside the field as the design draws it: the one place the accent appears on a form. */
+.ui-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/*
+ * Every button at a field's proportions — the same 22px line, the same 12px type, the focus ring inside —
+ * so a button reads like the fields it sits under rather than like a foreign widget (the dev's call,
+ * 2026-10-09).
+ */
+.ui-button {
+  --ui-button-height: 22px;
+  --ui-button-padding-inline: 10px;
+  --ui-button-font-size: 12px;
+  --ui-button-font-weight: 400;
+  --ui-button-font-family: inherit;
+  --ui-button-gap: 4px;
+  --ui-button-ring-offset: -2px;
+}
+
+/*
+ * The secondary button is drawn like a field on its surface: the panel's own fill — the background of
+ * the form it sits in — with the field's hairline around it, and the hover fill under the pointer.
+ */
+.ui-button--secondary {
+  --ui-button-bg: var(--panel);
+  --ui-button-fg: var(--ink);
+  --ui-button-border-color: var(--ink-off);
+  --ui-button-bg-hover: var(--hover);
+}
+
+/*
+ * The primary button's caption, under the pointer, takes the fields' own background — the dev's call,
+ * 2026-10-09. Its colours at rest come from the theme's `primary` tokens; the skin has no token for the
+ * hovered caption, hence a rule.
+ *
+ * The design system's default variant, primary, carries no modifier class, so it is reached by excluding
+ * the four other variants by name. Not "any `ui-button--` class": sizes and icon position are modifiers
+ * too, and a small primary button would have slipped out.
+ */
+.ui-button:not(
+  .ui-button--secondary,
+  .ui-button--destructive,
+  .ui-button--outline,
+  .ui-button--ghost
+) {
+  --ui-button-fg-hover: var(--bg);
+}
+
+/*
+ * A dialogue is a `Card` inside the `Modal` shell (the design system's own composition). Drawn after
+ * Illustrator's Document Setup: a hairline round the panel and no shadow — the design's second rule —
+ * a title bar with its title centred and bold, and the body and footer at the form's 10px rhythm. The
+ * bar takes the fields' own fill and ink (the dev's call, 2026-10-09), so it reads as set into the panel.
+ */
+.ui-card {
+  --ui-card-border-color: var(--line);
+  --ui-card-shadow: none;
+  --ui-card-font-family: inherit;
+}
+
+.ui-card__header {
+  --ui-card-header-padding: 0 10px;
+
+  justify-content: center;
+  align-items: center;
+  height: 26px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ui-card__body {
+  --ui-card-body-padding: 10px;
+  --ui-card-body-gap: 10px;
+}
+
+.ui-card__footer {
+  --ui-card-footer-padding: 10px;
+  --ui-card-footer-gap: 8px;
+}
+
+/*
+ * The close cross on the right of a dialogue's title bar. Taken out of the flow so the title stays centred
+ * on the whole bar, centred vertically, and placed so the *glyph* — not its 18px hit area — sits on the
+ * bar's 10px lateral padding: 10px minus the 3px of hit area on either side of a 12px glyph.
+ */
+.ui-card__header {
+  position: relative;
+}
+
+.ui-card__header > .ui-icon-button {
+  --ui-icon-button-size: 18px;
+  --ui-icon-button-radius: 0;
+  --ui-button-height: 18px;
+
+  position: absolute;
+  inset-inline-end: 7px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.ui-card__header > .ui-icon-button svg {
+  width: 12px;
+  height: 12px;
+}

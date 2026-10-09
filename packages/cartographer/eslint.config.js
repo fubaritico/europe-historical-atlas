@@ -56,9 +56,15 @@ const CARTOGRAPHER_BOUNDARIES = [
   }),
   layerBoundary({
     files: ['src/components/**/*.{ts,tsx}'],
+    forbid: ['main', 'workbench'],
+    paths: CARTOGRAPHER_IS_2D,
+    why: 'components/ is the React chrome — it owns DOM elements and wires the layers together, so it may read all of them. It must not reach back into the composition root: a component that imports the entry would run the application to render itself. Nor into the workbench: a plate holds literal fixtures, and a component reading one would ship a fixture as data.',
+  }),
+  layerBoundary({
+    files: ['src/workbench/**/*.{ts,tsx}'],
     forbid: ['main'],
     paths: CARTOGRAPHER_IS_2D,
-    why: 'components/ is the React chrome — it owns DOM elements and wires the layers together, so it may read all of them. It must not reach back into the composition root: a component that imports the entry would run the application to render itself.',
+    why: 'workbench/ is a second root: a development page mounting pieces of the chrome alone, on literal data. It may read every layer, as main does, but never main itself — importing the entry would boot the whole editor, backdrop and all, behind a plate meant to load in a second.',
   }),
   layerBoundary({
     files: ['src/backdropSource.ts', 'src/vectorLayers.ts'],

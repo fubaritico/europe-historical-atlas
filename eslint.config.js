@@ -27,6 +27,7 @@ const LAYER = {
   canvas: ['**/canvas', '**/canvas/**'],
   components: ['**/components', '**/components/**'],
   state: ['**/state', '**/state/**'],
+  workbench: ['**/workbench', '**/workbench/**'],
   // `{ts,tsx}` rather than `.ts`: the Cartographer's entry is `main.tsx`, so the narrow glob would have
   // let `./main.tsx` through a boundary that forbids the composition root. Fifth instance of the family
   // known-issues records, and the reason the rule there is to write `{ts,tsx}` unless there is a reason.
