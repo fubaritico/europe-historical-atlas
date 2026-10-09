@@ -1,6 +1,7 @@
 import { useId } from 'react'
 
 import { startCanvasController } from '../canvas/controller'
+import { trackFocusOrigin } from '../canvas/focusOrigin'
 
 import type { PaintStyle } from '../canvas/painter'
 import type { CartographerStoreHook } from '../state/store'
@@ -110,19 +111,23 @@ export function MapCanvas({
         // order, which is the defect `jsx-a11y` has a rule against.
         tabIndex={0}
         style={{ display: 'block', width: '100%', height: '100%' }}
-        ref={(node) =>
-          node === null
-            ? undefined
-            : startCanvasController(node, {
-                store,
-                frame,
-                backdropImage,
-                vectorLayers,
-                onHover,
-                style,
-                zoneLabel,
-              })
-        }
+        ref={(node) => {
+          if (node === null) return undefined
+          const forgetFocusOrigin = trackFocusOrigin(node)
+          const stopController = startCanvasController(node, {
+            store,
+            frame,
+            backdropImage,
+            vectorLayers,
+            onHover,
+            style,
+            zoneLabel,
+          })
+          return () => {
+            stopController()
+            forgetFocusOrigin()
+          }
+        }}
       />
     </>
   )

@@ -16,7 +16,7 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.ts'],
     // Vitest empties every stylesheet by default, `?raw` included — so a test reading a sheet as text
     // reads `''`, and a guard over it passes on nothing. Opened for our own sheets only.
-    css: { include: [/src\/styles\/.*\.css/] },
+    css: { include: [/src\/.*\.css/] },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
