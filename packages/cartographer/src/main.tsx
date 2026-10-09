@@ -17,8 +17,12 @@ import { createCartographerStore } from './state/store'
 import { loadVectorLayers } from './vectorLayers'
 import { UNFRAMED } from './view/viewport'
 
-// The preflight first: it zeroes every border width, so a sheet loaded after it keeps its hairlines
-// and a sheet loaded before it would lose them.
+// Precedence is decided by cascade layers, not by this order: the reset sits in `ui.reset`, the design
+// system's skin in `ui.components`, which wins over it, and our own sheets are unlayered, so they win over
+// both. The one order that matters is the design system's own: the skin reads `var(--color-*)` from the
+// tokens sheet, so the tokens come first.
+import '@fubaritico/tokens/css'
+import '@fubaritico/styles'
 import './styles/reset.css'
 import './components/shell.css'
 

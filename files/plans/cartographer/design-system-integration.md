@@ -116,8 +116,13 @@ import '@fubaritico/styles'
 
 The order is not cosmetic: the skin resolves `var(--color-*)` out of the tokens sheet.
 
-**What it must prove**: the measured cost of the two sheets, gzipped, written into the commit. And
-that the preflight still comes first — `*{border-width:0}` after the skin would erase its borders.
+**What it must prove**: the measured cost of the two sheets, gzipped, written into the commit.
+
+**Corrected while doing it (2026-10-09)**: this paragraph said the preflight only had to *come first*.
+Wrong — an unlayered rule beats every layered one **whatever the load order**, so our unlayered
+`*{border-width:0}` would have erased the skin's borders from anywhere in the file. The reset now lives
+in `@layer ui.reset`, the slot the skin itself declares, and `reset.test.ts` fails if any rule leaves
+it. **Done** — measured: CSS 3.30 → 11.77 kB gzip, worker unchanged.
 
 ### 3 · The dark override sheet — `src/styles/theme.css`
 
