@@ -152,6 +152,19 @@ on `--panel` was measured at 5.25:1 when the design was written; the override mu
 and `A11Y-101`'s lesson is that a palette edit reintroduces a contrast failure silently. A test over
 the pairs the form actually uses.
 
+**Done 2026-10-09, and the token list above was wrong in two ways** — it was written from the 0.1.0
+tarballs and never checked against what the skin reads. It redefined `--color-background-subtle` and
+`--color-border-muted`, which the skin never reads; and it said nothing of the **primitive greys**,
+which the skin does read — in `Listbox` (which has its own `variant="dark"`, to use instead) and behind
+`Modal` (a scrim, dark either way). They are left alone. Three measured decisions:
+
+- **a field's boundary is `--ink-off`, not `--line`**: `--line` gives 1.58:1, under 1.4.11's 3:1, so a
+  field would all but vanish. The outline button's border takes the same value, being read like a field;
+- **the design system's `primary` is neutral** (near-black on white), so here it is the ink on the dark —
+  the blue stays the focus ring and nothing else;
+- **the error message under a field is a declared gap**: `--warn` gives 3.89:1 on a panel, and text owes
+  4.5:1. A colour choice, recorded in `known-issues.md`.
+
 ### 4 · The fineness pass — `src/styles/editor-chrome.css`
 
 Unlayered rules, so they beat `@layer ui.components` without `!important`. This is where the

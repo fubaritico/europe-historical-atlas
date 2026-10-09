@@ -33,6 +33,17 @@ Put here the know issues to avoid cluttering the context window.
   il faut bumper les trois lignes ensemble. **Le ColorPicker arrive en `0.3.0`.**
   **Sévérité : à savoir.**
 
+- **Le texte d'erreur sous un champ n'atteint pas 4,5:1 — la palette n'a pas d'encre d'alerte assez claire.**
+  Relevé au pas 3 du design system (09/10). Le DS colore le message d'erreur d'un champ avec
+  `--color-destructive-hover`, et notre seule teinte d'alerte est `--warn #c86a52` : **3,89:1** sur
+  `--panel`, **4,36:1** sur `--bg`. C'est du texte, donc WCAG 1.4.3 demande 4,5:1. La bordure rouge d'un
+  champ invalide, elle, passe (3:1 suffit pour une bordure).
+  **Le remède est une couleur, donc une décision du dev** : une encre d'alerte plus claire, réservée au
+  texte. `theme.test.ts` porte ce manque en **manque déclaré** — le test tombe le jour où une teinte
+  assez claire est posée, et il faut alors basculer la paire dans `TEXT_PAIRS`.
+  **Déclencheur** : le premier message d'erreur affiché, au formulaire de `(c2)` — *« id déjà pris »*.
+  **Sévérité : à savoir aujourd'hui, bloquant au formulaire.**
+
 - **Le zoom du Cartographe est « acceptable », pas fluide — et ce qui reste n'est plus les vecteurs.**
   Jugé par le dev le 07/10 après deux corrections : la coalescence des repeintures sur
   `requestAnimationFrame` (on peignait **dans** le gestionnaire, donc 60 à 120 fois par seconde) puis

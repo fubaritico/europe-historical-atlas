@@ -19,13 +19,11 @@
  * replacing this file should be a change of import, not a change of markup.
  */
 
-/* The tokens the shell reads. The full palette lives in the handoff; these are the ones used below. */
+/*
+ * The shell's layout sizes. Its colours (`--bg`, `--panel`, `--line`, `--ink`, `--ink-dim`) are declared
+ * once, in `styles/theme.css`, beside the design system's tokens that point at them.
+ */
 :root {
-  --bg: #22201d; /* app background, gutters, inset fields */
-  --panel: #2b2926; /* every panel body, the rail, the bars */
-  --line: #45403a; /* structural hairline, between surfaces */
-  --ink: #e8e3d8; /* primary text */
-  --ink-dim: #a49a8c; /* secondary text — 5.25:1 on --panel */
   --rail: 38px;
   --dock-w: 280px;
 }

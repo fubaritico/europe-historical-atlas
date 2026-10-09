@@ -1,0 +1,61 @@
+/*
+ * The Cartographer's one theme: dark, after Illustrator. There is no other — no light variant, no
+ * `prefers-color-scheme`, no `[data-theme]`. The design system ships light values; this sheet replaces
+ * them once, in `:root`.
+ *
+ * **Here the load order does decide**, unlike for the reset: the tokens sheet is unlayered too, both
+ * declare the same properties on the same selector, so the later one wins. `main.tsx` imports this sheet
+ * after `@fubaritico/tokens/css`, and `theme.test.ts` fails if that order is ever swapped.
+ *
+ * **Every colour here is ours**, from `files/plans/cartographer/design/chrome.css`, and each is declared
+ * once: the palette first, then the design system's semantic tokens pointing at it. Nothing is invented,
+ * and `theme.test.ts` checks the contrast of every pair the polity form will show.
+ *
+ * **The primitive greys (`--color-primitive-neutral-*`) are left alone, deliberately.** The skin reads
+ * them in two places only: the `Listbox`, which has its own `variant="dark"` to use instead, and the
+ * scrim behind a `Modal`, which is dark in either scheme. Inverting the grey scale would turn that scrim
+ * light and mean "neutral-0" no longer means white.
+ */
+:root {
+  /* — the palette — */
+  --bg: #22201d; /* app background, gutters, inset fields */
+  --panel: #2b2926; /* every panel body, the rail, the bars */
+  --raised: #35322e; /* raised surface */
+  --hover: #403b35; /* hover fill */
+  --line: #45403a; /* structural hairline, between surfaces — not a field boundary (1.58:1) */
+  --ink: #e8e3d8; /* primary text */
+  --ink-dim: #a49a8c; /* secondary text — 5.23:1 on --panel */
+  --ink-off: #7d7468; /* a field's boundary — 3.54:1 on --bg, over 1.4.11's 3:1 */
+  --accent: #5b93d6; /* selection blue — RESERVED, never served to a polity; the focus ring */
+  --warn: #c86a52; /* refusal, an invalid field */
+
+  /* — the design system's tokens, on the palette — */
+  --color-background: var(--bg);
+  --color-background-muted: var(--raised);
+  --color-foreground: var(--ink);
+  --color-foreground-muted: var(--ink-dim);
+  --color-muted: var(--raised);
+  --color-muted-foreground: var(--ink-dim);
+  --color-border: var(--line);
+  --color-input: var(--ink-off); /* the outline button's border, read like a field's */
+  --color-input-border: var(--ink-off);
+  --color-ring: var(--accent);
+
+  /* The design system's primary is neutral — near-black on white. Here it is the ink on the dark. */
+  --color-primary: var(--ink);
+  --color-primary-hover: var(--ink-dim);
+  --color-primary-foreground: var(--bg);
+
+  --color-secondary: var(--raised);
+  --color-secondary-hover: var(--hover);
+  --color-secondary-foreground: var(--ink);
+  /* The design system's "accent" is a hover fill, not our selection blue. */
+  --color-accent: var(--hover);
+  --color-accent-foreground: var(--ink);
+  --color-card: var(--panel);
+  --color-card-foreground: var(--ink);
+
+  --color-destructive: var(--warn);
+  /* The error message under a field. 3.89:1 on --panel, under the 4.5:1 text needs — see known-issues. */
+  --color-destructive-hover: var(--warn);
+}
