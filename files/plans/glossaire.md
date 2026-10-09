@@ -169,3 +169,5 @@
 | **Chaikin**          | L'algorithme qui arrondit les angles d'une ligne en escalier.                                  |
 | **scalerank**        | Le classement d'importance d'un fleuve chez Natural Earth. Décide lesquels on garde.           |
 | **provenance**       | D'où vient un tronçon et sous quelle licence. Attaché au tronçon, pas au fichier.              |
+| **workbench** / établi | Une page du Cartographe (`/workbench.html`) où l'on monte un morceau du chrome seul, sur des données écrites à la main, pour le régler et en décider. Même feuilles de style que l'application. |
+| **plate** / fiche    | Une vue de l'établi : un composant dans un état donné (formulaire vide, refusé…). **Pas** la planche, qui est la zone éditoriale. |

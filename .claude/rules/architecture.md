@@ -66,8 +66,9 @@ packages/
     ├── eslint.config.js    # re-imports the root config, then adds React; forbids `three`
     ├── vite.config.ts
     ├── vitest.config.ts    # jsdom + the React plugin
-    ├── vitest.setup.ts     # unmounts after each test — testing-library cannot do it itself here
-    └── src/                # 2D canvas and React chrome (being built)
+    ├── vitest.setup.ts     # unmounts after each test; stands in for the canvas, ResizeObserver, <dialog>
+    ├── workbench.html      # the workbench: chrome pieces mounted alone, never built (2026-10-09)
+    └── src/                # 2D canvas and React chrome; styles/sheets.ts holds the one stylesheet order
 
 files/plans/            # the plans — shipped since 2026-09-24
 files/spikes/           # runnable experiments; their out/ stays ignored

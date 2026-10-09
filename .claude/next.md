@@ -5,7 +5,7 @@
 
 ## Where we are
 
-**1900 tests** (640 `core` · 782 atlas · 478 Cartographe), gate verte sur cinq contrôles (`lint`,
+**1969 tests** (640 `core` · 782 atlas · 547 Cartographe), gate verte sur cinq contrôles (`lint`,
 `type-check`, `test`, `build`, `format:check`). Worker à **13 490 o**, toujours sans three.js — et depuis
 le 07/10 le Cartographe émet **le même chunk, au même hash**, le fond étant cuit par le même port.
 
@@ -68,15 +68,14 @@ point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui 
 
 ## ▶ ON REPREND ICI — en trois lignes
 
-**L'éditeur est une fenêtre : cinq zones, le fond cadré sur la zone éditoriale, les deux outils dans
-la main et un curseur qui refuse quand il n'y a personne pour qui dessiner. On ne peut toujours rien
-dessiner.**
+**On crée un pays : `[+ New polity]` ouvre le formulaire dans une boîte, OK le crée et donne la plume —
+le curseur du canevas passe du refus à la plume. On ne peut toujours rien dessiner.**
 
 | | | |
 | --- | --- | --- |
-| **ce qui marche** | les cinq zones · le fond cadré et tenu (cover) · le pan, le zoom proportionnel · ‹P› ‹A› ‹space› · les curseurs · la barre d'état · **tout l'état de la cible**, créer un pays compris, undoable | ✅ |
-| **ce qui manque** | l'écran du formulaire (`c2`, **avec le design system, qui est prêt**) · puis poser des ancres, fermer un anneau, déplacer un point (`d`) | ◀ |
-| **à faire d'abord** | **lire `files/plans/cartographer/design-system-integration.md`** — tout y est, en cinq pas | |
+| **ce qui marche** | les cinq zones · le fond cadré · pan, zoom · ‹P› ‹A› ‹space› · les curseurs · la barre d'état · l'état de la cible · **le DS branché sur le thème sombre, à la finesse Illustrator** · **le formulaire de création** · **l'établi** (`/workbench.html`) | ✅ |
+| **ce qui manque** | **`(d)`** : le second canevas, poser des ancres, fermer un anneau, déplacer un point · et de `(c2)` : la liste `{Polities}` avec « no territory », l'avis transitoire de cible | ◀ |
+| **à faire d'abord** | **`/scenarii-to-code` sur `s02`** (poser, fermer) et `s03` (déplacer) — puis dire au dev ce que `(d)` livrera et ne livrera pas, **avant** d'écrire | |
 
 > **Le découpage `a/b/c/d` est figé — ne plus le re-trancher.** Il a bougé deux fois le 07/10, et
 > c'est ce qui a fait perdre le fil au dev. S'il paraît faux à la reprise, le dire **avant** d'y
@@ -84,31 +83,30 @@ dessiner.**
 > design system, donc la façade DS-indépendante de `(d)` — les touches et les curseurs — est passée
 > devant. Le découpage lui-même n'a pas bougé.
 
-### Le design system est livré, et le plan est écrit
+### Le design system est branché — ce qu'il faut savoir pour s'en servir
 
-**Publié sur GitHub Packages le 09/10** en `0.2.0`, scope `@fubaritico/*` — les tarballs du 08/10 n'ont
-vécu qu'une heure. Le ColorPicker arrive en `0.3.0`. **Le plan détaillé est dans
-`files/plans/cartographer/design-system-integration.md`** — cinq pas, chacun avec ce qu'il doit
-prouver. Les trois faits à ne pas re-découvrir :
+**`@fubaritico/react` en `0.2.1`, `tokens`/`styles` en `0.2.0`**, depuis GitHub Packages (token en
+local dans `~/.npmrc`, `github.token` en CI). Le ColorPicker arrive en **`0.3.0`** : alors monter les
+plages et ajouter le champ couleur, avec son état « automatic » = `null`. Le plan
+(`files/plans/cartographer/design-system-integration.md`) est **fait jusqu'au pas 4**.
 
-1. **Le thème livré est clair et il n'y a aucun thème sombre** — mesuré :
-   `--color-background: #ffffff`, aucun `prefers-color-scheme`, aucun `[data-theme]`. La peau sombre
-   est à nous, avec **nos** couleurs, qui sont déjà dans `shell.css`.
-2. **La troisième marche de surcharge est celle qui compte** : la peau vit dans
-   `@layer ui.components`, donc **toute règle non-layerisée de nous gagne**, sans `!important`. C'est
-   pour ça que les `--ui-*` par composant sont si peu nombreux — ils ne servent à rien.
-3. **Ne jamais poser `display` sur `Modal` ou `Drawer`** : ce sont des `<dialog>` natifs, et une
-   règle d'auteur écrase `dialog:not([open]) { display: none }` — le panneau reste à l'écran pour
-   toujours.
+1. **Une seule cascade, dans un seul module** : `styles/sheets.ts` — tokens → peau → thème → reset (dans
+   `@layer ui.reset`) → shell → `editor-chrome.css`. L'app et l'établi l'importent ; un test refuse tout
+   import de feuille ailleurs. **Une règle hors layer bat tout layer** : c'est ce qui fait gagner nos
+   surcharges, et c'est ce qui aurait fait perdre le DS contre un reset hors layer.
+2. **Les couleurs : la palette dans `theme.css`, une fois**, et les tokens du DS pointés dessus. Aucune
+   couleur en dur ailleurs — vérifié le 09/10. **Les tailles viennent de `design/chrome.css`.**
+3. **Régler le style dans l'établi** (`pnpm dev:cartographer` → `/workbench.html`), et **prouver par le
+   style calculé dans un vrai navigateur** : jsdom n'a pas de cascade de layers.
+4. **Pièges déjà payés** : jamais de `display` sur `Modal`/`Drawer` · `autoFocus` de React n'écrit pas
+   l'attribut, un `<dialog>` ne le verrait pas · un bouton dans un `<form>` soumet par défaut —
+   `type="button"` partout sauf OK · le `Card` coupe ce qui déborde, d'où `overflow: visible` sur la
+   boîte du formulaire.
 
-**Les captures Illustrator sont un guide de finesse, jamais de couleur** (sa consigne du 09/10) :
-petits contrôles, filet d'un pixel, libellés à droite en encre atténuée, anneau au focus, accent
-réservé à trois choses. Les couleurs sont les nôtres. Et **Cancel/OK ne suivent pas Illustrator** :
-sombres, filet fin, anneau au focus, comme les champs.
-
-**Pas de sélecteur de couleur dans le design system**, et c'est tranché : la couleur reste `null` —
-*« on part sur des couleurs aléatoires d'abord »* — ce que le format signifie déjà comme « la palette
-décide ». Il regardera un sélecteur après avoir fait un `Toast`.
+**Décisions du dev du 09/10, à ne pas re-trancher** : le **contraste n'est pas une contrainte** dans
+l'éditeur · le formulaire est une **boîte de dialogue**, pas le panneau `{Details}` de `design/03` · un
+**établi** plutôt qu'un Storybook · secondaire sur le panneau avec le filet des champs, **primaire
+rempli de la couleur du filet**, texte blanc, au survol le fond des champs.
 
 ### Ce qu'il faut savoir avant d'écrire `(c)` et `(d)`
 
@@ -235,10 +233,12 @@ un objet. Donc annuler la création d'un pays fait que la cible **cesse de réso
 disparaît et la plume refuse, sans écouteur, sans nettoyage, sans rien à penser dans `undo` / `goTo` /
 `restoreMarker`. Vérifié en écrivant la version qui tient l'objet : le test tombe.
 
-**Ce que `(c2)` doit faire, et rien de plus** : `[+ New polity]`, le formulaire à huit champs (le neuvième
-étant l'id proposé), et la bannière — **montés sur le design system**, décision du dev du 08/10 : les
-écrire en styles inline serait les écrire deux fois. Le câblage est `if (createPolity(p, step)) aimAt(p.id)`,
-deux lignes.
+**`(c2)` livré le 09/10, sauf la bannière** : `[+ New polity]` dans la tête de `{Polities}`, le
+formulaire (`components/PolityForm.tsx`, la vue ; `NewPolityDialog.tsx`, le branchement ;
+`polityDraft.ts`, la lecture pure qui ne refuse que ce qui casse le fichier). Le câblage est bien
+`if (createPolity(p, step)) aimAt(p.id)` — et **l'ordre est gardé par un test**, viser avant de lire le
+refus laisserait la plume pointée sur un pays inexistant. **Restent** : la liste `{Polities}` avec
+« no territory » (s02 : *« it appears in {Polities} marked "no territory" »*) et l'avis transitoire.
 
 **Une question que `s02` ne tranche pas, et qui n'a pas été décidée ici** : presser ‹P› **seul** doit-il
 garder une cible choisie il y a longtemps, ou l'oublier ? Aujourd'hui `selectTool` ne touche pas à la
@@ -332,8 +332,8 @@ plus tôt, promettant un cache que `4d-1` n'a pas construit.
 | **4d-2 (b)** ✅ | la barre d'état — *le second canevas est passé en tête de (d), voir plus haut* | la position suit le pointeur |
 | **4d-2 (c1)** ✅ | l'**état** de la cible : `toolSlice` (outil + cible, hors de la ligne d'annulation), `createPolity` undoable, `describeDrawingTarget`, et le forgeage d'id dans `core/editor/polityId.ts` | annuler la création fait **évaporer la cible** toute seule |
 | **4d-2 (c1b)** ✅ | les touches d'outil ‹P› ‹A› ‹space› et les curseurs — la façade de `(d)` qui ne dépend pas du DS, passée devant parce que `(c2)` attendait | le curseur refuse quand personne n'est sélectionné |
-| **4d-2 (c2)** ◀ | le **design system câblé** (5 pas, voir le plan) puis `[+ New polity]`, le formulaire, l'avis de cible | on sait toujours pour qui on dessine |
-| **4d-2 (d)** | le **second canevas**, les deux outils câblés sur `documentEdits` et `history` | on dessine, `ctrl+z` défait le geste |
+| **4d-2 (c2)** ✅ | le **design system câblé** puis `[+ New polity]` et le formulaire — **restent la liste `{Polities}` et l'avis de cible**, qui peuvent suivre `(d)` | OK donne la plume, vérifié dans l'application |
+| **4d-2 (d)** ◀ | le **second canevas**, les deux outils câblés sur `documentEdits` et `history` | on dessine, `ctrl+z` défait le geste |
 | **5** | le chrome : `{Polities}` en arbre, les formulaires, `{Overrides}`, **et les contrôles désactivés tant que le fond n'est pas prêt** | les valeurs viennent de `design/chrome.css` |
 
 ### Trois choses décidées pour l'étape 4, à ne pas re-trancher
