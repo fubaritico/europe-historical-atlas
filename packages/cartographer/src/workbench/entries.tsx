@@ -3,7 +3,19 @@ import { Card } from '@fubaritico/react/Card'
 import { IconButton } from '@fubaritico/react/IconButton'
 import { Input } from '@fubaritico/react/Input'
 
+import { DRAFT_ERRORS, EMPTY_DRAFT } from '../components/polityDraft'
+import { PolityForm } from '../components/PolityForm'
+
 import type { WorkbenchEntry } from './Workbench'
+
+/** Polities a new one could owe homage to, as the suzerain list offers them. */
+const SUZERAINS = [
+  { value: 'hre', label: 'Holy Roman Empire' },
+  { value: 'byzantium', label: 'Byzantine Empire' },
+]
+
+/** The form's callbacks, inert: a plate is looked at, not submitted. */
+const INERT = { onField: () => undefined, onSubmit: () => undefined, onCancel: () => undefined }
 
 /**
  * Every plate on the workbench, in the order they are listed.
@@ -56,6 +68,46 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
           <Button>OK</Button>
         </Card.Footer>
       </Card>
+    ),
+  },
+  {
+    id: 'polity-form',
+    title: 'Polity form',
+    note: '[+ New polity] opens this, inside the Modal. Empty: nothing typed, every list on none.',
+    width: 360,
+    render: () => (
+      <PolityForm
+        title="New polity"
+        draft={EMPTY_DRAFT}
+        errors={{}}
+        suzerains={SUZERAINS}
+        {...INERT}
+      />
+    ),
+  },
+  {
+    id: 'polity-form-refused',
+    title: 'Polity form, refused',
+    note: 'OK pressed with an id the year already holds and a year that is not a number: each message sits under its own field.',
+    width: 360,
+    render: () => (
+      <PolityForm
+        title="New polity"
+        draft={{
+          ...EMPTY_DRAFT,
+          name: 'Reaume de France',
+          id: 'fr-couronne',
+          idEdited: true,
+          rank: 'kingdom',
+          status: 'country',
+          existsFrom: '98a',
+          suzerain: null,
+          wikidata: 'Q70972',
+        }}
+        errors={{ id: DRAFT_ERRORS.idTaken, existsFrom: DRAFT_ERRORS.notAYear }}
+        suzerains={SUZERAINS}
+        {...INERT}
+      />
     ),
   },
 ]

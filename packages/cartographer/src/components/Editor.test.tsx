@@ -49,15 +49,15 @@ function mount(): void {
 
 describe('Editor', () => {
   describe('happy path', () => {
-    it('puts the map in the canvas zone and leaves the rest named and empty', () => {
+    it('puts the map in the canvas zone, {Polities} in the dock, and leaves the rest named and empty', () => {
       mount()
 
       expect(document.querySelector('.shell__canvas [data-testid="map-area"]')).not.toBeNull()
+      expect(document.querySelector('.shell__dock .polities')).not.toBeNull()
       expect([...document.querySelectorAll('.empty-zone')].map((n) => n.textContent)).toEqual([
         'app bar',
         'document bar',
         'tools',
-        'panels',
       ])
     })
   })

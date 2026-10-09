@@ -25,6 +25,7 @@
  */
 :root {
   --rail: 38px;
+  --tab: 24px; /* a panel tab strip, and its square actions */
   --dock-w: 280px;
 }
 

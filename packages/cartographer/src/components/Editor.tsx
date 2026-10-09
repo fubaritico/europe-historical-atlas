@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 
 import { MapArea } from './MapArea'
+import { PolitiesPanel } from './PolitiesPanel'
 import { Shell } from './Shell'
 
 import type { BackdropLoad } from './MapArea'
@@ -64,6 +65,7 @@ export function Editor({ store, load, style, zoneLabel, label, heading }: Editor
           statusRef={status}
         />
       }
+      dock={<PolitiesPanel store={store} />}
       status={
         // No `aria-live`, and that is the accessibility decision rather than an omission: this text
         // changes on every pointer sample, so announcing it would make a screen reader unusable — the

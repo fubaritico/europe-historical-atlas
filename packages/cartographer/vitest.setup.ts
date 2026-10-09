@@ -60,3 +60,22 @@ globalThis.ResizeObserver = class {
   /** Never fires. */
   disconnect = noop
 }
+
+/**
+ * `showModal()` and `close()` on `<dialog>`, because jsdom has neither — and the design system's `Modal`
+ * drives the native element through them (its README: `isOpen` calls `showModal()` / `close()`).
+ *
+ * The stand-in does what a test can observe: it sets and removes `open`, so the dialogue's content is in
+ * the document exactly while it is open, and on opening it focuses an `autofocus` descendant, as the
+ * browser's dialogue focusing steps do. No top layer, no focus trap, no `::backdrop` —
+ * none of which jsdom could render or a test could assert anyway; those are the browser's.
+ */
+HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement) {
+  this.setAttribute('open', '')
+  // The one focusing step a test can see: the browser moves focus to an `autofocus` descendant.
+  this.querySelector<HTMLElement>('[autofocus]')?.focus()
+}
+HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
+  this.removeAttribute('open')
+  this.dispatchEvent(new Event('close'))
+}

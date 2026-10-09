@@ -160,3 +160,114 @@
   width: 12px;
   height: 12px;
 }
+
+/*
+ * A list reads like a field: `design/03` draws `<select>`s, the design system's Dropdown is a menu button,
+ * so its trigger takes the field's fill, hairline and inset — label and caret pushed to either end.
+ */
+.ui-dropdown {
+  --ui-dropdown-font-family: inherit;
+
+  display: flex;
+}
+
+.ui-dropdown .ui-button--outline {
+  --ui-button-bg: var(--bg);
+  --ui-button-bg-hover: var(--bg);
+  --ui-button-fg-hover: var(--ink);
+  --ui-button-border-color: var(--ink-off);
+  --ui-button-padding-inline: 6px;
+
+  justify-content: space-between;
+}
+
+/* The skin clips a card to its corners, which would cut off a list opened near the dialogue's edge. */
+.polity-form .ui-card {
+  overflow: visible;
+}
+
+/* The dialogue's width: wide enough for a long period name, as `design/03`'s panel is. */
+.polity-form {
+  width: 340px;
+}
+
+/*
+ * `{Polities}`' head, after `design/chrome.css`'s tab strip: the bar on the page's fill with a hairline
+ * under it, the panel's name as the active tab — melting into the panel below — and `[+ New polity]` as
+ * a square action at the end.
+ */
+.polities__head {
+  display: flex;
+  align-items: stretch;
+  height: var(--tab);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.polities__title {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.polities__head > .ui-icon-button {
+  --ui-icon-button-size: var(--tab);
+  --ui-icon-button-radius: 0;
+  --ui-button-height: var(--tab);
+
+  margin-inline-start: auto;
+}
+
+.polities__head > .ui-icon-button svg {
+  width: 12px;
+  height: 12px;
+}
+
+/*
+ * The list a Dropdown opens, at the field's scale and on the field's fill: a hairline and no shadow, rows
+ * of a field's height, nothing rounded. The skin draws it light from the primitive greys, so every value
+ * the skin exposes is set here from the palette.
+ */
+.ui-listbox {
+  --ui-listbox-bg: var(--bg);
+  --ui-listbox-border-color: var(--ink-off);
+  --ui-listbox-shadow: none;
+  --ui-listbox-padding: 0;
+  --ui-listbox-item-gap: 0;
+  --ui-listbox-ring-color: var(--accent);
+}
+
+.ui-listbox__item {
+  --ui-listbox-item-padding-block: 3px;
+  --ui-listbox-item-padding-inline: 6px;
+  --ui-listbox-item-font-family: inherit;
+  --ui-listbox-item-font-size: 12px;
+  --ui-listbox-item-line-height: 16px;
+  --ui-listbox-item-selected-weight: 500;
+  --ui-listbox-item-color: var(--ink);
+  --ui-listbox-item-hover-bg: var(--hover);
+  --ui-listbox-item-hover-color: var(--ink);
+  --ui-listbox-item-active-bg: var(--hover);
+  --ui-listbox-item-active-color: var(--ink);
+  --ui-listbox-item-selected-bg: var(--raised);
+  --ui-listbox-item-selected-color: var(--ink);
+}
+
+/* The menu opens against the field, with no gap between them. */
+.ui-dropdown {
+  --ui-dropdown-menu-gap: 0;
+}
+
+/*
+ * No focus ring on the Modal's shell. It is a transparent `<dialog>` the size of the window, so a ring on
+ * it outlines the screen and designates nothing. It takes focus when the backdrop is clicked; the fields
+ * and buttons inside keep their rings, which is where a keyboard reader needs to see the focus.
+ */
+.ui-modal:focus-visible {
+  outline: none;
+}
