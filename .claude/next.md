@@ -76,6 +76,7 @@ le curseur du canevas passe du refus à la plume. On ne peut toujours rien dessi
 | **ce qui marche** | les cinq zones · le fond cadré · pan, zoom · ‹P› ‹A› ‹space› · les curseurs · la barre d'état · l'état de la cible · **le DS branché sur le thème sombre, à la finesse Illustrator** · **le formulaire de création** · **l'établi** (`/workbench.html`) | ✅ |
 | **ce qui manque** | **`(d)`** : le second canevas, poser des ancres, fermer un anneau, déplacer un point · et de `(c2)` : la liste `{Polities}` avec « no territory », l'avis transitoire de cible | ◀ |
 | **à faire d'abord** | **`/scenarii-to-code` sur `s02`** (poser, fermer) et `s03` (déplacer) — puis dire au dev ce que `(d)` livrera et ne livrera pas, **avant** d'écrire | |
+| **dès que la `0.3.0` sort** | **le ColorPicker dans la boîte de création** — annoncé « bientôt fini » par le dev le 09/10 au soir. Petit et indépendant de `(d)`, donc il passe devant s'il arrive avant. Voir ci-dessous | |
 
 > **Le découpage `a/b/c/d` est figé — ne plus le re-trancher.** Il a bougé deux fois le 07/10, et
 > c'est ce qui a fait perdre le fil au dev. S'il paraît faux à la reprise, le dire **avant** d'y
@@ -102,6 +103,14 @@ plages et ajouter le champ couleur, avec son état « automatic » = `null`. Le 
    l'attribut, un `<dialog>` ne le verrait pas · un bouton dans un `<form>` soumet par défaut —
    `type="button"` partout sauf OK · le `Card` coupe ce qui déborde, d'où `overflow: visible` sur la
    boîte du formulaire.
+
+**Le ColorPicker, quand la `0.3.0` sera publiée — ce qu'il faudra faire, et c'est tout** :
+monter `@fubaritico/react` à `^0.3.0` (seuls les paquets republiés montent) · ajouter le champ
+**Colour** au formulaire (`PolityForm.tsx`), avec l'état **« automatic » = `null`** que le DS a promis
+(s02 : *« I leave the colour on "automatic" »*, qui veut dire « la palette décide ») · faire porter la
+couleur par le brouillon (`polityDraft.ts` : `colour` n'est plus forcé à `null`) · une fiche de l'établi
+pour le régler à la finesse des champs · un test qui crée un pays avec une couleur choisie, et un qui
+le crée en « automatic ». Lire la **Notes** du README du composant avant de l'utiliser.
 
 **Décisions du dev du 09/10, à ne pas re-trancher** : le **contraste n'est pas une contrainte** dans
 l'éditeur · le formulaire est une **boîte de dialogue**, pas le panneau `{Details}` de `design/03` · un
