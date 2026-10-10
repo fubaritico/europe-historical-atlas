@@ -125,5 +125,7 @@ Read @known-issues.md
 | `error-handling.md`       | Any fallback, `catch`, or default covering a failure |
 | `tests.md`                | Writing tests — 5-level policy                       |
 | `troubleshooting.md`      | Debug three.js/Vite/WebGL, architectural decisions   |
+| `../known-issues-atlas.md` | Before touching the atlas (render, pipeline wiring, dev panel) — its open issues |
+| `../archive/*.md`         | Older sessions and closed issues — when a past decision or lesson is in question |
 
 **Before coding**: ask which reference files are needed — do NOT start without the relevant files loaded.
