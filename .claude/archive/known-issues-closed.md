@@ -2,6 +2,10 @@
 
 Entries closed and moved out of `known-issues.md`. Kept for the lessons they carry.
 
+- **Les fleuves sont vérifiés contre la boîte du relief dans les deux applications — fermé le 12/10.**
+  Le Cartographe depuis le 11/10 (`loadVectorLayers`), l'atlas depuis le 12/10 (`settleRivers`, quand
+  le second des deux arrive) : des fleuves recadrés autrement sont refusés en `semantic`, la carte vient
+  sans eux et le dit — la réponse déjà prise pour le masque.
 - ~~**`CLAUDE.md` dit « No React, no monorepo, no design system »**~~ — **CORRIGÉ 2026-10-01** (`7f75624`),
   au moment où React est entré dans le dépôt. `rules/architecture.md` et `rules/troubleshooting.md` ont été
   corrigés dans le même commit : le premier affirmait encore « No Turbo and no Lerna », le second disait

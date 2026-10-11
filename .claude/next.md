@@ -5,7 +5,7 @@
 
 ## Where we are
 
-**2350 tests** (682 `core` · 782 atlas · 886 Cartographe, 11/10), gate verte sur cinq contrôles (`lint`,
+**2523 tests** (737 `core` · 787 atlas · 999 Cartographe, 12/10), gate verte sur cinq contrôles (`lint`,
 `type-check`, `test`, `build`, `format:check`). Worker à **13 490 o**, toujours sans three.js — et depuis
 le 07/10 le Cartographe émet **le même chunk, au même hash**, le fond étant cuit par le même port.
 
@@ -68,17 +68,17 @@ point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui 
 
 ## ▶ ON REPREND ICI — en trois lignes
 
-**On dessine : la plume trace, suit la côte et les fleuves, le crayon trace à main levée, ‹P› passe
-d'un mode à l'autre ; les pays s'empilent par groupes, `{Polities}` est un arbre (11/10).**
+**On dessine et on édite : plume (libre, côte, fleuve), crayon, sélection à la marquise, déplacer et
+supprimer plusieurs points, pays empilés par groupes, pays modifiables (12/10). Mais rien ne
+s'enregistre : chaque rechargement repart d'une carte vide.**
 
 | | | |
 | --- | --- | --- |
-| **ce qui marche** | `(d)` livré le 10–11/10 : plume (libre / côte, avec aperçu), fermeture, ‹ctrl+z› pas à pas qui rouvre un contour, flèche (déplacer, insérer, supprimer, ‹suppr›), accrochage aux ancres partagées, la côte d'abord en mode côte avec réutilisation des ancres du voisin, la plume « + » · la barre d'outils à la Illustrator · `{Polities}` qui suit le document · clic dans un remplissage = cible, clic dans le vide = désélection · ColorField (DS `0.5.0`) | ✅ |
-| **à faire tout de suite** | **la sélection** — le dev, 11/10 au soir : (1) **pas encore de sélection multiple à la marquise** (`s03` l'attend aussi, pour la suppression multiple) ; (2) **choisir un pays par un clic dans son remplissage doit se faire au relâchement (`pointerup`), pas à l'appui** — sinon une marquise commencée dans la mer désélectionne avant d'avoir tracé quoi que ce soit. Aujourd'hui c'est à l'appui (`arrowPress`). **On y revient après son test de l'empilement** · le « Y » est **retiré** (11/10) : plus de badge, la jonction aux ancres du voisin reste | ◀ |
-| **livré le 11/10 au soir** | l'**empilement par groupes** (`s16`, plan suivi en 7 pas, `5594aa2`..`e23e260`) : `paintOrder` dans `core`, lu par l'atlas **et** le Cartographe · `{Polities}` en **arbre**, le devant en haut · le **menu Arrange** au clic droit et à ‹⇧F10›, entre frères, un pas d'historique. Limites : `known-issues` | ✅ |
-| **ensuite / noté** | le zoom ‹+›/‹−› : le dev le trouve **suffisant** (11/10), rien à corriger · **masquer un pays** (`H-32`, idée du dev, besoin non prouvé — essayer d'abord un affichage contours seuls global, ‹⌘Y›) · **liste par nom ou par empilement** (`H-33`, ouvert) · les fleuves jusqu'à la mer (`extendRiversToSea`), **remis à plus tard par le dev** · le contrôle de bbox des fleuves côté atlas (`known-issues`) | |
-| **à pousser** | 23 commits non poussés depuis `059af13` (`git log origin/main..main`) (`git ls-remote origin main` = `6b10462`). Pousser **quand le dev le demande** | |
-| **noté, non urgent** | alléger les tronçons de côte (Douglas–Peucker, tolérance non tranchée) · la confirmation avant de supprimer une ancre partagée et la suppression multiple (attend la marquise), écrites dans `s03` | |
+| **à faire demain** | **enregistrer et rouvrir une carte** — la demande du dev, 12/10 : *« j'ai pas envie de redessiner constamment les choses »*. Scénarios : `s04` (save, reopen identical, *« the saved file loses nothing »*) et `s15` (offline : les trois fichiers `registry` / `polities` / `borders.json` d'une année sous `packages/atlas/public/years/<année>/`, plus le manifeste `years/index.json`). **Le format et le modèle sont prêts** : `saveYearDocument` / `openYearDocument` dans `core`, l'aller-retour testé (le partage des ancres conservé, et l'ordre de la liste depuis le 12/10). **La décision à prendre d'abord avec lui, c'est `H-28`** : comment le navigateur écrit — un **téléchargement** (partout, mais trois fichiers à déplacer à la main) ou la **File System Access API** (écrit dans un dossier choisi, ‹ctrl+s› écrase en place, pas dans tous les navigateurs ; Chrome l'a). Puis ‹ctrl+s›, `[Open…]`, et l'atlas qui lit l'année | ◀ |
+| **ensuite** | ce que le dev a cité : la suite du chantier · l'**inspecteur `{Details}`** (lecture seule : le pays choisi, ou un point — coordonnées, provenance, contours qui le partagent — avec « Edit properties… ») · les **noms datés** de `s07` (« Royaume des Francs » → « Royaume de France » en 1190), **plus tard, dit le dev** | |
+| **livré le 11–12/10** | les fleuves · le crayon et ‹P› · l'empilement par groupes et `{Polities}` en arbre · modifier un pays · la sélection, la marquise, déplacer et supprimer plusieurs points — détail dans `completed.md` | ✅ |
+| **noté** | **masquer un pays** (`H-32`, besoin non prouvé — essayer d'abord un affichage contours seuls, ‹⌘Y›) · les fleuves jusqu'à la mer (`extendRiversToSea`, **remis à plus tard par le dev**) · alléger les tronçons de côte (Douglas–Peucker) · la confirmation avant de supprimer une ancre partagée (`s03`) · tracer au clavier (étape 5) | |
+| **à pousser** | **35 commits** non poussés depuis `059af13` (`git log origin/main..main` ; `git ls-remote origin main` = `6b10462`). Pousser **quand le dev le demande** | |
 
 > **Le découpage `a/b/c/d` est figé — ne plus le re-trancher.** Il a bougé deux fois le 07/10, et
 > c'est ce qui a fait perdre le fil au dev. S'il paraît faux à la reprise, le dire **avant** d'y

@@ -222,10 +222,6 @@ Put here the know issues to avoid cluttering the context window.
   commité. Rattrapé tout de suite, rien de perdu. **La règle** : pour défaire un sabotage de vérification,
   copier le fichier avant (`cp`) ou éditer à la main — `git checkout` ne connaît que le dernier commit.
   **Cosmétique**, mais ça coûte une réécriture à chaque fois.
-- **Les fleuves sont vérifiés contre la boîte du relief dans les deux applications — fermé le 12/10.**
-  Le Cartographe depuis le 11/10 (`loadVectorLayers`), l'atlas depuis le 12/10 (`settleRivers`, quand
-  le second des deux arrive) : des fleuves recadrés autrement sont refusés en `semantic`, la carte vient
-  sans eux et le dit — la réponse déjà prise pour le masque. **À archiver** au prochain `/end-session`.
 - **Le manifeste des années déclare la bbox du rendu, et personne ne vérifie qu'elle correspond au DEM.**
   `years/index.json` porte la boîte géographique contre laquelle les années dessinées se projettent, et elle
   **doit** être celle du DEM : si elle diffère, chaque frontière glisse hors du terrain qu'elle borde, sans
