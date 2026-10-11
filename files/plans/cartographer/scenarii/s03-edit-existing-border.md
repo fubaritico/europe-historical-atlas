@@ -134,6 +134,18 @@ Scenario: delete an anchor
 
 > `projectRegions` already drops rings under 4 vertices on load — so a ring reduced below that would
 > silently vanish on the next open. Refusing at the gesture is the honest place.
+>
+> **Counted the way the file stores a ring** (2026-10-11): a GeoJSON ring repeats its first vertex at
+> the end, so its 4 vertices are **3 anchors** in our index lists, where the closure is implied. The
+> tool refuses under three anchors and says *"a ring needs at least three anchors"* — the same
+> threshold, in the unit the author sees.
+>
+> **What the first rung does, and does not** (2026-10-11): a click on one of the **target's** stretches
+> inserts a point reported by eye into every ring over it, and keeping the pointer down drags it — two
+> undo steps, the insertion then the move. ‹delete›/‹backspace› remove the selected anchor from every
+> ring. **Not yet**: the confirmation naming both polities before a shared anchor goes (the result zone
+> names them after, and one undo puts it back), and deleting several at once, which waits on the
+> marquee.
 
 ```gherkin
 Scenario: delete an anchor two polities stand on

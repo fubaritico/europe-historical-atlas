@@ -7,7 +7,7 @@
  * happens once at save.
  */
 
-import { referencedAnchors } from './yearDocument'
+import { MIN_RING_ANCHORS, referencedAnchors } from './yearDocument'
 
 import type { YearDocument } from './yearDocument'
 import type { YearPolity, YearProvenance } from '../data/yearFormat'
@@ -95,7 +95,7 @@ export function addPolity(doc: YearDocument, polity: YearPolity): boolean {
  * @returns `false` when the polity is unknown or the ring cannot enclose an area
  */
 export function closeRing(doc: YearDocument, polityId: string, ring: number[]): boolean {
-  if (ring.length < 3) return false
+  if (ring.length < MIN_RING_ANCHORS) return false
   if (!doc.polities.some((polity) => polity.id === polityId)) return false
   if (ring.some((index) => index < 0 || index >= doc.anchors.length)) return false
   const claim = doc.claims.find((existing) => existing.polity === polityId)
@@ -164,7 +164,7 @@ export function addOutline(
   polityId: string,
   points: readonly OutlinePoint[]
 ): boolean {
-  if (points.length < 3) return false
+  if (points.length < MIN_RING_ANCHORS) return false
   if (!doc.polities.some((polity) => polity.id === polityId)) return false
   const count = doc.anchors.length
   if (
@@ -195,7 +195,7 @@ export function addOutline(
  * @returns `false` when the polity is unknown or the run cannot enclose anything
  */
 export function duplicateRun(doc: YearDocument, run: number[], intoPolity: string): boolean {
-  if (run.length < 3) return false
+  if (run.length < MIN_RING_ANCHORS) return false
   if (!doc.polities.some((polity) => polity.id === intoPolity)) return false
   if (run.some((index) => index < 0 || index >= doc.anchors.length)) return false
   return closeRing(doc, intoPolity, [...run].reverse())

@@ -32,6 +32,7 @@ function action(overrides: Partial<ActionInputs> = {}): ActionInputs {
     snapping: false,
     following: false,
     joining: null,
+    inserting: false,
     session: idleSession(),
     ...overrides,
   }
@@ -95,6 +96,17 @@ describe('toolSession', () => {
       )
       const moving = { ...selected, moving: { index: 3, to: [0, 0] as [number, number] } }
       expect(actionSentence(action({ tool: 'edit', session: moving }))).toBe(
+        'Moving path from Reaume de France'
+      )
+    })
+
+    // s03 — the white arrow over a stretch, where a click inserts an anchor; a drag still says it moves.
+    it('names the insertion offered over a stretch, under the drag', () => {
+      expect(actionSentence(action({ tool: 'edit', inserting: true }))).toBe(
+        'Inserting a point into Reaume de France'
+      )
+      const moving = { ...idleSession(), moving: { index: 3, to: [0, 0] as [number, number] } }
+      expect(actionSentence(action({ tool: 'edit', inserting: true, session: moving }))).toBe(
         'Moving path from Reaume de France'
       )
     })

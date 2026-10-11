@@ -11,6 +11,7 @@ const AT_REST: CursorState = {
   panning: false,
   closing: false,
   overHandle: false,
+  overStretch: false,
   snapping: false,
   branching: false,
   overFill: false,
@@ -40,6 +41,13 @@ describe('cursorFor', () => {
       expect(cursorFor({ ...AT_REST, tool: 'edit', hasTarget: true, overHandle: true })).toBe(
         'arrow-handle'
       )
+    })
+
+    // CURSORS.md — `arrow-insert` over a stretch, away from any handle; the handle wins.
+    it('marks a stretch under the arrow with the insert cursor, under the handle mark', () => {
+      const arrow = { ...AT_REST, tool: 'edit' as const, hasTarget: true, overStretch: true }
+      expect(cursorFor(arrow)).toBe('arrow-insert')
+      expect(cursorFor({ ...arrow, overHandle: true })).toBe('arrow-handle')
     })
 
     // CURSORS.md — `cross-snap` while the coastline is within reach; the closing mark still wins.
@@ -116,6 +124,7 @@ describe('cursorFor', () => {
                   spaceHeld,
                   closing: false,
                   overHandle: false,
+                  overStretch: false,
                   snapping: false,
                   branching: false,
                   overFill: false,

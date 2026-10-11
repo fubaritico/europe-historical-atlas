@@ -16,6 +16,8 @@
  * with the land mask and an inclusion test.
  */
 
+import { MIN_RING_ANCHORS } from './yearDocument'
+
 import type { YearDocument } from './yearDocument'
 
 /** One boundary edge: a pair of consecutive anchors, and every path holding it. */
@@ -68,7 +70,7 @@ export function collectBorderEdges(doc: YearDocument): Map<string, BorderEdge> {
   const edges = new Map<string, BorderEdge>()
   for (const claim of doc.claims) {
     for (const ring of claim.rings) {
-      if (ring.length < 3) continue
+      if (ring.length < MIN_RING_ANCHORS) continue
       for (let i = 0; i < ring.length; i += 1) {
         const a = ring[i]
         const b = ring[(i + 1) % ring.length]

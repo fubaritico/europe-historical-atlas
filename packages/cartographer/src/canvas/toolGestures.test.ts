@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import { lonLatToScreen } from '../view/projection'
 
-import { openEmptyYear } from '../state/openEmptyYear'
-import { createCartographerStore } from '../state/store'
-import { lonLatToScreen, projectToBackdrop, remapToScreen } from '../view/projection'
-import { TEST_BACKDROP_FRAME } from '../view/testFrame'
-
-import { projectedTerritories } from './scene'
+import {
+  TEST_COAST_PROVENANCE,
+  testGestureContext,
+  testPolity,
+  testStore,
+} from './testGestureContext'
 import {
   MOVE_ANCHOR_STEP,
   arrowDrag,
@@ -21,29 +21,9 @@ import {
   toolKey,
   undoGesture,
 } from './toolGestures'
-import { idleSession } from './toolSession'
 
 import type { GestureContext } from './toolGestures'
 import type { CoastContour } from '../geometry/coastSnap'
-import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
-
-/** A polity with only an id and a name. */
-function polity(id: string, name: string): YearPolity {
-  return {
-    id,
-    name,
-    rank: null,
-    status: null,
-    suzerain: null,
-    existsFrom: null,
-    existsTo: null,
-    colour: null,
-    wikidata: null,
-  }
-}
-
-/** What the test coastline is said to be traced from. */
-const COAST_PROVENANCE = { name: 'test shore', licence: 'CC0' }
 
 /** Three screen points that make a triangle well inside the backdrop. */
 const TRIANGLE: [number, number][] = [
@@ -58,37 +38,15 @@ const TRIANGLE: [number, number][] = [
  * @returns the gesture context, over a fresh session
  */
 function openContext(aimed = true, coast: readonly CoastContour[] = []): GestureContext {
-  const store = createCartographerStore({
-    edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
-    viewport: { viewport: { scale: 1, originX: 0, originY: 0 } },
-  })
-  store.getState().createPolity(polity('fr', 'Reaume de France'), { kind: 'create', label: 'fr' })
-  store.getState().createPolity(polity('hre', 'Sacrum Imperium'), { kind: 'create', label: 'hre' })
+  const store = testStore()
+  store
+    .getState()
+    .createPolity(testPolity('fr', 'Reaume de France'), { kind: 'create', label: 'fr' })
+  store
+    .getState()
+    .createPolity(testPolity('hre', 'Sacrum Imperium'), { kind: 'create', label: 'hre' })
   if (aimed) store.getState().aimAt('fr')
-  return {
-    store,
-    frame: TEST_BACKDROP_FRAME,
-    session: idleSession(),
-    anchorsOnScreen: () =>
-      remapToScreen(
-        projectToBackdrop(store.getState().document.anchors, TEST_BACKDROP_FRAME),
-        store.getState().viewport
-      ),
-    territoriesOnScreen: () => {
-      const state = store.getState()
-      return projectedTerritories(
-        state.document,
-        remapToScreen(
-          projectToBackdrop(state.document.anchors, TEST_BACKDROP_FRAME),
-          state.viewport
-        )
-      )
-    },
-    radius: 8,
-    coast,
-    coastProvenance: COAST_PROVENANCE,
-    report: () => undefined,
-  }
+  return testGestureContext(store, coast).context
 }
 
 /**
@@ -552,7 +510,7 @@ describe('the Pen following the coast', () => {
       expect(context.session.outline).toHaveLength(1)
       expect(onScreenPoint(context, context.session.outline[0]?.at)[0]).toBeCloseTo(150, 6)
       expect(onScreenPoint(context, context.session.outline[0]?.at)[1]).toBeCloseTo(200, 6)
-      expect(context.session.outline[0]?.provenance).toEqual(COAST_PROVENANCE)
+      expect(context.session.outline[0]?.provenance).toEqual(TEST_COAST_PROVENANCE)
     })
 
     // s02 — "the whole coastline sub-path between the two is inserted / inserted 412 vertices".

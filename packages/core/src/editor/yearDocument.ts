@@ -29,6 +29,15 @@ import type {
 } from '../data/yearFormat'
 import type { GeoBounds } from '../geo/mercator'
 
+/**
+ * The fewest anchors a ring can have — closure implied, so a triangle.
+ *
+ * Two anchors close onto a line with no interior: it paints nothing, derives no border and claims no
+ * cell. **The one floor for the whole editor** — closing, drawing, duplicating, removing a point, saving,
+ * and the Pen's closing offer — so no two of them can disagree on what a ring is (QUAL-002).
+ */
+export const MIN_RING_ANCHORS = 3
+
 /** A year being edited. Flat on purpose: the three files are a storage layout, not a working one. */
 export interface YearDocument {
   /** The year being drawn. */
@@ -231,11 +240,11 @@ export function saveYearDocument(doc: YearDocument): YearFiles {
       anchorSource,
       claims: doc.claims.map((claim) => ({
         polity: claim.polity,
-        rings: claim.rings.map(rewrite).filter((ring) => ring.length >= 3),
+        rings: claim.rings.map(rewrite).filter((ring) => ring.length >= MIN_RING_ANCHORS),
       })),
       deliberateGaps: doc.deliberateGaps
         .map((gap) => ({ ring: rewrite(gap.ring), reason: gap.reason }))
-        .filter((gap) => gap.ring.length >= 3),
+        .filter((gap) => gap.ring.length >= MIN_RING_ANCHORS),
     },
     borders: {
       version: 1,

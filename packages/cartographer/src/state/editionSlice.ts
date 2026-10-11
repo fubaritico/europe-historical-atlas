@@ -1,4 +1,8 @@
 import {
+  insertAnchorOnStretch,
+  removeAnchor,
+} from '@europe-historical-atlas/core/editor/anchorEdits'
+import {
   addOutline,
   addPolity,
   moveAnchor,
@@ -7,6 +11,7 @@ import { createHistory } from '@europe-historical-atlas/core/editor/history'
 
 import type { CartographerStore } from './store'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
+import type { AnchorRemoval } from '@europe-historical-atlas/core/editor/anchorEdits'
 import type { OutlinePoint, Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
 import type {
   History,
@@ -125,6 +130,25 @@ export interface EditionActions {
    * @returns `false` when there is no such anchor — and nothing happened
    */
   moveAnchor: (index: number, point: [number, number], step: HistoryStep) => boolean
+  /**
+   * Insert an anchor on a stretch, as one undoable step — the white arrow's click on a stretch (`s03`).
+   *
+   * Every ring running over the stretch gains it, so two polities sharing that border keep sharing it.
+   * The point is reported by eye.
+   * @param a - one end of the stretch
+   * @param b - the other end
+   * @param point - where the new anchor goes, as `[longitude, latitude]`
+   * @param step - how the gesture is named
+   * @returns the new anchor's index, or `null` when no ring runs from `a` to `b` — and nothing happened
+   */
+  insertAnchor: (a: number, b: number, point: [number, number], step: HistoryStep) => number | null
+  /**
+   * Remove an anchor from every ring holding it, as one undoable step — ‹delete› under ⟨edit⟩ (`s03`).
+   * @param index - the anchor to remove
+   * @param step - how the gesture is named
+   * @returns the polities that held it, or `null` when nothing holds it or a ring would fall too short
+   */
+  deleteAnchor: (index: number, step: HistoryStep) => AnchorRemoval | null
   /** Take back the last gesture. Does nothing at the origin: `ctrl+z` at the end of the line is ordinary. */
   undo: () => void
   /** Apply an undone gesture again. Does nothing at the end of the line. */
@@ -263,6 +287,35 @@ function recorder(
 }
 
 /**
+ * The two edits of a single anchor — insert one on a stretch, remove one — each answering with what it
+ * did, which `recorder`'s boolean cannot carry.
+ * @param record - the runner every recorded action goes through
+ * @returns `insertAnchor` and `deleteAnchor`
+ */
+function anchorActions(
+  record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean
+): Pick<EditionActions, 'insertAnchor' | 'deleteAnchor'> {
+  return {
+    insertAnchor: (a, b, point, step): number | null => {
+      let index: number | null = null
+      record((document) => {
+        index = insertAnchorOnStretch(document, a, b, point, FREE_POINT_PROVENANCE)
+        return index !== null
+      }, step)
+      return index
+    },
+    deleteAnchor: (index, step): AnchorRemoval | null => {
+      let removal: AnchorRemoval | null = null
+      record((document) => {
+        removal = removeAnchor(document, index)
+        return removal !== null
+      }, step)
+      return removal
+    },
+  }
+}
+
+/**
  * The actions, over a line and a way to publish.
  *
  * **Outside the slice creator on purpose** (ARCH-012): pure logic trapped in a closure is a module that was
@@ -295,6 +348,7 @@ export function editionActions(
       record((document) => addOutline(document, polityId, points), step),
     moveAnchor: (index, point, step): boolean =>
       record((document) => moveAnchor(document, index, point), step),
+    ...anchorActions(record),
     undo: (): void => {
       const back = line.undo()
       if (back !== null) publish(back)

@@ -1,37 +1,17 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
-
 import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
-import { openEmptyYear } from '../state/openEmptyYear'
-import { createCartographerStore } from '../state/store'
-import { projectToBackdrop, remapToScreen, screenToLonLatOnBackdrop } from '../view/projection'
+import { screenToLonLatOnBackdrop } from '../view/projection'
 import { TEST_BACKDROP_FRAME } from '../view/testFrame'
 
 import { anchorClick, anchorHit, anchorSentence, borderRunTo } from './borderSnap'
-import { idleSession } from './toolSession'
+import { testGestureContext, testPolity, testStore } from './testGestureContext'
 
 import type { GestureContext } from './toolGestures'
-import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 
 afterEach(() => {
   vi.restoreAllMocks()
 })
-
-/** A polity with only an id and a name. */
-function polity(id: string): YearPolity {
-  return {
-    id,
-    name: id,
-    rank: null,
-    status: null,
-    suzerain: null,
-    existsFrom: null,
-    existsTo: null,
-    colour: null,
-    wikidata: null,
-  }
-}
 
 /** France's hexagon, screen positions at scale 1: anchors 0 to 5 in ring order. */
 const HEXAGON: [number, number][] = [
@@ -48,39 +28,17 @@ const HEXAGON: [number, number][] = [
  * @returns the gesture context and what it reported
  */
 function openContext() {
-  const viewport = { scale: 1, originX: 0, originY: 0 }
-  const store = createCartographerStore({
-    edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
-    viewport: { viewport },
-  })
-  store.getState().createPolity(polity('fr'), { kind: 'create', label: 'fr' })
-  store.getState().createPolity(polity('hre'), { kind: 'create', label: 'hre' })
+  const store = testStore()
+  store.getState().createPolity(testPolity('fr'), { kind: 'create', label: 'fr' })
+  store.getState().createPolity(testPolity('hre'), { kind: 'create', label: 'hre' })
   const points = HEXAGON.map((at) => {
-    const lonLat = screenToLonLatOnBackdrop(at, TEST_BACKDROP_FRAME, viewport)
+    const lonLat = screenToLonLatOnBackdrop(at, TEST_BACKDROP_FRAME, store.getState().viewport)
     if (lonLat === null) throw new Error('off the backdrop')
     return { at: lonLat, provenance: FREE_POINT_PROVENANCE }
   })
   store.getState().drawOutline('fr', points, { kind: 'draw-outline', label: 'fr' })
   store.getState().aimAt('hre')
-  const reports: string[] = []
-  const context: GestureContext = {
-    store,
-    frame: TEST_BACKDROP_FRAME,
-    session: idleSession(),
-    anchorsOnScreen: () =>
-      remapToScreen(
-        projectToBackdrop(store.getState().document.anchors, TEST_BACKDROP_FRAME),
-        store.getState().viewport
-      ),
-    territoriesOnScreen: () => [],
-    radius: 8,
-    coast: [],
-    coastProvenance: { name: 'test shore', licence: 'CC0' },
-    report: (message) => {
-      reports.push(message)
-    },
-  }
-  return { context, reports }
+  return testGestureContext(store)
 }
 
 /** The anchor indices of the outline in progress. */

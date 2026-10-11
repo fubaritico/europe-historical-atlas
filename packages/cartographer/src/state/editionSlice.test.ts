@@ -717,3 +717,83 @@ describe('editionSlice.drawOutline and moveAnchor', () => {
     })
   })
 })
+
+/** How the white arrow's two anchor edits are named. */
+const INSERT: HistoryStep = { kind: 'insert-anchor', label: 'insert anchor' }
+const DELETE: HistoryStep = { kind: 'delete-anchor', label: 'delete anchor' }
+
+describe('editionSlice.insertAnchor and deleteAnchor', () => {
+  describe('happy path', () => {
+    it('inserts an anchor on the shared side into both rings, as one step', () => {
+      const { store } = openStore()
+
+      expect(store.getState().insertAnchor(1, 2, [2, 47], INSERT)).toBe(6)
+
+      const rings = store.getState().document.claims.map((claim) => claim.rings[0])
+      expect(rings).toEqual([
+        [0, 1, 6, 2, 3],
+        [1, 4, 5, 2, 6],
+      ])
+      store.getState().undo()
+      expect(store.getState().document.anchors).toHaveLength(6)
+    })
+
+    it('removes the shared anchor from both rings, naming both holders', () => {
+      const { store } = openStore()
+
+      expect(store.getState().deleteAnchor(1, DELETE)).toEqual({ polities: ['fr-couronne', 'hre'] })
+
+      expect(store.getState().document.claims.map((claim) => claim.rings[0])).toEqual([
+        [0, 2, 3],
+        [4, 5, 2],
+      ])
+    })
+  })
+
+  describe('variants', () => {
+    it('records the inserted point as reported by eye', () => {
+      const { store } = openStore()
+      store.getState().insertAnchor(0, 1, [1, 48], INSERT)
+      const { document } = store.getState()
+      const source = document.anchorSource.at(-1)
+      expect(document.sources.find((entry) => entry.id === source)).toMatchObject(
+        FREE_POINT_PROVENANCE
+      )
+    })
+  })
+
+  describe('managed errors', () => {
+    it('records nothing for two anchors no ring joins', () => {
+      const { store } = openStore()
+      expect(store.getState().insertAnchor(0, 2, [1, 47], INSERT)).toBeNull()
+      expect(store.getState().canUndo).toBe(false)
+      expect(store.getState().document.anchors).toHaveLength(6)
+    })
+
+    it('records nothing for a deletion that would leave a ring of two', () => {
+      const { store } = openStore()
+      store.getState().deleteAnchor(0, DELETE)
+      const steps = store.getState().rows.length
+      expect(store.getState().deleteAnchor(3, DELETE)).toBeNull()
+      expect(store.getState().rows).toHaveLength(steps)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('records nothing for an anchor no ring holds', () => {
+      const { store } = openStore()
+      expect(store.getState().deleteAnchor(99, DELETE)).toBeNull()
+      expect(store.getState().canUndo).toBe(false)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('keeps the deleted anchor in the table, so an undo finds it at the same index', () => {
+      const { store } = openStore()
+      store.getState().deleteAnchor(1, DELETE)
+      expect(store.getState().document.anchors).toHaveLength(6)
+      store.getState().undo()
+      expect(store.getState().document.claims[0]?.rings[0]).toEqual([0, 1, 2, 3])
+    })
+  })
+})

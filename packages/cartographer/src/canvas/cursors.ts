@@ -1,4 +1,5 @@
 import arrowHandleUrl from '../cursors/arrow-handle.svg'
+import arrowInsertUrl from '../cursors/arrow-insert.svg'
 import arrowUrl from '../cursors/arrow.svg'
 import crossBranchUrl from '../cursors/cross-branch.svg'
 import crossCloseUrl from '../cursors/cross-close.svg'
@@ -28,8 +29,8 @@ import type { EditorTool } from '../state/toolSlice'
  */
 
 /**
- * The cursors this rung can reach. Two of the kit's ten wait for the gestures that call for them —
- * inserting and the marquee.
+ * The cursors this rung can reach. One of the kit's ten waits for the gesture that calls for it — the
+ * marquee.
  */
 export type CursorName =
   | 'hand-open'
@@ -40,6 +41,7 @@ export type CursorName =
   | 'cross-snap'
   | 'arrow'
   | 'arrow-handle'
+  | 'arrow-insert'
 
 /** What the canvas may be doing, as far as the pointer is concerned. */
 export interface CursorState {
@@ -59,6 +61,8 @@ export interface CursorState {
   snapping: boolean
   /** Whether the Pen is over an existing anchor it would join — CURSORS.md's branching mark. */
   branching: boolean
+  /** Whether the white arrow is over one of the target's stretches, away from any handle. */
+  overStretch: boolean
   /** Whether the pointer is over a polity's fill — where the white arrow's click chooses it. */
   overFill: boolean
 }
@@ -79,6 +83,7 @@ const HOT_SPOT: Record<CursorName, readonly [number, number]> = {
   'cross-snap': [16, 16],
   arrow: [6, 4],
   'arrow-handle': [6, 4],
+  'arrow-insert': [6, 4],
 }
 
 /** What the browser uses if the image cannot be had. Taken from the handoff's own table. */
@@ -91,6 +96,7 @@ const FALLBACK: Record<CursorName, string> = {
   'cross-snap': 'crosshair',
   arrow: 'default',
   'arrow-handle': 'default',
+  'arrow-insert': 'copy',
 }
 
 /** The inlined image of each cursor. */
@@ -103,6 +109,7 @@ const IMAGE: Record<CursorName, string> = {
   'cross-snap': crossSnapUrl,
   arrow: arrowUrl,
   'arrow-handle': arrowHandleUrl,
+  'arrow-insert': arrowInsertUrl,
 }
 
 /** What the pointer shows when a tool has no polity to act on — a CSS keyword, not an image of ours. */
@@ -129,7 +136,8 @@ export function cursorFor(state: CursorState): CursorName | typeof REFUSED {
   // With nobody aimed at, the arrow still has one thing to do: a click in a fill chooses its polity.
   if (!state.hasTarget) return state.tool === 'edit' && state.overFill ? 'arrow' : REFUSED
   if (state.tool === 'draw') return drawCursor(state)
-  return state.overHandle ? 'arrow-handle' : 'arrow'
+  if (state.overHandle) return 'arrow-handle'
+  return state.overStretch ? 'arrow-insert' : 'arrow'
 }
 
 /**

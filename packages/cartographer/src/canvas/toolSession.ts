@@ -171,6 +171,8 @@ export interface ActionInputs {
   following: boolean
   /** The sentence for an existing anchor the Pen is over — `s02`'s branching line — or `null`. */
   joining: string | null
+  /** Whether the white arrow is over a stretch of the target, where a click inserts an anchor. */
+  inserting: boolean
   /** The session. */
   session: ToolSession
 }
@@ -208,6 +210,7 @@ export function actionSentence(inputs: ActionInputs): string | null {
   if (targetName === null) return inputs.onCanvas ? 'Select a polity to draw in' : null
   if (tool === 'draw') return penSentence(inputs, targetName)
   if (session.moving !== null) return `Moving path from ${targetName}`
+  if (inputs.inserting) return `Inserting a point into ${targetName}`
   return session.selected === null ? null : `Selecting path from ${targetName}`
 }
 

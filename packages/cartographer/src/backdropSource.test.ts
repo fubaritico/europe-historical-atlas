@@ -389,10 +389,13 @@ describe('the test fixture stays out of production', () => {
     eager: true,
   })
 
+  /** A test fixture's file: `testFrame.ts`, `testGestureContext.ts` — `test` then a capital. */
+  const TEST_FIXTURE = /\/test[A-Z]\w*\.ts$/
+
   it('is imported by no production module', () => {
     const offenders = Object.entries(modules)
-      .filter(([path]) => !/\.test\.tsx?$/.test(path) && !path.endsWith('view/testFrame.ts'))
-      .filter(([, source]) => source.includes('testFrame'))
+      .filter(([path]) => !/\.test\.tsx?$/.test(path) && !TEST_FIXTURE.test(path))
+      .filter(([, source]) => /from '[^']*\/test[A-Z]\w*'/.test(source))
       .map(([path]) => path)
 
     // `TEST_BACKDROP_FRAME` was the application's frame until 2026-10-07, and that is precisely the

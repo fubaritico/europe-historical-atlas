@@ -7,6 +7,7 @@ import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
 import { backdropToLonLat, lonLatToScreen, screenToLonLatOnBackdrop } from '../view/projection'
 import { screenToBackdrop } from '../view/viewport'
 
+import { deleteSelected, insertOnStretch } from './anchorGestures'
 import { anchorClick } from './borderSnap'
 import { TAG } from './consoleTag'
 import { abandonGesture, dropDrag, sessionPointOf, targetHandles } from './toolSession'
@@ -249,8 +250,8 @@ function placeOnCoast(context: GestureContext, points: readonly (Point | undefin
 }
 
 /**
- * A press with the white arrow: select the target's handle under the pointer — or, off any handle,
- * aim at the polity whose fill is under it.
+ * A press with the white arrow: select the target's handle under the pointer; off any handle, insert
+ * an anchor on the target's stretch under it (`s03`); off both, aim at the polity whose fill is under it.
  * @param context - the session and the store
  * @param at - the pointer, in screen pixels
  */
@@ -262,6 +263,7 @@ export function arrowPress(context: GestureContext, at: Point): void {
   context.session.selected = hit
   context.session.grabbed = hit
   if (hit !== null) return
+  if (target !== null && insertOnStretch(context, target.id, at)) return
   // Not on a handle: a press in a polity's fill makes it the target, the tool staying the arrow
   // (the dev, 2026-10-11). Over unclaimed ground it deselects, as Illustrator does — his call, the
   // same day, over keeping the target.
@@ -300,19 +302,31 @@ export function arrowRelease(context: GestureContext): void {
 }
 
 /**
+ * The white arrow's keys: ‹escape› drops the selection, ‹delete› or ‹backspace› removes the anchor.
+ * @param context - the session and the store
+ * @param key - the key, as `KeyboardEvent.key`
+ * @returns whether the key was taken
+ */
+function editKey(context: GestureContext, key: string): boolean {
+  if (key === 'Escape') {
+    context.session.selected = null
+    return true
+  }
+  return key === 'Delete' || key === 'Backspace' ? deleteSelected(context) : false
+}
+
+/**
  * The Pen's keys: ‹backspace› takes back the last anchor, ‹escape› abandons the outline, ‹enter› closes it.
  *
- * Under ⟨edit⟩, ‹escape› drops the selection. ‹delete› is not bound: deleting an anchor is the next rung.
+ * Under ⟨edit⟩, ‹escape› drops the selection, and ‹delete› or ‹backspace› removes the selected anchor —
+ * the same thing, as in Illustrator (`s03`).
  * @param context - the session and the store
  * @param key - the key, as `KeyboardEvent.key`
  * @returns whether the key was the tools', so the caller can stop it
  */
 export function toolKey(context: GestureContext, key: string): boolean {
   const tool = context.store.getState().tool
-  if (tool === 'edit' && key === 'Escape') {
-    context.session.selected = null
-    return true
-  }
+  if (tool === 'edit') return editKey(context, key)
   if (tool !== 'draw' || context.session.outline.length === 0) return false
   if (key === 'Backspace') {
     context.session.outline.pop()

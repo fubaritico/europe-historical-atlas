@@ -403,10 +403,21 @@ function onKeyDown(it: LiveCanvas, event: KeyboardEvent): void {
     showCursor(it)
     return
   }
-  if (toolKey(gestureOf(it), event.key)) {
+  // An object, not a `let`: TypeScript does not see the closure assign it, and would read it as `false`.
+  const said = { reported: false }
+  const gesture = gestureOf(it)
+  const context = {
+    ...gesture,
+    report: (message: string) => {
+      said.reported = true
+      gesture.report(message)
+    },
+  }
+  if (toolKey(context, event.key)) {
     event.preventDefault()
-    // A gesture key changes the outline the result described; the pan and zoom keys do not (QUAL-109).
-    it.deps.onResult(null)
+    // A gesture key changes what the result described; the pan and zoom keys do not (QUAL-109). Unless
+    // the key's own gesture said what it did — a deleted anchor — which is then the result.
+    if (!said.reported) it.deps.onResult(null)
     it.requestPaint()
     refreshTools(it)
     return

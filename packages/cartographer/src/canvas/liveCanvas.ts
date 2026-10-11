@@ -5,6 +5,7 @@ import { describeDrawingTarget } from '../state/drawingTarget'
 import { lonLatToScreen, remapToScreen } from '../view/projection'
 import { backdropToScreen } from '../view/viewport'
 
+import { stretchUnder } from './anchorGestures'
 import { anchorHit, anchorSentence, borderRunTo } from './borderSnap'
 import { cursorCss, cursorFor } from './cursors'
 import { HANDLE_HIT_RADIUS } from './navigation'
@@ -271,7 +272,11 @@ export function handInHand(it: LiveCanvas): boolean {
  * @param offer - what the Pen offers under the pointer, when the caller has already worked it out — the
  *   refresh does, once per pointer move; the ‹space› handlers do not, and it is computed for them
  */
-export function showCursor(it: LiveCanvas, offer: SnapOffer = snapOffer(it)): void {
+export function showCursor(
+  it: LiveCanvas,
+  offer: SnapOffer = snapOffer(it),
+  inserting: boolean = overStretch(it)
+): void {
   const state = it.deps.store.getState()
   const hasTarget = describeDrawingTarget(state.document, state.target) !== null
   const css = cursorCss(
@@ -282,6 +287,7 @@ export function showCursor(it: LiveCanvas, offer: SnapOffer = snapOffer(it)): vo
       spaceHeld: it.spaceHeld,
       closing: closingOffered(it),
       overHandle: overHandle(it),
+      overStretch: inserting,
       snapping: offer.kind === 'coast',
       branching: offer.kind === 'anchor',
       // Only read with nobody aimed at, so only tested then — not on every move (QUAL-001).
@@ -331,6 +337,20 @@ export function overHandle(it: LiveCanvas): boolean {
 }
 
 /**
+ * Whether a white-arrow press here would insert an anchor: over one of the target's stretches, off any
+ * handle, nothing held.
+ * @param it - the attachment
+ * @returns `true` when the click would insert
+ */
+export function overStretch(it: LiveCanvas): boolean {
+  if (it.pointer === null || it.session.grabbed !== null || overHandle(it)) return false
+  const state = it.deps.store.getState()
+  if (state.tool !== 'edit') return false
+  const target = describeDrawingTarget(state.document, state.target)
+  return target !== null && stretchUnder(gestureOf(it), target.id, it.pointer) !== null
+}
+
+/**
  * Bring everything the session drives up to date: the overlay, the action sentence, the cursor.
  *
  * Called after any change to the session or the pointer. The overlay is cheap to repaint — a few
@@ -341,6 +361,7 @@ export function refreshTools(it: LiveCanvas): void {
   const state = it.deps.store.getState()
   const moving = it.session.moving
   const offer = snapOffer(it)
+  const inserting = overStretch(it)
   const scene = overlayScene({
     session: it.session,
     tool: state.tool,
@@ -361,11 +382,12 @@ export function refreshTools(it: LiveCanvas): void {
     snapping: offer.kind === 'coast',
     joining: offer.anchor === null ? null : anchorSentence(gestureOf(it), offer.anchor),
     following: state.penMode === 'coast',
+    inserting,
     session: it.session,
   })
   if (sentence !== it.sentence) {
     it.sentence = sentence
     it.deps.onAction(sentence)
   }
-  showCursor(it, offer)
+  showCursor(it, offer, inserting)
 }

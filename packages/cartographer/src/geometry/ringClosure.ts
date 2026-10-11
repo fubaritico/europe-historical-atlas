@@ -1,3 +1,5 @@
+import { MIN_RING_ANCHORS } from '@europe-historical-atlas/core/editor/yearDocument'
+
 import { distanceSquared, squaredRadius } from './hitTest'
 
 import type { Point } from '../view/viewport'
@@ -18,14 +20,8 @@ import type { Point } from '../view/viewport'
  * rather than declared — see `hitTest`'s header.
  */
 
-/**
- * The fewest anchors a ring can have.
- *
- * Three, because two anchors close onto a line with no interior: it would paint nothing, derive no
- * border, and claim no cell — a shape the rest of the pipeline has no answer for. Refusing it here is
- * cheaper than discovering it in the rasteriser.
- */
-export const MIN_RING_ANCHORS = 3
+/** The fewest anchors a ring can have — core's floor, so the Pen offers to close what the document accepts. */
+export { MIN_RING_ANCHORS }
 
 /**
  * Whether an outline holds enough anchors to be closed at all.

@@ -1617,3 +1617,77 @@ describe('the Pen meeting a shared border, on the canvas', () => {
     dispose()
   })
 })
+
+describe('inserting and deleting anchors with the white arrow, on the canvas', () => {
+  /**
+   * France's triangle drawn and closed, the white arrow in hand.
+   * @returns the attached canvas
+   */
+  function attachWithTriangle() {
+    const attached = attach()
+    aimAtFrance(attached.store)
+    for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(attached.node, at)
+    attached.node.dispatchEvent(keyEvent('a'))
+    return attached
+  }
+
+  describe('happy path', () => {
+    // s03 — "When I click on a stretch between two anchors / Then a new anchor is created".
+    it('inserts an anchor with a click on the top side, and Delete takes it out again', () => {
+      const { node, store, resulted, dispose } = attachWithTriangle()
+      click(node, [400, 202])
+      expect(store.getState().document.claims[0]?.rings).toEqual([[0, 3, 1, 2]])
+      node.dispatchEvent(keyEvent('Delete'))
+      expect(store.getState().document.claims[0]?.rings).toEqual([[0, 1, 2]])
+      expect(resulted).toHaveBeenLastCalledWith('removed an anchor')
+      dispose()
+    })
+  })
+
+  describe('variants', () => {
+    // CURSORS.md — `arrow-insert` over a stretch; the bar says what a click there would do.
+    it('shows the insert cursor and names the insertion over a side, not over a handle', () => {
+      const { node, acted, dispose } = attachWithTriangle()
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 400, offsetY: 202 }))
+      expect(node.style.cursor).toContain('copy')
+      expect(acted).toHaveBeenLastCalledWith('Inserting a point into Reaume de France')
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 500, offsetY: 200 }))
+      expect(node.style.cursor).not.toContain('copy')
+      dispose()
+    })
+  })
+
+  describe('managed errors', () => {
+    it('refuses to delete from a triangle, and says why in the result zone', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { node, store, resulted, dispose } = attachWithTriangle()
+      click(node, [500, 200])
+      node.dispatchEvent(keyEvent('Backspace'))
+      expect(store.getState().document.claims[0]?.rings).toEqual([[0, 1, 2]])
+      expect(resulted).toHaveBeenLastCalledWith('not removed — a ring needs at least three anchors')
+      warn.mockRestore()
+      dispose()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // L4: N/A beyond the gestures' own tests — the canvas only routes the press and the key to them.
+    it('lets Delete through to the page when nothing is selected', () => {
+      const { node, dispose } = attachWithTriangle()
+      const key = keyEvent('Delete')
+      node.dispatchEvent(key)
+      expect(key.defaultPrevented).toBe(false)
+      dispose()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('takes the insertion back with one ctrl+Z', () => {
+      const { node, store, dispose } = attachWithTriangle()
+      click(node, [400, 202])
+      node.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true }))
+      expect(store.getState().document.claims[0]?.rings).toEqual([[0, 1, 2]])
+      dispose()
+    })
+  })
+})
