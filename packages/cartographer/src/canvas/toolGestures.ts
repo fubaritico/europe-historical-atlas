@@ -1,4 +1,5 @@
 import { coastStretch, nearestCoastVertex } from '../geometry/coastSnap'
+import { polityAt } from '../geometry/fillHit'
 import { nearestAmong } from '../geometry/hitTest'
 import { canCloseRing, isClosingOffered } from '../geometry/ringClosure'
 import { describeDrawingTarget } from '../state/drawingTarget'
@@ -10,6 +11,7 @@ import { abandonGesture, dropDrag, targetHandles } from './toolSession'
 
 import type { SessionPoint, ToolSession } from './toolSession'
 import type { CoastContour, CoastVertex } from '../geometry/coastSnap'
+import type { PolityRings } from '../geometry/fillHit'
 import type { CartographerStoreHook } from '../state/store'
 import type { BackdropFrame } from '../view/projection'
 import type { Point } from '../view/viewport'
@@ -34,6 +36,8 @@ export interface GestureContext {
   session: ToolSession
   /** The document's anchors in screen pixels, parallel to its table — the cached projection. */
   anchorsOnScreen: () => readonly Point[]
+  /** Every polity's rings in screen pixels, in painting order — what a click in a fill is tested on. */
+  territoriesOnScreen: () => readonly PolityRings[]
   /** How near, in screen pixels, a press must be to catch a handle or the first anchor. */
   radius: number
   /** The traced coastline, in backdrop pixels — what the Pen follows in its coast mode. */
@@ -251,7 +255,8 @@ function placeOnCoast(context: GestureContext, points: readonly (Point | undefin
 }
 
 /**
- * A press with the white arrow: select the target's handle under the pointer, or clear the selection.
+ * A press with the white arrow: select the target's handle under the pointer — or, off any handle,
+ * aim at the polity whose fill is under it.
  * @param context - the session and the store
  * @param at - the pointer, in screen pixels
  */
@@ -262,6 +267,11 @@ export function arrowPress(context: GestureContext, at: Point): void {
   const hit = nearestAmong(context.anchorsOnScreen(), candidates, at, context.radius)
   context.session.selected = hit
   context.session.grabbed = hit
+  if (hit !== null) return
+  // Not on a handle: a press in a polity's fill makes it the target, the tool staying the arrow
+  // (the dev, 2026-10-11). Over unclaimed ground the target is kept — a stray click must not lose it.
+  const under = polityAt(context.territoriesOnScreen(), at)
+  if (under !== null && under !== target?.id) context.store.getState().chooseTarget(under)
 }
 
 /**

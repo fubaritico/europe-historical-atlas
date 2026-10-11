@@ -217,4 +217,15 @@ describe('toolSlice', () => {
       expect(store.getState().penMode).toBe('coast')
     })
   })
+
+  describe('chooseTarget', () => {
+    // A click in a fill aims without changing the tool: the arrow stays the arrow.
+    it('aims at a polity and leaves the tool in hand', () => {
+      const { store } = openStore()
+      store.getState().selectTool('edit')
+      store.getState().chooseTarget('fr-couronne')
+      expect(store.getState().target).toBe('fr-couronne')
+      expect(store.getState().tool).toBe('edit')
+    })
+  })
 })

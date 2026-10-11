@@ -1,6 +1,7 @@
 import { documentFaults } from '@europe-historical-atlas/core/editor/documentFaults'
 import { polityColours } from '@europe-historical-atlas/core/editor/polityColours'
 
+import { polityAt } from '../geometry/fillHit'
 import { nearestAmong } from '../geometry/hitTest'
 import { isClosingOffered } from '../geometry/ringClosure'
 import { describeDrawingTarget } from '../state/drawingTarget'
@@ -10,6 +11,7 @@ import { backdropToScreen } from '../view/viewport'
 import { cursorCss, cursorFor } from './cursors'
 import { HANDLE_HIT_RADIUS } from './navigation'
 import { paintOverlay } from './overlayPainter'
+import { projectedTerritories } from './scene'
 import { inDevicePixels } from './style'
 import { coastHit, coastStretchTo, outlineOnScreen, resolvedTarget } from './toolGestures'
 import { actionSentence, overlayScene, ringNeighbours, targetHandles } from './toolSession'
@@ -165,6 +167,8 @@ export function gestureOf(it: LiveCanvas): GestureContext {
     frame: it.deps.frame,
     session: it.session,
     anchorsOnScreen: () => anchorsOnScreen(it),
+    territoriesOnScreen: () =>
+      projectedTerritories(it.deps.store.getState().document, anchorsOnScreen(it)),
     radius: HANDLE_HIT_RADIUS * it.ratio,
     coast: it.deps.vectorLayers.coast,
     coastProvenance: it.deps.vectorLayers.coastProvenance,
@@ -239,20 +243,33 @@ export function handInHand(it: LiveCanvas): boolean {
  */
 export function showCursor(it: LiveCanvas, snapping = coastOffer(it).target !== null): void {
   const state = it.deps.store.getState()
+  const hasTarget = describeDrawingTarget(state.document, state.target) !== null
   const css = cursorCss(
     cursorFor({
       tool: state.tool,
-      hasTarget: describeDrawingTarget(state.document, state.target) !== null,
+      hasTarget,
       panning: it.dragging && handInHand(it),
       spaceHeld: it.spaceHeld,
       closing: closingOffered(it),
       overHandle: overHandle(it),
       snapping,
+      // Only read with nobody aimed at, so only tested then — not on every move (QUAL-001).
+      overFill: !hasTarget && overFill(it),
     })
   )
   if (css === it.cursor) return
   it.cursor = css
   it.node.style.cursor = css
+}
+
+/**
+ * Whether the white arrow is over a polity's fill — where its click chooses that polity.
+ * @param it - the attachment
+ * @returns `true` over a fill, under ⟨edit⟩
+ */
+function overFill(it: LiveCanvas): boolean {
+  if (it.deps.store.getState().tool !== 'edit' || it.pointer === null) return false
+  return polityAt(gestureOf(it).territoriesOnScreen(), it.pointer) !== null
 }
 
 /**

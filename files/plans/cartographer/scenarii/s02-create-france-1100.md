@@ -101,6 +101,22 @@ Scenario: I always know who I am drawing for
 > Whichever is chosen, the **refusal** is unaffected: with no target the Pen does not place an anchor, and
 > that is the guarantee the state actually enforces.
 >
+```gherkin
+Scenario: choose the polity by clicking its fill
+  Given ⟨edit⟩ is active
+  When I click inside the fill of "Holy Roman Empire", away from any handle
+  Then "Holy Roman Empire" becomes the drawing target, and ⟨edit⟩ stays the tool
+  When a duchy is drawn inside the kingdom and I click inside the duchy
+  Then the duchy becomes the target — the polity painted on top wins
+  When I click on unclaimed ground
+  Then the target stays as it was
+```
+
+> **A second way to the same choice — the dev's request, 2026-10-11**: *"en cliquant dans le plein
+> d'une forme … on puisse la sélectionner, même si on peut le faire avec le panneau."* It adds a route,
+> it does not change the rule below: you still pick **who** before you act. Only the white arrow does
+> it — under the Pen, a click in a fill places an anchor, since one draws over a neighbour all the time.
+
 > **Selecting the target is a gesture of `{Polities}`, not of the toolbar** (the dev, 2026-10-08): you pick
 > **who** first, then you act. That is the deliberate difference from Illustrator, where selecting a point
 > selects the object that holds it. Here the question *"whose points am I moving?"* is answered before the

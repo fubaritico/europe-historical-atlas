@@ -49,6 +49,8 @@ export interface CursorState {
   overHandle: boolean
   /** Whether the Pen, following the coast, has the coastline within reach. */
   snapping: boolean
+  /** Whether the pointer is over a polity's fill — where the white arrow's click chooses it. */
+  overFill: boolean
 }
 
 /**
@@ -111,7 +113,8 @@ export function cursorFor(state: CursorState): CursorName | typeof REFUSED {
   if (state.tool === 'navigate') return 'hand-open'
   // ⟨draw⟩ and ⟨edit⟩ both need a subject: drawing with nobody selected would put anchors nowhere, and
   // selecting points with nobody selected is selecting *whose* points? (the dev, 2026-10-08).
-  if (!state.hasTarget) return REFUSED
+  // With nobody aimed at, the arrow still has one thing to do: a click in a fill chooses its polity.
+  if (!state.hasTarget) return state.tool === 'edit' && state.overFill ? 'arrow' : REFUSED
   if (state.tool === 'draw') return drawCursor(state)
   return state.overHandle ? 'arrow-handle' : 'arrow'
 }

@@ -15,6 +15,7 @@ import {
   editorialZoneRect,
   projectedFills,
   projectedRings,
+  projectedTerritories,
 } from './scene'
 
 import type { SceneInputs } from './scene'
@@ -343,6 +344,51 @@ describe('projectedFills', () => {
     it('passes the handles through to the scene untouched', () => {
       const document = sharedBorderDocument()
       expect(buildScene(document, inputs(document, { handles: [1, 2] })).handles).toEqual([1, 2])
+    })
+  })
+})
+
+describe('projectedTerritories', () => {
+  const anchors = projectAnchors(sharedBorderDocument().anchors, FRAME, NATIVE)
+
+  describe('happy path', () => {
+    it('gives each claim its polity and its rings, in painting order', () => {
+      expect(projectedTerritories(sharedBorderDocument(), anchors).map((t) => t.polity)).toEqual([
+        'fr-couronne',
+        'hre',
+      ])
+    })
+  })
+
+  describe('variants', () => {
+    it('resolves the rings through the shared anchor table', () => {
+      expect(projectedTerritories(sharedBorderDocument(), anchors)[1]?.rings[0]?.[0]).toEqual(
+        anchors[1]
+      )
+    })
+  })
+
+  describe('managed errors', () => {
+    // QUAL-002: what is not painted cannot be selected.
+    it('leaves out a claim whose polity the registry does not hold', () => {
+      const document = sharedBorderDocument()
+      document.polities.pop()
+      expect(projectedTerritories(document, anchors).map((t) => t.polity)).toEqual(['fr-couronne'])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // L4: N/A — pure arithmetic over arrays.
+    it('gives nothing for a year with no claims', () => {
+      expect(projectedTerritories({ ...sharedBorderDocument(), claims: [] }, anchors)).toEqual([])
+    })
+  })
+
+  describe('edge cases', () => {
+    it('keeps a polity’s several rings together', () => {
+      const document = sharedBorderDocument()
+      document.claims[0]?.rings.push([1, 4, 5])
+      expect(projectedTerritories(document, anchors)[0]?.rings).toHaveLength(2)
     })
   })
 })

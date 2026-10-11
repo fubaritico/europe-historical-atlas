@@ -2,6 +2,7 @@ import { lonLatToScreen, remapToScreen } from '../view/projection'
 import { backdropToScreen } from '../view/viewport'
 
 import type { CanvasScene } from './painter'
+import type { PolityRings } from '../geometry/fillHit'
 import type { Rect } from '../geometry/marquee'
 import type { VectorLayers } from '../vectorLayers'
 import type { BackdropFrame } from '../view/projection'
@@ -139,6 +140,28 @@ export function projectedFills(
     fills.push({ rings: projectedRings({ ...document, claims: [claim] }, anchors), colour })
   }
   return fills
+}
+
+/**
+ * Each claim's rings with the polity that holds them, in painting order — what the white arrow's click
+ * in a fill is tested against (`geometry/fillHit`).
+ * @param document - the document to read
+ * @param anchors - the projected anchor table, parallel to `document.anchors`
+ * @returns one entry per claim
+ */
+export function projectedTerritories(
+  document: YearDocument,
+  anchors: readonly Point[]
+): PolityRings[] {
+  // A claim naming a polity the registry lacks is not painted (`projectedFills`), so it is not
+  // selectable either (QUAL-002); `documentFaults` reports it once per version.
+  const known = new Set(document.polities.map((polity) => polity.id))
+  return document.claims
+    .filter((claim) => known.has(claim.polity))
+    .map((claim) => ({
+      polity: claim.polity,
+      rings: projectedRings({ ...document, claims: [claim] }, anchors),
+    }))
 }
 
 /**

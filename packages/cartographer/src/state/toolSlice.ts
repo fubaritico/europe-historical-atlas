@@ -79,6 +79,11 @@ export interface ToolActions {
    */
   aimAt: (polityId: string) => void
   /**
+   * Aim at a polity **without touching the tool** — what clicking its fill with the white arrow does,
+   * and what clicking it in `{Polities}` will. `aimAt` is this plus the Pen, for the form's OK.
+   */
+  chooseTarget: (polityId: string) => void
+  /**
    * Choose a variant of the Pen, which also puts the Pen in hand — what choosing a row of its group
    * does in Illustrator.
    */
@@ -109,6 +114,9 @@ export const createToolSlice: StateCreator<
   penMode: 'free',
   selectTool: (tool: EditorTool): void => {
     set({ tool })
+  },
+  chooseTarget: (polityId: string): void => {
+    set({ target: polityId })
   },
   aimAt: (polityId: string): void => {
     set({ tool: 'draw', target: polityId })

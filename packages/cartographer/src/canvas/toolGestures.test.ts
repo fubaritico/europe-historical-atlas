@@ -7,6 +7,7 @@ import { createCartographerStore } from '../state/store'
 import { lonLatToScreen, projectToBackdrop, remapToScreen } from '../view/projection'
 import { TEST_BACKDROP_FRAME } from '../view/testFrame'
 
+import { projectedTerritories } from './scene'
 import {
   MOVE_ANCHOR_STEP,
   arrowDrag,
@@ -73,6 +74,16 @@ function openContext(aimed = true, coast: readonly CoastContour[] = []): Gesture
         projectToBackdrop(store.getState().document.anchors, TEST_BACKDROP_FRAME),
         store.getState().viewport
       ),
+    territoriesOnScreen: () => {
+      const state = store.getState()
+      return projectedTerritories(
+        state.document,
+        remapToScreen(
+          projectToBackdrop(state.document.anchors, TEST_BACKDROP_FRAME),
+          state.viewport
+        )
+      )
+    },
     radius: 8,
     coast,
     coastProvenance: COAST_PROVENANCE,
@@ -707,6 +718,38 @@ describe('the Pen following the coast', () => {
       context.store.getState().selectTool('draw')
       undoGesture(context, false)
       expect(logged.error).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('a click in a fill', () => {
+    // The dev, 2026-10-11: clicking in a polity's fill selects it, as {Polities} does.
+    it('aims at the polity whose fill the arrow is pressed in, the arrow staying in hand', () => {
+      const context = openContext()
+      drawTriangle(context)
+      context.store.getState().chooseTarget('hre')
+      context.store.getState().selectTool('edit')
+      arrowPress(context, [250, 150])
+      expect(context.store.getState().target).toBe('fr')
+      expect(context.store.getState().tool).toBe('edit')
+    })
+
+    // A handle wins over the fill it sits on: the press picks up the anchor, the target is unchanged.
+    it('picks up a handle rather than re-aiming', () => {
+      const context = openContext()
+      drawTriangle(context)
+      context.store.getState().selectTool('edit')
+      arrowPress(context, [300, 100])
+      expect(context.session.selected).toBe(1)
+      expect(context.store.getState().target).toBe('fr')
+    })
+
+    // A stray click on unclaimed ground must not lose the polity the author is working on.
+    it('keeps the target on a press over unclaimed ground', () => {
+      const context = openContext()
+      drawTriangle(context)
+      context.store.getState().selectTool('edit')
+      arrowPress(context, [900, 900])
+      expect(context.store.getState().target).toBe('fr')
     })
   })
 })

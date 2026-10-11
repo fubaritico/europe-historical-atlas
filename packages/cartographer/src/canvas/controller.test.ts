@@ -1451,3 +1451,69 @@ describe('the Pen following the coast, on the canvas', () => {
     })
   })
 })
+
+describe('choosing a polity by its fill, on the canvas', () => {
+  describe('happy path', () => {
+    it('aims at the polity pressed in with the arrow, and the cursor stops refusing over it', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(node, at)
+      store.setState({ target: null })
+      node.dispatchEvent(keyEvent('a'))
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 450, offsetY: 260 }))
+      expect(node.style.cursor).not.toBe('not-allowed')
+      click(node, [450, 260])
+      expect(store.getState().target).toBe('fr')
+      expect(store.getState().tool).toBe('edit')
+      dispose()
+    })
+  })
+
+  describe('variants', () => {
+    it('still refuses the arrow over unclaimed ground with nobody aimed at', () => {
+      const { node, store, dispose } = attach()
+      node.dispatchEvent(keyEvent('a'))
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 450, offsetY: 260 }))
+      expect(node.style.cursor).toBe('not-allowed')
+      expect(store.getState().target).toBeNull()
+      dispose()
+    })
+  })
+
+  describe('managed errors', () => {
+    // L3: N/A — a press over nothing keeps what was aimed at; covered by the gestures' own tests.
+    it('places no anchor with the Pen in a fill: the Pen draws, it does not choose', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(node, at)
+      click(node, [450, 260])
+      node.dispatchEvent(keyEvent('Escape'))
+      expect(store.getState().document.claims).toHaveLength(1)
+      dispose()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // L4: N/A — pure geometry over projected rings; a degenerate ring is covered in fillHit's tests.
+    it('chooses nothing when the document holds no territory', () => {
+      const { node, store, dispose } = attach()
+      node.dispatchEvent(keyEvent('a'))
+      click(node, [450, 260])
+      expect(store.getState().target).toBeNull()
+      dispose()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('keeps the target when the press is in its own fill', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(node, at)
+      node.dispatchEvent(keyEvent('a'))
+      click(node, [500, 200])
+      click(node, [450, 260])
+      expect(store.getState().target).toBe('fr')
+      dispose()
+    })
+  })
+})

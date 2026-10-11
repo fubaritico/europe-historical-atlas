@@ -12,6 +12,7 @@ const AT_REST: CursorState = {
   closing: false,
   overHandle: false,
   snapping: false,
+  overFill: false,
   spaceHeld: false,
 }
 
@@ -45,6 +46,13 @@ describe('cursorFor', () => {
       const pen = { ...AT_REST, tool: 'draw' as const, hasTarget: true, snapping: true }
       expect(cursorFor(pen)).toBe('cross-snap')
       expect(cursorFor({ ...pen, closing: true })).toBe('cross-close')
+    })
+
+    // With nobody aimed at, the arrow over a fill can still choose its polity — so it does not refuse.
+    it('lets the arrow over a fill even with nobody aimed at, and refuses elsewhere', () => {
+      expect(cursorFor({ ...AT_REST, tool: 'edit', overFill: true })).toBe('arrow')
+      expect(cursorFor({ ...AT_REST, tool: 'edit' })).toBe(REFUSED)
+      expect(cursorFor({ ...AT_REST, tool: 'draw', overFill: true })).toBe(REFUSED)
     })
 
     it('lends the open hand to ‹space› over any tool', () => {
@@ -100,6 +108,7 @@ describe('cursorFor', () => {
                   closing: false,
                   overHandle: false,
                   snapping: false,
+                  overFill: false,
                 })
               ).toBeTruthy()
     })
