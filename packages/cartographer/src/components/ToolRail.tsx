@@ -23,6 +23,8 @@ export interface ToolRailProps {
   penMode: string
   /** A variant of the Pen's group was chosen. */
   onPenMode: (id: string) => void
+  /** The tools listed, top to bottom — {@link RAIL_TOOLS} unless a test or the workbench hands others. */
+  tools?: readonly RailTool[]
 }
 
 /**
@@ -268,6 +270,7 @@ export function ToolRail({
   initiallyOpen,
   penMode,
   onPenMode,
+  tools = RAIL_TOOLS,
 }: ToolRailProps) {
   const [openGroup, setOpenGroup] = useState<EditorTool | null>(initiallyOpen ?? null)
   return (
@@ -279,7 +282,7 @@ export function ToolRail({
         aria-label="Tools"
         onKeyDown={moveAlongToolbar}
       >
-        {RAIL_TOOLS.map((entry) => (
+        {tools.map((entry) => (
           <ToolButton
             key={entry.tool}
             entry={entry}

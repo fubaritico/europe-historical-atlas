@@ -8,7 +8,7 @@ import { TEST_BACKDROP_FRAME } from '../view/testFrame'
 import { projectedTerritories } from './scene'
 import { idleSession } from './toolSession'
 
-import type { GestureContext } from './toolGestures'
+import type { GestureContext, RiverLine } from './toolGestures'
 import type { CoastContour } from '../geometry/coastSnap'
 import type { CartographerStoreHook } from '../state/store'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
@@ -20,6 +20,9 @@ import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 
 /** What the test coastline is said to be traced from. */
 export const TEST_COAST_PROVENANCE = { name: 'test shore', licence: 'CC0' }
+
+/** What the test rivers are said to be drawn from. */
+export const TEST_RIVER_PROVENANCE = { name: 'test rivers', licence: 'PD' }
 
 /**
  * A polity with only an id and a name.
@@ -57,11 +60,13 @@ export function testStore(): CartographerStoreHook {
  * radius, a fresh session, and every report kept.
  * @param store - the store
  * @param coast - the coastline, none by default
+ * @param rivers - the river centrelines, none by default
  * @returns the context, and the reports it has made
  */
 export function testGestureContext(
   store: CartographerStoreHook,
-  coast: readonly CoastContour[] = []
+  coast: readonly CoastContour[] = [],
+  rivers: readonly RiverLine[] = []
 ): { context: GestureContext; reports: string[] } {
   const reports: string[] = []
   const anchorsOnScreen = () =>
@@ -78,6 +83,8 @@ export function testGestureContext(
     radius: 8,
     coast,
     coastProvenance: TEST_COAST_PROVENANCE,
+    rivers,
+    riverProvenance: TEST_RIVER_PROVENANCE,
     report: (message) => {
       reports.push(message)
     },

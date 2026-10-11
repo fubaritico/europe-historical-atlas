@@ -183,7 +183,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
   {
     id: 'tool-rail-group',
     title: 'Tool rail, Pen group open',
-    note: "The Pen's hidden tools, as Illustrator lists them: the square marks the one in use, the key in brackets. Following the coast is there; following a river is listed and disabled — it is the next rung.",
+    note: "The Pen's hidden tools, as Illustrator lists them: the square marks the one in use, the key in brackets. Following the coast and following a river are both there.",
     width: 300,
     render: () => (
       <div className="workbench__rail">

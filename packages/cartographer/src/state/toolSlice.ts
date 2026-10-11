@@ -22,10 +22,10 @@ import type { StateCreator } from 'zustand'
 export type EditorTool = 'navigate' | 'draw' | 'edit'
 
 /**
- * How the Pen places its points — the variants of its group (`s02`'s ⟨free point⟩, ⟨snap to coast⟩).
- * Following a river is the next rung and has no mode yet.
+ * How the Pen places its points — the variants of its group (`s02`'s ⟨free point⟩, ⟨snap to coast⟩,
+ * ⟨snap to river⟩).
  */
-export const PEN_MODES = ['free', 'coast'] as const
+export const PEN_MODES = ['free', 'coast', 'river'] as const
 
 /** One of {@link PEN_MODES}. */
 export type PenMode = (typeof PEN_MODES)[number]

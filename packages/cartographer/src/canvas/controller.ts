@@ -554,6 +554,9 @@ function watchStore(it: LiveCanvas, paint: () => void): () => void {
     it.deps.store.subscribe((state) => state.version, prune),
     it.deps.store.subscribe((state) => state.tool, restart),
     it.deps.store.subscribe((state) => state.target, restart),
+    // Another mode of the Pen offers another layer: refresh what is offered, and keep the outline in
+    // hand — switching from the coast to a river mid-border is what the two modes are for.
+    it.deps.store.subscribe((state) => state.penMode, refresh),
   ]
   return (): void => {
     for (const stop of stops) stop()

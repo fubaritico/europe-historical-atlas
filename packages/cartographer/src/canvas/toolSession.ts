@@ -10,7 +10,7 @@ import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 export interface SessionPoint {
   /** `[longitude, latitude]`. */
   at: [number, number]
-  /** Reported by eye, or snapped onto the coast. */
+  /** Reported by eye, or snapped onto the coast or a river. */
   provenance: Provenance
   /**
    * The anchor of the document this point **is**, when the Pen snapped onto one — a neighbour's, met
@@ -46,10 +46,34 @@ export interface ToolSession {
    */
   reopened: SessionPoint[] | null
   /**
-   * The coast vertex the last snapped click landed on — where the next snapped click's stretch starts.
+   * The layer vertex the last snapped click landed on — where the next snapped click's stretch starts.
    * `null` once a point was placed any other way, or the outline changed under it.
    */
-  snap: CoastVertex | null
+  snap: SnapVertex | null
+}
+
+/**
+ * The vector layer the Pen follows when it snaps: the shore, or the rivers (`s02`'s ⟨snap to coast⟩,
+ * ⟨snap to river⟩) — two of `s00`'s {Layers}.
+ */
+export type SnapLayer = 'coast' | 'river'
+
+/**
+ * What a snap layer is called in a sentence — the status bar's and the console's.
+ * @param layer - the layer
+ * @returns `"coastline"` or `"river"`
+ */
+export function layerNoun(layer: SnapLayer): string {
+  return layer === 'coast' ? 'coastline' : 'river'
+}
+
+/**
+ * A vertex of a layer: which layer, which of its lines, which point. The layer is part of it so a stretch
+ * is only ever run along the line the last click landed on — a coast contour and a river share indices.
+ */
+export interface SnapVertex extends CoastVertex {
+  /** The layer the line belongs to. */
+  layer: SnapLayer
 }
 
 /**
@@ -165,10 +189,13 @@ export interface ActionInputs {
   onCanvas: boolean
   /** Whether a click would close the outline now. */
   closing: boolean
-  /** Whether the Pen, following the coast, has the coastline within reach. */
-  snapping: boolean
-  /** Whether the Pen is following the coast at all — out of reach, its click places a free point. */
-  following: boolean
+  /**
+   * What the Pen has within reach and would follow — `"coastline"`, or a river's name verbatim
+   * (`"Maas"`) — or `null` when nothing is.
+   */
+  snapping: string | null
+  /** Which layer the Pen follows at all, `null` for the free Pen — out of reach, it places a free point. */
+  following: SnapLayer | null
   /** The sentence for an existing anchor the Pen is over — `s02`'s branching line — or `null`. */
   joining: string | null
   /** Whether a click here inserts an anchor on a stretch of the target — the arrow, or the idle Pen. */
@@ -179,7 +206,7 @@ export interface ActionInputs {
 
 /**
  * What the Pen is doing, for the polity it draws in.
- * @param inputs - whether closing, joining an anchor, inserting, snapping or following the coast
+ * @param inputs - whether closing, joining an anchor, inserting, snapping or following a layer
  * @param targetName - the polity's name, verbatim
  * @returns the sentence
  */
@@ -187,13 +214,12 @@ function penSentence(inputs: ActionInputs, targetName: string): string {
   if (inputs.closing) return `Closing the outline of ${targetName}`
   if (inputs.joining !== null) return inputs.joining
   if (inputs.inserting) return `Inserting a point into ${targetName}`
-  // s02 — "Following the coastline for Kingdom of France".
-  if (inputs.snapping) return `Following the coastline for ${targetName}`
-  // s02's "place points freely", for the coast and before the click (QUAL-110). The polity is kept:
-  // the bar always names whom the action is for.
-  return inputs.following
-    ? `Drawing in ${targetName} — no coastline within reach, placing points freely`
-    : `Drawing in ${targetName}`
+  // s02 — "Following the coastline for Kingdom of France", "Following the Maas for Kingdom of France".
+  if (inputs.snapping !== null) return `Following the ${inputs.snapping} for ${targetName}`
+  // s02's "place points freely", before the click (QUAL-110). The polity is kept: the bar always names
+  // whom the action is for.
+  if (inputs.following === null) return `Drawing in ${targetName}`
+  return `Drawing in ${targetName} — no ${layerNoun(inputs.following)} within reach, placing points freely`
 }
 
 /**
@@ -225,9 +251,9 @@ export interface OverlayScene {
   closing: boolean
   /** An anchor being dragged: where it would land, and the anchors its stretches run from. */
   moving: { at: Point; from: readonly Point[] } | null
-  /** The coast vertex the Pen would snap onto — emphasised before the click. */
+  /** The layer vertex the Pen would snap onto — emphasised before the click. */
   snapTarget: Point | null
-  /** The stretch of coast a click would insert, from the last snapped anchor — the preview. */
+  /** The stretch of layer a click would insert, from the last snapped anchor — the preview. */
   snapPreview: readonly Point[] | null
 }
 
@@ -247,9 +273,9 @@ export interface OverlayInputs {
   movingFrom: readonly number[]
   /** How near the first anchor, in screen pixels, closes the ring. */
   closeRadius: number
-  /** The coast vertex under the pointer, on screen — `null` when not following the coast or out of reach. */
+  /** The layer vertex under the pointer, on screen — `null` when not following a layer or out of reach. */
   snapTarget: Point | null
-  /** The coast stretch a click would insert, on screen — `null` when the click would only place a point. */
+  /** The layer stretch a click would insert, on screen — `null` when the click would only place a point. */
   snapPreview: readonly Point[] | null
 }
 
@@ -268,7 +294,7 @@ export function overlayScene(inputs: OverlayInputs): OverlayScene {
   const pointer = drawing ? inputs.pointer : null
   const moving = inputs.session.moving
   // The preview replaces the rubber band — it *is* the line the click will lay. Without one, the band
-  // runs to the coast vertex the click would snap onto, not to the pointer beside it.
+  // runs to the layer vertex the click would snap onto, not to the pointer beside it.
   const bandEnd = inputs.snapTarget ?? pointer
   return {
     outline: drawing ? outline : [],

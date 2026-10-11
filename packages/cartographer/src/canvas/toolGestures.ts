@@ -10,10 +10,10 @@ import { screenToBackdrop } from '../view/viewport'
 import { deleteSelected, insertOnStretch, penInsertHit } from './anchorGestures'
 import { anchorClick, anchorsByPosition } from './borderSnap'
 import { TAG } from './consoleTag'
-import { abandonGesture, dropDrag, sessionPointOf, targetHandles } from './toolSession'
+import { abandonGesture, dropDrag, layerNoun, sessionPointOf, targetHandles } from './toolSession'
 
-import type { SessionPoint, ToolSession } from './toolSession'
-import type { CoastContour, CoastVertex } from '../geometry/coastSnap'
+import type { SessionPoint, SnapLayer, SnapVertex, ToolSession } from './toolSession'
+import type { CoastContour } from '../geometry/coastSnap'
 import type { PolityRings } from '../geometry/fillHit'
 import type { CartographerStoreHook } from '../state/store'
 import type { BackdropFrame } from '../view/projection'
@@ -47,11 +47,21 @@ export interface GestureContext {
   coast: readonly CoastContour[]
   /** What the coastline was traced from, recorded on every anchor snapped onto it. */
   coastProvenance: Provenance
+  /** The river centrelines, in backdrop pixels — what the Pen follows in its river mode. */
+  rivers: readonly RiverLine[]
+  /** What the rivers were drawn from, recorded on every anchor snapped onto one. */
+  riverProvenance: Provenance
   /**
    * Say what a gesture did — *"inserted 412 vertices from the coastline"*, the status bar's result
    * zone beside the action (`s02`).
    */
   report: (message: string) => void
+}
+
+/** A river centreline, as the Pen follows it: a line of the layer, and the name the bar reads. */
+export interface RiverLine extends CoastContour {
+  /** The river's name as the dataset holds it — `Maas`, not *Meuse* (`H-02`) — or `null`. */
+  name: string | null
 }
 
 /** The step kind a closed outline is recorded under — what tells an undo that it is undoing a closing. */
@@ -139,18 +149,20 @@ export function penClick(context: GestureContext, at: Point): void {
     closeOutline(context)
     return
   }
-  // The target's own stretch before the coast: there the idle Pen edits the outline it already has.
+  // The target's own stretch before the layer: there the idle Pen edits the outline it already has.
   // On its own coast this rarely bites — coast anchors are dense, so an anchor is nearly always the
-  // nearer hit, and that one is reused by the coast click.
+  // nearer hit, and that one is reused by the layer click.
   if (penInserts(context, at)) return
-  // Following the coast, the shore wins: a neighbour drawn along it left an anchor on every vertex,
-  // and branching onto those would lose the coast (the dev, Spain then Portugal, 2026-10-11). Those
-  // anchors are reused by the coast click, so the border stays shared. Elsewhere an existing anchor
+  // Following a layer, the layer wins: a neighbour drawn along it left an anchor on every vertex, and
+  // branching onto those would lose the coast (the dev, Spain then Portugal, 2026-10-11). Those
+  // anchors are reused by the layer click, so the border stays shared. Elsewhere an existing anchor
   // wins over a free point: the border is already there.
-  const following = context.store.getState().penMode === 'coast'
-  if (following && coastClick(context, at)) return
+  const layer = followedLayer(context)
+  if (layer !== null && snapClick(context, layer, at)) return
   if (anchorClick(context, at)) return
-  if (following) console.warn(`${TAG} no coastline within reach: a free point was placed.`)
+  if (layer !== null) {
+    console.warn(`${TAG} no ${layerNoun(layer)} within reach: a free point was placed.`)
+  }
   freeClick(context, at)
 }
 
@@ -183,65 +195,107 @@ function freeClick(context: GestureContext, at: Point): void {
 }
 
 /**
- * The coast vertex under the pointer, or `null` when the coastline is out of reach.
+ * The layer the Pen follows in its current mode, or `null` for the free Pen.
+ * @param context - the store
+ * @returns the layer
+ */
+export function followedLayer(context: GestureContext): SnapLayer | null {
+  const mode = context.store.getState().penMode
+  return mode === 'free' ? null : mode
+}
+
+/**
+ * The lines of a layer, in backdrop pixels.
+ * @param context - the coast and the rivers
+ * @param layer - which layer
+ * @returns its lines
+ */
+export function layerLines(context: GestureContext, layer: SnapLayer): readonly CoastContour[] {
+  return layer === 'coast' ? context.coast : context.rivers
+}
+
+/**
+ * What the line under a hit is called — `"coastline"`, a river's name verbatim, or *unnamed river*.
  *
- * The pointer is brought into the coast's own grid — one point — rather than the 95 233 coast points
+ * **The name as the dataset holds it** (`H-02`): `Maas` for the Meuse, `Schelde` for the Scheldt.
+ * `s02` writes *"Following the Maas"*, so no alias table stands in front of it.
+ * @param context - the rivers
+ * @param hit - the vertex
+ * @returns the line's label
+ */
+export function lineLabel(context: GestureContext, hit: SnapVertex): string {
+  if (hit.layer === 'coast') return 'coastline'
+  return context.rivers[hit.contour]?.name ?? 'unnamed river'
+}
+
+/**
+ * The layer vertex under the pointer, or `null` when the layer is out of reach.
+ *
+ * The pointer is brought into the layer's own grid — one point — rather than the 95 233 coast points
  * onto the screen; the radius follows it, divided by the scale.
- * @param context - the coast and the view
+ * @param context - the snap layers and the view
+ * @param layer - which layer
  * @param at - the pointer, in screen pixels
  * @returns the vertex, or `null`
  */
-export function coastHit(context: GestureContext, at: Point): CoastVertex | null {
+export function snapHit(context: GestureContext, layer: SnapLayer, at: Point): SnapVertex | null {
   const viewport = context.store.getState().viewport
   if (viewport.scale <= 0) return null
-  return nearestCoastVertex(
-    context.coast,
+  const hit = nearestCoastVertex(
+    layerLines(context, layer),
     screenToBackdrop(viewport, at),
     context.radius / viewport.scale
   )
+  return hit === null ? null : { ...hit, layer }
 }
 
 /**
  * The stretch a snapped click would insert: from the last snapped vertex to `hit`, when both lie on the
- * same contour and the outline still ends there — `null` otherwise, when the click only places `hit`.
- * @param context - the session and the coast
+ * same line of the same layer and the outline still ends there — `null` otherwise, when the click only
+ * places `hit`.
+ * @param context - the session and the snap layers
  * @param hit - the vertex under the pointer
- * @returns the coast points to insert after the last one placed, in backdrop pixels, or `null`
+ * @returns the layer points to insert after the last one placed, in backdrop pixels, or `null`
  */
-export function coastStretchTo(context: GestureContext, hit: CoastVertex): Point[] | null {
+export function snapStretchTo(context: GestureContext, hit: SnapVertex): Point[] | null {
   const snap = context.session.snap
-  const contour = context.coast[hit.contour]
-  if (snap?.contour !== hit.contour || contour === undefined) return null
+  const line = layerLines(context, hit.layer)[hit.contour]
+  if (snap?.layer !== hit.layer || snap.contour !== hit.contour || line === undefined) return null
   if (context.session.outline.length === 0) return null
-  return coastStretch(contour, snap.vertex, hit.vertex)
+  return coastStretch(line, snap.vertex, hit.vertex)
 }
 
 /**
- * A click with the Pen following the coast (`s02`): on the first, an anchor exactly on the coast; on
- * the next one along the same shore, the whole stretch between them, in one gesture.
+ * A click with the Pen following a layer (`s02`): on the first, an anchor exactly on the line; on the
+ * next one along the same line, the whole stretch between them, in one gesture. A closed coast contour
+ * is followed the short way round; a river, which never closes, has one way.
  *
- * Off the coast it places nothing — the caller then joins an anchor or places a free point, and says
+ * Off the layer it places nothing — the caller then joins an anchor or places a free point, and says
  * so: `s02`'s *"place points freely"*.
- * @param context - the session, the coast and the store
+ * @param context - the session, the snap layers and the store
+ * @param layer - which layer
  * @param at - the pointer, in screen pixels
- * @returns `true` when the click was taken by the coast
+ * @returns `true` when the click was taken by the layer
  */
-function coastClick(context: GestureContext, at: Point): boolean {
-  const hit = coastHit(context, at)
-  const contour = hit === null ? undefined : context.coast[hit.contour]
-  if (hit === null || contour === undefined) return false
-  const stretch = coastStretchTo(context, hit)
+function snapClick(context: GestureContext, layer: SnapLayer, at: Point): boolean {
+  const hit = snapHit(context, layer, at)
+  const line = hit === null ? undefined : layerLines(context, layer)[hit.contour]
+  if (hit === null || line === undefined) return false
+  const stretch = snapStretchTo(context, hit)
   // A second click on the vertex already placed: nothing to insert. Placing it again would put two
   // anchors on one spot (a zero-length edge); placing a free point would defeat the snap (QUAL-101).
   if (stretch !== null && stretch.length < 2) {
-    console.warn(`${TAG} nothing placed: the outline already ends on that coast vertex.`)
+    console.warn(
+      `${TAG} nothing placed: the outline already ends on that ${layerNoun(layer)} vertex.`
+    )
     return true
   }
-  if (stretch === null) placeOnCoast(context, [contour.points[hit.vertex]])
+  const provenance = layer === 'coast' ? context.coastProvenance : context.riverProvenance
+  if (stretch === null) placeOnLayer(context, [line.points[hit.vertex]], provenance)
   else {
-    const placed = placeOnCoast(context, stretch.slice(1))
+    const placed = placeOnLayer(context, stretch.slice(1), provenance)
     context.report(
-      `inserted ${String(placed)} ${placed === 1 ? 'vertex' : 'vertices'} from the coastline`
+      `inserted ${String(placed)} ${placed === 1 ? 'vertex' : 'vertices'} from the ${lineLabel(context, hit)}`
     )
   }
   context.session.snap = hit
@@ -249,12 +303,17 @@ function coastClick(context: GestureContext, at: Point): boolean {
 }
 
 /**
- * Append coast points to the outline, each under the coast's provenance.
- * @param context - the session, the frame and the provenance
- * @param points - the coast points, in backdrop pixels
+ * Append layer points to the outline, each under the layer's provenance.
+ * @param context - the session and the frame
+ * @param points - the layer points, in backdrop pixels
+ * @param provenance - what the layer was drawn from
  * @returns how many were placed
  */
-function placeOnCoast(context: GestureContext, points: readonly (Point | undefined)[]): number {
+function placeOnLayer(
+  context: GestureContext,
+  points: readonly (Point | undefined)[],
+  provenance: Provenance
+): number {
   const existing = anchorsByPosition(context)
   let placed = 0
   for (const point of points) {
@@ -269,9 +328,7 @@ function placeOnCoast(context: GestureContext, points: readonly (Point | undefin
         `${TAG} anchor ${String(anchor)} has no declared source; a new point was placed on it.`
       )
     }
-    context.session.outline.push(
-      reused ?? { at, provenance: context.coastProvenance, anchor: null }
-    )
+    context.session.outline.push(reused ?? { at, provenance, anchor: null })
     placed += 1
   }
   return placed

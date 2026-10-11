@@ -205,7 +205,8 @@ describe('toolSlice', () => {
 
     it('knows its modes, and no other', () => {
       expect(isPenMode('coast')).toBe(true)
-      expect(isPenMode('river')).toBe(false)
+      expect(isPenMode('river')).toBe(true)
+      expect(isPenMode('lake')).toBe(false)
     })
 
     // The mode is the session's: an undo never changes how the Pen places its points.

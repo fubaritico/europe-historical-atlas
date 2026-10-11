@@ -29,8 +29,8 @@ function action(overrides: Partial<ActionInputs> = {}): ActionInputs {
     targetName: 'Reaume de France',
     onCanvas: true,
     closing: false,
-    snapping: false,
-    following: false,
+    snapping: null,
+    following: null,
     joining: null,
     inserting: false,
     session: idleSession(),
@@ -229,7 +229,7 @@ describe('toolSession', () => {
     // QUAL-003: over an existing anchor the bar says so, above the coast's sentences, under closing.
     it('names the shared anchor before the coast, and closing before the shared anchor', () => {
       const joining = 'Branching from a shared anchor — held by 1 path'
-      expect(actionSentence(action({ joining, snapping: true }))).toBe(joining)
+      expect(actionSentence(action({ joining, snapping: 'coastline' }))).toBe(joining)
       expect(actionSentence(action({ joining, closing: true }))).toBe(
         'Closing the outline of Reaume de France'
       )
@@ -237,17 +237,30 @@ describe('toolSession', () => {
 
     // QUAL-110: s02's "place points freely", for the coast — on screen, before the click.
     it('says the Pen will place points freely when the coast is out of reach', () => {
-      expect(actionSentence(action({ following: true }))).toBe(
+      expect(actionSentence(action({ following: 'coast' }))).toBe(
         'Drawing in Reaume de France — no coastline within reach, placing points freely'
       )
     })
 
     it('says the Pen is following the coastline while it is within reach', () => {
-      expect(actionSentence(action({ snapping: true }))).toBe(
+      expect(actionSentence(action({ snapping: 'coastline' }))).toBe(
         'Following the coastline for Reaume de France'
       )
-      expect(actionSentence(action({ snapping: true, closing: true }))).toBe(
+      expect(actionSentence(action({ snapping: 'coastline', closing: true }))).toBe(
         'Closing the outline of Reaume de France'
+      )
+    })
+
+    // s02 — "Following the Maas for Kingdom of France": the river's name verbatim, as the dataset has it.
+    it('names the river under the pointer, verbatim', () => {
+      expect(actionSentence(action({ following: 'river', snapping: 'Maas' }))).toBe(
+        'Following the Maas for Reaume de France'
+      )
+    })
+
+    it('says the Pen will place points freely when no river is within reach', () => {
+      expect(actionSentence(action({ following: 'river' }))).toBe(
+        'Drawing in Reaume de France — no river within reach, placing points freely'
       )
     })
   })

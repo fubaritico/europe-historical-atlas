@@ -4,6 +4,7 @@ import { lonLatToScreen } from '../view/projection'
 
 import {
   TEST_COAST_PROVENANCE,
+  TEST_RIVER_PROVENANCE,
   testGestureContext,
   testPolity,
   testStore,
@@ -14,15 +15,15 @@ import {
   arrowPress,
   arrowRelease,
   closeOutline,
-  coastHit,
   lonLatAt,
   penClick,
   redoGesture,
+  snapHit,
   toolKey,
   undoGesture,
 } from './toolGestures'
 
-import type { GestureContext } from './toolGestures'
+import type { GestureContext, RiverLine } from './toolGestures'
 import type { CoastContour } from '../geometry/coastSnap'
 
 /** Three screen points that make a triangle well inside the backdrop. */
@@ -35,9 +36,15 @@ const TRIANGLE: [number, number][] = [
 /**
  * A store with France created and aimed at, under a view where a screen pixel is a backdrop pixel.
  * @param aimed - whether France is the target
+ * @param coast - the coastline, none by default
+ * @param rivers - the river centrelines, none by default
  * @returns the gesture context, over a fresh session
  */
-function openContext(aimed = true, coast: readonly CoastContour[] = []): GestureContext {
+function openContext(
+  aimed = true,
+  coast: readonly CoastContour[] = [],
+  rivers: readonly RiverLine[] = []
+): GestureContext {
   const store = testStore()
   store
     .getState()
@@ -46,7 +53,7 @@ function openContext(aimed = true, coast: readonly CoastContour[] = []): Gesture
     .getState()
     .createPolity(testPolity('hre', 'Sacrum Imperium'), { kind: 'create', label: 'hre' })
   if (aimed) store.getState().aimAt('fr')
-  return testGestureContext(store, coast).context
+  return testGestureContext(store, coast, rivers).context
 }
 
 /**
@@ -605,7 +612,7 @@ describe('the Pen following the coast', () => {
     it('finds no coast when the view has no scale yet', () => {
       const { context } = coastContext()
       context.store.getState().setViewport({ scale: 0, originX: 0, originY: 0 })
-      expect(coastHit(context, [150, 200])).toBeNull()
+      expect(snapHit(context, 'coast', [150, 200])).toBeNull()
     })
   })
 
@@ -619,7 +626,7 @@ describe('the Pen following the coast', () => {
       expect(context.session.outline).toHaveLength(1)
       expect(reports).toEqual([])
       expect(logged.warn).toHaveBeenCalledWith(
-        expect.stringContaining('already ends on that coast vertex')
+        expect.stringContaining('already ends on that coastline vertex')
       )
     })
 
@@ -628,9 +635,13 @@ describe('the Pen following the coast', () => {
       const { context } = coastContext()
       context.store.getState().setViewport({ scale: 2, originX: 0, originY: 0 })
       // 6 screen px from the vertex at backdrop (150, 200), which is screen (300, 400) at scale 2.
-      expect(coastHit(context, [300, 406])).toEqual({ contour: 0, vertex: 5 })
+      expect(snapHit(context, 'coast', [300, 406])).toEqual({
+        layer: 'coast',
+        contour: 0,
+        vertex: 5,
+      })
       // 12 screen px away is out of an 8 px reach, though it is only 6 backdrop px away.
-      expect(coastHit(context, [300, 412])).toBeNull()
+      expect(snapHit(context, 'coast', [300, 412])).toBeNull()
     })
 
     // QUAL-106: each of the resets breaks the run, so the next snapped click starts afresh.
@@ -960,5 +971,138 @@ describe('the idle Pen over its own stretch while following the coast', () => {
 
     expect(context.session.outline).toEqual([])
     expect(context.store.getState().document.claims[0]?.rings).toEqual([[0, 3, 1, 2]])
+  })
+})
+
+/** A straight river from (100,500) to (300,500), a vertex every 10 backdrop pixels — `Maas`, as named. */
+const MAAS: RiverLine = {
+  points: Array.from({ length: 21 }, (_, index): [number, number] => [100 + index * 10, 500]),
+  closed: false,
+  bounds: { left: 100, top: 500, right: 300, bottom: 500 },
+  name: 'Maas',
+}
+
+/** A short river the dataset leaves unnamed. */
+const UNNAMED: RiverLine = {
+  points: [
+    [600, 300],
+    [610, 300],
+    [620, 300],
+  ],
+  closed: false,
+  bounds: { left: 600, top: 300, right: 620, bottom: 300 },
+  name: null,
+}
+
+/**
+ * A context with the Pen following a river, the shore and the rivers both loaded, and a recorder.
+ *
+ * The shore is the coast's line 0 and the Maas the rivers' line 0: the same index on two snap layers.
+ * @returns the context and the reports
+ */
+function riverContext() {
+  const context = openContext(true, [SHORE], [MAAS, UNNAMED])
+  context.store.getState().choosePenMode('river')
+  const reports: string[] = []
+  context.report = (message) => {
+    reports.push(message)
+  }
+  return { context, reports }
+}
+
+describe('the Pen following a river', () => {
+  describe('happy path', () => {
+    // s02 — "the nearest vertex on the nearest polyline" is where the first click lands.
+    it('places the first anchor exactly on the river, under its provenance', () => {
+      const { context } = riverContext()
+      penClick(context, [151, 504])
+      expect(context.session.outline).toHaveLength(1)
+      expect(onScreenPoint(context, context.session.outline[0]?.at)[0]).toBeCloseTo(150, 6)
+      expect(onScreenPoint(context, context.session.outline[0]?.at)[1]).toBeCloseTo(500, 6)
+      expect(context.session.outline[0]?.provenance).toEqual(TEST_RIVER_PROVENANCE)
+    })
+
+    // s02 — "When I click again further upstream / Then the sub-path between the two is inserted".
+    it('inserts the stretch between two clicks and names the river in the report', () => {
+      const { context, reports } = riverContext()
+      penClick(context, [150, 500])
+      penClick(context, [250, 502])
+      expect(context.session.outline).toHaveLength(11)
+      expect(reports).toEqual(['inserted 10 vertices from the Maas'])
+      expect(
+        context.session.outline.every((point) => point.provenance === TEST_RIVER_PROVENANCE)
+      ).toBe(true)
+    })
+  })
+
+  describe('variants', () => {
+    it('follows the river back towards its start on a later click', () => {
+      const { context } = riverContext()
+      penClick(context, [250, 500])
+      penClick(context, [150, 500])
+      expect(context.session.outline).toHaveLength(11)
+    })
+
+    it('names an unnamed river as such in the report', () => {
+      const { context, reports } = riverContext()
+      penClick(context, [600, 300])
+      penClick(context, [620, 300])
+      expect(reports).toEqual(['inserted 2 vertices from the unnamed river'])
+    })
+  })
+
+  describe('managed errors', () => {
+    // s02 — "no polyline lies within the snapping radius / clicking places an ordinary free point".
+    it('places a free point when no river is within reach, and says so', () => {
+      const logged = watchConsole()
+      const { context } = riverContext()
+      penClick(context, [400, 400])
+      expect(context.session.outline[0]?.provenance.name).toBe('reported by eye')
+      expect(logged.warn).toHaveBeenCalledWith(expect.stringContaining('no river within reach'))
+    })
+
+    // The coast is not a river: in river mode a click on the shore places a free point.
+    it('does not snap onto the coast while following a river', () => {
+      const { context } = riverContext()
+      penClick(context, [150, 200])
+      expect(context.session.outline[0]?.provenance.name).toBe('reported by eye')
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // Line 0 of the coast and line 0 of the rivers are different lines: no stretch runs between them.
+    it('does not run a stretch from a coast vertex to a river vertex with the same line index', () => {
+      const { context, reports } = riverContext()
+      context.store.getState().choosePenMode('coast')
+      penClick(context, [150, 200])
+      context.store.getState().choosePenMode('river')
+      penClick(context, [250, 500])
+      expect(context.session.outline).toHaveLength(2)
+      expect(reports).toEqual([])
+    })
+  })
+
+  describe('edge cases', () => {
+    it('places nothing on a second click on the same river vertex, and says so', () => {
+      const logged = watchConsole()
+      const { context, reports } = riverContext()
+      penClick(context, [150, 500])
+      penClick(context, [151, 501])
+      expect(context.session.outline).toHaveLength(1)
+      expect(reports).toEqual([])
+      expect(logged.warn).toHaveBeenCalledWith(
+        expect.stringContaining('already ends on that river vertex')
+      )
+    })
+
+    it('finds the river vertex under the pointer, tagged with its layer', () => {
+      const { context } = riverContext()
+      expect(snapHit(context, 'river', [200, 503])).toEqual({
+        layer: 'river',
+        contour: 0,
+        vertex: 10,
+      })
+      expect(snapHit(context, 'coast', [200, 503])).toBeNull()
+    })
   })
 })

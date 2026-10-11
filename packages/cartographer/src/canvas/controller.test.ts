@@ -23,6 +23,8 @@ import { coloursOf } from './liveCanvas'
 import { CHROME_PAINT_STYLE } from './style'
 
 import type { CartographerStoreHook } from '../state/store'
+import type { PenMode } from '../state/toolSlice'
+import type { NamedPolyline } from '../vectorLayers'
 
 /** The canvas box every test pretends to have, jsdom reporting every element as zero-sized. */
 const BOX = { width: 800, height: 600 }
@@ -1270,9 +1272,16 @@ describe('undo and redo from the keyboard', () => {
 describe('the Pen following the coast, on the canvas', () => {
   /**
    * A canvas whose coast is one long horizontal shore across the backdrop, at backdrop y = 500.
+   * @param overlay - the overlay canvas
+   * @param rivers - the river centrelines, none by default
+   * @param mode - the Pen's mode, following the coast by default
    * @returns the attachment
    */
-  function attachWithShore(overlay: HTMLCanvasElement = document.createElement('canvas')) {
+  function attachWithShore(
+    overlay: HTMLCanvasElement = document.createElement('canvas'),
+    rivers: readonly NamedPolyline[] = [],
+    mode: PenMode = 'coast'
+  ) {
     const acted = vi.fn()
     const resulted = vi.fn()
     const store = createCartographerStore({
@@ -1291,7 +1300,7 @@ describe('the Pen following the coast, on the canvas', () => {
       backdropImage: backdropStandIn(),
       vectorLayers: {
         coast: [shore],
-        rivers: [],
+        rivers,
         coastProvenance: { name: 'test shore', licence: 'CC0' },
         riverProvenance: { name: 'test rivers', licence: 'test' },
       },
@@ -1304,7 +1313,7 @@ describe('the Pen following the coast, on the canvas', () => {
       colours: createPolityColourSource(AUTOMATIC_PALETTE),
     })
     aimAtFrance(store)
-    store.getState().choosePenMode('coast')
+    store.getState().choosePenMode(mode)
     // A view where a backdrop pixel is a screen pixel, so the shore sits at screen y = 500 - 282.
     store.getState().setViewport({ scale: 1, originX: -240, originY: -282 })
     return { node, store, acted, resulted, dispose }
@@ -1371,6 +1380,58 @@ describe('the Pen following the coast, on the canvas', () => {
       expect(store.getState().document.claims).toHaveLength(1)
       node.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true }))
       expect(store.getState().document.claims).toEqual([])
+      dispose()
+    })
+  })
+
+  describe('following a river', () => {
+    /** The Maas, at backdrop y = 700 — screen y = 418, 200 px below the shore. */
+    const MAAS: NamedPolyline = {
+      points: Array.from({ length: 121 }, (_, index): [number, number] => [index * 10, 700]),
+      closed: false,
+      bounds: { left: 0, top: 700, right: 1200, bottom: 700 },
+      name: 'Maas',
+      rank: 3,
+    }
+
+    // s02 — "Following the Maas for Kingdom of France".
+    it('names the river while it is within reach, and offers nothing on the shore', () => {
+      const { node, acted, dispose } = attachWithShore(undefined, [MAAS], 'river')
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 420 }))
+      expect(acted).toHaveBeenLastCalledWith('Following the Maas for Reaume de France')
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 220 }))
+      expect(acted).toHaveBeenLastCalledWith(
+        'Drawing in Reaume de France — no river within reach, placing points freely'
+      )
+      dispose()
+    })
+
+    it('inserts the stretch between two clicks on the river, and names it in the report', () => {
+      const { node, resulted, dispose } = attachWithShore(undefined, [MAAS], 'river')
+      click(node, [60, 418])
+      click(node, [160, 418])
+      expect(resulted).toHaveBeenLastCalledWith('inserted 10 vertices from the Maas')
+      dispose()
+    })
+
+    it('shows the snap cursor over the river, and the plain cross on the shore', () => {
+      const { node, dispose } = attachWithShore(undefined, [MAAS], 'river')
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 220 }))
+      const onShore = node.style.cursor
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 420 }))
+      expect(node.style.cursor).not.toBe(onShore)
+      dispose()
+    })
+
+    // A mode chosen in the Pen's group, the pointer still on the canvas: the offer follows at once.
+    it('updates the sentence when the mode changes with the pointer parked', () => {
+      const { node, store, acted, dispose } = attachWithShore(undefined, [MAAS], 'coast')
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 420 }))
+      expect(acted).toHaveBeenLastCalledWith(
+        'Drawing in Reaume de France — no coastline within reach, placing points freely'
+      )
+      store.getState().choosePenMode('river')
+      expect(acted).toHaveBeenLastCalledWith('Following the Maas for Reaume de France')
       dispose()
     })
   })

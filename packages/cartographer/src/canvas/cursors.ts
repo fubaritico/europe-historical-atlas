@@ -59,7 +59,7 @@ export interface CursorState {
   closing: boolean
   /** Whether the white arrow is over one of the target's handles. */
   overHandle: boolean
-  /** Whether the Pen, following the coast, has the coastline within reach. */
+  /** Whether the Pen, following a layer — the coast or a river — has it within reach. */
   snapping: boolean
   /** Whether the Pen is over an existing anchor it would join — CURSORS.md's branching mark. */
   branching: boolean

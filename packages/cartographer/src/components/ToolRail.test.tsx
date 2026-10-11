@@ -15,6 +15,7 @@ import { HOLD_TO_OPEN_MS, RAIL_TOOLS } from './railTools'
 import { ToolRail } from './ToolRail'
 import { ToolRailPanel } from './ToolRailPanel'
 
+import type { RailTool } from './railTools'
 import type { ToolRailProps } from './ToolRail'
 
 /** One colour source for the mounts below, over the shipped palette. */
@@ -47,6 +48,20 @@ function mount(overrides: Partial<ToolRailProps> = {}) {
 
 const tool = (name: string) => screen.getByRole('button', { name })
 
+/** The Pen alone, its group holding one row that is not available — what a rung in progress lists. */
+const WITH_A_DISABLED_ROW: readonly RailTool[] = [
+  {
+    tool: 'draw',
+    label: 'Pen',
+    key: 'P',
+    icon: 'draw',
+    variants: [
+      { id: 'free', label: 'Pen', shortcut: 'P', icon: 'draw', enabled: true },
+      { id: 'river', label: 'Pen — follow a river', shortcut: null, icon: 'draw', enabled: false },
+    ],
+  },
+]
+
 describe('ToolRail', () => {
   describe('happy path', () => {
     // The dev, 2026-10-11: the tools one under the other, in Illustrator's order.
@@ -78,7 +93,14 @@ describe('ToolRail', () => {
       ])
       expect(items[0]?.getAttribute('aria-checked')).toBe('true')
       expect(items[1]?.getAttribute('aria-disabled')).toBe('false')
-      expect(items[2]?.getAttribute('aria-disabled')).toBe('true')
+      expect(items[2]?.getAttribute('aria-disabled')).toBe('false')
+    })
+
+    it('reports the river Pen when its row is chosen', async () => {
+      const { onPenMode, user } = mount()
+      await user.pointer({ keys: '[MouseRight]', target: tool('Pen') })
+      await user.click(screen.getByRole('menuitemradio', { name: /follow a river/ }))
+      expect(onPenMode).toHaveBeenCalledWith('river')
     })
 
     it('opens the group on a press held long enough, and that press takes no tool', () => {
@@ -172,11 +194,12 @@ describe('ToolRail', () => {
 
   describe('managed errors', () => {
     // A disabled variant stays listed, so the group's shape shows, and cannot be chosen.
-    it('ignores a click on a variant that is not there yet', async () => {
-      const { onSelect, user } = mount()
+    it('ignores a click on a variant that is disabled', async () => {
+      const { onSelect, onPenMode, user } = mount({ tools: WITH_A_DISABLED_ROW })
       await user.pointer({ keys: '[MouseRight]', target: tool('Pen') })
       await user.click(screen.getByRole('menuitemradio', { name: /follow a river/ }))
       expect(onSelect).not.toHaveBeenCalled()
+      expect(onPenMode).not.toHaveBeenCalled()
       expect(screen.getByRole('menu')).toBeDefined()
     })
 

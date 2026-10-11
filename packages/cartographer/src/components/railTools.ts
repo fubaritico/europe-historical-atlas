@@ -17,13 +17,13 @@ export interface RailTool {
 }
 
 /**
- * The Pen's group: the free Pen, and the Pen that follows the coast. Following a river is listed,
- * disabled — it is the next rung (`s02`), and nothing in the group pretends to work.
+ * The Pen's group: the free Pen, the Pen that follows the coast, and the Pen that follows a river
+ * (`s02`).
  */
 export const PEN_VARIANTS: readonly [ToolVariant, ...ToolVariant[]] = [
   { id: 'free', label: 'Pen', shortcut: 'P', icon: 'draw', enabled: true },
   { id: 'coast', label: 'Pen — follow the coast', shortcut: null, icon: 'draw', enabled: true },
-  { id: 'river', label: 'Pen — follow a river', shortcut: null, icon: 'draw', enabled: false },
+  { id: 'river', label: 'Pen — follow a river', shortcut: null, icon: 'draw', enabled: true },
 ]
 
 /**

@@ -12,13 +12,21 @@ import { HANDLE_HIT_RADIUS } from './navigation'
 import { paintOverlay } from './overlayPainter'
 import { projectedTerritories } from './scene'
 import { inDevicePixels } from './style'
-import { coastHit, coastStretchTo, outlineOnScreen, resolvedTarget } from './toolGestures'
+import {
+  followedLayer,
+  layerLines,
+  lineLabel,
+  outlineOnScreen,
+  resolvedTarget,
+  snapHit,
+  snapStretchTo,
+} from './toolGestures'
 import { actionSentence, overlayScene, ringNeighbours, targetHandles } from './toolSession'
 
 import type { AnchorCache } from './anchorCache'
 import type { PaintStyle, Painter2D } from './painter'
 import type { GestureContext } from './toolGestures'
-import type { ToolSession } from './toolSession'
+import type { SnapLayer, ToolSession } from './toolSession'
 import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
 import type { VectorLayers } from '../vectorLayers'
@@ -78,7 +86,7 @@ export interface CanvasControllerDeps {
    * subject. Reported only when it changes; raw like `onHover`, the bar decides how to show it.
    */
   onAction: (sentence: string | null) => void
-  /** Where the polities' colours come from — the same source `{Polities}` and the rail read. */
+  /** Where the polities' colours come from — the same source `{Polities}` and the layer read. */
   colours: PolityColourSource
   /**
    * The status bar's result zone — what a gesture did, *"inserted 412 vertices from the coastline"* —
@@ -160,6 +168,8 @@ export function gestureOf(it: LiveCanvas): GestureContext {
     radius: HANDLE_HIT_RADIUS * it.ratio,
     coast: it.deps.vectorLayers.coast,
     coastProvenance: it.deps.vectorLayers.coastProvenance,
+    rivers: it.deps.vectorLayers.rivers,
+    riverProvenance: it.deps.vectorLayers.riverProvenance,
     report: (message) => {
       it.deps.onResult(message)
     },
@@ -168,21 +178,29 @@ export function gestureOf(it: LiveCanvas): GestureContext {
 
 /** What the Pen offers under the pointer: where a click would land, what it would insert, and why. */
 export interface SnapOffer {
-  /** Where the click would land, on screen — an existing anchor or a coast vertex. */
+  /** Where the click would land, on screen — an existing anchor or a layer vertex. */
   target: Point | null
   /** The run a click would insert from the last snapped point, on screen. */
   preview: Point[] | null
-  /** What is offered: an existing anchor (a shared border), the coast, or nothing. */
-  kind: 'anchor' | 'coast' | null
+  /** What is offered: an existing anchor (a shared border), a layer — the coast or a river — or nothing. */
+  kind: 'anchor' | 'layer' | null
   /** The anchor under the pointer, when `kind` is `'anchor'`. */
   anchor: number | null
+  /** What the layer line is called — `"coastline"`, `"Maas"` — when `kind` is `'layer'`. */
+  lineLabel: string | null
 }
 
 /** Nothing on offer. */
-const NO_OFFER: SnapOffer = { target: null, preview: null, kind: null, anchor: null }
+const NO_OFFER: SnapOffer = {
+  target: null,
+  preview: null,
+  kind: null,
+  anchor: null,
+  lineLabel: null,
+}
 
 /**
- * What the Pen offers under the pointer. **Following the coast, the shore first** — a neighbour's
+ * What the Pen offers under the pointer. **Following a layer, the layer first** — a neighbour's
  * anchors on it are reused by the click, not branched onto — then an existing anchor, whose border is
  * already there.
  * @param it - the attachment
@@ -193,10 +211,11 @@ export function snapOffer(it: LiveCanvas, inserting: boolean = overStretch(it)):
   // Over the target's own stretch the idle Pen inserts, so it offers no snap there (`penInserts`).
   if (inserting) return NO_OFFER
   const gesture = gestureOf(it)
-  // Following the coast, the shore first — the same order as the click (`penClick`).
-  if (it.deps.store.getState().penMode === 'coast') {
-    const coast = coastOffer(it, gesture, it.pointer)
-    if (coast.kind !== null) return coast
+  // Following a layer, the layer first — the same order as the click (`penClick`).
+  const layer = followedLayer(gesture)
+  if (layer !== null) {
+    const offer = lineOffer(it, gesture, layer, it.pointer)
+    if (offer.kind !== null) return offer
   }
   const hit = anchorHit(gesture, it.pointer)
   return hit === null ? NO_OFFER : anchorOffer(it, gesture, hit)
@@ -216,27 +235,34 @@ function anchorOffer(it: LiveCanvas, gesture: GestureContext, hit: number): Snap
     run === null || run.length < 2
       ? null
       : run.map((index) => anchors[index]).filter((point) => point !== undefined)
-  return { target: anchors[hit] ?? null, preview, kind: 'anchor', anchor: hit }
+  return { target: anchors[hit] ?? null, preview, kind: 'anchor', anchor: hit, lineLabel: null }
 }
 
 /**
- * The offer of a coast vertex, and of the stretch a click would insert.
+ * The offer of a layer vertex, and of the stretch a click would insert.
  * @param it - the attachment
  * @param gesture - its gesture context
+ * @param layer - the layer the Pen follows
  * @param pointer - the pointer, in screen pixels
  * @returns the offer
  */
-function coastOffer(it: LiveCanvas, gesture: GestureContext, pointer: Point): SnapOffer {
-  const hit = coastHit(gesture, pointer)
+function lineOffer(
+  it: LiveCanvas,
+  gesture: GestureContext,
+  layer: SnapLayer,
+  pointer: Point
+): SnapOffer {
+  const hit = snapHit(gesture, layer, pointer)
   const vertex =
-    hit === null ? undefined : it.deps.vectorLayers.coast[hit.contour]?.points[hit.vertex]
+    hit === null ? undefined : layerLines(gesture, layer)[hit.contour]?.points[hit.vertex]
   if (hit === null || vertex === undefined) return NO_OFFER
   const viewport = it.deps.store.getState().viewport
   const toScreen = (point: Point) => backdropToScreen(viewport, point)
-  const stretch = coastStretchTo(gesture, hit)
+  const stretch = snapStretchTo(gesture, hit)
   // A one-point stretch is the vertex already placed: nothing to preview, so the band stays (QUAL-101).
   const preview = stretch === null || stretch.length < 2 ? null : stretch.map(toScreen)
-  return { target: toScreen(vertex), preview, kind: 'coast', anchor: null }
+  const label = lineLabel(gesture, hit)
+  return { target: toScreen(vertex), preview, kind: 'layer', anchor: null, lineLabel: label }
 }
 
 /**
@@ -293,7 +319,7 @@ export function showCursor(
       closing: closingOffered(it),
       overHandle: overHandle(it),
       overStretch: inserting,
-      snapping: offer.kind === 'coast',
+      snapping: offer.kind === 'layer',
       branching: offer.kind === 'anchor',
       // Only read with nobody aimed at, so only tested then — not on every move (QUAL-001).
       overFill: !hasTarget && overFill(it),
@@ -387,9 +413,9 @@ export function refreshTools(it: LiveCanvas): void {
     targetName: resolvedTarget(gestureOf(it))?.name ?? null,
     onCanvas: it.pointer !== null,
     closing: scene.closing,
-    snapping: offer.kind === 'coast',
+    snapping: offer.lineLabel,
     joining: offer.anchor === null ? null : anchorSentence(gestureOf(it), offer.anchor),
-    following: state.penMode === 'coast',
+    following: followedLayer(gestureOf(it)),
     inserting,
     session: it.session,
   })
