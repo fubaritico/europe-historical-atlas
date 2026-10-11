@@ -46,6 +46,15 @@ describe('polityDraft', () => {
   })
 
   describe('variants', () => {
+    // s02 — "explicit when given": the picker's HSVA becomes the file's #rrggbb.
+    it("writes a chosen colour as the file's six-digit hex", () => {
+      const reading = readDraft(
+        draft({ name: 'France', id: 'france', colour: { h: 210, s: 50, v: 80, a: 1 } }),
+        NONE
+      )
+      expect(reading.ok && reading.polity.colour).toBe('#6699cc')
+    })
+
     it('steps past an id the year already holds', () => {
       expect(withName(EMPTY_DRAFT, 'Reaume de France', ['reaume-de-france']).id).toBe(
         'reaume-de-france-2'
@@ -109,6 +118,12 @@ describe('polityDraft', () => {
   })
 
   describe('unmanaged errors', () => {
+    // Loud propagation: a broken colour stops the reading rather than writing a plausible one.
+    it('lets a colour that is not a number throw rather than write one', () => {
+      const broken = draft({ name: 'France', id: 'france', colour: { h: 0, s: NaN, v: 50, a: 1 } })
+      expect(() => readDraft(broken, NONE)).toThrow(RangeError)
+    })
+
     // s00: the rules are defaults. An end before the beginning is odd, and the author's to decide.
     it('does not refuse an end before the beginning', () => {
       expect(
@@ -121,6 +136,16 @@ describe('polityDraft', () => {
     // H-31: a non-latin name proposes nothing rather than a romanisation — the id is then the author's.
     it('proposes no id for a name with nothing to slug', () => {
       expect(withName(EMPTY_DRAFT, 'Βασιλεία', []).id).toBe('')
+    })
+
+    // The format has six digits and no alpha: a translucent value is written opaque, never as #rrggbbaa,
+    // which the reader would refuse at the next open.
+    it('writes a translucent colour opaque, in six digits', () => {
+      const reading = readDraft(
+        draft({ name: 'France', id: 'france', colour: { h: 210, s: 50, v: 80, a: 0.5 } }),
+        NONE
+      )
+      expect(reading.ok && reading.polity.colour).toBe('#6699cc')
     })
 
     it('leaves the colour to the palette', () => {

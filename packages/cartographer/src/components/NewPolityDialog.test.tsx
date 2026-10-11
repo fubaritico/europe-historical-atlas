@@ -83,6 +83,27 @@ describe('NewPolityDialog', () => {
       expect(store.getState().document.polities[0]?.rank).toBe('kingdom')
     })
 
+    // s02 — "explicit when given": the hex typed in the field, applied on Enter, reaches the file as #rrggbb.
+    it('records a colour chosen in the field', async () => {
+      const { store, user } = openDialog()
+      await user.type(field('Name'), 'France')
+      // By role: the hex input is named through `aria-labelledby` (itself + the field's label), which
+      // `getByLabelText` does not compose — the accessible name does.
+      await user.type(screen.getByRole('textbox', { name: 'Hex color Colour' }), '6699cc{Enter}')
+      // Enter applies the hex and nothing more: inside a <form> it would otherwise create the polity.
+      expect(store.getState().document.polities).toHaveLength(0)
+      await user.click(screen.getByRole('button', { name: 'OK' }))
+      expect(store.getState().document.polities[0]?.colour).toBe('#6699cc')
+    })
+
+    // s02 — "I leave the colour on automatic": nothing touched, the palette decides.
+    it('leaves the colour automatic when it is not touched', async () => {
+      const { store, user } = openDialog()
+      await user.type(field('Name'), 'France')
+      await user.click(screen.getByRole('button', { name: 'OK' }))
+      expect(store.getState().document.polities[0]?.colour).toBeNull()
+    })
+
     it('names the step after the polity, for {History}', async () => {
       const { store, user } = openDialog()
       await user.type(field('Name'), 'France')

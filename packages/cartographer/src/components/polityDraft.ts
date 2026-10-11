@@ -1,6 +1,9 @@
+import { hsvaToHex } from '@fubaritico/behaviors'
+
 import { proposePolityId } from '@europe-historical-atlas/core/editor/polityId'
 
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
+import type { HsvaColor } from '@fubaritico/behaviors'
 
 /**
  * What the polity form holds while the author types — strings where the author types, the raw choice
@@ -28,6 +31,14 @@ export interface PolityDraft {
   suzerain: string | null
   /** As typed: empty, or a Wikidata id. */
   wikidata: string
+  /**
+   * As picked, or `null` for "automatic" — *"the palette decides"* (`s02`).
+   *
+   * **Held as the picker's HSVA, not as the file's hex**: the design system keeps HSVA as the source of
+   * truth because a grey carries no hue in RGB, so a draft round-tripped through hex would jump the hue
+   * thumb back to red. The hex is made once, when the form is read.
+   */
+  colour: HsvaColor | null
 }
 
 /** A blank form — what `[+ New polity]` opens. */
@@ -41,6 +52,7 @@ export const EMPTY_DRAFT: PolityDraft = {
   existsTo: '',
   suzerain: null,
   wikidata: '',
+  colour: null,
 }
 
 /** One choice of a list: the value stored in the file, and what the list shows. */
@@ -115,12 +127,26 @@ function readYear(text: string): number | null | undefined {
 }
 
 /**
+ * The file's `#rrggbb` for a picked colour.
+ *
+ * **The alpha is set to opaque, and that is the format speaking, not a fallback**: a polity's colour has
+ * no alpha channel — the atlas lays it over the relief itself — and the file's schema accepts six digits
+ * only. The form never offers alpha, so this changes nothing a picker produced; it stops an eight-digit
+ * hex, which the reader would refuse at the next open, from ever being written.
+ * @param colour - the picked colour, or `null` for "automatic"
+ * @returns the lowercase six-digit hex, or `null` — the file's own "the palette decides"
+ */
+function toFileColour(colour: HsvaColor | null): string | null {
+  return colour === null ? null : hsvaToHex({ ...colour, a: 1 })
+}
+
+/**
  * Read the form into a polity, or say what stops it.
  *
  * **Only what would break the file is refused** — an empty name or id, an id the year already holds, a
  * year that is not a number. Everything else is the author's to decide, `s00`'s rule: an end before the
- * beginning is odd and not refused, a Wikidata id is not checked for shape. The colour is `null` — *"the
- * palette decides"* — until the design system's colour picker exists.
+ * beginning is odd and not refused, a Wikidata id is not checked for shape. A colour cannot be refused:
+ * the picker only ever produces one.
  * @param draft - the form
  * @param taken - the ids already in the year
  * @returns the polity, or the errors by field
@@ -153,7 +179,7 @@ export function readDraft(draft: PolityDraft, taken: ReadonlySet<string>): Draft
       suzerain: draft.suzerain,
       existsFrom,
       existsTo,
-      colour: null,
+      colour: toFileColour(draft.colour),
       wikidata: wikidata === '' ? null : wikidata,
     },
   }

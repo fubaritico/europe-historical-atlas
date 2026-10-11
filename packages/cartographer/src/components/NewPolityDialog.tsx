@@ -7,6 +7,7 @@ import { PolityForm } from './PolityForm'
 import type { DraftField, PolityDraft } from './polityDraft'
 import type { PolityFormField } from './PolityForm'
 import type { CartographerStoreHook } from '../state/store'
+import type { HsvaColor } from '@fubaritico/behaviors'
 
 /** What the dialogue needs from its caller. */
 export interface NewPolityDialogProps {
@@ -51,6 +52,10 @@ function usePolityDraft(store: CartographerStoreHook, onClose: () => void) {
     })
   }
 
+  const onColour = (colour: HsvaColor | null) => {
+    setDraft((current) => ({ ...current, colour }))
+  }
+
   // OK creates, then aims — in that order and only on success. `createPolity` refuses an id the year
   // already holds by returning `false`; the form checked first, and this second line stays because the
   // document is the authority, not the form's copy of its ids.
@@ -70,7 +75,7 @@ function usePolityDraft(store: CartographerStoreHook, onClose: () => void) {
     close()
   }
 
-  return { draft, errors, polities, close, onField, onSubmit }
+  return { draft, errors, polities, close, onField, onColour, onSubmit }
 }
 
 /**
@@ -83,7 +88,10 @@ function usePolityDraft(store: CartographerStoreHook, onClose: () => void) {
  * @returns the dialogue
  */
 export function NewPolityDialog({ store, isOpen, onClose }: NewPolityDialogProps) {
-  const { draft, errors, polities, close, onField, onSubmit } = usePolityDraft(store, onClose)
+  const { draft, errors, polities, close, onField, onColour, onSubmit } = usePolityDraft(
+    store,
+    onClose
+  )
   return (
     <Modal
       isOpen={isOpen}
@@ -99,6 +107,7 @@ export function NewPolityDialog({ store, isOpen, onClose }: NewPolityDialogProps
         errors={errors}
         suzerains={polities.map((polity) => ({ value: polity.id, label: polity.name }))}
         onField={onField}
+        onColour={onColour}
         onSubmit={onSubmit}
         onCancel={close}
       />

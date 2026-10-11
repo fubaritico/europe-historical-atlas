@@ -1,5 +1,6 @@
 import { Button } from '@fubaritico/react/Button'
 import { Card } from '@fubaritico/react/Card'
+import { ColorField } from '@fubaritico/react/ColorField'
 import { Dropdown } from '@fubaritico/react/Dropdown'
 import { IconButton } from '@fubaritico/react/IconButton'
 import { Input } from '@fubaritico/react/Input'
@@ -7,9 +8,10 @@ import { Input } from '@fubaritico/react/Input'
 import { RANKS, STATUSES } from './polityDraft'
 
 import type { DraftField, DraftOption, PolityDraft } from './polityDraft'
+import type { HsvaColor } from '@fubaritico/behaviors'
 
-/** The fields a form event can name: every text field and every list of the draft. */
-export type PolityFormField = Exclude<keyof PolityDraft, 'idEdited'>
+/** The fields a form event can name: every text field and every list of the draft — the colour has its own. */
+export type PolityFormField = Exclude<keyof PolityDraft, 'idEdited' | 'colour'>
 
 /**
  * What the polity form shows and what it reports. Never the store: the binding,
@@ -30,6 +32,12 @@ export interface PolityFormProps {
    * @param value - its new value
    */
   onField: (field: PolityFormField, value: string | null) => void
+  /**
+   * The colour changed — continuously while a thumb is dragged, which is cheap: the draft is the
+   * dialogue's own state, and nothing is written to the document before OK.
+   * @param colour - the picked colour, or `null` for "automatic"
+   */
+  onColour: (colour: HsvaColor | null) => void
   /** [OK] or ‹enter›: read the form. */
   onSubmit: () => void
   /** [Cancel] or the close cross: leave without creating anything. */
@@ -96,9 +104,26 @@ function ChoiceField({
   )
 }
 
+/**
+ * The colour, as the design system's field: a swatch, the hex, and the picker in a popover.
+ *
+ * `nullable` is "automatic", `s02`'s default. **No `alpha`**: a polity's colour is laid over the relief,
+ * so the format has no opacity to give. **The popover stays inside the Modal**, never in a portal —
+ * `showModal()` makes everything outside the dialogue inert, so a portalled panel could not be clicked.
+ */
+function ColourField({
+  value,
+  onChange,
+}: {
+  value: HsvaColor | null
+  onChange: (colour: HsvaColor | null) => void
+}) {
+  return <ColorField label="Colour" value={value} onChange={onChange} nullable density="compact" />
+}
+
 /** The form's fields, in `s02`'s order, with the id after the name it is proposed from. */
 function PolityFields(props: PolityFormProps) {
-  const { draft, errors, suzerains, onField } = props
+  const { draft, errors, suzerains, onField, onColour } = props
   const choose = (field: PolityFormField) => (value: string | null) => {
     onField(field, value)
   }
@@ -137,6 +162,7 @@ function PolityFields(props: PolityFormProps) {
         value={draft.suzerain}
         onSelect={choose('suzerain')}
       />
+      <ColourField value={draft.colour} onChange={onColour} />
       <Input label="Wikidata id" placeholder="Q…" {...textField('wikidata', props)} />
     </>
   )

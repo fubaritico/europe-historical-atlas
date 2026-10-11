@@ -15,7 +15,12 @@ const SUZERAINS = [
 ]
 
 /** The form's callbacks, inert: a plate is looked at, not submitted. */
-const INERT = { onField: () => undefined, onSubmit: () => undefined, onCancel: () => undefined }
+const INERT = {
+  onField: () => undefined,
+  onColour: () => undefined,
+  onSubmit: () => undefined,
+  onCancel: () => undefined,
+}
 
 /**
  * Every plate on the workbench, in the order they are listed.
@@ -105,6 +110,26 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
           wikidata: 'Q70972',
         }}
         errors={{ id: DRAFT_ERRORS.idTaken, existsFrom: DRAFT_ERRORS.notAYear }}
+        suzerains={SUZERAINS}
+        {...INERT}
+      />
+    ),
+  },
+  {
+    id: 'polity-form-colour',
+    title: 'Polity form, colour chosen',
+    note: 'Colour taken off automatic: the swatch shows it and the hex reads it. Press the swatch to judge the compact popover against the fields — it opens above, as it does inside the Modal.',
+    width: 360,
+    render: () => (
+      <PolityForm
+        title="New polity"
+        draft={{
+          ...EMPTY_DRAFT,
+          name: 'Reaume de France',
+          id: 'reaume-de-france',
+          colour: { h: 214, s: 62, v: 68, a: 1 },
+        }}
+        errors={{}}
         suzerains={SUZERAINS}
         {...INERT}
       />
