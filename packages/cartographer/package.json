@@ -18,7 +18,7 @@
   "dependencies": {
     "@europe-historical-atlas/core": "workspace:^",
     "@fubaritico/behaviors": "^0.4.0",
-    "@fubaritico/react": "^0.4.0",
+    "@fubaritico/react": "^0.4.1",
     "@fubaritico/styles": "^0.4.0",
     "@fubaritico/tokens": "^0.4.0",
     "react": "catalog:",
