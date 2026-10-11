@@ -1,3 +1,4 @@
+import { boundsDisagreement } from '@europe-historical-atlas/core/data/assetError'
 import { chainSegments } from '@europe-historical-atlas/core/data/coastlineChain'
 import { createMaskCoastlineSource } from '@europe-historical-atlas/core/data/coastlineSource'
 
@@ -61,6 +62,11 @@ export interface VectorLayers {
    * mask's own declaration, never restated here.
    */
   coastProvenance: Provenance
+  /**
+   * What the rivers were drawn from — recorded on every anchor the Pen snaps onto one. Read off the
+   * river payload's own declaration, never restated here.
+   */
+  riverProvenance: Provenance
 }
 
 /**
@@ -69,7 +75,8 @@ export interface VectorLayers {
  * **It refuses rather than guesses** (`rules/error-handling.md`): a source with no licence in brackets
  * would otherwise have to be recorded under a licence nobody declared — and a licence is the one thing
  * this project cannot afford to make up, the GPL years being the reason it watches its sources at all.
- * @param source - the mask's `source`, e.g. `"Natural Earth 10m land minus lakes (public domain)"`
+ * @param source - an asset's `source` — the mask's or the rivers' — e.g.
+ *   `"Natural Earth 10m land minus lakes (public domain)"`
  * @returns the name and the licence
  * @throws when the declaration does not end with its licence in brackets
  */
@@ -79,7 +86,7 @@ export function provenanceOf(source: string): Provenance {
   const licence = match?.[2]
   if (name === undefined || licence === undefined) {
     throw new Error(
-      `Cartographer: the coastline's source "${source}" names no licence in brackets; no anchor can be recorded under it.`
+      `Cartographer: the source "${source}" names no licence in brackets; no anchor can be recorded under it.`
     )
   }
   return { name, licence }
@@ -182,14 +189,25 @@ export interface VectorLayersDeps {
  * **A failing river load propagates**, like the backdrop's two assets: the dev's call of 2026-10-07 is
  * that the canvas area shows nothing and says so rather than drawing a map that is quietly incomplete.
  * A missing river is not cosmetic here — it is a stretch of frontier with nothing to snap to.
+ *
+ * **Rivers projected against another box are refused the same way**, and so is a source naming no
+ * licence — both before the tracing: their `(u, v)`
+ * are computed against the payload's box and multiplied here by the backdrop's, so the two must be one.
  * @param deps - the mask, the river source, and the frame
  * @returns both layers, in backdrop pixels
+ * @throws AssetError when the river load fails, or when the rivers cover different ground
  */
 export async function loadVectorLayers(deps: VectorLayersDeps): Promise<VectorLayers> {
-  const rivers = await deps.rivers.load()
+  const loaded = await deps.rivers.load()
+  const disagreement = boundsDisagreement(deps.frame.bounds, loaded.bbox, 'rivers', 'the rivers')
+  if (disagreement !== null) throw disagreement
+  // Every refusal before the tracing, so a payload turned away costs no 660 ms first.
+  const coastProvenance = provenanceOf(deps.mask.meta.source)
+  const riverProvenance = provenanceOf(loaded.source)
   return {
     coast: traceCoastline(deps.mask, deps.frame, deps.traceWidth),
-    rivers: projectRiverLines(rivers, deps.frame),
-    coastProvenance: provenanceOf(deps.mask.meta.source),
+    rivers: projectRiverLines(loaded.rivers, deps.frame),
+    coastProvenance,
+    riverProvenance,
   }
 }

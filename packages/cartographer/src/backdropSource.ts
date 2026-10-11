@@ -1,7 +1,6 @@
-import { assetError, boundsMatch } from '@europe-historical-atlas/core/data/assetError'
+import { boundsDisagreement } from '@europe-historical-atlas/core/data/assetError'
 
 import type { BackdropFrame } from './view/projection'
-import type { AssetError } from '@europe-historical-atlas/core/data/assetError'
 import type { HeightmapMeta, HeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
 import type { LandMask, LandMaskSource } from '@europe-historical-atlas/core/data/landMask'
 import type {
@@ -110,34 +109,6 @@ export function frameFromHeightmap(meta: HeightmapMeta): BackdropFrame {
 }
 
 /**
- * Check that the mask covers the same ground as the relief.
- *
- * **This is the `semantic` class of the asset taxonomy** — each file is internally valid and the pair is
- * wrong for us. It is worth a check of its own because it is the failure nothing else can see: a mask
- * cropped to a different box still samples, still returns land and water, and simply puts the coastline
- * somewhere else. The author would read the disagreement as their own bad tracing.
- * @param dem - the elevation metadata
- * @param mask - the mask metadata
- * @param source - where the mask was loaded from, for the message
- * @returns the error to throw, or `null` when the two agree
- */
-export function boundsDisagreement(
-  dem: { bbox: HeightmapMeta['bbox'] },
-  mask: { bbox: HeightmapMeta['bbox'] },
-  source: string
-): AssetError | null {
-  if (boundsMatch(dem.bbox, mask.bbox)) return null
-  const box = (b: HeightmapMeta['bbox']): string =>
-    `W${String(b.west)} S${String(b.south)} E${String(b.east)} N${String(b.north)}`
-  return assetError(
-    'landMask',
-    'semantic',
-    source,
-    `covers ${box(mask.bbox)} while the relief covers ${box(dem.bbox)} — the two must share one coordinate space`
-  )
-}
-
-/**
  * Load both assets, bake the bare terrain, and return the picture with the frame it defines.
  *
  * **Nothing is caught.** A missing or malformed asset throws the `AssetError` its reader built, carrying
@@ -154,7 +125,12 @@ export function boundsDisagreement(
 export async function loadBackdrop(deps: BackdropDeps): Promise<Backdrop> {
   const [dem, mask] = await Promise.all([deps.heightmap.load(), deps.landMask.load()])
 
-  const disagreement = boundsDisagreement(dem.meta, mask.meta, 'the land mask')
+  const disagreement = boundsDisagreement(
+    dem.meta.bbox,
+    mask.meta.bbox,
+    'landMask',
+    'the land mask'
+  )
   if (disagreement !== null) throw disagreement
 
   await deps.compute.setSources({

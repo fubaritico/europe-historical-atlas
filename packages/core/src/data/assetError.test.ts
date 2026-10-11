@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   assetError,
+  boundsDisagreement,
   boundsMatch,
   expectArray,
   expectBounds,
@@ -155,4 +156,50 @@ describe('boundsMatch', () => {
       expect(boundsMatch(BOX, { ...BOX, north: 10.5 }, 0.1)).toBe(false)
     })
   })
+})
+
+describe('boundsDisagreement', () => {
+  describe('happy path', () => {
+    it('returns null when the two boxes are equal', () => {
+      expect(boundsDisagreement(BOX, { ...BOX }, 'landMask', 'the mask')).toBeNull()
+    })
+  })
+
+  describe('variants', () => {
+    it.each(['west', 'south', 'east', 'north'] as const)(
+      'returns a semantic error when %s moved by one degree',
+      (edge) => {
+        const error = boundsDisagreement(BOX, { ...BOX, [edge]: BOX[edge] + 1 }, 'landMask', 'm')
+
+        expect(error?.failure).toBe('semantic')
+        expect(error?.asset).toBe('landMask')
+      }
+    )
+
+    it('names the asset family it was handed, so a river disagreement is not blamed on the mask', () => {
+      const error = boundsDisagreement(BOX, { ...BOX, west: BOX.west + 1 }, 'rivers', 'the rivers')
+
+      expect(error?.asset).toBe('rivers')
+    })
+  })
+
+  describe('managed errors', () => {
+    it('names both boxes and the source in the message', () => {
+      const error = boundsDisagreement(BOX, { ...BOX, east: 60 }, 'landMask', 'the mask')
+
+      expect(error?.detail).toContain('E60')
+      expect(error?.detail).toContain(`E${String(BOX.east)}`)
+      expect(error?.source).toBe('the mask')
+    })
+  })
+
+  describe('edge cases', () => {
+    it('returns null for a 1e-9 degree difference', () => {
+      expect(
+        boundsDisagreement(BOX, { ...BOX, north: BOX.north + 1e-9 }, 'landMask', 'm')
+      ).toBeNull()
+    })
+  })
+
+  // L4: N/A — two numbers compared per edge; malformed boxes are the readers' job.
 })

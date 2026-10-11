@@ -4,12 +4,7 @@ import { isAssetError } from '@europe-historical-atlas/core/data/assetError'
 import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { createLandMask } from '@europe-historical-atlas/core/data/landMask'
 
-import {
-  bakeToBitmap,
-  boundsDisagreement,
-  frameFromHeightmap,
-  loadBackdrop,
-} from './backdropSource'
+import { bakeToBitmap, frameFromHeightmap, loadBackdrop } from './backdropSource'
 
 import type { BackdropDeps } from './backdropSource'
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
@@ -155,49 +150,6 @@ describe('frameFromHeightmap', () => {
 
   // L3/L4: N/A — a pure read of parsed metadata. Whether the numbers are numbers at all is the
   // heightmap reader's job, and `parseHeightmapMeta` already owns and tests it.
-})
-
-describe('boundsDisagreement', () => {
-  describe('happy path', () => {
-    it('says nothing when the two cover the same ground', () => {
-      expect(boundsDisagreement({ bbox: BBOX }, { bbox: BBOX }, 'the mask')).toBeNull()
-    })
-  })
-
-  describe('variants', () => {
-    it.each(['west', 'south', 'east', 'north'] as const)(
-      'reports a disagreement on %s, whichever edge moved',
-      (edge) => {
-        const moved = { ...BBOX, [edge]: BBOX[edge] + 1 }
-
-        const error = boundsDisagreement({ bbox: BBOX }, { bbox: moved }, 'the mask')
-
-        expect(error).not.toBeNull()
-        expect(error?.failure).toBe('semantic')
-        expect(error?.asset).toBe('landMask')
-      }
-    )
-  })
-
-  describe('managed errors', () => {
-    it('names both boxes, so the message says which is which', () => {
-      const moved = { ...BBOX, east: 60 }
-
-      const error = boundsDisagreement({ bbox: BBOX }, { bbox: moved }, 'the mask')
-
-      expect(error?.detail).toContain('E60')
-      expect(error?.detail).toContain('E78.75')
-      expect(error?.source).toBe('the mask')
-    })
-  })
-
-  describe('edge cases', () => {
-    it('tolerates a floating-point difference too small to move a pixel', () => {
-      const rounded = { ...BBOX, north: BBOX.north + 1e-9 }
-
-      expect(boundsDisagreement({ bbox: BBOX }, { bbox: rounded }, 'the mask')).toBeNull()
-    })
-  })
 })
 
 describe('loadBackdrop', () => {

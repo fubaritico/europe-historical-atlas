@@ -13,7 +13,8 @@ import {
 import { TEST_BACKDROP_FRAME } from './view/testFrame'
 
 import type { BackdropFrame } from './view/projection'
-import type { River } from '@europe-historical-atlas/core/data/riverSource'
+import type { River, RiverSource } from '@europe-historical-atlas/core/data/riverSource'
+import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
 
 /** A small frame with **different** width and height, so a swapped axis cannot pass. */
 const FRAME: BackdropFrame = {
@@ -37,6 +38,16 @@ function islandMask(size = 16) {
     },
     (col, row) => col > 4 && col < 11 && row > 4 && row < 11
   )
+}
+
+/**
+ * A river source answering at once, over the frame's own box unless told otherwise.
+ * @param rivers - the centrelines
+ * @param bbox - the box the payload declares
+ * @returns the source
+ */
+function riverSource(rivers: River[], bbox: GeoBounds = FRAME.bounds): RiverSource {
+  return { load: () => Promise.resolve({ source: 'test rivers (PD)', bbox, rivers }) }
 }
 
 describe('toBackdropPixels', () => {
@@ -187,12 +198,9 @@ describe('loadVectorLayers', () => {
     it('returns both layers, projected into the frame', async () => {
       const layers = await loadVectorLayers({
         mask: islandMask(),
-        rivers: {
-          load: () =>
-            Promise.resolve([
-              { rank: 1, kind: 'River', name: 'Rhône', points: [{ u: 0.5, v: 0.5 }] },
-            ]),
-        },
+        rivers: riverSource([
+          { rank: 1, kind: 'River', name: 'Rhône', points: [{ u: 0.5, v: 0.5 }] },
+        ]),
         frame: FRAME,
         traceWidth: 16,
       })
@@ -200,6 +208,7 @@ describe('loadVectorLayers', () => {
       expect(layers.coast.length).toBeGreaterThan(0)
       expect(layers.rivers[0]?.points).toEqual([[100, 40]])
       expect(layers.coastProvenance).toEqual({ name: 'test shore', licence: 'CC0' })
+      expect(layers.riverProvenance).toEqual({ name: 'test rivers', licence: 'PD' })
     })
   })
 
@@ -215,6 +224,30 @@ describe('loadVectorLayers', () => {
       // The dev's call of 2026-10-07, applied here: a missing river is not cosmetic, it is a stretch of
       // frontier with nothing to snap to. The canvas area says so rather than drawing most of a map.
       await expect(failing).rejects.toThrow('rivers 404')
+    })
+
+    it('refuses rivers cropped to another box than the backdrop, naming the rivers', async () => {
+      const slid = loadVectorLayers({
+        mask: islandMask(),
+        rivers: riverSource([], { ...FRAME.bounds, east: FRAME.bounds.east - 10 }),
+        frame: FRAME,
+        traceWidth: 16,
+      })
+
+      await expect(slid).rejects.toMatchObject({ asset: 'rivers', failure: 'semantic' })
+    })
+
+    it('refuses a river source that names no licence, rather than recording anchors under none', async () => {
+      const unlicensed = loadVectorLayers({
+        mask: islandMask(),
+        rivers: {
+          load: () => Promise.resolve({ source: 'rivers', bbox: FRAME.bounds, rivers: [] }),
+        },
+        frame: FRAME,
+        traceWidth: 16,
+      })
+
+      await expect(unlicensed).rejects.toThrow(/no licence/)
     })
   })
 
@@ -237,6 +270,29 @@ describe('loadVectorLayers', () => {
       // The tracing is the expensive half (539 ms at the shipped width). Awaiting the cheap, failable
       // half first is what keeps a 404 from costing it.
       expect(trace).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('edge cases — refusals come first', () => {
+    it('does not trace when the river source names no licence', async () => {
+      const read: (string | symbol)[] = []
+      const unlicensed = loadVectorLayers({
+        mask: new Proxy(islandMask(), {
+          get(target, key) {
+            read.push(key)
+            return Reflect.get(target, key) as unknown
+          },
+        }),
+        rivers: {
+          load: () => Promise.resolve({ source: 'rivers', bbox: FRAME.bounds, rivers: [] }),
+        },
+        frame: FRAME,
+        traceWidth: 16,
+      })
+
+      await expect(unlicensed).rejects.toThrow(/no licence/)
+      // Reading the mask's declared source is the provenance check; anything else is the tracing.
+      expect(read.filter((key) => key !== 'meta')).toEqual([])
     })
   })
 

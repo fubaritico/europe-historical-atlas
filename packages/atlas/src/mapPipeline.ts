@@ -358,7 +358,7 @@ function loadRivers(context: PipelineContext): void {
     .load()
     .then((loaded) => {
       if (context.isDisposed()) return
-      context.sources.riverData = loaded
+      context.sources.riverData = loaded.rivers
       context.layers.rebuildRivers()
     })
     .catch((error: unknown) => {

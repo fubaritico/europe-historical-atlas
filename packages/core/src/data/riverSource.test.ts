@@ -115,10 +115,22 @@ describe('riverSource', () => {
       ])
       const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(body) })
       vi.stubGlobal('fetch', fetchMock)
-      const rivers = await createFetchRiverSource('/rivers/x.json').load()
+      const loaded = await createFetchRiverSource('/rivers/x.json').load()
       expect(fetchMock).toHaveBeenCalledWith('/rivers/x.json')
-      expect(rivers).toHaveLength(1)
-      expect(rivers[0]?.name).toBe('Rhine')
+      expect(loaded.rivers).toHaveLength(1)
+      expect(loaded.rivers[0]?.name).toBe('Rhine')
+      vi.unstubAllGlobals()
+    })
+
+    it('hands over the payload source and bbox beside the centrelines', async () => {
+      const body = payload([])
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(body) })
+      )
+      const loaded = await createFetchRiverSource('/rivers/x.json').load()
+      expect(loaded.source).toBe(body.source)
+      expect(loaded.bbox).toEqual(body.bbox)
       vi.unstubAllGlobals()
     })
   })

@@ -42,7 +42,12 @@ function readyBackdrop(): EditorAssets {
         meta: { width: 2, height: 2, scale: 1, bbox: TEST_BACKDROP_FRAME.bounds },
       } as LandMask,
     },
-    vectors: { coast: [], rivers: [], coastProvenance: { name: 'test coast', licence: 'test' } },
+    vectors: {
+      coast: [],
+      rivers: [],
+      coastProvenance: { name: 'test coast', licence: 'test' },
+      riverProvenance: { name: 'test rivers', licence: 'test' },
+    },
   }
 }
 

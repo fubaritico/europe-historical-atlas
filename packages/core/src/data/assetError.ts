@@ -262,3 +262,35 @@ export function boundsMatch(a: GeoBounds, b: GeoBounds, toleranceDeg = 1e-6): bo
     Math.abs(a.north - b.north) <= toleranceDeg
   )
 }
+
+/**
+ * Check that an asset laid over the relief covers the same ground as the relief, and say how it does
+ * not when it does not.
+ *
+ * **The `semantic` class of the taxonomy, as an error rather than a boolean** — {@link boundsMatch}
+ * answers *whether*, this names both boxes and the file, so the reader is told which asset slid where.
+ * It is the failure nothing else can see: a mask cropped to a different box still samples and simply
+ * puts the coastline somewhere else; rivers projected against another box slide off the valleys they
+ * run in. An author would read either as their own bad tracing.
+ * @param relief - the box the relief covers
+ * @param other - the box the other asset declares
+ * @param asset - which asset family it is, so the error names the right file
+ * @param source - where the other asset was loaded from, for the message
+ * @returns the error to throw, or `null` when the two agree
+ */
+export function boundsDisagreement(
+  relief: GeoBounds,
+  other: GeoBounds,
+  asset: AssetKind,
+  source: string
+): AssetError | null {
+  if (boundsMatch(relief, other)) return null
+  const box = (b: GeoBounds): string =>
+    `W${String(b.west)} S${String(b.south)} E${String(b.east)} N${String(b.north)}`
+  return assetError(
+    asset,
+    'semantic',
+    source,
+    `covers ${box(other)} while the relief covers ${box(relief)} — the two must share one coordinate space`
+  )
+}

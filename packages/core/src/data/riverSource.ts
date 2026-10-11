@@ -38,9 +38,26 @@ export interface River {
 export interface RiverSource {
   /**
    * Load the rivers.
-   * @returns the reprojected centrelines
+   * @returns the reprojected centrelines, with what the payload declared about them
    */
-  load(): Promise<River[]>
+  load(): Promise<RiverSet>
+}
+
+/**
+ * The rivers as a source hands them over: the centrelines, and the two declarations of the payload
+ * that a consumer cannot recover from the centrelines alone.
+ *
+ * **Why the box travels with them.** The `(u, v)` of every point are computed against **this** box,
+ * and a consumer lays them over the relief's own — so the two must be the same box, and only a consumer
+ * holding both can check it. Dropping it here is what left that check unwritable.
+ */
+export interface RiverSet {
+  /** Where the data came from, and under what terms — `"<name> (<licence>)"`, as the payload says. */
+  source: string
+  /** The geographic box the `(u, v)` of every point were computed against. */
+  bbox: GeoBounds
+  /** The reprojected centrelines. */
+  rivers: River[]
 }
 
 /** The on-disk payload emitted by `files/spikes/fetch-rivers` (lon/lat, cropped to the DEM bbox). */
@@ -85,11 +102,12 @@ export function projectRivers(payload: RiverPayload): River[] {
  */
 export function createFetchRiverSource(path: string): RiverSource {
   return {
-    async load(): Promise<River[]> {
+    async load(): Promise<RiverSet> {
       const response = await fetch(path)
       if (!response.ok)
         throw assetError('rivers', 'transport', path, `HTTP ${String(response.status)}`)
-      return projectRivers(parseRiverPayload(await response.json(), path))
+      const payload = parseRiverPayload(await response.json(), path)
+      return { source: payload.source, bbox: payload.bbox, rivers: projectRivers(payload) }
     },
   }
 }

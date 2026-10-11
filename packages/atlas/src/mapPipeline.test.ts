@@ -99,7 +99,7 @@ function fakeAssets(over: Partial<MapAssetSources> = {}): Partial<MapAssetSource
   return {
     heightmap: { load: () => Promise.resolve(DEM) },
     landMask: { load: () => Promise.resolve(MASK) },
-    rivers: { load: () => Promise.resolve([]) },
+    rivers: { load: () => Promise.resolve({ source: 'test', bbox: META.bbox, rivers: [] }) },
     regions: { load: () => Promise.resolve(YEAR) },
     ...over,
   }

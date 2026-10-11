@@ -277,6 +277,7 @@ describe('scene', () => {
             coast: COAST,
             rivers: RIVERS,
             coastProvenance: { name: 'test coast', licence: 'test' },
+            riverProvenance: { name: 'test rivers', licence: 'test' },
           },
           viewport: { scale: 2, originX: 5, originY: -3 },
         })
