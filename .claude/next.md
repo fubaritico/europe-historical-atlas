@@ -69,14 +69,15 @@ point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui 
 ## ▶ ON REPREND ICI — en trois lignes
 
 **On dessine : la plume trace, suit la côte et les fleuves, le crayon trace à main levée, ‹P› passe
-d'un mode à l'autre (11/10) ; la flèche sélectionne, déplace, ajoute et supprime un point.**
+d'un mode à l'autre ; les pays s'empilent par groupes, `{Polities}` est un arbre (11/10).**
 
 | | | |
 | --- | --- | --- |
 | **ce qui marche** | `(d)` livré le 10–11/10 : plume (libre / côte, avec aperçu), fermeture, ‹ctrl+z› pas à pas qui rouvre un contour, flèche (déplacer, insérer, supprimer, ‹suppr›), accrochage aux ancres partagées, la côte d'abord en mode côte avec réutilisation des ancres du voisin, la plume « + » · la barre d'outils à la Illustrator · `{Polities}` qui suit le document · clic dans un remplissage = cible, clic dans le vide = désélection · ColorField (DS `0.5.0`) | ✅ |
-| **à faire tout de suite** | **l'empilement par groupes — en attente du « go » du dev.** Son modèle (11/10, capture Illustrator dans `design/references/`) : un pays et ses vassaux forment un **groupe**, le suzerain au fond, les vassaux par-dessus ; on réordonne **entre frères** à chaque niveau. Plan : `files/plans/cartographer/stacking-order-plan.md` (7 pas, le premier : vérifier que la liste des pays garde son ordre à l'enregistrement), scénario `s16` réécrit. **Une seule fonction d'ordre de peinture dans `core`, lue par l'atlas aussi** — sinon les deux apps divergent. `core/editor/stacking.ts` (non commité) sera recadré sur les frères au pas 4 · **question posée, sans réponse** : le « Y », retirer seulement le badge du curseur ? (je recommande de garder la jonction) | ◀ |
+| **à faire tout de suite** | **« des petites choses pour la sélection »** — annoncées par le dev le 11/10 au soir, **pas encore dites** : lui demander lesquelles · **le « Y »** (`cross-branch`) : il garde la jonction aux ancres du voisin, le badge du curseur lui semble inutile — le retirer seulement s'il le confirme | ◀ |
+| **livré le 11/10 au soir** | l'**empilement par groupes** (`s16`, plan suivi en 7 pas, `5594aa2`..`e23e260`) : `paintOrder` dans `core`, lu par l'atlas **et** le Cartographe · `{Polities}` en **arbre**, le devant en haut · le **menu Arrange** au clic droit et à ‹⇧F10›, entre frères, un pas d'historique. Limites : `known-issues` | ✅ |
 | **ensuite / noté** | le zoom ‹+›/‹−› : le dev le trouve **suffisant** (11/10), rien à corriger · **masquer un pays** (`H-32`, idée du dev, besoin non prouvé — essayer d'abord un affichage contours seuls global, ‹⌘Y›) · **liste par nom ou par empilement** (`H-33`, ouvert) · les fleuves jusqu'à la mer (`extendRiversToSea`), **remis à plus tard par le dev** · le contrôle de bbox des fleuves côté atlas (`known-issues`) | |
-| **à pousser** | 11 commits non poussés, `059af13`..le commit de doc du 11/10 au soir (`git ls-remote origin main` = `6b10462`). Pousser **quand le dev le demande** | |
+| **à pousser** | ~26 commits non poussés depuis `059af13` (`git log origin/main..main`) (`git ls-remote origin main` = `6b10462`). Pousser **quand le dev le demande** | |
 | **noté, non urgent** | alléger les tronçons de côte (Douglas–Peucker, tolérance non tranchée) · la confirmation avant de supprimer une ancre partagée et la suppression multiple (attend la marquise), écrites dans `s03` | |
 
 > **Le découpage `a/b/c/d` est figé — ne plus le re-trancher.** Il a bougé deux fois le 07/10, et
