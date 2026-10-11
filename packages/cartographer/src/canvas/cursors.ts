@@ -1,5 +1,6 @@
 import arrowHandleUrl from '../cursors/arrow-handle.svg'
 import arrowUrl from '../cursors/arrow.svg'
+import crossBranchUrl from '../cursors/cross-branch.svg'
 import crossCloseUrl from '../cursors/cross-close.svg'
 import crossSnapUrl from '../cursors/cross-snap.svg'
 import crossUrl from '../cursors/cross.svg'
@@ -27,11 +28,18 @@ import type { EditorTool } from '../state/toolSlice'
  */
 
 /**
- * The cursors this rung can reach. Three of the kit's ten wait for the gestures that call for them —
- * branching, inserting and the marquee.
+ * The cursors this rung can reach. Two of the kit's ten wait for the gestures that call for them —
+ * inserting and the marquee.
  */
 export type CursorName =
-  'hand-open' | 'hand-closed' | 'cross' | 'cross-close' | 'cross-snap' | 'arrow' | 'arrow-handle'
+  | 'hand-open'
+  | 'hand-closed'
+  | 'cross'
+  | 'cross-close'
+  | 'cross-branch'
+  | 'cross-snap'
+  | 'arrow'
+  | 'arrow-handle'
 
 /** What the canvas may be doing, as far as the pointer is concerned. */
 export interface CursorState {
@@ -49,6 +57,8 @@ export interface CursorState {
   overHandle: boolean
   /** Whether the Pen, following the coast, has the coastline within reach. */
   snapping: boolean
+  /** Whether the Pen is over an existing anchor it would join — CURSORS.md's branching mark. */
+  branching: boolean
   /** Whether the pointer is over a polity's fill — where the white arrow's click chooses it. */
   overFill: boolean
 }
@@ -65,6 +75,7 @@ const HOT_SPOT: Record<CursorName, readonly [number, number]> = {
   'hand-closed': [16, 16],
   cross: [16, 16],
   'cross-close': [16, 16],
+  'cross-branch': [16, 16],
   'cross-snap': [16, 16],
   arrow: [6, 4],
   'arrow-handle': [6, 4],
@@ -76,6 +87,7 @@ const FALLBACK: Record<CursorName, string> = {
   'hand-closed': 'grabbing',
   cross: 'crosshair',
   'cross-close': 'crosshair',
+  'cross-branch': 'crosshair',
   'cross-snap': 'crosshair',
   arrow: 'default',
   'arrow-handle': 'default',
@@ -87,6 +99,7 @@ const IMAGE: Record<CursorName, string> = {
   'hand-closed': handClosedUrl,
   cross: crossUrl,
   'cross-close': crossCloseUrl,
+  'cross-branch': crossBranchUrl,
   'cross-snap': crossSnapUrl,
   arrow: arrowUrl,
   'arrow-handle': arrowHandleUrl,
@@ -120,12 +133,14 @@ export function cursorFor(state: CursorState): CursorName | typeof REFUSED {
 }
 
 /**
- * The Pen's cursor: the closing mark wins over the snap mark, which wins over the plain cross.
+ * The Pen's cursor: the closing mark, then the branching mark over an existing anchor, then the snap
+ * mark over the coast, then the plain cross.
  * @param state - the Pen's two offers
  * @returns the cursor
  */
 function drawCursor(state: CursorState): CursorName {
   if (state.closing) return 'cross-close'
+  if (state.branching) return 'cross-branch'
   return state.snapping ? 'cross-snap' : 'cross'
 }
 

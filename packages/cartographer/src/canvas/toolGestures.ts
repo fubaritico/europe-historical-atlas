@@ -7,7 +7,9 @@ import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
 import { backdropToLonLat, lonLatToScreen, screenToLonLatOnBackdrop } from '../view/projection'
 import { screenToBackdrop } from '../view/viewport'
 
-import { abandonGesture, dropDrag, targetHandles } from './toolSession'
+import { anchorClick } from './borderSnap'
+import { TAG } from './consoleTag'
+import { abandonGesture, dropDrag, sessionPointOf, targetHandles } from './toolSession'
 
 import type { SessionPoint, ToolSession } from './toolSession'
 import type { CoastContour, CoastVertex } from '../geometry/coastSnap'
@@ -50,17 +52,6 @@ export interface GestureContext {
    */
   report: (message: string) => void
 }
-
-/**
- * Every refusal says so, in the console at least — the dev's rule, 2026-10-11: *"faut prévenir, faut tout
- * couvrir."* Two levels, and the line between them is whether anything should have prevented it:
- *
- * - `console.warn` for a gesture of the author's the tool declines — a click off the backdrop, ‹enter›
- *   on two anchors. Ordinary, and worth a line because the screen may show nothing;
- * - `console.error` for what no gesture should reach — the document refusing what the tool already
- *   checked. A defect, said loudly, never swallowed.
- */
-const TAG = '[Cartographer]'
 
 /** The step kind a closed outline is recorded under — what tells an undo that it is undoing a closing. */
 export const DRAW_OUTLINE_KIND = 'draw-outline'
@@ -147,6 +138,8 @@ export function penClick(context: GestureContext, at: Point): void {
     closeOutline(context)
     return
   }
+  // An existing anchor wins over the coast and over a free point: the border is already there.
+  if (anchorClick(context, at)) return
   if (context.store.getState().penMode === 'coast' && coastClick(context, at)) return
   freeClick(context, at)
 }
@@ -162,7 +155,7 @@ function freeClick(context: GestureContext, at: Point): void {
     console.warn(`${TAG} no anchor placed: the click was off the map.`)
     return
   }
-  context.session.outline.push({ at: point, provenance: FREE_POINT_PROVENANCE })
+  context.session.outline.push({ at: point, provenance: FREE_POINT_PROVENANCE, anchor: null })
   context.session.snap = null
 }
 
@@ -248,6 +241,7 @@ function placeOnCoast(context: GestureContext, points: readonly (Point | undefin
     context.session.outline.push({
       at: backdropToLonLat(point, context.frame),
       provenance: context.coastProvenance,
+      anchor: null,
     })
     placed += 1
   }
@@ -354,17 +348,14 @@ function ringsOf(context: GestureContext, polityId: string): number[][] {
  * @returns each anchor and its provenance, copied
  */
 function pointsOf(context: GestureContext, ring: readonly number[]): SessionPoint[] {
-  const { anchors, anchorSource, sources } = context.store.getState().document
+  const { document } = context.store.getState()
   return ring.flatMap((index) => {
-    const anchor = anchors[index]
-    const source = sources.find((declared) => declared.id === anchorSource[index])
-    if (anchor === undefined || source === undefined) {
+    const point = sessionPointOf(document, index)
+    if (point === null) {
       console.error(`${TAG} anchor ${String(index)} has no declared source; it was not put back.`)
       return []
     }
-    return [
-      { at: [anchor[0], anchor[1]], provenance: { name: source.name, licence: source.licence } },
-    ]
+    return [point]
   })
 }
 
@@ -395,7 +386,13 @@ function undoAndReopen(context: GestureContext): void {
   state.undo()
   const after = target === null ? before.length : ringsOf(context, target.id).length
   if (after === before.length - 1 && points.length > 0) {
-    context.session.outline = points
+    // An anchor the ring reused — a neighbour's — is still in the document after the undo, at the
+    // same index (the table only grows): it stays reused, so closing again shares it again. One the
+    // ring itself created is gone with the undo, and comes back as a new point.
+    const kept = context.store.getState().document.anchors.length
+    context.session.outline = points.map((point) =>
+      point.anchor !== null && point.anchor < kept ? point : { ...point, anchor: null }
+    )
     context.session.reopened = points.map((point) => ({ ...point, at: [point.at[0], point.at[1]] }))
     return
   }

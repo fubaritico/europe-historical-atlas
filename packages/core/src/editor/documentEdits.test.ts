@@ -446,6 +446,34 @@ describe('addOutline', () => {
   })
 
   describe('edge cases', () => {
+    // H-06: a point on a neighbour's anchor reuses it — the two rings then share one border.
+    it('reuses an existing anchor by its index, without copying it', () => {
+      const doc = sharedBorderDocument()
+      const before = doc.anchors.length
+      addPolity(doc, polity('lu', 'Lotharingia'))
+      addOutline(doc, 'lu', [
+        { at: [4, 48], provenance: BY_EYE, anchor: 4 },
+        { at: [4, 46], provenance: BY_EYE, anchor: 5 },
+        { at: [6, 47], provenance: BY_EYE },
+      ])
+      expect(doc.anchors).toHaveLength(before + 1)
+      expect(doc.claims.find((claim) => claim.polity === 'lu')?.rings[0]).toEqual([4, 5, before])
+    })
+
+    it('refuses an outline naming an anchor the document does not hold, and writes nothing', () => {
+      const doc = sharedBorderDocument()
+      const before = doc.anchors.length
+      addPolity(doc, polity('lu', 'Lotharingia'))
+      expect(
+        addOutline(doc, 'lu', [
+          { at: [4, 48], provenance: BY_EYE, anchor: 99 },
+          { at: [4, 46], provenance: BY_EYE },
+          { at: [6, 47], provenance: BY_EYE },
+        ])
+      ).toBe(false)
+      expect(doc.anchors).toHaveLength(before)
+    })
+
     // One ring may mix points placed by eye and points snapped onto the coast.
     it('records each point under its own provenance', () => {
       const doc = createYearDocument(1100, zone)

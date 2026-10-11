@@ -95,17 +95,34 @@ export function nearestCoastVertex(
  */
 export function coastStretch(contour: CoastContour, from: number, to: number): Point[] {
   const { points } = contour
-  const count = points.length
   if (!contour.closed) return subPathBetween(points, from, to)
   if (!isVertexOf(points, from) || !isVertexOf(points, to)) return []
+  return shortestRunBetween(points, from, to)
+}
+
+/**
+ * The run of a closed loop between two of its positions, both included, the shorter way round —
+ * forward when both ways are as long, so the answer does not flicker.
+ *
+ * Generic over what the loop holds: coast points, or the anchor indices of a ring, which is how the Pen
+ * follows a neighbour's border along the very anchors it is made of.
+ * @param loop - the loop, its last item joined to its first
+ * @param from - the position the run starts at
+ * @param to - the position it ends at
+ * @returns the items from `from` to `to`, inclusive; empty when either is not a position of the loop
+ */
+export function shortestRunBetween<T>(loop: readonly T[], from: number, to: number): T[] {
+  const count = loop.length
+  if (!Number.isInteger(from) || !Number.isInteger(to)) return []
+  if (from < 0 || to < 0 || from >= count || to >= count) return []
   const forward = (to - from + count) % count
   const backward = (from - to + count) % count
   const step = forward <= backward ? 1 : -1
-  const stretch: Point[] = []
+  const run: T[] = []
   for (let walked = 0, at = from; walked <= Math.min(forward, backward); walked += 1) {
-    const point = points[at]
-    if (point !== undefined) stretch.push(point)
+    const item = loop[at]
+    if (item !== undefined) run.push(item)
     at = (at + step + count) % count
   }
-  return stretch
+  return run
 }

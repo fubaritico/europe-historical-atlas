@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { coastStretch, nearestCoastVertex } from './coastSnap'
+import { coastStretch, nearestCoastVertex, shortestRunBetween } from './coastSnap'
 
 import type { CoastContour } from './coastSnap'
 
@@ -111,6 +111,40 @@ describe('coastSnap', () => {
     it('goes forward when both ways are as long', () => {
       expect(coastStretch(ISLAND, 0, 4).at(-1)).toEqual([20, 20])
       expect(coastStretch(ISLAND, 0, 4)[1]).toEqual([10, 0])
+    })
+  })
+})
+
+describe('shortestRunBetween', () => {
+  const RING = [10, 11, 12, 13, 14, 15]
+
+  describe('happy path', () => {
+    it('walks a ring of anchor indices the shorter way', () => {
+      expect(shortestRunBetween(RING, 1, 5)).toEqual([11, 10, 15])
+    })
+  })
+
+  describe('variants', () => {
+    it('walks forward when forward is shorter', () => {
+      expect(shortestRunBetween(RING, 1, 3)).toEqual([11, 12, 13])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('gives nothing for a position outside the ring', () => {
+      expect(shortestRunBetween(RING, 0, 6)).toEqual([])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('gives nothing for a position that is not a whole number', () => {
+      expect(shortestRunBetween(RING, 0.5, 2)).toEqual([])
+    })
+  })
+
+  describe('edge cases', () => {
+    it('gives the one item when both positions are the same', () => {
+      expect(shortestRunBetween(RING, 2, 2)).toEqual([12])
     })
   })
 })

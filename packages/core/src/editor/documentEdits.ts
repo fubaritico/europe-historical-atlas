@@ -138,6 +138,12 @@ export interface OutlinePoint {
    * different sources, and one ring may hold both.
    */
   provenance: Provenance
+  /**
+   * An anchor already in the document that this point **is** — a neighbour's, met along a shared
+   * border. Reused by its index, never copied: two outlines over one anchor are one border, and a copy
+   * would drift from it at the first move (`H-06`). `null` or absent for a new point.
+   */
+  anchor?: number | null
 }
 
 /**
@@ -150,7 +156,8 @@ export interface OutlinePoint {
  * @param doc - the document to edit
  * @param polityId - who the outline is drawn for
  * @param points - each anchor, in order, closure implied, with its own provenance
- * @returns `false` when the polity is unknown or the points cannot enclose an area
+ * @returns `false` when the polity is unknown, the points cannot enclose an area, or a point names an
+ *   anchor the document does not hold — and nothing was written
  */
 export function addOutline(
   doc: YearDocument,
@@ -159,8 +166,18 @@ export function addOutline(
 ): boolean {
   if (points.length < 3) return false
   if (!doc.polities.some((polity) => polity.id === polityId)) return false
+  const count = doc.anchors.length
+  if (
+    points.some(
+      (point) => typeof point.anchor === 'number' && !(point.anchor >= 0 && point.anchor < count)
+    )
+  ) {
+    return false
+  }
   const ring = points.map((point) =>
-    addAnchor(doc, [point.at[0], point.at[1]], declareSource(doc, point.provenance))
+    typeof point.anchor === 'number'
+      ? point.anchor
+      : addAnchor(doc, [point.at[0], point.at[1]], declareSource(doc, point.provenance))
   )
   return closeRing(doc, polityId, ring)
 }

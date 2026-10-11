@@ -5,6 +5,7 @@ import { describeDrawingTarget } from '../state/drawingTarget'
 import { lonLatToScreen, remapToScreen } from '../view/projection'
 import { backdropToScreen } from '../view/viewport'
 
+import { anchorHit, anchorSentence, borderRunTo } from './borderSnap'
 import { cursorCss, cursorFor } from './cursors'
 import { HANDLE_HIT_RADIUS } from './navigation'
 import { paintOverlay } from './overlayPainter'
@@ -164,16 +165,63 @@ export function gestureOf(it: LiveCanvas): GestureContext {
   }
 }
 
+/** What the Pen offers under the pointer: where a click would land, what it would insert, and why. */
+export interface SnapOffer {
+  /** Where the click would land, on screen — an existing anchor or a coast vertex. */
+  target: Point | null
+  /** The run a click would insert from the last snapped point, on screen. */
+  preview: Point[] | null
+  /** What is offered: an existing anchor (a shared border), the coast, or nothing. */
+  kind: 'anchor' | 'coast' | null
+  /** The anchor under the pointer, when `kind` is `'anchor'`. */
+  anchor: number | null
+}
+
+/** Nothing on offer. */
+const NO_OFFER: SnapOffer = { target: null, preview: null, kind: null, anchor: null }
+
 /**
- * What the Pen following the coast offers under the pointer: the vertex it would snap onto, and the
- * stretch a click would insert — both on screen, both `null` when there is nothing to offer.
+ * What the Pen offers under the pointer. **An existing anchor first** — the border is already there,
+ * and joining it is what keeps two polities on one line — then, following the coast, a coast vertex.
  * @param it - the attachment
- * @returns the snap target and the preview
+ * @returns the offer, `NO_OFFER` when there is nothing
  */
-export function coastOffer(it: LiveCanvas): { target: Point | null; preview: Point[] | null } {
-  if (!coastOffered(it) || it.pointer === null) return NO_OFFER
+export function snapOffer(it: LiveCanvas): SnapOffer {
+  if (!penOffered(it) || it.pointer === null) return NO_OFFER
   const gesture = gestureOf(it)
-  const hit = coastHit(gesture, it.pointer)
+  const hit = anchorHit(gesture, it.pointer)
+  if (hit !== null) return anchorOffer(it, gesture, hit)
+  return it.deps.store.getState().penMode === 'coast'
+    ? coastOffer(it, gesture, it.pointer)
+    : NO_OFFER
+}
+
+/**
+ * The offer of an existing anchor, and of the shared border back to the last one joined.
+ * @param it - the attachment
+ * @param gesture - its gesture context
+ * @param hit - the anchor under the pointer
+ * @returns the offer
+ */
+function anchorOffer(it: LiveCanvas, gesture: GestureContext, hit: number): SnapOffer {
+  const anchors = anchorsOnScreen(it)
+  const run = borderRunTo(gesture, hit)
+  const preview =
+    run === null || run.length < 2
+      ? null
+      : run.map((index) => anchors[index]).filter((point) => point !== undefined)
+  return { target: anchors[hit] ?? null, preview, kind: 'anchor', anchor: hit }
+}
+
+/**
+ * The offer of a coast vertex, and of the stretch a click would insert.
+ * @param it - the attachment
+ * @param gesture - its gesture context
+ * @param pointer - the pointer, in screen pixels
+ * @returns the offer
+ */
+function coastOffer(it: LiveCanvas, gesture: GestureContext, pointer: Point): SnapOffer {
+  const hit = coastHit(gesture, pointer)
   const vertex =
     hit === null ? undefined : it.deps.vectorLayers.coast[hit.contour]?.points[hit.vertex]
   if (hit === null || vertex === undefined) return NO_OFFER
@@ -182,23 +230,19 @@ export function coastOffer(it: LiveCanvas): { target: Point | null; preview: Poi
   const stretch = coastStretchTo(gesture, hit)
   // A one-point stretch is the vertex already placed: nothing to preview, so the band stays (QUAL-101).
   const preview = stretch === null || stretch.length < 2 ? null : stretch.map(toScreen)
-  return { target: toScreen(vertex), preview }
+  return { target: toScreen(vertex), preview, kind: 'coast', anchor: null }
 }
 
-/** No coast to offer. */
-const NO_OFFER = { target: null, preview: null } as const
-
 /**
- * Whether the coast is on offer at all: the Pen in hand following the coast, someone to draw for, the
- * hand not borrowed with ‹space› (QUAL-104), and the pointer not on the first anchor — there the click
- * closes the ring with a straight segment, so a coast preview would promise what it will not do
- * (QUAL-102).
+ * Whether the Pen offers anything at all: the Pen in hand, someone to draw for, the hand not borrowed
+ * with ‹space› (QUAL-104), and the pointer not on the first anchor — there the click closes the ring
+ * with a straight segment, so a snap preview would promise what it will not do (QUAL-102).
  * @param it - the attachment
- * @returns `true` when a coast vertex under the pointer may be offered
+ * @returns `true` when a snap under the pointer may be offered
  */
-function coastOffered(it: LiveCanvas): boolean {
+function penOffered(it: LiveCanvas): boolean {
   const state = it.deps.store.getState()
-  if (state.tool !== 'draw' || state.penMode !== 'coast' || it.spaceHeld) return false
+  if (state.tool !== 'draw' || it.spaceHeld) return false
   return resolvedTarget(gestureOf(it)) !== null && !closingOffered(it)
 }
 
@@ -224,10 +268,10 @@ export function handInHand(it: LiveCanvas): boolean {
  * ‹space› is not in the store, deliberately: it is a key being held, not a tool that was chosen, and
  * `s99` keeps the session's keys out of anything an undo can reach.
  * @param it - the attachment
- * @param snapping - whether the coast is on offer, when the caller has already worked it out — the
+ * @param offer - what the Pen offers under the pointer, when the caller has already worked it out — the
  *   refresh does, once per pointer move; the ‹space› handlers do not, and it is computed for them
  */
-export function showCursor(it: LiveCanvas, snapping = coastOffer(it).target !== null): void {
+export function showCursor(it: LiveCanvas, offer: SnapOffer = snapOffer(it)): void {
   const state = it.deps.store.getState()
   const hasTarget = describeDrawingTarget(state.document, state.target) !== null
   const css = cursorCss(
@@ -238,7 +282,8 @@ export function showCursor(it: LiveCanvas, snapping = coastOffer(it).target !== 
       spaceHeld: it.spaceHeld,
       closing: closingOffered(it),
       overHandle: overHandle(it),
-      snapping,
+      snapping: offer.kind === 'coast',
+      branching: offer.kind === 'anchor',
       // Only read with nobody aimed at, so only tested then — not on every move (QUAL-001).
       overFill: !hasTarget && overFill(it),
     })
@@ -295,7 +340,7 @@ export function overHandle(it: LiveCanvas): boolean {
 export function refreshTools(it: LiveCanvas): void {
   const state = it.deps.store.getState()
   const moving = it.session.moving
-  const offer = coastOffer(it)
+  const offer = snapOffer(it)
   const scene = overlayScene({
     session: it.session,
     tool: state.tool,
@@ -313,7 +358,8 @@ export function refreshTools(it: LiveCanvas): void {
     targetName: resolvedTarget(gestureOf(it))?.name ?? null,
     onCanvas: it.pointer !== null,
     closing: scene.closing,
-    snapping: offer.target !== null,
+    snapping: offer.kind === 'coast',
+    joining: offer.anchor === null ? null : anchorSentence(gestureOf(it), offer.anchor),
     following: state.penMode === 'coast',
     session: it.session,
   })
@@ -321,5 +367,5 @@ export function refreshTools(it: LiveCanvas): void {
     it.sentence = sentence
     it.deps.onAction(sentence)
   }
-  showCursor(it, offer.target !== null)
+  showCursor(it, offer)
 }

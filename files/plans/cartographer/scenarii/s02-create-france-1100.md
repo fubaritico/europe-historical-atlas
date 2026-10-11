@@ -532,6 +532,22 @@ Scenario: branch a new outline from an anchor that already exists
   And the status bar reads "branched from a shared anchor — held by 2 paths"
 ```
 
+```gherkin
+Scenario: follow a neighbour's border between two of its anchors
+  Given the Holy Roman Empire's western limit runs along the Meuse
+  And I have joined one of its anchors with the Pen
+  When the pointer comes onto another anchor of the same limit
+  Then the run of the limit between the two is previewed, the short way
+  When I click it
+  Then the outline follows that run over the Empire's own anchors — none is copied
+  And the status bar reads "followed 96 anchors of a shared border"
+  And moving any of those anchors afterwards moves both polities' borders
+```
+
+> **Built 2026-10-11, on the dev's request** — *"le snapping pour les frontières communes"*. An existing
+> anchor wins over the coast and over a free point: the border is already there. Undoing the closing
+> and closing again shares the same anchors; only the points the outline created itself are new.
+
 > The dev, 2026-09-22: _"À partir d'un point sur lequel on clique, on ne le supprime pas comme dans
 > Illustrator, mais on fait démarrer un autre tracé car nous aurons des points en commun sur plusieurs
 > tracés."_ Illustrator's Pen deletes an anchor it is hovering; here that gesture is worth far more as a

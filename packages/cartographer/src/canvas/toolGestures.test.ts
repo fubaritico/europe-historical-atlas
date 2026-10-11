@@ -752,4 +752,75 @@ describe('the Pen following the coast', () => {
       expect(context.store.getState().target).toBeNull()
     })
   })
+
+  describe('a shared border', () => {
+    /**
+     * France's triangle drawn and closed, then the Empire aimed at with the Pen.
+     * @returns the context, on the Empire
+     */
+    function neighbourContext() {
+      const context = openContext()
+      drawTriangle(context)
+      context.store.getState().aimAt('hre')
+      return context
+    }
+
+    // H-06: the Pen lands on France's anchor itself — no copy is made.
+    it('joins a neighbour’s anchor by its index', () => {
+      const context = neighbourContext()
+      penClick(context, [302, 101])
+      expect(context.session.outline[0]?.anchor).toBe(1)
+    })
+
+    it('follows the neighbour’s ring between two joined anchors, and says how many', () => {
+      const context = neighbourContext()
+      const reports: string[] = []
+      context.report = (message) => {
+        reports.push(message)
+      }
+      penClick(context, [300, 100])
+      penClick(context, [300, 300])
+      expect(context.session.outline.map((point) => point.anchor)).toEqual([1, 2])
+      expect(reports).toEqual(['followed 1 anchor of a shared border'])
+    })
+
+    // The point of it all: the two polities hold one border, so moving it moves both.
+    it('closes onto the shared anchors without copying them, so one move moves both borders', () => {
+      const context = neighbourContext()
+      penClick(context, [300, 100])
+      penClick(context, [300, 300])
+      penClick(context, [450, 200])
+      penClick(context, [301, 101])
+      const { document } = context.store.getState()
+      expect(document.anchors).toHaveLength(4)
+      expect(document.claims.find((claim) => claim.polity === 'hre')?.rings[0]).toEqual([1, 2, 3])
+      context.store.getState().moveAnchor(1, [5, 5], MOVE_ANCHOR_STEP)
+      expect(
+        context.store.getState().document.claims.every((claim) => claim.rings[0]?.includes(1))
+      ).toBe(true)
+    })
+
+    // Reopening keeps the shared anchors shared: closing again copies nothing.
+    it('keeps the shared anchors shared through an undo and a second closing', () => {
+      const context = neighbourContext()
+      penClick(context, [300, 100])
+      penClick(context, [300, 300])
+      penClick(context, [450, 200])
+      penClick(context, [301, 101])
+      undoGesture(context, false)
+      expect(context.session.outline.map((point) => point.anchor)).toEqual([1, 2, null])
+      closeOutline(context)
+      expect(context.store.getState().document.anchors).toHaveLength(4)
+    })
+
+    // The outline's own points are not offered: the first is the closing, the others are already in it.
+    it('does not join an anchor the outline in progress already holds', () => {
+      const context = neighbourContext()
+      penClick(context, [300, 100])
+      penClick(context, [450, 200])
+      penClick(context, [300, 300])
+      penClick(context, [452, 201])
+      expect(context.session.outline.map((point) => point.anchor)).toEqual([1, null, 2, null])
+    })
+  })
 })

@@ -12,6 +12,11 @@ export interface SessionPoint {
   at: [number, number]
   /** Reported by eye, or snapped onto the coast. */
   provenance: Provenance
+  /**
+   * The anchor of the document this point **is**, when the Pen snapped onto one — a neighbour's, met
+   * along a shared border. Closing the ring reuses it by index; `null` for a new point.
+   */
+  anchor: number | null
 }
 
 /**
@@ -53,6 +58,28 @@ export interface ToolSession {
  */
 export function idleSession(): ToolSession {
   return { outline: [], selected: null, grabbed: null, moving: null, reopened: null, snap: null }
+}
+
+/**
+ * A document's anchor as a point of the outline in progress: its coordinates, the provenance it was
+ * recorded under, and its index — so closing the ring reuses it rather than copying it.
+ *
+ * The one conversion, for joining a neighbour's anchor and for reopening a closed ring alike (ARCH-102 /
+ * QUAL-001). `null` when the document cannot describe it — no such anchor, or a source it does not
+ * declare; the caller says so, never a made-up provenance.
+ * @param document - the year
+ * @param index - the anchor
+ * @returns the session point, or `null`
+ */
+export function sessionPointOf(document: YearDocument, index: number): SessionPoint | null {
+  const at = document.anchors[index]
+  const source = document.sources.find((declared) => declared.id === document.anchorSource[index])
+  if (at === undefined || source === undefined) return null
+  return {
+    at: [at[0], at[1]],
+    provenance: { name: source.name, licence: source.licence },
+    anchor: index,
+  }
 }
 
 /**
@@ -142,6 +169,8 @@ export interface ActionInputs {
   snapping: boolean
   /** Whether the Pen is following the coast at all — out of reach, its click places a free point. */
   following: boolean
+  /** The sentence for an existing anchor the Pen is over — `s02`'s branching line — or `null`. */
+  joining: string | null
   /** The session. */
   session: ToolSession
 }
@@ -154,6 +183,7 @@ export interface ActionInputs {
  */
 function penSentence(inputs: ActionInputs, targetName: string): string {
   if (inputs.closing) return `Closing the outline of ${targetName}`
+  if (inputs.joining !== null) return inputs.joining
   // s02 — "Following the coastline for Kingdom of France".
   if (inputs.snapping) return `Following the coastline for ${targetName}`
   // s02's "place points freely", for the coast and before the click (QUAL-110). The polity is kept:

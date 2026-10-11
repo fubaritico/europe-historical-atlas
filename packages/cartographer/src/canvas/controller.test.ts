@@ -18,6 +18,7 @@ import {
   startCanvasController,
   wheelZoomFactor,
 } from './controller'
+import { cursorCss } from './cursors'
 import { coloursOf } from './liveCanvas'
 import { CHROME_PAINT_STYLE } from './style'
 
@@ -1516,5 +1517,103 @@ describe('choosing a polity by its fill, on the canvas', () => {
       expect(store.getState().target).toBe('fr')
       dispose()
     })
+  })
+})
+
+describe('the Pen meeting a shared border, on the canvas', () => {
+  it('names the shared anchor under the Pen in the status bar, and joins it on click', () => {
+    const { node, store, acted, dispose } = attach()
+    aimAtFrance(store)
+    for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(node, at)
+    store.getState().createPolity(
+      {
+        id: 'hre',
+        name: 'Sacrum Imperium',
+        rank: null,
+        status: null,
+        suzerain: null,
+        existsFrom: null,
+        existsTo: null,
+        colour: null,
+        wikidata: null,
+      },
+      { kind: 'create-polity', label: 'create' }
+    )
+    store.getState().aimAt('hre')
+    node.dispatchEvent(pointerEvent('pointermove', { offsetX: 501, offsetY: 201 }))
+    expect(acted).toHaveBeenLastCalledWith('Branching from a shared anchor — held by 1 path')
+    // QUAL-003: the live canvas sets the branching mark, not only cursorFor with a literal.
+    expect(node.style.cursor).toBe(cursorCss('cross-branch'))
+    click(node, [501, 201])
+    click(node, [501, 399])
+    click(node, [650, 300])
+    click(node, [500, 200])
+    expect(store.getState().document.anchors).toHaveLength(4)
+    dispose()
+  })
+
+  // QUAL-003: the run between two shared anchors is drawn on the overlay before the click.
+  it('previews the shared border on the overlay before the click', () => {
+    const widths: (number | 'clear')[] = []
+    const overlay = document.createElement('canvas')
+    overlay.getContext = vi.fn(
+      () =>
+        new Proxy(
+          {},
+          {
+            get: (_, op) => () => {
+              if (op === 'clearRect') widths.push('clear')
+            },
+            set: (_, key, value: unknown) => {
+              if (key === 'lineWidth' && typeof value === 'number') widths.push(value)
+              return true
+            },
+          }
+        )
+    ) as unknown as typeof overlay.getContext
+    const store = createCartographerStore({
+      edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
+      viewport: { viewport: UNFRAMED },
+    })
+    const node = canvasWithBox()
+    const dispose = startCanvasController(node, {
+      store,
+      frame: TEST_BACKDROP_FRAME,
+      backdropImage: backdropStandIn(),
+      vectorLayers: {
+        coast: [],
+        rivers: [],
+        coastProvenance: { name: 'test coast', licence: 'test' },
+      },
+      onHover: () => undefined,
+      onAction: () => undefined,
+      onResult: () => undefined,
+      style: CHROME_PAINT_STYLE,
+      zoneLabel: 'zone',
+      overlay,
+      colours: createPolityColourSource(AUTOMATIC_PALETTE),
+    })
+    aimAtFrance(store)
+    for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(node, at)
+    store.getState().createPolity(
+      {
+        id: 'hre',
+        name: 'Sacrum Imperium',
+        rank: null,
+        status: null,
+        suzerain: null,
+        existsFrom: null,
+        existsTo: null,
+        colour: null,
+        wikidata: null,
+      },
+      { kind: 'create-polity', label: 'create' }
+    )
+    store.getState().aimAt('hre')
+    const lastPaint = () => widths.slice(widths.lastIndexOf('clear'))
+    click(node, [501, 201])
+    node.dispatchEvent(pointerEvent('pointermove', { offsetX: 501, offsetY: 399 }))
+    expect(lastPaint()).toContain(CHROME_PAINT_STYLE.pathWidth * 2)
+    dispose()
   })
 })

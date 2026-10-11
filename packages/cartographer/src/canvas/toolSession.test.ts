@@ -19,7 +19,7 @@ import type { ActionInputs, OverlayInputs, SessionPoint } from './toolSession'
  * @returns the session point
  */
 function here(lon: number, lat: number): SessionPoint {
-  return { at: [lon, lat], provenance: { name: 'reported by eye', licence: 'fact' } }
+  return { at: [lon, lat], provenance: { name: 'reported by eye', licence: 'fact' }, anchor: null }
 }
 
 /** A sentence's inputs with the Pen in hand, aimed at France, the pointer on the canvas. */
@@ -31,6 +31,7 @@ function action(overrides: Partial<ActionInputs> = {}): ActionInputs {
     closing: false,
     snapping: false,
     following: false,
+    joining: null,
     session: idleSession(),
     ...overrides,
   }
@@ -207,6 +208,15 @@ describe('toolSession', () => {
     })
 
     // s02 — "Following the coastline for Kingdom of France".
+    // QUAL-003: over an existing anchor the bar says so, above the coast's sentences, under closing.
+    it('names the shared anchor before the coast, and closing before the shared anchor', () => {
+      const joining = 'Branching from a shared anchor — held by 1 path'
+      expect(actionSentence(action({ joining, snapping: true }))).toBe(joining)
+      expect(actionSentence(action({ joining, closing: true }))).toBe(
+        'Closing the outline of Reaume de France'
+      )
+    })
+
     // QUAL-110: s02's "place points freely", for the coast — on screen, before the click.
     it('says the Pen will place points freely when the coast is out of reach', () => {
       expect(actionSentence(action({ following: true }))).toBe(

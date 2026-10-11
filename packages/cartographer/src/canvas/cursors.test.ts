@@ -12,6 +12,7 @@ const AT_REST: CursorState = {
   closing: false,
   overHandle: false,
   snapping: false,
+  branching: false,
   overFill: false,
   spaceHeld: false,
 }
@@ -53,6 +54,14 @@ describe('cursorFor', () => {
       expect(cursorFor({ ...AT_REST, tool: 'edit', overFill: true })).toBe('arrow')
       expect(cursorFor({ ...AT_REST, tool: 'edit' })).toBe(REFUSED)
       expect(cursorFor({ ...AT_REST, tool: 'draw', overFill: true })).toBe(REFUSED)
+    })
+
+    // CURSORS.md — the branching mark over an existing anchor: under closing, over the coast's mark.
+    it('marks an existing anchor the Pen would join, between closing and the coast', () => {
+      const pen = { ...AT_REST, tool: 'draw' as const, hasTarget: true, branching: true }
+      expect(cursorFor(pen)).toBe('cross-branch')
+      expect(cursorFor({ ...pen, closing: true })).toBe('cross-close')
+      expect(cursorFor({ ...pen, snapping: true })).toBe('cross-branch')
     })
 
     it('lends the open hand to ‹space› over any tool', () => {
@@ -108,6 +117,7 @@ describe('cursorFor', () => {
                   closing: false,
                   overHandle: false,
                   snapping: false,
+                  branching: false,
                   overFill: false,
                 })
               ).toBeTruthy()
