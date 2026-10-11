@@ -360,11 +360,14 @@ describe('removePolity', () => {
 const BY_EYE = { name: 'reported by eye', licence: 'fact' }
 
 /** Three points of a small triangle, west of the fixture's squares. */
-const TRIANGLE: [number, number][] = [
+const TRIANGLE_AT: [number, number][] = [
   [-4, 47],
   [-2, 48],
   [-2, 46],
 ]
+
+/** The same triangle, each point reported by eye. */
+const TRIANGLE = TRIANGLE_AT.map((at) => ({ at, provenance: BY_EYE }))
 
 describe('addOutline', () => {
   describe('happy path', () => {
@@ -372,15 +375,15 @@ describe('addOutline', () => {
     it('adds the anchors and closes them into a ring for the polity', () => {
       const doc = createYearDocument(1100, zone)
       addPolity(doc, polity('fr', 'France'))
-      expect(addOutline(doc, 'fr', TRIANGLE, BY_EYE)).toBe(true)
-      expect(doc.anchors).toEqual(TRIANGLE)
+      expect(addOutline(doc, 'fr', TRIANGLE)).toBe(true)
+      expect(doc.anchors).toEqual(TRIANGLE_AT)
       expect(doc.claims).toEqual([{ polity: 'fr', rings: [[0, 1, 2]] }])
     })
 
     it('records every new anchor under the provenance given', () => {
       const doc = createYearDocument(1100, zone)
       addPolity(doc, polity('fr', 'France'))
-      addOutline(doc, 'fr', TRIANGLE, BY_EYE)
+      addOutline(doc, 'fr', TRIANGLE)
       expect(doc.sources).toEqual([{ id: 0, ...BY_EYE }])
       expect(doc.anchorSource).toEqual([0, 0, 0])
     })
@@ -390,8 +393,8 @@ describe('addOutline', () => {
     it('reuses a provenance already declared rather than declaring it twice', () => {
       const doc = createYearDocument(1100, zone, [{ id: 0, ...BY_EYE }])
       addPolity(doc, polity('fr', 'France'))
-      addOutline(doc, 'fr', TRIANGLE, BY_EYE)
-      addOutline(doc, 'fr', TRIANGLE, BY_EYE)
+      addOutline(doc, 'fr', TRIANGLE)
+      addOutline(doc, 'fr', TRIANGLE)
       expect(doc.sources).toHaveLength(1)
       expect(doc.claims[0]?.rings).toHaveLength(2)
     })
@@ -399,7 +402,7 @@ describe('addOutline', () => {
     it('appends after the anchors already there, so no existing index moves', () => {
       const doc = sharedBorderDocument()
       const before = doc.anchors.length
-      addOutline(doc, 'fr-couronne', TRIANGLE, BY_EYE)
+      addOutline(doc, 'fr-couronne', TRIANGLE)
       expect(doc.claims.find((claim) => claim.polity === 'fr-couronne')?.rings[1]).toEqual([
         before,
         before + 1,
@@ -412,7 +415,7 @@ describe('addOutline', () => {
     // Checked before writing: a refused outline leaves nothing behind for the save to clean up.
     it('refuses an unknown polity and writes nothing', () => {
       const doc = createYearDocument(1100, zone)
-      expect(addOutline(doc, 'nobody', TRIANGLE, BY_EYE)).toBe(false)
+      expect(addOutline(doc, 'nobody', TRIANGLE)).toBe(false)
       expect(doc.anchors).toEqual([])
       expect(doc.sources).toEqual([])
     })
@@ -420,7 +423,7 @@ describe('addOutline', () => {
     it('refuses two points, which enclose nothing, and writes nothing', () => {
       const doc = createYearDocument(1100, zone)
       addPolity(doc, polity('fr', 'France'))
-      expect(addOutline(doc, 'fr', TRIANGLE.slice(0, 2), BY_EYE)).toBe(false)
+      expect(addOutline(doc, 'fr', TRIANGLE.slice(0, 2))).toBe(false)
       expect(doc.anchors).toEqual([])
       expect(doc.claims).toEqual([])
     })
@@ -431,14 +434,35 @@ describe('addOutline', () => {
     it('keeps its own copy of each point', () => {
       const doc = createYearDocument(1100, zone)
       addPolity(doc, polity('fr', 'France'))
-      const points = TRIANGLE.map((point): [number, number] => [point[0], point[1]])
-      addOutline(doc, 'fr', points, BY_EYE)
+      const points = TRIANGLE_AT.map((at): [number, number] => [at[0], at[1]])
+      addOutline(
+        doc,
+        'fr',
+        points.map((at) => ({ at, provenance: BY_EYE }))
+      )
       if (points[0]) points[0][0] = 99
       expect(doc.anchors[0]).toEqual([-4, 47])
     })
   })
 
   describe('edge cases', () => {
+    // One ring may mix points placed by eye and points snapped onto the coast.
+    it('records each point under its own provenance', () => {
+      const doc = createYearDocument(1100, zone)
+      addPolity(doc, polity('fr', 'France'))
+      const coast = { name: 'Natural Earth 10m land minus lakes', licence: 'public domain' }
+      addOutline(doc, 'fr', [
+        { at: [-4, 47], provenance: BY_EYE },
+        { at: [-2, 48], provenance: coast },
+        { at: [-2, 46], provenance: coast },
+      ])
+      expect(doc.sources).toEqual([
+        { id: 0, ...BY_EYE },
+        { id: 1, ...coast },
+      ])
+      expect(doc.anchorSource).toEqual([0, 1, 1])
+    })
+
     it('declares a new id past the highest one, even when the ids are not dense', () => {
       const doc = createYearDocument(1100, zone, [{ id: 4, name: 'Duby', licence: 'fact' }])
       expect(declareSource(doc, BY_EYE)).toBe(5)

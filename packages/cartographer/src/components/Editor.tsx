@@ -53,6 +53,7 @@ export interface EditorProps {
 export function Editor({ store, load, style, zoneLabel, label, heading }: EditorProps) {
   const status = useRef<HTMLElement | null>(null)
   const action = useRef<HTMLElement | null>(null)
+  const result = useRef<HTMLElement | null>(null)
 
   return (
     <Shell
@@ -66,6 +67,7 @@ export function Editor({ store, load, style, zoneLabel, label, heading }: Editor
           label={label}
           statusRef={status}
           actionRef={action}
+          resultRef={result}
         />
       }
       rail={<ToolRailPanel store={store} />}
@@ -77,6 +79,9 @@ export function Editor({ store, load, style, zoneLabel, label, heading }: Editor
         // today, which is honest; what will serve them is the anchor list of step 5, not a firehose.
         <p className="shell__status">
           <span className="shell__action" ref={action} />
+          {/* The one zone that speaks: a result is rare and discrete, unlike the action and the position,
+              which change on every pointer sample and would drown a screen reader (A11Y-001). */}
+          <span className="shell__result" ref={result} role="status" />
           <span className="shell__position" ref={status} />
         </p>
       }

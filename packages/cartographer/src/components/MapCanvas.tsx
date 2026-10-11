@@ -41,6 +41,8 @@ export interface MapCanvasProps {
   onHover: (lonLat: [number, number] | null) => void
   /** The action and its subject, or `null` — written by the status bar's other zone. */
   onAction: (sentence: string | null) => void
+  /** What a gesture did, or `null` to clear it — the status bar's result zone. */
+  onResult: (message: string | null) => void
   /** The colours and sizes, from `design/chrome.css`. */
   style: PaintStyle
   /** What to call the editorial zone on screen. */
@@ -137,6 +139,7 @@ export function MapCanvas({
   vectorLayers,
   onHover,
   onAction,
+  onResult,
   style,
   zoneLabel,
   label,
@@ -170,6 +173,7 @@ export function MapCanvas({
             vectorLayers,
             onHover,
             onAction,
+            onResult,
             style,
             zoneLabel,
             palette: AUTOMATIC_PALETTE,

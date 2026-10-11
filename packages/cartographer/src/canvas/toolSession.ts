@@ -1,8 +1,18 @@
 import { isClosingOffered } from '../geometry/ringClosure'
 
+import type { CoastVertex } from '../geometry/coastSnap'
 import type { EditorTool } from '../state/toolSlice'
 import type { Point } from '../view/viewport'
+import type { Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+
+/** A point of the outline in progress: where, and what it was taken from. */
+export interface SessionPoint {
+  /** `[longitude, latitude]`. */
+  at: [number, number]
+  /** Reported by eye, or snapped onto the coast. */
+  provenance: Provenance
+}
 
 /**
  * What the two tools hold between two clicks — the session's half of a gesture, never the document's.
@@ -16,8 +26,8 @@ import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocu
  * these functions what a gesture means; it never decides anything itself.
  */
 export interface ToolSession {
-  /** The Pen's outline in progress, `[longitude, latitude]` per anchor, in the order placed. */
-  outline: [number, number][]
+  /** The Pen's outline in progress, in the order placed, each point with its provenance. */
+  outline: SessionPoint[]
   /** The anchor the white arrow has selected, or `null`. */
   selected: number | null
   /** The anchor under the button while it is held — what a drag would move. `null` once released. */
@@ -29,12 +39,20 @@ export interface ToolSession {
    * closes the ring again only while the outline in hand is still exactly these; once the author has
    * changed it, the outline is theirs and a redo does not overwrite it.
    */
-  reopened: [number, number][] | null
+  reopened: SessionPoint[] | null
+  /**
+   * The coast vertex the last snapped click landed on — where the next snapped click's stretch starts.
+   * `null` once a point was placed any other way, or the outline changed under it.
+   */
+  snap: CoastVertex | null
 }
 
-/** A session with nothing in hand — what every tool change and every change of target returns to. */
+/**
+ * A session with nothing in hand — what every tool change and every change of target returns to.
+ * @returns an empty session
+ */
 export function idleSession(): ToolSession {
-  return { outline: [], selected: null, grabbed: null, moving: null, reopened: null }
+  return { outline: [], selected: null, grabbed: null, moving: null, reopened: null, snap: null }
 }
 
 /**
@@ -53,6 +71,7 @@ export function abandonGesture(session: ToolSession): boolean {
   session.moving = null
   session.grabbed = null
   session.reopened = null
+  session.snap = null
   return busy
 }
 
@@ -119,6 +138,8 @@ export interface ActionInputs {
   onCanvas: boolean
   /** Whether a click would close the outline now. */
   closing: boolean
+  /** Whether the Pen, following the coast, has the coastline within reach. */
+  snapping: boolean
   /** The session. */
   session: ToolSession
 }
@@ -137,7 +158,11 @@ export function actionSentence(inputs: ActionInputs): string | null {
   if (tool === 'navigate') return null
   if (targetName === null) return inputs.onCanvas ? 'Select a polity to draw in' : null
   if (tool === 'draw') {
-    return inputs.closing ? `Closing the outline of ${targetName}` : `Drawing in ${targetName}`
+    if (inputs.closing) return `Closing the outline of ${targetName}`
+    // s02 — "Following the coastline for Kingdom of France".
+    return inputs.snapping
+      ? `Following the coastline for ${targetName}`
+      : `Drawing in ${targetName}`
   }
   if (session.moving !== null) return `Moving path from ${targetName}`
   return session.selected === null ? null : `Selecting path from ${targetName}`
@@ -153,6 +178,10 @@ export interface OverlayScene {
   closing: boolean
   /** An anchor being dragged: where it would land, and the anchors its stretches run from. */
   moving: { at: Point; from: readonly Point[] } | null
+  /** The coast vertex the Pen would snap onto — emphasised before the click. */
+  snapTarget: Point | null
+  /** The stretch of coast a click would insert, from the last snapped anchor — the preview. */
+  snapPreview: readonly Point[] | null
 }
 
 /** Everything {@link overlayScene} reads. */
@@ -171,6 +200,10 @@ export interface OverlayInputs {
   movingFrom: readonly number[]
   /** How near the first anchor, in screen pixels, closes the ring. */
   closeRadius: number
+  /** The coast vertex under the pointer, on screen — `null` when not following the coast or out of reach. */
+  snapTarget: Point | null
+  /** The coast stretch a click would insert, on screen — `null` when the click would only place a point. */
+  snapPreview: readonly Point[] | null
 }
 
 /**
@@ -183,13 +216,18 @@ export interface OverlayInputs {
  * @returns the overlay scene
  */
 export function overlayScene(inputs: OverlayInputs): OverlayScene {
-  const outline = inputs.session.outline.map(inputs.toScreen)
+  const outline = inputs.session.outline.map((point) => inputs.toScreen(point.at))
   const drawing = inputs.tool === 'draw'
   const pointer = drawing ? inputs.pointer : null
   const moving = inputs.session.moving
+  // The preview replaces the rubber band — it *is* the line the click will lay. Without one, the band
+  // runs to the coast vertex the click would snap onto, not to the pointer beside it.
+  const bandEnd = inputs.snapTarget ?? pointer
   return {
     outline: drawing ? outline : [],
-    rubberTo: outline.length > 0 ? pointer : null,
+    rubberTo: outline.length > 0 && inputs.snapPreview === null ? bandEnd : null,
+    snapTarget: drawing ? inputs.snapTarget : null,
+    snapPreview: drawing ? inputs.snapPreview : null,
     closing: pointer !== null && isClosingOffered(outline, pointer, inputs.closeRadius),
     moving:
       moving === null

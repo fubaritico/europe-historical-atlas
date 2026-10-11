@@ -26,8 +26,18 @@ afterEach(() => {
  */
 function mount(overrides: Partial<ToolRailProps> = {}) {
   const onSelect = vi.fn()
-  render(<ToolRail tool="navigate" onSelect={onSelect} swatch={null} {...overrides} />)
-  return { onSelect, user: userEvent.setup() }
+  const onPenMode = vi.fn()
+  render(
+    <ToolRail
+      tool="navigate"
+      onSelect={onSelect}
+      swatch={null}
+      penMode="free"
+      onPenMode={onPenMode}
+      {...overrides}
+    />
+  )
+  return { onSelect, onPenMode, user: userEvent.setup() }
 }
 
 const tool = (name: string) => screen.getByRole('button', { name })
@@ -62,13 +72,22 @@ describe('ToolRail', () => {
         'Pen — follow a river',
       ])
       expect(items[0]?.getAttribute('aria-checked')).toBe('true')
-      expect(items[1]?.getAttribute('aria-disabled')).toBe('true')
+      expect(items[1]?.getAttribute('aria-disabled')).toBe('false')
+      expect(items[2]?.getAttribute('aria-disabled')).toBe('true')
     })
 
     it('opens the group on a press held long enough, and that press takes no tool', () => {
       vi.useFakeTimers()
       const onSelect = vi.fn()
-      render(<ToolRail tool="navigate" onSelect={onSelect} swatch={null} />)
+      render(
+        <ToolRail
+          tool="navigate"
+          onSelect={onSelect}
+          swatch={null}
+          penMode="free"
+          onPenMode={vi.fn()}
+        />
+      )
       fireEvent.pointerDown(tool('Pen'), { button: 0 })
       act(() => {
         vi.advanceTimersByTime(HOLD_TO_OPEN_MS)
@@ -82,7 +101,15 @@ describe('ToolRail', () => {
     it('takes the tool on a press released before the hold', () => {
       vi.useFakeTimers()
       const onSelect = vi.fn()
-      render(<ToolRail tool="navigate" onSelect={onSelect} swatch={null} />)
+      render(
+        <ToolRail
+          tool="navigate"
+          onSelect={onSelect}
+          swatch={null}
+          penMode="free"
+          onPenMode={vi.fn()}
+        />
+      )
       fireEvent.pointerDown(tool('Pen'), { button: 0 })
       act(() => {
         vi.advanceTimersByTime(HOLD_TO_OPEN_MS - 100)
@@ -99,13 +126,36 @@ describe('ToolRail', () => {
 
     it('cancels the hold when the pointer leaves the button', () => {
       vi.useFakeTimers()
-      render(<ToolRail tool="navigate" onSelect={vi.fn()} swatch={null} />)
+      render(
+        <ToolRail
+          tool="navigate"
+          onSelect={vi.fn()}
+          swatch={null}
+          penMode="free"
+          onPenMode={vi.fn()}
+        />
+      )
       fireEvent.pointerDown(tool('Pen'), { button: 0 })
       fireEvent.pointerLeave(tool('Pen'))
       act(() => {
         vi.advanceTimersByTime(HOLD_TO_OPEN_MS * 2)
       })
       expect(screen.queryByRole('menu')).toBeNull()
+    })
+
+    // A11Y-002, closed: the row marked is the mode in use, and choosing a row reports it.
+    it('marks the Pen’s mode in use, and reports the one chosen', async () => {
+      const { onPenMode, user } = mount({ tool: 'draw', penMode: 'coast' })
+      // A11Y-002: the head is named after the variant in use.
+      expect(tool('Pen — follow the coast').getAttribute('title')).toBe(
+        'Pen — follow the coast (P)'
+      )
+      await user.pointer({ keys: '[MouseRight]', target: tool('Pen — follow the coast') })
+      expect(
+        screen.getByRole('menuitemradio', { name: /follow the coast/ }).getAttribute('aria-checked')
+      ).toBe('true')
+      await user.click(screen.getByRole('menuitemradio', { name: /^Pen\(P\)$/ }))
+      expect(onPenMode).toHaveBeenCalledWith('free')
     })
 
     it('shows the aimed-at polity’s colour at the foot', () => {
@@ -120,7 +170,7 @@ describe('ToolRail', () => {
     it('ignores a click on a variant that is not there yet', async () => {
       const { onSelect, user } = mount()
       await user.pointer({ keys: '[MouseRight]', target: tool('Pen') })
-      await user.click(screen.getByRole('menuitemradio', { name: /follow the coast/ }))
+      await user.click(screen.getByRole('menuitemradio', { name: /follow a river/ }))
       expect(onSelect).not.toHaveBeenCalled()
       expect(screen.getByRole('menu')).toBeDefined()
     })
@@ -145,12 +195,12 @@ describe('ToolRail', () => {
   describe('edge cases', () => {
     // The keyboard has its way in and out: → opens, ↑ ↓ move, Enter chooses, Escape returns.
     it('opens on →, chooses with Enter, and gives the focus back to the tool', async () => {
-      const { onSelect, user } = mount({ tool: 'draw' })
+      const { onPenMode, user } = mount({ tool: 'draw' })
       tool('Pen').focus()
       await user.keyboard('{ArrowRight}')
       expect(document.activeElement?.getAttribute('role')).toBe('menuitemradio')
       await user.keyboard('{Enter}')
-      expect(onSelect).toHaveBeenCalledWith('draw')
+      expect(onPenMode).toHaveBeenCalledWith('free')
       expect(screen.queryByRole('menu')).toBeNull()
       expect(document.activeElement).toBe(tool('Pen'))
     })
@@ -182,7 +232,15 @@ describe('ToolRail — what the review found', () => {
   it('still takes the Pen from the keyboard after a hold opened its group', () => {
     vi.useFakeTimers()
     const onSelect = vi.fn()
-    render(<ToolRail tool="navigate" onSelect={onSelect} swatch={null} />)
+    render(
+      <ToolRail
+        tool="navigate"
+        onSelect={onSelect}
+        swatch={null}
+        penMode="free"
+        onPenMode={vi.fn()}
+      />
+    )
     fireEvent.pointerDown(tool('Pen'), { button: 0 })
     act(() => {
       vi.advanceTimersByTime(HOLD_TO_OPEN_MS)
@@ -201,6 +259,23 @@ describe('ToolRail — what the review found', () => {
       const entry = RAIL_TOOLS.find((candidate) => candidate.tool === bound)
       expect(entry?.key.toLowerCase()).toBe(key)
     }
+  })
+})
+
+describe('ToolRailPanel — the Pen’s mode', () => {
+  // QUAL-108: the binding carries the mode both ways — choosing a row sets it, the store marks it.
+  it('sets the Pen’s mode from its group, and marks the one the store holds', async () => {
+    const store = createCartographerStore({
+      edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
+      viewport: { viewport: UNFRAMED },
+    })
+    render(<ToolRailPanel store={store} />)
+    const user = userEvent.setup()
+    await user.pointer({ keys: '[MouseRight]', target: tool('Pen') })
+    await user.click(screen.getByRole('menuitemradio', { name: /follow the coast/ }))
+    expect(store.getState().penMode).toBe('coast')
+    expect(store.getState().tool).toBe('draw')
+    expect(tool('Pen — follow the coast').getAttribute('aria-pressed')).toBe('true')
   })
 })
 

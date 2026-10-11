@@ -47,7 +47,7 @@ const DEM_META: HeightmapMeta = {
  * the wrong one of the two would have the right bounds and the wrong grid — and the projection would be
  * off by a factor of four with every box still agreeing. Nothing but the size can catch it.
  */
-const MASK_META: LandMaskMeta = { width: 32, height: 20, scale: 4, bbox: BBOX }
+const MASK_META: LandMaskMeta = { width: 32, height: 20, scale: 4, bbox: BBOX, source: 'test' }
 
 /**
  * A source that hands back a value already in hand.

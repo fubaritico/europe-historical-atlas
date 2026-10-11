@@ -1,4 +1,11 @@
-import { assetError, expectBounds, expectInteger, field, parseAsset } from './assetError'
+import {
+  assetError,
+  expectBounds,
+  expectInteger,
+  expectString,
+  field,
+  parseAsset,
+} from './assetError'
 
 import type { Heightmap } from './heightmap'
 import type { GeoBounds } from '../geo/mercator'
@@ -15,6 +22,15 @@ export interface LandMaskMeta {
   scale: number
   /** Geographic extent the grid covers — the DEM's, so the two share a coordinate space. */
   bbox: GeoBounds
+  /**
+   * What the mask was rasterised from, and under what terms — `"Natural Earth 10m land minus lakes
+   * (public domain)"` for the shipped one.
+   *
+   * **Carried with the data, never restated by a reader**: the Cartographer records it as the provenance
+   * of every anchor it inserts along the coast traced from this mask, and a copy of the sentence in a
+   * second place would drift from the file the day the mask is regenerated from another source.
+   */
+  source: string
 }
 
 /**
@@ -147,7 +163,8 @@ export function createPackedLandMask(meta: LandMaskMeta, bits: Uint8Array): Land
 export function createElevationLandMask(heightmap: Heightmap, seaLevel: number): LandMask {
   const { width, height, bbox } = heightmap.meta
   const data = heightmap.data
-  return createLandMask({ width, height, scale: 1, bbox }, (col, row) => {
+  const source = 'derived from elevation above sea level'
+  return createLandMask({ width, height, scale: 1, bbox, source }, (col, row) => {
     return (data[row * width + col] ?? 0) > seaLevel
   })
 }
@@ -199,6 +216,7 @@ export function parseLandMaskMeta(value: unknown, source: string): LandMaskMeta 
       height: expectInteger(at('height'), 'meta.height', 1),
       scale: expectInteger(at('scale'), 'meta.scale', 1),
       bbox: expectBounds(at('bbox'), 'meta.bbox'),
+      source: expectString(at('source'), 'meta.source'),
     }
   })
 }

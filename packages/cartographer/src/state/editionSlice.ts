@@ -7,6 +7,7 @@ import { createHistory } from '@europe-historical-atlas/core/editor/history'
 
 import type { CartographerStore } from './store'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
+import type { OutlinePoint, Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
 import type {
   History,
   HistoryMarker,
@@ -106,18 +107,14 @@ export interface EditionActions {
   /**
    * Give a polity a closed outline, as one undoable step — what the Pen does when the ring closes.
    *
-   * The points are the session's until now; they enter the document here, all at once, under the
-   * provenance of a free point (`s02`: *"reported by eye"*). One `ctrl+z` takes the whole outline back.
+   * The points are the session's until now; they enter the document here, all at once, each under its
+   * own provenance — reported by eye, or snapped onto the coast. One step takes the whole outline back.
    * @param polityId - who the outline is drawn for
-   * @param points - `[longitude, latitude]` per anchor, in order, closure implied
+   * @param points - each anchor and its provenance, in order, closure implied
    * @param step - how `{History}` and `[↶ Undo]` will name the gesture
    * @returns `false` when the polity is unknown or the points enclose nothing — and nothing happened
    */
-  drawOutline: (
-    polityId: string,
-    points: readonly (readonly [number, number])[],
-    step: HistoryStep
-  ) => boolean
+  drawOutline: (polityId: string, points: readonly OutlinePoint[], step: HistoryStep) => boolean
   /**
    * Move one anchor, as one undoable step — the white arrow's drag, committed on release.
    *
@@ -164,7 +161,7 @@ export interface EditionActions {
  * (reference)"*), which is the author's to say and has nowhere to be said yet. The licence is `fact`, the
  * terms a reported fact travels under.
  */
-export const FREE_POINT_PROVENANCE = { name: 'reported by eye', licence: 'fact' } as const
+export const FREE_POINT_PROVENANCE: Provenance = { name: 'reported by eye', licence: 'fact' }
 
 /** The slice: what it holds, and what may be done to it. */
 export type EditionSlice = EditionState & EditionActions
@@ -295,7 +292,7 @@ export function editionActions(
     createPolity: (polity: YearPolity, step: HistoryStep): boolean =>
       record((document) => addPolity(document, polity), step),
     drawOutline: (polityId, points, step): boolean =>
-      record((document) => addOutline(document, polityId, points, FREE_POINT_PROVENANCE), step),
+      record((document) => addOutline(document, polityId, points), step),
     moveAnchor: (index, point, step): boolean =>
       record((document) => moveAnchor(document, index, point), step),
     undo: (): void => {

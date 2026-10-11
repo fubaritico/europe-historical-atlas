@@ -91,10 +91,12 @@ function attach(): {
   store: CartographerStoreHook
   hovered: ReturnType<typeof vi.fn>
   acted: ReturnType<typeof vi.fn>
+  resulted: ReturnType<typeof vi.fn>
   dispose: () => void
 } {
   const hovered = vi.fn()
   const acted = vi.fn()
+  const resulted = vi.fn()
   const store = createCartographerStore({
     edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
     viewport: { viewport: UNFRAMED },
@@ -104,15 +106,20 @@ function attach(): {
     store,
     frame: TEST_BACKDROP_FRAME,
     backdropImage: backdropStandIn(),
-    vectorLayers: { coast: [], rivers: [] },
+    vectorLayers: {
+      coast: [],
+      rivers: [],
+      coastProvenance: { name: 'test coast', licence: 'test' },
+    },
     onHover: hovered,
     onAction: acted,
+    onResult: resulted,
     style: CHROME_PAINT_STYLE,
     zoneLabel: 'zone',
     overlay: document.createElement('canvas'),
     palette: AUTOMATIC_PALETTE,
   })
-  return { node, store, hovered, acted, dispose }
+  return { node, store, hovered, acted, resulted, dispose }
 }
 
 afterEach(() => {
@@ -428,9 +435,14 @@ describe('startCanvasController', () => {
           store,
           frame: TEST_BACKDROP_FRAME,
           backdropImage: backdropStandIn(),
-          vectorLayers: { coast: [], rivers: [] },
+          vectorLayers: {
+            coast: [],
+            rivers: [],
+            coastProvenance: { name: 'test coast', licence: 'test' },
+          },
           onHover: () => undefined,
           onAction: () => undefined,
+          onResult: () => undefined,
           style: CHROME_PAINT_STYLE,
           zoneLabel: 'zone',
           overlay: document.createElement('canvas'),
@@ -973,9 +985,14 @@ describe('the tools on the canvas', () => {
         store,
         frame: TEST_BACKDROP_FRAME,
         backdropImage: backdropStandIn(),
-        vectorLayers: { coast: [], rivers: [] },
+        vectorLayers: {
+          coast: [],
+          rivers: [],
+          coastProvenance: { name: 'test coast', licence: 'test' },
+        },
         onHover: () => undefined,
         onAction: () => undefined,
+        onResult: () => undefined,
         style: CHROME_PAINT_STYLE,
         zoneLabel: 'zone',
         overlay,
@@ -1041,9 +1058,14 @@ describe('the tools — what the review found', () => {
         store,
         frame: TEST_BACKDROP_FRAME,
         backdropImage: backdropStandIn(),
-        vectorLayers: { coast: [], rivers: [] },
+        vectorLayers: {
+          coast: [],
+          rivers: [],
+          coastProvenance: { name: 'test coast', licence: 'test' },
+        },
         onHover: () => undefined,
         onAction: () => undefined,
+        onResult: () => undefined,
         style: CHROME_PAINT_STYLE,
         zoneLabel: 'zone',
         overlay,
@@ -1234,6 +1256,195 @@ describe('undo and redo from the keyboard', () => {
       node.dispatchEvent(chord({ key: 'z', ctrlKey: true }))
       expect(store.getState().document.polities).toEqual([])
       expect(node.style.cursor).toBe('not-allowed')
+      dispose()
+    })
+  })
+})
+
+describe('the Pen following the coast, on the canvas', () => {
+  /**
+   * A canvas whose coast is one long horizontal shore across the backdrop, at backdrop y = 500.
+   * @returns the attachment
+   */
+  function attachWithShore(overlay: HTMLCanvasElement = document.createElement('canvas')) {
+    const acted = vi.fn()
+    const resulted = vi.fn()
+    const store = createCartographerStore({
+      edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
+      viewport: { viewport: UNFRAMED },
+    })
+    const shore = {
+      points: Array.from({ length: 121 }, (_, index): [number, number] => [index * 10, 500]),
+      closed: false,
+      bounds: { left: 0, top: 500, right: 1200, bottom: 500 },
+    }
+    const node = canvasWithBox()
+    const dispose = startCanvasController(node, {
+      store,
+      frame: TEST_BACKDROP_FRAME,
+      backdropImage: backdropStandIn(),
+      vectorLayers: {
+        coast: [shore],
+        rivers: [],
+        coastProvenance: { name: 'test shore', licence: 'CC0' },
+      },
+      onHover: () => undefined,
+      onAction: acted,
+      onResult: resulted,
+      style: CHROME_PAINT_STYLE,
+      zoneLabel: 'zone',
+      overlay,
+      palette: AUTOMATIC_PALETTE,
+    })
+    aimAtFrance(store)
+    store.getState().choosePenMode('coast')
+    // A view where a backdrop pixel is a screen pixel, so the shore sits at screen y = 500 - 282.
+    store.getState().setViewport({ scale: 1, originX: -240, originY: -282 })
+    return { node, store, acted, resulted, dispose }
+  }
+
+  describe('happy path', () => {
+    it('inserts the stretch between two clicks on the shore, and reports it', () => {
+      const { node, store, resulted, dispose } = attachWithShore()
+      click(node, [60, 218])
+      click(node, [160, 218])
+      expect(resulted).toHaveBeenLastCalledWith('inserted 10 vertices from the coastline')
+      node.dispatchEvent(keyEvent('Escape'))
+      expect(store.getState().document.claims).toEqual([])
+      dispose()
+    })
+  })
+
+  describe('variants', () => {
+    // s02 — the bar names what the Pen is doing while the coast is within reach.
+    it('says it is following the coastline while the shore is within reach', () => {
+      const { node, acted, dispose } = attachWithShore()
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 220 }))
+      expect(acted).toHaveBeenLastCalledWith('Following the coastline for Reaume de France')
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 400 }))
+      expect(acted).toHaveBeenLastCalledWith('Drawing in Reaume de France')
+      dispose()
+    })
+  })
+
+  describe('managed errors', () => {
+    it('clears the result on the next press', () => {
+      const { node, resulted, dispose } = attachWithShore()
+      click(node, [60, 218])
+      click(node, [160, 218])
+      node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 300, offsetY: 400 }))
+      expect(resulted).toHaveBeenLastCalledWith(null)
+      dispose()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // L4: N/A beyond the gestures' own tests — the canvas only routes the click to them.
+    it('places a free point off the shore', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { node, resulted, dispose } = attachWithShore()
+      click(node, [60, 400])
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('no coastline within reach'))
+      expect(resulted).not.toHaveBeenCalledWith(expect.stringContaining('inserted'))
+      warn.mockRestore()
+      dispose()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('takes the shore’s vertices back with one undo once the ring is closed', () => {
+      const { node, store, dispose } = attachWithShore()
+      click(node, [60, 218])
+      click(node, [160, 218])
+      store.getState().choosePenMode('free')
+      click(node, [110, 300])
+      click(node, [61, 219])
+      expect(store.getState().document.claims).toHaveLength(1)
+      node.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true }))
+      expect(store.getState().document.claims).toEqual([])
+      dispose()
+    })
+  })
+
+  describe('what the review found', () => {
+    // QUAL-107: the snap cursor reaches the canvas, and goes off the shore.
+    it('shows the snap cursor over the shore, and the plain cross away from it', () => {
+      const { node, dispose } = attachWithShore()
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 220 }))
+      expect(node.style.cursor).toContain('crosshair')
+      const onShore = node.style.cursor
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 400 }))
+      expect(node.style.cursor).not.toBe(onShore)
+      dispose()
+    })
+
+    // QUAL-109: Backspace takes back what the result described, so the result goes too.
+    it('clears the result when Backspace takes the inserted anchors back', () => {
+      const { node, resulted, dispose } = attachWithShore()
+      click(node, [60, 218])
+      click(node, [160, 218])
+      node.dispatchEvent(keyEvent('Backspace'))
+      expect(resulted).toHaveBeenLastCalledWith(null)
+      dispose()
+    })
+
+    // QUAL-102: on the first anchor the click closes with a straight segment, so the overlay must not
+    // preview a stretch of coast there. The sentence alone cannot tell: closing wins it either way.
+    it('previews no coast on the outline’s first anchor, where the click closes', () => {
+      // Every lineWidth the overlay is given, with a marker at each clear: the last paint is what shows.
+      const widths: (number | 'clear')[] = []
+      const overlay = document.createElement('canvas')
+      overlay.getContext = vi.fn(
+        () =>
+          new Proxy(
+            {},
+            {
+              get: (_, op) => () => {
+                if (op === 'clearRect') widths.push('clear')
+              },
+              set: (_, key, value: unknown) => {
+                if (key === 'lineWidth' && typeof value === 'number') widths.push(value)
+                return true
+              },
+            }
+          )
+      ) as unknown as typeof overlay.getContext
+      const { node, acted, dispose } = attachWithShore(overlay)
+      const lastPaint = () => widths.slice(widths.lastIndexOf('clear'))
+      click(node, [60, 218])
+      click(node, [160, 218])
+      // Further along the shore the preview is drawn — so the check below is one that can fail.
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 260, offsetY: 219 }))
+      expect(lastPaint()).toContain(CHROME_PAINT_STYLE.pathWidth * 2)
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 61, offsetY: 219 }))
+      expect(acted).toHaveBeenLastCalledWith('Closing the outline of Reaume de France')
+      expect(lastPaint()).not.toContain(CHROME_PAINT_STYLE.pathWidth * 2)
+      dispose()
+    })
+
+    // QUAL-104: with the hand borrowed, the Pen offers no coast vertex — a click would pan, not snap.
+    it('offers no coast vertex while ‹space› lends the hand', () => {
+      const ops: string[] = []
+      const overlay = document.createElement('canvas')
+      overlay.getContext = vi.fn(
+        () =>
+          new Proxy(
+            {},
+            {
+              get: (_, op) => () => {
+                ops.push(String(op))
+              },
+              set: () => true,
+            }
+          )
+      ) as unknown as typeof overlay.getContext
+      const { node, dispose } = attachWithShore(overlay)
+      const lastPaint = () => ops.slice(ops.lastIndexOf('clearRect'))
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 219 }))
+      expect(lastPaint()).toContain('arc')
+      node.dispatchEvent(keyEvent(' '))
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 62, offsetY: 219 }))
+      expect(lastPaint()).not.toContain('arc')
       dispose()
     })
   })

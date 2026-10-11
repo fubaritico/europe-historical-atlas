@@ -272,7 +272,11 @@ describe('scene', () => {
       const scene = buildScene(
         document,
         inputs(document, {
-          vectorLayers: { coast: COAST, rivers: RIVERS },
+          vectorLayers: {
+            coast: COAST,
+            rivers: RIVERS,
+            coastProvenance: { name: 'test coast', licence: 'test' },
+          },
           viewport: { scale: 2, originX: 5, originY: -3 },
         })
       )

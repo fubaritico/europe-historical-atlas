@@ -17,13 +17,12 @@ export interface RailTool {
 }
 
 /**
- * The Pen's group. Only the Pen itself can be chosen today: following the coast and following a river
- * are listed, disabled, because they are the next rung (`s02`) — the group shows its shape before it is
- * full, and nothing in it pretends to work.
+ * The Pen's group: the free Pen, and the Pen that follows the coast. Following a river is listed,
+ * disabled — it is the next rung (`s02`), and nothing in the group pretends to work.
  */
 export const PEN_VARIANTS: readonly [ToolVariant, ...ToolVariant[]] = [
   { id: 'free', label: 'Pen', shortcut: 'P', icon: 'draw', enabled: true },
-  { id: 'coast', label: 'Pen — follow the coast', shortcut: null, icon: 'draw', enabled: false },
+  { id: 'coast', label: 'Pen — follow the coast', shortcut: null, icon: 'draw', enabled: true },
   { id: 'river', label: 'Pen — follow a river', shortcut: null, icon: 'draw', enabled: false },
 ]
 

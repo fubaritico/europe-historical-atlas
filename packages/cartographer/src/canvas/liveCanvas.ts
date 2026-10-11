@@ -5,12 +5,13 @@ import { nearestAmong } from '../geometry/hitTest'
 import { isClosingOffered } from '../geometry/ringClosure'
 import { describeDrawingTarget } from '../state/drawingTarget'
 import { lonLatToScreen, remapToScreen } from '../view/projection'
+import { backdropToScreen } from '../view/viewport'
 
 import { cursorCss, cursorFor } from './cursors'
 import { HANDLE_HIT_RADIUS } from './navigation'
 import { paintOverlay } from './overlayPainter'
 import { inDevicePixels } from './style'
-import { outlineOnScreen, resolvedTarget } from './toolGestures'
+import { coastHit, coastStretchTo, outlineOnScreen, resolvedTarget } from './toolGestures'
 import { actionSentence, overlayScene, ringNeighbours, targetHandles } from './toolSession'
 
 import type { AnchorCache } from './anchorCache'
@@ -80,6 +81,11 @@ export interface CanvasControllerDeps {
    * (ARCH-104), so the canvas can be run against any palette. Never empty, which the type holds.
    */
   palette: readonly [string, ...string[]]
+  /**
+   * The status bar's result zone — what a gesture did, *"inserted 412 vertices from the coastline"* —
+   * or `null` to clear it. Beside the action, never in its place (`s02`, the dev's call of 2026-10-08).
+   */
+  onResult: (message: string | null) => void
 }
 
 /** One live attachment: the node, its context, the deps, and the little state a gesture needs. */
@@ -160,7 +166,50 @@ export function gestureOf(it: LiveCanvas): GestureContext {
     session: it.session,
     anchorsOnScreen: () => anchorsOnScreen(it),
     radius: HANDLE_HIT_RADIUS * it.ratio,
+    coast: it.deps.vectorLayers.coast,
+    coastProvenance: it.deps.vectorLayers.coastProvenance,
+    report: (message) => {
+      it.deps.onResult(message)
+    },
   }
+}
+
+/**
+ * What the Pen following the coast offers under the pointer: the vertex it would snap onto, and the
+ * stretch a click would insert — both on screen, both `null` when there is nothing to offer.
+ * @param it - the attachment
+ * @returns the snap target and the preview
+ */
+export function coastOffer(it: LiveCanvas): { target: Point | null; preview: Point[] | null } {
+  if (!coastOffered(it) || it.pointer === null) return NO_OFFER
+  const gesture = gestureOf(it)
+  const hit = coastHit(gesture, it.pointer)
+  const vertex =
+    hit === null ? undefined : it.deps.vectorLayers.coast[hit.contour]?.points[hit.vertex]
+  if (hit === null || vertex === undefined) return NO_OFFER
+  const viewport = it.deps.store.getState().viewport
+  const toScreen = (point: Point) => backdropToScreen(viewport, point)
+  const stretch = coastStretchTo(gesture, hit)
+  // A one-point stretch is the vertex already placed: nothing to preview, so the band stays (QUAL-101).
+  const preview = stretch === null || stretch.length < 2 ? null : stretch.map(toScreen)
+  return { target: toScreen(vertex), preview }
+}
+
+/** No coast to offer. */
+const NO_OFFER = { target: null, preview: null } as const
+
+/**
+ * Whether the coast is on offer at all: the Pen in hand following the coast, someone to draw for, the
+ * hand not borrowed with ‹space› (QUAL-104), and the pointer not on the first anchor — there the click
+ * closes the ring with a straight segment, so a coast preview would promise what it will not do
+ * (QUAL-102).
+ * @param it - the attachment
+ * @returns `true` when a coast vertex under the pointer may be offered
+ */
+function coastOffered(it: LiveCanvas): boolean {
+  const state = it.deps.store.getState()
+  if (state.tool !== 'draw' || state.penMode !== 'coast' || it.spaceHeld) return false
+  return resolvedTarget(gestureOf(it)) !== null && !closingOffered(it)
 }
 
 /**
@@ -185,8 +234,10 @@ export function handInHand(it: LiveCanvas): boolean {
  * ‹space› is not in the store, deliberately: it is a key being held, not a tool that was chosen, and
  * `s99` keeps the session's keys out of anything an undo can reach.
  * @param it - the attachment
+ * @param snapping - whether the coast is on offer, when the caller has already worked it out — the
+ *   refresh does, once per pointer move; the ‹space› handlers do not, and it is computed for them
  */
-export function showCursor(it: LiveCanvas): void {
+export function showCursor(it: LiveCanvas, snapping = coastOffer(it).target !== null): void {
   const state = it.deps.store.getState()
   const css = cursorCss(
     cursorFor({
@@ -196,6 +247,7 @@ export function showCursor(it: LiveCanvas): void {
       spaceHeld: it.spaceHeld,
       closing: closingOffered(it),
       overHandle: overHandle(it),
+      snapping,
     })
   )
   if (css === it.cursor) return
@@ -240,6 +292,7 @@ export function overHandle(it: LiveCanvas): boolean {
 export function refreshTools(it: LiveCanvas): void {
   const state = it.deps.store.getState()
   const moving = it.session.moving
+  const offer = coastOffer(it)
   const scene = overlayScene({
     session: it.session,
     tool: state.tool,
@@ -248,6 +301,8 @@ export function refreshTools(it: LiveCanvas): void {
     anchors: moving === null ? [] : anchorsOnScreen(it),
     movingFrom: moving === null ? [] : ringNeighbours(state.document, moving.index),
     closeRadius: HANDLE_HIT_RADIUS * it.ratio,
+    snapTarget: offer.target,
+    snapPreview: offer.preview,
   })
   paintOverlay(it.overlay.ctx, it.size, scene, inDevicePixels(it.deps.style, it.ratio))
   const sentence = actionSentence({
@@ -255,11 +310,12 @@ export function refreshTools(it: LiveCanvas): void {
     targetName: resolvedTarget(gestureOf(it))?.name ?? null,
     onCanvas: it.pointer !== null,
     closing: scene.closing,
+    snapping: offer.target !== null,
     session: it.session,
   })
   if (sentence !== it.sentence) {
     it.sentence = sentence
     it.deps.onAction(sentence)
   }
-  showCursor(it)
+  showCursor(it, offer.target !== null)
 }

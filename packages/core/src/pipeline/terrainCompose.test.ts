@@ -42,7 +42,7 @@ const OPTS: TerrainTextureOptions = { ...DEFAULT_TERRAIN_OPTIONS, supersample: 1
 /** A hand-written land mask over a small grid — row-major, `true` = land. */
 function maskOf(width: number, height: number, land: boolean[]): ReturnType<typeof createLandMask> {
   return createLandMask(
-    { width, height, scale: 1, bbox: { west: 0, south: 0, east: 1, north: 1 } },
+    { width, height, scale: 1, bbox: { west: 0, south: 0, east: 1, north: 1 }, source: 'test' },
     (col, row) => land[row * width + col] ?? false
   )
 }

@@ -5,6 +5,7 @@ import { ToolFlyout } from './ToolFlyout'
 import { ToolIcon } from './toolIcons'
 
 import type { RailTool } from './railTools'
+import type { ToolVariant } from './ToolFlyout'
 import type { EditorTool } from '../state/toolSlice'
 import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
 
@@ -18,6 +19,10 @@ export interface ToolRailProps {
   swatch: { name: string; colour: string } | null
   /** A group to show open from the start — the workbench's plate of the flyout. Closed otherwise. */
   initiallyOpen?: EditorTool
+  /** The Pen's variant in use — the row its group marks. */
+  penMode: string
+  /** A variant of the Pen's group was chosen. */
+  onPenMode: (id: string) => void
 }
 
 /**
@@ -66,6 +71,10 @@ interface ToolButtonProps {
   setOpen: (open: boolean) => void
   /** Take the tool. */
   onSelect: (tool: EditorTool) => void
+  /** The variant in use, when the tool heads a group. */
+  current: string
+  /** A variant of its group was chosen. */
+  onVariant: (id: string) => void
 }
 
 /**
@@ -109,15 +118,18 @@ function useHoldToOpen(enabled: boolean, open: () => void) {
 }
 
 /**
- * The two other ways into a group: a right click, and → for the keyboard.
+ * A group head's popup state, and the two other ways into its group: a right click, and → for the
+ * keyboard.
  * @param enabled - whether the button heads a group
+ * @param expanded - whether the group is open
  * @param open - open the group
- * @returns the handlers to spread on the button
+ * @returns the attributes and handlers to spread on the button
  */
-function groupOpeners(enabled: boolean, open: () => void) {
+function groupOpeners(enabled: boolean, expanded: boolean, open: () => void) {
   if (!enabled) return {}
   return {
     'aria-haspopup': 'menu' as const,
+    'aria-expanded': expanded,
     onContextMenu: (event: { preventDefault: () => void }) => {
       event.preventDefault()
       open()
@@ -131,18 +143,71 @@ function groupOpeners(enabled: boolean, open: () => void) {
 }
 
 /**
+ * A group's flyout, wired to close once a row is chosen.
+ * @param props - the group's name, its rows, the one in use, the choice and the close
+ * @returns the flyout
+ */
+function GroupFlyout({
+  label,
+  variants,
+  current,
+  onVariant,
+  close,
+}: {
+  label: string
+  variants: readonly ToolVariant[]
+  current: string
+  onVariant: (id: string) => void
+  close: () => void
+}) {
+  return (
+    <ToolFlyout
+      label={`${label} tools`}
+      variants={variants}
+      current={current}
+      onChoose={(id) => {
+        onVariant(id)
+        close()
+      }}
+      onDismiss={close}
+    />
+  )
+}
+
+/**
+ * A tool's name — for a group head, the name of the variant in use, so the toolbar says which Pen is in
+ * hand without opening the flyout (A11Y-002). The binding only ever hands a variant of the group; a tool
+ * heading none keeps its own name.
+ * @param entry - the tool
+ * @param current - the variant in use
+ * @returns the accessible name and the tooltip's first half
+ */
+function headLabel(entry: RailTool, current: string): string {
+  return entry.variants?.find((variant) => variant.id === current)?.label ?? entry.label
+}
+
+/**
  * One tool, and — when it heads a group — the three ways Illustrator opens it: holding the press, a
  * right click, and here also →, so the keyboard has a way in.
  * @param props - the tool, its state, and the callbacks
  * @returns the button, and its flyout when open
  */
-function ToolButton({ entry, pressed, open, setOpen, onSelect }: ToolButtonProps) {
+function ToolButton({
+  entry,
+  pressed,
+  open,
+  setOpen,
+  onSelect,
+  current,
+  onVariant,
+}: ToolButtonProps) {
   const button = useRef<HTMLButtonElement | null>(null)
   const group = entry.variants
   const openGroup = () => {
     setOpen(true)
   }
   const { consumeHold, ...hold } = useHoldToOpen(group !== undefined, openGroup)
+  const label = headLabel(entry, current)
   const close = () => {
     setOpen(false)
     button.current?.focus()
@@ -154,12 +219,11 @@ function ToolButton({ entry, pressed, open, setOpen, onSelect }: ToolButtonProps
         type="button"
         className={`tool-rail__tool${group === undefined ? '' : ' tool-rail__tool--group'}`}
         aria-pressed={pressed}
-        aria-label={entry.label}
-        title={`${entry.label} (${entry.key})`}
+        aria-label={label}
+        title={`${label} (${entry.key})`}
         tabIndex={pressed ? 0 : -1}
-        {...(group === undefined ? {} : { 'aria-expanded': open })}
         {...hold}
-        {...groupOpeners(group !== undefined, openGroup)}
+        {...groupOpeners(group !== undefined, open, openGroup)}
         onClick={() => {
           if (!consumeHold()) onSelect(entry.tool)
         }}
@@ -167,20 +231,25 @@ function ToolButton({ entry, pressed, open, setOpen, onSelect }: ToolButtonProps
         <ToolIcon name={entry.icon} />
       </button>
       {open && group !== undefined ? (
-        <ToolFlyout
-          label={`${entry.label} tools`}
+        <GroupFlyout
+          label={entry.label}
           variants={group}
-          // The group's head: the only variant usable today, so the only one that can be in use.
-          current={group[0].id}
-          onChoose={() => {
-            onSelect(entry.tool)
-            close()
-          }}
-          onDismiss={close}
+          current={current}
+          onVariant={onVariant}
+          close={close}
         />
       ) : null}
     </div>
   )
+}
+
+/**
+ * What a group with no binding does when a variant is chosen: say so. Only the Pen heads a group today;
+ * a second one that reached this without being wired would otherwise do nothing, silently.
+ * @param id - the variant chosen
+ */
+function unwiredGroup(id: string): void {
+  console.error(`[Cartographer] the tool rail has no binding for the variant "${id}".`)
 }
 
 /**
@@ -192,7 +261,14 @@ function ToolButton({ entry, pressed, open, setOpen, onSelect }: ToolButtonProps
  * @param props - the tool in hand, the swatch, and the choice
  * @returns the rail
  */
-export function ToolRail({ tool, onSelect, swatch, initiallyOpen }: ToolRailProps) {
+export function ToolRail({
+  tool,
+  onSelect,
+  swatch,
+  initiallyOpen,
+  penMode,
+  onPenMode,
+}: ToolRailProps) {
   const [openGroup, setOpenGroup] = useState<EditorTool | null>(initiallyOpen ?? null)
   return (
     <div className="tool-rail">
@@ -213,6 +289,9 @@ export function ToolRail({ tool, onSelect, swatch, initiallyOpen }: ToolRailProp
               setOpenGroup(open ? entry.tool : null)
             }}
             onSelect={onSelect}
+            // Only the Pen heads a group today; a second group gets its own entry here.
+            current={entry.tool === 'draw' ? penMode : entry.tool}
+            onVariant={entry.tool === 'draw' ? onPenMode : unwiredGroup}
           />
         ))}
       </div>

@@ -44,7 +44,14 @@ function recording(): { ctx: Painter2D; calls: Call[] } {
 const SIZE = { width: 400, height: 300 }
 
 /** An empty overlay: nothing in progress. */
-const NOTHING: OverlayScene = { outline: [], rubberTo: null, closing: false, moving: null }
+const NOTHING: OverlayScene = {
+  outline: [],
+  rubberTo: null,
+  closing: false,
+  moving: null,
+  snapTarget: null,
+  snapPreview: null,
+}
 
 /** The fill of each handle drawn, in order. */
 function handleFills(calls: Call[]): unknown[] {
@@ -155,6 +162,45 @@ describe('paintOverlay', () => {
       const { ctx, calls } = recording()
       paintOverlay(ctx, SIZE, { ...NOTHING, outline: [[1, 1]] }, CHROME_PAINT_STYLE)
       expect(handleFills(calls)).toEqual([CHROME_PAINT_STYLE.anchorStroke])
+    })
+  })
+
+  describe('the coast offer', () => {
+    // QUAL-107: the preview is stroked at twice the outline's weight, and the weight put back after.
+    it('strokes the preview at twice the weight, then restores it, and fills the target', () => {
+      const widths: number[] = []
+      const { ctx, calls } = recording()
+      const watched = new Proxy(ctx, {
+        set: (target, key, value: unknown) => {
+          if (key === 'lineWidth' && typeof value === 'number') widths.push(value)
+          return Reflect.set(target, key, value)
+        },
+      })
+      paintOverlay(
+        watched,
+        SIZE,
+        {
+          ...NOTHING,
+          snapPreview: [
+            [0, 0],
+            [10, 0],
+          ],
+          snapTarget: [10, 0],
+        },
+        CHROME_PAINT_STYLE
+      )
+      expect(widths).toEqual([
+        CHROME_PAINT_STYLE.pathWidth,
+        CHROME_PAINT_STYLE.pathWidth * 2,
+        CHROME_PAINT_STYLE.pathWidth,
+      ])
+      expect(handleFills(calls)).toEqual([CHROME_PAINT_STYLE.anchorStroke])
+    })
+
+    it('draws nothing of the coast when nothing is offered', () => {
+      const { ctx, calls } = recording()
+      paintOverlay(ctx, SIZE, NOTHING, CHROME_PAINT_STYLE)
+      expect(calls.filter((call) => call.op === 'lineTo')).toEqual([])
     })
   })
 })

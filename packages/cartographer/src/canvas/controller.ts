@@ -257,6 +257,8 @@ function report(it: LiveCanvas, at: [number, number]): void {
  * @param event - the pointer event
  */
 function onPointerDown(it: LiveCanvas, event: PointerEvent): void {
+  // A result describes the last gesture; the next press starts another, so it goes.
+  it.deps.onResult(null)
   it.pressAt = positionOf(event)
   it.dragging = false
   it.node.setPointerCapture(event.pointerId)
@@ -359,6 +361,8 @@ function onModifiedKey(it: LiveCanvas, event: KeyboardEvent): boolean {
   const history = historyKey(event)
   if (history === null) return true
   event.preventDefault()
+  // The result described the gesture now being taken back or replayed (QUAL-109).
+  it.deps.onResult(null)
   if (history === 'undo') undoGesture(gestureOf(it), event.repeat)
   else redoGesture(gestureOf(it), event.repeat)
   it.requestPaint()
@@ -401,6 +405,8 @@ function onKeyDown(it: LiveCanvas, event: KeyboardEvent): void {
   }
   if (toolKey(gestureOf(it), event.key)) {
     event.preventDefault()
+    // A gesture key changes the outline the result described; the pan and zoom keys do not (QUAL-109).
+    it.deps.onResult(null)
     it.requestPaint()
     refreshTools(it)
     return

@@ -44,3 +44,15 @@ export function writeAction(node: HTMLElement | null, sentence: string | null): 
   if (node === null) return
   node.textContent = sentence ?? ''
 }
+
+/**
+ * Write what a gesture did — *"inserted 412 vertices from the coastline"* — or clear it.
+ *
+ * Its own zone beside the action, so neither ever takes the other's place (`s02`).
+ * @param node - the result zone, or `null` before it is mounted
+ * @param message - the result, or `null` to clear it
+ */
+export function writeResult(node: HTMLElement | null, message: string | null): void {
+  if (node === null) return
+  node.textContent = message ?? ''
+}

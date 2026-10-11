@@ -48,7 +48,13 @@ function sources(landBits?: Uint8Array): ComputeSources {
     ? {
         heightmap,
         landMask: {
-          meta: { width: 8, height: 8, scale: 1, bbox: { west: 0, south: 0, east: 1, north: 1 } },
+          meta: {
+            width: 8,
+            height: 8,
+            scale: 1,
+            bbox: { west: 0, south: 0, east: 1, north: 1 },
+            source: 'test',
+          },
           bits: landBits,
         },
       }
@@ -57,7 +63,7 @@ function sources(landBits?: Uint8Array): ComputeSources {
 
 /** Every cell land, packed — built through the real mask so the fixture cannot drift from the format. */
 const ALL_LAND = createLandMask(
-  { width: 8, height: 8, scale: 1, bbox: { west: 0, south: 0, east: 1, north: 1 } },
+  { width: 8, height: 8, scale: 1, bbox: { west: 0, south: 0, east: 1, north: 1 }, source: 'test' },
   () => true
 ).pack()
 

@@ -1,7 +1,7 @@
 import { isAssetError } from '@europe-historical-atlas/core/data/assetError'
 
 import { MapCanvas } from './MapCanvas'
-import { writeAction, writePosition } from './statusBar'
+import { writeAction, writePosition, writeResult } from './statusBar'
 import { useEditorAssets } from './useEditorAssets'
 
 import type { Backdrop } from '../backdropSource'
@@ -77,6 +77,8 @@ export interface MapAreaProps {
   statusRef: RefObject<HTMLElement | null>
   /** The status bar's action zone, beside the position — same reasons, same ownership. */
   actionRef: RefObject<HTMLElement | null>
+  /** The status bar's result zone, beside the action. */
+  resultRef: RefObject<HTMLElement | null>
 }
 
 /** What each phase of a bake is called, for the waiting line. */
@@ -191,6 +193,7 @@ export function MapArea({
   label,
   statusRef,
   actionRef,
+  resultRef,
 }: MapAreaProps) {
   const { assets, error, fraction, phase } = useEditorAssets(load)
 
@@ -208,6 +211,9 @@ export function MapArea({
         }}
         onAction={(sentence) => {
           writeAction(actionRef.current, sentence)
+        }}
+        onResult={(message) => {
+          writeResult(resultRef.current, message)
         }}
         style={style}
         zoneLabel={zoneLabel}

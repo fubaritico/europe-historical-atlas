@@ -15,7 +15,7 @@ const BBOX = { west: 0, south: 0, east: 1, north: 1 }
 
 /** Metadata for a small test grid. */
 function meta(width: number, height: number): LandMaskMeta {
-  return { width, height, scale: 1, bbox: BBOX }
+  return { width, height, scale: 1, bbox: BBOX, source: 'test' }
 }
 
 /** A 2×1 mask: water to the west, land to the east. */
@@ -101,9 +101,34 @@ describe('landMask', () => {
       expect(mask.isLand(1, 0)).toBe(false)
       vi.unstubAllGlobals()
     })
+
+    // The source travels with the data: the Cartographer records it on every anchor traced from it.
+    it('keeps what the mask was rasterised from', async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(meta(8, 1)) })
+        .mockResolvedValueOnce({
+          ok: true,
+          arrayBuffer: () => Promise.resolve(new Uint8Array([0]).buffer),
+        })
+      vi.stubGlobal('fetch', fetchMock)
+      expect((await createFetchLandMaskSource('/masks/x').load()).meta.source).toBe('test')
+      vi.unstubAllGlobals()
+    })
   })
 
   describe('managed errors', () => {
+    // A mask that does not say where it comes from is refused, never given a plausible source.
+    it('refuses a sidecar that declares no source', async () => {
+      const { source: _dropped, ...unsourced } = meta(8, 1)
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(unsourced) })
+      )
+      await expect(createFetchLandMaskSource('/masks/x').load()).rejects.toThrow(/meta\.source/)
+      vi.unstubAllGlobals()
+    })
+
     it('surfaces a missing sidecar rather than guessing a grid', async () => {
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 404 }))
       await expect(createFetchLandMaskSource('/masks/x').load()).rejects.toThrow(

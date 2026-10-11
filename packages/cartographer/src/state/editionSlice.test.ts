@@ -639,11 +639,13 @@ describe('editionSlice.createPolity', () => {
 const DRAW: HistoryStep = { kind: 'draw-outline', label: 'draw outline' }
 
 /** A small triangle west of the fixture's two squares. */
-const OUTLINE: [number, number][] = [
-  [-4, 47],
-  [-2, 48],
-  [-2, 46],
-]
+const OUTLINE = (
+  [
+    [-4, 47],
+    [-2, 48],
+    [-2, 46],
+  ] as [number, number][]
+).map((at) => ({ at, provenance: FREE_POINT_PROVENANCE }))
 
 describe('editionSlice.drawOutline and moveAnchor', () => {
   describe('happy path', () => {

@@ -14,7 +14,13 @@ import type { ComputeWorkerHandle } from './workerCompute'
 import type { HeightmapMeta } from '../data/heightmap'
 import type { Region } from '../data/regionSource'
 
-const MASK_META = { width: 4, height: 4, scale: 1, bbox: { west: 0, south: 0, east: 1, north: 1 } }
+const MASK_META = {
+  width: 4,
+  height: 4,
+  scale: 1,
+  bbox: { west: 0, south: 0, east: 1, north: 1 },
+  source: 'test',
+}
 
 /** Metadata for a 4x4 test grid. */
 const HEIGHTMAP_META: HeightmapMeta = {

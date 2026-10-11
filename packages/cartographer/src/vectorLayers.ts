@@ -8,6 +8,7 @@ import type { BackdropFrame } from './view/projection'
 import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
 import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 import type { River, RiverSource } from '@europe-historical-atlas/core/data/riverSource'
+import type { Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
 
 /**
  * The vector layers the author aims at: the coastline and the rivers.
@@ -55,6 +56,33 @@ export interface VectorLayers {
   coast: readonly Polyline[]
   /** The river centrelines. */
   rivers: readonly NamedPolyline[]
+  /**
+   * What the coastline was traced from — recorded on every anchor the Pen snaps onto it. Read off the
+   * mask's own declaration, never restated here.
+   */
+  coastProvenance: Provenance
+}
+
+/**
+ * Split a source declared as `"<name> (<licence>)"` into the provenance a year records.
+ *
+ * **It refuses rather than guesses** (`rules/error-handling.md`): a source with no licence in brackets
+ * would otherwise have to be recorded under a licence nobody declared — and a licence is the one thing
+ * this project cannot afford to make up, the GPL years being the reason it watches its sources at all.
+ * @param source - the mask's `source`, e.g. `"Natural Earth 10m land minus lakes (public domain)"`
+ * @returns the name and the licence
+ * @throws when the declaration does not end with its licence in brackets
+ */
+export function provenanceOf(source: string): Provenance {
+  const match = /^(.+?)\s*\(([^()]+)\)$/.exec(source.trim())
+  const name = match?.[1]
+  const licence = match?.[2]
+  if (name === undefined || licence === undefined) {
+    throw new Error(
+      `Cartographer: the coastline's source "${source}" names no licence in brackets; no anchor can be recorded under it.`
+    )
+  }
+  return { name, licence }
 }
 
 /**
@@ -162,5 +190,6 @@ export async function loadVectorLayers(deps: VectorLayersDeps): Promise<VectorLa
   return {
     coast: traceCoastline(deps.mask, deps.frame, deps.traceWidth),
     rivers: projectRiverLines(rivers, deps.frame),
+    coastProvenance: provenanceOf(deps.mask.meta.source),
   }
 }

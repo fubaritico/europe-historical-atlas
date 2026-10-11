@@ -13,6 +13,7 @@ import {
   arrowPress,
   arrowRelease,
   closeOutline,
+  coastHit,
   lonLatAt,
   penClick,
   redoGesture,
@@ -22,6 +23,7 @@ import {
 import { idleSession } from './toolSession'
 
 import type { GestureContext } from './toolGestures'
+import type { CoastContour } from '../geometry/coastSnap'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 
 /** A polity with only an id and a name. */
@@ -39,6 +41,9 @@ function polity(id: string, name: string): YearPolity {
   }
 }
 
+/** What the test coastline is said to be traced from. */
+const COAST_PROVENANCE = { name: 'test shore', licence: 'CC0' }
+
 /** Three screen points that make a triangle well inside the backdrop. */
 const TRIANGLE: [number, number][] = [
   [100, 100],
@@ -51,7 +56,7 @@ const TRIANGLE: [number, number][] = [
  * @param aimed - whether France is the target
  * @returns the gesture context, over a fresh session
  */
-function openContext(aimed = true): GestureContext {
+function openContext(aimed = true, coast: readonly CoastContour[] = []): GestureContext {
   const store = createCartographerStore({
     edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
     viewport: { viewport: { scale: 1, originX: 0, originY: 0 } },
@@ -69,6 +74,9 @@ function openContext(aimed = true): GestureContext {
         store.getState().viewport
       ),
     radius: 8,
+    coast,
+    coastProvenance: COAST_PROVENANCE,
+    report: () => undefined,
   }
 }
 
@@ -412,7 +420,7 @@ describe('undoGesture and redoGesture', () => {
       undoGesture(context, false)
       expect(context.store.getState().document.claims).toEqual([])
       expect(context.session.outline).toHaveLength(3)
-      expect(onScreenPoint(context, context.session.outline[1])[0]).toBeCloseTo(300, 6)
+      expect(onScreenPoint(context, context.session.outline[1]?.at)[0]).toBeCloseTo(300, 6)
     })
 
     it('then takes back one anchor per press', () => {
@@ -491,3 +499,214 @@ function onScreenPoint(
   if (point === undefined) throw new Error('no point')
   return lonLatToScreen(point, context.frame, context.store.getState().viewport)
 }
+
+/** A straight shore from (100,200) to (500,200), a vertex every 10 backdrop pixels. */
+const SHORE: CoastContour = {
+  points: Array.from({ length: 41 }, (_, index): [number, number] => [100 + index * 10, 200]),
+  closed: false,
+  bounds: { left: 100, top: 200, right: 500, bottom: 200 },
+}
+
+/** A small island well away from the shore. */
+const ISLE: CoastContour = {
+  points: [
+    [700, 600],
+    [710, 600],
+    [710, 610],
+  ],
+  closed: true,
+  bounds: { left: 700, top: 600, right: 710, bottom: 610 },
+}
+
+/**
+ * A context with the Pen following the coast, and a recorder for what it reports.
+ * @returns the context and the reports
+ */
+function coastContext() {
+  const context = openContext(true, [SHORE, ISLE])
+  context.store.getState().choosePenMode('coast')
+  const reports: string[] = []
+  context.report = (message) => {
+    reports.push(message)
+  }
+  return { context, reports }
+}
+
+describe('the Pen following the coast', () => {
+  describe('happy path', () => {
+    // s02 — "a first vertex is placed exactly on the coastline contour".
+    it('places the first anchor exactly on the coast, under its provenance', () => {
+      const { context } = coastContext()
+      penClick(context, [151, 204])
+      expect(context.session.outline).toHaveLength(1)
+      expect(onScreenPoint(context, context.session.outline[0]?.at)[0]).toBeCloseTo(150, 6)
+      expect(onScreenPoint(context, context.session.outline[0]?.at)[1]).toBeCloseTo(200, 6)
+      expect(context.session.outline[0]?.provenance).toEqual(COAST_PROVENANCE)
+    })
+
+    // s02 — "the whole coastline sub-path between the two is inserted / inserted 412 vertices".
+    it('inserts the whole stretch on the second click, and says how many', () => {
+      const { context, reports } = coastContext()
+      penClick(context, [150, 203])
+      penClick(context, [300, 197])
+      expect(context.session.outline).toHaveLength(16)
+      expect(reports).toEqual(['inserted 15 vertices from the coastline'])
+    })
+
+    it('records the snapped anchors under the coast’s provenance once the ring closes', () => {
+      const { context } = coastContext()
+      penClick(context, [150, 200])
+      penClick(context, [200, 200])
+      context.store.getState().choosePenMode('free')
+      penClick(context, [175, 300])
+      penClick(context, [151, 201])
+      const { sources, anchorSource } = context.store.getState().document
+      expect(sources.map((source) => source.name).sort()).toEqual(['reported by eye', 'test shore'])
+      expect(anchorSource).toHaveLength(7)
+    })
+  })
+
+  describe('variants', () => {
+    it('follows on from the last snapped vertex, in either direction', () => {
+      const { context } = coastContext()
+      penClick(context, [300, 200])
+      penClick(context, [250, 200])
+      penClick(context, [400, 200])
+      // 1 + 5 back towards the start + 15 forward again.
+      expect(context.session.outline).toHaveLength(21)
+    })
+
+    it('places only the vertex when the second click lands on another contour', () => {
+      const { context, reports } = coastContext()
+      penClick(context, [150, 200])
+      penClick(context, [705, 601])
+      expect(context.session.outline).toHaveLength(2)
+      expect(reports).toEqual([])
+    })
+  })
+
+  describe('managed errors', () => {
+    // s02 — "no river within 12 km — place points freely": the same rule for the coast, and said.
+    it('places a free point off the coast, and says so', () => {
+      const logged = watchConsole()
+      const { context } = coastContext()
+      penClick(context, [300, 400])
+      expect(context.session.outline[0]?.provenance.name).toBe('reported by eye')
+      expect(logged.warn).toHaveBeenCalledWith(expect.stringContaining('no coastline within reach'))
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // A free point placed after a snapped one breaks the run: the next snap starts afresh.
+    it('does not bridge a stretch across a free point', () => {
+      const { context, reports } = coastContext()
+      penClick(context, [150, 200])
+      context.store.getState().choosePenMode('free')
+      penClick(context, [200, 300])
+      context.store.getState().choosePenMode('coast')
+      penClick(context, [300, 200])
+      expect(context.session.outline).toHaveLength(3)
+      expect(reports).toEqual([])
+    })
+
+    it('starts afresh after Backspace takes back a snapped anchor', () => {
+      const { context, reports } = coastContext()
+      penClick(context, [150, 200])
+      penClick(context, [160, 200])
+      toolKey(context, 'Backspace')
+      penClick(context, [300, 200])
+      expect(reports).toEqual(['inserted 1 vertex from the coastline'])
+      expect(context.session.outline).toHaveLength(2)
+    })
+  })
+
+  describe('edge cases', () => {
+    // Closing wins: the first anchor sits on the coast too, and a click on it must close the ring.
+    it('still closes the ring on the first anchor while following the coast', () => {
+      const { context } = coastContext()
+      penClick(context, [150, 200])
+      penClick(context, [200, 200])
+      context.store.getState().choosePenMode('free')
+      penClick(context, [175, 300])
+      context.store.getState().choosePenMode('coast')
+      penClick(context, [151, 201])
+      expect(context.store.getState().document.claims).toHaveLength(1)
+    })
+
+    it('finds no coast when the view has no scale yet', () => {
+      const { context } = coastContext()
+      context.store.getState().setViewport({ scale: 0, originX: 0, originY: 0 })
+      expect(coastHit(context, [150, 200])).toBeNull()
+    })
+  })
+
+  describe('what the review found', () => {
+    // QUAL-101: a second click on the vertex already placed inserts nothing and reports nothing.
+    it('places nothing on a second click on the same coast vertex, and says so', () => {
+      const logged = watchConsole()
+      const { context, reports } = coastContext()
+      penClick(context, [150, 200])
+      penClick(context, [151, 201])
+      expect(context.session.outline).toHaveLength(1)
+      expect(reports).toEqual([])
+      expect(logged.warn).toHaveBeenCalledWith(
+        expect.stringContaining('already ends on that coast vertex')
+      )
+    })
+
+    // QUAL-105: the reach is in screen pixels, so it shrinks on the coast's grid as the view zooms in.
+    it('reaches the coast in screen pixels, whatever the scale', () => {
+      const { context } = coastContext()
+      context.store.getState().setViewport({ scale: 2, originX: 0, originY: 0 })
+      // 6 screen px from the vertex at backdrop (150, 200), which is screen (300, 400) at scale 2.
+      expect(coastHit(context, [300, 406])).toEqual({ contour: 0, vertex: 5 })
+      // 12 screen px away is out of an 8 px reach, though it is only 6 backdrop px away.
+      expect(coastHit(context, [300, 412])).toBeNull()
+    })
+
+    // QUAL-106: each of the resets breaks the run, so the next snapped click starts afresh.
+    it('starts afresh after Escape abandons the outline', () => {
+      const { context, reports } = coastContext()
+      penClick(context, [150, 200])
+      toolKey(context, 'Escape')
+      penClick(context, [300, 200])
+      expect(context.session.outline).toHaveLength(1)
+      expect(reports).toEqual([])
+    })
+
+    it('starts afresh after ctrl+Z takes back the last snapped anchor', () => {
+      const { context, reports } = coastContext()
+      penClick(context, [150, 200])
+      penClick(context, [160, 200])
+      undoGesture(context, false)
+      penClick(context, [300, 200])
+      expect(context.session.outline).toHaveLength(2)
+      expect(reports).toEqual(['inserted 1 vertex from the coastline'])
+    })
+
+    // QUAL-112: a reopened ring whose anchor has no declared source drops it, and says so.
+    it('reports and leaves out an anchor with no declared source when reopening', () => {
+      const logged = watchConsole()
+      const context = openContext()
+      drawTriangle(context)
+      context.store.getState().document.anchorSource[1] = 99
+      undoGesture(context, false)
+      expect(context.session.outline).toHaveLength(2)
+      expect(logged.error).toHaveBeenCalledWith(expect.stringContaining('no declared source'))
+    })
+
+    it('reads nothing of a ring when the step undone is not a closing', () => {
+      const logged = watchConsole()
+      const context = openContext()
+      drawTriangle(context)
+      context.store.getState().document.anchorSource[1] = 99
+      context.store.getState().selectTool('edit')
+      arrowPress(context, [100, 100])
+      arrowDrag(context, [110, 110])
+      arrowRelease(context)
+      context.store.getState().selectTool('draw')
+      undoGesture(context, false)
+      expect(logged.error).not.toHaveBeenCalled()
+    })
+  })
+})

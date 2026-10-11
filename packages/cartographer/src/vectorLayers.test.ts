@@ -6,6 +6,7 @@ import {
   COASTLINE_TRACE_WIDTH,
   loadVectorLayers,
   projectRiverLines,
+  provenanceOf,
   toBackdropPixels,
   traceCoastline,
 } from './vectorLayers'
@@ -27,7 +28,13 @@ const FRAME: BackdropFrame = {
  */
 function islandMask(size = 16) {
   return createLandMask(
-    { width: size, height: size, scale: 1, bbox: TEST_BACKDROP_FRAME.bounds },
+    {
+      width: size,
+      height: size,
+      scale: 1,
+      bbox: TEST_BACKDROP_FRAME.bounds,
+      source: 'test shore (CC0)',
+    },
     (col, row) => col > 4 && col < 11 && row > 4 && row < 11
   )
 }
@@ -103,7 +110,13 @@ describe('traceCoastline', () => {
   describe('edge cases', () => {
     it('returns nothing for an all-land mask, there being no shore in it', () => {
       const allLand = createLandMask(
-        { width: 8, height: 8, scale: 1, bbox: TEST_BACKDROP_FRAME.bounds },
+        {
+          width: 8,
+          height: 8,
+          scale: 1,
+          bbox: TEST_BACKDROP_FRAME.bounds,
+          source: 'test shore (CC0)',
+        },
         () => true
       )
 
@@ -186,6 +199,7 @@ describe('loadVectorLayers', () => {
 
       expect(layers.coast.length).toBeGreaterThan(0)
       expect(layers.rivers[0]?.points).toEqual([[100, 40]])
+      expect(layers.coastProvenance).toEqual({ name: 'test shore', licence: 'CC0' })
     })
   })
 
@@ -228,4 +242,43 @@ describe('loadVectorLayers', () => {
 
   // L4: N/A — nothing is caught, so there is no swallowed rejection; the managed case above is the
   // whole of its error behaviour.
+})
+
+describe('provenanceOf', () => {
+  describe('happy path', () => {
+    it('splits the shipped mask’s declaration into a name and a licence', () => {
+      expect(provenanceOf('Natural Earth 10m land minus lakes (public domain)')).toEqual({
+        name: 'Natural Earth 10m land minus lakes',
+        licence: 'public domain',
+      })
+    })
+  })
+
+  describe('variants', () => {
+    it('takes the last bracket as the licence', () => {
+      expect(provenanceOf('Survey (2nd ed.) of the coast (CC0)')).toEqual({
+        name: 'Survey (2nd ed.) of the coast',
+        licence: 'CC0',
+      })
+    })
+  })
+
+  describe('managed errors', () => {
+    // A licence nobody declared is never recorded: the source is refused instead.
+    it('refuses a source with no licence in brackets', () => {
+      expect(() => provenanceOf('Natural Earth 10m land')).toThrow(/names no licence/)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('refuses an empty source', () => {
+      expect(() => provenanceOf('')).toThrow(/names no licence/)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('ignores the whitespace around the declaration', () => {
+      expect(provenanceOf('  Shore (CC0)  ')).toEqual({ name: 'Shore', licence: 'CC0' })
+    })
+  })
 })

@@ -79,6 +79,22 @@ function paintMoving(ctx: Painter2D, scene: OverlayScene, style: PaintStyle): vo
 }
 
 /**
+ * The coast the next click would follow, twice the outline's weight so it reads as an offer, and the
+ * vertex it would snap onto.
+ * @param ctx - the context
+ * @param scene - what to draw
+ * @param style - the colours and sizes
+ */
+function paintSnap(ctx: Painter2D, scene: OverlayScene, style: PaintStyle): void {
+  if (scene.snapPreview !== null) {
+    ctx.lineWidth = style.pathWidth * 2
+    polyline(ctx, scene.snapPreview)
+    ctx.lineWidth = style.pathWidth
+  }
+  if (scene.snapTarget !== null) handle(ctx, scene.snapTarget, true, style)
+}
+
+/**
  * Paint the overlay: clear it, then whatever the session is doing.
  * @param ctx - the overlay's context
  * @param size - the canvas, in device pixels
@@ -95,5 +111,6 @@ export function paintOverlay(
   ctx.strokeStyle = style.pathStroke
   ctx.lineWidth = style.pathWidth
   paintOutline(ctx, scene, style)
+  paintSnap(ctx, scene, style)
   paintMoving(ctx, scene, style)
 }

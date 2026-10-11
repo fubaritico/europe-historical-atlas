@@ -86,7 +86,7 @@ export function nearestVertexOnPolylines(
  * @param index - the index to check
  * @returns `true` when the polyline holds a vertex at that index
  */
-function isVertexOf(polyline: readonly Point[], index: number): boolean {
+export function isVertexOf(polyline: readonly Point[], index: number): boolean {
   return Number.isInteger(index) && index >= 0 && index < polyline.length
 }
 

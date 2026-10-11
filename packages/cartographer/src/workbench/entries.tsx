@@ -125,6 +125,8 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
           tool="draw"
           onSelect={() => undefined}
           swatch={{ name: 'Reaume de France', colour: '#54719b' }}
+          penMode="free"
+          onPenMode={() => undefined}
         />
       </div>
     ),
@@ -132,11 +134,18 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
   {
     id: 'tool-rail-group',
     title: 'Tool rail, Pen group open',
-    note: "The Pen's hidden tools, as Illustrator lists them: the square marks the one in use, the key in brackets. Following the coast and a river are listed and disabled — they are the next rung.",
+    note: "The Pen's hidden tools, as Illustrator lists them: the square marks the one in use, the key in brackets. Following the coast is there; following a river is listed and disabled — it is the next rung.",
     width: 300,
     render: () => (
       <div className="workbench__rail">
-        <ToolRail tool="draw" onSelect={() => undefined} swatch={null} initiallyOpen="draw" />
+        <ToolRail
+          tool="draw"
+          onSelect={() => undefined}
+          swatch={null}
+          initiallyOpen="draw"
+          penMode="free"
+          onPenMode={() => undefined}
+        />
       </div>
     ),
   },

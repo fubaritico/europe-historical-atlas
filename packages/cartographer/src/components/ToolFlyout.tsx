@@ -45,11 +45,12 @@ function enabledItems(menu: HTMLElement): HTMLElement[] {
 }
 
 /**
- * Move the focus among the enabled rows on ↑ and ↓, wrapping — the WAI-ARIA menu pattern.
+ * Move the focus among the rows on ↑ and ↓, wrapping — the WAI-ARIA menu pattern, which keeps a
+ * disabled row reachable so it can be discovered, but never chosen (A11Y-003).
  * @param event - the key event, on the menu
  */
 function moveFocus(event: KeyboardEvent<HTMLUListElement>): void {
-  const items = enabledItems(event.currentTarget)
+  const items = [...event.currentTarget.querySelectorAll<HTMLElement>('[role="menuitemradio"]')]
   const at = items.findIndex((item) => item === document.activeElement)
   const step = event.key === 'ArrowDown' ? 1 : -1
   items[(at + step + items.length) % items.length]?.focus()
@@ -148,6 +149,9 @@ export function ToolFlyout({ label, variants, current, onChoose, onDismiss }: To
           moveFocus(event)
         } else if (event.key === 'Escape') {
           event.preventDefault()
+          onDismiss()
+        } else if (event.key === 'Tab') {
+          // Tab leaves the menu, so the menu goes; the focus returns to its tool and Tab moves on.
           onDismiss()
         }
       }}

@@ -10,7 +10,17 @@ import {
   targetHandles,
 } from './toolSession'
 
-import type { ActionInputs, OverlayInputs } from './toolSession'
+import type { ActionInputs, OverlayInputs, SessionPoint } from './toolSession'
+
+/**
+ * A point of an outline in progress, reported by eye.
+ * @param lon - its longitude, which these tests read as a screen x
+ * @param lat - its latitude, read as a screen y
+ * @returns the session point
+ */
+function here(lon: number, lat: number): SessionPoint {
+  return { at: [lon, lat], provenance: { name: 'reported by eye', licence: 'fact' } }
+}
 
 /** A sentence's inputs with the Pen in hand, aimed at France, the pointer on the canvas. */
 function action(overrides: Partial<ActionInputs> = {}): ActionInputs {
@@ -19,6 +29,7 @@ function action(overrides: Partial<ActionInputs> = {}): ActionInputs {
     targetName: 'Reaume de France',
     onCanvas: true,
     closing: false,
+    snapping: false,
     session: idleSession(),
     ...overrides,
   }
@@ -34,6 +45,8 @@ function overlay(overrides: Partial<OverlayInputs> = {}): OverlayInputs {
     anchors: [],
     movingFrom: [],
     closeRadius: 8,
+    snapTarget: null,
+    snapPreview: null,
     ...overrides,
   }
 }
@@ -54,7 +67,7 @@ describe('toolSession', () => {
     it('runs the rubber band from the last anchor to the pointer', () => {
       const session = {
         ...idleSession(),
-        outline: [[10, 10] as [number, number], [20, 10] as [number, number]],
+        outline: [here(10, 10), here(20, 10)],
       }
       const scene = overlayScene(overlay({ session }))
       expect(scene.outline).toEqual([
@@ -85,11 +98,7 @@ describe('toolSession', () => {
     })
 
     it('offers to close once the pointer is on the first anchor of three', () => {
-      const outline: [number, number][] = [
-        [50, 52],
-        [90, 50],
-        [90, 90],
-      ]
+      const outline = [here(50, 52), here(90, 50), here(90, 90)]
       expect(overlayScene(overlay({ session: { ...idleSession(), outline } })).closing).toBe(true)
     })
 
@@ -158,16 +167,52 @@ describe('toolSession', () => {
 
     // Off the canvas, a band to the last known position would point where the author is not aiming.
     it('draws no rubber band when the pointer is off the canvas', () => {
-      const session = { ...idleSession(), outline: [[10, 10] as [number, number]] }
+      const session = { ...idleSession(), outline: [here(10, 10)] }
       expect(overlayScene(overlay({ session, pointer: null })).rubberTo).toBeNull()
     })
 
     it('does not offer to close an outline of two anchors, which encloses nothing', () => {
-      const outline: [number, number][] = [
-        [50, 52],
-        [90, 50],
-      ]
+      const outline = [here(50, 52), here(90, 50)]
       expect(overlayScene(overlay({ session: { ...idleSession(), outline } })).closing).toBe(false)
+    })
+  })
+
+  describe('the coast preview', () => {
+    // The preview is the line the click will lay, so it takes the rubber band's place.
+    it('shows the stretch instead of the rubber band', () => {
+      const session = { ...idleSession(), outline: [here(10, 10)] }
+      const stretch = [
+        [10, 10],
+        [20, 10],
+        [30, 10],
+      ] as const
+      const scene = overlayScene(overlay({ session, snapTarget: [30, 10], snapPreview: stretch }))
+      expect(scene.snapPreview).toBe(stretch)
+      expect(scene.rubberTo).toBeNull()
+    })
+
+    // Without a stretch to offer, the band still runs — to the vertex the click would snap onto.
+    it('runs the rubber band to the snap target, not to the pointer beside it', () => {
+      const session = { ...idleSession(), outline: [here(10, 10)] }
+      const scene = overlayScene(overlay({ session, pointer: [52, 49], snapTarget: [50, 50] }))
+      expect(scene.rubberTo).toEqual([50, 50])
+      expect(scene.snapTarget).toEqual([50, 50])
+    })
+
+    it('offers nothing under the arrow', () => {
+      const scene = overlayScene(overlay({ tool: 'edit', snapTarget: [50, 50], snapPreview: [] }))
+      expect(scene.snapTarget).toBeNull()
+      expect(scene.snapPreview).toBeNull()
+    })
+
+    // s02 — "Following the coastline for Kingdom of France".
+    it('says the Pen is following the coastline while it is within reach', () => {
+      expect(actionSentence(action({ snapping: true }))).toBe(
+        'Following the coastline for Reaume de France'
+      )
+      expect(actionSentence(action({ snapping: true, closing: true }))).toBe(
+        'Closing the outline of Reaume de France'
+      )
     })
   })
 })

@@ -43,15 +43,21 @@ describe('ToolFlyout', () => {
   })
 
   describe('variants', () => {
-    // ↑ ↓ walk the enabled rows only, and wrap.
-    it('walks the enabled rows with the arrows, skipping a disabled one and wrapping', async () => {
+    // ↑ ↓ walk every row, a disabled one included so it can be discovered (A11Y-003), and wrap.
+    it('walks every row with the arrows, the disabled one included, and wraps', async () => {
       const { user } = mount('a')
       await user.keyboard('{ArrowDown}')
-      expect(document.activeElement).toBe(item('Third'))
-      await user.keyboard('{ArrowDown}')
+      expect(document.activeElement).toBe(item('Second'))
+      await user.keyboard('{ArrowDown}{ArrowDown}')
       expect(document.activeElement).toBe(item('First'))
       await user.keyboard('{ArrowUp}')
       expect(document.activeElement).toBe(item('Third'))
+    })
+
+    it('closes when Tab leaves it', async () => {
+      const { onDismiss, user } = mount('a')
+      await user.keyboard('{Tab}')
+      expect(onDismiss).toHaveBeenCalled()
     })
 
     it('chooses with Space as with Enter', async () => {
@@ -75,7 +81,7 @@ describe('ToolFlyout', () => {
     // useEffectEvent: a parent re-render hands a new onDismiss, and must not pull the focus back.
     it('keeps the focus where the author moved it when the parent re-renders', async () => {
       const { view, user } = mount('a')
-      await user.keyboard('{ArrowDown}')
+      await user.keyboard('{ArrowUp}')
       view.rerender(
         <ToolFlyout
           label="Group"

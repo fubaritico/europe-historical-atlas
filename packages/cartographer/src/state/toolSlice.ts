@@ -21,6 +21,24 @@ import type { StateCreator } from 'zustand'
  */
 export type EditorTool = 'navigate' | 'draw' | 'edit'
 
+/**
+ * How the Pen places its points — the variants of its group (`s02`'s ⟨free point⟩, ⟨snap to coast⟩).
+ * Following a river is the next rung and has no mode yet.
+ */
+export const PEN_MODES = ['free', 'coast'] as const
+
+/** One of {@link PEN_MODES}. */
+export type PenMode = (typeof PEN_MODES)[number]
+
+/**
+ * Whether a variant id names a mode of the Pen — the one check, beside the one list (QUAL-115).
+ * @param id - a row id from the Pen's group
+ * @returns `true` for a {@link PenMode}
+ */
+export function isPenMode(id: string): id is PenMode {
+  return PEN_MODES.some((mode) => mode === id)
+}
+
 /** What the session holds about tools. */
 export interface ToolState {
   /** The tool a click obeys. `s00`'s Background opens on ⟨navigate⟩. */
@@ -32,6 +50,8 @@ export interface ToolState {
    * `describeDrawingTarget` rather than trusting it.
    */
   target: string | null
+  /** How the Pen places its points. ⟨free point⟩ is the default (`s02`). */
+  penMode: PenMode
 }
 
 /** What the chrome may do to the tools. */
@@ -58,6 +78,11 @@ export interface ToolActions {
    * lookup in two places.
    */
   aimAt: (polityId: string) => void
+  /**
+   * Choose a variant of the Pen, which also puts the Pen in hand — what choosing a row of its group
+   * does in Illustrator.
+   */
+  choosePenMode: (mode: PenMode) => void
 }
 
 /** The slice: the tool, the target, and the two ways they change. */
@@ -81,10 +106,14 @@ export const createToolSlice: StateCreator<
 > = (set) => ({
   tool: 'navigate',
   target: null,
+  penMode: 'free',
   selectTool: (tool: EditorTool): void => {
     set({ tool })
   },
   aimAt: (polityId: string): void => {
     set({ tool: 'draw', target: polityId })
+  },
+  choosePenMode: (mode: PenMode): void => {
+    set({ tool: 'draw', penMode: mode })
   },
 })

@@ -113,7 +113,7 @@ export function closeRing(doc: YearDocument, polityId: string, ring: number[]): 
  * @param provenance - what the geometry was taken from, and under what terms
  * @returns the id anchors of that provenance carry
  */
-export function declareSource(doc: YearDocument, provenance: Omit<YearProvenance, 'id'>): number {
+export function declareSource(doc: YearDocument, provenance: Provenance): number {
   const known = doc.sources.find(
     (source) => source.name === provenance.name && source.licence === provenance.licence
   )
@@ -121,6 +121,23 @@ export function declareSource(doc: YearDocument, provenance: Omit<YearProvenance
   const id = doc.sources.reduce((next, source) => Math.max(next, source.id + 1), 0)
   doc.sources.push({ id, name: provenance.name, licence: provenance.licence })
   return id
+}
+
+/**
+ * Where geometry was taken from and under what terms — a {@link YearProvenance} before the document has
+ * given it an id. What the tools carry with every point until the outline enters the document.
+ */
+export type Provenance = Omit<YearProvenance, 'id'>
+
+/** One point of an outline drawn by hand, with where it was taken from. */
+export interface OutlinePoint {
+  /** `[longitude, latitude]`. */
+  at: readonly [number, number]
+  /**
+   * Its provenance — a point placed by eye and a point snapped onto the coast are recorded under
+   * different sources, and one ring may hold both.
+   */
+  provenance: Provenance
 }
 
 /**
@@ -132,20 +149,19 @@ export function declareSource(doc: YearDocument, provenance: Omit<YearProvenance
  * anything is written, so a refused outline leaves no anchor and no source behind.
  * @param doc - the document to edit
  * @param polityId - who the outline is drawn for
- * @param points - the `[longitude, latitude]` of each anchor, in order, closure implied
- * @param provenance - what the points were taken from
+ * @param points - each anchor, in order, closure implied, with its own provenance
  * @returns `false` when the polity is unknown or the points cannot enclose an area
  */
 export function addOutline(
   doc: YearDocument,
   polityId: string,
-  points: readonly (readonly [number, number])[],
-  provenance: Omit<YearProvenance, 'id'>
+  points: readonly OutlinePoint[]
 ): boolean {
   if (points.length < 3) return false
   if (!doc.polities.some((polity) => polity.id === polityId)) return false
-  const source = declareSource(doc, provenance)
-  const ring = points.map((point) => addAnchor(doc, [point[0], point[1]], source))
+  const ring = points.map((point) =>
+    addAnchor(doc, [point.at[0], point.at[1]], declareSource(doc, point.provenance))
+  )
   return closeRing(doc, polityId, ring)
 }
 

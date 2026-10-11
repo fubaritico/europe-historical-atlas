@@ -85,6 +85,12 @@ describe('Editor', () => {
       expect(action).not.toBeNull()
       expect(handed?.statusRef.current).toBe(position)
       expect(handed?.actionRef.current).toBe(action)
+      // A11Y-001: only the result zone speaks; the action and the position change per pointer sample.
+      const result = document.querySelector('p.shell__status > .shell__result')
+      expect(handed?.resultRef.current).toBe(result)
+      expect(result?.getAttribute('role')).toBe('status')
+      expect(action?.getAttribute('role')).toBeNull()
+      expect(position?.getAttribute('role')).toBeNull()
     })
 
     it('forwards the heading, which the shell puts inside the landmark', () => {

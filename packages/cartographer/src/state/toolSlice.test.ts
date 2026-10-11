@@ -14,6 +14,7 @@ import { UNFRAMED } from '../view/viewport'
 
 import { describeDrawingTarget } from './drawingTarget'
 import { createCartographerStore } from './store'
+import { isPenMode } from './toolSlice'
 
 import type { HistoryStep } from '@europe-historical-atlas/core/editor/history'
 
@@ -187,6 +188,33 @@ describe('toolSlice', () => {
       // hold that polity. Opening a file is not a reason to take someone's tool away.
       expect(store.getState().tool).toBe('draw')
       expect(describeDrawingTarget(store.getState().document, store.getState().target)).toBeNull()
+    })
+  })
+
+  describe('the Pen’s mode', () => {
+    it('opens on the free Pen (s02: ⟨free point⟩ is active by default)', () => {
+      expect(openStore().store.getState().penMode).toBe('free')
+    })
+
+    it('puts the Pen in hand with the mode chosen', () => {
+      const { store } = openStore()
+      store.getState().choosePenMode('coast')
+      expect(store.getState().tool).toBe('draw')
+      expect(store.getState().penMode).toBe('coast')
+    })
+
+    it('knows its modes, and no other', () => {
+      expect(isPenMode('coast')).toBe(true)
+      expect(isPenMode('river')).toBe(false)
+    })
+
+    // The mode is the session's: an undo never changes how the Pen places its points.
+    it('keeps the mode across a tool change and an undo', () => {
+      const { store } = openStore()
+      store.getState().choosePenMode('coast')
+      store.getState().selectTool('edit')
+      store.getState().undo()
+      expect(store.getState().penMode).toBe('coast')
     })
   })
 })

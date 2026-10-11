@@ -2,6 +2,7 @@ import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPale
 import { polityColours } from '@europe-historical-atlas/core/editor/polityColours'
 
 import { describeDrawingTarget } from '../state/drawingTarget'
+import { isPenMode } from '../state/toolSlice'
 
 import { ToolRail } from './ToolRail'
 
@@ -25,6 +26,8 @@ export interface ToolRailPanelProps {
 export function ToolRailPanel({ store }: ToolRailPanelProps) {
   const tool = store((state) => state.tool)
   const selectTool = store((state) => state.selectTool)
+  const penMode = store((state) => state.penMode)
+  const choosePenMode = store((state) => state.choosePenMode)
   store((state) => state.target)
   store((state) => state.version)
   const { document, target } = store.getState()
@@ -35,6 +38,14 @@ export function ToolRailPanel({ store }: ToolRailPanelProps) {
     <ToolRail
       tool={tool}
       onSelect={selectTool}
+      penMode={penMode}
+      onPenMode={(id) => {
+        if (isPenMode(id)) choosePenMode(id)
+        else
+          console.error(
+            `[Cartographer] the Pen has no mode "${id}"; the rail and the store disagree.`
+          )
+      }}
       swatch={aimed === null || colour === undefined ? null : { name: aimed.name, colour }}
     />
   )

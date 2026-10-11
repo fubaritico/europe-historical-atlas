@@ -37,7 +37,7 @@ function readyBackdrop(): EditorAssets {
         meta: { width: 2, height: 2, scale: 1, bbox: TEST_BACKDROP_FRAME.bounds },
       } as LandMask,
     },
-    vectors: { coast: [], rivers: [] },
+    vectors: { coast: [], rivers: [], coastProvenance: { name: 'test coast', licence: 'test' } },
   }
 }
 
@@ -73,6 +73,7 @@ function mount(load: BackdropLoad, strict = false): HTMLParagraphElement {
       label="la carte"
       statusRef={statusRef}
       actionRef={{ current: document.createElement('span') }}
+      resultRef={{ current: document.createElement('span') }}
     />
   )
   render(strict ? <StrictMode>{area}</StrictMode> : area)
@@ -419,6 +420,7 @@ describe('MapCanvas, re-rendered', () => {
           vectorLayers={assets.vectors}
           onHover={() => undefined}
           onAction={() => undefined}
+          onResult={() => undefined}
           style={CHROME_PAINT_STYLE}
           zoneLabel="zone"
           label="la carte"

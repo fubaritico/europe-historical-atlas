@@ -1,14 +1,19 @@
+import { coastStretch, nearestCoastVertex } from '../geometry/coastSnap'
 import { nearestAmong } from '../geometry/hitTest'
 import { canCloseRing, isClosingOffered } from '../geometry/ringClosure'
 import { describeDrawingTarget } from '../state/drawingTarget'
-import { lonLatToScreen, screenToLonLatOnBackdrop } from '../view/projection'
+import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
+import { backdropToLonLat, lonLatToScreen, screenToLonLatOnBackdrop } from '../view/projection'
+import { screenToBackdrop } from '../view/viewport'
 
 import { abandonGesture, dropDrag, targetHandles } from './toolSession'
 
-import type { ToolSession } from './toolSession'
+import type { SessionPoint, ToolSession } from './toolSession'
+import type { CoastContour, CoastVertex } from '../geometry/coastSnap'
 import type { CartographerStoreHook } from '../state/store'
 import type { BackdropFrame } from '../view/projection'
 import type { Point } from '../view/viewport'
+import type { Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
 
 /**
  * What the Pen and the white arrow do with a press, a drag, a release and a key.
@@ -31,6 +36,15 @@ export interface GestureContext {
   anchorsOnScreen: () => readonly Point[]
   /** How near, in screen pixels, a press must be to catch a handle or the first anchor. */
   radius: number
+  /** The traced coastline, in backdrop pixels — what the Pen follows in its coast mode. */
+  coast: readonly CoastContour[]
+  /** What the coastline was traced from, recorded on every anchor snapped onto it. */
+  coastProvenance: Provenance
+  /**
+   * Say what a gesture did — *"inserted 412 vertices from the coastline"*, the status bar's result
+   * zone beside the action (`s02`).
+   */
+  report: (message: string) => void
 }
 
 /**
@@ -71,7 +85,7 @@ export function lonLatAt(context: GestureContext, at: Point): [number, number] |
  */
 export function outlineOnScreen(context: GestureContext): Point[] {
   const viewport = context.store.getState().viewport
-  return context.session.outline.map((point) => lonLatToScreen(point, context.frame, viewport))
+  return context.session.outline.map((point) => lonLatToScreen(point.at, context.frame, viewport))
 }
 
 /**
@@ -97,7 +111,7 @@ export function closeOutline(context: GestureContext): void {
     console.warn(`${TAG} the outline was not closed: no polity is selected to close it into.`)
     return
   }
-  if (!canCloseRing(context.session.outline)) {
+  if (!canCloseRing(outlineOnScreen(context))) {
     console.warn(`${TAG} the outline was not closed: a ring needs at least three anchors.`)
     return
   }
@@ -129,12 +143,111 @@ export function penClick(context: GestureContext, at: Point): void {
     closeOutline(context)
     return
   }
+  if (context.store.getState().penMode === 'coast' && coastClick(context, at)) return
+  freeClick(context, at)
+}
+
+/**
+ * Place a free point — reported by eye — where the click is.
+ * @param context - the session and the store
+ * @param at - the pointer, in screen pixels
+ */
+function freeClick(context: GestureContext, at: Point): void {
   const point = lonLatAt(context, at)
   if (point === null) {
     console.warn(`${TAG} no anchor placed: the click was off the map.`)
     return
   }
-  context.session.outline.push(point)
+  context.session.outline.push({ at: point, provenance: FREE_POINT_PROVENANCE })
+  context.session.snap = null
+}
+
+/**
+ * The coast vertex under the pointer, or `null` when the coastline is out of reach.
+ *
+ * The pointer is brought into the coast's own grid — one point — rather than the 95 233 coast points
+ * onto the screen; the radius follows it, divided by the scale.
+ * @param context - the coast and the view
+ * @param at - the pointer, in screen pixels
+ * @returns the vertex, or `null`
+ */
+export function coastHit(context: GestureContext, at: Point): CoastVertex | null {
+  const viewport = context.store.getState().viewport
+  if (viewport.scale <= 0) return null
+  return nearestCoastVertex(
+    context.coast,
+    screenToBackdrop(viewport, at),
+    context.radius / viewport.scale
+  )
+}
+
+/**
+ * The stretch a snapped click would insert: from the last snapped vertex to `hit`, when both lie on the
+ * same contour and the outline still ends there — `null` otherwise, when the click only places `hit`.
+ * @param context - the session and the coast
+ * @param hit - the vertex under the pointer
+ * @returns the coast points to insert after the last one placed, in backdrop pixels, or `null`
+ */
+export function coastStretchTo(context: GestureContext, hit: CoastVertex): Point[] | null {
+  const snap = context.session.snap
+  const contour = context.coast[hit.contour]
+  if (snap?.contour !== hit.contour || contour === undefined) return null
+  if (context.session.outline.length === 0) return null
+  return coastStretch(contour, snap.vertex, hit.vertex)
+}
+
+/**
+ * A click with the Pen following the coast (`s02`): on the first, an anchor exactly on the coast; on
+ * the next one along the same shore, the whole stretch between them, in one gesture.
+ *
+ * Off the coast it places nothing here and says so — the caller then places a free point, `s02`'s
+ * *"place points freely"*.
+ * @param context - the session, the coast and the store
+ * @param at - the pointer, in screen pixels
+ * @returns `true` when the click was taken by the coast
+ */
+function coastClick(context: GestureContext, at: Point): boolean {
+  const hit = coastHit(context, at)
+  const contour = hit === null ? undefined : context.coast[hit.contour]
+  if (hit === null || contour === undefined) {
+    console.warn(`${TAG} no coastline within reach: a free point was placed.`)
+    return false
+  }
+  const stretch = coastStretchTo(context, hit)
+  // A second click on the vertex already placed: nothing to insert. Placing it again would put two
+  // anchors on one spot (a zero-length edge); placing a free point would defeat the snap (QUAL-101).
+  if (stretch !== null && stretch.length < 2) {
+    console.warn(`${TAG} nothing placed: the outline already ends on that coast vertex.`)
+    return true
+  }
+  if (stretch === null) placeOnCoast(context, [contour.points[hit.vertex]])
+  else {
+    const placed = placeOnCoast(context, stretch.slice(1))
+    context.report(
+      `inserted ${String(placed)} ${placed === 1 ? 'vertex' : 'vertices'} from the coastline`
+    )
+  }
+  context.session.snap = hit
+  return true
+}
+
+/**
+ * Append coast points to the outline, each under the coast's provenance.
+ * @param context - the session, the frame and the provenance
+ * @param points - the coast points, in backdrop pixels
+ * @returns how many were placed
+ */
+function placeOnCoast(context: GestureContext, points: readonly (Point | undefined)[]): number {
+  let placed = 0
+  for (const point of points) {
+    if (point === undefined) continue
+    context.session.outline.push({
+      at: backdropToLonLat(point, context.frame),
+      provenance: context.coastProvenance,
+    })
+    placed += 1
+  }
+  return placed
 }
 
 /**
@@ -196,10 +309,13 @@ export function toolKey(context: GestureContext, key: string): boolean {
     return true
   }
   if (tool !== 'draw' || context.session.outline.length === 0) return false
-  if (key === 'Backspace') context.session.outline.pop()
-  else if (key === 'Escape') {
+  if (key === 'Backspace') {
+    context.session.outline.pop()
+    context.session.snap = null
+  } else if (key === 'Escape') {
     context.session.outline = []
     context.session.reopened = null
+    context.session.snap = null
   } else if (key === 'Enter') closeOutline(context)
   else return false
   return true
@@ -217,16 +333,27 @@ function ringsOf(context: GestureContext, polityId: string): number[][] {
 }
 
 /**
- * A ring's points, read off the document as it stands.
+ * A ring's points, read off the document as it stands, each with the provenance it was recorded under.
+ *
+ * An anchor whose source the document does not declare is reported and left out — `documentFaults`
+ * names the same fault once per version; here it would silently put a point back with a made-up
+ * provenance, which is the substitution `rules/error-handling.md` refuses.
  * @param context - the store
  * @param ring - the anchor indices
- * @returns `[longitude, latitude]` per anchor, copied
+ * @returns each anchor and its provenance, copied
  */
-function pointsOf(context: GestureContext, ring: readonly number[]): [number, number][] {
-  const anchors = context.store.getState().document.anchors
+function pointsOf(context: GestureContext, ring: readonly number[]): SessionPoint[] {
+  const { anchors, anchorSource, sources } = context.store.getState().document
   return ring.flatMap((index) => {
     const anchor = anchors[index]
-    return anchor === undefined ? [] : [[anchor[0], anchor[1]] as [number, number]]
+    const source = sources.find((declared) => declared.id === anchorSource[index])
+    if (anchor === undefined || source === undefined) {
+      console.error(`${TAG} anchor ${String(index)} has no declared source; it was not put back.`)
+      return []
+    }
+    return [
+      { at: [anchor[0], anchor[1]], provenance: { name: source.name, licence: source.licence } },
+    ]
   })
 }
 
@@ -244,17 +371,21 @@ function pointsOf(context: GestureContext, ring: readonly number[]): [number, nu
  */
 function undoAndReopen(context: GestureContext): void {
   const state = context.store.getState()
-  const closing = state.rows.find((row) => row.current)?.kind === DRAW_OUTLINE_KIND
+  if (state.rows.find((row) => row.current)?.kind !== DRAW_OUTLINE_KIND) {
+    state.undo()
+    return
+  }
+  // Read before the undo, which takes the ring away — and only for a closing, so undoing anything else
+  // never reads, nor reports on, a ring it does not touch (QUAL-112).
   const target = state.tool === 'draw' ? resolvedTarget(context) : null
   const before = target === null ? [] : ringsOf(context, target.id)
   const last = before.at(-1)
   const points = last === undefined ? [] : pointsOf(context, last)
   state.undo()
-  if (!closing) return
   const after = target === null ? before.length : ringsOf(context, target.id).length
   if (after === before.length - 1 && points.length > 0) {
     context.session.outline = points
-    context.session.reopened = points.map((point): [number, number] => [point[0], point[1]])
+    context.session.reopened = points.map((point) => ({ ...point, at: [point.at[0], point.at[1]] }))
     return
   }
   console.warn(
@@ -279,6 +410,7 @@ export function undoGesture(context: GestureContext, repeat: boolean): void {
   if (dropDrag(context.session)) return
   if (context.session.outline.length > 0) {
     context.session.outline.pop()
+    context.session.snap = null
     return
   }
   if (!context.store.getState().canUndo) {
@@ -298,7 +430,7 @@ function stillReopened(session: ToolSession): boolean {
   if (reopened?.length !== session.outline.length) return false
   return reopened.every((point, index) => {
     const held = session.outline[index]
-    return held === undefined ? false : held[0] === point[0] && held[1] === point[1]
+    return held === undefined ? false : held.at[0] === point.at[0] && held.at[1] === point.at[1]
   })
 }
 

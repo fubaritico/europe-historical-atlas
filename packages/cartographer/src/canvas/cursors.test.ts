@@ -11,6 +11,7 @@ const AT_REST: CursorState = {
   panning: false,
   closing: false,
   overHandle: false,
+  snapping: false,
   spaceHeld: false,
 }
 
@@ -37,6 +38,13 @@ describe('cursorFor', () => {
       expect(cursorFor({ ...AT_REST, tool: 'edit', hasTarget: true, overHandle: true })).toBe(
         'arrow-handle'
       )
+    })
+
+    // CURSORS.md — `cross-snap` while the coastline is within reach; the closing mark still wins.
+    it('marks the coast within reach, under the closing mark', () => {
+      const pen = { ...AT_REST, tool: 'draw' as const, hasTarget: true, snapping: true }
+      expect(cursorFor(pen)).toBe('cross-snap')
+      expect(cursorFor({ ...pen, closing: true })).toBe('cross-close')
     })
 
     it('lends the open hand to ‹space› over any tool', () => {
@@ -91,6 +99,7 @@ describe('cursorFor', () => {
                   spaceHeld,
                   closing: false,
                   overHandle: false,
+                  snapping: false,
                 })
               ).toBeTruthy()
     })
