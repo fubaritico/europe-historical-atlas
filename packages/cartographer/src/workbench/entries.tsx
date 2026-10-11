@@ -1,5 +1,7 @@
 import { Button } from '@fubaritico/react/Button'
 import { Card } from '@fubaritico/react/Card'
+import { ColorField } from '@fubaritico/react/ColorField'
+import { ColorPicker } from '@fubaritico/react/ColorPicker'
 import { IconButton } from '@fubaritico/react/IconButton'
 import { Input } from '@fubaritico/react/Input'
 
@@ -13,6 +15,9 @@ const SUZERAINS = [
   { value: 'hre', label: 'Holy Roman Empire' },
   { value: 'byzantium', label: 'Byzantine Empire' },
 ]
+
+/** A chosen colour for the colour plates — a mid blue, far from both the accent and the warning ink. */
+const BLUE = { h: 214, s: 62, v: 68, a: 1 }
 
 /** The form's callbacks, inert: a plate is looked at, not submitted. */
 const INERT = {
@@ -74,6 +79,39 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
         </Card.Footer>
       </Card>
     ),
+  },
+  {
+    id: 'colour-field',
+    title: 'Colour field',
+    note: "The design system's ColorField alone, between two Inputs so the label column and the 22px line can be compared. Top: automatic, as the form opens. Bottom: a colour chosen.",
+    width: 340,
+    render: () => (
+      <div style={{ display: 'grid', gap: 10 }}>
+        <Input label="Name" defaultValue="Reaume de France" />
+        <ColorField label="Colour" defaultValue={null} nullable density="compact" />
+        <ColorField label="Colour" defaultValue={BLUE} nullable density="compact" />
+        <Input label="Wikidata id" placeholder="Q…" />
+      </div>
+    ),
+  },
+  {
+    id: 'colour-field-open',
+    title: 'Colour field, open',
+    note: 'The popover opened from the start, so the panel is judged against the field it hangs from without clicking. Escape or a click outside closes it; reload to bring it back.',
+    width: 340,
+    render: () => (
+      <div style={{ display: 'grid', gap: 10 }}>
+        <Input label="Suzerain" placeholder="none" />
+        <ColorField label="Colour" defaultValue={BLUE} nullable density="compact" defaultOpen />
+      </div>
+    ),
+  },
+  {
+    id: 'colour-picker',
+    title: 'Colour picker, flat',
+    note: "The panel the popover holds, laid flat — area, hue, the automatic toggle and the hex — to tune it without the popover's positioning in the way.",
+    width: 340,
+    render: () => <ColorPicker defaultValue={BLUE} nullable density="compact" />,
   },
   {
     id: 'polity-form',

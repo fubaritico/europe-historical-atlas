@@ -96,6 +96,16 @@ describe('NewPolityDialog', () => {
       expect(store.getState().document.polities[0]?.colour).toBe('#6699cc')
     })
 
+    // 0.5.0: a complete hex previews live, so a colour typed and never confirmed with Enter still
+    // reaches the file — the author who types a hex and presses OK has chosen it.
+    it('records a colour typed without Enter', async () => {
+      const { store, user } = openDialog()
+      await user.type(field('Name'), 'France')
+      await user.type(screen.getByRole('textbox', { name: 'Hex color Colour' }), '#6699cc')
+      await user.click(screen.getByRole('button', { name: 'OK' }))
+      expect(store.getState().document.polities[0]?.colour).toBe('#6699cc')
+    })
+
     // s02 — "I leave the colour on automatic": nothing touched, the palette decides.
     it('leaves the colour automatic when it is not touched', async () => {
       const { store, user } = openDialog()

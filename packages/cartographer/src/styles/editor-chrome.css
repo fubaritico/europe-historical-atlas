@@ -264,6 +264,79 @@
 }
 
 /*
+ * The colour field laid out as a field row. The design system's ColorField has its own label and no
+ * `.ui-field`, so the grid above does not reach it: the same 88px label column, the same dimmed 11.5px
+ * label, the swatch at a field's 22px line, nothing rounded, the focus ring inside as on the inputs. The
+ * hex input already takes `.ui-input`'s line.
+ *
+ * The popover panel is a top-layer element, out of the grid's flow once open, so the grid only places
+ * the label and the control.
+ */
+.ui-color-field {
+  --ui-color-field-width: auto;
+  --ui-color-field-label-font-size: 11.5px;
+  --ui-color-field-label-font-weight: 400;
+  --ui-color-field-label-color: var(--ink-dim);
+  --ui-color-field-trigger-size: 22px;
+  --ui-color-field-trigger-radius: 0;
+  --ui-color-field-trigger-ring-color: var(--accent);
+
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 8px;
+}
+
+.ui-color-field__label {
+  grid-column: 1;
+  text-align: right;
+}
+
+.ui-color-field__control {
+  grid-column: 2;
+}
+
+.ui-color-field__trigger:focus-visible {
+  outline-offset: -2px;
+}
+
+/*
+ * The picker — in the popover or flat — at the form's scale: the swatch and the area framed by the
+ * fields' hairline, nothing rounded, the accent for the thumbs' focus ring, 12px type, the warning ink
+ * for a refused hex.
+ */
+.ui-color-picker {
+  --ui-color-picker-font-family: inherit;
+  --ui-color-picker-font-size: 12px;
+  --ui-color-picker-text-color: var(--ink);
+  --ui-color-picker-gap: 8px;
+  --ui-color-picker-ring-color: var(--accent);
+  --ui-color-picker-area-radius: 0;
+  --ui-color-picker-area-border-color: var(--ink-off);
+  --ui-color-picker-swatch-radius: 0;
+  --ui-color-picker-swatch-border-color: var(--ink-off);
+  --ui-color-picker-error-color: var(--warn);
+  --ui-color-picker-error-font-size: 11px;
+}
+
+/*
+ * The popover the field opens, drawn like the list a Dropdown opens: against the field with no gap, on
+ * the panel's fill, a hairline and no shadow, nothing rounded, at the dialogue's 10px rhythm.
+ */
+.ui-popover {
+  --ui-popover-bg: var(--panel);
+  --ui-popover-fg: var(--ink);
+  --ui-popover-border-color: var(--ink-off);
+  --ui-popover-border-width: 1px;
+  --ui-popover-shadow: none;
+  --ui-popover-radius: 0;
+  --ui-popover-padding: 10px;
+  --ui-popover-offset: 0;
+  --ui-popover-font-family: inherit;
+  --ui-popover-ring-color: var(--accent);
+}
+
+/*
  * No focus ring on the Modal's shell. It is a transparent `<dialog>` the size of the window, so a ring on
  * it outlines the screen and designates nothing. It takes focus when the backdrop is clicked; the fields
  * and buttons inside keep their rings, which is where a keyboard reader needs to see the focus.
