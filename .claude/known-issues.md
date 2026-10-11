@@ -221,17 +221,10 @@ Put here the know issues to avoid cluttering the context window.
   commité. Rattrapé tout de suite, rien de perdu. **La règle** : pour défaire un sabotage de vérification,
   copier le fichier avant (`cp`) ou éditer à la main — `git checkout` ne connaît que le dernier commit.
   **Cosmétique**, mais ça coûte une réécriture à chaque fois.
-- **Les fleuves se projettent contre une boîte que l'atlas ne vérifie pas — le Cartographe, si (11/10).**
-  `projectRivers` calcule ses `(u,v)` contre la **bbox du payload des fleuves**, et les deux applications
-  les posent ensuite sur la bbox du **DEM**. Les deux sont égales aujourd'hui (vérifié le 07/10).
-  **Fait le 11/10, avant l'accrochage aux fleuves** : `RiverSource.load()` rend un `RiverSet` — la source
-  et la bbox du payload avec les tracés — et le Cartographe refuse en `semantic` des fleuves recadrés
-  autrement (`boundsDisagreement`, généralisé à tout asset), avant de tracer la côte. C'était là que ça
-  comptait : une frontière accrochée à un fleuve décalé est **fausse dans le fichier publié**.
-  **Ce qui reste** : l'atlas n'a pas le contrôle. Il charge les fleuves sans attendre le relief, donc le
-  contrôle devrait vivre là où les deux se rejoignent (`rebuildRivers`). Un défaut là n'y serait
-  qu'**à l'écran**. **Déclencheur** : le jour où `files/spikes/fetch-rivers` est relancé (`H-02`).
-  **Sévérité : cosmétique côté atlas.**
+- **Les fleuves sont vérifiés contre la boîte du relief dans les deux applications — fermé le 12/10.**
+  Le Cartographe depuis le 11/10 (`loadVectorLayers`), l'atlas depuis le 12/10 (`settleRivers`, quand
+  le second des deux arrive) : des fleuves recadrés autrement sont refusés en `semantic`, la carte vient
+  sans eux et le dit — la réponse déjà prise pour le masque. **À archiver** au prochain `/end-session`.
 - **Le manifeste des années déclare la bbox du rendu, et personne ne vérifie qu'elle correspond au DEM.**
   `years/index.json` porte la boîte géographique contre laquelle les années dessinées se projettent, et elle
   **doit** être celle du DEM : si elle diffère, chaque frontière glisse hors du terrain qu'elle borde, sans

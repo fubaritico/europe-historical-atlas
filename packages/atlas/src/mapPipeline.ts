@@ -11,7 +11,11 @@
  * last. Two deliberate stages replace them: the terrain, then the same map with its countries.
  */
 
-import { assetError, boundsMatch } from '@europe-historical-atlas/core/data/assetError'
+import {
+  assetError,
+  boundsDisagreement,
+  boundsMatch,
+} from '@europe-historical-atlas/core/data/assetError'
 import { createFetchHeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
 import { createFetchLandMaskSource } from '@europe-historical-atlas/core/data/landMask'
 import { createFetchRegionSource } from '@europe-historical-atlas/core/data/regionSource'
@@ -37,7 +41,7 @@ import type { MapUi } from './mapUi'
 import type { HeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
 import type { LandMaskSource } from '@europe-historical-atlas/core/data/landMask'
 import type { RegionSet, RegionSource } from '@europe-historical-atlas/core/data/regionSource'
-import type { RiverSource } from '@europe-historical-atlas/core/data/riverSource'
+import type { RiverSet, RiverSource } from '@europe-historical-atlas/core/data/riverSource'
 import type { MapCompute, ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 import type { ComputeWorkerHandle } from '@europe-historical-atlas/core/pipeline/workerCompute'
 import type { LatestOnly } from '@europe-historical-atlas/core/utils/latestOnly'
@@ -137,6 +141,8 @@ interface PipelineContext extends MapPipelineDeps {
   politicalGate: LatestOnly
   /** The four payload ports, defaults filled in. */
   assets: MapAssetSources
+  /** The rivers once loaded, held until the relief is there to check their ground against. */
+  pendingRivers: { set: RiverSet | null }
 }
 
 /** The map's compute, sequenced. */
@@ -321,6 +327,7 @@ async function startup(context: PipelineContext): Promise<void> {
   const { dev, sources, layers, ui } = context
   await loadTerrain(context)
   if (context.isDisposed() || !sources.heightmap) return
+  settleRivers(context) // when the rivers came first, they waited for the relief
   refreshReliefSource(sources, dev.relief.smoothing) // draping is correct from here on, mesh or no mesh
   await pushSources(context)
   if (context.isDisposed()) return
@@ -348,8 +355,8 @@ async function startup(context: PipelineContext): Promise<void> {
 /**
  * Load the rivers, independently of everything else.
  *
- * Neither blocks the other, and the second to arrive triggers the build: the rebuild needs both the
- * terrain to drape on and the centrelines to drape.
+ * Neither blocks the other, and the second to arrive settles them (`settleRivers`): the check needs
+ * both, and so does the rebuild — the terrain to drape on and the centrelines to drape.
  * @param context - the pipeline's world
  * @returns nothing; it settles on its own
  */
@@ -358,12 +365,36 @@ function loadRivers(context: PipelineContext): void {
     .load()
     .then((loaded) => {
       if (context.isDisposed()) return
-      context.sources.riverData = loaded.rivers
-      context.layers.rebuildRivers()
+      context.pendingRivers.set = loaded
+      settleRivers(context)
     })
     .catch((error: unknown) => {
       context.ui.reportAssetFailure('rivers', error)
     })
+}
+
+/**
+ * Install the rivers once both they and the relief are in — refused when they cover other ground.
+ *
+ * **The same check the land mask gets**, and the same answer (`loadTerrain`): the `(u, v)` of every
+ * point were computed against the rivers' own box, and are draped over the relief's — a payload cropped
+ * differently would slide every river off its valley with no error anywhere. So the map comes up without
+ * its rivers, and says so, rather than with rivers in the wrong place (session review, 2026-10-12;
+ * the Cartographer refuses the same case since 2026-10-11).
+ * @param context - the pipeline's world
+ */
+function settleRivers(context: PipelineContext): void {
+  const pending = context.pendingRivers.set
+  const dem = context.sources.heightmap
+  if (pending === null || dem === null) return
+  context.pendingRivers.set = null
+  const disagreement = boundsDisagreement(dem.meta.bbox, pending.bbox, 'rivers', RIVERS_URL)
+  if (disagreement !== null) {
+    context.ui.reportAssetFailure('rivers', disagreement)
+    return
+  }
+  context.sources.riverData = pending.rivers
+  context.layers.rebuildRivers()
 }
 
 /**
@@ -432,6 +463,7 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
     bakeGate: createLatestOnly(),
     politicalGate: createLatestOnly(),
     box: { compute: null as unknown as MapCompute },
+    pendingRivers: { set: null },
   }
   context.box.compute = createCompute(context)
 

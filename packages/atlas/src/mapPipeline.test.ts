@@ -260,6 +260,39 @@ describe('createMapPipeline', () => {
       expect(asMock(deps.layers.rebuildRelief)).not.toHaveBeenCalled()
     })
 
+    // The same check as the land mask: rivers cropped to other ground would slide off their valleys.
+    it('refuses rivers covering other ground than the relief, and says so', async () => {
+      const river = { rank: 1, kind: 'River', name: 'Rhine', points: [{ u: 0, v: 0 }] }
+      const slid = { ...META.bbox, east: META.bbox.east + 1 }
+      const { deps, pipeline } = build({
+        assets: fakeAssets({
+          rivers: { load: () => Promise.resolve({ source: 'test', bbox: slid, rivers: [river] }) },
+        }),
+      })
+      await pipeline.start()
+      await Promise.resolve()
+      expect(asMock(deps.ui.reportAssetFailure)).toHaveBeenCalledWith(
+        'rivers',
+        expect.objectContaining({ failure: 'semantic' })
+      )
+      expect(deps.sources.riverData).toEqual([])
+    })
+
+    it('installs rivers that arrived before the relief once the relief is in', async () => {
+      const river = { rank: 1, kind: 'River', name: 'Rhine', points: [{ u: 0, v: 0 }] }
+      const { deps, pipeline } = build({
+        assets: fakeAssets({
+          rivers: {
+            load: () => Promise.resolve({ source: 'test', bbox: META.bbox, rivers: [river] }),
+          },
+        }),
+      })
+      await pipeline.start()
+      await Promise.resolve()
+      expect(deps.sources.riverData).toEqual([river])
+      expect(asMock(deps.ui.reportAssetFailure)).not.toHaveBeenCalled()
+    })
+
     it('says so when the rivers fail, without touching anything else', async () => {
       const { deps, pipeline } = build({
         assets: fakeAssets({ rivers: { load: () => Promise.reject(new Error('404')) } }),
