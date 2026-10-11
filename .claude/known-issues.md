@@ -25,6 +25,22 @@ Put here the know issues to avoid cluttering the context window.
   mineure. En `0.x` le caret ne franchit pas une mineure, donc `^0.2.0` ne prendra jamais `0.3.0` seul —
   il faut bumper les trois lignes ensemble. **Le ColorPicker arrive en `0.3.0`.**
   **Sévérité : à savoir.**
+- **La revue de fin de session du 11/10 a laissé ouvert, par décision de moi, ce qui suit — aucun n'est
+  bloquant pour un éditeur à un seul auteur, tout est à reprendre avec l'étape 5.**
+  **Accessibilité** : (1) **la hiérarchie de l'arbre `{Polities}` n'est pas annoncée** — `aria-level`
+  est invalide sur `option` (ARIA 1.2), retiré ; le remède est un texte masqué *« vassal de X »* sur la
+  ligne, ou un vrai `tree` (autre modèle clavier). (2) **Le changement d'outil au clavier (‹A›, ‹P›
+  depuis un autre outil) et un déplacement dans la pile ne sont pas annoncés** — seul le mode de la
+  plume l'est, dans la zone résultat ; le remède est le même puits `onResult` pour les deux. (3)
+  **Tracer au clavier est impossible** (plume et crayon), déjà connu pour l'étape 5 (*« the anchor
+  list »*) ; le rail annonce pourtant ces outils. (4) Le groupe de la plume s'ouvre à ‹→›, sans
+  `aria-keyshortcuts`. (5) Cibles de 24–30 px, densité Illustrator assumée.
+  **Architecture** : (6) **« côte ou fleuve » est réparti sur cinq aiguillages** (`followedLayer`,
+  `layerLines`, `lineLabel`, la provenance dans `snapClick`, `layerNoun`) — le jour où une troisième
+  couche d'accroche arrive (lacs, frontières d'une autre année), en faire **une table par couche**
+  `{ lignes, provenance, nom }`, et renommer au passage les aides `coast*` qui servent aux fleuves. (7)
+  `paintRanks` est recalculé à chaque repeinture — ~50 pays, négligeable ; à mettre en cache par
+  version si le document grossit. **Sévérité : à savoir.**
 - **Le menu d'empilement de `{Polities}` (11/10) a deux limites connues, laissées ouvertes.**
   (1) **Il peut déborder du bord de la fenêtre** : il s'ouvre au point du clic droit (ou sous la ligne
   au clavier), sans se replier — un clic droit sur une des dernières lignes, dans une fenêtre basse,

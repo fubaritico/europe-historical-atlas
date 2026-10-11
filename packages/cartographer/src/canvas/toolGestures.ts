@@ -232,6 +232,9 @@ export function layerLines(context: GestureContext, layer: SnapLayer): readonly 
  */
 export function lineLabel(context: GestureContext, hit: SnapVertex): string {
   if (hit.layer === 'coast') return 'coastline'
+  // A river the dataset leaves unnamed is ordinary (25 of its 591 lines). The hit's index comes from
+  // this very array (`snapHit`), so the `?.` only satisfies the indexed lookup — and this runs on every
+  // pointer move, where a log would drown the console.
   return context.rivers[hit.contour]?.name ?? 'unnamed river'
 }
 
@@ -437,6 +440,7 @@ export function toolKey(context: GestureContext, key: string): boolean {
  */
 function ringsOf(context: GestureContext, polityId: string): number[][] {
   const claim = context.store.getState().document.claims.find((held) => held.polity === polityId)
+  // No claim is a polity with no territory — the normal starting state (`s02`), not a failed lookup.
   return claim?.rings ?? []
 }
 

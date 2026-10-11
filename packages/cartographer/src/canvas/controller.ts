@@ -63,17 +63,6 @@ import type { Viewport } from '../view/viewport'
  */
 
 export type { CanvasControllerDeps, LiveCanvas } from './liveCanvas'
-export {
-  DRAG_TOLERANCE,
-  FRAME_MARGIN,
-  HANDLE_HIT_RADIUS,
-  KEY_PAN_STEP,
-  KEY_ZOOM_STEP,
-  MAX_SCALE,
-  ZOOM_PER_PIXEL,
-  scaleLimitsFor,
-  wheelZoomFactor,
-} from './navigation'
 
 /**
  * The position of a pointer or wheel event in the canvas's device pixels.

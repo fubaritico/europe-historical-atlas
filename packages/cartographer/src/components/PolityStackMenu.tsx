@@ -5,15 +5,8 @@ import { STACKING_MOVES } from '@europe-historical-atlas/core/editor/stacking'
 
 import { STACKING_LABELS } from './stackingLabels'
 
+import type { ViewportPoint } from '../view/viewport'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
-
-/** A point of the viewport, in CSS pixels — where a menu opens. */
-export interface ViewportPoint {
-  /** From the viewport's left edge. */
-  x: number
-  /** From its top edge. */
-  y: number
-}
 
 /** What the menu shows and reports. Never the store: `PolitiesPanel` reads it and hands literals. */
 export interface PolityStackMenuProps {
@@ -54,9 +47,17 @@ export function PolityStackMenu({ name, at, moves, onChoose, onClose }: PolitySt
     const outside = (event: PointerEvent) => {
       if (!(event.target instanceof Node) || !shell.current?.contains(event.target)) close.current()
     }
+    // Leaving it with ‹Tab› closes it too: the design system's Menu answers ‹escape› only (A11Y-006).
+    const left = (event: FocusEvent) => {
+      const to = event.relatedTarget
+      if (!(to instanceof Node) || !shell.current?.contains(to)) close.current()
+    }
+    const node = shell.current
     document.addEventListener('pointerdown', outside)
+    node?.addEventListener('focusout', left)
     return () => {
       document.removeEventListener('pointerdown', outside)
+      node?.removeEventListener('focusout', left)
     }
   }, [])
   return (

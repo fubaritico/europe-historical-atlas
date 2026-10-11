@@ -5,8 +5,8 @@ import { availableMoves } from '@europe-historical-atlas/core/editor/stacking'
 import { PolityStackMenu } from './PolityStackMenu'
 import { STACKING_LABELS } from './stackingLabels'
 
-import type { ViewportPoint } from './PolityStackMenu'
 import type { CartographerStoreHook } from '../state/store'
+import type { ViewportPoint } from '../view/viewport'
 
 /** Which row's menu is open, and where. */
 export interface ArrangeRequest {

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { listKeyAction } from './listKeys'
 
 import type { PolityRow } from './polityRows'
-import type { ViewportPoint } from './PolityStackMenu'
+import type { ViewportPoint } from '../view/viewport'
 import type { CSSProperties, KeyboardEvent } from 'react'
 
 /** What the list shows and reports. Never the store: `PolitiesPanel` reads it and hands rows. */
@@ -99,8 +99,9 @@ function PolityOption({
       className="polity-row"
       isSelected={selected}
       isActive={active}
-      // The tree's level for assistive tech, which the indent alone does not reach (A11Y-001).
-      aria-level={row.depth + 1}
+      // The tree's depth, for the separators (s16). Not `aria-level`: ARIA 1.2 does not support it on an
+      // option (session review A11Y-002), so the hierarchy is not yet announced — see known-issues.
+      data-depth={row.depth}
       // The tree's indent, one step per level of homage — the width is the stylesheet's.
       style={{ '--polity-depth': row.depth } as CSSProperties}
       onClick={() => {

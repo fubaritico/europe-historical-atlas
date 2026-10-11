@@ -246,8 +246,8 @@ describe('PolitiesPanel — the stacking menu (s16)', () => {
       expect(disabled).toEqual(['Bring to Front', 'Bring Forward'])
     })
 
-    // A11Y-001: the tree's level reaches assistive tech, not only the indent.
-    it('gives each row its level in the tree', () => {
+    // The tree's depth on each row, for the separators (s16).
+    it('gives each row its depth in the tree', () => {
       const { store } = mountTwo()
       act(() => {
         store
@@ -261,12 +261,12 @@ describe('PolitiesPanel — the stacking menu (s16)', () => {
         .getAllByRole('option')
         .map((option) => [
           option.querySelector('.polity-row__name')?.textContent,
-          option.getAttribute('aria-level'),
+          option.getAttribute('data-depth'),
         ])
       expect(levels).toEqual([
-        ['Sacrum Imperium', '1'],
-        ['Reaume de France', '1'],
-        ['Normandie', '2'],
+        ['Sacrum Imperium', '0'],
+        ['Reaume de France', '0'],
+        ['Normandie', '1'],
       ])
     })
 
@@ -300,6 +300,13 @@ describe('PolitiesPanel — the stacking menu (s16)', () => {
       expect(screen.queryByRole('listbox', { name: 'Arrange Reaume de France' })).toBeNull()
       expect(order(store)).toEqual(['fr', 'hre'])
       expect(document.activeElement).toBe(screen.getByRole('listbox', { name: 'Polities' }))
+    })
+
+    it('closes when Tab takes the focus out of it', async () => {
+      const { user } = mountTwo()
+      await user.pointer({ keys: '[MouseRight]', target: screen.getByText('Reaume de France') })
+      await user.tab()
+      expect(screen.queryByRole('listbox', { name: 'Arrange Reaume de France' })).toBeNull()
     })
 
     it('closes on a press outside it', async () => {

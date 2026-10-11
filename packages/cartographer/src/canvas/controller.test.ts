@@ -10,16 +10,16 @@ import { TEST_BACKDROP_FRAME } from '../view/testFrame'
 import { UNFRAMED } from '../view/viewport'
 import { screenToBackdrop } from '../view/viewport'
 
+import { startCanvasController } from './controller'
+import { cursorCss } from './cursors'
+import { coloursOf } from './liveCanvas'
 import {
   DRAG_TOLERANCE,
   KEY_PAN_STEP,
   MAX_SCALE,
   scaleLimitsFor,
-  startCanvasController,
   wheelZoomFactor,
-} from './controller'
-import { cursorCss } from './cursors'
-import { coloursOf } from './liveCanvas'
+} from './navigation'
 import { CHROME_PAINT_STYLE } from './style'
 
 import type { CartographerStoreHook } from '../state/store'

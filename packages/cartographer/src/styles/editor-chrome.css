@@ -297,11 +297,11 @@
   border-top: 1px solid var(--polity-group-line);
 }
 
-.polity-row[aria-level='2'] {
+.polity-row[data-depth='1'] {
   border-top-style: dashed;
 }
 
-.polity-row:not([aria-level='1'], [aria-level='2']) {
+.polity-row:not([data-depth='0'], [data-depth='1']) {
   border-top-style: dotted;
 }
 

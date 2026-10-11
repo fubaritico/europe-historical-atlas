@@ -9,9 +9,10 @@ import { TOOL_KEYS } from '../canvas/navigation'
 import { openEmptyYear } from '../state/openEmptyYear'
 import { createPolityColourSource } from '../state/polityColourSource'
 import { createCartographerStore } from '../state/store'
+import { PEN_MODES } from '../state/toolSlice'
 import { UNFRAMED } from '../view/viewport'
 
-import { HOLD_TO_OPEN_MS, RAIL_TOOLS } from './railTools'
+import { HOLD_TO_OPEN_MS, PEN_VARIANTS, RAIL_TOOLS } from './railTools'
 import { ToolRail } from './ToolRail'
 import { ToolRailPanel } from './ToolRailPanel'
 
@@ -103,6 +104,11 @@ describe('ToolRail', () => {
       const head = tool('Pencil — freehand')
       const paths = [...head.querySelectorAll('path')].map((path) => path.getAttribute('d'))
       expect(paths).toContain('M10 4.5l3.5 3.5')
+    })
+
+    // ARCH-002: a mode added to the store and not to the rail would be reached by ‹P› and shown nowhere.
+    it('lists one row per Pen mode, in the store’s order', () => {
+      expect(PEN_VARIANTS.map((variant) => variant.id)).toEqual([...PEN_MODES])
     })
 
     it('reports the river Pen when its row is chosen', async () => {

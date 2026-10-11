@@ -168,3 +168,11 @@ export function zoomAbout(
     originY: screen[1] - held[1] * scale,
   }
 }
+
+/** A point of the viewport, in CSS pixels — where a menu opens, as a pointer event's client position. */
+export interface ViewportPoint {
+  /** From the viewport's left edge. */
+  x: number
+  /** From its top edge. */
+  y: number
+}
