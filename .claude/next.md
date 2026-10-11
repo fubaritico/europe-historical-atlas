@@ -68,13 +68,13 @@ point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui 
 
 ## ▶ ON REPREND ICI — en trois lignes
 
-**On dessine : la plume trace, suit la côte et les fleuves (11/10), s'accroche aux frontières
-partagées, ajoute un point ; la flèche sélectionne, déplace, ajoute et supprime un point.**
+**On dessine : la plume trace, suit la côte et les fleuves, le crayon trace à main levée, ‹P› passe
+d'un mode à l'autre (11/10) ; la flèche sélectionne, déplace, ajoute et supprime un point.**
 
 | | | |
 | --- | --- | --- |
 | **ce qui marche** | `(d)` livré le 10–11/10 : plume (libre / côte, avec aperçu), fermeture, ‹ctrl+z› pas à pas qui rouvre un contour, flèche (déplacer, insérer, supprimer, ‹suppr›), accrochage aux ancres partagées, la côte d'abord en mode côte avec réutilisation des ancres du voisin, la plume « + » · la barre d'outils à la Illustrator · `{Polities}` qui suit le document · clic dans un remplissage = cible, clic dans le vide = désélection · ColorField (DS `0.5.0`) | ✅ |
-| **à faire tout de suite** | **l'ordre d'empilement** des pays — scénario `s16` (écrit le 11/10) : les quatre commandes d'Illustrator (*Bring to Front / Forward*, *Send Backward / to Back*) par un **menu contextuel sur une ligne de `{Polities}`**, pas de glisser-déposer. L'ordre est celui de `document.claims`, donc **un pas d'historique** et l'atlas le voit. Le DS a `Menu` et `Popover` | ◀ |
+| **à faire tout de suite** | **l'ordre d'empilement — en attente du « go » du dev.** Le plan est écrit : `files/plans/cartographer/stacking-order-plan.md` (scénario `s16`). **`core/editor/stacking.ts` et son test existent, non commités** — commencés sans qu'il le demande ; les garder ou non est sa décision · **question posée, sans réponse** : le « Y » (`cross-branch`), retirer le badge du curseur seulement, ou la jonction aux ancres du voisin elle-même ? Rien n'est touché | ◀ |
 | **ensuite / noté** | le zoom ‹+›/‹−› : le dev le trouve **suffisant** (11/10), rien à corriger · **masquer un pays** (`H-32`, idée du dev, besoin non prouvé — essayer d'abord un affichage contours seuls global, ‹⌘Y›) · **liste par nom ou par empilement** (`H-33`, ouvert) · les fleuves jusqu'à la mer (`extendRiversToSea`), **remis à plus tard par le dev** · le contrôle de bbox des fleuves côté atlas (`known-issues`) | |
 | **à pousser** | 11 commits non poussés, `059af13`..le commit de doc du 11/10 au soir (`git ls-remote origin main` = `6b10462`). Pousser **quand le dev le demande** | |
 | **noté, non urgent** | alléger les tronçons de côte (Douglas–Peucker, tolérance non tranchée) · la confirmation avant de supprimer une ancre partagée et la suppression multiple (attend la marquise), écrites dans `s03` | |

@@ -6,9 +6,15 @@
 
 ## What the order is, in the file
 
-The polities are painted in the order of the document's **claims** — the first is at the back, the last
-at the front. That order is saved, so the atlas paints the same way. **Changing it is an edit of the
-document**: one step in the history, undone by ‹ctrl+Z›, like any other gesture.
+The Cartographer paints the polities in the order of the document's **claims** — the first at the back,
+the last at the front. That order is saved. **Changing it is an edit of the document**: one step in the
+history, undone by ‹ctrl+Z›, like any other gesture.
+
+**The atlas does not paint by that order alone** — measured in `core/data/toRegionPayload.ts`, 2026-10-11:
+it sorts by **depth of homage** first (a vassal is always over its suzerain), and keeps the claims order
+only between polities of the same depth. So sending a vassal behind its suzerain changes the
+Cartographer's picture and **not** the atlas's. Worth knowing; whether the Cartographer should apply the
+same depth rule is open, and `s08` (vassalage) is where it belongs.
 
 It only shows where two fills overlap — a vassal drawn inside its suzerain, a contested strip, a draft
 outline over a neighbour. Where borders are shared, nothing overlaps and the order changes nothing on
