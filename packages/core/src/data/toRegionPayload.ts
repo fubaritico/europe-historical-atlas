@@ -14,13 +14,13 @@
  * 2. **Rings are closed on the way out.** Ours are index lists with closure implied; `projectRegions` drops
  *    any ring under four points, GeoJSON-style, where the first vertex is repeated last. A triangle — three
  *    indices, legal in our format — would vanish with nothing said.
- * 3. **Claims are emitted in {@link paintOrder}.** `rasteriseRegions` resolves an overlap by "later index
+ * 3. **Claims are emitted in `paintOrder`.** `rasteriseRegions` resolves an overlap by "later index
  *    wins", so emitting back to front is what makes a vassal paint over its lord (H-05a) and a group the
  *    author brought forward paint over the one behind it, vassals included (`s16`) — without touching
  *    the rasteriser. The Cartographer paints by the same function, so the two show one map.
  */
 
-import { paintOrder } from './paintOrder'
+import { paintRanks } from './paintOrder'
 
 import type { RegionPayload } from './regionSource'
 import type { AuthoredYear, YearPolity } from './yearFormat'
@@ -94,7 +94,7 @@ export function toRegionPayload(year: AuthoredYear, bbox: GeoBounds): RegionPayl
   const byId = new Map(year.registry.polities.map((polity) => [polity.id, polity]))
   // Back to front. A loop of homage cannot reach here: `assembleAuthoredYear` refuses it on load, and
   // refuses a claim naming no polity — so every claim has a rank, and `?? -1` only satisfies the type.
-  const rank = new Map(paintOrder(year.registry.polities).order.map((id, index) => [id, index]))
+  const rank = paintRanks(year.registry.polities)
   const ordered = year.polities.claims
     .map((claim) => ({ claim, polity: byId.get(claim.polity) }))
     .sort((a, b) => (rank.get(a.claim.polity) ?? -1) - (rank.get(b.claim.polity) ?? -1))

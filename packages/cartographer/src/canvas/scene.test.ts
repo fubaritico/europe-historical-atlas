@@ -367,6 +367,28 @@ describe('projectedTerritories', () => {
         anchors[1]
       )
     })
+
+    // s16 — the paint order is the polities list's, not the claims': the click lands on the fill seen.
+    it('orders the territories by the polities list, whatever the claims order', () => {
+      const document = sharedBorderDocument()
+      document.polities.reverse()
+      expect(projectedTerritories(document, anchors).map((t) => t.polity)).toEqual([
+        'hre',
+        'fr-couronne',
+      ])
+    })
+
+    // s16 — a vassal over its suzerain, even listed and claimed before it.
+    it('puts a vassal after its suzerain', () => {
+      const document = sharedBorderDocument()
+      const [france, empire] = document.polities
+      if (france === undefined || empire === undefined) throw new Error('fixture changed')
+      document.polities = [{ ...france, suzerain: 'hre' }, empire]
+      expect(projectedTerritories(document, anchors).map((t) => t.polity)).toEqual([
+        'hre',
+        'fr-couronne',
+      ])
+    })
   })
 
   describe('managed errors', () => {

@@ -1,3 +1,5 @@
+import { paintOrder } from '../data/paintOrder'
+
 import type { YearDocument } from './yearDocument'
 
 /**
@@ -26,6 +28,11 @@ export function documentFaults(doc: YearDocument): string[] {
         )
       }
     }
+  }
+  // Painted last rather than lost (`paintOrder`), and said here once per version, not per frame.
+  const looped = paintOrder(doc.polities).looped
+  if (looped.length > 0) {
+    faults.push(`homage forms a loop through ${looped.map((id) => `"${id}"`).join(', ')}`)
   }
   return faults
 }

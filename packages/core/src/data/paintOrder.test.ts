@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { paintOrder } from './paintOrder'
+import { paintOrder, paintRanks } from './paintOrder'
 
 import type { YearPolity } from './yearFormat'
 
@@ -38,6 +38,15 @@ describe('paintOrder', () => {
     it('puts a vassal over the other group when its own group comes later in the list', () => {
       const { order } = paintOrder([polity('hre'), polity('fr'), polity('normandy', 'fr')])
       expect(order).toEqual(['hre', 'fr', 'normandy'])
+    })
+
+    it('ranks each polity by its place in the order, 0 at the back', () => {
+      const ranks = paintRanks([polity('fr'), polity('hre'), polity('normandy', 'fr')])
+      expect([...ranks]).toEqual([
+        ['fr', 0],
+        ['normandy', 1],
+        ['hre', 2],
+      ])
     })
 
     it('orders the vassals of one suzerain by the list', () => {

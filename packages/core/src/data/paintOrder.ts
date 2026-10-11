@@ -56,3 +56,14 @@ export function paintOrder(polities: readonly YearPolity[]): PaintOrder {
   looped.forEach(walk)
   return { order, looped }
 }
+
+/**
+ * Each polity's place in the paint order, 0 at the back — what a caller sorts its own items by. What to
+ * do with an item naming no polity of the list stays the caller's: the atlas keeps such a claim and
+ * skips it later, the Cartographer leaves it out.
+ * @param polities - the year's polities, in list order
+ * @returns each id's rank, back to front
+ */
+export function paintRanks(polities: readonly YearPolity[]): Map<string, number> {
+  return new Map(paintOrder(polities).order.map((id, index) => [id, index]))
+}

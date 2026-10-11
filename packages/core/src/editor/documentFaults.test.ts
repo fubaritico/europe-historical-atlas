@@ -27,6 +27,16 @@ describe('documentFaults', () => {
   })
 
   describe('managed errors', () => {
+    // Painted last by `paintOrder` rather than walked for ever — and said, once per version.
+    it('names the polities caught in a loop of homage', () => {
+      const doc = sharedBorderDocument()
+      doc.polities = doc.polities.map((polity) => ({
+        ...polity,
+        suzerain: polity.id === 'hre' ? 'fr-couronne' : 'hre',
+      }))
+      expect(documentFaults(doc)).toEqual(['homage forms a loop through "fr-couronne", "hre"'])
+    })
+
     it('reports a negative index as past the table', () => {
       const doc = sharedBorderDocument()
       doc.claims[0]?.rings[0]?.push(-1)

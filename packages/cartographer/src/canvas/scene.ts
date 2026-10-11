@@ -1,3 +1,5 @@
+import { paintRanks } from '@europe-historical-atlas/core/data/paintOrder'
+
 import { lonLatToScreen, remapToScreen } from '../view/projection'
 import { backdropToScreen } from '../view/viewport'
 
@@ -118,6 +120,23 @@ export function projectedRings(document: YearDocument, anchors: readonly Point[]
 }
 
 /**
+ * The claims back to front — the polities' `paintOrder`, the same function the atlas paints by
+ * (`s16`), so the Cartographer and the atlas show one map. A claim naming a polity the registry lacks is
+ * left out: it is not painted, and `documentFaults` reports it once per version.
+ * @param document - the document to read
+ * @returns the claims, back to front
+ */
+export function claimsInPaintOrder(document: YearDocument): YearDocument['claims'] {
+  const rank = paintRanks(document.polities)
+  return (
+    document.claims
+      .filter((claim) => rank.has(claim.polity))
+      // Every claim left has a rank (the filter above); `?? 0` only satisfies the indexed lookup.
+      .sort((a, b) => (rank.get(a.polity) ?? 0) - (rank.get(b.polity) ?? 0))
+  )
+}
+
+/**
  * Each claim's rings as one fill in its polity's colour.
  *
  * A claim whose polity has no colour in the map is skipped: `polityColours` gives one to every polity of
@@ -134,7 +153,7 @@ export function projectedFills(
   colours: ReadonlyMap<string, string>
 ): { rings: Point[][]; colour: string }[] {
   const fills: { rings: Point[][]; colour: string }[] = []
-  for (const claim of document.claims) {
+  for (const claim of claimsInPaintOrder(document)) {
     const colour = colours.get(claim.polity)
     if (colour === undefined) continue
     fills.push({ rings: projectedRings({ ...document, claims: [claim] }, anchors), colour })
@@ -154,14 +173,11 @@ export function projectedTerritories(
   anchors: readonly Point[]
 ): PolityRings[] {
   // A claim naming a polity the registry lacks is not painted (`projectedFills`), so it is not
-  // selectable either (QUAL-002); `documentFaults` reports it once per version.
-  const known = new Set(document.polities.map((polity) => polity.id))
-  return document.claims
-    .filter((claim) => known.has(claim.polity))
-    .map((claim) => ({
-      polity: claim.polity,
-      rings: projectedRings({ ...document, claims: [claim] }, anchors),
-    }))
+  // selectable either (QUAL-002); and the order is the paint order, so a click lands on the fill seen.
+  return claimsInPaintOrder(document).map((claim) => ({
+    polity: claim.polity,
+    rings: projectedRings({ ...document, claims: [claim] }, anchors),
+  }))
 }
 
 /**
