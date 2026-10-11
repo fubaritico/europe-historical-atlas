@@ -280,6 +280,11 @@
   align-items: center;
   gap: 8px;
   height: 24px;
+  /* The tree of groups (s16): one step per level — the swatch's 12px column and the 8px gap above — so a
+     vassal's swatch sits under its suzerain's name. */
+  --polity-indent: calc(12px + 8px);
+
+  padding-inline-start: calc(10px + var(--polity-depth, 0) * var(--polity-indent));
 }
 
 .polity-row[aria-selected='true'] {
@@ -582,4 +587,25 @@
  */
 .ui-modal:focus-visible {
   outline: none;
+}
+
+/* The stacking menu of a {Polities} row (s16): opened at the right-click, a hairline and no shadow, rows
+   at a field's height — the tool flyout's look, over the design system's Menu. */
+.polity-stack-menu {
+  /* Wide enough for "Send Backward" at the item's 12px, with the item's 10px either side. */
+  --polity-stack-menu-width: 180px;
+
+  position: fixed;
+  z-index: 10;
+  min-width: var(--polity-stack-menu-width);
+  border: 1px solid var(--line);
+  background: var(--raised);
+}
+
+.polity-stack-menu [role='option'] {
+  --ui-listbox-item-padding-block: 0;
+  --ui-listbox-item-padding-inline: 10px;
+  --ui-listbox-item-font-size: 12px;
+
+  height: 24px;
 }

@@ -8,6 +8,7 @@ import { Input } from '@fubaritico/react/Input'
 import { DRAFT_ERRORS, EMPTY_DRAFT } from '../components/polityDraft'
 import { PolityForm } from '../components/PolityForm'
 import { PolityList } from '../components/PolityList'
+import { PolityStackMenu } from '../components/PolityStackMenu'
 import { ToolRail } from '../components/ToolRail'
 
 import type { WorkbenchEntry } from './Workbench'
@@ -118,22 +119,15 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
   {
     id: 'polity-list',
     title: 'Polities list',
-    note: "{Polities}' list after design/01: a subhead naming the year and the count, one 24px row per polity — swatch, name, the no-territory chip, rank and dates. Reaume de France is the target. Click a row, or focus the list and use the arrows and Enter.",
+    note: "{Polities}' list after design/01: a subhead naming the year and the count, one 24px row per polity — swatch, name, the no-territory chip, rank and dates — as the tree of groups, front first, Aquitaine a vassal of France (s16). Reaume de France is the target. Click a row, or focus the list and use the arrows and Enter.",
     render: () => (
       <div className="workbench__panel">
         <PolityList
           year={1100}
           targetId="fr-couronne"
           onChoose={() => undefined}
+          onMenu={() => undefined}
           rows={[
-            {
-              id: 'aq',
-              name: 'Duchy of Aquitaine',
-              rank: 'duchy',
-              dates: '–',
-              colour: '#6f8a52',
-              hasTerritory: true,
-            },
             {
               id: 'hre',
               name: 'Holy Roman Empire',
@@ -141,6 +135,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
               dates: '962–1806',
               colour: '#c29646',
               hasTerritory: true,
+              depth: 0,
             },
             {
               id: 'fr-couronne',
@@ -149,6 +144,16 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
               dates: '987–',
               colour: '#54719b',
               hasTerritory: true,
+              depth: 0,
+            },
+            {
+              id: 'aq',
+              name: 'Duchy of Aquitaine',
+              rank: 'duchy',
+              dates: '–',
+              colour: '#6f8a52',
+              hasTerritory: true,
+              depth: 1,
             },
             {
               id: 'pl',
@@ -157,8 +162,26 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
               dates: '1025–',
               colour: '#b8554a',
               hasTerritory: false,
+              depth: 0,
             },
           ]}
+        />
+      </div>
+    ),
+  },
+  {
+    id: 'polity-stack-menu',
+    title: 'Stacking menu',
+    note: "A {Polities} row's menu (s16), opened at a point: the four Arrange commands, Bring to Front and Bring Forward disabled — the polity is already at the front among its siblings. The design system's Menu, placed by our shell.",
+    width: 300,
+    render: () => (
+      <div className="workbench__panel" style={{ height: 140 }}>
+        <PolityStackMenu
+          name="Reaume de France"
+          at={{ x: 40, y: 40 }}
+          moves={{ front: false, forward: false, backward: true, back: true }}
+          onChoose={() => undefined}
+          onClose={() => undefined}
         />
       </div>
     ),

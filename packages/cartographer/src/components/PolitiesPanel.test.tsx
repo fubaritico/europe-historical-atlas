@@ -1,6 +1,6 @@
 import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
@@ -182,6 +182,165 @@ describe('PolitiesPanel', () => {
         store.getState().undo()
       })
       expect(screen.queryByRole('option')).toBeNull()
+    })
+  })
+})
+
+describe('PolitiesPanel — the stacking menu (s16)', () => {
+  /**
+   * A polity with only an id and a name, owing nobody.
+   * @param id - its id
+   * @param name - its name
+   * @returns the polity
+   */
+  const polity = (id: string, name: string) => ({
+    id,
+    name,
+    rank: null,
+    status: null,
+    suzerain: null,
+    existsFrom: null,
+    existsTo: null,
+    colour: null,
+    wikidata: null,
+  })
+
+  /** Two groups, France at the back and the Empire in front — the list shows the Empire first. */
+  function mountTwo() {
+    const mounted = mount()
+    act(() => {
+      mounted.store
+        .getState()
+        .createPolity(polity('fr', 'Reaume de France'), { kind: 'c', label: 'c' })
+      mounted.store
+        .getState()
+        .createPolity(polity('hre', 'Sacrum Imperium'), { kind: 'c', label: 'c' })
+    })
+    return mounted
+  }
+
+  const order = (store: ReturnType<typeof mount>['store']) =>
+    store.getState().document.polities.map((held) => held.id)
+
+  describe('happy path', () => {
+    // s16 — "When I right-click … and choose [Bring to Front] / Then France is painted over the Empire".
+    it('brings France to the front from its row’s menu, as one named step', async () => {
+      const { store, user } = mountTwo()
+      await user.pointer({ keys: '[MouseRight]', target: screen.getByText('Reaume de France') })
+      await user.click(screen.getByRole('option', { name: 'Bring to Front' }))
+      expect(order(store)).toEqual(['hre', 'fr'])
+      expect(store.getState().undoLabel).toBe('bring to front — Reaume de France')
+      expect(screen.queryByRole('listbox', { name: 'Arrange Reaume de France' })).toBeNull()
+    })
+  })
+
+  describe('variants', () => {
+    // s16 — "a command that would change nothing is disabled".
+    it('disables the moves that would change nothing', async () => {
+      const { user } = mountTwo()
+      await user.pointer({ keys: '[MouseRight]', target: screen.getByText('Sacrum Imperium') })
+      const disabled = screen
+        .getAllByRole('option')
+        .filter((option) => option.getAttribute('aria-disabled') === 'true')
+        .map((option) => option.textContent)
+      expect(disabled).toEqual(['Bring to Front', 'Bring Forward'])
+    })
+
+    // A11Y-001: the tree's level reaches assistive tech, not only the indent.
+    it('gives each row its level in the tree', () => {
+      const { store } = mountTwo()
+      act(() => {
+        store
+          .getState()
+          .createPolity(
+            { ...polity('normandy', 'Normandie'), suzerain: 'fr' },
+            { kind: 'c', label: 'c' }
+          )
+      })
+      const levels = screen
+        .getAllByRole('option')
+        .map((option) => [
+          option.querySelector('.polity-row__name')?.textContent,
+          option.getAttribute('aria-level'),
+        ])
+      expect(levels).toEqual([
+        ['Sacrum Imperium', '1'],
+        ['Reaume de France', '1'],
+        ['Normandie', '2'],
+      ])
+    })
+
+    it('opens the target’s menu with shift+F10, and focuses it', async () => {
+      const { store, user } = mountTwo()
+      act(() => {
+        store.getState().chooseTarget('fr')
+      })
+      screen.getByRole('listbox', { name: 'Polities' }).focus()
+      await user.keyboard('{Shift>}{F10}{/Shift}')
+      const menu = screen.getByRole('listbox', { name: 'Arrange Reaume de France' })
+      expect(document.activeElement).toBe(menu)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('opens the target’s menu with the menu key too', async () => {
+      const { store, user } = mountTwo()
+      act(() => {
+        store.getState().chooseTarget('hre')
+      })
+      screen.getByRole('listbox', { name: 'Polities' }).focus()
+      await user.keyboard('{ContextMenu}')
+      expect(screen.getByRole('listbox', { name: 'Arrange Sacrum Imperium' })).toBeDefined()
+    })
+
+    it('closes on escape, the order unchanged, the focus back on the list', async () => {
+      const { store, user } = mountTwo()
+      await user.pointer({ keys: '[MouseRight]', target: screen.getByText('Reaume de France') })
+      await user.keyboard('{Escape}')
+      expect(screen.queryByRole('listbox', { name: 'Arrange Reaume de France' })).toBeNull()
+      expect(order(store)).toEqual(['fr', 'hre'])
+      expect(document.activeElement).toBe(screen.getByRole('listbox', { name: 'Polities' }))
+    })
+
+    it('closes on a press outside it', async () => {
+      const { user } = mountTwo()
+      await user.pointer({ keys: '[MouseRight]', target: screen.getByText('Reaume de France') })
+      await user.click(document.body)
+      expect(screen.queryByRole('listbox', { name: 'Arrange Reaume de France' })).toBeNull()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // An undo can take the polity away while its menu is open: nothing to arrange, and said.
+    it('shows no menu for a polity an undo took away, and says so', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { store, user } = mountTwo()
+      await user.pointer({ keys: '[MouseRight]', target: screen.getByText('Sacrum Imperium') })
+      act(() => {
+        store.getState().undo()
+      })
+      expect(screen.queryByRole('listbox', { name: 'Arrange Sacrum Imperium' })).toBeNull()
+      expect(warn).toHaveBeenCalledTimes(1)
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('"hre" is gone'))
+      expect(document.activeElement).toBe(screen.getByRole('listbox', { name: 'Polities' }))
+      // A redo brings the Empire back; its menu does not reopen by itself (ARCH-002).
+      act(() => {
+        store.getState().redo()
+      })
+      expect(screen.queryByRole('listbox', { name: 'Arrange Sacrum Imperium' })).toBeNull()
+      warn.mockRestore()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('warns, and opens nothing, with shift+F10 and no row to arrange', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { user } = mountTwo()
+      screen.getByRole('listbox', { name: 'Polities' }).focus()
+      await user.keyboard('{Shift>}{F10}{/Shift}')
+      expect(screen.queryAllByRole('listbox')).toHaveLength(1)
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('no polity to arrange'))
+      warn.mockRestore()
     })
   })
 })

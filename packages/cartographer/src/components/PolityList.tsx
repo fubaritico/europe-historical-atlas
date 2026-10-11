@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import { listKeyAction } from './listKeys'
 
 import type { PolityRow } from './polityRows'
-import type { KeyboardEvent } from 'react'
+import type { ViewportPoint } from './PolityStackMenu'
+import type { CSSProperties, KeyboardEvent } from 'react'
 
 /** What the list shows and reports. Never the store: `PolitiesPanel` reads it and hands rows. */
 export interface PolityListProps {
@@ -16,6 +17,20 @@ export interface PolityListProps {
   targetId: string | null
   /** A row was chosen — a click, or ‹enter› on the one the keys are on. */
   onChoose: (id: string) => void
+  /**
+   * A row's menu was asked for — a right-click, or ‹shift+F10› / the menu key on the row the keys are
+   * on (or the target) — with where to open it, in viewport pixels (`s16`).
+   */
+  onMenu: (id: string, at: ViewportPoint) => void
+}
+
+/**
+ * Whether a key asks for the context menu — the platform's two ways.
+ * @param event - the key event
+ * @returns `true` for the menu key and ‹shift+F10›
+ */
+function asksForMenu(event: KeyboardEvent<HTMLUListElement>): boolean {
+  return event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')
 }
 
 /**
@@ -30,6 +45,22 @@ function PolitiesSubhead({ year, count }: { year: number; count: number }) {
       <span className="polities__count">{count}</span>
     </div>
   )
+}
+
+/**
+ * Open a row's menu from the keyboard, under the row the keys are on — or the target's, when the keys
+ * have not moved yet. With neither, there is no row to arrange, and it says so.
+ * @param id - the row's polity, or `null`
+ * @param onMenu - where to ask for the menu
+ */
+function menuFromKeys(id: string | null, onMenu: (id: string, at: ViewportPoint) => void): void {
+  const option = id === null ? null : document.getElementById(optionId(id))
+  if (id === null || option === null) {
+    console.warn('[Cartographer] no polity to arrange: move to a row first.')
+    return
+  }
+  const box = option.getBoundingClientRect()
+  onMenu(id, { x: box.left, y: box.bottom })
 }
 
 /**
@@ -52,12 +83,14 @@ function PolityOption({
   active,
   id,
   onChoose,
+  onMenu,
 }: {
   row: PolityRow
   selected: boolean
   active: boolean
   id: string
   onChoose: (id: string) => void
+  onMenu: (id: string, at: ViewportPoint) => void
 }) {
   return (
     <ListboxItem
@@ -66,8 +99,16 @@ function PolityOption({
       className="polity-row"
       isSelected={selected}
       isActive={active}
+      // The tree's level for assistive tech, which the indent alone does not reach (A11Y-001).
+      aria-level={row.depth + 1}
+      // The tree's indent, one step per level of homage — the width is the stylesheet's.
+      style={{ '--polity-depth': row.depth } as CSSProperties}
       onClick={() => {
         onChoose(row.id)
+      }}
+      onContextMenu={(event) => {
+        event.preventDefault()
+        onMenu(row.id, { x: event.clientX, y: event.clientY })
       }}
     >
       <span
@@ -87,6 +128,48 @@ function PolityOption({
 }
 
 /**
+ * The keys' cursor over the rows: which row it is on, kept in view, and what each key does — ↑ ↓ Home
+ * End move it, ‹enter› or ‹space› choose, ‹shift+F10› or the menu key open the row's menu.
+ *
+ * **It holds a polity's id, not a position**: a row inserted or undone above it must not move the
+ * cursor onto another polity (QUAL-003).
+ * @param rows - the rows, in the list's order
+ * @param targetId - the target, where the menu opens before the keys have moved
+ * @param onChoose - a row chosen
+ * @param onMenu - a row's menu asked for
+ * @returns the active id, its position, and the key handler
+ */
+function useListCursor(
+  rows: readonly PolityRow[],
+  targetId: string | null,
+  onChoose: (id: string) => void,
+  onMenu: (id: string, at: ViewportPoint) => void
+) {
+  const [activeId, setActiveId] = useState<string | null>(null)
+  const active = rows.findIndex((row) => row.id === activeId)
+  useEffect(() => {
+    // Keep the row the keys are on in view: focus stays on the list, so nothing scrolls by itself.
+    if (activeId !== null)
+      document.getElementById(optionId(activeId))?.scrollIntoView({ block: 'nearest' })
+  }, [activeId])
+  const onKeyDown = (event: KeyboardEvent<HTMLUListElement>) => {
+    if (asksForMenu(event)) {
+      event.preventDefault()
+      menuFromKeys(activeId ?? targetId, onMenu)
+      return
+    }
+    const action = listKeyAction(active, event.key, rows.length)
+    if (action === null) return
+    event.preventDefault()
+    const row = rows['move' in action ? action.move : action.choose]
+    if (row === undefined) return
+    if ('move' in action) setActiveId(row.id)
+    else onChoose(row.id)
+  }
+  return { activeId, active, onKeyDown }
+}
+
+/**
  * `{Polities}`' list: every polity of the year, the target marked, a click or ‹enter› aiming at one —
  * `s02`'s *"selecting the target is a gesture of `{Polities}`"*.
  *
@@ -97,25 +180,8 @@ function PolityOption({
  * @param props - the rows, the target and the choice
  * @returns the subhead and the list, or the subhead and a line saying the year is empty
  */
-export function PolityList({ year, rows, targetId, onChoose }: PolityListProps) {
-  // The keys' cursor holds a polity's id, not a position: a row inserted or undone above it must not
-  // move the cursor onto another polity (QUAL-003).
-  const [activeId, setActiveId] = useState<string | null>(null)
-  const active = rows.findIndex((row) => row.id === activeId)
-  useEffect(() => {
-    // Keep the row the keys are on in view: focus stays on the list, so nothing scrolls by itself.
-    if (activeId !== null)
-      document.getElementById(optionId(activeId))?.scrollIntoView({ block: 'nearest' })
-  }, [activeId])
-  const onKeyDown = (event: KeyboardEvent<HTMLUListElement>) => {
-    const action = listKeyAction(active, event.key, rows.length)
-    if (action === null) return
-    event.preventDefault()
-    const row = rows['move' in action ? action.move : action.choose]
-    if (row === undefined) return
-    if ('move' in action) setActiveId(row.id)
-    else onChoose(row.id)
-  }
+export function PolityList({ year, rows, targetId, onChoose, onMenu }: PolityListProps) {
+  const { activeId, active, onKeyDown } = useListCursor(rows, targetId, onChoose, onMenu)
   return (
     <>
       <PolitiesSubhead year={year} count={rows.length} />
@@ -143,6 +209,7 @@ export function PolityList({ year, rows, targetId, onChoose }: PolityListProps) 
               selected={row.id === targetId}
               active={row.id === activeId}
               onChoose={onChoose}
+              onMenu={onMenu}
             />
           ))}
         </ListboxList>

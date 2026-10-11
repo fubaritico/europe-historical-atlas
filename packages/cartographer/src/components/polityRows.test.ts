@@ -11,11 +11,31 @@ const COLOURS = new Map([
 
 describe('polityRows', () => {
   describe('happy path', () => {
-    // s01 — "sorted by name", "its colour swatch, its name, and its rank".
-    it('lists every polity, sorted by name, with its colour and rank', () => {
+    // s16 — the list is the stack, the front first; s01 — "its colour swatch, its name, and its rank".
+    it('lists every polity front first, with its colour and rank', () => {
       const rows = polityRows(sharedBorderDocument(), COLOURS)
-      expect(rows.map((row) => row.name)).toEqual(['Reaume de France', 'Sacrum Imperium'])
-      expect(rows[0]).toMatchObject({ id: 'fr-couronne', rank: 'kingdom', colour: '#aa0000' })
+      expect(rows.map((row) => row.id)).toEqual(['hre', 'fr-couronne'])
+      expect(rows[1]).toMatchObject({ rank: 'kingdom', colour: '#aa0000', depth: 0 })
+    })
+
+    // s16 — the dev's layer model: a suzerain's vassals beneath it, indented, front first.
+    it('lists each suzerain followed by its vassals, one level deeper, front first', () => {
+      const document = sharedBorderDocument()
+      const [france, empire] = document.polities
+      if (france === undefined || empire === undefined) throw new Error('fixture changed')
+      document.polities = [
+        france,
+        { ...france, id: 'normandy', name: 'Normandie', suzerain: 'fr-couronne' },
+        { ...france, id: 'aquitaine', name: 'Aquitaine', suzerain: 'fr-couronne' },
+        empire,
+      ]
+      const rows = polityRows(document, COLOURS)
+      expect(rows.map((row) => [row.id, row.depth])).toEqual([
+        ['hre', 0],
+        ['fr-couronne', 0],
+        ['aquitaine', 1],
+        ['normandy', 1],
+      ])
     })
   })
 
@@ -26,14 +46,17 @@ describe('polityRows', () => {
       const empire = document.polities[1]
       if (empire) empire.existsTo = 1806
       const rows = polityRows(document, COLOURS)
-      expect(rows.map((row) => row.dates)).toEqual(['987–', '962–1806'])
+      expect(rows.map((row) => row.dates)).toEqual(['962–1806', '987–'])
     })
 
     it('marks a polity with territory, and one without', () => {
       const document = sharedBorderDocument()
       document.claims = document.claims.filter((claim) => claim.polity === 'hre')
       const rows = polityRows(document, COLOURS)
-      expect(rows.map((row) => row.hasTerritory)).toEqual([false, true])
+      expect(rows.map((row) => [row.id, row.hasTerritory])).toEqual([
+        ['hre', true],
+        ['fr-couronne', false],
+      ])
     })
   })
 
@@ -43,7 +66,9 @@ describe('polityRows', () => {
       const document = sharedBorderDocument()
       const claim = document.claims[0]
       if (claim) claim.rings = []
-      expect(polityRows(document, COLOURS)[0]?.hasTerritory).toBe(false)
+      expect(
+        polityRows(document, COLOURS).find((row) => row.id === 'fr-couronne')?.hasTerritory
+      ).toBe(false)
     })
   })
 
@@ -70,12 +95,25 @@ describe('polityRows', () => {
         empire.existsFrom = null
         empire.existsTo = 1806
       }
-      expect(polityRows(document, COLOURS)[1]?.dates).toBe('–1806')
+      expect(polityRows(document, COLOURS).find((row) => row.id === 'hre')?.dates).toBe('–1806')
     })
 
     // QUAL-001: a polity the colour source has no colour for gets null, never an empty string.
     it('gives a null colour to a polity the colour map lacks', () => {
       expect(polityRows(sharedBorderDocument(), new Map())[0]?.colour).toBeNull()
+    })
+
+    // A loop of homage: listed, at the top level, last — documentFaults says so.
+    it('lists the polities of a loop of homage last, at the top level', () => {
+      const document = sharedBorderDocument()
+      document.polities = document.polities.map((polity) => ({
+        ...polity,
+        suzerain: polity.id === 'hre' ? 'fr-couronne' : 'hre',
+      }))
+      expect(polityRows(document, COLOURS).map((row) => [row.id, row.depth])).toEqual([
+        ['fr-couronne', 0],
+        ['hre', 1],
+      ])
     })
 
     it('lists nothing for a year with no polity', () => {

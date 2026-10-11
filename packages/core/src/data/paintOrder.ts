@@ -60,7 +60,11 @@ export function paintOrder(polities: readonly YearPolity[]): PaintOrder {
   for (const polity of polities) {
     const suzerain = suzerains.get(polity.id) ?? null
     if (suzerain === null) roots.push(polity.id)
-    else vassalsOf.set(suzerain, [...(vassalsOf.get(suzerain) ?? []), polity.id])
+    else {
+      const vassals = vassalsOf.get(suzerain)
+      if (vassals === undefined) vassalsOf.set(suzerain, [polity.id])
+      else vassals.push(polity.id)
+    }
   }
   const order: string[] = []
   const placed = new Set<string>()
