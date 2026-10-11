@@ -1,12 +1,15 @@
 import { Menu } from '@fubaritico/react/Menu'
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 
 import { STACKING_MOVES } from '@europe-historical-atlas/core/editor/stacking'
+
+import { placeMenu } from '../view/menuPlacement'
 
 import { STACKING_LABELS } from './stackingLabels'
 
 import type { ViewportPoint } from '../view/viewport'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
+import type { RefObject } from 'react'
 
 /** What the menu shows and reports. Never the store: `PolitiesPanel` reads it and hands literals. */
 export interface PolityStackMenuProps {
@@ -23,6 +26,62 @@ export interface PolityStackMenuProps {
 }
 
 /**
+ * Fold the menu back inside the window (`placeMenu`), once it can be measured. Written on the element
+ * before the first paint — no state, so no second render — so it never shows half off-screen and jumps.
+ * @param at - where it was asked for
+ * @returns the ref the menu's element takes
+ */
+function useInsideWindow(at: ViewportPoint): RefObject<HTMLDivElement | null> {
+  const shell = useRef<HTMLDivElement | null>(null)
+  useLayoutEffect(() => {
+    const node = shell.current
+    if (node === null) return
+    const box = node.getBoundingClientRect()
+    const place = placeMenu(
+      at,
+      { width: box.width, height: box.height },
+      { width: globalThis.innerWidth, height: globalThis.innerHeight }
+    )
+    node.style.left = `${String(place.x)}px`
+    node.style.top = `${String(place.y)}px`
+  }, [at])
+  return shell
+}
+
+/**
+ * Focus the menu on opening, and close it on a press outside or when ‹Tab› takes the focus out — the
+ * design system's Menu answers ‹escape› only (A11Y-006).
+ *
+ * **The latest close is read through a ref**: the caller passes a fresh closure on every render, and an
+ * effect keyed on it would re-run — and re-take the focus — each time the panel re-renders (QUAL-002).
+ * @param shell - the menu's element
+ * @param onClose - how it closes
+ */
+function useDismiss(shell: RefObject<HTMLDivElement | null>, onClose: () => void): void {
+  const close = useRef(onClose)
+  useEffect(() => {
+    close.current = onClose
+  }, [onClose])
+  useEffect(() => {
+    const node = shell.current
+    node?.querySelector<HTMLElement>('[role="listbox"]')?.focus()
+    const away = (to: EventTarget | null) => !(to instanceof Node) || !node?.contains(to)
+    const outside = (event: PointerEvent) => {
+      if (away(event.target)) close.current()
+    }
+    const left = (event: FocusEvent) => {
+      if (away(event.relatedTarget)) close.current()
+    }
+    document.addEventListener('pointerdown', outside)
+    node?.addEventListener('focusout', left)
+    return () => {
+      document.removeEventListener('pointerdown', outside)
+      node?.removeEventListener('focusout', left)
+    }
+  }, [shell])
+}
+
+/**
  * The stacking commands of a row of `{Polities}` — `s16`'s context menu.
  *
  * **The design system's `Menu` for the list** — it owns the keyboard (↑ ↓ Home End, ‹enter›, ‹escape›)
@@ -35,31 +94,8 @@ export interface PolityStackMenuProps {
  * @returns the menu
  */
 export function PolityStackMenu({ name, at, moves, onChoose, onClose }: PolityStackMenuProps) {
-  const shell = useRef<HTMLDivElement | null>(null)
-  // The latest close, read by the listener: the caller passes a fresh closure on every render, and an
-  // effect keyed on it would re-run — and re-take the focus — each time the panel re-renders (QUAL-002).
-  const close = useRef(onClose)
-  useEffect(() => {
-    close.current = onClose
-  }, [onClose])
-  useEffect(() => {
-    shell.current?.querySelector<HTMLElement>('[role="listbox"]')?.focus()
-    const outside = (event: PointerEvent) => {
-      if (!(event.target instanceof Node) || !shell.current?.contains(event.target)) close.current()
-    }
-    // Leaving it with ‹Tab› closes it too: the design system's Menu answers ‹escape› only (A11Y-006).
-    const left = (event: FocusEvent) => {
-      const to = event.relatedTarget
-      if (!(to instanceof Node) || !shell.current?.contains(to)) close.current()
-    }
-    const node = shell.current
-    document.addEventListener('pointerdown', outside)
-    node?.addEventListener('focusout', left)
-    return () => {
-      document.removeEventListener('pointerdown', outside)
-      node?.removeEventListener('focusout', left)
-    }
-  }, [])
+  const shell = useInsideWindow(at)
+  useDismiss(shell, onClose)
   return (
     <div ref={shell} className="polity-stack-menu" style={{ left: at.x, top: at.y }}>
       <Menu
