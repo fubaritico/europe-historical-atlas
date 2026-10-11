@@ -68,15 +68,15 @@ point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui 
 
 ## ▶ ON REPREND ICI — en trois lignes
 
-**On dessine : la plume trace, suit la côte, s'accroche aux frontières partagées, ajoute un point ; la
-flèche sélectionne, déplace, ajoute et supprime un point. Le zoom ‹+›/‹−› ne marche pas chez le dev.**
+**On dessine : la plume trace, suit la côte et les fleuves (11/10), s'accroche aux frontières
+partagées, ajoute un point ; la flèche sélectionne, déplace, ajoute et supprime un point.**
 
 | | | |
 | --- | --- | --- |
 | **ce qui marche** | `(d)` livré le 10–11/10 : plume (libre / côte, avec aperçu), fermeture, ‹ctrl+z› pas à pas qui rouvre un contour, flèche (déplacer, insérer, supprimer, ‹suppr›), accrochage aux ancres partagées, la côte d'abord en mode côte avec réutilisation des ancres du voisin, la plume « + » · la barre d'outils à la Illustrator · `{Polities}` qui suit le document · clic dans un remplissage = cible, clic dans le vide = désélection · ColorField (DS `0.5.0`) | ✅ |
-| **à faire tout de suite** | **le zoom clavier** — le dev : *« le plus et le moins, ça zoome, dézoome, c'est tout »*, et ça ne marche pas. Deux causes possibles dans le code, **corriger les deux sans redemander** : ‹⌘+›/‹⌘−› partent au navigateur (`onModifiedKey` laisse passer tout ‹⌘›) → les prendre pour la carte ; les touches ne sont écoutées que sur le canvas (`listen` dans `controller.ts`) → un focus dans la barre d'outils ou `{Polities}` les perd → écouter ‹+›/‹−› sur `window` hors champ de saisie. Rien n'est écrit encore | ◀ |
-| **ensuite, dans l'ordre du dev** | l'accrochage aux **fleuves** (même forme que la côte, variante « Pen — follow a river » déjà dans `railTools`, désactivée) · puis l'**ordre d'empilement** des pays depuis `{Polities}`, par un **menu contextuel à la Illustrator** (« Bring to front »…), pas de glisser-déposer — le dev peut demander les composants au Claude du DS | |
-| **à pousser** | 7 commits non poussés, `059af13`..`9ff0757` (`git ls-remote origin main` = `6b10462`). Pousser **quand le dev le demande** | |
+| **à faire tout de suite** | **l'ordre d'empilement** des pays — scénario `s16` (écrit le 11/10) : les quatre commandes d'Illustrator (*Bring to Front / Forward*, *Send Backward / to Back*) par un **menu contextuel sur une ligne de `{Polities}`**, pas de glisser-déposer. L'ordre est celui de `document.claims`, donc **un pas d'historique** et l'atlas le voit. Le DS a `Menu` et `Popover` | ◀ |
+| **ensuite / noté** | le zoom ‹+›/‹−› : le dev le trouve **suffisant** (11/10), rien à corriger · **masquer un pays** (`H-32`, idée du dev, besoin non prouvé — essayer d'abord un affichage contours seuls global, ‹⌘Y›) · **liste par nom ou par empilement** (`H-33`, ouvert) · les fleuves jusqu'à la mer (`extendRiversToSea`), **remis à plus tard par le dev** · le contrôle de bbox des fleuves côté atlas (`known-issues`) | |
+| **à pousser** | 11 commits non poussés, `059af13`..le commit de doc du 11/10 au soir (`git ls-remote origin main` = `6b10462`). Pousser **quand le dev le demande** | |
 | **noté, non urgent** | alléger les tronçons de côte (Douglas–Peucker, tolérance non tranchée) · la confirmation avant de supprimer une ancre partagée et la suppression multiple (attend la marquise), écrites dans `s03` | |
 
 > **Le découpage `a/b/c/d` est figé — ne plus le re-trancher.** Il a bougé deux fois le 07/10, et

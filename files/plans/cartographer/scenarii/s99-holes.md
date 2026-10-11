@@ -445,3 +445,27 @@ reachable from the atlas. Not decided.
 - **Roadmap chapter 06 must be corrected**: it says _"seed from year T−1 and paint only the delta"_, which
   is the sharing model now refused. Cosmetic-but-misleading — a document promising a mechanism we decided
   against will be read as the plan.
+
+### H-32 · Hiding a polity — **raised 2026-10-11 by the dev, not decided, not needed yet**
+
+The dev's idea: an eye before each row's swatch in {Polities}, to show or hide a polity — *"mais je
+sais pas si vraiment on en a besoin."* No case has shown the need yet. What is recorded, so it is not
+re-derived:
+
+- **A hidden polity must keep its outline drawn and snappable.** Hiding its anchors from the Pen would
+  let a neighbour be drawn beside it with a second, independent border — the gap or overlap that shared
+  anchors exist to prevent. So "hidden" means **fill hidden, outline kept**, not Illustrator's hidden
+  object. *(my deduction)*
+- **Session state**, like the tool in hand: not in the file, not in the history.
+- **The cheaper answer to the likely case** — a fill hiding the relief or a river being traced — is a
+  global **outline view**, Illustrator's ‹⌘Y›: one switch rather than 51 eyes. *(my proposal)*
+
+**Trigger**: the first time a fill gets in the way while drawing. Try the outline view first.
+
+### H-33 · Does {Polities} list by name, or in stacking order? — **open, 2026-10-11**
+
+`s01` sorts the list by name; Illustrator's Layers panel lists front-to-back, so the panel *is* the
+stack. With [Bring to Front] in the row's menu (`s16`), a name-sorted list shows no change when the
+command runs — the change is on the canvas only. **Kept by name for now**; the dev's call when the
+stacking commands are in use. *(the question is mine)*
+

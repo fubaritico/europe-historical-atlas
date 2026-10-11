@@ -39,6 +39,7 @@ Every control name below is **provisional**. It names an _intention_, not a deci
 | 13  | [overrides](s13-overrides.md)                             | taking the hand on colours and lines, and the one place they are all visible        |
 | 14  | [the History panel](s14-history-panel.md)                 | the line listed, reached in one click, and the markers that survive a truncation    |
 | 15  | [offline and online](s15-offline-and-online.md)         | **integration, not interface** — where a saved year goes, and how the atlas reads it |
+| 16  | [stacking order](s16-stacking-order.md)                   | which fill is painted over which: Illustrator's four Arrange commands, from {Polities} |
 
 ## The two tools — decided 2026-09-22
 
