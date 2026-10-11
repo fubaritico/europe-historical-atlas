@@ -65,3 +65,11 @@
   border: 1px solid var(--line);
   background: var(--panel);
 }
+
+/* A rail's column for the rail plates: its own width and a panel's height, so the foot sits at the bottom. */
+.workbench__rail {
+  width: var(--rail);
+  height: 320px;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+}

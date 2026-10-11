@@ -70,6 +70,9 @@
 }
 
 .shell__rail {
+  /* Above the canvas's cell, which comes after it in the tree: a tool group's flyout opens over the map. */
+  position: relative;
+  z-index: 1;
   background: var(--panel);
   border-right: 1px solid var(--line);
 }

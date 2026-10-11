@@ -7,6 +7,7 @@ import { Input } from '@fubaritico/react/Input'
 
 import { DRAFT_ERRORS, EMPTY_DRAFT } from '../components/polityDraft'
 import { PolityForm } from '../components/PolityForm'
+import { ToolRail } from '../components/ToolRail'
 
 import type { WorkbenchEntry } from './Workbench'
 
@@ -112,6 +113,32 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
     note: "The panel the popover holds, laid flat — area, hue, the automatic toggle and the hex — to tune it without the popover's positioning in the way.",
     width: 340,
     render: () => <ColorPicker defaultValue={BLUE} nullable density="compact" />,
+  },
+  {
+    id: 'tool-rail',
+    title: 'Tool rail',
+    note: "Illustrator's Tools panel, narrowed to three: the white arrow, the Pen, the hand. The Pen is in hand; its corner triangle says it heads a group — hold it, right-click it, or press → on it. The swatch is the aimed-at polity's colour.",
+    width: 300,
+    render: () => (
+      <div className="workbench__rail">
+        <ToolRail
+          tool="draw"
+          onSelect={() => undefined}
+          swatch={{ name: 'Reaume de France', colour: '#54719b' }}
+        />
+      </div>
+    ),
+  },
+  {
+    id: 'tool-rail-group',
+    title: 'Tool rail, Pen group open',
+    note: "The Pen's hidden tools, as Illustrator lists them: the square marks the one in use, the key in brackets. Following the coast and a river are listed and disabled — they are the next rung.",
+    width: 300,
+    render: () => (
+      <div className="workbench__rail">
+        <ToolRail tool="draw" onSelect={() => undefined} swatch={null} initiallyOpen="draw" />
+      </div>
+    ),
   },
   {
     id: 'polity-form',

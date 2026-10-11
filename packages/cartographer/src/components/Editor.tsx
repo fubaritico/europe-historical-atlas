@@ -3,6 +3,7 @@ import { useRef } from 'react'
 import { MapArea } from './MapArea'
 import { PolitiesPanel } from './PolitiesPanel'
 import { Shell } from './Shell'
+import { ToolRailPanel } from './ToolRailPanel'
 
 import type { BackdropLoad } from './MapArea'
 import type { PaintStyle } from '../canvas/painter'
@@ -67,6 +68,7 @@ export function Editor({ store, load, style, zoneLabel, label, heading }: Editor
           actionRef={action}
         />
       }
+      rail={<ToolRailPanel store={store} />}
       dock={<PolitiesPanel store={store} />}
       status={
         // No `aria-live`, and that is the accessibility decision rather than an omission: this text
