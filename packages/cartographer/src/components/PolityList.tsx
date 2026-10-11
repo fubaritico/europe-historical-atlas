@@ -99,8 +99,8 @@ function PolityOption({
       className="polity-row"
       isSelected={selected}
       isActive={active}
-      // The tree's depth, for the separators (s16). Not `aria-level`: ARIA 1.2 does not support it on an
-      // option (session review A11Y-002), so the hierarchy is not yet announced — see known-issues.
+      // The tree's depth, for the indent and the separators (s16). Not `aria-level`, which ARIA 1.2 does
+      // not support on an option: the hierarchy is announced by the hidden suzerain below instead.
       data-depth={row.depth}
       // The tree's indent, one step per level of homage — the width is the stylesheet's.
       style={{ '--polity-depth': row.depth } as CSSProperties}

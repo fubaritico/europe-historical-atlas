@@ -1890,6 +1890,17 @@ describe('the Pencil on the canvas', () => {
       dispose()
     })
 
+    // A Pen taken from another tool is named by its mode, not as a bare Pen (review QUAL-004).
+    it('says the Pen’s mode when P takes it from another tool', () => {
+      const { node, store, resulted, dispose } = attach()
+      aimAtFrance(store)
+      store.getState().choosePenMode('river')
+      node.dispatchEvent(keyEvent('a'))
+      node.dispatchEvent(keyEvent('p'))
+      expect(resulted).toHaveBeenLastCalledWith('Pen — follow a river')
+      dispose()
+    })
+
     it('takes the Pen with P from another tool, its mode unchanged', () => {
       const { node, store, dispose } = attach()
       aimAtFrance(store)

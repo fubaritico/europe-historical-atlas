@@ -1,6 +1,3 @@
-import type { CartographerStore } from './store'
-import type { StateCreator } from 'zustand'
-
 /**
  * Which tool is in the author's hand, and which polity the Pen draws for.
  *
@@ -19,6 +16,11 @@ import type { StateCreator } from 'zustand'
  * leaves the document. Undo the creation and the target evaporates on its own, with nothing to clear. That
  * is what `describeDrawingTarget` is for, and it is why this slice carries no `releaseTarget`.
  */
+
+import type { CartographerStore } from './store'
+import type { StateCreator } from 'zustand'
+
+/** The tool a click obeys: the hand, the Pen, or the white arrow. */
 export type EditorTool = 'navigate' | 'draw' | 'edit'
 
 /**

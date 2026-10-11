@@ -14,6 +14,7 @@ import type { MapAssetSources, MapPipelineDeps } from './mapPipeline'
 import type { MapUi } from './mapUi'
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
+import type { RiverSet } from '@europe-historical-atlas/core/data/riverSource'
 import type { Mock } from 'vitest'
 
 const META: HeightmapMeta = {
@@ -93,6 +94,21 @@ function fakeUi(): MapUi {
     dispose: vi.fn(),
   }
 }
+
+/**
+ * A promise the test resolves when it chooses — to force an order of arrival.
+ * @returns the promise and its resolver
+ */
+function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
+  let resolve: (value: T) => void = () => undefined
+  const promise = new Promise<T>((settle) => {
+    resolve = settle
+  })
+  return { promise, resolve }
+}
+
+/** Let every pending microtask run. */
+const flush = () => new Promise((settle) => setTimeout(settle, 0))
 
 /** Ports that answer instantly, overridable one at a time. */
 function fakeAssets(over: Partial<MapAssetSources> = {}): Partial<MapAssetSources> {
@@ -291,6 +307,57 @@ describe('createMapPipeline', () => {
       await Promise.resolve()
       expect(deps.sources.riverData).toEqual([river])
       expect(asMock(deps.ui.reportAssetFailure)).not.toHaveBeenCalled()
+    })
+
+    // QUAL-005: each arrival order forced, so each of settleRivers' two callers is the one that fires.
+    it.each(['rivers first', 'relief first'] as const)(
+      'installs the rivers whichever arrives first — %s',
+      async (order) => {
+        const river = { rank: 1, kind: 'River', name: 'Rhine', points: [{ u: 0, v: 0 }] }
+        const rivers = deferred<RiverSet>()
+        const relief = deferred<typeof DEM>()
+        const { deps, pipeline } = build({
+          assets: fakeAssets({
+            heightmap: { load: () => relief.promise },
+            rivers: { load: () => rivers.promise },
+          }),
+        })
+        const started = pipeline.start()
+        if (order === 'rivers first') {
+          rivers.resolve({ source: 'test', bbox: META.bbox, rivers: [river] })
+          await flush()
+          expect(deps.sources.riverData).toEqual([])
+          relief.resolve(DEM)
+          await started
+        } else {
+          relief.resolve(DEM)
+          await started
+          expect(deps.sources.riverData).toEqual([])
+          rivers.resolve({ source: 'test', bbox: META.bbox, rivers: [river] })
+          await flush()
+        }
+        expect(deps.sources.riverData).toEqual([river])
+      }
+    )
+
+    // ARCH-001 (2026-10-12): draped before the relief source exists, every river sits at sea level.
+    it('never rebuilds the rivers while the relief source is missing', async () => {
+      const river = { rank: 1, kind: 'River', name: 'Rhine', points: [{ u: 0, v: 0 }] }
+      const { deps, pipeline } = build({
+        assets: fakeAssets({
+          rivers: {
+            load: () => Promise.resolve({ source: 'test', bbox: META.bbox, rivers: [river] }),
+          },
+        }),
+      })
+      const seen: boolean[] = []
+      asMock(deps.layers.rebuildRivers).mockImplementation(() => {
+        if (deps.sources.riverData.length > 0) seen.push(deps.sources.reliefSource !== null)
+      })
+      await pipeline.start()
+      await Promise.resolve()
+      expect(seen.length).toBeGreaterThan(0)
+      expect(seen.every(Boolean)).toBe(true)
     })
 
     it('says so when the rivers fail, without touching anything else', async () => {

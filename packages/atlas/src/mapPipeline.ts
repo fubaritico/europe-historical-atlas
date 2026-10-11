@@ -327,8 +327,8 @@ async function startup(context: PipelineContext): Promise<void> {
   const { dev, sources, layers, ui } = context
   await loadTerrain(context)
   if (context.isDisposed() || !sources.heightmap) return
-  settleRivers(context) // when the rivers came first, they waited for the relief
   refreshReliefSource(sources, dev.relief.smoothing) // draping is correct from here on, mesh or no mesh
+  settleRivers(context) // when the rivers came first, they waited for the relief to drape on
   await pushSources(context)
   if (context.isDisposed()) return
 
@@ -386,7 +386,9 @@ function loadRivers(context: PipelineContext): void {
 function settleRivers(context: PipelineContext): void {
   const pending = context.pendingRivers.set
   const dem = context.sources.heightmap
-  if (pending === null || dem === null) return
+  // Ready means draped for real: with no relief source yet, the drape puts every river at sea level
+  // without a word (session review ARCH-001, 2026-10-12) — so the rivers wait for both.
+  if (pending === null || dem === null || context.sources.reliefSource === null) return
   context.pendingRivers.set = null
   const disagreement = boundsDisagreement(dem.meta.bbox, pending.bbox, 'rivers', RIVERS_URL)
   if (disagreement !== null) {

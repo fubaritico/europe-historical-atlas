@@ -13,7 +13,7 @@ import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
 import type { ViewportPoint } from '../view/viewport'
 
-/** What the panel needs: the store, handed on to the dialogue. */
+/** What the panel needs: the store, the colours its rows show, and where to say what a command did. */
 export interface PolitiesPanelProps {
   /** The store polities are created in. */
   store: CartographerStoreHook
@@ -48,8 +48,8 @@ function useArrangeMenu() {
  * **The list follows the document**: every polity of the year as the tree of groups, front first
  * (`s16`), the one aimed at marked, those with nothing drawn marked *"no territory"* (`s02`). Choosing a
  * row aims at it and leaves the tool in hand — `next.md`'s *"we pick who, then act"*.
- * @param props - the store
- * @returns the panel's head and the dialogue it opens
+ * @param props - the store, the colour source and the result sink
+ * @returns the panel's head, the tree, the stacking menu when open, and the dialogue it opens
  */
 export function PolitiesPanel({ store, colours, onResult }: PolitiesPanelProps) {
   const [creating, setCreating] = useState(false)
