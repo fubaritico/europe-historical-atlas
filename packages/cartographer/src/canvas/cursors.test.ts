@@ -50,6 +50,18 @@ describe('cursorFor', () => {
       expect(cursorFor({ ...arrow, overHandle: true })).toBe('arrow-handle')
     })
 
+    // The Pen's plus, as Illustrator's over a selected path; branching onto an anchor wins.
+    it('shows the Pen’s plus over the target’s stretch, under the branching mark', () => {
+      const pen = { ...AT_REST, tool: 'draw' as const, hasTarget: true, overStretch: true }
+      expect(cursorFor(pen)).toBe('cross-add')
+      expect(cursorFor({ ...pen, branching: true })).toBe('cross-branch')
+      // Inserting wins over the snap: over its own stretch the idle Pen inserts, it does not follow.
+      expect(cursorFor({ ...pen, snapping: true })).toBe('cross-add')
+      expect(cursorFor({ ...pen, snapping: true, branching: true, closing: true })).toBe(
+        'cross-close'
+      )
+    })
+
     // CURSORS.md — `cross-snap` while the coastline is within reach; the closing mark still wins.
     it('marks the coast within reach, under the closing mark', () => {
       const pen = { ...AT_REST, tool: 'draw' as const, hasTarget: true, snapping: true }

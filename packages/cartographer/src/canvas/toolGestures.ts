@@ -7,7 +7,7 @@ import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
 import { backdropToLonLat, lonLatToScreen, screenToLonLatOnBackdrop } from '../view/projection'
 import { screenToBackdrop } from '../view/viewport'
 
-import { deleteSelected, insertOnStretch } from './anchorGestures'
+import { deleteSelected, insertOnStretch, penInsertHit } from './anchorGestures'
 import { anchorClick, anchorsByPosition } from './borderSnap'
 import { TAG } from './consoleTag'
 import { abandonGesture, dropDrag, sessionPointOf, targetHandles } from './toolSession'
@@ -139,6 +139,10 @@ export function penClick(context: GestureContext, at: Point): void {
     closeOutline(context)
     return
   }
+  // The target's own stretch before the coast: there the idle Pen edits the outline it already has.
+  // On its own coast this rarely bites — coast anchors are dense, so an anchor is nearly always the
+  // nearer hit, and that one is reused by the coast click.
+  if (penInserts(context, at)) return
   // Following the coast, the shore wins: a neighbour drawn along it left an anchor on every vertex,
   // and branching onto those would lose the coast (the dev, Spain then Portugal, 2026-10-11). Those
   // anchors are reused by the coast click, so the border stays shared. Elsewhere an existing anchor
@@ -148,6 +152,19 @@ export function penClick(context: GestureContext, at: Point): void {
   if (anchorClick(context, at)) return
   if (following) console.warn(`${TAG} no coastline within reach: a free point was placed.`)
   freeClick(context, at)
+}
+
+/**
+ * Insert a point where the idle Pen clicks one of the target's stretches (`penInsertHit` decides),
+ * as Illustrator's Pen adds a point on the selected path (the dev, 2026-10-11).
+ * @param context - the session and the store
+ * @param at - the pointer, in screen pixels
+ * @returns `true` when the click inserted a point, or was refused and said
+ */
+export function penInserts(context: GestureContext, at: Point): boolean {
+  const target = resolvedTarget(context)
+  if (target === null || penInsertHit(context, at) === null) return false
+  return insertOnStretch(context, target.id, at, false)
 }
 
 /**

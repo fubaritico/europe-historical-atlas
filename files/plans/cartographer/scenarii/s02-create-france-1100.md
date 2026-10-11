@@ -557,6 +557,12 @@ Scenario: follow a neighbour's border between two of its anchors
 > So the junction stays one shared anchor and the coast is followed from it. Branching still holds in
 > free mode, and off the shore. The cost: in coast mode, near the shore, a shared border is not
 > followed anchor to anchor — switch to free mode for that.
+>
+> **The Pen inserts too** (the dev, 2026-10-11, expecting Illustrator's Pen over a selected path): with
+> no outline in progress, over one of the **target's** stretches, the cursor shows a plus, the bar reads
+> *"Inserting a point into X"*, and the click inserts an anchor into every ring over that stretch, as
+> the white arrow does ([s03](s03-edit-existing-border.md)) — but without holding it for a drag. An
+> anchor under the Pen is still branched onto, never deleted: the 2026-09-22 decision above stands.
 
 > The dev, 2026-09-22: _"À partir d'un point sur lequel on clique, on ne le supprime pas comme dans
 > Illustrator, mais on fait démarrer un autre tracé car nous aurons des points en commun sur plusieurs

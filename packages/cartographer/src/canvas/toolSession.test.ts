@@ -111,6 +111,12 @@ describe('toolSession', () => {
       )
     })
 
+    it('names the Pen’s insertion over the target’s stretch', () => {
+      expect(actionSentence(action({ inserting: true }))).toBe(
+        'Inserting a point into Reaume de France'
+      )
+    })
+
     it('offers to close once the pointer is on the first anchor of three', () => {
       const outline = [here(50, 52), here(90, 50), here(90, 90)]
       expect(overlayScene(overlay({ session: { ...idleSession(), outline } })).closing).toBe(true)

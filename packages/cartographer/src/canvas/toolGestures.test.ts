@@ -863,3 +863,102 @@ describe('two neighbours along one shore', () => {
     expect(context.session.outline[0]?.anchor).toBeNull()
   })
 })
+
+describe('the Pen inserting a point on the target’s outline', () => {
+  /**
+   * France's triangle drawn and closed, the Pen still in hand and idle.
+   * @returns the context
+   */
+  function idlePenOnTriangle() {
+    const context = openContext()
+    drawTriangle(context)
+    return context
+  }
+
+  /** France's rings. */
+  function franceRings(context: GestureContext): number[][] {
+    return (
+      context.store.getState().document.claims.find((claim) => claim.polity === 'fr')?.rings ?? []
+    )
+  }
+
+  describe('happy path', () => {
+    // As Illustrator's Pen over a selected path (the dev, 2026-10-11).
+    it('inserts a point between anchors 0 and 1 when the idle Pen clicks the top side', () => {
+      const context = idlePenOnTriangle()
+
+      penClick(context, [200, 102])
+
+      expect(franceRings(context)).toEqual([[0, 3, 1, 2]])
+      expect(context.session.outline).toEqual([])
+    })
+  })
+
+  describe('variants', () => {
+    it('neither selects nor holds the point it inserted — a drag after it moves nothing', () => {
+      const context = idlePenOnTriangle()
+
+      penClick(context, [200, 102])
+
+      expect(context.session.selected).toBeNull()
+      expect(context.session.grabbed).toBeNull()
+    })
+  })
+
+  describe('managed errors', () => {
+    it('places an outline point, not an insertion, once an outline is in progress', () => {
+      const context = idlePenOnTriangle()
+      penClick(context, [200, 30])
+
+      penClick(context, [200, 102])
+
+      expect(franceRings(context)).toEqual([[0, 1, 2]])
+      expect(context.session.outline).toHaveLength(2)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // L4: N/A beyond the arrow's — the same insertion runs; its refusal is tested in anchorGestures.
+    it('inserts nothing on a polity that is not the target', () => {
+      const context = idlePenOnTriangle()
+      context.store.getState().aimAt('hre')
+
+      penClick(context, [200, 102])
+
+      expect(franceRings(context)).toEqual([[0, 1, 2]])
+    })
+  })
+
+  describe('edge cases', () => {
+    // s02 — an anchor under the Pen is branched onto, never deleted nor inserted beside.
+    it('branches onto an anchor rather than inserting next to it', () => {
+      const context = idlePenOnTriangle()
+
+      penClick(context, [101, 101])
+
+      expect(franceRings(context)).toEqual([[0, 1, 2]])
+      expect(context.session.outline[0]?.anchor).toBe(0)
+    })
+  })
+})
+
+describe('the idle Pen over its own stretch while following the coast', () => {
+  // QUAL-003: the order is deliberate — the target's own stretch is edited, the coast is not followed.
+  it('inserts on the target’s own stretch rather than snapping to a shore within reach', () => {
+    const { context } = coastContext()
+    context.store.getState().choosePenMode('free')
+    for (const at of [
+      [100, 210],
+      [300, 210],
+      [200, 320],
+    ] as const)
+      penClick(context, at)
+    penClick(context, [101, 211])
+    context.store.getState().choosePenMode('coast')
+
+    penClick(context, [200, 207])
+
+    expect(context.session.outline).toEqual([])
+    expect(context.store.getState().document.claims[0]?.rings).toEqual([[0, 3, 1, 2]])
+  })
+})

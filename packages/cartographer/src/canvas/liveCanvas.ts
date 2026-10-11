@@ -5,7 +5,7 @@ import { describeDrawingTarget } from '../state/drawingTarget'
 import { lonLatToScreen, remapToScreen } from '../view/projection'
 import { backdropToScreen } from '../view/viewport'
 
-import { stretchUnder } from './anchorGestures'
+import { penInsertHit, stretchUnder } from './anchorGestures'
 import { anchorHit, anchorSentence, borderRunTo } from './borderSnap'
 import { cursorCss, cursorFor } from './cursors'
 import { HANDLE_HIT_RADIUS } from './navigation'
@@ -188,8 +188,10 @@ const NO_OFFER: SnapOffer = { target: null, preview: null, kind: null, anchor: n
  * @param it - the attachment
  * @returns the offer, `NO_OFFER` when there is nothing
  */
-export function snapOffer(it: LiveCanvas): SnapOffer {
+export function snapOffer(it: LiveCanvas, inserting: boolean = overStretch(it)): SnapOffer {
   if (!penOffered(it) || it.pointer === null) return NO_OFFER
+  // Over the target's own stretch the idle Pen inserts, so it offers no snap there (`penInserts`).
+  if (inserting) return NO_OFFER
   const gesture = gestureOf(it)
   // Following the coast, the shore first — the same order as the click (`penClick`).
   if (it.deps.store.getState().penMode === 'coast') {
@@ -340,17 +342,20 @@ export function overHandle(it: LiveCanvas): boolean {
 }
 
 /**
- * Whether a white-arrow press here would insert an anchor: over one of the target's stretches, off any
- * handle, nothing held.
+ * Whether a click here would insert an anchor on one of the target's stretches: the white arrow off
+ * any handle, or the Pen with no outline in progress and no anchor to branch onto; nothing held.
  * @param it - the attachment
  * @returns `true` when the click would insert
  */
 export function overStretch(it: LiveCanvas): boolean {
-  if (it.pointer === null || it.session.grabbed !== null || overHandle(it)) return false
+  if (it.pointer === null || it.session.grabbed !== null || it.spaceHeld) return false
   const state = it.deps.store.getState()
-  if (state.tool !== 'edit') return false
+  const gesture = gestureOf(it)
+  // The Pen's plus reads the very rule its click does.
+  if (state.tool === 'draw') return penInsertHit(gesture, it.pointer) !== null
+  if (state.tool !== 'edit' || overHandle(it)) return false
   const target = describeDrawingTarget(state.document, state.target)
-  return target !== null && stretchUnder(gestureOf(it), target.id, it.pointer) !== null
+  return target !== null && stretchUnder(gesture, target.id, it.pointer) !== null
 }
 
 /**
@@ -363,8 +368,8 @@ export function overStretch(it: LiveCanvas): boolean {
 export function refreshTools(it: LiveCanvas): void {
   const state = it.deps.store.getState()
   const moving = it.session.moving
-  const offer = snapOffer(it)
   const inserting = overStretch(it)
+  const offer = snapOffer(it, inserting)
   const scene = overlayScene({
     session: it.session,
     tool: state.tool,

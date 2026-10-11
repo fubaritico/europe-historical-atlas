@@ -171,7 +171,7 @@ export interface ActionInputs {
   following: boolean
   /** The sentence for an existing anchor the Pen is over — `s02`'s branching line — or `null`. */
   joining: string | null
-  /** Whether the white arrow is over a stretch of the target, where a click inserts an anchor. */
+  /** Whether a click here inserts an anchor on a stretch of the target — the arrow, or the idle Pen. */
   inserting: boolean
   /** The session. */
   session: ToolSession
@@ -179,13 +179,14 @@ export interface ActionInputs {
 
 /**
  * What the Pen is doing, for the polity it draws in.
- * @param inputs - whether closing, snapping or following the coast
+ * @param inputs - whether closing, joining an anchor, inserting, snapping or following the coast
  * @param targetName - the polity's name, verbatim
  * @returns the sentence
  */
 function penSentence(inputs: ActionInputs, targetName: string): string {
   if (inputs.closing) return `Closing the outline of ${targetName}`
   if (inputs.joining !== null) return inputs.joining
+  if (inputs.inserting) return `Inserting a point into ${targetName}`
   // s02 — "Following the coastline for Kingdom of France".
   if (inputs.snapping) return `Following the coastline for ${targetName}`
   // s02's "place points freely", for the coast and before the click (QUAL-110). The polity is kept:

@@ -2,6 +2,7 @@ import { nearestStretch } from '../geometry/stretchHit'
 import { describeDrawingTarget } from '../state/drawingTarget'
 import { screenToLonLatOnBackdrop } from '../view/projection'
 
+import { anchorHit } from './borderSnap'
 import { TAG } from './consoleTag'
 import { targetHandles } from './toolSession'
 
@@ -65,18 +66,39 @@ export function stretchUnder(
 }
 
 /**
+ * The target's stretch the Pen would insert a point on — the one rule both its click (`penInserts`)
+ * and its cursor and sentence (`overStretch`) read, so they cannot disagree (ARCH-001). No outline in
+ * progress, and no anchor under the pointer: that one is branched onto.
+ * @param context - the session and the store
+ * @param at - the pointer, in screen pixels
+ * @returns the stretch, or `null` when the Pen does not insert here
+ */
+export function penInsertHit(
+  context: GestureContext,
+  at: readonly [number, number]
+): StretchHit | null {
+  if (context.session.outline.length > 0 || anchorHit(context, at) !== null) return null
+  const { document, target } = context.store.getState()
+  const aimed = describeDrawingTarget(document, target)
+  return aimed === null ? null : stretchUnder(context, aimed.id, at)
+}
+
+/**
  * Insert an anchor where the white arrow pressed on one of the target's stretches, and hand it to the
  * drag: keeping the pointer down moves it (`s03`). The insertion and the move are two steps, so an undo
  * after the drag takes back the move first, then the point.
  * @param context - the session and the store
  * @param polityId - the target's id
  * @param at - the pointer, in screen pixels
+ * @param hold - whether the new anchor is selected and held for a drag — the arrow's press; the Pen's
+ *   click only inserts, as Illustrator's Pen does
  * @returns `true` when the press was on a stretch — inserted, or refused and said
  */
 export function insertOnStretch(
   context: GestureContext,
   polityId: string,
-  at: readonly [number, number]
+  at: readonly [number, number],
+  hold = true
 ): boolean {
   const hit = stretchUnder(context, polityId, at)
   if (hit === null) return false
@@ -92,6 +114,7 @@ export function insertOnStretch(
     )
     return true
   }
+  if (!hold) return true
   context.session.selected = index
   context.session.grabbed = index
   return true

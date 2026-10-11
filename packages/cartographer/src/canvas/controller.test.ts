@@ -1668,6 +1668,19 @@ describe('inserting and deleting anchors with the white arrow, on the canvas', (
     })
   })
 
+  describe('the Pen', () => {
+    it('shows the plus and names the insertion over a side, with no outline in progress', () => {
+      const { node, store, acted, dispose } = attachWithTriangle()
+      node.dispatchEvent(keyEvent('p'))
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 400, offsetY: 202 }))
+      expect(acted).toHaveBeenLastCalledWith('Inserting a point into Reaume de France')
+      expect(node.style.cursor).toBe(cursorCss('cross-add'))
+      click(node, [400, 202])
+      expect(store.getState().document.claims[0]?.rings).toEqual([[0, 3, 1, 2]])
+      dispose()
+    })
+  })
+
   describe('variants', () => {
     // CURSORS.md — `arrow-insert` over a stretch; the bar says what a click there would do.
     it('shows the insert cursor and names the insertion over a side, not over a handle', () => {

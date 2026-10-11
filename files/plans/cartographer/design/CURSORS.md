@@ -23,6 +23,7 @@ High-fidelity. The shapes, sizes and hot spots are final.
 | `cross-close` | Cross + closing ring | ⟨draw⟩, pointer within snapping radius of the open outline's **first** anchor: a click closes the ring (‹enter› closes on a straight segment) | 16 16 | `crosshair` |
 | `cross-branch` | Cross + branch mark | ⟨draw⟩, over an existing anchor: a new outline will start from it | 16 16 | `crosshair` |
 | `cross-snap` | Cross + snap mark | ⟨draw⟩ with snap to river / snap to coast, pointer within snapping range of that feature | 16 16 | `crosshair` |
+| `cross-add` | Cross + plus | ⟨draw⟩, no outline in progress, over one of the target's stretches: a click inserts an anchor, as Illustrator's Pen over a selected path. **Not from the handoff** — derived on 2026-10-11 from `cross` and the plus of `arrow-insert`; replace it if a designed one arrives | 16 16 | `crosshair` |
 | `arrow` | White arrow | ⟨edit⟩ active | 6 4 | `default` |
 | `arrow-handle` | White arrow + square | ⟨edit⟩, over a handle | 6 4 | `default` |
 | `arrow-insert` | White arrow + plus | ⟨edit⟩, over a stretch, away from any handle: a click inserts an anchor | 6 4 | `copy` |
