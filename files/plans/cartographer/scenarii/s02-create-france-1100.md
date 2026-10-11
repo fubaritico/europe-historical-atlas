@@ -109,7 +109,7 @@ Scenario: choose the polity by clicking its fill
   When a duchy is drawn inside the kingdom and I click inside the duchy
   Then the duchy becomes the target — the polity painted on top wins
   When I click on unclaimed ground
-  Then the target stays as it was
+  Then no polity is the target any more — as in Illustrator, a click on nothing deselects
 ```
 
 > **A second way to the same choice — the dev's request, 2026-10-11**: *"en cliquant dans le plein

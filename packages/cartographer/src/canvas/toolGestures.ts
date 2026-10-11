@@ -269,9 +269,10 @@ export function arrowPress(context: GestureContext, at: Point): void {
   context.session.grabbed = hit
   if (hit !== null) return
   // Not on a handle: a press in a polity's fill makes it the target, the tool staying the arrow
-  // (the dev, 2026-10-11). Over unclaimed ground the target is kept — a stray click must not lose it.
+  // (the dev, 2026-10-11). Over unclaimed ground it deselects, as Illustrator does — his call, the
+  // same day, over keeping the target.
   const under = polityAt(context.territoriesOnScreen(), at)
-  if (under !== null && under !== target?.id) context.store.getState().chooseTarget(under)
+  if (under !== (target?.id ?? null)) context.store.getState().chooseTarget(under)
 }
 
 /**

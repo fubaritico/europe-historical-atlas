@@ -743,13 +743,13 @@ describe('the Pen following the coast', () => {
       expect(context.store.getState().target).toBe('fr')
     })
 
-    // A stray click on unclaimed ground must not lose the polity the author is working on.
-    it('keeps the target on a press over unclaimed ground', () => {
+    // The dev, 2026-10-11: a press on unclaimed ground deselects, as in Illustrator.
+    it('aims at nobody on a press over unclaimed ground', () => {
       const context = openContext()
       drawTriangle(context)
       context.store.getState().selectTool('edit')
       arrowPress(context, [900, 900])
-      expect(context.store.getState().target).toBe('fr')
+      expect(context.store.getState().target).toBeNull()
     })
   })
 })
