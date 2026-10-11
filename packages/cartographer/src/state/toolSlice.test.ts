@@ -14,7 +14,7 @@ import { UNFRAMED } from '../view/viewport'
 
 import { describeDrawingTarget } from './drawingTarget'
 import { createCartographerStore } from './store'
-import { isPenMode } from './toolSlice'
+import { isPenMode, nextPenMode } from './toolSlice'
 
 import type { HistoryStep } from '@europe-historical-atlas/core/editor/history'
 
@@ -203,9 +203,18 @@ describe('toolSlice', () => {
       expect(store.getState().penMode).toBe('coast')
     })
 
+    // The dev, 2026-10-11: pressing ‹P› again must change the Pen.
+    it('goes round the modes in the group’s order, back to the free Pen', () => {
+      expect(nextPenMode('free')).toBe('coast')
+      expect(nextPenMode('coast')).toBe('river')
+      expect(nextPenMode('river')).toBe('pencil')
+      expect(nextPenMode('pencil')).toBe('free')
+    })
+
     it('knows its modes, and no other', () => {
       expect(isPenMode('coast')).toBe(true)
       expect(isPenMode('river')).toBe(true)
+      expect(isPenMode('pencil')).toBe(true)
       expect(isPenMode('lake')).toBe(false)
     })
 

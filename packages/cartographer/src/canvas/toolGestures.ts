@@ -10,7 +10,15 @@ import { screenToBackdrop } from '../view/viewport'
 import { deleteSelected, insertOnStretch, penInsertHit } from './anchorGestures'
 import { anchorClick, anchorsByPosition } from './borderSnap'
 import { TAG } from './consoleTag'
-import { abandonGesture, dropDrag, layerNoun, sessionPointOf, targetHandles } from './toolSession'
+import {
+  abandonGesture,
+  clearOutline,
+  dropDrag,
+  layerNoun,
+  sessionPointOf,
+  takeBackStroke,
+  targetHandles,
+} from './toolSession'
 
 import type { SessionPoint, SnapLayer, SnapVertex, ToolSession } from './toolSession'
 import type { CoastContour } from '../geometry/coastSnap'
@@ -123,8 +131,7 @@ export function closeOutline(context: GestureContext): void {
   }
   const step = { kind: DRAW_OUTLINE_KIND, label: `draw outline of ${target.name}` }
   if (context.store.getState().drawOutline(target.id, context.session.outline, step)) {
-    context.session.outline = []
-    context.session.reopened = null
+    clearOutline(context.session)
     return
   }
   console.error(
@@ -201,7 +208,7 @@ function freeClick(context: GestureContext, at: Point): void {
  */
 export function followedLayer(context: GestureContext): SnapLayer | null {
   const mode = context.store.getState().penMode
-  return mode === 'free' ? null : mode
+  return mode === 'coast' || mode === 'river' ? mode : null
 }
 
 /**
@@ -416,11 +423,8 @@ export function toolKey(context: GestureContext, key: string): boolean {
   if (key === 'Backspace') {
     context.session.outline.pop()
     context.session.snap = null
-  } else if (key === 'Escape') {
-    context.session.outline = []
-    context.session.reopened = null
-    context.session.snap = null
-  } else if (key === 'Enter') closeOutline(context)
+  } else if (key === 'Escape') clearOutline(context.session)
+  else if (key === 'Enter') closeOutline(context)
   else return false
   return true
 }
@@ -501,8 +505,9 @@ function undoAndReopen(context: GestureContext): void {
 }
 
 /**
- * ‹ctrl+Z›, one step at a time: a drag in progress is dropped, an open outline loses its last anchor,
- * and only then is the last recorded gesture taken back — reopening the outline it closed, if it did.
+ * ‹ctrl+Z›, one step at a time: a drag in progress is dropped, an open outline loses its last Pencil
+ * stroke or its last anchor, and only then is the last recorded gesture taken back — reopening the
+ * outline it closed, if it did.
  *
  * **The gesture in progress first** (`H-10` applied to the session, and ARCH-001 / QUAL-001): an
  * anchor still under the button is not in the line, so rewinding the document under it would have the
@@ -515,6 +520,8 @@ function undoAndReopen(context: GestureContext): void {
  */
 export function undoGesture(context: GestureContext, repeat: boolean): void {
   if (dropDrag(context.session)) return
+  // A Pencil drag goes back whole, as in Illustrator; otherwise one point at a time.
+  if (takeBackStroke(context.session)) return
   if (context.session.outline.length > 0) {
     context.session.outline.pop()
     context.session.snap = null

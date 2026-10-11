@@ -1,3 +1,4 @@
+import { PEN_MODE_LABELS, nextPenMode } from '../state/toolSlice'
 import { backdropBoxOfBounds, clampToCover, openingView } from '../view/framing'
 import { screenToLonLatOnBackdrop } from '../view/projection'
 import { panBy, zoomAbout } from '../view/viewport'
@@ -17,6 +18,7 @@ import {
   wheelZoomFactor,
 } from './navigation'
 import { paintCanvas } from './painter'
+import { pencilCancel, pencilDrag, pencilEnd, pencilStart } from './pencil'
 import { buildScene } from './scene'
 import { inDevicePixels } from './style'
 import {
@@ -270,9 +272,9 @@ function onPointerDown(it: LiveCanvas, event: PointerEvent): void {
 
 /**
  * Follow the pointer: the overlay and the status bar always, and a drag once the press has travelled
- * far enough — a pan with the hand, an anchor with the white arrow. **A drag under the Pen does
- * nothing**: `s02` says a drag never curves anything, and a Pen that panned on a slightly long click
- * would lose the anchor the author meant to place.
+ * far enough — a pan with the hand, an anchor with the white arrow, a stroke with the Pencil. **A drag
+ * under the Pen does nothing**: `s02` says a drag never curves anything, and a Pen that panned on a
+ * slightly long click would lose the anchor the author meant to place.
  * @param it - the attachment
  * @param event - the pointer event
  */
@@ -285,11 +287,16 @@ function onPointerMove(it: LiveCanvas, event: PointerEvent): void {
     from !== null &&
     (it.dragging || Math.hypot(to[0] - from[0], to[1] - from[1]) > DRAG_TOLERANCE)
   ) {
+    const starting = !it.dragging
     it.dragging = true
     if (handInHand(it)) {
       settle(it, panBy(it.deps.store.getState().viewport, to[0] - from[0], to[1] - from[1]))
       it.pressAt = to
     } else if (it.deps.store.getState().tool === 'edit') arrowDrag(gestureOf(it), to)
+    else if (pencilInHand(it)) {
+      if (starting) pencilStart(gestureOf(it), from, event.timeStamp)
+      pencilDrag(gestureOf(it), to, event.timeStamp)
+    }
   }
   refreshTools(it)
 }
@@ -321,6 +328,13 @@ function onPointerUp(it: LiveCanvas, event: PointerEvent): void {
     if (tool === 'edit') arrowRelease(gestureOf(it))
     else if (tool === 'draw' && !dragged) penClick(gestureOf(it), positionOf(event))
   }
+  // A Pencil drag ends with the button, whatever happened meanwhile: the hand borrowed with ‹space›, or
+  // ‹P› turning the Pen to another mode. Then no last point is laid — the pointer was not drawing.
+  const drawing = it.session.drawing
+  if (drawing !== null) {
+    const at = pencilInHand(it) ? positionOf(event) : drawing.at
+    pencilEnd(gestureOf(it), at, event.timeStamp)
+  }
   refreshTools(it)
 }
 
@@ -339,8 +353,41 @@ function onPointerCancel(it: LiveCanvas, event: PointerEvent): void {
   it.dragging = false
   it.session.moving = null
   it.session.grabbed = null
+  pencilCancel(gestureOf(it))
   if (it.node.hasPointerCapture(event.pointerId)) it.node.releasePointerCapture(event.pointerId)
   refreshTools(it)
+}
+
+/**
+ * ‹P› and ‹A›: take the tool — and ‹P› with the Pen already in hand goes round its group, free → coast →
+ * river → Pencil (the dev, 2026-10-11: pressing ‹P› again must change the Pen).
+ * @param it - the attachment
+ * @param event - the key event
+ * @returns `true` when the key was a tool's, and was taken
+ */
+function onToolKey(it: LiveCanvas, event: KeyboardEvent): boolean {
+  const tool = TOOL_KEYS[event.key.toLowerCase()]
+  if (tool === undefined) return false
+  event.preventDefault()
+  const state = it.deps.store.getState()
+  if (tool === 'draw' && state.tool === 'draw') {
+    const mode = nextPenMode(state.penMode)
+    state.choosePenMode(mode)
+    // Said in the result zone, a polite live region: focus is on the canvas, not on the rail's button
+    // whose name changed, so the mode would otherwise change in silence (A11Y-010).
+    it.deps.onResult(PEN_MODE_LABELS[mode])
+  } else state.selectTool(tool)
+  return true
+}
+
+/**
+ * Whether a drag lays Pencil points: the Pen in hand in its freehand mode, the hand not borrowed.
+ * @param it - the attachment
+ * @returns `true` when a drag draws
+ */
+function pencilInHand(it: LiveCanvas): boolean {
+  const state = it.deps.store.getState()
+  return state.tool === 'draw' && state.penMode === 'pencil' && !handInHand(it)
 }
 
 /**
@@ -422,12 +469,7 @@ function onKeyDown(it: LiveCanvas, event: KeyboardEvent): void {
     refreshTools(it)
     return
   }
-  const tool = TOOL_KEYS[event.key.toLowerCase()]
-  if (tool !== undefined) {
-    event.preventDefault()
-    state.selectTool(tool)
-    return
-  }
+  if (onToolKey(it, event)) return
   const pan = PAN_KEYS[event.key]
   if (pan !== undefined) {
     event.preventDefault()

@@ -4,7 +4,7 @@
  */
 
 /** The tools that have a glyph. */
-export type ToolIconName = 'navigate' | 'draw' | 'edit'
+export type ToolIconName = 'navigate' | 'draw' | 'edit' | 'pencil'
 
 /** Each glyph's paths, copied verbatim from the design so the two cannot be told apart. */
 const PATHS: Record<ToolIconName, readonly string[]> = {
@@ -13,6 +13,9 @@ const PATHS: Record<ToolIconName, readonly string[]> = {
   ],
   draw: ['M9 2l5 7-3.5 7h-3L4 9z', 'M9 2v7'],
   edit: ['M4.5 2v13l3.4-3.4 2.4 5 2-1-2.4-5H14.5z'],
+  // Not in the design's set: drawn on the same grid and stroke as the Pen, a pencil laid at 45°, its
+  // ferrule and its sharpened tip (2026-10-11).
+  pencil: ['M12 2.5l3.5 3.5-9 9L2 16l1-4.5z', 'M10 4.5l3.5 3.5', 'M3 11.5l3.5 3.5'],
 }
 
 /**

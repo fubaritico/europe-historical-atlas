@@ -1,3 +1,5 @@
+import { PEN_MODE_LABELS } from '../state/toolSlice'
+
 import type { ToolVariant } from './ToolFlyout'
 import type { ToolIconName } from './toolIcons'
 import type { EditorTool } from '../state/toolSlice'
@@ -17,13 +19,14 @@ export interface RailTool {
 }
 
 /**
- * The Pen's group: the free Pen, the Pen that follows the coast, and the Pen that follows a river
- * (`s02`).
+ * The Pen's group: the free Pen, the Pen that follows the coast, the Pen that follows a river (`s02`),
+ * and the Pencil, which lays a point every 200 ms of a drag (the dev, 2026-10-11).
  */
 export const PEN_VARIANTS: readonly [ToolVariant, ...ToolVariant[]] = [
-  { id: 'free', label: 'Pen', shortcut: 'P', icon: 'draw', enabled: true },
-  { id: 'coast', label: 'Pen — follow the coast', shortcut: null, icon: 'draw', enabled: true },
-  { id: 'river', label: 'Pen — follow a river', shortcut: null, icon: 'draw', enabled: true },
+  { id: 'free', label: PEN_MODE_LABELS.free, shortcut: 'P', icon: 'draw', enabled: true },
+  { id: 'coast', label: PEN_MODE_LABELS.coast, shortcut: null, icon: 'draw', enabled: true },
+  { id: 'river', label: PEN_MODE_LABELS.river, shortcut: null, icon: 'draw', enabled: true },
+  { id: 'pencil', label: PEN_MODE_LABELS.pencil, shortcut: null, icon: 'pencil', enabled: true },
 ]
 
 /**

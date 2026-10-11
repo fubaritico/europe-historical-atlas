@@ -50,6 +50,34 @@ export interface ToolSession {
    * `null` once a point was placed any other way, or the outline changed under it.
    */
   snap: SnapVertex | null
+  /**
+   * The stretches the Pencil laid, one per drag, oldest first — what lets ‹ctrl+Z› take a whole stroke
+   * back, as Illustrator does. Held by the points themselves, not by positions, so an outline changed by
+   * any other gesture simply stops matching and the stroke is forgotten (`takeBackStroke`).
+   */
+  strokes: PencilStroke[]
+  /** The Pencil's drag in progress: when and where it last placed a point — `null` between drags. */
+  drawing: PencilSample | null
+}
+
+/** A stretch of the outline laid by one Pencil drag: its first and its last point, by identity. */
+export interface PencilStroke {
+  /** The point the drag began with. */
+  first: SessionPoint
+  /** The last point it placed. */
+  last: SessionPoint
+}
+
+/** The Pencil's last sample: when, and where on screen. */
+export interface PencilSample {
+  /** The event's time stamp, in milliseconds. */
+  time: number
+  /** The pointer, in screen pixels. */
+  at: [number, number]
+  /** How many samples fell off the map during this drag — said once, at its end. */
+  offMap: number
+  /** The stroke this drag is laying — `null` until its first point lands on the map. */
+  stroke: PencilStroke | null
 }
 
 /**
@@ -81,7 +109,16 @@ export interface SnapVertex extends CoastVertex {
  * @returns an empty session
  */
 export function idleSession(): ToolSession {
-  return { outline: [], selected: null, grabbed: null, moving: null, reopened: null, snap: null }
+  return {
+    outline: [],
+    selected: null,
+    grabbed: null,
+    moving: null,
+    reopened: null,
+    snap: null,
+    strokes: [],
+    drawing: null,
+  }
 }
 
 /**
@@ -107,6 +144,48 @@ export function sessionPointOf(document: YearDocument, index: number): SessionPo
 }
 
 /**
+ * Take back the last Pencil stroke whole, when the outline ends on it — ‹ctrl+Z› after a drag removes
+ * the drag, not its last point (the dev, 2026-10-11, as Illustrator does).
+ *
+ * **The newest stroke is only looked at, not dropped, when points sit on top of it** (QUAL-001): a Pen
+ * click after a stroke is taken back by itself, and the next ‹ctrl+Z› still takes the stroke whole. A
+ * stroke is forgotten only once its points are gone — ‹backspace› ate into it, the outline was emptied —
+ * and the caller then takes one point. A drag still laying onto a stroke taken back starts a new one.
+ * @param session - the session, mutated in place
+ * @returns `true` when a stroke was taken back
+ */
+export function takeBackStroke(session: ToolSession): boolean {
+  for (let stroke = session.strokes.at(-1); stroke !== undefined; stroke = session.strokes.at(-1)) {
+    const start = session.outline.indexOf(stroke.first)
+    if (start < 0 || !session.outline.includes(stroke.last)) {
+      session.strokes.pop()
+      continue
+    }
+    if (session.outline.at(-1) !== stroke.last) return false
+    session.outline.splice(start)
+    session.strokes.pop()
+    session.snap = null
+    if (session.drawing?.stroke === stroke) session.drawing.stroke = null
+    return true
+  }
+  return false
+}
+
+/**
+ * Empty the outline in hand — closed into the document, or let go with ‹escape› — and everything that
+ * only meant something about it: the snap it ended on, the strokes it was laid in, the outline an undo
+ * reopened. A Pencil drag still under the button goes on, into a new stroke.
+ * @param session - the session, mutated in place
+ */
+export function clearOutline(session: ToolSession): void {
+  session.outline = []
+  session.reopened = null
+  session.snap = null
+  session.strokes = []
+  if (session.drawing !== null) session.drawing.stroke = null
+}
+
+/**
  * Drop the gesture in progress — the outline being drawn, the anchor being dragged — and keep the
  * selection, which is a pointer the author chose and not a gesture.
  *
@@ -123,6 +202,8 @@ export function abandonGesture(session: ToolSession): boolean {
   session.grabbed = null
   session.reopened = null
   session.snap = null
+  session.strokes = []
+  session.drawing = null
   return busy
 }
 

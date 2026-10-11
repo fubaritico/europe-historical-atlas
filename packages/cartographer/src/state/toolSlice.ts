@@ -23,12 +23,23 @@ export type EditorTool = 'navigate' | 'draw' | 'edit'
 
 /**
  * How the Pen places its points — the variants of its group (`s02`'s ⟨free point⟩, ⟨snap to coast⟩,
- * ⟨snap to river⟩).
+ * ⟨snap to river⟩), and the Pencil, its freehand mode (the dev, 2026-10-11). In the group's order.
  */
-export const PEN_MODES = ['free', 'coast', 'river'] as const
+export const PEN_MODES = ['free', 'coast', 'river', 'pencil'] as const
 
 /** One of {@link PEN_MODES}. */
 export type PenMode = (typeof PEN_MODES)[number]
+
+/**
+ * Each mode's name — the row of the Pen's group, the group head's name, and what ‹P› says in the status
+ * bar when it changes the mode. Written once, here, so the three cannot disagree.
+ */
+export const PEN_MODE_LABELS: Record<PenMode, string> = {
+  free: 'Pen',
+  coast: 'Pen — follow the coast',
+  river: 'Pen — follow a river',
+  pencil: 'Pencil — freehand',
+}
 
 /**
  * Whether a variant id names a mode of the Pen — the one check, beside the one list (QUAL-115).
@@ -37,6 +48,22 @@ export type PenMode = (typeof PEN_MODES)[number]
  */
 export function isPenMode(id: string): id is PenMode {
   return PEN_MODES.some((mode) => mode === id)
+}
+
+/**
+ * The mode after this one, in the group's order and round again — what ‹P› does with the Pen already in
+ * hand (the dev, 2026-10-11: pressing ‹P› again must change the Pen).
+ * @param mode - the mode in use
+ * @returns the next one
+ */
+export function nextPenMode(mode: PenMode): PenMode {
+  const next = PEN_MODES[(PEN_MODES.indexOf(mode) + 1) % PEN_MODES.length]
+  if (next === undefined) {
+    // Out of range only if PEN_MODES were empty: said, and the mode kept rather than replaced.
+    console.error(`[Cartographer] no Pen mode follows "${mode}"; the mode is unchanged.`)
+    return mode
+  }
+  return next
 }
 
 /** What the session holds about tools. */

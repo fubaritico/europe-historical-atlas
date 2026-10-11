@@ -90,10 +90,19 @@ describe('ToolRail', () => {
         'Pen(P)',
         'Pen — follow the coast',
         'Pen — follow a river',
+        'Pencil — freehand',
       ])
       expect(items[0]?.getAttribute('aria-checked')).toBe('true')
       expect(items[1]?.getAttribute('aria-disabled')).toBe('false')
       expect(items[2]?.getAttribute('aria-disabled')).toBe('false')
+    })
+
+    // As Illustrator's button shows the Pencil once it is chosen.
+    it('shows the Pencil glyph on the group head when the Pencil is in use', () => {
+      mount({ tool: 'draw', penMode: 'pencil' })
+      const head = tool('Pencil — freehand')
+      const paths = [...head.querySelectorAll('path')].map((path) => path.getAttribute('d'))
+      expect(paths).toContain('M10 4.5l3.5 3.5')
     })
 
     it('reports the river Pen when its row is chosen', async () => {

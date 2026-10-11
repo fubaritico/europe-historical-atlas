@@ -6,6 +6,7 @@ import { ToolIcon } from './toolIcons'
 
 import type { RailTool } from './railTools'
 import type { ToolVariant } from './ToolFlyout'
+import type { ToolIconName } from './toolIcons'
 import type { EditorTool } from '../state/toolSlice'
 import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
 
@@ -189,6 +190,17 @@ function headLabel(entry: RailTool, current: string): string {
 }
 
 /**
+ * A tool's glyph — for a group head, the glyph of the variant in use, as Illustrator's button shows the
+ * Pencil once it is chosen. A tool heading no group keeps its own.
+ * @param entry - the tool
+ * @param current - the variant in use
+ * @returns the glyph's name
+ */
+function headIcon(entry: RailTool, current: string): ToolIconName {
+  return entry.variants?.find((variant) => variant.id === current)?.icon ?? entry.icon
+}
+
+/**
  * One tool, and — when it heads a group — the three ways Illustrator opens it: holding the press, a
  * right click, and here also →, so the keyboard has a way in.
  * @param props - the tool, its state, and the callbacks
@@ -230,7 +242,7 @@ function ToolButton({
           if (!consumeHold()) onSelect(entry.tool)
         }}
       >
-        <ToolIcon name={entry.icon} />
+        <ToolIcon name={headIcon(entry, current)} />
       </button>
       {open && group !== undefined ? (
         <GroupFlyout

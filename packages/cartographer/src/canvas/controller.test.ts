@@ -1795,3 +1795,187 @@ describe('inserting and deleting anchors with the white arrow, on the canvas', (
     })
   })
 })
+
+describe('the Pencil on the canvas', () => {
+  /**
+   * A pointer event carrying its own time stamp — the Pencil reads `event.timeStamp`, which the
+   * constructor does not let a test set.
+   * @param type - the event type
+   * @param at - where, in CSS pixels
+   * @param time - the time stamp, in milliseconds
+   * @returns the event
+   */
+  function timed(type: string, at: readonly [number, number], time: number): Event {
+    const event = pointerEvent(type, { offsetX: at[0], offsetY: at[1] })
+    Object.defineProperty(event, 'timeStamp', { value: time })
+    return event
+  }
+
+  /**
+   * One Pencil drag: pressed on the first point at `start`, moved through the others 250 ms apart,
+   * released on the last.
+   * @param node - the canvas
+   * @param points - the pointer's path
+   * @param start - the press's time stamp
+   */
+  function stroke(
+    node: HTMLCanvasElement,
+    points: readonly (readonly [number, number])[],
+    start: number
+  ) {
+    const [first, ...rest] = points
+    if (first === undefined) return
+    node.dispatchEvent(timed('pointerdown', first, start))
+    rest.forEach((at, index) => {
+      node.dispatchEvent(timed('pointermove', at, start + (index + 1) * 250))
+    })
+    node.dispatchEvent(timed('pointerup', rest.at(-1) ?? first, start + rest.length * 250))
+  }
+
+  describe('happy path', () => {
+    // The dev, 2026-10-11: a drag lays a point every 200 ms, and the outline closes as the Pen's does.
+    it('lays a point per interval of a drag, and closes on enter', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      store.getState().choosePenMode('pencil')
+      const view = store.getState().viewport
+      stroke(
+        node,
+        [
+          [300, 200],
+          [350, 200],
+          [400, 200],
+          [400, 300],
+        ],
+        0
+      )
+      node.dispatchEvent(keyEvent('Enter'))
+      expect(store.getState().document.claims[0]?.rings[0]).toHaveLength(3)
+      expect(store.getState().viewport).toEqual(view)
+      dispose()
+    })
+  })
+
+  describe('variants', () => {
+    // The dev, 2026-10-11: pressing ‹P› again must change the Pen.
+    it('goes round the Pen’s modes with P, the Pen in hand', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      const modes = ['coast', 'river', 'pencil', 'free'].map(() => {
+        node.dispatchEvent(keyEvent('p'))
+        return store.getState().penMode
+      })
+      expect(modes).toEqual(['coast', 'river', 'pencil', 'free'])
+      dispose()
+    })
+
+    // A11Y-010: focus is on the canvas, so the new mode is said in the result zone, a live region.
+    it('says the new mode in the result zone when P changes it', () => {
+      const { node, store, resulted, dispose } = attach()
+      aimAtFrance(store)
+      node.dispatchEvent(keyEvent('p'))
+      expect(resulted).toHaveBeenLastCalledWith('Pen — follow the coast')
+      dispose()
+    })
+
+    it('takes the Pen with P from another tool, its mode unchanged', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      store.getState().choosePenMode('river')
+      node.dispatchEvent(keyEvent('a'))
+      node.dispatchEvent(keyEvent('p'))
+      expect(store.getState().tool).toBe('draw')
+      expect(store.getState().penMode).toBe('river')
+      dispose()
+    })
+  })
+
+  describe('managed errors', () => {
+    it('takes the last stroke back whole with ctrl+Z', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      store.getState().choosePenMode('pencil')
+      stroke(
+        node,
+        [
+          [300, 200],
+          [350, 200],
+          [400, 200],
+          [400, 300],
+        ],
+        0
+      )
+      stroke(
+        node,
+        [
+          [450, 300],
+          [480, 300],
+          [500, 300],
+          [500, 350],
+        ],
+        5000
+      )
+      node.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true }))
+      node.dispatchEvent(keyEvent('Enter'))
+      expect(store.getState().document.claims[0]?.rings[0]).toHaveLength(3)
+      dispose()
+    })
+  })
+
+  describe('what the review found', () => {
+    // ARCH-003. What the canvas shows: no point at the release. That the drag is also *ended* (its
+    // off-map count said) is not observable here — the backdrop covers the canvas — and no test holds it.
+    it('lays no point at the release after P turned the mode mid-drag', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      store.getState().choosePenMode('pencil')
+      node.dispatchEvent(timed('pointerdown', [300, 200], 0))
+      node.dispatchEvent(timed('pointermove', [350, 200], 250))
+      node.dispatchEvent(timed('pointermove', [400, 200], 500))
+      node.dispatchEvent(timed('pointermove', [400, 300], 750))
+      node.dispatchEvent(keyEvent('p'))
+      node.dispatchEvent(timed('pointerup', [600, 400], 1000))
+      store.getState().choosePenMode('pencil')
+      node.dispatchEvent(keyEvent('Enter'))
+      expect(store.getState().document.claims[0]?.rings[0]).toHaveLength(3)
+      dispose()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('drops the stroke of a cancelled drag', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      store.getState().choosePenMode('pencil')
+      stroke(
+        node,
+        [
+          [300, 200],
+          [350, 200],
+          [400, 200],
+          [400, 300],
+        ],
+        0
+      )
+      node.dispatchEvent(timed('pointerdown', [450, 300], 5000))
+      node.dispatchEvent(timed('pointermove', [500, 300], 5250))
+      node.dispatchEvent(timed('pointercancel', [500, 300], 5300))
+      node.dispatchEvent(keyEvent('Enter'))
+      expect(store.getState().document.claims[0]?.rings[0]).toHaveLength(3)
+      dispose()
+    })
+  })
+
+  describe('edge cases', () => {
+    // A press and release in place is a click: the Pencil places one point, as the Pen does.
+    it('places one point on a click without a drag', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      store.getState().choosePenMode('pencil')
+      for (const at of CANVAS_TRIANGLE) click(node, at)
+      click(node, [301, 201])
+      expect(store.getState().document.claims[0]?.rings[0]).toHaveLength(3)
+      dispose()
+    })
+  })
+})
