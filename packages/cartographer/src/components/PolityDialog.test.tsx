@@ -9,7 +9,7 @@ import { openEmptyYear } from '../state/openEmptyYear'
 import { createCartographerStore } from '../state/store'
 import { UNFRAMED } from '../view/viewport'
 
-import { NewPolityDialog } from './NewPolityDialog'
+import { PolityDialog } from './PolityDialog'
 import { DRAFT_ERRORS } from './polityDraft'
 
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
@@ -34,13 +34,13 @@ function openDialog() {
     viewport: { viewport: UNFRAMED },
   })
   const onClose = vi.fn()
-  render(<NewPolityDialog store={store} isOpen onClose={onClose} />)
+  render(<PolityDialog store={store} editing={null} isOpen onClose={onClose} />)
   return { store, onClose, user: userEvent.setup() }
 }
 
 const field = (name: string) => screen.getByLabelText<HTMLInputElement>(name)
 
-describe('NewPolityDialog', () => {
+describe('PolityDialog', () => {
   describe('happy path', () => {
     // s02 — "validating the form hands me the Pen": created with no territory, aimed at, Pen in hand.
     it('creates the polity, aims the Pen at it and closes', async () => {

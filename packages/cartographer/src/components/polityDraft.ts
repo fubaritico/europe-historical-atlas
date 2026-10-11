@@ -1,5 +1,6 @@
-import { hsvaToHex } from '@fubaritico/behaviors'
+import { hexToRgba, hsvaToHex, rgbaToHsva } from '@fubaritico/behaviors'
 
+import { vassalsOf } from '@europe-historical-atlas/core/data/paintOrder'
 import { proposePolityId } from '@europe-historical-atlas/core/editor/polityId'
 
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
@@ -183,4 +184,66 @@ export function readDraft(draft: PolityDraft, taken: ReadonlySet<string>): Draft
       wikidata: wikidata === '' ? null : wikidata,
     },
   }
+}
+
+/**
+ * The form filled with a polity of the year — what *[Edit properties…]* opens (`s07`): *"the same form
+ * as creation opens, filled with its current values"*. The id is marked as the author's, so the name no
+ * longer proposes one: an existing polity's id never changes.
+ * @param polity - the polity, as the document holds it
+ * @returns the draft
+ */
+export function draftOf(polity: YearPolity): PolityDraft {
+  return {
+    name: polity.name,
+    id: polity.id,
+    idEdited: true,
+    rank: polity.rank,
+    status: polity.status,
+    existsFrom: polity.existsFrom === null ? '' : String(polity.existsFrom),
+    existsTo: polity.existsTo === null ? '' : String(polity.existsTo),
+    suzerain: polity.suzerain,
+    wikidata: polity.wikidata ?? '',
+    colour: pickedColour(polity),
+  }
+}
+
+/**
+ * A polity's colour as the picker holds it, or `null` for "automatic".
+ *
+ * **A colour that does not read as hex is said, and opens as automatic.** It cannot come from the
+ * readers (the schema takes `#rrggbb` only) nor from the picker; reaching it is a defect. Validating the
+ * form then would write the palette's colour in its place — the one cost of not refusing to open.
+ * @param polity - the polity
+ * @returns the HSVA, or `null`
+ */
+function pickedColour(polity: YearPolity): HsvaColor | null {
+  if (polity.colour === null) return null
+  const rgba = hexToRgba(polity.colour)
+  if (rgba === null) {
+    console.error(
+      `[Cartographer] "${polity.id}" has the colour "${polity.colour}", which is no hex.`
+    )
+    return null
+  }
+  return rgbaToHsva(rgba)
+}
+
+/**
+ * The polities a polity may owe homage to — every other one of the year, **less itself and its own
+ * vassals at any depth**: choosing one of those would close a loop of homage, which the document refuses
+ * (`updatePolity`). Offering it and then refusing it would be a choice the form pretends to give.
+ * @param polities - the year's polities
+ * @param editing - the polity being edited, or `null` when creating one
+ * @returns the choices, in list order
+ */
+export function suzerainChoices(
+  polities: readonly YearPolity[],
+  editing: string | null
+): DraftOption[] {
+  const below = editing === null ? new Set<string>() : vassalsOf(polities, editing)
+  if (editing !== null) below.add(editing)
+  return polities
+    .filter((polity) => !below.has(polity.id))
+    .map((polity) => ({ value: polity.id, label: polity.name }))
 }

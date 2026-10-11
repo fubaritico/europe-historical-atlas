@@ -847,3 +847,33 @@ describe('editionSlice.restackPolity', () => {
 
   // L5: the edge cases of the order itself are `core/editor/stacking`'s; this only records it.
 })
+
+describe('editionSlice.editPolity', () => {
+  const EDIT: HistoryStep = { kind: 'edit-polity', label: 'edit Royaume de France' }
+
+  describe('happy path', () => {
+    // s07 — "When I validate / Then the change lands".
+    it('changes a polity as one step, and the undo puts it back', () => {
+      const { store } = openStore()
+      const france = store.getState().document.polities[0]
+      if (france === undefined) throw new Error('fixture changed')
+      expect(store.getState().editPolity({ ...france, name: 'Royaume de France' }, EDIT)).toBe(true)
+      expect(store.getState().document.polities[0]?.name).toBe('Royaume de France')
+      expect(store.getState().undoLabel).toBe('edit Royaume de France')
+      store.getState().undo()
+      expect(store.getState().document.polities[0]?.name).toBe(france.name)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('records nothing for a suzerain that would loop', () => {
+      const { store } = openStore()
+      const france = store.getState().document.polities[0]
+      if (france === undefined) throw new Error('fixture changed')
+      expect(store.getState().editPolity({ ...france, suzerain: france.id }, EDIT)).toBe(false)
+      expect(store.getState().canUndo).toBe(false)
+    })
+  })
+
+  // L2/L4/L5: the variants and edges of the change are `core/editor/documentEdits.updatePolity`'s.
+})

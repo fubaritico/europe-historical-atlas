@@ -11,6 +11,9 @@ import type { ViewportPoint } from '../view/viewport'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
 import type { RefObject } from 'react'
 
+/** The value of the menu's first item, *Edit properties…* — `s07`'s gesture, above the four moves. */
+const EDIT = 'edit'
+
 /** What the menu shows and reports. Never the store: `PolitiesPanel` reads it and hands literals. */
 export interface PolityStackMenuProps {
   /** The polity the commands act on, verbatim — the menu's accessible name. */
@@ -19,8 +22,10 @@ export interface PolityStackMenuProps {
   at: ViewportPoint
   /** Which commands would change anything; the others are disabled (`s16`). */
   moves: Record<StackingMove, boolean>
-  /** A command was chosen. The menu closes itself afterwards through `onClose`. */
+  /** A stacking command was chosen. The menu closes itself afterwards through `onClose`. */
   onChoose: (move: StackingMove) => void
+  /** *Edit properties…* was chosen — the polity's dialogue (`s07`). The menu closes itself afterwards. */
+  onEdit: () => void
   /** ‹escape›, a press outside, or a command chosen. */
   onClose: () => void
 }
@@ -93,16 +98,28 @@ function useDismiss(shell: RefObject<HTMLDivElement | null>, onClose: () => void
  * @param props - the polity, the point, the enabled moves and the callbacks
  * @returns the menu
  */
-export function PolityStackMenu({ name, at, moves, onChoose, onClose }: PolityStackMenuProps) {
+export function PolityStackMenu({
+  name,
+  at,
+  moves,
+  onChoose,
+  onEdit,
+  onClose,
+}: PolityStackMenuProps) {
   const shell = useInsideWindow(at)
   useDismiss(shell, onClose)
   return (
     <div ref={shell} className="polity-stack-menu" style={{ left: at.x, top: at.y }}>
       <Menu
         variant="dark"
-        aria-label={`Arrange ${name}`}
+        aria-label={`Actions for ${name}`}
         onClose={onClose}
         onSelect={(value) => {
+          if (value === EDIT) {
+            onClose()
+            onEdit()
+            return
+          }
           const move = STACKING_MOVES.find((candidate) => candidate === value)
           if (move === undefined) {
             console.error(`[Cartographer] the stacking menu chose "${value}", which is no command.`)
@@ -112,8 +129,11 @@ export function PolityStackMenu({ name, at, moves, onChoose, onClose }: PolitySt
           onClose()
         }}
       >
+        <Menu.Item index={0} value={EDIT}>
+          Edit properties…
+        </Menu.Item>
         {STACKING_MOVES.map((move, index) => (
-          <Menu.Item key={move} index={index} value={move} disabled={!moves[move]}>
+          <Menu.Item key={move} index={index + 1} value={move} disabled={!moves[move]}>
             {STACKING_LABELS[move]}
           </Menu.Item>
         ))}

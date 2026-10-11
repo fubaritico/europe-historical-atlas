@@ -45,9 +45,10 @@ Put here the know issues to avoid cluttering the context window.
   coupe le bas du menu (≈ 100 px). Remède : le replier dans un effet de mise en page, une fois mesuré.
   (2) **Il est annoncé comme une liste, pas comme un menu** : c'est le `Menu` du design system, qui rend
   un `role="listbox"` d'`option`. Le remède est au design system (un `role="menu"`), à demander à son
-  Claude avec un menu contextuel positionné. **Et une boucle d'hommage n'est pas refusée à la saisie**
-  — rien ne permet encore de choisir un suzerain dans l'éditeur ; si un fichier en contient une, ses
-  pays sont peints en dernier et `documentFaults` le dit une fois. **Sévérité : cosmétique.**
+  Claude avec un menu contextuel positionné. **Une boucle d'hommage est refusée à la saisie depuis le 12/10**
+  (`updatePolity` / `vassalsOf`, et la liste des suzerains ne la propose pas) — l'entrée écrite ici le
+  11/10 disait à tort que rien ne permettait de choisir un suzerain : le formulaire l'avait depuis le
+  09/10. Un fichier qui en contient une est peint en dernier, et `documentFaults` le dit une fois. **Sévérité : cosmétique.**
 - **Le texte d'erreur sous un champ n'atteint pas 4,5:1 — la palette n'a pas d'encre d'alerte assez claire.**
   Relevé au pas 3 du design system (09/10). Le DS colore le message d'erreur d'un champ avec
   `--color-destructive-hover`, et notre seule teinte d'alerte est `--warn #c86a52` : **3,89:1** sur

@@ -172,6 +172,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
           targetId="fr-couronne"
           onChoose={() => undefined}
           onMenu={() => undefined}
+          onEdit={() => undefined}
           rows={PLATE_ROWS}
         />
       </div>
@@ -180,7 +181,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
   {
     id: 'polity-stack-menu',
     title: 'Stacking menu',
-    note: "A {Polities} row's menu (s16), opened at a point: the four Arrange commands, Bring to Front and Bring Forward disabled — the polity is already at the front among its siblings. The design system's Menu, placed by our shell.",
+    note: "A {Polities} row's menu (s16), opened at a point: Edit properties… then the four Arrange commands, Bring to Front and Bring Forward disabled — the polity is already at the front among its siblings. The design system's Menu, placed by our shell.",
     width: 300,
     render: () => (
       <div className="workbench__panel" style={{ height: 140 }}>
@@ -189,6 +190,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
           at={{ x: 40, y: 40 }}
           moves={{ front: false, forward: false, backward: true, back: true }}
           onChoose={() => undefined}
+          onEdit={() => undefined}
           onClose={() => undefined}
         />
       </div>

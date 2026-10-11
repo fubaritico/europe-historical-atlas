@@ -90,3 +90,28 @@ export function paintOrder(polities: readonly YearPolity[]): PaintOrder {
 export function paintRanks(polities: readonly YearPolity[]): Map<string, number> {
   return new Map(paintOrder(polities).order.map((id, index) => [id, index]))
 }
+
+/**
+ * A polity's vassals at any depth — its whole group below it. **The one definition of "below"**: the
+ * document refuses a suzerain from it (`updatePolity`), and the form leaves it out of the suzerain list
+ * (`suzerainChoices`), so the form never offers what the document refuses (review ARCH-001, 2026-10-12).
+ *
+ * Read on the declared suzerains, not the effective ones: a loop already in the list stops the walk
+ * rather than spinning it.
+ * @param polities - the year's polities
+ * @param id - whose vassals
+ * @returns their ids, the polity itself not included
+ */
+export function vassalsOf(polities: readonly YearPolity[], id: string): Set<string> {
+  const below = new Set<string>()
+  const frontier = [id]
+  for (let at = frontier.pop(); at !== undefined; at = frontier.pop()) {
+    for (const polity of polities) {
+      if (polity.suzerain === at && polity.id !== id && !below.has(polity.id)) {
+        below.add(polity.id)
+        frontier.push(polity.id)
+      }
+    }
+  }
+  return below
+}

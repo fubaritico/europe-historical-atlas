@@ -3,8 +3,8 @@ import { useCallback, useRef, useState } from 'react'
 
 import { describeDrawingTarget } from '../state/drawingTarget'
 
-import { NewPolityDialog } from './NewPolityDialog'
 import { PolityArrangeMenu } from './PolityArrangeMenu'
+import { PolityDialog } from './PolityDialog'
 import { PolityList } from './PolityList'
 import { polityRows } from './polityRows'
 
@@ -12,6 +12,7 @@ import type { ArrangeRequest } from './PolityArrangeMenu'
 import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
 import type { ViewportPoint } from '../view/viewport'
+import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 
 /** What the panel needs: the store, the colours its rows show, and where to say what a command did. */
 export interface PolitiesPanelProps {
@@ -42,6 +43,46 @@ function useArrangeMenu() {
 }
 
 /**
+ * The panel's title bar and `[+ New polity]`, where `design/03` puts it — the `+` at the end of the
+ * panel's tab strip.
+ * @param props - what `+` does
+ * @param props.onNew - open the creation dialogue
+ * @returns the head
+ */
+function PolitiesHead({ onNew }: { onNew: () => void }) {
+  return (
+    <header className="polities__head">
+      <h2 className="polities__title">Polities</h2>
+      <IconButton icon="Plus" aria-label="New polity" onClick={onNew} />
+    </header>
+  )
+}
+
+/**
+ * The panel's two dialogues: `[+ New polity]`'s, and the one editing a polity — mounted per polity, so
+ * the form opens filled with that polity's values (`s07`).
+ * @param props - the store, whether creating, the polity edited, and how each closes
+ * @returns the dialogues
+ */
+function PolityDialogs(props: {
+  store: CartographerStoreHook
+  creating: boolean
+  edited: YearPolity | null
+  onCreated: () => void
+  onEdited: () => void
+}) {
+  const { store, creating, edited, onCreated, onEdited } = props
+  return (
+    <>
+      {edited === null ? null : (
+        <PolityDialog key={edited.id} store={store} editing={edited} isOpen onClose={onEdited} />
+      )}
+      <PolityDialog store={store} editing={null} isOpen={creating} onClose={onCreated} />
+    </>
+  )
+}
+
+/**
  * `{Polities}` as it stands today: its title bar and `[+ New polity]`, where `design/03` puts it — the
  * `+` at the end of the panel's tab strip.
  *
@@ -59,24 +100,24 @@ export function PolitiesPanel({ store, colours, onResult }: PolitiesPanelProps) 
   // The document is mutated in place: the version is what changes when a polity is added or drawn.
   const version = store((state) => state.version)
   const { document } = store.getState()
+  const [editing, setEditing] = useState<string | null>(null)
+  // Resolved each render: an undo can take the polity away while its dialogue is open, and then there
+  // is nothing to edit — the dialogue is not shown.
+  const edited = document.polities.find((polity) => polity.id === editing)
   return (
     <section ref={panel} className="polities" aria-label="Polities">
-      <header className="polities__head">
-        <h2 className="polities__title">Polities</h2>
-        <IconButton
-          icon="Plus"
-          aria-label="New polity"
-          onClick={() => {
-            setCreating(true)
-          }}
-        />
-      </header>
+      <PolitiesHead
+        onNew={() => {
+          setCreating(true)
+        }}
+      />
       <PolityList
         year={document.year}
         rows={polityRows(document, colours.coloursOf(document, version))}
         targetId={describeDrawingTarget(document, target)?.id ?? null}
         onChoose={chooseTarget}
         onMenu={openMenu}
+        onEdit={setEditing}
       />
       {arranging === null ? null : (
         <PolityArrangeMenu
@@ -84,13 +125,20 @@ export function PolitiesPanel({ store, colours, onResult }: PolitiesPanelProps) 
           request={arranging}
           onClose={closeMenu}
           onResult={onResult}
+          onEdit={setEditing}
         />
       )}
-      <NewPolityDialog
+      <PolityDialogs
         store={store}
-        isOpen={creating}
-        onClose={() => {
+        creating={creating}
+        edited={edited ?? null}
+        onCreated={() => {
           setCreating(false)
+        }}
+        onEdited={() => {
+          setEditing(null)
+          // The dialogue is unmounted, not closed: the focus is handed back to the list by hand.
+          panel.current?.querySelector<HTMLElement>('.polities__list')?.focus()
         }}
       />
     </section>

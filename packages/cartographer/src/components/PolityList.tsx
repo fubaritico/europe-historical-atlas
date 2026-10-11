@@ -5,7 +5,7 @@ import { listKeyAction } from './listKeys'
 
 import type { PolityRow } from './polityRows'
 import type { ViewportPoint } from '../view/viewport'
-import type { CSSProperties, KeyboardEvent } from 'react'
+import type { CSSProperties, KeyboardEvent, MouseEvent } from 'react'
 
 /** What the list shows and reports. Never the store: `PolitiesPanel` reads it and hands rows. */
 export interface PolityListProps {
@@ -22,6 +22,8 @@ export interface PolityListProps {
    * on (or the target) — with where to open it, in viewport pixels (`s16`).
    */
   onMenu: (id: string, at: ViewportPoint) => void
+  /** A row was double-clicked — its polity's dialogue, as a layer's options in Illustrator (`s07`). */
+  onEdit: (id: string) => void
 }
 
 /**
@@ -73,6 +75,35 @@ function optionId(id: string): string {
 }
 
 /**
+ * A row's three pointer gestures: a click aims at its polity, a double-click opens its dialogue (`s07`),
+ * a right-click its menu (`s16`).
+ * @param id - the row's polity
+ * @param onChoose - aim at it
+ * @param onMenu - open its menu at the pointer
+ * @param onEdit - open its dialogue
+ * @returns the row's handlers
+ */
+function rowGestures(
+  id: string,
+  onChoose: (id: string) => void,
+  onMenu: (id: string, at: ViewportPoint) => void,
+  onEdit: (id: string) => void
+) {
+  return {
+    onClick: () => {
+      onChoose(id)
+    },
+    onDoubleClick: () => {
+      onEdit(id)
+    },
+    onContextMenu: (event: MouseEvent) => {
+      event.preventDefault()
+      onMenu(id, { x: event.clientX, y: event.clientY })
+    },
+  }
+}
+
+/**
  * One row: the swatch, the name, the *"no territory"* chip and the rank and dates — `design/01`'s row.
  * @param props - the row, and whether it is the target or the one the keys are on
  * @returns the option
@@ -84,6 +115,7 @@ function PolityOption({
   id,
   onChoose,
   onMenu,
+  onEdit,
 }: {
   row: PolityRow
   selected: boolean
@@ -91,6 +123,7 @@ function PolityOption({
   id: string
   onChoose: (id: string) => void
   onMenu: (id: string, at: ViewportPoint) => void
+  onEdit: (id: string) => void
 }) {
   return (
     <ListboxItem
@@ -104,13 +137,7 @@ function PolityOption({
       data-depth={row.depth}
       // The tree's indent, one step per level of homage — the width is the stylesheet's.
       style={{ '--polity-depth': row.depth } as CSSProperties}
-      onClick={() => {
-        onChoose(row.id)
-      }}
-      onContextMenu={(event) => {
-        event.preventDefault()
-        onMenu(row.id, { x: event.clientX, y: event.clientY })
-      }}
+      {...rowGestures(row.id, onChoose, onMenu, onEdit)}
     >
       <span
         className="polity-row__swatch"
@@ -185,7 +212,7 @@ function useListCursor(
  * @param props - the rows, the target and the choice
  * @returns the subhead and the list, or the subhead and a line saying the year is empty
  */
-export function PolityList({ year, rows, targetId, onChoose, onMenu }: PolityListProps) {
+export function PolityList({ year, rows, targetId, onChoose, onMenu, onEdit }: PolityListProps) {
   const { activeId, active, onKeyDown } = useListCursor(rows, targetId, onChoose, onMenu)
   return (
     <>
@@ -215,6 +242,7 @@ export function PolityList({ year, rows, targetId, onChoose, onMenu }: PolityLis
               active={row.id === activeId}
               onChoose={onChoose}
               onMenu={onMenu}
+              onEdit={onEdit}
             />
           ))}
         </ListboxList>

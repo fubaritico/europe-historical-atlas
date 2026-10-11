@@ -15,7 +15,7 @@ export type PolityFormField = Exclude<keyof PolityDraft, 'idEdited' | 'colour'>
 
 /**
  * What the polity form shows and what it reports. Never the store: the binding,
- * `NewPolityDialog`, reads the store and hands this view literals.
+ * `PolityDialog`, reads the store and hands this view literals.
  */
 export interface PolityFormProps {
   /** The dialogue's title. */
@@ -24,8 +24,10 @@ export interface PolityFormProps {
   draft: PolityDraft
   /** What to say beside which field, after a reading refused the form. */
   errors: Partial<Record<DraftField, string>>
-  /** The polities of the year the new one may owe homage to, as value (id) and label (name). */
+  /** The polities of the year it may owe homage to, as value (id) and label (name). */
   suzerains: readonly DraftOption[]
+  /** Whether the id is shown but not editable — an existing polity's id never changes (`s07`). */
+  idLocked?: boolean
   /**
    * A field changed. Lists report `null` for "none".
    * @param field - which one
@@ -135,7 +137,12 @@ function PolityFields(props: PolityFormProps) {
         {...textField('name', props)}
         {...errorOf(errors.name)}
       />
-      <Input label="Id" {...textField('id', props)} {...errorOf(errors.id)} />
+      <Input
+        label="Id"
+        readOnly={props.idLocked === true}
+        {...textField('id', props)}
+        {...errorOf(errors.id)}
+      />
       <ChoiceField label="Rank" options={RANKS} value={draft.rank} onSelect={choose('rank')} />
       <ChoiceField
         label="Status"

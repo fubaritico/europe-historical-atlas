@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -241,7 +241,7 @@ describe('PolitiesPanel — the stacking menu (s16)', () => {
       expect(store.getState().undoLabel).toBe('bring to front — Reaume de France')
       // A11Y-003: the focus goes back to the list, so the move is said in the result zone.
       expect(results).toEqual(['Bring to Front — Reaume de France'])
-      expect(screen.queryByRole('listbox', { name: 'Arrange Reaume de France' })).toBeNull()
+      expect(screen.queryByRole('listbox', { name: 'Actions for Reaume de France' })).toBeNull()
     })
   })
 
@@ -292,7 +292,7 @@ describe('PolitiesPanel — the stacking menu (s16)', () => {
       })
       screen.getByRole('listbox', { name: 'Polities' }).focus()
       await user.keyboard('{Shift>}{F10}{/Shift}')
-      const menu = screen.getByRole('listbox', { name: 'Arrange Reaume de France' })
+      const menu = screen.getByRole('listbox', { name: 'Actions for Reaume de France' })
       expect(document.activeElement).toBe(menu)
     })
   })
@@ -305,14 +305,14 @@ describe('PolitiesPanel — the stacking menu (s16)', () => {
       })
       screen.getByRole('listbox', { name: 'Polities' }).focus()
       await user.keyboard('{ContextMenu}')
-      expect(screen.getByRole('listbox', { name: 'Arrange Sacrum Imperium' })).toBeDefined()
+      expect(screen.getByRole('listbox', { name: 'Actions for Sacrum Imperium' })).toBeDefined()
     })
 
     it('closes on escape, the order unchanged, the focus back on the list', async () => {
       const { store, user } = mountTwo()
       await user.pointer({ keys: '[MouseRight]', target: screen.getByText('Reaume de France') })
       await user.keyboard('{Escape}')
-      expect(screen.queryByRole('listbox', { name: 'Arrange Reaume de France' })).toBeNull()
+      expect(screen.queryByRole('listbox', { name: 'Actions for Reaume de France' })).toBeNull()
       expect(order(store)).toEqual(['fr', 'hre'])
       expect(document.activeElement).toBe(screen.getByRole('listbox', { name: 'Polities' }))
     })
@@ -321,14 +321,14 @@ describe('PolitiesPanel — the stacking menu (s16)', () => {
       const { user } = mountTwo()
       await user.pointer({ keys: '[MouseRight]', target: screen.getByText('Reaume de France') })
       await user.tab()
-      expect(screen.queryByRole('listbox', { name: 'Arrange Reaume de France' })).toBeNull()
+      expect(screen.queryByRole('listbox', { name: 'Actions for Reaume de France' })).toBeNull()
     })
 
     it('closes on a press outside it', async () => {
       const { user } = mountTwo()
       await user.pointer({ keys: '[MouseRight]', target: screen.getByText('Reaume de France') })
       await user.click(document.body)
-      expect(screen.queryByRole('listbox', { name: 'Arrange Reaume de France' })).toBeNull()
+      expect(screen.queryByRole('listbox', { name: 'Actions for Reaume de France' })).toBeNull()
     })
   })
 
@@ -341,7 +341,7 @@ describe('PolitiesPanel — the stacking menu (s16)', () => {
       act(() => {
         store.getState().undo()
       })
-      expect(screen.queryByRole('listbox', { name: 'Arrange Sacrum Imperium' })).toBeNull()
+      expect(screen.queryByRole('listbox', { name: 'Actions for Sacrum Imperium' })).toBeNull()
       expect(warn).toHaveBeenCalledTimes(1)
       expect(warn).toHaveBeenCalledWith(expect.stringContaining('"hre" is gone'))
       expect(document.activeElement).toBe(screen.getByRole('listbox', { name: 'Polities' }))
@@ -349,7 +349,7 @@ describe('PolitiesPanel — the stacking menu (s16)', () => {
       act(() => {
         store.getState().redo()
       })
-      expect(screen.queryByRole('listbox', { name: 'Arrange Sacrum Imperium' })).toBeNull()
+      expect(screen.queryByRole('listbox', { name: 'Actions for Sacrum Imperium' })).toBeNull()
       warn.mockRestore()
     })
   })
@@ -365,4 +365,130 @@ describe('PolitiesPanel — the stacking menu (s16)', () => {
       warn.mockRestore()
     })
   })
+})
+
+describe('PolitiesPanel — editing a polity (s07)', () => {
+  /** The open dialogue — the creation one is mounted too, closed. */
+  const open = () => {
+    const dialogue = document.querySelector<HTMLElement>('dialog[open]')
+    if (dialogue === null) throw new Error('no open dialogue')
+    return within(dialogue)
+  }
+
+  /**
+   * A field's current value.
+   * @param field - the field
+   * @returns its value
+   */
+  const valueOf = (field: HTMLElement): string =>
+    field instanceof HTMLInputElement ? field.value : 'not an input'
+
+  /** France and its vassal Normandy, France aimed at. */
+  function mountGroup() {
+    const mounted = mount()
+    const base = {
+      rank: null,
+      status: null,
+      existsFrom: null,
+      existsTo: null,
+      colour: null,
+      wikidata: null,
+    }
+    act(() => {
+      const { createPolity, chooseTarget } = mounted.store.getState()
+      createPolity(
+        { ...base, id: 'fr', name: 'Reaume de France', suzerain: null },
+        { kind: 'c', label: 'c' }
+      )
+      createPolity(
+        { ...base, id: 'nd', name: 'Normandie', suzerain: 'fr' },
+        { kind: 'c', label: 'c' }
+      )
+      chooseTarget('fr')
+    })
+    return mounted
+  }
+
+  describe('happy path', () => {
+    // s07 — "reopen a polity's form and change it … When I validate / Then the change lands".
+    it('opens the form filled on a double-click, and OK changes the polity as one step', async () => {
+      const { store, user } = mountGroup()
+      await user.dblClick(screen.getByText('Reaume de France'))
+      const name = open().getByLabelText('Name')
+      expect(valueOf(name)).toBe('Reaume de France')
+      await user.clear(name)
+      await user.type(name, 'Royaume de France')
+      await user.click(open().getByRole('button', { name: 'OK' }))
+      expect(store.getState().document.polities[0]?.name).toBe('Royaume de France')
+      expect(store.getState().undoLabel).toBe('edit Royaume de France')
+      expect(store.getState().target).toBe('fr')
+    })
+  })
+
+  describe('variants', () => {
+    it('opens the same form from the row’s menu', async () => {
+      const { user } = mountGroup()
+      await user.pointer({ keys: '[MouseRight]', target: screen.getByText('Normandie') })
+      await user.click(screen.getByRole('option', { name: 'Edit properties…' }))
+      expect(valueOf(open().getByLabelText('Name'))).toBe('Normandie')
+    })
+
+    // The wiring of the suzerain list: France's own vassal is not offered to it (review QUAL-002).
+    it('offers France no suzerain among its own vassals', async () => {
+      const { user } = mountGroup()
+      await user.dblClick(screen.getByText('Reaume de France'))
+      await user.click(open().getByRole('button', { name: /Suzerain/ }))
+      const offered = screen.getAllByRole('option').map((option) => option.textContent)
+      expect(offered).not.toContain('Normandie')
+    })
+
+    it('moves Normandie out of France’s group when its suzerain is cleared', async () => {
+      const { store, user } = mountGroup()
+      await user.dblClick(screen.getByText('Normandie'))
+      await user.click(open().getByRole('button', { name: /Suzerain/ }))
+      await user.click(screen.getByRole('option', { name: 'none' }))
+      await user.click(open().getByRole('button', { name: 'OK' }))
+      expect(store.getState().document.polities[1]?.suzerain).toBeNull()
+    })
+
+    // A11Y-001: the dialogue is unmounted rather than closed, so the focus is handed back by hand.
+    it('gives the focus back to the list when the dialogue closes', async () => {
+      const { user } = mountGroup()
+      await user.dblClick(screen.getByText('Reaume de France'))
+      await user.click(open().getByRole('button', { name: 'Cancel' }))
+      expect(document.activeElement).toBe(screen.getByRole('listbox', { name: 'Polities' }))
+    })
+
+    // s07 — "the same polity, with the same id".
+    it('shows the id but does not let it change', async () => {
+      const { user } = mountGroup()
+      await user.dblClick(screen.getByText('Reaume de France'))
+      expect(open().getByLabelText('Id').hasAttribute('readonly')).toBe(true)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('changes nothing on Cancel', async () => {
+      const { store, user } = mountGroup()
+      await user.dblClick(screen.getByText('Reaume de France'))
+      await user.type(open().getByLabelText('Name'), ' bis')
+      await user.click(open().getByRole('button', { name: 'Cancel' }))
+      expect(store.getState().document.polities[0]?.name).toBe('Reaume de France')
+      expect(store.getState().undoLabel).toBe('c')
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // An undo can take the polity away while its dialogue is open: then there is nothing to edit.
+    it('closes the dialogue when an undo takes its polity away', async () => {
+      const { store, user } = mountGroup()
+      await user.dblClick(screen.getByText('Normandie'))
+      act(() => {
+        store.getState().undo()
+      })
+      expect(document.querySelector('dialog[open]')).toBeNull()
+    })
+  })
+
+  // L5: the suzerain list without loops is suzerainChoices', tested in polityDraft.test.ts.
 })

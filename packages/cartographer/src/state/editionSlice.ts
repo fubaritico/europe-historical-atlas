@@ -6,6 +6,7 @@ import {
   addOutline,
   addPolity,
   moveAnchor,
+  updatePolity,
 } from '@europe-historical-atlas/core/editor/documentEdits'
 import { createHistory } from '@europe-historical-atlas/core/editor/history'
 import { restack } from '@europe-historical-atlas/core/editor/stacking'
@@ -111,6 +112,14 @@ export interface EditionActions {
    * @returns `false` when the id is already taken, and nothing happened
    */
   createPolity: (polity: YearPolity, step: HistoryStep) => boolean
+  /**
+   * Change a polity's properties, as one undoable step — `s07`'s *"reopen a polity's form and change
+   * it"*. Its id stays; a suzerain closing a loop of homage is refused by the document.
+   * @param polity - the new properties, under the id of the polity to change
+   * @param step - how the gesture is named — *"edit Reaume de France"*
+   * @returns `false` when no polity has that id or the suzerain would loop — and nothing happened
+   */
+  editPolity: (polity: YearPolity, step: HistoryStep) => boolean
   /**
    * Give a polity a closed outline, as one undoable step — what the Pen does when the ring closes.
    *
@@ -298,6 +307,25 @@ function recorder(
 }
 
 /**
+ * The edits of a polity's identity — create one, change one — each one recorded step.
+ *
+ * `addPolity` and `updatePolity` copy what they keep, so the caller's object cannot be mutated from here
+ * later.
+ * @param record - the runner every recorded action goes through
+ * @returns `createPolity` and `editPolity`
+ */
+function polityActions(
+  record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean
+): Pick<EditionActions, 'createPolity' | 'editPolity'> {
+  return {
+    createPolity: (polity, step): boolean =>
+      record((document) => addPolity(document, polity), step),
+    editPolity: (polity, step): boolean =>
+      record((document) => updatePolity(document, polity), step),
+  }
+}
+
+/**
  * The two edits of a single anchor — insert one on a stretch, remove one — each answering with what it
  * did, which `recorder`'s boolean cannot carry.
  * @param record - the runner every recorded action goes through
@@ -353,8 +381,7 @@ export function editionActions(
       publish(current())
     },
     // `addPolity` copies what it keeps, so the caller's object cannot be mutated from here later.
-    createPolity: (polity: YearPolity, step: HistoryStep): boolean =>
-      record((document) => addPolity(document, polity), step),
+    ...polityActions(record),
     drawOutline: (polityId, points, step): boolean =>
       record((document) => addOutline(document, polityId, points), step),
     moveAnchor: (index, point, step): boolean =>

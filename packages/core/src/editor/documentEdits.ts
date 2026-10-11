@@ -7,6 +7,8 @@
  * happens once at save.
  */
 
+import { vassalsOf } from '../data/paintOrder'
+
 import { MIN_RING_ANCHORS, referencedAnchors } from './yearDocument'
 
 import type { YearDocument } from './yearDocument'
@@ -84,6 +86,41 @@ export function pathsHolding(doc: YearDocument, index: number): number {
 export function addPolity(doc: YearDocument, polity: YearPolity): boolean {
   if (doc.polities.some((existing) => existing.id === polity.id)) return false
   doc.polities.push({ ...polity })
+  return true
+}
+
+/**
+ * Whether making `suzerain` the lord of `polityId` would close a loop of homage — the polity itself, or
+ * one of its own vassals, at any depth.
+ * @param doc - the document
+ * @param polityId - the polity whose suzerain changes
+ * @param suzerain - the suzerain proposed, or `null`
+ * @returns `true` when `suzerain` is the polity itself or one of its vassals (`vassalsOf`)
+ */
+export function wouldLoopHomage(
+  doc: YearDocument,
+  polityId: string,
+  suzerain: string | null
+): boolean {
+  if (suzerain === null) return false
+  return suzerain === polityId || vassalsOf(doc.polities, polityId).has(suzerain)
+}
+
+/**
+ * Change a polity's properties — `s07`'s *"reopen a polity's form and change it"*. **Its id stays**:
+ * claims, vassals, borders and colours point at it, and `s07` keeps *"the same polity, with the same
+ * id"*. The polity keeps its place in the list, so its place in the stack (`s16`).
+ *
+ * **A loop of homage is refused here**, not only by the form's list: the document is the authority, and
+ * a loop would leave `paintOrder` painting the polities last and `documentFaults` saying so forever.
+ * @param doc - the document to edit
+ * @param polity - the new properties, under the id of the polity to change
+ * @returns `false` when no polity has that id, or the suzerain would close a loop — and nothing changed
+ */
+export function updatePolity(doc: YearDocument, polity: YearPolity): boolean {
+  const at = doc.polities.findIndex((existing) => existing.id === polity.id)
+  if (at < 0 || wouldLoopHomage(doc, polity.id, polity.suzerain)) return false
+  doc.polities[at] = { ...polity }
   return true
 }
 

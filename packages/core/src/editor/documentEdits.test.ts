@@ -10,6 +10,8 @@ import {
   moveAnchor,
   pathsHolding,
   removePolity,
+  updatePolity,
+  wouldLoopHomage,
 } from './documentEdits'
 import { FIXTURE_SOURCES, FIXTURE_ZONE, sharedBorderDocument } from './documentFixtures'
 import { createYearDocument } from './yearDocument'
@@ -499,6 +501,100 @@ describe('addOutline', () => {
     it('tells the same words under another licence apart', () => {
       const doc = createYearDocument(1100, zone, [{ id: 0, ...BY_EYE }])
       expect(declareSource(doc, { name: BY_EYE.name, licence: 'CC0' })).toBe(1)
+    })
+  })
+})
+
+describe('updatePolity', () => {
+  /**
+   * The shared-border document with a third polity, a vassal of France.
+   * @returns the document
+   */
+  function withVassal() {
+    const doc = sharedBorderDocument()
+    const [france] = doc.polities
+    if (france === undefined) throw new Error('fixture changed')
+    doc.polities.push({ ...france, id: 'normandy', name: 'Normandie', suzerain: 'fr-couronne' })
+    return doc
+  }
+
+  /**
+   * The document's first polity — France.
+   * @param doc - the document
+   * @returns it
+   */
+  function first(doc: ReturnType<typeof withVassal>): YearPolity {
+    const polity = doc.polities[0]
+    if (polity === undefined) throw new Error('fixture changed')
+    return polity
+  }
+
+  describe('happy path', () => {
+    // s07 — "the same form as creation opens … I can change name, rank, status, dates, suzerain, colour".
+    it('changes a polity’s properties under the same id, in the same place in the list', () => {
+      const doc = withVassal()
+      const [france] = doc.polities
+      if (france === undefined) throw new Error('fixture changed')
+      expect(updatePolity(doc, { ...france, name: 'Royaume de France', colour: '#3355aa' })).toBe(
+        true
+      )
+      expect(doc.polities[0]).toMatchObject({
+        id: 'fr-couronne',
+        name: 'Royaume de France',
+        colour: '#3355aa',
+      })
+    })
+  })
+
+  describe('variants', () => {
+    it('moves a polity under another suzerain', () => {
+      const doc = withVassal()
+      const normandy = doc.polities[2]
+      if (normandy === undefined) throw new Error('fixture changed')
+      expect(updatePolity(doc, { ...normandy, suzerain: 'hre' })).toBe(true)
+      expect(doc.polities[2]?.suzerain).toBe('hre')
+    })
+
+    it('keeps its own copy, so the caller’s object cannot change it later', () => {
+      const doc = withVassal()
+      const france = { ...first(doc) }
+      updatePolity(doc, france)
+      france.name = 'changed after'
+      expect(doc.polities[0]?.name).not.toBe('changed after')
+    })
+  })
+
+  describe('managed errors', () => {
+    it('refuses a polity no one in the year has, and changes nothing', () => {
+      const doc = withVassal()
+      const before = structuredClone(doc.polities)
+      expect(updatePolity(doc, { ...first(doc), id: 'nobody' })).toBe(false)
+      expect(doc.polities).toEqual(before)
+    })
+
+    // A loop of homage is refused by the document, not only by the form's list.
+    it('refuses France as a vassal of its own vassal, and of itself', () => {
+      const doc = withVassal()
+      const france = first(doc)
+      expect(updatePolity(doc, { ...france, suzerain: 'normandy' })).toBe(false)
+      expect(updatePolity(doc, { ...france, suzerain: 'fr-couronne' })).toBe(false)
+      expect(doc.polities[0]?.suzerain).toBeNull()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('accepts a suzerain the year does not hold — the readers refuse it on load', () => {
+      const doc = withVassal()
+      expect(wouldLoopHomage(doc, 'normandy', 'gone')).toBe(false)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('sees a loop already in the document without walking for ever', () => {
+      const doc = withVassal()
+      first(doc).suzerain = 'normandy'
+      expect(wouldLoopHomage(doc, 'hre', 'normandy')).toBe(false)
+      expect(wouldLoopHomage(doc, 'normandy', 'fr-couronne')).toBe(true)
     })
   })
 })

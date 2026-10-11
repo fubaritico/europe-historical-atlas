@@ -26,6 +26,8 @@ export interface PolityArrangeMenuProps {
   onClose: () => void
   /** Say what the command did — the focus goes back to the list, so the move would pass in silence. */
   onResult: (message: string | null) => void
+  /** Open the polity's dialogue — *Edit properties…*. */
+  onEdit: (id: string) => void
 }
 
 /**
@@ -37,7 +39,13 @@ export interface PolityArrangeMenuProps {
  * @param props - the store, the request and the close
  * @returns the menu, or nothing when the polity is gone
  */
-export function PolityArrangeMenu({ store, request, onClose, onResult }: PolityArrangeMenuProps) {
+export function PolityArrangeMenu({
+  store,
+  request,
+  onClose,
+  onResult,
+  onEdit,
+}: PolityArrangeMenuProps) {
   const restackPolity = store((state) => state.restackPolity)
   // The document is mutated in place: the version is what changes when the order does.
   store((state) => state.version)
@@ -63,6 +71,9 @@ export function PolityArrangeMenu({ store, request, onClose, onResult }: PolityA
         if (restackPolity(polity.id, move, { kind: 'restack', label })) {
           onResult(`${STACKING_LABELS[move]} — ${polity.name}`)
         } else console.error(`[Cartographer] the document refused to ${label}.`)
+      }}
+      onEdit={() => {
+        onEdit(polity.id)
       }}
       onClose={onClose}
     />

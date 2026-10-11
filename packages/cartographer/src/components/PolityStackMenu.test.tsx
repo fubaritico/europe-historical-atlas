@@ -17,7 +17,14 @@ function mountAt(at: { x: number; y: number }): HTMLElement {
     new DOMRect(at.x, at.y, 180, 100)
   )
   const { container } = render(
-    <PolityStackMenu name="France" at={at} moves={ALL} onChoose={vi.fn()} onClose={vi.fn()} />
+    <PolityStackMenu
+      name="France"
+      at={at}
+      moves={ALL}
+      onChoose={vi.fn()}
+      onEdit={vi.fn()}
+      onClose={vi.fn()}
+    />
   )
   const shell = container.querySelector<HTMLElement>('.polity-stack-menu')
   if (shell === null) throw new Error('no menu')

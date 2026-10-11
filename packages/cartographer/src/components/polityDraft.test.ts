@@ -1,8 +1,20 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
-import { DRAFT_ERRORS, EMPTY_DRAFT, readDraft, withId, withName } from './polityDraft'
+import { updatePolity } from '@europe-historical-atlas/core/editor/documentEdits'
+import { createYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+
+import {
+  DRAFT_ERRORS,
+  EMPTY_DRAFT,
+  draftOf,
+  readDraft,
+  suzerainChoices,
+  withId,
+  withName,
+} from './polityDraft'
 
 import type { PolityDraft } from './polityDraft'
+import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 
 const NONE: ReadonlySet<string> = new Set()
 
@@ -151,6 +163,118 @@ describe('polityDraft', () => {
     it('leaves the colour to the palette', () => {
       const reading = readDraft(draft({ name: 'France', id: 'france' }), NONE)
       expect(reading.ok && reading.polity.colour).toBeNull()
+    })
+  })
+})
+
+/**
+ * A polity with every field set, owing nobody unless told.
+ * @param id - its id
+ * @param suzerain - whom it owes
+ * @returns the polity
+ */
+function polity(id: string, suzerain: string | null = null): YearPolity {
+  return {
+    id,
+    name: `Name of ${id}`,
+    rank: 'kingdom',
+    status: null,
+    suzerain,
+    existsFrom: 987,
+    existsTo: null,
+    colour: '#3355aa',
+    wikidata: 'Q70972',
+  }
+}
+
+describe('draftOf', () => {
+  describe('happy path', () => {
+    // s07 — "the same form as creation opens, filled with its current values".
+    it('fills the form with the polity’s values, the id kept as the author’s', () => {
+      const filled = draftOf(polity('fr'))
+      expect(filled).toMatchObject({
+        name: 'Name of fr',
+        id: 'fr',
+        idEdited: true,
+        rank: 'kingdom',
+        existsFrom: '987',
+        existsTo: '',
+        wikidata: 'Q70972',
+      })
+    })
+  })
+
+  describe('variants', () => {
+    it('reads back the same polity it was filled from', () => {
+      const original = polity('fr')
+      const reading = readDraft(draftOf(original), NONE)
+      expect(reading).toEqual({ ok: true, polity: original })
+    })
+
+    it('opens "automatic" for a polity with no colour of its own', () => {
+      expect(draftOf({ ...polity('fr'), colour: null }).colour).toBeNull()
+    })
+  })
+
+  describe('managed errors', () => {
+    it('opens "automatic" for a colour that is no hex, and says so', () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      expect(draftOf({ ...polity('fr'), colour: 'blue' }).colour).toBeNull()
+      expect(error).toHaveBeenCalledWith(expect.stringContaining('"blue", which is no hex'))
+      error.mockRestore()
+    })
+  })
+
+  // L4: N/A — the polity comes from a document the readers already checked.
+  // L5: the year 0 and negative years are readDraft's, tested above.
+})
+
+describe('suzerainChoices', () => {
+  const year = [polity('fr'), polity('normandy', 'fr'), polity('bayeux', 'normandy'), polity('hre')]
+
+  describe('happy path', () => {
+    it('offers every polity of the year to a new one', () => {
+      expect(suzerainChoices(year, null).map((choice) => choice.value)).toEqual([
+        'fr',
+        'normandy',
+        'bayeux',
+        'hre',
+      ])
+    })
+  })
+
+  describe('variants', () => {
+    // A loop of homage would be refused by the document: the list does not offer it.
+    it('leaves out the polity edited and its vassals at any depth', () => {
+      expect(suzerainChoices(year, 'fr').map((choice) => choice.value)).toEqual(['hre'])
+    })
+
+    it('labels each choice with its name', () => {
+      expect(suzerainChoices(year, 'bayeux')[0]).toEqual({ value: 'fr', label: 'Name of fr' })
+    })
+  })
+
+  // L3: N/A — a filter over the year's polities.
+
+  describe('unmanaged errors', () => {
+    // The form never offers what the document refuses, nor hides what it accepts (review ARCH-001).
+    it('offers exactly the suzerains the document accepts, for every polity of the year', () => {
+      const doc = createYearDocument(1100, { west: -45, south: 20, east: 60, north: 76 })
+      doc.polities = year
+      for (const edited of year) {
+        const offered = new Set(suzerainChoices(year, edited.id).map((choice) => choice.value))
+        for (const candidate of year) {
+          const accepted = updatePolity(structuredClone(doc), { ...edited, suzerain: candidate.id })
+          expect([candidate.id, offered.has(candidate.id)]).toEqual([candidate.id, accepted])
+        }
+      }
+    })
+  })
+
+  describe('edge cases', () => {
+    it('stops on a loop already in the year', () => {
+      const looped = [polity('a', 'b'), polity('b', 'a'), polity('c')]
+      expect(suzerainChoices(looped, 'a').map((choice) => choice.value)).toEqual(['c'])
     })
   })
 })

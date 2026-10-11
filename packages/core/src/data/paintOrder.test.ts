@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { effectiveSuzerains, paintOrder, paintRanks } from './paintOrder'
+import { effectiveSuzerains, paintOrder, paintRanks, vassalsOf } from './paintOrder'
 
 import type { YearPolity } from './yearFormat'
 
@@ -111,6 +111,29 @@ describe('paintOrder', () => {
       const { order, looped } = paintOrder([polity('a', 'a')])
       expect(order).toEqual(['a'])
       expect(looped).toEqual(['a'])
+    })
+  })
+})
+
+describe('vassalsOf', () => {
+  describe('happy path', () => {
+    it('gives a polity’s vassals at any depth, itself left out', () => {
+      const year = [polity('fr'), polity('nd', 'fr'), polity('bx', 'nd'), polity('hre')]
+      expect([...vassalsOf(year, 'fr')].sort()).toEqual(['bx', 'nd'])
+    })
+  })
+
+  describe('variants', () => {
+    it('gives nothing for a polity with no vassal', () => {
+      expect(vassalsOf([polity('fr'), polity('hre')], 'hre').size).toBe(0)
+    })
+  })
+
+  // L3/L4: N/A — a walk over the declared suzerains.
+
+  describe('edge cases', () => {
+    it('stops on a loop already in the list', () => {
+      expect([...vassalsOf([polity('a', 'b'), polity('b', 'a')], 'a')]).toEqual(['b'])
     })
   })
 })
