@@ -6,6 +6,8 @@
  * own slider without failing type-check.
  */
 
+import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
+
 import type { ControlGroup, ControlTable } from '@europe-historical-atlas/core/utils/controlSpec'
 
 /**
@@ -175,16 +177,15 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   borderInlayZoom: 0.35,
   colorBySuzerain: false,
   snapToCoast: 12,
-  // Eight is comfortably above what a political map of Europe needs: four colours suffice in theory,
-  // and the surplus keeps neighbours-of-neighbours from echoing each other.
-  palette1: '#b8554a',
-  palette2: '#6f8a52',
-  palette3: '#54719b',
-  palette4: '#c29646',
-  palette5: '#8f6a9c',
-  palette6: '#468a83',
-  palette7: '#c46b42',
-  palette8: '#87825c',
+  // The shared automatic palette — the Cartographer previews with the same eight (see its JSDoc).
+  palette1: AUTOMATIC_PALETTE[0],
+  palette2: AUTOMATIC_PALETTE[1],
+  palette3: AUTOMATIC_PALETTE[2],
+  palette4: AUTOMATIC_PALETTE[3],
+  palette5: AUTOMATIC_PALETTE[4],
+  palette6: AUTOMATIC_PALETTE[5],
+  palette7: AUTOMATIC_PALETTE[6],
+  palette8: AUTOMATIC_PALETTE[7],
 }
 
 /** Range, step and label of every {@link PoliticalDevParams} field. */

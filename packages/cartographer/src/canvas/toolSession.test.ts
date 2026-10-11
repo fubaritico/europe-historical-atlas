@@ -1,0 +1,173 @@
+import { describe, expect, it } from 'vitest'
+
+import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
+
+import {
+  actionSentence,
+  idleSession,
+  overlayScene,
+  ringNeighbours,
+  targetHandles,
+} from './toolSession'
+
+import type { ActionInputs, OverlayInputs } from './toolSession'
+
+/** A sentence's inputs with the Pen in hand, aimed at France, the pointer on the canvas. */
+function action(overrides: Partial<ActionInputs> = {}): ActionInputs {
+  return {
+    tool: 'draw',
+    targetName: 'Reaume de France',
+    onCanvas: true,
+    closing: false,
+    session: idleSession(),
+    ...overrides,
+  }
+}
+
+/** Overlay inputs where degrees and screen pixels are the same numbers. */
+function overlay(overrides: Partial<OverlayInputs> = {}): OverlayInputs {
+  return {
+    session: idleSession(),
+    tool: 'draw',
+    pointer: [50, 50],
+    toScreen: (lonLat) => [lonLat[0], lonLat[1]],
+    anchors: [],
+    movingFrom: [],
+    closeRadius: 8,
+    ...overrides,
+  }
+}
+
+describe('toolSession', () => {
+  describe('happy path', () => {
+    // s02 — the bar names the action and whose it is.
+    it('says who the Pen is drawing in', () => {
+      expect(actionSentence(action())).toBe('Drawing in Reaume de France')
+    })
+
+    it('lists the target’s anchors only, each once', () => {
+      // France holds 0 1 2 3, the Empire 1 4 5 2: anchors 1 and 2 are both's.
+      expect(targetHandles(sharedBorderDocument(), 'fr-couronne')).toEqual([0, 1, 2, 3])
+    })
+
+    // s02 — "a rubber band runs from the eleventh anchor to the pointer".
+    it('runs the rubber band from the last anchor to the pointer', () => {
+      const session = {
+        ...idleSession(),
+        outline: [[10, 10] as [number, number], [20, 10] as [number, number]],
+      }
+      const scene = overlayScene(overlay({ session }))
+      expect(scene.outline).toEqual([
+        [10, 10],
+        [20, 10],
+      ])
+      expect(scene.rubberTo).toEqual([50, 50])
+    })
+  })
+
+  describe('variants', () => {
+    it('says when a click would close the outline', () => {
+      expect(actionSentence(action({ closing: true }))).toBe(
+        'Closing the outline of Reaume de France'
+      )
+    })
+
+    // s02 — "Selecting path from…", then "Moving path from…" while dragging.
+    it('names the white arrow’s selection and its drag', () => {
+      const selected = { ...idleSession(), selected: 3 }
+      expect(actionSentence(action({ tool: 'edit', session: selected }))).toBe(
+        'Selecting path from Reaume de France'
+      )
+      const moving = { ...selected, moving: { index: 3, to: [0, 0] as [number, number] } }
+      expect(actionSentence(action({ tool: 'edit', session: moving }))).toBe(
+        'Moving path from Reaume de France'
+      )
+    })
+
+    it('offers to close once the pointer is on the first anchor of three', () => {
+      const outline: [number, number][] = [
+        [50, 52],
+        [90, 50],
+        [90, 90],
+      ]
+      expect(overlayScene(overlay({ session: { ...idleSession(), outline } })).closing).toBe(true)
+    })
+
+    it('draws an anchor being dragged with the stretches it pulls', () => {
+      const session = { ...idleSession(), moving: { index: 0, to: [5, 6] as [number, number] } }
+      const scene = overlayScene(
+        overlay({
+          tool: 'edit',
+          session,
+          anchors: [
+            [0, 0],
+            [10, 0],
+            [0, 10],
+          ],
+          movingFrom: [1, 2],
+        })
+      )
+      expect(scene.moving).toEqual({
+        at: [5, 6],
+        from: [
+          [10, 0],
+          [0, 10],
+        ],
+      })
+    })
+  })
+
+  describe('managed errors', () => {
+    // s02 — "no subject, so the bar says what to do about it".
+    it('tells the author to select a polity when there is nobody to act on', () => {
+      expect(actionSentence(action({ targetName: null }))).toBe('Select a polity to draw in')
+      expect(actionSentence(action({ tool: 'edit', targetName: null }))).toBe(
+        'Select a polity to draw in'
+      )
+    })
+
+    it('lists no handle when nobody is aimed at', () => {
+      expect(targetHandles(sharedBorderDocument(), null)).toEqual([])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('lists no handle for a target the document does not hold', () => {
+      expect(targetHandles(sharedBorderDocument(), 'nobody')).toEqual([])
+    })
+
+    it('finds no neighbour for an anchor no ring holds', () => {
+      expect(ringNeighbours(sharedBorderDocument(), 99)).toEqual([])
+    })
+  })
+
+  describe('edge cases', () => {
+    it('says nothing under the hand, which has no subject', () => {
+      expect(actionSentence(action({ tool: 'navigate' }))).toBeNull()
+    })
+
+    // Off the canvas the refusal is not repeated: the author is looking at the chrome, choosing.
+    it('says nothing off the canvas when there is nobody to act on', () => {
+      expect(actionSentence(action({ targetName: null, onCanvas: false }))).toBeNull()
+    })
+
+    it('takes a shared anchor’s neighbours from every ring holding it', () => {
+      // Anchor 1 is France's (0 1 2 3) and the Empire's (1 4 5 2): its neighbours are 0, 2 and 4.
+      expect(ringNeighbours(sharedBorderDocument(), 1).sort()).toEqual([0, 2, 4])
+    })
+
+    // Off the canvas, a band to the last known position would point where the author is not aiming.
+    it('draws no rubber band when the pointer is off the canvas', () => {
+      const session = { ...idleSession(), outline: [[10, 10] as [number, number]] }
+      expect(overlayScene(overlay({ session, pointer: null })).rubberTo).toBeNull()
+    })
+
+    it('does not offer to close an outline of two anchors, which encloses nothing', () => {
+      const outline: [number, number][] = [
+        [50, 52],
+        [90, 50],
+      ]
+      expect(overlayScene(overlay({ session: { ...idleSession(), outline } })).closing).toBe(false)
+    })
+  })
+})

@@ -35,10 +35,10 @@ export interface DrawingTarget {
  * same trap `History.rows` cost us on 2026-10-05. The binding selects `target` (a string, stable) and
  * `version` (a number, stable) and calls this during the render, where a new object costs nothing.
  *
- * **A `null` colour is passed through, not substituted.** The palette-by-adjacency that would fill it is
- * `assignRegionColors`, which needs the raster — ~825 ms, and H-08 has not decided when the editor runs
- * it. So the banner is told *"no colour pinned"* and may say so; inventing a swatch here would be a value
- * nobody chose, standing in for one that has not arrived (`rules/error-handling.md`).
+ * **A `null` colour is passed through, not substituted**: it means *"automatic"*, which is a choice, not
+ * a missing value. The colour the canvas actually paints is `core/editor/polityColours`' — the palette
+ * slot read off the document's shared edges, no raster needed — and a banner wanting a swatch reads it
+ * there rather than inventing one here (`rules/error-handling.md`).
  * @param document - the year being edited
  * @param target - the id the tool slice is aiming at, or `null`
  * @returns the target to show, or `null` when there is nobody to draw for

@@ -38,6 +38,10 @@ export interface SceneInputs {
   viewport: Viewport
   /** Which anchors are selected, by index into the document's table. */
   selected: ReadonlySet<number>
+  /** Which anchors get a handle, by index — see {@link CanvasScene.handles}. */
+  handles: readonly number[]
+  /** Each polity's colour, by id — see `core/editor/polityColours`. */
+  colours: ReadonlyMap<string, string>
   /** What to call the editorial zone on screen. */
   zoneLabel: string
   /** The baked terrain, or `null` while it is still being baked. */
@@ -113,6 +117,31 @@ export function projectedRings(document: YearDocument, anchors: readonly Point[]
 }
 
 /**
+ * Each claim's rings as one fill in its polity's colour.
+ *
+ * A claim whose polity has no colour in the map is skipped: `polityColours` gives one to every polity of
+ * the registry, so that is a claim naming a polity the registry lacks — which the file could not have been
+ * opened with, and which painting in an invented colour would hide.
+ * @param document - the document to read
+ * @param anchors - the projected anchor table, parallel to `document.anchors`
+ * @param colours - each polity's colour, by id
+ * @returns one fill per claim
+ */
+export function projectedFills(
+  document: YearDocument,
+  anchors: readonly Point[],
+  colours: ReadonlyMap<string, string>
+): { rings: Point[][]; colour: string }[] {
+  const fills: { rings: Point[][]; colour: string }[] = []
+  for (const claim of document.claims) {
+    const colour = colours.get(claim.polity)
+    if (colour === undefined) continue
+    fills.push({ rings: projectedRings({ ...document, claims: [claim] }, anchors), colour })
+  }
+  return fills
+}
+
+/**
  * Everything to paint, for one document and one view.
  *
  * The anchors are remapped **once** and the rings read that result, which is what keeps a shared anchor
@@ -131,7 +160,9 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
     editorialZone: editorialZoneRect(document, inputs),
     zoneLabel: inputs.zoneLabel,
     rings: projectedRings(document, anchors),
+    fills: projectedFills(document, anchors, inputs.colours),
     anchors,
+    handles: inputs.handles,
     selected: inputs.selected,
     vectors:
       inputs.vectorLayers === null

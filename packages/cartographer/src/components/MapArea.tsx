@@ -1,7 +1,7 @@
 import { isAssetError } from '@europe-historical-atlas/core/data/assetError'
 
 import { MapCanvas } from './MapCanvas'
-import { writePosition } from './statusBar'
+import { writeAction, writePosition } from './statusBar'
 import { useEditorAssets } from './useEditorAssets'
 
 import type { Backdrop } from '../backdropSource'
@@ -74,7 +74,9 @@ export interface MapAreaProps {
    * reason the whole area is imperative: a pointer emits a move per device sample, and reconciling at
    * that rate is what kills canvas applications.
    */
-  statusRef: RefObject<HTMLParagraphElement | null>
+  statusRef: RefObject<HTMLElement | null>
+  /** The status bar's action zone, beside the position — same reasons, same ownership. */
+  actionRef: RefObject<HTMLElement | null>
 }
 
 /** What each phase of a bake is called, for the waiting line. */
@@ -181,7 +183,15 @@ export function BackdropFailure({ error }: BackdropFailureProps) {
  * @param props - the store, how to load, and the names
  * @returns the waiting notice, the failure notice, or the canvas
  */
-export function MapArea({ store, load, style, zoneLabel, label, statusRef }: MapAreaProps) {
+export function MapArea({
+  store,
+  load,
+  style,
+  zoneLabel,
+  label,
+  statusRef,
+  actionRef,
+}: MapAreaProps) {
   const { assets, error, fraction, phase } = useEditorAssets(load)
 
   if (error !== null) return <BackdropFailure error={error} />
@@ -195,6 +205,9 @@ export function MapArea({ store, load, style, zoneLabel, label, statusRef }: Map
         vectorLayers={assets.vectors}
         onHover={(lonLat) => {
           writePosition(statusRef.current, lonLat)
+        }}
+        onAction={(sentence) => {
+          writeAction(actionRef.current, sentence)
         }}
         style={style}
         zoneLabel={zoneLabel}

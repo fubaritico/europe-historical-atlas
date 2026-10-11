@@ -72,6 +72,7 @@ function mount(load: BackdropLoad, strict = false): HTMLParagraphElement {
       zoneLabel="zone"
       label="la carte"
       statusRef={statusRef}
+      actionRef={{ current: document.createElement('span') }}
     />
   )
   render(strict ? <StrictMode>{area}</StrictMode> : area)
@@ -417,6 +418,7 @@ describe('MapCanvas, re-rendered', () => {
           backdropImage={assets.backdrop.image}
           vectorLayers={assets.vectors}
           onHover={() => undefined}
+          onAction={() => undefined}
           style={CHROME_PAINT_STYLE}
           zoneLabel="zone"
           label="la carte"

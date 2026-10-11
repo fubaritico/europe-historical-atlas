@@ -1,21 +1,35 @@
-import { describeDrawingTarget } from '../state/drawingTarget'
-import { backdropBoxOfBounds, clampToCover, coverScale, openingView } from '../view/framing'
-import { backdropToLonLat } from '../view/projection'
-import { panBy, screenToBackdrop, zoomAbout } from '../view/viewport'
+import { backdropBoxOfBounds, clampToCover, openingView } from '../view/framing'
+import { screenToLonLatOnBackdrop } from '../view/projection'
+import { panBy, zoomAbout } from '../view/viewport'
 
 import { createAnchorCache } from './anchorCache'
-import { cursorCss, cursorFor } from './cursors'
+import { coloursOf, gestureOf, handInHand, refreshTools, showCursor } from './liveCanvas'
+import {
+  DRAG_TOLERANCE,
+  FRAME_MARGIN,
+  KEY_ZOOM_STEP,
+  PAN_KEYS,
+  TOOL_KEYS,
+  ZOOM_IN_KEYS,
+  ZOOM_OUT_KEYS,
+  scaleLimitsFor,
+  wheelZoomFactor,
+} from './navigation'
 import { paintCanvas } from './painter'
 import { buildScene } from './scene'
 import { inDevicePixels } from './style'
+import {
+  arrowDrag,
+  arrowPress,
+  arrowRelease,
+  penClick,
+  resolvedTarget,
+  toolKey,
+} from './toolGestures'
+import { idleSession, targetHandles } from './toolSession'
 
-import type { AnchorCache } from './anchorCache'
-import type { PaintStyle, Painter2D } from './painter'
-import type { CartographerStoreHook } from '../state/store'
-import type { EditorTool } from '../state/toolSlice'
-import type { VectorLayers } from '../vectorLayers'
-import type { BackdropFrame } from '../view/projection'
-import type { PixelSize, ScaleLimits, Viewport } from '../view/viewport'
+import type { CanvasControllerDeps, LiveCanvas } from './liveCanvas'
+import type { Viewport } from '../view/viewport'
 
 /**
  * What turns an inert `<canvas>` into a working map: this module owns the node for as long as it lives.
@@ -43,200 +57,18 @@ import type { PixelSize, ScaleLimits, Viewport } from '../view/viewport'
  * its own.
  */
 
-/** Everything the wiring needs from its caller. */
-export interface CanvasControllerDeps {
-  /** The store: the document to draw, and the viewport to draw it through. */
-  store: CartographerStoreHook
-  /**
-   * The backdrop's coordinate system.
-   *
-   * It arrives with the picture below, from the DEM's own metadata, so the box projected against and the
-   * box painted are the same object rather than two that agree today.
-   */
-  frame: BackdropFrame
-  /** The baked terrain to blit under everything else. */
-  backdropImage: CanvasImageSource
-  /**
-   * The coastline and the rivers, in backdrop pixels.
-   *
-   * Held here rather than in the store because they never change: they are loaded once and the view is
-   * applied at paint time. Putting them in a slice would invite a selector on an object of 125 000
-   * points, which is the shape `zustand-react-pattern` warns about.
-   */
-  vectorLayers: VectorLayers
-  /**
-   * Where the pointer is, in degrees — `null` when it is off the backdrop.
-   *
-   * Reported raw rather than formatted: turning a position into `2°21′E` is a presentation choice, and
-   * the wiring has no business holding one. `null` for the vellum around the map, which is not a place.
-   */
-  onHover: (lonLat: [number, number] | null) => void
-  /** The colours and sizes, from the design. */
-  style: PaintStyle
-  /** What to call the editorial zone on screen. */
-  zoneLabel: string
-}
-
-/**
- * How far the view may be magnified past the backdrop's own resolution.
- *
- * **Thirty-two, raised from eight on 2026-10-08 because the first argument was borrowed and did not
- * apply.** It read: at scale 8 one backdrop pixel covers eight screen pixels, so the ground resolution
- * is 7.6 km / 8 ≈ 0.95 km per screen pixel at 45°N — finer than the 1.9 km cells the political raster
- * works in. True, and beside the point: **the political raster is the atlas's.** This editor stores
- * longitudes and latitudes at six decimals — about ten centimetres — and derives a border from the
- * anchors two outlines *share*, exactly, never from a rasterised cell. Nothing in the format cared
- * about 1.9 km.
- *
- * **What the ceiling is really for**, then: at scale 32 one screen pixel is about **240 m** of ground,
- * which is far below anything the project measures itself against — a city on the wrong side of a
- * frontier, the accuracy criterion of `H-15`, is an error of kilometres. Past that a reader would be
- * placing anchors at a precision no source supports, which is a different kind of wrong.
- *
- * **The blur is expected, not a reason to stop.** `s01` specifies it: *"the backdrop gives out before
- * the grid does"* — the terrain goes soft while the coastline, the rivers and the graticule stay sharp,
- * being vectors. Those are what a frontier is reported against, so the useful picture survives the
- * zoom the baked image does not.
- *
- * **And it costs nothing.** Measured: culling and decimation make a repaint *cheaper* the further in
- * the view goes — 28 % of the coastline's points at scale 8 against 48 % at scale 2.
- */
-export const MAX_SCALE = 32
-
-/** Screen pixels left around the backdrop when it is first framed, so its edge is not flush. */
-export const FRAME_MARGIN = 24
-
-/** How much one press of a zoom key scales the view. A key is one discrete step, so it stays a factor. */
-export const KEY_ZOOM_STEP = 1.1
-
-/**
- * How many device pixels of wheel travel double the scale — the wheel's zoom, in one number.
- *
- * **The wheel is not a key, and treating it as one is what made the zoom unusable.** Until 2026-10-09 a
- * wheel event multiplied the scale by a fixed 1.1 and `deltaY`'s magnitude was thrown away. A mouse
- * notch produces one event; a trackpad swipe produces sixty to a hundred and twenty a second. So the
- * same gesture was 1.1 on a mouse and 1.1³⁰ ≈ 17× on a trackpad, which is the "trop sensible" the dev
- * reported and is not a value that could have been tuned — the two devices needed different arithmetic,
- * not a different constant.
- *
- * Scaling **exponentially in the distance travelled** makes it one device again: `exp(−Δ · k)` composes,
- * so sixty small events and one large one of the same total travel land on exactly the same scale.
- *
- * Calibrated so a 100-pixel delta — one notch of a conventional mouse wheel — still gives the 1.1 it
- * always gave, which is the one thing about the old behaviour that was right.
- */
-export const ZOOM_PER_PIXEL = Math.log(1.1) / 100
-
-/**
- * Device pixels of travel per unit of `deltaMode`, since a wheel does not report in one unit.
- *
- * `deltaMode` is 0 for pixels, 1 for lines and 2 for pages, and a mouse reporting lines is ordinary
- * rather than exotic — Firefox on Windows does it. Reading a line as a pixel would make that mouse
- * sixteen times gentler than the same mouse in another browser, which reads as "the zoom is broken
- * here" and is in fact a unit never converted.
- */
-const DELTA_UNIT: Record<number, number> = { 0: 1, 1: 16, 2: 400 }
-
-/**
- * What one wheel event should multiply the scale by.
- *
- * Exported so a test can read it with a literal event rather than through the DOM, and so the two
- * normalisations — the unit, and the exponential — are visible in one place.
- * @param deltaY - the event's own travel, in its own unit
- * @param deltaMode - 0 pixels, 1 lines, 2 pages
- * @returns the factor to apply to the scale
- */
-export function wheelZoomFactor(deltaY: number, deltaMode: number): number {
-  const pixels = deltaY * (DELTA_UNIT[deltaMode] ?? 1)
-  return Math.exp(-pixels * ZOOM_PER_PIXEL)
-}
-
-/**
- * How far the pointer must travel, in device pixels, before a press counts as a drag.
- *
- * **Decided once, and here, because this is where the drag lives** (`s01`, explicitly: *"Do not decide
- * it a second time here"*). The DOM fires a `click` at the end of every drag with no threshold of its
- * own, so a second module deciding this would disagree about a slightly imprecise click and no test
- * could see the disagreement. Four pixels is the atlas's own tolerance, already proved there.
- */
-export const DRAG_TOLERANCE = 4
-
-/** How far one arrow key pans, in device pixels. */
-export const KEY_PAN_STEP = 60
-
-/**
- * Keys that pan, and which way.
- *
- * The same four the atlas binds, so the two applications do not disagree about what an arrow does.
- */
-const PAN_KEYS: Record<string, [number, number]> = {
-  ArrowUp: [0, KEY_PAN_STEP],
-  ArrowDown: [0, -KEY_PAN_STEP],
-  ArrowLeft: [KEY_PAN_STEP, 0],
-  ArrowRight: [-KEY_PAN_STEP, 0],
-}
-
-/**
- * The two tools, on the keys Illustrator uses — `s00`, settled 2026-09-22 from the dev's own reading.
- *
- * Lower-cased before the lookup, so ‹shift+P› still reaches the Pen: a capital is the same key.
- * ⟨navigate⟩ is deliberately absent — it is reached by *holding* ‹space›, which is a borrow rather than
- * a choice, and by its button in the rail at step 5.
- */
-const TOOL_KEYS: Record<string, EditorTool> = { p: 'draw', a: 'edit' }
-
-/** Keys that zoom in — the atlas's own set, and what `design/CURSORS.md` specifies. */
-const ZOOM_IN_KEYS = new Set(['+', '=', 'PageUp'])
-
-/** Keys that zoom out. */
-const ZOOM_OUT_KEYS = new Set(['-', '_', 'PageDown'])
-
-/** One live attachment: the node, its context, the deps, and the little state a gesture needs. */
-interface LiveCanvas {
-  /** The element being driven. */
-  node: HTMLCanvasElement
-  /** Its 2D context. */
-  ctx: Painter2D
-  /** What to draw and how. */
-  deps: CanvasControllerDeps
-  /** Whether ‹space› is held, which borrows the hand under any tool. Not store state: it is a key. */
-  spaceHeld: boolean
-  /** The last value written to `style.cursor`, so an unchanged one costs no DOM write. */
-  cursor: string
-  /** Device pixels per screen pixel, as of the last resize — what the style is scaled by. */
-  ratio: number
-  /** The canvas size in device pixels, refreshed on resize. */
-  size: PixelSize
-  /** Where the pointer went down, in device pixels; `null` when no button is held. */
-  pressAt: [number, number] | null
-  /** Whether the press has travelled far enough to be a drag. */
-  dragging: boolean
-  /** The anchors in backdrop pixels, recomputed only when an anchor moves. */
-  anchors: AnchorCache
-}
-
-/**
- * The scale range for a given canvas.
- *
- * **The lower bound is computed, not declared**: it is the scale at which the whole backdrop fits, so the
- * reader cannot zoom out until the map is a speck. Declaring a number instead would be wrong at every
- * canvas size, and this one is right at all of them.
- *
- * **It fits with the same margin the first framing uses, and that is not cosmetic.** A first version left
- * the margin out here, which made the minimum *larger* than the scale the editor opened on — so the very
- * first wheel notch, in either direction, snapped the view. Found by a test expecting a zoom out to zoom
- * out. The opening view now sits exactly on the lower bound, which is what "you cannot zoom out past the
- * whole map" should mean.
- * @param canvas - the canvas size, in device pixels
- * @param backdrop - the backdrop's own size
- * @returns the range a zoom may move within
- */
-export function scaleLimitsFor(canvas: PixelSize, backdrop: PixelSize): ScaleLimits {
-  return {
-    min: coverScale(canvas, { x: 0, y: 0, width: backdrop.width, height: backdrop.height }),
-    max: MAX_SCALE,
-  }
-}
+export type { CanvasControllerDeps, LiveCanvas } from './liveCanvas'
+export {
+  DRAG_TOLERANCE,
+  FRAME_MARGIN,
+  HANDLE_HIT_RADIUS,
+  KEY_PAN_STEP,
+  KEY_ZOOM_STEP,
+  MAX_SCALE,
+  ZOOM_PER_PIXEL,
+  scaleLimitsFor,
+  wheelZoomFactor,
+} from './navigation'
 
 /**
  * The position of a pointer or wheel event in the canvas's device pixels.
@@ -254,8 +86,9 @@ function positionOf(event: { offsetX: number; offsetY: number }): [number, numbe
 /**
  * Paint the current document through the current view.
  *
- * The selection is empty until the tools arrive at step 4d-2; it is passed explicitly rather than left
- * out so that the day it is real, this line is the only one that changes.
+ * **Handles are the drawing target's only**, and only under a tool that acts on them: under the hand
+ * there is nothing to aim at, and showing every anchor of the year would bury the target's in its
+ * neighbours' (`H-03`'s smear, avoided by construction for the anchors that matter).
  *
  * **The anchors come from the cache, keyed on the edition's version.** A pan writes the viewport on every
  * pointer move, so without that the Mercator conversion would run per frame over the whole table — the
@@ -265,13 +98,17 @@ function positionOf(event: { offsetX: number; offsetY: number }): [number, numbe
  */
 function repaint(it: LiveCanvas): void {
   const state = it.deps.store.getState()
+  const target = state.tool === 'navigate' ? null : resolvedTarget(gestureOf(it))
+  const selected = it.session.selected
   const scene = buildScene(state.document, {
     anchorsInBackdrop: it.anchors.anchorsInBackdrop(state.document, state.version),
     backdropImage: it.deps.backdropImage,
     vectorLayers: it.deps.vectorLayers,
     frame: it.deps.frame,
     viewport: state.viewport,
-    selected: new Set<number>(),
+    selected: new Set(selected === null ? [] : [selected]),
+    handles: targetHandles(state.document, target?.id ?? null),
+    colours: coloursOf(it),
     zoneLabel: it.deps.zoneLabel,
   })
   paintCanvas(it.ctx, it.size, scene, inDevicePixels(it.deps.style, it.ratio))
@@ -298,9 +135,23 @@ function repaint(it: LiveCanvas): void {
  * for the wheel, where 120 events arrive per second and nothing is destroyed between them; it is wrong
  * here, where the clear has already happened. Reported by the dev on 2026-10-09, and visible on screen
  * rather than deduced.
+ * **Both canvases are cleared here and both are repainted here** (ARCH-101, found in review): the
+ * overlay's size assignment clears it as surely as the static one's, and a resize that repainted only
+ * the static canvas left the outline in progress invisible until the pointer moved.
  * @param it - the attachment to resize
  */
 function resize(it: LiveCanvas): void {
+  sizeSurfaces(it)
+  frameView(it)
+  repaint(it)
+  refreshTools(it)
+}
+
+/**
+ * Match both backing stores to the element's box — which clears them both.
+ * @param it - the attachment
+ */
+function sizeSurfaces(it: LiveCanvas): void {
   const ratio = window.devicePixelRatio
   const width = Math.max(0, Math.round(it.node.clientWidth * ratio))
   const height = Math.max(0, Math.round(it.node.clientHeight * ratio))
@@ -309,11 +160,17 @@ function resize(it: LiveCanvas): void {
   it.size = { width, height }
   it.node.width = width
   it.node.height = height
+  it.overlay.node.width = width
+  it.overlay.node.height = height
+}
+
+/**
+ * Frame the view the first time the canvas has a size, and re-hold it every time after.
+ * @param it - the attachment, already sized
+ */
+function frameView(it: LiveCanvas): void {
   const state = it.deps.store.getState()
-  if (width <= 0 || height <= 0) {
-    repaint(it)
-    return
-  }
+  if (it.size.width <= 0 || it.size.height <= 0) return
   if (state.viewport.scale <= 0) {
     // The opening view frames the EDITORIAL ZONE, not the backdrop: a third of the backdrop lies east
     // of 60°E, where the author may not draw. Read off the document, which is the only thing that
@@ -326,7 +183,6 @@ function resize(it: LiveCanvas): void {
         FRAME_MARGIN
       )
     )
-    repaint(it)
     return
   }
   // A view already chosen still has to be re-held: growing the window can leave a scale below the new
@@ -335,36 +191,6 @@ function resize(it: LiveCanvas): void {
     ...state.viewport,
     scale: Math.max(state.viewport.scale, scaleLimitsFor(it.size, it.deps.frame.size).min),
   })
-  repaint(it)
-}
-
-/**
- * Show the cursor the current state calls for.
- *
- * **Written on the node, never on `body`** — that single fact is what makes the pointer a tool cursor
- * over the canvas and the platform's everywhere else, with no enter/leave handling at all.
- *
- * **Only when it changes.** The decision is cheap, the DOM write is not: it is called from the wheel
- * and from the pointer, which arrive faster than frames, and assigning the same string would have the
- * browser re-resolve the image each time.
- *
- * ‹space› is not in the store, deliberately: it is a key being held, not a tool that was chosen, and
- * `s99` keeps the session's keys out of anything an undo can reach.
- * @param it - the attachment
- */
-function showCursor(it: LiveCanvas): void {
-  const state = it.deps.store.getState()
-  const css = cursorCss(
-    cursorFor({
-      tool: state.tool,
-      hasTarget: describeDrawingTarget(state.document, state.target) !== null,
-      dragging: it.dragging,
-      spaceHeld: it.spaceHeld,
-    })
-  )
-  if (css === it.cursor) return
-  it.cursor = css
-  it.node.style.cursor = css
 }
 
 /**
@@ -416,10 +242,7 @@ function onWheel(it: LiveCanvas, event: WheelEvent): void {
  * @param at - the pointer, in device pixels
  */
 function report(it: LiveCanvas, at: [number, number]): void {
-  const point = screenToBackdrop(it.deps.store.getState().viewport, at)
-  const { width, height } = it.deps.frame.size
-  const onMap = point[0] >= 0 && point[0] <= width && point[1] >= 0 && point[1] <= height
-  it.deps.onHover(onMap ? backdropToLonLat(point, it.deps.frame) : null)
+  it.deps.onHover(screenToLonLatOnBackdrop(at, it.deps.frame, it.deps.store.getState().viewport))
 }
 
 /**
@@ -434,24 +257,47 @@ function onPointerDown(it: LiveCanvas, event: PointerEvent): void {
   it.pressAt = positionOf(event)
   it.dragging = false
   it.node.setPointerCapture(event.pointerId)
+  if (handInHand(it) || it.deps.store.getState().tool !== 'edit') return
+  arrowPress(gestureOf(it), it.pressAt)
+  it.requestPaint()
+  refreshTools(it)
 }
 
 /**
- * Pan, once the press has travelled far enough to be a drag.
+ * Follow the pointer: the overlay and the status bar always, and a drag once the press has travelled
+ * far enough — a pan with the hand, an anchor with the white arrow. **A drag under the Pen does
+ * nothing**: `s02` says a drag never curves anything, and a Pen that panned on a slightly long click
+ * would lose the anchor the author meant to place.
  * @param it - the attachment
  * @param event - the pointer event
  */
 function onPointerMove(it: LiveCanvas, event: PointerEvent): void {
   const to = positionOf(event)
   report(it, to)
+  it.pointer = to
   const from = it.pressAt
-  if (from === null) return
-  if (!it.dragging && Math.hypot(to[0] - from[0], to[1] - from[1]) <= DRAG_TOLERANCE) return
-  it.dragging = true
-  showCursor(it)
-  const state = it.deps.store.getState()
-  settle(it, panBy(state.viewport, to[0] - from[0], to[1] - from[1]))
-  it.pressAt = to
+  if (
+    from !== null &&
+    (it.dragging || Math.hypot(to[0] - from[0], to[1] - from[1]) > DRAG_TOLERANCE)
+  ) {
+    it.dragging = true
+    if (handInHand(it)) {
+      settle(it, panBy(it.deps.store.getState().viewport, to[0] - from[0], to[1] - from[1]))
+      it.pressAt = to
+    } else if (it.deps.store.getState().tool === 'edit') arrowDrag(gestureOf(it), to)
+  }
+  refreshTools(it)
+}
+
+/**
+ * The pointer left the canvas: no rubber band to nowhere, and no action sentence about a place the
+ * author is not looking at.
+ * @param it - the attachment
+ */
+function onPointerLeave(it: LiveCanvas): void {
+  it.pointer = null
+  it.deps.onHover(null)
+  refreshTools(it)
 }
 
 /**
@@ -460,10 +306,49 @@ function onPointerMove(it: LiveCanvas, event: PointerEvent): void {
  * @param event - the pointer event
  */
 function onPointerUp(it: LiveCanvas, event: PointerEvent): void {
+  const pressed = it.pressAt !== null
+  const dragged = it.dragging
   it.pressAt = null
   it.dragging = false
-  showCursor(it)
   if (it.node.hasPointerCapture(event.pointerId)) it.node.releasePointerCapture(event.pointerId)
+  if (pressed && !handInHand(it)) {
+    const tool = it.deps.store.getState().tool
+    if (tool === 'edit') arrowRelease(gestureOf(it))
+    else if (tool === 'draw' && !dragged) penClick(gestureOf(it), positionOf(event))
+  }
+  refreshTools(it)
+}
+
+/**
+ * A press the system took back — a touch interrupted, the capture lost.
+ *
+ * **It undoes, it does not complete** (QUAL-005, found in review): routed through `pointerup` it
+ * committed a half-dragged anchor as a step and, under the Pen, placed an anchor the author never
+ * clicked. A cancelled gesture is one that did not happen, so the preview is dropped and nothing is
+ * recorded.
+ * @param it - the attachment
+ * @param event - the pointer event
+ */
+function onPointerCancel(it: LiveCanvas, event: PointerEvent): void {
+  it.pressAt = null
+  it.dragging = false
+  it.session.moving = null
+  it.session.grabbed = null
+  if (it.node.hasPointerCapture(event.pointerId)) it.node.releasePointerCapture(event.pointerId)
+  refreshTools(it)
+}
+
+/**
+ * Whether a key belongs to the browser or the assistive technology rather than to the canvas.
+ *
+ * Held with ‹ctrl›, ‹cmd› or ‹alt›, it is theirs — ‹cmd+P› prints, ‹ctrl+A› selects, ‹cmd+plus› zooms the
+ * page — never a tool's (A11Y-001, found in review). ‹shift› is not excluded: on many layouts `+` is
+ * typed with it.
+ * @param event - the key event
+ * @returns `true` when the canvas must let the key through untouched
+ */
+function isPlatformShortcut(event: KeyboardEvent): boolean {
+  return event.ctrlKey || event.metaKey || event.altKey
 }
 
 /**
@@ -495,6 +380,13 @@ function onKeyDown(it: LiveCanvas, event: KeyboardEvent): void {
     event.preventDefault()
     it.spaceHeld = true
     showCursor(it)
+    return
+  }
+  if (isPlatformShortcut(event)) return
+  if (toolKey(gestureOf(it), event.key)) {
+    event.preventDefault()
+    it.requestPaint()
+    refreshTools(it)
     return
   }
   const tool = TOOL_KEYS[event.key.toLowerCase()]
@@ -529,20 +421,17 @@ function onKeyDown(it: LiveCanvas, event: KeyboardEvent): void {
  * @returns the remover
  */
 function listen(it: LiveCanvas): () => void {
-  const wheel = (event: WheelEvent): void => {
-    onWheel(it, event)
-  }
-  const down = (event: PointerEvent): void => {
-    onPointerDown(it, event)
-  }
-  const move = (event: PointerEvent): void => {
-    onPointerMove(it, event)
-  }
-  const up = (event: PointerEvent): void => {
-    onPointerUp(it, event)
-  }
-  const key = (event: KeyboardEvent): void => {
-    onKeyDown(it, event)
+  const removers: (() => void)[] = []
+  // Each listener is added and its removal recorded in the same call, so the two lists cannot differ.
+  const on = <K extends keyof HTMLElementEventMap>(
+    type: K,
+    handler: (event: HTMLElementEventMap[K]) => void,
+    options?: AddEventListenerOptions
+  ): void => {
+    it.node.addEventListener(type, handler, options)
+    removers.push(() => {
+      it.node.removeEventListener(type, handler, options)
+    })
   }
   // The release half of ‹space›. Without it the hand stays in place after the key is let go, which is
   // the shape of bug a missing `keyup` always has: the state is entered correctly and never left.
@@ -551,40 +440,42 @@ function listen(it: LiveCanvas): () => void {
     it.spaceHeld = false
     showCursor(it)
   }
-  const keyUp = (event: KeyboardEvent): void => {
-    if (event.key !== ' ') return
-    releaseSpace()
-  }
   // Not passive: see `onWheel`. React would have attached it passively through an `onWheel` prop.
-  it.node.addEventListener('wheel', wheel, { passive: false })
-  it.node.addEventListener('pointerdown', down)
-  it.node.addEventListener('pointermove', move)
-  it.node.addEventListener('pointerup', up)
-  it.node.addEventListener('pointercancel', up)
-  it.node.addEventListener('keydown', key)
-  it.node.addEventListener('keyup', keyUp)
+  on(
+    'wheel',
+    (event) => {
+      onWheel(it, event)
+    },
+    { passive: false }
+  )
+  on('pointerdown', (event) => {
+    onPointerDown(it, event)
+  })
+  on('pointermove', (event) => {
+    onPointerMove(it, event)
+  })
+  on('pointerup', (event) => {
+    onPointerUp(it, event)
+  })
+  on('pointercancel', (event) => {
+    onPointerCancel(it, event)
+  })
+  on('pointerleave', () => {
+    onPointerLeave(it)
+  })
+  on('keydown', (event) => {
+    onKeyDown(it, event)
+  })
+  on('keyup', (event) => {
+    if (event.key === ' ') releaseSpace()
+  })
   // Letting go outside the canvas would otherwise leave the hand up for ever.
-  it.node.addEventListener('blur', releaseSpace)
+  on('blur', releaseSpace)
   return (): void => {
-    it.node.removeEventListener('wheel', wheel)
-    it.node.removeEventListener('pointerdown', down)
-    it.node.removeEventListener('pointermove', move)
-    it.node.removeEventListener('pointerup', up)
-    it.node.removeEventListener('pointercancel', up)
-    it.node.removeEventListener('keydown', key)
-    it.node.removeEventListener('keyup', keyUp)
-    it.node.removeEventListener('blur', releaseSpace)
+    for (const remove of removers) remove()
   }
 }
 
-/**
- * Attach the canvas, and return its teardown.
- * @param node - the canvas element to drive
- * @param deps - the store, the frame, the style and the zone's name
- * @returns a function that removes every listener and observer this added
- * @throws when the browser gives no 2D context — not a runtime condition but a browser that cannot run
- *   this application at all. Substituting anything would draw nothing and say nothing.
- */
 /**
  * Subscribe to everything the canvas has to answer to, and hand back one way to stop.
  *
@@ -604,27 +495,53 @@ function listen(it: LiveCanvas): () => void {
  * @returns the one teardown
  */
 function watchStore(it: LiveCanvas, paint: () => void): () => void {
-  const refreshCursor = (): void => {
-    showCursor(it)
+  const refresh = (): void => {
+    refreshTools(it)
+  }
+  // A new tool or a new subject starts the session over: an outline begun for one polity must not be
+  // closed into another, and a selection is the selection of *someone's* points.
+  const restart = (): void => {
+    it.session = idleSession()
+    paint()
+    refreshTools(it)
+  }
+  // An undo can take the selected anchor's ring away; a selection the target no longer holds is dropped.
+  const prune = (): void => {
+    const { document, target } = it.deps.store.getState()
+    const selected = it.session.selected
+    if (selected !== null && !targetHandles(document, target).includes(selected)) {
+      it.session.selected = null
+    }
+    refreshTools(it)
   }
   const stops = [
     it.deps.store.subscribe((state) => state.viewport, paint, { fireImmediately: true }),
+    it.deps.store.subscribe((state) => state.viewport, refresh),
     it.deps.store.subscribe((state) => state.version, paint),
-    it.deps.store.subscribe((state) => state.tool, refreshCursor),
-    it.deps.store.subscribe((state) => state.target, refreshCursor),
-    it.deps.store.subscribe((state) => state.version, refreshCursor),
+    it.deps.store.subscribe((state) => state.version, prune),
+    it.deps.store.subscribe((state) => state.tool, restart),
+    it.deps.store.subscribe((state) => state.target, restart),
   ]
   return (): void => {
     for (const stop of stops) stop()
   }
 }
 
+/**
+ * Attach the canvas, and return its teardown.
+ * @param node - the canvas element to drive
+ * @param deps - the store, the frame, the style, the overlay and the zone's name
+ * @returns a function that removes every listener and observer this added
+ * @throws when the browser gives no 2D context — not a runtime condition but a browser that cannot run
+ *   this application at all. Substituting anything would draw nothing and say nothing.
+ */
 export function startCanvasController(
   node: HTMLCanvasElement,
   deps: CanvasControllerDeps
 ): () => void {
   const ctx = node.getContext('2d')
-  if (ctx === null)
+  const overlayCtx = deps.overlay.getContext('2d')
+  if (ctx === null || overlayCtx === null)
     throw new Error('Cartographer: the canvas gave no 2D context — there is nothing to draw on.')
 
   const it: LiveCanvas = {
@@ -638,6 +555,12 @@ export function startCanvasController(
     pressAt: null,
     dragging: false,
     anchors: createAnchorCache(deps.frame),
+    overlay: { node: deps.overlay, ctx: overlayCtx },
+    session: idleSession(),
+    pointer: null,
+    colours: null,
+    sentence: null,
+    requestPaint: () => undefined,
   }
 
   /**
@@ -662,6 +585,7 @@ export function startCanvasController(
       repaint(it)
     })
   }
+  it.requestPaint = paint
   const unlisten = listen(it)
   const observer = new ResizeObserver(() => {
     resize(it)
@@ -671,7 +595,7 @@ export function startCanvasController(
   const unsubscribe = watchStore(it, paint)
 
   resize(it)
-  showCursor(it)
+  refreshTools(it)
 
   return (): void => {
     unsubscribe()

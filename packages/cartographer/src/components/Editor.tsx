@@ -50,7 +50,8 @@ export interface EditorProps {
  * @returns the shell, filled where there is something to put in it
  */
 export function Editor({ store, load, style, zoneLabel, label, heading }: EditorProps) {
-  const status = useRef<HTMLParagraphElement | null>(null)
+  const status = useRef<HTMLElement | null>(null)
+  const action = useRef<HTMLElement | null>(null)
 
   return (
     <Shell
@@ -63,6 +64,7 @@ export function Editor({ store, load, style, zoneLabel, label, heading }: Editor
           zoneLabel={zoneLabel}
           label={label}
           statusRef={status}
+          actionRef={action}
         />
       }
       dock={<PolitiesPanel store={store} />}
@@ -71,7 +73,10 @@ export function Editor({ store, load, style, zoneLabel, label, heading }: Editor
         // changes on every pointer sample, so announcing it would make a screen reader unusable — the
         // very failure `role="status"` exists to avoid elsewhere. A keyboard reader gets nothing from it
         // today, which is honest; what will serve them is the anchor list of step 5, not a firehose.
-        <p className="shell__status" ref={status} />
+        <p className="shell__status">
+          <span className="shell__action" ref={action} />
+          <span className="shell__position" ref={status} />
+        </p>
       }
     />
   )

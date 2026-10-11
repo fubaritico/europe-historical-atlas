@@ -8,7 +8,9 @@ import type { CursorState } from './cursors'
 const AT_REST: CursorState = {
   tool: 'navigate',
   hasTarget: false,
-  dragging: false,
+  panning: false,
+  closing: false,
+  overHandle: false,
   spaceHeld: false,
 }
 
@@ -24,7 +26,17 @@ describe('cursorFor', () => {
   describe('variants', () => {
     it('shows the closed hand while the view is dragged, whatever is in hand', () => {
       for (const tool of ['navigate', 'draw', 'edit'] as const)
-        expect(cursorFor({ ...AT_REST, tool, hasTarget: true, dragging: true })).toBe('hand-closed')
+        expect(cursorFor({ ...AT_REST, tool, hasTarget: true, panning: true })).toBe('hand-closed')
+    })
+
+    // CURSORS.md — `cross-close` on the first anchor, `arrow-handle` over a handle.
+    it('marks the closing offer and the handle under the arrow', () => {
+      expect(cursorFor({ ...AT_REST, tool: 'draw', hasTarget: true, closing: true })).toBe(
+        'cross-close'
+      )
+      expect(cursorFor({ ...AT_REST, tool: 'edit', hasTarget: true, overHandle: true })).toBe(
+        'arrow-handle'
+      )
     })
 
     it('lends the open hand to ‹space› over any tool', () => {
@@ -34,7 +46,7 @@ describe('cursorFor', () => {
     })
 
     it('lets the drag win over ‹space›, a held key being the weaker claim', () => {
-      expect(cursorFor({ ...AT_REST, dragging: true, spaceHeld: true })).toBe('hand-closed')
+      expect(cursorFor({ ...AT_REST, panning: true, spaceHeld: true })).toBe('hand-closed')
     })
 
     it('needs no subject for ⟨navigate⟩ — panning belongs to no polity', () => {
@@ -69,9 +81,18 @@ describe('cursorFor', () => {
     it('is total — every combination answers something', () => {
       for (const tool of ['navigate', 'draw', 'edit'] as const)
         for (const hasTarget of [true, false])
-          for (const dragging of [true, false])
+          for (const panning of [true, false])
             for (const spaceHeld of [true, false])
-              expect(cursorFor({ tool, hasTarget, dragging, spaceHeld })).toBeTruthy()
+              expect(
+                cursorFor({
+                  tool,
+                  hasTarget,
+                  panning,
+                  spaceHeld,
+                  closing: false,
+                  overHandle: false,
+                })
+              ).toBeTruthy()
     })
   })
 

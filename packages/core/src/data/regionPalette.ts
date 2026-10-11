@@ -48,6 +48,30 @@ export const REGION_COLOR_RULES: RegionColorRule[] = [
 ]
 
 /**
+ * The automatic palette: eight muted tints chosen to sit on parchment rather than fight it, in
+ * preference order. A polity no editorial choice pins takes the first slot none of its neighbours uses.
+ *
+ * **Declared here, once, because two applications read it.** It lived in the atlas's dev panel until
+ * 2026-10-11, as that panel's defaults; the Cartographer paints a polity left on "automatic" with the same
+ * rule (`s02`: *"it takes a palette colour no neighbour is using"*), and an editor that previewed one
+ * palette while the atlas published another would show the author colours nobody will see. The atlas's
+ * panel still overrides it live — these are its defaults, not a constraint on it.
+ *
+ * Eight is comfortably above what a political map of Europe needs: four colours suffice in theory, and
+ * the surplus keeps neighbours-of-neighbours from echoing each other.
+ */
+export const AUTOMATIC_PALETTE = [
+  '#b8554a',
+  '#6f8a52',
+  '#54719b',
+  '#c29646',
+  '#8f6a9c',
+  '#468a83',
+  '#c46b42',
+  '#87825c',
+] as const
+
+/**
  * The pinned colour for a polity, if any rule claims it.
  * @param name - the polity's name, or `null`
  * @returns the colour, or `null` when nothing matches and the automatic palette should decide

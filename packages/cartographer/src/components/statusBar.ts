@@ -1,7 +1,12 @@
 import { formatLonLat } from '../view/coordinateLabel'
 
 /**
- * The status bar: what is under the pointer, written into the DOM by hand.
+ * The status bar: the action and its subject on one side, what is under the pointer on the other — both
+ * written into the DOM by hand.
+ *
+ * **Two zones, side by side, never one slot taken in turn** — the dev's call, 2026-10-08: *"je ne vois
+ * pas pourquoi l'un prendrait la place de l'autre."* Each has its own node, so neither writer can clear
+ * the other's text.
  *
  * **Its own module for two reasons that agree.** Fast Refresh refuses a file that exports both
  * components and other things (`react-refresh/only-export-components`), and `MapArea` had just walked
@@ -21,12 +26,21 @@ import { formatLonLat } from '../view/coordinateLabel'
  * @param node - the status bar's element, or `null` before it is mounted
  * @param lonLat - the position in degrees, or `null` off the map
  */
-export function writePosition(
-  node: HTMLParagraphElement | null,
-  lonLat: [number, number] | null
-): void {
+export function writePosition(node: HTMLElement | null, lonLat: [number, number] | null): void {
   if (node === null) return
   // Off the map the bar goes quiet rather than holding the last place the pointer was over — a stale
   // coordinate reads exactly like a live one.
   node.textContent = lonLat === null ? '' : formatLonLat(lonLat)
+}
+
+/**
+ * Write the action sentence — *"Drawing in Reaume de France"* — or clear it.
+ *
+ * Written only when it changes (the controller compares), so this is not called at the pointer's rate.
+ * @param node - the action zone, or `null` before it is mounted
+ * @param sentence - the sentence, or `null` when no action has a subject
+ */
+export function writeAction(node: HTMLElement | null, sentence: string | null): void {
+  if (node === null) return
+  node.textContent = sentence ?? ''
 }

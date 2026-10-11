@@ -9,7 +9,13 @@ import {
 import { lonLatToScreen, projectAnchors, projectToBackdrop } from '../view/projection'
 import { TEST_BACKDROP_FRAME } from '../view/testFrame'
 
-import { backdropRect, buildScene, editorialZoneRect, projectedRings } from './scene'
+import {
+  backdropRect,
+  buildScene,
+  editorialZoneRect,
+  projectedFills,
+  projectedRings,
+} from './scene'
 
 import type { SceneInputs } from './scene'
 import type { BackdropFrame } from '../view/projection'
@@ -39,6 +45,8 @@ function inputs(document: YearDocument, overrides: Partial<SceneInputs> = {}): S
     frame: FRAME,
     viewport: NATIVE,
     selected: new Set<number>(),
+    handles: [],
+    colours: new Map<string, string>(),
     zoneLabel: 'editorial zone',
     ...overrides,
   }
@@ -284,6 +292,53 @@ describe('scene', () => {
       const document = sharedBorderDocument()
 
       expect(buildScene(document, inputs(document, { vectorLayers: null })).vectors).toBeNull()
+    })
+  })
+})
+
+describe('projectedFills', () => {
+  const anchors = projectAnchors(sharedBorderDocument().anchors, FRAME, NATIVE)
+
+  describe('happy path', () => {
+    it('gives each claim its polity’s colour', () => {
+      const colours = new Map([
+        ['fr-couronne', '#aa0000'],
+        ['hre', '#00aa00'],
+      ])
+      expect(
+        projectedFills(sharedBorderDocument(), anchors, colours).map((fill) => fill.colour)
+      ).toEqual(['#aa0000', '#00aa00'])
+    })
+  })
+
+  describe('variants', () => {
+    it('resolves each ring through the shared anchor table', () => {
+      const fills = projectedFills(sharedBorderDocument(), anchors, new Map([['hre', '#00aa00']]))
+      expect(fills[0]?.rings[0]?.[0]).toEqual(anchors[1])
+    })
+  })
+
+  describe('managed errors', () => {
+    // A claim whose polity has no colour names a polity the registry lacks; it is not painted in an
+    // invented one.
+    it('skips a claim with no colour', () => {
+      expect(projectedFills(sharedBorderDocument(), anchors, new Map())).toEqual([])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // L4: N/A — pure arithmetic over arrays; an index past the table is dropped by projectedRings.
+    it('returns nothing for a document with no claims', () => {
+      expect(projectedFills({ ...sharedBorderDocument(), claims: [] }, anchors, new Map())).toEqual(
+        []
+      )
+    })
+  })
+
+  describe('edge cases', () => {
+    it('passes the handles through to the scene untouched', () => {
+      const document = sharedBorderDocument()
+      expect(buildScene(document, inputs(document, { handles: [1, 2] })).handles).toEqual([1, 2])
     })
   })
 })

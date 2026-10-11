@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 
 import {
   addAnchor,
+  addOutline,
   addPolity,
   closeRing,
+  declareSource,
   duplicateRun,
   moveAnchor,
   pathsHolding,
@@ -351,6 +353,100 @@ describe('removePolity', () => {
       const doc = neighbours()
       closeRing(doc, 'hre', [1, 2, 4])
       expect(removePolity(doc, 'hre')?.rings).toBe(2)
+    })
+  })
+})
+
+const BY_EYE = { name: 'reported by eye', licence: 'fact' }
+
+/** Three points of a small triangle, west of the fixture's squares. */
+const TRIANGLE: [number, number][] = [
+  [-4, 47],
+  [-2, 48],
+  [-2, 46],
+]
+
+describe('addOutline', () => {
+  describe('happy path', () => {
+    // s02 — the Pen's outline closes: its anchors and its ring enter the document together.
+    it('adds the anchors and closes them into a ring for the polity', () => {
+      const doc = createYearDocument(1100, zone)
+      addPolity(doc, polity('fr', 'France'))
+      expect(addOutline(doc, 'fr', TRIANGLE, BY_EYE)).toBe(true)
+      expect(doc.anchors).toEqual(TRIANGLE)
+      expect(doc.claims).toEqual([{ polity: 'fr', rings: [[0, 1, 2]] }])
+    })
+
+    it('records every new anchor under the provenance given', () => {
+      const doc = createYearDocument(1100, zone)
+      addPolity(doc, polity('fr', 'France'))
+      addOutline(doc, 'fr', TRIANGLE, BY_EYE)
+      expect(doc.sources).toEqual([{ id: 0, ...BY_EYE }])
+      expect(doc.anchorSource).toEqual([0, 0, 0])
+    })
+  })
+
+  describe('variants', () => {
+    it('reuses a provenance already declared rather than declaring it twice', () => {
+      const doc = createYearDocument(1100, zone, [{ id: 0, ...BY_EYE }])
+      addPolity(doc, polity('fr', 'France'))
+      addOutline(doc, 'fr', TRIANGLE, BY_EYE)
+      addOutline(doc, 'fr', TRIANGLE, BY_EYE)
+      expect(doc.sources).toHaveLength(1)
+      expect(doc.claims[0]?.rings).toHaveLength(2)
+    })
+
+    it('appends after the anchors already there, so no existing index moves', () => {
+      const doc = sharedBorderDocument()
+      const before = doc.anchors.length
+      addOutline(doc, 'fr-couronne', TRIANGLE, BY_EYE)
+      expect(doc.claims.find((claim) => claim.polity === 'fr-couronne')?.rings[1]).toEqual([
+        before,
+        before + 1,
+        before + 2,
+      ])
+    })
+  })
+
+  describe('managed errors', () => {
+    // Checked before writing: a refused outline leaves nothing behind for the save to clean up.
+    it('refuses an unknown polity and writes nothing', () => {
+      const doc = createYearDocument(1100, zone)
+      expect(addOutline(doc, 'nobody', TRIANGLE, BY_EYE)).toBe(false)
+      expect(doc.anchors).toEqual([])
+      expect(doc.sources).toEqual([])
+    })
+
+    it('refuses two points, which enclose nothing, and writes nothing', () => {
+      const doc = createYearDocument(1100, zone)
+      addPolity(doc, polity('fr', 'France'))
+      expect(addOutline(doc, 'fr', TRIANGLE.slice(0, 2), BY_EYE)).toBe(false)
+      expect(doc.anchors).toEqual([])
+      expect(doc.claims).toEqual([])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // The caller's array is copied point by point: mutating it afterwards cannot reach the document.
+    it('keeps its own copy of each point', () => {
+      const doc = createYearDocument(1100, zone)
+      addPolity(doc, polity('fr', 'France'))
+      const points = TRIANGLE.map((point): [number, number] => [point[0], point[1]])
+      addOutline(doc, 'fr', points, BY_EYE)
+      if (points[0]) points[0][0] = 99
+      expect(doc.anchors[0]).toEqual([-4, 47])
+    })
+  })
+
+  describe('edge cases', () => {
+    it('declares a new id past the highest one, even when the ids are not dense', () => {
+      const doc = createYearDocument(1100, zone, [{ id: 4, name: 'Duby', licence: 'fact' }])
+      expect(declareSource(doc, BY_EYE)).toBe(5)
+    })
+
+    it('tells the same words under another licence apart', () => {
+      const doc = createYearDocument(1100, zone, [{ id: 0, ...BY_EYE }])
+      expect(declareSource(doc, { name: BY_EYE.name, licence: 'CC0' })).toBe(1)
     })
   })
 })

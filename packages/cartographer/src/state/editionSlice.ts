@@ -1,4 +1,8 @@
-import { addPolity } from '@europe-historical-atlas/core/editor/documentEdits'
+import {
+  addOutline,
+  addPolity,
+  moveAnchor,
+} from '@europe-historical-atlas/core/editor/documentEdits'
 import { createHistory } from '@europe-historical-atlas/core/editor/history'
 
 import type { CartographerStore } from './store'
@@ -70,10 +74,9 @@ export interface EditionState {
  * **No action takes a state.** The slice *is* the working document, so `commit` reads it rather than being
  * handed it — which is also what makes it impossible for a caller to record a document the slice is not on.
  *
- * The geometric operations (`addAnchor`, `closeRing`, …) are still absent: they arrive with the tools at
- * step 4d-2 (d), mutate the document in place, and end in a {@link EditionActions.commit}.
- * {@link EditionActions.createPolity} is the first of the family to land, at 4d-2 (c), because a drawing
- * target cannot exist before the thing it aims at does.
+ * Every action that changes the document **mutates and records together** — {@link EditionActions.createPolity},
+ * {@link EditionActions.drawOutline}, {@link EditionActions.moveAnchor} — so no caller can do the first half
+ * and forget the commit.
  */
 export interface EditionActions {
   /** Record a finished gesture. One gesture is one step — never one per pointer move. */
@@ -100,6 +103,31 @@ export interface EditionActions {
    * @returns `false` when the id is already taken, and nothing happened
    */
   createPolity: (polity: YearPolity, step: HistoryStep) => boolean
+  /**
+   * Give a polity a closed outline, as one undoable step — what the Pen does when the ring closes.
+   *
+   * The points are the session's until now; they enter the document here, all at once, under the
+   * provenance of a free point (`s02`: *"reported by eye"*). One `ctrl+z` takes the whole outline back.
+   * @param polityId - who the outline is drawn for
+   * @param points - `[longitude, latitude]` per anchor, in order, closure implied
+   * @param step - how `{History}` and `[↶ Undo]` will name the gesture
+   * @returns `false` when the polity is unknown or the points enclose nothing — and nothing happened
+   */
+  drawOutline: (
+    polityId: string,
+    points: readonly (readonly [number, number])[],
+    step: HistoryStep
+  ) => boolean
+  /**
+   * Move one anchor, as one undoable step — the white arrow's drag, committed on release.
+   *
+   * Every ring holding it follows, the anchor being one index in all of them.
+   * @param index - the anchor to move
+   * @param point - where to, as `[longitude, latitude]`
+   * @param step - how the gesture is named
+   * @returns `false` when there is no such anchor — and nothing happened
+   */
+  moveAnchor: (index: number, point: [number, number], step: HistoryStep) => boolean
   /** Take back the last gesture. Does nothing at the origin: `ctrl+z` at the end of the line is ordinary. */
   undo: () => void
   /** Apply an undone gesture again. Does nothing at the end of the line. */
@@ -128,6 +156,15 @@ export interface EditionActions {
   /** Open a document, starting a fresh line on it: the history that was there belonged to the file closed. */
   open: (document: YearDocument, origin?: HistoryStep) => void
 }
+
+/**
+ * The provenance a point placed by hand is recorded under — `s02`'s *"reported by eye"*.
+ *
+ * **Generic on purpose, and that is a declared gap**: `s02` names the reference too (*"— Duby
+ * (reference)"*), which is the author's to say and has nowhere to be said yet. The licence is `fact`, the
+ * terms a reported fact travels under.
+ */
+export const FREE_POINT_PROVENANCE = { name: 'reported by eye', licence: 'fact' } as const
 
 /** The slice: what it holds, and what may be done to it. */
 export type EditionSlice = EditionState & EditionActions
@@ -205,7 +242,31 @@ function required(restored: YearDocument | null, what: string): YearDocument {
 }
 
 /**
- * The eight actions, over a line and a way to publish.
+ * Run an edit on the working document and, only if it took, record and publish it as one step.
+ *
+ * **The one shape every document-changing action has**, written once: the edit refuses before it writes
+ * (each `core` operation checks first), so a `false` leaves the document and the line as they were.
+ * @param line - the undo line to record on
+ * @param publish - hand the document to the store
+ * @param current - read the working document
+ * @returns a runner taking the edit and the step's name
+ */
+function recorder(
+  line: History<YearDocument>,
+  publish: (document: YearDocument) => void,
+  current: () => YearDocument
+): (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean {
+  return (edit, step) => {
+    const document = current()
+    if (!edit(document)) return false
+    line.commit(step, document)
+    publish(document)
+    return true
+  }
+}
+
+/**
+ * The actions, over a line and a way to publish.
  *
  * **Outside the slice creator on purpose** (ARCH-012): pure logic trapped in a closure is a module that was
  * not written, and `max-lines-per-function` measures a factory together with its methods precisely so that it
@@ -224,20 +285,19 @@ export function editionActions(
   publish: (document: YearDocument) => void,
   current: () => YearDocument
 ): EditionActions {
+  const record = recorder(line, publish, current)
   return {
     commit: (step: HistoryStep): void => {
       line.commit(step, current())
       publish(current())
     },
-    createPolity: (polity: YearPolity, step: HistoryStep): boolean => {
-      const document = current()
-      // Checked before anything is recorded, so a refusal leaves both the document and the line as they
-      // were. `addPolity` copies what it keeps, so the caller's object cannot be mutated from here later.
-      if (!addPolity(document, polity)) return false
-      line.commit(step, document)
-      publish(document)
-      return true
-    },
+    // `addPolity` copies what it keeps, so the caller's object cannot be mutated from here later.
+    createPolity: (polity: YearPolity, step: HistoryStep): boolean =>
+      record((document) => addPolity(document, polity), step),
+    drawOutline: (polityId, points, step): boolean =>
+      record((document) => addOutline(document, polityId, points, FREE_POINT_PROVENANCE), step),
+    moveAnchor: (index, point, step): boolean =>
+      record((document) => moveAnchor(document, index, point), step),
     undo: (): void => {
       const back = line.undo()
       if (back !== null) publish(back)

@@ -79,9 +79,12 @@ describe('Editor', () => {
       // and the first pointer sample is many frames later. A separate test for that was written and
       // removed: it failed on exactly this defect and guarded nothing of its own.
 
-      const bar = document.querySelector('p.shell__status')
-      expect(bar).not.toBeNull()
-      expect(handed?.statusRef.current).toBe(bar)
+      const position = document.querySelector('p.shell__status > .shell__position')
+      const action = document.querySelector('p.shell__status > .shell__action')
+      expect(position).not.toBeNull()
+      expect(action).not.toBeNull()
+      expect(handed?.statusRef.current).toBe(position)
+      expect(handed?.actionRef.current).toBe(action)
     })
 
     it('forwards the heading, which the shell puts inside the landmark', () => {

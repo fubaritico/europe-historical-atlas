@@ -10,7 +10,7 @@
 import { referencedAnchors } from './yearDocument'
 
 import type { YearDocument } from './yearDocument'
-import type { YearPolity } from '../data/yearFormat'
+import type { YearPolity, YearProvenance } from '../data/yearFormat'
 
 /** What removing a polity touched, in the terms the status bar reports. */
 export interface RemovalReport {
@@ -102,6 +102,51 @@ export function closeRing(doc: YearDocument, polityId: string, ring: number[]): 
   if (claim) claim.rings.push([...ring])
   else doc.claims.push({ polity: polityId, rings: [[...ring]] })
   return true
+}
+
+/**
+ * The id of a provenance, declaring it on first use.
+ *
+ * Matched on **name and licence together**: the same words under another licence are another source,
+ * and folding them would put a stretch under terms it was not reported under.
+ * @param doc - the document to edit
+ * @param provenance - what the geometry was taken from, and under what terms
+ * @returns the id anchors of that provenance carry
+ */
+export function declareSource(doc: YearDocument, provenance: Omit<YearProvenance, 'id'>): number {
+  const known = doc.sources.find(
+    (source) => source.name === provenance.name && source.licence === provenance.licence
+  )
+  if (known) return known.id
+  const id = doc.sources.reduce((next, source) => Math.max(next, source.id + 1), 0)
+  doc.sources.push({ id, name: provenance.name, licence: provenance.licence })
+  return id
+}
+
+/**
+ * Give a polity a closed outline drawn point by point — what the Pen commits when the ring closes.
+ *
+ * **The whole outline enters at once, and only when it closes** (the dev's call, 2026-10-11): until then
+ * it is the session's, not the document's, so ‹escape› has nothing to take back and one `ctrl+z` removes
+ * the lot — `H-10`'s *one gesture is one step*, applied to the outline. Refusals are checked **before**
+ * anything is written, so a refused outline leaves no anchor and no source behind.
+ * @param doc - the document to edit
+ * @param polityId - who the outline is drawn for
+ * @param points - the `[longitude, latitude]` of each anchor, in order, closure implied
+ * @param provenance - what the points were taken from
+ * @returns `false` when the polity is unknown or the points cannot enclose an area
+ */
+export function addOutline(
+  doc: YearDocument,
+  polityId: string,
+  points: readonly (readonly [number, number])[],
+  provenance: Omit<YearProvenance, 'id'>
+): boolean {
+  if (points.length < 3) return false
+  if (!doc.polities.some((polity) => polity.id === polityId)) return false
+  const source = declareSource(doc, provenance)
+  const ring = points.map((point) => addAnchor(doc, [point[0], point[1]], source))
+  return closeRing(doc, polityId, ring)
 }
 
 /**

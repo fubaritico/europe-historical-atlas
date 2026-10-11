@@ -9,6 +9,7 @@ import {
   lonLatToScreen,
   projectAnchors,
   screenToLonLat,
+  screenToLonLatOnBackdrop,
 } from './projection'
 import { TEST_BACKDROP_FRAME } from './testFrame'
 
@@ -176,6 +177,54 @@ describe('projection', () => {
       // north. A projection done by proportion would put it at 0.43 and look plausible.
       expect(x / 1280).toBeCloseTo(0.383, 2)
       expect(y / 1164).toBeCloseTo(0.601, 2)
+    })
+  })
+})
+
+describe('screenToLonLatOnBackdrop', () => {
+  const NATIVE: Viewport = { scale: 1, originX: 0, originY: 0 }
+  const { width, height } = TEST_BACKDROP_FRAME.size
+
+  describe('happy path', () => {
+    it('reads the degrees under a point of the backdrop', () => {
+      const lonLat = screenToLonLatOnBackdrop([0, 0], TEST_BACKDROP_FRAME, NATIVE)
+      expect(lonLat?.[0]).toBeCloseTo(TEST_BACKDROP_FRAME.bounds.west, 9)
+    })
+  })
+
+  describe('variants', () => {
+    it('reads through the view: the same ground under a panned pointer', () => {
+      const panned: Viewport = { scale: 1, originX: -100, originY: 0 }
+      expect(screenToLonLatOnBackdrop([0, 10], TEST_BACKDROP_FRAME, panned)).toEqual(
+        screenToLonLatOnBackdrop([100, 10], TEST_BACKDROP_FRAME, NATIVE)
+      )
+    })
+  })
+
+  describe('managed errors', () => {
+    // The vellum around the backdrop is not a place.
+    it('answers null off the backdrop, on every side', () => {
+      for (const at of [
+        [-1, 10],
+        [width + 1, 10],
+        [10, -1],
+        [10, height + 1],
+      ] as const)
+        expect(screenToLonLatOnBackdrop(at, TEST_BACKDROP_FRAME, NATIVE)).toBeNull()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // Loud propagation (the dev's rule, 2026-09-17): a NaN stays a NaN rather than becoming "off the map",
+    // which would read as a plausible answer. No DOM event produces one.
+    it('carries a position that is not a number through as NaN', () => {
+      expect(screenToLonLatOnBackdrop([Number.NaN, 0], TEST_BACKDROP_FRAME, NATIVE)?.[0]).toBeNaN()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('counts the edges as on the backdrop', () => {
+      expect(screenToLonLatOnBackdrop([width, height], TEST_BACKDROP_FRAME, NATIVE)).not.toBeNull()
     })
   })
 })

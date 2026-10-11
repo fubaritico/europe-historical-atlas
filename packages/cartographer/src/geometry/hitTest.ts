@@ -90,3 +90,35 @@ export function nearestPoint(points: readonly Point[], at: Point, radiusPx: numb
   }
   return best
 }
+
+/**
+ * The nearest of some points within a radius — {@link nearestPoint}, restricted to a list of candidates.
+ *
+ * What the white arrow asks: the anchors it may pick up are the drawing target's, not every anchor of the
+ * year, and the index returned is still the document's.
+ * @param points - every point, in screen pixels, parallel to the document's anchors
+ * @param candidates - the indices that may be caught
+ * @param at - where the pointer is, in screen pixels
+ * @param radiusPx - how far the pointer may be and still catch a point
+ * @returns the index of the nearest candidate in range, or `null` when none is
+ */
+export function nearestAmong(
+  points: readonly Point[],
+  candidates: readonly number[],
+  at: Point,
+  radiusPx: number
+): number | null {
+  const limit = squaredRadius(radiusPx)
+  let best: number | null = null
+  let bestDistance = Infinity
+  for (const index of candidates) {
+    const point = points[index]
+    if (point === undefined) continue
+    const distance = distanceSquared(point, at)
+    if (distance <= limit && distance < bestDistance) {
+      best = index
+      bestDistance = distance
+    }
+  }
+  return best
+}

@@ -16,7 +16,7 @@ import {
 
 import { UNFRAMED } from '../view/viewport'
 
-import { editionActions, snapshot } from './editionSlice'
+import { FREE_POINT_PROVENANCE, editionActions, snapshot } from './editionSlice'
 import { createCartographerStore } from './store'
 
 import type { History, HistoryStep } from '@europe-historical-atlas/core/editor/history'
@@ -631,6 +631,87 @@ describe('editionSlice.createPolity', () => {
 
       expect(store.getState().createPolity(AQUITAINE_IDENTITY, CREATE)).toBe(true)
       expect(store.getState().document.polities).toHaveLength(1)
+    })
+  })
+})
+
+/** The Pen's closing gesture, named as the gestures module names it. */
+const DRAW: HistoryStep = { kind: 'draw-outline', label: 'draw outline' }
+
+/** A small triangle west of the fixture's two squares. */
+const OUTLINE: [number, number][] = [
+  [-4, 47],
+  [-2, 48],
+  [-2, 46],
+]
+
+describe('editionSlice.drawOutline and moveAnchor', () => {
+  describe('happy path', () => {
+    // H-10 — one gesture, one step: the whole outline comes back out in one ctrl+z.
+    it('adds a closed outline as one step, and one undo takes it all back', () => {
+      const { store } = openStore()
+      const anchors = store.getState().document.anchors.length
+      expect(store.getState().drawOutline('fr-couronne', OUTLINE, DRAW)).toBe(true)
+      expect(store.getState().document.anchors).toHaveLength(anchors + 3)
+      store.getState().undo()
+      expect(store.getState().document.anchors).toHaveLength(anchors)
+    })
+
+    it('moves an anchor as one step, and the undo puts it back', () => {
+      const { store } = openStore()
+      expect(store.getState().moveAnchor(1, [3, 49], MOVE)).toBe(true)
+      expect(store.getState().document.anchors[1]).toEqual([3, 49])
+      store.getState().undo()
+      expect(store.getState().document.anchors[1]).toEqual([2, 48])
+    })
+  })
+
+  describe('variants', () => {
+    it('records a drawn point under the free point’s provenance', () => {
+      const { store } = openStore()
+      store.getState().drawOutline('fr-couronne', OUTLINE, DRAW)
+      const { document } = store.getState()
+      const source = document.anchorSource.at(-1)
+      expect(document.sources.find((entry) => entry.id === source)).toMatchObject(
+        FREE_POINT_PROVENANCE
+      )
+    })
+  })
+
+  describe('managed errors', () => {
+    it('records nothing for an outline the document refuses', () => {
+      const { store } = openStore()
+      const version = store.getState().version
+      expect(store.getState().drawOutline('nobody', OUTLINE, DRAW)).toBe(false)
+      expect(store.getState().version).toBe(version)
+      expect(store.getState().canUndo).toBe(false)
+    })
+
+    it('records nothing for an anchor that is not there', () => {
+      const { store } = openStore()
+      expect(store.getState().moveAnchor(99, [0, 0], MOVE)).toBe(false)
+      expect(store.getState().canUndo).toBe(false)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // L4: N/A — both actions refuse before writing; a throwing copier is covered for every action above.
+    it('bumps the version once per recorded gesture, so the canvas repaints', () => {
+      const { store } = openStore()
+      const version = store.getState().version
+      store.getState().moveAnchor(1, [3, 49], MOVE)
+      expect(store.getState().version).toBe(version + 1)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('restores a shared anchor for both owners on undo', () => {
+      const { store } = openStore()
+      store.getState().moveAnchor(1, [3, 49], MOVE)
+      store.getState().undo()
+      const { document } = store.getState()
+      expect(document.claims.map((claim) => claim.rings[0]?.includes(1))).toEqual([true, true])
+      expect(document.anchors[1]).toEqual([2, 48])
     })
   })
 })

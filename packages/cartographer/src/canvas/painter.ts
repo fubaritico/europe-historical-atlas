@@ -81,6 +81,8 @@ export interface Painter2D {
   lineWidth: number
   /** The current font, as CSS. */
   font: string
+  /** How what is drawn next combines with what is already there — the fills' `overlay`. */
+  globalCompositeOperation: GlobalCompositeOperation
   /**
    * Replace the transform — used for the two layers that are **not** handed over in screen pixels.
    *
@@ -131,6 +133,13 @@ export interface PaintStyle {
   anchorStroke: string
   /** A handle's radius in screen pixels. `s02` wants about 8 across, at any zoom. */
   anchorRadius: number
+  /**
+   * How a polity's fill combines with the relief under it: `overlay`, at full strength — the atlas's own
+   * `politicalMode` (`core/pipeline/terrainOptions.ts`), whose formula in `terrainCompose.ts` is the
+   * standard overlay the 2D context implements natively. The dev's call, 2026-10-11, over `02 Drawing`'s
+   * 70 % layer: the editor shows the tint the atlas will publish.
+   */
+  fillBlend: GlobalCompositeOperation
   /** The shoreline's ink. Darker than the terrain's own edge, so it reads over land and over sea. */
   coastStroke: string
   /** The shoreline's width in **screen** pixels, held constant as the view zooms. */
@@ -174,8 +183,15 @@ export interface CanvasScene {
   zoneLabel: string
   /** The closed outlines of the open document, each a run of projected anchors. */
   rings: readonly (readonly Point[])[]
+  /**
+   * Each polity's territory, filled in its colour: all its rings in one path, so a ring inside another
+   * is a hole by the even-odd rule — `H-07`'s *"inclusion decides"*.
+   */
+  fills: readonly { rings: readonly (readonly Point[])[]; colour: string }[]
   /** Every anchor, projected, parallel to the document's own table. */
   anchors: readonly Point[]
+  /** Which anchors get a handle drawn, by index — the drawing target's, under a tool that acts on them. */
+  handles: readonly number[]
   /** Which anchors are selected, by the same index. */
   selected: ReadonlySet<number>
   /**
@@ -277,7 +293,7 @@ function strokeRing(ctx: Painter2D, ring: readonly Point[]): void {
 function paintAnchors(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): void {
   ctx.lineWidth = 1
   ctx.strokeStyle = style.anchorStroke
-  for (let index = 0; index < scene.anchors.length; index += 1) {
+  for (const index of scene.handles) {
     const anchor = scene.anchors[index]
     if (anchor === undefined) continue
     ctx.fillStyle = scene.selected.has(index) ? style.anchorStroke : style.anchorFill
@@ -286,6 +302,39 @@ function paintAnchors(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): vo
     ctx.fill()
     ctx.stroke()
   }
+}
+
+/**
+ * Fill every polity's territory in its colour, blended into the relief — the atlas's tint, previewed.
+ *
+ * **The blend is set and reset here**, the same discipline as the vectors' transform: an `overlay` left
+ * behind would blend the coastline, the outlines and the handles drawn after it.
+ * @param ctx - the context to draw into
+ * @param scene - what to draw
+ * @param style - the colours and the opacity
+ */
+function paintFills(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): void {
+  ctx.globalCompositeOperation = style.fillBlend
+  for (const fill of scene.fills) {
+    ctx.fillStyle = fill.colour
+    ctx.beginPath()
+    for (const ring of fill.rings) addRingToPath(ctx, ring)
+    ctx.fill('evenodd')
+  }
+  ctx.globalCompositeOperation = 'source-over'
+}
+
+/**
+ * Add one closed ring to the current path.
+ * @param ctx - the context
+ * @param ring - the ring, in screen pixels
+ */
+function addRingToPath(ctx: Painter2D, ring: readonly Point[]): void {
+  const first = ring[0]
+  if (first === undefined || ring.length < 3) return
+  ctx.moveTo(first[0], first[1])
+  for (const point of ring.slice(1)) ctx.lineTo(point[0], point[1])
+  ctx.closePath()
 }
 
 /**
@@ -419,6 +468,9 @@ export function paintCanvas(
     const { rect } = scene.backdrop
     ctx.drawImage(scene.backdrop.image, rect.x, rect.y, rect.width, rect.height)
   }
+  // The tint goes straight onto the relief and under the coastline and the rivers, as the atlas bakes it:
+  // a shoreline blended into its country's colour would lose the contrast it is drawn for.
+  paintFills(ctx, scene, style)
   paintVectors(ctx, size, scene, style)
   paintZone(ctx, size, scene, style)
   ctx.strokeStyle = style.pathStroke

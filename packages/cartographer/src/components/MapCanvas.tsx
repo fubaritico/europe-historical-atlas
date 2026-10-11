@@ -1,8 +1,11 @@
-import { useId } from 'react'
+import { useId, useRef } from 'react'
+
+import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 
 import { startCanvasController } from '../canvas/controller'
 import { trackFocusOrigin } from '../canvas/focusOrigin'
 
+import type { CanvasControllerDeps } from '../canvas/controller'
 import type { PaintStyle } from '../canvas/painter'
 import type { CartographerStoreHook } from '../state/store'
 import type { VectorLayers } from '../vectorLayers'
@@ -36,6 +39,8 @@ export interface MapCanvasProps {
   vectorLayers: VectorLayers
   /** Where the pointer is, in degrees, or `null` off the map — written by the status bar. */
   onHover: (lonLat: [number, number] | null) => void
+  /** The action and its subject, or `null` — written by the status bar's other zone. */
+  onAction: (sentence: string | null) => void
   /** The colours and sizes, from `design/chrome.css`. */
   style: PaintStyle
   /** What to call the editorial zone on screen. */
@@ -47,13 +52,14 @@ export interface MapCanvasProps {
 /**
  * What a keyboard reader is told the surface can do.
  *
- * **It names only the keys `attach.ts` actually binds today**, which is what keeps it from going stale:
- * the arrows, `+`/`−` and PageUp/PageDown exist now, and the tools of step 4d-2 will add their own keys
- * and their own sentence. Promising a gesture before it is wired is the defect this repository keeps
- * finding in its own comments.
+ * **It names only the keys `controller.ts` actually binds**, which is what keeps it from going stale:
+ * the arrows, `+`/`−` and PageUp/PageDown, ‹P› and ‹A›, and the Pen's three keys. Promising a gesture
+ * before it is wired is the defect this repository keeps finding in its own comments.
  */
 const CANVAS_INSTRUCTIONS =
-  'Arrow keys to pan the map, plus and minus or Page Up and Page Down to zoom.'
+  'Arrow keys to pan the map, plus and minus or Page Up and Page Down to zoom. ' +
+  'P takes the Pen and A the white arrow. With the Pen, Backspace removes the last point, ' +
+  'Escape abandons the outline and Enter closes it.'
 
 /** Off-screen but in the accessibility tree — the instruction text has nothing to show visually. */
 const offScreen = {
@@ -65,12 +71,49 @@ const offScreen = {
   whiteSpace: 'nowrap',
 } as const
 
+/** The overlay sits exactly over the surface and lets every pointer event through to it. */
+const OVERLAY_STYLE = {
+  position: 'absolute',
+  inset: 0,
+  width: '100%',
+  height: '100%',
+  pointerEvents: 'none',
+} as const
+
+/**
+ * Start the surface's controller once both canvases exist, and hand back its teardown.
+ *
+ * **A missing overlay throws rather than leaving the map inert.** The overlay comes first in the tree, so
+ * its ref is attached before this runs; finding it `null` means that order was broken, a wiring fault.
+ * Returning quietly would leave a canvas that never paints and never answers, with nothing said — the
+ * same reasoning as the controller's own throw on a missing 2D context.
+ * @param node - the drawing surface
+ * @param overlay - the overlay canvas, or `null` if the tree order was broken
+ * @param deps - everything the controller needs but the overlay
+ * @returns the teardown
+ */
+function startSurface(
+  node: HTMLCanvasElement,
+  overlay: HTMLCanvasElement | null,
+  deps: Omit<CanvasControllerDeps, 'overlay'>
+): () => void {
+  if (overlay === null) {
+    throw new Error('Cartographer: the overlay canvas was not mounted before the drawing surface.')
+  }
+  const forgetFocusOrigin = trackFocusOrigin(node)
+  const stopController = startCanvasController(node, { ...deps, overlay })
+  return () => {
+    stopController()
+    forgetFocusOrigin()
+  }
+}
+
 /**
  * The drawing surface.
  *
  * **Accessibility, stated rather than implied, and corrected on 2026-10-07.** This comment used to say
  * the canvas *"has no keyboard equivalent"* — which stopped being true in the same step that wrote it:
- * `attach.ts` binds the arrows and the zoom keys, and the element carries `tabIndex` so they can fire.
+ * `controller.ts` binds the arrows and the zoom keys, and the element carries `tabIndex` so they can fire.
  * A comment contradicting the code three lines below it is worse than no comment, and a review caught
  * exactly that.
  *
@@ -92,41 +135,44 @@ export function MapCanvas({
   backdropImage,
   vectorLayers,
   onHover,
+  onAction,
   style,
   zoneLabel,
   label,
 }: MapCanvasProps) {
   const instructionsId = useId()
+  // The overlay comes first in the tree so its ref is set before the drawing surface's callback reads it
+  // (refs attach in tree order). Being positioned, it still paints above the static canvas, and it lets
+  // every pointer event through to the element that owns them.
+  const overlay = useRef<HTMLCanvasElement | null>(null)
   return (
     <>
       <span id={instructionsId} style={offScreen}>
         {CANVAS_INSTRUCTIONS}
       </span>
+      <canvas ref={overlay} aria-hidden="true" style={OVERLAY_STYLE} />
       <canvas
         aria-label={label}
         aria-describedby={instructionsId}
         // `<canvas>` is not natively focusable, so without this the keyboard pan and zoom bound in
-        // `attach.ts` could never fire — nothing would ever focus the element. The two ship together or
+        // `controller.ts` could never fire — nothing would ever focus the element. The two ship together or
         // neither works. Zero and not a positive value: a positive `tabIndex` jumps the document's own
         // order, which is the defect `jsx-a11y` has a rule against.
         tabIndex={0}
         style={{ display: 'block', width: '100%', height: '100%' }}
         ref={(node) => {
           if (node === null) return undefined
-          const forgetFocusOrigin = trackFocusOrigin(node)
-          const stopController = startCanvasController(node, {
+          return startSurface(node, overlay.current, {
             store,
             frame,
             backdropImage,
             vectorLayers,
             onHover,
+            onAction,
             style,
             zoneLabel,
+            palette: AUTOMATIC_PALETTE,
           })
-          return () => {
-            stopController()
-            forgetFocusOrigin()
-          }
         }}
       />
     </>

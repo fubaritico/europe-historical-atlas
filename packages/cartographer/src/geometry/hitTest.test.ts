@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { distanceSquared, nearestPoint, squaredRadius } from './hitTest'
+import { distanceSquared, nearestAmong, nearestPoint, squaredRadius } from './hitTest'
 
 import type { Point } from '../view/viewport'
 
@@ -132,6 +132,45 @@ describe('hitTest', () => {
       const dense: Point[] = Array.from({ length: 1000 }, (_, i) => [i * 3, 0] as Point)
 
       expect(nearestPoint(dense, [617 * 3 + 1, 1], RADIUS)).toBe(617)
+    })
+  })
+})
+
+describe('nearestAmong', () => {
+  const POINTS: Point[] = [
+    [0, 0],
+    [10, 0],
+    [3, 0],
+  ]
+
+  describe('happy path', () => {
+    it('returns the nearest candidate’s document index', () => {
+      expect(nearestAmong(POINTS, [1, 2], [9, 0], 8)).toBe(1)
+    })
+  })
+
+  describe('variants', () => {
+    // The white arrow's rule: a point outside the candidates is never caught, however near.
+    it('ignores a nearer point that is not a candidate', () => {
+      expect(nearestAmong(POINTS, [1], [0, 0], 20)).toBe(1)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('catches nothing out of range', () => {
+      expect(nearestAmong(POINTS, [0, 1, 2], [50, 50], 8)).toBeNull()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('skips a candidate index the table does not hold', () => {
+      expect(nearestAmong(POINTS, [7, 2], [3, 0], 8)).toBe(2)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('catches nothing from an empty list of candidates', () => {
+      expect(nearestAmong(POINTS, [], [0, 0], 8)).toBeNull()
     })
   })
 })

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { openEmptyYear } from '../state/openEmptyYear'
@@ -16,6 +17,7 @@ import {
   startCanvasController,
   wheelZoomFactor,
 } from './controller'
+import { coloursOf } from './liveCanvas'
 import { CHROME_PAINT_STYLE } from './style'
 
 import type { CartographerStoreHook } from '../state/store'
@@ -88,9 +90,11 @@ function attach(): {
   node: HTMLCanvasElement
   store: CartographerStoreHook
   hovered: ReturnType<typeof vi.fn>
+  acted: ReturnType<typeof vi.fn>
   dispose: () => void
 } {
   const hovered = vi.fn()
+  const acted = vi.fn()
   const store = createCartographerStore({
     edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
     viewport: { viewport: UNFRAMED },
@@ -102,10 +106,13 @@ function attach(): {
     backdropImage: backdropStandIn(),
     vectorLayers: { coast: [], rivers: [] },
     onHover: hovered,
+    onAction: acted,
     style: CHROME_PAINT_STYLE,
     zoneLabel: 'zone',
+    overlay: document.createElement('canvas'),
+    palette: AUTOMATIC_PALETTE,
   })
-  return { node, store, hovered, dispose }
+  return { node, store, hovered, acted, dispose }
 }
 
 afterEach(() => {
@@ -423,8 +430,11 @@ describe('startCanvasController', () => {
           backdropImage: backdropStandIn(),
           vectorLayers: { coast: [], rivers: [] },
           onHover: () => undefined,
+          onAction: () => undefined,
           style: CHROME_PAINT_STYLE,
           zoneLabel: 'zone',
+          overlay: document.createElement('canvas'),
+          palette: AUTOMATIC_PALETTE,
         })
       ).toThrow(/no 2D context/)
     })
@@ -810,6 +820,318 @@ describe('wheelZoomFactor', () => {
     it('never returns a negative factor, which would mirror the map', () => {
       for (const delta of [-5000, -1, 0, 1, 5000])
         expect(wheelZoomFactor(delta, 0)).toBeGreaterThan(0)
+    })
+  })
+})
+
+/**
+ * Create a polity and aim the Pen at it, as `[+ New polity]`'s OK does.
+ * @param store - the store
+ */
+function aimAtFrance(store: CartographerStoreHook): void {
+  store.getState().createPolity(
+    {
+      id: 'fr',
+      name: 'Reaume de France',
+      rank: null,
+      status: null,
+      suzerain: null,
+      existsFrom: null,
+      existsTo: null,
+      colour: null,
+      wikidata: null,
+    },
+    { kind: 'create-polity', label: 'create' }
+  )
+  store.getState().aimAt('fr')
+}
+
+/**
+ * A click at a canvas position: a press and a release in place.
+ * @param node - the canvas
+ * @param at - where, in CSS pixels
+ */
+function click(node: HTMLCanvasElement, at: readonly [number, number]): void {
+  node.dispatchEvent(pointerEvent('pointerdown', { offsetX: at[0], offsetY: at[1] }))
+  node.dispatchEvent(pointerEvent('pointerup', { offsetX: at[0], offsetY: at[1] }))
+}
+
+/** Three points of a triangle in the middle of the canvas, where the backdrop always is. */
+const CANVAS_TRIANGLE = [
+  [300, 200],
+  [500, 200],
+  [500, 400],
+] as const
+
+describe('the tools on the canvas', () => {
+  describe('happy path', () => {
+    // s02 — place anchors, click the first, and the ring closes into the target's territory.
+    it('draws a ring with the Pen and closes it on the first anchor', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      for (const at of CANVAS_TRIANGLE) click(node, at)
+      expect(store.getState().document.claims).toEqual([])
+      click(node, [301, 201])
+      expect(store.getState().document.claims).toEqual([{ polity: 'fr', rings: [[0, 1, 2]] }])
+      dispose()
+    })
+
+    // s02 — "the status bar reads Drawing in Kingdom of France".
+    it('names the action and its subject in the status bar', () => {
+      const { node, store, acted, dispose } = attach()
+      aimAtFrance(store)
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 300, offsetY: 200 }))
+      expect(acted).toHaveBeenLastCalledWith('Drawing in Reaume de France')
+      dispose()
+    })
+
+    // s03 — "press on a handle and drag it … When I release / Then the move is committed".
+    it('moves an anchor with the white arrow, and does not pan while doing it', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(node, at)
+      node.dispatchEvent(keyEvent('a'))
+      const view = store.getState().viewport
+      const before = store.getState().document.anchors[1]
+      node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 500, offsetY: 200 }))
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 540, offsetY: 240 }))
+      node.dispatchEvent(pointerEvent('pointerup', { offsetX: 540, offsetY: 240 }))
+      expect(store.getState().viewport).toEqual(view)
+      expect(store.getState().document.anchors[1]).not.toEqual(before)
+      expect(store.getState().undoLabel).toBe('move anchor')
+      dispose()
+    })
+  })
+
+  describe('variants', () => {
+    // s02 — "a drag does not curve anything": and it does not pan either, or a long click loses its anchor.
+    it('neither places nor pans on a drag with the Pen', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      roomToPan(store)
+      node.dispatchEvent(keyEvent('p'))
+      const view = store.getState().viewport
+      node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 300, offsetY: 200 }))
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 360, offsetY: 260 }))
+      node.dispatchEvent(pointerEvent('pointerup', { offsetX: 360, offsetY: 260 }))
+      expect(store.getState().viewport).toEqual(view)
+      node.dispatchEvent(keyEvent('Enter'))
+      expect(store.getState().document.claims).toEqual([])
+      dispose()
+    })
+
+    it('still pans with ‹space› held under the Pen', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      roomToPan(store)
+      const view = store.getState().viewport
+      node.dispatchEvent(keyEvent(' '))
+      node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 300, offsetY: 200 }))
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 340, offsetY: 230 }))
+      node.dispatchEvent(pointerEvent('pointerup', { offsetX: 340, offsetY: 230 }))
+      expect(store.getState().viewport).not.toEqual(view)
+      dispose()
+    })
+  })
+
+  describe('managed errors', () => {
+    // s02 — "no subject, so the bar says what to do about it".
+    it('asks for a polity, and places nothing, with the Pen and no target', () => {
+      const { node, store, acted, dispose } = attach()
+      node.dispatchEvent(keyEvent('p'))
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 300, offsetY: 200 }))
+      expect(acted).toHaveBeenLastCalledWith('Select a polity to draw in')
+      for (const at of CANVAS_TRIANGLE) click(node, at)
+      node.dispatchEvent(keyEvent('Enter'))
+      expect(store.getState().document.claims).toEqual([])
+      dispose()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // An outline begun for one polity must never be closed into another.
+    it('abandons the outline in progress when the tool changes', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      for (const at of CANVAS_TRIANGLE) click(node, at)
+      node.dispatchEvent(keyEvent('a'))
+      node.dispatchEvent(keyEvent('p'))
+      node.dispatchEvent(keyEvent('Enter'))
+      expect(store.getState().document.claims).toEqual([])
+      dispose()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('sizes the overlay with the drawing surface', () => {
+      const overlay = document.createElement('canvas')
+      const store = createCartographerStore({
+        edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
+        viewport: { viewport: UNFRAMED },
+      })
+      const dispose = startCanvasController(canvasWithBox(), {
+        store,
+        frame: TEST_BACKDROP_FRAME,
+        backdropImage: backdropStandIn(),
+        vectorLayers: { coast: [], rivers: [] },
+        onHover: () => undefined,
+        onAction: () => undefined,
+        style: CHROME_PAINT_STYLE,
+        zoneLabel: 'zone',
+        overlay,
+        palette: AUTOMATIC_PALETTE,
+      })
+      expect([overlay.width, overlay.height]).toEqual([
+        BOX.width * window.devicePixelRatio,
+        BOX.height * window.devicePixelRatio,
+      ])
+      dispose()
+    })
+
+    it('stops reporting the action when the pointer leaves the canvas', () => {
+      const { node, store, acted, dispose } = attach()
+      store.getState().selectTool('draw')
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 300, offsetY: 200 }))
+      node.dispatchEvent(pointerEvent('pointerleave', {}))
+      expect(acted).toHaveBeenLastCalledWith(null)
+      dispose()
+    })
+  })
+})
+
+describe('the tools — what the review found', () => {
+  describe('happy path', () => {
+    // ARCH-101: assigning the overlay's size clears it, so a resize must leave it repainted. This holds
+    // through two paths — `resize` repaints it itself, and the view `settle` publishes repaints it too —
+    // and the test asserts the behaviour, not which path. Removing either alone does not fail it.
+    it('keeps the outline in progress on screen across a resize', () => {
+      let fire: () => void = () => undefined
+      const original = globalThis.ResizeObserver
+      globalThis.ResizeObserver = class {
+        constructor(callback: ResizeObserverCallback) {
+          fire = () => {
+            callback([], this)
+          }
+        }
+        observe = (): void => undefined
+        unobserve = (): void => undefined
+        disconnect = (): void => undefined
+      }
+      // What the overlay was last asked to draw: everything since its last clear.
+      const ops: string[] = []
+      const overlay = document.createElement('canvas')
+      overlay.getContext = vi.fn(
+        () =>
+          new Proxy(
+            {},
+            {
+              get: (_, op) => () => {
+                ops.push(String(op))
+              },
+              set: () => true,
+            }
+          )
+      ) as unknown as typeof overlay.getContext
+      const store = createCartographerStore({
+        edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
+        viewport: { viewport: UNFRAMED },
+      })
+      const node = canvasWithBox()
+      const dispose = startCanvasController(node, {
+        store,
+        frame: TEST_BACKDROP_FRAME,
+        backdropImage: backdropStandIn(),
+        vectorLayers: { coast: [], rivers: [] },
+        onHover: () => undefined,
+        onAction: () => undefined,
+        style: CHROME_PAINT_STYLE,
+        zoneLabel: 'zone',
+        overlay,
+        palette: AUTOMATIC_PALETTE,
+      })
+      aimAtFrance(store)
+      for (const at of CANVAS_TRIANGLE.slice(0, 2)) click(node, at)
+      ops.length = 0
+      fire()
+      const lastPaint = ops.slice(ops.lastIndexOf('clearRect'))
+      expect(ops).toContain('clearRect')
+      expect(lastPaint.filter((op) => op === 'arc')).toHaveLength(2)
+      dispose()
+      globalThis.ResizeObserver = original
+    })
+  })
+
+  describe('variants', () => {
+    // QUAL-003: the sentence is reported when it changes, not on every pointer sample.
+    it('reports an unchanged action sentence once', () => {
+      const { node, store, acted, dispose } = attach()
+      aimAtFrance(store)
+      acted.mockClear()
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 300, offsetY: 200 }))
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 310, offsetY: 210 }))
+      expect(acted).not.toHaveBeenCalled()
+      dispose()
+    })
+  })
+
+  describe('managed errors', () => {
+    // A11Y-001: ‹cmd+P› prints and ‹ctrl+A› selects — they are the platform's, never a tool's.
+    it('lets a key held with a modifier through, untouched', () => {
+      const { node, store, dispose } = attach()
+      for (const init of [
+        { key: 'p', metaKey: true },
+        { key: 'a', ctrlKey: true },
+        { key: 'p', altKey: true },
+      ]) {
+        const event = new KeyboardEvent('keydown', { ...init, bubbles: true, cancelable: true })
+        node.dispatchEvent(event)
+        expect(event.defaultPrevented).toBe(false)
+      }
+      expect(store.getState().tool).toBe('navigate')
+      dispose()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // QUAL-005: a cancelled press did not happen — it places nothing and commits nothing.
+    it('places no anchor when a Pen press is cancelled', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 300, offsetY: 200 }))
+      node.dispatchEvent(pointerEvent('pointercancel', { offsetX: 300, offsetY: 200 }))
+      for (const at of CANVAS_TRIANGLE.slice(1)) click(node, at)
+      node.dispatchEvent(keyEvent('Enter'))
+      expect(store.getState().document.claims).toEqual([])
+      dispose()
+    })
+
+    it('drops a drag the system cancels, recording nothing', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(node, at)
+      node.dispatchEvent(keyEvent('a'))
+      const before = store.getState().document.anchors[1]
+      node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 500, offsetY: 200 }))
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 540, offsetY: 240 }))
+      node.dispatchEvent(pointerEvent('pointercancel', { offsetX: 540, offsetY: 240 }))
+      expect(store.getState().document.anchors[1]).toEqual(before)
+      expect(store.getState().undoLabel).not.toBe('move anchor')
+      dispose()
+    })
+  })
+
+  describe('edge cases', () => {
+    // QUAL-003: the colours are derived once per version — a pan must not re-derive adjacency.
+    it('derives the colours once per edition version', () => {
+      const store = createCartographerStore({
+        edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
+        viewport: { viewport: UNFRAMED },
+      })
+      const it = { colours: null, deps: { store, palette: AUTOMATIC_PALETTE } }
+      const first = coloursOf(it)
+      expect(coloursOf(it)).toBe(first)
+      aimAtFrance(store)
+      expect(coloursOf(it)).not.toBe(first)
     })
   })
 })

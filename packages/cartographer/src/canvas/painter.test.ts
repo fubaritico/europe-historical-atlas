@@ -15,6 +15,8 @@ interface Call {
   fillStyle: string | CanvasGradient | CanvasPattern
   /** The stroke colour at the time. */
   strokeStyle: string | CanvasGradient | CanvasPattern
+  /** The blend at the time. */
+  globalCompositeOperation: string
   /** The stroke width at the time. */
   lineWidth: number
 }
@@ -33,7 +35,14 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
     strokeStyle: string | CanvasGradient | CanvasPattern
     lineWidth: number
     font: string
-  } = { fillStyle: '', strokeStyle: '', lineWidth: 0, font: '' }
+    globalCompositeOperation: GlobalCompositeOperation
+  } = {
+    fillStyle: '',
+    strokeStyle: '',
+    lineWidth: 0,
+    font: '',
+    globalCompositeOperation: 'source-over',
+  }
   const record =
     (op: string) =>
     (...args: (number | string | CanvasImageSource | undefined)[]): void => {
@@ -43,6 +52,7 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
         fillStyle: state.fillStyle,
         strokeStyle: state.strokeStyle,
         lineWidth: state.lineWidth,
+        globalCompositeOperation: state.globalCompositeOperation,
       })
     }
   const ctx: Painter2D = {
@@ -84,6 +94,12 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
     set font(value: string) {
       state.font = value
     },
+    get globalCompositeOperation() {
+      return state.globalCompositeOperation
+    },
+    set globalCompositeOperation(value: GlobalCompositeOperation) {
+      state.globalCompositeOperation = value
+    },
   }
   return { ctx, calls }
 }
@@ -103,6 +119,7 @@ const STYLE: PaintStyle = {
   anchorFill: '#ffffff',
   anchorStroke: '#5b93d6',
   anchorRadius: 4,
+  fillBlend: 'overlay',
   coastStroke: 'rgba(60, 50, 38, 0.85)',
   coastWidth: 1,
   riverStroke: 'rgba(86, 107, 122, 0.75)',
@@ -130,7 +147,11 @@ function scene(overrides: Partial<CanvasScene> = {}): CanvasScene {
     editorialZone: { x: 50, y: 60, width: 400, height: 300 },
     zoneLabel: 'editorial zone',
     rings: [],
+    fills: [],
     anchors: [],
+    // Every anchor gets a handle unless a test says otherwise — the handle filter is the scene's
+    // decision (`targetHandles`), not the painter's, which only draws the indices it is handed.
+    handles: (overrides.anchors ?? []).map((_, index) => index),
     selected: new Set<number>(),
     vectors: null,
     ...overrides,
@@ -689,6 +710,105 @@ describe('painter', () => {
       // cannot arrive from the viewport, which clamps — this is the guard for the day something else
       // writes one.
       expect(calls.some((call) => call.op === 'setTransform')).toBe(false)
+    })
+  })
+})
+
+describe('painter — fills and handles', () => {
+  describe('happy path', () => {
+    // The atlas's tint: the colour at full strength, blended into the relief, and the blend reset after.
+    it('fills a territory in its colour in overlay, then restores normal compositing', () => {
+      const { ctx, calls } = recordingContext()
+      paintCanvas(ctx, SIZE, scene({ fills: [{ rings: [SQUARE], colour: '#54719b' }] }), STYLE)
+      const fill = calls.find((call) => call.op === 'fill' && call.fillStyle === '#54719b')
+      expect(fill?.globalCompositeOperation).toBe('overlay')
+      expect(fill?.args).toEqual(['evenodd'])
+      expect(ctx.globalCompositeOperation).toBe('source-over')
+    })
+
+    // As the atlas bakes it: the tint on the relief, the coastline drawn over the tint.
+    it('fills before it strokes the coastline, so the shore is not tinted', () => {
+      const { ctx, calls } = recordingContext()
+      const run = {
+        points: [
+          [0, 0],
+          [10, 0],
+          [10, 10],
+        ] as [number, number][],
+        bounds: { left: 0, top: 0, right: 10, bottom: 10 },
+      }
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({
+          fills: [{ rings: [SQUARE], colour: '#54719b' }],
+          vectors: { coast: [run], rivers: [], scale: 1, originX: 0, originY: 0 },
+        }),
+        STYLE
+      )
+      const fillAt = calls.findIndex((call) => call.op === 'fill' && call.fillStyle === '#54719b')
+      const coastAt = calls.findIndex(
+        (call) => call.op === 'stroke' && call.strokeStyle === STYLE.coastStroke
+      )
+      expect(fillAt).toBeGreaterThan(-1)
+      expect(coastAt).toBeGreaterThan(fillAt)
+      expect(calls[coastAt]?.globalCompositeOperation).toBe('source-over')
+    })
+  })
+
+  describe('variants', () => {
+    it('draws a handle only for the anchors it is told to', () => {
+      const { ctx, calls } = recordingContext()
+      paintCanvas(ctx, SIZE, scene({ anchors: SQUARE, handles: [2] }), STYLE)
+      const arcs = calls.filter((call) => call.op === 'arc')
+      expect(arcs.map((call) => call.args.slice(0, 2))).toEqual([[200, 200]])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('skips a ring of two points, which encloses nothing', () => {
+      const { ctx, calls } = recordingContext()
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({ fills: [{ rings: [SQUARE.slice(0, 2)], colour: '#123456' }] }),
+        STYLE
+      )
+      expect(calls.filter((call) => call.op === 'lineTo' && call.fillStyle === '#123456')).toEqual(
+        []
+      )
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('skips a handle index past the anchor table', () => {
+      const { ctx, calls } = recordingContext()
+      paintCanvas(ctx, SIZE, scene({ anchors: SQUARE, handles: [9] }), STYLE)
+      expect(calls.filter((call) => call.op === 'arc')).toEqual([])
+    })
+  })
+
+  describe('edge cases', () => {
+    // H-07 — a ring inside another is a hole: one path, filled even-odd.
+    it('fills all of a polity’s rings in one path', () => {
+      const { ctx, calls } = recordingContext()
+      const inner: Point[] = [
+        [120, 120],
+        [180, 120],
+        [180, 180],
+      ]
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({ fills: [{ rings: [SQUARE, inner], colour: '#54719b' }] }),
+        STYLE
+      )
+      expect(
+        calls.filter((call) => call.op === 'fill' && call.fillStyle === '#54719b')
+      ).toHaveLength(1)
+      expect(
+        calls.filter((call) => call.op === 'closePath' && call.fillStyle === '#54719b')
+      ).toHaveLength(2)
     })
   })
 })

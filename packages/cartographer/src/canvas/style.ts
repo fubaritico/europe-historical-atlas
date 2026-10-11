@@ -34,6 +34,8 @@ export const CHROME_PAINT_STYLE: PaintStyle = {
   anchorFill: '#ffffff',
   anchorStroke: '#5b93d6',
   anchorRadius: 4,
+  // The atlas's political tint, at full strength — the dev's call, 2026-10-11, over the mockup's 70 %.
+  fillBlend: 'overlay',
   // The shoreline reads darker than the terrain's own painted edge, so it stays legible over land and
   // over sea alike — the same reasoning as the atlas's coastline ink, which this takes.
   coastStroke: 'rgba(60, 50, 38, 0.85)',

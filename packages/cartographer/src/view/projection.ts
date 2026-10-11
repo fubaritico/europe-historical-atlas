@@ -94,6 +94,28 @@ export function screenToLonLat(
 }
 
 /**
+ * Which position the pointer is over — or `null` off the backdrop.
+ *
+ * **The one rule for "on the map"**, read by the status bar and by the tools alike (ARCH-103, found in
+ * review: it was written twice). The vellum around the backdrop is not a place, and a latitude
+ * extrapolated past its edge would be arithmetic presented as a fact. The edges are inclusive.
+ * @param screen - the pointer position in screen pixels
+ * @param frame - the backdrop's coordinate system
+ * @param viewport - the current view
+ * @returns the position in degrees, longitude first, or `null`
+ */
+export function screenToLonLatOnBackdrop(
+  screen: Point,
+  frame: BackdropFrame,
+  viewport: Viewport
+): [number, number] | null {
+  const point = screenToBackdrop(viewport, screen)
+  const { width, height } = frame.size
+  if (point[0] < 0 || point[0] > width || point[1] < 0 || point[1] > height) return null
+  return backdropToLonLat(point, frame)
+}
+
+/**
  * The expensive half: a whole anchor table into **backdrop** pixels.
  *
  * **This is the half worth caching, and the only one.** Every anchor costs a `log(tan(…))` here, because
