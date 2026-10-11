@@ -51,6 +51,7 @@ const NOTHING: OverlayScene = {
   moving: null,
   snapTarget: null,
   snapPreview: null,
+  marquee: null,
 }
 
 /** The fill of each handle drawn, in order. */

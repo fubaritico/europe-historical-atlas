@@ -95,6 +95,20 @@ function paintSnap(ctx: Painter2D, scene: OverlayScene, style: PaintStyle): void
 }
 
 /**
+ * The marquee being dragged: a thin rectangle in the edit stroke (`s03`, *"a selection rectangle follows
+ * the pointer while it is down"*). Nothing is drawn once released — *"no bounding box and no frame"*.
+ * @param ctx - the context
+ * @param scene - what to draw
+ * @param style - the colours and sizes
+ */
+function paintMarquee(ctx: Painter2D, scene: OverlayScene, style: PaintStyle): void {
+  if (scene.marquee === null) return
+  const { x, y, width, height } = scene.marquee
+  ctx.lineWidth = style.pathWidth
+  ctx.strokeRect(x, y, width, height)
+}
+
+/**
  * Paint the overlay: clear it, then whatever the session is doing.
  * @param ctx - the overlay's context
  * @param size - the canvas, in device pixels
@@ -113,4 +127,5 @@ export function paintOverlay(
   paintOutline(ctx, scene, style)
   paintSnap(ctx, scene, style)
   paintMoving(ctx, scene, style)
+  paintMarquee(ctx, scene, style)
 }

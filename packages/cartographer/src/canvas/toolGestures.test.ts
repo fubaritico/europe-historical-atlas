@@ -121,10 +121,10 @@ describe('toolGestures', () => {
       const context = openContext()
       drawTriangle(context)
       context.store.getState().selectTool('edit')
-      arrowPress(context, [301, 99])
+      arrowPress(context, [301, 99], false)
       arrowDrag(context, [350, 150])
       expect(context.store.getState().undoLabel).toBe('draw outline of Reaume de France')
-      arrowRelease(context)
+      arrowRelease(context, [0, 0])
       expect(onScreen(context, 1)[0]).toBeCloseTo(350, 6)
       expect(context.store.getState().undoLabel).toBe(MOVE_ANCHOR_STEP.label)
     })
@@ -162,9 +162,9 @@ describe('toolGestures', () => {
       const document = context.store.getState().document
       document.claims.push({ polity: 'hre', rings: [[1, 2, 0]] })
       context.store.getState().selectTool('edit')
-      arrowPress(context, [300, 100])
+      arrowPress(context, [300, 100], false)
       arrowDrag(context, [320, 120])
-      arrowRelease(context)
+      arrowRelease(context, [0, 0])
       // One anchor moved, none copied: both rings still name index 1, and it is where it was dropped.
       const after = context.store.getState().document
       expect(after.anchors).toHaveLength(3)
@@ -176,9 +176,9 @@ describe('toolGestures', () => {
       const context = openContext()
       drawTriangle(context)
       const rows = context.store.getState().rows.length
-      arrowPress(context, [300, 100])
-      arrowRelease(context)
-      expect(context.session.selected).toBe(1)
+      arrowPress(context, [300, 100], false)
+      arrowRelease(context, [0, 0])
+      expect(context.session.selected).toEqual([1])
       expect(context.store.getState().rows).toHaveLength(rows)
     })
   })
@@ -198,8 +198,8 @@ describe('toolGestures', () => {
       const context = openContext()
       drawTriangle(context)
       context.store.setState({ target: null })
-      arrowPress(context, [300, 100])
-      expect(context.session.selected).toBeNull()
+      arrowPress(context, [300, 100], false)
+      expect(context.session.selected).toEqual([])
     })
 
     // The dev's inversion of Illustrator: whose points first. A neighbour's anchor is not reachable.
@@ -207,8 +207,8 @@ describe('toolGestures', () => {
       const context = openContext()
       drawTriangle(context)
       context.store.getState().aimAt('hre')
-      arrowPress(context, [300, 100])
-      expect(context.session.selected).toBeNull()
+      arrowPress(context, [300, 100], false)
+      expect(context.session.selected).toEqual([])
     })
 
     it('does not close two anchors, which enclose nothing, and says so', () => {
@@ -261,9 +261,9 @@ describe('toolGestures', () => {
       const context = openContext()
       drawTriangle(context)
       context.store.setState({ moveAnchor: () => false })
-      arrowPress(context, [300, 100])
+      arrowPress(context, [300, 100], false)
       arrowDrag(context, [320, 120])
-      arrowRelease(context)
+      arrowRelease(context, [0, 0])
       expect(logged.error).toHaveBeenCalledWith(expect.stringContaining('refused to move anchor 1'))
     })
   })
@@ -272,10 +272,10 @@ describe('toolGestures', () => {
     it('leaves a dragged anchor where it last landed when the pointer leaves the backdrop', () => {
       const context = openContext()
       drawTriangle(context)
-      arrowPress(context, [300, 100])
+      arrowPress(context, [300, 100], false)
       arrowDrag(context, [320, 120])
       arrowDrag(context, [-50, -50])
-      arrowRelease(context)
+      arrowRelease(context, [0, 0])
       expect(onScreen(context, 1)[0]).toBeCloseTo(320, 6)
     })
 
@@ -289,9 +289,9 @@ describe('toolGestures', () => {
       const context = openContext()
       drawTriangle(context)
       context.store.getState().selectTool('edit')
-      arrowPress(context, [300, 100])
+      arrowPress(context, [300, 100], false)
       expect(toolKey(context, 'Escape')).toBe(true)
-      expect(context.session.selected).toBeNull()
+      expect(context.session.selected).toEqual([])
     })
   })
 })
@@ -358,13 +358,13 @@ describe('undoGesture and redoGesture', () => {
     it('drops a drag in progress before undoing, and keeps the selection', () => {
       const context = openContext()
       drawTriangle(context)
-      arrowPress(context, [300, 100])
+      arrowPress(context, [300, 100], false)
       arrowDrag(context, [320, 120])
       undoGesture(context, false)
-      arrowRelease(context)
+      arrowRelease(context, [0, 0])
       expect(context.store.getState().document.claims).toHaveLength(1)
       expect(context.store.getState().undoLabel).toBe('draw outline of Reaume de France')
-      expect(context.session.selected).toBe(1)
+      expect(context.session.selected).toEqual([1])
     })
 
     it('drops an outline in progress before redoing', () => {
@@ -457,9 +457,9 @@ describe('undoGesture and redoGesture', () => {
       const context = openContext()
       drawTriangle(context)
       context.store.getState().selectTool('edit')
-      arrowPress(context, [300, 100])
+      arrowPress(context, [300, 100], false)
       arrowDrag(context, [320, 120])
-      arrowRelease(context)
+      arrowRelease(context, [0, 0])
       context.store.getState().selectTool('draw')
       undoGesture(context, false)
       expect(context.session.outline).toEqual([])
@@ -682,9 +682,9 @@ describe('the Pen following the coast', () => {
       drawTriangle(context)
       context.store.getState().document.anchorSource[1] = 99
       context.store.getState().selectTool('edit')
-      arrowPress(context, [100, 100])
+      arrowPress(context, [100, 100], false)
       arrowDrag(context, [110, 110])
-      arrowRelease(context)
+      arrowRelease(context, [0, 0])
       context.store.getState().selectTool('draw')
       undoGesture(context, false)
       expect(logged.error).not.toHaveBeenCalled()
@@ -693,12 +693,15 @@ describe('the Pen following the coast', () => {
 
   describe('a click in a fill', () => {
     // The dev, 2026-10-11: clicking in a polity's fill selects it, as {Polities} does.
-    it('aims at the polity whose fill the arrow is pressed in, the arrow staying in hand', () => {
+    // Decided on release (the dev, 2026-10-12): the press alone changes nothing.
+    it('aims at the polity whose fill the arrow clicks, on release, the arrow staying in hand', () => {
       const context = openContext()
       drawTriangle(context)
       context.store.getState().chooseTarget('hre')
       context.store.getState().selectTool('edit')
-      arrowPress(context, [250, 150])
+      arrowPress(context, [250, 150], false)
+      expect(context.store.getState().target).toBe('hre')
+      arrowRelease(context, [250, 150])
       expect(context.store.getState().target).toBe('fr')
       expect(context.store.getState().tool).toBe('edit')
     })
@@ -708,17 +711,18 @@ describe('the Pen following the coast', () => {
       const context = openContext()
       drawTriangle(context)
       context.store.getState().selectTool('edit')
-      arrowPress(context, [300, 100])
-      expect(context.session.selected).toBe(1)
+      arrowPress(context, [300, 100], false)
+      expect(context.session.selected).toEqual([1])
       expect(context.store.getState().target).toBe('fr')
     })
 
     // The dev, 2026-10-11: a press on unclaimed ground deselects, as in Illustrator.
-    it('aims at nobody on a press over unclaimed ground', () => {
+    it('aims at nobody on a click over unclaimed ground', () => {
       const context = openContext()
       drawTriangle(context)
       context.store.getState().selectTool('edit')
-      arrowPress(context, [900, 900])
+      arrowPress(context, [900, 900], false)
+      arrowRelease(context, [900, 900])
       expect(context.store.getState().target).toBeNull()
     })
   })
@@ -912,7 +916,7 @@ describe('the Pen inserting a point on the target’s outline', () => {
 
       penClick(context, [200, 102])
 
-      expect(context.session.selected).toBeNull()
+      expect(context.session.selected).toEqual([])
       expect(context.session.grabbed).toBeNull()
     })
   })
@@ -1104,6 +1108,206 @@ describe('the Pen following a river', () => {
         vertex: 10,
       })
       expect(snapHit(context, 'coast', [200, 503])).toBeNull()
+    })
+  })
+})
+
+describe('the white arrow’s selection and marquee (s03)', () => {
+  /** A six-anchor outline for France: three along the top at y 100, three along the bottom at y 300. */
+  const HEXAGON: [number, number][] = [
+    [100, 100],
+    [200, 100],
+    [300, 100],
+    [300, 300],
+    [200, 300],
+    [100, 300],
+  ]
+
+  /**
+   * France drawn as the hexagon, aimed at, the white arrow in hand.
+   * @returns the context
+   */
+  function hexagonContext(): GestureContext {
+    const context = openContext()
+    for (const at of HEXAGON) penClick(context, at)
+    penClick(context, [101, 101])
+    context.store.getState().selectTool('edit')
+    return context
+  }
+
+  /**
+   * A drag of the white arrow from one point to another, released there.
+   * @param context - the session
+   * @param from - the press
+   * @param to - the release
+   * @param shift - whether ‹shift› is held at the press
+   */
+  function drag(
+    context: GestureContext,
+    from: [number, number],
+    to: [number, number],
+    shift = false
+  ) {
+    arrowPress(context, from, shift)
+    arrowDrag(context, to)
+    arrowRelease(context, to)
+  }
+
+  describe('happy path', () => {
+    // s03 — "drag a rectangle over twelve handles / on release those twelve anchors are drawn solid blue".
+    it('selects the target’s anchors a marquee covers, and leaves no rectangle', () => {
+      const context = hexagonContext()
+      drag(context, [50, 50], [350, 150])
+      expect(context.session.selected).toEqual([0, 1, 2])
+      expect(context.session.marquee).toBeNull()
+    })
+
+    // s03 — "delete several at once … all twelve are removed in one undo step".
+    it('deletes the whole selection in one step, and one undo puts it back', () => {
+      const context = hexagonContext()
+      drag(context, [150, 50], [250, 350])
+      expect(context.session.selected).toEqual([1, 4])
+      toolKey(context, 'Delete')
+      const ring = () => context.store.getState().document.claims[0]?.rings[0]
+      expect(ring()).toEqual([0, 2, 3, 5])
+      expect(context.store.getState().undoLabel).toBe('delete 2 anchors')
+      context.store.getState().undo()
+      expect(ring()).toEqual([0, 1, 2, 3, 4, 5])
+    })
+  })
+
+  describe('variants', () => {
+    // s03 — "When I shift-click three more / Then all four … When I shift-click one of them again".
+    it('adds an anchor with shift, and drops it with shift again', () => {
+      const context = hexagonContext()
+      arrowPress(context, [100, 100], false)
+      arrowRelease(context, [100, 100])
+      arrowPress(context, [300, 300], true)
+      arrowRelease(context, [300, 300])
+      expect(context.session.selected).toEqual([0, 3])
+      arrowPress(context, [100, 100], true)
+      arrowRelease(context, [100, 100])
+      expect(context.session.selected).toEqual([3])
+    })
+
+    // The plausible version takes the rectangle from its corners as given: dragged up-left, it is empty.
+    it('selects the same anchors whichever way the marquee is dragged', () => {
+      const context = hexagonContext()
+      drag(context, [350, 150], [50, 50])
+      expect(context.session.selected).toEqual([0, 1, 2])
+    })
+
+    it('adds a marquee’s anchors to the selection with shift', () => {
+      const context = hexagonContext()
+      drag(context, [50, 50], [150, 150])
+      drag(context, [250, 250], [350, 350], true)
+      expect(context.session.selected).toEqual([0, 3])
+    })
+
+    // Pressing an anchor already selected keeps the selection, so a drag would move all of it.
+    it('keeps the selection when a selected anchor is pressed', () => {
+      const context = hexagonContext()
+      drag(context, [50, 50], [350, 150])
+      arrowPress(context, [200, 100], false)
+      expect(context.session.selected).toEqual([0, 1, 2])
+    })
+  })
+
+  describe('managed errors', () => {
+    // The dev, 2026-10-12: a marquee may start on the sea without deselecting the polity.
+    it('keeps the target when a marquee starts outside its fill', () => {
+      const context = hexagonContext()
+      drag(context, [900, 900], [250, 250])
+      expect(context.store.getState().target).toBe('fr')
+      expect(context.session.selected).toEqual([3])
+    })
+
+    it('says the marquee caught nothing when nobody is aimed at', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const context = hexagonContext()
+      context.store.getState().chooseTarget(null)
+      drag(context, [50, 50], [350, 150])
+      expect(context.session.selected).toEqual([])
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('the marquee selected nothing'))
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // All or nothing: removing them one by one would leave the document changed with no step to undo.
+    it('removes none of them when the ring would fall under three anchors', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const context = hexagonContext()
+      const steps = context.store.getState().rows.length
+      drag(context, [50, 50], [350, 310])
+      toolKey(context, 'Delete')
+      expect(context.store.getState().document.claims[0]?.rings[0]).toHaveLength(6)
+      expect(context.store.getState().rows).toHaveLength(steps)
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('a ring needs at least three'))
+    })
+  })
+
+  describe('what the review found', () => {
+    // QUAL-010: shift adds to a selection — a shift-click on the sea must not empty it.
+    it('keeps the selection and the target on a shift-click outside any fill', () => {
+      const context = hexagonContext()
+      drag(context, [50, 50], [350, 150])
+      arrowPress(context, [900, 900], true)
+      arrowRelease(context, [900, 900])
+      expect(context.session.selected).toEqual([0, 1, 2])
+      expect(context.store.getState().target).toBe('fr')
+    })
+
+    // ARCH-002: ctrl+Z mid-marquee drops the marquee, it does not rewind the document under it.
+    it('drops a marquee in progress on ctrl+Z, the document untouched', () => {
+      const context = hexagonContext()
+      const steps = context.store.getState().rows.length
+      arrowPress(context, [50, 50], false)
+      arrowDrag(context, [350, 150])
+      undoGesture(context, false)
+      expect(context.session.marquee).toBeNull()
+      expect(context.store.getState().rows).toHaveLength(steps)
+    })
+
+    it('cancels a marquee on Escape first, and the selection on the next Escape', () => {
+      const context = hexagonContext()
+      drag(context, [50, 50], [350, 150])
+      arrowPress(context, [50, 250], false)
+      arrowDrag(context, [350, 350])
+      toolKey(context, 'Escape')
+      expect(context.session.marquee).toBeNull()
+      expect(context.session.selected).toEqual([0, 1, 2])
+      toolKey(context, 'Escape')
+      expect(context.session.selected).toEqual([])
+    })
+
+    // ARCH-001: a press left undecided cannot turn the next anchor drag into a marquee.
+    it('moves a grabbed anchor even after a press that was never released', () => {
+      const context = hexagonContext()
+      arrowPress(context, [50, 50], false)
+      arrowPress(context, [100, 100], false)
+      arrowDrag(context, [120, 120])
+      expect(context.session.marquee).toBeNull()
+      expect(context.session.moving?.index).toBe(0)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('deselects the anchors on a click outside any fill, and drops the target', () => {
+      const context = hexagonContext()
+      drag(context, [50, 50], [350, 150])
+      arrowPress(context, [900, 900], false)
+      arrowRelease(context, [900, 900])
+      expect(context.session.selected).toEqual([])
+      expect(context.store.getState().target).toBeNull()
+    })
+
+    it('counts an anchor on the marquee’s edge as inside it', () => {
+      const context = hexagonContext()
+      // The corners on the anchors' own screen positions, so the rectangle has no height at all.
+      const [, top] = onScreen(context, 0)
+      const [right] = onScreen(context, 2)
+      drag(context, [60, top], [right, top])
+      expect(context.session.selected).toEqual([0, 1, 2])
     })
   })
 })

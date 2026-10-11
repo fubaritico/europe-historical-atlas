@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { insertAnchorOnStretch, removeAnchor } from './anchorEdits'
+import { insertAnchorOnStretch, removeAnchor, removeAnchors } from './anchorEdits'
 import { sharedBorderDocument } from './documentFixtures'
 import { MIN_RING_ANCHORS } from './yearDocument'
 
@@ -164,6 +164,58 @@ describe('anchorEdits — the deliberate gaps and the dressed runs', () => {
       removeAnchor(doc, 1)
 
       expect(doc.runs[0]?.run).toEqual([0, 1])
+    })
+  })
+})
+
+describe('removeAnchors', () => {
+  /**
+   * The shared border, France given two more anchors on its own stretches — six in its ring.
+   * @returns the document and the two new anchors
+   */
+  function sixAnchorFrance() {
+    const doc = sharedBorderDocument()
+    const top = insertAnchorOnStretch(doc, 0, 1, [1, 48], { name: 'test', licence: 'CC0' })
+    const bottom = insertAnchorOnStretch(doc, 2, 3, [1, 46], { name: 'test', licence: 'CC0' })
+    if (top === null || bottom === null) throw new Error('fixture changed')
+    return { doc, top, bottom }
+  }
+
+  describe('happy path', () => {
+    // s03 — "delete several at once … all twelve are removed in one undo step".
+    it('removes several anchors from the rings holding them, at once', () => {
+      const { doc, top, bottom } = sixAnchorFrance()
+      expect(removeAnchors(doc, [top, bottom])?.polities).toEqual(['fr-couronne'])
+      expect(ringOf(doc, 'fr-couronne')).toEqual([0, 1, 2, 3])
+    })
+  })
+
+  describe('variants', () => {
+    it('names every polity that held one of them — a shared anchor and its neighbour’s', () => {
+      const { doc, top } = sixAnchorFrance()
+      expect(removeAnchors(doc, [top, 1])?.polities.sort()).toEqual(['fr-couronne', 'hre'])
+    })
+  })
+
+  describe('managed errors', () => {
+    // All or nothing: a ring that would fall under three refuses the whole gesture, nothing written.
+    it('refuses the whole removal when one ring would fall too short, and writes nothing', () => {
+      const doc = sharedBorderDocument()
+      const before = structuredClone(doc.claims)
+      expect(removeAnchors(doc, [0, 3])).toBeNull()
+      expect(doc.claims).toEqual(before)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('refuses anchors no ring holds', () => {
+      expect(removeAnchors(sharedBorderDocument(), [98, 99])).toBeNull()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('refuses an empty selection', () => {
+      expect(removeAnchors(sharedBorderDocument(), [])).toBeNull()
     })
   })
 })

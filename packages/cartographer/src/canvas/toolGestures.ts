@@ -1,6 +1,7 @@
 import { polityAt } from '../geometry/fillHit'
 import { nearestAmong } from '../geometry/hitTest'
 import { lineStretch, nearestLineVertex } from '../geometry/lineSnap'
+import { normaliseRect, pointsInRect } from '../geometry/marquee'
 import { canCloseRing, isClosingOffered } from '../geometry/ringClosure'
 import { describeDrawingTarget } from '../state/drawingTarget'
 import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
@@ -326,29 +327,47 @@ function placeOnLayer(
 }
 
 /**
- * A press with the white arrow: select the target's handle under the pointer; off any handle, insert
- * an anchor on the target's stretch under it (`s03`); off both, aim at the polity whose fill is under it.
+ * A press with the white arrow (`s03`):
+ *
+ * - **on one of the target's handles**, it takes it — the selection becomes that anchor, unless the
+ *   anchor is already selected, so a drag moves the whole selection; with ‹shift› it adds the anchor to
+ *   the selection or drops it;
+ * - **on the target's stretch**, it inserts an anchor there;
+ * - **anywhere else, it decides nothing yet** (the dev, 2026-10-12): released in place it is a click,
+ *   dragged it is a marquee — see {@link arrowRelease}. So a marquee may start on the sea without first
+ *   deselecting the polity.
  * @param context - the session and the store
  * @param at - the pointer, in screen pixels
+ * @param shift - whether ‹shift› is held
  */
-export function arrowPress(context: GestureContext, at: Point): void {
+export function arrowPress(context: GestureContext, at: Point, shift: boolean): void {
   const target = resolvedTarget(context)
   const candidates =
     target === null ? [] : targetHandles(context.store.getState().document, target.id)
   const hit = nearestAmong(context.anchorsOnScreen(), candidates, at, context.radius)
-  context.session.selected = hit
-  context.session.grabbed = hit
-  if (hit !== null) return
-  if (target !== null && insertOnStretch(context, target.id, at)) return
-  // Not on a handle: a press in a polity's fill makes it the target, the tool staying the arrow
-  // (the dev, 2026-10-11). Over unclaimed ground it deselects, as Illustrator does — his call, the
-  // same day, over keeping the target.
-  const under = polityAt(context.territoriesOnScreen(), at)
-  if (under !== (target?.id ?? null)) context.store.getState().chooseTarget(under)
+  const session = context.session
+  // A press starts clean: nothing a previous press left undecided may steer this one (ARCH-001).
+  dropDrag(session)
+  if (hit !== null) {
+    const held = session.selected.includes(hit)
+    if (shift) {
+      session.selected = held
+        ? session.selected.filter((index) => index !== hit)
+        : [...session.selected, hit]
+      session.grabbed = held ? null : hit
+      return
+    }
+    if (!held) session.selected = [hit]
+    session.grabbed = hit
+    return
+  }
+  if (target !== null && !shift && insertOnStretch(context, target.id, at)) return
+  session.pending = { at: [at[0], at[1]], shift }
 }
 
 /**
- * A drag with the white arrow: the grabbed anchor follows the pointer, in the session only.
+ * A drag with the white arrow: the grabbed anchor follows the pointer, in the session only — or, from a
+ * press off any handle, the marquee follows it.
  *
  * **The document is not touched until release** — a drag writes a preview, the release writes one step.
  * Off the backdrop the anchor stays where it last landed rather than following the pointer onto the
@@ -357,24 +376,84 @@ export function arrowPress(context: GestureContext, at: Point): void {
  * @param at - the pointer, in screen pixels
  */
 export function arrowDrag(context: GestureContext, at: Point): void {
-  const index = context.session.grabbed
+  const session = context.session
+  if (session.pending !== null) {
+    session.marquee = { from: session.pending.at, to: [at[0], at[1]] }
+    return
+  }
+  const index = session.grabbed
   if (index === null) return
   const to = lonLatAt(context, at)
-  if (to !== null) context.session.moving = { index, to }
+  if (to !== null) session.moving = { index, to }
 }
 
 /**
- * Release the white arrow: a drag in progress becomes one recorded move.
+ * Release the white arrow: a drag in progress becomes one recorded move; a marquee selects what it
+ * covers; a press that never moved is a click (see {@link arrowClick}).
  * @param context - the session and the store
+ * @param at - where the button came up, in screen pixels
  */
-export function arrowRelease(context: GestureContext): void {
-  const moving = context.session.moving
-  context.session.moving = null
-  context.session.grabbed = null
+export function arrowRelease(context: GestureContext, at: Point): void {
+  const session = context.session
+  const { pending, marquee, moving } = session
+  session.pending = null
+  session.marquee = null
+  session.moving = null
+  session.grabbed = null
+  if (marquee !== null) marqueeSelect(context, marquee, pending?.shift ?? false)
+  else if (pending !== null) arrowClick(context, at, pending.shift)
   if (moving === null) return
   if (!context.store.getState().moveAnchor(moving.index, moving.to, MOVE_ANCHOR_STEP)) {
     console.error(`${TAG} the document refused to move anchor ${String(moving.index)}.`)
   }
+}
+
+/**
+ * A click of the white arrow off any handle and stretch: a click in a polity's fill makes it the
+ * target, the tool staying the arrow (the dev, 2026-10-11); over unclaimed ground it deselects, as
+ * Illustrator does — and the anchors selected are dropped.
+ *
+ * **With ‹shift› it does nothing**: ‹shift› adds to a selection, and a click that changed the target
+ * would empty it instead (review QUAL-010).
+ * @param context - the session and the store
+ * @param at - where the click was, in screen pixels
+ * @param shift - whether ‹shift› was held
+ */
+function arrowClick(context: GestureContext, at: Point, shift: boolean): void {
+  if (shift) return
+  context.session.selected = []
+  const target = resolvedTarget(context)
+  const under = polityAt(context.territoriesOnScreen(), at)
+  if (under !== (target?.id ?? null)) context.store.getState().chooseTarget(under)
+}
+
+/**
+ * Select the target's handles a marquee covers — `s03`'s *"anchors merely crossed by the rectangle's
+ * edge count as inside it"*. With ‹shift› they are added to the selection, otherwise they replace it.
+ * With nobody aimed at there is no handle to catch, and it says so.
+ * @param context - the session and the store
+ * @param marquee - the rectangle's two corners, in screen pixels
+ * @param shift - whether ‹shift› was held at the press
+ */
+function marqueeSelect(
+  context: GestureContext,
+  marquee: { from: Point; to: Point },
+  shift: boolean
+): void {
+  const target = resolvedTarget(context)
+  if (target === null) {
+    console.warn(
+      `${TAG} the marquee selected nothing: select a polity first, its points are what it catches.`
+    )
+    return
+  }
+  const handles = new Set(targetHandles(context.store.getState().document, target.id))
+  const caught = pointsInRect(
+    context.anchorsOnScreen(),
+    normaliseRect(marquee.from, marquee.to)
+  ).filter((index) => handles.has(index))
+  const kept = shift ? context.session.selected : []
+  context.session.selected = [...kept, ...caught.filter((index) => !kept.includes(index))]
 }
 
 /**
@@ -385,7 +464,11 @@ export function arrowRelease(context: GestureContext): void {
  */
 function editKey(context: GestureContext, key: string): boolean {
   if (key === 'Escape') {
-    context.session.selected = null
+    // A marquee or a move in progress goes first; the selection on the next press of ‹escape›.
+    const session = context.session
+    const drawing = session.marquee !== null || session.moving !== null
+    dropDrag(session)
+    if (!drawing) session.selected = []
     return true
   }
   return key === 'Delete' || key === 'Backspace' ? deleteSelected(context) : false

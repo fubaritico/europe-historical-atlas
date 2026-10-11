@@ -2002,3 +2002,46 @@ describe('the Pencil on the canvas', () => {
     })
   })
 })
+
+describe('the white arrow’s marquee, on the canvas', () => {
+  // Review ARCH-001 / QUAL-001 (2026-10-12): a press released with ‹space› held must not steer the next.
+  it('moves an anchor after a marquee was released with space held', () => {
+    const { node, store, dispose } = attach()
+    aimAtFrance(store)
+    for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(node, at)
+    node.dispatchEvent(keyEvent('a'))
+    node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 700, offsetY: 500 }))
+    node.dispatchEvent(pointerEvent('pointermove', { offsetX: 760, offsetY: 560 }))
+    node.dispatchEvent(keyEvent(' '))
+    node.dispatchEvent(pointerEvent('pointerup', { offsetX: 760, offsetY: 560 }))
+    node.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }))
+    const before = store.getState().document.anchors[1]
+    node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 500, offsetY: 200 }))
+    node.dispatchEvent(pointerEvent('pointermove', { offsetX: 540, offsetY: 240 }))
+    node.dispatchEvent(pointerEvent('pointerup', { offsetX: 540, offsetY: 240 }))
+    expect(store.getState().document.anchors[1]).not.toEqual(before)
+    dispose()
+  })
+
+  // s03 — "delete several at once", through the canvas: a marquee, then ‹delete›, one step.
+  it('deletes what a marquee caught with one key, as one step', () => {
+    const { node, store, dispose } = attach()
+    aimAtFrance(store)
+    const square = [
+      [300, 200],
+      [400, 200],
+      [500, 200],
+      [500, 400],
+      [300, 400],
+    ] as const
+    for (const at of [...square, [301, 201] as const]) click(node, at)
+    node.dispatchEvent(keyEvent('a'))
+    node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 350, offsetY: 150 }))
+    node.dispatchEvent(pointerEvent('pointermove', { offsetX: 450, offsetY: 250 }))
+    node.dispatchEvent(pointerEvent('pointerup', { offsetX: 450, offsetY: 250 }))
+    node.dispatchEvent(keyEvent('Delete'))
+    expect(store.getState().document.claims[0]?.rings[0]).toHaveLength(4)
+    expect(store.getState().undoLabel).toBe('delete anchor')
+    dispose()
+  })
+})

@@ -1,6 +1,8 @@
+import { normaliseRect } from '../geometry/marquee'
 import { isClosingOffered } from '../geometry/ringClosure'
 
 import type { LineVertex } from '../geometry/lineSnap'
+import type { Rect } from '../geometry/marquee'
 import type { EditorTool } from '../state/toolSlice'
 import type { Point } from '../view/viewport'
 import type { Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
@@ -33,8 +35,19 @@ export interface SessionPoint {
 export interface ToolSession {
   /** The Pen's outline in progress, in the order placed, each point with its provenance. */
   outline: SessionPoint[]
-  /** The anchor the white arrow has selected, or `null`. */
-  selected: number | null
+  /**
+   * The anchors the white arrow has selected, in the order taken — a click takes one, ‹shift›+click adds
+   * or drops one, the marquee takes those it covers (`s03`). Empty when nothing is selected.
+   */
+  selected: number[]
+  /**
+   * A press of the white arrow off any handle and any stretch, not yet decided (the dev, 2026-10-12):
+   * released where it began, it is a click — choose the polity under it, or deselect; dragged, it is a
+   * marquee. Deciding on release is what lets a marquee start on the sea without deselecting first.
+   */
+  pending: { at: [number, number]; shift: boolean } | null
+  /** The marquee being dragged, corner to corner, in screen pixels — `null` when none is. */
+  marquee: { from: [number, number]; to: [number, number] } | null
   /** The anchor under the button while it is held — what a drag would move. `null` once released. */
   grabbed: number | null
   /** The anchor being dragged and where it would land, in degrees — `null` when nothing is moving. */
@@ -102,7 +115,9 @@ export interface SnapVertex extends LineVertex {
 export function idleSession(): ToolSession {
   return {
     outline: [],
-    selected: null,
+    selected: [],
+    pending: null,
+    marquee: null,
     grabbed: null,
     moving: null,
     reopened: null,
@@ -187,10 +202,8 @@ export function clearOutline(session: ToolSession): void {
  * @returns `true` when there was a gesture in progress to drop
  */
 export function abandonGesture(session: ToolSession): boolean {
-  const busy = session.outline.length > 0 || session.moving !== null || session.grabbed !== null
+  const busy = session.outline.length > 0 || dropDrag(session)
   session.outline = []
-  session.moving = null
-  session.grabbed = null
   session.reopened = null
   session.snap = null
   session.strokes = []
@@ -199,14 +212,21 @@ export function abandonGesture(session: ToolSession): boolean {
 }
 
 /**
- * Drop an anchor drag in progress, and nothing else.
+ * Drop the white arrow's gesture in progress — an anchor dragged, a press not yet decided, a marquee —
+ * and nothing else: the selection is a pointer the author chose, not a gesture.
  * @param session - the session, mutated in place
- * @returns `true` when a drag was in progress
+ * @returns `true` when one was in progress
  */
 export function dropDrag(session: ToolSession): boolean {
-  const busy = session.moving !== null || session.grabbed !== null
+  const busy =
+    session.moving !== null ||
+    session.grabbed !== null ||
+    session.pending !== null ||
+    session.marquee !== null
   session.moving = null
   session.grabbed = null
+  session.pending = null
+  session.marquee = null
   return busy
 }
 
@@ -313,7 +333,7 @@ export function actionSentence(inputs: ActionInputs): string | null {
   if (tool === 'draw') return penSentence(inputs, targetName)
   if (session.moving !== null) return `Moving path from ${targetName}`
   if (inputs.inserting) return `Inserting a point into ${targetName}`
-  return session.selected === null ? null : `Selecting path from ${targetName}`
+  return session.selected.length === 0 ? null : `Selecting path from ${targetName}`
 }
 
 /** What the overlay canvas paints, all of it in screen pixels. */
@@ -326,6 +346,8 @@ export interface OverlayScene {
   closing: boolean
   /** An anchor being dragged: where it would land, and the anchors its stretches run from. */
   moving: { at: Point; from: readonly Point[] } | null
+  /** The marquee being dragged, normalised — `null` when none is. Gone on release: no frame (`s03`). */
+  marquee: Rect | null
   /** The layer vertex the Pen would snap onto — emphasised before the click. */
   snapTarget: Point | null
   /** The stretch of layer a click would insert, from the last snapped anchor — the preview. */
@@ -355,6 +377,16 @@ export interface OverlayInputs {
 }
 
 /**
+ * The marquee being dragged, as a rectangle — `null` when none is.
+ * @param session - the session
+ * @returns the normalised rectangle, in screen pixels
+ */
+function marqueeRect(session: ToolSession): Rect | null {
+  const marquee = session.marquee
+  return marquee === null ? null : normaliseRect(marquee.from, marquee.to)
+}
+
+/**
  * What the overlay should show for this session and this pointer.
  *
  * The rubber band runs from the last anchor to the pointer only under the Pen, and only while the pointer
@@ -377,6 +409,7 @@ export function overlayScene(inputs: OverlayInputs): OverlayScene {
     snapTarget: drawing ? inputs.snapTarget : null,
     snapPreview: drawing ? inputs.snapPreview : null,
     closing: pointer !== null && isClosingOffered(outline, pointer, inputs.closeRadius),
+    marquee: marqueeRect(inputs.session),
     moving:
       moving === null
         ? null

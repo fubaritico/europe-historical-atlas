@@ -12,7 +12,7 @@ import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 
 /**
  * The white arrow's two edits of the anchors themselves (`s03`): a click on a stretch inserts one, and
- * ‹delete› or ‹backspace› removes the one selected.
+ * ‹delete› or ‹backspace› removes the ones selected.
  *
  * **Both go through the store's recorded actions**, so each is one undo step, and both act on every
  * ring that holds the anchor — a border two polities share stays one border.
@@ -115,7 +115,7 @@ export function insertOnStretch(
     return true
   }
   if (!hold) return true
-  context.session.selected = index
+  context.session.selected = [index]
   context.session.grabbed = index
   return true
 }
@@ -146,37 +146,65 @@ function stillTargets(context: GestureContext, index: number): boolean {
 }
 
 /**
- * ‹delete› or ‹backspace› under ⟨edit⟩: remove the selected anchor from every ring holding it.
+ * ‹delete› or ‹backspace› under ⟨edit⟩: remove the selected anchors from every ring holding them — one,
+ * or a marquee's dozen (`s03`, *"all twelve are removed in one undo step"*).
  *
  * **A shared anchor is removed without asking** — `s03` wants a confirmation naming both polities, and
  * there is no dialogue for it yet. The result zone names them instead, and one undo puts it back.
- * Refused, and said, when a ring would fall under three anchors.
+ * Refused as a whole, and said, when a ring would fall under three anchors.
  * @param context - the session and the store
  * @returns `true` when the key was taken — there was a selection to act on
  */
 export function deleteSelected(context: GestureContext): boolean {
-  const index = context.session.selected
-  if (index === null) return false
-  if (!stillTargets(context, index)) {
+  const selected = context.session.selected
+  if (selected.length === 0) return false
+  const kept = selected.filter((index) => stillTargets(context, index))
+  if (kept.length < selected.length) {
     // Told apart from a ring too short: after an undo the message would otherwise blame the ring.
-    context.session.selected = null
     console.warn(
-      `${TAG} anchor not removed: the selected anchor is no longer on the target's outline.`
+      `${TAG} ${String(selected.length - kept.length)} selected anchor(s) no longer on the target's outline were left out.`
     )
+  }
+  if (kept.length === 0) {
+    context.session.selected = []
     return true
   }
-  const removal = context.store.getState().deleteAnchor(index, DELETE_ANCHOR_STEP)
+  const removal = context.store.getState().deleteAnchors(kept, deleteStep(kept.length))
   if (removal === null) {
-    console.warn(`${TAG} anchor not removed: a ring needs at least three anchors.`)
+    console.warn(`${TAG} anchors not removed: a ring needs at least three anchors.`)
     context.report('not removed — a ring needs at least three anchors')
     return true
   }
-  context.session.selected = null
-  const held = removal.polities.length
-  context.report(
-    held > 1
-      ? `removed an anchor held by ${String(held)} paths — ${namesOf(context.store.getState().document, removal.polities).join(', ')}`
-      : 'removed an anchor'
-  )
+  context.session.selected = []
+  context.report(removalReport(context, kept.length, removal.polities))
   return true
+}
+
+/**
+ * How `{History}` and `[↶ Undo]` name a deletion — `s03`'s *"Undo — delete anchor"*, plural for several.
+ * @param count - how many anchors
+ * @returns the step
+ */
+function deleteStep(count: number): { kind: string; label: string } {
+  return count === 1
+    ? DELETE_ANCHOR_STEP
+    : { kind: DELETE_ANCHOR_STEP.kind, label: `delete ${String(count)} anchors` }
+}
+
+/**
+ * What the result zone says after a deletion — the polities named when a shared border was touched.
+ * @param context - the store
+ * @param count - how many anchors went
+ * @param polities - the polities that held them
+ * @returns the sentence
+ */
+function removalReport(
+  context: GestureContext,
+  count: number,
+  polities: readonly string[]
+): string {
+  const what = count === 1 ? 'an anchor' : `${String(count)} anchors`
+  if (polities.length < 2) return `removed ${what}`
+  const names = namesOf(context.store.getState().document, polities).join(', ')
+  return `removed ${what} held by ${String(polities.length)} paths — ${names}`
 }

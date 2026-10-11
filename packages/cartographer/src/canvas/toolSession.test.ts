@@ -90,7 +90,7 @@ describe('toolSession', () => {
 
     // s02 — "Selecting path from…", then "Moving path from…" while dragging.
     it('names the white arrow’s selection and its drag', () => {
-      const selected = { ...idleSession(), selected: 3 }
+      const selected = { ...idleSession(), selected: [3] }
       expect(actionSentence(action({ tool: 'edit', session: selected }))).toBe(
         'Selecting path from Reaume de France'
       )

@@ -1,6 +1,6 @@
 import {
   insertAnchorOnStretch,
-  removeAnchor,
+  removeAnchors,
 } from '@europe-historical-atlas/core/editor/anchorEdits'
 import {
   addOutline,
@@ -154,12 +154,13 @@ export interface EditionActions {
    */
   insertAnchor: (a: number, b: number, point: [number, number], step: HistoryStep) => number | null
   /**
-   * Remove an anchor from every ring holding it, as one undoable step — ‹delete› under ⟨edit⟩ (`s03`).
-   * @param index - the anchor to remove
+   * Remove several anchors at once, as one undoable step — ‹delete› on a marquee's selection (`s03`).
+   * All or nothing: refused when a ring would fall too short once they are all gone.
+   * @param indices - the anchors to remove
    * @param step - how the gesture is named
-   * @returns the polities that held it, or `null` when nothing holds it or a ring would fall too short
+   * @returns the polities that held any of them, or `null` — and nothing happened
    */
-  deleteAnchor: (index: number, step: HistoryStep) => AnchorRemoval | null
+  deleteAnchors: (indices: readonly number[], step: HistoryStep) => AnchorRemoval | null
   /**
    * Move a polity among its siblings, its vassals with it, as one undoable step — `s16`'s four
    * commands, from the menu of a row of `{Polities}`.
@@ -326,14 +327,14 @@ function polityActions(
 }
 
 /**
- * The two edits of a single anchor — insert one on a stretch, remove one — each answering with what it
+ * The edits of the anchors — insert one on a stretch, remove some — each answering with what it
  * did, which `recorder`'s boolean cannot carry.
  * @param record - the runner every recorded action goes through
- * @returns `insertAnchor` and `deleteAnchor`
+ * @returns `insertAnchor` and `deleteAnchors`
  */
 function anchorActions(
   record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean
-): Pick<EditionActions, 'insertAnchor' | 'deleteAnchor'> {
+): Pick<EditionActions, 'insertAnchor' | 'deleteAnchors'> {
   return {
     insertAnchor: (a, b, point, step): number | null => {
       let index: number | null = null
@@ -343,10 +344,10 @@ function anchorActions(
       }, step)
       return index
     },
-    deleteAnchor: (index, step): AnchorRemoval | null => {
+    deleteAnchors: (indices, step): AnchorRemoval | null => {
       let removal: AnchorRemoval | null = null
       record((document) => {
-        removal = removeAnchor(document, index)
+        removal = removeAnchors(document, indices)
         return removal !== null
       }, step)
       return removal

@@ -86,7 +86,7 @@ describe('anchorGestures', () => {
     it('inserts an anchor between anchors 0 and 1 when the arrow presses on the top side', () => {
       const { store, context } = openSquare()
 
-      arrowPress(context, [200, 103])
+      arrowPress(context, [200, 103], false)
 
       expect(ringsOf(store, 'fr')).toEqual([[0, 4, 1, 2, 3]])
       expect(store.getState().rows.at(-1)?.label).toBe(INSERT_ANCHOR_STEP.label)
@@ -95,7 +95,7 @@ describe('anchorGestures', () => {
     it('places the inserted anchor on the side, not under the pointer', () => {
       const { store, context } = openSquare()
 
-      arrowPress(context, [200, 103])
+      arrowPress(context, [200, 103], false)
 
       const expected = screenToLonLatOnBackdrop(
         [200, 100],
@@ -107,13 +107,13 @@ describe('anchorGestures', () => {
 
     it('removes the selected anchor from the ring on Delete, as one step', () => {
       const { store, context } = openSquare()
-      context.session.selected = 0
+      context.session.selected = [0]
 
       expect(toolKey(context, 'Delete')).toBe(true)
 
       expect(ringsOf(store, 'fr')).toEqual([[1, 2, 3]])
       expect(store.getState().rows.at(-1)?.label).toBe(DELETE_ANCHOR_STEP.label)
-      expect(context.session.selected).toBeNull()
+      expect(context.session.selected).toEqual([])
     })
   })
 
@@ -121,9 +121,9 @@ describe('anchorGestures', () => {
     it('hands the inserted anchor to the drag: keeping the pointer down moves it', () => {
       const { store, context } = openSquare()
 
-      arrowPress(context, [200, 103])
+      arrowPress(context, [200, 103], false)
       arrowDrag(context, [200, 60])
-      arrowRelease(context)
+      arrowRelease(context, [0, 0])
 
       const expected = screenToLonLatOnBackdrop(
         [200, 60],
@@ -142,7 +142,7 @@ describe('anchorGestures', () => {
     it('inserts into both polities when the stretch is their shared border', () => {
       const { store, context } = openSquare(true)
 
-      arrowPress(context, [303, 200])
+      arrowPress(context, [303, 200], false)
 
       const added = store.getState().document.anchors.length - 1
       expect(ringsOf(store, 'fr')).toEqual([[0, 1, added, 2, 3]])
@@ -151,7 +151,7 @@ describe('anchorGestures', () => {
 
     it('removes a shared anchor from both rings, and names both polities', () => {
       const { store, context, reports } = openSquare(true)
-      context.session.selected = 1
+      context.session.selected = [1]
 
       toolKey(context, 'Backspace')
 
@@ -170,8 +170,8 @@ describe('anchorGestures', () => {
 
     it('takes back the insertion with one undo', () => {
       const { store, context } = openSquare()
-      arrowPress(context, [200, 103])
-      arrowRelease(context)
+      arrowPress(context, [200, 103], false)
+      arrowRelease(context, [0, 0])
 
       store.getState().undo()
 
@@ -183,9 +183,9 @@ describe('anchorGestures', () => {
     it('refuses to bring a ring under three anchors, and says so', () => {
       const { store, context, reports } = openSquare()
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-      context.session.selected = 0
+      context.session.selected = [0]
       toolKey(context, 'Delete')
-      context.session.selected = 1
+      context.session.selected = [1]
 
       toolKey(context, 'Delete')
 
@@ -197,8 +197,8 @@ describe('anchorGestures', () => {
     it('does not delete an anchor an undo took away, and does not blame the ring', () => {
       const { store, context, reports } = openSquare()
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-      arrowPress(context, [200, 103])
-      arrowRelease(context)
+      arrowPress(context, [200, 103], false)
+      arrowRelease(context, [0, 0])
       store.getState().undo()
 
       toolKey(context, 'Delete')
@@ -206,7 +206,7 @@ describe('anchorGestures', () => {
       expect(ringsOf(store, 'fr')).toEqual([[0, 1, 2, 3]])
       expect(warn.mock.calls[0]?.[0]).toContain('no longer on the target')
       expect(reports).toEqual([])
-      expect(context.session.selected).toBeNull()
+      expect(context.session.selected).toEqual([])
     })
 
     it('leaves Delete to the platform when nothing is selected', () => {
@@ -225,7 +225,7 @@ describe('anchorGestures', () => {
       expect(insertOnStretch(context, 'fr', [200, 103])).toBe(true)
 
       expect(error).toHaveBeenCalledOnce()
-      expect(context.session.selected).toBeNull()
+      expect(context.session.selected).toEqual([])
     })
   })
 
@@ -233,16 +233,16 @@ describe('anchorGestures', () => {
     it('catches the handle rather than inserting, on a corner', () => {
       const { store, context } = openSquare()
 
-      arrowPress(context, [102, 101])
+      arrowPress(context, [102, 101], false)
 
-      expect(context.session.selected).toBe(0)
+      expect(context.session.selected).toEqual([0])
       expect(ringsOf(store, 'fr')).toEqual([[0, 1, 2, 3]])
     })
 
     it('inserts nothing on another polity’s stretch — only the target is edited', () => {
       const { store, context } = openSquare(true)
 
-      arrowPress(context, [400, 103])
+      arrowPress(context, [400, 103], false)
 
       expect(ringsOf(store, 'hre')).toEqual([[1, 4, 5, 2]])
       expect(store.getState().document.anchors).toHaveLength(6)
@@ -251,7 +251,7 @@ describe('anchorGestures', () => {
     it('inserts nothing inside the fill, away from every side', () => {
       const { store, context } = openSquare()
 
-      arrowPress(context, [200, 200])
+      arrowPress(context, [200, 200], false)
 
       expect(store.getState().document.anchors).toHaveLength(4)
     })

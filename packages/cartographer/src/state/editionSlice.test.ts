@@ -722,7 +722,7 @@ describe('editionSlice.drawOutline and moveAnchor', () => {
 const INSERT: HistoryStep = { kind: 'insert-anchor', label: 'insert anchor' }
 const DELETE: HistoryStep = { kind: 'delete-anchor', label: 'delete anchor' }
 
-describe('editionSlice.insertAnchor and deleteAnchor', () => {
+describe('editionSlice.insertAnchor and deleteAnchors', () => {
   describe('happy path', () => {
     it('inserts an anchor on the shared side into both rings, as one step', () => {
       const { store } = openStore()
@@ -741,7 +741,9 @@ describe('editionSlice.insertAnchor and deleteAnchor', () => {
     it('removes the shared anchor from both rings, naming both holders', () => {
       const { store } = openStore()
 
-      expect(store.getState().deleteAnchor(1, DELETE)).toEqual({ polities: ['fr-couronne', 'hre'] })
+      expect(store.getState().deleteAnchors([1], DELETE)).toEqual({
+        polities: ['fr-couronne', 'hre'],
+      })
 
       expect(store.getState().document.claims.map((claim) => claim.rings[0])).toEqual([
         [0, 2, 3],
@@ -772,9 +774,9 @@ describe('editionSlice.insertAnchor and deleteAnchor', () => {
 
     it('records nothing for a deletion that would leave a ring of two', () => {
       const { store } = openStore()
-      store.getState().deleteAnchor(0, DELETE)
+      store.getState().deleteAnchors([0], DELETE)
       const steps = store.getState().rows.length
-      expect(store.getState().deleteAnchor(3, DELETE)).toBeNull()
+      expect(store.getState().deleteAnchors([3], DELETE)).toBeNull()
       expect(store.getState().rows).toHaveLength(steps)
     })
   })
@@ -782,7 +784,7 @@ describe('editionSlice.insertAnchor and deleteAnchor', () => {
   describe('unmanaged errors', () => {
     it('records nothing for an anchor no ring holds', () => {
       const { store } = openStore()
-      expect(store.getState().deleteAnchor(99, DELETE)).toBeNull()
+      expect(store.getState().deleteAnchors([99], DELETE)).toBeNull()
       expect(store.getState().canUndo).toBe(false)
     })
   })
@@ -790,7 +792,7 @@ describe('editionSlice.insertAnchor and deleteAnchor', () => {
   describe('edge cases', () => {
     it('keeps the deleted anchor in the table, so an undo finds it at the same index', () => {
       const { store } = openStore()
-      store.getState().deleteAnchor(1, DELETE)
+      store.getState().deleteAnchors([1], DELETE)
       expect(store.getState().document.anchors).toHaveLength(6)
       store.getState().undo()
       expect(store.getState().document.claims[0]?.rings[0]).toEqual([0, 1, 2, 3])

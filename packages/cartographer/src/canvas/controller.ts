@@ -31,7 +31,7 @@ import {
   toolKey,
   undoGesture,
 } from './toolGestures'
-import { idleSession, targetHandles } from './toolSession'
+import { dropDrag, idleSession, targetHandles } from './toolSession'
 
 import type { CanvasControllerDeps, LiveCanvas } from './liveCanvas'
 import type { Viewport } from '../view/viewport'
@@ -93,14 +93,13 @@ function positionOf(event: { offsetX: number; offsetY: number }): [number, numbe
 function repaint(it: LiveCanvas): void {
   const state = it.deps.store.getState()
   const target = state.tool === 'navigate' ? null : resolvedTarget(gestureOf(it))
-  const selected = it.session.selected
   const scene = buildScene(state.document, {
     anchorsInBackdrop: it.anchors.anchorsInBackdrop(state.document, state.version),
     backdropImage: it.deps.backdropImage,
     vectorLayers: it.deps.vectorLayers,
     frame: it.deps.frame,
     viewport: state.viewport,
-    selected: new Set(selected === null ? [] : [selected]),
+    selected: new Set(it.session.selected),
     handles: targetHandles(state.document, target?.id ?? null),
     colours: coloursOf(it),
     zoneLabel: it.deps.zoneLabel,
@@ -254,7 +253,7 @@ function onPointerDown(it: LiveCanvas, event: PointerEvent): void {
   it.dragging = false
   it.node.setPointerCapture(event.pointerId)
   if (handInHand(it) || it.deps.store.getState().tool !== 'edit') return
-  arrowPress(gestureOf(it), it.pressAt)
+  arrowPress(gestureOf(it), it.pressAt, event.shiftKey)
   it.requestPaint()
   refreshTools(it)
 }
@@ -312,9 +311,12 @@ function onPointerUp(it: LiveCanvas, event: PointerEvent): void {
   it.pressAt = null
   it.dragging = false
   if (it.node.hasPointerCapture(event.pointerId)) it.node.releasePointerCapture(event.pointerId)
+  // The arrow's press ends with the button, the hand borrowed or not: a marquee left open would steer
+  // the next press (review ARCH-001, 2026-10-12).
+  if (handInHand(it)) dropDrag(it.session)
   if (pressed && !handInHand(it)) {
     const tool = it.deps.store.getState().tool
-    if (tool === 'edit') arrowRelease(gestureOf(it))
+    if (tool === 'edit') arrowRelease(gestureOf(it), positionOf(event))
     else if (tool === 'draw' && !dragged) penClick(gestureOf(it), positionOf(event))
   }
   // A Pencil drag ends with the button, whatever happened meanwhile: the hand borrowed with ‹space›, or
@@ -342,6 +344,8 @@ function onPointerCancel(it: LiveCanvas, event: PointerEvent): void {
   it.dragging = false
   it.session.moving = null
   it.session.grabbed = null
+  it.session.pending = null
+  it.session.marquee = null
   pencilCancel(gestureOf(it))
   if (it.node.hasPointerCapture(event.pointerId)) it.node.releasePointerCapture(event.pointerId)
   refreshTools(it)
@@ -576,10 +580,8 @@ function watchStore(it: LiveCanvas, paint: () => void): () => void {
   // An undo can take the selected anchor's ring away; a selection the target no longer holds is dropped.
   const prune = (): void => {
     const { document, target } = it.deps.store.getState()
-    const selected = it.session.selected
-    if (selected !== null && !targetHandles(document, target).includes(selected)) {
-      it.session.selected = null
-    }
+    const handles = new Set(targetHandles(document, target))
+    it.session.selected = it.session.selected.filter((index) => handles.has(index))
     refreshTools(it)
   }
   const stops = [

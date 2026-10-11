@@ -99,31 +99,45 @@ export interface AnchorRemoval {
 
 /**
  * Remove an anchor from every ring that holds it; its two stretches merge into one.
- *
- * **Refused, with nothing written, when a ring would fall under {@link MIN_RING_ANCHORS}**: `s03` — a
- * ring that cannot enclose an area would vanish silently on the next open, so the gesture is where it is
- * said. The anchor stays in the table, as every anchor does while editing; nothing holding it, it
- * leaves the file at save.
  * @param doc - the document to edit
  * @param index - the anchor to remove
  * @returns the polities that held it, or `null` when no claim holds it or a ring would fall too short
  */
 export function removeAnchor(doc: YearDocument, index: number): AnchorRemoval | null {
-  const holding = doc.claims.filter((claim) => claim.rings.some((ring) => ring.includes(index)))
+  return removeAnchors(doc, [index])
+}
+
+/**
+ * Remove several anchors from every ring that holds them — `s03`'s *"delete several at once … in one
+ * undo step"*.
+ *
+ * **All or nothing, checked before anything is written**: refused when a ring would fall under
+ * {@link MIN_RING_ANCHORS} once they are all gone — `s03`, a ring that cannot enclose an area would
+ * vanish silently on the next open. Removing them one by one and stopping at the first refusal would
+ * leave the document changed with no step to undo it. The anchors stay in the table, as every anchor
+ * does while editing; nothing holding them, they leave the file at save.
+ * @param doc - the document to edit
+ * @param indices - the anchors to remove
+ * @returns the polities that held any of them, or `null` when none is held or a ring would fall short
+ */
+export function removeAnchors(doc: YearDocument, indices: readonly number[]): AnchorRemoval | null {
+  const gone = new Set(indices)
+  const touches = (ring: readonly number[]) => ring.some((at) => gone.has(at))
+  const holding = doc.claims.filter((claim) => claim.rings.some(touches))
   if (holding.length === 0) return null
   const tooShort = everyRing(doc).some(
-    (ring) => ring.includes(index) && ring.filter((at) => at !== index).length < MIN_RING_ANCHORS
+    (ring) => touches(ring) && ring.filter((at) => !gone.has(at)).length < MIN_RING_ANCHORS
   )
   if (tooShort) return null
   for (const claim of holding) {
-    claim.rings = claim.rings.map((ring) => ring.filter((at) => at !== index))
+    claim.rings = claim.rings.map((ring) => ring.filter((at) => !gone.has(at)))
   }
-  for (const gap of doc.deliberateGaps) gap.ring = gap.ring.filter((at) => at !== index)
-  // A dressed run loses the point too, so it runs over the merged stretch. One left with a single
+  for (const gap of doc.deliberateGaps) gap.ring = gap.ring.filter((at) => !gone.has(at))
+  // A dressed run loses the points too, so it runs over the merged stretch. One left with a single
   // anchor is kept as it was: the file refuses a run under two, and dropping it would undo a hand-set
   // stroke silently (s13) — it shows in {Overrides} as orphaned instead.
   for (const dressed of doc.runs) {
-    const kept = dressed.run.filter((at) => at !== index)
+    const kept = dressed.run.filter((at) => !gone.has(at))
     if (kept.length >= 2) dressed.run = kept
   }
   return { polities: holding.map((claim) => claim.polity) }
