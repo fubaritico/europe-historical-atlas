@@ -1,59 +1,63 @@
-# 16 — Stacking order
+# 16 — Stacking order, by groups
 
-> Written 2026-10-11, from the dev's request: _"il faut qu'on puisse changer l'ordre… back to front"_,
-> **by a context menu à la Illustrator** (« Bring to Front »…), **not by drag and drop** — his call,
-> recorded in `next.md` the same day. Illustrator's _Object › Arrange_ is the model: four commands.
+> Written 2026-10-11, rewritten the same evening. The dev first asked for Illustrator's four *Arrange*
+> commands from a context menu on {Polities}, not drag and drop. Then he gave the model, from
+> Illustrator's Layers panel ([`design/references/illustrator-layers-suzerain-vassal.png`](../design/references/illustrator-layers-suzerain-vassal.png)):
+> *"le suzerain est considéré comme le fond, et le vassal comme un sous-calque"* — and *"il faudrait
+> pouvoir changer l'empilement des vassaux… et la pile au niveau des pays eux-mêmes, soit des groupes
+> formés par un pays."*
 
-## What the order is, in the file
+## The model
 
-The Cartographer paints the polities in the order of the document's **claims** — the first at the back,
-the last at the front. That order is saved. **Changing it is an edit of the document**: one step in the
-history, undone by ‹ctrl+Z›, like any other gesture.
-
-**The atlas does not paint by that order alone** — measured in `core/data/toRegionPayload.ts`, 2026-10-11:
-it sorts by **depth of homage** first (a vassal is always over its suzerain), and keeps the claims order
-only between polities of the same depth. So sending a vassal behind its suzerain changes the
-Cartographer's picture and **not** the atlas's. Worth knowing; whether the Cartographer should apply the
-same depth rule is open, and `s08` (vassalage) is where it belongs.
-
-It only shows where two fills overlap — a vassal drawn inside its suzerain, a contested strip, a draft
-outline over a neighbour. Where borders are shared, nothing overlaps and the order changes nothing on
-screen.
+- **A polity and its vassals form a group** — Illustrator's layer and its sublayers. The suzerain is
+  the group's background; its vassals are painted over it. A vassal with vassals of its own is a group
+  inside the group.
+- **The stack is re-ordered among siblings only**, at any level: the top-level groups among themselves
+  (France against the Empire, each moving **with all its vassals**), and the vassals of one suzerain
+  among themselves.
+- **A vassal never goes under its suzerain, and never leaves its group by stacking.** Changing group is
+  changing suzerain — the polity form (`s08`), not a stacking command.
+- **The paint order is read off the tree**: the groups in their order, each suzerain then its vassals in
+  theirs, depth first. One function in `core`, read by the Cartographer **and** the atlas.
 
 ```gherkin
-Scenario: bring a polity to the front
-  Given "Kingdom of France" and "Duchy of Normandy" overlap, and France is painted over Normandy
-  When I right-click "Duchy of Normandy" in {Polities}
-  Then a menu offers [Bring to Front], [Bring Forward], [Send Backward], [Send to Back]
-  When I choose [Bring to Front]
-  Then Normandy is painted over France
-  And {History} gains one step, "bring to front — Duchy of Normandy"
-  And ‹ctrl+Z› puts France back on top
+Scenario: bring a group to the front, vassals with it
+  Given the Kingdom of France has the Duchy of Normandy as a vassal
+  And the Holy Roman Empire is painted over the Kingdom of France
+  When I right-click "Kingdom of France" in {Polities} and choose [Bring to Front]
+  Then France is painted over the Empire
+  And Normandy is painted over France, and over the Empire with it
+  And {History} gains one step, "bring to front — Kingdom of France"
 
-Scenario: one step at a time
-  Given four polities painted A, B, C, D from back to front
-  When I choose [Bring Forward] on B
-  Then the order is A, C, B, D
-  When I choose [Send Backward] on B
-  Then the order is A, B, C, D again
+Scenario: re-order two vassals of one suzerain
+  Given Normandy and Aquitaine are both vassals of France, Aquitaine painted over Normandy
+  When I choose [Bring Forward] on Normandy
+  Then Normandy is painted over Aquitaine
+  And both are still painted over France
 
-Scenario: a command that would change nothing
-  Given D is already at the front
-  When I right-click D
+Scenario: a vassal cannot be sent under its suzerain
+  Given Normandy is the lowest of France's vassals
+  When I right-click Normandy
+  Then [Send Backward] and [Send to Back] are disabled
+  And France is still painted under Normandy
+
+Scenario: a command that would change nothing is disabled
+  Given the Kingdom of France is the top-level group at the front
+  When I right-click it
   Then [Bring to Front] and [Bring Forward] are disabled
-  And [Send Backward] and [Send to Back] are enabled
 
-Scenario: a polity with no territory has no place in the stack
-  Given "Kingdom of León" has no territory
-  When I right-click it in {Polities}
-  Then the four commands are disabled, since there is nothing to paint
+Scenario: the atlas paints the same order
+  Given an order set in the Cartographer and saved
+  When the atlas shows that year
+  Then every overlap is painted in the order the Cartographer showed
 ```
 
-> **Defaults, not decisions** (`s00`: every rule here is a default):
+> **Defaults, not decisions** (`s00`):
 >
-> - The menu opens on a **row of {Polities}**. Illustrator also offers it on the canvas, on a selected
->   object; here a right-click on a fill could do the same after it aims at that polity. Not written yet.
-> - **Illustrator's shortcuts**: ‹⇧⌘]› front, ‹⌘]› forward, ‹⌘[› backward, ‹⇧⌘[› back, acting on the
->   target. Proposed, not asked for.
-> - **The list keeps its sort by name** (`s01`), so the order is seen on the canvas, not in the list.
->   Illustrator's Layers panel lists front-to-back instead — see `H-33`.
+> - **{Polities} becomes the tree**, as in the dev's screenshot — a group's head, its vassals indented
+>   beneath. Already planned for step 5; it is what makes the order **visible** rather than only seen on
+>   the canvas. Within a level, the list shows the stack front first, as Illustrator does. *(mine)*
+> - A polity with no territory still heads its group: its vassals are drawn even if it is not.
+> - Illustrator's shortcuts ‹⇧⌘]› ‹⌘]› ‹⌘[› ‹⇧⌘[› on the target, and the same menu on a fill on the
+>   canvas — proposed, never asked for.
+> - `H-33` (list by name or by stack) is settled by the tree if the dev agrees.

@@ -1,49 +1,50 @@
-# Stacking order — plan
+# Stacking order by groups — plan
 
-> Written 2026-10-11 at the dev's request (*"tu feras un plan pour la fonctionnalité"*). Governing
-> scenario: [`scenarii/s16-stacking-order.md`](scenarii/s16-stacking-order.md). **Nothing here is built
-> until the dev says go** — one piece already exists, see step 1.
+> Written 2026-10-11, rewritten the same evening on the dev's model: **a polity and its vassals form a
+> group, re-ordered among siblings at every level** — Illustrator's layers and sublayers
+> ([`design/references/illustrator-layers-suzerain-vassal.png`](design/references/illustrator-layers-suzerain-vassal.png)).
+> Governing scenario: [`scenarii/s16-stacking-order.md`](scenarii/s16-stacking-order.md).
+> **Nothing is built until the dev says go.**
 
-## What it is
+## Where the order lives
 
-Illustrator's *Object › Arrange*: **Bring to Front**, **Bring Forward**, **Send Backward**, **Send to
-Back**, chosen from a **context menu on a row of {Polities}** (the dev's call, not drag and drop).
+**In the order of the document's polities list**, read per sibling group — not in `claims`, as the first
+version of this plan said: a polity with no territory holds no claim, yet it can head a group, so it
+needs a place. Every polity is in the list. The suzerain is already recorded on each polity
+(`suzerain`), so **the file format does not change**.
 
-The order is the document's `claims` array — first painted at the back, last at the front — so a move
-is **an edit of the document**: one history step, undone by ‹ctrl+Z›, saved with the year.
+**To verify first, before step 1**: that the polities list is saved and read back **in order** — the
+round trip of `s04`. If a reader sorts it, the order is lost at the first save.
 
 ## Steps — each verified and committed alone
 
 | | what | where | how we know it works |
 | --- | --- | --- | --- |
-| **1** | the pure operation: `restack(doc, polity, move)` and `availableMoves(doc, polity)` | `core/editor/stacking.ts` | **already written, 11 tests green, not committed** — I started it before being asked. Keep it or drop it: the dev's call |
-| **2** | the recorded action `restackPolity(id, move, step)` | `cartographer/state/editionSlice.ts`, through `recorder` like `moveAnchor` | `{History}` gains *"bring to front — Duchy of Normandy"*; ‹ctrl+Z› restores the order |
-| **3** | the context menu: right-click on a row (and ‹shift+F10› / the context-menu key, for the keyboard) opens the four commands, those that would change nothing disabled | `components/PolityContextMenu.tsx` (view) + its wiring in `PolityList` | a test per command, a test for the disabled states, a test that ‹escape› and a click outside close it |
-| **4** | the canvas repaints in the new order — nothing to write, it already paints `claims` in order | — | a canvas test: after *Bring to Front*, the fill test (`polityAt`) answers the polity brought forward where the two overlap |
+| **0** | verify the polities list keeps its order through save and reopen | `core/editor/yearDocument` round trip | a round-trip test on a deliberately unsorted list |
+| **1** | **`paintOrder(document)`** — the tree walked depth first: groups in list order, each suzerain then its vassals | `core/editor/` | literals: two groups, a vassal of a vassal, a headless group, a cycle in `suzerain` (refused loudly, never looped) |
+| **2** | the **atlas** reads `paintOrder` instead of its own sort by depth (`toRegionPayload`) | `core/data/toRegionPayload.ts` | `s16`'s last scenario: the Empire over France also covers France's vassal, in both apps |
+| **3** | the Cartographer paints and hit-tests in `paintOrder` | `canvas/scene.ts` (`projectedTerritories`, the fills) | the fill test answers the front polity where two overlap |
+| **4** | **`restack(document, polity, move)`** among siblings only, and `availableMoves` for the menu | `core/editor/stacking.ts` — the file written early, **re-scoped to siblings** | a vassal can never go under its suzerain; a group moves with its vassals |
+| **5** | the recorded action `restackPolity`, one history step | `state/editionSlice.ts` | ‹ctrl+Z› restores the order |
+| **6** | **{Polities} as a tree** — heads, vassals indented, front first within a level — and the context menu on a row | `components/` | the order is visible in the list, and the menu's disabled states follow `availableMoves` |
 
-## The menu — one decision taken, one to ask
+Steps 0–3 change nothing on screen for a year without vassals, and fix the atlas/Cartographer
+disagreement on their own. Steps 4–6 give the author the commands.
 
-- **Taken (mine)**: the design system's `Menu` for the list itself — it owns the keyboard model and the
-  disabled items. It does not place itself (its README: *"N/A — positioning"*), and its `Dropdown`
-  anchors to a trigger button, not to a pointer position. So **a thin shell of ours** places it at the
-  right-click, closes it on ‹escape› and on a press outside. Substitutable later by an import change.
-- **To ask, if the dev wants it**: a `ContextMenu` from the design system's Claude — a menu opened at
-  a point. Same shape as the `ColorField` hand-off of 2026-10-10.
+## The menu
 
-## Open — the dev's calls, none blocking step 1–4
+The design system's `Menu` for the list; it does not place itself, so **a thin shell of ours** opens it
+at the right-click and closes it on ‹escape› or a press outside. *(my call)* If the dev prefers, a
+`ContextMenu` can be asked of the design system's Claude, as the `ColorField` was.
 
-1. **`H-33` — the list's order.** It stays sorted by name (`s01`); the stacking is then seen on the
-   canvas only. Illustrator's Layers panel lists front-to-back instead.
-2. **The same menu on the canvas** — a right-click on a fill aiming at it first, as Illustrator offers
-   *Arrange* on a selected object. Not in `s16` yet.
-3. **Illustrator's shortcuts** ‹⇧⌘]› ‹⌘]› ‹⌘[› ‹⇧⌘[›, on the target. Proposed, never asked for. Note:
-   ‹⌘› keys go to the browser today (`onModifiedKey`), so they would have to be taken for the map.
-4. **The atlas does not follow this order alone** — it puts a vassal over its suzerain first
-   (`toRegionPayload`, depth of homage), and keeps the claims order only between equals. So sending a
-   vassal behind its suzerain shows in the Cartographer and **not** in the atlas. Whether the
-   Cartographer should paint by the same rule belongs with `s08` (vassalage).
+## Open — the dev's calls
+
+1. **Within a level, the tree lists front first** (Illustrator's order) — mine, not asked.
+2. **Illustrator's shortcuts** and **the same menu on the canvas** — proposed, never asked for.
+3. **Choosing a group head in {Polities}** aims at that polity only, not its vassals — the target stays
+   one polity (`next.md`, decision of 2026-10-08). To confirm when the tree is built.
 
 ## Cost
 
-Steps 2–4: one action, one component, its wiring, and their tests — the size of the ColorField's
-integration. No change to the file format: the order of `claims` is already saved.
+Steps 0–3: one pure function, its tests, and two call sites switched to it. Steps 4–6: the size of the
+`ColorField` integration, plus the tree, which step 5 of P4 owed anyway.

@@ -170,6 +170,7 @@
 | **snap** / accrocher | Poser un point exactement sur un fleuve ou une côte qu'on possède déjà.                        |
 | **snap layer** / couche d'accroche | Ce que la plume suit quand elle s'accroche : la **côte** ou les **fleuves**, deux des couches de `{Layers}`. Un mode de la plume par couche. **Pas** le rail d'outils. |
 | **Pencil** / crayon | Le mode à main levée de la plume : on appuie et on glisse, un point est posé au plus toutes les 200 ms (et seulement si la souris a bougé). Un ‹ctrl+z› reprend tout le trait. |
+| **group** / groupe | Un pays et ses vassaux, comme un calque et ses sous-calques dans Illustrator : le suzerain au fond, ses vassaux peints par-dessus. L'empilement se change **entre frères** — entre groupes, ou entre vassaux d'un même suzerain ; un groupe bouge avec tous ses vassaux. |
 | **georeferencing**   | Caler une image scannée sur de vraies coordonnées. **Abandonné** — on reporte à vue.           |
 | **TPS**              | _Thin-plate spline_, la déformation élastique qui sert à ça. Abandonné avec.                   |
 | **Chaikin**          | L'algorithme qui arrondit les angles d'une ligne en escalier.                                  |

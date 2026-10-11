@@ -469,3 +469,6 @@ stack. With [Bring to Front] in the row's menu (`s16`), a name-sorted list shows
 command runs — the change is on the canvas only. **Kept by name for now**; the dev's call when the
 stacking commands are in use. *(the question is mine)*
 
+**Proposed the same evening, with the group model of `s16`**: {Polities} becomes the tree of groups,
+front first within a level, which makes the stack visible in the list. Settled if the dev agrees.
+
