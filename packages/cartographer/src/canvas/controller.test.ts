@@ -1228,7 +1228,9 @@ describe('undo and redo from the keyboard', () => {
       const { node, store, dispose } = attach()
       aimAtFrance(store)
       for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(node, at)
+      // The first press reopens the outline into the hand; Escape lets it go; the next undoes the creation.
       node.dispatchEvent(chord({ key: 'z', ctrlKey: true }))
+      node.dispatchEvent(keyEvent('Escape'))
       node.dispatchEvent(chord({ key: 'z', ctrlKey: true }))
       expect(store.getState().document.polities).toEqual([])
       expect(node.style.cursor).toBe('not-allowed')

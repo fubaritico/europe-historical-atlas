@@ -325,7 +325,7 @@ describe('undoGesture and redoGesture', () => {
 
   describe('variants', () => {
     // H-10 applied to the session: the outline in progress is the gesture in progress, so it goes first.
-    it('abandons an outline in progress before undoing anything', () => {
+    it('takes back the open outline’s anchor before undoing anything', () => {
       const context = openContext()
       drawTriangle(context)
       penClick(context, [500, 500])
@@ -403,4 +403,91 @@ describe('undoGesture and redoGesture', () => {
       expect(logged.warn).toHaveBeenCalledTimes(1)
     })
   })
+
+  describe('one step at a time — the closing reopens', () => {
+    // The dev, 2026-10-11: "que ça enlève juste la fermeture de la zone".
+    it('reopens the outline it closed, with its points back in hand', () => {
+      const context = openContext()
+      drawTriangle(context)
+      undoGesture(context, false)
+      expect(context.store.getState().document.claims).toEqual([])
+      expect(context.session.outline).toHaveLength(3)
+      expect(onScreenPoint(context, context.session.outline[1])[0]).toBeCloseTo(300, 6)
+    })
+
+    it('then takes back one anchor per press', () => {
+      const context = openContext()
+      drawTriangle(context)
+      undoGesture(context, false)
+      undoGesture(context, false)
+      expect(context.session.outline).toHaveLength(2)
+    })
+
+    it('closes it again on redo, and empties the hand', () => {
+      const context = openContext()
+      drawTriangle(context)
+      undoGesture(context, false)
+      redoGesture(context, false)
+      expect(context.session.outline).toEqual([])
+      expect(context.store.getState().document.claims[0]?.rings).toHaveLength(1)
+    })
+
+    // Once the author has changed the reopened outline, it is theirs: a redo does not overwrite it.
+    it('does not close a reopened outline the author has changed — the redo waits, and says so', () => {
+      const logged = watchConsole()
+      const context = openContext()
+      drawTriangle(context)
+      undoGesture(context, false)
+      penClick(context, [200, 250])
+      redoGesture(context, false)
+      expect(context.session.outline).toEqual([])
+      expect(context.store.getState().document.claims).toEqual([])
+      expect(context.store.getState().canRedo).toBe(true)
+      expect(logged.warn).toHaveBeenCalledWith(expect.stringContaining('redo again'))
+    })
+
+    // A reopened outline let go with Escape is no longer the one an undo handed back.
+    it('forgets the reopened outline once Escape lets it go', () => {
+      const context = openContext()
+      drawTriangle(context)
+      undoGesture(context, false)
+      toolKey(context, 'Escape')
+      expect(context.session.reopened).toBeNull()
+    })
+
+    // No refusal is silent: undoing a closing with the arrow in hand reopens nothing, and says so.
+    it('undoes a closing without reopening it under another tool, and says so', () => {
+      const logged = watchConsole()
+      const context = openContext()
+      drawTriangle(context)
+      context.store.getState().selectTool('edit')
+      undoGesture(context, false)
+      expect(context.store.getState().document.claims).toEqual([])
+      expect(context.session.outline).toEqual([])
+      expect(logged.warn).toHaveBeenCalledWith(expect.stringContaining('no outline was put back'))
+    })
+
+    it('reopens nothing, and says nothing, when the step undone was not a closing', () => {
+      const logged = watchConsole()
+      const context = openContext()
+      drawTriangle(context)
+      context.store.getState().selectTool('edit')
+      arrowPress(context, [300, 100])
+      arrowDrag(context, [320, 120])
+      arrowRelease(context)
+      context.store.getState().selectTool('draw')
+      undoGesture(context, false)
+      expect(context.session.outline).toEqual([])
+      expect(logged.warn).not.toHaveBeenCalled()
+    })
+  })
 })
+
+/** Where a point in degrees lands on screen, under the context's view. */
+function onScreenPoint(
+  context: GestureContext,
+  point: [number, number] | undefined
+): [number, number] {
+  if (point === undefined) throw new Error('no point')
+  return lonLatToScreen(point, context.frame, context.store.getState().viewport)
+}

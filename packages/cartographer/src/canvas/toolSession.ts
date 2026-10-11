@@ -24,11 +24,17 @@ export interface ToolSession {
   grabbed: number | null
   /** The anchor being dragged and where it would land, in degrees — `null` when nothing is moving. */
   moving: { index: number; to: [number, number] } | null
+  /**
+   * The points an undo put back in hand when it reopened a closed outline — `null` otherwise. A redo
+   * closes the ring again only while the outline in hand is still exactly these; once the author has
+   * changed it, the outline is theirs and a redo does not overwrite it.
+   */
+  reopened: [number, number][] | null
 }
 
 /** A session with nothing in hand — what every tool change and every change of target returns to. */
 export function idleSession(): ToolSession {
-  return { outline: [], selected: null, grabbed: null, moving: null }
+  return { outline: [], selected: null, grabbed: null, moving: null, reopened: null }
 }
 
 /**
@@ -44,6 +50,19 @@ export function idleSession(): ToolSession {
 export function abandonGesture(session: ToolSession): boolean {
   const busy = session.outline.length > 0 || session.moving !== null || session.grabbed !== null
   session.outline = []
+  session.moving = null
+  session.grabbed = null
+  session.reopened = null
+  return busy
+}
+
+/**
+ * Drop an anchor drag in progress, and nothing else.
+ * @param session - the session, mutated in place
+ * @returns `true` when a drag was in progress
+ */
+export function dropDrag(session: ToolSession): boolean {
+  const busy = session.moving !== null || session.grabbed !== null
   session.moving = null
   session.grabbed = null
   return busy

@@ -3,7 +3,7 @@ import { canCloseRing, isClosingOffered } from '../geometry/ringClosure'
 import { describeDrawingTarget } from '../state/drawingTarget'
 import { lonLatToScreen, screenToLonLatOnBackdrop } from '../view/projection'
 
-import { abandonGesture, targetHandles } from './toolSession'
+import { abandonGesture, dropDrag, targetHandles } from './toolSession'
 
 import type { ToolSession } from './toolSession'
 import type { CartographerStoreHook } from '../state/store'
@@ -43,6 +43,9 @@ export interface GestureContext {
  *   checked. A defect, said loudly, never swallowed.
  */
 const TAG = '[Cartographer]'
+
+/** The step kind a closed outline is recorded under — what tells an undo that it is undoing a closing. */
+export const DRAW_OUTLINE_KIND = 'draw-outline'
 
 /** How `{History}` and `[↶ Undo]` name a moved anchor — `s03`'s *"Undo — move anchor"*. */
 export const MOVE_ANCHOR_STEP = { kind: 'move-anchor', label: 'move anchor' } as const
@@ -98,9 +101,10 @@ export function closeOutline(context: GestureContext): void {
     console.warn(`${TAG} the outline was not closed: a ring needs at least three anchors.`)
     return
   }
-  const step = { kind: 'draw-outline', label: `draw outline of ${target.name}` }
+  const step = { kind: DRAW_OUTLINE_KIND, label: `draw outline of ${target.name}` }
   if (context.store.getState().drawOutline(target.id, context.session.outline, step)) {
     context.session.outline = []
+    context.session.reopened = null
     return
   }
   console.error(
@@ -193,19 +197,78 @@ export function toolKey(context: GestureContext, key: string): boolean {
   }
   if (tool !== 'draw' || context.session.outline.length === 0) return false
   if (key === 'Backspace') context.session.outline.pop()
-  else if (key === 'Escape') context.session.outline = []
-  else if (key === 'Enter') closeOutline(context)
+  else if (key === 'Escape') {
+    context.session.outline = []
+    context.session.reopened = null
+  } else if (key === 'Enter') closeOutline(context)
   else return false
   return true
 }
 
 /**
- * ‹ctrl+Z›: abandon the gesture in progress if there is one, otherwise take back the last gesture.
+ * The rings a polity holds, as lists of anchor indices.
+ * @param context - the store
+ * @param polityId - whose rings
+ * @returns its rings, in the order they were closed
+ */
+function ringsOf(context: GestureContext, polityId: string): number[][] {
+  const claim = context.store.getState().document.claims.find((held) => held.polity === polityId)
+  return claim?.rings ?? []
+}
+
+/**
+ * A ring's points, read off the document as it stands.
+ * @param context - the store
+ * @param ring - the anchor indices
+ * @returns `[longitude, latitude]` per anchor, copied
+ */
+function pointsOf(context: GestureContext, ring: readonly number[]): [number, number][] {
+  const anchors = context.store.getState().document.anchors
+  return ring.flatMap((index) => {
+    const anchor = anchors[index]
+    return anchor === undefined ? [] : [[anchor[0], anchor[1]] as [number, number]]
+  })
+}
+
+/**
+ * Undo the last step; if it was the closing of the outline the Pen is drawing, put its points back in
+ * hand — the dev's call, 2026-10-11: *"que ça enlève juste la fermeture de la zone"*, as Illustrator does.
  *
- * **The gesture in progress first** — `H-10`'s *one gesture is one step*, applied to the session: an
- * outline not yet closed or an anchor still under the button is not in the line, so undoing the step
- * *before* it would rewind the document under it, and the release would then write onto the rewound
- * document (ARCH-001 / QUAL-001). A second ‹ctrl+Z› undoes.
+ * **The document's history is untouched by this**: a ring still enters the document closed, in one step,
+ * so a saved file never holds an open outline. Only the session is given the points back.
+ *
+ * It reopens only when the step undone took a ring away from the polity the Pen is drawing for. Undoing
+ * a closing under another tool, or for another polity, takes the ring back without handing anything —
+ * and says so (`rules/error-handling.md`, no refusal is silent).
+ * @param context - the session and the store
+ */
+function undoAndReopen(context: GestureContext): void {
+  const state = context.store.getState()
+  const closing = state.rows.find((row) => row.current)?.kind === DRAW_OUTLINE_KIND
+  const target = state.tool === 'draw' ? resolvedTarget(context) : null
+  const before = target === null ? [] : ringsOf(context, target.id)
+  const last = before.at(-1)
+  const points = last === undefined ? [] : pointsOf(context, last)
+  state.undo()
+  if (!closing) return
+  const after = target === null ? before.length : ringsOf(context, target.id).length
+  if (after === before.length - 1 && points.length > 0) {
+    context.session.outline = points
+    context.session.reopened = points.map((point): [number, number] => [point[0], point[1]])
+    return
+  }
+  console.warn(
+    `${TAG} the closing was undone; no outline was put back, the Pen is not drawing for it.`
+  )
+}
+
+/**
+ * ‹ctrl+Z›, one step at a time: a drag in progress is dropped, an open outline loses its last anchor,
+ * and only then is the last recorded gesture taken back — reopening the outline it closed, if it did.
+ *
+ * **The gesture in progress first** (`H-10` applied to the session, and ARCH-001 / QUAL-001): an
+ * anchor still under the button is not in the line, so rewinding the document under it would have the
+ * release write onto the rewound document.
  *
  * At the origin there is nothing to take back, which is ordinary — and said, once per press: a held key
  * repeats, and the history is walked on repeat (as in Illustrator) but the warning is not.
@@ -213,23 +276,48 @@ export function toolKey(context: GestureContext, key: string): boolean {
  * @param repeat - whether this is the key's auto-repeat rather than a press
  */
 export function undoGesture(context: GestureContext, repeat: boolean): void {
-  if (abandonGesture(context.session)) return
-  const state = context.store.getState()
-  if (!state.canUndo) {
+  if (dropDrag(context.session)) return
+  if (context.session.outline.length > 0) {
+    context.session.outline.pop()
+    return
+  }
+  if (!context.store.getState().canUndo) {
     if (!repeat) console.warn(`${TAG} nothing to undo.`)
     return
   }
-  state.undo()
+  undoAndReopen(context)
 }
 
 /**
- * ‹ctrl+shift+Z›: abandon the gesture in progress if there is one, otherwise apply an undone gesture
- * again. Nothing to redo is ordinary — and said, once per press.
+ * Whether the outline in hand is exactly what an undo reopened — the case where a redo closes it again.
+ * @param session - the session
+ * @returns `true` when the author has not changed the reopened outline
+ */
+function stillReopened(session: ToolSession): boolean {
+  const reopened = session.reopened
+  if (reopened?.length !== session.outline.length) return false
+  return reopened.every((point, index) => {
+    const held = session.outline[index]
+    return held === undefined ? false : held[0] === point[0] && held[1] === point[1]
+  })
+}
+
+/**
+ * ‹ctrl+shift+Z›: apply an undone gesture again.
+ *
+ * After an undo reopened an outline and the author left it as it was, the redo closes it again and
+ * empties the hand — otherwise the ring would come back with its points still in hand over it. Any
+ * other gesture in progress is dropped first, and the redo waits for the next press. Nothing to redo is
+ * ordinary — and said, once per press.
  * @param context - the session and the store
  * @param repeat - whether this is the key's auto-repeat rather than a press
  */
 export function redoGesture(context: GestureContext, repeat: boolean): void {
-  if (abandonGesture(context.session)) return
+  const reclose = context.session.outline.length > 0 && stillReopened(context.session)
+  if (abandonGesture(context.session) && !reclose) {
+    console.warn(`${TAG} the gesture in progress was dropped; redo again to apply the undone step.`)
+    return
+  }
   const state = context.store.getState()
   if (!state.canRedo) {
     if (!repeat) console.warn(`${TAG} nothing to redo.`)
