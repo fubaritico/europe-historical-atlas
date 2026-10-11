@@ -325,6 +325,11 @@ Scenario: start an outline
   And no Bézier handle is ever offered: a click places a point, a drag does not curve anything
 ```
 
+> **The modes are the Pen's tool group — the dev's call, 2026-10-11, "copier pas à pas Illustrator".**
+> No separate strip: the Pen's button carries Illustrator's corner triangle, and holding it, right-clicking
+> it or pressing → opens its hidden tools — *Pen* (P), *Pen — follow the coast*, *Pen — follow a river*.
+> The square marks the one in use, the button takes its name, and choosing a row puts the Pen in hand.
+>
 > **⟨reuse border⟩ is gone**, and nothing replaced it: reusing a neighbour's line is _duplicating a path_,
 > which is a command on an existing outline rather than a mode of the Pen. See the section below and
 > [s00](s00-index.md).
@@ -355,6 +360,37 @@ Scenario: follow the coast without placing points by hand
 
 > Two clicks, several hundred exact points. The coastline contour already exists —
 > `createMaskCoastlineSource`, marching squares over the land mask.
+
+```gherkin
+Scenario: see the stretch before the click that inserts it
+  Given ⟨draw⟩ follows the coast and an anchor sits on the coast at the mouth of the Somme
+  When the pointer moves along the shore towards Brittany
+  Then the stretch from the Somme to the coast vertex under the pointer is drawn, heavier than the outline
+  And that vertex is emphasised and the cursor shows the snapping mark
+  And the status bar reads "Following the coastline for Kingdom of France"
+
+Scenario: an island or a looping coast is followed the short way round
+  Given the two clicks lie on the same closed contour
+  Then the stretch inserted is the shorter of the two ways round it
+
+Scenario: a second click on the vertex already placed
+  When I click again on the coast vertex the outline already ends on
+  Then nothing is placed, and nothing is reported as inserted
+
+Scenario: the coast is out of reach
+  Given ⟨draw⟩ follows the coast
+  When the pointer is further from any coast than the snapping radius
+  Then the status bar reads "Drawing in Kingdom of France — no coastline within reach, placing points freely"
+  And a click places an ordinary free point
+```
+
+> **Decided with the dev, 2026-10-11.** The preview is his call — *"avec l'aperçu"* — and the reason is
+> the cost of being wrong without it: between the Channel and the Atlantic, the difference is thousands
+> of anchors, learnt only after the second click. The short way round is mine, taken on the approach he
+> approved: the long way from the Somme to Brittany is the coast of the whole continent. The out-of-reach
+> line keeps the polity in the sentence, because the bar's rule is that it always names whom the action
+> is for. Snapped anchors carry the provenance the land mask declares (`"Natural Earth 10m land minus
+> lakes"`, public domain), read from the mask itself.
 
 ```gherkin
 Scenario: follow a river

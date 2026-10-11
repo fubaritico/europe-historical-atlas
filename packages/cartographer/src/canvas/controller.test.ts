@@ -1322,7 +1322,9 @@ describe('the Pen following the coast, on the canvas', () => {
       node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 220 }))
       expect(acted).toHaveBeenLastCalledWith('Following the coastline for Reaume de France')
       node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 400 }))
-      expect(acted).toHaveBeenLastCalledWith('Drawing in Reaume de France')
+      expect(acted).toHaveBeenLastCalledWith(
+        'Drawing in Reaume de France — no coastline within reach, placing points freely'
+      )
       dispose()
     })
   })

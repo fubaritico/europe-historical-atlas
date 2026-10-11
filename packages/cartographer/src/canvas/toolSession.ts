@@ -140,8 +140,27 @@ export interface ActionInputs {
   closing: boolean
   /** Whether the Pen, following the coast, has the coastline within reach. */
   snapping: boolean
+  /** Whether the Pen is following the coast at all — out of reach, its click places a free point. */
+  following: boolean
   /** The session. */
   session: ToolSession
+}
+
+/**
+ * What the Pen is doing, for the polity it draws in.
+ * @param inputs - whether closing, snapping or following the coast
+ * @param targetName - the polity's name, verbatim
+ * @returns the sentence
+ */
+function penSentence(inputs: ActionInputs, targetName: string): string {
+  if (inputs.closing) return `Closing the outline of ${targetName}`
+  // s02 — "Following the coastline for Kingdom of France".
+  if (inputs.snapping) return `Following the coastline for ${targetName}`
+  // s02's "place points freely", for the coast and before the click (QUAL-110). The polity is kept:
+  // the bar always names whom the action is for.
+  return inputs.following
+    ? `Drawing in ${targetName} — no coastline within reach, placing points freely`
+    : `Drawing in ${targetName}`
 }
 
 /**
@@ -157,13 +176,7 @@ export function actionSentence(inputs: ActionInputs): string | null {
   const { tool, targetName, session } = inputs
   if (tool === 'navigate') return null
   if (targetName === null) return inputs.onCanvas ? 'Select a polity to draw in' : null
-  if (tool === 'draw') {
-    if (inputs.closing) return `Closing the outline of ${targetName}`
-    // s02 — "Following the coastline for Kingdom of France".
-    return inputs.snapping
-      ? `Following the coastline for ${targetName}`
-      : `Drawing in ${targetName}`
-  }
+  if (tool === 'draw') return penSentence(inputs, targetName)
   if (session.moving !== null) return `Moving path from ${targetName}`
   return session.selected === null ? null : `Selecting path from ${targetName}`
 }

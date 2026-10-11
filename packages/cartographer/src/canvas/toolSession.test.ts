@@ -30,6 +30,7 @@ function action(overrides: Partial<ActionInputs> = {}): ActionInputs {
     onCanvas: true,
     closing: false,
     snapping: false,
+    following: false,
     session: idleSession(),
     ...overrides,
   }
@@ -206,6 +207,13 @@ describe('toolSession', () => {
     })
 
     // s02 — "Following the coastline for Kingdom of France".
+    // QUAL-110: s02's "place points freely", for the coast — on screen, before the click.
+    it('says the Pen will place points freely when the coast is out of reach', () => {
+      expect(actionSentence(action({ following: true }))).toBe(
+        'Drawing in Reaume de France — no coastline within reach, placing points freely'
+      )
+    })
+
     it('says the Pen is following the coastline while it is within reach', () => {
       expect(actionSentence(action({ snapping: true }))).toBe(
         'Following the coastline for Reaume de France'

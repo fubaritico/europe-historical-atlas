@@ -260,6 +260,30 @@ Scenario: what counts as one operation
   Then that is one undo step, not 412
 ```
 
+```gherkin
+Scenario: undoing a closing reopens the outline
+  Given ⟨draw⟩ is active and I have just closed an outline of 340 anchors
+  When I press ‹ctrl+z›
+  Then the ring is taken out of the document and its fill disappears
+  And its 340 anchors are back in hand as an open outline, the rubber band running from the last
+  When I press ‹ctrl+z› again
+  Then the last anchor of the open outline is taken back, and only it
+  When I press ‹ctrl+shift+z› before changing anything
+  Then the ring closes again exactly as it was, and nothing is left in hand
+
+Scenario: the gesture in progress goes first
+  Given an outline is open, or an anchor is still under the button
+  When I press ‹ctrl+z›
+  Then that gesture is dropped, and the step before it is not touched
+```
+
+> **The dev's call, 2026-10-11**: *"que ça enlève juste la fermeture de la zone"* — one step at a time,
+> as Illustrator does. **The document's history does not change for it**: a ring still enters the
+> document closed, in one step, so a saved file never holds an open outline; the reopening happens in
+> the session. It only reopens for the polity the Pen is drawing for — under another tool, the undo
+> takes the ring back and says, in the console, that nothing was put back. A redo after a reopened
+> outline has been changed drops the change first: the author's edit is not overwritten silently.
+
 > **H-10 settled 2026-09-22: one gesture is one step**, committed when the gesture ends. 412 anchors placed
 > by two clicks come back in one ‹ctrl+z›. There was no real fork here.
 

@@ -311,6 +311,7 @@ export function refreshTools(it: LiveCanvas): void {
     onCanvas: it.pointer !== null,
     closing: scene.closing,
     snapping: offer.target !== null,
+    following: state.penMode === 'coast',
     session: it.session,
   })
   if (sentence !== it.sentence) {
