@@ -229,6 +229,107 @@
 }
 
 /*
+ * `{Polities}`' list, after `design/01`: a subhead naming the year and the count, then one 24px row per
+ * polity — its swatch, its name, the *"no territory"* chip, its rank and dates. The target is the
+ * selected row: on the raised fill, ringed in the selection blue, as the design draws it.
+ */
+.polities__subhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-dim);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.polities__empty {
+  margin: 0;
+  padding: 8px 10px;
+  color: var(--ink-dim);
+  font-size: 11.5px;
+}
+
+/* The design system's listbox, flattened into the panel: no frame of its own, rows edge to edge. */
+.polities__list {
+  --ui-listbox-bg: var(--panel);
+  --ui-listbox-border-color: transparent;
+  --ui-listbox-shadow: none;
+  --ui-listbox-padding: 0;
+
+  width: 100%;
+}
+
+.polities__list:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.polity-row {
+  --ui-listbox-item-padding-block: 0;
+  --ui-listbox-item-padding-inline: 10px;
+  --ui-listbox-item-font-size: 11.5px;
+  --ui-listbox-item-selected-bg: var(--raised);
+  --ui-listbox-item-selected-weight: 400;
+
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+}
+
+.polity-row[aria-selected='true'] {
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+
+.polity-row__swatch {
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--ink-off);
+}
+
+/* No colour to show: struck through, as the rail's empty swatch is — never a blank that reads as white. */
+.polity-row__swatch[data-empty='true'] {
+  background: var(--raised)
+    linear-gradient(
+      to bottom right,
+      transparent calc(50% - 1px),
+      var(--warn) calc(50% - 1px),
+      var(--warn) calc(50% + 1px),
+      transparent calc(50% + 1px)
+    );
+}
+
+.polity-row__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.polity-row__tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-dim);
+  font-size: 11px;
+}
+
+.polity-row__chip {
+  padding: 0 4px;
+  border: 1px solid var(--ink-off);
+  font-size: 10.5px;
+  line-height: 15px;
+}
+
+.polity-row__dates {
+  font-family: ui-monospace, monospace;
+}
+
+/*
  * The list a Dropdown opens, at the field's scale and on the field's fill: a hairline and no shadow, rows
  * of a field's height, nothing rounded. The skin draws it light from the primitive greys, so every value
  * the skin exposes is set here from the palette.

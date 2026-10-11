@@ -1,16 +1,21 @@
 import { render } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
+import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { CHROME_PAINT_STYLE } from '../canvas/style'
 import { openEmptyYear } from '../state/openEmptyYear'
+import { createPolityColourSource } from '../state/polityColourSource'
 import { createCartographerStore } from '../state/store'
 import { UNFRAMED } from '../view/viewport'
 
 import { Editor } from './Editor'
 
 import type { MapAreaProps } from './MapArea'
+
+/** One colour source for the mounts below, over the shipped palette. */
+const COLOURS = createPolityColourSource(AUTOMATIC_PALETTE)
 
 /**
  * What the stand-in `MapArea` was handed, last time it rendered.
@@ -43,6 +48,7 @@ function mount(): void {
       zoneLabel="editorial zone — 1100"
       label="Map of the year 1100, being edited"
       heading={<h1>Cartographer — year 1100</h1>}
+      colours={COLOURS}
     />
   )
 }

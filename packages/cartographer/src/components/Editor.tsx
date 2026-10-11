@@ -7,6 +7,7 @@ import { ToolRailPanel } from './ToolRailPanel'
 
 import type { BackdropLoad } from './MapArea'
 import type { PaintStyle } from '../canvas/painter'
+import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
 import type { ReactNode } from 'react'
 
@@ -39,6 +40,8 @@ export interface EditorProps {
   label: string
   /** The page's `<h1>`, which {@link Shell} places inside the canvas landmark. */
   heading: ReactNode
+  /** Where the polities' colours come from — one source for the canvas and every panel. */
+  colours: PolityColourSource
 }
 
 /**
@@ -50,7 +53,7 @@ export interface EditorProps {
  * @param props - the store, how to load, and the names
  * @returns the shell, filled where there is something to put in it
  */
-export function Editor({ store, load, style, zoneLabel, label, heading }: EditorProps) {
+export function Editor({ store, load, style, zoneLabel, label, heading, colours }: EditorProps) {
   const status = useRef<HTMLElement | null>(null)
   const action = useRef<HTMLElement | null>(null)
   const result = useRef<HTMLElement | null>(null)
@@ -68,10 +71,11 @@ export function Editor({ store, load, style, zoneLabel, label, heading }: Editor
           statusRef={status}
           actionRef={action}
           resultRef={result}
+          colours={colours}
         />
       }
-      rail={<ToolRailPanel store={store} />}
-      dock={<PolitiesPanel store={store} />}
+      rail={<ToolRailPanel store={store} colours={colours} />}
+      dock={<PolitiesPanel store={store} colours={colours} />}
       status={
         // No `aria-live`, and that is the accessibility decision rather than an omission: this text
         // changes on every pointer sample, so announcing it would make a screen reader unusable — the

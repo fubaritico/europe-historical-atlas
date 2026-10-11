@@ -21,7 +21,7 @@ describe('degreesAndMinutes', () => {
       expect(degreesAndMinutes(48.13, 'N', 'S')).toBe('48°08′N')
     })
 
-    it('writes the scenario’s own example', () => {
+    it('writes 2.35 as 2°21′E, 11.57 as 11°34′E and 48.13 as 48°08′N', () => {
       // s01: "the status bar reads 2°21′E 48°51′N · unclaimed"
       expect(degreesAndMinutes(2.35, 'E', 'O')).toBe('2°21′E')
       expect(degreesAndMinutes(11.57, 'E', 'O')).toBe('11°34′E')

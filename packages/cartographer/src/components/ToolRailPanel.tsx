@@ -1,17 +1,17 @@
-import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
-import { polityColours } from '@europe-historical-atlas/core/editor/polityColours'
-
 import { describeDrawingTarget } from '../state/drawingTarget'
 import { isPenMode } from '../state/toolSlice'
 
 import { ToolRail } from './ToolRail'
 
+import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
 
 /** What the binding needs. */
 export interface ToolRailPanelProps {
   /** The store the tool is read from and chosen through. */
   store: CartographerStoreHook
+  /** Where the polities' colours come from — the canvas reads the same source. */
+  colours: PolityColourSource
 }
 
 /**
@@ -23,17 +23,16 @@ export interface ToolRailPanelProps {
  * @param props - the store
  * @returns the rail
  */
-export function ToolRailPanel({ store }: ToolRailPanelProps) {
+export function ToolRailPanel({ store, colours }: ToolRailPanelProps) {
   const tool = store((state) => state.tool)
   const selectTool = store((state) => state.selectTool)
   const penMode = store((state) => state.penMode)
   const choosePenMode = store((state) => state.choosePenMode)
   store((state) => state.target)
-  store((state) => state.version)
+  const version = store((state) => state.version)
   const { document, target } = store.getState()
   const aimed = describeDrawingTarget(document, target)
-  const colour =
-    aimed === null ? undefined : polityColours(document, AUTOMATIC_PALETTE).get(aimed.id)
+  const colour = aimed === null ? undefined : colours.coloursOf(document, version).get(aimed.id)
   return (
     <ToolRail
       tool={tool}

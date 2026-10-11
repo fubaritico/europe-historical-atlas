@@ -192,7 +192,7 @@ describe('toolSlice', () => {
   })
 
   describe('the Pen’s mode', () => {
-    it('opens on the free Pen (s02: ⟨free point⟩ is active by default)', () => {
+    it('opens with the Pen placing free points', () => {
       expect(openStore().store.getState().penMode).toBe('free')
     })
 

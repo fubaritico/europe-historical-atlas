@@ -1,6 +1,3 @@
-import { documentFaults } from '@europe-historical-atlas/core/editor/documentFaults'
-import { polityColours } from '@europe-historical-atlas/core/editor/polityColours'
-
 import { polityAt } from '../geometry/fillHit'
 import { nearestAmong } from '../geometry/hitTest'
 import { isClosingOffered } from '../geometry/ringClosure'
@@ -20,6 +17,7 @@ import type { AnchorCache } from './anchorCache'
 import type { PaintStyle, Painter2D } from './painter'
 import type { GestureContext } from './toolGestures'
 import type { ToolSession } from './toolSession'
+import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
 import type { VectorLayers } from '../vectorLayers'
 import type { BackdropFrame } from '../view/projection'
@@ -78,11 +76,8 @@ export interface CanvasControllerDeps {
    * subject. Reported only when it changes; raw like `onHover`, the bar decides how to show it.
    */
   onAction: (sentence: string | null) => void
-  /**
-   * The automatic palette a polity left on "automatic" takes a slot of — injected rather than imported
-   * (ARCH-104), so the canvas can be run against any palette. Never empty, which the type holds.
-   */
-  palette: readonly [string, ...string[]]
+  /** Where the polities' colours come from — the same source `{Polities}` and the rail read. */
+  colours: PolityColourSource
   /**
    * The status bar's result zone — what a gesture did, *"inserted 412 vertices from the coastline"* —
    * or `null` to clear it. Beside the action, never in its place (`s02`, the dev's call of 2026-10-08).
@@ -118,8 +113,6 @@ export interface LiveCanvas {
   session: ToolSession
   /** The pointer in device pixels, or `null` when it is off the canvas. */
   pointer: Point | null
-  /** Each polity's colour, computed once per edition version — a pan must not re-derive adjacency. */
-  colours: { version: number; byId: ReadonlyMap<string, string> } | null
   /** The last action sentence reported, so an unchanged one is not reported again. */
   sentence: string | null
   /** Ask for a repaint of the static canvas, at most one per frame. */
@@ -127,23 +120,16 @@ export interface LiveCanvas {
 }
 
 /**
- * Each polity's colour, derived once per edition version.
- *
- * Keyed on the version for the anchor cache's reason: a pan repaints on every pointer move and the
- * colours depend on the document alone.
+ * Each polity's colour, from the shared source — cached there on the edition's version, so a pan,
+ * which repaints on every pointer move, never re-derives them.
  * @param it - the attachment
  * @returns the colour of each polity, by id
  */
-export function coloursOf(
-  it: Pick<LiveCanvas, 'colours'> & { deps: Pick<CanvasControllerDeps, 'store' | 'palette'> }
-): ReadonlyMap<string, string> {
+export function coloursOf(it: {
+  deps: Pick<CanvasControllerDeps, 'store' | 'colours'>
+}): ReadonlyMap<string, string> {
   const { document, version } = it.deps.store.getState()
-  if (it.colours?.version !== version) {
-    it.colours = { version, byId: polityColours(document, it.deps.palette) }
-    // Once per version, never per frame: the painters skip what these name, so this is where it is said.
-    for (const fault of documentFaults(document)) console.error(`[Cartographer] ${fault}`)
-  }
-  return it.colours.byId
+  return it.deps.colours.coloursOf(document, version)
 }
 
 /**

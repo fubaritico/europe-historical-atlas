@@ -3,10 +3,12 @@ import { StrictMode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { assetError } from '@europe-historical-atlas/core/data/assetError'
+import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { CHROME_PAINT_STYLE } from '../canvas/style'
 import { openEmptyYear } from '../state/openEmptyYear'
+import { createPolityColourSource } from '../state/polityColourSource'
 import { createCartographerStore } from '../state/store'
 import { TEST_BACKDROP_FRAME } from '../view/testFrame'
 import { UNFRAMED } from '../view/viewport'
@@ -18,6 +20,9 @@ import type { BackdropLoad } from './MapArea'
 import type { EditorAssets } from './MapArea'
 import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
+
+/** One colour source for the mounts below, over the shipped palette. */
+const COLOURS = createPolityColourSource(AUTOMATIC_PALETTE)
 
 /**
  * A ready backdrop.
@@ -74,6 +79,7 @@ function mount(load: BackdropLoad, strict = false): HTMLParagraphElement {
       statusRef={statusRef}
       actionRef={{ current: document.createElement('span') }}
       resultRef={{ current: document.createElement('span') }}
+      colours={COLOURS}
     />
   )
   render(strict ? <StrictMode>{area}</StrictMode> : area)
@@ -421,6 +427,7 @@ describe('MapCanvas, re-rendered', () => {
           onHover={() => undefined}
           onAction={() => undefined}
           onResult={() => undefined}
+          colours={COLOURS}
           style={CHROME_PAINT_STYLE}
           zoneLabel="zone"
           label="la carte"

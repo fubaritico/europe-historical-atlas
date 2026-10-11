@@ -6,6 +6,7 @@ import { useEditorAssets } from './useEditorAssets'
 
 import type { Backdrop } from '../backdropSource'
 import type { PaintStyle } from '../canvas/painter'
+import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
 import type { VectorLayers } from '../vectorLayers'
 import type {
@@ -79,6 +80,8 @@ export interface MapAreaProps {
   actionRef: RefObject<HTMLElement | null>
   /** The status bar's result zone, beside the action. */
   resultRef: RefObject<HTMLElement | null>
+  /** Where the polities' colours come from — shared with the panels. */
+  colours: PolityColourSource
 }
 
 /** What each phase of a bake is called, for the waiting line. */
@@ -194,6 +197,7 @@ export function MapArea({
   statusRef,
   actionRef,
   resultRef,
+  colours,
 }: MapAreaProps) {
   const { assets, error, fraction, phase } = useEditorAssets(load)
 
@@ -218,6 +222,7 @@ export function MapArea({
         style={style}
         zoneLabel={zoneLabel}
         label={label}
+        colours={colours}
       />
     </div>
   )

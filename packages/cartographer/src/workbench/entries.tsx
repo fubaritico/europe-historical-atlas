@@ -7,6 +7,7 @@ import { Input } from '@fubaritico/react/Input'
 
 import { DRAFT_ERRORS, EMPTY_DRAFT } from '../components/polityDraft'
 import { PolityForm } from '../components/PolityForm'
+import { PolityList } from '../components/PolityList'
 import { ToolRail } from '../components/ToolRail'
 
 import type { WorkbenchEntry } from './Workbench'
@@ -113,6 +114,54 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
     note: "The panel the popover holds, laid flat — area, hue, the automatic toggle and the hex — to tune it without the popover's positioning in the way.",
     width: 340,
     render: () => <ColorPicker defaultValue={BLUE} nullable density="compact" />,
+  },
+  {
+    id: 'polity-list',
+    title: 'Polities list',
+    note: "{Polities}' list after design/01: a subhead naming the year and the count, one 24px row per polity — swatch, name, the no-territory chip, rank and dates. Reaume de France is the target. Click a row, or focus the list and use the arrows and Enter.",
+    render: () => (
+      <div className="workbench__panel">
+        <PolityList
+          year={1100}
+          targetId="fr-couronne"
+          onChoose={() => undefined}
+          rows={[
+            {
+              id: 'aq',
+              name: 'Duchy of Aquitaine',
+              rank: 'duchy',
+              dates: '–',
+              colour: '#6f8a52',
+              hasTerritory: true,
+            },
+            {
+              id: 'hre',
+              name: 'Holy Roman Empire',
+              rank: 'empire',
+              dates: '962–1806',
+              colour: '#c29646',
+              hasTerritory: true,
+            },
+            {
+              id: 'fr-couronne',
+              name: 'Reaume de France',
+              rank: 'kingdom',
+              dates: '987–',
+              colour: '#54719b',
+              hasTerritory: true,
+            },
+            {
+              id: 'pl',
+              name: 'Kingdom of Poland',
+              rank: 'kingdom',
+              dates: '1025–',
+              colour: '#b8554a',
+              hasTerritory: false,
+            },
+          ]}
+        />
+      </div>
+    ),
   },
   {
     id: 'tool-rail',

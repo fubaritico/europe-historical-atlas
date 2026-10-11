@@ -2,10 +2,12 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { TOOL_KEYS } from '../canvas/navigation'
 import { openEmptyYear } from '../state/openEmptyYear'
+import { createPolityColourSource } from '../state/polityColourSource'
 import { createCartographerStore } from '../state/store'
 import { UNFRAMED } from '../view/viewport'
 
@@ -14,6 +16,9 @@ import { ToolRail } from './ToolRail'
 import { ToolRailPanel } from './ToolRailPanel'
 
 import type { ToolRailProps } from './ToolRail'
+
+/** One colour source for the mounts below, over the shipped palette. */
+const COLOURS = createPolityColourSource(AUTOMATIC_PALETTE)
 
 afterEach(() => {
   vi.useRealTimers()
@@ -269,7 +274,7 @@ describe('ToolRailPanel — the Pen’s mode', () => {
       edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
       viewport: { viewport: UNFRAMED },
     })
-    render(<ToolRailPanel store={store} />)
+    render(<ToolRailPanel store={store} colours={COLOURS} />)
     const user = userEvent.setup()
     await user.pointer({ keys: '[MouseRight]', target: tool('Pen') })
     await user.click(screen.getByRole('menuitemradio', { name: /follow the coast/ }))
@@ -291,7 +296,7 @@ describe('ToolRailPanel', () => {
   describe('happy path', () => {
     it('takes the tool through the store', async () => {
       const store = openStore()
-      render(<ToolRailPanel store={store} />)
+      render(<ToolRailPanel store={store} colours={COLOURS} />)
       await userEvent.setup().click(tool('Pen'))
       expect(store.getState().tool).toBe('draw')
     })
@@ -300,7 +305,7 @@ describe('ToolRailPanel', () => {
   describe('variants', () => {
     it('presses the tool the store holds, whoever chose it', () => {
       const store = openStore()
-      render(<ToolRailPanel store={store} />)
+      render(<ToolRailPanel store={store} colours={COLOURS} />)
       act(() => {
         store.getState().selectTool('edit')
       })
@@ -310,7 +315,7 @@ describe('ToolRailPanel', () => {
 
   describe('managed errors', () => {
     it('shows no swatch while nobody is aimed at', () => {
-      render(<ToolRailPanel store={openStore()} />)
+      render(<ToolRailPanel store={openStore()} colours={COLOURS} />)
       expect(screen.getByRole('img', { name: /none selected/ })).toBeDefined()
     })
   })
@@ -319,7 +324,7 @@ describe('ToolRailPanel', () => {
     // An undo that takes the polity away empties the swatch on its own: the target stops resolving.
     it('empties the swatch when the aimed-at polity is undone', () => {
       const store = openStore()
-      render(<ToolRailPanel store={store} />)
+      render(<ToolRailPanel store={store} colours={COLOURS} />)
       act(() => {
         store.getState().createPolity(
           {
@@ -363,7 +368,7 @@ describe('ToolRailPanel', () => {
         { kind: 'create-polity', label: 'create' }
       )
       store.getState().aimAt('fr')
-      render(<ToolRailPanel store={store} />)
+      render(<ToolRailPanel store={store} colours={COLOURS} />)
       expect(screen.getByRole('img', { name: /France/ }).getAttribute('style')).toContain(
         'rgb(18, 52, 86)'
       )

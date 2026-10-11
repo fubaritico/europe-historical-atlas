@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 
 import { createFetchHeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
 import { createFetchLandMaskSource } from '@europe-historical-atlas/core/data/landMask'
+import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { createFetchRiverSource } from '@europe-historical-atlas/core/data/riverSource'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?worker'
@@ -13,6 +14,7 @@ import { bakeToBitmap, loadBackdrop } from './backdropSource'
 import { CHROME_PAINT_STYLE } from './canvas/style'
 import { Editor } from './components/Editor'
 import { openEmptyYear } from './state/openEmptyYear'
+import { createPolityColourSource } from './state/polityColourSource'
 import { createCartographerStore } from './state/store'
 import { loadVectorLayers } from './vectorLayers'
 import { UNFRAMED } from './view/viewport'
@@ -147,6 +149,12 @@ const loadTheBackdrop = async (onProgress: ProgressReport) => {
   return { backdrop, vectors }
 }
 
+/**
+ * The polities' colours, for the canvas and every panel alike — one source, with the palette given here
+ * and nowhere else, so a fill and the swatch beside its name cannot disagree.
+ */
+const colours = createPolityColourSource(AUTOMATIC_PALETTE)
+
 createRoot(container).render(
   <StrictMode>
     <Editor
@@ -156,6 +164,7 @@ createRoot(container).render(
       style={CHROME_PAINT_STYLE}
       zoneLabel={`editorial zone — ${String(store.getState().document.year)}`}
       label={`Map of the year ${String(store.getState().document.year)}, being edited`}
+      colours={colours}
     />
   </StrictMode>
 )

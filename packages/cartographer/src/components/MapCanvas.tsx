@@ -1,12 +1,11 @@
 import { useId, useRef } from 'react'
 
-import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
-
 import { startCanvasController } from '../canvas/controller'
 import { trackFocusOrigin } from '../canvas/focusOrigin'
 
 import type { CanvasControllerDeps } from '../canvas/controller'
 import type { PaintStyle } from '../canvas/painter'
+import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
 import type { VectorLayers } from '../vectorLayers'
 import type { BackdropFrame } from '../view/projection'
@@ -49,6 +48,8 @@ export interface MapCanvasProps {
   zoneLabel: string
   /** What a screen reader is told this surface is. */
   label: string
+  /** Where the polities' colours come from — shared with the panels. */
+  colours: PolityColourSource
 }
 
 /**
@@ -143,6 +144,7 @@ export function MapCanvas({
   style,
   zoneLabel,
   label,
+  colours,
 }: MapCanvasProps) {
   const instructionsId = useId()
   // The overlay comes first in the tree so its ref is set before the drawing surface's callback reads it
@@ -176,7 +178,7 @@ export function MapCanvas({
             onResult,
             style,
             zoneLabel,
-            palette: AUTOMATIC_PALETTE,
+            colours,
           })
         }}
       />

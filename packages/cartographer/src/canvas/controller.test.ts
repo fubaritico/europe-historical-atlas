@@ -4,6 +4,7 @@ import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPale
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { openEmptyYear } from '../state/openEmptyYear'
+import { createPolityColourSource } from '../state/polityColourSource'
 import { createCartographerStore } from '../state/store'
 import { TEST_BACKDROP_FRAME } from '../view/testFrame'
 import { UNFRAMED } from '../view/viewport'
@@ -117,7 +118,7 @@ function attach(): {
     style: CHROME_PAINT_STYLE,
     zoneLabel: 'zone',
     overlay: document.createElement('canvas'),
-    palette: AUTOMATIC_PALETTE,
+    colours: createPolityColourSource(AUTOMATIC_PALETTE),
   })
   return { node, store, hovered, acted, resulted, dispose }
 }
@@ -446,7 +447,7 @@ describe('startCanvasController', () => {
           style: CHROME_PAINT_STYLE,
           zoneLabel: 'zone',
           overlay: document.createElement('canvas'),
-          palette: AUTOMATIC_PALETTE,
+          colours: createPolityColourSource(AUTOMATIC_PALETTE),
         })
       ).toThrow(/no 2D context/)
     })
@@ -996,7 +997,7 @@ describe('the tools on the canvas', () => {
         style: CHROME_PAINT_STYLE,
         zoneLabel: 'zone',
         overlay,
-        palette: AUTOMATIC_PALETTE,
+        colours: createPolityColourSource(AUTOMATIC_PALETTE),
       })
       expect([overlay.width, overlay.height]).toEqual([
         BOX.width * window.devicePixelRatio,
@@ -1069,7 +1070,7 @@ describe('the tools — what the review found', () => {
         style: CHROME_PAINT_STYLE,
         zoneLabel: 'zone',
         overlay,
-        palette: AUTOMATIC_PALETTE,
+        colours: createPolityColourSource(AUTOMATIC_PALETTE),
       })
       aimAtFrance(store)
       for (const at of CANVAS_TRIANGLE.slice(0, 2)) click(node, at)
@@ -1149,7 +1150,7 @@ describe('the tools — what the review found', () => {
         edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
         viewport: { viewport: UNFRAMED },
       })
-      const it = { colours: null, deps: { store, palette: AUTOMATIC_PALETTE } }
+      const it = { deps: { store, colours: createPolityColourSource(AUTOMATIC_PALETTE) } }
       const first = coloursOf(it)
       expect(coloursOf(it)).toBe(first)
       aimAtFrance(store)
@@ -1164,7 +1165,7 @@ describe('the tools — what the review found', () => {
         viewport: { viewport: UNFRAMED },
       })
       store.getState().document.claims.push({ polity: 'ghost', rings: [] })
-      const it = { colours: null, deps: { store, palette: AUTOMATIC_PALETTE } }
+      const it = { deps: { store, colours: createPolityColourSource(AUTOMATIC_PALETTE) } }
       coloursOf(it)
       coloursOf(it)
       expect(error).toHaveBeenCalledTimes(1)
@@ -1294,7 +1295,7 @@ describe('the Pen following the coast, on the canvas', () => {
       style: CHROME_PAINT_STYLE,
       zoneLabel: 'zone',
       overlay,
-      palette: AUTOMATIC_PALETTE,
+      colours: createPolityColourSource(AUTOMATIC_PALETTE),
     })
     aimAtFrance(store)
     store.getState().choosePenMode('coast')

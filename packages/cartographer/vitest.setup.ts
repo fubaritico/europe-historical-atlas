@@ -79,3 +79,10 @@ HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
   this.removeAttribute('open')
   this.dispatchEvent(new Event('close'))
 }
+
+/**
+ * `scrollIntoView`, because jsdom has none and lays nothing out. `{Polities}` scrolls the row the keys
+ * are on into view; under jsdom there is nothing to scroll, so the stub records nothing and only has to
+ * exist — the same reason as the 2D context above.
+ */
+Element.prototype.scrollIntoView = noop

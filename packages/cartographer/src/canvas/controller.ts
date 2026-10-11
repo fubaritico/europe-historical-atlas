@@ -580,7 +580,6 @@ export function startCanvasController(
     overlay: { node: deps.overlay, ctx: overlayCtx },
     session: idleSession(),
     pointer: null,
-    colours: null,
     sentence: null,
     requestPaint: () => undefined,
   }

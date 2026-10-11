@@ -73,3 +73,8 @@
   background: var(--panel);
   border-right: 1px solid var(--line);
 }
+
+/* A dock panel's body for the panel plates: its fill, the dock's width set by the stage. */
+.workbench__panel {
+  background: var(--panel);
+}

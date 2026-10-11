@@ -65,7 +65,7 @@ describe('inDevicePixels', () => {
   })
 
   describe('edge cases', () => {
-    it('reads as the design at 1× — the values are the stylesheet’s, not ours', () => {
+    it('keeps an 11px label and a 1px zone frame at 1×', () => {
       // `.artboard-label { font-size: 11px }` and `.artboard { border: 1px }`, as `style.ts` records.
       expect(CHROME_PAINT_STYLE.labelSize).toBe(11)
       expect(CHROME_PAINT_STYLE.zoneWidth).toBe(1)
