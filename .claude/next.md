@@ -5,7 +5,7 @@
 
 ## Where we are
 
-**1969 tests** (640 `core` · 782 atlas · 547 Cartographe), gate verte sur cinq contrôles (`lint`,
+**2350 tests** (682 `core` · 782 atlas · 886 Cartographe, 11/10), gate verte sur cinq contrôles (`lint`,
 `type-check`, `test`, `build`, `format:check`). Worker à **13 490 o**, toujours sans three.js — et depuis
 le 07/10 le Cartographe émet **le même chunk, au même hash**, le fond étant cuit par le même port.
 
@@ -26,9 +26,9 @@ Structure : **trois paquets**, orchestrés par **Turbo**, avec un **catalogue de
 
 | paquet | ce que c'est | lint | tests |
 | --- | --- | --- | --- |
-| `core` | pure TS, ni three.js ni DOM ni React ni zustand — **tenu par ESLint et par `tsc`**. Cinq couches : `utils`, `geo`, `data`, `pipeline`, `editor` | config racine | **`node`**, 621 |
+| `core` | pure TS, ni three.js ni DOM ni React ni zustand — **tenu par ESLint et par `tsc`**. Cinq couches : `utils`, `geo`, `data`, `pipeline`, `editor` | config racine | **`node`**, 682 |
 | `atlas` | l'application 3D, three.js vanille | config racine | `jsdom`, 782 |
-| `cartographer` | l'éditeur de territoires, React 19 + Vite 8. Son `publicDir` **est** celui de l'atlas | **sa propre config**, qui réimporte la racine | `jsdom` + plugin React, 368 |
+| `cartographer` | l'éditeur de territoires, React 19 + Vite 8. Son `publicDir` **est** celui de l'atlas | **sa propre config**, qui réimporte la racine | `jsdom` + plugin React, 886 |
 
 **Trois faits de structure à ne pas re-découvrir** : *flat config n'a aucune cascade*, donc la config d'un
 paquet **réimporte** la racine et ESLint résout **une** config depuis le **répertoire courant** — d'où un
@@ -68,15 +68,16 @@ point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui 
 
 ## ▶ ON REPREND ICI — en trois lignes
 
-**On crée un pays : `[+ New polity]` ouvre le formulaire dans une boîte, OK le crée et donne la plume —
-le curseur du canevas passe du refus à la plume. On ne peut toujours rien dessiner.**
+**On dessine : la plume trace, suit la côte, s'accroche aux frontières partagées, ajoute un point ; la
+flèche sélectionne, déplace, ajoute et supprime un point. Le zoom ‹+›/‹−› ne marche pas chez le dev.**
 
 | | | |
 | --- | --- | --- |
-| **ce qui marche** | les cinq zones · le fond cadré · pan, zoom · ‹P› ‹A› ‹space› · les curseurs · la barre d'état · l'état de la cible · **le DS branché sur le thème sombre, à la finesse Illustrator** · **le formulaire de création** · **l'établi** (`/workbench.html`) | ✅ |
-| **ce qui manque** | **`(d)`** : le second canevas, poser des ancres, fermer un anneau, déplacer un point · et de `(c2)` : la liste `{Polities}` avec « no territory », l'avis transitoire de cible | ◀ |
-| **à faire d'abord** | **`/scenarii-to-code` sur `s02`** (poser, fermer) et `s03` (déplacer) — puis dire au dev ce que `(d)` livrera et ne livrera pas, **avant** d'écrire | |
-| **dès que la `0.3.0` sort** | **le ColorPicker dans la boîte de création** — annoncé « bientôt fini » par le dev le 09/10 au soir. Petit et indépendant de `(d)`, donc il passe devant s'il arrive avant. Voir ci-dessous | |
+| **ce qui marche** | `(d)` livré le 10–11/10 : plume (libre / côte, avec aperçu), fermeture, ‹ctrl+z› pas à pas qui rouvre un contour, flèche (déplacer, insérer, supprimer, ‹suppr›), accrochage aux ancres partagées, la côte d'abord en mode côte avec réutilisation des ancres du voisin, la plume « + » · la barre d'outils à la Illustrator · `{Polities}` qui suit le document · clic dans un remplissage = cible, clic dans le vide = désélection · ColorField (DS `0.5.0`) | ✅ |
+| **à faire tout de suite** | **le zoom clavier** — le dev : *« le plus et le moins, ça zoome, dézoome, c'est tout »*, et ça ne marche pas. Deux causes possibles dans le code, **corriger les deux sans redemander** : ‹⌘+›/‹⌘−› partent au navigateur (`onModifiedKey` laisse passer tout ‹⌘›) → les prendre pour la carte ; les touches ne sont écoutées que sur le canvas (`listen` dans `controller.ts`) → un focus dans la barre d'outils ou `{Polities}` les perd → écouter ‹+›/‹−› sur `window` hors champ de saisie. Rien n'est écrit encore | ◀ |
+| **ensuite, dans l'ordre du dev** | l'accrochage aux **fleuves** (même forme que la côte, variante « Pen — follow a river » déjà dans `railTools`, désactivée) · puis l'**ordre d'empilement** des pays depuis `{Polities}`, par un **menu contextuel à la Illustrator** (« Bring to front »…), pas de glisser-déposer — le dev peut demander les composants au Claude du DS | |
+| **à pousser** | 7 commits non poussés, `059af13`..`9ff0757` (`git ls-remote origin main` = `6b10462`). Pousser **quand le dev le demande** | |
+| **noté, non urgent** | alléger les tronçons de côte (Douglas–Peucker, tolérance non tranchée) · la confirmation avant de supprimer une ancre partagée et la suppression multiple (attend la marquise), écrites dans `s03` | |
 
 > **Le découpage `a/b/c/d` est figé — ne plus le re-trancher.** Il a bougé deux fois le 07/10, et
 > c'est ce qui a fait perdre le fil au dev. S'il paraît faux à la reprise, le dire **avant** d'y
@@ -104,13 +105,7 @@ plages et ajouter le champ couleur, avec son état « automatic » = `null`. Le 
    `type="button"` partout sauf OK · le `Card` coupe ce qui déborde, d'où `overflow: visible` sur la
    boîte du formulaire.
 
-**Le ColorPicker, quand la `0.3.0` sera publiée — ce qu'il faudra faire, et c'est tout** :
-monter `@fubaritico/react` à `^0.3.0` (seuls les paquets republiés montent) · ajouter le champ
-**Colour** au formulaire (`PolityForm.tsx`), avec l'état **« automatic » = `null`** que le DS a promis
-(s02 : *« I leave the colour on "automatic" »*, qui veut dire « la palette décide ») · faire porter la
-couleur par le brouillon (`polityDraft.ts` : `colour` n'est plus forcé à `null`) · une fiche de l'établi
-pour le régler à la finesse des champs · un test qui crée un pays avec une couleur choisie, et un qui
-le crée en « automatic ». Lire la **Notes** du README du composant avant de l'utiliser.
+**Le ColorPicker est fait** (10/10) : `ColorField` du DS `0.5.0` dans la boîte de création, « automatic » = `null`.
 
 **Décisions du dev du 09/10, à ne pas re-trancher** : le **contraste n'est pas une contrainte** dans
 l'éditeur · le formulaire est une **boîte de dialogue**, pas le panneau `{Details}` de `design/03` · un

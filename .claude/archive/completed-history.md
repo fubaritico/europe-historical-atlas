@@ -2,6 +2,126 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-10-08 → 09 — L'éditeur devient une fenêtre, et quatre défauts que seul l'écran pouvait dire
+
+Une plage : **19:21 → 01:28 (6 h 06, 288 actions)**, après ~18 h de coupure. Le chantier ouvert le
+05/10 totalise **14 h 36 sur 3 plages**. **12 commits** `fb12abc`..`77333de`, 56 fichiers,
+**+3 829 / −218**, **1771 → 1900 tests**, gate verte à chaque pas. **8 commits non poussés.** Livré :
+`4d-2 (c1)` entier, le Cartographe en anglais, le zoning, le preflight, le cover, les curseurs, et le
+plan d'intégration du design system.
+
+- **La leçon du soir, et elle est neuve : un test peut cesser d'exercer quoi que ce soit sans jamais
+  devenir rouge.** Dix tests de molette envoyaient `deltaY: -1`. Après le passage au zoom
+  proportionnel, ça vaut **+0,095 %** — ils passaient toujours, puisqu'ils assèrent une *direction*.
+  Le test-vedette « le point reste sous le pointeur » était devenu trivialement vrai. **Un test vert
+  n'est pas un test qui garde** : c'est la même famille que la garde qui ne garde rien, vue quatre
+  fois le 07/10, mais par l'autre bout — ici c'est le *stimulus* qui s'est éteint, pas l'assertion.
+- **Le défaut le plus coûteux était invisible pour moi et évident pour lui : tout était à moitié
+  trop petit.** Le canevas est dimensionné en `clientWidth × devicePixelRatio` et rien ne met le
+  contexte à l'échelle — volontairement, l'arithmétique de `view/` étant en pixels d'appareil, donc
+  les **positions** tombent juste. Mais chaque valeur que le design déclare en pixels **d'écran**
+  était utilisée comme pixel d'appareil : sur un 2×, le label de 11 px rendait **5,5**, les filets de
+  1 px **un demi**, les poignées de 8 px **4**. *Positions justes, tailles de moitié* — ça se lit
+  « le design est trop petit » et pas « il y a un bug ». **Et c'est invisible pour qui travaille sur
+  un écran 1×.** `inDevicePixels(style, ratio)` met le style à l'échelle **une fois** ; sa garde est
+  écrite **sur l'objet** et non sur une liste de champs, parce qu'une liste serait le même oubli un
+  fichier plus loin.
+- **Le zoom « trop sensible » n'était pas un réglage.** Le facteur était appliqué **par événement** et
+  `deltaY` était jeté. Une molette de souris émet un événement par cran ; un trackpad en émet 60 à
+  120 par seconde. Le même geste valait **1,1 sur l'une et 1,1³⁰ ≈ 17× sur l'autre** — aucune
+  constante ne peut être juste pour les deux, il fallait une autre arithmétique. Exponentiel dans la
+  course, donc il compose : cinquante petits événements et un grand de même course tombent sur la
+  même échelle. Et **`deltaMode` est lu** : une molette qui rapporte des *lignes* est ordinaire
+  (Firefox/Windows), et lue comme des pixels elle serait seize fois plus douce ailleurs.
+- **Le clignotement au redimensionnement avait une cause exacte** : assigner `node.width` **efface le
+  canevas immédiatement** (c'est ce que dit la spec), pendant que le repaint attend le
+  `requestAnimationFrame` suivant. Une frame blanche par événement. La coalescence est juste pour la
+  molette et **fausse là où l'effacement est déjà arrivé** : le redimensionnement repeint dans le
+  même tour.
+- **`4d-2 (c1)` : la cible est un id, jamais l'objet, et c'est toute la propriété du pas.** Annuler la
+  création d'un pays fait que la cible **cesse de résoudre** — la bannière disparaîtra, la plume
+  refusera — sans écouteur, sans nettoyage, sans rien à penser dans `undo`, `goTo` ou
+  `restoreMarker`. Vérifié en écrivant la version qui tient l'objet. Six sabotages, chacun sur son
+  propre test.
+- **Un trou non enregistré, tranché par le dev : d'où vient l'id d'une polity ?** Trois documents
+  pointaient dans trois directions — `format.md` montre `fr-couronne`, `s02` ne demande pas d'id,
+  `s07` exige qu'un renommage ne le change pas. Sa décision : **proposé, éditable**, parce que c'est
+  la seule des trois règles sous laquelle `fr-couronne` est atteignable depuis *« Reaume de France »*.
+  Inscrit en **H-31**.
+- **Ma fixture a divergé en moins d'une heure.** `AQUITAINE` écrite dans deux suites, les deux
+  copies déjà en désaccord sur `colour`, et **aucun test ne tombait**. Trouvé **indépendamment par
+  deux agents de revue**. Leur remède commun était à moitié faux : le critère n'est pas la couche
+  mais **si la dérive est silencieuse** — l'identité descend dans `core`, `openStore` reste en double
+  parce que `tsc` refuse les deux copies si les deps bougent.
+- **Le zoning, et le dev a dû le demander deux fois avant que je comprenne ce qu'il voulait.** Cinq
+  zones, **aucune valeur de moi** : les quatre hauteurs et les trois largeurs viennent de
+  `chrome.css`. Une zone vide **porte son nom**, sinon elle est indistinguable d'une zone dont le CSS
+  a échoué. Et **BEM, décidé par lui** : pas de CSS modules, parce qu'un nom haché ne peut pas
+  cohabiter avec une chaîne BEM venue du design system.
+- **Le reset trouvé en regardant les SEPT dépôts voisins**, pas un — la faute du 01/10 non répétée.
+  Il est dans `date-time-picker`, inspiré du preflight de Tailwind, et `fubaritico-ds/packages/styles`
+  a été vérifié aussi : **que des feuilles de composants, aucune base**. C'est lui qui a réparé la
+  capture : `body` gardait sa marge de 8 px, donc `.shell` à `100dvh` commençait 8 px plus bas et la
+  barre d'état passait sous le pli.
+- **Le cover, sa décision, et sa moitié manquante.** Une échelle minimale promet seulement que le fond
+  est *assez grand* ; rien n'empêche un pan de le faire glisser. D'où `clampToCover` — le clamp que
+  `viewport.ts` avait **refusé d'inventer** (*« les vrais chiffres appartiennent à l'appelant »*), et
+  ici ils sont réels. **Un seul `settle()`** par lequel passe chaque changement de vue : un maintien
+  posé à trois endroits sur quatre rate le quatrième.
+- **Et ma JSDoc a survendu deux fois dans la même journée.** `openingView` disait « centre » la zone,
+  alors qu'elle la centre *puis la maintient* — la zone commençant à −45°, exactement là où le fond
+  commence, elle ne peut **jamais** être centrée horizontalement. Un test écrit depuis cette
+  affirmation a accusé du code qui avait raison. Et `fitWhole` se réclamait de `s01` *« the whole
+  frame is visible »*, qui est le `Given` d'un **autre** scénario et jamais une spécification de
+  l'ouverture. Les deux corrigées.
+- **Les curseurs, et le fait qui porte toute la séquence de zones** : `cursor` est une propriété
+  d'**élément**, donc posée sur le canvas elle s'applique là et nulle part ailleurs — le navigateur
+  restitue le pointeur alentour tout seul. *« Quand je sors du canevas ça redevient la flèche »*
+  n'est **pas du code à écrire**, et c'est nécessaire plutôt que cosmétique : le geste qui donne un
+  sujet à la plume est **un clic dans le chrome**. Vérifié par le dev **dans Illustrator**.
+- **Trois frictions levées par lui sur les curseurs** : pas d'outil de zoom (les boutons `[+]/[−]`
+  suffisent, donc « deux outils et seulement deux » tient) · pas d'onzième curseur (le refus est le
+  `not-allowed` natif) · la flèche blanche à bord noir **existe déjà**. Et le refus vaut pour
+  ⟨edit⟩ autant que pour ⟨draw⟩ — la moitié que le handoff n'avait jamais posée et qu'il a posée :
+  *« tu sélectionnes les points de qui ? »*
+- **Les dix curseurs pesaient 82 615 octets dont ~94 % de manifeste C2PA** embarqué par l'outil de
+  design. Nettoyés : **5 265 octets**, ce qui les met sous le seuil d'inlining de Vite — donc des
+  `data:` URI, aucune requête, **aucun 404** que le repli CSS aurait traduit en simple croix. Un test
+  assère qu'aucun manifeste n'a suivi.
+- **L'interface du Cartographe passe en anglais** (sa décision), l'atlas reste en français. Dix
+  chaînes, `lang="en"`, et **sept assertions de test** — dont un test nommé *« names the phase in
+  French »*. La distinction à ne pas perdre : **le chrome est en anglais, le contenu non** — un nom
+  de polity est une donnée, *« Reaume de France »* est une graphie d'époque.
+- **Qui parle quelle langue, tranché et consigné dans `plan.md` P8** : atlas FR **et** EN le français
+  d'abord, Cartographe EN seul, Payload **EN et FR dans le même formulaire**. Et **deux choses se
+  contribueront** : le contenu *et* les labels de l'application. La chaîne qu'il a déjà fait tourner :
+  `Payload → un script d'export → du JSON → la couche de traduction → ICU`. Le JSON est **généré,
+  jamais lu à l'exécution** — ce qui découle de la contrainte déjà écrite : *une chaîne qui décrit une
+  panne ne doit pas pouvoir échouer*. **Le script d'export n'avait jamais été nommé** : Payload garde
+  ses données en base, et c'est la raison même pour laquelle il avait choisi JSON.
+- **Trois documents affirmaient une bannière permanente ; elle est transitoire.** *« Un petit peu
+  comme une sting bar »* — 5 secondes puis elle se retire. Et **ça renverse laquelle des deux pièces
+  porte la garantie** : la barre d'état, elle, reste, donc c'est **elle** qui garde les quatre cents
+  ancres dans le bon pays. La barre nomme désormais **l'action et sur qui elle porte**, et l'action et
+  un résultat transitoire s'affichent **en même temps** — *« je ne vois pas pourquoi l'un prendrait la
+  place de l'autre »*.
+- **`CURSORS.md` posait encore quatre questions tranchées le 22/09.** Le document qu'on ouvre pour
+  construire demandait des réponses déjà données — la faute que `known-issues.md` consigne sur
+  lui-même, retrouvée ailleurs.
+- **Trois reproches du dev, tous justes.** *« Quand tu dégueules du contenu comme ça, je ne le lis
+  même plus »* — mes réponses étaient des murs. *« Tu peux arrêter avec tes choix là ? »* — j'ai
+  posé des questions à cocher au lieu de trancher. Et une phrase en franglais si mal traduite qu'elle
+  ne voulait rien dire (*« une action mute le document… un copieur qui lève »*), réécrite en français
+  dans `known-issues.md`.
+- **Deux fautes de procédure, de moi.** Un `rm -rf` dans une commande, refusé par la garde — la règle
+  demande une permission explicite **à chaque fois**. Et un message de commit aplati en une ligne de
+  500 caractères, faute d'avoir mis la ligne vide après le sujet.
+- **Le budget de lisibilité a eu raison une cinquième fois** (`startCanvasController` à 55 lignes,
+  d'où `watchStore`), jamais désactivé. **`attach.ts` renommé `controller.ts`** à sa demande :
+  *« attach »* disait que quelque chose était fixé à quelque chose et jamais quoi, ni par qui.
+- **Mesures du soir** : Cartographe 247,36 → **253,78 ko / 80,12 ko gzip**, plus **3,30 ko de CSS**
+  (1,39 gzip). Worker **13 490 o au même hash que l'atlas**, toujours.
+
 ### 2026-10-07 → 08 — Le fond servi, la côte en vecteurs, et quatre gardes à moi qui ne gardaient rien
 
 Une plage : **22:04 → 01:14 (3 h 10, 284 actions)**, après 44 h de coupure. Le chantier ouvert le 05/10
