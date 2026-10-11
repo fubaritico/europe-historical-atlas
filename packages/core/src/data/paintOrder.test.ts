@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { paintOrder, paintRanks } from './paintOrder'
+import { effectiveSuzerains, paintOrder, paintRanks } from './paintOrder'
 
 import type { YearPolity } from './yearFormat'
 
@@ -76,6 +76,16 @@ describe('paintOrder', () => {
   })
 
   describe('managed errors', () => {
+    it('gives a polity whose suzerain is missing no effective suzerain', () => {
+      expect([
+        ...effectiveSuzerains([polity('fr'), polity('normandy', 'fr'), polity('x', 'gone')]),
+      ]).toEqual([
+        ['fr', null],
+        ['normandy', 'fr'],
+        ['x', null],
+      ])
+    })
+
     it('lets a polity whose suzerain is not in the list head its own group', () => {
       const { order, looped } = paintOrder([polity('fr'), polity('normandy', 'gone')])
       expect(order).toEqual(['fr', 'normandy'])

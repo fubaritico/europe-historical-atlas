@@ -27,6 +27,24 @@ export interface PaintOrder {
 }
 
 /**
+ * Each polity's group: the suzerain it is painted over — **the one definition of a sibling**, read by
+ * `paintOrder` and by the stacking commands alike, so a Bring to Front cannot move what the map does not
+ * paint as one block (review ARCH-001). A suzerain the list does not hold counts as none: the polity
+ * heads its own group.
+ * @param polities - the year's polities
+ * @returns each id's effective suzerain, `null` for a top-level group
+ */
+export function effectiveSuzerains(polities: readonly YearPolity[]): Map<string, string | null> {
+  const ids = new Set(polities.map((polity) => polity.id))
+  return new Map(
+    polities.map((polity) => [
+      polity.id,
+      polity.suzerain !== null && ids.has(polity.suzerain) ? polity.suzerain : null,
+    ])
+  )
+}
+
+/**
  * The polities, back to front.
  *
  * A suzerain the list does not hold is treated as no suzerain: the polity heads its own group. The
@@ -36,12 +54,13 @@ export interface PaintOrder {
  * @returns the ids back to front, and those only reachable through a loop
  */
 export function paintOrder(polities: readonly YearPolity[]): PaintOrder {
-  const ids = new Set(polities.map((polity) => polity.id))
+  const suzerains = effectiveSuzerains(polities)
   const vassalsOf = new Map<string, string[]>()
   const roots: string[] = []
   for (const polity of polities) {
-    if (polity.suzerain === null || !ids.has(polity.suzerain)) roots.push(polity.id)
-    else vassalsOf.set(polity.suzerain, [...(vassalsOf.get(polity.suzerain) ?? []), polity.id])
+    const suzerain = suzerains.get(polity.id) ?? null
+    if (suzerain === null) roots.push(polity.id)
+    else vassalsOf.set(suzerain, [...(vassalsOf.get(suzerain) ?? []), polity.id])
   }
   const order: string[] = []
   const placed = new Set<string>()
