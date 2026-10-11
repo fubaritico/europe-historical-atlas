@@ -157,3 +157,24 @@ export function scaleLimitsFor(canvas: PixelSize, backdrop: PixelSize): ScaleLim
     max: MAX_SCALE,
   }
 }
+
+/**
+ * Which history move a key asks for: ‹ctrl+Z› undoes, ‹ctrl+shift+Z› redoes — ‹cmd› on a Mac (`s03`).
+ *
+ * Read on `key` lower-cased, so ‹shift› turning `z` into `Z` does not hide it. ‹alt› is never part of
+ * either: held with ‹alt› the key is the platform's.
+ * @param event - the key and its modifiers
+ * @returns `'undo'`, `'redo'`, or `null` for any other key
+ */
+export function historyKey(event: {
+  key: string
+  ctrlKey: boolean
+  metaKey: boolean
+  altKey: boolean
+  shiftKey: boolean
+}): 'undo' | 'redo' | null {
+  if (event.altKey || !(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'z') {
+    return null
+  }
+  return event.shiftKey ? 'redo' : 'undo'
+}

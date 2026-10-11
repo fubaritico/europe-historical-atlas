@@ -32,6 +32,24 @@ export function idleSession(): ToolSession {
 }
 
 /**
+ * Drop the gesture in progress — the outline being drawn, the anchor being dragged — and keep the
+ * selection, which is a pointer the author chose and not a gesture.
+ *
+ * **One place for "the gesture in progress"** (ARCH-001, found in review): the undo and the redo both
+ * start here, so neither can rewind the document under a half-done gesture that would then be written on
+ * top of it.
+ * @param session - the session, mutated in place
+ * @returns `true` when there was a gesture in progress to drop
+ */
+export function abandonGesture(session: ToolSession): boolean {
+  const busy = session.outline.length > 0 || session.moving !== null || session.grabbed !== null
+  session.outline = []
+  session.moving = null
+  session.grabbed = null
+  return busy
+}
+
+/**
  * The anchors the tools may act on: those of the drawing target's rings, each once.
  *
  * **Only the target's, and that is the dev's inversion of Illustrator** (2026-10-08): you choose *whose*

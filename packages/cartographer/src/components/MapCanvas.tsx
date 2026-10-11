@@ -53,13 +53,14 @@ export interface MapCanvasProps {
  * What a keyboard reader is told the surface can do.
  *
  * **It names only the keys `controller.ts` actually binds**, which is what keeps it from going stale:
- * the arrows, `+`/`−` and PageUp/PageDown, ‹P› and ‹A›, and the Pen's three keys. Promising a gesture
+ * the arrows, `+`/`−` and PageUp/PageDown, ‹P› and ‹A›, the Pen's three keys, and undo and redo. Promising a gesture
  * before it is wired is the defect this repository keeps finding in its own comments.
  */
 const CANVAS_INSTRUCTIONS =
   'Arrow keys to pan the map, plus and minus or Page Up and Page Down to zoom. ' +
-  'P takes the Pen and A the white arrow. With the Pen, Backspace removes the last point, ' +
-  'Escape abandons the outline and Enter closes it.'
+  'Hold Space to pan with the hand. P takes the Pen and A the white arrow. With the Pen, Backspace removes the last point, ' +
+  'Escape abandons the outline and Enter closes it. ' +
+  'Control or Command with Z undoes the last gesture; with Shift as well, it redoes it.'
 
 /** Off-screen but in the accessibility tree — the instruction text has nothing to show visually. */
 const offScreen = {

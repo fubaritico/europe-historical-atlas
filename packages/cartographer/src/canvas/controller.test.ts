@@ -1151,3 +1151,88 @@ describe('the tools — what the review found', () => {
     })
   })
 })
+
+describe('undo and redo from the keyboard', () => {
+  /**
+   * A history key, as the browser fires it.
+   * @param init - the key and its modifiers
+   * @returns the event
+   */
+  function chord(init: KeyboardEventInit): KeyboardEvent {
+    return new KeyboardEvent('keydown', { ...init, bubbles: true, cancelable: true })
+  }
+
+  describe('happy path', () => {
+    it('undoes a closed ring on ‹ctrl+Z› and redoes it on ‹ctrl+shift+Z›', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(node, at)
+      const undo = chord({ key: 'z', ctrlKey: true })
+      node.dispatchEvent(undo)
+      expect(undo.defaultPrevented).toBe(true)
+      expect(store.getState().document.claims).toEqual([])
+      node.dispatchEvent(chord({ key: 'Z', ctrlKey: true, shiftKey: true }))
+      expect(store.getState().document.claims).toHaveLength(1)
+      dispose()
+    })
+  })
+
+  describe('variants', () => {
+    it('answers ‹cmd› as ‹ctrl›', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(node, at)
+      node.dispatchEvent(chord({ key: 'z', metaKey: true }))
+      expect(store.getState().document.claims).toEqual([])
+      dispose()
+    })
+  })
+
+  describe('managed errors', () => {
+    // The other modified keys stay the platform's — the history's two are the only exception.
+    // A11Y review: ‹ctrl+space› is the input method's, not the hand's.
+    it('lets ‹ctrl+space› through without borrowing the hand', () => {
+      const { node, dispose } = attach()
+      const space = chord({ key: ' ', ctrlKey: true })
+      node.dispatchEvent(space)
+      expect(space.defaultPrevented).toBe(false)
+      expect(node.style.cursor).not.toContain('hand-closed')
+      dispose()
+    })
+
+    it('still lets ‹ctrl+A› through untouched', () => {
+      const { node, store, dispose } = attach()
+      const select = chord({ key: 'a', ctrlKey: true })
+      node.dispatchEvent(select)
+      expect(select.defaultPrevented).toBe(false)
+      expect(store.getState().tool).toBe('navigate')
+      dispose()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('takes the outline in progress before the gesture before it', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(node, at)
+      click(node, [600, 300])
+      node.dispatchEvent(chord({ key: 'z', ctrlKey: true }))
+      expect(store.getState().document.claims).toHaveLength(1)
+      dispose()
+    })
+  })
+
+  describe('edge cases', () => {
+    // s03 — the undo takes the polity's creation back too, and the Pen loses its subject on its own.
+    it('walks back past the outline to the polity’s creation', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(node, at)
+      node.dispatchEvent(chord({ key: 'z', ctrlKey: true }))
+      node.dispatchEvent(chord({ key: 'z', ctrlKey: true }))
+      expect(store.getState().document.polities).toEqual([])
+      expect(node.style.cursor).toBe('not-allowed')
+      dispose()
+    })
+  })
+})

@@ -3,7 +3,7 @@ import { canCloseRing, isClosingOffered } from '../geometry/ringClosure'
 import { describeDrawingTarget } from '../state/drawingTarget'
 import { lonLatToScreen, screenToLonLatOnBackdrop } from '../view/projection'
 
-import { targetHandles } from './toolSession'
+import { abandonGesture, targetHandles } from './toolSession'
 
 import type { ToolSession } from './toolSession'
 import type { CartographerStoreHook } from '../state/store'
@@ -197,4 +197,43 @@ export function toolKey(context: GestureContext, key: string): boolean {
   else if (key === 'Enter') closeOutline(context)
   else return false
   return true
+}
+
+/**
+ * ‹ctrl+Z›: abandon the gesture in progress if there is one, otherwise take back the last gesture.
+ *
+ * **The gesture in progress first** — `H-10`'s *one gesture is one step*, applied to the session: an
+ * outline not yet closed or an anchor still under the button is not in the line, so undoing the step
+ * *before* it would rewind the document under it, and the release would then write onto the rewound
+ * document (ARCH-001 / QUAL-001). A second ‹ctrl+Z› undoes.
+ *
+ * At the origin there is nothing to take back, which is ordinary — and said, once per press: a held key
+ * repeats, and the history is walked on repeat (as in Illustrator) but the warning is not.
+ * @param context - the session and the store
+ * @param repeat - whether this is the key's auto-repeat rather than a press
+ */
+export function undoGesture(context: GestureContext, repeat: boolean): void {
+  if (abandonGesture(context.session)) return
+  const state = context.store.getState()
+  if (!state.canUndo) {
+    if (!repeat) console.warn(`${TAG} nothing to undo.`)
+    return
+  }
+  state.undo()
+}
+
+/**
+ * ‹ctrl+shift+Z›: abandon the gesture in progress if there is one, otherwise apply an undone gesture
+ * again. Nothing to redo is ordinary — and said, once per press.
+ * @param context - the session and the store
+ * @param repeat - whether this is the key's auto-repeat rather than a press
+ */
+export function redoGesture(context: GestureContext, repeat: boolean): void {
+  if (abandonGesture(context.session)) return
+  const state = context.store.getState()
+  if (!state.canRedo) {
+    if (!repeat) console.warn(`${TAG} nothing to redo.`)
+    return
+  }
+  state.redo()
 }

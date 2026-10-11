@@ -12,6 +12,7 @@ import {
   TOOL_KEYS,
   ZOOM_IN_KEYS,
   ZOOM_OUT_KEYS,
+  historyKey,
   scaleLimitsFor,
   wheelZoomFactor,
 } from './navigation'
@@ -23,8 +24,10 @@ import {
   arrowPress,
   arrowRelease,
   penClick,
+  redoGesture,
   resolvedTarget,
   toolKey,
+  undoGesture,
 } from './toolGestures'
 import { idleSession, targetHandles } from './toolSession'
 
@@ -339,16 +342,28 @@ function onPointerCancel(it: LiveCanvas, event: PointerEvent): void {
 }
 
 /**
- * Whether a key belongs to the browser or the assistive technology rather than to the canvas.
+ * Handle a key held with a modifier: the history's two, or none.
  *
- * Held with ‹ctrl›, ‹cmd› or ‹alt›, it is theirs — ‹cmd+P› prints, ‹ctrl+A› selects, ‹cmd+plus› zooms the
- * page — never a tool's (A11Y-001, found in review). ‹shift› is not excluded: on many layouts `+` is
- * typed with it.
+ * **Every other modified key belongs to the browser or the assistive technology** — ‹cmd+P› prints,
+ * ‹ctrl+A› selects, ‹cmd+plus› zooms the page — never a tool's (A11Y-001, found in review). ‹shift› alone
+ * is not a modifier here: on many layouts `+` is typed with it.
+ *
+ * **‹ctrl+Z› and ‹ctrl+shift+Z› are the exception, and take nothing from the browser**: a canvas has no
+ * text to undo. ‹cmd› stands for ‹ctrl› on a Mac (`s03`).
+ * @param it - the attachment
  * @param event - the key event
- * @returns `true` when the canvas must let the key through untouched
+ * @returns `true` when the key was a modified one, handled here or left to the platform
  */
-function isPlatformShortcut(event: KeyboardEvent): boolean {
-  return event.ctrlKey || event.metaKey || event.altKey
+function onModifiedKey(it: LiveCanvas, event: KeyboardEvent): boolean {
+  if (!event.ctrlKey && !event.metaKey && !event.altKey) return false
+  const history = historyKey(event)
+  if (history === null) return true
+  event.preventDefault()
+  if (history === 'undo') undoGesture(gestureOf(it), event.repeat)
+  else redoGesture(gestureOf(it), event.repeat)
+  it.requestPaint()
+  refreshTools(it)
+  return true
 }
 
 /**
@@ -376,13 +391,14 @@ function onKeyDown(it: LiveCanvas, event: KeyboardEvent): void {
   const state = it.deps.store.getState()
   // ‹space› borrows the hand for as long as it is held. `preventDefault` because a focusable element
   // scrolls the page on space, which here would scroll the editor out from under the map.
+  // First, so a modified ‹space› (‹ctrl+space›, which input methods use) stays the platform's too.
+  if (onModifiedKey(it, event)) return
   if (event.key === ' ') {
     event.preventDefault()
     it.spaceHeld = true
     showCursor(it)
     return
   }
-  if (isPlatformShortcut(event)) return
   if (toolKey(gestureOf(it), event.key)) {
     event.preventDefault()
     it.requestPaint()

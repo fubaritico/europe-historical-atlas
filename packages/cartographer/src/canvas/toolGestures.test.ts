@@ -15,7 +15,9 @@ import {
   closeOutline,
   lonLatAt,
   penClick,
+  redoGesture,
   toolKey,
+  undoGesture,
 } from './toolGestures'
 import { idleSession } from './toolSession'
 
@@ -305,6 +307,100 @@ describe('toolGestures', () => {
       arrowPress(context, [300, 100])
       expect(toolKey(context, 'Escape')).toBe(true)
       expect(context.session.selected).toBeNull()
+    })
+  })
+})
+
+describe('undoGesture and redoGesture', () => {
+  describe('happy path', () => {
+    it('takes back the last closed outline, and puts it back', () => {
+      const context = openContext()
+      drawTriangle(context)
+      undoGesture(context, false)
+      expect(context.store.getState().document.claims).toEqual([])
+      redoGesture(context, false)
+      expect(context.store.getState().document.claims).toHaveLength(1)
+    })
+  })
+
+  describe('variants', () => {
+    // H-10 applied to the session: the outline in progress is the gesture in progress, so it goes first.
+    it('abandons an outline in progress before undoing anything', () => {
+      const context = openContext()
+      drawTriangle(context)
+      penClick(context, [500, 500])
+      undoGesture(context, false)
+      expect(context.session.outline).toEqual([])
+      expect(context.store.getState().document.claims).toHaveLength(1)
+      undoGesture(context, false)
+      expect(context.store.getState().document.claims).toEqual([])
+    })
+  })
+
+  describe('managed errors', () => {
+    // No refusal is silent (rules/error-handling.md).
+    it('says there is nothing to redo at the end of the line', () => {
+      const logged = watchConsole()
+      redoGesture(openContext(), false)
+      expect(logged.warn).toHaveBeenCalledWith(expect.stringContaining('nothing to redo'))
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('says there is nothing to undo at the origin', () => {
+      const logged = watchConsole()
+      const context = openContext()
+      while (context.store.getState().canUndo) context.store.getState().undo()
+      undoGesture(context, false)
+      expect(logged.warn).toHaveBeenCalledWith(expect.stringContaining('nothing to undo'))
+    })
+  })
+
+  describe('edge cases', () => {
+    // s03 — "undoing never changes the tool in my hand".
+    it('leaves the tool in hand untouched', () => {
+      const context = openContext()
+      drawTriangle(context)
+      context.store.getState().selectTool('edit')
+      undoGesture(context, false)
+      expect(context.store.getState().tool).toBe('edit')
+    })
+  })
+
+  describe('what the review found', () => {
+    // ARCH-001 / QUAL-001: an undo mid-drag drops the drag, so the release writes nothing on the
+    // rewound document — and the selection, which is not a gesture, stays.
+    it('drops a drag in progress before undoing, and keeps the selection', () => {
+      const context = openContext()
+      drawTriangle(context)
+      arrowPress(context, [300, 100])
+      arrowDrag(context, [320, 120])
+      undoGesture(context, false)
+      arrowRelease(context)
+      expect(context.store.getState().document.claims).toHaveLength(1)
+      expect(context.store.getState().undoLabel).toBe('draw outline of Reaume de France')
+      expect(context.session.selected).toBe(1)
+    })
+
+    it('drops an outline in progress before redoing', () => {
+      const context = openContext()
+      drawTriangle(context)
+      undoGesture(context, false)
+      penClick(context, [500, 500])
+      redoGesture(context, false)
+      expect(context.session.outline).toEqual([])
+      expect(context.store.getState().document.claims).toEqual([])
+    })
+
+    // QUAL-002: a held key walks the line, but the warning is said once per press.
+    it('says nothing to undo once per press, not on every repeat', () => {
+      const logged = watchConsole()
+      const context = openContext()
+      while (context.store.getState().canUndo) context.store.getState().undo()
+      undoGesture(context, false)
+      undoGesture(context, true)
+      undoGesture(context, true)
+      expect(logged.warn).toHaveBeenCalledTimes(1)
     })
   })
 })
