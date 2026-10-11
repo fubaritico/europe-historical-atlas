@@ -1,3 +1,4 @@
+import { documentFaults } from '@europe-historical-atlas/core/editor/documentFaults'
 import { polityColours } from '@europe-historical-atlas/core/editor/polityColours'
 
 import { nearestAmong } from '../geometry/hitTest'
@@ -131,6 +132,8 @@ export function coloursOf(
   const { document, version } = it.deps.store.getState()
   if (it.colours?.version !== version) {
     it.colours = { version, byId: polityColours(document, it.deps.palette) }
+    // Once per version, never per frame: the painters skip what these name, so this is where it is said.
+    for (const fault of documentFaults(document)) console.error(`[Cartographer] ${fault}`)
   }
   return it.colours.byId
 }

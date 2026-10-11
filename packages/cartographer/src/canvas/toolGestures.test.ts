@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
@@ -84,6 +84,18 @@ function onScreen(context: GestureContext, index: number): [number, number] {
   const anchor = context.store.getState().document.anchors[index]
   if (anchor === undefined) throw new Error(`no anchor ${String(index)}`)
   return lonLatToScreen(anchor, context.frame, context.store.getState().viewport)
+}
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
+/** Silence and record the console at both levels. */
+function watchConsole() {
+  return {
+    warn: vi.spyOn(console, 'warn').mockImplementation(() => undefined),
+    error: vi.spyOn(console, 'error').mockImplementation(() => undefined),
+  }
 }
 
 describe('toolGestures', () => {
@@ -186,10 +198,12 @@ describe('toolGestures', () => {
 
   describe('managed errors', () => {
     // s02 — "the Pen refuses to place an anchor" with nobody to draw for.
-    it('places nothing when nobody is aimed at', () => {
+    it('places nothing when nobody is aimed at, and says so', () => {
+      const logged = watchConsole()
       const context = openContext(false)
       penClick(context, [100, 100])
       expect(context.session.outline).toEqual([])
+      expect(logged.warn).toHaveBeenCalledWith(expect.stringContaining('select a polity'))
     })
 
     // s02 — "a click selects nothing — there is no polity whose points it could select".
@@ -210,32 +224,60 @@ describe('toolGestures', () => {
       expect(context.session.selected).toBeNull()
     })
 
-    it('does not close two anchors, which enclose nothing', () => {
+    it('does not close two anchors, which enclose nothing, and says so', () => {
+      const logged = watchConsole()
       const context = openContext()
       penClick(context, [100, 100])
       penClick(context, [300, 100])
       closeOutline(context)
       expect(context.store.getState().document.claims).toEqual([])
       expect(context.session.outline).toHaveLength(2)
+      expect(logged.warn).toHaveBeenCalledWith(expect.stringContaining('three anchors'))
     })
   })
 
   describe('unmanaged errors', () => {
     // The vellum around the backdrop is not a place.
-    it('places nothing off the backdrop', () => {
+    it('places nothing off the backdrop, and says so', () => {
+      const logged = watchConsole()
       const context = openContext()
       penClick(context, [-50, -50])
       expect(context.session.outline).toEqual([])
       expect(lonLatAt(context, [-50, -50])).toBeNull()
+      expect(logged.warn).toHaveBeenCalledWith(expect.stringContaining('off the map'))
     })
 
     // The target is gone (an undo took the polity): the outline stays on screen, nothing is lost to it.
-    it('keeps the outline when the target no longer resolves at closing', () => {
+    it('keeps the outline when the target no longer resolves at closing, and says so', () => {
+      const logged = watchConsole()
       const context = openContext()
       for (const at of TRIANGLE) penClick(context, at)
       context.store.setState({ target: 'gone' })
       closeOutline(context)
       expect(context.session.outline).toHaveLength(3)
+      expect(logged.warn).toHaveBeenCalledWith(expect.stringContaining('no polity is selected'))
+    })
+
+    // What no gesture should reach: the document refusing what the tool checked. Loud, at error level.
+    it('reports a document that refuses a checked outline as an error, keeping the outline', () => {
+      const logged = watchConsole()
+      const context = openContext()
+      for (const at of TRIANGLE) penClick(context, at)
+      context.store.setState({ drawOutline: () => false })
+      closeOutline(context)
+      expect(context.session.outline).toHaveLength(3)
+      expect(logged.error).toHaveBeenCalledWith(expect.stringContaining('refused the outline'))
+    })
+
+    it('reports a document that refuses a move as an error', () => {
+      const logged = watchConsole()
+      const context = openContext()
+      drawTriangle(context)
+      context.store.setState({ moveAnchor: () => false })
+      arrowPress(context, [300, 100])
+      arrowDrag(context, [320, 120])
+      arrowRelease(context)
+      expect(logged.error).toHaveBeenCalledWith(expect.stringContaining('refused to move anchor 1'))
     })
   })
 

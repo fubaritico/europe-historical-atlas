@@ -33,6 +33,17 @@ export interface GestureContext {
   radius: number
 }
 
+/**
+ * Every refusal says so, in the console at least — the dev's rule, 2026-10-11: *"faut prévenir, faut tout
+ * couvrir."* Two levels, and the line between them is whether anything should have prevented it:
+ *
+ * - `console.warn` for a gesture of the author's the tool declines — a click off the backdrop, ‹enter›
+ *   on two anchors. Ordinary, and worth a line because the screen may show nothing;
+ * - `console.error` for what no gesture should reach — the document refusing what the tool already
+ *   checked. A defect, said loudly, never swallowed.
+ */
+const TAG = '[Cartographer]'
+
 /** How `{History}` and `[↶ Undo]` name a moved anchor — `s03`'s *"Undo — move anchor"*. */
 export const MOVE_ANCHOR_STEP = { kind: 'move-anchor', label: 'move anchor' } as const
 
@@ -79,11 +90,22 @@ export function resolvedTarget(context: GestureContext): { id: string; name: str
  */
 export function closeOutline(context: GestureContext): void {
   const target = resolvedTarget(context)
-  if (target === null || !canCloseRing(context.session.outline)) return
+  if (target === null) {
+    console.warn(`${TAG} the outline was not closed: no polity is selected to close it into.`)
+    return
+  }
+  if (!canCloseRing(context.session.outline)) {
+    console.warn(`${TAG} the outline was not closed: a ring needs at least three anchors.`)
+    return
+  }
   const step = { kind: 'draw-outline', label: `draw outline of ${target.name}` }
   if (context.store.getState().drawOutline(target.id, context.session.outline, step)) {
     context.session.outline = []
+    return
   }
+  console.error(
+    `${TAG} the document refused the outline of "${target.id}" after the tool had checked it.`
+  )
 }
 
 /**
@@ -95,13 +117,20 @@ export function closeOutline(context: GestureContext): void {
  * @param at - the pointer, in screen pixels
  */
 export function penClick(context: GestureContext, at: Point): void {
-  if (resolvedTarget(context) === null) return
+  if (resolvedTarget(context) === null) {
+    console.warn(`${TAG} no anchor placed: select a polity to draw in first.`)
+    return
+  }
   if (isClosingOffered(outlineOnScreen(context), at, context.radius)) {
     closeOutline(context)
     return
   }
   const point = lonLatAt(context, at)
-  if (point !== null) context.session.outline.push(point)
+  if (point === null) {
+    console.warn(`${TAG} no anchor placed: the click was off the map.`)
+    return
+  }
+  context.session.outline.push(point)
 }
 
 /**
@@ -142,8 +171,10 @@ export function arrowRelease(context: GestureContext): void {
   const moving = context.session.moving
   context.session.moving = null
   context.session.grabbed = null
-  if (moving !== null)
-    context.store.getState().moveAnchor(moving.index, moving.to, MOVE_ANCHOR_STEP)
+  if (moving === null) return
+  if (!context.store.getState().moveAnchor(moving.index, moving.to, MOVE_ANCHOR_STEP)) {
+    console.error(`${TAG} the document refused to move anchor ${String(moving.index)}.`)
+  }
 }
 
 /**

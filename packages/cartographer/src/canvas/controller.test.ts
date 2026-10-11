@@ -1133,5 +1133,21 @@ describe('the tools — what the review found', () => {
       aimAtFrance(store)
       expect(coloursOf(it)).not.toBe(first)
     })
+
+    // The painters skip a claim naming an unknown polity; this is where that is said — once per version.
+    it('reports a faulty document once per version, not once per frame', () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      const store = createCartographerStore({
+        edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
+        viewport: { viewport: UNFRAMED },
+      })
+      store.getState().document.claims.push({ polity: 'ghost', rings: [] })
+      const it = { colours: null, deps: { store, palette: AUTOMATIC_PALETTE } }
+      coloursOf(it)
+      coloursOf(it)
+      expect(error).toHaveBeenCalledTimes(1)
+      expect(error).toHaveBeenCalledWith(expect.stringContaining('"ghost"'))
+      error.mockRestore()
+    })
   })
 })

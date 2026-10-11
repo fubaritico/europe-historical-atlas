@@ -29,6 +29,24 @@ Stop and ask before writing any of these:
 Bring three things to the question, not one: **what breaks**, **who learns that it happened**, and
 **what the alternative costs**.
 
+## No refusal is silent — decided by the dev, 2026-10-11
+
+> *"Faut prévenir, faut tout couvrir parce que tu vas voir que ça va devenir extrêmement subtil. On ne
+> peut pas se permettre de laisser les choses sans message."*
+
+Whatever the branch chosen above, **something is said**. A guard that returns early, a refused gesture,
+an entry a painter skips: each one logs, at least to the console, with the `[Cartographer]` (or the
+application's) tag. Two levels, and the line is whether anything should have prevented it:
+
+- **`console.warn`** — a gesture of the author's that the tool declines (a click off the map, ‹enter› on
+  two anchors). Ordinary, and logged because the screen may show nothing.
+- **`console.error`** — what no gesture should reach (the document refusing what the tool checked, a
+  claim naming a polity the registry lacks). A defect, said loudly.
+
+**Never per frame.** A check that would run on every repaint is run once per document version instead
+(`documentFaults`), or the log drowns everything else. A refusal with an on-screen answer still logs —
+the console is the one place a later, subtler failure can be traced back to.
+
 ## The distinction that makes the discussion tractable
 
 Not every substitution is equal, and the difference is not how bad the failure is — it is **whether
