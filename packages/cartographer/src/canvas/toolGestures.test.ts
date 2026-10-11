@@ -782,3 +782,84 @@ describe('the Pen following the coast', () => {
     })
   })
 })
+
+describe('two neighbours along one shore', () => {
+  /**
+   * France drawn along the shore from x = 100 to x = 250 — anchors 0 to 15, one per vertex — and
+   * closed inland; then the Empire aimed at, the Pen still following the coast.
+   * @returns the context, on the Empire, and its reports
+   */
+  function shoreNeighbours() {
+    const { context, reports } = coastContext()
+    penClick(context, [100, 200])
+    penClick(context, [250, 200])
+    context.store.getState().choosePenMode('free')
+    penClick(context, [175, 300])
+    penClick(context, [101, 201])
+    context.store.getState().aimAt('hre')
+    context.store.getState().choosePenMode('coast')
+    reports.length = 0
+    return { context, reports }
+  }
+
+  // The dev's case, Spain then Portugal: the shared vertex is France's own anchor, and the Pen keeps
+  // following the coast from it rather than branching off it.
+  it('starts on the neighbour’s coast anchor by its index, and follows the shore from there', () => {
+    const { context, reports } = shoreNeighbours()
+
+    penClick(context, [250, 202])
+    penClick(context, [400, 198])
+
+    expect(context.session.outline[0]?.anchor).toBe(15)
+    expect(context.session.outline.slice(1).every((point) => point.anchor === null)).toBe(true)
+    expect(reports).toEqual(['inserted 15 vertices from the coastline'])
+  })
+
+  it('reuses every neighbour’s anchor a coast stretch runs over, and adds only the rest', () => {
+    const { context } = shoreNeighbours()
+
+    penClick(context, [300, 200])
+    penClick(context, [200, 200])
+
+    expect(context.session.outline.map((point) => point.anchor)).toEqual([
+      null,
+      null,
+      null,
+      null,
+      null,
+      15,
+      14,
+      13,
+      12,
+      11,
+      10,
+    ])
+  })
+
+  it('keeps the neighbour’s provenance on a reused anchor', () => {
+    const { context } = shoreNeighbours()
+    penClick(context, [250, 200])
+    expect(context.session.outline[0]?.provenance).toEqual(TEST_COAST_PROVENANCE)
+  })
+
+  // In free mode the shore is not followed, so an existing anchor is still branched onto.
+  it('branches onto the neighbour’s anchor in free mode', () => {
+    const { context } = shoreNeighbours()
+    context.store.getState().choosePenMode('free')
+
+    penClick(context, [250, 202])
+
+    expect(context.session.outline[0]?.anchor).toBe(15)
+    expect(context.session.snap).toBeNull()
+  })
+
+  it('places a free point next to the shore without capturing a neighbour’s anchor', () => {
+    const { context } = shoreNeighbours()
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    context.store.getState().choosePenMode('free')
+
+    penClick(context, [240, 260])
+
+    expect(context.session.outline[0]?.anchor).toBeNull()
+  })
+})

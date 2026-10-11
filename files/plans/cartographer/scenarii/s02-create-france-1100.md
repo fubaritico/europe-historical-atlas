@@ -545,8 +545,18 @@ Scenario: follow a neighbour's border between two of its anchors
 ```
 
 > **Built 2026-10-11, on the dev's request** — *"le snapping pour les frontières communes"*. An existing
-> anchor wins over the coast and over a free point: the border is already there. Undoing the closing
-> and closing again shares the same anchors; only the points the outline created itself are new.
+> anchor wins over a free point: the border is already there. Undoing the closing and closing again
+> shares the same anchors; only the points the outline created itself are new.
+>
+> **Corrected the same evening, the dev drawing Spain then Portugal**: an anchor no longer wins over the
+> coast. A neighbour drawn along the shore leaves an anchor on every coast vertex, so with the Pen
+> following the coast those anchors hijacked the click — *"j'ai la fonctionnalité branching"* — and the
+> next click could not follow the shore from there. **Following the coast, the shore wins**, and a
+> coast vertex that is already an anchor is **that anchor, reused by its index** — matched exactly,
+> since an anchor placed from the coast is its vertex's own coordinates and nothing rounds it at save.
+> So the junction stays one shared anchor and the coast is followed from it. Branching still holds in
+> free mode, and off the shore. The cost: in coast mode, near the shore, a shared border is not
+> followed anchor to anchor — switch to free mode for that.
 
 > The dev, 2026-09-22: _"À partir d'un point sur lequel on clique, on ne le supprime pas comme dans
 > Illustrator, mais on fait démarrer un autre tracé car nous aurons des points en commun sur plusieurs

@@ -182,19 +182,22 @@ export interface SnapOffer {
 const NO_OFFER: SnapOffer = { target: null, preview: null, kind: null, anchor: null }
 
 /**
- * What the Pen offers under the pointer. **An existing anchor first** — the border is already there,
- * and joining it is what keeps two polities on one line — then, following the coast, a coast vertex.
+ * What the Pen offers under the pointer. **Following the coast, the shore first** — a neighbour's
+ * anchors on it are reused by the click, not branched onto — then an existing anchor, whose border is
+ * already there.
  * @param it - the attachment
  * @returns the offer, `NO_OFFER` when there is nothing
  */
 export function snapOffer(it: LiveCanvas): SnapOffer {
   if (!penOffered(it) || it.pointer === null) return NO_OFFER
   const gesture = gestureOf(it)
+  // Following the coast, the shore first — the same order as the click (`penClick`).
+  if (it.deps.store.getState().penMode === 'coast') {
+    const coast = coastOffer(it, gesture, it.pointer)
+    if (coast.kind !== null) return coast
+  }
   const hit = anchorHit(gesture, it.pointer)
-  if (hit !== null) return anchorOffer(it, gesture, hit)
-  return it.deps.store.getState().penMode === 'coast'
-    ? coastOffer(it, gesture, it.pointer)
-    : NO_OFFER
+  return hit === null ? NO_OFFER : anchorOffer(it, gesture, hit)
 }
 
 /**

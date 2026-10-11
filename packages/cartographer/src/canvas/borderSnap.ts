@@ -135,3 +135,28 @@ export function anchorSentence(context: GestureContext, hit: number): string {
   const paths = pathsHolding(context.store.getState().document, hit)
   return `Branching from a shared anchor — held by ${String(paths)} ${paths === 1 ? 'path' : 'paths'}`
 }
+
+/**
+ * The existing anchors by position, for the coast to reuse: a coast vertex already placed as an anchor
+ * — a neighbour drawn along the same shore — is that anchor, not a second point on the same spot.
+ *
+ * **Exact equality, no tolerance**, and that is sound rather than lucky: an anchor placed from the coast
+ * is `backdropToLonLat` of its vertex, deterministic, and nothing rounds it at save. A free point near
+ * the shore never equals a vertex, so it is never captured. The outline's own anchors are left out:
+ * reusing one would fold the ring back on itself.
+ * @param context - the store and the session
+ * @returns the anchor at a position, or `null`
+ */
+export function anchorsByPosition(
+  context: GestureContext
+): (lonLat: readonly [number, number]) => number | null {
+  const { document } = context.store.getState()
+  const held = new Set(context.session.outline.map((point) => point.anchor))
+  const byKey = new Map<string, number>()
+  for (const index of referencedAnchors(document)) {
+    const anchor = document.anchors[index]
+    if (anchor !== undefined && !held.has(index))
+      byKey.set(`${String(anchor[0])},${String(anchor[1])}`, index)
+  }
+  return (lonLat) => byKey.get(`${String(lonLat[0])},${String(lonLat[1])}`) ?? null
+}

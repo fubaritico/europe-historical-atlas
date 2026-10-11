@@ -838,25 +838,25 @@ describe('wheelZoomFactor', () => {
   })
 })
 
+/** France's identity, with nothing but an id and a name. */
+const FRANCE_IDENTITY = {
+  id: 'fr',
+  name: 'Reaume de France',
+  rank: null,
+  status: null,
+  suzerain: null,
+  existsFrom: null,
+  existsTo: null,
+  colour: null,
+  wikidata: null,
+}
+
 /**
  * Create a polity and aim the Pen at it, as `[+ New polity]`'s OK does.
  * @param store - the store
  */
 function aimAtFrance(store: CartographerStoreHook): void {
-  store.getState().createPolity(
-    {
-      id: 'fr',
-      name: 'Reaume de France',
-      rank: null,
-      status: null,
-      suzerain: null,
-      existsFrom: null,
-      existsTo: null,
-      colour: null,
-      wikidata: null,
-    },
-    { kind: 'create-polity', label: 'create' }
-  )
+  store.getState().createPolity(FRANCE_IDENTITY, { kind: 'create-polity', label: 'create' })
   store.getState().aimAt('fr')
 }
 
@@ -1366,6 +1366,30 @@ describe('the Pen following the coast, on the canvas', () => {
       expect(store.getState().document.claims).toHaveLength(1)
       node.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true }))
       expect(store.getState().document.claims).toEqual([])
+      dispose()
+    })
+  })
+
+  describe('a neighbour along the same shore', () => {
+    // The dev's case, Spain then Portugal (2026-10-11): over the neighbour's coast anchor the Pen keeps
+    // following the coast, rather than offering to branch.
+    it('says it follows the coastline over a neighbour’s coast anchor, not that it branches', () => {
+      const { node, store, acted, dispose } = attachWithShore()
+      click(node, [60, 218])
+      click(node, [160, 218])
+      store.getState().choosePenMode('free')
+      click(node, [110, 300])
+      click(node, [61, 219])
+      store
+        .getState()
+        .createPolity(
+          { ...FRANCE_IDENTITY, id: 'pt', name: 'Portucale' },
+          { kind: 'create-polity', label: 'create' }
+        )
+      store.getState().aimAt('pt')
+      store.getState().choosePenMode('coast')
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 160, offsetY: 219 }))
+      expect(acted).toHaveBeenLastCalledWith('Following the coastline for Portucale')
       dispose()
     })
   })

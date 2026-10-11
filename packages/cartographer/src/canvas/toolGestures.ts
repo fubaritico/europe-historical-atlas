@@ -8,7 +8,7 @@ import { backdropToLonLat, lonLatToScreen, screenToLonLatOnBackdrop } from '../v
 import { screenToBackdrop } from '../view/viewport'
 
 import { deleteSelected, insertOnStretch } from './anchorGestures'
-import { anchorClick } from './borderSnap'
+import { anchorClick, anchorsByPosition } from './borderSnap'
 import { TAG } from './consoleTag'
 import { abandonGesture, dropDrag, sessionPointOf, targetHandles } from './toolSession'
 
@@ -139,9 +139,14 @@ export function penClick(context: GestureContext, at: Point): void {
     closeOutline(context)
     return
   }
-  // An existing anchor wins over the coast and over a free point: the border is already there.
+  // Following the coast, the shore wins: a neighbour drawn along it left an anchor on every vertex,
+  // and branching onto those would lose the coast (the dev, Spain then Portugal, 2026-10-11). Those
+  // anchors are reused by the coast click, so the border stays shared. Elsewhere an existing anchor
+  // wins over a free point: the border is already there.
+  const following = context.store.getState().penMode === 'coast'
+  if (following && coastClick(context, at)) return
   if (anchorClick(context, at)) return
-  if (context.store.getState().penMode === 'coast' && coastClick(context, at)) return
+  if (following) console.warn(`${TAG} no coastline within reach: a free point was placed.`)
   freeClick(context, at)
 }
 
@@ -198,8 +203,8 @@ export function coastStretchTo(context: GestureContext, hit: CoastVertex): Point
  * A click with the Pen following the coast (`s02`): on the first, an anchor exactly on the coast; on
  * the next one along the same shore, the whole stretch between them, in one gesture.
  *
- * Off the coast it places nothing here and says so — the caller then places a free point, `s02`'s
- * *"place points freely"*.
+ * Off the coast it places nothing — the caller then joins an anchor or places a free point, and says
+ * so: `s02`'s *"place points freely"*.
  * @param context - the session, the coast and the store
  * @param at - the pointer, in screen pixels
  * @returns `true` when the click was taken by the coast
@@ -207,10 +212,7 @@ export function coastStretchTo(context: GestureContext, hit: CoastVertex): Point
 function coastClick(context: GestureContext, at: Point): boolean {
   const hit = coastHit(context, at)
   const contour = hit === null ? undefined : context.coast[hit.contour]
-  if (hit === null || contour === undefined) {
-    console.warn(`${TAG} no coastline within reach: a free point was placed.`)
-    return false
-  }
+  if (hit === null || contour === undefined) return false
   const stretch = coastStretchTo(context, hit)
   // A second click on the vertex already placed: nothing to insert. Placing it again would put two
   // anchors on one spot (a zero-length edge); placing a free point would defeat the snap (QUAL-101).
@@ -236,14 +238,23 @@ function coastClick(context: GestureContext, at: Point): boolean {
  * @returns how many were placed
  */
 function placeOnCoast(context: GestureContext, points: readonly (Point | undefined)[]): number {
+  const existing = anchorsByPosition(context)
   let placed = 0
   for (const point of points) {
     if (point === undefined) continue
-    context.session.outline.push({
-      at: backdropToLonLat(point, context.frame),
-      provenance: context.coastProvenance,
-      anchor: null,
-    })
+    const at = backdropToLonLat(point, context.frame)
+    const anchor = existing(at)
+    // An anchor a neighbour already has there is joined with its own provenance, never duplicated.
+    const reused =
+      anchor === null ? null : sessionPointOf(context.store.getState().document, anchor)
+    if (anchor !== null && reused === null) {
+      console.error(
+        `${TAG} anchor ${String(anchor)} has no declared source; a new point was placed on it.`
+      )
+    }
+    context.session.outline.push(
+      reused ?? { at, provenance: context.coastProvenance, anchor: null }
+    )
     placed += 1
   }
   return placed
