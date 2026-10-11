@@ -797,3 +797,53 @@ describe('editionSlice.insertAnchor and deleteAnchor', () => {
     })
   })
 })
+
+describe('editionSlice.restackPolity', () => {
+  /** How s16 names the step. */
+  const FRONT: HistoryStep = { kind: 'restack', label: 'bring to front — Sacrum Imperium' }
+
+  const ids = (store: ReturnType<typeof openStore>['store']): string[] =>
+    store.getState().document.polities.map((polity) => polity.id)
+
+  describe('happy path', () => {
+    // s16 — "{History} gains one step … And ‹ctrl+Z› puts France back on top".
+    it('moves a group as one step, and the undo puts the order back', () => {
+      const { store } = openStore()
+      const before = ids(store)
+      expect(store.getState().restackPolity(before[0] ?? '', 'front', FRONT)).toBe(true)
+      expect(ids(store)).toEqual([...before].reverse())
+      expect(store.getState().undoLabel).toBe('bring to front — Sacrum Imperium')
+      store.getState().undo()
+      expect(ids(store)).toEqual(before)
+    })
+  })
+
+  describe('variants', () => {
+    it('publishes the move, so the canvas repaints', () => {
+      const { store } = openStore()
+      const version = store.getState().version
+      store.getState().restackPolity(ids(store)[0] ?? '', 'front', FRONT)
+      expect(store.getState().version).toBeGreaterThan(version)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('records nothing for a move that would change nothing', () => {
+      const { store } = openStore()
+      const version = store.getState().version
+      expect(store.getState().restackPolity(ids(store)[1] ?? '', 'front', FRONT)).toBe(false)
+      expect(store.getState().version).toBe(version)
+      expect(store.getState().canUndo).toBe(false)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('records nothing for a polity the year does not hold', () => {
+      const { store } = openStore()
+      expect(store.getState().restackPolity('nobody', 'back', FRONT)).toBe(false)
+      expect(store.getState().canUndo).toBe(false)
+    })
+  })
+
+  // L5: the edge cases of the order itself are `core/editor/stacking`'s; this only records it.
+})

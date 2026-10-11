@@ -8,6 +8,7 @@ import {
   moveAnchor,
 } from '@europe-historical-atlas/core/editor/documentEdits'
 import { createHistory } from '@europe-historical-atlas/core/editor/history'
+import { restack } from '@europe-historical-atlas/core/editor/stacking'
 
 import type { CartographerStore } from './store'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
@@ -19,6 +20,7 @@ import type {
   HistoryRow,
   HistoryStep,
 } from '@europe-historical-atlas/core/editor/history'
+import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import type { StateCreator } from 'zustand'
 
@@ -149,6 +151,15 @@ export interface EditionActions {
    * @returns the polities that held it, or `null` when nothing holds it or a ring would fall too short
    */
   deleteAnchor: (index: number, step: HistoryStep) => AnchorRemoval | null
+  /**
+   * Move a polity among its siblings, its vassals with it, as one undoable step — `s16`'s four
+   * commands, from the menu of a row of `{Polities}`.
+   * @param polityId - which polity
+   * @param move - the command
+   * @param step - how the gesture is named — *"bring to front — Duchy of Normandy"*
+   * @returns `false` when the polity is unknown or the move would change nothing — and nothing happened
+   */
+  restackPolity: (polityId: string, move: StackingMove, step: HistoryStep) => boolean
   /** Take back the last gesture. Does nothing at the origin: `ctrl+z` at the end of the line is ordinary. */
   undo: () => void
   /** Apply an undone gesture again. Does nothing at the end of the line. */
@@ -348,6 +359,8 @@ export function editionActions(
       record((document) => addOutline(document, polityId, points), step),
     moveAnchor: (index, point, step): boolean =>
       record((document) => moveAnchor(document, index, point), step),
+    restackPolity: (polityId, move, step): boolean =>
+      record((document) => restack(document, polityId, move), step),
     ...anchorActions(record),
     undo: (): void => {
       const back = line.undo()
