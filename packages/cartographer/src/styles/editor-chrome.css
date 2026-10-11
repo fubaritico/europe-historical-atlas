@@ -253,8 +253,9 @@
   font-size: 11.5px;
 }
 
-/* The design system's listbox, flattened into the panel: no frame of its own, rows edge to edge. */
-.polities__list {
+/* The design system's listbox, flattened into the panel: no frame of its own, rows edge to edge. Two
+   classes, so it wins over the Dropdown's `.ui-listbox` further down, which gave it back a frame. */
+.ui-listbox.polities__list {
   --ui-listbox-bg: var(--panel);
   --ui-listbox-border-color: transparent;
   --ui-listbox-shadow: none;
@@ -285,6 +286,27 @@
   --polity-indent: calc(12px + 8px);
 
   padding-inline-start: calc(10px + var(--polity-depth, 0) * var(--polity-indent));
+}
+
+/* The groups, told apart by the line above a row (the dev, 2026-10-11): solid above a suzerain owing
+   nobody — the start of a group — a shade quieter than the panel's own hairlines; dashed above a vassal;
+   dotted above a vassal's vassal and deeper. The first row has nothing above it. */
+.polity-row {
+  --polity-group-line: color-mix(in srgb, var(--line) 70%, var(--panel));
+
+  border-top: 1px solid var(--polity-group-line);
+}
+
+.polity-row[aria-level='2'] {
+  border-top-style: dashed;
+}
+
+.polity-row:not([aria-level='1'], [aria-level='2']) {
+  border-top-style: dotted;
+}
+
+.polity-row:first-child {
+  border-top-color: transparent;
 }
 
 .polity-row[aria-selected='true'] {
