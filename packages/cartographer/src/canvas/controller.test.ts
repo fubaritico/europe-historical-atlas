@@ -1878,6 +1878,18 @@ describe('the Pencil on the canvas', () => {
       dispose()
     })
 
+    // A11Y-001: a tool taken with a key is said, the focus being on the canvas and not the rail.
+    it('says the tool a key takes, and says nothing when it is already in hand', () => {
+      const { node, store, resulted, dispose } = attach()
+      aimAtFrance(store)
+      node.dispatchEvent(keyEvent('a'))
+      expect(resulted).toHaveBeenLastCalledWith('Direct Selection')
+      resulted.mockClear()
+      node.dispatchEvent(keyEvent('a'))
+      expect(resulted).not.toHaveBeenCalled()
+      dispose()
+    })
+
     it('takes the Pen with P from another tool, its mode unchanged', () => {
       const { node, store, dispose } = attach()
       aimAtFrance(store)

@@ -12,6 +12,7 @@ import { PolityStackMenu } from '../components/PolityStackMenu'
 import { ToolRail } from '../components/ToolRail'
 
 import type { WorkbenchEntry } from './Workbench'
+import type { PolityRow } from '../components/polityRows'
 
 /** Polities a new one could owe homage to, as the suzerain list offers them. */
 const SUZERAINS = [
@@ -37,6 +38,50 @@ const INERT = {
  * can be looked at the second it is saved. Add one whenever a piece of the chrome has a state worth
  * judging on its own: an empty form, a filled one, an error.
  */
+/** {Polities}' rows for the plate: two groups and a vassal, front first (s16). */
+const PLATE_ROWS: PolityRow[] = [
+  {
+    id: 'hre',
+    name: 'Holy Roman Empire',
+    rank: 'empire',
+    dates: '962–1806',
+    colour: '#c29646',
+    hasTerritory: true,
+    depth: 0,
+    suzerainName: null,
+  },
+  {
+    id: 'fr-couronne',
+    name: 'Reaume de France',
+    rank: 'kingdom',
+    dates: '987–',
+    colour: '#54719b',
+    hasTerritory: true,
+    depth: 0,
+    suzerainName: null,
+  },
+  {
+    id: 'aq',
+    name: 'Duchy of Aquitaine',
+    rank: 'duchy',
+    dates: '–',
+    colour: '#6f8a52',
+    hasTerritory: true,
+    depth: 1,
+    suzerainName: 'Reaume de France',
+  },
+  {
+    id: 'pl',
+    name: 'Kingdom of Poland',
+    rank: 'kingdom',
+    dates: '1025–',
+    colour: '#b8554a',
+    hasTerritory: false,
+    depth: 0,
+    suzerainName: null,
+  },
+]
+
 export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
   {
     id: 'fields',
@@ -127,44 +172,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
           targetId="fr-couronne"
           onChoose={() => undefined}
           onMenu={() => undefined}
-          rows={[
-            {
-              id: 'hre',
-              name: 'Holy Roman Empire',
-              rank: 'empire',
-              dates: '962–1806',
-              colour: '#c29646',
-              hasTerritory: true,
-              depth: 0,
-            },
-            {
-              id: 'fr-couronne',
-              name: 'Reaume de France',
-              rank: 'kingdom',
-              dates: '987–',
-              colour: '#54719b',
-              hasTerritory: true,
-              depth: 0,
-            },
-            {
-              id: 'aq',
-              name: 'Duchy of Aquitaine',
-              rank: 'duchy',
-              dates: '–',
-              colour: '#6f8a52',
-              hasTerritory: true,
-              depth: 1,
-            },
-            {
-              id: 'pl',
-              name: 'Kingdom of Poland',
-              rank: 'kingdom',
-              dates: '1025–',
-              colour: '#b8554a',
-              hasTerritory: false,
-              depth: 0,
-            },
-          ]}
+          rows={PLATE_ROWS}
         />
       </div>
     ),

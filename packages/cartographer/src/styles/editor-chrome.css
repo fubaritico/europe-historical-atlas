@@ -253,6 +253,16 @@
   font-size: 11.5px;
 }
 
+/* Read by assistive tech, never seen — the tree's hierarchy in {Polities}. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* The design system's listbox, flattened into the panel: no frame of its own, rows edge to edge. Two
    classes, so it wins over the Dropdown's `.ui-listbox` further down, which gave it back a frame. */
 .ui-listbox.polities__list {

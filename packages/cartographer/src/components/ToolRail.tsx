@@ -201,6 +201,35 @@ function headIcon(entry: RailTool, current: string): ToolIconName {
 }
 
 /**
+ * The keys that reach a tool, for assistive tech (A11Y-005): its own key, and → for a group's hidden
+ * tools — which only the `title` said, and keyboard focus does not show a title.
+ * @param entry - the tool
+ * @returns the `aria-keyshortcuts` value
+ */
+function keyShortcuts(entry: RailTool): string {
+  return entry.variants === undefined ? entry.key : `${entry.key} ArrowRight`
+}
+
+/**
+ * What a tool's button says and how it is reached: pressed or not, its name (the variant in use for a
+ * group head), its key in the tooltip and for assistive tech, and the one Tab stop on the tool in hand.
+ * @param entry - the tool
+ * @param current - the variant in use
+ * @param pressed - whether it is the tool in hand
+ * @returns the button's attributes
+ */
+function headNames(entry: RailTool, current: string, pressed: boolean) {
+  const label = headLabel(entry, current)
+  return {
+    'aria-pressed': pressed,
+    'aria-label': label,
+    title: `${label} (${entry.key})`,
+    'aria-keyshortcuts': keyShortcuts(entry),
+    tabIndex: pressed ? 0 : -1,
+  }
+}
+
+/**
  * One tool, and — when it heads a group — the three ways Illustrator opens it: holding the press, a
  * right click, and here also →, so the keyboard has a way in.
  * @param props - the tool, its state, and the callbacks
@@ -221,7 +250,6 @@ function ToolButton({
     setOpen(true)
   }
   const { consumeHold, ...hold } = useHoldToOpen(group !== undefined, openGroup)
-  const label = headLabel(entry, current)
   const close = () => {
     setOpen(false)
     button.current?.focus()
@@ -232,10 +260,7 @@ function ToolButton({
         ref={button}
         type="button"
         className={`tool-rail__tool${group === undefined ? '' : ' tool-rail__tool--group'}`}
-        aria-pressed={pressed}
-        aria-label={label}
-        title={`${label} (${entry.key})`}
-        tabIndex={pressed ? 0 : -1}
+        {...headNames(entry, current, pressed)}
         {...hold}
         {...groupOpeners(group !== undefined, open, openGroup)}
         onClick={() => {

@@ -1,4 +1,4 @@
-import { PEN_MODE_LABELS } from '../state/toolSlice'
+import { PEN_MODE_LABELS, TOOL_LABELS } from '../state/toolSlice'
 
 import type { ToolVariant } from './ToolFlyout'
 import type { ToolIconName } from './toolIcons'
@@ -35,9 +35,9 @@ export const PEN_VARIANTS: readonly [ToolVariant, ...ToolVariant[]] = [
  * *"la plume, la flèche, c'est les uns en dessous des autres."*
  */
 export const RAIL_TOOLS: readonly RailTool[] = [
-  { tool: 'edit', label: 'Direct Selection', key: 'A', icon: 'edit' },
-  { tool: 'draw', label: 'Pen', key: 'P', icon: 'draw', variants: PEN_VARIANTS },
-  { tool: 'navigate', label: 'Hand', key: 'Space', icon: 'navigate' },
+  { tool: 'edit', label: TOOL_LABELS.edit, key: 'A', icon: 'edit' },
+  { tool: 'draw', label: TOOL_LABELS.draw, key: 'P', icon: 'draw', variants: PEN_VARIANTS },
+  { tool: 'navigate', label: TOOL_LABELS.navigate, key: 'Space', icon: 'navigate' },
 ]
 
 /**

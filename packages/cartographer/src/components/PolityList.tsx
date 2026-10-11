@@ -119,6 +119,10 @@ function PolityOption({
         aria-hidden="true"
       />
       <span className="polity-row__name">{row.name}</span>
+      {row.suzerainName === null ? null : (
+        // The tree's hierarchy for assistive tech, which the indent does not reach (A11Y-002).
+        <span className="visually-hidden">, vassal of {row.suzerainName}</span>
+      )}
       <span className="polity-row__tags">
         {row.hasTerritory ? null : <span className="polity-row__chip">no territory</span>}
         <span>{row.rank}</span>

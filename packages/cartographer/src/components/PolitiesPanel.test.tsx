@@ -20,8 +20,17 @@ function mount() {
     edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
     viewport: { viewport: UNFRAMED },
   })
-  render(<PolitiesPanel store={store} colours={COLOURS} />)
-  return { store, user: userEvent.setup() }
+  const results: (string | null)[] = []
+  render(
+    <PolitiesPanel
+      store={store}
+      colours={COLOURS}
+      onResult={(message) => {
+        results.push(message)
+      }}
+    />
+  )
+  return { store, results, user: userEvent.setup() }
 }
 
 /** The dialogue element, open or not — the design system's Modal is a native `<dialog>`. */
@@ -225,11 +234,13 @@ describe('PolitiesPanel — the stacking menu (s16)', () => {
   describe('happy path', () => {
     // s16 — "When I right-click … and choose [Bring to Front] / Then France is painted over the Empire".
     it('brings France to the front from its row’s menu, as one named step', async () => {
-      const { store, user } = mountTwo()
+      const { store, results, user } = mountTwo()
       await user.pointer({ keys: '[MouseRight]', target: screen.getByText('Reaume de France') })
       await user.click(screen.getByRole('option', { name: 'Bring to Front' }))
       expect(order(store)).toEqual(['hre', 'fr'])
       expect(store.getState().undoLabel).toBe('bring to front — Reaume de France')
+      // A11Y-003: the focus goes back to the list, so the move is said in the result zone.
+      expect(results).toEqual(['Bring to Front — Reaume de France'])
       expect(screen.queryByRole('listbox', { name: 'Arrange Reaume de France' })).toBeNull()
     })
   })
@@ -268,6 +279,10 @@ describe('PolitiesPanel — the stacking menu (s16)', () => {
         ['Reaume de France', '0'],
         ['Normandie', '1'],
       ])
+      // A11Y-002: the hierarchy is in the row's text for assistive tech, hidden from the eye.
+      expect(
+        screen.getByRole('option', { name: /Normandie, vassal of Reaume de France/ })
+      ).toBeDefined()
     })
 
     it('opens the target’s menu with shift+F10, and focuses it', async () => {

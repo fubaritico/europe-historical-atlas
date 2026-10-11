@@ -106,6 +106,13 @@ describe('ToolRail', () => {
       expect(paths).toContain('M10 4.5l3.5 3.5')
     })
 
+    // A11Y-005: the keys reach assistive tech, not only the tooltip — → opens the Pen's group.
+    it('declares each tool’s key, and → on the group head', () => {
+      mount()
+      expect(tool('Direct Selection').getAttribute('aria-keyshortcuts')).toBe('A')
+      expect(tool('Pen').getAttribute('aria-keyshortcuts')).toBe('P ArrowRight')
+    })
+
     // ARCH-002: a mode added to the store and not to the rail would be reached by ‹P› and shown nowhere.
     it('lists one row per Pen mode, in the store’s order', () => {
       expect(PEN_VARIANTS.map((variant) => variant.id)).toEqual([...PEN_MODES])

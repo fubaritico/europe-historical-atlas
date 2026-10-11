@@ -51,6 +51,16 @@ export function isPenMode(id: string): id is PenMode {
 }
 
 /**
+ * Each tool's name — the rail's button, and what a key that takes the tool says in the status bar. The
+ * Pen's name is its mode's ({@link PEN_MODE_LABELS}) once it is in hand.
+ */
+export const TOOL_LABELS: Record<EditorTool, string> = {
+  edit: 'Direct Selection',
+  draw: 'Pen',
+  navigate: 'Hand',
+}
+
+/**
  * The mode after this one, in the group's order and round again — what ‹P› does with the Pen already in
  * hand (the dev, 2026-10-11: pressing ‹P› again must change the Pen).
  * @param mode - the mode in use

@@ -24,6 +24,8 @@ export interface PolityArrangeMenuProps {
   request: ArrangeRequest
   /** Close the menu — after a command, ‹escape›, or a press outside. */
   onClose: () => void
+  /** Say what the command did — the focus goes back to the list, so the move would pass in silence. */
+  onResult: (message: string | null) => void
 }
 
 /**
@@ -35,7 +37,7 @@ export interface PolityArrangeMenuProps {
  * @param props - the store, the request and the close
  * @returns the menu, or nothing when the polity is gone
  */
-export function PolityArrangeMenu({ store, request, onClose }: PolityArrangeMenuProps) {
+export function PolityArrangeMenu({ store, request, onClose, onResult }: PolityArrangeMenuProps) {
   const restackPolity = store((state) => state.restackPolity)
   // The document is mutated in place: the version is what changes when the order does.
   store((state) => state.version)
@@ -58,9 +60,9 @@ export function PolityArrangeMenu({ store, request, onClose }: PolityArrangeMenu
       onChoose={(move) => {
         const label = `${STACKING_LABELS[move].toLowerCase()} — ${polity.name}`
         // The menu offers only the moves that change something: a refusal here is a defect.
-        if (!restackPolity(polity.id, move, { kind: 'restack', label })) {
-          console.error(`[Cartographer] the document refused to ${label}.`)
-        }
+        if (restackPolity(polity.id, move, { kind: 'restack', label })) {
+          onResult(`${STACKING_LABELS[move]} — ${polity.name}`)
+        } else console.error(`[Cartographer] the document refused to ${label}.`)
       }}
       onClose={onClose}
     />

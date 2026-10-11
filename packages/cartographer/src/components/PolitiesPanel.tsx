@@ -11,6 +11,7 @@ import { polityRows } from './polityRows'
 import type { ArrangeRequest } from './PolityArrangeMenu'
 import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
+import type { ViewportPoint } from '../view/viewport'
 
 /** What the panel needs: the store, handed on to the dialogue. */
 export interface PolitiesPanelProps {
@@ -18,6 +19,26 @@ export interface PolitiesPanelProps {
   store: CartographerStoreHook
   /** Where the polities' colours come from — the canvas reads the same source. */
   colours: PolityColourSource
+  /** Say what a command did, in the status bar's result zone — the one live region (A11Y-003). */
+  onResult: (message: string | null) => void
+}
+
+/**
+ * The open stacking menu of `{Polities}`: which row, where, and how it closes — the focus going back to
+ * this panel's list, where the menu was asked for, so the keys carry on there.
+ * @returns the request, its open and close, and the panel's ref
+ */
+function useArrangeMenu() {
+  const [arranging, setArranging] = useState<ArrangeRequest | null>(null)
+  const panel = useRef<HTMLElement | null>(null)
+  const openMenu = useCallback((id: string, at: ViewportPoint) => {
+    setArranging({ id, at })
+  }, [])
+  const closeMenu = useCallback(() => {
+    setArranging(null)
+    panel.current?.querySelector<HTMLElement>('.polities__list')?.focus()
+  }, [])
+  return { arranging, openMenu, closeMenu, panel }
 }
 
 /**
@@ -30,20 +51,14 @@ export interface PolitiesPanelProps {
  * @param props - the store
  * @returns the panel's head and the dialogue it opens
  */
-export function PolitiesPanel({ store, colours }: PolitiesPanelProps) {
+export function PolitiesPanel({ store, colours, onResult }: PolitiesPanelProps) {
   const [creating, setCreating] = useState(false)
-  const [arranging, setArranging] = useState<ArrangeRequest | null>(null)
+  const { arranging, openMenu, closeMenu, panel } = useArrangeMenu()
   const chooseTarget = store((state) => state.chooseTarget)
   const target = store((state) => state.target)
   // The document is mutated in place: the version is what changes when a polity is added or drawn.
   const version = store((state) => state.version)
   const { document } = store.getState()
-  const panel = useRef<HTMLElement | null>(null)
-  const closeMenu = useCallback(() => {
-    setArranging(null)
-    // Focus goes back to this panel's list, where the menu was asked for, so the keys carry on there.
-    panel.current?.querySelector<HTMLElement>('.polities__list')?.focus()
-  }, [])
   return (
     <section ref={panel} className="polities" aria-label="Polities">
       <header className="polities__head">
@@ -61,12 +76,15 @@ export function PolitiesPanel({ store, colours }: PolitiesPanelProps) {
         rows={polityRows(document, colours.coloursOf(document, version))}
         targetId={describeDrawingTarget(document, target)?.id ?? null}
         onChoose={chooseTarget}
-        onMenu={(id, at) => {
-          setArranging({ id, at })
-        }}
+        onMenu={openMenu}
       />
       {arranging === null ? null : (
-        <PolityArrangeMenu store={store} request={arranging} onClose={closeMenu} />
+        <PolityArrangeMenu
+          store={store}
+          request={arranging}
+          onClose={closeMenu}
+          onResult={onResult}
+        />
       )}
       <NewPolityDialog
         store={store}

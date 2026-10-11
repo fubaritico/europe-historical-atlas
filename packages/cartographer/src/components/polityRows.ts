@@ -23,6 +23,8 @@ export interface PolityRow {
   hasTerritory: boolean
   /** How deep in the tree of groups: 0 for a polity owing nobody, 1 for its vassals… — the indent. */
   depth: number
+  /** Its suzerain's name, verbatim — what the tree says to assistive tech — or `null` at the top. */
+  suzerainName: string | null
 }
 
 /**
@@ -56,7 +58,7 @@ export function polityRows(
   }
   const rows: PolityRow[] = []
   const listed = new Set<string>()
-  const walk = (polity: YearPolity, depth: number): void => {
+  const walk = (polity: YearPolity, depth: number, suzerainName: string | null): void => {
     if (listed.has(polity.id)) return
     listed.add(polity.id)
     rows.push({
@@ -67,12 +69,15 @@ export function polityRows(
       colour: colours.get(polity.id) ?? null,
       hasTerritory: claimed.has(polity.id),
       depth,
+      suzerainName,
     })
     // Front first: the list order is back to front, so each level is read backwards.
-    for (const vassal of [...(children.get(polity.id) ?? [])].reverse()) walk(vassal, depth + 1)
+    for (const vassal of [...(children.get(polity.id) ?? [])].reverse()) {
+      walk(vassal, depth + 1, polity.name)
+    }
   }
-  for (const polity of [...(children.get(null) ?? [])].reverse()) walk(polity, 0)
-  for (const polity of document.polities) walk(polity, 0)
+  for (const polity of [...(children.get(null) ?? [])].reverse()) walk(polity, 0, null)
+  for (const polity of document.polities) walk(polity, 0, null)
   return rows
 }
 

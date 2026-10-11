@@ -1,4 +1,4 @@
-import { PEN_MODE_LABELS, nextPenMode } from '../state/toolSlice'
+import { PEN_MODE_LABELS, TOOL_LABELS, nextPenMode } from '../state/toolSlice'
 import { backdropBoxOfBounds, clampToCover, openingView } from '../view/framing'
 import { screenToLonLatOnBackdrop } from '../view/projection'
 import { panBy, zoomAbout } from '../view/viewport'
@@ -365,7 +365,11 @@ function onToolKey(it: LiveCanvas, event: KeyboardEvent): boolean {
     // Said in the result zone, a polite live region: focus is on the canvas, not on the rail's button
     // whose name changed, so the mode would otherwise change in silence (A11Y-010).
     it.deps.onResult(PEN_MODE_LABELS[mode])
-  } else state.selectTool(tool)
+  } else if (tool !== state.tool) {
+    state.selectTool(tool)
+    // Said for the same reason as the Pen's mode: the focus is on the canvas, not on the rail.
+    it.deps.onResult(tool === 'draw' ? PEN_MODE_LABELS[state.penMode] : TOOL_LABELS[tool])
+  }
   return true
 }
 
