@@ -173,6 +173,21 @@ describe('YearDocument', () => {
       expect(() => assembleAuthoredYear(files, 'empty')).not.toThrow()
     })
 
+    // s16: the stack is the order of the polities list, so a save must not re-sort it.
+    it('keeps the polities in their list order, unsorted, across a round trip', () => {
+      const doc = sharedBorderDocument()
+      const [first, second] = doc.polities
+      if (first === undefined || second === undefined) throw new Error('fixture changed')
+      doc.polities = [
+        { ...second, id: 'zz', name: 'Z' },
+        second,
+        { ...first, id: 'aa', name: 'A' },
+        first,
+      ]
+      const order = doc.polities.map((polity) => polity.id)
+      expect(roundTrip(doc).polities.map((polity) => polity.id)).toEqual(order)
+    })
+
     it('survives two round trips unchanged', () => {
       const once = saveYearDocument(sharedBorderDocument())
       const twice = saveYearDocument(openYearDocument(assembleAuthoredYear(once, 'a')))
