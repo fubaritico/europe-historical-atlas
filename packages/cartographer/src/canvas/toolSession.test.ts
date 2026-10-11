@@ -237,7 +237,7 @@ describe('toolSession', () => {
 
     // QUAL-110: s02's "place points freely", for the coast — on screen, before the click.
     it('says the Pen will place points freely when the coast is out of reach', () => {
-      expect(actionSentence(action({ following: 'coast' }))).toBe(
+      expect(actionSentence(action({ following: 'coastline' }))).toBe(
         'Drawing in Reaume de France — no coastline within reach, placing points freely'
       )
     })

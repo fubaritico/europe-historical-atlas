@@ -11,6 +11,7 @@ import { cursorCss, cursorFor } from './cursors'
 import { HANDLE_HIT_RADIUS } from './navigation'
 import { paintOverlay } from './overlayPainter'
 import { projectedTerritories } from './scene'
+import { snapLayersOf } from './snapLayers'
 import { inDevicePixels } from './style'
 import {
   followedLayer,
@@ -166,10 +167,7 @@ export function gestureOf(it: LiveCanvas): GestureContext {
     territoriesOnScreen: () =>
       projectedTerritories(it.deps.store.getState().document, anchorsOnScreen(it)),
     radius: HANDLE_HIT_RADIUS * it.ratio,
-    coast: it.deps.vectorLayers.coast,
-    coastProvenance: it.deps.vectorLayers.coastProvenance,
-    rivers: it.deps.vectorLayers.rivers,
-    riverProvenance: it.deps.vectorLayers.riverProvenance,
+    layers: snapLayersOf(it.deps.vectorLayers),
     report: (message) => {
       it.deps.onResult(message)
     },
@@ -263,6 +261,16 @@ function lineOffer(
   const preview = stretch === null || stretch.length < 2 ? null : stretch.map(toScreen)
   const label = lineLabel(gesture, hit)
   return { target: toScreen(vertex), preview, kind: 'layer', anchor: null, lineLabel: label }
+}
+
+/**
+ * The noun of the layer the Pen follows — what the out-of-reach sentence names — or `null`.
+ * @param gesture - the gesture context
+ * @returns `"coastline"`, `"river"`, or `null` for the free Pen and the Pencil
+ */
+function followedNoun(gesture: GestureContext): string | null {
+  const layer = followedLayer(gesture)
+  return layer === null ? null : gesture.layers[layer].noun
 }
 
 /**
@@ -414,7 +422,7 @@ export function refreshTools(it: LiveCanvas): void {
     closing: scene.closing,
     snapping: offer.lineLabel,
     joining: offer.anchor === null ? null : anchorSentence(gestureOf(it), offer.anchor),
-    following: followedLayer(gestureOf(it)),
+    following: followedNoun(gestureOf(it)),
     inserting,
     session: it.session,
   })

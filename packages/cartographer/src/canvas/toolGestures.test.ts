@@ -23,8 +23,9 @@ import {
   undoGesture,
 } from './toolGestures'
 
-import type { GestureContext, RiverLine } from './toolGestures'
-import type { CoastContour } from '../geometry/coastSnap'
+import type { RiverLine } from './snapLayers'
+import type { GestureContext } from './toolGestures'
+import type { SnapLine } from '../geometry/lineSnap'
 
 /** Three screen points that make a triangle well inside the backdrop. */
 const TRIANGLE: [number, number][] = [
@@ -42,7 +43,7 @@ const TRIANGLE: [number, number][] = [
  */
 function openContext(
   aimed = true,
-  coast: readonly CoastContour[] = [],
+  coast: readonly SnapLine[] = [],
   rivers: readonly RiverLine[] = []
 ): GestureContext {
   const store = testStore()
@@ -477,14 +478,14 @@ function onScreenPoint(
 }
 
 /** A straight shore from (100,200) to (500,200), a vertex every 10 backdrop pixels. */
-const SHORE: CoastContour = {
+const SHORE: SnapLine = {
   points: Array.from({ length: 41 }, (_, index): [number, number] => [100 + index * 10, 200]),
   closed: false,
   bounds: { left: 100, top: 200, right: 500, bottom: 200 },
 }
 
 /** A small island well away from the shore. */
-const ISLE: CoastContour = {
+const ISLE: SnapLine = {
   points: [
     [700, 600],
     [710, 600],

@@ -1,6 +1,6 @@
 import { isClosingOffered } from '../geometry/ringClosure'
 
-import type { CoastVertex } from '../geometry/coastSnap'
+import type { LineVertex } from '../geometry/lineSnap'
 import type { EditorTool } from '../state/toolSlice'
 import type { Point } from '../view/viewport'
 import type { Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
@@ -87,19 +87,10 @@ export interface PencilSample {
 export type SnapLayer = 'coast' | 'river'
 
 /**
- * What a snap layer is called in a sentence — the status bar's and the console's.
- * @param layer - the layer
- * @returns `"coastline"` or `"river"`
- */
-export function layerNoun(layer: SnapLayer): string {
-  return layer === 'coast' ? 'coastline' : 'river'
-}
-
-/**
  * A vertex of a layer: which layer, which of its lines, which point. The layer is part of it so a stretch
  * is only ever run along the line the last click landed on — a coast contour and a river share indices.
  */
-export interface SnapVertex extends CoastVertex {
+export interface SnapVertex extends LineVertex {
   /** The layer the line belongs to. */
   layer: SnapLayer
 }
@@ -275,8 +266,11 @@ export interface ActionInputs {
    * (`"Maas"`) — or `null` when nothing is.
    */
   snapping: string | null
-  /** Which layer the Pen follows at all, `null` for the free Pen — out of reach, it places a free point. */
-  following: SnapLayer | null
+  /**
+   * The layer the Pen follows, by its noun (`"coastline"`, `"river"` — `snapLayersOf`), or `null` for
+   * the free Pen and the Pencil — out of reach, a click places a free point.
+   */
+  following: string | null
   /** The sentence for an existing anchor the Pen is over — `s02`'s branching line — or `null`. */
   joining: string | null
   /** Whether a click here inserts an anchor on a stretch of the target — the arrow, or the idle Pen. */
@@ -300,7 +294,7 @@ function penSentence(inputs: ActionInputs, targetName: string): string {
   // s02's "place points freely", before the click (QUAL-110). The polity is kept: the bar always names
   // whom the action is for.
   if (inputs.following === null) return `Drawing in ${targetName}`
-  return `Drawing in ${targetName} — no ${layerNoun(inputs.following)} within reach, placing points freely`
+  return `Drawing in ${targetName} — no ${inputs.following} within reach, placing points freely`
 }
 
 /**

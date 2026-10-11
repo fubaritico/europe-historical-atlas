@@ -1,8 +1,8 @@
 import { pathsHolding } from '@europe-historical-atlas/core/editor/documentEdits'
 import { referencedAnchors } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import { shortestRunBetween } from '../geometry/coastSnap'
 import { nearestAmong } from '../geometry/hitTest'
+import { shortestRunBetween } from '../geometry/lineSnap'
 
 import { TAG } from './consoleTag'
 import { sessionPointOf } from './toolSession'

@@ -35,10 +35,8 @@ Put here the know issues to avoid cluttering the context window.
   **Tracer au clavier est impossible** (plume et crayon), déjà connu pour l'étape 5 (*« the anchor
   list »*) ; le rail annonce pourtant ces outils. (4) Le groupe de la plume s'ouvre à ‹→›, sans
   `aria-keyshortcuts`. (5) Cibles de 24–30 px, densité Illustrator assumée.
-  **Architecture** : (6) **« côte ou fleuve » est réparti sur cinq aiguillages** (`followedLayer`,
-  `layerLines`, `lineLabel`, la provenance dans `snapClick`, `layerNoun`) — le jour où une troisième
-  couche d'accroche arrive (lacs, frontières d'une autre année), en faire **une table par couche**
-  `{ lignes, provenance, nom }`, et renommer au passage les aides `coast*` qui servent aux fleuves. (7)
+  **Architecture** : (6) ~~« côte ou fleuve » sur cinq aiguillages~~ — **fait le 12/10** : une table
+  par couche (`canvas/snapLayers.ts`), la géométrie renommée `lineSnap`. (7)
   `paintRanks` est recalculé à chaque repeinture — ~50 pays, négligeable ; à mettre en cache par
   version si le document grossit. **Sévérité : à savoir.**
 - **Le menu d'empilement de `{Polities}` (11/10) a deux limites connues, laissées ouvertes.**

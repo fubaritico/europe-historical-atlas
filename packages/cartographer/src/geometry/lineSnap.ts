@@ -4,30 +4,31 @@ import { isVertexOf, subPathBetween } from './polylineSnap'
 import type { Point } from '../view/viewport'
 
 /**
- * Snapping the Pen onto the coastline — `s02`'s *"two clicks, several hundred exact points"*.
+ * Snapping the Pen onto a line of a snap layer — the coastline or a river, `s02`'s *"two clicks,
+ * several hundred exact points"*. Named for the coast until the rivers joined it (2026-10-11).
  *
  * **Backdrop pixels, not screen pixels**, unlike `hitTest`: the coast is 95 233 points held in the
  * backdrop's grid, and turning all of them into screen positions on every pointer move to find one is
- * the work the culling exists to avoid. The pointer is brought into the coast's grid instead — one
+ * the work the culling exists to avoid. The pointer is brought into the lines' grid instead — one
  * point — and the radius with it (`radius / scale`).
  *
  * Declared structurally, so this layer reads no module above it: a contour is points, whether it
  * closes, and the box it fills.
  */
 
-/** A contour of the traced coastline, in backdrop pixels. */
-export interface CoastContour {
+/** A line of a snap layer — a coast contour or a river — in backdrop pixels. */
+export interface SnapLine {
   /** Its points, in order. A closed contour does not repeat its first point at the end. */
   points: readonly Point[]
-  /** Whether it closes on itself — an island, or a coast that loops. */
+  /** Whether it closes on itself — an island, a coast that loops. A river never does. */
   closed: boolean
   /** The box it fills, so a contour far from the pointer is skipped on one comparison. */
   bounds: { left: number; top: number; right: number; bottom: number }
 }
 
-/** A vertex of the traced coastline: which contour, and which point of it. */
-export interface CoastVertex {
-  /** The contour's index in the coast layer. */
+/** A vertex of a snap layer: which line, and which point of it. */
+export interface LineVertex {
+  /** The line's index in its layer. */
   contour: number
   /** The vertex's index in that contour. */
   vertex: number
@@ -40,7 +41,7 @@ export interface CoastVertex {
  * @param radius - the radius, same units
  * @returns `true` when some part of the box is within reach
  */
-function withinReach(bounds: CoastContour['bounds'], at: Point, radius: number): boolean {
+function withinReach(bounds: SnapLine['bounds'], at: Point, radius: number): boolean {
   return (
     at[0] >= bounds.left - radius &&
     at[0] <= bounds.right + radius &&
@@ -50,25 +51,25 @@ function withinReach(bounds: CoastContour['bounds'], at: Point, radius: number):
 }
 
 /**
- * The coast vertex nearest the pointer, within a radius — or `null` when the coast is out of reach.
+ * The line vertex nearest the pointer, within a radius — or `null` when every line is out of reach.
  *
  * **Every contour in reach is weighed against every other**, the trap `polylineSnap` names for rivers:
  * returning the first contour holding a vertex in range would let storage order pick between an
  * island and the shore beside it.
- * @param coast - the contours, in backdrop pixels
+ * @param lines - the layer's lines, in backdrop pixels
  * @param at - the pointer, in backdrop pixels
  * @param radius - how far it may be, in backdrop pixels
  * @returns the nearest vertex in reach, or `null`
  */
-export function nearestCoastVertex(
-  coast: readonly CoastContour[],
+export function nearestLineVertex(
+  lines: readonly SnapLine[],
   at: Point,
   radius: number
-): CoastVertex | null {
+): LineVertex | null {
   const limit = squaredRadius(radius)
-  let best: CoastVertex | null = null
+  let best: LineVertex | null = null
   let bestDistance = Infinity
-  coast.forEach((contour, index) => {
+  lines.forEach((contour, index) => {
     if (!withinReach(contour.bounds, at, radius)) return
     contour.points.forEach((point, vertex) => {
       const distance = distanceSquared(point, at)
@@ -93,7 +94,7 @@ export function nearestCoastVertex(
  * @param to - the vertex it ends at
  * @returns the vertices from `from` to `to`, inclusive; empty when either is not a vertex of it
  */
-export function coastStretch(contour: CoastContour, from: number, to: number): Point[] {
+export function lineStretch(contour: SnapLine, from: number, to: number): Point[] {
   const { points } = contour
   if (!contour.closed) return subPathBetween(points, from, to)
   if (!isVertexOf(points, from) || !isVertexOf(points, to)) return []

@@ -1,6 +1,6 @@
-import { coastStretch, nearestCoastVertex } from '../geometry/coastSnap'
 import { polityAt } from '../geometry/fillHit'
 import { nearestAmong } from '../geometry/hitTest'
+import { lineStretch, nearestLineVertex } from '../geometry/lineSnap'
 import { canCloseRing, isClosingOffered } from '../geometry/ringClosure'
 import { describeDrawingTarget } from '../state/drawingTarget'
 import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
@@ -14,15 +14,15 @@ import {
   abandonGesture,
   clearOutline,
   dropDrag,
-  layerNoun,
   sessionPointOf,
   takeBackStroke,
   targetHandles,
 } from './toolSession'
 
+import type { SnapLayers } from './snapLayers'
 import type { SessionPoint, SnapLayer, SnapVertex, ToolSession } from './toolSession'
-import type { CoastContour } from '../geometry/coastSnap'
 import type { PolityRings } from '../geometry/fillHit'
+import type { SnapLine } from '../geometry/lineSnap'
 import type { CartographerStoreHook } from '../state/store'
 import type { BackdropFrame } from '../view/projection'
 import type { Point } from '../view/viewport'
@@ -51,25 +51,13 @@ export interface GestureContext {
   territoriesOnScreen: () => readonly PolityRings[]
   /** How near, in screen pixels, a press must be to catch a handle or the first anchor. */
   radius: number
-  /** The traced coastline, in backdrop pixels — what the Pen follows in its coast mode. */
-  coast: readonly CoastContour[]
-  /** What the coastline was traced from, recorded on every anchor snapped onto it. */
-  coastProvenance: Provenance
-  /** The river centrelines, in backdrop pixels — what the Pen follows in its river mode. */
-  rivers: readonly RiverLine[]
-  /** What the rivers were drawn from, recorded on every anchor snapped onto one. */
-  riverProvenance: Provenance
+  /** The snap layers — the coast and the rivers — what the Pen follows in those modes. */
+  layers: SnapLayers
   /**
    * Say what a gesture did — *"inserted 412 vertices from the coastline"*, the status bar's result
    * zone beside the action (`s02`).
    */
   report: (message: string) => void
-}
-
-/** A river centreline, as the Pen follows it: a line of the layer, and the name the bar reads. */
-export interface RiverLine extends CoastContour {
-  /** The river's name as the dataset holds it — `Maas`, not *Meuse* (`H-02`) — or `null`. */
-  name: string | null
 }
 
 /** The step kind a closed outline is recorded under — what tells an undo that it is undoing a closing. */
@@ -168,7 +156,7 @@ export function penClick(context: GestureContext, at: Point): void {
   if (layer !== null && snapClick(context, layer, at)) return
   if (anchorClick(context, at)) return
   if (layer !== null) {
-    console.warn(`${TAG} no ${layerNoun(layer)} within reach: a free point was placed.`)
+    console.warn(`${TAG} no ${context.layers[layer].noun} within reach: a free point was placed.`)
   }
   freeClick(context, at)
 }
@@ -213,29 +201,22 @@ export function followedLayer(context: GestureContext): SnapLayer | null {
 
 /**
  * The lines of a layer, in backdrop pixels.
- * @param context - the coast and the rivers
+ * @param context - the snap layers
  * @param layer - which layer
  * @returns its lines
  */
-export function layerLines(context: GestureContext, layer: SnapLayer): readonly CoastContour[] {
-  return layer === 'coast' ? context.coast : context.rivers
+export function layerLines(context: GestureContext, layer: SnapLayer): readonly SnapLine[] {
+  return context.layers[layer].lines
 }
 
 /**
- * What the line under a hit is called — `"coastline"`, a river's name verbatim, or *unnamed river*.
- *
- * **The name as the dataset holds it** (`H-02`): `Maas` for the Meuse, `Schelde` for the Scheldt.
- * `s02` writes *"Following the Maas"*, so no alias table stands in front of it.
- * @param context - the rivers
+ * What the line under a hit is called — `"coastline"`, a river's name verbatim (`snapLayersOf`).
+ * @param context - the snap layers
  * @param hit - the vertex
  * @returns the line's label
  */
 export function lineLabel(context: GestureContext, hit: SnapVertex): string {
-  if (hit.layer === 'coast') return 'coastline'
-  // A river the dataset leaves unnamed is ordinary (25 of its 591 lines). The hit's index comes from
-  // this very array (`snapHit`), so the `?.` only satisfies the indexed lookup — and this runs on every
-  // pointer move, where a log would drown the console.
-  return context.rivers[hit.contour]?.name ?? 'unnamed river'
+  return context.layers[hit.layer].label(hit.contour)
 }
 
 /**
@@ -251,7 +232,7 @@ export function lineLabel(context: GestureContext, hit: SnapVertex): string {
 export function snapHit(context: GestureContext, layer: SnapLayer, at: Point): SnapVertex | null {
   const viewport = context.store.getState().viewport
   if (viewport.scale <= 0) return null
-  const hit = nearestCoastVertex(
+  const hit = nearestLineVertex(
     layerLines(context, layer),
     screenToBackdrop(viewport, at),
     context.radius / viewport.scale
@@ -272,7 +253,7 @@ export function snapStretchTo(context: GestureContext, hit: SnapVertex): Point[]
   const line = layerLines(context, hit.layer)[hit.contour]
   if (snap?.layer !== hit.layer || snap.contour !== hit.contour || line === undefined) return null
   if (context.session.outline.length === 0) return null
-  return coastStretch(line, snap.vertex, hit.vertex)
+  return lineStretch(line, snap.vertex, hit.vertex)
 }
 
 /**
@@ -296,11 +277,11 @@ function snapClick(context: GestureContext, layer: SnapLayer, at: Point): boolea
   // anchors on one spot (a zero-length edge); placing a free point would defeat the snap (QUAL-101).
   if (stretch !== null && stretch.length < 2) {
     console.warn(
-      `${TAG} nothing placed: the outline already ends on that ${layerNoun(layer)} vertex.`
+      `${TAG} nothing placed: the outline already ends on that ${context.layers[layer].noun} vertex.`
     )
     return true
   }
-  const provenance = layer === 'coast' ? context.coastProvenance : context.riverProvenance
+  const provenance = context.layers[layer].provenance
   if (stretch === null) placeOnLayer(context, [line.points[hit.vertex]], provenance)
   else {
     const placed = placeOnLayer(context, stretch.slice(1), provenance)

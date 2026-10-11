@@ -6,10 +6,12 @@ import { projectToBackdrop, remapToScreen } from '../view/projection'
 import { TEST_BACKDROP_FRAME } from '../view/testFrame'
 
 import { projectedTerritories } from './scene'
+import { snapLayersOf } from './snapLayers'
 import { idleSession } from './toolSession'
 
-import type { GestureContext, RiverLine } from './toolGestures'
-import type { CoastContour } from '../geometry/coastSnap'
+import type { RiverLine } from './snapLayers'
+import type { GestureContext } from './toolGestures'
+import type { SnapLine } from '../geometry/lineSnap'
 import type { CartographerStoreHook } from '../state/store'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 
@@ -65,7 +67,7 @@ export function testStore(): CartographerStoreHook {
  */
 export function testGestureContext(
   store: CartographerStoreHook,
-  coast: readonly CoastContour[] = [],
+  coast: readonly SnapLine[] = [],
   rivers: readonly RiverLine[] = []
 ): { context: GestureContext; reports: string[] } {
   const reports: string[] = []
@@ -81,10 +83,12 @@ export function testGestureContext(
     anchorsOnScreen,
     territoriesOnScreen: () => projectedTerritories(store.getState().document, anchorsOnScreen()),
     radius: 8,
-    coast,
-    coastProvenance: TEST_COAST_PROVENANCE,
-    rivers,
-    riverProvenance: TEST_RIVER_PROVENANCE,
+    layers: snapLayersOf({
+      coast,
+      coastProvenance: TEST_COAST_PROVENANCE,
+      rivers,
+      riverProvenance: TEST_RIVER_PROVENANCE,
+    }),
     report: (message) => {
       reports.push(message)
     },
