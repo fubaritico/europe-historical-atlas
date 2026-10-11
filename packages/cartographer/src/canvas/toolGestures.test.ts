@@ -260,11 +260,11 @@ describe('toolGestures', () => {
       const logged = watchConsole()
       const context = openContext()
       drawTriangle(context)
-      context.store.setState({ moveAnchor: () => false })
+      context.store.setState({ moveAnchors: () => false })
       arrowPress(context, [300, 100], false)
       arrowDrag(context, [320, 120])
       arrowRelease(context, [0, 0])
-      expect(logged.error).toHaveBeenCalledWith(expect.stringContaining('refused to move anchor 1'))
+      expect(logged.error).toHaveBeenCalledWith(expect.stringContaining('refused to move 1 anchor'))
     })
   })
 
@@ -768,7 +768,7 @@ describe('the Pen following the coast', () => {
       const { document } = context.store.getState()
       expect(document.anchors).toHaveLength(4)
       expect(document.claims.find((claim) => claim.polity === 'hre')?.rings[0]).toEqual([1, 2, 3])
-      context.store.getState().moveAnchor(1, [5, 5], MOVE_ANCHOR_STEP)
+      context.store.getState().moveAnchors([{ index: 1, to: [5, 5] }], MOVE_ANCHOR_STEP)
       expect(
         context.store.getState().document.claims.every((claim) => claim.rings[0]?.includes(1))
       ).toBe(true)
@@ -1243,6 +1243,48 @@ describe('the white arrow’s selection and marquee (s03)', () => {
       expect(context.store.getState().document.claims[0]?.rings[0]).toHaveLength(6)
       expect(context.store.getState().rows).toHaveLength(steps)
       expect(warn).toHaveBeenCalledWith(expect.stringContaining('a ring needs at least three'))
+    })
+  })
+
+  describe('moving several anchors at once', () => {
+    // s03 — "When I drag any one of them / Then all twelve move together, keeping their relative
+    // positions … And the move is committed as one undo step".
+    it('moves the whole selection by the grabbed anchor’s offset, as one step', () => {
+      const context = hexagonContext()
+      drag(context, [50, 50], [350, 150])
+      const before = [0, 1, 2].map((index) => onScreen(context, index))
+      drag(context, [200, 100], [230, 140])
+      const after = [0, 1, 2].map((index) => onScreen(context, index))
+      after.forEach((point, at) => {
+        expect(point[0] - (before[at]?.[0] ?? 0)).toBeCloseTo(30, 6)
+        expect(point[1] - (before[at]?.[1] ?? 0)).toBeCloseTo(40, 6)
+      })
+      expect(context.store.getState().undoLabel).toBe('move 3 anchors')
+      context.store.getState().undo()
+      expect(onScreen(context, 0)[0]).toBeCloseTo(before[0]?.[0] ?? 0, 6)
+    })
+
+    it('moves only the grabbed anchor when it is not part of the selection', () => {
+      const context = hexagonContext()
+      drag(context, [50, 50], [350, 150])
+      const untouched = onScreen(context, 0)
+      // A shift-click drops anchor 2 from the selection; then it is dragged alone.
+      arrowPress(context, [300, 100], true)
+      arrowRelease(context, [300, 100])
+      drag(context, [300, 300], [320, 320])
+      expect(onScreen(context, 0)).toEqual(untouched)
+    })
+
+    // All or nothing: part of the selection off the map, and nothing moves.
+    it('moves nothing when part of the selection would leave the map, and says so', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const context = hexagonContext()
+      drag(context, [50, 50], [350, 150])
+      const before = onScreen(context, 0)
+      // The right-hand anchor dragged 120 px left lands on the map; the left-hand one would not.
+      drag(context, [300, 100], [180, 100])
+      expect(onScreen(context, 0)).toEqual(before)
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('would have left the map'))
     })
   })
 

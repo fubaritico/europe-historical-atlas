@@ -520,6 +520,22 @@ describe('repaint coalescing', () => {
     }
   }
 
+  // The dev, 2026-10-12: the anchors a marquee caught showed as selected only after another click.
+  it('repaints the static canvas when a marquee is released, so its anchors show at once', () => {
+    const frames = frameControl()
+    const { node, store, dispose } = attach()
+    aimAtFrance(store)
+    for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(node, at)
+    node.dispatchEvent(keyEvent('a'))
+    node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 250, offsetY: 150 }))
+    node.dispatchEvent(pointerEvent('pointermove', { offsetX: 550, offsetY: 250 }))
+    while (frames.asked() > 0) frames.run()
+    node.dispatchEvent(pointerEvent('pointerup', { offsetX: 550, offsetY: 250 }))
+    expect(frames.asked()).toBe(1)
+    vi.unstubAllGlobals()
+    dispose()
+  })
+
   describe('happy path', () => {
     it('asks for one frame however many wheel events arrive between two', () => {
       const frames = frameControl()

@@ -316,8 +316,12 @@ function onPointerUp(it: LiveCanvas, event: PointerEvent): void {
   if (handInHand(it)) dropDrag(it.session)
   if (pressed && !handInHand(it)) {
     const tool = it.deps.store.getState().tool
-    if (tool === 'edit') arrowRelease(gestureOf(it), positionOf(event))
-    else if (tool === 'draw' && !dragged) penClick(gestureOf(it), positionOf(event))
+    if (tool === 'edit') {
+      arrowRelease(gestureOf(it), positionOf(event))
+      // The selection is painted on the static canvas: a marquee chooses its anchors on release, and
+      // without this they showed as selected only at the next press (the dev, 2026-10-12).
+      it.requestPaint()
+    } else if (tool === 'draw' && !dragged) penClick(gestureOf(it), positionOf(event))
   }
   // A Pencil drag ends with the button, whatever happened meanwhile: the hand borrowed with ‹space›, or
   // ‹P› turning the Pen to another mode. Then no last point is laid — the pointer was not drawing.

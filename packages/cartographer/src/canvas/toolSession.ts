@@ -344,8 +344,11 @@ export interface OverlayScene {
   rubberTo: Point | null
   /** Whether the first anchor is offering to close the ring, and should be emphasised. */
   closing: boolean
-  /** An anchor being dragged: where it would land, and the anchors its stretches run from. */
-  moving: { at: Point; from: readonly Point[] } | null
+  /**
+   * The anchors being dragged — one, or the whole selection: where each would land, and the anchors its
+   * stretches run from (moved too when they are). Empty when nothing is moving.
+   */
+  moving: readonly { at: Point; from: readonly Point[] }[]
   /** The marquee being dragged, normalised — `null` when none is. Gone on release: no frame (`s03`). */
   marquee: Rect | null
   /** The layer vertex the Pen would snap onto — emphasised before the click. */
@@ -366,14 +369,37 @@ export interface OverlayInputs {
   toScreen: (lonLat: readonly [number, number]) => Point
   /** The document's anchors in screen pixels, parallel to its table. */
   anchors: readonly Point[]
-  /** The anchors either side of the one being moved. */
-  movingFrom: readonly number[]
+  /** The anchors being dragged and where each would land, on screen — empty when nothing is moving. */
+  moves: readonly { index: number; at: Point }[]
+  /**
+   * The anchors either side of one in its rings — what a moved anchor's stretches run from.
+   * @param index - the anchor
+   * @returns its neighbours
+   */
+  neighboursOf: (index: number) => readonly number[]
   /** How near the first anchor, in screen pixels, closes the ring. */
   closeRadius: number
   /** The layer vertex under the pointer, on screen — `null` when not following a layer or out of reach. */
   snapTarget: Point | null
   /** The layer stretch a click would insert, on screen — `null` when the click would only place a point. */
   snapPreview: readonly Point[] | null
+}
+
+/**
+ * The anchors being dragged, each with the stretches it pulls — a neighbour that moves too is drawn
+ * where it would land, so the selection moves as one shape.
+ * @param inputs - the moves, the anchors and their neighbours
+ * @returns one entry per moved anchor
+ */
+function movingPreview(inputs: OverlayInputs): { at: Point; from: Point[] }[] {
+  const landed = new Map(inputs.moves.map((move) => [move.index, move.at]))
+  return inputs.moves.map((move) => ({
+    at: move.at,
+    from: inputs
+      .neighboursOf(move.index)
+      .map((index) => landed.get(index) ?? inputs.anchors[index])
+      .filter((point) => point !== undefined),
+  }))
 }
 
 /**
@@ -399,7 +425,6 @@ export function overlayScene(inputs: OverlayInputs): OverlayScene {
   const outline = inputs.session.outline.map((point) => inputs.toScreen(point.at))
   const drawing = inputs.tool === 'draw'
   const pointer = drawing ? inputs.pointer : null
-  const moving = inputs.session.moving
   // The preview replaces the rubber band — it *is* the line the click will lay. Without one, the band
   // runs to the layer vertex the click would snap onto, not to the pointer beside it.
   const bandEnd = inputs.snapTarget ?? pointer
@@ -410,14 +435,6 @@ export function overlayScene(inputs: OverlayInputs): OverlayScene {
     snapPreview: drawing ? inputs.snapPreview : null,
     closing: pointer !== null && isClosingOffered(outline, pointer, inputs.closeRadius),
     marquee: marqueeRect(inputs.session),
-    moving:
-      moving === null
-        ? null
-        : {
-            at: inputs.toScreen(moving.to),
-            from: inputs.movingFrom
-              .map((index) => inputs.anchors[index])
-              .filter((point) => point !== undefined),
-          },
+    moving: movingPreview(inputs),
   }
 }

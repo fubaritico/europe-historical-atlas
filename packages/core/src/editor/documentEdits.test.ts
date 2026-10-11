@@ -8,6 +8,7 @@ import {
   declareSource,
   duplicateRun,
   moveAnchor,
+  moveAnchors,
   pathsHolding,
   removePolity,
   updatePolity,
@@ -595,6 +596,58 @@ describe('updatePolity', () => {
       first(doc).suzerain = 'normandy'
       expect(wouldLoopHomage(doc, 'hre', 'normandy')).toBe(false)
       expect(wouldLoopHomage(doc, 'normandy', 'fr-couronne')).toBe(true)
+    })
+  })
+})
+
+describe('moveAnchors', () => {
+  describe('happy path', () => {
+    // s03 — "all twelve move together … every path holding any of them follows".
+    it('moves several anchors at once, every ring holding them following', () => {
+      const doc = sharedBorderDocument()
+      expect(
+        moveAnchors(doc, [
+          { index: 1, to: [3, 49] },
+          { index: 2, to: [3, 45] },
+        ])
+      ).toBe(true)
+      expect([doc.anchors[1], doc.anchors[2]]).toEqual([
+        [3, 49],
+        [3, 45],
+      ])
+    })
+  })
+
+  describe('variants', () => {
+    it('keeps its own copy of each point', () => {
+      const doc = sharedBorderDocument()
+      const to: [number, number] = [3, 49]
+      moveAnchors(doc, [{ index: 1, to }])
+      to[0] = 99
+      expect(doc.anchors[1]).toEqual([3, 49])
+    })
+  })
+
+  describe('managed errors', () => {
+    // All or nothing: one index past the table and nothing moves.
+    it('moves none of them when one names no anchor', () => {
+      const doc = sharedBorderDocument()
+      const before = structuredClone(doc.anchors)
+      expect(
+        moveAnchors(doc, [
+          { index: 1, to: [3, 49] },
+          { index: 99, to: [0, 0] },
+        ])
+      ).toBe(false)
+      expect(doc.anchors).toEqual(before)
+    })
+  })
+
+  // L4: N/A — the points come from the tool, already in degrees.
+
+  describe('edge cases', () => {
+    it('refuses an empty move', () => {
+      expect(moveAnchors(sharedBorderDocument(), [])).toBe(false)
     })
   })
 })

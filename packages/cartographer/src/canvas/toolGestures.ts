@@ -27,7 +27,7 @@ import type { SnapLine } from '../geometry/lineSnap'
 import type { CartographerStoreHook } from '../state/store'
 import type { BackdropFrame } from '../view/projection'
 import type { Point } from '../view/viewport'
-import type { Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
+import type { AnchorMove, Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
 
 /**
  * What the Pen and the white arrow do with a press, a drag, a release and a key.
@@ -403,9 +403,64 @@ export function arrowRelease(context: GestureContext, at: Point): void {
   if (marquee !== null) marqueeSelect(context, marquee, pending?.shift ?? false)
   else if (pending !== null) arrowClick(context, at, pending.shift)
   if (moving === null) return
-  if (!context.store.getState().moveAnchor(moving.index, moving.to, MOVE_ANCHOR_STEP)) {
-    console.error(`${TAG} the document refused to move anchor ${String(moving.index)}.`)
+  const moves = selectionMoves(context, moving)
+  if (moves === 'off-map') {
+    console.warn(`${TAG} nothing moved: part of the selection would have left the map.`)
+    return
   }
+  if (moves === 'missing') {
+    console.error(`${TAG} nothing moved: a selected anchor is no longer in the view's table.`)
+    return
+  }
+  if (!context.store.getState().moveAnchors(moves, moveStep(moves.length))) {
+    console.error(`${TAG} the document refused to move ${String(moves.length)} anchor(s).`)
+  }
+}
+
+/**
+ * How `{History}` and `[↶ Undo]` name a move — `s03`'s *"Undo — move anchor"*, plural for several.
+ * @param count - how many anchors moved
+ * @returns the step
+ */
+function moveStep(count: number): { kind: string; label: string } {
+  return count === 1
+    ? MOVE_ANCHOR_STEP
+    : { kind: MOVE_ANCHOR_STEP.kind, label: `move ${String(count)} anchors` }
+}
+
+/**
+ * Where every anchor of the selection lands when the one grabbed goes to `lead.to` — `s03`'s *"all
+ * twelve move together, keeping their relative positions"*. Each moves by the grabbed anchor's offset
+ * **on screen**, so the shape the author sees is the shape that lands. The grabbed anchor alone when it
+ * is not part of the selection.
+ * @param context - the session, the view and the frame
+ * @param lead - the grabbed anchor and where it goes, in degrees
+ * @returns each anchor and where it goes; `'off-map'` when one would leave the map, `'missing'` when an
+ *   anchor of the selection is not in the table — in both cases nothing moves
+ */
+export function selectionMoves(
+  context: GestureContext,
+  lead: { index: number; to: [number, number] }
+): AnchorMove[] | 'off-map' | 'missing' {
+  const anchors = context.anchorsOnScreen()
+  const from = anchors[lead.index]
+  if (from === undefined) return 'missing'
+  const to = lonLatToScreen(lead.to, context.frame, context.store.getState().viewport)
+  const selected = context.session.selected
+  const indices = selected.includes(lead.index) ? selected : [lead.index]
+  const moves: AnchorMove[] = []
+  for (const index of indices) {
+    if (index === lead.index) {
+      moves.push({ index, to: lead.to })
+      continue
+    }
+    const point = anchors[index]
+    if (point === undefined) return 'missing'
+    const landed = lonLatAt(context, [point[0] + to[0] - from[0], point[1] + to[1] - from[1]])
+    if (landed === null) return 'off-map'
+    moves.push({ index, to: landed })
+  }
+  return moves
 }
 
 /**

@@ -48,7 +48,7 @@ const NOTHING: OverlayScene = {
   outline: [],
   rubberTo: null,
   closing: false,
-  moving: null,
+  moving: [],
   snapTarget: null,
   snapPreview: null,
   marquee: null,
@@ -123,13 +123,15 @@ describe('paintOverlay', () => {
         SIZE,
         {
           ...NOTHING,
-          moving: {
-            at: [5, 5],
-            from: [
-              [0, 0],
-              [10, 0],
-            ],
-          },
+          moving: [
+            {
+              at: [5, 5],
+              from: [
+                [0, 0],
+                [10, 0],
+              ],
+            },
+          ],
         },
         CHROME_PAINT_STYLE
       )

@@ -5,7 +5,7 @@ import {
 import {
   addOutline,
   addPolity,
-  moveAnchor,
+  moveAnchors,
   updatePolity,
 } from '@europe-historical-atlas/core/editor/documentEdits'
 import { createHistory } from '@europe-historical-atlas/core/editor/history'
@@ -14,7 +14,11 @@ import { restack } from '@europe-historical-atlas/core/editor/stacking'
 import type { CartographerStore } from './store'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { AnchorRemoval } from '@europe-historical-atlas/core/editor/anchorEdits'
-import type { OutlinePoint, Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
+import type {
+  AnchorMove,
+  OutlinePoint,
+  Provenance,
+} from '@europe-historical-atlas/core/editor/documentEdits'
 import type {
   History,
   HistoryMarker,
@@ -84,7 +88,7 @@ export interface EditionState {
  * handed it — which is also what makes it impossible for a caller to record a document the slice is not on.
  *
  * Every action that changes the document **mutates and records together** — {@link EditionActions.createPolity},
- * {@link EditionActions.drawOutline}, {@link EditionActions.moveAnchor} — so no caller can do the first half
+ * {@link EditionActions.drawOutline}, {@link EditionActions.moveAnchors} — so no caller can do the first half
  * and forget the commit.
  */
 export interface EditionActions {
@@ -132,15 +136,13 @@ export interface EditionActions {
    */
   drawOutline: (polityId: string, points: readonly OutlinePoint[], step: HistoryStep) => boolean
   /**
-   * Move one anchor, as one undoable step — the white arrow's drag, committed on release.
-   *
-   * Every ring holding it follows, the anchor being one index in all of them.
-   * @param index - the anchor to move
-   * @param point - where to, as `[longitude, latitude]`
+   * Move anchors, as one undoable step — the white arrow's drag, committed on release: one anchor, or
+   * the whole selection, keeping their relative positions (`s03`). Every ring holding any follows.
+   * @param moves - each anchor and where it goes, as `[longitude, latitude]`
    * @param step - how the gesture is named
-   * @returns `false` when there is no such anchor — and nothing happened
+   * @returns `false` when a move names no anchor — and nothing happened
    */
-  moveAnchor: (index: number, point: [number, number], step: HistoryStep) => boolean
+  moveAnchors: (moves: readonly AnchorMove[], step: HistoryStep) => boolean
   /**
    * Insert an anchor on a stretch, as one undoable step — the white arrow's click on a stretch (`s03`).
    *
@@ -385,8 +387,7 @@ export function editionActions(
     ...polityActions(record),
     drawOutline: (polityId, points, step): boolean =>
       record((document) => addOutline(document, polityId, points), step),
-    moveAnchor: (index, point, step): boolean =>
-      record((document) => moveAnchor(document, index, point), step),
+    moveAnchors: (moves, step): boolean => record((document) => moveAnchors(document, moves), step),
     restackPolity: (polityId, move, step): boolean =>
       record((document) => restack(document, polityId, move), step),
     ...anchorActions(record),

@@ -19,6 +19,7 @@ import {
   lineLabel,
   outlineOnScreen,
   resolvedTarget,
+  selectionMoves,
   snapHit,
   snapStretchTo,
 } from './toolGestures'
@@ -392,6 +393,27 @@ export function overStretch(it: LiveCanvas): boolean {
 }
 
 /**
+ * The anchors being dragged and where each would land, on screen — the selection's moves
+ * (`selectionMoves`), or none. A move that would take part of the selection off the map shows nothing:
+ * its release is refused, and says so.
+ * @param it - the attachment
+ * @returns the moves, in screen pixels
+ */
+function movesOnScreen(it: LiveCanvas): { index: number; at: Point }[] {
+  const moving = it.session.moving
+  if (moving === null) return []
+  const viewport = it.deps.store.getState().viewport
+  const moves = selectionMoves(gestureOf(it), moving)
+  // A refused move previews nothing, deliberately: the release says why (`arrowRelease`), once, and
+  // saying it here would log on every pointer move — which the no-silent-refusal rule forbids.
+  if (typeof moves === 'string') return []
+  return moves.map((move) => ({
+    index: move.index,
+    at: lonLatToScreen(move.to, it.deps.frame, viewport),
+  }))
+}
+
+/**
  * Bring everything the session drives up to date: the overlay, the action sentence, the cursor.
  *
  * Called after any change to the session or the pointer. The overlay is cheap to repaint — a few
@@ -409,7 +431,8 @@ export function refreshTools(it: LiveCanvas): void {
     pointer: it.pointer,
     toScreen: (lonLat) => lonLatToScreen(lonLat, it.deps.frame, state.viewport),
     anchors: moving === null ? [] : anchorsOnScreen(it),
-    movingFrom: moving === null ? [] : ringNeighbours(state.document, moving.index),
+    moves: movesOnScreen(it),
+    neighboursOf: (index) => ringNeighbours(state.document, index),
     closeRadius: HANDLE_HIT_RADIUS * it.ratio,
     snapTarget: offer.target,
     snapPreview: offer.preview,

@@ -46,7 +46,8 @@ function overlay(overrides: Partial<OverlayInputs> = {}): OverlayInputs {
     pointer: [50, 50],
     toScreen: (lonLat) => [lonLat[0], lonLat[1]],
     anchors: [],
-    movingFrom: [],
+    moves: [],
+    neighboursOf: () => [],
     closeRadius: 8,
     snapTarget: null,
     snapPreview: null,
@@ -123,26 +124,49 @@ describe('toolSession', () => {
     })
 
     it('draws an anchor being dragged with the stretches it pulls', () => {
-      const session = { ...idleSession(), moving: { index: 0, to: [5, 6] as [number, number] } }
       const scene = overlayScene(
         overlay({
           tool: 'edit',
-          session,
           anchors: [
             [0, 0],
             [10, 0],
             [0, 10],
           ],
-          movingFrom: [1, 2],
+          moves: [{ index: 0, at: [5, 6] }],
+          neighboursOf: () => [1, 2],
         })
       )
-      expect(scene.moving).toEqual({
-        at: [5, 6],
-        from: [
-          [10, 0],
-          [0, 10],
-        ],
-      })
+      expect(scene.moving).toEqual([
+        {
+          at: [5, 6],
+          from: [
+            [10, 0],
+            [0, 10],
+          ],
+        },
+      ])
+    })
+
+    // s03 — "all twelve move together": a neighbour that moves too is drawn where it lands.
+    it('draws two neighbours dragged together, each pulled to where the other lands', () => {
+      const scene = overlayScene(
+        overlay({
+          tool: 'edit',
+          anchors: [
+            [0, 0],
+            [10, 0],
+          ],
+          moves: [
+            { index: 0, at: [5, 5] },
+            { index: 1, at: [15, 5] },
+          ],
+          neighboursOf: (index) => (index === 0 ? [1] : [0]),
+        })
+      )
+      expect(scene.moving).toEqual([
+        { at: [5, 5], from: [[15, 5]] },
+        { at: [15, 5], from: [[5, 5]] },
+      ])
     })
   })
 

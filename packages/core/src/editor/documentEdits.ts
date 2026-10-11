@@ -51,8 +51,31 @@ export function addAnchor(doc: YearDocument, point: [number, number], sourceId: 
  * @returns `true` when the anchor existed
  */
 export function moveAnchor(doc: YearDocument, index: number, point: [number, number]): boolean {
-  if (index < 0 || index >= doc.anchors.length) return false
-  doc.anchors[index] = [point[0], point[1]]
+  return moveAnchors(doc, [{ index, to: point }])
+}
+
+/** One anchor's move: which, and where to, as `[longitude, latitude]`. */
+export interface AnchorMove {
+  /** The anchor. */
+  index: number
+  /** Where it goes. */
+  to: [number, number]
+}
+
+/**
+ * Move several anchors at once — `s03`'s *"all twelve move together … committed as one undo step"*.
+ * Every ring holding any of them follows, an anchor being one index in all of them.
+ *
+ * **All or nothing**: an index past the table refuses the whole move before anything is written, so a
+ * refused gesture never leaves half the selection moved with no step to undo it.
+ * @param doc - the document to edit
+ * @param moves - the anchors and where each goes
+ * @returns `false` when a move names no anchor, or there is no move at all — and nothing moved
+ */
+export function moveAnchors(doc: YearDocument, moves: readonly AnchorMove[]): boolean {
+  if (moves.length === 0) return false
+  if (moves.some((move) => move.index < 0 || move.index >= doc.anchors.length)) return false
+  for (const move of moves) doc.anchors[move.index] = [move.to[0], move.to[1]]
   return true
 }
 

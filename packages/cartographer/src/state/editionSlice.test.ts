@@ -647,7 +647,7 @@ const OUTLINE = (
   ] as [number, number][]
 ).map((at) => ({ at, provenance: FREE_POINT_PROVENANCE }))
 
-describe('editionSlice.drawOutline and moveAnchor', () => {
+describe('editionSlice.drawOutline and moveAnchors', () => {
   describe('happy path', () => {
     // H-10 — one gesture, one step: the whole outline comes back out in one ctrl+z.
     it('adds a closed outline as one step, and one undo takes it all back', () => {
@@ -661,7 +661,7 @@ describe('editionSlice.drawOutline and moveAnchor', () => {
 
     it('moves an anchor as one step, and the undo puts it back', () => {
       const { store } = openStore()
-      expect(store.getState().moveAnchor(1, [3, 49], MOVE)).toBe(true)
+      expect(store.getState().moveAnchors([{ index: 1, to: [3, 49] }], MOVE)).toBe(true)
       expect(store.getState().document.anchors[1]).toEqual([3, 49])
       store.getState().undo()
       expect(store.getState().document.anchors[1]).toEqual([2, 48])
@@ -691,7 +691,7 @@ describe('editionSlice.drawOutline and moveAnchor', () => {
 
     it('records nothing for an anchor that is not there', () => {
       const { store } = openStore()
-      expect(store.getState().moveAnchor(99, [0, 0], MOVE)).toBe(false)
+      expect(store.getState().moveAnchors([{ index: 99, to: [0, 0] }], MOVE)).toBe(false)
       expect(store.getState().canUndo).toBe(false)
     })
   })
@@ -701,7 +701,7 @@ describe('editionSlice.drawOutline and moveAnchor', () => {
     it('bumps the version once per recorded gesture, so the canvas repaints', () => {
       const { store } = openStore()
       const version = store.getState().version
-      store.getState().moveAnchor(1, [3, 49], MOVE)
+      store.getState().moveAnchors([{ index: 1, to: [3, 49] }], MOVE)
       expect(store.getState().version).toBe(version + 1)
     })
   })
@@ -709,7 +709,7 @@ describe('editionSlice.drawOutline and moveAnchor', () => {
   describe('edge cases', () => {
     it('restores a shared anchor for both owners on undo', () => {
       const { store } = openStore()
-      store.getState().moveAnchor(1, [3, 49], MOVE)
+      store.getState().moveAnchors([{ index: 1, to: [3, 49] }], MOVE)
       store.getState().undo()
       const { document } = store.getState()
       expect(document.claims.map((claim) => claim.rings[0]?.includes(1))).toEqual([true, true])

@@ -72,10 +72,10 @@ function paintOutline(ctx: Painter2D, scene: OverlayScene, style: PaintStyle): v
  * @param style - the colours and sizes
  */
 function paintMoving(ctx: Painter2D, scene: OverlayScene, style: PaintStyle): void {
-  if (scene.moving === null) return
-  const { at, from } = scene.moving
-  for (const point of from) polyline(ctx, [point, at])
-  handle(ctx, at, true, style)
+  for (const { at, from } of scene.moving) {
+    for (const point of from) polyline(ctx, [point, at])
+    handle(ctx, at, true, style)
+  }
 }
 
 /**
