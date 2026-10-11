@@ -105,13 +105,36 @@ describe('toRegionPayload', () => {
       expect(france?.subjectTo).toBeNull()
     })
 
-    it('orders claims by depth of homage, so a vassal paints over its lord', () => {
+    it('paints a vassal over its lord', () => {
       // `rasteriseRegions` resolves an overlap by "later index wins", so the suzerain has to come first.
       // This is H-05a implemented in the adapter rather than in the rasteriser.
       const payload = toRegionPayload(authoredYear(), renderBbox)
       expect(payload.regions.map((region) => region.name)).toEqual([
         'Reaume de France',
         'Duché d’Aquitaine',
+      ])
+    })
+
+    // s16 — a group brought forward covers the group behind it, vassals included.
+    it('paints a later group over an earlier group’s vassal', () => {
+      const year = authoredYear()
+      year.registry.polities.push({
+        id: 'hre',
+        name: 'Sacrum Imperium',
+        rank: 'empire',
+        status: null,
+        suzerain: null,
+        existsFrom: 962,
+        existsTo: null,
+        colour: null,
+        wikidata: null,
+      })
+      year.polities.claims.push({ polity: 'hre', rings: [[1, 2, 3]] })
+      const payload = toRegionPayload(year, renderBbox)
+      expect(payload.regions.map((region) => region.name)).toEqual([
+        'Reaume de France',
+        'Duché d’Aquitaine',
+        'Sacrum Imperium',
       ])
     })
 

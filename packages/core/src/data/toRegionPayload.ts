@@ -14,35 +14,17 @@
  * 2. **Rings are closed on the way out.** Ours are index lists with closure implied; `projectRegions` drops
  *    any ring under four points, GeoJSON-style, where the first vertex is repeated last. A triangle — three
  *    indices, legal in our format — would vanish with nothing said.
- * 3. **Claims are ordered by depth of homage.** `rasteriseRegions` resolves an overlap by "later index
- *    wins", so emitting suzerains before their vassals is what makes a vassal paint over its lord — H-05a,
- *    implemented without touching the rasteriser. File order stops mattering, which it should never have.
+ * 3. **Claims are emitted in {@link paintOrder}.** `rasteriseRegions` resolves an overlap by "later index
+ *    wins", so emitting back to front is what makes a vassal paint over its lord (H-05a) and a group the
+ *    author brought forward paint over the one behind it, vassals included (`s16`) — without touching
+ *    the rasteriser. The Cartographer paints by the same function, so the two show one map.
  */
+
+import { paintOrder } from './paintOrder'
 
 import type { RegionPayload } from './regionSource'
 import type { AuthoredYear, YearPolity } from './yearFormat'
 import type { GeoBounds } from '../geo/mercator'
-
-/**
- * How deep a polity sits in the chain of homage: 0 for one that owes nobody.
- *
- * Terminates because `assembleAuthoredYear` has already refused a loop — the two belong together, and
- * calling this on unchecked files is how a render would hang instead of failing.
- * @param polity - the polity to place
- * @param byId - every polity of the year, by id
- * @returns the number of links up to a polity owing nobody
- */
-function depthOfHomage(polity: YearPolity, byId: ReadonlyMap<string, YearPolity>): number {
-  let depth = 0
-  let current = polity
-  while (current.suzerain !== null) {
-    const suzerain = byId.get(current.suzerain)
-    if (suzerain === undefined) return depth
-    current = suzerain
-    depth += 1
-  }
-  return depth
-}
 
 /**
  * Resolve one ring of indices into closed lon/lat coordinates.
@@ -110,12 +92,12 @@ function toRegion(
  */
 export function toRegionPayload(year: AuthoredYear, bbox: GeoBounds): RegionPayload {
   const byId = new Map(year.registry.polities.map((polity) => [polity.id, polity]))
+  // Back to front. A loop of homage cannot reach here: `assembleAuthoredYear` refuses it on load, and
+  // refuses a claim naming no polity — so every claim has a rank, and `?? -1` only satisfies the type.
+  const rank = new Map(paintOrder(year.registry.polities).order.map((id, index) => [id, index]))
   const ordered = year.polities.claims
-    .map((claim) => {
-      const polity = byId.get(claim.polity)
-      return { claim, polity, depth: polity === undefined ? 0 : depthOfHomage(polity, byId) }
-    })
-    .sort((a, b) => a.depth - b.depth)
+    .map((claim) => ({ claim, polity: byId.get(claim.polity) }))
+    .sort((a, b) => (rank.get(a.claim.polity) ?? -1) - (rank.get(b.claim.polity) ?? -1))
 
   const regions: RegionPayload['regions'] = []
   for (const { claim, polity } of ordered) {
