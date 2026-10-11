@@ -320,7 +320,6 @@ export function showCursor(
       overHandle: overHandle(it),
       overStretch: inserting,
       snapping: offer.kind === 'layer',
-      branching: offer.kind === 'anchor',
       // Only read with nobody aimed at, so only tested then — not on every move (QUAL-001).
       overFill: !hasTarget && overFill(it),
     })

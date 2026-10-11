@@ -1632,8 +1632,8 @@ describe('the Pen meeting a shared border, on the canvas', () => {
     store.getState().aimAt('hre')
     node.dispatchEvent(pointerEvent('pointermove', { offsetX: 501, offsetY: 201 }))
     expect(acted).toHaveBeenLastCalledWith('Branching from a shared anchor — held by 1 path')
-    // QUAL-003: the live canvas sets the branching mark, not only cursorFor with a literal.
-    expect(node.style.cursor).toBe(cursorCss('cross-branch'))
+    // The branching mark is gone (the dev, 2026-10-11): the plain cross, and the click still joins.
+    expect(node.style.cursor).toBe(cursorCss('cross'))
     click(node, [501, 201])
     click(node, [501, 399])
     click(node, [650, 300])

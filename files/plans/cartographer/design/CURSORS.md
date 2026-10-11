@@ -1,7 +1,7 @@
 # Handoff: Cartographer canvas cursors
 
 ## Overview
-Ten cursor images for the canvas of the Cartographer, the contribution tool of a 3D historical atlas of Europe. They cover the nine tool/state rows of the UI inventory: ⟨navigate⟩, ⟨draw⟩ (the Pen) and ⟨edit⟩ (white arrow). **The images are design. When each one appears is code**, driven by what lies under the pointer.
+Nine cursor images in use for the canvas of the Cartographer, the contribution tool of a 3D historical atlas of Europe. They cover the nine tool/state rows of the UI inventory: ⟨navigate⟩, ⟨draw⟩ (the Pen) and ⟨edit⟩ (white arrow). **The images are design. When each one appears is code**, driven by what lies under the pointer.
 
 ## About the design files
 `05 Cursors.dc.html` is a **design reference built in HTML**, not production code. Open it in a browser: each card shows the cursor enlarged 4×, with its hot spot marked in magenta, the CSS line to use, and a terrain pad you can hover to try the real cursor. Build the behaviour in the target codebase using its own patterns. **The SVG/PNG files in `cursors/` are final assets**, so use them as they are.
@@ -21,7 +21,6 @@ High-fidelity. The shapes, sizes and hot spots are final.
 | `hand-closed` | Closed hand | dragging the view | 16 16 | `grabbing` |
 | `cross` | Cross | ⟨draw⟩ active | 16 16 | `crosshair` |
 | `cross-close` | Cross + closing ring | ⟨draw⟩, pointer within snapping radius of the open outline's **first** anchor: a click closes the ring (‹enter› closes on a straight segment) | 16 16 | `crosshair` |
-| `cross-branch` | Cross + branch mark | ⟨draw⟩, over an existing anchor: a new outline will start from it | 16 16 | `crosshair` |
 | `cross-snap` | Cross + snap mark | ⟨draw⟩ with snap to river / snap to coast, pointer within snapping range of that feature | 16 16 | `crosshair` |
 | `cross-add` | Cross + plus | ⟨draw⟩, no outline in progress, over one of the target's stretches: a click inserts an anchor, as Illustrator's Pen over a selected path. **Not from the handoff** — derived on 2026-10-11 from `cross` and the plus of `arrow-insert`; replace it if a designed one arrives | 16 16 | `crosshair` |
 | `arrow` | White arrow | ⟨edit⟩ active | 6 4 | `default` |
@@ -37,7 +36,7 @@ cursor: image-set(url(cursors/png/cross.png) 1x, url(cursors/png/cross-2x.png) 2
 ```
 Hot spots are given in 32-px units for **every** file, the 64-px `-2x` PNGs included. Do not double them.
 
-Precedence, highest first: ‹space› held (hand) › marquee drag › hover state (first anchor › existing anchor › snap range / handle › stretch) › tool default. This order is not in the scenarios. It is inferred from the table, so confirm it.
+Precedence, highest first: ‹space› held (hand) › marquee drag › hover state › tool default. The hover state, as `cursors.ts` orders it: for the Pen, first anchor (closing) › the target's stretch (plus) › a snap layer in reach (snap) › plain cross; for the arrow, handle › stretch › arrow.
 
 ## Construction
 - Canvas 32×32, `viewBox="0 0 32 32"`.
@@ -46,7 +45,7 @@ Precedence, highest first: ‹space› held (hand) › marquee drag › hover st
 - The arrow is hollow (white fill, ink outline), after Illustrator's direct-selection tool. Its tip is at (6.5, 4.5), so its hot spot is (6,4).
 - The modifier badges sit in the lower-right quadrant, clear of the arms:
   - closing ring: circle, r 3.5, centred at (25,25)
-  - branch mark: a Y-fork
+  - ~~branch mark: a Y-fork~~ — removed from the app, 2026-10-11 (see the end of this file)
   - snap mark: diamond, 9 px, centred at (25,25)
   - handle square: 7×7, white with an ink outline
   - plus: 8 px
@@ -103,6 +102,8 @@ decision, because the document someone opens to build from still asks the questi
 
 ## Files
 - `05 Cursors.dc.html`: the reference sheet. It needs `support.js`, `cursors/` and `assets/` next to it.
-- `cursors/*.svg`: the 10 source cursors, 32×32.
+- `cursors/*.svg`: the 10 source cursors, 32×32 — `cross-branch` among them, **kept in this kit for reference only**: the app no longer ships it.
 - `cursors/png/*.png`: 32×32 files, plus `-2x` files at 64×64.
 - `assets/europe-terrain.png`: the terrain backdrop, used only for the try-it pads.
+
+> **`cross-branch` removed, 2026-10-11, the dev's call**: the mark over a neighbour's anchor was not useful to him. The behaviour stays — a Pen click on an anchor another outline holds joins it, so the border is shared — with the plain cross over it.

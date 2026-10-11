@@ -2,7 +2,6 @@ import arrowHandleUrl from '../cursors/arrow-handle.svg'
 import arrowInsertUrl from '../cursors/arrow-insert.svg'
 import arrowUrl from '../cursors/arrow.svg'
 import crossAddUrl from '../cursors/cross-add.svg'
-import crossBranchUrl from '../cursors/cross-branch.svg'
 import crossCloseUrl from '../cursors/cross-close.svg'
 import crossSnapUrl from '../cursors/cross-snap.svg'
 import crossUrl from '../cursors/cross.svg'
@@ -39,7 +38,6 @@ export type CursorName =
   | 'cross'
   | 'cross-close'
   | 'cross-add'
-  | 'cross-branch'
   | 'cross-snap'
   | 'arrow'
   | 'arrow-handle'
@@ -61,8 +59,6 @@ export interface CursorState {
   overHandle: boolean
   /** Whether the Pen, following a layer — the coast or a river — has it within reach. */
   snapping: boolean
-  /** Whether the Pen is over an existing anchor it would join — CURSORS.md's branching mark. */
-  branching: boolean
   /**
    * Whether a click here inserts a point on one of the target's stretches — the white arrow away from
    * any handle, or the Pen with no outline in progress, as Illustrator's Pen does over a selected path.
@@ -85,7 +81,6 @@ const HOT_SPOT: Record<CursorName, readonly [number, number]> = {
   cross: [16, 16],
   'cross-close': [16, 16],
   'cross-add': [16, 16],
-  'cross-branch': [16, 16],
   'cross-snap': [16, 16],
   arrow: [6, 4],
   'arrow-handle': [6, 4],
@@ -99,7 +94,6 @@ const FALLBACK: Record<CursorName, string> = {
   cross: 'crosshair',
   'cross-close': 'crosshair',
   'cross-add': 'crosshair',
-  'cross-branch': 'crosshair',
   'cross-snap': 'crosshair',
   arrow: 'default',
   'arrow-handle': 'default',
@@ -113,7 +107,6 @@ const IMAGE: Record<CursorName, string> = {
   cross: crossUrl,
   'cross-close': crossCloseUrl,
   'cross-add': crossAddUrl,
-  'cross-branch': crossBranchUrl,
   'cross-snap': crossSnapUrl,
   arrow: arrowUrl,
   'arrow-handle': arrowHandleUrl,
@@ -149,14 +142,14 @@ export function cursorFor(state: CursorState): CursorName | typeof REFUSED {
 }
 
 /**
- * The Pen's cursor: the closing mark, then the branching mark over an existing anchor, then the plus
- * over the target's stretch, then the snap mark over the coast, then the plain cross.
+ * The Pen's cursor: the closing mark, then the plus over the target's stretch, then the snap mark over
+ * a snap layer, then the plain cross. **No mark over a neighbour's anchor**: the click still joins it,
+ * so the border stays shared, but the dev found the mark useless and it was removed (2026-10-11).
  * @param state - the Pen's two offers
  * @returns the cursor
  */
 function drawCursor(state: CursorState): CursorName {
   if (state.closing) return 'cross-close'
-  if (state.branching) return 'cross-branch'
   if (state.overStretch) return 'cross-add'
   return state.snapping ? 'cross-snap' : 'cross'
 }
