@@ -25,6 +25,14 @@ Put here the know issues to avoid cluttering the context window.
   mineure. En `0.x` le caret ne franchit pas une mineure, donc `^0.2.0` ne prendra jamais `0.3.0` seul —
   il faut bumper les trois lignes ensemble. **Le ColorPicker arrive en `0.3.0`.**
   **Sévérité : à savoir.**
+- **Depuis le 12/10, `lint` attend `^lint` : si le plugin `eslint-plugin-eha` échoue à son propre lint,
+  Turbo n'exécute pas le lint des trois autres paquets.** C'est le prix de la correction du cache (sans
+  `^lint`, un changement de règle laissait le lint des paquets en `cache hit`, vert sur du code que la règle
+  n'avait pas lu — voir `troubleshooting.md`). Conséquence : on ne voit que la première panne ; une fois le
+  plugin réparé, le reste s'exécute. Remède si ça gêne : `pnpm exec turbo lint --continue`. **Sévérité : à savoir.**
+- **`eha/hoist-independent-function` ne réécrit pas quand le nom est déjà pris** (au module, ou par une
+  autre fonction du fichier) : il signale, et c'est l'auteur qui renomme. Voulu — un renommage automatique
+  toucherait les références. **Sévérité : à savoir.**
 - **La revue de fin de session du 11/10 a laissé ouvert, par décision de moi, ce qui suit — aucun n'est
   bloquant pour un éditeur à un seul auteur, tout est à reprendre avec l'étape 5.**
   **Accessibilité** : (1) **la hiérarchie de l'arbre `{Polities}` n'est pas annoncée** — `aria-level`
