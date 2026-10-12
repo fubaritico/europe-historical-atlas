@@ -2,6 +2,40 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-10-12 — un plugin ESLint à nous, la plume qui trouve l'eau, et la barre d'actions décidée
+
+Une plage, **12/10 14:45 → 18:17 (3 h 31, 332 actions)** ; le chantier ouvert le 05/10 totalise **34 h 08 sur
+8 plages**. **10 commits** `bd0fd45`..`3ea738c`, **tous poussés**, CI verte (sept jobs, déploiement compris),
+**2523 → 2633 tests**, gate verte à chaque pas, revue à plusieurs agents à chaque pas, chaque garde prouvée
+par le code naïf.
+
+- **`eslint-plugin-eha`**, quatrième paquet (JS + JSDoc vérifié par `tsc`, Node 22.14 ne chargeant pas un
+  `.ts`), adapté du plugin Fluid du dev, **trois règles en erreur** : `component-body-order` (Guards → Store →
+  Store actions → … → Render, un séparateur `// …` par groupe, corrigé par `--fix` ; props déstructurées dans
+  la signature sauf usage entier ; une déclaration ne remonte jamais au-dessus de ce qu'elle lit) ·
+  `hoist-independent-function` (tous les paquets, tests compris ; 38 fonctions déplacées par son correctif,
+  aucune chaîne modifiée — vérifié au compilateur) · `no-inline-event-handlers` (20 handlers nommés,
+  `PolityArrangeMenu` scindé en `KnownPolityMenu`). **Écartées sur mesure** : déstructurer les dépendances
+  (482 paramètres, et déstructurer `event.preventDefault` casse `this`), l'ordre des fabriques (constructions
+  séquentielles). Plan : `files/plans/eslint-plugin-eha/plan.md`.
+- **Trouvé en route** : Turbo rejouait un lint vert après un changement de règle ou de config racine —
+  `globalDependencies` + `lint` → `^lint`.
+- **La règle du dev, mémorisée** : *« un système, pas des exceptions »* — une règle qui n'en tient que par des
+  exceptions est abandonnée, mesure à l'appui.
+- **Le menu de pile** : un seul filet (`--line`), libellés centrés.
+- **La plume trouve la côte et les fleuves** (`s02`) : la plume simple et le crayon s'accrochent au plus
+  proche des deux, la plume bascule en mode côte ou fleuve ; le premier clic qu'aucune eau ne prend rend le
+  mode de départ ; d'une eau à l'autre, bascule directe ; le crayon s'arrête sur l'eau. **‹ctrl+z› ne rend
+  pas le mode** — *« pas d'annulation pour l'instant »*. `s02` écrit aussi le crayon, jamais spécifié.
+- **La barre d'actions de `{Polities}`** : plan décidé (D1–D5), étape 1 écrite (`s07`, `H-17` fermé). Les
+  icônes : longue enquête sur la netteté ; **verdict du dev** — le flou des outils est accepté, la barre prend
+  **ses dessins en pixels** (le `+` encadré de pointillés, la poubelle à trois lamelles) posés sur des pixels
+  entiers, nets à 100 %.
+- **Mes fautes** : avoir affirmé que le design system avait une poubelle sans l'avoir vu ; m'être trompé
+  **deux fois** sur le demi-pixel (à ×2 il vaut un pixel physique entier) ; un plan qui affirmait que Turbo
+  hachait les dépendances de workspace ; un **second serveur de dev** qui a fait chercher la page au dev ;
+  un `cd` ; un en-tête de commit à 101 caractères ; une fixture déclarée dans un `describe` et utilisée hors.
+
 ### 2026-10-11 → 12 — les fleuves, le crayon, l'empilement par groupes, modifier un pays, la sélection
 
 Une plage continue, **11/10 13:31 → 12/10 01:05 (11 h 34, 828 actions)**, dont cette session-ci de
@@ -41,29 +75,4 @@ attente.
   de la revue** — il l'a réclamé ; un `cd /dev/null` ; une affirmation fausse dans `s16` (l'atlas peignait
   autrement), et une entrée fausse dans `known-issues` (« rien ne permet de choisir un suzerain »).
 
-### 2026-10-10 → 11 — `(d)` livré : on dessine, on suit la côte, on partage une frontière
-
-Deux plages : **10/10 10:36 → 10:46 (10 min)** et **11/10 13:31 → 21:23 (7 h 52, 434 actions)**. Le
-chantier ouvert le 05/10 totalise **26 h 50 sur 7 plages**. **17 commits** `0db39ce`..`9ff0757`,
-**1969 → 2350 tests**, gate verte à chaque pas, revue à quatre agents à chaque commit. **7 non poussés**
-(`059af13`..`9ff0757`).
-
-- **Le ColorField** (DS `0.4.0` → `0.5.0`) dans la boîte de création, réglé dans l'établi.
-- **`(d)`** : la plume pose, ferme, suit la côte avec aperçu ; la flèche déplace ; remplissage en
-  `overlay` à 100 % ; ‹ctrl+z› pas à pas, et défaire une fermeture **rouvre** le contour (décision du
-  dev) ; la barre d'outils à la Illustrator ; `{Polities}` suit le document ; clic dans un remplissage =
-  cible, clic dans le vide = désélection (le dev a renversé mon choix).
-- **Frontières partagées** : la plume s'accroche aux ancres existantes et suit la frontière d'ancre en
-  ancre. **Corrigé le soir sur son cas Espagne → Portugal** : en mode côte, la côte passe d'abord et un
-  sommet déjà ancre est **réutilisé à l'identique** — sinon le branchement détournait le clic.
-- **Ajouter / supprimer un point** : `core/editor/anchorEdits.ts`, dans **tous** les anneaux (trous
-  délibérés compris) et les tronçons stylés ; flèche et plume « + » (curseur `cross-add` dérivé, pas du
-  kit). `MIN_RING_ANCHORS` devenu **une** constante.
-- **Règle du dev, consignée** : aucun refus silencieux (`rules/error-handling.md`), `warn` / `error`,
-  jamais par frame. Et **noms de tests factuels** (mémoire).
-- **Mes fautes** : un test-sabot qui cassait la syntaxe au lieu de saboter (rattrapé) ; trois messages de
-  commit au-dessus de 100 colonnes ; et surtout **une option de conception inventée** — le dev parlait du
-  **zoom ‹+›/‹−›** qui ne marche pas, j'en ai fait une « plume − » et j'ai reposé des questions. Il a dû
-  le dire trois fois. Le zoom : **jugé suffisant par le dev le 11/10 au soir**, rien à corriger.
-
-> Older sessions (2026-09-12 → 2026-10-09) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-11) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

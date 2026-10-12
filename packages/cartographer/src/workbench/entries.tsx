@@ -11,6 +11,9 @@ import { PolityList } from '../components/PolityList'
 import { PolityStackMenu } from '../components/PolityStackMenu'
 import { ToolRail } from '../components/ToolRail'
 
+import { BarIconCandidates } from './BarIconCandidates'
+import { IconSharpness } from './IconSharpness'
+
 import type { WorkbenchEntry } from './Workbench'
 import type { PolityRow } from '../components/polityRows'
 
@@ -195,6 +198,20 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
         />
       </div>
     ),
+  },
+  {
+    id: 'bar-icons',
+    title: 'Icons — the action bar',
+    note: "The bar's plus, minus and trash, two ways, each in a 26 × 24 box on whole pixels as the bar will hold it: the dev's pixel drawing moved onto whole pixels, and the same traced with the tools' 1.4 round stroke. The tools above, for consistency.",
+    width: 320,
+    render: () => <BarIconCandidates />,
+  },
+  {
+    id: 'icon-sharpness',
+    title: 'Icons — sharpness',
+    note: "Each glyph at 18 px, never scaled: today's 1.4 stroke beside the proposal — a 1 px stroke, every straight segment on a half pixel, as the cursors are drawn. The header's + is the design system's, scaled to 12 px. Judge on the screen the editor runs on.",
+    width: 640,
+    render: () => <IconSharpness />,
   },
   {
     id: 'tool-rail',

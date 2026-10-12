@@ -270,10 +270,15 @@ the editor writes.
 
 Even-odd fill gives a figure-of-eight a hole where it crosses itself. Refuse it, repair it, or allow it?
 
-### H-17 · Deleting a polity
+### H-17 · Deleting a polity — **settled 2026-10-12, by the dev**
 
 What becomes of its territory — unclaimed, or given to a neighbour? And what becomes of the stretches it
 shared with others?
+
+**Answered**: the polity and its outline go, the ground is left **unclaimed**, and the anchors it shared
+**stay** — the neighbour's border does not move (`s00`'s constraint; `removePolity` already keeps them).
+Every deletion is confirmed. Giving the ground to a neighbour is set aside, a gesture of its own if it
+is ever needed. [`s07`](s07-manage-the-registry.md), *Removing*.
 
 ### H-18 · Ring winding order
 

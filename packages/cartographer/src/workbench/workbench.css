@@ -49,12 +49,15 @@
 .workbench__heading {
   font-size: 15px;
   font-weight: 600;
+  /* Whole pixels, so the stage below lands on a whole pixel: a glyph's sharpness is judged on it. */
+  line-height: 20px;
 }
 
 .workbench__note {
   max-width: 60ch;
   margin-top: 4px;
   color: var(--ink-dim);
+  line-height: 16px;
 }
 
 /* A panel's surface at the dock's width, unless a plate asks for another. */

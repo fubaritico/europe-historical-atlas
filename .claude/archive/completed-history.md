@@ -2,6 +2,31 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-10-10 → 11 — `(d)` livré : on dessine, on suit la côte, on partage une frontière
+
+Deux plages : **10/10 10:36 → 10:46 (10 min)** et **11/10 13:31 → 21:23 (7 h 52, 434 actions)**. Le
+chantier ouvert le 05/10 totalise **26 h 50 sur 7 plages**. **17 commits** `0db39ce`..`9ff0757`,
+**1969 → 2350 tests**, gate verte à chaque pas, revue à quatre agents à chaque commit. **7 non poussés**
+(`059af13`..`9ff0757`).
+
+- **Le ColorField** (DS `0.4.0` → `0.5.0`) dans la boîte de création, réglé dans l'établi.
+- **`(d)`** : la plume pose, ferme, suit la côte avec aperçu ; la flèche déplace ; remplissage en
+  `overlay` à 100 % ; ‹ctrl+z› pas à pas, et défaire une fermeture **rouvre** le contour (décision du
+  dev) ; la barre d'outils à la Illustrator ; `{Polities}` suit le document ; clic dans un remplissage =
+  cible, clic dans le vide = désélection (le dev a renversé mon choix).
+- **Frontières partagées** : la plume s'accroche aux ancres existantes et suit la frontière d'ancre en
+  ancre. **Corrigé le soir sur son cas Espagne → Portugal** : en mode côte, la côte passe d'abord et un
+  sommet déjà ancre est **réutilisé à l'identique** — sinon le branchement détournait le clic.
+- **Ajouter / supprimer un point** : `core/editor/anchorEdits.ts`, dans **tous** les anneaux (trous
+  délibérés compris) et les tronçons stylés ; flèche et plume « + » (curseur `cross-add` dérivé, pas du
+  kit). `MIN_RING_ANCHORS` devenu **une** constante.
+- **Règle du dev, consignée** : aucun refus silencieux (`rules/error-handling.md`), `warn` / `error`,
+  jamais par frame. Et **noms de tests factuels** (mémoire).
+- **Mes fautes** : un test-sabot qui cassait la syntaxe au lieu de saboter (rattrapé) ; trois messages de
+  commit au-dessus de 100 colonnes ; et surtout **une option de conception inventée** — le dev parlait du
+  **zoom ‹+›/‹−›** qui ne marche pas, j'en ai fait une « plume − » et j'ai reposé des questions. Il a dû
+  le dire trois fois. Le zoom : **jugé suffisant par le dev le 11/10 au soir**, rien à corriger.
+
 ### 2026-10-09 — Le design system branché, un établi, et le premier pays créé à l'écran
 
 Deux plages : **12:42 → 13:34 (52 min)** et **16:14 → 19:12 (2 h 57)**, soit **3 h 49 et 243 actions**.

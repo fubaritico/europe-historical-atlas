@@ -5,7 +5,7 @@
 
 ## Where we are
 
-**2523 tests** (737 `core` · 787 atlas · 999 Cartographe, 12/10), gate verte sur cinq contrôles (`lint`,
+**2633 tests** (737 `core` · 787 atlas · 1027 Cartographe · 82 plugin `eslint-plugin-eha`, 12/10), gate verte sur cinq contrôles (`lint`,
 `type-check`, `test`, `build`, `format:check`). Worker à **13 490 o**, toujours sans three.js — et depuis
 le 07/10 le Cartographe émet **le même chunk, au même hash**, le fond étant cuit par le même port.
 
@@ -66,6 +66,33 @@ d'ancres ne perd jamais rien pendant l'édition.** Donc `removePolity` retire un
 point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui n'est plus référencé disparaît
 à l'enregistrement, par une seule renumération. Vérifié en la cassant : 3 tests tombent.
 
+## ▶ ON REPREND ICI (13/10) — deux chantiers, dans cet ordre
+
+**1. La barre d'actions de `{Polities}` — étape 2.** Plan décidé : `files/plans/cartographer/polities-footer-plan.md`
+(D1–D5). L'étape 1 est écrite et commitée (`s07` *The panel's action bar* et *Removing*, `H-17` fermé). Reste :
+
+| étape | quoi | prouvé quand |
+| --- | --- | --- |
+| **2** ◀ | `deletePolity(id, step)` sur la slice d'édition, annulable, jumelle de `createPolity`, autour de `removePolity` (déjà dans `core`, testé) | ‹ctrl+z› rend le pays, son tracé, ses vassaux **et le partage des ancres** — prouvé par le code naïf qui rendrait des coordonnées |
+| **3a** | `src/icons/` : les dessins du dev — le `+` encadré de pointillés et la poubelle — **posés sur des pixels entiers** (décalés d'un demi-pixel, tracé intact), remplis en `currentColor` | nets à 100 % à ×1 et ×2, mesuré dans le navigateur |
+| **3** | la barre, une vue : `+` et poubelle au pied du panneau, l'en-tête sans action ; cases de 26 × 24 posées sur des entiers | elle s'affiche seule dans l'établi |
+| **4** | le branchement : la poubelle supprime la cible, désactivée sans cible, résultat annoncé | dans l'app : sélectionner, supprimer, ‹ctrl+z› |
+| **5** | la confirmation (D2) : *« Delete Duchy of Normandy? Its 3 rings go; its 2 vassals become sovereign. »*, `[Cancel]` en focus | supprimer demande, annuler garde |
+
+**Verdict du dev sur les icônes, à ne pas rouvrir** : le flou des outils (trait 1,4) est accepté ; *« ce qui
+doit être net est net »* — la barre. Pas de `−` dans la barre.
+
+**2. Enregistrer et rouvrir une carte — juste après, et c'est devenu prioritaire.** Le dev, 12/10 : *« pour
+revenir sur les outils de dessin, sur les différents fonctionnements, il faut qu'on puisse revenir sur des
+choses déjà faites. Donc enregistrer et lire à l'ouverture va devenir très important. »* Aujourd'hui chaque
+rechargement repart d'une carte vide. Scénarios `s04` et `s15` ; `saveYearDocument` / `openYearDocument`
+existent dans `core`, l'aller-retour testé. **La décision à prendre d'abord : `H-28`** — un téléchargement
+(partout, trois fichiers à déplacer à la main) ou la File System Access API (‹ctrl+s› écrit en place, Chrome
+l'a). Recommandation déjà faite : la File System Access API.
+
+**Un seul serveur de dev** : le dev fait tourner le sien (`pnpm dev:cartographer`, souvent sur 5174). Ne pas
+en lancer un second ; lui donner l'adresse du sien.
+
 ## ▶ ON REPREND ICI — en trois lignes
 
 **On dessine et on édite : plume (libre, côte, fleuve), crayon, sélection à la marquise, déplacer et
@@ -74,11 +101,11 @@ s'enregistre : chaque rechargement repart d'une carte vide.**
 
 | | | |
 | --- | --- | --- |
-| **à faire demain** | **enregistrer et rouvrir une carte** — la demande du dev, 12/10 : *« j'ai pas envie de redessiner constamment les choses »*. Scénarios : `s04` (save, reopen identical, *« the saved file loses nothing »*) et `s15` (offline : les trois fichiers `registry` / `polities` / `borders.json` d'une année sous `packages/atlas/public/years/<année>/`, plus le manifeste `years/index.json`). **Le format et le modèle sont prêts** : `saveYearDocument` / `openYearDocument` dans `core`, l'aller-retour testé (le partage des ancres conservé, et l'ordre de la liste depuis le 12/10). **La décision à prendre d'abord avec lui, c'est `H-28`** : comment le navigateur écrit — un **téléchargement** (partout, mais trois fichiers à déplacer à la main) ou la **File System Access API** (écrit dans un dossier choisi, ‹ctrl+s› écrase en place, pas dans tous les navigateurs ; Chrome l'a). Puis ‹ctrl+s›, `[Open…]`, et l'atlas qui lit l'année | ◀ |
+| **après la barre d'actions** | **enregistrer et rouvrir une carte** — la demande du dev, 12/10 : *« j'ai pas envie de redessiner constamment les choses »*. Scénarios : `s04` (save, reopen identical, *« the saved file loses nothing »*) et `s15` (offline : les trois fichiers `registry` / `polities` / `borders.json` d'une année sous `packages/atlas/public/years/<année>/`, plus le manifeste `years/index.json`). **Le format et le modèle sont prêts** : `saveYearDocument` / `openYearDocument` dans `core`, l'aller-retour testé (le partage des ancres conservé, et l'ordre de la liste depuis le 12/10). **La décision à prendre d'abord avec lui, c'est `H-28`** : comment le navigateur écrit — un **téléchargement** (partout, mais trois fichiers à déplacer à la main) ou la **File System Access API** (écrit dans un dossier choisi, ‹ctrl+s› écrase en place, pas dans tous les navigateurs ; Chrome l'a). Puis ‹ctrl+s›, `[Open…]`, et l'atlas qui lit l'année | ◀ |
 | **ensuite** | ce que le dev a cité : la suite du chantier · l'**inspecteur `{Details}`** (lecture seule : le pays choisi, ou un point — coordonnées, provenance, contours qui le partagent — avec « Edit properties… ») · les **noms datés** de `s07` (« Royaume des Francs » → « Royaume de France » en 1190), **plus tard, dit le dev** | |
 | **livré le 11–12/10** | les fleuves · le crayon et ‹P› · l'empilement par groupes et `{Polities}` en arbre · modifier un pays · la sélection, la marquise, déplacer et supprimer plusieurs points — détail dans `completed.md` | ✅ |
 | **noté** | **masquer un pays** (`H-32`, besoin non prouvé — essayer d'abord un affichage contours seuls, ‹⌘Y›) · les fleuves jusqu'à la mer (`extendRiversToSea`, **remis à plus tard par le dev**) · alléger les tronçons de côte (Douglas–Peucker) · la confirmation avant de supprimer une ancre partagée (`s03`) · tracer au clavier (étape 5) | |
-| **poussé par le dev** | le dev a annoncé le 12/10 à 01:10 qu'il pousse lui-même les **36 commits** (`059af13`..`86a1cbd` et la note qui suit) — **tout doit être en ligne au matin du 12/10**. À l'ouverture de session, **le vérifier** : `git ls-remote origin main` doit rendre le dernier commit local (`git log -1`), et la CI doit être verte (sept jobs, déploiement compris). S'il manque quelque chose, le dire avant toute autre chose | |
+| **poussé** | tout est en ligne au 12/10 au soir (`3ea738c`, CI verte, déployé) ; vérifier à l'ouverture avec `git ls-remote origin main` contre `git log -1` | ✅ |
 
 > **Le découpage `a/b/c/d` est figé — ne plus le re-trancher.** Il a bougé deux fois le 07/10, et
 > c'est ce qui a fait perdre le fil au dev. S'il paraît faux à la reprise, le dire **avant** d'y

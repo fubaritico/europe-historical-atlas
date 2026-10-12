@@ -25,6 +25,15 @@ Put here the know issues to avoid cluttering the context window.
   mineure. En `0.x` le caret ne franchit pas une mineure, donc `^0.2.0` ne prendra jamais `0.3.0` seul —
   il faut bumper les trois lignes ensemble. **Le ColorPicker arrive en `0.3.0`.**
   **Sévérité : à savoir.**
+- **Les icônes d'outils sont légèrement floues, et c'est accepté — la barre d'actions, elle, est nette.**
+  Mesuré le 12/10 dans le navigateur du dev (Retina, ×2) : le trait de 1,4 de la maquette (grille 18×18) ne
+  tombe jamais sur des pixels physiques entiers — 58 à 62 % de pixels pleins à ×2, 13 à 37 % à ×1. Un trait
+  de 1 px aligné sur un demi-pixel rend les traits droits nets mais pas les courbes ; un trait de 2 px aligné
+  rend tout net mais alourdit. **Verdict du dev** : *« ce qui doit être net est net »* — les outils restent
+  tels quels ; la barre prend **ses dessins en formes pleines**, posés sur des pixels entiers (100 % à ×1 et
+  ×2). Il note que le standard serait 16/1 et 24/1,5. **À retenir** : à ×2, un demi-pixel CSS vaut un pixel
+  physique entier — un décalage de 0,5 n'y floute rien, il floute à ×1 ; et un texte sans `line-height`
+  entière décale tout ce qui le suit d'une fraction. **Sévérité : cosmétique.**
 - **Depuis le 12/10, `lint` attend `^lint` : si le plugin `eslint-plugin-eha` échoue à son propre lint,
   Turbo n'exécute pas le lint des trois autres paquets.** C'est le prix de la correction du cache (sans
   `^lint`, un changement de règle laissait le lint des paquets en `cache hit`, vert sur du code que la règle

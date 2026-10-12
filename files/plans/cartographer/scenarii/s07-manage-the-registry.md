@@ -157,23 +157,65 @@ Scenario: see the tree
   And polities owing nobody sit at the root
 ```
 
-## Removing
+## The panel's action bar — the dev, 2026-10-12
 
 ```gherkin
-Scenario: delete a polity that is used
-  Given "Kingdom of Dublin" holds territory in 1100
-  When I press [Delete] in the registry
-  Then I am told it appears in 1 year and holds 3 rings
-  And I choose: reassign its territory to another polity, or leave the ground unclaimed
-  And only then is it removed
+Scenario: the actions sit at the foot of {Polities}
+  Given a year is open
+  Then {Polities} carries a bar at its foot, holding [New polity] and [Delete polity]
+  And the panel's title bar carries no action any more
+  When no polity is selected
+  Then [Delete polity] is disabled
+  When I select "Duchy of Normandy" in the list
+  Then [Delete polity] is enabled
 ```
 
+> **The dev's request, 2026-10-12**: *"pouvoir ajouter ou supprimer une polity à partir d'une petite barre
+> localisée en bas du panneau. Supprimez l'icône plus située dans la barre en haut du panneau. Regrouper
+> ces manipulations et toutes manipulations ultérieures dans la barre en bas du panneau."* Every later
+> action of the panel goes there too. The glyphs are the design's grid (18×18, stroke 1.4); the dev notes
+> the standards are 16/1 and 24/1.5, a rescaling recorded in `known-issues`.
+
+## Removing — rewritten 2026-10-12
+
 ```gherkin
-Scenario: delete a polity that is used nowhere
-  Given a polity appears in no year
-  When I press [Delete]
-  Then it is removed with no further question
+Scenario: delete a polity
+  Given "Duchy of Normandy" is selected, holds 3 rings, and 2 polities owe it homage
+  When I press [Delete polity]
+  Then a dialogue asks "Delete Duchy of Normandy?"
+  And it says its 3 rings go, and its 2 vassals become sovereign
+  And [Cancel] has the focus
+  When I press [Cancel], or ‹escape›
+  Then nothing changes
+  When I press [Delete polity] again and then [Delete]
+  Then the polity and its outline are gone, in one undo step
+  And the anchors it shared with a neighbour stay, so the neighbour's border does not move
+  And its vassals owe homage to nobody
+  And the ground it held is left unclaimed
+  And the result zone reads "deleted Duchy of Normandy"
+  And no polity is selected any more, so [Delete polity] is disabled again
+  When I press ‹ctrl+z›
+  Then the polity comes back with its outline, its vassals and the anchors it shared
+
+Scenario: delete a polity that holds nothing
+  Given "Kingdom of Dublin" is selected, with no territory and no vassal
+  When I press [Delete polity]
+  Then the dialogue asks "Delete Kingdom of Dublin?" and lists nothing else
 ```
+
+> **Decided by the dev, 2026-10-12**: deleting removes *"la polity et son tracé"*; it is always confirmed
+> (*"il vaut mieux demander confirmation"*); it acts on the selected polity, the trash enabled only then.
+> **The shared anchors staying is not a new rule** but `s00`'s first real constraint: a neighbour's border
+> must never move because someone else was deleted — `removePolity` in `core` already keeps them, and
+> what nothing holds any more leaves at save.
+>
+> **Mine, proposed with the plan**: [Cancel] holds the focus, so ‹enter› on a reflex deletes nothing; the
+> ground is left unclaimed, and giving it to a neighbour is a gesture of its own, later.
+>
+> **What changed from the 2026-09-22 version**: it read *"appears in 1 year"* and offered to reassign the
+> territory. The registry became **per year** on 2026-09-27 (P3), so a polity appears in exactly one, and
+> the reassignment is set aside. The old *"used nowhere: removed with no further question"* is replaced:
+> every deletion asks.
 
 ## Import
 
