@@ -43,6 +43,9 @@ catalog:
   eslint-plugin-react-hooks: ^7.1.1
   eslint-plugin-jsx-a11y: ^6.10.2
   eslint-plugin-react-refresh: ^0.5.7
+  # Writing lint rules — the types of the tree and of a rule's context
+  '@types/estree': ^1.0.9
+  '@typescript-eslint/utils': ^8.70.0
 
   # Testing
   vitest: ^5.0.3

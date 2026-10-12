@@ -24,6 +24,9 @@ catalogs:
     '@testing-library/user-event':
       specifier: ^14.6.7
       version: 14.6.7
+    '@types/estree':
+      specifier: ^1.0.9
+      version: 1.0.9
     '@types/node':
       specifier: ^24.13.3
       version: 24.19.1
@@ -36,6 +39,9 @@ catalogs:
     '@types/three':
       specifier: ^0.186.0
       version: 0.186.0
+    '@typescript-eslint/utils':
+      specifier: ^8.70.0
+      version: 8.70.0
     '@vitejs/plugin-react':
       specifier: ^6.1.1
       version: 6.1.1
@@ -293,6 +299,30 @@ importers:
       '@vitest/coverage-v8':
         specifier: 'catalog:'
         version: 5.0.3(vitest@5.0.3)
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.3(@types/node@24.19.1)(@vitest/coverage-v8@5.0.3)(jsdom@30.0.1)(vite@8.3.0(@types/node@24.19.1)(jiti@2.6.1)(yaml@2.9.1))
+
+  packages/eslint-plugin-eha:
+    devDependencies:
+      '@types/estree':
+        specifier: 'catalog:'
+        version: 1.0.9
+      '@typescript-eslint/utils':
+        specifier: 'catalog:'
+        version: 8.70.0(eslint@9.39.5(jiti@2.6.1))(typescript@5.7.3)
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 5.0.3(vitest@5.0.3)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.5(jiti@2.6.1)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.7.3
+      typescript-eslint:
+        specifier: 'catalog:'
+        version: 8.70.0(eslint@9.39.5(jiti@2.6.1))(typescript@5.7.3)
       vitest:
         specifier: 'catalog:'
         version: 5.0.3(@types/node@24.19.1)(@vitest/coverage-v8@5.0.3)(jsdom@30.0.1)(vite@8.3.0(@types/node@24.19.1)(jiti@2.6.1)(yaml@2.9.1))
@@ -567,6 +597,11 @@ packages:
       react: '>=19'
       react-dom: '>=19'
       react-router-dom: '>=7'
+    peerDependenciesMeta:
+      next:
+        optional: true
+      react-router-dom:
+        optional: true
 
   '@fubaritico/styles@0.5.0':
     resolution: {integrity: sha512-e3WPHn9R9wQ38lhkk04Il6V43jvSVZAih15V7pWYo0E79UPXjci5bGTCEbIFUbNhQoEvwBWPM4b9Z1goMaX0Jg==, tarball: https://npm.pkg.github.com/download/@fubaritico/styles/0.5.0/54d1396c6a93a90f8bbdb77d2752eb6b79b8822f}

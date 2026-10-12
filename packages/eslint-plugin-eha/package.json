@@ -1,0 +1,35 @@
+{
+  "name": "eslint-plugin-eha",
+  "version": "1.0.0",
+  "description": "Lint rules of the Europe historical atlas: where each declaration sits in a component, a hook or a function body.",
+  "type": "module",
+  "private": true,
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "eslint-plugin"
+  ],
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "peerDependencies": {
+    "eslint": "catalog:"
+  },
+  "devDependencies": {
+    "@types/estree": "catalog:",
+    "@typescript-eslint/utils": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "typescript-eslint": "catalog:",
+    "vitest": "catalog:"
+  }
+}

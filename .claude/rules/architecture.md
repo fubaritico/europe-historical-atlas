@@ -62,13 +62,17 @@ packages/
 │       ├── controls/   # navigation; depends on camera/ only
 │       ├── picking/    # raycasting: answers WHERE, never WHAT
 │       └── ui/         # plain DOM over the canvas
-└── cartographer/       # @europe-historical-atlas/cartographer — the territory editor
-    ├── eslint.config.js    # re-imports the root config, then adds React; forbids `three`
-    ├── vite.config.ts
-    ├── vitest.config.ts    # jsdom + the React plugin
-    ├── vitest.setup.ts     # unmounts after each test; stands in for the canvas, ResizeObserver, <dialog>
-    ├── workbench.html      # the workbench: chrome pieces mounted alone, never built (2026-10-09)
-    └── src/                # 2D canvas and React chrome; styles/sheets.ts holds the one stylesheet order
+├── cartographer/       # @europe-historical-atlas/cartographer — the territory editor
+│   ├── eslint.config.js    # re-imports the root config, then adds React; forbids `three`
+│   ├── vite.config.ts
+│   ├── vitest.config.ts    # jsdom + the React plugin
+│   ├── vitest.setup.ts     # unmounts after each test; stands in for the canvas, ResizeObserver, <dialog>
+│   ├── workbench.html      # the workbench: chrome pieces mounted alone, never built (2026-10-09)
+│   └── src/                # 2D canvas and React chrome; styles/sheets.ts holds the one stylesheet order
+└── eslint-plugin-eha/  # the lint rules of this repository: where each declaration sits (2026-10-12)
+    ├── tsconfig.json       # JavaScript checked by tsc (`checkJs`): ESLint imports it with no build step
+    ├── vitest.config.ts    # node: ESLint never runs in a page
+    └── src/                # one folder per rule, its suite beside it
 
 files/plans/            # the plans — shipped since 2026-09-24
 files/spikes/           # runnable experiments; their out/ stays ignored

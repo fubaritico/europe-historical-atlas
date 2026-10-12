@@ -6,8 +6,8 @@
 camera (arrow keys), with clickable polygons. End goal: one map per century (1st → 21st); clicking a
 region shows a historical event (battle, political decision, invention…), its consequences and its actors.
 
-- **Stack**: **TypeScript** + **Vite** (bundler + HMR), web-only. **pnpm workspace of three packages**,
-  orchestrated by **Turbo**, with one declared version per dependency in `pnpm-workspace.yaml`'s catalogue.
+- **Stack**: **TypeScript** + **Vite** (bundler + HMR), web-only. **pnpm workspace of four packages** — three, plus
+  the lint plugin `eslint-plugin-eha` since 2026-10-12 — orchestrated by **Turbo**, with one declared version per dependency in `pnpm-workspace.yaml`'s catalogue.
 - **Two applications, and they do not render alike.** The **atlas** is a WebGL canvas in **vanilla
   three.js** — no framework anywhere near the render loop. The **Cartographer** is a **2D canvas** with a
   **React + Zustand** chrome (the dev's call, 2026-09-29): its chrome *is* the application, which is what a

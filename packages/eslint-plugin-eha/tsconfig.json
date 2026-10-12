@@ -1,0 +1,14 @@
+{
+  // The plugin is JavaScript typed with JSDoc, because ESLint imports it as it is: Node 22.14 cannot
+  // load a `.ts` file without a flag (type stripping is unflagged from 22.18), and a build step would put
+  // a `dist/` between a rule and every lint that runs it. `checkJs` gives the JSDoc the same strictness as
+  // the rest of the repository, and the typed lint reads the files through this config.
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "types": ["node"],
+    "allowJs": true,
+    "checkJs": true
+  },
+  "include": ["src"]
+}
