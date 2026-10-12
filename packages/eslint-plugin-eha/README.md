@@ -20,7 +20,7 @@ by `tsc` (`checkJs`), and the typed lint of the repository reads them like any o
 | `eha/component-body-order`       | the Cartographer, `**/*.{ts,tsx}` | separators, and props moved into the signature when it is safe |
 | `eha/hoist-independent-function` | every package, tests included     | moves the function to the module when it is safe               |
 
-Both are errors: one author, nothing to count down.
+All are errors: one author, nothing to count down.
 
 ### `component-body-order`
 
@@ -41,3 +41,11 @@ and its actions are told from its values by their type.
 A function declared at the top of another's body that reads nothing from it — no parameter, variable,
 type parameter, `this`, `super` — belongs to the module. The fix moves it with its attached comments,
 keeps every string byte for byte, and refuses when the name is taken or the code shares its lines.
+
+### `no-inline-event-handlers`
+
+A function written in an `on*` attribute of a component's render is declared in the body instead, under
+`// Handlers`, and passed by name — the message proposes `handleClick`, then `handleButtonClick`, then a
+number, so the name collides with nothing. When the function reads a `.map` row or a callback's
+parameter, it cannot move up: the message asks for that part to become a component of its own. JSX no
+component renders — a test's callback, a helper — is not a component body, and is left alone.

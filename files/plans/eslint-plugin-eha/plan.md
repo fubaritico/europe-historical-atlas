@@ -2,7 +2,7 @@
 
 > Opened 2026-10-12, at the dev's request. Source of inspiration:
 > `~/Desktop/WebstormProjects/eslint-plugin-fluid-react` (his plugin for Fluid's React library).
-> **Status: done 2026-10-12** — steps 1–4 shipped, 5 and 6 dropped on measurement (below), 7 waits for the dev.
+> **Status: done 2026-10-12** — steps 1–4 and 7 shipped, 5 and 6 dropped on measurement (below).
 
 ## Why
 
@@ -119,7 +119,7 @@ completion. Commits per step; **no push** (he pushes).
 | 4 | `eha/hoist-independent-function`, every package: 38 functions moved by its fix (1 in source, 37 in tests) | this step |
 | 5 | **dropped** — `injected-deps-first` | — |
 | 6 | **dropped** — `factory-body-order` | — |
-| 7 | `no-inline-event-handlers` — the dev's call | — |
+| 7 | `no-inline-event-handlers`, the Cartographer: 20 handlers declared in their bodies — the dev left it to me, 2026-10-12; my call: yes, because a handler in the markup escapes `// Handlers` | this step |
 
 **Why 5 is dropped (D4: generic and coherent, or not at all).** Measured on the three packages: 482
 parameters are read field by field and never whole. The most frequent are `event` (21), `gui` (9),
@@ -137,3 +137,11 @@ spanning lines is never dedented (checked on the 38 applied moves: no literal ch
 apart by a blank line stays; a name already bound at the module, or declared by another function of the
 file, gets a report and no rewrite; a `vi.mock` / `vi.hoisted` factory is not reported (Vitest lifts it
 above the module); an arrow reading `super` or `new.target` stays.
+
+**Step 7, what the rule does that Fluid's did not.** Fluid's rule asked every inline handler to move up,
+including one reading a `.map` row — a move JavaScript cannot make. Here that case gets its own message:
+give the row a component of its own (Fluid's README already said so). Measured: none in the Cartographer
+today. JSX that no component renders — a test's `it` callback — is outside the rule by definition, not by
+a file glob. `PolityArrangeMenu` was split the same way: its handlers read a polity resolved after an early
+return, so the menu of a polity known to exist became `KnownPolityMenu`, rather than a silent guard or a
+`?? ''` in each handler (`rules/error-handling.md`).

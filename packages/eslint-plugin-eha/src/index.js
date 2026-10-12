@@ -1,5 +1,6 @@
 import componentBodyOrder from './rules/component-body-order/index.js'
 import hoistIndependentFunction from './rules/hoist-independent-function/index.js'
+import noInlineEventHandlers from './rules/no-inline-event-handlers/index.js'
 
 /**
  * The lint rules of the Europe historical atlas. They put every declaration where a reader expects it,
@@ -13,6 +14,7 @@ const plugin = {
   rules: {
     'component-body-order': componentBodyOrder,
     'hoist-independent-function': hoistIndependentFunction,
+    'no-inline-event-handlers': noInlineEventHandlers,
   },
 }
 

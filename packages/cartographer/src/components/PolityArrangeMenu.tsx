@@ -7,6 +7,8 @@ import { STACKING_LABELS } from './stackingLabels'
 
 import type { CartographerStoreHook } from '../state/store'
 import type { ViewportPoint } from '../view/viewport'
+import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
+import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
 
 /** Which row's menu is open, and where. */
 export interface ArrangeRequest {
@@ -28,6 +30,68 @@ export interface PolityArrangeMenuProps {
   onResult: (message: string | null) => void
   /** Open the polity's dialogue — *Edit properties…*. */
   onEdit: (id: string) => void
+}
+
+/** What the menu of a polity known to exist needs. */
+interface KnownPolityMenuProps {
+  /** The polity, resolved by the binding: it exists for as long as this menu does. */
+  polity: YearPolity
+  /** Where the menu opens, in viewport pixels. */
+  at: ViewportPoint
+  /** Which moves change something, read from the document. */
+  moves: Record<StackingMove, boolean>
+  /** Record a move as one step; `false` when the document refuses it. */
+  restack: (
+    polityId: string,
+    move: StackingMove,
+    step: { kind: 'restack'; label: string }
+  ) => boolean
+  /** Say what the command did. */
+  onResult: (message: string | null) => void
+  /** Open the polity's dialogue. */
+  onEdit: (id: string) => void
+  /** Close the menu. */
+  onClose: () => void
+}
+
+/**
+ * The menu of a polity that exists — split from the binding so its handlers are declared in its body,
+ * with the polity already resolved: the binding returns nothing when an undo has taken it away.
+ * @param props - the polity, the moves, and what each command does
+ * @returns the menu
+ */
+function KnownPolityMenu({
+  polity,
+  at,
+  moves,
+  restack,
+  onResult,
+  onEdit,
+  onClose,
+}: KnownPolityMenuProps) {
+  // Handlers
+  const handleChoose = (move: StackingMove) => {
+    const label = `${STACKING_LABELS[move].toLowerCase()} — ${polity.name}`
+    // The menu offers only the moves that change something: a refusal here is a defect.
+    if (restack(polity.id, move, { kind: 'restack', label })) {
+      onResult(`${STACKING_LABELS[move]} — ${polity.name}`)
+    } else console.error(`[Cartographer] the document refused to ${label}.`)
+  }
+  const handleEdit = () => {
+    onEdit(polity.id)
+  }
+
+  // Render
+  return (
+    <PolityStackMenu
+      name={polity.name}
+      at={at}
+      moves={moves}
+      onChoose={handleChoose}
+      onEdit={handleEdit}
+      onClose={onClose}
+    />
+  )
 }
 
 /**
@@ -70,20 +134,13 @@ export function PolityArrangeMenu({
   // Render
   if (polity === undefined) return null
   return (
-    <PolityStackMenu
-      name={polity.name}
+    <KnownPolityMenu
+      polity={polity}
       at={request.at}
       moves={availableMoves(document, polity.id)}
-      onChoose={(move) => {
-        const label = `${STACKING_LABELS[move].toLowerCase()} — ${polity.name}`
-        // The menu offers only the moves that change something: a refusal here is a defect.
-        if (restackPolity(polity.id, move, { kind: 'restack', label })) {
-          onResult(`${STACKING_LABELS[move]} — ${polity.name}`)
-        } else console.error(`[Cartographer] the document refused to ${label}.`)
-      }}
-      onEdit={() => {
-        onEdit(polity.id)
-      }}
+      restack={restackPolity}
+      onResult={onResult}
+      onEdit={onEdit}
       onClose={onClose}
     />
   )

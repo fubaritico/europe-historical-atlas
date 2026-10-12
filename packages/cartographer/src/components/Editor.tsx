@@ -60,6 +60,11 @@ export function Editor({ store, load, style, zoneLabel, label, heading, colours 
   const action = useRef<HTMLElement | null>(null)
   const result = useRef<HTMLElement | null>(null)
 
+  // Handlers
+  const handleResult = (message: string | null) => {
+    writeResult(result.current, message)
+  }
+
   // Render
   return (
     <Shell
@@ -78,15 +83,7 @@ export function Editor({ store, load, style, zoneLabel, label, heading, colours 
         />
       }
       rail={<ToolRailPanel store={store} colours={colours} />}
-      dock={
-        <PolitiesPanel
-          store={store}
-          colours={colours}
-          onResult={(message) => {
-            writeResult(result.current, message)
-          }}
-        />
-      }
+      dock={<PolitiesPanel store={store} colours={colours} onResult={handleResult} />}
       status={
         // No `aria-live`, and that is the accessibility decision rather than an omission: this text
         // changes on every pointer sample, so announcing it would make a screen reader unusable — the

@@ -208,6 +208,17 @@ export function MapArea({
   // State
   const { assets, error, fraction, phase } = useEditorAssets(load)
 
+  // Handlers
+  const handleHover = (lonLat: [number, number] | null) => {
+    writePosition(statusRef.current, lonLat)
+  }
+  const handleAction = (sentence: string | null) => {
+    writeAction(actionRef.current, sentence)
+  }
+  const handleResult = (message: string | null) => {
+    writeResult(resultRef.current, message)
+  }
+
   // Render
   if (error !== null) return <BackdropFailure error={error} />
   if (assets === null) return <BackdropWaiting fraction={fraction} phase={phase} />
@@ -218,15 +229,9 @@ export function MapArea({
         frame={assets.backdrop.frame}
         backdropImage={assets.backdrop.image}
         vectorLayers={assets.vectors}
-        onHover={(lonLat) => {
-          writePosition(statusRef.current, lonLat)
-        }}
-        onAction={(sentence) => {
-          writeAction(actionRef.current, sentence)
-        }}
-        onResult={(message) => {
-          writeResult(resultRef.current, message)
-        }}
+        onHover={handleHover}
+        onAction={handleAction}
+        onResult={handleResult}
         style={style}
         zoneLabel={zoneLabel}
         label={label}

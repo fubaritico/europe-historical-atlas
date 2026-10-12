@@ -117,6 +117,22 @@ export function PolityStackMenu({
   // Refs
   const shell = useInsideWindow(at)
 
+  // Handlers
+  const handleSelect = (value: string) => {
+    if (value === EDIT) {
+      onClose()
+      onEdit()
+      return
+    }
+    const move = STACKING_MOVES.find((candidate) => candidate === value)
+    if (move === undefined) {
+      console.error(`[Cartographer] the stacking menu chose "${value}", which is no command.`)
+      return
+    }
+    onChoose(move)
+    onClose()
+  }
+
   // Effects
   useDismiss(shell, onClose)
 
@@ -127,20 +143,7 @@ export function PolityStackMenu({
         variant="dark"
         aria-label={`Actions for ${name}`}
         onClose={onClose}
-        onSelect={(value) => {
-          if (value === EDIT) {
-            onClose()
-            onEdit()
-            return
-          }
-          const move = STACKING_MOVES.find((candidate) => candidate === value)
-          if (move === undefined) {
-            console.error(`[Cartographer] the stacking menu chose "${value}", which is no command.`)
-            return
-          }
-          onChoose(move)
-          onClose()
-        }}
+        onSelect={handleSelect}
       >
         <Menu.Item index={0} value={EDIT}>
           Edit properties…

@@ -17,14 +17,14 @@ function Counter() {
   // State
   const [count, setCount] = useState(0)
 
+  // Handlers
+  const handleClick = () => {
+    setCount(count + 1)
+  }
+
   // Render
   return (
-    <button
-      type="button"
-      onClick={() => {
-        setCount(count + 1)
-      }}
-    >
+    <button type="button" onClick={handleClick}>
       count {count}
     </button>
   )

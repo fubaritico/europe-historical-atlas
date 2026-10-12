@@ -173,16 +173,19 @@ function GroupFlyout({
   onVariant: (id: string) => void
   close: () => void
 }) {
+  // Handlers
+  const handleChoose = (id: string) => {
+    onVariant(id)
+    close()
+  }
+
   // Render
   return (
     <ToolFlyout
       label={`${label} tools`}
       variants={variants}
       current={current}
-      onChoose={(id) => {
-        onVariant(id)
-        close()
-      }}
+      onChoose={handleChoose}
       onDismiss={close}
     />
   )
@@ -270,6 +273,9 @@ function ToolButton({
     setOpen(false)
     button.current?.focus()
   }
+  const handleClick = () => {
+    if (!consumeHold()) onSelect(entry.tool)
+  }
 
   // Render
   return (
@@ -281,9 +287,7 @@ function ToolButton({
         {...headNames(entry, current, pressed)}
         {...hold}
         {...groupOpeners(group !== undefined, open, openGroup)}
-        onClick={() => {
-          if (!consumeHold()) onSelect(entry.tool)
-        }}
+        onClick={handleClick}
       >
         <ToolIcon name={headIcon(entry, current)} />
       </button>

@@ -64,6 +64,14 @@ function commit(
 }
 
 /**
+ * A click on the backdrop does nothing — deliberately: a dialogue holding typed work must not lose it to a
+ * stray click (the design system's own warning). Escape, Cancel and the cross close it.
+ */
+function ignoreOverlayClick(): void {
+  // Deliberately nothing.
+}
+
+/**
  * The draft the dialogue opens on: empty for a new polity, the polity's own values when editing one.
  * @param editing - the polity edited, or `null` when creating
  * @returns the opening draft
@@ -157,14 +165,7 @@ export function PolityDialog({ store, editing, isOpen, onClose }: PolityDialogPr
 
   // Render
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={close}
-      onOverlayClick={() => {
-        // Deliberately nothing — see the header.
-      }}
-      aria-label={title}
-    >
+    <Modal isOpen={isOpen} onClose={close} onOverlayClick={ignoreOverlayClick} aria-label={title}>
       <PolityForm
         title={title}
         draft={draft}

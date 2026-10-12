@@ -158,6 +158,8 @@ export default tseslint.config(
           },
         },
       ],
+      // A handler written in the markup escapes `// Handlers`: every one is declared in the body, by name.
+      'eha/no-inline-event-handlers': 'error',
     },
   },
 

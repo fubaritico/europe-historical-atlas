@@ -70,6 +70,17 @@ function FlyoutItem({
   checked: boolean
   onChoose: (id: string) => void
 }) {
+  // Handlers
+  const handleClick = () => {
+    if (variant.enabled) onChoose(variant.id)
+  }
+  const handleKeyDown = (event: KeyboardEvent<HTMLLIElement>) => {
+    if ((event.key === 'Enter' || event.key === ' ') && variant.enabled) {
+      event.preventDefault()
+      onChoose(variant.id)
+    }
+  }
+
   // Render
   return (
     <li
@@ -78,15 +89,8 @@ function FlyoutItem({
       aria-disabled={!variant.enabled}
       tabIndex={-1}
       className="tool-rail__item"
-      onClick={() => {
-        if (variant.enabled) onChoose(variant.id)
-      }}
-      onKeyDown={(event) => {
-        if ((event.key === 'Enter' || event.key === ' ') && variant.enabled) {
-          event.preventDefault()
-          onChoose(variant.id)
-        }
-      }}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
     >
       <span className="tool-rail__mark" aria-hidden="true" />
       <ToolIcon name={variant.icon} />
@@ -140,6 +144,20 @@ export function ToolFlyout({ label, variants, current, onChoose, onDismiss }: To
   // Refs
   const menu = useRef<HTMLUListElement | null>(null)
 
+  // Handlers
+  const handleKeyDown = (event: KeyboardEvent<HTMLUListElement>) => {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault()
+      moveFocus(event)
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      onDismiss()
+    } else if (event.key === 'Tab') {
+      // Tab leaves the menu, so the menu goes; the focus returns to its tool and Tab moves on.
+      onDismiss()
+    }
+  }
+
   // Effects
   useFlyoutFocus(menu, onDismiss)
 
@@ -150,18 +168,7 @@ export function ToolFlyout({ label, variants, current, onChoose, onDismiss }: To
       role="menu"
       aria-label={label}
       className="tool-rail__flyout"
-      onKeyDown={(event) => {
-        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-          event.preventDefault()
-          moveFocus(event)
-        } else if (event.key === 'Escape') {
-          event.preventDefault()
-          onDismiss()
-        } else if (event.key === 'Tab') {
-          // Tab leaves the menu, so the menu goes; the focus returns to its tool and Tab moves on.
-          onDismiss()
-        }
-      }}
+      onKeyDown={handleKeyDown}
     >
       {variants.map((variant) => (
         <FlyoutItem

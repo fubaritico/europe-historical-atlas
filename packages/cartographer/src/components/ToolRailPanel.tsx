@@ -39,19 +39,20 @@ export function ToolRailPanel({ store, colours }: ToolRailPanelProps) {
   const aimed = describeDrawingTarget(document, target)
   const colour = aimed === null ? undefined : colours.coloursOf(document, version).get(aimed.id)
 
+  // Handlers
+  const handlePenMode = (id: string) => {
+    if (isPenMode(id)) choosePenMode(id)
+    else
+      console.error(`[Cartographer] the Pen has no mode "${id}"; the rail and the store disagree.`)
+  }
+
   // Render
   return (
     <ToolRail
       tool={tool}
       onSelect={selectTool}
       penMode={penMode}
-      onPenMode={(id) => {
-        if (isPenMode(id)) choosePenMode(id)
-        else
-          console.error(
-            `[Cartographer] the Pen has no mode "${id}"; the rail and the store disagree.`
-          )
-      }}
+      onPenMode={handlePenMode}
       swatch={aimed === null || colour === undefined ? null : { name: aimed.name, colour }}
     />
   )

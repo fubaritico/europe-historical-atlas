@@ -9,6 +9,7 @@ import { RANKS, STATUSES } from './polityDraft'
 
 import type { DraftField, DraftOption, PolityDraft } from './polityDraft'
 import type { HsvaColor } from '@fubaritico/behaviors'
+import type { SubmitEvent } from 'react'
 
 /** The fields a form event can name: every text field and every list of the draft — the colour has its own. */
 export type PolityFormField = Exclude<keyof PolityDraft, 'idEdited' | 'colour'>
@@ -88,6 +89,11 @@ function ChoiceField({
   value: string | null
   onSelect: (value: string | null) => void
 }) {
+  // Handlers
+  const handleSelect = (selected: string) => {
+    onSelect(selected === NONE ? null : selected)
+  }
+
   // Render
   return (
     <div className="ui-field">
@@ -98,9 +104,7 @@ function ChoiceField({
       <Dropdown
         aria-label={label}
         selectedValue={value ?? NONE}
-        onSelect={(selected) => {
-          onSelect(selected === NONE ? null : selected)
-        }}
+        onSelect={handleSelect}
         options={[{ value: NONE, label: 'none' }, ...options]}
       />
     </div>
@@ -195,16 +199,15 @@ export function PolityForm(props: PolityFormProps) {
   // Derived
   const { title, onSubmit, onCancel } = props
 
+  // Handlers
+  const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    onSubmit()
+  }
+
   // Render
   return (
-    <form
-      className="polity-form"
-      noValidate
-      onSubmit={(event) => {
-        event.preventDefault()
-        onSubmit()
-      }}
-    >
+    <form className="polity-form" noValidate onSubmit={handleSubmit}>
       <Card>
         <Card.Header>
           {title}

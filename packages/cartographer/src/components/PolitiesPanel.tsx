@@ -126,14 +126,23 @@ export function PolitiesPanel({ store, colours, onResult }: PolitiesPanelProps) 
   // is nothing to edit — the dialogue is not shown.
   const edited = document.polities.find((polity) => polity.id === editing)
 
+  // Handlers
+  const handleNew = () => {
+    setCreating(true)
+  }
+  const handleCreated = () => {
+    setCreating(false)
+  }
+  const handleEdited = () => {
+    setEditing(null)
+    // The dialogue is unmounted, not closed: the focus is handed back to the list by hand.
+    panel.current?.querySelector<HTMLElement>('.polities__list')?.focus()
+  }
+
   // Render
   return (
     <section ref={panel} className="polities" aria-label="Polities">
-      <PolitiesHead
-        onNew={() => {
-          setCreating(true)
-        }}
-      />
+      <PolitiesHead onNew={handleNew} />
       <PolityList
         year={document.year}
         rows={polityRows(document, colours.coloursOf(document, version))}
@@ -155,14 +164,8 @@ export function PolitiesPanel({ store, colours, onResult }: PolitiesPanelProps) 
         store={store}
         creating={creating}
         edited={edited ?? null}
-        onCreated={() => {
-          setCreating(false)
-        }}
-        onEdited={() => {
-          setEditing(null)
-          // The dialogue is unmounted, not closed: the focus is handed back to the list by hand.
-          panel.current?.querySelector<HTMLElement>('.polities__list')?.focus()
-        }}
+        onCreated={handleCreated}
+        onEdited={handleEdited}
       />
     </section>
   )
