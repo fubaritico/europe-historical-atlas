@@ -2,6 +2,7 @@ import { useId, useRef } from 'react'
 
 import { startCanvasController } from '../canvas/controller'
 import { trackFocusOrigin } from '../canvas/focusOrigin'
+import { MAX_SNAP_REACH_KM } from '../view/toolReach'
 
 import type { CanvasControllerDeps } from '../canvas/controller'
 import type { PaintStyle } from '../canvas/painter'
@@ -61,7 +62,9 @@ export interface MapCanvasProps {
  */
 const CANVAS_INSTRUCTIONS =
   'Arrow keys to pan the map, plus and minus or Page Up and Page Down to zoom. ' +
-  'Hold Space to pan with the hand. P takes the Pen and A the white arrow. With the Pen, Backspace removes the last point, ' +
+  'Hold Space to pan with the hand. P takes the Pen and A the white arrow. ' +
+  'The Pen, the Pencil and the white arrow act only once zoomed in close enough; zoom in first. ' +
+  'With the Pen, Backspace removes the last point, ' +
   'Escape abandons the outline and Enter closes it. ' +
   'With the white arrow, Delete or Backspace removes the selected anchor. ' +
   'Control or Command with Z undoes the last gesture; with Shift as well, it redoes it.'
@@ -185,6 +188,7 @@ export function MapCanvas({
             style,
             zoneLabel,
             colours,
+            maxSnapReachKm: MAX_SNAP_REACH_KM,
           })
         }}
       />

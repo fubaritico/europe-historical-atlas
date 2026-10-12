@@ -297,6 +297,8 @@ export interface ActionInputs {
   joining: string | null
   /** Whether a click here inserts an anchor on a stretch of the target — the arrow, or the idle Pen. */
   inserting: boolean
+  /** Whether the view is too far out for the drawing tools to act (`H-34`, `view/toolReach.ts`). */
+  tooFar: boolean
   /** The session. */
   session: ToolSession
 }
@@ -332,6 +334,9 @@ export function actionSentence(inputs: ActionInputs): string | null {
   const { tool, targetName, session } = inputs
   if (tool === 'navigate') return null
   if (targetName === null) return inputs.onCanvas ? 'Select a polity to draw in' : null
+  // H-34: the bar says why the tool is waiting, and still names whom it would act for.
+  if (inputs.tooFar)
+    return tool === 'draw' ? `Zoom in to draw in ${targetName}` : `Zoom in to edit ${targetName}`
   if (tool === 'draw') return penSentence(inputs, targetName)
   if (session.moving !== null) return `Moving path from ${targetName}`
   if (inputs.inserting) return `Inserting a point into ${targetName}`

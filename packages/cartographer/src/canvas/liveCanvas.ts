@@ -3,6 +3,7 @@ import { nearestAmong } from '../geometry/hitTest'
 import { isClosingOffered } from '../geometry/ringClosure'
 import { describeDrawingTarget } from '../state/drawingTarget'
 import { lonLatToScreen, remapToScreen } from '../view/projection'
+import { closeEnoughToEdit, snapReachKm } from '../view/toolReach'
 import { backdropToScreen } from '../view/viewport'
 
 import { penInsertHit, stretchUnder } from './anchorGestures'
@@ -87,6 +88,12 @@ export interface CanvasControllerDeps {
    * or `null` to clear it. Beside the action, never in its place (`s02`, the dev's call of 2026-10-08).
    */
   onResult: (message: string | null) => void
+  /**
+   * How far the snap may reach on the ground, in kilometres, for the drawing tools to act (`H-34`) —
+   * `MAX_SNAP_REACH_KM` in the application. Injected rather than imported so a suite about another
+   * gesture can lift it, and the threshold's own suite can set it.
+   */
+  maxSnapReachKm: number
 }
 
 /** One live attachment: the node, its context, the deps, and the little state a gesture needs. */
@@ -119,6 +126,11 @@ export interface LiveCanvas {
   pointer: Point | null
   /** The last action sentence reported, so an unchanged one is not reported again. */
   sentence: string | null
+  /**
+   * Whether the tools were too far out at the last refresh — `null` before the first. When it flips, the
+   * result zone is cleared: a refusal's reason must not outlive the refusal (`s17`).
+   */
+  wasTooFar: boolean | null
   /** Ask for a repaint of the static canvas, at most one per frame. */
   requestPaint: () => void
 }
@@ -307,7 +319,8 @@ export function handInHand(it: LiveCanvas): boolean {
 export function showCursor(
   it: LiveCanvas,
   offer: SnapOffer = snapOffer(it),
-  inserting: boolean = overStretch(it)
+  inserting: boolean = overStretch(it),
+  tooFar: boolean = tooFarToEdit(it)
 ): void {
   const state = it.deps.store.getState()
   const hasTarget = describeDrawingTarget(state.document, state.target) !== null
@@ -315,19 +328,47 @@ export function showCursor(
     cursorFor({
       tool: state.tool,
       hasTarget,
+      tooFar,
       panning: it.dragging && handInHand(it),
       spaceHeld: it.spaceHeld,
       closing: closingOffered(it),
       overHandle: overHandle(it),
       overStretch: inserting,
       snapping: offer.kind === 'layer',
-      // Only read with nobody aimed at, so only tested then — not on every move (QUAL-001).
-      overFill: !hasTarget && overFill(it),
+      // Only read when it can change the cursor — nobody aimed at, or too far for anything but choosing
+      // a polity — so not tested on every move (QUAL-001).
+      overFill: (!hasTarget || tooFar) && overFill(it),
     })
   )
   if (css === it.cursor) return
   it.cursor = css
   it.node.style.cursor = css
+}
+
+/**
+ * How far the snap reaches on the ground at the centre of this view — the number the tools wait on.
+ * @param it - the attachment
+ * @returns kilometres; `Infinity` before the view is framed
+ */
+export function snapReachOf(it: LiveCanvas): number {
+  return snapReachKm(
+    it.deps.store.getState().viewport,
+    it.size,
+    it.deps.frame,
+    HANDLE_HIT_RADIUS * it.ratio
+  )
+}
+
+/**
+ * Whether the tool in hand is a drawing tool held too far out to act (`H-34`): the Pen and the Pencil
+ * place nothing, and the white arrow only chooses a polity by its fill. The hand is never too far.
+ * @param it - the attachment
+ * @returns `true` when the Pen, the Pencil or the white arrow must wait for a closer view
+ */
+export function tooFarToEdit(it: LiveCanvas): boolean {
+  const tool = it.deps.store.getState().tool
+  if (tool === 'navigate') return false
+  return !closeEnoughToEdit(snapReachOf(it), it.deps.maxSnapReachKm)
 }
 
 /**
@@ -417,6 +458,12 @@ export function refreshTools(it: LiveCanvas): void {
   const moving = it.session.moving
   const inserting = overStretch(it)
   const offer = snapOffer(it, inserting)
+  const tooFar = tooFarToEdit(it)
+  // A zoom that wakes the tools, or puts them to sleep, ends what the last result described — "too far
+  // to draw" beside "Drawing in …" read as a contradiction when it stayed (s17, found walking it). Any
+  // result goes, not only a refusal: crossing the threshold changes what the screen is for (QUAL-003).
+  if (it.wasTooFar !== null && it.wasTooFar !== tooFar) it.deps.onResult(null)
+  it.wasTooFar = tooFar
   const scene = overlayScene({
     session: it.session,
     tool: state.tool,
@@ -439,11 +486,12 @@ export function refreshTools(it: LiveCanvas): void {
     joining: offer.anchor === null ? null : anchorSentence(gestureOf(it), offer.anchor),
     following: followedNoun(gestureOf(it)),
     inserting,
+    tooFar,
     session: it.session,
   })
   if (sentence !== it.sentence) {
     it.sentence = sentence
     it.deps.onAction(sentence)
   }
-  showCursor(it, offer, inserting)
+  showCursor(it, offer, inserting, tooFar)
 }

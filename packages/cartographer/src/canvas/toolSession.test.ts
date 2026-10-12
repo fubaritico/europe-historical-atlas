@@ -33,6 +33,7 @@ function action(overrides: Partial<ActionInputs> = {}): ActionInputs {
     following: null,
     joining: null,
     inserting: false,
+    tooFar: false,
     session: idleSession(),
     ...overrides,
   }
@@ -56,6 +57,34 @@ function overlay(overrides: Partial<OverlayInputs> = {}): OverlayInputs {
 }
 
 describe('toolSession', () => {
+  describe('the action sentence from too far out (H-34)', () => {
+    it('asks to zoom in to draw, still naming the polity the Pen would draw in', () => {
+      expect(actionSentence(action({ tooFar: true }))).toBe('Zoom in to draw in Reaume de France')
+    })
+
+    it('asks to zoom in to edit with the arrow', () => {
+      expect(actionSentence(action({ tool: 'edit', tooFar: true }))).toBe(
+        'Zoom in to edit Reaume de France'
+      )
+    })
+
+    it('wins over what the Pen would otherwise offer — no promise of a snap that will be refused', () => {
+      expect(actionSentence(action({ tooFar: true, snapping: 'Maas', closing: true }))).toBe(
+        'Zoom in to draw in Reaume de France'
+      )
+    })
+
+    it('still asks for a polity first when nobody is aimed at', () => {
+      expect(actionSentence(action({ tooFar: true, targetName: null }))).toBe(
+        'Select a polity to draw in'
+      )
+    })
+
+    it('says nothing for the hand, far or near', () => {
+      expect(actionSentence(action({ tool: 'navigate', tooFar: true }))).toBeNull()
+    })
+  })
+
   describe('happy path', () => {
     // s02 — the bar names the action and whose it is.
     it('says who the Pen is drawing in', () => {

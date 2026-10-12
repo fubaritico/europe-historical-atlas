@@ -4,7 +4,14 @@ import { screenToLonLatOnBackdrop } from '../view/projection'
 import { panBy, zoomAbout } from '../view/viewport'
 
 import { createAnchorCache } from './anchorCache'
-import { coloursOf, gestureOf, handInHand, refreshTools, showCursor } from './liveCanvas'
+import {
+  coloursOf,
+  gestureOf,
+  handInHand,
+  refreshTools,
+  showCursor,
+  tooFarToEdit,
+} from './liveCanvas'
 import {
   DRAG_TOLERANCE,
   FRAME_MARGIN,
@@ -24,13 +31,12 @@ import { inDevicePixels } from './style'
 import {
   arrowDrag,
   arrowPress,
-  arrowRelease,
-  penClick,
   redoGesture,
   resolvedTarget,
   toolKey,
   undoGesture,
 } from './toolGestures'
+import { keyRefusedFromAfar, releaseTool } from './toolRelease'
 import { dropDrag, idleSession, targetHandles } from './toolSession'
 
 import type { CanvasControllerDeps, LiveCanvas } from './liveCanvas'
@@ -253,6 +259,14 @@ function onPointerDown(it: LiveCanvas, event: PointerEvent): void {
   it.dragging = false
   it.node.setPointerCapture(event.pointerId)
   if (handInHand(it) || it.deps.store.getState().tool !== 'edit') return
+  if (tooFarToEdit(it)) {
+    // From afar the arrow only chooses a polity (H-34): no handle is caught, nothing is inserted, and the
+    // press is a click to be decided on release, never the start of a marquee.
+    dropDrag(it.session)
+    it.session.pending = { at: it.pressAt, shift: event.shiftKey }
+    refreshTools(it)
+    return
+  }
   arrowPress(gestureOf(it), it.pressAt, event.shiftKey)
   it.requestPaint()
   refreshTools(it)
@@ -280,8 +294,9 @@ function onPointerMove(it: LiveCanvas, event: PointerEvent): void {
     if (handInHand(it)) {
       settle(it, panBy(it.deps.store.getState().viewport, to[0] - from[0], to[1] - from[1]))
       it.pressAt = to
-    } else if (it.deps.store.getState().tool === 'edit') arrowDrag(gestureOf(it), to)
-    else if (pencilInHand(it)) {
+    } else if (it.deps.store.getState().tool === 'edit') {
+      if (!tooFarToEdit(it)) arrowDrag(gestureOf(it), to)
+    } else if (pencilInHand(it) && !tooFarToEdit(it)) {
       if (starting) pencilStart(gestureOf(it), from, event.timeStamp)
       pencilDrag(gestureOf(it), to, event.timeStamp)
     }
@@ -314,15 +329,7 @@ function onPointerUp(it: LiveCanvas, event: PointerEvent): void {
   // The arrow's press ends with the button, the hand borrowed or not: a marquee left open would steer
   // the next press (review ARCH-001, 2026-10-12).
   if (handInHand(it)) dropDrag(it.session)
-  if (pressed && !handInHand(it)) {
-    const tool = it.deps.store.getState().tool
-    if (tool === 'edit') {
-      arrowRelease(gestureOf(it), positionOf(event))
-      // The selection is painted on the static canvas: a marquee chooses its anchors on release, and
-      // without this they showed as selected only at the next press (the dev, 2026-10-12).
-      it.requestPaint()
-    } else if (tool === 'draw' && !dragged) penClick(gestureOf(it), positionOf(event))
-  }
+  if (pressed && !handInHand(it)) releaseTool(it, positionOf(event), dragged)
   // A Pencil drag ends with the button, whatever happened meanwhile: the hand borrowed with ‹space›, or
   // ‹P› turning the Pen to another mode. Then no last point is laid — the pointer was not drawing.
   const drawing = it.session.drawing
@@ -419,6 +426,21 @@ function onModifiedKey(it: LiveCanvas, event: KeyboardEvent): boolean {
 }
 
 /**
+ * The keys settled before any tool sees them: those held with a modifier (the history's, or the
+ * platform's), then — from too far out — the ones that would change the document, refused and said so
+ * (H-34, QUAL-001).
+ * @param it - the attachment
+ * @param event - the key event
+ * @returns `true` when the key needs nothing more
+ */
+function keyTakenFirst(it: LiveCanvas, event: KeyboardEvent): boolean {
+  if (onModifiedKey(it, event)) return true
+  if (!keyRefusedFromAfar(it, event.key)) return false
+  event.preventDefault()
+  return true
+}
+
+/**
  * Pan and zoom from the keyboard.
  *
  * **WCAG 2.1.1, and it was a real gap rather than a staged one** (found in review, 2026-10-06). The
@@ -444,7 +466,7 @@ function onKeyDown(it: LiveCanvas, event: KeyboardEvent): void {
   // ‹space› borrows the hand for as long as it is held. `preventDefault` because a focusable element
   // scrolls the page on space, which here would scroll the editor out from under the map.
   // First, so a modified ‹space› (‹ctrl+space›, which input methods use) stays the platform's too.
-  if (onModifiedKey(it, event)) return
+  if (keyTakenFirst(it, event)) return
   if (event.key === ' ') {
     event.preventDefault()
     it.spaceHeld = true
@@ -636,6 +658,7 @@ export function startCanvasController(
     session: idleSession(),
     pointer: null,
     sentence: null,
+    wasTooFar: null,
     requestPaint: () => undefined,
   }
 

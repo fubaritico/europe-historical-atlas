@@ -8,6 +8,7 @@ import type { CursorState } from './cursors'
 const AT_REST: CursorState = {
   tool: 'navigate',
   hasTarget: false,
+  tooFar: false,
   panning: false,
   closing: false,
   overHandle: false,
@@ -18,6 +19,42 @@ const AT_REST: CursorState = {
 }
 
 describe('cursorFor', () => {
+  describe('too far out to act (H-34)', () => {
+    it('refuses with the Pen and the arrow when the view is too far out, a polity aimed at or not', () => {
+      expect(cursorFor({ ...AT_REST, tool: 'draw', hasTarget: true, tooFar: true })).toBe(REFUSED)
+      expect(cursorFor({ ...AT_REST, tool: 'edit', hasTarget: true, tooFar: true })).toBe(REFUSED)
+    })
+
+    it('keeps the arrow over a fill from afar, where its click chooses the polity', () => {
+      expect(
+        cursorFor({ ...AT_REST, tool: 'edit', hasTarget: true, tooFar: true, overFill: true })
+      ).toBe('arrow')
+    })
+
+    it('never refuses the hand, nor a hand borrowed with space or a pan under way', () => {
+      expect(cursorFor({ ...AT_REST, tooFar: true })).toBe('hand-open')
+      expect(
+        cursorFor({ ...AT_REST, tool: 'draw', hasTarget: true, tooFar: true, spaceHeld: true })
+      ).toBe('hand-open')
+      expect(
+        cursorFor({ ...AT_REST, tool: 'draw', hasTarget: true, tooFar: true, panning: true })
+      ).toBe('hand-closed')
+    })
+
+    it('hides the Pen’s own marks from afar — no snap mark promises a click that will be refused', () => {
+      expect(
+        cursorFor({
+          ...AT_REST,
+          tool: 'draw',
+          hasTarget: true,
+          tooFar: true,
+          snapping: true,
+          closing: true,
+        })
+      ).toBe(REFUSED)
+    })
+  })
+
   describe('happy path', () => {
     it('gives each tool its own cursor once there is a subject', () => {
       expect(cursorFor({ ...AT_REST, tool: 'draw', hasTarget: true })).toBe('cross')
@@ -120,6 +157,7 @@ describe('cursorFor', () => {
                 cursorFor({
                   tool,
                   hasTarget,
+                  tooFar: false,
                   panning,
                   spaceHeld,
                   closing: false,

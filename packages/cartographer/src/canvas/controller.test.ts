@@ -89,8 +89,13 @@ function keyEvent(key: string): KeyboardEvent {
   return new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })
 }
 
-/** Everything one attached canvas needs, plus the handle to tear it down. */
-function attach(): {
+/**
+ * Everything one attached canvas needs, plus the handle to tear it down.
+ * @param maxSnapReachKm - the far-view threshold (`H-34`); lifted by default, so suites about other
+ *   gestures draw at the opening view as they always have
+ * @returns the canvas, the store, the three status spies and the teardown
+ */
+function attach(maxSnapReachKm = Infinity): {
   node: HTMLCanvasElement
   store: CartographerStoreHook
   hovered: ReturnType<typeof vi.fn>
@@ -119,6 +124,7 @@ function attach(): {
     onHover: hovered,
     onAction: acted,
     onResult: resulted,
+    maxSnapReachKm,
     style: CHROME_PAINT_STYLE,
     zoneLabel: 'zone',
     overlay: document.createElement('canvas'),
@@ -449,6 +455,7 @@ describe('startCanvasController', () => {
           onHover: () => undefined,
           onAction: () => undefined,
           onResult: () => undefined,
+          maxSnapReachKm: Infinity,
           style: CHROME_PAINT_STYLE,
           zoneLabel: 'zone',
           overlay: document.createElement('canvas'),
@@ -897,6 +904,261 @@ const CANVAS_TRIANGLE = [
   [500, 400],
 ] as const
 
+/**
+ * A view at a scale, its centre over a point of the backdrop near 46°N — where the reach is measured.
+ * At scale 1 the snap reaches about 60 km there, at scale 8 about 7.5 km.
+ * @param store - the store to position
+ * @param scale - screen pixels per backdrop pixel
+ */
+function viewAtScale(store: CartographerStoreHook, scale: number): void {
+  store.getState().setViewport({
+    scale,
+    originX: BOX.width / 2 - 640 * scale,
+    originY: BOX.height / 2 - 560 * scale,
+  })
+}
+
+describe('the tools from too far out (H-34)', () => {
+  /** The threshold the application uses. */
+  const TEN_KM = 10
+
+  describe('happy path', () => {
+    it('places nothing with the Pen from afar, and says why in the result zone and the console', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { node, store, resulted, dispose } = attach(TEN_KM)
+      aimAtFrance(store)
+      viewAtScale(store, 1)
+      click(node, [400, 300])
+      node.dispatchEvent(keyEvent('Escape'))
+
+      expect(store.getState().document.anchors).toEqual([])
+      expect(resulted).toHaveBeenLastCalledWith(
+        expect.stringMatching(
+          /^too far to draw — zoom in \(the snap would reach \d+ km; the tools act within 10 km\)$/
+        )
+      )
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('too far to draw'))
+      warn.mockRestore()
+      dispose()
+    })
+
+    it('draws as before once close enough', () => {
+      const { node, store, dispose } = attach(TEN_KM)
+      aimAtFrance(store)
+      viewAtScale(store, 8)
+      for (const at of CANVAS_TRIANGLE) click(node, at)
+      click(node, [301, 201])
+
+      expect(store.getState().document.claims).toEqual([{ polity: 'fr', rings: [[0, 1, 2]] }])
+      dispose()
+    })
+  })
+
+  describe('variants', () => {
+    it('asks to zoom in in the status bar from afar, and names the action again once close', () => {
+      const { node, store, acted, dispose } = attach(TEN_KM)
+      aimAtFrance(store)
+      viewAtScale(store, 1)
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 400, offsetY: 300 }))
+      expect(acted).toHaveBeenLastCalledWith('Zoom in to draw in Reaume de France')
+
+      viewAtScale(store, 8)
+      expect(acted).toHaveBeenLastCalledWith('Drawing in Reaume de France')
+      dispose()
+    })
+
+    it('refuses with the cursor from afar and gives the cross back once close, without a pointer move', () => {
+      const { node, store, dispose } = attach(TEN_KM)
+      aimAtFrance(store)
+      viewAtScale(store, 1)
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 400, offsetY: 300 }))
+      expect(node.style.cursor).toBe('not-allowed')
+
+      viewAtScale(store, 8)
+      expect(node.style.cursor).toBe(cursorCss('cross'))
+      dispose()
+    })
+  })
+
+  describe('the result of a refusal', () => {
+    it('is cleared when a zoom wakes the tools, so it no longer contradicts the bar', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { node, store, resulted, dispose } = attach(TEN_KM)
+      aimAtFrance(store)
+      viewAtScale(store, 1)
+      click(node, [400, 300])
+      expect(resulted).toHaveBeenLastCalledWith(expect.stringContaining('too far to draw'))
+
+      viewAtScale(store, 8)
+      expect(resulted).toHaveBeenLastCalledWith(null)
+      warn.mockRestore()
+      dispose()
+    })
+
+    it('is cleared when a zoom puts the tools to sleep, whatever it said', () => {
+      const { node, store, resulted, dispose } = attach(TEN_KM)
+      aimAtFrance(store)
+      viewAtScale(store, 8)
+      for (const at of CANVAS_TRIANGLE) click(node, at)
+      click(node, [301, 201])
+      resulted.mockClear()
+      viewAtScale(store, 1)
+
+      expect(resulted).toHaveBeenLastCalledWith(null)
+      dispose()
+    })
+
+    it('is left alone by a zoom that does not cross the threshold', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { node, store, resulted, dispose } = attach(TEN_KM)
+      aimAtFrance(store)
+      viewAtScale(store, 1)
+      click(node, [400, 300])
+      viewAtScale(store, 1.5)
+
+      expect(resulted).toHaveBeenLastCalledWith(expect.stringContaining('too far to draw'))
+      warn.mockRestore()
+      dispose()
+    })
+  })
+
+  describe('managed errors', () => {
+    it('lets the white arrow choose a polity by its fill from afar, and nothing else', () => {
+      const { node, store, dispose } = attach(TEN_KM)
+      aimAtFrance(store)
+      viewAtScale(store, 8)
+      for (const at of CANVAS_TRIANGLE) click(node, at)
+      click(node, [301, 201])
+      store.getState().chooseTarget(null)
+      node.dispatchEvent(keyEvent('a'))
+      viewAtScale(store, 1)
+      // The triangle, seen from afar, shrinks about the centre of the canvas: its inside is still there.
+      const inside: [number, number] = [400 + (430 - 400) / 8, 300 + (267 - 300) / 8]
+      click(node, inside)
+
+      expect(store.getState().target).toBe('fr')
+      dispose()
+    })
+
+    it('moves no anchor when the white arrow is dragged from afar, and says so', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { node, store, resulted, dispose } = attach(TEN_KM)
+      aimAtFrance(store)
+      viewAtScale(store, 8)
+      for (const at of CANVAS_TRIANGLE) click(node, at)
+      click(node, [301, 201])
+      node.dispatchEvent(keyEvent('a'))
+      viewAtScale(store, 1)
+      const before = store.getState().document.anchors.map(([lon, lat]) => [lon, lat])
+      // A press on where the second anchor now sits, from afar, then a drag.
+      const corner: [number, number] = [400 + (500 - 400) / 8, 300 + (200 - 300) / 8]
+      node.dispatchEvent(pointerEvent('pointerdown', { offsetX: corner[0], offsetY: corner[1] }))
+      node.dispatchEvent(
+        pointerEvent('pointermove', { offsetX: corner[0] + 40, offsetY: corner[1] + 40 })
+      )
+      node.dispatchEvent(
+        pointerEvent('pointerup', { offsetX: corner[0] + 40, offsetY: corner[1] + 40 })
+      )
+
+      expect(store.getState().document.anchors).toEqual(before)
+      expect(resulted).toHaveBeenLastCalledWith(expect.stringContaining('too far to edit'))
+      warn.mockRestore()
+      dispose()
+    })
+  })
+
+  describe('the keys from afar (QUAL-001)', () => {
+    it('refuses Delete on a selection from afar, keeping the anchors, and says so', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { node, store, resulted, dispose } = attach(TEN_KM)
+      aimAtFrance(store)
+      viewAtScale(store, 8)
+      for (const at of CANVAS_TRIANGLE) click(node, at)
+      click(node, [301, 201])
+      node.dispatchEvent(keyEvent('a'))
+      click(node, [500, 200])
+      viewAtScale(store, 1)
+      node.dispatchEvent(keyEvent('Delete'))
+
+      expect(store.getState().document.claims[0]?.rings[0]).toHaveLength(3)
+      expect(resulted).toHaveBeenLastCalledWith(expect.stringContaining('too far to edit'))
+      warn.mockRestore()
+      dispose()
+    })
+
+    it('refuses Enter on an outline in hand from afar, and lets Escape throw it away', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { node, store, resulted, dispose } = attach(TEN_KM)
+      aimAtFrance(store)
+      viewAtScale(store, 8)
+      for (const at of CANVAS_TRIANGLE) click(node, at)
+      viewAtScale(store, 1)
+      node.dispatchEvent(keyEvent('Enter'))
+      expect(store.getState().document.claims).toEqual([])
+      expect(resulted).toHaveBeenLastCalledWith(expect.stringContaining('too far to draw'))
+
+      node.dispatchEvent(keyEvent('Escape'))
+      viewAtScale(store, 8)
+      node.dispatchEvent(keyEvent('Enter'))
+      expect(store.getState().document.claims).toEqual([])
+      warn.mockRestore()
+      dispose()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('lays no Pencil point when dragged from afar', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { node, store, dispose } = attach(TEN_KM)
+      aimAtFrance(store)
+      store.getState().choosePenMode('pencil')
+      viewAtScale(store, 1)
+      stroke(
+        node,
+        [
+          [300, 200],
+          [350, 200],
+          [400, 200],
+          [400, 300],
+        ],
+        0
+      )
+      node.dispatchEvent(keyEvent('Enter'))
+
+      expect(store.getState().document.anchors).toEqual([])
+      warn.mockRestore()
+      dispose()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('says the view is not framed yet rather than printing an infinite reach', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { node, store, resulted, dispose } = attach(TEN_KM)
+      aimAtFrance(store)
+      store.getState().setViewport(UNFRAMED)
+      click(node, [400, 300])
+
+      expect(resulted).toHaveBeenLastCalledWith(
+        'too far to draw — zoom in (the view is not framed yet; the tools act within 10 km)'
+      )
+      warn.mockRestore()
+      dispose()
+    })
+
+    it('never refuses the hand from afar', () => {
+      const { node, store, dispose } = attach(TEN_KM)
+      aimAtFrance(store)
+      store.getState().selectTool('navigate')
+      viewAtScale(store, 1)
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 400, offsetY: 300 }))
+
+      expect(node.style.cursor).toBe(cursorCss('hand-open'))
+      dispose()
+    })
+  })
+})
+
 describe('the tools on the canvas', () => {
   describe('happy path', () => {
     // s02 — place anchors, click the first, and the ring closes into the target's territory.
@@ -1016,6 +1278,7 @@ describe('the tools on the canvas', () => {
         onHover: () => undefined,
         onAction: () => undefined,
         onResult: () => undefined,
+        maxSnapReachKm: Infinity,
         style: CHROME_PAINT_STYLE,
         zoneLabel: 'zone',
         overlay,
@@ -1090,6 +1353,7 @@ describe('the tools — what the review found', () => {
         onHover: () => undefined,
         onAction: () => undefined,
         onResult: () => undefined,
+        maxSnapReachKm: Infinity,
         style: CHROME_PAINT_STYLE,
         zoneLabel: 'zone',
         overlay,
@@ -1322,6 +1586,7 @@ function attachWithShore(
     onHover: () => undefined,
     onAction: acted,
     onResult: resulted,
+    maxSnapReachKm: Infinity,
     style: CHROME_PAINT_STYLE,
     zoneLabel: 'zone',
     overlay,
@@ -1700,6 +1965,7 @@ describe('the Pen meeting a shared border, on the canvas', () => {
       onHover: () => undefined,
       onAction: () => undefined,
       onResult: () => undefined,
+      maxSnapReachKm: Infinity,
       style: CHROME_PAINT_STYLE,
       zoneLabel: 'zone',
       overlay,

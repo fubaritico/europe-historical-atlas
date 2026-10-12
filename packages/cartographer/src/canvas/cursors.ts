@@ -49,6 +49,11 @@ export interface CursorState {
   tool: EditorTool
   /** Whether the aimed-at polity resolves against the document. */
   hasTarget: boolean
+  /**
+   * Whether the view is too far out for the drawing tools to act (`H-34`, `view/toolReach.ts`): the snap
+   * would reach farther than the threshold on the ground.
+   */
+  tooFar: boolean
   /** Whether the view is being dragged right now — a pan, not a tool's drag. */
   panning: boolean
   /** Whether ‹space› is held, which borrows the hand under any tool. */
@@ -64,7 +69,10 @@ export interface CursorState {
    * any handle, or the Pen with no outline in progress, as Illustrator's Pen does over a selected path.
    */
   overStretch: boolean
-  /** Whether the pointer is over a polity's fill — where the white arrow's click chooses it. */
+  /**
+   * Whether the pointer is over a polity's fill — where the white arrow's click chooses it, with nobody
+   * aimed at or from too far out.
+   */
   overFill: boolean
 }
 
@@ -133,10 +141,22 @@ export function cursorFor(state: CursorState): CursorName | typeof REFUSED {
   if (state.spaceHeld) return 'hand-open'
   if (state.tool === 'navigate') return 'hand-open'
   // ⟨draw⟩ and ⟨edit⟩ both need a subject: drawing with nobody selected would put anchors nowhere, and
-  // selecting points with nobody selected is selecting *whose* points? (the dev, 2026-10-08).
-  // With nobody aimed at, the arrow still has one thing to do: a click in a fill chooses its polity.
-  if (!state.hasTarget) return state.tool === 'edit' && state.overFill ? 'arrow' : REFUSED
-  if (state.tool === 'draw') return drawCursor(state)
+  // selecting points with nobody selected is selecting *whose* points? (the dev, 2026-10-08). And both
+  // need a close enough view (H-34, the dev's call of 2026-10-12). One refusal for the two, because it is
+  // one message — not here, not like this — and in both cases the arrow keeps the one thing that is not
+  // about points: a click in a fill chooses its polity.
+  if (!state.hasTarget || state.tooFar)
+    return state.tool === 'edit' && state.overFill ? 'arrow' : REFUSED
+  return state.tool === 'draw' ? drawCursor(state) : arrowCursor(state)
+}
+
+/**
+ * The white arrow's cursor, with a subject and close enough: the handle mark over one of the target's
+ * anchors, the plus over its stretch, the plain arrow elsewhere.
+ * @param state - the arrow's two offers
+ * @returns the cursor
+ */
+function arrowCursor(state: CursorState): CursorName {
   if (state.overHandle) return 'arrow-handle'
   return state.overStretch ? 'arrow-insert' : 'arrow'
 }

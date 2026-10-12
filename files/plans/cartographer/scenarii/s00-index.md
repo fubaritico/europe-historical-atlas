@@ -40,6 +40,7 @@ Every control name below is **provisional**. It names an _intention_, not a deci
 | 14  | [the History panel](s14-history-panel.md)                 | the line listed, reached in one click, and the markers that survive a truncation    |
 | 15  | [offline and online](s15-offline-and-online.md)         | **integration, not interface** — where a saved year goes, and how the atlas reads it |
 | 16  | [stacking order](s16-stacking-order.md)                   | which fill is painted over which: Illustrator's four Arrange commands, from {Polities} |
+| 17  | [the tools wait for the zoom](s17-tools-wait-for-the-zoom.md) | from afar the overview, close up the tools: a snap reach on the ground decides (`H-34`) |
 
 ## The two tools — decided 2026-09-22
 
