@@ -532,7 +532,7 @@ in one piece, the Meuse continuous from its source to Maastricht and on to the d
 about 25 m (`RIVER_JOIN_TOLERANCE`) — the Loire's pieces meet 11 m apart, rounded two ways. **Forks stay
 cut** (the Rhône at Arles), (c) is not built. The atlas is untouched: it only draws the rivers.
 
-### H-36 · On a river border, the shared-border follow never triggers — **observed 2026-10-12**
+### H-36 · On a river border, the shared-border follow never triggers — **observed, then closed by use 2026-10-12**
 
 The Pen weighs the water before an existing anchor (`liveCanvas.ts`, `snapOffer`), so on a neighbour's
 outline made of river vertices the hover says *"Following the Rhône"* and the two-anchor follow of
@@ -540,6 +540,14 @@ outline made of river vertices the hover says *"Following the Rhône"* and the t
 — the vertices are the same, so the anchors were reused — but it asks the author to know where the
 neighbour's stretches began and ended. **Options, not decided**: an anchor of a neighbour wins over the
 water when the pointer is on it exactly · a modifier key to choose · keep it and document the replay.
+
+**Closed the same evening, by walking it again once the rivers were mended** (`H-35`): a neighbour drawn
+by clicking the Saône and the Rhône only — no anchor aimed at — reused 46 of France's anchors out of 52;
+the 4 not shared lie where France itself cut a corner (a straight segment from Lyon to Vienne). The water
+keeping priority over an anchor is right: it is what the dev's Spain–Portugal case needs, and with
+continuous rivers it shares the border by itself. A rule giving the neighbour's anchor priority was
+proposed and **not built** — it would add a rule the author must understand, for a case the mending
+solved. [s02](s02-create-france-1100.md).
 
 ### H-37 · No gesture welds two anchors into one — **observed 2026-10-12**
 

@@ -844,6 +844,24 @@ Scenario: a neighbour shares the river border by repeating its clicks
 ```
 
 ```gherkin
+Scenario: a neighbour shares a river border by clicking the rivers only
+  # walked 2026-10-12, after the rivers were mended — no file read, no anchor aimed at
+  Given France's eastern limit runs along the Saône and the Rhône
+  And a new polity is aimed at, the view close enough for the tools
+  When I hover then click the Saône upstream, then near Lyon
+  And the Rhône below Lyon, then near Avignon
+  Then the Pen follows each river — 16 then 32 vertices
+  And 46 of the 52 anchors of the new outline are France's own, reused
+  And only 6 are new: the two free points I placed, and 4 on the Rhône between Lyon and Vienne
+```
+
+> **Why those 4 are not shared**: France was drawn with a straight segment from Lyon to Vienne — its Rhône
+> click began at Vienne — so France holds no anchor there to reuse; the new outline follows the river where
+> France cut the corner. The tool did its part; the gap is in France's own drawing, and inserting those
+> points into France would close it. **Verdict, Claude as observer: fluid** — four clicks on the rivers
+> shared the border without thinking about anchors. `H-36` closed by the mending.
+
+```gherkin
 Scenario: on a river border, the water wins over the neighbour's anchor
   Given France's anchor lies on the Rhône
   When I hover it with the Pen
