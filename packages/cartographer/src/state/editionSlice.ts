@@ -6,6 +6,7 @@ import {
   addOutline,
   addPolity,
   moveAnchors,
+  removePolity,
   updatePolity,
 } from '@europe-historical-atlas/core/editor/documentEdits'
 import { createHistory } from '@europe-historical-atlas/core/editor/history'
@@ -18,6 +19,7 @@ import type {
   AnchorMove,
   OutlinePoint,
   Provenance,
+  RemovalReport,
 } from '@europe-historical-atlas/core/editor/documentEdits'
 import type {
   History,
@@ -124,6 +126,18 @@ export interface EditionActions {
    * @returns `false` when no polity has that id or the suzerain would loop — and nothing happened
    */
   editPolity: (polity: YearPolity, step: HistoryStep) => boolean
+  /**
+   * Delete a polity, as one undoable step — the trash of `{Polities}`'s action bar (`s07`, *Removing*).
+   *
+   * **Its outline goes, never a point** (`removePolity`): the anchors it shared with a neighbour stay, or
+   * that neighbour's border would move with no one having touched it — `s00`'s first real constraint. Its
+   * vassals become sovereign; the ground is left unclaimed. ‹ctrl+z› gives everything back, sharing
+   * included, because the step is a snapshot of the document and a snapshot keeps indices, not copies.
+   * @param polityId - who to delete
+   * @param step - how the gesture is named — *"delete Duchy of Normandy"*
+   * @returns what went, or `null` when no polity has that id — and nothing happened
+   */
+  deletePolity: (polityId: string, step: HistoryStep) => RemovalReport | null
   /**
    * Give a polity a closed outline, as one undoable step — what the Pen does when the ring closes.
    *
@@ -310,21 +324,29 @@ function recorder(
 }
 
 /**
- * The edits of a polity's identity — create one, change one — each one recorded step.
+ * The edits of a polity's identity — create one, change one, delete one — each one recorded step.
  *
  * `addPolity` and `updatePolity` copy what they keep, so the caller's object cannot be mutated from here
  * later.
  * @param record - the runner every recorded action goes through
- * @returns `createPolity` and `editPolity`
+ * @returns `createPolity`, `editPolity` and `deletePolity`
  */
 function polityActions(
   record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean
-): Pick<EditionActions, 'createPolity' | 'editPolity'> {
+): Pick<EditionActions, 'createPolity' | 'editPolity' | 'deletePolity'> {
   return {
     createPolity: (polity, step): boolean =>
       record((document) => addPolity(document, polity), step),
     editPolity: (polity, step): boolean =>
       record((document) => updatePolity(document, polity), step),
+    deletePolity: (polityId, step): RemovalReport | null => {
+      let report: RemovalReport | null = null
+      record((document) => {
+        report = removePolity(document, polityId)
+        return report !== null
+      }, step)
+      return report
+    },
   }
 }
 

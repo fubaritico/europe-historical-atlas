@@ -879,3 +879,87 @@ describe('editionSlice.editPolity', () => {
 
   // L2/L4/L5: the variants and edges of the change are `core/editor/documentEdits.updatePolity`'s.
 })
+
+const REMOVE: HistoryStep = { kind: 'delete-polity', label: 'delete Reaume de France' }
+
+describe('editionSlice.deletePolity', () => {
+  describe('happy path', () => {
+    it('deletes the polity and its outline as one step, and reports what went', () => {
+      const { store } = openStore()
+      const report = store.getState().deletePolity('fr-couronne', REMOVE)
+
+      expect(report).toEqual({ rings: 1, anchorsKept: 2, anchorsOrphaned: 2, bordersDropped: 0 })
+      expect(store.getState().document.polities.map((polity) => polity.id)).toEqual(['hre'])
+      expect(store.getState().document.claims.map((claim) => claim.polity)).toEqual(['hre'])
+      expect(store.getState().undoLabel).toBe('delete Reaume de France')
+    })
+
+    it('gives everything back on undo, the shared anchors still shared', () => {
+      // The trap: an undo that restored coordinates rather than indices would bring France back beside
+      // the Empire on its own copy of the border — moving one anchor would then move one outline only.
+      const { store } = openStore()
+      store.getState().deletePolity('fr-couronne', REMOVE)
+      store.getState().undo()
+      const restored = store.getState().document
+      const shared = firstSharedAnchor(restored)
+      moveAnchor(restored, shared, [3, 47])
+
+      expect(ringOf(restored, 'fr-couronne')).toContainEqual([3, 47])
+      expect(ringOf(restored, 'hre')).toContainEqual([3, 47])
+    })
+  })
+
+  describe('variants', () => {
+    it('leaves the neighbour’s border where it was — no shared anchor moves or goes', () => {
+      const { store } = openStore()
+      const before = ringOf(store.getState().document, 'hre')
+      store.getState().deletePolity('fr-couronne', REMOVE)
+
+      expect(ringOf(store.getState().document, 'hre')).toEqual(before)
+    })
+
+    it('frees its vassals, and binds them again on undo', () => {
+      const { store } = openStore()
+      store.getState().createPolity({ ...AQUITAINE_IDENTITY, suzerain: 'fr-couronne' }, CREATE)
+      store.getState().deletePolity('fr-couronne', REMOVE)
+      const freed = store.getState().document.polities.find((polity) => polity.id === 'aquitaine')
+      expect(freed?.suzerain).toBeNull()
+
+      store.getState().undo()
+      const bound = store.getState().document.polities.find((polity) => polity.id === 'aquitaine')
+      expect(bound?.suzerain).toBe('fr-couronne')
+    })
+  })
+
+  describe('managed errors', () => {
+    it('returns null for an unknown id, recording nothing', () => {
+      const { store } = openStore()
+      const version = store.getState().version
+
+      expect(store.getState().deletePolity('nobody', REMOVE)).toBeNull()
+      expect(store.getState().version).toBe(version)
+      expect(store.getState().canUndo).toBe(false)
+    })
+  })
+
+  // L4: N/A — the edit is synchronous and its collaborator, removePolity, is pure and tested in core.
+
+  describe('edge cases', () => {
+    it('deletes a polity with no territory, reporting no ring', () => {
+      const { store } = openStore()
+      store.getState().createPolity(AQUITAINE_IDENTITY, CREATE)
+
+      expect(store.getState().deletePolity('aquitaine', REMOVE)?.rings).toBe(0)
+    })
+
+    it('makes the target stop resolving when the aimed-at polity is deleted, with nothing to clear', () => {
+      const { store } = openStore()
+      store.getState().chooseTarget('fr-couronne')
+      store.getState().deletePolity('fr-couronne', REMOVE)
+
+      expect(
+        store.getState().document.polities.some((polity) => polity.id === store.getState().target)
+      ).toBe(false)
+    })
+  })
+})
