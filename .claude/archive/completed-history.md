@@ -2,6 +2,45 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-10-11 → 12 — les fleuves, le crayon, l'empilement par groupes, modifier un pays, la sélection
+
+Une plage continue, **11/10 13:31 → 12/10 01:05 (11 h 34, 828 actions)**, dont cette session-ci de
+**21:25 à 01:05 (3 h 40)** après la clôture de 21:23. Le chantier ouvert le 05/10 totalise **30 h 32 sur
+7 plages**. **27 commits** `e4d250e`..`27ab9c7`, 86 fichiers, **+5 407 / −843**, **2350 → 2523 tests**,
+gate verte à chaque commit, revue à plusieurs agents à chaque pas. **Rien n'est poussé** : 35 commits en
+attente.
+
+- **Le zoom ‹+›/‹−›** : le dev l'a testé et le trouve suffisant. **Rien à corriger** — les « deux causes »
+  écrites la veille étaient mes hypothèses, présentées à tort comme décidées avec lui.
+- **Les fleuves** : `RiverSource.load()` rend la source et la boîte ; la plume **suit un fleuve** comme la
+  côte (« Pen — follow a river », le nom verbatim, `Maas`) ; la côte et les fleuves sont **une table par
+  couche d'accroche** (`snapLayersOf`), la géométrie s'appelle `lineSnap`. **Les deux apps refusent des
+  fleuves recadrés autrement que le relief** — et l'atlas attend que la source du relief soit prête (un
+  défaut à moi : drapés une ligne trop tôt, au niveau de la mer, sans un mot). L'extension jusqu'à la mer :
+  **remise à plus tard par le dev**.
+- **Le crayon** (« Pencil — freehand ») : un point au plus toutes les 200 ms en glissant, ‹ctrl+z›
+  reprend tout le trait ; **‹P› fait tourner les modes** de la plume et l'annonce.
+- **Le « Y » retiré** (`cross-branch`) à la demande du dev ; la jonction aux ancres du voisin reste.
+- **L'empilement par groupes** — le modèle du dev, d'après les calques d'Illustrator (capture dans
+  `design/references/`) : un pays et ses vassaux forment un **groupe**, le suzerain au fond ; on réordonne
+  **entre frères**. `paintOrder` dans `core`, **lu par l'atlas et le Cartographe** (l'atlas mettait avant
+  tous les vassaux par-dessus tous les pays) ; `{Polities}` en **arbre**, le devant en haut, séparé par
+  des traits pleins / tirets / pointillés (son dessin, réglé sur l'établi) ; le **menu Arrange** au clic
+  droit ou ‹⇧F10›, qui se replie dans la fenêtre. Plan : `files/plans/cartographer/stacking-order-plan.md`.
+- **Modifier un pays** (`s07`) : double-clic sur la ligne, ou « Edit properties… » dans son menu → la même
+  boîte, remplie, l'id en lecture seule, **une boucle d'hommage refusée** par le document et absente de la
+  liste (`vassalsOf`, une seule définition). `NewPolityDialog` → `PolityDialog`.
+- **La sélection** (`s03`) : une liste de points ; **la marquise** ; ‹shift› ajoute ; **le choix d'un pays
+  se décide au relâchement** (sa décision : une marquise peut partir de la mer) ; glisser un point
+  sélectionné **déplace toute la sélection** ; ‹suppr› **supprime toute la sélection**, en un pas. Les
+  deux opérations de `core` sont **tout ou rien**. **Bug trouvé par le dev, corrigé** : les points
+  attrapés ne s'affichaient qu'au clic suivant (le relâchement ne redessinait pas).
+- **Les revues de toute la session** : traitées, ou consignées dans `known-issues` avec leur raison.
+- **Mes fautes** : avoir commencé l'empilement **sans qu'il le demande** ; avoir **reposé une question à
+  laquelle il avait répondu** (le « Y ») ; avoir enchaîné sur des corrections **sans lui donner le tableau
+  de la revue** — il l'a réclamé ; un `cd /dev/null` ; une affirmation fausse dans `s16` (l'atlas peignait
+  autrement), et une entrée fausse dans `known-issues` (« rien ne permet de choisir un suzerain »).
+
 ### 2026-10-10 → 11 — `(d)` livré : on dessine, on suit la côte, on partage une frontière
 
 Deux plages : **10/10 10:36 → 10:46 (10 min)** et **11/10 13:31 → 21:23 (7 h 52, 434 actions)**. Le

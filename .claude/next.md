@@ -5,7 +5,7 @@
 
 ## Where we are
 
-**2633 tests** (737 `core` · 787 atlas · 1027 Cartographe · 82 plugin `eslint-plugin-eha`, 12/10), gate verte sur cinq contrôles (`lint`,
+**2831 tests** (756 `core` · 787 atlas · 1206 Cartographe · 82 plugin `eslint-plugin-eha`, 12/10 au soir), gate verte sur cinq contrôles (`lint`,
 `type-check`, `test`, `build`, `format:check`). Worker à **13 490 o**, toujours sans three.js — et depuis
 le 07/10 le Cartographe émet **le même chunk, au même hash**, le fond étant cuit par le même port.
 
@@ -66,56 +66,37 @@ d'ancres ne perd jamais rien pendant l'édition.** Donc `removePolity` retire un
 point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui n'est plus référencé disparaît
 à l'enregistrement, par une seule renumération. Vérifié en la cassant : 3 tests tombent.
 
-## ▶ ON REPREND ICI (13/10) — deux chantiers, dans cet ordre
+## ▶ ON REPREND ICI (13/10) — une nouvelle méthode, puis les « petites choses »
 
-**1. La barre d'actions de `{Polities}` — ✅ faite le 12/10 au soir** (étapes 2 à 5 d'un coup, parcourue dans
-son Chrome : `s07`, *Walked for real*). `+` et poubelle au pied du panneau, ses dessins en pixels entiers
-(mesurés : glyphes à x/y entiers, cases 26 × 24), confirmation avec `[Cancel]` en focus, ‹ctrl+z› **depuis le
-panneau aussi** (le contrôleur du canevas écoute toute la page, hors champs et boîtes). **Une question laissée
-au dev** : la barre reste active de loin, contrairement aux outils (`s17`) — ma recommandation, une ligne à
-changer s'il veut l'inverse.
+**La méthode, décidée par le dev le 12/10 au soir** : *« tu vas vraiment tester toi-même ce que tu codes sur
+l'application […] ça fait tester l'accessibilité […] et puis je te regarderai faire. »* Chaque changement du
+Cartographe se termine par **moi qui l'utilise dans son Chrome**, clavier compris, sous ses yeux, avant de
+dire « fait » (mémoire [[test-it-yourself-in-the-app]]). Attendre le fond avant d'agir : les clics pendant
+« Preparing the backdrop… » se perdent.
 
-**2. Enregistrer et rouvrir une carte — juste après, et c'est devenu prioritaire.** Le dev, 12/10 : *« pour
-revenir sur les outils de dessin, sur les différents fonctionnements, il faut qu'on puisse revenir sur des
-choses déjà faites. Donc enregistrer et lire à l'ouverture va devenir très important. »* Aujourd'hui chaque
-rechargement repart d'une carte vide. Scénarios `s04` et `s15` ; `saveYearDocument` / `openYearDocument`
-existent dans `core`, l'aller-retour testé. **La décision à prendre d'abord : `H-28`** — un téléchargement
-(partout, trois fichiers à déplacer à la main) ou la File System Access API (‹ctrl+s› écrit en place, Chrome
-l'a). Recommandation déjà faite : la File System Access API.
+| | quoi | |
+| --- | --- | --- |
+| **1** | **Les « plein de petites choses qui vont pas »** — le dev a essayé l'app le 12/10 au soir et les a vues, sans les lister. **Lui demander la liste d'abord**, puis les prendre une à une avec la méthode ci-dessus | ◀ |
+| **2** | **Une question à lui poser** : la barre d'actions reste active de loin, contrairement aux outils (`s17`) — ma recommandation ; une ligne s'il veut l'inverse | |
+| **3** | **Nos propres frontières** — *« il faudrait qu'on puisse faire nos propres frontières, c'est dans les specs »* (12/10). Existe : la dérivation dans `core` (`derivedBorders.ts`, `borderGraph.ts`, [[borders-are-derived-not-drawn]]), la main d'une frontière déduite du registre ([[border-hand-is-not-a-relation]]), `s13` et `{Overrides}`. Manque : les afficher et les régler dans le Cartographe, et que **l'atlas les dessine depuis l'année** au lieu des 21 payloads GPL (`mapPipeline.ts` lit encore `/borders/europe-<année>.json`). **À découper avec lui** : lire `s13`, `s08` et `format.md` ensemble d'abord | |
+| **4** | **Des tests end-to-end Playwright** — sa note du 12/10 : *« s'il y a un bug que tu n'as pas trouvé par JSDOM […] il peut être trouvé via le navigateur »*. Rien n'existe. Premiers cas : le `<dialog>` natif qui rendait le focus à la poubelle désactivée, ‹ctrl+z› entendu par le seul canevas. À proposer comme chantier | |
 
-**3. Nos propres frontières — un gros sujet, rappelé par le dev le 12/10** : *« il faudrait qu'on puisse
-faire nos propres frontières, c'est dans les specs. »* Ce qui existe : la **dérivation** dans `core`
-(`editor/derivedBorders.ts`, `borderGraph.ts` — une frontière est le bord commun de deux remplissages, jamais
-un trait à part, mémoire [[borders-are-derived-not-drawn]]) ; la **main** d'une frontière (vassal, union,
-contesté) déduite du registre, son style étant une table éditoriale à part ([[border-hand-is-not-a-relation]]) ;
-et **`s13`**, la reprise en main — *« je veux pouvoir avoir la main sur les couleurs et les lignes »* — avec
-`{Overrides}`. Ce qui manque : **les afficher et les régler dans le Cartographe**, et **que l'atlas les dessine
-depuis l'année** au lieu des 21 payloads GPL (`mapPipeline.ts` lit encore `/borders/europe-<année>.json`). C'est
-le cœur de P5 : le jour où 1100 est dessiné, `borders/` et son lecteur `unauthored` disparaissent. **À
-découper avec lui** après l'enregistrement : lire `s13`, `s08` (vassalité) et `format.md` ensemble d'abord.
-
-**4. Des tests end-to-end Playwright — noté par le dev le 12/10, pas commencé** : *« S'il y a un bug que tu
-n'as pas trouvé par JSDOM, eh bien peut-être qu'il peut être trouvé via le navigateur. Donc par tes tests
-end-to-end basés sur Playwright. »* Rien n'existe dans le dépôt. Premiers cas, trouvés à la main le 12/10 sur
-la barre d'actions et invisibles à jsdom : le `<dialog>` natif rend le focus à la poubelle qui vient d'être
-désactivée (donc à `body`) ; ‹ctrl+z› n'était entendu que par le canevas. À proposer comme chantier.
+**Livré le 12/10 au soir** (détail dans `completed.md`) : enregistrer et rouvrir **en mode local** (‹ctrl+s›,
+ouverture au démarrage, `H-28` tranché) · les outils attendent le zoom (`s17`) · les fleuves suivis d'un
+morceau à l'autre et dessinés comme dans l'atlas · la barre d'actions de `{Polities}`, calée à droite. **Les
+années enregistrées ne sont jamais commitées** ; l'année de travail est `years/1100/` (France + Bourgogne),
+une trace dans `years/1100.bourgogne-v1/`.
 
 **Un seul serveur de dev** : le dev fait tourner le sien (`pnpm dev:cartographer`, souvent sur 5174). Ne pas
 en lancer un second ; lui donner l'adresse du sien.
 
-## ▶ ON REPREND ICI — en trois lignes
+**Noté, non prioritaire** : masquer un pays (`H-32`, besoin non prouvé — essayer d'abord un affichage contours
+seuls) · les fleuves jusqu'à la mer (**remis à plus tard par le dev**) · alléger les tronçons de côte
+(Douglas–Peucker) · la confirmation avant de supprimer une ancre partagée (`s03`) · tracer au clavier · le
+geste « souder » deux ancres (`H-37`) · l'inspecteur `{Details}` · les noms datés de `s07` (**plus tard**).
 
-**On dessine et on édite : plume (libre, côte, fleuve), crayon, sélection à la marquise, déplacer et
-supprimer plusieurs points, pays empilés par groupes, pays modifiables (12/10). Mais rien ne
-s'enregistre : chaque rechargement repart d'une carte vide.**
-
-| | | |
-| --- | --- | --- |
-| **après la barre d'actions** | **enregistrer et rouvrir une carte** — la demande du dev, 12/10 : *« j'ai pas envie de redessiner constamment les choses »*. Scénarios : `s04` (save, reopen identical, *« the saved file loses nothing »*) et `s15` (offline : les trois fichiers `registry` / `polities` / `borders.json` d'une année sous `packages/atlas/public/years/<année>/`, plus le manifeste `years/index.json`). **Le format et le modèle sont prêts** : `saveYearDocument` / `openYearDocument` dans `core`, l'aller-retour testé (le partage des ancres conservé, et l'ordre de la liste depuis le 12/10). **La décision à prendre d'abord avec lui, c'est `H-28`** : comment le navigateur écrit — un **téléchargement** (partout, mais trois fichiers à déplacer à la main) ou la **File System Access API** (écrit dans un dossier choisi, ‹ctrl+s› écrase en place, pas dans tous les navigateurs ; Chrome l'a). Puis ‹ctrl+s›, `[Open…]`, et l'atlas qui lit l'année | ◀ |
-| **ensuite** | ce que le dev a cité : la suite du chantier · l'**inspecteur `{Details}`** (lecture seule : le pays choisi, ou un point — coordonnées, provenance, contours qui le partagent — avec « Edit properties… ») · les **noms datés** de `s07` (« Royaume des Francs » → « Royaume de France » en 1190), **plus tard, dit le dev** | |
-| **livré le 11–12/10** | les fleuves · le crayon et ‹P› · l'empilement par groupes et `{Polities}` en arbre · modifier un pays · la sélection, la marquise, déplacer et supprimer plusieurs points — détail dans `completed.md` | ✅ |
-| **noté** | **masquer un pays** (`H-32`, besoin non prouvé — essayer d'abord un affichage contours seuls, ‹⌘Y›) · les fleuves jusqu'à la mer (`extendRiversToSea`, **remis à plus tard par le dev**) · alléger les tronçons de côte (Douglas–Peucker) · la confirmation avant de supprimer une ancre partagée (`s03`) · tracer au clavier (étape 5) | |
-| **poussé** | tout est en ligne au 12/10 au soir (`3ea738c`, CI verte, déployé) ; vérifier à l'ouverture avec `git ls-remote origin main` contre `git log -1` | ✅ |
+**Poussé** : tout est en ligne au 12/10 au soir ; vérifier à l'ouverture avec `git ls-remote origin main`
+contre `git log -1`.
 
 > **Le découpage `a/b/c/d` est figé — ne plus le re-trancher.** Il a bougé deux fois le 07/10, et
 > c'est ce qui a fait perdre le fil au dev. S'il paraît faux à la reprise, le dire **avant** d'y

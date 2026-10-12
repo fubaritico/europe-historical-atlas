@@ -163,6 +163,7 @@ Scenario: see the tree
 Scenario: the actions sit at the foot of {Polities}
   Given a year is open
   Then {Polities} carries a bar at its foot, holding [New polity] and [Delete polity]
+  And the two buttons sit flush right
   And the panel's title bar carries no action any more
   When no polity is selected
   Then [Delete polity] is disabled
