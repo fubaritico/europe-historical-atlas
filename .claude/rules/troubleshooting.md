@@ -65,3 +65,15 @@ Prettier ignores `.claude`, `files`, `.husky`.
 ## History (to fill in)
 
 _(Add each real solved problem here: symptom → root cause → solution → reference.)_
+
+### Turbo replayed a green lint after the lint rules had changed (2026-10-12)
+
+**Symptom**: measured, not reported. Appending a line to the root `eslint.config.js` left `atlas:lint` a
+`cache hit`; so did changing `eslint-plugin-eha`, even with the plugin declared `workspace:*` in the
+Cartographer. A rule change could have shipped with every package replaying the green lint it had before.
+**Root cause**: a task's hash covers its own package's files and the hashes of the tasks in its
+`dependsOn` — not files outside the package, and not a workspace dependency's sources by itself.
+**Solution**: `globalDependencies` lists the root files every task reads (`eslint.config.js`,
+`tsconfig.json`, `.prettierrc`), and `lint` depends on `^lint`, so a consumer's lint hash carries the
+plugin's. Both probes re-run: `cache miss`. **Rule**: a package that consumes the plugin declares it as a
+dependency, or its lint never sees a rule change.

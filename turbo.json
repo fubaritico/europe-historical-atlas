@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [".prettierrc", "tsconfig.json", "eslint.config.js"],
   "tasks": {
     "build": {
       "dependsOn": ["^build", "type-check"],
@@ -10,6 +11,7 @@
       "outputs": []
     },
     "lint": {
+      "dependsOn": ["^lint"],
       "outputs": []
     },
     "test": {

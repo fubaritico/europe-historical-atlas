@@ -1,7 +1,7 @@
 {
   "name": "@europe-historical-atlas/cartographer",
   "version": "1.0.0",
-  "description": "The Cartographer: the territory editor — a 2D canvas for anchors and rings, with its React chrome.",
+  "description": "The Cartographer: the territory editor \u2014 a 2D canvas for anchors and rings, with its React chrome.",
   "type": "module",
   "private": true,
   "scripts": {
@@ -34,6 +34,7 @@
     "@vitejs/plugin-react": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "eslint": "catalog:",
+    "eslint-plugin-eha": "workspace:*",
     "eslint-plugin-jsx-a11y": "catalog:",
     "eslint-plugin-react": "catalog:",
     "eslint-plugin-react-hooks": "catalog:",
