@@ -634,10 +634,20 @@
   background: var(--raised);
 }
 
+/* One edge, the hairline above: the list inside would otherwise draw the field boundary `.ui-listbox` gives a
+   Dropdown's list (--ink-off), the strongest line of the palette — a second, louder frame. Two classes, so
+   it wins over `.ui-listbox`. */
+.polity-stack-menu .ui-listbox {
+  --ui-listbox-border-color: transparent;
+}
+
 .polity-stack-menu [role='option'] {
   --ui-listbox-item-padding-block: 0;
   --ui-listbox-item-padding-inline: 10px;
   --ui-listbox-item-font-size: 12px;
 
+  /* The label centred on the row's height, which the item's own line height would leave at the top. */
+  display: flex;
+  align-items: center;
   height: 24px;
 }
