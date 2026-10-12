@@ -509,6 +509,17 @@ function coastContext() {
   return { context, reports }
 }
 
+/**
+ * France's triangle drawn and closed, then the Empire aimed at with the Pen.
+ * @returns the context, on the Empire
+ */
+function neighbourContext() {
+  const context = openContext()
+  drawTriangle(context)
+  context.store.getState().aimAt('hre')
+  return context
+}
+
 describe('the Pen following the coast', () => {
   describe('happy path', () => {
     // s02 — "a first vertex is placed exactly on the coastline contour".
@@ -728,17 +739,6 @@ describe('the Pen following the coast', () => {
   })
 
   describe('a shared border', () => {
-    /**
-     * France's triangle drawn and closed, then the Empire aimed at with the Pen.
-     * @returns the context, on the Empire
-     */
-    function neighbourContext() {
-      const context = openContext()
-      drawTriangle(context)
-      context.store.getState().aimAt('hre')
-      return context
-    }
-
     // H-06: the Pen lands on France's anchor itself — no copy is made.
     it('joins a neighbour’s anchor by its index', () => {
       const context = neighbourContext()
@@ -799,25 +799,25 @@ describe('the Pen following the coast', () => {
   })
 })
 
-describe('two neighbours along one shore', () => {
-  /**
-   * France drawn along the shore from x = 100 to x = 250 — anchors 0 to 15, one per vertex — and
-   * closed inland; then the Empire aimed at, the Pen still following the coast.
-   * @returns the context, on the Empire, and its reports
-   */
-  function shoreNeighbours() {
-    const { context, reports } = coastContext()
-    penClick(context, [100, 200])
-    penClick(context, [250, 200])
-    context.store.getState().choosePenMode('free')
-    penClick(context, [175, 300])
-    penClick(context, [101, 201])
-    context.store.getState().aimAt('hre')
-    context.store.getState().choosePenMode('coast')
-    reports.length = 0
-    return { context, reports }
-  }
+/**
+ * France drawn along the shore from x = 100 to x = 250 — anchors 0 to 15, one per vertex — and
+ * closed inland; then the Empire aimed at, the Pen still following the coast.
+ * @returns the context, on the Empire, and its reports
+ */
+function shoreNeighbours() {
+  const { context, reports } = coastContext()
+  penClick(context, [100, 200])
+  penClick(context, [250, 200])
+  context.store.getState().choosePenMode('free')
+  penClick(context, [175, 300])
+  penClick(context, [101, 201])
+  context.store.getState().aimAt('hre')
+  context.store.getState().choosePenMode('coast')
+  reports.length = 0
+  return { context, reports }
+}
 
+describe('two neighbours along one shore', () => {
   // The dev's case, Spain then Portugal: the shared vertex is France's own anchor, and the Pen keeps
   // following the coast from it rather than branching off it.
   it('starts on the neighbour’s coast anchor by its index, and follows the shore from there', () => {
@@ -880,24 +880,24 @@ describe('two neighbours along one shore', () => {
   })
 })
 
+/**
+ * France's triangle drawn and closed, the Pen still in hand and idle.
+ * @returns the context
+ */
+function idlePenOnTriangle() {
+  const context = openContext()
+  drawTriangle(context)
+  return context
+}
+
+/** France's rings. */
+function franceRings(context: GestureContext): number[][] {
+  return (
+    context.store.getState().document.claims.find((claim) => claim.polity === 'fr')?.rings ?? []
+  )
+}
+
 describe('the Pen inserting a point on the target’s outline', () => {
-  /**
-   * France's triangle drawn and closed, the Pen still in hand and idle.
-   * @returns the context
-   */
-  function idlePenOnTriangle() {
-    const context = openContext()
-    drawTriangle(context)
-    return context
-  }
-
-  /** France's rings. */
-  function franceRings(context: GestureContext): number[][] {
-    return (
-      context.store.getState().document.claims.find((claim) => claim.polity === 'fr')?.rings ?? []
-    )
-  }
-
   describe('happy path', () => {
     // As Illustrator's Pen over a selected path (the dev, 2026-10-11).
     it('inserts a point between anchors 0 and 1 when the idle Pen clicks the top side', () => {
@@ -1112,6 +1112,24 @@ describe('the Pen following a river', () => {
   })
 })
 
+/**
+ * A drag of the white arrow from one point to another, released there.
+ * @param context - the session
+ * @param from - the press
+ * @param to - the release
+ * @param shift - whether ‹shift› is held at the press
+ */
+function drag(
+  context: GestureContext,
+  from: [number, number],
+  to: [number, number],
+  shift = false
+) {
+  arrowPress(context, from, shift)
+  arrowDrag(context, to)
+  arrowRelease(context, to)
+}
+
 describe('the white arrow’s selection and marquee (s03)', () => {
   /** A six-anchor outline for France: three along the top at y 100, three along the bottom at y 300. */
   const HEXAGON: [number, number][] = [
@@ -1133,24 +1151,6 @@ describe('the white arrow’s selection and marquee (s03)', () => {
     penClick(context, [101, 101])
     context.store.getState().selectTool('edit')
     return context
-  }
-
-  /**
-   * A drag of the white arrow from one point to another, released there.
-   * @param context - the session
-   * @param from - the press
-   * @param to - the release
-   * @param shift - whether ‹shift› is held at the press
-   */
-  function drag(
-    context: GestureContext,
-    from: [number, number],
-    to: [number, number],
-    shift = false
-  ) {
-    arrowPress(context, from, shift)
-    arrowDrag(context, to)
-    arrowRelease(context, to)
   }
 
   describe('happy path', () => {

@@ -47,6 +47,8 @@ function groups(): YearDocument {
 
 const painted = (doc: YearDocument): string[] => paintOrder(doc.polities).order
 
+const three = () => yearOf(polity('fr'), polity('a', 'fr'), polity('b', 'fr'), polity('c', 'fr'))
+
 describe('stacking', () => {
   describe('happy path', () => {
     // s16 — "bring a group to the front, vassals with it".
@@ -73,8 +75,6 @@ describe('stacking', () => {
 
     // Three siblings, moved from an end, so one place and all the way differ (review QUAL-001).
     it('moves the back vassal of three one place forward, and the front one one place back', () => {
-      const three = () =>
-        yearOf(polity('fr'), polity('a', 'fr'), polity('b', 'fr'), polity('c', 'fr'))
       const forward = three()
       restack(forward, 'a', 'forward')
       expect(painted(forward)).toEqual(['fr', 'b', 'a', 'c'])

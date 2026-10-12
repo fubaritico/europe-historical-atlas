@@ -275,53 +275,51 @@ describe('createMapInteraction', () => {
   })
 })
 
+/** The gestures bound to a genuine camera, so the two modules' idea of a drag has to agree. */
+function compose() {
+  const element = document.createElement('canvas')
+  document.body.appendChild(element)
+  const camera = new PerspectiveCamera(50, 1, 0.1, 300)
+  const controls = createMapControls(camera, element, {
+    extent: { minX: -6, maxX: 6, minZ: -6, maxZ: 6 },
+    minDistance: 2,
+    maxDistance: 10,
+    minPitchDeg: 45,
+    maxPitchDeg: 70,
+    panSpeed: 8,
+    zoomSpeed: 0.1,
+    smoothingTau: 0.12,
+    initialZoom: 0.5,
+    enableDrag: true,
+    enableEdgeScroll: false,
+    edgeScrollMargin: 24,
+    edgeScrollSpeed: 10,
+    flyDurationMs: 700,
+    flyFocusZoom: 1,
+    flyArcZoom: 0,
+  })
+  const interaction = createMapInteraction({
+    element,
+    picker: fakePicker(HIT),
+    controls,
+    keyTarget: new EventTarget(),
+    clickSettleMs: SETTLE,
+  })
+  return { element, controls, interaction }
+}
+
+/** Press, move and release — the sequence a grab-and-drag pan is made of. */
+function dragBy(element: HTMLElement, pixels: number): void {
+  element.dispatchEvent(new MouseEvent('pointerdown', { clientX: 100, clientY: 80, bubbles: true }))
+  window.dispatchEvent(
+    new MouseEvent('pointermove', { clientX: 100 + pixels, clientY: 80, bubbles: true })
+  )
+  window.dispatchEvent(
+    new MouseEvent('pointerup', { clientX: 100 + pixels, clientY: 80, bubbles: true })
+  )
+}
+
 describe('createMapInteraction over the real controls', () => {
-  /** The gestures bound to a genuine camera, so the two modules' idea of a drag has to agree. */
-  function compose() {
-    const element = document.createElement('canvas')
-    document.body.appendChild(element)
-    const camera = new PerspectiveCamera(50, 1, 0.1, 300)
-    const controls = createMapControls(camera, element, {
-      extent: { minX: -6, maxX: 6, minZ: -6, maxZ: 6 },
-      minDistance: 2,
-      maxDistance: 10,
-      minPitchDeg: 45,
-      maxPitchDeg: 70,
-      panSpeed: 8,
-      zoomSpeed: 0.1,
-      smoothingTau: 0.12,
-      initialZoom: 0.5,
-      enableDrag: true,
-      enableEdgeScroll: false,
-      edgeScrollMargin: 24,
-      edgeScrollSpeed: 10,
-      flyDurationMs: 700,
-      flyFocusZoom: 1,
-      flyArcZoom: 0,
-    })
-    const interaction = createMapInteraction({
-      element,
-      picker: fakePicker(HIT),
-      controls,
-      keyTarget: new EventTarget(),
-      clickSettleMs: SETTLE,
-    })
-    return { element, controls, interaction }
-  }
-
-  /** Press, move and release — the sequence a grab-and-drag pan is made of. */
-  function dragBy(element: HTMLElement, pixels: number): void {
-    element.dispatchEvent(
-      new MouseEvent('pointerdown', { clientX: 100, clientY: 80, bubbles: true })
-    )
-    window.dispatchEvent(
-      new MouseEvent('pointermove', { clientX: 100 + pixels, clientY: 80, bubbles: true })
-    )
-    window.dispatchEvent(
-      new MouseEvent('pointerup', { clientX: 100 + pixels, clientY: 80, bubbles: true })
-    )
-  }
-
   describe('happy path', () => {
     it('does not fly after a drag-pan, however the click arrives', () => {
       const { element, controls, interaction } = compose()

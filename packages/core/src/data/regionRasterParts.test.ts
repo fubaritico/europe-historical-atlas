@@ -181,9 +181,9 @@ describe('fillRowSpans', () => {
   })
 })
 
-describe('claimedCells and claimNeighbours', () => {
-  const allLand = (): boolean => true
+const allLand = (): boolean => true
 
+describe('claimedCells and claimNeighbours', () => {
   describe('happy path', () => {
     it('reports only the cells a polity already holds', () => {
       const cells = Int16Array.from([-1, 4, -1, -1])

@@ -122,6 +122,20 @@ describe('scaleProgress', () => {
   })
 })
 
+// Measured where it is meant to be seen: the tinted pixels. One DEM cell of reach must colour the
+// same share of the map whichever grid it was walked on — otherwise the colours stop short of the
+// coastline the moment the raster gets finer.
+const tinted = async (rasterScale: number): Promise<number> => {
+  const compute = createInlineMapCompute()
+  await compute.setSources(sources(ALL_LAND))
+  const bare = await compute.bakeTerrain(OPTIONS)
+  await compute.computePolitical({ ...REQUEST, rasterScale, snapToCoast: 1 })
+  const painted = await compute.bakeTerrain(OPTIONS)
+  let differing = 0
+  for (let i = 0; i < painted.rgba.length; i += 4) if (painted.rgba[i] !== bare.rgba[i]) differing++
+  return differing / (painted.rgba.length / 4)
+}
+
 describe('createInlineMapCompute', () => {
   describe('happy path', () => {
     it('rasterises, colours and derives borders from one request', async () => {
@@ -211,20 +225,6 @@ describe('createInlineMapCompute', () => {
     })
 
     it('scales snapToCoast with the grid, so its reach in kilometres holds', async () => {
-      // Measured where it is meant to be seen: the tinted pixels. One DEM cell of reach must colour the
-      // same share of the map whichever grid it was walked on — otherwise the colours stop short of the
-      // coastline the moment the raster gets finer.
-      const tinted = async (rasterScale: number): Promise<number> => {
-        const compute = createInlineMapCompute()
-        await compute.setSources(sources(ALL_LAND))
-        const bare = await compute.bakeTerrain(OPTIONS)
-        await compute.computePolitical({ ...REQUEST, rasterScale, snapToCoast: 1 })
-        const painted = await compute.bakeTerrain(OPTIONS)
-        let differing = 0
-        for (let i = 0; i < painted.rgba.length; i += 4)
-          if (painted.rgba[i] !== bare.rgba[i]) differing++
-        return differing / (painted.rgba.length / 4)
-      }
       expect(await tinted(2)).toBeCloseTo(await tinted(1), 1)
     })
 

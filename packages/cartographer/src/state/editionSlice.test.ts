@@ -800,12 +800,12 @@ describe('editionSlice.insertAnchor and deleteAnchors', () => {
   })
 })
 
+const ids = (store: ReturnType<typeof openStore>['store']): string[] =>
+  store.getState().document.polities.map((polity) => polity.id)
+
 describe('editionSlice.restackPolity', () => {
   /** How s16 names the step. */
   const FRONT: HistoryStep = { kind: 'restack', label: 'bring to front — Sacrum Imperium' }
-
-  const ids = (store: ReturnType<typeof openStore>['store']): string[] =>
-    store.getState().document.polities.map((polity) => polity.id)
 
   describe('happy path', () => {
     // s16 — "{History} gains one step … And ‹ctrl+Z› puts France back on top".

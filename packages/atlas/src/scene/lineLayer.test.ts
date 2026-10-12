@@ -174,6 +174,8 @@ describe('createLineLayer', () => {
   })
 })
 
+const flat = (u: number, v: number): [number, number, number] => [u, 0, v]
+
 describe('buildSegmentPositions', () => {
   const seg = [
     [
@@ -181,8 +183,6 @@ describe('buildSegmentPositions', () => {
       { u: 1, v: 1 },
     ],
   ] as const
-  const flat = (u: number, v: number): [number, number, number] => [u, 0, v]
-
   describe('happy path', () => {
     it('writes six floats for one segment', () => {
       expect(buildSegmentPositions(seg, flat, 0, 1)).toHaveLength(6)

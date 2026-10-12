@@ -163,6 +163,36 @@ function ops(calls: Call[]): string[] {
   return calls.map((call) => call.op)
 }
 
+/** A scene carrying one coast contour and one river, under a doubled view. */
+const withVectors = (scale = 2) =>
+  scene({
+    vectors: {
+      coast: [
+        {
+          points: [
+            [0, 0],
+            [10, 0],
+            [10, 10],
+          ],
+          closed: true,
+          bounds: { left: 0, top: 0, right: 10, bottom: 10 },
+        },
+      ],
+      rivers: [
+        {
+          points: [
+            [1, 1],
+            [5, 5],
+          ],
+          bounds: { left: 1, top: 1, right: 5, bottom: 5 },
+        },
+      ],
+      scale,
+      originX: 7,
+      originY: 9,
+    },
+  })
+
 describe('painter', () => {
   describe('happy path', () => {
     it('clears, then lays the background over the whole canvas', () => {
@@ -422,36 +452,6 @@ describe('painter', () => {
     })
   })
   describe('the vector layers', () => {
-    /** A scene carrying one coast contour and one river, under a doubled view. */
-    const withVectors = (scale = 2) =>
-      scene({
-        vectors: {
-          coast: [
-            {
-              points: [
-                [0, 0],
-                [10, 0],
-                [10, 10],
-              ],
-              closed: true,
-              bounds: { left: 0, top: 0, right: 10, bottom: 10 },
-            },
-          ],
-          rivers: [
-            {
-              points: [
-                [1, 1],
-                [5, 5],
-              ],
-              bounds: { left: 1, top: 1, right: 5, bottom: 5 },
-            },
-          ],
-          scale,
-          originX: 7,
-          originY: 9,
-        },
-      })
-
     it('draws them under the view’s transform instead of projecting them', () => {
       const { ctx, calls } = recordingContext()
 

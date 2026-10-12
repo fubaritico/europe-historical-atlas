@@ -2,7 +2,7 @@
 
 > Opened 2026-10-12, at the dev's request. Source of inspiration:
 > `~/Desktop/WebstormProjects/eslint-plugin-fluid-react` (his plugin for Fluid's React library).
-> **Status: decided 2026-10-12, in progress.**
+> **Status: done 2026-10-12** — steps 1–4 shipped, 5 and 6 dropped on measurement (below), 7 waits for the dev.
 
 ## Why
 
@@ -107,3 +107,33 @@ rule only ever asks for a move JavaScript can make.
 
 **Mandate**: the dev gave full rights on 2026-10-12 to run the whole plan in one go, notifying progress and
 completion. Commits per step; **no push** (he pushes).
+
+## Outcome — 2026-10-12
+
+| step | result | commit |
+| --- | --- | --- |
+| 1 | the package, JS + JSDoc checked by `tsc` | `bd0fd45` |
+| — | **found on the way**: Turbo replayed a green lint after a rule or a root config changed. `globalDependencies` + `lint` → `^lint` | `c8eaa25` |
+| 2 | `eha/component-body-order`: groups, separators (fixable), props in the signature, store values before actions by type | `fa6b2cf` |
+| 3 | wired in the Cartographer at `error`: 91 separators by `--fix`, 13 moves by hand, `openingOf` in `PolityDialog` | `47e0394` |
+| 4 | `eha/hoist-independent-function`, every package: 38 functions moved by its fix (1 in source, 37 in tests) | this step |
+| 5 | **dropped** — `injected-deps-first` | — |
+| 6 | **dropped** — `factory-body-order` | — |
+| 7 | `no-inline-event-handlers` — the dev's call | — |
+
+**Why 5 is dropped (D4: generic and coherent, or not at all).** Measured on the three packages: 482
+parameters are read field by field and never whole. The most frequent are `event` (21), `gui` (9),
+`scene` (10) — read through **method calls**, `event.preventDefault()`: destructuring a method detaches its
+`this` and breaks the code. Then `a` / `b` in the geometry, where `({ x: ax }, { x: bx })` reads worse
+than `a.x - b.x`. The rule holds only with exceptions — by name, or for methods — which D4 rules out.
+
+**Why 6 is dropped.** The 60 `create…` factories are sequential constructions: value, wiring, value,
+value, wiring… (`VWVVWWR` is the typical shape — a three.js module creates an object, adds it to the
+scene, creates the next). Wiring statements are barriers, so an order rule would move nothing and only
+stack alternating separators. Same finding as for plain functions: a computation has its order already.
+
+**What the review changed in step 4's fix**, all proven by sabotage: the text of a string or template
+spanning lines is never dedented (checked on the 38 applied moves: no literal changed); a comment set
+apart by a blank line stays; a name already bound at the module, or declared by another function of the
+file, gets a report and no rewrite; a `vi.mock` / `vi.hoisted` factory is not reported (Vitest lifts it
+above the module); an arrow reading `super` or `new.target` stays.

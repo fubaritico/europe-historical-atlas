@@ -264,6 +264,14 @@ export function boundsMatch(a: GeoBounds, b: GeoBounds, toleranceDeg = 1e-6): bo
 }
 
 /**
+ * Write a bounding box for a message, west to north.
+ * @param b - the box
+ * @returns `W… S… E… N…`
+ */
+const box = (b: GeoBounds): string =>
+  `W${String(b.west)} S${String(b.south)} E${String(b.east)} N${String(b.north)}`
+
+/**
  * Check that an asset laid over the relief covers the same ground as the relief, and say how it does
  * not when it does not.
  *
@@ -285,8 +293,6 @@ export function boundsDisagreement(
   source: string
 ): AssetError | null {
   if (boundsMatch(relief, other)) return null
-  const box = (b: GeoBounds): string =>
-    `W${String(b.west)} S${String(b.south)} E${String(b.east)} N${String(b.north)}`
   return assetError(
     asset,
     'semantic',

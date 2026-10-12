@@ -3,6 +3,7 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 import importPlugin from 'eslint-plugin-import'
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
+import eha from 'eslint-plugin-eha'
 
 /**
  * Import patterns that name a layer, whatever the specifier looks like. Matching is on the import
@@ -276,6 +277,18 @@ export default tseslint.config(
           memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
         },
       ],
+    },
+  },
+
+  // Where declarations sit — the repository's own lint plugin (packages/eslint-plugin-eha). Here, the rules
+  // that hold for every function of every package; the component order is the Cartographer's, in its own
+  // config. An error, not a warning: one author, nothing to count down.
+  {
+    plugins: { eha },
+    rules: {
+      // A function declared inside another that reads nothing of it belongs to the module: rebuilt on every
+      // call otherwise, and untestable alone. Tests included — a helper inside a `describe` is the same case.
+      'eha/hoist-independent-function': 'error',
     },
   },
 

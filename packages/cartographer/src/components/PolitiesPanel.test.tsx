@@ -36,6 +36,31 @@ function mount() {
 /** The dialogue element, open or not — the design system's Modal is a native `<dialog>`. */
 const dialog = () => document.querySelector('dialog')
 
+/**
+ * Add a polity to the store's year, as the form does.
+ * @param store - the store
+ * @param id - its id
+ * @param name - its name
+ */
+function create(store: ReturnType<typeof mount>['store'], id: string, name: string) {
+  act(() => {
+    store.getState().createPolity(
+      {
+        id,
+        name,
+        rank: 'kingdom',
+        status: null,
+        suzerain: null,
+        existsFrom: 987,
+        existsTo: null,
+        colour: null,
+        wikidata: null,
+      },
+      { kind: 'create-polity', label: `create ${name}` }
+    )
+  })
+}
+
 describe('PolitiesPanel', () => {
   describe('happy path', () => {
     it('opens the form on [+ New polity]', async () => {
@@ -82,31 +107,6 @@ describe('PolitiesPanel', () => {
   })
 
   describe('the list', () => {
-    /**
-     * Add a polity to the store's year, as the form does.
-     * @param store - the store
-     * @param id - its id
-     * @param name - its name
-     */
-    function create(store: ReturnType<typeof mount>['store'], id: string, name: string) {
-      act(() => {
-        store.getState().createPolity(
-          {
-            id,
-            name,
-            rank: 'kingdom',
-            status: null,
-            suzerain: null,
-            existsFrom: 987,
-            existsTo: null,
-            colour: null,
-            wikidata: null,
-          },
-          { kind: 'create-polity', label: `create ${name}` }
-        )
-      })
-    }
-
     it('says the year is empty while it holds no polity', () => {
       mount()
       expect(screen.getByText('No polity in this year yet.')).toBeDefined()
@@ -195,42 +195,42 @@ describe('PolitiesPanel', () => {
   })
 })
 
-describe('PolitiesPanel — the stacking menu (s16)', () => {
-  /**
-   * A polity with only an id and a name, owing nobody.
-   * @param id - its id
-   * @param name - its name
-   * @returns the polity
-   */
-  const polity = (id: string, name: string) => ({
-    id,
-    name,
-    rank: null,
-    status: null,
-    suzerain: null,
-    existsFrom: null,
-    existsTo: null,
-    colour: null,
-    wikidata: null,
+/**
+ * A polity with only an id and a name, owing nobody.
+ * @param id - its id
+ * @param name - its name
+ * @returns the polity
+ */
+const polity = (id: string, name: string) => ({
+  id,
+  name,
+  rank: null,
+  status: null,
+  suzerain: null,
+  existsFrom: null,
+  existsTo: null,
+  colour: null,
+  wikidata: null,
+})
+
+/** Two groups, France at the back and the Empire in front — the list shows the Empire first. */
+function mountTwo() {
+  const mounted = mount()
+  act(() => {
+    mounted.store
+      .getState()
+      .createPolity(polity('fr', 'Reaume de France'), { kind: 'c', label: 'c' })
+    mounted.store
+      .getState()
+      .createPolity(polity('hre', 'Sacrum Imperium'), { kind: 'c', label: 'c' })
   })
+  return mounted
+}
 
-  /** Two groups, France at the back and the Empire in front — the list shows the Empire first. */
-  function mountTwo() {
-    const mounted = mount()
-    act(() => {
-      mounted.store
-        .getState()
-        .createPolity(polity('fr', 'Reaume de France'), { kind: 'c', label: 'c' })
-      mounted.store
-        .getState()
-        .createPolity(polity('hre', 'Sacrum Imperium'), { kind: 'c', label: 'c' })
-    })
-    return mounted
-  }
+const order = (store: ReturnType<typeof mount>['store']) =>
+  store.getState().document.polities.map((held) => held.id)
 
-  const order = (store: ReturnType<typeof mount>['store']) =>
-    store.getState().document.polities.map((held) => held.id)
-
+describe('PolitiesPanel — the stacking menu (s16)', () => {
   describe('happy path', () => {
     // s16 — "When I right-click … and choose [Bring to Front] / Then France is painted over the Empire".
     it('brings France to the front from its row’s menu, as one named step', async () => {
@@ -367,48 +367,48 @@ describe('PolitiesPanel — the stacking menu (s16)', () => {
   })
 })
 
+/** The open dialogue — the creation one is mounted too, closed. */
+const open = () => {
+  const dialogue = document.querySelector<HTMLElement>('dialog[open]')
+  if (dialogue === null) throw new Error('no open dialogue')
+  return within(dialogue)
+}
+
+/**
+ * A field's current value.
+ * @param field - the field
+ * @returns its value
+ */
+const valueOf = (field: HTMLElement): string =>
+  field instanceof HTMLInputElement ? field.value : 'not an input'
+
+/** France and its vassal Normandy, France aimed at. */
+function mountGroup() {
+  const mounted = mount()
+  const base = {
+    rank: null,
+    status: null,
+    existsFrom: null,
+    existsTo: null,
+    colour: null,
+    wikidata: null,
+  }
+  act(() => {
+    const { createPolity, chooseTarget } = mounted.store.getState()
+    createPolity(
+      { ...base, id: 'fr', name: 'Reaume de France', suzerain: null },
+      { kind: 'c', label: 'c' }
+    )
+    createPolity(
+      { ...base, id: 'nd', name: 'Normandie', suzerain: 'fr' },
+      { kind: 'c', label: 'c' }
+    )
+    chooseTarget('fr')
+  })
+  return mounted
+}
+
 describe('PolitiesPanel — editing a polity (s07)', () => {
-  /** The open dialogue — the creation one is mounted too, closed. */
-  const open = () => {
-    const dialogue = document.querySelector<HTMLElement>('dialog[open]')
-    if (dialogue === null) throw new Error('no open dialogue')
-    return within(dialogue)
-  }
-
-  /**
-   * A field's current value.
-   * @param field - the field
-   * @returns its value
-   */
-  const valueOf = (field: HTMLElement): string =>
-    field instanceof HTMLInputElement ? field.value : 'not an input'
-
-  /** France and its vassal Normandy, France aimed at. */
-  function mountGroup() {
-    const mounted = mount()
-    const base = {
-      rank: null,
-      status: null,
-      existsFrom: null,
-      existsTo: null,
-      colour: null,
-      wikidata: null,
-    }
-    act(() => {
-      const { createPolity, chooseTarget } = mounted.store.getState()
-      createPolity(
-        { ...base, id: 'fr', name: 'Reaume de France', suzerain: null },
-        { kind: 'c', label: 'c' }
-      )
-      createPolity(
-        { ...base, id: 'nd', name: 'Normandie', suzerain: 'fr' },
-        { kind: 'c', label: 'c' }
-      )
-      chooseTarget('fr')
-    })
-    return mounted
-  }
-
   describe('happy path', () => {
     // s07 — "reopen a polity's form and change it … When I validate / Then the change lands".
     it('opens the form filled on a double-click, and OK changes the polity as one step', async () => {

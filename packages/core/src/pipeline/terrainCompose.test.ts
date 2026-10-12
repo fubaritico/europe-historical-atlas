@@ -88,6 +88,9 @@ describe('terrainTexture controls', () => {
   })
 })
 
+const allEqual = (buf: Uint8Array): boolean =>
+  buf.every((_, i) => i % 4 === 3 || buf[i] === buf[i % 4])
+
 describe('terrainCompose', () => {
   describe('happy path', () => {
     it('composes an RGBA buffer of length width*height*4 with opaque alpha', () => {
@@ -143,8 +146,6 @@ describe('terrainCompose', () => {
       const hm = createHeightmap(meta(8, 8, 800), new Int16Array(64).fill(800))
       const flat = composeTerrainRgba(hm, { ...OPTS, grain: 0 })
       const grained = composeTerrainRgba(hm, { ...OPTS, grain: 0.6 })
-      const allEqual = (buf: Uint8Array): boolean =>
-        buf.every((_, i) => i % 4 === 3 || buf[i] === buf[i % 4])
       expect(allEqual(flat)).toBe(true)
       expect(allEqual(grained)).toBe(false)
     })

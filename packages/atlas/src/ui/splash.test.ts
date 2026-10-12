@@ -308,26 +308,27 @@ describe('buildSplashFigure', () => {
   })
 })
 
+/** What the eye gets: the glyph spans, joined back into a word. */
+const lettered = (line: HTMLElement): string =>
+  [...line.querySelectorAll('span[aria-hidden]')].map((s) => s.textContent).join('')
+
+/** What a screen reader gets: the one span that is read but not seen. */
+const spoken = (line: HTMLElement): string =>
+  line.querySelector('span:not([aria-hidden])')?.textContent ?? ''
+
+// Pinned to the constant rather than to a font name: `scene/mapTitle` asserts the same thing
+// against the same constant, which is what keeps the two screens from drifting apart.
+// Compared stripped of quotes and spaces: jsdom renormalises a family list the way it
+// renormalises a hex colour into `rgb()`, so the raw strings never match.
+const bare = (list: string): string => list.replace(/['" ]/g, '')
+
 describe('buildSplashLine', () => {
-  /** What the eye gets: the glyph spans, joined back into a word. */
-  const lettered = (line: HTMLElement): string =>
-    [...line.querySelectorAll('span[aria-hidden]')].map((s) => s.textContent).join('')
-
-  /** What a screen reader gets: the one span that is read but not seen. */
-  const spoken = (line: HTMLElement): string =>
-    line.querySelector('span:not([aria-hidden])')?.textContent ?? ''
-
   describe('happy path', () => {
     it('letters the title for the eye', () => {
       expect(lettered(buildSplashLine('Atlas', '#5c3a2e', 300, 15))).toBe('ΛTLΛS')
     })
 
     it('sets it in the shared face, the one the map title uses', () => {
-      // Pinned to the constant rather than to a font name: `scene/mapTitle` asserts the same thing
-      // against the same constant, which is what keeps the two screens from drifting apart.
-      // Compared stripped of quotes and spaces: jsdom renormalises a family list the way it
-      // renormalises a hex colour into `rgb()`, so the raw strings never match.
-      const bare = (list: string): string => list.replace(/['" ]/g, '')
       const line = buildSplashLine('Atlas', '#5c3a2e', 300, 15)
       expect(bare(line.style.fontFamily)).toBe(bare(MAP_TYPEFACE))
     })

@@ -143,6 +143,13 @@ function at(a: Float32Array, i: number): number {
   return a[i] ?? 0
 }
 
+const extent = (size: number): { w: number; h: number } => {
+  const p = positions(createMapTitle({ ...OPTIONS, size }))
+  const xs = [...p].filter((_, i) => i % 3 === 0)
+  const zs = [...p].filter((_, i) => i % 3 === 2)
+  return { w: Math.max(...xs) - Math.min(...xs), h: Math.max(...zs) - Math.min(...zs) }
+}
+
 describe('createMapTitle', () => {
   describe('happy path', () => {
     it('lays a quad on centre, at the depth it is given', () => {
@@ -177,12 +184,6 @@ describe('createMapTitle', () => {
 
   describe('variants', () => {
     it('keeps the lettering unstretched, whatever height is asked for', () => {
-      const extent = (size: number): { w: number; h: number } => {
-        const p = positions(createMapTitle({ ...OPTIONS, size }))
-        const xs = [...p].filter((_, i) => i % 3 === 0)
-        const zs = [...p].filter((_, i) => i % 3 === 2)
-        return { w: Math.max(...xs) - Math.min(...xs), h: Math.max(...zs) - Math.min(...zs) }
-      }
       const small = extent(0.2)
       const large = extent(0.8)
       expect(small.w / small.h).toBeCloseTo(large.w / large.h, 4)

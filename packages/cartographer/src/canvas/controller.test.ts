@@ -495,31 +495,31 @@ describe('startCanvasController', () => {
   })
 })
 
-describe('repaint coalescing', () => {
-  /**
-   * Take over `requestAnimationFrame` so frames can be counted and run on demand.
-   * @returns the captured callbacks and how many times a frame was asked for
-   */
-  function frameControl(): { run: () => void; asked: () => number; cancelled: () => number } {
-    const queued: (() => void)[] = []
-    let cancels = 0
-    vi.stubGlobal('requestAnimationFrame', (fn: () => void) => {
-      queued.push(fn)
-      return queued.length
-    })
-    vi.stubGlobal('cancelAnimationFrame', () => {
-      cancels += 1
-    })
-    return {
-      run: () => {
-        const next = queued.shift()
-        next?.()
-      },
-      asked: () => queued.length,
-      cancelled: () => cancels,
-    }
+/**
+ * Take over `requestAnimationFrame` so frames can be counted and run on demand.
+ * @returns the captured callbacks and how many times a frame was asked for
+ */
+function frameControl(): { run: () => void; asked: () => number; cancelled: () => number } {
+  const queued: (() => void)[] = []
+  let cancels = 0
+  vi.stubGlobal('requestAnimationFrame', (fn: () => void) => {
+    queued.push(fn)
+    return queued.length
+  })
+  vi.stubGlobal('cancelAnimationFrame', () => {
+    cancels += 1
+  })
+  return {
+    run: () => {
+      const next = queued.shift()
+      next?.()
+    },
+    asked: () => queued.length,
+    cancelled: () => cancels,
   }
+}
 
+describe('repaint coalescing', () => {
   // The dev, 2026-10-12: the anchors a marquee caught showed as selected only after another click.
   it('repaints the static canvas when a marquee is released, so its anchors show at once', () => {
     const frames = frameControl()
@@ -1198,16 +1198,16 @@ describe('the tools — what the review found', () => {
   })
 })
 
-describe('undo and redo from the keyboard', () => {
-  /**
-   * A history key, as the browser fires it.
-   * @param init - the key and its modifiers
-   * @returns the event
-   */
-  function chord(init: KeyboardEventInit): KeyboardEvent {
-    return new KeyboardEvent('keydown', { ...init, bubbles: true, cancelable: true })
-  }
+/**
+ * A history key, as the browser fires it.
+ * @param init - the key and its modifiers
+ * @returns the event
+ */
+function chord(init: KeyboardEventInit): KeyboardEvent {
+  return new KeyboardEvent('keydown', { ...init, bubbles: true, cancelable: true })
+}
 
+describe('undo and redo from the keyboard', () => {
   describe('happy path', () => {
     it('undoes a closed ring on ‹ctrl+Z› and redoes it on ‹ctrl+shift+Z›', () => {
       const { node, store, dispose } = attach()
@@ -1285,56 +1285,56 @@ describe('undo and redo from the keyboard', () => {
   })
 })
 
-describe('the Pen following the coast, on the canvas', () => {
-  /**
-   * A canvas whose coast is one long horizontal shore across the backdrop, at backdrop y = 500.
-   * @param overlay - the overlay canvas
-   * @param rivers - the river centrelines, none by default
-   * @param mode - the Pen's mode, following the coast by default
-   * @returns the attachment
-   */
-  function attachWithShore(
-    overlay: HTMLCanvasElement = document.createElement('canvas'),
-    rivers: readonly NamedPolyline[] = [],
-    mode: PenMode = 'coast'
-  ) {
-    const acted = vi.fn()
-    const resulted = vi.fn()
-    const store = createCartographerStore({
-      edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
-      viewport: { viewport: UNFRAMED },
-    })
-    const shore = {
-      points: Array.from({ length: 121 }, (_, index): [number, number] => [index * 10, 500]),
-      closed: false,
-      bounds: { left: 0, top: 500, right: 1200, bottom: 500 },
-    }
-    const node = canvasWithBox()
-    const dispose = startCanvasController(node, {
-      store,
-      frame: TEST_BACKDROP_FRAME,
-      backdropImage: backdropStandIn(),
-      vectorLayers: {
-        coast: [shore],
-        rivers,
-        coastProvenance: { name: 'test shore', licence: 'CC0' },
-        riverProvenance: { name: 'test rivers', licence: 'test' },
-      },
-      onHover: () => undefined,
-      onAction: acted,
-      onResult: resulted,
-      style: CHROME_PAINT_STYLE,
-      zoneLabel: 'zone',
-      overlay,
-      colours: createPolityColourSource(AUTOMATIC_PALETTE),
-    })
-    aimAtFrance(store)
-    store.getState().choosePenMode(mode)
-    // A view where a backdrop pixel is a screen pixel, so the shore sits at screen y = 500 - 282.
-    store.getState().setViewport({ scale: 1, originX: -240, originY: -282 })
-    return { node, store, acted, resulted, dispose }
+/**
+ * A canvas whose coast is one long horizontal shore across the backdrop, at backdrop y = 500.
+ * @param overlay - the overlay canvas
+ * @param rivers - the river centrelines, none by default
+ * @param mode - the Pen's mode, following the coast by default
+ * @returns the attachment
+ */
+function attachWithShore(
+  overlay: HTMLCanvasElement = document.createElement('canvas'),
+  rivers: readonly NamedPolyline[] = [],
+  mode: PenMode = 'coast'
+) {
+  const acted = vi.fn()
+  const resulted = vi.fn()
+  const store = createCartographerStore({
+    edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
+    viewport: { viewport: UNFRAMED },
+  })
+  const shore = {
+    points: Array.from({ length: 121 }, (_, index): [number, number] => [index * 10, 500]),
+    closed: false,
+    bounds: { left: 0, top: 500, right: 1200, bottom: 500 },
   }
+  const node = canvasWithBox()
+  const dispose = startCanvasController(node, {
+    store,
+    frame: TEST_BACKDROP_FRAME,
+    backdropImage: backdropStandIn(),
+    vectorLayers: {
+      coast: [shore],
+      rivers,
+      coastProvenance: { name: 'test shore', licence: 'CC0' },
+      riverProvenance: { name: 'test rivers', licence: 'test' },
+    },
+    onHover: () => undefined,
+    onAction: acted,
+    onResult: resulted,
+    style: CHROME_PAINT_STYLE,
+    zoneLabel: 'zone',
+    overlay,
+    colours: createPolityColourSource(AUTOMATIC_PALETTE),
+  })
+  aimAtFrance(store)
+  store.getState().choosePenMode(mode)
+  // A view where a backdrop pixel is a screen pixel, so the shore sits at screen y = 500 - 282.
+  store.getState().setViewport({ scale: 1, originX: -240, originY: -282 })
+  return { node, store, acted, resulted, dispose }
+}
 
+describe('the Pen following the coast, on the canvas', () => {
   describe('happy path', () => {
     it('inserts the stretch between two clicks on the shore, and reports it', () => {
       const { node, store, resulted, dispose } = attachWithShore()
@@ -1725,19 +1725,19 @@ describe('the Pen meeting a shared border, on the canvas', () => {
   })
 })
 
-describe('inserting and deleting anchors with the white arrow, on the canvas', () => {
-  /**
-   * France's triangle drawn and closed, the white arrow in hand.
-   * @returns the attached canvas
-   */
-  function attachWithTriangle() {
-    const attached = attach()
-    aimAtFrance(attached.store)
-    for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(attached.node, at)
-    attached.node.dispatchEvent(keyEvent('a'))
-    return attached
-  }
+/**
+ * France's triangle drawn and closed, the white arrow in hand.
+ * @returns the attached canvas
+ */
+function attachWithTriangle() {
+  const attached = attach()
+  aimAtFrance(attached.store)
+  for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(attached.node, at)
+  attached.node.dispatchEvent(keyEvent('a'))
+  return attached
+}
 
+describe('inserting and deleting anchors with the white arrow, on the canvas', () => {
   describe('happy path', () => {
     // s03 — "When I click on a stretch between two anchors / Then a new anchor is created".
     it('inserts an anchor with a click on the top side, and Delete takes it out again', () => {
@@ -1812,42 +1812,42 @@ describe('inserting and deleting anchors with the white arrow, on the canvas', (
   })
 })
 
+/**
+ * A pointer event carrying its own time stamp — the Pencil reads `event.timeStamp`, which the
+ * constructor does not let a test set.
+ * @param type - the event type
+ * @param at - where, in CSS pixels
+ * @param time - the time stamp, in milliseconds
+ * @returns the event
+ */
+function timed(type: string, at: readonly [number, number], time: number): Event {
+  const event = pointerEvent(type, { offsetX: at[0], offsetY: at[1] })
+  Object.defineProperty(event, 'timeStamp', { value: time })
+  return event
+}
+
+/**
+ * One Pencil drag: pressed on the first point at `start`, moved through the others 250 ms apart,
+ * released on the last.
+ * @param node - the canvas
+ * @param points - the pointer's path
+ * @param start - the press's time stamp
+ */
+function stroke(
+  node: HTMLCanvasElement,
+  points: readonly (readonly [number, number])[],
+  start: number
+) {
+  const [first, ...rest] = points
+  if (first === undefined) return
+  node.dispatchEvent(timed('pointerdown', first, start))
+  rest.forEach((at, index) => {
+    node.dispatchEvent(timed('pointermove', at, start + (index + 1) * 250))
+  })
+  node.dispatchEvent(timed('pointerup', rest.at(-1) ?? first, start + rest.length * 250))
+}
+
 describe('the Pencil on the canvas', () => {
-  /**
-   * A pointer event carrying its own time stamp — the Pencil reads `event.timeStamp`, which the
-   * constructor does not let a test set.
-   * @param type - the event type
-   * @param at - where, in CSS pixels
-   * @param time - the time stamp, in milliseconds
-   * @returns the event
-   */
-  function timed(type: string, at: readonly [number, number], time: number): Event {
-    const event = pointerEvent(type, { offsetX: at[0], offsetY: at[1] })
-    Object.defineProperty(event, 'timeStamp', { value: time })
-    return event
-  }
-
-  /**
-   * One Pencil drag: pressed on the first point at `start`, moved through the others 250 ms apart,
-   * released on the last.
-   * @param node - the canvas
-   * @param points - the pointer's path
-   * @param start - the press's time stamp
-   */
-  function stroke(
-    node: HTMLCanvasElement,
-    points: readonly (readonly [number, number])[],
-    start: number
-  ) {
-    const [first, ...rest] = points
-    if (first === undefined) return
-    node.dispatchEvent(timed('pointerdown', first, start))
-    rest.forEach((at, index) => {
-      node.dispatchEvent(timed('pointermove', at, start + (index + 1) * 250))
-    })
-    node.dispatchEvent(timed('pointerup', rest.at(-1) ?? first, start + rest.length * 250))
-  }
-
   describe('happy path', () => {
     // The dev, 2026-10-11: a drag lays a point every 200 ms, and the outline closes as the Pen's does.
     it('lays a point per interval of a drag, and closes on enter', () => {

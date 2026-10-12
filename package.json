@@ -39,6 +39,7 @@
     "@types/three": "catalog:",
     "eslint": "catalog:",
     "eslint-config-prettier": "catalog:",
+    "eslint-plugin-eha": "workspace:*",
     "eslint-plugin-import": "catalog:",
     "eslint-plugin-prettier": "catalog:",
     "globals": "catalog:",

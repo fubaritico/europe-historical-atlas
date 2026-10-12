@@ -506,30 +506,30 @@ describe('addOutline', () => {
   })
 })
 
+/**
+ * The shared-border document with a third polity, a vassal of France.
+ * @returns the document
+ */
+function withVassal() {
+  const doc = sharedBorderDocument()
+  const [france] = doc.polities
+  if (france === undefined) throw new Error('fixture changed')
+  doc.polities.push({ ...france, id: 'normandy', name: 'Normandie', suzerain: 'fr-couronne' })
+  return doc
+}
+
+/**
+ * The document's first polity — France.
+ * @param doc - the document
+ * @returns it
+ */
+function first(doc: ReturnType<typeof withVassal>): YearPolity {
+  const polity = doc.polities[0]
+  if (polity === undefined) throw new Error('fixture changed')
+  return polity
+}
+
 describe('updatePolity', () => {
-  /**
-   * The shared-border document with a third polity, a vassal of France.
-   * @returns the document
-   */
-  function withVassal() {
-    const doc = sharedBorderDocument()
-    const [france] = doc.polities
-    if (france === undefined) throw new Error('fixture changed')
-    doc.polities.push({ ...france, id: 'normandy', name: 'Normandie', suzerain: 'fr-couronne' })
-    return doc
-  }
-
-  /**
-   * The document's first polity — France.
-   * @param doc - the document
-   * @returns it
-   */
-  function first(doc: ReturnType<typeof withVassal>): YearPolity {
-    const polity = doc.polities[0]
-    if (polity === undefined) throw new Error('fixture changed')
-    return polity
-  }
-
   describe('happy path', () => {
     // s07 — "the same form as creation opens … I can change name, rank, status, dates, suzerain, colour".
     it('changes a polity’s properties under the same id, in the same place in the list', () => {

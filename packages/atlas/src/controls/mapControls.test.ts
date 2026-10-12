@@ -448,14 +448,14 @@ describe('MapControls focus', () => {
   })
 })
 
-describe('MapControls pointerDragged', () => {
-  /** Press at one place, release at another — the shape of a grab-and-drag pan. */
-  function press(dom: HTMLElement, fromX: number, toX: number): void {
-    dom.dispatchEvent(makeMouse('pointerdown', fromX, 100))
-    window.dispatchEvent(makeMouse('pointermove', toX, 100))
-    window.dispatchEvent(makeMouse('pointerup', toX, 100))
-  }
+/** Press at one place, release at another — the shape of a grab-and-drag pan. */
+function press(dom: HTMLElement, fromX: number, toX: number): void {
+  dom.dispatchEvent(makeMouse('pointerdown', fromX, 100))
+  window.dispatchEvent(makeMouse('pointermove', toX, 100))
+  window.dispatchEvent(makeMouse('pointerup', toX, 100))
+}
 
+describe('MapControls pointerDragged', () => {
   describe('happy path', () => {
     it('reports a drag once the pointer has travelled', () => {
       const { controls, dom } = setup()

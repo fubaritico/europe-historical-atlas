@@ -329,15 +329,15 @@ describe('ToolRailPanel — the Pen’s mode', () => {
   })
 })
 
-describe('ToolRailPanel', () => {
-  /** A store on an empty year. */
-  function openStore() {
-    return createCartographerStore({
-      edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
-      viewport: { viewport: UNFRAMED },
-    })
-  }
+/** A store on an empty year. */
+function openStore() {
+  return createCartographerStore({
+    edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
+    viewport: { viewport: UNFRAMED },
+  })
+}
 
+describe('ToolRailPanel', () => {
   describe('happy path', () => {
     it('takes the tool through the store', async () => {
       const store = openStore()

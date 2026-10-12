@@ -184,18 +184,18 @@ describe('buildLabelAtlasSvg', () => {
   })
 })
 
-describe('createFrameLabels', () => {
-  const build = (over: Partial<Parameters<typeof createFrameLabels>[0]> = {}) =>
-    createFrameLabels({
-      ...OPTIONS,
-      labelStepDeg: 10,
-      labelInk: '#4a3424',
-      labelRoughness: 1.1,
-      labelOpacity: 0.88,
-      loadTexture: vi.fn(() => new Texture()),
-      ...over,
-    })
+const build = (over: Partial<Parameters<typeof createFrameLabels>[0]> = {}) =>
+  createFrameLabels({
+    ...OPTIONS,
+    labelStepDeg: 10,
+    labelInk: '#4a3424',
+    labelRoughness: 1.1,
+    labelOpacity: 0.88,
+    loadTexture: vi.fn(() => new Texture()),
+    ...over,
+  })
 
+describe('createFrameLabels', () => {
   describe('happy path', () => {
     it('builds one quad per placement', () => {
       const labels = build()

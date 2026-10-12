@@ -168,19 +168,19 @@ describe('anchorEdits — the deliberate gaps and the dressed runs', () => {
   })
 })
 
-describe('removeAnchors', () => {
-  /**
-   * The shared border, France given two more anchors on its own stretches — six in its ring.
-   * @returns the document and the two new anchors
-   */
-  function sixAnchorFrance() {
-    const doc = sharedBorderDocument()
-    const top = insertAnchorOnStretch(doc, 0, 1, [1, 48], { name: 'test', licence: 'CC0' })
-    const bottom = insertAnchorOnStretch(doc, 2, 3, [1, 46], { name: 'test', licence: 'CC0' })
-    if (top === null || bottom === null) throw new Error('fixture changed')
-    return { doc, top, bottom }
-  }
+/**
+ * The shared border, France given two more anchors on its own stretches — six in its ring.
+ * @returns the document and the two new anchors
+ */
+function sixAnchorFrance() {
+  const doc = sharedBorderDocument()
+  const top = insertAnchorOnStretch(doc, 0, 1, [1, 48], { name: 'test', licence: 'CC0' })
+  const bottom = insertAnchorOnStretch(doc, 2, 3, [1, 46], { name: 'test', licence: 'CC0' })
+  if (top === null || bottom === null) throw new Error('fixture changed')
+  return { doc, top, bottom }
+}
 
+describe('removeAnchors', () => {
   describe('happy path', () => {
     // s03 — "delete several at once … all twelve are removed in one undo step".
     it('removes several anchors from the rings holding them, at once', () => {

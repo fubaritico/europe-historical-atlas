@@ -1,4 +1,5 @@
 import componentBodyOrder from './rules/component-body-order/index.js'
+import hoistIndependentFunction from './rules/hoist-independent-function/index.js'
 
 /**
  * The lint rules of the Europe historical atlas. They put every declaration where a reader expects it,
@@ -11,6 +12,7 @@ const plugin = {
   /** @type {Record<string, import('eslint').Rule.RuleModule>} */
   rules: {
     'component-body-order': componentBodyOrder,
+    'hoist-independent-function': hoistIndependentFunction,
   },
 }
 

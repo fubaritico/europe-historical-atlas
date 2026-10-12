@@ -93,6 +93,26 @@ function Panel({ label, store }: Props) {
 }
 `
 
+/**
+ * Lints one component with the rule, through a parser given no type information.
+ * @param ruleOptions - the options of the rule
+ * @returns what the lint reports
+ */
+const lintUntyped = (ruleOptions: unknown) =>
+  new Linter().verify(
+    preamble + ordered,
+    {
+      files: ['**/*.tsx'],
+      languageOptions: {
+        parser: tseslint.parser,
+        parserOptions: { ecmaFeatures: { jsx: true } },
+      },
+      plugins: { eha: { rules: { 'component-body-order': rule } } },
+      rules: { 'eha/component-body-order': ['error', ruleOptions] },
+    },
+    'file.tsx'
+  )
+
 describe('eha/component-body-order', () => {
   describe('happy path', () => {
     ruleTester.run('in order', rule, {
@@ -501,26 +521,6 @@ function Panel({ label }: Props) {
   })
 
   describe('managed errors — the configuration', () => {
-    /**
-     * Lints one component with the rule, through a parser given no type information.
-     * @param ruleOptions - the options of the rule
-     * @returns what the lint reports
-     */
-    const lintUntyped = (ruleOptions: unknown) =>
-      new Linter().verify(
-        preamble + ordered,
-        {
-          files: ['**/*.tsx'],
-          languageOptions: {
-            parser: tseslint.parser,
-            parserOptions: { ecmaFeatures: { jsx: true } },
-          },
-          plugins: { eha: { rules: { 'component-body-order': rule } } },
-          rules: { 'eha/component-body-order': ['error', ruleOptions] },
-        },
-        'file.tsx'
-      )
-
     it('stops the lint with what to set when a store selector has no type information', () => {
       expect(() => lintUntyped(options[0])).toThrow(/parserOptions/)
     })
