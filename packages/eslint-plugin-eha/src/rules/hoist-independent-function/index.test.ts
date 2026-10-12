@@ -189,6 +189,32 @@ function outer() {
 }
 `
         ),
+        // A parameter shares a name with another function's: only the function's own name can collide.
+        movable(
+          `function a(mode: number) {
+  return mode
+}
+function b() {
+  function helper(mode: number) {
+    return mode
+  }
+  return helper(1)
+}
+`,
+          'helper',
+          '`b`',
+          `function a(mode: number) {
+  return mode
+}
+function helper(mode: number) {
+  return mode
+}
+
+function b() {
+  return helper(1)
+}
+`
+        ),
         // Two functions would bring two \`make\` to the module: reported, never rewritten.
         {
           code: `function a() {

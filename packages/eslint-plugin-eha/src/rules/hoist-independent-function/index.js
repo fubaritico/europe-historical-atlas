@@ -68,7 +68,14 @@ const isHoistedFactory = (owner, sourceCode) => {
  * @returns {boolean} `true` when the name is taken
  */
 const nameTaken = (statement, sourceCode) => {
-  const own = new Set(sourceCode.getDeclaredVariables(statement))
+  // A `function` declaration also declares its parameters: only its own name goes to the module.
+  const own = new Set(
+    sourceCode
+      .getDeclaredVariables(statement)
+      .filter((variable) =>
+        variable.defs.some(({ type }) => type === 'FunctionName' || type === 'Variable')
+      )
+  )
   const names = new Set([...own].map((variable) => variable.name))
   return sourceCode.scopeManager.scopes.some((scope) =>
     scope.variables.some((variable) => names.has(variable.name) && !own.has(variable))
