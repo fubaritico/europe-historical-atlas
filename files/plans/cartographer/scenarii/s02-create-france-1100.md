@@ -809,14 +809,20 @@ Scenario: the Saône is there, under the dataset's name
 > spells it `Sane`. At least its lower course, Chalon to Lyon, is present. See `s99`.
 
 ```gherkin
-Scenario: a river is not followed from one of its stretches to another
+Scenario: a river is followed from one of its stretches to another — except across a fork
   Given the outline ends on the Meuse at Mézières
   When I click the Meuse again near its source
-  Then a straight segment joins the two clicks, and nothing is inserted
+  Then the Meuse is followed between the two clicks
+  # walked 2026-10-12: it was a straight segment, the click having caught a 2-point fragment — H-35, fixed
+  Given the outline ends on the Rhône at Avignon
+  When I click the Petit Rhône near its mouth
+  Then a straight segment joins them: the Arles fork is never joined
 ```
 
-> **Observed, not yet explained** — `H-35` in `s99`. *(Claude's hypothesis: the river is cut into several
-> polylines and following stays inside one.)* Same with the Rhône from Avignon to the Petit Rhône mouth.
+> **Observed, measured, fixed the same evening** — `H-35` in `s99`. The Mézières click had caught a 2-point
+> fragment beside the Meuse; the rivers are now mended at load (fragments dropped, pieces joined end to end),
+> so the Meuse is followed from Mézières to its source. **Still true at a fork**: the Rhône from Avignon to
+> the Petit Rhône mouth crosses the Arles fork, which is never joined.
 
 ```gherkin
 Scenario: take back the last anchor while drawing

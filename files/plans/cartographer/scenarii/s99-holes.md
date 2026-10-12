@@ -500,7 +500,7 @@ the scale he habitually draws at), whether the arrow is held too or only the Pen
 refusal is shown — the cursor already refuses where there is no target (2026-10-08), the same `not-allowed`
 plus a status-bar line (*"zoom in to draw"*) is the obvious reuse. *(the last two are my questions)*
 
-### H-35 · A river is not followed from one of its stretches to another — **observed and measured 2026-10-12**
+### H-35 · A river is not followed from one of its stretches to another — **observed, measured and fixed 2026-10-12**
 
 Drawing France, two clicks on the Meuse (Mézières, then near its source) gave a straight segment and no
 insertion; the same between Avignon and the Petit Rhône mouth. The Scheldt, the Saône and the Rhône from
@@ -523,6 +523,14 @@ coastline precedent (95 212 segments → 2 029 contours, no epsilon) — which m
 continuous; (b) ignore 2-point fragments that duplicate a longer course, which removes the Mézières trap;
 (c) a fork stays ambiguous for chaining (which arm?) — leave it cut, or build a river graph and follow the
 shortest path. *Claude's recommendation: (a) and (b) now, (c) only if a border needs to cross a fork.*
+
+**Fixed the same evening, on the dev's go** (*"si tu vois que ça t'a gêné et que tu as une solution, vas-y"*
+— and his own report: *"ça n'a jamais marché d'une seule traite, à part de Dunkerque à Biarritz"*): (a) and
+(b), in `core/data/riverChain.ts`, applied when the Cartographer loads the rivers. Measured on the shipped
+file: **591 polylines → 398**, 28 fragments dropped, 165 joins; rivers in several pieces 109 → 70; the Loire
+in one piece, the Meuse continuous from its source to Maastricht and on to the delta. Ends are joined within
+about 25 m (`RIVER_JOIN_TOLERANCE`) — the Loire's pieces meet 11 m apart, rounded two ways. **Forks stay
+cut** (the Rhône at Arles), (c) is not built. The atlas is untouched: it only draws the rivers.
 
 ### H-36 · On a river border, the shared-border follow never triggers — **observed 2026-10-12**
 

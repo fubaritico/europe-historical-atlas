@@ -1,6 +1,7 @@
 import { boundsDisagreement } from '@europe-historical-atlas/core/data/assetError'
 import { chainSegments } from '@europe-historical-atlas/core/data/coastlineChain'
 import { createMaskCoastlineSource } from '@europe-historical-atlas/core/data/coastlineSource'
+import { mendRivers } from '@europe-historical-atlas/core/data/riverChain'
 
 import { boundsOf } from './view/culling'
 
@@ -206,7 +207,10 @@ export async function loadVectorLayers(deps: VectorLayersDeps): Promise<VectorLa
   const riverProvenance = provenanceOf(loaded.source)
   return {
     coast: traceCoastline(deps.mask, deps.frame, deps.traceWidth),
-    rivers: projectRiverLines(loaded.rivers, deps.frame),
+    // Mended before they are projected (H-35): Natural Earth cuts a river into pieces and strews 2-point
+    // fragments, and the Pen follows one polyline at a time — so the Loire, in three pieces, could never be
+    // followed in one go. Measured on the shipped file: 591 polylines → 398, 28 fragments, 165 joins.
+    rivers: projectRiverLines(mendRivers(loaded.rivers).rivers, deps.frame),
     coastProvenance,
     riverProvenance,
   }

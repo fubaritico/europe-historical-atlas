@@ -212,6 +212,42 @@ describe('loadVectorLayers', () => {
     })
   })
 
+  describe('variants', () => {
+    it('mends the rivers before projecting them, so a river cut in two pieces is followed as one', async () => {
+      // H-35: the Loire ships in pieces laid end to end; the Pen follows one polyline at a time.
+      const layers = await loadVectorLayers({
+        mask: islandMask(),
+        rivers: riverSource([
+          {
+            rank: 5,
+            kind: 'River',
+            name: 'Loire',
+            points: [
+              { u: 0.1, v: 0.5 },
+              { u: 0.2, v: 0.5 },
+              { u: 0.3, v: 0.5 },
+            ],
+          },
+          {
+            rank: 5,
+            kind: 'River',
+            name: 'Loire',
+            points: [
+              { u: 0.3, v: 0.5 },
+              { u: 0.4, v: 0.5 },
+              { u: 0.5, v: 0.5 },
+            ],
+          },
+        ]),
+        frame: FRAME,
+        traceWidth: 16,
+      })
+
+      expect(layers.rivers).toHaveLength(1)
+      expect(layers.rivers[0]?.points).toHaveLength(5)
+    })
+  })
+
   describe('managed errors', () => {
     it('propagates a failing river load rather than drawing a map with holes in it', async () => {
       const failing = loadVectorLayers({
