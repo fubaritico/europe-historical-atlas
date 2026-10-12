@@ -336,7 +336,7 @@ Scenario: start an outline
   When I press [Draw territory], or press ‹P›
   Then ⟨draw⟩ becomes the active tool — the Pen
   And the cursor becomes a cross
-  And a tool strip offers ⟨free point⟩, ⟨snap to river⟩, ⟨snap to coast⟩
+  And the Pen's group offers ⟨free point⟩, ⟨snap to coast⟩, ⟨snap to river⟩ and the Pencil
   And ⟨free point⟩ is active by default
   And no Bézier handle is ever offered: a click places a point, a drag does not curve anything
 ```
@@ -398,6 +398,7 @@ Scenario: the coast is out of reach
   When the pointer is further from any coast than the snapping radius
   Then the status bar reads "Drawing in Kingdom of France — no coastline within reach, placing points freely"
   And a click places an ordinary free point
+  And the Pen goes back to the mode it came from — see "The Pen finds the coast and the rivers by itself" below
 ```
 
 > **Decided with the dev, 2026-10-11.** The preview is his call — *"avec l'aperçu"* — and the reason is
@@ -407,6 +408,100 @@ Scenario: the coast is out of reach
 > line keeps the polity in the sentence, because the bar's rule is that it always names whom the action
 > is for. Snapped anchors carry the provenance the land mask declares (`"Natural Earth 10m land minus
 > lakes"`, public domain), read from the mask itself.
+
+## The Pen finds the coast and the rivers by itself — the dev, 2026-10-12
+
+```gherkin
+Scenario: the plain Pen reaches a coast
+  Given ⟨draw⟩ is the plain Pen and "Kingdom of France" is the drawing target
+  When the pointer comes within the snapping radius of a coast
+  Then the coast vertex under it is emphasised, as when the Pen follows the coast
+  And the status bar reads "Following the coastline for Kingdom of France"
+  When I click
+  Then an anchor is placed exactly on the coast vertex
+  And the Pen becomes "Pen — follow the coast", without my asking for it
+  And the result zone reads "Pen — follow the coast", and the Pen's button takes that name
+  When I click further along the same coast
+  Then the whole stretch between the two is inserted, as in "follow the coast without placing points by hand"
+
+Scenario: the plain Pen reaches a river
+  Given ⟨draw⟩ is the plain Pen
+  When I click within the snapping radius of the Maas
+  Then an anchor is placed exactly on the river's vertex
+  And the Pen becomes "Pen — follow a river", and the result zone says so
+  When I click further along the Maas
+  Then the stretch between the two is inserted
+
+Scenario: the Pencil reaches a coast or a river
+  Given ⟨draw⟩ is the Pencil and I am dragging a freehand stroke inland
+  When a point of the stroke falls within the snapping radius of a coast or a river
+  Then that point is placed exactly on its vertex, and the freehand stroke stops there
+  And the rest of the drag places nothing until I release
+  And the Pen follows that coast or that river, and the result zone says which
+  When I click further along it
+  Then the whole stretch between the two is inserted
+
+Scenario: a coast and a river both within reach
+  Given the pointer is within the snapping radius of a coast and of a river, at an estuary
+  Then the nearer vertex of the two is the one offered, and the one a click takes
+
+Scenario: from the coast to a river, and back to the land
+  Given the plain Pen reached the coast, and follows it
+  When I click within reach of a river and out of reach of the coast
+  Then the Pen follows the river
+  When I then click where neither the coast nor a river takes the click
+  Then the Pen is the plain Pen again — the mode it started from, not the coast
+
+Scenario: leaving the water gives the Pen back
+  Given the Pen follows a coast or a river
+  When I click where neither takes the click — a free point, or an anchor away from them
+  Then that click places its point, as it would have before
+  And the Pen goes back to the mode it came from: the plain Pen, or the Pencil
+  And the result zone names that mode
+  When I had chosen the coast or the river mode myself rather than reached it
+  Then it goes back to the plain Pen
+
+Scenario: what does not switch
+  When a click closes the outline on its first anchor, or inserts a point into the target's own stretch
+  Then the mode does not change
+  When a click falls off the map and places nothing
+  Then the mode does not change either
+```
+
+> **The dev's request, 2026-10-12**: *"il faudrait que tu puisses avoir l'aimantation sur les côtes quand
+> tu es en mode P simple et P free-hand … quand tu ajoutais un point sur une côte, ça te fait directement
+> basculer automatiquement vers cet outil."* The way back: *"ce serait logique qu'on revienne à ‹P› si
+> on est éloigné (au premier clic, création de point, car sinon j'imagine que ça le fera tout le temps)."*
+> And within the hour, the rivers too, and the mode it came from: *"si je suis sur l'outil free-hand,
+> j'approche d'une côte … quand je commence à m'éloigner d'une côte, je reviens vers l'outil main
+> libre"* — the same for a river.
+>
+> **The click decides, never the hover** — his own condition: a mode that followed the pointer would
+> change under the hand at every pass along a shore. The hover only *previews* what the click will do.
+>
+> **Rivers switch too — his call, reversing mine.** I had proposed to keep rivers out, since a river
+> crosses the land where borders are drawn freely and would catch strokes not meant to follow it. He
+> wants them in. The cost stays: a stroke that brushes a river is caught by it; zooming in narrows the
+> reach, which is counted in screen pixels.
+>
+> **Two rules of mine, proposed and accepted (*"vas-y"*)**: when a coast and a river are both within
+> reach, the **nearer vertex wins** — the one criterion that favours neither layer; and from one water
+> to the other the Pen **switches directly**, keeping the mode it started from as the one to go back to.
+>
+> **A cancelled stroke gives the mode back** — not a new decision, QUAL-005's rule applied: a gesture the
+> system took back is one that did not happen, so a Pencil drag cancelled after it reached the water
+> returns to the Pencil, and says so.
+>
+> **‹ctrl+z› does not give the mode back — the dev, 2026-10-12: *"pas besoin d'annulation pour
+> l'instant."*** It takes the point back and **leaves the Pen following the water**; the next click off it
+> returns to the starting mode. Restoring the mode was proposed and set aside for now, not refused.
+>
+> **What it costs, and it is my deduction, not his decision.** Under the plain Pen a layer now wins over
+> a neighbour's anchor near it, as it already did under the coast mode (the Spain–Portugal fix above).
+> Along a shore or a river that loses nothing: a neighbour's anchors there *are* the layer's vertices,
+> and the layer click reuses them by index, so the border stays shared. What it loses is a neighbour's
+> border running within the snapping radius of a coast or a river without following it — zooming in is
+> the way out.
 
 ```gherkin
 Scenario: follow a river
@@ -426,6 +521,7 @@ Scenario: the river I need is not in the dataset
   And no polyline lies within the snapping radius
   Then the status bar reads "no river within 12 km — place points freely"
   And clicking places an ordinary free point
+  And the Pen goes back to the mode it came from — see "The Pen finds the coast and the rivers by itself"
 ```
 
 > **Hole H-02.** We hold **591** Natural Earth polylines, chosen by `scalerank`. The Saône and the Rhône
@@ -446,6 +542,23 @@ Scenario: report a stretch by eye
 
 > Decided 2026-09-22. This is **fact extraction**, which the Duby and Euratlas licences permit, and it is
 > what made both usable again. Groundwork §6 quinquies.
+
+```gherkin
+Scenario: draw a border freehand with the Pencil
+  Given ⟨draw⟩ is the Pencil and "Kingdom of France" is the drawing target
+  When I press and drag across the map
+  Then a free point is laid at most every 200 ms while the pointer moves, and none while it is held still
+  And a last point is laid where I release
+  And the outline stays open, to be closed as the Pen's is
+  When I press ‹ctrl+z›
+  Then the whole stroke is taken back, in one step
+  When I press ‹P› with the Pen in hand
+  Then the Pen moves to its next mode, and the result zone names it
+```
+
+> **The Pencil — the dev, 2026-10-11**, written here on 2026-10-12: it shipped the day before with no
+> scenario. One point every 200 ms is his figure; ‹P› cycling the modes is his request (*"pressing ‹P›
+> again must change the Pen"*). A sample that falls off the map is skipped, and said once per drag.
 
 ```gherkin
 Scenario: take back the last point
@@ -554,9 +667,10 @@ Scenario: follow a neighbour's border between two of its anchors
 > next click could not follow the shore from there. **Following the coast, the shore wins**, and a
 > coast vertex that is already an anchor is **that anchor, reused by its index** — matched exactly,
 > since an anchor placed from the coast is its vertex's own coordinates and nothing rounds it at save.
-> So the junction stays one shared anchor and the coast is followed from it. Branching still holds in
-> free mode, and off the shore. The cost: in coast mode, near the shore, a shared border is not
-> followed anchor to anchor — switch to free mode for that.
+> So the junction stays one shared anchor and the coast is followed from it. Branching still holds off
+> the shore. The cost: near the shore, a shared border is not followed anchor to anchor. **Since
+> 2026-10-12 that holds under the plain Pen too**, which finds the coast by itself — see "The Pen finds
+> the coast and the rivers by itself" above; zooming in is the way out.
 >
 > **The Pen inserts too** (the dev, 2026-10-11, expecting Illustrator's Pen over a selected path): with
 > no outline in progress, over one of the **target's** stretches, the cursor shows a plus, the bar reads

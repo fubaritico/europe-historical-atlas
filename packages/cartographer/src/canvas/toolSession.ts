@@ -91,6 +91,8 @@ export interface PencilSample {
   offMap: number
   /** The stroke this drag is laying — `null` until its first point lands on the map. */
   stroke: PencilStroke | null
+  /** Whether this drag reached a coast or a river and switched the Pen — undone if the drag is cancelled. */
+  reached: boolean
 }
 
 /**

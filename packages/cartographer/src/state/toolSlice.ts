@@ -43,6 +43,18 @@ export const PEN_MODE_LABELS: Record<PenMode, string> = {
   pencil: 'Pencil — freehand',
 }
 
+/** The modes that follow a layer — the coast, or a river — as opposed to placing points freely. */
+export type FollowingMode = Extract<PenMode, 'coast' | 'river'>
+
+/**
+ * Whether a mode follows a layer.
+ * @param mode - a Pen mode
+ * @returns `true` for the coast and the river modes
+ */
+export function isFollowingMode(mode: PenMode): mode is FollowingMode {
+  return mode === 'coast' || mode === 'river'
+}
+
 /**
  * Whether a variant id names a mode of the Pen — the one check, beside the one list (QUAL-115).
  * @param id - a row id from the Pen's group
@@ -91,6 +103,12 @@ export interface ToolState {
   target: string | null
   /** How the Pen places its points. ⟨free point⟩ is the default (`s02`). */
   penMode: PenMode
+  /**
+   * The mode the Pen goes back to when, following a coast or a river, a click lands where neither takes
+   * it (`s02`, *"The Pen finds the coast and the rivers by itself"*): the plain Pen or the Pencil it came
+   * from, and the plain Pen when the coast or river mode was chosen by hand.
+   */
+  layerReturn: PenMode
 }
 
 /** What the chrome may do to the tools. */
@@ -130,6 +148,20 @@ export interface ToolActions {
    * does in Illustrator.
    */
   choosePenMode: (mode: PenMode) => void
+  /**
+   * The Pen reached a coast or a river on its own: it follows it from now on (`s02`, the dev, 2026-10-12).
+   * From the plain Pen or the Pencil it remembers that mode to go back to; from the other water it keeps
+   * the one it already had, so the land gives back the mode the Pen started from.
+   * @param mode - the mode that follows what was reached
+   */
+  reachLayer: (mode: FollowingMode) => void
+  /**
+   * Leave the water for the mode the Pen came from — the first click neither a coast nor a river takes.
+   * Under any other mode there is nothing to leave: it changes nothing and returns `null`, which is
+   * ordinary — it runs after every free click — and so says nothing.
+   * @returns the mode it went back to, for the result zone to name, or `null` when the Pen followed nothing
+   */
+  leaveLayer: () => PenMode | null
 }
 
 /** The slice: the tool, the target, and the two ways they change. */
@@ -150,10 +182,11 @@ export const createToolSlice: StateCreator<
   [['zustand/subscribeWithSelector', never]],
   [],
   ToolSlice
-> = (set) => ({
+> = (set, get) => ({
   tool: 'navigate',
   target: null,
   penMode: 'free',
+  layerReturn: 'free',
   selectTool: (tool: EditorTool): void => {
     set({ tool })
   },
@@ -164,6 +197,26 @@ export const createToolSlice: StateCreator<
     set({ tool: 'draw', target: polityId })
   },
   choosePenMode: (mode: PenMode): void => {
-    set({ tool: 'draw', penMode: mode })
+    // Chosen by hand, a coast or river mode goes back to the plain Pen when the water is left.
+    set({ tool: 'draw', penMode: mode, layerReturn: 'free' })
+  },
+  reachLayer: (mode: FollowingMode): void => {
+    const { penMode, layerReturn } = get()
+    if (penMode === mode) {
+      // Reaching what is already followed would change nothing: no gesture calls this, so a caller that
+      // does is a defect, said rather than absorbed.
+      console.error(
+        `[Cartographer] the Pen already follows ${mode === 'coast' ? 'the coast' : 'a river'}.`
+      )
+      return
+    }
+    const back = isFollowingMode(penMode) ? layerReturn : penMode
+    set({ tool: 'draw', penMode: mode, layerReturn: back })
+  },
+  leaveLayer: (): PenMode | null => {
+    const { penMode, layerReturn } = get()
+    if (!isFollowingMode(penMode)) return null
+    set({ penMode: layerReturn, layerReturn: 'free' })
+    return layerReturn
   },
 })

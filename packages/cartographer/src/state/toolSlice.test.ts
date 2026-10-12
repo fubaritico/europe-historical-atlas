@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import {
   AQUITAINE_IDENTITY,
@@ -238,4 +238,68 @@ describe('toolSlice', () => {
       expect(store.getState().tool).toBe('edit')
     })
   })
+})
+
+describe('toolSlice — the switch to a coast or a river (s02, 2026-10-12)', () => {
+  describe('happy path', () => {
+    it('goes back to the mode the coast was reached from', () => {
+      const { store } = openStore()
+      store.getState().choosePenMode('pencil')
+      store.getState().reachLayer('coast')
+      expect(store.getState().penMode).toBe('coast')
+      expect(store.getState().leaveLayer()).toBe('pencil')
+      expect(store.getState().penMode).toBe('pencil')
+    })
+  })
+
+  describe('variants', () => {
+    it('keeps the mode it started from when it goes from the coast to a river', () => {
+      const { store } = openStore()
+      store.getState().choosePenMode('pencil')
+      store.getState().reachLayer('coast')
+      store.getState().reachLayer('river')
+      expect(store.getState().penMode).toBe('river')
+      expect(store.getState().leaveLayer()).toBe('pencil')
+    })
+
+    it('goes back to the plain Pen when the river mode was chosen by hand', () => {
+      const { store } = openStore()
+      store.getState().choosePenMode('pencil')
+      store.getState().reachLayer('coast')
+      store.getState().choosePenMode('river')
+      expect(store.getState().leaveLayer()).toBe('free')
+    })
+
+    it('forgets where it came from once it has gone back', () => {
+      const { store } = openStore()
+      store.getState().choosePenMode('pencil')
+      store.getState().reachLayer('coast')
+      store.getState().leaveLayer()
+      expect(store.getState().layerReturn).toBe('free')
+    })
+  })
+
+  describe('managed errors', () => {
+    it('changes nothing and returns null when the Pen follows nothing', () => {
+      const { store } = openStore()
+      store.getState().choosePenMode('pencil')
+      expect(store.getState().leaveLayer()).toBeNull()
+      expect(store.getState().penMode).toBe('pencil')
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('refuses to reach the layer already followed, and says so', () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      const { store } = openStore()
+      store.getState().choosePenMode('pencil')
+      store.getState().reachLayer('coast')
+      store.getState().reachLayer('coast')
+      expect(store.getState().layerReturn).toBe('pencil')
+      expect(error).toHaveBeenCalledWith(expect.stringContaining('already follows the coast'))
+      error.mockRestore()
+    })
+  })
+
+  // L5: N/A — two fields and two actions; the boundaries are the cases above.
 })

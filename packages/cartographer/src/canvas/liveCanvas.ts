@@ -8,21 +8,13 @@ import { backdropToScreen } from '../view/viewport'
 import { penInsertHit, stretchUnder } from './anchorGestures'
 import { anchorHit, anchorSentence, borderRunTo } from './borderSnap'
 import { cursorCss, cursorFor } from './cursors'
+import { followedLayer, layerLines, lineLabel, nearestLayer, snapHit } from './layerHits'
 import { HANDLE_HIT_RADIUS } from './navigation'
 import { paintOverlay } from './overlayPainter'
 import { projectedTerritories } from './scene'
 import { snapLayersOf } from './snapLayers'
 import { inDevicePixels } from './style'
-import {
-  followedLayer,
-  layerLines,
-  lineLabel,
-  outlineOnScreen,
-  resolvedTarget,
-  selectionMoves,
-  snapHit,
-  snapStretchTo,
-} from './toolGestures'
+import { outlineOnScreen, resolvedTarget, selectionMoves, snapStretchTo } from './toolGestures'
 import { actionSentence, overlayScene, ringNeighbours, targetHandles } from './toolSession'
 
 import type { AnchorCache } from './anchorCache'
@@ -199,9 +191,10 @@ const NO_OFFER: SnapOffer = {
 }
 
 /**
- * What the Pen offers under the pointer. **Following a layer, the layer first** — a neighbour's
- * anchors on it are reused by the click, not branched onto — then an existing anchor, whose border is
- * already there.
+ * What the Pen offers under the pointer. **The layer the click would snap to first** (`nearestLayer`:
+ * the coast or the river within reach, the nearer of the two, whatever the mode) — a neighbour's anchors
+ * on it are reused by the click, not branched onto — then an existing anchor, whose border is already
+ * there.
  * @param it - the attachment
  * @returns the offer, `NO_OFFER` when there is nothing
  */
@@ -210,12 +203,11 @@ export function snapOffer(it: LiveCanvas, inserting: boolean = overStretch(it)):
   // Over the target's own stretch the idle Pen inserts, so it offers no snap there (`penInserts`).
   if (inserting) return NO_OFFER
   const gesture = gestureOf(it)
-  // Following a layer, the layer first — the same order as the click (`penClick`).
-  const layer = followedLayer(gesture)
-  if (layer !== null) {
-    const offer = lineOffer(it, gesture, layer, it.pointer)
-    if (offer.kind !== null) return offer
-  }
+  // The layer first — the same order as the click (`penClick`): the nearer water within reach, whatever
+  // the mode, previewed so the click that switches is foreseen.
+  const layer = nearestLayer(gesture, it.pointer)
+  const offer = layer === null ? NO_OFFER : lineOffer(it, gesture, layer, it.pointer)
+  if (offer.kind !== null) return offer
   const hit = anchorHit(gesture, it.pointer)
   return hit === null ? NO_OFFER : anchorOffer(it, gesture, hit)
 }
@@ -241,7 +233,7 @@ function anchorOffer(it: LiveCanvas, gesture: GestureContext, hit: number): Snap
  * The offer of a layer vertex, and of the stretch a click would insert.
  * @param it - the attachment
  * @param gesture - its gesture context
- * @param layer - the layer the Pen follows
+ * @param layer - the layer the click would snap to (`nearestLayer`)
  * @param pointer - the pointer, in screen pixels
  * @returns the offer
  */

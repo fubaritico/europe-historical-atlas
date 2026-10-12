@@ -1,16 +1,17 @@
 import { polityAt } from '../geometry/fillHit'
 import { nearestAmong } from '../geometry/hitTest'
-import { lineStretch, nearestLineVertex } from '../geometry/lineSnap'
+import { lineStretch } from '../geometry/lineSnap'
 import { normaliseRect, pointsInRect } from '../geometry/marquee'
 import { canCloseRing, isClosingOffered } from '../geometry/ringClosure'
 import { describeDrawingTarget } from '../state/drawingTarget'
 import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
 import { backdropToLonLat, lonLatToScreen, screenToLonLatOnBackdrop } from '../view/projection'
-import { screenToBackdrop } from '../view/viewport'
 
 import { deleteSelected, insertOnStretch, penInsertHit } from './anchorGestures'
 import { anchorClick, anchorsByPosition } from './borderSnap'
 import { TAG } from './consoleTag'
+import { followedLayer, layerLines, lineLabel, nearestLayer, snapHit } from './layerHits'
+import { leaveLayer, reachLayer } from './layerSwitch'
 import {
   abandonGesture,
   clearOutline,
@@ -23,7 +24,6 @@ import {
 import type { SnapLayers } from './snapLayers'
 import type { SessionPoint, SnapLayer, SnapVertex, ToolSession } from './toolSession'
 import type { PolityRings } from '../geometry/fillHit'
-import type { SnapLine } from '../geometry/lineSnap'
 import type { CartographerStoreHook } from '../state/store'
 import type { BackdropFrame } from '../view/projection'
 import type { Point } from '../view/viewport'
@@ -149,17 +149,31 @@ export function penClick(context: GestureContext, at: Point): void {
   // On its own coast this rarely bites — coast anchors are dense, so an anchor is nearly always the
   // nearer hit, and that one is reused by the layer click.
   if (penInserts(context, at)) return
-  // Following a layer, the layer wins: a neighbour drawn along it left an anchor on every vertex, and
+  // A layer wins over an anchor: a neighbour drawn along it left an anchor on every vertex, and
   // branching onto those would lose the coast (the dev, Spain then Portugal, 2026-10-11). Those
-  // anchors are reused by the layer click, so the border stays shared. Elsewhere an existing anchor
-  // wins over a free point: the border is already there.
+  // anchors are reused by the layer click, so the border stays shared. Whatever the mode, a coast or a
+  // river within reach takes the click, and the Pen then follows it (`s02`, the dev, 2026-10-12).
+  const layer = nearestLayer(context, at)
+  if (layer !== null && snapClick(context, layer, at)) {
+    if (followedLayer(context) !== layer) reachLayer(context, layer)
+    return
+  }
+  // Elsewhere an existing anchor wins over a free point: the border is already there.
+  if (anchorClick(context, at) || offLayerClick(context, at)) leaveLayer(context)
+}
+
+/**
+ * Place a free point where the layer the Pen follows did not take the click, and say so.
+ * @param context - the session and the store
+ * @param at - the pointer, in screen pixels
+ * @returns `true` when a point was placed
+ */
+function offLayerClick(context: GestureContext, at: Point): boolean {
   const layer = followedLayer(context)
-  if (layer !== null && snapClick(context, layer, at)) return
-  if (anchorClick(context, at)) return
   if (layer !== null) {
     console.warn(`${TAG} no ${context.layers[layer].noun} within reach: a free point was placed.`)
   }
-  freeClick(context, at)
+  return freeClick(context, at)
 }
 
 /**
@@ -179,66 +193,17 @@ export function penInserts(context: GestureContext, at: Point): boolean {
  * Place a free point — reported by eye — where the click is.
  * @param context - the session and the store
  * @param at - the pointer, in screen pixels
+ * @returns `true` when a point was placed, `false` off the map
  */
-function freeClick(context: GestureContext, at: Point): void {
+function freeClick(context: GestureContext, at: Point): boolean {
   const point = lonLatAt(context, at)
   if (point === null) {
     console.warn(`${TAG} no anchor placed: the click was off the map.`)
-    return
+    return false
   }
   context.session.outline.push({ at: point, provenance: FREE_POINT_PROVENANCE, anchor: null })
   context.session.snap = null
-}
-
-/**
- * The layer the Pen follows in its current mode, or `null` for the free Pen.
- * @param context - the store
- * @returns the layer
- */
-export function followedLayer(context: GestureContext): SnapLayer | null {
-  const mode = context.store.getState().penMode
-  return mode === 'coast' || mode === 'river' ? mode : null
-}
-
-/**
- * The lines of a layer, in backdrop pixels.
- * @param context - the snap layers
- * @param layer - which layer
- * @returns its lines
- */
-export function layerLines(context: GestureContext, layer: SnapLayer): readonly SnapLine[] {
-  return context.layers[layer].lines
-}
-
-/**
- * What the line under a hit is called — `"coastline"`, a river's name verbatim (`snapLayersOf`).
- * @param context - the snap layers
- * @param hit - the vertex
- * @returns the line's label
- */
-export function lineLabel(context: GestureContext, hit: SnapVertex): string {
-  return context.layers[hit.layer].label(hit.contour)
-}
-
-/**
- * The layer vertex under the pointer, or `null` when the layer is out of reach.
- *
- * The pointer is brought into the layer's own grid — one point — rather than the 95 233 coast points
- * onto the screen; the radius follows it, divided by the scale.
- * @param context - the snap layers and the view
- * @param layer - which layer
- * @param at - the pointer, in screen pixels
- * @returns the vertex, or `null`
- */
-export function snapHit(context: GestureContext, layer: SnapLayer, at: Point): SnapVertex | null {
-  const viewport = context.store.getState().viewport
-  if (viewport.scale <= 0) return null
-  const hit = nearestLineVertex(
-    layerLines(context, layer),
-    screenToBackdrop(viewport, at),
-    context.radius / viewport.scale
-  )
-  return hit === null ? null : { ...hit, layer }
+  return true
 }
 
 /**
@@ -269,7 +234,7 @@ export function snapStretchTo(context: GestureContext, hit: SnapVertex): Point[]
  * @param at - the pointer, in screen pixels
  * @returns `true` when the click was taken by the layer
  */
-function snapClick(context: GestureContext, layer: SnapLayer, at: Point): boolean {
+export function snapClick(context: GestureContext, layer: SnapLayer, at: Point): boolean {
   const hit = snapHit(context, layer, at)
   const line = hit === null ? undefined : layerLines(context, layer)[hit.contour]
   if (hit === null || line === undefined) return false

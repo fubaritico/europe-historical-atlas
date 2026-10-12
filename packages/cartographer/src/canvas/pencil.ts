@@ -1,7 +1,9 @@
 import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
 
 import { TAG } from './consoleTag'
-import { lonLatAt, resolvedTarget } from './toolGestures'
+import { nearestLayer } from './layerHits'
+import { leaveLayer, reachLayer } from './layerSwitch'
+import { lonLatAt, resolvedTarget, snapClick } from './toolGestures'
 
 import type { GestureContext } from './toolGestures'
 import type { PencilSample, SessionPoint } from './toolSession'
@@ -58,6 +60,7 @@ function moved(last: PencilSample, at: Point): boolean {
 function lay(context: GestureContext, drawing: PencilSample, at: Point, time: number): void {
   drawing.time = time
   drawing.at = [at[0], at[1]]
+  if (layOnLayer(context, drawing, at)) return
   const point = lonLatAt(context, at)
   if (point === null) {
     drawing.offMap += 1
@@ -73,6 +76,35 @@ function lay(context: GestureContext, drawing: PencilSample, at: Point, time: nu
 }
 
 /**
+ * A point of the stroke within reach of a coast or a river: placed on its vertex instead, and the Pencil
+ * gives way to the Pen following it (`s02`, the dev, 2026-10-12). What the layer placed joins the stroke,
+ * so ‹ctrl+z› takes it back with the rest. The drag goes on placing nothing — the Pencil is no longer in
+ * hand, so the controller stops feeding it and its release lays no last point.
+ * @param context - the session, the store and the snap layers
+ * @param drawing - the drag in progress
+ * @param at - the pointer, in screen pixels
+ * @returns `true` when a layer took the point
+ */
+function layOnLayer(context: GestureContext, drawing: PencilSample, at: Point): boolean {
+  const layer = nearestLayer(context, at)
+  const before = context.session.outline.length
+  if (layer === null || !snapClick(context, layer, at)) return false
+  const first = context.session.outline[before]
+  const last = context.session.outline.at(-1)
+  if (first !== undefined && last !== undefined) {
+    if (drawing.stroke === null) {
+      drawing.stroke = { first, last }
+      context.session.strokes.push(drawing.stroke)
+    } else drawing.stroke.last = last
+  }
+  // Switched even when the layer placed nothing — the stroke reached the vertex the outline already ends
+  // on: the point was on the water, and the click (here the sample) is what decides (`s02`).
+  reachLayer(context, layer)
+  drawing.reached = true
+  return true
+}
+
+/**
  * Begin a Pencil drag where the press was, laying its first point.
  *
  * With nobody aimed at it lays nothing, as the Pen refuses (`s02`), and says so once.
@@ -85,7 +117,13 @@ export function pencilStart(context: GestureContext, at: Point, time: number): v
     console.warn(`${TAG} nothing drawn: select a polity to draw in first.`)
     return
   }
-  const drawing: PencilSample = { time, at: [at[0], at[1]], offMap: 0, stroke: null }
+  const drawing: PencilSample = {
+    time,
+    at: [at[0], at[1]],
+    offMap: 0,
+    stroke: null,
+    reached: false,
+  }
   context.session.drawing = drawing
   lay(context, drawing, at, time)
 }
@@ -98,6 +136,8 @@ export function pencilStart(context: GestureContext, at: Point, time: number): v
  */
 export function pencilDrag(context: GestureContext, at: Point, time: number): void {
   const drawing = context.session.drawing
+  // The press itself may have reached the water, and the Pencil given way in the same event.
+  if (context.store.getState().penMode !== 'pencil') return
   if (drawing === null || !pencilPointDue(drawing, time, at)) return
   lay(context, drawing, at, time)
 }
@@ -114,7 +154,9 @@ export function pencilDrag(context: GestureContext, at: Point, time: number): vo
 export function pencilEnd(context: GestureContext, at: Point, time: number): void {
   const drawing = context.session.drawing
   if (drawing === null) return
-  if (moved(drawing, at)) lay(context, drawing, at, time)
+  // A stroke that reached a coast or a river ended there: the Pen follows it now, and lays no last point.
+  const stillPencil = context.store.getState().penMode === 'pencil'
+  if (stillPencil && moved(drawing, at)) lay(context, drawing, at, time)
   if (drawing.offMap > 0) {
     console.warn(
       `${TAG} ${String(drawing.offMap)} Pencil ${drawing.offMap === 1 ? 'point' : 'points'} fell off the map and were not placed.`
@@ -129,8 +171,11 @@ export function pencilEnd(context: GestureContext, at: Point, time: number): voi
  * @param context - the session
  */
 export function pencilCancel(context: GestureContext): void {
-  const stroke = context.session.drawing?.stroke ?? null
+  const drawing = context.session.drawing
+  const stroke = drawing?.stroke ?? null
   context.session.drawing = null
+  // A drag that reached the water switched the Pen: a gesture that did not happen gives the Pencil back.
+  if (drawing?.reached === true) leaveLayer(context)
   if (stroke === null) return
   context.session.strokes = context.session.strokes.filter((held) => held !== stroke)
   const start = context.session.outline.indexOf(stroke.first)

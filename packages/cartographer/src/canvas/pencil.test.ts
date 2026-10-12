@@ -219,10 +219,18 @@ describe('pencil', () => {
   describe('edge cases', () => {
     it('lays no point while the pointer is held still', () => {
       expect(
-        pencilPointDue({ time: 0, at: [100, 100], offMap: 0, stroke: null }, 1000, [100, 100])
+        pencilPointDue(
+          { time: 0, at: [100, 100], offMap: 0, stroke: null, reached: false },
+          1000,
+          [100, 100]
+        )
       ).toBe(false)
       expect(
-        pencilPointDue({ time: 0, at: [100, 100], offMap: 0, stroke: null }, 1000, [101, 100])
+        pencilPointDue(
+          { time: 0, at: [100, 100], offMap: 0, stroke: null, reached: false },
+          1000,
+          [101, 100]
+        )
       ).toBe(true)
     })
 

@@ -1334,6 +1334,15 @@ function attachWithShore(
   return { node, store, acted, resulted, dispose }
 }
 
+/** The Maas, at backdrop y = 700 — screen y = 418, 200 px below `attachWithShore`'s shore. */
+const MAAS: NamedPolyline = {
+  points: Array.from({ length: 121 }, (_, index): [number, number] => [index * 10, 700]),
+  closed: false,
+  bounds: { left: 0, top: 700, right: 1200, bottom: 700 },
+  name: 'Maas',
+  rank: 3,
+}
+
 describe('the Pen following the coast, on the canvas', () => {
   describe('happy path', () => {
     it('inserts the stretch between two clicks on the shore, and reports it', () => {
@@ -1401,21 +1410,15 @@ describe('the Pen following the coast, on the canvas', () => {
   })
 
   describe('following a river', () => {
-    /** The Maas, at backdrop y = 700 — screen y = 418, 200 px below the shore. */
-    const MAAS: NamedPolyline = {
-      points: Array.from({ length: 121 }, (_, index): [number, number] => [index * 10, 700]),
-      closed: false,
-      bounds: { left: 0, top: 700, right: 1200, bottom: 700 },
-      name: 'Maas',
-      rank: 3,
-    }
-
-    // s02 — "Following the Maas for Kingdom of France".
-    it('names the river while it is within reach, and offers nothing on the shore', () => {
+    // s02 — "Following the Maas for Kingdom of France"; and since 2026-10-12 the shore is offered too,
+    // whatever the mode ("The Pen finds the coast and the rivers by itself").
+    it('names the river within reach, the coastline on the shore, and says when neither is', () => {
       const { node, acted, dispose } = attachWithShore(undefined, [MAAS], 'river')
       node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 420 }))
       expect(acted).toHaveBeenLastCalledWith('Following the Maas for Reaume de France')
       node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 220 }))
+      expect(acted).toHaveBeenLastCalledWith('Following the coastline for Reaume de France')
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 320 }))
       expect(acted).toHaveBeenLastCalledWith(
         'Drawing in Reaume de France — no river within reach, placing points freely'
       )
@@ -1430,24 +1433,26 @@ describe('the Pen following the coast, on the canvas', () => {
       dispose()
     })
 
-    it('shows the snap cursor over the river, and the plain cross on the shore', () => {
+    it('shows the snap cursor over the river, and the plain cross away from any water', () => {
       const { node, dispose } = attachWithShore(undefined, [MAAS], 'river')
-      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 220 }))
-      const onShore = node.style.cursor
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 320 }))
+      const onLand = node.style.cursor
       node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 420 }))
-      expect(node.style.cursor).not.toBe(onShore)
+      expect(node.style.cursor).not.toBe(onLand)
       dispose()
     })
 
     // A mode chosen in the Pen's group, the pointer still on the canvas: the offer follows at once.
     it('updates the sentence when the mode changes with the pointer parked', () => {
       const { node, store, acted, dispose } = attachWithShore(undefined, [MAAS], 'coast')
-      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 420 }))
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 320 }))
       expect(acted).toHaveBeenLastCalledWith(
         'Drawing in Reaume de France — no coastline within reach, placing points freely'
       )
       store.getState().choosePenMode('river')
-      expect(acted).toHaveBeenLastCalledWith('Following the Maas for Reaume de France')
+      expect(acted).toHaveBeenLastCalledWith(
+        'Drawing in Reaume de France — no river within reach, placing points freely'
+      )
       dispose()
     })
   })
@@ -2060,4 +2065,65 @@ describe('the white arrow’s marquee, on the canvas', () => {
     expect(store.getState().undoLabel).toBe('delete anchor')
     dispose()
   })
+})
+
+describe('the Pen finding the coast, on the canvas (s02)', () => {
+  describe('happy path', () => {
+    // s02 — the plain Pen previews the coast it will snap to, and says so, before the click decides.
+    it('says it is following the coastline under the plain Pen near the shore, and drawing elsewhere', () => {
+      const { node, acted, dispose } = attachWithShore(undefined, [], 'free')
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 220 }))
+      expect(acted).toHaveBeenLastCalledWith('Following the coastline for Reaume de France')
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 400 }))
+      expect(acted).toHaveBeenLastCalledWith('Drawing in Reaume de France')
+      dispose()
+    })
+
+    it('names the river under the plain Pen, and turns it to following the river on a click', () => {
+      const { node, store, acted, resulted, dispose } = attachWithShore(undefined, [MAAS], 'free')
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 60, offsetY: 420 }))
+      expect(acted).toHaveBeenLastCalledWith('Following the Maas for Reaume de France')
+      click(node, [60, 420])
+      expect(store.getState().penMode).toBe('river')
+      expect(resulted).toHaveBeenLastCalledWith('Pen — follow a river')
+      dispose()
+    })
+
+    it('turns the plain Pen to following the coast on a click near the shore, and says so', () => {
+      const { node, store, resulted, dispose } = attachWithShore(undefined, [], 'free')
+      click(node, [60, 220])
+      expect(store.getState().penMode).toBe('coast')
+      expect(resulted).toHaveBeenLastCalledWith('Pen — follow the coast')
+      dispose()
+    })
+  })
+
+  describe('variants', () => {
+    // s02 — the Pencil's stroke stops on the shore; the rest of the drag places nothing, and the first
+    // click off the shore gives the Pencil back.
+    it('hands a Pencil stroke over to the coast, then gives the Pencil back off the shore', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { node, store, resulted, dispose } = attachWithShore(undefined, [], 'pencil')
+      stroke(
+        node,
+        [
+          [60, 400],
+          [60, 300],
+          [60, 219],
+          [60, 100],
+        ],
+        0
+      )
+      expect(store.getState().penMode).toBe('coast')
+      expect(resulted).toHaveBeenCalledWith('Pen — follow the coast')
+      click(node, [160, 400])
+      expect(store.getState().penMode).toBe('pencil')
+      expect(resulted).toHaveBeenLastCalledWith('Pencil — freehand')
+      warn.mockRestore()
+      dispose()
+    })
+  })
+
+  // L3–L5: the gestures' own suite (`coastSwitch.test.ts`) holds them; the canvas only routes the
+  // press, the drag and the release to them.
 })

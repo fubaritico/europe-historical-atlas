@@ -2,9 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { lonLatToScreen } from '../view/projection'
 
+import { snapHit } from './layerHits'
 import {
   TEST_COAST_PROVENANCE,
   TEST_RIVER_PROVENANCE,
+  TEST_SHORE,
   testGestureContext,
   testPolity,
   testStore,
@@ -18,7 +20,6 @@ import {
   lonLatAt,
   penClick,
   redoGesture,
-  snapHit,
   toolKey,
   undoGesture,
 } from './toolGestures'
@@ -477,12 +478,8 @@ function onScreenPoint(
   return lonLatToScreen(point, context.frame, context.store.getState().viewport)
 }
 
-/** A straight shore from (100,200) to (500,200), a vertex every 10 backdrop pixels. */
-const SHORE: SnapLine = {
-  points: Array.from({ length: 41 }, (_, index): [number, number] => [100 + index * 10, 200]),
-  closed: false,
-  bounds: { left: 100, top: 200, right: 500, bottom: 200 },
-}
+/** The shared test shore: (100,200) to (500,200), a vertex every 10 backdrop pixels. */
+const SHORE = TEST_SHORE
 
 /** A small island well away from the shore. */
 const ISLE: SnapLine = {
@@ -858,15 +855,18 @@ describe('two neighbours along one shore', () => {
     expect(context.session.outline[0]?.provenance).toEqual(TEST_COAST_PROVENANCE)
   })
 
-  // In free mode the shore is not followed, so an existing anchor is still branched onto.
-  it('branches onto the neighbour’s anchor in free mode', () => {
-    const { context } = shoreNeighbours()
+  // s02, "The Pen finds the coast by itself" (2026-10-12): the plain Pen snaps to the shore too, so the
+  // neighbour's coast anchor is reused by its index — still shared — and the Pen now follows the coast.
+  it('reuses the neighbour’s coast anchor in free mode, and turns to following the coast', () => {
+    const { context, reports } = shoreNeighbours()
     context.store.getState().choosePenMode('free')
 
     penClick(context, [250, 202])
 
     expect(context.session.outline[0]?.anchor).toBe(15)
-    expect(context.session.snap).toBeNull()
+    expect(context.session.snap).not.toBeNull()
+    expect(context.store.getState().penMode).toBe('coast')
+    expect(reports).toEqual(['Pen — follow the coast'])
   })
 
   it('places a free point next to the shore without capturing a neighbour’s anchor', () => {
@@ -1066,11 +1066,13 @@ describe('the Pen following a river', () => {
       expect(logged.warn).toHaveBeenCalledWith(expect.stringContaining('no river within reach'))
     })
 
-    // The coast is not a river: in river mode a click on the shore places a free point.
-    it('does not snap onto the coast while following a river', () => {
+    // s02, 2026-10-12 — from one water to the other the Pen switches directly: a river-mode click on the
+    // shore snaps to the coast, and the Pen follows the coast.
+    it('snaps a river-mode click on the shore to the coast, and follows the coast', () => {
       const { context } = riverContext()
       penClick(context, [150, 200])
-      expect(context.session.outline[0]?.provenance.name).toBe('reported by eye')
+      expect(context.session.outline[0]?.provenance).toEqual(TEST_COAST_PROVENANCE)
+      expect(context.store.getState().penMode).toBe('coast')
     })
   })
 

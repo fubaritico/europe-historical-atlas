@@ -23,6 +23,16 @@ import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 /** What the test coastline is said to be traced from. */
 export const TEST_COAST_PROVENANCE = { name: 'test shore', licence: 'CC0' }
 
+/**
+ * A straight shore along y = 200, from x = 100 to x = 500, a vertex every 10 pixels — in backdrop pixels,
+ * which `testStore`'s view makes screen pixels.
+ */
+export const TEST_SHORE: SnapLine = {
+  points: Array.from({ length: 41 }, (_, index): [number, number] => [100 + index * 10, 200]),
+  closed: false,
+  bounds: { left: 100, top: 200, right: 500, bottom: 200 },
+}
+
 /** What the test rivers are said to be drawn from. */
 export const TEST_RIVER_PROVENANCE = { name: 'test rivers', licence: 'PD' }
 
