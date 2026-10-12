@@ -500,13 +500,29 @@ the scale he habitually draws at), whether the arrow is held too or only the Pen
 refusal is shown — the cursor already refuses where there is no target (2026-10-08), the same `not-allowed`
 plus a status-bar line (*"zoom in to draw"*) is the obvious reuse. *(the last two are my questions)*
 
-### H-35 · A river is not followed from one of its stretches to another — **observed 2026-10-12**
+### H-35 · A river is not followed from one of its stretches to another — **observed and measured 2026-10-12**
 
 Drawing France, two clicks on the Meuse (Mézières, then near its source) gave a straight segment and no
 insertion; the same between Avignon and the Petit Rhône mouth. The Scheldt, the Saône and the Rhône from
 Lyon to Avignon were followed. *(Claude's hypothesis: the dataset cuts a river into several polylines and
 following stays inside one.)* **Measure first**: count the polylines named `Maas` and see where they meet.
 Then the choice is the dev's — join them at load, or follow across a junction. [s02](s02-create-france-1100.md).
+
+**Measured 2026-10-12** (`rivers/europe-rivers.json`, Natural Earth as shipped). Two causes, neither in the
+following code:
+1. **A stray fragment.** `Maas` is 4 polylines, one of them **2 points** at Charleville-Mézières, 1.3 km from
+   the main course. France's Mézières anchor is exactly that fragment's first vertex — the click caught it,
+   the next click landed on the main course, another polyline, so nothing was followed. The main course
+   itself runs unbroken from the source to Maastricht (152 points).
+2. **Rivers cut at confluences and forks.** `Rhône` is 5 polylines: the one from Geneva ends at the Arles
+   fork, where the Petit Rhône and the Grand Rhône begin at the very same point (and a 2-point stub lies
+   there too). `Loire` is 3 polylines laid end to end, their ends identical.
+
+**Options, the dev's call**: (a) at load, chain polylines of one name whose ends coincide exactly — the
+coastline precedent (95 212 segments → 2 029 contours, no epsilon) — which makes the Loire and the Meuse
+continuous; (b) ignore 2-point fragments that duplicate a longer course, which removes the Mézières trap;
+(c) a fork stays ambiguous for chaining (which arm?) — leave it cut, or build a river graph and follow the
+shortest path. *Claude's recommendation: (a) and (b) now, (c) only if a border needs to cross a fork.*
 
 ### H-36 · On a river border, the shared-border follow never triggers — **observed 2026-10-12**
 

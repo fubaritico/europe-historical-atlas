@@ -166,6 +166,7 @@
 | **spike**            | Un petit programme jetable pour répondre à une question. Les nôtres sont dans `files/spikes/`. |
 | **payload**          | Le contenu d'un fichier de données, une fois chargé.                                           |
 | **round trip**       | Ouvrir → modifier → enregistrer → rouvrir **à l'identique**. Le test d'un vrai éditeur.        |
+| **code naïf** (et **sabotage**) | La version fausse mais *plausible* d'un code — celle qu'on écrirait sans penser au piège. On la substitue un instant au vrai code : **le test écrit pour ce piège doit tomber**, lui précisément, puis on remet le vrai code. Ce n'est pas le cas nominal : c'est la preuve qu'un test garde quelque chose (règle du 27/09). |
 | **manifeste des années** | `years/index.json` : la liste des années dessinées et le cadre contre lequel elles l'ont été. Une année **absente** du manifeste est un fait ; une année **listée qui échoue** est une panne — les deux ne se confondent jamais. |
 | **mode local** | Le Cartographe lancé par `pnpm dev:cartographer` : son serveur de dev écrit l'année dans `packages/atlas/public/years/<année>/` (‹ctrl+S›), et l'éditeur la rouvre au démarrage. Le site publié ne peut pas enregistrer. Arrêté le 12/10. |
 | **année de travail** | Une année enregistrée en mode local : la copie de travail du dev, **jamais commitée** (sa décision, 12/10) — pour retrouver ses tracés, déboguer les outils, maîtriser le format. |
