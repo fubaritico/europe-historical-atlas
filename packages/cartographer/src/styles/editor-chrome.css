@@ -210,6 +210,8 @@
 .polities__actions {
   display: flex;
   flex: 0 0 auto;
+  /* Flush right — the dev's call, 2026-10-12. */
+  justify-content: flex-end;
   height: calc(var(--tab) + 1px);
   margin-top: auto;
   border-top: 1px solid var(--line);
