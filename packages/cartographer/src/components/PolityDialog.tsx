@@ -64,6 +64,15 @@ function commit(
 }
 
 /**
+ * The draft the dialogue opens on: empty for a new polity, the polity's own values when editing one.
+ * @param editing - the polity edited, or `null` when creating
+ * @returns the opening draft
+ */
+function openingOf(editing: YearPolity | null): PolityDraft {
+  return editing === null ? EMPTY_DRAFT : draftOf(editing)
+}
+
+/**
  * The draft, its errors, and the gestures that change them — the dialogue's state, kept apart from its
  * markup so each reads alone.
  *
@@ -75,18 +84,24 @@ function usePolityDraft(
   editing: YearPolity | null,
   onClose: () => void
 ) {
-  const opening = editing === null ? EMPTY_DRAFT : draftOf(editing)
-  const [draft, setDraft] = useState<PolityDraft>(opening)
-  const [errors, setErrors] = useState<Partial<Record<DraftField, string>>>({})
+  // Store
   // The document is mutated in place, so the version is what changes; reading it re-renders the
   // dialogue when a polity is added or undone, which the suzerain list and the taken ids depend on.
   store((state) => state.version)
+
+  // State
+  const [draft, setDraft] = useState<PolityDraft>(() => openingOf(editing))
+  const [errors, setErrors] = useState<Partial<Record<DraftField, string>>>({})
+
+  // Derived
   const polities = store.getState().document.polities
   // Its own id is not "taken" by the polity being edited.
   const taken = new Set(polities.map((polity) => polity.id).filter((id) => id !== editing?.id))
+  const suzerains = suzerainChoices(polities, editing?.id ?? null)
 
+  // Handlers
   const close = () => {
-    setDraft(opening)
+    setDraft(openingOf(editing))
     setErrors({})
     onClose()
   }
@@ -114,7 +129,7 @@ function usePolityDraft(
     else setErrors(refused)
   }
 
-  const suzerains = suzerainChoices(polities, editing?.id ?? null)
+  // Return
   return { draft, errors, suzerains, close, onField, onColour, onSubmit }
 }
 
@@ -130,12 +145,17 @@ function usePolityDraft(
  * @returns the dialogue
  */
 export function PolityDialog({ store, editing, isOpen, onClose }: PolityDialogProps) {
+  // State
   const { draft, errors, suzerains, close, onField, onColour, onSubmit } = usePolityDraft(
     store,
     editing,
     onClose
   )
+
+  // Derived
   const title = editing === null ? 'New polity' : 'Edit polity'
+
+  // Render
   return (
     <Modal
       isOpen={isOpen}

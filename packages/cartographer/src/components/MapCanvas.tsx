@@ -147,11 +147,16 @@ export function MapCanvas({
   label,
   colours,
 }: MapCanvasProps) {
+  // Ids
   const instructionsId = useId()
+
+  // Refs
   // The overlay comes first in the tree so its ref is set before the drawing surface's callback reads it
   // (refs attach in tree order). Being positioned, it still paints above the static canvas, and it lets
   // every pointer event through to the element that owns them.
   const overlay = useRef<HTMLCanvasElement | null>(null)
+
+  // Render
   return (
     <>
       <span id={instructionsId} style={offScreen}>

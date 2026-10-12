@@ -65,7 +65,7 @@ lint is how it stays true without anyone watching.
 | --- | --- |
 | Node **22.14**: type stripping is unflagged only from 22.18 | the plugin is **JS + JSDoc**, checked by `tsc --checkJs --noEmit` — no build step, ESLint imports the source |
 | `pnpm-workspace.yaml` globs `packages/*` | the package is picked up by pnpm and Turbo with no list to edit |
-| **Turbo hashes a workspace dependency into its dependents' cache key** | the plugin is a `devDependency` (`workspace:*`) of **each consuming package**, not only of the root. Otherwise a rule change leaves `lint` of the atlas `FULL TURBO` — green over code the new rule never read |
+| **Turbo does NOT hash a workspace dependency's sources by itself** — measured 2026-10-12, my plan said the opposite | `lint` depends on `^lint` and each consumer declares the plugin `workspace:*`; the root `eslint.config.js`, `tsconfig.json`, `.prettierrc` are `globalDependencies` (they were not: a pre-existing hole). See `troubleshooting.md` |
 | `.lintstagedrc.json` globs `packages/*/src/**/*.{ts,tsx}` | rules live under `src/` and the glob gains `js`. **Known-issues trap: grep every `.ts'` glob in the config before writing the first file** |
 | `sonar.exclusions` lists `*.test.ts`, `*.test.tsx` | add `*.test.js` |
 | `scripts/merge-coverage.mjs` reads `packages/*/coverage` | picks the new package up; verify its `SF:` paths resolve |

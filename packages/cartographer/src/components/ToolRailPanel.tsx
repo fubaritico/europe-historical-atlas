@@ -24,15 +24,22 @@ export interface ToolRailPanelProps {
  * @returns the rail
  */
 export function ToolRailPanel({ store, colours }: ToolRailPanelProps) {
+  // Store
   const tool = store((state) => state.tool)
-  const selectTool = store((state) => state.selectTool)
   const penMode = store((state) => state.penMode)
-  const choosePenMode = store((state) => state.choosePenMode)
   store((state) => state.target)
   const version = store((state) => state.version)
+
+  // Store actions
+  const selectTool = store((state) => state.selectTool)
+  const choosePenMode = store((state) => state.choosePenMode)
+
+  // Derived
   const { document, target } = store.getState()
   const aimed = describeDrawingTarget(document, target)
   const colour = aimed === null ? undefined : colours.coloursOf(document, version).get(aimed.id)
+
+  // Render
   return (
     <ToolRail
       tool={tool}

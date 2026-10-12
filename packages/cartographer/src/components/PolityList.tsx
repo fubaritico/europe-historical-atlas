@@ -41,6 +41,7 @@ function asksForMenu(event: KeyboardEvent<HTMLUListElement>): boolean {
  * @returns the subhead
  */
 function PolitiesSubhead({ year, count }: { year: number; count: number }) {
+  // Render
   return (
     <div className="polities__subhead">
       <span>Drawn at {year}</span>
@@ -125,6 +126,7 @@ function PolityOption({
   onMenu: (id: string, at: ViewportPoint) => void
   onEdit: (id: string) => void
 }) {
+  // Render
   return (
     <ListboxItem
       id={id}
@@ -177,13 +179,13 @@ function useListCursor(
   onChoose: (id: string) => void,
   onMenu: (id: string, at: ViewportPoint) => void
 ) {
+  // State
   const [activeId, setActiveId] = useState<string | null>(null)
+
+  // Derived
   const active = rows.findIndex((row) => row.id === activeId)
-  useEffect(() => {
-    // Keep the row the keys are on in view: focus stays on the list, so nothing scrolls by itself.
-    if (activeId !== null)
-      document.getElementById(optionId(activeId))?.scrollIntoView({ block: 'nearest' })
-  }, [activeId])
+
+  // Handlers
   const onKeyDown = (event: KeyboardEvent<HTMLUListElement>) => {
     if (asksForMenu(event)) {
       event.preventDefault()
@@ -198,6 +200,15 @@ function useListCursor(
     if ('move' in action) setActiveId(row.id)
     else onChoose(row.id)
   }
+
+  // Effects
+  useEffect(() => {
+    // Keep the row the keys are on in view: focus stays on the list, so nothing scrolls by itself.
+    if (activeId !== null)
+      document.getElementById(optionId(activeId))?.scrollIntoView({ block: 'nearest' })
+  }, [activeId])
+
+  // Return
   return { activeId, active, onKeyDown }
 }
 
@@ -213,7 +224,10 @@ function useListCursor(
  * @returns the subhead and the list, or the subhead and a line saying the year is empty
  */
 export function PolityList({ year, rows, targetId, onChoose, onMenu, onEdit }: PolityListProps) {
+  // State
   const { activeId, active, onKeyDown } = useListCursor(rows, targetId, onChoose, onMenu)
+
+  // Render
   return (
     <>
       <PolitiesSubhead year={year} count={rows.length} />

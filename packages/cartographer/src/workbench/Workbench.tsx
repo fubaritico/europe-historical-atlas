@@ -49,9 +49,13 @@ function readHash(): string {
  * @returns the workbench page
  */
 export function Workbench({ entries }: WorkbenchProps) {
+  // State
   const hash = useSyncExternalStore(subscribeToHash, readHash)
+
+  // Derived
   const selected = entries.find((entry) => entry.id === hash) ?? entries[0]
 
+  // Render
   return (
     <div className="workbench">
       <nav className="workbench__nav" aria-label="Plates">

@@ -30,8 +30,13 @@ export interface PolitiesPanelProps {
  * @returns the request, its open and close, and the panel's ref
  */
 function useArrangeMenu() {
-  const [arranging, setArranging] = useState<ArrangeRequest | null>(null)
+  // Refs
   const panel = useRef<HTMLElement | null>(null)
+
+  // State
+  const [arranging, setArranging] = useState<ArrangeRequest | null>(null)
+
+  // Handlers
   const openMenu = useCallback((id: string, at: ViewportPoint) => {
     setArranging({ id, at })
   }, [])
@@ -39,6 +44,8 @@ function useArrangeMenu() {
     setArranging(null)
     panel.current?.querySelector<HTMLElement>('.polities__list')?.focus()
   }, [])
+
+  // Return
   return { arranging, openMenu, closeMenu, panel }
 }
 
@@ -50,6 +57,7 @@ function useArrangeMenu() {
  * @returns the head
  */
 function PolitiesHead({ onNew }: { onNew: () => void }) {
+  // Render
   return (
     <header className="polities__head">
       <h2 className="polities__title">Polities</h2>
@@ -64,14 +72,20 @@ function PolitiesHead({ onNew }: { onNew: () => void }) {
  * @param props - the store, whether creating, the polity edited, and how each closes
  * @returns the dialogues
  */
-function PolityDialogs(props: {
+function PolityDialogs({
+  store,
+  creating,
+  edited,
+  onCreated,
+  onEdited,
+}: {
   store: CartographerStoreHook
   creating: boolean
   edited: YearPolity | null
   onCreated: () => void
   onEdited: () => void
 }) {
-  const { store, creating, edited, onCreated, onEdited } = props
+  // Render
   return (
     <>
       {edited === null ? null : (
@@ -93,17 +107,26 @@ function PolityDialogs(props: {
  * @returns the panel's head, the tree, the stacking menu when open, and the dialogue it opens
  */
 export function PolitiesPanel({ store, colours, onResult }: PolitiesPanelProps) {
-  const [creating, setCreating] = useState(false)
-  const { arranging, openMenu, closeMenu, panel } = useArrangeMenu()
-  const chooseTarget = store((state) => state.chooseTarget)
+  // Store
   const target = store((state) => state.target)
   // The document is mutated in place: the version is what changes when a polity is added or drawn.
   const version = store((state) => state.version)
-  const { document } = store.getState()
+
+  // Store actions
+  const chooseTarget = store((state) => state.chooseTarget)
+
+  // State
+  const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState<string | null>(null)
+  const { arranging, openMenu, closeMenu, panel } = useArrangeMenu()
+
+  // Derived
+  const { document } = store.getState()
   // Resolved each render: an undo can take the polity away while its dialogue is open, and then there
   // is nothing to edit — the dialogue is not shown.
   const edited = document.polities.find((polity) => polity.id === editing)
+
+  // Render
   return (
     <section ref={panel} className="polities" aria-label="Polities">
       <PolitiesHead

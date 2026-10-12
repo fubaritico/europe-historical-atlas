@@ -46,12 +46,19 @@ export function PolityArrangeMenu({
   onResult,
   onEdit,
 }: PolityArrangeMenuProps) {
-  const restackPolity = store((state) => state.restackPolity)
+  // Store
   // The document is mutated in place: the version is what changes when the order does.
   store((state) => state.version)
+
+  // Store actions
+  const restackPolity = store((state) => state.restackPolity)
+
+  // Derived
   const { document } = store.getState()
   const polity = document.polities.find((held) => held.id === request.id)
   const gone = polity === undefined
+
+  // Effects
   // An undo took the polity away: the menu closes — said once, and the focus handed back — rather
   // than staying open on nothing, to reappear if a redo brings the polity back (ARCH-002).
   useEffect(() => {
@@ -59,6 +66,8 @@ export function PolityArrangeMenu({
     console.warn(`[Cartographer] the polity "${request.id}" is gone; its menu was closed.`)
     onClose()
   }, [gone, request.id, onClose])
+
+  // Render
   if (polity === undefined) return null
   return (
     <PolityStackMenu

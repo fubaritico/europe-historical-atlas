@@ -49,7 +49,10 @@ function moveAlongToolbar(event: KeyboardEvent<HTMLDivElement>): void {
  * @returns the swatch
  */
 function ActiveSwatch({ swatch }: { swatch: ToolRailProps['swatch'] }) {
+  // Derived
   const name = swatch === null ? 'Active polity — none selected' : `Active polity — ${swatch.name}`
+
+  // Render
   return (
     <span
       className="tool-rail__swatch"
@@ -93,11 +96,18 @@ interface ToolButtonProps {
  * @returns the pointer handlers, and `consumeHold`, which tells the click whether it ends a hold
  */
 function useHoldToOpen(enabled: boolean, open: () => void) {
+  // Refs
   const hold = useRef<{ timer: number; opened: boolean } | null>(null)
+
+  // Handlers
   const stop = () => {
     if (hold.current !== null) window.clearTimeout(hold.current.timer)
   }
+
+  // Effects
   useEffect(() => stop, [])
+
+  // Return
   return {
     onPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => {
       if (!enabled || event.button !== 0) return
@@ -163,6 +173,7 @@ function GroupFlyout({
   onVariant: (id: string) => void
   close: () => void
 }) {
+  // Render
   return (
     <ToolFlyout
       label={`${label} tools`}
@@ -244,8 +255,13 @@ function ToolButton({
   current,
   onVariant,
 }: ToolButtonProps) {
+  // Refs
   const button = useRef<HTMLButtonElement | null>(null)
+
+  // Derived
   const group = entry.variants
+
+  // Handlers
   const openGroup = () => {
     setOpen(true)
   }
@@ -254,6 +270,8 @@ function ToolButton({
     setOpen(false)
     button.current?.focus()
   }
+
+  // Render
   return (
     <div className="tool-rail__group">
       <button
@@ -309,7 +327,10 @@ export function ToolRail({
   onPenMode,
   tools = RAIL_TOOLS,
 }: ToolRailProps) {
+  // State
   const [openGroup, setOpenGroup] = useState<EditorTool | null>(initiallyOpen ?? null)
+
+  // Render
   return (
     <div className="tool-rail">
       <div

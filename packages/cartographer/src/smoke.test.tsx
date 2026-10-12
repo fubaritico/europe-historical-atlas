@@ -14,8 +14,10 @@ import { describe, expect, it } from 'vitest'
  * The first real suite arrives with the first real component, and this file goes when it does.
  */
 function Counter() {
+  // State
   const [count, setCount] = useState(0)
 
+  // Render
   return (
     <button
       type="button"

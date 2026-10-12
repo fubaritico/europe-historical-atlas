@@ -88,6 +88,7 @@ function ChoiceField({
   value: string | null
   onSelect: (value: string | null) => void
 }) {
+  // Render
   return (
     <div className="ui-field">
       {/* Visual only: the trigger carries the same name as its `aria-label`. */}
@@ -120,15 +121,21 @@ function ColourField({
   value: HsvaColor | null
   onChange: (colour: HsvaColor | null) => void
 }) {
+  // Render
   return <ColorField label="Colour" value={value} onChange={onChange} nullable density="compact" />
 }
 
 /** The form's fields, in `s02`'s order, with the id after the name it is proposed from. */
 function PolityFields(props: PolityFormProps) {
+  // Derived
   const { draft, errors, suzerains, onField, onColour } = props
+
+  // Handlers
   const choose = (field: PolityFormField) => (value: string | null) => {
     onField(field, value)
   }
+
+  // Render
   return (
     <>
       <Input
@@ -185,7 +192,10 @@ function PolityFields(props: PolityFormProps) {
  * @returns the form
  */
 export function PolityForm(props: PolityFormProps) {
+  // Derived
   const { title, onSubmit, onCancel } = props
+
+  // Render
   return (
     <form
       className="polity-form"

@@ -37,7 +37,10 @@ export interface PolityStackMenuProps {
  * @returns the ref the menu's element takes
  */
 function useInsideWindow(at: ViewportPoint): RefObject<HTMLDivElement | null> {
+  // Refs
   const shell = useRef<HTMLDivElement | null>(null)
+
+  // Effects
   useLayoutEffect(() => {
     const node = shell.current
     if (node === null) return
@@ -50,6 +53,8 @@ function useInsideWindow(at: ViewportPoint): RefObject<HTMLDivElement | null> {
     node.style.left = `${String(place.x)}px`
     node.style.top = `${String(place.y)}px`
   }, [at])
+
+  // Return
   return shell
 }
 
@@ -63,7 +68,10 @@ function useInsideWindow(at: ViewportPoint): RefObject<HTMLDivElement | null> {
  * @param onClose - how it closes
  */
 function useDismiss(shell: RefObject<HTMLDivElement | null>, onClose: () => void): void {
+  // Refs
   const close = useRef(onClose)
+
+  // Effects
   useEffect(() => {
     close.current = onClose
   }, [onClose])
@@ -106,8 +114,13 @@ export function PolityStackMenu({
   onEdit,
   onClose,
 }: PolityStackMenuProps) {
+  // Refs
   const shell = useInsideWindow(at)
+
+  // Effects
   useDismiss(shell, onClose)
+
+  // Render
   return (
     <div ref={shell} className="polity-stack-menu" style={{ left: at.x, top: at.y }}>
       <Menu

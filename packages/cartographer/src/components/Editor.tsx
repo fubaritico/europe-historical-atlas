@@ -55,10 +55,12 @@ export interface EditorProps {
  * @returns the shell, filled where there is something to put in it
  */
 export function Editor({ store, load, style, zoneLabel, label, heading, colours }: EditorProps) {
+  // Refs
   const status = useRef<HTMLElement | null>(null)
   const action = useRef<HTMLElement | null>(null)
   const result = useRef<HTMLElement | null>(null)
 
+  // Render
   return (
     <Shell
       heading={heading}

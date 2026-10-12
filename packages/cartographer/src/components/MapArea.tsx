@@ -131,12 +131,15 @@ export interface BackdropWaitingProps {
  * @returns the waiting notice
  */
 export function BackdropWaiting({ fraction, phase }: BackdropWaitingProps) {
+  // Derived
   const percent = Math.round(fraction * 100)
   // What the bar measures, named for a screen reader. A `<progress>` exposes its own value natively, so
   // this must say what is progressing and not repeat the number. Derived per render rather than fixed:
   // a hard-coded phase would go stale, which is the same gap as no label, just later. Same pattern as
   // the atlas's own progress overlay, which keeps the `aria-label` in step with its caption.
   const measuring = phase === null ? 'Preparing the backdrop' : PHASE_LABELS[phase]
+
+  // Render
   return (
     <div style={NOTICE} role="status">
       <p>Preparing the backdrop…</p>
@@ -169,11 +172,14 @@ export interface BackdropFailureProps {
  * @returns the blocking notice
  */
 export function BackdropFailure({ error }: BackdropFailureProps) {
+  // Derived
   const detail = isAssetError(error)
     ? `${error.asset} (${error.failure}) — ${error.detail}`
     : error instanceof Error
       ? error.message
       : String(error)
+
+  // Render
   return (
     <div style={NOTICE} role="alert">
       <p>The backdrop could not be prepared.</p>
@@ -199,8 +205,10 @@ export function MapArea({
   resultRef,
   colours,
 }: MapAreaProps) {
+  // State
   const { assets, error, fraction, phase } = useEditorAssets(load)
 
+  // Render
   if (error !== null) return <BackdropFailure error={error} />
   if (assets === null) return <BackdropWaiting fraction={fraction} phase={phase} />
   return (

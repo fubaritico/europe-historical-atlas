@@ -25,6 +25,7 @@ const PATHS: Record<ToolIconName, readonly string[]> = {
  * @returns the SVG
  */
 export function ToolIcon({ name }: { name: ToolIconName }) {
+  // Render
   return (
     <svg
       width={18}

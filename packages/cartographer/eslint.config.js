@@ -4,6 +4,7 @@ import jsxA11y from 'eslint-plugin-jsx-a11y'
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
+import eha from 'eslint-plugin-eha'
 
 import rootEslintConfig, { layerBoundary } from '../../eslint.config.js'
 
@@ -131,6 +132,33 @@ export default tseslint.config(
     rules: {
       // Prop types are the types. The rule exists for JavaScript React and only ever fires here as noise.
       'react/prop-types': 'off',
+    },
+  },
+
+  // Where each declaration sits in a component or a hook — the dev's own rule, adapted from his Fluid plugin
+  // (files/plans/eslint-plugin-eha/plan.md). An error, not a warning: one author, nothing to count down.
+  // `stores` names the hook a store is selected through; `hooks` gives every custom hook the group of what
+  // it returns, and a new hook stops the lint until it has one.
+  {
+    files: ['**/*.{ts,tsx}'],
+    plugins: { eha },
+    rules: {
+      'eha/component-body-order': [
+        'error',
+        {
+          stores: ['store'],
+          hooks: {
+            useArrangeMenu: 'state',
+            useDismiss: 'effect',
+            useEditorAssets: 'state',
+            useFlyoutFocus: 'effect',
+            useHoldToOpen: 'handler',
+            useInsideWindow: 'ref',
+            useListCursor: 'state',
+            usePolityDraft: 'state',
+          },
+        },
+      ],
     },
   },
 

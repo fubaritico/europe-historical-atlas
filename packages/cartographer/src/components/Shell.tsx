@@ -54,6 +54,7 @@ export interface ShellProps {
 
 /** A zone with nothing in it yet, carrying its own name so the layout reads. */
 function Placeholder({ name }: { name: string }) {
+  // Render
   return <div className="empty-zone">{name}</div>
 }
 
@@ -68,6 +69,7 @@ function Placeholder({ name }: { name: string }) {
  * @returns the five zones, laid out
  */
 export function Shell({ heading, appbar, docbar, rail, canvas, dock, status }: ShellProps) {
+  // Render
   return (
     <div className="shell">
       <div className="shell__appbar">{appbar ?? <Placeholder name="app bar" />}</div>

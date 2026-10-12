@@ -70,6 +70,7 @@ function FlyoutItem({
   checked: boolean
   onChoose: (id: string) => void
 }) {
+  // Render
   return (
     <li
       role="menuitemradio"
@@ -103,6 +104,7 @@ function FlyoutItem({
  * @param onDismiss - close without choosing
  */
 function useFlyoutFocus(menu: RefObject<HTMLUListElement | null>, onDismiss: () => void): void {
+  // Effects
   // An effect event, so a parent re-render — a new `onDismiss` each time — does not re-run the effect
   // and pull the focus back to the checked row while the author is moving through the list.
   const dismiss = useEffectEvent(onDismiss)
@@ -135,8 +137,13 @@ function useFlyoutFocus(menu: RefObject<HTMLUListElement | null>, onDismiss: () 
  * @returns the menu
  */
 export function ToolFlyout({ label, variants, current, onChoose, onDismiss }: ToolFlyoutProps) {
+  // Refs
   const menu = useRef<HTMLUListElement | null>(null)
+
+  // Effects
   useFlyoutFocus(menu, onDismiss)
+
+  // Render
   return (
     <ul
       ref={menu}

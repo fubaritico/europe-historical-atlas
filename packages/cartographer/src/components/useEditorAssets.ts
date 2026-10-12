@@ -42,13 +42,17 @@ export interface EditorAssetsState {
  * @returns the waiting notice, the failure notice, or the canvas
  */
 export function useEditorAssets(load: BackdropLoad): EditorAssetsState {
+  // Refs
   const inFlight = useRef<Promise<EditorAssets> | null>(null)
   const progress = useRef<(at: number, running: ComputePhase) => void>(() => undefined)
+
+  // State
   const [assets, setAssets] = useState<EditorAssets | null>(null)
   const [error, setError] = useState<unknown>(null)
   const [fraction, setFraction] = useState(0)
   const [phase, setPhase] = useState<ComputePhase | null>(null)
 
+  // Effects
   useEffect(() => {
     let ignore = false
     progress.current = (at, running) => {
@@ -72,5 +76,6 @@ export function useEditorAssets(load: BackdropLoad): EditorAssetsState {
     }
   }, [load])
 
+  // Return
   return { assets, error, fraction, phase }
 }
