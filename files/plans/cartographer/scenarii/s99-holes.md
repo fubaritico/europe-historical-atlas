@@ -110,6 +110,10 @@ The third is worth serious thought: the editor does not need the raster, only th
 
 Also present: Rhine, Seine, Loire, Garonne, Elbe, Danube, Vistula, Oder. Also absent: the Somme.
 
+> **Corrected 2026-10-12, by use**: the Saône **is** in the dataset, spelled `Sane` — this measure searched
+> for "Saône". Its lower course, Chalon to Lyon, was followed by the Pen while drawing France (23 vertices,
+> `s02`). Whether its upper course is there is not measured yet. Finding 1 below stands only for that part.
+
 **Three findings, and two are new holes:**
 
 1. **The Saône is missing** — a tributary, cut by the `scalerank` threshold. It is one of _les quatre
@@ -362,6 +366,11 @@ ways: a **download**, which works everywhere and makes the author move three fil
 System Access API**, which writes straight into a chosen directory and lets ‹ctrl+s› overwrite in place.
 The second is far better for the author and is not in every browser. **Does not block drawing 1100.**
 
+**Settled for local mode, 2026-10-12**: neither — the Cartographer's **dev server** writes the year into
+`packages/atlas/public/years/<year>/`, authorised explicitly by the dev; the File System Access API's
+native folder dialog could not be driven remotely. The built site cannot save; the download fallback and
+the online tier stay open. `s15`, *Local mode*; `files/plans/cartographer/save-open-plan.md`.
+
 ### H-29 · Who may write online, and what happens with two authors?
 
 A single shared secret in a Netlify Function is enough for one author and answers nothing beyond that.
@@ -477,3 +486,41 @@ stacking commands are in use. *(the question is mine)*
 **Proposed the same evening, with the group model of `s16`**: {Polities} becomes the tree of groups,
 front first within a level, which makes the stack visible in the list. Settled if the dev agrees.
 
+
+### H-34 · Tools only once zoomed in — **raised and decided 2026-10-12 by the dev, built the same evening — [s17](s17-tools-wait-for-the-zoom.md)**
+
+Seen while I drew remotely at continent scale: three of four Pen clicks snapped to rivers, because the snap
+radius is in **screen pixels** (H-04) and a few pixels span tens of kilometres there. The dev: *"moi quand
+je dessine, je zoome avant. Ça, c'est la vraie expérience utilisateur"* — and, asked whether only the
+snapping should wait for the zoom or the tools themselves: *"on peut désactiver les outils tant qu'on est
+trop loin, d'accord, pas de problème."*
+
+**Settled**: below a zoom threshold the drawing tools do not act. **Open**: the threshold (to be measured on
+the scale he habitually draws at), whether the arrow is held too or only the Pen and Pencil, and how the
+refusal is shown — the cursor already refuses where there is no target (2026-10-08), the same `not-allowed`
+plus a status-bar line (*"zoom in to draw"*) is the obvious reuse. *(the last two are my questions)*
+
+### H-35 · A river is not followed from one of its stretches to another — **observed 2026-10-12**
+
+Drawing France, two clicks on the Meuse (Mézières, then near its source) gave a straight segment and no
+insertion; the same between Avignon and the Petit Rhône mouth. The Scheldt, the Saône and the Rhône from
+Lyon to Avignon were followed. *(Claude's hypothesis: the dataset cuts a river into several polylines and
+following stays inside one.)* **Measure first**: count the polylines named `Maas` and see where they meet.
+Then the choice is the dev's — join them at load, or follow across a junction. [s02](s02-create-france-1100.md).
+
+### H-36 · On a river border, the shared-border follow never triggers — **observed 2026-10-12**
+
+The Pen weighs the water before an existing anchor (`liveCanvas.ts`, `snapOffer`), so on a neighbour's
+outline made of river vertices the hover says *"Following the Rhône"* and the two-anchor follow of
+`borderSnap.ts` is never reached. Drawing Burgundy beside France worked by repeating France's river clicks
+— the vertices are the same, so the anchors were reused — but it asks the author to know where the
+neighbour's stretches began and ended. **Options, not decided**: an anchor of a neighbour wins over the
+water when the pointer is on it exactly · a modifier key to choose · keep it and document the replay.
+
+### H-37 · No gesture welds two anchors into one — **observed 2026-10-12**
+
+One click at the Petit Rhône mouth took a river vertex 2.3 km from France's, so the two outlines do not
+meet between Avignon and the sea. Moving one onto the other with the arrow makes them coincide without
+sharing an index — exactly the second geometry `s00` forbids. A weld (select two anchors, merge them, every
+ring following the survivor) is the missing gesture. **Trigger**: the first time a shared border has to be
+repaired by hand.

@@ -760,3 +760,92 @@ Scenario: the fills and borders refresh
 > **Hole H-08.** Rasterising a year at the 4× grid costs **~825 ms**, measured. A refresh per vertex is
 > impossible. So there are two representations on screen at once — the live vector outline and the
 > lagging raster fill — and what happens when they disagree has to be designed, not discovered.
+
+## Walked for real — the Kingdom of France, then Burgundy beside it (2026-10-12)
+
+> **Scenarios written from use, not from design.** The dev's call the same evening: *"lorsque tu fais des
+> tests end-to-end toi-même et qu'on travaille sur des scénarios, va ajouter ces scénarios là où il faut
+> […] il faut qu'on construise notre propre culture de l'utilisation de l'application."* Every line below
+> was seen on screen or read in the saved file while Claude drew in the dev's Chrome. Kept traces:
+> `years/1100.france-v1/`, `years/1100.bourgogne-v1/` (local, never committed).
+
+```gherkin
+Scenario: a whole Atlantic and Channel coast in two clicks
+  Given the Pen is aimed at the Kingdom of France, France filling the screen
+  When I hover the Basque coast until the bar reads "Following the coastline for Royaume de France"
+  And I click, then click the coast at the Scheldt estuary
+  Then the result reads "inserted 851 vertices from the coastline"
+  And the outline follows every inlet between them, Brittany and the Gironde included, the short way
+```
+
+```gherkin
+Scenario: hover first, then click — the snap must be live before the click
+  Given the Pen is near a river
+  When the pointer arrives and clicks in the same instant
+  Then the click may land as a free point: the snap had not been offered yet
+  When instead I hover, wait until the bar names the river, then click
+  Then the click lands on the river
+```
+
+> The dev, 2026-10-12: *"quand tu t'approches d'un fleuve, il faut attendre une seconde."* What a hand does
+> naturally, a script must do on purpose. *(Claude's reading of the cause: the hover is evaluated on the
+> next animation frame.)*
+
+```gherkin
+Scenario: a river followed upstream between two clicks
+  Given the outline ends at the Scheldt estuary
+  When I click the Schelde below Antwerp, then again near Cambrai
+  Then the result reads "inserted 26 vertices from the Schelde"
+```
+
+```gherkin
+Scenario: the Saône is there, under the dataset's name
+  When I hover the river between Chalon and Lyon
+  Then the bar reads "Following the Sane for Royaume de France"
+  And two clicks insert 23 vertices
+```
+
+> **Correction of `H-02`**, which measured the Saône as missing: it searched for "Saône" and the dataset
+> spells it `Sane`. At least its lower course, Chalon to Lyon, is present. See `s99`.
+
+```gherkin
+Scenario: a river is not followed from one of its stretches to another
+  Given the outline ends on the Meuse at Mézières
+  When I click the Meuse again near its source
+  Then a straight segment joins the two clicks, and nothing is inserted
+```
+
+> **Observed, not yet explained** — `H-35` in `s99`. *(Claude's hypothesis: the river is cut into several
+> polylines and following stays inside one.)* Same with the Rhône from Avignon to the Petit Rhône mouth.
+
+```gherkin
+Scenario: take back the last anchor while drawing
+  Given the outline has anchors and the rubber band runs to the pointer
+  When I press ‹Backspace›
+  Then the last anchor goes, and the rubber band now starts from the one before
+  And the line to the pointer is the rubber band, never a placed segment
+```
+
+```gherkin
+Scenario: a neighbour shares the river border by repeating its clicks
+  Given France's eastern limit is made of Saône and Rhône vertices
+  And I draw the Kingdom of Burgundy
+  When I join France's free anchor at Gray — the bar reads "Branching from a shared anchor — held by 1 path"
+  And I click the same river vertices France was drawn with: Saône at Chalon then Lyon, Rhône below Lyon then at Avignon
+  Then each stretch inserts as many vertices as it did for France — 23, then 34
+  And the saved file shows 61 anchors held by both rings, contiguous from Gray to Avignon
+  And hovering the Gray anchor afterwards reads "held by 2 paths"
+```
+
+```gherkin
+Scenario: on a river border, the water wins over the neighbour's anchor
+  Given France's anchor lies on the Rhône
+  When I hover it with the Pen
+  Then the bar reads "Following the Rhône", not "Branching from a shared anchor"
+  And a click lands on the river vertex — France's anchor reused if it is the same vertex
+  But the shared-border follow (two clicks on one ring's anchors) does not trigger
+```
+
+> **`H-36` and `H-37` in `s99`.** Repeating the neighbour's clicks works, but only because they land on the
+> same vertices; one click that took another vertex 2.3 km away (the Petit Rhône mouth) left the two
+> outlines not meeting there, and no gesture yet welds two anchors into one.

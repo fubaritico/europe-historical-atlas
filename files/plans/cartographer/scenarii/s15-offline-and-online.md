@@ -84,6 +84,81 @@ Scenario: the year is not listed in the manifest
 > *absent from the manifest* is a decision; a year *listed and failing* is a breakdown, and only the
 > second one is announced.
 
+### Local mode — the dev server writes (built and walked 2026-10-12)
+
+> `H-28` answered for working on the dev's machine: the Cartographer's own dev server writes the year
+> (`PUT /__years/<year>`), straight into `packages/atlas/public/years/<year>/`. Walked end to end in the dev's
+> Chrome the same evening — every line below was seen on screen or read on disk.
+> `files/plans/cartographer/save-open-plan.md` holds the decisions (D1–D10).
+
+```gherkin
+Scenario: the editor opens the saved year by itself
+  Given years/index.json lists 1100 and years/1100/ holds its three files
+  When I load http://localhost:5174/
+  Then the status bar reads "opened 1100 · 1 polity · 1,101 vertices" before the backdrop has finished baking
+  And {Polities} lists the saved polities
+  And the undo line starts fresh on the opened year
+```
+
+```gherkin
+Scenario: a year never saved starts empty, and says so
+  Given years/index.json does not list 1100
+  When I load the Cartographer
+  Then the status bar reads "1100 has never been saved — starting from an empty map"
+  And ‹ctrl+S› is allowed
+```
+
+```gherkin
+Scenario: save in place
+  Given I have drawn the Kingdom of France
+  When I press ‹ctrl+S›
+  Then the status bar reads "saved 1100 · 1 polity · 1,101 vertices"
+  And registry.json, polities.json and borders.json are written under years/1100/
+  And years/index.json lists 1100, written last
+  And the page does not reload, and the drawing stays on screen
+```
+
+```gherkin
+Scenario: reopen and find it identical, to the byte
+  Given a saved year
+  When I reload the page, then press ‹ctrl+S› without touching anything
+  Then the three files and the manifest are rewritten
+  And their contents are byte-for-byte what they were
+  And two polities that shared 61 anchors still share 61
+```
+
+```gherkin
+Scenario: an unreadable year blocks saving rather than being overwritten
+  Given years/index.json lists 1100 and its polities.json fails its schema
+  When I load the Cartographer
+  Then the editor starts on an empty map
+  And the status bar says why 1100 could not be read, and that saving is blocked
+  And ‹ctrl+S› writes nothing and repeats the reason
+```
+
+```gherkin
+Scenario: drawing before the saved year arrives
+  Given the start-up read is still in flight
+  When I edit the empty map, and the read lands afterwards
+  Then the read is not applied — my edit stays
+  And saving is blocked, and the status bar says to reload to open the year
+```
+
+```gherkin
+Scenario: a page from elsewhere cannot write a year
+  Given the dev server is running on localhost
+  When another site's page sends PUT /__years/1100
+  Then the server answers 403 and writes nothing
+  And the same holds for a DNS-rebound name whose page is same-origin with itself
+```
+
+```gherkin
+Scenario: the saved years are working copies, never committed
+  Given I have saved 1100 locally
+  Then git status shows nothing — the year folders are ignored and years/index.json is skip-worktree
+  And a copy kept under a suffix (years/1100.france-v1/) is ignored too, and read by nothing
+```
+
 ---
 
 ## Online — the later tier
