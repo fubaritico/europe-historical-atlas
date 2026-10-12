@@ -122,8 +122,9 @@ const STYLE: PaintStyle = {
   fillBlend: 'overlay',
   coastStroke: 'rgba(60, 50, 38, 0.85)',
   coastWidth: 1,
-  riverStroke: 'rgba(86, 107, 122, 0.75)',
-  riverWidth: 1,
+  riverStroke: 'rgba(74, 52, 36, 0.3)',
+  riverWidthMajor: 1.25,
+  riverWidthMinor: 0.95,
 }
 
 const SIZE: PixelSize = { width: 800, height: 600 }
@@ -185,6 +186,7 @@ const withVectors = (scale = 2) =>
             [5, 5],
           ],
           bounds: { left: 1, top: 1, right: 5, bottom: 5 },
+          rank: 1,
         },
       ],
       scale,
@@ -490,8 +492,35 @@ describe('painter', () => {
 
       // Without this a river at zoom 8 is eight times too thick — and the error grows with the zoom, so
       // it looks right in the opening view, which is the only one anyone checks.
-      expect(strokes.some((call) => call.lineWidth === STYLE.riverWidth / 4)).toBe(true)
+      expect(strokes.some((call) => call.lineWidth === STYLE.riverWidthMajor / 4)).toBe(true)
       expect(strokes.some((call) => call.lineWidth === STYLE.coastWidth / 4)).toBe(true)
+    })
+
+    it('draws a major river thicker than a minor one, the atlas’s width by rank', () => {
+      const { ctx, calls } = recordingContext()
+      const bounds = { left: 1, top: 1, right: 5, bottom: 5 }
+      const points: [number, number][] = [
+        [1, 1],
+        [5, 5],
+      ]
+      const twoRanks = scene({
+        vectors: {
+          coast: [],
+          rivers: [
+            { points, bounds, rank: 9 },
+            { points, bounds, rank: 1 },
+          ],
+          scale: 1,
+          originX: 0,
+          originY: 0,
+        },
+      })
+
+      paintCanvas(ctx, SIZE, twoRanks, STYLE)
+      // The rivers' strokes come first, the major one first; the coastline's follows them.
+      const widths = calls.filter((call) => call.op === 'stroke').map((call) => call.lineWidth)
+
+      expect(widths.slice(0, 2)).toEqual([STYLE.riverWidthMajor, STYLE.riverWidthMinor])
     })
 
     it('strokes each layer once, not once per contour', () => {

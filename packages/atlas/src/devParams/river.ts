@@ -6,7 +6,7 @@
  * own slider without failing type-check.
  */
 
-import { DEFAULT_COASTLINE_PARAMS } from './coastline'
+import { RIVER_DISPLAY } from '@europe-historical-atlas/core/data/riverDisplay'
 
 import type { ControlTable } from '@europe-historical-atlas/core/utils/controlSpec'
 
@@ -37,15 +37,16 @@ export interface RiverDevParams {
 
 /** Same sepia ink as the coastline — one hand drew the whole map. Minor tributaries appear on zoom-in. */
 export const DEFAULT_RIVER_PARAMS: RiverDevParams = {
-  color: DEFAULT_COASTLINE_PARAMS.color,
-  opacity: 0.3,
+  // The look the Cartographer opens with too — one definition, `core/data/riverDisplay.ts`.
+  color: RIVER_DISPLAY.ink,
+  opacity: RIVER_DISPLAY.opacity,
   revealStart: 0,
   revealEnd: 0.8,
   fade: 0.25,
-  includeLakeCenterlines: false,
+  includeLakeCenterlines: RIVER_DISPLAY.includeLakeCenterlines,
   jitter: 0,
-  widthMajor: 1.25,
-  widthMinor: 0.95,
+  widthMajor: RIVER_DISPLAY.widthMajor,
+  widthMinor: RIVER_DISPLAY.widthMinor,
 }
 
 /** Range, step and label of every {@link RiverDevParams} field. */

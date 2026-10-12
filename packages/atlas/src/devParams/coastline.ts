@@ -6,6 +6,8 @@
  * own slider without failing type-check.
  */
 
+import { MAP_INK } from '@europe-historical-atlas/core/data/riverDisplay'
+
 import type { ControlTable } from '@europe-historical-atlas/core/utils/controlSpec'
 
 /**
@@ -28,7 +30,7 @@ export interface CoastlineDevParams {
 
 /** Soft pencil coastline: a light jitter over a few overlaid strokes at low opacity. */
 export const DEFAULT_COASTLINE_PARAMS: CoastlineDevParams = {
-  color: '#4a3424',
+  color: MAP_INK,
   opacity: 0.2,
   opacityZoomIn: 0.1,
   yLift: 0.002,

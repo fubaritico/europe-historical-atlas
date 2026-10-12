@@ -2,6 +2,11 @@ import { boundsDisagreement } from '@europe-historical-atlas/core/data/assetErro
 import { chainSegments } from '@europe-historical-atlas/core/data/coastlineChain'
 import { createMaskCoastlineSource } from '@europe-historical-atlas/core/data/coastlineSource'
 import { mendRivers } from '@europe-historical-atlas/core/data/riverChain'
+import { RIVER_DISPLAY, isDrawnRiver } from '@europe-historical-atlas/core/data/riverDisplay'
+import {
+  DEFAULT_RIVER_EXTENSION,
+  extendRiversToSea,
+} from '@europe-historical-atlas/core/data/riverSource'
 
 import { boundsOf } from './view/culling'
 
@@ -165,6 +170,28 @@ export function projectRiverLines(rivers: readonly River[], frame: BackdropFrame
   })
 }
 
+/**
+ * The rivers as the Cartographer draws them **and snaps to** — the atlas's rivers, drawn the atlas's way.
+ *
+ * The dev's call, 2026-10-12: *"si ça affiche exactement la même chose que dans l'application […] et qu'on
+ * a un fonctionnement cohérent, moi, ça me va."* Three steps, in this order:
+ *   1. **the paths traced through lakes go** (`isDrawnRiver`, the atlas's own rule) — not drawn, so not
+ *      snapped to: the Pen must only ever reach what the author sees;
+ *   2. **the pieces are mended** (`H-35`): Natural Earth cuts a river into pieces and strews 2-point
+ *      fragments, and the Pen follows one polyline at a time — 591 polylines → 398 on the shipped file;
+ *   3. **the mouths are carried to the sea** (`extendRiversToSea`, the atlas's function on the same mask),
+ *      so a river ends at the coast here as it does in the atlas, and a border running down an estuary can
+ *      follow it to the shore. Mended first, so a mouth is found at the true end of a river and not at the
+ *      end of one of its pieces.
+ * @param rivers - the centrelines as the source projected them
+ * @param mask - the land/water mask the backdrop was baked from
+ * @returns the centrelines to draw and to snap to
+ */
+export function riversAsDrawn(rivers: readonly River[], mask: LandMask): River[] {
+  const drawn = rivers.filter((river) => isDrawnRiver(river, RIVER_DISPLAY.includeLakeCenterlines))
+  return extendRiversToSea(mendRivers(drawn).rivers, mask, DEFAULT_RIVER_EXTENSION)
+}
+
 /** What {@link loadVectorLayers} needs. */
 export interface VectorLayersDeps {
   /** The mask the backdrop already loaded — the shoreline is traced through it. */
@@ -207,10 +234,7 @@ export async function loadVectorLayers(deps: VectorLayersDeps): Promise<VectorLa
   const riverProvenance = provenanceOf(loaded.source)
   return {
     coast: traceCoastline(deps.mask, deps.frame, deps.traceWidth),
-    // Mended before they are projected (H-35): Natural Earth cuts a river into pieces and strews 2-point
-    // fragments, and the Pen follows one polyline at a time — so the Loire, in three pieces, could never be
-    // followed in one go. Measured on the shipped file: 591 polylines → 398, 28 fragments, 165 joins.
-    rivers: projectRiverLines(mendRivers(loaded.rivers).rivers, deps.frame),
+    rivers: projectRiverLines(riversAsDrawn(loaded.rivers, deps.mask), deps.frame),
     coastProvenance,
     riverProvenance,
   }

@@ -855,3 +855,43 @@ Scenario: on a river border, the water wins over the neighbour's anchor
 > **`H-36` and `H-37` in `s99`.** Repeating the neighbour's clicks works, but only because they land on the
 > same vertices; one click that took another vertex 2.3 km away (the Petit Rhône mouth) left the two
 > outlines not meeting there, and no gesture yet welds two anchors into one.
+
+## The rivers the Pen reaches are the atlas's rivers (2026-10-12)
+
+> The dev, after hearing that the two applications drew the rivers differently: *"moi, à la base, je me
+> suis juste adapté à comment c'était […] si ça affiche exactement la même chose que dans l'application,
+> […] et qu'on a un fonctionnement cohérent, moi, ça me va."* One definition both read —
+> `core/data/riverDisplay.ts`. Walked in his Chrome the same evening.
+
+```gherkin
+Scenario: the rivers are drawn the atlas's way
+  Given the Cartographer has loaded
+  Then the rivers are drawn in the coastline's sepia ink at the atlas's opacity
+  And a major river is drawn thicker than a minor tributary, by the atlas's width scale
+  And the paths traced through lakes are not drawn
+```
+
+```gherkin
+Scenario: what is not drawn is not reached
+  Given a path traced through a lake in the dataset
+  When the Pen comes near it
+  Then nothing is offered: the Pen snaps only to the rivers on screen
+```
+
+```gherkin
+Scenario: a river runs to the sea as it does in the atlas
+  Given a river whose mouth stops short of the coast in the dataset
+  When the Cartographer loads
+  Then its mouth is carried to the shore, by the atlas's own function on the same land mask
+  And the Pen can follow it down to the coast
+  But a river whose last point already lies in the mask's estuary water stays as it is — the Loire at
+  Saint-Nazaire — in the Cartographer exactly as in the atlas
+```
+
+> **Kept different on purpose**: the atlas reveals the minor ranks as the camera comes in; the Cartographer
+> draws every rank it snaps to, because a tributary hidden yet snappable would pull points onto an
+> invisible line. From afar the tools wait anyway (`s17`).
+>
+> **Seen while walking it, for the dev to judge**: at the atlas's opacity, a river over a political fill
+> reads faint in the editor — the same numbers do not give the same contrast on a flat 2D tint as on the
+> atlas's lit relief. The opacity is one value in `riverDisplay.ts`; the dev decides on sight.

@@ -1,3 +1,5 @@
+import { RIVER_DISPLAY, riverStrokeCss } from '@europe-historical-atlas/core/data/riverDisplay'
+
 import type { PaintStyle } from './painter'
 
 /**
@@ -40,9 +42,11 @@ export const CHROME_PAINT_STYLE: PaintStyle = {
   // over sea alike — the same reasoning as the atlas's coastline ink, which this takes.
   coastStroke: 'rgba(60, 50, 38, 0.85)',
   coastWidth: 1,
-  // Rivers sit a shade lighter and thinner: they are landmarks to aim at, not the subject.
-  riverStroke: 'rgba(86, 107, 122, 0.75)',
-  riverWidth: 1,
+  // The atlas's rivers, drawn the atlas's way — its ink, its opacity, its width by rank — from the one
+  // definition both read (the dev's call, 2026-10-12: "exactement la même chose que dans l'application").
+  riverStroke: riverStrokeCss(RIVER_DISPLAY),
+  riverWidthMajor: RIVER_DISPLAY.widthMajor,
+  riverWidthMinor: RIVER_DISPLAY.widthMinor,
 }
 
 /**
@@ -73,6 +77,7 @@ export function inDevicePixels(style: PaintStyle, pixelRatio: number): PaintStyl
     pathWidth: style.pathWidth * pixelRatio,
     anchorRadius: style.anchorRadius * pixelRatio,
     coastWidth: style.coastWidth * pixelRatio,
-    riverWidth: style.riverWidth * pixelRatio,
+    riverWidthMajor: style.riverWidthMajor * pixelRatio,
+    riverWidthMinor: style.riverWidthMinor * pixelRatio,
   }
 }

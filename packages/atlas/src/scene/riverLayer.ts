@@ -1,5 +1,13 @@
 import { Group } from 'three'
 
+import {
+  RIVER_MAX_RANK,
+  RIVER_MIN_RANK,
+  isDrawnRiver,
+  riverRankWidth,
+  wholeRiverRank,
+} from '@europe-historical-atlas/core/data/riverDisplay'
+
 import { createLineLayer } from './lineLayer'
 
 import type { LineLayer, UvSegment } from './lineLayer'
@@ -73,10 +81,6 @@ export interface RiverLayer {
   dispose(): void
 }
 
-/** The `scalerank` range Natural Earth uses: 1 = major, 9 = minor. */
-const MIN_RANK = 1
-const MAX_RANK = 9
-
 /**
  * The zoom at which a rank reaches full opacity. Rank 1 lands on `revealStart`, rank 9 on `revealEnd`,
  * the rest spread evenly between — so pulling the camera in progressively fills the basins with their
@@ -89,8 +93,7 @@ export function rankRevealZoom(
   rank: number,
   options: Pick<RiverLayerOptions, 'revealStart' | 'revealEnd'>
 ): number {
-  const clamped = Math.min(MAX_RANK, Math.max(MIN_RANK, rank))
-  const t = (clamped - MIN_RANK) / (MAX_RANK - MIN_RANK)
+  const t = (wholeRiverRank(rank) - RIVER_MIN_RANK) / (RIVER_MAX_RANK - RIVER_MIN_RANK)
   return options.revealStart + (options.revealEnd - options.revealStart) * t
 }
 
@@ -106,9 +109,8 @@ export function rankWidth(
   rank: number,
   options: Pick<RiverLayerOptions, 'widthMajor' | 'widthMinor'>
 ): number {
-  const clamped = Math.min(MAX_RANK, Math.max(MIN_RANK, rank))
-  const t = (clamped - MIN_RANK) / (MAX_RANK - MIN_RANK)
-  return options.widthMajor + (options.widthMinor - options.widthMajor) * t
+  // The one definition the Cartographer paints with too (`core/data/riverDisplay.ts`).
+  return riverRankWidth(rank, options)
 }
 
 /**
@@ -156,13 +158,11 @@ export function createRiverLayer(rivers: readonly River[], options: RiverLayerOp
   const object = new Group()
   const byRank = new Map<number, LineLayer>()
 
-  const wanted = options.includeLakeCenterlines
-    ? rivers
-    : rivers.filter((river) => river.kind !== 'Lake Centerline')
+  const wanted = rivers.filter((river) => isDrawnRiver(river, options.includeLakeCenterlines))
 
   const segmentsByRank = new Map<number, UvSegment[]>()
   for (const river of wanted) {
-    const rank = Math.min(MAX_RANK, Math.max(MIN_RANK, Math.round(river.rank)))
+    const rank = wholeRiverRank(river.rank)
     const bucket = segmentsByRank.get(rank) ?? []
     bucket.push(...toSegments(river.points))
     segmentsByRank.set(rank, bucket)

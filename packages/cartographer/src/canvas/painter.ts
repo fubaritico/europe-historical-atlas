@@ -1,3 +1,5 @@
+import { riverRankWidth, wholeRiverRank } from '@europe-historical-atlas/core/data/riverDisplay'
+
 import { boxesOverlap, detailThresholdSquared, visibleBox } from '../view/culling'
 
 import type { Rect } from '../geometry/marquee'
@@ -144,10 +146,12 @@ export interface PaintStyle {
   coastStroke: string
   /** The shoreline's width in **screen** pixels, held constant as the view zooms. */
   coastWidth: number
-  /** A river's ink. */
+  /** A river's ink — the atlas's, with its opacity (`core/data/riverDisplay.ts`). */
   riverStroke: string
-  /** A river's width in screen pixels. */
-  riverWidth: number
+  /** A major river's width (rank 1) in screen pixels. */
+  riverWidthMajor: number
+  /** The finest tributary's width (rank 9) in screen pixels; the ranks between are interpolated. */
+  riverWidthMinor: number
 }
 
 /**
@@ -164,6 +168,12 @@ export interface VectorRun {
   closed?: boolean
   /** The box it occupies, in the same units. */
   bounds: Box
+}
+
+/** A river's run: a vector run that knows its Natural Earth rank, which decides its width. */
+export interface RiverRun extends VectorRun {
+  /** Natural Earth's `scalerank`, 1 (major) to 9 (minor). */
+  rank: number
 }
 
 /** What there is to draw, all of it already in screen pixels. */
@@ -211,8 +221,8 @@ export interface CanvasScene {
   vectors: {
     /** The shoreline, chained into contours. */
     coast: readonly VectorRun[]
-    /** The river centrelines. */
-    rivers: readonly VectorRun[]
+    /** The river centrelines, each with its rank. */
+    rivers: readonly RiverRun[]
     /** Backdrop pixels to screen pixels: multiply by this. */
     scale: number
     /** Then add this horizontally. */
@@ -338,17 +348,6 @@ function addRingToPath(ctx: Painter2D, ring: readonly Point[]): void {
 }
 
 /**
- * Paint the whole static scene, back to front.
- *
- * The order is the decision the painter *does* carry, and it is the only one: the vellum, then the baked
- * terrain, then the zone's frame, then the outlines, then the handles on top — a handle under an outline
- * could not be aimed at, and a frame under the terrain could not be seen.
- * @param ctx - the context to draw into
- * @param size - the canvas, in the same pixels the scene is in
- * @param scene - what to draw
- * @param style - the colours and sizes
- */
-/**
  * Add one run to the current path, dropping the points too close together to be told apart.
  *
  * **The decimation is the second half of what makes this affordable, and it only bites when zoomed
@@ -392,16 +391,6 @@ function addRunToPath(ctx: Painter2D, run: VectorRun, minGapSquared: number): vo
 }
 
 /**
- * Draw the coastline and the rivers, under the view's transform.
- *
- * **The transform is set and reset here, never left behind.** Everything else on this canvas is handed
- * over in screen pixels, so leaving the context scaled would silently magnify the handles and the
- * zone's label — a defect that looks like a styling mistake and is not.
- * @param ctx - the context
- * @param scene - what to draw
- * @param style - the colours and widths
- */
-/**
  * Stroke a layer: skip what is off screen, decimate what is too fine to see, stroke once.
  * @param ctx - the context, transformed to backdrop pixels
  * @param runs - the layer's runs
@@ -427,6 +416,44 @@ function strokeLayer(
   ctx.stroke()
 }
 
+/**
+ * The river runs grouped by rank, the major ranks first, each with the width it is stroked at.
+ *
+ * Grouped at paint time and in one pass — a push into each rank's bucket, never a copy (ARCH-101): about
+ * four hundred runs into at most nine buckets, against the tens of thousands of points the same repaint
+ * strokes. Keyed by rank and not by width, because the widths are scaled by the pixel ratio and the rank is
+ * what does not change.
+ * @param rivers - the river runs
+ * @param style - the two ends of the width scale, in device pixels
+ * @returns each rank's width with its runs, the thickest first
+ */
+function riversByWidth(
+  rivers: readonly RiverRun[],
+  style: Pick<PaintStyle, 'riverWidthMajor' | 'riverWidthMinor'>
+): [number, RiverRun[]][] {
+  const byRank = new Map<number, RiverRun[]>()
+  for (const run of rivers) {
+    const rank = wholeRiverRank(run.rank)
+    const bucket = byRank.get(rank)
+    if (bucket === undefined) byRank.set(rank, [run])
+    else bucket.push(run)
+  }
+  const widths = { widthMajor: style.riverWidthMajor, widthMinor: style.riverWidthMinor }
+  return [...byRank.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([rank, runs]) => [riverRankWidth(rank, widths), runs])
+}
+
+/**
+ * Draw the coastline and the rivers, under the view's transform.
+ *
+ * **The transform is set and reset here, never left behind.** Everything else on this canvas is handed
+ * over in screen pixels, so leaving the context scaled would silently magnify the handles and the
+ * zone's label — a defect that looks like a styling mistake and is not.
+ * @param ctx - the context
+ * @param scene - what to draw
+ * @param style - the colours and widths
+ */
 function paintVectors(
   ctx: Painter2D,
   size: PixelSize,
@@ -441,10 +468,13 @@ function paintVectors(
   ctx.setTransform(vectors.scale, 0, 0, vectors.scale, vectors.originX, vectors.originY)
 
   ctx.strokeStyle = style.riverStroke
-  // Divided by the scale because the width is specified in screen pixels and the transform is about to
-  // magnify everything it draws. Without this, a river at zoom 8 would be eight times too thick.
-  ctx.lineWidth = style.riverWidth / vectors.scale
-  strokeLayer(ctx, vectors.rivers, view, minGapSquared)
+  // One stroke per width, the atlas's hierarchy (rank 1 thickest): at most nine strokes, never one per
+  // river. Divided by the scale because the width is specified in screen pixels and the transform is about
+  // to magnify everything it draws — without that, a river at zoom 8 would be eight times too thick.
+  for (const [width, runs] of riversByWidth(vectors.rivers, style)) {
+    ctx.lineWidth = width / vectors.scale
+    strokeLayer(ctx, runs, view, minGapSquared)
+  }
 
   ctx.strokeStyle = style.coastStroke
   ctx.lineWidth = style.coastWidth / vectors.scale
@@ -453,6 +483,18 @@ function paintVectors(
   ctx.setTransform(1, 0, 0, 1, 0, 0)
 }
 
+/**
+ * Paint the whole static scene, back to front.
+ *
+ * The order is the decision the painter *does* carry, and it is the only one: the vellum, then the baked
+ * terrain, then the zone's frame, then the outlines, then the handles on top — a handle under an outline
+ * could not be aimed at, and a frame under the terrain could not be seen.
+ * @param ctx - the context to draw into
+ * @param size - the canvas, in the same pixels the scene is in
+ * @param scene - what to draw
+ * @param style - the colours and sizes
+ * @returns nothing — the scene is drawn into `ctx`
+ */
 export function paintCanvas(
   ctx: Painter2D,
   size: PixelSize,

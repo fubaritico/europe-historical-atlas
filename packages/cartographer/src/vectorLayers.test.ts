@@ -7,6 +7,7 @@ import {
   loadVectorLayers,
   projectRiverLines,
   provenanceOf,
+  riversAsDrawn,
   toBackdropPixels,
   traceCoastline,
 } from './vectorLayers'
@@ -245,6 +246,88 @@ describe('loadVectorLayers', () => {
 
       expect(layers.rivers).toHaveLength(1)
       expect(layers.rivers[0]?.points).toHaveLength(5)
+    })
+  })
+
+  describe('the rivers as drawn — the atlas’s', () => {
+    it('drops the paths traced through lakes, so the Pen never snaps to an undrawn line', () => {
+      const drawn = riversAsDrawn(
+        [
+          {
+            rank: 5,
+            kind: 'Lake Centerline',
+            name: 'Rhône',
+            points: [
+              { u: 0.5, v: 0.5 },
+              { u: 0.55, v: 0.5 },
+              { u: 0.6, v: 0.5 },
+            ],
+          },
+          {
+            rank: 5,
+            kind: 'River',
+            name: 'Loire',
+            points: [
+              { u: 0.5, v: 0.6 },
+              { u: 0.55, v: 0.6 },
+              { u: 0.6, v: 0.6 },
+            ],
+          },
+        ],
+        islandMask()
+      )
+
+      expect(drawn.map((river) => river.name)).toEqual(['Loire'])
+    })
+
+    it('mends before it extends, so a 2-point fragment near a coast never grows into a river', () => {
+      // Extended first, the fragment would gain points walking to the shore and no longer read as a
+      // fragment — an invented estuary line the Pen would snap to (QUAL-004).
+      const drawn = riversAsDrawn(
+        [
+          {
+            rank: 5,
+            kind: 'River',
+            name: 'Seine',
+            points: [
+              { u: 0.4, v: 0.5 },
+              { u: 0.45, v: 0.5 },
+              { u: 0.5, v: 0.5 },
+            ],
+          },
+          {
+            rank: 5,
+            kind: 'River',
+            name: 'Seine',
+            points: [
+              { u: 0.69, v: 0.6 },
+              { u: 0.695, v: 0.6 },
+            ],
+          },
+        ],
+        islandMask()
+      )
+
+      expect(drawn).toHaveLength(1)
+    })
+
+    it('carries a mouth to the sea, as the atlas does', () => {
+      // islandMask: isLand reads round(u × 15), so the land ends and the sea begins at u = 0.7. A river
+      // ending at 0.695, flowing east, is 0.005 from the shore — within the extension's 0.01 reach.
+      const river = {
+        rank: 5,
+        kind: 'River',
+        name: 'Seine',
+        points: [
+          { u: 0.62, v: 0.5 },
+          { u: 0.66, v: 0.5 },
+          { u: 0.695, v: 0.5 },
+        ],
+      }
+      const drawn = riversAsDrawn([river], islandMask())
+
+      expect(drawn[0]?.points.length).toBeGreaterThan(river.points.length)
+      expect(drawn[0]?.points.at(-1)?.u).toBeGreaterThanOrEqual(0.7)
     })
   })
 

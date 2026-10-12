@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import { RIVER_DISPLAY, riverStrokeCss } from '@europe-historical-atlas/core/data/riverDisplay'
+
 import { CHROME_PAINT_STYLE, inDevicePixels } from './style'
 
 describe('inDevicePixels', () => {
@@ -70,5 +72,13 @@ describe('inDevicePixels', () => {
       expect(CHROME_PAINT_STYLE.labelSize).toBe(11)
       expect(CHROME_PAINT_STYLE.zoneWidth).toBe(1)
     })
+  })
+})
+
+describe('CHROME_PAINT_STYLE', () => {
+  it('paints the rivers from the one definition the atlas reads too', () => {
+    expect(CHROME_PAINT_STYLE.riverStroke).toBe(riverStrokeCss(RIVER_DISPLAY))
+    expect(CHROME_PAINT_STYLE.riverWidthMajor).toBe(RIVER_DISPLAY.widthMajor)
+    expect(CHROME_PAINT_STYLE.riverWidthMinor).toBe(RIVER_DISPLAY.widthMinor)
   })
 })
