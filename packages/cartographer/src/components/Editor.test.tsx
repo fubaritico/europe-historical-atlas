@@ -1,10 +1,11 @@
-import { render } from '@testing-library/react'
+import { act, render } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { CHROME_PAINT_STYLE } from '../canvas/style'
+import { createResultRelay } from '../persistence/resultRelay'
 import { openEmptyYear } from '../state/openEmptyYear'
 import { createPolityColourSource } from '../state/polityColourSource'
 import { createCartographerStore } from '../state/store'
@@ -34,8 +35,11 @@ vi.mock('./MapArea', () => ({
   },
 }))
 
-/** The editor, mounted with everything the entry gives it. */
-function mount(): void {
+/**
+ * The editor, mounted with everything the entry gives it.
+ * @param results - the relay the year session says into; a fresh one by default
+ */
+function mount(results = createResultRelay()): void {
   handed = null
   render(
     <Editor
@@ -49,8 +53,14 @@ function mount(): void {
       label="Map of the year 1100, being edited"
       heading={<h1>Cartographer — year 1100</h1>}
       colours={COLOURS}
+      results={results}
     />
   )
+}
+
+/** The text in the status bar's result zone. */
+function resultText(): string | null | undefined {
+  return document.querySelector('.shell__result')?.textContent
 }
 
 describe('Editor', () => {
@@ -65,6 +75,28 @@ describe('Editor', () => {
         'app bar',
         'document bar',
       ])
+    })
+  })
+
+  describe('messages from outside React', () => {
+    it('shows a message said before the page mounted, once it has', () => {
+      const results = createResultRelay()
+      results.say('opened 1100 · 2 polities · 8 vertices')
+
+      mount(results)
+
+      expect(resultText()).toBe('opened 1100 · 2 polities · 8 vertices')
+    })
+
+    it('shows a message said after the page mounted', () => {
+      const results = createResultRelay()
+      mount(results)
+
+      act(() => {
+        results.say('saved 1100 · 2 polities · 8 vertices')
+      })
+
+      expect(resultText()).toBe('saved 1100 · 2 polities · 8 vertices')
     })
   })
 

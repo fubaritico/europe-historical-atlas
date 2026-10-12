@@ -166,6 +166,10 @@
 | **spike**            | Un petit programme jetable pour répondre à une question. Les nôtres sont dans `files/spikes/`. |
 | **payload**          | Le contenu d'un fichier de données, une fois chargé.                                           |
 | **round trip**       | Ouvrir → modifier → enregistrer → rouvrir **à l'identique**. Le test d'un vrai éditeur.        |
+| **manifeste des années** | `years/index.json` : la liste des années dessinées et le cadre contre lequel elles l'ont été. Une année **absente** du manifeste est un fait ; une année **listée qui échoue** est une panne — les deux ne se confondent jamais. |
+| **mode local** | Le Cartographe lancé par `pnpm dev:cartographer` : son serveur de dev écrit l'année dans `packages/atlas/public/years/<année>/` (‹ctrl+S›), et l'éditeur la rouvre au démarrage. Le site publié ne peut pas enregistrer. Arrêté le 12/10. |
+| **année de travail** | Une année enregistrée en mode local : la copie de travail du dev, **jamais commitée** (sa décision, 12/10) — pour retrouver ses tracés, déboguer les outils, maîtriser le format. |
+| **enregistrement bloqué** | L'état où ‹ctrl+S› refuse et dit pourquoi : l'année sur disque n'a pas pu être lue, ou elle est arrivée après qu'on a commencé à dessiner. Il existe pour qu'une carte vide n'écrase jamais une année illisible. |
 | **Gherkin**          | La façon d'écrire un scénario : _Étant donné… Quand… Alors…_. Lisible sans être programmeur.   |
 | **snap** / accrocher | Poser un point exactement sur un fleuve ou une côte qu'on possède déjà.                        |
 | **snap layer** / couche d'accroche | Ce que la plume suit quand elle s'accroche : la **côte** ou les **fleuves**, deux des couches de `{Layers}`. Un mode de la plume par couche. **Pas** le rail d'outils. |

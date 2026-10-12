@@ -13,6 +13,11 @@ import { createWorkerMapCompute } from '@europe-historical-atlas/core/pipeline/w
 import { bakeToBitmap, loadBackdrop } from './backdropSource'
 import { CHROME_PAINT_STYLE } from './canvas/style'
 import { Editor } from './components/Editor'
+import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
+import { createResultRelay } from './persistence/resultRelay'
+import { installSaveShortcut } from './persistence/saveShortcut'
+import { createDevServerYearArchive } from './persistence/yearArchive'
+import { createYearSession } from './persistence/yearSession'
 import { openEmptyYear } from './state/openEmptyYear'
 import { createPolityColourSource } from './state/polityColourSource'
 import { createCartographerStore } from './state/store'
@@ -155,6 +160,33 @@ const loadTheBackdrop = async (onProgress: ProgressReport) => {
  */
 const colours = createPolityColourSource(AUTOMATIC_PALETTE)
 
+/**
+ * The year on disk: opened when the editor starts, saved on ‹ctrl+S› — local mode, through the dev server
+ * (`files/plans/cartographer/save-open-plan.md`).
+ *
+ * **Started here, in the entry module, and not in a component's effect**: a component remounts and its
+ * effect re-runs, and `StrictMode` runs it twice on purpose — a second start-up read racing the first is
+ * exactly the shape `known-issues.md` records for the backdrop. This runs once because a module runs once.
+ *
+ * `/years` is read with a plain GET, the folder the atlas reads too; the write route is served by the dev
+ * server only (`vite.config.ts`), so the built site answers a save with an error, said in the status bar.
+ */
+const results = createResultRelay()
+const yearSession = createYearSession({
+  store,
+  archive: createDevServerYearArchive({
+    fetch: (input, init) => fetch(input, init),
+    yearsBase: '/years',
+    writeRoute: YEAR_WRITE_ROUTE,
+  }),
+  year: FIRST_YEAR,
+  report: results.say,
+})
+void yearSession.openOnStartup()
+installSaveShortcut(window, () => {
+  void yearSession.save()
+})
+
 createRoot(container).render(
   <StrictMode>
     <Editor
@@ -165,6 +197,7 @@ createRoot(container).render(
       zoneLabel={`editorial zone — ${String(store.getState().document.year)}`}
       label={`Map of the year ${String(store.getState().document.year)}, being edited`}
       colours={colours}
+      results={results}
     />
   </StrictMode>
 )

@@ -37,6 +37,13 @@ files/spikes/*/out/
 # payloads were committed as a result. `**/` matches at any depth and survives the next move.
 **/public/borders/
 
+# Years saved by the Cartographer in local mode — the dev's working copies, never committed (his call,
+# 2026-10-12: "ils sont pour nous pour travailler"). A year folder is ignored; `years/index.json` stays
+# tracked, committed with `"years": []`, and is marked skip-worktree on the dev's machine so a local save
+# listing a year does not show as a change (see known-issues.md). `*.tmp` covers a save cut off half-way.
+**/public/years/*/
+**/public/years/*.tmp
+
 # Turbo task cache
 .turbo
 

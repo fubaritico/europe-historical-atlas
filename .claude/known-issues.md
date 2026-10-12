@@ -4,6 +4,17 @@ Put here the know issues to avoid cluttering the context window.
 
 > Closed entries are archived in `archive/known-issues-closed.md` (move one there the step it closes); atlas-only open issues live in `known-issues-atlas.md`.
 
+- **Les années enregistrées en local ne sont jamais commitées, et `years/index.json` est en `skip-worktree`
+  sur la machine du dev.** Sa décision, 12/10 : *« ils sont pour nous pour travailler »* — retrouver ses
+  tracés, déboguer les outils, maîtriser le format. Les dossiers `packages/atlas/public/years/<année>/` sont
+  dans `.gitignore`. Le manifeste, lui, est **suivi** (commité avec `"years": []`, l'atlas en ligne le lit) et
+  une sauvegarde y ajoute l'année : d'où `git update-index --skip-worktree packages/atlas/public/years/index.json`,
+  pour que git ignore cette modification locale. **Trois conséquences** : (1) `git status` ne montre plus ce
+  fichier, même modifié — `git ls-files -v` l'affiche avec un `S` ; (2) **en local, l'atlas lit l'année
+  dessinée** pour 1100 au lieu du payload GPL, puisque le manifeste local la liste — voulu, c'est ce qui
+  permet de vérifier le format ; (3) le jour où une année doit vraiment être publiée, il faut d'abord
+  `git update-index --no-skip-worktree` sur ce fichier, sinon il ne partira pas. Réglage **par clone** :
+  une autre machine ne l'a pas. **Sévérité : à savoir.**
 - **Le design system vient de GitHub Packages, et GitHub exige un token même pour l'installer.**
   `@fubaritico/{tokens,styles,react}` en `^0.2.0` (09/10). Le `.npmrc` du dépôt ne fait que **router**
   le scope, sans aucun token : une ligne `${NODE_AUTH_TOKEN}` y faisait **ignorer tout le fichier** en

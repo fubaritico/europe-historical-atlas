@@ -78,6 +78,8 @@ const LAYERS = {
   components: 'src/components/MapCanvas.tsx',
   loaders: 'src/vectorLayers.ts',
   workbench: 'src/workbench/Workbench.tsx',
+  persistence: 'src/persistence/yearSession.ts',
+  devServer: 'src/devServer/yearWritePlan.ts',
   root: 'src/main.tsx',
 } as const
 
@@ -170,6 +172,14 @@ describe('architecture boundaries', () => {
       expect(forbiddenPatterns(loaders)).toContain('**/canvas/**')
       // And the package ban survives the composition, which is the single-rule trap.
       expect(forbiddenPackages(loaders)).toContain('three')
+    })
+
+    it('keeps the browser side and the server side of saving apart, both ways', () => {
+      // The seam the online tier replaces: the page speaks HTTP to the server, never imports it — or the
+      // server's validation ships in the bundle, and the dev server's disk access sits one import away.
+      expect(forbiddenPatterns(resolved.get('persistence') ?? {})).toContain('**/devServer/**')
+      expect(forbiddenPatterns(resolved.get('devServer') ?? {})).toContain('**/persistence/**')
+      expect(forbiddenPatterns(resolved.get('devServer') ?? {})).toContain('**/state/**')
     })
 
     it('carries a message that names the boundary and explains it', () => {

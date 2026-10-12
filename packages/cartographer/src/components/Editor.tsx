@@ -5,9 +5,11 @@ import { PolitiesPanel } from './PolitiesPanel'
 import { Shell } from './Shell'
 import { writeResult } from './statusBar'
 import { ToolRailPanel } from './ToolRailPanel'
+import { useRelayedResults } from './useRelayedResults'
 
 import type { BackdropLoad } from './MapArea'
 import type { PaintStyle } from '../canvas/painter'
+import type { ResultRelay } from '../persistence/resultRelay'
 import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
 import type { ReactNode } from 'react'
@@ -43,6 +45,11 @@ export interface EditorProps {
   heading: ReactNode
   /** Where the polities' colours come from — one source for the canvas and every panel. */
   colours: PolityColourSource
+  /**
+   * Messages from outside React for the result zone — what opening and saving the year say
+   * (`persistence/resultRelay.ts`).
+   */
+  results: ResultRelay
 }
 
 /**
@@ -51,10 +58,19 @@ export interface EditorProps {
  * The status `<p>` is rendered **after** the canvas in tree order, so its ref is attached after the
  * canvas's. That is safe and worth stating once: nothing reads `statusRef.current` until a pointer
  * moves, which is long after the commit that fills both.
- * @param props - the store, how to load, and the names
+ * @param props - the store, how to load, the names, and the relay for messages from outside React
  * @returns the shell, filled where there is something to put in it
  */
-export function Editor({ store, load, style, zoneLabel, label, heading, colours }: EditorProps) {
+export function Editor({
+  store,
+  load,
+  style,
+  zoneLabel,
+  label,
+  heading,
+  colours,
+  results,
+}: EditorProps) {
   // Refs
   const status = useRef<HTMLElement | null>(null)
   const action = useRef<HTMLElement | null>(null)
@@ -64,6 +80,9 @@ export function Editor({ store, load, style, zoneLabel, label, heading, colours 
   const handleResult = (message: string | null) => {
     writeResult(result.current, message)
   }
+
+  // Effects
+  useRelayedResults(results, result)
 
   // Render
   return (
