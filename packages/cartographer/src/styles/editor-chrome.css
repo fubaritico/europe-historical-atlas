@@ -192,9 +192,75 @@
 }
 
 /*
+ * `{Polities}` fills the dock as a column: the head, the list — which scrolls on its own — and the action
+ * bar pinned at the foot, even under an empty list.
+ */
+.polities {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/*
+ * The action bar (`s07`, *The panel's action bar*): a 24px strip under a hairline, holding the design's
+ * 26px `icon-btn` boxes. Every size is a whole pixel — the bar is 24 plus its hairline, so each box is
+ * 26 × 24 and the 18px glyph sits 4px in and 3px down: on whole pixels, as the dev's drawings need.
+ */
+.polities__actions {
+  display: flex;
+  flex: 0 0 auto;
+  height: calc(var(--tab) + 1px);
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.polities__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: var(--tab);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-dim);
+}
+
+.polities__action:hover:not(:disabled) {
+  background: var(--raised);
+  color: var(--ink);
+}
+
+.polities__action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.polities__action:disabled {
+  color: var(--ink-off);
+}
+
+.polities__action > svg {
+  flex: 0 0 auto;
+}
+
+/* The confirmation before deleting a polity: as wide as the form, the question in the panel's text. */
+.polity-delete {
+  width: 340px;
+}
+
+.polity-delete__question {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+/*
  * `{Polities}`' head, after `design/chrome.css`'s tab strip: the bar on the page's fill with a hairline
- * under it, the panel's name as the active tab — melting into the panel below — and `[+ New polity]` as
- * a square action at the end.
+ * under it, and the panel's name as the active tab, melting into the panel below.
  */
 .polities__head {
   display: flex;
@@ -213,19 +279,6 @@
   color: var(--ink);
   font-size: 11.5px;
   font-weight: 500;
-}
-
-.polities__head > .ui-icon-button {
-  --ui-icon-button-size: var(--tab);
-  --ui-icon-button-radius: 0;
-  --ui-button-height: var(--tab);
-
-  margin-inline-start: auto;
-}
-
-.polities__head > .ui-icon-button svg {
-  width: 12px;
-  height: 12px;
 }
 
 /*
@@ -271,7 +324,10 @@
   --ui-listbox-shadow: none;
   --ui-listbox-padding: 0;
 
+  flex: 1 1 auto;
   width: 100%;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .polities__list:focus-visible {

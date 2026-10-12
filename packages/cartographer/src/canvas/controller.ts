@@ -4,6 +4,7 @@ import { screenToLonLatOnBackdrop } from '../view/projection'
 import { panBy, zoomAbout } from '../view/viewport'
 
 import { createAnchorCache } from './anchorCache'
+import { listenForPageHistory } from './historyShortcut'
 import {
   coloursOf,
   gestureOf,
@@ -508,6 +509,27 @@ function onKeyDown(it: LiveCanvas, event: KeyboardEvent): void {
 }
 
 /**
+ * The release half of ‹space›. Without it the hand stays in place after the key is let go, which is the
+ * shape of bug a missing `keyup` always has: the state is entered correctly and never left.
+ * @param it - the attachment
+ */
+function releaseSpace(it: LiveCanvas): void {
+  if (!it.spaceHeld) return
+  it.spaceHeld = false
+  showCursor(it)
+}
+
+/**
+ * ‹ctrl+Z› pressed in `{Polities}` or on its bar takes the canvas's own path, so an outline in progress is
+ * taken back before the history moves (`historyShortcut.ts`, ARCH-101).
+ * @param it - the attachment
+ * @returns a function that stops listening
+ */
+function hearPageHistory(it: LiveCanvas): () => void {
+  return listenForPageHistory(it.node, (event) => onModifiedKey(it, event))
+}
+
+/**
  * Bind every pointer, wheel and key listener, and return the one call that removes them all.
  *
  * **One function so that adding and removing cannot drift apart** — a listener added here and forgotten
@@ -530,13 +552,6 @@ function listen(it: LiveCanvas): () => void {
     removers.push(() => {
       it.node.removeEventListener(type, handler, options)
     })
-  }
-  // The release half of ‹space›. Without it the hand stays in place after the key is let go, which is
-  // the shape of bug a missing `keyup` always has: the state is entered correctly and never left.
-  const releaseSpace = (): void => {
-    if (!it.spaceHeld) return
-    it.spaceHeld = false
-    showCursor(it)
   }
   // Not passive: see `onWheel`. React would have attached it passively through an `onWheel` prop.
   on(
@@ -565,10 +580,13 @@ function listen(it: LiveCanvas): () => void {
     onKeyDown(it, event)
   })
   on('keyup', (event) => {
-    if (event.key === ' ') releaseSpace()
+    if (event.key === ' ') releaseSpace(it)
   })
   // Letting go outside the canvas would otherwise leave the hand up for ever.
-  on('blur', releaseSpace)
+  on('blur', () => {
+    releaseSpace(it)
+  })
+  removers.push(hearPageHistory(it))
   return (): void => {
     for (const remove of removers) remove()
   }

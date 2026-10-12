@@ -66,17 +66,32 @@ globalThis.ResizeObserver = class {
  * drives the native element through them (its README: `isOpen` calls `showModal()` / `close()`).
  *
  * The stand-in does what a test can observe: it sets and removes `open`, so the dialogue's content is in
- * the document exactly while it is open, and on opening it focuses an `autofocus` descendant, as the
- * browser's dialogue focusing steps do. No top layer, no focus trap, no `::backdrop` —
+ * the document exactly while it is open, on opening it focuses an `autofocus` descendant, and on closing
+ * it gives the focus back to what held it before — as the browser's dialogue focusing steps do. No top layer, no focus trap, no `::backdrop` —
  * none of which jsdom could render or a test could assert anyway; those are the browser's.
  */
+/** The element focused before each dialogue opened — the browser gives it the focus back on close. */
+const focusedBeforeOpening = new WeakMap<HTMLDialogElement, Element | null>()
+
 HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement) {
+  focusedBeforeOpening.set(this, document.activeElement)
   this.setAttribute('open', '')
   // The one focusing step a test can see: the browser moves focus to an `autofocus` descendant.
   this.querySelector<HTMLElement>('[autofocus]')?.focus()
 }
 HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
   this.removeAttribute('open')
+  // The browser's closing steps give the focus back to what held it before the dialogue opened; when that
+  // element can no longer take it (a button disabled meanwhile), the focus falls to the body. Found in the
+  // browser on 2026-10-12, where it threw the focus of the polity panel away — the stand-in now does it too.
+  const before = focusedBeforeOpening.get(this)
+  focusedBeforeOpening.delete(this)
+  if (before instanceof HTMLElement) {
+    before.focus()
+    if (document.activeElement !== before && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
+  }
   this.dispatchEvent(new Event('close'))
 }
 

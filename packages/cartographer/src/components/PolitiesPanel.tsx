@@ -1,14 +1,17 @@
-import { IconButton } from '@fubaritico/react/IconButton'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { describeDrawingTarget } from '../state/drawingTarget'
 
+import { PolitiesActions } from './PolitiesActions'
 import { PolityArrangeMenu } from './PolityArrangeMenu'
+import { PolityDeleteDialog } from './PolityDeleteDialog'
+import { deletionResult, pendingDeletion } from './polityDeletion'
 import { PolityDialog } from './PolityDialog'
 import { PolityList } from './PolityList'
 import { polityRows } from './polityRows'
 
 import type { ArrangeRequest } from './PolityArrangeMenu'
+import type { PendingDeletion } from './polityDeletion'
 import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
 import type { ViewportPoint } from '../view/viewport'
@@ -50,55 +53,168 @@ function useArrangeMenu() {
 }
 
 /**
- * The panel's title bar and `[+ New polity]`, where `design/03` puts it — the `+` at the end of the
- * panel's tab strip.
- * @param props - what `+` does
- * @param props.onNew - open the creation dialogue
+ * `{Polities}`' head: the panel's name as its tab. Its actions moved to the bar at the foot of the panel
+ * (`PolitiesActions`) — the dev's request, 2026-10-12.
  * @returns the head
  */
-function PolitiesHead({ onNew }: { onNew: () => void }) {
+function PolitiesHead() {
   // Render
   return (
     <header className="polities__head">
       <h2 className="polities__title">Polities</h2>
-      <IconButton icon="Plus" aria-label="New polity" onClick={onNew} />
     </header>
   )
 }
 
 /**
- * The panel's two dialogues: `[+ New polity]`'s, and the one editing a polity — mounted per polity, so
- * the form opens filled with that polity's values (`s07`).
- * @param props - the store, whether creating, the polity edited, and how each closes
- * @returns the dialogues
+ * The dialogue editing a polity — mounted per polity, so the form opens filled with that polity's values
+ * (`s07`). None while nothing is edited.
+ * @param props - the store, the polity edited, and how the dialogue closes
+ * @param props.store - the store holding the document
+ * @param props.edited - the polity edited, or `null`
+ * @param props.onEdited - close it
+ * @returns the dialogue, or nothing
  */
-function PolityDialogs({
+function EditDialog({
   store,
-  creating,
   edited,
-  onCreated,
   onEdited,
 }: {
   store: CartographerStoreHook
-  creating: boolean
   edited: YearPolity | null
-  onCreated: () => void
   onEdited: () => void
 }) {
   // Render
+  return edited === null ? null : (
+    <PolityDialog key={edited.id} store={store} editing={edited} isOpen onClose={onEdited} />
+  )
+}
+
+/**
+ * Deleting the selected polity: ask first (D2), then delete as one undoable step and say what went.
+ *
+ * **A refusal is said, never silent**: a polity gone between the question and the answer (an undo in
+ * between) is reported in the result zone and logged as an error — the panel and the document disagreed.
+ * @param store - the store holding the document
+ * @param onResult - the status bar's result zone
+ * @param onDone - give the focus back to the list, once the dialogue has closed
+ * @returns the polity awaiting confirmation, and the three gestures
+ */
+function usePolityDeletion(
+  store: CartographerStoreHook,
+  onResult: (message: string | null) => void,
+  onDone: () => void
+) {
+  // Store actions
+  const deletePolity = store((state) => state.deletePolity)
+
+  // Refs
+  const answered = useRef(false)
+
+  // State
+  const [pending, setPending] = useState<PendingDeletion | null>(null)
+
+  // Handlers
+  const askToDelete = () => {
+    const { document, target } = store.getState()
+    const resolved = describeDrawingTarget(document, target)
+    setPending(resolved === null ? null : pendingDeletion(document, resolved.id))
+  }
+  const cancelDeletion = () => {
+    answered.current = true
+    setPending(null)
+  }
+  const confirmDeletion = () => {
+    if (pending !== null) {
+      const report = deletePolity(pending.id, {
+        kind: 'delete-polity',
+        label: `delete ${pending.name}`,
+      })
+      if (report === null) {
+        console.error(
+          `[Cartographer] "${pending.name}" was no longer in the year; nothing was deleted.`
+        )
+        onResult(`nothing deleted: ${pending.name} is no longer in the year`)
+      } else onResult(deletionResult(pending, report))
+    }
+    answered.current = true
+    setPending(null)
+  }
+
+  // Effects
+  // The focus goes back to the list only once the dialogue has closed. Closing hands it to the trash that
+  // opened it — disabled by then, after a deletion, so the focus would fall to the body. The design
+  // system's Modal closes in its own effect, and a child's effects run before its parent's: this one comes
+  // after, and has the last word.
+  useEffect(() => {
+    if (pending === null && answered.current) {
+      answered.current = false
+      onDone()
+    }
+  }, [pending, onDone])
+
+  // Return
+  return { pending, askToDelete, cancelDeletion, confirmDeletion }
+}
+
+/**
+ * The panel's foot: the action bar, the new-polity dialogue its `[+]` opens and the confirmation its
+ * trash opens. The trash deletes the polity aimed at (D3), and is disabled when none resolves — an undo
+ * that takes the target away disables it too.
+ * @param props - the store, the result sink and the focus hand-back
+ * @param props.store - the store holding the document
+ * @param props.onResult - the status bar's result zone
+ * @param props.onDone - give the focus back to the list once the confirmation closes
+ * @returns the bar and the two dialogues it opens
+ */
+function PolitiesFoot({
+  store,
+  onResult,
+  onDone,
+}: {
+  store: CartographerStoreHook
+  onResult: (message: string | null) => void
+  onDone: () => void
+}) {
+  // Store
+  const target = store((state) => state.target)
+  // Read so an undo that removes or restores the target re-renders the bar. Today the panel's own
+  // re-render carries the foot along too, so no test can tell this line is missing; it is what keeps the
+  // foot right on its own, the day it is memoised.
+  store((state) => state.version)
+
+  // State
+  const [creating, setCreating] = useState(false)
+  const { pending, askToDelete, cancelDeletion, confirmDeletion } = usePolityDeletion(
+    store,
+    onResult,
+    onDone
+  )
+
+  // Derived
+  const canDelete = describeDrawingTarget(store.getState().document, target) !== null
+
+  // Handlers
+  const handleNew = () => {
+    setCreating(true)
+  }
+  const handleCreated = () => {
+    setCreating(false)
+  }
+
+  // Render
   return (
     <>
-      {edited === null ? null : (
-        <PolityDialog key={edited.id} store={store} editing={edited} isOpen onClose={onEdited} />
-      )}
-      <PolityDialog store={store} editing={null} isOpen={creating} onClose={onCreated} />
+      <PolitiesActions onNew={handleNew} onDelete={askToDelete} canDelete={canDelete} />
+      <PolityDialog store={store} editing={null} isOpen={creating} onClose={handleCreated} />
+      <PolityDeleteDialog pending={pending} onConfirm={confirmDeletion} onCancel={cancelDeletion} />
     </>
   )
 }
 
 /**
- * `{Polities}` as it stands today: its title bar and `[+ New polity]`, where `design/03` puts it — the
- * `+` at the end of the panel's tab strip.
+ * `{Polities}` as it stands today: its title bar, the tree, and the action bar at its foot (`s07`, *The
+ * panel's action bar*) — `[+]` and the trash.
  *
  * **The list follows the document**: every polity of the year as the tree of groups, front first
  * (`s16`), the one aimed at marked, those with nothing drawn marked *"no territory"* (`s02`). Choosing a
@@ -116,7 +232,6 @@ export function PolitiesPanel({ store, colours, onResult }: PolitiesPanelProps) 
   const chooseTarget = store((state) => state.chooseTarget)
 
   // State
-  const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState<string | null>(null)
   const { arranging, openMenu, closeMenu, panel } = useArrangeMenu()
 
@@ -127,22 +242,19 @@ export function PolitiesPanel({ store, colours, onResult }: PolitiesPanelProps) 
   const edited = document.polities.find((polity) => polity.id === editing)
 
   // Handlers
-  const handleNew = () => {
-    setCreating(true)
-  }
-  const handleCreated = () => {
-    setCreating(false)
+  // A dialogue unmounted rather than closed gives the focus back to nothing: it is handed to the list.
+  const focusList = () => {
+    panel.current?.querySelector<HTMLElement>('.polities__list')?.focus()
   }
   const handleEdited = () => {
     setEditing(null)
-    // The dialogue is unmounted, not closed: the focus is handed back to the list by hand.
-    panel.current?.querySelector<HTMLElement>('.polities__list')?.focus()
+    focusList()
   }
 
   // Render
   return (
     <section ref={panel} className="polities" aria-label="Polities">
-      <PolitiesHead onNew={handleNew} />
+      <PolitiesHead />
       <PolityList
         year={document.year}
         rows={polityRows(document, colours.coloursOf(document, version))}
@@ -160,13 +272,8 @@ export function PolitiesPanel({ store, colours, onResult }: PolitiesPanelProps) 
           onEdit={setEditing}
         />
       )}
-      <PolityDialogs
-        store={store}
-        creating={creating}
-        edited={edited ?? null}
-        onCreated={handleCreated}
-        onEdited={handleEdited}
-      />
+      <PolitiesFoot store={store} onResult={onResult} onDone={focusList} />
+      <EditDialog store={store} edited={edited ?? null} onEdited={handleEdited} />
     </section>
   )
 }

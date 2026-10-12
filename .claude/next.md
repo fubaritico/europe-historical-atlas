@@ -68,19 +68,12 @@ point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui 
 
 ## ▶ ON REPREND ICI (13/10) — deux chantiers, dans cet ordre
 
-**1. La barre d'actions de `{Polities}` — étape 2.** Plan décidé : `files/plans/cartographer/polities-footer-plan.md`
-(D1–D5). L'étape 1 est écrite et commitée (`s07` *The panel's action bar* et *Removing*, `H-17` fermé). Reste :
-
-| étape | quoi | prouvé quand |
-| --- | --- | --- |
-| **2** ◀ | `deletePolity(id, step)` sur la slice d'édition, annulable, jumelle de `createPolity`, autour de `removePolity` (déjà dans `core`, testé) | ‹ctrl+z› rend le pays, son tracé, ses vassaux **et le partage des ancres** — prouvé par le code naïf qui rendrait des coordonnées |
-| **3a** | `src/icons/` : les dessins du dev — le `+` encadré de pointillés et la poubelle — **posés sur des pixels entiers** (décalés d'un demi-pixel, tracé intact), remplis en `currentColor` | nets à 100 % à ×1 et ×2, mesuré dans le navigateur |
-| **3** | la barre, une vue : `+` et poubelle au pied du panneau, l'en-tête sans action ; cases de 26 × 24 posées sur des entiers | elle s'affiche seule dans l'établi |
-| **4** | le branchement : la poubelle supprime la cible, désactivée sans cible, résultat annoncé | dans l'app : sélectionner, supprimer, ‹ctrl+z› |
-| **5** | la confirmation (D2) : *« Delete Duchy of Normandy? Its 3 rings go; its 2 vassals become sovereign. »*, `[Cancel]` en focus | supprimer demande, annuler garde |
-
-**Verdict du dev sur les icônes, à ne pas rouvrir** : le flou des outils (trait 1,4) est accepté ; *« ce qui
-doit être net est net »* — la barre. Pas de `−` dans la barre.
+**1. La barre d'actions de `{Polities}` — ✅ faite le 12/10 au soir** (étapes 2 à 5 d'un coup, parcourue dans
+son Chrome : `s07`, *Walked for real*). `+` et poubelle au pied du panneau, ses dessins en pixels entiers
+(mesurés : glyphes à x/y entiers, cases 26 × 24), confirmation avec `[Cancel]` en focus, ‹ctrl+z› **depuis le
+panneau aussi** (le contrôleur du canevas écoute toute la page, hors champs et boîtes). **Une question laissée
+au dev** : la barre reste active de loin, contrairement aux outils (`s17`) — ma recommandation, une ligne à
+changer s'il veut l'inverse.
 
 **2. Enregistrer et rouvrir une carte — juste après, et c'est devenu prioritaire.** Le dev, 12/10 : *« pour
 revenir sur les outils de dessin, sur les différents fonctionnements, il faut qu'on puisse revenir sur des
@@ -100,6 +93,12 @@ et **`s13`**, la reprise en main — *« je veux pouvoir avoir la main sur les c
 depuis l'année** au lieu des 21 payloads GPL (`mapPipeline.ts` lit encore `/borders/europe-<année>.json`). C'est
 le cœur de P5 : le jour où 1100 est dessiné, `borders/` et son lecteur `unauthored` disparaissent. **À
 découper avec lui** après l'enregistrement : lire `s13`, `s08` (vassalité) et `format.md` ensemble d'abord.
+
+**4. Des tests end-to-end Playwright — noté par le dev le 12/10, pas commencé** : *« S'il y a un bug que tu
+n'as pas trouvé par JSDOM, eh bien peut-être qu'il peut être trouvé via le navigateur. Donc par tes tests
+end-to-end basés sur Playwright. »* Rien n'existe dans le dépôt. Premiers cas, trouvés à la main le 12/10 sur
+la barre d'actions et invisibles à jsdom : le `<dialog>` natif rend le focus à la poubelle qui vient d'être
+désactivée (donc à `body`) ; ‹ctrl+z› n'était entendu que par le canevas. À proposer comme chantier.
 
 **Un seul serveur de dev** : le dev fait tourner le sien (`pnpm dev:cartographer`, souvent sur 5174). Ne pas
 en lancer un second ; lui donner l'adresse du sien.

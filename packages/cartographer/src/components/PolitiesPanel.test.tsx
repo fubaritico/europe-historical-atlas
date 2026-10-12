@@ -492,3 +492,123 @@ describe('PolitiesPanel — editing a polity (s07)', () => {
 
   // L5: the suzerain list without loops is suzerainChoices', tested in polityDraft.test.ts.
 })
+
+/** France with Normandie holding from it, France aimed at — the trash's subject. */
+function mountFranceAimed() {
+  const mounted = mount()
+  act(() => {
+    const { createPolity, chooseTarget } = mounted.store.getState()
+    createPolity(polity('fr', 'Reaume de France'), { kind: 'c', label: 'c' })
+    createPolity({ ...polity('no', 'Normandie'), suzerain: 'fr' }, { kind: 'c', label: 'c' })
+    chooseTarget('fr')
+  })
+  return mounted
+}
+
+/** The confirmation, when it is open. */
+const openDialog = () => document.querySelector<HTMLElement>('dialog[open]')
+
+/** The confirmation, which the test expects open. */
+function confirmation(): HTMLElement {
+  const open = openDialog()
+  if (open === null) throw new Error('no dialogue is open')
+  return open
+}
+
+/** The bar's trash. */
+const trash = () => screen.getByRole('button', { name: 'Delete polity' })
+
+describe('PolitiesPanel — the action bar (s07)', () => {
+  describe('happy path', () => {
+    it('asks before deleting the polity aimed at, then deletes it as one step and says so', async () => {
+      const { store, results, user } = mountFranceAimed()
+      await user.click(screen.getByRole('button', { name: 'Delete polity' }))
+      expect(confirmation().textContent).toContain(
+        'Delete Reaume de France? Its 1 vassal becomes sovereign.'
+      )
+      await user.click(within(confirmation()).getByRole('button', { name: 'Delete' }))
+      expect(order(store)).toEqual(['no'])
+      expect(store.getState().rows.at(-1)?.label).toBe('delete Reaume de France')
+      expect(results.at(-1)).toBe(
+        'deleted Reaume de France — 0 rings, 1 vassal now sovereign · ctrl+Z brings it back'
+      )
+      expect(openDialog()).toBeNull()
+      // The trash is disabled by now: the focus goes to the list, not to the body.
+      expect(document.activeElement).toBe(screen.getByRole('listbox', { name: 'Polities' }))
+    })
+  })
+
+  describe('variants', () => {
+    it('holds [+] and the trash at the foot, and nothing in the head', () => {
+      mount()
+      const bar = screen.getByRole('toolbar', { name: 'Polity actions' })
+      expect(
+        within(bar)
+          .getAllByRole('button')
+          .map((button) => button.getAttribute('aria-label'))
+      ).toEqual(['New polity', 'Delete polity'])
+      expect(document.querySelector('.polities__head button')).toBeNull()
+    })
+
+    it('disables the trash while no polity is aimed at, and says why', () => {
+      mount()
+      expect(trash().hasAttribute('disabled')).toBe(true)
+      expect(trash().getAttribute('title')).toBe('Select a polity to delete')
+    })
+
+    it('enables the trash once a polity is aimed at, and disables it again when undo takes it', () => {
+      const { store } = mountFranceAimed()
+      expect(trash().hasAttribute('disabled')).toBe(false)
+      act(() => {
+        store.getState().undo()
+        store.getState().undo()
+      })
+      expect(trash().hasAttribute('disabled')).toBe(true)
+    })
+
+    it('gives the polity and its vassal back on undo', async () => {
+      const { store, user } = mountFranceAimed()
+      await user.click(screen.getByRole('button', { name: 'Delete polity' }))
+      await user.click(within(confirmation()).getByRole('button', { name: 'Delete' }))
+      act(() => {
+        store.getState().undo()
+      })
+      expect(order(store)).toEqual(['fr', 'no'])
+      expect(store.getState().document.polities[1]?.suzerain).toBe('fr')
+      expect(trash().hasAttribute('disabled')).toBe(false)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('keeps the polity on Cancel, which holds the focus when the question opens', async () => {
+      const { store, user } = mountFranceAimed()
+      await user.click(screen.getByRole('button', { name: 'Delete polity' }))
+      const cancel = within(confirmation()).getByRole('button', { name: 'Cancel' })
+      expect(cancel.hasAttribute('autofocus')).toBe(true)
+      await user.click(cancel)
+      expect(order(store)).toEqual(['fr', 'no'])
+      expect(openDialog()).toBeNull()
+      expect(document.activeElement).toBe(screen.getByRole('listbox', { name: 'Polities' }))
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // An undo can take the polity away while the question is open: nothing is deleted, and it is said.
+    it('deletes nothing when an undo took the polity away first, and says so', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      const { store, results, user } = mountFranceAimed()
+      await user.click(screen.getByRole('button', { name: 'Delete polity' }))
+      act(() => {
+        store.getState().undo()
+        store.getState().undo()
+      })
+      await user.click(within(confirmation()).getByRole('button', { name: 'Delete' }))
+      expect(error).toHaveBeenCalledTimes(1)
+      expect(results.at(-1)).toBe('nothing deleted: Reaume de France is no longer in the year')
+      expect(store.getState().canRedo).toBe(true)
+      error.mockRestore()
+    })
+  })
+
+  // L5: the question's wording for no ring, no vassal, plurals — polityDeletion.test.ts.
+})

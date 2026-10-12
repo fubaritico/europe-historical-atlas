@@ -62,7 +62,10 @@ Put here the know issues to avoid cluttering the context window.
   plume l'est, dans la zone résultat ; le remède est le même puits `onResult` pour les deux. (3)
   **Tracer au clavier est impossible** (plume et crayon), déjà connu pour l'étape 5 (*« the anchor
   list »*) ; le rail annonce pourtant ces outils. (4) Le groupe de la plume s'ouvre à ‹→›, sans
-  `aria-keyshortcuts`. (5) Cibles de 24–30 px, densité Illustrator assumée.
+  `aria-keyshortcuts`. (5) Cibles de 24–30 px, densité Illustrator assumée. (6) **La poubelle désactivée ne dit pas pourquoi au clavier** (12/10,
+  A11Y-001) : un bouton `disabled` ne prend pas le focus et son `title` *« Select a polity to delete »* ne
+  s'entend qu'au survol. Laissé tel quel : D3 veut la poubelle grisée sans cible, et la barre d'état dit déjà
+  *« Sélectionnez un pays »*. Remède si besoin : `aria-disabled` + une description masquée.
   **Architecture** : (6) ~~« côte ou fleuve » sur cinq aiguillages~~ — **fait le 12/10** : une table
   par couche (`canvas/snapLayers.ts`), la géométrie renommée `lineSnap`. (7)
   `paintRanks` est recalculé à chaque repeinture — ~50 pays, négligeable ; à mettre en cache par

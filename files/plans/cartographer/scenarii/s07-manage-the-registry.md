@@ -173,8 +173,9 @@ Scenario: the actions sit at the foot of {Polities}
 > **The dev's request, 2026-10-12**: *"pouvoir ajouter ou supprimer une polity à partir d'une petite barre
 > localisée en bas du panneau. Supprimez l'icône plus située dans la barre en haut du panneau. Regrouper
 > ces manipulations et toutes manipulations ultérieures dans la barre en bas du panneau."* Every later
-> action of the panel goes there too. The glyphs are the design's grid (18×18, stroke 1.4); the dev notes
-> the standards are 16/1 and 24/1.5, a rescaling recorded in `known-issues`.
+> action of the panel goes there too. **The glyphs are the dev's own pixel drawings** (a
+> `+` framed in dots, a three-slatted trash), filled shapes on whole pixels — his verdict of 2026-10-12,
+> *"ce qui doit être net est net"*, after the tool glyphs' 1.4 stroke was measured blurry.
 
 ## Removing — rewritten 2026-10-12
 
@@ -216,6 +217,43 @@ Scenario: delete a polity that holds nothing
 > territory. The registry became **per year** on 2026-09-27 (P3), so a polity appears in exactly one, and
 > the reassignment is set aside. The old *"used nowhere: removed with no further question"* is replaced:
 > every deletion asks.
+
+### Walked for real — 2026-10-12, in the dev's Chrome (×2), on the working year (France + Burgundy)
+
+```gherkin
+Scenario: delete a neighbour and take it back from the panel
+  Given "Royaume de Bourgogne" shares its western border with "Royaume de France"
+  When I select "Royaume de Bourgogne" in {Polities} and press the trash
+  Then the dialogue asks "Delete Royaume de Bourgogne? Its 1 ring goes." and [Cancel] has the focus
+  When I press [Delete]
+  Then Burgundy is gone, France's outline has not moved
+  And the result zone reads "deleted Royaume de Bourgogne — 1 ring · ctrl+Z brings it back"
+  And the focus is on the {Polities} list, the trash disabled
+  When I press ‹ctrl+z› with the focus still in {Polities}
+  Then Burgundy comes back with its shared border, selected, and the trash is enabled again
+  When I press ‹ctrl+shift+z›
+  Then it is gone again
+
+Scenario: ‹ctrl+z› in the panel takes back an outline in progress first
+  Given two anchors of an outline are placed with the Pen, the outline still open
+  When I click a row of {Polities} and press ‹ctrl+z›
+  Then the outline's last anchor is taken back, and no step of the history is undone
+```
+
+> **Two surprises of the walk, both invisible to jsdom** — the dev's note: such bugs want Playwright
+> end-to-end tests (`next.md`). (1) **The native `<dialog>` gives the focus back to the button that opened
+> it** — the trash, disabled by the deletion, so the focus fell to the body. The hand-back to the list now
+> runs in an effect after the design system's Modal has closed, and the test stand-in restores focus as
+> the browser does. (2) **‹ctrl+z› was the canvas's alone**: from the panel, the promise *"ctrl+Z brings it
+> back"* did nothing. The canvas controller now hears the history keys on the whole page — outside text
+> fields and open dialogues — and runs **its own** gesture-aware undo, so an outline in progress is taken
+> back before the history moves (the review's ARCH-101, which caught a first version calling the store).
+> The second scenario is proven by a unit test, not walked: from the opening view the Pen is refused
+> (`s17`).
+>
+> **The bar ignores the zoom**, unlike the tools (`s17`): creating or deleting a whole polity asks for no
+> precision on the map, the dialogue says what goes, and undo brings it back. Mine, said to the dev the
+> same night, his to overrule.
 
 ## Import
 

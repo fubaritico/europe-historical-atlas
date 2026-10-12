@@ -3,7 +3,7 @@
 > Opened 2026-10-12, at the dev's request: *"pouvoir ajouter ou supprimer une polity à partir d'une petite
 > barre localisée en bas du panneau. Supprimez l'icône plus située dans la barre en haut du panneau.
 > Regrouper ces manipulations et toutes manipulations ultérieures dans la barre en bas du panneau."*
-> **Status: decided 2026-10-12, in progress.**
+> **Status: decided 2026-10-12, built the same night** — steps 2 to 5 shipped together, walked in the dev's Chrome (`s07`, *Walked for real*).
 
 ## What exists, read in the code (2026-10-12)
 

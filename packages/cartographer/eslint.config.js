@@ -175,6 +175,7 @@ export default tseslint.config(
             useHoldToOpen: 'handler',
             useInsideWindow: 'ref',
             useListCursor: 'state',
+            usePolityDeletion: 'state',
             usePolityDraft: 'state',
             useRelayedResults: 'effect',
           },

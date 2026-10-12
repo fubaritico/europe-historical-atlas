@@ -1488,6 +1488,33 @@ describe('undo and redo from the keyboard', () => {
   })
 
   describe('variants', () => {
+    // ARCH-101: from {Polities}, ctrl+Z takes the same path as on the canvas — an outline in progress is
+    // taken back first, never the history under it.
+    it('takes back the outline in progress on ‹ctrl+Z› pressed in the panel, not the history', () => {
+      const { node, store, dispose } = attach()
+      aimAtFrance(store)
+      const [first, second] = CANVAS_TRIANGLE
+      click(node, first)
+      click(node, second)
+      const list = document.body.appendChild(document.createElement('ul'))
+      const undo = chord({ key: 'z', ctrlKey: true })
+      list.dispatchEvent(undo)
+      expect(undo.defaultPrevented).toBe(true)
+      expect(store.getState().document.polities).toHaveLength(1)
+      expect(store.getState().canUndo).toBe(true)
+      dispose()
+    })
+
+    it('stops hearing the page once detached', () => {
+      const { store, dispose } = attach()
+      aimAtFrance(store)
+      dispose()
+      const undo = chord({ key: 'z', ctrlKey: true })
+      document.body.dispatchEvent(undo)
+      expect(undo.defaultPrevented).toBe(false)
+      expect(store.getState().document.polities).toHaveLength(1)
+    })
+
     it('answers ‹cmd› as ‹ctrl›', () => {
       const { node, store, dispose } = attach()
       aimAtFrance(store)
