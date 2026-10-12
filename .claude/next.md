@@ -90,6 +90,17 @@ existent dans `core`, l'aller-retour testé. **La décision à prendre d'abord :
 (partout, trois fichiers à déplacer à la main) ou la File System Access API (‹ctrl+s› écrit en place, Chrome
 l'a). Recommandation déjà faite : la File System Access API.
 
+**3. Nos propres frontières — un gros sujet, rappelé par le dev le 12/10** : *« il faudrait qu'on puisse
+faire nos propres frontières, c'est dans les specs. »* Ce qui existe : la **dérivation** dans `core`
+(`editor/derivedBorders.ts`, `borderGraph.ts` — une frontière est le bord commun de deux remplissages, jamais
+un trait à part, mémoire [[borders-are-derived-not-drawn]]) ; la **main** d'une frontière (vassal, union,
+contesté) déduite du registre, son style étant une table éditoriale à part ([[border-hand-is-not-a-relation]]) ;
+et **`s13`**, la reprise en main — *« je veux pouvoir avoir la main sur les couleurs et les lignes »* — avec
+`{Overrides}`. Ce qui manque : **les afficher et les régler dans le Cartographe**, et **que l'atlas les dessine
+depuis l'année** au lieu des 21 payloads GPL (`mapPipeline.ts` lit encore `/borders/europe-<année>.json`). C'est
+le cœur de P5 : le jour où 1100 est dessiné, `borders/` et son lecteur `unauthored` disparaissent. **À
+découper avec lui** après l'enregistrement : lire `s13`, `s08` (vassalité) et `format.md` ensemble d'abord.
+
 **Un seul serveur de dev** : le dev fait tourner le sien (`pnpm dev:cartographer`, souvent sur 5174). Ne pas
 en lancer un second ; lui donner l'adresse du sien.
 
