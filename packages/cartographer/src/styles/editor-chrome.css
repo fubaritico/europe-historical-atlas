@@ -749,3 +749,93 @@
   line-height: 16px;
   white-space: nowrap;
 }
+
+.app-brand__sep {
+  color: var(--ink-off);
+}
+
+.app-brand__year {
+  color: var(--ink-dim);
+  line-height: 16px;
+}
+
+/*
+ * The two top bars' buttons, after the handoff's `appbar` and `docbar` (`design/chrome.css`): full height,
+ * a soft hairline between them, the hover fill. Unavailable is `aria-disabled` (`BarButton.tsx`), drawn in
+ * the off ink and with no hover, so it reads as there but not yet.
+ */
+.bar-actions {
+  display: flex;
+  align-items: stretch;
+}
+
+.bar-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 11px;
+  border: 0;
+  border-left: 1px solid var(--line-soft);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+}
+
+.bar-button--icon {
+  width: 26px;
+  padding: 0;
+}
+
+/* The one inversion: the bar's single primary action goes dark on light, so it does not sink into the panel. */
+.bar-button--primary {
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 500;
+}
+
+.bar-button:not([aria-disabled='true']):hover {
+  background: var(--hover);
+}
+
+.bar-button--primary:not([aria-disabled='true']):hover {
+  background: var(--ink-dim);
+}
+
+.bar-button[aria-disabled='true'] {
+  color: var(--ink-off);
+}
+
+.bar-button--primary[aria-disabled='true'] {
+  background: var(--raised);
+}
+
+.bar-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* The open year's tab: the panel's fill, a hairline on its right, the close glyph in its own square. */
+.doc-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px 0 1px;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  font-size: 11.5px;
+}
+
+.doc-tab .bar-button--icon {
+  width: 24px;
+  height: 24px;
+  border-left: 0;
+}
+
+.doc-tab__name {
+  font-weight: 500;
+}
+
+.doc-tab__meta {
+  color: var(--ink-dim);
+  font-family: ui-monospace, monospace;
+}

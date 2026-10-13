@@ -100,6 +100,13 @@ Scenario: export the shape the atlas consumes today
 > The adapter, from groundwork §5. **The lossy direction is deliberate and one-way**: export is for
 > consumption, the working file is the truth.
 
+> **Superseded, 2026-10-13 — `[Export for the atlas…]` is dropped** (the dev, on reading what it did). Two
+> things made it a duplicate: P4 step 1 gave the atlas the readers of the editor's own format, with the
+> adapter to `RegionPayload` in `core`, so the conversion happens when the atlas loads; and since
+> 2026-10-12 `[Save]` writes the year straight into `atlas/public/years/`, which the atlas already reads in
+> local mode. The scenario above is therefore met **without a button**. What it carried of its own — the
+> GPL warning of the scenario below (`H-13`) — moves to `[Save]`, since saving is what publishes now.
+
 ## Provenance and licence
 
 ```gherkin

@@ -12,6 +12,7 @@ import { screenToBackdrop } from '../view/viewport'
 
 import { startCanvasController } from './controller'
 import { cursorCss } from './cursors'
+import { createHistoryRelay } from './historyRelay'
 import { coloursOf } from './liveCanvas'
 import {
   DRAG_TOLERANCE,
@@ -22,6 +23,7 @@ import {
 } from './navigation'
 import { CHROME_PAINT_STYLE } from './style'
 
+import type { HistoryRelay } from './historyRelay'
 import type { CartographerStoreHook } from '../state/store'
 import type { PenMode } from '../state/toolSlice'
 import type { NamedPolyline } from '../vectorLayers'
@@ -101,8 +103,10 @@ function attach(maxSnapReachKm = Infinity): {
   hovered: ReturnType<typeof vi.fn>
   acted: ReturnType<typeof vi.fn>
   resulted: ReturnType<typeof vi.fn>
+  history: HistoryRelay
   dispose: () => void
 } {
+  const history = createHistoryRelay()
   const hovered = vi.fn()
   const acted = vi.fn()
   const resulted = vi.fn()
@@ -129,8 +133,9 @@ function attach(maxSnapReachKm = Infinity): {
     zoneLabel: 'zone',
     overlay: document.createElement('canvas'),
     colours: createPolityColourSource(AUTOMATIC_PALETTE),
+    history,
   })
-  return { node, store, hovered, acted, resulted, dispose }
+  return { node, store, hovered, acted, resulted, history, dispose }
 }
 
 afterEach(() => {
@@ -455,6 +460,7 @@ describe('startCanvasController', () => {
           onHover: () => undefined,
           onAction: () => undefined,
           onResult: () => undefined,
+          history: createHistoryRelay(),
           maxSnapReachKm: Infinity,
           style: CHROME_PAINT_STYLE,
           zoneLabel: 'zone',
@@ -1278,6 +1284,7 @@ describe('the tools on the canvas', () => {
         onHover: () => undefined,
         onAction: () => undefined,
         onResult: () => undefined,
+        history: createHistoryRelay(),
         maxSnapReachKm: Infinity,
         style: CHROME_PAINT_STYLE,
         zoneLabel: 'zone',
@@ -1353,6 +1360,7 @@ describe('the tools — what the review found', () => {
         onHover: () => undefined,
         onAction: () => undefined,
         onResult: () => undefined,
+        history: createHistoryRelay(),
         maxSnapReachKm: Infinity,
         style: CHROME_PAINT_STYLE,
         zoneLabel: 'zone',
@@ -1523,6 +1531,37 @@ describe('undo and redo from the keyboard', () => {
       expect(store.getState().document.claims).toEqual([])
       dispose()
     })
+
+    // The document bar's buttons run through the relay, so they take the keys' path — ARCH-101 again.
+    it('takes back the outline in progress when the Undo button runs, not the history', () => {
+      const { node, store, history, dispose } = attach()
+      aimAtFrance(store)
+      const [first, second] = CANVAS_TRIANGLE
+      click(node, first)
+      click(node, second)
+      expect(history.run('undo')).toBe(true)
+      expect(store.getState().document.polities).toHaveLength(1)
+      expect(store.getState().canUndo).toBe(true)
+      dispose()
+    })
+
+    it('undoes and redoes a closed outline when the buttons run', () => {
+      const { node, store, history, dispose } = attach()
+      aimAtFrance(store)
+      for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(node, at)
+      history.run('undo')
+      expect(store.getState().document.claims).toEqual([])
+      history.run('redo')
+      expect(store.getState().document.claims).toHaveLength(1)
+      dispose()
+    })
+
+    it('leaves the relay once detached, so the buttons stop reaching a torn-down canvas', () => {
+      const { store, history, dispose } = attach()
+      aimAtFrance(store)
+      dispose()
+      expect(history.run('undo')).toBe(false)
+    })
   })
 
   describe('managed errors', () => {
@@ -1613,6 +1652,7 @@ function attachWithShore(
     onHover: () => undefined,
     onAction: acted,
     onResult: resulted,
+    history: createHistoryRelay(),
     maxSnapReachKm: Infinity,
     style: CHROME_PAINT_STYLE,
     zoneLabel: 'zone',
@@ -1992,6 +2032,7 @@ describe('the Pen meeting a shared border, on the canvas', () => {
       onHover: () => undefined,
       onAction: () => undefined,
       onResult: () => undefined,
+      history: createHistoryRelay(),
       maxSnapReachKm: Infinity,
       style: CHROME_PAINT_STYLE,
       zoneLabel: 'zone',

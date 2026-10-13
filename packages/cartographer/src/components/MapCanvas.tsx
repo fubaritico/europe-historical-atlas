@@ -5,6 +5,7 @@ import { trackFocusOrigin } from '../canvas/focusOrigin'
 import { MAX_SNAP_REACH_KM } from '../view/toolReach'
 
 import type { CanvasControllerDeps } from '../canvas/controller'
+import type { HistoryRelay } from '../canvas/historyRelay'
 import type { PaintStyle } from '../canvas/painter'
 import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
@@ -51,6 +52,8 @@ export interface MapCanvasProps {
   label: string
   /** Where the polities' colours come from — shared with the panels. */
   colours: PolityColourSource
+  /** Where the controller installs its undo and redo, for the document bar's buttons. */
+  history: HistoryRelay
 }
 
 /**
@@ -149,6 +152,7 @@ export function MapCanvas({
   zoneLabel,
   label,
   colours,
+  history,
 }: MapCanvasProps) {
   // Ids
   const instructionsId = useId()
@@ -188,6 +192,7 @@ export function MapCanvas({
             style,
             zoneLabel,
             colours,
+            history,
             maxSnapReachKm: MAX_SNAP_REACH_KM,
           })
         }}

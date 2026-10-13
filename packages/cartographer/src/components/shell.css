@@ -55,11 +55,11 @@
   border-bottom: 1px solid var(--line);
 }
 
+/* No panel fill: the open year's tab is the panel, the rest of the bar the app's ground (the handoff's). */
 .shell__docbar {
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  background: var(--panel);
   border-bottom: 1px solid var(--line);
 }
 

@@ -23,6 +23,7 @@
   --raised: #35322e; /* raised surface */
   --hover: #403b35; /* hover fill */
   --line: #45403a; /* structural hairline, between surfaces — not a field boundary (1.58:1) */
+  --line-soft: #3c3833; /* separation inside one surface — between the bars' buttons */
   --ink: #e8e3d8; /* primary text */
   --ink-dim: #a49a8c; /* secondary text — 5.23:1 on --panel */
   --ink-off: #7d7468; /* a field's boundary — 3.54:1 on --bg, over 1.4.11's 3:1 */

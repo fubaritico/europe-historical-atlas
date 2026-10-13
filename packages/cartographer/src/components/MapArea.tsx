@@ -5,6 +5,7 @@ import { writeAction, writePosition, writeResult } from './statusBar'
 import { useEditorAssets } from './useEditorAssets'
 
 import type { Backdrop } from '../backdropSource'
+import type { HistoryRelay } from '../canvas/historyRelay'
 import type { PaintStyle } from '../canvas/painter'
 import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
@@ -82,6 +83,8 @@ export interface MapAreaProps {
   resultRef: RefObject<HTMLElement | null>
   /** Where the polities' colours come from — shared with the panels. */
   colours: PolityColourSource
+  /** Where the canvas installs its undo and redo, for the document bar's buttons. */
+  history: HistoryRelay
 }
 
 /** What each phase of a bake is called, for the waiting line. */
@@ -204,6 +207,7 @@ export function MapArea({
   actionRef,
   resultRef,
   colours,
+  history,
 }: MapAreaProps) {
   // State
   const { assets, error, fraction, phase } = useEditorAssets(load)
@@ -236,6 +240,7 @@ export function MapArea({
         zoneLabel={zoneLabel}
         label={label}
         colours={colours}
+        history={history}
       />
     </div>
   )

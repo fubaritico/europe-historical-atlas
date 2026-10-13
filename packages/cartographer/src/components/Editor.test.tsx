@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
+import { createHistoryRelay } from '../canvas/historyRelay'
 import { CHROME_PAINT_STYLE } from '../canvas/style'
 import { createResultRelay } from '../persistence/resultRelay'
 import { openEmptyYear } from '../state/openEmptyYear'
@@ -53,6 +54,8 @@ function mount(results = createResultRelay()): void {
       label="Map of the year 1100, being edited"
       heading={<h1>Cartographer — year 1100</h1>}
       name="Europe Historical Atlas Cartographer"
+      onSave={() => undefined}
+      history={createHistoryRelay()}
       colours={COLOURS}
       results={results}
     />
@@ -66,7 +69,7 @@ function resultText(): string | null | undefined {
 
 describe('Editor', () => {
   describe('happy path', () => {
-    it('puts the map in the canvas zone, the tools in the rail, {Polities} in the dock, the brand in the top bar, and leaves the rest named and empty', () => {
+    it('puts the map in the canvas zone, the tools in the rail, {Polities} in the dock, the bars on top, and leaves no zone empty', () => {
       mount()
 
       expect(document.querySelector('.shell__canvas [data-testid="map-area"]')).not.toBeNull()
@@ -75,9 +78,8 @@ describe('Editor', () => {
       expect(document.querySelector('.shell__appbar .app-brand__name')?.textContent).toBe(
         'Europe Historical Atlas Cartographer'
       )
-      expect([...document.querySelectorAll('.empty-zone')].map((n) => n.textContent)).toEqual([
-        'document bar',
-      ])
+      expect(document.querySelector('.shell__docbar .doc-tab')).not.toBeNull()
+      expect(document.querySelectorAll('.empty-zone')).toHaveLength(0)
     })
   })
 

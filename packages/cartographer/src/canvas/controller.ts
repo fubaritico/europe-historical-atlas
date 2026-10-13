@@ -4,7 +4,7 @@ import { screenToLonLatOnBackdrop } from '../view/projection'
 import { panBy, zoomAbout } from '../view/viewport'
 
 import { createAnchorCache } from './anchorCache'
-import { listenForPageHistory } from './historyShortcut'
+import { hearPageHistory, onModifiedKey } from './historyAnswer'
 import {
   coloursOf,
   gestureOf,
@@ -21,7 +21,6 @@ import {
   TOOL_KEYS,
   ZOOM_IN_KEYS,
   ZOOM_OUT_KEYS,
-  historyKey,
   scaleLimitsFor,
   wheelZoomFactor,
 } from './navigation'
@@ -29,14 +28,7 @@ import { paintCanvas } from './painter'
 import { pencilCancel, pencilDrag, pencilEnd, pencilStart } from './pencil'
 import { buildScene } from './scene'
 import { inDevicePixels } from './style'
-import {
-  arrowDrag,
-  arrowPress,
-  redoGesture,
-  resolvedTarget,
-  toolKey,
-  undoGesture,
-} from './toolGestures'
+import { arrowDrag, arrowPress, resolvedTarget, toolKey } from './toolGestures'
 import { keyRefusedFromAfar, releaseTool } from './toolRelease'
 import { dropDrag, idleSession, targetHandles } from './toolSession'
 
@@ -400,33 +392,6 @@ function pencilInHand(it: LiveCanvas): boolean {
 }
 
 /**
- * Handle a key held with a modifier: the history's two, or none.
- *
- * **Every other modified key belongs to the browser or the assistive technology** — ‹cmd+P› prints,
- * ‹ctrl+A› selects, ‹cmd+plus› zooms the page — never a tool's (A11Y-001, found in review). ‹shift› alone
- * is not a modifier here: on many layouts `+` is typed with it.
- *
- * **‹ctrl+Z› and ‹ctrl+shift+Z› are the exception, and take nothing from the browser**: a canvas has no
- * text to undo. ‹cmd› stands for ‹ctrl› on a Mac (`s03`).
- * @param it - the attachment
- * @param event - the key event
- * @returns `true` when the key was a modified one, handled here or left to the platform
- */
-function onModifiedKey(it: LiveCanvas, event: KeyboardEvent): boolean {
-  if (!event.ctrlKey && !event.metaKey && !event.altKey) return false
-  const history = historyKey(event)
-  if (history === null) return true
-  event.preventDefault()
-  // The result described the gesture now being taken back or replayed (QUAL-109).
-  it.deps.onResult(null)
-  if (history === 'undo') undoGesture(gestureOf(it), event.repeat)
-  else redoGesture(gestureOf(it), event.repeat)
-  it.requestPaint()
-  refreshTools(it)
-  return true
-}
-
-/**
  * The keys settled before any tool sees them: those held with a modifier (the history's, or the
  * platform's), then — from too far out — the ones that would change the document, refused and said so
  * (H-34, QUAL-001).
@@ -517,16 +482,6 @@ function releaseSpace(it: LiveCanvas): void {
   if (!it.spaceHeld) return
   it.spaceHeld = false
   showCursor(it)
-}
-
-/**
- * ‹ctrl+Z› pressed in `{Polities}` or on its bar takes the canvas's own path, so an outline in progress is
- * taken back before the history moves (`historyShortcut.ts`, ARCH-101).
- * @param it - the attachment
- * @returns a function that stops listening
- */
-function hearPageHistory(it: LiveCanvas): () => void {
-  return listenForPageHistory(it.node, (event) => onModifiedKey(it, event))
 }
 
 /**

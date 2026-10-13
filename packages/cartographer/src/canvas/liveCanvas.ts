@@ -19,6 +19,7 @@ import { outlineOnScreen, resolvedTarget, selectionMoves, snapStretchTo } from '
 import { actionSentence, overlayScene, ringNeighbours, targetHandles } from './toolSession'
 
 import type { AnchorCache } from './anchorCache'
+import type { HistoryRelay } from './historyRelay'
 import type { PaintStyle, Painter2D } from './painter'
 import type { GestureContext } from './toolGestures'
 import type { SnapLayer, ToolSession } from './toolSession'
@@ -94,6 +95,8 @@ export interface CanvasControllerDeps {
    * gesture can lift it, and the threshold's own suite can set it.
    */
   maxSnapReachKm: number
+  /** Where the controller installs its undo and redo, for the document bar's buttons. */
+  history: HistoryRelay
 }
 
 /** One live attachment: the node, its context, the deps, and the little state a gesture needs. */

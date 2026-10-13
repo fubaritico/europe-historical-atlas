@@ -11,6 +11,7 @@ import { DEFAULT_TERRAIN_OPTIONS } from '@europe-historical-atlas/core/pipeline/
 import { createWorkerMapCompute } from '@europe-historical-atlas/core/pipeline/workerCompute'
 
 import { bakeToBitmap, loadBackdrop } from './backdropSource'
+import { createHistoryRelay } from './canvas/historyRelay'
 import { CHROME_PAINT_STYLE } from './canvas/style'
 import { Editor } from './components/Editor'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
@@ -183,14 +184,24 @@ const yearSession = createYearSession({
   report: results.say,
 })
 void yearSession.openOnStartup()
-installSaveShortcut(window, () => {
+/** Save the year — ‹ctrl+S› anywhere, and the top bar's `[Save]`: one call, two triggers. */
+const handleSave = (): void => {
   void yearSession.save()
-})
+}
+installSaveShortcut(window, handleSave)
+
+/**
+ * The canvas's undo and redo, for the document bar's buttons — gesture first, as the keys (ARCH-101). Built
+ * here because neither end owns the other: the controller registers once the backdrop is baked.
+ */
+const history = createHistoryRelay()
 
 createRoot(container).render(
   <StrictMode>
     <Editor
       name="Europe Historical Atlas Cartographer"
+      onSave={handleSave}
+      history={history}
       heading={<h1 style={visuallyHidden}>Cartographer — year {store.getState().document.year}</h1>}
       store={store}
       load={loadTheBackdrop}

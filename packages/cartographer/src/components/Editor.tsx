@@ -1,19 +1,20 @@
 import { useRef } from 'react'
 
-import { AppBar } from './AppBar'
 import { MapArea } from './MapArea'
 import { PolitiesPanel } from './PolitiesPanel'
 import { Shell } from './Shell'
 import { writeResult } from './statusBar'
 import { ToolRailPanel } from './ToolRailPanel'
+import { AppBarPanel, DocBarPanel } from './TopBars'
 import { useRelayedResults } from './useRelayedResults'
 
 import type { BackdropLoad } from './MapArea'
+import type { HistoryRelay } from '../canvas/historyRelay'
 import type { PaintStyle } from '../canvas/painter'
 import type { ResultRelay } from '../persistence/resultRelay'
 import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
-import type { ReactNode } from 'react'
+import type { ReactNode, RefObject } from 'react'
 
 /**
  * The editor as a page: the shell, with the map in its zone and the status bar in its row.
@@ -24,10 +25,44 @@ import type { ReactNode } from 'react'
  * declaring one there is what Fast Refresh cannot reload (`react-refresh/only-export-components`).
  *
  * **It is the binding of the shell/view/binding split** (`react-canvas-and-panels`): it knows there is a
- * store and which zone takes what, and it holds no layout and no value of its own. A zone it does not
- * fill — the document bar, today — comes back from {@link Shell} as a named placeholder, which is the dev's call of 2026-10-08: an empty zone should look deliberately
+ * store and which zone takes what, and it holds no layout and no value of its own. Every zone is filled since
+ * 2026-10-13; one left out would come back from {@link Shell} as a named placeholder, which is the dev's call of 2026-10-08: an empty zone should look deliberately
  * empty rather than broken.
  */
+
+/**
+ * The status bar's three zones, each written imperatively through its ref.
+ *
+ * No `aria-live` on the row, and that is the accessibility decision rather than an omission: the action and
+ * the position change on every pointer sample, so announcing them would make a screen reader unusable — the
+ * very failure `role="status"` exists to avoid elsewhere. A keyboard reader gets nothing from them today,
+ * which is honest; what will serve them is the anchor list of step 5, not a firehose.
+ * @param props - the three zones' refs
+ * @param props.action - what is being done, and to whom
+ * @param props.result - what a gesture did
+ * @param props.position - where the pointer is
+ * @returns the row
+ */
+function StatusRow({
+  action,
+  result,
+  position,
+}: {
+  action: RefObject<HTMLElement | null>
+  result: RefObject<HTMLElement | null>
+  position: RefObject<HTMLElement | null>
+}) {
+  // Render
+  return (
+    <p className="shell__status">
+      <span className="shell__action" ref={action} />
+      {/* The one zone that speaks: a result is rare and discrete, unlike the action and the position,
+          which change on every pointer sample and would drown a screen reader (A11Y-001). */}
+      <span className="shell__result" ref={result} role="status" />
+      <span className="shell__position" ref={position} />
+    </p>
+  )
+}
 
 /** What the page needs, which is what the map needs plus the store. */
 export interface EditorProps {
@@ -45,6 +80,10 @@ export interface EditorProps {
   heading: ReactNode
   /** The application's name, written in the top bar beside the mark. */
   name: string
+  /** Save the open year — the top bar's `[Save]`, the same call as ‹ctrl+S›. */
+  onSave: () => void
+  /** The canvas's undo and redo, for the document bar's buttons. */
+  history: HistoryRelay
   /** Where the polities' colours come from — one source for the canvas and every panel. */
   colours: PolityColourSource
   /**
@@ -71,6 +110,8 @@ export function Editor({
   label,
   heading,
   name,
+  onSave,
+  history,
   colours,
   results,
 }: EditorProps) {
@@ -91,7 +132,8 @@ export function Editor({
   return (
     <Shell
       heading={heading}
-      appbar={<AppBar name={name} />}
+      appbar={<AppBarPanel store={store} name={name} onSave={onSave} />}
+      docbar={<DocBarPanel store={store} history={history} />}
       canvas={
         <MapArea
           store={store}
@@ -103,23 +145,12 @@ export function Editor({
           actionRef={action}
           resultRef={result}
           colours={colours}
+          history={history}
         />
       }
       rail={<ToolRailPanel store={store} colours={colours} />}
       dock={<PolitiesPanel store={store} colours={colours} onResult={handleResult} />}
-      status={
-        // No `aria-live`, and that is the accessibility decision rather than an omission: this text
-        // changes on every pointer sample, so announcing it would make a screen reader unusable — the
-        // very failure `role="status"` exists to avoid elsewhere. A keyboard reader gets nothing from it
-        // today, which is honest; what will serve them is the anchor list of step 5, not a firehose.
-        <p className="shell__status">
-          <span className="shell__action" ref={action} />
-          {/* The one zone that speaks: a result is rare and discrete, unlike the action and the position,
-              which change on every pointer sample and would drown a screen reader (A11Y-001). */}
-          <span className="shell__result" ref={result} role="status" />
-          <span className="shell__position" ref={status} />
-        </p>
-      }
+      status={<StatusRow action={action} result={result} position={status} />}
     />
   )
 }

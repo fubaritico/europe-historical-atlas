@@ -90,6 +90,13 @@ une trace dans `years/1100.bourgogne-v1/`.
 **Un seul serveur de dev** : le dev fait tourner le sien (`pnpm dev:cartographer`, souvent sur 5174). Ne pas
 en lancer un second ; lui donner l'adresse du sien.
 
+**Les deux barres du haut sont posées (13/10)** : `[Save]`, Undo et Redo branchés (les boutons passent par
+le relais du canevas, `historyRelay.ts`, jamais `store.undo()` direct — ARCH-101) ; `[Open…]`, `[Save as…]`,
+`[Registry]`, le `×` de l'onglet et `[Check this year]` posés **indisponibles** (`aria-disabled`, l'infobulle
+nomme le scénario). `[Export for the atlas…]` **retiré** (note dans `s04`). **Manquent** : la marque
+« modified » (suivre la version enregistrée) et la promesse de `4d-3` — `[Save]` désactivé tant que le fond
+n'est pas prêt.
+
 **Noté, non prioritaire** : masquer un pays (`H-32`, besoin non prouvé — essayer d'abord un affichage contours
 seuls) · les fleuves jusqu'à la mer (**remis à plus tard par le dev**) · alléger les tronçons de côte
 (Douglas–Peucker) · la confirmation avant de supprimer une ancre partagée (`s03`) · tracer au clavier · le

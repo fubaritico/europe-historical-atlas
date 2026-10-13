@@ -6,6 +6,7 @@ import { assetError } from '@europe-historical-atlas/core/data/assetError'
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
+import { createHistoryRelay } from '../canvas/historyRelay'
 import { CHROME_PAINT_STYLE } from '../canvas/style'
 import { openEmptyYear } from '../state/openEmptyYear'
 import { createPolityColourSource } from '../state/polityColourSource'
@@ -85,6 +86,7 @@ function mount(load: BackdropLoad, strict = false): HTMLParagraphElement {
       actionRef={{ current: document.createElement('span') }}
       resultRef={{ current: document.createElement('span') }}
       colours={COLOURS}
+      history={createHistoryRelay()}
     />
   )
   render(strict ? <StrictMode>{area}</StrictMode> : area)
@@ -433,6 +435,7 @@ describe('MapCanvas, re-rendered', () => {
           onAction={() => undefined}
           onResult={() => undefined}
           colours={COLOURS}
+          history={createHistoryRelay()}
           style={CHROME_PAINT_STYLE}
           zoneLabel="zone"
           label="la carte"
