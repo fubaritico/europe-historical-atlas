@@ -3,6 +3,7 @@ import { useRef } from 'react'
 import { LayersPanel } from './LayersPanel'
 import { LinePanel } from './LinePanel'
 import { MapArea } from './MapArea'
+import { OverridesPanel } from './OverridesPanel'
 import { PolitiesPanel } from './PolitiesPanel'
 import { Shell } from './Shell'
 import { writeResult } from './statusBar'
@@ -72,7 +73,7 @@ function StatusRow({
 }
 
 /**
- * The dock's panels, top to bottom: `{Polities}`, `{Line}` — the selected stretch's style — then `{Layers}`.
+ * The dock's panels, top to bottom: `{Polities}`, `{Line}` — the selected stretch's style — `{Overrides}`, then `{Layers}`.
  * @param props - what the panels need
  * @param props.store - the store
  * @param props.colours - the polities' colours
@@ -93,6 +94,7 @@ function Dock({
     <div className="dock-stack">
       <PolitiesPanel store={store} colours={colours} onResult={onResult} />
       <LinePanel store={store} />
+      <OverridesPanel store={store} />
       <LayersPanel store={store} />
     </div>
   )
