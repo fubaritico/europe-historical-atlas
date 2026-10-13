@@ -352,3 +352,79 @@ describe('deriveBorders', () => {
     })
   })
 })
+
+/**
+ * One square polity, its west and south sides taken from the coast (source 1), its east and north reported
+ * by eye (source 0): `0 (0,10) → 1 (10,10) → 2 (10,0) → 3 (0,0)`. North and east are sides 0→1 and 1→2.
+ */
+function coastAndLand(clockwise = true): YearDocument {
+  const doc = createYearDocument(1100, zone, [
+    ...source,
+    { id: 1, name: 'Natural Earth 10m land minus lakes', licence: 'public domain' },
+  ])
+  addAnchor(doc, [0, 10], 0)
+  addAnchor(doc, [10, 10], 0)
+  addAnchor(doc, [10, 0], 1)
+  addAnchor(doc, [0, 0], 1)
+  addPolity(doc, polity('france'))
+  closeRing(doc, 'france', clockwise ? [0, 1, 2, 3] : [3, 2, 1, 0])
+  return doc
+}
+
+/** Land east of 10°: the far side of the east limit is dry, every other far side is sea. */
+const eastIsLand = (lon: number): boolean => lon > 10
+
+// The 1100 France of 2026-10-13: its whole outer limit was one run, asked once at its midpoint, so every
+// coast came out as a frontier against unclaimed ground (1 042 anchors).
+describe('deriveBorders — the far side, segment by segment', () => {
+  describe('happy path', () => {
+    it('cuts a polity’s outer limit where the far side turns from land to sea', () => {
+      const borders = deriveBorders(coastAndLand(), { isLand: eastIsLand })
+      const unclaimed = borders.filter((border) => border.relation === 'unclaimed')
+      const coast = borders.filter((border) => border.relation === 'coastline')
+      expect(unclaimed.map((border) => border.run)).toEqual([[1, 2]])
+      expect(coast.flatMap((border) => border.run)).toEqual(expect.arrayContaining([0, 2, 3]))
+    })
+  })
+
+  describe('variants', () => {
+    it('finds the outside whichever way the ring is walked', () => {
+      const borders = deriveBorders(coastAndLand(false), { isLand: eastIsLand })
+      const unclaimed = borders.filter((border) => border.relation === 'unclaimed')
+      expect(unclaimed.map((border) => [...border.run].sort())).toEqual([[1, 2]])
+    })
+
+    it('reads a segment between two coast anchors as coast, whatever the mask says beyond it', () => {
+      // A narrow estuary: stepped outward, the mask finds the far bank — dry everywhere.
+      const borders = deriveBorders(coastAndLand(), {
+        isLand: () => true,
+        coastSources: new Set([1]),
+      })
+      const coast = borders.filter((border) => border.relation === 'coastline')
+      expect(coast.map((border) => border.run)).toEqual([[2, 3]])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('falls back on the mask when no coast source is named', () => {
+      const borders = deriveBorders(coastAndLand(), { isLand: () => true })
+      expect(borders.every((border) => border.relation === 'unclaimed')).toBe(true)
+    })
+  })
+
+  // L4: N/A — the readers refuse a document whose anchors or sources are missing; the derivation skips a
+  // segment whose anchor is absent, covered by 'survives a claim naming a polity the registry lacks'.
+
+  describe('edge cases', () => {
+    it('does not take a segment with only one coast end for coast', () => {
+      // South (2→3) is coast at both ends; east (1→2) has one coast end and stays the mask's to judge.
+      const borders = deriveBorders(coastAndLand(), {
+        isLand: () => true,
+        coastSources: new Set([1]),
+      })
+      expect(
+        borders.find((border) => border.run.includes(1) && border.run.includes(2))?.relation
+      ).toBe('unclaimed')
+    })
+  })
+})

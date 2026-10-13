@@ -55,6 +55,7 @@
 | **lon/lat**               | Longitude, latitude. Les coordonnées du monde réel.                                                                                                |
 | **(u, v)**                | Nos coordonnées internes, de 0 à 1 sur le cadre. `u`=0 à l'ouest, `v`=0 au nord.                                                                   |
 | **Mercator**              | La projection qui transforme lon/lat en (u,v). Étire le nord — le Groenland paraît énorme.                                                         |
+| **graticule**             | Le quadrillage des **méridiens et des parallèles** tracé sur la carte — une ligne tous les 5° ou 10°, par exemple. Sert à lire la position d'un coup d'œil. Une couche de `{Layers}` dans la maquette, pas encore dessinée. |
 | **even-odd**              | La règle de remplissage : un anneau dans un anneau fait un trou. Évite de déclarer les trous.                                                      |
 
 ## Notre pipeline
@@ -69,7 +70,7 @@
 | **texture**             | L'image peinte qu'on pose sur le relief : parchemin, altitudes, ombrage, grain.           |
 | **bake** / cuisson      | Calculer cette image, pixel par pixel. ~1,5 million de pixels.                            |
 | **tint**                | La couleur d'un pays, appliquée dans la texture.                                          |
-| **derived border**      | La frontière **calculée**, jamais dessinée à part. Deux calculs selon l'endroit : dans **l'atlas**, le bord des aplats du raster (il n'a que des coordonnées à plat) ; dans le **Cartographe**, le **bout partagé** entre deux tracés — exact, au lieu d'une marche de 1,9 km. |
+| **derived border**      | La frontière **calculée**, jamais dessinée à part. Calculée depuis le **bout partagé** entre deux tracés — exacte, au lieu d'une marche de 1,9 km. **Décidé le 13/10 (D1, `borders/plan.md`)** : l'atlas aussi la prend là pour une année dessinée, pour que styles et surcharges lui parviennent ; le bord des aplats du raster ne sert plus que pour les siècles encore lus dans les fichiers GPL. Les **couleurs**, elles, restent sur le raster. |
 | **worker**              | Un second fil d'exécution. Le calcul lourd y va, pour que l'écran ne gèle pas.            |
 | **drape** / draper      | Poser une ligne plate sur le relief pour qu'elle épouse les montagnes.                    |
 | **backdrop** / fond     | La texture cuite, posée **sous** le canevas du Cartographe. Le seul objet géoréférencé **par construction** — c'est littéralement l'image de sortie de l'atlas, donc zéro calage et erreur nulle. Son repère est celui du **DEM**, **jamais** la zone éditoriale : confondre les deux fait tout glisser sans erreur nulle part. |

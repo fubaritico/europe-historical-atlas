@@ -56,17 +56,16 @@ export interface DerivationDeps {
    * unowned far side is treated as sea, which draws nothing — the quiet choice, and the safe one.
    */
   isLand?: (lon: number, lat: number) => boolean
-}
-
-/** The midpoint of a run, in lon/lat — where the far-side question is asked. */
-function midpointOf(run: readonly number[], doc: YearDocument): [number, number] | null {
-  const first = run[Math.floor(run.length / 2) - 1] ?? run[0]
-  const second = run[Math.floor(run.length / 2)]
-  if (first === undefined || second === undefined) return null
-  const a = doc.anchors[first]
-  const b = doc.anchors[second]
-  if (a === undefined || b === undefined) return null
-  return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
+  /**
+   * The sources whose anchors lie on the coastline itself — in practice the land mask's own source, the
+   * one the Pen records for every vertex it takes from the coast.
+   *
+   * **Read before the mask, and it is exact where the mask is not**: a segment between two coast anchors
+   * *is* coast, because the author snapped it there. Asked of the mask instead, a point stepped outward from
+   * a narrow estuary lands on the far bank — dry — and the coast broke into a dozen two-anchor "unclaimed"
+   * fragments on the 1100 France (the Gironde, the Loire, the Breton rias; measured 2026-10-13).
+   */
+  coastSources?: ReadonlySet<number>
 }
 
 /** Resolve a polity's rings into coordinates, for an inclusion test. */
@@ -172,34 +171,178 @@ function borderOfShared(
   }
 }
 
-/** A run held by one owner: the far-side question, which is the half that costs something. */
-function borderOfSingle(
+/**
+ * How far outside a segment its far side is asked, in degrees — about two land-mask cells. A segment of
+ * coast lies **on** the mask's edge, where the cell under its midpoint is either; a step outward lands in
+ * the water it borders, or the land.
+ */
+const FAR_SIDE_OFFSET_DEG = 0.05
+
+/**
+ * The point just outside a segment, on the side away from the owner's own ground.
+ *
+ * Both sides are tried and the one the owner does not enclose is kept, so the rings' winding never
+ * matters. When neither or both are outside — a sliver narrower than the offset — the first is kept.
+ * @param a - one end, lon/lat
+ * @param b - the other
+ * @param ownRings - the owner's rings, resolved
+ * @returns the outward point
+ */
+function outsideOf(
+  a: readonly [number, number],
+  b: readonly [number, number],
+  ownRings: [number, number][][]
+): [number, number] {
+  const mid: [number, number] = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
+  const dx = b[0] - a[0]
+  const dy = b[1] - a[1]
+  const length = Math.hypot(dx, dy)
+  if (length === 0) return mid
+  const nx = (-dy / length) * FAR_SIDE_OFFSET_DEG
+  const ny = (dx / length) * FAR_SIDE_OFFSET_DEG
+  const left: [number, number] = [mid[0] + nx, mid[1] + ny]
+  const right: [number, number] = [mid[0] - nx, mid[1] - ny]
+  return pointInRings(left, ownRings) && !pointInRings(right, ownRings) ? right : left
+}
+
+/**
+ * Whether both ends of a segment were taken from the coastline.
+ * @param a - one end's index
+ * @param b - the other's
+ * @param doc - the document, for each anchor's source
+ * @param deps - which sources are the coast's
+ * @returns `true` when the segment lies on the coast
+ */
+function onCoast(
+  a: number | undefined,
+  b: number | undefined,
+  doc: YearDocument,
+  deps: DerivationDeps
+): boolean {
+  const coast = deps.coastSources
+  if (coast === undefined || a === undefined || b === undefined) return false
+  const sa = doc.anchorSource[a]
+  const sb = doc.anchorSource[b]
+  return sa !== undefined && sb !== undefined && coast.has(sa) && coast.has(sb)
+}
+
+/** What lies beyond one segment of a single-owner run: a polity, or nothing — dry or wet. */
+interface FarSide {
+  /** The enclosing polity, or `null`. */
+  far: string | null
+  /** Whether the ground there is land, when nothing claims it. */
+  dry: boolean
+}
+
+/**
+ * A run held by one owner: the far-side question, which is the half that costs something.
+ *
+ * **Asked segment by segment, and the run cut where the answer changes** (2026-10-13). It was asked once,
+ * at the run's midpoint — and a polity's whole outer limit is one run, so on the 1100 France its Atlantic
+ * and Channel coasts and its land limit in Flanders came out as one 1 042-anchor "unclaimed" border: every
+ * coast drawn as a frontier. Each segment is now judged just outside itself (`outsideOf`), and consecutive
+ * segments with the same far side make one border.
+ * @param run - the anchors, in order
+ * @param owner - the polity holding them
+ * @param doc - the document
+ * @param byId - every polity, by id
+ * @param deps - the land mask
+ * @returns one border per stretch of one far side
+ */
+function bordersOfSingle(
   run: number[],
   owner: string,
   doc: YearDocument,
   byId: ReadonlyMap<string, YearPolity>,
   deps: DerivationDeps
-): DerivedBorder | null {
-  const point = midpointOf(run, doc)
-  if (point === null) return null
+): DerivedBorder[] {
+  const ownRings = ringsOf(owner, doc)
+  const sides = run
+    .slice(1)
+    .map((to, at) => segmentSide(run[at], to, owner, ownRings, doc, byId, deps))
+  const out: DerivedBorder[] = []
+  let start = 0
+  for (let at = 1; at <= sides.length; at += 1) {
+    const here = sides[start]
+    if (at < sides.length && sameSide(here, sides[at])) continue
+    if (here !== null && here !== undefined)
+      out.push(borderOfStretch(run.slice(start, at + 1), owner, here, doc, byId))
+    start = at
+  }
+  return out
+}
 
+/**
+ * Whether two segments have the same far side, so they make one border.
+ * @param a - one segment's far side
+ * @param b - the next one's
+ * @returns `true` when both are known and equal
+ */
+function sameSide(a: FarSide | null | undefined, b: FarSide | null | undefined): boolean {
+  if (a === null || a === undefined || b === null || b === undefined) return false
+  return a.far === b.far && a.dry === b.dry
+}
+
+/**
+ * What lies beyond one segment: the coast when both ends were taken from it, else whoever encloses the
+ * point just outside it, else what the mask says of that point.
+ * @param from - the segment's first anchor
+ * @param to - its second
+ * @param owner - the polity holding it
+ * @param ownRings - the owner's rings, resolved
+ * @param doc - the document
+ * @param byId - every polity, by id
+ * @param deps - the land mask and the coast's sources
+ * @returns the far side, or `null` when an anchor is missing
+ */
+function segmentSide(
+  from: number | undefined,
+  to: number,
+  owner: string,
+  ownRings: [number, number][][],
+  doc: YearDocument,
+  byId: ReadonlyMap<string, YearPolity>,
+  deps: DerivationDeps
+): FarSide | null {
+  const a = from === undefined ? undefined : doc.anchors[from]
+  const b = doc.anchors[to]
+  if (a === undefined || b === undefined) return null
+  const point = outsideOf(a, b, ownRings)
   const far = farSideOf(owner, point, doc, byId)
-  if (far !== null) {
-    const between = [owner, far]
+  if (far === null && onCoast(from, to, doc, deps)) return { far: null, dry: false }
+  // Nothing claims the far side: only the mask can say whether that is the sea or ground nobody took.
+  return { far, dry: far === null && (deps.isLand?.(point[0], point[1]) ?? false) }
+}
+
+/**
+ * One stretch of a single-owner run, all of one far side.
+ * @param run - its anchors
+ * @param owner - the polity holding it
+ * @param side - what lies beyond it
+ * @param doc - the document
+ * @param byId - every polity, by id
+ * @returns the border
+ */
+function borderOfStretch(
+  run: number[],
+  owner: string,
+  side: FarSide,
+  doc: YearDocument,
+  byId: ReadonlyMap<string, YearPolity>
+): DerivedBorder {
+  if (side.far !== null) {
+    const between = [owner, side.far]
     return {
       run,
       between,
-      ...relationBetween(owner, far, byId),
+      ...relationBetween(owner, side.far, byId),
       ...dressingFor(run, between, doc),
     }
   }
-
-  // Nothing claims the far side. Only the mask can say whether that is the sea or ground nobody took.
-  const dry = deps.isLand?.(point[0], point[1]) ?? false
   return {
     run,
     between: [owner],
-    relation: dry ? 'unclaimed' : 'coastline',
+    relation: side.dry ? 'unclaimed' : 'coastline',
     degree: 0,
     ...dressingFor(run, [owner], doc),
   }
@@ -220,13 +363,10 @@ export function deriveBorders(doc: YearDocument, deps: DerivationDeps = {}): Der
   const out: DerivedBorder[] = []
   for (const { run, owners } of borderRunsOf(doc)) {
     const owner = owners[0]
-    const border =
-      owners.length >= 2
-        ? borderOfShared(run, owners, doc, byId)
-        : owner === undefined
-          ? null
-          : borderOfSingle(run, owner, doc, byId, deps)
-    if (border !== null) out.push(border)
+    if (owners.length >= 2) {
+      const border = borderOfShared(run, owners, doc, byId)
+      if (border !== null) out.push(border)
+    } else if (owner !== undefined) out.push(...bordersOfSingle(run, owner, doc, byId, deps))
   }
   return out
 }
