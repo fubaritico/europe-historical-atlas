@@ -320,6 +320,9 @@
   --ui-listbox-border-color: transparent;
   --ui-listbox-shadow: none;
   --ui-listbox-padding: 0;
+  /* The design system caps a listbox at 240px — a dropdown's height. This one is a panel: it takes the
+     dock's height and scrolls inside it. */
+  --ui-listbox-max-block-size: none;
 
   flex: 1 1 auto;
   width: 100%;
