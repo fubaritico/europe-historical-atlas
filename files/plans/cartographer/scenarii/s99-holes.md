@@ -641,3 +641,18 @@ suzerain of another owner (its limit merely coincides with its vassal's), then p
 and Poland, sovereign. `relationBetween` itself is right for a pair. One fix in `core` fixes the
 Cartographer and the atlas alike. **Test to write first**: the three-ring case, which the naive "two
 deepest" passes or fails depending on the order of the claims.
+
+**Same cause, second symptom, seen by the dev in the atlas the same evening: vassals' coasts drawn dotted.**
+Brittany reuses the Franks' coast anchors, so each coast stretch is held by **two** rings — vassal and lord —
+and two owners skip the far-side question: the pair reads vassal–suzerain, dotted along the sea, where the
+atlas draws no line but the baked coast. The same remedy fixes it: once the coinciding suzerain is dropped
+one owner remains, the far side is asked, it is sea — nothing drawn. **What must stay dotted**: only the
+inner limit between a vassal and its own lord.
+
+### H-45 · The vassal's dashes are too long in the atlas — **the dev, 2026-10-13**
+
+Seen on the general test: the dashes of the vassal hand read too coarse. The atlas draws every dashed line
+with one dash and one gap length (`borderDashSize`, `borderDashGap`). **Remedy**: a dash cadence per hand —
+shorter and tighter for the vassal — carried by the hands table (`core/editor/borderHands.ts`, which `s08`
+already describes as *"pattern, dash cadence, width per relation"*), so the Cartographer and the atlas share
+it. To settle by eye with the dev at the border-style session.

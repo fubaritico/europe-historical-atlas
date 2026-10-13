@@ -85,7 +85,8 @@ point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui 
   dans l'atlas) ; **l'intégration de la nouvelle version du DS en dernier** (`MIGRATION-color-roles-from-
   fubaritico-ds.md` à la racine, non lu).
 - **`H-43`** (`s99`) attend une décision : nommer le pays suivi dans le message du résultat.
-- **`H-44`** (`s99`), relevé par le dev : la limite d'un vassal avec un souverain étranger sort en pointillé (Bohême–Pologne). Cause trouvée (règle « deux plus profonds » sur un tronçon à trois pays), remède proposé : à faire, avec son test.
+- **`H-44`** (`s99`), relevé par le dev dans l'atlas : un vassal dessine des **pointillés sur ses côtes** et **contre un souverain étranger** (Bohême–Pologne). Une seule cause — sur un tronçon partagé, le suzerain dont la limite coïncide compte comme l'autre côté — et un seul remède : le retirer, puis juger ce qui reste. **À faire en premier, avec son test.**
+- **`H-45`** : les tirets du style vassal sont trop longs dans l'atlas — une cadence de tirets par style, dans la table des styles (`borderHands.ts`). Avec la séance sur le style des frontières.
 - **Le push** : le dev pousse lui-même les commits en attente (13/10).
 
 ## ▶ ON REPREND ICI (13/10) — une nouvelle méthode, puis les « petites choses »
