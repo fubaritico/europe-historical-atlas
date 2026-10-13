@@ -195,3 +195,31 @@ Scenario: a polity carrying overrides is merged into another
 - **H-29 — per-year colour and the registry drifting apart.** Nothing stops a polity being pinned blue in
   the registry and red in nineteen of twenty-one years. The panel shows it; nothing decides whether that is
   a defect.
+
+## Walked for real — France and Burgundy, 2026-10-13 (Claude, in the dev's Chrome)
+
+```gherkin
+Scenario: a stretch of the Saône dotted, the rest of the limit untouched
+  Given France is aimed at and the white arrow is in hand, at 696 %
+  When I marquee part of the Saône
+  Then {Line} reads "32 segments · Royaume de France – Royaume de Bourgogne"
+  When I choose [Dotted]
+  Then that stretch is dotted and the limit north of it stays solid
+  And ‹undo› reads "Undo dotted Royaume de France – Royaume de Bourgogne", and restores it
+```
+
+```gherkin
+Scenario: a stretch over a dressed border, both listed, one cleared
+  Given a stretch of the Saône dashed, then [Whole border] and [Double]
+  Then {Overrides} lists "dashed · 36 segments · …" then "double · whole border · …"
+  And the dashed stretch wins over the double border — a run beats a pair
+  When I press [Clear] on the dashed one
+  Then only the whole border is listed, and ‹undo› brings the stretch back
+```
+
+> **Found while building it, and fixed before it shipped**: a run override dressed **any** derived border
+> sharing one anchor with it, so the eleven segments of the first scenario would have restyled the whole
+> 61-anchor limit. The derivation now cuts each border where an override begins and ends.
+>
+> **Not offered yet**: a line's weight and ink — only its pattern. The `[Border hands]` table is a constant in
+> `core` (`borderHands.ts`), not yet a panel.

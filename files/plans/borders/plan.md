@@ -43,3 +43,19 @@ should cover it. **Check at step 4**; remedy if seen: a finer raster under the b
 
 The order is the dependencies': see before tuning, the table before what beats it, the editor before the
 atlas so we know what we publish.
+
+## Progress — 2026-10-13, delivered by Claude while the dev was away (each piece walked in his Chrome)
+
+| | commit | what |
+| --- | --- | --- |
+| 1a | `997cbb1` | the derivation cut where a polity's far side turns from sea to land, the coast read from the anchors' provenance — 11 true borders on the 1100 year |
+| 1b | `19d316f` | the Cartographer draws the borders in their hands (`core/editor/borderHands.ts`, D2 as proposed), and the status bar names what is under the pointer |
+| 1c | `4799226` | `{Layers}` — eye and opacity for backdrop, fills, coastline, rivers, borders, unclaimed |
+| 3a | `ae34714` | the run overrides dress their own segments only (a defect: one shared anchor dressed a whole border); the arrow's selection reaches `{Line}`, six patterns, this stretch or the whole border |
+| 3b | `2b9caf0` | `{Overrides}` — every dressed stretch and pair, orphans listed, `[Clear]` undoable |
+| 4 | `b85714f` | the atlas draws an authored year's borders from the anchors (`core/editor/atlasBorders.ts`), no longer grows its claims past the drawn line, and paints it in the Cartographer's colours — walked in the dev's Chrome, *"ça correspond bien"* |
+
+**Left for the dev's eye**: the blue edit outlines over the borders (D4, decided by use); the patterns' rendering
+at the zooms he works at — dotted and dashed read fine, double could not be told from dashed in a reduced
+capture; weight and ink of a line (`s13`) are not offered yet, only the pattern.
+
