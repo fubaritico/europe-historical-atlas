@@ -1,7 +1,7 @@
 import { isAssetError } from '@europe-historical-atlas/core/data/assetError'
 
 import { MapCanvas } from './MapCanvas'
-import { writeAction, writePosition, writeResult } from './statusBar'
+import { writeAction, writeFeature, writePosition, writeResult } from './statusBar'
 import { useEditorAssets } from './useEditorAssets'
 
 import type { Backdrop } from '../backdropSource'
@@ -81,6 +81,8 @@ export interface MapAreaProps {
   actionRef: RefObject<HTMLElement | null>
   /** The status bar's result zone, beside the action. */
   resultRef: RefObject<HTMLElement | null>
+  /** The status bar's zone naming what is under the pointer — a border or a polity. */
+  featureRef: RefObject<HTMLElement | null>
   /** Where the polities' colours come from — shared with the panels. */
   colours: PolityColourSource
   /** Where the canvas installs its undo and redo, for the document bar's buttons. */
@@ -206,6 +208,7 @@ export function MapArea({
   statusRef,
   actionRef,
   resultRef,
+  featureRef,
   colours,
   history,
 }: MapAreaProps) {
@@ -222,6 +225,9 @@ export function MapArea({
   const handleResult = (message: string | null) => {
     writeResult(resultRef.current, message)
   }
+  const handleFeature = (feature: string | null) => {
+    writeFeature(featureRef.current, feature)
+  }
 
   // Render
   if (error !== null) return <BackdropFailure error={error} />
@@ -236,11 +242,13 @@ export function MapArea({
         onHover={handleHover}
         onAction={handleAction}
         onResult={handleResult}
+        onFeature={handleFeature}
         style={style}
         zoneLabel={zoneLabel}
         label={label}
         colours={colours}
         history={history}
+        landMask={assets.backdrop.mask}
       />
     </div>
   )

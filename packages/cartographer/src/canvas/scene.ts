@@ -1,4 +1,5 @@
 import { paintRanks } from '@europe-historical-atlas/core/data/paintOrder'
+import { handFor } from '@europe-historical-atlas/core/editor/borderHands'
 
 import { lonLatToScreen, remapToScreen } from '../view/projection'
 import { backdropToScreen } from '../view/viewport'
@@ -9,6 +10,7 @@ import type { Rect } from '../geometry/marquee'
 import type { VectorLayers } from '../vectorLayers'
 import type { BackdropFrame } from '../view/projection'
 import type { Point, Viewport } from '../view/viewport'
+import type { DerivedBorder } from '@europe-historical-atlas/core/editor/derivedBorders'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /**
@@ -45,6 +47,8 @@ export interface SceneInputs {
   handles: readonly number[]
   /** Which anchors get a snap dot, by index — see {@link CanvasScene.snapAnchors}. */
   snapAnchors: readonly number[]
+  /** The document's borders, derived from its shared anchors (`core/editor/derivedBorders`). */
+  borders: readonly DerivedBorder[]
   /** Each polity's colour, by id — see `core/editor/polityColours`. */
   colours: ReadonlyMap<string, string>
   /** What to call the editorial zone on screen. */
@@ -183,6 +187,24 @@ export function projectedTerritories(
 }
 
 /**
+ * Each border as the painter takes it: its run on screen, and the hand it is drawn in.
+ * @param borders - the derived borders
+ * @param anchors - every anchor, projected
+ * @returns the borders to paint
+ */
+export function projectedBorders(
+  borders: readonly DerivedBorder[],
+  anchors: readonly Point[]
+): CanvasScene['borders'] {
+  return borders.map((border) => ({
+    points: border.run
+      .map((index) => anchors[index])
+      .filter((point): point is Point => point !== undefined),
+    hand: handFor(border),
+  }))
+}
+
+/**
  * Everything to paint, for one document and one view.
  *
  * The anchors are remapped **once** and the rings read that result, which is what keeps a shared anchor
@@ -203,6 +225,7 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
     rings: projectedRings(document, anchors),
     fills: projectedFills(document, anchors, inputs.colours),
     anchors,
+    borders: projectedBorders(inputs.borders, anchors),
     handles: inputs.handles,
     snapAnchors: inputs.snapAnchors,
     selected: inputs.selected,

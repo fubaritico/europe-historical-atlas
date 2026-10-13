@@ -1,3 +1,5 @@
+import { createLandMask } from '@europe-historical-atlas/core/data/landMask'
+
 import type { BackdropFrame } from './projection'
 
 /**
@@ -32,3 +34,14 @@ export const TEST_BACKDROP_FRAME: BackdropFrame = {
     north: 76.84081641443098,
   },
 }
+
+/**
+ * A land mask over the same frame that says **sea everywhere** — as a test fixture, under the same rule.
+ *
+ * The quiet answer, so a test that does not care about the far side draws no frontier: a polity's own
+ * outer limit derives as a coastline, which paints nothing.
+ */
+export const TEST_LAND_MASK = createLandMask(
+  { width: 1, height: 1, scale: 1, bbox: TEST_BACKDROP_FRAME.bounds, source: 'test mask' },
+  () => false
+)

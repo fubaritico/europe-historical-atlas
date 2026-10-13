@@ -6,10 +6,13 @@ import { panBy, zoomAbout } from '../view/viewport'
 import { createAnchorCache } from './anchorCache'
 import { hearPageHistory, onModifiedKey } from './historyAnswer'
 import {
+  bordersOf,
   coloursOf,
+  featureAt,
   gestureOf,
   handInHand,
   refreshTools,
+  reportFeature,
   showCursor,
   snapAnchorsOf,
   tooFarToEdit,
@@ -102,6 +105,7 @@ function repaint(it: LiveCanvas): void {
     selected: new Set(it.session.selected),
     handles: targetHandles(state.document, target?.id ?? null),
     snapAnchors: snapAnchorsOf(it, target?.id ?? null),
+    borders: bordersOf(it),
     colours: coloursOf(it),
     zoneLabel: it.deps.zoneLabel,
   })
@@ -237,6 +241,7 @@ function onWheel(it: LiveCanvas, event: WheelEvent): void {
  */
 function report(it: LiveCanvas, at: [number, number]): void {
   it.deps.onHover(screenToLonLatOnBackdrop(at, it.deps.frame, it.deps.store.getState().viewport))
+  reportFeature(it, featureAt(it, at))
 }
 
 /**
@@ -307,6 +312,7 @@ function onPointerMove(it: LiveCanvas, event: PointerEvent): void {
 function onPointerLeave(it: LiveCanvas): void {
   it.pointer = null
   it.deps.onHover(null)
+  reportFeature(it, null)
   refreshTools(it)
 }
 
@@ -602,6 +608,42 @@ function watchStore(it: LiveCanvas, paint: () => void): () => void {
 }
 
 /**
+ * A canvas attachment at rest: no gesture, no pointer, nothing derived yet.
+ * @param node - the drawing surface
+ * @param ctx - its 2D context
+ * @param overlayCtx - the overlay's 2D context
+ * @param deps - everything the controller needs
+ * @returns the attachment
+ */
+function freshCanvas(
+  node: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D,
+  overlayCtx: CanvasRenderingContext2D,
+  deps: CanvasControllerDeps
+): LiveCanvas {
+  return {
+    node,
+    ctx,
+    deps,
+    spaceHeld: false,
+    cursor: '',
+    ratio: 1,
+    size: { width: 0, height: 0 },
+    pressAt: null,
+    dragging: false,
+    anchors: createAnchorCache(deps.frame),
+    overlay: { node: deps.overlay, ctx: overlayCtx },
+    session: idleSession(),
+    pointer: null,
+    sentence: null,
+    wasTooFar: null,
+    borders: null,
+    feature: null,
+    requestPaint: () => undefined,
+  }
+}
+
+/**
  * Attach the canvas, and return its teardown.
  * @param node - the canvas element to drive
  * @param deps - the store, the frame, the style, the overlay and the zone's name
@@ -618,24 +660,7 @@ export function startCanvasController(
   if (ctx === null || overlayCtx === null)
     throw new Error('Cartographer: the canvas gave no 2D context — there is nothing to draw on.')
 
-  const it: LiveCanvas = {
-    node,
-    ctx,
-    deps,
-    spaceHeld: false,
-    cursor: '',
-    ratio: 1,
-    size: { width: 0, height: 0 },
-    pressAt: null,
-    dragging: false,
-    anchors: createAnchorCache(deps.frame),
-    overlay: { node: deps.overlay, ctx: overlayCtx },
-    session: idleSession(),
-    pointer: null,
-    sentence: null,
-    wasTooFar: null,
-    requestPaint: () => undefined,
-  }
+  const it = freshCanvas(node, ctx, overlayCtx, deps)
 
   /**
    * Ask for a repaint, at most one per displayed frame.

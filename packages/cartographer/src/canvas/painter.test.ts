@@ -70,6 +70,10 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
     fillText: record('fillText'),
     drawImage: record('drawImage'),
     setTransform: record('setTransform'),
+    setLineDash: (segments: number[]) => {
+      record('setLineDash')(...segments)
+    },
+    lineCap: 'butt',
     get fillStyle(): string | CanvasGradient | CanvasPattern {
       return state.fillStyle
     },
@@ -120,6 +124,11 @@ const STYLE: PaintStyle = {
   anchorStroke: '#5b93d6',
   anchorRadius: 4,
   snapAnchorRadius: 2,
+  borderCore: '#f3e7cd',
+  borderEdge: '#5c3a2e',
+  borderWidth: 1.4,
+  borderEdgeWidth: 3.2,
+  frontierWidth: 2.4,
   fillBlend: 'overlay',
   coastStroke: 'rgba(60, 50, 38, 0.85)',
   coastWidth: 1,
@@ -155,6 +164,7 @@ function scene(overrides: Partial<CanvasScene> = {}): CanvasScene {
     // decision (`targetHandles`), not the painter's, which only draws the indices it is handed.
     handles: (overrides.anchors ?? []).map((_, index) => index),
     snapAnchors: [],
+    borders: [],
     selected: new Set<number>(),
     vectors: null,
     ...overrides,
@@ -860,6 +870,97 @@ describe('painter — fills and handles', () => {
       expect(
         calls.filter((call) => call.op === 'closePath' && call.fillStyle === '#54719b')
       ).toHaveLength(2)
+    })
+  })
+})
+
+const strokesOf = (calls: Call[]) =>
+  calls.filter((call) => call.op === 'stroke' && call.strokeStyle !== STYLE.pathStroke)
+
+// The borders of 2026-10-13: derived from the shared anchors, each drawn in its hand (`core/borderHands`).
+describe('painter — borders', () => {
+  const RUN: Point[] = [
+    [100, 100],
+    [200, 100],
+    [300, 150],
+  ]
+  const SOVEREIGN = { pattern: 'solid', cased: true, weight: 1 } as const
+  describe('happy path', () => {
+    it('draws a sovereign border as a cream core inside a brown casing, casing first', () => {
+      const { ctx, calls } = recordingContext()
+      paintCanvas(ctx, SIZE, scene({ borders: [{ points: RUN, hand: SOVEREIGN }] }), STYLE)
+      expect(strokesOf(calls).map((call) => [call.strokeStyle, call.lineWidth])).toEqual([
+        [STYLE.borderEdge, STYLE.borderEdgeWidth],
+        [STYLE.borderCore, STYLE.borderWidth],
+      ])
+    })
+  })
+
+  describe('variants', () => {
+    it('draws a frontier against unclaimed ground as one brown stroke', () => {
+      const { ctx, calls } = recordingContext()
+      const hand = { pattern: 'solid', cased: false, weight: 1 } as const
+      paintCanvas(ctx, SIZE, scene({ borders: [{ points: RUN, hand }] }), STYLE)
+      expect(strokesOf(calls).map((call) => [call.strokeStyle, call.lineWidth])).toEqual([
+        [STYLE.borderEdge, STYLE.frontierWidth],
+      ])
+    })
+
+    it('dots a vassal’s limit, then clears the dash for what follows', () => {
+      const { ctx, calls } = recordingContext()
+      const hand = { pattern: 'dotted', cased: true, weight: 1 } as const
+      paintCanvas(ctx, SIZE, scene({ borders: [{ points: RUN, hand }] }), STYLE)
+      const dashes = calls.filter((call) => call.op === 'setLineDash').map((call) => call.args)
+      expect(dashes[0]?.length).toBe(2)
+      expect(dashes.at(-1)).toEqual([])
+    })
+
+    it('scales a lighter hand’s widths by its weight', () => {
+      const { ctx, calls } = recordingContext()
+      const hand = { pattern: 'solid', cased: true, weight: 0.5 } as const
+      paintCanvas(ctx, SIZE, scene({ borders: [{ points: RUN, hand }] }), STYLE)
+      expect(strokesOf(calls).map((call) => call.lineWidth)).toEqual([
+        STYLE.borderEdgeWidth * 0.5,
+        STYLE.borderWidth * 0.5,
+      ])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('draws nothing for a coast, whose line the coastline already is', () => {
+      const { ctx, calls } = recordingContext()
+      const hand = { pattern: 'none', cased: false, weight: 1 } as const
+      paintCanvas(ctx, SIZE, scene({ borders: [{ points: RUN, hand }] }), STYLE)
+      expect(strokesOf(calls)).toEqual([])
+    })
+  })
+
+  // L4: N/A — the scene hands only projected points; a run with a missing anchor arrives shorter.
+
+  describe('edge cases', () => {
+    it('draws the borders under the edit outlines, so the tool’s blue stays on top', () => {
+      const { ctx, calls } = recordingContext()
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({ rings: [SQUARE], borders: [{ points: RUN, hand: SOVEREIGN }] }),
+        STYLE
+      )
+      const core = calls.findIndex(
+        (call) => call.op === 'stroke' && call.strokeStyle === STYLE.borderCore
+      )
+      const outline = calls.findIndex(
+        (call) => call.op === 'stroke' && call.strokeStyle === STYLE.pathStroke
+      )
+      expect(core).toBeGreaterThan(-1)
+      expect(outline).toBeGreaterThan(core)
+    })
+
+    it('doubles a contested hand with a thin casing line down its core', () => {
+      const { ctx, calls } = recordingContext()
+      const hand = { pattern: 'double', cased: true, weight: 1 } as const
+      paintCanvas(ctx, SIZE, scene({ borders: [{ points: RUN, hand }] }), STYLE)
+      expect(strokesOf(calls)).toHaveLength(3)
     })
   })
 })

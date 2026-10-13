@@ -41,16 +41,19 @@ import type { ReactNode, RefObject } from 'react'
  * @param props.action - what is being done, and to whom
  * @param props.result - what a gesture did
  * @param props.position - where the pointer is
+ * @param props.feature - what is under it — a border, or a polity
  * @returns the row
  */
 function StatusRow({
   action,
   result,
   position,
+  feature,
 }: {
   action: RefObject<HTMLElement | null>
   result: RefObject<HTMLElement | null>
   position: RefObject<HTMLElement | null>
+  feature: RefObject<HTMLElement | null>
 }) {
   // Render
   return (
@@ -60,6 +63,8 @@ function StatusRow({
           which change on every pointer sample and would drown a screen reader (A11Y-001). */}
       <span className="shell__result" ref={result} role="status" />
       <span className="shell__position" ref={position} />
+      {/* What is under the pointer, beside where it is — the mockup's "Holy Roman Empire · empire". */}
+      <span className="shell__feature" ref={feature} />
     </p>
   )
 }
@@ -119,6 +124,7 @@ export function Editor({
   const status = useRef<HTMLElement | null>(null)
   const action = useRef<HTMLElement | null>(null)
   const result = useRef<HTMLElement | null>(null)
+  const feature = useRef<HTMLElement | null>(null)
 
   // Handlers
   const handleResult = (message: string | null) => {
@@ -144,13 +150,14 @@ export function Editor({
           statusRef={status}
           actionRef={action}
           resultRef={result}
+          featureRef={feature}
           colours={colours}
           history={history}
         />
       }
       rail={<ToolRailPanel store={store} colours={colours} />}
       dock={<PolitiesPanel store={store} colours={colours} onResult={handleResult} />}
-      status={<StatusRow action={action} result={result} position={status} />}
+      status={<StatusRow action={action} result={result} position={status} feature={feature} />}
     />
   )
 }

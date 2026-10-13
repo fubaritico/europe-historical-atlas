@@ -6,7 +6,7 @@ import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 import { openEmptyYear } from '../state/openEmptyYear'
 import { createPolityColourSource } from '../state/polityColourSource'
 import { createCartographerStore } from '../state/store'
-import { TEST_BACKDROP_FRAME } from '../view/testFrame'
+import { TEST_BACKDROP_FRAME, TEST_LAND_MASK } from '../view/testFrame'
 import { UNFRAMED } from '../view/viewport'
 import { screenToBackdrop } from '../view/viewport'
 
@@ -126,6 +126,7 @@ function attach(maxSnapReachKm = Infinity): {
       riverProvenance: { name: 'test rivers', licence: 'test' },
     },
     onHover: hovered,
+    onFeature: () => undefined,
     onAction: acted,
     onResult: resulted,
     maxSnapReachKm,
@@ -134,6 +135,7 @@ function attach(maxSnapReachKm = Infinity): {
     overlay: document.createElement('canvas'),
     colours: createPolityColourSource(AUTOMATIC_PALETTE),
     history,
+    landMask: TEST_LAND_MASK,
   })
   return { node, store, hovered, acted, resulted, history, dispose }
 }
@@ -458,9 +460,11 @@ describe('startCanvasController', () => {
             riverProvenance: { name: 'test rivers', licence: 'test' },
           },
           onHover: () => undefined,
+          onFeature: () => undefined,
           onAction: () => undefined,
           onResult: () => undefined,
           history: createHistoryRelay(),
+          landMask: TEST_LAND_MASK,
           maxSnapReachKm: Infinity,
           style: CHROME_PAINT_STYLE,
           zoneLabel: 'zone',
@@ -1282,9 +1286,11 @@ describe('the tools on the canvas', () => {
           riverProvenance: { name: 'test rivers', licence: 'test' },
         },
         onHover: () => undefined,
+        onFeature: () => undefined,
         onAction: () => undefined,
         onResult: () => undefined,
         history: createHistoryRelay(),
+        landMask: TEST_LAND_MASK,
         maxSnapReachKm: Infinity,
         style: CHROME_PAINT_STYLE,
         zoneLabel: 'zone',
@@ -1358,9 +1364,11 @@ describe('the tools — what the review found', () => {
           riverProvenance: { name: 'test rivers', licence: 'test' },
         },
         onHover: () => undefined,
+        onFeature: () => undefined,
         onAction: () => undefined,
         onResult: () => undefined,
         history: createHistoryRelay(),
+        landMask: TEST_LAND_MASK,
         maxSnapReachKm: Infinity,
         style: CHROME_PAINT_STYLE,
         zoneLabel: 'zone',
@@ -1650,9 +1658,11 @@ function attachWithShore(
       riverProvenance: { name: 'test rivers', licence: 'test' },
     },
     onHover: () => undefined,
+    onFeature: () => undefined,
     onAction: acted,
     onResult: resulted,
     history: createHistoryRelay(),
+    landMask: TEST_LAND_MASK,
     maxSnapReachKm: Infinity,
     style: CHROME_PAINT_STYLE,
     zoneLabel: 'zone',
@@ -2030,9 +2040,11 @@ describe('the Pen meeting a shared border, on the canvas', () => {
         riverProvenance: { name: 'test rivers', licence: 'test' },
       },
       onHover: () => undefined,
+      onFeature: () => undefined,
       onAction: () => undefined,
       onResult: () => undefined,
       history: createHistoryRelay(),
+      landMask: TEST_LAND_MASK,
       maxSnapReachKm: Infinity,
       style: CHROME_PAINT_STYLE,
       zoneLabel: 'zone',

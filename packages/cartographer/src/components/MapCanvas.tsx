@@ -11,6 +11,7 @@ import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
 import type { VectorLayers } from '../vectorLayers'
 import type { BackdropFrame } from '../view/projection'
+import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 
 /**
  * The component that owns the drawing surface.
@@ -44,6 +45,8 @@ export interface MapCanvasProps {
   onAction: (sentence: string | null) => void
   /** What a gesture did, or `null` to clear it — the status bar's result zone. */
   onResult: (message: string | null) => void
+  /** What is under the pointer — a border or a polity — or `null`; the status bar's feature zone. */
+  onFeature: (feature: string | null) => void
   /** The colours and sizes, from `design/chrome.css`. */
   style: PaintStyle
   /** What to call the editorial zone on screen. */
@@ -54,6 +57,8 @@ export interface MapCanvasProps {
   colours: PolityColourSource
   /** Where the controller installs its undo and redo, for the document bar's buttons. */
   history: HistoryRelay
+  /** Which ground is dry — what tells a frontier against unclaimed land from a coast. */
+  landMask: LandMask
 }
 
 /**
@@ -140,20 +145,7 @@ function startSurface(
  * @param props - the store, the frame, the style and the names
  * @returns the canvas element
  */
-export function MapCanvas({
-  store,
-  frame,
-  backdropImage,
-  vectorLayers,
-  onHover,
-  onAction,
-  onResult,
-  style,
-  zoneLabel,
-  label,
-  colours,
-  history,
-}: MapCanvasProps) {
+export function MapCanvas({ label, ...controller }: MapCanvasProps) {
   // Ids
   const instructionsId = useId()
 
@@ -181,18 +173,10 @@ export function MapCanvas({
         style={{ display: 'block', width: '100%', height: '100%' }}
         ref={(node) => {
           if (node === null) return undefined
+          // The controller's dependencies pass through as they came, gathered rather than named one by
+          // one: a prop added to the controller is then one line in `MapCanvasProps`, not three here.
           return startSurface(node, overlay.current, {
-            store,
-            frame,
-            backdropImage,
-            vectorLayers,
-            onHover,
-            onAction,
-            onResult,
-            style,
-            zoneLabel,
-            colours,
-            history,
+            ...controller,
             maxSnapReachKm: MAX_SNAP_REACH_KM,
           })
         }}

@@ -5,6 +5,7 @@ import { boxesOverlap, detailThresholdSquared, visibleBox } from '../view/cullin
 import type { Rect } from '../geometry/marquee'
 import type { Box } from '../view/culling'
 import type { PixelSize, Point } from '../view/viewport'
+import type { BorderHand } from '@europe-historical-atlas/core/editor/borderHands'
 
 /**
  * The painter — it draws, and it decides nothing.
@@ -93,6 +94,10 @@ export interface Painter2D {
    * `pointermove` of a pan.
    */
   setTransform: (a: number, b: number, c: number, d: number, e: number, f: number) => void
+  /** The dash pattern of what is stroked next — the dotted and dashed hands of a border. */
+  setLineDash: (segments: number[]) => void
+  /** How a stroke ends — round, so a dotted hand reads as dots. */
+  lineCap: CanvasLineCap
 }
 
 /**
@@ -137,6 +142,16 @@ export interface PaintStyle {
   anchorRadius: number
   /** A snap dot's radius in screen pixels: small enough never to be taken for a handle. */
   snapAnchorRadius: number
+  /** A border's light core — the atlas's. */
+  borderCore: string
+  /** A border's dark casing, and the frontier's one stroke — the atlas's. */
+  borderEdge: string
+  /** The core's width in screen pixels. */
+  borderWidth: number
+  /** The casing's width in screen pixels, wider than the core so it shows either side. */
+  borderEdgeWidth: number
+  /** The frontier's width, against ground nobody claims, in screen pixels. */
+  frontierWidth: number
   /**
    * How a polity's fill combines with the relief under it: `overlay`, at full strength — the atlas's own
    * `politicalMode` (`core/pipeline/terrainOptions.ts`), whose formula in `terrainCompose.ts` is the
@@ -202,6 +217,11 @@ export interface CanvasScene {
   fills: readonly { rings: readonly (readonly Point[])[]; colour: string }[]
   /** Every anchor, projected, parallel to the document's own table. */
   anchors: readonly Point[]
+  /**
+   * The borders, each a run of projected anchors and the hand it is drawn in (`core/editor/borderHands`) —
+   * derived from the shared anchors, never drawn by hand.
+   */
+  borders: readonly { points: readonly Point[]; hand: BorderHand }[]
   /** Which anchors get a handle drawn, by index — the drawing target's, under a tool that acts on them. */
   handles: readonly number[]
   /**
@@ -295,6 +315,71 @@ function strokeRing(ctx: Painter2D, ring: readonly Point[]): void {
   }
   ctx.closePath()
   ctx.stroke()
+}
+
+/**
+ * The dash pattern of a hand, scaled to the stroke it dresses.
+ * @param pattern - the hand's pattern
+ * @param width - the stroke's width
+ * @returns the segments for `setLineDash`; empty for a continuous line
+ */
+function dashOf(pattern: BorderHand['pattern'], width: number): number[] {
+  if (pattern === 'dotted') return [0.1, width * 2.5]
+  if (pattern === 'dashed') return [width * 6, width * 3]
+  return []
+}
+
+/**
+ * Stroke an open run of points once.
+ * @param ctx - the context
+ * @param points - the run, in screen pixels
+ */
+function strokeRun(ctx: Painter2D, points: readonly Point[]): void {
+  const first = points[0]
+  if (first === undefined) return
+  ctx.beginPath()
+  ctx.moveTo(first[0], first[1])
+  for (const point of points.slice(1)) ctx.lineTo(point[0], point[1])
+  ctx.stroke()
+}
+
+/**
+ * Draw the borders, each in its hand: a light core inside a dark casing, as the atlas draws them, or one
+ * dark stroke for a frontier against unclaimed ground; dotted or dashed as the hand says; doubled by a thin
+ * casing line down the middle of the core. A coast draws nothing — the coastline is there already.
+ * @param ctx - the context to draw into
+ * @param scene - what to draw
+ * @param style - the colours and sizes
+ */
+function paintBorders(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): void {
+  ctx.lineCap = 'round'
+  for (const { points, hand } of scene.borders) {
+    if (hand.pattern === 'none') continue
+    if (!hand.cased) {
+      const width = style.frontierWidth * hand.weight
+      ctx.setLineDash(dashOf(hand.pattern, width))
+      ctx.strokeStyle = style.borderEdge
+      ctx.lineWidth = width
+      strokeRun(ctx, points)
+      continue
+    }
+    const edge = style.borderEdgeWidth * hand.weight
+    const core = style.borderWidth * hand.weight
+    ctx.setLineDash(dashOf(hand.pattern, edge))
+    ctx.strokeStyle = style.borderEdge
+    ctx.lineWidth = edge
+    strokeRun(ctx, points)
+    ctx.strokeStyle = style.borderCore
+    ctx.lineWidth = core
+    strokeRun(ctx, points)
+    if (hand.pattern === 'double') {
+      ctx.strokeStyle = style.borderEdge
+      ctx.lineWidth = core / 3
+      strokeRun(ctx, points)
+    }
+  }
+  ctx.setLineDash([])
+  ctx.lineCap = 'butt'
 }
 
 /**
@@ -551,6 +636,9 @@ export function paintCanvas(
   // a shoreline blended into its country's colour would lose the contrast it is drawn for.
   paintFills(ctx, scene, style)
   paintVectors(ctx, size, scene, style)
+  // Over the fills and the water, under the zone's veil and the edit outlines: the borders belong to the
+  // map, the blue strokes to the tool.
+  paintBorders(ctx, scene, style)
   paintZone(ctx, size, scene, style)
   ctx.strokeStyle = style.pathStroke
   ctx.lineWidth = style.pathWidth

@@ -11,7 +11,7 @@ import { CHROME_PAINT_STYLE } from '../canvas/style'
 import { openEmptyYear } from '../state/openEmptyYear'
 import { createPolityColourSource } from '../state/polityColourSource'
 import { createCartographerStore } from '../state/store'
-import { TEST_BACKDROP_FRAME } from '../view/testFrame'
+import { TEST_BACKDROP_FRAME, TEST_LAND_MASK } from '../view/testFrame'
 import { UNFRAMED } from '../view/viewport'
 
 import { BackdropFailure, BackdropWaiting, MapArea } from './MapArea'
@@ -85,6 +85,7 @@ function mount(load: BackdropLoad, strict = false): HTMLParagraphElement {
       statusRef={statusRef}
       actionRef={{ current: document.createElement('span') }}
       resultRef={{ current: document.createElement('span') }}
+      featureRef={{ current: document.createElement('span') }}
       colours={COLOURS}
       history={createHistoryRelay()}
     />
@@ -434,8 +435,10 @@ describe('MapCanvas, re-rendered', () => {
           onHover={() => undefined}
           onAction={() => undefined}
           onResult={() => undefined}
+          onFeature={() => undefined}
           colours={COLOURS}
           history={createHistoryRelay()}
+          landMask={TEST_LAND_MASK}
           style={CHROME_PAINT_STYLE}
           zoneLabel="zone"
           label="la carte"

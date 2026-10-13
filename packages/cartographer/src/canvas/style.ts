@@ -38,6 +38,13 @@ export const CHROME_PAINT_STYLE: PaintStyle = {
   anchorRadius: 4,
   // A neighbour's anchor the Pen can branch from: a dot, half a handle (2026-10-13).
   snapAnchorRadius: 2,
+  // The atlas's border, from its political defaults (`atlas/src/devParams/political.ts`): a cream core inside
+  // a dark brown casing, because no single ink reads against every fill; the frontier is the casing alone.
+  borderCore: '#f3e7cd',
+  borderEdge: '#5c3a2e',
+  borderWidth: 1.4,
+  borderEdgeWidth: 3.2,
+  frontierWidth: 2.4,
   // The atlas's political tint, at full strength — the dev's call, 2026-10-11, over the mockup's 70 %.
   fillBlend: 'overlay',
   // The shoreline reads darker than the terrain's own painted edge, so it stays legible over land and
@@ -79,6 +86,9 @@ export function inDevicePixels(style: PaintStyle, pixelRatio: number): PaintStyl
     pathWidth: style.pathWidth * pixelRatio,
     anchorRadius: style.anchorRadius * pixelRatio,
     snapAnchorRadius: style.snapAnchorRadius * pixelRatio,
+    borderWidth: style.borderWidth * pixelRatio,
+    borderEdgeWidth: style.borderEdgeWidth * pixelRatio,
+    frontierWidth: style.frontierWidth * pixelRatio,
     coastWidth: style.coastWidth * pixelRatio,
     riverWidthMajor: style.riverWidthMajor * pixelRatio,
     riverWidthMinor: style.riverWidthMinor * pixelRatio,

@@ -56,3 +56,15 @@ export function writeResult(node: HTMLElement | null, message: string | null): v
   if (node === null) return
   node.textContent = message ?? ''
 }
+
+/**
+ * Write what is under the pointer — *"Royaume de France – Royaume de Bourgogne · sovereign"* — or clear it.
+ *
+ * Written only when it changes (the controller compares), never at the pointer's rate.
+ * @param node - the feature zone, or `null` before it is mounted
+ * @param feature - the sentence, or `null` over nothing
+ */
+export function writeFeature(node: HTMLElement | null, feature: string | null): void {
+  if (node === null) return
+  node.textContent = feature ?? ''
+}

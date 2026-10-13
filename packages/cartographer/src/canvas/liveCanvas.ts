@@ -1,3 +1,9 @@
+import { deriveBorders } from '@europe-historical-atlas/core/editor/derivedBorders'
+import {
+  latitudeToVertical,
+  longitudeToHorizontal,
+} from '@europe-historical-atlas/core/geo/mercator'
+
 import { polityAt } from '../geometry/fillHit'
 import { nearestAmong } from '../geometry/hitTest'
 import { isClosingOffered } from '../geometry/ringClosure'
@@ -9,6 +15,7 @@ import { backdropToScreen } from '../view/viewport'
 import { penInsertHit, stretchUnder } from './anchorGestures'
 import { anchorHit, anchorSentence, borderRunTo } from './borderSnap'
 import { cursorCss, cursorFor } from './cursors'
+import { featureUnder } from './featureUnder'
 import { followedLayer, layerLines, lineLabel, nearestLayer, snapHit } from './layerHits'
 import { HANDLE_HIT_RADIUS } from './navigation'
 import { paintOverlay } from './overlayPainter'
@@ -35,6 +42,8 @@ import type { CartographerStoreHook } from '../state/store'
 import type { VectorLayers } from '../vectorLayers'
 import type { BackdropFrame } from '../view/projection'
 import type { PixelSize, Point } from '../view/viewport'
+import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
+import type { DerivedBorder } from '@europe-historical-atlas/core/editor/derivedBorders'
 
 /**
  * One live canvas, and everything that reads it without listening to anything.
@@ -104,6 +113,10 @@ export interface CanvasControllerDeps {
   maxSnapReachKm: number
   /** Where the controller installs its undo and redo, for the document bar's buttons. */
   history: HistoryRelay
+  /** Which ground is dry — what tells a frontier against unclaimed land from a coast. */
+  landMask: LandMask
+  /** What is under the pointer — a border, or a polity's fill — for the status bar; `null` for nothing. */
+  onFeature: (feature: string | null) => void
 }
 
 /** One live attachment: the node, its context, the deps, and the little state a gesture needs. */
@@ -142,6 +155,10 @@ export interface LiveCanvas {
    */
   wasTooFar: boolean | null
   /** Ask for a repaint of the static canvas, at most one per frame. */
+  /** The document's borders, derived once per version — `null` until the first paint asks. */
+  borders: { version: number; list: DerivedBorder[] } | null
+  /** What the status bar last said is under the pointer — written again only when it changes. */
+  feature: string | null
   requestPaint: () => void
 }
 
@@ -396,6 +413,64 @@ export function tooFarToEdit(it: LiveCanvas): boolean {
   const tool = it.deps.store.getState().tool
   if (tool === 'navigate') return false
   return !closeEnoughToEdit(snapReachOf(it), it.deps.maxSnapReachKm)
+}
+
+/**
+ * The document's borders, derived from its shared anchors once per version of the document — a derivation
+ * walks every ring (~70 ms on the 1100 year), so it never runs per pointer move.
+ *
+ * **The far side is asked of the land mask, the coast of the anchors' provenance**: a segment between two
+ * anchors the Pen took from the coastline is coast, whatever the mask finds across a narrow estuary.
+ * @param it - the attachment
+ * @returns the borders, each a run of anchors with its relation and hand
+ */
+export function bordersOf(it: LiveCanvas): DerivedBorder[] {
+  const { document, version } = it.deps.store.getState()
+  if (it.borders?.version === version) return it.borders.list
+  const mask = it.deps.landMask
+  const coastName = it.deps.vectorLayers.coastProvenance.name
+  const list = deriveBorders(document, {
+    isLand: (lon, lat) =>
+      mask.isLand(
+        longitudeToHorizontal(lon, mask.meta.bbox),
+        latitudeToVertical(lat, mask.meta.bbox)
+      ),
+    coastSources: new Set(
+      document.sources.filter((source) => source.name === coastName).map((source) => source.id)
+    ),
+  })
+  it.borders = { version, list }
+  return list
+}
+
+/**
+ * What is under a point of the canvas: a border, else a polity's fill (`featureUnder`).
+ * @param it - the attachment
+ * @param at - the point, in device pixels
+ * @returns the sentence for the bar, or `null`
+ */
+export function featureAt(it: LiveCanvas, at: Point): string | null {
+  const { document } = it.deps.store.getState()
+  const anchors = anchorsOnScreen(it)
+  return featureUnder({
+    document,
+    borders: bordersOf(it),
+    anchors,
+    territories: projectedTerritories(document, anchors),
+    at,
+    radius: HANDLE_HIT_RADIUS * it.ratio,
+  })
+}
+
+/**
+ * Say what is under the pointer, when it changed — not at the pointer's rate.
+ * @param it - the attachment
+ * @param feature - the sentence, or `null`
+ */
+export function reportFeature(it: LiveCanvas, feature: string | null): void {
+  if (feature === it.feature) return
+  it.feature = feature
+  it.deps.onFeature(feature)
 }
 
 /**

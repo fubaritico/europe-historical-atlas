@@ -48,6 +48,7 @@ function inputs(document: YearDocument, overrides: Partial<SceneInputs> = {}): S
     selected: new Set<number>(),
     handles: [],
     snapAnchors: [],
+    borders: [],
     colours: new Map<string, string>(),
     zoneLabel: 'editorial zone',
     ...overrides,
