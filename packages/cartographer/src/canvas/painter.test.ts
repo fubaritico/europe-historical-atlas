@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import { DEFAULT_LAYERS } from '../state/layersSlice'
+
 import { paintCanvas } from './painter'
 
 import type { CanvasScene, PaintStyle, Painter2D } from './painter'
@@ -17,6 +19,8 @@ interface Call {
   strokeStyle: string | CanvasGradient | CanvasPattern
   /** The blend at the time. */
   globalCompositeOperation: string
+  /** The opacity at the time — a layer's, in `{Layers}`. */
+  globalAlpha: number
   /** The stroke width at the time. */
   lineWidth: number
 }
@@ -36,12 +40,14 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
     lineWidth: number
     font: string
     globalCompositeOperation: GlobalCompositeOperation
+    globalAlpha: number
   } = {
     fillStyle: '',
     strokeStyle: '',
     lineWidth: 0,
     font: '',
     globalCompositeOperation: 'source-over',
+    globalAlpha: 1,
   }
   const record =
     (op: string) =>
@@ -53,6 +59,7 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
         strokeStyle: state.strokeStyle,
         lineWidth: state.lineWidth,
         globalCompositeOperation: state.globalCompositeOperation,
+        globalAlpha: state.globalAlpha,
       })
     }
   const ctx: Painter2D = {
@@ -103,6 +110,12 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
     },
     set globalCompositeOperation(value: GlobalCompositeOperation) {
       state.globalCompositeOperation = value
+    },
+    get globalAlpha(): number {
+      return state.globalAlpha
+    },
+    set globalAlpha(value: number) {
+      state.globalAlpha = value
     },
   }
   return { ctx, calls }
@@ -165,6 +178,7 @@ function scene(overrides: Partial<CanvasScene> = {}): CanvasScene {
     handles: (overrides.anchors ?? []).map((_, index) => index),
     snapAnchors: [],
     borders: [],
+    layers: DEFAULT_LAYERS,
     selected: new Set<number>(),
     vectors: null,
     ...overrides,
@@ -888,7 +902,12 @@ describe('painter — borders', () => {
   describe('happy path', () => {
     it('draws a sovereign border as a cream core inside a brown casing, casing first', () => {
       const { ctx, calls } = recordingContext()
-      paintCanvas(ctx, SIZE, scene({ borders: [{ points: RUN, hand: SOVEREIGN }] }), STYLE)
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({ borders: [{ points: RUN, hand: SOVEREIGN, layer: 'borders' as const }] }),
+        STYLE
+      )
       expect(strokesOf(calls).map((call) => [call.strokeStyle, call.lineWidth])).toEqual([
         [STYLE.borderEdge, STYLE.borderEdgeWidth],
         [STYLE.borderCore, STYLE.borderWidth],
@@ -900,7 +919,12 @@ describe('painter — borders', () => {
     it('draws a frontier against unclaimed ground as one brown stroke', () => {
       const { ctx, calls } = recordingContext()
       const hand = { pattern: 'solid', cased: false, weight: 1 } as const
-      paintCanvas(ctx, SIZE, scene({ borders: [{ points: RUN, hand }] }), STYLE)
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({ borders: [{ points: RUN, hand, layer: 'borders' as const }] }),
+        STYLE
+      )
       expect(strokesOf(calls).map((call) => [call.strokeStyle, call.lineWidth])).toEqual([
         [STYLE.borderEdge, STYLE.frontierWidth],
       ])
@@ -909,7 +933,12 @@ describe('painter — borders', () => {
     it('dots a vassal’s limit, then clears the dash for what follows', () => {
       const { ctx, calls } = recordingContext()
       const hand = { pattern: 'dotted', cased: true, weight: 1 } as const
-      paintCanvas(ctx, SIZE, scene({ borders: [{ points: RUN, hand }] }), STYLE)
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({ borders: [{ points: RUN, hand, layer: 'borders' as const }] }),
+        STYLE
+      )
       const dashes = calls.filter((call) => call.op === 'setLineDash').map((call) => call.args)
       expect(dashes[0]?.length).toBe(2)
       expect(dashes.at(-1)).toEqual([])
@@ -918,7 +947,12 @@ describe('painter — borders', () => {
     it('scales a lighter hand’s widths by its weight', () => {
       const { ctx, calls } = recordingContext()
       const hand = { pattern: 'solid', cased: true, weight: 0.5 } as const
-      paintCanvas(ctx, SIZE, scene({ borders: [{ points: RUN, hand }] }), STYLE)
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({ borders: [{ points: RUN, hand, layer: 'borders' as const }] }),
+        STYLE
+      )
       expect(strokesOf(calls).map((call) => call.lineWidth)).toEqual([
         STYLE.borderEdgeWidth * 0.5,
         STYLE.borderWidth * 0.5,
@@ -930,7 +964,12 @@ describe('painter — borders', () => {
     it('draws nothing for a coast, whose line the coastline already is', () => {
       const { ctx, calls } = recordingContext()
       const hand = { pattern: 'none', cased: false, weight: 1 } as const
-      paintCanvas(ctx, SIZE, scene({ borders: [{ points: RUN, hand }] }), STYLE)
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({ borders: [{ points: RUN, hand, layer: 'borders' as const }] }),
+        STYLE
+      )
       expect(strokesOf(calls)).toEqual([])
     })
   })
@@ -943,7 +982,10 @@ describe('painter — borders', () => {
       paintCanvas(
         ctx,
         SIZE,
-        scene({ rings: [SQUARE], borders: [{ points: RUN, hand: SOVEREIGN }] }),
+        scene({
+          rings: [SQUARE],
+          borders: [{ points: RUN, hand: SOVEREIGN, layer: 'borders' as const }],
+        }),
         STYLE
       )
       const core = calls.findIndex(
@@ -959,8 +1001,74 @@ describe('painter — borders', () => {
     it('doubles a contested hand with a thin casing line down its core', () => {
       const { ctx, calls } = recordingContext()
       const hand = { pattern: 'double', cased: true, weight: 1 } as const
-      paintCanvas(ctx, SIZE, scene({ borders: [{ points: RUN, hand }] }), STYLE)
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({ borders: [{ points: RUN, hand, layer: 'borders' as const }] }),
+        STYLE
+      )
       expect(strokesOf(calls)).toHaveLength(3)
+    })
+  })
+})
+
+// {Layers}, 2026-10-13: an eye hides a layer, a slider sets its opacity.
+describe('painter — layers', () => {
+  const RUN: Point[] = [
+    [100, 100],
+    [200, 100],
+  ]
+  const hand = { pattern: 'solid', cased: false, weight: 1 } as const
+
+  describe('happy path', () => {
+    it('draws nothing of a hidden layer', () => {
+      const { ctx, calls } = recordingContext()
+      const layers = { ...DEFAULT_LAYERS, unclaimed: { visible: false, opacity: 100 } }
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({ borders: [{ points: RUN, hand, layer: 'unclaimed' as const }], layers }),
+        STYLE
+      )
+      expect(
+        calls.filter((call) => call.op === 'stroke' && call.strokeStyle === STYLE.borderEdge)
+      ).toEqual([])
+    })
+  })
+
+  describe('variants', () => {
+    it('draws a layer at its opacity, then restores full opacity', () => {
+      const { ctx, calls } = recordingContext()
+      const layers = { ...DEFAULT_LAYERS, borders: { visible: true, opacity: 40 } }
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({ borders: [{ points: RUN, hand, layer: 'borders' as const }], layers }),
+        STYLE
+      )
+      const stroke = calls.find(
+        (call) => call.op === 'stroke' && call.strokeStyle === STYLE.borderEdge
+      )
+      expect(stroke?.globalAlpha).toBe(0.4)
+      expect(calls.at(-1)?.globalAlpha).toBe(1)
+    })
+  })
+
+  // L3/L4: N/A — the settings arrive from the slice, which clamps and refuses.
+
+  describe('edge cases', () => {
+    it('keeps the other layer of the borders when one is hidden', () => {
+      const { ctx, calls } = recordingContext()
+      const layers = { ...DEFAULT_LAYERS, unclaimed: { visible: false, opacity: 100 } }
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({ borders: [{ points: RUN, hand, layer: 'borders' as const }], layers }),
+        STYLE
+      )
+      expect(
+        calls.filter((call) => call.op === 'stroke' && call.strokeStyle === STYLE.borderEdge)
+      ).toHaveLength(1)
     })
   })
 })

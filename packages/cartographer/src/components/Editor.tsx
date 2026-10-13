@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 
+import { LayersPanel } from './LayersPanel'
 import { MapArea } from './MapArea'
 import { PolitiesPanel } from './PolitiesPanel'
 import { Shell } from './Shell'
@@ -66,6 +67,32 @@ function StatusRow({
       {/* What is under the pointer, beside where it is — the mockup's "Holy Roman Empire · empire". */}
       <span className="shell__feature" ref={feature} />
     </p>
+  )
+}
+
+/**
+ * The dock's two panels, top to bottom as the mockup stacks them: `{Polities}`, then `{Layers}`.
+ * @param props - what the panels need
+ * @param props.store - the store
+ * @param props.colours - the polities' colours
+ * @param props.onResult - the status bar's result zone, for what `{Polities}` did
+ * @returns the dock's content
+ */
+function Dock({
+  store,
+  colours,
+  onResult,
+}: {
+  store: CartographerStoreHook
+  colours: PolityColourSource
+  onResult: (message: string | null) => void
+}) {
+  // Render
+  return (
+    <div className="dock-stack">
+      <PolitiesPanel store={store} colours={colours} onResult={onResult} />
+      <LayersPanel store={store} />
+    </div>
   )
 }
 
@@ -156,7 +183,7 @@ export function Editor({
         />
       }
       rail={<ToolRailPanel store={store} colours={colours} />}
-      dock={<PolitiesPanel store={store} colours={colours} onResult={handleResult} />}
+      dock={<Dock store={store} colours={colours} onResult={handleResult} />}
       status={<StatusRow action={action} result={result} position={status} feature={feature} />}
     />
   )

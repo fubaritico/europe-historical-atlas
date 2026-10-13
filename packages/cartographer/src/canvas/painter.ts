@@ -3,6 +3,7 @@ import { riverRankWidth, wholeRiverRank } from '@europe-historical-atlas/core/da
 import { boxesOverlap, detailThresholdSquared, visibleBox } from '../view/culling'
 
 import type { Rect } from '../geometry/marquee'
+import type { LayerSetting, LayerSettings } from '../state/layersSlice'
 import type { Box } from '../view/culling'
 import type { PixelSize, Point } from '../view/viewport'
 import type { BorderHand } from '@europe-historical-atlas/core/editor/borderHands'
@@ -86,6 +87,8 @@ export interface Painter2D {
   font: string
   /** How what is drawn next combines with what is already there — the fills' `overlay`. */
   globalCompositeOperation: GlobalCompositeOperation
+  /** How opaque what is drawn next is, 0 to 1 — a layer's opacity in `{Layers}`. */
+  globalAlpha: number
   /**
    * Replace the transform — used for the two layers that are **not** handed over in screen pixels.
    *
@@ -221,7 +224,9 @@ export interface CanvasScene {
    * The borders, each a run of projected anchors and the hand it is drawn in (`core/editor/borderHands`) —
    * derived from the shared anchors, never drawn by hand.
    */
-  borders: readonly { points: readonly Point[]; hand: BorderHand }[]
+  borders: readonly { points: readonly Point[]; hand: BorderHand; layer: 'borders' | 'unclaimed' }[]
+  /** What `{Layers}` shows, and how opaque — read by the painter, decided by the author. */
+  layers: LayerSettings
   /** Which anchors get a handle drawn, by index — the drawing target's, under a tool that acts on them. */
   handles: readonly number[]
   /**
@@ -318,6 +323,18 @@ function strokeRing(ctx: Painter2D, ring: readonly Point[]): void {
 }
 
 /**
+ * Set the opacity of the layer about to be drawn, or say it is hidden.
+ * @param ctx - the context
+ * @param setting - the layer's setting in `{Layers}`
+ * @returns `false` when the layer is hidden and nothing should be drawn
+ */
+function layerAlpha(ctx: Painter2D, setting: LayerSetting): boolean {
+  if (!setting.visible) return false
+  ctx.globalAlpha = setting.opacity / 100
+  return true
+}
+
+/**
  * The dash pattern of a hand, scaled to the stroke it dresses.
  * @param pattern - the hand's pattern
  * @param width - the stroke's width
@@ -353,8 +370,8 @@ function strokeRun(ctx: Painter2D, points: readonly Point[]): void {
  */
 function paintBorders(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): void {
   ctx.lineCap = 'round'
-  for (const { points, hand } of scene.borders) {
-    if (hand.pattern === 'none') continue
+  for (const { points, hand, layer } of scene.borders) {
+    if (hand.pattern === 'none' || !layerAlpha(ctx, scene.layers[layer])) continue
     if (!hand.cased) {
       const width = style.frontierWidth * hand.weight
       ctx.setLineDash(dashOf(hand.pattern, width))
@@ -380,6 +397,7 @@ function paintBorders(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): vo
   }
   ctx.setLineDash([])
   ctx.lineCap = 'butt'
+  ctx.globalAlpha = 1
 }
 
 /**
@@ -446,6 +464,7 @@ function paintAnchors(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): vo
  * @param style - the colours and the opacity
  */
 function paintFills(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): void {
+  if (!layerAlpha(ctx, scene.layers.fills)) return
   ctx.globalCompositeOperation = style.fillBlend
   for (const fill of scene.fills) {
     ctx.fillStyle = fill.colour
@@ -454,6 +473,7 @@ function paintFills(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): void
     ctx.fill('evenodd')
   }
   ctx.globalCompositeOperation = 'source-over'
+  ctx.globalAlpha = 1
 }
 
 /**
@@ -590,6 +610,8 @@ function paintVectors(
   ctx.setTransform(vectors.scale, 0, 0, vectors.scale, vectors.originX, vectors.originY)
 
   ctx.strokeStyle = style.riverStroke
+  const { rivers, coastline } = scene.layers
+  ctx.globalAlpha = rivers.visible ? rivers.opacity / 100 : 0
   // One stroke per width, the atlas's hierarchy (rank 1 thickest): at most nine strokes, never one per
   // river. Divided by the scale because the width is specified in screen pixels and the transform is about
   // to magnify everything it draws — without that, a river at zoom 8 would be eight times too thick.
@@ -600,8 +622,10 @@ function paintVectors(
 
   ctx.strokeStyle = style.coastStroke
   ctx.lineWidth = style.coastWidth / vectors.scale
+  ctx.globalAlpha = coastline.visible ? coastline.opacity / 100 : 0
   strokeLayer(ctx, vectors.coast, view, minGapSquared)
 
+  ctx.globalAlpha = 1
   ctx.setTransform(1, 0, 0, 1, 0, 0)
 }
 
@@ -628,9 +652,10 @@ export function paintCanvas(
   ctx.fillRect(0, 0, size.width, size.height)
   // The terrain goes over the vellum and under everything else: it is the ground the reader reports
   // against, and a handle beneath it could not be aimed at.
-  if (scene.backdrop !== null) {
+  if (scene.backdrop !== null && layerAlpha(ctx, scene.layers.backdrop)) {
     const { rect } = scene.backdrop
     ctx.drawImage(scene.backdrop.image, rect.x, rect.y, rect.width, rect.height)
+    ctx.globalAlpha = 1
   }
   // The tint goes straight onto the relief and under the coastline and the rivers, as the atlas bakes it:
   // a shoreline blended into its country's colour would lose the contrast it is drawn for.

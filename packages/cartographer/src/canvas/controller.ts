@@ -106,6 +106,7 @@ function repaint(it: LiveCanvas): void {
     handles: targetHandles(state.document, target?.id ?? null),
     snapAnchors: snapAnchorsOf(it, target?.id ?? null),
     borders: bordersOf(it),
+    layers: state.layers,
     colours: coloursOf(it),
     zoneLabel: it.deps.zoneLabel,
   })
@@ -595,6 +596,8 @@ function watchStore(it: LiveCanvas, paint: () => void): () => void {
     it.deps.store.subscribe((state) => state.viewport, paint, { fireImmediately: true }),
     it.deps.store.subscribe((state) => state.viewport, refresh),
     it.deps.store.subscribe((state) => state.version, paint),
+    // `{Layers}`: an eye or an opacity changes what is drawn, never the document.
+    it.deps.store.subscribe((state) => state.layers, paint),
     it.deps.store.subscribe((state) => state.version, prune),
     it.deps.store.subscribe((state) => state.tool, restart),
     it.deps.store.subscribe((state) => state.target, restart),

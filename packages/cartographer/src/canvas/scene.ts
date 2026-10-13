@@ -7,6 +7,7 @@ import { backdropToScreen } from '../view/viewport'
 import type { CanvasScene } from './painter'
 import type { PolityRings } from '../geometry/fillHit'
 import type { Rect } from '../geometry/marquee'
+import type { LayerSettings } from '../state/layersSlice'
 import type { VectorLayers } from '../vectorLayers'
 import type { BackdropFrame } from '../view/projection'
 import type { Point, Viewport } from '../view/viewport'
@@ -49,6 +50,8 @@ export interface SceneInputs {
   snapAnchors: readonly number[]
   /** The document's borders, derived from its shared anchors (`core/editor/derivedBorders`). */
   borders: readonly DerivedBorder[]
+  /** What `{Layers}` shows, and how opaque. */
+  layers: LayerSettings
   /** Each polity's colour, by id — see `core/editor/polityColours`. */
   colours: ReadonlyMap<string, string>
   /** What to call the editorial zone on screen. */
@@ -201,6 +204,7 @@ export function projectedBorders(
       .map((index) => anchors[index])
       .filter((point): point is Point => point !== undefined),
     hand: handFor(border),
+    layer: border.relation === 'unclaimed' ? ('unclaimed' as const) : ('borders' as const),
   }))
 }
 
@@ -226,6 +230,7 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
     fills: projectedFills(document, anchors, inputs.colours),
     anchors,
     borders: projectedBorders(inputs.borders, anchors),
+    layers: inputs.layers,
     handles: inputs.handles,
     snapAnchors: inputs.snapAnchors,
     selected: inputs.selected,

@@ -6,6 +6,7 @@ import {
   sharedBorderDocument,
 } from '@europe-historical-atlas/core/editor/documentFixtures'
 
+import { DEFAULT_LAYERS } from '../state/layersSlice'
 import { lonLatToScreen, projectAnchors, projectToBackdrop } from '../view/projection'
 import { TEST_BACKDROP_FRAME } from '../view/testFrame'
 
@@ -49,6 +50,7 @@ function inputs(document: YearDocument, overrides: Partial<SceneInputs> = {}): S
     handles: [],
     snapAnchors: [],
     borders: [],
+    layers: DEFAULT_LAYERS,
     colours: new Map<string, string>(),
     zoneLabel: 'editorial zone',
     ...overrides,
