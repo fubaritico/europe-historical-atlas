@@ -618,3 +618,13 @@ The natural gesture is to click the river's end; it does not take. He stops a li
 clicks the coast, and the Pen switches. *"C'est quelque chose auquel tu t'habitues […] mais je sais pas si
 c'est très intuitif."* The result is clean — the cost is the gesture to learn. **The intuitive remedy**: the
 mouth counts as both the river and the coast, so one click there ends the river and turns the Pen to the coast.
+
+### H-43 · Two rings hold both anchors clicked: the Pen follows one of them, and does not say which — **observed 2026-10-13**
+
+The general test (Euratlas 1100). Besalú sits between Cerdanya and Barcelona, and both their rings hold the
+two tripoints (the crest anchor and the southern one). Clicking the first then the second followed
+**Barcelona's** ring, where the author wanted Cerdanya's — and the result zone said only *"followed 9 anchors
+of a shared border"*. The next aim, an anchor of Barcelona, was then already in the outline and refused
+silently: a free point was placed instead (the hover said *"Drawing in"*). **Worked around** by aiming first
+at an anchor only Cerdanya holds. **Remedy to decide**: name the ring in the result (*"followed 9 anchors of
+Barcelona's border"*), and when two rings tie, preview both or prefer the one the pointer moved along.

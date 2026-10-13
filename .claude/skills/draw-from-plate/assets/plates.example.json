@@ -1,0 +1,24 @@
+{
+ "ib": {
+  "image": "~/Desktop/Screenshot <date> at <time>.png",
+  "meridians": [
+   24,
+   418,
+   813
+  ],
+  "lon0": -15,
+  "parallels": [
+   [
+    185,
+    45
+   ],
+   [
+    722,
+    40
+   ]
+  ],
+  "step": 5,
+  "covers": "what the plate shows",
+  "source": "where it comes from, and under what terms"
+ }
+}
