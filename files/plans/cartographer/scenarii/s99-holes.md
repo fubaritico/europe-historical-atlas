@@ -603,3 +603,8 @@ two points a few pixels apart; the Pen is following the river, so the click take
 stays on the river. **To measure first**: the distance, at a real mouth (the Scheldt, the Rhône), between
 the river's last vertex and the coast's nearest — then decide whether the mouth vertex should be offered as
 the coast too. **Deferred by the dev**: *"largement utilisable"*, to come back to later.
+**Where, and what he does instead** (his precision, same day): a river followed down to the **Adriatic**.
+The natural gesture is to click the river's end; it does not take. He stops a little before the mouth, then
+clicks the coast, and the Pen switches. *"C'est quelque chose auquel tu t'habitues […] mais je sais pas si
+c'est très intuitif."* The result is clean — the cost is the gesture to learn. **The intuitive remedy**: the
+mouth counts as both the river and the coast, so one click there ends the river and turns the Pen to the coast.
