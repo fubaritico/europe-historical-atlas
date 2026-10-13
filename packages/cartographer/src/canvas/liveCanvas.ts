@@ -12,10 +12,10 @@ import { closeEnoughToEdit, snapReachKm } from '../view/toolReach'
 import { backdropToScreen } from '../view/viewport'
 
 import { penInsertHit, stretchUnder } from './anchorGestures'
-import { anchorHit, anchorSentence, borderRunTo } from './borderSnap'
+import { anchorHit, anchorSentence, borderRunTo, waterTaking } from './borderSnap'
 import { cursorCss, cursorFor } from './cursors'
 import { featureUnder } from './featureUnder'
-import { followedLayer, layerLines, lineLabel, nearestLayer, snapHit } from './layerHits'
+import { followedLayer, layerLines, lineLabel, snapHit } from './layerHits'
 import { HANDLE_HIT_RADIUS } from './navigation'
 import { paintOverlay } from './overlayPainter'
 import { projectedTerritories } from './scene'
@@ -260,7 +260,7 @@ export function snapOffer(it: LiveCanvas, inserting: boolean = overStretch(it)):
   const gesture = gestureOf(it)
   // The layer first — the same order as the click (`penClick`): the nearer water within reach, whatever
   // the mode, previewed so the click that switches is foreseen.
-  const layer = nearestLayer(gesture, it.pointer)
+  const layer = waterTaking(gesture, it.pointer)
   const offer = layer === null ? NO_OFFER : lineOffer(it, gesture, layer, it.pointer)
   if (offer.kind !== null) return offer
   const hit = anchorHit(gesture, it.pointer)

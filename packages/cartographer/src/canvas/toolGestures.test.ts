@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { declareSource } from '@europe-historical-atlas/core/editor/documentEdits'
+
 import { lonLatToScreen } from '../view/projection'
 
+import { waterTaking } from './borderSnap'
 import { snapHit } from './layerHits'
 import {
   TEST_COAST_PROVENANCE,
@@ -1352,6 +1355,108 @@ describe('the white arrow’s selection and marquee (s03)', () => {
       const [right] = onScreen(context, 2)
       drag(context, [60, top], [right, top])
       expect(context.session.selected).toEqual([0, 1, 2])
+    })
+  })
+})
+
+/** A river running north–south three pixels east of France's anchor at (300, 100). */
+const BESIDE: RiverLine = {
+  points: Array.from({ length: 31 }, (_, index): [number, number] => [303, 50 + index * 10]),
+  closed: false,
+  bounds: { left: 303, top: 50, right: 303, bottom: 350 },
+  name: 'Morava',
+}
+
+/**
+ * France's triangle drawn with no water loaded — its anchors placed by eye — then the same document
+ * reopened with a river beside it, and the Empire aimed at.
+ * @returns the context over the river, and its reports
+ */
+function anchorBesideRiver() {
+  const store = testStore()
+  store
+    .getState()
+    .createPolity(testPolity('fr', 'Reaume de France'), { kind: 'create', label: 'fr' })
+  store
+    .getState()
+    .createPolity(testPolity('hre', 'Sacrum Imperium'), { kind: 'create', label: 'hre' })
+  store.getState().aimAt('fr')
+  drawTriangle(testGestureContext(store).context)
+  store.getState().aimAt('hre')
+  return testGestureContext(store, [], [BESIDE])
+}
+
+// The general test of 2026-10-13: a neighbour's anchor placed by eye beside a river could not be joined,
+// the river always taking the click.
+describe('a neighbour’s anchor placed by eye beside a river', () => {
+  describe('happy path', () => {
+    it('lands on the anchor aimed at exactly, by its index', () => {
+      const { context } = anchorBesideRiver()
+
+      penClick(context, [300, 100])
+
+      expect(context.session.outline[0]?.anchor).toBe(1)
+    })
+  })
+
+  describe('variants', () => {
+    it('follows the river when the pointer is on the river, a few pixels off the anchor', () => {
+      const { context } = anchorBesideRiver()
+
+      penClick(context, [303, 112])
+
+      expect(context.session.outline[0]?.anchor).toBeNull()
+      expect(context.store.getState().penMode).toBe('river')
+    })
+
+    it('joins the anchor exactly aimed at even with the Pen already following the river', () => {
+      const { context } = anchorBesideRiver()
+      penClick(context, [303, 200])
+
+      penClick(context, [300, 100])
+
+      expect(context.session.outline.at(-1)?.anchor).toBe(1)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('leaves the click to the river over an anchor recorded from that river', () => {
+      const { context } = anchorBesideRiver()
+      const document = context.store.getState().document
+      document.anchorSource[1] = declareSource(document, TEST_RIVER_PROVENANCE)
+
+      penClick(context, [300, 100])
+
+      expect(context.session.outline[0]?.anchor).toBeNull()
+      expect(context.store.getState().penMode).toBe('river')
+    })
+  })
+
+  // The hover asks the same question as the click, so what the Pen announces is what it does.
+  describe('the one decision the hover and the click share', () => {
+    it('gives the anchor aimed at, and the river a few pixels off it', () => {
+      const { context } = anchorBesideRiver()
+
+      expect(waterTaking(context, [300, 100])).toBeNull()
+      expect(waterTaking(context, [303, 112])).toBe('river')
+    })
+
+    it('scales the aim with the reach, so a high-density screen aims as wide', () => {
+      const { context } = anchorBesideRiver()
+
+      expect(waterTaking({ ...context, radius: 16 }, [300, 104])).toBeNull()
+    })
+  })
+
+  // L4: N/A — a lookup over the document; nothing awaited or caught.
+
+  describe('edge cases', () => {
+    it('reaches no anchor four pixels off it, the aim being three', () => {
+      const { context } = anchorBesideRiver()
+
+      penClick(context, [300, 104])
+
+      expect(context.session.outline[0]?.anchor).toBeNull()
     })
   })
 })

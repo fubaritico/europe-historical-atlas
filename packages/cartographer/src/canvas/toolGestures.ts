@@ -8,9 +8,9 @@ import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
 import { backdropToLonLat, lonLatToScreen, screenToLonLatOnBackdrop } from '../view/projection'
 
 import { deleteSelected, insertOnStretch, penInsertHit } from './anchorGestures'
-import { anchorClick, anchorsByPosition } from './borderSnap'
+import { anchorClick, anchorsByPosition, waterTaking } from './borderSnap'
 import { TAG } from './consoleTag'
-import { followedLayer, layerLines, lineLabel, nearestLayer, snapHit } from './layerHits'
+import { followedLayer, layerLines, lineLabel, snapHit } from './layerHits'
 import { leaveLayer, reachLayer } from './layerSwitch'
 import {
   abandonGesture,
@@ -152,8 +152,9 @@ export function penClick(context: GestureContext, at: Point): void {
   // A layer wins over an anchor: a neighbour drawn along it left an anchor on every vertex, and
   // branching onto those would lose the coast (the dev, Spain then Portugal, 2026-10-11). Those
   // anchors are reused by the layer click, so the border stays shared. Whatever the mode, a coast or a
-  // river within reach takes the click, and the Pen then follows it (`s02`, the dev, 2026-10-12).
-  const layer = nearestLayer(context, at)
+  // river within reach takes the click, and the Pen then follows it (`s02`, the dev, 2026-10-12) —
+  // except on an anchor aimed at exactly that the water would not reuse (`waterTaking`).
+  const layer = waterTaking(context, at)
   if (layer !== null && snapClick(context, layer, at)) {
     if (followedLayer(context) !== layer) reachLayer(context, layer)
     return

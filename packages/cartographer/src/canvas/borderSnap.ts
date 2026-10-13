@@ -5,10 +5,11 @@ import { nearestAmong } from '../geometry/hitTest'
 import { shortestRunBetween } from '../geometry/lineSnap'
 
 import { TAG } from './consoleTag'
+import { nearestLayer } from './layerHits'
 import { sessionPointOf } from './toolSession'
 
 import type { GestureContext } from './toolGestures'
-import type { SessionPoint } from './toolSession'
+import type { SessionPoint, SnapLayer } from './toolSession'
 
 /**
  * The Pen meeting a border that already exists — the dev's request, 2026-10-11: *"le snapping pour les
@@ -20,18 +21,77 @@ import type { SessionPoint } from './toolSession'
  */
 
 /**
- * The anchor under the pointer that the Pen may land on: any anchor a ring holds, but not one the
- * outline in progress already holds — those are its own points, and the first is the closing.
+ * The anchors the Pen may land on: any anchor a ring holds, but not one the outline in progress already
+ * holds — those are its own points, and the first is the closing.
+ * @param context - the document and the session
+ * @returns their indices
+ */
+function landable(context: GestureContext): number[] {
+  const held = new Set(context.session.outline.map((point) => point.anchor))
+  return [...referencedAnchors(context.store.getState().document)].filter(
+    (index) => !held.has(index)
+  )
+}
+
+/**
+ * The anchor under the pointer that the Pen may land on.
  * @param context - the document, the session and the projection
  * @param at - the pointer, in screen pixels
  * @returns the anchor's index, or `null`
  */
 export function anchorHit(context: GestureContext, at: readonly [number, number]): number | null {
-  const held = new Set(context.session.outline.map((point) => point.anchor))
-  const candidates = [...referencedAnchors(context.store.getState().document)].filter(
-    (index) => !held.has(index)
-  )
-  return nearestAmong(context.anchorsOnScreen(), candidates, at, context.radius)
+  return nearestAmong(context.anchorsOnScreen(), landable(context), at, context.radius)
+}
+
+/**
+ * The share of the Pen's reach ({@link GestureContext.radius}) within which an anchor counts as aimed at —
+ * 3 of its 8 pixels. A share of the reach rather than a pixel count, so it scales with the screen's ratio as
+ * the reach does.
+ */
+export const ANCHOR_AIM_SHARE = 3 / 8
+
+/**
+ * An anchor the pointer is right on that the water under it would **not** reuse — one placed by eye, or
+ * taken from another layer — so the click lands on it rather than on the water. An anchor that came from
+ * that water stays behind it: the water click reuses it anyway, which keeps a neighbour's coast intact.
+ *
+ * A source the document does not declare cannot reach here: a year whose anchor names one is refused when
+ * it is read.
+ * @param context - the document, the session, the projection and the layers
+ * @param at - the pointer, in screen pixels
+ * @param layer - the water the click would otherwise take
+ * @returns the anchor's index, or `null` when the water should take the click
+ */
+export function anchorOverWater(
+  context: GestureContext,
+  at: readonly [number, number],
+  layer: SnapLayer
+): number | null {
+  const aim = context.radius * ANCHOR_AIM_SHARE
+  const hit = nearestAmong(context.anchorsOnScreen(), landable(context), at, aim)
+  if (hit === null) return null
+  const document = context.store.getState().document
+  const source = document.sources.find((each) => each.id === document.anchorSource[hit])
+  const water = context.layers[layer].provenance
+  return source?.name === water.name && source.licence === water.licence ? null : hit
+}
+
+/**
+ * The water that takes a Pen click here, if any — the nearer coast or river within reach, unless an anchor
+ * is aimed at that it would not reuse (`anchorOverWater`, `s99` H-36 as rectified 2026-10-13).
+ *
+ * **The one place the order is decided**: the click (`penClick`) and the hover (`snapOffer`) both ask it, so
+ * what the Pen announces is what it does.
+ * @param context - the document, the session, the projection and the layers
+ * @param at - the pointer, in screen pixels
+ * @returns the layer, or `null` when an anchor or a free point takes the click
+ */
+export function waterTaking(
+  context: GestureContext,
+  at: readonly [number, number]
+): SnapLayer | null {
+  const layer = nearestLayer(context, at)
+  return layer === null || anchorOverWater(context, at, layer) !== null ? null : layer
 }
 
 /**

@@ -549,6 +549,16 @@ continuous rivers it shares the border by itself. A rule giving the neighbour's 
 proposed and **not built** — it would add a rule the author must understand, for a case the mending
 solved. [s02](s02-create-france-1100.md).
 
+**Reopened and rectified 2026-10-13, by the general test** (Euratlas 1100 copied into the Cartographer, the
+dev: *"ce sont des décisions que l'on a prises alors que l'on ne s'était pas encore servi de
+l'application"*). The Empire's eastern border had been placed **by eye** beside the Mur, the Morava and the
+Danube. Drawing Hungary, Poland and Bohemia against it, every aim at its anchors said *"Following the
+Morava"* and took a river vertex: Hungary shared 15 anchors of a ~50-anchor border, the rest a second line
+beside the first. The mending only helps when the neighbour itself followed the river. **The rule now**
+(`borderSnap.ts`, `anchorOverWater`): an anchor aimed at within 3 px wins over the water **unless it came
+from that water** — the water click reuses those anyway, which keeps the Spain–Portugal case intact (its
+tests unchanged and green).
+
 ### H-37 · No gesture welds two anchors into one — **observed 2026-10-12**
 
 One click at the Petit Rhône mouth took a river vertex 2.3 km from France's, so the two outlines do not
