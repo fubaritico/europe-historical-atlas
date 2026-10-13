@@ -96,6 +96,34 @@ HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
 }
 
 /**
+ * `showPopover()` and `hidePopover()`, because jsdom 30 has neither **and still hides every popover**: its
+ * own default stylesheet carries `[popover]:not(:popover-open) { display: none }`, so an element with a
+ * `popover` attribute is invisible until something opens it, and nothing can. Since the design system's
+ * 0.6.0 the `Dropdown` menu is a `popover="manual"` it opens itself (2026-10-13, the DS handoff) — and it
+ * skips the call when the method is missing, so under jsdom the menu stayed hidden and its options could
+ * not be found by role.
+ *
+ * Same shape as the dialogue's stand-in: what a test can observe. `:popover-open` is the browser's state
+ * and cannot be set from here, so the stand-in marks the element with an attribute and a rule shows what
+ * carries it. No top layer: jsdom renders nothing anyway.
+ *
+ * **`!important`, and it is needed, measured**: jsdom's computed style ranks rules by specificity without
+ * the cascade's origins, so its own `[popover]:not(:popover-open):not(dialog[open])` (0,3,1) beat a plain
+ * author rule (0,2,0) — the attribute was set, the six options were there, and `display` stayed `none`.
+ */
+const POPOVER_OPEN = 'data-test-popover-open'
+const popoverStyle = document.createElement('style')
+popoverStyle.textContent = `[popover][${POPOVER_OPEN}] { display: block !important; }`
+document.head.append(popoverStyle)
+
+HTMLElement.prototype.showPopover = function showPopover(this: HTMLElement) {
+  this.setAttribute(POPOVER_OPEN, '')
+}
+HTMLElement.prototype.hidePopover = function hidePopover(this: HTMLElement) {
+  this.removeAttribute(POPOVER_OPEN)
+}
+
+/**
  * `scrollIntoView`, because jsdom has none and lays nothing out. `{Polities}` scrolls the row the keys
  * are on into view; under jsdom there is nothing to scroll, so the stub records nothing and only has to
  * exist — the same reason as the 2D context above.

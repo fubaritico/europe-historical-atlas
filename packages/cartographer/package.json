@@ -1,7 +1,7 @@
 {
   "name": "@europe-historical-atlas/cartographer",
   "version": "1.0.0",
-  "description": "The Cartographer: the territory editor \u2014 a 2D canvas for anchors and rings, with its React chrome.",
+  "description": "The Cartographer: the territory editor — a 2D canvas for anchors and rings, with its React chrome.",
   "type": "module",
   "private": true,
   "scripts": {
@@ -17,10 +17,10 @@
   },
   "dependencies": {
     "@europe-historical-atlas/core": "workspace:^",
-    "@fubaritico/behaviors": "^0.5.0",
-    "@fubaritico/react": "^0.5.0",
-    "@fubaritico/styles": "^0.5.0",
-    "@fubaritico/tokens": "^0.5.0",
+    "@fubaritico/behaviors": "^0.6.0",
+    "@fubaritico/react": "^0.6.0",
+    "@fubaritico/styles": "^0.6.0",
+    "@fubaritico/tokens": "^0.6.0",
     "react": "catalog:",
     "react-dom": "catalog:",
     "zustand": "catalog:"

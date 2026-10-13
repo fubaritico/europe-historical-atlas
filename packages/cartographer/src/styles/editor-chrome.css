@@ -181,11 +181,6 @@
   justify-content: space-between;
 }
 
-/* The skin clips a card to its corners, which would cut off a list opened near the dialogue's edge. */
-.polity-form .ui-card {
-  overflow: visible;
-}
-
 /* The dialogue's width: wide enough for a long period name, as `design/03`'s panel is. */
 .polity-form {
   width: 340px;
