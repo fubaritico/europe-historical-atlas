@@ -229,3 +229,15 @@ target.z)` would be coherent with the navigation that already exists.
   accessible name/role + a keyboard-reachable region list for picking (M1.4/M2); (c) Stats overlay is
   mouse-only. Keyboard zoom (`+`/`-`/PageUp/Down), `prefers-reduced-motion`, and ctrl+wheel passthrough are
   already handled.
+- **On an authored year, four dev-panel controls do nothing, and the panel does not say so** (2026-10-13,
+  QUAL-001, **left open by decision**). The year's borders are exact and its colours are the Cartographer's
+  (`files/plans/borders/plan.md`, step 4), so *snap to coast*, *colour by suzerain*, the editorial name rules
+  and the *border smoothing* slider no longer apply. Only the smoothing slider says so (a console warning on
+  release); the other two quietly rebuild to the same picture. **What it costs**: a minute of puzzlement over
+  a dead slider, on a dev tool. **Remedy if it bites**: grey the controls while the installed year is
+  authored — which needs the year's kind to reach the panel after it is built. **Severity: cosmetic.**
+- **What the atlas does not yet draw of an authored year's borders** (2026-10-13, declared in
+  `core/editor/atlasBorders.ts` and pinned by its tests): a hand's **weight** (a limit between two vassals of
+  one lord is drawn as heavy as a sovereign one), a **dotted** hand (drawn dashed — no dot pattern yet), and
+  an authored style on a **frontier** against unclaimed land (drawn in the frontier stroke, warned once per
+  derivation). **Trigger**: the border-style session the dev announced on 2026-10-13. **Severity: worth knowing.**

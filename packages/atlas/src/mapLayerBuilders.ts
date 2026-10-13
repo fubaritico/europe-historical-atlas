@@ -12,6 +12,7 @@ import {
   DEFAULT_RIVER_EXTENSION,
   extendRiversToSea,
 } from '@europe-historical-atlas/core/data/riverSource'
+import { pairKey } from '@europe-historical-atlas/core/editor/atlasBorders'
 import { requireHeightmap } from '@europe-historical-atlas/core/pipeline/inlineCompute'
 import { composeSheetRgba } from '@europe-historical-atlas/core/pipeline/sheetCompose'
 import { terrainTextureSize } from '@europe-historical-atlas/core/pipeline/terrainCompose'
@@ -46,15 +47,25 @@ import type { BorderPattern } from '@europe-historical-atlas/core/data/borderSty
 import type { DataTexture } from 'three'
 
 /**
- * How the border between two polities is drawn, looked up by name in the editorial style table.
+ * How a border group is drawn: its hand when the year is authored, else looked up by name in the editorial
+ * style table.
  * @param context - the layers and what they read
  * @param pair - the two region indices the stretch separates
  * @returns the drawing pattern
+ * @throws when an authored year has no pattern for a group — every group is filed with one, so a miss is a
+ *   defect, said rather than drawn in a pattern nobody chose
  */
 export function patternForPair(
   context: LayerContext,
   pair: readonly [number, number]
 ): BorderPattern {
+  const authored = context.sources.borderPatterns
+  if (authored !== null) {
+    const pattern = authored.get(pairKey(pair))
+    if (pattern === undefined)
+      throw new Error(`[atlas] no pattern filed for the border group ${pairKey(pair)}`)
+    return pattern
+  }
   const regions = context.sources.regionSet?.regions
   if (!regions) return 'solid'
   return borderPatternFor(regions[pair[0]]?.name ?? null, regions[pair[1]]?.name ?? null)

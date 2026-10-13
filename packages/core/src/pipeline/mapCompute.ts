@@ -63,6 +63,12 @@ export interface PoliticalRequest {
   palette: readonly RgbColor[]
   /** Chaikin rounds applied to the derived border lines. */
   borderSmoothing: number
+  /**
+   * The colour of each region, indexed as `regions` — given for an authored year, whose colours are the
+   * Cartographer's (`core/editor/polityColours`). When present it replaces the automatic palette, the
+   * editorial name rules and `colorBySuzerain`: the author already chose.
+   */
+  colours?: readonly RgbColor[]
 }
 
 /**

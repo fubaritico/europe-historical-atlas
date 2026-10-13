@@ -74,6 +74,21 @@ export interface InlineComputeOptions {
   pinnedFor?: (name: string | null) => RgbColor | null
 }
 
+/**
+ * The colours a request gave, checked against its regions.
+ * @param colours - one colour per region
+ * @param count - how many regions there are
+ * @returns the colours, as tints
+ * @throws when the two counts differ — a colour would land on the wrong polity, which no caller does
+ */
+function givenColours(colours: readonly RgbColor[], count: number): RgbColor[] {
+  if (colours.length !== count)
+    throw new Error(
+      `map compute: ${String(colours.length)} colours given for ${String(count)} regions`
+    )
+  return [...colours]
+}
+
 /** Announce a phase, then let the host paint before it starts. */
 export type Announce = (fraction: number, phase: Parameters<ProgressReport>[1]) => Promise<void>
 
@@ -167,7 +182,9 @@ export async function rasterisePolitical(
   const named = request.regions.map((region) => ({
     name: request.colorBySuzerain ? (region.subjectTo ?? region.name) : region.name,
   }))
-  const tints = assignRegionColors(raster, named, request.palette, pinnedFor)
+  const tints = request.colours
+    ? givenColours(request.colours, request.regions.length)
+    : assignRegionColors(raster, named, request.palette, pinnedFor)
 
   await announce(0.9, 'borders')
   return {

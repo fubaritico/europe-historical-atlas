@@ -174,6 +174,36 @@ describe('toRegionPayload', () => {
       expect(toRegionPayload(year, renderBbox).regions[0]?.rings).toHaveLength(2)
     })
 
+    it('carries each polity’s id through projection, so the atlas can paint it in the editor’s colour', () => {
+      const regions = projectRegions(toRegionPayload(authoredYear(), renderBbox)).regions
+      expect(regions.map((region) => region.polityId).sort()).toEqual(['aquitaine', 'fr-couronne'])
+    })
+
+    it('gives a region from a per-century payload no polity id at all', () => {
+      const [region] = projectRegions({
+        source: 'test',
+        year: 1500,
+        bbox: renderBbox,
+        tolerance: 0,
+        regions: [
+          {
+            name: 'Somewhere',
+            subjectTo: null,
+            partOf: null,
+            rings: [
+              [
+                [0, 40],
+                [1, 40],
+                [1, 41],
+                [0, 40],
+              ],
+            ],
+          },
+        ],
+      }).regions
+      expect(region !== undefined && 'polityId' in region).toBe(false)
+    })
+
     it('says nothing about partOf, because the format declares no such thing', () => {
       const payload = toRegionPayload(authoredYear(), renderBbox)
       for (const region of payload.regions) expect(region.partOf).toBeNull()

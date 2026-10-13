@@ -80,6 +80,8 @@ function toRegion(
     // OHM carries no equivalent of historical-basemaps' PARTOF, and the format declares none. Saying
     // `null` is the honest answer; inventing a grouping here would be a second source of truth.
     partOf: null,
+    // Carried so the atlas paints it in the Cartographer's colour, which is decided per polity id.
+    polityId: polity.id,
     rings,
   }
 }

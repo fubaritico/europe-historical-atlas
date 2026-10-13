@@ -1,8 +1,13 @@
 import { chooseColorSlots } from '../data/regionRaster'
+import { hexToRgb } from '../utils/color'
 
 import { collectBorderEdges } from './borderGraph'
+import { openYearDocument } from './yearDocument'
 
 import type { YearDocument } from './yearDocument'
+import type { Region } from '../data/regionSource'
+import type { AuthoredYear } from '../data/yearFormat'
+import type { RgbColor } from '../utils/color'
 
 /**
  * The colour each polity of a document is painted in — its own when the author pinned one, otherwise a
@@ -56,4 +61,31 @@ export function polityColours(
       polity.colour ?? palette[slots[index] ?? 0] ?? palette[0],
     ])
   )
+}
+
+/**
+ * The colour of each region of an authored year as the atlas receives it — the Cartographer's, polity by
+ * polity, so the map the author published is painted as the one they drew.
+ * @param authored - the year's three files
+ * @param regions - the regions the atlas draws, each carrying the id of its polity
+ * @param palette - the automatic palette, never empty — the atlas's live one, whose defaults are the
+ *   Cartographer's
+ * @returns one colour per region, in the regions' order
+ * @throws when a region names no polity of the year — the adapter gives every region its id, so a miss is a
+ *   defect, and a colour guessed for it would paint a polity in a neighbour's
+ */
+export function authoredRegionColours(
+  authored: AuthoredYear,
+  regions: readonly Pick<Region, 'polityId'>[],
+  palette: readonly [string, ...string[]]
+): RgbColor[] {
+  const byId = polityColours(openYearDocument(authored), palette)
+  return regions.map((region, index) => {
+    const colour = region.polityId === undefined ? undefined : byId.get(region.polityId)
+    if (colour === undefined)
+      throw new Error(
+        `[atlas] region ${String(index)} names no polity of the year (${String(region.polityId)})`
+      )
+    return hexToRgb(colour)
+  })
 }

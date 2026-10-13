@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { borderRunsOf, collectBorderEdges } from './borderGraph'
-import { deriveBorders } from './derivedBorders'
+import { coastSourceIds, deriveBorders } from './derivedBorders'
 import { addAnchor, addPolity, closeRing } from './documentEdits'
 import { createYearDocument } from './yearDocument'
 
@@ -467,5 +467,26 @@ describe('deriveBorders — a run override dresses its own segments only', () =>
     doc.runs.push({ run: [0, 1], hand: 'dotted', source: null, note: null })
     const shared = deriveBorders(doc).filter((border) => border.between.length === 2)
     expect(shared.every((border) => border.hand === null)).toBe(true)
+  })
+})
+
+/** A document holding one anchor under the coast's own source, and its sources table. */
+function shoreDocument(): YearDocument {
+  const doc = createYearDocument(1100, zone, [...source, { id: 1, name: 'Shore', licence: 'CC0' }])
+  addAnchor(doc, [0, 0], 1)
+  return doc
+}
+
+describe('coastSourceIds', () => {
+  it('finds the sources recorded under the mask’s name, without its licence', () => {
+    expect(coastSourceIds(shoreDocument(), 'Shore (CC0)')).toEqual(new Set([1]))
+  })
+
+  it('finds none for a mask whose source names no licence', () => {
+    expect(coastSourceIds(shoreDocument(), 'Shore')).toEqual(new Set())
+  })
+
+  it('finds none when the document never took from that mask', () => {
+    expect(coastSourceIds(shoreDocument(), 'Elsewhere (CC0)')).toEqual(new Set())
   })
 })

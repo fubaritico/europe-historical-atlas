@@ -151,6 +151,13 @@ describe('createAuthoredYearSource', () => {
       expect(set.regions[0]?.name).toBe('Reaume de France')
     })
 
+    it('keeps the year as authored, with the manifest’s frame, for the exact borders', async () => {
+      stubFetch(served)
+      const set = await source(unauthoredSource()).load(1100)
+      expect(set.authored?.bbox).toEqual(bbox)
+      expect(set.authored?.year.polities.anchors).toEqual(polities.anchors)
+    })
+
     it('leaves a year nobody has drawn to the source it was given', async () => {
       stubFetch(served)
       const unauthored = unauthoredSource()

@@ -116,7 +116,11 @@ export function createAuthoredYearSource(deps: AuthoredYearSourceDeps): RegionSo
       if (!list.years.includes(year)) return deps.unauthored.load(year)
       const folder = `${deps.yearsBase.replace(/\/$/, '')}/${String(year)}`
       const files = await fetchYearFiles(yearPaths(deps.yearsBase, year))
-      return projectRegions(toRegionPayload(assembleAuthoredYear(files, folder), list.bbox))
+      const authored = assembleAuthoredYear(files, folder)
+      return {
+        ...projectRegions(toRegionPayload(authored, list.bbox)),
+        authored: { year: authored, bbox: list.bbox },
+      }
     },
   }
 }

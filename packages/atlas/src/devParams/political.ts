@@ -116,7 +116,7 @@ export interface PoliticalDevParams {
  * @param params - the political params
  * @returns the palette, in preference order
  */
-export function politicalPalette(params: PoliticalDevParams): string[] {
+export function politicalPalette(params: PoliticalDevParams): [string, ...string[]] {
   return [
     params.palette1,
     params.palette2,

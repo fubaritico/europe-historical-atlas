@@ -19,7 +19,6 @@ import { MapCanvas } from './MapCanvas'
 
 import type { BackdropLoad } from './MapArea'
 import type { EditorAssets } from './MapArea'
-import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
 /** One colour source for the mounts below, over the shipped palette. */
@@ -37,11 +36,9 @@ function readyBackdrop(): EditorAssets {
     backdrop: {
       frame: TEST_BACKDROP_FRAME,
       image: document.createElement('canvas'),
-      // Never read by the canvas — it is the coastline's input, and these tests hand the vector layers
-      // over already traced. A stub of the one shape the type wants.
-      mask: {
-        meta: { width: 2, height: 2, scale: 1, bbox: TEST_BACKDROP_FRAME.bounds },
-      } as LandMask,
+      // Read by the canvas for the borders' far side and the coast's source; the vector layers come
+      // over already traced, so the shared one-cell mask is enough.
+      mask: TEST_LAND_MASK,
     },
     vectors: {
       coast: [],

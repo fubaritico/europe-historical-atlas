@@ -16,14 +16,17 @@
  *    author's gesture is the law, and nothing here may recompute it away.
  */
 
+import { latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
 import { pointInRings } from '../geo/pointInRing'
 
 import { borderRunsOf } from './borderGraph'
 import { coveringRun, stretchesBy } from './borderOverrides'
 import { relationBetween } from './borderRelation'
+import { parseProvenance } from './provenance'
 
 import type { BorderRelation } from './borderRelation'
 import type { YearDocument } from './yearDocument'
+import type { LandMask } from '../data/landMask'
 import type { YearPolity } from '../data/yearFormat'
 
 /** One border, ready to draw. */
@@ -67,6 +70,43 @@ export interface DerivationDeps {
    * fragments on the 1100 France (the Gironde, the Loire, the Breton rias; measured 2026-10-13).
    */
   coastSources?: ReadonlySet<number>
+}
+
+/**
+ * The document's sources whose anchors lie on the coastline — the land mask's own source, recorded by the
+ * Cartographer under the name {@link parseProvenance} reads from it.
+ *
+ * **None, for a mask whose source names no licence** — the atlas's elevation threshold is one. The
+ * Cartographer refuses to record an anchor under such a source, so no anchor can be coast by it: the exact
+ * answer, not a substitute for one. The mask alone then tells coast from frontier.
+ * @param doc - the document
+ * @param maskSource - the land mask's source sentence, *"Natural Earth 10m land minus lakes (public domain)"*
+ * @returns the coast's source ids
+ */
+export function coastSourceIds(doc: YearDocument, maskSource: string): Set<number> {
+  const provenance = parseProvenance(maskSource)
+  if (provenance === null) return new Set()
+  return new Set(
+    doc.sources.filter((source) => source.name === provenance.name).map((source) => source.id)
+  )
+}
+
+/**
+ * What the far-side question asks of a land mask, wired once for both applications — so the Cartographer's
+ * view of a border and the atlas's drawing of it cannot disagree on what is dry or what is coast.
+ * @param doc - the document
+ * @param mask - which cells are dry
+ * @returns the derivation's dependencies
+ */
+export function maskDerivationDeps(doc: YearDocument, mask: LandMask): DerivationDeps {
+  return {
+    isLand: (lon, lat) =>
+      mask.isLand(
+        longitudeToHorizontal(lon, mask.meta.bbox),
+        latitudeToVertical(lat, mask.meta.bbox)
+      ),
+    coastSources: coastSourceIds(doc, mask.meta.source),
+  }
 }
 
 /** Resolve a polity's rings into coordinates, for an inclusion test. */

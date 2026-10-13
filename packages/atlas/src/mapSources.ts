@@ -11,6 +11,7 @@
 
 import { smoothHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 
+import type { BorderPattern } from '@europe-historical-atlas/core/data/borderStyles'
 import type { Heightmap } from '@europe-historical-atlas/core/data/heightmap'
 import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionRaster'
@@ -41,6 +42,11 @@ export interface MapSources {
    * geometry, and that is the one border tunable that asks for a fresh derivation.
    */
   derivedBorders: RegionBorders | null
+  /**
+   * The pattern of each border group when the year is authored — its hand, not a name rule — keyed by the
+   * group's pair as `"a:b"`; `null` for a year read from the per-century payloads.
+   */
+  borderPatterns: ReadonlyMap<string, BorderPattern> | null
 }
 
 /**
@@ -55,6 +61,7 @@ export function createMapSources(): MapSources {
     regionSet: null,
     riverData: [],
     derivedBorders: null,
+    borderPatterns: null,
   }
 }
 

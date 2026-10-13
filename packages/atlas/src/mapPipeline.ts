@@ -21,6 +21,7 @@ import { createFetchLandMaskSource } from '@europe-historical-atlas/core/data/la
 import { createFetchRegionSource } from '@europe-historical-atlas/core/data/regionSource'
 import { createFetchRiverSource } from '@europe-historical-atlas/core/data/riverSource'
 import { createAuthoredYearSource } from '@europe-historical-atlas/core/data/yearManifest'
+import { authoredRegionColours } from '@europe-historical-atlas/core/editor/polityColours'
 import {
   createInlineMapCompute,
   scaleProgress,
@@ -33,6 +34,7 @@ import { COMPUTE_PHASE_LABELS } from './computeLabels'
 import { politicalPalette } from './devParams'
 import { refreshReliefSource } from './mapSources'
 import { wrapTerrainTexture } from './scene/terrainTexture'
+import { settleYearBorders } from './yearBorders'
 
 import type { DevState } from './devState'
 import type { MapLayers } from './mapLayers'
@@ -228,7 +230,6 @@ async function rebuildPolitical(context: PipelineContext): Promise<void> {
   try {
     const loaded = await context.assets.regions.load(year)
     if (context.isDisposed() || !isCurrent()) return
-    sources.regionSet = loaded
 
     // The bar spans two jobs, so each reports into its own slice rather than being told where it sits
     // in a sequence it knows nothing about.
@@ -240,7 +241,10 @@ async function rebuildPolitical(context: PipelineContext): Promise<void> {
       scaleProgress(report, POLITICAL_SPLIT.fetch, POLITICAL_SPLIT.compute)
     )
     if (context.isDisposed() || !isCurrent()) return
-    sources.derivedBorders = result.borders
+    // The year and its lines change together: a redraw between the two would read one year's pairs
+    // against the other's polities, or one kind of year's patterns against the other kind's lines.
+    sources.regionSet = loaded
+    settleYearBorders(sources, loaded, result.borders)
 
     await rebuildTexture(
       context,
@@ -259,21 +263,35 @@ async function rebuildPolitical(context: PipelineContext): Promise<void> {
 
 /**
  * What the compute is asked for, gathered from the live tunables.
+ *
+ * **An authored year's claims are never grown toward the coast.** The growth exists for the per-century
+ * payloads, whose schematic outlines miss the shore; an authored outline already runs along it, so the
+ * growth only spreads each polity over the unclaimed land beside it — ~20 km past the line its author drew
+ * and the atlas now draws exactly (seen 2026-10-13: Burgundy over the Alps, France over Lorraine).
  * @param dev - the live tunables
  * @param loaded - the year's polities
  * @returns the request
  */
-function politicalRequest(
+export function politicalRequest(
   dev: DevState,
   loaded: RegionSet
 ): Parameters<MapCompute['computePolitical']>[0] {
+  // One reading of the palette for both uses: the automatic tints and the editor's colours agree on it.
+  const palette = politicalPalette(dev.political)
   return {
     regions: loaded.regions,
     rasterScale: dev.political.rasterScale,
-    snapToCoast: dev.political.snapToCoast,
+    snapToCoast: loaded.authored === undefined ? dev.political.snapToCoast : 0,
     colorBySuzerain: dev.political.colorBySuzerain,
-    palette: politicalPalette(dev.political).map(hexToRgb),
+    palette: palette.map(hexToRgb),
     borderSmoothing: dev.political.borderSmoothing,
+    // An authored year is painted in the Cartographer's colours, polity by polity: the editor shows what
+    // the atlas publishes, or it is not an editor.
+    ...(loaded.authored === undefined
+      ? {}
+      : {
+          colours: authoredRegionColours(loaded.authored.year, loaded.regions, palette),
+        }),
   }
 }
 
@@ -486,6 +504,14 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
     },
     async rebuildBorderGeometry(): Promise<void> {
       if (!deps.sources.regionSet) return
+      // An authored year's lines go through its anchors (D3): there is no raster trace to smooth, and
+      // re-tracing one here would replace the exact lines with the raster's.
+      if (deps.sources.regionSet.authored !== undefined) {
+        console.warn(
+          '[atlas] border smoothing does not apply to an authored year: its lines are exact.'
+        )
+        return
+      }
       try {
         const traced = await context.box.compute.deriveBorders(deps.dev.political.borderSmoothing)
         if (deps.isDisposed()) return

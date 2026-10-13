@@ -13,6 +13,7 @@ import {
 } from './assetError'
 
 import type { UvPoint } from './coastlineSource'
+import type { AuthoredYear } from './yearFormat'
 import type { GeoBounds } from '../geo/mercator'
 
 /**
@@ -26,6 +27,11 @@ export interface Region {
   /** A wider cultural grouping (`PARTOF`). */
   partOf: string | null
   /**
+   * The id of the polity it was adapted from — only for an authored year, whose colours are the
+   * Cartographer's and are looked up by it. The per-century payloads have no ids.
+   */
+  polityId?: string
+  /**
    * Every ring of the polity, outer and holes alike, in one flat list. An even-odd fill then handles
    * the holes without the consumer having to know which ring is which.
    */
@@ -38,6 +44,13 @@ export interface RegionSet {
   year: number
   /** The polities. */
   regions: Region[]
+  /**
+   * The year as the Cartographer authored it, and the frame its anchors project against — present only
+   * when the year was read from `years/<year>/`. Kept past the lossy adapter so the atlas can draw the
+   * borders **exact**, from the shared anchors, with their hands and overrides (D1, 2026-10-13); the
+   * worker never sees it, only `regions` cross.
+   */
+  authored?: { year: AuthoredYear; bbox: GeoBounds }
 }
 
 /**
@@ -67,6 +80,8 @@ export interface RegionPayload {
     name: string | null
     subjectTo: string | null
     partOf: string | null
+    /** The authored polity's id; absent from the per-century payloads. */
+    polityId?: string
     rings: [number, number][][]
   }[]
 }
@@ -96,6 +111,7 @@ export function projectRegions(payload: RegionPayload): RegionSet {
       name: region.name,
       subjectTo: region.subjectTo,
       partOf: region.partOf,
+      ...(region.polityId === undefined ? {} : { polityId: region.polityId }),
       rings,
     })
   }

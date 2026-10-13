@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
+import { hexToRgb } from '../utils/color'
+
 import { addAnchor, addPolity, closeRing } from './documentEdits'
 import { FIXTURE_ZONE, sharedBorderDocument } from './documentFixtures'
-import { polityColours, polityNeighbours } from './polityColours'
-import { createYearDocument } from './yearDocument'
+import { authoredRegionColours, polityColours, polityNeighbours } from './polityColours'
+import { createYearDocument, saveYearDocument } from './yearDocument'
 
 const PALETTE: [string, ...string[]] = ['#aa0000', '#00aa00', '#0000aa']
 
@@ -91,3 +93,57 @@ function base(id: string) {
     wikidata: null,
   }
 }
+
+const authored = () => ({ year: 1100, ...saveYearDocument(sharedBorderDocument()) })
+
+describe('authoredRegionColours', () => {
+  describe('happy path', () => {
+    it('paints each region in its polity’s editor colour, in the regions’ order', () => {
+      const byId = polityColours(sharedBorderDocument(), PALETTE)
+
+      const colours = authoredRegionColours(
+        authored(),
+        [{ polityId: 'hre' }, { polityId: 'fr-couronne' }],
+        PALETTE
+      )
+
+      expect(colours).toEqual([
+        hexToRgb(byId.get('hre') ?? ''),
+        hexToRgb(byId.get('fr-couronne') ?? ''),
+      ])
+    })
+  })
+
+  describe('variants', () => {
+    it('keeps a colour the author pinned', () => {
+      const year = authored()
+      const france = year.registry.polities.find((polity) => polity.id === 'fr-couronne')
+      if (france) france.colour = '#123456'
+
+      expect(authoredRegionColours(year, [{ polityId: 'fr-couronne' }], PALETTE)).toEqual([
+        { r: 0x12, g: 0x34, b: 0x56 },
+      ])
+    })
+  })
+
+  describe('managed errors', () => {
+    // Every adapted region carries its id: a miss is a defect, never a guessed colour.
+    it('refuses a region naming no polity of the year', () => {
+      expect(() => authoredRegionColours(authored(), [{ polityId: 'nobody' }], PALETTE)).toThrow(
+        /names no polity/
+      )
+    })
+
+    it('refuses a region carrying no polity id', () => {
+      expect(() => authoredRegionColours(authored(), [{}], PALETTE)).toThrow(/names no polity/)
+    })
+  })
+
+  // L4: N/A — a lookup over a map the year built; nothing awaited or caught.
+
+  describe('edge cases', () => {
+    it('answers no colour for no region', () => {
+      expect(authoredRegionColours(authored(), [], PALETTE)).toEqual([])
+    })
+  })
+})

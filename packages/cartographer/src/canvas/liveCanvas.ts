@@ -1,8 +1,7 @@
-import { deriveBorders } from '@europe-historical-atlas/core/editor/derivedBorders'
 import {
-  latitudeToVertical,
-  longitudeToHorizontal,
-} from '@europe-historical-atlas/core/geo/mercator'
+  deriveBorders,
+  maskDerivationDeps,
+} from '@europe-historical-atlas/core/editor/derivedBorders'
 
 import { polityAt } from '../geometry/fillHit'
 import { nearestAmong } from '../geometry/hitTest'
@@ -427,18 +426,7 @@ export function tooFarToEdit(it: LiveCanvas): boolean {
 export function bordersOf(it: LiveCanvas): DerivedBorder[] {
   const { document, version } = it.deps.store.getState()
   if (it.borders?.version === version) return it.borders.list
-  const mask = it.deps.landMask
-  const coastName = it.deps.vectorLayers.coastProvenance.name
-  const list = deriveBorders(document, {
-    isLand: (lon, lat) =>
-      mask.isLand(
-        longitudeToHorizontal(lon, mask.meta.bbox),
-        latitudeToVertical(lat, mask.meta.bbox)
-      ),
-    coastSources: new Set(
-      document.sources.filter((source) => source.name === coastName).map((source) => source.id)
-    ),
-  })
+  const list = deriveBorders(document, maskDerivationDeps(document, it.deps.landMask))
   it.borders = { version, list }
   return list
 }

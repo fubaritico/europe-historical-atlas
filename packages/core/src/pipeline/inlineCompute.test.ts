@@ -294,6 +294,47 @@ describe('createInlineMapCompute', () => {
     })
   })
 
+  describe('given colours', () => {
+    it('paints each region in the colour the request gave, ahead of any palette', async () => {
+      const compute = createInlineMapCompute()
+      await compute.setSources(sources(ALL_LAND))
+      const given: RgbColor[] = [
+        { r: 1, g: 2, b: 3 },
+        { r: 4, g: 5, b: 6 },
+      ]
+
+      const result = await compute.computePolitical({ ...REQUEST, colours: given })
+
+      expect(result.tints).toEqual(given)
+    })
+
+    it('ignores colouring by suzerain when the colours are given', async () => {
+      const compute = createInlineMapCompute()
+      await compute.setSources(sources(ALL_LAND))
+      const given: RgbColor[] = [
+        { r: 1, g: 2, b: 3 },
+        { r: 4, g: 5, b: 6 },
+      ]
+
+      const result = await compute.computePolitical({
+        ...REQUEST,
+        colorBySuzerain: true,
+        colours: given,
+      })
+
+      expect(result.tints).toEqual(given)
+    })
+
+    it('refuses colours that do not match the regions one for one', async () => {
+      const compute = createInlineMapCompute()
+      await compute.setSources(sources(ALL_LAND))
+
+      await expect(
+        compute.computePolitical({ ...REQUEST, colours: [{ r: 1, g: 2, b: 3 }] })
+      ).rejects.toThrow(/1 colours given for 2 regions/)
+    })
+  })
+
   describe('managed errors', () => {
     it('falls back to thresholding elevation when no mask is installed', async () => {
       const compute = createInlineMapCompute()
