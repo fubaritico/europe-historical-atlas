@@ -80,11 +80,13 @@ point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui 
   dev qu'il s'ouvre sur l'année dessinée (une ligne, `devParams/political.ts`).
 - **À la fin du test** : ranger `years/1100/` en `years/1100.test-euratlas/`, remettre
   `years/1100.avant-test-euratlas/` en `years/1100/` (voir `known-issues.md`).
-- **Questions en attente du dev** : pousser les 10 commits (`git ls-remote origin main` d'abord) ; remplacer
+- **Questions en attente du dev** : remplacer
   « main » par « style » dans le glossaire ; la séance sur le **style des frontières** (épaisseur, pointillé
   dans l'atlas) ; **l'intégration de la nouvelle version du DS en dernier** (`MIGRATION-color-roles-from-
   fubaritico-ds.md` à la racine, non lu).
 - **`H-43`** (`s99`) attend une décision : nommer le pays suivi dans le message du résultat.
+- **`H-44`** (`s99`), relevé par le dev : la limite d'un vassal avec un souverain étranger sort en pointillé (Bohême–Pologne). Cause trouvée (règle « deux plus profonds » sur un tronçon à trois pays), remède proposé : à faire, avec son test.
+- **Le push** : le dev pousse lui-même les commits en attente (13/10).
 
 ## ▶ ON REPREND ICI (13/10) — une nouvelle méthode, puis les « petites choses »
 

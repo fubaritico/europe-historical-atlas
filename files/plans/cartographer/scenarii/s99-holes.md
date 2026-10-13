@@ -628,3 +628,16 @@ of a shared border"*. The next aim, an anchor of Barcelona, was then already in 
 silently: a free point was placed instead (the hover said *"Drawing in"*). **Worked around** by aiming first
 at an anchor only Cerdanya holds. **Remedy to decide**: name the ring in the result (*"followed 9 anchors of
 Barcelona's border"*), and when two rings tie, preview both or prefer the one the pointer moved along.
+
+### H-44 · A vassal's limit with a foreign sovereign is drawn dotted, as if facing its own lord — **observed by the dev, 2026-10-13**
+
+Seen on the general test: Bohemia, vassal of the Empire, drawn by reusing the Empire's anchors, shows its
+limit with **Poland** in the vassal hand (dotted), where it is a limit between Bohemia and a foreign
+sovereign. **Cause, read in the code** (`core/editor/derivedBorders.ts`, `borderOfShared`): that stretch is
+held by three rings — Bohemia, the Empire whose limit coincides, and Poland — and the three-owner rule keeps
+"the two deepest": Bohemia, then whichever of the Empire and Poland comes first (both depth 0). When it is
+the Empire, the pair reads vassal–suzerain. **Remedy proposed**: drop from the owners any polity that is a
+suzerain of another owner (its limit merely coincides with its vassal's), then pair what is left — Bohemia
+and Poland, sovereign. `relationBetween` itself is right for a pair. One fix in `core` fixes the
+Cartographer and the atlas alike. **Test to write first**: the three-ring case, which the naive "two
+deepest" passes or fails depending on the order of the claims.
