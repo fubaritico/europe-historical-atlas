@@ -275,6 +275,48 @@ export function neighbourAnchors(document: YearDocument, target: string): number
 }
 
 /**
+ * Of some anchors, those the line alone does not reveal: both ring neighbours at least `minGap` away on
+ * screen — a bend between two long segments, an anchor reported by eye.
+ *
+ * **Why not every anchor** (2026-10-13, measured in the dev's Chrome): along a coast or a river the anchors
+ * are a few pixels apart, so a dot on each made a solid blue band — the line is visible there anyway, and no
+ * click can miss a vertex — and that band swallowed the Pen's own last anchor, a solid blue disc. Dots are
+ * for the bends nobody can see.
+ * @param document - the document to read
+ * @param candidates - the anchors to choose among
+ * @param onScreen - every anchor, projected, parallel to the document's table
+ * @param minGap - the screen distance below which a neighbour makes the anchor visible
+ * @returns the isolated ones, in the order given
+ */
+export function isolatedAnchors(
+  document: YearDocument,
+  candidates: readonly number[],
+  onScreen: readonly Point[],
+  minGap: number
+): number[] {
+  const wanted = new Set(candidates)
+  const near = new Set<number>()
+  const minGapSquared = minGap * minGap
+  for (const claim of document.claims) {
+    for (const ring of claim.rings) {
+      ring.forEach((index, at) => {
+        if (!wanted.has(index)) return
+        const here = onScreen[index]
+        const neighbours = [ring.at(at - 1), ring[(at + 1) % ring.length]]
+        for (const other of neighbours) {
+          const there = other === undefined ? undefined : onScreen[other]
+          if (here === undefined || there === undefined) continue
+          const dx = here[0] - there[0]
+          const dy = here[1] - there[1]
+          if (dx * dx + dy * dy < minGapSquared) near.add(index)
+        }
+      })
+    }
+  }
+  return candidates.filter((index) => !near.has(index))
+}
+
+/**
  * The snap dots to show: the neighbours' anchors with the Pen in hand, a target, and a view close enough to
  * draw — none otherwise, so the overview stays a picture of the map (`s17`) and the white arrow, which acts
  * on the target's points alone, is not shown points it cannot take.

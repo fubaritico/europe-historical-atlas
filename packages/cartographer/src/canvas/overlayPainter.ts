@@ -79,15 +79,17 @@ function paintMoving(ctx: Painter2D, scene: OverlayScene, style: PaintStyle): vo
 }
 
 /**
- * The coast the next click would follow, twice the outline's weight so it reads as an offer, and the
- * vertex it would snap onto.
+ * The run the next click would follow, three times the outline's weight so it reads as an offer, and the
+ * vertex it would snap onto. **Three, not two** (2026-10-13, measured in the dev's Chrome): a border
+ * follow runs exactly over the neighbour's own 1px blue outline, and at twice the weight the offer read as
+ * the same line, a little thicker — the author could not tell a click would lay it.
  * @param ctx - the context
  * @param scene - what to draw
  * @param style - the colours and sizes
  */
 function paintSnap(ctx: Painter2D, scene: OverlayScene, style: PaintStyle): void {
   if (scene.snapPreview !== null) {
-    ctx.lineWidth = style.pathWidth * 2
+    ctx.lineWidth = style.pathWidth * 3
     polyline(ctx, scene.snapPreview)
     ctx.lineWidth = style.pathWidth
   }

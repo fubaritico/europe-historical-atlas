@@ -1862,10 +1862,10 @@ describe('the Pen following the coast, on the canvas', () => {
       click(node, [160, 218])
       // Further along the shore the preview is drawn — so the check below is one that can fail.
       node.dispatchEvent(pointerEvent('pointermove', { offsetX: 260, offsetY: 219 }))
-      expect(lastPaint()).toContain(CHROME_PAINT_STYLE.pathWidth * 2)
+      expect(lastPaint()).toContain(CHROME_PAINT_STYLE.pathWidth * 3)
       node.dispatchEvent(pointerEvent('pointermove', { offsetX: 61, offsetY: 219 }))
       expect(acted).toHaveBeenLastCalledWith('Closing the outline of Reaume de France')
-      expect(lastPaint()).not.toContain(CHROME_PAINT_STYLE.pathWidth * 2)
+      expect(lastPaint()).not.toContain(CHROME_PAINT_STYLE.pathWidth * 3)
       dispose()
     })
 
@@ -2059,7 +2059,7 @@ describe('the Pen meeting a shared border, on the canvas', () => {
     const lastPaint = () => widths.slice(widths.lastIndexOf('clear'))
     click(node, [501, 201])
     node.dispatchEvent(pointerEvent('pointermove', { offsetX: 501, offsetY: 399 }))
-    expect(lastPaint()).toContain(CHROME_PAINT_STYLE.pathWidth * 2)
+    expect(lastPaint()).toContain(CHROME_PAINT_STYLE.pathWidth * 3)
     dispose()
   })
 })

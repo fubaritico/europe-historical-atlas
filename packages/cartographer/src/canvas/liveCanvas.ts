@@ -18,6 +18,7 @@ import { inDevicePixels } from './style'
 import { outlineOnScreen, resolvedTarget, selectionMoves, snapStretchTo } from './toolGestures'
 import {
   actionSentence,
+  isolatedAnchors,
   overlayScene,
   penSnapAnchors,
   ringNeighbours,
@@ -168,6 +169,25 @@ export function anchorsOnScreen(it: LiveCanvas): Point[] {
 }
 
 /**
+ * A result zone for one gesture, where what it says is joined rather than replaced.
+ *
+ * One click can say two things — what it laid, then the Pen's change of mode — and the second must not
+ * erase the first: *"followed 32 anchors of a shared border"* was replaced by *"Pen"* in the dev's Chrome
+ * (2026-10-13). A gesture context lives one gesture, so the next one starts afresh.
+ * @param onResult - the result zone
+ * @returns what a gesture reports through
+ */
+export function joinedReports(
+  onResult: (message: string | null) => void
+): (message: string) => void {
+  const said: string[] = []
+  return (message) => {
+    said.push(message)
+    onResult(said.join(' · '))
+  }
+}
+
+/**
  * What a tool gesture reads and writes, for this attachment.
  * @param it - the attachment
  * @returns the gesture context
@@ -182,9 +202,7 @@ export function gestureOf(it: LiveCanvas): GestureContext {
       projectedTerritories(it.deps.store.getState().document, anchorsOnScreen(it)),
     radius: HANDLE_HIT_RADIUS * it.ratio,
     layers: snapLayersOf(it.deps.vectorLayers),
-    report: (message) => {
-      it.deps.onResult(message)
-    },
+    report: joinedReports(it.deps.onResult),
   }
 }
 
@@ -381,6 +399,12 @@ export function tooFarToEdit(it: LiveCanvas): boolean {
 }
 
 /**
+ * How far apart, in CSS pixels, two anchors of one ring must be for a dot to mark them: half again the
+ * snap radius (8). Closer than that the line already shows the vertex and no click can miss one.
+ */
+const SNAP_DOT_MIN_GAP = 12
+
+/**
  * The neighbours' anchors to show as snap dots: with the Pen in hand, a target, and the view close enough to
  * draw — never otherwise, so the overview stays a picture of the map (`s17`).
  * @param it - the attachment
@@ -389,7 +413,9 @@ export function tooFarToEdit(it: LiveCanvas): boolean {
  */
 export function snapAnchorsOf(it: LiveCanvas, target: string | null): number[] {
   const state = it.deps.store.getState()
-  return penSnapAnchors(state.document, state.tool, target, tooFarToEdit(it))
+  const shown = penSnapAnchors(state.document, state.tool, target, tooFarToEdit(it))
+  if (shown.length === 0) return shown
+  return isolatedAnchors(state.document, shown, anchorsOnScreen(it), SNAP_DOT_MIN_GAP * it.ratio)
 }
 
 /**

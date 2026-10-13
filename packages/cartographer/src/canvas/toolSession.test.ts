@@ -5,6 +5,7 @@ import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/docum
 import {
   actionSentence,
   idleSession,
+  isolatedAnchors,
   neighbourAnchors,
   overlayScene,
   penSnapAnchors,
@@ -367,6 +368,51 @@ describe('neighbourAnchors and penSnapAnchors', () => {
       if (france === undefined) throw new Error('the fixture has no polity')
       document.polities.push({ ...france, id: 'third', name: 'Third' })
       expect(neighbourAnchors(document, 'third')).toEqual([0, 1, 2, 3, 4, 5])
+    })
+  })
+})
+
+// 2026-10-13: a dot on every coast anchor made a solid blue band that swallowed the Pen's last anchor.
+// France holds the ring 0 1 2 3; on screen, 0 and 1 are 4 px apart, 2 and 3 far from everything.
+describe('isolatedAnchors', () => {
+  const onScreen: [number, number][] = [
+    [100, 100],
+    [104, 100],
+    [300, 300],
+    [100, 300],
+    [500, 100],
+    [500, 300],
+  ]
+
+  describe('happy path', () => {
+    it('keeps an anchor whose ring neighbours are both far, drops one a near neighbour shows', () => {
+      expect(isolatedAnchors(sharedBorderDocument(), [0, 2, 3], onScreen, 12)).toEqual([2, 3])
+    })
+  })
+
+  describe('variants', () => {
+    it('keeps everything when the gap asked is zero', () => {
+      expect(isolatedAnchors(sharedBorderDocument(), [0, 1, 2], onScreen, 0)).toEqual([0, 1, 2])
+    })
+  })
+
+  // L3: N/A — a filter; an empty list is a valid answer.
+
+  describe('unmanaged errors', () => {
+    it('keeps an anchor with no projection rather than guessing its distance', () => {
+      expect(isolatedAnchors(sharedBorderDocument(), [2], [], 12)).toEqual([2])
+    })
+  })
+
+  describe('edge cases', () => {
+    it('drops a shared anchor when any ring puts a neighbour near it', () => {
+      // Anchor 1 is France's and the Empire's: near 0 in France's ring, far from 4 in the Empire's.
+      expect(isolatedAnchors(sharedBorderDocument(), [1], onScreen, 12)).toEqual([])
+    })
+
+    it('measures across the ring’s closure, last to first', () => {
+      // France's ring is 0 1 2 3: 3 closes onto 0, 200 px away — still isolated.
+      expect(isolatedAnchors(sharedBorderDocument(), [3], onScreen, 12)).toEqual([3])
     })
   })
 })

@@ -592,3 +592,14 @@ corrects it. Remedy: take the position from the wheel event as from a `pointermo
 by adjacency, and a polity with no territory has no neighbour yet. It reads as one country until it is
 drawn. **Worth knowing**; remedy to weigh: spread the palette over the registry order for polities with no
 ring.
+
+### H-42 · At a river's mouth, the Pen does not pass from the river to the coast — **observed by the dev 2026-10-13, deferred**
+
+The dev, following a river down to the sea: the last point, the mouth shared by the river and the coast,
+does not switch the Pen to the coast. He had to click a little before it, then on the coast, for the Pen
+to take the coast and go on along it. *"C'est la transition d'un outil à l'autre, ça ne veut pas la faire."*
+**Claude's hypothesis, not measured**: at the mouth the river's last vertex and the nearest coast vertex are
+two points a few pixels apart; the Pen is following the river, so the click takes the river's vertex and
+stays on the river. **To measure first**: the distance, at a real mouth (the Scheldt, the Rhône), between
+the river's last vertex and the coast's nearest — then decide whether the mouth vertex should be offered as
+the coast too. **Deferred by the dev**: *"largement utilisable"*, to come back to later.

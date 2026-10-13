@@ -170,7 +170,7 @@ describe('paintOverlay', () => {
 
   describe('the coast offer', () => {
     // QUAL-107: the preview is stroked at twice the outline's weight, and the weight put back after.
-    it('strokes the preview at twice the weight, then restores it, and fills the target', () => {
+    it('strokes the preview at three times the weight, then restores it, and fills the target', () => {
       const widths: number[] = []
       const { ctx, calls } = recording()
       const watched = new Proxy(ctx, {
@@ -194,7 +194,7 @@ describe('paintOverlay', () => {
       )
       expect(widths).toEqual([
         CHROME_PAINT_STYLE.pathWidth,
-        CHROME_PAINT_STYLE.pathWidth * 2,
+        CHROME_PAINT_STYLE.pathWidth * 3,
         CHROME_PAINT_STYLE.pathWidth,
       ])
       expect(handleFills(calls)).toEqual([CHROME_PAINT_STYLE.anchorStroke])
