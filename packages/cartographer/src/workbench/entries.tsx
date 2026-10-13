@@ -223,7 +223,8 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
         <ToolRail
           tool="draw"
           onSelect={() => undefined}
-          swatch={{ name: 'Reaume de France', colour: '#54719b' }}
+          swatch={{ name: 'Reaume de France', colour: '#54719b', picked: null }}
+          onColour={() => undefined}
           penMode="free"
           onPenMode={() => undefined}
         />
@@ -241,6 +242,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
           tool="draw"
           onSelect={() => undefined}
           swatch={null}
+          onColour={() => undefined}
           initiallyOpen="draw"
           penMode="free"
           onPenMode={() => undefined}

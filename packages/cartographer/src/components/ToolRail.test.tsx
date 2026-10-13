@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -39,6 +39,7 @@ function mount(overrides: Partial<ToolRailProps> = {}) {
       tool="navigate"
       onSelect={onSelect}
       swatch={null}
+      onColour={() => undefined}
       penMode="free"
       onPenMode={onPenMode}
       {...overrides}
@@ -68,7 +69,10 @@ describe('ToolRail', () => {
     // The dev, 2026-10-11: the tools one under the other, in Illustrator's order.
     it('lists the three tools top to bottom, the one in hand pressed', () => {
       mount({ tool: 'draw' })
-      const names = screen.getAllByRole('button').map((button) => button.getAttribute('aria-label'))
+      // The toolbar's buttons: the swatch at the foot is a button too since it opens the colour picker.
+      const names = within(screen.getByRole('toolbar'))
+        .getAllByRole('button')
+        .map((button) => button.getAttribute('aria-label'))
       expect(names).toEqual(['Direct Selection', 'Pen', 'Hand'])
       expect(tool('Pen').getAttribute('aria-pressed')).toBe('true')
       expect(tool('Hand').getAttribute('aria-pressed')).toBe('false')
@@ -133,6 +137,7 @@ describe('ToolRail', () => {
           tool="navigate"
           onSelect={onSelect}
           swatch={null}
+          onColour={() => undefined}
           penMode="free"
           onPenMode={vi.fn()}
         />
@@ -155,6 +160,7 @@ describe('ToolRail', () => {
           tool="navigate"
           onSelect={onSelect}
           swatch={null}
+          onColour={() => undefined}
           penMode="free"
           onPenMode={vi.fn()}
         />
@@ -180,6 +186,7 @@ describe('ToolRail', () => {
           tool="navigate"
           onSelect={vi.fn()}
           swatch={null}
+          onColour={() => undefined}
           penMode="free"
           onPenMode={vi.fn()}
         />
@@ -208,8 +215,8 @@ describe('ToolRail', () => {
     })
 
     it('shows the aimed-at polity’s colour at the foot', () => {
-      mount({ swatch: { name: 'Reaume de France', colour: '#54719b' } })
-      const swatch = screen.getByRole('img', { name: 'Active polity — Reaume de France' })
+      mount({ swatch: { name: 'Reaume de France', colour: '#54719b', picked: null } })
+      const swatch = screen.getByRole('button', { name: 'Colour of Reaume de France' })
       expect(swatch.getAttribute('style')).toContain('background')
     })
   })
@@ -227,8 +234,9 @@ describe('ToolRail', () => {
 
     it('says when nobody is aimed at', () => {
       mount()
-      const swatch = screen.getByRole('img', { name: 'Active polity — none selected' })
+      const swatch = screen.getByRole('button', { name: 'Active polity — none selected' })
       expect(swatch.getAttribute('data-empty')).toBe('true')
+      expect(swatch.getAttribute('aria-disabled')).toBe('true')
     })
   })
 
@@ -287,6 +295,7 @@ describe('ToolRail — what the review found', () => {
         tool="navigate"
         onSelect={onSelect}
         swatch={null}
+        onColour={() => undefined}
         penMode="free"
         onPenMode={vi.fn()}
       />
@@ -361,7 +370,7 @@ describe('ToolRailPanel', () => {
   describe('managed errors', () => {
     it('shows no swatch while nobody is aimed at', () => {
       render(<ToolRailPanel store={openStore()} colours={COLOURS} />)
-      expect(screen.getByRole('img', { name: /none selected/ })).toBeDefined()
+      expect(screen.getByRole('button', { name: /none selected/ })).toBeDefined()
     })
   })
 
@@ -387,11 +396,11 @@ describe('ToolRailPanel', () => {
         )
         store.getState().aimAt('fr')
       })
-      expect(screen.getByRole('img', { name: 'Active polity — Reaume de France' })).toBeDefined()
+      expect(screen.getByRole('button', { name: 'Colour of Reaume de France' })).toBeDefined()
       act(() => {
         store.getState().undo()
       })
-      expect(screen.getByRole('img', { name: /none selected/ })).toBeDefined()
+      expect(screen.getByRole('button', { name: /none selected/ })).toBeDefined()
     })
   })
 
@@ -414,9 +423,9 @@ describe('ToolRailPanel', () => {
       )
       store.getState().aimAt('fr')
       render(<ToolRailPanel store={store} colours={COLOURS} />)
-      expect(screen.getByRole('img', { name: /France/ }).getAttribute('style')).toContain(
-        'rgb(18, 52, 86)'
-      )
+      expect(
+        screen.getByRole('button', { name: /Colour of .*France/ }).getAttribute('style')
+      ).toContain('rgb(18, 52, 86)')
     })
   })
 })

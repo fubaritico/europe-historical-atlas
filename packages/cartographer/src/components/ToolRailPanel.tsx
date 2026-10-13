@@ -1,10 +1,12 @@
 import { describeDrawingTarget } from '../state/drawingTarget'
 import { isPenMode } from '../state/toolSlice'
 
+import { pickedColour, recolouring } from './polityColourValue'
 import { ToolRail } from './ToolRail'
 
 import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
+import type { HsvaColor } from '@fubaritico/behaviors'
 
 /** What the binding needs. */
 export interface ToolRailPanelProps {
@@ -33,17 +35,27 @@ export function ToolRailPanel({ store, colours }: ToolRailPanelProps) {
   // Store actions
   const selectTool = store((state) => state.selectTool)
   const choosePenMode = store((state) => state.choosePenMode)
+  const editPolity = store((state) => state.editPolity)
 
   // Derived
   const { document, target } = store.getState()
   const aimed = describeDrawingTarget(document, target)
   const colour = aimed === null ? undefined : colours.coloursOf(document, version).get(aimed.id)
+  const polity = aimed === null ? undefined : document.polities.find((p) => p.id === aimed.id)
 
   // Handlers
   const handlePenMode = (id: string) => {
     if (isPenMode(id)) choosePenMode(id)
     else
       console.error(`[Cartographer] the Pen has no mode "${id}"; the rail and the store disagree.`)
+  }
+
+  const handleColour = (picked: HsvaColor | null) => {
+    if (polity === undefined) return
+    const change = recolouring(polity, picked)
+    if (change === null) return
+    if (!editPolity(change.polity, change.step))
+      console.error(`[Cartographer] the colour of "${polity.id}" was refused by the document.`)
   }
 
   // Render
@@ -53,7 +65,12 @@ export function ToolRailPanel({ store, colours }: ToolRailPanelProps) {
       onSelect={selectTool}
       penMode={penMode}
       onPenMode={handlePenMode}
-      swatch={aimed === null || colour === undefined ? null : { name: aimed.name, colour }}
+      swatch={
+        polity === undefined || colour === undefined
+          ? null
+          : { name: polity.name, colour, picked: pickedColour(polity) }
+      }
+      onColour={handleColour}
     />
   )
 }

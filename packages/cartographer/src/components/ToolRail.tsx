@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { ActiveSwatch } from './ActiveSwatch'
 import { HOLD_TO_OPEN_MS, RAIL_TOOLS } from './railTools'
 import { ToolFlyout } from './ToolFlyout'
 import { ToolIcon } from './toolIcons'
 
+import type { SwatchPolity } from './ActiveSwatch'
 import type { RailTool } from './railTools'
 import type { ToolVariant } from './ToolFlyout'
 import type { ToolIconName } from './toolIcons'
 import type { EditorTool } from '../state/toolSlice'
+import type { HsvaColor } from '@fubaritico/behaviors'
 import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
 
 /** What the rail shows and reports. Never the store: `ToolRailPanel` reads it and hands literals. */
@@ -17,7 +20,9 @@ export interface ToolRailProps {
   /** A tool was chosen — a click, or a variant of its group. */
   onSelect: (tool: EditorTool) => void
   /** The polity the tools act on and the colour it is painted in, or `null` when nobody is aimed at. */
-  swatch: { name: string; colour: string } | null
+  swatch: SwatchPolity | null
+  /** A colour was chosen from the swatch's picker, or "automatic" (`null`). */
+  onColour: (picked: HsvaColor | null) => void
   /** A group to show open from the start — the workbench's plate of the flyout. Closed otherwise. */
   initiallyOpen?: EditorTool
   /** The Pen's variant in use — the row its group marks. */
@@ -40,29 +45,6 @@ function moveAlongToolbar(event: KeyboardEvent<HTMLDivElement>): void {
   event.preventDefault()
   const step = event.key === 'ArrowDown' ? 1 : -1
   buttons[(at + step + buttons.length) % buttons.length]?.focus()
-}
-
-/**
- * The active polity's swatch, at the foot of the rail — where Illustrator keeps its fill and stroke.
- * @param props - the swatch, or `null`
- * @param props.swatch - the polity's name and colour
- * @returns the swatch
- */
-function ActiveSwatch({ swatch }: { swatch: ToolRailProps['swatch'] }) {
-  // Derived
-  const name = swatch === null ? 'Active polity — none selected' : `Active polity — ${swatch.name}`
-
-  // Render
-  return (
-    <span
-      className="tool-rail__swatch"
-      role="img"
-      aria-label={name}
-      title={name}
-      data-empty={swatch === null}
-      style={swatch === null ? undefined : { background: swatch.colour }}
-    />
-  )
 }
 
 /** What one button needs from the rail. */
@@ -326,6 +308,7 @@ export function ToolRail({
   tool,
   onSelect,
   swatch,
+  onColour,
   initiallyOpen,
   penMode,
   onPenMode,
@@ -361,7 +344,7 @@ export function ToolRail({
         ))}
       </div>
       <div className="tool-rail__foot">
-        <ActiveSwatch swatch={swatch} />
+        <ActiveSwatch polity={swatch} onColour={onColour} />
       </div>
     </div>
   )

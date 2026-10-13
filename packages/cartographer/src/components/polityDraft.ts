@@ -1,7 +1,7 @@
-import { hexToRgba, hsvaToHex, rgbaToHsva } from '@fubaritico/behaviors'
-
 import { vassalsOf } from '@europe-historical-atlas/core/data/paintOrder'
 import { proposePolityId } from '@europe-historical-atlas/core/editor/polityId'
+
+import { pickedColour, toFileColour } from './polityColourValue'
 
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { HsvaColor } from '@fubaritico/behaviors'
@@ -128,20 +128,6 @@ function readYear(text: string): number | null | undefined {
 }
 
 /**
- * The file's `#rrggbb` for a picked colour.
- *
- * **The alpha is set to opaque, and that is the format speaking, not a fallback**: a polity's colour has
- * no alpha channel — the atlas lays it over the relief itself — and the file's schema accepts six digits
- * only. The form never offers alpha, so this changes nothing a picker produced; it stops an eight-digit
- * hex, which the reader would refuse at the next open, from ever being written.
- * @param colour - the picked colour, or `null` for "automatic"
- * @returns the lowercase six-digit hex, or `null` — the file's own "the palette decides"
- */
-function toFileColour(colour: HsvaColor | null): string | null {
-  return colour === null ? null : hsvaToHex({ ...colour, a: 1 })
-}
-
-/**
  * Read the form into a polity, or say what stops it.
  *
  * **Only what would break the file is refused** — an empty name or id, an id the year already holds, a
@@ -206,27 +192,6 @@ export function draftOf(polity: YearPolity): PolityDraft {
     wikidata: polity.wikidata ?? '',
     colour: pickedColour(polity),
   }
-}
-
-/**
- * A polity's colour as the picker holds it, or `null` for "automatic".
- *
- * **A colour that does not read as hex is said, and opens as automatic.** It cannot come from the
- * readers (the schema takes `#rrggbb` only) nor from the picker; reaching it is a defect. Validating the
- * form then would write the palette's colour in its place — the one cost of not refusing to open.
- * @param polity - the polity
- * @returns the HSVA, or `null`
- */
-function pickedColour(polity: YearPolity): HsvaColor | null {
-  if (polity.colour === null) return null
-  const rgba = hexToRgba(polity.colour)
-  if (rgba === null) {
-    console.error(
-      `[Cartographer] "${polity.id}" has the colour "${polity.colour}", which is no hex.`
-    )
-    return null
-  }
-  return rgbaToHsva(rgba)
 }
 
 /**
