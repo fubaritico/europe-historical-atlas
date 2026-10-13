@@ -2,6 +2,29 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-10-13 — les frontières jusqu'à l'atlas, et le test général sur Euratlas 1100
+
+Une plage, **13/10 14:28 → 23:33 (9 h 05, 634 actions)** ; le chantier ouvert le 05/10 totalise **48 h 05 sur
+9 plages**. **9 commits** `997cbb1`..`3e849ff`, **aucun poussé** (10 en attente avec `1d946d1`), gate verte et
+revue à quatre agents à chaque pas de code, chaque garde prouvée par le code naïf.
+
+- **Les frontières, déléguées par le dev** (`files/plans/borders/plan.md`) : la dérivation coupée où la mer
+  tourne en terre, le Cartographe dessine les frontières dans le style de leur relation, `{Layers}`,
+  `{Line}`, `{Overrides}` (`997cbb1`..`2b9caf0`).
+- **L'atlas montre une année dessinée telle qu'elle est dessinée** (`b85714f`) : frontières exactes depuis
+  les ancres (`core/editor/atlasBorders.ts`), plus de débordement des pays (~20 km) hors du tracé, et les
+  **couleurs du Cartographe** (`authoredRegionColours`) — le dev : *« les couleurs doivent être pareilles,
+  c'est tout l'intérêt de l'éditeur »*. Pas encore dessiné, déclaré : l'épaisseur d'un style, le pointillé.
+- **Le test général** (*« une répétition générale, il faut qu'on voie ce que l'appli a dans le ventre »*) :
+  16 pays d'Euratlas 1100 dessinés dans le Cartographe. Précision mesurée : 0,5 km médian sur la frontière
+  Francs–Empire. **`H-36` rectifié** (`a44d4b9`) — un point de voisin visé pile l'emporte sur l'eau ; **`H-43`
+  trouvé** — deux pays tiennent les deux points cliqués, la plume en suit un sans dire lequel.
+- **La skill `/draw-from-plate`** (`3e849ff`) : la méthode lente et ses scripts, pour ne jamais repartir de
+  zéro.
+- **Mes fautes** : dessiner trop vite et refaire trois fois la Navarre (*« prends ton temps »*) ; des tracés
+  au script sans regarder le résultat ; un `cd` en début de session ; le mot « main » employé sans le
+  définir.
+
 ### 2026-10-12 (soir) — enregistrer et rouvrir, les outils attendent le zoom, les fleuves de l'atlas, la barre d'actions
 
 Une session à distance, **12/10 ~18:20 → 22:59 (~4 h 40, dans la plage 14:45 → 22:59, 712 actions)** ; le
@@ -29,38 +52,4 @@ le code naïf. Le dev, absent de l'écran, m'a laissé **conduire son Chrome** e
   par la revue, ARCH-101) ; une phrase de boîte qui contredisait `s07` ; des clics envoyés pendant le
   chargement du fond, perdus.
 
-### 2026-10-12 — un plugin ESLint à nous, la plume qui trouve l'eau, et la barre d'actions décidée
-
-Une plage, **12/10 14:45 → 18:17 (3 h 31, 332 actions)** ; le chantier ouvert le 05/10 totalise **34 h 08 sur
-8 plages**. **10 commits** `bd0fd45`..`3ea738c`, **tous poussés**, CI verte (sept jobs, déploiement compris),
-**2523 → 2633 tests**, gate verte à chaque pas, revue à plusieurs agents à chaque pas, chaque garde prouvée
-par le code naïf.
-
-- **`eslint-plugin-eha`**, quatrième paquet (JS + JSDoc vérifié par `tsc`, Node 22.14 ne chargeant pas un
-  `.ts`), adapté du plugin Fluid du dev, **trois règles en erreur** : `component-body-order` (Guards → Store →
-  Store actions → … → Render, un séparateur `// …` par groupe, corrigé par `--fix` ; props déstructurées dans
-  la signature sauf usage entier ; une déclaration ne remonte jamais au-dessus de ce qu'elle lit) ·
-  `hoist-independent-function` (tous les paquets, tests compris ; 38 fonctions déplacées par son correctif,
-  aucune chaîne modifiée — vérifié au compilateur) · `no-inline-event-handlers` (20 handlers nommés,
-  `PolityArrangeMenu` scindé en `KnownPolityMenu`). **Écartées sur mesure** : déstructurer les dépendances
-  (482 paramètres, et déstructurer `event.preventDefault` casse `this`), l'ordre des fabriques (constructions
-  séquentielles). Plan : `files/plans/eslint-plugin-eha/plan.md`.
-- **Trouvé en route** : Turbo rejouait un lint vert après un changement de règle ou de config racine —
-  `globalDependencies` + `lint` → `^lint`.
-- **La règle du dev, mémorisée** : *« un système, pas des exceptions »* — une règle qui n'en tient que par des
-  exceptions est abandonnée, mesure à l'appui.
-- **Le menu de pile** : un seul filet (`--line`), libellés centrés.
-- **La plume trouve la côte et les fleuves** (`s02`) : la plume simple et le crayon s'accrochent au plus
-  proche des deux, la plume bascule en mode côte ou fleuve ; le premier clic qu'aucune eau ne prend rend le
-  mode de départ ; d'une eau à l'autre, bascule directe ; le crayon s'arrête sur l'eau. **‹ctrl+z› ne rend
-  pas le mode** — *« pas d'annulation pour l'instant »*. `s02` écrit aussi le crayon, jamais spécifié.
-- **La barre d'actions de `{Polities}`** : plan décidé (D1–D5), étape 1 écrite (`s07`, `H-17` fermé). Les
-  icônes : longue enquête sur la netteté ; **verdict du dev** — le flou des outils est accepté, la barre prend
-  **ses dessins en pixels** (le `+` encadré de pointillés, la poubelle à trois lamelles) posés sur des pixels
-  entiers, nets à 100 %.
-- **Mes fautes** : avoir affirmé que le design system avait une poubelle sans l'avoir vu ; m'être trompé
-  **deux fois** sur le demi-pixel (à ×2 il vaut un pixel physique entier) ; un plan qui affirmait que Turbo
-  hachait les dépendances de workspace ; un **second serveur de dev** qui a fait chercher la page au dev ;
-  un `cd` ; un en-tête de commit à 101 caractères ; une fixture déclarée dans un `describe` et utilisée hors.
-
-> Older sessions (2026-09-12 → 2026-10-12 morning) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-12 afternoon) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

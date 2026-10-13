@@ -4,6 +4,11 @@ Put here the know issues to avoid cluttering the context window.
 
 > Closed entries are archived in `archive/known-issues-closed.md` (move one there the step it closes); atlas-only open issues live in `known-issues-atlas.md`.
 
+- **Depuis le 13/10 au soir, `years/1100/` contient le tracé du test Euratlas, pas l'année du dev.** Son 1100
+  (France + Bourgogne) est rangé, intact, dans `years/1100.avant-test-euratlas/`. Le Cartographe ouvre donc
+  le test, et l'atlas local le montre à l'année 1100. **À la fin du test** : `years/1100` → `years/1100.test-
+  euratlas`, puis `years/1100.avant-test-euratlas` → `years/1100`. Rien de tout ça n'est commité (Euratlas
+  est une référence privée). **Sévérité : à savoir.**
 - **Les années enregistrées en local ne sont jamais commitées, et `years/index.json` est en `skip-worktree`
   sur la machine du dev.** Sa décision, 12/10 : *« ils sont pour nous pour travailler »* — retrouver ses
   tracés, déboguer les outils, maîtriser le format. Les dossiers `packages/atlas/public/years/<année>/` sont
