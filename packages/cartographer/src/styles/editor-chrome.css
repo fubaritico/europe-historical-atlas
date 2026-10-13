@@ -538,13 +538,18 @@
  * its glyph in ink. A tool heading a group carries the small triangle in its corner. Sizes are
  * `design/chrome.css`'s `.tool` (30px); colours are the theme's.
  */
+/*
+ * One pixel of left padding, and it is what keeps the buttons sharp: the rail is 38px with a 1px hairline,
+ * so 37px are left, and centring 30px in them put every button at x = 3.5 — half a pixel, a blur at 1×
+ * (measured 2026-10-13). In 36px they land on x = 4, and their middle on x = 19, the mark's axis above.
+ */
 .tool-rail {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   height: 100%;
-  padding: 4px 0;
+  padding: 4px 0 4px 1px;
 }
 
 .tool-rail__tools {
@@ -708,4 +713,39 @@
   display: flex;
   align-items: center;
   height: 24px;
+}
+
+/*
+ * The top bar's brand: the 20px mark on the tool column's axis — 9px in, so its middle is the rail
+ * buttons' (4 + 30 / 2 = 19), the dev's ask — 5px from the top, then 4px and the hairline below; and the
+ * name beside it (2026-10-13). `align-self` keeps it off the bar's stretch, so the 5px is whole rather than
+ * the half pixel centring in 29px would give; the name's 16px line height centres it on whole pixels too.
+ */
+.app-brand {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0 0 9px;
+}
+
+.brand-mark {
+  display: block;
+  flex: none;
+}
+
+.brand-mark__ground {
+  fill: var(--mark-ground);
+}
+
+.brand-mark__glyph {
+  fill: var(--mark-ink);
+}
+
+.app-brand__name {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  white-space: nowrap;
 }

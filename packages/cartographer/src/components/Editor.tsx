@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 
+import { AppBar } from './AppBar'
 import { MapArea } from './MapArea'
 import { PolitiesPanel } from './PolitiesPanel'
 import { Shell } from './Shell'
@@ -23,9 +24,8 @@ import type { ReactNode } from 'react'
  * declaring one there is what Fast Refresh cannot reload (`react-refresh/only-export-components`).
  *
  * **It is the binding of the shell/view/binding split** (`react-canvas-and-panels`): it knows there is a
- * store and which zone takes what, and it holds no layout and no value of its own. The four zones it
- * does not fill — the app bar, the document bar, the tool rail, the dock — come back from {@link Shell}
- * as named placeholders, which is the dev's call of 2026-10-08: an empty zone should look deliberately
+ * store and which zone takes what, and it holds no layout and no value of its own. A zone it does not
+ * fill — the document bar, today — comes back from {@link Shell} as a named placeholder, which is the dev's call of 2026-10-08: an empty zone should look deliberately
  * empty rather than broken.
  */
 
@@ -43,6 +43,8 @@ export interface EditorProps {
   label: string
   /** The page's `<h1>`, which {@link Shell} places inside the canvas landmark. */
   heading: ReactNode
+  /** The application's name, written in the top bar beside the mark. */
+  name: string
   /** Where the polities' colours come from — one source for the canvas and every panel. */
   colours: PolityColourSource
   /**
@@ -68,6 +70,7 @@ export function Editor({
   zoneLabel,
   label,
   heading,
+  name,
   colours,
   results,
 }: EditorProps) {
@@ -88,6 +91,7 @@ export function Editor({
   return (
     <Shell
       heading={heading}
+      appbar={<AppBar name={name} />}
       canvas={
         <MapArea
           store={store}

@@ -52,6 +52,7 @@ function mount(results = createResultRelay()): void {
       zoneLabel="editorial zone — 1100"
       label="Map of the year 1100, being edited"
       heading={<h1>Cartographer — year 1100</h1>}
+      name="Europe Historical Atlas Cartographer"
       colours={COLOURS}
       results={results}
     />
@@ -65,14 +66,16 @@ function resultText(): string | null | undefined {
 
 describe('Editor', () => {
   describe('happy path', () => {
-    it('puts the map in the canvas zone, the tools in the rail, {Polities} in the dock, and leaves the rest named and empty', () => {
+    it('puts the map in the canvas zone, the tools in the rail, {Polities} in the dock, the brand in the top bar, and leaves the rest named and empty', () => {
       mount()
 
       expect(document.querySelector('.shell__canvas [data-testid="map-area"]')).not.toBeNull()
       expect(document.querySelector('.shell__rail [role="toolbar"]')).not.toBeNull()
       expect(document.querySelector('.shell__dock .polities')).not.toBeNull()
+      expect(document.querySelector('.shell__appbar .app-brand__name')?.textContent).toBe(
+        'Europe Historical Atlas Cartographer'
+      )
       expect([...document.querySelectorAll('.empty-zone')].map((n) => n.textContent)).toEqual([
-        'app bar',
         'document bar',
       ])
     })

@@ -190,6 +190,7 @@ installSaveShortcut(window, () => {
 createRoot(container).render(
   <StrictMode>
     <Editor
+      name="Europe Historical Atlas Cartographer"
       heading={<h1 style={visuallyHidden}>Cartographer — year {store.getState().document.year}</h1>}
       store={store}
       load={loadTheBackdrop}

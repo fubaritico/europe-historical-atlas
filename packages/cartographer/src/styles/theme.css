@@ -28,6 +28,9 @@
   --ink-off: #7d7468; /* a field's boundary — 3.54:1 on --bg, over 1.4.11's 3:1 */
   --accent: #5b93d6; /* selection blue — RESERVED, never served to a polity; the focus ring */
   --warn: #c86a52; /* refusal, an invalid field */
+  /* The mark's two colours are the atlas's, as its favicon has them: the page's vellum, the border brown. */
+  --mark-ground: #efe6d2;
+  --mark-ink: #5c3a2e;
 
   /* — the design system's tokens, on the palette — */
   --color-background: var(--bg);
