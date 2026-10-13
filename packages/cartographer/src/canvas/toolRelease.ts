@@ -1,3 +1,5 @@
+import { reachLabel } from '../view/toolReach'
+
 import { TAG } from './consoleTag'
 import { gestureOf, snapReachOf, tooFarToEdit } from './liveCanvas'
 import { arrowRelease, penClick } from './toolGestures'
@@ -25,7 +27,7 @@ import type { Point } from '../view/viewport'
 export function refuseFromAfar(it: LiveCanvas, verb: 'draw' | 'edit'): void {
   const reach = snapReachOf(it)
   const from = Number.isFinite(reach)
-    ? `the snap would reach ${String(Math.round(reach))} km`
+    ? `the snap would reach ${reachLabel(reach)}`
     : 'the view is not framed yet'
   const message = `too far to ${verb} — zoom in (${from}; the tools act within ${String(it.deps.maxSnapReachKm)} km)`
   console.warn(`${TAG} ${message}`)

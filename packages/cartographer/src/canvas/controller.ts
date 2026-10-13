@@ -11,6 +11,7 @@ import {
   handInHand,
   refreshTools,
   showCursor,
+  snapAnchorsOf,
   tooFarToEdit,
 } from './liveCanvas'
 import {
@@ -100,6 +101,7 @@ function repaint(it: LiveCanvas): void {
     viewport: state.viewport,
     selected: new Set(it.session.selected),
     handles: targetHandles(state.document, target?.id ?? null),
+    snapAnchors: snapAnchorsOf(it, target?.id ?? null),
     colours: coloursOf(it),
     zoneLabel: it.deps.zoneLabel,
   })

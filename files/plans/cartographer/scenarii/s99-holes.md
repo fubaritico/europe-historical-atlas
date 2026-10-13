@@ -556,3 +556,39 @@ meet between Avignon and the sea. Moving one onto the other with the arrow makes
 sharing an index — exactly the second geometry `s00` forbids. A weld (select two anchors, merge them, every
 ring following the survivor) is the missing gesture. **Trigger**: the first time a shared border has to be
 repaired by hand.
+
+### H-38 · A neighbour's anchors cannot be seen, and only they snap — **observed 2026-10-13, first half fixed**
+
+Walked by the dev, then by Claude: the Holy Roman Empire drawn from the Scheldt mouth down France's and
+Burgundy's eastern borders. A neighbour's outline was drawn as one line, so an anchor reported by eye sat on
+a bend that could hardly be seen — 20 to 50 px apart at the zoom where the Pen acts — and the Pen snaps to
+anchors only, within 8 px. Clicking the visible border between two anchors placed a **free** point beside it
+(*"placing points freely"*): a gap or an overlap between the two countries. With the anchors' positions read
+from the file, the follow itself was flawless (*"followed 4 anchors"* along France, *"followed 26 anchors"*
+along Burgundy's whole eastern border in one click).
+**Fixed, first half**: with the Pen in hand and the view close enough, every anchor a neighbour holds is drawn
+as a small blue dot (`penSnapAnchors`). **Open, second half**: snapping to the line between two anchors,
+which would insert a shared anchor into the neighbour's ring. **Trigger**: the dev still misses anchors once
+they are visible.
+
+### H-39 · The Pen switches off while panning south, at the same zoom — **observed 2026-10-13, not decided**
+
+`s17` measures the snap's reach at the latitude of the view's centre. Following a border from Belgium down
+to the Alps at 556 %, the Pen went to *"Zoom in to draw"* after a pan, with no zoom change: on this
+projection a screen pixel covers more ground further south. One notch brought it back. **The dev's call**:
+keep it (the rule is a distance on the ground, and it is honest), or never refuse while an outline is in
+progress, or measure once when the outline starts.
+
+### H-40 · The wheel does not refresh what the pointer is over — **observed 2026-10-13**
+
+After wheel notches with the pointer still, the bar went on naming what had been under the pointer *before*
+the zoom (*"Following the Mur"* over France, at 56°E), and the rubber band stayed on its old end. A `wheel`
+event carries the pointer's position; the controller does not take it. **Cosmetic** — any pointer move
+corrects it. Remedy: take the position from the wheel event as from a `pointermove`.
+
+### H-41 · A new polity takes its neighbour's automatic colour — **observed 2026-10-13**
+
+*HRE*, created with no territory, was given the same red as France by the automatic palette — which colours
+by adjacency, and a polity with no territory has no neighbour yet. It reads as one country until it is
+drawn. **Worth knowing**; remedy to weigh: spread the palette over the registry order for polities with no
+ring.

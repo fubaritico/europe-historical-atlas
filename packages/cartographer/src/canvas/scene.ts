@@ -43,6 +43,8 @@ export interface SceneInputs {
   selected: ReadonlySet<number>
   /** Which anchors get a handle, by index — see {@link CanvasScene.handles}. */
   handles: readonly number[]
+  /** Which anchors get a snap dot, by index — see {@link CanvasScene.snapAnchors}. */
+  snapAnchors: readonly number[]
   /** Each polity's colour, by id — see `core/editor/polityColours`. */
   colours: ReadonlyMap<string, string>
   /** What to call the editorial zone on screen. */
@@ -202,6 +204,7 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
     fills: projectedFills(document, anchors, inputs.colours),
     anchors,
     handles: inputs.handles,
+    snapAnchors: inputs.snapAnchors,
     selected: inputs.selected,
     vectors:
       inputs.vectorLayers === null

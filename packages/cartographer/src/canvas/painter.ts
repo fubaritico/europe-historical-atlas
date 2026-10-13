@@ -135,6 +135,8 @@ export interface PaintStyle {
   anchorStroke: string
   /** A handle's radius in screen pixels. `s02` wants about 8 across, at any zoom. */
   anchorRadius: number
+  /** A snap dot's radius in screen pixels: small enough never to be taken for a handle. */
+  snapAnchorRadius: number
   /**
    * How a polity's fill combines with the relief under it: `overlay`, at full strength — the atlas's own
    * `politicalMode` (`core/pipeline/terrainOptions.ts`), whose formula in `terrainCompose.ts` is the
@@ -202,6 +204,11 @@ export interface CanvasScene {
   anchors: readonly Point[]
   /** Which anchors get a handle drawn, by index — the drawing target's, under a tool that acts on them. */
   handles: readonly number[]
+  /**
+   * Which anchors get a snap dot, by index — the neighbours' anchors the Pen can branch from, while it is
+   * in hand and close enough to draw. Empty otherwise.
+   */
+  snapAnchors: readonly number[]
   /** Which anchors are selected, by the same index. */
   selected: ReadonlySet<number>
   /**
@@ -288,6 +295,36 @@ function strokeRing(ctx: Painter2D, ring: readonly Point[]): void {
   }
   ctx.closePath()
   ctx.stroke()
+}
+
+/**
+ * Draw the neighbours' anchors the Pen can branch from, as small dots in the outline's blue.
+ *
+ * **Filled, small and without a rim**, so they read as points *on* the line rather than as the target's
+ * own handles, which are white and twice the size. Only those on screen are drawn: at the zoom where the
+ * Pen acts, most of a year's anchors are off it.
+ * @param ctx - the context to draw into
+ * @param size - the canvas, to skip what falls outside it
+ * @param scene - what to draw
+ * @param style - the colours and sizes
+ */
+function paintSnapAnchors(
+  ctx: Painter2D,
+  size: PixelSize,
+  scene: CanvasScene,
+  style: PaintStyle
+): void {
+  const reach = style.snapAnchorRadius
+  ctx.fillStyle = style.pathStroke
+  for (const index of scene.snapAnchors) {
+    const anchor = scene.anchors[index]
+    if (anchor === undefined) continue
+    const [x, y] = anchor
+    if (x < -reach || y < -reach || x > size.width + reach || y > size.height + reach) continue
+    ctx.beginPath()
+    ctx.arc(x, y, reach, 0, FULL_TURN)
+    ctx.fill()
+  }
 }
 
 /**
@@ -518,5 +555,6 @@ export function paintCanvas(
   ctx.strokeStyle = style.pathStroke
   ctx.lineWidth = style.pathWidth
   for (const ring of scene.rings) strokeRing(ctx, ring)
+  paintSnapAnchors(ctx, size, scene, style)
   paintAnchors(ctx, scene, style)
 }

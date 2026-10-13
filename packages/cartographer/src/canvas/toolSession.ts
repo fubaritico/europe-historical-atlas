@@ -253,6 +253,48 @@ export function targetHandles(document: YearDocument, target: string | null): nu
 }
 
 /**
+ * The anchors a neighbour holds and the target does not — the points the Pen can branch from.
+ *
+ * **Shown so they can be aimed at** (the dev's walk of 2026-10-13, the Holy Roman Empire along France and
+ * Burgundy): a neighbour's outline is drawn as one line, so an anchor reported by eye sits on a bend that
+ * can hardly be seen, and the Pen snaps to anchors only — not to the line between them. Following a border
+ * meant hitting, within eight pixels, a point nobody could see. The target's own anchors are left out:
+ * they already have their handles.
+ * @param document - the document to read
+ * @param target - the resolved target's id
+ * @returns anchor indices, ascending, each once
+ */
+export function neighbourAnchors(document: YearDocument, target: string): number[] {
+  const own = new Set(targetHandles(document, target))
+  const held = new Set<number>()
+  for (const claim of document.claims) {
+    if (claim.polity === target) continue
+    for (const ring of claim.rings) for (const index of ring) if (!own.has(index)) held.add(index)
+  }
+  return [...held].sort((a, b) => a - b)
+}
+
+/**
+ * The snap dots to show: the neighbours' anchors with the Pen in hand, a target, and a view close enough to
+ * draw — none otherwise, so the overview stays a picture of the map (`s17`) and the white arrow, which acts
+ * on the target's points alone, is not shown points it cannot take.
+ * @param document - the document to read
+ * @param tool - the tool in hand
+ * @param target - the resolved target's id, or `null`
+ * @param tooFar - whether the view is too far out for the tools to act
+ * @returns anchor indices, ascending, or none
+ */
+export function penSnapAnchors(
+  document: YearDocument,
+  tool: EditorTool,
+  target: string | null,
+  tooFar: boolean
+): number[] {
+  if (tool !== 'draw' || target === null || tooFar) return []
+  return neighbourAnchors(document, target)
+}
+
+/**
  * The anchors on either side of one, in every ring that holds it — what a drag pulls along.
  * @param document - the document to read
  * @param index - the anchor being moved

@@ -16,7 +16,13 @@ import { projectedTerritories } from './scene'
 import { snapLayersOf } from './snapLayers'
 import { inDevicePixels } from './style'
 import { outlineOnScreen, resolvedTarget, selectionMoves, snapStretchTo } from './toolGestures'
-import { actionSentence, overlayScene, ringNeighbours, targetHandles } from './toolSession'
+import {
+  actionSentence,
+  overlayScene,
+  penSnapAnchors,
+  ringNeighbours,
+  targetHandles,
+} from './toolSession'
 
 import type { AnchorCache } from './anchorCache'
 import type { HistoryRelay } from './historyRelay'
@@ -372,6 +378,18 @@ export function tooFarToEdit(it: LiveCanvas): boolean {
   const tool = it.deps.store.getState().tool
   if (tool === 'navigate') return false
   return !closeEnoughToEdit(snapReachOf(it), it.deps.maxSnapReachKm)
+}
+
+/**
+ * The neighbours' anchors to show as snap dots: with the Pen in hand, a target, and the view close enough to
+ * draw — never otherwise, so the overview stays a picture of the map (`s17`).
+ * @param it - the attachment
+ * @param target - the resolved target's id, or `null`
+ * @returns anchor indices, or none
+ */
+export function snapAnchorsOf(it: LiveCanvas, target: string | null): number[] {
+  const state = it.deps.store.getState()
+  return penSnapAnchors(state.document, state.tool, target, tooFarToEdit(it))
 }
 
 /**

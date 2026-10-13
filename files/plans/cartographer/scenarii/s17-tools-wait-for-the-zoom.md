@@ -25,15 +25,19 @@ Scenario: a click from afar is refused, and says by how much
   Given the overview, the Pen in hand
   When I click the map
   Then nothing is placed
-  And the result zone reads "too far to draw — zoom in (the snap would reach 37 km; the tools act within 10 km)"
+  And the result zone reads "too far to draw — zoom in (the snap would reach 37.4 km; the tools act within 10 km)"
   And the console says the same, once
 ```
+
+> **Corrected 2026-10-13**: the reach is written to one decimal, **rounded up** (`reachLabel`). Rounded to
+> the nearest kilometre it read *"would reach 10 km; the tools act within 10 km"* at 10.2 km — a refusal
+> contradicting itself. The two figures above were whole numbers until then.
 
 ```gherkin
 Scenario: zooming in until the tools wake up
   Given the Pen in hand, France aimed at
   When I zoom in on France one wheel notch at a time
-  Then one notch short of the threshold a click is refused at "the snap would reach 11 km"
+  Then one notch short of the threshold a click is refused at "the snap would reach 10.6 km"
   And one notch closer the bar reads "Drawing in Royaume de France" and the Pen places again
   And the bar and the cursor change with the zoom itself, without the pointer moving
 ```

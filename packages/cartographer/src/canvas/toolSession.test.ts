@@ -5,7 +5,9 @@ import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/docum
 import {
   actionSentence,
   idleSession,
+  neighbourAnchors,
   overlayScene,
+  penSnapAnchors,
   ringNeighbours,
   targetHandles,
 } from './toolSession'
@@ -315,6 +317,56 @@ describe('toolSession', () => {
       expect(actionSentence(action({ following: 'river' }))).toBe(
         'Drawing in Reaume de France — no river within reach, placing points freely'
       )
+    })
+  })
+})
+
+// The walk of 2026-10-13: following France's and Burgundy's borders for the Empire, the anchors to aim at
+// could not be seen. France holds 0 1 2 3, the Empire 1 4 5 2: anchors 1 and 2 are both's.
+describe('neighbourAnchors and penSnapAnchors', () => {
+  describe('happy path', () => {
+    it('lists the anchors only a neighbour holds, the target’s own left to its handles', () => {
+      expect(neighbourAnchors(sharedBorderDocument(), 'fr-couronne')).toEqual([4, 5])
+    })
+
+    it('shows them with the Pen in hand, a target, and the view close enough', () => {
+      expect(penSnapAnchors(sharedBorderDocument(), 'draw', 'hre', false)).toEqual([0, 3])
+    })
+  })
+
+  describe('variants', () => {
+    it('shows none to the white arrow, which takes the target’s points alone', () => {
+      expect(penSnapAnchors(sharedBorderDocument(), 'edit', 'hre', false)).toEqual([])
+    })
+
+    it('shows none to the hand', () => {
+      expect(penSnapAnchors(sharedBorderDocument(), 'navigate', 'hre', false)).toEqual([])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('shows none with nobody aimed at, where the Pen refuses anyway', () => {
+      expect(penSnapAnchors(sharedBorderDocument(), 'draw', null, false)).toEqual([])
+    })
+
+    it('shows none from afar, where the tools wait for the zoom (s17)', () => {
+      expect(penSnapAnchors(sharedBorderDocument(), 'draw', 'hre', true)).toEqual([])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('treats an unknown target as holding nothing: every claimed anchor is a neighbour’s', () => {
+      expect(neighbourAnchors(sharedBorderDocument(), 'nobody')).toEqual([0, 1, 2, 3, 4, 5])
+    })
+  })
+
+  describe('edge cases', () => {
+    it('lists an anchor held by two neighbours once', () => {
+      const document = sharedBorderDocument()
+      const [france] = document.polities
+      if (france === undefined) throw new Error('the fixture has no polity')
+      document.polities.push({ ...france, id: 'third', name: 'Third' })
+      expect(neighbourAnchors(document, 'third')).toEqual([0, 1, 2, 3, 4, 5])
     })
   })
 })

@@ -36,6 +36,8 @@ export const CHROME_PAINT_STYLE: PaintStyle = {
   anchorFill: '#ffffff',
   anchorStroke: '#5b93d6',
   anchorRadius: 4,
+  // A neighbour's anchor the Pen can branch from: a dot, half a handle (2026-10-13).
+  snapAnchorRadius: 2,
   // The atlas's political tint, at full strength — the dev's call, 2026-10-11, over the mockup's 70 %.
   fillBlend: 'overlay',
   // The shoreline reads darker than the terrain's own painted edge, so it stays legible over land and
@@ -76,6 +78,7 @@ export function inDevicePixels(style: PaintStyle, pixelRatio: number): PaintStyl
     labelPad: style.labelPad * pixelRatio,
     pathWidth: style.pathWidth * pixelRatio,
     anchorRadius: style.anchorRadius * pixelRatio,
+    snapAnchorRadius: style.snapAnchorRadius * pixelRatio,
     coastWidth: style.coastWidth * pixelRatio,
     riverWidthMajor: style.riverWidthMajor * pixelRatio,
     riverWidthMinor: style.riverWidthMinor * pixelRatio,

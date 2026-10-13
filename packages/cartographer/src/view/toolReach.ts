@@ -70,3 +70,16 @@ export function snapReachKm(
 export function closeEnoughToEdit(reachKm: number, maxKm: number): boolean {
   return reachKm <= maxKm
 }
+
+/**
+ * A reach as the refusal writes it: kilometres to one decimal, **rounded up**.
+ *
+ * Up and not to the nearest, so a reach just past the limit can never read as the limit itself — the
+ * sentence *"the snap would reach 10 km; the tools act within 10 km"* was seen on 2026-10-13 at 10.2 km, and
+ * it contradicts itself. A refused reach is above the limit, so its label is too.
+ * @param reachKm - the snap's reach on the ground
+ * @returns `"10.3 km"`
+ */
+export function reachLabel(reachKm: number): string {
+  return `${(Math.ceil(reachKm * 10) / 10).toFixed(1)} km`
+}

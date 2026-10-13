@@ -940,7 +940,7 @@ describe('the tools from too far out (H-34)', () => {
       expect(store.getState().document.anchors).toEqual([])
       expect(resulted).toHaveBeenLastCalledWith(
         expect.stringMatching(
-          /^too far to draw — zoom in \(the snap would reach \d+ km; the tools act within 10 km\)$/
+          /^too far to draw — zoom in \(the snap would reach \d+\.\d km; the tools act within 10 km\)$/
         )
       )
       expect(warn).toHaveBeenCalledWith(expect.stringContaining('too far to draw'))

@@ -119,6 +119,7 @@ const STYLE: PaintStyle = {
   anchorFill: '#ffffff',
   anchorStroke: '#5b93d6',
   anchorRadius: 4,
+  snapAnchorRadius: 2,
   fillBlend: 'overlay',
   coastStroke: 'rgba(60, 50, 38, 0.85)',
   coastWidth: 1,
@@ -153,6 +154,7 @@ function scene(overrides: Partial<CanvasScene> = {}): CanvasScene {
     // Every anchor gets a handle unless a test says otherwise — the handle filter is the scene's
     // decision (`targetHandles`), not the painter's, which only draws the indices it is handed.
     handles: (overrides.anchors ?? []).map((_, index) => index),
+    snapAnchors: [],
     selected: new Set<number>(),
     vectors: null,
     ...overrides,
@@ -786,6 +788,26 @@ describe('painter — fills and handles', () => {
   })
 
   describe('variants', () => {
+    it('draws a neighbour’s anchor as a small blue dot, under the handles', () => {
+      const { ctx, calls } = recordingContext()
+      paintCanvas(ctx, SIZE, scene({ anchors: SQUARE, handles: [0], snapAnchors: [2] }), STYLE)
+      const arcs = calls.filter((call) => call.op === 'arc')
+      expect(arcs.map((call) => call.args.slice(0, 3))).toEqual([
+        [200, 200, 2],
+        [100, 100, 4],
+      ])
+      const dot = calls.findIndex((call) => call.op === 'fill' && call.fillStyle === '#5b93d6')
+      expect(dot).toBeGreaterThan(-1)
+    })
+
+    it('skips a neighbour’s anchor that falls off the canvas', () => {
+      const { ctx, calls } = recordingContext()
+      const anchors: Point[] = [...SQUARE, [900, 100], [100, -10]]
+      paintCanvas(ctx, SIZE, scene({ anchors, handles: [], snapAnchors: [0, 4, 5] }), STYLE)
+      const arcs = calls.filter((call) => call.op === 'arc')
+      expect(arcs.map((call) => call.args.slice(0, 2))).toEqual([[100, 100]])
+    })
+
     it('draws a handle only for the anchors it is told to', () => {
       const { ctx, calls } = recordingContext()
       paintCanvas(ctx, SIZE, scene({ anchors: SQUARE, handles: [2] }), STYLE)

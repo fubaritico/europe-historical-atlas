@@ -47,6 +47,7 @@ function inputs(document: YearDocument, overrides: Partial<SceneInputs> = {}): S
     viewport: NATIVE,
     selected: new Set<number>(),
     handles: [],
+    snapAnchors: [],
     colours: new Map<string, string>(),
     zoneLabel: 'editorial zone',
     ...overrides,

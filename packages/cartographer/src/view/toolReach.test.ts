@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { lonLatToBackdrop } from './projection'
 import { metresPerBackdropPixel } from './resolution'
 import { TEST_BACKDROP_FRAME } from './testFrame'
-import { MAX_SNAP_REACH_KM, closeEnoughToEdit, snapReachKm } from './toolReach'
+import { MAX_SNAP_REACH_KM, closeEnoughToEdit, reachLabel, snapReachKm } from './toolReach'
 import { UNFRAMED } from './viewport'
 
 import type { Viewport } from './viewport'
@@ -112,5 +112,31 @@ describe('closeEnoughToEdit', () => {
   it('refuses an unframed view and a reach that is not a number, rather than letting them act', () => {
     expect(closeEnoughToEdit(Infinity, MAX_SNAP_REACH_KM)).toBe(false)
     expect(closeEnoughToEdit(Number.NaN, MAX_SNAP_REACH_KM)).toBe(false)
+  })
+})
+
+describe('reachLabel', () => {
+  describe('happy path', () => {
+    it('writes kilometres to one decimal', () => {
+      expect(reachLabel(37.42)).toBe('37.5 km')
+    })
+  })
+
+  describe('variants', () => {
+    it('keeps a whole reach whole, to one decimal', () => {
+      expect(reachLabel(12)).toBe('12.0 km')
+    })
+  })
+
+  // L3: N/A — a label; whether the reach is refused is closeEnoughToEdit's.
+
+  // L4: N/A — the one caller writes a label only for a finite reach (`refuseFromAfar`).
+
+  describe('edge cases', () => {
+    // Seen on 2026-10-13: "would reach 10 km; the tools act within 10 km", at 10.2 km.
+    it('never writes a reach just past the limit as the limit itself', () => {
+      expect(reachLabel(10.02)).toBe('10.1 km')
+      expect(reachLabel(10.2)).toBe('10.2 km')
+    })
   })
 })

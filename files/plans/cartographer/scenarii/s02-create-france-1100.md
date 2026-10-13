@@ -913,3 +913,35 @@ Scenario: a river runs to the sea as it does in the atlas
 > **Seen while walking it, for the dev to judge**: at the atlas's opacity, a river over a political fill
 > reads faint in the editor — the same numbers do not give the same contrast on a flat 2D tint as on the
 > atlas's lit relief. The opacity is one value in `riverDisplay.ts`; the dev decides on sight.
+
+## Walked for real — the Holy Roman Empire along France and Burgundy (2026-10-13)
+
+> The dev's friction first (*"j'ai du mal à rattraper les sommets"*), then Claude's walk in his Chrome,
+> at 556–612 %. Holes in `s99`: `H-38` to `H-41`.
+
+```gherkin
+Scenario: following a neighbour's border, anchor to anchor
+  Given France and Burgundy are drawn, and the Empire is aimed at with the Pen
+  When I click France's anchor at the Scheldt mouth, then two points on the Scheldt
+  Then the bar reads "inserted 26 vertices from the Schelde", France's own
+  When I click France's anchor at 3°54′E 49°57′N, then the France–Burgundy junction
+  Then the bar reads "followed 4 anchors of a shared border"
+  When I click Burgundy's last Alpine anchor above Nice
+  Then the bar reads "followed 26 anchors of a shared border" — its whole eastern border in one click
+```
+
+```gherkin
+Scenario: the anchors to aim at are shown (H-38, fixed 2026-10-13)
+  Given the Pen in hand, a target, and the view close enough to draw
+  Then every anchor a neighbour holds is a small blue dot on its outline
+  And the target's own anchors keep their white handles
+  But from afar, or with the arrow or the hand, no dot is drawn
+```
+
+```gherkin
+Scenario: the visible border between two anchors does not snap (H-38, open)
+  Given the Pen over France's eastern border, between two of its anchors
+  Then the bar reads "Drawing in HRE — no river within reach, placing points freely"
+  And a click there places a point beside France, not on it
+```
+
