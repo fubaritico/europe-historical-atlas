@@ -3,6 +3,11 @@ import {
   removeAnchors,
 } from '@europe-historical-atlas/core/editor/anchorEdits'
 import {
+  clearOverride,
+  dressPair,
+  dressSegments,
+} from '@europe-historical-atlas/core/editor/borderOverrides'
+import {
   addOutline,
   addPolity,
   moveAnchors,
@@ -15,6 +20,7 @@ import { restack } from '@europe-historical-atlas/core/editor/stacking'
 import type { CartographerStore } from './store'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { AnchorRemoval } from '@europe-historical-atlas/core/editor/anchorEdits'
+import type { Segment } from '@europe-historical-atlas/core/editor/borderOverrides'
 import type {
   AnchorMove,
   OutlinePoint,
@@ -138,6 +144,32 @@ export interface EditionActions {
    * @returns what went, or `null` when no polity has that id — and nothing happened
    */
   deletePolity: (polityId: string, step: HistoryStep) => RemovalReport | null
+  /**
+   * Dress some segments of the borders with a hand — or give them back to the rule with `null` — as one
+   * undoable step (`s13`: *give a line a pattern*). The unit is the segment, so half a border may be
+   * dotted and the other half not (`core/editor/borderOverrides`).
+   * @param segments - the segments chosen with the white arrow's marquee
+   * @param hand - the pattern, or `null`
+   * @param step - how the gesture is named — *"dotted France – Burgundy"*
+   * @returns `false` when there was nothing to dress — and nothing happened
+   */
+  dressSegments: (segments: readonly Segment[], hand: string | null, step: HistoryStep) => boolean
+  /**
+   * Dress the whole limit between two polities — or clear its hand — as one undoable step.
+   * @param between - the two polities
+   * @param hand - the pattern, or `null`
+   * @param step - how the gesture is named
+   * @returns `false` when the two are one — and nothing happened
+   */
+  dressPair: (between: readonly [string, string], hand: string | null, step: HistoryStep) => boolean
+  /**
+   * Clear one override — `{Overrides}`' `[Clear]` — as one undoable step.
+   * @param kind - a run override or a pair override
+   * @param index - its place in the document's list
+   * @param step - how the gesture is named
+   * @returns `false` when there is no such override — and nothing happened
+   */
+  clearOverride: (kind: 'run' | 'pair', index: number, step: HistoryStep) => boolean
   /**
    * Give a polity a closed outline, as one undoable step — what the Pen does when the ring closes.
    *
@@ -324,6 +356,24 @@ function recorder(
 }
 
 /**
+ * The author's hand on the borders (`s13`), each one undoable step: dress segments, dress a pair, clear one.
+ * @param record - the runner every recorded action goes through
+ * @returns `dressSegments`, `dressPair` and `clearOverride`
+ */
+function overrideActions(
+  record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean
+): Pick<EditionActions, 'dressSegments' | 'dressPair' | 'clearOverride'> {
+  return {
+    dressSegments: (segments, hand, step): boolean =>
+      record((document) => dressSegments(document, segments, hand), step),
+    dressPair: (between, hand, step): boolean =>
+      record((document) => dressPair(document, between, hand), step),
+    clearOverride: (kind, index, step): boolean =>
+      record((document) => clearOverride(document, kind, index), step),
+  }
+}
+
+/**
  * The edits of a polity's identity — create one, change one, delete one — each one recorded step.
  *
  * `addPolity` and `updatePolity` copy what they keep, so the caller's object cannot be mutated from here
@@ -407,6 +457,7 @@ export function editionActions(
     },
     // `addPolity` copies what it keeps, so the caller's object cannot be mutated from here later.
     ...polityActions(record),
+    ...overrideActions(record),
     drawOutline: (polityId, points, step): boolean =>
       record((document) => addOutline(document, polityId, points), step),
     moveAnchors: (moves, step): boolean => record((document) => moveAnchors(document, moves), step),

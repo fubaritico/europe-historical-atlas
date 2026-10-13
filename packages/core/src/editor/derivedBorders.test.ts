@@ -428,3 +428,44 @@ describe('deriveBorders — the far side, segment by segment', () => {
     })
   })
 })
+
+/** France and the Empire sharing a three-segment limit, 1 → 6 → 7 → 2. */
+function longShared(): YearDocument {
+  const doc = createYearDocument(1100, zone, source)
+  anchors(doc, [
+    [0, 10],
+    [10, 10],
+    [10, 0],
+    [0, 0],
+    [20, 10],
+    [20, 0],
+    [10, 7],
+    [10, 3],
+  ])
+  addPolity(doc, polity('france'))
+  addPolity(doc, polity('hre'))
+  closeRing(doc, 'france', [0, 1, 6, 7, 2, 3])
+  closeRing(doc, 'hre', [1, 4, 5, 2, 7, 6])
+  return doc
+}
+
+// 2026-10-13: a run override dressed any border sharing ONE anchor with it — eleven segments of the Saône
+// would have restyled the whole limit. `s13` wants half a border bold and the other half not.
+describe('deriveBorders — a run override dresses its own segments only', () => {
+  it('cuts the shared limit where the override ends, and dresses only the covered stretch', () => {
+    const doc = longShared()
+    doc.runs.push({ run: [6, 7], hand: 'dotted', source: null, note: null })
+    const shared = deriveBorders(doc).filter((border) => border.between.length === 2)
+    const dotted = shared.filter((border) => border.hand === 'dotted')
+    expect(dotted.map((border) => [...border.run].sort())).toEqual([[6, 7]])
+    expect(dotted[0]?.dressedBy).toBe('run')
+    expect(shared.filter((border) => border.dressedBy === 'rule').length).toBeGreaterThan(0)
+  })
+
+  it('does not dress a border that only touches the override at one anchor', () => {
+    const doc = longShared()
+    doc.runs.push({ run: [0, 1], hand: 'dotted', source: null, note: null })
+    const shared = deriveBorders(doc).filter((border) => border.between.length === 2)
+    expect(shared.every((border) => border.hand === null)).toBe(true)
+  })
+})

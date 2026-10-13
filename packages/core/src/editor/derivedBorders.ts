@@ -19,6 +19,7 @@
 import { pointInRings } from '../geo/pointInRing'
 
 import { borderRunsOf } from './borderGraph'
+import { coveringRun, stretchesBy } from './borderOverrides'
 import { relationBetween } from './borderRelation'
 
 import type { BorderRelation } from './borderRelation'
@@ -124,18 +125,17 @@ function chainDepth(id: string, byId: ReadonlyMap<string, YearPolity>): number {
   return depth
 }
 
-/** Apply the precedence: a run override, then a pair override, then the rule. */
+/**
+ * The dressing a whole border takes before any run override: a pair override, then the rule. The run
+ * overrides are applied afterwards, segment by segment (`splitByRunOverrides`).
+ * @param between - who it separates
+ * @param doc - the document, for its pair overrides
+ * @returns the hand and where it came from
+ */
 function dressingFor(
-  run: readonly number[],
   between: readonly string[],
   doc: YearDocument
 ): { hand: string | null; dressedBy: DerivedBorder['dressedBy'] } {
-  const covering = doc.runs.find(
-    (override) => override.hand !== null && override.run.some((index) => run.includes(index))
-  )
-  if (covering?.hand !== undefined && covering.hand !== null)
-    return { hand: covering.hand, dressedBy: 'run' }
-
   if (between.length === 2) {
     const [a, b] = between
     const pair = doc.pairs.find(
@@ -148,6 +148,27 @@ function dressingFor(
       return { hand: pair.hand, dressedBy: 'pair' }
   }
   return { hand: null, dressedBy: 'rule' }
+}
+
+/**
+ * Cut a border where a run override begins and ends, and dress each covered stretch by its override.
+ *
+ * **Segment by segment, and that was a defect before** (2026-10-13): a run override dressed any derived
+ * border sharing **one anchor** with it, so styling eleven segments of the Saône would have restyled the
+ * whole 61-anchor France–Burgundy limit — where `s13` wants half a border bold and the other half not.
+ * @param border - the border, dressed by its pair or its rule
+ * @param doc - the document, for its run overrides
+ * @returns the border, cut into stretches of one dressing each
+ */
+function splitByRunOverrides(border: DerivedBorder, doc: YearDocument): DerivedBorder[] {
+  if (doc.runs.length === 0) return [border]
+  const covers = border.run.slice(1).map((to, at) => coveringRun(doc, border.run[at] ?? -1, to))
+  return stretchesBy(border.run, covers, (a, b) => a === b).map(({ run, label }) => {
+    const override = doc.runs[label]
+    return override !== undefined && override.hand !== null
+      ? { ...border, run, hand: override.hand, dressedBy: 'run' as const }
+      : { ...border, run }
+  })
 }
 
 /** A run held by two or more owners: the peer case, and the three-owner case H-05a settles. */
@@ -167,7 +188,7 @@ function borderOfShared(
     run,
     between,
     ...relationBetween(first, second, byId),
-    ...dressingFor(run, between, doc),
+    ...dressingFor(between, doc),
   }
 }
 
@@ -260,16 +281,9 @@ function bordersOfSingle(
   const sides = run
     .slice(1)
     .map((to, at) => segmentSide(run[at], to, owner, ownRings, doc, byId, deps))
-  const out: DerivedBorder[] = []
-  let start = 0
-  for (let at = 1; at <= sides.length; at += 1) {
-    const here = sides[start]
-    if (at < sides.length && sameSide(here, sides[at])) continue
-    if (here !== null && here !== undefined)
-      out.push(borderOfStretch(run.slice(start, at + 1), owner, here, doc, byId))
-    start = at
-  }
-  return out
+  return stretchesBy(run, sides, sameSide).flatMap(({ run: stretch, label }) =>
+    label === null ? [] : [borderOfStretch(stretch, owner, label, doc, byId)]
+  )
 }
 
 /**
@@ -336,7 +350,7 @@ function borderOfStretch(
       run,
       between,
       ...relationBetween(owner, side.far, byId),
-      ...dressingFor(run, between, doc),
+      ...dressingFor(between, doc),
     }
   }
   return {
@@ -344,7 +358,7 @@ function borderOfStretch(
     between: [owner],
     relation: side.dry ? 'unclaimed' : 'coastline',
     degree: 0,
-    ...dressingFor(run, [owner], doc),
+    ...dressingFor([owner], doc),
   }
 }
 
@@ -368,5 +382,5 @@ export function deriveBorders(doc: YearDocument, deps: DerivationDeps = {}): Der
       if (border !== null) out.push(border)
     } else if (owner !== undefined) out.push(...bordersOfSingle(run, owner, doc, byId, deps))
   }
-  return out
+  return out.flatMap((border) => splitByRunOverrides(border, doc))
 }

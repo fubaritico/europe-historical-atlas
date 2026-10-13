@@ -910,3 +910,58 @@
   font-size: 10.5px;
   text-align: right;
 }
+
+/* {Line}: the selected stretch's style — what it is, where a choice applies, and the patterns. */
+.line-panel {
+  flex: 0 0 auto;
+  border-top: 1px solid var(--line);
+}
+
+.line-panel__hint,
+.line-panel__what {
+  margin: 0;
+  padding: 6px 10px;
+  color: var(--ink-dim);
+  font-size: 11.5px;
+}
+
+.line-panel__what {
+  color: var(--ink);
+}
+
+.line-panel__scope,
+.line-panel__patterns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0 10px 6px;
+}
+
+.line-panel__choice {
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 11.5px;
+}
+
+.line-panel__choice:hover:not([aria-disabled='true']) {
+  background: var(--hover);
+}
+
+.line-panel__choice[aria-pressed='true'],
+.line-panel__choice[aria-checked='true'] {
+  border-color: var(--ink-off);
+  background: var(--raised);
+}
+
+.line-panel__choice[aria-disabled='true'] {
+  color: var(--ink-off);
+}
+
+.line-panel__choice:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}

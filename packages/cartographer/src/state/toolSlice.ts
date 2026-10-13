@@ -109,6 +109,12 @@ export interface ToolState {
    * from, and the plain Pen when the coast or river mode was chosen by hand.
    */
   layerReturn: PenMode
+  /**
+   * The anchors the white arrow has selected, published by the canvas after every gesture so the chrome
+   * can act on them — `{Line}` dresses the segments between them (`s13`). The canvas's session holds the
+   * live selection; this is its copy, out of the undo line like the tool and the target.
+   */
+  selectedAnchors: readonly number[]
 }
 
 /** What the chrome may do to the tools. */
@@ -162,6 +168,11 @@ export interface ToolActions {
    * @returns the mode it went back to, for the result zone to name, or `null` when the Pen followed nothing
    */
   leaveLayer: () => PenMode | null
+  /**
+   * Publish the white arrow's selection — the canvas calls it when its selection changes.
+   * @param anchors - the selected anchor indices
+   */
+  setSelectedAnchors: (anchors: readonly number[]) => void
 }
 
 /** The slice: the tool, the target, and the two ways they change. */
@@ -185,6 +196,10 @@ export const createToolSlice: StateCreator<
 > = (set, get) => ({
   tool: 'navigate',
   target: null,
+  selectedAnchors: [],
+  setSelectedAnchors: (anchors): void => {
+    set({ selectedAnchors: [...anchors] })
+  },
   penMode: 'free',
   layerReturn: 'free',
   selectTool: (tool: EditorTool): void => {

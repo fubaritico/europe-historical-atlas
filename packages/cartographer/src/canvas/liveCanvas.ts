@@ -474,6 +474,19 @@ export function reportFeature(it: LiveCanvas, feature: string | null): void {
 }
 
 /**
+ * Publish the white arrow's selection to the store when it changed, so the chrome can act on it — called
+ * from `refreshTools`, which every gesture ends with.
+ * @param it - the attachment
+ */
+function publishSelection(it: LiveCanvas): void {
+  const published = it.deps.store.getState().selectedAnchors
+  const live = it.session.selected
+  const same =
+    published.length === live.length && published.every((index, at) => index === live[at])
+  if (!same) it.deps.store.getState().setSelectedAnchors(live)
+}
+
+/**
  * How far apart, in CSS pixels, two anchors of one ring must be for a dot to mark them: half again the
  * snap radius (8). Closer than that the line already shows the vertex and no click can miss one.
  */
@@ -576,6 +589,7 @@ function movesOnScreen(it: LiveCanvas): { index: number; at: Point }[] {
  * @param it - the attachment
  */
 export function refreshTools(it: LiveCanvas): void {
+  publishSelection(it)
   const state = it.deps.store.getState()
   const moving = it.session.moving
   const inserting = overStretch(it)
