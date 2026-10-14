@@ -3,6 +3,8 @@ import { Slider } from '@fubaritico/react/Slider'
 import { ChromeIcon } from '../icons/chromeIcons'
 import { LAYER_IDS } from '../state/layersSlice'
 
+import { Panel } from './Panel'
+
 import type { LayerId, LayerSettings } from '../state/layersSlice'
 import type { CartographerStoreHook } from '../state/store'
 
@@ -106,11 +108,8 @@ export function LayersPanel({ store }: { store: CartographerStoreHook }) {
 
   // Render
   return (
-    <section className="layers" aria-label="Layers">
-      <header className="polities__head">
-        <h2 className="polities__title">Layers</h2>
-      </header>
+    <Panel title="Layers">
       <LayerList layers={layers} onVisible={setLayerVisible} onOpacity={setLayerOpacity} />
-    </section>
+    </Panel>
   )
 }

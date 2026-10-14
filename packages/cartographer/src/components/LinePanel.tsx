@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { describeDrawingTarget } from '../state/drawingTarget'
 
 import { readLineSelection } from './lineSelection'
+import { Panel } from './Panel'
 
 import type { CartographerStoreHook } from '../state/store'
 
@@ -67,12 +68,12 @@ export function LineView({
   // Render
   if (segments === 0)
     return (
-      <p className="line-panel__hint">
+      <p className="panel__hint">
         Select a stretch of the aimed polity with the white arrow to style it.
       </p>
     )
   return (
-    <div className="line-panel__body">
+    <>
       <p className="line-panel__what">
         {segments} {segments === 1 ? 'segment' : 'segments'} · {between}
       </p>
@@ -97,7 +98,7 @@ export function LineView({
           />
         ))}
       </div>
-    </div>
+    </>
   )
 }
 
@@ -230,10 +231,7 @@ export function LinePanel({ store }: { store: CartographerStoreHook }) {
 
   // Render
   return (
-    <section className="line-panel" aria-label="Line">
-      <header className="polities__head">
-        <h2 className="polities__title">Line</h2>
-      </header>
+    <Panel title="Line">
       <LineView
         segments={selection.segments.length}
         between={between}
@@ -244,6 +242,6 @@ export function LinePanel({ store }: { store: CartographerStoreHook }) {
         onScope={setScope}
         onHand={handleHand}
       />
-    </section>
+    </Panel>
   )
 }

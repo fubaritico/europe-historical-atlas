@@ -185,18 +185,6 @@
 .polity-form {
   width: 340px;
 }
-
-/*
- * `{Polities}` fills the dock as a column: the head, the list — which scrolls on its own — and the action
- * bar pinned at the foot, even under an empty list.
- */
-.polities {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-}
-
 /*
  * The action bar (`s07`, *The panel's action bar*): a 24px strip under a hairline, holding the design's
  * 26px `icon-btn` boxes. Every size is a whole pixel — the bar is 24 plus its hairline, so each box is
@@ -254,33 +242,6 @@
   font-size: 12px;
   line-height: 18px;
 }
-
-/*
- * `{Polities}`' head, after `design/chrome.css`'s tab strip: the bar on the page's fill with a hairline
- * under it, and the panel's name as the active tab, melting into the panel below.
- */
-.polities__head {
-  display: flex;
-  align-items: stretch;
-  /* Never shrunk: in {Polities}, the one panel that takes what is left and scrolls, a long list squeezed
-     the head to 14px against the others' 24 (the dev, 2026-10-14). */
-  flex: 0 0 auto;
-  height: var(--tab);
-  border-bottom: 1px solid var(--line);
-  background: var(--bg);
-}
-
-.polities__title {
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
-  border-right: 1px solid var(--line);
-  background: var(--panel);
-  color: var(--ink);
-  font-size: 11.5px;
-  font-weight: 500;
-}
-
 /*
  * `{Polities}`' list, after `design/01`: a subhead naming the year and the count, then one 24px row per
  * polity — its swatch, its name, the *"no territory"* chip, its rank and dates. The target is the
@@ -846,9 +807,7 @@
   font-family: ui-monospace, monospace;
 }
 
-/*
- * The dock's two panels stacked, as the mockup's dock: {Polities} takes what is left, {Layers} its rows.
- */
+/* The dock: its four panels stacked, as the mockup's dock — {Polities} takes what is left. */
 .dock-stack {
   display: flex;
   flex-direction: column;
@@ -856,14 +815,63 @@
   min-height: 0;
 }
 
-.dock-stack > .polities {
+/*
+ * The shell every panel of the dock is (`components/Panel.tsx`, decided by the dev on 2026-10-14): a head
+ * with its name as a tab, a body, an optional foot. How a panel sizes lives here, once — the four used to
+ * hold their height each its own way, and a long {Polities} squeezed its head to 14px.
+ */
+.panel {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.dock-stack > .panel + .panel {
+  border-top: 1px solid var(--line);
+}
+
+/* The panel that takes what the dock has left — {Polities}: its body scrolls, its head and foot stay. */
+.panel--fill {
+  height: 100%;
+  min-height: 0;
+}
+
+.dock-stack > .panel--fill {
   flex: 1 1 auto;
   height: auto;
 }
 
-.layers {
+.panel--fill > .panel__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/*
+ * The head, after `design/chrome.css`'s tab strip: the bar on the page's fill with a hairline under it, and
+ * the panel's name as the active tab, melting into the panel below.
+ */
+.panel__head {
+  display: flex;
+  align-items: stretch;
+  /* Never shrunk: in the panel that fills the dock, a long list squeezed the head to 14px (2026-10-14). */
   flex: 0 0 auto;
-  border-top: 1px solid var(--line);
+  height: var(--tab);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.panel__title {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0 10px;
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 11.5px;
+  font-weight: 500;
 }
 
 .layer-list {
@@ -923,12 +931,7 @@
 }
 
 /* {Line}: the selected stretch's style — what it is, where a choice applies, and the patterns. */
-.line-panel {
-  flex: 0 0 auto;
-  border-top: 1px solid var(--line);
-}
-
-.line-panel__hint,
+.panel__hint,
 .line-panel__what {
   margin: 0;
   padding: 6px 10px;

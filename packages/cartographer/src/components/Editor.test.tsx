@@ -1,4 +1,4 @@
-import { act, render } from '@testing-library/react'
+import { act, render, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
@@ -74,7 +74,10 @@ describe('Editor', () => {
 
       expect(document.querySelector('.shell__canvas [data-testid="map-area"]')).not.toBeNull()
       expect(document.querySelector('.shell__rail [role="toolbar"]')).not.toBeNull()
-      expect(document.querySelector('.shell__dock .polities')).not.toBeNull()
+      const dock = document.querySelector<HTMLElement>('.shell__dock')
+      expect(
+        dock === null ? null : within(dock).queryByRole('region', { name: 'Polities' })
+      ).not.toBeNull()
       expect(document.querySelector('.shell__appbar .app-brand__name')?.textContent).toBe(
         'Europe Historical Atlas Cartographer'
       )

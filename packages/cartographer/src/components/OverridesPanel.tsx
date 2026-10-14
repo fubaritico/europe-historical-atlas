@@ -1,4 +1,5 @@
 import { overrideRows } from './overrideRows'
+import { Panel } from './Panel'
 
 import type { OverrideRow } from './overrideRows'
 import type { CartographerStoreHook } from '../state/store'
@@ -57,7 +58,7 @@ function OverrideItem({ row, onClear }: { row: OverrideRow; onClear: (row: Overr
 export function OverridesList({ rows, onClear }: OverridesListProps) {
   // Render
   if (rows.length === 0)
-    return <p className="line-panel__hint">Nothing overridden: every line follows its rule.</p>
+    return <p className="panel__hint">Nothing overridden: every line follows its rule.</p>
   return (
     <ul className="override-list" aria-label="Overrides">
       {rows.map((row) => (
@@ -90,11 +91,8 @@ export function OverridesPanel({ store }: { store: CartographerStoreHook }) {
 
   // Render
   return (
-    <section className="line-panel" aria-label="Overrides">
-      <header className="polities__head">
-        <h2 className="polities__title">Overrides</h2>
-      </header>
+    <Panel title="Overrides">
       <OverridesList rows={rows} onClear={handleClear} />
-    </section>
+    </Panel>
   )
 }

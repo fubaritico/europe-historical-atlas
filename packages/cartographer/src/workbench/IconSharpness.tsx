@@ -118,8 +118,10 @@ function ReferenceRows() {
     <>
       <tr style={{ height: 34 }}>
         <td style={{ paddingRight: 24 }}>header + (design system, 12 px)</td>
-        <td style={{ textAlign: 'center' }} className="polities__head">
-          <IconButton icon="Plus" aria-label="New polity" />
+        <td style={{ textAlign: 'center' }}>
+          <div className="panel__head">
+            <IconButton icon="Plus" aria-label="New polity" />
+          </div>
         </td>
         <td />
         <td />

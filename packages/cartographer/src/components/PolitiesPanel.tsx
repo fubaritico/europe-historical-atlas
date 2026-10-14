@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { describeDrawingTarget } from '../state/drawingTarget'
 
+import { Panel } from './Panel'
 import { PolitiesActions } from './PolitiesActions'
 import { PolityArrangeMenu } from './PolityArrangeMenu'
 import { PolityDeleteDialog } from './PolityDeleteDialog'
@@ -50,20 +51,6 @@ function useArrangeMenu() {
 
   // Return
   return { arranging, openMenu, closeMenu, panel }
-}
-
-/**
- * `{Polities}`' head: the panel's name as its tab. Its actions moved to the bar at the foot of the panel
- * (`PolitiesActions`) — the dev's request, 2026-10-12.
- * @returns the head
- */
-function PolitiesHead() {
-  // Render
-  return (
-    <header className="polities__head">
-      <h2 className="polities__title">Polities</h2>
-    </header>
-  )
 }
 
 /**
@@ -253,8 +240,14 @@ export function PolitiesPanel({ store, colours, onResult }: PolitiesPanelProps) 
 
   // Render
   return (
-    <section ref={panel} className="polities" aria-label="Polities">
-      <PolitiesHead />
+    // Its actions sit in the bar at the foot (`PolitiesActions`), not in the head — the dev's request,
+    // 2026-10-12.
+    <Panel
+      ref={panel}
+      title="Polities"
+      fill
+      foot={<PolitiesFoot store={store} onResult={onResult} onDone={focusList} />}
+    >
       <PolityList
         year={document.year}
         rows={polityRows(document, colours.coloursOf(document, version))}
@@ -272,8 +265,7 @@ export function PolitiesPanel({ store, colours, onResult }: PolitiesPanelProps) 
           onEdit={setEditing}
         />
       )}
-      <PolitiesFoot store={store} onResult={onResult} onDone={focusList} />
       <EditDialog store={store} edited={edited ?? null} onEdited={handleEdited} />
-    </section>
+    </Panel>
   )
 }

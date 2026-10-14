@@ -547,7 +547,7 @@ describe('PolitiesPanel — the action bar (s07)', () => {
           .getAllByRole('button')
           .map((button) => button.getAttribute('aria-label'))
       ).toEqual(['New polity', 'Delete polity'])
-      expect(document.querySelector('.polities__head button')).toBeNull()
+      expect(document.querySelector('.panel__head button')).toBeNull()
     })
 
     it('disables the trash while no polity is aimed at, and says why', () => {

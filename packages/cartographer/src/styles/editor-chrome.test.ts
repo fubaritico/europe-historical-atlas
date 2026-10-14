@@ -33,7 +33,7 @@ describe('editor-chrome.css — the {Polities} list', () => {
   describe('edge cases', () => {
     // Measured on 1100 (137 polities, 2026-10-14): the head was squeezed to 14px against the others' 24.
     it('never lets the list squeeze the panel head or the subhead', () => {
-      expect(rule('.polities__head')).toContain('flex: 0 0 auto;')
+      expect(rule('.panel__head')).toContain('flex: 0 0 auto;')
       expect(rule('.polities__subhead')).toContain('flex: 0 0 auto;')
     })
   })
