@@ -11,6 +11,13 @@ Put here the know issues to avoid cluttering the context window.
   est une référence privée). **Depuis la nuit du 14/10**, `years/1100/` tient 137 pays, et les traces de la nuit
   sont `years/1100.euratlas-{16,19,30,48,76,98,137,137b}/` et `1100.before-rename/` — toutes locales, à trier avec
   le dev (aucune n'a été supprimée : `rm -rf` demande sa permission). **Sévérité : à savoir.**
+- **Un test du contrôleur qui échoue en fait tomber deux autres, les tests ‹espace›** (14/10). Il lève avant son
+  `dispose()` et laisse un écouteur sur la page : la panne accuse des tests sains. Remède : un `afterEach` qui
+  détache tout canevas attaché dans `controller.test.ts`. **Sévérité : cosmétique** — ne trompe qu'en cas d'échec.
+- **Suivre la frontière d'un voisin le long de ses ancres prend encore le plus court sans garde** (14/10) :
+  `borderSnap.ringRunTo` → `shortestRunBetween`, quand le fil d'eau, lui, prend l'autre sens s'il repasse sur le
+  tracé (`freshStretch`). Le dev n'y a rien vu de faux ; le jour où le même empilement y apparaît, même remède
+  (`runsBetween`, le premier qui ne repasse pas). **Sévérité : à savoir.**
 - **Les années enregistrées en local ne sont jamais commitées, et `years/index.json` est en `skip-worktree`
   sur la machine du dev.** Sa décision, 12/10 : *« ils sont pour nous pour travailler »* — retrouver ses
   tracés, déboguer les outils, maîtriser le format. Les dossiers `packages/atlas/public/years/<année>/` sont

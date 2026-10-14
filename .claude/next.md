@@ -66,34 +66,25 @@ d'ancres ne perd jamais rien pendant l'édition.** Donc `removePolity` retire un
 point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui n'est plus référencé disparaît
 à l'enregistrement, par une seule renumération. Vérifié en la cassant : 3 tests tombent.
 
-## ▶▶▶▶ ON REPREND ICI (fin du 14/10) — dans l'ordre décidé par le dev
+## ▶▶▶▶ ON REPREND ICI — le 15/10 à 9 h 30, décidé par le dev
 
-0. **D'abord, le test du dev sur du code NON COMMITÉ** : supprimer un anneau en entier — toutes ses ancres
-   sélectionnées à la flèche blanche + ‹suppr› retire l'anneau du pays visé (un pas), **le voisin garde les ancres
-   partagées**, un voisin qui perd un point est nommé (*« removed 1 ring (N anchors) · points taken from … »*). Fichiers :
-   `core/editor/anchorEdits.ts` (`removeAnchors(doc, indices, owner?)`, `rings` dans `AnchorRemoval`),
-   `state/editionSlice.ts`, `canvas/anchorGestures.ts`, leurs tests. Gate verte (3166), revue faite et corrigée
-   (ARCH-001 le cas partagé, ARCH-002 le voisin nommé, ARCH-003). **Le dev teste sur les îles du Danemark** (les
-   anneaux dégénérés de la nuit), puis **commit**. Puis cocher `H-46` (n° 2) dans `s99` et `s03` (*Reassigning*
-   reste à faire : donner un anneau à un autre pays).
-1. **La validation d'un contour posé** — décidée par le dev le 14/10 (`s99`, sous `H-46`) : **refuser** un contour
-   qui se croise, une ancre visitée deux fois, un anneau dégénéré ; **avertir** d'un chevauchement avec un voisin. À
-   la fermeture, après un retraçage, après une suppression. Puis le même contrôle sur l'année : `[Check this year]`
-   (`s10`), la liste des contours fautifs des 137 pays. **Nécessaire avant que je redessine d'autres sources**
-   (les planches de Duby, annoncées par le dev).
-2. **Le redimensionnement des panneaux** — **pas dans `Panel`** (revue du 14/10) : un `Dock` qui empile (aujourd'hui
-   `DockStack` dans `Editor.tsx`), une fonction pure des hauteurs testée avec des nombres, un port de stockage des
-   tailles injecté, `fill` remplacé par un descripteur (remplir / contenu / fixe avec hauteur par défaut). La
-   coquille `Panel` est livrée (`b754b11`) et reste une coquille d'affichage.
-3. **Le zoom maximum de 32 à 128** (accepté le 14/10), un commit à part.
-4. **Les outils de correction suivants** (`H-46`) : donner un anneau à un autre pays, souder et accrocher au bord,
-   découper. Le dev a *« d'autres cas à son idée »* pour ⟨retracer⟩.
-5. **Laissé ouvert** : détacher volontairement une frontière commune pendant un retraçage (question au dev, `s99`) ;
-   l'icône de ⟨retracer⟩ est provisoire, **le dev la dessine** (elle se remplace dans `toolIcons.tsx`, une entrée).
+**Tout est poussé** (`b3f4e20`, vérifié par `git ls-remote`). Ordre :
 
-**Livré le 14/10** (détail dans `completed.md`) : `{Polities}` défile, frontières 17× plus rapides, ⟨retracer⟩ avec
-ses trois règles, ‹espace› de partout, la liste qui glisse vers la cible, la coquille `Panel`. **Trois commits à
-pousser** (`1b2e89e`, `719dc89`, `b754b11` — vérifier avec `git ls-remote origin main`).
+0. **Le dev marche la soudure** (`b3f4e20`, jamais essayée dans l'appli) : ‹A›, tirer **une** ancre du pays visé près
+   d'une ancre puis d'un tronçon d'un voisin mal calé — elle s'aimante, le relâchement fusionne, *« welded onto … »*.
+   **Ne pas garder d'onglet piloté ouvert pendant son test** ; ne pas écrire de fichier sans le prévenir.
+1. **La revue à quatre agents de `b3f4e20`** (non faite, commit demandé par le dev), puis ses corrections.
+2. **La partie 2 de l'aimantation** : accrocher toute une sélection à la frontière d'un voisin d'un coup (`H-37`).
+   Rappel au dev : ⟨retracer⟩ le long du voisin remplace déjà un tronçon entier par ses ancres.
+3. **La validation d'un contour posé** (`s99`, sous `H-46`) : refuser un contour qui se croise, une ancre visitée
+   deux fois, un anneau dégénéré ; avertir d'un chevauchement. Puis `[Check this year]`. **Avant de redessiner
+   d'autres sources** (Duby).
+4. **Le redimensionnement des panneaux** dans un `Dock` (pas dans `Panel`) ; **le zoom maximum 32 → 128**, à part.
+5. **Laissé ouvert** : détacher une frontière commune pendant un retraçage ; l'icône de ⟨retracer⟩ (le dev la dessine) ;
+   cocher `H-46` n° 2 dans `s99`/`s03` (*Reassigning* — donner un anneau à un autre pays — reste à faire).
+
+**L'objectif que le dev a nommé** : *« le maximum d'ergonomie lorsqu'on corrige les tracés […] on aura fait le tour
+une fois qu'on aura tous ces systèmes d'aimantation, de liberté de suppression »*.
 
 ## ▶▶▶ POINT DU 14/10 À 9 h 30 — la nuit du test général
 

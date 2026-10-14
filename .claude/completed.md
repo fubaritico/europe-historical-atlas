@@ -2,12 +2,29 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
-### 2026-10-14 — ⟨retracer⟩, la lenteur des frontières, la coquille `Panel`, et le test au doigt du dev
+### 2026-10-14 — ⟨retracer⟩, la coquille `Panel`, puis l'après-midi des corrections au doigt du dev
 
-Le journal compte **10:14–10:27 (12 min) et 12:33–15:35 (3 h 02)** ; la session a duré de 10:14 à ~16:25 et le trou
-10:27–12:33 du journal est sans doute sous-compté (un `cd` vers 10:40, voir mes fautes). Le chantier ouvert le 05/10
-totalise **53 h 57 sur 11 plages** au journal. **8 commits** `d6ddc5b`..`b754b11` (les quatre premiers poussés par le
-dev), gate verte et revue à chaque pas, chaque garde prouvée par le code naïf. **3166 tests** au soir (842 → 848 `core`, 1428 → 1431 Cartographe).
+Le journal compte **10:14–10:27 (12 min) et 12:33–18:52 (6 h 19)** ; le trou 10:27–12:33 est sans doute
+sous-compté (un `cd` vers 10:40). Le chantier ouvert le 05/10 totalise **57 h 14 sur 11 plages** au journal.
+**11 commits** `d6ddc5b`..`b3f4e20`, **tous poussés** le soir (`73fd1a5..b3f4e20`, par moi à la demande du dev).
+**3204 tests** au soir (860 `core`, 1457 Cartographe).
+
+**L'après-midi, le dev corrige ses îles et le Nil, et chaque gêne devient une règle** (`f709e57`, `b3f4e20`) :
+- **Supprimer un anneau entier** (toutes ses ancres + ‹suppr›), le voisin gardant les points partagés.
+- **Aucune suppression refusée** (*« y'a rien qui doit m'empêcher d'enlever des points. Rien. »*) : un contour du
+  pays visé sous trois ancres part entier ; celui d'un voisin garde ses points, nommé dans la barre.
+- **Le clic de fermeture suit l'eau** jusqu'à la première ancre, prévisualisé (`canvas/waterClosing.ts`).
+- **La plume ne pose jamais un tronçon deux fois** : sur une boucle, le plus court sauf s'il repasse, alors l'autre
+  sens (le Nil) ; sur une ligne ouverte, seul le sommet.
+- **La flèche blanche n'insère plus**, seule la plume (`arrow-insert` retiré) — *« beaucoup plus cohérent »*.
+- **Souder point par point** (`H-37`, moitié) : une ancre tirée seule près de l'ancre ou du tronçon d'un voisin
+  s'aimante, et le relâchement fusionne (`core/editor/anchorWeld.ts`, `canvas/weldGestures.ts`). Le dev : *« ce
+  sera déjà une grosse avancée »*. **Pas encore marché dans l'appli, pas revu à quatre agents** (commit demandé).
+- **Mes fautes de l'après-midi** : un onglet Chrome piloté par moi ouvert pendant son test, et sa page a cessé de
+  répondre jusqu'à ce que je le ferme (mémoire [[no-automation-tab-while-he-tests]]) ; des fichiers écrits pendant
+  qu'il testait (risque de rechargement Vite) ; des tests aux comptes faux du premier coup, recomptés.
+
+Le matin :
 
 - **`{Polities}` défile enfin** (`d6ddc5b`) : le corps du shell n'avait pas de ligne de grille (le dock grandissait
   à 3 646 px, la carte s'étirait et ne glissait plus) et 46 textes masqués « vassal de » s'échappaient de la liste.
@@ -25,8 +42,6 @@ dev), gate verte et revue à chaque pas, chaque garde prouvée par le code naïf
   **son en-tête garde ses 24 px** (`73fd1a5`).
 - **Une coquille `Panel` pour les quatre panneaux** (`b754b11`), décidée par le dev ; rien ne bouge à l'écran. La
   revue m'a corrigé : le redimensionnement ira dans un `Dock`, pas dans la coquille.
-- **Non commité, en attente du test du dev** : supprimer un anneau en entier (toutes ses ancres sélectionnées +
-  ‹suppr›), le voisin gardant les points partagés — voir `next.md`.
 - **Mes fautes** : une page rechargée qui a effacé la correction non enregistrée du dev (il l'a refaite) ; un `cd`
   en tête de commande ; un heredoc non protégé qui a vidé des gabarits (réparé) ; un premier test « Rana » qui
   passait aussi avec l'ancienne règle (réécrit, `719dc89`) ; la promesse « le redimensionnement dans la coquille »,
