@@ -2,6 +2,7 @@ import { ListboxItem, ListboxList } from '@fubaritico/react/Listbox'
 import { useEffect, useState } from 'react'
 
 import { listKeyAction } from './listKeys'
+import { scrollTopToShow } from './rowScroll'
 
 import type { PolityRow } from './polityRows'
 import type { ViewportPoint } from '../view/viewport'
@@ -213,6 +214,29 @@ function useListCursor(
 }
 
 /**
+ * Scroll the list, smoothly, to the target's row — centred, unless it is already wholly in view
+ * (`scrollTopToShow`). Only the list scrolls, never the page; and at once when the system asks for less
+ * motion.
+ * @param targetId - the polity aimed at
+ */
+function showRow(targetId: string): void {
+  const row = document.getElementById(optionId(targetId))
+  const list = row?.parentElement
+  // A target that no longer resolves — an undo took its polity away — has no row. Ordinary, and said
+  // where it matters: the status bar no longer names it, and the Pen refuses.
+  if (row === null || list === null || list === undefined) return
+  const top = scrollTopToShow({
+    rowTop: row.offsetTop,
+    rowHeight: row.offsetHeight,
+    scrollTop: list.scrollTop,
+    viewHeight: list.clientHeight,
+  })
+  if (top === null) return
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  list.scrollTo({ top, behavior: still ? 'auto' : 'smooth' })
+}
+
+/**
  * `{Polities}`' list: every polity of the year, the target marked, a click or ‹enter› aiming at one —
  * `s02`'s *"selecting the target is a gesture of `{Polities}`"*.
  *
@@ -226,6 +250,11 @@ function useListCursor(
 export function PolityList({ year, rows, targetId, onChoose, onMenu, onEdit }: PolityListProps) {
   // State
   const { activeId, active, onKeyDown } = useListCursor(rows, targetId, onChoose, onMenu)
+
+  // Effects
+  useEffect(() => {
+    if (targetId !== null) showRow(targetId)
+  }, [targetId])
 
   // Render
   return (
