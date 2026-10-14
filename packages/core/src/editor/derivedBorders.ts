@@ -109,15 +109,60 @@ export function maskDerivationDeps(doc: YearDocument, mask: LandMask): Derivatio
   }
 }
 
-/** Resolve a polity's rings into coordinates, for an inclusion test. */
-function ringsOf(polityId: string, doc: YearDocument): [number, number][][] {
-  const claim = doc.claims.find((existing) => existing.polity === polityId)
-  if (claim === undefined) return []
-  return claim.rings.map((ring) =>
-    ring
-      .map((index) => doc.anchors[index])
-      .filter((anchor): anchor is [number, number] => anchor !== undefined)
-  )
+/** One claim resolved for inclusion tests: its rings in coordinates, and the box around them. */
+interface ResolvedClaim {
+  /** Whose claim. */
+  polity: string
+  /** Its rings, as `[lon, lat]`. */
+  rings: [number, number][][]
+  /** The box around every ring: a point outside it is outside the claim, with no ring walked. */
+  box: { west: number; east: number; south: number; north: number }
+}
+
+/**
+ * Every claim resolved once, for a whole derivation.
+ *
+ * **Once, not per segment — the defect of 2026-10-14**: the far side of each segment of a single-owner run
+ * resolved every claim's rings afresh and walked all of them, so a derivation grew with segments × anchors.
+ * On the 137 polities of 1100 it took 5.7 s, and the Cartographer paid it after every gesture. Resolved
+ * here, and skipped by their box, the answer is the same and the cost is the segments.
+ * @param doc - the document
+ * @returns each claim's rings and box, by polity id
+ */
+function resolveClaims(doc: YearDocument): Map<string, ResolvedClaim> {
+  const resolved = new Map<string, ResolvedClaim>()
+  for (const claim of doc.claims) {
+    const rings = claim.rings.map((ring) =>
+      ring
+        .map((index) => doc.anchors[index])
+        .filter((anchor): anchor is [number, number] => anchor !== undefined)
+    )
+    const box = { west: Infinity, east: -Infinity, south: Infinity, north: -Infinity }
+    for (const ring of rings) {
+      for (const [lon, lat] of ring) {
+        box.west = Math.min(box.west, lon)
+        box.east = Math.max(box.east, lon)
+        box.south = Math.min(box.south, lat)
+        box.north = Math.max(box.north, lat)
+      }
+    }
+    resolved.set(claim.polity, { polity: claim.polity, rings, box })
+  }
+  return resolved
+}
+
+/**
+ * Whether a point lies inside a resolved claim — its box first, then its rings.
+ * @param point - `[lon, lat]`
+ * @param claim - the claim, resolved
+ * @returns `true` when one of its rings encloses the point
+ */
+function encloses(point: readonly [number, number], claim: ResolvedClaim): boolean {
+  const { box } = claim
+  if (point[0] < box.west || point[0] > box.east || point[1] < box.south || point[1] > box.north) {
+    return false
+  }
+  return pointInRings([point[0], point[1]], claim.rings)
 }
 
 /**
@@ -128,21 +173,21 @@ function ringsOf(polityId: string, doc: YearDocument): [number, number][][] {
  * same rule that decides who paints a cell.
  * @param owner - the polity holding the run
  * @param point - the run's midpoint
- * @param doc - the document
+ * @param claims - every claim, resolved once for the derivation
  * @param byId - every polity, by id
  * @returns the enclosing polity's id, or `null` when nothing claims it
  */
 function farSideOf(
   owner: string,
   point: [number, number],
-  doc: YearDocument,
+  claims: ReadonlyMap<string, ResolvedClaim>,
   byId: ReadonlyMap<string, YearPolity>
 ): string | null {
   let best: string | null = null
   let bestDepth = -1
-  for (const claim of doc.claims) {
+  for (const claim of claims.values()) {
     if (claim.polity === owner) continue
-    if (!pointInRings(point, ringsOf(claim.polity, doc))) continue
+    if (!encloses(point, claim)) continue
     const depth = chainDepth(claim.polity, byId)
     if (depth > bestDepth) {
       best = claim.polity
@@ -287,6 +332,18 @@ function onCoast(
   return sa !== undefined && sb !== undefined && coast.has(sa) && coast.has(sb)
 }
 
+/** What a derivation reads, gathered once: the document, the polities by id, the claims resolved, the mask. */
+interface Derivation {
+  /** The document. */
+  doc: YearDocument
+  /** Every polity, by id. */
+  byId: ReadonlyMap<string, YearPolity>
+  /** Every claim's rings and box, by polity id. */
+  claims: ReadonlyMap<string, ResolvedClaim>
+  /** The land mask and the coast's sources. */
+  deps: DerivationDeps
+}
+
 /** What lies beyond one segment of a single-owner run: a polity, or nothing — dry or wet. */
 interface FarSide {
   /** The enclosing polity, or `null`. */
@@ -305,24 +362,14 @@ interface FarSide {
  * segments with the same far side make one border.
  * @param run - the anchors, in order
  * @param owner - the polity holding them
- * @param doc - the document
- * @param byId - every polity, by id
- * @param deps - the land mask
+ * @param derivation - the document, the polities, the claims resolved and the mask
  * @returns one border per stretch of one far side
  */
-function bordersOfSingle(
-  run: number[],
-  owner: string,
-  doc: YearDocument,
-  byId: ReadonlyMap<string, YearPolity>,
-  deps: DerivationDeps
-): DerivedBorder[] {
-  const ownRings = ringsOf(owner, doc)
-  const sides = run
-    .slice(1)
-    .map((to, at) => segmentSide(run[at], to, owner, ownRings, doc, byId, deps))
+function bordersOfSingle(run: number[], owner: string, derivation: Derivation): DerivedBorder[] {
+  const ownRings = derivation.claims.get(owner)?.rings ?? []
+  const sides = run.slice(1).map((to, at) => segmentSide(run[at], to, owner, ownRings, derivation))
   return stretchesBy(run, sides, sameSide).flatMap(({ run: stretch, label }) =>
-    label === null ? [] : [borderOfStretch(stretch, owner, label, doc, byId)]
+    label === null ? [] : [borderOfStretch(stretch, owner, label, derivation.doc, derivation.byId)]
   )
 }
 
@@ -344,9 +391,7 @@ function sameSide(a: FarSide | null | undefined, b: FarSide | null | undefined):
  * @param to - its second
  * @param owner - the polity holding it
  * @param ownRings - the owner's rings, resolved
- * @param doc - the document
- * @param byId - every polity, by id
- * @param deps - the land mask and the coast's sources
+ * @param derivation - the document, the polities, the claims resolved and the mask
  * @returns the far side, or `null` when an anchor is missing
  */
 function segmentSide(
@@ -354,15 +399,14 @@ function segmentSide(
   to: number,
   owner: string,
   ownRings: [number, number][][],
-  doc: YearDocument,
-  byId: ReadonlyMap<string, YearPolity>,
-  deps: DerivationDeps
+  derivation: Derivation
 ): FarSide | null {
+  const { doc, deps } = derivation
   const a = from === undefined ? undefined : doc.anchors[from]
   const b = doc.anchors[to]
   if (a === undefined || b === undefined) return null
   const point = outsideOf(a, b, ownRings)
-  const far = farSideOf(owner, point, doc, byId)
+  const far = farSideOf(owner, point, derivation.claims, derivation.byId)
   if (far === null && onCoast(from, to, doc, deps)) return { far: null, dry: false }
   // Nothing claims the far side: only the mask can say whether that is the sea or ground nobody took.
   return { far, dry: far === null && (deps.isLand?.(point[0], point[1]) ?? false) }
@@ -414,13 +458,14 @@ function borderOfStretch(
  */
 export function deriveBorders(doc: YearDocument, deps: DerivationDeps = {}): DerivedBorder[] {
   const byId = new Map(doc.polities.map((polity) => [polity.id, polity]))
+  const derivation: Derivation = { doc, byId, claims: resolveClaims(doc), deps }
   const out: DerivedBorder[] = []
   for (const { run, owners } of borderRunsOf(doc)) {
     const owner = owners[0]
     if (owners.length >= 2) {
       const border = borderOfShared(run, owners, doc, byId)
       if (border !== null) out.push(border)
-    } else if (owner !== undefined) out.push(...bordersOfSingle(run, owner, doc, byId, deps))
+    } else if (owner !== undefined) out.push(...bordersOfSingle(run, owner, derivation))
   }
   return out.flatMap((border) => splitByRunOverrides(border, doc))
 }
