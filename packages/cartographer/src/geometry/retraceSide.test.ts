@@ -30,26 +30,27 @@ describe('retraceSide', () => {
   })
 
   describe('variants', () => {
-    // The Duchy of the Rana, 2026-10-14: an island joined to the mainland by two adjacent anchors; the run
-    // adds the mainland, far from both sides. The nearer side was the island — the smaller change is the
-    // join between the two anchors.
-    it('adds ground by replacing the short join, not the island far from the run', () => {
+    // The Duchy of the Rana, 2026-10-14: an island joined to the mainland by two adjacent anchors, the run
+    // adding the mainland and hugging the island near the join. The nearer side — the first rule, which
+    // these points make fail — was the island; the smaller change is the join.
+    it('adds ground by replacing the short join, not the island the run passes close to', () => {
       const join: Point[] = [
         [0, 0],
         [10, 0],
       ]
       const island: Point[] = [
         [0, 0],
-        [-5, -10],
-        [5, -40],
-        [15, -10],
+        [-5, -8],
+        [5, -20],
+        [15, -8],
         [10, 0],
       ]
       const mainland: Point[] = [
         [0, 0],
-        [-30, 20],
-        [-20, 40],
-        [20, 40],
+        [-100, 1],
+        [-100, 60],
+        [110, 60],
+        [110, 1],
         [10, 0],
       ]
       expect(smallerSide(mainland, join, island)).toBe('forward')
