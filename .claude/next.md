@@ -66,16 +66,53 @@ d'ancres ne perd jamais rien pendant l'édition.** Donc `removePolity` retire un
 point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui n'est plus référencé disparaît
 à l'enregistrement, par une seule renumération. Vérifié en la cassant : 3 tests tombent.
 
-## ▶▶ REPRISE IMMÉDIATE (14/10) — continuer le test général, `/draw-from-plate` d'abord
+## ▶▶▶▶ ON REPREND ICI (fin du 14/10) — dans l'ordre décidé par le dev
+
+0. **D'abord, le test du dev sur du code NON COMMITÉ** : supprimer un anneau en entier — toutes ses ancres
+   sélectionnées à la flèche blanche + ‹suppr› retire l'anneau du pays visé (un pas), **le voisin garde les ancres
+   partagées**, un voisin qui perd un point est nommé (*« removed 1 ring (N anchors) · points taken from … »*). Fichiers :
+   `core/editor/anchorEdits.ts` (`removeAnchors(doc, indices, owner?)`, `rings` dans `AnchorRemoval`),
+   `state/editionSlice.ts`, `canvas/anchorGestures.ts`, leurs tests. Gate verte (3166), revue faite et corrigée
+   (ARCH-001 le cas partagé, ARCH-002 le voisin nommé, ARCH-003). **Le dev teste sur les îles du Danemark** (les
+   anneaux dégénérés de la nuit), puis **commit**. Puis cocher `H-46` (n° 2) dans `s99` et `s03` (*Reassigning*
+   reste à faire : donner un anneau à un autre pays).
+1. **La validation d'un contour posé** — décidée par le dev le 14/10 (`s99`, sous `H-46`) : **refuser** un contour
+   qui se croise, une ancre visitée deux fois, un anneau dégénéré ; **avertir** d'un chevauchement avec un voisin. À
+   la fermeture, après un retraçage, après une suppression. Puis le même contrôle sur l'année : `[Check this year]`
+   (`s10`), la liste des contours fautifs des 137 pays. **Nécessaire avant que je redessine d'autres sources**
+   (les planches de Duby, annoncées par le dev).
+2. **Le redimensionnement des panneaux** — **pas dans `Panel`** (revue du 14/10) : un `Dock` qui empile (aujourd'hui
+   `DockStack` dans `Editor.tsx`), une fonction pure des hauteurs testée avec des nombres, un port de stockage des
+   tailles injecté, `fill` remplacé par un descripteur (remplir / contenu / fixe avec hauteur par défaut). La
+   coquille `Panel` est livrée (`b754b11`) et reste une coquille d'affichage.
+3. **Le zoom maximum de 32 à 128** (accepté le 14/10), un commit à part.
+4. **Les outils de correction suivants** (`H-46`) : donner un anneau à un autre pays, souder et accrocher au bord,
+   découper. Le dev a *« d'autres cas à son idée »* pour ⟨retracer⟩.
+5. **Laissé ouvert** : détacher volontairement une frontière commune pendant un retraçage (question au dev, `s99`) ;
+   l'icône de ⟨retracer⟩ est provisoire, **le dev la dessine** (elle se remplace dans `toolIcons.tsx`, une entrée).
+
+**Livré le 14/10** (détail dans `completed.md`) : `{Polities}` défile, frontières 17× plus rapides, ⟨retracer⟩ avec
+ses trois règles, ‹espace› de partout, la liste qui glisse vers la cible, la coquille `Panel`. **Trois commits à
+pousser** (`1b2e89e`, `719dc89`, `b754b11` — vérifier avec `git ls-remote origin main`).
+
+## ▶▶▶ POINT DU 14/10 À 9 h 30 — la nuit du test général
+
+**Lire d'abord `files/plans/cartographer/general-test-night.md`** (l'état de la nuit) et
+`files/plans/cartographer/general-test-defects.md` (23 défauts, chacun avec l'outil qui l'aurait corrigé).
+137 pays d'Euratlas 1100 dessinés, vassaux et sous-vassaux compris, rang / statut / suzerain / couleur posés ;
+la liste `{Polities}` défile (`4de406c`). Ce qui manque : ce qu'aucune planche ne couvre (nord de 60°N, est de
+45°E, sud de 32°N). **La décision qui attend le dev** : l'ordre des outils de correction (`H-46` dans `s99` —
+retracer un tronçon, découper, souder, accrocher au bord), puis `H-44`.
+
+## ▶▶ LE TEST GÉNÉRAL — contexte (le dessin est fait, voir le point ci-dessus)
 
 **Le test général** : copier la planche Euratlas **AD 1100** dans le Cartographe, tout ce qui se dessine
 (royaumes, duchés, comtés, vassaux), pour éprouver l'outil et rectifier les décisions prises avant l'usage
 (le dev : *« s'il y a des décisions erronées, tu nommes le problème et on rectifie »*). **Ouvrir
 `/draw-from-plate`** — la méthode **lente**, un pays à la fois, vérifié contre la planche avant le suivant.
 
-- **Fait** : 16 pays (liste dans la skill). **Suivant** : Saragosse (son plan disait `shared=0`, à vérifier),
-  Lérida, Tortosa ; puis l'Aquitaine, la Bourgogne-Provence, l'Italie, la Scandinavie, l'Écosse, le pays de
-  Galles, l'Irlande, les Almoravides, Byzance.
+- **Fait** (nuit du 14/10) : 137 pays, tout ce que les huit planches couvrent. **Reste** : le nord, l'est et le
+  sud hors planches (captures Euratlas à faire), et les corrections du journal des défauts.
 - **L'atlas s'ouvre sur 1500** : passer `year` à 1100 dans le panneau de dev pour voir le tracé. Proposer au
   dev qu'il s'ouvre sur l'année dessinée (une ligne, `devParams/political.ts`).
 - **À la fin du test** : ranger `years/1100/` en `years/1100.test-euratlas/`, remettre

@@ -676,3 +676,12 @@ the aimed polity retraced, the neighbour left where it was? Recommended: no by d
 follows, as now), and if the need is shown, an explicit modifier held during the retrace. **Noted for later**:
 the maximum zoom raised from 32 to 128 (aiming at coast anchors 4–6 px apart at 3200 %), a separate commit;
 lighter coastlines (fewer points), the dev's remark — already in `next.md` (Douglas–Peucker).
+
+**Validating an outline when it is laid — the dev's call, 2026-10-14** (*"lorsqu'un tracé est posé, il
+puisse être validé, répondre à certains critères"*; asked before I redraw other sources, Duby's plates).
+Checked at a ring's closing, after a retrace and after a deletion. **Refused**: a ring that crosses itself
+(the night's Lolland and Euboea), an anchor visited twice (a figure of eight), a degenerate ring (too small,
+or a sliver). **Warned, not refused**: an overlap with a neighbour past a threshold — sometimes meant while
+work is in progress (Pisa drawn over the Empire until the carve tool exists). The same check over a whole
+year lists the faulty rings of its polities: `[Check this year]` (`s10`), placed and unavailable today.
+**Not built yet** — next after deleting a ring.

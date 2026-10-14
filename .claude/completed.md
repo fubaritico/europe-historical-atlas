@@ -2,11 +2,48 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-10-14 — ⟨retracer⟩, la lenteur des frontières, la coquille `Panel`, et le test au doigt du dev
+
+Le journal compte **10:14–10:27 (12 min) et 12:33–15:35 (3 h 02)** ; la session a duré de 10:14 à ~16:25 et le trou
+10:27–12:33 du journal est sans doute sous-compté (un `cd` vers 10:40, voir mes fautes). Le chantier ouvert le 05/10
+totalise **53 h 57 sur 11 plages** au journal. **8 commits** `d6ddc5b`..`b754b11` (les quatre premiers poussés par le
+dev), gate verte et revue à chaque pas, chaque garde prouvée par le code naïf. **3166 tests** au soir (842 → 848 `core`, 1428 → 1431 Cartographe).
+
+- **`{Polities}` défile enfin** (`d6ddc5b`) : le corps du shell n'avait pas de ligne de grille (le dock grandissait
+  à 3 646 px, la carte s'étirait et ne glissait plus) et 46 textes masqués « vassal de » s'échappaient de la liste.
+- **La dérivation des frontières de 5,7 s à 0,34 s** (`b3fd4cc`) : chaque segment de côte reconstruisait les anneaux
+  des 137 pays. Le dev : la correction s'affiche « sans attente ».
+- **⟨retracer⟩, le premier outil de correction** (`ad09e4c`, `1b2e89e`, `719dc89`) : ‹R›, une ancre du pays visé, un
+  tracé à la plume (côte, fleuve, voisin, points libres, crayon), une autre ancre du même contour ; tirets rouges
+  avant le clic, ‹alt› l'autre côté. **Trois règles sorties de la marche du dev** : l'arrivée suit l'eau
+  (Formentor) ; *« c'est les Obotrites qui comptent »* — un voisin qui ne fait que toucher le tronçon garde ses
+  points, dit dans la barre ; le côté remplacé est **le plus petit changement** (surface), la règle « le plus près »
+  ayant choisi toute l'île de la Rana. Corrigé à l'usage : Majorque, Minorque, l'Empire, les Obotrites, la Rana.
+- **‹espace› donne la main de partout** au-dessus de la carte, comme Illustrator (focus arrivé par un clic ; par
+  ‹Tab› il reste au contrôle, A11Y-001).
+- **La liste `{Polities}` glisse vers le pays visé** (`27e1d10`) — le dev : *« on gagne énormément d'ergonomie »* ;
+  **son en-tête garde ses 24 px** (`73fd1a5`).
+- **Une coquille `Panel` pour les quatre panneaux** (`b754b11`), décidée par le dev ; rien ne bouge à l'écran. La
+  revue m'a corrigé : le redimensionnement ira dans un `Dock`, pas dans la coquille.
+- **Non commité, en attente du test du dev** : supprimer un anneau en entier (toutes ses ancres sélectionnées +
+  ‹suppr›), le voisin gardant les points partagés — voir `next.md`.
+- **Mes fautes** : une page rechargée qui a effacé la correction non enregistrée du dev (il l'a refaite) ; un `cd`
+  en tête de commande ; un heredoc non protégé qui a vidé des gabarits (réparé) ; un premier test « Rana » qui
+  passait aussi avec l'ancienne règle (réécrit, `719dc89`) ; la promesse « le redimensionnement dans la coquille »,
+  fausse.
+
 ### 2026-10-13 — les frontières jusqu'à l'atlas, et le test général sur Euratlas 1100
 
-Une plage, **13/10 14:28 → 23:33 (9 h 05, 634 actions)** ; le chantier ouvert le 05/10 totalise **48 h 05 sur
-9 plages**. **9 commits** `997cbb1`..`3e849ff`, **aucun poussé** (10 en attente avec `1d946d1`), gate verte et
-revue à quatre agents à chaque pas de code, chaque garde prouvée par le code naïf.
+Une plage, **13/10 14:28 → 14/10 02:11 (11 h 42, 991 actions)**, nuit comprise ; le chantier ouvert le 05/10
+totalise **50 h 42 sur 9 plages**. **10 commits** `997cbb1`..`4de406c`, **aucun poussé** (le dev pousse), gate
+verte et revue à quatre agents à chaque pas de code, chaque garde prouvée par le code naïf.
+
+- **La nuit, seul, à la demande du dev** (*« tu dessines tout ce que tu peux dessiner, vassaux, sous-vassaux »*) :
+  **137 pays d'Euratlas 1100** dans `years/1100/`, îles comprises, rang / statut / suzerain / couleur posés.
+  Manques déclarés : au nord de 60°N, à l'est de 45°E, au sud de 32°N (aucune planche). **23 défauts de l'outil**
+  relevés dans `files/plans/cartographer/general-test-defects.md`, chacun avec l'outil qui l'aurait corrigé →
+  `H-46`. État de la nuit : `general-test-night.md`. `{Polities}` défile enfin (`4de406c`). **Ma faute** : un
+  `cd` vers 02:00.
 
 - **Les frontières, déléguées par le dev** (`files/plans/borders/plan.md`) : la dérivation coupée où la mer
   tourne en terre, le Cartographe dessine les frontières dans le style de leur relation, `{Layers}`,
@@ -25,31 +62,4 @@ revue à quatre agents à chaque pas de code, chaque garde prouvée par le code 
   au script sans regarder le résultat ; un `cd` en début de session ; le mot « main » employé sans le
   définir.
 
-### 2026-10-12 (soir) — enregistrer et rouvrir, les outils attendent le zoom, les fleuves de l'atlas, la barre d'actions
-
-Une session à distance, **12/10 ~18:20 → 22:59 (~4 h 40, dans la plage 14:45 → 22:59, 712 actions)** ; le
-chantier ouvert le 05/10 totalise **38 h 50 sur 8 plages**. **9 commits** `8f37372`..`9082652`, **tous
-poussés**, **2633 → 2831 tests**, gate verte et revue à quatre agents à chaque pas, chaque garde prouvée par
-le code naïf. Le dev, absent de l'écran, m'a laissé **conduire son Chrome** et juger à l'usage.
-
-- **Enregistrer et rouvrir, en mode local** (`H-28` tranché local) : le serveur de dev du Cartographe écrit
-  `years/<année>/` (`PUT /__years/<année>`, même machine, validé par le schéma de `core`, fichiers `.tmp` puis
-  renommés, manifeste en dernier) ; ‹ctrl+s› partout ; l'année s'ouvre au démarrage. **Les années ne sont
-  jamais commitées** (*« ils sont pour nous pour travailler »*), les traces gardées en copies suffixées
-  (`1100.bourgogne-v1/`). Allers-retours identiques à l'octet (md5).
-- **La France 1100 et la Bourgogne dessinées par moi**, enregistrées, rouvertes — d'où mon carnet de dessin
-  (`files/plans/cartographer/drawing-as-claude.md`) et des scénarios *Walked for real* dans `s02`/`s15`.
-- **Les outils attendent le zoom** (`H-34`, `s17`) : de trop loin (portée d'accroche > 10 km au sol) la plume,
-  le crayon et les touches qui modifient des points refusent, le curseur et la barre d'état le disent.
-- **Les fleuves suivis d'un morceau à l'autre** (`H-35`, `mendRivers`, 591 → 398 polylignes) et **dessinés
-  comme dans l'atlas**, d'une seule définition dans `core` (`riverDisplay.ts`). `H-36` fermé : 46 ancres sur
-  52 partagées au simple clic sur les fleuves.
-- **La barre d'actions de `{Polities}`** : `+` et poubelle au pied, ses dessins en pixels entiers,
-  confirmation `[Cancel]` en focus, ‹ctrl+z› depuis le panneau. **Deux bugs invisibles à jsdom trouvés dans
-  son Chrome** (le `<dialog>` rendait le focus à la poubelle désactivée ; ‹ctrl+z› n'était entendu que par le
-  canevas) — d'où sa note : **des tests Playwright**.
-- **Mes fautes** : deux `cd` ; un premier ‹ctrl+z› de page qui court-circuitait le geste en cours (attrapé
-  par la revue, ARCH-101) ; une phrase de boîte qui contredisait `s07` ; des clics envoyés pendant le
-  chargement du fond, perdus.
-
-> Older sessions (2026-09-12 → 2026-10-12 afternoon) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-12 evening) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

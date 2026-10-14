@@ -88,9 +88,21 @@ lord is drawn after the lord.
 
 ## What exists already (update at the end of a drawing session)
 
-16 polities of Euratlas 1100 in `years/1100/` (the dev's own 1100 kept in `years/1100.avant-test-euratlas/`):
-the Franks, the Empire, England, Hungary, Poland, Bohemia (vassal of the Empire), Normandy, Brittany,
-Flanders, Toulouse (vassals of the Franks), León-Castile, Pamplona-Nájera, Aragon-Navarre, Barcelona,
-Cerdanya, Besalú. Next on the Ebro: Zaragoza (its plan found `shared=0` at `share 5` — check it), Lérida,
-Tortosa. Then Aquitaine, Burgundy-Provence, Italy, Scandinavia, Scotland, Wales, Ireland, the Almoravids,
-Byzantium.
+**137 polities of Euratlas 1100** in `years/1100/` after the night of 2026-10-14 (the dev's own 1100 kept in
+`years/1100.avant-test-euratlas/`; backups `years/1100.euratlas-<count>/`). Everything the eight plates cover is drawn,
+vassals and sub-vassals included, with rank, status, suzerain and the plate's colour from
+`files/resources/euratlas/meta-1100.json` (applied by `apply-meta.py` after a save, then a reload). Not drawn, no plate:
+the Finns, Chudes, Mordvins, Burtas, Cheremiss; Norway, Sweden, Novgorod cut at 60°N, the Almoravids at 32°N. The night's
+defects, each with the tool it asks for: `files/plans/cartographer/general-test-defects.md`.
+
+## Tools added on the night of 2026-10-14
+
+- `files/plans/cartographer/night-helpers-ext.js` — inject after `page-helpers.js`. A hidden tab gets no
+  `requestAnimationFrame` and timers throttled to one a minute: the file ticks on a `MessageChannel`. Adds `ring`
+  (steps by kind, closed by searching for *Closing*), `island`, `islandAt`, `coastRun` (adaptive: bisects a coast
+  click that inserted nothing — **never across land between two far coast points**, it took lakes once), `river`,
+  `auto`/`autoC` (play a `plan.py` plan from `files/resources/euratlas/ops/`).
+- A long script outlives the browser tool's 45 s: start it as `(async()=>{…; window.__f=log})()` and poll.
+- **‹ctrl+z› ×N is the way back** from a script that went wrong — the history held the night.
+- `files/resources/euratlas/euratlas-1100-entities.json` — the 138 entities of Euratlas 1100 with title, rank and
+  `dependsOn` (private reference). **Euratlas's entity pages swap the empires' names** against the plates.

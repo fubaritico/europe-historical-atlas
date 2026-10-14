@@ -8,7 +8,9 @@ Put here the know issues to avoid cluttering the context window.
   (France + Bourgogne) est rangé, intact, dans `years/1100.avant-test-euratlas/`. Le Cartographe ouvre donc
   le test, et l'atlas local le montre à l'année 1100. **À la fin du test** : `years/1100` → `years/1100.test-
   euratlas`, puis `years/1100.avant-test-euratlas` → `years/1100`. Rien de tout ça n'est commité (Euratlas
-  est une référence privée). **Sévérité : à savoir.**
+  est une référence privée). **Depuis la nuit du 14/10**, `years/1100/` tient 137 pays, et les traces de la nuit
+  sont `years/1100.euratlas-{16,19,30,48,76,98,137,137b}/` et `1100.before-rename/` — toutes locales, à trier avec
+  le dev (aucune n'a été supprimée : `rm -rf` demande sa permission). **Sévérité : à savoir.**
 - **Les années enregistrées en local ne sont jamais commitées, et `years/index.json` est en `skip-worktree`
   sur la machine du dev.** Sa décision, 12/10 : *« ils sont pour nous pour travailler »* — retrouver ses
   tracés, déboguer les outils, maîtriser le format. Les dossiers `packages/atlas/public/years/<année>/` sont
@@ -71,6 +73,15 @@ Put here the know issues to avoid cluttering the context window.
   A11Y-001) : un bouton `disabled` ne prend pas le focus et son `title` *« Select a polity to delete »* ne
   s'entend qu'au survol. Laissé tel quel : D3 veut la poubelle grisée sans cible, et la barre d'état dit déjà
   *« Sélectionnez un pays »*. Remède si besoin : `aria-disabled` + une description masquée.
+  (7) **⟨retracer⟩ ne se trace pas au clavier non plus** (14/10, A11Y-002) — même manque que (3) : le rail l'annonce
+  avec ‹R›, rien ne permet de choisir une ancre sans pointeur. Et **‹espace› est la seule touche simple entendue sur
+  toute la page** (quand le pointeur est sur la carte et que le focus est arrivé par un clic) : voulu par le dev
+  (*« quel que soit l'outil, espace donne la main »*), et un focus arrivé par ‹Tab› la laisse au contrôle
+  (A11Y-001, corrigé). Ni réglable ni désactivable, ce que WCAG 2.1.4 demanderait pour une touche simple globale ;
+  remède si besoin : une préférence. **‹alt› n'est entendu que par le canevas** (14/10, ARCH-002) : focus ailleurs,
+  l'aperçu de l'autre côté ne bascule qu'au prochain mouvement du pointeur — le clic, lui, lit `altKey` et décide
+  juste. Remède le jour où une troisième touche tenue arrive : un seul objet pour les touches tenues, nourri par les
+  deux écoutes.
   **Architecture** : (6) ~~« côte ou fleuve » sur cinq aiguillages~~ — **fait le 12/10** : une table
   par couche (`canvas/snapLayers.ts`), la géométrie renommée `lineSnap`. (7)
   `paintRanks` est recalculé à chaque repeinture — ~50 pays, négligeable ; à mettre en cache par
