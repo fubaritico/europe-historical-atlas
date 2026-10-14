@@ -205,10 +205,12 @@ Scenario: retrace a stretch of the aimed polity
   Then the stretch is replaced by the run, in one undo step
   And the result zone reads "Emirate of the Balearic Islands: 2 anchors replaced by 4"
 
-Scenario: the side replaced is the one the run lies closer to
+Scenario: the side replaced is the smaller change
   Given a run drawn from one anchor to another of a closed outline
-  Then the stretch replaced is the one the run lies closer to — not the shorter
+  Then the stretch replaced is the one that, closed by the run, encloses the smaller area — not the shorter
   And with ‹alt› held, the other one
+  Given the Duchy of the Rana's island joined to the mainland by two anchors, and a run adding the mainland
+  Then the join between the two anchors is replaced, never the island
 
 Scenario: a neighbour on the whole stretch follows, one that only touches it keeps its points
   Given the stretch is a border France shares with the Empire along all its length
@@ -243,7 +245,9 @@ Scenario: what is refused, said before the click
 > bay of Palma on Majorca, the west of Minorca, the Holy Roman Empire's limit along the Obotrites, the
 > Obotrites' own coast. What the walk changed is written above: the end along the water (Formentor), the
 > bar saying what a click lays, the mode named *"Retrace · Pen — follow the coast"* rather than *"Pen"*,
-> and the junction rule. **What it found that is not the tool's**: the cape of Formentor is a contour of
+> the junction rule, and **the side replaced** — first the one the run lies closer to, which chose the whole
+> island of the Rana when its mainland was added (a third anchor on the join changed nothing); now the
+> smaller change. **What it found that is not the tool's**: the cape of Formentor is a contour of
 > its own in the coastline data, so no single coast line joins its two sides — the author removes the point
 > that strays and joins the two coast anchors. And the derivation of borders cost 5.7 s after every
 > gesture on 137 polities: fixed the same day (0.34 s).

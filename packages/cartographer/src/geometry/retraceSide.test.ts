@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { closerSide, lineGap } from './retraceSide'
+import { enclosedArea, smallerSide } from './retraceSide'
 
 import type { Point } from '../view/viewport'
 
@@ -18,18 +18,44 @@ const UNDER: Point[] = [
 
 describe('retraceSide', () => {
   describe('happy path', () => {
-    it('replaces the side the new run lies closer to', () => {
+    it('replaces the side whose change is the smaller — a correction along it', () => {
       const run: Point[] = [
         [0, 0],
         [8, 1],
         [10, 10],
       ]
-      expect(closerSide(run, OVER_TOP, UNDER)).toBe('forward')
-      expect(closerSide(run, UNDER, OVER_TOP)).toBe('backward')
+      expect(smallerSide(run, OVER_TOP, UNDER)).toBe('forward')
+      expect(smallerSide(run, UNDER, OVER_TOP)).toBe('backward')
     })
   })
 
   describe('variants', () => {
+    // The Duchy of the Rana, 2026-10-14: an island joined to the mainland by two adjacent anchors; the run
+    // adds the mainland, far from both sides. The nearer side was the island — the smaller change is the
+    // join between the two anchors.
+    it('adds ground by replacing the short join, not the island far from the run', () => {
+      const join: Point[] = [
+        [0, 0],
+        [10, 0],
+      ]
+      const island: Point[] = [
+        [0, 0],
+        [-5, -10],
+        [5, -40],
+        [15, -10],
+        [10, 0],
+      ]
+      const mainland: Point[] = [
+        [0, 0],
+        [-30, 20],
+        [-20, 40],
+        [20, 40],
+        [10, 0],
+      ]
+      expect(smallerSide(mainland, join, island)).toBe('forward')
+      expect(smallerSide(mainland, island, join)).toBe('backward')
+    })
+
     // Defect 14 of the general test: the shorter side is not the one the author draws over.
     it('takes the longer side when the run lies along it', () => {
       const short: Point[] = [
@@ -48,22 +74,25 @@ describe('retraceSide', () => {
         [9, 19],
         [10, 0],
       ]
-      expect(closerSide(run, short, long)).toBe('backward')
+      expect(smallerSide(run, short, long)).toBe('backward')
     })
 
-    it('measures the gap both ways, so a far stretch scores far even under a short run', () => {
-      expect(lineGap(OVER_TOP, OVER_TOP)).toBe(0)
-      expect(lineGap(OVER_TOP, UNDER)).toBeGreaterThan(0)
-      expect(lineGap(OVER_TOP, UNDER)).toBe(lineGap(UNDER, OVER_TOP))
+    it('measures the ground between a run and a stretch, whichever way they wind', () => {
+      const run: Point[] = [
+        [0, 0],
+        [0, 10],
+        [10, 10],
+      ]
+      expect(enclosedArea(run, OVER_TOP)).toBe(100)
+      expect(enclosedArea([...run].reverse(), [...OVER_TOP].reverse())).toBe(100)
     })
   })
 
   // L3: N/A — pure arithmetic, nothing refused.
 
   describe('unmanaged errors', () => {
-    it('reads two empty lines as no gap, and an empty one as infinitely far from points', () => {
-      expect(lineGap([], [])).toBe(0)
-      expect(lineGap([[0, 0]], [])).toBe(Infinity)
+    it('reads an empty run and stretch as enclosing nothing', () => {
+      expect(enclosedArea([], [])).toBe(0)
     })
   })
 
@@ -84,12 +113,12 @@ describe('retraceSide', () => {
         [5, -1],
         [10, 0],
       ]
-      expect(closerSide(straight, above, below)).toBe('forward')
-      expect(closerSide(straight, below, above)).toBe('forward')
+      expect(smallerSide(straight, above, below)).toBe('forward')
+      expect(smallerSide(straight, below, above)).toBe('forward')
     })
 
-    it('measures a one-point line by its point', () => {
-      expect(lineGap([[3, 4]], [[0, 0]])).toBe(5)
+    it('reads a run laid over the stretch itself as no change at all', () => {
+      expect(enclosedArea(OVER_TOP, OVER_TOP)).toBe(0)
     })
   })
 })

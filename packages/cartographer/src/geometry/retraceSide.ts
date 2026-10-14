@@ -1,68 +1,54 @@
-import { nearestOnSegment } from './stretchHit'
-
 import type { Point } from '../view/viewport'
 
 /**
  * Which way round a ring ⟨retrace⟩ replaces (`H-46`): between two anchors of a closed ring there are two
- * stretches, and the one replaced is **the one the new run lies closest to** — not the shorter. The
- * night of the general test drew Lori and Damascus along the wrong side because a follow took "the shorter
- * way" (defect 14); the author draws over the stretch that is wrong, so nearness is what names it.
+ * stretches, and the one replaced is **the smaller change** — the one that, closed by the new run, encloses
+ * the smaller area.
+ *
+ * **Not the nearer, which was the first rule and failed at once** (the dev, 2026-10-14, the Duchy of the
+ * Rana): adding the mainland to Rügen, joined by two anchors, the run went far from both sides, and the
+ * nearer was the whole island — which it was about to replace. The area between a run and a stretch is the
+ * ground the gesture adds or takes away; a correction changes little, so the smaller is the one meant. It
+ * agrees with the nearer on a correction along the stretch (Formentor), and still refuses "the shorter
+ * way" that drew Lori and Damascus along the wrong side (defect 14 of the general test). ‹alt› takes the
+ * other one.
  */
 
 /** One of the two ways round: along the ring's stored order, or against it. */
 export type RetraceSide = 'forward' | 'backward'
 
 /**
- * The squared distance from a point to a polyline — to its nearest segment, or its only point.
- * @param point - the point
- * @param line - the polyline, at least one point
- * @returns the squared distance, `Infinity` for an empty line
+ * The area a run and a stretch enclose between them: the run from its start to its end, then the stretch
+ * back — a polygon, by the shoelace formula.
+ * @param run - the new run, from the start anchor to the end anchor
+ * @param stretch - a stretch between the same two anchors, its two ends included, from the start
+ * @returns the area, in the points' unit squared; `0` when they enclose nothing
  */
-function distanceToLine(point: Point, line: readonly Point[]): number {
-  const only = line[0]
-  if (only === undefined) return Infinity
-  if (line.length === 1) return (point[0] - only[0]) ** 2 + (point[1] - only[1]) ** 2
-  let best = Infinity
-  for (let at = 1; at < line.length; at += 1) {
-    const a = line[at - 1]
-    const b = line[at]
-    if (a !== undefined && b !== undefined)
-      best = Math.min(best, nearestOnSegment(point, a, b).distance)
-  }
-  return best
+export function enclosedArea(run: readonly Point[], stretch: readonly Point[]): number {
+  // The stretch walked back, its two ends left out: they are the run's own ends.
+  const polygon = [...run, ...stretch.slice(1, -1).reverse()]
+  let twice = 0
+  polygon.forEach((point, at) => {
+    const next = polygon[(at + 1) % polygon.length]
+    if (next !== undefined) twice += point[0] * next[1] - next[0] * point[1]
+  })
+  return Math.abs(twice) / 2
 }
 
 /**
- * How far apart two polylines lie: the mean distance of each one's points to the other — symmetric, so a
- * long stretch far from a short run scores as far as it looks.
- * @param a - one polyline
- * @param b - the other
- * @returns the mean distance, in the points' unit
- */
-export function lineGap(a: readonly Point[], b: readonly Point[]): number {
-  const count = a.length + b.length
-  if (count === 0) return 0
-  let sum = 0
-  for (const point of a) sum += Math.sqrt(distanceToLine(point, b))
-  for (const point of b) sum += Math.sqrt(distanceToLine(point, a))
-  return sum / count
-}
-
-/**
- * The side the new run replaces: the stretch it lies closer to. On an exact tie, the stretch with fewer
- * points — the smaller change.
+ * The side the new run replaces: the smaller change. On an exact tie, the stretch with fewer points.
  * @param run - the new run, from the start anchor to the end anchor, in screen pixels
  * @param forward - the stretch along the ring's order, its two ends included
  * @param backward - the stretch against it, its two ends included
  * @returns the side to replace
  */
-export function closerSide(
+export function smallerSide(
   run: readonly Point[],
   forward: readonly Point[],
   backward: readonly Point[]
 ): RetraceSide {
-  const ahead = lineGap(run, forward)
-  const behind = lineGap(run, backward)
+  const ahead = enclosedArea(run, forward)
+  const behind = enclosedArea(run, backward)
   if (ahead !== behind) return ahead < behind ? 'forward' : 'backward'
   return forward.length <= backward.length ? 'forward' : 'backward'
 }

@@ -5,7 +5,7 @@ import {
 } from '@europe-historical-atlas/core/editor/retrace'
 
 import { nearestAmong } from '../geometry/hitTest'
-import { closerSide } from '../geometry/retraceSide'
+import { smallerSide } from '../geometry/retraceSide'
 import { MIN_RING_ANCHORS } from '../geometry/ringClosure'
 import { backdropToLonLat } from '../view/projection'
 
@@ -165,7 +165,7 @@ function stretchOnScreen(
 }
 
 /**
- * The stretch a run replaces: the side it lies closer to (`closerSide`), or the other with ‹alt› held.
+ * The stretch a run replaces: the smaller change (`smallerSide`), or the other with ‹alt› held.
  * @param context - the projection, and whether ‹alt› is held
  * @param arcs - both ways round, from `from` to `to`
  * @param ends - the start and end anchors
@@ -178,7 +178,7 @@ export function replacedSide(
   ends: { from: number; to: number },
   run: readonly Point[]
 ): number[] {
-  const side = closerSide(
+  const side = smallerSide(
     run,
     stretchOnScreen(context, ends.from, arcs.forward, ends.to),
     stretchOnScreen(context, ends.from, arcs.backward, ends.to)
