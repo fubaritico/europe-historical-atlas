@@ -328,6 +328,10 @@
   width: 100%;
   min-height: 0;
   overflow-y: auto;
+  /* The containing block of the rows' `.visually-hidden` spans (« , vassal of … »). They are absolute, and
+     an absolute box is clipped by a scroller only if the scroller is positioned: without this, the 46 of
+     1100 escaped to the viewport and made the whole page scroll by 2 300px under the map (2026-10-14). */
+  position: relative;
 }
 
 .polities__list:focus-visible {

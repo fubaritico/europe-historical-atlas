@@ -35,6 +35,12 @@
  * `minmax(0, 1fr)` rather than `1fr` in both, which is the handoff's own choice and not a detail: a bare
  * `1fr` floors at the content's minimum size, so a canvas or a long list would push the grid wider than
  * the window instead of being clipped by it.
+ *
+ * **The body declares its row too, and that is the half that was missing until 2026-10-14.** The shell's
+ * `minmax(0, 1fr)` bounds the body; it bounds nothing *inside* it. With no `grid-template-rows` the body's
+ * one row is implicit, so `auto`, so as tall as its tallest cell: 137 polities made the dock 3 646px, the
+ * row followed, and the canvas cell stretched with it — a map drawn mostly off-screen that no longer
+ * dragged. The list only scrolls if the row it sits in is held to the window.
  */
 .shell {
   height: 100dvh;
@@ -66,6 +72,7 @@
 .shell__body {
   display: grid;
   grid-template-columns: var(--rail) minmax(0, 1fr) var(--dock-w);
+  grid-template-rows: minmax(0, 1fr);
   min-height: 0;
 }
 

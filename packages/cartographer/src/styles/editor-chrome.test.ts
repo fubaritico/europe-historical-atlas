@@ -1,14 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
 import chrome from './editor-chrome.css?raw'
+import { sheetRule } from './sheetRule'
 
-/** The declarations of one rule of the chrome sheet, comments removed, by its exact selector. */
-function rule(selector: string): string {
-  const code = chrome.replace(/\/\*[\s\S]*?\*\//g, '')
-  const start = code.indexOf(`${selector} {`)
-  if (start < 0) throw new Error(`${selector} is not in editor-chrome.css`)
-  return code.slice(start, code.indexOf('}', start)).replace(/\s+/g, ' ')
-}
+const rule = (selector: string): string => sheetRule(chrome, 'editor-chrome.css', selector)
 
 // jsdom has no cascade of layers, so the computed height cannot be read here: the sheet is read as text,
 // and the real height was measured in the browser (2026-10-14: 240px before, the dock's height after).
@@ -25,6 +20,13 @@ describe('editor-chrome.css — the {Polities} list', () => {
       expect(list).toContain('flex: 1 1 auto;')
       expect(list).toContain('min-height: 0;')
       expect(list).toContain('overflow-y: auto;')
+    })
+
+    // Measured on 1100 (137 polities): without it, 46 absolute « vassal of » spans escaped the scroller and
+    // the document scrolled to 3 236px in a 903px window.
+    it('is positioned, so the absolute visually-hidden spans of its rows stay clipped inside it', () => {
+      expect(rule('.visually-hidden')).toContain('position: absolute;')
+      expect(rule('.ui-listbox.polities__list')).toContain('position: relative;')
     })
   })
 
