@@ -7,6 +7,7 @@ import crossSnapUrl from '../cursors/cross-snap.svg'
 import crossUrl from '../cursors/cross.svg'
 import handClosedUrl from '../cursors/hand-closed.svg'
 import handOpenUrl from '../cursors/hand-open.svg'
+import { isPenTool } from '../state/toolSlice'
 
 import type { EditorTool } from '../state/toolSlice'
 
@@ -147,7 +148,7 @@ export function cursorFor(state: CursorState): CursorName | typeof REFUSED {
   // about points: a click in a fill chooses its polity.
   if (!state.hasTarget || state.tooFar)
     return state.tool === 'edit' && state.overFill ? 'arrow' : REFUSED
-  return state.tool === 'draw' ? drawCursor(state) : arrowCursor(state)
+  return isPenTool(state.tool) ? drawCursor(state) : arrowCursor(state)
 }
 
 /**

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { isPageHistoryKey, keepsItsOwnUndo } from './historyShortcut'
+import { isPageHistoryKey, keepsItsOwnKeys } from './historyShortcut'
 
 /**
  * A key pressed on an element and read where the page's listener reads it, after bubbling.
@@ -95,8 +95,8 @@ describe('isPageHistoryKey', () => {
     })
 
     it('reads a target that is not an element as no text field', () => {
-      expect(keepsItsOwnUndo(window)).toBe(false)
-      expect(keepsItsOwnUndo(null)).toBe(false)
+      expect(keepsItsOwnKeys(window)).toBe(false)
+      expect(keepsItsOwnKeys(null)).toBe(false)
     })
   })
 })

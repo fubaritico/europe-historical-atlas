@@ -38,6 +38,7 @@ function action(overrides: Partial<ActionInputs> = {}): ActionInputs {
     inserting: false,
     tooFar: false,
     session: idleSession(),
+    retracing: null,
     ...overrides,
   }
 }
@@ -55,6 +56,7 @@ function overlay(overrides: Partial<OverlayInputs> = {}): OverlayInputs {
     closeRadius: 8,
     snapTarget: null,
     snapPreview: null,
+    replaced: null,
     ...overrides,
   }
 }
@@ -414,5 +416,59 @@ describe('isolatedAnchors', () => {
       // France's ring is 0 1 2 3: 3 closes onto 0, 200 px away — still isolated.
       expect(isolatedAnchors(sharedBorderDocument(), [3], onScreen, 12)).toEqual([3])
     })
+  })
+})
+
+describe('toolSession — ⟨retrace⟩ (H-46)', () => {
+  it('says ⟨retrace⟩’s own sentence while it is in hand', () => {
+    const said = actionSentence(
+      action({ tool: 'retrace', retracing: 'Retracing Reaume de France — start on this anchor' })
+    )
+    expect(said).toBe('Retracing Reaume de France — start on this anchor')
+  })
+
+  it('says the water a click would follow while the run is drawn', () => {
+    expect(actionSentence(action({ tool: 'retrace', snapping: 'coastline' }))).toBe(
+      'Retracing Reaume de France — following the coastline'
+    )
+    expect(actionSentence(action({ tool: 'retrace', joining: 'Branching from…' }))).toBe(
+      'Retracing Reaume de France — on a neighbour’s anchor'
+    )
+    expect(actionSentence(action({ tool: 'retrace' }))).toBe(
+      'Retracing Reaume de France — click one of its anchors to end'
+    )
+  })
+
+  it('asks to zoom in to retrace from too far out', () => {
+    expect(actionSentence(action({ tool: 'retrace', tooFar: true, retracing: 'x' }))).toBe(
+      'Zoom in to retrace Reaume de France'
+    )
+  })
+
+  it('shows the run in progress and the stretch it would replace, never a closing offer', () => {
+    const session = idleSession()
+    session.outline = [here(50, 50), here(100, 50), here(100, 100)]
+    const scene = overlayScene(
+      overlay({
+        tool: 'retrace',
+        session,
+        pointer: [51, 51],
+        replaced: [
+          [0, 0],
+          [1, 1],
+        ],
+      })
+    )
+    expect(scene.outline).toHaveLength(3)
+    expect(scene.closing).toBe(false)
+    expect(scene.replaced).toEqual([
+      [0, 0],
+      [1, 1],
+    ])
+  })
+
+  it('shows no replaced stretch under the white arrow', () => {
+    const scene = overlayScene(overlay({ tool: 'edit', replaced: [[0, 0]] }))
+    expect(scene.replaced).toBeNull()
   })
 })

@@ -17,11 +17,12 @@ import { historyKey } from './navigation'
  */
 
 /**
- * Whether a key's target keeps its own ‹ctrl+Z›: a text field, or anything inside an open dialogue.
+ * Whether a key's target keeps its own keys — its ‹ctrl+Z›, its ‹space›: a text field, or anything inside an
+ * open dialogue. The page-level ‹ctrl+Z› and ‹space› (`toolKeys.listenForPageSpace`) both leave these alone.
  * @param target - where the key was pressed
- * @returns `true` when the document's history must not answer
+ * @returns `true` when the canvas must not answer the key
  */
-export function keepsItsOwnUndo(target: EventTarget | null): boolean {
+export function keepsItsOwnKeys(target: EventTarget | null): boolean {
   if (!(target instanceof Element)) return false
   if (target.closest('dialog[open]') !== null) return true
   if (target instanceof HTMLElement && target.isContentEditable) return true
@@ -35,7 +36,7 @@ export function keepsItsOwnUndo(target: EventTarget | null): boolean {
  * @returns `true` for ‹ctrl+Z› / ‹ctrl+shift+Z› pressed outside the canvas, a field or a dialogue
  */
 export function isPageHistoryKey(event: KeyboardEvent, canvas: Element): boolean {
-  if (event.defaultPrevented || event.target === canvas || keepsItsOwnUndo(event.target))
+  if (event.defaultPrevented || event.target === canvas || keepsItsOwnKeys(event.target))
     return false
   return historyKey(event) !== null
 }

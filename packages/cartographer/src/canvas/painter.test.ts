@@ -136,6 +136,7 @@ const STYLE: PaintStyle = {
   anchorFill: '#ffffff',
   anchorStroke: '#5b93d6',
   anchorRadius: 4,
+  replacedStroke: '#c86a52',
   snapAnchorRadius: 2,
   borderCore: '#f3e7cd',
   borderEdge: '#5c3a2e',

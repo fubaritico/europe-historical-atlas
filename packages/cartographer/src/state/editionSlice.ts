@@ -15,6 +15,7 @@ import {
   updatePolity,
 } from '@europe-historical-atlas/core/editor/documentEdits'
 import { createHistory } from '@europe-historical-atlas/core/editor/history'
+import { isRetraceRefusal, retraceStretch } from '@europe-historical-atlas/core/editor/retrace'
 import { restack } from '@europe-historical-atlas/core/editor/stacking'
 
 import type { CartographerStore } from './store'
@@ -33,6 +34,7 @@ import type {
   HistoryRow,
   HistoryStep,
 } from '@europe-historical-atlas/core/editor/history'
+import type { RetraceDone, RetraceRefusal } from '@europe-historical-atlas/core/editor/retrace'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import type { StateCreator } from 'zustand'
@@ -209,6 +211,25 @@ export interface EditionActions {
    * @returns the polities that held any of them, or `null` — and nothing happened
    */
   deleteAnchors: (indices: readonly number[], step: HistoryStep) => AnchorRemoval | null
+  /**
+   * Replace a stretch of a polity's ring by a new run, as one undoable step — ⟨retrace⟩'s last click
+   * (`H-46`). Every ring running over the stretch takes the run, so a neighbour on it follows.
+   * @param polityId - whose ring is retraced
+   * @param from - the anchor the retrace starts on
+   * @param to - the anchor it ends on
+   * @param replaced - the anchors strictly between them that go, from `from`
+   * @param points - the new run, strictly between `from` and `to`, each with its provenance
+   * @param step - how the gesture is named
+   * @returns what it did, or why it was refused — and then nothing happened
+   */
+  retraceStretch: (
+    polityId: string,
+    from: number,
+    to: number,
+    replaced: readonly number[],
+    points: readonly OutlinePoint[],
+    step: HistoryStep
+  ) => RetraceDone | RetraceRefusal
   /**
    * Move a polity among its siblings, its vassals with it, as one undoable step — `s16`'s four
    * commands, from the menu of a row of `{Polities}`.
@@ -404,12 +425,21 @@ function polityActions(
  * The edits of the anchors — insert one on a stretch, remove some — each answering with what it
  * did, which `recorder`'s boolean cannot carry.
  * @param record - the runner every recorded action goes through
- * @returns `insertAnchor` and `deleteAnchors`
+ * @returns `insertAnchor`, `deleteAnchors` and `retraceStretch`
  */
 function anchorActions(
   record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean
-): Pick<EditionActions, 'insertAnchor' | 'deleteAnchors'> {
+): Pick<EditionActions, 'insertAnchor' | 'deleteAnchors' | 'retraceStretch'> {
   return {
+    retraceStretch: (polityId, from, to, replaced, points, step): RetraceDone | RetraceRefusal => {
+      // Overwritten at once: `record` runs the edit synchronously, and the answer comes back out of it.
+      let answer: RetraceDone | RetraceRefusal = { kind: 'no-ring' }
+      record((document) => {
+        answer = retraceStretch(document, polityId, from, to, replaced, points)
+        return !isRetraceRefusal(answer)
+      }, step)
+      return answer
+    },
     insertAnchor: (a, b, point, step): number | null => {
       let index: number | null = null
       record((document) => {

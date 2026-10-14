@@ -1,5 +1,6 @@
 import { normaliseRect } from '../geometry/marquee'
 import { isClosingOffered } from '../geometry/ringClosure'
+import { isPenTool } from '../state/toolSlice'
 
 import type { LineVertex } from '../geometry/lineSnap'
 import type { Rect } from '../geometry/marquee'
@@ -332,7 +333,7 @@ export function penSnapAnchors(
   target: string | null,
   tooFar: boolean
 ): number[] {
-  if (tool !== 'draw' || target === null || tooFar) return []
+  if (!isPenTool(tool) || target === null || tooFar) return []
   return neighbourAnchors(document, target)
 }
 
@@ -385,6 +386,11 @@ export interface ActionInputs {
   tooFar: boolean
   /** The session. */
   session: ToolSession
+  /**
+   * ⟨retrace⟩'s own sentence (`retraceView`) — `null` under any other tool, and under ⟨retrace⟩ while the
+   * run is drawn with no end anchor under the pointer.
+   */
+  retracing: string | null
 }
 
 /**
@@ -406,6 +412,27 @@ function penSentence(inputs: ActionInputs, targetName: string): string {
 }
 
 /**
+ * What ⟨retrace⟩ is doing: its own sentence when it has one (starting, or over an end anchor), otherwise
+ * what the click would lay — the water followed, or the end still to click.
+ * @param inputs - ⟨retrace⟩'s sentence, and what the Pen's machinery offers under the pointer
+ * @param targetName - the polity's name, verbatim
+ * @returns the sentence
+ */
+function retraceSentence(inputs: ActionInputs, targetName: string): string {
+  if (inputs.retracing !== null) return inputs.retracing
+  if (inputs.snapping !== null) return `Retracing ${targetName} — following the ${inputs.snapping}`
+  if (inputs.joining !== null) return `Retracing ${targetName} — on a neighbour’s anchor`
+  return `Retracing ${targetName} — click one of its anchors to end`
+}
+
+/** What a tool would do, for the far-view sentence — *"Zoom in to retrace Almoravids"*. */
+const FAR_VERBS: Record<Exclude<EditorTool, 'navigate'>, string> = {
+  draw: 'draw in',
+  edit: 'edit',
+  retrace: 'retrace',
+}
+
+/**
  * The status bar's description of the action — a verb, and the polity it acts on.
  *
  * **The dev's pattern, 2026-10-08**: present participle, the polity's name verbatim, never its id — so a
@@ -419,8 +446,8 @@ export function actionSentence(inputs: ActionInputs): string | null {
   if (tool === 'navigate') return null
   if (targetName === null) return inputs.onCanvas ? 'Select a polity to draw in' : null
   // H-34: the bar says why the tool is waiting, and still names whom it would act for.
-  if (inputs.tooFar)
-    return tool === 'draw' ? `Zoom in to draw in ${targetName}` : `Zoom in to edit ${targetName}`
+  if (inputs.tooFar) return `Zoom in to ${FAR_VERBS[tool]} ${targetName}`
+  if (tool === 'retrace') return retraceSentence(inputs, targetName)
   if (tool === 'draw') return penSentence(inputs, targetName)
   if (session.moving !== null) return `Moving path from ${targetName}`
   if (inputs.inserting) return `Inserting a point into ${targetName}`
@@ -446,6 +473,8 @@ export interface OverlayScene {
   snapTarget: Point | null
   /** The stretch of layer a click would insert, from the last snapped anchor — the preview. */
   snapPreview: readonly Point[] | null
+  /** The stretch ⟨retrace⟩ would replace on a click here, its ends included — `null` when none would be. */
+  replaced: readonly Point[] | null
 }
 
 /** Everything {@link overlayScene} reads. */
@@ -474,6 +503,8 @@ export interface OverlayInputs {
   snapTarget: Point | null
   /** The layer stretch a click would insert, on screen — `null` when the click would only place a point. */
   snapPreview: readonly Point[] | null
+  /** The stretch ⟨retrace⟩ would replace, on screen — `null` under any other tool, or when none would be. */
+  replaced: readonly Point[] | null
 }
 
 /**
@@ -504,6 +535,23 @@ function marqueeRect(session: ToolSession): Rect | null {
 }
 
 /**
+ * Whether the first anchor offers to close the outline — under the Pen only: a retrace ends on an anchor
+ * of the outline it corrects, never by closing its own run.
+ * @param inputs - the tool and the closing radius
+ * @param outline - the outline in progress, on screen
+ * @param pointer - the pointer under a pen tool, or `null`
+ * @returns `true` when a click would close the ring
+ */
+function closingOffer(
+  inputs: OverlayInputs,
+  outline: readonly Point[],
+  pointer: Point | null
+): boolean {
+  if (inputs.tool !== 'draw' || pointer === null) return false
+  return isClosingOffered(outline, pointer, inputs.closeRadius)
+}
+
+/**
  * What the overlay should show for this session and this pointer.
  *
  * The rubber band runs from the last anchor to the pointer only under the Pen, and only while the pointer
@@ -514,7 +562,7 @@ function marqueeRect(session: ToolSession): Rect | null {
  */
 export function overlayScene(inputs: OverlayInputs): OverlayScene {
   const outline = inputs.session.outline.map((point) => inputs.toScreen(point.at))
-  const drawing = inputs.tool === 'draw'
+  const drawing = isPenTool(inputs.tool)
   const pointer = drawing ? inputs.pointer : null
   // The preview replaces the rubber band — it *is* the line the click will lay. Without one, the band
   // runs to the layer vertex the click would snap onto, not to the pointer beside it.
@@ -524,7 +572,8 @@ export function overlayScene(inputs: OverlayInputs): OverlayScene {
     rubberTo: outline.length > 0 && inputs.snapPreview === null ? bandEnd : null,
     snapTarget: drawing ? inputs.snapTarget : null,
     snapPreview: drawing ? inputs.snapPreview : null,
-    closing: pointer !== null && isClosingOffered(outline, pointer, inputs.closeRadius),
+    closing: closingOffer(inputs, outline, pointer),
+    replaced: drawing ? inputs.replaced : null,
     marquee: marqueeRect(inputs.session),
     moving: movingPreview(inputs),
   }

@@ -2473,3 +2473,298 @@ describe('the Pen finding the coast, on the canvas (s02)', () => {
   // L3–L5: the gestures' own suite (`coastSwitch.test.ts`) holds them; the canvas only routes the
   // press, the drag and the release to them.
 })
+
+/**
+ * A click with ‹alt› held, as a browser sends it: the key on both the press and the release.
+ * @param node - the canvas
+ * @param at - where, in CSS pixels
+ */
+function altClick(node: HTMLCanvasElement, at: readonly [number, number]): void {
+  for (const type of ['pointerdown', 'pointerup']) {
+    const event = pointerEvent(type, { offsetX: at[0], offsetY: at[1] })
+    Object.assign(event, { altKey: true })
+    node.dispatchEvent(event)
+  }
+}
+
+/** France as the canvas triangle, drawn with the Pen and closed, then ⟨retrace⟩ taken with ‹R›. */
+function triangleThenRetrace() {
+  const opened = attach()
+  aimAtFrance(opened.store)
+  viewAtScale(opened.store, 8)
+  for (const at of CANVAS_TRIANGLE) click(opened.node, at)
+  click(opened.node, [301, 201])
+  opened.node.dispatchEvent(keyEvent('r'))
+  return opened
+}
+
+/** France's first ring. */
+const ring = (store: CartographerStoreHook) => store.getState().document.claims[0]?.rings[0] ?? []
+
+describe('⟨retrace⟩ on the canvas (H-46)', () => {
+  describe('happy path', () => {
+    it('takes ⟨retrace⟩ with R, and says so', () => {
+      const { store, resulted, dispose } = triangleThenRetrace()
+      expect(store.getState().tool).toBe('retrace')
+      expect(resulted).toHaveBeenLastCalledWith('Retrace')
+      dispose()
+    })
+
+    it('replaces a stretch clicked from one anchor to another, the point between laid', () => {
+      const { node, store, dispose } = triangleThenRetrace()
+      click(node, [500, 200])
+      click(node, [400, 150])
+      click(node, [300, 200])
+      expect(ring(store)).toHaveLength(4)
+      expect(store.getState().rows.find((row) => row.current)?.kind).toBe('retrace')
+      dispose()
+    })
+  })
+
+  describe('variants', () => {
+    it('goes round the modes with R again, and stays ⟨retrace⟩', () => {
+      const { node, store, resulted, dispose } = triangleThenRetrace()
+      node.dispatchEvent(keyEvent('r'))
+      expect(store.getState().tool).toBe('retrace')
+      expect(store.getState().penMode).toBe('coast')
+      expect(resulted).toHaveBeenLastCalledWith('Retrace · Pen — follow the coast')
+      dispose()
+    })
+
+    it('replaces the other side when the end is clicked with ‹alt› held', () => {
+      const { node, store, dispose } = triangleThenRetrace()
+      click(node, [500, 200])
+      click(node, [400, 150])
+      altClick(node, [300, 200])
+      expect(ring(store)).toHaveLength(3)
+      expect(ring(store)).not.toContain(2)
+      dispose()
+    })
+  })
+
+  describe('managed errors', () => {
+    it('does not close its own run with Enter', () => {
+      const { node, store, dispose } = triangleThenRetrace()
+      click(node, [500, 200])
+      click(node, [400, 150])
+      const enter = keyEvent('Enter')
+      node.dispatchEvent(enter)
+      expect(enter.defaultPrevented).toBe(false)
+      expect(store.getState().document.claims[0]?.rings).toHaveLength(1)
+      dispose()
+    })
+  })
+
+  // L4: N/A — the gestures are synchronous; the document's own refusals are retrace.test.ts's.
+
+  describe('edge cases', () => {
+    it('lets go of ‹alt› with the key, the next end taking the nearer side', () => {
+      const { node, store, dispose } = triangleThenRetrace()
+      node.dispatchEvent(keyEvent('Alt'))
+      node.dispatchEvent(new KeyboardEvent('keyup', { key: 'Alt', bubbles: true }))
+      click(node, [500, 200])
+      click(node, [400, 150])
+      click(node, [300, 200])
+      expect(ring(store)).toHaveLength(4)
+      dispose()
+    })
+  })
+})
+
+/** A button outside the canvas, holding the focus — a rail button, a row of {Polities}. */
+function focusedButton(): HTMLButtonElement {
+  const button = document.createElement('button')
+  document.body.append(button)
+  button.focus()
+  return button
+}
+
+/** The canvas with the pointer over it and the white arrow in hand. */
+function overTheMap() {
+  const opened = attach()
+  viewAtScale(opened.store, 8)
+  opened.store.getState().selectTool('edit')
+  opened.node.dispatchEvent(pointerEvent('pointermove', { offsetX: 300, offsetY: 200 }))
+  return opened
+}
+
+describe('‹space› from anywhere on the page (the dev, 2026-10-14)', () => {
+  describe('happy path', () => {
+    it('borrows the hand when ‹space› is pressed on a focused button, the pointer over the map', () => {
+      const { node, store, dispose } = overTheMap()
+      const button = focusedButton()
+      const space = keyEvent(' ')
+      button.dispatchEvent(space)
+      expect(space.defaultPrevented).toBe(true)
+      const before = store.getState().viewport.originX
+      node.dispatchEvent(pointerEvent('pointerdown', { offsetX: 300, offsetY: 200 }))
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 400, offsetY: 200 }))
+      node.dispatchEvent(pointerEvent('pointerup', { offsetX: 400, offsetY: 200 }))
+      expect(store.getState().viewport.originX).not.toBe(before)
+      button.remove()
+      dispose()
+    })
+  })
+
+  describe('variants', () => {
+    it('gives the hand back on the release, which the button never sees', () => {
+      const { node, dispose } = overTheMap()
+      const button = focusedButton()
+      const clicked = vi.fn()
+      button.addEventListener('keyup', clicked)
+      button.dispatchEvent(keyEvent(' '))
+      expect(node.style.cursor).toContain('grab')
+      const up = new KeyboardEvent('keyup', { key: ' ', bubbles: true, cancelable: true })
+      button.dispatchEvent(up)
+      expect(up.defaultPrevented).toBe(true)
+      expect(clicked).not.toHaveBeenCalled()
+      expect(node.style.cursor).not.toContain('grab')
+      button.remove()
+      dispose()
+    })
+  })
+
+  describe('managed errors', () => {
+    it('leaves ‹space› to a text field', () => {
+      const { node, dispose } = overTheMap()
+      const field = document.createElement('input')
+      document.body.append(field)
+      field.focus()
+      const space = keyEvent(' ')
+      field.dispatchEvent(space)
+      expect(space.defaultPrevented).toBe(false)
+      expect(node.style.cursor).not.toContain('grab')
+      field.remove()
+      dispose()
+    })
+
+    it('leaves ‹space› to the page when the pointer is off the map', () => {
+      const { node, dispose } = overTheMap()
+      node.dispatchEvent(pointerEvent('pointerleave', {}))
+      const button = focusedButton()
+      const space = keyEvent(' ')
+      button.dispatchEvent(space)
+      expect(space.defaultPrevented).toBe(false)
+      button.remove()
+      dispose()
+    })
+  })
+
+  // L4: N/A — synchronous key handling, nothing optional.
+
+  describe('edge cases', () => {
+    it('lets go of the hand when the window loses the focus with ‹space› down', () => {
+      const { node, dispose } = overTheMap()
+      const button = focusedButton()
+      button.dispatchEvent(keyEvent(' '))
+      window.dispatchEvent(new Event('blur'))
+      expect(node.style.cursor).not.toContain('grab')
+      button.remove()
+      dispose()
+    })
+
+    it('stops listening on the page once the canvas is torn down', () => {
+      const { dispose } = overTheMap()
+      dispose()
+      const button = focusedButton()
+      const space = keyEvent(' ')
+      button.dispatchEvent(space)
+      expect(space.defaultPrevented).toBe(false)
+      button.remove()
+    })
+  })
+})
+
+/** France as the canvas triangle, ⟨retrace⟩ in hand, turned to the Pencil with ‹R› three times. */
+function retracingWithPencil() {
+  const opened = attach()
+  aimAtFrance(opened.store)
+  viewAtScale(opened.store, 8)
+  for (const at of CANVAS_TRIANGLE) click(opened.node, at)
+  click(opened.node, [301, 201])
+  for (let press = 0; press < 4; press += 1) opened.node.dispatchEvent(keyEvent('r'))
+  return opened
+}
+
+describe('⟨retrace⟩ with the Pencil (ARCH-001)', () => {
+  it('turns ⟨retrace⟩ to the Pencil with R, and stays ⟨retrace⟩', () => {
+    const { store, dispose } = retracingWithPencil()
+    expect(store.getState().tool).toBe('retrace')
+    expect(store.getState().penMode).toBe('pencil')
+    dispose()
+  })
+
+  // The defect: a drag pressed on nothing began a run no click could ever end.
+  it('refuses a drag that does not start on an anchor of the target, and says where to start', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const { node, store, resulted, dispose } = retracingWithPencil()
+    stroke(
+      node,
+      [
+        [400, 300],
+        [420, 320],
+        [440, 340],
+      ],
+      0
+    )
+    expect(store.getState().document.claims[0]?.rings[0]).toHaveLength(3)
+    expect(resulted).toHaveBeenCalledWith(
+      'click an anchor of Reaume de France to start the retrace'
+    )
+    // Nothing was left in hand: a retrace started properly afterwards still ends.
+    click(node, [500, 200])
+    click(node, [400, 150])
+    click(node, [300, 200])
+    expect(store.getState().document.claims[0]?.rings[0]).toHaveLength(4)
+    dispose()
+  })
+
+  it('starts the run on the anchor a drag is pressed on, and a click on another ends it', () => {
+    const { node, store, dispose } = retracingWithPencil()
+    stroke(
+      node,
+      [
+        [500, 200],
+        [450, 150],
+        [400, 150],
+        [350, 150],
+      ],
+      0
+    )
+    click(node, [300, 200])
+    expect(store.getState().document.claims[0]?.rings[0]?.length).toBeGreaterThan(3)
+    expect(store.getState().rows.find((row) => row.current)?.kind).toBe('retrace')
+    dispose()
+  })
+})
+
+describe('‹space› on a control reached with Tab (A11Y-001)', () => {
+  it('leaves ‹space› to a button the focus reached by the keyboard', () => {
+    const { node, dispose } = overTheMap()
+    const button = document.createElement('button')
+    document.body.append(button)
+    button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }))
+    button.focus()
+    const space = keyEvent(' ')
+    button.dispatchEvent(space)
+    expect(space.defaultPrevented).toBe(false)
+    expect(node.style.cursor).not.toContain('grab')
+    button.remove()
+    dispose()
+  })
+
+  it('takes ‹space› again once the pointer has pressed somewhere', () => {
+    const { node, dispose } = overTheMap()
+    const button = document.createElement('button')
+    document.body.append(button)
+    button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }))
+    button.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+    button.focus()
+    const space = keyEvent(' ')
+    button.dispatchEvent(space)
+    expect(space.defaultPrevented).toBe(true)
+    expect(node.style.cursor).toContain('grab')
+    button.remove()
+    dispose()
+  })
+})

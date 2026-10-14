@@ -20,8 +20,21 @@
 import type { CartographerStore } from './store'
 import type { StateCreator } from 'zustand'
 
-/** The tool a click obeys: the hand, the Pen, or the white arrow. */
-export type EditorTool = 'navigate' | 'draw' | 'edit'
+/**
+ * The tool a click obeys: the hand, the Pen, the white arrow, or ⟨retrace⟩ — the correction tool that
+ * redraws a stretch of an outline already closed (`H-46`, the dev, 2026-10-14).
+ */
+export type EditorTool = 'navigate' | 'draw' | 'edit' | 'retrace'
+
+/**
+ * Whether a tool places points the Pen's way — the Pen itself, and ⟨retrace⟩, which draws its new run
+ * exactly as the Pen does: snapping to the coast and the rivers, following a neighbour, or freehand.
+ * @param tool - a tool
+ * @returns `true` for the Pen and ⟨retrace⟩
+ */
+export function isPenTool(tool: EditorTool): tool is 'draw' | 'retrace' {
+  return tool === 'draw' || tool === 'retrace'
+}
 
 /**
  * How the Pen places its points — the variants of its group (`s02`'s ⟨free point⟩, ⟨snap to coast⟩,
@@ -41,6 +54,19 @@ export const PEN_MODE_LABELS: Record<PenMode, string> = {
   coast: 'Pen — follow the coast',
   river: 'Pen — follow a river',
   pencil: 'Pencil — freehand',
+}
+
+/**
+ * What a mode is called under the tool in hand — the Pen's own label, or ⟨retrace⟩'s with it, so the bar
+ * never says "Pen" while the author holds ⟨retrace⟩.
+ * @param tool - the tool in hand
+ * @param mode - the mode
+ * @returns the label
+ */
+export function modeLabel(tool: EditorTool, mode: PenMode): string {
+  return tool === 'retrace'
+    ? `${TOOL_LABELS.retrace} · ${PEN_MODE_LABELS[mode]}`
+    : PEN_MODE_LABELS[mode]
 }
 
 /** The modes that follow a layer — the coast, or a river — as opposed to placing points freely. */
@@ -71,6 +97,7 @@ export function isPenMode(id: string): id is PenMode {
 export const TOOL_LABELS: Record<EditorTool, string> = {
   edit: 'Direct Selection',
   draw: 'Pen',
+  retrace: 'Retrace',
   navigate: 'Hand',
 }
 
@@ -155,6 +182,12 @@ export interface ToolActions {
    */
   choosePenMode: (mode: PenMode) => void
   /**
+   * Change how points are placed **without changing the tool in hand** — ‹R› pressed again under ⟨retrace⟩
+   * goes round the modes as ‹P› does under the Pen, and stays ⟨retrace⟩.
+   * @param mode - the mode to place points in
+   */
+  turnPenMode: (mode: PenMode) => void
+  /**
    * The Pen reached a coast or a river on its own: it follows it from now on (`s02`, the dev, 2026-10-12).
    * From the plain Pen or the Pencil it remembers that mode to go back to; from the other water it keeps
    * the one it already had, so the land gives back the mode the Pen started from.
@@ -215,8 +248,11 @@ export const createToolSlice: StateCreator<
     // Chosen by hand, a coast or river mode goes back to the plain Pen when the water is left.
     set({ tool: 'draw', penMode: mode, layerReturn: 'free' })
   },
+  turnPenMode: (mode: PenMode): void => {
+    set({ penMode: mode, layerReturn: 'free' })
+  },
   reachLayer: (mode: FollowingMode): void => {
-    const { penMode, layerReturn } = get()
+    const { penMode, layerReturn, tool } = get()
     if (penMode === mode) {
       // Reaching what is already followed would change nothing: no gesture calls this, so a caller that
       // does is a defect, said rather than absorbed.
@@ -226,7 +262,8 @@ export const createToolSlice: StateCreator<
       return
     }
     const back = isFollowingMode(penMode) ? layerReturn : penMode
-    set({ tool: 'draw', penMode: mode, layerReturn: back })
+    // ⟨retrace⟩ reaches the water too, and stays ⟨retrace⟩: only the way points are placed changes.
+    set({ tool: tool === 'retrace' ? 'retrace' : 'draw', penMode: mode, layerReturn: back })
   },
   leaveLayer: (): PenMode | null => {
     const { penMode, layerReturn } = get()

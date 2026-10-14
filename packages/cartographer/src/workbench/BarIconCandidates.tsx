@@ -219,7 +219,7 @@ export function BarIconCandidates() {
     >
       <div>
         <div>the tools today (1.4 stroke)</div>
-        {(['navigate', 'draw', 'edit', 'pencil'] as const).map((name) => (
+        {(['navigate', 'draw', 'edit', 'pencil', 'retrace'] as const).map((name) => (
           <Slot key={name}>
             <ToolIcon name={name} />
           </Slot>

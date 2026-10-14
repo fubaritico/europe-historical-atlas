@@ -14,7 +14,7 @@ import { UNFRAMED } from '../view/viewport'
 
 import { describeDrawingTarget } from './drawingTarget'
 import { createCartographerStore } from './store'
-import { isPenMode, nextPenMode } from './toolSlice'
+import { isPenMode, isPenTool, modeLabel, nextPenMode } from './toolSlice'
 
 import type { HistoryStep } from '@europe-historical-atlas/core/editor/history'
 
@@ -302,4 +302,50 @@ describe('toolSlice — the switch to a coast or a river (s02, 2026-10-12)', () 
   })
 
   // L5: N/A — two fields and two actions; the boundaries are the cases above.
+})
+
+describe('toolSlice — ⟨retrace⟩ (H-46)', () => {
+  it('takes ⟨retrace⟩ as a tool of its own, read as a pen tool', () => {
+    const { store } = openStore()
+    store.getState().selectTool('retrace')
+    expect(store.getState().tool).toBe('retrace')
+    expect(isPenTool('retrace')).toBe(true)
+    expect(isPenTool('draw')).toBe(true)
+    expect(isPenTool('edit')).toBe(false)
+    expect(isPenTool('navigate')).toBe(false)
+  })
+
+  it('turns the mode without changing the tool in hand', () => {
+    const { store } = openStore()
+    store.getState().selectTool('retrace')
+    store.getState().turnPenMode('pencil')
+    expect(store.getState().tool).toBe('retrace')
+    expect(store.getState().penMode).toBe('pencil')
+  })
+
+  // The water reached by a retrace's click must not hand the author the Pen instead.
+  it('stays ⟨retrace⟩ when it reaches the coast', () => {
+    const { store } = openStore()
+    store.getState().selectTool('retrace')
+    store.getState().reachLayer('coast')
+    expect(store.getState().tool).toBe('retrace')
+    expect(store.getState().penMode).toBe('coast')
+    expect(store.getState().leaveLayer()).toBe('free')
+    expect(store.getState().tool).toBe('retrace')
+  })
+
+  it('still hands the Pen when another tool reaches the water', () => {
+    const { store } = openStore()
+    store.getState().selectTool('edit')
+    store.getState().reachLayer('river')
+    expect(store.getState().tool).toBe('draw')
+  })
+})
+
+describe('modeLabel', () => {
+  it('names a mode after the tool in hand, so ⟨retrace⟩ is never called the Pen', () => {
+    expect(modeLabel('draw', 'coast')).toBe('Pen — follow the coast')
+    expect(modeLabel('retrace', 'coast')).toBe('Retrace · Pen — follow the coast')
+    expect(modeLabel('retrace', 'pencil')).toBe('Retrace · Pencil — freehand')
+  })
 })

@@ -38,6 +38,8 @@ export const CHROME_PAINT_STYLE: PaintStyle = {
   anchorRadius: 4,
   // A neighbour's anchor the Pen can branch from: a dot, half a handle (2026-10-13).
   snapAnchorRadius: 2,
+  // The stretch a retrace would replace: `--warn` (theme.css), the palette's one alert ink (2026-10-14).
+  replacedStroke: '#c86a52',
   // The atlas's border, from its political defaults (`atlas/src/devParams/political.ts`): a cream core inside
   // a dark brown casing, because no single ink reads against every fill; the frontier is the casing alone.
   borderCore: '#f3e7cd',

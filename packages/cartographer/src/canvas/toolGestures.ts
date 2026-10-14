@@ -5,6 +5,7 @@ import { normaliseRect, pointsInRect } from '../geometry/marquee'
 import { canCloseRing, isClosingOffered } from '../geometry/ringClosure'
 import { describeDrawingTarget } from '../state/drawingTarget'
 import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
+import { isPenTool } from '../state/toolSlice'
 import { backdropToLonLat, lonLatToScreen, screenToLonLatOnBackdrop } from '../view/projection'
 
 import { deleteSelected, insertOnStretch, penInsertHit } from './anchorGestures'
@@ -59,6 +60,11 @@ export interface GestureContext {
    * zone beside the action (`s02`).
    */
   report: (message: string) => void
+  /**
+   * Whether ‹alt› is held — under ⟨retrace⟩ it takes the other side of the ring than the one the new run
+   * lies closer to (`H-46`). Absent is not held.
+   */
+  flipSide?: boolean
 }
 
 /** The step kind a closed outline is recorded under — what tells an undo that it is undoing a closing. */
@@ -149,6 +155,16 @@ export function penClick(context: GestureContext, at: Point): void {
   // On its own coast this rarely bites — coast anchors are dense, so an anchor is nearly always the
   // nearer hit, and that one is reused by the layer click.
   if (penInserts(context, at)) return
+  placeClick(context, at)
+}
+
+/**
+ * Place what a Pen click lands on — the water, an existing anchor, or a free point — without closing and
+ * without inserting: what the Pen and ⟨retrace⟩ share (`retraceClick`).
+ * @param context - the session and the store
+ * @param at - the pointer, in screen pixels
+ */
+export function placeClick(context: GestureContext, at: Point): void {
   // A layer wins over an anchor: a neighbour drawn along it left an anchor on every vertex, and
   // branching onto those would lose the coast (the dev, Spain then Portugal, 2026-10-11). Those
   // anchors are reused by the layer click, so the border stays shared. Whatever the mode, a coast or a
@@ -507,12 +523,13 @@ function editKey(context: GestureContext, key: string): boolean {
 export function toolKey(context: GestureContext, key: string): boolean {
   const tool = context.store.getState().tool
   if (tool === 'edit') return editKey(context, key)
-  if (tool !== 'draw' || context.session.outline.length === 0) return false
+  if (!isPenTool(tool) || context.session.outline.length === 0) return false
   if (key === 'Backspace') {
     context.session.outline.pop()
     context.session.snap = null
   } else if (key === 'Escape') clearOutline(context.session)
-  else if (key === 'Enter') closeOutline(context)
+  // A retrace ends on an anchor of the outline it corrects, never by closing its own run.
+  else if (key === 'Enter' && tool === 'draw') closeOutline(context)
   else return false
   return true
 }

@@ -1,4 +1,3 @@
-import { PEN_MODE_LABELS, TOOL_LABELS, nextPenMode } from '../state/toolSlice'
 import { backdropBoxOfBounds, clampToCover, openingView } from '../view/framing'
 import { screenToLonLatOnBackdrop } from '../view/projection'
 import { panBy, zoomAbout } from '../view/viewport'
@@ -13,7 +12,6 @@ import {
   handInHand,
   refreshTools,
   reportFeature,
-  showCursor,
   snapAnchorsOf,
   tooFarToEdit,
 } from './liveCanvas'
@@ -22,7 +20,6 @@ import {
   FRAME_MARGIN,
   KEY_ZOOM_STEP,
   PAN_KEYS,
-  TOOL_KEYS,
   ZOOM_IN_KEYS,
   ZOOM_OUT_KEYS,
   scaleLimitsFor,
@@ -33,6 +30,13 @@ import { pencilCancel, pencilDrag, pencilEnd, pencilStart } from './pencil'
 import { buildScene } from './scene'
 import { inDevicePixels } from './style'
 import { arrowDrag, arrowPress, resolvedTarget, toolKey } from './toolGestures'
+import {
+  listenForPageSpace,
+  onToolKey,
+  pencilInHand,
+  pressHeldKey,
+  releaseHeldKey,
+} from './toolKeys'
 import { keyRefusedFromAfar, releaseTool } from './toolRelease'
 import { dropDrag, idleSession, targetHandles } from './toolSession'
 
@@ -256,6 +260,7 @@ function report(it: LiveCanvas, at: [number, number]): void {
 function onPointerDown(it: LiveCanvas, event: PointerEvent): void {
   // A result describes the last gesture; the next press starts another, so it goes.
   it.deps.onResult(null)
+  it.altHeld = event.altKey
   it.pressAt = positionOf(event)
   it.dragging = false
   it.node.setPointerCapture(event.pointerId)
@@ -283,6 +288,7 @@ function onPointerDown(it: LiveCanvas, event: PointerEvent): void {
  */
 function onPointerMove(it: LiveCanvas, event: PointerEvent): void {
   const to = positionOf(event)
+  it.altHeld = event.altKey
   report(it, to)
   it.pointer = to
   const from = it.pressAt
@@ -325,6 +331,7 @@ function onPointerLeave(it: LiveCanvas): void {
 function onPointerUp(it: LiveCanvas, event: PointerEvent): void {
   const pressed = it.pressAt !== null
   const dragged = it.dragging
+  it.altHeld = event.altKey
   it.pressAt = null
   it.dragging = false
   if (it.node.hasPointerCapture(event.pointerId)) it.node.releasePointerCapture(event.pointerId)
@@ -365,42 +372,6 @@ function onPointerCancel(it: LiveCanvas, event: PointerEvent): void {
 }
 
 /**
- * ‹P› and ‹A›: take the tool — and ‹P› with the Pen already in hand goes round its group, free → coast →
- * river → Pencil (the dev, 2026-10-11: pressing ‹P› again must change the Pen).
- * @param it - the attachment
- * @param event - the key event
- * @returns `true` when the key was a tool's, and was taken
- */
-function onToolKey(it: LiveCanvas, event: KeyboardEvent): boolean {
-  const tool = TOOL_KEYS[event.key.toLowerCase()]
-  if (tool === undefined) return false
-  event.preventDefault()
-  const state = it.deps.store.getState()
-  if (tool === 'draw' && state.tool === 'draw') {
-    const mode = nextPenMode(state.penMode)
-    state.choosePenMode(mode)
-    // Said in the result zone, a polite live region: focus is on the canvas, not on the rail's button
-    // whose name changed, so the mode would otherwise change in silence (A11Y-010).
-    it.deps.onResult(PEN_MODE_LABELS[mode])
-  } else if (tool !== state.tool) {
-    state.selectTool(tool)
-    // Said for the same reason as the Pen's mode: the focus is on the canvas, not on the rail.
-    it.deps.onResult(tool === 'draw' ? PEN_MODE_LABELS[state.penMode] : TOOL_LABELS[tool])
-  }
-  return true
-}
-
-/**
- * Whether a drag lays Pencil points: the Pen in hand in its freehand mode, the hand not borrowed.
- * @param it - the attachment
- * @returns `true` when a drag draws
- */
-function pencilInHand(it: LiveCanvas): boolean {
-  const state = it.deps.store.getState()
-  return state.tool === 'draw' && state.penMode === 'pencil' && !handInHand(it)
-}
-
-/**
  * The keys settled before any tool sees them: those held with a modifier (the history's, or the
  * platform's), then — from too far out — the ones that would change the document, refused and said so
  * (H-34, QUAL-001).
@@ -438,16 +409,7 @@ function keyTakenFirst(it: LiveCanvas, event: KeyboardEvent): boolean {
  */
 function onKeyDown(it: LiveCanvas, event: KeyboardEvent): void {
   const state = it.deps.store.getState()
-  // ‹space› borrows the hand for as long as it is held. `preventDefault` because a focusable element
-  // scrolls the page on space, which here would scroll the editor out from under the map.
-  // First, so a modified ‹space› (‹ctrl+space›, which input methods use) stays the platform's too.
-  if (keyTakenFirst(it, event)) return
-  if (event.key === ' ') {
-    event.preventDefault()
-    it.spaceHeld = true
-    showCursor(it)
-    return
-  }
+  if (pressHeldKey(it, event, keyTakenFirst)) return
   // An object, not a `let`: TypeScript does not see the closure assign it, and would read it as `false`.
   const said = { reported: false }
   const gesture = gestureOf(it)
@@ -480,17 +442,6 @@ function onKeyDown(it: LiveCanvas, event: KeyboardEvent): void {
   const centre: [number, number] = [it.size.width / 2, it.size.height / 2]
   const factor = zoomIn ? KEY_ZOOM_STEP : 1 / KEY_ZOOM_STEP
   settle(it, zoomAbout(state.viewport, centre, factor, scaleLimitsFor(it.size, it.deps.frame.size)))
-}
-
-/**
- * The release half of ‹space›. Without it the hand stays in place after the key is let go, which is the
- * shape of bug a missing `keyup` always has: the state is entered correctly and never left.
- * @param it - the attachment
- */
-function releaseSpace(it: LiveCanvas): void {
-  if (!it.spaceHeld) return
-  it.spaceHeld = false
-  showCursor(it)
 }
 
 /**
@@ -544,13 +495,14 @@ function listen(it: LiveCanvas): () => void {
     onKeyDown(it, event)
   })
   on('keyup', (event) => {
-    if (event.key === ' ') releaseSpace(it)
+    releaseHeldKey(it, event.key)
   })
   // Letting go outside the canvas would otherwise leave the hand up for ever.
   on('blur', () => {
-    releaseSpace(it)
+    releaseHeldKey(it, ' ')
+    releaseHeldKey(it, 'Alt')
   })
-  removers.push(hearPageHistory(it))
+  removers.push(hearPageHistory(it), listenForPageSpace(it))
   return (): void => {
     for (const remove of removers) remove()
   }
@@ -642,6 +594,7 @@ function freshCanvas(
     wasTooFar: null,
     borders: null,
     feature: null,
+    altHeld: false,
     requestPaint: () => undefined,
   }
 }

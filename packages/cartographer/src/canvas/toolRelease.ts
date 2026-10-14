@@ -2,6 +2,7 @@ import { reachLabel } from '../view/toolReach'
 
 import { TAG } from './consoleTag'
 import { gestureOf, snapReachOf, tooFarToEdit } from './liveCanvas'
+import { retraceClick } from './retrace'
 import { arrowRelease, penClick } from './toolGestures'
 import { dropDrag } from './toolSession'
 
@@ -78,7 +79,9 @@ export function releaseTool(it: LiveCanvas, at: Point, dragged: boolean): void {
     it.requestPaint()
     return
   }
-  if (tool !== 'draw') return
+  if (tool !== 'draw' && tool !== 'retrace') return
   if (tooFar) refuseFromAfar(it, 'draw')
-  else if (!dragged) penClick(gestureOf(it), at)
+  else if (dragged) return
+  else if (tool === 'retrace') retraceClick(gestureOf(it), at)
+  else penClick(gestureOf(it), at)
 }

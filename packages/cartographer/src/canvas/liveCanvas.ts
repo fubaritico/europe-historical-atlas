@@ -7,6 +7,7 @@ import { polityAt } from '../geometry/fillHit'
 import { nearestAmong } from '../geometry/hitTest'
 import { isClosingOffered } from '../geometry/ringClosure'
 import { describeDrawingTarget } from '../state/drawingTarget'
+import { isPenTool } from '../state/toolSlice'
 import { lonLatToScreen, remapToScreen } from '../view/projection'
 import { closeEnoughToEdit, snapReachKm } from '../view/toolReach'
 import { backdropToScreen } from '../view/viewport'
@@ -18,6 +19,7 @@ import { featureUnder } from './featureUnder'
 import { followedLayer, layerLines, lineLabel, snapHit } from './layerHits'
 import { HANDLE_HIT_RADIUS } from './navigation'
 import { paintOverlay } from './overlayPainter'
+import { retraceAnchorUnder, retraceView } from './retrace'
 import { projectedTerritories } from './scene'
 import { snapLayersOf } from './snapLayers'
 import { inDevicePixels } from './style'
@@ -34,6 +36,7 @@ import {
 import type { AnchorCache } from './anchorCache'
 import type { HistoryRelay } from './historyRelay'
 import type { PaintStyle, Painter2D } from './painter'
+import type { RetraceView } from './retrace'
 import type { GestureContext } from './toolGestures'
 import type { SnapLayer, ToolSession } from './toolSession'
 import type { PolityColourSource } from '../state/polityColourSource'
@@ -153,11 +156,13 @@ export interface LiveCanvas {
    * result zone is cleared: a refusal's reason must not outlive the refusal (`s17`).
    */
   wasTooFar: boolean | null
-  /** Ask for a repaint of the static canvas, at most one per frame. */
   /** The document's borders, derived once per version — `null` until the first paint asks. */
   borders: { version: number; list: DerivedBorder[] } | null
   /** What the status bar last said is under the pointer — written again only when it changes. */
   feature: string | null
+  /** Whether ‹alt› is held — ⟨retrace⟩'s other side. A key, like ‹space›, never store state. */
+  altHeld: boolean
+  /** Ask for a repaint of the static canvas, at most one per frame. */
   requestPaint: () => void
 }
 
@@ -219,6 +224,7 @@ export function gestureOf(it: LiveCanvas): GestureContext {
     radius: HANDLE_HIT_RADIUS * it.ratio,
     layers: snapLayersOf(it.deps.vectorLayers),
     report: joinedReports(it.deps.onResult),
+    flipSide: it.altHeld,
   }
 }
 
@@ -258,6 +264,8 @@ export function snapOffer(it: LiveCanvas, inserting: boolean = overStretch(it)):
   // Over the target's own stretch the idle Pen inserts, so it offers no snap there (`penInserts`).
   if (inserting) return NO_OFFER
   const gesture = gestureOf(it)
+  const retrace = retraceOffer(it, gesture, it.pointer)
+  if (retrace !== null) return retrace
   // The layer first — the same order as the click (`penClick`): the nearer water within reach, whatever
   // the mode, previewed so the click that switches is foreseen.
   const layer = waterTaking(gesture, it.pointer)
@@ -265,6 +273,43 @@ export function snapOffer(it: LiveCanvas, inserting: boolean = overStretch(it)):
   if (offer.kind !== null) return offer
   const hit = anchorHit(gesture, it.pointer)
   return hit === null ? NO_OFFER : anchorOffer(it, gesture, hit)
+}
+
+/**
+ * What ⟨retrace⟩ offers of its own: the start anchor before the first click, and — the run following
+ * the water — the stretch of water up to the end anchor under the pointer (`followWaterTo`), what the
+ * click will lay. `null` for anything the Pen's own offer answers.
+ * @param it - the attachment
+ * @param gesture - its gesture context
+ * @param pointer - the pointer, in screen pixels
+ * @returns the offer, or `null`
+ */
+function retraceOffer(it: LiveCanvas, gesture: GestureContext, pointer: Point): SnapOffer | null {
+  if (it.deps.store.getState().tool !== 'retrace') return null
+  // A retrace starts on one of the target's anchors, and nothing else: that is all it offers.
+  if (it.session.outline.length === 0) return startOffer(it, gesture, pointer)
+  const target = resolvedTarget(gesture)
+  const end = target === null ? null : retraceAnchorUnder(gesture, target.id, pointer)
+  const snap = it.session.snap
+  const at = end === null ? undefined : anchorsOnScreen(it)[end]
+  if (snap === null || at === undefined) return null
+  const offer = lineOffer(it, gesture, snap.layer, at)
+  return offer.kind === null ? null : offer
+}
+
+/**
+ * ⟨retrace⟩'s first offer: the target's anchor under the pointer, the one a click would start on.
+ * @param it - the attachment
+ * @param gesture - its gesture context
+ * @param pointer - the pointer, in screen pixels
+ * @returns the offer, `NO_OFFER` when no anchor of the target is within reach
+ */
+function startOffer(it: LiveCanvas, gesture: GestureContext, pointer: Point): SnapOffer {
+  const target = resolvedTarget(gesture)
+  const hit = target === null ? null : retraceAnchorUnder(gesture, target.id, pointer)
+  if (hit === null) return NO_OFFER
+  const at = anchorsOnScreen(it)[hit] ?? null
+  return { target: at, preview: null, kind: 'anchor', anchor: hit, lineLabel: null }
 }
 
 /**
@@ -330,7 +375,7 @@ function followedNoun(gesture: GestureContext): string | null {
  */
 function penOffered(it: LiveCanvas): boolean {
   const state = it.deps.store.getState()
-  if (state.tool !== 'draw' || it.spaceHeld) return false
+  if (!isPenTool(state.tool) || it.spaceHeld) return false
   return resolvedTarget(gestureOf(it)) !== null && !closingOffered(it)
 }
 
@@ -416,7 +461,7 @@ export function tooFarToEdit(it: LiveCanvas): boolean {
 
 /**
  * The document's borders, derived from its shared anchors once per version of the document — a derivation
- * walks every ring (~70 ms on the 1100 year), so it never runs per pointer move.
+ * walks every run (~0.3 s on the 137 polities of 1100, measured 2026-10-14), so it never runs per pointer move.
  *
  * **The far side is asked of the land mask, the coast of the anchors' provenance**: a segment between two
  * anchors the Pen took from the coastline is coast, whatever the mask finds across a narrow estuary.
@@ -569,6 +614,23 @@ function movesOnScreen(it: LiveCanvas): { index: number; at: Point }[] {
   }))
 }
 
+/** ⟨retrace⟩ showing nothing: another tool, nobody aimed at, or too far out to act. */
+const NO_RETRACE = { replaced: null, sentence: null } as const
+
+/**
+ * What ⟨retrace⟩ shows now — nothing under any other tool, with nobody aimed at, or from too far out:
+ * none of those would let a click retrace.
+ * @param it - the attachment
+ * @param tooFar - whether the view is too far out for the tools
+ * @returns the preview and the sentence, both `null` when nothing is shown
+ */
+function retraceOf(it: LiveCanvas, tooFar: boolean): RetraceView | typeof NO_RETRACE {
+  if (it.deps.store.getState().tool !== 'retrace' || tooFar) return NO_RETRACE
+  const gesture = gestureOf(it)
+  const target = resolvedTarget(gesture)
+  return target === null ? NO_RETRACE : retraceView(gesture, target, it.pointer)
+}
+
 /**
  * Bring everything the session drives up to date: the overlay, the action sentence, the cursor.
  *
@@ -588,6 +650,7 @@ export function refreshTools(it: LiveCanvas): void {
   // result goes, not only a refusal: crossing the threshold changes what the screen is for (QUAL-003).
   if (it.wasTooFar !== null && it.wasTooFar !== tooFar) it.deps.onResult(null)
   it.wasTooFar = tooFar
+  const retrace = retraceOf(it, tooFar)
   const scene = overlayScene({
     session: it.session,
     tool: state.tool,
@@ -599,6 +662,7 @@ export function refreshTools(it: LiveCanvas): void {
     closeRadius: HANDLE_HIT_RADIUS * it.ratio,
     snapTarget: offer.target,
     snapPreview: offer.preview,
+    replaced: retrace.replaced,
   })
   paintOverlay(it.overlay.ctx, it.size, scene, inDevicePixels(it.deps.style, it.ratio))
   const sentence = actionSentence({
@@ -612,6 +676,7 @@ export function refreshTools(it: LiveCanvas): void {
     inserting,
     tooFar,
     session: it.session,
+    retracing: retrace.sentence,
   })
   if (sentence !== it.sentence) {
     it.sentence = sentence

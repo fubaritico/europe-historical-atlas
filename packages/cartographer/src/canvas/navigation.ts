@@ -121,13 +121,15 @@ export const PAN_KEYS: Record<string, [number, number]> = {
 }
 
 /**
- * The two tools, on the keys Illustrator uses — `s00`, settled 2026-09-22 from the dev's own reading.
+ * The tools, on the keys Illustrator uses — `s00`, settled 2026-09-22 from the dev's own reading — and
+ * ‹R› for ⟨retrace⟩ (2026-10-14): Illustrator gives ‹R› to its Rotate tool, which this editor has no use
+ * for (nothing here is rotated, `s03`).
  *
  * Lower-cased before the lookup, so ‹shift+P› still reaches the Pen: a capital is the same key.
  * ⟨navigate⟩ is deliberately absent — it is reached by *holding* ‹space›, which is a borrow rather than
  * a choice, and by its button in the rail at step 5.
  */
-export const TOOL_KEYS: Record<string, EditorTool> = { p: 'draw', a: 'edit' }
+export const TOOL_KEYS: Record<string, EditorTool> = { p: 'draw', a: 'edit', r: 'retrace' }
 
 /** Keys that zoom in — the atlas's own set, and what `design/CURSORS.md` specifies. */
 export const ZOOM_IN_KEYS = new Set(['+', '=', 'PageUp'])

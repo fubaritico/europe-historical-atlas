@@ -96,6 +96,27 @@ function paintSnap(ctx: Painter2D, scene: OverlayScene, style: PaintStyle): void
   if (scene.snapTarget !== null) handle(ctx, scene.snapTarget, true, style)
 }
 
+/** The dash of the stretch a retrace would replace, in multiples of the path's width. */
+const REPLACED_DASH = [4, 3]
+
+/**
+ * The stretch ⟨retrace⟩ would replace on a click here: dashed, in the alert ink, at twice the path's
+ * weight — what goes, shown before the click (`H-46`), beside the new run in the edit blue.
+ * @param ctx - the context
+ * @param scene - what to draw
+ * @param style - the colours and sizes
+ */
+function paintReplaced(ctx: Painter2D, scene: OverlayScene, style: PaintStyle): void {
+  if (scene.replaced === null) return
+  ctx.strokeStyle = style.replacedStroke
+  ctx.lineWidth = style.pathWidth * 2
+  ctx.setLineDash(REPLACED_DASH.map((length) => length * style.pathWidth * 2))
+  polyline(ctx, scene.replaced)
+  ctx.setLineDash([])
+  ctx.strokeStyle = style.pathStroke
+  ctx.lineWidth = style.pathWidth
+}
+
 /**
  * The marquee being dragged: a thin rectangle in the edit stroke (`s03`, *"a selection rectangle follows
  * the pointer while it is down"*). Nothing is drawn once released — *"no bounding box and no frame"*.
@@ -126,6 +147,7 @@ export function paintOverlay(
   ctx.clearRect(0, 0, size.width, size.height)
   ctx.strokeStyle = style.pathStroke
   ctx.lineWidth = style.pathWidth
+  paintReplaced(ctx, scene, style)
   paintOutline(ctx, scene, style)
   paintSnap(ctx, scene, style)
   paintMoving(ctx, scene, style)

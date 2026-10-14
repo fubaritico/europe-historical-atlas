@@ -1,4 +1,4 @@
-import { PEN_MODE_LABELS } from '../state/toolSlice'
+import { modeLabel } from '../state/toolSlice'
 
 import type { SnapLayer } from './toolSession'
 import type { CartographerStoreHook } from '../state/store'
@@ -24,7 +24,7 @@ export interface LayerSwitchContext {
  */
 export function reachLayer(context: LayerSwitchContext, layer: SnapLayer): void {
   context.store.getState().reachLayer(layer)
-  context.report(PEN_MODE_LABELS[layer])
+  context.report(modeLabel(context.store.getState().tool, layer))
 }
 
 /**
@@ -34,5 +34,5 @@ export function reachLayer(context: LayerSwitchContext, layer: SnapLayer): void 
  */
 export function leaveLayer(context: LayerSwitchContext): void {
   const back = context.store.getState().leaveLayer()
-  if (back !== null) context.report(PEN_MODE_LABELS[back])
+  if (back !== null) context.report(modeLabel(context.store.getState().tool, back))
 }

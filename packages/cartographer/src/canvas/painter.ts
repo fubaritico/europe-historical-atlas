@@ -145,6 +145,8 @@ export interface PaintStyle {
   anchorRadius: number
   /** A snap dot's radius in screen pixels: small enough never to be taken for a handle. */
   snapAnchorRadius: number
+  /** The stretch ⟨retrace⟩ would replace, dashed — the palette's alert ink, `--warn`. */
+  replacedStroke: string
   /** A border's light core — the atlas's. */
   borderCore: string
   /** A border's dark casing, and the frontier's one stroke — the atlas's. */

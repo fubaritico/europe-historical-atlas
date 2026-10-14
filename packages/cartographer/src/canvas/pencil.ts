@@ -3,6 +3,7 @@ import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
 import { TAG } from './consoleTag'
 import { nearestLayer } from './layerHits'
 import { leaveLayer, reachLayer } from './layerSwitch'
+import { retracePencilStart } from './retrace'
 import { lonLatAt, resolvedTarget, snapClick } from './toolGestures'
 
 import type { GestureContext } from './toolGestures'
@@ -117,6 +118,9 @@ export function pencilStart(context: GestureContext, at: Point, time: number): v
     console.warn(`${TAG} nothing drawn: select a polity to draw in first.`)
     return
   }
+  // Under ⟨retrace⟩ the drag must start the run on one of the target's anchors, as the first click must.
+  const start = retracePencilStart(context, at)
+  if (start === 'refused') return
   const drawing: PencilSample = {
     time,
     at: [at[0], at[1]],
@@ -125,7 +129,8 @@ export function pencilStart(context: GestureContext, at: Point, time: number): v
     reached: false,
   }
   context.session.drawing = drawing
-  lay(context, drawing, at, time)
+  // A run just started on an anchor already holds the press's point: laying it again would repeat it.
+  if (start === 'drawing') lay(context, drawing, at, time)
 }
 
 /**

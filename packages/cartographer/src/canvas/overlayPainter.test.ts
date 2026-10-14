@@ -52,6 +52,7 @@ const NOTHING: OverlayScene = {
   snapTarget: null,
   snapPreview: null,
   marquee: null,
+  replaced: null,
 }
 
 /** The fill of each handle drawn, in order. */
@@ -205,5 +206,29 @@ describe('paintOverlay', () => {
       paintOverlay(ctx, SIZE, NOTHING, CHROME_PAINT_STYLE)
       expect(calls.filter((call) => call.op === 'lineTo')).toEqual([])
     })
+  })
+})
+
+describe('paintOverlay — ⟨retrace⟩ (H-46)', () => {
+  it('draws the stretch a retrace would replace dashed, then puts the dash away', () => {
+    const { ctx, calls } = recording()
+    const replaced: [number, number][] = [
+      [10, 10],
+      [20, 30],
+      [40, 30],
+    ]
+    paintOverlay(ctx, SIZE, { ...NOTHING, replaced }, CHROME_PAINT_STYLE)
+    const dashes = calls.filter((call) => call.op === 'setLineDash').map((call) => call.args[0])
+    expect(dashes).toEqual([[8, 6], []])
+    expect(calls.filter((call) => call.op === 'lineTo').map((call) => call.args)).toEqual([
+      [20, 30],
+      [40, 30],
+    ])
+  })
+
+  it('sets no dash when no stretch would be replaced', () => {
+    const { ctx, calls } = recording()
+    paintOverlay(ctx, SIZE, NOTHING, CHROME_PAINT_STYLE)
+    expect(calls.some((call) => call.op === 'setLineDash')).toBe(false)
   })
 })

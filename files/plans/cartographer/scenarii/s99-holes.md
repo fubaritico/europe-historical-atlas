@@ -656,3 +656,23 @@ with one dash and one gap length (`borderDashSize`, `borderDashGap`). **Remedy**
 shorter and tighter for the vassal — carried by the hands table (`core/editor/borderHands.ts`, which `s08`
 already describes as *"pattern, dash cadence, width per relation"*), so the Cartographer and the atlas share
 it. To settle by eye with the dev at the border-style session.
+
+### H-46 · A stretch drawn wrong cannot be traced again — **the dev, 2026-10-14, from the general test**
+
+The night of the general test is drawn alone, so its errors are found the next morning: they need tools that
+correct them, not a redraw. The first case, Lisbon: across the Tagus mouth the coastline is two contours, and a
+coast click took a vertex of the estuary's contour, inland on the north bank; the straight line from it to the
+south bank left a triangle of land outside the Almoravids. Corrected by hand, the anchor dragged with the white
+arrow to the mouth's corner. **The tool asked for**: *retrace a stretch* — choose two anchors of a ring, and
+the stretch between them is replaced by the water that joins them (coast or river), the shared anchors kept
+shared, so the neighbour follows (same requirement as `H-37`'s weld: never a second geometry). **The night's
+defects are logged** in `files/plans/cartographer/general-test-defects.md`, one line per defect with the tool
+that would have fixed it in one gesture — the list that orders the correction tools.
+
+**Built 2026-10-14 — ⟨retrace⟩** (`s03`, *Retracing a stretch*): the first of the four correction tools, in
+the order the dev took (retrace, then delete or give a ring, then weld and snap to an edge, then carve).
+**Still open, the dev's to answer**: may a border shared along the whole stretch be **detached** on purpose —
+the aimed polity retraced, the neighbour left where it was? Recommended: no by default (the neighbour
+follows, as now), and if the need is shown, an explicit modifier held during the retrace. **Noted for later**:
+the maximum zoom raised from 32 to 128 (aiming at coast anchors 4–6 px apart at 3200 %), a separate commit;
+lighter coastlines (fewer points), the dev's remark — already in `next.md` (Douglas–Peucker).

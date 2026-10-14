@@ -182,19 +182,71 @@ Scenario: delete several at once
 > intégralité. On serait toujours dans une démarche d'ajustement."_ Moving a run of border is selecting
 > its anchors and dragging them, which the marquee already gives. No stretch-dragging tool is built.
 
+## Retracing a stretch — ⟨retrace⟩ (`H-46`, built 2026-10-14)
+
+> **This replaces the marquee-and-river gesture written here before** (*"marquee the anchors of that
+> stretch, choose ⟨snap to river⟩, click the river at each end"*): one gesture, and more general — the new
+> run is drawn exactly as the Pen draws, so it follows a coast, a river, a neighbour's border, free points
+> or the Pencil. **Its own tool on the rail, under the Pen, on ‹R›**, because it corrects an outline and
+> does not draw one (the dev: *"ce n'est plus un outil de traçage, mais un outil de retraçage, de
+> correction"*). Its glyph is provisional until the dev draws it.
+
 ```gherkin
-Scenario: replace a whole stretch by a snapped run
-  Given a stretch of the Empire's western limit was digitised crudely
-  When I marquee the anchors of that stretch
-  And I choose ⟨snap to river⟩
-  And I click the Meuse at each end of the stretch
-  Then those anchors are replaced by the river's sub-path
-  And its provenance changes accordingly
-  And every path that ran over them runs over the new ones
+Scenario: retrace a stretch of the aimed polity
+  Given the Emirate of the Balearic Islands is aimed at, and ⟨retrace⟩ is in hand
+  When I click one of its anchors
+  Then the run starts there, and the bar reads "Retracing … — click one of its anchors to end"
+  When I click the coast, a neighbour's anchors, or free points, as with the Pen
+  Then the bar says what each click lays — "following the coastline" — as the Pen's does
+  When I hover another of its anchors, on the same outline
+  Then the stretch the click would replace is drawn dashed in the alert ink
+  And the bar reads "Retracing … — replaces 2 anchors · ‹alt› the other side"
+  When I click it
+  Then the stretch is replaced by the run, in one undo step
+  And the result zone reads "Emirate of the Balearic Islands: 2 anchors replaced by 4"
+
+Scenario: the side replaced is the one the run lies closer to
+  Given a run drawn from one anchor to another of a closed outline
+  Then the stretch replaced is the one the run lies closer to — not the shorter
+  And with ‹alt› held, the other one
+
+Scenario: a neighbour on the whole stretch follows, one that only touches it keeps its points
+  Given the stretch is a border France shares with the Empire along all its length
+  When I retrace it
+  Then the Empire takes the new run too, and the result says "· Empire follows"
+  Given instead the Pomeranian Lordships hold one anchor of the stretch and nothing more of it
+  When I retrace it
+  Then the Pomeranian Lordships keep their points, and the bar and the result say "· Pomeranian Lordships keeps its points"
+
+Scenario: following the water to the end
+  Given the run's last click snapped onto the coast
+  When I click an end anchor placed by eye beside that coast
+  Then the coast is followed up to it, and the end joined — never a straight line across the water
+
+Scenario: what is refused, said before the click
+  Given the new run would pass again through an anchor a following outline keeps
+  Then the bar reads "cannot end here: the new run passes again through an anchor Empire keeps"
+  And no stretch is previewed, and a click is refused with the same words
+  Given a border dressed by hand runs over the stretch
+  Then the click is refused: "clear it in {Overrides} first"
 ```
 
-> This is the gesture that actually _improves_ an import, rather than nudging it. It is worth more than
-> the three point operations put together.
+> **The dev's call, 2026-10-14 — "c'est les Obotrites qui comptent"**: the first version refused a stretch
+> through a junction (a third polity meeting it at one anchor), on the argument that it would open a gap
+> there. Walked on the Obotrites, it blocked the correction for a neighbour the author was not editing. Now
+> the aimed polity is retraced and the one meeting it keeps its points; what that leaves between them is
+> visible, said, and corrected by retracing the neighbour. **A border shared along the whole stretch still
+> moves as one** — the sliver `H-06` forbids would come back otherwise. Whether a shared border may ever be
+> *detached* on purpose is asked, not decided (`s99`, `H-46`).
+
+> **Walked for real, 2026-10-14**, by the dev in his Chrome on the general test's 1100: Formentor and the
+> bay of Palma on Majorca, the west of Minorca, the Holy Roman Empire's limit along the Obotrites, the
+> Obotrites' own coast. What the walk changed is written above: the end along the water (Formentor), the
+> bar saying what a click lays, the mode named *"Retrace · Pen — follow the coast"* rather than *"Pen"*,
+> and the junction rule. **What it found that is not the tool's**: the cape of Formentor is a contour of
+> its own in the coastline data, so no single coast line joins its two sides — the author removes the point
+> that strays and joins the two coast anchors. And the derivation of borders cost 5.7 s after every
+> gesture on 137 polities: fixed the same day (0.34 s).
 
 ## The shared border — settled
 

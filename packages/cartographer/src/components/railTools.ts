@@ -37,6 +37,8 @@ export const PEN_VARIANTS: readonly [ToolVariant, ...ToolVariant[]] = [
 export const RAIL_TOOLS: readonly RailTool[] = [
   { tool: 'edit', label: TOOL_LABELS.edit, key: 'A', icon: 'edit' },
   { tool: 'draw', label: TOOL_LABELS.draw, key: 'P', icon: 'draw', variants: PEN_VARIANTS },
+  // The correction tool, under the Pen it borrows its gestures from (`H-46`, the dev, 2026-10-14).
+  { tool: 'retrace', label: TOOL_LABELS.retrace, key: 'R', icon: 'retrace' },
   { tool: 'navigate', label: TOOL_LABELS.navigate, key: 'Space', icon: 'navigate' },
 ]
 

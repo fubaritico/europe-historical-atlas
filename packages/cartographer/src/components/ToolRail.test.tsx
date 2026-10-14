@@ -67,15 +67,24 @@ const WITH_A_DISABLED_ROW: readonly RailTool[] = [
 describe('ToolRail', () => {
   describe('happy path', () => {
     // The dev, 2026-10-11: the tools one under the other, in Illustrator's order.
-    it('lists the three tools top to bottom, the one in hand pressed', () => {
+    it('lists the four tools top to bottom, the one in hand pressed', () => {
       mount({ tool: 'draw' })
       // The toolbar's buttons: the swatch at the foot is a button too since it opens the colour picker.
       const names = within(screen.getByRole('toolbar'))
         .getAllByRole('button')
         .map((button) => button.getAttribute('aria-label'))
-      expect(names).toEqual(['Direct Selection', 'Pen', 'Hand'])
+      expect(names).toEqual(['Direct Selection', 'Pen', 'Retrace', 'Hand'])
       expect(tool('Pen').getAttribute('aria-pressed')).toBe('true')
       expect(tool('Hand').getAttribute('aria-pressed')).toBe('false')
+      expect(tool('Retrace').getAttribute('aria-pressed')).toBe('false')
+    })
+
+    // H-46 — the correction tool sits under the Pen, on its own key.
+    it('takes the retrace tool on its button, named with its key', async () => {
+      const { onSelect, user } = mount()
+      expect(tool('Retrace').getAttribute('title')).toBe('Retrace (R)')
+      await user.click(tool('Retrace'))
+      expect(onSelect).toHaveBeenCalledWith('retrace')
     })
 
     it('takes a tool on a click', async () => {

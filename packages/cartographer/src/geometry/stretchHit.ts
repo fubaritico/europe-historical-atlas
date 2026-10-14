@@ -26,7 +26,7 @@ export interface StretchHit {
  * @param b - the other
  * @returns the nearest point and how far it is, squared
  */
-function nearestOnSegment(p: Point, a: Point, b: Point): { at: Point; distance: number } {
+export function nearestOnSegment(p: Point, a: Point, b: Point): { at: Point; distance: number } {
   const dx = b[0] - a[0]
   const dy = b[1] - a[1]
   const length = dx * dx + dy * dy

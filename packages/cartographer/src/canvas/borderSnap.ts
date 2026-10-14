@@ -110,6 +110,10 @@ export function borderRunTo(context: GestureContext, to: number): number[] | nul
 /**
  * The run of a ring between the last joined anchor and `to`, before any check — `null` when no ring
  * holds both.
+ *
+ * **Under ⟨retrace⟩ the target's own rings are not followed** (`H-46`): the run is drawn to replace a
+ * stretch of them, and following one would lay that very stretch back. A neighbour's ring is followed as
+ * the Pen follows it — which is what aligns a retrace onto the neighbour's border.
  * @param context - the document and the session
  * @param to - the anchor under the pointer
  * @returns the run of anchor indices, `from` included, or `null`
@@ -117,7 +121,9 @@ export function borderRunTo(context: GestureContext, to: number): number[] | nul
 function ringRunTo(context: GestureContext, to: number): number[] | null {
   const from = context.session.outline.at(-1)?.anchor ?? null
   if (from === null) return null
-  for (const claim of context.store.getState().document.claims) {
+  const { document, tool, target } = context.store.getState()
+  for (const claim of document.claims) {
+    if (tool === 'retrace' && claim.polity === target) continue
     for (const ring of claim.rings) {
       const start = ring.indexOf(from)
       const end = ring.indexOf(to)

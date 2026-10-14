@@ -963,3 +963,41 @@ describe('editionSlice.deletePolity', () => {
     })
   })
 })
+
+describe('editionSlice.retraceStretch (H-46)', () => {
+  const RETRACE: HistoryStep = { kind: 'retrace', label: 'retrace' }
+  const NEW_POINT = { at: [2.5, 47] as [number, number], provenance: FREE_POINT_PROVENANCE }
+
+  it('replaces the shared side in both rings as one step, and one undo gives the border back', () => {
+    const { store } = openStore()
+    expect(store.getState().retraceStretch('fr-couronne', 1, 2, [], [NEW_POINT], RETRACE)).toEqual({
+      removed: 0,
+      added: 1,
+      neighbours: ['hre'],
+      untouched: [],
+    })
+    expect(store.getState().rows.find((row) => row.current)?.kind).toBe('retrace')
+    store.getState().undo()
+    expect(store.getState().document.claims.map((claim) => claim.rings[0])).toEqual([
+      [0, 1, 2, 3],
+      [1, 4, 5, 2],
+    ])
+  })
+
+  it('records nothing when the document refuses', () => {
+    const { store } = openStore()
+    const version = store.getState().version
+    // The Empire follows 1 → 2 and keeps 4: a run through 4 would visit it twice.
+    const through = {
+      at: [4, 48] as [number, number],
+      provenance: FREE_POINT_PROVENANCE,
+      anchor: 4,
+    }
+    expect(store.getState().retraceStretch('fr-couronne', 1, 2, [], [through], RETRACE)).toEqual({
+      kind: 'loop',
+      polity: 'hre',
+    })
+    expect(store.getState().version).toBe(version)
+    expect(store.getState().canUndo).toBe(false)
+  })
+})
