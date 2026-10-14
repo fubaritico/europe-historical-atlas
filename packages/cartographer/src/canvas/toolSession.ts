@@ -54,6 +54,11 @@ export interface ToolSession {
   /** The anchor being dragged and where it would land, in degrees — `null` when nothing is moving. */
   moving: { index: number; to: [number, number] } | null
   /**
+   * What the anchor being dragged alone would weld onto if released here — a neighbour's anchor or
+   * stretch (`H-37`); `null` when it would only move.
+   */
+  weld: WeldOffer | null
+  /**
    * The points an undo put back in hand when it reopened a closed outline — `null` otherwise. A redo
    * closes the ring again only while the outline in hand is still exactly these; once the author has
    * changed it, the outline is theirs and a redo does not overwrite it.
@@ -80,6 +85,14 @@ export interface ToolSession {
   /** The Pencil's drag in progress: when and where it last placed a point — `null` between drags. */
   drawing: PencilSample | null
 }
+
+/**
+ * A weld on offer under a dragged anchor: onto another polity's anchor, or onto a point of another
+ * polity's stretch — where, in degrees, so the drag shows the anchor where it will land.
+ */
+export type WeldOffer =
+  | { kind: 'anchor'; into: number; at: [number, number] }
+  | { kind: 'stretch'; a: number; b: number; at: [number, number] }
 
 /** A stretch of the outline laid by one Pencil drag: its first and its last point, by identity. */
 export interface PencilStroke {
@@ -130,6 +143,7 @@ export function idleSession(): ToolSession {
     marquee: null,
     grabbed: null,
     moving: null,
+    weld: null,
     reopened: null,
     snap: null,
     start: null,
@@ -237,6 +251,7 @@ export function dropDrag(session: ToolSession): boolean {
     session.pending !== null ||
     session.marquee !== null
   session.moving = null
+  session.weld = null
   session.grabbed = null
   session.pending = null
   session.marquee = null
@@ -479,7 +494,10 @@ export interface OverlayScene {
   moving: readonly { at: Point; from: readonly Point[] }[]
   /** The marquee being dragged, normalised — `null` when none is. Gone on release: no frame (`s03`). */
   marquee: Rect | null
-  /** The layer vertex the Pen would snap onto — emphasised before the click. */
+  /**
+   * The layer vertex the Pen would snap onto — emphasised before the click — or, under the white arrow,
+   * the neighbour's point a dragged anchor would weld onto.
+   */
   snapTarget: Point | null
   /** The stretch of layer a click would insert, from the last snapped anchor — the preview. */
   snapPreview: readonly Point[] | null
@@ -580,7 +598,7 @@ export function overlayScene(inputs: OverlayInputs): OverlayScene {
   return {
     outline: drawing ? outline : [],
     rubberTo: outline.length > 0 && inputs.snapPreview === null ? bandEnd : null,
-    snapTarget: drawing ? inputs.snapTarget : null,
+    snapTarget: drawing || inputs.session.weld !== null ? inputs.snapTarget : null,
     snapPreview: drawing ? inputs.snapPreview : null,
     closing: closingOffer(inputs, outline, pointer),
     replaced: drawing ? inputs.replaced : null,

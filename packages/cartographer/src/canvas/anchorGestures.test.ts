@@ -3,7 +3,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
 import { createCartographerStore } from '../state/store'
 import { screenToLonLatOnBackdrop } from '../view/projection'
 import { TEST_BACKDROP_FRAME } from '../view/testFrame'
@@ -15,7 +14,7 @@ import {
   insertOnStretch,
   targetStretches,
 } from './anchorGestures'
-import { testGestureContext, testPolity, testStore } from './testGestureContext'
+import { drawOutlineAt, testGestureContext, testPolity, testStore } from './testGestureContext'
 import { arrowDrag, arrowPress, arrowRelease, toolKey } from './toolGestures'
 
 import type { CartographerStoreHook } from '../state/store'
@@ -41,29 +40,6 @@ const EAST: [number, number][] = [
 ]
 
 /**
- * Draw an outline for a polity, from screen points, reusing the anchors given by index.
- * @param store - the store
- * @param polityId - whose outline
- * @param points - the screen points
- * @param reuse - for each point, the anchor it reuses, or `null`
- */
-function outline(
-  store: CartographerStoreHook,
-  polityId: string,
-  points: readonly [number, number][],
-  reuse: readonly (number | null)[] = []
-): void {
-  const placed = points.map((at, index) => {
-    const lonLat = screenToLonLatOnBackdrop(at, TEST_BACKDROP_FRAME, store.getState().viewport)
-    if (lonLat === null) throw new Error('off the backdrop')
-    return { at: lonLat, provenance: FREE_POINT_PROVENANCE, anchor: reuse[index] ?? null }
-  })
-  if (!store.getState().drawOutline(polityId, placed, { kind: 'draw-outline', label: polityId })) {
-    throw new Error(`the outline of ${polityId} was refused`)
-  }
-}
-
-/**
  * France as a square, aimed at, under the white arrow — and, when asked, the Empire beside it on
  * France's right-hand side.
  * @param shared - whether the Empire shares France's right-hand side
@@ -73,8 +49,8 @@ function openSquare(shared = false) {
   const store = testStore()
   store.getState().createPolity(testPolity('fr', 'Reaume de France'), { kind: 'c', label: 'fr' })
   store.getState().createPolity(testPolity('hre', 'Sacrum Imperium'), { kind: 'c', label: 'hre' })
-  outline(store, 'fr', SQUARE)
-  if (shared) outline(store, 'hre', EAST, [1, null, null, 2])
+  drawOutlineAt(store, 'fr', SQUARE)
+  if (shared) drawOutlineAt(store, 'hre', EAST, [1, null, null, 2])
   store.getState().aimAt('fr')
   store.getState().selectTool('edit')
   return { store, ...testGestureContext(store) }

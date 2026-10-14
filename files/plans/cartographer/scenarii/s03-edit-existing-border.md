@@ -122,6 +122,16 @@ Scenario: insert an anchor
   Then a new anchor is created at that point on the stretch
   And every path running over that stretch gains it, so none of them can drift
 
+Scenario: weld an anchor onto a neighbour's
+  Given ⟨edit⟩ is active and an anchor of the target lies near, but not on, a neighbour's outline
+  When I drag that anchor alone near one of the neighbour's anchors
+  Then it snaps onto it, emphasised
+  When I release
+  Then the two are one anchor, held by both outlines, as one step — "welded onto Marca's anchor"
+  When instead I release it near a stretch of the neighbour's
+  Then it lands on that stretch and the neighbour's outline gains it — "welded onto Marca's border"
+  And the target's own stretches, shared or not, never offer a weld; a selection of several never welds
+
 Scenario: the white arrow does not insert
   Given ⟨edit⟩ is active
   When I click on a stretch between two anchors, away from any handle

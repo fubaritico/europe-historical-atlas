@@ -21,6 +21,7 @@ import {
   targetHandles,
 } from './toolSession'
 import { closingPoints, closingReport, freshStretch, layerPoints } from './waterClosing'
+import { releaseWeld, weldOfferAt } from './weldGestures'
 
 import type { SnapLayers } from './snapLayers'
 import type { SessionPoint, SnapLayer, SnapVertex, ToolSession } from './toolSession'
@@ -388,7 +389,11 @@ export function arrowDrag(context: GestureContext, at: Point): void {
   }
   const index = session.grabbed
   if (index === null) return
-  const to = lonLatAt(context, at)
+  // An anchor dragged alone snaps onto a neighbour's anchor or border, to weld there (H-37); a selection
+  // moves as one shape and does not.
+  const alone = session.selected.length <= 1 || !session.selected.includes(index)
+  session.weld = alone ? weldOfferAt(context, index, at) : null
+  const to = session.weld?.at ?? lonLatAt(context, at)
   if (to !== null) session.moving = { index, to }
 }
 
@@ -400,14 +405,19 @@ export function arrowDrag(context: GestureContext, at: Point): void {
  */
 export function arrowRelease(context: GestureContext, at: Point): void {
   const session = context.session
-  const { pending, marquee, moving } = session
+  const { pending, marquee, moving, weld } = session
   session.pending = null
   session.marquee = null
   session.moving = null
   session.grabbed = null
+  session.weld = null
   if (marquee !== null) marqueeSelect(context, marquee, pending?.shift ?? false)
   else if (pending !== null) arrowClick(context, at, pending.shift)
   if (moving === null) return
+  if (weld !== null) {
+    releaseWeld(context, moving.index, weld)
+    return
+  }
   const moves = selectionMoves(context, moving)
   if (moves === 'off-map') {
     console.warn(`${TAG} nothing moved: part of the selection would have left the map.`)

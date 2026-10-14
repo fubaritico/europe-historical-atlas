@@ -559,7 +559,13 @@ beside the first. The mending only helps when the neighbour itself followed the 
 from that water** — the water click reuses those anyway, which keeps the Spain–Portugal case intact (its
 tests unchanged and green).
 
-### H-37 · No gesture welds two anchors into one — **observed 2026-10-12**
+### H-37 · No gesture welds two anchors into one — **observed 2026-10-12, first half built 2026-10-14**
+
+> **Built 2026-10-14, the dev's call** (*« ça donne la frontière, ça fusionne les points »*): the white arrow
+> drags an anchor of the target alone; near another polity's anchor it snaps onto it and the release welds
+> them (`weldAnchor`), near another polity's stretch it snaps onto it and the release threads it into the
+> neighbour's ring (`threadAnchor`). One step, said in the result. **Second half, to come**: snapping a
+> whole selection onto a neighbour's border at once.
 
 One click at the Petit Rhône mouth took a river vertex 2.3 km from France's, so the two outlines do not
 meet between Avignon and the sea. Moving one onto the other with the arrow makes them coincide without

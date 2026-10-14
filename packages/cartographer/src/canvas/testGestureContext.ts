@@ -1,8 +1,9 @@
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
+import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
 import { openEmptyYear } from '../state/openEmptyYear'
 import { createCartographerStore } from '../state/store'
-import { projectToBackdrop, remapToScreen } from '../view/projection'
+import { projectToBackdrop, remapToScreen, screenToLonLatOnBackdrop } from '../view/projection'
 import { TEST_BACKDROP_FRAME } from '../view/testFrame'
 
 import { projectedTerritories } from './scene'
@@ -104,4 +105,27 @@ export function testGestureContext(
     },
   }
   return { context, reports }
+}
+
+/**
+ * Draw an outline for a polity, from screen points under the store's view, reusing the anchors given by index.
+ * @param store - the store
+ * @param polityId - whose outline
+ * @param points - the screen points
+ * @param reuse - for each point, the anchor it reuses, or `null`
+ */
+export function drawOutlineAt(
+  store: CartographerStoreHook,
+  polityId: string,
+  points: readonly [number, number][],
+  reuse: readonly (number | null)[] = []
+): void {
+  const placed = points.map((at, index) => {
+    const lonLat = screenToLonLatOnBackdrop(at, TEST_BACKDROP_FRAME, store.getState().viewport)
+    if (lonLat === null) throw new Error('off the backdrop')
+    return { at: lonLat, provenance: FREE_POINT_PROVENANCE, anchor: reuse[index] ?? null }
+  })
+  if (!store.getState().drawOutline(polityId, placed, { kind: 'draw-outline', label: polityId })) {
+    throw new Error(`the outline of ${polityId} was refused`)
+  }
 }

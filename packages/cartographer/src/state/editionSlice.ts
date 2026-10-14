@@ -3,6 +3,11 @@ import {
   removeAnchors,
 } from '@europe-historical-atlas/core/editor/anchorEdits'
 import {
+  isWeldRefusal,
+  threadAnchor,
+  weldAnchor,
+} from '@europe-historical-atlas/core/editor/anchorWeld'
+import {
   clearOverride,
   dressPair,
   dressSegments,
@@ -21,6 +26,7 @@ import { restack } from '@europe-historical-atlas/core/editor/stacking'
 import type { CartographerStore } from './store'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { AnchorRemoval } from '@europe-historical-atlas/core/editor/anchorEdits'
+import type { WeldDone, WeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
 import type { Segment } from '@europe-historical-atlas/core/editor/borderOverrides'
 import type {
   AnchorMove,
@@ -218,6 +224,32 @@ export interface EditionActions {
     step: HistoryStep,
     owner?: string
   ) => AnchorRemoval | null
+  /**
+   * Weld an anchor onto another, as one undoable step — the white arrow dropping a point on a
+   * neighbour's (`H-37`): every ring holding `from` holds `into` instead, so the two share it.
+   * @param from - the anchor dragged
+   * @param into - the anchor it is dropped on
+   * @param step - how the gesture is named
+   * @returns the polities now holding `into`, a refusal, or `null` — and then nothing was recorded
+   */
+  weldAnchor: (from: number, into: number, step: HistoryStep) => WeldDone | WeldRefusal | null
+  /**
+   * Put an anchor on a neighbour's stretch and thread it into every ring over it, as one undoable step —
+   * the white arrow dropping a point on a neighbour's border (`H-37`).
+   * @param index - the anchor dragged
+   * @param a - one end of the stretch
+   * @param b - the other end
+   * @param point - where on the stretch, as `[longitude, latitude]`
+   * @param step - how the gesture is named
+   * @returns the polities now holding the anchor, or `null` — and then nothing was recorded
+   */
+  threadAnchor: (
+    index: number,
+    a: number,
+    b: number,
+    point: [number, number],
+    step: HistoryStep
+  ) => WeldDone | null
   /**
    * Replace a stretch of a polity's ring by a new run, as one undoable step — ⟨retrace⟩'s last click
    * (`H-46`). Every ring running over the stretch takes the run, so a neighbour on it follows.
@@ -467,6 +499,34 @@ function anchorActions(
 }
 
 /**
+ * The welds of an anchor onto a neighbour's outline (`H-37`), each one step answering with what it did.
+ * @param record - the runner every recorded action goes through
+ * @returns `weldAnchor` and `threadAnchor`
+ */
+function weldActions(
+  record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean
+): Pick<EditionActions, 'weldAnchor' | 'threadAnchor'> {
+  return {
+    weldAnchor: (from, into, step): WeldDone | WeldRefusal | null => {
+      let answer: WeldDone | WeldRefusal | null = null
+      record((document) => {
+        answer = weldAnchor(document, from, into)
+        return answer !== null && !isWeldRefusal(answer)
+      }, step)
+      return answer
+    },
+    threadAnchor: (index, a, b, point, step): WeldDone | null => {
+      let answer: WeldDone | null = null
+      record((document) => {
+        answer = threadAnchor(document, index, a, b, point)
+        return answer !== null
+      }, step)
+      return answer
+    },
+  }
+}
+
+/**
  * The actions, over a line and a way to publish.
  *
  * **Outside the slice creator on purpose** (ARCH-012): pure logic trapped in a closure is a module that was
@@ -501,6 +561,7 @@ export function editionActions(
     restackPolity: (polityId, move, step): boolean =>
       record((document) => restack(document, polityId, move), step),
     ...anchorActions(record),
+    ...weldActions(record),
     undo: (): void => {
       const back = line.undo()
       if (back !== null) publish(back)

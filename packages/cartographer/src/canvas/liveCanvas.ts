@@ -33,6 +33,7 @@ import {
   targetHandles,
 } from './toolSession'
 import { closingStretch } from './waterClosing'
+import { weldTargetOnScreen } from './weldGestures'
 
 import type { AnchorCache } from './anchorCache'
 import type { HistoryRelay } from './historyRelay'
@@ -667,16 +668,19 @@ export function refreshTools(it: LiveCanvas): void {
   if (it.wasTooFar !== null && it.wasTooFar !== tooFar) it.deps.onResult(null)
   it.wasTooFar = tooFar
   const retrace = retraceOf(it, tooFar)
+  const toScreen = (lonLat: readonly [number, number]) =>
+    lonLatToScreen(lonLat, it.deps.frame, state.viewport)
   const scene = overlayScene({
     session: it.session,
     tool: state.tool,
     pointer: it.pointer,
-    toScreen: (lonLat) => lonLatToScreen(lonLat, it.deps.frame, state.viewport),
+    toScreen,
     anchors: moving === null ? [] : anchorsOnScreen(it),
     moves: movesOnScreen(it),
     neighboursOf: (index) => ringNeighbours(state.document, index),
     closeRadius: HANDLE_HIT_RADIUS * it.ratio,
-    snapTarget: offer.target,
+    // A weld on offer under the white arrow is emphasised as the Pen's snap is: where it will land.
+    snapTarget: offer.target ?? weldTargetOnScreen(it.session.weld, toScreen),
     snapPreview: offer.preview,
     replaced: retrace.replaced,
   })

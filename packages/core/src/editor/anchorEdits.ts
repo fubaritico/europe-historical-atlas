@@ -24,7 +24,7 @@ import type { YearDocument } from './yearDocument'
  * @param doc - the document to read
  * @returns the rings, live — splicing one edits the document
  */
-function everyRing(doc: YearDocument): number[][] {
+export function everyRing(doc: YearDocument): number[][] {
   return [
     ...doc.claims.flatMap((claim) => claim.rings),
     ...doc.deliberateGaps.map((gap) => gap.ring),
@@ -38,7 +38,7 @@ function everyRing(doc: YearDocument): number[][] {
  * @param b - the other
  * @returns the position after which the new anchor goes, or `-1` when they are not neighbours
  */
-function edgeAt(ring: readonly number[], a: number, b: number): number {
+export function edgeAt(ring: readonly number[], a: number, b: number): number {
   for (let at = 0; at < ring.length; at += 1) {
     const next = ring[(at + 1) % ring.length]
     const here = ring[at]
@@ -54,7 +54,7 @@ function edgeAt(ring: readonly number[], a: number, b: number): number {
  * @param b - the other
  * @returns the position after which the new anchor goes, or `-1`
  */
-function runStepAt(run: readonly number[], a: number, b: number): number {
+export function runStepAt(run: readonly number[], a: number, b: number): number {
   for (let at = 0; at + 1 < run.length; at += 1) {
     const here = run[at]
     const next = run[at + 1]
