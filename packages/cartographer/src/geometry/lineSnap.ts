@@ -95,10 +95,27 @@ export function nearestLineVertex(
  * @returns the vertices from `from` to `to`, inclusive; empty when either is not a vertex of it
  */
 export function lineStretch(contour: SnapLine, from: number, to: number): Point[] {
+  return lineStretches(contour, from, to)[0] ?? []
+}
+
+/**
+ * Every way along a contour between two of its vertices, both ends included, the shorter first — two
+ * on a closed contour, one on an open one, none when either is not a vertex of it. What lets the Pen
+ * take the long way round when the short one runs back over what it laid (the dev, round the Nile,
+ * 2026-10-14).
+ * @param contour - the contour
+ * @param from - the vertex the stretch starts at
+ * @param to - the vertex it ends at
+ * @returns the runs, the shorter first
+ */
+export function lineStretches(contour: SnapLine, from: number, to: number): Point[][] {
   const { points } = contour
-  if (!contour.closed) return subPathBetween(points, from, to)
+  if (!contour.closed) {
+    const run = subPathBetween(points, from, to)
+    return run.length === 0 ? [] : [run]
+  }
   if (!isVertexOf(points, from) || !isVertexOf(points, to)) return []
-  return shortestRunBetween(points, from, to)
+  return runsBetween(points, from, to)
 }
 
 /**
@@ -113,14 +130,40 @@ export function lineStretch(contour: SnapLine, from: number, to: number): Point[
  * @returns the items from `from` to `to`, inclusive; empty when either is not a position of the loop
  */
 export function shortestRunBetween<T>(loop: readonly T[], from: number, to: number): T[] {
+  return runsBetween(loop, from, to)[0] ?? []
+}
+
+/**
+ * Both runs of a closed loop between two of its positions, both included — the shorter first, forward
+ * first when both are as long.
+ * @param loop - the loop, its last item joined to its first
+ * @param from - the position the runs start at
+ * @param to - the position they end at
+ * @returns the two runs; none when either is not a position of the loop
+ */
+export function runsBetween<T>(loop: readonly T[], from: number, to: number): T[][] {
   const count = loop.length
   if (!Number.isInteger(from) || !Number.isInteger(to)) return []
   if (from < 0 || to < 0 || from >= count || to >= count) return []
   const forward = (to - from + count) % count
   const backward = (from - to + count) % count
-  const step = forward <= backward ? 1 : -1
+  const ahead = walkLoop(loop, from, 1, forward)
+  const behind = walkLoop(loop, from, -1, backward)
+  return forward <= backward ? [ahead, behind] : [behind, ahead]
+}
+
+/**
+ * Walk a loop from a position, a number of steps in one direction, collecting every item met.
+ * @param loop - the loop
+ * @param from - where the walk starts
+ * @param step - `1` forward, `-1` backward
+ * @param steps - how many steps
+ * @returns the items, `steps + 1` of them
+ */
+function walkLoop<T>(loop: readonly T[], from: number, step: 1 | -1, steps: number): T[] {
+  const count = loop.length
   const run: T[] = []
-  for (let walked = 0, at = from; walked <= Math.min(forward, backward); walked += 1) {
+  for (let walked = 0, at = from; walked <= steps; walked += 1) {
     const item = loop[at]
     if (item !== undefined) run.push(item)
     at = (at + step + count) % count

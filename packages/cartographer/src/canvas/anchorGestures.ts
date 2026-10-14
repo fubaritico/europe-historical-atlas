@@ -8,11 +8,12 @@ import { targetHandles } from './toolSession'
 
 import type { GestureContext } from './toolGestures'
 import type { StretchHit } from '../geometry/stretchHit'
+import type { AnchorRemoval } from '@europe-historical-atlas/core/editor/anchorEdits'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /**
- * The white arrow's two edits of the anchors themselves (`s03`): a click on a stretch inserts one, and
- * ‹delete› or ‹backspace› removes the ones selected.
+ * The two edits of the anchors themselves (`s03`): the idle Pen's click on a stretch inserts one, and
+ * ‹delete› or ‹backspace› removes the ones the white arrow selected.
  *
  * **Both go through the store's recorded actions**, so each is one undo step, and both act on every
  * ring that holds the anchor — a border two polities share stays one border.
@@ -84,21 +85,18 @@ export function penInsertHit(
 }
 
 /**
- * Insert an anchor where the white arrow pressed on one of the target's stretches, and hand it to the
- * drag: keeping the pointer down moves it (`s03`). The insertion and the move are two steps, so an undo
- * after the drag takes back the move first, then the point.
+ * Insert an anchor where the idle Pen clicked one of the target's stretches, as Illustrator's Pen adds a
+ * point on a path. **The Pen's alone** (the dev, 2026-10-14): the white arrow selects, it does not add —
+ * a point is inserted with ‹P›, then dragged with ‹A›.
  * @param context - the session and the store
  * @param polityId - the target's id
  * @param at - the pointer, in screen pixels
- * @param hold - whether the new anchor is selected and held for a drag — the arrow's press; the Pen's
- *   click only inserts, as Illustrator's Pen does
- * @returns `true` when the press was on a stretch — inserted, or refused and said
+ * @returns `true` when the click was on a stretch — inserted, or refused and said
  */
 export function insertOnStretch(
   context: GestureContext,
   polityId: string,
-  at: readonly [number, number],
-  hold = true
+  at: readonly [number, number]
 ): boolean {
   const hit = stretchUnder(context, polityId, at)
   if (hit === null) return false
@@ -112,11 +110,7 @@ export function insertOnStretch(
     console.error(
       `${TAG} the document refused a point between anchors ${String(hit.a)} and ${String(hit.b)}.`
     )
-    return true
   }
-  if (!hold) return true
-  context.session.selected = [index]
-  context.session.grabbed = index
   return true
 }
 
@@ -151,7 +145,8 @@ function stillTargets(context: GestureContext, index: number): boolean {
  *
  * **A shared anchor is removed without asking** — `s03` wants a confirmation naming both polities, and
  * there is no dialogue for it yet. The result zone names them instead, and one undo puts it back.
- * Refused as a whole, and said, when a ring would fall under three anchors.
+ * Never refused (the dev, 2026-10-14): a ring of the target that would fall under three anchors goes
+ * whole, a neighbour's keeps its points and is named.
  * @param context - the session and the store
  * @returns `true` when the key was taken — there was a selection to act on
  */
@@ -169,15 +164,35 @@ export function deleteSelected(context: GestureContext): boolean {
     context.session.selected = []
     return true
   }
-  const removal = context.store.getState().deleteAnchors(kept, deleteStep(kept.length))
+  const owner = resolvedOwner(context)
+  const removal = context.store.getState().deleteAnchors(kept, deleteStep(kept.length), owner)
+  context.session.selected = []
   if (removal === null) {
-    console.warn(`${TAG} anchors not removed: a ring needs at least three anchors.`)
-    context.report('not removed — a ring needs at least three anchors')
+    // The anchors were checked against the target's outline just above: no ring holding them is a defect.
+    console.error(
+      `${TAG} the document holds none of the ${String(kept.length)} selected anchor(s).`
+    )
     return true
   }
-  context.session.selected = []
-  context.report(removalReport(context, kept.length, removal.polities))
+  const said =
+    removal.rings === 0
+      ? removalReport(context, kept.length, removal.polities)
+      : ringRemovalReport(context, removal, kept.length, owner)
+  context.report(said + sparedReport(context, removal.spared))
   return true
+}
+
+/**
+ * What the result zone adds when another polity's outline kept the points it would have lost — it would
+ * have fallen under three anchors, and a gesture on the target's points never deletes a neighbour's.
+ * @param context - the store, for the names
+ * @param spared - the polities whose outline kept its points
+ * @returns the clause to append, empty when none did
+ */
+function sparedReport(context: GestureContext, spared: readonly string[]): string {
+  if (spared.length === 0) return ''
+  const names = namesOf(context.store.getState().document, spared).join(', ')
+  return ` · ${names} kept ${spared.length === 1 ? 'its' : 'their'} points (too few left to keep an outline)`
 }
 
 /**
@@ -189,6 +204,37 @@ function deleteStep(count: number): { kind: string; label: string } {
   return count === 1
     ? DELETE_ANCHOR_STEP
     : { kind: DELETE_ANCHOR_STEP.kind, label: `delete ${String(count)} anchors` }
+}
+
+/**
+ * The polity whose rings a deletion may take whole — the target, as the selection is its points.
+ * @param context - the store
+ * @returns its id, or none when nobody is aimed at
+ */
+function resolvedOwner(context: GestureContext): string | undefined {
+  const { document, target } = context.store.getState()
+  return describeDrawingTarget(document, target)?.id
+}
+
+/**
+ * What deleting whole rings says — *"removed 1 ring (47 anchors)"* — and, when the selection also took
+ * points from another polity's outline, whose (review ARCH-002): a neighbour's outline never changes unsaid.
+ * @param context - the store, for the names
+ * @param removal - what the deletion touched
+ * @param anchors - how many anchors the selection held
+ * @param owner - the polity whose rings went whole
+ * @returns the sentence
+ */
+function ringRemovalReport(
+  context: GestureContext,
+  removal: AnchorRemoval,
+  anchors: number,
+  owner: string | undefined
+): string {
+  const rings = `removed ${String(removal.rings)} ${removal.rings === 1 ? 'ring' : 'rings'} (${String(anchors)} ${anchors === 1 ? 'anchor' : 'anchors'})`
+  const others = removal.polities.filter((polity) => polity !== owner)
+  if (others.length === 0) return rings
+  return `${rings} · points taken from ${namesOf(context.store.getState().document, others).join(', ')}`
 }
 
 /**

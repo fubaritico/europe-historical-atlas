@@ -1,5 +1,4 @@
 import arrowHandleUrl from '../cursors/arrow-handle.svg'
-import arrowInsertUrl from '../cursors/arrow-insert.svg'
 import arrowUrl from '../cursors/arrow.svg'
 import crossAddUrl from '../cursors/cross-add.svg'
 import crossCloseUrl from '../cursors/cross-close.svg'
@@ -42,7 +41,6 @@ export type CursorName =
   | 'cross-snap'
   | 'arrow'
   | 'arrow-handle'
-  | 'arrow-insert'
 
 /** What the canvas may be doing, as far as the pointer is concerned. */
 export interface CursorState {
@@ -66,8 +64,8 @@ export interface CursorState {
   /** Whether the Pen, following a layer — the coast or a river — has it within reach. */
   snapping: boolean
   /**
-   * Whether a click here inserts a point on one of the target's stretches — the white arrow away from
-   * any handle, or the Pen with no outline in progress, as Illustrator's Pen does over a selected path.
+   * Whether a Pen click here inserts a point on one of the target's stretches — no outline in progress,
+   * as Illustrator's Pen does over a selected path. The white arrow never inserts (the dev, 2026-10-14).
    */
   overStretch: boolean
   /**
@@ -93,7 +91,6 @@ const HOT_SPOT: Record<CursorName, readonly [number, number]> = {
   'cross-snap': [16, 16],
   arrow: [6, 4],
   'arrow-handle': [6, 4],
-  'arrow-insert': [6, 4],
 }
 
 /** What the browser uses if the image cannot be had. Taken from the handoff's own table. */
@@ -106,7 +103,6 @@ const FALLBACK: Record<CursorName, string> = {
   'cross-snap': 'crosshair',
   arrow: 'default',
   'arrow-handle': 'default',
-  'arrow-insert': 'copy',
 }
 
 /** The inlined image of each cursor. */
@@ -119,7 +115,6 @@ const IMAGE: Record<CursorName, string> = {
   'cross-snap': crossSnapUrl,
   arrow: arrowUrl,
   'arrow-handle': arrowHandleUrl,
-  'arrow-insert': arrowInsertUrl,
 }
 
 /** What the pointer shows when a tool has no polity to act on — a CSS keyword, not an image of ours. */
@@ -153,13 +148,12 @@ export function cursorFor(state: CursorState): CursorName | typeof REFUSED {
 
 /**
  * The white arrow's cursor, with a subject and close enough: the handle mark over one of the target's
- * anchors, the plus over its stretch, the plain arrow elsewhere.
- * @param state - the arrow's two offers
+ * anchors, the plain arrow elsewhere — it selects, it never adds a point (the dev, 2026-10-14).
+ * @param state - the arrow's offer
  * @returns the cursor
  */
 function arrowCursor(state: CursorState): CursorName {
-  if (state.overHandle) return 'arrow-handle'
-  return state.overStretch ? 'arrow-insert' : 'arrow'
+  return state.overHandle ? 'arrow-handle' : 'arrow'
 }
 
 /**

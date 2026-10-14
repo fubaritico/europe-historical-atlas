@@ -1,15 +1,14 @@
 import { polityAt } from '../geometry/fillHit'
 import { nearestAmong } from '../geometry/hitTest'
-import { lineStretch } from '../geometry/lineSnap'
 import { normaliseRect, pointsInRect } from '../geometry/marquee'
 import { canCloseRing, isClosingOffered } from '../geometry/ringClosure'
 import { describeDrawingTarget } from '../state/drawingTarget'
 import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
 import { isPenTool } from '../state/toolSlice'
-import { backdropToLonLat, lonLatToScreen, screenToLonLatOnBackdrop } from '../view/projection'
+import { lonLatToScreen, screenToLonLatOnBackdrop } from '../view/projection'
 
 import { deleteSelected, insertOnStretch, penInsertHit } from './anchorGestures'
-import { anchorClick, anchorsByPosition, waterTaking } from './borderSnap'
+import { anchorClick, waterTaking } from './borderSnap'
 import { TAG } from './consoleTag'
 import { followedLayer, layerLines, lineLabel, snapHit } from './layerHits'
 import { leaveLayer, reachLayer } from './layerSwitch'
@@ -21,10 +20,12 @@ import {
   takeBackStroke,
   targetHandles,
 } from './toolSession'
+import { closingPoints, closingReport, freshStretch, layerPoints } from './waterClosing'
 
 import type { SnapLayers } from './snapLayers'
 import type { SessionPoint, SnapLayer, SnapVertex, ToolSession } from './toolSession'
 import type { PolityRings } from '../geometry/fillHit'
+import type { SnapLine } from '../geometry/lineSnap'
 import type { CartographerStoreHook } from '../state/store'
 import type { BackdropFrame } from '../view/projection'
 import type { Point } from '../view/viewport'
@@ -113,8 +114,11 @@ export function resolvedTarget(context: GestureContext): { id: string; name: str
  * The session is emptied only when the document took it: a refused outline stays on screen, so nothing
  * the author placed is lost to a refusal.
  * @param context - the session and the store
+ * @param followWater - whether the closing follows the coast back to the first point when both ends lie
+ *   on the same line (`closingStretch`) — the closing click does; ‹enter› closes on a straight segment
+ *   (`s02`)
  */
-export function closeOutline(context: GestureContext): void {
+export function closeOutline(context: GestureContext, followWater = false): void {
   const target = resolvedTarget(context)
   if (target === null) {
     console.warn(`${TAG} the outline was not closed: no polity is selected to close it into.`)
@@ -125,8 +129,12 @@ export function closeOutline(context: GestureContext): void {
     return
   }
   const step = { kind: DRAW_OUTLINE_KIND, label: `draw outline of ${target.name}` }
-  if (context.store.getState().drawOutline(target.id, context.session.outline, step)) {
+  // Laid only into what is handed to the document: a refused outline stays on screen as it was.
+  const closing = followWater ? closingPoints(context) : []
+  const outline = [...context.session.outline, ...closing]
+  if (context.store.getState().drawOutline(target.id, outline, step)) {
     clearOutline(context.session)
+    if (closing.length > 0) context.report(closingReport(closing.length))
     return
   }
   console.error(
@@ -148,7 +156,7 @@ export function penClick(context: GestureContext, at: Point): void {
     return
   }
   if (isClosingOffered(outlineOnScreen(context), at, context.radius)) {
-    closeOutline(context)
+    closeOutline(context, true)
     return
   }
   // The target's own stretch before the layer: there the idle Pen edits the outline it already has.
@@ -203,7 +211,7 @@ function offLayerClick(context: GestureContext, at: Point): boolean {
 export function penInserts(context: GestureContext, at: Point): boolean {
   const target = resolvedTarget(context)
   if (target === null || penInsertHit(context, at) === null) return false
-  return insertOnStretch(context, target.id, at, false)
+  return insertOnStretch(context, target.id, at)
 }
 
 /**
@@ -234,9 +242,20 @@ function freeClick(context: GestureContext, at: Point): boolean {
 export function snapStretchTo(context: GestureContext, hit: SnapVertex): Point[] | null {
   const snap = context.session.snap
   const line = layerLines(context, hit.layer)[hit.contour]
-  if (snap?.layer !== hit.layer || snap.contour !== hit.contour || line === undefined) return null
-  if (context.session.outline.length === 0) return null
-  return lineStretch(line, snap.vertex, hit.vertex)
+  if (snap === null || line === undefined || !continuesLine(context, hit)) return null
+  return freshStretch(context, line, snap.vertex, hit.vertex)
+}
+
+/**
+ * Whether a snapped click lands on the line the outline ends on — where a stretch is run.
+ * @param context - the session
+ * @param hit - the vertex under the pointer
+ * @returns `true` when it does and the outline is under way
+ */
+function continuesLine(context: GestureContext, hit: SnapVertex): boolean {
+  const snap = context.session.snap
+  if (snap?.layer !== hit.layer || snap.contour !== hit.contour) return false
+  return context.session.outline.length > 0
 }
 
 /**
@@ -265,7 +284,7 @@ export function snapClick(context: GestureContext, layer: SnapLayer, at: Point):
     return true
   }
   const provenance = context.layers[layer].provenance
-  if (stretch === null) placeOnLayer(context, [line.points[hit.vertex]], provenance)
+  if (stretch === null) placeVertex(context, hit, line)
   else {
     const placed = placeOnLayer(context, stretch.slice(1), provenance)
     context.report(
@@ -274,6 +293,27 @@ export function snapClick(context: GestureContext, layer: SnapLayer, at: Point):
   }
   context.session.snap = hit
   return true
+}
+
+/**
+ * Place the one layer vertex a snapped click landed on, with no stretch before it — the outline's first
+ * point, a click on another line, or a line that runs back over the outline both ways (said). The first
+ * point is remembered as where the outline began, for the closing click (`closingStretch`).
+ * @param context - the session, the snap layers and the store
+ * @param hit - the vertex under the pointer
+ * @param line - its line
+ */
+function placeVertex(context: GestureContext, hit: SnapVertex, line: SnapLine): void {
+  const noun = context.layers[hit.layer].noun
+  if (continuesLine(context, hit)) {
+    console.warn(
+      `${TAG} the ${noun} runs back over the outline both ways: only the vertex was placed.`
+    )
+  }
+  const first = context.session.outline.length === 0
+  placeOnLayer(context, [line.points[hit.vertex]], context.layers[hit.layer].provenance)
+  const point = context.session.outline[0]
+  if (first && point !== undefined) context.session.start = { vertex: hit, point }
 }
 
 /**
@@ -288,24 +328,9 @@ function placeOnLayer(
   points: readonly (Point | undefined)[],
   provenance: Provenance
 ): number {
-  const existing = anchorsByPosition(context)
-  let placed = 0
-  for (const point of points) {
-    if (point === undefined) continue
-    const at = backdropToLonLat(point, context.frame)
-    const anchor = existing(at)
-    // An anchor a neighbour already has there is joined with its own provenance, never duplicated.
-    const reused =
-      anchor === null ? null : sessionPointOf(context.store.getState().document, anchor)
-    if (anchor !== null && reused === null) {
-      console.error(
-        `${TAG} anchor ${String(anchor)} has no declared source; a new point was placed on it.`
-      )
-    }
-    context.session.outline.push(reused ?? { at, provenance, anchor: null })
-    placed += 1
-  }
-  return placed
+  const placed = layerPoints(context, points, provenance)
+  context.session.outline.push(...placed)
+  return placed.length
 }
 
 /**
@@ -314,7 +339,6 @@ function placeOnLayer(
  * - **on one of the target's handles**, it takes it — the selection becomes that anchor, unless the
  *   anchor is already selected, so a drag moves the whole selection; with ‹shift› it adds the anchor to
  *   the selection or drops it;
- * - **on the target's stretch**, it inserts an anchor there;
  * - **anywhere else, it decides nothing yet** (the dev, 2026-10-12): released in place it is a click,
  *   dragged it is a marquee — see {@link arrowRelease}. So a marquee may start on the sea without first
  *   deselecting the polity.
@@ -343,7 +367,6 @@ export function arrowPress(context: GestureContext, at: Point, shift: boolean): 
     session.grabbed = hit
     return
   }
-  if (target !== null && !shift && insertOnStretch(context, target.id, at)) return
   session.pending = { at: [at[0], at[1]], shift }
 }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { lineStretch, nearestLineVertex, shortestRunBetween } from './lineSnap'
+import { lineStretch, lineStretches, nearestLineVertex, shortestRunBetween } from './lineSnap'
 
 import type { SnapLine } from './lineSnap'
 
@@ -145,6 +145,58 @@ describe('shortestRunBetween', () => {
   describe('edge cases', () => {
     it('gives the one item when both positions are the same', () => {
       expect(shortestRunBetween(RING, 2, 2)).toEqual([12])
+    })
+  })
+})
+
+// The dev, round the Nile, 2026-10-14: the Pen takes the other way round when the short one runs back
+// over what it laid, so both ways must be on offer.
+describe('lineStretches', () => {
+  describe('happy path', () => {
+    it('gives both ways round a closed contour, the shorter first', () => {
+      expect(lineStretches(ISLAND, 1, 3)).toEqual([
+        [
+          [10, 0],
+          [20, 0],
+          [20, 10],
+        ],
+        [
+          [10, 0],
+          [0, 0],
+          [0, 10],
+          [0, 20],
+          [10, 20],
+          [20, 20],
+          [20, 10],
+        ],
+      ])
+    })
+  })
+
+  describe('variants', () => {
+    it('gives the one way along an open line', () => {
+      expect(lineStretches(SHORE, 2, 0)).toEqual([
+        [
+          [120, 0],
+          [110, 0],
+          [100, 0],
+        ],
+      ])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('gives nothing for a position that is not a vertex', () => {
+      expect(lineStretches(ISLAND, 0, 8)).toEqual([])
+      expect(lineStretches(SHORE, 0, 5)).toEqual([])
+    })
+  })
+
+  // L4: N/A — pure arithmetic over literals, no collaborator to fail.
+
+  describe('edge cases', () => {
+    it('puts the forward way first when both are as long', () => {
+      expect(lineStretches(ISLAND, 0, 4)[0]?.[1]).toEqual([10, 0])
     })
   })
 })

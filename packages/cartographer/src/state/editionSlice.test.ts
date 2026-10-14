@@ -743,6 +743,8 @@ describe('editionSlice.insertAnchor and deleteAnchors', () => {
 
       expect(store.getState().deleteAnchors([1], DELETE)).toEqual({
         polities: ['fr-couronne', 'hre'],
+        rings: 0,
+        spared: [],
       })
 
       expect(store.getState().document.claims.map((claim) => claim.rings[0])).toEqual([
@@ -772,7 +774,7 @@ describe('editionSlice.insertAnchor and deleteAnchors', () => {
       expect(store.getState().document.anchors).toHaveLength(6)
     })
 
-    it('records nothing for a deletion that would leave a ring of two', () => {
+    it('records nothing for a deletion with no owner that every ring touched refuses to lose', () => {
       const { store } = openStore()
       store.getState().deleteAnchors([0], DELETE)
       const steps = store.getState().rows.length

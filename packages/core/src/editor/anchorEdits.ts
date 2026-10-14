@@ -95,13 +95,23 @@ export function insertAnchorOnStretch(
 export interface AnchorRemoval {
   /** The polities whose rings held it — two or more for a shared border. */
   polities: string[]
+  /**
+   * How many of the owner's rings went whole — every anchor of theirs removed, or too few left to enclose
+   * an area (`removeAnchors`).
+   */
+  rings: number
+  /**
+   * The other polities whose outline kept the points, because losing them would have left it under
+   * {@link MIN_RING_ANCHORS} — a neighbour's outline is never deleted by a gesture on the owner's points.
+   */
+  spared: string[]
 }
 
 /**
  * Remove an anchor from every ring that holds it; its two stretches merge into one.
  * @param doc - the document to edit
  * @param index - the anchor to remove
- * @returns the polities that held it, or `null` when no claim holds it or a ring would fall too short
+ * @returns the polities that held it, or `null` when no claim holds it
  */
 export function removeAnchor(doc: YearDocument, index: number): AnchorRemoval | null {
   return removeAnchors(doc, [index])
@@ -109,30 +119,67 @@ export function removeAnchor(doc: YearDocument, index: number): AnchorRemoval | 
 
 /**
  * Remove several anchors from every ring that holds them — `s03`'s *"delete several at once … in one
- * undo step"*.
+ * undo step"* — and, **for the polity named as owner, every ring all of whose anchors are removed goes
+ * whole**: selecting all the points of an outline and deleting them deletes the outline, as in Illustrator
+ * (the dev, 2026-10-14, on the night's degenerate islands of Denmark — defect 11 of the general test).
+ * **A ring deleted whole leaves its anchors to the neighbours that share them**: the list of indices goes,
+ * the points stay with whoever else holds them, so a country with a land border can be deleted without its
+ * neighbour losing a point. A polity left with no ring has no claim, the normal state of a polity with no
+ * territory. **Another polity's ring never goes whole**, even covered: the tools select the owner's points,
+ * and deleting a neighbour's outline unsaid would be the inverse defect.
  *
- * **All or nothing, checked before anything is written**: refused when a ring would fall under
- * {@link MIN_RING_ANCHORS} once they are all gone — `s03`, a ring that cannot enclose an area would
- * vanish silently on the next open. Removing them one by one and stopping at the first refusal would
- * leave the document changed with no step to undo it. The anchors stay in the table, as every anchor
+ * **Nothing refuses a deletion** (the dev, 2026-10-14: *« y'a rien qui doit m'empêcher d'enlever des
+ * points. Rien. »*). A ring left under {@link MIN_RING_ANCHORS} cannot enclose an area and would vanish
+ * silently on the next open (`s03`), so it never stays: **an owner's ring that would fall short goes
+ * whole**, as if all its points had been selected; **another polity's, or a deliberate gap's, keeps the
+ * points** it would have lost, and is named in `spared`. The anchors stay in the table, as every anchor
  * does while editing; nothing holding them, they leave the file at save.
  * @param doc - the document to edit
  * @param indices - the anchors to remove
- * @returns the polities that held any of them, or `null` when none is held or a ring would fall short
+ * @param owner - the polity whose rings may go whole, or none
+ * @returns the polities that held any of them, how many rings went whole and who kept the points, or
+ *   `null` when nothing was removed — no ring holds any of them, or every one touched kept its points
  */
-export function removeAnchors(doc: YearDocument, indices: readonly number[]): AnchorRemoval | null {
-  const gone = new Set(indices)
-  const touches = (ring: readonly number[]) => ring.some((at) => gone.has(at))
-  const holding = doc.claims.filter((claim) => claim.rings.some(touches))
-  if (holding.length === 0) return null
-  const tooShort = everyRing(doc).some(
-    (ring) => touches(ring) && ring.filter((at) => !gone.has(at)).length < MIN_RING_ANCHORS
+export function removeAnchors(
+  doc: YearDocument,
+  indices: readonly number[],
+  owner?: string
+): AnchorRemoval | null {
+  const selected = new Set(indices)
+  // Whole, or too few points left to enclose an area: either way the owner's ring goes.
+  const goesWhole = (ring: readonly number[]) =>
+    ring.filter((at) => !selected.has(at)).length < MIN_RING_ANCHORS
+  const ownerRings = new Set(
+    doc.claims.find((claim) => claim.polity === owner)?.rings.filter(goesWhole) ?? []
   )
-  if (tooShort) return null
+  // A ring deleted whole leaves its anchors to whoever else holds them — a neighbour along a shared border
+  // keeps its outline (review ARCH-001, 2026-10-14). Only the anchors selected outside such a ring leave the
+  // other rings.
+  const inWhole = new Set([...ownerRings].flat())
+  const gone = new Set(indices.filter((index) => !inWhole.has(index)))
+  const touches = (ring: readonly number[]) => ring.some((at) => gone.has(at))
+  // Any other ring that would fall short keeps its points: it is not this gesture's to delete.
+  const spares = (ring: number[]) =>
+    !ownerRings.has(ring) && ring.filter((at) => !gone.has(at)).length < MIN_RING_ANCHORS
+  const holding = doc.claims.filter((claim) =>
+    claim.rings.some((ring) => ownerRings.has(ring) || touches(ring))
+  )
+  if (holding.length === 0) return null
+  // Every ring touched keeping its points — no owner named — is nothing done: no step to record.
+  const changes =
+    ownerRings.size > 0 || everyRing(doc).some((ring) => touches(ring) && !spares(ring))
+  if (!changes) return null
+  const spared = holding
+    .filter((claim) => claim.rings.some((ring) => touches(ring) && spares(ring)))
+    .map((claim) => claim.polity)
+  const thinned = (ring: number[]): number[] =>
+    spares(ring) ? [...ring] : ring.filter((at) => !gone.has(at))
   for (const claim of holding) {
-    claim.rings = claim.rings.map((ring) => ring.filter((at) => !gone.has(at)))
+    claim.rings = claim.rings.filter((ring) => !ownerRings.has(ring)).map(thinned)
   }
-  for (const gap of doc.deliberateGaps) gap.ring = gap.ring.filter((at) => !gone.has(at))
+  // Only a claim this gesture emptied goes (ARCH-003): an untouched one is not this gesture's to edit.
+  doc.claims = doc.claims.filter((claim) => !holding.includes(claim) || claim.rings.length > 0)
+  for (const gap of doc.deliberateGaps) gap.ring = thinned(gap.ring)
   // A dressed run loses the points too, so it runs over the merged stretch. One left with a single
   // anchor is kept as it was: the file refuses a run under two, and dropping it would undo a hand-set
   // stroke silently (s13) — it shows in {Overrides} as orphaned instead.
@@ -140,5 +187,5 @@ export function removeAnchors(doc: YearDocument, indices: readonly number[]): An
     const kept = dressed.run.filter((at) => !gone.has(at))
     if (kept.length >= 2) dressed.run = kept
   }
-  return { polities: holding.map((claim) => claim.polity) }
+  return { polities: holding.map((claim) => claim.polity), rings: ownerRings.size, spared }
 }

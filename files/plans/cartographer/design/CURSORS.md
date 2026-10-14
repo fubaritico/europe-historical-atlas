@@ -25,7 +25,7 @@ High-fidelity. The shapes, sizes and hot spots are final.
 | `cross-add` | Cross + plus | ⟨draw⟩, no outline in progress, over one of the target's stretches: a click inserts an anchor, as Illustrator's Pen over a selected path. **Not from the handoff** — derived on 2026-10-11 from `cross` and the plus of `arrow-insert`; replace it if a designed one arrives | 16 16 | `crosshair` |
 | `arrow` | White arrow | ⟨edit⟩ active | 6 4 | `default` |
 | `arrow-handle` | White arrow + square | ⟨edit⟩, over a handle | 6 4 | `default` |
-| `arrow-insert` | White arrow + plus | ⟨edit⟩, over a stretch, away from any handle: a click inserts an anchor | 6 4 | `copy` |
+| ~~`arrow-insert`~~ | White arrow + plus | **Retired 2026-10-14** (the dev): the white arrow selects, it never adds a point — inserting is the Pen's (`cross-add`). The file is deleted; its plus lives on in `cross-add` | — | — |
 | `cross-thin` | Thin cross | ⟨edit⟩, dragging a marquee | 16 16 | `crosshair` |
 
 CSS form:

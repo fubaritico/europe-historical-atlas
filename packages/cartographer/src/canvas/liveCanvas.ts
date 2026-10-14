@@ -12,7 +12,7 @@ import { lonLatToScreen, remapToScreen } from '../view/projection'
 import { closeEnoughToEdit, snapReachKm } from '../view/toolReach'
 import { backdropToScreen } from '../view/viewport'
 
-import { penInsertHit, stretchUnder } from './anchorGestures'
+import { penInsertHit } from './anchorGestures'
 import { anchorHit, anchorSentence, borderRunTo, waterTaking } from './borderSnap'
 import { cursorCss, cursorFor } from './cursors'
 import { featureUnder } from './featureUnder'
@@ -32,6 +32,7 @@ import {
   ringNeighbours,
   targetHandles,
 } from './toolSession'
+import { closingStretch } from './waterClosing'
 
 import type { AnchorCache } from './anchorCache'
 import type { HistoryRelay } from './historyRelay'
@@ -260,6 +261,8 @@ const NO_OFFER: SnapOffer = {
  * @returns the offer, `NO_OFFER` when there is nothing
  */
 export function snapOffer(it: LiveCanvas, inserting: boolean = overStretch(it)): SnapOffer {
+  const closing = closingOffer(it)
+  if (closing !== null) return closing
   if (!penOffered(it) || it.pointer === null) return NO_OFFER
   // Over the target's own stretch the idle Pen inserts, so it offers no snap there (`penInserts`).
   if (inserting) return NO_OFFER
@@ -273,6 +276,22 @@ export function snapOffer(it: LiveCanvas, inserting: boolean = overStretch(it)):
   if (offer.kind !== null) return offer
   const hit = anchorHit(gesture, it.pointer)
   return hit === null ? NO_OFFER : anchorOffer(it, gesture, hit)
+}
+
+/**
+ * What the closing click offers when it follows the water back to the first point (`closingStretch`):
+ * the stretch it will lay, previewed — nothing to snap onto, the first anchor is the target. `null` when
+ * the ring would close on a straight segment, which the rubber band already shows.
+ * @param it - the attachment
+ * @returns the offer, or `null`
+ */
+function closingOffer(it: LiveCanvas): SnapOffer | null {
+  if (it.spaceHeld || !closingOffered(it)) return null
+  const stretch = closingStretch(gestureOf(it))
+  if (stretch === null) return null
+  const viewport = it.deps.store.getState().viewport
+  const preview = stretch.map((point) => backdropToScreen(viewport, point))
+  return { ...NO_OFFER, preview }
 }
 
 /**
@@ -368,8 +387,8 @@ function followedNoun(gesture: GestureContext): string | null {
 
 /**
  * Whether the Pen offers anything at all: the Pen in hand, someone to draw for, the hand not borrowed
- * with ‹space› (QUAL-104), and the pointer not on the first anchor — there the click closes the ring
- * with a straight segment, so a snap preview would promise what it will not do (QUAL-102).
+ * with ‹space› (QUAL-104), and the pointer not on the first anchor — there the click closes the ring,
+ * so a snap preview would promise what it will not do (QUAL-102); what it does lay is `closingOffer`'s.
  * @param it - the attachment
  * @returns `true` when a snap under the pointer may be offered
  */
@@ -577,20 +596,17 @@ export function overHandle(it: LiveCanvas): boolean {
 }
 
 /**
- * Whether a click here would insert an anchor on one of the target's stretches: the white arrow off
- * any handle, or the Pen with no outline in progress and no anchor to branch onto; nothing held.
+ * Whether a click here would insert an anchor on one of the target's stretches: the Pen with no outline
+ * in progress and no anchor to branch onto — the Pen's alone, the white arrow selects (the dev,
+ * 2026-10-14); nothing held.
  * @param it - the attachment
  * @returns `true` when the click would insert
  */
 export function overStretch(it: LiveCanvas): boolean {
   if (it.pointer === null || it.session.grabbed !== null || it.spaceHeld) return false
-  const state = it.deps.store.getState()
-  const gesture = gestureOf(it)
   // The Pen's plus reads the very rule its click does.
-  if (state.tool === 'draw') return penInsertHit(gesture, it.pointer) !== null
-  if (state.tool !== 'edit' || overHandle(it)) return false
-  const target = describeDrawingTarget(state.document, state.target)
-  return target !== null && stretchUnder(gesture, target.id, it.pointer) !== null
+  if (it.deps.store.getState().tool !== 'draw') return false
+  return penInsertHit(gestureOf(it), it.pointer) !== null
 }
 
 /**

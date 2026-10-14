@@ -65,6 +65,13 @@ export interface ToolSession {
    */
   snap: SnapVertex | null
   /**
+   * The layer vertex the outline's first point was snapped onto, and that point — what lets the click
+   * that closes the ring lay the rest of the coast back to it, as any snapped click does (the dev, Danish
+   * islands, 2026-10-14). Held by the point itself, so an outline whose first point changed simply stops
+   * matching (`closingStretch`); `null` when the first point was not snapped.
+   */
+  start: { vertex: SnapVertex; point: SessionPoint } | null
+  /**
    * The stretches the Pencil laid, one per drag, oldest first — what lets ‹ctrl+Z› take a whole stroke
    * back, as Illustrator does. Held by the points themselves, not by positions, so an outline changed by
    * any other gesture simply stops matching and the stroke is forgotten (`takeBackStroke`).
@@ -125,6 +132,7 @@ export function idleSession(): ToolSession {
     moving: null,
     reopened: null,
     snap: null,
+    start: null,
     strokes: [],
     drawing: null,
   }
@@ -190,6 +198,7 @@ export function clearOutline(session: ToolSession): void {
   session.outline = []
   session.reopened = null
   session.snap = null
+  session.start = null
   session.strokes = []
   if (session.drawing !== null) session.drawing.stroke = null
 }
@@ -209,6 +218,7 @@ export function abandonGesture(session: ToolSession): boolean {
   session.outline = []
   session.reopened = null
   session.snap = null
+  session.start = null
   session.strokes = []
   session.drawing = null
   return busy

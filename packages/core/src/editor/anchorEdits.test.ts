@@ -24,7 +24,7 @@ describe('anchorEdits', () => {
     // s03 — "the anchor is removed and its two stretches merge into one".
     it('removes an anchor from its ring', () => {
       const doc = sharedBorderDocument()
-      expect(removeAnchor(doc, 0)).toEqual({ polities: ['fr-couronne'] })
+      expect(removeAnchor(doc, 0)).toEqual({ polities: ['fr-couronne'], rings: 0, spared: [] })
       expect(ringOf(doc, 'fr-couronne')).toEqual([1, 2, 3])
     })
   })
@@ -56,8 +56,9 @@ describe('anchorEdits', () => {
   })
 
   describe('managed errors', () => {
-    // s03 — "the deletion is refused": a ring left with fewer anchors would vanish on the next open.
-    it('refuses to take a ring under three anchors, and writes nothing', () => {
+    // The dev, 2026-10-14: nothing refuses a deletion. With no owner named, a ring that would fall
+    // under three anchors — it would vanish on the next open — keeps its points, and says whose.
+    it('keeps the points of a ring that would fall under three anchors, and does nothing', () => {
       const doc = sharedBorderDocument()
       removeAnchor(doc, 0)
       expect(ringOf(doc, 'fr-couronne')).toHaveLength(MIN_RING_ANCHORS)
@@ -134,12 +135,12 @@ describe('anchorEdits — the deliberate gaps and the dressed runs', () => {
   })
 
   describe('managed errors', () => {
-    it('refuses a removal that would leave a gap ring of two', () => {
+    it('keeps the points of a gap ring that would fall to two, and removes the rest', () => {
       const doc = withGap()
 
-      expect(removeAnchor(doc, 1)).toBeNull()
+      expect(removeAnchor(doc, 1)).not.toBeNull()
       expect(doc.deliberateGaps[0]?.ring).toEqual([1, 2, 5])
-      expect(ringOf(doc, 'fr-couronne')).toEqual([0, 1, 2, 3])
+      expect(ringOf(doc, 'fr-couronne')).toEqual([0, 2, 3])
     })
   })
 
@@ -198,12 +199,16 @@ describe('removeAnchors', () => {
   })
 
   describe('managed errors', () => {
-    // All or nothing: a ring that would fall under three refuses the whole gesture, nothing written.
-    it('refuses the whole removal when one ring would fall too short, and writes nothing', () => {
+    // The dev, 2026-10-14: an owner's ring that would fall under three goes whole, as if all were taken.
+    it('deletes the owner’s ring whole when the removal would leave it under three anchors', () => {
       const doc = sharedBorderDocument()
-      const before = structuredClone(doc.claims)
-      expect(removeAnchors(doc, [0, 3])).toBeNull()
-      expect(doc.claims).toEqual(before)
+      expect(removeAnchors(doc, [0, 3], 'fr-couronne')).toEqual({
+        polities: ['fr-couronne'],
+        rings: 1,
+        spared: [],
+      })
+      expect(doc.claims.map((claim) => claim.polity)).toEqual(['hre'])
+      expect(doc.claims[0]?.rings).toEqual([[1, 4, 5, 2]])
     })
   })
 
@@ -216,6 +221,84 @@ describe('removeAnchors', () => {
   describe('edge cases', () => {
     it('refuses an empty selection', () => {
       expect(removeAnchors(sharedBorderDocument(), [])).toBeNull()
+    })
+  })
+
+  describe('removeAnchors — a whole ring of the owner (the dev, 2026-10-14)', () => {
+    // Illustrator's gesture: every point of an outline selected and deleted deletes the outline.
+    it('deletes the owner’s ring whole when every one of its anchors goes', () => {
+      const doc = sharedBorderDocument()
+      const island = [6, 7, 8]
+      for (const point of [
+        [10, 50],
+        [11, 50],
+        [10, 51],
+      ] as [number, number][]) {
+        doc.anchors.push(point)
+        doc.anchorSource.push(0)
+      }
+      doc.claims.find((claim) => claim.polity === 'fr-couronne')?.rings.push(island)
+      expect(removeAnchors(doc, island, 'fr-couronne')).toEqual({
+        polities: ['fr-couronne'],
+        rings: 1,
+        spared: [],
+      })
+      expect(doc.claims.find((claim) => claim.polity === 'fr-couronne')?.rings).toEqual([
+        [0, 1, 2, 3],
+      ])
+    })
+
+    it('leaves a polity with no territory, so no claim, when its last ring goes', () => {
+      const doc = sharedBorderDocument()
+      doc.claims = doc.claims.filter((claim) => claim.polity === 'fr-couronne')
+      expect(removeAnchors(doc, [0, 1, 2, 3], 'fr-couronne')).toMatchObject({ rings: 1 })
+      expect(doc.claims).toEqual([])
+    })
+
+    // Review ARCH-001, 2026-10-14: a ring sharing a border was undeletable — the neighbour lost the shared
+    // anchors and fell short. The list goes; the shared points stay with the Empire.
+    it('deletes a ring that shares a border, the neighbour keeping every one of its anchors', () => {
+      const doc = sharedBorderDocument()
+      expect(removeAnchors(doc, [0, 1, 2, 3], 'fr-couronne')).toEqual({
+        polities: ['fr-couronne'],
+        rings: 1,
+        spared: [],
+      })
+      expect(doc.claims.map((claim) => claim.polity)).toEqual(['hre'])
+      expect(doc.claims[0]?.rings).toEqual([[1, 4, 5, 2]])
+    })
+
+    it('deletes no ring whole with no owner named: the ring keeps its points', () => {
+      const doc = sharedBorderDocument()
+      doc.claims = doc.claims.filter((claim) => claim.polity === 'fr-couronne')
+      expect(removeAnchors(doc, [0, 1, 2, 3])).toBeNull()
+      expect(ringOf(doc, 'fr-couronne')).toEqual([0, 1, 2, 3])
+    })
+
+    // Deleting a neighbour's outline unsaid would be the inverse defect.
+    it('never deletes another polity’s ring: it keeps the points it would lose, and is named', () => {
+      const doc = sharedBorderDocument()
+      // The Empire's whole ring selected, France the owner: France, left with two, goes whole; the Empire
+      // is not France's to delete, so it keeps every point and is named.
+      expect(removeAnchors(doc, [1, 4, 5, 2], 'fr-couronne')).toEqual({
+        polities: ['fr-couronne', 'hre'],
+        rings: 1,
+        spared: ['hre'],
+      })
+      expect(doc.claims.map((claim) => claim.rings[0])).toEqual([[1, 4, 5, 2]])
+    })
+
+    it('removes the other selected anchors from the other rings beside a whole ring', () => {
+      const doc = sharedBorderDocument()
+      doc.anchors.push([10, 50], [11, 50], [10, 51])
+      doc.anchorSource.push(0, 0, 0)
+      doc.claims.find((claim) => claim.polity === 'fr-couronne')?.rings.push([6, 7, 8])
+      expect(removeAnchors(doc, [6, 7, 8, 0], 'fr-couronne')).toEqual({
+        polities: ['fr-couronne'],
+        rings: 1,
+        spared: [],
+      })
+      expect(doc.claims.find((claim) => claim.polity === 'fr-couronne')?.rings).toEqual([[1, 2, 3]])
     })
   })
 })

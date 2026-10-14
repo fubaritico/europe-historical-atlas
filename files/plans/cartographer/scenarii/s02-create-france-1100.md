@@ -389,6 +389,13 @@ Scenario: an island or a looping coast is followed the short way round
   Given the two clicks lie on the same closed contour
   Then the stretch inserted is the shorter of the two ways round it
 
+Scenario: the short way runs back over what was laid
+  Given the outline runs along a closed contour and I click its far side
+  When the shorter way back to that vertex runs over anchors already placed
+  Then the other way round is inserted, and nothing is laid twice
+  When both ways would — or the line is open and the click goes back down it
+  Then only the vertex is placed, and the console says why
+
 Scenario: a second click on the vertex already placed
   When I click again on the coast vertex the outline already ends on
   Then nothing is placed, and nothing is reported as inserted
@@ -584,7 +591,31 @@ Scenario: close without going back to the first anchor
   Given the outline is open
   When I press ‹enter›
   Then the ring closes on a straight segment from the last anchor to the first
+
+Scenario: the closing click follows the water back to the first anchor
+  Given the outline began on a coast vertex of an island and its last click landed on the same contour
+  When the pointer comes near the first anchor
+  Then the stretch of coast from the last anchor back to the first is drawn, the short way round
+  When I click it
+  Then that stretch is laid and the ring closes, as one step
+  And the result reads "closed along the water, N vertices inserted"
+
+Scenario: the way back would run over what was laid
+  Given the outline only went out along an island's coast, from its first anchor to its last
+  When I click the first anchor
+  Then the ring closes the other way round the island, and nothing is laid twice
+  When the line is open — a river, a mainland coast cut by the frame
+  Then the ring closes on a straight segment: following the water back would fold the ring onto itself
 ```
+
+> **Walked by the dev, round the Nile, 2026-10-14**: clicking the far side to go faster, the short way ran
+> back over the points just laid — *« ça superpose des points sur le point et un chemin sur un chemin »*. One
+> rule for the snapped click and the closing click: the shorter way **that lays nothing twice**.
+
+> **Walked by the dev, Danish islands, 2026-10-14.** *« Je suis toujours obligé de m'arrêter au dernier point
+> juste avant de clore pour pouvoir clore en suivant les côtes. Sinon, ça fait une ligne droite. »* The
+> closing click short-circuited the snap: it closed before the Pen looked at the water. ‹enter› keeps the
+> straight closing `s02` gives it.
 
 > **H-04 settled 2026-09-22.** Closing by proximity to the first anchor, announced before the click, as
 > the dev asked: _"arrivé à une certaine proximité, on peut fermer un tracé."_ ‹enter› is kept as the

@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
+import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+
 import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
+import { createCartographerStore } from '../state/store'
 import { screenToLonLatOnBackdrop } from '../view/projection'
 import { TEST_BACKDROP_FRAME } from '../view/testFrame'
 
@@ -83,10 +87,10 @@ function ringsOf(store: CartographerStoreHook, polityId: string): number[][] {
 
 describe('anchorGestures', () => {
   describe('happy path', () => {
-    it('inserts an anchor between anchors 0 and 1 when the arrow presses on the top side', () => {
+    it('inserts an anchor between anchors 0 and 1 on a click on the top side', () => {
       const { store, context } = openSquare()
 
-      arrowPress(context, [200, 103], false)
+      insertOnStretch(context, 'fr', [200, 103])
 
       expect(ringsOf(store, 'fr')).toEqual([[0, 4, 1, 2, 3]])
       expect(store.getState().rows.at(-1)?.label).toBe(INSERT_ANCHOR_STEP.label)
@@ -95,7 +99,7 @@ describe('anchorGestures', () => {
     it('places the inserted anchor on the side, not under the pointer', () => {
       const { store, context } = openSquare()
 
-      arrowPress(context, [200, 103], false)
+      insertOnStretch(context, 'fr', [200, 103])
 
       const expected = screenToLonLatOnBackdrop(
         [200, 100],
@@ -118,31 +122,23 @@ describe('anchorGestures', () => {
   })
 
   describe('variants', () => {
-    it('hands the inserted anchor to the drag: keeping the pointer down moves it', () => {
+    // The dev, 2026-10-14: the white arrow selects, it never adds a point — that is the Pen's.
+    it('inserts nothing when the white arrow presses and drags on a side', () => {
       const { store, context } = openSquare()
 
       arrowPress(context, [200, 103], false)
       arrowDrag(context, [200, 60])
-      arrowRelease(context, [0, 0])
+      arrowRelease(context, [200, 60])
 
-      const expected = screenToLonLatOnBackdrop(
-        [200, 60],
-        TEST_BACKDROP_FRAME,
-        store.getState().viewport
-      )
-      expect(store.getState().document.anchors[4]).toEqual(expected)
-      expect(
-        store
-          .getState()
-          .rows.slice(-2)
-          .map((row) => row.label)
-      ).toEqual([INSERT_ANCHOR_STEP.label, 'move anchor'])
+      expect(ringsOf(store, 'fr')).toEqual([[0, 1, 2, 3]])
+      expect(store.getState().document.anchors).toHaveLength(4)
+      expect(store.getState().rows.map((row) => row.label)).not.toContain(INSERT_ANCHOR_STEP.label)
     })
 
     it('inserts into both polities when the stretch is their shared border', () => {
       const { store, context } = openSquare(true)
 
-      arrowPress(context, [303, 200], false)
+      insertOnStretch(context, 'fr', [303, 200])
 
       const added = store.getState().document.anchors.length - 1
       expect(ringsOf(store, 'fr')).toEqual([[0, 1, added, 2, 3]])
@@ -170,8 +166,7 @@ describe('anchorGestures', () => {
 
     it('takes back the insertion with one undo', () => {
       const { store, context } = openSquare()
-      arrowPress(context, [200, 103], false)
-      arrowRelease(context, [0, 0])
+      insertOnStretch(context, 'fr', [200, 103])
 
       store.getState().undo()
 
@@ -180,25 +175,50 @@ describe('anchorGestures', () => {
   })
 
   describe('managed errors', () => {
-    it('refuses to bring a ring under three anchors, and says so', () => {
+    // The dev, 2026-10-14 (the night's degenerate islands of Denmark): all the points of an outline
+    // selected and deleted delete the outline, and the result zone says so.
+    it('deletes the target’s ring whole when every anchor of it is selected, and says so', () => {
       const { store, context, reports } = openSquare()
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      context.session.selected = [0, 1, 2, 3]
+      toolKey(context, 'Delete')
+      expect(ringsOf(store, 'fr')).toEqual([])
+      expect(reports.at(-1)).toBe('removed 1 ring (4 anchors)')
+    })
+
+    // The dev, 2026-10-14: « y'a rien qui doit m'empêcher d'enlever des points. Rien. »
+    it('deletes the ring whole when a point would leave it under three anchors, and says so', () => {
+      const { store, context, reports } = openSquare()
       context.session.selected = [0]
       toolKey(context, 'Delete')
       context.session.selected = [1]
 
       toolKey(context, 'Delete')
 
-      expect(ringsOf(store, 'fr')).toEqual([[1, 2, 3]])
-      expect(reports.at(-1)).toBe('not removed — a ring needs at least three anchors')
-      expect(warn).toHaveBeenCalledOnce()
+      expect(ringsOf(store, 'fr')).toEqual([])
+      expect(reports.at(-1)).toBe('removed 1 ring (1 anchor)')
+    })
+
+    // A neighbour's outline is not the target's to delete: it keeps the points, and is named.
+    it('names the neighbour that kept its points rather than fall under three anchors', () => {
+      const { store, context, reports } = openSquare(true)
+      // France given a point on its top and bottom sides, so it keeps four; the Empire brought to three.
+      insertOnStretch(context, 'fr', [200, 103])
+      insertOnStretch(context, 'fr', [200, 303])
+      store.getState().deleteAnchors([4], { kind: 'd', label: 'd' })
+      context.session.selected = [1, 2]
+
+      toolKey(context, 'Delete')
+
+      expect(ringsOf(store, 'fr')).toEqual([[0, 6, 7, 3]])
+      expect(ringsOf(store, 'hre')).toEqual([[1, 5, 2]])
+      expect(reports.at(-1)).toContain('Sacrum Imperium kept its points')
     })
 
     it('does not delete an anchor an undo took away, and does not blame the ring', () => {
       const { store, context, reports } = openSquare()
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-      arrowPress(context, [200, 103], false)
-      arrowRelease(context, [0, 0])
+      insertOnStretch(context, 'fr', [200, 103])
+      context.session.selected = [4]
       store.getState().undo()
 
       toolKey(context, 'Delete')
@@ -242,7 +262,7 @@ describe('anchorGestures', () => {
     it('inserts nothing on another polity’s stretch — only the target is edited', () => {
       const { store, context } = openSquare(true)
 
-      arrowPress(context, [400, 103], false)
+      insertOnStretch(context, 'fr', [400, 103])
 
       expect(ringsOf(store, 'hre')).toEqual([[1, 4, 5, 2]])
       expect(store.getState().document.anchors).toHaveLength(6)
@@ -251,9 +271,33 @@ describe('anchorGestures', () => {
     it('inserts nothing inside the fill, away from every side', () => {
       const { store, context } = openSquare()
 
-      arrowPress(context, [200, 200], false)
+      insertOnStretch(context, 'fr', [200, 200])
 
       expect(store.getState().document.anchors).toHaveLength(4)
     })
+  })
+})
+
+describe('deleting a whole ring beside a shared border (review ARCH-002)', () => {
+  // France [0,1,2,3] and the Empire [1,4,5,2] share 1–2; France also holds an island [6,7,8].
+  it('names the neighbour whose outline lost a point beside the ring deleted', () => {
+    const document = sharedBorderDocument()
+    document.anchors.push([10, 50], [11, 50], [10, 51])
+    document.anchorSource.push(0, 0, 0)
+    document.claims.find((claim) => claim.polity === 'fr-couronne')?.rings.push([6, 7, 8])
+    const store = createCartographerStore({
+      edition: { document, clone: cloneYearDocument },
+      viewport: { viewport: { scale: 1, originX: 0, originY: 0 } },
+    })
+    store.getState().chooseTarget('fr-couronne')
+    store.getState().selectTool('edit')
+    const { context, reports } = testGestureContext(store)
+    context.session.selected = [6, 7, 8, 1]
+    toolKey(context, 'Delete')
+    expect(reports.at(-1)).toBe('removed 1 ring (4 anchors) · points taken from Sacrum Imperium')
+    expect(store.getState().document.claims.map((claim) => claim.rings)).toEqual([
+      [[0, 2, 3]],
+      [[4, 5, 2]],
+    ])
   })
 })

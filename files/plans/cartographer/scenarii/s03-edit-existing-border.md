@@ -115,12 +115,23 @@ Scenario: a vertex snaps while being moved
 
 ```gherkin
 Scenario: insert an anchor
-  Given ⟨edit⟩ is active
-  When I click on a stretch between two anchors
+  Given ⟨draw⟩ is active with no outline in progress
+  When the pointer is over a stretch of the target between two anchors
+  Then the cursor shows the Pen's plus
+  When I click
   Then a new anchor is created at that point on the stretch
-  And it becomes the dragged anchor if I keep the pointer down
   And every path running over that stretch gains it, so none of them can drift
+
+Scenario: the white arrow does not insert
+  Given ⟨edit⟩ is active
+  When I click on a stretch between two anchors, away from any handle
+  Then no anchor is created, and the cursor is the plain arrow
 ```
+
+> **Moved to the Pen by the dev, 2026-10-14**: *« c'est beaucoup plus cohérent »* — the white arrow selects,
+> as Illustrator's Direct Selection does; adding a point is the Pen's, which already did it over the target's
+> stretch since 2026-10-11. The one gesture lost is insert-and-drag in a single press: it is now a Pen click,
+> then a drag with ‹A›. It frees the arrow's click on a stretch for selecting that stretch (`{Line}`, `s13`).
 
 ```gherkin
 Scenario: delete an anchor
@@ -128,9 +139,17 @@ Scenario: delete an anchor
   When I click a handle to select it
   And I press ‹delete› or ‹backspace›
   Then the anchor is removed and its two stretches merge into one
-  When the ring is left with fewer than 4 anchors
-  Then the deletion is refused with "a ring needs at least 4 anchors"
+  When the target's ring would be left with fewer than three anchors
+  Then the ring is deleted whole, as if all its points had been selected — "removed 1 ring (N anchors)"
+  When a neighbour's ring would be left with fewer than three
+  Then the neighbour keeps those points, and the result names it — "… kept its points"
 ```
+
+> **Nothing refuses a deletion — the dev, 2026-10-14**: *« Je devrais pouvoir enlever ce que je veux comme
+> point. Y'a rien qui doit m'empêcher d'enlever des points. Rien. »* The refusal below it is superseded: a
+> ring under three anchors still never stays in the document (it would vanish on the next open), but the
+> gesture resolves it instead of refusing — the target's ring goes, a neighbour's is not the target's to
+> delete. One ‹ctrl+Z› puts everything back.
 
 > `projectRegions` already drops rings under 4 vertices on load — so a ring reduced below that would
 > silently vanish on the next open. Refusing at the gesture is the honest place.

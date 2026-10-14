@@ -24,6 +24,7 @@ import {
 import { CHROME_PAINT_STYLE } from './style'
 
 import type { HistoryRelay } from './historyRelay'
+import type { SnapLine } from '../geometry/lineSnap'
 import type { CartographerStoreHook } from '../state/store'
 import type { PenMode } from '../state/toolSlice'
 import type { NamedPolyline } from '../vectorLayers'
@@ -1624,16 +1625,59 @@ describe('undo and redo from the keyboard', () => {
 })
 
 /**
+ * An overlay canvas that records every lineWidth it is given, with a marker at each clear — the last
+ * paint is what shows, and the snap preview is the one stroke three times the path's width.
+ * @returns the overlay, and the widths of its last paint
+ */
+function widthRecordingOverlay() {
+  const widths: (number | 'clear')[] = []
+  const overlay = document.createElement('canvas')
+  overlay.getContext = vi.fn(
+    () =>
+      new Proxy(
+        {},
+        {
+          get: (_, op) => () => {
+            if (op === 'clearRect') widths.push('clear')
+          },
+          set: (_, key, value: unknown) => {
+            if (key === 'lineWidth' && typeof value === 'number') widths.push(value)
+            return true
+          },
+        }
+      )
+  ) as unknown as typeof overlay.getContext
+  return { overlay, lastPaint: () => widths.slice(widths.lastIndexOf('clear')) }
+}
+
+/**
+ * A square island at backdrop (500, 300)–(600, 400), a vertex every 10 — screen (260, 18)–(360, 118)
+ * under `attachWithShore`'s view — numbered clockwise from its top-left corner.
+ */
+const SQUARE_ISLAND: SnapLine = {
+  points: [
+    ...Array.from({ length: 10 }, (_, i): [number, number] => [500 + i * 10, 300]),
+    ...Array.from({ length: 10 }, (_, i): [number, number] => [600, 300 + i * 10]),
+    ...Array.from({ length: 10 }, (_, i): [number, number] => [600 - i * 10, 400]),
+    ...Array.from({ length: 10 }, (_, i): [number, number] => [500, 400 - i * 10]),
+  ],
+  closed: true,
+  bounds: { left: 500, top: 300, right: 600, bottom: 400 },
+}
+
+/**
  * A canvas whose coast is one long horizontal shore across the backdrop, at backdrop y = 500.
  * @param overlay - the overlay canvas
  * @param rivers - the river centrelines, none by default
  * @param mode - the Pen's mode, following the coast by default
+ * @param islands - more coast contours beside the shore, none by default
  * @returns the attachment
  */
 function attachWithShore(
   overlay: HTMLCanvasElement = document.createElement('canvas'),
   rivers: readonly NamedPolyline[] = [],
-  mode: PenMode = 'coast'
+  mode: PenMode = 'coast',
+  islands: readonly SnapLine[] = []
 ) {
   const acted = vi.fn()
   const resulted = vi.fn()
@@ -1652,7 +1696,7 @@ function attachWithShore(
     frame: TEST_BACKDROP_FRAME,
     backdropImage: backdropStandIn(),
     vectorLayers: {
-      coast: [shore],
+      coast: [shore, ...islands],
       rivers,
       coastProvenance: { name: 'test shore', licence: 'CC0' },
       riverProvenance: { name: 'test rivers', licence: 'test' },
@@ -1848,26 +1892,8 @@ describe('the Pen following the coast, on the canvas', () => {
     // QUAL-102: on the first anchor the click closes with a straight segment, so the overlay must not
     // preview a stretch of coast there. The sentence alone cannot tell: closing wins it either way.
     it('previews no coast on the outline’s first anchor, where the click closes', () => {
-      // Every lineWidth the overlay is given, with a marker at each clear: the last paint is what shows.
-      const widths: (number | 'clear')[] = []
-      const overlay = document.createElement('canvas')
-      overlay.getContext = vi.fn(
-        () =>
-          new Proxy(
-            {},
-            {
-              get: (_, op) => () => {
-                if (op === 'clearRect') widths.push('clear')
-              },
-              set: (_, key, value: unknown) => {
-                if (key === 'lineWidth' && typeof value === 'number') widths.push(value)
-                return true
-              },
-            }
-          )
-      ) as unknown as typeof overlay.getContext
+      const { overlay, lastPaint } = widthRecordingOverlay()
       const { node, acted, dispose } = attachWithShore(overlay)
-      const lastPaint = () => widths.slice(widths.lastIndexOf('clear'))
       click(node, [60, 218])
       click(node, [160, 218])
       // Further along the shore the preview is drawn — so the check below is one that can fail.
@@ -1876,6 +1902,20 @@ describe('the Pen following the coast, on the canvas', () => {
       node.dispatchEvent(pointerEvent('pointermove', { offsetX: 61, offsetY: 219 }))
       expect(acted).toHaveBeenLastCalledWith('Closing the outline of Reaume de France')
       expect(lastPaint()).not.toContain(CHROME_PAINT_STYLE.pathWidth * 3)
+      dispose()
+    })
+
+    // The dev, Danish islands, 2026-10-14: round an island, the closing click lays the coast back to the
+    // first anchor — and the overlay shows that stretch before the click, as for any snapped click.
+    it('previews the coast back to the first anchor where the closing click follows it', () => {
+      const { overlay, lastPaint } = widthRecordingOverlay()
+      const { node, acted, dispose } = attachWithShore(overlay, [], 'coast', [SQUARE_ISLAND])
+      click(node, [260, 18])
+      click(node, [360, 68])
+      click(node, [260, 118])
+      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 261, offsetY: 19 }))
+      expect(acted).toHaveBeenLastCalledWith('Closing the outline of Reaume de France')
+      expect(lastPaint()).toContain(CHROME_PAINT_STYLE.pathWidth * 3)
       dispose()
     })
 
@@ -2088,13 +2128,16 @@ function attachWithTriangle() {
   return attached
 }
 
-describe('inserting and deleting anchors with the white arrow, on the canvas', () => {
+describe('inserting with the Pen and deleting with the white arrow, on the canvas', () => {
   describe('happy path', () => {
-    // s03 — "When I click on a stretch between two anchors / Then a new anchor is created".
-    it('inserts an anchor with a click on the top side, and Delete takes it out again', () => {
+    // s03 — the Pen inserts on a stretch, the white arrow selects the new anchor and Delete removes it.
+    it('inserts an anchor with a Pen click on the top side, and Delete takes it out again', () => {
       const { node, store, resulted, dispose } = attachWithTriangle()
+      node.dispatchEvent(keyEvent('p'))
       click(node, [400, 202])
       expect(store.getState().document.claims[0]?.rings).toEqual([[0, 3, 1, 2]])
+      node.dispatchEvent(keyEvent('a'))
+      click(node, [400, 200])
       node.dispatchEvent(keyEvent('Delete'))
       expect(store.getState().document.claims[0]?.rings).toEqual([[0, 1, 2]])
       expect(resulted).toHaveBeenLastCalledWith('removed an anchor')
@@ -2116,27 +2159,26 @@ describe('inserting and deleting anchors with the white arrow, on the canvas', (
   })
 
   describe('variants', () => {
-    // CURSORS.md — `arrow-insert` over a stretch; the bar says what a click there would do.
-    it('shows the insert cursor and names the insertion over a side, not over a handle', () => {
-      const { node, acted, dispose } = attachWithTriangle()
+    // The dev, 2026-10-14: the white arrow selects, it never adds — no plus, no insertion, over a side.
+    it('shows the plain arrow over a side, and its click inserts nothing', () => {
+      const { node, store, acted, dispose } = attachWithTriangle()
       node.dispatchEvent(pointerEvent('pointermove', { offsetX: 400, offsetY: 202 }))
-      expect(node.style.cursor).toContain('copy')
-      expect(acted).toHaveBeenLastCalledWith('Inserting a point into Reaume de France')
-      node.dispatchEvent(pointerEvent('pointermove', { offsetX: 500, offsetY: 200 }))
-      expect(node.style.cursor).not.toContain('copy')
+      expect(node.style.cursor).toBe(cursorCss('arrow'))
+      expect(acted).not.toHaveBeenLastCalledWith('Inserting a point into Reaume de France')
+      click(node, [400, 202])
+      expect(store.getState().document.claims[0]?.rings).toEqual([[0, 1, 2]])
       dispose()
     })
   })
 
   describe('managed errors', () => {
-    it('refuses to delete from a triangle, and says why in the result zone', () => {
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    // The dev, 2026-10-14: nothing refuses a deletion — a point of a triangle takes the triangle.
+    it('deletes the triangle whole when one of its points goes, and says so', () => {
       const { node, store, resulted, dispose } = attachWithTriangle()
       click(node, [500, 200])
       node.dispatchEvent(keyEvent('Backspace'))
-      expect(store.getState().document.claims[0]?.rings).toEqual([[0, 1, 2]])
-      expect(resulted).toHaveBeenLastCalledWith('not removed — a ring needs at least three anchors')
-      warn.mockRestore()
+      expect(store.getState().document.claims).toEqual([])
+      expect(resulted).toHaveBeenLastCalledWith('removed 1 ring (1 anchor)')
       dispose()
     })
   })
@@ -2155,6 +2197,7 @@ describe('inserting and deleting anchors with the white arrow, on the canvas', (
   describe('edge cases', () => {
     it('takes the insertion back with one ctrl+Z', () => {
       const { node, store, dispose } = attachWithTriangle()
+      node.dispatchEvent(keyEvent('p'))
       click(node, [400, 202])
       node.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true }))
       expect(store.getState().document.claims[0]?.rings).toEqual([[0, 1, 2]])

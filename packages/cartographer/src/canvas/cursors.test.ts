@@ -79,10 +79,10 @@ describe('cursorFor', () => {
       )
     })
 
-    // CURSORS.md — `arrow-insert` over a stretch, away from any handle; the handle wins.
-    it('marks a stretch under the arrow with the insert cursor, under the handle mark', () => {
+    // The dev, 2026-10-14: the white arrow never inserts, so a stretch under it shows no plus.
+    it('keeps the plain arrow over a stretch, and the handle mark over a handle', () => {
       const arrow = { ...AT_REST, tool: 'edit' as const, hasTarget: true, overStretch: true }
-      expect(cursorFor(arrow)).toBe('arrow-insert')
+      expect(cursorFor(arrow)).toBe('arrow')
       expect(cursorFor({ ...arrow, overHandle: true })).toBe('arrow-handle')
     })
 

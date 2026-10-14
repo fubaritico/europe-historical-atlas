@@ -559,9 +559,23 @@ describe('the Pen following the coast', () => {
       const { context } = coastContext()
       penClick(context, [300, 200])
       penClick(context, [250, 200])
+      // 1 + 5 back towards the start of the shore.
+      expect(context.session.outline).toHaveLength(6)
+    })
+
+    // The dev, round the Nile, 2026-10-14: an open line has one way, and back over what was laid it
+    // would stack points on points — so only the vertex is placed, and that is said.
+    it('places only the vertex when the open line runs back over the outline, and says so', () => {
+      const logged = watchConsole()
+      const { context, reports } = coastContext()
+      penClick(context, [300, 200])
+      penClick(context, [250, 200])
       penClick(context, [400, 200])
-      // 1 + 5 back towards the start + 15 forward again.
-      expect(context.session.outline).toHaveLength(21)
+      expect(context.session.outline).toHaveLength(7)
+      expect(reports).toEqual(['inserted 5 vertices from the coastline'])
+      expect(logged.warn).toHaveBeenCalledWith(
+        expect.stringContaining('runs back over the outline')
+      )
     })
 
     it('places only the vertex when the second click lands on another contour', () => {
@@ -795,6 +809,170 @@ describe('the Pen following the coast', () => {
       penClick(context, [300, 300])
       penClick(context, [452, 201])
       expect(context.session.outline.map((point) => point.anchor)).toEqual([1, null, 2, null])
+    })
+  })
+})
+
+/**
+ * A square island, 100 backdrop pixels a side, a vertex every 10 — 40 in all, numbered clockwise from
+ * its top-left corner (600, 100).
+ */
+const SQUARE_ISLAND: SnapLine = {
+  points: [
+    ...Array.from({ length: 10 }, (_, i): [number, number] => [600 + i * 10, 100]),
+    ...Array.from({ length: 10 }, (_, i): [number, number] => [700, 100 + i * 10]),
+    ...Array.from({ length: 10 }, (_, i): [number, number] => [700 - i * 10, 200]),
+    ...Array.from({ length: 10 }, (_, i): [number, number] => [600, 200 - i * 10]),
+  ],
+  closed: true,
+  bounds: { left: 600, top: 100, right: 700, bottom: 200 },
+}
+
+/**
+ * The Pen following the coast of the square island, with the outline run from its corner (600, 100)
+ * round to (600, 200) — 31 of its 40 vertices — and a recorder for what it reports.
+ * @returns the context and the reports
+ */
+function roundTheIsland() {
+  const context = openContext(true, [SQUARE_ISLAND])
+  context.store.getState().choosePenMode('coast')
+  const reports: string[] = []
+  context.report = (message) => {
+    reports.push(message)
+  }
+  penClick(context, [600, 100])
+  penClick(context, [700, 150])
+  penClick(context, [600, 200])
+  return { context, reports }
+}
+
+/** The first ring of the first claim. */
+const firstRing = (context: GestureContext) =>
+  context.store.getState().document.claims[0]?.rings[0] ?? []
+
+// The dev, Danish islands, 2026-10-14: closing on the first anchor laid a straight line across the
+// water instead of following the coast back to it.
+describe('closing an outline that follows the water', () => {
+  describe('happy path', () => {
+    it('lays the coast back to the first anchor on the closing click, and says how many', () => {
+      const { context, reports } = roundTheIsland()
+      expect(context.session.outline).toHaveLength(31)
+      penClick(context, [601, 101])
+      expect(firstRing(context)).toHaveLength(40)
+      expect(context.session.outline).toEqual([])
+      expect(reports.at(-1)).toBe('closed along the water, 9 vertices inserted')
+    })
+  })
+
+  describe('variants', () => {
+    // s02 — "When I press ‹enter› / Then the ring closes on a straight segment".
+    it('closes on a straight segment on ‹enter>, the same outline', () => {
+      const { context } = roundTheIsland()
+      toolKey(context, 'Enter')
+      expect(firstRing(context)).toHaveLength(31)
+    })
+
+    it('closes straight when the last click landed on another line', () => {
+      const context = openContext(true, [SQUARE_ISLAND, TEST_SHORE])
+      context.store.getState().choosePenMode('coast')
+      penClick(context, [600, 100])
+      penClick(context, [700, 150])
+      penClick(context, [300, 200])
+      penClick(context, [601, 101])
+      expect(firstRing(context)).toHaveLength(17)
+    })
+  })
+
+  describe('managed errors', () => {
+    // Back the way it came would fold the ring onto itself: the other way round the island is taken.
+    it('closes the other way round when the short way back runs over the stretch laid', () => {
+      const context = openContext(true, [SQUARE_ISLAND])
+      context.store.getState().choosePenMode('coast')
+      penClick(context, [600, 100])
+      penClick(context, [700, 150])
+      penClick(context, [601, 101])
+      expect(firstRing(context)).toHaveLength(40)
+    })
+
+    it('closes straight back down an open line, never retracing it', () => {
+      const context = openContext(true, [TEST_SHORE])
+      context.store.getState().choosePenMode('coast')
+      penClick(context, [150, 200])
+      penClick(context, [300, 200])
+      penClick(context, [151, 201])
+      expect(firstRing(context)).toHaveLength(16)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('closes straight when the first point was placed freely', () => {
+      const context = openContext(true, [SQUARE_ISLAND])
+      context.store.getState().choosePenMode('free')
+      penClick(context, [650, 300])
+      context.store.getState().choosePenMode('coast')
+      penClick(context, [700, 150])
+      penClick(context, [600, 200])
+      penClick(context, [651, 301])
+      expect(firstRing(context)).toHaveLength(17)
+    })
+  })
+
+  describe('the other way round', () => {
+    // The dev, round the Nile, 2026-10-14: a click on the far side whose short way runs back over the
+    // points just laid takes the other way round, so nothing is laid twice.
+    it('takes the long way round when the short one runs back over the points laid', () => {
+      const context = openContext(true, [SQUARE_ISLAND])
+      context.store.getState().choosePenMode('coast')
+      penClick(context, [600, 100])
+      penClick(context, [640, 100])
+      // From vertex 4 back to vertex 38 the short way (6 steps) runs over 3, 2, 1, 0: the long way is taken.
+      penClick(context, [600, 120])
+      const placed = context.session.outline.map((point) => String(point.at))
+      expect(new Set(placed).size).toBe(placed.length)
+      expect(placed).toHaveLength(39)
+    })
+
+    // Review QUAL-002: on a loop laid half round, a vertex in the laid half is reached both ways only
+    // over points already placed — so only the vertex is placed, and that is said.
+    it('places only the vertex when both ways round the loop run over the points laid', () => {
+      const logged = watchConsole()
+      const context = openContext(true, [SQUARE_ISLAND])
+      context.store.getState().choosePenMode('coast')
+      penClick(context, [600, 100])
+      penClick(context, [700, 200])
+      expect(context.session.outline).toHaveLength(21)
+      penClick(context, [700, 100])
+      expect(context.session.outline).toHaveLength(22)
+      expect(logged.warn).toHaveBeenCalledWith(
+        expect.stringContaining('runs back over the outline')
+      )
+    })
+  })
+
+  describe('edge cases', () => {
+    // The start is held by the point itself: once Backspace takes the first point back, it is gone.
+    it('closes straight once the first snapped point is taken back and placed again freely', () => {
+      const context = openContext(true, [SQUARE_ISLAND])
+      context.store.getState().choosePenMode('coast')
+      penClick(context, [600, 100])
+      toolKey(context, 'Backspace')
+      // Out of the coast's reach: within it, the coast takes the click whatever the mode.
+      context.store.getState().choosePenMode('free')
+      penClick(context, [600, 60])
+      context.store.getState().choosePenMode('coast')
+      penClick(context, [700, 150])
+      penClick(context, [600, 200])
+      penClick(context, [601, 61])
+      expect(firstRing(context)).toHaveLength(17)
+    })
+
+    it('closes without inserting when the last vertex is the first’s neighbour', () => {
+      const { context, reports } = roundTheIsland()
+      penClick(context, [600, 110])
+      const before = reports.length
+      penClick(context, [601, 101])
+      expect(firstRing(context)).toHaveLength(40)
+      expect(reports).toHaveLength(before)
     })
   })
 })
@@ -1239,15 +1417,24 @@ describe('the white arrow’s selection and marquee (s03)', () => {
 
   describe('unmanaged errors', () => {
     // All or nothing: removing them one by one would leave the document changed with no step to undo.
-    it('removes none of them when the ring would fall under three anchors', () => {
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    // The dev, 2026-10-14: every point of an outline selected and deleted deletes the outline.
+    it('deletes the whole ring when the marquee covers every one of its anchors, in one step', () => {
       const context = hexagonContext()
       const steps = context.store.getState().rows.length
       drag(context, [50, 50], [350, 310])
       toolKey(context, 'Delete')
-      expect(context.store.getState().document.claims[0]?.rings[0]).toHaveLength(6)
-      expect(context.store.getState().rows).toHaveLength(steps)
-      expect(warn).toHaveBeenCalledWith(expect.stringContaining('a ring needs at least three'))
+      expect(context.store.getState().document.claims).toEqual([])
+      expect(context.store.getState().rows).toHaveLength(steps + 1)
+    })
+
+    // The dev, 2026-10-14: nothing refuses a deletion — a ring left under three anchors goes whole.
+    it('deletes the whole ring when the removal would leave it under three anchors, in one step', () => {
+      const context = hexagonContext()
+      const steps = context.store.getState().rows.length
+      context.session.selected = [0, 1, 2, 3]
+      toolKey(context, 'Delete')
+      expect(context.store.getState().document.claims).toEqual([])
+      expect(context.store.getState().rows).toHaveLength(steps + 1)
     })
   })
 

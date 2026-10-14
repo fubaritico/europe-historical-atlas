@@ -3,7 +3,7 @@ import { squaredRadius } from './hitTest'
 import type { Point } from '../view/viewport'
 
 /**
- * Which stretch of the target's outline is under the pointer — where the white arrow inserts a point
+ * Which stretch of the target's outline is under the pointer — where the idle Pen inserts a point
  * (`s03`: *"When I click on a stretch between two anchors / Then a new anchor is created at that point"*).
  *
  * Screen pixels, on the anchors already projected, for `hitTest`'s reasons; the radius is passed in.

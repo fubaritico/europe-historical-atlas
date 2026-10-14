@@ -192,7 +192,7 @@ export interface EditionActions {
    */
   moveAnchors: (moves: readonly AnchorMove[], step: HistoryStep) => boolean
   /**
-   * Insert an anchor on a stretch, as one undoable step — the white arrow's click on a stretch (`s03`).
+   * Insert an anchor on a stretch, as one undoable step — the idle Pen's click on a stretch (`s03`).
    *
    * Every ring running over the stretch gains it, so two polities sharing that border keep sharing it.
    * The point is reported by eye.
@@ -205,12 +205,19 @@ export interface EditionActions {
   insertAnchor: (a: number, b: number, point: [number, number], step: HistoryStep) => number | null
   /**
    * Remove several anchors at once, as one undoable step — ‹delete› on a marquee's selection (`s03`).
-   * All or nothing: refused when a ring would fall too short once they are all gone.
+   * Never refused (the dev, 2026-10-14): a ring of `owner` left under three anchors goes whole, any
+   * other keeps its points and is named (`removeAnchors`).
    * @param indices - the anchors to remove
    * @param step - how the gesture is named
-   * @returns the polities that held any of them, or `null` — and nothing happened
+   * @param owner - the polity whose rings may go whole — the target
+   * @returns the polities that held any of them, how many rings went whole and who kept the points, or
+   *   `null` when nothing was removed — and nothing was recorded
    */
-  deleteAnchors: (indices: readonly number[], step: HistoryStep) => AnchorRemoval | null
+  deleteAnchors: (
+    indices: readonly number[],
+    step: HistoryStep,
+    owner?: string
+  ) => AnchorRemoval | null
   /**
    * Replace a stretch of a polity's ring by a new run, as one undoable step — ⟨retrace⟩'s last click
    * (`H-46`). Every ring running over the stretch takes the run, so a neighbour on it follows.
@@ -448,10 +455,10 @@ function anchorActions(
       }, step)
       return index
     },
-    deleteAnchors: (indices, step): AnchorRemoval | null => {
+    deleteAnchors: (indices, step, owner): AnchorRemoval | null => {
       let removal: AnchorRemoval | null = null
       record((document) => {
-        removal = removeAnchors(document, indices)
+        removal = removeAnchors(document, indices, owner)
         return removal !== null
       }, step)
       return removal
