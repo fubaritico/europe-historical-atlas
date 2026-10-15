@@ -14,9 +14,12 @@ describe('handFor', () => {
   })
 
   describe('variants', () => {
-    it('draws a vassal’s limit dotted, a co-vassal’s lighter, unclaimed ground uncased', () => {
+    // The dev, 2026-10-15: a vassal's limit is dotted against its lord AND against a vassal of the same lord.
+    it('draws a vassal’s limit dotted, a co-vassal’s in the same stroke, unclaimed ground uncased', () => {
       expect(handFor({ relation: 'vassal', hand: null }).pattern).toBe('dotted')
-      expect(handFor({ relation: 'co-vassal', hand: null }).weight).toBeLessThan(1)
+      expect(handFor({ relation: 'co-vassal', hand: null })).toEqual(
+        handFor({ relation: 'vassal', hand: null })
+      )
       expect(handFor({ relation: 'unclaimed', hand: null }).cased).toBe(false)
     })
 

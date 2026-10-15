@@ -23,10 +23,9 @@ import type { GeoBounds } from '../geo/mercator'
  * **No smoothing** — the dev's D3: the line goes through the anchors, so a city sitting in a bend is on the
  * side the author put it.
  *
- * **What the atlas does not draw yet, said here and at run time**: a hand's **weight** — a limit between two
- * vassals of one lord is drawn as heavy as one between sovereigns, the atlas's widths being one per kind of
- * line — and an authored hand on a **frontier**, which the atlas draws in its one dark stroke whatever the
- * author chose. The latter is warned once per derivation.
+ * **What the atlas does not draw yet, said here and at run time**: a hand's **weight** — the atlas's widths
+ * being one per kind of line — and an authored hand on a **frontier**, which the atlas draws in its one dark
+ * stroke whatever the author chose. The latter is warned once per derivation.
  */
 
 /** An authored year's borders, and the pattern each group is drawn in. */

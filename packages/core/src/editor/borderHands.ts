@@ -29,15 +29,16 @@ export interface BorderHand {
  * The hand of each relation (`s08`):
  * - between two sovereigns, solid and cased;
  * - between a vassal and its suzerain, dotted — the relation crosses the hierarchy;
- * - between two vassals of one lord, solid and lighter — a limit within one lordship (*the weight
- *   follows the depth of the lowest common suzerain*);
+ * - between two vassals of one lord, **the same stroke as a vassal against its lord** — the dev's call,
+ *   2026-10-15: a vassal is dotted against its lord and against its peers under that lord, at the same
+ *   weight; only a limit against another lineage is solid. It was solid and lighter from 2026-09-27 (`s08`);
  * - against ground nobody claims, the frontier: one dark stroke, as the atlas draws it today;
  * - a coastline, nothing.
  */
 export const RELATION_HANDS: Readonly<Record<BorderRelation, BorderHand>> = {
   sovereign: { pattern: 'solid', cased: true, weight: 1 },
   vassal: { pattern: 'dotted', cased: true, weight: 1 },
-  'co-vassal': { pattern: 'solid', cased: true, weight: 0.6 },
+  'co-vassal': { pattern: 'dotted', cased: true, weight: 1 },
   unclaimed: { pattern: 'solid', cased: false, weight: 1 },
   coastline: { pattern: 'none', cased: false, weight: 1 },
 }

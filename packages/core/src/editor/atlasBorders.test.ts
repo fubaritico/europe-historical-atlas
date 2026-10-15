@@ -186,7 +186,9 @@ describe('exactBordersOf', () => {
   })
 
   describe('declared gaps', () => {
-    it('draws a limit between two vassals of one lord as a sovereign one — the weight is not drawn', () => {
+    // The dev, 2026-10-15: co-vassals take the same stroke as a vassal against its lord — dashed in the
+    // atlas, like that one, until it has a dot.
+    it('draws a limit between two vassals of one lord in the vassal’s stroke', () => {
       const doc = sideBySide('lord')
       addPolity(doc, polity('lord'))
       doc.polities.forEach((each) => {
@@ -195,7 +197,7 @@ describe('exactBordersOf', () => {
 
       const { patterns } = exactBordersOf(authored(doc), bbox, uniformMask(false))
 
-      expect(patterns.get('0:0')).toBe('solid')
+      expect(patterns.get('0:0')).toBe('dashed')
     })
 
     it('draws a dressed frontier in the frontier stroke, and says so once', () => {
