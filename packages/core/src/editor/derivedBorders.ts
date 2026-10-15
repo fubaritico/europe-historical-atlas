@@ -256,25 +256,159 @@ function splitByRunOverrides(border: DerivedBorder, doc: YearDocument): DerivedB
   })
 }
 
-/** A run held by two or more owners: the peer case, and the three-owner case H-05a settles. */
-function borderOfShared(
+/** Who holds the ground on each side of one segment of a shared run. */
+interface Sides {
+  /** The owners whose rings hold the ground on one side. */
+  left: string[]
+  /** The owners whose rings hold the ground on the other. */
+  right: string[]
+}
+
+/**
+ * Who of a run's owners actually holds ground on each side of one of its segments (H-44, 2026-10-15).
+ *
+ * Holding a segment's anchors is not holding ground beside it: an outline can run along a neighbour's limit
+ * with **no width** — a domain cleared by hand from under a vassal leaves such a path — or two outlines can
+ * hold the same coast from the same side. Counting them as owners drew the Empire against Bohemia, dotted,
+ * on Bohemia's frontier with unclaimed ground. An owner holding neither side is not on the limit at all.
+ * @param a - the segment's first anchor, `[lon, lat]`
+ * @param b - its second
+ * @param owners - who holds the run
+ * @param claims - every claim, resolved once for the derivation
+ * @returns each side's holders, or `null` for a segment of no length
+ */
+function sidesOf(
+  a: [number, number] | undefined,
+  b: [number, number] | undefined,
+  owners: readonly string[],
+  claims: ReadonlyMap<string, ResolvedClaim>
+): Sides | null {
+  if (a === undefined || b === undefined) return null
+  if (a[0] === b[0] && a[1] === b[1]) return null
+  const mid: [number, number] = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
+  const nx = -(b[1] - a[1]) * SIDE_STEP
+  const ny = (b[0] - a[0]) * SIDE_STEP
+  const holds = (owner: string, point: [number, number]): boolean => {
+    const claim = claims.get(owner)
+    return claim !== undefined && encloses(point, claim)
+  }
+  return {
+    left: owners.filter((owner) => holds(owner, [mid[0] + nx, mid[1] + ny])),
+    right: owners.filter((owner) => holds(owner, [mid[0] - nx, mid[1] - ny])),
+  }
+}
+
+/** How far either side of a segment its sides are asked, as a fraction of its length. */
+const SIDE_STEP = 1e-3
+
+/**
+ * The deepest of some polities in the chain of homage — the most specific; the first on a tie.
+ * @param ids - the polities
+ * @param byId - every polity, by id
+ * @returns the deepest, or `undefined` for none
+ */
+function deepest(
+  ids: readonly string[],
+  byId: ReadonlyMap<string, YearPolity>
+): string | undefined {
+  return [...ids].sort((x, y) => chainDepth(y, byId) - chainDepth(x, byId))[0]
+}
+
+/** How one segment of a shared run is judged: a limit between two, one holder's, or the owners as counted. */
+type SharedLabel =
+  | { kind: 'pair'; one: string; other: string }
+  | { kind: 'single'; holder: string }
+  | { kind: 'counted' }
+
+/**
+ * Whether two segments are judged alike, so they make one border.
+ * @param x - one segment's judgement
+ * @param y - the next one's
+ * @returns `true` when they name the same polities the same way
+ */
+function sameLabel(x: SharedLabel, y: SharedLabel): boolean {
+  if (x.kind === 'pair' && y.kind === 'pair') return x.one === y.one && x.other === y.other
+  if (x.kind === 'single' && y.kind === 'single') return x.holder === y.holder
+  return x.kind === 'counted' && y.kind === 'counted'
+}
+
+/**
+ * Judge one segment of a shared run by who holds the ground on each side.
+ * @param a - the segment's first anchor
+ * @param b - its second
+ * @param owners - who holds the run
+ * @param derivation - the polities and the claims resolved
+ * @returns the judgement
+ */
+function labelOf(
+  a: number | undefined,
+  b: number,
+  owners: readonly string[],
+  derivation: Derivation
+): SharedLabel {
+  const { doc, byId, claims } = derivation
+  const sides = sidesOf(
+    a === undefined ? undefined : doc.anchors[a],
+    doc.anchors[b],
+    owners,
+    claims
+  )
+  if (sides === null) return { kind: 'counted' }
+  const one = deepest(sides.left, byId)
+  const other = deepest(sides.right, byId)
+  if (one !== undefined && other !== undefined && one !== other) return { kind: 'pair', one, other }
+  const holder = one ?? other
+  return holder === undefined ? { kind: 'counted' } : { kind: 'single', holder }
+}
+
+/**
+ * The borders of a run held by two or more owners, judged segment by segment by who holds the ground on
+ * each side, and cut where the judgement changes.
+ *
+ * Both sides held: the deepest on one side against the deepest on the other — Bohemia | Poland is
+ * sovereign, Normandy | France the vassal hand. One side held: no limit between them, so the stretch is
+ * asked what lies beyond, as a run held by one (the coast, unclaimed ground, a neighbour). Neither side, or
+ * a segment of no length: the owners as counted, the deepest two.
+ * @param run - the anchors, in order
+ * @param owners - who holds them
+ * @param derivation - the document, the polities, the claims resolved and the mask
+ * @returns the borders
+ */
+function bordersOfShared(
   run: number[],
   owners: readonly string[],
+  derivation: Derivation
+): DerivedBorder[] {
+  const { doc, byId } = derivation
+  const labels = run.slice(1).map((to, at) => labelOf(run[at], to, owners, derivation))
+  return stretchesBy(run, labels, sameLabel).flatMap(({ run: stretch, label }) => {
+    if (label.kind === 'pair') return [borderOfPair(stretch, label.one, label.other, doc, byId)]
+    if (label.kind === 'single') return bordersOfSingle(stretch, label.holder, derivation)
+    const [first, second] = [...owners].sort((x, y) => chainDepth(y, byId) - chainDepth(x, byId))
+    return first === undefined || second === undefined
+      ? []
+      : [borderOfPair(stretch, first, second, doc, byId)]
+  })
+}
+
+/**
+ * A border between two polities over a run.
+ * @param run - the anchors, in order
+ * @param first - one side
+ * @param second - the other
+ * @param doc - the document, for its pair overrides
+ * @param byId - every polity, by id
+ * @returns the border, its relation read off the chain of homage
+ */
+function borderOfPair(
+  run: number[],
+  first: string,
+  second: string,
   doc: YearDocument,
   byId: ReadonlyMap<string, YearPolity>
-): DerivedBorder | null {
-  // Three or more owners is a vassal whose limit coincides with its lord's: the pair drawn is the two
-  // deepest, which is the most specific statement the geometry supports.
-  const ranked = [...owners].sort((a, b) => chainDepth(b, byId) - chainDepth(a, byId))
-  const [first, second] = ranked
-  if (first === undefined || second === undefined) return null
+): DerivedBorder {
   const between = [first, second]
-  return {
-    run,
-    between,
-    ...relationBetween(first, second, byId),
-    ...dressingFor(between, doc),
-  }
+  return { run, between, ...relationBetween(first, second, byId), ...dressingFor(between, doc) }
 }
 
 /**
@@ -464,10 +598,8 @@ export function deriveBorders(doc: YearDocument, deps: DerivationDeps = {}): Der
   const out: DerivedBorder[] = []
   for (const { run, owners } of borderRunsOf(doc)) {
     const owner = owners[0]
-    if (owners.length >= 2) {
-      const border = borderOfShared(run, owners, doc, byId)
-      if (border !== null) out.push(border)
-    } else if (owner !== undefined) out.push(...bordersOfSingle(run, owner, derivation))
+    if (owners.length >= 2) out.push(...bordersOfShared(run, owners, derivation))
+    else if (owner !== undefined) out.push(...bordersOfSingle(run, owner, derivation))
   }
   return out.flatMap((border) => splitByRunOverrides(border, doc))
 }

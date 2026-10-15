@@ -248,17 +248,66 @@ describe('deriveBorders', () => {
       expect(outer?.relation).toBe('unclaimed')
     })
 
-    it('gives the deepest pair when three owners run over one stretch', () => {
-      // A vassal whose own limit coincides with its lord's: the most specific statement the geometry
-      // supports is the two deepest, which is H-05a.
+    // H-44, 2026-10-15: the Empire's own ring, cleared by hand from under Bohemia, still ran along Bohemia's
+    // limit with unclaimed ground — no width — and that limit came out dotted, Bohemia against the Empire.
+    it('ignores a lord whose outline runs along its vassal with no ground behind it', () => {
+      const doc = createYearDocument(1100, zone, source)
+      anchors(doc, [
+        [0, 10],
+        [10, 10],
+        [10, 0],
+        [0, 0],
+        [-10, 10],
+        [-10, 0],
+      ])
+      addPolity(doc, polity('hre'))
+      addPolity(doc, polity('bohemia', 'hre'))
+      closeRing(doc, 'bohemia', [0, 1, 2, 3])
+      // The Empire beside Bohemia to the west, its ring running out along Bohemia's north and east sides
+      // and back the same way: a path of no width there, chained with the real west limit into one run.
+      closeRing(doc, 'hre', [3, 0, 1, 2, 1, 0, 4, 5])
+      const borders = deriveBorders(doc, { isLand: () => true })
+      const east = borders.find((border) => border.run.includes(1) && border.run.includes(2))
+      const west = borders.find((border) => border.run.includes(3) && border.run.includes(0))
+      expect(east?.between).toEqual(['bohemia'])
+      expect(east?.relation).toBe('unclaimed')
+      expect(west?.relation).toBe('vassal')
+    })
+
+    it('draws a coast a vassal shares with its lord, from the same side, as coast', () => {
+      const doc = coastAndLand()
+      addPolity(doc, polity('normandy', 'france'))
+      addAnchor(doc, [5, 5], 0)
+      closeRing(doc, 'normandy', [2, 3, 4])
+      const coast = deriveBorders(doc, { isLand: () => false, coastSources: new Set([1]) }).find(
+        (border) => border.run.includes(2) && border.run.includes(3) && border.run.length === 2
+      )
+      expect(coast?.relation).toBe('coastline')
+    })
+
+    it('keeps the vassal hand where only the vassal and its lord hold the stretch', () => {
       const doc = sideBySide()
       addPolity(doc, polity('aquitaine', 'france'))
       closeRing(doc, 'aquitaine', [1, 2, 3])
-      // Anchor 1 is on France's own chain as well, so looking it up by index alone finds the wrong run —
-      // which is how this test first failed. What identifies the stretch is who holds it.
-      const shared = deriveBorders(doc).find((border) => border.between.includes('aquitaine'))
-      expect(shared?.between).toContain('aquitaine')
+      // Anchor 1 is on France's own chain as well, so looking it up by index alone finds the wrong run.
+      // What identifies the stretch is who holds it.
+      const shared = deriveBorders(doc).find(
+        (border) => border.between.includes('aquitaine') && border.between.includes('france')
+      )
       expect(shared?.relation).toBe('vassal')
+    })
+
+    // H-44, 2026-10-15: Bohemia, the Empire and Poland on one stretch — the Empire tied with Poland on depth
+    // and won by document order, so the Bohemia–Poland frontier came out dotted.
+    it('drops the lord from a stretch its vassal holds against a foreign polity', () => {
+      const doc = sideBySide()
+      addPolity(doc, polity('aquitaine', 'france'))
+      closeRing(doc, 'aquitaine', [1, 2, 3])
+      const stretch = deriveBorders(doc).find(
+        (border) => border.run.length === 2 && border.run.includes(1) && border.run.includes(2)
+      )
+      expect([...(stretch?.between ?? [])].sort()).toEqual(['aquitaine', 'hre'])
+      expect(stretch?.relation).toBe('sovereign')
     })
 
     it('reports the border as referencing anchors, so moving one moves it', () => {
