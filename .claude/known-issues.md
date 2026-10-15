@@ -11,6 +11,11 @@ Put here the know issues to avoid cluttering the context window.
   est une référence privée). **Depuis la nuit du 14/10**, `years/1100/` tient 137 pays, et les traces de la nuit
   sont `years/1100.euratlas-{16,19,30,48,76,98,137,137b}/` et `1100.before-rename/` — toutes locales, à trier avec
   le dev (aucune n'a été supprimée : `rm -rf` demande sa permission). **Sévérité : à savoir.**
+- **Une tribu n'a pas de remplissage dans le Cartographe, mais l'atlas la remplit encore** (15/10). Le Cartographe lit le
+  rang `tribe` (`core/editor/tribes.ts`) : pas de remplissage, le contour en tirets dans sa couleur, et ses frontières
+  dérivées retirées. L'atlas, lui, la teinte et trace ses frontières comme celles d'un royaume. Remède, l'étape suivante :
+  `authoredRegionColours` sans teinte pour une tribu, `exactBordersOf` qui écarte ses frontières (`touchesTribe`), et une
+  couche de traits en tirets par couleur de tribu. **Sévérité : à savoir.**
 - **Un test du contrôleur qui échoue en fait tomber deux autres, les tests ‹espace›** (14/10). Il lève avant son
   `dispose()` et laisse un écouteur sur la page : la panne accuse des tests sains. Remède : un `afterEach` qui
   détache tout canevas attaché dans `controller.test.ts`. **Sévérité : cosmétique** — ne trompe qu'en cas d'échec.

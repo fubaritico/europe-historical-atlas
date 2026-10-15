@@ -1,5 +1,6 @@
 import { vassalsOf } from '@europe-historical-atlas/core/data/paintOrder'
 import { proposePolityId } from '@europe-historical-atlas/core/editor/polityId'
+import { TRIBE_RANK } from '@europe-historical-atlas/core/editor/tribes'
 
 import { pickedColour, toFileColour } from './polityColourValue'
 
@@ -20,7 +21,7 @@ export interface PolityDraft {
   id: string
   /** Whether the author has written the id themselves — from then on the name no longer proposes one. */
   idEdited: boolean
-  /** One of {@link RANKS}' values, or `null` for none. */
+  /** A rank — an open vocabulary, offered by {@link rankChoices} — or `null` for none. */
   rank: string | null
   /** One of {@link STATUSES}' values, or `null` for none. */
   status: string | null
@@ -74,6 +75,8 @@ export const RANKS: readonly DraftOption[] = [
   { value: 'principality', label: 'principality' },
   { value: 'duchy', label: 'duchy' },
   { value: 'county', label: 'county' },
+  // The rank that makes a polity a tribe, drawn with no fill — core's, never a copy (review ARCH-001).
+  { value: TRIBE_RANK, label: TRIBE_RANK },
 ]
 
 /** The standings the form offers — `design/03`'s list, stored as OHM writes its `place` values. */
@@ -192,6 +195,22 @@ export function draftOf(polity: YearPolity): PolityDraft {
     wikidata: polity.wikidata ?? '',
     colour: pickedColour(polity),
   }
+}
+
+/**
+ * The ranks the form offers for a year: {@link RANKS}, then **every other rank the year already uses**, in
+ * alphabetical order. The rank is an open vocabulary, so a value read from a file — `lordship`, `emirate` —
+ * must be choosable for another polity and shown as the current one, never hidden behind "none" (the dev,
+ * 2026-10-16: *« qu'est-ce qui empêche les choses ? »*).
+ * @param polities - the year's polities
+ * @returns the choices, in list order
+ */
+export function rankChoices(polities: readonly Pick<YearPolity, 'rank'>[]): DraftOption[] {
+  const offered = new Set(RANKS.map((option) => option.value))
+  const used = [...new Set(polities.map((polity) => polity.rank))]
+    .filter((rank): rank is string => rank !== null && rank !== '' && !offered.has(rank))
+    .sort((a, b) => a.localeCompare(b))
+  return [...RANKS, ...used.map((rank) => ({ value: rank, label: rank }))]
 }
 
 /**

@@ -1,5 +1,6 @@
 import { paintRanks } from '@europe-historical-atlas/core/data/paintOrder'
 import { handFor } from '@europe-historical-atlas/core/editor/borderHands'
+import { touchesTribe, tribeIds } from '@europe-historical-atlas/core/editor/tribes'
 
 import { lonLatToScreen, remapToScreen } from '../view/projection'
 import { backdropToScreen } from '../view/viewport'
@@ -148,7 +149,8 @@ export function claimsInPaintOrder(document: YearDocument): YearDocument['claims
 }
 
 /**
- * Each claim's rings as one fill in its polity's colour.
+ * Each claim's rings in its polity's colour, in painting order — the claims of one kind only: the
+ * polities that are filled, or the tribes, which are not (`core/editor/tribes`).
  *
  * A claim whose polity has no colour in the map is skipped: `polityColours` gives one to every polity of
  * the registry, so that is a claim naming a polity the registry lacks — which the file could not have been
@@ -156,20 +158,60 @@ export function claimsInPaintOrder(document: YearDocument): YearDocument['claims
  * @param document - the document to read
  * @param anchors - the projected anchor table, parallel to `document.anchors`
  * @param colours - each polity's colour, by id
- * @returns one fill per claim
+ * @param tribal - the ids of the year's tribes
+ * @param tribes - `true` for the tribes' claims, `false` for everyone else's
+ * @returns one entry per claim of that kind
+ */
+function colouredClaims(
+  document: YearDocument,
+  anchors: readonly Point[],
+  colours: ReadonlyMap<string, string>,
+  tribal: ReadonlySet<string>,
+  tribes: boolean
+): { rings: Point[][]; colour: string }[] {
+  const out: { rings: Point[][]; colour: string }[] = []
+  for (const claim of claimsInPaintOrder(document)) {
+    const colour = colours.get(claim.polity)
+    if (colour === undefined || tribal.has(claim.polity) !== tribes) continue
+    out.push({ rings: projectedRings({ ...document, claims: [claim] }, anchors), colour })
+  }
+  return out
+}
+
+/**
+ * Each claim's rings as one fill in its polity's colour — **a tribe's excepted**: a tribe is not yet
+ * sovereign, and a fill is the mark of sovereignty (the dev, 2026-10-15).
+ * @param document - the document to read
+ * @param anchors - the projected anchor table, parallel to `document.anchors`
+ * @param colours - each polity's colour, by id
+ * @param tribes - the ids of the year's tribes (`tribeIds`), built once per scene
+ * @returns one fill per claim of a polity that is not a tribe
  */
 export function projectedFills(
   document: YearDocument,
   anchors: readonly Point[],
-  colours: ReadonlyMap<string, string>
+  colours: ReadonlyMap<string, string>,
+  tribes: ReadonlySet<string>
 ): { rings: Point[][]; colour: string }[] {
-  const fills: { rings: Point[][]; colour: string }[] = []
-  for (const claim of claimsInPaintOrder(document)) {
-    const colour = colours.get(claim.polity)
-    if (colour === undefined) continue
-    fills.push({ rings: projectedRings({ ...document, claims: [claim] }, anchors), colour })
-  }
-  return fills
+  return colouredClaims(document, anchors, colours, tribes, false)
+}
+
+/**
+ * Each tribe's rings, to be stroked dashed in its colour — the colour a fill would have had (the dev,
+ * 2026-10-15: *« la couleur de remplissage sera plutôt la couleur des traits en pointillés »*).
+ * @param document - the document to read
+ * @param anchors - the projected anchor table, parallel to `document.anchors`
+ * @param colours - each polity's colour, by id
+ * @param tribes - the ids of the year's tribes (`tribeIds`), built once per scene
+ * @returns one outline per tribe's claim
+ */
+export function projectedTribeOutlines(
+  document: YearDocument,
+  anchors: readonly Point[],
+  colours: ReadonlyMap<string, string>,
+  tribes: ReadonlySet<string>
+): { rings: Point[][]; colour: string }[] {
+  return colouredClaims(document, anchors, colours, tribes, true)
 }
 
 /**
@@ -185,6 +227,8 @@ export function projectedTerritories(
 ): PolityRings[] {
   // A claim naming a polity the registry lacks is not painted (`projectedFills`), so it is not
   // selectable either (QUAL-002); and the order is the paint order, so a click lands on the fill seen.
+  // A tribe is listed too, though it has no fill: a click inside its dashed outline selects it, which is
+  // the only way to select one with the white arrow (review QUAL-004, 2026-10-16).
   return claimsInPaintOrder(document).map((claim) => ({
     polity: claim.polity,
     rings: projectedRings({ ...document, claims: [claim] }, anchors),
@@ -192,22 +236,27 @@ export function projectedTerritories(
 }
 
 /**
- * Each border as the painter takes it: its run on screen, and the hand it is drawn in.
+ * Each border as the painter takes it: its run on screen, and the hand it is drawn in. A border with a
+ * tribe on either side is left out — the tribe's dashed outline is the line there (`core/editor/tribes`).
  * @param borders - the derived borders
  * @param anchors - every anchor, projected
+ * @param tribes - the ids of the year's tribes
  * @returns the borders to paint
  */
 export function projectedBorders(
   borders: readonly DerivedBorder[],
-  anchors: readonly Point[]
+  anchors: readonly Point[],
+  tribes: ReadonlySet<string>
 ): CanvasScene['borders'] {
-  return borders.map((border) => ({
-    points: border.run
-      .map((index) => anchors[index])
-      .filter((point): point is Point => point !== undefined),
-    hand: handFor(border),
-    layer: border.relation === 'unclaimed' ? ('unclaimed' as const) : ('borders' as const),
-  }))
+  return borders
+    .filter((border) => !touchesTribe(border, tribes))
+    .map((border) => ({
+      points: border.run
+        .map((index) => anchors[index])
+        .filter((point): point is Point => point !== undefined),
+      hand: handFor(border),
+      layer: border.relation === 'unclaimed' ? ('unclaimed' as const) : ('borders' as const),
+    }))
 }
 
 /**
@@ -221,6 +270,7 @@ export function projectedBorders(
  */
 export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasScene {
   const anchors = remapToScreen(inputs.anchorsInBackdrop, inputs.viewport)
+  const tribes = tribeIds(document.polities)
   return {
     backdrop:
       inputs.backdropImage === null
@@ -229,9 +279,10 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
     editorialZone: editorialZoneRect(document, inputs),
     zoneLabel: inputs.zoneLabel,
     rings: projectedRings(document, anchors),
-    fills: projectedFills(document, anchors, inputs.colours),
+    fills: projectedFills(document, anchors, inputs.colours, tribes),
+    tribeOutlines: projectedTribeOutlines(document, anchors, inputs.colours, tribes),
     anchors,
-    borders: projectedBorders(inputs.borders, anchors),
+    borders: projectedBorders(inputs.borders, anchors, tribes),
     layers: inputs.layers,
     handles: inputs.handles,
     snapAnchors: inputs.snapAnchors,

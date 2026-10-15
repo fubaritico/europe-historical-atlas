@@ -173,6 +173,7 @@ function scene(overrides: Partial<CanvasScene> = {}): CanvasScene {
     zoneLabel: 'editorial zone',
     rings: [],
     fills: [],
+    tribeOutlines: [],
     anchors: [],
     // Every anchor gets a handle unless a test says otherwise — the handle filter is the scene's
     // decision (`targetHandles`), not the painter's, which only draws the indices it is handed.
@@ -1094,6 +1095,87 @@ describe('painter — layers', () => {
       expect(
         calls.filter((call) => call.op === 'stroke' && call.strokeStyle === STYLE.borderEdge)
       ).toHaveLength(1)
+    })
+  })
+})
+
+const strokesIn = (calls: Call[], colour: string) =>
+  calls.filter((call) => call.op === 'stroke' && call.strokeStyle === colour)
+
+// A tribe has no fill and its outline dashed in its colour (the dev, 2026-10-15; `core/editor/tribes`).
+describe('paintCanvas — a tribe’s outline', () => {
+  const TRIBE = { rings: [SQUARE], colour: '#8a2be2' }
+  describe('happy path', () => {
+    it('strokes a tribe’s ring in its colour', () => {
+      const { ctx, calls } = recordingContext()
+      paintCanvas(ctx, SIZE, scene({ tribeOutlines: [TRIBE] }), STYLE)
+      expect(strokesIn(calls, '#8a2be2')).toHaveLength(1)
+    })
+  })
+
+  describe('variants', () => {
+    it('strokes it dashed, at a border casing’s width', () => {
+      const { ctx, calls } = recordingContext()
+      paintCanvas(ctx, SIZE, scene({ tribeOutlines: [TRIBE] }), STYLE)
+      const at = calls.findIndex((call) => call.op === 'stroke' && call.strokeStyle === '#8a2be2')
+      const dash = calls
+        .slice(0, at)
+        .filter((call) => call.op === 'setLineDash')
+        .at(-1)
+      expect(dash?.args).toEqual([STYLE.borderEdgeWidth * 6, STYLE.borderEdgeWidth * 3])
+      expect(calls[at]?.lineWidth).toBe(STYLE.borderEdgeWidth)
+    })
+
+    it('strokes every ring of a tribe', () => {
+      const { ctx, calls } = recordingContext()
+      paintCanvas(
+        ctx,
+        SIZE,
+        scene({ tribeOutlines: [{ ...TRIBE, rings: [SQUARE, SQUARE] }] }),
+        STYLE
+      )
+      expect(strokesIn(calls, '#8a2be2')).toHaveLength(2)
+    })
+
+    it('leaves the dash off for what is stroked after it', () => {
+      const { ctx, calls } = recordingContext()
+      paintCanvas(ctx, SIZE, scene({ tribeOutlines: [TRIBE], rings: [SQUARE] }), STYLE)
+      const blue = calls.findIndex(
+        (call) => call.op === 'stroke' && call.strokeStyle === STYLE.pathStroke
+      )
+      const dash = calls
+        .slice(0, blue)
+        .filter((call) => call.op === 'setLineDash')
+        .at(-1)
+      expect(dash?.args).toEqual([])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('draws nothing when the borders’ layer is hidden', () => {
+      const { ctx, calls } = recordingContext()
+      const layers = { ...DEFAULT_LAYERS, borders: { ...DEFAULT_LAYERS.borders, visible: false } }
+      paintCanvas(ctx, SIZE, scene({ tribeOutlines: [TRIBE], layers }), STYLE)
+      expect(strokesIn(calls, '#8a2be2')).toHaveLength(0)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // L4: N/A — a ring too short to stroke is skipped by strokeRing, tested with the outlines.
+    it('strokes nothing for a tribe whose ring has one point', () => {
+      const { ctx, calls } = recordingContext()
+      paintCanvas(ctx, SIZE, scene({ tribeOutlines: [{ ...TRIBE, rings: [[[1, 1]]] }] }), STYLE)
+      expect(strokesIn(calls, '#8a2be2')).toHaveLength(0)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('fills nothing in a tribe’s colour', () => {
+      const { ctx, calls } = recordingContext()
+      paintCanvas(ctx, SIZE, scene({ tribeOutlines: [TRIBE] }), STYLE)
+      expect(
+        calls.filter((call) => call.op === 'fill' && call.fillStyle === '#8a2be2')
+      ).toHaveLength(0)
     })
   })
 })

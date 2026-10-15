@@ -5,7 +5,7 @@ import { ColorPicker } from '@fubaritico/react/ColorPicker'
 import { IconButton } from '@fubaritico/react/IconButton'
 import { Input } from '@fubaritico/react/Input'
 
-import { DRAFT_ERRORS, EMPTY_DRAFT } from '../components/polityDraft'
+import { DRAFT_ERRORS, EMPTY_DRAFT, RANKS } from '../components/polityDraft'
 import { PolityForm } from '../components/PolityForm'
 import { PolityList } from '../components/PolityList'
 import { PolityStackMenu } from '../components/PolityStackMenu'
@@ -261,6 +261,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
         draft={EMPTY_DRAFT}
         errors={{}}
         suzerains={SUZERAINS}
+        ranks={RANKS}
         {...INERT}
       />
     ),
@@ -286,6 +287,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
         }}
         errors={{ id: DRAFT_ERRORS.idTaken, existsFrom: DRAFT_ERRORS.notAYear }}
         suzerains={SUZERAINS}
+        ranks={RANKS}
         {...INERT}
       />
     ),
@@ -306,6 +308,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
         }}
         errors={{}}
         suzerains={SUZERAINS}
+        ranks={RANKS}
         {...INERT}
       />
     ),

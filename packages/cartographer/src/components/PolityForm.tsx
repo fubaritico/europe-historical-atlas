@@ -5,7 +5,7 @@ import { Dropdown } from '@fubaritico/react/Dropdown'
 import { IconButton } from '@fubaritico/react/IconButton'
 import { Input } from '@fubaritico/react/Input'
 
-import { RANKS, STATUSES } from './polityDraft'
+import { STATUSES } from './polityDraft'
 
 import type { DraftField, DraftOption, PolityDraft } from './polityDraft'
 import type { HsvaColor } from '@fubaritico/behaviors'
@@ -27,6 +27,8 @@ export interface PolityFormProps {
   errors: Partial<Record<DraftField, string>>
   /** The polities of the year it may owe homage to, as value (id) and label (name). */
   suzerains: readonly DraftOption[]
+  /** The ranks it may take — the usual ones and every one the year already uses (`rankChoices`). */
+  ranks: readonly DraftOption[]
   /** Whether the id is shown but not editable — an existing polity's id never changes (`s07`). */
   idLocked?: boolean
   /**
@@ -132,7 +134,7 @@ function ColourField({
 /** The form's fields, in `s02`'s order, with the id after the name it is proposed from. */
 function PolityFields(props: PolityFormProps) {
   // Derived
-  const { draft, errors, suzerains, onField, onColour } = props
+  const { draft, errors, suzerains, ranks, onField, onColour } = props
 
   // Handlers
   const choose = (field: PolityFormField) => (value: string | null) => {
@@ -154,7 +156,7 @@ function PolityFields(props: PolityFormProps) {
         {...textField('id', props)}
         {...errorOf(errors.id)}
       />
-      <ChoiceField label="Rank" options={RANKS} value={draft.rank} onSelect={choose('rank')} />
+      <ChoiceField label="Rank" options={ranks} value={draft.rank} onSelect={choose('rank')} />
       <ChoiceField
         label="Status"
         options={STATUSES}

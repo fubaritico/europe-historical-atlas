@@ -5,6 +5,7 @@ import {
   DRAFT_ERRORS,
   EMPTY_DRAFT,
   draftOf,
+  rankChoices,
   readDraft,
   suzerainChoices,
   withId,
@@ -106,6 +107,7 @@ function usePolityDraft(
   // Its own id is not "taken" by the polity being edited.
   const taken = new Set(polities.map((polity) => polity.id).filter((id) => id !== editing?.id))
   const suzerains = suzerainChoices(polities, editing?.id ?? null)
+  const ranks = rankChoices(polities)
 
   // Handlers
   const close = () => {
@@ -138,7 +140,7 @@ function usePolityDraft(
   }
 
   // Return
-  return { draft, errors, suzerains, close, onField, onColour, onSubmit }
+  return { draft, errors, suzerains, ranks, close, onField, onColour, onSubmit }
 }
 
 /**
@@ -154,7 +156,7 @@ function usePolityDraft(
  */
 export function PolityDialog({ store, editing, isOpen, onClose }: PolityDialogProps) {
   // State
-  const { draft, errors, suzerains, close, onField, onColour, onSubmit } = usePolityDraft(
+  const { draft, errors, suzerains, ranks, close, onField, onColour, onSubmit } = usePolityDraft(
     store,
     editing,
     onClose
@@ -171,6 +173,7 @@ export function PolityDialog({ store, editing, isOpen, onClose }: PolityDialogPr
         draft={draft}
         errors={errors}
         suzerains={suzerains}
+        ranks={ranks}
         idLocked={editing !== null}
         onField={onField}
         onColour={onColour}

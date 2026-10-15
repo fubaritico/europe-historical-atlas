@@ -220,6 +220,11 @@ export interface CanvasScene {
    * is a hole by the even-odd rule — `H-07`'s *"inclusion decides"*.
    */
   fills: readonly { rings: readonly (readonly Point[])[]; colour: string }[]
+  /**
+   * Each tribe's rings, stroked dashed in its colour instead of filled (`core/editor/tribes`) — and standing
+   * in for its borders, which {@link borders} leaves out.
+   */
+  tribeOutlines: readonly { rings: readonly (readonly Point[])[]; colour: string }[]
   /** Every anchor, projected, parallel to the document's own table. */
   anchors: readonly Point[]
   /**
@@ -389,6 +394,27 @@ function strokeRun(ctx: Painter2D, points: readonly Point[]): void {
   ctx.moveTo(first[0], first[1])
   for (const point of points.slice(1)) ctx.lineTo(point[0], point[1])
   ctx.stroke()
+}
+
+/**
+ * Draw each tribe's outline dashed in its colour, at a border casing's width, under the borders' layer
+ * setting — the line a tribe has instead of a fill and of its borders (the dev, 2026-10-15).
+ * @param ctx - the context to draw into
+ * @param scene - what to draw
+ * @param style - the sizes
+ */
+function paintTribeOutlines(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): void {
+  if (scene.tribeOutlines.length === 0 || !layerAlpha(ctx, scene.layers.borders)) return
+  ctx.lineCap = 'round'
+  ctx.lineWidth = style.borderEdgeWidth
+  ctx.setLineDash(dashOf('dashed', style.borderEdgeWidth))
+  for (const outline of scene.tribeOutlines) {
+    ctx.strokeStyle = outline.colour
+    for (const ring of outline.rings) strokeRing(ctx, ring)
+  }
+  ctx.setLineDash([])
+  ctx.lineCap = 'butt'
+  ctx.globalAlpha = 1
 }
 
 /**
@@ -695,6 +721,7 @@ export function paintCanvas(
   // Over the fills and the water, under the zone's veil and the edit outlines: the borders belong to the
   // map, the blue strokes to the tool.
   paintBorders(ctx, scene, style)
+  paintTribeOutlines(ctx, scene, style)
   paintZone(ctx, size, scene, style)
   ctx.strokeStyle = style.pathStroke
   ctx.lineWidth = style.pathWidth

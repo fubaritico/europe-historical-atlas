@@ -5,6 +5,7 @@ import {
   firstSharedAnchor,
   sharedBorderDocument,
 } from '@europe-historical-atlas/core/editor/documentFixtures'
+import { tribeIds } from '@europe-historical-atlas/core/editor/tribes'
 
 import { DEFAULT_LAYERS } from '../state/layersSlice'
 import { lonLatToScreen, projectAnchors, projectToBackdrop } from '../view/projection'
@@ -14,14 +15,17 @@ import {
   backdropRect,
   buildScene,
   editorialZoneRect,
+  projectedBorders,
   projectedFills,
   projectedRings,
   projectedTerritories,
+  projectedTribeOutlines,
 } from './scene'
 
 import type { SceneInputs } from './scene'
 import type { BackdropFrame } from '../view/projection'
 import type { Viewport } from '../view/viewport'
+import type { DerivedBorder } from '@europe-historical-atlas/core/editor/derivedBorders'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /**
@@ -33,6 +37,9 @@ import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 const FRAME: BackdropFrame = TEST_BACKDROP_FRAME
 
 const NATIVE: Viewport = { scale: 1, originX: 0, originY: 0 }
+
+/** A year without a tribe. */
+const NO_TRIBES: ReadonlySet<string> = new Set()
 
 /**
  * Inputs with whatever a test needs.
@@ -325,14 +332,21 @@ describe('projectedFills', () => {
         ['hre', '#00aa00'],
       ])
       expect(
-        projectedFills(sharedBorderDocument(), anchors, colours).map((fill) => fill.colour)
+        projectedFills(sharedBorderDocument(), anchors, colours, NO_TRIBES).map(
+          (fill) => fill.colour
+        )
       ).toEqual(['#aa0000', '#00aa00'])
     })
   })
 
   describe('variants', () => {
     it('resolves each ring through the shared anchor table', () => {
-      const fills = projectedFills(sharedBorderDocument(), anchors, new Map([['hre', '#00aa00']]))
+      const fills = projectedFills(
+        sharedBorderDocument(),
+        anchors,
+        new Map([['hre', '#00aa00']]),
+        NO_TRIBES
+      )
       expect(fills[0]?.rings[0]?.[0]).toEqual(anchors[1])
     })
   })
@@ -341,16 +355,16 @@ describe('projectedFills', () => {
     // A claim whose polity has no colour names a polity the registry lacks; it is not painted in an
     // invented one.
     it('skips a claim with no colour', () => {
-      expect(projectedFills(sharedBorderDocument(), anchors, new Map())).toEqual([])
+      expect(projectedFills(sharedBorderDocument(), anchors, new Map(), NO_TRIBES)).toEqual([])
     })
   })
 
   describe('unmanaged errors', () => {
     // L4: N/A — pure arithmetic over arrays; an index past the table is dropped by projectedRings.
     it('returns nothing for a document with no claims', () => {
-      expect(projectedFills({ ...sharedBorderDocument(), claims: [] }, anchors, new Map())).toEqual(
-        []
-      )
+      expect(
+        projectedFills({ ...sharedBorderDocument(), claims: [] }, anchors, new Map(), NO_TRIBES)
+      ).toEqual([])
     })
   })
 
@@ -425,6 +439,106 @@ describe('projectedTerritories', () => {
       const document = sharedBorderDocument()
       document.claims[0]?.rings.push([1, 4, 5])
       expect(projectedTerritories(document, anchors)[0]?.rings).toHaveLength(2)
+    })
+  })
+})
+
+/** The fixture with the Empire ranked a tribe. */
+const withTribe = (): YearDocument => {
+  const document = sharedBorderDocument()
+  const hre = document.polities.find((polity) => polity.id === 'hre')
+  if (hre) hre.rank = 'tribe'
+  return document
+}
+
+const border = (between: string[]): DerivedBorder => ({
+  run: [1, 2],
+  between,
+  relation: 'sovereign',
+  degree: 0,
+  hand: null,
+  dressedBy: 'rule',
+})
+
+// A tribe has no fill and its outline dashed in its colour, standing in for its borders (the dev,
+// 2026-10-15; `core/editor/tribes`).
+describe('tribes in the scene', () => {
+  const COLOURS = new Map([
+    ['fr-couronne', '#aa0000'],
+    ['hre', '#8a2be2'],
+  ])
+  const anchors = projectAnchors(sharedBorderDocument().anchors, FRAME, NATIVE)
+
+  describe('happy path', () => {
+    it('fills every polity but the tribe', () => {
+      expect(
+        projectedFills(withTribe(), anchors, COLOURS, tribeIds(withTribe().polities)).map(
+          (fill) => fill.colour
+        )
+      ).toEqual(['#aa0000'])
+    })
+
+    it('gives the tribe an outline in its colour', () => {
+      expect(
+        projectedTribeOutlines(withTribe(), anchors, COLOURS, tribeIds(withTribe().polities)).map(
+          (o) => o.colour
+        )
+      ).toEqual(['#8a2be2'])
+    })
+  })
+
+  describe('variants', () => {
+    it('leaves out a border with the tribe on one side', () => {
+      const kept = projectedBorders(
+        [border(['fr-couronne', 'hre']), border(['fr-couronne'])],
+        anchors,
+        new Set(['hre'])
+      )
+      expect(kept).toHaveLength(1)
+    })
+
+    it('outlines nobody when the year has no tribe', () => {
+      expect(projectedTribeOutlines(sharedBorderDocument(), anchors, COLOURS, NO_TRIBES)).toEqual(
+        []
+      )
+    })
+
+    it('puts the outline and the filtered borders into the scene', () => {
+      const document = withTribe()
+      const built = buildScene(
+        document,
+        inputs(document, { colours: COLOURS, borders: [border(['fr-couronne', 'hre'])] })
+      )
+      expect([built.tribeOutlines.length, built.borders.length]).toEqual([1, 0])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('outlines no tribe that has no colour', () => {
+      expect(
+        projectedTribeOutlines(withTribe(), anchors, new Map(), tribeIds(withTribe().polities))
+      ).toEqual([])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // L4: N/A — pure arithmetic over arrays.
+    it('keeps every border when no polity is a tribe', () => {
+      expect(projectedBorders([border(['fr-couronne', 'hre'])], anchors, new Set())).toHaveLength(1)
+    })
+  })
+
+  describe('edge cases', () => {
+    // It has no fill, but a click inside its outline still selects it (review QUAL-004).
+    it('keeps the tribe selectable by a click inside its outline', () => {
+      expect(projectedTerritories(withTribe(), anchors).map((t) => t.polity)).toContain('hre')
+    })
+
+    it('resolves the tribe’s ring through the shared anchor table', () => {
+      expect(
+        projectedTribeOutlines(withTribe(), anchors, COLOURS, tribeIds(withTribe().polities))[0]
+          ?.rings[0]?.[0]
+      ).toEqual(anchors[1])
     })
   })
 })

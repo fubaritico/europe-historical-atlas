@@ -6,7 +6,9 @@ import { createYearDocument } from '@europe-historical-atlas/core/editor/yearDoc
 import {
   DRAFT_ERRORS,
   EMPTY_DRAFT,
+  RANKS,
   draftOf,
+  rankChoices,
   readDraft,
   suzerainChoices,
   withId,
@@ -275,6 +277,57 @@ describe('suzerainChoices', () => {
     it('stops on a loop already in the year', () => {
       const looped = [polity('a', 'b'), polity('b', 'a'), polity('c')]
       expect(suzerainChoices(looped, 'a').map((choice) => choice.value)).toEqual(['c'])
+    })
+  })
+})
+
+const ranked = (...ranks: (string | null)[]) => ranks.map((rank) => ({ rank }))
+
+describe('rankChoices', () => {
+  describe('happy path', () => {
+    it('offers the usual ranks, tribe among them', () => {
+      expect(rankChoices([]).map((option) => option.value)).toEqual([
+        'empire',
+        'kingdom',
+        'principality',
+        'duchy',
+        'county',
+        'tribe',
+      ])
+    })
+  })
+
+  describe('variants', () => {
+    it('adds every other rank the year uses, in alphabetical order', () => {
+      expect(
+        rankChoices(ranked('lordship', 'emirate', 'kingdom'))
+          .slice(RANKS.length)
+          .map((option) => option.value)
+      ).toEqual(['emirate', 'lordship'])
+    })
+
+    it('offers a rank used by two polities once', () => {
+      expect(rankChoices(ranked('march', 'march')).slice(RANKS.length)).toHaveLength(1)
+    })
+  })
+
+  describe('managed errors', () => {
+    // L3: N/A — nothing is refused; any rank of the file is a choice.
+    it('adds nothing for a polity with no rank', () => {
+      expect(rankChoices(ranked(null))).toHaveLength(RANKS.length)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // L4: N/A — a pure read over an array.
+    it('adds nothing for an empty rank', () => {
+      expect(rankChoices(ranked(''))).toHaveLength(RANKS.length)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('does not offer an usual rank twice when the year uses it', () => {
+      expect(rankChoices(ranked('tribe')).filter((o) => o.value === 'tribe')).toHaveLength(1)
     })
   })
 })
