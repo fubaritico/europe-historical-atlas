@@ -236,6 +236,12 @@ export interface CanvasScene {
    * in hand and close enough to draw. Empty otherwise.
    */
   snapAnchors: readonly number[]
+  /**
+   * The aimed polity's **extent** outline (`core/editor/extent`), as runs of projected anchors: its own
+   * domain and its vassals' as one contour, the limits between them left out (the dev, 2026-10-15). Drawn
+   * over the thin outlines, twice their width, so the selection reads at a glance. Empty when nobody is aimed.
+   */
+  extentOutline: readonly (readonly Point[])[]
   /** Which anchors are selected, by the same index. */
   selected: ReadonlySet<number>
   /**
@@ -322,6 +328,29 @@ function strokeRing(ctx: Painter2D, ring: readonly Point[]): void {
   }
   ctx.closePath()
   ctx.stroke()
+}
+
+/**
+ * Stroke the aimed polity's extent outline: open runs, each one path, in the outline's blue at twice its
+ * width. A closed contour comes back from the chaining with its first anchor repeated at the end, so no
+ * `closePath` is needed — and one would wrongly join the two ends of a run cut at a pinch.
+ * @param ctx - the context to draw into
+ * @param scene - what to draw
+ * @param style - the colours and sizes
+ */
+function paintExtentOutline(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): void {
+  if (scene.extentOutline.length === 0) return
+  ctx.strokeStyle = style.pathStroke
+  ctx.lineWidth = style.pathWidth * 2
+  ctx.beginPath()
+  for (const run of scene.extentOutline) {
+    const first = run[0]
+    if (first === undefined || run.length < 2) continue
+    ctx.moveTo(first[0], first[1])
+    for (const point of run.slice(1)) ctx.lineTo(point[0], point[1])
+  }
+  ctx.stroke()
+  ctx.lineWidth = style.pathWidth
 }
 
 /**
@@ -670,6 +699,7 @@ export function paintCanvas(
   ctx.strokeStyle = style.pathStroke
   ctx.lineWidth = style.pathWidth
   for (const ring of scene.rings) strokeRing(ctx, ring)
+  paintExtentOutline(ctx, scene, style)
   paintSnapAnchors(ctx, size, scene, style)
   paintAnchors(ctx, scene, style)
 }

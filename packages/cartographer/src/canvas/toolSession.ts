@@ -1,3 +1,5 @@
+import { extentMembers } from '@europe-historical-atlas/core/editor/extent'
+
 import { normaliseRect } from '../geometry/marquee'
 import { isClosingOffered } from '../geometry/ringClosure'
 import { isPenTool } from '../state/toolSlice'
@@ -270,12 +272,55 @@ export function dropDrag(session: ToolSession): boolean {
  */
 export function targetHandles(document: YearDocument, target: string | null): number[] {
   if (target === null) return []
+  return ascending(anchorsHeldBy(document, (polity) => polity === target))
+}
+
+/**
+ * Every anchor held by the polities a test accepts — **the one walk over the claims**, which
+ * {@link targetHandles}, {@link extentHandles} and {@link neighbourAnchors} share (review ARCH-101, 2026-10-15).
+ * @param document - the document to read
+ * @param holds - whether a polity's rings count
+ * @returns the anchor indices, each once
+ */
+function anchorsHeldBy(document: YearDocument, holds: (polity: string) => boolean): Set<number> {
   const held = new Set<number>()
-  for (const claim of document.claims) {
-    if (claim.polity !== target) continue
-    for (const ring of claim.rings) for (const index of ring) held.add(index)
-  }
-  return [...held].sort((a, b) => a - b)
+  for (const claim of document.claims)
+    if (holds(claim.polity))
+      for (const ring of claim.rings) for (const index of ring) held.add(index)
+  return held
+}
+
+/** A set of anchor indices as an ascending list. */
+function ascending(indices: ReadonlySet<number>): number[] {
+  return [...indices].sort((a, b) => a - b)
+}
+
+/**
+ * The anchors the white arrow may pick up: the target's own and those of its **extent** outline — a vassal's
+ * limit against a foreign polity is the suzerain's limit too, so it is edited from the suzerain (the dev,
+ * 2026-10-15).
+ *
+ * **The limits between the suzerain and its vassals are not offered** (the dev, same evening): an anchor the
+ * target shares with one of its vassals is the vassal's to edit, so taking it from the suzerain while clearing
+ * its own domain from under the vassals would drag the vassal along. A tripoint against a foreign polity is on
+ * the outline and stays; the target's own ring still lying under a vassal, sharing nothing, stays too — it is
+ * what the author removes.
+ * @param document - the document to read
+ * @param target - the resolved target's id, or `null`
+ * @param outline - the target's extent outline, as runs of anchor indices
+ * @returns anchor indices, ascending, each once
+ */
+export function extentHandles(
+  document: YearDocument,
+  target: string | null,
+  outline: readonly (readonly number[])[]
+): number[] {
+  if (target === null) return []
+  const vassals = new Set(extentMembers(document, target).slice(1))
+  const vassalHeld = anchorsHeldBy(document, (polity) => vassals.has(polity))
+  const held = new Set(targetHandles(document, target).filter((index) => !vassalHeld.has(index)))
+  for (const run of outline) for (const index of run) held.add(index)
+  return ascending(held)
 }
 
 /**
@@ -291,13 +336,9 @@ export function targetHandles(document: YearDocument, target: string | null): nu
  * @returns anchor indices, ascending, each once
  */
 export function neighbourAnchors(document: YearDocument, target: string): number[] {
-  const own = new Set(targetHandles(document, target))
-  const held = new Set<number>()
-  for (const claim of document.claims) {
-    if (claim.polity === target) continue
-    for (const ring of claim.rings) for (const index of ring) if (!own.has(index)) held.add(index)
-  }
-  return [...held].sort((a, b) => a - b)
+  const own = anchorsHeldBy(document, (polity) => polity === target)
+  const theirs = anchorsHeldBy(document, (polity) => polity !== target)
+  return ascending(new Set([...theirs].filter((index) => !own.has(index))))
 }
 
 /**

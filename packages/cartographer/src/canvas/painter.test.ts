@@ -178,6 +178,7 @@ function scene(overrides: Partial<CanvasScene> = {}): CanvasScene {
     // decision (`targetHandles`), not the painter's, which only draws the indices it is handed.
     handles: (overrides.anchors ?? []).map((_, index) => index),
     snapAnchors: [],
+    extentOutline: [],
     borders: [],
     layers: DEFAULT_LAYERS,
     selected: new Set<number>(),
@@ -448,6 +449,29 @@ describe('painter', () => {
   })
 
   describe('edge cases', () => {
+    // The dev, 2026-10-15: the aimed polity's extent outline, over the thin ones.
+    it('strokes the extent outline at twice the edit width, as open runs, after the rings', () => {
+      const { ctx, calls } = recordingContext()
+
+      paintCanvas(ctx, SIZE, scene({ rings: [SQUARE], extentOutline: [SQUARE] }), STYLE)
+
+      const lastRingClose = ops(calls).lastIndexOf('closePath')
+      const strokes = calls.filter((call) => call.op === 'stroke')
+      const outline = strokes[strokes.length - 1]
+      if (outline === undefined) throw new Error('nothing was stroked')
+      expect(outline.lineWidth).toBe(2)
+      expect(calls.indexOf(outline)).toBeGreaterThan(lastRingClose)
+      expect(ops(calls.slice(lastRingClose + 1))).not.toContain('closePath')
+    })
+
+    it('strokes no extent outline when nobody is aimed', () => {
+      const { ctx, calls } = recordingContext()
+      paintCanvas(ctx, SIZE, scene({ rings: [SQUARE] }), STYLE)
+      expect(calls.filter((call) => call.op === 'stroke').every((c) => c.lineWidth === 1)).toBe(
+        true
+      )
+    })
+
     it('puts the handles above the outlines, or they could not be aimed at', () => {
       const { ctx, calls } = recordingContext()
 

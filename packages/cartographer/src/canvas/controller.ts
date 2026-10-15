@@ -7,6 +7,8 @@ import { hearPageHistory, onModifiedKey } from './historyAnswer'
 import {
   bordersOf,
   coloursOf,
+  editHandlesIn,
+  extentOutlineOf,
   featureAt,
   gestureOf,
   handInHand,
@@ -99,7 +101,9 @@ function positionOf(event: { offsetX: number; offsetY: number }): [number, numbe
  */
 function repaint(it: LiveCanvas): void {
   const state = it.deps.store.getState()
-  const target = state.tool === 'navigate' ? null : resolvedTarget(gestureOf(it))
+  // The aimed polity's outline shows under every tool, the hand included: it says who is selected.
+  const aimed = resolvedTarget(gestureOf(it))
+  const target = state.tool === 'navigate' ? null : aimed
   const scene = buildScene(state.document, {
     anchorsInBackdrop: it.anchors.anchorsInBackdrop(state.document, state.version),
     backdropImage: it.deps.backdropImage,
@@ -107,8 +111,12 @@ function repaint(it: LiveCanvas): void {
     frame: it.deps.frame,
     viewport: state.viewport,
     selected: new Set(it.session.selected),
-    handles: targetHandles(state.document, target?.id ?? null),
+    // Under the white arrow the extent outline's anchors are handles too; the Pen and ⟨retrace⟩ act on
+    // the target's own rings only.
+    handles:
+      state.tool === 'edit' ? editHandlesIn(it) : targetHandles(state.document, target?.id ?? null),
     snapAnchors: snapAnchorsOf(it, target?.id ?? null),
+    extentOutline: extentOutlineOf(it, aimed?.id ?? null),
     borders: bordersOf(it),
     layers: state.layers,
     colours: coloursOf(it),
@@ -538,10 +546,12 @@ function watchStore(it: LiveCanvas, paint: () => void): () => void {
     refreshTools(it)
   }
   // An undo can take the selected anchor's ring away; a selection the target no longer holds is dropped.
+  // With nothing selected there is nothing to drop, and the extent outline is not asked for (review QUAL-002).
   const prune = (): void => {
-    const { document, target } = it.deps.store.getState()
-    const handles = new Set(targetHandles(document, target))
-    it.session.selected = it.session.selected.filter((index) => handles.has(index))
+    if (it.session.selected.length > 0) {
+      const handles = new Set(editHandlesIn(it))
+      it.session.selected = it.session.selected.filter((index) => handles.has(index))
+    }
     refreshTools(it)
   }
   const stops = [
@@ -593,6 +603,7 @@ function freshCanvas(
     sentence: null,
     wasTooFar: null,
     borders: null,
+    extent: null,
     feature: null,
     altHeld: false,
     requestPaint: () => undefined,

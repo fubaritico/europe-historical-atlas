@@ -127,6 +127,19 @@ function namesOf(document: YearDocument, ids: readonly string[]): string[] {
 }
 
 /**
+ * The anchors the white arrow may pick up: the context's {@link GestureContext.editHandles} when it carries
+ * them, else the target's own anchors.
+ * @param context - the store, and the canvas's handles when wired
+ * @returns anchor indices
+ */
+export function editHandlesOf(context: GestureContext): readonly number[] {
+  if (context.editHandles !== undefined) return context.editHandles()
+  const { document, target } = context.store.getState()
+  const aimed = describeDrawingTarget(document, target)
+  return aimed === null ? [] : targetHandles(document, aimed.id)
+}
+
+/**
  * Whether the selected anchor is still one of the target's — an undo may have taken it away, or the
  * target changed under the selection.
  * @param context - the store
@@ -134,9 +147,7 @@ function namesOf(document: YearDocument, ids: readonly string[]): string[] {
  * @returns `true` when the target's rings hold it
  */
 function stillTargets(context: GestureContext, index: number): boolean {
-  const { document, target } = context.store.getState()
-  const aimed = describeDrawingTarget(document, target)
-  return aimed !== null && targetHandles(document, aimed.id).includes(index)
+  return editHandlesOf(context).includes(index)
 }
 
 /**

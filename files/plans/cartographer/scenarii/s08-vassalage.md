@@ -4,6 +4,19 @@
 > personal union. The relation is derived from the registry; the hand is an editorial table.
 > Background: [`../groundwork.md`](../groundwork.md) §6 bis.
 
+> **Superseded in part on 2026-10-15, by the dev — read this before the scenarios below.**
+>
+> 1. **A vassal is a neighbour of its suzerain, not drawn on top of it.** A suzerain's **extent** is its own
+>    domain plus its vassals' extents, computed from the registry (`core/editor/extent.ts`); a suzerain may
+>    have no ring of its own. Overlap stays allowed while the author corrects by hand. So *"a vassal drawn
+>    inside its suzerain"* below describes the old way of drawing — the vassal border still comes out, now
+>    from shared anchors rather than from inclusion.
+> 2. **Co-vassals take the vassal's stroke**: dotted, same weight (`borderHands.ts`). The scenarios *"three
+>    limits out of two outlines"* and *"the weight of a line follows the depth"* drew them solid and lighter;
+>    the dev: *« le même trait »*. Only a limit against another lineage is solid.
+> 3. **Aiming a suzerain** strokes its extent outline, and the white arrow takes the anchors of that outline
+>    plus its own anchors not shared with a vassal — the limits with its vassals are theirs to edit.
+
 ## Declaring it
 
 ```gherkin

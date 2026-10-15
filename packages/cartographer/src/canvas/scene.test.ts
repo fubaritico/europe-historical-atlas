@@ -49,6 +49,7 @@ function inputs(document: YearDocument, overrides: Partial<SceneInputs> = {}): S
     selected: new Set<number>(),
     handles: [],
     snapAnchors: [],
+    extentOutline: [],
     borders: [],
     layers: DEFAULT_LAYERS,
     colours: new Map<string, string>(),
@@ -79,6 +80,14 @@ describe('scene', () => {
       // The fixture holds two polities, one ring each.
       expect(scene.rings).toHaveLength(2)
       expect(scene.rings[0]).toHaveLength(4)
+    })
+
+    it('projects the extent outline through the same anchors, skipping an index none answers', () => {
+      const document = sharedBorderDocument()
+
+      const scene = buildScene(document, inputs(document, { extentOutline: [[0, 1, 999]] }))
+
+      expect(scene.extentOutline).toEqual([[scene.anchors[0], scene.anchors[1]]])
     })
 
     it('puts the editorial zone where its own corners project', () => {

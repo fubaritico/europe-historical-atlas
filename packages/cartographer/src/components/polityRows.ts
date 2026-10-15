@@ -1,4 +1,5 @@
 import { effectiveSuzerains } from '@europe-historical-atlas/core/data/paintOrder'
+import { hasExtent } from '@europe-historical-atlas/core/editor/extent'
 
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
@@ -19,7 +20,10 @@ export interface PolityRow {
    * (QUAL-001): the source colours every polity of the document, so `null` is a defect made visible.
    */
   colour: string | null
-  /** Whether it holds at least one ring — `s02`'s *"marked 'no territory'"* when not. */
+  /**
+   * Whether its **extent** holds a ring — its own or a vassal's at any depth (the dev, 2026-10-15: a suzerain
+   * made of its vassals has territory). `s02`'s *"marked 'no territory'"* when not.
+   */
   hasTerritory: boolean
   /** How deep in the tree of groups: 0 for a polity owing nobody, 1 for its vassals… — the indent. */
   depth: number
@@ -45,9 +49,6 @@ export function polityRows(
   document: YearDocument,
   colours: ReadonlyMap<string, string>
 ): PolityRow[] {
-  const claimed = new Set(
-    document.claims.filter((claim) => claim.rings.length > 0).map((claim) => claim.polity)
-  )
   const suzerains = effectiveSuzerains(document.polities)
   const children = new Map<string | null, YearPolity[]>()
   for (const polity of document.polities) {
@@ -67,7 +68,7 @@ export function polityRows(
       rank: polity.rank ?? '',
       dates: datesOf(polity.existsFrom, polity.existsTo),
       colour: colours.get(polity.id) ?? null,
-      hasTerritory: claimed.has(polity.id),
+      hasTerritory: hasExtent(document, polity.id),
       depth,
       suzerainName,
     })

@@ -58,6 +58,16 @@ describe('polityRows', () => {
         ['fr-couronne', false],
       ])
     })
+
+    // The dev, 2026-10-15: a suzerain made of its vassals has territory.
+    it('gives territory to a suzerain whose only ground is its vassal’s', () => {
+      const document = sharedBorderDocument()
+      const france = document.polities.find((polity) => polity.id === 'fr-couronne')
+      if (france) france.suzerain = 'hre'
+      document.claims = document.claims.filter((claim) => claim.polity === 'fr-couronne')
+      const rows = polityRows(document, COLOURS)
+      expect(rows.find((row) => row.id === 'hre')?.hasTerritory).toBe(true)
+    })
   })
 
   describe('managed errors', () => {

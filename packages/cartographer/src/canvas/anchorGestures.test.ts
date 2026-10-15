@@ -11,6 +11,7 @@ import {
   DELETE_ANCHOR_STEP,
   INSERT_ANCHOR_STEP,
   deleteSelected,
+  editHandlesOf,
   insertOnStretch,
   targetStretches,
 } from './anchorGestures'
@@ -275,5 +276,55 @@ describe('deleting a whole ring beside a shared border (review ARCH-002)', () =>
       [[0, 2, 3]],
       [[4, 5, 2]],
     ])
+  })
+})
+
+// The dev, 2026-10-15: from a suzerain, the anchors of its extent outline — a vassal's limit against a
+// foreign polity — are picked up like its own.
+describe('anchorGestures — the extent’s handles', () => {
+  describe('happy path', () => {
+    it('picks up an anchor the context offers beyond the target’s own rings', () => {
+      const { context } = openSquare(true)
+      context.editHandles = () => [0, 1, 2, 3, 4, 5]
+
+      arrowPress(context, [500, 100], false)
+
+      expect(context.session.selected).toEqual([4])
+    })
+  })
+
+  describe('variants', () => {
+    it('offers the target’s own anchors alone when the context carries no extent', () => {
+      const { context } = openSquare(true)
+
+      arrowPress(context, [500, 100], false)
+
+      expect(context.session.selected).toEqual([])
+      expect(editHandlesOf(context)).toEqual([0, 1, 2, 3])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('offers nothing when nobody is aimed', () => {
+      const { store, context } = openSquare(true)
+      store.getState().chooseTarget(null)
+      expect(editHandlesOf(context)).toEqual([])
+    })
+  })
+
+  // L4: N/A — the handles are indices the canvas computed; a stale one is dropped by deleteSelected's check.
+
+  describe('edge cases', () => {
+    it('deletes an extent anchor from the ring that holds it, the target’s untouched', () => {
+      const { store, context } = openSquare(true)
+      context.editHandles = () => [0, 1, 2, 3, 4, 5]
+
+      arrowPress(context, [500, 100], false)
+      arrowRelease(context, [500, 100])
+      toolKey(context, 'Delete')
+
+      expect(ringsOf(store, 'hre')).toEqual([[1, 5, 2]])
+      expect(ringsOf(store, 'fr')).toEqual([[0, 1, 2, 3]])
+    })
   })
 })

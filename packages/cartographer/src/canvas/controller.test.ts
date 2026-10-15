@@ -22,6 +22,7 @@ import {
   wheelZoomFactor,
 } from './navigation'
 import { CHROME_PAINT_STYLE } from './style'
+import { drawOutlineAt } from './testGestureContext'
 
 import type { HistoryRelay } from './historyRelay'
 import type { SnapLine } from '../geometry/lineSnap'
@@ -2808,6 +2809,76 @@ describe('‹space› on a control reached with Tab (A11Y-001)', () => {
     expect(space.defaultPrevented).toBe(true)
     expect(node.style.cursor).toContain('grab')
     button.remove()
+    dispose()
+  })
+})
+
+/** A polity identity for these tests. */
+function identity(id: string, suzerain: string | null = null) {
+  return { ...FRANCE_IDENTITY, id, name: id, suzerain }
+}
+
+/** The Empire owning nothing itself, Saxony its vassal, Poland beside Saxony sharing its east side. */
+function empireOfSaxony() {
+  const opened = attach()
+  const { store } = opened
+  viewAtScale(store, 1)
+  const step = { kind: 'create-polity', label: 'create' }
+  store.getState().createPolity(identity('hre'), step)
+  store.getState().createPolity(identity('saxony', 'hre'), step)
+  store.getState().createPolity(identity('poland'), step)
+  drawOutlineAt(store, 'saxony', [
+    [300, 200],
+    [400, 200],
+    [400, 300],
+    [300, 300],
+  ])
+  drawOutlineAt(
+    store,
+    'poland',
+    [
+      [400, 200],
+      [500, 200],
+      [500, 300],
+      [400, 300],
+    ],
+    [1, null, null, 2]
+  )
+  store.getState().chooseTarget('hre')
+  store.getState().selectTool('edit')
+  return opened
+}
+
+/** Press on a point and drag it, as the white arrow does. */
+function drag(node: HTMLCanvasElement, from: [number, number], to: [number, number]): void {
+  node.dispatchEvent(
+    pointerEvent('pointerdown', { offsetX: from[0], offsetY: from[1], buttons: 1 })
+  )
+  node.dispatchEvent(pointerEvent('pointermove', { offsetX: to[0], offsetY: to[1], buttons: 1 }))
+  node.dispatchEvent(pointerEvent('pointerup', { offsetX: to[0], offsetY: to[1] }))
+}
+
+// The dev, 2026-10-15: aimed at a suzerain, the white arrow takes the anchors of its extent outline — here a
+// vassal's limit against a foreign polity — and not the limits between the suzerain and its vassals.
+describe('the extent’s handles, wired', () => {
+  it('moves a vassal’s anchor on the extent outline from the suzerain', () => {
+    const { node, store, dispose } = empireOfSaxony()
+    const before = store.getState().document.anchors[1]
+
+    drag(node, [400, 200], [400, 160])
+
+    expect(store.getState().document.anchors[1]).not.toEqual(before)
+    dispose()
+  })
+
+  it('takes no anchor a foreign polity holds alone, off the suzerain’s outline', () => {
+    const { node, store, dispose } = empireOfSaxony()
+    const before = store.getState().document.anchors.map((anchor) => [...anchor])
+
+    drag(node, [500, 200], [500, 160])
+    drag(node, [500, 300], [500, 340])
+
+    expect(store.getState().document.anchors.slice(4)).toEqual(before.slice(4))
     dispose()
   })
 })

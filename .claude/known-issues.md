@@ -18,6 +18,11 @@ Put here the know issues to avoid cluttering the context window.
   `borderSnap.ringRunTo` → `shortestRunBetween`, quand le fil d'eau, lui, prend l'autre sens s'il repasse sur le
   tracé (`freshStretch`). Le dev n'y a rien vu de faux ; le jour où le même empilement y apparaît, même remède
   (`runsBetween`, le premier qui ne repasse pas). **Sévérité : à savoir.**
+- **Le contour de l'étendue coûte ~45 ms pour l'Empire, une fois par geste quand il est visé** (15/10, QUAL-002).
+  `extentOutline` teste les deux côtés de chaque tronçon contre les anneaux de tous les membres ; le pré-filtre par
+  boîte ne gagne presque rien, l'anneau propre de l'Empire (1 304 ancres) contenant presque tout. Mesuré à chaud :
+  Empire 45 ms, France 27 ms, Angleterre 23 ms ; mis en cache par version et pays visé, et `prune` ne le demande
+  plus sans sélection. Remède si ça se sent à la plume : un index spatial des tronçons. **Sévérité : à savoir.**
 - **Un tronçon entre deux ancres de côte est lu comme de la côte, même s'il coupe la terre** (15/10, QUAL-001).
   Depuis que la côte est demandée avant l'inclusion (les îles dalmates de Venise), un trait droit tiré de côte à
   côte en travers d'une presqu'île — le cou d'un duché tranché d'un seul segment — perd sa frontière avec le pays

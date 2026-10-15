@@ -4,6 +4,7 @@ import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/docum
 
 import {
   actionSentence,
+  extentHandles,
   idleSession,
   isolatedAnchors,
   neighbourAnchors,
@@ -470,5 +471,44 @@ describe('toolSession — ⟨retrace⟩ (H-46)', () => {
   it('shows no replaced stretch under the white arrow', () => {
     const scene = overlayScene(overlay({ tool: 'edit', replaced: [[0, 0]] }))
     expect(scene.replaced).toBeNull()
+  })
+})
+
+describe('extentHandles', () => {
+  it('adds the extent outline’s anchors to the target’s own, each once, ascending', () => {
+    expect(extentHandles(sharedBorderDocument(), 'fr-couronne', [[5, 4, 1], [4]])).toEqual([
+      0, 1, 2, 3, 4, 5,
+    ])
+  })
+
+  it('gives the target’s own anchors when the outline is empty', () => {
+    expect(extentHandles(sharedBorderDocument(), 'fr-couronne', [])).toEqual([0, 1, 2, 3])
+  })
+
+  it('gives nothing when nobody is aimed', () => {
+    expect(extentHandles(sharedBorderDocument(), null, [[4]])).toEqual([])
+  })
+})
+
+/** France `0 1 2 3` as a vassal of the Empire `1 4 5 2`: they share anchors 1 and 2. */
+function franceUnderTheEmpire(): ReturnType<typeof sharedBorderDocument> {
+  const doc = sharedBorderDocument()
+  const france = doc.polities.find((polity) => polity.id === 'fr-couronne')
+  if (france) france.suzerain = 'hre'
+  return doc
+}
+
+// The dev, 2026-10-15: the limit between a suzerain and its vassal is the vassal's to edit.
+describe('extentHandles — the limits with the vassals', () => {
+  it('leaves out the anchors the target shares with its vassal', () => {
+    expect(extentHandles(franceUnderTheEmpire(), 'hre', [])).toEqual([4, 5])
+  })
+
+  it('keeps a shared anchor that lies on the extent outline — a tripoint against a foreign polity', () => {
+    expect(extentHandles(franceUnderTheEmpire(), 'hre', [[1, 0]])).toEqual([0, 1, 4, 5])
+  })
+
+  it('keeps every own anchor of a polity with no vassal', () => {
+    expect(extentHandles(sharedBorderDocument(), 'hre', [])).toEqual([1, 2, 4, 5])
   })
 })

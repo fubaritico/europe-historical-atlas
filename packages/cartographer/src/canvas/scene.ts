@@ -48,6 +48,8 @@ export interface SceneInputs {
   handles: readonly number[]
   /** Which anchors get a snap dot, by index — see {@link CanvasScene.snapAnchors}. */
   snapAnchors: readonly number[]
+  /** The aimed polity's extent outline, as runs of anchor indices — see {@link CanvasScene.extentOutline}. */
+  extentOutline: readonly (readonly number[])[]
   /** The document's borders, derived from its shared anchors (`core/editor/derivedBorders`). */
   borders: readonly DerivedBorder[]
   /** What `{Layers}` shows, and how opaque. */
@@ -233,6 +235,12 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
     layers: inputs.layers,
     handles: inputs.handles,
     snapAnchors: inputs.snapAnchors,
+    extentOutline: inputs.extentOutline.map((run) =>
+      run.flatMap((index) => {
+        const point = anchors[index]
+        return point === undefined ? [] : [point]
+      })
+    ),
     selected: inputs.selected,
     vectors:
       inputs.vectorLayers === null

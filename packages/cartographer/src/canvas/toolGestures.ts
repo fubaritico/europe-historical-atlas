@@ -7,7 +7,7 @@ import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
 import { isPenTool } from '../state/toolSlice'
 import { lonLatToScreen, screenToLonLatOnBackdrop } from '../view/projection'
 
-import { deleteSelected, insertOnStretch, penInsertHit } from './anchorGestures'
+import { deleteSelected, editHandlesOf, insertOnStretch, penInsertHit } from './anchorGestures'
 import { anchorClick, waterTaking } from './borderSnap'
 import { TAG } from './consoleTag'
 import { followedLayer, layerLines, lineLabel, snapHit } from './layerHits'
@@ -18,7 +18,6 @@ import {
   dropDrag,
   sessionPointOf,
   takeBackStroke,
-  targetHandles,
 } from './toolSession'
 import { closingPoints, closingReport, freshStretch, layerPoints } from './waterClosing'
 import { releaseWeld, weldOfferAt } from './weldGestures'
@@ -55,6 +54,12 @@ export interface GestureContext {
   territoriesOnScreen: () => readonly PolityRings[]
   /** How near, in screen pixels, a press must be to catch a handle or the first anchor. */
   radius: number
+  /**
+   * The anchors the white arrow may pick up — the target's own and its extent outline's (`extentHandles`),
+   * read from the canvas's cache. **Optional by contract**: a context without it offers the target's own
+   * anchors only (`targetHandles`), which is what a gesture test with no vassal needs.
+   */
+  editHandles?: () => readonly number[]
   /** The snap layers — the coast and the rivers — what the Pen follows in those modes. */
   layers: SnapLayers
   /**
@@ -348,9 +353,7 @@ function placeOnLayer(
  * @param shift - whether ‹shift› is held
  */
 export function arrowPress(context: GestureContext, at: Point, shift: boolean): void {
-  const target = resolvedTarget(context)
-  const candidates =
-    target === null ? [] : targetHandles(context.store.getState().document, target.id)
+  const candidates = editHandlesOf(context)
   const hit = nearestAmong(context.anchorsOnScreen(), candidates, at, context.radius)
   const session = context.session
   // A press starts clean: nothing a previous press left undecided may steer this one (ARCH-001).
@@ -517,7 +520,7 @@ function marqueeSelect(
     )
     return
   }
-  const handles = new Set(targetHandles(context.store.getState().document, target.id))
+  const handles = new Set(editHandlesOf(context))
   const caught = pointsInRect(
     context.anchorsOnScreen(),
     normaliseRect(marquee.from, marquee.to)

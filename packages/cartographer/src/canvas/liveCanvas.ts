@@ -2,6 +2,7 @@ import {
   deriveBorders,
   maskDerivationDeps,
 } from '@europe-historical-atlas/core/editor/derivedBorders'
+import { extentOutline } from '@europe-historical-atlas/core/editor/extent'
 
 import { polityAt } from '../geometry/fillHit'
 import { nearestAmong } from '../geometry/hitTest'
@@ -26,6 +27,7 @@ import { inDevicePixels } from './style'
 import { outlineOnScreen, resolvedTarget, selectionMoves, snapStretchTo } from './toolGestures'
 import {
   actionSentence,
+  extentHandles,
   isolatedAnchors,
   overlayScene,
   penSnapAnchors,
@@ -160,6 +162,8 @@ export interface LiveCanvas {
   wasTooFar: boolean | null
   /** The document's borders, derived once per version — `null` until the first paint asks. */
   borders: { version: number; list: DerivedBorder[] } | null
+  /** The aimed polity's extent outline, once per version and target — `null` until the first paint asks. */
+  extent: { version: number; target: string; outline: number[][] } | null
   /** What the status bar last said is under the pointer — written again only when it changes. */
   feature: string | null
   /** Whether ‹alt› is held — ⟨retrace⟩'s other side. A key, like ‹space›, never store state. */
@@ -224,6 +228,7 @@ export function gestureOf(it: LiveCanvas): GestureContext {
     territoriesOnScreen: () =>
       projectedTerritories(it.deps.store.getState().document, anchorsOnScreen(it)),
     radius: HANDLE_HIT_RADIUS * it.ratio,
+    editHandles: () => editHandlesIn(it),
     layers: snapLayersOf(it.deps.vectorLayers),
     report: joinedReports(it.deps.onResult),
     flipSide: it.altHeld,
@@ -494,6 +499,36 @@ export function bordersOf(it: LiveCanvas): DerivedBorder[] {
   const list = deriveBorders(document, maskDerivationDeps(document, it.deps.landMask))
   it.borders = { version, list }
   return list
+}
+
+/**
+ * The aimed polity's extent outline (`core/editor/extent`) — its own domain and its vassals' as one
+ * contour. Asked once per version and target: a pan repaints per pointer move, and the outline tests both
+ * sides of every segment of every member.
+ * @param it - the attachment
+ * @param target - the aimed polity's id, or `null`
+ * @returns runs of anchor indices, empty when nobody is aimed
+ */
+export function extentOutlineOf(it: LiveCanvas, target: string | null): number[][] {
+  if (target === null) return []
+  const { document, version } = it.deps.store.getState()
+  if (it.extent?.version === version && it.extent.target === target) return it.extent.outline
+  const outline = extentOutline(document, target)
+  it.extent = { version, target, outline }
+  return outline
+}
+
+/**
+ * The aimed polity's handles under the white arrow: its own anchors and its extent outline's
+ * (`extentHandles`), the outline read from the cache.
+ * @param it - the attachment
+ * @returns anchor indices, ascending
+ */
+export function editHandlesIn(it: LiveCanvas): number[] {
+  const { document, target } = it.deps.store.getState()
+  const aimed = describeDrawingTarget(document, target)
+  if (aimed === null) return []
+  return extentHandles(document, aimed.id, extentOutlineOf(it, aimed.id))
 }
 
 /**
