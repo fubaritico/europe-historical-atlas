@@ -64,7 +64,7 @@ export interface DerivationDeps {
    * The sources whose anchors lie on the coastline itself — in practice the land mask's own source, the
    * one the Pen records for every vertex it takes from the coast.
    *
-   * **Read before the mask, and it is exact where the mask is not**: a segment between two coast anchors
+   * **Read before inclusion and the mask, and it is exact where they are not**: a segment between two coast anchors
    * *is* coast, because the author snapped it there. Asked of the mask instead, a point stepped outward from
    * a narrow estuary lands on the far bank — dry — and the coast broke into a dozen two-anchor "unclaimed"
    * fragments on the 1100 France (the Gironde, the Loire, the Breton rias; measured 2026-10-13).
@@ -405,9 +405,11 @@ function segmentSide(
   const a = from === undefined ? undefined : doc.anchors[from]
   const b = doc.anchors[to]
   if (a === undefined || b === undefined) return null
+  // The coast is asked first: the author snapped both ends to it, so water lies beyond, however narrow.
+  // Asked after inclusion (2026-10-15), the step outward crossed the Velebit channel into Venice's islands.
+  if (onCoast(from, to, doc, deps)) return { far: null, dry: false }
   const point = outsideOf(a, b, ownRings)
   const far = farSideOf(owner, point, derivation.claims, derivation.byId)
-  if (far === null && onCoast(from, to, doc, deps)) return { far: null, dry: false }
   // Nothing claims the far side: only the mask can say whether that is the sea or ground nobody took.
   return { far, dry: far === null && (deps.isLand?.(point[0], point[1]) ?? false) }
 }

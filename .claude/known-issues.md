@@ -18,6 +18,13 @@ Put here the know issues to avoid cluttering the context window.
   `borderSnap.ringRunTo` → `shortestRunBetween`, quand le fil d'eau, lui, prend l'autre sens s'il repasse sur le
   tracé (`freshStretch`). Le dev n'y a rien vu de faux ; le jour où le même empilement y apparaît, même remède
   (`runsBetween`, le premier qui ne repasse pas). **Sévérité : à savoir.**
+- **Un tronçon entre deux ancres de côte est lu comme de la côte, même s'il coupe la terre** (15/10, QUAL-001).
+  Depuis que la côte est demandée avant l'inclusion (les îles dalmates de Venise), un trait droit tiré de côte à
+  côte en travers d'une presqu'île — le cou d'un duché tranché d'un seul segment — perd sa frontière avec le pays
+  qui l'englobe. **Mesuré sur les 137 pays de 1100 : aucun cas** ; ~200 tronçons changent, tous ≤ 5,7 km (de vraies
+  côtes face à un canal étroit), sauf une corde de 17,2 km… au-dessus du golfe de Naples. Remède le jour où ça mord :
+  exiger que les deux ancres soient **consécutives sur le trait de côte**, pas seulement prises dessus.
+  **Sévérité : à savoir.**
 - **Les années enregistrées en local ne sont jamais commitées, et `years/index.json` est en `skip-worktree`
   sur la machine du dev.** Sa décision, 12/10 : *« ils sont pour nous pour travailler »* — retrouver ses
   tracés, déboguer les outils, maîtriser le format. Les dossiers `packages/atlas/public/years/<année>/` sont

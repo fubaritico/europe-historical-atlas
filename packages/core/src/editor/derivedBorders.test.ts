@@ -403,6 +403,22 @@ describe('deriveBorders — the far side, segment by segment', () => {
       const coast = borders.filter((border) => border.relation === 'coastline')
       expect(coast.map((border) => border.run)).toEqual([[2, 3]])
     })
+
+    // 2026-10-15, the Dalmatian islands given to Venice: the Velebit channel is narrower than the far-side
+    // offset, so each coast was asked its far side inside the other's ring — ten Venice–Croatia frontiers.
+    it('reads two coasts facing each other across a channel narrower than the offset as coast', () => {
+      const doc = coastAndLand()
+      const island = [
+        addAnchor(doc, [2, -0.02], 1),
+        addAnchor(doc, [8, -0.02], 1),
+        addAnchor(doc, [8, -0.5], 1),
+        addAnchor(doc, [2, -0.5], 1),
+      ]
+      addPolity(doc, polity('venice'))
+      closeRing(doc, 'venice', island)
+      const borders = deriveBorders(doc, { isLand: () => false, coastSources: new Set([1]) })
+      expect(borders.filter((border) => border.between.length === 2)).toEqual([])
+    })
   })
 
   describe('managed errors', () => {
