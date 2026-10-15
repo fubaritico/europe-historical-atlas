@@ -70,6 +70,10 @@ point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui 
 
 **Tout est commité et poussé** (`220ae18` + l'état de session ; vérifier par `git ls-remote origin main`). Ordre :
 
+0. **Les côtes de l'atlas sont « très sales »** (le dev, 16/10 à 00:30, cinq captures) : les teintes débordent en mer
+   et gonflent les îles, le trait de côte passe à côté, des marches d'escalier sous les frontières exactes. Lire
+   `files/plans/atlas/2026-10-16-coasts/README.md` et ses captures (non commitées) **avant tout le reste** ; mesurer,
+   puis comparer capture pour capture avec le Cartographe.
 1. **Le dev regarde les tribus en tirets et le menu des rangs.** Si les tirets sont trop fins ou trop épais : une ligne,
    `paintTribeOutlines` (largeur du bord d'une frontière, `borderEdgeWidth`). Les Prussiens et les Sudoviens ont la même
    couleur `#41580b` : leurs tirets se confondent, à lui dire.
