@@ -2,6 +2,34 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-10-15 (soir) — l'étendue, le creusement, la dérivation par côté, les tribus
+
+Une plage au journal, **15/10 19:24 → 16/10 00:22 (4 h 58, 332 actions)** ; le chantier ouvert le 05/10 totalise
+**62 h 14 sur 12 plages**. **6 commits** `d49509e`..`220ae18`, plus celui de cet état, **poussés le soir à la demande
+du dev**. **3 294 tests** (904 `core`, 1 503 Cartographe, 805 atlas, 82 plugin), revue à quatre agents à chaque pas.
+
+- **Un vassal est le voisin de son suzerain** (décision du dev, mémoire [[vassal-is-a-neighbour]]) : l'**étendue** d'un
+  suzerain est calculée (`core/editor/extent.ts`), son contour tracé quand il est visé (`186d017`) ; un contour fermé
+  pour un vassal est **creusé** dans le domaine propre du suzerain (`core/editor/carve.ts`, `0003896`), jamais dans un
+  co-vassal, en un seul ‹ctrl+z›.
+- **Les frontières partagées jugées côté par côté** (`H-44`, `86496e6`) : Bohême–Pologne, Bohême ↔ terre sans maître et
+  les côtes des vassaux ne sortent plus en pointillé. Co-vassaux au trait du vassal (`69f3035`) ; un segment entre deux
+  ancres de côte lu comme côte (`d49509e`).
+- **Les tribus** (`220ae18`) : le rang `tribe` → pas de remplissage, le contour en tirets dans sa couleur, ses frontières
+  dérivées retirées (`core/editor/tribes.ts`). Le rang `people` de la nuit du 14/10 renommé `tribe` dans `years/1100`
+  (15 tribus, 14 au dernier enregistrement du dev). Le menu « Rank » propose `tribe` et **tous les rangs de l'année** —
+  il n'en offrait que cinq, le dev : *« qu'est-ce qui empêche les choses ? »*. **L'atlas les remplit encore.**
+- **Quinze vassaux recreusés à la main** dans `years/1100` (Champagne, Frise, Bohême, Toulouse, Provence, Gênes, les
+  marches saxonnes, Chester, Durham, Shrewsbury, Hereford, Roussillon) : dessinés la nuit du test, avant que la plume
+  sache creuser. Copies de secours dans le brouillon de la session (`backup-2240`, `-2245`, `-2253`).
+- **La Rus' de 1100** : trois cartes trouvées (Shepherd 1097, domaine public ; *Principalities of Kievan Rus'
+  1054-1132*, CC BY-SA, référence seule ; EGO) ; les 72 noms traduits et croisés avec le registre dans
+  `~/Desktop/rus-1100-correspondances.md`.
+- **Mes fautes** : des réponses trop longues et trop techniques pendant qu'il dessinait (*« je comprends rien »*) ;
+  **deux corrections écrasées par son ‹ctrl+s›**, la page tenant l'ancien état — je ne l'avais pas prévenu de recharger
+  sans enregistrer ; une commande à coller trop longue, coupée en trois au collage ; un `cd` (vers `/dev/null`, sans
+  effet) ; le mode automatique a bloqué l'écrasement de son fichier deux fois, passé par un script qu'il a lancé.
+
 ### 2026-10-14 — ⟨retracer⟩, la coquille `Panel`, puis l'après-midi des corrections au doigt du dev
 
 Le journal compte **10:14–10:27 (12 min) et 12:33–18:52 (6 h 19)** ; le trou 10:27–12:33 est sans doute
@@ -47,34 +75,4 @@ Le matin :
   passait aussi avec l'ancienne règle (réécrit, `719dc89`) ; la promesse « le redimensionnement dans la coquille »,
   fausse.
 
-### 2026-10-13 — les frontières jusqu'à l'atlas, et le test général sur Euratlas 1100
-
-Une plage, **13/10 14:28 → 14/10 02:11 (11 h 42, 991 actions)**, nuit comprise ; le chantier ouvert le 05/10
-totalise **50 h 42 sur 9 plages**. **10 commits** `997cbb1`..`4de406c`, **aucun poussé** (le dev pousse), gate
-verte et revue à quatre agents à chaque pas de code, chaque garde prouvée par le code naïf.
-
-- **La nuit, seul, à la demande du dev** (*« tu dessines tout ce que tu peux dessiner, vassaux, sous-vassaux »*) :
-  **137 pays d'Euratlas 1100** dans `years/1100/`, îles comprises, rang / statut / suzerain / couleur posés.
-  Manques déclarés : au nord de 60°N, à l'est de 45°E, au sud de 32°N (aucune planche). **23 défauts de l'outil**
-  relevés dans `files/plans/cartographer/general-test-defects.md`, chacun avec l'outil qui l'aurait corrigé →
-  `H-46`. État de la nuit : `general-test-night.md`. `{Polities}` défile enfin (`4de406c`). **Ma faute** : un
-  `cd` vers 02:00.
-
-- **Les frontières, déléguées par le dev** (`files/plans/borders/plan.md`) : la dérivation coupée où la mer
-  tourne en terre, le Cartographe dessine les frontières dans le style de leur relation, `{Layers}`,
-  `{Line}`, `{Overrides}` (`997cbb1`..`2b9caf0`).
-- **L'atlas montre une année dessinée telle qu'elle est dessinée** (`b85714f`) : frontières exactes depuis
-  les ancres (`core/editor/atlasBorders.ts`), plus de débordement des pays (~20 km) hors du tracé, et les
-  **couleurs du Cartographe** (`authoredRegionColours`) — le dev : *« les couleurs doivent être pareilles,
-  c'est tout l'intérêt de l'éditeur »*. Pas encore dessiné, déclaré : l'épaisseur d'un style, le pointillé.
-- **Le test général** (*« une répétition générale, il faut qu'on voie ce que l'appli a dans le ventre »*) :
-  16 pays d'Euratlas 1100 dessinés dans le Cartographe. Précision mesurée : 0,5 km médian sur la frontière
-  Francs–Empire. **`H-36` rectifié** (`a44d4b9`) — un point de voisin visé pile l'emporte sur l'eau ; **`H-43`
-  trouvé** — deux pays tiennent les deux points cliqués, la plume en suit un sans dire lequel.
-- **La skill `/draw-from-plate`** (`3e849ff`) : la méthode lente et ses scripts, pour ne jamais repartir de
-  zéro.
-- **Mes fautes** : dessiner trop vite et refaire trois fois la Navarre (*« prends ton temps »*) ; des tracés
-  au script sans regarder le résultat ; un `cd` en début de session ; le mot « main » employé sans le
-  définir.
-
-> Older sessions (2026-09-12 → 2026-10-12 evening) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-13) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

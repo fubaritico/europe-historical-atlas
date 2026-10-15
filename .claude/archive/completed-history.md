@@ -2,6 +2,36 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-10-13 — les frontières jusqu'à l'atlas, et le test général sur Euratlas 1100
+
+Une plage, **13/10 14:28 → 14/10 02:11 (11 h 42, 991 actions)**, nuit comprise ; le chantier ouvert le 05/10
+totalise **50 h 42 sur 9 plages**. **10 commits** `997cbb1`..`4de406c`, **aucun poussé** (le dev pousse), gate
+verte et revue à quatre agents à chaque pas de code, chaque garde prouvée par le code naïf.
+
+- **La nuit, seul, à la demande du dev** (*« tu dessines tout ce que tu peux dessiner, vassaux, sous-vassaux »*) :
+  **137 pays d'Euratlas 1100** dans `years/1100/`, îles comprises, rang / statut / suzerain / couleur posés.
+  Manques déclarés : au nord de 60°N, à l'est de 45°E, au sud de 32°N (aucune planche). **23 défauts de l'outil**
+  relevés dans `files/plans/cartographer/general-test-defects.md`, chacun avec l'outil qui l'aurait corrigé →
+  `H-46`. État de la nuit : `general-test-night.md`. `{Polities}` défile enfin (`4de406c`). **Ma faute** : un
+  `cd` vers 02:00.
+
+- **Les frontières, déléguées par le dev** (`files/plans/borders/plan.md`) : la dérivation coupée où la mer
+  tourne en terre, le Cartographe dessine les frontières dans le style de leur relation, `{Layers}`,
+  `{Line}`, `{Overrides}` (`997cbb1`..`2b9caf0`).
+- **L'atlas montre une année dessinée telle qu'elle est dessinée** (`b85714f`) : frontières exactes depuis
+  les ancres (`core/editor/atlasBorders.ts`), plus de débordement des pays (~20 km) hors du tracé, et les
+  **couleurs du Cartographe** (`authoredRegionColours`) — le dev : *« les couleurs doivent être pareilles,
+  c'est tout l'intérêt de l'éditeur »*. Pas encore dessiné, déclaré : l'épaisseur d'un style, le pointillé.
+- **Le test général** (*« une répétition générale, il faut qu'on voie ce que l'appli a dans le ventre »*) :
+  16 pays d'Euratlas 1100 dessinés dans le Cartographe. Précision mesurée : 0,5 km médian sur la frontière
+  Francs–Empire. **`H-36` rectifié** (`a44d4b9`) — un point de voisin visé pile l'emporte sur l'eau ; **`H-43`
+  trouvé** — deux pays tiennent les deux points cliqués, la plume en suit un sans dire lequel.
+- **La skill `/draw-from-plate`** (`3e849ff`) : la méthode lente et ses scripts, pour ne jamais repartir de
+  zéro.
+- **Mes fautes** : dessiner trop vite et refaire trois fois la Navarre (*« prends ton temps »*) ; des tracés
+  au script sans regarder le résultat ; un `cd` en début de session ; le mot « main » employé sans le
+  définir.
+
 ### 2026-10-12 (soir) — enregistrer et rouvrir, les outils attendent le zoom, les fleuves de l'atlas, la barre d'actions
 
 Une session à distance, **12/10 ~18:20 → 22:59 (~4 h 40, dans la plage 14:45 → 22:59, 712 actions)** ; le

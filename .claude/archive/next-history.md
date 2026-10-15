@@ -1,5 +1,15 @@
 # Next — archive
 
+## ▶▶▶ POINT DU 14/10 À 9 h 30 — la nuit du test général
+
+**Lire d'abord `files/plans/cartographer/general-test-night.md`** (l'état de la nuit) et
+`files/plans/cartographer/general-test-defects.md` (23 défauts, chacun avec l'outil qui l'aurait corrigé).
+137 pays d'Euratlas 1100 dessinés, vassaux et sous-vassaux compris, rang / statut / suzerain / couleur posés ;
+la liste `{Polities}` défile (`4de406c`). Ce qui manque : ce qu'aucune planche ne couvre (nord de 60°N, est de
+45°E, sud de 32°N). **La décision qui attend le dev** : l'ordre des outils de correction (`H-46` dans `s99` —
+retracer un tronçon, découper, souder, accrocher au bord), puis `H-44`.
+
+
 Sections moved out of `next.md` once the step they prepared had shipped. Newest first.
 
 ## Archived 2026-10-13

@@ -66,34 +66,25 @@ d'ancres ne perd jamais rien pendant l'édition.** Donc `removePolity` retire un
 point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui n'est plus référencé disparaît
 à l'enregistrement, par une seule renumération. Vérifié en la cassant : 3 tests tombent.
 
-## ▶▶▶▶ ON REPREND ICI — le 15/10 à 9 h 30, décidé par le dev
+## ▶▶▶▶ ON REPREND ICI — le 16/10 à 9 h 30, décidé par le dev
 
-**Tout est poussé** (`b3f4e20`, vérifié par `git ls-remote`). Ordre :
+**Tout est commité et poussé** (`220ae18` + l'état de session ; vérifier par `git ls-remote origin main`). Ordre :
 
-0. **Le dev marche la soudure** (`b3f4e20`, jamais essayée dans l'appli) : ‹A›, tirer **une** ancre du pays visé près
-   d'une ancre puis d'un tronçon d'un voisin mal calé — elle s'aimante, le relâchement fusionne, *« welded onto … »*.
-   **Ne pas garder d'onglet piloté ouvert pendant son test** ; ne pas écrire de fichier sans le prévenir.
-1. **La revue à quatre agents de `b3f4e20`** (non faite, commit demandé par le dev), puis ses corrections.
-2. **La partie 2 de l'aimantation** : accrocher toute une sélection à la frontière d'un voisin d'un coup (`H-37`).
-   Rappel au dev : ⟨retracer⟩ le long du voisin remplace déjà un tronçon entier par ses ancres.
-3. **La validation d'un contour posé** (`s99`, sous `H-46`) : refuser un contour qui se croise, une ancre visitée
-   deux fois, un anneau dégénéré ; avertir d'un chevauchement. Puis `[Check this year]`. **Avant de redessiner
-   d'autres sources** (Duby).
-4. **Le redimensionnement des panneaux** dans un `Dock` (pas dans `Panel`) ; **le zoom maximum 32 → 128**, à part.
-5. **Laissé ouvert** : détacher une frontière commune pendant un retraçage ; l'icône de ⟨retracer⟩ (le dev la dessine) ;
-   cocher `H-46` n° 2 dans `s99`/`s03` (*Reassigning* — donner un anneau à un autre pays — reste à faire).
+1. **Le dev regarde les tribus en tirets et le menu des rangs.** Si les tirets sont trop fins ou trop épais : une ligne,
+   `paintTribeOutlines` (largeur du bord d'une frontière, `borderEdgeWidth`). Les Prussiens et les Sudoviens ont la même
+   couleur `#41580b` : leurs tirets se confondent, à lui dire.
+2. **Les tribus dans l'atlas** (`known-issues`) : pas de teinte (`authoredRegionColours`), frontières écartées
+   (`exactBordersOf` + `touchesTribe`), une couche de tirets par couleur. `pnpm dev` à lui demander après.
+3. **Le dev dessine la Rus'**, principauté par principauté, avec `~/Desktop/rus-1100-correspondances.md` : ce qui
+   existe déjà (Kiev, Tchernigov, Novgorod…) se retouche, ne se recrée pas. Puis il replace les tribus autour.
+   **Pendant qu'il dessine : réponses très courtes et concrètes**, et si j'écris dans `years/`, il recharge **sans**
+   ‹ctrl+s› (mémoire [[reload-without-saving-after-my-write]]).
+4. **Recreuser un vassal depuis l'outil** (`known-issues`) — aujourd'hui seule la fermeture d'un contour neuf creuse.
+5. Les étapes encore ouvertes du 15/10 : la revue à quatre agents de la soudure (`b3f4e20`) ; l'aimantation d'une
+   sélection entière (`H-37` partie 2) ; la validation d'un contour posé (`s99`, `H-46`) ; le `Dock` redimensionnable et
+   le zoom 128 ; ⟨retracer⟩ / supprimer depuis un suzerain sur les bords de l'étendue tenus par un vassal.
 
-**L'objectif que le dev a nommé** : *« le maximum d'ergonomie lorsqu'on corrige les tracés […] on aura fait le tour
-une fois qu'on aura tous ces systèmes d'aimantation, de liberté de suppression »*.
-
-## ▶▶▶ POINT DU 14/10 À 9 h 30 — la nuit du test général
-
-**Lire d'abord `files/plans/cartographer/general-test-night.md`** (l'état de la nuit) et
-`files/plans/cartographer/general-test-defects.md` (23 défauts, chacun avec l'outil qui l'aurait corrigé).
-137 pays d'Euratlas 1100 dessinés, vassaux et sous-vassaux compris, rang / statut / suzerain / couleur posés ;
-la liste `{Polities}` défile (`4de406c`). Ce qui manque : ce qu'aucune planche ne couvre (nord de 60°N, est de
-45°E, sud de 32°N). **La décision qui attend le dev** : l'ordre des outils de correction (`H-46` dans `s99` —
-retracer un tronçon, découper, souder, accrocher au bord), puis `H-44`.
+**L'objectif que le dev a nommé** : *« le maximum d'ergonomie lorsqu'on corrige les tracés »*.
 
 ## ▶▶ LE TEST GÉNÉRAL — contexte (le dessin est fait, voir le point ci-dessus)
 

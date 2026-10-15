@@ -16,6 +16,13 @@ Put here the know issues to avoid cluttering the context window.
   dérivées retirées. L'atlas, lui, la teinte et trace ses frontières comme celles d'un royaume. Remède, l'étape suivante :
   `authoredRegionColours` sans teinte pour une tribu, `exactBordersOf` qui écarte ses frontières (`touchesTribe`), et une
   couche de traits en tirets par couleur de tribu. **Sévérité : à savoir.**
+- **Recreuser un vassal après coup est impossible depuis l'outil** (16/10). Le creusement ne tourne qu'à la fermeture
+  d'un contour neuf (`addOutlineCarving`) ; un vassal dessiné avant, ou recouvert de nouveau par une retouche du
+  suzerain, garde la couleur du suzerain par-dessus (la Champagne, la Frise : recreusées au script). Remède : un geste
+  « recreuser » sur un vassal sélectionné, qui appelle `carveOutOfSuzerain` sur chacun de ses anneaux. **Sévérité : à savoir.**
+- **J'écris dans `years/`, sa page ne se recharge pas, et son ‹ctrl+s› suivant réécrit l'ancien état** (16/10). Arrivé
+  deux fois : la Frise et le renommage des tribus. Règle : après une écriture de ma part, il **recharge sans
+  enregistrer** ; et je vérifie l'heure du fichier avant d'écrire. **Sévérité : à savoir.**
 - **Un test du contrôleur qui échoue en fait tomber deux autres, les tests ‹espace›** (14/10). Il lève avant son
   `dispose()` et laisse un écouteur sur la page : la panne accuse des tests sains. Remède : un `afterEach` qui
   détache tout canevas attaché dans `controller.test.ts`. **Sévérité : cosmétique** — ne trompe qu'en cas d'échec.
