@@ -9,6 +9,7 @@ import { lonLatToScreen, screenToLonLatOnBackdrop } from '../view/projection'
 
 import { deleteSelected, editHandlesOf, insertOnStretch, penInsertHit } from './anchorGestures'
 import { anchorClick, waterTaking } from './borderSnap'
+import { carvedReport } from './carving'
 import { TAG } from './consoleTag'
 import { followedLayer, layerLines, lineLabel, snapHit } from './layerHits'
 import { leaveLayer, reachLayer } from './layerSwitch'
@@ -29,6 +30,7 @@ import type { SnapLine } from '../geometry/lineSnap'
 import type { CartographerStoreHook } from '../state/store'
 import type { BackdropFrame } from '../view/projection'
 import type { Point } from '../view/viewport'
+import type { Carving } from '@europe-historical-atlas/core/editor/carve'
 import type { AnchorMove, Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
 
 /**
@@ -138,9 +140,14 @@ export function closeOutline(context: GestureContext, followWater = false): void
   // Laid only into what is handed to the document: a refused outline stays on screen as it was.
   const closing = followWater ? closingPoints(context) : []
   const outline = [...context.session.outline, ...closing]
-  if (context.store.getState().drawOutline(target.id, outline, step)) {
+  const carved: string[] = []
+  const onCarved = (carving: Carving): void => {
+    carved.push(carvedReport(context.store.getState().document.polities, carving))
+  }
+  if (context.store.getState().drawOutline(target.id, outline, step, onCarved)) {
     clearOutline(context.session)
     if (closing.length > 0) context.report(closingReport(closing.length))
+    for (const message of carved) context.report(message)
     return
   }
   console.error(

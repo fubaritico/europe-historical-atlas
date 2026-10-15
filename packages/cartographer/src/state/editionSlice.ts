@@ -12,8 +12,8 @@ import {
   dressPair,
   dressSegments,
 } from '@europe-historical-atlas/core/editor/borderOverrides'
+import { addOutlineCarving } from '@europe-historical-atlas/core/editor/carve'
 import {
-  addOutline,
   addPolity,
   moveAnchors,
   removePolity,
@@ -28,6 +28,7 @@ import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { AnchorRemoval } from '@europe-historical-atlas/core/editor/anchorEdits'
 import type { WeldDone, WeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
 import type { Segment } from '@europe-historical-atlas/core/editor/borderOverrides'
+import type { Carving } from '@europe-historical-atlas/core/editor/carve'
 import type {
   AnchorMove,
   OutlinePoint,
@@ -185,10 +186,19 @@ export interface EditionActions {
    * own provenance — reported by eye, or snapped onto the coast. One step takes the whole outline back.
    * @param polityId - who the outline is drawn for
    * @param points - each anchor and its provenance, in order, closure implied
+   *
+   * **A vassal's outline carves its suzerain's own domain** in the same step (`s08`, the dev, 2026-10-15):
+   * the ground under it is no longer the suzerain's own, the new limit shares its anchors.
    * @param step - how `{History}` and `[↶ Undo]` will name the gesture
+   * @param onCarved - told what a carving did, for the status bar; a carving that failed is logged here
    * @returns `false` when the polity is unknown or the points enclose nothing — and nothing happened
    */
-  drawOutline: (polityId: string, points: readonly OutlinePoint[], step: HistoryStep) => boolean
+  drawOutline: (
+    polityId: string,
+    points: readonly OutlinePoint[],
+    step: HistoryStep,
+    onCarved?: (carving: Carving) => void
+  ) => boolean
   /**
    * Move anchors, as one undoable step — the white arrow's drag, committed on release: one anchor, or
    * the whole selection, keeping their relative positions (`s03`). Every ring holding any follows.
@@ -461,6 +471,30 @@ function polityActions(
 }
 
 /**
+ * Closing an outline, which carves a vassal's suzerain in the same step (`s08`, 2026-10-15).
+ * @param record - the runner every recorded action goes through
+ * @returns `drawOutline`
+ */
+function outlineActions(
+  record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean
+): Pick<EditionActions, 'drawOutline'> {
+  return {
+    drawOutline: (polityId, points, step, onCarved): boolean =>
+      record((document) => {
+        const drawn = addOutlineCarving(document, polityId, points)
+        if (!drawn.closed || drawn.carving === null) return drawn.closed
+        // A carving that could not be done leaves the overlap, for the author to correct — said loudly.
+        if ('reason' in drawn.carving) {
+          console.error(
+            `[Cartographer] the outline of "${polityId}" was closed but not carved out of "${drawn.carving.suzerain}": ${drawn.carving.reason}; they overlap.`
+          )
+        } else onCarved?.(drawn.carving)
+        return true
+      }, step),
+  }
+}
+
+/**
  * The edits of the anchors — insert one on a stretch, remove some — each answering with what it
  * did, which `recorder`'s boolean cannot carry.
  * @param record - the runner every recorded action goes through
@@ -555,8 +589,7 @@ export function editionActions(
     // `addPolity` copies what it keeps, so the caller's object cannot be mutated from here later.
     ...polityActions(record),
     ...overrideActions(record),
-    drawOutline: (polityId, points, step): boolean =>
-      record((document) => addOutline(document, polityId, points), step),
+    ...outlineActions(record),
     moveAnchors: (moves, step): boolean => record((document) => moveAnchors(document, moves), step),
     restackPolity: (polityId, move, step): boolean =>
       record((document) => restack(document, polityId, move), step),

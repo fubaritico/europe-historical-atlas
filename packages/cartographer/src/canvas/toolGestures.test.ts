@@ -10,6 +10,7 @@ import {
   TEST_COAST_PROVENANCE,
   TEST_RIVER_PROVENANCE,
   TEST_SHORE,
+  drawOutlineAt,
   testGestureContext,
   testPolity,
   testStore,
@@ -1645,5 +1646,34 @@ describe('a neighbour’s anchor placed by eye beside a river', () => {
 
       expect(context.session.outline[0]?.anchor).toBeNull()
     })
+  })
+})
+
+// s08, the dev, 2026-10-15: closing a vassal's outline carves its suzerain, and the status bar says so.
+describe('closeOutline — a vassal carving its suzerain', () => {
+  it('reports the carving beside the closing', () => {
+    const store = testStore()
+    store.getState().createPolity(testPolity('fr', 'Reaume de France'), { kind: 'c', label: 'fr' })
+    drawOutlineAt(store, 'fr', [
+      [100, 100],
+      [400, 100],
+      [400, 400],
+      [100, 400],
+    ])
+    store
+      .getState()
+      .createPolity({ ...testPolity('anjou'), suzerain: 'fr' }, { kind: 'c', label: 'anjou' })
+    store.getState().aimAt('anjou')
+    const { context, reports } = testGestureContext(store)
+
+    penClick(context, [200, 200])
+    penClick(context, [300, 200])
+    penClick(context, [300, 300])
+    closeOutline(context)
+
+    expect(reports).toContain("carved out of Reaume de France's own domain")
+    expect(
+      store.getState().document.claims.find((claim) => claim.polity === 'fr')?.rings
+    ).toHaveLength(2)
   })
 })

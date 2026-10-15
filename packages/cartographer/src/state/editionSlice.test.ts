@@ -1003,3 +1003,80 @@ describe('editionSlice.retraceStretch (H-46)', () => {
     expect(store.getState().canUndo).toBe(false)
   })
 })
+
+/** The fixture with Anjou declared a vassal of France, before the store opens it. */
+function withAnjou() {
+  const opened = openStore()
+  opened.store.getState().createPolity(
+    {
+      id: 'anjou',
+      name: 'County of Anjou',
+      rank: null,
+      status: null,
+      suzerain: 'fr-couronne',
+      existsFrom: null,
+      existsTo: null,
+      colour: null,
+      wikidata: null,
+    },
+    { kind: 'create-polity', label: 'create' }
+  )
+  return opened
+}
+
+const franceRings = (store: ReturnType<typeof openStore>['store']) =>
+  store.getState().document.claims.find((claim) => claim.polity === 'fr-couronne')?.rings ?? []
+
+// s08, the dev, 2026-10-15: a vassal's outline carves its suzerain's own domain, in the same step.
+describe('editionSlice.drawOutline — carving the suzerain', () => {
+  const inside = (
+    [
+      [0.5, 47.5],
+      [1.5, 47.5],
+      [1, 46.5],
+    ] as [number, number][]
+  ).map((at) => ({ at, provenance: FREE_POINT_PROVENANCE }))
+
+  it('carves the vassal out of France and tells who was carved', () => {
+    const { store } = withAnjou()
+    const onCarved = vi.fn()
+
+    expect(store.getState().drawOutline('anjou', inside, DRAW, onCarved)).toBe(true)
+
+    expect(franceRings(store)).toHaveLength(2)
+    expect(onCarved).toHaveBeenCalledWith({ suzerain: 'fr-couronne', crossings: 0, rings: 2 })
+  })
+
+  it('takes back the outline and the carving with one undo', () => {
+    const { store } = withAnjou()
+    store.getState().drawOutline('anjou', inside, DRAW)
+
+    store.getState().undo()
+
+    expect(franceRings(store)).toHaveLength(1)
+    expect(
+      store.getState().document.claims.find((claim) => claim.polity === 'anjou')
+    ).toBeUndefined()
+  })
+
+  it('keeps the outline, overlapping, and says so loudly when the carving cannot be done', () => {
+    const { store } = withAnjou()
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    const onCarved = vi.fn()
+    // Its top side lies ON France's, between France's anchors: the carved domain cannot close.
+    const onTheLimit = (
+      [
+        [0.5, 48],
+        [1.5, 48],
+        [1, 47],
+      ] as [number, number][]
+    ).map((at) => ({ at, provenance: FREE_POINT_PROVENANCE }))
+
+    expect(store.getState().drawOutline('anjou', onTheLimit, DRAW, onCarved)).toBe(true)
+
+    expect(franceRings(store)).toHaveLength(1)
+    expect(onCarved).not.toHaveBeenCalled()
+    expect(error).toHaveBeenCalledOnce()
+    error.mockRestore()
+  })
+})

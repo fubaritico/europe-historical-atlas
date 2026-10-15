@@ -171,6 +171,54 @@ Scenario: a vassal drawn inside its suzerain
 > Declared vassal + outline inside the suzerain = the vassal border. No overlap reported, no question put to
 > the author. The nesting is read by the tool, never entered by hand.
 
+## A new vassal carves its ground out of its suzerain
+
+> **The dev, 2026-10-15** — the scenario that replaces drawing on top: *« je crée un vassal dans un suzerain,
+> je dessine la forme du vassal dans le suzerain ; si le vassal n'existait pas avant, il va creuser dans la
+> surface non vassalisée du suzerain »*. Every outline closed from then on carves; what is already drawn keeps
+> its overlap, which the author corrects by hand.
+
+```gherkin
+Scenario: the outline of a new vassal carves its suzerain's own domain
+  Given "Kingdom of France" holds its own domain
+  And I create "Duchy of Aquitaine" inside France in {Polities}, with no territory yet
+  When I draw Aquitaine's outline over France's own domain and close it
+  Then the ground under Aquitaine is no longer France's own domain
+  And France and Aquitaine share the anchors of their new common limit
+  And that limit is drawn with the vassal hand
+  And France's extent outline is unchanged
+  And one undo takes back both the outline and the carving
+
+Scenario: a vassal drawn wholly inside its suzerain leaves a hole in its domain
+  Given France holds its own domain
+  When I close a new vassal's outline that touches none of France's limits
+  Then France's own domain holds a hole exactly where the vassal is, by the same anchors
+
+Scenario: a new vassal's outline crossing its suzerain's limit
+  Given France holds its own domain
+  When I close a new vassal's outline that crosses France's limit between two anchors
+  Then an anchor is placed at each crossing, shared by both outlines
+  And only the part inside France's own domain is carved
+  And the part outside stays the vassal's, adding to France's extent
+
+Scenario: every outline closed for a vassal carves, and nothing already drawn is recomputed
+  Given "Duchy of Normandy" is a vassal of France and already holds an outline overlapping France's domain
+  When I close another outline for Normandy — an island, an exclave — over France's own domain
+  Then France's own domain is carved under the new outline
+  And Normandy's first outline keeps its overlap, for the author to correct by hand
+
+Scenario: a new vassal's outline over a co-vassal overlaps it, carves nothing of it
+  Given "Duchy of Aquitaine" and "County of Poitou" are both vassals of France
+  When I close an outline for Poitou that overlaps Aquitaine
+  Then Aquitaine is not touched — the two overlap, and the author corrects the outline
+  And only France's own domain is carved
+```
+
+> **Settled by the dev, 2026-10-15**: the carving takes from the **suzerain's own domain only**, never from a
+> co-vassal (*« il ne le creuse pas, il se chevauche »*); and **every** outline closed for a vassal carves,
+> not only its first (*« ça permettra de gérer les enclaves et les exclaves entre vassaux et suzerains »*).
+> What is already drawn is never recomputed, so the overlaps being corrected by hand stay as they are.
+
 ## Two vassals side by side in one suzerain
 
 > **The dev's test case, 2026-09-27.** It is the normal shape of 11th-century France, and it breaks the
