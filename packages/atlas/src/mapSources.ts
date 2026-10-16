@@ -6,10 +6,13 @@
  * would only add ceremony around "this landed, that has not".
  *
  * The one rule it does carry is the relief source: overlays must sample the *mesh's* grid, not the raw
- * DEM, so the smoothed copy is derived here and read from here rather than recomputed per layer.
+ * DEM, so the smoothed and shore-lowered copy is derived here and read from here rather than recomputed
+ * per layer.
  */
 
 import { smoothHeightmap } from '@europe-historical-atlas/core/data/heightmap'
+import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
+import { taperHeightmapToShore } from '@europe-historical-atlas/core/data/shoreRamp'
 
 import type { BorderPattern } from '@europe-historical-atlas/core/data/borderStyles'
 import type { Heightmap } from '@europe-historical-atlas/core/data/heightmap'
@@ -29,8 +32,13 @@ export interface MapSources {
    * from its own asset, with an elevation threshold as the documented degraded fallback.
    */
   landMask: LandMask | null
-  /** The (possibly smoothed) grid every draped overlay samples. */
+  /** The grid the mesh is built from and every draped overlay samples: smoothed, and lowered to the shore. */
   reliefSource: Heightmap | null
+  /**
+   * What {@link MapSources.reliefSource} was derived from, so asking again with the same inputs costs
+   * nothing — the shore ramp takes ~180 ms on the full DEM, and startup asks twice.
+   */
+  reliefInputs: ReliefInputs | null
   /** The polities of the year on screen, or `null` before one has been chosen. */
   regionSet: RegionSet | null
   /** The river centrelines, empty until they land. */
@@ -58,6 +66,7 @@ export function createMapSources(): MapSources {
     heightmap: null,
     landMask: null,
     reliefSource: null,
+    reliefInputs: null,
     regionSet: null,
     riverData: [],
     derivedBorders: null,
@@ -66,16 +75,109 @@ export function createMapSources(): MapSources {
 }
 
 /**
- * Re-derive the grid every draped overlay samples.
+ * The shoreline the map is drawn against: the land mask, or the documented degraded fallback.
+ *
+ * Thresholding elevation drowns land below sea level and dries out every lake above it — visibly wrong
+ * in the Dutch polders — but a degraded map beats a blank canvas. One function for the coastline and the
+ * relief alike, so the line and the land always end at the same place.
+ * @param sources - what has been loaded
+ * @param seaLevel - the elevation threshold used when the mask failed
+ * @returns a mask, or `null` before the elevation has loaded
+ */
+export function shorelineMask(sources: MapSources, seaLevel: number): LandMask | null {
+  if (sources.landMask) return sources.landMask
+  return sources.heightmap ? maskOver(sources.heightmap, null, seaLevel) : null
+}
+
+/**
+ * The rule behind {@link shorelineMask}, once the elevation is known to be there.
+ * @param heightmap - the elevation grid
+ * @param landMask - the land mask, or `null` when it failed
+ * @param seaLevel - the elevation threshold standing in for it
+ * @returns the mask, or the threshold over the elevation
+ */
+function maskOver(heightmap: Heightmap, landMask: LandMask | null, seaLevel: number): LandMask {
+  return landMask ?? createElevationLandMask(heightmap, seaLevel)
+}
+
+/** How the relief source is derived from the DEM. */
+export interface ReliefShaping {
+  /** Box-blur radius in grid cells; zero leaves the DEM unblurred. */
+  smoothing: number
+  /** Width (km) of the ramp down to sea level at the shore; zero leaves the DEM's own coast. */
+  shoreRamp: number
+}
+
+/** Everything the relief source depends on, compared by identity and value. */
+export interface ReliefInputs extends ReliefShaping {
+  /** The elevation grid it was derived from. */
+  heightmap: Heightmap
+  /** The land mask it was lowered against, or `null` when it was the elevation threshold. */
+  landMask: LandMask | null
+  /** The threshold standing in for a failed mask. */
+  seaLevel: number
+}
+
+/**
+ * Whether two sets of relief inputs would derive the same grid.
+ * @param a - one set
+ * @param b - the other
+ * @returns `true` when nothing differs
+ */
+function sameReliefInputs(a: ReliefInputs, b: ReliefInputs): boolean {
+  return (
+    a.heightmap === b.heightmap &&
+    a.landMask === b.landMask &&
+    a.smoothing === b.smoothing &&
+    a.shoreRamp === b.shoreRamp &&
+    // The threshold only shapes the shore when there is no mask to read it from.
+    (a.landMask !== null || a.seaLevel === b.seaLevel)
+  )
+}
+
+/**
+ * Re-derive the grid the mesh is built from and every draped overlay samples.
+ *
+ * Derived once per set of inputs: asking again with nothing changed hands back the same grid.
  *
  * Kept apart from the mesh build so that draping stops depending on build order: an overlay created
  * before the relief mesh exists would otherwise be laid flat at sea level and stay there. That order
  * dependency was latent until the bake became asynchronous and the mesh stopped being first.
  * @param sources - the sources to refresh in place
- * @param smoothing - the box-blur radius in grid cells; zero returns the DEM itself
+ * @param shaping - the smoothing and the shore ramp
+ * @param seaLevel - the elevation threshold standing in for a failed land mask
  * @returns the grid, or `null` before the elevation has loaded
  */
-export function refreshReliefSource(sources: MapSources, smoothing: number): Heightmap | null {
-  sources.reliefSource = sources.heightmap ? smoothHeightmap(sources.heightmap, smoothing) : null
+export function refreshReliefSource(
+  sources: MapSources,
+  shaping: ReliefShaping,
+  seaLevel: number
+): Heightmap | null {
+  const { heightmap, landMask } = sources
+  if (!heightmap) {
+    sources.reliefSource = null
+    sources.reliefInputs = null
+    return null
+  }
+  const inputs: ReliefInputs = {
+    heightmap,
+    landMask,
+    smoothing: shaping.smoothing,
+    shoreRamp: shaping.shoreRamp,
+    seaLevel,
+  }
+  if (
+    sources.reliefSource &&
+    sources.reliefInputs &&
+    sameReliefInputs(sources.reliefInputs, inputs)
+  )
+    return sources.reliefSource
+  const mask = maskOver(heightmap, landMask, seaLevel)
+  sources.reliefSource = taperHeightmapToShore(
+    smoothHeightmap(heightmap, shaping.smoothing),
+    mask,
+    shaping.shoreRamp
+  )
+  sources.reliefInputs = inputs
   return sources.reliefSource
 }

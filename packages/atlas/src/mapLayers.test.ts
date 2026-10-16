@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { Scene } from 'three'
+import { Scene, ShaderLib } from 'three'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
@@ -8,11 +8,18 @@ import { createElevationLandMask } from '@europe-historical-atlas/core/data/land
 import { createDevState } from './devState'
 import { createMapLayers } from './mapLayers'
 import { createMapSources, refreshReliefSource } from './mapSources'
+import { DEPTH_BIAS_UNIFORM } from './scene/depthBias'
 
 import type { MapSources } from './mapSources'
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionRaster'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
+import type {
+  BufferGeometry,
+  LineBasicMaterial,
+  LineSegments,
+  WebGLProgramParametersWithUniforms,
+} from 'three'
 
 const META: HeightmapMeta = {
   width: 8,
@@ -72,7 +79,7 @@ function build(loaded = true): {
     sources.landMask = createElevationLandMask(DEM, 0)
     sources.regionSet = REGIONS
     sources.derivedBorders = BORDERS
-    refreshReliefSource(sources, 0)
+    refreshReliefSource(sources, dev.relief, dev.texture.seaLevel)
   }
   return { scene, sources, dev, layers: createMapLayers({ scene, dev, sources }) }
 }
@@ -101,6 +108,17 @@ describe('createMapLayers', () => {
       const { scene, layers } = build()
       layers.rebuildRelief()
       expect(scene.children).toHaveLength(2)
+    })
+
+    it('re-derives the relief grid from the live shaping, so the smoothing and shore sliders apply', () => {
+      // Until 2026-10-16 the mesh was rebuilt on the grid derived at startup: the smoothing slider did
+      // nothing at all, and a shore ramp would have done nothing either.
+      const { sources, dev, layers } = build()
+      const before = sources.reliefSource
+      dev.relief.shoreRamp = 0
+      layers.rebuildRelief()
+      expect(sources.reliefSource).not.toBe(before)
+      expect(sources.reliefSource).toBe(DEM)
     })
 
     it('leaves the relief alone when the edge is not cut', () => {
@@ -165,6 +183,33 @@ describe('createMapLayers', () => {
       const relief = scene.children[0]?.scale.y ?? 0
       const borders = scene.children[2]?.scale.y ?? 0
       expect(borders).toBeCloseTo(relief)
+    })
+
+    it('tracks the relief scale on the coastline, now laid on the relief at the shore', () => {
+      const { scene, dev, layers } = build()
+      dev.relief.exaggeration = 3
+      dev.relief.exaggZoomIn = 1
+      layers.rebuildRelief()
+      layers.rebuildCoastline()
+      layers.frame(0)
+      const relief = scene.children[0]?.scale.y ?? 0
+      const coastline = scene.children[2]?.scale.y ?? 0
+      expect(relief).toBeCloseTo(3)
+      expect(coastline).toBeCloseTo(relief)
+    })
+
+    it('hands the coastline the depth bias from the panel, so the relief never hides it', () => {
+      const { scene, dev, layers } = build()
+      dev.coast.depthBias = 0.013
+      layers.rebuildCoastline()
+      const material = (scene.children[0] as LineSegments<BufferGeometry, LineBasicMaterial>)
+        .material
+      const shader = {
+        uniforms: {},
+        vertexShader: ShaderLib.basic.vertexShader,
+      } as unknown as WebGLProgramParametersWithUniforms
+      material.onBeforeCompile(shader, undefined as never)
+      expect(shader.uniforms[DEPTH_BIAS_UNIFORM]).toEqual({ value: 0.013 })
     })
 
     it('repaints the coastline without rebuilding it', () => {

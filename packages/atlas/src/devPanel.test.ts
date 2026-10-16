@@ -281,8 +281,48 @@ describe('createDevPanel', () => {
       const seaLevel = controls.find((c) => c.property === 'seaLevel')
       if (seaLevel) nudge(seaLevel)
       expect(calls.rebuildTexture).toBe(1)
-      expect(calls.rebuildCoastline).toBe(1)
       expect(calls.rebuildRhumb).toBe(1)
+      // The coastline lies on the relief, so it is retraced through it — and without a land mask the
+      // shore ramp is drawn against the same threshold.
+      expect(calls.rebuildRelief).toBe(1)
+      expect(calls.rebuildCoastline ?? 0).toBe(0)
+    })
+
+    it('routes the flat lift to the rhumbs, which alone stand on the flat sea', () => {
+      const { calls, controls } = build()
+      const control = controls.find((c) => c.property === 'yLift')
+      expect(control).toBeDefined()
+      if (control) nudge(control)
+      expect(calls.rebuildRhumb).toBe(1)
+      expect(calls.rebuildCoastline ?? 0).toBe(0)
+    })
+
+    it('routes the coast lift and the depth bias to a coastline rebuild', () => {
+      for (const property of ['shoreLift', 'depthBias']) {
+        const { calls, controls } = build()
+        const control = controls.find((c) => c.property === property)
+        expect(control).toBeDefined()
+        if (control) nudge(control)
+        expect(calls.rebuildCoastline).toBe(1)
+      }
+    })
+
+    it('routes the shore ramp and the smoothing to a relief rebuild', () => {
+      for (const property of ['shoreRamp', 'smoothing']) {
+        const { calls, controls } = build()
+        const control = controls.find((c) => c.property === property)
+        expect(control).toBeDefined()
+        if (control) nudge(control)
+        expect(calls.rebuildRelief).toBe(1)
+      }
+    })
+
+    it('leaves the relief geometry alone when only the exaggeration moves, a scale on the mesh', () => {
+      const { calls, controls } = build()
+      const control = controls.find((c) => c.property === 'exaggeration')
+      expect(control).toBeDefined()
+      if (control) nudge(control)
+      expect(calls.rebuildRelief ?? 0).toBe(0)
     })
 
     it('rebuilds the rivers for every tunable but the colour', () => {

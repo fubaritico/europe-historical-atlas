@@ -148,6 +148,7 @@ function frameRelief(context: LayerContext, zoom: number): void {
   handles.edge?.setReliefScale(relief.scale.y)
   if (handles.rivers) handles.rivers.object.scale.setY(relief.scale.y)
   if (handles.borders) handles.borders.object.scale.setY(relief.scale.y)
+  if (handles.coastline) handles.coastline.object.scale.setY(relief.scale.y)
 }
 
 /**

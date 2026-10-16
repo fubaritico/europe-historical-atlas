@@ -1,9 +1,24 @@
-import { LineSegments } from 'three'
+import { LineSegments, ShaderLib } from 'three'
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 import { describe, expect, it, vi } from 'vitest'
 
+import { DEPTH_BIAS_UNIFORM } from './depthBias'
 import { buildSegmentPositions, createLineLayer } from './lineLayer'
 
-import type { UvSegment } from './lineLayer'
+import type { LineLayer, UvSegment } from './lineLayer'
+import type { WebGLProgramParametersWithUniforms } from 'three'
+
+/**
+ * Run a layer material's compile hook against the shader three would hand it.
+ * @param layer - the layer
+ * @param vertexShader - the source
+ * @returns the uniforms the hook left
+ */
+const compiledUniforms = (layer: LineLayer, vertexShader: string): Record<string, unknown> => {
+  const shader = { uniforms: {}, vertexShader } as unknown as WebGLProgramParametersWithUniforms
+  layer.object.material.onBeforeCompile(shader, undefined as never)
+  return shader.uniforms
+}
 
 /** Identity-ish projection: normalized (u, v) → world [u, 0, v]. */
 const project = (u: number, v: number): [number, number, number] => [u, 0, v]
@@ -35,6 +50,31 @@ describe('createLineLayer', () => {
   })
 
   describe('variants', () => {
+    it('pulls a thin line toward the camera by the requested bias', () => {
+      const layer = createLineLayer(ONE_SEGMENT, { project, color: '#000', depthBias: 0.01 })
+      expect(compiledUniforms(layer, ShaderLib.basic.vertexShader)[DEPTH_BIAS_UNIFORM]).toEqual({
+        value: 0.01,
+      })
+    })
+
+    it('pulls a fat line toward the camera by the requested bias', () => {
+      const layer = createLineLayer(ONE_SEGMENT, {
+        project,
+        color: '#000',
+        width: 2,
+        depthBias: 0.01,
+      })
+      const uniforms = compiledUniforms(layer, new LineMaterial().vertexShader)
+      expect(uniforms[DEPTH_BIAS_UNIFORM]).toEqual({ value: 0.01 })
+    })
+
+    it('leaves a line with no bias exactly as three compiles it', () => {
+      const layer = createLineLayer(ONE_SEGMENT, { project, color: '#000' })
+      expect(
+        compiledUniforms(layer, ShaderLib.basic.vertexShader)[DEPTH_BIAS_UNIFORM]
+      ).toBeUndefined()
+    })
+
     it('projects many segments (vertex count = 2 × segments)', () => {
       const segs: UvSegment[] = Array.from({ length: 5 }, (_, i) => [
         { u: i / 5, v: 0 },

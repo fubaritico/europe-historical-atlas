@@ -25,6 +25,7 @@ import {
   disposeRelief,
   maskOrFallback,
 } from './mapLayerContext'
+import { refreshReliefSource } from './mapSources'
 import { createCompassRose } from './scene/compassRose'
 import { buildBorderStrokes, createComposedLineLayer } from './scene/composedLineLayer'
 import { createFrameLabels } from './scene/frameLabels'
@@ -72,15 +73,19 @@ export function patternForPair(
 }
 
 /**
- * Rebuild the terrain mesh from the current relief grid.
+ * Re-derive the relief grid from the live smoothing and shore ramp, then rebuild the terrain mesh on it.
+ *
+ * The grid is re-derived here and not only at startup: a mesh rebuilt on the old grid is what left the
+ * smoothing slider doing nothing at all until 2026-10-16.
  * @param context - the layers and what they read
  * @returns nothing
  */
 export function rebuildRelief(context: LayerContext): void {
   const { scene, dev, sources, handles } = context
-  if (!sources.reliefSource) return
+  const reliefSource = refreshReliefSource(sources, dev.relief, dev.texture.seaLevel)
+  if (!reliefSource) return
   disposeRelief(scene, handles.relief)
-  const relief = createReliefMesh(sources.reliefSource, {
+  const relief = createReliefMesh(reliefSource, {
     worldWidth: WORLD_WIDTH,
     segments: RELIEF_SEGMENTS,
     plainsCeiling: dev.relief.plainsCeiling,
@@ -98,7 +103,7 @@ export function rebuildRelief(context: LayerContext): void {
   handles.edge = null
   if (!dev.frame.edgeShow) return
   handles.edge = createMapEdge({
-    source: sources.reliefSource,
+    source: reliefSource,
     worldWidth: WORLD_WIDTH,
     segments: RELIEF_SEGMENTS,
     curve: { plainsCeiling: dev.relief.plainsCeiling, peakTarget: dev.relief.peakTarget },
@@ -144,7 +149,8 @@ export function rebuildCoastline(context: LayerContext): void {
     sources.heightmap.meta.width * 2
   ).load()
   handles.coastline = createLineLayer(segments, {
-    project: projection.toWorld,
+    project: projection.shore,
+    depthBias: dev.coast.depthBias,
     color: dev.coast.color,
     opacity: dev.coast.opacity,
     jitter: dev.coast.jitter,

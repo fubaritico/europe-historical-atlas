@@ -290,7 +290,9 @@ function addReliefControls(gui: GUI, deps: DevPanelDeps): void {
  * The terrain look, in sub-folders mirroring the compositing order.
  *
  * Regenerating the texture is a full pixel pass, so tuning fires on release. The shoreline is shared:
- * the coastline and the sea-clipped rhumbs sit on the same iso-line, so moving it rebuilds them too.
+ * the coastline and the sea-clipped rhumbs sit on the same iso-line, so moving it rebuilds them too —
+ * the coastline through the relief it lies on, whose shore ramp reads the same line when the land mask
+ * failed (the grid is derived once per set of inputs, and the threshold is not one of them otherwise).
  * @param gui - where to add the folder
  * @param deps - what the panel binds to
  * @returns nothing
@@ -300,8 +302,8 @@ function addTextureFolder(gui: GUI, deps: DevPanelDeps): void {
   const folder = gui.addFolder('texture (parchment)')
   const onSeaLevelChange = (): void => {
     callbacks.rebuildTexture()
-    callbacks.rebuildCoastline()
     callbacks.rebuildRhumb()
+    callbacks.rebuildRelief() // retraces the coastline too, which lies on the relief
   }
   for (const group of TERRAIN_CONTROL_GROUPS) {
     const sub = folder.addFolder(group.title)
@@ -331,7 +333,10 @@ function addCoastlineFolder(gui: GUI, deps: DevPanelDeps): void {
         }
       : key === 'opacity' || key === 'opacityZoomIn'
         ? noEffect
-        : callbacks.rebuildCoastline
+        : // The flat lift only places the rhumbs now: the coastline lies on the relief.
+          key === 'yLift'
+          ? callbacks.rebuildRhumb
+          : callbacks.rebuildCoastline
   for (const key of COASTLINE_CONTROL_ORDER)
     addControl(folder, coast, key, COASTLINE_CONTROLS[key], effect(key), key === 'color')
   folder.close()

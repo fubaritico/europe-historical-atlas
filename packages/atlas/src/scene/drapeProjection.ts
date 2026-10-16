@@ -88,8 +88,10 @@ export interface DrapeProjectionDeps {
   source: () => DrapeSource | null
   /** The live height curve. */
   curve: () => HeightCurve
-  /** Lift applied to a flat projection — the shoreline sits just above a flat sea. */
+  /** Lift applied to a flat projection — the rhumbs sit just above a flat sea. */
   flatLift: () => number
+  /** Lift of the shoreline above the relief, before the exaggeration the coastline is scaled by. */
+  shoreLift: () => number
   /** Lift applied to a draped point before the exaggeration scale, so it clears the terrain. */
   readonly drapedLift: number
 }
@@ -116,6 +118,18 @@ export interface DrapeProjection {
    * @returns the world position
    */
   draped: (u: number, v: number) => WorldPoint
+  /**
+   * Place a shoreline point on the relief surface, raised by the shore lift.
+   *
+   * The coastline used to be laid flat just above the sea, and wherever the DEM still stands above the
+   * land mask's coast it ran inside the cliff and vanished (2026-10-16). On the surface it is never cut.
+   * What keeps the relief from hiding it is a depth bias toward the camera; the lift is only a look — a
+   * lifted line slides up the screen at an oblique angle, which is what the dev saw at 0.009.
+   * @param u - west→east, 0..1
+   * @param v - north→south, 0..1
+   * @returns the world position; at the lift above sea level before the relief has been derived
+   */
+  shore: (u: number, v: number) => WorldPoint
 }
 
 /**
@@ -141,5 +155,11 @@ export function createDrapeProjection(deps: DrapeProjectionDeps): DrapeProjectio
     if (!source) return [x, 0, z]
     return [x, meshSurfaceY(u, v, source, deps.segments, deps.curve()) + deps.drapedLift, z]
   }
-  return { toWorld, draped }
+  const shore = (u: number, v: number): WorldPoint => {
+    const [x, , z] = toWorld(u, v)
+    const source = deps.source()
+    const surface = source ? meshSurfaceY(u, v, source, deps.segments, deps.curve()) : 0
+    return [x, surface + deps.shoreLift(), z]
+  }
+  return { toWorld, draped, shore }
 }

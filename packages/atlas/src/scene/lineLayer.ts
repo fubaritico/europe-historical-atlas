@@ -5,6 +5,8 @@ import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js
 
 import { hashInts } from '@europe-historical-atlas/core/utils/hash'
 
+import { applyDepthBias } from './depthBias'
+
 import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
 
 /** Fixed-point scale for hashing normalized `[0, 1]` coordinates: two shared endpoints must quantize to
@@ -60,6 +62,13 @@ export interface LineLayerOptions {
    * behind a summit stays visible at an oblique angle, as on most strategy-game maps.
    */
   depthTest?: boolean
+  /**
+   * Pull the strokes this many world units toward the camera along their line of sight (default 0),
+   * so a line laid on the relief wins the depth test against the surface it sits on **without moving on
+   * screen** — lifting it straight up instead slides it up the screen at an oblique angle. See
+   * `depthBias.ts`.
+   */
+  depthBias?: number
   /**
    * Draw order within the transparent pass (default 0). Worth setting whenever `depthTest` is off, since
    * depth no longer arbitrates between overlays and only this does.
@@ -195,6 +204,7 @@ function createFatLineLayer(
     dashSize: options.dashSize ?? 0.02,
     gapSize: options.gapSize ?? 0.02,
   })
+  applyDepthBias(material, 'fat', options.depthBias ?? 0)
   const object = new LineSegments2(geometry, material)
   object.renderOrder = options.renderOrder ?? 0
   // Walks the buffer accumulating each instance's length into the `instanceDistance` attribute the dash
@@ -238,6 +248,7 @@ function createThinLineLayer(positions: Float32Array, options: LineLayerOptions)
     depthWrite: false, // let overlaid strokes blend into a soft band
     depthTest: options.depthTest ?? true,
   })
+  applyDepthBias(material, 'built-in', options.depthBias ?? 0)
   const object = new LineSegments(geometry, material)
   object.renderOrder = options.renderOrder ?? 0
 

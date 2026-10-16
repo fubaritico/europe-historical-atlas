@@ -18,6 +18,11 @@ export interface ReliefDevParams {
   exaggZoomIn: number
   /** Box-blur radius (grid cells); kills isolated DEM outliers. Keep low to stay crisp. */
   smoothing: number
+  /**
+   * Width (km) over which the relief comes down to sea level at the land mask's shore. Zero leaves the
+   * DEM's own coast, which stands hundreds of metres above the water along much of Europe.
+   */
+  shoreRamp: number
   /** Elevations up to this (metres) stay 1:1 — plains keep their relief. */
   plainsCeiling: number
   /** Apparent height (metres) the highest peaks ease toward (e.g. 4441 m → ~700 m). Lower = flatter. */
@@ -31,6 +36,7 @@ export const DEFAULT_RELIEF_PARAMS: ReliefDevParams = {
   exaggeration: 0.75,
   exaggZoomIn: 0.35,
   smoothing: 0,
+  shoreRamp: 12,
   plainsCeiling: 575,
   peakTarget: 1900,
   wireframe: false,
@@ -41,6 +47,7 @@ export const RELIEF_CONTROLS: ControlTable<ReliefDevParams> = {
   exaggeration: { kind: 'number', min: 0, max: 4, step: 0.05, label: 'exaggeration (zoom-out)' },
   exaggZoomIn: { kind: 'number', min: 0.1, max: 1, step: 0.05, label: 'exaggeration @ zoom-in' },
   smoothing: { kind: 'number', min: 0, max: 8, step: 1, label: 'smoothing (outliers)' },
+  shoreRamp: { kind: 'number', min: 0, max: 30, step: 1, label: 'shore ramp (km)' },
   plainsCeiling: { kind: 'number', min: 0, max: 1000, step: 25, label: 'plains ceiling (m)' },
   peakTarget: { kind: 'number', min: 200, max: 3000, step: 25, label: 'peak target (m)' },
   wireframe: { kind: 'boolean', label: 'wireframe' },
@@ -51,6 +58,7 @@ export const RELIEF_CONTROL_ORDER: (keyof ReliefDevParams)[] = [
   'exaggeration',
   'exaggZoomIn',
   'smoothing',
+  'shoreRamp',
   'plainsCeiling',
   'peakTarget',
   'wireframe',

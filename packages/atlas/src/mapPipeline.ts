@@ -345,7 +345,7 @@ async function startup(context: PipelineContext): Promise<void> {
   const { dev, sources, layers, ui } = context
   await loadTerrain(context)
   if (context.isDisposed() || !sources.heightmap) return
-  refreshReliefSource(sources, dev.relief.smoothing) // draping is correct from here on, mesh or no mesh
+  refreshReliefSource(sources, dev.relief, dev.texture.seaLevel) // draping is correct from here on, mesh or no mesh
   settleRivers(context) // when the rivers came first, they waited for the relief to drape on
   await pushSources(context)
   if (context.isDisposed()) return

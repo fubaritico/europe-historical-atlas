@@ -5,8 +5,7 @@
  * other: this holds the state and the few helpers every rebuild needs, and nothing that draws.
  */
 
-import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
-
+import { shorelineMask } from './mapSources'
 import { createDrapeProjection } from './scene/drapeProjection'
 
 import type { DevState } from './devState'
@@ -21,6 +20,7 @@ import type { MapEdge } from './scene/mapEdge'
 import type { MapTitle } from './scene/mapTitle'
 import type { PaperSheet } from './scene/paperSheet'
 import type { RiverLayer } from './scene/riverLayer'
+import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 import type { DataTexture, Mesh, MeshBasicMaterial, Object3D, PlaneGeometry, Scene } from 'three'
 
 /** World-space width of the map plane on X, which every other dimension follows from. */
@@ -149,21 +149,18 @@ export function createLayerProjection(dev: DevState, sources: MapSources): Drape
     source: () => sources.reliefSource,
     curve: () => ({ plainsCeiling: dev.relief.plainsCeiling, peakTarget: dev.relief.peakTarget }),
     flatLift: () => dev.coast.yLift,
+    shoreLift: () => dev.coast.shoreLift,
     drapedLift: RIVER_LIFT,
   })
 }
 
 /**
- * The land mask, or the documented degraded fallback when the asset failed.
- *
- * Thresholding elevation drowns land below sea level and dries out every lake above it — visibly wrong
- * in the Dutch polders — but a degraded map beats a blank canvas.
+ * The land mask, or the documented degraded fallback when the asset failed — see {@link shorelineMask}.
  * @param context - the layers and what they read
  * @returns a mask, always
  */
-export function maskOrFallback(context: LayerContext): ReturnType<typeof createElevationLandMask> {
-  const { sources, dev } = context
-  if (sources.landMask) return sources.landMask
-  if (!sources.heightmap) throw new Error('map layers: no elevation to threshold')
-  return createElevationLandMask(sources.heightmap, dev.texture.seaLevel)
+export function maskOrFallback(context: LayerContext): LandMask {
+  const mask = shorelineMask(context.sources, context.dev.texture.seaLevel)
+  if (!mask) throw new Error('map layers: no elevation to threshold')
+  return mask
 }

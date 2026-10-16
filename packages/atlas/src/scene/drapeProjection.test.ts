@@ -26,6 +26,7 @@ const deps = (over: Partial<DrapeProjectionDeps> = {}): DrapeProjectionDeps => (
   source: () => flat(0),
   curve: () => CURVE,
   flatLift: () => 0.01,
+  shoreLift: () => 0.002,
   drapedLift: 0.004,
   ...over,
 })
@@ -50,6 +51,43 @@ describe('drapeProjection', () => {
     it('drapes a point on the surface plus the clearance lift', () => {
       const [, y] = createDrapeProjection(deps({ source: () => flat(300) })).draped(0.5, 0.5)
       expect(y).toBeCloseTo(300 * WORLD_PER_METRE + 0.004)
+    })
+  })
+
+  describe('shore', () => {
+    it('lays a shoreline point on the relief surface, raised by the shore lift alone', () => {
+      // The coastline used to sit flat at the lift and ran inside every coast the DEM keeps high.
+      const [, y] = createDrapeProjection(deps({ source: () => flat(300) })).shore(0.5, 0.5)
+      expect(y).toBeCloseTo(300 * WORLD_PER_METRE + 0.002)
+    })
+
+    it('climbs a cliff the flat line would have run inside', () => {
+      const projection = createDrapeProjection(deps({ source: () => cliff(2000), segments: 2 }))
+      expect(projection.shore(0.5, 0.5)[1]).toBeGreaterThan(projection.toWorld(0.5, 0.5)[1])
+    })
+
+    it('shares its plan position with the flat projection', () => {
+      const projection = createDrapeProjection(deps({ source: () => flat(300) }))
+      const [x, , z] = projection.shore(0.25, 0.75)
+      const [fx, , fz] = projection.toWorld(0.25, 0.75)
+      expect([x, z]).toEqual([fx, fz])
+    })
+
+    it('reads the shore lift live, and ignores the flat one the rhumbs use', () => {
+      let lift = 0.002
+      let flatLift = 0.01
+      const projection = createDrapeProjection(
+        deps({ shoreLift: () => lift, flatLift: () => flatLift, source: () => flat(0) })
+      )
+      lift = 0.02
+      flatLift = 0.5
+      expect(projection.shore(0.5, 0.5)[1]).toBeCloseTo(0.02)
+    })
+
+    it('stands at the lift above sea level before the relief has been derived', () => {
+      expect(createDrapeProjection(deps({ source: () => null })).shore(0.5, 0.5)[1]).toBeCloseTo(
+        0.002
+      )
     })
   })
 
