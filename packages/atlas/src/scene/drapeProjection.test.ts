@@ -138,6 +138,17 @@ describe('drapeProjection', () => {
       expect(surface).toBeGreaterThan(0)
     })
 
+    it('reads the plane of the triangle the point is in, as the fills do, not a bilinear blend', () => {
+      // One cell, its south-east node alone raised: the north-west triangle (a, b, d) is flat at sea
+      // level, so a point in it is at zero — a bilinear blend would lift it by a sixteenth of the peak.
+      const corner: DrapeSource = {
+        meta: { width: 8, height: 8 },
+        sample: (u: number, v: number) => (u === 1 && v === 1 ? 300 : 0),
+      }
+      expect(meshSurfaceY(0.25, 0.25, corner, 1, CURVE)).toBe(0)
+      expect(meshSurfaceY(0.75, 0.75, corner, 1, CURVE)).toBeGreaterThan(0)
+    })
+
     it('lands exactly on a vertex where one exists', () => {
       // u = 0.5 with 2 segments is node 1, so no interpolation happens and the DEM value comes through.
       expect(meshSurfaceY(0.5, 0.5, cliff(500), 2, CURVE)).toBeCloseTo(500 * WORLD_PER_METRE)
@@ -161,6 +172,35 @@ describe('drapeProjection', () => {
       const after = projection.draped(0.5, 0.5)
       expect(projection.toWorld(0.5, 0.5)[1]).toBeCloseTo(0.5)
       expect(after[1]).toBeGreaterThan(before[1])
+    })
+  })
+
+  describe('split', () => {
+    const long = [
+      [
+        { u: 0.05, v: 0.1 },
+        { u: 0.95, v: 0.8 },
+      ],
+    ] as const
+
+    it('cuts a long segment on the mesh grid, so each piece lies in one triangle', () => {
+      // 4 segments over an 8×8 grid: a 4×4 mesh, and a diagonal segment across it crosses many lines.
+      const pieces = createDrapeProjection(deps()).split(long)
+      expect(pieces.length).toBeGreaterThan(8)
+      expect(pieces[0]?.[0]).toBe(long[0][0])
+      expect(pieces.at(-1)?.[1]).toBe(long[0][1])
+    })
+
+    it('reads the subdivision live, as the heights do', () => {
+      let segments = 4
+      const projection = createDrapeProjection(deps({ segments: () => segments }))
+      const coarse = projection.split(long).length
+      segments = 8
+      expect(projection.split(long).length).toBeGreaterThan(coarse)
+    })
+
+    it('leaves the segments whole while the elevation has not been derived', () => {
+      expect(createDrapeProjection(deps({ source: () => null })).split(long)).toEqual(long)
     })
   })
 

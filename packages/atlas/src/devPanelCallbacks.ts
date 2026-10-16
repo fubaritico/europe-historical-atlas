@@ -82,12 +82,7 @@ function rebuildCallbacks(
   const { layers, pipeline } = deps
   return {
     rebuildRelief: (): void => {
-      layers.rebuildRelief()
-      // Lines laid on the relief read their heights off its grid when they are built, so a new grid
-      // leaves them on the old surface — under it in a valley, floating where the shore came down.
-      layers.rebuildCoastline()
-      layers.rebuildRivers()
-      layers.rebuildBorders()
+      layers.rebuildSurface()
     },
     rebuildTexture: (): void => {
       void pipeline.rebuildTexture().catch((error: unknown) => {

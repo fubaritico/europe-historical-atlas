@@ -13,6 +13,7 @@ import {
   extendRiversToSea,
 } from '@europe-historical-atlas/core/data/riverSource'
 import { pairKey } from '@europe-historical-atlas/core/editor/atlasBorders'
+import { fillTriangles } from '@europe-historical-atlas/core/pipeline/fillTriangles'
 import { requireHeightmap } from '@europe-historical-atlas/core/pipeline/inlineCompute'
 import { composeSheetRgba } from '@europe-historical-atlas/core/pipeline/sheetCompose'
 import { terrainTextureSize } from '@europe-historical-atlas/core/pipeline/terrainCompose'
@@ -24,17 +25,19 @@ import {
   disposeHandle,
   disposeRelief,
   maskOrFallback,
+  paintsExactFills,
 } from './mapLayerContext'
 import { refreshReliefSource } from './mapSources'
 import { createCompassRose } from './scene/compassRose'
 import { buildBorderStrokes, createComposedLineLayer } from './scene/composedLineLayer'
+import { createFillLayer } from './scene/fillLayer'
 import { createFrameLabels } from './scene/frameLabels'
 import { createGraticuleFrame, labelLane } from './scene/graticuleFrame'
 import { createLineLayer } from './scene/lineLayer'
 import { createMapEdge } from './scene/mapEdge'
 import { MAP_TITLE, createMapTitle } from './scene/mapTitle'
 import { createPaperSheet } from './scene/paperSheet'
-import { createReliefMesh, meshWorldDepth } from './scene/reliefMesh'
+import { createReliefMesh, meshVertexGrid, meshWorldDepth } from './scene/reliefMesh'
 import { generateRhumbSegments } from './scene/rhumbNetwork'
 import { createRiverLayer } from './scene/riverLayer'
 import { svgToTexture } from './scene/svgTexture'
@@ -45,6 +48,7 @@ import type { LayerContext } from './mapLayerContext'
 import type { GraticuleFrameOptions } from './scene/graticuleFrame'
 import type { MapTitle } from './scene/mapTitle'
 import type { BorderPattern } from '@europe-historical-atlas/core/data/borderStyles'
+import type { Region } from '@europe-historical-atlas/core/data/regionSource'
 import type { DataTexture } from 'three'
 
 /**
@@ -123,14 +127,108 @@ export function rebuildRelief(context: LayerContext): void {
  * @returns nothing
  */
 export function setTexture(context: LayerContext, texture: DataTexture): void {
-  const { handles } = context
+  const { handles, dev } = context
   handles.texture?.dispose()
   handles.texture = texture
+  // The fills composite onto the texture, so they follow it — and the blend and strength they read are
+  // the texture folder's, retuned with it.
+  handles.fills?.setMap(texture)
+  handles.fills?.setLook(dev.texture.politicalMode, dev.texture.politicalStrength)
   const relief = handles.relief
   if (!relief) return
   relief.material.map = texture
   relief.material.color.set('#ffffff') // white base, so the map's own colours show unmodulated
   relief.material.needsUpdate = true
+}
+
+/**
+ * Name what a fill is waiting for, for the warning.
+ * @param relief - the relief mesh, if built
+ * @param texture - the baked texture, if hung
+ * @returns what is missing
+ */
+function missingForFills(relief: unknown, texture: unknown): string {
+  if (!relief) return 'the relief'
+  return texture ? 'the year' : 'the texture'
+}
+
+/**
+ * The fills of a year on a grid, cut once and kept until either changes.
+ * @param context - the layers, whose handles hold the last cut
+ * @param regions - the year's polities
+ * @param grid - the relief's subdivision
+ * @param grid.segX - cells across
+ * @param grid.segY - cells down
+ * @returns each polity's triangles
+ */
+function cutFills(
+  context: LayerContext,
+  regions: readonly Region[],
+  grid: { segX: number; segY: number }
+): Float32Array[] {
+  const last = context.handles.fillCut
+  if (last?.regions === regions && last.segX === grid.segX && last.segY === grid.segY)
+    return last.fills
+  const fills = fillTriangles(regions, grid)
+  context.handles.fillCut = { regions, segX: grid.segX, segY: grid.segY, fills }
+  return fills
+}
+
+/**
+ * Lay an authored year's polities on the relief as geometry, or clear them when the texture carries the
+ * colour (a payload year, or the panel's switch off).
+ *
+ * Built against the relief mesh on screen — its subdivision and its very vertex heights — so a new relief
+ * asks for new fills; and composited onto the texture on screen, which `setTexture` keeps current.
+ * @param context - the layers and what they read
+ * @returns nothing
+ */
+export function rebuildFills(context: LayerContext): void {
+  const { scene, dev, sources, handles } = context
+  disposeHandle(scene, handles.fills)
+  handles.fills = null
+  if (!paintsExactFills(dev, sources)) return
+  const relief = handles.relief
+  const texture = handles.texture
+  const regions = sources.regionSet?.regions
+  const tints = sources.regionTints
+  if (!relief || !texture || !regions || !tints || !sources.heightmap) {
+    // The bake has already dropped the tint for this year, so no fill means no colour at all: said, not
+    // swallowed (rules/error-handling.md).
+    console.warn(
+      `[atlas] exact fills asked for, but ${missingForFills(relief, texture)} is not in yet — the year shows uncoloured until the next rebuild.`
+    )
+    return
+  }
+  const { segX, segY } = meshVertexGrid(sources.heightmap.meta, dev.relief.segments)
+  const grid = { segX, segY }
+  const heights = relief.geometry.getAttribute('position')
+  handles.fills = createFillLayer({
+    fills: cutFills(context, regions, grid),
+    tints,
+    grid,
+    nodeY: (ix, iy) => heights.getY(iy * (segX + 1) + ix),
+    worldWidth: WORLD_WIDTH,
+    worldDepth: meshWorldDepth(sources.heightmap.meta, WORLD_WIDTH),
+    map: texture,
+    mode: dev.texture.politicalMode,
+    strength: dev.texture.politicalStrength,
+  })
+  handles.fills.object.scale.setY(relief.scale.y)
+  scene.add(handles.fills.object)
+}
+
+/**
+ * Rebuild the relief, then everything laid on it, in the one order that keeps them on its surface.
+ * @param context - the layers and what they read
+ * @returns nothing
+ */
+export function rebuildSurface(context: LayerContext): void {
+  rebuildRelief(context)
+  rebuildCoastline(context)
+  rebuildRivers(context)
+  rebuildBorders(context)
+  rebuildFills(context)
 }
 
 /**
@@ -212,6 +310,7 @@ export function rebuildRivers(context: LayerContext): void {
   )
   handles.rivers = createRiverLayer(connected, {
     project: projection.draped,
+    split: projection.split,
     depthBias: DRAPED_DEPTH_BIAS,
     color: dev.river.color,
     opacity: dev.river.opacity,
@@ -247,6 +346,7 @@ export function rebuildBorders(context: LayerContext): void {
   if (strokes.length === 0) return
   handles.borders = createComposedLineLayer(strokes, {
     project: projection.draped,
+    split: projection.split,
     depthBias: DRAPED_DEPTH_BIAS,
     depthTest: !dev.political.borderOnTop,
     renderOrderBase: BORDER_RENDER_ORDER,

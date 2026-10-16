@@ -17,6 +17,8 @@ function wired(): { callbacks: ReturnType<typeof createPanelCallbacks>; calls: s
     rebuildRelief: record('relief'),
     rebuildRivers: record('rivers'),
     rebuildBorders: record('borders'),
+    rebuildFills: record('fills'),
+    rebuildSurface: record('surface'),
     rebuildCoastline: record('coastline'),
   } as unknown as MapLayers
   const deps = {
@@ -30,10 +32,10 @@ function wired(): { callbacks: ReturnType<typeof createPanelCallbacks>; calls: s
 
 describe('createPanelCallbacks', () => {
   describe('happy path', () => {
-    it('relays the coastline, the rivers and the borders after the relief, on its new surface', () => {
+    it('rebuilds the relief with everything laid on it, in one call to the layers', () => {
       const { callbacks, calls } = wired()
       callbacks.rebuildRelief()
-      expect(calls).toEqual(['relief', 'coastline', 'rivers', 'borders'])
+      expect(calls).toEqual(['surface'])
     })
   })
 

@@ -1,16 +1,18 @@
 // @vitest-environment jsdom
-import { Scene, ShaderLib } from 'three'
+import { DataTexture, Scene, ShaderLib } from 'three'
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
+import * as fillModule from '@europe-historical-atlas/core/pipeline/fillTriangles'
 
 import { createDevState } from './devState'
 import { DRAPED_DEPTH_BIAS, createLayerProjection } from './mapLayerContext'
 import { createMapLayers } from './mapLayers'
 import { createMapSources, refreshReliefSource } from './mapSources'
 import { DEPTH_BIAS_UNIFORM } from './scene/depthBias'
+import { FILL_RENDER_ORDER } from './scene/fillLayer'
 
 import type { MapSources } from './mapSources'
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
@@ -65,6 +67,27 @@ const REGIONS = {
     { name: 'A', subjectTo: null },
     { name: 'B', subjectTo: null },
   ],
+} as unknown as RegionSet
+
+/** An authored year of one square polity in the middle of the map. */
+const AUTHORED = {
+  year: 1100,
+  regions: [
+    {
+      name: 'A',
+      subjectTo: null,
+      partOf: null,
+      rings: [
+        [
+          { u: 0.3, v: 0.3 },
+          { u: 0.7, v: 0.3 },
+          { u: 0.7, v: 0.7 },
+          { u: 0.3, v: 0.7 },
+        ],
+      ],
+    },
+  ],
+  authored: {},
 } as unknown as RegionSet
 
 /** A scene with layers over a fully loaded set of sources. */
@@ -295,6 +318,115 @@ describe('createMapLayers', () => {
         ;(stroke as LineSegments2).material.onBeforeCompile(shader, undefined as never)
         expect(shader.uniforms[DEPTH_BIAS_UNIFORM]).toEqual({ value: DRAPED_DEPTH_BIAS })
       }
+    })
+
+    it('cuts rivers and borders on the relief grid, so a long segment follows the surface', () => {
+      // One river segment across a third of the map: drawn as one chord it would float over every valley.
+      const { scene, sources, layers } = build()
+      sources.riverData = [
+        {
+          rank: 1,
+          kind: 'River',
+          name: null,
+          points: [
+            { u: 0.3, v: 0.4 },
+            { u: 0.6, v: 0.5 },
+          ],
+        },
+      ]
+      layers.rebuildRivers()
+      const river = scene.children[0]?.children[0] as LineSegments2
+      expect(river.geometry.getAttribute('instanceStart').count).toBeGreaterThan(1)
+      scene.clear()
+      layers.rebuildBorders()
+      const border = scene.children[0]?.children[0] as LineSegments2
+      // BORDERS holds one segment, across six tenths of the map.
+      expect(border.geometry.getAttribute('instanceStart').count).toBeGreaterThan(1)
+    })
+
+    it('lays an authored year on the relief as geometry, following the exaggeration and the texture', () => {
+      const { scene, sources, dev, layers } = build()
+      sources.regionSet = AUTHORED
+      sources.regionTints = [{ r: 200, g: 40, b: 10 }]
+      dev.relief.exaggeration = 2
+      dev.relief.exaggZoomIn = 1
+      layers.rebuildRelief()
+      layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))
+      layers.rebuildFills()
+      layers.frame(0)
+      const fill = scene.children.find((child) => child.renderOrder === 1)
+      expect(fill).toBeDefined()
+      expect(fill?.scale.y).toBeCloseTo(2)
+      const next = new DataTexture(new Uint8Array(16), 2, 2)
+      layers.setTexture(next)
+      expect(
+        (fill as unknown as { material: { uniforms: { map: { value: unknown } } } }).material
+          .uniforms.map.value
+      ).toBe(next)
+    })
+
+    it('replaces the fill on a second build instead of stacking one, and clears it when the switch goes off', () => {
+      const { scene, sources, dev, layers } = build()
+      sources.regionSet = AUTHORED
+      sources.regionTints = [{ r: 200, g: 40, b: 10 }]
+      layers.rebuildRelief()
+      layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))
+      layers.rebuildFills()
+      const first = scene.children.find((child) => child.renderOrder === FILL_RENDER_ORDER)
+      let freed = 0
+      ;(first as unknown as { geometry: BufferGeometry }).geometry.addEventListener(
+        'dispose',
+        () => {
+          freed += 1
+        }
+      )
+      layers.rebuildFills()
+      expect(
+        scene.children.filter((child) => child.renderOrder === FILL_RENDER_ORDER)
+      ).toHaveLength(1)
+      expect(freed).toBe(1)
+      dev.political.exactFills = false
+      layers.rebuildFills()
+      expect(scene.children.some((child) => child.renderOrder === FILL_RENDER_ORDER)).toBe(false)
+    })
+
+    it('cuts the fills once per year and grid, so a height-curve change only re-lays them', () => {
+      const { sources, dev, layers } = build()
+      sources.regionSet = AUTHORED
+      sources.regionTints = [{ r: 200, g: 40, b: 10 }]
+      layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))
+      layers.rebuildSurface()
+      const spy = vi.spyOn(fillModule, 'fillTriangles')
+      dev.relief.plainsCeiling += 100
+      layers.rebuildSurface()
+      expect(spy).not.toHaveBeenCalled()
+      dev.relief.segments = 4
+      layers.rebuildSurface()
+      expect(spy).toHaveBeenCalledTimes(1)
+    })
+
+    it('says so when an authored year cannot be filled yet, rather than leaving it uncoloured in silence', () => {
+      const { sources, layers } = build()
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      sources.regionSet = AUTHORED
+      sources.regionTints = [{ r: 200, g: 40, b: 10 }]
+      layers.rebuildRelief()
+      layers.rebuildFills() // no texture yet
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('the texture'))
+    })
+
+    it('lays no fill for a payload year, nor for an authored one with the switch off', () => {
+      const { scene, sources, dev, layers } = build()
+      sources.regionTints = [{ r: 200, g: 40, b: 10 }]
+      layers.rebuildRelief()
+      layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))
+      const count = scene.children.length
+      layers.rebuildFills() // REGIONS, a payload year
+      expect(scene.children.length).toBe(count)
+      sources.regionSet = AUTHORED
+      dev.political.exactFills = false
+      layers.rebuildFills()
+      expect(scene.children.length).toBe(count)
     })
 
     it('repaints the coastline without rebuilding it', () => {

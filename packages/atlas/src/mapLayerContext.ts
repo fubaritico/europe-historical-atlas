@@ -13,6 +13,7 @@ import type { MapSources } from './mapSources'
 import type { CompassRose } from './scene/compassRose'
 import type { ComposedLineLayer } from './scene/composedLineLayer'
 import type { DrapeProjection } from './scene/drapeProjection'
+import type { FillLayer } from './scene/fillLayer'
 import type { FrameLabels } from './scene/frameLabels'
 import type { GraticuleFrame } from './scene/graticuleFrame'
 import type { LineLayer } from './scene/lineLayer'
@@ -58,6 +59,13 @@ export interface LayerHandles {
   rivers: RiverLayer | null
   /** The political line work — frontier, casing and core — behind one handle like any other overlay. */
   borders: ComposedLineLayer | null
+  /** An authored year's polities as geometry on the relief, or `null` when the texture carries them. */
+  fills: FillLayer | null
+  /**
+   * The last fills cut, and what they were cut from: the cut depends only on the year and the grid, so a
+   * height-curve slider re-lays the same triangles instead of cutting them again (~170 ms on 1100).
+   */
+  fillCut: { regions: object; segX: number; segY: number; fills: Float32Array[] } | null
   /** The compass rose. */
   compass: CompassRose | null
   /** The vellum the map is printed on. */
@@ -143,6 +151,18 @@ export function createLayerProjection(dev: DevState, sources: MapSources): Drape
     flatLift: () => dev.coast.yLift,
     shoreLift: () => dev.coast.shoreLift,
   })
+}
+
+/**
+ * Whether the year on screen is painted as geometry rather than through the texture: an authored year,
+ * with the panel's switch on. The one place both the bake and the layers ask, so the texture never drops
+ * a tint the geometry does not then draw.
+ * @param dev - the live tunables
+ * @param sources - what has been loaded
+ * @returns `true` when the fills carry the colour
+ */
+export function paintsExactFills(dev: DevState, sources: MapSources): boolean {
+  return dev.political.exactFills && sources.regionSet?.authored !== undefined
 }
 
 /**

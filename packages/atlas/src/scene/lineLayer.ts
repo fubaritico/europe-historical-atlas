@@ -7,14 +7,14 @@ import { hashInts } from '@europe-historical-atlas/core/utils/hash'
 
 import { applyDepthBias } from './depthBias'
 
-import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
+import type { UvPair } from '@europe-historical-atlas/core/pipeline/gridDrape'
 
 /** Fixed-point scale for hashing normalized `[0, 1]` coordinates: two shared endpoints must quantize to
  * the same integer key so their jitter matches (welds); 1e5 ≈ 5 decimals is finer than the DEM grid. */
 const HASH_QUANTIZATION = 100000
 
 /** A line segment in normalized grid coordinates (two endpoints). */
-export type UvSegment = readonly [UvPoint, UvPoint]
+export type UvSegment = UvPair
 
 /**
  * Options for building a draped line layer.
@@ -28,6 +28,14 @@ export interface LineLayerOptions {
    * @returns the world position `[x, y, z]`
    */
   project: (u: number, v: number) => [number, number, number]
+  /**
+   * Cut the segments before projecting them (default: drawn as given). A layer draped on the relief
+   * passes `DrapeProjection.split`, so a long segment follows the surface instead of cutting a chord
+   * through it. Order and direction are kept, so a dash pattern runs on unbroken.
+   * @param segments - the segments, in normalized grid coordinates
+   * @returns the pieces to draw
+   */
+  split?: (segments: readonly UvSegment[]) => UvSegment[]
   /** Line colour. */
   color: string
   /**
@@ -55,11 +63,10 @@ export interface LineLayerOptions {
   width?: number
   /**
    * Depth-test the strokes against the rest of the scene (default `true`). Turn it **off** to draw the
-   * line over the terrain whatever the terrain's depth: the relief is a triangulated surface while draped
-   * points are placed by bilinear interpolation between the same vertices, and the two only agree on a
-   * quad's edges — on a ridge the triangle rises above the interpolation and eats the line, which shows
-   * up as short cuts in mountains and none on plains. The cost is honest: a line that should be hidden
-   * behind a summit stays visible at an oblique angle, as on most strategy-game maps.
+   * line over the terrain whatever the terrain's depth. A draped line cut by `split` lies on the relief's
+   * own triangles since 2026-10-16, so the depth bias alone keeps it visible; off is a look, the borders
+   * read over every summit. The cost is honest: a line that should be hidden behind a summit stays
+   * visible at an oblique angle, as on most strategy-game maps.
    */
   depthTest?: boolean
   /**
@@ -290,7 +297,7 @@ export function createLineLayer(
   options: LineLayerOptions
 ): LineLayer {
   const positions = buildSegmentPositions(
-    segments,
+    options.split ? options.split(segments) : segments,
     options.project,
     options.jitter ?? 0,
     Math.max(1, Math.round(options.strokes ?? 1))

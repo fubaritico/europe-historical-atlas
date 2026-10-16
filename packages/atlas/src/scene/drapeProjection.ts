@@ -1,6 +1,9 @@
+import { planeHeight, splitAtGrid } from '@europe-historical-atlas/core/pipeline/gridDrape'
+
 import { meshVertexGrid, meshWorldDepth, reliefWorldY } from './reliefMesh'
 
 import type { GridFrame, ReliefOptions } from './reliefMesh'
+import type { UvPair } from '@europe-historical-atlas/core/pipeline/gridDrape'
 
 /**
  * The slice of an elevation grid a draped projection reads.
@@ -33,8 +36,9 @@ export type WorldPoint = [number, number, number]
  * need not fall on the DEM's samples — at 512 segments against a 1280-wide grid its triangles cut
  * straight across some 17 km of terrain — so a point placed at its true DEM elevation can sit *below*
  * the drawn valley floor and be occluded by it. This evaluates the
- * curve on the mesh's own vertex grid and interpolates bilinearly between those nodes, which is the
- * very surface being drawn.
+ * curve on the mesh's own vertex grid and reads the plane of the triangle the point falls in — the very
+ * surface being drawn, and the height the fills are laid at (`fillLayer`). Bilinear between the four
+ * nodes, as it was until 2026-10-16, drifts off both triangles inside a cell.
  * @param u - west→east, 0..1
  * @param v - north→south, 0..1
  * @param source - the elevation grid the mesh was built from
@@ -52,17 +56,9 @@ export function meshSurfaceY(
   // Asked of the mesh rather than recomputed here: the vertex layout is the mesh's to decide, and a
   // second copy of that arithmetic is how an overlay keeps an old subdivision after the mesh changes.
   const { segX, segY } = meshVertexGrid(source.meta, segments)
-  const fx = Math.min(segX, Math.max(0, u * segX))
-  const fy = Math.min(segY, Math.max(0, v * segY))
-  const x0 = Math.min(segX - 1, Math.floor(fx))
-  const y0 = Math.min(segY - 1, Math.floor(fy))
-  const tx = fx - x0
-  const ty = fy - y0
   const nodeY = (col: number, row: number): number =>
     reliefWorldY(source.sample(col / segX, row / segY), curve)
-  const top = nodeY(x0, y0) * (1 - tx) + nodeY(x0 + 1, y0) * tx
-  const bottom = nodeY(x0, y0 + 1) * (1 - tx) + nodeY(x0 + 1, y0 + 1) * tx
-  return top * (1 - ty) + bottom * ty
+  return planeHeight(u, v, { segX, segY }, nodeY)
 }
 
 /**
@@ -132,6 +128,14 @@ export interface DrapeProjection {
    * @returns the world position; at the lift above sea level before the relief has been derived
    */
   shore: (u: number, v: number) => WorldPoint
+  /**
+   * Cut segments where they cross the relief's cell edges and diagonals, so that each piece, draped at
+   * its two ends, lies on the surface along its whole length — a chord between two far anchors floats
+   * over a valley and slides off the fill at an angle. See `core/pipeline/gridDrape`.
+   * @param segments - the segments, in normalized grid coordinates
+   * @returns the pieces, in order; unchanged before the elevation has loaded
+   */
+  split: (segments: readonly UvPair[]) => UvPair[]
 }
 
 /**
@@ -163,5 +167,12 @@ export function createDrapeProjection(deps: DrapeProjectionDeps): DrapeProjectio
     const surface = source ? meshSurfaceY(u, v, source, deps.segments(), deps.curve()) : 0
     return [x, surface + deps.shoreLift(), z]
   }
-  return { toWorld, draped, shore }
+  const split = (segments: readonly UvPair[]): UvPair[] => {
+    const source = deps.source()
+    // Before the elevation, `draped` lays everything flat at zero: there is no surface to follow yet.
+    if (!source) return [...segments]
+    // The grid `meshSurfaceY` reads its heights on, so every cut falls where its plane changes.
+    return splitAtGrid(segments, meshVertexGrid(source.meta, deps.segments()))
+  }
+  return { toWorld, draped, shore, split }
 }

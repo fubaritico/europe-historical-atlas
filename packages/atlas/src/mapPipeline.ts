@@ -32,6 +32,7 @@ import { createLatestOnly } from '@europe-historical-atlas/core/utils/latestOnly
 
 import { COMPUTE_PHASE_LABELS } from './computeLabels'
 import { politicalPalette } from './devParams'
+import { paintsExactFills } from './mapLayerContext'
 import { refreshReliefSource } from './mapSources'
 import { wrapTerrainTexture } from './scene/terrainTexture'
 import { settleYearBorders } from './yearBorders'
@@ -206,7 +207,12 @@ async function rebuildTexture(
 ): Promise<void> {
   if (!context.sources.heightmap) return
   const isCurrent = context.bakeGate.begin()
-  const baked = await context.box.compute.bakeTerrain(context.dev.texture, onProgress)
+  // When the fills carry an authored year's colour, the texture is the bare terrain they composite onto:
+  // tinted twice, the colour would show the grid's staircase under the exact one.
+  const options = paintsExactFills(context.dev, context.sources)
+    ? { ...context.dev.texture, politicalStrength: 0 }
+    : context.dev.texture
+  const baked = await context.box.compute.bakeTerrain(options, onProgress)
   if (context.isDisposed() || !isCurrent()) return
   context.layers.setTexture(wrapTerrainTexture(baked.rgba, baked.width, baked.height))
 }
@@ -244,6 +250,7 @@ async function rebuildPolitical(context: PipelineContext): Promise<void> {
     // The year and its lines change together: a redraw between the two would read one year's pairs
     // against the other's polities, or one kind of year's patterns against the other kind's lines.
     sources.regionSet = loaded
+    sources.regionTints = result.tints
     settleYearBorders(sources, loaded, result.borders)
 
     await rebuildTexture(
@@ -252,6 +259,7 @@ async function rebuildPolitical(context: PipelineContext): Promise<void> {
     )
     if (context.isDisposed() || !isCurrent()) return
 
+    layers.rebuildFills()
     layers.rebuildBorders()
     ui.progress.report(1)
   } catch (error: unknown) {

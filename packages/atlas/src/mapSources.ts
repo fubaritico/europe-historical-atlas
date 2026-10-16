@@ -20,6 +20,7 @@ import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionRaster'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { River } from '@europe-historical-atlas/core/data/riverSource'
+import type { RgbColor } from '@europe-historical-atlas/core/utils/color'
 
 /** Everything loaded, and everything derived from it. */
 export interface MapSources {
@@ -41,6 +42,8 @@ export interface MapSources {
   reliefInputs: ReliefInputs | null
   /** The polities of the year on screen, or `null` before one has been chosen. */
   regionSet: RegionSet | null
+  /** Each polity's tint, in `regionSet` order, as the compute settled them; `null` before a year. */
+  regionTints: RgbColor[] | null
   /** The river centrelines, empty until they land. */
   riverData: River[]
   /**
@@ -68,6 +71,7 @@ export function createMapSources(): MapSources {
     reliefSource: null,
     reliefInputs: null,
     regionSet: null,
+    regionTints: null,
     riverData: [],
     derivedBorders: null,
     borderPatterns: null,

@@ -75,6 +75,22 @@ describe('createLineLayer', () => {
       ).toBeUndefined()
     })
 
+    it('draws the pieces its split cuts the segments into, in their order', () => {
+      const mid = { u: 0.5, v: 0.5 }
+      const split = vi.fn((segments: readonly UvSegment[]): UvSegment[] =>
+        segments.flatMap(([a, b]): UvSegment[] => [
+          [a, mid],
+          [mid, b],
+        ])
+      )
+      const layer = createLineLayer(ONE_SEGMENT, { project, color: '#000', split })
+      expect(split).toHaveBeenCalledWith(ONE_SEGMENT)
+      const pos = layer.object.geometry.getAttribute('position')
+      expect(pos.count).toBe(4)
+      expect([pos.getX(1), pos.getZ(1), pos.getX(2), pos.getZ(2)]).toEqual([0.5, 0.5, 0.5, 0.5])
+      layer.dispose()
+    })
+
     it('projects many segments (vertex count = 2 × segments)', () => {
       const segs: UvSegment[] = Array.from({ length: 5 }, (_, i) => [
         { u: i / 5, v: 0 },

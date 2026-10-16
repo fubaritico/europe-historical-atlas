@@ -76,6 +76,7 @@ function fakeLayers(): MapLayers {
     'rebuildRhumb',
     'rebuildRivers',
     'rebuildBorders',
+    'rebuildFills',
     'rebuildRose',
     'rebuildFrame',
     'setWireframe',
@@ -167,6 +168,11 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
+// Stage one bakes the bare terrain; the year's bake is compared with it. Tinted twice, the colour
+// would show the grid's staircase under the exact fill.
+const pixels = (call: unknown[] | undefined): Uint8Array =>
+  (call?.[0] as { image: { data: Uint8Array } }).image.data
+
 describe('createMapPipeline', () => {
   describe('happy path', () => {
     it('brings the terrain up before the countries', async () => {
@@ -233,6 +239,27 @@ describe('createMapPipeline', () => {
       await pipeline.start()
       expect(deps.sources.derivedBorders?.between.map((group) => group.pair)).toEqual([[0, 0]])
       expect(deps.sources.borderPatterns?.get('0:0')).toBe('solid')
+    })
+
+    it('bakes an authored year bare when the fills carry its colour, tinted when they do not', async () => {
+      // A finer grid than the suite's default, so the authored polities cover cells and a tint shows.
+      const exact = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
+      })
+      exact.dev.political.rasterScale = 4
+      await exact.pipeline.start()
+      const exactCalls = asMock(exact.deps.layers.setTexture).mock.calls
+      expect(pixels(exactCalls.at(-1))).toEqual(pixels(exactCalls[0]))
+      expect(asMock(exact.deps.layers.rebuildFills)).toHaveBeenCalled()
+
+      const grid = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
+      })
+      grid.dev.political.exactFills = false
+      grid.dev.political.rasterScale = 4
+      await grid.pipeline.start()
+      const gridCalls = asMock(grid.deps.layers.setTexture).mock.calls
+      expect(pixels(gridCalls.at(-1))).not.toEqual(pixels(gridCalls[0]))
     })
 
     it('leaves an authored year’s exact lines when asked to re-trace, and says so', async () => {

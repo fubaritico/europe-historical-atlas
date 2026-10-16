@@ -15,11 +15,13 @@ import { lerp } from '@europe-historical-atlas/core/utils/math'
 import {
   rebuildBorders,
   rebuildCoastline,
+  rebuildFills,
   rebuildFrame,
   rebuildRelief,
   rebuildRhumb,
   rebuildRivers,
   rebuildRose,
+  rebuildSurface,
   setTexture,
 } from './mapLayerBuilders'
 import { createLayerProjection, disposeHandle, disposeRelief } from './mapLayerContext'
@@ -64,6 +66,20 @@ export interface MapLayers {
    * @returns nothing
    */
   rebuildBorders: () => void
+  /**
+   * Lay an authored year's polities on the relief as geometry, or clear them when the texture carries the
+   * colour. Needed after a new year, a new relief or the panel's switch.
+   * @returns nothing
+   */
+  rebuildFills: () => void
+  /**
+   * Rebuild the relief, then everything laid on it — the coastline, the rivers, the borders and the fills.
+   * They read their heights off the relief's grid when they are built, so a new grid leaves them on the
+   * old surface: under it in a valley, floating where the shore came down. One method, so the order lives
+   * beside the layers rather than in each caller.
+   * @returns nothing
+   */
+  rebuildSurface: () => void
   /**
    * Rebuild the compass rose, whose colours and labels are baked into its SVG.
    * @returns nothing
@@ -149,6 +165,7 @@ function frameRelief(context: LayerContext, zoom: number): void {
   if (handles.rivers) handles.rivers.object.scale.setY(relief.scale.y)
   if (handles.borders) handles.borders.object.scale.setY(relief.scale.y)
   if (handles.coastline) handles.coastline.object.scale.setY(relief.scale.y)
+  if (handles.fills) handles.fills.object.scale.setY(relief.scale.y)
 }
 
 /**
@@ -195,6 +212,8 @@ function layerRebuilders(
   | 'rebuildRhumb'
   | 'rebuildRivers'
   | 'rebuildBorders'
+  | 'rebuildFills'
+  | 'rebuildSurface'
   | 'rebuildRose'
   | 'rebuildFrame'
 > {
@@ -213,6 +232,12 @@ function layerRebuilders(
     },
     rebuildRivers(): void {
       rebuildRivers(context)
+    },
+    rebuildFills(): void {
+      rebuildFills(context)
+    },
+    rebuildSurface(): void {
+      rebuildSurface(context)
     },
     rebuildBorders(): void {
       rebuildBorders(context)
@@ -287,6 +312,7 @@ function layerLifecycle(
       disposeHandle(scene, handles.rhumb)
       disposeHandle(scene, handles.rivers)
       disposeHandle(scene, handles.borders)
+      disposeHandle(scene, handles.fills)
       disposeHandle(scene, handles.compass)
       disposeHandle(scene, handles.sheet)
       disposeHandle(scene, handles.frame)
@@ -315,6 +341,8 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
       rhumb: null,
       rivers: null,
       borders: null,
+      fills: null,
+      fillCut: null,
       compass: null,
       sheet: null,
       frame: null,

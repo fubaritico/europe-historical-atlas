@@ -20,6 +20,12 @@ export interface PoliticalDevParams {
   /** Draw the border lines on top of the tinted areas. */
   showBorders: boolean
   /**
+   * Paint an authored year's polities as geometry cut from their outlines, so the colour meets the border
+   * line at any zoom (2026-10-16); off, the colour goes through the grid and the texture as before. A
+   * per-century payload year always takes the grid.
+   */
+  exactFills: boolean
+  /**
    * How fine the political grid is, as a multiple of the DEM.
    *
    * This is the resolution of the staircase, and the only lever that flattens it without a trade-off:
@@ -133,6 +139,7 @@ export function politicalPalette(params: PoliticalDevParams): [string, ...string
 export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   year: 1100,
   showBorders: true,
+  exactFills: true,
   // 4× the DEM: 1.9 km cells against the DEM's own 7.6 km, on a 5120×4656 grid of 23.8 million cells.
   // It was held at 2× only because it blocked the main thread for 825 ms; the compute runs in a worker
   // now, so the staircase — which is a *resolution* problem and nothing else — gets the one fix that has
@@ -192,6 +199,7 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
 export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
   year: { kind: 'number', min: 100, max: 2000, step: 100, label: 'year (CE)' },
   showBorders: { kind: 'boolean', label: 'draw borders' },
+  exactFills: { kind: 'boolean', label: 'exact fills (authored year)' },
   rasterScale: { kind: 'number', min: 1, max: 4, step: 1, label: 'raster scale (× DEM)' },
   borderSmoothing: { kind: 'number', min: 0, max: 4, step: 1, label: 'border smoothing' },
   borderOnTop: { kind: 'boolean', label: 'borders over relief' },
@@ -252,7 +260,10 @@ export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
  * rather than by which module reads the value.
  */
 export const POLITICAL_CONTROL_GROUPS: ControlGroup<PoliticalDevParams>[] = [
-  { title: '1 \u00b7 what is shown', keys: ['year', 'snapToCoast', 'colorBySuzerain'] },
+  {
+    title: '1 \u00b7 what is shown',
+    keys: ['year', 'snapToCoast', 'colorBySuzerain', 'exactFills'],
+  },
   {
     title: '2 \u00b7 border line',
     keys: [
@@ -301,6 +312,7 @@ export const POLITICAL_CONTROL_ORDER: (keyof PoliticalDevParams)[] = [
   'year',
   'snapToCoast',
   'colorBySuzerain',
+  'exactFills',
   'showBorders',
   'rasterScale',
   'borderSmoothing',

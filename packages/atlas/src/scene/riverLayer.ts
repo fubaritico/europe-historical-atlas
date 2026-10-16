@@ -10,7 +10,7 @@ import {
 
 import { createLineLayer } from './lineLayer'
 
-import type { LineLayer, UvSegment } from './lineLayer'
+import type { LineLayer, LineLayerOptions, UvSegment } from './lineLayer'
 import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
 import type { River } from '@europe-historical-atlas/core/data/riverSource'
 
@@ -25,6 +25,8 @@ export interface RiverLayerOptions {
    * on to each per-rank line layer.
    */
   project: (u: number, v: number) => [number, number, number]
+  /** Cut the segments so they follow the relief (`lineLayer`'s `split`). */
+  split?: LineLayerOptions['split']
   /** How far to pull the strokes toward the camera so the relief does not hide them (`lineLayer`). */
   depthBias?: number
   /** Line colour. */
@@ -179,6 +181,7 @@ export function createRiverLayer(rivers: readonly River[], options: RiverLayerOp
       jitter: options.jitter,
       width: rankWidth(rank, options),
       ...(options.depthBias === undefined ? {} : { depthBias: options.depthBias }),
+      ...(options.split === undefined ? {} : { split: options.split }),
     })
     byRank.set(rank, layer)
     object.add(layer.object)
