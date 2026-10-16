@@ -11,6 +11,7 @@ import {
   patternStrokes,
   polylinesToSegments,
   ringNeighbours,
+  tribeStrokes,
 } from './composedLineLayer'
 
 import type { BorderStrokeStyle, ComposedLineLayer, ComposedStroke } from './composedLineLayer'
@@ -55,7 +56,10 @@ const STYLE: BorderStrokeStyle = {
 const project = (u: number, v: number): [number, number, number] => [u, 0, v]
 
 /** The live material property named on each pass — what the zoom link actually drives. */
-function liveValues(layer: ComposedLineLayer, property: 'linewidth' | 'opacity'): number[] {
+function liveValues(
+  layer: ComposedLineLayer,
+  property: 'linewidth' | 'opacity' | 'dashScale'
+): number[] {
   return layer.object.children.map((child: object) => {
     // Fat lines carry a LineMaterial; reading it back is the only way to prove the setter reached it.
     const { material } = child as unknown as { material: Record<string, number> }
@@ -209,6 +213,52 @@ describe('composedLineLayer', () => {
     // L4: no async work and no external resource — nothing else can fail unexpectedly here.
   })
 
+  describe('tribeStrokes', () => {
+    const ring = [
+      { u: 0.1, v: 0.1 },
+      { u: 0.2, v: 0.1 },
+      { u: 0.2, v: 0.2 },
+      { u: 0.1, v: 0.1 },
+    ]
+
+    it('strokes each tribe dashed in its colour, at a border edge’s weight', () => {
+      const [stroke, ...rest] = tribeStrokes([{ colour: '#41580b', rings: [ring] }], STYLE)
+      expect(rest).toEqual([])
+      expect(stroke).toMatchObject({
+        color: '#41580b',
+        width: STYLE.edgeWidth,
+        opacity: STYLE.opacity,
+        dashed: true,
+        role: 'pattern',
+      })
+      expect(stroke?.segments).toHaveLength(3)
+    })
+
+    it('draws two tribes of one colour as one pass, and two colours as two', () => {
+      const same = tribeStrokes(
+        [
+          { colour: '#41580b', rings: [ring] },
+          { colour: '#41580b', rings: [ring] },
+        ],
+        STYLE
+      )
+      expect(same).toHaveLength(1)
+      expect(same[0]?.segments).toHaveLength(6)
+      const two = tribeStrokes(
+        [
+          { colour: '#41580b', rings: [ring] },
+          { colour: '#aa0000', rings: [ring] },
+        ],
+        STYLE
+      )
+      expect(two.map((stroke) => stroke.color)).toEqual(['#41580b', '#aa0000'])
+    })
+
+    it('has no pass for no tribe', () => {
+      expect(tribeStrokes([], STYLE)).toEqual([])
+    })
+  })
+
   describe('zoom-linked styling', () => {
     it('scales every pass from the width it was built with', () => {
       const layer = createComposedLineLayer(buildBorderStrokes(borders(1, 1), STYLE), { project })
@@ -230,6 +280,16 @@ describe('composedLineLayer', () => {
       )
       layer.setWidthScale(1, 0.5)
       expect(liveValues(layer, 'linewidth')).toEqual([STYLE.edgeWidth * 0.5])
+      layer.dispose()
+    })
+
+    it('scales the dash pattern of every pass alike', () => {
+      const layer = createComposedLineLayer(
+        buildBorderStrokes(borders(1, 1), STYLE, () => 'dashed'),
+        { project }
+      )
+      layer.setDashScale(320)
+      expect(liveValues(layer, 'dashScale')).toEqual([320, 320])
       layer.dispose()
     })
 

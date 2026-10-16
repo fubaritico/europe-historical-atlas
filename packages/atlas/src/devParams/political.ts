@@ -68,11 +68,11 @@ export interface PoliticalDevParams {
   /** Frontier stroke width in CSS pixels. */
   frontierWidth: number
   /**
-   * Dash length in world units for the borders `data/borderStyles` marks as broken — a personal union is
+   * Dash length in screen pixels for the borders `data/borderStyles` marks as broken — a personal union is
    * a border the map should admit is a fiction.
    */
   borderDashSize: number
-  /** Gap length in world units for those same broken borders. */
+  /** Gap length in screen pixels for those same broken borders. */
   borderDashGap: number
   /** Half the distance between the two runs of a doubled border, in normalized grid units. */
   borderDoubleGap: number
@@ -172,11 +172,11 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   // Thicker than a negotiated border: it is the edge of what the map knows, and reads as an outer limit
   // rather than as a line between two named things.
   frontierWidth: 2.4,
-  // World units: the map plane is 12 across, so 0.03 is roughly a 30 km dash — long enough to read as a
-  // deliberate break rather than a dotted line at any zoom the camera allows.
-  // Tight enough to read as one broken line rather than as a row of marks.
-  borderDashSize: 0.018,
-  borderDashGap: 0.009,
+  // Screen pixels, the same size at every zoom: in world units (0.018, some 16 km) the dashes grew as the
+  // camera came in, *« trop allongés »* (the dev, 2026-10-16). Six and three times the core's width, as
+  // the Cartographer dashes a border (`dashOf` in its painter).
+  borderDashSize: 8,
+  borderDashGap: 4,
   // Normalized grid units: about two DEM cells apart, which separates without reading as two borders.
   borderDoubleGap: 0.0016,
   borderWidthZoomOut: 0.3,
@@ -218,8 +218,8 @@ export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
   frontierColor: { kind: 'hexColor', label: 'frontier colour' },
   frontierOpacity: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'frontier opacity' },
   frontierWidth: { kind: 'number', min: 0.5, max: 5, step: 0.05, label: 'frontier width (px)' },
-  borderDashSize: { kind: 'number', min: 0.005, max: 0.2, step: 0.005, label: 'dash length' },
-  borderDashGap: { kind: 'number', min: 0.005, max: 0.2, step: 0.005, label: 'dash gap' },
+  borderDashSize: { kind: 'number', min: 1, max: 40, step: 0.5, label: 'dash length (px)' },
+  borderDashGap: { kind: 'number', min: 1, max: 40, step: 0.5, label: 'dash gap (px)' },
   borderDoubleGap: {
     kind: 'number',
     min: 0.0002,

@@ -29,7 +29,11 @@ import {
 } from './mapLayerContext'
 import { refreshReliefSource } from './mapSources'
 import { createCompassRose } from './scene/compassRose'
-import { buildBorderStrokes, createComposedLineLayer } from './scene/composedLineLayer'
+import {
+  buildBorderStrokes,
+  createComposedLineLayer,
+  tribeStrokes,
+} from './scene/composedLineLayer'
 import { createFillLayer } from './scene/fillLayer'
 import { createFrameLabels } from './scene/frameLabels'
 import { createGraticuleFrame, labelLane } from './scene/graticuleFrame'
@@ -340,9 +344,11 @@ export function rebuildBorders(context: LayerContext): void {
   disposeHandle(scene, handles.borders)
   handles.borders = null
   if (!sources.derivedBorders || !dev.political.showBorders) return
-  const strokes = buildBorderStrokes(sources.derivedBorders, borderStrokeStyle(dev), (pair) =>
-    patternForPair(context, pair)
-  )
+  const style = borderStrokeStyle(dev)
+  const strokes = [
+    ...buildBorderStrokes(sources.derivedBorders, style, (pair) => patternForPair(context, pair)),
+    ...tribeStrokes(sources.tribeOutlines, style),
+  ]
   if (strokes.length === 0) return
   handles.borders = createComposedLineLayer(strokes, {
     project: projection.draped,

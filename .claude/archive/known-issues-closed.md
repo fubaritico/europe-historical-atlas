@@ -258,3 +258,7 @@ Entries closed and moved out of `known-issues.md`. Kept for the lessons they car
   production is when a corrupt asset most deserves a message.
   **Still open from chapter 07**: nothing validates the compass SVG; the contribution tooling (chapter 06) will need the same readers pointed at hand-imported files, which is the case the chapter says
   justifies revisiting the schema-library question.
+- **Une tribu n'a pas de remplissage dans le Cartographe, mais l'atlas la remplit encore** (15/10) — **fermé le
+  16/10** : l'atlas lit les tribus comme le Cartographe (`exactBordersOf` écarte leurs frontières et rend leurs
+  contours, `settleYearBorders` retire leur teinte, `tribeStrokes` les trace en tirets dans leur couleur). Reste
+  le rendu par grille du panneau, qui les teint encore (`known-issues-atlas.md`).

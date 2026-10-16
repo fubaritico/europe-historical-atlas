@@ -108,6 +108,28 @@ describe('exactBordersOf', () => {
       expect(patterns.get('0:0')).toBe('dashed')
     })
 
+    it('leaves out a tribe’s borders and hands back its rings closed, to be stroked dashed', () => {
+      const doc = sideBySide()
+      const hre = doc.polities.find((each) => each.id === 'hre')
+      if (hre) hre.rank = 'tribe'
+
+      const { borders, tribeOutlines } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+
+      expect(borders.between).toEqual([])
+      expect(tribeOutlines).toEqual([
+        {
+          polity: 'hre',
+          rings: [[uv([10, 10]), uv([20, 10]), uv([20, 0]), uv([10, 0]), uv([10, 10])]],
+        },
+      ])
+    })
+
+    it('has no tribe outlines in a year without tribes', () => {
+      expect(
+        exactBordersOf(authored(sideBySide()), bbox, uniformMask(false)).tribeOutlines
+      ).toEqual([])
+    })
+
     it('dresses a stretch in its run override', () => {
       const doc = sideBySide()
       doc.runs.push({ run: [1, 2], hand: 'double', source: null, note: null })
@@ -242,6 +264,7 @@ describe('exactBordersOf', () => {
       expect(exactBordersOf(authored(doc), bbox, uniformMask(true))).toEqual({
         borders: { between: [], frontier: [] },
         patterns: new Map(),
+        tribeOutlines: [],
       })
     })
 

@@ -204,6 +204,20 @@ describe('createLineLayer', () => {
       thin.dispose()
     })
 
+    it('scales the dash pattern on a fat layer and ignores it on a thin one', () => {
+      // Pixels per world unit, set every frame, is what keeps a dash the same size on screen.
+      const fat = createLineLayer(ONE_SEGMENT, { project, color: '#000', width: 2, dashed: true })
+      fat.setDashScale(250)
+      expect((fat.object.material as LineMaterial).dashScale).toBe(250)
+      fat.dispose()
+
+      const thin = createLineLayer(ONE_SEGMENT, { project, color: '#000' })
+      expect(() => {
+        thin.setDashScale(250)
+      }).not.toThrow()
+      thin.dispose()
+    })
+
     it('passes the viewport to a fat layer and ignores it on a thin one', () => {
       const fat = createLineLayer(ONE_SEGMENT, { project, color: '#000', width: 2 })
       fat.setResolution(1280, 720)

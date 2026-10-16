@@ -250,8 +250,7 @@ async function rebuildPolitical(context: PipelineContext): Promise<void> {
     // The year and its lines change together: a redraw between the two would read one year's pairs
     // against the other's polities, or one kind of year's patterns against the other kind's lines.
     sources.regionSet = loaded
-    sources.regionTints = result.tints
-    settleYearBorders(sources, loaded, result.borders)
+    settleYearBorders(sources, loaded, result, politicalPalette(dev.political))
 
     await rebuildTexture(
       context,

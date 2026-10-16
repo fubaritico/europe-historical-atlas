@@ -8,6 +8,8 @@
 
 import { Timer } from 'three'
 
+import { pixelsPerWorldUnit } from './scene/screenScale'
+
 import type { MapLayers } from './mapLayers'
 import type { Viewport } from './viewport'
 
@@ -33,7 +35,15 @@ export function startFrameLoop(view: Viewport, layers: MapLayers, stats: FrameSt
   const tick = (): void => {
     timer.update()
     view.controls.update(timer.getDelta())
-    layers.frame(view.controls.zoom)
+    const { camera, controls } = view
+    layers.frame(
+      controls.zoom,
+      pixelsPerWorldUnit(
+        camera.position.distanceTo(controls.target),
+        camera.fov,
+        window.innerHeight
+      )
+    )
     view.frame()
     view.render()
     stats.update()

@@ -249,3 +249,7 @@ target.z)` would be coherent with the navigation that already exists.
   one lord is drawn as heavy as a sovereign one), a **dotted** hand (drawn dashed — no dot pattern yet), and
   an authored style on a **frontier** against unclaimed land (drawn in the frontier stroke, warned once per
   derivation). **Trigger**: the border-style session the dev announced on 2026-10-13. **Severity: worth knowing.**
+- **With `exact fills` off, a tribe is still filled** (2026-10-16, review ARCH-101). Tribes lose their tint in
+  `sources.regionTints`, which only the exact fill layer reads; the grid path kept in the dev panel for
+  comparison bakes the compute's own tints. Remedy if that path ever ships again: a null tint per tribe in
+  the compute request, keeping the regions' indices aligned. **Severity: cosmetic** — a comparison switch.

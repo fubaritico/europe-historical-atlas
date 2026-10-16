@@ -91,9 +91,12 @@ export interface LineLayerOptions {
    * that the pattern does not restart between runs, which reads as continuous rather than wrong.
    */
   dashed?: boolean
-  /** Dash length in world units (default 0.02). Only read when {@link dashed} is set. */
+  /**
+   * Dash length (default 0.02), in world units until `setDashScale` says how many of its units one world
+   * unit is — pixels, for the borders. Only read when {@link dashed} is set.
+   */
   dashSize?: number
-  /** Gap length in world units (default 0.02). Only read when {@link dashed} is set. */
+  /** Gap length (default 0.02), in the same units as {@link dashSize}. Only read when {@link dashed} is set. */
   gapSize?: number
 }
 
@@ -128,6 +131,14 @@ export interface LineLayer {
    * @returns nothing
    */
   setWidth(value: number): void
+  /**
+   * Scale the dash pattern: line length times this is compared with the dash and gap sizes. Pass the
+   * screen pixels per world unit to read those sizes as pixels. A no-op on the thin pipeline, which
+   * does not dash.
+   * @param scale - the factor
+   * @returns nothing
+   */
+  setDashScale(scale: number): void
   /**
    * Tell a fat-line layer the viewport size, which its shader needs to convert a pixel width into clip
    * space. A no-op for thin lines. Call on every resize or the stroke width distorts.
@@ -229,6 +240,9 @@ function createFatLineLayer(
     setWidth(value: number): void {
       material.linewidth = value
     },
+    setDashScale(scale: number): void {
+      material.dashScale = scale
+    },
     setResolution(viewportWidth: number, viewportHeight: number): void {
       material.resolution.set(viewportWidth, viewportHeight)
     },
@@ -272,6 +286,9 @@ function createThinLineLayer(positions: Float32Array, options: LineLayerOptions)
     },
     setResolution(): void {
       // Thin lines are 1 px by definition — the viewport size does not enter into it.
+    },
+    setDashScale(): void {
+      // Thin lines are never dashed — there is no pattern to scale.
     },
     dispose(): void {
       geometry.dispose()

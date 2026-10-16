@@ -229,12 +229,43 @@ describe('createMapLayers', () => {
       dev.relief.exaggeration = 2
       dev.relief.exaggZoomIn = 0.5
       layers.rebuildRelief()
-      layers.frame(0)
+      layers.frame(0, 100)
       const out = scene.children[0]?.scale.y ?? 0
-      layers.frame(1)
+      layers.frame(1, 100)
       const inn = scene.children[0]?.scale.y ?? 0
       expect(out).toBeCloseTo(2)
       expect(inn).toBeCloseTo(1)
+    })
+
+    it('strokes a tribe’s outline dashed after the borders, and alone when it has no border', () => {
+      const { scene, sources, layers } = build()
+      sources.derivedBorders = { between: [], frontier: [] }
+      sources.tribeOutlines = [
+        {
+          colour: '#41580b',
+          rings: [
+            [
+              { u: 0.2, v: 0.2 },
+              { u: 0.4, v: 0.2 },
+              { u: 0.4, v: 0.4 },
+              { u: 0.2, v: 0.2 },
+            ],
+          ],
+        },
+      ]
+      layers.rebuildBorders()
+      const strokes = (scene.children[0]?.children ?? []) as LineSegments2[]
+      expect(strokes).toHaveLength(1)
+      expect(strokes[0]?.material.dashed).toBe(true)
+      expect(`#${strokes[0]?.material.color.getHexString() ?? ''}`).toBe('#41580b')
+    })
+
+    it('reads the border dashes in screen pixels, from the scale the frame passes', () => {
+      const { scene, layers } = build()
+      layers.rebuildBorders()
+      layers.frame(0.5, 640)
+      for (const stroke of scene.children[0]?.children ?? [])
+        expect((stroke as LineSegments2).material.dashScale).toBe(640)
     })
 
     it('tracks the relief scale on everything draped over it', () => {
@@ -245,7 +276,7 @@ describe('createMapLayers', () => {
       dev.relief.exaggZoomIn = 1
       layers.rebuildRelief()
       layers.rebuildBorders()
-      layers.frame(0)
+      layers.frame(0, 100)
       // The relief adds its wall between itself and the borders, so the borders are the third child.
       const relief = scene.children[0]?.scale.y ?? 0
       const borders = scene.children[2]?.scale.y ?? 0
@@ -258,7 +289,7 @@ describe('createMapLayers', () => {
       dev.relief.exaggZoomIn = 1
       layers.rebuildRelief()
       layers.rebuildCoastline()
-      layers.frame(0)
+      layers.frame(0, 100)
       const relief = scene.children[0]?.scale.y ?? 0
       const coastline = scene.children[2]?.scale.y ?? 0
       expect(relief).toBeCloseTo(3)
@@ -353,7 +384,7 @@ describe('createMapLayers', () => {
       layers.rebuildRelief()
       layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))
       layers.rebuildFills()
-      layers.frame(0)
+      layers.frame(0, 100)
       const fill = scene.children.find((child) => child.renderOrder === 1)
       expect(fill).toBeDefined()
       expect(fill?.scale.y).toBeCloseTo(2)
@@ -490,7 +521,7 @@ describe('createMapLayers', () => {
     it('frames a map with nothing on it', () => {
       const { layers } = build(false)
       expect(() => {
-        layers.frame(0.5)
+        layers.frame(0.5, 100)
       }).not.toThrow()
     })
   })

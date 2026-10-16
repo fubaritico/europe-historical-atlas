@@ -27,7 +27,27 @@ const TRACED: RegionBorders = {
   frontier: [],
 }
 
+/** What the compute settled: the traced lines, and no tint — the tests that need tints build their own. */
+const COMPUTED = { borders: TRACED, tints: [] }
+
+const PALETTE: [string, ...string[]] = ['#aa0000', '#00aa00', '#0000aa']
+
+const RED = { r: 200, g: 0, b: 0 }
+const BLUE = { r: 0, g: 0, b: 200 }
+
 const PAYLOAD_YEAR: RegionSet = { year: 1500, regions: [] }
+
+/**
+ * The authored year with the Empire made a tribe, and its two regions named.
+ * @returns the year
+ */
+function withTribe(): RegionSet {
+  const year = authoredYear()
+  const hre = year.authored?.year.registry.polities.find((polity) => polity.id === 'hre')
+  if (hre) hre.rank = 'tribe'
+  year.regions = [{ polityId: 'fr-couronne' }, { polityId: 'hre' }] as RegionSet['regions']
+  return year
+}
 
 function authoredYear(): RegionSet {
   const doc = sharedBorderDocument()
@@ -43,7 +63,7 @@ describe('settleYearBorders', () => {
     it('draws an authored year’s borders from its anchors, each filed with its pattern', () => {
       const sources = createMapSources()
 
-      settleYearBorders(sources, authoredYear(), TRACED)
+      settleYearBorders(sources, authoredYear(), COMPUTED, PALETTE)
 
       expect(sources.derivedBorders).not.toBe(TRACED)
       expect(sources.derivedBorders?.between).toHaveLength(1)
@@ -51,11 +71,46 @@ describe('settleYearBorders', () => {
     })
   })
 
+  describe('tribes', () => {
+    it('leaves a tribe unfilled, its borders out, and its outline in its colour', () => {
+      const sources = createMapSources()
+
+      settleYearBorders(sources, withTribe(), { borders: TRACED, tints: [RED, BLUE] }, PALETTE)
+
+      expect(sources.regionTints).toEqual([RED, null])
+      expect(sources.derivedBorders?.between).toEqual([])
+      expect(sources.tribeOutlines).toHaveLength(1)
+      expect(sources.tribeOutlines[0]?.colour).toMatch(/^#[0-9a-f]{6}$/i)
+      expect(sources.tribeOutlines[0]?.rings[0]?.length).toBeGreaterThan(3)
+    })
+
+    it('fills every region and outlines nothing in a year without a tribe', () => {
+      const sources = createMapSources()
+      const year = authoredYear()
+      year.regions = [{ polityId: 'fr-couronne' }, { polityId: 'hre' }] as RegionSet['regions']
+
+      settleYearBorders(sources, year, { borders: TRACED, tints: [RED, BLUE] }, PALETTE)
+
+      expect(sources.regionTints).toEqual([RED, BLUE])
+      expect(sources.tribeOutlines).toEqual([])
+    })
+
+    it('forgets the tribe outlines when a payload year follows', () => {
+      const sources = createMapSources()
+      settleYearBorders(sources, withTribe(), { borders: TRACED, tints: [RED, BLUE] }, PALETTE)
+
+      settleYearBorders(sources, PAYLOAD_YEAR, { borders: TRACED, tints: [BLUE] }, PALETTE)
+
+      expect(sources.tribeOutlines).toEqual([])
+      expect(sources.regionTints).toEqual([BLUE])
+    })
+  })
+
   describe('variants', () => {
     it('keeps the raster’s lines for a year read from the payloads, with no pattern of its own', () => {
       const sources = createMapSources()
 
-      settleYearBorders(sources, PAYLOAD_YEAR, TRACED)
+      settleYearBorders(sources, PAYLOAD_YEAR, COMPUTED, PALETTE)
 
       expect(sources.derivedBorders).toBe(TRACED)
       expect(sources.borderPatterns).toBeNull()
@@ -63,9 +118,9 @@ describe('settleYearBorders', () => {
 
     it('forgets the previous authored year’s patterns when a payload year follows it', () => {
       const sources = createMapSources()
-      settleYearBorders(sources, authoredYear(), TRACED)
+      settleYearBorders(sources, authoredYear(), COMPUTED, PALETTE)
 
-      settleYearBorders(sources, PAYLOAD_YEAR, TRACED)
+      settleYearBorders(sources, PAYLOAD_YEAR, COMPUTED, PALETTE)
 
       expect(sources.borderPatterns).toBeNull()
     })
@@ -76,7 +131,7 @@ describe('settleYearBorders', () => {
     it('draws the shared limit and no frontier without a land mask', () => {
       const sources = createMapSources()
 
-      settleYearBorders(sources, authoredYear(), TRACED)
+      settleYearBorders(sources, authoredYear(), COMPUTED, PALETTE)
 
       expect(sources.derivedBorders?.frontier).toEqual([])
     })
@@ -90,7 +145,7 @@ describe('settleYearBorders', () => {
       const empty = authoredYear()
       if (empty.authored) empty.authored.year.polities.claims = []
 
-      settleYearBorders(sources, empty, TRACED)
+      settleYearBorders(sources, empty, COMPUTED, PALETTE)
 
       expect(sources.derivedBorders).toEqual({ between: [], frontier: [] })
       expect(sources.borderPatterns?.size).toBe(0)

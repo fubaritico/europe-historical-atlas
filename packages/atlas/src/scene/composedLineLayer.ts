@@ -195,9 +195,9 @@ export interface BorderStrokeStyle {
   frontierWidth: number
   /** Opacity of the frontier stroke — usually below the borders', being a limit rather than a treaty. */
   frontierOpacity: number
-  /** Dash length in world units, for borders the style table marks as broken. */
+  /** Dash length in screen pixels, for borders the style table marks as broken (`setDashScale`). */
   dashSize: number
-  /** Gap length in world units, for those same borders. */
+  /** Gap length in screen pixels, for those same borders. */
   gapSize: number
   /** Half the distance between the two runs of a doubled border, in normalized grid units. */
   doubleGap: number
@@ -263,6 +263,12 @@ export interface ComposedLineLayer {
    * @returns nothing
    */
   setOpacityScale(scale: number): void
+  /**
+   * Scale every pass's dash pattern — screen pixels per world unit, to read the dash sizes as pixels.
+   * @param scale - the factor
+   * @returns nothing
+   */
+  setDashScale(scale: number): void
   /**
    * Free the GPU resources of every pass.
    * @returns nothing
@@ -378,6 +384,34 @@ export function patternStrokes(
 }
 
 /**
+ * The passes of the tribes' outlines: one dashed stroke per colour, at a border edge's weight, drawn after
+ * the borders — a tribe has neither fill nor borders, its outline is its line (`core/editor/tribes`, the
+ * Cartographer's `paintTribeOutlines`). A pattern pass, so it thins with the zoom as a dashed border does.
+ * @param outlines - each tribe's closed rings and its colour
+ * @param style - the weight and opacity of a border edge
+ * @returns the passes, one per colour, in first-seen order
+ */
+export function tribeStrokes(
+  outlines: readonly { colour: string; rings: readonly (readonly UvPoint[])[] }[],
+  style: Pick<BorderStrokeStyle, 'edgeWidth' | 'opacity'>
+): ComposedStroke[] {
+  const byColour = new Map<string, UvSegment[]>()
+  for (const { colour, rings } of outlines) {
+    const bucket = byColour.get(colour) ?? []
+    for (const segment of polylinesToSegments(rings)) bucket.push(segment)
+    byColour.set(colour, bucket)
+  }
+  return [...byColour].map(([colour, segments]) => ({
+    segments,
+    color: colour,
+    width: style.edgeWidth,
+    opacity: style.opacity,
+    dashed: true,
+    role: 'pattern' as const,
+  }))
+}
+
+/**
  * Choose the passes that dress a set of derived borders.
  *
  * Pure, and separated from the drawing precisely so it can be exercised without a renderer: the ordering
@@ -456,6 +490,9 @@ export function createComposedLineLayer(
     setInlayOpacity(scale: number): void {
       for (const { layer, stroke } of layers)
         if (stroke.role === 'inlay') layer.setOpacity(stroke.opacity * globalOpacityScale * scale)
+    },
+    setDashScale(scale: number): void {
+      for (const { layer } of layers) layer.setDashScale(scale)
     },
     setOpacityScale(scale: number): void {
       globalOpacityScale = scale

@@ -130,9 +130,11 @@ export interface MapLayers {
   /**
    * Bring every layer up to date for this frame's zoom.
    * @param zoom - the camera's zoom in `[0, 1]`, zoomed out at zero
+   * @param pixelsPerUnit - screen pixels per world unit where the camera looks (`scene/screenScale`),
+   *   which keeps a dash the same size on screen at every zoom
    * @returns nothing
    */
-  frame: (zoom: number) => void
+  frame: (zoom: number, pixelsPerUnit: number) => void
   /**
    * What a click raycasts against — the terrain itself, or `null` before it is built.
    *
@@ -176,9 +178,10 @@ function frameRelief(context: LayerContext, zoom: number): void {
  * live material uniform, so nothing is rebuilt while zooming.
  * @param context - the layers and what they read
  * @param zoom - the camera's zoom in `[0, 1]`
+ * @param pixelsPerUnit - screen pixels per world unit where the camera looks
  * @returns nothing
  */
-function frameLineWork(context: LayerContext, zoom: number): void {
+function frameLineWork(context: LayerContext, zoom: number, pixelsPerUnit: number): void {
   const { dev, handles } = context
   handles.rivers?.setZoom(zoom)
   if (handles.borders) {
@@ -191,6 +194,8 @@ function frameLineWork(context: LayerContext, zoom: number): void {
     )
     handles.borders.setOpacityScale(lerp(dev.political.borderOpacityZoomOut, 1, zoom))
     handles.borders.setInlayOpacity(inlayOpacityScale(zoom, dev.political.borderInlayZoom))
+    // The dash pattern is in pixels; the line's length is in world units.
+    handles.borders.setDashScale(pixelsPerUnit)
   }
   handles.coastline?.setOpacity(lerp(dev.coast.opacity, dev.coast.opacityZoomIn, zoom))
   // The rhumb web fades as you zoom in, so it does not clutter the terrain it is drawn over.
@@ -298,9 +303,9 @@ function layerLifecycle(
       handles.rivers?.setResolution(width, height)
       handles.borders?.setResolution(width, height)
     },
-    frame(zoom: number): void {
+    frame(zoom: number, pixelsPerUnit: number): void {
       frameRelief(context, zoom)
-      frameLineWork(context, zoom)
+      frameLineWork(context, zoom, pixelsPerUnit)
     },
     pickTarget(): Object3D | null {
       return handles.relief

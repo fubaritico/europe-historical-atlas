@@ -188,14 +188,14 @@ pattern is not available by default — which is worth keeping, but it is not th
 
 | what | Cartographer | atlas |
 | --- | --- | --- |
-| a polity's fill | a vector path from the outline, composited `overlay` on the backdrop (`canvas/painter.ts`): the edge is exact | rasterised on a 1.9 km grid (`data/regionRaster`), then baked into the texture: the edge is approximate — **being replaced, 2026-10-16** |
+| a polity's fill | a vector path from the outline, composited `overlay` on the backdrop (`canvas/painter.ts`): the edge is exact | cut from the same outline into triangles on the relief's planes (`pipeline/fillTriangles`, atlas `scene/fillLayer`), blended in a shader: the edge is exact too since 2026-10-16 |
 | the relief | a flat image | a 3D mesh, with the shore ramp (`data/shoreRamp`) |
 | how a border is stroked | canvas strokes, every hand | three.js lines from `editor/borderHands`' table, minus weight and a dotted pattern (`known-issues-atlas.md`) |
-| a tribe | no fill, a dashed outline (`editor/tribes`) | still filled — open in `known-issues.md` |
+| a tribe | no fill, a dashed outline (`editor/tribes`), canvas dashes | the same rule from `editor/atlasBorders`, dashes in screen pixels (`scene/screenScale`) |
 
 **The direction**: geometry and decisions live in `core`; only the drawing — a 2D canvas on one side, the
 GPU on the other — belongs to each application. A difference in the second table is either a rendering
-choice (the relief) or a debt to close (the fill, the tribes, the border weights).
+choice (the relief) or a debt to close (the border weights).
 
 ## Scripts
 

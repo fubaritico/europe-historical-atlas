@@ -2,13 +2,15 @@ import { latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
 
 import { handFor } from './borderHands'
 import { deriveBorders, maskDerivationDeps } from './derivedBorders'
+import { touchesTribe, tribeIds } from './tribes'
 import { openYearDocument } from './yearDocument'
 
 import type { HandPattern } from './borderHands'
 import type { BorderPattern } from '../data/borderStyles'
+import type { UvPoint } from '../data/coastlineSource'
 import type { LandMask } from '../data/landMask'
 import type { RegionBorders } from '../data/regionBorders'
-import type { AuthoredYear } from '../data/yearFormat'
+import type { AuthoredYear, YearClaim } from '../data/yearFormat'
 import type { GeoBounds } from '../geo/mercator'
 
 /**
@@ -26,6 +28,10 @@ import type { GeoBounds } from '../geo/mercator'
  * **What the atlas does not draw yet, said here and at run time**: a hand's **weight** — the atlas's widths
  * being one per kind of line — and an authored hand on a **frontier**, which the atlas draws in its one dark
  * stroke whatever the author chose. The latter is warned once per derivation.
+ *
+ * **A tribe has no borders, its dashed outline instead** — as in the Cartographer (`tribes.ts`): a border
+ * with a tribe on either side is left out, and each tribe's rings come back apart, for the atlas to stroke
+ * dashed in its colour.
  */
 
 /** An authored year's borders, and the pattern each group is drawn in. */
@@ -34,6 +40,8 @@ export interface ExactBorders {
   borders: RegionBorders
   /** The pattern of each group, keyed by its pair as `"a:b"`. */
   patterns: ReadonlyMap<string, BorderPattern>
+  /** Each tribe's claim, its rings closed, in grid coordinates — stroked dashed instead of bordered. */
+  tribeOutlines: { polity: string; rings: UvPoint[][] }[]
 }
 
 /**
@@ -69,20 +77,24 @@ export function exactBordersOf(
 ): ExactBorders {
   const doc = openYearDocument(authored)
   const derived = deriveBorders(doc, mask === null ? {} : maskDerivationDeps(doc, mask))
+  const tribes = tribeIds(doc.polities)
   const borders: RegionBorders = { between: [], frontier: [] }
   const patterns = new Map<string, BorderPattern>()
-  let undrawnHands = 0
-  for (const border of derived) {
-    const hand = handFor(border, warn)
-    if (hand.pattern === 'none') continue
-    // Every index resolves: `assembleAuthoredYear` refused the year if one pointed past the table.
-    const line = border.run
+  // Every index resolves: `assembleAuthoredYear` refused the year if one pointed past the table.
+  const toGrid = (indices: readonly number[]): UvPoint[] =>
+    indices
       .map((index) => doc.anchors[index])
       .filter((anchor): anchor is [number, number] => anchor !== undefined)
       .map(([lon, lat]) => ({
         u: longitudeToHorizontal(lon, bbox),
         v: latitudeToVertical(lat, bbox),
       }))
+  let undrawnHands = 0
+  for (const border of derived) {
+    if (touchesTribe(border, tribes)) continue
+    const hand = handFor(border, warn)
+    if (hand.pattern === 'none') continue
+    const line = toGrid(border.run)
     if (line.length < 2) continue
     if (!hand.cased) {
       if (border.hand !== null) undrawnHands += 1
@@ -97,7 +109,32 @@ export function exactBordersOf(
     warn(
       `[atlas] ${String(undrawnHands)} frontier stretch(es) carry an authored hand the atlas draws as its frontier stroke.`
     )
-  return { borders, patterns }
+  return { borders, patterns, tribeOutlines: tribeOutlinesOf(doc.claims, tribes, toGrid) }
+}
+
+/**
+ * Each tribe's claim, its rings closed and in grid coordinates.
+ * @param claims - the year's claims
+ * @param tribes - the ids of its tribes
+ * @param toGrid - anchor indices to grid points
+ * @returns one outline per claim of a tribe
+ */
+function tribeOutlinesOf(
+  claims: readonly YearClaim[],
+  tribes: ReadonlySet<string>,
+  toGrid: (indices: readonly number[]) => UvPoint[]
+): ExactBorders['tribeOutlines'] {
+  return claims
+    .filter((claim) => tribes.has(claim.polity))
+    .map((claim) => ({
+      polity: claim.polity,
+      // Closed, so the stroke goes all the way round: a ring's closure is implied in the format.
+      rings: claim.rings.flatMap((indices) => {
+        const ring = toGrid(indices)
+        const first = ring[0]
+        return first !== undefined && ring.length >= 3 ? [[...ring, first]] : []
+      }),
+    }))
 }
 
 /**

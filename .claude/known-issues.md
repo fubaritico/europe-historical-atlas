@@ -11,11 +11,6 @@ Put here the know issues to avoid cluttering the context window.
   est une référence privée). **Depuis la nuit du 14/10**, `years/1100/` tient 137 pays, et les traces de la nuit
   sont `years/1100.euratlas-{16,19,30,48,76,98,137,137b}/` et `1100.before-rename/` — toutes locales, à trier avec
   le dev (aucune n'a été supprimée : `rm -rf` demande sa permission). **Sévérité : à savoir.**
-- **Une tribu n'a pas de remplissage dans le Cartographe, mais l'atlas la remplit encore** (15/10). Le Cartographe lit le
-  rang `tribe` (`core/editor/tribes.ts`) : pas de remplissage, le contour en tirets dans sa couleur, et ses frontières
-  dérivées retirées. L'atlas, lui, la teinte et trace ses frontières comme celles d'un royaume. Remède, l'étape suivante :
-  `authoredRegionColours` sans teinte pour une tribu, `exactBordersOf` qui écarte ses frontières (`touchesTribe`), et une
-  couche de traits en tirets par couleur de tribu. **Sévérité : à savoir.**
 - **Recreuser un vassal après coup est impossible depuis l'outil** (16/10). Le creusement ne tourne qu'à la fermeture
   d'un contour neuf (`addOutlineCarving`) ; un vassal dessiné avant, ou recouvert de nouveau par une retouche du
   suzerain, garde la couleur du suzerain par-dessus (la Champagne, la Frise : recreusées au script). Remède : un geste

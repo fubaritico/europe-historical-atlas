@@ -15,6 +15,7 @@ import { createElevationLandMask } from '@europe-historical-atlas/core/data/land
 import { taperHeightmapToShore } from '@europe-historical-atlas/core/data/shoreRamp'
 
 import type { BorderPattern } from '@europe-historical-atlas/core/data/borderStyles'
+import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
 import type { Heightmap } from '@europe-historical-atlas/core/data/heightmap'
 import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionRaster'
@@ -42,8 +43,11 @@ export interface MapSources {
   reliefInputs: ReliefInputs | null
   /** The polities of the year on screen, or `null` before one has been chosen. */
   regionSet: RegionSet | null
-  /** Each polity's tint, in `regionSet` order, as the compute settled them; `null` before a year. */
-  regionTints: RgbColor[] | null
+  /**
+   * Each polity's tint, in `regionSet` order, as the compute settled them — `null` for a tribe, which has
+   * no fill (`core/editor/tribes`); `null` as a whole before a year.
+   */
+  regionTints: (RgbColor | null)[] | null
   /** The river centrelines, empty until they land. */
   riverData: River[]
   /**
@@ -58,6 +62,19 @@ export interface MapSources {
    * group's pair as `"a:b"`; `null` for a year read from the per-century payloads.
    */
   borderPatterns: ReadonlyMap<string, BorderPattern> | null
+  /**
+   * Each tribe's rings in its colour, stroked dashed in place of a fill and of its borders — empty for a
+   * year with no tribe, and for a year read from the per-century payloads, which has no ranks.
+   */
+  tribeOutlines: TribeOutline[]
+}
+
+/** One tribe's claim as the border layer strokes it. */
+export interface TribeOutline {
+  /** The `#rrggbb` the tribe would have been filled in. */
+  colour: string
+  /** Its rings, closed, in grid coordinates. */
+  rings: UvPoint[][]
 }
 
 /**
@@ -75,6 +92,7 @@ export function createMapSources(): MapSources {
     riverData: [],
     derivedBorders: null,
     borderPatterns: null,
+    tribeOutlines: [],
   }
 }
 
