@@ -42,6 +42,8 @@ files/spikes/*/out/
 # tracked, committed with `"years": []`, and is marked skip-worktree on the dev's machine so a local save
 # listing a year does not show as a change (see known-issues.md). `*.tmp` covers a save cut off half-way.
 **/public/years/*/
+# Published by the dev's call, 2026-10-16: 1100 goes online as it stands, to show to a few people.
+!**/public/years/1100/
 **/public/years/*.tmp
 
 # Turbo task cache

@@ -8,3 +8,5 @@ public/heightmaps
 .claude
 .husky
 pnpm-lock.yaml
+# Year files are written by the Cartographer and stay byte for byte as it saved them
+packages/atlas/public/years

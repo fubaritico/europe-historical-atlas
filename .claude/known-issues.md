@@ -48,6 +48,10 @@ Put here the know issues to avoid cluttering the context window.
   côtes face à un canal étroit), sauf une corde de 17,2 km… au-dessus du golfe de Naples. Remède le jour où ça mord :
   exiger que les deux ancres soient **consécutives sur le trait de côte**, pas seulement prises dessus.
   **Sévérité : à savoir.**
+- **Depuis le 16/10 au soir, `years/1100/` est publié** (décision du dev : *« vas-y, tu peux la mettre en ligne »*,
+  à montrer à quelques personnes, la carte va encore changer). `.gitignore` l'excepte, `.prettierignore` exclut
+  `years/`, et `years/index.json` **n'est plus en `skip-worktree`** : chaque ‹ctrl+s› du dev sur 1100 apparaît
+  désormais dans `git status`, à commiter comme du code. L'entrée ci-dessous décrit l'état d'avant.
 - **Les années enregistrées en local ne sont jamais commitées, et `years/index.json` est en `skip-worktree`
   sur la machine du dev.** Sa décision, 12/10 : *« ils sont pour nous pour travailler »* — retrouver ses
   tracés, déboguer les outils, maîtriser le format. Les dossiers `packages/atlas/public/years/<année>/` sont
