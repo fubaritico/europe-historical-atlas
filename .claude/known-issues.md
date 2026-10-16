@@ -11,6 +11,11 @@ Put here the know issues to avoid cluttering the context window.
   est une référence privée). **Depuis la nuit du 14/10**, `years/1100/` tient 137 pays, et les traces de la nuit
   sont `years/1100.euratlas-{16,19,30,48,76,98,137,137b}/` et `1100.before-rename/` — toutes locales, à trier avec
   le dev (aucune n'a été supprimée : `rm -rf` demande sa permission). **Sévérité : à savoir.**
+- **Deux gênes du Cartographe relevées par le dev le 16/10 au soir, à déboguer** (*« ça fait peur pour l'expérience
+  utilisateur »*). (1) **Les outils s'activent trop tard au zoom** : il faut trop se rapprocher avant de pouvoir
+  sélectionner ou dessiner (seuil de `s17`, « les outils attendent le zoom ») — l'abaisser. (2) **‹P› et ‹A› ne
+  répondent pas sur un pays neuf ou vide** : il faut cliquer l'outil dans la barre. **Le dev donnera le cas exact** ;
+  le reproduire avant de toucher au code. **Sévérité : gênant, en tête de la prochaine séance.**
 - **Les raccourcis d'empilement (16/10) laissent deux constats de revue ouverts, par ma décision.** (1) A11Y-002 :
   répéter la même commande réécrit le même message dans la barre d'état, et un lecteur d'écran peut ne pas le
   relire — non vérifié, et ça touche toute la barre (`persistence/resultRelay.ts`), pas ce seul raccourci. (2)
