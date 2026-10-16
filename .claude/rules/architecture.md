@@ -167,6 +167,36 @@ CPU work runs in a worker, that no geometry is rebuilt per frame, and that exagg
 rather than a re-displacement. There is almost no DOM to be slow. What vanilla buys is that the wrong
 pattern is not available by default — which is worth keeping, but it is not the measurement.
 
+## Editor–atlas parity — what the two applications share, and where they differ
+
+> The promise behind it: **what the Cartographer shows is what the atlas publishes.** Written 2026-10-16
+> at the dev's request, from the imports of both packages, not from memory. **Update this table whenever
+> a module moves from one column to the other** — it is the map of where the two can drift apart.
+
+**Shared — one implementation in `core`, read by both:**
+
+| what | how |
+| --- | --- |
+| the terrain backdrop | the same bake (`pipeline/terrainCompose`), in the same worker chunk, same hash; the Cartographer bakes it with no political tint |
+| the land mask and the coast | the same asset (`data/landMask`); each traces its coastline from it (`data/coastlineSource`, chained by `data/coastlineChain` in the editor) |
+| the borders | one derivation from the outlines (`editor/derivedBorders`); the atlas receives it through `editor/atlasBorders`, so **the line is the same geometry in both** |
+| the paint order | `data/paintOrder`, through `data/toRegionPayload` on the atlas side |
+| the polity colours | `editor/polityColours` and `data/regionPalette` |
+| the rivers | the same data and base style (`data/riverSource`, `data/riverDisplay`) |
+
+**Different — each application does it its own way:**
+
+| what | Cartographer | atlas |
+| --- | --- | --- |
+| a polity's fill | a vector path from the outline, composited `overlay` on the backdrop (`canvas/painter.ts`): the edge is exact | rasterised on a 1.9 km grid (`data/regionRaster`), then baked into the texture: the edge is approximate — **being replaced, 2026-10-16** |
+| the relief | a flat image | a 3D mesh, with the shore ramp (`data/shoreRamp`) |
+| how a border is stroked | canvas strokes, every hand | three.js lines from `editor/borderHands`' table, minus weight and a dotted pattern (`known-issues-atlas.md`) |
+| a tribe | no fill, a dashed outline (`editor/tribes`) | still filled — open in `known-issues.md` |
+
+**The direction**: geometry and decisions live in `core`; only the drawing — a 2D canvas on one side, the
+GPU on the other — belongs to each application. A difference in the second table is either a rendering
+choice (the relief) or a debt to close (the fill, the tribes, the border weights).
+
 ## Scripts
 
 ```bash

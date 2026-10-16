@@ -119,7 +119,7 @@ Read @known-issues.md
 
 | File                      | When to load                                         |
 | ------------------------- | ---------------------------------------------------- |
-| `architecture.md`         | Stack, project structure, scripts, 3D pipeline       |
+| `architecture.md`         | Stack, structure, scripts, 3D pipeline, editor–atlas parity |
 | `modular-architecture.md` | SOLID/pluggable/standalone rule — any module         |
 | `decision-tree.md`        | Skill triggers — check before coding                 |
 | `error-handling.md`       | Any fallback, `catch`, or default covering a failure |
