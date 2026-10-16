@@ -72,6 +72,9 @@ point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui 
 retouche l'Angleterre, puis Écosse, Irlande, Byzance — surtout des réglages de couleurs. Ordre proposé, **il tient
 l'ordre** (mémoire [[do-not-start-unasked-work]]) :
 
+00. **Passer à Trello, au début de la séance** (décision du dev, 16/10 au soir) : l'avancement suivi par **tickets**
+    sur un tableau Trello. Voir avec lui si je peux agir sur le tableau (un MCP Trello ou une skill) ; puis y verser
+    cette liste.
 0. **Les deux gênes du 16/10 au soir** (`known-issues`) : outils actifs de plus loin ; ‹P›/‹A› muets sur un pays
    neuf ou vide — attendre son cas exact, le reproduire, puis corriger.
 1. **Son retour sur l'expérience de dessin dans le Cartographe** (*« compliqué à expliquer »*) : le recueillir même en
