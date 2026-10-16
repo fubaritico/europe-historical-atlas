@@ -357,6 +357,31 @@ describe('startCanvasController', () => {
       dispose()
     })
 
+    it('leaves ‹cmd+↑› and ‹ctrl+↓› to the stacking keys instead of panning', () => {
+      const { node, store, dispose } = attach()
+      roomToPan(store)
+      const before = store.getState().viewport
+
+      const up = new KeyboardEvent('keydown', {
+        key: 'ArrowUp',
+        metaKey: true,
+        bubbles: true,
+        cancelable: true,
+      })
+      const down = new KeyboardEvent('keydown', {
+        key: 'ArrowDown',
+        ctrlKey: true,
+        bubbles: true,
+        cancelable: true,
+      })
+      node.dispatchEvent(up)
+      node.dispatchEvent(down)
+
+      expect(store.getState().viewport).toEqual(before)
+      expect(up.defaultPrevented).toBe(false)
+      dispose()
+    })
+
     it('pans in all four directions', () => {
       const { node, store, dispose } = attach()
       roomToPan(store)

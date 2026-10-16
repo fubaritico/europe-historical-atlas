@@ -13,7 +13,9 @@ import { createWorkerMapCompute } from '@europe-historical-atlas/core/pipeline/w
 import { bakeToBitmap, loadBackdrop } from './backdropSource'
 import { createHistoryRelay } from './canvas/historyRelay'
 import { CHROME_PAINT_STYLE } from './canvas/style'
+import { arrangeSelected } from './components/arrange'
 import { Editor } from './components/Editor'
+import { listenForStackingKeys } from './components/stackingShortcut'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
 import { createResultRelay } from './persistence/resultRelay'
 import { installSaveShortcut } from './persistence/saveShortcut'
@@ -189,6 +191,10 @@ const handleSave = (): void => {
   void yearSession.save()
 }
 installSaveShortcut(window, handleSave)
+// ‹cmd+↑ ↓›, with ‹shift› to the end: the selected polity up or down the stacking order, from anywhere.
+listenForStackingKeys(document, (move) => {
+  arrangeSelected(store.getState(), move, results.say)
+})
 
 /**
  * The canvas's undo and redo, for the document bar's buttons — gesture first, as the keys (ARCH-101). Built

@@ -2,9 +2,10 @@ import { useEffect } from 'react'
 
 import { availableMoves } from '@europe-historical-atlas/core/editor/stacking'
 
+import { arrangePolity } from './arrange'
 import { PolityStackMenu } from './PolityStackMenu'
-import { STACKING_LABELS } from './stackingLabels'
 
+import type { Restack } from './arrange'
 import type { CartographerStoreHook } from '../state/store'
 import type { ViewportPoint } from '../view/viewport'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
@@ -41,11 +42,7 @@ interface KnownPolityMenuProps {
   /** Which moves change something, read from the document. */
   moves: Record<StackingMove, boolean>
   /** Record a move as one step; `false` when the document refuses it. */
-  restack: (
-    polityId: string,
-    move: StackingMove,
-    step: { kind: 'restack'; label: string }
-  ) => boolean
+  restack: Restack
   /** Say what the command did. */
   onResult: (message: string | null) => void
   /** Open the polity's dialogue. */
@@ -71,11 +68,8 @@ function KnownPolityMenu({
 }: KnownPolityMenuProps) {
   // Handlers
   const handleChoose = (move: StackingMove) => {
-    const label = `${STACKING_LABELS[move].toLowerCase()} — ${polity.name}`
-    // The menu offers only the moves that change something: a refusal here is a defect.
-    if (restack(polity.id, move, { kind: 'restack', label })) {
-      onResult(`${STACKING_LABELS[move]} — ${polity.name}`)
-    } else console.error(`[Cartographer] the document refused to ${label}.`)
+    // The menu offers only the moves that change something; `arrangePolity` says a refusal loudly.
+    arrangePolity(restack, polity, move, onResult)
   }
   const handleEdit = () => {
     onEdit(polity.id)

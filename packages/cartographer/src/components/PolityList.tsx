@@ -193,6 +193,8 @@ function useListCursor(
       menuFromKeys(activeId ?? targetId, onMenu)
       return
     }
+    // ‹cmd+↑› and its kin restack the selected polity (`stackingShortcut`); the cursor stays where it is.
+    if (event.metaKey || event.ctrlKey) return
     const action = listKeyAction(active, event.key, rows.length)
     if (action === null) return
     event.preventDefault()

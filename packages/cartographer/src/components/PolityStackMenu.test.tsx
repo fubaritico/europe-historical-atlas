@@ -38,6 +38,18 @@ afterEach(() => {
 
 describe('PolityStackMenu', () => {
   describe('happy path', () => {
+    it('shows each command’s keys at its row’s end, and announces them', () => {
+      const shell = mountAt({ x: 100, y: 100 })
+      const front = [...shell.querySelectorAll('[role="option"]')].find((option) =>
+        option.textContent?.startsWith('Bring to Front')
+      )
+      expect(front?.querySelector('kbd')?.textContent).toBe('⇧⌘↑')
+      expect(front?.querySelector('kbd')?.getAttribute('aria-hidden')).toBe('true')
+      expect(front?.getAttribute('aria-keyshortcuts')).toBe(
+        'Meta+Shift+ArrowUp Control+Shift+ArrowUp'
+      )
+    })
+
     it('opens at the point when it fits', () => {
       const shell = mountAt({ x: 100, y: 100 })
       expect([shell.style.left, shell.style.top]).toEqual(['100px', '100px'])

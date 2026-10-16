@@ -395,6 +395,21 @@ function keyTakenFirst(it: LiveCanvas, event: KeyboardEvent): boolean {
 }
 
 /**
+ * Pan for an arrow key — a bare one: ‹cmd+↑› and its kin restack the selected polity
+ * (`components/stackingShortcut`), and must reach the page rather than move the map.
+ * @param it - the attachment
+ * @param event - the key event
+ * @returns `true` when the key panned
+ */
+function panFromKeys(it: LiveCanvas, event: KeyboardEvent): boolean {
+  const pan = PAN_KEYS[event.key]
+  if (pan === undefined || event.metaKey || event.ctrlKey) return false
+  event.preventDefault()
+  settle(it, panBy(it.deps.store.getState().viewport, pan[0], pan[1]))
+  return true
+}
+
+/**
  * Pan and zoom from the keyboard.
  *
  * **WCAG 2.1.1, and it was a real gap rather than a staged one** (found in review, 2026-10-06). The
@@ -438,12 +453,7 @@ function onKeyDown(it: LiveCanvas, event: KeyboardEvent): void {
     return
   }
   if (onToolKey(it, event)) return
-  const pan = PAN_KEYS[event.key]
-  if (pan !== undefined) {
-    event.preventDefault()
-    settle(it, panBy(state.viewport, pan[0], pan[1]))
-    return
-  }
+  if (panFromKeys(it, event)) return
   const zoomIn = ZOOM_IN_KEYS.has(event.key)
   if (!zoomIn && !ZOOM_OUT_KEYS.has(event.key)) return
   event.preventDefault()

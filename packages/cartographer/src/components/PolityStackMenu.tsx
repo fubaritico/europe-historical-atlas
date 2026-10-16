@@ -6,6 +6,7 @@ import { STACKING_MOVES } from '@europe-historical-atlas/core/editor/stacking'
 import { placeMenu } from '../view/menuPlacement'
 
 import { STACKING_LABELS } from './stackingLabels'
+import { STACKING_SHORTCUTS } from './stackingShortcut'
 
 import type { ViewportPoint } from '../view/viewport'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
@@ -95,6 +96,31 @@ function useDismiss(shell: RefObject<HTMLDivElement | null>, onClose: () => void
 }
 
 /**
+ * One stacking command: its name, and its keys at the row's end — announced through `aria-keyshortcuts`,
+ * the glyphs being hidden from a screen reader, which would spell them out.
+ * @param move - the command
+ * @param index - its place in the keyboard order
+ * @param enabled - whether it would change anything
+ * @returns the item
+ */
+function stackItem(move: StackingMove, index: number, enabled: boolean) {
+  return (
+    <Menu.Item
+      key={move}
+      index={index}
+      value={move}
+      disabled={!enabled}
+      aria-keyshortcuts={STACKING_SHORTCUTS[move].aria}
+    >
+      <span className="polity-stack-menu__label">{STACKING_LABELS[move]}</span>
+      <kbd className="polity-stack-menu__keys" aria-hidden="true">
+        {STACKING_SHORTCUTS[move].shown}
+      </kbd>
+    </Menu.Item>
+  )
+}
+
+/**
  * The stacking commands of a row of `{Polities}` — `s16`'s context menu.
  *
  * **The design system's `Menu` for the list** — it owns the keyboard (↑ ↓ Home End, ‹enter›, ‹escape›)
@@ -148,11 +174,7 @@ export function PolityStackMenu({
         <Menu.Item index={0} value={EDIT}>
           Edit properties…
         </Menu.Item>
-        {STACKING_MOVES.map((move, index) => (
-          <Menu.Item key={move} index={index + 1} value={move} disabled={!moves[move]}>
-            {STACKING_LABELS[move]}
-          </Menu.Item>
-        ))}
+        {STACKING_MOVES.map((move, index) => stackItem(move, index + 1, moves[move]))}
       </Menu>
     </div>
   )

@@ -654,8 +654,8 @@
 /* The stacking menu of a {Polities} row (s16): opened at the right-click, a hairline and no shadow, rows
    at a field's height — the tool flyout's look, over the design system's Menu. */
 .polity-stack-menu {
-  /* Wide enough for "Send Backward" at the item's 12px, with the item's 10px either side. */
-  --polity-stack-menu-width: 180px;
+  /* Wide enough for "Send Backward" and its keys at the item's 12px, with the item's 10px either side. */
+  --polity-stack-menu-width: 210px;
 
   position: fixed;
   z-index: 10;
@@ -680,6 +680,18 @@
   display: flex;
   align-items: center;
   height: 24px;
+}
+
+/* A command's keys at the row's right end, quieter than its name (the dev, 2026-10-16). */
+.polity-stack-menu__label {
+  flex: 1;
+}
+
+.polity-stack-menu__keys {
+  margin-inline-start: 16px;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--ink-dim);
 }
 
 /*

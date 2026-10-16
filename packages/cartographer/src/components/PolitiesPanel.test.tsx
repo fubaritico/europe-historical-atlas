@@ -170,6 +170,15 @@ describe('PolitiesPanel', () => {
       expect(store.getState().target).toBe('b')
     })
 
+    it('leaves the keys’ cursor where it is on ‹cmd+↓›, the stacking key', async () => {
+      const { store, user } = mount()
+      create(store, 'b', 'Bohemia')
+      create(store, 'a', 'Aragon')
+      screen.getByRole('listbox', { name: 'Polities' }).focus()
+      await user.keyboard('{ArrowDown}{Meta>}{ArrowDown}{/Meta}{Enter}')
+      expect(store.getState().target).toBe('a')
+    })
+
     // QUAL-003: the keys' cursor follows a polity, not a position — a row sorted in above it does not
     // move Enter onto another polity.
     it('keeps the keys on the same polity when another is added above it', async () => {
@@ -253,7 +262,7 @@ describe('PolitiesPanel — the stacking menu (s16)', () => {
       const disabled = screen
         .getAllByRole('option')
         .filter((option) => option.getAttribute('aria-disabled') === 'true')
-        .map((option) => option.textContent)
+        .map((option) => option.querySelector('.polity-stack-menu__label')?.textContent)
       expect(disabled).toEqual(['Bring to Front', 'Bring Forward'])
     })
 
