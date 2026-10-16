@@ -27,7 +27,6 @@ const deps = (over: Partial<DrapeProjectionDeps> = {}): DrapeProjectionDeps => (
   curve: () => CURVE,
   flatLift: () => 0.01,
   shoreLift: () => 0.002,
-  drapedLift: 0.004,
   ...over,
 })
 
@@ -48,9 +47,9 @@ describe('drapeProjection', () => {
       expect(meshSurfaceY(0.5, 0.5, flat(300), 4, CURVE)).toBeCloseTo(300 * WORLD_PER_METRE)
     })
 
-    it('drapes a point on the surface plus the clearance lift', () => {
+    it('drapes a point exactly on the surface, with no lift to slide it up the screen', () => {
       const [, y] = createDrapeProjection(deps({ source: () => flat(300) })).draped(0.5, 0.5)
-      expect(y).toBeCloseTo(300 * WORLD_PER_METRE + 0.004)
+      expect(y).toBeCloseTo(300 * WORLD_PER_METRE)
     })
   })
 
@@ -116,7 +115,7 @@ describe('drapeProjection', () => {
       const [x, y, z] = projection.draped(1, 1)
       expect(x).toBeCloseTo(6)
       expect(z).toBeCloseTo(3)
-      expect(y).toBeCloseTo(300 * WORLD_PER_METRE + 0.004)
+      expect(y).toBeCloseTo(300 * WORLD_PER_METRE)
     })
 
     it('eases elevations above the plains ceiling instead of passing them through', () => {
@@ -179,10 +178,6 @@ describe('drapeProjection', () => {
       expect(x).toBeCloseTo(6)
       expect(z).toBeCloseTo(6)
       expect(y).toBe(0)
-    })
-
-    it('does not apply the clearance lift when there is no surface to clear', () => {
-      expect(createDrapeProjection(deps({ source: () => null })).draped(0.5, 0.5)[1]).toBe(0)
     })
   })
 

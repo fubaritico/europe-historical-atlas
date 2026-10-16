@@ -92,8 +92,6 @@ export interface DrapeProjectionDeps {
   flatLift: () => number
   /** Lift of the shoreline above the relief, before the exaggeration the coastline is scaled by. */
   shoreLift: () => number
-  /** Lift applied to a draped point before the exaggeration scale, so it clears the terrain. */
-  readonly drapedLift: number
 }
 
 /**
@@ -112,7 +110,11 @@ export interface DrapeProjection {
    */
   toWorld: (u: number, v: number) => WorldPoint
   /**
-   * Place a grid coordinate on the relief surface.
+   * Place a grid coordinate exactly on the relief surface, with no lift.
+   *
+   * A lift used to clear the terrain, and seen at an angle it slid every border and river up the
+   * screen, off the colours they bound (2026-10-16). The layers that need to win the depth test against
+   * the surface now ask for a depth bias instead (`lineLayer`'s `depthBias`), which does not move them.
    * @param u - west→east, 0..1
    * @param v - north→south, 0..1
    * @returns the world position
@@ -153,7 +155,7 @@ export function createDrapeProjection(deps: DrapeProjectionDeps): DrapeProjectio
     const [x, , z] = toWorld(u, v)
     const source = deps.source()
     if (!source) return [x, 0, z]
-    return [x, meshSurfaceY(u, v, source, deps.segments(), deps.curve()) + deps.drapedLift, z]
+    return [x, meshSurfaceY(u, v, source, deps.segments(), deps.curve()), z]
   }
   const shore = (u: number, v: number): WorldPoint => {
     const [x, , z] = toWorld(u, v)

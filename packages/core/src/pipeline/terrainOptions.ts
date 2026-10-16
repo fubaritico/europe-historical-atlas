@@ -100,8 +100,11 @@ export interface TerrainTextureOptions {
   /**
    * How many texture pixels to bake per DEM sample, per axis (1 = one-to-one, 2 = double resolution).
    * This buys no new terrain detail — the DEM caps that — but the grain, the snow line and the coast
-   * antialiasing are all evaluated per output pixel, so they get genuinely finer. Costs the square of
-   * this factor in bake time, so drop it to 1 while tuning.
+   * antialiasing are all evaluated per output pixel, so they get genuinely finer — and so do the edges of
+   * the political tint, whose grid is 4× the DEM: at 4 the texture stops being what blurs them. Costs the
+   * square of this factor in bake time and texture memory (95 MB at 4), so drop it to 1 while tuning.
+   * At 4 the texture is 5120 px wide, past the 4096 some mobile and integrated GPUs allow — and nothing
+   * checks it yet (`known-issues-atlas.md`): a dev setting, the default stays at 2.
    */
   supersample: number
 }
@@ -186,7 +189,7 @@ export const TERRAIN_CONTROLS: ControlTable<TerrainTextureOptions> = {
   zFactor: { kind: 'number', min: 0.0002, max: 0.006, step: 0.0002, label: 'relief strength' },
   grain: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'grain (vellum)' },
   grainScale: { kind: 'number', min: 1, max: 40, step: 1, label: 'grain scale (px)' },
-  supersample: { kind: 'number', min: 1, max: 3, step: 1, label: 'resolution (\u00d7DEM)' },
+  supersample: { kind: 'number', min: 1, max: 4, step: 1, label: 'resolution (\u00d7DEM)' },
 }
 
 /**

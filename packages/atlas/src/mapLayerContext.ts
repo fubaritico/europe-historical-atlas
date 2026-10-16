@@ -27,10 +27,11 @@ import type { DataTexture, Mesh, MeshBasicMaterial, Object3D, PlaneGeometry, Sce
 export const WORLD_WIDTH = 12
 
 /**
- * Lift applied to draped lines before the exaggeration scale, so they clear the terrain they sit on
- * instead of z-fighting with it. Scaled down with the relief, hence deliberately generous.
+ * How far (world units) the lines laid on the relief — rivers and borders — are pulled toward the camera,
+ * so the surface they sit on does not hide them. Replaced a vertical lift of 0.004 on 2026-10-16: the
+ * lift slid them up the screen at an oblique angle, off the colours they bound.
  */
-export const RIVER_LIFT = 0.004
+export const DRAPED_DEPTH_BIAS = 0.006
 
 /**
  * Draw order of the political line work. It only matters once `borderOnTop` switches depth testing off:
@@ -141,7 +142,6 @@ export function createLayerProjection(dev: DevState, sources: MapSources): Drape
     curve: () => ({ plainsCeiling: dev.relief.plainsCeiling, peakTarget: dev.relief.peakTarget }),
     flatLift: () => dev.coast.yLift,
     shoreLift: () => dev.coast.shoreLift,
-    drapedLift: RIVER_LIFT,
   })
 }
 

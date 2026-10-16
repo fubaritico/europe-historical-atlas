@@ -19,6 +19,7 @@ import { terrainTextureSize } from '@europe-historical-atlas/core/pipeline/terra
 
 import {
   BORDER_RENDER_ORDER,
+  DRAPED_DEPTH_BIAS,
   WORLD_WIDTH,
   disposeHandle,
   disposeRelief,
@@ -211,6 +212,7 @@ export function rebuildRivers(context: LayerContext): void {
   )
   handles.rivers = createRiverLayer(connected, {
     project: projection.draped,
+    depthBias: DRAPED_DEPTH_BIAS,
     color: dev.river.color,
     opacity: dev.river.opacity,
     revealStart: dev.river.revealStart,
@@ -245,6 +247,7 @@ export function rebuildBorders(context: LayerContext): void {
   if (strokes.length === 0) return
   handles.borders = createComposedLineLayer(strokes, {
     project: projection.draped,
+    depthBias: DRAPED_DEPTH_BIAS,
     depthTest: !dev.political.borderOnTop,
     renderOrderBase: BORDER_RENDER_ORDER,
     dashSize: dev.political.borderDashSize,

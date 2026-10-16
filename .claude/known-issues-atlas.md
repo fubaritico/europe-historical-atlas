@@ -178,7 +178,7 @@ target.z)` would be coherent with the navigation that already exists.
   out of range). Loire, Seine, Garonne and Thames are.
 - **GPU max texture size is not checked.** The bake is 2560 px wide at supersample 2 and 3840 at 3, while
   WebGL2 only guarantees 2048. Fine on desktop, not guaranteed everywhere; clamp from
-  `renderer.capabilities.maxTextureSize` if it ever bites.
+  `renderer.capabilities.maxTextureSize` if it ever bites. **Since 2026-10-16 the dev slider reaches supersample 4** (5120 px), past the 4096 of many mobile and integrated GPUs; the default stays 2. Whether to clamp, refuse or warn is an error-handling decision to take with the dev the day the default rises.
 - **The dismiss button's two accessibility defects are fixed** (A11Y-201, A11Y-202, found 2026-09-17).
   The glyph was drawn at `opacity:0.65`, compositing to **3.71:1** against the panel — under the 4.5:1
   floor of WCAG 1.4.3 for 19px non-bold text. Fixed by dropping the alpha entirely rather than picking a

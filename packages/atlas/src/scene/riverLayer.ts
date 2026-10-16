@@ -25,6 +25,8 @@ export interface RiverLayerOptions {
    * on to each per-rank line layer.
    */
   project: (u: number, v: number) => [number, number, number]
+  /** How far to pull the strokes toward the camera so the relief does not hide them (`lineLayer`). */
+  depthBias?: number
   /** Line colour. */
   color: string
   /** Opacity of a fully revealed river. */
@@ -176,6 +178,7 @@ export function createRiverLayer(rivers: readonly River[], options: RiverLayerOp
       opacity: options.opacity,
       jitter: options.jitter,
       width: rankWidth(rank, options),
+      ...(options.depthBias === undefined ? {} : { depthBias: options.depthBias }),
     })
     byRank.set(rank, layer)
     object.add(layer.object)

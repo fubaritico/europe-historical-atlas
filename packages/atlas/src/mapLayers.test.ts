@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
 import { Scene, ShaderLib } from 'three'
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
 
 import { createDevState } from './devState'
-import { createLayerProjection } from './mapLayerContext'
+import { DRAPED_DEPTH_BIAS, createLayerProjection } from './mapLayerContext'
 import { createMapLayers } from './mapLayers'
 import { createMapSources, refreshReliefSource } from './mapSources'
 import { DEPTH_BIAS_UNIFORM } from './scene/depthBias'
@@ -21,6 +22,7 @@ import type {
   LineSegments,
   WebGLProgramParametersWithUniforms,
 } from 'three'
+import type { LineSegments2 } from 'three/addons/lines/LineSegments2.js'
 
 const META: HeightmapMeta = {
   width: 8,
@@ -252,6 +254,47 @@ describe('createMapLayers', () => {
       } as unknown as WebGLProgramParametersWithUniforms
       material.onBeforeCompile(shader, undefined as never)
       expect(shader.uniforms[DEPTH_BIAS_UNIFORM]).toEqual({ value: 0.013 })
+    })
+
+    it('pulls the borders toward the camera rather than lifting them off the colours they bound', () => {
+      const { scene, layers } = build()
+      layers.rebuildBorders()
+      const strokes = scene.children[0]?.children ?? []
+      expect(strokes.length).toBeGreaterThan(0)
+      for (const stroke of strokes) {
+        const shader = {
+          uniforms: {},
+          vertexShader: new LineMaterial().vertexShader,
+        } as unknown as WebGLProgramParametersWithUniforms
+        ;(stroke as LineSegments2).material.onBeforeCompile(shader, undefined as never)
+        expect(shader.uniforms[DEPTH_BIAS_UNIFORM]).toEqual({ value: DRAPED_DEPTH_BIAS })
+      }
+    })
+
+    it('pulls the rivers toward the camera rather than lifting them off the valleys they run in', () => {
+      const { scene, sources, layers } = build()
+      sources.riverData = [
+        {
+          rank: 1,
+          kind: 'River',
+          name: null,
+          points: [
+            { u: 0.3, v: 0.4 },
+            { u: 0.6, v: 0.5 },
+          ],
+        },
+      ]
+      layers.rebuildRivers()
+      const strokes = scene.children[0]?.children ?? []
+      expect(strokes.length).toBeGreaterThan(0)
+      for (const stroke of strokes) {
+        const shader = {
+          uniforms: {},
+          vertexShader: new LineMaterial().vertexShader,
+        } as unknown as WebGLProgramParametersWithUniforms
+        ;(stroke as LineSegments2).material.onBeforeCompile(shader, undefined as never)
+        expect(shader.uniforms[DEPTH_BIAS_UNIFORM]).toEqual({ value: DRAPED_DEPTH_BIAS })
+      }
     })
 
     it('repaints the coastline without rebuilding it', () => {
