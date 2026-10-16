@@ -19,7 +19,6 @@ import { terrainTextureSize } from '@europe-historical-atlas/core/pipeline/terra
 
 import {
   BORDER_RENDER_ORDER,
-  RELIEF_SEGMENTS,
   WORLD_WIDTH,
   disposeHandle,
   disposeRelief,
@@ -87,7 +86,7 @@ export function rebuildRelief(context: LayerContext): void {
   disposeRelief(scene, handles.relief)
   const relief = createReliefMesh(reliefSource, {
     worldWidth: WORLD_WIDTH,
-    segments: RELIEF_SEGMENTS,
+    segments: dev.relief.segments,
     plainsCeiling: dev.relief.plainsCeiling,
     peakTarget: dev.relief.peakTarget,
     wireframe: dev.relief.wireframe,
@@ -105,7 +104,7 @@ export function rebuildRelief(context: LayerContext): void {
   handles.edge = createMapEdge({
     source: reliefSource,
     worldWidth: WORLD_WIDTH,
-    segments: RELIEF_SEGMENTS,
+    segments: dev.relief.segments,
     curve: { plainsCeiling: dev.relief.plainsCeiling, peakTarget: dev.relief.peakTarget },
     depth: dev.frame.edgeDepth,
     soil: dev.frame.edgeSoil,

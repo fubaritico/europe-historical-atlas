@@ -307,8 +307,8 @@ describe('createDevPanel', () => {
       }
     })
 
-    it('routes the shore ramp and the smoothing to a relief rebuild', () => {
-      for (const property of ['shoreRamp', 'smoothing']) {
+    it('routes the shore ramp, the smoothing and the subdivision to a relief rebuild', () => {
+      for (const property of ['shoreRamp', 'smoothing', 'segments']) {
         const { calls, controls } = build()
         const control = controls.find((c) => c.property === property)
         expect(control).toBeDefined()

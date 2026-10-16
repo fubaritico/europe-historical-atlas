@@ -21,7 +21,7 @@ const cliff = (high: number, width = 8, height = 8): DrapeSource => ({
 
 const deps = (over: Partial<DrapeProjectionDeps> = {}): DrapeProjectionDeps => ({
   worldWidth: 12,
-  segments: 4,
+  segments: () => 4,
   frame: () => ({ width: 8, height: 8 }),
   source: () => flat(0),
   curve: () => CURVE,
@@ -62,7 +62,9 @@ describe('drapeProjection', () => {
     })
 
     it('climbs a cliff the flat line would have run inside', () => {
-      const projection = createDrapeProjection(deps({ source: () => cliff(2000), segments: 2 }))
+      const projection = createDrapeProjection(
+        deps({ source: () => cliff(2000), segments: () => 2 })
+      )
       expect(projection.shore(0.5, 0.5)[1]).toBeGreaterThan(projection.toWorld(0.5, 0.5)[1])
     })
 

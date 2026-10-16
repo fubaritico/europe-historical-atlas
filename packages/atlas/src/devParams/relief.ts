@@ -29,6 +29,13 @@ export interface ReliefDevParams {
   peakTarget: number
   /** Render the relief as a wireframe. */
   wireframe: boolean
+  /**
+   * Subdivisions of the relief mesh along X; Z follows the grid's aspect. The DEM has 1280 columns, so
+   * 1280 is one vertex per sample — the sharpest coast and six times the vertices of 512. Weighed live by
+   * the dev on 2026-10-16: 60 fps at both ends on his machine, the build 140 → 390 ms, the coasts sharp
+   * only at the top — *« plus le chiffre est élevé, mieux c'est »*.
+   */
+  segments: number
 }
 
 /** Tuned relief defaults — a low exaggeration that flattens further as the camera comes in. */
@@ -40,6 +47,7 @@ export const DEFAULT_RELIEF_PARAMS: ReliefDevParams = {
   plainsCeiling: 575,
   peakTarget: 1900,
   wireframe: false,
+  segments: 1280,
 }
 
 /** Range, step and label of every {@link ReliefDevParams} field. */
@@ -51,6 +59,7 @@ export const RELIEF_CONTROLS: ControlTable<ReliefDevParams> = {
   plainsCeiling: { kind: 'number', min: 0, max: 1000, step: 25, label: 'plains ceiling (m)' },
   peakTarget: { kind: 'number', min: 200, max: 3000, step: 25, label: 'peak target (m)' },
   wireframe: { kind: 'boolean', label: 'wireframe' },
+  segments: { kind: 'number', min: 256, max: 1280, step: 128, label: 'mesh segments' },
 }
 
 /** Display order of the relief controls (a flat list — the relief sits at the panel root). */
@@ -61,5 +70,6 @@ export const RELIEF_CONTROL_ORDER: (keyof ReliefDevParams)[] = [
   'shoreRamp',
   'plainsCeiling',
   'peakTarget',
+  'segments',
   'wireframe',
 ]

@@ -92,7 +92,10 @@ function addControl<T extends object>(
  * mutable relief/coastline/camera handles).
  */
 export interface DevPanelCallbacks {
-  /** Rebuild the relief geometry (height curve / smoothing changed). */
+  /**
+   * Rebuild the relief geometry (height curve, smoothing, shore ramp or subdivision changed), and with it
+   * the lines laid on it: the coastline, the rivers and the borders.
+   */
   rebuildRelief: () => void
   /** Regenerate the terrain texture (a full pixel pass). */
   rebuildTexture: () => void

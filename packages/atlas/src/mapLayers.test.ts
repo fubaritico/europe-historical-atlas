@@ -6,6 +6,7 @@ import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
 
 import { createDevState } from './devState'
+import { createLayerProjection } from './mapLayerContext'
 import { createMapLayers } from './mapLayers'
 import { createMapSources, refreshReliefSource } from './mapSources'
 import { DEPTH_BIAS_UNIFORM } from './scene/depthBias'
@@ -119,6 +120,47 @@ describe('createMapLayers', () => {
       layers.rebuildRelief()
       expect(sources.reliefSource).not.toBe(before)
       expect(sources.reliefSource).toBe(DEM)
+    })
+
+    it('builds the relief at the subdivision the panel asks for', () => {
+      const { scene, dev, layers } = build()
+      dev.relief.segments = 4
+      layers.rebuildRelief()
+      // 4 segments on X over a square grid: 5 × 5 vertices.
+      const count = (
+        scene.children[0] as unknown as { geometry: BufferGeometry }
+      ).geometry.getAttribute('position').count
+      expect(count).toBe(25)
+    })
+
+    it('builds the wall at the same subdivision as the relief it closes', () => {
+      const { scene, dev, layers } = build()
+      // The wall is a group of two meshes: the section along the land, and the board below it.
+      const wallVertices = (): number =>
+        (scene.children[1]?.children ?? []).reduce(
+          (sum, part) =>
+            sum +
+            (part as unknown as { geometry: BufferGeometry }).geometry.getAttribute('position')
+              .count,
+          0
+        )
+      dev.relief.segments = 4
+      layers.rebuildRelief()
+      const coarse = wallVertices()
+      dev.relief.segments = 8
+      layers.rebuildRelief()
+      expect(wallVertices()).toBeGreaterThan(coarse)
+    })
+
+    it('drapes the lines on the subdivision the panel asks for, read live', () => {
+      // The relief is a 400 m plateau on a -20 m sea: between two coarse vertices the surface ramps,
+      // so the height under a point next to the plateau depends on where the vertices fall.
+      const { sources, dev } = build()
+      const projection = createLayerProjection(dev, sources)
+      dev.relief.segments = 2
+      const coarse = projection.draped(0.3, 0.5)[1]
+      dev.relief.segments = 7
+      expect(projection.draped(0.3, 0.5)[1]).not.toBeCloseTo(coarse, 6)
     })
 
     it('leaves the relief alone when the edge is not cut', () => {

@@ -25,7 +25,7 @@ import {
 import { createLayerProjection, disposeHandle, disposeRelief } from './mapLayerContext'
 import { inlayOpacityScale } from './scene/composedLineLayer'
 
-export { RELIEF_SEGMENTS, WORLD_WIDTH } from './mapLayerContext'
+export { WORLD_WIDTH } from './mapLayerContext'
 export type { MapLayersDeps } from './mapLayerContext'
 
 import type { LayerContext, MapLayersDeps } from './mapLayerContext'

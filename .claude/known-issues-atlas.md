@@ -2,6 +2,14 @@
 
 Open issues specific to `packages/atlas`, moved out of `known-issues.md` to keep the auto-loaded context under its limit. **Load before touching the atlas render, its pipeline wiring or its dev panel.**
 
+- **The relief mesh is built at 1280 segments, one vertex per DEM column** (2026-10-16): 1.49 M vertices,
+  built in ~390 ms on the main thread at startup and on each relief slider (512 was ~140 ms), ~48 MB of
+  vertex data. 60 fps on the dev's machine at both ends; the coasts are only sharp at the top. **Two
+  consequences to plan for**: (1) a weak machine (a phone) may not hold the frame rate — remedy, the one
+  already written for `rasterScale` below: time the first build and step the `segments` tunable down
+  (768 halves the vertices of 1024); (2) **M1.4 picking** will raycast ~3 M triangles — brute force is
+  tens of milliseconds a click, so give the relief a spatial index (a BVH) when picking lands, not
+  before. **Severity: worth knowing.**
 - **`terrainOptions.ts`'s comment on `politicalMode` contradicts its value.** The comment argues for
   `'normal'` _"rather than multiply"_, and the value is `'overlay'` — a tuning pass moved the value and
   left the reasoning behind. Cosmetic, but it is the kind of comment someone trusts instead of reading the

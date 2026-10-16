@@ -29,10 +29,10 @@ export type WorldPoint = [number, number, number]
 /**
  * Height of the relief *surface* at a grid coordinate, in world units before exaggeration.
  *
- * Deliberately not `reliefWorldY(source.sample(u, v))`. The mesh is a subdivided plane with far fewer
- * vertices than the DEM has samples — 512 segments against a 1280-wide grid — so between two vertices
- * the triangles interpolate straight across some 17 km of terrain. A point placed at its true DEM
- * elevation therefore sits *below* the drawn valley floor and is occluded by it. This evaluates the
+ * Deliberately not `reliefWorldY(source.sample(u, v))`. The mesh is a subdivided plane whose vertices
+ * need not fall on the DEM's samples — at 512 segments against a 1280-wide grid its triangles cut
+ * straight across some 17 km of terrain — so a point placed at its true DEM elevation can sit *below*
+ * the drawn valley floor and be occluded by it. This evaluates the
  * curve on the mesh's own vertex grid and interpolates bilinearly between those nodes, which is the
  * very surface being drawn.
  * @param u - west→east, 0..1
@@ -75,8 +75,8 @@ export function meshSurfaceY(
 export interface DrapeProjectionDeps {
   /** World-space width of the map plane on X. */
   readonly worldWidth: number
-  /** The relief mesh's subdivision count on X. */
-  readonly segments: number
+  /** The relief mesh's subdivision count on X — read live, the dev panel tunes it. */
+  segments: () => number
   /**
    * The grid that gives the plane its aspect ratio, or `null` before the elevation has loaded.
    *
@@ -153,12 +153,12 @@ export function createDrapeProjection(deps: DrapeProjectionDeps): DrapeProjectio
     const [x, , z] = toWorld(u, v)
     const source = deps.source()
     if (!source) return [x, 0, z]
-    return [x, meshSurfaceY(u, v, source, deps.segments, deps.curve()) + deps.drapedLift, z]
+    return [x, meshSurfaceY(u, v, source, deps.segments(), deps.curve()) + deps.drapedLift, z]
   }
   const shore = (u: number, v: number): WorldPoint => {
     const [x, , z] = toWorld(u, v)
     const source = deps.source()
-    const surface = source ? meshSurfaceY(u, v, source, deps.segments, deps.curve()) : 0
+    const surface = source ? meshSurfaceY(u, v, source, deps.segments(), deps.curve()) : 0
     return [x, surface + deps.shoreLift(), z]
   }
   return { toWorld, draped, shore }

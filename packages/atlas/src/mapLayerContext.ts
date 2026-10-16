@@ -27,15 +27,6 @@ import type { DataTexture, Mesh, MeshBasicMaterial, Object3D, PlaneGeometry, Sce
 export const WORLD_WIDTH = 12
 
 /**
- * Relief subdivision.
- *
- * Draped overlays must land on the surface this produces, not on the raw DEM: at 512 segments against a
- * 1280-wide grid the mesh interpolates straight across some 17 km of terrain, so a river read at its
- * true DEM elevation sits *below* the drawn valley floor and is occluded by it.
- */
-export const RELIEF_SEGMENTS = 512
-
-/**
  * Lift applied to draped lines before the exaggeration scale, so they clear the terrain they sit on
  * instead of z-fighting with it. Scaled down with the relief, hence deliberately generous.
  */
@@ -144,7 +135,7 @@ export function disposeRelief(scene: Scene, relief: ReliefMesh | null): void {
 export function createLayerProjection(dev: DevState, sources: MapSources): DrapeProjection {
   return createDrapeProjection({
     worldWidth: WORLD_WIDTH,
-    segments: RELIEF_SEGMENTS,
+    segments: () => dev.relief.segments,
     frame: () => sources.heightmap?.meta ?? null,
     source: () => sources.reliefSource,
     curve: () => ({ plainsCeiling: dev.relief.plainsCeiling, peakTarget: dev.relief.peakTarget }),
