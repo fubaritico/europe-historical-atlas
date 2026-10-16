@@ -66,29 +66,25 @@ d'ancres ne perd jamais rien pendant l'édition.** Donc `removePolity` retire un
 point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui n'est plus référencé disparaît
 à l'enregistrement, par une seule renumération. Vérifié en la cassant : 3 tests tombent.
 
-## ▶▶▶▶ ON REPREND ICI — le 16/10 à 9 h 30, décidé par le dev
+## ▶▶▶▶ ON REPREND ICI — après le 16/10
 
-**Tout est commité et poussé** (`220ae18` + l'état de session ; vérifier par `git ls-remote origin main`). Ordre :
+**Tout est commité et poussé** (`5c96eaf` + l'état de session ; vérifier par `git ls-remote origin main`). Le dev
+retouche l'Angleterre, puis Écosse, Irlande, Byzance — surtout des réglages de couleurs. Ordre proposé, **il tient
+l'ordre** (mémoire [[do-not-start-unasked-work]]) :
 
-0. **Les côtes de l'atlas sont « très sales »** (le dev, 16/10 à 00:30, cinq captures) : les teintes débordent en mer
-   et gonflent les îles, le trait de côte passe à côté, des marches d'escalier sous les frontières exactes. Lire
-   `files/plans/atlas/2026-10-16-coasts/README.md` et ses captures (non commitées) **avant tout le reste** ; mesurer,
-   puis comparer capture pour capture avec le Cartographe.
-1. **Le dev regarde les tribus en tirets et le menu des rangs.** Si les tirets sont trop fins ou trop épais : une ligne,
-   `paintTribeOutlines` (largeur du bord d'une frontière, `borderEdgeWidth`). Les Prussiens et les Sudoviens ont la même
-   couleur `#41580b` : leurs tirets se confondent, à lui dire.
-2. **Les tribus dans l'atlas** (`known-issues`) : pas de teinte (`authoredRegionColours`), frontières écartées
-   (`exactBordersOf` + `touchesTribe`), une couche de tirets par couleur. `pnpm dev` à lui demander après.
-3. **Le dev dessine la Rus'**, principauté par principauté, avec `~/Desktop/rus-1100-correspondances.md` : ce qui
-   existe déjà (Kiev, Tchernigov, Novgorod…) se retouche, ne se recrée pas. Puis il replace les tribus autour.
-   **Pendant qu'il dessine : réponses très courtes et concrètes**, et si j'écris dans `years/`, il recharge **sans**
-   ‹ctrl+s› (mémoire [[reload-without-saving-after-my-write]]).
-4. **Recreuser un vassal depuis l'outil** (`known-issues`) — aujourd'hui seule la fermeture d'un contour neuf creuse.
-5. Les étapes encore ouvertes du 15/10 : la revue à quatre agents de la soudure (`b3f4e20`) ; l'aimantation d'une
-   sélection entière (`H-37` partie 2) ; la validation d'un contour posé (`s99`, `H-46`) ; le `Dock` redimensionnable et
-   le zoom 128 ; ⟨retracer⟩ / supprimer depuis un suzerain sur les bords de l'étendue tenus par un vassal.
-
-**L'objectif que le dev a nommé** : *« le maximum d'ergonomie lorsqu'on corrige les tracés »*.
+1. **Son retour sur l'expérience de dessin dans le Cartographe** (*« compliqué à expliquer »*) : le recueillir même en
+   désordre, en faire des scénarios avant de coder.
+2. **Les couleurs** : comparer et régler le mélange atlas ↔ Cartographe, capture pour capture.
+3. **`H-46`** : la validation des contours qui se recoupent (19 pays listés dans
+   `files/plans/atlas/2026-10-16-coasts/exact-fills.md`).
+4. **Recreuser un vassal depuis l'outil** (`known-issues`).
+5. **La séance sur le style des frontières** : épaisseurs par main, vrai pointillé, main de frontière (`H-45`).
+6. La revue à quatre agents de la soudure (`b3f4e20`) et `H-37` partie 2 ; ⟨retracer⟩ / supprimer depuis un suzerain
+   sur les bords tenus par un vassal ; le `Dock` redimensionnable et le zoom 128 ; `H-43` et la marque « modified ».
+7. Le découpage des teintes dans le worker et un index pour le picking ; `boundsMatch` et la suppression de `borders/`
+   (GPL) ; Playwright ; trier les copies de `years/1100*` (`rm` : sa permission) ; la nouvelle version du DS en dernier.
+8. **La publication de 1100 et la licence Euratlas** (clauses 6/9) : à reprendre **quand il montre la carte finie**,
+   pas avant.
 
 ## ▶▶ LE TEST GÉNÉRAL — contexte (le dessin est fait, voir le point ci-dessus)
 

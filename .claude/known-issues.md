@@ -11,6 +11,12 @@ Put here the know issues to avoid cluttering the context window.
   est une référence privée). **Depuis la nuit du 14/10**, `years/1100/` tient 137 pays, et les traces de la nuit
   sont `years/1100.euratlas-{16,19,30,48,76,98,137,137b}/` et `1100.before-rename/` — toutes locales, à trier avec
   le dev (aucune n'a été supprimée : `rm -rf` demande sa permission). **Sévérité : à savoir.**
+- **Les raccourcis d'empilement (16/10) laissent deux constats de revue ouverts, par ma décision.** (1) A11Y-002 :
+  répéter la même commande réécrit le même message dans la barre d'état, et un lecteur d'écran peut ne pas le
+  relire — non vérifié, et ça touche toute la barre (`persistence/resultRelay.ts`), pas ce seul raccourci. (2)
+  ARCH-001 : la règle « une flèche modifiée ne fait ni défiler la carte ni bouger le curseur de la liste » est écrite à
+  trois endroits (`controller.panFromKeys`, `PolityList`, `stackingShortcut`) ; à mettre en commun au prochain
+  raccourci du même genre. **Sévérité : cosmétique.**
 - **Recreuser un vassal après coup est impossible depuis l'outil** (16/10). Le creusement ne tourne qu'à la fermeture
   d'un contour neuf (`addOutlineCarving`) ; un vassal dessiné avant, ou recouvert de nouveau par une retouche du
   suzerain, garde la couleur du suzerain par-dessus (la Champagne, la Frise : recreusées au script). Remède : un geste
