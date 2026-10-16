@@ -99,6 +99,9 @@ function build(loaded = true): {
 } {
   const scene = new Scene()
   const dev = createDevState()
+  // The production default builds the relief at the DEM's 1280 segments: 1.4 s a test here, past the
+  // 5 s timeout on the CI's runners. Nothing in this suite depends on the mesh being that fine.
+  dev.relief.segments = 16
   const sources = createMapSources()
   if (loaded) {
     sources.heightmap = DEM
