@@ -129,9 +129,9 @@ export function politicalPalette(params: PoliticalDevParams): [string, ...string
   ]
 }
 
-/** Opens on 1500 — a Europe recognisable enough to judge the rendering against. */
+/** Opens on 1100, the year being drawn in the Cartographer — the dev's call, 2026-10-16. */
 export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
-  year: 1500,
+  year: 1100,
   showBorders: true,
   // 4× the DEM: 1.9 km cells against the DEM's own 7.6 km, on a 5120×4656 grid of 23.8 million cells.
   // It was held at 2× only because it blocked the main thread for 825 ms; the compute runs in a worker
