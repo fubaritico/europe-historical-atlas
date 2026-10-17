@@ -96,10 +96,10 @@
       "rank": "county",
       "status": null,
       "suzerain": "kingdom-of-the-franks",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 866,
+      "existsTo": 1797,
       "colour": "#ffb700",
-      "wikidata": null
+      "wikidata": "Q157070"
     },
     {
       "id": "county-of-toulouse",
@@ -275,17 +275,6 @@
       "existsFrom": null,
       "existsTo": null,
       "colour": "#99e680",
-      "wikidata": null
-    },
-    {
-      "id": "banu-hilal-tribes-confederation",
-      "name": "Banu Hilal Tribes Confederation",
-      "rank": "tribe",
-      "status": "country",
-      "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
-      "colour": "#e0f0d4",
       "wikidata": null
     },
     {
@@ -546,7 +535,7 @@
       "name": "Emirate of Kemakh-Erzinjan",
       "rank": "emirate",
       "status": "country",
-      "suzerain": null,
+      "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
       "existsFrom": null,
       "existsTo": null,
       "colour": "#1169a4",
@@ -557,7 +546,7 @@
       "name": "Emirate of Erzurum",
       "rank": "emirate",
       "status": "country",
-      "suzerain": null,
+      "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
       "existsFrom": null,
       "existsTo": null,
       "colour": "#dbd4db",
@@ -586,28 +575,6 @@
       "wikidata": null
     },
     {
-      "id": "lordship-of-gerger",
-      "name": "Lordship of Gerger",
-      "rank": "lordship",
-      "status": null,
-      "suzerain": "empire-of-the-romans",
-      "existsFrom": null,
-      "existsTo": null,
-      "colour": "#370453",
-      "wikidata": null
-    },
-    {
-      "id": "barony-of-cilician-armenia",
-      "name": "Barony of Cilician Armenia",
-      "rank": "barony",
-      "status": null,
-      "suzerain": "empire-of-the-romans",
-      "existsFrom": null,
-      "existsTo": null,
-      "colour": "#420663",
-      "wikidata": null
-    },
-    {
       "id": "emirate-of-amida",
       "name": "Emirate of Amida",
       "rank": "emirate",
@@ -616,17 +583,6 @@
       "existsFrom": null,
       "existsTo": null,
       "colour": "#f0e3c2",
-      "wikidata": null
-    },
-    {
-      "id": "principality-of-keysun",
-      "name": "Principality of Keysun",
-      "rank": "principality",
-      "status": null,
-      "suzerain": "empire-of-the-romans",
-      "existsFrom": null,
-      "existsTo": null,
-      "colour": "#774393",
       "wikidata": null
     },
     {
@@ -656,7 +612,7 @@
       "name": "Emirate of Ahlat",
       "rank": "emirate",
       "status": "country",
-      "suzerain": null,
+      "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
       "existsFrom": null,
       "existsTo": null,
       "colour": "#e3e8bf",
@@ -667,10 +623,10 @@
       "name": "Emirate of Mosul",
       "rank": "emirate",
       "status": "country",
-      "suzerain": null,
+      "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#d9d6eb",
+      "colour": "#529c52",
       "wikidata": null
     },
     {
@@ -679,31 +635,31 @@
       "rank": "principality",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1098,
+      "existsTo": 1268,
       "colour": "#f57db3",
-      "wikidata": null
+      "wikidata": "Q235030"
     },
     {
       "id": "principality-of-jerusalem",
-      "name": "Principality of Jerusalem",
-      "rank": "principality",
+      "name": "Kingdom of Jerusalem",
+      "rank": "kingdom",
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
       "colour": "#db9cf5",
-      "wikidata": null
+      "wikidata": "Q55502"
     },
     {
       "id": "emirate-of-damascus",
       "name": "Emirate of Damascus",
       "rank": "emirate",
       "status": "country",
-      "suzerain": null,
+      "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#ffffcc",
+      "colour": "#47ca47",
       "wikidata": null
     },
     {
@@ -711,10 +667,10 @@
       "name": "Emirate of Aleppo",
       "rank": "emirate",
       "status": "country",
-      "suzerain": null,
+      "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#ebd975",
+      "colour": "#1e731e",
       "wikidata": null
     },
     {
@@ -729,11 +685,44 @@
       "wikidata": null
     },
     {
+      "id": "emirate-of-yemen",
+      "name": "Emirate of Yemen",
+      "rank": "emirate",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#683939",
+      "wikidata": null
+    },
+    {
+      "id": "imamate-of-oman",
+      "name": "Imamate of Oman",
+      "rank": "emirate",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#822222",
+      "wikidata": null
+    },
+    {
+      "id": "emirate-of-sana",
+      "name": "Emirate of Sana",
+      "rank": "emirate",
+      "status": null,
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#ba5d5d",
+      "wikidata": null
+    },
+    {
       "id": "kingdom-of-kars",
       "name": "Kingdom of Kars",
       "rank": "kingdom",
       "status": "country",
-      "suzerain": null,
+      "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
       "existsFrom": null,
       "existsTo": null,
       "colour": "#ccd1e8",
@@ -755,7 +744,7 @@
       "name": "Lordship of Ani",
       "rank": "lordship",
       "status": "country",
-      "suzerain": null,
+      "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
       "existsFrom": null,
       "existsTo": null,
       "colour": "#dbba9e",
@@ -766,7 +755,7 @@
       "name": "Kingdom of Tashir-Dzoraget",
       "rank": "kingdom",
       "status": "country",
-      "suzerain": null,
+      "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
       "existsFrom": null,
       "existsTo": null,
       "colour": "#f5ebef",
@@ -1506,18 +1495,51 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#3873a5",
+      "colour": "#009900",
       "wikidata": null
     },
     {
       "id": "kingdom-of-the-franks",
-      "name": "Kingdom of the Franks",
+      "name": "Kingdom of France",
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
+      "existsFrom": 987,
+      "existsTo": 1791,
+      "colour": "#0641f1",
+      "wikidata": "Q70972"
+    },
+    {
+      "id": "barony-of-clician-armenia",
+      "name": "Barony of Clician Armenia",
+      "rank": "county",
+      "status": null,
+      "suzerain": "empire-of-the-romans",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#0641f1",
+      "colour": "#7b56b4",
+      "wikidata": null
+    },
+    {
+      "id": "principality-of-keysun",
+      "name": "Principality of Keysun",
+      "rank": "principality",
+      "status": null,
+      "suzerain": "empire-of-the-romans",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#4a3965",
+      "wikidata": null
+    },
+    {
+      "id": "lordship-of-gerger",
+      "name": "Lordship of Gerger",
+      "rank": "lordship",
+      "status": null,
+      "suzerain": "empire-of-the-romans",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#977dbe",
       "wikidata": null
     }
   ]
