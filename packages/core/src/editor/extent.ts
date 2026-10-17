@@ -8,7 +8,7 @@
  */
 
 import { vassalsOf } from '../data/paintOrder'
-import { pointInRings } from '../geo/pointInRing'
+import { indexRings, pointInIndexedRings } from '../geo/pointInRing'
 
 import { chainBorderRuns } from './borderGraph'
 import { MIN_RING_ANCHORS } from './yearDocument'
@@ -57,10 +57,12 @@ const SIDE_STEP = 1e-3
  */
 export function extentOutline(doc: YearDocument, id: string): number[][] {
   const members = new Set(extentMembers(doc, id))
-  const memberClaims = doc.claims
+  // Each member's rings indexed once for the whole outline (CARTO-240): a test then walks only the edges
+  // of its latitude band — Norway's 16 235 vertices made every test walk them all, seconds per gesture.
+  const memberIndexes = doc.claims
     .filter((claim) => members.has(claim.polity))
     .map((claim) =>
-      boxed(
+      indexRings(
         claim.rings.map((ring) =>
           ring
             .map((index) => doc.anchors[index])
@@ -68,17 +70,8 @@ export function extentOutline(doc: YearDocument, id: string): number[][] {
         )
       )
     )
-  // The box first (review QUAL-002, 2026-10-15): a member far from the point is skipped without walking its
-  // rings, as `derivedBorders` does for the far side.
   const inExtent = (point: [number, number]): boolean =>
-    memberClaims.some(
-      ({ rings, box }) =>
-        point[0] >= box.west &&
-        point[0] <= box.east &&
-        point[1] >= box.south &&
-        point[1] <= box.north &&
-        pointInRings(point, rings)
-    )
+    memberIndexes.some((index) => pointInIndexedRings(point, index))
 
   const kept = new Map<string, BorderEdge>()
   for (const claim of doc.claims) {
@@ -97,31 +90,6 @@ export function extentOutline(doc: YearDocument, id: string): number[][] {
     }
   }
   return chainBorderRuns(kept).map(({ run }) => run)
-}
-
-/** A member's rings resolved to coordinates, and the box around them. */
-interface BoxedRings {
-  /** Its rings, as `[lon, lat]`. */
-  rings: [number, number][][]
-  /** The box around every ring: a point outside it is outside the member. */
-  box: { west: number; east: number; south: number; north: number }
-}
-
-/**
- * Put a box around resolved rings.
- * @param rings - the rings, as `[lon, lat]`
- * @returns the rings and their box
- */
-function boxed(rings: [number, number][][]): BoxedRings {
-  const box = { west: Infinity, east: -Infinity, south: Infinity, north: -Infinity }
-  for (const ring of rings)
-    for (const [lon, lat] of ring) {
-      box.west = Math.min(box.west, lon)
-      box.east = Math.max(box.east, lon)
-      box.south = Math.min(box.south, lat)
-      box.north = Math.max(box.north, lat)
-    }
-  return { rings, box }
 }
 
 /**

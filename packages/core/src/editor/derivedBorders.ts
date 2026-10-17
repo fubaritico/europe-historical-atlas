@@ -17,7 +17,7 @@
  */
 
 import { latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
-import { pointInRings } from '../geo/pointInRing'
+import { indexRings, pointInIndexedRings } from '../geo/pointInRing'
 
 import { borderRunsOf } from './borderGraph'
 import { coveringRun, stretchesBy } from './borderOverrides'
@@ -28,6 +28,7 @@ import type { BorderRelation } from './borderRelation'
 import type { YearDocument } from './yearDocument'
 import type { LandMask } from '../data/landMask'
 import type { YearPolity } from '../data/yearFormat'
+import type { RingIndex } from '../geo/pointInRing'
 
 /** One border, ready to draw. */
 export interface DerivedBorder {
@@ -117,7 +118,12 @@ interface ResolvedClaim {
   rings: [number, number][][]
   /** The box around every ring: a point outside it is outside the claim, with no ring walked. */
   box: { west: number; east: number; south: number; north: number }
+  /** Its rings indexed for the far-side tests, built once per derivation (CARTO-240). */
+  index: RingIndex
 }
+
+/** The index of a polity holding no ring: every point is outside it. */
+const NO_RINGS: RingIndex = indexRings([])
 
 /**
  * Every claim resolved once, for a whole derivation.
@@ -127,7 +133,7 @@ interface ResolvedClaim {
  * On the 137 polities of 1100 it took 5.7 s, and the Cartographer paid it after every gesture. Resolved
  * here, and skipped by their box, the answer is the same and the cost is the segments.
  * @param doc - the document
- * @returns each claim's rings and box, by polity id
+ * @returns each claim's rings, box and index, by polity id
  */
 function resolveClaims(doc: YearDocument): Map<string, ResolvedClaim> {
   const resolved = new Map<string, ResolvedClaim>()
@@ -146,7 +152,7 @@ function resolveClaims(doc: YearDocument): Map<string, ResolvedClaim> {
         box.north = Math.max(box.north, lat)
       }
     }
-    resolved.set(claim.polity, { polity: claim.polity, rings, box })
+    resolved.set(claim.polity, { polity: claim.polity, rings, box, index: indexRings(rings) })
   }
   return resolved
 }
@@ -162,7 +168,7 @@ function encloses(point: readonly [number, number], claim: ResolvedClaim): boole
   if (point[0] < box.west || point[0] > box.east || point[1] < box.south || point[1] > box.north) {
     return false
   }
-  return pointInRings([point[0], point[1]], claim.rings)
+  return pointInIndexedRings(point, claim.index)
 }
 
 /**
@@ -425,13 +431,13 @@ const FAR_SIDE_OFFSET_DEG = 0.05
  * matters. When neither or both are outside — a sliver narrower than the offset — the first is kept.
  * @param a - one end, lon/lat
  * @param b - the other
- * @param ownRings - the owner's rings, resolved
+ * @param own - the owner's rings, indexed
  * @returns the outward point
  */
 function outsideOf(
   a: readonly [number, number],
   b: readonly [number, number],
-  ownRings: [number, number][][]
+  own: RingIndex
 ): [number, number] {
   const mid: [number, number] = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
   const dx = b[0] - a[0]
@@ -442,7 +448,7 @@ function outsideOf(
   const ny = (dx / length) * FAR_SIDE_OFFSET_DEG
   const left: [number, number] = [mid[0] + nx, mid[1] + ny]
   const right: [number, number] = [mid[0] - nx, mid[1] - ny]
-  return pointInRings(left, ownRings) && !pointInRings(right, ownRings) ? right : left
+  return pointInIndexedRings(left, own) && !pointInIndexedRings(right, own) ? right : left
 }
 
 /**
@@ -500,8 +506,8 @@ interface FarSide {
  * @returns one border per stretch of one far side
  */
 function bordersOfSingle(run: number[], owner: string, derivation: Derivation): DerivedBorder[] {
-  const ownRings = derivation.claims.get(owner)?.rings ?? []
-  const sides = run.slice(1).map((to, at) => segmentSide(run[at], to, owner, ownRings, derivation))
+  const own = derivation.claims.get(owner)?.index ?? NO_RINGS
+  const sides = run.slice(1).map((to, at) => segmentSide(run[at], to, owner, own, derivation))
   return stretchesBy(run, sides, sameSide).flatMap(({ run: stretch, label }) =>
     label === null ? [] : [borderOfStretch(stretch, owner, label, derivation.doc, derivation.byId)]
   )
@@ -524,7 +530,7 @@ function sameSide(a: FarSide | null | undefined, b: FarSide | null | undefined):
  * @param from - the segment's first anchor
  * @param to - its second
  * @param owner - the polity holding it
- * @param ownRings - the owner's rings, resolved
+ * @param own - the owner's rings, indexed
  * @param derivation - the document, the polities, the claims resolved and the mask
  * @returns the far side, or `null` when an anchor is missing
  */
@@ -532,7 +538,7 @@ function segmentSide(
   from: number | undefined,
   to: number,
   owner: string,
-  ownRings: [number, number][][],
+  own: RingIndex,
   derivation: Derivation
 ): FarSide | null {
   const { doc, deps } = derivation
@@ -542,7 +548,7 @@ function segmentSide(
   // The coast is asked first: the author snapped both ends to it, so water lies beyond, however narrow.
   // Asked after inclusion (2026-10-15), the step outward crossed the Velebit channel into Venice's islands.
   if (onCoast(from, to, doc, deps)) return { far: null, dry: false }
-  const point = outsideOf(a, b, ownRings)
+  const point = outsideOf(a, b, own)
   const far = farSideOf(owner, point, derivation.claims, derivation.byId)
   // Nothing claims the far side: only the mask can say whether that is the sea or ground nobody took.
   return { far, dry: far === null && (deps.isLand?.(point[0], point[1]) ?? false) }
