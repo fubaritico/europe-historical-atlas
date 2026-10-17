@@ -77,8 +77,12 @@ When the dev proposes something:
 - **Always run** the checks after every change (once tooling is in place: Phase 0.1) —
   `pnpm type-check && pnpm lint && pnpm test` — then `/review`.
 - **Always ask** the dev to run `pnpm dev` (Vite server) after changing the 3D rendering.
-- **Knowledge base** — feed memory (`memory-*` skills / knowledge graph) as technical decisions are made
-  (choices, thresholds, trade-offs). Establish the convention from the first decision.
+- **Knowledge base — one home per kind of fact** (the dev's call, 2026-10-17). This project's decisions go in
+  its plans and `.claude/*.md`; the tasks on the Trello board (`/trello`); how to work with the dev in the file
+  memory. **Basic Memory is the knowledge graph that crosses projects**: a tooling trap, a code pattern, a
+  method that would serve in another repository — feed it as such a lesson is learned, in the `main` project's
+  `patterns/` folder, linked from `Cross-project engineering patterns — index`. Use the CLI when the MCP is not
+  loaded: `basic-memory tool search-notes|write-note|edit-note … --project main`; search before writing.
 - **Model**: Haiku for questions/research, Sonnet for code/commits — suggest Haiku when appropriate.
 - **Never `--no-verify`** on commit without the dev's explicit agreement.
 - **Shared responsibility** — care about every line, review your own output before presenting it.

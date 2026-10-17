@@ -27,6 +27,7 @@ drifts, and nothing fails when it does ([[distribute-notes-dont-pile-them]]).
 | `.claude/known-issues.md` (+ `known-issues-atlas.md`) | a problem's mechanism: measure, cause, why the remedy. An entry **that asks for an action** gets a card naming it; an entry *« à savoir »* stays in the file with no card | the to-do — on the card |
 | `.claude/next.md` | the resume point: where we stopped, what is mid-flight and in what state, context that is not a task. Points to the cards in À toi / En cours | **any list of tasks** |
 | `.claude/completed.md` | a short account of each session: time spans, the dev's own words, my faults — citing tickets (`CARTO-41`) | the detail of what shipped — in the Fait cards (description: what, commits, date) |
+| Basic Memory, `main` project, `patterns/` | what holds **across** projects — a tooling trap, a code pattern, a method (the dev's call, 2026-10-17); linked from `Cross-project engineering patterns — index` | anything specific to this project |
 
 **Every gesture keeps both sides in step, in the same breath:**
 
