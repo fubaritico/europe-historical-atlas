@@ -12,10 +12,14 @@ import {
   withName,
 } from './polityDraft'
 import { PolityForm } from './PolityForm'
+import { useWikidataItem } from './useWikidataItem'
+import { wikidataViewOf } from './wikidataView'
 
 import type { DraftField, PolityDraft } from './polityDraft'
 import type { PolityFormField } from './PolityForm'
 import type { CartographerStoreHook } from '../state/store'
+import type { WikidataField } from '../wikidata/wikidataFacts'
+import type { WikidataSource } from '../wikidata/wikidataSource'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { HsvaColor } from '@fubaritico/behaviors'
 
@@ -32,6 +36,8 @@ export interface PolityDialogProps {
   isOpen: boolean
   /** Called once the dialogue is done, validated or cancelled. */
   onClose: () => void
+  /** Where Wikidata is read from, for the panel under the Wikidata field (CARTO-243). */
+  wikidata: WikidataSource
 }
 
 /**
@@ -155,19 +161,29 @@ function usePolityDraft(
  *
  * **A click on the backdrop does not close it**: the design system's own warning — a dialogue holding
  * typed work must not lose it to a stray click. Escape, Cancel and the cross do.
- * @param props - the store, the polity edited if any, and the open state the caller owns
+ * @param props - the store, the polity edited if any, the open state the caller owns, and Wikidata
  * @returns the dialogue
  */
-export function PolityDialog({ store, editing, isOpen, onClose }: PolityDialogProps) {
+export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: PolityDialogProps) {
   // State
   const { draft, errors, suzerains, ranks, close, onField, onColour, onSubmit } = usePolityDraft(
     store,
     editing,
     onClose
   )
+  const reading = useWikidataItem(wikidata, draft.wikidata)
 
   // Derived
   const title = editing === null ? 'New polity' : 'Edit polity'
+  const { document } = store.getState()
+  const others = document.polities.filter((polity) => polity.id !== editing?.id)
+  const wikidataView = wikidataViewOf(reading, draft, document.year, others)
+
+  // Handlers
+  // Wikidata only ever writes on the author's click, through the same path as typing.
+  const handleUseWikidata = (field: WikidataField, value: string) => {
+    onField(field, value)
+  }
 
   // Render
   return (
@@ -183,6 +199,8 @@ export function PolityDialog({ store, editing, isOpen, onClose }: PolityDialogPr
         onColour={onColour}
         onSubmit={onSubmit}
         onCancel={close}
+        wikidata={wikidataView}
+        onUseWikidata={handleUseWikidata}
       />
     </Modal>
   )

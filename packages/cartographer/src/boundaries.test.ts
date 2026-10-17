@@ -80,6 +80,7 @@ const LAYERS = {
   workbench: 'src/workbench/Workbench.tsx',
   persistence: 'src/persistence/yearSession.ts',
   devServer: 'src/devServer/yearWritePlan.ts',
+  wikidata: 'src/wikidata/wikidataFacts.ts',
   root: 'src/main.tsx',
 } as const
 

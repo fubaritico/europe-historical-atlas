@@ -16,6 +16,7 @@ import type { PendingDeletion } from './polityDeletion'
 import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
 import type { ViewportPoint } from '../view/viewport'
+import type { WikidataSource } from '../wikidata/wikidataSource'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 
 /** What the panel needs: the store, the colours its rows show, and where to say what a command did. */
@@ -26,6 +27,8 @@ export interface PolitiesPanelProps {
   colours: PolityColourSource
   /** Say what a command did, in the status bar's result zone — the one live region (A11Y-003). */
   onResult: (message: string | null) => void
+  /** Where the polity form reads Wikidata from (CARTO-243). */
+  wikidata: WikidataSource
 }
 
 /**
@@ -60,20 +63,30 @@ function useArrangeMenu() {
  * @param props.store - the store holding the document
  * @param props.edited - the polity edited, or `null`
  * @param props.onEdited - close it
+ * @param props.wikidata - where the form reads Wikidata from
  * @returns the dialogue, or nothing
  */
 function EditDialog({
   store,
   edited,
   onEdited,
+  wikidata,
 }: {
   store: CartographerStoreHook
   edited: YearPolity | null
   onEdited: () => void
+  wikidata: WikidataSource
 }) {
   // Render
   return edited === null ? null : (
-    <PolityDialog key={edited.id} store={store} editing={edited} isOpen onClose={onEdited} />
+    <PolityDialog
+      key={edited.id}
+      store={store}
+      editing={edited}
+      isOpen
+      onClose={onEdited}
+      wikidata={wikidata}
+    />
   )
 }
 
@@ -152,16 +165,19 @@ function usePolityDeletion(
  * @param props.store - the store holding the document
  * @param props.onResult - the status bar's result zone
  * @param props.onDone - give the focus back to the list once the confirmation closes
+ * @param props.wikidata - where the new-polity form reads Wikidata from
  * @returns the bar and the two dialogues it opens
  */
 function PolitiesFoot({
   store,
   onResult,
   onDone,
+  wikidata,
 }: {
   store: CartographerStoreHook
   onResult: (message: string | null) => void
   onDone: () => void
+  wikidata: WikidataSource
 }) {
   // Store
   const target = store((state) => state.target)
@@ -193,7 +209,13 @@ function PolitiesFoot({
   return (
     <>
       <PolitiesActions onNew={handleNew} onDelete={askToDelete} canDelete={canDelete} />
-      <PolityDialog store={store} editing={null} isOpen={creating} onClose={handleCreated} />
+      <PolityDialog
+        store={store}
+        editing={null}
+        isOpen={creating}
+        onClose={handleCreated}
+        wikidata={wikidata}
+      />
       <PolityDeleteDialog pending={pending} onConfirm={confirmDeletion} onCancel={cancelDeletion} />
     </>
   )
@@ -209,7 +231,7 @@ function PolitiesFoot({
  * @param props - the store, the colour source and the result sink
  * @returns the panel's head, the tree, the stacking menu when open, and the dialogue it opens
  */
-export function PolitiesPanel({ store, colours, onResult }: PolitiesPanelProps) {
+export function PolitiesPanel({ store, colours, onResult, wikidata }: PolitiesPanelProps) {
   // Store
   const target = store((state) => state.target)
   // The document is mutated in place: the version is what changes when a polity is added or drawn.
@@ -246,7 +268,9 @@ export function PolitiesPanel({ store, colours, onResult }: PolitiesPanelProps) 
       ref={panel}
       title="Polities"
       fill
-      foot={<PolitiesFoot store={store} onResult={onResult} onDone={focusList} />}
+      foot={
+        <PolitiesFoot store={store} onResult={onResult} onDone={focusList} wikidata={wikidata} />
+      }
     >
       <PolityList
         year={document.year}
@@ -265,7 +289,12 @@ export function PolitiesPanel({ store, colours, onResult }: PolitiesPanelProps) 
           onEdit={setEditing}
         />
       )}
-      <EditDialog store={store} edited={edited ?? null} onEdited={handleEdited} />
+      <EditDialog
+        store={store}
+        edited={edited ?? null}
+        onEdited={handleEdited}
+        wikidata={wikidata}
+      />
     </Panel>
   )
 }

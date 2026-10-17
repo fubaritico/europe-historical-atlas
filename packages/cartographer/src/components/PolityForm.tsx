@@ -9,8 +9,11 @@ import { useEffect, useRef, useState } from 'react'
 
 import { STATUSES } from './polityDraft'
 import { MAX_SUGGESTIONS, matchingOptions } from './suzerainSearch'
+import { WikidataPanel } from './WikidataPanel'
 
 import type { DraftField, DraftOption, PolityDraft } from './polityDraft'
+import type { WikidataView } from './WikidataPanel'
+import type { WikidataField } from '../wikidata/wikidataFacts'
 import type { HsvaColor } from '@fubaritico/behaviors'
 import type { SubmitEvent } from 'react'
 
@@ -50,6 +53,14 @@ export interface PolityFormProps {
   onSubmit: () => void
   /** [Cancel] or the close cross: leave without creating anything. */
   onCancel: () => void
+  /** What Wikidata says about the id typed (CARTO-243). */
+  wikidata: WikidataView
+  /**
+   * Take Wikidata's value for a field — only on the author's click.
+   * @param field - the field
+   * @param value - Wikidata's value, as the form holds it
+   */
+  onUseWikidata: (field: WikidataField, value: string) => void
 }
 
 /** The value standing for "none" in a list — the design system's Dropdown selects strings only. */
@@ -283,6 +294,7 @@ function PolityFields(props: PolityFormProps) {
       <SuzerainField options={suzerains} value={draft.suzerain} onSelect={choose('suzerain')} />
       <ColourField value={draft.colour} onChange={onColour} />
       <Input label="Wikidata id" placeholder="Q…" {...textField('wikidata', props)} />
+      <WikidataPanel view={props.wikidata} onUse={props.onUseWikidata} />
     </>
   )
 }

@@ -14,6 +14,9 @@ import { DRAFT_ERRORS } from './polityDraft'
 
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 
+/** A Wikidata source that knows nothing — the form's panel stays quiet (CARTO-243). */
+const NO_WIKIDATA = { read: () => Promise.resolve({ found: new Map(), unknown: [] }) }
+
 const STEP = { kind: 'create-polity', label: 'create polity' }
 
 const EMPIRE: YearPolity = {
@@ -34,7 +37,9 @@ function openDialog() {
     viewport: { viewport: UNFRAMED },
   })
   const onClose = vi.fn()
-  render(<PolityDialog store={store} editing={null} isOpen onClose={onClose} />)
+  render(
+    <PolityDialog store={store} editing={null} isOpen onClose={onClose} wikidata={NO_WIKIDATA} />
+  )
   return { store, onClose, user: userEvent.setup() }
 }
 

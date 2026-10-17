@@ -12,6 +12,9 @@ import { UNFRAMED } from '../view/viewport'
 
 import { PolitiesPanel } from './PolitiesPanel'
 
+/** A Wikidata source that knows nothing — the form's panel stays quiet (CARTO-243). */
+const NO_WIKIDATA = { read: () => Promise.resolve({ found: new Map(), unknown: [] }) }
+
 /** One colour source for the mounts below, over the shipped palette. */
 const COLOURS = createPolityColourSource(AUTOMATIC_PALETTE)
 
@@ -25,6 +28,7 @@ function mount() {
     <PolitiesPanel
       store={store}
       colours={COLOURS}
+      wikidata={NO_WIKIDATA}
       onResult={(message) => {
         results.push(message)
       }}

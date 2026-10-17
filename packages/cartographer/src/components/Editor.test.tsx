@@ -16,6 +16,9 @@ import { Editor } from './Editor'
 
 import type { MapAreaProps } from './MapArea'
 
+/** A Wikidata source that knows nothing — the form's panel stays quiet (CARTO-243). */
+const NO_WIKIDATA = { read: () => Promise.resolve({ found: new Map(), unknown: [] }) }
+
 /** One colour source for the mounts below, over the shipped palette. */
 const COLOURS = createPolityColourSource(AUTOMATIC_PALETTE)
 
@@ -58,6 +61,7 @@ function mount(results = createResultRelay()): void {
       history={createHistoryRelay()}
       colours={COLOURS}
       results={results}
+      wikidata={NO_WIKIDATA}
     />
   )
 }

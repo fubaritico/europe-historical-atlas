@@ -33,6 +33,7 @@ import { createPolityColourSource } from './state/polityColourSource'
 import { createCartographerStore } from './state/store'
 import { loadVectorLayers } from './vectorLayers'
 import { UNFRAMED } from './view/viewport'
+import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataSource'
 
 // Every sheet, in order, through one module the workbench imports too — see `styles/sheets.ts`.
 import './styles/sheets'
@@ -171,6 +172,15 @@ const loadTheBackdrop = async (onProgress: ProgressReport) => {
 const colours = createPolityColourSource(AUTOMATIC_PALETTE)
 
 /**
+ * Wikidata, read by the polity form to propose names, dates and a suzerain, and to warn of an anachronism
+ * (CARTO-243). The public API, anonymously: only the ids are sent. Down the props, like the colours.
+ */
+const wikidata = createWikidataApiSource({
+  fetch: (input, init) => fetch(input, init),
+  endpoint: WIKIDATA_ENDPOINT,
+})
+
+/**
  * The year on disk: opened when the editor starts, saved on ‹ctrl+S› — local mode, through the dev server
  * (`files/plans/cartographer/save-open-plan.md`).
  *
@@ -270,6 +280,7 @@ createRoot(container).render(
       zoneLabel={`editorial zone — ${String(store.getState().document.year)}`}
       label={`Map of the year ${String(store.getState().document.year)}, being edited`}
       colours={colours}
+      wikidata={wikidata}
       results={results}
     />
     <DraftRecoveryDialog offers={draftOffers} />

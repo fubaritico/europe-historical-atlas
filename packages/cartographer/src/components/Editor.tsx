@@ -17,6 +17,7 @@ import type { PaintStyle } from '../canvas/painter'
 import type { ResultRelay } from '../persistence/resultRelay'
 import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
+import type { WikidataSource } from '../wikidata/wikidataSource'
 import type { ReactNode, RefObject } from 'react'
 
 /**
@@ -78,21 +79,24 @@ function StatusRow({
  * @param props.store - the store
  * @param props.colours - the polities' colours
  * @param props.onResult - the status bar's result zone, for what `{Polities}` did
+ * @param props.wikidata - where the polity form reads Wikidata from
  * @returns the dock's content
  */
 function Dock({
   store,
   colours,
   onResult,
+  wikidata,
 }: {
   store: CartographerStoreHook
   colours: PolityColourSource
   onResult: (message: string | null) => void
+  wikidata: WikidataSource
 }) {
   // Render
   return (
     <div className="dock-stack">
-      <PolitiesPanel store={store} colours={colours} onResult={onResult} />
+      <PolitiesPanel store={store} colours={colours} onResult={onResult} wikidata={wikidata} />
       <LinePanel store={store} />
       <OverridesPanel store={store} />
       <LayersPanel store={store} />
@@ -122,6 +126,8 @@ export interface EditorProps {
   history: HistoryRelay
   /** Where the polities' colours come from — one source for the canvas and every panel. */
   colours: PolityColourSource
+  /** Where the polity form reads Wikidata from (CARTO-243) — the public API, a stub in tests. */
+  wikidata: WikidataSource
   /**
    * Messages from outside React for the result zone — what opening and saving the year say
    * (`persistence/resultRelay.ts`).
@@ -149,6 +155,7 @@ export function Editor({
   onSave,
   history,
   colours,
+  wikidata,
   results,
 }: EditorProps) {
   // Refs
@@ -187,7 +194,7 @@ export function Editor({
         />
       }
       rail={<ToolRailPanel store={store} colours={colours} />}
-      dock={<Dock store={store} colours={colours} onResult={handleResult} />}
+      dock={<Dock store={store} colours={colours} onResult={handleResult} wikidata={wikidata} />}
       status={<StatusRow action={action} result={result} position={status} feature={feature} />}
     />
   )

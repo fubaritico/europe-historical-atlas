@@ -1068,3 +1068,55 @@
   font-size: 12px;
   line-height: 18px;
 }
+
+/*
+ * What Wikidata says, under the form's Wikidata field (CARTO-243): a summary line with the Wikipedia links,
+ * the anachronism in the warning ink, and one line per field it can fill.
+ */
+.wikidata-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--ink);
+}
+
+.wikidata-panel p {
+  margin: 0;
+}
+
+.wikidata-panel__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.wikidata-panel__note {
+  color: var(--ink-off);
+}
+
+.wikidata-panel__warning {
+  color: var(--warn);
+}
+
+.wikidata-panel__suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wikidata-panel__suggestion {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.wikidata-panel__field,
+.wikidata-panel__agrees {
+  color: var(--ink-off);
+}

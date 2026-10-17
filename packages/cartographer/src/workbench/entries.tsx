@@ -32,6 +32,8 @@ const INERT = {
   onColour: () => undefined,
   onSubmit: () => undefined,
   onCancel: () => undefined,
+  onUseWikidata: () => undefined,
+  wikidata: { kind: 'none' } as const,
 }
 
 /**
