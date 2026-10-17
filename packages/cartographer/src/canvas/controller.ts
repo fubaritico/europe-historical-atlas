@@ -3,6 +3,7 @@ import { screenToLonLatOnBackdrop } from '../view/projection'
 import { panBy, zoomAbout } from '../view/viewport'
 
 import { createAnchorCache } from './anchorCache'
+import { arrowDoubleClick } from './arrowDoubleClick'
 import { hearPageHistory, onModifiedKey } from './historyAnswer'
 import {
   bordersOf,
@@ -332,6 +333,23 @@ function onPointerLeave(it: LiveCanvas): void {
 }
 
 /**
+ * Listen for a double-click on the canvas: with the white arrow, it opens the form of the polity under it
+ * (CARTO-246); any other tool, or the hand borrowed, ignores it.
+ * @param it - the attachment
+ * @returns a function that stops listening
+ */
+function hearDoubleClick(it: LiveCanvas): () => void {
+  const onDoubleClick = (event: MouseEvent): void => {
+    if (it.deps.store.getState().tool !== 'edit' || handInHand(it)) return
+    arrowDoubleClick(gestureOf(it), positionOf(event))
+  }
+  it.node.addEventListener('dblclick', onDoubleClick)
+  return () => {
+    it.node.removeEventListener('dblclick', onDoubleClick)
+  }
+}
+
+/**
  * End a press, whether it was a drag or a click.
  * @param it - the attachment
  * @param event - the pointer event
@@ -520,7 +538,7 @@ function listen(it: LiveCanvas): () => void {
     releaseHeldKey(it, ' ')
     releaseHeldKey(it, 'Alt')
   })
-  removers.push(hearPageHistory(it), listenForPageSpace(it))
+  removers.push(hearPageHistory(it), listenForPageSpace(it), hearDoubleClick(it))
   return (): void => {
     for (const remove of removers) remove()
   }

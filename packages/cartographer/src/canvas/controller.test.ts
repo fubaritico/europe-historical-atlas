@@ -934,6 +934,17 @@ function click(node: HTMLCanvasElement, at: readonly [number, number]): void {
   node.dispatchEvent(pointerEvent('pointerup', { offsetX: at[0], offsetY: at[1] }))
 }
 
+/**
+ * A double-click at a canvas position, as the browser sends it after two clicks.
+ * @param node - the canvas
+ * @param at - where, in CSS pixels
+ */
+function doubleClick(node: HTMLCanvasElement, at: readonly [number, number]): void {
+  click(node, at)
+  click(node, at)
+  node.dispatchEvent(pointerEvent('dblclick', { offsetX: at[0], offsetY: at[1] }))
+}
+
 /** Three points of a triangle in the middle of the canvas, where the backdrop always is. */
 const CANVAS_TRIANGLE = [
   [300, 200],
@@ -2142,10 +2153,79 @@ describe('the Pen meeting a shared border, on the canvas', () => {
   })
 })
 
+/** France drawn as the canvas triangle, then the white arrow in hand. */
+function franceWithTheArrow() {
+  const attached = attach()
+  aimAtFrance(attached.store)
+  for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(attached.node, at)
+  attached.node.dispatchEvent(keyEvent('a'))
+  attached.store.setState({ target: null })
+  return attached
+}
+
 /**
  * France's triangle drawn and closed, the white arrow in hand.
  * @returns the attached canvas
  */
+describe('double-clicking a polity on the canvas opens its form (CARTO-246)', () => {
+  describe('happy path', () => {
+    it('opens the form of the polity double-clicked in its fill with the white arrow', () => {
+      const { node, store, dispose } = franceWithTheArrow()
+      doubleClick(node, [450, 260])
+      expect(store.getState().polityForm).toBe('fr')
+      dispose()
+    })
+  })
+
+  describe('variants', () => {
+    it('opens nothing with the Pen in hand', () => {
+      const { node, store, dispose } = franceWithTheArrow()
+      node.dispatchEvent(keyEvent('p'))
+      node.dispatchEvent(pointerEvent('dblclick', { offsetX: 450, offsetY: 260 }))
+      expect(store.getState().polityForm).toBeNull()
+      dispose()
+    })
+  })
+
+  describe('managed errors', () => {
+    it('opens nothing on a point, and says why in the console', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { node, store, dispose } = franceWithTheArrow()
+      store.setState({ target: 'fr' })
+      doubleClick(node, [500, 200])
+      expect(store.getState().polityForm).toBeNull()
+      expect(
+        warn.mock.calls.some(([message]) => String(message).includes('double-click on a point'))
+      ).toBe(true)
+      warn.mockRestore()
+      dispose()
+    })
+
+    it('opens nothing outside every polity, and says so', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { node, store, dispose } = franceWithTheArrow()
+      doubleClick(node, [100, 500])
+      expect(store.getState().polityForm).toBeNull()
+      expect(
+        warn.mock.calls.some(([message]) => String(message).includes('outside every polity'))
+      ).toBe(true)
+      warn.mockRestore()
+      dispose()
+    })
+  })
+
+  // L4: N/A — the fill test is the arrow's own, covered by fillHit's tests and the click above.
+
+  describe('edge cases', () => {
+    it('stops listening once the canvas is disposed', () => {
+      const { node, store, dispose } = franceWithTheArrow()
+      dispose()
+      node.dispatchEvent(pointerEvent('dblclick', { offsetX: 450, offsetY: 260 }))
+      expect(store.getState().polityForm).toBeNull()
+    })
+  })
+})
+
 function attachWithTriangle() {
   const attached = attach()
   aimAtFrance(attached.store)

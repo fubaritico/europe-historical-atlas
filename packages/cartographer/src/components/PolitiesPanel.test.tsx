@@ -292,6 +292,49 @@ describe('PolitiesPanel — creating a polity next to the one selected (CARTO-24
   })
 })
 
+describe('PolitiesPanel — the form opened from the map (CARTO-246)', () => {
+  it("opens the form, filled, when the store is asked — as the map's double-click asks", () => {
+    const { store } = mountTwo()
+    act(() => {
+      store.getState().openPolityForm('fr')
+    })
+    expect(valueOf(open().getByLabelText('Name'))).toBe('Reaume de France')
+  })
+
+  it('closes it in the store on Cancel', async () => {
+    const { store, user } = mountTwo()
+    act(() => {
+      store.getState().openPolityForm('fr')
+    })
+    await user.click(open().getByRole('button', { name: 'Cancel' }))
+    expect(store.getState().polityForm).toBeNull()
+  })
+
+  it('forgets the form of a polity an undo took away, so a redo does not reopen it', () => {
+    // Review ARCH-102.
+    const { store } = mountTwo()
+    act(() => {
+      store.getState().openPolityForm('hre')
+    })
+    act(() => {
+      store.getState().undo()
+    })
+    expect(store.getState().polityForm).toBeNull()
+    act(() => {
+      store.getState().redo()
+    })
+    expect(document.querySelector('dialog[open]')).toBeNull()
+  })
+
+  it('opens nothing for a polity the year no longer holds', () => {
+    const { store } = mountTwo()
+    act(() => {
+      store.getState().openPolityForm('gone')
+    })
+    expect(document.querySelector('dialog[open]')).toBeNull()
+  })
+})
+
 describe('PolitiesPanel — the stacking menu (s16)', () => {
   describe('happy path', () => {
     // s16 — "When I right-click … and choose [Bring to Front] / Then France is painted over the Empire".

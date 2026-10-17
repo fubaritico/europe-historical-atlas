@@ -57,6 +57,38 @@ function useArrangeMenu() {
 }
 
 /**
+ * The polity whose form is open, and the two gestures on it — from the store (CARTO-246), so the map's
+ * double-click opens it as the list's does. Resolved each render: an undo can take the polity away while
+ * its form is open, and then there is nothing to edit — the form is not shown.
+ * @param store - the store
+ * @returns the polity edited or `null`, and how to open and close its form
+ */
+function usePolityForm(store: CartographerStoreHook) {
+  // Store
+  const polityForm = store((state) => state.polityForm)
+  // Read so an undo or a redo that takes the polity away, or brings it back, re-renders the hook itself.
+  store((state) => state.version)
+
+  // Store actions
+  const open = store((state) => state.openPolityForm)
+  const close = store((state) => state.closePolityForm)
+
+  // Derived
+  const edited =
+    store.getState().document.polities.find((polity) => polity.id === polityForm) ?? null
+
+  // Effects
+  // A form whose polity no longer resolves is closed, not kept: a redo bringing the polity back must not
+  // reopen a form nobody asked for (review ARCH-102).
+  useEffect(() => {
+    if (polityForm !== null && edited === null) close()
+  }, [polityForm, edited, close])
+
+  // Return
+  return { edited, open, close }
+}
+
+/**
  * The dialogue editing a polity — mounted per polity, so the form opens filled with that polity's values
  * (`s07`). None while nothing is edited.
  * @param props - the store, the polity edited, and how the dialogue closes
@@ -241,14 +273,11 @@ export function PolitiesPanel({ store, colours, onResult, wikidata }: PolitiesPa
   const chooseTarget = store((state) => state.chooseTarget)
 
   // State
-  const [editing, setEditing] = useState<string | null>(null)
   const { arranging, openMenu, closeMenu, panel } = useArrangeMenu()
+  const form = usePolityForm(store)
 
   // Derived
   const { document } = store.getState()
-  // Resolved each render: an undo can take the polity away while its dialogue is open, and then there
-  // is nothing to edit — the dialogue is not shown.
-  const edited = document.polities.find((polity) => polity.id === editing)
 
   // Handlers
   // A dialogue unmounted rather than closed gives the focus back to nothing: it is handed to the list.
@@ -256,7 +285,7 @@ export function PolitiesPanel({ store, colours, onResult, wikidata }: PolitiesPa
     panel.current?.querySelector<HTMLElement>('.polities__list')?.focus()
   }
   const handleEdited = () => {
-    setEditing(null)
+    form.close()
     focusList()
   }
 
@@ -278,7 +307,7 @@ export function PolitiesPanel({ store, colours, onResult, wikidata }: PolitiesPa
         targetId={describeDrawingTarget(document, target)?.id ?? null}
         onChoose={chooseTarget}
         onMenu={openMenu}
-        onEdit={setEditing}
+        onEdit={form.open}
       />
       {arranging === null ? null : (
         <PolityArrangeMenu
@@ -286,15 +315,10 @@ export function PolitiesPanel({ store, colours, onResult, wikidata }: PolitiesPa
           request={arranging}
           onClose={closeMenu}
           onResult={onResult}
-          onEdit={setEditing}
+          onEdit={form.open}
         />
       )}
-      <EditDialog
-        store={store}
-        edited={edited ?? null}
-        onEdited={handleEdited}
-        wikidata={wikidata}
-      />
+      <EditDialog store={store} edited={form.edited} onEdited={handleEdited} wikidata={wikidata} />
     </Panel>
   )
 }

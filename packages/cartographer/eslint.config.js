@@ -192,6 +192,7 @@ export default tseslint.config(
             useListCursor: 'state',
             usePolityDeletion: 'state',
             usePolityDraft: 'state',
+            usePolityForm: 'state',
             useRelayedResults: 'effect',
             useWikidataItem: 'state',
           },

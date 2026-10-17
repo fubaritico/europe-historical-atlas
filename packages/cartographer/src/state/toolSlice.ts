@@ -142,6 +142,13 @@ export interface ToolState {
    * live selection; this is its copy, out of the undo line like the tool and the target.
    */
   selectedAnchors: readonly number[]
+  /**
+   * The polity whose form is open, or `null` (CARTO-246). Here rather than in `{Polities}` so the list's
+   * double-click and the map's ask for the same thing, and the panel — which owns the form — opens it; the
+   * canvas never knows the form. Outside the undo line, like the tool and the target. It may name a polity
+   * the document no longer holds (an undo): the panel then opens nothing.
+   */
+  polityForm: string | null
 }
 
 /** What the chrome may do to the tools. */
@@ -176,6 +183,14 @@ export interface ToolActions {
    * 2026-10-11).
    */
   chooseTarget: (polityId: string | null) => void
+  /**
+   * Open a polity's form — a double-click on its row in `{Polities}`, or in its fill on the map with the
+   * white arrow (CARTO-246).
+   * @param polityId - whose form
+   */
+  openPolityForm: (polityId: string) => void
+  /** Close the form — validated or cancelled. */
+  closePolityForm: () => void
   /**
    * Choose a variant of the Pen, which also puts the Pen in hand — what choosing a row of its group
    * does in Illustrator.
@@ -230,6 +245,13 @@ export const createToolSlice: StateCreator<
   tool: 'navigate',
   target: null,
   selectedAnchors: [],
+  polityForm: null,
+  openPolityForm: (polityId: string): void => {
+    set({ polityForm: polityId })
+  },
+  closePolityForm: (): void => {
+    set({ polityForm: null })
+  },
   setSelectedAnchors: (anchors): void => {
     set({ selectedAnchors: [...anchors] })
   },
