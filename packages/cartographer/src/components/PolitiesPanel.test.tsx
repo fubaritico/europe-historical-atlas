@@ -446,16 +446,14 @@ describe('PolitiesPanel — editing a polity (s07)', () => {
     it('offers France no suzerain among its own vassals', async () => {
       const { user } = mountGroup()
       await user.dblClick(screen.getByText('Reaume de France'))
-      await user.click(open().getByRole('button', { name: /Suzerain/ }))
-      const offered = screen.getAllByRole('option').map((option) => option.textContent)
-      expect(offered).not.toContain('Normandie')
+      await user.type(open().getByRole('combobox', { name: 'Suzerain' }), 'norm')
+      expect(await screen.findByText('No polity matches')).toBeTruthy()
     })
 
     it('moves Normandie out of France’s group when its suzerain is cleared', async () => {
       const { store, user } = mountGroup()
       await user.dblClick(screen.getByText('Normandie'))
-      await user.click(open().getByRole('button', { name: /Suzerain/ }))
-      await user.click(screen.getByRole('option', { name: 'none' }))
+      await user.click(open().getByRole('button', { name: 'Remove the suzerain Reaume de France' }))
       await user.click(open().getByRole('button', { name: 'OK' }))
       expect(store.getState().document.polities[1]?.suzerain).toBeNull()
     })

@@ -184,8 +184,45 @@ describe('PolityDialog', () => {
       const { store, user } = openDialog()
       store.getState().createPolity(EMPIRE, STEP)
       await user.type(field('Name'), 'Duchy of Lorraine')
-      await user.click(screen.getByRole('button', { name: 'Suzerain' }))
+      await user.type(screen.getByRole('combobox', { name: 'Suzerain' }), 'holy')
       await user.click(await screen.findByRole('option', { name: 'Holy Roman Empire' }))
+      await user.click(screen.getByRole('button', { name: 'OK' }))
+      expect(store.getState().document.polities[1]?.suzerain).toBe('hre')
+    })
+
+    it('removes the suzerain with its cross, announces none, and hands the focus to the field', async () => {
+      // Review A11Y-001 / A11Y-010 / QUAL-001: the cross unmounts with the suzerain it removes.
+      const { store, user } = openDialog()
+      store.getState().createPolity(EMPIRE, STEP)
+      await user.type(field('Name'), 'Duchy of Lorraine')
+      await user.type(screen.getByRole('combobox', { name: 'Suzerain' }), 'holy')
+      await user.click(await screen.findByRole('option', { name: 'Holy Roman Empire' }))
+      await user.click(
+        screen.getByRole('button', { name: 'Remove the suzerain Holy Roman Empire' })
+      )
+      expect(document.querySelector('.suzerain-field__held [role="status"]')?.textContent).toBe(
+        'none'
+      )
+      expect(document.activeElement).toBe(screen.getByRole('combobox', { name: 'Suzerain' }))
+      await user.click(screen.getByRole('button', { name: 'OK' }))
+      expect(store.getState().document.polities[1]?.suzerain).toBeNull()
+    })
+
+    it('says no polity matches a name nobody bears', async () => {
+      const { store, user } = openDialog()
+      store.getState().createPolity(EMPIRE, STEP)
+      await user.type(screen.getByRole('combobox', { name: 'Suzerain' }), 'zzz')
+      expect(await screen.findByText('No polity matches')).toBeTruthy()
+    })
+
+    it('chooses the suzerain from the keyboard, the typed letters filtering the list', async () => {
+      // CARTO-241: about 150 polities in 1100 — typing narrows them, the arrows and enter choose.
+      const { store, user } = openDialog()
+      store.getState().createPolity(EMPIRE, STEP)
+      await user.type(field('Name'), 'Duchy of Lorraine')
+      await user.type(screen.getByRole('combobox', { name: 'Suzerain' }), 'emp')
+      await user.keyboard('{ArrowDown}{Enter}')
+      expect(screen.getByText('Holy Roman Empire')).toBeTruthy()
       await user.click(screen.getByRole('button', { name: 'OK' }))
       expect(store.getState().document.polities[1]?.suzerain).toBe('hre')
     })

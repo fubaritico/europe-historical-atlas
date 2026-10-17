@@ -4,8 +4,11 @@ import { ColorField } from '@fubaritico/react/ColorField'
 import { Dropdown } from '@fubaritico/react/Dropdown'
 import { IconButton } from '@fubaritico/react/IconButton'
 import { Input } from '@fubaritico/react/Input'
+import { Typeahead } from '@fubaritico/react/Typeahead'
+import { useEffect, useRef, useState } from 'react'
 
 import { STATUSES } from './polityDraft'
+import { MAX_SUGGESTIONS, matchingOptions } from './suzerainSearch'
 
 import type { DraftField, DraftOption, PolityDraft } from './polityDraft'
 import type { HsvaColor } from '@fubaritico/behaviors'
@@ -114,6 +117,107 @@ function ChoiceField({
 }
 
 /**
+ * The suzerain held now — its name, or *none* — and the cross that removes it.
+ * @param props - the name held and what removing does
+ * @param props.held - the suzerain's name, or `null` when there is none
+ * @param props.onRemove - remove the suzerain
+ * @returns the line
+ */
+function HeldSuzerain({ held, onRemove }: { held: string | null; onRemove: () => void }) {
+  // Render
+  return (
+    <p className="suzerain-field__held">
+      {/* Announced when the choice changes (A11Y-010); the cross stays out of the announcement. */}
+      <span role="status">{held ?? 'none'}</span>
+      {held !== null && (
+        <IconButton
+          type="button"
+          icon="XMark"
+          aria-label={`Remove the suzerain ${held}`}
+          onClick={onRemove}
+        />
+      )}
+    </p>
+  )
+}
+
+/**
+ * The suzerain, chosen by typing (CARTO-241): about 150 polities in 1100 were too many to scroll in a list.
+ *
+ * The polity held now is shown above the field, with a cross to remove it; the field is the design system's
+ * `Typeahead`: it searches from the first letter, offers the matches (prefixes first, accents ignored,
+ * `suzerainSearch.ts`) with the typed part in bold, and brings the keyboard and the combobox pattern. The
+ * options are the ones the binding already cleared of every polity that would make a loop of homage.
+ * @param props - the options, the polity held, and where the choice goes
+ * @param props.options - the polities that may be chosen
+ * @param props.value - the suzerain held now, or `null`
+ * @param props.onSelect - called with the chosen id, or `null` to remove the suzerain
+ * @returns the field
+ */
+function SuzerainField({
+  options,
+  value,
+  onSelect,
+}: {
+  options: readonly DraftOption[]
+  value: string | null
+  onSelect: (value: string | null) => void
+}) {
+  // Refs
+  const field = useRef<HTMLDivElement>(null)
+
+  // State
+  const [query, setQuery] = useState('')
+
+  // Derived
+  const known = options.find((option) => option.value === value)
+  // A held id the list does not offer (a loop of homage already in the file) is shown as itself, and said.
+  const held = value === null ? null : (known?.label ?? value)
+  const matches = matchingOptions(options, query, MAX_SUGGESTIONS)
+
+  // Handlers
+  const handleSelect = (selected: string) => {
+    onSelect(selected)
+    setQuery('')
+  }
+  const handleRemove = () => {
+    onSelect(null)
+    // The cross unmounts with the suzerain: the focus goes to the field rather than to the dialogue (A11Y-001).
+    field.current?.querySelector('input')?.focus()
+  }
+
+  // Effects
+  useEffect(() => {
+    if (value !== null && known === undefined)
+      console.warn(
+        `[Cartographer] the suzerain "${value}" is not among the polities offered — shown as its id`
+      )
+  }, [value, known])
+
+  // Render
+  return (
+    <div ref={field} className="ui-field suzerain-field">
+      {/* Visual only: the field carries the same name as its `aria-label`. */}
+      <span className="ui-field__label" aria-hidden="true">
+        Suzerain
+      </span>
+      <HeldSuzerain held={held} onRemove={handleRemove} />
+      <Typeahead minChars={1} onSearch={setQuery} onSelect={handleSelect}>
+        <Typeahead.Input aria-label="Suzerain" placeholder="Type a name to choose…" />
+        <Typeahead.Menu aria-label="Polities">
+          {matches.map((option, index) => (
+            <Typeahead.Item key={option.value} value={option.value} index={index}>
+              <Typeahead.Highlight>{option.label}</Typeahead.Highlight>
+            </Typeahead.Item>
+          ))}
+          {matches.length === 0 && <Typeahead.Empty>No polity matches</Typeahead.Empty>}
+        </Typeahead.Menu>
+      </Typeahead>
+    </div>
+  )
+}
+
+/**
  * The colour, as the design system's field: a swatch, the hex, and the picker in a popover.
  *
  * `nullable` is "automatic", `s02`'s default. **No `alpha`**: a polity's colour is laid over the relief,
@@ -176,12 +280,7 @@ function PolityFields(props: PolityFormProps) {
         {...textField('existsTo', props)}
         {...errorOf(errors.existsTo)}
       />
-      <ChoiceField
-        label="Suzerain"
-        options={suzerains}
-        value={draft.suzerain}
-        onSelect={choose('suzerain')}
-      />
+      <SuzerainField options={suzerains} value={draft.suzerain} onSelect={choose('suzerain')} />
       <ColourField value={draft.colour} onChange={onColour} />
       <Input label="Wikidata id" placeholder="Q…" {...textField('wikidata', props)} />
     </>
