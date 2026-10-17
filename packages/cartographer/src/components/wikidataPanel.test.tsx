@@ -22,12 +22,22 @@ const TRIPOLI: WikidataFacts = {
   labels: { en: 'County of Tripoli', fr: 'comté de Tripoli' },
   inception: 1102,
   dissolved: 1289,
-  belongsTo: ['Q55502'],
+  belongsTo: [{ id: 'Q55502', from: null, to: null }],
+  imperialState: false,
+  vassalState: false,
   predecessors: [],
   successors: [],
   wikipedia: { en: 'https://en.wikipedia.org/wiki/County_of_Tripoli', fr: null },
   notASubject: null,
 }
+
+/** Tripoli's view found, saying it is a vassal state or not. */
+const vassalView = (vassalState: boolean) => ({
+  kind: 'found' as const,
+  facts: { ...TRIPOLI, vassalState },
+  warning: null,
+  suggestions: [],
+})
 
 /** A source answering from a table of facts, recording the ids it was asked. */
 function tableSource(table: Record<string, WikidataFacts>) {
@@ -216,6 +226,17 @@ describe('WikidataPanel', () => {
     expect(
       screen.getByText('Q25167513 is a Wikipedia category, not a polity — check the id')
     ).toBeTruthy()
+  })
+
+  it('says the item calls itself a vassal state, and says nothing of it otherwise', () => {
+    const { container, rerender } = render(
+      <WikidataPanel view={vassalView(true)} onUse={() => undefined} />
+    )
+    expect(container.querySelector('.wikidata-panel__summary')?.textContent).toContain(
+      ' · a vassal state'
+    )
+    rerender(<WikidataPanel view={vassalView(false)} onUse={() => undefined} />)
+    expect(container.querySelector('.wikidata-panel__summary')?.textContent).not.toContain('vassal')
   })
 
   it('offers Use for an empty field, Replace for a different one, and an inert Agrees for one that agrees', async () => {

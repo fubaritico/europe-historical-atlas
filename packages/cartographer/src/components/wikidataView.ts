@@ -6,7 +6,7 @@ import type { PolityWithWikidata, WikidataComparable } from '../wikidata/wikidat
 
 /**
  * What the form's Wikidata panel shows, from where the reading stands (CARTO-243): the anachronism for the
- * year edited and one suggestion per field. An item that is a Wikipedia category, not a polity, offers
+ * year edited and one suggestion per field, the suzerain among the lords of that year (CARTO-248). An item that is a Wikipedia category, not a polity, offers
  * nothing and warns of nothing but that. Pure, so the dialogue's binding stays a few lines.
  * @param reading - where the reading of the item stands
  * @param form - the form's current values
@@ -27,7 +27,7 @@ export function wikidataViewOf(
     kind: 'found',
     facts,
     warning: anachronism(year, facts),
-    suggestions: suggestionsFor(form, facts, polities),
+    suggestions: suggestionsFor(form, facts, polities, year),
   }
 }
 

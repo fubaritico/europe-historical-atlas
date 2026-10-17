@@ -10,6 +10,12 @@
  * Pure: the item is the JSON the API sent, the rest are literals — measured on four real items of the dev's
  * 1100 on 2026-10-17 (County of Tripoli, Kingdom of Jerusalem, Armenian Cilicia, and a *category* entered by
  * mistake for the Emirate of Mosul).
+ *
+ * **Vassalage is read sideways** (CARTO-248): Wikidata has no *vassal of* property. Three roads lead to it,
+ * measured on eight real vassals of 1100 — *country* (P17) dated by its *start* and *end* qualifiers (the
+ * County of Flanders: Kingdom of France 864–1529, then the Holy Roman Empire); *instance of* a State of the
+ * Holy Roman Empire (Bohemia); and *instance of* a vassal state, which says that it is one, not of whom
+ * (Burgundy). Five of the eight come out right; the rest stay empty, never wrong in the form unless taken.
  */
 
 /** The properties read, by their Wikidata number. */
@@ -23,13 +29,36 @@ const PROPERTY = {
   follows: 'P155',
   replacedBy: 'P1366',
   followedBy: 'P156',
+  startTime: 'P580',
+  endTime: 'P582',
 } as const
+
+/** The kinds of item (P31) that say something of a polity's lord. */
+const KIND = {
+  /** *State of the Holy Roman Empire* — its lord is the Empire. */
+  imperialState: 'Q26830017',
+  /** *Vassal state* — it has a lord, the item does not say which. */
+  vassalState: 'Q1371288',
+} as const
+
+/** The Holy Roman Empire, lord of every *State of the Holy Roman Empire*. */
+const HOLY_ROMAN_EMPIRE = 'Q12548'
 
 /** Items that are pages about Wikipedia itself, never a polity — an id entered by mistake. */
 const NOT_A_SUBJECT: Readonly<Record<string, string>> = {
   Q4167836: 'a Wikipedia category',
   Q4167410: 'a disambiguation page',
   Q13406463: 'a Wikipedia list',
+}
+
+/** One item a polity belonged to, with the years the item gives for it. */
+export interface Belonging {
+  /** The item it belonged to, `Q…`. */
+  id: string
+  /** The *start time* qualifier's year, or `null` when the claim has none or an unknown one. */
+  from: number | null
+  /** The *end time* qualifier's year, or `null` when the claim has none or an unknown one. */
+  to: number | null
 }
 
 /** The facts the editor uses, read from one item. */
@@ -42,8 +71,12 @@ export interface WikidataFacts {
   inception: number | null
   /** The year it ended, or `null` when the item does not say. */
   dissolved: number | null
-  /** The items it belonged to — *country* (P17) then *part of* (P361) — as `Q…`, best rank first. */
-  belongsTo: string[]
+  /** The items it belonged to — *country* (P17) then *part of* (P361) — best rank first, with their years. */
+  belongsTo: Belonging[]
+  /** Whether it is an instance of a *State of the Holy Roman Empire*. */
+  imperialState: boolean
+  /** Whether it is an instance of a *vassal state* — of whom, the item does not say. */
+  vassalState: boolean
   /** What it followed (P1365, P155), as `Q…`. */
   predecessors: string[]
   /** What followed it (P1366, P156), as `Q…`. */
@@ -54,10 +87,16 @@ export interface WikidataFacts {
   notASubject: string | null
 }
 
+/** One snak of the API's answer — a claim's value or one of its qualifiers — reduced to what is read. */
+interface Snak {
+  datavalue?: { value?: unknown }
+}
+
 /** One claim of the API's answer, reduced to what is read. */
 interface Claim {
   rank?: string
-  mainsnak?: { datavalue?: { value?: unknown } }
+  mainsnak?: Snak
+  qualifiers?: Record<string, unknown>
 }
 
 /**
@@ -100,6 +139,35 @@ export function yearOfTime(time: string): number | null {
 }
 
 /**
+ * The year of a snak holding a time.
+ * @param snak - a claim's value or a qualifier
+ * @returns the year, or `null` when the snak holds no time — an *unknown value* among them
+ */
+function yearOfSnak(snak: Snak | undefined): number | null {
+  const time = recordOf(snak?.datavalue?.value)?.time
+  return typeof time === 'string' ? yearOfTime(time) : null
+}
+
+/**
+ * The year of a claim's time qualifier.
+ *
+ * An *unknown value* — the item says the claim began, not when — reads as no bound, like a claim with no
+ * qualifier: the lord stays proposed, and the author decides.
+ * @param claim - the claim
+ * @param property - `P580` or `P582`
+ * @returns the first year the qualifier gives, or `null`
+ */
+function qualifierYear(claim: Claim, property: string): number | null {
+  const snaks = recordOf(claim.qualifiers)?.[property]
+  if (!Array.isArray(snaks)) return null
+  for (const snak of snaks as Snak[]) {
+    const year = yearOfSnak(snak)
+    if (year !== null) return year
+  }
+  return null
+}
+
+/**
  * The first year a property gives.
  * @param claims - the item's claims
  * @param property - a time property
@@ -107,8 +175,8 @@ export function yearOfTime(time: string): number | null {
  */
 function firstYear(claims: Record<string, unknown>, property: string): number | null {
   for (const claim of claimsOf(claims, property)) {
-    const time = recordOf(claim.mainsnak?.datavalue?.value)?.time
-    if (typeof time === 'string') return yearOfTime(time)
+    const year = yearOfSnak(claim.mainsnak)
+    if (year !== null) return year
   }
   return null
 }
@@ -127,6 +195,27 @@ function itemsOf(claims: Record<string, unknown>, properties: readonly string[])
       if (typeof id === 'string' && !ids.includes(id)) ids.push(id)
     }
   return ids
+}
+
+/**
+ * Every item a set of properties points to, with each claim's years — a repeat dropped only when its years
+ * are the same too, since one lord may come back after another.
+ * @param claims - the item's claims
+ * @param properties - item properties
+ * @returns the belongings, in order
+ */
+function belongingsOf(claims: Record<string, unknown>, properties: readonly string[]): Belonging[] {
+  const out: Belonging[] = []
+  for (const property of properties)
+    for (const claim of claimsOf(claims, property)) {
+      const id = recordOf(claim.mainsnak?.datavalue?.value)?.id
+      if (typeof id !== 'string') continue
+      const from = qualifierYear(claim, PROPERTY.startTime)
+      const to = qualifierYear(claim, PROPERTY.endTime)
+      if (!out.some((seen) => seen.id === id && seen.from === from && seen.to === to))
+        out.push({ id, from, to })
+    }
+  return out
 }
 
 /**
@@ -168,7 +257,9 @@ export function readEntity(entity: unknown): WikidataFacts | null {
     labels: { en: labelOf(item, 'en'), fr: labelOf(item, 'fr') },
     inception: firstYear(claims, PROPERTY.inception),
     dissolved: firstYear(claims, PROPERTY.dissolved),
-    belongsTo: itemsOf(claims, [PROPERTY.country, PROPERTY.partOf]),
+    belongsTo: belongingsOf(claims, [PROPERTY.country, PROPERTY.partOf]),
+    imperialState: kinds.includes(KIND.imperialState),
+    vassalState: kinds.includes(KIND.vassalState),
     predecessors: itemsOf(claims, [PROPERTY.replaces, PROPERTY.follows]),
     successors: itemsOf(claims, [PROPERTY.replacedBy, PROPERTY.followedBy]),
     wikipedia: { en: articleOf(item, 'en'), fr: articleOf(item, 'fr') },
@@ -258,6 +349,44 @@ export interface PolityWithWikidata {
 }
 
 /**
+ * Whether a belonging's years hold the year — both ends included, a missing end open.
+ * @param belonging - the belonging
+ * @param year - the year being edited
+ * @returns `true` when the year falls within its years
+ */
+function holds(belonging: Belonging, year: number): boolean {
+  return (
+    (belonging.from === null || belonging.from <= year) &&
+    (belonging.to === null || belonging.to >= year)
+  )
+}
+
+/**
+ * Whether a belonging carries a year at all.
+ * @param belonging - the belonging
+ * @returns `true` when the claim has a start or an end
+ */
+function isDated(belonging: Belonging): boolean {
+  return belonging.from !== null || belonging.to !== null
+}
+
+/**
+ * The items that may be the polity's lord in the year edited, the likeliest first: the belongings whose
+ * years hold the year, then the undated ones, then the Holy Roman Empire for one of its States. A belonging
+ * dated outside the year is no lord of it — Flanders' Empire of 1529–1556 in 1100.
+ * @param facts - the item's facts
+ * @param year - the year being edited
+ * @returns the `Q…` ids, without repeats
+ */
+export function lordsIn(facts: WikidataFacts, year: number): string[] {
+  const dated = facts.belongsTo.filter((belonging) => isDated(belonging) && holds(belonging, year))
+  const undated = facts.belongsTo.filter((belonging) => !isDated(belonging))
+  const ids = [...dated, ...undated].map((belonging) => belonging.id)
+  if (facts.imperialState) ids.push(HOLY_ROMAN_EMPIRE)
+  return ids.filter((id, index) => ids.indexOf(id) === index)
+}
+
+/**
  * Compare one field with its proposal.
  * @param field - the field
  * @param held - what the form holds, `''` or `null` for nothing
@@ -278,17 +407,20 @@ function compare(
 
 /**
  * What Wikidata proposes for the form: the name (English, else French), the two years, and the suzerain —
- * the first item the polity belongs to that a polity of this year carries as its own Wikidata id. Wikidata's
- * *country* on a medieval item mixes modern states in, so nothing outside the year's registry is offered.
+ * the first of its lords in the year edited (`lordsIn`) that a polity of this year carries as its own
+ * Wikidata id. Wikidata's *country* on a medieval item mixes modern states in, so nothing outside the year's
+ * registry is offered.
  * @param form - the form's current values
  * @param facts - the item's facts
  * @param polities - the polities of the year, the one edited excluded
+ * @param year - the year being edited
  * @returns one suggestion per field Wikidata has something for
  */
 export function suggestionsFor(
   form: WikidataComparable,
   facts: WikidataFacts,
-  polities: readonly PolityWithWikidata[]
+  polities: readonly PolityWithWikidata[],
+  year: number
 ): WikidataSuggestion[] {
   const out: WikidataSuggestion[] = []
   const name = facts.labels.en ?? facts.labels.fr
@@ -299,7 +431,7 @@ export function suggestionsFor(
     )
   if (facts.dissolved !== null)
     out.push(compare('existsTo', form.existsTo, String(facts.dissolved), String(facts.dissolved)))
-  const lord = facts.belongsTo
+  const lord = lordsIn(facts, year)
     .map((id) => polities.find((polity) => polity.wikidata === id))
     .find((polity) => polity !== undefined)
   if (lord !== undefined) out.push(compare('suzerain', form.suzerain, lord.id, lord.name))

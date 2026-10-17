@@ -8,7 +8,8 @@ import type { WikidataFacts, WikidataField, WikidataSuggestion } from '../wikida
 
 /**
  * What Wikidata says about the polity in the form (CARTO-243): its name, its years, its Wikipedia articles,
- * a warning when the year edited lies outside its dates, and one button per field it can fill. The view of
+ * a warning when the year edited lies outside its dates, whether it calls itself a vassal state (CARTO-248),
+ * and one button per field it can fill. The view of
  * the shell/view/binding split — literals in, a click out; the dialogue reads Wikidata and decides nothing
  * here.
  *
@@ -124,6 +125,7 @@ function FoundFacts({
     <>
       <p className="wikidata-panel__summary">
         {nameOf(facts)} · {spanOf(facts)}
+        {facts.vassalState && ' · a vassal state'}
         {facts.wikipedia.en !== null && (
           <a href={facts.wikipedia.en} target="_blank" rel="noreferrer">
             Wikipedia (en)
