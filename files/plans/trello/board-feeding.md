@@ -4,7 +4,7 @@
 
 ## Decisions of the dev, 2026-10-17
 
-- Columns **Idées → Backlog → À faire → En cours → À toi → Fait**; blocked is a red label, not a column.
+- Columns **Idées → Backlog → À faire → En cours → À valider par le développeur → Fait**; blocked is a red label, not a column.
 - Every title starts with its **scope in brackets**: `[atlas]` `[carto]` `[core]` `[contrib]`, and `[repo]`
   for what is none of the four. Scope **labels stay** too (redundant cues help him remember).
 - Severity is a label: `critique` / `gênant` / `cosmétique`.

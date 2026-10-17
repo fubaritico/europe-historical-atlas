@@ -25,7 +25,7 @@ drifts, and nothing fails when it does ([[distribute-notes-dont-pile-them]]).
 | **the board** | the list of tasks and the state of each — what, its stage, blocked or not, who has the ball | — |
 | `files/plans/*.md` | a chantier's design: why, how, the trade-offs. Its card links the file in **Détails**; the plan's steps become a **checklist on the card** (`checklist`, `check`) | progress — ticked on the card, not in the file |
 | `.claude/known-issues.md` (+ `known-issues-atlas.md`) | a problem's mechanism: measure, cause, why the remedy. An entry **that asks for an action** gets a card naming it; an entry *« à savoir »* stays in the file with no card | the to-do — on the card |
-| `.claude/next.md` | the resume point: where we stopped, what is mid-flight and in what state, context that is not a task. Points to the cards in À toi / En cours | **any list of tasks** |
+| `.claude/next.md` | the resume point: where we stopped, what is mid-flight and in what state, context that is not a task. Points to the cards in À valider par le développeur / En cours | **any list of tasks** |
 | `.claude/completed.md` | a short account of each session: time spans, the dev's own words, my faults — citing tickets (`CARTO-41`) | the detail of what shipped — in the Fait cards (description: what, commits, date) |
 | Basic Memory, `main` project, `patterns/` | what holds **across** projects — a tooling trap, a code pattern, a method (the dev's call, 2026-10-17); linked from `Cross-project engineering patterns — index` | anything specific to this project |
 
@@ -40,7 +40,7 @@ drifts, and nothing fails when it does ([[distribute-notes-dont-pile-them]]).
 
 **The sync check — run it at every `/end-session`, and at `/start-session` before proposing work:**
 
-1. `list`. Every card in **En cours** or **À toi**: is `next.md` saying where it stands? Every card I
+1. `list`. Every card in **En cours** or **À valider par le développeur**: is `next.md` saying where it stands? Every card I
    touched this session: does it carry a comment saying where it stands?
 2. Every file of `files/plans/`, `known-issues.md` and `next.md` changed this session
    (`git diff --stat` + `git status`): does what it asks for have a card? Does every ticket it
@@ -55,9 +55,9 @@ drifts, and nothing fails when it does ([[distribute-notes-dont-pile-them]]).
 | **Idées** | a raw thought, the *Idée* template | anyone, the dev mostly | I shape it into the *Backlog* template, **he validates the wording** |
 | **Backlog** | a shaped ticket, validated as written, **unordered** | the dev, once I shaped it — **never me alone** | he decides to do it now |
 | **À faire** | what he decided to do, **in his order** | the dev | I start the top card, unless he names another |
-| **En cours** | what I am working on, **one or two cards at most** | me, when I start | the DoD's steps 1–4 are done → À toi |
-| **À toi** | waiting on his gesture: test it in the app, or decide a question | me, the moment the ball is his | he tested it → Fait; he found a fault → back to En cours with a comment |
-| **Fait** | acceptance criteria **and** DoD met | me, after **his** test or decision | — |
+| **En cours** | what I am working on, **one or two cards at most** | me, when I start | the DoD's steps 1–4 are done → À valider par le développeur |
+| **À valider par le développeur** | waiting on his gesture: test it in the app, or decide a question | me, the moment the ball is his | he tested it → Fait; he found a fault → back to En cours with a comment |
+| **Fait** | acceptance criteria **and** DoD met, **newest on top** (the dev's call, 2026-10-18) — `done` places it there | me, after **his** test or decision | — |
 
 **The dev holds the order** ([[do-not-start-unasked-work]]): never pull a card from Backlog into À faire,
 never reorder À faire, never start a card he did not choose. "On passe à la suite" means *propose* the
@@ -108,7 +108,7 @@ description is French too, the dev reads it alone.
 gesture and an observation in the app ("je presse ‹P› sur un pays vide → la plume s'active"), never
 "the code handles X". When a card comes from a known-issue or an `H-NN`, its severity label matches the one
 the entry already gives. When the remedy is a product decision (`rules/error-handling.md`, a fallback, a refusal),
-the card says so in **Le remède** and goes to **À toi** before anything is written.
+the card says so in **Le remède** and goes to **À valider par le développeur** before anything is written.
 
 ## Labels — one home for severity, scope and type (the dev's call, 2026-10-17)
 
@@ -130,7 +130,7 @@ Every card I create gets its labels **in the same breath** (`tag`); the list liv
 
 - **Blocked is a red label `Bloqué`, never a column**: the card keeps its stage (blocked *en cours*,
   blocked *à faire*), so nobody has to remember where to put it back. Jira's *Flagged*, not a status.
-- **Not the same wait as À toi**: À toi waits on the dev's gesture; Bloqué waits on another card.
+- **Not the same wait as À valider par le développeur**: À valider par le développeur waits on the dev's gesture; Bloqué waits on another card.
 - **One direction only, "depends on"**: the template's **Dépend de** line, plus `block`, which labels the
   card, attaches a link to the blocking card (Trello previews it) and comments on both. `unblock` removes
   the label and those links and says « Débloqué ». No two-way *blocks / is blocked by* as in Jira.
@@ -171,6 +171,7 @@ $S comment 7 "commit 5c96eaf — testé par le dev : « c'est bon »"
 $S done 7                                  # → Fait
 $S tag 7 Cartographe défaut gênant          # labels from LABELS only
 $S untag 7 gênant
+$S priority 7 haute                         # cover colour: haute = red, moyenne = yellow, aucune = none (2026-10-18)
 $S block 7 4 "attend la soudure"           # 7 depends on 4: label, link, comment on both
 $S unblock 7
 $S archive 7 "doublon de #9"               # my own mistakes only — undone from Trello's archive
@@ -188,10 +189,10 @@ point: the dev reads `move 7 "En cours"`, not a curl. A multi-line description i
 
 | moment | gesture |
 | --- | --- |
-| **start-session** | `list`, then tell the dev what is in **À toi** (it waits on him) and the top of **À faire** |
+| **start-session** | `list`, then tell the dev what is in **À valider par le développeur** (it waits on him) and the top of **À faire** |
 | I start a card he chose | `move N "En cours"` |
-| a question or a test is his | `move N "À toi"` + a comment saying exactly what he has to do or decide |
-| he reports a fault on a card in À toi | `comment` his words, `move N "En cours"` |
+| a question or a test is his | `move N "À valider par le développeur"` + a comment saying exactly what he has to do or decide |
+| he reports a fault on a card in À valider par le développeur | `comment` his words, `move N "En cours"` |
 | he tested it, DoD met | `comment` the commit and his verdict, `done N` |
 | he mentions a thought in passing | `add "Idées"` from the template, and tell him in one line |
 | a review or a test surfaces a new problem | `add "Idées"` — never straight into Backlog |

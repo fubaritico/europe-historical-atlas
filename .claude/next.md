@@ -5,27 +5,32 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — après le 17/10 au soir
+## ▶ ON REPREND ICI — après la nuit du 17 au 18/10
 
-**Le tableau d'abord** : `/trello` → `list`. Tout est commité et poussé (`7f0b2be` + l'état de session ; vérifier par
-`git ls-remote origin main`). Ce qui attend le dev est en **À toi**, ce qu'il a choisi en **À faire**, dans son ordre
-(mémoire [[do-not-start-unasked-work]]).
+**Deux objectifs, décidés par le dev le 18/10** : la **contribution des événements**, et l'**interface de l'atlas** — à plat
+(son zonage dessiné puis sur Illustrator, ensuite Claude Design nourri d'une capture de la carte où des événements sont déjà
+posés) et en 3D dans la carte (des essais jetables, une idée à la fois, il juge le rendu). **Le Cartographe est en pause**
+jusque-là. « À faire » est ordonné par dépendance ; son premier ticket est **CORE-217** (le type de date), puis **CORE-252**
+(le format d'un événement et 2-3 événements de 1100 écrits à la main). Proposer, ne pas commencer sans son mot
+([[do-not-start-unasked-work]]).
 
-**La question en vol à la clôture** : **CARTO-248** (Idées) — lire la vassalité dans Wikidata. Mesuré : aucune propriété
-« vassal de » ; l'information passe par « pays » (P17) **daté** (P580/P582), par « État du Saint-Empire » (Q26830017) et
-par « État vassal » (Q1371288) ; 5 vassaux sur 8 exploitables. Tout est écrit sur la carte. **J'avais demandé** : je crée
-la carte Backlog et je code ? — attendre sa réponse.
+**Première tâche, demandée par le dev le 18/10** : vérifier dans le code et dans `git log` si des tickets d'**Idées** et du
+**Backlog** ne sont pas déjà faits — beaucoup y ont été versés depuis les plans, sans contrôle. Pour chacun : fait, en
+partie, ou pas, avec la preuve (commit, fichier). Lui rapporter ; **c'est lui** qui les passe en Fait ou les archive.
 
-| où | carte | état |
+**Le tableau d'abord** : `/trello` → `list` — **lire toute la sortie** (une lecture coupée à 80 lignes m'a fait créer un
+doublon le 18/10). Tout est commité et poussé (`f10ac04` + l'état de session ; vérifier par `git ls-remote origin main`).
+En français, un élément du tableau est un **ticket**, jamais une « carte » ([[say-ticket-not-carte]]).
+
+| où | ticket | état |
 | --- | --- | --- |
-| **À faire** | CARTO-238 Sauvegarde automatique | palier 1 fait et poussé (`f967d4d`) ; **suivant : palier 2, l'instantané horaire** — le dev l'avait prévu « avant d'attaquer » ; puis 3 (fichier changé sous la page), 4 (repli navigateur) |
-| **À toi** | CARTO-233 Outils actifs trop tard au zoom | seuil 10 → 20 km dans `view/toolReach.ts` + note dans `s17`, **non commité** : le dev juge sur un très grand pays (Fatimides, Cordoue) ; option notée : outils toujours actifs, aimantation coupée de loin |
-| **À toi** | CARTO-235 ‹P›/‹A› muets sur un pays neuf ou vide | attendre son cas exact |
-| **À toi** | REPO-234 Le lot d'étiquettes | qu'il regarde le rendu |
-| **Backlog** | CARTO-247 Vérifier toute l'année contre Wikidata | palier 2 de CARTO-243, prêt à tirer |
+| **À valider par le développeur** | CARTO-233 Outils actifs trop tard au zoom | seuil 10 → 20 km dans `view/toolReach.ts` + note dans `s17`, **non commité** : le dev juge sur un très grand pays (Fatimides, Cordoue) |
+| **À valider par le développeur** | CARTO-116 Trier les copies de `years/1100*` | sa décision ; rien supprimé sans lui |
+| **À valider par le développeur** | CARTO-237 Ce qui reste d'Euratlas dans 1100 | il envoie une capture ; Duby et les cartes glanées restent des références (lire, pas décalquer) |
+| **En cours** | — | vide |
 
-**Non commité, à ne pas embarquer** : `toolReach.ts` et `s17` (CARTO-233) ; `years/1100/{polities,registry}.json` — le dessin du
-dev, à commiter seulement à sa demande (1100 est publié).
+**Non commité, à ne pas embarquer** : `toolReach.ts` et `s17` (CARTO-233). Sa 1100 se commite **à sa demande**, à chaque
+fois qu'il le dit — trois fois le soir du 18/10.
 
 **À savoir pour coder** : Basic Memory sert de graphe **entre projets** (`main/patterns/`, CLI `basic-memory tool …` quand le
 MCP n'est pas chargé). Une commande interrompue ou refusée a pu agir : relire l'état avant de relancer. Modifier `core`
@@ -33,7 +38,7 @@ ou `main.tsx` recharge la page du dev — le prévenir d'enregistrer avant.
 
 ## Where we are
 
-**3 629 tests** (977 `core` · 1 686 Cartographe · 884 atlas · 82 plugin `eslint-plugin-eha`, 17/10), gate
+**3 642 tests** (977 `core` · 1 699 Cartographe · 884 atlas · 82 plugin `eslint-plugin-eha`, 18/10), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 

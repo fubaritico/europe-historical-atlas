@@ -15,7 +15,7 @@ Put here the know issues to avoid cluttering the context window.
   utilisateur »*). (1) **Les outils s'activent trop tard au zoom** : il faut trop se rapprocher avant de pouvoir
   sélectionner ou dessiner (seuil de `s17`, « les outils attendent le zoom ») — l'abaisser. (2) **‹P› et ‹A› ne
   répondent pas sur un pays neuf ou vide** : il faut cliquer l'outil dans la barre. **Le dev donnera le cas exact** ;
-  le reproduire avant de toucher au code. **17/10** : (1) seuil passé à 20 km, non commité, le dev le jugera sur un très grand pays ; (2) toujours en attente de son cas. **Sévérité : gênant.**
+  le reproduire avant de toucher au code. **17/10** : (1) seuil passé à 20 km, non commité, le dev le jugera sur un très grand pays. **18/10** : (2) fermé — le dev : *« le P et le A s'activent bien maintenant au raccourci clavier »*, sans code écrit (CARTO-235, Fait). Reste (1). **Sévérité : gênant.**
 - **Les raccourcis d'empilement (16/10) laissent deux constats de revue ouverts, par ma décision.** — CARTO-121, CARTO-123 (1) A11Y-002 :
   répéter la même commande réécrit le même message dans la barre d'état, et un lecteur d'écran peut ne pas le
   relire — non vérifié, et ça touche toute la barre (`persistence/resultRelay.ts`), pas ce seul raccourci. (2)
