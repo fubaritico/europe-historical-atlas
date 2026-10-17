@@ -5,25 +5,35 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — après le 17/10
+## ▶ ON REPREND ICI — après le 17/10 au soir
 
-**Le tableau d'abord** : `/trello` → `list`. Ce qui attend le dev est en **À toi**, ce qu'il a choisi en
-**À faire**, dans son ordre (mémoire [[do-not-start-unasked-work]]).
+**Le tableau d'abord** : `/trello` → `list`. Tout est commité et poussé (`7f0b2be` + l'état de session ; vérifier par
+`git ls-remote origin main`). Ce qui attend le dev est en **À toi**, ce qu'il a choisi en **À faire**, dans son ordre
+(mémoire [[do-not-start-unasked-work]]).
+
+**La question en vol à la clôture** : **CARTO-248** (Idées) — lire la vassalité dans Wikidata. Mesuré : aucune propriété
+« vassal de » ; l'information passe par « pays » (P17) **daté** (P580/P582), par « État du Saint-Empire » (Q26830017) et
+par « État vassal » (Q1371288) ; 5 vassaux sur 8 exploitables. Tout est écrit sur la carte. **J'avais demandé** : je crée
+la carte Backlog et je code ? — attendre sa réponse.
 
 | où | carte | état |
 | --- | --- | --- |
-| **À toi** | REPO-236 Passer à Trello | le tableau est rempli et numéroté (`files/plans/trello/board-feeding.md`, étapes 1–7) ; **reste : le commit** de la skill, du `.gitignore` (`**/.env*`) et des fichiers allégés, après que le dev a regardé le tableau |
-| **À toi** | CARTO-235 ‹P›/‹A› muets sur un pays neuf ou vide | j'attends son cas exact pour le reproduire |
+| **À faire** | CARTO-238 Sauvegarde automatique | palier 1 fait et poussé (`f967d4d`) ; **suivant : palier 2, l'instantané horaire** — le dev l'avait prévu « avant d'attaquer » ; puis 3 (fichier changé sous la page), 4 (repli navigateur) |
+| **À toi** | CARTO-233 Outils actifs trop tard au zoom | seuil 10 → 20 km dans `view/toolReach.ts` + note dans `s17`, **non commité** : le dev juge sur un très grand pays (Fatimides, Cordoue) ; option notée : outils toujours actifs, aimantation coupée de loin |
+| **À toi** | CARTO-235 ‹P›/‹A› muets sur un pays neuf ou vide | attendre son cas exact |
 | **À toi** | REPO-234 Le lot d'étiquettes | qu'il regarde le rendu |
-| **À faire** | CARTO-233 Les outils s'activent trop tard au zoom | mis en forme, prêt ; sans doute la même cause que `H-39` |
+| **Backlog** | CARTO-247 Vérifier toute l'année contre Wikidata | palier 2 de CARTO-243, prêt à tirer |
 
-**À savoir pour la suite** : 34 cartes du Backlog n'ont pour critère que « à préciser avec le dev » — le
-plan n'en disait pas assez ; on les précise **au moment de les tirer**, jamais en inventant. CARTO-175 et CARTO-189 sont
-mises en forme en Idées, en attente de sa validation pour passer en Backlog.
+**Non commité, à ne pas embarquer** : `toolReach.ts` et `s17` (CARTO-233) ; `years/1100/{polities,registry}.json` — le dessin du
+dev, à commiter seulement à sa demande (1100 est publié).
+
+**À savoir pour coder** : Basic Memory sert de graphe **entre projets** (`main/patterns/`, CLI `basic-memory tool …` quand le
+MCP n'est pas chargé). Une commande interrompue ou refusée a pu agir : relire l'état avant de relancer. Modifier `core`
+ou `main.tsx` recharge la page du dev — le prévenir d'enregistrer avant.
 
 ## Where we are
 
-**3 455 tests** (965 `core` · 1 524 Cartographe · 884 atlas · 82 plugin `eslint-plugin-eha`, 16/10), gate
+**3 629 tests** (977 `core` · 1 686 Cartographe · 884 atlas · 82 plugin `eslint-plugin-eha`, 17/10), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 

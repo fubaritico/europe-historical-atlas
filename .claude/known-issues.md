@@ -15,7 +15,7 @@ Put here the know issues to avoid cluttering the context window.
   utilisateur »*). (1) **Les outils s'activent trop tard au zoom** : il faut trop se rapprocher avant de pouvoir
   sélectionner ou dessiner (seuil de `s17`, « les outils attendent le zoom ») — l'abaisser. (2) **‹P› et ‹A› ne
   répondent pas sur un pays neuf ou vide** : il faut cliquer l'outil dans la barre. **Le dev donnera le cas exact** ;
-  le reproduire avant de toucher au code. **Sévérité : gênant, en tête de la prochaine séance.**
+  le reproduire avant de toucher au code. **17/10** : (1) seuil passé à 20 km, non commité, le dev le jugera sur un très grand pays ; (2) toujours en attente de son cas. **Sévérité : gênant.**
 - **Les raccourcis d'empilement (16/10) laissent deux constats de revue ouverts, par ma décision.** — CARTO-121, CARTO-123 (1) A11Y-002 :
   répéter la même commande réécrit le même message dans la barre d'état, et un lecteur d'écran peut ne pas le
   relire — non vérifié, et ça touche toute la barre (`persistence/resultRelay.ts`), pas ce seul raccourci. (2)
@@ -36,13 +36,6 @@ Put here the know issues to avoid cluttering the context window.
   `borderSnap.ringRunTo` → `shortestRunBetween`, quand le fil d'eau, lui, prend l'autre sens s'il repasse sur le
   tracé (`freshStretch`). Le dev n'y a rien vu de faux ; le jour où le même empilement y apparaît, même remède
   (`runsBetween`, le premier qui ne repasse pas). **Sévérité : à savoir.**
-- **Le contour de l'étendue et les frontières dérivées coûtaient des secondes sur la Norvège — réglé le 17/10** (CARTO-240).
-  Ses 16 235 points (fjords, Islande, Groenland) faisaient marcher chaque test « ce point est-il dans ce pays ? » sur
-  tous ses sommets : 4,6 s pour l'étendue, 4,8 s pour les frontières, à chaque geste. Remède : `indexRings` /
-  `pointInIndexedRings` (`core/geo/pointInRing.ts`), les arêtes rangées par bandes de latitude, construit une fois par
-  calcul — **55 ms et 118 ms**, sortie identique à l'octet sur les 137 pays (vérifié contre l'ancien code). L'index
-  spatial que cette entrée annonçait le 15/10 est celui-là. **À surveiller** : le seul calcul encore en `n` par
-  geste est la sérialisation du brouillon (~20 ms). **Sévérité : réglé, à archiver après le test du dev.**
 - **Un tronçon entre deux ancres de côte est lu comme de la côte, même s'il coupe la terre** (15/10, QUAL-001).
   Depuis que la côte est demandée avant l'inclusion (les îles dalmates de Venise), un trait droit tiré de côte à
   côte en travers d'une presqu'île — le cou d'un duché tranché d'un seul segment — perd sa frontière avec le pays

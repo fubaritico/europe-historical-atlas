@@ -2,6 +2,13 @@
 
 Entries closed and moved out of `known-issues.md`. Kept for the lessons they carry.
 
+- **Le contour de l'étendue et les frontières dérivées coûtaient des secondes sur la Norvège — réglé le 17/10** (CARTO-240).
+  Ses 16 235 points (fjords, Islande, Groenland) faisaient marcher chaque test « ce point est-il dans ce pays ? » sur
+  tous ses sommets : 4,6 s pour l'étendue, 4,8 s pour les frontières, à chaque geste. Remède : `indexRings` /
+  `pointInIndexedRings` (`core/geo/pointInRing.ts`), les arêtes rangées par bandes de latitude, construit une fois par
+  calcul — **55 ms et 118 ms**, sortie identique à l'octet sur les 137 pays (vérifié contre l'ancien code). L'index
+  spatial que cette entrée annonçait le 15/10 est celui-là. **À surveiller** : le seul calcul encore en `n` par
+  geste est la sérialisation du brouillon (~20 ms). **Fermé le 17/10** : testé par le dev (« Bravo, félicitations, c'est parfait »), commit `218910a`.
 - **Les fleuves sont vérifiés contre la boîte du relief dans les deux applications — fermé le 12/10.**
   Le Cartographe depuis le 11/10 (`loadVectorLayers`), l'atlas depuis le 12/10 (`settleRivers`, quand
   le second des deux arrive) : des fleuves recadrés autrement sont refusés en `semantic`, la carte vient
