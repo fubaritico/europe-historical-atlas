@@ -14,9 +14,16 @@ import { bakeToBitmap, loadBackdrop } from './backdropSource'
 import { createHistoryRelay } from './canvas/historyRelay'
 import { CHROME_PAINT_STYLE } from './canvas/style'
 import { arrangeSelected } from './components/arrange'
+import { DraftRecoveryDialog } from './components/DraftRecoveryDialog'
 import { Editor } from './components/Editor'
 import { listenForStackingKeys } from './components/stackingShortcut'
+import { DRAFTS_FOLDER, DRAFT_ROUTE } from './devServer/draftRoute'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
+import { DRAFT_DELAY_MS, createDraftKeeper } from './persistence/draftKeeper'
+import { createDraftOffers } from './persistence/draftOffers'
+import { offerDraft } from './persistence/draftRecovery'
+import { openWithDraft, saveAndClearDraft } from './persistence/draftSession'
+import { createDevServerDraftStore } from './persistence/draftStore'
 import { createResultRelay } from './persistence/resultRelay'
 import { installSaveShortcut } from './persistence/saveShortcut'
 import { createDevServerYearArchive } from './persistence/yearArchive'
@@ -185,10 +192,58 @@ const yearSession = createYearSession({
   year: FIRST_YEAR,
   report: results.say,
 })
-void yearSession.openOnStartup()
-/** Save the year — ‹ctrl+S› anywhere, and the top bar's `[Save]`: one call, two triggers. */
+/**
+ * The draft — the work since the last ‹ctrl+S›, kept on disk a moment after every gesture (CARTO-238).
+ *
+ * **The order is the whole point, and it is one chain**: open the year, *then* offer the draft the previous
+ * session left, *then* start keeping drafts. Started any earlier, the keeper's first write would overwrite
+ * the draft the offer exists to give back — and it starts only when the offer leaves the way clear
+ * (`persistence/draftSession.ts`).
+ */
+const drafts = createDevServerDraftStore({
+  fetch: (input, init) => fetch(input, init),
+  route: DRAFT_ROUTE,
+})
+const draftOffers = createDraftOffers()
+const draftKeeper = createDraftKeeper({
+  store,
+  drafts,
+  year: FIRST_YEAR,
+  delayMs: DRAFT_DELAY_MS,
+  now: () => new Date(),
+  timers: {
+    set: (run, delayMs) => window.setTimeout(run, delayMs),
+    clear: (handle) => {
+      window.clearTimeout(handle)
+    },
+  },
+  report: results.say,
+})
+void openWithDraft({
+  openYear: () => yearSession.openOnStartup(),
+  offerDraft: () =>
+    offerDraft({
+      drafts,
+      year: FIRST_YEAR,
+      store,
+      ask: draftOffers.ask,
+      now: () => new Date(),
+      report: results.say,
+      draftsFolder: DRAFTS_FOLDER,
+    }),
+  keeper: draftKeeper,
+  report: results.say,
+})
+/**
+ * Save the year — ‹ctrl+S› anywhere, and the top bar's `[Save]`: one call, two triggers. A save that wrote
+ * the year tells the keeper, which removes the draft unless the author drew since the save took the document.
+ */
 const handleSave = (): void => {
-  void yearSession.save()
+  void saveAndClearDraft({
+    version: () => store.getState().version,
+    save: () => yearSession.save(),
+    keeper: draftKeeper,
+  })
 }
 installSaveShortcut(window, handleSave)
 // ‹cmd+↑ ↓›, with ‹shift› to the end: the selected polity up or down the stacking order, from anywhere.
@@ -217,5 +272,6 @@ createRoot(container).render(
       colours={colours}
       results={results}
     />
+    <DraftRecoveryDialog offers={draftOffers} />
   </StrictMode>
 )

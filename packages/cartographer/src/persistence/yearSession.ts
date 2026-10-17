@@ -1,3 +1,5 @@
+import { reasonOf } from './errorReason'
+
 import type { SavedYearSummary, YearArchive } from './yearArchive'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
@@ -66,8 +68,9 @@ export interface YearSession {
   /**
    * Save the working document as its year.
    * Resolves either way: a refused or failed save is reported, never thrown.
+   * @returns `true` when the year was written — what tells the draft keeper it may remove the draft
    */
-  save: () => Promise<void>
+  save: () => Promise<boolean>
   /** Where the session stands now. */
   phase: () => SessionPhase
 }
@@ -83,15 +86,6 @@ export function describeYearContents(
   const polities = `${summary.polities.toLocaleString('en-US')} ${summary.polities === 1 ? 'polity' : 'polities'}`
   const vertices = `${summary.vertices.toLocaleString('en-US')} ${summary.vertices === 1 ? 'vertex' : 'vertices'}`
   return `${polities} · ${vertices}`
-}
-
-/**
- * Read a caught value as one sentence for the author.
- * @param error - whatever was thrown
- * @returns its message
- */
-function reasonOf(error: unknown): string {
-  return error instanceof Error ? error.message : String(error)
 }
 
 /**
@@ -203,21 +197,24 @@ function whySaveRefused(deps: YearSessionDeps, cell: SessionCell): string | null
  * Save the working document, or say why not.
  * @param deps - the store, the archive, where to report
  * @param cell - the session's memory
+ * @returns `true` when the year was written
  */
-async function saveYear(deps: YearSessionDeps, cell: SessionCell): Promise<void> {
+async function saveYear(deps: YearSessionDeps, cell: SessionCell): Promise<boolean> {
   const refusal = whySaveRefused(deps, cell)
   if (refusal !== null) {
     console.warn(`${LOG_TAG} save refused: ${refusal}`)
     deps.report(refusal)
-    return
+    return false
   }
   cell.saving = true
   try {
     const summary = await deps.archive.save(deps.store.getState().document)
     deps.report(`saved ${String(summary.year)} · ${describeYearContents(summary)}`)
+    return true
   } catch (error: unknown) {
     console.error(`${LOG_TAG} ${String(deps.year)} was not saved`, error)
     deps.report(`not saved: ${reasonOf(error)}`)
+    return false
   } finally {
     cell.saving = false
   }

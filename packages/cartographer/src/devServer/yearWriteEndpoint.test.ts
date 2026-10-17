@@ -3,19 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import {
-  MAX_BODY_BYTES,
-  createYearWriteMiddleware,
-  handleYearWrite,
-  isSameMachineRequest,
-} from './yearWriteEndpoint'
+import { MAX_BODY_BYTES, isSameMachineRequest } from './httpEndpoint'
+import { createYearWriteMiddleware, handleYearWrite } from './yearWriteEndpoint'
 
-import type {
-  BodyStream,
-  ResponseSink,
-  YearWriteHttpRequest,
-  YearsFolder,
-} from './yearWriteEndpoint'
+import type { DiskFolder } from './diskFolder'
+import type { BodyStream, EndpointRequest, ResponseSink } from './httpEndpoint'
 
 /** The manifest as committed today. */
 const MANIFEST = JSON.stringify({
@@ -28,7 +20,7 @@ const MANIFEST = JSON.stringify({
 function memoryFolder(initial: Record<string, string> = { 'index.json': MANIFEST }) {
   const files = new Map(Object.entries(initial))
   const log: string[] = []
-  const folder: YearsFolder = {
+  const folder: DiskFolder = {
     read: (path) => files.get(path) ?? null,
     write: (path, text) => {
       log.push(`write ${path}`)
@@ -46,7 +38,7 @@ function memoryFolder(initial: Record<string, string> = { 'index.json': MANIFEST
 }
 
 /** A save of the fixture year, from the page this server served. */
-function saveRequest(overrides: Partial<YearWriteHttpRequest> = {}): YearWriteHttpRequest {
+function saveRequest(overrides: Partial<EndpointRequest> = {}): EndpointRequest {
   return {
     method: 'PUT',
     path: '/1100',
@@ -170,7 +162,7 @@ describe('handleYearWrite', () => {
         '1100/registry.json': 'old',
       })
       let writes = 0
-      const failing: YearsFolder = {
+      const failing: DiskFolder = {
         ...folder,
         write: (path, text) => {
           writes += 1
@@ -273,7 +265,7 @@ describe('createYearWriteMiddleware', () => {
   })
 
   it('answers 500 and logs when the disk fails, rather than claiming a save', () => {
-    const folder: YearsFolder = {
+    const folder: DiskFolder = {
       read: () => MANIFEST,
       write: () => {
         throw Object.assign(

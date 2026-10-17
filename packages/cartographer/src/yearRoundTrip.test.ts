@@ -10,7 +10,7 @@ import {
 import { handleYearWrite } from './devServer/yearWriteEndpoint'
 import { createDevServerYearArchive } from './persistence/yearArchive'
 
-import type { YearsFolder } from './devServer/yearWriteEndpoint'
+import type { DiskFolder } from './devServer/diskFolder'
 
 /** The manifest as committed today. */
 const MANIFEST = JSON.stringify({
@@ -28,7 +28,7 @@ const MANIFEST = JSON.stringify({
  */
 function devServer() {
   const disk = new Map<string, string>([['index.json', MANIFEST]])
-  const folder: YearsFolder = {
+  const folder: DiskFolder = {
     read: (path) => disk.get(path) ?? null,
     write: (path, text) => disk.set(path, text),
     rename: (from, to) => {

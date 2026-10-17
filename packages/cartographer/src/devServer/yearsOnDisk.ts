@@ -1,7 +1,8 @@
-import type { YearsFolder } from './yearWriteEndpoint'
+import type { DiskFolder } from './diskFolder'
+import type { DraftFolder } from './draftEndpoint'
 
 /**
- * The years folder on the real disk — the one implementation of {@link YearsFolder} that is not a map in
+ * The years folder on the real disk — the one implementation of {@link DiskFolder} that is not a map in
  * memory.
  *
  * **The file-system calls are handed in, not imported**, for two reasons that are not ceremony. This
@@ -66,7 +67,7 @@ function folderOf(path: string): string {
  * @param disk - the file-system calls
  * @returns the folder
  */
-export function createYearsFolderOnDisk(root: string, disk: DiskCalls): YearsFolder {
+export function createYearsFolderOnDisk(root: string, disk: DiskCalls): DiskFolder {
   const base = root.replace(/\/$/, '')
   const at = (relativePath: string): string => `${base}/${relativePath}`
   return {
@@ -87,6 +88,31 @@ export function createYearsFolderOnDisk(root: string, disk: DiskCalls): YearsFol
     },
     rename: (fromPath, toPath) => {
       disk.rename(at(fromPath), at(toPath))
+    },
+  }
+}
+
+/** The disk calls the drafts folder needs: the year folder's, plus removing a file. */
+export interface DraftDiskCalls extends DiskCalls {
+  /**
+   * Remove a file.
+   * @param path - an absolute path
+   */
+  removeFile: (path: string) => void
+}
+
+/**
+ * Build the drafts folder over a root and the disk calls — the year folder's behaviour, plus removal.
+ * @param root - the absolute path of `.autosave/drafts/`
+ * @param disk - the file-system calls
+ * @returns the folder
+ */
+export function createDraftFolderOnDisk(root: string, disk: DraftDiskCalls): DraftFolder {
+  const base = root.replace(/\/$/, '')
+  return {
+    ...createYearsFolderOnDisk(root, disk),
+    remove: (relativePath) => {
+      disk.removeFile(`${base}/${relativePath}`)
     },
   }
 }

@@ -51,3 +51,6 @@ files/spikes/*/out/
 
 # NPM
 .npmrc
+
+# The Cartographer's autosave: drafts and hourly snapshots, local to the machine (CARTO-238)
+**/.autosave/

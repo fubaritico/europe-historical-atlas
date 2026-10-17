@@ -99,7 +99,7 @@ async function readJson<T>(
  * @param response - the refusal
  * @returns the reason, or the status when the body says nothing usable
  */
-async function refusalReason(response: Response): Promise<string> {
+export async function refusalReason(response: Response): Promise<string> {
   const fallback = `HTTP ${String(response.status)}`
   try {
     const body: unknown = await response.json()
@@ -116,6 +116,31 @@ async function refusalReason(response: Response): Promise<string> {
     // most honest thing left to show, and the save is reported failed either way.
     return fallback
   }
+}
+
+/**
+ * Open a year's three files, already in hand, as a working document — through the same readers and
+ * cross-checks as a year read off disk. How a draft (CARTO-238) is reopened: a draft the atlas could not
+ * read is refused here exactly as a year would be.
+ * @param files - an object holding `registry`, `polities` and `borders`
+ * @param source - where they came from, for the error
+ * @returns the document
+ * @throws an `AssetError` naming the file and the field when any of the three is wrong
+ */
+export function documentFromFiles(files: unknown, source: string): YearDocument {
+  const held = new Map<string, unknown>(
+    files !== null && typeof files === 'object' ? Object.entries(files) : []
+  )
+  return openYearDocument(
+    assembleAuthoredYear(
+      {
+        registry: parseYearRegistry(held.get('registry'), source),
+        polities: parseYearPolities(held.get('polities'), source),
+        borders: parseYearBorders(held.get('borders'), source),
+      },
+      source
+    )
+  )
 }
 
 /**

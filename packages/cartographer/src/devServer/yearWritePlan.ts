@@ -77,8 +77,14 @@ export interface YearWriteRequest {
   manifestText: string | null
 }
 
-/** A whole number written in decimal, a minus sign allowed for the years before the common era. */
-const YEAR_SEGMENT = /^-?\d{1,5}$/
+/**
+ * A year in a path: a whole number of up to five digits, a minus before Christ — the one rule both
+ * endpoints check (the year save here, the draft in `draftEndpoint.ts`). Digits only, so a path built from
+ * it cannot climb out of its folder.
+ */
+export const YEAR_DIGITS = '-?\\d{1,5}'
+
+const YEAR_SEGMENT = new RegExp(`^${YEAR_DIGITS}$`)
 
 /**
  * Build a refusal.

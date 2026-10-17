@@ -77,6 +77,13 @@ describe('createYearSession', () => {
       expect(archive.save).toHaveBeenCalledWith(state.document)
       expect(reports.at(-1)).toBe('saved 1100 · 2 polities · 6 vertices')
     })
+
+    it('answers true when the year was written — what lets the draft keeper remove the draft', async () => {
+      const { yearSession } = session()
+      await yearSession.openOnStartup()
+
+      expect(await yearSession.save()).toBe(true)
+    })
   })
 
   describe('variants', () => {
@@ -171,12 +178,19 @@ describe('createYearSession', () => {
         })
       )
       await yearSession.openOnStartup()
-      await yearSession.save()
+      const saved = await yearSession.save()
 
+      expect(saved).toBe(false)
       expect(reports.at(-1)).toBe(
         'not saved: the files say year 1100, the save was addressed to 1110'
       )
       expect(console.error).toHaveBeenCalled()
+    })
+
+    it('answers false to a save refused before it starts, so the draft is kept', async () => {
+      const { yearSession } = session()
+
+      expect(await yearSession.save()).toBe(false)
     })
   })
 

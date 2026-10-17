@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { createYearsFolderOnDisk } from './yearsOnDisk'
+import { createDraftFolderOnDisk, createYearsFolderOnDisk } from './yearsOnDisk'
 
 import type { DiskCalls } from './yearsOnDisk'
 
@@ -107,5 +107,38 @@ describe('createYearsFolderOnDisk', () => {
 
       expect(() => createYearsFolderOnDisk('/repo/years', calls).read('index.json')).toThrow()
     })
+  })
+})
+
+describe('createDraftFolderOnDisk', () => {
+  it('removes a draft by its path under the root', () => {
+    const removed: string[] = []
+    const folder = createDraftFolderOnDisk('/repo/.autosave/drafts/', {
+      readFile: () => '',
+      writeFile: () => undefined,
+      makeFolder: () => undefined,
+      rename: () => undefined,
+      removeFile: (path) => removed.push(path),
+    })
+
+    folder.remove('1100.json')
+
+    expect(removed).toEqual(['/repo/.autosave/drafts/1100.json'])
+  })
+
+  it('reads, writes and renames as the year folder does', () => {
+    const written: string[] = []
+    const folder = createDraftFolderOnDisk('/repo/.autosave/drafts', {
+      readFile: () => 'draft',
+      writeFile: (path) => written.push(path),
+      makeFolder: () => undefined,
+      rename: () => undefined,
+      removeFile: () => undefined,
+    })
+
+    folder.write('1100.json.tmp', '{}')
+
+    expect(folder.read('1100.json')).toBe('draft')
+    expect(written).toEqual(['/repo/.autosave/drafts/1100.json.tmp'])
   })
 })
