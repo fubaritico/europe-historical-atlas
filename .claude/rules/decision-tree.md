@@ -18,6 +18,7 @@
 | End a work session                   | `/end-session`    |
 | Answer "how long / since when"       | `/timeline`       |
 | Fetch the SonarCloud report          | `/sonar`          |
+| Track a task — a card, its column, its label | `/trello` |
 
 > **This repository has React in it** — the Cartographer, since 2026-10-01. The line that used to stand
 > here said the archived React skills "do NOT apply to this 3D project", and it stopped being true the day

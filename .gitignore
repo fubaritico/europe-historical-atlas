@@ -52,5 +52,8 @@ files/spikes/*/out/
 # NPM
 .npmrc
 
+# Secrets (API keys, tokens)
+**/.env*
+
 # The Cartographer's autosave: drafts and hourly snapshots, local to the machine (CARTO-238)
 **/.autosave/

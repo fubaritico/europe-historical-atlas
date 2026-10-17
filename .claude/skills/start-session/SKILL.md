@@ -3,7 +3,7 @@ name: start-session
 description: Gather all necessary written context from the previous session. Use at the start of a work session to reload state and relevant rules.
 allowed-tools: Read Bash
 metadata:
-  version: '1.1'
+  version: '1.2'
 ---
 
 # Start Session
@@ -25,5 +25,8 @@ Gather all necessary written context from previous session.
 2. Read @.claude/CLAUDE.md to load current Session State and reference file list
 3. Ask the user which rule files are needed for this session, based on what's in `### Next`
 4. Read the relevant rule files and memorize their patterns
-5. Remind the user of the next step from `### Next` in CLAUDE.md, framed by the elapsed time from
+5. **Read the Trello board** — `/trello` skill, `list`, then its sync check. Tell the dev, in two lines,
+   what waits on him in **À toi** and what tops **À faire**: the board is the list of tasks, `next.md`
+   only the resume point.
+6. Remind the user of the next step from `### Next` in CLAUDE.md, framed by the elapsed time from
    step 1 (e.g. "on reprend le chantier d'hier" vs "ça fait 2 mois, voici où on en était")

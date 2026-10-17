@@ -4,43 +4,45 @@ Put here the know issues to avoid cluttering the context window.
 
 > Closed entries are archived in `archive/known-issues-closed.md` (move one there the step it closes); atlas-only open issues live in `known-issues-atlas.md`.
 
-- **Depuis le 13/10 au soir, `years/1100/` contient le tracé du test Euratlas, pas l'année du dev.** Son 1100
+- **Depuis le 13/10 au soir, `years/1100/` contient le tracé du test Euratlas, pas l'année du dev.** — CARTO-116 Son 1100
   (France + Bourgogne) est rangé, intact, dans `years/1100.avant-test-euratlas/`. Le Cartographe ouvre donc
   le test, et l'atlas local le montre à l'année 1100. **À la fin du test** : `years/1100` → `years/1100.test-
   euratlas`, puis `years/1100.avant-test-euratlas` → `years/1100`. Rien de tout ça n'est commité (Euratlas
   est une référence privée). **Depuis la nuit du 14/10**, `years/1100/` tient 137 pays, et les traces de la nuit
   sont `years/1100.euratlas-{16,19,30,48,76,98,137,137b}/` et `1100.before-rename/` — toutes locales, à trier avec
   le dev (aucune n'a été supprimée : `rm -rf` demande sa permission). **Sévérité : à savoir.**
-- **Deux gênes du Cartographe relevées par le dev le 16/10 au soir, à déboguer** (*« ça fait peur pour l'expérience
+- **Deux gênes du Cartographe relevées par le dev le 16/10 au soir, à déboguer** — CARTO-233, CARTO-235 (*« ça fait peur pour l'expérience
   utilisateur »*). (1) **Les outils s'activent trop tard au zoom** : il faut trop se rapprocher avant de pouvoir
   sélectionner ou dessiner (seuil de `s17`, « les outils attendent le zoom ») — l'abaisser. (2) **‹P› et ‹A› ne
   répondent pas sur un pays neuf ou vide** : il faut cliquer l'outil dans la barre. **Le dev donnera le cas exact** ;
   le reproduire avant de toucher au code. **Sévérité : gênant, en tête de la prochaine séance.**
-- **Les raccourcis d'empilement (16/10) laissent deux constats de revue ouverts, par ma décision.** (1) A11Y-002 :
+- **Les raccourcis d'empilement (16/10) laissent deux constats de revue ouverts, par ma décision.** — CARTO-121, CARTO-123 (1) A11Y-002 :
   répéter la même commande réécrit le même message dans la barre d'état, et un lecteur d'écran peut ne pas le
   relire — non vérifié, et ça touche toute la barre (`persistence/resultRelay.ts`), pas ce seul raccourci. (2)
   ARCH-001 : la règle « une flèche modifiée ne fait ni défiler la carte ni bouger le curseur de la liste » est écrite à
   trois endroits (`controller.panFromKeys`, `PolityList`, `stackingShortcut`) ; à mettre en commun au prochain
   raccourci du même genre. **Sévérité : cosmétique.**
-- **Recreuser un vassal après coup est impossible depuis l'outil** (16/10). Le creusement ne tourne qu'à la fermeture
+- **Recreuser un vassal après coup est impossible depuis l'outil** — CARTO-189 (16/10). Le creusement ne tourne qu'à la fermeture
   d'un contour neuf (`addOutlineCarving`) ; un vassal dessiné avant, ou recouvert de nouveau par une retouche du
   suzerain, garde la couleur du suzerain par-dessus (la Champagne, la Frise : recreusées au script). Remède : un geste
   « recreuser » sur un vassal sélectionné, qui appelle `carveOutOfSuzerain` sur chacun de ses anneaux. **Sévérité : à savoir.**
 - **J'écris dans `years/`, sa page ne se recharge pas, et son ‹ctrl+s› suivant réécrit l'ancien état** (16/10). Arrivé
   deux fois : la Frise et le renommage des tribus. Règle : après une écriture de ma part, il **recharge sans
   enregistrer** ; et je vérifie l'heure du fichier avant d'écrire. **Sévérité : à savoir.**
-- **Un test du contrôleur qui échoue en fait tomber deux autres, les tests ‹espace›** (14/10). Il lève avant son
+- **Un test du contrôleur qui échoue en fait tomber deux autres, les tests ‹espace›** — CARTO-124 (14/10). Il lève avant son
   `dispose()` et laisse un écouteur sur la page : la panne accuse des tests sains. Remède : un `afterEach` qui
   détache tout canevas attaché dans `controller.test.ts`. **Sévérité : cosmétique** — ne trompe qu'en cas d'échec.
 - **Suivre la frontière d'un voisin le long de ses ancres prend encore le plus court sans garde** (14/10) :
   `borderSnap.ringRunTo` → `shortestRunBetween`, quand le fil d'eau, lui, prend l'autre sens s'il repasse sur le
   tracé (`freshStretch`). Le dev n'y a rien vu de faux ; le jour où le même empilement y apparaît, même remède
   (`runsBetween`, le premier qui ne repasse pas). **Sévérité : à savoir.**
-- **Le contour de l'étendue coûte ~45 ms pour l'Empire, une fois par geste quand il est visé** (15/10, QUAL-002).
-  `extentOutline` teste les deux côtés de chaque tronçon contre les anneaux de tous les membres ; le pré-filtre par
-  boîte ne gagne presque rien, l'anneau propre de l'Empire (1 304 ancres) contenant presque tout. Mesuré à chaud :
-  Empire 45 ms, France 27 ms, Angleterre 23 ms ; mis en cache par version et pays visé, et `prune` ne le demande
-  plus sans sélection. Remède si ça se sent à la plume : un index spatial des tronçons. **Sévérité : à savoir.**
+- **Le contour de l'étendue et les frontières dérivées coûtaient des secondes sur la Norvège — réglé le 17/10** (CARTO-240).
+  Ses 16 235 points (fjords, Islande, Groenland) faisaient marcher chaque test « ce point est-il dans ce pays ? » sur
+  tous ses sommets : 4,6 s pour l'étendue, 4,8 s pour les frontières, à chaque geste. Remède : `indexRings` /
+  `pointInIndexedRings` (`core/geo/pointInRing.ts`), les arêtes rangées par bandes de latitude, construit une fois par
+  calcul — **55 ms et 118 ms**, sortie identique à l'octet sur les 137 pays (vérifié contre l'ancien code). L'index
+  spatial que cette entrée annonçait le 15/10 est celui-là. **À surveiller** : le seul calcul encore en `n` par
+  geste est la sérialisation du brouillon (~20 ms). **Sévérité : réglé, à archiver après le test du dev.**
 - **Un tronçon entre deux ancres de côte est lu comme de la côte, même s'il coupe la terre** (15/10, QUAL-001).
   Depuis que la côte est demandée avant l'inclusion (les îles dalmates de Venise), un trait droit tiré de côte à
   côte en travers d'une presqu'île — le cou d'un duché tranché d'un seul segment — perd sa frontière avec le pays
@@ -102,7 +104,7 @@ Put here the know issues to avoid cluttering the context window.
   autre fonction du fichier) : il signale, et c'est l'auteur qui renomme. Voulu — un renommage automatique
   toucherait les références. **Sévérité : à savoir.**
 - **La revue de fin de session du 11/10 a laissé ouvert, par décision de moi, ce qui suit — aucun n'est
-  bloquant pour un éditeur à un seul auteur, tout est à reprendre avec l'étape 5.**
+  bloquant pour un éditeur à un seul auteur, tout est à reprendre avec l'étape 5.** — CARTO-121, CARTO-207
   **Accessibilité** : (1) **la hiérarchie de l'arbre `{Polities}` n'est pas annoncée** — `aria-level`
   est invalide sur `option` (ARIA 1.2), retiré ; le remède est un texte masqué *« vassal de X »* sur la
   ligne, ou un vrai `tree` (autre modèle clavier). (2) **Le changement d'outil au clavier (‹A›, ‹P›
@@ -127,7 +129,7 @@ Put here the know issues to avoid cluttering the context window.
   par couche (`canvas/snapLayers.ts`), la géométrie renommée `lineSnap`. (7)
   `paintRanks` est recalculé à chaque repeinture — ~50 pays, négligeable ; à mettre en cache par
   version si le document grossit. **Sévérité : à savoir.**
-- **Le menu d'empilement de `{Polities}` (11/10) a deux limites connues, laissées ouvertes.**
+- **Le menu d'empilement de `{Polities}` (11/10) a deux limites connues, laissées ouvertes.** — CARTO-122
   (1) **Il peut déborder du bord de la fenêtre** : il s'ouvre au point du clic droit (ou sous la ligne
   au clavier), sans se replier — un clic droit sur une des dernières lignes, dans une fenêtre basse,
   coupe le bas du menu (≈ 100 px). Remède : le replier dans un effet de mise en page, une fois mesuré.
@@ -149,7 +151,7 @@ Put here the know issues to avoid cluttering the context window.
   **Déclassé le 09/10 par le dev** : le contraste n'est pas une contrainte qu'il tient pour l'éditeur
   (*« on s'en fout des contrastes »*). Le manque reste mesuré et déclaré, plus rien n'en dépend.
   **Sévérité : cosmétique.**
-- **Le zoom du Cartographe est « acceptable », pas fluide — et ce qui reste n'est plus les vecteurs.**
+- **Le zoom du Cartographe est « acceptable », pas fluide — et ce qui reste n'est plus les vecteurs.** — CARTO-120
   Jugé par le dev le 07/10 après deux corrections : la coalescence des repeintures sur
   `requestAnimationFrame` (on peignait **dans** le gestionnaire, donc 60 à 120 fois par seconde) puis
   l'élagage au viewport et la décimation au pixel écran. Mesuré : de **95 233 points** de côte, une
@@ -195,7 +197,7 @@ Put here the know issues to avoid cluttering the context window.
   sélecteur et pas la fuite**. Trouvé par un test écrit exprès pour ça.
   **Remède en place** : `packages/cartographer/vitest.setup.ts`. **Tout nouveau paquet React devra avoir le
   sien** — c'est la chose qu'on oubliera.
-- **`scripts/merge-coverage.mjs` n'est linté ni testé par rien** (ARCH-005 / QUAL-003, 01/10, **laissé
+- **`scripts/merge-coverage.mjs` n'est linté ni testé par rien** — REPO-125 (ARCH-005 / QUAL-003, 01/10, **laissé
   ouvert**). `turbo lint` ne fane que sur les paquets, le fichier est hors de tous les `tsconfig`, et il n'a
   pas de suite. Il porte pourtant de la logique — la réécriture des chemins `SF:` — dont la régression ne
   sortirait **nulle part** : le job Sonar est délibérément non bloquant.
@@ -203,12 +205,12 @@ Put here the know issues to avoid cluttering the context window.
   paquet `tooling` est propre mais c'est une structure pour 60 lignes ; une invocation ESLint dédiée à
   `scripts/` demande un bloc de config qui désactive le lint typé, le fichier étant hors tsconfig.
   **Cosmétique**, et Prettier le couvre désormais au commit. À reprendre si `scripts/` grossit.
-- **Le cache de Turbo ne sert à rien en CI.** Chaque job part d'un runner neuf et `.turbo` n'est jamais
+- **Le cache de Turbo ne sert à rien en CI.** — REPO-126 Chaque job part d'un runner neuf et `.turbo` n'est jamais
   restauré, donc les trois jobs de `validate.yml` sont toujours froids. Localement il marche (mesuré :
   8 ms, `FULL TURBO`, contre 8,4 s à froid). **Cosmétique** — le remède est un `actions/cache` sur `.turbo`
   ou le cache distant, et ça gagnerait des secondes sur une gate qui se compte en secondes. Écrit en tête
   de `validate.yml` pour que personne ne croie le contraire.
-- **Toute la ligne ESLint 9 est en fin de support.** `9.39.5` **est** la dernière 9.x — l'avertissement
+- **Toute la ligne ESLint 9 est en fin de support.** — REPO-127 `9.39.5` **est** la dernière 9.x — l'avertissement
   `deprecated` de npm ne dit pas qu'une version plus haute existe, il dit que la 9 n'est plus maintenue
   depuis la sortie de la 10. **Décision du dev, 01/10 : on reste en 9**, et le coût est qu'il n'y aura plus
   de correctif de sécurité dessus. **À savoir**, à reconsidérer quand la 10 aura quelques mois — et noter
@@ -279,7 +281,7 @@ Put here the know issues to avoid cluttering the context window.
   **Donc la règle se double d'une procédure** : après avoir écrit le test d'un piège, vérifier qu'il tombe
   contre l'implémentation naïve — pas que la suite tombe, **que ce test-là tombe**. Un sabotage attrapé par
   la suite entière ne dit pas lequel des tests garde quoi.
-- **Recharger un jalon jette ce que la ligne tenait après lui, et rien ne le décide encore.** `restoreMarker`
+- **Recharger un jalon jette ce que la ligne tenait après lui, et rien ne le décide encore.** — CARTO-198 `restoreMarker`
   remplace la ligne par ce que le jalon a gelé ; ce qui suivait le pas marqué disparaît. Le code **ne prend
   aucune politique**, délibérément : le mécanisme est dans `core`, la décision appartient au chrome, et
   `rules/error-handling.md` en fait une décision produit et non un détail d'implémentation.
@@ -310,7 +312,7 @@ Put here the know issues to avoid cluttering the context window.
   commité. Rattrapé tout de suite, rien de perdu. **La règle** : pour défaire un sabotage de vérification,
   copier le fichier avant (`cp`) ou éditer à la main — `git checkout` ne connaît que le dernier commit.
   **Cosmétique**, mais ça coûte une réécriture à chaque fois.
-- **Le manifeste des années déclare la bbox du rendu, et personne ne vérifie qu'elle correspond au DEM.**
+- **Le manifeste des années déclare la bbox du rendu, et personne ne vérifie qu'elle correspond au DEM.** — ATLAS-143
   `years/index.json` porte la boîte géographique contre laquelle les années dessinées se projettent, et elle
   **doit** être celle du DEM : si elle diffère, chaque frontière glisse hors du terrain qu'elle borde, sans
   erreur nulle part. Le choix de la déclarer plutôt que de la lire du relief était volontaire — la prendre du
@@ -323,8 +325,8 @@ Put here the know issues to avoid cluttering the context window.
   compte un `RunBorder` comme une référence, délibérément : un trait posé à la main est une décision, et
   laisser tomber les points sous lui l'annulerait en silence (ce que `s13` interdit). Conséquence assumée :
   supprimer un pays dont un tronçon était stylé laisse ces ancres dans le fichier, invisibles, sans aucun
-  contour qui les tienne. **Le remède est `{Overrides}`**, qui les liste comme orphelines avec son
-  `[Clear]` — mais ce panneau n'existe pas encore. **Cosmétique tant que l'éditeur n'a pas d'interface** ;
+  contour qui les tienne. **Le remède est `{Overrides}`**, qui existe depuis le 13/10 (`2b9caf0`) avec son `[Clear]` —
+  reste à vérifier qu'il liste ces ancres orphelines (corrigé le 17/10 : l'entrée le disait absent). **Cosmétique tant que l'éditeur n'a pas d'interface** ;
   à ne pas « corriger » en supprimant l'override, ce serait le défaut inverse et plus grave.
 - **Un test vert du premier coup ne prouve rien, et une casse arbitraire ne le vérifie pas non plus.**
   Découvert le 27/09 sur le test le plus important de l'étape 2 — celui qui garantit qu'un aller-retour
@@ -351,7 +353,7 @@ Put here the know issues to avoid cluttering the context window.
   déplacement de dossier, pas avant.
   Résolu : historique réécrit, dépôt supprimé et recréé, et la CI **assère** désormais l'absence de
   `dist/borders`.
-- **`packages/core/README.md` décrit un paquet qui va changer.** Il annonce « le format, les lecteurs, le
+- **`packages/core/README.md` décrit un paquet qui va changer.** — REPO-229 Il annonce « le format, les lecteurs, le
   compositeur, les maths ». Deux choses s'y ajouteront et n'y sont pas : le **type de date historique**
   (`HistoricalDate`, plan P8) et les **tables de traduction** (ICU, même section). Cosmétique, à faire
   quand l'un des deux arrive — mais un README de paquet est la première chose qu'un lecteur ouvre dans un
