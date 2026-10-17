@@ -7,7 +7,7 @@
  * happens once at save.
  */
 
-import { vassalsOf } from '../data/paintOrder'
+import { effectiveSuzerains, vassalsOf } from '../data/paintOrder'
 
 import { MIN_RING_ANCHORS, referencedAnchors } from './yearDocument'
 
@@ -102,13 +102,33 @@ export function pathsHolding(doc: YearDocument, index: number): number {
  *
  * Territory-less is the normal starting state, not a transient one: at 1100 OHM gives the Kingdom of France
  * its identity and no geometry at all.
+ *
+ * **Where it lands in the stacking order** (CARTO-242, the dev's call of 2026-10-17): the polities list is the
+ * order, back to front, **read by sibling groups** — polities owing the same suzerain (`stacking.ts`). By
+ * default the new polity goes to the end of the list: the front of its group, the top of it in `{Polities}`.
+ * Given `inFrontOf` **and the two are siblings**, it goes right after that polity in the list: just in front of
+ * it, so a group of neighbours drawn one after another stays together without being moved by hand. Not
+ * siblings — the new polity owes another suzerain — the list position near the target would say nothing about
+ * its rank in its own group, so it takes the default. An `inFrontOf` naming no polity of the year is the same
+ * as none: the target is an id that may cease to resolve (a polity deleted, an undo), a legitimate state.
  * @param doc - the document to edit
  * @param polity - the identity to add
+ * @param inFrontOf - the polity to place it just in front of when they are siblings, or `null`
  * @returns `false` when the id is already taken, which is refused rather than merged
  */
-export function addPolity(doc: YearDocument, polity: YearPolity): boolean {
+export function addPolity(
+  doc: YearDocument,
+  polity: YearPolity,
+  inFrontOf: string | null = null
+): boolean {
   if (doc.polities.some((existing) => existing.id === polity.id)) return false
   doc.polities.push({ ...polity })
+  if (inFrontOf === null) return true
+  const anchor = doc.polities.findIndex((existing) => existing.id === inFrontOf)
+  const suzerains = effectiveSuzerains(doc.polities)
+  if (anchor === -1 || suzerains.get(inFrontOf) !== suzerains.get(polity.id)) return true
+  const added = doc.polities.pop()
+  if (added !== undefined) doc.polities.splice(anchor + 1, 0, added)
   return true
 }
 

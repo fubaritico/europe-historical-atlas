@@ -40,6 +40,10 @@ export interface PolityDialogProps {
  * **Create, then aim, in that order and only on success.** `createPolity` refuses an id the year already
  * holds by returning `false`; the form checked first, and this second line stays because the document is
  * the authority, not the form's copy of its ids. A change keeps the polity's id and so its target.
+ *
+ * **A new polity is created just in front of the one selected** (CARTO-242): the target when `[+]` was
+ * pressed, so it appears right above it in `{Polities}` — when the two owe the same suzerain; otherwise, and
+ * with nothing selected, at the top of its own group as before (`addPolity`).
  * @param store - the store
  * @param polity - the form, read
  * @param editing - whether it changes an existing polity
@@ -50,14 +54,14 @@ function commit(
   polity: YearPolity,
   editing: boolean
 ): Partial<Record<DraftField, string>> | null {
-  const { createPolity, editPolity, aimAt } = store.getState()
+  const { createPolity, editPolity, aimAt, target } = store.getState()
   if (editing) {
     // The suzerain list offers no loop: a refusal here is a defect, said loudly.
     if (editPolity(polity, { kind: 'edit-polity', label: `edit ${polity.name}` })) return null
     console.error(`[Cartographer] the document refused the change to "${polity.id}".`)
     return {}
   }
-  if (!createPolity(polity, { kind: 'create-polity', label: `create ${polity.name}` })) {
+  if (!createPolity(polity, { kind: 'create-polity', label: `create ${polity.name}` }, target)) {
     return { id: DRAFT_ERRORS.idTaken }
   }
   aimAt(polity.id)

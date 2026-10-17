@@ -239,6 +239,55 @@ function mountTwo() {
 const order = (store: ReturnType<typeof mount>['store']) =>
   store.getState().document.polities.map((held) => held.id)
 
+/** The names of the rows of {Polities}, top to bottom — the front first. */
+const rowNames = () =>
+  screen
+    .getAllByRole('option')
+    .map((option) => option.querySelector('.polity-row__name')?.textContent)
+
+describe('PolitiesPanel — creating a polity next to the one selected (CARTO-242)', () => {
+  describe('happy path', () => {
+    it('creates the new polity just above the one selected', async () => {
+      const { store, user } = mountTwo()
+      act(() => {
+        store.getState().chooseTarget('fr')
+      })
+      await user.click(screen.getByRole('button', { name: 'New polity' }))
+      await user.type(open().getByLabelText('Name'), 'Bourgogne')
+      await user.click(open().getByRole('button', { name: 'OK' }))
+      expect(rowNames()).toEqual(['Sacrum Imperium', 'Bourgogne', 'Reaume de France'])
+    })
+  })
+
+  describe('variants', () => {
+    it('creates it at the top when nothing is selected, as before', async () => {
+      const { user } = mountTwo()
+      await user.click(screen.getByRole('button', { name: 'New polity' }))
+      await user.type(open().getByLabelText('Name'), 'Bourgogne')
+      await user.click(open().getByRole('button', { name: 'OK' }))
+      expect(rowNames()).toEqual(['Bourgogne', 'Sacrum Imperium', 'Reaume de France'])
+    })
+  })
+
+  // L3/L4: N/A — a target that no longer resolves is the same as none, tested in core (addPolity).
+
+  describe('edge cases', () => {
+    it('gives the order back in one undo', async () => {
+      const { store, user } = mountTwo()
+      act(() => {
+        store.getState().chooseTarget('fr')
+      })
+      await user.click(screen.getByRole('button', { name: 'New polity' }))
+      await user.type(open().getByLabelText('Name'), 'Bourgogne')
+      await user.click(open().getByRole('button', { name: 'OK' }))
+      act(() => {
+        store.getState().undo()
+      })
+      expect(rowNames()).toEqual(['Sacrum Imperium', 'Reaume de France'])
+    })
+  })
+})
+
 describe('PolitiesPanel — the stacking menu (s16)', () => {
   describe('happy path', () => {
     // s16 — "When I right-click … and choose [Bring to Front] / Then France is painted over the Empire".

@@ -139,6 +139,50 @@ describe('polities and rings', () => {
   })
 
   describe('variants', () => {
+    it('adds a polity just in front of the one named, the others keeping their order', () => {
+      // CARTO-242: the list is the stacking order, back to front — "in front of" is right after it.
+      const doc = neighbours()
+      const before = doc.polities.map((held) => held.id)
+      expect(addPolity(doc, polity('x', 'X'), before[0] ?? null)).toBe(true)
+      expect(doc.polities.map((held) => held.id)).toEqual([before[0], 'x', ...before.slice(1)])
+    })
+
+    it('adds a vassal just in front of a co-vassal of the same suzerain', () => {
+      // The dev's case: neighbours of one lord drawn one after another stay side by side.
+      const doc = neighbours()
+      const lord = doc.polities[0]?.id ?? ''
+      addPolity(doc, polity('a', 'A', lord))
+      addPolity(doc, polity('b', 'B', lord))
+      addPolity(doc, polity('c', 'C', lord), 'a')
+      const ids = doc.polities.map((held) => held.id)
+      expect(ids.indexOf('c')).toBe(ids.indexOf('a') + 1)
+    })
+
+    it('adds a polity owing another suzerain than the target at the front of its own group', () => {
+      // Review QUAL-001: not siblings, the list position near the target would mean nothing.
+      const doc = neighbours()
+      const lord = doc.polities[0]?.id ?? ''
+      addPolity(doc, polity('a', 'A', lord))
+      // b behind a in the list: in front of a and at the front of the list are now two different places.
+      addPolity(doc, polity('b', 'B', lord))
+      addPolity(doc, polity('free', 'Free'), 'a')
+      expect(doc.polities.at(-1)?.id).toBe('free')
+    })
+
+    it("adds a vassal of the target at the front of the target's vassals, not beside it", () => {
+      const doc = neighbours()
+      const lord = doc.polities[0]?.id ?? ''
+      addPolity(doc, polity('child', 'Child', lord), lord)
+      expect(doc.polities.at(-1)?.id).toBe('child')
+    })
+
+    it('adds a polity at the front when the one named is not in the year', () => {
+      // A target is an id that may cease to resolve (a polity deleted, an undo): it is the same as none.
+      const doc = neighbours()
+      addPolity(doc, polity('x', 'X'), 'gone')
+      expect(doc.polities.at(-1)?.id).toBe('x')
+    })
+
     it('adds a second ring to a polity that already holds one', () => {
       const doc = neighbours()
       expect(closeRing(doc, 'fr-couronne', [1, 2, 3])).toBe(true)

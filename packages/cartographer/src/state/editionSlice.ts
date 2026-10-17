@@ -130,9 +130,11 @@ export interface EditionActions {
    * when it returns `false` — the document is untouched and the line has not moved.
    * @param polity - the identity to add, its id already chosen (see `core/editor/polityId`)
    * @param step - how `{History}` and `[↶ Undo]` will name the gesture
+   * @param inFrontOf - the polity to create it just in front of — the one selected (CARTO-242) — or `null`
+   *   for the front of the stacking order
    * @returns `false` when the id is already taken, and nothing happened
    */
-  createPolity: (polity: YearPolity, step: HistoryStep) => boolean
+  createPolity: (polity: YearPolity, step: HistoryStep, inFrontOf?: string | null) => boolean
   /**
    * Change a polity's properties, as one undoable step — `s07`'s *"reopen a polity's form and change
    * it"*. Its id stays; a suzerain closing a loop of homage is refused by the document.
@@ -455,8 +457,8 @@ function polityActions(
   record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean
 ): Pick<EditionActions, 'createPolity' | 'editPolity' | 'deletePolity'> {
   return {
-    createPolity: (polity, step): boolean =>
-      record((document) => addPolity(document, polity), step),
+    createPolity: (polity, step, inFrontOf = null): boolean =>
+      record((document) => addPolity(document, polity, inFrontOf), step),
     editPolity: (polity, step): boolean =>
       record((document) => updatePolity(document, polity), step),
     deletePolity: (polityId, step): RemovalReport | null => {
