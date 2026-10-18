@@ -1,5 +1,5 @@
-import type { Backdrop } from '../../backdropSource'
-import type { VectorLayers } from '../../vectorLayers'
+import type { Backdrop } from '../../loaders/backdropSource'
+import type { VectorLayers } from '../../loaders/vectorLayers'
 import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
 /**

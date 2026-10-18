@@ -9,10 +9,10 @@ import {
 } from '@europe-historical-atlas/core/data/riverSource'
 import { provenanceOf } from '@europe-historical-atlas/core/editor/provenance'
 
-import { boundsOf } from './viewport/culling'
+import { boundsOf } from '../viewport/culling'
 
-import type { Box } from './viewport/culling'
-import type { BackdropFrame } from './viewport/projection'
+import type { Box } from '../viewport/culling'
+import type { BackdropFrame } from '../viewport/projection'
 import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
 import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 import type { River, RiverSource } from '@europe-historical-atlas/core/data/riverSource'

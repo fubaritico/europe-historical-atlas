@@ -76,7 +76,7 @@ const LAYERS = {
   state: 'src/state/editionSlice.ts',
   canvas: 'src/canvas/paint/painter.ts',
   components: 'src/components/Editor/Editor.tsx',
-  loaders: 'src/vectorLayers.ts',
+  loaders: 'src/loaders/vectorLayers.ts',
   workbench: 'src/workbench/Workbench.tsx',
   persistence: 'src/persistence/yearSession.ts',
   devServer: 'src/devServer/yearWritePlan.ts',
@@ -163,10 +163,10 @@ describe('architecture boundaries', () => {
       }
     })
 
-    it('holds the root-level loaders to a direction too, not just to the package ban', () => {
-      // They live beside the composition root, which has no row of its own — so without this they were
-      // covered by nothing but the three.js ban, and could have reached into the store or the painter
-      // with the gate green. Found in review, 2026-10-07.
+    it('holds the loaders to a direction too, not just to the package ban', () => {
+      // They lived beside the composition root, which has no row of its own, until 2026-10-18 — so
+      // without this they were covered by nothing but the three.js ban, and could have reached into the
+      // store or the painter with the gate green. Found in review, 2026-10-07.
       const loaders = resolved.get('loaders') ?? {}
 
       expect(forbiddenPatterns(loaders)).toContain('**/state/**')

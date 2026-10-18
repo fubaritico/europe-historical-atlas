@@ -67,10 +67,10 @@ const CARTOGRAPHER_BOUNDARIES = [
     why: 'workbench/ is a second root: a development page mounting pieces of the chrome alone, on literal data. It may read every layer, as main does, but never main itself — importing the entry would boot the whole editor, backdrop and all, behind a plate meant to load in a second.',
   }),
   layerBoundary({
-    files: ['src/backdropSource.ts', 'src/vectorLayers.ts'],
+    files: ['src/loaders/**/*.{ts,tsx}'],
     forbid: ['state', 'canvas', 'components', 'main'],
     paths: CARTOGRAPHER_IS_2D,
-    why: 'The root-level loaders fetch, bake and project what the editor draws on. They sit beside the composition root rather than in a layer because they are what it wires together — but they are not it: they hold real logic and real tests, so they must not reach into the store, the painter, a component, or the entry. Found in review on 2026-10-07, when they had no row at all and only the package-wide three.js ban covered them; the atlas gets away with the same shape because nothing there interrogates its config, while this package has boundaries.test.ts precisely so a missing row cannot go quiet.',
+    why: 'loaders/ fetches, bakes and projects what the editor draws on. These modules sat beside the composition root until 2026-10-18, because they are what it wires together — but they are not it: they hold real logic and real tests, so they must not reach into the store, the painter, a component, or the entry. Found in review on 2026-10-07, when they had no row at all and only the package-wide three.js ban covered them; the atlas gets away with the same shape because nothing there interrogates its config, while this package has boundaries.test.ts precisely so a missing row cannot go quiet.',
   }),
   layerBoundary({
     files: ['src/persistence/**/*.{ts,tsx}'],

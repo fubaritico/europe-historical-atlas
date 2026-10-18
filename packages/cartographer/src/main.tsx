@@ -10,7 +10,6 @@ import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?
 import { DEFAULT_TERRAIN_OPTIONS } from '@europe-historical-atlas/core/pipeline/terrainOptions'
 import { createWorkerMapCompute } from '@europe-historical-atlas/core/pipeline/workerCompute'
 
-import { bakeToBitmap, loadBackdrop } from './backdropSource'
 import { createHistoryRelay } from './canvas/history/historyRelay'
 import { CHROME_PAINT_STYLE } from './canvas/paint/style'
 import { DraftRecoveryDialog } from './components/DraftRecoveryDialog'
@@ -22,6 +21,8 @@ import { listenForStackingKeys } from './components/shared/stackingShortcut'
 import { SnapshotDialog } from './components/SnapshotDialog'
 import { DRAFTS_FOLDER, DRAFT_ROUTE } from './devServer/draftRoute'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
+import { bakeToBitmap, loadBackdrop } from './loaders/backdropSource'
+import { loadVectorLayers } from './loaders/vectorLayers'
 import {
   DRAFT_DELAY_MS,
   SNAPSHOT_EVERY_MS,
@@ -40,7 +41,6 @@ import { createYearSession } from './persistence/yearSession'
 import { openEmptyYear } from './state/openEmptyYear'
 import { createPolityColourSource } from './state/polityColourSource'
 import { createCartographerStore } from './state/store'
-import { loadVectorLayers } from './vectorLayers'
 import { UNFRAMED } from './viewport/viewport'
 import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataSource'
 

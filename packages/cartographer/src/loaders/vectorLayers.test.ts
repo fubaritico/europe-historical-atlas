@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { createLandMask } from '@europe-historical-atlas/core/data/landMask'
 
+import { TEST_BACKDROP_FRAME } from '../viewport/testFrame'
+
 import {
   COASTLINE_TRACE_WIDTH,
   loadVectorLayers,
@@ -10,9 +12,8 @@ import {
   toBackdropPixels,
   traceCoastline,
 } from './vectorLayers'
-import { TEST_BACKDROP_FRAME } from './viewport/testFrame'
 
-import type { BackdropFrame } from './viewport/projection'
+import type { BackdropFrame } from '../viewport/projection'
 import type { River, RiverSource } from '@europe-historical-atlas/core/data/riverSource'
 import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
 

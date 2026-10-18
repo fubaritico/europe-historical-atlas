@@ -328,14 +328,14 @@ describe('bakeToBitmap', () => {
 
 describe('the test fixture stays out of production', () => {
   /**
-   * Every module under `src/`, read as text.
+   * Every module under `src/` — this file sits in `loaders/`, hence `../` — read as text.
    *
    * **`import.meta.glob` and not `node:fs`**, which is the whole reason this guard is writable at all:
    * reading the tree with `fs` needs `@types/node`, and no package here declares them — the root pins
    * `"types": ["vite/client"]` so that a browser package compiles against the browser. Vite's own glob
    * is part of that declared environment, so the check costs no contract.
    */
-  const modules = import.meta.glob('./**/*.{ts,tsx}', {
+  const modules = import.meta.glob('../**/*.{ts,tsx}', {
     query: '?raw',
     import: 'default',
     eager: true,
@@ -361,7 +361,7 @@ describe('the test fixture stays out of production', () => {
     // file-walking test. This is the assertion that it is actually looking.
     const production = Object.keys(modules).filter((path) => !/\.test\.tsx?$/.test(path))
 
-    expect(production).toContain('./main.tsx')
+    expect(production).toContain('../main.tsx')
     expect(production).toContain('./backdropSource.ts')
   })
 })

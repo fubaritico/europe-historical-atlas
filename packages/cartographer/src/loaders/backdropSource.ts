@@ -1,6 +1,6 @@
 import { boundsDisagreement } from '@europe-historical-atlas/core/data/assetError'
 
-import type { BackdropFrame } from './viewport/projection'
+import type { BackdropFrame } from '../viewport/projection'
 import type { HeightmapMeta, HeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
 import type { LandMask, LandMaskSource } from '@europe-historical-atlas/core/data/landMask'
 import type {

@@ -73,6 +73,7 @@ packages/
 │       ├── canvas/         # the controller and the live canvas at the root; tools/ (gestures, snaps),
 │       │                   #   paint/ (painters, scene, style, cursors), history/ (undo keys and relay)
 │       ├── persistence/    # the year on disk: open, save, snapshots; draft/ holds the automatic draft
+│       ├── loaders/        # fetch, bake and project the backdrop and the vector layers
 │       └── components/     # one folder per component: <Name>/<Name>.tsx and its test at the root,
 │                           #   hooks/ (its own hooks), internal/ (its own children), index.ts (2026-10-18)
 └── eslint-plugin-eha/  # the lint rules of this repository: where each declaration sits (2026-10-12)

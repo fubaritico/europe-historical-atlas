@@ -26,9 +26,9 @@ import { drawOutlineAt } from './testGestureContext'
 
 import type { HistoryRelay } from './history/historyRelay'
 import type { SnapLine } from '../geometry/lineSnap'
+import type { NamedPolyline } from '../loaders/vectorLayers'
 import type { CartographerStoreHook } from '../state/store'
 import type { PenMode } from '../state/toolSlice'
-import type { NamedPolyline } from '../vectorLayers'
 
 /** The canvas box every test pretends to have, jsdom reporting every element as zero-sized. */
 const BOX = { width: 800, height: 600 }
