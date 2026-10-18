@@ -2,6 +2,33 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-10-18 — le code d'équerre, les vassaux par le zoom, les tribus au bord évanoui, un relief plus fin
+
+Une plage au journal, **18/10 14:22 → 23:59 (9 h 37, 1 619 actions)** ; le chantier ouvert le 05/10 totalise **89 h 43 sur
+15 plages**. **39 commits** `b9d3cc6`..`6d3903f`, **tous poussés** à la demande du dev, plus celui de cet état.
+**4 207 tests** (1 126 `core` · 1 931 Cartographe · 983 atlas · 167 plugin). Le détail de chaque livraison est sur son ticket.
+
+- **Le tableau** : l'audit d'Idées/Backlog (aucun fait, 9 en partie, passés en cours par le dev) ; la comparaison avec
+  Euratlas, ~33–37 % retracé (CARTO-237).
+- **Le Cartographe** : CARTO-121, CARTO-122 (la demande au design system rédigée), CARTO-195 (**la zone éditoriale
+  supprimée** — je l'avais inventée : *« n'en invente pas. Par pitié »*), CARTO-238 (la garde contre l'écrasement, les
+  snapshots), CARTO-257 (l'aimant au bord de la carte), CARTO-233 commité à 20 km, le fond gris de la page.
+- **Le code remis d'équerre, à la demande du dev** : un dossier par composant (`hooks/`, `internal/`, barrel) et quatre
+  règles de lint ; **zéro import circulaire**, types compris — son principe, *l'enfant déclare son type, celui du parent en
+  hérite* — tenu par `eha/no-import-cycle` ; le JSDoc imposé par `eslint-plugin-jsdoc` (286 manques documentés) ; Node
+  22.14 → 22.23 ; `viewport/`, `canvas/{tools,paint,history}`, `persistence/draft/`, `loaders/` ; plus aucun fichier non suivi
+  hors le sien. *« pas de dette, rien »*.
+- **L'atlas** : ATLAS-253 (de loin un vassal porte la couleur de son suzerain ; hommage limité à 8 niveaux) — *« ça réagit
+  bien »* ; ATLAS-258 (les tribus au bord évanoui, pareil dans les deux applis ; à travers une tribu un État montre sa
+  frontière) — *« les frontières sont respectées »* ; ses réglages (fleuves toujours visibles, frontières plus visibles) ;
+  le relief au niveau 6 sur 1 920, en ligne pour mesurer le chargement (2 560 : *« c'est trop »*).
+- **Idée notée** : ATLAS-259 (deux tribus voisines mêlant leurs couleurs).
+- **Mes fautes** : deux remplacements Perl ratés — le nom nu `vectorLayers` réécrit dans le code, puis quatre lignes collées
+  en tête d'`atlasBorders.ts` — rattrapés avant commit ; une consigne trop large qui a donné à une tribu une frontière
+  d'État ; un test cassé masqué par le cache de Turbo ; sa page rechargée sans fin par mes agents (*« c'est lourd »*,
+  règle du worktree notée) ; *« le fond de la page »* lu d'abord comme le canevas ; trop de délégation à son goût
+  (*« dis-moi pas que t'as encore délégué »*) ; « 13 cycles » annoncés pour 12 paires.
+
 ### 2026-10-17 — Trello, la sauvegarde automatique, la Norvège rapide, le suzerain tapé, Wikidata, le double-clic
 
 Une plage au journal, **17/10 14:43 → 22:03 (7 h 19, 486 actions)** ; le chantier ouvert le 05/10 totalise **76 h 38 sur
@@ -40,24 +67,4 @@ Une plage au journal, **17/10 14:43 → 22:03 (7 h 19, 486 actions)** ; le chant
   doublon CONTRIB-250, créé sans voir CONTRIB-218 à 228 (ma lecture du tableau coupée à 80 lignes), archivé ; 8 tickets
   posés en haut du Backlog au lieu du bas, redescendus ; un `perl` sans `use utf8` qui n'avait rien remplacé.
 
-### 2026-10-16 — les côtes de l'atlas, les remplissages exacts, les tribus dans l'atlas, l'empilement au clavier
-
-Une plage au journal, **16/10 12:24 → 18:50 (6 h 26, 378 actions)** ; le chantier ouvert le 05/10 totalise **68 h 53
-sur 13 plages**. **10 commits** `0566243`..`5c96eaf`, plus celui de cet état, **poussés le soir à la demande du dev**.
-**3 455 tests** (965 `core`, 1 524 Cartographe, 884 atlas, 82 plugin).
-
-- **Les côtes de l'atlas** (`d74f272`) : le relief descend au niveau de la mer sur la ligne du masque (`data/shoreRamp`),
-  le trait de côte reste dessus. Le relief à la résolution du DEM (`3869822`), l'atlas s'ouvre sur 1100 (`ac97836`).
-- **Les remplissages exacts** (`1818096`, `ed5ee1a`) : chaque pays découpé en triangles posés à plat sur le relief,
-  teinte mélangée dans le shader ; frontières et fleuves coupés aux mailles du relief (`pipeline/gridDrape`). Le dev :
-  *« On a un rendu magnifique … Là, on est avec les grands. »* L'étape « couper les teintes en mer » : plus rien à faire.
-- **Les tribus dans l'atlas comme dans le Cartographe** (`3ba62ee`) : pas de teinte, contour en tirets ; tirets en
-  pixels écran (8/4 px), *« on va rester comme ça »*. Parité écrite dans `architecture.md` (`cfea532`).
-- **L'empilement au clavier** (`5c96eaf`, demandé en priorité, testé par le dev : *« c'est bon »*) : ‹cmd+↑/↓›,
-  ‹⇧› jusqu'au bout, affichés dans le menu ; la carte ne défile plus sur une flèche modifiée.
-- **Le dev a fini la Rus'** et retouche l'Angleterre, puis Écosse, Irlande, Byzance. Publication de 1100 souhaitée ;
-  la licence Euratlas reprise **quand il montrera la carte finie** (*« il faut se calmer là »*).
-- **Mes fautes** : des réponses trop techniques (*« de quoi tu me parles ? »*) ; `main.tsx` modifié pendant qu'il
-  dessinait, deux rechargements Vite de sa page (mémoire [[never-reload-the-devs-page]] renforcée).
-
-> Older sessions (2026-09-12 → 2026-10-15) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-16) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

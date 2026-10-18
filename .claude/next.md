@@ -5,40 +5,45 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — après la nuit du 17 au 18/10
+## ▶ ON REPREND ICI — après le soir du 18/10
 
 **Deux objectifs, décidés par le dev le 18/10** : la **contribution des événements**, et l'**interface de l'atlas** — à plat
 (son zonage dessiné puis sur Illustrator, ensuite Claude Design nourri d'une capture de la carte où des événements sont déjà
-posés) et en 3D dans la carte (des essais jetables, une idée à la fois, il juge le rendu). **Le Cartographe est en pause**
-jusque-là. « À faire » est ordonné par dépendance ; son premier ticket est **CORE-217** (le type de date), puis **CORE-252**
-(le format d'un événement et 2-3 événements de 1100 écrits à la main). Proposer, ne pas commencer sans son mot
-([[do-not-start-unasked-work]]).
+posés) et en 3D dans la carte (des essais jetables, une idée à la fois, il juge le rendu). « À faire » est ordonné par
+dépendance ; son premier ticket est **CORE-217** (le type de date), puis **CORE-252** (le format d'un événement et 2-3
+événements de 1100 écrits à la main). Proposer, ne pas commencer sans son mot ([[do-not-start-unasked-work]]).
 
-**Première tâche, demandée par le dev le 18/10** : vérifier dans le code et dans `git log` si des tickets d'**Idées** et du
-**Backlog** ne sont pas déjà faits — beaucoup y ont été versés depuis les plans, sans contrôle. Pour chacun : fait, en
-partie, ou pas, avec la preuve (commit, fichier). Lui rapporter ; **c'est lui** qui les passe en Fait ou les archive.
+**Deux choix du dev en attente, nés du soir du 18/10** — lui reposer en une phrase chacun :
+- **Le relief plus fin** (`0ee299d`) : l'atlas lit le niveau 6 à 1 920 de large, mis en ligne pour qu'il **mesure le
+  chargement**. Selon son verdict : passer aussi le Cartographe dessus (une ligne, `main.tsx`) pour que les deux fonds
+  redeviennent identiques, ou revenir au niveau 5. Le 2 560 est dans la Corbeille (`europe-map-relief-2560`).
+- **Les tribus, inset ou outset** (ATLAS-258, fait) : le défaut est inset 30 km dans `core` ; l'outset s'essaie au panneau de
+  l'atlas. Son choix va dans `TRIBE_FEATHER`, pour les deux applications.
 
-**Le tableau d'abord** : `/trello` → `list` — **lire toute la sortie** (une lecture coupée à 80 lignes m'a fait créer un
-doublon le 18/10). Tout est commité et poussé (`f10ac04` + l'état de session ; vérifier par `git ls-remote origin main`).
-En français, un élément du tableau est un **ticket**, jamais une « carte » ([[say-ticket-not-carte]]).
+**À traiter à part, au calme** : la gate rouge sur du code juste quand tout tourne en parallèle (`known-issues.md`, la
+machine à 71 de charge sur 8 cœurs ; REPO-260, dans Idées) — plafonner les travailleurs de Vitest, puis remesurer.
+
+**Le tableau d'abord** : `/trello` → `list` — **lire toute la sortie**. Tout est commité et poussé (`6d3903f` + l'état de
+session ; vérifier par `git ls-remote origin main`). En français, un élément du tableau est un **ticket**, jamais une
+« carte » ([[say-ticket-not-carte]]).
 
 | où | ticket | état |
 | --- | --- | --- |
-| **À valider par le développeur** | CARTO-233 Outils actifs trop tard au zoom | seuil 10 → 20 km dans `viewport/toolReach.ts` + note dans `s17`, **non commité** : le dev juge sur un très grand pays (Fatimides, Cordoue) |
+| **À valider par le développeur** | CARTO-237 Ce qui reste d'Euratlas dans 1100 | mesuré le 18/10 (~33–37 % retracé) ; il décide quand la carte sera finie |
 | **À valider par le développeur** | CARTO-116 Trier les copies de `years/1100*` | sa décision ; rien supprimé sans lui |
-| **À valider par le développeur** | CARTO-237 Ce qui reste d'Euratlas dans 1100 | il envoie une capture ; Duby et les cartes glanées restent des références (lire, pas décalquer) |
-| **En cours** | 9 tickets entamés (CARTO-121, 122, 195, 202, 206, 208, 238 · ATLAS-145, 152) | trouvés en partie faits par l'audit du 18/10 ; le dev les a passés en cours. Chaque ticket porte en commentaire « déjà fait / reste » |
+| **À valider par le développeur** | CARTO-122 Le menu d'empilement | replié dans la fenêtre (fait) ; le rôle `menu` est demandé au design system (`files/plans/cartographer/ds-request-menu-role.md`), à lui de le transmettre |
+| **En cours** | ATLAS-145 Séance : le style des frontières | une séance avec le dev ; il a déjà retouché les frontières le 18/10 (`eb62f4c`) |
+| **En cours** | ATLAS-152 Provenance et licence de 1100 affichées | entamé avant le 18/10 ; le commentaire du ticket dit ce qui reste |
 
-**Non commité, à ne pas embarquer** : `toolReach.ts` et `s17` (CARTO-233). Sa 1100 se commite **à sa demande**, à chaque
-fois qu'il le dit — trois fois le soir du 18/10.
-
-**À savoir pour coder** : Basic Memory sert de graphe **entre projets** (`main/patterns/`, CLI `basic-memory tool …` quand le
-MCP n'est pas chargé). Une commande interrompue ou refusée a pu agir : relire l'état avant de relancer. Modifier `core`
-ou `main.tsx` recharge la page du dev — le prévenir d'enregistrer avant.
+**À savoir pour coder** : un agent qui touche `core` ou une application pendant que la page du dev est ouverte travaille
+dans un **worktree** ([[agents-in-a-worktree-while-he-uses-the-app]]) — sinon Vite la recharge à chaque fichier. Le dev
+préfère que je fasse moi-même une correction courte plutôt que de la déléguer. Basic Memory sert de graphe **entre
+projets** (`main/patterns/`). Une commande interrompue ou refusée a pu agir : relire l'état avant de relancer. Jamais de
+remplacement Perl sur un fichier de code sans relire le résultat — deux accidents le 18/10 ; l'outil d'édition vérifie.
 
 ## Where we are
 
-**3 642 tests** (977 `core` · 1 699 Cartographe · 884 atlas · 82 plugin `eslint-plugin-eha`, 18/10), gate
+**4 207 tests** (1 126 `core` · 1 931 Cartographe · 983 atlas · 167 plugin `eslint-plugin-eha`, 18/10), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 
