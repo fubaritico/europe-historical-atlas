@@ -35,7 +35,9 @@ Put here the know issues to avoid cluttering the context window.
   pointe sur un interpréteur Node explicite, le changer dans ses réglages. Le plugin est en `~65.0.2` : une version a
   au moins deux semaines avant d'entrer. **Sévérité : à savoir.**
 - **`main.test.tsx` a échoué une fois sur sept passages, sous charge, le 18/10** (Node 22.23.3, `turbo type-check test
-  --force` : huit tâches en parallèle). Seul, 3/3 ; la suite entière, 3/3 ; la même commande rejouée, 2/2. Son premier
+  --force` : huit tâches en parallèle). Seul, 3/3 ; la suite entière, 3/3 ; la même commande rejouée, 2/2 puis 8/8 (logs gardés) — **1 échec sur
+  17**. Ce passage était le premier après `pnpm install` (montée du plugin), caches de Vite et Vitest froids : piste
+  la plus probable. Pour l'attraper : rejouer la commande juste après une réinstallation. Son premier
   test charge toute l'application (716 ms au repos) : un dépassement des 5 s de Vitest sous charge est probable, **non
   prouvé** — le message n'a pas été capturé. Remède si ça revient : lire le message, puis un `timeout` plus large sur ce
   seul test, en disant pourquoi. **Sévérité : à savoir.**
