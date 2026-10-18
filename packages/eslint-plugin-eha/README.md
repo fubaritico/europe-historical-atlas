@@ -15,10 +15,14 @@ by `tsc` (`checkJs`), and the typed lint of the repository reads them like any o
 
 ## The rules
 
-| rule                             | where                             | fix                                                            |
-| -------------------------------- | --------------------------------- | -------------------------------------------------------------- |
-| `eha/component-body-order`       | the Cartographer, `**/*.{ts,tsx}` | separators, and props moved into the signature when it is safe |
-| `eha/hoist-independent-function` | every package, tests included     | moves the function to the module when it is safe               |
+| rule                             | where                                | fix                                                            |
+| -------------------------------- | ------------------------------------ | -------------------------------------------------------------- |
+| `eha/component-body-order`       | the Cartographer, `**/*.{ts,tsx}`    | separators, and props moved into the signature when it is safe |
+| `eha/hoist-independent-function` | every package, tests included        | moves the function to the module when it is safe               |
+| `eha/no-import-cycle`            | every package, tests included        | none — the child declares its type, the parent's extends it    |
+| `eha/one-hook-per-file`          | the Cartographer's component folders | none                                                           |
+| `eha/component-folder-layout`    | the Cartographer's component folders | none — hooks in `hooks/`, children in `internal/`              |
+| `eha/no-reach-into-component`    | the Cartographer, tests included     | none — import the folder's `index.ts`                          |
 
 All are errors: one author, nothing to count down.
 

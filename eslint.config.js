@@ -291,6 +291,10 @@ export default tseslint.config(
       // A function declared inside another that reads nothing of it belongs to the module: rebuilt on every
       // call otherwise, and untestable alone. Tests included — a helper inside a `describe` is the same case.
       'eha/hoist-independent-function': 'error',
+      // No import cycle, type-only imports included — `import/no-cycle` skips those, and all thirteen cycles
+      // found on 2026-10-18 were closed by one. The dev's rule: dependencies run parent → child only, so the
+      // child declares its type and the parent's extends it.
+      'eha/no-import-cycle': 'error',
     },
   },
 

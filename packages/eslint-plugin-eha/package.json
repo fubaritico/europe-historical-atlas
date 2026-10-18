@@ -21,7 +21,8 @@
     "coverage": "vitest run --coverage"
   },
   "peerDependencies": {
-    "eslint": "catalog:"
+    "eslint": "catalog:",
+    "typescript": "catalog:"
   },
   "dependencies": {
     "@typescript-eslint/utils": "catalog:"
