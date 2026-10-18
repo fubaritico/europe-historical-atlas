@@ -54,7 +54,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#ffbf4d",
+      "colour": "#fda000",
       "wikidata": null
     },
     {
@@ -98,7 +98,7 @@
       "suzerain": "kingdom-of-the-franks",
       "existsFrom": 866,
       "existsTo": 1797,
-      "colour": "#ffb700",
+      "colour": "#658bff",
       "wikidata": "Q157070"
     },
     {
@@ -131,7 +131,7 @@
       "suzerain": "kingdom-of-leon-and-castile",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#fad187",
+      "colour": "#ffbd4d",
       "wikidata": null
     },
     {
@@ -153,7 +153,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#fda000",
+      "colour": "#fd5d00",
       "wikidata": null
     },
     {
@@ -186,7 +186,7 @@
       "suzerain": "lordship-of-valencia",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#ffe9c3",
+      "colour": "#fb9255",
       "wikidata": null
     },
     {
@@ -197,7 +197,7 @@
       "suzerain": "lordship-of-valencia",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#fdbb4a",
+      "colour": "#f9bd9a",
       "wikidata": null
     },
     {
@@ -208,7 +208,7 @@
       "suzerain": "lordship-of-valencia",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#e29a1f",
+      "colour": "#feaf81",
       "wikidata": null
     },
     {
@@ -219,7 +219,7 @@
       "suzerain": "lordship-of-valencia",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#f2d49f",
+      "colour": "#f7ab7f",
       "wikidata": null
     },
     {
@@ -230,7 +230,7 @@
       "suzerain": "lordship-of-valencia",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#ffbc49",
+      "colour": "#ad795a",
       "wikidata": null
     },
     {
@@ -450,7 +450,7 @@
       "suzerain": "kingdom-of-duklja",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#d9cc8c",
+      "colour": "#8b8b0b",
       "wikidata": null
     },
     {
@@ -461,7 +461,7 @@
       "suzerain": "kingdom-of-duklja",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#e3b39e",
+      "colour": "#baba0d",
       "wikidata": null
     },
     {
@@ -472,7 +472,7 @@
       "suzerain": "kingdom-of-duklja",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#b3b3a3",
+      "colour": "#c2c22c",
       "wikidata": null
     },
     {
@@ -483,7 +483,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#e6f0e3",
+      "colour": "#5b5b06",
       "wikidata": null
     },
     {
@@ -494,7 +494,7 @@
       "suzerain": "kingdom-of-duklja",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#d3beb3",
+      "colour": "#a2a20c",
       "wikidata": null
     },
     {
@@ -1105,7 +1105,7 @@
     {
       "id": "confederacy-of-the-liutizians",
       "name": "Confederacy of the Liutizians",
-      "rank": "confederacy",
+      "rank": "tribe",
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
@@ -1253,7 +1253,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#f2e3c4",
+      "colour": "#6ead25",
       "wikidata": null
     },
     {
@@ -1264,7 +1264,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#f2de80",
+      "colour": "#b3d24d",
       "wikidata": null
     },
     {
@@ -1297,7 +1297,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#f5f2d9",
+      "colour": "#6a8425",
       "wikidata": null
     },
     {
@@ -1308,7 +1308,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#215521",
+      "colour": "#3d7a3d",
       "wikidata": null
     },
     {
@@ -1319,13 +1319,13 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#1a3a02",
+      "colour": "#4b9415",
       "wikidata": null
     },
     {
       "id": "principality-of-ryazan",
       "name": "Principality of Ryazan",
-      "rank": "principality",
+      "rank": "tribe",
       "status": null,
       "suzerain": null,
       "existsFrom": null,
@@ -1374,8 +1374,30 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": null,
+      "colour": "#5d1919",
       "wikidata": null
+    },
+    {
+      "id": "finnish-tribes",
+      "name": "Finnish tribes",
+      "rank": "tribe",
+      "status": null,
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#0062ff",
+      "wikidata": "Q18690466"
+    },
+    {
+      "id": "tavastia",
+      "name": "Tavastia",
+      "rank": "tribe",
+      "status": null,
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#6d90c4",
+      "wikidata": "Q475244"
     },
     {
       "id": "latvians",
@@ -1396,7 +1418,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": null,
+      "colour": "#651e1e",
       "wikidata": null
     },
     {
@@ -1407,7 +1429,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#41580b",
+      "colour": "#5a741d",
       "wikidata": null
     },
     {
@@ -1440,8 +1462,8 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": null,
-      "wikidata": null
+      "colour": "#745c5c",
+      "wikidata": "Q1035516"
     },
     {
       "id": "vlach-populations",
@@ -1479,7 +1501,7 @@
     {
       "id": "northern-march",
       "name": "Northern March",
-      "rank": "confederacy",
+      "rank": "tribe",
       "status": null,
       "suzerain": "roman-empire",
       "existsFrom": null,
