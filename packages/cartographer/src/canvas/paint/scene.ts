@@ -1,6 +1,10 @@
 import { paintRanks } from '@europe-historical-atlas/core/data/paintOrder'
 import { handFor } from '@europe-historical-atlas/core/editor/borderHands'
-import { isTribeEdge, tribeIds } from '@europe-historical-atlas/core/editor/tribes'
+import {
+  asSeenAcrossTribes,
+  isTribeEdge,
+  tribeIds,
+} from '@europe-historical-atlas/core/editor/tribes'
 
 import { remapToScreen } from '../../viewport/projection'
 import { backdropToScreen } from '../../viewport/viewport'
@@ -235,15 +239,19 @@ export function projectedBorders(
   anchors: readonly Point[],
   tribes: ReadonlySet<string>
 ): CanvasScene['borders'] {
-  return borders
-    .filter((border) => !isTribeEdge(border, tribes))
-    .map((border) => ({
-      points: border.run
-        .map((index) => anchors[index])
-        .filter((point): point is Point => point !== undefined),
-      hand: handFor(border),
-      layer: border.relation === 'unclaimed' ? ('unclaimed' as const) : ('borders' as const),
-    }))
+  return (
+    borders
+      .filter((border) => !isTribeEdge(border, tribes))
+      // Across a tribe a state shows its frontier, never a border between two states.
+      .map((border) => asSeenAcrossTribes(border, tribes))
+      .map((border) => ({
+        points: border.run
+          .map((index) => anchors[index])
+          .filter((point): point is Point => point !== undefined),
+        hand: handFor(border),
+        layer: border.relation === 'unclaimed' ? ('unclaimed' as const) : ('borders' as const),
+      }))
+  )
 }
 
 /**

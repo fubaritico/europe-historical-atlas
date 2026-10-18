@@ -107,16 +107,16 @@ describe('exactBordersOf', () => {
       expect(patterns.get('0:0')).toBe('dashed')
     })
 
-    it('draws the border between a tribe and a kingdom as the kingdom’s, one solid cased group', () => {
+    // The dev, 2026-10-18: « on ne peut pas considérer une tribu comme un état » — the kingdom's frontier.
+    it('draws the border between a tribe and a kingdom as the kingdom’s frontier, never a cased border', () => {
       const doc = sideBySide()
       const hre = doc.polities.find((each) => each.id === 'hre')
       if (hre) hre.rank = 'tribe'
 
-      const { borders, patterns, levels } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+      const { borders } = exactBordersOf(authored(doc), bbox, uniformMask(false))
 
-      expect(borders.between).toEqual([{ pair: [0, 0], lines: [[uv([10, 10]), uv([10, 0])]] }])
-      expect(patterns.get('0:0')).toBe('solid')
-      expect(levels.get('0:0')).toBe(0)
+      expect(borders.between).toEqual([])
+      expect(borders.frontier).toEqual([[uv([10, 10]), uv([10, 0])]])
     })
 
     it('draws no border between two tribes side by side — only their fading colour', () => {
@@ -219,8 +219,9 @@ describe('exactBordersOf', () => {
       expect(levels.get('0:0')).toBe(0)
     })
 
-    // ARCH-001: the tribe layer wears the tribe's own colour at every zoom, so nothing hides its borders.
-    it('files every border of a tribe vassal of a kingdom at level 0, its lord’s and its fellow vassal’s', () => {
+    // ARCH-001: the tribe layer wears the tribe's own colour at every zoom, so nothing hides its borders —
+    // they are frontiers, which every zoom shows, and the vassal hand does not apply across a tribe.
+    it('draws a tribe vassal of a kingdom against its lord and its fellow vassal as their frontiers', () => {
       const doc = sideBySide('france')
       const hre = doc.polities.find((each) => each.id === 'hre')
       if (hre) hre.rank = 'tribe'
@@ -233,8 +234,9 @@ describe('exactBordersOf', () => {
 
       const { borders, levels } = exactBordersOf(authored(doc), bbox, uniformMask(false))
 
-      expect(borders.between).toHaveLength(2)
-      expect([...levels.values()]).toEqual([0, 0])
+      expect(borders.between).toEqual([])
+      expect(levels.size).toBe(0)
+      expect(borders.frontier).toHaveLength(2)
     })
 
     it('reads the split level from the homage it is handed', () => {

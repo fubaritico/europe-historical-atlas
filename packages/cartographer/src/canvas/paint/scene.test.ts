@@ -422,8 +422,8 @@ const border = (between: string[]): DerivedBorder => ({
   dressedBy: 'rule',
 })
 
-// A tribe has no fill and its outline dashed in its colour, standing in for its borders (the dev,
-// 2026-10-15; `core/editor/tribes`).
+// A tribe has no fill and no outline: its colour fades toward its edge (ATLAS-258, the dev, 2026-10-18), and
+// a state beside it shows its frontier there (`core/editor/tribes`).
 describe('tribes in the scene', () => {
   const COLOURS = new Map([
     ['fr-couronne', '#aa0000'],
@@ -450,14 +450,16 @@ describe('tribes in the scene', () => {
   })
 
   describe('variants', () => {
-    it('keeps the border between a tribe and a kingdom — the kingdom’s — and drops a tribe’s against the sea', () => {
+    // The dev, 2026-10-18: « on ne peut pas considérer une tribu comme un état » — the kingdom's frontier.
+    it('draws the border between a tribe and a kingdom as the kingdom’s frontier, and drops a tribe’s against the sea', () => {
       const kept = projectedBorders(
         [border(['fr-couronne', 'hre']), border(['hre']), border(['fr-couronne'])],
         anchors,
         new Set(['hre'])
       )
       expect(kept).toHaveLength(2)
-      expect(kept[0]?.hand.pattern).toBe('solid')
+      expect(kept[0]?.hand).toEqual({ pattern: 'solid', cased: false, weight: 1 })
+      expect(kept[0]?.layer).toBe('unclaimed')
     })
 
     it('drops the border between two tribes side by side', () => {

@@ -3,7 +3,7 @@ import { latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
 import { handFor } from './borderHands'
 import { deriveBorders, maskDerivationDeps } from './derivedBorders'
 import { homageLevels } from './homageLevels'
-import { isTribeEdge, tribeIds } from './tribes'
+import { asSeenAcrossTribes, isTribeEdge, tribeIds } from './tribes'
 import { openYearDocument } from './yearDocument'
 
 import type { HandPattern } from './borderHands'
@@ -106,19 +106,21 @@ export function exactBordersOf(
   let undrawnHands = 0
   for (const border of derived) {
     if (isTribeEdge(border, tribes)) continue
-    const hand = handFor(border, warn)
+    // Across a tribe a state shows its frontier, never a border between two states.
+    const seen = asSeenAcrossTribes(border, tribes)
+    const hand = handFor(seen, warn)
     if (hand.pattern === 'none') continue
     const line = toGrid(border.run)
     if (line.length < 2) continue
     if (!hand.cased) {
-      if (border.hand !== null) undrawnHands += 1
+      if (seen.hand !== null) undrawnHands += 1
       borders.frontier.push(line)
       continue
     }
     const key = borders.between.length
     borders.between.push({ pair: [key, key], lines: [line] })
     patterns.set(pairKey([key, key]), ATLAS_PATTERN[hand.pattern])
-    levels.set(pairKey([key, key]), splitLevelOf(border, homage, tribes))
+    levels.set(pairKey([key, key]), splitLevelOf(border, homage))
   }
   warnUndrawnHands(undrawnHands, warn)
   return { borders, patterns, levels }
@@ -141,24 +143,18 @@ function warnUndrawnHands(count: number, warn: (message: string) => void): void 
  * The split level of a derived border: the first display level at which its two sides wear different
  * colours.
  *
- * **A border touching a tribe is level 0** (ARCH-001, 2026-10-18): the tribe layer wears the tribe's own
- * colour at every zoom — it never takes its suzerain's — so the tribe and the state beside it differ from
- * the farthest view, and the state's border there must show from it too. Read as any pair, a tribe vassal
- * of the kingdom it borders would hide that border until the zoom revealed a vassal that was never hidden.
+ * A border touching a tribe never reaches here: across a tribe a state shows its frontier
+ * (`asSeenAcrossTribes`), which every zoom draws — the tribe layer wears the tribe's own colour at every
+ * zoom, so nothing may hide that line (ARCH-001, 2026-10-18).
  * @param border - the border, naming who it separates
  * @param homage - the year's homage
- * @param tribes - the ids of the year's tribes
- * @returns `0` for a border with one side — the sea or ground nobody claims beyond it — or with a tribe on
- *   either side, else the pair's split level
+ * @returns `0` for a border with one side — the sea or ground nobody claims beyond it — else the pair's
+ *   split level
  */
-function splitLevelOf(
-  border: Pick<DerivedBorder, 'between'>,
-  homage: HomageLevels,
-  tribes: ReadonlySet<string>
-): number {
+function splitLevelOf(border: Pick<DerivedBorder, 'between'>, homage: HomageLevels): number {
   const [one, other] = border.between
   if (one === undefined || other === undefined) return 0
-  return tribes.has(one) || tribes.has(other) ? 0 : homage.splitLevel(one, other)
+  return homage.splitLevel(one, other)
 }
 
 /**

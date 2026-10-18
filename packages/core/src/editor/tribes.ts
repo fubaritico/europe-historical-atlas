@@ -14,8 +14,10 @@ import type { YearPolity } from '../data/yearFormat'
  *
  * **Its fading colour is its limit, except against a state**: a derived border between two tribes, or between
  * a tribe and the sea or unclaimed ground, is not drawn — a hard line along a limit drawn as vague would
- * contradict it. A border between a tribe and a polity that is not one **is** drawn, as that polity's border
- * in its hand (the dev, 2026-10-18: the state's border stays a solid line where a tribe touches it).
+ * contradict it. A border between a tribe and a polity that is not one **is** drawn — as that polity's
+ * **frontier**, the one dark stroke it shows against ground no state holds, never as a border between two
+ * states, whatever hand the pair would get (the dev, 2026-10-18: the state's border stays a solid line where a
+ * tribe touches it, but *« on ne peut pas considérer une tribu comme un état »*). {@link asSeenAcrossTribes}.
  */
 
 /** The rank that makes a polity a tribe. */
@@ -51,4 +53,23 @@ export function isTribeEdge(
   tribes: ReadonlySet<string>
 ): boolean {
   return border.between.length > 0 && border.between.every((id) => tribes.has(id))
+}
+
+/**
+ * A border as both applications draw it once tribes are read: across a tribe, a state shows its frontier.
+ *
+ * A border with a tribe on one side and a state on the other is read as a frontier against unclaimed ground
+ * — one dark stroke, at every zoom — and an authored hand on it is set aside: a tribe is not a state, so no
+ * hand meant for a limit between two states applies there. Any other border comes back as it was. Tribes on
+ * every side ({@link isTribeEdge}) are the caller's to drop before.
+ * @param border - the derived border, who it separates, its relation and any authored hand
+ * @param tribes - the ids of the year's tribes
+ * @returns the border unchanged, or read as a frontier against unclaimed ground
+ */
+export function asSeenAcrossTribes<T extends Pick<DerivedBorder, 'between' | 'relation' | 'hand'>>(
+  border: T,
+  tribes: ReadonlySet<string>
+): T {
+  if (!border.between.some((id) => tribes.has(id))) return border
+  return { ...border, relation: 'unclaimed', hand: null }
 }

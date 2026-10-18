@@ -27,6 +27,10 @@
   backdrop). Never per frame.
 - **The dashed outline goes**, in both. `editor/tribes` keeps saying what a tribe is; `atlasBorders` stops
   returning tribe outlines for dashes.
+- **Across a tribe, a state shows its frontier** (the dev, 2026-10-18, after a first cut drew it as a border
+  between two states: *« on ne peut pas considérer une tribu comme un état »*): one dark stroke, solid, at every
+  zoom, whatever hand the pair would get — `asSeenAcrossTribes`, read by both apps. Between two tribes, or a
+  tribe against the sea or unclaimed ground, no line.
 
 ## Steps
 

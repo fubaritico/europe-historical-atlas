@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { isTribe, isTribeEdge, tribeIds } from './tribes'
+import { asSeenAcrossTribes, isTribe, isTribeEdge, tribeIds } from './tribes'
 
 const POLITIES = [
   { id: 'prussians', rank: 'tribe' },
@@ -64,6 +64,65 @@ describe('tribes', () => {
 
     it('does not read a capitalised Tribe as a tribe', () => {
       expect(isTribe({ rank: 'Tribe' })).toBe(false)
+    })
+  })
+})
+
+/** Two tribes of the Baltic. */
+const TRIBES = new Set(['prussians', 'curonians'])
+
+/**
+ * A border as `asSeenAcrossTribes` reads it.
+ * @param between - who it separates
+ * @param relation - its relation, read off the chain of homage
+ * @returns the border, no authored hand
+ */
+const border = (between: string[], relation: 'sovereign' | 'vassal' = 'sovereign') => ({
+  between,
+  relation,
+  hand: null as string | null,
+})
+
+// The dev, 2026-10-18: across a tribe a state shows its frontier — « on ne peut pas considérer une tribu
+// comme un état ».
+describe('asSeenAcrossTribes', () => {
+  describe('happy path', () => {
+    it('reads a border between a tribe and a kingdom as a frontier against unclaimed ground', () => {
+      expect(asSeenAcrossTribes(border(['poland', 'prussians']), TRIBES)).toEqual({
+        between: ['poland', 'prussians'],
+        relation: 'unclaimed',
+        hand: null,
+      })
+    })
+  })
+
+  describe('variants', () => {
+    it('reads a tribe vassal of the kingdom it borders as that kingdom’s frontier, not the vassal hand', () => {
+      expect(asSeenAcrossTribes(border(['poland', 'prussians'], 'vassal'), TRIBES).relation).toBe(
+        'unclaimed'
+      )
+    })
+
+    it('sets an authored hand aside across a tribe', () => {
+      expect(
+        asSeenAcrossTribes({ ...border(['prussians', 'poland']), hand: 'double' }, TRIBES).hand
+      ).toBeNull()
+    })
+  })
+
+  describe('managed errors', () => {
+    it('returns a border between two states as it was, the same object', () => {
+      const between = border(['poland', 'hungary'])
+      expect(asSeenAcrossTribes(between, TRIBES)).toBe(between)
+    })
+  })
+
+  // L4: N/A — a pure reading of three fields, nothing thrown.
+
+  describe('edge cases', () => {
+    it('returns every border as it was when the year has no tribe', () => {
+      const between = border(['poland', 'prussians'])
+      expect(asSeenAcrossTribes(between, new Set())).toBe(between)
     })
   })
 })
