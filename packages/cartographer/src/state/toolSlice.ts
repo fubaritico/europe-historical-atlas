@@ -17,7 +17,6 @@
  * is what `describeDrawingTarget` is for, and it is why this slice carries no `releaseTarget`.
  */
 
-import type { CartographerStore } from './store'
 import type { StateCreator } from 'zustand'
 
 /**
@@ -237,7 +236,7 @@ export type ToolSlice = ToolState & ToolActions
  * @returns the slice
  */
 export const createToolSlice: StateCreator<
-  CartographerStore,
+  ToolSlice,
   [['zustand/subscribeWithSelector', never]],
   [],
   ToolSlice

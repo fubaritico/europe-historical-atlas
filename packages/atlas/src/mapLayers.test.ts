@@ -16,7 +16,7 @@ import { FILL_RENDER_ORDER } from './scene/fillLayer'
 
 import type { MapSources } from './mapSources'
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
-import type { RegionBorders } from '@europe-historical-atlas/core/data/regionRaster'
+import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type {
   BufferGeometry,

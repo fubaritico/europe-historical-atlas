@@ -4,4 +4,5 @@
  * component, a barrel as its boundary).
  */
 export { PolityForm } from './PolityForm'
-export type { PolityFormField, PolityFormProps } from './PolityForm'
+export type { PolityFormProps } from './PolityForm'
+export type { PolityFormField } from './internal/PolityFields'

@@ -1,6 +1,6 @@
 import { ToolFlyout } from './ToolFlyout'
 
-import type { ToolVariant } from './ToolFlyout'
+import type { ToolVariant } from './FlyoutItem'
 
 /**
  * A group's flyout, wired to close once a row is chosen.

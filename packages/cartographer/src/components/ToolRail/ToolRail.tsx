@@ -4,7 +4,7 @@ import { ActiveSwatch } from './internal/ActiveSwatch'
 import { ToolButton } from './internal/ToolButton'
 import { RAIL_TOOLS } from './railTools'
 
-import type { SwatchPolity } from './internal/ActiveSwatch'
+import type { SwatchPolity } from './internal/SwatchPicker'
 import type { RailTool } from './railTools'
 import type { EditorTool } from '../../state/toolSlice'
 import type { HsvaColor } from '@fubaritico/behaviors'

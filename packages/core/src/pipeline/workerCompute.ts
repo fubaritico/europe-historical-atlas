@@ -17,7 +17,7 @@ import type {
   TerrainBakeResult,
 } from './mapCompute'
 import type { TerrainTextureOptions } from './terrainCompose'
-import type { RegionBorders } from '../data/regionRaster'
+import type { RegionBorders } from '../data/regionBorders'
 
 /**
  * The slice of a `Worker` this client touches — narrow enough for a test to stand one up literally.

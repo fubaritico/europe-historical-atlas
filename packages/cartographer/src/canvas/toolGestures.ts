@@ -24,12 +24,12 @@ import {
 import { closingPoints, closingReport, freshStretch, layerPoints } from './waterClosing'
 import { releaseWeld, weldOfferAt } from './weldGestures'
 
-import type { SnapLayers } from './snapLayers'
+import type { AnchorGestureContext } from './anchorGestures'
 import type { SessionPoint, SnapLayer, SnapVertex, ToolSession, WeldOffer } from './toolSession'
+import type { WaterClosingContext } from './waterClosing'
+import type { WeldContext } from './weldGestures'
 import type { PolityRings } from '../geometry/fillHit'
 import type { SnapLine } from '../geometry/lineSnap'
-import type { CartographerStoreHook } from '../state/store'
-import type { BackdropFrame } from '../view/projection'
 import type { Point } from '../view/viewport'
 import type { Carving } from '@europe-historical-atlas/core/editor/carve'
 import type { AnchorMove, Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
@@ -43,33 +43,15 @@ import type { AnchorMove, Provenance } from '@europe-historical-atlas/core/edito
  * through the store's recorded actions — so every change they make is one undo step or nothing.
  */
 
-/** What a gesture needs to read and where it may write. */
-export interface GestureContext {
-  /** The store: the document, the view, the tool, the target, and the recorded actions. */
-  store: CartographerStoreHook
-  /** The backdrop's coordinate system, for turning the pointer into degrees. */
-  frame: BackdropFrame
-  /** The session, mutated in place by the gestures. */
-  session: ToolSession
-  /** The document's anchors in screen pixels, parallel to its table — the cached projection. */
-  anchorsOnScreen: () => readonly Point[]
+/**
+ * What a gesture needs to read and where it may write: every slice its helpers declare — the anchor
+ * gestures' (with the border snap's and the frame snap's under it), the water closing's and the weld's —
+ * plus what only this module reads. The helpers declare what they read and never import this type, so the
+ * imports run one way, from here down.
+ */
+export interface GestureContext extends AnchorGestureContext, WaterClosingContext, WeldContext {
   /** Every polity's rings in screen pixels, in painting order — what a click in a fill is tested on. */
   territoriesOnScreen: () => readonly PolityRings[]
-  /** How near, in screen pixels, a press must be to catch a handle or the first anchor. */
-  radius: number
-  /**
-   * The anchors the white arrow may pick up — the target's own and its extent outline's (`extentHandles`),
-   * read from the canvas's cache. **Optional by contract**: a context without it offers the target's own
-   * anchors only (`targetHandles`), which is what a gesture test with no vassal needs.
-   */
-  editHandles?: () => readonly number[]
-  /** The snap layers — the coast and the rivers — what the Pen follows in those modes. */
-  layers: SnapLayers
-  /**
-   * Say what a gesture did — *"inserted 412 vertices from the coastline"*, the status bar's result
-   * zone beside the action (`s02`).
-   */
-  report: (message: string) => void
   /**
    * Whether ‹alt› is held — under ⟨retrace⟩ it takes the other side of the ring than the one the new run
    * lies closer to (`H-46`). Absent is not held.

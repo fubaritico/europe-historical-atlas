@@ -6,7 +6,8 @@ import { anchorHit } from './borderSnap'
 import { TAG } from './consoleTag'
 import { targetHandles } from './toolSession'
 
-import type { GestureContext } from './toolGestures'
+import type { BorderSnapContext } from './borderSnap'
+import type { FrameSnapContext } from './frameSnap'
 import type { StretchHit } from '../geometry/stretchHit'
 import type { AnchorRemoval } from '@europe-historical-atlas/core/editor/anchorEdits'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
@@ -18,6 +19,19 @@ import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocu
  * **Both go through the store's recorded actions**, so each is one undo step, and both act on every
  * ring that holds the anchor — a border two polities share stays one border.
  */
+
+/**
+ * What the anchor edits read of a gesture: the border snap's slice and the frame snap's, plus the anchors
+ * the white arrow may pick up. The gestures' context extends this one; nothing here imports it.
+ */
+export interface AnchorGestureContext extends BorderSnapContext, FrameSnapContext {
+  /**
+   * The anchors the white arrow may pick up — the target's own and its extent outline's (`extentHandles`),
+   * read from the canvas's cache. **Optional by contract**: a context without it offers the target's own
+   * anchors only (`targetHandles`), which is what a gesture test with no vassal needs.
+   */
+  editHandles?: () => readonly number[]
+}
 
 /** How `{History}` names an inserted anchor. */
 export const INSERT_ANCHOR_STEP = { kind: 'insert-anchor', label: 'insert anchor' } as const
@@ -53,7 +67,7 @@ export function targetStretches(document: YearDocument, polityId: string): [numb
  * @returns the stretch and the point on it, or `null`
  */
 export function stretchUnder(
-  context: GestureContext,
+  context: AnchorGestureContext,
   polityId: string,
   at: readonly [number, number]
 ): StretchHit | null {
@@ -75,7 +89,7 @@ export function stretchUnder(
  * @returns the stretch, or `null` when the Pen does not insert here
  */
 export function penInsertHit(
-  context: GestureContext,
+  context: AnchorGestureContext,
   at: readonly [number, number]
 ): StretchHit | null {
   if (context.session.outline.length > 0 || anchorHit(context, at) !== null) return null
@@ -94,7 +108,7 @@ export function penInsertHit(
  * @returns `true` when the click was on a stretch — inserted, or refused and said
  */
 export function insertOnStretch(
-  context: GestureContext,
+  context: AnchorGestureContext,
   polityId: string,
   at: readonly [number, number]
 ): boolean {
@@ -127,12 +141,12 @@ function namesOf(document: YearDocument, ids: readonly string[]): string[] {
 }
 
 /**
- * The anchors the white arrow may pick up: the context's {@link GestureContext.editHandles} when it carries
+ * The anchors the white arrow may pick up: the context's {@link AnchorGestureContext.editHandles} when it carries
  * them, else the target's own anchors.
  * @param context - the store, and the canvas's handles when wired
  * @returns anchor indices
  */
-export function editHandlesOf(context: GestureContext): readonly number[] {
+export function editHandlesOf(context: AnchorGestureContext): readonly number[] {
   if (context.editHandles !== undefined) return context.editHandles()
   const { document, target } = context.store.getState()
   const aimed = describeDrawingTarget(document, target)
@@ -146,7 +160,7 @@ export function editHandlesOf(context: GestureContext): readonly number[] {
  * @param index - the selected anchor
  * @returns `true` when the target's rings hold it
  */
-function stillTargets(context: GestureContext, index: number): boolean {
+function stillTargets(context: AnchorGestureContext, index: number): boolean {
   return editHandlesOf(context).includes(index)
 }
 
@@ -161,7 +175,7 @@ function stillTargets(context: GestureContext, index: number): boolean {
  * @param context - the session and the store
  * @returns `true` when the key was taken — there was a selection to act on
  */
-export function deleteSelected(context: GestureContext): boolean {
+export function deleteSelected(context: AnchorGestureContext): boolean {
   const selected = context.session.selected
   if (selected.length === 0) return false
   const kept = selected.filter((index) => stillTargets(context, index))
@@ -200,7 +214,7 @@ export function deleteSelected(context: GestureContext): boolean {
  * @param spared - the polities whose outline kept its points
  * @returns the clause to append, empty when none did
  */
-function sparedReport(context: GestureContext, spared: readonly string[]): string {
+function sparedReport(context: AnchorGestureContext, spared: readonly string[]): string {
   if (spared.length === 0) return ''
   const names = namesOf(context.store.getState().document, spared).join(', ')
   return ` · ${names} kept ${spared.length === 1 ? 'its' : 'their'} points (too few left to keep an outline)`
@@ -222,7 +236,7 @@ function deleteStep(count: number): { kind: string; label: string } {
  * @param context - the store
  * @returns its id, or none when nobody is aimed at
  */
-function resolvedOwner(context: GestureContext): string | undefined {
+function resolvedOwner(context: AnchorGestureContext): string | undefined {
   const { document, target } = context.store.getState()
   return describeDrawingTarget(document, target)?.id
 }
@@ -237,7 +251,7 @@ function resolvedOwner(context: GestureContext): string | undefined {
  * @returns the sentence
  */
 function ringRemovalReport(
-  context: GestureContext,
+  context: AnchorGestureContext,
   removal: AnchorRemoval,
   anchors: number,
   owner: string | undefined
@@ -256,7 +270,7 @@ function ringRemovalReport(
  * @returns the sentence
  */
 function removalReport(
-  context: GestureContext,
+  context: AnchorGestureContext,
   count: number,
   polities: readonly string[]
 ): string {

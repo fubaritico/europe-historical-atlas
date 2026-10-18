@@ -5,7 +5,7 @@ import { mapComputeOver, unwrapDone } from './workerCompute'
 import type { ComputeEvent } from './computeProtocol'
 import type { PoliticalResult, TerrainBakeResult } from './mapCompute'
 import type { SendCommand } from './workerCompute'
-import type { RegionBorders } from '../data/regionRaster'
+import type { RegionBorders } from '../data/regionBorders'
 
 const POLITICAL = { colors: new Uint8Array(4), borders: [] } as unknown as PoliticalResult
 const BORDERS = [] as unknown as RegionBorders

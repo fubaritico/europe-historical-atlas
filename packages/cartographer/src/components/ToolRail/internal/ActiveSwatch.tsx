@@ -1,7 +1,7 @@
 import { EmptySwatch } from './EmptySwatch'
 import { SwatchPicker } from './SwatchPicker'
 
-import type { HsvaColor } from '@fubaritico/behaviors'
+import type { SwatchPickerProps, SwatchPolity } from './SwatchPicker'
 
 /**
  * The active polity's swatch, at the foot of the rail — where Illustrator keeps its fill and stroke — and,
@@ -19,22 +19,13 @@ import type { HsvaColor } from '@fubaritico/behaviors'
  * **Active from afar** (`s17`): a colour moves no point on the map, like the `{Polities}` action bar.
  */
 
-/** The polity the swatch shows. */
-export interface SwatchPolity {
-  /** Its name, verbatim. */
-  name: string
-  /** The colour it is painted in — the palette's when it has none of its own. */
-  colour: string
-  /** Its own colour as the picker holds it, or `null` for "automatic". */
-  picked: HsvaColor | null
-}
-
-/** What the swatch shows and does. */
-export interface ActiveSwatchProps {
+/**
+ * What the swatch shows and does: the picker's props, with a polity that may be missing and a picker
+ * closed unless asked.
+ */
+export interface ActiveSwatchProps extends Omit<SwatchPickerProps, 'polity' | 'defaultOpen'> {
   /** The polity aimed at, or `null`. */
   polity: SwatchPolity | null
-  /** A gesture in the picker ended on this colour, or on "automatic". */
-  onColour: (picked: HsvaColor | null) => void
   /**
    * The picker shown open from the start — the workbench's plate and the tests'. Opening on a click is the
    * browser's own `popovertarget`, which jsdom does not implement, so a test cannot click it open.

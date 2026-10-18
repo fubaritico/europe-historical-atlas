@@ -8,15 +8,55 @@ import { ChoiceField } from './ChoiceField'
 import { ColourField } from './ColourField'
 import { SuzerainField } from './SuzerainField'
 
-import type { PolityFormField, PolityFormProps } from '../PolityForm'
+import type { WikidataField } from '../../../wikidata/wikidataFacts'
+import type { DraftField, DraftOption, PolityDraft } from '../../shared/polityDraft'
+import type { WikidataView } from '../../shared/wikidataView'
+import type { HsvaColor } from '@fubaritico/behaviors'
+
+/** The fields a form event can name: every text field and every list of the draft — the colour has its own. */
+export type PolityFormField = Exclude<keyof PolityDraft, 'idEdited' | 'colour'>
+
+/** What the form's fields show and what they report — the form's own props extend these. */
+export interface PolityFieldsProps {
+  /** The form's values. */
+  draft: PolityDraft
+  /** What to say beside which field, after a reading refused the form. */
+  errors: Partial<Record<DraftField, string>>
+  /** The polities of the year it may owe homage to, as value (id) and label (name). */
+  suzerains: readonly DraftOption[]
+  /** The ranks it may take — the usual ones and every one the year already uses (`rankChoices`). */
+  ranks: readonly DraftOption[]
+  /** Whether the id is shown but not editable — an existing polity's id never changes (`s07`). */
+  idLocked?: boolean
+  /**
+   * A field changed. Lists report `null` for "none".
+   * @param field - which one
+   * @param value - its new value
+   */
+  onField: (field: PolityFormField, value: string | null) => void
+  /**
+   * The colour changed — continuously while a thumb is dragged, which is cheap: the draft is the
+   * dialogue's own state, and nothing is written to the document before OK.
+   * @param colour - the picked colour, or `null` for "automatic"
+   */
+  onColour: (colour: HsvaColor | null) => void
+  /** What Wikidata says about the id typed (CARTO-243). */
+  wikidata: WikidataView
+  /**
+   * Take Wikidata's value for a field — only on the author's click.
+   * @param field - the field
+   * @param value - Wikidata's value, as the form holds it
+   */
+  onUseWikidata: (field: WikidataField, value: string) => void
+}
 
 /** The props that show an error under a field, or none at all — `exactOptionalPropertyTypes` forbids `undefined`. */
 function errorOf(message: string | undefined) {
   return message === undefined ? {} : { message, messageType: 'error' as const }
 }
 
-/** The props of a controlled text field reporting to {@link PolityFormProps.onField}. */
-function textField(field: PolityFormField, props: PolityFormProps) {
+/** The props of a controlled text field reporting to {@link PolityFieldsProps.onField}. */
+function textField(field: PolityFormField, props: PolityFieldsProps) {
   return {
     value: props.draft[field] ?? '',
     onChange: (event: { target: { value: string } }) => {
@@ -26,7 +66,7 @@ function textField(field: PolityFormField, props: PolityFormProps) {
 }
 
 /** The form's fields, in `s02`'s order, with the id after the name it is proposed from. */
-export function PolityFields(props: PolityFormProps) {
+export function PolityFields(props: PolityFieldsProps) {
   // Derived
   const { draft, errors, suzerains, ranks, onField, onColour } = props
 

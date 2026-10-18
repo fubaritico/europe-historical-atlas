@@ -2,8 +2,27 @@ import { ColorPicker } from '@fubaritico/react/ColorPicker'
 import { Popover } from '@fubaritico/react/Popover'
 import { useState } from 'react'
 
-import type { ActiveSwatchProps, SwatchPolity } from './ActiveSwatch'
 import type { HsvaColor } from '@fubaritico/behaviors'
+
+/** The polity the swatch shows. */
+export interface SwatchPolity {
+  /** Its name, verbatim. */
+  name: string
+  /** The colour it is painted in — the palette's when it has none of its own. */
+  colour: string
+  /** Its own colour as the picker holds it, or `null` for "automatic". */
+  picked: HsvaColor | null
+}
+
+/** What the picker shows and does. */
+export interface SwatchPickerProps {
+  /** The polity whose colour it shows. */
+  polity: SwatchPolity
+  /** A gesture in the picker ended on this colour, or on "automatic". */
+  onColour: (picked: HsvaColor | null) => void
+  /** Show the picker open from the start. */
+  defaultOpen: boolean
+}
 
 /**
  * The swatch of a polity, and the picker it opens.
@@ -13,15 +32,7 @@ import type { HsvaColor } from '@fubaritico/behaviors'
  * @param props.defaultOpen - show the picker open from the start
  * @returns the swatch and its picker
  */
-export function SwatchPicker({
-  polity,
-  onColour,
-  defaultOpen,
-}: {
-  polity: SwatchPolity
-  onColour: ActiveSwatchProps['onColour']
-  defaultOpen: boolean
-}) {
+export function SwatchPicker({ polity, onColour, defaultOpen }: SwatchPickerProps) {
   // State
   // The picker's value during a gesture: it moves with every sample, and only its end reaches the document.
   const [draft, setDraft] = useState<HsvaColor | null>(polity.picked)

@@ -7,7 +7,7 @@ import { createLineLayer } from './lineLayer'
 import type { LineLayerOptions, UvSegment } from './lineLayer'
 import type { BorderPattern } from '@europe-historical-atlas/core/data/borderStyles'
 import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
-import type { RegionBorders } from '@europe-historical-atlas/core/data/regionRaster'
+import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
 import type { Object3D } from 'three'
 
 /**

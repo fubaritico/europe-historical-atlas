@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { ToolFlyout } from './ToolFlyout'
 
-import type { ToolVariant } from './ToolFlyout'
+import type { ToolVariant } from './FlyoutItem'
 
 const VARIANTS: ToolVariant[] = [
   { id: 'a', label: 'First', shortcut: 'P', icon: 'draw', enabled: true },

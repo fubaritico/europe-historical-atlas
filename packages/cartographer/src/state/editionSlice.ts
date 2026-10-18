@@ -23,7 +23,6 @@ import { createHistory } from '@europe-historical-atlas/core/editor/history'
 import { isRetraceRefusal, retraceStretch } from '@europe-historical-atlas/core/editor/retrace'
 import { restack } from '@europe-historical-atlas/core/editor/stacking'
 
-import type { CartographerStore } from './store'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { AnchorRemoval } from '@europe-historical-atlas/core/editor/anchorEdits'
 import type { WeldDone, WeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
@@ -641,9 +640,15 @@ export function editionActions(
  * never imported here — and what lets every test build a fresh store, so the `setState(initialState)` reset
  * ritual and the `replace: true` trap beside it never arise.
  *
- * It is typed against {@link CartographerStore} rather than against itself, per the official slices pattern:
- * that is what will let a later slice read this one through `get()`. The resulting import cycle is
- * **type-only** and erases at runtime, `verbatimModuleSyntax` being on.
+ * **It is typed against what it reads and writes — itself — not against the whole store**, which departs
+ * from the official slices pattern on purpose (the dev's rule, 2026-10-18): the store's type is the
+ * composition of the slices, so a slice typed against it would import its own parent, and the two files
+ * would cycle, even if only through a type. A slice declares its needs; `CartographerStore` in `store.ts`
+ * satisfies all of them. zustand's `setState` is declared as a method, so the whole store's setter and
+ * getter are accepted where a slice's are expected. **A slice that comes to read another through `get()`**
+ * types itself against its own slice intersected with a structural declaration of what it reads, written
+ * in its own file (or imported from that sibling, if the sibling does not import it back) — never against
+ * `CartographerStore`.
  *
  * The version counter starts at 0 and only ever grows, {@link EditionActions.open} included: resetting it
  * would let a subscriber sitting at 0 miss the very change that opened a file.
@@ -653,12 +658,7 @@ export function editionActions(
 export const createEditionSlice =
   (
     deps: EditionDeps
-  ): StateCreator<
-    CartographerStore,
-    [['zustand/subscribeWithSelector', never]],
-    [],
-    EditionSlice
-  > =>
+  ): StateCreator<EditionSlice, [['zustand/subscribeWithSelector', never]], [], EditionSlice> =>
   (set, get) => {
     const line = createHistory(deps.document, {
       clone: deps.clone,

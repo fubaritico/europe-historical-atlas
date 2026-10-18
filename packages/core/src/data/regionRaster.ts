@@ -1,10 +1,6 @@
 import { hslToRgb } from '../utils/color'
 import { hashInts } from '../utils/hash'
 
-// Re-exported so the split moved no call site: the raster and the borders it implies are still one
-// import away from each other. A type-only import points the other way, so nothing cycles at runtime.
-export * from './regionBorders'
-
 import type { Region } from './regionSource'
 import type { RgbColor } from '../utils/color'
 

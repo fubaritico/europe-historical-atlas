@@ -8,8 +8,9 @@ import { TAG } from './consoleTag'
 import { nearestLayer } from './layerHits'
 import { sessionPointOf } from './toolSession'
 
-import type { GestureContext } from './toolGestures'
-import type { SessionPoint, SnapLayer } from './toolSession'
+import type { LayerHitContext } from './layerHits'
+import type { SessionPoint, SnapLayer, ToolSession } from './toolSession'
+import type { Point } from '../view/viewport'
 
 /**
  * The Pen meeting a border that already exists — the dev's request, 2026-10-11: *"le snapping pour les
@@ -21,12 +22,29 @@ import type { SessionPoint, SnapLayer } from './toolSession'
  */
 
 /**
+ * What the border snap reads of a gesture: the layer lookup's slice (the store, the water, the reach), plus
+ * the session, the projected anchors and the result zone. Declared here, never imported from the gestures:
+ * their context extends this one.
+ */
+export interface BorderSnapContext extends LayerHitContext {
+  /** The session, mutated in place by the gestures. */
+  session: ToolSession
+  /** The document's anchors in screen pixels, parallel to its table — the cached projection. */
+  anchorsOnScreen: () => readonly Point[]
+  /**
+   * Say what a gesture did — *"inserted 412 vertices from the coastline"*, the status bar's result
+   * zone beside the action (`s02`).
+   */
+  report: (message: string) => void
+}
+
+/**
  * The anchors the Pen may land on: any anchor a ring holds, but not one the outline in progress already
  * holds — those are its own points, and the first is the closing.
  * @param context - the document and the session
  * @returns their indices
  */
-function landable(context: GestureContext): number[] {
+function landable(context: BorderSnapContext): number[] {
   const held = new Set(context.session.outline.map((point) => point.anchor))
   return [...referencedAnchors(context.store.getState().document)].filter(
     (index) => !held.has(index)
@@ -39,12 +57,15 @@ function landable(context: GestureContext): number[] {
  * @param at - the pointer, in screen pixels
  * @returns the anchor's index, or `null`
  */
-export function anchorHit(context: GestureContext, at: readonly [number, number]): number | null {
+export function anchorHit(
+  context: BorderSnapContext,
+  at: readonly [number, number]
+): number | null {
   return nearestAmong(context.anchorsOnScreen(), landable(context), at, context.radius)
 }
 
 /**
- * The share of the Pen's reach ({@link GestureContext.radius}) within which an anchor counts as aimed at —
+ * The share of the Pen's reach ({@link BorderSnapContext.radius}) within which an anchor counts as aimed at —
  * 3 of its 8 pixels. A share of the reach rather than a pixel count, so it scales with the screen's ratio as
  * the reach does.
  */
@@ -63,7 +84,7 @@ export const ANCHOR_AIM_SHARE = 3 / 8
  * @returns the anchor's index, or `null` when the water should take the click
  */
 export function anchorOverWater(
-  context: GestureContext,
+  context: BorderSnapContext,
   at: readonly [number, number],
   layer: SnapLayer
 ): number | null {
@@ -87,7 +108,7 @@ export function anchorOverWater(
  * @returns the layer, or `null` when an anchor or a free point takes the click
  */
 export function waterTaking(
-  context: GestureContext,
+  context: BorderSnapContext,
   at: readonly [number, number]
 ): SnapLayer | null {
   const layer = nearestLayer(context, at)
@@ -102,7 +123,7 @@ export function waterTaking(
  * @param to - the anchor under the pointer
  * @returns the run of anchor indices, or `null`
  */
-export function borderRunTo(context: GestureContext, to: number): number[] | null {
+export function borderRunTo(context: BorderSnapContext, to: number): number[] | null {
   const run = ringRunTo(context, to)
   return run === null || crossesOutline(context, run) ? null : run
 }
@@ -118,7 +139,7 @@ export function borderRunTo(context: GestureContext, to: number): number[] | nul
  * @param to - the anchor under the pointer
  * @returns the run of anchor indices, `from` included, or `null`
  */
-function ringRunTo(context: GestureContext, to: number): number[] | null {
+function ringRunTo(context: BorderSnapContext, to: number): number[] | null {
   const from = context.session.outline.at(-1)?.anchor ?? null
   if (from === null) return null
   const { document, tool, target } = context.store.getState()
@@ -141,7 +162,7 @@ function ringRunTo(context: GestureContext, to: number): number[] | null {
  * @param run - the run, `from` first
  * @returns `true` when following the run would repeat an anchor of the outline
  */
-function crossesOutline(context: GestureContext, run: readonly number[]): boolean {
+function crossesOutline(context: BorderSnapContext, run: readonly number[]): boolean {
   const held = new Set(context.session.outline.map((point) => point.anchor))
   return run.slice(1).some((index) => held.has(index))
 }
@@ -152,7 +173,7 @@ function crossesOutline(context: GestureContext, run: readonly number[]): boolea
  * @param indices - the anchors
  * @returns one point per anchor the document can describe; any other is reported and left out
  */
-function anchorPoints(context: GestureContext, indices: readonly number[]): SessionPoint[] {
+function anchorPoints(context: BorderSnapContext, indices: readonly number[]): SessionPoint[] {
   const { document } = context.store.getState()
   return indices.flatMap((index) => {
     const point = sessionPointOf(document, index)
@@ -171,7 +192,7 @@ function anchorPoints(context: GestureContext, indices: readonly number[]): Sess
  * @param at - the pointer, in screen pixels
  * @returns `true` when the click landed on an anchor
  */
-export function anchorClick(context: GestureContext, at: readonly [number, number]): boolean {
+export function anchorClick(context: BorderSnapContext, at: readonly [number, number]): boolean {
   const hit = anchorHit(context, at)
   if (hit === null) return false
   const run = borderRunTo(context, hit)
@@ -197,7 +218,7 @@ export function anchorClick(context: GestureContext, at: readonly [number, numbe
  * @param hit - the anchor under the pointer
  * @returns the sentence
  */
-export function anchorSentence(context: GestureContext, hit: number): string {
+export function anchorSentence(context: BorderSnapContext, hit: number): string {
   const paths = pathsHolding(context.store.getState().document, hit)
   return `Branching from a shared anchor — held by ${String(paths)} ${paths === 1 ? 'path' : 'paths'}`
 }
@@ -214,7 +235,7 @@ export function anchorSentence(context: GestureContext, hit: number): string {
  * @returns the anchor at a position, or `null`
  */
 export function anchorsByPosition(
-  context: GestureContext
+  context: BorderSnapContext
 ): (lonLat: readonly [number, number]) => number | null {
   const { document } = context.store.getState()
   const held = new Set(context.session.outline.map((point) => point.anchor))

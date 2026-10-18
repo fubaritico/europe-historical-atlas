@@ -1,4 +1,3 @@
-import type { CartographerStore } from './store'
 import type { Viewport } from '../view/viewport'
 import type { StateCreator } from 'zustand'
 
@@ -55,12 +54,7 @@ export interface ViewportDeps {
 export const createViewportSlice =
   (
     deps: ViewportDeps
-  ): StateCreator<
-    CartographerStore,
-    [['zustand/subscribeWithSelector', never]],
-    [],
-    ViewportSlice
-  > =>
+  ): StateCreator<ViewportSlice, [['zustand/subscribeWithSelector', never]], [], ViewportSlice> =>
   (set) => ({
     viewport: deps.viewport,
     setViewport: (viewport: Viewport): void => {

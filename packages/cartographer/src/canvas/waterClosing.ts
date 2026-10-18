@@ -6,7 +6,8 @@ import { TAG } from './consoleTag'
 import { layerLines } from './layerHits'
 import { sessionPointOf } from './toolSession'
 
-import type { GestureContext } from './toolGestures'
+import type { BorderSnapContext } from './borderSnap'
+import type { FrameSnapContext } from './frameSnap'
 import type { SessionPoint } from './toolSession'
 import type { SnapLine } from '../geometry/lineSnap'
 import type { Point } from '../view/viewport'
@@ -19,6 +20,13 @@ import type { Provenance } from '@europe-historical-atlas/core/editor/documentEd
  */
 
 /**
+ * What the water closing reads of a gesture: the border snap's slice, for the anchors a neighbour already
+ * has on the water, and the frame snap's, for turning layer points into degrees. The gestures' context
+ * extends it; nothing here imports that context.
+ */
+export type WaterClosingContext = BorderSnapContext & FrameSnapContext
+
+/**
  * Layer points as points of the outline, each under the layer's provenance — or the anchor a neighbour
  * already has there, joined rather than duplicated.
  * @param context - the session, the frame and the store
@@ -27,7 +35,7 @@ import type { Provenance } from '@europe-historical-atlas/core/editor/documentEd
  * @returns the outline points, in order
  */
 export function layerPoints(
-  context: GestureContext,
+  context: WaterClosingContext,
   points: readonly (Point | undefined)[],
   provenance: Provenance
 ): SessionPoint[] {
@@ -58,7 +66,7 @@ export function layerPoints(
  * @param context - the session and the snap layers
  * @returns the layer points from the last one placed to the first, in backdrop pixels, or `null`
  */
-export function closingStretch(context: GestureContext): Point[] | null {
+export function closingStretch(context: WaterClosingContext): Point[] | null {
   const { snap, start, outline } = context.session
   if (snap === null || start === null || start.point !== outline[0]) return null
   if (snap.layer !== start.vertex.layer || snap.contour !== start.vertex.contour) return null
@@ -81,7 +89,7 @@ export function closingStretch(context: GestureContext): Point[] | null {
  * @returns the layer points from `from` to `to`, both included, in backdrop pixels, or `null`
  */
 export function freshStretch(
-  context: GestureContext,
+  context: WaterClosingContext,
   line: SnapLine,
   from: number,
   to: number
@@ -99,7 +107,7 @@ export function freshStretch(
  * @param points - layer points, in backdrop pixels
  * @returns `true` when one of them was placed already
  */
-function retracesOutline(context: GestureContext, points: readonly Point[]): boolean {
+function retracesOutline(context: WaterClosingContext, points: readonly Point[]): boolean {
   const placed = new Set(context.session.outline.map((point) => String(point.at)))
   return points.some((point) => placed.has(String(backdropToLonLat(point, context.frame))))
 }
@@ -110,7 +118,7 @@ function retracesOutline(context: GestureContext, points: readonly Point[]): boo
  * @param context - the session, the snap layers and the store
  * @returns the points to append before closing
  */
-export function closingPoints(context: GestureContext): SessionPoint[] {
+export function closingPoints(context: WaterClosingContext): SessionPoint[] {
   const stretch = closingStretch(context)
   const snap = context.session.snap
   if (stretch === null || snap === null) return []

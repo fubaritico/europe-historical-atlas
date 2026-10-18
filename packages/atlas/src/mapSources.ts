@@ -18,7 +18,7 @@ import type { BorderPattern } from '@europe-historical-atlas/core/data/borderSty
 import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
 import type { Heightmap } from '@europe-historical-atlas/core/data/heightmap'
 import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
-import type { RegionBorders } from '@europe-historical-atlas/core/data/regionRaster'
+import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { River } from '@europe-historical-atlas/core/data/riverSource'
 import type { RgbColor } from '@europe-historical-atlas/core/utils/color'

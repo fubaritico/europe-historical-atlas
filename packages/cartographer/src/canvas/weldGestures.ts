@@ -8,7 +8,8 @@ import { screenToLonLatOnBackdrop } from '../view/projection'
 
 import { TAG } from './consoleTag'
 
-import type { GestureContext } from './toolGestures'
+import type { BorderSnapContext } from './borderSnap'
+import type { FrameSnapContext } from './frameSnap'
 import type { WeldOffer } from './toolSession'
 import type { Point } from '../view/viewport'
 import type { WeldDone, WeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
@@ -24,13 +25,12 @@ import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocu
  */
 
 /**
- * What the weld reads of the gesture context, and nothing more (ARCH-005): the store, the reach, the
- * projected anchors, the frame and the result zone.
+ * What the weld reads of the gesture context, and nothing more (ARCH-005): the frame snap's slice (the
+ * store, the frame, the reach), plus the projected anchors and the result zone as the border snap declares
+ * them. The gestures' context extends this one; nothing here imports it.
  */
-export type WeldContext = Pick<
-  GestureContext,
-  'store' | 'radius' | 'anchorsOnScreen' | 'frame' | 'report'
->
+export interface WeldContext
+  extends FrameSnapContext, Pick<BorderSnapContext, 'anchorsOnScreen' | 'report'> {}
 
 /** How `{History}` names a weld. */
 export const WELD_ANCHOR_STEP = { kind: 'weld-anchor', label: 'weld anchor' } as const

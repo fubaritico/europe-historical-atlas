@@ -4,22 +4,8 @@ import { useFlyoutFocus } from '../hooks/useFlyoutFocus'
 
 import { FlyoutItem } from './FlyoutItem'
 
-import type { ToolIconName } from '../../ToolIcon'
+import type { ToolVariant } from './FlyoutItem'
 import type { KeyboardEvent } from 'react'
-
-/** One variant of a tool group, as the flyout lists it. */
-export interface ToolVariant {
-  /** Stable id, what a choice reports. */
-  id: string
-  /** What the row reads. */
-  label: string
-  /** The key that takes it, shown in brackets as Illustrator does — `null` when it has none. */
-  shortcut: string | null
-  /** Its glyph. */
-  icon: ToolIconName
-  /** Whether it can be chosen today. A disabled row stays listed, so the group's shape is visible. */
-  enabled: boolean
-}
 
 /** What the flyout needs. */
 export interface ToolFlyoutProps {

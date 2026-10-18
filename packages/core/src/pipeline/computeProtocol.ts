@@ -15,7 +15,7 @@ import type {
   TerrainBakeResult,
 } from './mapCompute'
 import type { TerrainTextureOptions } from './terrainCompose'
-import type { RegionBorders } from '../data/regionRaster'
+import type { RegionBorders } from '../data/regionBorders'
 
 /** What the main thread asks the worker to do. `id` pairs an answer back to its question. */
 export type ComputeCommand =

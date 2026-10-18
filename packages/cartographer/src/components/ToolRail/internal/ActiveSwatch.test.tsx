@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { ActiveSwatch } from './ActiveSwatch'
 
-import type { SwatchPolity } from './ActiveSwatch'
+import type { SwatchPolity } from './SwatchPicker'
 
 const FRANCE: SwatchPolity = {
   name: 'Reaume de France',

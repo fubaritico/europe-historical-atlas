@@ -1,15 +1,16 @@
 import { describe, expect, it } from 'vitest'
 
+import { extractRegionBorders } from './regionBorders'
 import {
   assignRegionColors,
   createRegionRaster,
   expandRegionsOverLand,
-  extractRegionBorders,
   rasteriseRegions,
   regionColor,
 } from './regionRaster'
 
-import type { RegionBorderSegment, RegionRaster } from './regionRaster'
+import type { RegionBorderSegment } from './regionBorders'
+import type { RegionRaster } from './regionRaster'
 import type { Region } from './regionSource'
 import type { RgbColor } from '../utils/color'
 

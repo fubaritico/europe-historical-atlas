@@ -1,7 +1,7 @@
 import { PEN_MODE_LABELS, TOOL_LABELS } from '../../state/toolSlice'
 
 import type { ToolIconName } from '../ToolIcon'
-import type { ToolVariant } from './internal/ToolFlyout'
+import type { ToolVariant } from './internal/FlyoutItem'
 import type { EditorTool } from '../../state/toolSlice'
 
 /** One button of the rail. */

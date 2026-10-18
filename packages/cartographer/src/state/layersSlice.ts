@@ -1,4 +1,3 @@
-import type { CartographerStore } from './store'
 import type { StateCreator } from 'zustand'
 
 /**
@@ -85,7 +84,7 @@ export type LayersSlice = LayersState & LayersActions
  * @returns the slice
  */
 export const createLayersSlice: StateCreator<
-  CartographerStore,
+  LayersSlice,
   [['zustand/subscribeWithSelector', never]],
   [],
   LayersSlice

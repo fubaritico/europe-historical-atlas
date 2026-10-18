@@ -13,7 +13,7 @@
 import type { TerrainTextureOptions } from './terrainCompose'
 import type { HeightmapMeta } from '../data/heightmap'
 import type { LandMaskMeta } from '../data/landMask'
-import type { RegionBorders } from '../data/regionRaster'
+import type { RegionBorders } from '../data/regionBorders'
 import type { Region } from '../data/regionSource'
 import type { RgbColor } from '../utils/color'
 

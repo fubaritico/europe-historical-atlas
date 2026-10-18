@@ -9,13 +9,9 @@
 
 import { createHeightmap } from '../data/heightmap'
 import { createElevationLandMask, createPackedLandMask } from '../data/landMask'
+import { extractRegionBorders } from '../data/regionBorders'
 import { pinnedRegionColor } from '../data/regionPalette'
-import {
-  assignRegionColors,
-  expandRegionsOverLand,
-  extractRegionBorders,
-  rasteriseRegions,
-} from '../data/regionRaster'
+import { assignRegionColors, expandRegionsOverLand, rasteriseRegions } from '../data/regionRaster'
 
 import { composeTerrainRgba, terrainTextureSize } from './terrainCompose'
 
@@ -30,7 +26,8 @@ import type {
 import type { AreaTint, TerrainTextureOptions } from './terrainCompose'
 import type { Heightmap } from '../data/heightmap'
 import type { LandMask } from '../data/landMask'
-import type { RegionBorders, RegionRaster } from '../data/regionRaster'
+import type { RegionBorders } from '../data/regionBorders'
+import type { RegionRaster } from '../data/regionRaster'
 import type { RgbColor } from '../utils/color'
 
 /**
