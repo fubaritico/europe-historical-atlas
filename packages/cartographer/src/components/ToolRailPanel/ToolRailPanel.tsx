@@ -1,11 +1,10 @@
-import { describeDrawingTarget } from '../state/drawingTarget'
-import { isPenMode } from '../state/toolSlice'
+import { describeDrawingTarget } from '../../state/drawingTarget'
+import { isPenMode } from '../../state/toolSlice'
+import { pickedColour, recolouring } from '../polityColourValue'
+import { ToolRail } from '../ToolRail'
 
-import { pickedColour, recolouring } from './polityColourValue'
-import { ToolRail } from './ToolRail'
-
-import type { PolityColourSource } from '../state/polityColourSource'
-import type { CartographerStoreHook } from '../state/store'
+import type { PolityColourSource } from '../../state/polityColourSource'
+import type { CartographerStoreHook } from '../../state/store'
 import type { HsvaColor } from '@fubaritico/behaviors'
 
 /** What the binding needs. */

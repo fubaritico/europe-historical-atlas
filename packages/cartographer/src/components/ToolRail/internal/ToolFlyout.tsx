@@ -1,9 +1,11 @@
-import { useEffect, useEffectEvent, useRef } from 'react'
+import { useRef } from 'react'
 
-import { ToolIcon } from './toolIcons'
+import { useFlyoutFocus } from '../hooks/useFlyoutFocus'
 
-import type { ToolIconName } from './toolIcons'
-import type { KeyboardEvent, RefObject } from 'react'
+import { FlyoutItem } from './FlyoutItem'
+
+import type { ToolIconName } from '../../toolIcons'
+import type { KeyboardEvent } from 'react'
 
 /** One variant of a tool group, as the flyout lists it. */
 export interface ToolVariant {
@@ -34,17 +36,6 @@ export interface ToolFlyoutProps {
 }
 
 /**
- * The menu items a key may land on: the enabled rows, in order.
- * @param menu - the menu element
- * @returns its enabled items
- */
-function enabledItems(menu: HTMLElement): HTMLElement[] {
-  return [
-    ...menu.querySelectorAll<HTMLElement>('[role="menuitemradio"]:not([aria-disabled="true"])'),
-  ]
-}
-
-/**
  * Move the focus among the rows on ↑ and ↓, wrapping — the WAI-ARIA menu pattern, which keeps a
  * disabled row reachable so it can be discovered, but never chosen (A11Y-003).
  * @param event - the key event, on the menu
@@ -54,77 +45,6 @@ function moveFocus(event: KeyboardEvent<HTMLUListElement>): void {
   const at = items.findIndex((item) => item === document.activeElement)
   const step = event.key === 'ArrowDown' ? 1 : -1
   items[(at + step + items.length) % items.length]?.focus()
-}
-
-/**
- * One row: the square that marks the variant in use, its glyph, its name, its key.
- * @param props - the variant, whether it is current, and the choice
- * @returns the menu item
- */
-function FlyoutItem({
-  variant,
-  checked,
-  onChoose,
-}: {
-  variant: ToolVariant
-  checked: boolean
-  onChoose: (id: string) => void
-}) {
-  // Handlers
-  const handleClick = () => {
-    if (variant.enabled) onChoose(variant.id)
-  }
-  const handleKeyDown = (event: KeyboardEvent<HTMLLIElement>) => {
-    if ((event.key === 'Enter' || event.key === ' ') && variant.enabled) {
-      event.preventDefault()
-      onChoose(variant.id)
-    }
-  }
-
-  // Render
-  return (
-    <li
-      role="menuitemradio"
-      aria-checked={checked}
-      aria-disabled={!variant.enabled}
-      tabIndex={-1}
-      className="tool-rail__item"
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-    >
-      <span className="tool-rail__mark" aria-hidden="true" />
-      <ToolIcon name={variant.icon} />
-      <span>{variant.label}</span>
-      <span className="tool-rail__key">
-        {variant.shortcut === null ? '' : `(${variant.shortcut})`}
-      </span>
-    </li>
-  )
-}
-
-/**
- * Focus the current row when the flyout opens, and close it on a press anywhere outside.
- * @param menu - the menu element
- * @param onDismiss - close without choosing
- */
-function useFlyoutFocus(menu: RefObject<HTMLUListElement | null>, onDismiss: () => void): void {
-  // Effects
-  // An effect event, so a parent re-render — a new `onDismiss` each time — does not re-run the effect
-  // and pull the focus back to the checked row while the author is moving through the list.
-  const dismiss = useEffectEvent(onDismiss)
-  useEffect(() => {
-    const node = menu.current
-    if (node === null) return undefined
-    const checked = node.querySelector<HTMLElement>('[aria-checked="true"]')
-    ;(checked ?? enabledItems(node)[0])?.focus()
-    const outside = (event: PointerEvent): void => {
-      if (!(event.target instanceof Node) || !node.contains(event.target)) dismiss()
-    }
-    document.addEventListener('pointerdown', outside)
-    return () => {
-      document.removeEventListener('pointerdown', outside)
-    }
-  }, [menu])
 }
 
 /**
