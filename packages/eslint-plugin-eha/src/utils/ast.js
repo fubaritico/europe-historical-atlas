@@ -152,3 +152,33 @@ export const wholeLines = (node, text, withBlankBelow) => {
   const blankBelow = withBlankBelow && next !== -1 && text.slice(to, next).trim() === ''
   return [from, blankBelow ? next + 1 : to]
 }
+
+/**
+ * The name a component goes by: its own, or — wrapped as `const Panel = memo(() => …)` — the name of the
+ * variable that receives the wrapper's call.
+ * @param {FunctionNode} fn - the function
+ * @returns {string | undefined} its name, or `undefined` when it has none
+ */
+export const componentNameOf = (fn) => {
+  const own = functionName(fn)
+  if (own !== undefined) return own
+  const call = parentOf(fn)
+  const holder = call?.type === 'CallExpression' ? parentOf(call) : null
+  return holder?.type === 'VariableDeclarator' && holder.id.type === 'Identifier'
+    ? holder.id.name
+    : undefined
+}
+
+/**
+ * Tells whether a function is a component: an uppercase name, and JSX among what it returns.
+ * @param {FunctionNode} fn - the function
+ * @returns {boolean} `true` for a component
+ */
+export const isComponent = (fn) => {
+  const name = componentNameOf(fn)
+  if (name === undefined || !isComponentName(name)) return false
+  if (fn.body.type !== 'BlockStatement') return isRender(fn.body)
+  return fn.body.body.some(
+    (statement) => statement.type === 'ReturnStatement' && isRender(statement.argument)
+  )
+}

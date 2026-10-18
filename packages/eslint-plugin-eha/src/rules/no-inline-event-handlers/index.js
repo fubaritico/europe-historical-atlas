@@ -1,39 +1,9 @@
-import { functionName, isComponentName, isRender, parentOf } from '../../utils/ast.js'
+import { componentNameOf, isComponent, parentOf } from '../../utils/ast.js'
 
 /**
  * A function node, as the tree of a `.tsx` file holds it.
  * @typedef {import('../../utils/ast.js').FunctionNode} FunctionNode
  */
-
-/**
- * The name a component goes by: its own, or — wrapped as `const Panel = memo(() => …)` — the name of the
- * variable that receives the wrapper's call.
- * @param {FunctionNode} fn - the function
- * @returns {string | undefined} its name, or `undefined` when it has none
- */
-const componentNameOf = (fn) => {
-  const own = functionName(fn)
-  if (own !== undefined) return own
-  const call = parentOf(fn)
-  const holder = call?.type === 'CallExpression' ? parentOf(call) : null
-  return holder?.type === 'VariableDeclarator' && holder.id.type === 'Identifier'
-    ? holder.id.name
-    : undefined
-}
-
-/**
- * Tells whether a function is a component: an uppercase name, and JSX among what it returns.
- * @param {FunctionNode} fn - the function
- * @returns {boolean} `true` for a component
- */
-const isComponent = (fn) => {
-  const name = componentNameOf(fn)
-  if (name === undefined || !isComponentName(name)) return false
-  if (fn.body.type !== 'BlockStatement') return isRender(fn.body)
-  return fn.body.body.some(
-    (statement) => statement.type === 'ReturnStatement' && isRender(statement.argument)
-  )
-}
 
 /**
  * Finds the functions between a node and the component whose render holds it, innermost first, and the

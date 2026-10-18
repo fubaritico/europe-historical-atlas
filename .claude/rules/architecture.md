@@ -69,6 +69,8 @@ packages/
 │   ├── vitest.setup.ts     # unmounts after each test; stands in for the canvas, ResizeObserver, <dialog>
 │   ├── workbench.html      # the workbench: chrome pieces mounted alone, never built (2026-10-09)
 │   └── src/                # 2D canvas and React chrome; styles/sheets.ts holds the one stylesheet order
+│       └── components/     # one folder per component: <Name>/<Name>.tsx and its test at the root,
+│                           #   hooks/ (its own hooks), internal/ (its own children), index.ts (2026-10-18)
 └── eslint-plugin-eha/  # the lint rules of this repository: where each declaration sits (2026-10-12)
     ├── tsconfig.json       # JavaScript checked by tsc (`checkJs`): ESLint imports it with no build step
     ├── vitest.config.ts    # node: ESLint never runs in a page
@@ -82,6 +84,17 @@ files/spikes/           # runnable experiments; their out/ stays ignored
 inheriting it, and ESLint resolves one config **from the current directory** — which is why every package
 owns a `lint` script. A single `eslint .` from the root would read the Cartographer's `.tsx` with no React
 rule at all: green over code nothing had checked.
+
+**Components: a folder each, a barrel each — and no barrel of barrels** (the dev's call, 2026-10-18, his
+convention in `vite-mf-monorepo`, `nextjs-multizone-tmdb` and `date-time-picker`). `components/<Name>/` holds
+the component and its test at the root, **its own hooks in `hooks/`**, **its own children in `internal/`**, one
+entity per file, and `index.ts` exporting only what the rest of the application uses. Four rules hold it, for
+every component already moved into its folder (the flat files move one by one, the lint green at each step):
+`react/no-multi-comp`, `eha/one-hook-per-file`, `eha/component-folder-layout` (what sits where), and
+`eha/no-reach-into-component` — over all of `src/` — so nothing outside a folder imports its `hooks/` or
+`internal/`: they are private by construction. **Open, to settle at the first migration that meets one**: where
+a hook or a child shared by several components lives (`useDismiss`, `useListCursor`…). **No `components/index.ts`**: a barrel of every component is the one that makes cycles,
+and the subpath rule below already refuses it for `core`.
 
 **Cross-package imports use subpath exports**: `@europe-historical-atlas/core/utils/math`, never a barrel. A single
 barrel would flatten the four layers into one namespace and put `pipeline/` behind the same entry as the

@@ -203,6 +203,26 @@ export default tseslint.config(
     },
   },
 
+  // One entity per file, in a folder per component behind its barrel — the dev's call, 2026-10-18: *« quand
+  // tu te balades d'entité en entité … c'est plus facile à lire quand on les a séparément »*. Held for the
+  // components already moved into their folder (`src/components/<Name>/`); a flat file is held the day it
+  // moves, so the migration goes folder by folder with the lint green at every step.
+  {
+    files: ['src/components/*/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}'],
+    rules: {
+      'react/no-multi-comp': 'error',
+      'eha/one-hook-per-file': 'error',
+      // A hook only that component uses in `hooks/`, a child only it uses in `internal/` (the dev, 2026-10-18).
+      'eha/component-folder-layout': 'error',
+    },
+  },
+  // A component's folder is private behind its barrel: from anywhere else, only `<Name>` itself is imported.
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    rules: { 'eha/no-reach-into-component': 'error' },
+  },
+
   // Architecture boundaries, last so nothing can replace the single `no-restricted-imports` rule after
   // them. The 2D-canvas decision is composed into each one: a 2D context gives the compositing mode the
   // atlas's bake already uses (`overlay`) for free, where WebGL would need a shader, and three.js in here

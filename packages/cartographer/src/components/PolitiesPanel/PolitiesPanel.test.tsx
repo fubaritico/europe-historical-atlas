@@ -5,10 +5,10 @@ import { describe, expect, it, vi } from 'vitest'
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import { openEmptyYear } from '../state/openEmptyYear'
-import { createPolityColourSource } from '../state/polityColourSource'
-import { createCartographerStore } from '../state/store'
-import { UNFRAMED } from '../view/viewport'
+import { openEmptyYear } from '../../state/openEmptyYear'
+import { createPolityColourSource } from '../../state/polityColourSource'
+import { createCartographerStore } from '../../state/store'
+import { UNFRAMED } from '../../view/viewport'
 
 import { PolitiesPanel } from './PolitiesPanel'
 
