@@ -1,5 +1,5 @@
 import { lineStretches } from '../geometry/lineSnap'
-import { backdropToLonLat } from '../view/projection'
+import { backdropToLonLat } from '../viewport/projection'
 
 import { anchorsByPosition } from './borderSnap'
 import { TAG } from './consoleTag'
@@ -10,7 +10,7 @@ import type { BorderSnapContext } from './borderSnap'
 import type { FrameSnapContext } from './frameSnap'
 import type { SessionPoint } from './toolSession'
 import type { SnapLine } from '../geometry/lineSnap'
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 import type { Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
 
 /*

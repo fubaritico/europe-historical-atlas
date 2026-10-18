@@ -4,14 +4,14 @@ import { MIN_RING_ANCHORS } from '@europe-historical-atlas/core/editor/yearDocum
 import { nearestAmong } from '../geometry/hitTest'
 import { nearestStretch } from '../geometry/stretchHit'
 import { describeDrawingTarget } from '../state/drawingTarget'
-import { screenToLonLatOnBackdrop } from '../view/projection'
+import { screenToLonLatOnBackdrop } from '../viewport/projection'
 
 import { TAG } from './consoleTag'
 
 import type { BorderSnapContext } from './borderSnap'
 import type { FrameSnapContext } from './frameSnap'
 import type { WeldOffer } from './toolSession'
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 import type { WeldDone, WeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 

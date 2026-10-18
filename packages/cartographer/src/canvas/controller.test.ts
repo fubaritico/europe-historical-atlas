@@ -6,9 +6,9 @@ import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 import { openEmptyYear } from '../state/openEmptyYear'
 import { createPolityColourSource } from '../state/polityColourSource'
 import { createCartographerStore } from '../state/store'
-import { TEST_BACKDROP_FRAME, TEST_LAND_MASK } from '../view/testFrame'
-import { UNFRAMED } from '../view/viewport'
-import { screenToBackdrop } from '../view/viewport'
+import { TEST_BACKDROP_FRAME, TEST_LAND_MASK } from '../viewport/testFrame'
+import { UNFRAMED } from '../viewport/viewport'
+import { screenToBackdrop } from '../viewport/viewport'
 
 import { startCanvasController } from './controller'
 import { cursorCss } from './cursors'

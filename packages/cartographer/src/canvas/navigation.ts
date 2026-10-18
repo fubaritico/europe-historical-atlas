@@ -1,7 +1,7 @@
-import { coverScale } from '../view/framing'
+import { coverScale } from '../viewport/framing'
 
 import type { EditorTool } from '../state/toolSlice'
-import type { PixelSize, ScaleLimits } from '../view/viewport'
+import type { PixelSize, ScaleLimits } from '../viewport/viewport'
 
 /**
  * How the hand moves the view — the zoom's arithmetic and the keys that pan, zoom and pick a tool.

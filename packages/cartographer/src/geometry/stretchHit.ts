@@ -1,6 +1,6 @@
 import { squaredRadius } from './hitTest'
 
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /**
  * Which stretch of the target's outline is under the pointer — where the idle Pen inserts a point

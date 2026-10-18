@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { declareSource } from '@europe-historical-atlas/core/editor/documentEdits'
 
-import { lonLatToScreen } from '../view/projection'
+import { lonLatToScreen } from '../viewport/projection'
 
 import { waterTaking } from './borderSnap'
 import { snapHit } from './layerHits'

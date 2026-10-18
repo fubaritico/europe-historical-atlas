@@ -8,8 +8,8 @@ import {
 import { tribeIds } from '@europe-historical-atlas/core/editor/tribes'
 
 import { DEFAULT_LAYERS } from '../state/layersSlice'
-import { lonLatToScreen, projectAnchors, projectToBackdrop } from '../view/projection'
-import { TEST_BACKDROP_FRAME } from '../view/testFrame'
+import { lonLatToScreen, projectAnchors, projectToBackdrop } from '../viewport/projection'
+import { TEST_BACKDROP_FRAME } from '../viewport/testFrame'
 
 import {
   backdropRect,
@@ -22,8 +22,8 @@ import {
 } from './scene'
 
 import type { SceneInputs } from './scene'
-import type { BackdropFrame } from '../view/projection'
-import type { Viewport } from '../view/viewport'
+import type { BackdropFrame } from '../viewport/projection'
+import type { Viewport } from '../viewport/viewport'
 import type { DerivedBorder } from '@europe-historical-atlas/core/editor/derivedBorders'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 

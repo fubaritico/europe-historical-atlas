@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { moveAnchor } from '@europe-historical-atlas/core/editor/documentEdits'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
-import { projectToBackdrop } from '../view/projection'
-import { TEST_BACKDROP_FRAME } from '../view/testFrame'
+import { projectToBackdrop } from '../viewport/projection'
+import { TEST_BACKDROP_FRAME } from '../viewport/testFrame'
 
 import { createAnchorCache } from './anchorCache'
 

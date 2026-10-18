@@ -1,4 +1,4 @@
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /**
  * Which anchor is under the pointer — the question every gesture asks first.
@@ -17,7 +17,7 @@ import type { Point } from '../view/viewport'
  * The array handed in is **parallel to `document.anchors`**, so the index returned *is* the anchor index —
  * nothing to map back, and no second identity to keep in step.
  *
- * **No tolerance is declared here.** Radii are passed in, same rule as `view/`'s zoom limits: a number
+ * **No tolerance is declared here.** Radii are passed in, same rule as `viewport/`'s zoom limits: a number
  * invented inside a pure function is a silent substitution, and this one is a product decision about how
  * forgiving the tool feels.
  */

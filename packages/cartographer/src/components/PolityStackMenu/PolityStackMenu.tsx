@@ -8,7 +8,7 @@ import { STACKING_SHORTCUTS } from '../shared/stackingShortcut'
 import { useDismiss } from './hooks/useDismiss'
 import { useInsideWindow } from './hooks/useInsideWindow'
 
-import type { ViewportPoint } from '../../view/viewport'
+import type { ViewportPoint } from '../../viewport/viewport'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
 
 /** The value of the menu's first item, *Edit properties…* — `s07`'s gesture, above the four moves. */

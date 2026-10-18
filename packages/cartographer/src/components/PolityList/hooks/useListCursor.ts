@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { listKeyAction } from '../listKeys'
 import { optionId } from '../optionId'
 
-import type { ViewportPoint } from '../../../view/viewport'
+import type { ViewportPoint } from '../../../viewport/viewport'
 import type { PolityRow } from '../../shared/polityRows'
 import type { KeyboardEvent } from 'react'
 

@@ -3,8 +3,8 @@ import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
 import { openEmptyYear } from '../state/openEmptyYear'
 import { createCartographerStore } from '../state/store'
-import { projectToBackdrop, remapToScreen, screenToLonLatOnBackdrop } from '../view/projection'
-import { TEST_BACKDROP_FRAME } from '../view/testFrame'
+import { projectToBackdrop, remapToScreen, screenToLonLatOnBackdrop } from '../viewport/projection'
+import { TEST_BACKDROP_FRAME } from '../viewport/testFrame'
 
 import { projectedTerritories } from './scene'
 import { snapLayersOf } from './snapLayers'

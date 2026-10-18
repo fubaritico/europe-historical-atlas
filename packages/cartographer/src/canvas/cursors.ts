@@ -49,7 +49,7 @@ export interface CursorState {
   /** Whether the aimed-at polity resolves against the document. */
   hasTarget: boolean
   /**
-   * Whether the view is too far out for the drawing tools to act (`H-34`, `view/toolReach.ts`): the snap
+   * Whether the view is too far out for the drawing tools to act (`H-34`, `viewport/toolReach.ts`): the snap
    * would reach farther than the threshold on the ground.
    */
   tooFar: boolean

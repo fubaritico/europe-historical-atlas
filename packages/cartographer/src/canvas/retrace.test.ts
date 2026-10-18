@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
-import { screenToLonLatOnBackdrop } from '../view/projection'
-import { TEST_BACKDROP_FRAME } from '../view/testFrame'
+import { screenToLonLatOnBackdrop } from '../viewport/projection'
+import { TEST_BACKDROP_FRAME } from '../viewport/testFrame'
 
 import {
   doneMessage,
@@ -15,7 +15,7 @@ import { TEST_SHORE, testGestureContext, testPolity, testStore } from './testGes
 
 import type { SnapLine } from '../geometry/lineSnap'
 import type { CartographerStoreHook } from '../state/store'
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 import type { RetraceRefusal } from '@europe-historical-atlas/core/editor/retrace'
 
 afterEach(() => {

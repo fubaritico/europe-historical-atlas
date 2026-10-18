@@ -4,8 +4,8 @@ import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/docum
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { createCartographerStore } from '../state/store'
-import { screenToLonLatOnBackdrop } from '../view/projection'
-import { TEST_BACKDROP_FRAME } from '../view/testFrame'
+import { screenToLonLatOnBackdrop } from '../viewport/projection'
+import { TEST_BACKDROP_FRAME } from '../viewport/testFrame'
 
 import {
   DELETE_ANCHOR_STEP,

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { insideRings, polityAt } from './fillHit'
 
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /** A square from (x, y) to (x + size, y + size). */
 function square(x: number, y: number, size: number): Point[] {

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { enclosedArea, smallerSide } from './retraceSide'
 
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /** A square's two halves between its corners (0,0) and (10,10): over the top-right, or the bottom-left. */
 const OVER_TOP: Point[] = [

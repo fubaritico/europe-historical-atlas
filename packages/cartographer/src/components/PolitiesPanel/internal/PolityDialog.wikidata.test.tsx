@@ -6,7 +6,7 @@ import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 
 import { openEmptyYear } from '../../../state/openEmptyYear'
 import { createCartographerStore } from '../../../state/store'
-import { UNFRAMED } from '../../../view/viewport'
+import { UNFRAMED } from '../../../viewport/viewport'
 import { WIKIDATA_DELAY_MS, useWikidataItem } from '../../shared/hooks/useWikidataItem'
 import { wikidataViewOf } from '../../shared/wikidataView'
 import { WikidataPanel } from '../../WikidataPanel'

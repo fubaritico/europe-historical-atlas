@@ -1,4 +1,4 @@
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /**
  * The marquee — the rubber-band rectangle, and the anchors it catches.

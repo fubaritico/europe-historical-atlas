@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 
-import type { ViewportPoint } from '../../../view/viewport'
+import type { ViewportPoint } from '../../../viewport/viewport'
 import type { ArrangeRequest } from '../internal/PolityArrangeMenu'
 
 /**

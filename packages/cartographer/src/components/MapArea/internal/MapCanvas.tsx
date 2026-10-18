@@ -2,7 +2,7 @@ import { useId, useRef } from 'react'
 
 import { startCanvasController } from '../../../canvas/controller'
 import { trackFocusOrigin } from '../../../canvas/focusOrigin'
-import { MAX_SNAP_REACH_KM } from '../../../view/toolReach'
+import { MAX_SNAP_REACH_KM } from '../../../viewport/toolReach'
 
 import type { CanvasControllerDeps } from '../../../canvas/controller'
 import type { HistoryRelay } from '../../../canvas/historyRelay'
@@ -10,7 +10,7 @@ import type { PaintStyle } from '../../../canvas/painter'
 import type { PolityColourSource } from '../../../state/polityColourSource'
 import type { CartographerStoreHook } from '../../../state/store'
 import type { VectorLayers } from '../../../vectorLayers'
-import type { BackdropFrame } from '../../../view/projection'
+import type { BackdropFrame } from '../../../viewport/projection'
 import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 
 /**

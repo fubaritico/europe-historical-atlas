@@ -5,7 +5,7 @@ import { DEFAULT_LAYERS } from '../state/layersSlice'
 import { paintCanvas } from './painter'
 
 import type { CanvasScene, PaintStyle, Painter2D } from './painter'
-import type { PixelSize, Point } from '../view/viewport'
+import type { PixelSize, Point } from '../viewport/viewport'
 
 /** One call the fake recorded: what was asked for, and the state the context was in. */
 interface Call {

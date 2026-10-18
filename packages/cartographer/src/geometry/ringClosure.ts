@@ -2,7 +2,7 @@ import { MIN_RING_ANCHORS } from '@europe-historical-atlas/core/editor/yearDocum
 
 import { distanceSquared, squaredRadius } from './hitTest'
 
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /**
  * Whether the outline in progress can be closed, and whether the gesture is being offered.

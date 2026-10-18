@@ -8,7 +8,7 @@ import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 import { openEmptyYear } from '../../state/openEmptyYear'
 import { createPolityColourSource } from '../../state/polityColourSource'
 import { createCartographerStore } from '../../state/store'
-import { UNFRAMED } from '../../view/viewport'
+import { UNFRAMED } from '../../viewport/viewport'
 
 import { PolitiesPanel } from './PolitiesPanel'
 

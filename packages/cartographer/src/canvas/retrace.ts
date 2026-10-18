@@ -7,7 +7,7 @@ import {
 import { nearestAmong } from '../geometry/hitTest'
 import { smallerSide } from '../geometry/retraceSide'
 import { MIN_RING_ANCHORS } from '../geometry/ringClosure'
-import { backdropToLonLat } from '../view/projection'
+import { backdropToLonLat } from '../viewport/projection'
 
 import { TAG } from './consoleTag'
 import { layerLines, snapHit } from './layerHits'
@@ -16,7 +16,7 @@ import { clearOutline, sessionPointOf, targetHandles } from './toolSession'
 
 import type { GestureContext } from './toolGestures'
 import type { SnapLayer, SnapVertex } from './toolSession'
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 import type { OutlinePoint } from '@europe-historical-atlas/core/editor/documentEdits'
 import type {
   RetraceArcs,

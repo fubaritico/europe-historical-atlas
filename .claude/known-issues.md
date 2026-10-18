@@ -138,7 +138,7 @@ Put here the know issues to avoid cluttering the context window.
   `paintRanks` est recalculé à chaque repeinture — ~50 pays, négligeable ; à mettre en cache par
   version si le document grossit. **Sévérité : à savoir.**
 - **Le menu d'empilement de `{Polities}` (11/10) a une limite connue, laissée ouverte.** — CARTO-122
-  (1) ~~Il peut déborder du bord de la fenêtre~~ — **fait** (`2c3acf8`, `view/menuPlacement.ts`) : il se replie.
+  (1) ~~Il peut déborder du bord de la fenêtre~~ — **fait** (`2c3acf8`, `components/shared/menuPlacement.ts`) : il se replie.
   (2) **Il est annoncé comme une liste, pas comme un menu** : c'est le `Menu` du design system, qui rend
   un `role="listbox"` d'`option`. Le remède est au design system (un `role="menu"`) : **demande rédigée le 18/10**,
   `files/plans/cartographer/ds-request-menu-role.md`, à transmettre par le dev à son Claude. **Une boucle d'hommage est refusée à la saisie depuis le 12/10**

@@ -146,13 +146,13 @@ hover — none of them is React state. Route any of them through `useState` and 
 60 Hz, which is what actually kills these applications (`rules/troubleshooting.md`).
 
 The store holds the **settled** viewport, committed at the end of a gesture, which is what the static
-canvas reads. That is why `state/` is allowed to read `view/` and not the reverse.
+canvas reads. That is why `state/` is allowed to read `viewport/` and not the reverse.
 
 ---
 
 ## Device pixels, and the resize nobody remembers
 
-`view/`'s arithmetic is declared in **device pixels of the backing store**, not CSS pixels. So:
+`viewport/`'s arithmetic is declared in **device pixels of the backing store**, not CSS pixels. So:
 
 - set `canvas.width/height` to `clientWidth/Height × devicePixelRatio`, and the CSS size separately;
 - convert a pointer event's CSS coordinates **once**, where the events arrive;
@@ -208,6 +208,6 @@ worker chunk.
 - **Every new React package needs its own `vitest.setup.ts` calling `cleanup()`** — testing-library
   only registers its own `afterEach` when the runner's hooks are global, and ours are imported. This
   is the thing we will forget.
-- **`view/` and `geometry/` are pure and may not import `state/`** — held by ESLint in
+- **`viewport/` and `geometry/` are pure and may not import `state/`** — held by ESLint in
   `packages/cartographer/eslint.config.js`, proved by breaking it. A component is the only place
   allowed to know about both.

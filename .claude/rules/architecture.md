@@ -69,6 +69,7 @@ packages/
 │   ├── vitest.setup.ts     # unmounts after each test; stands in for the canvas, ResizeObserver, <dialog>
 │   ├── workbench.html      # the workbench: chrome pieces mounted alone, never built (2026-10-09)
 │   └── src/                # 2D canvas and React chrome; styles/sheets.ts holds the one stylesheet order
+│       ├── viewport/       # the screen↔backdrop arithmetic: projection, framing, zoom, reach — pure
 │       └── components/     # one folder per component: <Name>/<Name>.tsx and its test at the root,
 │                           #   hooks/ (its own hooks), internal/ (its own children), index.ts (2026-10-18)
 └── eslint-plugin-eha/  # the lint rules of this repository: where each declaration sits (2026-10-12)

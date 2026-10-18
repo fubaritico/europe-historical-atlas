@@ -22,9 +22,9 @@ const LAYER = {
   geo: ['**/geo', '**/geo/**'],
   editor: ['**/editor', '**/editor/**'],
   // The Cartographer's own layers. `geo` above stays reachable from them on purpose: projection maths is
-  // a leaf of `core`, and `view/` reads it. Note `**/geo` cannot match `**/geometry` — a pattern segment
+  // a leaf of `core`, and `viewport/` reads it. Note `**/geo` cannot match `**/geometry` — a pattern segment
   // is matched whole — so the two keys do not collide.
-  view: ['**/view', '**/view/**'],
+  viewport: ['**/viewport', '**/viewport/**'],
   geometry: ['**/geometry', '**/geometry/**'],
   canvas: ['**/canvas', '**/canvas/**'],
   components: ['**/components', '**/components/**'],
@@ -138,7 +138,7 @@ const CORE_IS_PURE = [
  * **It takes `files` rather than deriving it from a directory, and that is load-bearing.** ESLint resolves
  * these patterns against the directory of the config file it **loaded**, not against the file they were
  * written in — measured on 2026-10-05 with `--print-config`, after a boundary row authored here for
- * `packages/cartographer/src/view` failed to fire. It matches when `eslint` runs from the repository root
+ * `packages/cartographer/src/view` (now `viewport`) failed to fire. It matches when `eslint` runs from the repository root
  * and matches **nothing** when it runs from inside the Cartographer, which is exactly how that package's
  * `lint` script runs. This is the sister of "flat config has no cascade", one step further: a row cannot be
  * shared with a package that owns its own config.

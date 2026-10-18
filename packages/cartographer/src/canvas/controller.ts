@@ -1,6 +1,6 @@
-import { clampToCover, openingView } from '../view/framing'
-import { screenToLonLatOnBackdrop } from '../view/projection'
-import { panBy, zoomAbout } from '../view/viewport'
+import { clampToCover, openingView } from '../viewport/framing'
+import { screenToLonLatOnBackdrop } from '../viewport/projection'
+import { panBy, zoomAbout } from '../viewport/viewport'
 
 import { createAnchorCache } from './anchorCache'
 import { arrowDoubleClick } from './arrowDoubleClick'
@@ -43,7 +43,7 @@ import { keyRefusedFromAfar, releaseTool } from './toolRelease'
 import { dropDrag, idleSession, targetHandles } from './toolSession'
 
 import type { CanvasControllerDeps, LiveCanvas } from './liveCanvas'
-import type { Viewport } from '../view/viewport'
+import type { Viewport } from '../viewport/viewport'
 
 /**
  * What turns an inert `<canvas>` into a working map: this module owns the node for as long as it lives.

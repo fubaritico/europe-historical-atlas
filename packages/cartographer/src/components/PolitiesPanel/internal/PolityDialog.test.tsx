@@ -7,7 +7,7 @@ import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 import { describeDrawingTarget } from '../../../state/drawingTarget'
 import { openEmptyYear } from '../../../state/openEmptyYear'
 import { createCartographerStore } from '../../../state/store'
-import { UNFRAMED } from '../../../view/viewport'
+import { UNFRAMED } from '../../../viewport/viewport'
 import { DRAFT_ERRORS } from '../../shared/polityDraft'
 
 import { PolityDialog } from './PolityDialog'

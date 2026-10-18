@@ -1,4 +1,4 @@
-import { zoomLabel } from '../../../view/zoomLabel'
+import { zoomLabel } from '../../../viewport/zoomLabel'
 
 import { DocBar } from './DocBar'
 

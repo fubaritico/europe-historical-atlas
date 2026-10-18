@@ -1,4 +1,4 @@
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /**
  * Which polity's territory is under the pointer — the white arrow's click in a fill (the dev's request,

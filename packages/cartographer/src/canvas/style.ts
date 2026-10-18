@@ -54,7 +54,7 @@ export const CHROME_PAINT_STYLE: PaintStyle = {
  *
  * **The defect this exists for, found on 2026-10-09 from the dev's "le texte est tout petit".** The
  * backing store is sized `clientWidth × devicePixelRatio` and nothing ever scales the context, which is
- * deliberate — `view/`'s arithmetic is declared in device pixels, so positions land correctly. But every
+ * deliberate — `viewport/`'s arithmetic is declared in device pixels, so positions land correctly. But every
  * value the design states in *screen* pixels was being used as a device pixel, so on a 2× display an
  * 11px label rendered at 5.5 CSS px, a 1px hairline at half a pixel, and an 8px handle at four. The
  * positions were right and the sizes were half, which reads as "the design is too small" rather than as

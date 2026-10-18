@@ -10,7 +10,7 @@ import { sessionPointOf } from './toolSession'
 
 import type { LayerHitContext } from './layerHits'
 import type { SessionPoint, SnapLayer, ToolSession } from './toolSession'
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /**
  * The Pen meeting a border that already exists — the dev's request, 2026-10-11: *"le snapping pour les

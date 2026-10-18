@@ -9,7 +9,7 @@ import {
   createYearDocument,
 } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import { UNFRAMED } from '../view/viewport'
+import { UNFRAMED } from '../viewport/viewport'
 
 import { describeDrawingTarget } from './drawingTarget'
 import { createCartographerStore } from './store'

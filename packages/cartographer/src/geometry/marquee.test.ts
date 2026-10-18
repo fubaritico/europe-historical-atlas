@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { normaliseRect, pointsInRect, rectContains } from './marquee'
 
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /** Four anchors in a square, so each direction of drag has something to catch. */
 const SQUARE: Point[] = [

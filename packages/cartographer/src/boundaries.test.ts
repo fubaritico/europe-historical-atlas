@@ -6,14 +6,14 @@ import { beforeAll, describe, expect, it } from 'vitest'
  *
  * **Why this exists, and it is not belt-and-braces.** The layer directions here are held by
  * `no-restricted-imports`, and the practice had been to prove each new row by breaking it **by hand**,
- * once, the day it was written. That practice failed on 2026-10-05: the first row written for `view/` was
+ * once, the day it was written. That practice failed on 2026-10-05: the first row written for `view/` (now `viewport/`) was
  * authored in the root config and caught **nothing**, because ESLint resolves a `files` glob against the
  * directory of the config it *loaded*, and this package loads its own. The gate stayed green and only a
  * manual sabotage found it. A guard proved once by hand becomes false again at the next move, in silence.
  *
  * **What is asserted, and why it is the right thing.** Not that the rule *fires* — that is ESLint's own
  * job and it has tests. What broke was **matching**: the rule resolved to no `patterns` at all on a
- * `view/` file. So these tests take real files in each layer and check the options the rule ends up with.
+ * `viewport/` file. So these tests take real files in each layer and check the options the rule ends up with.
  * Had they existed that evening, they would have failed on the exact defect.
  *
  * `lintText` was tried first and does not work here: the config turns on typed linting through the
@@ -71,7 +71,7 @@ const resolved = new Map<string, RestrictedImports>()
 
 /** A real file in each layer that owns a boundary row, plus one the package-wide row alone covers. */
 const LAYERS = {
-  view: 'src/view/viewport.ts',
+  viewport: 'src/viewport/viewport.ts',
   geometry: 'src/geometry/hitTest.ts',
   state: 'src/state/editionSlice.ts',
   canvas: 'src/canvas/painter.ts',
@@ -118,7 +118,7 @@ describe('architecture boundaries', () => {
     })
 
     it('forbids the store to the two pure layers', () => {
-      for (const layer of ['view', 'geometry']) {
+      for (const layer of ['viewport', 'geometry']) {
         const patterns = forbiddenPatterns(resolved.get(layer) ?? {})
 
         expect(patterns, `${layer} must not reach state/`).toContain('**/state/**')
@@ -140,23 +140,23 @@ describe('architecture boundaries', () => {
     it('composes the package ban with the layer direction, rather than replacing it', () => {
       // `no-restricted-imports` is a single rule, so a directory row that carried only a direction
       // would erase the three.js ban for every file under it. Both halves have to survive together.
-      const view = resolved.get('view') ?? {}
+      const viewport = resolved.get('viewport') ?? {}
 
-      expect(forbiddenPackages(view)).toContain('three')
-      expect(forbiddenPatterns(view)).toContain('**/state/**')
+      expect(forbiddenPackages(viewport)).toContain('three')
+      expect(forbiddenPatterns(viewport)).toContain('**/state/**')
     })
 
-    it('leaves view/ readable from above — a direction, not a symmetry', () => {
-      // Forbidding this was the mistake of 2026-10-05: `view/` is a leaf, read from above exactly as
+    it('leaves viewport/ readable from above — a direction, not a symmetry', () => {
+      // Forbidding this was the mistake of 2026-10-05: `viewport/` (then `view/`) is a leaf, read from above exactly as
       // core's geo/ is read by its data/, and step 4d puts the settled viewport in a slice.
       const patterns = forbiddenPatterns(resolved.get('state') ?? {})
 
-      expect(patterns).not.toContain('**/view/**')
-      expect(patterns).not.toContain('**/view')
+      expect(patterns).not.toContain('**/viewport/**')
+      expect(patterns).not.toContain('**/viewport')
     })
 
     it('keeps core’s projection maths reachable from the pure layers', () => {
-      for (const layer of ['view', 'geometry']) {
+      for (const layer of ['viewport', 'geometry']) {
         const patterns = forbiddenPatterns(resolved.get(layer) ?? {})
 
         expect(patterns, `${layer} must still read geo/`).not.toContain('**/geo/**')
@@ -184,10 +184,10 @@ describe('architecture boundaries', () => {
     })
 
     it('carries a message that names the boundary and explains it', () => {
-      const entry = (resolved.get('view')?.patterns ?? [])[0]
+      const entry = (resolved.get('viewport')?.patterns ?? [])[0]
 
       expect(entry?.message).toContain('Architecture boundary')
-      expect(entry?.message).toContain('view/')
+      expect(entry?.message).toContain('viewport/')
     })
   })
 
@@ -209,7 +209,7 @@ describe('architecture boundaries', () => {
     it('treats an absent rule as a failure and not as an empty set', async () => {
       const eslint = new ESLint()
 
-      await expect(restrictionsFor(eslint, 'src/view/viewport.ts')).resolves.toBeDefined()
+      await expect(restrictionsFor(eslint, 'src/viewport/viewport.ts')).resolves.toBeDefined()
     }, 120_000)
   })
 
@@ -225,7 +225,7 @@ describe('architecture boundaries', () => {
     }, 120_000)
 
     it('forbids the composition root to be imported from anywhere that has a row', () => {
-      for (const layer of ['view', 'geometry', 'state', 'canvas', 'components', 'workbench']) {
+      for (const layer of ['viewport', 'geometry', 'state', 'canvas', 'components', 'workbench']) {
         const patterns = forbiddenPatterns(resolved.get(layer) ?? {})
 
         expect(patterns, `${layer} must not import main`).toContain('**/main.{ts,tsx}')
@@ -237,12 +237,12 @@ describe('architecture boundaries', () => {
     })
 
     it('lets the painter and the components read the layers below them', () => {
-      // `canvas/` paints what the store holds, through `view/`'s arithmetic; `components/` wires them
+      // `canvas/` paints what the store holds, through `viewport/`'s arithmetic; `components/` wires them
       // together. Forbidding either would be the symmetry mistake made once already on `state/`.
       for (const layer of ['canvas', 'components']) {
         const patterns = forbiddenPatterns(resolved.get(layer) ?? {})
 
-        expect(patterns, `${layer} must read view/`).not.toContain('**/view/**')
+        expect(patterns, `${layer} must read viewport/`).not.toContain('**/viewport/**')
         expect(patterns, `${layer} must read geometry/`).not.toContain('**/geometry/**')
         expect(patterns, `${layer} must read state/`).not.toContain('**/state/**')
       }

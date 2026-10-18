@@ -1,7 +1,7 @@
 import { PolityStackMenu } from '../../PolityStackMenu'
 import { arrangePolity } from '../../shared/arrange'
 
-import type { ViewportPoint } from '../../../view/viewport'
+import type { ViewportPoint } from '../../../viewport/viewport'
 import type { Restack } from '../../shared/arrange'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'

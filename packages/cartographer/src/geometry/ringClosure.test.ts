@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { MIN_RING_ANCHORS, canCloseRing, isClosingOffered } from './ringClosure'
 
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /** The handle radius `s02` names, and the same constant the closing gesture uses. */
 const RADIUS = 8

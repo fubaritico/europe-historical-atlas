@@ -309,7 +309,7 @@ Follow `rules/tests.md` (5 levels) as for any other module.
 - **JSDoc on every exported slice, action type and notable constant.**
 - **Inject, never reach** — a store imported directly by a pure module is the global
   singleton `rules/modular-architecture.md` forbids. Pure logic takes data and returns
-  data; the store is wired at the composition root. Steps 4b and 4c add *pure* `view/` and
+  data; the store is wired at the composition root. Steps 4b and 4c add *pure* `viewport/` and
   `geometry/` layers to this package, and they must not import `state/`.
 - **Name a slice after what it owns, never after the whole application.** `yearStore` was
   rejected on 2026-10-05 for exactly that: the Cartographer edits one year, so "year"

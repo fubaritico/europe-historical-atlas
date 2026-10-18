@@ -1,13 +1,13 @@
-import { projectToBackdrop } from '../view/projection'
+import { projectToBackdrop } from '../viewport/projection'
 
-import type { BackdropFrame } from '../view/projection'
+import type { BackdropFrame } from '../viewport/projection'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /**
  * The anchor table in backdrop pixels, recomputed only when the anchors change.
  *
  * **It exists because two modules promised it and nothing delivered it** — found in review on
- * 2026-10-06, and the promise was in my own words: `view/projection.ts` and `geometry/hitTest.ts` both
+ * 2026-10-06, and the promise was in my own words: `viewport/projection.ts` and `geometry/hitTest.ts` both
  * say the projection *"happens once per viewport change, cached, and the cache belongs to the caller
  * (step 4d)"*. Step 4d's wiring had no cache at all, so every pointer move of a pan reprojected the whole
  * table through a `log(tan(…))` per anchor. At the 16 579 vertices `s01` announces for 1100, that is

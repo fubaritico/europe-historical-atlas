@@ -14,7 +14,7 @@ import {
   createYearDocument,
 } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import { UNFRAMED } from '../view/viewport'
+import { UNFRAMED } from '../viewport/viewport'
 
 import { FREE_POINT_PROVENANCE, editionActions, snapshot } from './editionSlice'
 import { createCartographerStore } from './store'

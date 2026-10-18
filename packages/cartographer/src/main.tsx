@@ -37,7 +37,7 @@ import { openEmptyYear } from './state/openEmptyYear'
 import { createPolityColourSource } from './state/polityColourSource'
 import { createCartographerStore } from './state/store'
 import { loadVectorLayers } from './vectorLayers'
-import { UNFRAMED } from './view/viewport'
+import { UNFRAMED } from './viewport/viewport'
 import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataSource'
 
 // Every sheet, in order, through one module the workbench imports too — see `styles/sheets.ts`.

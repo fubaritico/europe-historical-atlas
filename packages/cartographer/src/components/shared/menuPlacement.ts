@@ -1,4 +1,4 @@
-import type { PixelSize, ViewportPoint } from './viewport'
+import type { PixelSize, ViewportPoint } from '../../viewport/viewport'
 
 /**
  * Where a menu opened at a point must sit to stay inside the window — a right-click on the last rows

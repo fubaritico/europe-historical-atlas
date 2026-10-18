@@ -1,7 +1,7 @@
 import { distanceSquared, squaredRadius } from './hitTest'
 import { isVertexOf, subPathBetween } from './polylineSnap'
 
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /**
  * Snapping the Pen onto a line of a snap layer — the coastline or a river, `s02`'s *"two clicks,

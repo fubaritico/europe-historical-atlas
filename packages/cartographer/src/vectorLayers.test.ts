@@ -10,9 +10,9 @@ import {
   toBackdropPixels,
   traceCoastline,
 } from './vectorLayers'
-import { TEST_BACKDROP_FRAME } from './view/testFrame'
+import { TEST_BACKDROP_FRAME } from './viewport/testFrame'
 
-import type { BackdropFrame } from './view/projection'
+import type { BackdropFrame } from './viewport/projection'
 import type { River, RiverSource } from '@europe-historical-atlas/core/data/riverSource'
 import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
 

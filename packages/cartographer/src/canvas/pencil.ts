@@ -9,7 +9,7 @@ import { resolvedTarget, snapClick } from './toolGestures'
 
 import type { GestureContext } from './toolGestures'
 import type { PencilSample, SessionPoint } from './toolSession'
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /**
  * The Pencil — the Pen's freehand mode (the dev, 2026-10-11): pressed and dragged, it lays a point at

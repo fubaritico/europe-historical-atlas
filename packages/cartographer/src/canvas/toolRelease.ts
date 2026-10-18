@@ -1,4 +1,4 @@
-import { reachLabel } from '../view/toolReach'
+import { reachLabel } from '../viewport/toolReach'
 
 import { TAG } from './consoleTag'
 import { gestureOf, snapReachOf, tooFarToEdit } from './liveCanvas'
@@ -7,7 +7,7 @@ import { arrowRelease, penClick } from './toolGestures'
 import { dropDrag } from './toolSession'
 
 import type { LiveCanvas } from './liveCanvas'
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /**
  * What a tool does when the button comes up or a key is pressed — and what it refuses to do from too far

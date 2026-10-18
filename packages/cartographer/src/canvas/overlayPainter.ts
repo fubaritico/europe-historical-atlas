@@ -1,6 +1,6 @@
 import type { PaintStyle, Painter2D } from './painter'
 import type { OverlayScene } from './toolSession'
-import type { PixelSize, Point } from '../view/viewport'
+import type { PixelSize, Point } from '../viewport/viewport'
 
 /**
  * The overlay canvas's painter — what moves with the pointer, drawn over the static canvas.

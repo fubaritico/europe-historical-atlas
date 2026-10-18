@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { distanceSquared, nearestAmong, nearestPoint, squaredRadius } from './hitTest'
 
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /** The handle radius `s02` names: "about 8 screen pixels across, at any zoom". */
 const RADIUS = 8

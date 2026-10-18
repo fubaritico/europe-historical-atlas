@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import { UNFRAMED } from '../view/viewport'
+import { UNFRAMED } from '../viewport/viewport'
 
 import { DEFAULT_LAYERS } from './layersSlice'
 import { openEmptyYear } from './openEmptyYear'

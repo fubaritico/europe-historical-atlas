@@ -7,7 +7,7 @@ import { isPenTool } from '../state/toolSlice'
 import type { LineVertex } from '../geometry/lineSnap'
 import type { Rect } from '../geometry/marquee'
 import type { EditorTool } from '../state/toolSlice'
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 import type { Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
@@ -454,7 +454,7 @@ export interface ActionInputs {
   edge: 'edge' | 'corner' | null
   /** Whether a click here inserts an anchor on a stretch of the target — the arrow, or the idle Pen. */
   inserting: boolean
-  /** Whether the view is too far out for the drawing tools to act (`H-34`, `view/toolReach.ts`). */
+  /** Whether the view is too far out for the drawing tools to act (`H-34`, `viewport/toolReach.ts`). */
   tooFar: boolean
   /** The session. */
   session: ToolSession

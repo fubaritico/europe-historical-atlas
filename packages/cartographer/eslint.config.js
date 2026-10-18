@@ -13,7 +13,7 @@ import rootEslintConfig, { layerBoundary } from '../../eslint.config.js'
  * `no-restricted-imports` is a **single rule**, so a later config object replaces its options wholesale
  * for the files it matches — which is why this cannot be a standalone block: it would erase the layer
  * directions under it, silently. Measured, not feared: a package-wide block carrying only this ban is
- * exactly what used to make `--print-config` report no `patterns` at all on a `view/` file.
+ * exactly what used to make `--print-config` report no `patterns` at all on a `view/` file (now `viewport/`).
  */
 const CARTOGRAPHER_IS_2D = [
   {
@@ -28,7 +28,7 @@ const CARTOGRAPHER_IS_2D = [
  *
  * They live here and not in the root table for a measured reason (see `layerBoundary`'s header): ESLint
  * resolves a `files` pattern against the directory of the config it loaded, and this package's `lint` runs
- * from this directory — so a root-authored `packages/cartographer/src/view/**` row matches nothing. Every
+ * from this directory — so a root-authored `packages/cartographer/src/viewport/**` row matches nothing. Every
  * row was proved by breaking it.
  *
  * Order matters: the package-wide row comes first so the directory rows, which carry the same ban *plus* a
@@ -37,22 +37,22 @@ const CARTOGRAPHER_IS_2D = [
 const CARTOGRAPHER_BOUNDARIES = [
   layerBoundary({ files: ['**/*.{ts,tsx}'], paths: CARTOGRAPHER_IS_2D }),
   layerBoundary({
-    files: ['src/view/**/*.{ts,tsx}'],
+    files: ['src/viewport/**/*.{ts,tsx}'],
     forbid: ['state', 'geometry', 'canvas', 'main'],
     paths: CARTOGRAPHER_IS_2D,
-    why: 'view/ is the screen↔backdrop arithmetic, and a viewport is data. It may read core’s geo/ for projection maths and nothing else: a pure layer reaching into the store would be the global singleton rules/modular-architecture.md forbids, and it could no longer be exercised with literals.',
+    why: 'viewport/ is the screen↔backdrop arithmetic, and a viewport is data. It may read core’s geo/ for projection maths and nothing else: a pure layer reaching into the store would be the global singleton rules/modular-architecture.md forbids, and it could no longer be exercised with literals.',
   }),
   layerBoundary({
     files: ['src/geometry/**/*.{ts,tsx}'],
     forbid: ['state', 'canvas', 'main'],
     paths: CARTOGRAPHER_IS_2D,
-    why: 'geometry/ is the arithmetic of the gestures — nearest anchor, marquee, ring closure, snapping to a polyline. It works in screen pixels on flat arrays and answers questions; it never edits a document and never reads a store. It may read `view/`, which is the leaf that defines screen space, and core’s geo/ and utils/.',
+    why: 'geometry/ is the arithmetic of the gestures — nearest anchor, marquee, ring closure, snapping to a polyline. It works in screen pixels on flat arrays and answers questions; it never edits a document and never reads a store. It may read `viewport/`, which is the leaf that defines screen space, and core’s geo/ and utils/.',
   }),
   layerBoundary({
     files: ['src/canvas/**/*.{ts,tsx}'],
     forbid: ['main'],
     paths: CARTOGRAPHER_IS_2D,
-    why: 'canvas/ is the painter, and it decides nothing: positions arrive already in screen pixels and colours arrive in a style object. It may read view/ and geometry/ for their types, and the store for what to draw — but never the composition root, which is what keeps it mountable in a harness. It takes a structural 2D context rather than CanvasRenderingContext2D, because jsdom has no 2D context and the alternative is not testing the painter at all.',
+    why: 'canvas/ is the painter, and it decides nothing: positions arrive already in screen pixels and colours arrive in a style object. It may read viewport/ and geometry/ for their types, and the store for what to draw — but never the composition root, which is what keeps it mountable in a harness. It takes a structural 2D context rather than CanvasRenderingContext2D, because jsdom has no 2D context and the alternative is not testing the painter at all.',
   }),
   layerBoundary({
     files: ['src/components/**/*.{ts,tsx}'],
@@ -82,7 +82,7 @@ const CARTOGRAPHER_BOUNDARIES = [
     files: ['src/devServer/**/*.{ts,tsx}'],
     forbid: [
       'state',
-      'view',
+      'viewport',
       'geometry',
       'canvas',
       'components',
@@ -112,7 +112,7 @@ const CARTOGRAPHER_BOUNDARIES = [
     files: ['src/state/**/*.{ts,tsx}'],
     forbid: ['geometry', 'canvas', 'main'],
     paths: CARTOGRAPHER_IS_2D,
-    why: 'state/ owns what is being edited and must not know how it is *drawn*: the canvas and the tools read the store, never the reverse, which is what keeps the store exercisable without a canvas. `view/` is deliberately NOT on this list — it is a leaf of pure arithmetic, read from above exactly as core’s geo/ and utils/ are read by its data/, and step 4d puts the settled viewport in a slice. Forbidding it would have been a symmetry where the principle is a direction, and it would have blocked the case we want. What keeps per-frame pan and zoom out of the store is a rule about when `set` is called (rules/troubleshooting.md), not an import ban — a ban would equally block the committed value the static canvas reads.',
+    why: 'state/ owns what is being edited and must not know how it is *drawn*: the canvas and the tools read the store, never the reverse, which is what keeps the store exercisable without a canvas. `viewport/` is deliberately NOT on this list — it is a leaf of pure arithmetic, read from above exactly as core’s geo/ and utils/ are read by its data/, and step 4d puts the settled viewport in a slice. Forbidding it would have been a symmetry where the principle is a direction, and it would have blocked the case we want. What keeps per-frame pan and zoom out of the store is a rule about when `set` is called (rules/troubleshooting.md), not an import ban — a ban would equally block the committed value the static canvas reads.',
   }),
 ]
 

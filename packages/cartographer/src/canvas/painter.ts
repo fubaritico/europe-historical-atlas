@@ -1,11 +1,11 @@
 import { riverRankWidth, wholeRiverRank } from '@europe-historical-atlas/core/data/riverDisplay'
 
-import { boxesOverlap, detailThresholdSquared, visibleBox } from '../view/culling'
+import { boxesOverlap, detailThresholdSquared, visibleBox } from '../viewport/culling'
 
 import type { Rect } from '../geometry/marquee'
 import type { LayerSetting, LayerSettings } from '../state/layersSlice'
-import type { Box } from '../view/culling'
-import type { PixelSize, Point } from '../view/viewport'
+import type { Box } from '../viewport/culling'
+import type { PixelSize, Point } from '../viewport/viewport'
 import type { BorderHand } from '@europe-historical-atlas/core/editor/borderHands'
 
 /**

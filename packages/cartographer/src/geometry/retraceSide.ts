@@ -1,4 +1,4 @@
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /**
  * Which way round a ring ⟨retrace⟩ replaces (`H-46`): between two anchors of a closed ring there are two

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { backdropToLonLat, screenToLonLatOnBackdrop } from '../view/projection'
-import { TEST_BACKDROP_FRAME } from '../view/testFrame'
+import { backdropToLonLat, screenToLonLatOnBackdrop } from '../viewport/projection'
+import { TEST_BACKDROP_FRAME } from '../viewport/testFrame'
 
 import { frameEdgeUnder, freeLonLatAt } from './frameSnap'
 import { pencilDrag, pencilEnd, pencilStart } from './pencil'

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { nearestVertexOnPolylines, subPathBetween } from './polylineSnap'
 
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /** The snapping radius, in screen pixels like every other handle. */
 const RADIUS = 12

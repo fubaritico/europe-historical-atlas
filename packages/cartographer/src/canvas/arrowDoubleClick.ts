@@ -5,7 +5,7 @@ import { editHandlesOf } from './anchorGestures'
 import { TAG } from './consoleTag'
 
 import type { GestureContext } from './toolGestures'
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /**
  * A double-click of the white arrow: in a polity's fill it opens that polity's form (CARTO-246) — the

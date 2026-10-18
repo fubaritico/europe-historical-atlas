@@ -1,12 +1,12 @@
 import { nearestLineVertex } from '../geometry/lineSnap'
 import { isFollowingMode } from '../state/toolSlice'
-import { screenToBackdrop } from '../view/viewport'
+import { screenToBackdrop } from '../viewport/viewport'
 
 import type { SnapLayers } from './snapLayers'
 import type { SnapLayer, SnapVertex } from './toolSession'
 import type { SnapLine } from '../geometry/lineSnap'
 import type { CartographerStoreHook } from '../state/store'
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /*
  * What the coast and the rivers offer a gesture: the layer a mode follows, the lines of a layer, the

@@ -1,6 +1,6 @@
 import { nearestStretch } from '../geometry/stretchHit'
 import { describeDrawingTarget } from '../state/drawingTarget'
-import { screenToLonLatOnBackdrop } from '../view/projection'
+import { screenToLonLatOnBackdrop } from '../viewport/projection'
 
 import { anchorHit } from './borderSnap'
 import { TAG } from './consoleTag'

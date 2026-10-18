@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { nearestStretch } from './stretchHit'
 
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 const SQUARE: Point[] = [
   [0, 0],

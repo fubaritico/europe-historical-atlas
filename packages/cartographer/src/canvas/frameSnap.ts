@@ -1,13 +1,13 @@
-import { snapToFrameEdge } from '../view/frameEdge'
-import { backdropToLonLat, screenToLonLatOnBackdrop } from '../view/projection'
-import { screenToBackdrop } from '../view/viewport'
+import { snapToFrameEdge } from '../viewport/frameEdge'
+import { backdropToLonLat, screenToLonLatOnBackdrop } from '../viewport/projection'
+import { screenToBackdrop } from '../viewport/viewport'
 
 import { TAG } from './consoleTag'
 
 import type { CartographerStoreHook } from '../state/store'
-import type { FrameEdgeSnap } from '../view/frameEdge'
-import type { BackdropFrame } from '../view/projection'
-import type { Point } from '../view/viewport'
+import type { FrameEdgeSnap } from '../viewport/frameEdge'
+import type { BackdropFrame } from '../viewport/projection'
+import type { Point } from '../viewport/viewport'
 
 /*
  * The map's edges and corners, for the gestures and the status bar (CARTO-257): where a free point lands, and

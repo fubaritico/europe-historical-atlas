@@ -1,4 +1,4 @@
-import type { Viewport } from '../view/viewport'
+import type { Viewport } from '../viewport/viewport'
 import type { StateCreator } from 'zustand'
 
 /**
@@ -29,7 +29,7 @@ export interface ViewportActions {
   /**
    * Adopt a view.
    *
-   * The arithmetic lives in `view/` — `panBy`, `zoomAbout`, `openingView` — and the caller composes it. This
+   * The arithmetic lives in `viewport/` — `panBy`, `zoomAbout`, `openingView` — and the caller composes it. This
    * slice holds and publishes; it computes nothing, so there is no second place a pan could be defined.
    */
   setViewport: (viewport: Viewport) => void

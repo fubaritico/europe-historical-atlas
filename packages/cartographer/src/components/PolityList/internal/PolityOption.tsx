@@ -1,6 +1,6 @@
 import { ListboxItem } from '@fubaritico/react/Listbox'
 
-import type { ViewportPoint } from '../../../view/viewport'
+import type { ViewportPoint } from '../../../viewport/viewport'
 import type { PolityRow } from '../../shared/polityRows'
 import type { CSSProperties, MouseEvent } from 'react'
 

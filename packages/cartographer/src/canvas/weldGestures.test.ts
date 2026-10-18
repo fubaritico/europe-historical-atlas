@@ -2,8 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { MIN_RING_ANCHORS } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import { screenToLonLatOnBackdrop } from '../view/projection'
-import { TEST_BACKDROP_FRAME } from '../view/testFrame'
+import { screenToLonLatOnBackdrop } from '../viewport/projection'
+import { TEST_BACKDROP_FRAME } from '../viewport/testFrame'
 
 import { drawOutlineAt, testGestureContext, testPolity, testStore } from './testGestureContext'
 import { arrowDrag, arrowPress, arrowRelease } from './toolGestures'

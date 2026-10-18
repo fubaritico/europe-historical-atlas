@@ -2,7 +2,7 @@ import { polityAt } from '../geometry/fillHit'
 import { nearestStretch } from '../geometry/stretchHit'
 
 import type { PolityRings } from '../geometry/fillHit'
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 import type { BorderRelation } from '@europe-historical-atlas/core/editor/borderRelation'
 import type { DerivedBorder } from '@europe-historical-atlas/core/editor/derivedBorders'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'

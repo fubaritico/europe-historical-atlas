@@ -7,7 +7,7 @@ import { PolityOption } from './internal/PolityOption'
 import { optionId } from './optionId'
 import { scrollTopToShow } from './rowScroll'
 
-import type { ViewportPoint } from '../../view/viewport'
+import type { ViewportPoint } from '../../viewport/viewport'
 import type { PolityRow } from '../shared/polityRows'
 
 /** What the list shows and reports. Never the store: `PolitiesPanel` reads it and hands rows. */

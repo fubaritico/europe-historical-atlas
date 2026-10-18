@@ -1,4 +1,4 @@
-import { formatLonLat } from '../../view/coordinateLabel'
+import { formatLonLat } from '../../viewport/coordinateLabel'
 
 /**
  * The status bar: the action and its subject on one side, what is under the pointer on the other — both

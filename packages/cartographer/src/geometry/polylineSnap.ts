@@ -1,6 +1,6 @@
 import { distanceSquared, squaredRadius } from './hitTest'
 
-import type { Point } from '../view/viewport'
+import type { Point } from '../viewport/viewport'
 
 /**
  * Snapping to a coastline or a river — *"deux clics, plusieurs centaines de points exacts"*.

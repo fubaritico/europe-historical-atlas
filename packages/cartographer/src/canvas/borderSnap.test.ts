@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
-import { screenToLonLatOnBackdrop } from '../view/projection'
-import { TEST_BACKDROP_FRAME } from '../view/testFrame'
+import { screenToLonLatOnBackdrop } from '../viewport/projection'
+import { TEST_BACKDROP_FRAME } from '../viewport/testFrame'
 
 import { anchorClick, anchorHit, anchorSentence, borderRunTo } from './borderSnap'
 import { testGestureContext, testPolity, testStore } from './testGestureContext'
