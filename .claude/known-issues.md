@@ -29,13 +29,13 @@ Put here the know issues to avoid cluttering the context window.
   la dernière 22. **Un terminal ou WebStorm ouvert avant la mise à jour garde la 22.14** — le relancer ; si WebStorm
   pointe sur un interpréteur Node explicite, le changer dans ses réglages. Le plugin est en `~65.0.2` : une version a
   au moins deux semaines avant d'entrer. **Sévérité : à savoir.**
-- **`main.test.tsx` a échoué une fois sur sept passages, sous charge, le 18/10** (Node 22.23.3, `turbo type-check test
-  --force` : huit tâches en parallèle). Seul, 3/3 ; la suite entière, 3/3 ; la même commande rejouée, 2/2 puis 8/8 (logs gardés) — **1 échec sur
-  17**. Ce passage était le premier après `pnpm install` (montée du plugin), caches de Vite et Vitest froids : piste
-  la plus probable. Pour l'attraper : rejouer la commande juste après une réinstallation. Son premier
-  test charge toute l'application (716 ms au repos) : un dépassement des 5 s de Vitest sous charge est probable, **non
-  prouvé** — le message n'a pas été capturé. Remède si ça revient : lire le message, puis un `timeout` plus large sur ce
-  seul test, en disant pourquoi. **Sévérité : à savoir.**
+- **Sous `turbo … --force`, des tests dépassent les 5 s de Vitest : la machine est saturée, pas le code** (18/10, cause
+  trouvée). Log capturé : `Error: Test timed out in 5000ms` sur un test de `core/geo/pointInRing` qui passe en **287 ms** au
+  repos, pendant une charge moyenne de **71 sur 8 cœurs**. Turbo lance les quatre suites en parallèle, chaque Vitest ouvre un
+  travailleur par cœur, plus les `tsc` et le build : ~40 processus pour 8 cœurs. Le même mal a fait tomber `main.test.tsx`
+  (1 sur 17 passages, puis 5 tests d'un coup) — seul, il passe toujours. **Remède** : plafonner les travailleurs de Vitest
+  par paquet (`maxWorkers`) ou la concurrence de Turbo, puis remesurer la durée de la gate. **Sévérité : gênant** (une
+  gate rouge sur du code juste, dès que tout tourne en même temps).
 - **Recreuser un vassal après coup est impossible depuis l'outil** — CARTO-189 (16/10). Le creusement ne tourne qu'à la fermeture
   d'un contour neuf (`addOutlineCarving`) ; un vassal dessiné avant, ou recouvert de nouveau par une retouche du
   suzerain, garde la couleur du suzerain par-dessus (la Champagne, la Frise : recreusées au script). Remède : un geste

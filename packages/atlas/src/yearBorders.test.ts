@@ -111,14 +111,15 @@ describe('settleYearBorders', () => {
   })
 
   describe('tribes', () => {
-    it('leaves a tribe unfilled, its border with the kingdom drawn, and its ground in its colour', () => {
+    it('leaves a tribe unfilled, the kingdom’s frontier drawn against it, and its ground in its colour', () => {
       const sources = createMapSources()
 
       settleYearBorders(sources, withTribe(), { borders: TRACED, tints: [RED, BLUE] }, PALETTE)
 
       expect(sources.regionTints).toEqual([RED, null])
-      // The kingdom's border stays where the tribe touches it (the dev, 2026-10-18).
-      expect(sources.derivedBorders?.between).toHaveLength(1)
+      // Across a tribe the kingdom shows its frontier, never a border between two states (the dev, 2026-10-18).
+      expect(sources.derivedBorders?.between).toEqual([])
+      expect(sources.derivedBorders?.frontier).toHaveLength(1)
       expect(sources.tribes).toHaveLength(1)
       expect(sources.tribes[0]?.colour).toMatch(/^#[0-9a-f]{6}$/i)
       expect(sources.tribes[0]?.rings).toEqual([TRIBE_RING])
