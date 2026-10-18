@@ -97,7 +97,7 @@ defects, each with the tool it asks for: `files/plans/cartographer/general-test-
 
 ## Tools added on the night of 2026-10-14
 
-- `files/plans/cartographer/night-helpers-ext.js` — inject after `page-helpers.js`. A hidden tab gets no
+- `scripts/night-helpers-ext.js` — inject after `page-helpers.js`. A hidden tab gets no
   `requestAnimationFrame` and timers throttled to one a minute: the file ticks on a `MessageChannel`. Adds `ring`
   (steps by kind, closed by searching for *Closing*), `island`, `islandAt`, `coastRun` (adaptive: bisects a coast
   click that inserted nothing — **never across land between two far coast points**, it took lakes once), `river`,
