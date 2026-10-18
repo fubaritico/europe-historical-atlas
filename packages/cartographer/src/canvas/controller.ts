@@ -79,6 +79,8 @@ export type { CanvasControllerDeps, LiveCanvas } from './liveCanvas'
  * `offsetX`/`offsetY` are CSS pixels relative to the element; the viewport works in device pixels, so
  * the ratio is applied here — **once, where the events arrive**, which is the only place it belongs.
  * @param event - the event to read
+ * @param event.offsetX - the horizontal position, in CSS pixels from the element's left edge
+ * @param event.offsetY - the vertical position, in CSS pixels from the element's top edge
  * @returns the position in device pixels
  */
 function positionOf(event: { offsetX: number; offsetY: number }): [number, number] {

@@ -2,6 +2,8 @@
  * One pattern choice.
  * @param props - the pattern, whether it is the one in force, and the callback
  * @param props.pattern - this pattern
+ * @param props.pattern.hand - the hand it applies, `null` for *Auto*
+ * @param props.pattern.label - what the button reads
  * @param props.chosen - whether it is the hand in force
  * @param props.onHand - a pattern was chosen
  * @returns the button

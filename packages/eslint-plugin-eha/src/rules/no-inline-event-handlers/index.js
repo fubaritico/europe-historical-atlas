@@ -58,7 +58,12 @@ const readsFromCallbacks = (handler, between, sourceCode) => {
  * @returns {string} the name
  */
 const proposeName = (attribute, element, scope, proposed) => {
-  /** @param {string} candidate - a name @returns {boolean} `true` when nothing around holds it */
+  /**
+   * Whether a name is still free for the handler.
+   * @param {string} candidate - the handler name being considered
+   * @returns {boolean} `true` when no scope from the attribute's outwards declares it and it was not
+   * already proposed in this component
+   */
   const isFree = (candidate) => {
     for (
       let current = /** @type {import('eslint').Scope.Scope | null} */ (scope);

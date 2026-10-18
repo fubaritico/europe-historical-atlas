@@ -169,6 +169,8 @@ function stretchOnScreen(
  * @param context - the projection, and whether ‹alt› is held
  * @param arcs - both ways round, from `from` to `to`
  * @param ends - the start and end anchors
+ * @param ends.from - the anchor the run starts on
+ * @param ends.to - the anchor the run ends on
  * @param run - the new run on screen, from the start anchor to the end anchor
  * @returns the anchors that go, from the start
  */
@@ -449,6 +451,8 @@ export function retraceView(
  * @param context - the session, the store, and whether ‹alt› is held
  * @param polity - the target
  * @param ends - the start anchor and the one under the pointer
+ * @param ends.from - the anchor the retrace started on
+ * @param ends.to - the anchor under the pointer, where it would end
  * @param pointer - the pointer, in screen pixels
  * @returns the preview and the sentence
  */

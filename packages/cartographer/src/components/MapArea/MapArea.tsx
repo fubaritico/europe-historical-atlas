@@ -63,6 +63,16 @@ export interface MapAreaProps {
 /**
  * The area: wait for the backdrop, then draw.
  * @param props - the store, how to load, and the names
+ * @param props.store - the store the canvas draws from and navigates
+ * @param props.load - how to fetch and bake the backdrop
+ * @param props.style - the colours and sizes the painter reads
+ * @param props.label - what a screen reader is told the drawing surface is
+ * @param props.statusRef - the status bar's position zone, written on every pointer sample
+ * @param props.actionRef - the status bar's action zone
+ * @param props.resultRef - the status bar's result zone
+ * @param props.featureRef - the status bar's zone naming what is under the pointer
+ * @param props.colours - where the polities' colours come from, shared with the panels
+ * @param props.history - where the canvas installs its undo and redo
  * @returns the waiting notice, the failure notice, or the canvas
  */
 export function MapArea({

@@ -36,6 +36,11 @@ export interface PolityArrangeMenuProps {
  * **Resolved on every render**: an undo can take the polity away while its menu is open, and then
  * there is nothing to arrange — the menu closes, and says so.
  * @param props - the store, the request and the close
+ * @param props.store - the store the polity is read from and the move recorded in
+ * @param props.request - which polity's menu is open, and where
+ * @param props.onClose - closes the menu, after a command, ‹escape› or a press outside, or when the polity is gone
+ * @param props.onResult - says what the command did
+ * @param props.onEdit - opens the polity's dialogue, given its id
  * @returns the menu, or nothing when the polity is gone
  */
 export function PolityArrangeMenu({

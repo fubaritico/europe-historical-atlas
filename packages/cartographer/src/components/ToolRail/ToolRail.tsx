@@ -60,6 +60,14 @@ function unwiredGroup(id: string): void {
  * tools. Each tool is a toggle (`aria-pressed`) named by its label, with its key in the tooltip. A tool
  * that heads a group carries the small triangle and `aria-haspopup="menu"`.
  * @param props - the tool in hand, the swatch, and the choice
+ * @param props.tool - the tool in hand, shown pressed
+ * @param props.onSelect - takes a tool — a click, or a variant of its group
+ * @param props.swatch - the polity the tools act on and its colour, or `null` when nobody is aimed at
+ * @param props.onColour - applies a colour picked from the swatch, `null` for "automatic"
+ * @param props.initiallyOpen - a group to show open from the start, as the workbench does; closed otherwise
+ * @param props.penMode - the Pen's variant in use, marked in its group
+ * @param props.onPenMode - takes a variant of the Pen's group, given its id
+ * @param props.tools - the tools listed, top to bottom; {@link RAIL_TOOLS} by default
  * @returns the rail
  */
 export function ToolRail({

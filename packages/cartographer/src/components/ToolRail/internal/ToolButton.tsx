@@ -109,6 +109,13 @@ function headNames(entry: RailTool, current: string, pressed: boolean) {
  * One tool, and — when it heads a group — the three ways Illustrator opens it: holding the press, a
  * right click, and here also →, so the keyboard has a way in.
  * @param props - the tool, its state, and the callbacks
+ * @param props.entry - the button's tool, and its group's variants when it heads one
+ * @param props.pressed - whether it is the tool in hand
+ * @param props.open - whether its group's flyout is open
+ * @param props.setOpen - opens or closes its group's flyout
+ * @param props.onSelect - takes the tool, on a click that was not a hold
+ * @param props.current - the variant in use, when the tool heads a group
+ * @param props.onVariant - takes a variant of its group, given its id
  * @returns the button, and its flyout when open
  */
 export function ToolButton({

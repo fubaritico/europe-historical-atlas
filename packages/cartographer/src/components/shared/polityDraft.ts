@@ -123,7 +123,11 @@ export const DRAFT_ERRORS = {
   notAYear: 'A year, as a whole number.',
 } as const
 
-/** `''` → `null`; a whole number, negative for before the era → that number; anything else → `undefined`. */
+/**
+ * `''` → `null`; a whole number, negative for before the era → that number; anything else → `undefined`.
+ * @param text - the year as typed
+ * @returns the year, `null` when the field is empty, `undefined` when it is not a whole number
+ */
 function readYear(text: string): number | null | undefined {
   const trimmed = text.trim()
   if (trimmed === '') return null

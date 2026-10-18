@@ -20,6 +20,7 @@ export interface BackdropFailureProps {
  * a message someone can act on. The title deliberately claims nothing about the cause: pretending to
  * know more is what once had this project blame the JSON for a file that was simply absent.
  * @param props - the thrown value
+ * @param props.error - whatever was thrown; an `AssetError` is named with its asset and failure
  * @returns the blocking notice
  */
 export function BackdropFailure({ error }: BackdropFailureProps) {

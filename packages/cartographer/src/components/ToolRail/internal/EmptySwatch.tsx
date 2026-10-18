@@ -6,7 +6,10 @@ function refuseColour(): void {
   console.warn(`[Cartographer] colour refused: ${NO_TARGET}.`)
 }
 
-/** The swatch with nobody aimed at: struck through, and it says why it does nothing. */
+/**
+ * The swatch with nobody aimed at: struck through, and it says why it does nothing.
+ * @returns the disabled swatch button, whose click only warns
+ */
 export function EmptySwatch() {
   // Render
   return (

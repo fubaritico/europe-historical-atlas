@@ -44,6 +44,11 @@ function moveFocus(event: KeyboardEvent<HTMLUListElement>): void {
  * trigger, and here a click *selects the tool* — the flyout answers a long press, a right click or →. The
  * day the Popover takes a trigger it does not own, this becomes a change of import.
  * @param props - the rows, the current one and the two callbacks
+ * @param props.label - the menu's accessible name, the group's
+ * @param props.variants - the rows, in order
+ * @param props.current - the id of the variant in use, marked by the square and focused on opening
+ * @param props.onChoose - takes a row, given its id
+ * @param props.onDismiss - closes without choosing — ‹escape› or a click outside
  * @returns the menu
  */
 export function ToolFlyout({ label, variants, current, onChoose, onDismiss }: ToolFlyoutProps) {

@@ -50,12 +50,21 @@ export interface PolityFieldsProps {
   onUseWikidata: (field: WikidataField, value: string) => void
 }
 
-/** The props that show an error under a field, or none at all — `exactOptionalPropertyTypes` forbids `undefined`. */
+/**
+ * The props that show an error under a field, or none at all — `exactOptionalPropertyTypes` forbids `undefined`.
+ * @param message - what to say under the field, or `undefined` when the field is fine
+ * @returns the message and its error type, or an empty object
+ */
 function errorOf(message: string | undefined) {
   return message === undefined ? {} : { message, messageType: 'error' as const }
 }
 
-/** The props of a controlled text field reporting to {@link PolityFieldsProps.onField}. */
+/**
+ * The props of a controlled text field reporting to {@link PolityFieldsProps.onField}.
+ * @param field - the draft field the input shows and reports
+ * @param props - the form's props: the draft read and the `onField` called on a change
+ * @returns the input's value and its change handler
+ */
 function textField(field: PolityFormField, props: PolityFieldsProps) {
   return {
     value: props.draft[field] ?? '',
@@ -65,7 +74,11 @@ function textField(field: PolityFormField, props: PolityFieldsProps) {
   }
 }
 
-/** The form's fields, in `s02`'s order, with the id after the name it is proposed from. */
+/**
+ * The form's fields, in `s02`'s order, with the id after the name it is proposed from.
+ * @param props - the draft, its errors, the choices offered, Wikidata's view and the callbacks
+ * @returns the fields, as a fragment
+ */
 export function PolityFields(props: PolityFieldsProps) {
   // Derived
   const { draft, errors, suzerains, ranks, onField, onColour } = props

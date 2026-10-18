@@ -11,7 +11,12 @@
 
 import { hashInts } from '../utils/hash'
 
-/** Smoothstep-interpolated value noise in `[0, 1]` — smooth mottling, not per-pixel static. */
+/**
+ * Smoothstep-interpolated value noise in `[0, 1]` — smooth mottling, not per-pixel static.
+ * @param x - horizontal position in noise cells; one unit is the distance between two lattice values
+ * @param y - vertical position in noise cells
+ * @returns the noise at that position, in `[0, 1]`, the same for the same position every time
+ */
 export function valueNoise(x: number, y: number): number {
   const ix = Math.floor(x)
   const iy = Math.floor(y)

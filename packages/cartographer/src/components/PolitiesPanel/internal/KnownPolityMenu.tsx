@@ -28,6 +28,13 @@ interface KnownPolityMenuProps {
  * The menu of a polity that exists — split from the binding so its handlers are declared in its body,
  * with the polity already resolved: the binding returns nothing when an undo has taken it away.
  * @param props - the polity, the moves, and what each command does
+ * @param props.polity - the polity the menu acts on, already resolved by the binding
+ * @param props.at - where the menu opens, in viewport pixels
+ * @param props.moves - which stacking moves change something, so which are enabled
+ * @param props.restack - records a move as one step, `false` when the document refuses it
+ * @param props.onResult - says what the command did
+ * @param props.onEdit - opens the polity's dialogue, given its id
+ * @param props.onClose - closes the menu
  * @returns the menu
  */
 export function KnownPolityMenu({

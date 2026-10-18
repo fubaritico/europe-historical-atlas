@@ -65,6 +65,12 @@ function stackItem(move: StackingMove, index: number, enabled: boolean) {
  *
  * Focus goes to the list on opening, so the keyboard works at once; the caller gives it back.
  * @param props - the polity, the point, the enabled moves and the callbacks
+ * @param props.name - the polity the commands act on, verbatim — the menu's accessible name
+ * @param props.at - where the menu opens, in viewport pixels, kept inside the window
+ * @param props.moves - which stacking commands would change anything; the others are disabled
+ * @param props.onChoose - applies the stacking command chosen
+ * @param props.onEdit - opens the polity's dialogue, after the menu has closed
+ * @param props.onClose - closes the menu — ‹escape›, a press outside, or a command chosen
  * @returns the menu
  */
 export function PolityStackMenu({

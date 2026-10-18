@@ -55,7 +55,7 @@ function destination(from: number, count: number, move: StackingMove): number {
  * change nothing is disabled).
  * @param doc - the document
  * @param polityId - whose place
- * @returns, per move, whether it would move the polity among its siblings
+ * @returns per move, whether it would move the polity among its siblings
  */
 export function availableMoves(doc: YearDocument, polityId: string): Record<StackingMove, boolean> {
   const slots = siblingSlots(doc, polityId)

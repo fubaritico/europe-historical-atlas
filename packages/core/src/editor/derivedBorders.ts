@@ -203,7 +203,13 @@ function farSideOf(
   return best
 }
 
-/** How many links of homage sit above a polity. */
+/**
+ * How many links of homage sit above a polity.
+ * @param id - the polity whose depth is wanted
+ * @param byId - the year's polities, by id
+ * @returns `0` for a polity owing nobody; a loop of homage is counted only up to the first polity seen
+ * twice
+ */
 function chainDepth(id: string, byId: ReadonlyMap<string, YearPolity>): number {
   let depth = 0
   const seen = new Set<string>([id])

@@ -36,6 +36,13 @@ function rowGestures(
 /**
  * One row: the swatch, the name, the *"no territory"* chip and the rank and dates — `design/01`'s row.
  * @param props - the row, and whether it is the target or the one the keys are on
+ * @param props.row - the polity's row: its name, colour, depth, suzerain, rank and dates
+ * @param props.selected - whether it is the target
+ * @param props.active - whether the keyboard's cursor is on it
+ * @param props.id - the option's element id, which `aria-activedescendant` points at
+ * @param props.onChoose - aims at its polity, given the polity's id
+ * @param props.onMenu - opens its menu, given the polity's id and the pointer in viewport pixels
+ * @param props.onEdit - opens its polity's dialogue, given the polity's id
  * @returns the option
  */
 export function PolityOption({

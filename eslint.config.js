@@ -4,6 +4,7 @@ import tseslint from 'typescript-eslint'
 import importPlugin from 'eslint-plugin-import'
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import eha from 'eslint-plugin-eha'
+import jsdoc from 'eslint-plugin-jsdoc'
 
 /**
  * Import patterns that name a layer, whatever the specifier looks like. Matching is on the import
@@ -295,6 +296,30 @@ export default tseslint.config(
       // found on 2026-10-18 were closed by one. The dev's rule: dependencies run parent → child only, so the
       // child declares its type and the parent's extends it.
       'eha/no-import-cycle': 'error',
+    },
+  },
+
+  // Every exported function carries its JSDoc, with a @param per parameter and its @returns — CLAUDE.md's rule,
+  // held by the gate since 2026-10-18 rather than by review (an extracted hook shipped without them). Tests
+  // are exempt, as CLAUDE.md says.
+  {
+    files: ['**/*.{ts,tsx,js}'],
+    ignores: ['**/*.test.{ts,tsx}', '**/vitest.setup.ts', '**/*.config.{ts,js}'],
+    plugins: { jsdoc },
+    rules: {
+      'jsdoc/require-jsdoc': [
+        'error',
+        {
+          publicOnly: { esm: true },
+          require: {
+            FunctionDeclaration: true,
+            ArrowFunctionExpression: true,
+            FunctionExpression: true,
+          },
+        },
+      ],
+      'jsdoc/require-param': 'error',
+      'jsdoc/require-returns': 'error',
     },
   },
 

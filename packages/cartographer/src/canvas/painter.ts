@@ -583,6 +583,7 @@ function riversByWidth(
  * over in screen pixels, so leaving the context scaled would silently magnify the handles and the
  * borders' widths — a defect that looks like a styling mistake and is not.
  * @param ctx - the context
+ * @param size - the canvas size in device pixels, which bounds what is visible and so what is stroked
  * @param scene - what to draw
  * @param style - the colours and widths
  */

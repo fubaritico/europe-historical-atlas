@@ -137,7 +137,11 @@ export function rankOpacity(
   return eased * options.opacity
 }
 
-/** Split a polyline into the pairwise segments `lineLayer` consumes. */
+/**
+ * Split a polyline into the pairwise segments `lineLayer` consumes.
+ * @param points - the river's vertices, in order along it
+ * @returns one `[a, b]` segment per consecutive pair; empty for fewer than two points
+ */
 function toSegments(points: readonly UvPoint[]): UvSegment[] {
   const segments: UvSegment[] = []
   for (let i = 1; i < points.length; i++) {

@@ -49,19 +49,6 @@ export function createRegionRaster(width: number, height: number, cells: Int16Ar
 }
 
 /**
- * Rasterise dated polities into a per-cell index grid by even-odd scanline fill.
- *
- * Rasterised in the browser rather than shipped per year: the geometry is small (a few thousand
- * vertices), whereas an index grid is one byte per cell per year, which would make switching centuries
- * an asset download instead of a millisecond of work.
- *
- * Later polities win on overlap, which keeps enclaves drawn on top of the power surrounding them.
- * @param regions - the polities, in normalized grid coordinates
- * @param width - grid width in cells
- * @param height - grid height in cells
- * @returns the index grid
- */
-/**
  * Bucket a polity's edges by the grid rows they span.
  *
  * Bucketed rather than tested row by row against every edge: a century holds thousands of vertices and a
@@ -136,6 +123,19 @@ export function fillRowSpans(
   }
 }
 
+/**
+ * Rasterise dated polities into a per-cell index grid by even-odd scanline fill.
+ *
+ * Rasterised in the browser rather than shipped per year: the geometry is small (a few thousand
+ * vertices), whereas an index grid is one byte per cell per year, which would make switching centuries
+ * an asset download instead of a millisecond of work.
+ *
+ * Later polities win on overlap, which keeps enclaves drawn on top of the power surrounding them.
+ * @param regions - the polities, in normalized grid coordinates
+ * @param width - grid width in cells
+ * @param height - grid height in cells
+ * @returns the index grid
+ */
 export function rasteriseRegions(
   regions: readonly Region[],
   width: number,
@@ -177,24 +177,6 @@ export function regionColor(name: string | null): RgbColor {
   return hslToRgb(hue, saturation, lightness)
 }
 
-/**
- * Grow the claimed areas into any land cell no polity reached, each taking its nearest claim.
- *
- * The political geometry and the coastline come from different sources at very different levels of
- * generalisation: the historical polygons are schematic, so where one falls short of the real shoreline
- * the land is left bare and the colour appears to stop before the coast. Since a tint can never spill
- * *into* the sea — the compositor only paints where the mask says land — the visible symptom is an
- * apparent offset, which no coordinate fix would address.
- *
- * Growing the claims settles it the way historical atlases do: the coastline is the modern one, and only
- * the internal divisions come from the historical source, which is exactly where its approximation is
- * legitimate. A breadth-first expansion from every claimed cell at once makes each unclaimed cell take
- * its nearest neighbour's polity.
- * @param raster - the rasterised claims
- * @param isLand - whether a normalized coordinate is land
- * @param maxCells - how far a claim may grow, in cells; keeps an island from adopting a distant power
- * @returns a new raster with the land gaps filled
- */
 /** The four orthogonal steps a claim grows through — no diagonals, or it would leak across a strait. */
 const NEIGHBOUR_STEPS = [
   [1, 0],
@@ -247,6 +229,24 @@ export function claimNeighbours(
   }
 }
 
+/**
+ * Grow the claimed areas into any land cell no polity reached, each taking its nearest claim.
+ *
+ * The political geometry and the coastline come from different sources at very different levels of
+ * generalisation: the historical polygons are schematic, so where one falls short of the real shoreline
+ * the land is left bare and the colour appears to stop before the coast. Since a tint can never spill
+ * *into* the sea — the compositor only paints where the mask says land — the visible symptom is an
+ * apparent offset, which no coordinate fix would address.
+ *
+ * Growing the claims settles it the way historical atlases do: the coastline is the modern one, and only
+ * the internal divisions come from the historical source, which is exactly where its approximation is
+ * legitimate. A breadth-first expansion from every claimed cell at once makes each unclaimed cell take
+ * its nearest neighbour's polity.
+ * @param raster - the rasterised claims
+ * @param isLand - whether a normalized coordinate is land
+ * @param maxCells - how far a claim may grow, in cells; keeps an island from adopting a distant power
+ * @returns a new raster with the land gaps filled
+ */
 export function expandRegionsOverLand(
   raster: RegionRaster,
   isLand: (u: number, v: number) => boolean,
@@ -267,25 +267,6 @@ export function expandRegionsOverLand(
   return createRegionRaster(width, height, cells)
 }
 
-/**
- * Assign each polity a colour from a palette so that no two that share a border get the same one.
- *
- * A hash of the name spreads colours evenly over the wheel but has no idea what touches what, so two
- * neighbours regularly land on near-identical tints and the border between them stops reading. A map is
- * legible because adjacent areas contrast — the four-colour theorem is the formal version of the same
- * observation — so adjacency is what the assignment has to respect, not variety for its own sake.
- *
- * Adjacency is read off the raster rather than the geometry: polygons that merely look neighbourly may
- * not touch, and after the claims have grown over the coast the raster is the truth anyway. Polities are
- * coloured most-connected first, which is the greedy order that needs fewest colours.
- * Polities with a pinned colour take it and are skipped: an editorial choice outranks the automatic
- * one, and since the pinned colours sit outside the palette they cannot collide with it either.
- * @param raster - the rasterised claims
- * @param regions - the polities, in index order
- * @param palette - the colours to choose from, in preference order
- * @param pinnedFor - an editorial colour for a polity, or `null` to let the palette decide
- * @returns one colour per region index
- */
 /**
  * Record that two polities touch, in both directions.
  * @param neighbours - the adjacency sets, by region index
@@ -357,6 +338,25 @@ export function chooseColorSlots(
   return chosen
 }
 
+/**
+ * Assign each polity a colour from a palette so that no two that share a border get the same one.
+ *
+ * A hash of the name spreads colours evenly over the wheel but has no idea what touches what, so two
+ * neighbours regularly land on near-identical tints and the border between them stops reading. A map is
+ * legible because adjacent areas contrast — the four-colour theorem is the formal version of the same
+ * observation — so adjacency is what the assignment has to respect, not variety for its own sake.
+ *
+ * Adjacency is read off the raster rather than the geometry: polygons that merely look neighbourly may
+ * not touch, and after the claims have grown over the coast the raster is the truth anyway. Polities are
+ * coloured most-connected first, which is the greedy order that needs fewest colours.
+ * Polities with a pinned colour take it and are skipped: an editorial choice outranks the automatic
+ * one, and since the pinned colours sit outside the palette they cannot collide with it either.
+ * @param raster - the rasterised claims
+ * @param regions - the polities, in index order
+ * @param palette - the colours to choose from, in preference order
+ * @param pinnedFor - an editorial colour for a polity, or `null` to let the palette decide
+ * @returns one colour per region index
+ */
 export function assignRegionColors(
   raster: RegionRaster,
   regions: readonly { name: string | null }[],

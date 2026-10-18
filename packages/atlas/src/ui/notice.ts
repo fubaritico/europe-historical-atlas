@@ -188,7 +188,11 @@ export function createNoticeBoard(options: NoticeBoardOptions): NoticeBoard {
 
   const posted = new Map<string, HTMLElement>()
 
-  /** Build one notice's panel, with its dismiss button wired to this board when it has one. */
+  /**
+   * Build one notice's panel, with its dismiss button wired to this board when it has one.
+   * @param notice - the notice to show; only a `degraded` one gets a dismiss button
+   * @returns the panel, not yet attached to the board
+   */
   const build = (notice: Notice): HTMLElement => {
     const panel = buildNoticePanel(notice, ink, background)
     // Only a degraded notice can be dismissed. A blocking one has nothing behind it to go back to, and

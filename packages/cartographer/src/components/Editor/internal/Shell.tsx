@@ -62,6 +62,13 @@ export interface ShellProps {
  * controls in it is worse for a screen reader than a plain box. Those roles arrive with their contents,
  * which is the same rule this package already applies to its `aria-live` regions.
  * @param props - what to put in each zone; omit a zone to get a named placeholder
+ * @param props.heading - the page's `<h1>`, placed inside the canvas landmark
+ * @param props.appbar - the top bar's content
+ * @param props.docbar - the document bar's content
+ * @param props.rail - the tool rail's content
+ * @param props.canvas - the map, the one zone always given
+ * @param props.dock - the panels' content
+ * @param props.status - the status bar; an empty status row when omitted
  * @returns the five zones, laid out
  */
 export function Shell({ heading, appbar, docbar, rail, canvas, dock, status }: ShellProps) {

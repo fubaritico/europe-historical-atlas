@@ -163,6 +163,11 @@ export function scaleLimitsFor(canvas: PixelSize, backdrop: PixelSize): ScaleLim
  * Read on `key` lower-cased, so ‹shift› turning `z` into `Z` does not hide it. ‹alt› is never part of
  * either: held with ‹alt› the key is the platform's.
  * @param event - the key and its modifiers
+ * @param event.key - the key pressed, compared lower-cased
+ * @param event.ctrlKey - whether ‹ctrl› was held
+ * @param event.metaKey - whether ‹cmd› was held, the Mac's ‹ctrl›
+ * @param event.altKey - whether ‹alt› was held, which leaves the key to the platform
+ * @param event.shiftKey - whether ‹shift› was held, which turns an undo into a redo
  * @returns `'undo'`, `'redo'`, or `null` for any other key
  */
 export function historyKey(event: {

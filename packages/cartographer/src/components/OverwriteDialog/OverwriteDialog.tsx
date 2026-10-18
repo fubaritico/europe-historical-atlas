@@ -40,6 +40,7 @@ function overwriteSentence(question: OverwriteQuestion): string {
 /**
  * Render the question, open while a save waits for an answer.
  * @param props - the relay
+ * @param props.questions - the relay the save asks through: it holds the pending question and takes the answer
  * @returns the dialogue
  */
 export function OverwriteDialog({ questions }: OverwriteDialogProps) {

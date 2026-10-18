@@ -31,6 +31,9 @@ export interface PolitiesActionsProps {
 /**
  * Render the bar.
  * @param props - the two commands and whether deleting is possible
+ * @param props.onNew - opens the new-polity dialogue, called by `[+]`
+ * @param props.onDelete - asks to delete the selected polity, called by the trash
+ * @param props.canDelete - whether a polity is selected to delete; the trash is disabled without one
  * @returns the bar
  */
 export function PolitiesActions({ onNew, onDelete, canDelete }: PolitiesActionsProps) {

@@ -20,6 +20,9 @@ export interface ToolVariant {
 /**
  * One row: the square that marks the variant in use, its glyph, its name, its key.
  * @param props - the variant, whether it is current, and the choice
+ * @param props.variant - the variant the row shows: its name, glyph, key and whether it can be chosen
+ * @param props.checked - whether it is the variant in use, marked by the square
+ * @param props.onChoose - takes the variant, given its id; never called for a disabled row
  * @returns the menu item
  */
 export function FlyoutItem({

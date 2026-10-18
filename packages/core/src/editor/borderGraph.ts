@@ -44,12 +44,21 @@ export interface BorderRun {
   owners: string[]
 }
 
-/** The key an edge is grouped by. Sorted, so a ring walked either way yields the same edge. */
+/**
+ * The key an edge is grouped by. Sorted, so a ring walked either way yields the same edge.
+ * @param a - one end's anchor index
+ * @param b - the other end's anchor index
+ * @returns `low:high`, the same whichever end comes first
+ */
 function edgeKey(a: number, b: number): string {
   return a < b ? `${String(a)}:${String(b)}` : `${String(b)}:${String(a)}`
 }
 
-/** The key an owner set is grouped by, so two edges of the same border chain together. */
+/**
+ * The key an owner set is grouped by, so two edges of the same border chain together.
+ * @param owners - the ids of the polities holding an edge, in any order
+ * @returns the ids sorted and joined with `|`, the same whatever their order
+ */
 function ownersKey(owners: readonly string[]): string {
   return [...owners].sort().join('|')
 }
@@ -89,7 +98,11 @@ export function collectBorderEdges(doc: YearDocument): Map<string, BorderEdge> {
 /** Where each anchor's edges of one owner set can be found. */
 type Adjacency = Map<number, string[]>
 
-/** Build the vertex-to-edges index for one owner set. */
+/**
+ * Build the vertex-to-edges index for one owner set.
+ * @param edges - the edges sharing one owner set
+ * @returns for each anchor index touched, the keys of the edges meeting there
+ */
 function adjacencyOf(edges: readonly BorderEdge[]): Adjacency {
   const at: Adjacency = new Map()
   for (const edge of edges) {

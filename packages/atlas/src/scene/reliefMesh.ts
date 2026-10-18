@@ -29,18 +29,6 @@ export interface ReliefOptions {
 }
 
 /**
- * Build a relief mesh by displacing a subdivided plane from a {@link Heightmap} (CPU displacement, so
- * raycasting hits the real relief). Heights are in absolute metres remapped by an ease-out curve
- * (elevations ≤ `plainsCeiling` pass through 1:1, higher ones ease toward `peakTarget`) then scaled into
- * world units by a fixed `worldPerMetre` factor; sea (elevation ≤ 0) is flat (y = 0). Apply vertical
- * exaggeration at the call site via `mesh.scale.y` for live tuning.
- *
- * The plane lies in the XZ ground plane (+Y up); north (grid top row) faces −Z, east faces +X.
- * @param heightmap - the elevation source
- * @param options - build options
- * @returns the relief mesh (metres × `worldPerMetre`; scale Y at the call site for exaggeration)
- */
-/**
  * Base world scale per metre of elevation; `mesh.scale.y` (exaggeration) multiplies this. Chosen so the
  * exaggeration slider sits around ~1 rather than ~0.1, which keeps it low-sensitivity and usable.
  */
@@ -124,6 +112,18 @@ export function meshWorldDepth(frame: GridFrame, worldWidth: number): number {
   return worldWidth / (frame.width / frame.height)
 }
 
+/**
+ * Build a relief mesh by displacing a subdivided plane from a {@link Heightmap} (CPU displacement, so
+ * raycasting hits the real relief). Heights are in absolute metres remapped by an ease-out curve
+ * (elevations ≤ `plainsCeiling` pass through 1:1, higher ones ease toward `peakTarget`) then scaled into
+ * world units by a fixed `worldPerMetre` factor; sea (elevation ≤ 0) is flat (y = 0). Apply vertical
+ * exaggeration at the call site via `mesh.scale.y` for live tuning.
+ *
+ * The plane lies in the XZ ground plane (+Y up); north (grid top row) faces −Z, east faces +X.
+ * @param heightmap - the elevation source
+ * @param options - build options
+ * @returns the relief mesh (metres × `worldPerMetre`; scale Y at the call site for exaggeration)
+ */
 export function createReliefMesh(
   heightmap: Heightmap,
   options: ReliefOptions

@@ -175,6 +175,7 @@ export interface LiveCanvas {
  * Each polity's colour, from the shared source — cached there on the edition's version, so a pan,
  * which repaints on every pointer move, never re-derives them.
  * @param it - the attachment
+ * @param it.deps - the store holding the document and the shared colour source
  * @returns the colour of each polity, by id
  */
 export function coloursOf(it: {
@@ -263,6 +264,8 @@ const NO_OFFER: SnapOffer = {
  * on it are reused by the click, not branched onto — then an existing anchor, whose border is already
  * there.
  * @param it - the attachment
+ * @param inserting - whether the idle Pen is over the target's own stretch, where a click inserts an
+ *   anchor and nothing is offered; worked out from the pointer when not given
  * @returns the offer, `NO_OFFER` when there is nothing
  */
 export function snapOffer(it: LiveCanvas, inserting: boolean = overStretch(it)): SnapOffer {
@@ -427,6 +430,9 @@ export function handInHand(it: LiveCanvas): boolean {
  * @param it - the attachment
  * @param offer - what the Pen offers under the pointer, when the caller has already worked it out — the
  *   refresh does, once per pointer move; the ‹space› handlers do not, and it is computed for them
+ * @param inserting - whether the Pen is over the target's own stretch, so the cursor shows the plus;
+ *   worked out from the pointer when not given
+ * @param tooFar - whether the view is zoomed too far out for the tools to act; worked out when not given
  */
 export function showCursor(
   it: LiveCanvas,

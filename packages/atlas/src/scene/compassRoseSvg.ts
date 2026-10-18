@@ -35,13 +35,22 @@ const HUB_FILL = '#e4d4a8' // parchment fill inside the hub
 
 const HEX_COLOR = /^#[0-9a-fA-F]{3,8}$/
 
-/** Return a colour only if it is a safe hex literal, else a black fallback — prevents SVG attribute
- * breakout from untrusted/future data-driven colour inputs (defence in depth). */
+/**
+ * Return a colour only if it is a safe hex literal, else a black fallback — prevents SVG attribute
+ * breakout from untrusted/future data-driven colour inputs (defence in depth).
+ * @param color - the candidate CSS colour, expected as `#rgb` to `#rrggbbaa`
+ * @returns `color` unchanged when it is a hex literal, `#000000` otherwise
+ */
 function safeColor(color: string): string {
   return HEX_COLOR.test(color) ? color : '#000000'
 }
 
-/** Polar → cartesian, angle in degrees from North (up), clockwise (svg y-down). */
+/**
+ * Polar → cartesian, angle in degrees from North (up), clockwise (svg y-down).
+ * @param r - distance from the rose's centre, in viewBox units
+ * @param aDeg - bearing in degrees, 0 = North, 90 = East
+ * @returns the `[x, y]` point in viewBox coordinates
+ */
 function pt(r: number, aDeg: number): [number, number] {
   const a = (aDeg * Math.PI) / 180
   return [C + r * Math.sin(a), C - r * Math.cos(a)]
@@ -65,7 +74,15 @@ const lineSeg = (
 const ring = (r: number, sw: number, stroke: string, fill = 'none'): string =>
   `<circle cx="${numStr(C)}" cy="${numStr(C)}" r="${f2(r)}" fill="${fill}" stroke="${stroke}" stroke-width="${numStr(sw)}"/>`
 
-/** A two-tone principal spike (light left half, ink right half) from centre to tip at angle a. */
+/**
+ * A two-tone principal spike (light left half, ink right half) from centre to tip at angle a.
+ * @param a - the spike's bearing in degrees from North, clockwise
+ * @param R - the tip's distance from the centre, in viewBox units
+ * @param ink - the dark half's fill and both halves' outline
+ * @param halfBaseDeg - half the spike's angular width at its base, in degrees
+ * @param baseR - the distance from the centre of the base's two corners, in viewBox units
+ * @returns two SVG `<polygon>` elements, as markup
+ */
 function spike(a: number, R: number, ink: string, halfBaseDeg: number, baseR: number): string {
   const tip = pt(R, a)
   return (
@@ -73,11 +90,25 @@ function spike(a: number, R: number, ink: string, halfBaseDeg: number, baseR: nu
     poly([[C, C], pt(baseR, a + halfBaseDeg), tip], ink, ink, 1)
   )
 }
-/** A slim single-tone spike (secondary winds). */
+/**
+ * A slim single-tone spike (secondary winds).
+ * @param a - the spike's bearing in degrees from North, clockwise
+ * @param R - the tip's distance from the centre, in viewBox units
+ * @param fill - the spike's fill colour
+ * @param stroke - its outline colour
+ * @returns one SVG `<polygon>` element, as markup
+ */
 function slimSpike(a: number, R: number, fill: string, stroke: string): string {
   return poly([pt(8, a - 4), pt(R, a), pt(8, a + 4)], fill, stroke, 0.8)
 }
-/** Stylised fleur-de-lis North marker centred on (cx, cy), scaled by s. */
+/**
+ * Stylised fleur-de-lis North marker centred on (cx, cy), scaled by s.
+ * @param cx - the marker's centre on x, in viewBox units
+ * @param cy - its centre on y, in viewBox units
+ * @param s - the scale applied to the drawing's own units; 1 draws it about 26 units tall
+ * @param ink - the fill colour
+ * @returns two SVG `<path>` elements, as markup
+ */
 function fleur(cx: number, cy: number, s: number, ink: string): string {
   const p = (x: number, y: number): string => `${f2(cx + x * s)},${f2(cy + y * s)}`
   return (
@@ -85,7 +116,16 @@ function fleur(cx: number, cy: number, s: number, ink: string): string {
     `<path d="M ${p(0, 2)} C ${p(9, -2)} ${p(9, 8)} ${p(0, 6)} C ${p(-9, 8)} ${p(-9, -2)} ${p(0, 2)} Z" fill="${ink}"/>`
   )
 }
-/** An upright text label centred at polar (r, a). */
+/**
+ * An upright text label centred at polar (r, a).
+ * @param text - the label, inserted into the markup as is
+ * @param r - its distance from the centre, in viewBox units
+ * @param aDeg - its bearing in degrees from North, clockwise
+ * @param size - the font size, in viewBox units
+ * @param bold - whether it is set in bold
+ * @param ink - the text colour
+ * @returns one SVG `<text>` element, as markup
+ */
 function label(
   text: string,
   r: number,

@@ -290,7 +290,11 @@ function anchorsHeldBy(document: YearDocument, holds: (polity: string) => boolea
   return held
 }
 
-/** A set of anchor indices as an ascending list. */
+/**
+ * A set of anchor indices as an ascending list.
+ * @param indices - the anchor indices, each once
+ * @returns the same indices, sorted ascending
+ */
 function ascending(indices: ReadonlySet<number>): number[] {
   return [...indices].sort((a, b) => a - b)
 }

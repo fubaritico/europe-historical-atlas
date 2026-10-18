@@ -233,6 +233,7 @@ export type ToolSlice = ToolState & ToolActions
  * nothing aimed at), so there is nothing for a composition root to choose; a `deps` argument with one
  * possible value would be structure for nothing.
  * @param set - the store's setter, supplied by the combined store
+ * @param get - the store's getter, for the actions that read the current state before changing it
  * @returns the slice
  */
 export const createToolSlice: StateCreator<

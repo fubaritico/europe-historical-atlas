@@ -61,6 +61,12 @@ function showRow(targetId: string): void {
  * — the persistent state — and the keys' cursor is the active one, two states kept apart as the design
  * system keeps them.
  * @param props - the rows, the target and the choice
+ * @param props.year - the year being drawn, written in the subhead
+ * @param props.rows - the rows to show, already sorted
+ * @param props.targetId - the id of the polity the tools act on, marked as selected, or `null`
+ * @param props.onChoose - aims at a polity, given its id — a click, or ‹enter› on the active row
+ * @param props.onMenu - opens a row's menu, given its id and where to open it in viewport pixels
+ * @param props.onEdit - opens a polity's dialogue, given its id — a double-click
  * @returns the subhead and the list, or the subhead and a line saying the year is empty
  */
 export function PolityList({ year, rows, targetId, onChoose, onMenu, onEdit }: PolityListProps) {

@@ -176,6 +176,8 @@ export function createWorkerMapCompute(options: WorkerComputeOptions): MapComput
   /**
    * Fail every call in flight and refuse the next one. `notify` separates a worker that died from one
    * that was torn down: only the first is news the host has to react to.
+   * @param error - what every pending call is rejected with, and what `onFatal` receives
+   * @param notify - `true` when the worker died, so `onFatal` is called; `false` for a deliberate teardown
    */
   const die = (error: Error, notify: boolean): void => {
     dead = true

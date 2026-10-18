@@ -44,6 +44,11 @@ function ignoreOverlayClick(): void {
  * **A click on the backdrop does not close it**: the design system's own warning — a dialogue holding
  * typed work must not lose it to a stray click. Escape, Cancel and the cross do.
  * @param props - the store, the polity edited if any, the open state the caller owns, and Wikidata
+ * @param props.store - the store the polity is created or changed in, and the Pen aimed through
+ * @param props.editing - the polity to change, or `null` to create one; read when the dialogue mounts
+ * @param props.isOpen - whether the dialogue is shown, owned by the caller
+ * @param props.onClose - called once the dialogue is done, validated or cancelled
+ * @param props.wikidata - where Wikidata is read from, for the panel under the Wikidata field
  * @returns the dialogue
  */
 export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: PolityDialogProps) {

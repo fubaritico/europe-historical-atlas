@@ -33,6 +33,10 @@ export interface PolitiesPanelProps {
  * (`s16`), the one aimed at marked, those with nothing drawn marked *"no territory"* (`s02`). Choosing a
  * row aims at it and leaves the tool in hand — `next.md`'s *"we pick who, then act"*.
  * @param props - the store, the colour source and the result sink
+ * @param props.store - the store the polities are read from and created in
+ * @param props.colours - where the rows' colours come from, the source the canvas reads too
+ * @param props.onResult - says what a command did, in the status bar's result zone
+ * @param props.wikidata - where the polity form reads Wikidata from
  * @returns the panel's head, the tree, the stacking menu when open, and the dialogue it opens
  */
 export function PolitiesPanel({ store, colours, onResult, wikidata }: PolitiesPanelProps) {

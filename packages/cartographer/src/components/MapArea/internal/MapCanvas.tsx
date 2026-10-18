@@ -141,6 +141,7 @@ function startSurface(
  * screen-reader user can move the view but cannot reach an anchor or hear what is under it. That waits on
  * the tools and `{Polities}`, which is what will give a keyboard reader a list to walk.
  * @param props - the store, the frame, the style and the names
+ * @param props.label - what a screen reader is told the drawing surface is; the rest goes to the controller
  * @returns the canvas element
  */
 export function MapCanvas({ label, ...controller }: MapCanvasProps) {

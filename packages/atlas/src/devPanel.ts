@@ -170,12 +170,21 @@ export interface DevPanelDeps {
   callbacks: DevPanelCallbacks
 }
 
-/** Deep-clone a plain, JSON-safe settings object (numbers, strings, nested colour objects). */
+/**
+ * Deep-clone a plain, JSON-safe settings object (numbers, strings, nested colour objects).
+ * @param value - the settings object; anything JSON cannot carry (a function, a texture) is lost
+ * @returns an independent copy, so tuning the live object never alters it
+ */
 function clonePlain<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T
 }
 
-/** Snapshot the controls-options fields the camera folder tunes (restored on reset; extent/zoom left be). */
+/**
+ * Snapshot the controls-options fields the camera folder tunes (restored on reset; extent/zoom left be).
+ * @param o - the live map-controls options
+ * @returns a copy of the tuned fields only, speeds, smoothing, drag and edge scroll, distance and pitch
+ * limits
+ */
 function cameraTuningOf(o: MapControlsOptions): Partial<MapControlsOptions> {
   return {
     panSpeed: o.panSpeed,
@@ -191,7 +200,10 @@ function cameraTuningOf(o: MapControlsOptions): Partial<MapControlsOptions> {
   }
 }
 
-/** Some controls need no side effect: the render loop already reads their value every frame. */
+/**
+ * Some controls need no side effect: the render loop already reads their value every frame.
+ * @returns nothing
+ */
 const noEffect = (): void => undefined
 
 /** Every tunable as it stood when the panel was built. */

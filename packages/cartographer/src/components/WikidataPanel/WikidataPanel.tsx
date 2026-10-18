@@ -31,6 +31,8 @@ export interface WikidataPanelProps {
 /**
  * Render what Wikidata says, under the form's Wikidata field.
  * @param props - the view and the click
+ * @param props.view - what Wikidata says about the id typed, or where its reading got to
+ * @param props.onUse - takes Wikidata's value for a field, on the author's click of *[Use]* or *[Replace]*
  * @returns the panel: the live region always, the facts when an item was found
  */
 export function WikidataPanel({ view, onUse }: WikidataPanelProps) {

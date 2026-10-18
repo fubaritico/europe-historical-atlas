@@ -22,6 +22,8 @@ export interface ToolRailPanelProps {
  * what changes), and resolves the swatch during the render, never in a selector: `describeDrawingTarget`
  * and `polityColours` build new objects, which a selector would hand React as a fresh snapshot each time.
  * @param props - the store
+ * @param props.store - the store the tool, the target and the colour are read from and chosen through
+ * @param props.colours - where the swatch's colour comes from, the source the canvas reads too
  * @returns the rail
  */
 export function ToolRailPanel({ store, colours }: ToolRailPanelProps) {

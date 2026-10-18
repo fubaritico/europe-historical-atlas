@@ -24,6 +24,7 @@ export interface SnapshotDialogProps extends Omit<SnapshotChooserProps, 'close'>
 /**
  * Render the dialogue, open while the picker is.
  * @param props - the picker, the source, the year, the clock, what opening does
+ * @param props.picker - says whether the dialogue is open and closes it; the rest goes to the chooser
  * @returns the dialogue
  */
 export function SnapshotDialog({ picker, ...chooser }: SnapshotDialogProps) {

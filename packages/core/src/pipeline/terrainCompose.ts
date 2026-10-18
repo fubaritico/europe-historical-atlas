@@ -59,7 +59,13 @@ export function blendChannel(base: number, top: number, mode: BlendMode): number
   }
 }
 
-/** Linear interpolation between two 8-bit colours, returned as normalized `[0, 1]` triplets. */
+/**
+ * Linear interpolation between two 8-bit colours, returned as normalized `[0, 1]` triplets.
+ * @param a - the colour at `t = 0`, channels in `[0, 255]`
+ * @param b - the colour at `t = 1`, channels in `[0, 255]`
+ * @param t - how far from `a` towards `b`, normally `[0, 1]`; not clamped
+ * @returns the mixed colour as an `[r, g, b]` triplet in `[0, 1]`
+ */
 function lerpColor(a: RgbColor, b: RgbColor, t: number): [number, number, number] {
   return [
     (a.r + (b.r - a.r) * t) / 255,
@@ -270,21 +276,6 @@ function landColorInto(
   blendGreyInto(out, out, shade, options.hillshadeMode, options.hillshadeStrength)
 }
 
-/**
- * Composite the terrain into an RGBA byte buffer: parchment base, hypsometric tint over land, the
- * greyscale heightmap layer, DEM hillshade multiplied on top (sea samples get the flat `sea` tone, and
- * the greyscale layer only if `elevationIncludesSea`), then a vellum paper grain modulated over
- * everything. The shoreline comes from the injected {@link LandMask}, whose bilinear coverage mixes sea
- * and land across the edge instead of snapping to one or the other — and because the mask can be baked
- * finer than the DEM, the coast is no longer limited by the elevation grid. Row 0 is the heightmap's north row (pair with `DataTexture.flipY = true` to align with
- * `PlaneGeometry` UVs).
- * @param heightmap - the elevation source
- * @param options - the texture options
- * @param landMask - which cells are land; falls back to thresholding elevation when omitted
- * @param areaTint - an optional colour claimed over part of the map (the political layer)
- * @returns an `RGBA` `Uint8Array` of length `width * height * 4`
- */
-
 /** Everything a row of the composite needs that does not change from one row to the next. */
 interface TerrainRowContext {
   /** The elevation source. */
@@ -478,6 +469,20 @@ function composeTerrainRow(
   }
 }
 
+/**
+ * Composite the terrain into an RGBA byte buffer: parchment base, hypsometric tint over land, the
+ * greyscale heightmap layer, DEM hillshade multiplied on top (sea samples get the flat `sea` tone, and
+ * the greyscale layer only if `elevationIncludesSea`), then a vellum paper grain modulated over
+ * everything. The shoreline comes from the injected {@link LandMask}, whose bilinear coverage mixes sea
+ * and land across the edge instead of snapping to one or the other — and because the mask can be baked
+ * finer than the DEM, the coast is no longer limited by the elevation grid. Row 0 is the heightmap's north row (pair with `DataTexture.flipY = true` to align with
+ * `PlaneGeometry` UVs).
+ * @param heightmap - the elevation source
+ * @param options - the texture options
+ * @param landMask - which cells are land; falls back to thresholding elevation when omitted
+ * @param areaTint - an optional colour claimed over part of the map (the political layer)
+ * @returns an `RGBA` `Uint8Array` of length `width * height * 4`, at the size {@link terrainTextureSize} gives
+ */
 export function composeTerrainRgba(
   heightmap: Heightmap,
   options: TerrainTextureOptions,

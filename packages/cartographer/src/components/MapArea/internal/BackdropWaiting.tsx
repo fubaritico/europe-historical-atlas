@@ -31,6 +31,8 @@ export interface BackdropWaitingProps {
  * be the kind of progress indicator that lies when the machine is slow — which is exactly when someone
  * reads it.
  * @param props - the progress so far and the phase about to run
+ * @param props.fraction - progress through the bake, in `[0, 1]`
+ * @param props.phase - the phase about to run, or `null` before the first announcement
  * @returns the waiting notice
  */
 export function BackdropWaiting({ fraction, phase }: BackdropWaitingProps) {

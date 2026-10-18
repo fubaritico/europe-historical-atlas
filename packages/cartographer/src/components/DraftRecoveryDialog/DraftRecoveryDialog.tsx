@@ -25,6 +25,7 @@ export interface DraftRecoveryDialogProps {
 /**
  * Render the question, open while the opening waits for an answer.
  * @param props - the relay
+ * @param props.offers - the relay the opening asks through: it holds the pending draft and takes the answer
  * @returns the dialogue
  */
 export function DraftRecoveryDialog({ offers }: DraftRecoveryDialogProps) {

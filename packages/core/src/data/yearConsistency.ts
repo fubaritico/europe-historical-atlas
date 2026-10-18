@@ -28,7 +28,13 @@ export interface YearFiles {
   borders: YearBorders
 }
 
-/** Fail, naming the file that has to be edited and what it disagrees with. */
+/**
+ * Fail, naming the file that has to be edited and what it disagrees with.
+ * @param asset - the file of the year that holds the wrong value, the one to edit
+ * @param source - the folder the year was loaded from
+ * @param detail - what that file says and what the other file says instead
+ * @returns never; always throws a `consistency` asset error
+ */
 function disagree(asset: AssetKind, source: string, detail: string): never {
   throw assetError(asset, 'consistency', source, detail)
 }

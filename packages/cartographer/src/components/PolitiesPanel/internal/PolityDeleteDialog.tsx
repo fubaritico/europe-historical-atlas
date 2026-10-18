@@ -30,6 +30,9 @@ export interface PolityDeleteDialogProps {
 /**
  * Render the confirmation.
  * @param props - the polity, and the two answers
+ * @param props.pending - the polity about to be deleted and what goes with it; `null` keeps the dialogue closed
+ * @param props.onConfirm - deletes the polity, called by `[Delete]`
+ * @param props.onCancel - keeps the polity, called by `[Cancel]`, the cross, ‹escape› or the backdrop
  * @returns the dialogue
  */
 export function PolityDeleteDialog({ pending, onConfirm, onCancel }: PolityDeleteDialogProps) {

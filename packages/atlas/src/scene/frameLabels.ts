@@ -79,7 +79,11 @@ export function frameLabelLayout(
   const texts: string[] = []
   const placements: LabelPlacement[] = []
 
-  /** Intern a text, so the atlas holds each distinct number once. */
+  /**
+   * Intern a text, so the atlas holds each distinct number once.
+   * @param text - the label as printed
+   * @returns its cell in the atlas, the existing one when the same text was met before
+   */
   const cellOf = (text: string): number => {
     const found = texts.indexOf(text)
     if (found >= 0) return found
@@ -166,7 +170,11 @@ export interface FrameLabels {
  * Turn the placements into a buffer of quads, each pointing at its own cell of the atlas.
  * @param layout - the numbers and where they are written
  * @param atlas - the grid they were laid out on
+ * @param atlas.columns - how many cells the atlas has across
+ * @param atlas.rows - how many cells it has down
  * @param size - half the width and half the height of one number, in world units
+ * @param size.halfW - half a number's width, in world units
+ * @param size.halfH - half a number's height, in world units
  * @param lift - how far above the sea they sit
  * @returns the geometry
  */

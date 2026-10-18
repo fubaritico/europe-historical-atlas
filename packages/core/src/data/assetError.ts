@@ -121,12 +121,22 @@ export function parseAsset<T>(asset: AssetKind, source: string, parse: () => T):
   }
 }
 
-/** Fail the current parse, naming the field. */
+/**
+ * Fail the current parse, naming the field.
+ * @param path - how the field is named in the message, as the reader built it while descending
+ * @param expected - what the field should have been, phrased to follow "should be" (`'a string'`)
+ * @param value - what turned up instead; only described, never echoed whole
+ * @returns never; always throws a field complaint that {@link parseAsset} turns into a schema error
+ */
 function fail(path: string, expected: string, value: unknown): never {
   throw new FieldError(`${path} should be ${expected}, got ${describe(value)}`)
 }
 
-/** A short, safe rendering of whatever turned up — never the value itself, which may be enormous. */
+/**
+ * A short, safe rendering of whatever turned up — never the value itself, which may be enormous.
+ * @param value - the offending value, of any type
+ * @returns a few words naming its kind, and its content only when it is a short scalar
+ */
 function describe(value: unknown): string {
   if (value === null) return 'null'
   if (Array.isArray(value)) return `an array of ${String(value.length)}`

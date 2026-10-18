@@ -282,7 +282,11 @@ function insertAlong(
   }
 }
 
-/** A ring's segments, closure included, as pairs of anchors. */
+/**
+ * A ring's segments, closure included, as pairs of anchors.
+ * @param ring - the ring, as anchor indices
+ * @returns `[from, to]` per segment, a zero-length one skipped; empty below two anchors
+ */
 function segmentsOf(ring: readonly number[]): [number, number][] {
   if (ring.length < 2) return []
   return ring.flatMap((from, position) => {
@@ -291,7 +295,11 @@ function segmentsOf(ring: readonly number[]): [number, number][] {
   })
 }
 
-/** Whether a position along a segment lies strictly inside it, its two ends excluded. */
+/**
+ * Whether a position along a segment lies strictly inside it, its two ends excluded.
+ * @param t - the position along the segment, `0` at its start and `1` at its end
+ * @returns `true` when it is farther than `END_TOLERANCE` from both ends
+ */
 const inside = (t: number): boolean => t > END_TOLERANCE && t < 1 - END_TOLERANCE
 
 /**
@@ -414,7 +422,12 @@ function walkLoop(
   return loop
 }
 
-/** A ring's anchors as coordinates, a missing index skipped. */
+/**
+ * A ring's anchors as coordinates, a missing index skipped.
+ * @param ring - the ring, as anchor indices
+ * @param at - the coordinates of an anchor index, or `undefined` when it has none
+ * @returns the coordinates in ring order, without the indices `at` did not know
+ */
 function resolve(
   ring: readonly number[],
   at: (index: number) => [number, number] | undefined
@@ -425,7 +438,12 @@ function resolve(
   })
 }
 
-/** The key of an unordered segment. */
+/**
+ * The key of an unordered segment.
+ * @param a - one end's anchor index
+ * @param b - the other end's anchor index
+ * @returns `low:high`, the same whichever end comes first
+ */
 function keyOf(a: number, b: number): string {
   return a < b ? `${String(a)}:${String(b)}` : `${String(b)}:${String(a)}`
 }

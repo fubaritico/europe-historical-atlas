@@ -63,6 +63,8 @@ function stretchesOf(rings: readonly number[][]): [number, number][] {
 /**
  * A key for a stretch, the same either way round.
  * @param stretch - its two anchors
+ * @param stretch.0 - one end's anchor index
+ * @param stretch.1 - the other end's anchor index
  * @returns the key
  */
 function stretchKey([a, b]: readonly [number, number]): string {

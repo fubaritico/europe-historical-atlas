@@ -31,6 +31,11 @@ export interface PanelProps {
  * **Presentational, and it stays so**: it is named by its visible heading (`aria-labelledby`, so the two
  * cannot drift apart), and it holds no state and reaches no storage.
  * @param props - the name, whether it fills the dock, the foot and the view
+ * @param props.title - its name, written as the tab in its head and naming the region
+ * @param props.fill - whether it takes the height the dock has left, its body scrolling; `false` by default
+ * @param props.foot - a bar pinned at its foot, under the body
+ * @param props.children - the view the panel holds
+ * @param props.ref - the panel's element, for a binding that hands the focus back into it
  * @returns the panel
  */
 export function Panel({ title, fill = false, foot, children, ref }: PanelProps) {

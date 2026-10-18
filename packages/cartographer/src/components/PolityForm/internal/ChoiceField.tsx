@@ -5,7 +5,15 @@ import type { DraftOption } from '../../shared/polityDraft'
 /** The value standing for "none" in a list — the design system's Dropdown selects strings only. */
 const NONE = ''
 
-/** A list laid out like a field: the label left, the choice right, "none" first. */
+/**
+ * A list laid out like a field: the label left, the choice right, "none" first.
+ * @param props - the label, the choices, the one chosen and the callback
+ * @param props.label - the field's name, shown on the left and naming the list for assistive tech
+ * @param props.options - the choices offered after "none", as value and label
+ * @param props.value - the value chosen, or `null` for "none"
+ * @param props.onSelect - reports the value chosen, `null` when "none" is picked
+ * @returns the label and its dropdown
+ */
 export function ChoiceField({
   label,
   options,

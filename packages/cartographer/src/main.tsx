@@ -151,6 +151,8 @@ const compute = createWorkerMapCompute({
  * The atlas declares the same two strings in `mapPipeline.ts`, and they are left as two declarations
  * rather than shared through `core`: a deployment path is not domain code, and the cost of them drifting
  * is a loud `transport` failure at startup, not a silent wrong picture. Worth a line, not a module.
+ * @param onProgress - told each phase of the bake before it runs, for the waiting notice's bar
+ * @returns the baked backdrop and the coastline and river layers projected into its frame
  */
 const loadTheBackdrop = async (onProgress: ProgressReport) => {
   const backdrop = await loadBackdrop({

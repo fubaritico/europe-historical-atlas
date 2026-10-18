@@ -204,7 +204,11 @@ function compactAnchors(doc: YearDocument): CompactedAnchors {
 export function saveYearDocument(doc: YearDocument): YearFiles {
   const { anchors, anchorSource, remap } = compactAnchors(doc)
 
-  /** Rewrite a list of indices, dropping any the mapping does not know. */
+  /**
+   * Rewrite a list of indices, dropping any the mapping does not know.
+   * @param indices - anchor indices in the edited document's numbering
+   * @returns the same anchors in the saved numbering, in order, unreferenced ones gone
+   */
   const rewrite = (indices: readonly number[]): number[] => {
     const out: number[] = []
     for (const index of indices) {

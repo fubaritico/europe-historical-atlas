@@ -33,7 +33,13 @@ export interface RelationVerdict {
   degree: number
 }
 
-/** The chain of suzerains above a polity, nearest first, ending at one owing nobody. */
+/**
+ * The chain of suzerains above a polity, nearest first, ending at one owing nobody.
+ * @param id - the polity whose overlords are wanted
+ * @param byId - the year's polities, by id
+ * @returns the suzerain ids, nearest first; empty for a polity owing nobody. A loop of homage stops the
+ * walk at the first polity seen twice
+ */
 function chainAbove(id: string, byId: ReadonlyMap<string, YearPolity>): string[] {
   const chain: string[] = []
   const seen = new Set<string>([id])

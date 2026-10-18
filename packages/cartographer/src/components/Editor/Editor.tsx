@@ -72,6 +72,18 @@ export interface EditorProps {
  * canvas's. That is safe and worth stating once: nothing reads `statusRef.current` until a pointer
  * moves, which is long after the commit that fills both.
  * @param props - the store, how to load, the names, and the relay for messages from outside React
+ * @param props.store - the store the canvas draws from and every panel reads
+ * @param props.load - how to fetch and bake the backdrop, handed to the map
+ * @param props.style - the colours and sizes the painter reads
+ * @param props.label - what a screen reader is told the drawing surface is
+ * @param props.heading - the page's `<h1>`, placed by the shell inside the canvas landmark
+ * @param props.name - the application's name, written in the top bar
+ * @param props.onSave - saves the open year, called by the top bar's `[Save]`
+ * @param props.onOpenSnapshot - opens the *Open snapshot* dialogue, called by the top bar
+ * @param props.history - the canvas's undo and redo, for the document bar's buttons
+ * @param props.colours - where the polities' colours come from, for the canvas and the panels
+ * @param props.wikidata - where the polity form reads Wikidata from
+ * @param props.results - messages from outside React, written into the result zone
  * @returns the shell, filled where there is something to put in it
  */
 export function Editor({

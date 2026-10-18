@@ -13,6 +13,8 @@ import type { MapCompute, ProgressReport } from './mapCompute'
 /**
  * A typed array's buffer, when it is one that may be handed over rather than copied.
  * @param view - the typed array about to be posted
+ * @param view.buffer - the memory behind it; only a plain `ArrayBuffer` can be transferred, a shared one
+ * cannot
  * @returns a single-entry transfer list, or an empty one for a buffer that cannot be transferred
  */
 function transferable(view: { buffer: ArrayBufferLike }): Transferable[] {

@@ -36,6 +36,14 @@ export interface LineViewProps {
 /**
  * The panel's view.
  * @param props - the selection read, the scope and the two callbacks
+ * @param props.segments - how many segments are selected; none shows the hint instead of the choices
+ * @param props.between - whom the stretch separates, already named
+ * @param props.canDressBorder - whether the whole border is on offer as a scope
+ * @param props.hand - the hand in force for the chosen scope, `null` for the relation's rule
+ * @param props.mixed - whether the stretch carries different hands, so no pattern reads as chosen
+ * @param props.scope - the scope chosen: the stretch or the whole border
+ * @param props.onScope - changes the scope
+ * @param props.onHand - applies a pattern, `null` for *Auto*
  * @returns the panel's body
  */
 export function LineView({

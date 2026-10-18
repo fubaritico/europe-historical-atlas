@@ -38,8 +38,8 @@ export interface EditorAssetsState {
  * **A late answer is dropped rather than written**, which is cleanliness rather than necessity: React 18
  * and later make a state write on an unmounted tree a silent no-op. It is kept because the flag is the
  * same mechanism the correctness above needs, so there is nothing extra to carry.
- * @param props - the store, how to load, and the names
- * @returns the waiting notice, the failure notice, or the canvas
+ * @param load - how to fetch and bake the backdrop, called once for the component's life
+ * @returns the assets once in, whatever was thrown, and the bake's progress so far
  */
 export function useEditorAssets(load: BackdropLoad): EditorAssetsState {
   // Refs

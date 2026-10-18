@@ -29,7 +29,14 @@ export interface RhumbNetworkOptions {
   step: number
 }
 
-/** Clip the infinite line `p + t·d` to the unit square, returning the `[t0, t1]` range or `null`. */
+/**
+ * Clip the infinite line `p + t·d` to the unit square, returning the `[t0, t1]` range or `null`.
+ * @param pu - a point on the line, horizontal, in normalized `[0, 1]` map units
+ * @param pv - the same point, vertical
+ * @param du - the line's direction, horizontal component
+ * @param dv - its direction, vertical component
+ * @returns the parameter range of `t` inside the square, or `null` when the line misses it
+ */
 function clipToUnitSquare(pu: number, pv: number, du: number, dv: number): [number, number] | null {
   let t0 = -Infinity
   let t1 = Infinity

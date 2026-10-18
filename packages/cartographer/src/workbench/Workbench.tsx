@@ -27,7 +27,11 @@ export interface WorkbenchProps {
   entries: readonly WorkbenchEntry[]
 }
 
-/** Re-render on every hash change: the hash is the selected plate. */
+/**
+ * Re-render on every hash change: the hash is the selected plate.
+ * @param onChange - called on every hash change, to have React read the hash again
+ * @returns the unsubscription
+ */
 function subscribeToHash(onChange: () => void): () => void {
   window.addEventListener('hashchange', onChange)
   return () => {
@@ -35,7 +39,10 @@ function subscribeToHash(onChange: () => void): () => void {
   }
 }
 
-/** The current hash, without its `#`. */
+/**
+ * The current hash, without its `#`.
+ * @returns the selected plate's id, or `''` when there is no hash
+ */
 function readHash(): string {
   return window.location.hash.slice(1)
 }
@@ -46,6 +53,7 @@ function readHash(): string {
  * **The selection is the URL's hash**, not React state, so a reload — which Vite's hot reload sometimes
  * forces — lands back on the plate being worked on. An unknown or empty hash shows the first plate.
  * @param props - the plates
+ * @param props.entries - every plate, in the order listed; the first is shown for an unknown hash
  * @returns the workbench page
  */
 export function Workbench({ entries }: WorkbenchProps) {

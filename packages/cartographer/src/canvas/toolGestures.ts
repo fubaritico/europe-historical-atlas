@@ -461,6 +461,8 @@ function moveStep(count: number): { kind: string; label: string } {
  * is not part of the selection.
  * @param context - the session, the view and the frame
  * @param lead - the grabbed anchor and where it goes, in degrees
+ * @param lead.index - the grabbed anchor's index
+ * @param lead.to - where the grabbed anchor goes, longitude and latitude in degrees
  * @returns each anchor and where it goes; `'off-map'` when one would leave the map, `'missing'` when an
  *   anchor of the selection is not in the table — in both cases nothing moves
  */
@@ -514,6 +516,8 @@ function arrowClick(context: GestureContext, at: Point, shift: boolean): void {
  * With nobody aimed at there is no handle to catch, and it says so.
  * @param context - the session and the store
  * @param marquee - the rectangle's two corners, in screen pixels
+ * @param marquee.from - the corner where the drag began
+ * @param marquee.to - the corner under the pointer
  * @param shift - whether ‹shift› was held at the press
  */
 function marqueeSelect(

@@ -41,6 +41,7 @@
     "eslint-config-prettier": "catalog:",
     "eslint-plugin-eha": "workspace:*",
     "eslint-plugin-import": "catalog:",
+    "eslint-plugin-jsdoc": "catalog:",
     "eslint-plugin-prettier": "catalog:",
     "globals": "catalog:",
     "husky": "catalog:",
