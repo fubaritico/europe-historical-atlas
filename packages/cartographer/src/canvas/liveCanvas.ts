@@ -17,6 +17,7 @@ import { penInsertHit } from './anchorGestures'
 import { anchorHit, anchorSentence, borderRunTo, waterTaking } from './borderSnap'
 import { cursorCss, cursorFor } from './cursors'
 import { featureUnder } from './featureUnder'
+import { frameEdgeUnder } from './frameSnap'
 import { followedLayer, layerLines, lineLabel, snapHit } from './layerHits'
 import { HANDLE_HIT_RADIUS } from './navigation'
 import { paintOverlay } from './overlayPainter'
@@ -725,6 +726,7 @@ export function refreshTools(it: LiveCanvas): void {
     closing: scene.closing,
     snapping: offer.lineLabel,
     joining: offer.anchor === null ? null : anchorSentence(gestureOf(it), offer.anchor),
+    edge: frameEdgeUnder(gestureOf(it), it.pointer),
     following: followedNoun(gestureOf(it)),
     inserting,
     tooFar,

@@ -1,10 +1,11 @@
 import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
 
 import { TAG } from './consoleTag'
+import { freeLonLatAt, landsOnLast } from './frameSnap'
 import { nearestLayer } from './layerHits'
 import { leaveLayer, reachLayer } from './layerSwitch'
 import { retracePencilStart } from './retrace'
-import { lonLatAt, resolvedTarget, snapClick } from './toolGestures'
+import { resolvedTarget, snapClick } from './toolGestures'
 
 import type { GestureContext } from './toolGestures'
 import type { PencilSample, SessionPoint } from './toolSession'
@@ -62,11 +63,14 @@ function lay(context: GestureContext, drawing: PencilSample, at: Point, time: nu
   drawing.time = time
   drawing.at = [at[0], at[1]]
   if (layOnLayer(context, drawing, at)) return
-  const point = lonLatAt(context, at)
+  const point = freeLonLatAt(context, at)
   if (point === null) {
     drawing.offMap += 1
     return
   }
+  // The Pencil's rule — no two points share a spot — kept when the frame clamps two samples onto one
+  // corner: the sample is simply not laid, as a pointer held still lays nothing.
+  if (landsOnLast(context.session.outline.at(-1)?.at, point)) return
   const placed: SessionPoint = { at: point, provenance: FREE_POINT_PROVENANCE, anchor: null }
   context.session.outline.push(placed)
   context.session.snap = null

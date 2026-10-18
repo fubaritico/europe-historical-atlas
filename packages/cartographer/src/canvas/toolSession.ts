@@ -446,6 +446,8 @@ export interface ActionInputs {
   following: string | null
   /** The sentence for an existing anchor the Pen is over — `s02`'s branching line — or `null`. */
   joining: string | null
+  /** The map's edge or corner a free point would land on (CARTO-257), or `null`. */
+  edge: 'edge' | 'corner' | null
   /** Whether a click here inserts an anchor on a stretch of the target — the arrow, or the idle Pen. */
   inserting: boolean
   /** Whether the view is too far out for the drawing tools to act (`H-34`, `view/toolReach.ts`). */
@@ -471,6 +473,9 @@ function penSentence(inputs: ActionInputs, targetName: string): string {
   if (inputs.inserting) return `Inserting a point into ${targetName}`
   // s02 — "Following the coastline for Kingdom of France", "Following the Maas for Kingdom of France".
   if (inputs.snapping !== null) return `Following the ${inputs.snapping} for ${targetName}`
+  // CARTO-257 — a free point near the frame lands on its edge, or in its corner.
+  if (inputs.edge === 'corner') return `Drawing in ${targetName} — in the map's corner`
+  if (inputs.edge === 'edge') return `Drawing in ${targetName} — on the map's edge`
   // s02's "place points freely", before the click (QUAL-110). The polity is kept: the bar always names
   // whom the action is for.
   if (inputs.following === null) return `Drawing in ${targetName}`
@@ -488,6 +493,9 @@ function retraceSentence(inputs: ActionInputs, targetName: string): string {
   if (inputs.retracing !== null) return inputs.retracing
   if (inputs.snapping !== null) return `Retracing ${targetName} — following the ${inputs.snapping}`
   if (inputs.joining !== null) return `Retracing ${targetName} — on a neighbour’s anchor`
+  // CARTO-257 — ⟨retrace⟩'s free points are clamped as the Pen's are, and said the same way.
+  if (inputs.edge === 'corner') return `Retracing ${targetName} — in the map's corner`
+  if (inputs.edge === 'edge') return `Retracing ${targetName} — on the map's edge`
   return `Retracing ${targetName} — click one of its anchors to end`
 }
 

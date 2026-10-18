@@ -11,6 +11,7 @@ import { deleteSelected, editHandlesOf, insertOnStretch, penInsertHit } from './
 import { anchorClick, waterTaking } from './borderSnap'
 import { carvedReport } from './carving'
 import { TAG } from './consoleTag'
+import { freeLonLatAt, repeatsLast } from './frameSnap'
 import { followedLayer, layerLines, lineLabel, snapHit } from './layerHits'
 import { leaveLayer, reachLayer } from './layerSwitch'
 import {
@@ -234,11 +235,13 @@ export function penInserts(context: GestureContext, at: Point): boolean {
  * @returns `true` when a point was placed, `false` off the map
  */
 function freeClick(context: GestureContext, at: Point): boolean {
-  const point = lonLatAt(context, at)
+  const point = freeLonLatAt(context, at)
   if (point === null) {
     console.warn(`${TAG} no anchor placed: the click was off the map.`)
     return false
   }
+  // A second click in the corner it already ends on: placing it again would be a zero-length edge.
+  if (repeatsLast(context.session.outline, point)) return true
   context.session.outline.push({ at: point, provenance: FREE_POINT_PROVENANCE, anchor: null })
   context.session.snap = null
   return true
@@ -403,7 +406,9 @@ export function arrowDrag(context: GestureContext, at: Point): void {
   // moves as one shape and does not.
   const alone = session.selected.length <= 1 || !session.selected.includes(index)
   session.weld = alone ? weldOfferAt(context, index, at) : null
-  const to = session.weld?.at ?? lonLatAt(context, at)
+  // Alone, it lands on the map's edge or corner when near them (CARTO-257); a selection is moved as a shape,
+  // clamped nowhere — clamping its lead would drag the whole shape onto the edge.
+  const to = session.weld?.at ?? (alone ? freeLonLatAt(context, at) : lonLatAt(context, at))
   if (to !== null) session.moving = { index, to }
 }
 

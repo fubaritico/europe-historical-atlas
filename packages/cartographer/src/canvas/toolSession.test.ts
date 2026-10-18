@@ -36,6 +36,7 @@ function action(overrides: Partial<ActionInputs> = {}): ActionInputs {
     snapping: null,
     following: null,
     joining: null,
+    edge: null,
     inserting: false,
     tooFar: false,
     session: idleSession(),
@@ -298,6 +299,33 @@ describe('toolSession', () => {
     it('says the Pen will place points freely when the coast is out of reach', () => {
       expect(actionSentence(action({ following: 'coastline' }))).toBe(
         'Drawing in Reaume de France — no coastline within reach, placing points freely'
+      )
+    })
+
+    // CARTO-257 — a free point near the frame lands on its edge, or in its corner.
+    it("says a free point lands on the map's edge, or in its corner", () => {
+      expect(actionSentence(action({ edge: 'edge' }))).toBe(
+        "Drawing in Reaume de France — on the map's edge"
+      )
+      expect(actionSentence(action({ edge: 'corner' }))).toBe(
+        "Drawing in Reaume de France — in the map's corner"
+      )
+    })
+
+    // CARTO-257 QUAL-003 — ⟨retrace⟩ clamps its free points too, and says so.
+    it("says the map's edge or corner under ⟨retrace⟩ as well", () => {
+      expect(actionSentence(action({ tool: 'retrace', edge: 'corner' }))).toBe(
+        "Retracing Reaume de France — in the map's corner"
+      )
+      expect(actionSentence(action({ tool: 'retrace', edge: 'edge' }))).toBe(
+        "Retracing Reaume de France — on the map's edge"
+      )
+    })
+
+    // CARTO-257 — the coast comes first: near both, the Pen follows the coastline.
+    it("names the coast before the map's edge", () => {
+      expect(actionSentence(action({ edge: 'corner', snapping: 'coastline' }))).toBe(
+        'Following the coastline for Reaume de France'
       )
     })
 

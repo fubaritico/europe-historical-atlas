@@ -510,6 +510,44 @@ Scenario: what does not switch
 > border running within the snapping radius of a coast or a river without following it — zooming in is
 > the way out.
 
+## The map's edges and corners — CARTO-257, the dev, 2026-10-18
+
+> *« Pour toutes les zones qui sont dans les bords, comme par exemple le Groenland, c'est compliqué d'avoir un
+> point parfaitement dans le coin. »* **A free point near an edge lands on it, near a corner in it** — a
+> clamp of the free point, not a third layer to follow: an edge is straight in the projection, so two points
+> on it already draw it, and following it would only add points. The coast and the rivers, a neighbour's
+> anchor or border still come first; only a point that would have been free is clamped. The same reach as
+> every snap, in screen pixels. The white arrow dragging one anchor clamps it too; a selection moved as a
+> shape does not — clamping each point alone would bend it. ⟨retrace⟩'s free points and the Pencil's are
+> clamped as the Pen's, and said the same way. **Within reach of the edge from just outside it counts too**:
+> such a click, once refused as off the map, now lands on the edge (review, 2026-10-18). Two clicks — or two
+> Pencil samples — landing on one corner place one point: a second would be a zero-length edge.
+
+```gherkin
+Scenario: a point near the map's edge lands on it
+  Given the Pen is drawing the Kingdom of Norway near the top of the map
+  When the pointer comes within reach of the edge
+  Then the bar reads "Drawing in Kingdom of Norway — on the map's edge"
+  When I click
+  Then the anchor lies exactly on the edge, at the latitude of the map's top
+
+Scenario: a point near a corner lands in it
+  When the pointer comes within reach of two edges at once
+  Then the bar reads "Drawing in Kingdom of Norway — in the map's corner"
+  When I click
+  Then the anchor lies exactly in the corner
+
+Scenario: the white arrow drags an anchor into the corner
+  Given the white arrow holds one anchor of the target
+  When I drag it within reach of the top-left corner and release
+  Then it lies exactly in the corner
+
+Scenario: the coast comes first
+  Given the coastline of Greenland runs within reach of the edge
+  When I click near both
+  Then the Pen follows the coastline, as anywhere else
+```
+
 ```gherkin
 Scenario: follow a river
   Given the outline is open and its last vertex is on the Scheldt estuary
