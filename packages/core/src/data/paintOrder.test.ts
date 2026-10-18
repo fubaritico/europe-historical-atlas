@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest'
 
-import { effectiveSuzerains, paintOrder, paintRanks, vassalsOf } from './paintOrder'
+import {
+  MAX_HOMAGE_DEPTH,
+  deepestVassalBelow,
+  effectiveSuzerains,
+  homageDepth,
+  paintOrder,
+  paintRanks,
+  vassalsOf,
+  wouldExceedHomageDepth,
+} from './paintOrder'
 
 import type { YearPolity } from './yearFormat'
 
@@ -134,6 +143,117 @@ describe('vassalsOf', () => {
   describe('edge cases', () => {
     it('stops on a loop already in the list', () => {
       expect([...vassalsOf([polity('a', 'b'), polity('b', 'a')], 'a')]).toEqual(['b'])
+    })
+  })
+})
+
+/**
+ * A chain of homage `c0` ← `c1` ← … ← `c<depth>`, each owing the one before.
+ * @param depth - the depth of its last polity
+ * @param prefix - the ids' prefix, so two chains can share a list
+ * @returns the polities, top first
+ */
+function chain(depth: number, prefix = 'c'): YearPolity[] {
+  return Array.from({ length: depth + 1 }, (_, level) =>
+    polity(`${prefix}${String(level)}`, level === 0 ? null : `${prefix}${String(level - 1)}`)
+  )
+}
+
+describe('homageDepth', () => {
+  describe('happy path', () => {
+    it('counts the suzerains above a polity', () => {
+      expect(homageDepth(chain(3), 'c3')).toBe(3)
+    })
+  })
+
+  describe('variants', () => {
+    it('gives 0 for a polity owing nobody', () => {
+      expect(homageDepth(chain(3), 'c0')).toBe(0)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('ends the chain at a suzerain the list does not hold', () => {
+      expect(homageDepth([polity('nd', 'gone')], 'nd')).toBe(0)
+    })
+
+    it('gives 0 for an id the list does not hold', () => {
+      expect(homageDepth(chain(2), 'nowhere')).toBe(0)
+    })
+  })
+
+  // L4: N/A — a walk over the declared suzerains, no input it cannot read.
+
+  describe('edge cases', () => {
+    it('stops on a loop already in the list', () => {
+      expect(homageDepth([polity('a', 'b'), polity('b', 'a')], 'a')).toBe(1)
+    })
+  })
+})
+
+describe('deepestVassalBelow', () => {
+  describe('happy path', () => {
+    it('counts the levels of vassals below a polity', () => {
+      expect(deepestVassalBelow(chain(4), 'c1')).toBe(3)
+    })
+  })
+
+  describe('variants', () => {
+    it('gives 0 for a polity with no vassal', () => {
+      expect(deepestVassalBelow(chain(2), 'c2')).toBe(0)
+    })
+
+    it('follows the deepest branch, not the first', () => {
+      const year = [polity('fr'), polity('nd', 'fr'), polity('an', 'fr'), polity('tr', 'an')]
+      expect(deepestVassalBelow(year, 'fr')).toBe(2)
+    })
+  })
+
+  // L3/L4: N/A — a walk over the declared suzerains.
+
+  describe('edge cases', () => {
+    it('stops on a loop already in the list', () => {
+      expect(deepestVassalBelow([polity('a', 'b'), polity('b', 'a')], 'a')).toBe(1)
+    })
+  })
+})
+
+describe('wouldExceedHomageDepth', () => {
+  describe('happy path', () => {
+    it('allows a suzerain that seats the polity exactly at the limit', () => {
+      const year = [...chain(MAX_HOMAGE_DEPTH - 1), polity('new')]
+      expect(wouldExceedHomageDepth(year, 'new', `c${String(MAX_HOMAGE_DEPTH - 1)}`)).toBe(false)
+    })
+
+    it('refuses a suzerain that seats the polity one level past it', () => {
+      const year = [...chain(MAX_HOMAGE_DEPTH), polity('new')]
+      expect(wouldExceedHomageDepth(year, 'new', `c${String(MAX_HOMAGE_DEPTH)}`)).toBe(true)
+    })
+  })
+
+  describe('variants', () => {
+    // The trap: the polity itself stays within the limit, a vassal below it does not.
+    it('refuses a suzerain that pushes a vassal below the polity past the limit', () => {
+      const year = [...chain(4), ...chain(4, 'v')]
+      // v0 under c4 sits at 5 — allowed alone — and drags v4 down to 9.
+      expect(wouldExceedHomageDepth(year, 'v0', 'c4')).toBe(true)
+    })
+
+    it('reads a polity not created yet as having no vassal', () => {
+      expect(wouldExceedHomageDepth(chain(MAX_HOMAGE_DEPTH - 1), null, 'c7')).toBe(false)
+      expect(wouldExceedHomageDepth(chain(MAX_HOMAGE_DEPTH), null, 'c8')).toBe(true)
+    })
+
+    it('never refuses owing nobody', () => {
+      expect(wouldExceedHomageDepth(chain(MAX_HOMAGE_DEPTH), 'c8', null)).toBe(false)
+    })
+  })
+
+  // L3/L4: N/A — arithmetic over two walks that read any list.
+
+  describe('edge cases', () => {
+    it('keeps the limit at 8, the depth the atlas’s fills are sized for', () => {
+      expect(MAX_HOMAGE_DEPTH).toBe(8)
     })
   })
 })

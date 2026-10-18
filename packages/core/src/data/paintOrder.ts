@@ -115,3 +115,83 @@ export function vassalsOf(polities: readonly YearPolity[], id: string): Set<stri
   }
   return below
 }
+
+/**
+ * How deep a chain of homage may go: a polity owing nobody is at depth 0, its vassal at 1, and so on —
+ * depth 8 is allowed, 9 refused (the dev's call, 2026-10-18, review QUAL-005 of ATLAS-253).
+ *
+ * **Why a limit at all**: the atlas spends one vertex attribute per homage level on the fills
+ * (`atlas/src/scene/fillLayer.ts`), and WebGL guarantees only 16 of them. A chain deeper than the shader
+ * can carry would make the fills vanish with no error. The dev expects one or two levels in practice; 8
+ * leaves room and stays clear of the hardware floor. **Enforced wherever a chain can be made** — the reader
+ * (`checkRegistry`), the document (`addPolity`, `updatePolity`) and the form's suzerain list — so an author
+ * can never save a year the reader then refuses.
+ */
+export const MAX_HOMAGE_DEPTH = 8
+
+/**
+ * A polity's depth in its chain of homage: 0 when it owes nobody, 1 for a vassal of such a polity, and so on.
+ *
+ * Walks the declared suzerains. A suzerain the list does not hold ends the chain, as in
+ * {@link effectiveSuzerains}; a loop already in the list stops the walk rather than spinning it, as in
+ * {@link vassalsOf} — both are refused elsewhere (the readers, `updatePolity`).
+ * @param polities - the year's polities
+ * @param id - whose depth; an id the list does not hold is at depth 0
+ * @returns the number of suzerains above it
+ */
+export function homageDepth(polities: readonly YearPolity[], id: string): number {
+  const suzerainOf = new Map(polities.map((polity) => [polity.id, polity.suzerain]))
+  const walked = new Set<string>([id])
+  let depth = 0
+  for (let at = suzerainOf.get(id) ?? null; at !== null; at = suzerainOf.get(at) ?? null) {
+    if (!suzerainOf.has(at) || walked.has(at)) break
+    walked.add(at)
+    depth += 1
+  }
+  return depth
+}
+
+/**
+ * How many levels of vassals hang below a polity: 0 with none, 1 with vassals only, 2 when one of them has
+ * its own, and so on. Read on the declared suzerains, like {@link vassalsOf}; a loop stops the walk.
+ * @param polities - the year's polities
+ * @param id - whose vassals
+ * @returns the depth of its deepest vassal, counted from it
+ */
+export function deepestVassalBelow(polities: readonly YearPolity[], id: string): number {
+  const seen = new Set<string>([id])
+  let level = [id]
+  let depth = 0
+  for (;;) {
+    const lords = new Set(level)
+    const next = polities
+      .filter((polity) => polity.suzerain !== null && lords.has(polity.suzerain))
+      .map((polity) => polity.id)
+      .filter((vassal) => !seen.has(vassal))
+    if (next.length === 0) return depth
+    next.forEach((vassal) => seen.add(vassal))
+    level = next
+    depth += 1
+  }
+}
+
+/**
+ * Whether making `suzerain` the lord of `polityId` would push a chain of homage past
+ * {@link MAX_HOMAGE_DEPTH} — **the polity itself or any vassal below it**, which goes down with it:
+ * `homageDepth(suzerain) + 1 + deepestVassalBelow(polityId)`. The one definition read by the document
+ * (`addPolity`, `updatePolity`) and the form's suzerain list (`suzerainChoices`), so the form never offers
+ * what the document refuses.
+ * @param polities - the year's polities
+ * @param polityId - the polity whose suzerain is set, or `null` for one not created yet (no vassals)
+ * @param suzerain - the suzerain proposed, or `null`
+ * @returns `true` when the deepest polity of the moved group would sit deeper than the limit
+ */
+export function wouldExceedHomageDepth(
+  polities: readonly YearPolity[],
+  polityId: string | null,
+  suzerain: string | null
+): boolean {
+  if (suzerain === null) return false
+  const below = polityId === null ? 0 : deepestVassalBelow(polities, polityId)
+  return homageDepth(polities, suzerain) + 1 + below > MAX_HOMAGE_DEPTH
+}

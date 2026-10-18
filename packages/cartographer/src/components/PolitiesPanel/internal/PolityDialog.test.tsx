@@ -146,7 +146,13 @@ describe('PolityDialog', () => {
     // between). Nothing may be aimed at — the trap is aiming before reading createPolity's answer.
     it('aims at nothing when the document refuses what the form accepted', async () => {
       const { store, onClose, user } = openDialog()
-      store.setState({ createPolity: () => false })
+      store.setState({
+        createPolity: (polity) => {
+          // The edit that landed in between: the id is now the document's.
+          store.getState().document.polities.push({ ...polity })
+          return false
+        },
+      })
       await user.type(field('Name'), 'France')
       await user.click(screen.getByRole('button', { name: 'OK' }))
 
@@ -154,6 +160,22 @@ describe('PolityDialog', () => {
       expect(store.getState().target).toBeNull()
       expect(store.getState().tool).toBe('navigate')
       expect(onClose).not.toHaveBeenCalled()
+    })
+
+    // Any refusal other than a taken id — a chain of homage too deep — the suzerain list never offers:
+    // a defect, said loudly, and not blamed on the id field.
+    it('says a refusal with the id still free as a defect, beside no field, aiming at nothing', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      const { store, onClose, user } = openDialog()
+      store.setState({ createPolity: () => false })
+      await user.type(field('Name'), 'France')
+      await user.click(screen.getByRole('button', { name: 'OK' }))
+
+      expect(screen.queryByText(DRAFT_ERRORS.idTaken)).toBeNull()
+      expect(error).toHaveBeenCalledWith(expect.stringContaining('refused to create "france"'))
+      expect(store.getState().target).toBeNull()
+      expect(onClose).not.toHaveBeenCalled()
+      error.mockRestore()
     })
 
     it('refuses an empty form and says what is missing', async () => {

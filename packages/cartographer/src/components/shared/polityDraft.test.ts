@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { updatePolity } from '@europe-historical-atlas/core/editor/documentEdits'
+import { MAX_HOMAGE_DEPTH } from '@europe-historical-atlas/core/data/paintOrder'
+import { addPolity, updatePolity } from '@europe-historical-atlas/core/editor/documentEdits'
 import { createYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import {
@@ -231,6 +232,18 @@ describe('draftOf', () => {
   // L5: the year 0 and negative years are readDraft's, tested above.
 })
 
+/**
+ * A chain of homage `<prefix>0` ← `<prefix>1` ← … ← `<prefix><depth>`.
+ * @param prefix - the ids' prefix
+ * @param depth - the depth of its last polity
+ * @returns the polities, top first
+ */
+function chainOf(prefix: string, depth: number): YearPolity[] {
+  return Array.from({ length: depth + 1 }, (_, level) =>
+    polity(`${prefix}${String(level)}`, level === 0 ? null : `${prefix}${String(level - 1)}`)
+  )
+}
+
 describe('suzerainChoices', () => {
   const year = [polity('fr'), polity('normandy', 'fr'), polity('bayeux', 'normandy'), polity('hre')]
 
@@ -254,6 +267,20 @@ describe('suzerainChoices', () => {
     it('labels each choice with its name', () => {
       expect(suzerainChoices(year, 'bayeux')[0]).toEqual({ value: 'fr', label: 'Name of fr' })
     })
+
+    // A chain deeper than the limit would be refused by the document: the list does not offer it.
+    it('leaves out a suzerain that would push a vassal below the polity edited past the limit', () => {
+      // v0 under c4 sits at 5; its vassal v4 would sit at 9.
+      const chains = [...chainOf('c', 4), ...chainOf('v', 4)]
+      const offered = suzerainChoices(chains, 'v0').map((choice) => choice.value)
+      expect(offered).toEqual(['c0', 'c1', 'c2', 'c3'])
+    })
+
+    it('leaves out, for a new polity, the suzerain at the limit and offers the one just above', () => {
+      const offered = suzerainChoices(chainOf('c', MAX_HOMAGE_DEPTH), null).map((c) => c.value)
+      expect(offered).toContain(`c${String(MAX_HOMAGE_DEPTH - 1)}`)
+      expect(offered).not.toContain(`c${String(MAX_HOMAGE_DEPTH)}`)
+    })
   })
 
   // L3: N/A — a filter over the year's polities.
@@ -269,6 +296,28 @@ describe('suzerainChoices', () => {
           const accepted = updatePolity(structuredClone(doc), { ...edited, suzerain: candidate.id })
           expect([candidate.id, offered.has(candidate.id)]).toEqual([candidate.id, accepted])
         }
+      }
+    })
+
+    it('offers exactly the suzerains the document accepts on deep chains, editing and creating', () => {
+      const chains = [...chainOf('c', MAX_HOMAGE_DEPTH), ...chainOf('v', 3)]
+      const doc = createYearDocument(1100)
+      doc.polities = chains
+      for (const edited of chains) {
+        const offered = new Set(suzerainChoices(chains, edited.id).map((choice) => choice.value))
+        for (const candidate of chains) {
+          const accepted = updatePolity(structuredClone(doc), { ...edited, suzerain: candidate.id })
+          expect([edited.id, candidate.id, offered.has(candidate.id)]).toEqual([
+            edited.id,
+            candidate.id,
+            accepted,
+          ])
+        }
+      }
+      const offeredNew = new Set(suzerainChoices(chains, null).map((choice) => choice.value))
+      for (const candidate of chains) {
+        const accepted = addPolity(structuredClone(doc), polity('new', candidate.id))
+        expect([candidate.id, offeredNew.has(candidate.id)]).toEqual([candidate.id, accepted])
       }
     })
   })

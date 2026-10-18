@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { isAssetError } from './assetError'
+import { MAX_HOMAGE_DEPTH } from './paintOrder'
 import { assembleAuthoredYear } from './yearConsistency'
 
 import type { AssetError } from './assetError'
@@ -71,6 +72,32 @@ function validYear(): YearFiles {
   }
 }
 
+/**
+ * Hang a chain of vassals below Aquitaine (depth 1) until the deepest one sits at `depth`.
+ * @param files - the year to extend
+ * @param depth - the depth of the deepest polity once done
+ * @returns the id of that deepest polity
+ */
+function chainTo(files: YearFiles, depth: number): string {
+  let lord = 'aquitaine'
+  for (let level = 2; level <= depth; level += 1) {
+    const id = `level-${String(level)}`
+    files.registry.polities.push({
+      id,
+      name: id,
+      rank: null,
+      status: null,
+      suzerain: lord,
+      existsFrom: null,
+      existsTo: null,
+      colour: null,
+      wikidata: null,
+    })
+    lord = id
+  }
+  return lord
+}
+
 /** Run the assembly and hand back the failure, so each case can read its fields. */
 function failureOf(files: YearFiles): AssetError {
   try {
@@ -103,6 +130,14 @@ describe('assembleAuthoredYear', () => {
   })
 
   describe('variants', () => {
+    it('accepts a chain of homage exactly as deep as the limit', () => {
+      const files = validYear()
+      chainTo(files, MAX_HOMAGE_DEPTH)
+      expect(assembleAuthoredYear(files, 'years/1100').registry.polities).toHaveLength(
+        MAX_HOMAGE_DEPTH + 1
+      )
+    })
+
     it('accepts a chain of homage several links deep', () => {
       const files = validYear()
       files.registry.polities.push({
@@ -179,6 +214,15 @@ describe('assembleAuthoredYear', () => {
       crown.suzerain = vassal.id
       const error = failureOf(files)
       expect(error.detail).toContain('loop')
+    })
+
+    it('refuses a chain of homage one level deeper than the limit, naming the polity and its depth', () => {
+      const files = validYear()
+      const deepest = chainTo(files, MAX_HOMAGE_DEPTH + 1)
+      const error = failureOf(files)
+      expect(error.asset).toBe('yearRegistry')
+      expect(error.detail).toContain(deepest)
+      expect(error.detail).toContain(`${String(MAX_HOMAGE_DEPTH + 1)} levels deep`)
     })
 
     it('refuses three files that do not describe the same year', () => {

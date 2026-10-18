@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import { MAX_HOMAGE_DEPTH } from '../data/paintOrder'
+
 import {
   addAnchor,
   addOutline,
@@ -34,6 +36,25 @@ function polity(id: string, name: string, suzerain: string | null = null): YearP
     colour: null,
     wikidata: null,
   }
+}
+
+/**
+ * A document holding chains of homage, each `<prefix>0` ← `<prefix>1` ← … ← `<prefix><depth>`.
+ * @param chains - each chain's prefix and the depth of its last polity
+ * @returns the document, no territory drawn
+ */
+function chainedDocument(chains: readonly (readonly [string, number])[]) {
+  const doc = createYearDocument(1100, source)
+  for (const [prefix, depth] of chains)
+    for (let level = 0; level <= depth; level += 1)
+      doc.polities.push(
+        polity(
+          `${prefix}${String(level)}`,
+          `${prefix}${String(level)}`,
+          level === 0 ? null : `${prefix}${String(level - 1)}`
+        )
+      )
+  return doc
 }
 
 /**
@@ -182,6 +203,11 @@ describe('polities and rings', () => {
       expect(doc.polities.at(-1)?.id).toBe('x')
     })
 
+    it('adds a new polity seated exactly at the limit of homage', () => {
+      const doc = chainedDocument([['c', MAX_HOMAGE_DEPTH - 1]])
+      expect(addPolity(doc, polity('deep', 'Deep', `c${String(MAX_HOMAGE_DEPTH - 1)}`))).toBe(true)
+    })
+
     it('adds a second ring to a polity that already holds one', () => {
       const doc = neighbours()
       expect(closeRing(doc, 'fr-couronne', [1, 2, 3])).toBe(true)
@@ -194,6 +220,22 @@ describe('polities and rings', () => {
       const doc = neighbours()
       expect(addPolity(doc, polity('fr-couronne', 'something else'))).toBe(false)
       expect(doc.polities).toHaveLength(2)
+    })
+
+    it('refuses a new polity seated one level deeper than the limit of homage, and adds nothing', () => {
+      const doc = chainedDocument([['c', MAX_HOMAGE_DEPTH]])
+      const before = structuredClone(doc.polities)
+      expect(addPolity(doc, polity('deep', 'Deep', `c${String(MAX_HOMAGE_DEPTH)}`))).toBe(false)
+      expect(doc.polities).toEqual(before)
+    })
+
+    it('refuses a new polity whose suzerain already owes it homage, and adds nothing', () => {
+      const doc = neighbours()
+      expect(addPolity(doc, polity('a', 'A', 'b'))).toBe(true)
+      const before = structuredClone(doc.polities)
+      expect(addPolity(doc, polity('b', 'B', 'a'))).toBe(false)
+      expect(addPolity(doc, polity('self', 'Self', 'self'))).toBe(false)
+      expect(doc.polities).toEqual(before)
     })
 
     it('refuses a ring of fewer than three anchors', () => {
@@ -624,6 +666,30 @@ describe('updatePolity', () => {
       expect(updatePolity(doc, { ...france, suzerain: 'fr-couronne' })).toBe(false)
       expect(doc.polities[0]?.suzerain).toBeNull()
     })
+
+    it('refuses a suzerain seating the polity one level deeper than the limit of homage', () => {
+      const doc = chainedDocument([
+        ['c', MAX_HOMAGE_DEPTH],
+        ['v', 0],
+      ])
+      const lone = doc.polities.find((p) => p.id === 'v0')
+      if (lone === undefined) throw new Error('fixture')
+      expect(updatePolity(doc, { ...lone, suzerain: `c${String(MAX_HOMAGE_DEPTH)}` })).toBe(false)
+      expect(doc.polities.find((p) => p.id === 'v0')?.suzerain).toBeNull()
+    })
+
+    // The trap: v0 under c4 sits at 5, well within the limit — but its vassal v4 would sit at 9.
+    it('refuses a suzerain that pushes a vassal below the polity past the limit of homage', () => {
+      const doc = chainedDocument([
+        ['c', 4],
+        ['v', 4],
+      ])
+      const head = doc.polities.find((p) => p.id === 'v0')
+      if (head === undefined) throw new Error('fixture')
+      const before = structuredClone(doc.polities)
+      expect(updatePolity(doc, { ...head, suzerain: 'c4' })).toBe(false)
+      expect(doc.polities).toEqual(before)
+    })
   })
 
   describe('unmanaged errors', () => {
@@ -634,6 +700,16 @@ describe('updatePolity', () => {
   })
 
   describe('edge cases', () => {
+    it('accepts a suzerain bringing the deepest vassal below exactly to the limit of homage', () => {
+      const doc = chainedDocument([
+        ['c', 4],
+        ['v', 3],
+      ])
+      const head = doc.polities.find((p) => p.id === 'v0')
+      if (head === undefined) throw new Error('fixture')
+      expect(updatePolity(doc, { ...head, suzerain: 'c4' })).toBe(true)
+    })
+
     it('sees a loop already in the document without walking for ever', () => {
       const doc = withVassal()
       first(doc).suzerain = 'normandy'

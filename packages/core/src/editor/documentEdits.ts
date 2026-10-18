@@ -7,7 +7,7 @@
  * happens once at save.
  */
 
-import { effectiveSuzerains, vassalsOf } from '../data/paintOrder'
+import { effectiveSuzerains, vassalsOf, wouldExceedHomageDepth } from '../data/paintOrder'
 
 import { MIN_RING_ANCHORS, referencedAnchors } from './yearDocument'
 
@@ -111,10 +111,15 @@ export function pathsHolding(doc: YearDocument, index: number): number {
  * siblings — the new polity owes another suzerain — the list position near the target would say nothing about
  * its rank in its own group, so it takes the default. An `inFrontOf` naming no polity of the year is the same
  * as none: the target is an id that may cease to resolve (a polity deleted, an undo), a legitimate state.
+ *
+ * **A suzerain that would seat the polity deeper than `MAX_HOMAGE_DEPTH` is refused** — as in
+ * {@link updatePolity}: the document is the authority, and the reader would refuse the year once saved.
+ * **So is a suzerain that would close a loop of homage** — itself, or a polity that already owes it.
  * @param doc - the document to edit
  * @param polity - the identity to add
  * @param inFrontOf - the polity to place it just in front of when they are siblings, or `null`
- * @returns `false` when the id is already taken, which is refused rather than merged
+ * @returns `false` when the id is already taken, which is refused rather than merged, or the suzerain would
+ *   exceed the depth of homage or close a loop — and nothing changed
  */
 export function addPolity(
   doc: YearDocument,
@@ -122,6 +127,8 @@ export function addPolity(
   inFrontOf: string | null = null
 ): boolean {
   if (doc.polities.some((existing) => existing.id === polity.id)) return false
+  if (wouldLoopHomage(doc, polity.id, polity.suzerain)) return false
+  if (wouldExceedHomageDepth(doc.polities, polity.id, polity.suzerain)) return false
   doc.polities.push({ ...polity })
   if (inFrontOf === null) return true
   const anchor = doc.polities.findIndex((existing) => existing.id === inFrontOf)
@@ -156,13 +163,18 @@ export function wouldLoopHomage(
  *
  * **A loop of homage is refused here**, not only by the form's list: the document is the authority, and
  * a loop would leave `paintOrder` painting the polities last and `documentFaults` saying so forever.
+ *
+ * **So is a chain deeper than `MAX_HOMAGE_DEPTH`** — counting the vassals below the polity, which go down
+ * with it: the reader refuses such a year, so saving it would lose the author's work at the next load.
  * @param doc - the document to edit
  * @param polity - the new properties, under the id of the polity to change
- * @returns `false` when no polity has that id, or the suzerain would close a loop — and nothing changed
+ * @returns `false` when no polity has that id, or the suzerain would close a loop or exceed the depth of
+ *   homage — and nothing changed
  */
 export function updatePolity(doc: YearDocument, polity: YearPolity): boolean {
   const at = doc.polities.findIndex((existing) => existing.id === polity.id)
   if (at < 0 || wouldLoopHomage(doc, polity.id, polity.suzerain)) return false
+  if (wouldExceedHomageDepth(doc.polities, polity.id, polity.suzerain)) return false
   doc.polities[at] = { ...polity }
   return true
 }

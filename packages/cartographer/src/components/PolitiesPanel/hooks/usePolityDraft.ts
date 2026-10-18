@@ -39,13 +39,18 @@ function commit(
 ): Partial<Record<DraftField, string>> | null {
   const { createPolity, editPolity, aimAt, target } = store.getState()
   if (editing) {
-    // The suzerain list offers no loop: a refusal here is a defect, said loudly.
+    // The suzerain list offers no loop and no chain too deep: a refusal here is a defect, said loudly.
     if (editPolity(polity, { kind: 'edit-polity', label: `edit ${polity.name}` })) return null
     console.error(`[Cartographer] the document refused the change to "${polity.id}".`)
     return {}
   }
   if (!createPolity(polity, { kind: 'create-polity', label: `create ${polity.name}` }, target)) {
-    return { id: DRAFT_ERRORS.idTaken }
+    // The form checked the id against its copy; the document holding it is the expected refusal.
+    if (store.getState().document.polities.some((existing) => existing.id === polity.id))
+      return { id: DRAFT_ERRORS.idTaken }
+    // Any other refusal — a loop, a chain too deep — the suzerain list does not offer: a defect.
+    console.error(`[Cartographer] the document refused to create "${polity.id}".`)
+    return {}
   }
   aimAt(polity.id)
   return null

@@ -13,6 +13,7 @@
  */
 
 import { assetError } from './assetError'
+import { MAX_HOMAGE_DEPTH } from './paintOrder'
 import { YEAR_FORMAT_VERSION } from './yearFormat'
 
 import type { AssetKind } from './assetError'
@@ -88,7 +89,9 @@ function checkYears(files: YearFiles, source: string): void {
 }
 
 /**
- * Check the registry against itself: unique ids, suzerains that exist, and no loop of homage.
+ * Check the registry against itself: unique ids, suzerains that exist, no loop of homage, and no chain
+ * deeper than {@link MAX_HOMAGE_DEPTH} — past it the atlas has no vertex attribute left for the level, and
+ * the fills would vanish without a word.
  *
  * **The cycle check earns its place by what it prevents, not by what it catches.** Anything walking the
  * chain to find a polity's depth — which is what decides who paints a cell and how heavy a border is drawn
@@ -126,6 +129,14 @@ function checkRegistry(registry: YearRegistry, source: string): Set<string> {
       walked.add(current)
       current = suzerainOf.get(current)
     }
+    // `walked` holds the polity and every suzerain above it: its depth is the rest.
+    const depth = walked.size - 1
+    if (depth > MAX_HOMAGE_DEPTH)
+      disagree(
+        'yearRegistry',
+        source,
+        `"${start}" sits ${String(depth)} levels deep in homage, past the limit of ${String(MAX_HOMAGE_DEPTH)}`
+      )
   }
   return ids
 }

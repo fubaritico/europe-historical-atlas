@@ -1,4 +1,4 @@
-import { vassalsOf } from '@europe-historical-atlas/core/data/paintOrder'
+import { vassalsOf, wouldExceedHomageDepth } from '@europe-historical-atlas/core/data/paintOrder'
 import { proposePolityId } from '@europe-historical-atlas/core/editor/polityId'
 import { TRIBE_RANK } from '@europe-historical-atlas/core/editor/tribes'
 
@@ -220,7 +220,9 @@ export function rankChoices(polities: readonly Pick<YearPolity, 'rank'>[]): Draf
 /**
  * The polities a polity may owe homage to — every other one of the year, **less itself and its own
  * vassals at any depth**: choosing one of those would close a loop of homage, which the document refuses
- * (`updatePolity`). Offering it and then refusing it would be a choice the form pretends to give.
+ * (`updatePolity`). Offering it and then refusing it would be a choice the form pretends to give. **Nor
+ * one that would seat the polity, or a vassal below it, deeper than `MAX_HOMAGE_DEPTH`**
+ * (`wouldExceedHomageDepth`), which the document refuses as well (`addPolity`, `updatePolity`).
  * @param polities - the year's polities
  * @param editing - the polity being edited, or `null` when creating one
  * @returns the choices, in list order
@@ -233,5 +235,6 @@ export function suzerainChoices(
   if (editing !== null) below.add(editing)
   return polities
     .filter((polity) => !below.has(polity.id))
+    .filter((polity) => !wouldExceedHomageDepth(polities, editing, polity.id))
     .map((polity) => ({ value: polity.id, label: polity.name }))
 }

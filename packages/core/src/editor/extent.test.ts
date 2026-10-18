@@ -110,8 +110,8 @@ describe('hasExtent', () => {
   describe('unmanaged errors', () => {
     it('ends on a loop of homage rather than spinning', () => {
       const doc = createYearDocument(1100, source)
-      addPolity(doc, polity('a', 'b'))
-      addPolity(doc, polity('b', 'a'))
+      // A loop the document refuses, as a hand-edited file could still hold it.
+      doc.polities.push(polity('a', 'b'), polity('b', 'a'))
       closeRing(doc, 'b', square(doc, 0, 0))
       expect(hasExtent(doc, 'a')).toBe(true)
     })
