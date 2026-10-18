@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 import react from '@vitejs/plugin-react'
@@ -11,7 +11,7 @@ import { YEAR_WRITE_ROUTE } from './src/devServer/yearWriteRoute'
 import type { DraftFolder } from './src/devServer/draftEndpoint'
 import type * as DraftEndpoint from './src/devServer/draftEndpoint'
 import type { BodyStream, ResponseSink } from './src/devServer/httpEndpoint'
-import type { DiskFolder } from './src/devServer/diskFolder'
+import type { YearFolder } from './src/devServer/diskFolder'
 import type * as YearWriteEndpoint from './src/devServer/yearWriteEndpoint'
 import type { Plugin, ViteDevServer } from 'vite'
 
@@ -39,10 +39,11 @@ const disk = {
   removeFile: (path: string) => {
     rmSync(path)
   },
+  modifiedAt: (path: string) => statSync(path).mtimeMs,
 }
 
 /** The years folder on the real disk. */
-const yearsOnDisk: DiskFolder = createYearsFolderOnDisk(YEARS_DIR, disk)
+const yearsOnDisk: YearFolder = createYearsFolderOnDisk(YEARS_DIR, disk)
 
 /** The drafts folder on the real disk. */
 const draftsOnDisk: DraftFolder = createDraftFolderOnDisk(DRAFTS_DIR, disk)

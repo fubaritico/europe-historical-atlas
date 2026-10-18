@@ -3,6 +3,8 @@ import { Card } from '@fubaritico/react/Card'
 import { Modal } from '@fubaritico/react/Modal'
 import { useSyncExternalStore } from 'react'
 
+import { autofocusOnOpen } from './autofocusOnOpen'
+
 import type { DraftOffers } from '../persistence/draftOffers'
 
 /**
@@ -18,15 +20,6 @@ import type { DraftOffers } from '../persistence/draftOffers'
 export interface DraftRecoveryDialogProps {
   /** The relay the opening asks through. */
   offers: DraftOffers
-}
-
-/**
- * Marks `[Resume]` with the native `autofocus` attribute, which `showModal()` honours — React's `autoFocus`
- * prop writes no attribute a `<dialog>` could see (the trap `PolityForm` records).
- * @param node - the Resume button, or `null` on unmount
- */
-function autofocusOnOpen(node: HTMLButtonElement | null): void {
-  node?.setAttribute('autofocus', '')
 }
 
 /**

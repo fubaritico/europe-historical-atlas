@@ -1,4 +1,4 @@
-import type { DiskFolder } from './diskFolder'
+import type { YearFolder } from './diskFolder'
 import type { DraftFolder } from './draftEndpoint'
 
 /**
@@ -38,6 +38,13 @@ export interface DiskCalls {
    * @param toPath - an absolute path
    */
   rename: (fromPath: string, toPath: string) => void
+  /**
+   * When a file was last modified.
+   * @param path - an absolute path
+   * @returns milliseconds since the epoch
+   * @throws an error carrying `code: 'ENOENT'` when there is no such file
+   */
+  modifiedAt: (path: string) => number
 }
 
 /**
@@ -67,7 +74,7 @@ function folderOf(path: string): string {
  * @param disk - the file-system calls
  * @returns the folder
  */
-export function createYearsFolderOnDisk(root: string, disk: DiskCalls): DiskFolder {
+export function createYearsFolderOnDisk(root: string, disk: DiskCalls): YearFolder {
   const base = root.replace(/\/$/, '')
   const at = (relativePath: string): string => `${base}/${relativePath}`
   return {
@@ -88,6 +95,15 @@ export function createYearsFolderOnDisk(root: string, disk: DiskCalls): DiskFold
     },
     rename: (fromPath, toPath) => {
       disk.rename(at(fromPath), at(toPath))
+    },
+    modifiedAt: (relativePath) => {
+      try {
+        return disk.modifiedAt(at(relativePath))
+      } catch (error: unknown) {
+        // Absent, as for a read: the caller is told there is no such file. Anything else is thrown on.
+        if (isMissingFile(error)) return null
+        throw error
+      }
     },
   }
 }

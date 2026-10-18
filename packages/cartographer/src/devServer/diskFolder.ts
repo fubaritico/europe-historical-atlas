@@ -26,3 +26,13 @@ export interface DiskFolder {
    */
   rename: (fromPath: string, toPath: string) => void
 }
+
+/** The years folder: a disk folder that can also say when a file was last written (CARTO-238, rung 3). */
+export interface YearFolder extends DiskFolder {
+  /**
+   * When a file was last modified.
+   * @param relativePath - e.g. `1100/polities.json`
+   * @returns milliseconds since the epoch, or `null` when there is no such file
+   */
+  modifiedAt: (relativePath: string) => number | null
+}

@@ -1,4 +1,6 @@
 import { reasonOf } from './errorReason'
+import { timeWords } from './timeWords'
+import { YearChangedOnDisk } from './yearArchive'
 
 import type { SavedYearSummary, YearArchive } from './yearArchive'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
@@ -38,6 +40,14 @@ export interface SessionStore {
   }
 }
 
+/** What the author is asked when a save would write over a year changed on disk (CARTO-238, rung 3). */
+export interface OverwriteQuestion {
+  /** The year. */
+  year: number
+  /** When its files changed, worded — *"today at 14:02"* — or `null` when they are gone from disk. */
+  when: string | null
+}
+
 /** What the session needs. */
 export interface YearSessionDeps {
   /** The store whose document is opened and saved. */
@@ -48,6 +58,13 @@ export interface YearSessionDeps {
   year: number
   /** Where a message for the author goes — the status bar's result zone. */
   report: (message: string) => void
+  /**
+   * Ask whether to write over a year changed on disk — the dialogue, through a question relay.
+   * @returns `true` for [Overwrite], `false` for [Cancel]
+   */
+  confirmOverwrite: (question: OverwriteQuestion) => Promise<boolean>
+  /** The clock, to word when the year changed. */
+  now: () => Date
 }
 
 /**
@@ -208,16 +225,58 @@ async function saveYear(deps: YearSessionDeps, cell: SessionCell): Promise<boole
   }
   cell.saving = true
   try {
-    const summary = await deps.archive.save(deps.store.getState().document)
-    deps.report(`saved ${String(summary.year)} · ${describeYearContents(summary)}`)
-    return true
+    return await writeYear(deps, false)
   } catch (error: unknown) {
+    // The question itself failed — the relay busy, a time out of range. `save` resolves either way, as
+    // its contract says: reported like any other failed save, never thrown.
     console.error(`${LOG_TAG} ${String(deps.year)} was not saved`, error)
     deps.report(`not saved: ${reasonOf(error)}`)
     return false
   } finally {
     cell.saving = false
   }
+}
+
+/**
+ * Write the working document — and, when the year changed on disk since it was opened, ask before writing
+ * over it (CARTO-238, rung 3). Every outcome is reported; none is thrown.
+ * @param deps - the store, the archive, where to report and whom to ask
+ * @param overwrite - write even over a year changed on disk
+ * @returns `true` when the year was written
+ */
+async function writeYear(deps: YearSessionDeps, overwrite: boolean): Promise<boolean> {
+  try {
+    // The document is taken now, not when ‹ctrl+S› was pressed: after [Overwrite] it is the page as it is.
+    const summary = await deps.archive.save(deps.store.getState().document, { overwrite })
+    deps.report(`saved ${String(summary.year)} · ${describeYearContents(summary)}`)
+    return true
+  } catch (error: unknown) {
+    if (error instanceof YearChangedOnDisk && !overwrite) return askBeforeOverwriting(deps, error)
+    console.error(`${LOG_TAG} ${String(deps.year)} was not saved`, error)
+    deps.report(`not saved: ${reasonOf(error)}`)
+    return false
+  }
+}
+
+/**
+ * The year changed on disk under the page: ask, then overwrite or leave everything as it is.
+ * @param deps - the archive, where to report and whom to ask
+ * @param refusal - what the server answered
+ * @returns `true` when the author chose to overwrite and the year was written
+ */
+async function askBeforeOverwriting(
+  deps: YearSessionDeps,
+  refusal: YearChangedOnDisk
+): Promise<boolean> {
+  const when =
+    refusal.changedAt === null
+      ? null
+      : timeWords(new Date(refusal.changedAt).toISOString(), deps.now())
+  if (await deps.confirmOverwrite({ year: refusal.year, when })) return writeYear(deps, true)
+  const changed = `${String(refusal.year)} was changed on disk ${when ?? 'since it was opened'}`
+  console.warn(`${LOG_TAG} save cancelled: ${changed}`)
+  deps.report(`not saved — ${changed}; ‹ctrl+S› again to choose`)
+  return false
 }
 
 /**

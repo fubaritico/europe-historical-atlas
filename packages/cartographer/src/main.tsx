@@ -16,6 +16,7 @@ import { CHROME_PAINT_STYLE } from './canvas/style'
 import { arrangeSelected } from './components/arrange'
 import { DraftRecoveryDialog } from './components/DraftRecoveryDialog'
 import { Editor } from './components/Editor'
+import { OverwriteDialog } from './components/OverwriteDialog'
 import { listenForStackingKeys } from './components/stackingShortcut'
 import { DRAFTS_FOLDER, DRAFT_ROUTE } from './devServer/draftRoute'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
@@ -24,6 +25,7 @@ import { createDraftOffers } from './persistence/draftOffers'
 import { offerDraft } from './persistence/draftRecovery'
 import { openWithDraft, saveAndClearDraft } from './persistence/draftSession'
 import { createDevServerDraftStore } from './persistence/draftStore'
+import { createQuestionRelay } from './persistence/questionRelay'
 import { createResultRelay } from './persistence/resultRelay'
 import { installSaveShortcut } from './persistence/saveShortcut'
 import { createDevServerYearArchive } from './persistence/yearArchive'
@@ -38,6 +40,7 @@ import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataS
 // Every sheet, in order, through one module the workbench imports too — see `styles/sheets.ts`.
 import './styles/sheets'
 
+import type { OverwriteQuestion } from './persistence/yearSession'
 import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
 /**
@@ -192,6 +195,8 @@ const wikidata = createWikidataApiSource({
  * server only (`vite.config.ts`), so the built site answers a save with an error, said in the status bar.
  */
 const results = createResultRelay()
+/** ‹ctrl+S› over a year changed on disk asks first (CARTO-238, rung 3) — answered in `OverwriteDialog`. */
+const overwriteQuestions = createQuestionRelay<OverwriteQuestion>('a save is already asking')
 const yearSession = createYearSession({
   store,
   archive: createDevServerYearArchive({
@@ -201,6 +206,8 @@ const yearSession = createYearSession({
   }),
   year: FIRST_YEAR,
   report: results.say,
+  confirmOverwrite: overwriteQuestions.ask,
+  now: () => new Date(),
 })
 /**
  * The draft — the work since the last ‹ctrl+S›, kept on disk a moment after every gesture (CARTO-238).
@@ -283,5 +290,6 @@ createRoot(container).render(
       results={results}
     />
     <DraftRecoveryDialog offers={draftOffers} />
+    <OverwriteDialog questions={overwriteQuestions} />
   </StrictMode>
 )

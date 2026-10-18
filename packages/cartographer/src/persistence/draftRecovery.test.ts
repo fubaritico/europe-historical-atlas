@@ -5,7 +5,7 @@ import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocum
 
 import { openEmptyYear } from '../state/openEmptyYear'
 
-import { draftTimeWords, offerDraft } from './draftRecovery'
+import { offerDraft } from './draftRecovery'
 
 import type { DraftOffer } from './draftOffers'
 import type { DraftRecoveryDeps } from './draftRecovery'
@@ -224,27 +224,5 @@ describe('offerDraft', () => {
         `the map changed while the draft of 1100 was offered, so it was not resumed — it is set aside in ${DRAFTS_FOLDER}`
       )
     })
-  })
-})
-
-describe('draftTimeWords', () => {
-  it('says "today" for a draft of the same day', () => {
-    expect(draftTimeWords(new Date(2026, 9, 17, 9, 5).toISOString(), NOW)).toBe('today at 09:05')
-  })
-
-  it('says "yesterday" for a draft of the day before', () => {
-    expect(draftTimeWords(new Date(2026, 9, 16, 23, 10).toISOString(), NOW)).toBe(
-      'yesterday at 23:10'
-    )
-  })
-
-  it('gives the date for an older draft', () => {
-    expect(draftTimeWords(new Date(2026, 9, 2, 8, 0).toISOString(), NOW)).toBe(
-      'on 2 October 2026 at 08:00'
-    )
-  })
-
-  it('says the time is unknown rather than inventing one', () => {
-    expect(draftTimeWords('not a date', NOW)).toBe('at an unknown time (not a date)')
   })
 })

@@ -1,7 +1,9 @@
+import { yearStamp } from '@europe-historical-atlas/core/data/yearStamp'
+
 import { LOG_TAG, answer, createBodyMiddleware, isSameMachineRequest } from './httpEndpoint'
 import { planYearWrite } from './yearWritePlan'
 
-import type { DiskFolder } from './diskFolder'
+import type { DiskFolder, YearFolder } from './diskFolder'
 import type { BodyStream, EndpointRequest, EndpointResponse, ResponseSink } from './httpEndpoint'
 import type { PlannedFile } from './yearWritePlan'
 
@@ -46,12 +48,54 @@ function writeAll(folder: DiskFolder, files: readonly PlannedFile[]): void {
 }
 
 /**
+ * Where a year's three files sit in the years folder.
+ * @param year - the year
+ * @returns the three relative paths
+ */
+function yearFilePaths(year: number): { registry: string; polities: string; borders: string } {
+  const folder = String(year)
+  return {
+    registry: `${folder}/registry.json`,
+    polities: `${folder}/polities.json`,
+    borders: `${folder}/borders.json`,
+  }
+}
+
+/**
+ * The fingerprint of a year's files as some reader sees them.
+ * @param year - the year
+ * @param read - how to get a file's text, `null` when absent
+ * @returns the fingerprint
+ */
+function stampOf(year: number, read: (relativePath: string) => string | null): string {
+  const paths = yearFilePaths(year)
+  return yearStamp({
+    registry: read(paths.registry),
+    polities: read(paths.polities),
+    borders: read(paths.borders),
+  })
+}
+
+/**
+ * When the most recent of a year's files was written, for the author — or `null` when none is there.
+ * @param folder - the years folder
+ * @param year - the year
+ * @returns milliseconds since the epoch, or `null`
+ */
+function lastChangeOf(folder: YearFolder, year: number): number | null {
+  const times = Object.values(yearFilePaths(year))
+    .map((path) => folder.modifiedAt(path))
+    .filter((time): time is number => time !== null)
+  return times.length === 0 ? null : Math.max(...times)
+}
+
+/**
  * Answer one request to the year endpoint.
  * @param request - the request, its body already read
  * @param folder - where the years live
  * @returns the response to send
  */
-export function handleYearWrite(request: EndpointRequest, folder: DiskFolder): EndpointResponse {
+export function handleYearWrite(request: EndpointRequest, folder: YearFolder): EndpointResponse {
   if (!isSameMachineRequest(request.host, request.origin)) {
     console.warn(`${LOG_TAG} refused a year write from another origin (${String(request.origin)})`)
     return answer(403, { reason: 'only the Cartographer served by this machine may save' })
@@ -77,10 +121,28 @@ export function handleYearWrite(request: EndpointRequest, folder: DiskFolder): E
     return answer(decision.refusal.status, { reason: decision.refusal.reason })
   }
 
-  writeAll(folder, decision.plan.files)
+  const { year, files } = decision.plan
+  // CARTO-238 rung 3: compared as the write is about to happen, so nothing can slip in between.
+  if (
+    request.ifMatch !== undefined &&
+    stampOf(year, (path) => folder.read(path)) !== request.ifMatch
+  ) {
+    console.warn(
+      `${LOG_TAG} refused a year write: ${String(year)} changed on disk since it was opened`
+    )
+    return answer(412, {
+      reason: `${String(year)} was changed on disk since it was opened`,
+      changedAt: lastChangeOf(folder, year),
+    })
+  }
+
+  writeAll(folder, files)
+  const written = new Map(files.map((file) => [file.relativePath, file.text]))
   return answer(200, {
-    year: decision.plan.year,
-    written: decision.plan.files.map((file) => file.relativePath),
+    year,
+    written: files.map((file) => file.relativePath),
+    // What the page now holds on disk — its next save is conditional on this.
+    stamp: stampOf(year, (path) => written.get(path) ?? null),
   })
 }
 
@@ -90,7 +152,7 @@ export function handleYearWrite(request: EndpointRequest, folder: DiskFolder): E
  * @returns a Connect middleware
  */
 export function createYearWriteMiddleware(
-  folder: DiskFolder
+  folder: YearFolder
 ): (req: BodyStream, res: ResponseSink) => void {
   return createBodyMiddleware({
     handle: (request) => handleYearWrite(request, folder),

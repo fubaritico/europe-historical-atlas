@@ -20,6 +20,10 @@ function disk(overrides: Partial<DiskCalls> = {}) {
     writeFile: (path) => log.push(`write ${path}`),
     makeFolder: (path) => log.push(`mkdir ${path}`),
     rename: (from, to) => log.push(`rename ${from} → ${to}`),
+    modifiedAt: (path) => {
+      log.push(`stat ${path}`)
+      return 1_700_000_000_000
+    },
     ...overrides,
   }
   return { calls, log }
@@ -47,6 +51,15 @@ describe('createYearsFolderOnDisk', () => {
 
       expect(log).toEqual(['rename /repo/years/index.json.tmp → /repo/years/index.json'])
     })
+
+    it('answers when a file under the root was last modified, as the disk says', () => {
+      const { calls, log } = disk()
+
+      expect(createYearsFolderOnDisk('/repo/years', calls).modifiedAt('1100/polities.json')).toBe(
+        1_700_000_000_000
+      )
+      expect(log).toEqual(['stat /repo/years/1100/polities.json'])
+    })
   })
 
   describe('variants', () => {
@@ -67,6 +80,16 @@ describe('createYearsFolderOnDisk', () => {
       })
 
       expect(createYearsFolderOnDisk('/repo/years', calls).read('index.json')).toBeNull()
+    })
+
+    it('answers null for the modification time of a missing file', () => {
+      const { calls } = disk({
+        modifiedAt: () => {
+          throw nodeError('ENOENT')
+        },
+      })
+
+      expect(createYearsFolderOnDisk('/repo/years', calls).modifiedAt('1100/a.json')).toBeNull()
     })
   })
 
@@ -95,6 +118,18 @@ describe('createYearsFolderOnDisk', () => {
         createYearsFolderOnDisk('/repo/years', calls).write('1100/a.tmp', '')
       }).toThrow('ENOSPC')
     })
+
+    it('throws any other failure to read a modification time on, rather than reading it as missing', () => {
+      const { calls } = disk({
+        modifiedAt: () => {
+          throw nodeError('EACCES')
+        },
+      })
+
+      expect(() => createYearsFolderOnDisk('/repo/years', calls).modifiedAt('1100/a.json')).toThrow(
+        'EACCES'
+      )
+    })
   })
 
   describe('edge cases', () => {
@@ -118,6 +153,7 @@ describe('createDraftFolderOnDisk', () => {
       writeFile: () => undefined,
       makeFolder: () => undefined,
       rename: () => undefined,
+      modifiedAt: () => 0,
       removeFile: (path) => removed.push(path),
     })
 
@@ -133,6 +169,7 @@ describe('createDraftFolderOnDisk', () => {
       writeFile: (path) => written.push(path),
       makeFolder: () => undefined,
       rename: () => undefined,
+      modifiedAt: () => 0,
       removeFile: () => undefined,
     })
 

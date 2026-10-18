@@ -1,4 +1,5 @@
 import { reasonOf } from './errorReason'
+import { timeWords } from './timeWords'
 import { documentFromFiles } from './yearArchive'
 
 import type { DraftOffer } from './draftOffers'
@@ -58,25 +59,6 @@ export interface DraftRecoveryDeps {
   draftsFolder: string
 }
 
-const day = (date: Date): string => date.toDateString()
-
-/**
- * Word a draft's time for the author: *"today at 15:42"*, *"yesterday at 23:10"*, or the date.
- * @param savedAt - the draft's ISO time
- * @param now - the present
- * @returns the words
- */
-export function draftTimeWords(savedAt: string, now: Date): string {
-  const at = new Date(savedAt)
-  if (Number.isNaN(at.getTime())) return `at an unknown time (${savedAt})`
-  const time = at.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-  const yesterday = new Date(now)
-  yesterday.setDate(now.getDate() - 1)
-  if (day(at) === day(now)) return `today at ${time}`
-  if (day(at) === day(yesterday)) return `yesterday at ${time}`
-  return `on ${at.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} at ${time}`
-}
-
 /**
  * Set the draft aside, reporting either outcome.
  * @param deps - the drafts, the year, where to report
@@ -115,7 +97,7 @@ async function readDraft(
     return setAside(deps, `a draft of ${yearName} could not be read (${reasonOf(error)})`)
   }
   if (draft === null) return null
-  const when = draftTimeWords(draft.savedAt, deps.now())
+  const when = timeWords(draft.savedAt, deps.now())
   try {
     return { document: documentFromFiles(draft.files, `the draft of ${yearName}`), when }
   } catch (error: unknown) {

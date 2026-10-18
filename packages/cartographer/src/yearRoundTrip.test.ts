@@ -10,7 +10,7 @@ import {
 import { handleYearWrite } from './devServer/yearWriteEndpoint'
 import { createDevServerYearArchive } from './persistence/yearArchive'
 
-import type { DiskFolder } from './devServer/diskFolder'
+import type { YearFolder } from './devServer/diskFolder'
 
 /** The manifest as committed today. */
 const MANIFEST = JSON.stringify({
@@ -28,8 +28,9 @@ const MANIFEST = JSON.stringify({
  */
 function devServer() {
   const disk = new Map<string, string>([['index.json', MANIFEST]])
-  const folder: DiskFolder = {
+  const folder: YearFolder = {
     read: (path) => disk.get(path) ?? null,
+    modifiedAt: (path) => (disk.has(path) ? 0 : null),
     write: (path, text) => disk.set(path, text),
     rename: (from, to) => {
       disk.set(to, disk.get(from) ?? '')
@@ -51,6 +52,7 @@ function devServer() {
           path: url.slice('/__years'.length),
           host: 'localhost:5174',
           origin: 'http://localhost:5174',
+          ifMatch: new Headers(init.headers).get('if-match') ?? undefined,
           body: init.body,
         },
         folder
@@ -117,6 +119,22 @@ describe('createDevServerYearArchive', () => {
       })
     })
 
+    it('saves twice over a year it opened, each save conditional on the stamp the last one answered', async () => {
+      const { archive, requests } = devServer()
+      await archive.save(sharedBorderDocument())
+      const reopened = await archive.open(1100)
+      await archive.save(reopened)
+      await archive.save(reopened)
+      const puts = requests.filter((request) => request.init?.method === 'PUT')
+
+      // The first save expects the year absent (it never read it), the next ones the stamp answered.
+      expect(puts.map((put) => new Headers(put.init?.headers).has('if-match'))).toEqual([
+        true,
+        true,
+        true,
+      ])
+    })
+
     it('lists the year in the manifest once saved', async () => {
       const { archive } = devServer()
       await archive.save(sharedBorderDocument())
@@ -164,6 +182,36 @@ describe('createDevServerYearArchive', () => {
       } as (typeof document.polities)[number]
 
       await expect(archive.save(document)).rejects.toThrow(/polities\[0\]\.id/)
+    })
+
+    it('refuses a save over a year another writer changed after it was opened', async () => {
+      const { archive, disk } = devServer()
+      await archive.save(sharedBorderDocument())
+      const reopened = await archive.open(1100)
+      disk.set('1100/registry.json', `${disk.get('1100/registry.json') ?? ''}\n`)
+
+      await expect(archive.save(reopened)).rejects.toMatchObject({
+        name: 'YearChangedOnDisk',
+        year: 1100,
+        changedAt: 0,
+      })
+    })
+
+    // ARCH-002: the page never read 1100, and something wrote it meanwhile — asked, not saved over.
+    it('refuses the first save of a year that appeared on disk after the page started', async () => {
+      const { archive, fetchStub } = devServer()
+      // Another page on the same server — another writer the first page never heard of.
+      const other = createDevServerYearArchive({
+        fetch: fetchStub,
+        yearsBase: '/years',
+        writeRoute: '/__years',
+      })
+      await other.save(sharedBorderDocument())
+
+      await expect(archive.save(sharedBorderDocument())).rejects.toMatchObject({
+        name: 'YearChangedOnDisk',
+        year: 1100,
+      })
     })
 
     it('refuses to open three files that disagree', async () => {

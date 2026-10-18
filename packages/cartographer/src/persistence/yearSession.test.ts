@@ -4,10 +4,11 @@ import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/docum
 
 import { openEmptyYear } from '../state/openEmptyYear'
 
+import { YearChangedOnDisk } from './yearArchive'
 import { createYearSession, describeYearContents } from './yearSession'
 
 import type { YearArchive } from './yearArchive'
-import type { SessionStore } from './yearSession'
+import type { OverwriteQuestion, SessionStore } from './yearSession'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /** A store in memory: one document, a version, and `open` replacing both. */
@@ -36,8 +37,22 @@ function stubArchive(overrides: Partial<YearArchive> = {}): YearArchive {
   }
 }
 
-/** A session over a memory store and a stub archive, recording what it reports. */
-function session(archive: YearArchive = stubArchive()) {
+/** The clock every session reads: 18 October 2026, 16:00, local time. */
+const NOW = new Date(2026, 9, 18, 16, 0)
+
+/** When another writer changed 1100 on disk, in the tests that need it: the same day, 14:02. */
+const CHANGED_AT = new Date(2026, 9, 18, 14, 2).getTime()
+
+/**
+ * A session over a memory store and a stub archive, recording what it reports. The overwrite question is
+ * answered by `confirmOverwrite`, which says no unless told otherwise.
+ */
+function session(
+  archive: YearArchive = stubArchive(),
+  confirmOverwrite: (question: OverwriteQuestion) => Promise<boolean> = vi.fn(() =>
+    Promise.resolve(false)
+  )
+) {
   const { store, state } = memoryStore()
   const reports: string[] = []
   const yearSession = createYearSession({
@@ -45,8 +60,20 @@ function session(archive: YearArchive = stubArchive()) {
     archive,
     year: 1100,
     report: (message) => reports.push(message),
+    confirmOverwrite,
+    now: () => NOW,
   })
-  return { yearSession, state, reports, archive }
+  return { yearSession, state, reports, archive, confirmOverwrite }
+}
+
+/** An archive save refused once as changed on disk (at `changedAt`), then writing what it is given. */
+function changedOnDiskOnce(changedAt: number | null = CHANGED_AT) {
+  return vi
+    .fn<YearArchive['save']>()
+    .mockRejectedValueOnce(new YearChangedOnDisk(1100, changedAt))
+    .mockImplementation((document) =>
+      Promise.resolve({ year: document.year, polities: document.polities.length, vertices: 6 })
+    )
 }
 
 beforeEach(() => {
@@ -74,7 +101,7 @@ describe('createYearSession', () => {
       await yearSession.openOnStartup()
       await yearSession.save()
 
-      expect(archive.save).toHaveBeenCalledWith(state.document)
+      expect(archive.save).toHaveBeenCalledWith(state.document, { overwrite: false })
       expect(reports.at(-1)).toBe('saved 1100 · 2 polities · 6 vertices')
     })
 
@@ -240,6 +267,177 @@ describe('createYearSession', () => {
 
       expect(save).toHaveBeenCalledTimes(1)
       expect(reports).toContain('the previous save is still running')
+    })
+  })
+})
+
+describe('createYearSession, a save over a year changed on disk (CARTO-238, rung 3)', () => {
+  describe('happy path', () => {
+    it('asks whether to overwrite, naming the year and when it changed', async () => {
+      const { yearSession, confirmOverwrite } = session(stubArchive({ save: changedOnDiskOnce() }))
+      await yearSession.openOnStartup()
+      await yearSession.save()
+
+      expect(confirmOverwrite).toHaveBeenCalledWith({ year: 1100, when: 'today at 14:02' })
+    })
+
+    it('on [Overwrite], saves again with overwrite, reports the save and answers true', async () => {
+      const save = changedOnDiskOnce()
+      const { yearSession, state, reports } = session(
+        stubArchive({ save }),
+        vi.fn(() => Promise.resolve(true))
+      )
+      await yearSession.openOnStartup()
+      const saved = await yearSession.save()
+
+      expect(save).toHaveBeenCalledTimes(2)
+      expect(save).toHaveBeenLastCalledWith(state.document, { overwrite: true })
+      expect(reports.at(-1)).toBe('saved 1100 · 2 polities · 6 vertices')
+      expect(saved).toBe(true)
+    })
+  })
+
+  describe('variants', () => {
+    it('on [Overwrite], writes the document as it is when answered, not as it was at ‹ctrl+S›', async () => {
+      const save = changedOnDiskOnce()
+      let answer: (yes: boolean) => void = () => undefined
+      const asked = vi.fn(() => new Promise<boolean>((resolve) => (answer = resolve)))
+      const { yearSession, state } = session(stubArchive({ save }), asked)
+      await yearSession.openOnStartup()
+      const saving = yearSession.save()
+      await vi.waitFor(() => {
+        expect(asked).toHaveBeenCalled()
+      })
+      const later = sharedBorderDocument()
+      state.document = later // the author drew on while the dialogue was open
+      answer(true)
+      await saving
+
+      expect(save.mock.calls[1]?.[0]).toBe(later)
+    })
+
+    it('asks with when null when the server could not say when the year changed', async () => {
+      const { yearSession, confirmOverwrite } = session(
+        stubArchive({ save: changedOnDiskOnce(null) })
+      )
+      await yearSession.openOnStartup()
+      await yearSession.save()
+
+      expect(confirmOverwrite).toHaveBeenCalledWith({ year: 1100, when: null })
+    })
+  })
+
+  describe('managed errors', () => {
+    it('on [Cancel], writes nothing more, reports when the year changed and answers false', async () => {
+      const save = changedOnDiskOnce()
+      const { yearSession, reports } = session(stubArchive({ save }))
+      await yearSession.openOnStartup()
+      const saved = await yearSession.save()
+
+      expect(save).toHaveBeenCalledTimes(1)
+      expect(reports.at(-1)).toBe(
+        'not saved — 1100 was changed on disk today at 14:02; ‹ctrl+S› again to choose'
+      )
+      expect(saved).toBe(false)
+    })
+
+    it('on [Cancel], logs the cancelled save once in the console', async () => {
+      const { yearSession } = session(stubArchive({ save: changedOnDiskOnce() }))
+      await yearSession.openOnStartup()
+      await yearSession.save()
+
+      expect(console.warn).toHaveBeenCalledTimes(1)
+      expect(console.warn).toHaveBeenCalledWith(
+        '[Cartographer] save cancelled: 1100 was changed on disk today at 14:02'
+      )
+    })
+
+    it('on [Cancel] with no time known, reports the year changed since it was opened', async () => {
+      const { yearSession, reports } = session(stubArchive({ save: changedOnDiskOnce(null) }))
+      await yearSession.openOnStartup()
+      await yearSession.save()
+
+      expect(reports.at(-1)).toBe(
+        'not saved — 1100 was changed on disk since it was opened; ‹ctrl+S› again to choose'
+      )
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // save() resolves either way, as its contract says — even when the question itself fails.
+    it('reports a question that fails as not saved, and resolves false rather than throwing', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      const { yearSession, reports } = session(
+        stubArchive({ save: changedOnDiskOnce() }),
+        vi.fn(() => Promise.reject(new Error('a save is already asking')))
+      )
+      await yearSession.openOnStartup()
+
+      await expect(yearSession.save()).resolves.toBe(false)
+      expect(reports.at(-1)).toBe('not saved: a save is already asking')
+      expect(error).toHaveBeenCalledOnce()
+    })
+
+    it('reports a failure of the overwrite save itself as not saved, without asking again', async () => {
+      const save = vi
+        .fn<YearArchive['save']>()
+        .mockRejectedValueOnce(new YearChangedOnDisk(1100, CHANGED_AT))
+        .mockRejectedValueOnce(new Error('the save failed on disk (ENOSPC)'))
+      const confirmOverwrite = vi.fn(() => Promise.resolve(true))
+      const { yearSession, reports } = session(stubArchive({ save }), confirmOverwrite)
+      await yearSession.openOnStartup()
+      const saved = await yearSession.save()
+
+      expect(confirmOverwrite).toHaveBeenCalledTimes(1)
+      expect(reports.at(-1)).toBe('not saved: the save failed on disk (ENOSPC)')
+      expect(console.error).toHaveBeenCalled()
+      expect(saved).toBe(false)
+    })
+
+    it('reports a second YearChangedOnDisk on the overwrite save as not saved, without asking again', async () => {
+      const save = vi
+        .fn<YearArchive['save']>()
+        .mockRejectedValue(new YearChangedOnDisk(1100, CHANGED_AT))
+      const confirmOverwrite = vi.fn(() => Promise.resolve(true))
+      const { yearSession, reports } = session(stubArchive({ save }), confirmOverwrite)
+      await yearSession.openOnStartup()
+
+      expect(await yearSession.save()).toBe(false)
+      expect(confirmOverwrite).toHaveBeenCalledTimes(1)
+      expect(reports.at(-1)).toBe('not saved: 1100 was changed on disk since it was opened')
+    })
+  })
+
+  describe('edge cases', () => {
+    it('refuses a second ‹ctrl+S› while the overwrite dialogue is open', async () => {
+      const save = changedOnDiskOnce()
+      let answer: (yes: boolean) => void = () => undefined
+      const asked = vi.fn(() => new Promise<boolean>((resolve) => (answer = resolve)))
+      const { yearSession, reports } = session(stubArchive({ save }), asked)
+      await yearSession.openOnStartup()
+      const first = yearSession.save()
+      await vi.waitFor(() => {
+        expect(asked).toHaveBeenCalled()
+      })
+      const second = await yearSession.save()
+      answer(false)
+      await first
+
+      expect(second).toBe(false)
+      expect(save).toHaveBeenCalledTimes(1)
+      expect(reports).toContain('the previous save is still running')
+    })
+
+    it('asks again at the next ‹ctrl+S› after a cancel', async () => {
+      const save = vi
+        .fn<YearArchive['save']>()
+        .mockRejectedValue(new YearChangedOnDisk(1100, CHANGED_AT))
+      const { yearSession, confirmOverwrite } = session(stubArchive({ save }))
+      await yearSession.openOnStartup()
+      await yearSession.save()
+      await yearSession.save()
+
+      expect(confirmOverwrite).toHaveBeenCalledTimes(2)
     })
   })
 })

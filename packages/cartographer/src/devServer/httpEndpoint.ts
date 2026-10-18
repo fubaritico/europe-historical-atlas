@@ -26,6 +26,11 @@ export interface EndpointRequest {
   host: string | undefined
   /** The `Origin` header. */
   origin: string | undefined
+  /**
+   * The `If-Match` header: the fingerprint of the year the page opened, when a save asks to write only over
+   * that very year (CARTO-238, rung 3). Absent, the write is unconditional.
+   */
+  ifMatch?: string | undefined
   /** The body, as text. */
   body: string
 }
@@ -153,6 +158,7 @@ function respond(req: BodyStream, res: ResponseSink, body: string, wiring: Endpo
         path: req.url,
         host: headerOf(req.headers.host),
         origin: headerOf(req.headers.origin),
+        ifMatch: headerOf(req.headers['if-match']),
         body,
       })
     )

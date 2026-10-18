@@ -3,6 +3,7 @@ import { Card } from '@fubaritico/react/Card'
 import { IconButton } from '@fubaritico/react/IconButton'
 import { Modal } from '@fubaritico/react/Modal'
 
+import { autofocusOnOpen } from './autofocusOnOpen'
 import { deletionQuestion } from './polityDeletion'
 
 import type { PendingDeletion } from './polityDeletion'
@@ -24,15 +25,6 @@ export interface PolityDeleteDialogProps {
   onConfirm: () => void
   /** Keep it. */
   onCancel: () => void
-}
-
-/**
- * Marks `[Cancel]` with the native `autofocus` attribute, which `showModal()` honours — not React's
- * `autoFocus` prop, which writes no attribute a `<dialog>` could see (the trap `PolityForm` records).
- * @param node - the Cancel button, or `null` on unmount
- */
-function autofocusOnOpen(node: HTMLButtonElement | null): void {
-  node?.setAttribute('autofocus', '')
 }
 
 /**

@@ -7,6 +7,7 @@ import { Input } from '@fubaritico/react/Input'
 import { Typeahead } from '@fubaritico/react/Typeahead'
 import { useEffect, useRef, useState } from 'react'
 
+import { autofocusOnOpen } from './autofocusOnOpen'
 import { STATUSES } from './polityDraft'
 import { MAX_SUGGESTIONS, matchingOptions } from './suzerainSearch'
 import { WikidataPanel } from './WikidataPanel'
@@ -79,18 +80,6 @@ function textField(field: PolityFormField, props: PolityFormProps) {
       props.onField(field, event.target.value)
     },
   }
-}
-
-/**
- * Marks the first field with the native `autofocus` attribute, which `showModal()` honours: the dialogue
- * opens with the cursor in Name, ready to type, rather than on the close cross that comes first in it.
- *
- * **Not React's `autoFocus` prop**, which writes no attribute — it calls `focus()` when the element
- * mounts, and the form mounts while the dialogue is still closed, so that call is lost. A ref runs at
- * commit, before the Modal's effect opens the dialogue, so the attribute is there when it looks.
- */
-function autofocusOnOpen(node: HTMLInputElement | null): void {
-  node?.setAttribute('autofocus', '')
 }
 
 /** A list laid out like a field: the label left, the choice right, "none" first. */

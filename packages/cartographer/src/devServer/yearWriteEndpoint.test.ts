@@ -1,12 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { yearStamp } from '@europe-historical-atlas/core/data/yearStamp'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { MAX_BODY_BYTES, isSameMachineRequest } from './httpEndpoint'
 import { createYearWriteMiddleware, handleYearWrite } from './yearWriteEndpoint'
 
-import type { DiskFolder } from './diskFolder'
+import type { YearFolder } from './diskFolder'
 import type { BodyStream, EndpointRequest, ResponseSink } from './httpEndpoint'
 
 /** The manifest as committed today. */
@@ -16,12 +17,19 @@ const MANIFEST = JSON.stringify({
   years: [],
 })
 
-/** A years folder in memory, recording every write and rename in order. */
-function memoryFolder(initial: Record<string, string> = { 'index.json': MANIFEST }) {
+/**
+ * A years folder in memory, recording every write and rename in order. A file's modification time is the
+ * one given in `times`, or 0; a missing file has none.
+ */
+function memoryFolder(
+  initial: Record<string, string> = { 'index.json': MANIFEST },
+  times: Record<string, number> = {}
+) {
   const files = new Map(Object.entries(initial))
   const log: string[] = []
-  const folder: DiskFolder = {
+  const folder: YearFolder = {
     read: (path) => files.get(path) ?? null,
+    modifiedAt: (path) => (files.has(path) ? (times[path] ?? 0) : null),
     write: (path, text) => {
       log.push(`write ${path}`)
       files.set(path, text)
@@ -49,6 +57,43 @@ function saveRequest(overrides: Partial<EndpointRequest> = {}): EndpointRequest 
   }
 }
 
+/**
+ * The fingerprint of year 1100 as the folder holds it now.
+ * @param files - the folder's files
+ */
+function stampOnDisk(files: Map<string, string>): string {
+  return yearStamp({
+    registry: files.get('1100/registry.json') ?? null,
+    polities: files.get('1100/polities.json') ?? null,
+    borders: files.get('1100/borders.json') ?? null,
+  })
+}
+
+/** Year 1100 as some other writer left it on disk, listed in the manifest, written at three times. */
+function savedYear() {
+  const listed = JSON.stringify({ ...(JSON.parse(MANIFEST) as object), years: [1100] })
+  return memoryFolder(
+    {
+      'index.json': listed,
+      '1100/registry.json': 'registry on disk',
+      '1100/polities.json': 'polities on disk',
+      '1100/borders.json': 'borders on disk',
+    },
+    {
+      '1100/registry.json': 1_000,
+      '1100/polities.json': 3_000,
+      '1100/borders.json': 2_000,
+    }
+  )
+}
+
+/** The fingerprint of {@link savedYear}'s files, as the page that opened them holds it. */
+const OPENED_STAMP = yearStamp({
+  registry: 'registry on disk',
+  polities: 'polities on disk',
+  borders: 'borders on disk',
+})
+
 /** The body of a response, parsed. */
 function bodyOf(response: { body: string }): Record<string, unknown> {
   return JSON.parse(response.body) as Record<string, unknown>
@@ -73,6 +118,7 @@ describe('handleYearWrite', () => {
       expect(bodyOf(response)).toEqual({
         year: 1100,
         written: ['1100/registry.json', '1100/polities.json', '1100/borders.json', 'index.json'],
+        stamp: stampOnDisk(files),
       })
       expect([...files.keys()].sort()).toEqual(
         ['1100/borders.json', '1100/polities.json', '1100/registry.json', 'index.json'].sort()
@@ -162,7 +208,7 @@ describe('handleYearWrite', () => {
         '1100/registry.json': 'old',
       })
       let writes = 0
-      const failing: DiskFolder = {
+      const failing: YearFolder = {
         ...folder,
         write: (path, text) => {
           writes += 1
@@ -186,6 +232,106 @@ describe('handleYearWrite', () => {
     it('reads a missing path as an empty year segment, refused', () => {
       expect(handleYearWrite(saveRequest({ path: undefined }), memoryFolder().folder).status).toBe(
         400
+      )
+    })
+  })
+})
+
+describe('handleYearWrite, conditional on the year the page opened (CARTO-238, rung 3)', () => {
+  describe('happy path', () => {
+    it('writes over the year when If-Match is the stamp of the files on disk, answering the new stamp', () => {
+      const { folder, files } = savedYear()
+      const response = handleYearWrite(saveRequest({ ifMatch: OPENED_STAMP }), folder)
+
+      expect(response.status).toBe(200)
+      expect(files.get('1100/registry.json')).not.toBe('registry on disk')
+      expect(bodyOf(response).stamp).toBe(stampOnDisk(files))
+    })
+  })
+
+  describe('variants', () => {
+    it('writes unconditionally when no If-Match is sent, as before rung 3', () => {
+      const { folder, files } = savedYear()
+      const response = handleYearWrite(saveRequest(), folder)
+
+      expect(response.status).toBe(200)
+      expect(files.get('1100/polities.json')).not.toBe('polities on disk')
+    })
+
+    it('accepts the stamp a first save answered as the If-Match of a second save', () => {
+      const { folder } = savedYear()
+      const first = handleYearWrite(saveRequest({ ifMatch: OPENED_STAMP }), folder)
+      const stamp = bodyOf(first).stamp
+      if (typeof stamp !== 'string') throw new Error('the first save answered no stamp')
+      const second = handleYearWrite(saveRequest({ ifMatch: stamp }), folder)
+
+      expect(second.status).toBe(200)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('refuses with 412 when If-Match differs from the files on disk, writing nothing', () => {
+      const { folder, files, log } = savedYear()
+      const response = handleYearWrite(saveRequest({ ifMatch: 'deadbeef' }), folder)
+
+      expect(response.status).toBe(412)
+      expect(log).toEqual([])
+      expect([...files.keys()].some((path) => path.endsWith('.tmp'))).toBe(false)
+      expect(files.get('1100/registry.json')).toBe('registry on disk')
+      expect(files.get('1100/polities.json')).toBe('polities on disk')
+      expect(files.get('1100/borders.json')).toBe('borders on disk')
+    })
+
+    it('answers the reason and the latest modification time of the three files with the 412', () => {
+      const { folder } = savedYear()
+      const response = handleYearWrite(saveRequest({ ifMatch: 'deadbeef' }), folder)
+
+      expect(bodyOf(response)).toEqual({
+        reason: '1100 was changed on disk since it was opened',
+        changedAt: 3_000,
+      })
+    })
+
+    it('logs a 412 refusal once in the console', () => {
+      const { folder } = savedYear()
+      handleYearWrite(saveRequest({ ifMatch: 'deadbeef' }), folder)
+
+      expect(console.warn).toHaveBeenCalledTimes(1)
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('1100 changed on disk since it was opened')
+      )
+    })
+
+    it('refuses with 412 an If-Match that was the stamp before another write', () => {
+      const { folder } = savedYear()
+      handleYearWrite(saveRequest(), folder)
+
+      expect(handleYearWrite(saveRequest({ ifMatch: OPENED_STAMP }), folder).status).toBe(412)
+    })
+  })
+
+  // L4: N/A — a disk that throws while stamping is the 500 path of the middleware, tested below.
+
+  describe('edge cases', () => {
+    it('refuses with 412 and changedAt null when the year files are gone from disk', () => {
+      const { folder } = memoryFolder()
+      const response = handleYearWrite(saveRequest({ ifMatch: OPENED_STAMP }), folder)
+
+      expect(response.status).toBe(412)
+      expect(bodyOf(response)).toEqual({
+        reason: '1100 was changed on disk since it was opened',
+        changedAt: null,
+      })
+    })
+
+    it('takes changedAt from the one year file still on disk', () => {
+      const { folder } = memoryFolder(
+        { 'index.json': MANIFEST, '1100/borders.json': 'borders on disk' },
+        { '1100/borders.json': 5_000 }
+      )
+
+      expect(bodyOf(handleYearWrite(saveRequest({ ifMatch: 'deadbeef' }), folder)).changedAt).toBe(
+        5_000
       )
     })
   })
@@ -264,9 +410,22 @@ describe('createYearWriteMiddleware', () => {
     expect(sent.ends).toBe(1)
   })
 
+  it('passes the If-Match header on to the endpoint, which refuses a stale one with 412', () => {
+    const req = streamOf(
+      [new TextEncoder().encode(JSON.stringify(saveYearDocument(sharedBorderDocument())))],
+      { 'if-match': 'deadbeef' }
+    )
+    const { res, sent } = sink()
+    createYearWriteMiddleware(savedYear().folder)(req, res)
+    req.emit()
+
+    expect(sent.status).toBe(412)
+  })
+
   it('answers 500 and logs when the disk fails, rather than claiming a save', () => {
-    const folder: DiskFolder = {
+    const folder: YearFolder = {
       read: () => MANIFEST,
+      modifiedAt: () => null,
       write: () => {
         throw Object.assign(
           new Error("EACCES: permission denied, open '/Users/someone/years/1100'"),

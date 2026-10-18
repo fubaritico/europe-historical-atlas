@@ -81,14 +81,59 @@ Scenario: a draft that cannot be opened is set aside, not overwritten
 > slow write land after a newer one"*; leaving an unreadable draft in place fails *"sets aside a draft that
 > cannot be read"*. Each trap is caught by its own test.
 
+## Rung 3 — the year changed on disk under the page (2026-10-18)
+
+> **Why first**: it is the loss that really happened, twice — Claude wrote into `years/` while the dev's
+> page was open, and his next ‹ctrl+S› wrote the old state back over it (`known-issues.md`, 16/10).
+> **How it knows**: at the opening the archive keeps a fingerprint of the three files it read; a save sends
+> it, and the dev server compares it with the files on disk **as it writes** — no write can slip between the
+> check and the save. A year never saved has no fingerprint, and its first save is unconditional.
+
+```gherkin
+Scenario: a save over a year changed on disk asks first
+  Given 1100 was opened, then its files were rewritten on disk at 14:02 by something else
+  When I press ‹ctrl+S›
+  Then nothing is written yet
+  And a dialogue asks "1100 was changed on disk today at 14:02, since it was opened. Overwrite it with this page?"
+  And [Cancel] holds the focus
+
+Scenario: overwrite
+  Given the dialogue is open
+  When I press [Overwrite]
+  Then the page is written over the files, and the status bar reads "saved 1100 · …"
+  And the next ‹ctrl+S› saves without asking — the page is now what is on disk
+
+Scenario: cancel
+  Given the dialogue is open
+  When I press [Cancel], or ‹escape›
+  Then nothing is written, the page and its draft stay as they are
+  And the status bar reads "not saved — 1100 was changed on disk today at 14:02; ‹ctrl+S› again to choose"
+  And the console warns it once
+
+Scenario: my own saves never ask
+  Given 1100 was opened, and I saved it twice
+  When I press ‹ctrl+S› a third time, with nothing else writing
+  Then it saves without asking
+```
+
 ## Not built yet — the rungs that follow (CARTO-238's checklist)
 
-- **Rung 2 — a full snapshot every hour of work**, in `.autosave/snapshots/`, keeping the last 24 and one
-  per day.
+> **Decided with the dev, 2026-10-18** — the order: rung 3 first (the loss that really happened, twice), then
+> rung 2; rung 4 dropped.
+
 - **Rung 3 — the file changed under the page**: ‹ctrl+S› warns before writing over a year modified on disk
-  since it was opened (a write of Claude's), instead of overwriting it.
-- **Rung 4 — the dev server is down**: the draft goes to the browser's storage, and the status bar says
-  *"draft kept in the browser only"*. Today a stopped server gives the failure line of the scenario above.
+  since it was opened (a write of Claude's), instead of overwriting it — *"1100 was changed on disk at 14:02,
+  since it was opened"* — **[Overwrite] [Cancel]**, nothing else (the dev: *« d'accord, c'est bon »*). [Cancel]
+  leaves the page as it is and the draft kept.
+- **Rung 2 — a full snapshot every hour of work**, in `.autosave/snapshots/`, only when something changed in
+  the hour. ~~Keeping the last 24 and one per day~~ (Claude's proposal) — **all are kept**, the dev: *« on les
+  conserve … on verra ensuite »* (≈ 3 MB an hour of work). **Loading one** — the dev's idea: a dated list
+  ("Snapshots…" beside [Open…]), select, load; with unsaved work, [Overwrite] or [Cancel]. Loading replaces
+  the document **in the page**, undoable; ‹ctrl+S› stays the only gesture that writes the year.
+- ~~**Rung 4 — the dev server is down**: the draft goes to the browser's storage, and the status bar says
+  *"draft kept in the browser only"*.~~ **Dropped by the dev, 2026-10-18**: with the server down the page
+  stays, the status bar already says the draft is not kept, and the next draft once the server is back
+  writes the whole document — only closing the tab meanwhile loses work, too narrow for a second store.
 - **A gesture made before drafting starts** (QUAL-002, review of 17/10, left open by Claude): drafting starts once
   the year is read and the offer answered; a gesture in that window is drafted only with the next one. The
   window is while the backdrop bakes and the tools still wait. Trigger to revisit: a loss seen in it.
