@@ -115,7 +115,7 @@ export function coverScale(canvas: PixelSize, box: BackdropBox): number {
  *
  * **The half that makes a cover-scale floor mean anything.** A minimum scale alone only promises that
  * the backdrop is *big enough* to cover; nothing stops a pan from sliding it off the side, and then the
- * void the floor exists to forbid appears anyway. This is the clamp `view/viewport.ts` deliberately
+ * void the floor exists to forbid appears anyway. This is the clamp `viewport/viewport.ts` deliberately
  * refused to invent — *"a clamp with invented numbers is a silent substitution, and the real ones belong
  * to the caller"*. Here the numbers are real: the canvas, and the backdrop at the current scale.
  *

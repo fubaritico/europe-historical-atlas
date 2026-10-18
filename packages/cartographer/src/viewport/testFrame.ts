@@ -10,7 +10,7 @@ import type { BackdropFrame } from './projection'
  * source of truth with a silent failure mode: project against one box while painting another and every
  * border slides off the terrain it borders, with no error anywhere. The application now takes them from
  * `packages/atlas/public/heightmaps/europe-dem-z5.json` itself, through the reader that already parses
- * it — see `frameFromHeightmap` in `backdropSource.ts`. That closes ARCH-102.
+ * it — see `frameFromHeightmap` in `loaders/backdropSource.ts`. That closes ARCH-102.
  *
  * **Why it still exists.** Six suites need a frame, and they need the *real* one: the projection,
  * framing and resolution tests assert against positions and scales that only mean something at this

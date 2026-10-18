@@ -85,7 +85,7 @@ champs des dropdowns, un filet fin avec un ring autour au focus »*. So the butt
 fields they sit under, not like a foreign widget.
 
 **The colours come from ours**: `design/chrome.css`'s dark set, already in
-`components/shell.css` — `--bg #22201d`, `--panel #2b2926`, `--raised #35322e`, `--line #45403a`,
+`styles/shell.css` — `--bg #22201d`, `--panel #2b2926`, `--raised #35322e`, `--line #45403a`,
 `--ink #e8e3d8`, `--ink-dim #a49a8c`, and the reserved `--accent #5b93d6`, which is the focus ring.
 
 ## The plan, in five steps
@@ -206,6 +206,6 @@ aléatoires d'abord. »*
 
 - **It does not touch `(d)`** — the second canvas and the two tools wired to `documentEdits` and
   `history`. That is the larger piece and it needs none of this.
-- **It does not restyle the canvas.** The painter's values come from `canvas/style.ts` and are not
+- **It does not restyle the canvas.** The painter's values come from `canvas/paint/style.ts` and are not
   CSS at all; the design system has no opinion about what is drawn on a canvas.
 - **It does not add a colour picker.** See above.

@@ -13,7 +13,7 @@ import type { PixelSize, Viewport } from './viewport'
  * - **zoomed out**, the largest contour's 25 629 points are drawn across about 1 200 pixels — twenty
  *   points per pixel, nineteen of which cannot change a single one.
  *
- * Both answers are arithmetic on the viewport, so they live here rather than in the painter: `view/` is
+ * Both answers are arithmetic on the viewport, so they live here rather than in the painter: `viewport/` is
  * the leaf that defines screen space, and these can be exercised with literals.
  */
 

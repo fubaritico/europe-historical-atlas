@@ -23,7 +23,7 @@ round trip of `s04`. If a reader sorts it, the order is lost at the first save.
 | **0** | verify the polities list keeps its order through save and reopen | `core/editor/yearDocument` round trip | a round-trip test on a deliberately unsorted list |
 | **1** | **`paintOrder(document)`** — the tree walked depth first: groups in list order, each suzerain then its vassals | `core/editor/` | literals: two groups, a vassal of a vassal, a headless group, a cycle in `suzerain` (refused loudly, never looped) |
 | **2** | the **atlas** reads `paintOrder` instead of its own sort by depth (`toRegionPayload`) | `core/data/toRegionPayload.ts` | `s16`'s last scenario: the Empire over France also covers France's vassal, in both apps |
-| **3** | the Cartographer paints and hit-tests in `paintOrder` | `canvas/scene.ts` (`projectedTerritories`, the fills) | the fill test answers the front polity where two overlap |
+| **3** | the Cartographer paints and hit-tests in `paintOrder` | `canvas/paint/scene.ts` (`projectedTerritories`, the fills) | the fill test answers the front polity where two overlap |
 | **4** | **`restack(document, polity, move)`** among siblings only, and `availableMoves` for the menu | `core/editor/stacking.ts` — the file written early, **re-scoped to siblings** | a vassal can never go under its suzerain; a group moves with its vassals |
 | **5** | the recorded action `restackPolity`, one history step | `state/editionSlice.ts` | ‹ctrl+Z› restores the order |
 | **6** | **{Polities} as a tree** — heads, vassals indented, front first within a level — and the context menu on a row | `components/` | the order is visible in the list, and the menu's disabled states follow `availableMoves` |

@@ -56,7 +56,7 @@ export interface Backdrop {
    * The land mask the bake read.
    *
    * **Handed back rather than dropped**, because the coastline is traced through it
-   * (`vectorLayers.ts`) and it is three megabytes: loading it twice for the same picture would double
+   * (`loaders/vectorLayers.ts`) and it is three megabytes: loading it twice for the same picture would double
    * the startup download for nothing. It is the mask and not the relief because that is the one the
    * shoreline comes from — elevation says how high, not wet or dry.
    */

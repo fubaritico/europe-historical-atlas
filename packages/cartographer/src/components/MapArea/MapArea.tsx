@@ -25,7 +25,7 @@ import type { RefObject } from 'react'
  * the backdrop is baked, *then* a year is laid on it.
  *
  * **There is no partial success.** Either asset failing is a failure, and the elevation-threshold
- * fallback the atlas keeps is deliberately not wired (see `backdropSource.ts`): a shoreline that is
+ * fallback the atlas keeps is deliberately not wired (see `loaders/backdropSource.ts`): a shoreline that is
  * quietly wrong would be read for the rest of a year's life as the author's own bad tracing.
  */
 
