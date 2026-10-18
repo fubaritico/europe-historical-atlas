@@ -63,7 +63,7 @@ const BBOX_TOLERANCE_DEG = 1e-6
 const POLITICAL_SPLIT = { fetch: 0.1, compute: 0.65, bake: 0.95 }
 
 /** Where the assets live. */
-const HEIGHTMAP_URL = '/heightmaps/europe-dem-z5'
+const HEIGHTMAP_URL = '/heightmaps/europe-dem-z6-1920'
 const LAND_MASK_URL = '/masks/europe-land'
 const RIVERS_URL = '/rivers/europe-rivers.json'
 const YEARS_BASE = '/years'
