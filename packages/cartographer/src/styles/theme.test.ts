@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import shell from '../components/shell.css?raw'
 import main from '../main.tsx?raw'
 import workbench from '../workbench/entry.tsx?raw'
 
 import sheets from './sheets.ts?raw'
+import shell from './shell.css?raw'
 import theme from './theme.css?raw'
 
 /** The theme's code, comments removed and whitespace collapsed — a formatter may wrap a value. */

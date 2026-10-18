@@ -88,8 +88,11 @@ rule at all: green over code nothing had checked.
 **Components: a folder each, a barrel each — and no barrel of barrels** (the dev's call, 2026-10-18, his
 convention in `vite-mf-monorepo`, `nextjs-multizone-tmdb` and `date-time-picker`). `components/<Name>/` holds
 the component and its test at the root, **its own hooks in `hooks/`**, **its own children in `internal/`**, one
-entity per file, and `index.ts` exporting only what the rest of the application uses. Four rules hold it, for
-every component already moved into its folder (the flat files move one by one, the lint green at each step):
+entity per file, and `index.ts` exporting only what the rest of the application uses. Every component is in its folder
+since 2026-10-18 (three commits, the lint green at each). **`internal/` does not nest**: a child that has
+children of its own gets its own top-level folder, even with a single user (`MapArea/`, `LayersPanel/`, the
+panels of `Editor`'s dock). A stylesheet stays in `styles/`, the one module that orders the cascade. Four rules
+hold it:
 `react/no-multi-comp`, `eha/one-hook-per-file`, `eha/component-folder-layout` (what sits where), and
 `eha/no-reach-into-component` — over all of `src/` — so nothing outside a folder imports its `hooks/` or
 `internal/`: they are private by construction. **Shared pieces** (the dev's call, 2026-10-18, option A of three): a hook several components use lives in

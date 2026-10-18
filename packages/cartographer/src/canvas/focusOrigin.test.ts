@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import shell from '../components/shell.css?raw'
+import shell from '../styles/shell.css?raw'
 
 import { FOCUS_ORIGIN_ATTRIBUTE, trackFocusOrigin } from './focusOrigin'
 
