@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest'
 
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
-import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import {
+  authoredRegionColours,
+  polityColours,
+} from '@europe-historical-atlas/core/editor/polityColours'
+import {
+  openYearDocument,
+  saveYearDocument,
+} from '@europe-historical-atlas/core/editor/yearDocument'
+import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
 
 import { createMapSources } from './mapSources'
 import { settleYearBorders } from './yearBorders'
@@ -35,6 +43,14 @@ const PALETTE: [string, ...string[]] = ['#aa0000', '#00aa00', '#0000aa']
 const RED = { r: 200, g: 0, b: 0 }
 const BLUE = { r: 0, g: 0, b: 200 }
 
+/**
+ * Fail a test whose fixture is missing what it was built with.
+ * @returns never
+ */
+function fail(): never {
+  throw new Error('fixture: no authored year')
+}
+
 const PAYLOAD_YEAR: RegionSet = { year: 1500, regions: [] }
 
 /**
@@ -56,6 +72,18 @@ function authoredYear(): RegionSet {
     regions: [],
     authored: { year: { year: 1100, ...saveYearDocument(doc) }, bbox },
   }
+}
+
+/**
+ * The authored year with the Empire made France's vassal, and its two regions named.
+ * @returns the year
+ */
+function withVassal(): RegionSet {
+  const year = authoredYear()
+  const hre = year.authored?.year.registry.polities.find((polity) => polity.id === 'hre')
+  if (hre) hre.suzerain = 'fr-couronne'
+  year.regions = [{ polityId: 'fr-couronne' }, { polityId: 'hre' }] as RegionSet['regions']
+  return year
 }
 
 describe('settleYearBorders', () => {
@@ -103,6 +131,75 @@ describe('settleYearBorders', () => {
 
       expect(sources.tribeOutlines).toEqual([])
       expect(sources.regionTints).toEqual([BLUE])
+    })
+  })
+
+  describe('levels of homage', () => {
+    it('paints a vassal in its suzerain’s colour at level 0 and its own at the deepest', () => {
+      const sources = createMapSources()
+      const year = withVassal()
+      const france = polityColours(openYearDocument(year.authored?.year ?? fail()), PALETTE).get(
+        'fr-couronne'
+      )
+
+      settleYearBorders(sources, year, { borders: TRACED, tints: [RED, BLUE] }, PALETTE)
+
+      const lord = hexToRgb(france ?? '')
+      expect(sources.homageDepth).toBe(1)
+      expect(sources.tintLevels).toEqual([
+        [lord, lord],
+        [RED, BLUE],
+      ])
+      expect(sources.borderLevels?.get('0:0')).toBe(1)
+    })
+
+    // The pipeline asks the compute for `authoredRegionColours`; the levels below are read from the
+    // colours settleYearBorders derives itself. Same year, same palette: the deepest is the vassal's own.
+    it('ends on the colours the pipeline asked the compute for, the vassal in its own', () => {
+      const sources = createMapSources()
+      const year = withVassal()
+      const authored = year.authored?.year ?? fail()
+      const asked = authoredRegionColours(authored, year.regions, PALETTE)
+
+      settleYearBorders(sources, year, { borders: TRACED, tints: asked }, PALETTE)
+
+      expect(sources.tintLevels).toHaveLength(2)
+      expect(sources.tintLevels?.[1]).toEqual(asked)
+      expect(sources.tintLevels?.[0]).toEqual([asked[0], asked[0]])
+    })
+
+    it('files the border between two sovereigns at level 0, in one level of tints', () => {
+      const sources = createMapSources()
+      const year = authoredYear()
+      year.regions = [{ polityId: 'fr-couronne' }, { polityId: 'hre' }] as RegionSet['regions']
+
+      settleYearBorders(sources, year, { borders: TRACED, tints: [RED, BLUE] }, PALETTE)
+
+      expect(sources.homageDepth).toBe(0)
+      expect(sources.tintLevels).toEqual([[RED, BLUE]])
+      expect(sources.borderLevels?.get('0:0')).toBe(0)
+    })
+
+    it('keeps a tribe unfilled at every level', () => {
+      const sources = createMapSources()
+      const year = withVassal()
+      const hre = year.authored?.year.registry.polities.find((polity) => polity.id === 'hre')
+      if (hre) hre.rank = 'tribe'
+
+      settleYearBorders(sources, year, { borders: TRACED, tints: [RED, BLUE] }, PALETTE)
+
+      expect(sources.tintLevels?.map((level) => level[1])).toEqual([null, null])
+    })
+
+    it('gives a payload year one level and no border level, forgetting the authored year’s', () => {
+      const sources = createMapSources()
+      settleYearBorders(sources, withVassal(), { borders: TRACED, tints: [RED, BLUE] }, PALETTE)
+
+      settleYearBorders(sources, PAYLOAD_YEAR, { borders: TRACED, tints: [BLUE] }, PALETTE)
+
+      expect(sources.tintLevels).toEqual([[BLUE]])
+      expect(sources.homageDepth).toBe(0)
+      expect(sources.borderLevels).toBeNull()
     })
   })
 

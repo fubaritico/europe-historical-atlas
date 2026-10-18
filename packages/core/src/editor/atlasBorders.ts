@@ -2,10 +2,13 @@ import { latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
 
 import { handFor } from './borderHands'
 import { deriveBorders, maskDerivationDeps } from './derivedBorders'
+import { homageLevels } from './homageLevels'
 import { touchesTribe, tribeIds } from './tribes'
 import { openYearDocument } from './yearDocument'
 
 import type { HandPattern } from './borderHands'
+import type { DerivedBorder } from './derivedBorders'
+import type { HomageLevels } from './homageLevels'
 import type { BorderPattern } from '../data/borderStyles'
 import type { UvPoint } from '../data/coastlineSource'
 import type { LandMask } from '../data/landMask'
@@ -32,6 +35,11 @@ import type { GeoBounds } from '../geo/mercator'
  * **A tribe has no borders, its dashed outline instead** — as in the Cartographer (`tribes.ts`): a border
  * with a tribe on either side is left out, and each tribe's rings come back apart, for the atlas to stroke
  * dashed in its colour.
+ *
+ * **Each group carries its split level** (`homageLevels`, ATLAS-253): the first display level at which its
+ * two sides wear different colours, so the atlas can hide a border between a vassal and its suzerain
+ * until the zoom shows the vassal apart. The frontier against unclaimed ground has one side only and is
+ * level 0, shown at every zoom; so are the tribes' outlines, which have no fill to reveal.
  */
 
 /** An authored year's borders, and the pattern each group is drawn in. */
@@ -40,6 +48,8 @@ export interface ExactBorders {
   borders: RegionBorders
   /** The pattern of each group, keyed by its pair as `"a:b"`. */
   patterns: ReadonlyMap<string, BorderPattern>
+  /** The split level of each group, keyed by its pair as `"a:b"` — `0` shows it at every zoom. */
+  levels: ReadonlyMap<string, number>
   /** Each tribe's claim, its rings closed, in grid coordinates — stroked dashed instead of bordered. */
   tribeOutlines: { polity: string; rings: UvPoint[][] }[]
 }
@@ -65,7 +75,9 @@ const ATLAS_PATTERN: Readonly<Record<Exclude<HandPattern, 'none'>, BorderPattern
  * @param bbox - the frame the anchors are projected against — the manifest's, which is the DEM's
  * @param mask - which cells are dry, or `null` when the asset failed
  * @param warn - where a hand the atlas cannot draw is said; the console in the application
- * @returns the lines and their patterns
+ * @param homage - the year's homage read as levels — passed in by a caller that reads it for the fills too,
+ *   so a loop of homage is said once per year rather than once per use
+ * @returns the lines, their patterns and their split levels
  */
 export function exactBordersOf(
   authored: AuthoredYear,
@@ -73,13 +85,15 @@ export function exactBordersOf(
   mask: LandMask | null,
   warn: (message: string) => void = (message) => {
     console.warn(message)
-  }
+  },
+  homage: HomageLevels = homageLevels(authored.registry.polities)
 ): ExactBorders {
   const doc = openYearDocument(authored)
   const derived = deriveBorders(doc, mask === null ? {} : maskDerivationDeps(doc, mask))
   const tribes = tribeIds(doc.polities)
   const borders: RegionBorders = { between: [], frontier: [] }
   const patterns = new Map<string, BorderPattern>()
+  const levels = new Map<string, number>()
   // Every index resolves: `assembleAuthoredYear` refused the year if one pointed past the table.
   const toGrid = (indices: readonly number[]): UvPoint[] =>
     indices
@@ -104,12 +118,36 @@ export function exactBordersOf(
     const key = borders.between.length
     borders.between.push({ pair: [key, key], lines: [line] })
     patterns.set(pairKey([key, key]), ATLAS_PATTERN[hand.pattern])
+    levels.set(pairKey([key, key]), splitLevelOf(border, homage))
   }
-  if (undrawnHands > 0)
+  warnUndrawnHands(undrawnHands, warn)
+  return { borders, patterns, levels, tribeOutlines: tribeOutlinesOf(doc.claims, tribes, toGrid) }
+}
+
+/**
+ * Say, once per derivation, how many frontier stretches carry a hand the atlas cannot draw there.
+ * @param count - how many
+ * @param warn - where it is said
+ * @returns nothing; silent for none
+ */
+function warnUndrawnHands(count: number, warn: (message: string) => void): void {
+  if (count > 0)
     warn(
-      `[atlas] ${String(undrawnHands)} frontier stretch(es) carry an authored hand the atlas draws as its frontier stroke.`
+      `[atlas] ${String(count)} frontier stretch(es) carry an authored hand the atlas draws as its frontier stroke.`
     )
-  return { borders, patterns, tribeOutlines: tribeOutlinesOf(doc.claims, tribes, toGrid) }
+}
+
+/**
+ * The split level of a derived border: the first display level at which its two sides wear different
+ * colours.
+ * @param border - the border, naming who it separates
+ * @param homage - the year's homage
+ * @returns `0` for a border with one side — the sea or ground nobody claims beyond it — else the pair's
+ *   split level
+ */
+function splitLevelOf(border: Pick<DerivedBorder, 'between'>, homage: HomageLevels): number {
+  const [one, other] = border.between
+  return one === undefined || other === undefined ? 0 : homage.splitLevel(one, other)
 }
 
 /**

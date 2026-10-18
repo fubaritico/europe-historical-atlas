@@ -6,7 +6,13 @@ import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { fillTriangles } from '@europe-historical-atlas/core/pipeline/fillTriangles'
 import { planeHeight } from '@europe-historical-atlas/core/pipeline/gridDrape'
 
-import { MODE_INDEX, createFillLayer, fillBuffers } from './fillLayer'
+import {
+  MODE_INDEX,
+  createFillLayer,
+  fillBuffers,
+  fillVertexShader,
+  tintAttribute,
+} from './fillLayer'
 import { createReliefMesh, meshVertexGrid, meshWorldDepth } from './reliefMesh'
 
 import type { FillLayerOptions } from './fillLayer'
@@ -82,7 +88,7 @@ const options = (over: Partial<FillLayerOptions> = {}): FillLayerOptions => ({
     ],
     GRID
   ),
-  tints: [{ r: 200, g: 40, b: 10 }],
+  tintLevels: [[{ r: 200, g: 40, b: 10 }]],
   grid: GRID,
   nodeY,
   worldWidth: WORLD_WIDTH,
@@ -139,21 +145,142 @@ describe('planeHeight', () => {
   })
 })
 
+/** Two polities, one per triangle: a suzerain and its vassal. */
+const twoPolities = (): FillLayerOptions['fills'] =>
+  fillTriangles(
+    [
+      {
+        rings: [
+          [
+            { u: 0.1, v: 0.1 },
+            { u: 0.4, v: 0.1 },
+            { u: 0.1, v: 0.4 },
+          ],
+        ],
+      },
+      {
+        rings: [
+          [
+            { u: 0.6, v: 0.6 },
+            { u: 0.9, v: 0.6 },
+            { u: 0.6, v: 0.9 },
+          ],
+        ],
+      },
+    ],
+    GRID
+  )
+
+const LORD = { r: 10, g: 20, b: 30 }
+const VASSAL = { r: 200, g: 100, b: 50 }
+
 describe('fillBuffers', () => {
-  it('lays every vertex on the relief and paints it its polity tint', () => {
-    const { positions, tints } = fillBuffers(options())
-    expect(positions.length).toBeGreaterThan(0)
-    for (let k = 0; k < positions.length; k += 3) {
-      const u = (positions[k] ?? 0) / WORLD_WIDTH + 0.5
-      const v = (positions[k + 2] ?? 0) / DEPTH + 0.5
-      expect(positions[k + 1]).toBeCloseTo(raycastHeight(u, v), 5)
-    }
-    expect(Array.from(tints.slice(0, 3))).toEqual([200, 40, 10])
+  describe('happy path', () => {
+    it('lays every vertex on the relief and paints it its polity tint', () => {
+      const { positions, tints } = fillBuffers(options())
+      expect(positions.length).toBeGreaterThan(0)
+      for (let k = 0; k < positions.length; k += 3) {
+        const u = (positions[k] ?? 0) / WORLD_WIDTH + 0.5
+        const v = (positions[k + 2] ?? 0) / DEPTH + 0.5
+        expect(positions[k + 1]).toBeCloseTo(raycastHeight(u, v), 5)
+      }
+      expect(tints).toHaveLength(1)
+      expect(Array.from(tints[0]?.slice(0, 3) ?? [])).toEqual([200, 40, 10])
+    })
   })
 
-  it('leaves out a polity with no tint', () => {
-    const { positions } = fillBuffers(options({ tints: [null] }))
-    expect(positions.length).toBe(0)
+  describe('variants', () => {
+    it('writes one tint buffer per level, the vassal in its lord’s colour at level 0', () => {
+      const fills = twoPolities()
+      const { positions, tints } = fillBuffers(
+        options({
+          fills,
+          tintLevels: [
+            [LORD, LORD],
+            [LORD, VASSAL],
+          ],
+        })
+      )
+      const lordVertices = Math.floor((fills[0]?.length ?? 0) / 2)
+      const last = positions.length - 3
+      expect(tints).toHaveLength(2)
+      expect(Array.from(tints[0]?.slice(last, last + 3) ?? [])).toEqual([10, 20, 30])
+      expect(Array.from(tints[1]?.slice(last, last + 3) ?? [])).toEqual([200, 100, 50])
+      expect(Array.from(tints[1]?.slice(0, 3) ?? [])).toEqual([10, 20, 30])
+      expect(lordVertices).toBeGreaterThan(0)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('leaves out a polity with no tint at the deepest level', () => {
+      const { positions } = fillBuffers(options({ tintLevels: [[null]] }))
+      expect(positions.length).toBe(0)
+    })
+
+    it('leaves a polity out of every level when its deepest tint is null', () => {
+      const { positions, tints } = fillBuffers(
+        options({
+          fills: twoPolities(),
+          tintLevels: [
+            [LORD, null],
+            [LORD, null],
+          ],
+        })
+      )
+      expect(tints[0]?.length).toBe(positions.length)
+      expect(tints[1]?.length).toBe(positions.length)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('throws when no level is given', () => {
+      expect(() => fillBuffers(options({ tintLevels: [] }))).toThrow(/no tint level/)
+    })
+
+    it('throws when a filled polity has no tint at a lower level', () => {
+      expect(() =>
+        fillBuffers(
+          options({
+            fills: twoPolities(),
+            tintLevels: [
+              [LORD, null],
+              [LORD, VASSAL],
+            ],
+          })
+        )
+      ).toThrow(/polity 1 is filled but has no tint at level 0/)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('writes nothing for no polity', () => {
+      const { positions, tints } = fillBuffers(options({ fills: [], tintLevels: [[], []] }))
+      expect(positions.length).toBe(0)
+      expect(tints.map((bytes) => bytes.length)).toEqual([0, 0])
+    })
+  })
+})
+
+describe('fillVertexShader', () => {
+  it('declares one tint attribute per level and compiles the count in', () => {
+    const source = fillVertexShader(3)
+    expect(source).toContain('#define LEVELS 3')
+    for (const level of [0, 1, 2])
+      expect(source).toContain(`attribute vec3 ${tintAttribute(level)};`)
+    expect(source).not.toContain('tint3')
+  })
+
+  it('mixes the two levels around the detail uniform', () => {
+    expect(fillVertexShader(2)).toMatch(
+      /mix\(tintAt\(below\), tintAt\(min\(below \+ 1\.0, top\)\), d - below\)/
+    )
+  })
+
+  it('reads one level as a single attribute', () => {
+    const source = fillVertexShader(1)
+    expect(source).toContain('#define LEVELS 1')
+    expect(source).toContain('return tint0;')
+    expect(source).not.toContain('tint1')
   })
 })
 
@@ -187,11 +314,44 @@ describe('createFillLayer', () => {
       expect(layer.object.material.uniforms.strength?.value).toBe(0.4)
       layer.dispose()
     })
+
+    it('carries one attribute per level and opens on the deepest, every polity in its own colour', () => {
+      const layer = createFillLayer(
+        options({
+          fills: twoPolities(),
+          tintLevels: [
+            [LORD, LORD],
+            [LORD, VASSAL],
+          ],
+        })
+      )
+      expect(layer.object.geometry.getAttribute('tint0')).toBeDefined()
+      expect(layer.object.geometry.getAttribute('tint1')).toBeDefined()
+      expect(layer.object.material.uniforms.detail?.value).toBe(1)
+      layer.dispose()
+    })
+
+    it('follows the zoom’s detail without touching the geometry', () => {
+      const layer = createFillLayer(
+        options({
+          fills: twoPolities(),
+          tintLevels: [
+            [LORD, LORD],
+            [LORD, VASSAL],
+          ],
+        })
+      )
+      const before = layer.object.geometry.getAttribute('tint0')
+      layer.setDetail(0.25)
+      expect(layer.object.material.uniforms.detail?.value).toBe(0.25)
+      expect(layer.object.geometry.getAttribute('tint0')).toBe(before)
+      layer.dispose()
+    })
   })
 
   describe('managed errors', () => {
     it('builds an empty mesh when no polity has a tint', () => {
-      const layer = createFillLayer(options({ tints: [null] }))
+      const layer = createFillLayer(options({ tintLevels: [[null]] }))
       expect(layer.object.geometry.getAttribute('position').count).toBe(0)
       layer.dispose()
     })

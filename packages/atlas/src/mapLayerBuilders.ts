@@ -29,14 +29,11 @@ import {
 } from './mapLayerContext'
 import { refreshReliefSource } from './mapSources'
 import { createCompassRose } from './scene/compassRose'
-import {
-  buildBorderStrokes,
-  createComposedLineLayer,
-  tribeStrokes,
-} from './scene/composedLineLayer'
+import { buildBorderStrokes, tribeStrokes } from './scene/composedLineLayer'
 import { createFillLayer } from './scene/fillLayer'
 import { createFrameLabels } from './scene/frameLabels'
 import { createGraticuleFrame, labelLane } from './scene/graticuleFrame'
+import { createLevelledBorderLayer, splitBordersByLevel } from './scene/levelledBorderLayer'
 import { createLineLayer } from './scene/lineLayer'
 import { createMapEdge } from './scene/mapEdge'
 import { MAP_TITLE, createMapTitle } from './scene/mapTitle'
@@ -78,6 +75,24 @@ export function patternForPair(
   const regions = context.sources.regionSet?.regions
   if (!regions) return 'solid'
   return borderPatternFor(regions[pair[0]]?.name ?? null, regions[pair[1]]?.name ?? null)
+}
+
+/**
+ * The split level of a border group (ATLAS-253): the one its year filed when it is authored, else 0 — a
+ * payload year carries no homage, and every one of its lines shows at every zoom.
+ * @param context - the layers and what they read
+ * @param pair - the group's two indices
+ * @returns the split level
+ * @throws when an authored year has no level for a group — every group is filed with one, so a miss is a
+ *   defect, said rather than drawn at a level nobody chose
+ */
+export function levelForPair(context: LayerContext, pair: readonly [number, number]): number {
+  const authored = context.sources.borderLevels
+  if (authored === null) return 0
+  const level = authored.get(pairKey(pair))
+  if (level === undefined)
+    throw new Error(`[atlas] no split level filed for the border group ${pairKey(pair)}`)
+  return level
 }
 
 /**
@@ -195,8 +210,8 @@ export function rebuildFills(context: LayerContext): void {
   const relief = handles.relief
   const texture = handles.texture
   const regions = sources.regionSet?.regions
-  const tints = sources.regionTints
-  if (!relief || !texture || !regions || !tints || !sources.heightmap) {
+  const tintLevels = sources.tintLevels
+  if (!relief || !texture || !regions || !tintLevels || !sources.heightmap) {
     // The bake has already dropped the tint for this year, so no fill means no colour at all: said, not
     // swallowed (rules/error-handling.md).
     console.warn(
@@ -209,7 +224,7 @@ export function rebuildFills(context: LayerContext): void {
   const heights = relief.geometry.getAttribute('position')
   handles.fills = createFillLayer({
     fills: cutFills(context, regions, grid),
-    tints,
+    tintLevels,
     grid,
     nodeY: (ix, iy) => heights.getY(iy * (segX + 1) + ix),
     worldWidth: WORLD_WIDTH,
@@ -345,12 +360,19 @@ export function rebuildBorders(context: LayerContext): void {
   handles.borders = null
   if (!sources.derivedBorders || !dev.political.showBorders) return
   const style = borderStrokeStyle(dev)
-  const strokes = [
-    ...buildBorderStrokes(sources.derivedBorders, style, (pair) => patternForPair(context, pair)),
-    ...tribeStrokes(sources.tribeOutlines, style),
-  ]
-  if (strokes.length === 0) return
-  handles.borders = createComposedLineLayer(strokes, {
+  const byLevel = splitBordersByLevel(sources.derivedBorders, (pair) => levelForPair(context, pair))
+  const strokesByLevel = new Map(
+    [...byLevel].map(([level, borders]) => [
+      level,
+      [
+        ...buildBorderStrokes(borders, style, (pair) => patternForPair(context, pair)),
+        // A tribe's outline has no fill to reveal: it is drawn at level 0, at every zoom.
+        ...(level === 0 ? tribeStrokes(sources.tribeOutlines, style) : []),
+      ],
+    ])
+  )
+  if ([...strokesByLevel.values()].every((strokes) => strokes.length === 0)) return
+  handles.borders = createLevelledBorderLayer(strokesByLevel, {
     project: projection.draped,
     split: projection.split,
     depthBias: DRAPED_DEPTH_BIAS,

@@ -21,6 +21,7 @@ import {
   DEFAULT_RHUMB_PARAMS,
   DEFAULT_RIVER_PARAMS,
   DEFAULT_ROSE_PARAMS,
+  DEFAULT_VASSAL_PARAMS,
 } from './devParams'
 
 import type { MapRect } from './controls/mapControls'
@@ -33,6 +34,7 @@ import type {
   RhumbDevParams,
   RiverDevParams,
   RoseDevParams,
+  VassalDevParams,
 } from './devParams'
 import type { TerrainTextureOptions } from '@europe-historical-atlas/core/pipeline/terrainCompose'
 
@@ -62,6 +64,8 @@ export interface DevState {
   river: RiverDevParams
   /** The historical political overlay. */
   political: PoliticalDevParams
+  /** How the zoom reveals the levels of homage. */
+  vassals: VassalDevParams
   /** Compass rose. */
   rose: RoseDevParams
   /** The world rectangle the camera is clamped within. */
@@ -86,6 +90,7 @@ export function createDevState(): DevState {
     rhumb: { ...DEFAULT_RHUMB_PARAMS },
     river: { ...DEFAULT_RIVER_PARAMS },
     political: { ...DEFAULT_POLITICAL_PARAMS },
+    vassals: { ...DEFAULT_VASSAL_PARAMS },
     rose: { ...DEFAULT_ROSE_PARAMS },
     extent: { ...DEFAULT_EXTENT_PARAMS },
     frame: { ...DEFAULT_FRAME_PARAMS },

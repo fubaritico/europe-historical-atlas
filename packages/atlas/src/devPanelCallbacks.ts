@@ -48,6 +48,7 @@ function logAllSettings(dev: DevState, controls: MapControls): void {
           rhumb: dev.rhumb,
           river: dev.river,
           political: dev.political,
+          vassals: dev.vassals,
           rose: dev.rose,
           frame: dev.frame,
           camera: { ...controls.getState(), fov: dev.framing.fov },
@@ -199,6 +200,7 @@ export function panelDepsFor(deps: PanelCallbackDeps): DevPanelDeps {
     rhumb: dev.rhumb,
     river: dev.river,
     political: dev.political,
+    vassals: dev.vassals,
     rose: dev.rose,
     frame: dev.frame,
     // The camera folder writes straight into the controls' own options: they are the live values, and

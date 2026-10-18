@@ -216,6 +216,7 @@ pattern is not available by default — which is worth keeping, but it is not th
 | the relief | a flat image | a 3D mesh, with the shore ramp (`data/shoreRamp`) |
 | how a border is stroked | canvas strokes, every hand | three.js lines from `editor/borderHands`' table, minus weight and a dotted pattern (`known-issues-atlas.md`) |
 | a tribe | no fill, a dashed outline (`editor/tribes`), canvas dashes | the same rule from `editor/atlasBorders`, dashes in screen pixels (`scene/screenScale`) |
+| a vassal | every polity in its own colour, with every border | from afar a vassal wears its suzerain's colour and no border parts them; its own colour and its border fade in by zoom (ATLAS-253) — levels from `editor/homageLevels`, the zoom read by `scene/homageReveal`, one line layer per split level (`scene/levelledBorderLayer`), the fills mixed across tint levels (`scene/fillLayer`) |
 
 **The direction**: geometry and decisions live in `core`; only the drawing — a 2D canvas on one side, the
 GPU on the other — belongs to each application. A difference in the second table is either a rendering

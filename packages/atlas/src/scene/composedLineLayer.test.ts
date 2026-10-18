@@ -350,6 +350,45 @@ describe('composedLineLayer', () => {
       expect(liveValues(layer, 'opacity')).toEqual([STYLE.opacity, STYLE.opacity])
       layer.dispose()
     })
+
+    // Guard against a fade reaching the inlay alone: a level of homage arrives as a whole line.
+    it('fades every pass — frontier, edge and inlay — when the whole line fades', () => {
+      const layer = createComposedLineLayer(buildBorderStrokes(borders(1, 1), STYLE), { project })
+      layer.setFade(0.25)
+      expect(liveValues(layer, 'opacity')).toEqual([
+        STYLE.frontierOpacity * 0.25,
+        STYLE.opacity * 0.25,
+        STYLE.opacity * 0.25,
+      ])
+      expect(layer.object.visible).toBe(true)
+      layer.dispose()
+    })
+
+    it('composes the fade with the zoom-out ease and the inlay, in whichever order they come', () => {
+      const one = createComposedLineLayer(buildBorderStrokes(borders(1, 0), STYLE), { project })
+      one.setFade(0.5)
+      one.setOpacityScale(0.5)
+      one.setInlayOpacity(0.5)
+      const other = createComposedLineLayer(buildBorderStrokes(borders(1, 0), STYLE), { project })
+      other.setInlayOpacity(0.5)
+      other.setOpacityScale(0.5)
+      other.setFade(0.5)
+      const expected = [STYLE.opacity * 0.25, STYLE.opacity * 0.125]
+      expect(liveValues(one, 'opacity')).toEqual(expected)
+      expect(liveValues(other, 'opacity')).toEqual(expected)
+      one.dispose()
+      other.dispose()
+    })
+
+    it('hides the line once faded out, and shows it again when it returns', () => {
+      const layer = createComposedLineLayer(buildBorderStrokes(borders(1, 0), STYLE), { project })
+      layer.setFade(0)
+      expect(layer.object.visible).toBe(false)
+      layer.setFade(1)
+      expect(layer.object.visible).toBe(true)
+      expect(liveValues(layer, 'opacity')).toEqual([STYLE.opacity, STYLE.opacity])
+      layer.dispose()
+    })
   })
 
   describe('inlayOpacityScale', () => {

@@ -48,6 +48,14 @@ export interface MapSources {
    * no fill (`core/editor/tribes`); `null` as a whole before a year.
    */
   regionTints: (RgbColor | null)[] | null
+  /**
+   * Each display level of homage's tints (ATLAS-253), level 0 first and {@link MapSources.regionTints} last
+   * — what the fills mix between as the zoom reveals the vassals. One level for a year read from the
+   * per-century payloads, which carries no homage to reveal; `null` before a year.
+   */
+  tintLevels: (RgbColor | null)[][] | null
+  /** The deepest level of homage of the year on screen — `0` for a payload year, or before one. */
+  homageDepth: number
   /** The river centrelines, empty until they land. */
   riverData: River[]
   /**
@@ -62,6 +70,11 @@ export interface MapSources {
    * group's pair as `"a:b"`; `null` for a year read from the per-century payloads.
    */
   borderPatterns: ReadonlyMap<string, BorderPattern> | null
+  /**
+   * The split level of each border group when the year is authored (`core/editor/homageLevels`), keyed like
+   * {@link MapSources.borderPatterns}; `null` for a payload year, whose every line is level 0.
+   */
+  borderLevels: ReadonlyMap<string, number> | null
   /**
    * Each tribe's rings in its colour, stroked dashed in place of a fill and of its borders — empty for a
    * year with no tribe, and for a year read from the per-century payloads, which has no ranks.
@@ -89,9 +102,12 @@ export function createMapSources(): MapSources {
     reliefInputs: null,
     regionSet: null,
     regionTints: null,
+    tintLevels: null,
+    homageDepth: 0,
     riverData: [],
     derivedBorders: null,
     borderPatterns: null,
+    borderLevels: null,
     tribeOutlines: [],
   }
 }

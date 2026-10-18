@@ -8,6 +8,7 @@ import {
   wholeRiverRank,
 } from '@europe-historical-atlas/core/data/riverDisplay'
 
+import { FADE_HIDDEN } from './fadeHidden'
 import { createLineLayer } from './lineLayer'
 
 import type { LineLayer, LineLayerOptions, UvSegment } from './lineLayer'
@@ -198,7 +199,7 @@ export function createRiverLayer(rivers: readonly River[], options: RiverLayerOp
       for (const [rank, layer] of byRank) {
         const opacity = rankOpacity(rank, zoom, options)
         layer.setOpacity(opacity)
-        layer.object.visible = opacity > 0.001
+        layer.object.visible = opacity > FADE_HIDDEN
       }
     },
     setResolution(width: number, height: number): void {

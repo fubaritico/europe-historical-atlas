@@ -24,6 +24,8 @@ import {
   RIVER_CONTROL_ORDER,
   ROSE_CONTROLS,
   ROSE_CONTROL_ORDER,
+  VASSAL_CONTROLS,
+  VASSAL_CONTROL_ORDER,
   politicalRebuildFor,
 } from './devParams'
 
@@ -38,6 +40,7 @@ import type {
   RhumbDevParams,
   RiverDevParams,
   RoseDevParams,
+  VassalDevParams,
 } from './devParams'
 import type { TerrainTextureOptions } from '@europe-historical-atlas/core/pipeline/terrainCompose'
 import type { ControlSpec } from '@europe-historical-atlas/core/utils/controlSpec'
@@ -51,6 +54,7 @@ export type {
   RhumbDevParams,
   RiverDevParams,
   RoseDevParams,
+  VassalDevParams,
 } from './devParams'
 
 /**
@@ -154,6 +158,8 @@ export interface DevPanelDeps {
   river: RiverDevParams
   /** Historical political overlay params. */
   political: PoliticalDevParams
+  /** How the zoom reveals the levels of homage. */
+  vassals: VassalDevParams
   /** Compass-rose styling params. */
   rose: RoseDevParams
   /** The sheet the map is printed on, and its graduated border. */
@@ -226,6 +232,7 @@ function snapshotDefaults(deps: DevPanelDeps) {
     rhumb: clonePlain(deps.rhumb),
     river: clonePlain(deps.river),
     political: clonePlain(deps.political),
+    vassals: clonePlain(deps.vassals),
     rose: clonePlain(deps.rose),
     frame: clonePlain(deps.frame),
     extent: clonePlain(deps.extent),
@@ -246,7 +253,19 @@ function snapshotDefaults(deps: DevPanelDeps) {
  * @returns the reset action
  */
 function createResetAction(gui: GUI, deps: DevPanelDeps, defaults: PanelDefaults): () => void {
-  const { relief, texture, coast, rhumb, river, political, rose, frame, extent, callbacks } = deps
+  const {
+    relief,
+    texture,
+    coast,
+    rhumb,
+    river,
+    political,
+    vassals,
+    rose,
+    frame,
+    extent,
+    callbacks,
+  } = deps
   return (): void => {
     Object.assign(relief, clonePlain(defaults.relief))
     Object.assign(texture, clonePlain(defaults.texture))
@@ -254,6 +273,7 @@ function createResetAction(gui: GUI, deps: DevPanelDeps, defaults: PanelDefaults
     Object.assign(rhumb, clonePlain(defaults.rhumb))
     Object.assign(river, clonePlain(defaults.river))
     Object.assign(political, clonePlain(defaults.political))
+    Object.assign(vassals, clonePlain(defaults.vassals))
     Object.assign(rose, clonePlain(defaults.rose))
     Object.assign(frame, clonePlain(defaults.frame))
     Object.assign(extent, clonePlain(defaults.extent))
@@ -435,6 +455,19 @@ function addPoliticalFolder(gui: GUI, deps: DevPanelDeps): void {
 }
 
 /**
+ * The vassals' reveal by zoom. Every field is read on each frame, so none needs a callback.
+ * @param gui - where to add the folder
+ * @param deps - what the panel binds to
+ * @returns nothing
+ */
+function addVassalFolder(gui: GUI, deps: DevPanelDeps): void {
+  const folder = gui.addFolder('vassals (by zoom)')
+  for (const key of VASSAL_CONTROL_ORDER)
+    addControl(folder, deps.vassals, key, VASSAL_CONTROLS[key], noEffect)
+  folder.close()
+}
+
+/**
  * The compass rose. Colours, labels and size are baked into its SVG, so each change regenerates it;
  * opacity is the exception, being a live material tweak.
  * @param gui - where to add the folder
@@ -529,6 +562,7 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
   addRhumbFolder(gui, deps)
   addRiverFolder(gui, deps)
   addPoliticalFolder(gui, deps)
+  addVassalFolder(gui, deps)
   addRoseFolder(gui, deps)
   addFrameFolder(gui, deps)
   addCameraFolder(gui, deps)

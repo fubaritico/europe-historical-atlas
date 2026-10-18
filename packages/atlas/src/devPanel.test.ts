@@ -119,6 +119,7 @@ function build(): {
     rhumb: dev.rhumb,
     river: dev.river,
     political: dev.political,
+    vassals: dev.vassals,
     rose: dev.rose,
     frame: dev.frame,
     controlsOptions,
@@ -194,6 +195,13 @@ const READ_EVERY_FRAME = new Set([
 ])
 
 /**
+ * The vassals' reveal, read on every frame (`mapLayers.frameDetail`) — spelled out by key, as the camera's
+ * are, so a vassal option added later and wired to nothing still fails the guard. Matched together with
+ * its object (`dev.vassals`): the rivers' rebuilding controls share some of these keys.
+ */
+const VASSALS_READ_EVERY_FRAME = new Set(['enabled', 'revealStart', 'revealEnd', 'fade'])
+
+/**
  * The flight controls, read once when a flight begins rather than every frame.
  *
  * Exempt from the callback guard for the same reason — they trigger no rebuild — but the exemption is
@@ -222,13 +230,14 @@ describe('createDevPanel', () => {
       // moved and changed nothing, and nothing anywhere noticed.
       const inert: string[] = []
       for (const controller of build().controls) {
-        const { calls, controls: fresh } = build()
+        const { calls, controls: fresh, dev } = build()
         const match = fresh.find(
           (c) => c.property === controller.property && c.getValue() === controller.getValue()
         )
         if (!match) continue
         nudge(match)
         const exempt =
+          (match.object === dev.vassals && VASSALS_READ_EVERY_FRAME.has(match.property)) ||
           READ_EVERY_FRAME.has(match.property) ||
           (FLIGHT_CONTROLS as readonly string[]).includes(match.property)
         if (total(calls) === 0 && !exempt) inert.push(match.property)
@@ -334,6 +343,21 @@ describe('createDevPanel', () => {
       expect(calls.rebuildRivers).toBe(1)
     })
 
+    it('writes the vassals’ reveal into the live object the frame reads, with no rebuild', () => {
+      const { dev, calls, controls } = build()
+      const vassals = controls.filter((c) => c.object === dev.vassals)
+      expect(vassals.map((c) => c.property)).toEqual([
+        'enabled',
+        'revealStart',
+        'revealEnd',
+        'fade',
+      ])
+      for (const control of vassals) nudge(control)
+      expect(dev.vassals.enabled).toBe(false)
+      expect(dev.vassals.revealStart).not.toBe(0.45)
+      expect(total(calls)).toBe(0)
+    })
+
     it('repaints a colour live rather than rebuilding for it', () => {
       const { calls, controls } = build()
       const colours = controls.filter((c) => c.property === 'color')
@@ -350,9 +374,12 @@ describe('createDevPanel', () => {
       const before = dev.texture.seaLevel
       const seaLevel = controls.find((c) => c.property === 'seaLevel')
       if (seaLevel) nudge(seaLevel)
+      dev.vassals.revealStart = 0.9
+      dev.vassals.enabled = false
       const reset = controls.find((c) => c.property === 'resetToDefaults')
       ;(reset?.object as { resetToDefaults: () => void }).resetToDefaults()
       expect(dev.texture.seaLevel).toBe(before)
+      expect(dev.vassals).toEqual(createDevState().vassals)
       // One rebuild per system, not one per controller: lil-gui's own reset() would fire dozens of
       // full texture bakes in a row.
       expect(calls.rebuildTexture).toBe(2) // once for the sea level above, once for the reset

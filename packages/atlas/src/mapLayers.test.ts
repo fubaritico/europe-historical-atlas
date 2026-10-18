@@ -121,6 +121,16 @@ const geometryOf = (object: unknown): { dispose: () => void } =>
 const materialOf = (object: unknown): { wireframe: boolean } =>
   (object as { material: { wireframe: boolean } }).material
 
+/**
+ * The border passes of the line work at a scene slot: one composed layer per level of homage, each holding
+ * its passes.
+ * @param scene - the scene
+ * @param slot - where the border handle sits
+ * @returns every pass, level by level
+ */
+const borderStrokes = (scene: Scene, slot = 0): LineSegments2[] =>
+  (scene.children[slot]?.children ?? []).flatMap((level) => level.children) as LineSegments2[]
+
 afterEach(() => {
   vi.restoreAllMocks()
 })
@@ -257,18 +267,124 @@ describe('createMapLayers', () => {
         },
       ]
       layers.rebuildBorders()
-      const strokes = (scene.children[0]?.children ?? []) as LineSegments2[]
+      const strokes = borderStrokes(scene)
       expect(strokes).toHaveLength(1)
       expect(strokes[0]?.material.dashed).toBe(true)
       expect(`#${strokes[0]?.material.color.getHexString() ?? ''}`).toBe('#41580b')
+    })
+
+    it('builds one border layer per split level, hiding a vassal’s border from afar', () => {
+      const { scene, sources, dev, layers } = build()
+      sources.regionSet = AUTHORED
+      sources.homageDepth = 1
+      sources.derivedBorders = {
+        between: [
+          { pair: [0, 0], lines: BORDERS.between[0]?.lines ?? [] },
+          {
+            pair: [1, 1],
+            lines: [
+              [
+                { u: 0.5, v: 0.2 },
+                { u: 0.5, v: 0.8 },
+              ],
+            ],
+          },
+        ],
+        frontier: [],
+      }
+      sources.borderPatterns = new Map([
+        ['0:0', 'solid'],
+        ['1:1', 'dashed'],
+      ])
+      sources.borderLevels = new Map([
+        ['0:0', 0],
+        ['1:1', 1],
+      ])
+      layers.rebuildBorders()
+      const levels = scene.children[0]?.children ?? []
+      expect(levels).toHaveLength(2)
+      layers.frame(0, 100)
+      expect(levels.map((level) => level.visible)).toEqual([true, false])
+      layers.frame(1, 100)
+      expect(levels.map((level) => level.visible)).toEqual([true, true])
+      dev.vassals.enabled = false
+      layers.frame(0, 100)
+      expect(levels.map((level) => level.visible)).toEqual([true, true])
+    })
+
+    it('shows every border level when the texture carries the colour, as the bake shows every polity', () => {
+      const { scene, sources, layers } = build()
+      sources.homageDepth = 1 // REGIONS: a payload year, never filled as geometry
+      sources.derivedBorders = {
+        between: [{ pair: [0, 0], lines: BORDERS.between[0]?.lines ?? [] }],
+        frontier: [],
+      }
+      sources.borderPatterns = new Map([['0:0', 'solid']])
+      sources.borderLevels = new Map([['0:0', 1]])
+      layers.rebuildBorders()
+      layers.frame(0, 100)
+      expect(scene.children[0]?.children[0]?.visible).toBe(true)
+    })
+
+    it('mixes the fills toward the vassals as the zoom comes in, with no rebuild', () => {
+      const { scene, sources, dev, layers } = build()
+      sources.regionSet = AUTHORED
+      sources.homageDepth = 1
+      sources.tintLevels = [[{ r: 1, g: 2, b: 3 }], [{ r: 200, g: 40, b: 10 }]]
+      layers.rebuildRelief()
+      layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))
+      layers.rebuildFills()
+      const fill = scene.children.find(
+        (child) => child.renderOrder === FILL_RENDER_ORDER
+      ) as unknown as {
+        material: { uniforms: { detail: { value: number } } }
+      }
+      layers.frame(0, 100)
+      expect(fill.material.uniforms.detail.value).toBe(0)
+      layers.frame(dev.vassals.revealStart, 100)
+      expect(fill.material.uniforms.detail.value).toBe(1)
+    })
+
+    // Three tint levels, so `revealEnd` — the deepest level's zoom — has a level to move. A frame test,
+    // not a call to homageDetail: it proves the live `dev.vassals` reaches the fills' uniform.
+    it('moves the fills’ detail at a fixed zoom when the deepest reveal or the fade span changes', () => {
+      const { scene, sources, dev, layers } = build()
+      sources.regionSet = AUTHORED
+      sources.homageDepth = 2
+      sources.tintLevels = [
+        [{ r: 1, g: 2, b: 3 }],
+        [{ r: 100, g: 20, b: 5 }],
+        [{ r: 200, g: 40, b: 10 }],
+      ]
+      Object.assign(dev.vassals, { enabled: true, revealStart: 0.45, revealEnd: 0.8, fade: 0.2 })
+      layers.rebuildRelief()
+      layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))
+      layers.rebuildFills()
+      const fill = scene.children.find(
+        (child) => child.renderOrder === FILL_RENDER_ORDER
+      ) as unknown as {
+        material: { uniforms: { detail: { value: number } } }
+      }
+      const detailAt = (zoom: number): number => {
+        layers.frame(zoom, 100)
+        return fill.material.uniforms.detail.value
+      }
+
+      // Level 1 whole, level 2 halfway through its fade [0.6, 0.8] — smoothstep(0.5) = 0.5.
+      expect(detailAt(0.7)).toBeCloseTo(1.5)
+      dev.vassals.revealEnd = 1
+      expect(detailAt(0.7)).toBeCloseTo(1) // level 2 now fades over [0.8, 1]: not begun
+      dev.vassals.revealEnd = 0.8
+      dev.vassals.fade = 0.4
+      // Level 2 fades over [0.4, 0.8]: t = 0.75, smoothstep = 0.84375.
+      expect(detailAt(0.7)).toBeCloseTo(1.84375)
     })
 
     it('reads the border dashes in screen pixels, from the scale the frame passes', () => {
       const { scene, layers } = build()
       layers.rebuildBorders()
       layers.frame(0.5, 640)
-      for (const stroke of scene.children[0]?.children ?? [])
-        expect((stroke as LineSegments2).material.dashScale).toBe(640)
+      for (const stroke of borderStrokes(scene)) expect(stroke.material.dashScale).toBe(640)
     })
 
     it('tracks the relief scale on everything draped over it', () => {
@@ -316,14 +432,14 @@ describe('createMapLayers', () => {
     it('pulls the borders toward the camera rather than lifting them off the colours they bound', () => {
       const { scene, layers } = build()
       layers.rebuildBorders()
-      const strokes = scene.children[0]?.children ?? []
+      const strokes = borderStrokes(scene)
       expect(strokes.length).toBeGreaterThan(0)
       for (const stroke of strokes) {
         const shader = {
           uniforms: {},
           vertexShader: new LineMaterial().vertexShader,
         } as unknown as WebGLProgramParametersWithUniforms
-        ;(stroke as LineSegments2).material.onBeforeCompile(shader, undefined as never)
+        stroke.material.onBeforeCompile(shader, undefined as never)
         expect(shader.uniforms[DEPTH_BIAS_UNIFORM]).toEqual({ value: DRAPED_DEPTH_BIAS })
       }
     })
@@ -373,15 +489,15 @@ describe('createMapLayers', () => {
       expect(river.geometry.getAttribute('instanceStart').count).toBeGreaterThan(1)
       scene.clear()
       layers.rebuildBorders()
-      const border = scene.children[0]?.children[0] as LineSegments2
+      const [border] = borderStrokes(scene)
       // BORDERS holds one segment, across six tenths of the map.
-      expect(border.geometry.getAttribute('instanceStart').count).toBeGreaterThan(1)
+      expect(border?.geometry.getAttribute('instanceStart').count).toBeGreaterThan(1)
     })
 
     it('lays an authored year on the relief as geometry, following the exaggeration and the texture', () => {
       const { scene, sources, dev, layers } = build()
       sources.regionSet = AUTHORED
-      sources.regionTints = [{ r: 200, g: 40, b: 10 }]
+      sources.tintLevels = [[{ r: 200, g: 40, b: 10 }]]
       dev.relief.exaggeration = 2
       dev.relief.exaggZoomIn = 1
       layers.rebuildRelief()
@@ -402,7 +518,7 @@ describe('createMapLayers', () => {
     it('replaces the fill on a second build instead of stacking one, and clears it when the switch goes off', () => {
       const { scene, sources, dev, layers } = build()
       sources.regionSet = AUTHORED
-      sources.regionTints = [{ r: 200, g: 40, b: 10 }]
+      sources.tintLevels = [[{ r: 200, g: 40, b: 10 }]]
       layers.rebuildRelief()
       layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))
       layers.rebuildFills()
@@ -427,7 +543,7 @@ describe('createMapLayers', () => {
     it('cuts the fills once per year and grid, so a height-curve change only re-lays them', () => {
       const { sources, dev, layers } = build()
       sources.regionSet = AUTHORED
-      sources.regionTints = [{ r: 200, g: 40, b: 10 }]
+      sources.tintLevels = [[{ r: 200, g: 40, b: 10 }]]
       layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))
       layers.rebuildSurface()
       const spy = vi.spyOn(fillModule, 'fillTriangles')
@@ -443,7 +559,7 @@ describe('createMapLayers', () => {
       const { sources, layers } = build()
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
       sources.regionSet = AUTHORED
-      sources.regionTints = [{ r: 200, g: 40, b: 10 }]
+      sources.tintLevels = [[{ r: 200, g: 40, b: 10 }]]
       layers.rebuildRelief()
       layers.rebuildFills() // no texture yet
       expect(warn).toHaveBeenCalledWith(expect.stringContaining('the texture'))
@@ -451,7 +567,7 @@ describe('createMapLayers', () => {
 
     it('lays no fill for a payload year, nor for an authored one with the switch off', () => {
       const { scene, sources, dev, layers } = build()
-      sources.regionTints = [{ r: 200, g: 40, b: 10 }]
+      sources.tintLevels = [[{ r: 200, g: 40, b: 10 }]]
       layers.rebuildRelief()
       layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))
       const count = scene.children.length

@@ -2,6 +2,7 @@ import { Group } from 'three'
 
 import { clamp01 } from '@europe-historical-atlas/core/utils/math'
 
+import { FADE_HIDDEN } from './fadeHidden'
 import { createLineLayer } from './lineLayer'
 
 import type { LineLayerOptions, UvSegment } from './lineLayer'
@@ -264,6 +265,14 @@ export interface ComposedLineLayer {
    */
   setOpacityScale(scale: number): void
   /**
+   * Fade the whole line — every pass, edge, inlay, pattern and frontier alike — on top of the other two
+   * opacity scales, and hide it once it is gone. What reveals a level of homage (ATLAS-253): a border
+   * between a vassal and its suzerain fades in as a whole, not as a light core inside a missing edging.
+   * @param scale - multiplier in `[0, 1]`; at or near 0 the layer is not drawn at all
+   * @returns nothing
+   */
+  setFade(scale: number): void
+  /**
    * Scale every pass's dash pattern — screen pixels per world unit, to read the dash sizes as pixels.
    * @param scale - the factor
    * @returns nothing
@@ -447,6 +456,28 @@ export function buildBorderStrokes(
 }
 
 /**
+ * The three opacity scales of a composed layer, remembered so each composes with the others rather than
+ * replacing them: they are set from different places in the same frame and must not fight. Every pass is
+ * rescaled from its *built* opacity, never from what the previous frame left.
+ * @param layers - the passes, each beside the stroke it was built from
+ * @returns a setter for one scale, which reapplies all three
+ */
+function opacityScales(
+  layers: readonly { layer: { setOpacity: (opacity: number) => void }; stroke: ComposedStroke }[]
+): { set: (which: 'whole' | 'inlay' | 'fade', scale: number) => void } {
+  const scales = { whole: 1, inlay: 1, fade: 1 }
+  return {
+    set(which, scale): void {
+      scales[which] = scale
+      for (const { layer, stroke } of layers)
+        layer.setOpacity(
+          stroke.opacity * scales.whole * scales.fade * (stroke.role === 'inlay' ? scales.inlay : 1)
+        )
+    },
+  }
+}
+
+/**
  * Draw several passes as one layer.
  * @param strokes - the passes, in draw order (widest first)
  * @param options - projection and depth behaviour, shared by every pass
@@ -474,9 +505,7 @@ export function createComposedLineLayer(
       return { layer, stroke }
     })
 
-  // The whole-line opacity scale, remembered so the inlay's own scale composes with it rather than
-  // replacing it. The two are applied from different places in the same frame and must not fight.
-  let globalOpacityScale = 1
+  const opacity = opacityScales(layers)
 
   return {
     object: group,
@@ -488,15 +517,17 @@ export function createComposedLineLayer(
         layer.setWidth(stroke.width * (stroke.role === 'pattern' ? (patternScale ?? scale) : scale))
     },
     setInlayOpacity(scale: number): void {
-      for (const { layer, stroke } of layers)
-        if (stroke.role === 'inlay') layer.setOpacity(stroke.opacity * globalOpacityScale * scale)
+      opacity.set('inlay', scale)
     },
     setDashScale(scale: number): void {
       for (const { layer } of layers) layer.setDashScale(scale)
     },
     setOpacityScale(scale: number): void {
-      globalOpacityScale = scale
-      for (const { layer, stroke } of layers) layer.setOpacity(stroke.opacity * scale)
+      opacity.set('whole', scale)
+    },
+    setFade(scale: number): void {
+      group.visible = scale > FADE_HIDDEN
+      opacity.set('fade', scale)
     },
     dispose(): void {
       for (const { layer } of layers) {

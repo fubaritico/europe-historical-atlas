@@ -24,8 +24,14 @@ import {
   rebuildSurface,
   setTexture,
 } from './mapLayerBuilders'
-import { createLayerProjection, disposeHandle, disposeRelief } from './mapLayerContext'
+import {
+  createLayerProjection,
+  disposeHandle,
+  disposeRelief,
+  paintsExactFills,
+} from './mapLayerContext'
 import { inlayOpacityScale } from './scene/composedLineLayer'
+import { homageDetail } from './scene/homageReveal'
 
 export { WORLD_WIDTH } from './mapLayerContext'
 export type { MapLayersDeps } from './mapLayerContext'
@@ -171,6 +177,23 @@ function frameRelief(context: LayerContext, zoom: number): void {
 }
 
 /**
+ * How much of the year's homage this frame's zoom shows — one number for the fills and the borders, so a
+ * vassal's colour and its border arrive together (ATLAS-253).
+ *
+ * **Only where the fills can follow**: when the texture carries the colour — a payload year, or the panel's
+ * exact-fills switch off — the bake paints every polity in its own colour, so every border shows too
+ * rather than hiding a line between two colours the map does tell apart.
+ * @param context - the layers and what they read
+ * @param zoom - the camera's zoom in `[0, 1]`
+ * @returns the detail, in `[0, homageDepth]`
+ */
+export function frameDetail(context: LayerContext, zoom: number): number {
+  const { dev, sources } = context
+  if (!paintsExactFills(dev, sources)) return sources.homageDepth
+  return homageDetail(zoom, sources.homageDepth, dev.vassals)
+}
+
+/**
  * Thin, fade and reveal the line work as the camera moves.
  *
  * A weight that reads as a drawn border close up becomes a rope across the continent from far away, and
@@ -184,7 +207,10 @@ function frameRelief(context: LayerContext, zoom: number): void {
 function frameLineWork(context: LayerContext, zoom: number, pixelsPerUnit: number): void {
   const { dev, handles } = context
   handles.rivers?.setZoom(zoom)
+  const detail = frameDetail(context, zoom)
+  handles.fills?.setDetail(detail)
   if (handles.borders) {
+    handles.borders.setDetail(detail)
     // A patterned border holds a plain border's weight at continent scale, then thins to the core's
     // weight close up — hence the ratio rather than a knob: it is the same width the inlay uses.
     const patternAtZoomIn = dev.political.borderWidth / dev.political.borderEdgeWidth

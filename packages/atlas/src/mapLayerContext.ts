@@ -11,11 +11,11 @@ import { createDrapeProjection } from './scene/drapeProjection'
 import type { DevState } from './devState'
 import type { MapSources } from './mapSources'
 import type { CompassRose } from './scene/compassRose'
-import type { ComposedLineLayer } from './scene/composedLineLayer'
 import type { DrapeProjection } from './scene/drapeProjection'
 import type { FillLayer } from './scene/fillLayer'
 import type { FrameLabels } from './scene/frameLabels'
 import type { GraticuleFrame } from './scene/graticuleFrame'
+import type { LevelledBorderLayer } from './scene/levelledBorderLayer'
 import type { LineLayer } from './scene/lineLayer'
 import type { MapEdge } from './scene/mapEdge'
 import type { MapTitle } from './scene/mapTitle'
@@ -57,8 +57,11 @@ export interface LayerHandles {
   rhumb: LineLayer | null
   /** The river network. */
   rivers: RiverLayer | null
-  /** The political line work — frontier, casing and core — behind one handle like any other overlay. */
-  borders: ComposedLineLayer | null
+  /**
+   * The political line work — frontier, casing and core — behind one handle like any other overlay, one
+   * composed layer per split level of homage inside it.
+   */
+  borders: LevelledBorderLayer | null
   /** An authored year's polities as geometry on the relief, or `null` when the texture carries them. */
   fills: FillLayer | null
   /**

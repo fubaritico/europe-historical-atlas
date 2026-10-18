@@ -293,7 +293,9 @@ export function politicalRequest(
     palette: palette.map(hexToRgb),
     borderSmoothing: dev.political.borderSmoothing,
     // An authored year is painted in the Cartographer's colours, polity by polity: the editor shows what
-    // the atlas publishes, or it is not an editor.
+    // the atlas publishes, or it is not an editor. `settleYearBorders` derives the same colours again after
+    // the compute, for the tint levels and the tribes: a per-year cache across that await would cost more
+    // than the second walk of the neighbour graph (ARCH-013).
     ...(loaded.authored === undefined
       ? {}
       : {

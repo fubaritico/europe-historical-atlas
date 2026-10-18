@@ -184,6 +184,52 @@ describe('exactBordersOf', () => {
       ])
       expect([...patterns.keys()]).toEqual(['0:0', '1:1'])
     })
+
+    it('files a border between two sovereigns at split level 0', () => {
+      const { levels } = exactBordersOf(authored(sideBySide()), bbox, uniformMask(false))
+
+      expect(levels.get('0:0')).toBe(0)
+    })
+
+    it('files a vassal’s limit with its lord at split level 1', () => {
+      const { levels } = exactBordersOf(authored(sideBySide('france')), bbox, uniformMask(false))
+
+      expect(levels.get('0:0')).toBe(1)
+    })
+
+    it('files two vassals of different lords at split level 0', () => {
+      const doc = sideBySide()
+      addPolity(doc, polity('aquitaine'))
+      addPolity(doc, polity('poland'))
+      const france = doc.polities.find((each) => each.id === 'france')
+      const hre = doc.polities.find((each) => each.id === 'hre')
+      if (france) france.suzerain = 'aquitaine'
+      if (hre) hre.suzerain = 'poland'
+
+      const { levels } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+
+      expect(levels.get('0:0')).toBe(0)
+    })
+
+    it('reads the split level from the homage it is handed', () => {
+      const splitLevel = vi.fn(() => 3)
+      const { levels } = exactBordersOf(
+        authored(sideBySide()),
+        bbox,
+        uniformMask(false),
+        () => undefined,
+        { chainOf: () => [], ancestorAt: (id) => id, splitLevel, deepest: 3 }
+      )
+
+      expect(levels.get('0:0')).toBe(3)
+      expect(splitLevel).toHaveBeenCalledWith('hre', 'france')
+    })
+
+    it('files no level for the frontier, which is shown at every zoom', () => {
+      const { levels } = exactBordersOf(authored(alone()), bbox, uniformMask(true))
+
+      expect(levels.size).toBe(0)
+    })
   })
 
   describe('managed errors', () => {
@@ -263,6 +309,7 @@ describe('exactBordersOf', () => {
       expect(exactBordersOf(authored(doc), bbox, uniformMask(true))).toEqual({
         borders: { between: [], frontier: [] },
         patterns: new Map(),
+        levels: new Map(),
         tribeOutlines: [],
       })
     })
