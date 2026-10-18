@@ -1,6 +1,6 @@
 import { PEN_MODE_LABELS, TOOL_LABELS } from '../../state/toolSlice'
 
-import type { ToolIconName } from '../toolIcons'
+import type { ToolIconName } from '../ToolIcon'
 import type { ToolVariant } from './internal/ToolFlyout'
 import type { EditorTool } from '../../state/toolSlice'
 

@@ -2,7 +2,7 @@ import { availableMoves } from '@europe-historical-atlas/core/editor/stacking'
 
 import { STACKING_LABELS } from './stackingLabels'
 
-import type { CartographerStore } from '../state/store'
+import type { CartographerStore } from '../../state/store'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
 

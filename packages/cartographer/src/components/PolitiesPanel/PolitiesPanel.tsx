@@ -2,7 +2,7 @@ import { describeDrawingTarget } from '../../state/drawingTarget'
 import { Panel } from '../Panel'
 import { PolityArrangeMenu } from '../PolityArrangeMenu'
 import { PolityList } from '../PolityList'
-import { polityRows } from '../polityRows'
+import { polityRows } from '../shared/polityRows'
 
 import { useArrangeMenu } from './hooks/useArrangeMenu'
 import { usePolityForm } from './hooks/usePolityForm'

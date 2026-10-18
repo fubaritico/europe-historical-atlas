@@ -4,7 +4,7 @@ import { useFlyoutFocus } from '../hooks/useFlyoutFocus'
 
 import { FlyoutItem } from './FlyoutItem'
 
-import type { ToolIconName } from '../../toolIcons'
+import type { ToolIconName } from '../../ToolIcon'
 import type { KeyboardEvent } from 'react'
 
 /** One variant of a tool group, as the flyout lists it. */

@@ -1,4 +1,4 @@
-import { ToolIcon } from '../components/toolIcons'
+import { ToolIcon } from '../components/ToolIcon'
 
 /*
  * The action bar's three glyphs, two ways — for the dev to choose on his own screen (2026-10-12):

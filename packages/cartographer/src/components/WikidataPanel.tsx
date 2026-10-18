@@ -2,9 +2,10 @@ import { Button } from '@fubaritico/react/Button'
 
 import { nameOf, spanOf } from '../wikidata/wikidataFacts'
 
-import { statusOf } from './wikidataView'
+import { statusOf } from './shared/wikidataView'
 
-import type { WikidataFacts, WikidataField, WikidataSuggestion } from '../wikidata/wikidataFacts'
+import type { WikidataView } from './shared/wikidataView'
+import type { WikidataField, WikidataSuggestion } from '../wikidata/wikidataFacts'
 
 /**
  * What Wikidata says about the polity in the form (CARTO-243): its name, its years, its Wikipedia articles,
@@ -20,19 +21,6 @@ import type { WikidataFacts, WikidataField, WikidataSuggestion } from '../wikida
  * unknown, not a polity, the anachronism. A region inserted already full is often not announced, and one
  * wrapping links and buttons would re-read them all; so the summary and the buttons sit outside it.
  */
-
-/** Where the reading of the item stands. */
-export type WikidataView =
-  | { kind: 'none' }
-  | { kind: 'reading'; id: string }
-  | { kind: 'failed'; id: string; reason: string }
-  | { kind: 'unknown'; id: string }
-  | {
-      kind: 'found'
-      facts: WikidataFacts
-      warning: string | null
-      suggestions: WikidataSuggestion[]
-    }
 
 /** What the panel needs. */
 export interface WikidataPanelProps {

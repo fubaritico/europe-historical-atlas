@@ -10,7 +10,7 @@ import { createCartographerStore } from '../state/store'
 import { UNFRAMED } from '../view/viewport'
 
 import { PolityDialog } from './PolityDialog'
-import { DRAFT_ERRORS } from './polityDraft'
+import { DRAFT_ERRORS } from './shared/polityDraft'
 
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 

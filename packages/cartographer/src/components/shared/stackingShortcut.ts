@@ -9,7 +9,7 @@
  * goes to the start of a field). The canvas and the list leave a modified arrow alone so it reaches here.
  */
 
-import { keepsItsOwnKeys } from '../canvas/historyShortcut'
+import { keepsItsOwnKeys } from '../../canvas/historyShortcut'
 
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
 

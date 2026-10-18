@@ -3,7 +3,7 @@ import { Card } from '@fubaritico/react/Card'
 import { Modal } from '@fubaritico/react/Modal'
 import { useSyncExternalStore } from 'react'
 
-import { autofocusOnOpen } from './autofocusOnOpen'
+import { autofocusOnOpen } from './shared/hooks/autofocusOnOpen'
 
 import type { DraftOffers } from '../persistence/draftOffers'
 

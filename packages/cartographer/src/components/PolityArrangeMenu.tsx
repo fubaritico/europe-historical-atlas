@@ -2,10 +2,10 @@ import { useEffect } from 'react'
 
 import { availableMoves } from '@europe-historical-atlas/core/editor/stacking'
 
-import { arrangePolity } from './arrange'
 import { PolityStackMenu } from './PolityStackMenu'
+import { arrangePolity } from './shared/arrange'
 
-import type { Restack } from './arrange'
+import type { Restack } from './shared/arrange'
 import type { CartographerStoreHook } from '../state/store'
 import type { ViewportPoint } from '../view/viewport'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'

@@ -5,8 +5,8 @@ import { STACKING_MOVES } from '@europe-historical-atlas/core/editor/stacking'
 
 import { placeMenu } from '../view/menuPlacement'
 
-import { STACKING_LABELS } from './stackingLabels'
-import { STACKING_SHORTCUTS } from './stackingShortcut'
+import { STACKING_LABELS } from './shared/stackingLabels'
+import { STACKING_SHORTCUTS } from './shared/stackingShortcut'
 
 import type { ViewportPoint } from '../view/viewport'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'

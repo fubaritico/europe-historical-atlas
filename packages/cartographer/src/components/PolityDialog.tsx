@@ -1,6 +1,8 @@
 import { Modal } from '@fubaritico/react/Modal'
 import { useState } from 'react'
 
+import { PolityForm } from './PolityForm'
+import { useWikidataItem } from './shared/hooks/useWikidataItem'
 import {
   DRAFT_ERRORS,
   EMPTY_DRAFT,
@@ -10,13 +12,11 @@ import {
   suzerainChoices,
   withId,
   withName,
-} from './polityDraft'
-import { PolityForm } from './PolityForm'
-import { useWikidataItem } from './useWikidataItem'
-import { wikidataViewOf } from './wikidataView'
+} from './shared/polityDraft'
+import { wikidataViewOf } from './shared/wikidataView'
 
-import type { DraftField, PolityDraft } from './polityDraft'
 import type { PolityFormField } from './PolityForm'
+import type { DraftField, PolityDraft } from './shared/polityDraft'
 import type { CartographerStoreHook } from '../state/store'
 import type { WikidataField } from '../wikidata/wikidataFacts'
 import type { WikidataSource } from '../wikidata/wikidataSource'

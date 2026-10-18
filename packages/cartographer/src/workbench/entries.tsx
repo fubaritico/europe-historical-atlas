@@ -5,17 +5,17 @@ import { ColorPicker } from '@fubaritico/react/ColorPicker'
 import { IconButton } from '@fubaritico/react/IconButton'
 import { Input } from '@fubaritico/react/Input'
 
-import { DRAFT_ERRORS, EMPTY_DRAFT, RANKS } from '../components/polityDraft'
 import { PolityForm } from '../components/PolityForm'
 import { PolityList } from '../components/PolityList'
 import { PolityStackMenu } from '../components/PolityStackMenu'
+import { DRAFT_ERRORS, EMPTY_DRAFT, RANKS } from '../components/shared/polityDraft'
 import { ToolRail } from '../components/ToolRail'
 
 import { BarIconCandidates } from './BarIconCandidates'
 import { IconSharpness } from './IconSharpness'
 
 import type { WorkbenchEntry } from './Workbench'
-import type { PolityRow } from '../components/polityRows'
+import type { PolityRow } from '../components/shared/polityRows'
 
 /** Polities a new one could owe homage to, as the suzerain list offers them. */
 const SUZERAINS = [

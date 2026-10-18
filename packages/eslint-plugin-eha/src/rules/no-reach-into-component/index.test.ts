@@ -58,6 +58,12 @@ describe('eha/no-reach-into-component', () => {
         from('Editor.tsx', "import { PolityList } from './PolityList'"),
         // A package is no component.
         from('Editor.tsx', "import { useState } from 'react'"),
+        // `shared/` is open to all: hooks and modules several components use.
+        from(
+          'Editor/Editor.tsx',
+          "import { autofocusOnOpen } from '../shared/hooks/autofocusOnOpen'"
+        ),
+        from('PolityList/PolityList.tsx', "import { polityRows } from '../shared/polityRows'"),
       ],
       invalid: [
         {

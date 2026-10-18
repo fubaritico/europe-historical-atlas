@@ -92,8 +92,11 @@ entity per file, and `index.ts` exporting only what the rest of the application 
 every component already moved into its folder (the flat files move one by one, the lint green at each step):
 `react/no-multi-comp`, `eha/one-hook-per-file`, `eha/component-folder-layout` (what sits where), and
 `eha/no-reach-into-component` — over all of `src/` — so nothing outside a folder imports its `hooks/` or
-`internal/`: they are private by construction. **Open, to settle at the first migration that meets one**: where
-a hook or a child shared by several components lives (`useDismiss`, `useListCursor`…). **No `components/index.ts`**: a barrel of every component is the one that makes cycles,
+`internal/`: they are private by construction. **Shared pieces** (the dev's call, 2026-10-18, option A of three): a hook several components use lives in
+`components/shared/hooks/`, a plain module they share at `components/shared/`'s root, and a shared component
+gets its own folder like any public one (`ToolIcon/`, `Panel/`). `shared/` is open to all —
+`no-reach-into-component` lets any file import from it. Moving the pure logic out of `components/` into its own
+layer (`src/hooks/`, a `polity/` domain) was option B: a separate chantier, not decided. **No `components/index.ts`**: a barrel of every component is the one that makes cycles,
 and the subpath rule below already refuses it for `core`.
 
 **Cross-package imports use subpath exports**: `@europe-historical-atlas/core/utils/math`, never a barrel. A single

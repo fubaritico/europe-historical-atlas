@@ -1,4 +1,4 @@
-import { ToolIcon } from '../../toolIcons'
+import { ToolIcon } from '../../ToolIcon'
 
 import type { ToolVariant } from './ToolFlyout'
 import type { KeyboardEvent } from 'react'

@@ -2,9 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import { openEmptyYear } from '../state/openEmptyYear'
-import { createCartographerStore } from '../state/store'
-import { UNFRAMED } from '../view/viewport'
+import { openEmptyYear } from '../../state/openEmptyYear'
+import { createCartographerStore } from '../../state/store'
+import { UNFRAMED } from '../../view/viewport'
 
 import { arrangePolity, arrangeSelected } from './arrange'
 

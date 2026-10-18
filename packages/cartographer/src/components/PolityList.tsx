@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { listKeyAction } from './listKeys'
 import { scrollTopToShow } from './rowScroll'
 
-import type { PolityRow } from './polityRows'
+import type { PolityRow } from './shared/polityRows'
 import type { ViewportPoint } from '../view/viewport'
 import type { CSSProperties, KeyboardEvent, MouseEvent } from 'react'
 

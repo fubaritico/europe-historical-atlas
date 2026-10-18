@@ -3,8 +3,8 @@ import { Card } from '@fubaritico/react/Card'
 import { IconButton } from '@fubaritico/react/IconButton'
 import { Modal } from '@fubaritico/react/Modal'
 
-import { autofocusOnOpen } from './autofocusOnOpen'
 import { deletionQuestion } from './polityDeletion'
+import { autofocusOnOpen } from './shared/hooks/autofocusOnOpen'
 
 import type { PendingDeletion } from './polityDeletion'
 

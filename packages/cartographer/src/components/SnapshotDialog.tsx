@@ -6,9 +6,9 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { reasonOf } from '../persistence/errorReason'
 import { timeWords } from '../persistence/timeWords'
 
-import { autofocusOnOpen } from './autofocusOnOpen'
+import { autofocusOnOpen } from './shared/hooks/autofocusOnOpen'
 
-import type { SnapshotPicker } from './snapshotPicker'
+import type { SnapshotPicker } from './shared/snapshotPicker'
 import type { SnapshotEntry, SnapshotSource } from '../persistence/draftStore'
 
 /**

@@ -9,9 +9,9 @@ import { createCartographerStore } from '../state/store'
 import { UNFRAMED } from '../view/viewport'
 
 import { PolityDialog } from './PolityDialog'
-import { WIKIDATA_DELAY_MS, useWikidataItem } from './useWikidataItem'
+import { WIKIDATA_DELAY_MS, useWikidataItem } from './shared/hooks/useWikidataItem'
+import { wikidataViewOf } from './shared/wikidataView'
 import { WikidataPanel } from './WikidataPanel'
-import { wikidataViewOf } from './wikidataView'
 
 import type { WikidataFacts } from '../wikidata/wikidataFacts'
 import type { WikidataAnswer, WikidataSource } from '../wikidata/wikidataSource'

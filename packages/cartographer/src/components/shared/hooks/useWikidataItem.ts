@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 
-import { WIKIDATA_ID } from '../wikidata/wikidataSource'
+import { WIKIDATA_ID } from '../../../wikidata/wikidataSource'
 
-import type { WikidataFacts } from '../wikidata/wikidataFacts'
-import type { WikidataSource } from '../wikidata/wikidataSource'
+import type { WikidataFacts } from '../../../wikidata/wikidataFacts'
+import type { WikidataSource } from '../../../wikidata/wikidataSource'
 
 /**
  * Read the Wikidata item the form names, a moment after the author stops typing (CARTO-243).

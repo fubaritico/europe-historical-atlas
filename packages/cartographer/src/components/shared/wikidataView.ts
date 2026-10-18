@@ -1,8 +1,25 @@
-import { anachronism, suggestionsFor } from '../wikidata/wikidataFacts'
+import { anachronism, suggestionsFor } from '../../wikidata/wikidataFacts'
 
-import type { WikidataReading } from './useWikidataItem'
-import type { WikidataView } from './WikidataPanel'
-import type { PolityWithWikidata, WikidataComparable } from '../wikidata/wikidataFacts'
+import type { WikidataReading } from './hooks/useWikidataItem'
+import type {
+  PolityWithWikidata,
+  WikidataComparable,
+  WikidataFacts,
+  WikidataSuggestion,
+} from '../../wikidata/wikidataFacts'
+
+/** Where the reading of the item stands. */
+export type WikidataView =
+  | { kind: 'none' }
+  | { kind: 'reading'; id: string }
+  | { kind: 'failed'; id: string; reason: string }
+  | { kind: 'unknown'; id: string }
+  | {
+      kind: 'found'
+      facts: WikidataFacts
+      warning: string | null
+      suggestions: WikidataSuggestion[]
+    }
 
 /**
  * What the form's Wikidata panel shows, from where the reading stands (CARTO-243): the anachronism for the

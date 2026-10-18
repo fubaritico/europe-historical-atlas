@@ -1,6 +1,6 @@
 import { describeDrawingTarget } from '../../state/drawingTarget'
 import { isPenMode } from '../../state/toolSlice'
-import { pickedColour, recolouring } from '../polityColourValue'
+import { pickedColour, recolouring } from '../shared/polityColourValue'
 import { ToolRail } from '../ToolRail'
 
 import type { PolityColourSource } from '../../state/polityColourSource'

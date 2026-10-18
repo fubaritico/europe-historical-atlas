@@ -1,12 +1,12 @@
 import { useRef } from 'react'
 
-import { ToolIcon } from '../../toolIcons'
+import { ToolIcon } from '../../ToolIcon'
 import { useHoldToOpen } from '../hooks/useHoldToOpen'
 
 import { GroupFlyout } from './GroupFlyout'
 
 import type { EditorTool } from '../../../state/toolSlice'
-import type { ToolIconName } from '../../toolIcons'
+import type { ToolIconName } from '../../ToolIcon'
 import type { RailTool } from '../railTools'
 import type { KeyboardEvent } from 'react'
 
