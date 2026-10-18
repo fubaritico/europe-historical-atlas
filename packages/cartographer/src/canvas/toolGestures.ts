@@ -24,7 +24,7 @@ import { closingPoints, closingReport, freshStretch, layerPoints } from './water
 import { releaseWeld, weldOfferAt } from './weldGestures'
 
 import type { SnapLayers } from './snapLayers'
-import type { SessionPoint, SnapLayer, SnapVertex, ToolSession } from './toolSession'
+import type { SessionPoint, SnapLayer, SnapVertex, ToolSession, WeldOffer } from './toolSession'
 import type { PolityRings } from '../geometry/fillHit'
 import type { SnapLine } from '../geometry/lineSnap'
 import type { CartographerStoreHook } from '../state/store'
@@ -408,6 +408,20 @@ export function arrowDrag(context: GestureContext, at: Point): void {
 }
 
 /**
+ * Release a dragged anchor onto the weld it was offered. Welded onto an anchor, the dragged one is held by
+ * nothing any more: the selection follows it onto the anchor that stays, or a ‹delete› next would act on a
+ * point that has gone (QUAL-003). Refused, the selection is left as it was.
+ * @param context - the session and the store
+ * @param index - the anchor dragged
+ * @param weld - what it was offered
+ */
+function finishWeld(context: GestureContext, index: number, weld: WeldOffer): void {
+  if (!releaseWeld(context, index, weld) || weld.kind !== 'anchor') return
+  const session = context.session
+  session.selected = session.selected.map((at) => (at === index ? weld.into : at))
+}
+
+/**
  * Release the white arrow: a drag in progress becomes one recorded move; a marquee selects what it
  * covers; a press that never moved is a click (see {@link arrowClick}).
  * @param context - the session and the store
@@ -425,7 +439,7 @@ export function arrowRelease(context: GestureContext, at: Point): void {
   else if (pending !== null) arrowClick(context, at, pending.shift)
   if (moving === null) return
   if (weld !== null) {
-    releaseWeld(context, moving.index, weld)
+    finishWeld(context, moving.index, weld)
     return
   }
   const moves = selectionMoves(context, moving)

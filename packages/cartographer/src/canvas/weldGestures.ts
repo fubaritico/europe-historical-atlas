@@ -1,4 +1,5 @@
 import { isWeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
+import { MIN_RING_ANCHORS } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { nearestAmong } from '../geometry/hitTest'
 import { nearestStretch } from '../geometry/stretchHit'
@@ -21,6 +22,15 @@ import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocu
  *
  * Pure over the gesture context: the controller asks what a drag would weld onto, and what a release does.
  */
+
+/**
+ * What the weld reads of the gesture context, and nothing more (ARCH-005): the store, the reach, the
+ * projected anchors, the frame and the result zone.
+ */
+export type WeldContext = Pick<
+  GestureContext,
+  'store' | 'radius' | 'anchorsOnScreen' | 'frame' | 'report'
+>
 
 /** How `{History}` names a weld. */
 export const WELD_ANCHOR_STEP = { kind: 'weld-anchor', label: 'weld anchor' } as const
@@ -69,7 +79,7 @@ function stretchKey([a, b]: readonly [number, number]): string {
  * @returns the offer, or `null` when the drag only moves
  */
 export function weldOfferAt(
-  context: GestureContext,
+  context: WeldContext,
   index: number,
   at: readonly [number, number]
 ): WeldOffer | null {
@@ -86,9 +96,11 @@ export function weldOfferAt(
   if (into !== null && point !== undefined)
     return { kind: 'anchor', into, at: [point[0], point[1]] }
   // The target's own stretches are left out, shared ones included: dropping a point on its own border
-  // is a move, not a weld.
+  // is a move, not a weld. So is a stretch only rings already holding the anchor run over — a neighbour
+  // sharing it already: no ring could take it, and the document would refuse what was offered (ARCH-002).
   const ownKeys = new Set(stretchesOf(own).map(stretchKey))
-  const stretches = stretchesOf(others).filter(
+  const lacking = others.filter((ring) => !ring.includes(index))
+  const stretches = stretchesOf(lacking).filter(
     (s) => s[0] !== index && s[1] !== index && !ownKeys.has(stretchKey(s))
   )
   const hit = nearestStretch(screen, stretches, [at[0], at[1]], context.radius)
@@ -113,31 +125,38 @@ function names(document: YearDocument, ids: readonly string[]): string {
  * @param context - the store and the result zone
  * @param index - the anchor dragged
  * @param offer - what it would weld onto
+ * @returns `true` when the document was welded
  */
-export function releaseWeld(context: GestureContext, index: number, offer: WeldOffer): void {
+export function releaseWeld(context: WeldContext, index: number, offer: WeldOffer): boolean {
   const state = context.store.getState()
   const result: WeldDone | WeldRefusal | null =
     offer.kind === 'anchor'
       ? state.weldAnchor(index, offer.into, WELD_ANCHOR_STEP)
       : state.threadAnchor(index, offer.a, offer.b, offer.at, WELD_ANCHOR_STEP)
   if (result === null) {
+    // The offer is built to match what the document takes, so this is a defect — said loudly, and on
+    // screen too, since the drag showed a snap the release does not keep.
     console.error(`${TAG} the document refused to weld anchor ${String(index)} the tool offered.`)
-    return
+    context.report('not welded — nothing to weld onto there')
+    return false
   }
   if (isWeldRefusal(result)) {
     const why =
       result.refused === 'pinch'
         ? 'the outline would pass twice through that point'
-        : 'an outline would keep fewer than three anchors'
+        : `an outline would keep fewer than ${String(MIN_RING_ANCHORS)} anchors`
     console.warn(`${TAG} anchor ${String(index)} not welded: ${why}.`)
     context.report(`not welded — ${why}`)
-    return
+    return false
   }
   const document = context.store.getState().document
   const aimed = describeDrawingTarget(document, state.target)
   const others = result.polities.filter((polity) => polity !== aimed?.id)
   const onto = offer.kind === 'anchor' ? 'anchor' : 'border'
-  context.report(`welded onto ${names(document, others)}’s ${onto}`)
+  // Held by no other polity's claim — a deliberate gap's ring alone: no name to give (ARCH-004).
+  const whose = others.length > 0 ? `${names(document, others)}’s` : 'the'
+  context.report(`welded onto ${whose} ${onto}`)
+  return true
 }
 
 /**

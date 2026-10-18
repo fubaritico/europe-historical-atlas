@@ -131,6 +131,30 @@ Scenario: weld an anchor onto a neighbour's
   When instead I release it near a stretch of the neighbour's
   Then it lands on that stretch and the neighbour's outline gains it — "welded onto Marca's border"
   And the target's own stretches, shared or not, never offer a weld; a selection of several never welds
+  And the welded anchor stays selected, in place of the one that went
+
+Scenario: what a weld refuses, said at the release
+  Given the dragged anchor is already shared with the Empire
+  When I drag it near another stretch of the Empire's
+  Then no weld is offered — the Empire holds it already — and the release is a plain move
+  Given a ring running over the stretch already passes through the dragged anchor elsewhere
+  When I release it there
+  Then nothing is welded — "not welded — the outline would pass twice through that point"
+  And an outline the weld would leave under three anchors refuses the same way, naming the floor
+  And a stroke dressed by hand over the welded point follows it, or, when it cannot, stays as it was,
+    orphaned in {Overrides} — never dropped
+```
+
+> **Reviewed 2026-10-18** (CARTO-202, four agents, the first review since `b3f4e20`): the tool offered a stretch the
+> document then refused (ARCH-002), a stretch shared by a ring already holding the anchor was skipped in silence,
+> leaving the sliver back (A11Y-003), and a dressed run could fall to one anchor and vanish at save (QUAL-001,
+> against `s13`). All three now refuse or keep, and say so; the welded anchor now stays selected.
+>
+> **Walked by the dev, 2026-10-17, all over 1100** — told on 2026-10-18: *« j'ai pas arrêté de m'en servir hier …
+> un peu partout »*; the fluidity of bringing points together one by one is what made him drop the selection
+> snap (`s99`, `H-37`). The review's fixes leave that path as it was; only the refusals and the selection changed.
+
+```gherkin
 
 Scenario: the white arrow does not insert
   Given ⟨edit⟩ is active

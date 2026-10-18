@@ -81,7 +81,7 @@ describe('threadAnchor', () => {
     // H-37, onto a stretch: the neighbour gains the point, and the two share it.
     it('puts the anchor on the neighbour’s stretch and threads it into the neighbour’s ring', () => {
       const doc = sharedBorderDocument()
-      expect(threadAnchor(doc, 0, 4, 5, [4, 47])).toEqual({ polities: ['fr-couronne', 'hre'] })
+      expect(threadAnchor(doc, 0, 4, 5, [4, 47])).toEqual({ polities: ['hre'] })
       expect(ringsOf(doc, 'hre')).toEqual([[1, 4, 0, 5, 2]])
       expect(ringsOf(doc, 'fr-couronne')).toEqual([[0, 1, 2, 3]])
       expect(doc.anchors[0]).toEqual([4, 47])
@@ -112,11 +112,52 @@ describe('threadAnchor', () => {
   })
 
   describe('edge cases', () => {
-    // A ring that already holds the anchor would visit it twice: only the rings lacking it take it.
-    it('does nothing for an end of the stretch, nor for a ring already holding the anchor', () => {
-      const doc = sharedBorderDocument()
-      expect(threadAnchor(doc, 4, 4, 5, [4, 47])).toBeNull()
-      expect(threadAnchor(doc, 2, 4, 5, [4, 47])).toBeNull()
+    it('does nothing for an end of the stretch', () => {
+      expect(threadAnchor(sharedBorderDocument(), 4, 4, 5, [4, 47])).toBeNull()
     })
+
+    // A ring over the stretch that already holds the anchor would visit it twice — and skipping it would
+    // leave it running past the point the others now share: the sliver a weld exists to remove.
+    it('refuses when a ring over the stretch already holds the anchor, writing nothing', () => {
+      const doc = sharedBorderDocument()
+      const result = threadAnchor(doc, 2, 4, 5, [4, 47])
+      expect(result !== null && isWeldRefusal(result) ? result.refused : null).toBe('pinch')
+      expect(ringsOf(doc, 'hre')).toEqual([[1, 4, 5, 2]])
+      expect(doc.anchors[2]).toEqual(sharedBorderDocument().anchors[2])
+    })
+
+    it('refuses even when another ring over the stretch lacks the anchor', () => {
+      const doc = sharedBorderDocument()
+      doc.claims.push({ polity: 'x', rings: [[4, 5, 3]] })
+      const result = threadAnchor(doc, 2, 4, 5, [4, 47])
+      expect(result !== null && isWeldRefusal(result) ? result.refused : null).toBe('pinch')
+      expect(ringsOf(doc, 'x')).toEqual([[4, 5, 3]])
+    })
+
+    // QUAL-005: the answer names who gained the point, not every holder of it.
+    it('names only the polities whose rings gained the anchor', () => {
+      const doc = sharedBorderDocument()
+      doc.claims.push({ polity: 'x', rings: [[0, 3, 6]] })
+      doc.anchors.push([1, 46])
+      doc.anchorSource.push(0)
+      expect(threadAnchor(doc, 0, 4, 5, [4, 47])).toEqual({ polities: ['hre'] })
+    })
+  })
+})
+
+describe('weldAnchor and dressed runs', () => {
+  // s13: a hand-set stroke is never dropped silently — kept as it was, orphaned in {Overrides}.
+  it('keeps a run as it was when the weld would leave it a single anchor', () => {
+    const doc = sharedBorderDocument()
+    doc.runs.push({ hand: 'dotted', source: null, note: null, run: [0, 1] })
+    expect(weldAnchor(doc, 0, 1)).not.toBeNull()
+    expect(doc.runs[0]?.run).toEqual([0, 1])
+  })
+
+  it('keeps a run as it was when the weld would make it pass twice through the same anchor', () => {
+    const doc = sharedBorderDocument()
+    doc.runs.push({ hand: 'dotted', source: null, note: null, run: [4, 1, 0] })
+    weldAnchor(doc, 0, 4)
+    expect(doc.runs[0]?.run).toEqual([4, 1, 0])
   })
 })

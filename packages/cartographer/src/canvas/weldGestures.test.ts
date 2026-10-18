@@ -1,11 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { MIN_RING_ANCHORS } from '@europe-historical-atlas/core/editor/yearDocument'
+
 import { screenToLonLatOnBackdrop } from '../view/projection'
 import { TEST_BACKDROP_FRAME } from '../view/testFrame'
 
 import { drawOutlineAt, testGestureContext, testPolity, testStore } from './testGestureContext'
 import { arrowDrag, arrowPress, arrowRelease } from './toolGestures'
-import { WELD_ANCHOR_STEP, weldOfferAt } from './weldGestures'
+import { WELD_ANCHOR_STEP, releaseWeld, weldOfferAt } from './weldGestures'
 
 import type { CartographerStoreHook } from '../state/store'
 
@@ -105,6 +107,19 @@ describe('weldGestures', () => {
       expect(context.session.moving?.to).toEqual(store.getState().document.anchors[7])
     })
 
+    // QUAL-003: the dragged anchor is held by nothing after the weld — the selection moves onto the survivor.
+    it('selects the anchor welded onto, not the one that went', () => {
+      const { context } = threeOutlines()
+      dragAnchor(context, [100, 100], [97, 101])
+      expect(context.session.selected).toEqual([7])
+    })
+
+    // QUAL-002: the border is already there at an anchor — never thread a point beside it.
+    it('offers a neighbour’s anchor before its stretch when both are in reach', () => {
+      const { context } = threeOutlines()
+      expect(weldOfferAt(context, 0, [97, 103])).toMatchObject({ kind: 'anchor', into: 7 })
+    })
+
     it('one undo puts the outline back as it was', () => {
       const { store, context } = threeOutlines()
       dragAnchor(context, [100, 100], [97, 101])
@@ -131,6 +146,24 @@ describe('weldGestures', () => {
       expect(reports.at(-1)).toBe('not welded — the outline would pass twice through that point')
       expect(warn).toHaveBeenCalledOnce()
     })
+
+    it('says the floor of anchors an outline keeps, from the one constant', () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { store, context, reports } = threeOutlines()
+      store.setState({ weldAnchor: () => ({ refused: 'collapse' }) })
+      dragAnchor(context, [100, 100], [97, 101])
+      expect(reports.at(-1)).toBe(
+        `not welded — an outline would keep fewer than ${String(MIN_RING_ANCHORS)} anchors`
+      )
+    })
+
+    it('keeps the selection on the dragged anchor when the weld is refused', () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { store, context } = threeOutlines()
+      store.setState({ weldAnchor: () => ({ refused: 'pinch' }) })
+      dragAnchor(context, [100, 100], [97, 101])
+      expect(context.session.selected).toEqual([0])
+    })
   })
 
   describe('unmanaged errors', () => {
@@ -141,6 +174,15 @@ describe('weldGestures', () => {
       dragAnchor(context, [100, 300], [94, 200])
       expect(error).toHaveBeenCalledOnce()
     })
+
+    // The drag showed a snap the release does not keep: the screen says so too, not the console alone.
+    it('says on screen that nothing was welded when the document finds nothing', () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      const { store, context, reports } = threeOutlines()
+      store.setState({ threadAnchor: () => null })
+      dragAnchor(context, [100, 300], [94, 200])
+      expect(reports.at(-1)).toBe('not welded — nothing to weld onto there')
+    })
   })
 
   describe('edge cases', () => {
@@ -149,6 +191,26 @@ describe('weldGestures', () => {
       const { context } = threeOutlines()
       expect(weldOfferAt(context, 0, [298, 200])).toBeNull()
       expect(weldOfferAt(context, 0, [200, 102])).toBeNull()
+    })
+
+    // QUAL-002: the target's own points are not a neighbour's border, even where it shares them.
+    it('never offers an anchor the target holds, even one a neighbour shares', () => {
+      const { context } = threeOutlines()
+      expect(weldOfferAt(context, 0, [300, 300])).not.toMatchObject({ kind: 'anchor' })
+    })
+
+    // ARCH-002: anchor 1 is shared with the Empire, so no ring of the Empire could take it — no offer.
+    it('offers no stretch that only rings already holding the anchor run over', () => {
+      const { context } = threeOutlines()
+      expect(weldOfferAt(context, 1, [498, 200])).toBeNull()
+    })
+
+    // ARCH-004: held by no other polity's claim — a deliberate gap alone — there is no name to give.
+    it('names nobody when no other polity holds the anchor welded onto', () => {
+      const { store, context, reports } = threeOutlines()
+      store.setState({ weldAnchor: () => ({ polities: ['fr'] }) })
+      expect(releaseWeld(context, 0, { kind: 'anchor', into: 7, at: [0, 0] })).toBe(true)
+      expect(reports.at(-1)).toBe('welded onto the anchor')
     })
 
     // A selection moves as one shape: only an anchor dragged alone welds.

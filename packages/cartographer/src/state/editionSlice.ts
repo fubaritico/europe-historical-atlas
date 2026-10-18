@@ -253,7 +253,8 @@ export interface EditionActions {
    * @param b - the other end
    * @param point - where on the stretch, as `[longitude, latitude]`
    * @param step - how the gesture is named
-   * @returns the polities now holding the anchor, or `null` — and then nothing was recorded
+   * @returns the polities whose rings gained the anchor, a refusal, or `null` — and then nothing was
+   *   recorded
    */
   threadAnchor: (
     index: number,
@@ -261,7 +262,7 @@ export interface EditionActions {
     b: number,
     point: [number, number],
     step: HistoryStep
-  ) => WeldDone | null
+  ) => WeldDone | WeldRefusal | null
   /**
    * Replace a stretch of a polity's ring by a new run, as one undoable step — ⟨retrace⟩'s last click
    * (`H-46`). Every ring running over the stretch takes the run, so a neighbour on it follows.
@@ -551,11 +552,11 @@ function weldActions(
       }, step)
       return answer
     },
-    threadAnchor: (index, a, b, point, step): WeldDone | null => {
-      let answer: WeldDone | null = null
+    threadAnchor: (index, a, b, point, step): WeldDone | WeldRefusal | null => {
+      let answer: WeldDone | WeldRefusal | null = null
       record((document) => {
         answer = threadAnchor(document, index, a, b, point)
-        return answer !== null
+        return answer !== null && !isWeldRefusal(answer)
       }, step)
       return answer
     },

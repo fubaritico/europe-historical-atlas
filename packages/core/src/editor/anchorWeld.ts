@@ -15,7 +15,9 @@ import type { YearDocument } from './yearDocument'
  * - **onto a stretch**: the dragged anchor is put on the neighbour's stretch and threaded into every ring
  *   that runs over it, as an inserted point would be — so the neighbour gains it.
  *
- * Both check before they write, so a refusal leaves the document as it was.
+ * Both check every ring before they write, so a refusal leaves the document as it was. A dressed run
+ * (`s13`) is a hand-set stroke, not an outline: it never refuses a weld — it follows when it can, and when it
+ * cannot it is kept as it was, orphaned in {Overrides}, as `removeAnchors` keeps one (never dropped silently).
  */
 
 /** What a weld or a thread did: the polities whose rings now hold the anchor. */
@@ -27,10 +29,39 @@ export interface WeldDone {
 /** Why a weld was refused — nothing was written. */
 export interface WeldRefusal {
   /**
-   * `'pinch'`: a ring already held the anchor welded onto, elsewhere — it would visit one point twice;
+   * `'pinch'`: a ring already held the anchor welded onto — or, threading, the anchor threaded — elsewhere:
+   * it would visit one point twice;
    * `'collapse'`: a ring would be left with fewer than {@link MIN_RING_ANCHORS} anchors.
    */
   refused: 'pinch' | 'collapse'
+}
+
+/**
+ * A dressed run with one anchor replaced by another, consecutive repeats dropped — or the run as it was
+ * when the welded one would hold fewer than two anchors or pass twice through `into`: the file refuses a run
+ * under two, and dropping it would undo a hand-set stroke silently (`s13`).
+ * @param run - the run's anchors, open
+ * @param from - the anchor replaced
+ * @param into - the anchor it becomes
+ * @returns the run to keep
+ */
+function weldedRun(run: readonly number[], from: number, into: number): number[] {
+  const replaced = run.map((at) => (at === from ? into : at))
+  const kept = replaced.filter((at, i) => i === 0 || at !== replaced[i - 1])
+  const valid = kept.length >= 2 && kept.filter((at) => at === into).length <= 1
+  return valid ? kept : [...run]
+}
+
+/**
+ * The polities whose claim holds one of the rings given.
+ * @param doc - the document to read
+ * @param rings - the rings, by identity
+ * @returns their ids, in claim order
+ */
+function holdersOf(doc: YearDocument, rings: readonly number[][]): string[] {
+  return doc.claims
+    .filter((claim) => claim.rings.some((ring) => rings.includes(ring)))
+    .map((claim) => claim.polity)
 }
 
 /**
@@ -91,10 +122,7 @@ export function weldAnchor(
   if (next.some((ring) => ring.filter((at) => at === into).length > 1)) return { refused: 'pinch' }
   if (next.some((ring) => ring.length < MIN_RING_ANCHORS)) return { refused: 'collapse' }
   rings.forEach((ring, i) => ring.splice(0, ring.length, ...(next[i] ?? ring)))
-  for (const dressed of doc.runs) {
-    const run = dressed.run.map((at) => (at === from ? into : at))
-    dressed.run = run.filter((at, i) => i === 0 || at !== run[i - 1])
-  }
+  for (const dressed of doc.runs) dressed.run = weldedRun(dressed.run, from, into)
   return { polities: holders(doc, into) }
 }
 
@@ -106,8 +134,10 @@ export function weldAnchor(
  * @param a - one end of the stretch
  * @param b - the other end
  * @param point - where on the stretch, `[longitude, latitude]`
- * @returns the polities now holding the anchor, or `null` when no ring that lacks it runs from `a` to
- *   `b`, or it is one of the two ends — and then nothing was written
+ * @returns the polities whose rings gained the anchor; `'pinch'` when a ring running from `a` to `b`
+ *   already holds it elsewhere — threading would make it visit the point twice, and skipping it would leave
+ *   the very sliver a weld removes; or `null` when no ring runs from `a` to `b`, or the anchor is one of the
+ *   two ends — and then nothing was written
  */
 export function threadAnchor(
   doc: YearDocument,
@@ -115,10 +145,11 @@ export function threadAnchor(
   a: number,
   b: number,
   point: [number, number]
-): WeldDone | null {
+): WeldDone | WeldRefusal | null {
   if (index === a || index === b || doc.anchors[index] === undefined) return null
-  const rings = everyRing(doc).filter((ring) => !ring.includes(index) && edgeAt(ring, a, b) >= 0)
+  const rings = everyRing(doc).filter((ring) => edgeAt(ring, a, b) >= 0)
   if (rings.length === 0) return null
+  if (rings.some((ring) => ring.includes(index))) return { refused: 'pinch' }
   moveAnchor(doc, index, point)
   for (const ring of rings) ring.splice(edgeAt(ring, a, b) + 1, 0, index)
   // A hand-set stroke over that stretch keeps covering all of it (s13).
@@ -126,5 +157,5 @@ export function threadAnchor(
     const at = runStepAt(dressed.run, a, b)
     if (at >= 0 && !dressed.run.includes(index)) dressed.run.splice(at + 1, 0, index)
   }
-  return { polities: holders(doc, index) }
+  return { polities: holdersOf(doc, rings) }
 }
