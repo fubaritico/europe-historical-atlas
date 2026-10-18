@@ -75,7 +75,7 @@ const LAYERS = {
   geometry: 'src/geometry/hitTest.ts',
   state: 'src/state/editionSlice.ts',
   canvas: 'src/canvas/painter.ts',
-  components: 'src/components/MapCanvas.tsx',
+  components: 'src/components/Editor/Editor.tsx',
   loaders: 'src/vectorLayers.ts',
   workbench: 'src/workbench/Workbench.tsx',
   persistence: 'src/persistence/yearSession.ts',

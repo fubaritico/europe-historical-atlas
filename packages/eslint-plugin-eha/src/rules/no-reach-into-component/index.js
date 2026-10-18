@@ -81,6 +81,18 @@ const rule = {
       ExportAllDeclaration: (node) => {
         check(node, node.source)
       },
+      // A lazy import reaches inside as surely as a static one; a computed path cannot be read, and passes.
+      ImportExpression: (node) => {
+        check(node, /** @type {import('estree').Literal} */ (node.source))
+      },
+      /**
+       * The type `import('./x').T` — its specifier in `source`, or in `argument.literal` for an older parser.
+       * @param {import('estree').Node & { source?: import('estree').Literal, argument?: { literal?: import('estree').Literal } }} node -
+       *   the type node
+       */
+      TSImportType: (node) => {
+        check(node, node.source ?? node.argument?.literal)
+      },
     }
   },
 }

@@ -66,6 +66,11 @@ function openingOf(editing: YearPolity | null): PolityDraft {
  *
  * **The draft is component state, not a slice**: one writer and one reader, both the dialogue — the
  * lightest sufficient tier. It is thrown away on close either way.
+ * @param store - the store the polity is created in or updated through
+ * @param editing - the polity edited, or `null` when creating one
+ * @param onClose - close the dialogue, after a commit or on cancel
+ * @returns the draft and its errors, the suzerains and ranks to choose from, and the gestures: close, a field
+ *   changed, the colour changed, submit
  */
 export function usePolityDraft(
   store: CartographerStoreHook,

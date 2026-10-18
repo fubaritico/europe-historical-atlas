@@ -860,7 +860,7 @@
 }
 
 /*
- * The shell every panel of the dock is (`components/Panel.tsx`, decided by the dev on 2026-10-14): a head
+ * The shell every panel of the dock is (`components/Panel/Panel.tsx`, decided by the dev on 2026-10-14): a head
  * with its name as a tab, a body, an optional foot. How a panel sizes lives here, once — the four used to
  * hold their height each its own way, and a long {Polities} squeezed its head to 14px.
  */

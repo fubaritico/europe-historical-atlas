@@ -86,6 +86,14 @@ describe('eha/no-reach-into-component', () => {
           errors: 1,
         },
         { ...from('Editor.tsx', "export * from './PolitiesPanel/hooks/useX'"), errors: 1 },
+        {
+          ...from('Editor.tsx', "const m = import('./PolitiesPanel/internal/PolitiesFoot')"),
+          errors: [reaching('./PolitiesPanel/internal/PolitiesFoot', 'PolitiesPanel')],
+        },
+        {
+          ...from('Editor.tsx', "type F = import('./PolitiesPanel/internal/PolitiesFoot').Foot"),
+          errors: [reaching('./PolitiesPanel/internal/PolitiesFoot', 'PolitiesPanel')],
+        },
       ],
     })
   })
@@ -105,7 +113,10 @@ describe('eha/no-reach-into-component', () => {
 
   describe('unmanaged errors', () => {
     ruleTester.run('a declaration without a source', rule, {
-      valid: [from('Editor.tsx', 'const a = 1\nexport { a }')],
+      valid: [
+        from('Editor.tsx', 'const a = 1\nexport { a }'),
+        from('Editor.tsx', 'const m = import(`./${name}`)'),
+      ],
       invalid: [],
     })
   })

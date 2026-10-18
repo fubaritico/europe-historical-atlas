@@ -15,6 +15,7 @@ import type { GestureContext } from './toolGestures'
 import type { SnapLine } from '../geometry/lineSnap'
 import type { CartographerStoreHook } from '../state/store'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
+import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /**
  * **A test fixture** — the gesture context the tool tests drive, written once so the copies cannot
@@ -58,12 +59,14 @@ export function testPolity(id: string, name: string = id): YearPolity {
 }
 
 /**
- * A store on an empty 1100, under a view where a screen pixel is a backdrop pixel.
+ * A store on a document — an empty 1100 unless one is given — under a view where a screen pixel is a
+ * backdrop pixel.
+ * @param document - the document to open on
  * @returns the store
  */
-export function testStore(): CartographerStoreHook {
+export function testStore(document: YearDocument = openEmptyYear(1100)): CartographerStoreHook {
   return createCartographerStore({
-    edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
+    edition: { document, clone: cloneYearDocument },
     viewport: { viewport: { scale: 1, originX: 0, originY: 0 } },
   })
 }
