@@ -72,6 +72,40 @@ Scenario: rename from the map, mid-century
 > _regnum Francorum_ becomes _regnum Franciae_ under Philip Augustus, around 1190. One polity, two names,
 > each with its own date.
 
+### Opening the form from the map — built 2026-10-17 (`7f0b2be`, CARTO-246)
+
+```gherkin
+Scenario: double-click a polity on the map with the white arrow
+  Given ⟨edit⟩ is in hand
+  When I double-click inside the fill of "Royaume de Bourgogne" on the map
+  Then the form of Royaume de Bourgogne opens, filled with its current values
+  And the first click of the two has already selected it, as a single click does
+  Given a vassal painted over its suzerain
+  When I double-click inside the vassal's fill
+  Then the form that opens is the vassal's — the polity on top, as a click chooses it
+
+Scenario: a double-click on a point, or off every polity, opens nothing
+  When I double-click on an anchor
+  Then no form opens
+  And the console warns "a double-click on a point opens no form: a point may be shared — double-click inside a fill."
+  When I double-click in the sea, outside every polity
+  Then no form opens
+  And the console warns "a double-click outside every polity opens no form."
+
+Scenario: the other tools ignore a double-click
+  Given ⟨draw⟩, or any tool but ⟨edit⟩, is in hand — or ‹space› is held
+  When I double-click on the map
+  Then nothing new happens
+  And a double-click on a row of {Polities} still opens that polity's form, whatever the tool
+```
+
+> **The dev's request, 2026-10-17** (the ticket): to change a polity's properties while working on the map,
+> without finding it in {Polities}. A point opens nothing because it may be held by several polities and
+> choosing one would be arbitrary. **Tested by the dev the same day**: *« le double-clic avec l'outil A
+> fonctionne, c'est parfait »*; no walk written down. The form whose polity an undo takes away is
+> forgotten, so a redo does not reopen it. Amends `H-04` in [s99](s99-holes.md), which said double-click
+> was not used.
+
 ```gherkin
 Scenario: open the registry
   When I press [Registry]
@@ -150,12 +184,112 @@ Scenario: refuse a cycle
 > **A cycle is now a question about one file.** The chain of `suzerain` fields inside a year either loops or
 > it does not — no dates to overlap, nothing to compare across years.
 
+### Choosing the suzerain by typing — built 2026-10-17 (`6c9bde0`, CARTO-241)
+
+```gherkin
+Scenario: type a few letters to choose the suzerain
+  Given the polity form is open, in a year of about 150 polities
+  Then the "Suzerain" field reads "Type a name to choose…"
+  And the suzerain held is shown above the field, or "none"
+  When I type "ile"
+  Then the polities whose name matches are offered from the first letter, the typed part in bold
+  And case and accents do not count — "Île-de-France" is offered
+  And the names that start with what I typed come first, then those that contain it
+  And at most 30 are offered at once
+  When I choose one, with the pointer or with ‹↓› ‹↑› and ‹enter›
+  Then it is the suzerain held, shown above the field, and the field is cleared
+
+Scenario: nothing matches
+  When I type letters no polity's name contains
+  Then the list reads "No polity matches"
+
+Scenario: remove the suzerain
+  Given "Kingdom of France" is the suzerain held
+  When I press the cross beside it — "Remove the suzerain Kingdom of France"
+  Then the suzerain held reads "none"
+  And the focus is back in the "Suzerain" field
+
+Scenario: a loop of homage is never offered
+  Given Normandy owes France
+  When I open France's form and type "Nor"
+  Then Normandy is not offered — nor any polity owing France, at any depth
+```
+
+> **The dev's request, 2026-10-17** (the ticket): the suzerain was chosen in a drop-down of every polity of
+> the year, about 150 in 1100. The field is the design system's `Typeahead`, which brings the keyboard and
+> the combobox pattern; the search is `components/suzerainSearch.ts`. A suzerain held that the list does
+> not offer (a loop already in a file) is shown as its id and warned once in the console. **Tested by the
+> dev, 2026-10-17** (the ticket); no walk written down.
+
 ```gherkin
 Scenario: see the tree
   When I press [Hierarchy] for a given year
   Then polities are shown as a tree: crowns at the root, their vassals beneath
   And polities owing nobody sit at the root
 ```
+
+## What Wikidata says, in the form — built 2026-10-17 (`8c817fc`, CARTO-243 rung 1; `d85bdb4`, CARTO-248)
+
+```gherkin
+Scenario: the item is read a moment after the id is typed
+  Given the polity form is open for the County of Tripoli
+  When I type "Q272033" in the "Wikidata id" field
+  Then 400 ms after the last keystroke, the panel under the field reads "Reading Q272033 on Wikidata…"
+  When Wikidata answers
+  Then the panel shows the item's name and years, "County of Tripoli · 1102–1289" — a "?" where Wikidata says nothing
+  And its Wikipedia links, in English and in French, when it has them
+  And one line per field Wikidata can fill: Name, Exists from, Exists to, Suzerain — each only when it has a value
+
+Scenario: nothing is written without a click
+  Given the panel proposes "1102" for Exists from
+  Then the line's button reads [Use] when the field is empty, [Replace] when I wrote something else,
+    and an inert "Agrees" when the field already holds that value
+  And no field of the form has changed
+  When I press [Use]
+  Then Exists from holds "1102", as if I had typed it
+  And the button stays where it was, now reading "Agrees", so the focus is not lost
+
+Scenario: the suzerain proposed is the one of the year edited
+  Given "Kingdom of France" carries Q70972 in this year's registry
+  And Wikidata gives Flanders the country Kingdom of France 864–1529, then the Holy Roman Empire 1529–1556
+  When the item of Flanders is read in 1100
+  Then the panel proposes "Suzerain · Kingdom of France"
+  And in 1540 it would propose the Holy Roman Empire, if a polity of that year carries its Q-id
+  And a lord dated in the year comes before an undated one; one dated outside it is never proposed
+  And a State of the Holy Roman Empire is proposed the Empire
+  And only a polity of the year that carries the lord's Q-id is ever proposed — never a modern state
+  And an item that is an instance of a vassal state says " · a vassal state" after its years
+
+Scenario: the year edited is outside the item's dates
+  When the item of the County of Tripoli is read in 1100
+  Then the panel warns "Wikidata: County of Tripoli 1102–1289 — does not exist yet in 1100"
+  And for an item dissolved before the year, "… — no longer exists in <year>"
+  And nothing is refused: the form validates as before
+
+Scenario: the id names a Wikipedia page, not a polity
+  When the id typed is a Wikipedia category
+  Then the panel warns "<id> is a Wikipedia category, not a polity — check the id"
+  And it proposes nothing
+  And the same for a disambiguation page or a Wikipedia list
+
+Scenario: an unknown id, or no network
+  When the id typed is one Wikidata does not know
+  Then the panel warns "Wikidata does not know <id>"
+  When Wikidata does not answer
+  Then the panel reads "Wikidata did not answer (<reason>) — the form works without it"
+  And the console warns of it
+  And the form validates as before
+```
+
+> **Decided by the dev, 2026-10-17** (CARTO-243): names, dates and suzerain — *« le plus d'informations, le
+> mieux »*; Wikidata proposes, the author decides. Images (flags, arms) are left out, their licence being per
+> file on Commons. **What the code found while building**: Wikidata has no *vassal of*; the lord is read from
+> *country* (P17) and *part of* with their start and end qualifiers, from *State of the Holy Roman Empire*,
+> and *vassal state* says that it is one, not of whom — five of eight real vassals of 1100 come out right,
+> the rest stay empty. Measured on the Emirate of Mosul, whose id was a category. Only ids of the form `Q…`
+> are read. **Tested by the dev, 2026-10-17** (the Mosul case) and, for the dated suzerain, *« ça
+> fonctionne. Aucun problème. »*; no walk written down. **Rung 2, not built**: checking a whole year
+> against Wikidata.
 
 ## The panel's action bar — the dev, 2026-10-12
 
@@ -177,6 +311,9 @@ Scenario: the actions sit at the foot of {Polities}
 > action of the panel goes there too. **The glyphs are the dev's own pixel drawings** (a
 > `+` framed in dots, a three-slatted trash), filled shapes on whole pixels — his verdict of 2026-10-12,
 > *"ce qui doit être net est net"*, after the tool glyphs' 1.4 stroke was measured blurry.
+>
+> **Where [New polity] puts the new polity in the stack** — just above the one selected, in its group
+> (CARTO-242, 2026-10-17) — is written in [s16](s16-stacking-order.md), *Where a new polity lands*.
 
 ## Removing — rewritten 2026-10-12
 
@@ -255,6 +392,31 @@ Scenario: ‹ctrl+z› in the panel takes back an outline in progress first
 > **The bar ignores the zoom**, unlike the tools (`s17`): creating or deleting a whole polity asks for no
 > precision on the map, the dialogue says what goes, and undo brings it back. Mine, said to the dev the
 > same night, his to overrule.
+
+## A tribe — the rank that draws without a fill (built 2026-10-15, `220ae18`)
+
+```gherkin
+Scenario: rank a polity "tribe"
+  Given "Obotrites" holds an outline and is ranked "duchy"
+  When I open its form and choose the rank "tribe"
+  Then its outline is no longer filled
+  And it is stroked dashed, in its colour, at a border's width, under the borders layer's setting
+  And no derived border touching it is drawn — its dashed outline is the line there
+  When I click inside its outline with ⟨edit⟩
+  Then it is selected, as a filled polity would be
+
+Scenario: the rank list offers every rank the year uses
+  When I open the "Rank" list of any polity
+  Then it offers the usual ranks, "tribe" among them, then every other rank the year already uses, in alphabetical order
+```
+
+> **The dev, 2026-10-15**: *« quand une policy prend une couleur, c'est qu'elle atteint une certaine
+> souveraineté »*, and *« la couleur de remplissage sera plutôt la couleur des traits en pointillés »*. The
+> rank is read exactly: `tribe` (`core/editor/tribes.ts`). The rank list offering the year's own ranks is
+> his too, 2026-10-16: *« qu'est-ce qui empêche les choses ? »*. **Claude's call, said to the dev the same
+> evening**: a derived border touching a tribe is dropped, since two strokes along one stretch would read as
+> two limits. The atlas draws tribes the same way since 2026-10-16 (`3ba62ee`). Not walked yet in the
+> Cartographer, as the code itself records.
 
 ## Import
 

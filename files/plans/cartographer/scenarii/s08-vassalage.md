@@ -187,6 +187,7 @@ Scenario: the outline of a new vassal carves its suzerain's own domain
   And France and Aquitaine share the anchors of their new common limit
   And that limit is drawn with the vassal hand
   And France's extent outline is unchanged
+  And the status bar reads "carved out of Kingdom of France's own domain"
   And one undo takes back both the outline and the carving
 
 Scenario: a vassal drawn wholly inside its suzerain leaves a hole in its domain
@@ -200,6 +201,16 @@ Scenario: a new vassal's outline crossing its suzerain's limit
   Then an anchor is placed at each crossing, shared by both outlines
   And only the part inside France's own domain is carved
   And the part outside stays the vassal's, adding to France's extent
+  And the status bar reads "carved out of Kingdom of France's own domain, 2 anchors placed where the limits cross"
+
+Scenario: a carving that cannot be done leaves the overlap, and says so in the console
+  Given France holds its own domain
+  When I close a new vassal's outline and the carving fails
+  Then the outline is closed and kept
+  And France's own domain is exactly as it was — any crossing anchor already placed is taken back out
+  And the two overlap, for the author to correct by hand
+  And the console logs an error: the outline "was closed but not carved out of" France, with the reason, "they overlap"
+  And the status bar says nothing of a carving
 
 Scenario: every outline closed for a vassal carves, and nothing already drawn is recomputed
   Given "Duchy of Normandy" is a vassal of France and already holds an outline overlapping France's domain
@@ -218,6 +229,36 @@ Scenario: a new vassal's outline over a co-vassal overlaps it, carves nothing of
 > co-vassal (*« il ne le creuse pas, il se chevauche »*); and **every** outline closed for a vassal carves,
 > not only its first (*« ça permettra de gérer les enclaves et les exclaves entre vassaux et suzerains »*).
 > What is already drawn is never recomputed, so the overlaps being corrected by hand stay as they are.
+>
+> **Built 2026-10-15 (`0003896`)**: `core/editor/carve.ts`, atomic — a fault puts the suzerain's domain back
+> as it was and is said loudly; the Pen's close says what was carved. No walk written down: the fifteen
+> vassals recarved in `years/1100` that night were drawn before the Pen knew how, and recarved outside the
+> tool (`completed` archive, 15/10). Recarving an existing vassal from the tool is not possible yet
+> (`known-issues.md`, CARTO-189).
+
+## Aiming at a suzerain — built 2026-10-15 (`186d017`)
+
+```gherkin
+Scenario: aiming at a suzerain strokes its extent and hands over its outline's anchors
+  Given "Kingdom of France" holds its own domain, and Aquitaine and Normandy, its vassals, theirs
+  When I aim at France with ⟨edit⟩
+  Then one outline is stroked around France's own domain and its vassals' together, twice the width of the edit outlines
+  And the limits between France and its vassals are not part of it
+  And the white arrow takes the anchors of that outline, and France's own anchors not shared with a vassal
+  But an anchor France shares with Aquitaine is not offered — that limit is Aquitaine's to edit
+  And a ring of France's own still lying under a vassal, sharing nothing with it, is offered, for the author to remove
+
+Scenario: a suzerain with no ring of its own
+  Given "Kingdom of France" holds no ring, and its vassals hold theirs
+  When I aim at France
+  Then its extent outline is stroked around its vassals
+  And it is not marked "no territory"
+```
+
+> **The dev, 2026-10-15** — point 3 of the note at the top of this file, now a contract: a vassal's limit
+> against a foreign polity is its suzerain's limit too, so it is edited from the suzerain; the limits with
+> its vassals are theirs (*same evening*). The extent is computed (`core/editor/extent.ts`), cached per
+> version. No walk written down.
 
 ## Two vassals side by side in one suzerain
 
@@ -231,23 +272,37 @@ Scenario: three limits out of two outlines
   When both outlines close
   Then the Aquitaine–France limit is drawn with the vassal hand
   And the Normandy–France limit is drawn with the vassal hand
-  And the Aquitaine–Normandy limit is drawn with neither
-  And it is not drawn like the France–Empire limit either
+  And the Aquitaine–Normandy limit is drawn with the vassal hand too — dotted, at the same weight
+  And only a limit against another lineage, like France–Empire, is drawn solid
 ```
 
-> **The finding, and it is the point of this case**: the hands table is keyed on _the relation between the
+> **Rewritten 2026-10-15, on the dev's call** (*« le même trait »*, `69f3035`, `core/editor/borderHands.ts`).
+> Until then the scenario read: ~~*"And the Aquitaine–Normandy limit is drawn with neither / And it is not
+> drawn like the France–Empire limit either"*~~.
+
+> ~~**The finding, and it is the point of this case**: the hands table is keyed on _the relation between the
 > two parties_, and between two co-vassals **there is no relation**. Neither owes the other. What they
 > share is a relation to a **third** party. So no row applies, and the two wrong answers are both
-> available: solid says they are sovereigns, dotted says one owes the other.
+> available: solid says they are sovereigns, dotted says one owes the other.~~ — superseded 2026-10-15: the
+> dev chose dotted, the vassal's stroke; the co-vassal row exists (`borderRelation.ts`) and draws as the
+> vassal row does.
 
 ```gherkin
-Scenario: the weight of a line follows the depth of the lowest common suzerain
-  Given France owes nobody, Aquitaine owes France, and Poitou owes Aquitaine
-  Then the France–Empire limit has no common suzerain, so it is drawn at full weight
-  And the Aquitaine–Normandy limit shares France at the first degree, so it is drawn lighter
-  And a Poitou–Saintonge limit shares Aquitaine at the second degree, so it is lighter still
-  And the Aquitaine–France limit is the vassal hand, which is a different axis and not a weight
+Scenario: every limit inside one lordship takes the vassal's stroke, at the same weight
+  Given France owes nobody, Aquitaine and Normandy owe France, and Poitou and Saintonge owe Aquitaine
+  Then the France–Empire limit has no common suzerain, so it is drawn solid, at full weight
+  And the Aquitaine–Normandy limit is dotted, at full weight
+  And a Poitou–Saintonge limit is dotted, at full weight
+  And the Aquitaine–France limit is dotted, at full weight
 ```
+
+> **Rewritten 2026-10-15, same call** — the co-vassal stroke is `{ dotted, weight 1 }`. The depth of the
+> lowest common suzerain is still computed (`borderRelation.ts`, `degree`) but no stroke reads it. Until then
+> the scenario was *"the weight of a line follows the depth of the lowest common suzerain"* and read:
+> ~~*"And the Aquitaine–Normandy limit shares France at the first degree, so it is drawn lighter / And a
+> Poitou–Saintonge limit shares Aquitaine at the second degree, so it is lighter still / And the
+> Aquitaine–France limit is the vassal hand, which is a different axis and not a weight"*~~. The blockquote
+> below is the 2026-09-27 reasoning, kept for the record; its *"lighter"* no longer holds.
 
 > **One rule, two holes closed.** Depth of the lowest common suzerain also answers **H-23** — _"does the hand
 > weaken by degree, or is any link drawn the same?"_ — with the same arithmetic instead of a second
@@ -288,6 +343,10 @@ Scenario: a vassal of a vassal
 > the chain drawn the same? In
 > 11th–15th century France the rear-vassal is the normal case, not an exception, and the map will be full
 > of them.
+>
+> **What the code does since 2026-10-15** (`borderHands.ts`): every vassal row is dotted at weight 1, so the
+> second degree is drawn **like** the first — *"visually lighter"* above is not built. Whether the dev's
+> *« le même trait »* also settles rear-vassals is not written down; open, not decided here.
 
 ## The empires view
 
@@ -308,6 +367,10 @@ Scenario: colour by crown instead of by polity
 > **Corrected 2026-09-27**: this scenario used to give the vassal hand to *every* border inside the group,
 > which would claim Normandy owes Aquitaine. Inside the group there are two different lines, and merging the
 > colours is precisely when confusing them costs the most — the ink is all the reader has left.
+>
+> **Out of step since 2026-10-15**: co-vassals now take the vassal's stroke (the note at the top of this
+> file), so ~~*"a limit between two co-vassals keeps its depth weight, not the vassal hand"*~~ no longer
+> holds. The view itself is not built.
 
 ```gherkin
 Scenario: a vassal whose suzerain is not pinned

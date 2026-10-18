@@ -168,11 +168,13 @@ Scenario: a drag that ends where it started must not count as a click
 > threshold. `MapControls.pointerDragged` decides it once, against a 4 px tolerance. **Do not decide it a
 > second time here** — the same tolerance, in the same place.
 
-```gherkin
-Scenario: frame a polity
-  When I double-click "Kingdom of Poland" in {Polities}
-  Then the view zooms and pans so its extent fills the canvas with a margin
-```
+> ~~`Scenario: frame a polity` — When I double-click "Kingdom of Poland" in {Polities}, Then the view zooms and
+> pans so its extent fills the canvas with a margin.~~
+>
+> **Superseded 2026-10-12** (`21bb1a2`, `s07` *edit a polity that already exists*): a double-click on a row of
+> {Polities} opens that polity's form, and since 2026-10-17 a double-click in its fill on the map does too
+> (CARTO-246). **Framing a polity has no gesture today** — it waits on the canvas's zoom buttons and "fit"
+> (CARTO-172). Struck on 2026-10-18 by the scenario audit, which found the line contradicting the code.
 
 ## Layers
 

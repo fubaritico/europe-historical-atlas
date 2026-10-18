@@ -227,8 +227,14 @@ Wikidata ids.
 **By proximity to the first anchor, announced before the click.** _"comme Illustrator, arrivé à une
 certaine proximité, on peut fermer un tracé."_ Entering the snapping radius emphasises the first anchor
 and changes the cursor; clicking it closes the ring and paints the fill. ‹enter› closes on a straight
-segment as the keyboard equivalent. **Double-click is not used** — it is the atlas's fly-to gesture and
-the two would collide.
+segment as the keyboard equivalent. ~~**Double-click is not used** — it is the atlas's fly-to gesture and
+the two would collide.~~
+
+> **Amended 2026-10-17 — the dev asked for a double-click** (CARTO-246): with the white arrow, a
+> double-click inside a fill opens that polity's form (`s07`, *Opening the form from the map*); the dev
+> tested it the same day, *« le double-clic avec l'outil A fonctionne, c'est parfait »* (`7f0b2be`).
+> **Closing an outline still takes no double-click**: the Pen ignores it, and the rest of this entry
+> stands. The collision feared above was with the atlas's fly-to, a different application.
 
 **The tolerance is in screen pixels, not kilometres**, like every other handle (`snapRadius / scale`). At
 continent scale it really is ~50 km wide, and that is right rather than sloppy: nobody aims finer than a

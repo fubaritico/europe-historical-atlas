@@ -58,6 +58,83 @@ Scenario: the atlas paints the same order
 >   beneath. Already planned for step 5; it is what makes the order **visible** rather than only seen on
 >   the canvas. Within a level, the list shows the stack front first, as Illustrator does. *(mine)*
 > - A polity with no territory still heads its group: its vassals are drawn even if it is not.
-> - Illustrator's shortcuts ‹⇧⌘]› ‹⌘]› ‹⌘[› ‹⇧⌘[› on the target, and the same menu on a fill on the
->   canvas — proposed, never asked for.
+> - ~~Illustrator's shortcuts ‹⇧⌘]› ‹⌘]› ‹⌘[› ‹⇧⌘[› on the target,~~ and the same menu on a fill on the
+>   canvas — proposed, never asked for. *(The shortcuts are struck: the dev asked for keys on 2026-10-16
+>   and proposed others, ‹cmd+↑› ‹cmd+↓› — built, below.)*
 > - `H-33` (list by name or by stack) is settled by the tree if the dev agrees.
+
+## From the keyboard — built 2026-10-16 (`5c96eaf`)
+
+> **The dev, 2026-10-16**: *« c'est une opération que je dois répéter plein de fois »* — asked as a priority.
+> The keys are the ones he proposed. ‹ctrl› stands for ‹cmd› off a Mac.
+
+```gherkin
+Scenario: move the selected polity one step, then to the end
+  Given "Duchy of Normandy" is selected, with Aquitaine painted over it among France's vassals
+  When I press ‹cmd+↑›
+  Then Normandy is painted over Aquitaine
+  And the result zone reads "Bring Forward — Duchy of Normandy"
+  And {History} gains one step, "bring forward — Duchy of Normandy"
+  When I press ‹cmd+↓›
+  Then it is sent one step backward — "Send Backward — Duchy of Normandy"
+  When I press ‹shift+cmd+↑›, or ‹shift+cmd+↓›
+  Then it goes to the front, or to the back, of its group — [Bring to Front], [Send to Back]
+  And a key held down repeats, one step per repetition
+
+Scenario: the keys are heard on the page, not in a field
+  Given "Duchy of Normandy" is selected
+  When I press ‹cmd+↑› with the focus in {Polities}, or on the map
+  Then Normandy moves
+  But with the focus in a text field, in an open dialogue, or in the open stacking menu
+  Then the key does what that place does with it, and nothing moves in the stack
+
+Scenario: a modified arrow neither pans the map nor moves the list's cursor
+  Given the focus is on the map, or on a row of {Polities}
+  When I press ‹cmd+↑›
+  Then the map does not pan and the list's cursor stays on its row
+  And only the stacking command runs
+
+Scenario: the menu shows the keys
+  When I open the stacking menu on a row of {Polities}
+  Then each command shows its keys at the row's end: ⇧⌘↑ · ⌘↑ · ⌘↓ · ⇧⌘↓
+  And each announces them to assistive technology
+
+Scenario: what the keys refuse, said
+  Given no polity is selected
+  When I press ‹cmd+↑›
+  Then nothing moves, and the result zone reads "Select a polity to bring forward"
+  Given "Kingdom of France" is the top-level group at the front
+  When I select it and press ‹cmd+↑›
+  Then nothing moves, and the result zone reads "Bring Forward — Kingdom of France: already in place"
+  And either refusal is logged to the console as a warning, with nothing recorded in {History}
+```
+
+> **Tested by the dev, 2026-10-16**: *« c'est bon »* (`completed.md`); no walk written down. The rule
+> *"a modified arrow is left to the stacking keys"* is written in three places (map, list, shortcut) — open
+> in `known-issues.md` (ARCH-001), to put in common at the next shortcut of the kind.
+
+## Where a new polity lands — built 2026-10-17 (`72ba74f`, CARTO-242)
+
+> **The dev's call, 2026-10-17**: a new polity always appeared at the very top of {Polities}, so drawing a
+> row of neighbours one after another meant moving each down by hand.
+
+```gherkin
+Scenario: a new polity is created just above the one selected, in its group
+  Given "Reaume de France" is selected, with "Sacrum Imperium" above it in {Polities}
+  When I press [New polity], name it "Bourgogne" and validate, owing the same suzerain as France — nobody
+  Then {Polities} reads, top to bottom: Sacrum Imperium · Bourgogne · Reaume de France
+  When I press ‹ctrl+z›
+  Then Bourgogne is gone and the order is as it was, in one undo step
+
+Scenario: not in the same group, or nothing selected — the top of its own group
+  Given nothing is selected
+  When I create "Bourgogne"
+  Then it is at the top of its group, as before
+  Given "Reaume de France" is selected
+  When I create a polity owing another suzerain than France does
+  Then it goes to the top of its own group, not beside France
+```
+
+> **Tested by the dev, 2026-10-17**: *« ça me l'ajoute bien au-dessus. C'est bon, ça fonctionne. »* (the
+> ticket); no walk written down. A selected polity deleted or undone away before validation counts as
+> nothing selected.

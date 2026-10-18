@@ -1,10 +1,10 @@
 ---
 name: scenarii-to-code
-description: Turn a scenario into code, one honestly-declared rung at a time — load the scenario that governs the work, make every Then line either an assertion or a declared gap, and say what the rung deliberately does not do yet. Use before writing any code a scenario specifies, in any application of this repository. Triggers on "scenario", "scenarii", "gherkin", "sNN" (s01…s14), a P4 step (4a…4d), "what does this stage not do", "degraded on purpose".
+description: Keep scenarios and code in step, both ways. Scenario → code — load the scenario that governs the work, make every Then line either an assertion or a declared gap, say what the rung deliberately does not do yet. Code → scenario — a gesture shipped, changed or walked is written back into its scenario in the same commit, and an audit finds what shipped without one. Use before writing any code a scenario specifies, after shipping a gesture, at end-session, and when asked whether the scenarios are up to date. Triggers on "scenario", "scenarii", "gherkin", "sNN" (s01…s18), "code to scenario", "synchronise les scénarios", a P4 step, "what does this stage not do", "degraded on purpose".
 argument-hint: '[step or scenario, e.g. 4d-2 or s02]'
 metadata:
   author: europe-map
-  version: '2.0'
+  version: '3.0'
 ---
 
 # From a scenario to code
@@ -132,7 +132,7 @@ Three honest answers, and picking the wrong one is how specification gets invent
 
 ## 6. The sets that exist today
 
-**The Cartographer** — `files/plans/cartographer/scenarii/`, 16 files, **14 of them holding Gherkin**
+**The Cartographer** — `files/plans/cartographer/scenarii/`, 20 files, **18 of them holding Gherkin**
 (`s00` and `s99` hold none, being the background and the holes).
 
 | scenario | what it specifies | the step that owes it |
@@ -151,6 +151,10 @@ Three honest answers, and picking the wrong one is how specification gets invent
 | `s12-out-of-frame` | the editorial zone against the render frame | 4b (done), 5 |
 | `s13-overrides` | `{Overrides}`, run borders, precedence | 5 |
 | `s14-history-panel` | `{History}`, rows, markers | 3 (done), 5 |
+| `s15-offline-and-online` | where a year goes, and how the atlas reads it | 5 |
+| `s16-stacking-order` | stacking by groups of homage, the menu and its shortcuts | 5 (done) |
+| `s17-tools-wait-for-the-zoom` | the tools' reach against the zoom | 5 (done) |
+| `s18-autosave` | the draft on disk, the snapshots | 5 (step 1 done) |
 
 **The atlas** — no set. It is specified by `files/plans/atlas/01-foundations.md` … `07-robustness.md`
 plus `focus-mode.md` and `readability-budgets.md`, which are chapters rather than gestures. Its own
@@ -161,7 +165,41 @@ scenarii would go in `files/plans/atlas/scenarii/`, following §1.
 
 ---
 
-## 7. What this skill does not do
+## 7. Code → scenario: the other direction (the dev's call, 2026-10-18)
+
+> *« il faut que cette histoire de scénarii to code, code to scénarii, ce soit en double sens »* — the dev, after an
+> audit found that of a dozen gestures shipped 15–18/10, **one** had a scenario (`s18`), and three scenarios said
+> the contrary of the code (H-04's *"double-click is not used"*, `s16`'s unasked keys, `s08`'s co-vassal limit).
+
+Scenarios come first, and they stay first only if what ships flows back into them. A feature built on the dev's
+word in the moment — a double-click, a typeahead — is product work nobody specified; §5 says to stop and write
+the scenario first, and when that did not happen, it is written **in the commit that ships it**, never later.
+
+**a. In the same commit as the gesture.** A gesture shipped or changed gets its `Scenario:` in the governing
+file — gestures and visible outcomes, the bar's messages **quoted exactly as the code writes them** — plus a
+dated prose note: `> **Built <date> (<commit>, <ticket>)**`, and *"not walked yet"* until a walk happens. A
+review that changes a behaviour (a refusal, a message) changes its scenario too.
+
+**b. A walk is written back.** When the dev or I use the gesture in the app, the note becomes *"Walked <date>"*
+with what the walk changed ([[every-walk-becomes-scenarios]]); a surprise goes to `s99`.
+
+**c. When code and scenario disagree, ask which is the decision.** The dev's latest word wins — usually the
+code, built on his request; sometimes the scenario, and then the code is the defect. The losing line is
+**struck** (`~~…~~`) with a dated note saying what replaced it and on whose word — **never deleted**: the
+history of a decision is what stops it being re-litigated.
+
+**d. The audit — when asked, and at every `/end-session`.** List the user-facing commits since the last audit
+(`git log --since=<date>`, leaving out data, docs and tooling); for each, the governing `sNN`, the `Scenario:`
+that covers it (file:line), whether it was walked, or **none**. Read the code for each gap — never the commit
+message alone, it rounds off. Write the missing scenarios from the code, strike what contradicts it, and report
+the table. The first audit ran on 2026-10-18 (15–18/10).
+
+**The code is evidence of behaviour, not of intent.** Writing a scenario from code describes what it does; if
+what it does was never asked for, the scenario says so (`> **Built … — not asked for, kept pending the dev**`)
+instead of dressing it up as a decision. That is the line §5 draws: a scenario must never merely describe the
+code — it records what was decided, and the code is checked against it.
+
+## 8. What this skill does not do
 
 It decides no product question. A scenario's prose settles many of them, `s99` lists the rest as open,
 and an open hole is **the dev's call** — the decision tables carry a `by` column precisely because an

@@ -94,4 +94,6 @@ Scenario: a draft that cannot be opened is set aside, not overwritten
   window is while the backdrop bakes and the tools still wait. Trigger to revisit: a loss seen in it.
 - **Drafting stays off when an old draft cannot be set aside** (ARCH-001): said in the status bar —
   *"automatic drafts are off: move it out of …, then reload"*. Claude's call under the dev's go, to confirm.
-- **Walked in the dev's Chrome**: not yet — every line above is asserted by a test, none was seen on screen.
+- **Walked in the dev's Chrome**: ~~not yet — every line above is asserted by a test, none was seen on screen.~~
+  **Tested by the dev on 2026-10-17** (`f967d4d`, CARTO-238): *« ça marche »* — the draft offered back at the
+  opening. No walk written down line by line; corrected on 2026-10-18 by the scenario audit.

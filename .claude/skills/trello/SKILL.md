@@ -148,7 +148,8 @@ A card reaches **Fait** only when its own acceptance criteria hold **and** all o
    without reloading his page ([[never-reload-the-devs-page]]).
 5. **Tested by the dev** in the app, or the decision taken by him → only then `done`.
 6. **Committed** (`/commit`) — after his test, never before; the commit hash goes in a comment.
-7. **Written where it lives** — a closed known-issue archived, a new term in `glossaire.md`, a walk in
+7. **Written where it lives** — a gesture shipped or changed in its scenario, same commit (`/scenarii-to-code`
+   §7), a closed known-issue archived, a new term in `glossaire.md`, a walk in
    its scenario ([[every-walk-becomes-scenarios]]).
 
 A step that does not apply is said in the closing comment ("pas de rendu touché : pas de test dans
