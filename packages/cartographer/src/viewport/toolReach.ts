@@ -22,11 +22,12 @@ import type { PixelSize, Viewport } from './viewport'
 /**
  * The farthest the snap may reach on the ground, in kilometres, for the drawing tools to act.
  *
- * **My estimate, to be tuned by the dev on sight** (2026-10-12): with France filling the screen the reach
- * is about 9 km and drawing there went well; at the opening view of the whole continent it is several
- * times that.
+ * **Tuned by the dev, 2026-10-17: 20 km** (CARTO-233). My first estimate of 2026-10-12 was 10 km — France
+ * filling the screen — and drawing he had to come *"trop près"* before the tools woke up. At 20 km they act
+ * from twice as far, France and its neighbours in view; the opening view of the whole continent still lies
+ * beyond, so it stays an overview to look at (`H-34`).
  */
-export const MAX_SNAP_REACH_KM = 10
+export const MAX_SNAP_REACH_KM = 20
 
 /**
  * The latitude at the centre of the view, held within the backdrop's own bounds — a centre over the

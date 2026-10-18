@@ -7,8 +7,12 @@
 >
 > **The rule is a distance on the ground, not a zoom level**: the drawing tools act when the snap radius
 > (8 CSS pixels) covers at most `MAX_SNAP_REACH_KM` — 10 km, an estimate to tune by sight — measured at the
-> latitude of the view's centre (`view/toolReach.ts`). Every line below was seen on screen; screenshots on
+> latitude of the view's centre (`viewport/toolReach.ts`). Every line below was seen on screen; screenshots on
 > the dev's Desktop, `seuil-1` to `seuil-4`.
+>
+> **Retuned by the dev on 2026-10-17: 20 km** (CARTO-233) — at 10 km he had to come too close before the
+> tools woke up. The figures in the scenarios below (10 km, 10.6 km, 37.4 km) are those of the walk of
+> 2026-10-12, at the old threshold; the behaviour is unchanged, only the distance doubled.
 
 ```gherkin
 Scenario: the overview at opening — the tools wait
