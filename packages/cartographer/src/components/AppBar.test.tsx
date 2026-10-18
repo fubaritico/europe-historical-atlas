@@ -5,12 +5,19 @@ import { describe, expect, it, vi } from 'vitest'
 import { AppBar } from './AppBar'
 
 /**
- * Render the bar with a spy on saving.
+ * Render the bar with a spy on saving and one on opening a snapshot.
  * @returns the save spy
  */
-function mount(): ReturnType<typeof vi.fn> {
+function mount(onOpenSnapshot: () => void = vi.fn()): ReturnType<typeof vi.fn> {
   const onSave = vi.fn()
-  render(<AppBar name="Europe Historical Atlas Cartographer" year={1100} onSave={onSave} />)
+  render(
+    <AppBar
+      name="Europe Historical Atlas Cartographer"
+      year={1100}
+      onSave={onSave}
+      onOpenSnapshot={onOpenSnapshot}
+    />
+  )
   return onSave
 }
 
@@ -31,13 +38,27 @@ describe('AppBar', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Save' }))
       expect(onSave).toHaveBeenCalledOnce()
     })
+
+    // s18, rung 2b: the button opens the dialogue, and only that — saving is not touched.
+    it('calls onOpenSnapshot on [Open snapshot…], not onSave', async () => {
+      const onOpenSnapshot = vi.fn()
+      const onSave = mount(onOpenSnapshot)
+
+      await userEvent.click(screen.getByRole('button', { name: 'Open snapshot…' }))
+
+      expect(onOpenSnapshot).toHaveBeenCalledOnce()
+      expect(onSave).not.toHaveBeenCalled()
+      expect(
+        screen.getByRole('button', { name: 'Open snapshot…' }).getAttribute('aria-disabled')
+      ).toBeNull()
+    })
   })
 
   describe('variants', () => {
-    it('lays out the design’s actions, in its order, without [Export for the atlas…]', () => {
+    it('lays out the design’s actions, in its order, [Open snapshot…] after [Open…], without [Export for the atlas…]', () => {
       mount()
       const labels = screen.getAllByRole('button').map((button) => button.textContent)
-      expect(labels).toEqual(['Open…', 'Save', 'Save as…', 'Registry'])
+      expect(labels).toEqual(['Open…', 'Open snapshot…', 'Save', 'Save as…', 'Registry'])
     })
   })
 

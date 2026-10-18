@@ -16,6 +16,12 @@ Put here the know issues to avoid cluttering the context window.
   sélectionner ou dessiner (seuil de `s17`, « les outils attendent le zoom ») — l'abaisser. (2) **‹P› et ‹A› ne
   répondent pas sur un pays neuf ou vide** : il faut cliquer l'outil dans la barre. **Le dev donnera le cas exact** ;
   le reproduire avant de toucher au code. **17/10** : (1) seuil passé à 20 km, non commité, le dev le jugera sur un très grand pays. **18/10** : (2) fermé — le dev : *« le P et le A s'activent bien maintenant au raccourci clavier »*, sans code écrit (CARTO-235, Fait). Reste (1). **Sévérité : gênant.**
+- **Modifier le code du serveur de dev du Cartographe (`src/devServer/`) n'est pris en compte qu'après un redémarrage
+  du serveur** (18/10). `vite.config.ts` charge chaque point d'entrée à sa première requête puis le garde en mémoire
+  (`mountEndpoint`) : une modification faite après ce chargement est ignorée, et le serveur répond avec l'ancien code —
+  vu sur *Open snapshot* (*« "/1100/snapshots" is not a draft »*). Modifier `vite.config.ts`, lui, redémarre le serveur.
+  Remède : après un changement dans `devServer/`, demander au dev de relancer `pnpm dev:cartographer` ; remède durable,
+  oublier le module chargé quand un fichier de `devServer/` change (`server.watcher`). **Sévérité : à savoir.**
 - **Les raccourcis d'empilement (16/10) laissent un constat de revue ouvert, par ma décision.** — CARTO-123 (1) ~~A11Y-002 :
   le même message répété n'est pas relu~~ — **fait le 18/10** (CARTO-121) : `writeResult` alterne un espace sans
   largeur sur une répétition ; pas d'essai au lecteur d'écran, par décision du dev (*« l'accessibilité pour la

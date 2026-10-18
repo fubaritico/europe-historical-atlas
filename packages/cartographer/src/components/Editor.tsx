@@ -120,6 +120,8 @@ export interface EditorProps {
   name: string
   /** Save the open year — the top bar's `[Save]`, the same call as ‹ctrl+S›. */
   onSave: () => void
+  /** Open the *Open snapshot* dialogue — the top bar's `[Open snapshot…]` (CARTO-238, rung 2b). */
+  onOpenSnapshot: () => void
   /** The canvas's undo and redo, for the document bar's buttons. */
   history: HistoryRelay
   /** Where the polities' colours come from — one source for the canvas and every panel. */
@@ -150,6 +152,7 @@ export function Editor({
   heading,
   name,
   onSave,
+  onOpenSnapshot,
   history,
   colours,
   wikidata,
@@ -173,7 +176,9 @@ export function Editor({
   return (
     <Shell
       heading={heading}
-      appbar={<AppBarPanel store={store} name={name} onSave={onSave} />}
+      appbar={
+        <AppBarPanel store={store} name={name} onSave={onSave} onOpenSnapshot={onOpenSnapshot} />
+      }
       docbar={<DocBarPanel store={store} history={history} />}
       canvas={
         <MapArea

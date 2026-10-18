@@ -1,3 +1,4 @@
+import { fileTime, whyNotADraft } from './draftBody'
 import {
   LOG_TAG,
   LOOPBACK_HOST,
@@ -5,9 +6,10 @@ import {
   createBodyMiddleware,
   isSameMachineRequest,
 } from './httpEndpoint'
+import { handleSnapshotRequest, snapshotPath } from './snapshotEndpoint'
 import { YEAR_DIGITS } from './yearWritePlan'
 
-import type { DiskFolder } from './diskFolder'
+import type { DiskFolder, SnapshotFolder } from './diskFolder'
 import type { BodyStream, EndpointRequest, EndpointResponse, ResponseSink } from './httpEndpoint'
 
 /**
@@ -21,6 +23,8 @@ import type { BodyStream, EndpointRequest, EndpointResponse, ResponseSink } from
  * | `DELETE /__drafts/<year>` | remove it — after a save, it holds nothing the year does not |
  * | `POST /__drafts/<year>/set-aside` | keep it under a dated name, out of the way of the next one |
  * | `POST /__drafts/<year>/snapshot` | keep the body as an hourly snapshot, under a dated name (rung 2a) |
+ * | `GET /__drafts/<year>/snapshots` | the year's snapshots, newest first — `[{ name, takenAt }]` (rung 2b) |
+ * | `GET /__drafts/<year>/snapshots/<name>` | one snapshot, byte for byte (rung 2b) |
  *
  * **Not in `public/`.** The drafts live in `packages/cartographer/.autosave/drafts/`, git-ignored: under
  * `public/years/` the dev server would serve them and every build would publish them.
@@ -45,8 +49,8 @@ export interface DraftFolder extends DiskFolder {
   remove: (relativePath: string) => void
 }
 
-/** `/1100`, `/1100/set-aside` or `/1100/snapshot`. */
-const DRAFT_PATH = new RegExp(`^/(${YEAR_DIGITS})(/set-aside|/snapshot)?$`)
+/** `/1100` or `/1100/set-aside`. */
+const DRAFT_PATH = new RegExp(`^/(${YEAR_DIGITS})(/set-aside)?$`)
 
 /**
  * Refuse, saying why, and log it.
@@ -67,73 +71,6 @@ function refuse(status: number, reason: string): EndpointResponse {
  */
 export function setAsideName(year: string, at: Date): string {
   return `${year}.set-aside-${fileTime(at)}.json`
-}
-
-/**
- * A time as it goes into a file name — sortable, and safe on every disk (no colon).
- * @param at - the time
- * @returns e.g. `2026-10-17T15-42-07Z`
- */
-function fileTime(at: Date): string {
-  return at
-    .toISOString()
-    .replace(/\.\d{3}Z$/, 'Z')
-    .replaceAll(':', '-')
-}
-
-/**
- * The file name an hourly snapshot takes (CARTO-238, rung 2a).
- * @param year - its year
- * @param at - when it was taken
- * @returns e.g. `1100.2026-10-18T15-01-02Z.json`
- */
-export function snapshotName(year: string, at: Date): string {
-  return `${year}.${fileTime(at)}.json`
-}
-
-/**
- * `POST /<year>/snapshot`: keep the body as a snapshot — every one is kept, under its own name (the dev,
- * 2026-10-18).
- * @param request - the request
- * @param year - the year in the path
- * @param snapshots - where the snapshots live
- * @param now - the clock
- * @returns the response
- */
-function keepSnapshot(
-  request: EndpointRequest,
-  year: string,
-  snapshots: DiskFolder,
-  now: () => Date
-): EndpointResponse {
-  if (request.method !== 'POST') return refuse(405, 'a snapshot is kept with POST')
-  const refusal = whyNotADraft(request.body, year)
-  if (refusal !== null) return refuse(400, refusal)
-  const name = snapshotName(year, now())
-  // Beside the target first, then renamed: a write cut short leaves no half snapshot under its name.
-  snapshots.write(`${name}.tmp`, request.body)
-  snapshots.rename(`${name}.tmp`, name)
-  return answer(200, { year: Number(year), snapshot: name })
-}
-
-/**
- * Whether a body is a draft of that year: JSON, an object, whose `year` is the year of the path.
- * @param body - the request's body
- * @param year - the year in the path
- * @returns the reason it is not, or `null`
- */
-function whyNotADraft(body: string, year: string): string | null {
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(body)
-  } catch {
-    return 'the draft is not JSON'
-  }
-  if (parsed === null || typeof parsed !== 'object' || !('year' in parsed))
-    return 'the draft does not say its year'
-  if (String(parsed.year) !== year)
-    return `the draft is of year ${String(parsed.year)}, not ${year}`
-  return null
 }
 
 /**
@@ -214,16 +151,18 @@ function onDraft(request: EndpointRequest, year: string, folder: DraftFolder): E
 export function handleDraftRequest(
   request: EndpointRequest,
   folder: DraftFolder,
-  snapshots: DiskFolder,
+  snapshots: SnapshotFolder,
   now: () => Date
 ): EndpointResponse {
   if (!isFromHere(request))
     return refuse(403, 'only the Cartographer served by this machine may keep drafts')
+  // A snapshot path is the snapshot endpoint's, behind the same lock (`snapshotEndpoint.ts`).
+  const snapshot = snapshotPath(request.path)
+  if (snapshot !== null) return handleSnapshotRequest(request, snapshot, snapshots, now)
   const match = DRAFT_PATH.exec(request.path ?? '')
   if (match === null)
     return refuse(404, `"${String(request.path)}" is not a draft — expected /<year>`)
   const year = match[1] ?? ''
-  if (match[2] === '/snapshot') return keepSnapshot(request, year, snapshots, now)
   return match[2] === undefined
     ? onDraft(request, year, folder)
     : setAside(request, year, folder, now)
@@ -238,7 +177,7 @@ export function handleDraftRequest(
  */
 export function createDraftMiddleware(
   folder: DraftFolder,
-  snapshots: DiskFolder,
+  snapshots: SnapshotFolder,
   now: () => Date
 ): (req: BodyStream, res: ResponseSink) => void {
   return createBodyMiddleware({

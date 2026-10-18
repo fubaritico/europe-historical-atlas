@@ -1,4 +1,4 @@
-import type { YearFolder } from './diskFolder'
+import type { SnapshotFolder, YearFolder } from './diskFolder'
 import type { DraftFolder } from './draftEndpoint'
 
 /**
@@ -102,6 +102,38 @@ export function createYearsFolderOnDisk(root: string, disk: DiskCalls): YearFold
       } catch (error: unknown) {
         // Absent, as for a read: the caller is told there is no such file. Anything else is thrown on.
         if (isMissingFile(error)) return null
+        throw error
+      }
+    },
+  }
+}
+
+/** The disk calls the snapshots folder needs: the year folder's, plus listing one (rung 2b). */
+export interface SnapshotDiskCalls extends DiskCalls {
+  /**
+   * The names of the entries of a folder.
+   * @param path - an absolute path
+   * @returns the names
+   * @throws an error carrying `code: 'ENOENT'` when there is no such folder
+   */
+  listFolder: (path: string) => string[]
+}
+
+/**
+ * Build the snapshots folder over a root and the disk calls — the year folder's behaviour, plus listing.
+ * @param root - the absolute path of `.autosave/snapshots/`
+ * @param disk - the file-system calls
+ * @returns the folder
+ */
+export function createSnapshotFolderOnDisk(root: string, disk: SnapshotDiskCalls): SnapshotFolder {
+  return {
+    ...createYearsFolderOnDisk(root, disk),
+    list: () => {
+      try {
+        return disk.listFolder(root.replace(/\/$/, ''))
+      } catch (error: unknown) {
+        // No folder yet means no snapshot yet — the first is kept an hour into drawing. Anything else is thrown on.
+        if (isMissingFile(error)) return []
         throw error
       }
     },

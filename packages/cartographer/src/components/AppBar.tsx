@@ -23,6 +23,8 @@ export interface AppBarProps {
   year: number
   /** Save the open year — what ‹ctrl+S› does. */
   onSave: () => void
+  /** Open the *Open snapshot* dialogue (CARTO-238, rung 2b). */
+  onOpenSnapshot: () => void
 }
 
 /**
@@ -31,9 +33,10 @@ export interface AppBarProps {
  * @param props.name - the application's name
  * @param props.year - the open year
  * @param props.onSave - save the open year
+ * @param props.onOpenSnapshot - open the snapshot dialogue
  * @returns the brand and the actions, the two ends of the bar
  */
-export function AppBar({ name, year, onSave }: AppBarProps) {
+export function AppBar({ name, year, onSave, onOpenSnapshot }: AppBarProps) {
   // Render
   return (
     <>
@@ -47,6 +50,11 @@ export function AppBar({ name, year, onSave }: AppBarProps) {
       </div>
       <div className="bar-actions">
         <BarButton label="Open…" unavailable="not built yet (s01)" />
+        <BarButton
+          label="Open snapshot…"
+          onPress={onOpenSnapshot}
+          hint="Open a snapshot of the year, kept every hour of drawing"
+        />
         <BarButton label="Save" onPress={onSave} hint="Save the year (⌘S / ctrl+S)" />
         <BarButton label="Save as…" unavailable="not built yet (s04, s05)" />
         <BarButton label="Registry" unavailable="not built yet (s07)" />

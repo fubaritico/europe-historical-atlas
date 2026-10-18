@@ -247,6 +247,33 @@
   font-size: 12px;
   line-height: 18px;
 }
+
+/* *Open snapshot* (CARTO-238, rung 2b): the list under the warning, one snapshot per line, and the line that
+   says why there is none — the dialogue's own type, not the browser's. */
+.snapshot-list {
+  display: grid;
+  gap: 4px;
+  margin: 12px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.snapshot-list__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.snapshot-list__note {
+  margin: 12px 0 0;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 18px;
+}
 /*
  * `{Polities}`' list, after `design/01`: a subhead naming the year and the count, then one 24px row per
  * polity — its swatch, its name, the *"no territory"* chip, its rank and dates. The target is the

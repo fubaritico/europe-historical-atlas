@@ -19,6 +19,8 @@ export interface AppBarPanelProps {
   name: string
   /** Save the open year — the same call as ‹ctrl+S›, from the composition root. */
   onSave: () => void
+  /** Open the *Open snapshot* dialogue. */
+  onOpenSnapshot: () => void
 }
 
 /**
@@ -27,14 +29,15 @@ export interface AppBarPanelProps {
  * @param props.store - the store
  * @param props.name - the application's name
  * @param props.onSave - save the open year
+ * @param props.onOpenSnapshot - open the snapshot dialogue
  * @returns the top bar
  */
-export function AppBarPanel({ store, name, onSave }: AppBarPanelProps) {
+export function AppBarPanel({ store, name, onSave, onOpenSnapshot }: AppBarPanelProps) {
   // Store
   const year = store((state) => state.document.year)
 
   // Render
-  return <AppBar name={name} year={year} onSave={onSave} />
+  return <AppBar name={name} year={year} onSave={onSave} onOpenSnapshot={onOpenSnapshot} />
 }
 
 /** What the document bar's binding needs. */

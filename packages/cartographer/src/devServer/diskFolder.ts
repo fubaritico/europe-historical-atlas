@@ -27,6 +27,15 @@ export interface DiskFolder {
   rename: (fromPath: string, toPath: string) => void
 }
 
+/** The snapshots folder: a disk folder that can also list its files (CARTO-238, rung 2b). */
+export interface SnapshotFolder extends DiskFolder {
+  /**
+   * The names of the files in the folder.
+   * @returns the names, in no particular order — none when the folder does not exist yet
+   */
+  list: () => string[]
+}
+
 /** The years folder: a disk folder that can also say when a file was last written (CARTO-238, rung 3). */
 export interface YearFolder extends DiskFolder {
   /**

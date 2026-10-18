@@ -1,12 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import {
-  createDraftMiddleware,
-  handleDraftRequest,
-  setAsideName,
-  snapshotName,
-} from './draftEndpoint'
+import { createDraftMiddleware, handleDraftRequest, setAsideName } from './draftEndpoint'
+import { snapshotName } from './snapshotEndpoint'
 
+import type { SnapshotFolder } from './diskFolder'
 import type { DraftFolder } from './draftEndpoint'
 import type { BodyStream, EndpointRequest, ResponseSink } from './httpEndpoint'
 
@@ -20,12 +17,17 @@ const DRAFT = JSON.stringify({
   files: { any: 'thing' },
 })
 
-/** A drafts folder in memory, recording every change in order. */
+/** A drafts or snapshots folder in memory, recording every change in order — and every read apart. */
 function memoryFolder(initial: Record<string, string> = {}) {
   const files = new Map(Object.entries(initial))
   const log: string[] = []
-  const folder: DraftFolder = {
-    read: (path) => files.get(path) ?? null,
+  const reads: string[] = []
+  const folder: DraftFolder & SnapshotFolder = {
+    read: (path) => {
+      reads.push(path)
+      return files.get(path) ?? null
+    },
+    list: () => [...files.keys()],
     write: (path, text) => {
       log.push(`write ${path}`)
       files.set(path, text)
@@ -42,7 +44,7 @@ function memoryFolder(initial: Record<string, string> = {}) {
       files.delete(path)
     },
   }
-  return { folder, files, log }
+  return { folder, files, log, reads }
 }
 
 /** A request from the page this server served. */
@@ -61,7 +63,7 @@ function request(overrides: Partial<EndpointRequest> = {}): EndpointRequest {
 function answer(
   req: EndpointRequest,
   folder: DraftFolder,
-  snapshots: DraftFolder = memoryFolder().folder
+  snapshots: SnapshotFolder = memoryFolder().folder
 ) {
   const response = handleDraftRequest(req, folder, snapshots, () => NOW)
   return { status: response.status, body: JSON.parse(response.body) as unknown }
@@ -413,6 +415,237 @@ describe('handleDraftRequest, the hourly snapshot (CARTO-238, rung 2a)', () => {
         snapshotName('1100', NOW),
         snapshotName('1100', later),
       ])
+    })
+  })
+})
+
+/** The snapshots folder of most listing tests: three of 1100, out of order, among files that are not. */
+const SNAPSHOT_FILES: Record<string, string> = {
+  '1100.2026-10-18T14-00-00Z.json': 'snapshot of 14:00',
+  '1100.2026-10-18T15-01-02Z.json': 'snapshot of 15:01',
+  '1100.2026-10-18T09-30-00Z.json': 'snapshot of 09:30',
+  '1100.2026-10-18T16-00-00Z.json.tmp': 'a write cut short',
+  '1200.2026-10-18T15-00-00Z.json': 'snapshot of another year',
+  '11000.2026-10-18T15-00-00Z.json': 'snapshot of a year that starts like it',
+  '1100.set-aside-2026-10-17T15-42-07Z.json': 'a set-aside draft',
+  '1100.json': 'a draft',
+  'notes.txt': 'a foreign file',
+}
+
+/** A read of the snapshots, as the page sends it — a GET, so no `Origin`. */
+const snapshotsRead = (path: string, overrides: Partial<EndpointRequest> = {}): EndpointRequest =>
+  request({ method: 'GET', path, origin: undefined, body: '', ...overrides })
+
+/** Answer a request over a snapshots folder, the drafts folder empty. */
+function answerSnapshots(req: EndpointRequest, snapshots: SnapshotFolder) {
+  return handleDraftRequest(req, memoryFolder().folder, snapshots, () => NOW)
+}
+
+describe('handleDraftRequest, reading the snapshots back (CARTO-238, rung 2b)', () => {
+  describe('happy path', () => {
+    it('lists only the snapshots of 1100, newest first, each with its time as ISO', () => {
+      const snapshots = memoryFolder(SNAPSHOT_FILES)
+
+      const response = answer(
+        snapshotsRead('/1100/snapshots'),
+        memoryFolder().folder,
+        snapshots.folder
+      )
+
+      expect(response).toEqual({
+        status: 200,
+        body: {
+          year: 1100,
+          snapshots: [
+            { name: '1100.2026-10-18T15-01-02Z.json', takenAt: '2026-10-18T15:01:02Z' },
+            { name: '1100.2026-10-18T14-00-00Z.json', takenAt: '2026-10-18T14:00:00Z' },
+            { name: '1100.2026-10-18T09-30-00Z.json', takenAt: '2026-10-18T09:30:00Z' },
+          ],
+        },
+      })
+    })
+
+    it('answers GET /1100/snapshots/<name> with the snapshot, byte for byte', () => {
+      const snapshots = memoryFolder({ '1100.2026-10-18T15-01-02Z.json': DRAFT })
+
+      const response = answerSnapshots(
+        snapshotsRead('/1100/snapshots/1100.2026-10-18T15-01-02Z.json'),
+        snapshots.folder
+      )
+
+      expect(response).toEqual({ status: 200, body: DRAFT })
+      expect(snapshots.reads).toEqual(['1100.2026-10-18T15-01-02Z.json'])
+    })
+  })
+
+  describe('variants', () => {
+    it('answers an empty list when no snapshot of 1100 was kept', () => {
+      const snapshots = memoryFolder({ '1200.2026-10-18T15-00-00Z.json': 'another year' })
+
+      expect(
+        answer(snapshotsRead('/1100/snapshots'), memoryFolder().folder, snapshots.folder)
+      ).toEqual({ status: 200, body: { year: 1100, snapshots: [] } })
+    })
+
+    it('lists the snapshots of a year before Christ', () => {
+      const snapshots = memoryFolder({ '-44.2026-10-18T15-00-00Z.json': 'snapshot' })
+
+      expect(
+        answer(snapshotsRead('/-44/snapshots'), memoryFolder().folder, snapshots.folder).body
+      ).toEqual({
+        year: -44,
+        snapshots: [{ name: '-44.2026-10-18T15-00-00Z.json', takenAt: '2026-10-18T15:00:00Z' }],
+      })
+    })
+
+    it('serves a GET from a loopback Host whatever its Origin — no CORS header lets another site read it', () => {
+      const snapshots = memoryFolder(SNAPSHOT_FILES)
+
+      const response = answerSnapshots(
+        snapshotsRead('/1100/snapshots', { origin: 'https://evil.example' }),
+        snapshots.folder
+      )
+
+      expect(response.status).toBe(200)
+      expect(Object.keys(response).sort()).toEqual(['body', 'status'])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('refuses a snapshot of another year asked under 1100 with 404, reading nothing', () => {
+      const snapshots = memoryFolder(SNAPSHOT_FILES)
+
+      const response = answer(
+        snapshotsRead('/1100/snapshots/1200.2026-10-18T15-00-00Z.json'),
+        memoryFolder().folder,
+        snapshots.folder
+      )
+
+      expect(response).toEqual({
+        status: 404,
+        body: { reason: '"1200.2026-10-18T15-00-00Z.json" is not a snapshot of 1100' },
+      })
+      expect(snapshots.reads).toEqual([])
+    })
+
+    it.each([
+      '1100.json',
+      '1100.set-aside-2026-10-17T15-42-07Z.json',
+      '1100.2026-10-18T16-00-00Z.json.tmp',
+      'notes.txt',
+    ])('refuses the name %s, which is no snapshot, with 404, reading nothing', (name) => {
+      const snapshots = memoryFolder(SNAPSHOT_FILES)
+
+      const response = answerSnapshots(snapshotsRead(`/1100/snapshots/${name}`), snapshots.folder)
+
+      expect(response.status).toBe(404)
+      expect(snapshots.reads).toEqual([])
+    })
+
+    it('answers an absent snapshot of 1100 with 404, saying which', () => {
+      const snapshots = memoryFolder()
+
+      const response = answer(
+        snapshotsRead('/1100/snapshots/1100.2026-10-18T15-01-02Z.json'),
+        memoryFolder().folder,
+        snapshots.folder
+      )
+
+      expect(response).toEqual({
+        status: 404,
+        body: { reason: 'there is no snapshot "1100.2026-10-18T15-01-02Z.json" of 1100' },
+      })
+    })
+
+    it.each(['POST', 'PUT'])('refuses a %s on the listing with 405, writing nothing', (method) => {
+      const snapshots = memoryFolder(SNAPSHOT_FILES)
+
+      const response = answer(
+        request({ method, path: '/1100/snapshots' }),
+        memoryFolder().folder,
+        snapshots.folder
+      )
+
+      expect(response).toEqual({ status: 405, body: { reason: 'snapshots are read with GET' } })
+      expect(snapshots.log).toEqual([])
+    })
+
+    it('refuses a write on the listing from another origin with 403', () => {
+      const snapshots = memoryFolder(SNAPSHOT_FILES)
+
+      const response = answer(
+        request({ method: 'POST', path: '/1100/snapshots', origin: 'https://evil.example' }),
+        memoryFolder().folder,
+        snapshots.folder
+      )
+
+      expect(response.status).toBe(403)
+      expect(snapshots.log).toEqual([])
+    })
+
+    it('refuses a read of the list whose Host is not a loopback name, listing nothing', () => {
+      const snapshots = memoryFolder(SNAPSHOT_FILES)
+      const list = vi.spyOn(snapshots.folder, 'list')
+
+      const response = answerSnapshots(
+        snapshotsRead('/1100/snapshots', { host: 'evil.example:5173' }),
+        snapshots.folder
+      )
+
+      expect(response.status).toBe(403)
+      expect(list).not.toHaveBeenCalled()
+    })
+
+    it('logs a refused snapshot name as a warning', () => {
+      answerSnapshots(
+        snapshotsRead('/1100/snapshots/notes.txt'),
+        memoryFolder(SNAPSHOT_FILES).folder
+      )
+
+      expect(console.warn).toHaveBeenCalledWith(
+        '[Cartographer dev server] refused a snapshot request: "notes.txt" is not a snapshot of 1100'
+      )
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('lets a failing listing throw, for the middleware to answer 500', () => {
+      const snapshots = memoryFolder()
+      snapshots.folder.list = () => {
+        throw Object.assign(new Error('denied'), { code: 'EACCES' })
+      }
+
+      expect(() => answerSnapshots(snapshotsRead('/1100/snapshots'), snapshots.folder)).toThrow(
+        'denied'
+      )
+    })
+  })
+
+  describe('edge cases', () => {
+    it.each([
+      '/1100/snapshots/..%2F..%2Fyears%2F1100%2Fpolities.json',
+      '/1100/snapshots/../years',
+      '/1100/snapshots/..',
+      '/1100/snapshots/1100.2026-10-18T15-01-02Z.json/..',
+    ])('refuses the path-like request %s with 404, reading nothing', (path) => {
+      const snapshots = memoryFolder(SNAPSHOT_FILES)
+
+      const response = answerSnapshots(snapshotsRead(path), snapshots.folder)
+
+      expect(response.status).toBe(404)
+      expect(snapshots.reads).toEqual([])
+    })
+
+    it('refuses a name whose time is not one a snapshot is named by', () => {
+      const snapshots = memoryFolder({ '1100.2026-10-18T15:01:02Z.json': 'colons' })
+
+      const response = answerSnapshots(
+        snapshotsRead('/1100/snapshots/1100.2026-10-18T15:01:02Z.json'),
+        snapshots.folder
+      )
+
+      expect(response.status).toBe(404)
+      expect(snapshots.reads).toEqual([])
     })
   })
 })

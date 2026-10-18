@@ -58,6 +58,59 @@ export interface SnapshotSink {
   snapshot: (draft: Draft) => Promise<void>
 }
 
+/** One kept snapshot, as the list offers it. */
+export interface SnapshotEntry {
+  /** Its name, to ask for it. */
+  name: string
+  /** When it was taken, as an ISO string. */
+  takenAt: string
+}
+
+/** Where the snapshots are read back from (CARTO-238, rung 2b). */
+export interface SnapshotSource {
+  /**
+   * The snapshots of a year, newest first.
+   * @param year - the year
+   * @returns the list, empty when none was kept
+   */
+  listSnapshots: (year: number) => Promise<SnapshotEntry[]>
+  /**
+   * One snapshot, read as a draft — checked when it is opened, by the readers a year goes through.
+   * @param year - the year
+   * @param name - its name, from the list
+   * @returns the snapshot
+   */
+  readSnapshot: (year: number, name: string) => Promise<Draft>
+}
+
+/**
+ * Read the snapshot list a server answered, refusing what is not one.
+ * @param value - the parsed body
+ * @param year - the year asked for
+ * @returns the entries
+ * @throws an `Error` saying the answer is not a list of snapshots
+ */
+function readSnapshotList(value: unknown, year: number): SnapshotEntry[] {
+  const list =
+    value !== null && typeof value === 'object' && 'snapshots' in value
+      ? value.snapshots
+      : undefined
+  if (
+    !Array.isArray(list) ||
+    !list.every(
+      (entry: unknown) =>
+        entry !== null &&
+        typeof entry === 'object' &&
+        'name' in entry &&
+        'takenAt' in entry &&
+        typeof entry.name === 'string' &&
+        typeof entry.takenAt === 'string'
+    )
+  )
+    throw new Error(`the snapshots of ${String(year)} could not be read — the answer is not a list`)
+  return (list as SnapshotEntry[]).map(({ name, takenAt }) => ({ name, takenAt }))
+}
+
 /** What the dev-server draft store needs. */
 export interface DevServerDraftStoreDeps {
   /** The fetch to use — the window's in the application, a stub in tests. */
@@ -97,7 +150,7 @@ function readDraft(value: unknown, year: number): Draft {
  */
 export function createDevServerDraftStore(
   deps: DevServerDraftStoreDeps
-): DraftStore & SnapshotSink {
+): DraftStore & SnapshotSink & SnapshotSource {
   const at = (year: number, suffix = ''): string => `${deps.route}/${String(year)}${suffix}`
   const send = async (url: string, init: RequestInit): Promise<Response> => {
     const response = await deps.fetch(url, init)
@@ -125,6 +178,18 @@ export function createDevServerDraftStore(
     },
     setAside: async (year) => {
       await send(at(year, '/set-aside'), { method: 'POST' })
+    },
+    listSnapshots: async (year) => {
+      const response = await deps.fetch(at(year, '/snapshots'), { cache: 'no-store' })
+      if (!response.ok) throw new Error(await refusalReason(response))
+      return readSnapshotList(await response.json(), year)
+    },
+    readSnapshot: async (year, name) => {
+      const response = await deps.fetch(at(year, `/snapshots/${encodeURIComponent(name)}`), {
+        cache: 'no-store',
+      })
+      if (!response.ok) throw new Error(await refusalReason(response))
+      return readDraft(await response.json(), year)
     },
     snapshot: async (draft) => {
       await send(at(draft.year, '/snapshot'), {

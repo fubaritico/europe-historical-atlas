@@ -143,6 +143,44 @@ Scenario: a snapshot that cannot be kept is said, and the drawing goes on
   And the draft itself is kept as before, and the next snapshot is tried an hour later
 ```
 
+## Rung 2b — open a snapshot (2026-10-18)
+
+> **The dev's words, 2026-10-18**: the button is *"Open snapshot"*, the dialogue's action *"Open"*, and *« un
+> warning qui dit qu'à l'ouverture, ça va écraser le travail, mais qu'une copie … a été faite avant l'ouverture …
+> il faut communiquer »* — then: *« tu n'as pas besoin de dire où il est sauvé … tu dis qu'un truc est possible …
+> du point de vue utilisateur »*: what can be done, never where a file lies. Opening resets the page's undo line, so the page is **kept as a snapshot
+> first**; without that copy, nothing opens. A gesture made while the page is being kept refuses the opening
+> too — it would be in no copy (review, 2026-10-18). **Times to the second** (the dev, after trying it,
+> 2026-10-18: two copies of one minute could not be told apart); the draft's and the overwrite's dialogues keep
+> the minute. **Walked by the dev, 2026-10-18**: *« testé, ça marche bien »*, on three test snapshots.
+
+```gherkin
+Scenario: open a snapshot
+  Given 1100 is open and snapshots of it were kept today at 14:00 and 15:00
+  When I press [Open snapshot…]
+  Then a dialogue lists them, the newest first, to the second: "today at 15:00:00", "today at 14:00:00"
+  And it warns: "Opening a snapshot replaces the page you are working on. Your page is kept first as a snapshot: you will find it in this list."
+  When I choose "today at 14:00:00" and press [Open]
+  Then the page is kept first as a snapshot, then the snapshot of 14:00 is open
+  And the status bar reads "opened the snapshot of today at 14:00:00 — your page was kept first, in the snapshots"
+  And the disk's year is untouched until I press ‹ctrl+S›
+
+Scenario: cancel
+  When I press [Cancel], or ‹escape›
+  Then nothing is kept, nothing is opened
+
+Scenario: no copy, no opening
+  Given the page cannot be kept as a snapshot (the dev server refuses)
+  When I press [Open]
+  Then the page stays as it is, nothing is opened
+  And the status bar reads "not opened — your page could not be kept first (<reason>)"
+
+Scenario: no snapshot yet
+  Given no snapshot of 1100 was ever kept
+  When I press [Open snapshot…]
+  Then the dialogue says "No snapshot of 1100 yet — one is kept every hour of drawing." and [Open] is unavailable
+```
+
 ## Not built yet — the rungs that follow (CARTO-238's checklist)
 
 > **Decided with the dev, 2026-10-18** — the order: rung 3 first (the loss that really happened, twice), then

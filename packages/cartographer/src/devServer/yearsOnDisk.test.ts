@@ -1,8 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { createDraftFolderOnDisk, createYearsFolderOnDisk } from './yearsOnDisk'
+import {
+  createDraftFolderOnDisk,
+  createSnapshotFolderOnDisk,
+  createYearsFolderOnDisk,
+} from './yearsOnDisk'
 
-import type { DiskCalls } from './yearsOnDisk'
+import type { DiskCalls, SnapshotDiskCalls } from './yearsOnDisk'
 
 /** An error shaped like Node's, carrying its `code`. */
 function nodeError(code: string): Error {
@@ -177,5 +181,92 @@ describe('createDraftFolderOnDisk', () => {
 
     expect(folder.read('1100.json')).toBe('draft')
     expect(written).toEqual(['/repo/.autosave/drafts/1100.json.tmp'])
+  })
+})
+
+/** Snapshot disk calls: the recording ones, plus a listing that answers as `listFolder` does and records its path. */
+function snapshotDisk(listFolder: SnapshotDiskCalls['listFolder'] = () => ['a.json']) {
+  const { calls, log } = disk()
+  const listed: string[] = []
+  const snapshotCalls: SnapshotDiskCalls = {
+    ...calls,
+    listFolder: (path) => {
+      listed.push(path)
+      return listFolder(path)
+    },
+  }
+  return { calls: snapshotCalls, log, listed }
+}
+
+describe('createSnapshotFolderOnDisk', () => {
+  describe('happy path', () => {
+    it('lists the names the disk gives for its root', () => {
+      const { calls, listed } = snapshotDisk(() => [
+        '1100.2026-10-18T14-00-00Z.json',
+        '1100.2026-10-18T15-01-02Z.json',
+      ])
+
+      expect(createSnapshotFolderOnDisk('/repo/.autosave/snapshots', calls).list()).toEqual([
+        '1100.2026-10-18T14-00-00Z.json',
+        '1100.2026-10-18T15-01-02Z.json',
+      ])
+      expect(listed).toEqual(['/repo/.autosave/snapshots'])
+    })
+
+    it('reads, writes and renames under its root as the year folder does', () => {
+      const { calls, log } = snapshotDisk()
+      const folder = createSnapshotFolderOnDisk('/repo/.autosave/snapshots', calls)
+
+      expect(folder.read('a.json')).toBe('text')
+      folder.write('b.json.tmp', '{}')
+      folder.rename('b.json.tmp', 'b.json')
+
+      expect(log).toEqual([
+        'read /repo/.autosave/snapshots/a.json',
+        'mkdir /repo/.autosave/snapshots',
+        'write /repo/.autosave/snapshots/b.json.tmp',
+        'rename /repo/.autosave/snapshots/b.json.tmp → /repo/.autosave/snapshots/b.json',
+      ])
+    })
+  })
+
+  describe('variants', () => {
+    it('lists its root without the trailing slash it was given with', () => {
+      const { calls, listed } = snapshotDisk()
+
+      createSnapshotFolderOnDisk('/repo/.autosave/snapshots/', calls).list()
+
+      expect(listed).toEqual(['/repo/.autosave/snapshots'])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('lists no name when the folder does not exist yet', () => {
+      const { calls } = snapshotDisk(() => {
+        throw nodeError('ENOENT')
+      })
+
+      expect(createSnapshotFolderOnDisk('/repo/.autosave/snapshots', calls).list()).toEqual([])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('throws any other listing failure on, rather than reading it as no snapshot', () => {
+      const { calls } = snapshotDisk(() => {
+        throw nodeError('EACCES')
+      })
+
+      expect(() => createSnapshotFolderOnDisk('/repo/.autosave/snapshots', calls).list()).toThrow(
+        'EACCES'
+      )
+    })
+  })
+
+  describe('edge cases', () => {
+    it('lists an empty folder as no name', () => {
+      const { calls } = snapshotDisk(() => [])
+
+      expect(createSnapshotFolderOnDisk('/repo/.autosave/snapshots', calls).list()).toEqual([])
+    })
   })
 })

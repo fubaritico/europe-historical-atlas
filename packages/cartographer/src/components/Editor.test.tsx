@@ -57,6 +57,7 @@ function mount(results = createResultRelay()): void {
       heading={<h1>Cartographer — year 1100</h1>}
       name="Europe Historical Atlas Cartographer"
       onSave={() => undefined}
+      onOpenSnapshot={() => undefined}
       history={createHistoryRelay()}
       colours={COLOURS}
       results={results}

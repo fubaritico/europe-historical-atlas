@@ -1,17 +1,29 @@
-import { mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  renameSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 import { DRAFT_ROUTE, DRAFTS_FOLDER, SNAPSHOTS_FOLDER } from './src/devServer/draftRoute'
-import { createDraftFolderOnDisk, createYearsFolderOnDisk } from './src/devServer/yearsOnDisk'
+import {
+  createDraftFolderOnDisk,
+  createSnapshotFolderOnDisk,
+  createYearsFolderOnDisk,
+} from './src/devServer/yearsOnDisk'
 import { YEAR_WRITE_ROUTE } from './src/devServer/yearWriteRoute'
 
 import type { DraftFolder } from './src/devServer/draftEndpoint'
 import type * as DraftEndpoint from './src/devServer/draftEndpoint'
 import type { BodyStream, ResponseSink } from './src/devServer/httpEndpoint'
-import type { YearFolder } from './src/devServer/diskFolder'
+import type { SnapshotFolder, YearFolder } from './src/devServer/diskFolder'
 import type * as YearWriteEndpoint from './src/devServer/yearWriteEndpoint'
 import type { Plugin, ViteDevServer } from 'vite'
 
@@ -52,7 +64,10 @@ const yearsOnDisk: YearFolder = createYearsFolderOnDisk(YEARS_DIR, disk)
 const draftsOnDisk: DraftFolder = createDraftFolderOnDisk(DRAFTS_DIR, disk)
 
 /** The snapshots folder on the real disk. */
-const snapshotsOnDisk: YearFolder = createYearsFolderOnDisk(SNAPSHOTS_DIR, disk)
+const snapshotsOnDisk: SnapshotFolder = createSnapshotFolderOnDisk(SNAPSHOTS_DIR, {
+  ...disk,
+  listFolder: (path: string) => readdirSync(path),
+})
 
 /** The endpoints' modules, as `ssrLoadModule` hands them back. */
 type YearEndpointModule = typeof YearWriteEndpoint

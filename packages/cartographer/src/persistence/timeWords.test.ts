@@ -16,6 +16,13 @@ describe('timeWords', () => {
       expect(timeWords(new Date(2026, 9, 16, 23, 10).toISOString(), NOW)).toBe('yesterday at 23:10')
     })
 
+    // The snapshot list, where two copies of one minute must be told apart (the dev, 2026-10-18).
+    it('gives the seconds when asked', () => {
+      expect(timeWords(new Date(2026, 9, 17, 9, 5, 7).toISOString(), NOW, { seconds: true })).toBe(
+        'today at 09:05:07'
+      )
+    })
+
     it('gives the date for an older time', () => {
       expect(timeWords(new Date(2026, 9, 2, 8, 0).toISOString(), NOW)).toBe(
         'on 2 October 2026 at 08:00'

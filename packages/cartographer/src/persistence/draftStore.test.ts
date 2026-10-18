@@ -118,3 +118,133 @@ describe('createDevServerDraftStore', () => {
     })
   })
 })
+
+/** Two snapshots of 1100, newest first, as the endpoint lists them. */
+const SNAPSHOTS = [
+  { name: '1100.2026-10-18T15-00-00Z.json', takenAt: '2026-10-18T15:00:00Z' },
+  { name: '1100.2026-10-18T14-00-00Z.json', takenAt: '2026-10-18T14:00:00Z' },
+]
+
+describe('createDevServerDraftStore, reading the snapshots back (CARTO-238, rung 2b)', () => {
+  describe('happy path', () => {
+    it('GETs the list from /<year>/snapshots, bypassing any cache, and returns its entries', async () => {
+      const { fetch, calls } = stubFetch(200, { year: 1100, snapshots: SNAPSHOTS })
+
+      const listed = await createDevServerDraftStore({
+        fetch,
+        route: '/__drafts',
+      }).listSnapshots(1100)
+
+      expect(listed).toEqual(SNAPSHOTS)
+      expect(calls[0]?.url).toBe('/__drafts/1100/snapshots')
+      expect(calls[0]?.init?.method).toBeUndefined()
+      expect(calls[0]?.init?.cache).toBe('no-store')
+    })
+
+    it('GETs one snapshot by its name, bypassing any cache, and returns it as a draft', async () => {
+      const { fetch, calls } = stubFetch(200, DRAFT)
+
+      const snapshot = await createDevServerDraftStore({
+        fetch,
+        route: '/__drafts',
+      }).readSnapshot(1100, '1100.2026-10-18T14-00-00Z.json')
+
+      expect(snapshot).toEqual(DRAFT)
+      expect(calls[0]?.url).toBe('/__drafts/1100/snapshots/1100.2026-10-18T14-00-00Z.json')
+      expect(calls[0]?.init?.cache).toBe('no-store')
+    })
+  })
+
+  describe('variants', () => {
+    it('returns an empty list when no snapshot was kept', async () => {
+      const { fetch } = stubFetch(200, { year: 1100, snapshots: [] })
+
+      expect(
+        await createDevServerDraftStore({ fetch, route: '/__drafts' }).listSnapshots(1100)
+      ).toEqual([])
+    })
+
+    it('keeps only the name and the time of each entry', async () => {
+      const { fetch } = stubFetch(200, {
+        year: 1100,
+        snapshots: [{ ...SNAPSHOTS[0], size: 3_000_000 }],
+      })
+
+      expect(
+        await createDevServerDraftStore({ fetch, route: '/__drafts' }).listSnapshots(1100)
+      ).toEqual([SNAPSHOTS[0]])
+    })
+
+    it('encodes a name that holds a slash, so it stays one segment of the path', async () => {
+      const { fetch, calls } = stubFetch(200, DRAFT)
+
+      await createDevServerDraftStore({ fetch, route: '/__drafts' }).readSnapshot(
+        1100,
+        '../years/1100'
+      )
+
+      expect(calls[0]?.url).toBe('/__drafts/1100/snapshots/..%2Fyears%2F1100')
+    })
+  })
+
+  describe('managed errors', () => {
+    it('rejects the list with the reason the server gave', async () => {
+      const { fetch } = stubFetch(403, {
+        reason: 'only the Cartographer served by this machine may keep drafts',
+      })
+
+      await expect(
+        createDevServerDraftStore({ fetch, route: '/__drafts' }).listSnapshots(1100)
+      ).rejects.toThrow('only the Cartographer served by this machine may keep drafts')
+    })
+
+    it('rejects an absent snapshot with the reason the server gave, rather than answering null', async () => {
+      const { fetch } = stubFetch(404, {
+        reason: 'there is no snapshot "1100.2026-10-18T14-00-00Z.json" of 1100',
+      })
+
+      await expect(
+        createDevServerDraftStore({ fetch, route: '/__drafts' }).readSnapshot(
+          1100,
+          '1100.2026-10-18T14-00-00Z.json'
+        )
+      ).rejects.toThrow('there is no snapshot "1100.2026-10-18T14-00-00Z.json" of 1100')
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it.each([
+      ['no list at all', { year: 1100 }],
+      ['a list that is not an array', { year: 1100, snapshots: 'none' }],
+      ['an entry without its time', { year: 1100, snapshots: [{ name: 'a.json' }] }],
+      ['an entry whose name is not text', { year: 1100, snapshots: [{ name: 3, takenAt: 'x' }] }],
+      ['null', null],
+    ])('refuses an answer with %s, saying it is not a list', async (_case, body) => {
+      const { fetch } = stubFetch(200, body)
+
+      await expect(
+        createDevServerDraftStore({ fetch, route: '/__drafts' }).listSnapshots(1100)
+      ).rejects.toThrow('the snapshots of 1100 could not be read — the answer is not a list')
+    })
+
+    it('refuses a snapshot that is not a draft, naming what it lacks', async () => {
+      const { fetch } = stubFetch(200, { year: 1100 })
+
+      await expect(
+        createDevServerDraftStore({ fetch, route: '/__drafts' }).readSnapshot(1100, 'a.json')
+      ).rejects.toThrow(
+        'the draft of 1100 is not a draft — it lacks its year, its time or its files'
+      )
+    })
+  })
+
+  describe('edge cases', () => {
+    it('refuses a snapshot that says it is of another year', async () => {
+      const { fetch } = stubFetch(200, { ...DRAFT, year: 1200 })
+
+      await expect(
+        createDevServerDraftStore({ fetch, route: '/__drafts' }).readSnapshot(1100, 'a.json')
+      ).rejects.toThrow('the draft of 1100 says it is of year 1200')
+    })
+  })
+})

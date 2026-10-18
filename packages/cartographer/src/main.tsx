@@ -17,6 +17,8 @@ import { arrangeSelected } from './components/arrange'
 import { DraftRecoveryDialog } from './components/DraftRecoveryDialog'
 import { Editor } from './components/Editor'
 import { OverwriteDialog } from './components/OverwriteDialog'
+import { SnapshotDialog } from './components/SnapshotDialog'
+import { createSnapshotPicker } from './components/snapshotPicker'
 import { listenForStackingKeys } from './components/stackingShortcut'
 import { DRAFTS_FOLDER, DRAFT_ROUTE } from './devServer/draftRoute'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
@@ -28,6 +30,7 @@ import { createDevServerDraftStore } from './persistence/draftStore'
 import { createQuestionRelay } from './persistence/questionRelay'
 import { createResultRelay } from './persistence/resultRelay'
 import { installSaveShortcut } from './persistence/saveShortcut'
+import { openSnapshot } from './persistence/snapshotOpening'
 import { createDevServerYearArchive } from './persistence/yearArchive'
 import { createYearSession } from './persistence/yearSession'
 import { openEmptyYear } from './state/openEmptyYear'
@@ -40,6 +43,7 @@ import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataS
 // Every sheet, in order, through one module the workbench imports too — see `styles/sheets.ts`.
 import './styles/sheets'
 
+import type { SnapshotEntry } from './persistence/draftStore'
 import type { OverwriteQuestion } from './persistence/yearSession'
 import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
@@ -265,6 +269,18 @@ const handleSave = (): void => {
   })
 }
 installSaveShortcut(window, handleSave)
+
+/**
+ * *Open snapshot* (CARTO-238, rung 2b): the top bar's button opens the dialogue; opening keeps the page as a
+ * snapshot first, then replaces it (`persistence/snapshotOpening.ts`).
+ */
+const snapshotPicker = createSnapshotPicker()
+const handleOpenSnapshot = (entry: SnapshotEntry): void => {
+  void openSnapshot(
+    { store, snapshots: drafts, year: FIRST_YEAR, now: () => new Date(), report: results.say },
+    entry
+  )
+}
 // ‹cmd+↑ ↓›, with ‹shift› to the end: the selected polity up or down the stacking order, from anywhere.
 listenForStackingKeys(document, (move) => {
   arrangeSelected(store.getState(), move, results.say)
@@ -281,6 +297,7 @@ createRoot(container).render(
     <Editor
       name="Europe Historical Atlas Cartographer"
       onSave={handleSave}
+      onOpenSnapshot={snapshotPicker.open}
       history={history}
       heading={<h1 style={visuallyHidden}>Cartographer — year {store.getState().document.year}</h1>}
       store={store}
@@ -293,5 +310,12 @@ createRoot(container).render(
     />
     <DraftRecoveryDialog offers={draftOffers} />
     <OverwriteDialog questions={overwriteQuestions} />
+    <SnapshotDialog
+      picker={snapshotPicker}
+      source={drafts}
+      year={FIRST_YEAR}
+      now={() => new Date()}
+      onOpen={handleOpenSnapshot}
+    />
   </StrictMode>
 )
