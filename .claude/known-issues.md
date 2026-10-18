@@ -29,6 +29,16 @@ Put here the know issues to avoid cluttering the context window.
   ARCH-001 : la règle « une flèche modifiée ne fait ni défiler la carte ni bouger le curseur de la liste » est écrite à
   trois endroits (`controller.panFromKeys`, `PolityList`, `stackingShortcut`) ; à mettre en commun au prochain
   raccourci du même genre. **Sévérité : cosmétique.**
+- **Le lint demande Node ≥ 22.22.2 depuis le 18/10** : `eslint-plugin-jsdoc` 65 l'exige (`engines`). Node passé de
+  22.14 à **22.23.3** par nvm (`nvm alias default 22`, la 22.14 reste installée) ; `.nvmrc` dit `22`, donc la CI prend
+  la dernière 22. **Un terminal ou WebStorm ouvert avant la mise à jour garde la 22.14** — le relancer ; si WebStorm
+  pointe sur un interpréteur Node explicite, le changer dans ses réglages. Le plugin est en `~65.0.2` : une version a
+  au moins deux semaines avant d'entrer. **Sévérité : à savoir.**
+- **`main.test.tsx` a échoué une fois sur sept passages, sous charge, le 18/10** (Node 22.23.3, `turbo type-check test
+  --force` : huit tâches en parallèle). Seul, 3/3 ; la suite entière, 3/3 ; la même commande rejouée, 2/2. Son premier
+  test charge toute l'application (716 ms au repos) : un dépassement des 5 s de Vitest sous charge est probable, **non
+  prouvé** — le message n'a pas été capturé. Remède si ça revient : lire le message, puis un `timeout` plus large sur ce
+  seul test, en disant pourquoi. **Sévérité : à savoir.**
 - **Recreuser un vassal après coup est impossible depuis l'outil** — CARTO-189 (16/10). Le creusement ne tourne qu'à la fermeture
   d'un contour neuf (`addOutlineCarving`) ; un vassal dessiné avant, ou recouvert de nouveau par une retouche du
   suzerain, garde la couleur du suzerain par-dessus (la Champagne, la Frise : recreusées au script). Remède : un geste
