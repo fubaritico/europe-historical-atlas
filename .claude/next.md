@@ -27,7 +27,7 @@ En français, un élément du tableau est un **ticket**, jamais une « carte » 
 | **À valider par le développeur** | CARTO-233 Outils actifs trop tard au zoom | seuil 10 → 20 km dans `view/toolReach.ts` + note dans `s17`, **non commité** : le dev juge sur un très grand pays (Fatimides, Cordoue) |
 | **À valider par le développeur** | CARTO-116 Trier les copies de `years/1100*` | sa décision ; rien supprimé sans lui |
 | **À valider par le développeur** | CARTO-237 Ce qui reste d'Euratlas dans 1100 | il envoie une capture ; Duby et les cartes glanées restent des références (lire, pas décalquer) |
-| **En cours** | — | vide |
+| **En cours** | 9 tickets entamés (CARTO-121, 122, 195, 202, 206, 208, 238 · ATLAS-145, 152) | trouvés en partie faits par l'audit du 18/10 ; le dev les a passés en cours. Chaque ticket porte en commentaire « déjà fait / reste » |
 
 **Non commité, à ne pas embarquer** : `toolReach.ts` et `s17` (CARTO-233). Sa 1100 se commite **à sa demande**, à chaque
 fois qu'il le dit — trois fois le soir du 18/10.

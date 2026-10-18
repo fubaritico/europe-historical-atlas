@@ -46,15 +46,30 @@ export function writeAction(node: HTMLElement | null, sentence: string | null): 
 }
 
 /**
+ * A zero-width space, toggled at the end of a result written twice in a row: invisible, meant to be silent,
+ * and enough to make the text differ (CARTO-121). Written as an escape — the raw character would read as
+ * `''` and an editor could strip it unseen. Whether every screen reader re-reads on it is not measured here:
+ * jsdom has no live regions, so the tests assert the text change, and VoiceOver is the dev's check.
+ */
+export const REPEAT_MARK = '\u200B'
+
+/**
  * Write what a gesture did — *"inserted 412 vertices from the coastline"* — or clear it.
  *
  * Its own zone beside the action, so neither ever takes the other's place (`s02`).
+ *
+ * **The same message twice is still said twice.** The zone is the bar's one `role="status"`, and a live
+ * region whose text does not change may not be read again — the second ‹cmd+↑› on a polity already on top
+ * would be silent. So a repeat toggles {@link REPEAT_MARK} at its end: the text changes, the screen does not.
+ * Synchronous on purpose — clearing and rewriting after a delay is the usual remedy, and it would bring a
+ * timer and a race with the next message.
  * @param node - the result zone, or `null` before it is mounted
  * @param message - the result, or `null` to clear it
  */
 export function writeResult(node: HTMLElement | null, message: string | null): void {
   if (node === null) return
-  node.textContent = message ?? ''
+  const text = message ?? ''
+  node.textContent = text !== '' && node.textContent === text ? text + REPEAT_MARK : text
 }
 
 /**

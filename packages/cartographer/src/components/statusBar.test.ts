@@ -1,6 +1,83 @@
 import { describe, expect, it } from 'vitest'
 
-import { writeAction, writePosition } from './statusBar'
+import { REPEAT_MARK, writeAction, writePosition, writeResult } from './statusBar'
+
+describe('writeResult', () => {
+  describe('happy path', () => {
+    it('writes the result into its zone', () => {
+      const node = document.createElement('span')
+      writeResult(node, 'Bring to front — Duchy of Normandy')
+      expect(node.textContent).toBe('Bring to front — Duchy of Normandy')
+    })
+  })
+
+  describe('variants', () => {
+    // CARTO-121 — a live region whose text does not change may not be read again.
+    it('changes the text when the same result is written twice', () => {
+      const node = document.createElement('span')
+      writeResult(node, 'Bring to front — Duchy of Normandy: already in place')
+      writeResult(node, 'Bring to front — Duchy of Normandy: already in place')
+      expect(node.textContent).toBe(
+        `Bring to front — Duchy of Normandy: already in place${REPEAT_MARK}`
+      )
+    })
+
+    it('changes the text again on a third identical result', () => {
+      const node = document.createElement('span')
+      const seen: (string | null)[] = []
+      for (let i = 0; i < 3; i++) {
+        writeResult(node, 'Saved 1100')
+        seen.push(node.textContent)
+      }
+      expect(seen).toEqual(['Saved 1100', `Saved 1100${REPEAT_MARK}`, 'Saved 1100'])
+    })
+
+    it('marks with one zero-width space, never an empty string', () => {
+      expect(REPEAT_MARK).toBe(String.fromCodePoint(0x200b))
+    })
+
+    it('writes a different result without the mark', () => {
+      const node = document.createElement('span')
+      writeResult(node, 'Saved 1100')
+      writeResult(node, 'Saved 1100')
+      writeResult(node, 'Opened 1100')
+      expect(node.textContent).toBe('Opened 1100')
+    })
+
+    it('clears the zone', () => {
+      const node = document.createElement('span')
+      writeResult(node, 'Saved 1100')
+      writeResult(node, null)
+      expect(node.textContent).toBe('')
+    })
+  })
+
+  describe('managed errors', () => {
+    it('does nothing before the zone is mounted', () => {
+      expect(() => {
+        writeResult(null, 'Saved 1100')
+      }).not.toThrow()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('writes the result as text, never as markup', () => {
+      const node = document.createElement('span')
+      writeResult(node, '<b>x</b>')
+      writeResult(node, '<b>x</b>')
+      expect(node.children).toHaveLength(0)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('never marks an empty zone cleared twice', () => {
+      const node = document.createElement('span')
+      writeResult(node, null)
+      writeResult(node, null)
+      expect(node.textContent).toBe('')
+    })
+  })
+})
 
 describe('statusBar', () => {
   describe('happy path', () => {

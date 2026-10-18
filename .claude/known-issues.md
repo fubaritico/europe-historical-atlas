@@ -16,9 +16,10 @@ Put here the know issues to avoid cluttering the context window.
   sélectionner ou dessiner (seuil de `s17`, « les outils attendent le zoom ») — l'abaisser. (2) **‹P› et ‹A› ne
   répondent pas sur un pays neuf ou vide** : il faut cliquer l'outil dans la barre. **Le dev donnera le cas exact** ;
   le reproduire avant de toucher au code. **17/10** : (1) seuil passé à 20 km, non commité, le dev le jugera sur un très grand pays. **18/10** : (2) fermé — le dev : *« le P et le A s'activent bien maintenant au raccourci clavier »*, sans code écrit (CARTO-235, Fait). Reste (1). **Sévérité : gênant.**
-- **Les raccourcis d'empilement (16/10) laissent deux constats de revue ouverts, par ma décision.** — CARTO-121, CARTO-123 (1) A11Y-002 :
-  répéter la même commande réécrit le même message dans la barre d'état, et un lecteur d'écran peut ne pas le
-  relire — non vérifié, et ça touche toute la barre (`persistence/resultRelay.ts`), pas ce seul raccourci. (2)
+- **Les raccourcis d'empilement (16/10) laissent un constat de revue ouvert, par ma décision.** — CARTO-123 (1) ~~A11Y-002 :
+  le même message répété n'est pas relu~~ — **fait le 18/10** (CARTO-121) : `writeResult` alterne un espace sans
+  largeur sur une répétition ; pas d'essai au lecteur d'écran, par décision du dev (*« l'accessibilité pour la
+  politesse »* dans un outil de dessin). (2)
   ARCH-001 : la règle « une flèche modifiée ne fait ni défiler la carte ni bouger le curseur de la liste » est écrite à
   trois endroits (`controller.panFromKeys`, `PolityList`, `stackingShortcut`) ; à mettre en commun au prochain
   raccourci du même genre. **Sévérité : cosmétique.**
@@ -98,11 +99,9 @@ Put here the know issues to avoid cluttering the context window.
   toucherait les références. **Sévérité : à savoir.**
 - **La revue de fin de session du 11/10 a laissé ouvert, par décision de moi, ce qui suit — aucun n'est
   bloquant pour un éditeur à un seul auteur, tout est à reprendre avec l'étape 5.** — CARTO-121, CARTO-207
-  **Accessibilité** : (1) **la hiérarchie de l'arbre `{Polities}` n'est pas annoncée** — `aria-level`
-  est invalide sur `option` (ARIA 1.2), retiré ; le remède est un texte masqué *« vassal de X »* sur la
-  ligne, ou un vrai `tree` (autre modèle clavier). (2) **Le changement d'outil au clavier (‹A›, ‹P›
-  depuis un autre outil) et un déplacement dans la pile ne sont pas annoncés** — seul le mode de la
-  plume l'est, dans la zone résultat ; le remède est le même puits `onResult` pour les deux. (3)
+  **Accessibilité** : (1) ~~la hiérarchie de l'arbre `{Polities}` n'est pas annoncée~~ — **fait** (`1d2429c`) :
+  un texte masqué *« vassal of X »* sur la ligne (`PolityList.tsx`). (2) ~~le changement d'outil au clavier et
+  un déplacement dans la pile ne sont pas annoncés~~ — **fait** (`1d2429c`, `toolKeys.ts`, `arrange.ts`). (3)
   **Tracer au clavier est impossible** (plume et crayon), déjà connu pour l'étape 5 (*« the anchor
   list »*) ; le rail annonce pourtant ces outils. (4) Le groupe de la plume s'ouvre à ‹→›, sans
   `aria-keyshortcuts`. (5) Cibles de 24–30 px, densité Illustrator assumée. (6) **La poubelle désactivée ne dit pas pourquoi au clavier** (12/10,
@@ -122,10 +121,8 @@ Put here the know issues to avoid cluttering the context window.
   par couche (`canvas/snapLayers.ts`), la géométrie renommée `lineSnap`. (7)
   `paintRanks` est recalculé à chaque repeinture — ~50 pays, négligeable ; à mettre en cache par
   version si le document grossit. **Sévérité : à savoir.**
-- **Le menu d'empilement de `{Polities}` (11/10) a deux limites connues, laissées ouvertes.** — CARTO-122
-  (1) **Il peut déborder du bord de la fenêtre** : il s'ouvre au point du clic droit (ou sous la ligne
-  au clavier), sans se replier — un clic droit sur une des dernières lignes, dans une fenêtre basse,
-  coupe le bas du menu (≈ 100 px). Remède : le replier dans un effet de mise en page, une fois mesuré.
+- **Le menu d'empilement de `{Polities}` (11/10) a une limite connue, laissée ouverte.** — CARTO-122
+  (1) ~~Il peut déborder du bord de la fenêtre~~ — **fait** (`2c3acf8`, `view/menuPlacement.ts`) : il se replie.
   (2) **Il est annoncé comme une liste, pas comme un menu** : c'est le `Menu` du design system, qui rend
   un `role="listbox"` d'`option`. Le remède est au design system (un `role="menu"`), à demander à son
   Claude avec un menu contextuel positionné. **Une boucle d'hommage est refusée à la saisie depuis le 12/10**
