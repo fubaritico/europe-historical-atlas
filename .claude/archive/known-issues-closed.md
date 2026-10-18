@@ -279,3 +279,10 @@ Entries closed and moved out of `known-issues.md`. Kept for the lessons they car
   dit déjà d'elle (« la planche, nommée au-dessus de son cadre ») et ce que `s12` sépare.
   **Sévérité : bloquant si oublié, réglé si appliqué.** À relire au début de `4b`.
   **Fermé le 18/10** : la zone éditoriale est supprimée (décision du dev, `s12`) — il ne reste qu'une boîte, celle du fond.
+
+- **Deux gênes du Cartographe relevées par le dev le 16/10 au soir, à déboguer** — CARTO-233, CARTO-235 (*« ça fait peur pour l'expérience
+  utilisateur »*). (1) **Les outils s'activent trop tard au zoom** : il faut trop se rapprocher avant de pouvoir
+  sélectionner ou dessiner (seuil de `s17`, « les outils attendent le zoom ») — l'abaisser. (2) **‹P› et ‹A› ne
+  répondent pas sur un pays neuf ou vide** : il faut cliquer l'outil dans la barre. **Le dev donnera le cas exact** ;
+  le reproduire avant de toucher au code. **17/10** : (1) seuil passé à 20 km, non commité, le dev le jugera sur un très grand pays. **18/10** : (2) fermé — le dev : *« le P et le A s'activent bien maintenant au raccourci clavier »*, sans code écrit (CARTO-235, Fait). Reste (1). **Sévérité : gênant.**
+  **Fermée le 18/10** : (1) commité à 20 km à la demande du dev (`8921dc4`, CARTO-233) ; (2) fermée le 18/10 sans code (CARTO-235).

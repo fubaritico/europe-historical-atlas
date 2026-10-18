@@ -11,11 +11,6 @@ Put here the know issues to avoid cluttering the context window.
   est une référence privée). **Depuis la nuit du 14/10**, `years/1100/` tient 137 pays, et les traces de la nuit
   sont `years/1100.euratlas-{16,19,30,48,76,98,137,137b}/` et `1100.before-rename/` — toutes locales, à trier avec
   le dev (aucune n'a été supprimée : `rm -rf` demande sa permission). **Sévérité : à savoir.**
-- **Deux gênes du Cartographe relevées par le dev le 16/10 au soir, à déboguer** — CARTO-233, CARTO-235 (*« ça fait peur pour l'expérience
-  utilisateur »*). (1) **Les outils s'activent trop tard au zoom** : il faut trop se rapprocher avant de pouvoir
-  sélectionner ou dessiner (seuil de `s17`, « les outils attendent le zoom ») — l'abaisser. (2) **‹P› et ‹A› ne
-  répondent pas sur un pays neuf ou vide** : il faut cliquer l'outil dans la barre. **Le dev donnera le cas exact** ;
-  le reproduire avant de toucher au code. **17/10** : (1) seuil passé à 20 km, non commité, le dev le jugera sur un très grand pays. **18/10** : (2) fermé — le dev : *« le P et le A s'activent bien maintenant au raccourci clavier »*, sans code écrit (CARTO-235, Fait). Reste (1). **Sévérité : gênant.**
 - **Modifier le code du serveur de dev du Cartographe (`src/devServer/`) n'est pris en compte qu'après un redémarrage
   du serveur** (18/10). `vite.config.ts` charge chaque point d'entrée à sa première requête puis le garde en mémoire
   (`mountEndpoint`) : une modification faite après ce chargement est ignorée, et le serveur répond avec l'ancien code —
