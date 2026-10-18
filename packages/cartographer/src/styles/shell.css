@@ -42,6 +42,14 @@
  * row followed, and the canvas cell stretched with it — a map drawn mostly off-screen that no longer
  * dragged. The list only scrolls if the row it sits in is held to the window.
  */
+/*
+ * The page itself is the chrome's grey (the dev, 2026-10-18): the reset leaves `body` with no background, so
+ * whatever the shell does not cover — while the application starts, or if it fails to — showed white.
+ */
+body {
+  background: var(--bg);
+}
+
 .shell {
   height: 100dvh;
   display: grid;
