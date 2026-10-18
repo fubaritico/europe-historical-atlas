@@ -20,6 +20,7 @@ import type { BodyStream, EndpointRequest, EndpointResponse, ResponseSink } from
  * | `GET /__drafts/<year>` | the draft, or 404 when there is none |
  * | `DELETE /__drafts/<year>` | remove it — after a save, it holds nothing the year does not |
  * | `POST /__drafts/<year>/set-aside` | keep it under a dated name, out of the way of the next one |
+ * | `POST /__drafts/<year>/snapshot` | keep the body as an hourly snapshot, under a dated name (rung 2a) |
  *
  * **Not in `public/`.** The drafts live in `packages/cartographer/.autosave/drafts/`, git-ignored: under
  * `public/years/` the dev server would serve them and every build would publish them.
@@ -44,8 +45,8 @@ export interface DraftFolder extends DiskFolder {
   remove: (relativePath: string) => void
 }
 
-/** `/1100` or `/1100/set-aside`. */
-const DRAFT_PATH = new RegExp(`^/(${YEAR_DIGITS})(/set-aside)?$`)
+/** `/1100`, `/1100/set-aside` or `/1100/snapshot`. */
+const DRAFT_PATH = new RegExp(`^/(${YEAR_DIGITS})(/set-aside|/snapshot)?$`)
 
 /**
  * Refuse, saying why, and log it.
@@ -65,11 +66,54 @@ function refuse(status: number, reason: string): EndpointResponse {
  * @returns e.g. `1100.set-aside-2026-10-17T15-42-07Z.json`
  */
 export function setAsideName(year: string, at: Date): string {
-  const stamp = at
+  return `${year}.set-aside-${fileTime(at)}.json`
+}
+
+/**
+ * A time as it goes into a file name — sortable, and safe on every disk (no colon).
+ * @param at - the time
+ * @returns e.g. `2026-10-17T15-42-07Z`
+ */
+function fileTime(at: Date): string {
+  return at
     .toISOString()
     .replace(/\.\d{3}Z$/, 'Z')
     .replaceAll(':', '-')
-  return `${year}.set-aside-${stamp}.json`
+}
+
+/**
+ * The file name an hourly snapshot takes (CARTO-238, rung 2a).
+ * @param year - its year
+ * @param at - when it was taken
+ * @returns e.g. `1100.2026-10-18T15-01-02Z.json`
+ */
+export function snapshotName(year: string, at: Date): string {
+  return `${year}.${fileTime(at)}.json`
+}
+
+/**
+ * `POST /<year>/snapshot`: keep the body as a snapshot — every one is kept, under its own name (the dev,
+ * 2026-10-18).
+ * @param request - the request
+ * @param year - the year in the path
+ * @param snapshots - where the snapshots live
+ * @param now - the clock
+ * @returns the response
+ */
+function keepSnapshot(
+  request: EndpointRequest,
+  year: string,
+  snapshots: DiskFolder,
+  now: () => Date
+): EndpointResponse {
+  if (request.method !== 'POST') return refuse(405, 'a snapshot is kept with POST')
+  const refusal = whyNotADraft(request.body, year)
+  if (refusal !== null) return refuse(400, refusal)
+  const name = snapshotName(year, now())
+  // Beside the target first, then renamed: a write cut short leaves no half snapshot under its name.
+  snapshots.write(`${name}.tmp`, request.body)
+  snapshots.rename(`${name}.tmp`, name)
+  return answer(200, { year: Number(year), snapshot: name })
 }
 
 /**
@@ -163,12 +207,14 @@ function onDraft(request: EndpointRequest, year: string, folder: DraftFolder): E
  * Answer one request to the draft endpoint.
  * @param request - the request, its body already read
  * @param folder - where the drafts live
- * @param now - the clock, for a set-aside draft's name
+ * @param snapshots - where the hourly snapshots live
+ * @param now - the clock, for a set-aside draft's or a snapshot's name
  * @returns the response to send
  */
 export function handleDraftRequest(
   request: EndpointRequest,
   folder: DraftFolder,
+  snapshots: DiskFolder,
   now: () => Date
 ): EndpointResponse {
   if (!isFromHere(request))
@@ -177,6 +223,7 @@ export function handleDraftRequest(
   if (match === null)
     return refuse(404, `"${String(request.path)}" is not a draft — expected /<year>`)
   const year = match[1] ?? ''
+  if (match[2] === '/snapshot') return keepSnapshot(request, year, snapshots, now)
   return match[2] === undefined
     ? onDraft(request, year, folder)
     : setAside(request, year, folder, now)
@@ -185,15 +232,17 @@ export function handleDraftRequest(
 /**
  * The middleware Vite mounts on `DRAFT_ROUTE` (`draftRoute.ts`).
  * @param folder - where the drafts live
+ * @param snapshots - where the hourly snapshots live
  * @param now - the clock
  * @returns a Connect middleware
  */
 export function createDraftMiddleware(
   folder: DraftFolder,
+  snapshots: DiskFolder,
   now: () => Date
 ): (req: BodyStream, res: ResponseSink) => void {
   return createBodyMiddleware({
-    handle: (request) => handleDraftRequest(request, folder, now),
+    handle: (request) => handleDraftRequest(request, folder, snapshots, now),
     what: 'the draft',
   })
 }

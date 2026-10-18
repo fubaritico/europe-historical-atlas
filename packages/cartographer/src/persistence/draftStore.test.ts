@@ -58,6 +58,20 @@ describe('createDevServerDraftStore', () => {
         'POST /__drafts/1100/set-aside',
       ])
     })
+
+    // CARTO-238 rung 2a: the hourly snapshot travels as a draft does, to its own path.
+    it('POSTs a snapshot as JSON to the year and /snapshot', async () => {
+      const { fetch, calls } = stubFetch(200)
+
+      await createDevServerDraftStore({ fetch, route: '/__drafts' }).snapshot(DRAFT)
+
+      expect(`${String(calls[0]?.init?.method)} ${String(calls[0]?.url)}`).toBe(
+        'POST /__drafts/1100/snapshot'
+      )
+      expect(
+        JSON.parse(typeof calls[0]?.init?.body === 'string' ? calls[0].init.body : '')
+      ).toEqual(DRAFT)
+    })
   })
 
   describe('managed errors', () => {

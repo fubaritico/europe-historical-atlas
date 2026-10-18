@@ -11,3 +11,9 @@ export const DRAFT_ROUTE = '/__drafts'
  * Outside `public/`, which the dev server serves and every build publishes; git-ignored.
  */
 export const DRAFTS_FOLDER = 'packages/cartographer/.autosave/drafts'
+
+/**
+ * Where the hourly snapshots are kept (CARTO-238, rung 2a), from the repository's root — beside the drafts,
+ * git-ignored with them; every one is kept.
+ */
+export const SNAPSHOTS_FOLDER = 'packages/cartographer/.autosave/snapshots'

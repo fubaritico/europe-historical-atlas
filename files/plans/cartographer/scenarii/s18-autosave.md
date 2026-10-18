@@ -116,6 +116,33 @@ Scenario: my own saves never ask
   Then it saves without asking
 ```
 
+## Rung 2a — a snapshot every hour of work (2026-10-18)
+
+> **Grafted on the draft**, not a clock of its own: the draft is written 2 s after every gesture; when one is
+> written and an hour has passed since the last snapshot, the same document is also kept as a snapshot. So
+> nothing is taken while nobody draws — *an hour of work*, as asked — and no second timer runs. The first is
+> taken an hour after drafting starts: before that, the year on disk is the one just opened. **All are kept**
+> (the dev, 2026-10-18), in `packages/cartographer/.autosave/snapshots/`, git-ignored like the drafts.
+
+```gherkin
+Scenario: an hour of drawing leaves a snapshot
+  Given 1100 is open, and drafting started at 14:00
+  When I place an anchor at 15:01, and the draft is written two seconds later
+  Then packages/cartographer/.autosave/snapshots/ holds 1100.2026-10-18T15-01-02Z.json, the whole document
+  And the status bar says nothing about it
+
+Scenario: nothing drawn, nothing taken
+  Given 1100 is open and I have not drawn for two hours
+  Then no snapshot is taken in those two hours
+
+Scenario: a snapshot that cannot be kept is said, and the drawing goes on
+  Given the dev server refuses the snapshot
+  When an hour of drawing has passed and the draft is written
+  Then the status bar reads "the hourly snapshot of 1100 was not kept (<reason>)"
+  And the console logs it as an error
+  And the draft itself is kept as before, and the next snapshot is tried an hour later
+```
+
 ## Not built yet — the rungs that follow (CARTO-238's checklist)
 
 > **Decided with the dev, 2026-10-18** — the order: rung 3 first (the loss that really happened, twice), then

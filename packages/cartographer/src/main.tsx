@@ -20,7 +20,7 @@ import { OverwriteDialog } from './components/OverwriteDialog'
 import { listenForStackingKeys } from './components/stackingShortcut'
 import { DRAFTS_FOLDER, DRAFT_ROUTE } from './devServer/draftRoute'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
-import { DRAFT_DELAY_MS, createDraftKeeper } from './persistence/draftKeeper'
+import { DRAFT_DELAY_MS, SNAPSHOT_EVERY_MS, createDraftKeeper } from './persistence/draftKeeper'
 import { createDraftOffers } from './persistence/draftOffers'
 import { offerDraft } from './persistence/draftRecovery'
 import { openWithDraft, saveAndClearDraft } from './persistence/draftSession'
@@ -227,6 +227,8 @@ const draftKeeper = createDraftKeeper({
   drafts,
   year: FIRST_YEAR,
   delayMs: DRAFT_DELAY_MS,
+  snapshotEveryMs: SNAPSHOT_EVERY_MS,
+  snapshots: drafts,
   now: () => new Date(),
   timers: {
     set: (run, delayMs) => window.setTimeout(run, delayMs),

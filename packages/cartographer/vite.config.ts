@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
-import { DRAFT_ROUTE, DRAFTS_FOLDER } from './src/devServer/draftRoute'
+import { DRAFT_ROUTE, DRAFTS_FOLDER, SNAPSHOTS_FOLDER } from './src/devServer/draftRoute'
 import { createDraftFolderOnDisk, createYearsFolderOnDisk } from './src/devServer/yearsOnDisk'
 import { YEAR_WRITE_ROUTE } from './src/devServer/yearWriteRoute'
 
@@ -23,6 +23,9 @@ const YEARS_DIR = fileURLToPath(new URL('../atlas/public/years/', import.meta.ur
  * publishes, and git-ignored (`.autosave` in `.gitignore`): a draft is the work since the last ‹ctrl+S›, on this machine.
  */
 const DRAFTS_DIR = fileURLToPath(new URL(`../../${DRAFTS_FOLDER}/`, import.meta.url))
+
+/** Where the hourly snapshots are kept (CARTO-238, rung 2a) — beside the drafts, git-ignored with them. */
+const SNAPSHOTS_DIR = fileURLToPath(new URL(`../../${SNAPSHOTS_FOLDER}/`, import.meta.url))
 
 /** `node:fs`'s synchronous calls, handed to the adapters, which hold the logic and its tests. */
 const disk = {
@@ -47,6 +50,9 @@ const yearsOnDisk: YearFolder = createYearsFolderOnDisk(YEARS_DIR, disk)
 
 /** The drafts folder on the real disk. */
 const draftsOnDisk: DraftFolder = createDraftFolderOnDisk(DRAFTS_DIR, disk)
+
+/** The snapshots folder on the real disk. */
+const snapshotsOnDisk: YearFolder = createYearsFolderOnDisk(SNAPSHOTS_DIR, disk)
 
 /** The endpoints' modules, as `ssrLoadModule` hands them back. */
 type YearEndpointModule = typeof YearWriteEndpoint
@@ -82,7 +88,7 @@ async function loadDraftMiddleware(server: ViteDevServer): Promise<Middleware> {
   const endpoint = (await server.ssrLoadModule(
     '/src/devServer/draftEndpoint.ts'
   )) as DraftEndpointModule
-  return endpoint.createDraftMiddleware(draftsOnDisk, () => new Date())
+  return endpoint.createDraftMiddleware(draftsOnDisk, snapshotsOnDisk, () => new Date())
 }
 
 /**

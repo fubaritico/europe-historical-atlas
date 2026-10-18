@@ -2,7 +2,7 @@ import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocum
 
 import { reasonOf } from './errorReason'
 
-import type { DraftStore } from './draftStore'
+import type { Draft, DraftStore, SnapshotSink } from './draftStore'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /**
@@ -22,10 +22,17 @@ import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocu
  *
  * **It starts only when told to** (`start`), after the opening has offered the previous draft: a draft
  * written before that offer would overwrite the very work the offer exists to give back.
+ *
+ * **And an hourly snapshot rides on it** (rung 2a): a draft written an hour of drawing after the last snapshot
+ * is kept as one too, through its own port. Sent beside the queue, not on it — a slow snapshot must not hold
+ * a save's draft removal — and a failure is said and logged, the next try an hour later.
  */
 
 /** How long after the last change the draft is written, in milliseconds. */
 export const DRAFT_DELAY_MS = 2000
+
+/** How much drawing between two snapshots: an hour (CARTO-238, rung 2a, the dev's « un snapshot complet toutes les heures »). */
+export const SNAPSHOT_EVERY_MS = 60 * 60 * 1000
 
 /** The console tag this module's lines start with. */
 const LOG_TAG = '[Cartographer]'
@@ -73,6 +80,10 @@ export interface DraftKeeperDeps {
   year: number
   /** How long after the last change to write. */
   delayMs: number
+  /** The least time between two snapshots, in milliseconds (rung 2a). */
+  snapshotEveryMs: number
+  /** Where the snapshots go. */
+  snapshots: SnapshotSink
   /** The clock, for the draft's time. */
   now: () => Date
   /** The timer. */
@@ -106,6 +117,8 @@ interface KeeperCell {
   queue: Promise<void>
   /** The last write failed: said once, then said again when one succeeds. */
   failing: boolean
+  /** When the last snapshot was taken or tried, in milliseconds — when drafting started, before the first. */
+  lastSnapshotAt: number
 }
 
 /**
@@ -116,15 +129,18 @@ interface KeeperCell {
 async function writeDraft(deps: DraftKeeperDeps, cell: KeeperCell): Promise<void> {
   const yearName = String(deps.year)
   try {
-    await deps.drafts.write({
+    const draft = {
       year: deps.year,
       savedAt: deps.now().toISOString(),
       files: saveYearDocument(deps.store.getState().document),
-    })
+    }
+    await deps.drafts.write(draft)
     if (cell.failing) {
       cell.failing = false
       deps.report(`the draft of ${yearName} is kept again`)
     }
+    // Beside the queue: its own failures are caught inside, and it must not hold the next write.
+    void snapshotIfDue(deps, cell, draft)
   } catch (error: unknown) {
     if (cell.failing) return
     cell.failing = true
@@ -132,6 +148,26 @@ async function writeDraft(deps: DraftKeeperDeps, cell: KeeperCell): Promise<void
     deps.report(
       `the draft is not kept (${reasonOf(error)}) — save with ‹ctrl+S› not to lose your work`
     )
+  }
+}
+
+/**
+ * Keep the draft just written as a snapshot too, when an hour of drawing has passed since the last one
+ * (rung 2a). Grafted on the draft rather than on a clock: nothing is taken while nobody draws. A failure is
+ * said and logged, and the next try waits another hour — the draft itself is already kept.
+ * @param deps - the drafts, the year, the clock, where to report
+ * @param cell - the keeper's memory
+ * @param draft - the draft just written
+ */
+async function snapshotIfDue(deps: DraftKeeperDeps, cell: KeeperCell, draft: Draft): Promise<void> {
+  const now = deps.now().getTime()
+  if (now - cell.lastSnapshotAt < deps.snapshotEveryMs) return
+  cell.lastSnapshotAt = now
+  try {
+    await deps.snapshots.snapshot(draft)
+  } catch (error: unknown) {
+    console.error(`${LOG_TAG} the hourly snapshot of ${String(deps.year)} was not kept`, error)
+    deps.report(`the hourly snapshot of ${String(deps.year)} was not kept (${reasonOf(error)})`)
   }
 }
 
@@ -189,10 +225,13 @@ export function createDraftKeeper(deps: DraftKeeperDeps): DraftKeeper {
     pending: null,
     queue: Promise.resolve(),
     failing: false,
+    lastSnapshotAt: 0,
   }
   return {
     start: () => {
       if (cell.unsubscribe !== null) return
+      // The year on disk is the one just opened: the first snapshot is an hour of drawing away.
+      cell.lastSnapshotAt = deps.now().getTime()
       let seen = deps.store.getState().version
       cell.unsubscribe = deps.store.subscribe(() => {
         const { version } = deps.store.getState()

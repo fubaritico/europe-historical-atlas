@@ -46,6 +46,18 @@ export interface DraftStore {
   setAside: (year: number) => Promise<void>
 }
 
+/**
+ * Where the hourly snapshots go (CARTO-238, rung 2a) — write only: a snapshot is never read back, removed or
+ * set aside by the keeper, so it is a port of its own rather than a fifth call on {@link DraftStore}.
+ */
+export interface SnapshotSink {
+  /**
+   * Keep a document as a snapshot, under its own dated name — every one is kept.
+   * @param draft - the document, shaped as a draft
+   */
+  snapshot: (draft: Draft) => Promise<void>
+}
+
 /** What the dev-server draft store needs. */
 export interface DevServerDraftStoreDeps {
   /** The fetch to use — the window's in the application, a stub in tests. */
@@ -79,11 +91,13 @@ function readDraft(value: unknown, year: number): Draft {
 }
 
 /**
- * A draft store kept by the Cartographer's dev server.
+ * A draft store kept by the Cartographer's dev server — and the sink of its snapshots, the same endpoint.
  * @param deps - the fetch and the route
  * @returns the store
  */
-export function createDevServerDraftStore(deps: DevServerDraftStoreDeps): DraftStore {
+export function createDevServerDraftStore(
+  deps: DevServerDraftStoreDeps
+): DraftStore & SnapshotSink {
   const at = (year: number, suffix = ''): string => `${deps.route}/${String(year)}${suffix}`
   const send = async (url: string, init: RequestInit): Promise<Response> => {
     const response = await deps.fetch(url, init)
@@ -111,6 +125,13 @@ export function createDevServerDraftStore(deps: DevServerDraftStoreDeps): DraftS
     },
     setAside: async (year) => {
       await send(at(year, '/set-aside'), { method: 'POST' })
+    },
+    snapshot: async (draft) => {
+      await send(at(draft.year, '/snapshot'), {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(draft),
+      })
     },
   }
 }

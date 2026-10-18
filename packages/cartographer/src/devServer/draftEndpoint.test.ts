@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createDraftMiddleware, handleDraftRequest, setAsideName } from './draftEndpoint'
+import {
+  createDraftMiddleware,
+  handleDraftRequest,
+  setAsideName,
+  snapshotName,
+} from './draftEndpoint'
 
 import type { DraftFolder } from './draftEndpoint'
 import type { BodyStream, EndpointRequest, ResponseSink } from './httpEndpoint'
@@ -53,8 +58,12 @@ function request(overrides: Partial<EndpointRequest> = {}): EndpointRequest {
 }
 
 /** Answer a request over a folder, with the fixed clock. */
-function answer(req: EndpointRequest, folder: DraftFolder) {
-  const response = handleDraftRequest(req, folder, () => NOW)
+function answer(
+  req: EndpointRequest,
+  folder: DraftFolder,
+  snapshots: DraftFolder = memoryFolder().folder
+) {
+  const response = handleDraftRequest(req, folder, snapshots, () => NOW)
   return { status: response.status, body: JSON.parse(response.body) as unknown }
 }
 
@@ -85,6 +94,7 @@ describe('handleDraftRequest', () => {
       const response = handleDraftRequest(
         request({ method: 'GET', origin: undefined, body: '' }),
         folder,
+        memoryFolder().folder,
         () => NOW
       )
 
@@ -222,7 +232,9 @@ describe('handleDraftRequest', () => {
         throw Object.assign(new Error('full'), { code: 'ENOSPC' })
       }
 
-      expect(() => handleDraftRequest(request(), folder, () => NOW)).toThrow('full')
+      expect(() => handleDraftRequest(request(), folder, memoryFolder().folder, () => NOW)).toThrow(
+        'full'
+      )
     })
   })
 
@@ -252,6 +264,7 @@ describe('handleDraftRequest', () => {
         handleDraftRequest(
           request({ body: JSON.stringify({ year: 1100, v: 2 }) }),
           folder,
+          memoryFolder().folder,
           () => NOW
         )
       ).toThrow()
@@ -303,7 +316,7 @@ describe('createDraftMiddleware', () => {
     const { folder, files } = memoryFolder()
     const { res, sent } = sink()
 
-    createDraftMiddleware(folder, () => NOW)(stream(DRAFT), res)
+    createDraftMiddleware(folder, memoryFolder().folder, () => NOW)(stream(DRAFT), res)
 
     expect((await sent).status).toBe(200)
     expect(files.get('1100.json')).toBe(DRAFT)
@@ -316,11 +329,90 @@ describe('createDraftMiddleware', () => {
     }
     const { res, sent } = sink()
 
-    createDraftMiddleware(folder, () => NOW)(stream(DRAFT), res)
+    createDraftMiddleware(folder, memoryFolder().folder, () => NOW)(stream(DRAFT), res)
 
     expect(await sent).toEqual({
       status: 500,
       body: JSON.stringify({ reason: 'the draft failed on disk (ENOSPC)' }),
+    })
+  })
+})
+
+const snapshotRequest = (overrides: Partial<EndpointRequest> = {}): EndpointRequest =>
+  request({ method: 'POST', path: '/1100/snapshot', ...overrides })
+
+describe('handleDraftRequest, the hourly snapshot (CARTO-238, rung 2a)', () => {
+  describe('happy path', () => {
+    it('keeps the body under its dated name in the snapshots folder, beside then renamed', () => {
+      const drafts = memoryFolder()
+      const snapshots = memoryFolder()
+      const name = snapshotName('1100', NOW)
+
+      const response = answer(snapshotRequest(), drafts.folder, snapshots.folder)
+
+      expect(response).toEqual({ status: 200, body: { year: 1100, snapshot: name } })
+      expect(snapshots.files.get(name)).toBe(DRAFT)
+      expect(snapshots.log).toEqual([`write ${name}.tmp`, `rename ${name}.tmp → ${name}`])
+      expect(drafts.log).toEqual([])
+    })
+  })
+
+  describe('variants', () => {
+    it('names a snapshot by its year and its time, sortable and without colons', () => {
+      expect(snapshotName('1100', NOW)).toBe('1100.2026-10-17T15-42-07Z.json')
+    })
+  })
+
+  describe('managed errors', () => {
+    it('refuses a snapshot sent with another method than POST', () => {
+      const snapshots = memoryFolder()
+
+      expect(
+        answer(snapshotRequest({ method: 'PUT' }), memoryFolder().folder, snapshots.folder).status
+      ).toBe(405)
+      expect(snapshots.log).toEqual([])
+    })
+
+    it('refuses a snapshot whose body is of another year, writing nothing', () => {
+      const snapshots = memoryFolder()
+
+      const response = answer(
+        snapshotRequest({ body: JSON.stringify({ year: 1200 }) }),
+        memoryFolder().folder,
+        snapshots.folder
+      )
+
+      expect(response.status).toBe(400)
+      expect(snapshots.log).toEqual([])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('refuses a snapshot from a page another site served', () => {
+      const snapshots = memoryFolder()
+
+      const response = answer(
+        snapshotRequest({ origin: 'https://elsewhere.example' }),
+        memoryFolder().folder,
+        snapshots.folder
+      )
+
+      expect(response.status).toBe(403)
+      expect(snapshots.log).toEqual([])
+    })
+  })
+
+  describe('edge cases', () => {
+    it('keeps two snapshots taken at two times, overwriting neither', () => {
+      const snapshots = memoryFolder()
+      const later = new Date(NOW.getTime() + 60 * 60 * 1000)
+      handleDraftRequest(snapshotRequest(), memoryFolder().folder, snapshots.folder, () => NOW)
+      handleDraftRequest(snapshotRequest(), memoryFolder().folder, snapshots.folder, () => later)
+
+      expect([...snapshots.files.keys()].sort()).toEqual([
+        snapshotName('1100', NOW),
+        snapshotName('1100', later),
+      ])
     })
   })
 })

@@ -2,10 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
-import { DRAFT_DELAY_MS, createDraftKeeper } from './draftKeeper'
+import { DRAFT_DELAY_MS, SNAPSHOT_EVERY_MS, createDraftKeeper } from './draftKeeper'
 
 import type { KeeperStore, KeeperTimers } from './draftKeeper'
-import type { Draft, DraftStore } from './draftStore'
+import type { Draft, DraftStore, SnapshotSink } from './draftStore'
 
 /** The clock every draft is stamped with. */
 const NOW = new Date('2026-10-17T15:42:05.000Z')
@@ -55,10 +55,11 @@ function manualTimers() {
 }
 
 /** A draft store in memory that records every call. */
-function memoryDrafts(overrides: Partial<DraftStore> = {}) {
+function memoryDrafts(overrides: Partial<DraftStore & SnapshotSink> = {}) {
   const written: Draft[] = []
+  const snapshots: Draft[] = []
   const calls: string[] = []
-  const drafts: DraftStore = {
+  const drafts: DraftStore & SnapshotSink = {
     write: vi.fn((draft: Draft) => {
       calls.push('write')
       written.push(draft)
@@ -70,13 +71,21 @@ function memoryDrafts(overrides: Partial<DraftStore> = {}) {
       return Promise.resolve()
     }),
     setAside: vi.fn(() => Promise.resolve()),
+    snapshot: vi.fn((draft: Draft) => {
+      calls.push('snapshot')
+      snapshots.push(draft)
+      return Promise.resolve()
+    }),
     ...overrides,
   }
-  return { drafts, written, calls }
+  return { drafts, written, calls, snapshots }
 }
 
 /** A keeper over memory stores, recording what it reports. */
-function keeper(drafts: DraftStore = memoryDrafts().drafts) {
+function keeper(
+  drafts: DraftStore & SnapshotSink = memoryDrafts().drafts,
+  now: () => Date = () => NOW
+) {
   const memory = memoryStore()
   const clock = manualTimers()
   const reports: string[] = []
@@ -85,7 +94,9 @@ function keeper(drafts: DraftStore = memoryDrafts().drafts) {
     drafts,
     year: 1100,
     delayMs: DRAFT_DELAY_MS,
-    now: () => NOW,
+    snapshotEveryMs: SNAPSHOT_EVERY_MS,
+    snapshots: drafts,
+    now,
     timers: clock.timers,
     report: (message) => reports.push(message),
   })
@@ -357,6 +368,134 @@ describe('createDraftKeeper', () => {
       await settle()
 
       expect(order).toEqual(['first', 'second'])
+    })
+  })
+})
+
+/** A clock the test moves: minutes after the moment drafting starts. */
+function movingClock() {
+  let minutes = 0
+  return {
+    now: () => new Date(NOW.getTime() + minutes * 60 * 1000),
+    at: (next: number) => {
+      minutes = next
+    },
+  }
+}
+
+describe('createDraftKeeper, the hourly snapshot (CARTO-238, rung 2a)', () => {
+  describe('happy path', () => {
+    it('keeps the draft written after an hour of drawing as a snapshot too', async () => {
+      const memory = memoryDrafts()
+      const clock = movingClock()
+      const { draftKeeper, change, elapse, reports } = keeper(memory.drafts, clock.now)
+      draftKeeper.start()
+      clock.at(61)
+      change()
+      elapse(DRAFT_DELAY_MS)
+      await settle()
+
+      expect(reports).toEqual([])
+      expect(memory.snapshots).toHaveLength(1)
+      expect(memory.snapshots[0]).toEqual(memory.written[0])
+      expect(memory.calls).toEqual(['write', 'snapshot'])
+    })
+  })
+
+  describe('variants', () => {
+    it('takes none before an hour of drawing has passed', async () => {
+      const memory = memoryDrafts()
+      const clock = movingClock()
+      const { draftKeeper, change, elapse } = keeper(memory.drafts, clock.now)
+      draftKeeper.start()
+      clock.at(59)
+      change()
+      elapse(DRAFT_DELAY_MS)
+      await settle()
+
+      expect(memory.written).toHaveLength(1)
+      expect(memory.snapshots).toEqual([])
+    })
+
+    it('takes the next one an hour after the last, not at every draft', async () => {
+      const memory = memoryDrafts()
+      const clock = movingClock()
+      const { draftKeeper, change, elapse } = keeper(memory.drafts, clock.now)
+      draftKeeper.start()
+      for (const minute of [61, 90, 120, 122]) {
+        clock.at(minute)
+        change()
+        elapse(DRAFT_DELAY_MS)
+        await settle()
+      }
+
+      expect(memory.snapshots).toHaveLength(2)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('says a snapshot that was not kept, logs it, and keeps the draft', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      const memory = memoryDrafts({ snapshot: vi.fn(() => Promise.reject(new Error('disk full'))) })
+      const clock = movingClock()
+      const { draftKeeper, change, elapse, reports } = keeper(memory.drafts, clock.now)
+      draftKeeper.start()
+      clock.at(61)
+      change()
+      elapse(DRAFT_DELAY_MS)
+      await settle()
+
+      expect(memory.written).toHaveLength(1)
+      expect(reports.at(-1)).toBe('the hourly snapshot of 1100 was not kept (disk full)')
+      expect(error).toHaveBeenCalledOnce()
+    })
+
+    it('tries again an hour after a failed snapshot, not at the next draft', async () => {
+      const snapshot = vi.fn(() => Promise.reject(new Error('disk full')))
+      const memory = memoryDrafts({ snapshot })
+      const clock = movingClock()
+      const { draftKeeper, change, elapse } = keeper(memory.drafts, clock.now)
+      draftKeeper.start()
+      for (const minute of [61, 62, 122]) {
+        clock.at(minute)
+        change()
+        elapse(DRAFT_DELAY_MS)
+        await settle()
+      }
+
+      expect(snapshot).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // A draft that could not be written is not the work on disk: no snapshot is taken of it.
+    it('takes no snapshot when the draft itself failed', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      const memory = memoryDrafts({ write: vi.fn(() => Promise.reject(new Error('server down'))) })
+      const clock = movingClock()
+      const { draftKeeper, change, elapse } = keeper(memory.drafts, clock.now)
+      draftKeeper.start()
+      clock.at(61)
+      change()
+      elapse(DRAFT_DELAY_MS)
+      await settle()
+
+      expect(memory.snapshots).toEqual([])
+    })
+  })
+
+  describe('edge cases', () => {
+    // Nothing drawn, nothing written: the snapshot rides on the draft, so an idle hour takes none.
+    it('takes none in an hour with no gesture', async () => {
+      const memory = memoryDrafts()
+      const clock = movingClock()
+      const { draftKeeper, elapse } = keeper(memory.drafts, clock.now)
+      draftKeeper.start()
+      clock.at(120)
+      elapse(DRAFT_DELAY_MS)
+      await settle()
+
+      expect(memory.snapshots).toEqual([])
     })
   })
 })
