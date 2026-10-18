@@ -4,17 +4,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import { openEmptyYear } from '../state/openEmptyYear'
-import { createCartographerStore } from '../state/store'
-import { UNFRAMED } from '../view/viewport'
+import { openEmptyYear } from '../../../state/openEmptyYear'
+import { createCartographerStore } from '../../../state/store'
+import { UNFRAMED } from '../../../view/viewport'
+import { WIKIDATA_DELAY_MS, useWikidataItem } from '../../shared/hooks/useWikidataItem'
+import { wikidataViewOf } from '../../shared/wikidataView'
+import { WikidataPanel } from '../../WikidataPanel'
 
 import { PolityDialog } from './PolityDialog'
-import { WIKIDATA_DELAY_MS, useWikidataItem } from './shared/hooks/useWikidataItem'
-import { wikidataViewOf } from './shared/wikidataView'
-import { WikidataPanel } from './WikidataPanel'
 
-import type { WikidataFacts } from '../wikidata/wikidataFacts'
-import type { WikidataAnswer, WikidataSource } from '../wikidata/wikidataSource'
+import type { WikidataFacts } from '../../../wikidata/wikidataFacts'
+import type { WikidataAnswer, WikidataSource } from '../../../wikidata/wikidataSource'
 
 /** The County of Tripoli's facts, as read from Wikidata on 2026-10-17. */
 const TRIPOLI: WikidataFacts = {

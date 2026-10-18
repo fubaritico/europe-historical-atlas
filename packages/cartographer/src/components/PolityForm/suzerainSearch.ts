@@ -1,4 +1,4 @@
-import type { DraftOption } from './shared/polityDraft'
+import type { DraftOption } from '../shared/polityDraft'
 
 /**
  * Which polities to offer as a suzerain for what the author has typed (CARTO-241) — the polities of the

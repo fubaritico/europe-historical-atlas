@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { describeDrawingTarget } from '../../../state/drawingTarget'
-import { deletionResult, pendingDeletion } from '../../polityDeletion'
+import { deletionResult, pendingDeletion } from '../polityDeletion'
 
 import type { CartographerStoreHook } from '../../../state/store'
-import type { PendingDeletion } from '../../polityDeletion'
+import type { PendingDeletion } from '../polityDeletion'
 
 /**
  * Deleting the selected polity: ask first (D2), then delete as one undoable step and say what went.

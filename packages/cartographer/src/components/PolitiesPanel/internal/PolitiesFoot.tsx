@@ -1,10 +1,11 @@
 import { useState } from 'react'
 
 import { describeDrawingTarget } from '../../../state/drawingTarget'
-import { PolitiesActions } from '../../PolitiesActions'
-import { PolityDeleteDialog } from '../../PolityDeleteDialog'
-import { PolityDialog } from '../../PolityDialog'
 import { usePolityDeletion } from '../hooks/usePolityDeletion'
+
+import { PolitiesActions } from './PolitiesActions'
+import { PolityDeleteDialog } from './PolityDeleteDialog'
+import { PolityDialog } from './PolityDialog'
 
 import type { CartographerStoreHook } from '../../../state/store'
 import type { WikidataSource } from '../../../wikidata/wikidataSource'

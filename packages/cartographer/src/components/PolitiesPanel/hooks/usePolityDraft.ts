@@ -1,8 +1,5 @@
-import { Modal } from '@fubaritico/react/Modal'
 import { useState } from 'react'
 
-import { PolityForm } from './PolityForm'
-import { useWikidataItem } from './shared/hooks/useWikidataItem'
 import {
   DRAFT_ERRORS,
   EMPTY_DRAFT,
@@ -12,33 +9,13 @@ import {
   suzerainChoices,
   withId,
   withName,
-} from './shared/polityDraft'
-import { wikidataViewOf } from './shared/wikidataView'
+} from '../../shared/polityDraft'
 
-import type { PolityFormField } from './PolityForm'
-import type { DraftField, PolityDraft } from './shared/polityDraft'
-import type { CartographerStoreHook } from '../state/store'
-import type { WikidataField } from '../wikidata/wikidataFacts'
-import type { WikidataSource } from '../wikidata/wikidataSource'
+import type { CartographerStoreHook } from '../../../state/store'
+import type { PolityFormField } from '../../PolityForm'
+import type { DraftField, PolityDraft } from '../../shared/polityDraft'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { HsvaColor } from '@fubaritico/behaviors'
-
-/** What the dialogue needs from its caller. */
-export interface PolityDialogProps {
-  /** The store the polity is created or changed in, and the Pen aimed through. */
-  store: CartographerStoreHook
-  /**
-   * The polity to change — `s07`'s *[Edit properties…]* — or `null` for `[+ New polity]`. Read when the
-   * dialogue mounts: the caller mounts one per polity edited.
-   */
-  editing: YearPolity | null
-  /** Whether the dialogue is shown. The caller owns it — the design system's Modal is controlled. */
-  isOpen: boolean
-  /** Called once the dialogue is done, validated or cancelled. */
-  onClose: () => void
-  /** Where Wikidata is read from, for the panel under the Wikidata field (CARTO-243). */
-  wikidata: WikidataSource
-}
 
 /**
  * Validate the form against the document: create, then aim — or change, keeping the target.
@@ -75,14 +52,6 @@ function commit(
 }
 
 /**
- * A click on the backdrop does nothing — deliberately: a dialogue holding typed work must not lose it to a
- * stray click (the design system's own warning). Escape, Cancel and the cross close it.
- */
-function ignoreOverlayClick(): void {
-  // Deliberately nothing.
-}
-
-/**
  * The draft the dialogue opens on: empty for a new polity, the polity's own values when editing one.
  * @param editing - the polity edited, or `null` when creating
  * @returns the opening draft
@@ -98,7 +67,7 @@ function openingOf(editing: YearPolity | null): PolityDraft {
  * **The draft is component state, not a slice**: one writer and one reader, both the dialogue — the
  * lightest sufficient tier. It is thrown away on close either way.
  */
-function usePolityDraft(
+export function usePolityDraft(
   store: CartographerStoreHook,
   editing: YearPolity | null,
   onClose: () => void
@@ -151,57 +120,4 @@ function usePolityDraft(
 
   // Return
   return { draft, errors, suzerains, ranks, close, onField, onColour, onSubmit }
-}
-
-/**
- * The polity's dialogue — `[+ New polity]` (`s02`'s *"create a polity from nothing"*, *"validating the
- * form hands me the Pen"*) and *[Edit properties…]* (`s07`'s *"the same form as creation opens, filled
- * with its current values"*, the id kept). The binding of the shell/view/binding split: the only place
- * that knows there is a store.
- *
- * **A click on the backdrop does not close it**: the design system's own warning — a dialogue holding
- * typed work must not lose it to a stray click. Escape, Cancel and the cross do.
- * @param props - the store, the polity edited if any, the open state the caller owns, and Wikidata
- * @returns the dialogue
- */
-export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: PolityDialogProps) {
-  // State
-  const { draft, errors, suzerains, ranks, close, onField, onColour, onSubmit } = usePolityDraft(
-    store,
-    editing,
-    onClose
-  )
-  const reading = useWikidataItem(wikidata, draft.wikidata)
-
-  // Derived
-  const title = editing === null ? 'New polity' : 'Edit polity'
-  const { document } = store.getState()
-  const others = document.polities.filter((polity) => polity.id !== editing?.id)
-  const wikidataView = wikidataViewOf(reading, draft, document.year, others)
-
-  // Handlers
-  // Wikidata only ever writes on the author's click, through the same path as typing.
-  const handleUseWikidata = (field: WikidataField, value: string) => {
-    onField(field, value)
-  }
-
-  // Render
-  return (
-    <Modal isOpen={isOpen} onClose={close} onOverlayClick={ignoreOverlayClick} aria-label={title}>
-      <PolityForm
-        title={title}
-        draft={draft}
-        errors={errors}
-        suzerains={suzerains}
-        ranks={ranks}
-        idLocked={editing !== null}
-        onField={onField}
-        onColour={onColour}
-        onSubmit={onSubmit}
-        onCancel={close}
-        wikidata={wikidataView}
-        onUseWikidata={handleUseWikidata}
-      />
-    </Modal>
-  )
 }

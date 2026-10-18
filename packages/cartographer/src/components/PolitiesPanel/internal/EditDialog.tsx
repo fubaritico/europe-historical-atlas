@@ -1,4 +1,4 @@
-import { PolityDialog } from '../../PolityDialog'
+import { PolityDialog } from './PolityDialog'
 
 import type { CartographerStoreHook } from '../../../state/store'
 import type { WikidataSource } from '../../../wikidata/wikidataSource'

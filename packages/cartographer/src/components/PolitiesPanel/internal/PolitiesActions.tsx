@@ -1,4 +1,4 @@
-import { BarIcon } from '../icons/barIcons'
+import { BarIcon } from '../../../icons/barIcons'
 
 /**
  * `{Polities}`' action bar — a strip at the foot of the panel holding its commands (`s07`, *The panel's

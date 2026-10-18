@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 
 import type { ViewportPoint } from '../../../view/viewport'
-import type { ArrangeRequest } from '../../PolityArrangeMenu'
+import type { ArrangeRequest } from '../internal/PolityArrangeMenu'
 
 /**
  * The open stacking menu of `{Polities}`: which row, where, and how it closes — the focus going back to

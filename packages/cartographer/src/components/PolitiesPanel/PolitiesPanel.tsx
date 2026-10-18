@@ -1,6 +1,5 @@
 import { describeDrawingTarget } from '../../state/drawingTarget'
 import { Panel } from '../Panel'
-import { PolityArrangeMenu } from '../PolityArrangeMenu'
 import { PolityList } from '../PolityList'
 import { polityRows } from '../shared/polityRows'
 
@@ -8,6 +7,7 @@ import { useArrangeMenu } from './hooks/useArrangeMenu'
 import { usePolityForm } from './hooks/usePolityForm'
 import { EditDialog } from './internal/EditDialog'
 import { PolitiesFoot } from './internal/PolitiesFoot'
+import { PolityArrangeMenu } from './internal/PolityArrangeMenu'
 
 import type { PolityColourSource } from '../../state/polityColourSource'
 import type { CartographerStoreHook } from '../../state/store'

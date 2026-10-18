@@ -1,16 +1,15 @@
 import { Menu } from '@fubaritico/react/Menu'
-import { useEffect, useLayoutEffect, useRef } from 'react'
 
 import { STACKING_MOVES } from '@europe-historical-atlas/core/editor/stacking'
 
-import { placeMenu } from '../view/menuPlacement'
+import { STACKING_LABELS } from '../shared/stackingLabels'
+import { STACKING_SHORTCUTS } from '../shared/stackingShortcut'
 
-import { STACKING_LABELS } from './shared/stackingLabels'
-import { STACKING_SHORTCUTS } from './shared/stackingShortcut'
+import { useDismiss } from './hooks/useDismiss'
+import { useInsideWindow } from './hooks/useInsideWindow'
 
-import type { ViewportPoint } from '../view/viewport'
+import type { ViewportPoint } from '../../view/viewport'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
-import type { RefObject } from 'react'
 
 /** The value of the menu's first item, *Edit properties…* — `s07`'s gesture, above the four moves. */
 const EDIT = 'edit'
@@ -29,70 +28,6 @@ export interface PolityStackMenuProps {
   onEdit: () => void
   /** ‹escape›, a press outside, or a command chosen. */
   onClose: () => void
-}
-
-/**
- * Fold the menu back inside the window (`placeMenu`), once it can be measured. Written on the element
- * before the first paint — no state, so no second render — so it never shows half off-screen and jumps.
- * @param at - where it was asked for
- * @returns the ref the menu's element takes
- */
-function useInsideWindow(at: ViewportPoint): RefObject<HTMLDivElement | null> {
-  // Refs
-  const shell = useRef<HTMLDivElement | null>(null)
-
-  // Effects
-  useLayoutEffect(() => {
-    const node = shell.current
-    if (node === null) return
-    const box = node.getBoundingClientRect()
-    const place = placeMenu(
-      at,
-      { width: box.width, height: box.height },
-      { width: globalThis.innerWidth, height: globalThis.innerHeight }
-    )
-    node.style.left = `${String(place.x)}px`
-    node.style.top = `${String(place.y)}px`
-  }, [at])
-
-  // Return
-  return shell
-}
-
-/**
- * Focus the menu on opening, and close it on a press outside or when ‹Tab› takes the focus out — the
- * design system's Menu answers ‹escape› only (A11Y-006).
- *
- * **The latest close is read through a ref**: the caller passes a fresh closure on every render, and an
- * effect keyed on it would re-run — and re-take the focus — each time the panel re-renders (QUAL-002).
- * @param shell - the menu's element
- * @param onClose - how it closes
- */
-function useDismiss(shell: RefObject<HTMLDivElement | null>, onClose: () => void): void {
-  // Refs
-  const close = useRef(onClose)
-
-  // Effects
-  useEffect(() => {
-    close.current = onClose
-  }, [onClose])
-  useEffect(() => {
-    const node = shell.current
-    node?.querySelector<HTMLElement>('[role="listbox"]')?.focus()
-    const away = (to: EventTarget | null) => !(to instanceof Node) || !node?.contains(to)
-    const outside = (event: PointerEvent) => {
-      if (away(event.target)) close.current()
-    }
-    const left = (event: FocusEvent) => {
-      if (away(event.relatedTarget)) close.current()
-    }
-    document.addEventListener('pointerdown', outside)
-    node?.addEventListener('focusout', left)
-    return () => {
-      document.removeEventListener('pointerdown', outside)
-      node?.removeEventListener('focusout', left)
-    }
-  }, [shell])
 }
 
 /**

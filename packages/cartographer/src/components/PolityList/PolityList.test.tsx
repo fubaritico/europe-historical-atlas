@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { PolityList } from './PolityList'
 
-import type { PolityRow } from './shared/polityRows'
+import type { PolityRow } from '../shared/polityRows'
 
 afterEach(() => {
   vi.unstubAllGlobals()

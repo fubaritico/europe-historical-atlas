@@ -3,10 +3,10 @@ import { Card } from '@fubaritico/react/Card'
 import { IconButton } from '@fubaritico/react/IconButton'
 import { Modal } from '@fubaritico/react/Modal'
 
-import { deletionQuestion } from './polityDeletion'
-import { autofocusOnOpen } from './shared/hooks/autofocusOnOpen'
+import { autofocusOnOpen } from '../../shared/hooks/autofocusOnOpen'
+import { deletionQuestion } from '../polityDeletion'
 
-import type { PendingDeletion } from './polityDeletion'
+import type { PendingDeletion } from '../polityDeletion'
 
 /**
  * The confirmation before a polity is deleted — `s07`'s D2, the dev's call of 2026-10-12: *every deletion is

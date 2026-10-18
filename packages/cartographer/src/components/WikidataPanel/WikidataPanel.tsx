@@ -1,0 +1,50 @@
+import { statusOf } from '../shared/wikidataView'
+
+import { FoundFacts } from './internal/FoundFacts'
+
+import type { WikidataField } from '../../wikidata/wikidataFacts'
+import type { WikidataView } from '../shared/wikidataView'
+
+/**
+ * What Wikidata says about the polity in the form (CARTO-243): its name, its years, its Wikipedia articles,
+ * a warning when the year edited lies outside its dates, whether it calls itself a vassal state (CARTO-248),
+ * and one button per field it can fill. The view of
+ * the shell/view/binding split — literals in, a click out; the dialogue reads Wikidata and decides nothing
+ * here.
+ *
+ * **It proposes, it never writes**: a field the author left empty shows *[Use]*; a field they filled
+ * differently shows *[Replace]*; it changes only on that click.
+ *
+ * **One live region, always there, holding only the short messages** (review A11Y-010): reading, failed,
+ * unknown, not a polity, the anachronism. A region inserted already full is often not announced, and one
+ * wrapping links and buttons would re-read them all; so the summary and the buttons sit outside it.
+ */
+
+/** What the panel needs. */
+export interface WikidataPanelProps {
+  /** What to show. */
+  view: WikidataView
+  /** Take Wikidata's value for a field. */
+  onUse: (field: WikidataField, value: string) => void
+}
+
+/**
+ * Render what Wikidata says, under the form's Wikidata field.
+ * @param props - the view and the click
+ * @returns the panel: the live region always, the facts when an item was found
+ */
+export function WikidataPanel({ view, onUse }: WikidataPanelProps) {
+  // Derived
+  const status = statusOf(view)
+  const warns = view.kind === 'unknown' || view.kind === 'found'
+
+  // Render
+  return (
+    <div className="wikidata-panel">
+      <p role="status" className={warns ? 'wikidata-panel__warning' : 'wikidata-panel__note'}>
+        {status}
+      </p>
+      {view.kind === 'found' && <FoundFacts view={view} onUse={onUse} />}
+    </div>
+  )
+}
