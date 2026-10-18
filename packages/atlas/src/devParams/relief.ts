@@ -44,7 +44,7 @@ export const DEFAULT_RELIEF_PARAMS: ReliefDevParams = {
   exaggZoomIn: 0.35,
   smoothing: 0,
   shoreRamp: 12,
-  plainsCeiling: 575,
+  plainsCeiling: 600,
   peakTarget: 1900,
   wireframe: false,
   segments: 1280,

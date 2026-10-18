@@ -160,28 +160,29 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   // At 0.7 each stroke is 30 % of whatever lies under it, which collapses the casing back toward the
   // fill it is meant to separate from. 0.9 is what makes the line read as a border rather than a scratch.
   borderOpacity: 0.9,
-  borderWidth: 1.4,
+  borderWidth: 2,
   borderEdgeColor: '#5c3a2e',
-  borderEdgeWidth: 3.2,
+  borderEdgeWidth: 4,
   // Back on, having been switched off for a shoreline artefact it turned out not to cause: measured on
   // 1700, the frontier is 3429 inland points against 109 coastal ones — 97 % inland, which is exactly
   // where a limit between a claim and unclaimed ground belongs.
   showFrontier: true,
   frontierColor: '#5c3a2e',
-  frontierOpacity: 0.3,
+  frontierOpacity: 0.75,
   // Thicker than a negotiated border: it is the edge of what the map knows, and reads as an outer limit
   // rather than as a line between two named things.
-  frontierWidth: 2.4,
+  frontierWidth: 2.75,
   // Screen pixels, the same size at every zoom: in world units (0.018, some 16 km) the dashes grew as the
-  // camera came in, *« trop allongés »* (the dev, 2026-10-16). Six and three times the core's width, as
-  // the Cartographer dashes a border (`dashOf` in its painter).
-  borderDashSize: 8,
-  borderDashGap: 4,
-  // Normalized grid units: about two DEM cells apart, which separates without reading as two borders.
-  borderDoubleGap: 0.0016,
-  borderWidthZoomOut: 0.3,
-  borderOpacityZoomOut: 0.55,
-  borderInlayZoom: 0.35,
+  // camera came in, *« trop allongés »* (the dev, 2026-10-16). Retuned by the dev on 2026-10-18, with the
+  // borders made more visible: short dashes, a gap half their length.
+  borderDashSize: 4.5,
+  borderDashGap: 2,
+  // Normalized grid units, the slider's floor: about half a DEM cell — the dev, 2026-10-18, closing the two
+  // strokes up so they read as one line.
+  borderDoubleGap: 0.0002,
+  borderWidthZoomOut: 0.45,
+  borderOpacityZoomOut: 0.6,
+  borderInlayZoom: 0.4,
   colorBySuzerain: false,
   snapToCoast: 12,
   // The shared automatic palette — the Cartographer previews with the same eight (see its JSDoc).

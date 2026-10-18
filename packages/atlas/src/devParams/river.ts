@@ -35,13 +35,16 @@ export interface RiverDevParams {
   widthMinor: number
 }
 
-/** Same sepia ink as the coastline — one hand drew the whole map. Minor tributaries appear on zoom-in. */
+/**
+ * Same sepia ink as the coastline — one hand drew the whole map. Every rank is drawn from the farthest zoom,
+ * as in the Cartographer (the dev, 2026-10-18): `revealEnd` at 0 lands the last rank where the first does.
+ */
 export const DEFAULT_RIVER_PARAMS: RiverDevParams = {
   // The look the Cartographer opens with too — one definition, `core/data/riverDisplay.ts`.
   color: RIVER_DISPLAY.ink,
   opacity: RIVER_DISPLAY.opacity,
   revealStart: 0,
-  revealEnd: 0.8,
+  revealEnd: 0,
   fade: 0.25,
   includeLakeCenterlines: RIVER_DISPLAY.includeLakeCenterlines,
   jitter: 0,
