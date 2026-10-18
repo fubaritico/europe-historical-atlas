@@ -144,6 +144,22 @@ Scenario: the white arrow does not insert
 > then a drag with ‹A›. It frees the arrow's click on a stretch for selecting that stretch (`{Line}`, `s13`).
 
 ```gherkin
+Scenario: a border welded point by point, the author's own way
+  Given France's outline runs 1 to 3 km off the Marca's along the Rhône
+  When I drag one of France's anchors onto one of the Marca's, with the white arrow
+  Then it snaps, and the release welds them — "welded onto Marca's anchor"
+  When a weld leaves the outline wrong, an anchor too many between two welds
+  Then I delete that anchor and weld again — the correction is the same two gestures
+  And a long stretch is retraced along the Marca's anchors with ⟨retrace⟩, which shares them all
+```
+
+> **Walked, and the dev's way of working, 2026-10-18** — *« j'aimante point par point. Ça va déjà très vite. C'est
+> très ergonomique »*: select an anchor, bring it against another, and when a weld goes wrong, delete points and do
+> it again. **The editor's formula, his words**: *« on sélectionne un pays à la fois, et on fait une chose à la
+> fois »* — no selection spanning several outlines, as Illustrator's marquee gives, which gets in the way in a dense
+> drawing. Snapping a whole selection at once is therefore **not built** (`s99`, `H-37`).
+
+```gherkin
 Scenario: delete an anchor
   Given ⟨edit⟩ is active
   When I click a handle to select it

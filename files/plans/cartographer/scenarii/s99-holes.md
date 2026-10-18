@@ -564,8 +564,19 @@ tests unchanged and green).
 > **Built 2026-10-14, the dev's call** (*« ça donne la frontière, ça fusionne les points »*): the white arrow
 > drags an anchor of the target alone; near another polity's anchor it snaps onto it and the release welds
 > them (`weldAnchor`), near another polity's stretch it snaps onto it and the release threads it into the
-> neighbour's ring (`threadAnchor`). One step, said in the result. **Second half, to come**: snapping a
-> whole selection onto a neighbour's border at once.
+> neighbour's ring (`threadAnchor`). One step, said in the result. ~~**Second half, to come**: snapping a
+> whole selection onto a neighbour's border at once.~~
+>
+> **Second half dropped, the dev's call, 2026-10-18** (`s03`, *a border welded point by point*): one polity at a
+> time, one thing at a time; welding point by point and ⟨retrace⟩ along the neighbour cover it. Snapping a
+> selection's anchors onto a border only shares the anchors welded — between two of them the neighbour keeps
+> points the target lacks, and the sliver `H-06` forbids comes back; sharing a whole stretch means taking the
+> neighbour's run, which is what ⟨retrace⟩ does. **Kept as an idea for later — CARTO-254**: an *origin* outline
+> welded onto a *target* one, the origin taking the target's points. What the computation asks, measured on
+> paper: find where the two outlines run close (a threshold — too wide swallows a peninsula, a fjord, the other
+> bank), pair the two runs in order without stepping back (Fréchet's family — the core), replace without breaking
+> a junction with a third polity, a carved vassal or an override, then preview, validate (`H-46`) and undo as one
+> step. **Open**: the threshold; selecting two outlines without bringing back a common selection; junctions.
 
 One click at the Petit Rhône mouth took a river vertex 2.3 km from France's, so the two outlines do not
 meet between Avignon and the sea. Moving one onto the other with the arrow makes them coincide without
