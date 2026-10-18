@@ -5,7 +5,7 @@ import { useSyncExternalStore } from 'react'
 
 import { autofocusOnOpen } from '../shared/hooks/autofocusOnOpen'
 
-import type { DraftOffers } from '../../persistence/draftOffers'
+import type { DraftOffers } from '../../persistence/draft/draftOffers'
 
 /**
  * The question asked at the opening when the previous session left a draft — work it never saved

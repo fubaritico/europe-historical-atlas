@@ -1,6 +1,6 @@
 import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import { reasonOf } from './errorReason'
+import { reasonOf } from '../errorReason'
 
 import type { Draft, DraftStore, SnapshotSink } from './draftStore'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'

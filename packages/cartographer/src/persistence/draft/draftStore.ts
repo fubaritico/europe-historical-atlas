@@ -1,4 +1,4 @@
-import { refusalReason } from './yearArchive'
+import { refusalReason } from '../yearArchive'
 
 /**
  * Where the editor keeps its draft — the work since the last ‹ctrl+S› (CARTO-238).

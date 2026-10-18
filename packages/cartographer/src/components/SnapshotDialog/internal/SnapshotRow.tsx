@@ -1,6 +1,6 @@
 import { timeWords } from '../../../persistence/timeWords'
 
-import type { SnapshotEntry } from '../../../persistence/draftStore'
+import type { SnapshotEntry } from '../../../persistence/draft/draftStore'
 
 /**
  * One snapshot to choose, worded by its time.

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import { openEmptyYear } from '../state/openEmptyYear'
+import { openEmptyYear } from '../../state/openEmptyYear'
 
 import { offerDraft } from './draftRecovery'
 

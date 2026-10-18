@@ -1,6 +1,6 @@
-import { reasonOf } from './errorReason'
-import { timeWords } from './timeWords'
-import { documentFromFiles } from './yearArchive'
+import { reasonOf } from '../errorReason'
+import { timeWords } from '../timeWords'
+import { documentFromFiles } from '../yearArchive'
 
 import type { DraftOffer } from './draftOffers'
 import type { Draft, DraftStore } from './draftStore'

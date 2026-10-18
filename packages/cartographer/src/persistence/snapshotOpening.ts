@@ -4,7 +4,7 @@ import { reasonOf } from './errorReason'
 import { timeWords } from './timeWords'
 import { documentFromFiles } from './yearArchive'
 
-import type { SnapshotSink, SnapshotSource } from './draftStore'
+import type { SnapshotSink, SnapshotSource } from './draft/draftStore'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /**

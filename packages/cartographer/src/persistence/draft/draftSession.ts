@@ -1,4 +1,4 @@
-import { reasonOf } from './errorReason'
+import { reasonOf } from '../errorReason'
 
 import type { DraftKeeper } from './draftKeeper'
 import type { RecoveryOutcome } from './draftRecovery'

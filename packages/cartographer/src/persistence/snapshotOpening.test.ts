@@ -7,7 +7,7 @@ import { openEmptyYear } from '../state/openEmptyYear'
 
 import { openSnapshot } from './snapshotOpening'
 
-import type { Draft, SnapshotSink, SnapshotSource } from './draftStore'
+import type { Draft, SnapshotSink, SnapshotSource } from './draft/draftStore'
 import type { SnapshotOpeningDeps } from './snapshotOpening'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 

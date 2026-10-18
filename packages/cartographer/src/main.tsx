@@ -22,11 +22,15 @@ import { listenForStackingKeys } from './components/shared/stackingShortcut'
 import { SnapshotDialog } from './components/SnapshotDialog'
 import { DRAFTS_FOLDER, DRAFT_ROUTE } from './devServer/draftRoute'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
-import { DRAFT_DELAY_MS, SNAPSHOT_EVERY_MS, createDraftKeeper } from './persistence/draftKeeper'
-import { createDraftOffers } from './persistence/draftOffers'
-import { offerDraft } from './persistence/draftRecovery'
-import { openWithDraft, saveAndClearDraft } from './persistence/draftSession'
-import { createDevServerDraftStore } from './persistence/draftStore'
+import {
+  DRAFT_DELAY_MS,
+  SNAPSHOT_EVERY_MS,
+  createDraftKeeper,
+} from './persistence/draft/draftKeeper'
+import { createDraftOffers } from './persistence/draft/draftOffers'
+import { offerDraft } from './persistence/draft/draftRecovery'
+import { openWithDraft, saveAndClearDraft } from './persistence/draft/draftSession'
+import { createDevServerDraftStore } from './persistence/draft/draftStore'
 import { createQuestionRelay } from './persistence/questionRelay'
 import { createResultRelay } from './persistence/resultRelay'
 import { installSaveShortcut } from './persistence/saveShortcut'
@@ -43,7 +47,7 @@ import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataS
 // Every sheet, in order, through one module the workbench imports too — see `styles/sheets.ts`.
 import './styles/sheets'
 
-import type { SnapshotEntry } from './persistence/draftStore'
+import type { SnapshotEntry } from './persistence/draft/draftStore'
 import type { OverwriteQuestion } from './persistence/yearSession'
 import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
@@ -221,7 +225,7 @@ const yearSession = createYearSession({
  * **The order is the whole point, and it is one chain**: open the year, *then* offer the draft the previous
  * session left, *then* start keeping drafts. Started any earlier, the keeper's first write would overwrite
  * the draft the offer exists to give back — and it starts only when the offer leaves the way clear
- * (`persistence/draftSession.ts`).
+ * (`persistence/draft/draftSession.ts`).
  */
 const drafts = createDevServerDraftStore({
   fetch: (input, init) => fetch(input, init),

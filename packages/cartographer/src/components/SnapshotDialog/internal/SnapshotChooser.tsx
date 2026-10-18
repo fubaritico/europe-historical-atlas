@@ -7,7 +7,7 @@ import { autofocusOnOpen } from '../../shared/hooks/autofocusOnOpen'
 
 import { SnapshotList } from './SnapshotList'
 
-import type { SnapshotEntry, SnapshotSource } from '../../../persistence/draftStore'
+import type { SnapshotEntry, SnapshotSource } from '../../../persistence/draft/draftStore'
 import type { Listing } from '../listing'
 
 /** What the dialogue warns, every time it opens. */

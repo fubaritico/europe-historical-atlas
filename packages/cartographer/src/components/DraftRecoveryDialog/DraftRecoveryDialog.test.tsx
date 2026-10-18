@@ -2,7 +2,7 @@ import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 
-import { createDraftOffers } from '../../persistence/draftOffers'
+import { createDraftOffers } from '../../persistence/draft/draftOffers'
 
 import { DraftRecoveryDialog } from './DraftRecoveryDialog'
 

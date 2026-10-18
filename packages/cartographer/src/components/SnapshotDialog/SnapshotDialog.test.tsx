@@ -6,7 +6,7 @@ import { createSnapshotPicker } from '../shared/snapshotPicker'
 
 import { SnapshotDialog } from './SnapshotDialog'
 
-import type { SnapshotEntry } from '../../persistence/draftStore'
+import type { SnapshotEntry } from '../../persistence/draft/draftStore'
 
 /** The present every test is set in: the afternoon of 2026-10-18, local time. */
 const NOW = new Date(2026, 9, 18, 16, 30)

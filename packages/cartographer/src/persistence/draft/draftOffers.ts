@@ -1,6 +1,6 @@
-import { createQuestionRelay } from './questionRelay'
+import { createQuestionRelay } from '../questionRelay'
 
-import type { QuestionRelay } from './questionRelay'
+import type { QuestionRelay } from '../questionRelay'
 
 /**
  * The question *"resume the draft?"*, asked by the opening and answered in a dialogue (CARTO-238) — a

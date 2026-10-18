@@ -1,4 +1,4 @@
-import type { SnapshotEntry } from '../../persistence/draftStore'
+import type { SnapshotEntry } from '../../persistence/draft/draftStore'
 
 /** The list as it stands: being read, read, or not readable. */
 export type Listing =
