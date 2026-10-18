@@ -70,6 +70,8 @@ packages/
 │   ├── workbench.html      # the workbench: chrome pieces mounted alone, never built (2026-10-09)
 │   └── src/                # 2D canvas and React chrome; styles/sheets.ts holds the one stylesheet order
 │       ├── viewport/       # the screen↔backdrop arithmetic: projection, framing, zoom, reach — pure
+│       ├── canvas/         # the controller and the live canvas at the root; tools/ (gestures, snaps),
+│       │                   #   paint/ (painters, scene, style, cursors), history/ (undo keys and relay)
 │       └── components/     # one folder per component: <Name>/<Name>.tsx and its test at the root,
 │                           #   hooks/ (its own hooks), internal/ (its own children), index.ts (2026-10-18)
 └── eslint-plugin-eha/  # the lint rules of this repository: where each declaration sits (2026-10-12)
@@ -208,7 +210,7 @@ pattern is not available by default — which is worth keeping, but it is not th
 
 | what | Cartographer | atlas |
 | --- | --- | --- |
-| a polity's fill | a vector path from the outline, composited `overlay` on the backdrop (`canvas/painter.ts`): the edge is exact | cut from the same outline into triangles on the relief's planes (`pipeline/fillTriangles`, atlas `scene/fillLayer`), blended in a shader: the edge is exact too since 2026-10-16 |
+| a polity's fill | a vector path from the outline, composited `overlay` on the backdrop (`canvas/paint/painter.ts`): the edge is exact | cut from the same outline into triangles on the relief's planes (`pipeline/fillTriangles`, atlas `scene/fillLayer`), blended in a shader: the edge is exact too since 2026-10-16 |
 | the relief | a flat image | a 3D mesh, with the shore ramp (`data/shoreRamp`) |
 | how a border is stroked | canvas strokes, every hand | three.js lines from `editor/borderHands`' table, minus weight and a dotted pattern (`known-issues-atlas.md`) |
 | a tribe | no fill, a dashed outline (`editor/tribes`), canvas dashes | the same rule from `editor/atlasBorders`, dashes in screen pixels (`scene/screenScale`) |

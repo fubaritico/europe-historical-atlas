@@ -3,8 +3,7 @@ import { screenToLonLatOnBackdrop } from '../viewport/projection'
 import { panBy, zoomAbout } from '../viewport/viewport'
 
 import { createAnchorCache } from './anchorCache'
-import { arrowDoubleClick } from './arrowDoubleClick'
-import { hearPageHistory, onModifiedKey } from './historyAnswer'
+import { hearPageHistory, onModifiedKey } from './history/historyAnswer'
 import {
   bordersOf,
   coloursOf,
@@ -27,20 +26,21 @@ import {
   scaleLimitsFor,
   wheelZoomFactor,
 } from './navigation'
-import { paintCanvas } from './painter'
-import { pencilCancel, pencilDrag, pencilEnd, pencilStart } from './pencil'
-import { buildScene } from './scene'
-import { inDevicePixels } from './style'
-import { arrowDrag, arrowPress, resolvedTarget, toolKey } from './toolGestures'
+import { paintCanvas } from './paint/painter'
+import { buildScene } from './paint/scene'
+import { inDevicePixels } from './paint/style'
+import { arrowDoubleClick } from './tools/arrowDoubleClick'
+import { pencilCancel, pencilDrag, pencilEnd, pencilStart } from './tools/pencil'
+import { arrowDrag, arrowPress, resolvedTarget, toolKey } from './tools/toolGestures'
 import {
   listenForPageSpace,
   onToolKey,
   pencilInHand,
   pressHeldKey,
   releaseHeldKey,
-} from './toolKeys'
-import { keyRefusedFromAfar, releaseTool } from './toolRelease'
-import { dropDrag, idleSession, targetHandles } from './toolSession'
+} from './tools/toolKeys'
+import { keyRefusedFromAfar, releaseTool } from './tools/toolRelease'
+import { dropDrag, idleSession, targetHandles } from './tools/toolSession'
 
 import type { CanvasControllerDeps, LiveCanvas } from './liveCanvas'
 import type { Viewport } from '../viewport/viewport'

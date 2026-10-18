@@ -13,19 +13,24 @@ import { lonLatToScreen, remapToScreen } from '../viewport/projection'
 import { closeEnoughToEdit, snapReachKm } from '../viewport/toolReach'
 import { backdropToScreen } from '../viewport/viewport'
 
-import { penInsertHit } from './anchorGestures'
-import { anchorHit, anchorSentence, borderRunTo, waterTaking } from './borderSnap'
-import { cursorCss, cursorFor } from './cursors'
 import { featureUnder } from './featureUnder'
-import { frameEdgeUnder } from './frameSnap'
-import { followedLayer, layerLines, lineLabel, snapHit } from './layerHits'
 import { HANDLE_HIT_RADIUS } from './navigation'
-import { paintOverlay } from './overlayPainter'
-import { retraceAnchorUnder, retraceView } from './retrace'
-import { projectedTerritories } from './scene'
-import { snapLayersOf } from './snapLayers'
-import { inDevicePixels } from './style'
-import { outlineOnScreen, resolvedTarget, selectionMoves, snapStretchTo } from './toolGestures'
+import { cursorCss, cursorFor } from './paint/cursors'
+import { paintOverlay } from './paint/overlayPainter'
+import { projectedTerritories } from './paint/scene'
+import { inDevicePixels } from './paint/style'
+import { penInsertHit } from './tools/anchorGestures'
+import { anchorHit, anchorSentence, borderRunTo, waterTaking } from './tools/borderSnap'
+import { frameEdgeUnder } from './tools/frameSnap'
+import { followedLayer, layerLines, lineLabel, snapHit } from './tools/layerHits'
+import { retraceAnchorUnder, retraceView } from './tools/retrace'
+import { snapLayersOf } from './tools/snapLayers'
+import {
+  outlineOnScreen,
+  resolvedTarget,
+  selectionMoves,
+  snapStretchTo,
+} from './tools/toolGestures'
 import {
   actionSentence,
   extentHandles,
@@ -34,16 +39,16 @@ import {
   penSnapAnchors,
   ringNeighbours,
   targetHandles,
-} from './toolSession'
-import { closingStretch } from './waterClosing'
-import { weldTargetOnScreen } from './weldGestures'
+} from './tools/toolSession'
+import { closingStretch } from './tools/waterClosing'
+import { weldTargetOnScreen } from './tools/weldGestures'
 
 import type { AnchorCache } from './anchorCache'
-import type { HistoryRelay } from './historyRelay'
-import type { PaintStyle, Painter2D } from './painter'
-import type { RetraceView } from './retrace'
-import type { GestureContext } from './toolGestures'
-import type { SnapLayer, ToolSession } from './toolSession'
+import type { HistoryRelay } from './history/historyRelay'
+import type { PaintStyle, Painter2D } from './paint/painter'
+import type { RetraceView } from './tools/retrace'
+import type { GestureContext } from './tools/toolGestures'
+import type { SnapLayer, ToolSession } from './tools/toolSession'
 import type { PolityColourSource } from '../state/polityColourSource'
 import type { CartographerStoreHook } from '../state/store'
 import type { VectorLayers } from '../vectorLayers'

@@ -4,12 +4,12 @@
  * ‹shift› all the way to the front or the back (‹ctrl› off a Mac). The keys he proposed, shown in the
  * menu beside each command.
  *
- * **Heard on the page**, as ‹ctrl+Z› is (`canvas/historyShortcut`), since the move is repeated from the list
+ * **Heard on the page**, as ‹ctrl+Z› is (`canvas/history/historyShortcut`), since the move is repeated from the list
  * as much as from the map; left to a text field and to an open dialogue, which keep their own keys (‹cmd+↑›
  * goes to the start of a field). The canvas and the list leave a modified arrow alone so it reaches here.
  */
 
-import { keepsItsOwnKeys } from '../../canvas/historyShortcut'
+import { keepsItsOwnKeys } from '../../canvas/history/historyShortcut'
 
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
 

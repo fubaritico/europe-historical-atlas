@@ -11,8 +11,7 @@ import { UNFRAMED } from '../viewport/viewport'
 import { screenToBackdrop } from '../viewport/viewport'
 
 import { startCanvasController } from './controller'
-import { cursorCss } from './cursors'
-import { createHistoryRelay } from './historyRelay'
+import { createHistoryRelay } from './history/historyRelay'
 import { coloursOf } from './liveCanvas'
 import {
   DRAG_TOLERANCE,
@@ -21,10 +20,11 @@ import {
   scaleLimitsFor,
   wheelZoomFactor,
 } from './navigation'
-import { CHROME_PAINT_STYLE } from './style'
+import { cursorCss } from './paint/cursors'
+import { CHROME_PAINT_STYLE } from './paint/style'
 import { drawOutlineAt } from './testGestureContext'
 
-import type { HistoryRelay } from './historyRelay'
+import type { HistoryRelay } from './history/historyRelay'
 import type { SnapLine } from '../geometry/lineSnap'
 import type { CartographerStoreHook } from '../state/store'
 import type { PenMode } from '../state/toolSlice'

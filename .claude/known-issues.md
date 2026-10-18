@@ -134,7 +134,7 @@ Put here the know issues to avoid cluttering the context window.
   juste. Remède le jour où une troisième touche tenue arrive : un seul objet pour les touches tenues, nourri par les
   deux écoutes.
   **Architecture** : (6) ~~« côte ou fleuve » sur cinq aiguillages~~ — **fait le 12/10** : une table
-  par couche (`canvas/snapLayers.ts`), la géométrie renommée `lineSnap`. (7)
+  par couche (`canvas/tools/snapLayers.ts`), la géométrie renommée `lineSnap`. (7)
   `paintRanks` est recalculé à chaque repeinture — ~50 pays, négligeable ; à mettre en cache par
   version si le document grossit. **Sévérité : à savoir.**
 - **Le menu d'empilement de `{Polities}` (11/10) a une limite connue, laissée ouverte.** — CARTO-122

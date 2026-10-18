@@ -11,8 +11,8 @@ import { DEFAULT_TERRAIN_OPTIONS } from '@europe-historical-atlas/core/pipeline/
 import { createWorkerMapCompute } from '@europe-historical-atlas/core/pipeline/workerCompute'
 
 import { bakeToBitmap, loadBackdrop } from './backdropSource'
-import { createHistoryRelay } from './canvas/historyRelay'
-import { CHROME_PAINT_STYLE } from './canvas/style'
+import { createHistoryRelay } from './canvas/history/historyRelay'
+import { CHROME_PAINT_STYLE } from './canvas/paint/style'
 import { DraftRecoveryDialog } from './components/DraftRecoveryDialog'
 import { Editor } from './components/Editor'
 import { OverwriteDialog } from './components/OverwriteDialog'

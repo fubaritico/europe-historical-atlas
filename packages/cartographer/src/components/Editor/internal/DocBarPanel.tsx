@@ -2,7 +2,7 @@ import { zoomLabel } from '../../../viewport/zoomLabel'
 
 import { DocBar } from './DocBar'
 
-import type { HistoryRelay } from '../../../canvas/historyRelay'
+import type { HistoryRelay } from '../../../canvas/history/historyRelay'
 import type { CartographerStoreHook } from '../../../state/store'
 
 /**

@@ -28,7 +28,7 @@ afterEach(() => {
  * cannot give one cannot run this editor. Without this stub, every test that mounts the real entry would
  * fail on an environment limitation rather than on anything about the application.
  *
- * It records nothing on purpose: what the painter draws is asserted in `canvas/painter.test.ts` against a
+ * It records nothing on purpose: what the painter draws is asserted in `canvas/paint/painter.test.ts` against a
  * recording fake, where the assertions belong. This one only has to exist.
  */
 /** What every member of the inert context is. */

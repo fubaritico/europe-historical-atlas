@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import { createHistoryRelay } from '../../../canvas/historyRelay'
+import { createHistoryRelay } from '../../../canvas/history/historyRelay'
 import { openEmptyYear } from '../../../state/openEmptyYear'
 import { createCartographerStore } from '../../../state/store'
 import { UNFRAMED } from '../../../viewport/viewport'
