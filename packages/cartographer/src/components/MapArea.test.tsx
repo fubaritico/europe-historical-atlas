@@ -77,7 +77,6 @@ function mount(load: BackdropLoad, strict = false): HTMLParagraphElement {
       store={store()}
       load={load}
       style={CHROME_PAINT_STYLE}
-      zoneLabel="zone"
       label="la carte"
       statusRef={statusRef}
       actionRef={{ current: document.createElement('span') }}
@@ -437,7 +436,6 @@ describe('MapCanvas, re-rendered', () => {
           history={createHistoryRelay()}
           landMask={TEST_LAND_MASK}
           style={CHROME_PAINT_STYLE}
-          zoneLabel="zone"
           label="la carte"
         />
       )

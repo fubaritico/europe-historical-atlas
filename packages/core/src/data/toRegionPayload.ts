@@ -8,9 +8,8 @@
  * **Three conversions here are not obvious, and each would have failed quietly:**
  *
  * 1. **The bounding box is the caller's, never the file's.** `RegionPayload.bbox` is what `projectRegions`
- *    projects lon/lat against, so it has to be the *render* frame — the DEM's. A year's `editorialZone` is
- *    deliberately a different box (`format.md`), and using it would slide every border off the terrain it
- *    belongs to. Hence a parameter.
+ *    projects lon/lat against, so it has to be the *render* frame — the DEM's, which the year file does not
+ *    carry. Hence a parameter.
  * 2. **Rings are closed on the way out.** Ours are index lists with closure implied; `projectRegions` drops
  *    any ring under four points, GeoJSON-style, where the first vertex is repeated last. A triangle — three
  *    indices, legal in our format — would vanish with nothing said.
@@ -89,7 +88,7 @@ function toRegion(
 /**
  * Adapt one authored year to a {@link RegionPayload}.
  * @param year - the year, already cross-checked by `assembleAuthoredYear`
- * @param bbox - the **render** frame to project against, which is the DEM's and not the editorial zone
+ * @param bbox - the **render** frame to project against, which is the DEM's
  * @returns the payload, ready for `projectRegions`
  */
 export function toRegionPayload(year: AuthoredYear, bbox: GeoBounds): RegionPayload {

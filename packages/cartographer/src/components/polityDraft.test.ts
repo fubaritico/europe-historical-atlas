@@ -261,7 +261,7 @@ describe('suzerainChoices', () => {
   describe('unmanaged errors', () => {
     // The form never offers what the document refuses, nor hides what it accepts (review ARCH-001).
     it('offers exactly the suzerains the document accepts, for every polity of the year', () => {
-      const doc = createYearDocument(1100, { west: -45, south: 20, east: 60, north: 76 })
+      const doc = createYearDocument(1100)
       doc.polities = year
       for (const edited of year) {
         const offered = new Set(suzerainChoices(year, edited.id).map((choice) => choice.value))

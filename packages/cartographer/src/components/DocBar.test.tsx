@@ -31,12 +31,10 @@ function mount(overrides: Partial<DocBarProps> = {}): DocBarProps {
 
 describe('DocBar', () => {
   describe('happy path', () => {
-    it('names the open year and its frame in the tab', () => {
+    it('names the open year in the tab, its zoom beside it', () => {
       mount()
       expect(document.querySelector('.doc-tab__name')?.textContent).toBe('1100')
-      expect(document.querySelector('.doc-tab__meta')?.textContent).toBe(
-        '@ — (1100 / editorial zone)'
-      )
+      expect(document.querySelector('.doc-tab__meta')?.textContent).toBe('@ —')
     })
 
     it('undoes on the Undo button, naming the gesture it takes back', async () => {

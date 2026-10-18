@@ -8,7 +8,6 @@ import { createYearDocument } from './yearDocument'
 import type { YearDocument } from './yearDocument'
 import type { YearPolity } from '../data/yearFormat'
 
-const zone = { west: -45, south: 20, east: 60, north: 76 }
 const source = [{ id: 0, name: 'reported by eye — Duby (reference)', licence: 'fact' }]
 
 function polity(id: string, suzerain: string | null = null): YearPolity {
@@ -36,7 +35,7 @@ function anchors(doc: YearDocument, points: [number, number][]): number[] {
  * Anchors 1 and 2 are one limit held by two paths — the peer case, named with no further question.
  */
 function sideBySide(): YearDocument {
-  const doc = createYearDocument(1100, zone, source)
+  const doc = createYearDocument(1100, source)
   anchors(doc, [
     [0, 10],
     [10, 10],
@@ -60,7 +59,7 @@ function sideBySide(): YearDocument {
  * of France.
  */
 function vassalInside(): YearDocument {
-  const doc = createYearDocument(1100, zone, source)
+  const doc = createYearDocument(1100, source)
   anchors(doc, [
     [0, 100],
     [100, 100],
@@ -143,7 +142,7 @@ describe('collectBorderEdges', () => {
 
   describe('edge cases', () => {
     it('finds nothing in a document with no claim', () => {
-      expect(collectBorderEdges(createYearDocument(1100, zone)).size).toBe(0)
+      expect(collectBorderEdges(createYearDocument(1100)).size).toBe(0)
     })
   })
 })
@@ -179,14 +178,14 @@ describe('borderRunsOf', () => {
 
   describe('managed errors', () => {
     it('returns nothing for a document with nothing drawn', () => {
-      expect(borderRunsOf(createYearDocument(1100, zone))).toEqual([])
+      expect(borderRunsOf(createYearDocument(1100))).toEqual([])
     })
   })
 
   describe('unmanaged errors', () => {
     it('stops a chain at a pinch rather than choosing a direction arbitrarily', () => {
       // Three edges of the same owner meeting at one point: two runs is right, one wrong run is not.
-      const doc = createYearDocument(1100, zone, source)
+      const doc = createYearDocument(1100, source)
       anchors(doc, [
         [0, 0],
         [10, 0],
@@ -251,7 +250,7 @@ describe('deriveBorders', () => {
     // H-44, 2026-10-15: the Empire's own ring, cleared by hand from under Bohemia, still ran along Bohemia's
     // limit with unclaimed ground — no width — and that limit came out dotted, Bohemia against the Empire.
     it('ignores a lord whose outline runs along its vassal with no ground behind it', () => {
-      const doc = createYearDocument(1100, zone, source)
+      const doc = createYearDocument(1100, source)
       anchors(doc, [
         [0, 10],
         [10, 10],
@@ -370,7 +369,7 @@ describe('deriveBorders', () => {
 
   describe('unmanaged errors', () => {
     it('derives nothing from a document with nothing drawn', () => {
-      expect(deriveBorders(createYearDocument(1100, zone))).toEqual([])
+      expect(deriveBorders(createYearDocument(1100))).toEqual([])
     })
 
     it('survives a claim naming a polity the registry lacks', () => {
@@ -407,7 +406,7 @@ describe('deriveBorders', () => {
  * by eye (source 0): `0 (0,10) → 1 (10,10) → 2 (10,0) → 3 (0,0)`. North and east are sides 0→1 and 1→2.
  */
 function coastAndLand(clockwise = true): YearDocument {
-  const doc = createYearDocument(1100, zone, [
+  const doc = createYearDocument(1100, [
     ...source,
     { id: 1, name: 'Natural Earth 10m land minus lakes', licence: 'public domain' },
   ])
@@ -496,7 +495,7 @@ describe('deriveBorders — the far side, segment by segment', () => {
 
 /** France and the Empire sharing a three-segment limit, 1 → 6 → 7 → 2. */
 function longShared(): YearDocument {
-  const doc = createYearDocument(1100, zone, source)
+  const doc = createYearDocument(1100, source)
   anchors(doc, [
     [0, 10],
     [10, 10],
@@ -537,7 +536,7 @@ describe('deriveBorders — a run override dresses its own segments only', () =>
 
 /** A document holding one anchor under the coast's own source, and its sources table. */
 function shoreDocument(): YearDocument {
-  const doc = createYearDocument(1100, zone, [...source, { id: 1, name: 'Shore', licence: 'CC0' }])
+  const doc = createYearDocument(1100, [...source, { id: 1, name: 'Shore', licence: 'CC0' }])
   addAnchor(doc, [0, 0], 1)
   return doc
 }

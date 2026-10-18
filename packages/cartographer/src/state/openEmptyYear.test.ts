@@ -1,14 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { EDITORIAL_ZONE, openEmptyYear } from './openEmptyYear'
+import { openEmptyYear } from './openEmptyYear'
 
 describe('openEmptyYear', () => {
   describe('happy path', () => {
-    it('opens the asked-for year, in the editorial zone, with nothing drawn', () => {
+    it('opens the asked-for year with nothing drawn', () => {
       const document = openEmptyYear(1100)
 
       expect(document.year).toBe(1100)
-      expect(document.editorialZone).toEqual(EDITORIAL_ZONE)
       expect(document.anchors).toEqual([])
       expect(document.polities).toEqual([])
       expect(document.claims).toEqual([])
@@ -23,10 +22,6 @@ describe('openEmptyYear', () => {
     it('covers the span the atlas maps, one century at each end', () => {
       expect(openEmptyYear(1).year).toBe(1)
       expect(openEmptyYear(2000).year).toBe(2000)
-    })
-
-    it('holds the zone the polities of 1100 were measured against', () => {
-      expect(EDITORIAL_ZONE).toEqual({ west: -45, south: 20, east: 60, north: 76 })
     })
   })
 
@@ -44,20 +39,15 @@ describe('openEmptyYear', () => {
       const first = openEmptyYear(1100)
       const second = openEmptyYear(1100)
 
-      first.editorialZone.west = 0
+      first.anchors.push([0, 0])
 
-      expect(second.editorialZone.west).toBe(-45)
-      expect(EDITORIAL_ZONE.west).toBe(-45)
+      expect(second.anchors).toEqual([])
     })
   })
 
   describe('edge cases', () => {
-    it('does not let an edited document write back into the shared zone', () => {
-      const document = openEmptyYear(1100)
-
-      document.editorialZone.north = 0
-
-      expect(EDITORIAL_ZONE.north).toBe(76)
+    it('opens year zero, which the calendar skips but a number may hold', () => {
+      expect(openEmptyYear(0).year).toBe(0)
     })
   })
 })

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { paintOrder } from '../data/paintOrder'
 
-import { FIXTURE_SOURCES, FIXTURE_ZONE } from './documentFixtures'
+import { FIXTURE_SOURCES } from './documentFixtures'
 import { availableMoves, restack } from './stacking'
 import { createYearDocument } from './yearDocument'
 
@@ -35,7 +35,7 @@ function polity(id: string, suzerain: string | null = null): YearPolity {
  * @returns the document
  */
 function yearOf(...polities: YearPolity[]): YearDocument {
-  const doc = createYearDocument(1100, FIXTURE_ZONE, FIXTURE_SOURCES)
+  const doc = createYearDocument(1100, FIXTURE_SOURCES)
   doc.polities = polities
   return doc
 }

@@ -1,11 +1,10 @@
 /**
  * The view of the backdrop, as data — screen ↔ backdrop, pan, and zoom about a point.
  *
- * **The frame is the backdrop's, not the editorial zone's** (decided 2026-09-29, before a line was
- * written). The baked terrain is the only thing georeferenced *by construction* — it is literally the
- * atlas's output image — so the canvas's coordinate system is its pixel grid. The editorial zone
- * (lon −45…60, lat 20…76) is a rectangle **drawn on top**; projecting against one while painting the
- * other slides everything with no error anywhere. See `known-issues.md`, "two geographic boxes".
+ * **The frame is the backdrop's** (decided 2026-09-29, before a line was written). The baked terrain is
+ * the only thing georeferenced *by construction* — it is literally the atlas's output image — so the
+ * canvas's coordinate system is its pixel grid. Projecting against any other box while painting this one
+ * would slide everything with no error anywhere.
  *
  * **One scalar scale, and that is measured rather than assumed.** The backdrop is a Web Mercator raster
  * (zoom-5 tiles), and its pixels are square in projected space to within **0.031 %** — 592.635 screen
@@ -57,7 +56,7 @@ export interface Viewport {
  *
  * Scale zero, which draws nothing — **deliberately not a plausible view**. The canvas cannot know what
  * fits until it has a size, so the composition root opens the store on this and the first sizing replaces
- * it with `fitWhole`. Handing over an arbitrary scale instead would show the reader a corner of the map
+ * it with `openingView`. Handing over an arbitrary scale instead would show the reader a corner of the map
  * for one frame and look like a bug in the framing rather than like a view nobody had chosen yet.
  */
 export const UNFRAMED: Viewport = { scale: 0, originX: 0, originY: 0 }

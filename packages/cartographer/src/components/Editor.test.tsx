@@ -53,7 +53,6 @@ function mount(results = createResultRelay()): void {
       })}
       load={() => new Promise(() => undefined)}
       style={CHROME_PAINT_STYLE}
-      zoneLabel="editorial zone — 1100"
       label="Map of the year 1100, being edited"
       heading={<h1>Cartographer — year 1100</h1>}
       name="Europe Historical Atlas Cartographer"
@@ -151,10 +150,9 @@ describe('Editor', () => {
       )
     })
 
-    it('passes the area the names and the style it needs, unchanged', () => {
+    it('passes the area its label and the style it needs, unchanged', () => {
       mount()
 
-      expect(handed?.zoneLabel).toBe('editorial zone — 1100')
       expect(handed?.label).toBe('Map of the year 1100, being edited')
       expect(handed?.style).toBe(CHROME_PAINT_STYLE)
     })

@@ -22,8 +22,7 @@ import type { BackdropFrame } from './projection'
  * sources and asserts it: a production import would reinstate exactly the defect this rename removed,
  * and a comment asking nicely would not have stopped it.
  *
- * It is the render frame, not the editorial zone. The DEM reaches down to 11.18°N and out to 78.75°E;
- * the zone the author draws in is narrower (lon −45…60, lat 20…76) and is a rectangle *drawn on top*.
+ * It is the render frame: the DEM reaches down to 11.18°N and out to 78.75°E.
  */
 export const TEST_BACKDROP_FRAME: BackdropFrame = {
   size: { width: 1280, height: 1164 },

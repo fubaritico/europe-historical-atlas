@@ -24,16 +24,15 @@ import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
  * where the backdrop paints it — which is exactly the failure `known-issues.md` describes under "two
  * geographic boxes", except on the other axis.
  *
- * **The frame is the backdrop's, never the editorial zone's** (decided 2026-09-29). The baked terrain is
- * georeferenced by construction — it *is* the atlas's output image — so its bounds are the reference.
- * The editorial zone is a rectangle drawn on top.
+ * **The frame is the backdrop's** (decided 2026-09-29). The baked terrain is georeferenced by
+ * construction — it *is* the atlas's output image — so its bounds are the reference, and the only box.
  */
 
 /** The backdrop as a coordinate system: how many pixels, and what ground they cover. */
 export interface BackdropFrame {
   /** The backdrop's size, in its own pixels. */
   size: PixelSize
-  /** The ground it covers — the DEM's bounds, never the editorial zone's. */
+  /** The ground it covers — the DEM's bounds. */
   bounds: GeoBounds
 }
 

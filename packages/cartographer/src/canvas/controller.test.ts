@@ -133,7 +133,6 @@ function attach(maxSnapReachKm = Infinity): {
     onResult: resulted,
     maxSnapReachKm,
     style: CHROME_PAINT_STYLE,
-    zoneLabel: 'zone',
     overlay: document.createElement('canvas'),
     colours: createPolityColourSource(AUTOMATIC_PALETTE),
     history,
@@ -149,9 +148,9 @@ afterEach(() => {
 /**
  * Put the view in the MIDDLE of what the hold allows, so a pan is a pan and not a clamp.
  *
- * **Needed since the hold landed, 2026-10-08.** The opening view is pinned against the backdrop's
- * western edge — the editorial zone begins at −45°, which is exactly where the backdrop begins — so a
- * pan eastward from it moves nothing, and every pan test read as a failure of panning.
+ * **Needed since the hold landed, 2026-10-08.** The opening view shows the whole backdrop at cover, so on
+ * one axis it meets the canvas edge to edge — a pan along that axis moves nothing, and every pan test
+ * read as a failure of panning.
  *
  * **The middle, and the first version of this helper got that wrong**: at scale 1 the backdrop is
  * 1280×1164 against an 800×600 canvas, so the origin may run from −480 to 0 and from −564 to 0. Placing
@@ -494,7 +493,6 @@ describe('startCanvasController', () => {
           landMask: TEST_LAND_MASK,
           maxSnapReachKm: Infinity,
           style: CHROME_PAINT_STYLE,
-          zoneLabel: 'zone',
           overlay: document.createElement('canvas'),
           colours: createPolityColourSource(AUTOMATIC_PALETTE),
         })
@@ -1331,7 +1329,6 @@ describe('the tools on the canvas', () => {
         landMask: TEST_LAND_MASK,
         maxSnapReachKm: Infinity,
         style: CHROME_PAINT_STYLE,
-        zoneLabel: 'zone',
         overlay,
         colours: createPolityColourSource(AUTOMATIC_PALETTE),
       })
@@ -1409,7 +1406,6 @@ describe('the tools — what the review found', () => {
         landMask: TEST_LAND_MASK,
         maxSnapReachKm: Infinity,
         style: CHROME_PAINT_STYLE,
-        zoneLabel: 'zone',
         overlay,
         colours: createPolityColourSource(AUTOMATIC_PALETTE),
       })
@@ -1746,7 +1742,6 @@ function attachWithShore(
     landMask: TEST_LAND_MASK,
     maxSnapReachKm: Infinity,
     style: CHROME_PAINT_STYLE,
-    zoneLabel: 'zone',
     overlay,
     colours: createPolityColourSource(AUTOMATIC_PALETTE),
   })
@@ -2124,7 +2119,6 @@ describe('the Pen meeting a shared border, on the canvas', () => {
       landMask: TEST_LAND_MASK,
       maxSnapReachKm: Infinity,
       style: CHROME_PAINT_STYLE,
-      zoneLabel: 'zone',
       overlay,
       colours: createPolityColourSource(AUTOMATIC_PALETTE),
     })

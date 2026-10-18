@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from 'vitest'
 
 import {
   AQUITAINE_IDENTITY,
-  FIXTURE_ZONE,
   sharedBorderDocument,
 } from '@europe-historical-atlas/core/editor/documentFixtures'
 import {
@@ -182,7 +181,7 @@ describe('toolSlice', () => {
       // opening a file does — not on `aimAt` also handing over the Pen, which is guarded elsewhere.
       store.getState().selectTool('draw')
       store.getState().aimAt('fr-couronne')
-      store.getState().open(createYearDocument(1110, FIXTURE_ZONE))
+      store.getState().open(createYearDocument(1110))
 
       // The tool stays in the author's hand; the target stops resolving because the new year does not
       // hold that polity. Opening a file is not a reason to take someone's tool away.

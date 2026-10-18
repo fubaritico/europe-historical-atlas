@@ -1,4 +1,4 @@
-import { backdropBoxOfBounds, clampToCover, openingView } from '../view/framing'
+import { clampToCover, openingView } from '../view/framing'
 import { screenToLonLatOnBackdrop } from '../view/projection'
 import { panBy, zoomAbout } from '../view/viewport'
 
@@ -20,7 +20,6 @@ import {
 } from './liveCanvas'
 import {
   DRAG_TOLERANCE,
-  FRAME_MARGIN,
   KEY_ZOOM_STEP,
   PAN_KEYS,
   ZOOM_IN_KEYS,
@@ -121,7 +120,6 @@ function repaint(it: LiveCanvas): void {
     borders: bordersOf(it),
     layers: state.layers,
     colours: coloursOf(it),
-    zoneLabel: it.deps.zoneLabel,
   })
   paintCanvas(it.ctx, it.size, scene, inDevicePixels(it.deps.style, it.ratio))
 }
@@ -184,17 +182,8 @@ function frameView(it: LiveCanvas): void {
   const state = it.deps.store.getState()
   if (it.size.width <= 0 || it.size.height <= 0) return
   if (state.viewport.scale <= 0) {
-    // The opening view frames the EDITORIAL ZONE, not the backdrop: a third of the backdrop lies east
-    // of 60°E, where the author may not draw. Read off the document, which is the only thing that
-    // declares the zone.
-    state.setViewport(
-      openingView(
-        it.size,
-        it.deps.frame.size,
-        backdropBoxOfBounds(state.document.editorialZone, it.deps.frame),
-        FRAME_MARGIN
-      )
-    )
+    // The opening view shows the whole backdrop at cover — the ground the author may draw anywhere on.
+    state.setViewport(openingView(it.size, it.deps.frame.size))
     return
   }
   // A view already chosen still has to be re-held: growing the window can leave a scale below the new

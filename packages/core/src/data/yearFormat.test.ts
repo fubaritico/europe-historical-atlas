@@ -31,7 +31,6 @@ const registry: YearRegistry = { version: 1, year: 1100, polities: [polity] }
 const polities: YearPolities = {
   version: 1,
   year: 1100,
-  editorialZone: { west: -45, south: 20, east: 60, north: 76 },
   sources: [{ id: 0, name: 'Natural Earth 10m coastline', licence: 'public domain' }],
   anchors: [
     [2.35, 48.85],
@@ -151,17 +150,13 @@ describe('yearFormat schemas', () => {
         expect(yearPolitySchema.safeParse(withField(polity, { wikidata })).success).toBe(false)
     })
 
-    it('refuses an editorial zone whose edges are the wrong way round', () => {
-      // A north/south swap flips the whole map and reports nothing anywhere, which is why it is checked.
-      const swapped = withField(polities, {
-        editorialZone: { west: -45, south: 76, east: 60, north: 20 },
+    it('refuses a territory file that still carries an editorial zone', () => {
+      // The zone left the format on 2026-10-18. A file written before then is refused, not stripped,
+      // like any other unrecognised key.
+      const legacy = withField(polities, {
+        editorialZone: { west: -45, south: 20, east: 60, north: 76 },
       })
-      expect(yearPolitiesSchema.safeParse(swapped).success).toBe(false)
-
-      const inverted = withField(polities, {
-        editorialZone: { west: 60, south: 20, east: -45, north: 76 },
-      })
-      expect(yearPolitiesSchema.safeParse(inverted).success).toBe(false)
+      expect(yearPolitiesSchema.safeParse(legacy).success).toBe(false)
     })
 
     it('refuses a ring of fewer than three indices, which encloses no area', () => {
@@ -215,11 +210,6 @@ describe('yearFormat schemas', () => {
       for (const bad of [Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
         expect(
           yearPolitiesSchema.safeParse(withField(polities, { anchors: [[bad, 48]] })).success
-        ).toBe(false)
-        expect(
-          yearPolitiesSchema.safeParse(
-            withField(polities, { editorialZone: { west: bad, south: 20, east: 60, north: 76 } })
-          ).success
         ).toBe(false)
       }
     })

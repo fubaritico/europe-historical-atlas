@@ -40,7 +40,6 @@ function validYear(): YearFiles {
     polities: {
       version: 1,
       year: 1100,
-      editorialZone: { west: -45, south: 20, east: 60, north: 76 },
       sources: [{ id: 0, name: 'Natural Earth 10m coastline', licence: 'public domain' }],
       anchors: [
         [0, 48],

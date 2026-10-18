@@ -53,7 +53,7 @@ export function DocBar({ year, undoLabel, redoLabel, onUndo, onRedo, zoomRef }: 
         />
         <span className="doc-tab__name">{year}</span>
         <span className="doc-tab__meta">
-          @ <span ref={zoomRef}>—</span> ({year} / editorial zone)
+          @ <span ref={zoomRef}>—</span>
         </span>
       </div>
       <div className="bar-actions">

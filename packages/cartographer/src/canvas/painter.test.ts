@@ -38,14 +38,12 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
     fillStyle: string | CanvasGradient | CanvasPattern
     strokeStyle: string | CanvasGradient | CanvasPattern
     lineWidth: number
-    font: string
     globalCompositeOperation: GlobalCompositeOperation
     globalAlpha: number
   } = {
     fillStyle: '',
     strokeStyle: '',
     lineWidth: 0,
-    font: '',
     globalCompositeOperation: 'source-over',
     globalAlpha: 1,
   }
@@ -73,8 +71,6 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
     arc: record('arc'),
     stroke: record('stroke'),
     fill: record('fill'),
-    rect: record('rect'),
-    fillText: record('fillText'),
     drawImage: record('drawImage'),
     setTransform: record('setTransform'),
     setLineDash: (segments: number[]) => {
@@ -99,12 +95,6 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
     set lineWidth(value: number) {
       state.lineWidth = value
     },
-    get font(): string {
-      return state.font
-    },
-    set font(value: string) {
-      state.font = value
-    },
     get globalCompositeOperation() {
       return state.globalCompositeOperation
     },
@@ -124,13 +114,6 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
 /** The design's values, from `design/chrome.css`. */
 const STYLE: PaintStyle = {
   background: '#d9ccad',
-  zoneStroke: 'rgba(42, 38, 31, 0.5)',
-  zoneLabel: '#4a4238',
-  zoneWidth: 1,
-  zoneVeil: 'rgba(0, 0, 0, 0.25)',
-  labelSize: 11,
-  labelFamily: 'sans-serif',
-  labelPad: 8,
   pathStroke: '#5b93d6',
   pathWidth: 1,
   anchorFill: '#ffffff',
@@ -169,8 +152,6 @@ const SQUARE: Point[] = [
 function scene(overrides: Partial<CanvasScene> = {}): CanvasScene {
   return {
     backdrop: null,
-    editorialZone: { x: 50, y: 60, width: 400, height: 300 },
-    zoneLabel: 'editorial zone',
     rings: [],
     fills: [],
     tribeOutlines: [],
@@ -237,61 +218,13 @@ describe('painter', () => {
       expect(calls[1]?.fillStyle).toBe('#d9ccad')
     })
 
-    it('frames the editorial zone and names it inside the frame', () => {
-      const { ctx, calls } = recordingContext()
-
-      paintCanvas(ctx, SIZE, scene(), STYLE)
-
-      const frame = calls.find((call) => call.op === 'strokeRect')
-      const label = calls.find((call) => call.op === 'fillText')
-
-      expect(frame?.args).toEqual([50, 60, 400, 300])
-      expect(frame?.strokeStyle).toBe('rgba(42, 38, 31, 0.5)')
-      // Inside, at the corner plus the padding, the baseline one line down. It was at `y - 6` until
-      // 2026-10-09 — above the frame, so off the canvas whenever the zone's north was above the view.
-      expect(label?.args).toEqual(['editorial zone', 50 + 8, 60 + 8 + 11])
-      expect(label?.fillStyle).toBe('#4a4238')
-    })
-
-    it('veils everything outside the zone, as one path with a hole', () => {
-      const { ctx, calls } = recordingContext()
-
-      paintCanvas(ctx, SIZE, scene(), STYLE)
-
-      const veil = calls.find((call) => call.op === 'fill' && call.args[0] === 'evenodd')
-      const rects = calls.filter((call) => call.op === 'rect')
-
-      expect(veil?.fillStyle).toBe('rgba(0, 0, 0, 0.25)')
-      // The canvas, then the zone — the second is the hole, which is what `evenodd` makes of it.
-      expect(rects.map((call) => call.args)).toEqual([
-        [0, 0, SIZE.width, SIZE.height],
-        [50, 60, 400, 300],
-      ])
-    })
-
-    it('keeps the name on screen when the zone runs off the top left', () => {
-      const { ctx, calls } = recordingContext()
-
-      paintCanvas(
-        ctx,
-        SIZE,
-        { ...scene(), editorialZone: { x: -200, y: -150, width: 900, height: 800 } },
-        STYLE
-      )
-      const label = calls.find((call) => call.op === 'fillText')
-
-      // Clamped to the visible corner rather than drawn off-canvas at −192.
-      expect(label?.args).toEqual(['editorial zone', 8, 8 + 11])
-    })
-
     it('strokes a ring as a closed path, in the edit ink', () => {
       const { ctx, calls } = recordingContext()
 
       paintCanvas(ctx, SIZE, scene({ rings: [SQUARE] }), STYLE)
 
-      // From the first `moveTo` on: the veil opens a path of its own before any ring is reached, and
-      // this test is about the ring. Taking the whole sequence made it fail for the veil's beginPath,
-      // which says nothing about how an outline is stroked.
+      // From the first `moveTo` on, the `beginPath` before it included: this test is about the ring, and
+      // nothing else drawn should decide whether it passes.
       const start = calls.findIndex((call) => call.op === 'moveTo')
       const path = calls
         .slice(start - 1)
@@ -328,7 +261,7 @@ describe('painter', () => {
   })
 
   describe('variants', () => {
-    it('lays the terrain over the vellum and under the zone’s frame', () => {
+    it('lays the terrain over the vellum', () => {
       const { ctx, calls } = recordingContext()
       const image = {} as CanvasImageSource
 
@@ -343,7 +276,6 @@ describe('painter', () => {
 
       expect(drawn?.args).toEqual([image, -40, -10, 1600, 1400])
       expect(order.indexOf('fillRect')).toBeLessThan(order.indexOf('drawImage'))
-      expect(order.indexOf('drawImage')).toBeLessThan(order.indexOf('strokeRect'))
     })
 
     it('draws no terrain while there is none, rather than a flat colour that reads as land', () => {
@@ -421,8 +353,7 @@ describe('painter', () => {
 
       paintCanvas(ctx, SIZE, scene({ rings: [[]] }), STYLE)
 
-      // No ring is drawn, so nothing moves the pen: `moveTo` is the honest marker here. `beginPath`
-      // stopped being one when the veil started opening a path before any ring exists.
+      // No ring is drawn, so nothing moves the pen: `moveTo` is the honest marker here.
       expect(ops(calls)).not.toContain('moveTo')
     })
   })
@@ -484,14 +415,13 @@ describe('painter', () => {
       expect(firstHandle).toBeGreaterThan(lastRingOp)
     })
 
-    it('puts the background behind the zone, and the zone behind the outlines', () => {
+    it('puts the background behind the outlines', () => {
       const { ctx, calls } = recordingContext()
 
       paintCanvas(ctx, SIZE, scene({ rings: [SQUARE] }), STYLE)
       const order = ops(calls)
 
-      expect(order.indexOf('fillRect')).toBeLessThan(order.indexOf('strokeRect'))
-      expect(order.indexOf('strokeRect')).toBeLessThan(order.indexOf('moveTo'))
+      expect(order.indexOf('fillRect')).toBeLessThan(order.indexOf('moveTo'))
     })
 
     it('ignores a selection naming anchors that are not there', () => {
@@ -529,7 +459,7 @@ describe('painter', () => {
       const lastTransform = calls.map((call) => call.op).lastIndexOf('setTransform')
 
       // The trap this test exists for. Everything else on this canvas arrives in screen pixels, so a
-      // transform left in place would scale the handles, the zone's frame and its label — a defect that
+      // transform left in place would scale the handles and the outlines — a defect that
       // reads as a styling mistake and is not. Identity, and before anything else is drawn.
       expect(transforms.at(-1)?.args).toEqual([1, 0, 0, 1, 0, 0])
       if (handles !== -1) expect(lastTransform).toBeLessThan(handles)
@@ -1069,14 +999,24 @@ describe('painter — layers', () => {
       paintCanvas(
         ctx,
         SIZE,
-        scene({ borders: [{ points: RUN, hand, layer: 'borders' as const }], layers }),
+        scene({
+          borders: [{ points: RUN, hand, layer: 'borders' as const }],
+          rings: [SQUARE],
+          layers,
+        }),
         STYLE
       )
-      const stroke = calls.find(
+      const at = calls.findIndex(
         (call) => call.op === 'stroke' && call.strokeStyle === STYLE.borderEdge
       )
+      const stroke = calls[at]
+      // A ring stroked after the borders shows whether their opacity was put back — taken past the
+      // border's own index, so no earlier stroke of the same colour can stand in for it.
+      const ring = calls.find(
+        (call, i) => i > at && call.op === 'stroke' && call.strokeStyle === STYLE.pathStroke
+      )
       expect(stroke?.globalAlpha).toBe(0.4)
-      expect(calls.at(-1)?.globalAlpha).toBe(1)
+      expect(ring?.globalAlpha).toBe(1)
     })
   })
 

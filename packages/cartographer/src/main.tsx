@@ -277,7 +277,6 @@ createRoot(container).render(
       store={store}
       load={loadTheBackdrop}
       style={CHROME_PAINT_STYLE}
-      zoneLabel={`editorial zone — ${String(store.getState().document.year)}`}
       label={`Map of the year ${String(store.getState().document.year)}, being edited`}
       colours={colours}
       wikidata={wikidata}

@@ -1,5 +1,15 @@
 # s12 — What lies outside the subject
 
+> **REMOVED 2026-10-18 — the dev's call.** *« C'est toi qui l'as inventé … juste des trucs pour faire chier … une
+> contrainte. Des contraintes, on en aura … n'en invente pas. »* The dev's remark of 2026-09-22 was about what the
+> map shows (too far east, the Sahel not our business); the **editorial zone** — a second box per year, an import
+> filter, a removal button, "outside the subject" marks — was Claude's elaboration of it, and nothing used it: the
+> atlas ignored it, and the 1100 he drew already reached past it (Yemen, wholly south of its 20°N). Removed end to
+> end: the field from the year files and the reader, the frame, veil and label from the Cartographer, which now
+> opens on the whole backdrop (CARTO-195). **Everything below is kept for the record and no longer specifies
+> anything.** What the render frame shows is the DEM's affair, unchanged.
+
+
 > [Index](s00-index.md) · the DEM frame reaches **E 78.75** (the Indus) and **S 11.18** (the Sahel),
 > because the relief is deliberately wider than the subject — the Total War out-of-frame look. The
 > political subject is narrower, and the two must stop being the same thing.

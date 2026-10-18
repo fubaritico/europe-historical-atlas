@@ -1,14 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  backdropBoxOfBounds,
-  clampToCover,
-  coverScale,
-  fitBox,
-  fitScale,
-  fitWhole,
-  openingView,
-} from './framing'
+import { clampToCover, coverScale, fitBox, fitScale, fitWhole, openingView } from './framing'
 import { TEST_BACKDROP_FRAME } from './testFrame'
 import { backdropToScreen } from './viewport'
 
@@ -266,11 +258,7 @@ describe('clampToCover', () => {
 })
 
 describe('openingView', () => {
-  /** The editorial zone, lon −45…60 / lat 20…76, as the document declares it. */
-  const ZONE = backdropBoxOfBounds(
-    { west: -45, south: 20, east: 60, north: 76 },
-    TEST_BACKDROP_FRAME
-  )
+  // The editor opens on the whole backdrop since 2026-10-18 — the ground the author may draw anywhere on.
 
   describe('happy path', () => {
     it('never opens below cover, so the editor never opens on void', () => {
@@ -279,7 +267,7 @@ describe('openingView', () => {
         { width: 1920, height: 400 },
         { width: 500, height: 1200 },
       ])
-        expect(openingView(canvas, BACKDROP, ZONE, 24).scale).toBeGreaterThanOrEqual(
+        expect(openingView(canvas, BACKDROP).scale).toBeGreaterThanOrEqual(
           coverScale(canvas, WHOLE)
         )
     })
@@ -287,30 +275,34 @@ describe('openingView', () => {
 
   describe('variants', () => {
     /*
-     * The second guard, and the one a naive version fails the other way: opening at `coverScale` flat
-     * would be simpler and would ignore the zone entirely, framing a third of the backdrop the author
-     * may not draw in. On a canvas shaped like the zone, fitting it wins and the scale is above cover.
+     * Framing the whole backdrop with its margin would fit it inside the canvas, which leaves void on the
+     * long axis whatever the canvas's shape. Cover wins, so the opening scale is cover, exactly.
      */
-    it('frames the editorial zone when the canvas has room for it', () => {
-      const canvas: PixelSize = { width: 900, height: 820 }
-      const scale = openingView(canvas, BACKDROP, ZONE, 24).scale
+    it('opens the whole backdrop at cover rather than fitted with void around it', () => {
+      for (const canvas of [
+        { width: 900, height: 820 },
+        { width: 1920, height: 400 },
+        { width: 500, height: 1200 },
+      ]) {
+        const scale = openingView(canvas, BACKDROP).scale
 
-      expect(scale).toBeGreaterThan(coverScale(canvas, WHOLE))
-      expect(scale).toBeCloseTo(fitScale(canvas, ZONE, 24), 9)
+        expect(scale).toBeCloseTo(coverScale(canvas, WHOLE), 9)
+        expect(scale).toBeGreaterThan(fitScale(canvas, WHOLE, 24))
+      }
     })
 
     it('is recomputed from the canvas, so two window sizes give two views', () => {
-      const narrow = openingView({ width: 700, height: 900 }, BACKDROP, ZONE, 24)
-      const wide = openingView({ width: 1900, height: 500 }, BACKDROP, ZONE, 24)
+      const narrow = openingView({ width: 700, height: 900 }, BACKDROP)
+      const wide = openingView({ width: 1900, height: 500 }, BACKDROP)
 
       expect(narrow.scale).not.toBeCloseTo(wide.scale, 6)
     })
   })
 
   describe('managed errors', () => {
-    it('holds the view inside the backdrop, zone or no zone', () => {
+    it('holds the view inside the backdrop', () => {
       const canvas: PixelSize = { width: 800, height: 600 }
-      const view = openingView(canvas, BACKDROP, ZONE, 24)
+      const view = openingView(canvas, BACKDROP)
 
       expect(view.originX).toBeLessThanOrEqual(0)
       expect(view.originY).toBeLessThanOrEqual(0)
@@ -322,110 +314,36 @@ describe('openingView', () => {
   })
 
   describe('unmanaged errors', () => {
-    it('falls back to cover for a zone with no extent', () => {
-      const canvas: PixelSize = { width: 800, height: 600 }
-      const empty: BackdropBox = { x: 0, y: 0, width: 0, height: 0 }
-
-      expect(openingView(canvas, BACKDROP, empty, 24).scale).toBeCloseTo(
-        coverScale(canvas, WHOLE),
-        9
-      )
+    // A canvas with no extent is one nothing can cover: the scale collapses to zero, visibly nothing.
+    it('opens a canvas of zero size at a scale of zero rather than inventing one', () => {
+      expect(openingView({ width: 0, height: 0 }, BACKDROP).scale).toBe(0)
     })
   })
 
   describe('edge cases', () => {
-    /*
-     * The zone cannot be centred horizontally, and that is geometry rather than a defect: its western
-     * limit is −45°, which is *exactly* where the backdrop starts. Centring it would need a positive
-     * origin — void down the left-hand side — so the hold puts its western edge on the canvas's.
-     * Written down because the first version of this test asserted a centred zone and accused correct
-     * code; the JSDoc said "centred" too, and said it of a view that is held.
-     */
-    it('puts the zone’s western edge on the canvas’s, the two sharing a limit', () => {
-      const canvas: PixelSize = { width: 900, height: 820 }
-      const view = openingView(canvas, BACKDROP, ZONE, 24)
-      const topLeft = backdropToScreen(view, [ZONE.x, ZONE.y])
+    // At cover the backdrop meets both edges of the canvas on one axis and overflows the other.
+    it('lays the backdrop edge to edge on the axis that fits', () => {
+      const canvas: PixelSize = { width: 1900, height: 500 }
+      const view = openingView(canvas, BACKDROP)
+      const topLeft = backdropToScreen(view, [0, 0])
+      const bottomRight = backdropToScreen(view, [BACKDROP.width, BACKDROP.height])
 
+      // A canvas this wide is constrained by its width: the columns fill it exactly.
       expect(topLeft[0]).toBeCloseTo(0, 6)
+      expect(bottomRight[0]).toBeCloseTo(canvas.width, 6)
     })
 
-    it('centres the zone on the axis that has room for it', () => {
-      const canvas: PixelSize = { width: 900, height: 820 }
-      const view = openingView(canvas, BACKDROP, ZONE, 24)
-      const centre = backdropToScreen(view, [ZONE.x + ZONE.width / 2, ZONE.y + ZONE.height / 2])
+    it('centres the backdrop, cropping the overflowing axis evenly', () => {
+      for (const canvas of [
+        { width: 900, height: 820 },
+        { width: 1900, height: 500 },
+      ]) {
+        const view = openingView(canvas, BACKDROP)
+        const centre = backdropToScreen(view, [BACKDROP.width / 2, BACKDROP.height / 2])
 
-      // Vertically the zone sits inside the backdrop on both sides — 20°N against 11.18°N, 76°N
-      // against 76.84°N — so there is slack and the centring survives the hold.
-      expect(centre[1]).toBeCloseTo(canvas.height / 2, 6)
-    })
-  })
-})
-
-describe('backdropBoxOfBounds', () => {
-  describe('happy path', () => {
-    it('turns the whole frame’s own bounds back into the whole frame', () => {
-      const box = backdropBoxOfBounds(TEST_BACKDROP_FRAME.bounds, TEST_BACKDROP_FRAME)
-
-      expect(box.x).toBeCloseTo(0, 6)
-      expect(box.y).toBeCloseTo(0, 6)
-      expect(box.width).toBeCloseTo(BACKDROP.width, 6)
-      expect(box.height).toBeCloseTo(BACKDROP.height, 6)
-    })
-  })
-
-  describe('variants', () => {
-    it('places the editorial zone inside the frame, not over it', () => {
-      const zone = backdropBoxOfBounds(
-        { west: -45, south: 20, east: 60, north: 76 },
-        TEST_BACKDROP_FRAME
-      )
-
-      expect(zone.x).toBeCloseTo(0, 6)
-      expect(zone.width).toBeLessThan(BACKDROP.width)
-      expect(zone.height).toBeLessThan(BACKDROP.height)
-    })
-  })
-
-  describe('managed errors', () => {
-    // THE guard here, and the one `scene.ts` already states for the same rectangle one transform
-    // further along: latitude is not linear in Mercator. The plausible version scales the degrees —
-    // `(north - lat) / (north - south) * height` — which puts the southern edge of a 56-degree box
-    // visibly wrong, and the taller the box the worse.
-    it('projects the latitudes rather than scaling the degrees', () => {
-      const half = backdropBoxOfBounds(
-        { west: -45, south: 11.1784, east: 78.75, north: 45 },
-        TEST_BACKDROP_FRAME
-      )
-      const linear =
-        ((TEST_BACKDROP_FRAME.bounds.north - 45) /
-          (TEST_BACKDROP_FRAME.bounds.north - TEST_BACKDROP_FRAME.bounds.south)) *
-        BACKDROP.height
-
-      expect(half.y).not.toBeCloseTo(linear, 0)
-    })
-  })
-
-  describe('unmanaged errors', () => {
-    it('yields a box with no extent for bounds with none', () => {
-      const point = backdropBoxOfBounds(
-        { west: 0, south: 45, east: 0, north: 45 },
-        TEST_BACKDROP_FRAME
-      )
-
-      expect(point.width).toBeCloseTo(0, 9)
-      expect(point.height).toBeCloseTo(0, 9)
-    })
-  })
-
-  describe('edge cases', () => {
-    it('is the inverse of what the scene draws, so the frame and the fit agree', () => {
-      const zone = backdropBoxOfBounds(
-        { west: -45, south: 20, east: 60, north: 76 },
-        TEST_BACKDROP_FRAME
-      )
-
-      expect(zone.width).toBeGreaterThan(0)
-      expect(zone.height).toBeGreaterThan(0)
+        expect(centre[0]).toBeCloseTo(canvas.width / 2, 6)
+        expect(centre[1]).toBeCloseTo(canvas.height / 2, 6)
+      }
     })
   })
 })

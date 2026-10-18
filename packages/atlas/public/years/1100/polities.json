@@ -1,12 +1,6 @@
 {
   "version": 1,
   "year": 1100,
-  "editorialZone": {
-    "west": -45,
-    "south": 20,
-    "east": 60,
-    "north": 76
-  },
   "sources": [
     {
       "id": 0,

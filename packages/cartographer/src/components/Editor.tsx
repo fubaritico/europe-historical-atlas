@@ -112,8 +112,6 @@ export interface EditorProps {
   load: BackdropLoad
   /** The colours and sizes the painter reads. */
   style: PaintStyle
-  /** What to call the editorial zone on the canvas. */
-  zoneLabel: string
   /** What a screen reader is told the drawing surface is. */
   label: string
   /** The page's `<h1>`, which {@link Shell} places inside the canvas landmark. */
@@ -148,7 +146,6 @@ export function Editor({
   store,
   load,
   style,
-  zoneLabel,
   label,
   heading,
   name,
@@ -183,7 +180,6 @@ export function Editor({
           store={store}
           load={load}
           style={style}
-          zoneLabel={zoneLabel}
           label={label}
           statusRef={status}
           actionRef={action}

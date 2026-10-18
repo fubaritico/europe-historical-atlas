@@ -14,10 +14,6 @@ import { createYearDocument } from './yearDocument'
 
 import type { YearDocument } from './yearDocument'
 import type { YearPolity } from '../data/yearFormat'
-import type { GeoBounds } from '../geo/mercator'
-
-/** The editorial window the author works in, distinct from the render frame. */
-export const FIXTURE_ZONE: GeoBounds = { west: -45, south: 20, east: 60, north: 76 }
 
 /** One declared provenance, enough for anchors to point at something. */
 export const FIXTURE_SOURCES = [
@@ -33,7 +29,7 @@ export const FIXTURE_SOURCES = [
  * @returns a fresh document, safe to mutate
  */
 export function sharedBorderDocument(): YearDocument {
-  const doc = createYearDocument(1100, FIXTURE_ZONE, FIXTURE_SOURCES)
+  const doc = createYearDocument(1100, FIXTURE_SOURCES)
   for (const point of [
     [0, 48],
     [2, 48],

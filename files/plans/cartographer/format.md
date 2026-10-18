@@ -124,7 +124,7 @@ and the only ids refused are the empty one and one already taken.
 {
   "version": 1,
   "year": 1100,
-  "editorialZone": { "west": -45, "south": 20, "east": 60, "north": 76 },
+  // "editorialZone" — removed 2026-10-18, the dev's call (an invented constraint, s12); the reader refuses it
   "sources": [
     { "id": 0, "name": "Natural Earth 10m coastline", "licence": "public domain" },
     { "id": 1, "name": "reported by eye — Duby (reference)", "licence": "fact" },

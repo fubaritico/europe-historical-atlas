@@ -11,7 +11,6 @@ import type { YearDocument } from './yearDocument'
 import type { LandMask } from '../data/landMask'
 import type { AuthoredYear, YearPolity } from '../data/yearFormat'
 
-const zone = { west: -45, south: 20, east: 60, north: 76 }
 const bbox = { west: -50, south: -20, east: 150, north: 80 }
 const SHORE = 'Shore (CC0)'
 const sources = [
@@ -48,7 +47,7 @@ function authored(doc: YearDocument): AuthoredYear {
 
 /** Two squares side by side sharing their middle edge, anchors 1 and 2. */
 function sideBySide(suzerain: string | null = null): YearDocument {
-  const doc = createYearDocument(1100, zone, sources)
+  const doc = createYearDocument(1100, sources)
   anchors(doc, [
     [0, 10],
     [10, 10],
@@ -66,7 +65,7 @@ function sideBySide(suzerain: string | null = null): YearDocument {
 
 /** One square standing alone, its anchors recorded under `source`. */
 function alone(source = 0): YearDocument {
-  const doc = createYearDocument(1100, zone, sources)
+  const doc = createYearDocument(1100, sources)
   anchors(
     doc,
     [
@@ -259,7 +258,7 @@ describe('exactBordersOf', () => {
 
   describe('edge cases', () => {
     it('draws nothing for a year with no claim', () => {
-      const doc = createYearDocument(1100, zone, sources)
+      const doc = createYearDocument(1100, sources)
 
       expect(exactBordersOf(authored(doc), bbox, uniformMask(true))).toEqual({
         borders: { between: [], frontier: [] },

@@ -10,7 +10,6 @@ import type { Carving, CarvingFault } from './carve'
 import type { YearDocument } from './yearDocument'
 import type { YearPolity } from '../data/yearFormat'
 
-const zone = { west: -45, south: 20, east: 60, north: 76 }
 const source = [{ id: 0, name: 'reported by eye', licence: 'fact' }]
 
 function polity(id: string, suzerain: string | null = null): YearPolity {
@@ -37,7 +36,7 @@ function anchors(doc: YearDocument, points: [number, number][]): number[] {
  * `0 (0,0) · 1 (10,0) · 2 (20,0) · 3 (20,20) · 4 (0,20) · 5 (0,10)`. Aquitaine declared its vassal.
  */
 function france(): YearDocument {
-  const doc = createYearDocument(1100, zone, source)
+  const doc = createYearDocument(1100, source)
   anchors(doc, [
     [0, 0],
     [10, 0],
@@ -226,7 +225,7 @@ describe('carveOutOfSuzerain', () => {
     })
 
     it('carves nothing from a suzerain with no domain of its own', () => {
-      const doc = createYearDocument(1100, zone, source)
+      const doc = createYearDocument(1100, source)
       addPolity(doc, polity('hre'))
       addPolity(doc, polity('saxony', 'hre'))
 
@@ -340,7 +339,7 @@ describe('carveOutOfSuzerain', () => {
 
   describe('edge cases', () => {
     it('places one anchor where a segment walked out and back is crossed once', () => {
-      const doc = createYearDocument(1100, zone, source)
+      const doc = createYearDocument(1100, source)
       const [sw, base, tip, se, ne, nw] = anchors(doc, [
         [0, 0],
         [10, 0],
@@ -376,7 +375,7 @@ describe('carveOutOfSuzerain', () => {
     // Measured on 1100, 2026-10-15: the Franks' ring runs up a river near Ghent and back down it over other
     // anchors at the very same positions. Keyed by anchor, the walk could not close; keyed by position it does.
     it('carves a domain whose ring runs out and back over anchors at the same positions', () => {
-      const doc = createYearDocument(1100, zone, source)
+      const doc = createYearDocument(1100, source)
       const [sw, base, tip, tipAgain, baseAgain, se, ne, nw] = anchors(doc, [
         [0, 0],
         [10, 0],

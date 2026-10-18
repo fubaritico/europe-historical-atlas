@@ -41,8 +41,8 @@ describe('inDevicePixels', () => {
     })
 
     it('handles the fractional ratios a scaled desktop reports', () => {
-      expect(inDevicePixels(CHROME_PAINT_STYLE, 1.5).labelSize).toBeCloseTo(
-        CHROME_PAINT_STYLE.labelSize * 1.5,
+      expect(inDevicePixels(CHROME_PAINT_STYLE, 1.5).anchorRadius).toBeCloseTo(
+        CHROME_PAINT_STYLE.anchorRadius * 1.5,
         9
       )
     })
@@ -66,13 +66,7 @@ describe('inDevicePixels', () => {
     })
   })
 
-  describe('edge cases', () => {
-    it('keeps an 11px label and a 1px zone frame at 1×', () => {
-      // `.artboard-label { font-size: 11px }` and `.artboard { border: 1px }`, as `style.ts` records.
-      expect(CHROME_PAINT_STYLE.labelSize).toBe(11)
-      expect(CHROME_PAINT_STYLE.zoneWidth).toBe(1)
-    })
-  })
+  // L5: N/A — the ratio's own boundaries (one, zero, fractional) are covered above.
 })
 
 describe('CHROME_PAINT_STYLE', () => {

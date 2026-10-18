@@ -117,7 +117,7 @@ design came back with no zoom control at all. A map tool needs visible ones.
 | control | note |
 |---|---|
 | `[+]` `[−]` | floating over the canvas, bottom-right |
-| `[fit to frame]` | frames the whole editorial zone |
+| `[fit to frame]` | frames the whole backdrop (the editorial zone was removed on 2026-10-18) |
 | the scale | **already in the status bar** — do not repeat it beside the buttons |
 
 Keyboard equivalents exist in the atlas already and belong in the tooltips: `+` / `−` and

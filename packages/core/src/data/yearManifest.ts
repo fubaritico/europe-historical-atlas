@@ -29,7 +29,7 @@ import type { GeoBounds } from '../geo/mercator'
 export interface YearManifest {
   /** Format version. */
   version: number
-  /** The render frame the years were drawn against — the DEM's box, not an editorial zone. */
+  /** The render frame the years were drawn against — the DEM's box. */
   bbox: GeoBounds
   /** Every year with a folder, in no particular order. */
   years: number[]

@@ -209,7 +209,7 @@ describe('editionSlice', () => {
     it('opens another document on a fresh line', () => {
       const { store } = openStore()
       store.getState().commit(MOVE)
-      const next = createYearDocument(1200, { west: -45, south: 20, east: 60, north: 76 })
+      const next = createYearDocument(1200)
 
       store.getState().open(next, { kind: 'open', label: 'ouvrir' })
 
@@ -461,7 +461,7 @@ describe('editionSlice', () => {
     })
 
     it('opens on a year with nothing in it', () => {
-      const document = createYearDocument(1100, { west: -45, south: 20, east: 60, north: 76 })
+      const document = createYearDocument(1100)
       const store = createCartographerStore({
         edition: { document, clone: cloneYearDocument },
         viewport: { viewport: UNFRAMED },
@@ -623,7 +623,7 @@ describe('editionSlice.createPolity', () => {
     })
 
     it('creates into a year that holds nothing yet', () => {
-      const document = createYearDocument(1100, { west: -45, south: 20, east: 60, north: 76 })
+      const document = createYearDocument(1100)
       const store = createCartographerStore({
         edition: { document, clone: cloneYearDocument },
         viewport: { viewport: UNFRAMED },

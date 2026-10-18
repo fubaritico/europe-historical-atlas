@@ -35,7 +35,7 @@ Every control name below is **provisional**. It names an _intention_, not a deci
 | 09  | [place the names](s09-place-the-names.md)                 | anchors, typography by rank, semantic zoom, collisions                              |
 | 10  | [check before publishing](s10-check-before-publishing.md) | a lint for a map — and the only completion gauge                                    |
 | 11  | [islands](s11-islands.md)                                 | what the coastal expansion can never reach                                          |
-| 12  | [out of frame](s12-out-of-frame.md)                       | the editorial zone, separate from the render frame                                  |
+| 12  | [out of frame](s12-out-of-frame.md)                       | ~~the editorial zone~~ — **removed 2026-10-18**, the dev's call                      |
 | 13  | [overrides](s13-overrides.md)                             | taking the hand on colours and lines, and the one place they are all visible        |
 | 14  | [the History panel](s14-history-panel.md)                 | the line listed, reached in one click, and the markers that survive a truncation    |
 | 15  | [offline and online](s15-offline-and-online.md)         | **integration, not interface** — where a saved year goes, and how the atlas reads it |

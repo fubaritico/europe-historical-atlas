@@ -27,7 +27,6 @@ import type {
   YearPolity,
   YearProvenance,
 } from '../data/yearFormat'
-import type { GeoBounds } from '../geo/mercator'
 
 /**
  * The fewest anchors a ring can have — closure implied, so a triangle.
@@ -42,8 +41,6 @@ export const MIN_RING_ANCHORS = 3
 export interface YearDocument {
   /** The year being drawn. */
   year: number
-  /** The window the author works in, distinct from the render frame. */
-  editorialZone: GeoBounds
   /** Where geometry may be said to come from. */
   sources: YearProvenance[]
   /**
@@ -67,22 +64,16 @@ export interface YearDocument {
 /**
  * An empty document — a year with nothing in it, which is how a year authored from scratch starts.
  *
- * **Both arguments are copied in**, like everything else in this file: held by reference, two documents
- * built from one caller's zone would share it, so editing the zone of one would move the other's editorial
- * window with nothing to see. The same hazard {@link cloneYearDocument} exists to close, one step earlier.
+ * **The sources are copied in**, like everything else in this file: held by reference, two documents built
+ * from one caller's list would share it. The same hazard {@link cloneYearDocument} exists to close, one step
+ * earlier.
  * @param year - the year being drawn
- * @param editorialZone - the window to work in
  * @param sources - where geometry may be said to come from
  * @returns the document
  */
-export function createYearDocument(
-  year: number,
-  editorialZone: GeoBounds,
-  sources: YearProvenance[] = []
-): YearDocument {
+export function createYearDocument(year: number, sources: YearProvenance[] = []): YearDocument {
   return {
     year,
-    editorialZone: { ...editorialZone },
     sources: sources.map((provenance) => ({ ...provenance })),
     anchors: [],
     anchorSource: [],
@@ -112,7 +103,6 @@ export function createYearDocument(
 export function cloneYearDocument(doc: YearDocument): YearDocument {
   return {
     year: doc.year,
-    editorialZone: { ...doc.editorialZone },
     sources: doc.sources.map((provenance) => ({ ...provenance })),
     anchors: doc.anchors.map(([lon, lat]) => [lon, lat]),
     anchorSource: [...doc.anchorSource],
@@ -143,7 +133,6 @@ export function cloneYearDocument(doc: YearDocument): YearDocument {
 export function openYearDocument(authored: AuthoredYear): YearDocument {
   return cloneYearDocument({
     year: authored.year,
-    editorialZone: authored.polities.editorialZone,
     sources: authored.polities.sources,
     anchors: authored.polities.anchors,
     anchorSource: authored.polities.anchorSource,
@@ -234,7 +223,6 @@ export function saveYearDocument(doc: YearDocument): YearFiles {
     polities: {
       version: 1,
       year: doc.year,
-      editorialZone: { ...doc.editorialZone },
       sources: doc.sources.map((provenance) => ({ ...provenance })),
       anchors,
       anchorSource,

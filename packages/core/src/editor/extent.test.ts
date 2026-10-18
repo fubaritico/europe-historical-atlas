@@ -7,7 +7,6 @@ import { createYearDocument } from './yearDocument'
 import type { YearDocument } from './yearDocument'
 import type { YearPolity } from '../data/yearFormat'
 
-const zone = { west: -45, south: 20, east: 60, north: 76 }
 const source = [{ id: 0, name: 'reported by eye', licence: 'fact' }]
 
 function polity(id: string, suzerain: string | null = null): YearPolity {
@@ -50,7 +49,7 @@ function segments(runs: number[][]): string[] {
  * Aquitaine, sharing 4–5 with it.
  */
 function franceAquitaineCastile(): YearDocument {
-  const doc = createYearDocument(1100, zone, source)
+  const doc = createYearDocument(1100, source)
   for (const point of [
     [0, 10],
     [10, 10],
@@ -73,7 +72,7 @@ function franceAquitaineCastile(): YearDocument {
 
 describe('extentMembers', () => {
   it('lists the polity first, then its vassals at any depth', () => {
-    const doc = createYearDocument(1100, zone, source)
+    const doc = createYearDocument(1100, source)
     addPolity(doc, polity('france'))
     addPolity(doc, polity('aquitaine', 'france'))
     addPolity(doc, polity('poitou', 'aquitaine'))
@@ -91,7 +90,7 @@ describe('hasExtent', () => {
 
   describe('variants', () => {
     it('is true for a suzerain with no ring of its own whose vassal holds one', () => {
-      const doc = createYearDocument(1100, zone, source)
+      const doc = createYearDocument(1100, source)
       addPolity(doc, polity('hre'))
       addPolity(doc, polity('saxony', 'hre'))
       closeRing(doc, 'saxony', square(doc, 0, 0))
@@ -101,7 +100,7 @@ describe('hasExtent', () => {
 
   describe('managed errors', () => {
     it('is false for a polity with nothing drawn, itself or below', () => {
-      const doc = createYearDocument(1100, zone, source)
+      const doc = createYearDocument(1100, source)
       addPolity(doc, polity('hre'))
       addPolity(doc, polity('saxony', 'hre'))
       expect(hasExtent(doc, 'hre')).toBe(false)
@@ -110,7 +109,7 @@ describe('hasExtent', () => {
 
   describe('unmanaged errors', () => {
     it('ends on a loop of homage rather than spinning', () => {
-      const doc = createYearDocument(1100, zone, source)
+      const doc = createYearDocument(1100, source)
       addPolity(doc, polity('a', 'b'))
       addPolity(doc, polity('b', 'a'))
       closeRing(doc, 'b', square(doc, 0, 0))
@@ -120,7 +119,7 @@ describe('hasExtent', () => {
 
   describe('edge cases', () => {
     it('does not count a vassal’s ground for its suzerain’s sibling', () => {
-      const doc = createYearDocument(1100, zone, source)
+      const doc = createYearDocument(1100, source)
       addPolity(doc, polity('france'))
       addPolity(doc, polity('england'))
       addPolity(doc, polity('normandy', 'france'))
@@ -176,7 +175,7 @@ describe('extentOutline', () => {
 
     // The hand correction of 2026-10-15: France still drawn under Aquitaine, sharing not one anchor.
     it('leaves out a suzerain’s ring still lying under its vassal, while the author corrects it', () => {
-      const doc = createYearDocument(1100, zone, source)
+      const doc = createYearDocument(1100, source)
       addPolity(doc, polity('france'))
       addPolity(doc, polity('aquitaine', 'france'))
       const outer = [
@@ -193,7 +192,7 @@ describe('extentOutline', () => {
 
   describe('managed errors', () => {
     it('is empty for a polity with nothing drawn', () => {
-      const doc = createYearDocument(1100, zone, source)
+      const doc = createYearDocument(1100, source)
       addPolity(doc, polity('hre'))
       expect(extentOutline(doc, 'hre')).toEqual([])
     })
@@ -215,7 +214,7 @@ describe('extentOutline', () => {
     })
 
     it('keeps both banks of a channel narrower than the derivation’s far-side step', () => {
-      const doc = createYearDocument(1100, zone, source)
+      const doc = createYearDocument(1100, source)
       addPolity(doc, polity('venice'))
       addPolity(doc, polity('croatia'))
       closeRing(doc, 'croatia', square(doc, 0, 0))

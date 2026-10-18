@@ -206,15 +206,6 @@ Put here the know issues to avoid cluttering the context window.
   de correctif de sécurité dessus. **À savoir**, à reconsidérer quand la 10 aura quelques mois — et noter
   que la 10 change un comportement qui nous concerne : elle résout la config **par fichier** et non depuis
   le répertoire courant, ce qui rendrait les configs par paquet lisibles sans lancer `eslint` depuis chacun.
-- **Le canevas du Cartographe a deux boîtes géographiques et une seule image.** La **bbox de rendu** (celle
-  du DEM : W −45 / S 11 / E 78,75 / N 76,84) est ce à quoi la texture cuite est géoréférencée ; la **zone
-  éditoriale** déclarée par le document est lon −45…60, lat 20…76. Elles ne coïncident pas. Projeter contre
-  l'une en dessinant le fond contre l'autre fait **tout glisser, sans erreur nulle part** — même famille que
-  le manifeste dont la bbox n'est vérifiée par personne (entrée ci-dessous).
-  **Décidé le 29/09, avant d'écrire une ligne** : le repère du canevas est celui **du fond**, seul
-  géoréférencé par construction ; la zone éditoriale est un **cadre dessiné par-dessus**, ce que le glossaire
-  dit déjà d'elle (« la planche, nommée au-dessus de son cadre ») et ce que `s12` sépare.
-  **Sévérité : bloquant si oublié, réglé si appliqué.** À relire au début de `4b`.
 - **Un garde « une seule fois » sous `StrictMode` doit retenir la promesse, jamais un booléen — et le
   test qui compte les appels ne voit pas la différence.** Trouvé en revue le 07/10, sur du code livré le
   même soir, et c'est un **vrai bug qui aurait mordu en dev uniquement**, donc exactement là où le dev

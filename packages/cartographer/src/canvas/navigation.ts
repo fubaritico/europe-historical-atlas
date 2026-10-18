@@ -37,9 +37,6 @@ import type { PixelSize, ScaleLimits } from '../view/viewport'
  */
 export const MAX_SCALE = 32
 
-/** Screen pixels left around the backdrop when it is first framed, so its edge is not flush. */
-export const FRAME_MARGIN = 24
-
 /** How much one press of a zoom key scales the view. A key is one discrete step, so it stays a factor. */
 export const KEY_ZOOM_STEP = 1.1
 

@@ -5,7 +5,6 @@ import { assembleAuthoredYear } from '../data/yearConsistency'
 import { addAnchor, closeRing, moveAnchor } from './documentEdits'
 import {
   FIXTURE_SOURCES,
-  FIXTURE_ZONE,
   firstSharedAnchor,
   ringOf,
   sharedAnchorsBetween,
@@ -21,7 +20,6 @@ import {
 
 import type { YearDocument } from './yearDocument'
 
-const zone = FIXTURE_ZONE
 const source = FIXTURE_SOURCES
 
 /** Save and reopen, which is what the round-trip guarantee is about. */
@@ -32,7 +30,7 @@ function roundTrip(doc: YearDocument): YearDocument {
 describe('YearDocument', () => {
   describe('happy path', () => {
     it('opens empty', () => {
-      const doc = createYearDocument(1100, zone)
+      const doc = createYearDocument(1100)
       expect(doc.anchors).toEqual([])
       expect(doc.polities).toEqual([])
       expect(doc.year).toBe(1100)
@@ -94,7 +92,7 @@ describe('YearDocument', () => {
     })
 
     it('renumbers every reference through the same mapping', () => {
-      const doc = createYearDocument(1100, zone, source)
+      const doc = createYearDocument(1100, source)
       const orphan = addAnchor(doc, [9, 9], 0)
       const a = addAnchor(doc, [0, 0], 0)
       const b = addAnchor(doc, [1, 0], 0)
@@ -130,7 +128,7 @@ describe('YearDocument', () => {
     it('drops a ring that falls below three indices after renumbering', () => {
       // Two of its three anchors are shared with nothing and referenced by nothing else, so they go —
       // and a two-point ring encloses no area, which the schema would refuse anyway.
-      const doc = createYearDocument(1100, zone, source)
+      const doc = createYearDocument(1100, source)
       const a = addAnchor(doc, [0, 0], 0)
       doc.polities.push({
         id: 'x',
@@ -167,7 +165,7 @@ describe('YearDocument', () => {
 
   describe('edge cases', () => {
     it('saves an empty document into three readable files', () => {
-      const files = saveYearDocument(createYearDocument(1100, zone, source))
+      const files = saveYearDocument(createYearDocument(1100, source))
       expect(files.polities.anchors).toEqual([])
       expect(files.registry.polities).toEqual([])
       expect(() => assembleAuthoredYear(files, 'empty')).not.toThrow()
@@ -292,7 +290,7 @@ describe('cloneYearDocument', () => {
 
   describe('edge cases', () => {
     it('copies an empty document', () => {
-      const empty = createYearDocument(1100, zone, source)
+      const empty = createYearDocument(1100, source)
       const copy = cloneYearDocument(empty)
       expect(copy).toEqual(empty)
       expect(copy.anchors).not.toBe(empty.anchors)

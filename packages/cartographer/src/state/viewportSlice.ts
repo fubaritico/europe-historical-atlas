@@ -30,7 +30,7 @@ export interface ViewportActions {
   /**
    * Adopt a view.
    *
-   * The arithmetic lives in `view/` — `panBy`, `zoomAbout`, `fitWhole` — and the caller composes it. This
+   * The arithmetic lives in `view/` — `panBy`, `zoomAbout`, `openingView` — and the caller composes it. This
    * slice holds and publishes; it computes nothing, so there is no second place a pan could be defined.
    */
   setViewport: (viewport: Viewport) => void
@@ -41,7 +41,7 @@ export type ViewportSlice = ViewportState & ViewportActions
 
 /** What the slice needs from whoever combines it. */
 export interface ViewportDeps {
-  /** The view to open on — usually `fitWhole`, computed once the canvas has a size. */
+  /** The view to open on — usually `openingView`, computed once the canvas has a size. */
   viewport: Viewport
 }
 

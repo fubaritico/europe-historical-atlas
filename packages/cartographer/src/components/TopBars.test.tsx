@@ -51,11 +51,11 @@ describe('top bars, bound', () => {
       const shared = store()
       const ratio = window.devicePixelRatio
       render(<DocBarPanel store={shared} history={createHistoryRelay(vi.fn())} />)
-      expect(meta()).toBe('@ — (1100 / editorial zone)')
+      expect(meta()).toBe('@ —')
       act(() => {
         shared.getState().setViewport({ scale: 0.48 * ratio, originX: 0, originY: 0 })
       })
-      expect(meta()).toBe('@ 48 % (1100 / editorial zone)')
+      expect(meta()).toBe('@ 48 %')
     })
   })
 

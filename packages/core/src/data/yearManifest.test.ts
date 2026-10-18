@@ -30,7 +30,6 @@ const registry = {
 const polities = {
   version: 1,
   year: 1100,
-  editorialZone: { west: -45, south: 20, east: 60, north: 76 },
   sources: [{ id: 0, name: 'Natural Earth 10m coastline', licence: 'public domain' }],
   anchors: [
     [0, 48],
@@ -247,8 +246,8 @@ describe('createAuthoredYearSource', () => {
   })
 
   describe('edge cases', () => {
-    it('projects against the manifest’s frame, not the year’s editorial zone', async () => {
-      // The editorial zone above is a different box on purpose. Projecting against it would slide every
+    it('projects against the manifest’s frame', async () => {
+      // The DEM's frame is the only box a year projects against; any other would slide every
       // border off the terrain, so the check is that the first anchor lands where the DEM's frame puts it.
       stubFetch(served)
       const set = await source(unauthoredSource()).load(1100)

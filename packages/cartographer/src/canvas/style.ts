@@ -15,17 +15,6 @@ import type { PaintStyle } from './painter'
 export const CHROME_PAINT_STYLE: PaintStyle = {
   // `.canvas { background: #d9ccad … }` — the vellum the baked terrain will sit on at step 4d-3.
   background: '#d9ccad',
-  // `.artboard { border: 1px solid rgba(42, 38, 31, 0.5) }` — the planche's frame.
-  zoneStroke: 'rgba(42, 38, 31, 0.5)',
-  zoneWidth: 1,
-  // Not in the design, and the dev's call of 2026-10-09 after a screenshot where the zone could not be
-  // found: everything outside the planche goes behind a quarter of black.
-  zoneVeil: 'rgba(0, 0, 0, 0.25)',
-  // `.artboard-label { color: #4a4238; font-size: 11px }`.
-  zoneLabel: '#4a4238',
-  labelSize: 11,
-  labelFamily: 'system-ui, sans-serif',
-  labelPad: 8,
   // The edit stroke: "fin, net, bleu, sans gaine" (2026-09-22). `--accent: #5b93d6` is the selection
   // blue, RESERVED by the design and never served to a polity — so a trace can never be read as a
   // territory.
@@ -73,7 +62,7 @@ export const CHROME_PAINT_STYLE: PaintStyle = {
  *
  * **Scaling the style rather than the context**, because scaling the context would double the positions
  * too — they are already in device pixels. And scaling it *here*, once, rather than at each use: a
- * multiplication repeated at eleven call sites is ten chances to forget one, and the one that is
+ * multiplication repeated at every call site is ten chances to forget one, and the one that is
  * forgotten is invisible on the machine of whoever wrote it if they are on a 1× display.
  * @param style - the design's values, in screen pixels
  * @param pixelRatio - device pixels per screen pixel
@@ -82,9 +71,6 @@ export const CHROME_PAINT_STYLE: PaintStyle = {
 export function inDevicePixels(style: PaintStyle, pixelRatio: number): PaintStyle {
   return {
     ...style,
-    zoneWidth: style.zoneWidth * pixelRatio,
-    labelSize: style.labelSize * pixelRatio,
-    labelPad: style.labelPad * pixelRatio,
     pathWidth: style.pathWidth * pixelRatio,
     anchorRadius: style.anchorRadius * pixelRatio,
     snapAnchorRadius: style.snapAnchorRadius * pixelRatio,

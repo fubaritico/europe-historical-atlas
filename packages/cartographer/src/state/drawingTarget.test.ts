@@ -1,10 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { addPolity } from '@europe-historical-atlas/core/editor/documentEdits'
-import {
-  FIXTURE_ZONE,
-  sharedBorderDocument,
-} from '@europe-historical-atlas/core/editor/documentFixtures'
+import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 import { createYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { describeDrawingTarget } from './drawingTarget'
@@ -78,7 +75,7 @@ describe('describeDrawingTarget', () => {
 
   describe('unmanaged errors', () => {
     it('answers nothing against a document with no polities at all', () => {
-      const empty = createYearDocument(1100, FIXTURE_ZONE)
+      const empty = createYearDocument(1100)
 
       expect(describeDrawingTarget(empty, 'fr-couronne')).toBeNull()
     })

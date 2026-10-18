@@ -135,7 +135,7 @@ plus tôt, promettant un cache que `4d-1` n'a pas construit.
 
 ### Trois choses décidées pour l'étape 4, à ne pas re-trancher
 
-1. **Le repère du canevas est celui du fond**, pas la zone éditoriale — voir `known-issues` (deux boîtes).
+1. **Le repère du canevas est celui du fond** — la seule boîte : la zone éditoriale est supprimée depuis le 18/10 (`s12`).
 2. **Deux canevas** : un statique redessiné au commit, un overlay au `pointermove`. La barre d'état
    s'écrit **impérativement**. (`4d-1` n'en a qu'un : le second arrive avec l'élastique, à `4d-2`.)
 3. **Le fond est cuit par le Cartographe** avec `bakeTerrainPixels(…, null)` — le `null` est l'année

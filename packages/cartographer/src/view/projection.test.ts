@@ -116,7 +116,7 @@ describe('projection', () => {
 
   describe('managed errors', () => {
     it('projects a position outside the frame rather than clamping it', () => {
-      // The editorial zone is narrower than the render frame, but a reference may sit outside both.
+      // A reference may sit outside the render frame.
       expect(lonLatToBackdrop([-80, 45], FRAME)[0]).toBeLessThan(0)
       expect(lonLatToBackdrop([120, 45], FRAME)[0]).toBeGreaterThan(1280)
     })
@@ -163,7 +163,7 @@ describe('projection', () => {
       expect(southEast[0]).toBeLessThanOrEqual(CANVAS.width - 20 + 1e-6)
     })
 
-    it('puts Paris inside the editorial zone, which is the sanity check that matters', () => {
+    it('puts Paris inside the backdrop, which is the sanity check that matters', () => {
       // The dev's own criterion: "ce qui serait gênant, c'est qu'une ville ne soit pas du bon côté".
       const [x, y] = lonLatToBackdrop([2.3522, 48.8566], FRAME)
 

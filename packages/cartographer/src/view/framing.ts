@@ -1,16 +1,12 @@
-import { lonLatToBackdrop } from './projection'
-
-import type { BackdropFrame } from './projection'
 import type { PixelSize, Viewport } from './viewport'
-import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
 
 /**
  * Framing: the viewports that are *computed* rather than gestured — fit the whole backdrop, fit a box.
  *
  * Separate from `viewport.ts` because it answers a different question. That module transforms a view
- * the reader is moving; this one *chooses* a view from an extent, which is what opening a file does
- * (`fitWhole`) and what double-clicking a polity does (`fitBox`, `s01` — "the view zooms and pans so its
- * extent fills the canvas with a margin").
+ * the reader is moving; this one *chooses* a view from an extent — what opening a file does
+ * ({@link openingView}, cover), and fitting a box or the whole backdrop with a margin (`fitBox`, `fitWhole`),
+ * which no gesture calls today.
  *
  * **Fitting is uniform and centred**, both for the same reason: the backdrop's pixels are square in
  * projected space, so one scale preserves shape. Fitting width and height independently would stretch
@@ -69,8 +65,8 @@ export function fitScale(canvas: PixelSize, box: BackdropBox, marginPx: number):
 /**
  * The view that shows a box of the backdrop as large as it will go, centred, with a margin.
  *
- * What double-clicking a polity in `{Polities}` does, once its extent has been turned into backdrop
- * pixels. The extent is the caller's to compute: this module deals in rectangles, not in geometry.
+ * The extent is the caller's to compute: this module deals in rectangles, not in geometry. No gesture
+ * calls it today — a double-click on a row opens the polity's form (`s07`).
  * @param canvas - the canvas, in screen pixels
  * @param box - the rectangle to frame, in backdrop pixels
  * @param marginPx - screen pixels to leave on every side
@@ -81,9 +77,9 @@ export function fitBox(canvas: PixelSize, box: BackdropBox, marginPx: number): V
 }
 
 /**
- * The view that shows the whole backdrop — what a freshly opened editor looks like.
+ * The view that shows the whole backdrop inside the canvas, with a margin — void around it on the long axis.
  *
- * `s01`'s "the whole frame is visible", and the state every navigation scenario starts from.
+ * Not the opening view, which is cover ({@link openingView}); no gesture calls this today.
  * @param canvas - the canvas, in screen pixels
  * @param backdrop - the backdrop's own size, in its pixels
  * @param marginPx - screen pixels to leave on every side
@@ -157,55 +153,18 @@ function holdAxis(origin: number, canvas: number, painted: number): number {
 }
 
 /**
- * The view an editor opens on: the editorial zone framed, but never pulled back past cover.
+ * The view an editor opens on: the whole backdrop at cover, centred — the ground the author may draw
+ * anywhere on, with no void around it (2026-10-18, when the editorial zone it used to frame was removed).
  *
- * **Two requirements that can contradict each other, and the dev stated both** — frame the editorial
- * zone, because that is the ground the author may draw on and a third of the backdrop lies outside it;
- * and never show void. On a wide window the zone fits at a scale *below* the cover scale, so fitting it
- * would open on exactly the emptiness the floor forbids. The larger of the two wins, which means the
- * zone is framed when it can be and overflows the short axis when it cannot — the same compromise a
- * photograph makes in a frame of the wrong shape.
- *
- * It is **recomputed on every resize** rather than stored, which is what makes the opening view
- * responsive: the two scales move with the canvas, and so does which of them wins.
- *
- * **It centres the zone and then holds the result, which is not the same as centring it.** The zone's
- * western limit is −45°, exactly where the backdrop begins, so centring it horizontally would ask for a
- * positive origin — void down the left-hand side — and the hold refuses. In practice the zone opens
- * flush with the canvas's left edge and centred vertically. Said here because the first version of this
- * header claimed "centred" flatly, and a test written from that claim accused correct code.
+ * **Cover, never fit**: fitting the whole backdrop would leave void on the long axis whatever the canvas's
+ * shape, the emptiness the zoom-out floor forbids. So the backdrop meets both edges on one axis and the
+ * other overflows, cropped evenly. It is **recomputed on every resize** rather than stored, which is what
+ * makes the opening view responsive.
  * @param canvas - the canvas, in screen pixels
  * @param backdrop - the backdrop's own size, in its pixels
- * @param zone - the editorial zone, already projected into backdrop pixels
- * @param marginPx - screen pixels to leave around the zone when it does fit
  * @returns the view
  */
-export function openingView(
-  canvas: PixelSize,
-  backdrop: PixelSize,
-  zone: BackdropBox,
-  marginPx: number
-): Viewport {
-  const scale = Math.max(
-    fitScale(canvas, zone, marginPx),
-    coverScale(canvas, { x: 0, y: 0, width: backdrop.width, height: backdrop.height })
-  )
-  return clampToCover(centred(canvas, zone, scale), canvas, backdrop)
-}
-
-/**
- * A geographic box as a rectangle of the backdrop.
- *
- * **The two corners are projected, never the four numbers scaled.** Latitude is not linear in Mercator,
- * so halving a span of degrees does not halve a span of pixels — `scene.ts` makes the same point about
- * the same rectangle, one transform further along. Getting it wrong puts the southern edge in the wrong
- * place, by more the taller the box is, which on the editorial zone is 56 degrees.
- * @param bounds - the geographic box
- * @param frame - the backdrop's own reference frame
- * @returns the rectangle, in backdrop pixels
- */
-export function backdropBoxOfBounds(bounds: GeoBounds, frame: BackdropFrame): BackdropBox {
-  const [left, top] = lonLatToBackdrop([bounds.west, bounds.north], frame)
-  const [right, bottom] = lonLatToBackdrop([bounds.east, bounds.south], frame)
-  return { x: left, y: top, width: right - left, height: bottom - top }
+export function openingView(canvas: PixelSize, backdrop: PixelSize): Viewport {
+  const whole = { x: 0, y: 0, width: backdrop.width, height: backdrop.height }
+  return clampToCover(centred(canvas, whole, coverScale(canvas, whole)), canvas, backdrop)
 }

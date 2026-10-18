@@ -35,8 +35,6 @@
 
 import { z } from 'zod/mini'
 
-import type { GeoBounds } from '../geo/mercator'
-
 /** A pinned colour, as a six-digit hex string. */
 const hexColour = z.nullable(
   z.string().check(z.regex(/^#[0-9a-fA-F]{6}$/, 'should be a #rrggbb hex colour'))
@@ -188,8 +186,6 @@ export interface YearPolities {
   version: number
   /** The year. */
   year: number
-  /** The window the author works in, distinct from the render frame. */
-  editorialZone: GeoBounds
   /** The sources the geometry was taken from. */
   sources: YearProvenance[]
   /** Every point of the year, once. **An anchor's id is its index in this array.** */
@@ -202,29 +198,10 @@ export interface YearPolities {
   deliberateGaps: DeliberateGap[]
 }
 
-/**
- * A geographic box whose edges are the right way round.
- *
- * The ordering check is what catches a north/south swap, which otherwise flips the whole map upside down
- * with no error anywhere — the same reasoning as `expectBounds` in the hand-written readers.
- */
-const geoBoundsSchema: z.ZodMiniType<GeoBounds> = z
-  .strictObject({
-    west: z.number(),
-    south: z.number(),
-    east: z.number(),
-    north: z.number(),
-  })
-  .check(
-    z.refine((box) => box.east > box.west, 'east should be east of west'),
-    z.refine((box) => box.north > box.south, 'north should be north of south')
-  )
-
 /** {@link YearPolities}. The anchors/anchorSource length agreement is a consistency check, not a schema one. */
 export const yearPolitiesSchema: z.ZodMiniType<YearPolities> = z.strictObject({
   version: z.int().check(z.gte(1)),
   year,
-  editorialZone: geoBoundsSchema,
   sources: z.array(yearProvenanceSchema),
   anchors: z.array(z.tuple([z.number(), z.number()])),
   anchorSource: z.array(z.int().check(z.nonnegative())),

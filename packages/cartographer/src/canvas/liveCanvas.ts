@@ -91,8 +91,6 @@ export interface CanvasControllerDeps {
   onHover: (lonLat: [number, number] | null) => void
   /** The colours and sizes, from the design. */
   style: PaintStyle
-  /** What to call the editorial zone on screen. */
-  zoneLabel: string
   /**
    * The second canvas, stacked over this one, for what moves with the pointer — the outline in progress,
    * the rubber band, an anchor being dragged. Decided for step 4: the static canvas is redrawn when the

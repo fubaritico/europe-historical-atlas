@@ -64,8 +64,6 @@ export interface MapAreaProps {
   load: BackdropLoad
   /** The colours and sizes, from `design/chrome.css`. */
   style: PaintStyle
-  /** What to call the editorial zone on screen. */
-  zoneLabel: string
   /** What a screen reader is told the drawing surface is. */
   label: string
   /**
@@ -203,7 +201,6 @@ export function MapArea({
   store,
   load,
   style,
-  zoneLabel,
   label,
   statusRef,
   actionRef,
@@ -244,7 +241,6 @@ export function MapArea({
         onResult={handleResult}
         onFeature={handleFeature}
         style={style}
-        zoneLabel={zoneLabel}
         label={label}
         colours={colours}
         history={history}

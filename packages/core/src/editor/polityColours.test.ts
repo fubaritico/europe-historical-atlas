@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { hexToRgb } from '../utils/color'
 
 import { addAnchor, addPolity, closeRing } from './documentEdits'
-import { FIXTURE_ZONE, sharedBorderDocument } from './documentFixtures'
+import { sharedBorderDocument } from './documentFixtures'
 import { authoredRegionColours, polityColours, polityNeighbours } from './polityColours'
 import { createYearDocument, saveYearDocument } from './yearDocument'
 
@@ -34,7 +34,7 @@ describe('polityColours', () => {
     })
 
     it('gives a polity with no neighbour the first slot', () => {
-      const doc = createYearDocument(1100, FIXTURE_ZONE)
+      const doc = createYearDocument(1100)
       addPolity(doc, { ...base('alone') })
       expect(polityColours(doc, PALETTE).get('alone')).toBe('#aa0000')
     })
@@ -43,7 +43,7 @@ describe('polityColours', () => {
   describe('managed errors', () => {
     // L3: N/A — nothing is refused; an empty palette is excluded by the type.
     it('colours a polity with no territory, which is the normal starting state', () => {
-      const doc = createYearDocument(1100, FIXTURE_ZONE)
+      const doc = createYearDocument(1100)
       addPolity(doc, base('fr'))
       expect(polityColours(doc, PALETTE).get('fr')).toBe('#aa0000')
     })
@@ -61,7 +61,7 @@ describe('polityColours', () => {
   describe('edge cases', () => {
     // Touching at one corner is not sharing a border: no edge in common, no constraint on colour.
     it('does not count a single shared anchor as a border', () => {
-      const doc = createYearDocument(1100, FIXTURE_ZONE)
+      const doc = createYearDocument(1100)
       for (const point of [
         [0, 0],
         [1, 0],

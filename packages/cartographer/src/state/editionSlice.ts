@@ -334,7 +334,7 @@ export type EditionSlice = EditionState & EditionActions
 
 /** What the slice needs from whoever combines it. */
 export interface EditionDeps {
-  /** The document to open on. There is no sensible default — a year needs its number and its zone. */
+  /** The document to open on. There is no sensible default — a year needs its number. */
   document: YearDocument
   /**
    * Deep-copy a document.

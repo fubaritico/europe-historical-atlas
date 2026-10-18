@@ -49,8 +49,6 @@ export interface MapCanvasProps {
   onFeature: (feature: string | null) => void
   /** The colours and sizes, from `design/chrome.css`. */
   style: PaintStyle
-  /** What to call the editorial zone on screen. */
-  zoneLabel: string
   /** What a screen reader is told this surface is. */
   label: string
   /** Where the polities' colours come from — shared with the panels. */

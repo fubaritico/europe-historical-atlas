@@ -6,7 +6,7 @@ import { toRegionPayload } from './toRegionPayload'
 import type { AuthoredYear } from './yearFormat'
 import type { GeoBounds } from '../geo/mercator'
 
-/** The render frame, which is the DEM's and deliberately not the editorial zone. */
+/** The render frame, which is the DEM's. */
 const renderBbox: GeoBounds = { west: -45, south: 11.18, east: 78.75, north: 76.84 }
 
 /** France, its vassal Aquitaine drawn inside it, and a square of four anchors they share. */
@@ -44,7 +44,6 @@ function authoredYear(): AuthoredYear {
     polities: {
       version: 1,
       year: 1100,
-      editorialZone: { west: -45, south: 20, east: 60, north: 76 },
       sources: [{ id: 0, name: 'Natural Earth 10m coastline', licence: 'public domain' }],
       anchors: [
         [0, 48],

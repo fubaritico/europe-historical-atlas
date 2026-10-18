@@ -269,3 +269,13 @@ Entries closed and moved out of `known-issues.md`. Kept for the lessons they car
   16/10** : l'atlas lit les tribus comme le Cartographe (`exactBordersOf` écarte leurs frontières et rend leurs
   contours, `settleYearBorders` retire leur teinte, `tribeStrokes` les trace en tirets dans leur couleur). Reste
   le rendu par grille du panneau, qui les teint encore (`known-issues-atlas.md`).
+- **Le canevas du Cartographe a deux boîtes géographiques et une seule image.** La **bbox de rendu** (celle
+  du DEM : W −45 / S 11 / E 78,75 / N 76,84) est ce à quoi la texture cuite est géoréférencée ; la **zone
+  éditoriale** déclarée par le document est lon −45…60, lat 20…76. Elles ne coïncident pas. Projeter contre
+  l'une en dessinant le fond contre l'autre fait **tout glisser, sans erreur nulle part** — même famille que
+  le manifeste dont la bbox n'est vérifiée par personne (entrée ci-dessous).
+  **Décidé le 29/09, avant d'écrire une ligne** : le repère du canevas est celui **du fond**, seul
+  géoréférencé par construction ; la zone éditoriale est un **cadre dessiné par-dessus**, ce que le glossaire
+  dit déjà d'elle (« la planche, nommée au-dessus de son cadre ») et ce que `s12` sépare.
+  **Sévérité : bloquant si oublié, réglé si appliqué.** À relire au début de `4b`.
+  **Fermé le 18/10** : la zone éditoriale est supprimée (décision du dev, `s12`) — il ne reste qu'une boîte, celle du fond.

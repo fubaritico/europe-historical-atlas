@@ -2,7 +2,7 @@ import { paintRanks } from '@europe-historical-atlas/core/data/paintOrder'
 import { handFor } from '@europe-historical-atlas/core/editor/borderHands'
 import { touchesTribe, tribeIds } from '@europe-historical-atlas/core/editor/tribes'
 
-import { lonLatToScreen, remapToScreen } from '../view/projection'
+import { remapToScreen } from '../view/projection'
 import { backdropToScreen } from '../view/viewport'
 
 import type { CanvasScene } from './painter'
@@ -39,7 +39,7 @@ export interface SceneInputs {
    * `canvas/anchorCache.ts`); what happens here is the cheap affine remap through the view.
    */
   anchorsInBackdrop: readonly (readonly [number, number])[]
-  /** The backdrop's coordinate system — the reference frame, never the editorial zone. */
+  /** The backdrop's coordinate system — the reference frame. */
   frame: BackdropFrame
   /** The current view. */
   viewport: Viewport
@@ -57,8 +57,6 @@ export interface SceneInputs {
   layers: LayerSettings
   /** Each polity's colour, by id — see `core/editor/polityColours`. */
   colours: ReadonlyMap<string, string>
-  /** What to call the editorial zone on screen. */
-  zoneLabel: string
   /** The baked terrain, or `null` while it is still being baked. */
   backdropImage: CanvasImageSource | null
   /**
@@ -84,23 +82,6 @@ export interface SceneInputs {
 export function backdropRect(frame: BackdropFrame, inputs: SceneInputs): Rect {
   const [left, top] = backdropToScreen(inputs.viewport, [0, 0])
   const [right, bottom] = backdropToScreen(inputs.viewport, [frame.size.width, frame.size.height])
-  return { x: left, y: top, width: right - left, height: bottom - top }
-}
-
-/**
- * The editorial zone as a screen rectangle.
- *
- * Both corners go through the projection rather than being derived from one and a size, because the
- * vertical axis is not linear: taking the north-west corner and adding a height computed in degrees
- * would put the southern edge in the wrong place, by more the taller the zone is.
- * @param document - the document, for its declared zone
- * @param inputs - the frame and the view
- * @returns the rectangle in screen pixels
- */
-export function editorialZoneRect(document: YearDocument, inputs: SceneInputs): Rect {
-  const zone = document.editorialZone
-  const [left, top] = lonLatToScreen([zone.west, zone.north], inputs.frame, inputs.viewport)
-  const [right, bottom] = lonLatToScreen([zone.east, zone.south], inputs.frame, inputs.viewport)
   return { x: left, y: top, width: right - left, height: bottom - top }
 }
 
@@ -276,8 +257,6 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
       inputs.backdropImage === null
         ? null
         : { image: inputs.backdropImage, rect: backdropRect(inputs.frame, inputs) },
-    editorialZone: editorialZoneRect(document, inputs),
-    zoneLabel: inputs.zoneLabel,
     rings: projectedRings(document, anchors),
     fills: projectedFills(document, anchors, inputs.colours, tribes),
     tribeOutlines: projectedTribeOutlines(document, anchors, inputs.colours, tribes),
