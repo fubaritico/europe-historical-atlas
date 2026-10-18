@@ -124,8 +124,8 @@ Put here the know issues to avoid cluttering the context window.
 - **Le menu d'empilement de `{Polities}` (11/10) a une limite connue, laissée ouverte.** — CARTO-122
   (1) ~~Il peut déborder du bord de la fenêtre~~ — **fait** (`2c3acf8`, `view/menuPlacement.ts`) : il se replie.
   (2) **Il est annoncé comme une liste, pas comme un menu** : c'est le `Menu` du design system, qui rend
-  un `role="listbox"` d'`option`. Le remède est au design system (un `role="menu"`), à demander à son
-  Claude avec un menu contextuel positionné. **Une boucle d'hommage est refusée à la saisie depuis le 12/10**
+  un `role="listbox"` d'`option`. Le remède est au design system (un `role="menu"`) : **demande rédigée le 18/10**,
+  `files/plans/cartographer/ds-request-menu-role.md`, à transmettre par le dev à son Claude. **Une boucle d'hommage est refusée à la saisie depuis le 12/10**
   (`updatePolity` / `vassalsOf`, et la liste des suzerains ne la propose pas) — l'entrée écrite ici le
   11/10 disait à tort que rien ne permettait de choisir un suzerain : le formulaire l'avait depuis le
   09/10. Un fichier qui en contient une est peint en dernier, et `documentFaults` le dit une fois. **Sévérité : cosmétique.**
