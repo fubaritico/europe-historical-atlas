@@ -1,3 +1,5 @@
+import { TRIBE_FEATHER } from '@europe-historical-atlas/core/editor/tribeFeather'
+
 import { clampToCover, openingView } from '../viewport/framing'
 import { screenToLonLatOnBackdrop } from '../viewport/projection'
 import { panBy, zoomAbout } from '../viewport/viewport'
@@ -41,8 +43,10 @@ import {
 } from './tools/toolKeys'
 import { keyRefusedFromAfar, releaseTool } from './tools/toolRelease'
 import { dropDrag, idleSession, targetHandles } from './tools/toolSession'
+import { createTribeFeatherCache } from './tribeFeatherCache'
 
-import type { CanvasControllerDeps, LiveCanvas } from './liveCanvas'
+import type { CanvasControllerDeps } from './controllerDeps'
+import type { LiveCanvas } from './liveCanvas'
 import type { Viewport } from '../viewport/viewport'
 
 /**
@@ -71,7 +75,8 @@ import type { Viewport } from '../viewport/viewport'
  * its own.
  */
 
-export type { CanvasControllerDeps, LiveCanvas } from './liveCanvas'
+export type { CanvasControllerDeps } from './controllerDeps'
+export type { LiveCanvas } from './liveCanvas'
 
 /**
  * The position of a pointer or wheel event in the canvas's device pixels.
@@ -122,6 +127,9 @@ function repaint(it: LiveCanvas): void {
     borders: bordersOf(it),
     layers: state.layers,
     colours: coloursOf(it),
+    // From the cache keyed on the edition's version: a pan repaints per pointer move, and never measures
+    // a distance again.
+    tribeFeathers: it.tribeFeathers.feathersOf(state.document, state.version, coloursOf(it)),
   })
   paintCanvas(it.ctx, it.size, scene, inDevicePixels(it.deps.style, it.ratio))
 }
@@ -616,6 +624,10 @@ function freshCanvas(
     pressAt: null,
     dragging: false,
     anchors: createAnchorCache(deps.frame),
+    tribeFeathers: createTribeFeatherCache(
+      { frame: deps.frame, feather: TRIBE_FEATHER, land: deps.landMask },
+      deps.tribeImage
+    ),
     overlay: { node: deps.overlay, ctx: overlayCtx },
     session: idleSession(),
     pointer: null,

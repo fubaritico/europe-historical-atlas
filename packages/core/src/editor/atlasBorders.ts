@@ -3,7 +3,7 @@ import { latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
 import { handFor } from './borderHands'
 import { deriveBorders, maskDerivationDeps } from './derivedBorders'
 import { homageLevels } from './homageLevels'
-import { touchesTribe, tribeIds } from './tribes'
+import { isTribeEdge, tribeIds } from './tribes'
 import { openYearDocument } from './yearDocument'
 
 import type { HandPattern } from './borderHands'
@@ -13,7 +13,7 @@ import type { BorderPattern } from '../data/borderStyles'
 import type { UvPoint } from '../data/coastlineSource'
 import type { LandMask } from '../data/landMask'
 import type { RegionBorders } from '../data/regionBorders'
-import type { AuthoredYear, YearClaim } from '../data/yearFormat'
+import type { AuthoredYear } from '../data/yearFormat'
 import type { GeoBounds } from '../geo/mercator'
 
 /**
@@ -32,14 +32,16 @@ import type { GeoBounds } from '../geo/mercator'
  * being one per kind of line — and an authored hand on a **frontier**, which the atlas draws in its one dark
  * stroke whatever the author chose. The latter is warned once per derivation.
  *
- * **A tribe has no borders, its dashed outline instead** — as in the Cartographer (`tribes.ts`): a border
- * with a tribe on either side is left out, and each tribe's rings come back apart, for the atlas to stroke
- * dashed in its colour.
+ * **A tribe has no borders of its own** — as in the Cartographer (`tribes.ts`): a border between two tribes,
+ * or between a tribe and the sea or ground nobody claims, is left out; one between a tribe and a state is the
+ * state's, drawn like any other, its split level read as for any pair. Its limit is drawn by its own colour fading out (`tribeFeather`, ATLAS-258), from the region's
+ * rings the atlas already holds; nothing of it comes back from here.
  *
  * **Each group carries its split level** (`homageLevels`, ATLAS-253): the first display level at which its
  * two sides wear different colours, so the atlas can hide a border between a vassal and its suzerain
  * until the zoom shows the vassal apart. The frontier against unclaimed ground has one side only and is
- * level 0, shown at every zoom; so are the tribes' outlines, which have no fill to reveal.
+ * level 0, shown at every zoom; so is a border with a tribe on one side, whose colour never changes with
+ * the zoom.
  */
 
 /** An authored year's borders, and the pattern each group is drawn in. */
@@ -50,8 +52,6 @@ export interface ExactBorders {
   patterns: ReadonlyMap<string, BorderPattern>
   /** The split level of each group, keyed by its pair as `"a:b"` — `0` shows it at every zoom. */
   levels: ReadonlyMap<string, number>
-  /** Each tribe's claim, its rings closed, in grid coordinates — stroked dashed instead of bordered. */
-  tribeOutlines: { polity: string; rings: UvPoint[][] }[]
 }
 
 /**
@@ -105,7 +105,7 @@ export function exactBordersOf(
       }))
   let undrawnHands = 0
   for (const border of derived) {
-    if (touchesTribe(border, tribes)) continue
+    if (isTribeEdge(border, tribes)) continue
     const hand = handFor(border, warn)
     if (hand.pattern === 'none') continue
     const line = toGrid(border.run)
@@ -118,10 +118,10 @@ export function exactBordersOf(
     const key = borders.between.length
     borders.between.push({ pair: [key, key], lines: [line] })
     patterns.set(pairKey([key, key]), ATLAS_PATTERN[hand.pattern])
-    levels.set(pairKey([key, key]), splitLevelOf(border, homage))
+    levels.set(pairKey([key, key]), splitLevelOf(border, homage, tribes))
   }
   warnUndrawnHands(undrawnHands, warn)
-  return { borders, patterns, levels, tribeOutlines: tribeOutlinesOf(doc.claims, tribes, toGrid) }
+  return { borders, patterns, levels }
 }
 
 /**
@@ -140,39 +140,25 @@ function warnUndrawnHands(count: number, warn: (message: string) => void): void 
 /**
  * The split level of a derived border: the first display level at which its two sides wear different
  * colours.
+ *
+ * **A border touching a tribe is level 0** (ARCH-001, 2026-10-18): the tribe layer wears the tribe's own
+ * colour at every zoom — it never takes its suzerain's — so the tribe and the state beside it differ from
+ * the farthest view, and the state's border there must show from it too. Read as any pair, a tribe vassal
+ * of the kingdom it borders would hide that border until the zoom revealed a vassal that was never hidden.
  * @param border - the border, naming who it separates
  * @param homage - the year's homage
- * @returns `0` for a border with one side — the sea or ground nobody claims beyond it — else the pair's
- *   split level
+ * @param tribes - the ids of the year's tribes
+ * @returns `0` for a border with one side — the sea or ground nobody claims beyond it — or with a tribe on
+ *   either side, else the pair's split level
  */
-function splitLevelOf(border: Pick<DerivedBorder, 'between'>, homage: HomageLevels): number {
+function splitLevelOf(
+  border: Pick<DerivedBorder, 'between'>,
+  homage: HomageLevels,
+  tribes: ReadonlySet<string>
+): number {
   const [one, other] = border.between
-  return one === undefined || other === undefined ? 0 : homage.splitLevel(one, other)
-}
-
-/**
- * Each tribe's claim, its rings closed and in grid coordinates.
- * @param claims - the year's claims
- * @param tribes - the ids of its tribes
- * @param toGrid - anchor indices to grid points
- * @returns one outline per claim of a tribe
- */
-function tribeOutlinesOf(
-  claims: readonly YearClaim[],
-  tribes: ReadonlySet<string>,
-  toGrid: (indices: readonly number[]) => UvPoint[]
-): ExactBorders['tribeOutlines'] {
-  return claims
-    .filter((claim) => tribes.has(claim.polity))
-    .map((claim) => ({
-      polity: claim.polity,
-      // Closed, so the stroke goes all the way round: a ring's closure is implied in the format.
-      rings: claim.rings.flatMap((indices) => {
-        const ring = toGrid(indices)
-        const first = ring[0]
-        return first !== undefined && ring.length >= 3 ? [[...ring, first]] : []
-      }),
-    }))
+  if (one === undefined || other === undefined) return 0
+  return tribes.has(one) || tribes.has(other) ? 0 : homage.splitLevel(one, other)
 }
 
 /**

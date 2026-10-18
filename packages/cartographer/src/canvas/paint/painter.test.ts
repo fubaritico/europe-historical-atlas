@@ -154,7 +154,7 @@ function scene(overrides: Partial<CanvasScene> = {}): CanvasScene {
     backdrop: null,
     rings: [],
     fills: [],
-    tribeOutlines: [],
+    tribeFeathers: [],
     anchors: [],
     // Every anchor gets a handle unless a test says otherwise — the handle filter is the scene's
     // decision (`targetHandles`), not the painter's, which only draws the indices it is handed.
@@ -1039,83 +1039,92 @@ describe('painter — layers', () => {
   })
 })
 
-const strokesIn = (calls: Call[], colour: string) =>
-  calls.filter((call) => call.op === 'stroke' && call.strokeStyle === colour)
+// A tribe's colour fades at its limit, composited like a fill (the dev, 2026-10-18; ATLAS-258).
+describe('paintCanvas — a tribe’s fade', () => {
+  const IMAGE = { kind: 'tribe image' } as unknown as CanvasImageSource
+  const FEATHER = { image: IMAGE, rect: { x: 10, y: 20, width: 30, height: 40 } }
+  const drawsOf = (calls: Call[]) =>
+    calls.filter((call) => call.op === 'drawImage' && call.args[0] === IMAGE)
 
-// A tribe has no fill and its outline dashed in its colour (the dev, 2026-10-15; `core/editor/tribes`).
-describe('paintCanvas — a tribe’s outline', () => {
-  const TRIBE = { rings: [SQUARE], colour: '#8a2be2' }
   describe('happy path', () => {
-    it('strokes a tribe’s ring in its colour', () => {
+    it('draws the tribe’s image over its rectangle on screen', () => {
       const { ctx, calls } = recordingContext()
-      paintCanvas(ctx, SIZE, scene({ tribeOutlines: [TRIBE] }), STYLE)
-      expect(strokesIn(calls, '#8a2be2')).toHaveLength(1)
+      paintCanvas(ctx, SIZE, scene({ tribeFeathers: [FEATHER] }), STYLE)
+      expect(drawsOf(calls).map((call) => call.args.slice(1))).toEqual([[10, 20, 30, 40]])
     })
   })
 
   describe('variants', () => {
-    it('strokes it dashed, at a border casing’s width', () => {
+    it('composites it as a fill: the fills’ blend, at the fills’ layer opacity', () => {
       const { ctx, calls } = recordingContext()
-      paintCanvas(ctx, SIZE, scene({ tribeOutlines: [TRIBE] }), STYLE)
-      const at = calls.findIndex((call) => call.op === 'stroke' && call.strokeStyle === '#8a2be2')
-      const dash = calls
-        .slice(0, at)
-        .filter((call) => call.op === 'setLineDash')
-        .at(-1)
-      expect(dash?.args).toEqual([STYLE.borderEdgeWidth * 6, STYLE.borderEdgeWidth * 3])
-      expect(calls[at]?.lineWidth).toBe(STYLE.borderEdgeWidth)
+      const layers = { ...DEFAULT_LAYERS, fills: { ...DEFAULT_LAYERS.fills, opacity: 40 } }
+      paintCanvas(ctx, SIZE, scene({ tribeFeathers: [FEATHER], layers }), STYLE)
+      const [drawn] = drawsOf(calls)
+      expect(drawn?.globalCompositeOperation).toBe(STYLE.fillBlend)
+      expect(drawn?.globalAlpha).toBeCloseTo(0.4)
     })
 
-    it('strokes every ring of a tribe', () => {
+    it('draws it after the fills and before the borders', () => {
       const { ctx, calls } = recordingContext()
       paintCanvas(
         ctx,
         SIZE,
-        scene({ tribeOutlines: [{ ...TRIBE, rings: [SQUARE, SQUARE] }] }),
+        scene({
+          fills: [{ rings: [SQUARE], colour: '#aa0000' }],
+          tribeFeathers: [FEATHER],
+          borders: [
+            {
+              points: SQUARE,
+              hand: { pattern: 'solid', cased: true, weight: 1 } as const,
+              layer: 'borders' as const,
+            },
+          ],
+        }),
         STYLE
       )
-      expect(strokesIn(calls, '#8a2be2')).toHaveLength(2)
+      const fill = calls.findIndex((call) => call.op === 'fill' && call.fillStyle === '#aa0000')
+      const tribe = calls.findIndex((call) => call.op === 'drawImage' && call.args[0] === IMAGE)
+      const border = calls.findIndex(
+        (call) => call.op === 'stroke' && call.strokeStyle === STYLE.borderEdge
+      )
+      expect(fill).toBeLessThan(tribe)
+      expect(tribe).toBeLessThan(border)
     })
 
-    it('leaves the dash off for what is stroked after it', () => {
+    it('leaves the blend reset for what is drawn after it', () => {
       const { ctx, calls } = recordingContext()
-      paintCanvas(ctx, SIZE, scene({ tribeOutlines: [TRIBE], rings: [SQUARE] }), STYLE)
-      const blue = calls.findIndex(
+      paintCanvas(ctx, SIZE, scene({ tribeFeathers: [FEATHER], rings: [SQUARE] }), STYLE)
+      const blue = calls.find(
         (call) => call.op === 'stroke' && call.strokeStyle === STYLE.pathStroke
       )
-      const dash = calls
-        .slice(0, blue)
-        .filter((call) => call.op === 'setLineDash')
-        .at(-1)
-      expect(dash?.args).toEqual([])
+      expect(blue?.globalCompositeOperation).toBe('source-over')
+      expect(blue?.globalAlpha).toBe(1)
     })
   })
 
   describe('managed errors', () => {
-    it('draws nothing when the borders’ layer is hidden', () => {
+    it('draws nothing when the fills’ layer is hidden', () => {
       const { ctx, calls } = recordingContext()
-      const layers = { ...DEFAULT_LAYERS, borders: { ...DEFAULT_LAYERS.borders, visible: false } }
-      paintCanvas(ctx, SIZE, scene({ tribeOutlines: [TRIBE], layers }), STYLE)
-      expect(strokesIn(calls, '#8a2be2')).toHaveLength(0)
+      const layers = { ...DEFAULT_LAYERS, fills: { ...DEFAULT_LAYERS.fills, visible: false } }
+      paintCanvas(ctx, SIZE, scene({ tribeFeathers: [FEATHER], layers }), STYLE)
+      expect(drawsOf(calls)).toHaveLength(0)
     })
   })
 
   describe('unmanaged errors', () => {
-    // L4: N/A — a ring too short to stroke is skipped by strokeRing, tested with the outlines.
-    it('strokes nothing for a tribe whose ring has one point', () => {
+    // L4: N/A — the painter draws what it is handed; the image was made by the cache.
+    it('draws nothing for no tribe', () => {
       const { ctx, calls } = recordingContext()
-      paintCanvas(ctx, SIZE, scene({ tribeOutlines: [{ ...TRIBE, rings: [[[1, 1]]] }] }), STYLE)
-      expect(strokesIn(calls, '#8a2be2')).toHaveLength(0)
+      paintCanvas(ctx, SIZE, scene(), STYLE)
+      expect(calls.filter((call) => call.op === 'drawImage')).toHaveLength(0)
     })
   })
 
   describe('edge cases', () => {
-    it('fills nothing in a tribe’s colour', () => {
+    it('strokes no dashed outline for a tribe any more', () => {
       const { ctx, calls } = recordingContext()
-      paintCanvas(ctx, SIZE, scene({ tribeOutlines: [TRIBE] }), STYLE)
-      expect(
-        calls.filter((call) => call.op === 'fill' && call.fillStyle === '#8a2be2')
-      ).toHaveLength(0)
+      paintCanvas(ctx, SIZE, scene({ tribeFeathers: [FEATHER] }), STYLE)
+      expect(calls.filter((call) => call.op === 'setLineDash' && call.args.length > 0)).toEqual([])
     })
   })
 })

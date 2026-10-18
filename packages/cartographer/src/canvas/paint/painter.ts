@@ -188,10 +188,10 @@ export interface CanvasScene {
    */
   fills: readonly { rings: readonly (readonly Point[])[]; colour: string }[]
   /**
-   * Each tribe's rings, stroked dashed in its colour instead of filled (`core/editor/tribes`) — and standing
-   * in for its borders, which {@link borders} leaves out.
+   * Each tribe's colour fading at its limit (`core/editor/tribeFeather`), as an image and the rectangle it
+   * covers on screen — instead of a fill, and of its borders, which {@link borders} leaves out.
    */
-  tribeOutlines: readonly { rings: readonly (readonly Point[])[]; colour: string }[]
+  tribeFeathers: readonly { image: CanvasImageSource; rect: Rect }[]
   /** Every anchor, projected, parallel to the document's own table. */
   anchors: readonly Point[]
   /**
@@ -330,23 +330,19 @@ function strokeRun(ctx: Painter2D, points: readonly Point[]): void {
 }
 
 /**
- * Draw each tribe's outline dashed in its colour, at a border casing's width, under the borders' layer
- * setting — the line a tribe has instead of a fill and of its borders (the dev, 2026-10-15).
+ * Draw each tribe's fade, composited onto the relief as a fill is — `overlay` at the fills' layer opacity —
+ * so a tribe's colour is the tint the fills give, faded by the image's alpha (the dev, 2026-10-18, ATLAS-258).
+ * The blend is set and reset here, as `paintFills` does.
  * @param ctx - the context to draw into
  * @param scene - what to draw
- * @param style - the sizes
+ * @param style - the blend
  */
-function paintTribeOutlines(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): void {
-  if (scene.tribeOutlines.length === 0 || !layerAlpha(ctx, scene.layers.borders)) return
-  ctx.lineCap = 'round'
-  ctx.lineWidth = style.borderEdgeWidth
-  ctx.setLineDash(dashOf('dashed', style.borderEdgeWidth))
-  for (const outline of scene.tribeOutlines) {
-    ctx.strokeStyle = outline.colour
-    for (const ring of outline.rings) strokeRing(ctx, ring)
-  }
-  ctx.setLineDash([])
-  ctx.lineCap = 'butt'
+function paintTribeFeathers(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): void {
+  if (scene.tribeFeathers.length === 0 || !layerAlpha(ctx, scene.layers.fills)) return
+  ctx.globalCompositeOperation = style.fillBlend
+  for (const { image, rect } of scene.tribeFeathers)
+    ctx.drawImage(image, rect.x, rect.y, rect.width, rect.height)
+  ctx.globalCompositeOperation = 'source-over'
   ctx.globalAlpha = 1
 }
 
@@ -651,11 +647,11 @@ export function paintCanvas(
   // The tint goes straight onto the relief and under the coastline and the rivers, as the atlas bakes it:
   // a shoreline blended into its country's colour would lose the contrast it is drawn for.
   paintFills(ctx, scene, style)
+  paintTribeFeathers(ctx, scene, style)
   paintVectors(ctx, size, scene, style)
   // Over the fills and the water, under the edit outlines: the borders belong to the map, the blue
   // strokes to the tool.
   paintBorders(ctx, scene, style)
-  paintTribeOutlines(ctx, scene, style)
   ctx.strokeStyle = style.pathStroke
   ctx.lineWidth = style.pathWidth
   for (const ring of scene.rings) strokeRing(ctx, ring)

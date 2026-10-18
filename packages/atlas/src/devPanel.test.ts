@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { beforeAll, describe, expect, it } from 'vitest'
 
+import { TRIBE_FEATHER } from '@europe-historical-atlas/core/editor/tribeFeather'
+
 import { createDevPanel } from './devPanel'
 import { createDevState } from './devState'
 
@@ -120,6 +122,7 @@ function build(): {
     river: dev.river,
     political: dev.political,
     vassals: dev.vassals,
+    tribes: dev.tribes,
     rose: dev.rose,
     frame: dev.frame,
     controlsOptions,
@@ -201,6 +204,9 @@ const READ_EVERY_FRAME = new Set([
  */
 const VASSALS_READ_EVERY_FRAME = new Set(['enabled', 'revealStart', 'revealEnd', 'fade'])
 
+/** The tribes' fade, written to a uniform on every frame (`mapLayers`) — spelled out by key, as above. */
+const TRIBES_READ_EVERY_FRAME = new Set(['mode', 'widthKm'])
+
 /**
  * The flight controls, read once when a flight begins rather than every frame.
  *
@@ -238,6 +244,7 @@ describe('createDevPanel', () => {
         nudge(match)
         const exempt =
           (match.object === dev.vassals && VASSALS_READ_EVERY_FRAME.has(match.property)) ||
+          (match.object === dev.tribes && TRIBES_READ_EVERY_FRAME.has(match.property)) ||
           READ_EVERY_FRAME.has(match.property) ||
           (FLIGHT_CONTROLS as readonly string[]).includes(match.property)
         if (total(calls) === 0 && !exempt) inert.push(match.property)
@@ -358,6 +365,21 @@ describe('createDevPanel', () => {
       expect(total(calls)).toBe(0)
     })
 
+    it('writes the tribes’ fade into the live object the frame reads, with no rebuild', () => {
+      const { dev, calls, controls } = build()
+      const tribes = controls.filter((c) => c.object === dev.tribes)
+      expect(tribes.map((c) => c.property)).toEqual(['mode', 'widthKm'])
+      const [mode, width] = tribes
+      if (mode) nudge(mode, 'outset')
+      if (width) nudge(width, 30)
+      expect(dev.tribes).toEqual({ mode: 'outset', widthKm: 30 })
+      expect(total(calls)).toBe(0)
+    })
+
+    it('starts the tribes’ fade from core’s default, the one the Cartographer draws', () => {
+      expect(build().dev.tribes).toEqual(TRIBE_FEATHER)
+    })
+
     it('repaints a colour live rather than rebuilding for it', () => {
       const { calls, controls } = build()
       const colours = controls.filter((c) => c.property === 'color')
@@ -376,10 +398,12 @@ describe('createDevPanel', () => {
       if (seaLevel) nudge(seaLevel)
       dev.vassals.revealStart = 0.9
       dev.vassals.enabled = false
+      dev.tribes.mode = 'outset'
       const reset = controls.find((c) => c.property === 'resetToDefaults')
       ;(reset?.object as { resetToDefaults: () => void }).resetToDefaults()
       expect(dev.texture.seaLevel).toBe(before)
       expect(dev.vassals).toEqual(createDevState().vassals)
+      expect(dev.tribes).toEqual(createDevState().tribes)
       // One rebuild per system, not one per controller: lil-gui's own reset() would fire dozens of
       // full texture bakes in a row.
       expect(calls.rebuildTexture).toBe(2) // once for the sea level above, once for the reset

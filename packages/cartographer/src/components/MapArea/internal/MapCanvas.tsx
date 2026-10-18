@@ -2,6 +2,7 @@ import { useId, useRef } from 'react'
 
 import { startCanvasController } from '../../../canvas/controller'
 import { trackFocusOrigin } from '../../../canvas/focusOrigin'
+import { rasterToCanvas } from '../../../canvas/tribeFeatherCache'
 import { MAX_SNAP_REACH_KM } from '../../../viewport/toolReach'
 
 import type { CanvasControllerDeps } from '../../../canvas/controller'
@@ -177,6 +178,7 @@ export function MapCanvas({ label, ...controller }: MapCanvasProps) {
           return startSurface(node, overlay.current, {
             ...controller,
             maxSnapReachKm: MAX_SNAP_REACH_KM,
+            tribeImage: rasterToCanvas,
           })
         }}
       />

@@ -24,6 +24,8 @@ import {
   RIVER_CONTROL_ORDER,
   ROSE_CONTROLS,
   ROSE_CONTROL_ORDER,
+  TRIBE_CONTROLS,
+  TRIBE_CONTROL_ORDER,
   VASSAL_CONTROLS,
   VASSAL_CONTROL_ORDER,
   politicalRebuildFor,
@@ -40,6 +42,7 @@ import type {
   RhumbDevParams,
   RiverDevParams,
   RoseDevParams,
+  TribeDevParams,
   VassalDevParams,
 } from './devParams'
 import type { TerrainTextureOptions } from '@europe-historical-atlas/core/pipeline/terrainCompose'
@@ -54,6 +57,7 @@ export type {
   RhumbDevParams,
   RiverDevParams,
   RoseDevParams,
+  TribeDevParams,
   VassalDevParams,
 } from './devParams'
 
@@ -160,6 +164,8 @@ export interface DevPanelDeps {
   political: PoliticalDevParams
   /** How the zoom reveals the levels of homage. */
   vassals: VassalDevParams
+  /** How a tribe's colour vanishes at its limit. */
+  tribes: TribeDevParams
   /** Compass-rose styling params. */
   rose: RoseDevParams
   /** The sheet the map is printed on, and its graduated border. */
@@ -233,6 +239,7 @@ function snapshotDefaults(deps: DevPanelDeps) {
     river: clonePlain(deps.river),
     political: clonePlain(deps.political),
     vassals: clonePlain(deps.vassals),
+    tribes: clonePlain(deps.tribes),
     rose: clonePlain(deps.rose),
     frame: clonePlain(deps.frame),
     extent: clonePlain(deps.extent),
@@ -261,6 +268,7 @@ function createResetAction(gui: GUI, deps: DevPanelDeps, defaults: PanelDefaults
     river,
     political,
     vassals,
+    tribes,
     rose,
     frame,
     extent,
@@ -274,6 +282,7 @@ function createResetAction(gui: GUI, deps: DevPanelDeps, defaults: PanelDefaults
     Object.assign(river, clonePlain(defaults.river))
     Object.assign(political, clonePlain(defaults.political))
     Object.assign(vassals, clonePlain(defaults.vassals))
+    Object.assign(tribes, clonePlain(defaults.tribes))
     Object.assign(rose, clonePlain(defaults.rose))
     Object.assign(frame, clonePlain(defaults.frame))
     Object.assign(extent, clonePlain(defaults.extent))
@@ -468,6 +477,20 @@ function addVassalFolder(gui: GUI, deps: DevPanelDeps): void {
 }
 
 /**
+ * The tribes' vanishing edge — inset or outset, and its width. Every field is read on each frame and
+ * written to a uniform, so none needs a callback.
+ * @param gui - where to add the folder
+ * @param deps - what the panel binds to
+ * @returns nothing
+ */
+function addTribeFolder(gui: GUI, deps: DevPanelDeps): void {
+  const folder = gui.addFolder('tribes (vanishing edge)')
+  for (const key of TRIBE_CONTROL_ORDER)
+    addControl(folder, deps.tribes, key, TRIBE_CONTROLS[key], noEffect)
+  folder.close()
+}
+
+/**
  * The compass rose. Colours, labels and size are baked into its SVG, so each change regenerates it;
  * opacity is the exception, being a live material tweak.
  * @param gui - where to add the folder
@@ -563,6 +586,7 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
   addRiverFolder(gui, deps)
   addPoliticalFolder(gui, deps)
   addVassalFolder(gui, deps)
+  addTribeFolder(gui, deps)
   addRoseFolder(gui, deps)
   addFrameFolder(gui, deps)
   addCameraFolder(gui, deps)

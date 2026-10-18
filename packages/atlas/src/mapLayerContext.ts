@@ -21,7 +21,10 @@ import type { MapEdge } from './scene/mapEdge'
 import type { MapTitle } from './scene/mapTitle'
 import type { PaperSheet } from './scene/paperSheet'
 import type { RiverLayer } from './scene/riverLayer'
+import type { TribeLayer } from './scene/tribeLayer'
+import type { TribePatch } from './tribePatches'
 import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
+import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
 import type { DataTexture, Mesh, MeshBasicMaterial, Object3D, PlaneGeometry, Scene } from 'three'
 
 /** World-space width of the map plane on X, which every other dimension follows from. */
@@ -42,6 +45,34 @@ export const BORDER_RENDER_ORDER = 10
 
 /** The relief mesh, whose material carries the baked terrain texture. */
 export type ReliefMesh = Mesh<PlaneGeometry, MeshBasicMaterial>
+
+/**
+ * What the tribe patches were measured from (`mapTribeLayer`) — compared field by field before measuring again. Everything
+ * `tribePatches` reads is in it: the tribes, every region whose ground cuts a spill, the frame, the grid and
+ * the land (ARCH-003 / QUAL-007).
+ *
+ * **The land by what it is made of, not by the mask object**: with the land mask failed, `maskOrFallback`
+ * derives a new threshold mask at every call, so its identity never repeats — the land is the mask asset
+ * when there is one, else the elevation and the sea level it is thresholded at.
+ */
+export interface TribeCutKey {
+  /** The tribes' rings and colours, by identity — replaced, never mutated, when a year is settled. */
+  tribes: object
+  /** Every region of the year, by identity. */
+  claims: object
+  /** The frame the rings were projected against, by value. */
+  bounds: GeoBounds
+  /** The relief's subdivision. */
+  segX: number
+  /** The relief's subdivision. */
+  segY: number
+  /** The land mask asset, or `null` when it failed. */
+  landMask: object | null
+  /** The elevation the fallback is thresholded over, or `null` before it loads. */
+  heightmap: object | null
+  /** The fallback's threshold — read only when there is no mask. */
+  seaLevel: number
+}
 
 /** Every layer currently on screen, or `null` where one has not been built yet. */
 export interface LayerHandles {
@@ -69,6 +100,14 @@ export interface LayerHandles {
    * height-curve slider re-lays the same triangles instead of cutting them again (~170 ms on 1100).
    */
   fillCut: { regions: object; segX: number; segY: number; fills: Float32Array[] } | null
+  /** The tribes' colour fading at their limit (ATLAS-258), or `null` when there is none to draw. */
+  tribes: TribeLayer | null
+  /**
+   * The last tribe patches built, and what from (`mapTribeLayer`'s key): like {@link LayerHandles.fillCut},
+   * they depend on the year, the grid and the land, not the heights, so a height-curve slider re-lays them
+   * instead of measuring every distance again.
+   */
+  tribeCut: { key: TribeCutKey; patches: TribePatch[] } | null
   /** The compass rose. */
   compass: CompassRose | null
   /** The vellum the map is printed on. */

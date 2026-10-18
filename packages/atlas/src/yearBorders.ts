@@ -6,8 +6,9 @@
  * read from the per-century payloads keeps the lines the compute traced from the raster of its fills: it
  * has no anchors to draw from.
  *
- * **A tribe is drawn as in the Cartographer** (`core/editor/tribes`): no fill, no borders, its outline
- * dashed in its colour. Its tint is dropped here, beside the lines that replace it — for the exact fills.
+ * **A tribe is drawn as in the Cartographer** (`core/editor/tribes`): no fill, no borders, its colour
+ * fading at its limit (`core/editor/tribeFeather`, ATLAS-258). Its tint is dropped here, beside the ground
+ * the tribe layer draws instead — for the exact fills.
  * The grid path the dev panel keeps for comparison (`exactFills` off) bakes the compute's own tints and
  * still fills a tribe; left so by decision, that path no longer ships (`known-issues-atlas.md`).
  *
@@ -45,7 +46,7 @@ export interface ComputedYear {
 }
 
 /**
- * Settle the year's tints, border lines and tribe outlines into the sources.
+ * Settle the year's tints, border lines and tribes into the sources.
  * @param sources - the sources, written in place
  * @param loaded - the year on screen
  * @param computed - what the compute settled for it
@@ -62,7 +63,7 @@ export function settleYearBorders(
     | 'regionTints'
     | 'tintLevels'
     | 'homageDepth'
-    | 'tribeOutlines'
+    | 'tribes'
   >,
   loaded: RegionSet,
   computed: ComputedYear,
@@ -75,13 +76,13 @@ export function settleYearBorders(
     sources.derivedBorders = computed.borders
     sources.borderPatterns = null
     sources.borderLevels = null
-    sources.tribeOutlines = []
+    sources.tribes = []
     return
   }
   const { year, bbox } = loaded.authored
   const homage = homageLevels(year.registry.polities)
   const exact = exactBordersOf(year, bbox, sources.landMask, undefined, homage)
-  // Derived once here, for the tint levels and the tribe outlines alike. The pipeline derived the same map
+  // Derived once here, for the tint levels and the tribes alike. The pipeline derived the same map
   // a step earlier (`authoredRegionColours`, for the compute's request); a per-year cache to share it
   // across that await would cost more state than one more walk of the neighbour graph per year opened.
   const colours = polityColours(openYearDocument(year), palette)
@@ -98,24 +99,29 @@ export function settleYearBorders(
   sources.derivedBorders = exact.borders
   sources.borderPatterns = exact.patterns
   sources.borderLevels = exact.levels
-  sources.tribeOutlines = colouredTribeOutlines(exact.tribeOutlines, colours)
+  sources.tribes = colouredTribes(year, loaded.regions, colours)
 }
 
 /**
- * Each tribe's outline in its colour.
- * @param outlines - each tribe's rings, by polity id
+ * Each tribe's ground in its colour, from the regions the fills are cut from — so the tribe fades from the
+ * very outline the borders and the fills are drawn on.
+ * @param year - the year's three files, whose registry says who is a tribe
+ * @param regions - its regions, each carrying the id of its polity
  * @param colours - every polity's colour, by id — `polityColours` of the year
- * @returns the outlines, each in its tribe's colour; empty for a year with no tribe
+ * @returns one area per region of a tribe; empty for a year with no tribe
  */
-function colouredTribeOutlines(
-  outlines: ReturnType<typeof exactBordersOf>['tribeOutlines'],
+function colouredTribes(
+  year: AuthoredYear,
+  regions: RegionSet['regions'],
   colours: ReadonlyMap<string, string>
-): MapSources['tribeOutlines'] {
-  return outlines.flatMap(({ polity, rings }) => {
-    const colour = colours.get(polity)
-    if (colour !== undefined) return [{ colour, rings }]
+): MapSources['tribes'] {
+  const tribes = tribeIds(year.registry.polities)
+  return regions.flatMap(({ polityId, rings }) => {
+    if (polityId === undefined || !tribes.has(polityId)) return []
+    const colour = colours.get(polityId)
+    if (colour !== undefined) return [{ polity: polityId, colour, rings }]
     // polityColours colours every polity of the year, and the reader refused a claim naming none.
-    console.error(`[atlas] tribe "${polity}" has no colour; its outline is not drawn.`)
+    console.error(`[atlas] tribe "${polityId}" has no colour; it is not drawn.`)
     return []
   })
 }

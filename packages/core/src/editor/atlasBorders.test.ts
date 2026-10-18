@@ -107,26 +107,34 @@ describe('exactBordersOf', () => {
       expect(patterns.get('0:0')).toBe('dashed')
     })
 
-    it('leaves out a tribe’s borders and hands back its rings closed, to be stroked dashed', () => {
+    it('draws the border between a tribe and a kingdom as the kingdom’s, one solid cased group', () => {
       const doc = sideBySide()
       const hre = doc.polities.find((each) => each.id === 'hre')
       if (hre) hre.rank = 'tribe'
 
-      const { borders, tribeOutlines } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+      const { borders, patterns, levels } = exactBordersOf(authored(doc), bbox, uniformMask(false))
 
-      expect(borders.between).toEqual([])
-      expect(tribeOutlines).toEqual([
-        {
-          polity: 'hre',
-          rings: [[uv([10, 10]), uv([20, 10]), uv([20, 0]), uv([10, 0]), uv([10, 10])]],
-        },
-      ])
+      expect(borders.between).toEqual([{ pair: [0, 0], lines: [[uv([10, 10]), uv([10, 0])]] }])
+      expect(patterns.get('0:0')).toBe('solid')
+      expect(levels.get('0:0')).toBe(0)
     })
 
-    it('has no tribe outlines in a year without tribes', () => {
-      expect(
-        exactBordersOf(authored(sideBySide()), bbox, uniformMask(false)).tribeOutlines
-      ).toEqual([])
+    it('draws no border between two tribes side by side — only their fading colour', () => {
+      const doc = sideBySide()
+      for (const polity of doc.polities) polity.rank = 'tribe'
+
+      const { borders } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+
+      expect(borders.between).toEqual([])
+    })
+
+    it('draws no line along a tribe’s edge against unclaimed ground', () => {
+      const doc = sideBySide()
+      for (const polity of doc.polities) polity.rank = 'tribe'
+
+      const { borders } = exactBordersOf(authored(doc), bbox, uniformMask(true))
+
+      expect(borders.frontier).toEqual([])
     })
 
     it('dresses a stretch in its run override', () => {
@@ -209,6 +217,24 @@ describe('exactBordersOf', () => {
       const { levels } = exactBordersOf(authored(doc), bbox, uniformMask(false))
 
       expect(levels.get('0:0')).toBe(0)
+    })
+
+    // ARCH-001: the tribe layer wears the tribe's own colour at every zoom, so nothing hides its borders.
+    it('files every border of a tribe vassal of a kingdom at level 0, its lord’s and its fellow vassal’s', () => {
+      const doc = sideBySide('france')
+      const hre = doc.polities.find((each) => each.id === 'hre')
+      if (hre) hre.rank = 'tribe'
+      anchors(doc, [
+        [30, 10],
+        [30, 0],
+      ])
+      addPolity(doc, polity('hungary', 'france'))
+      closeRing(doc, 'hungary', [4, 6, 7, 5])
+
+      const { borders, levels } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+
+      expect(borders.between).toHaveLength(2)
+      expect([...levels.values()]).toEqual([0, 0])
     })
 
     it('reads the split level from the homage it is handed', () => {
@@ -310,7 +336,6 @@ describe('exactBordersOf', () => {
         borders: { between: [], frontier: [] },
         patterns: new Map(),
         levels: new Map(),
-        tribeOutlines: [],
       })
     })
 

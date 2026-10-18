@@ -90,7 +90,7 @@ export function authoredRegionColours(
  * wears its suzerain's colour, and a sub-vassal its direct suzerain's before its own.
  *
  * **It takes the colours, it does not derive them**: the atlas derives `polityColours` once per year and
- * hands the same map to this and to the tribe outlines, so the neighbour graph is not walked twice.
+ * hands the same map to this and to the tribes' colours, so the neighbour graph is not walked twice.
  *
  * **The last level is {@link authoredRegionColours}, exactly**, when handed `polityColours` of the same year
  * over the same palette — the atlas fully zoomed in shows what it showed before levels.

@@ -174,6 +174,7 @@ function frameRelief(context: LayerContext, zoom: number): void {
   if (handles.borders) handles.borders.object.scale.setY(relief.scale.y)
   if (handles.coastline) handles.coastline.object.scale.setY(relief.scale.y)
   if (handles.fills) handles.fills.object.scale.setY(relief.scale.y)
+  if (handles.tribes) handles.tribes.object.scale.setY(relief.scale.y)
 }
 
 /**
@@ -209,6 +210,8 @@ function frameLineWork(context: LayerContext, zoom: number, pixelsPerUnit: numbe
   handles.rivers?.setZoom(zoom)
   const detail = frameDetail(context, zoom)
   handles.fills?.setDetail(detail)
+  // The tribes' fade, from the panel's live trial: two uniforms, nothing rebuilt.
+  handles.tribes?.setFeather(dev.tribes)
   if (handles.borders) {
     handles.borders.setDetail(detail)
     // A patterned border holds a plain border's weight at continent scale, then thins to the core's
@@ -344,6 +347,7 @@ function layerLifecycle(
       disposeHandle(scene, handles.rivers)
       disposeHandle(scene, handles.borders)
       disposeHandle(scene, handles.fills)
+      disposeHandle(scene, handles.tribes)
       disposeHandle(scene, handles.compass)
       disposeHandle(scene, handles.sheet)
       disposeHandle(scene, handles.frame)
@@ -374,6 +378,8 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
       borders: null,
       fills: null,
       fillCut: null,
+      tribes: null,
+      tribeCut: null,
       compass: null,
       sheet: null,
       frame: null,

@@ -61,9 +61,20 @@ function withTribe(): RegionSet {
   const year = authoredYear()
   const hre = year.authored?.year.registry.polities.find((polity) => polity.id === 'hre')
   if (hre) hre.rank = 'tribe'
-  year.regions = [{ polityId: 'fr-couronne' }, { polityId: 'hre' }] as RegionSet['regions']
+  year.regions = [
+    { polityId: 'fr-couronne' },
+    { polityId: 'hre', rings: [TRIBE_RING] },
+  ] as RegionSet['regions']
   return year
 }
+
+/** The Empire's ring, in grid coordinates, as its region carries it. */
+const TRIBE_RING = [
+  { u: 0.5, v: 0.1 },
+  { u: 0.9, v: 0.1 },
+  { u: 0.9, v: 0.9 },
+  { u: 0.5, v: 0.9 },
+]
 
 function authoredYear(): RegionSet {
   const doc = sharedBorderDocument()
@@ -100,19 +111,20 @@ describe('settleYearBorders', () => {
   })
 
   describe('tribes', () => {
-    it('leaves a tribe unfilled, its borders out, and its outline in its colour', () => {
+    it('leaves a tribe unfilled, its border with the kingdom drawn, and its ground in its colour', () => {
       const sources = createMapSources()
 
       settleYearBorders(sources, withTribe(), { borders: TRACED, tints: [RED, BLUE] }, PALETTE)
 
       expect(sources.regionTints).toEqual([RED, null])
-      expect(sources.derivedBorders?.between).toEqual([])
-      expect(sources.tribeOutlines).toHaveLength(1)
-      expect(sources.tribeOutlines[0]?.colour).toMatch(/^#[0-9a-f]{6}$/i)
-      expect(sources.tribeOutlines[0]?.rings[0]?.length).toBeGreaterThan(3)
+      // The kingdom's border stays where the tribe touches it (the dev, 2026-10-18).
+      expect(sources.derivedBorders?.between).toHaveLength(1)
+      expect(sources.tribes).toHaveLength(1)
+      expect(sources.tribes[0]?.colour).toMatch(/^#[0-9a-f]{6}$/i)
+      expect(sources.tribes[0]?.rings).toEqual([TRIBE_RING])
     })
 
-    it('fills every region and outlines nothing in a year without a tribe', () => {
+    it('fills every region and has no tribe in a year without one', () => {
       const sources = createMapSources()
       const year = authoredYear()
       year.regions = [{ polityId: 'fr-couronne' }, { polityId: 'hre' }] as RegionSet['regions']
@@ -120,16 +132,16 @@ describe('settleYearBorders', () => {
       settleYearBorders(sources, year, { borders: TRACED, tints: [RED, BLUE] }, PALETTE)
 
       expect(sources.regionTints).toEqual([RED, BLUE])
-      expect(sources.tribeOutlines).toEqual([])
+      expect(sources.tribes).toEqual([])
     })
 
-    it('forgets the tribe outlines when a payload year follows', () => {
+    it('forgets the tribes when a payload year follows', () => {
       const sources = createMapSources()
       settleYearBorders(sources, withTribe(), { borders: TRACED, tints: [RED, BLUE] }, PALETTE)
 
       settleYearBorders(sources, PAYLOAD_YEAR, { borders: TRACED, tints: [BLUE] }, PALETTE)
 
-      expect(sources.tribeOutlines).toEqual([])
+      expect(sources.tribes).toEqual([])
       expect(sources.regionTints).toEqual([BLUE])
     })
   })

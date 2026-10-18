@@ -166,7 +166,22 @@ function checkRingRange(
 }
 
 /**
- * Check the anchor table against its parallel source array and the declared sources.
+ * Whether a position lies on the globe: finite, a longitude within −180…180, a latitude within −90…90.
+ *
+ * **Refused rather than clamped** (the dev's call, 2026-10-18, SEC-001): an anchor at a longitude of 1e9 is
+ * a broken file, not a place, and a clamped one would draw a polity reaching to the antimeridian as if it
+ * had been drawn so. The editor's own operations never produce one.
+ * @param lon - the longitude, degrees
+ * @param lat - the latitude, degrees
+ * @returns `true` when both are in range, limits included
+ */
+function onTheGlobe(lon: number, lat: number): boolean {
+  return Number.isFinite(lon) && Number.isFinite(lat) && Math.abs(lon) <= 180 && Math.abs(lat) <= 90
+}
+
+/**
+ * Check the anchor table: every anchor on the globe, and the table against its parallel source array and
+ * the declared sources.
  * @param polities - the year's territory
  * @param source - where it came from
  */
@@ -178,6 +193,13 @@ function checkAnchorTable(polities: YearPolities, source: string): void {
       source,
       `${String(polities.anchorSource.length)} anchor sources for ${String(anchorCount)} anchors`
     )
+  for (const [index, [lon, lat]] of polities.anchors.entries())
+    if (!onTheGlobe(lon, lat))
+      disagree(
+        'yearPolities',
+        source,
+        `anchor ${String(index)} at (${String(lon)}, ${String(lat)}) is not on the globe — a longitude lies within −180…180 and a latitude within −90…90`
+      )
   const sourceIds = new Set(polities.sources.map((provenance) => provenance.id))
   for (const [index, id] of polities.anchorSource.entries())
     if (!sourceIds.has(id))

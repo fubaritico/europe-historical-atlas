@@ -15,6 +15,7 @@ import { DEFAULT_RELIEF_PARAMS, RELIEF_CONTROLS, RELIEF_CONTROL_ORDER } from './
 import { DEFAULT_RHUMB_PARAMS, RHUMB_CONTROLS, RHUMB_CONTROL_ORDER } from './rhumb'
 import { DEFAULT_RIVER_PARAMS, RIVER_CONTROLS, RIVER_CONTROL_ORDER } from './river'
 import { DEFAULT_ROSE_PARAMS, ROSE_CONTROLS, ROSE_CONTROL_ORDER } from './rose'
+import { DEFAULT_TRIBE_PARAMS, TRIBE_CONTROLS, TRIBE_CONTROL_ORDER } from './tribes'
 import { DEFAULT_VASSAL_PARAMS, VASSAL_CONTROLS, VASSAL_CONTROL_ORDER } from './vassals'
 
 /** Every declared control table, paired with its defaults and display order — used by the guard tests. */
@@ -54,6 +55,12 @@ export const ALL_CONTROL_TABLES = [
     controls: VASSAL_CONTROLS,
     defaults: DEFAULT_VASSAL_PARAMS,
     order: VASSAL_CONTROL_ORDER,
+  },
+  {
+    name: 'tribes',
+    controls: TRIBE_CONTROLS,
+    defaults: DEFAULT_TRIBE_PARAMS,
+    order: TRIBE_CONTROL_ORDER,
   },
   {
     name: 'political',

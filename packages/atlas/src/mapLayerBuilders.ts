@@ -28,8 +28,9 @@ import {
   paintsExactFills,
 } from './mapLayerContext'
 import { refreshReliefSource } from './mapSources'
+import { rebuildTribes } from './mapTribeLayer'
 import { createCompassRose } from './scene/compassRose'
-import { buildBorderStrokes, tribeStrokes } from './scene/composedLineLayer'
+import { buildBorderStrokes } from './scene/composedLineLayer'
 import { createFillLayer } from './scene/fillLayer'
 import { createFrameLabels } from './scene/frameLabels'
 import { createGraticuleFrame, labelLane } from './scene/graticuleFrame'
@@ -153,6 +154,8 @@ export function setTexture(context: LayerContext, texture: DataTexture): void {
   // the texture folder's, retuned with it.
   handles.fills?.setMap(texture)
   handles.fills?.setLook(dev.texture.politicalMode, dev.texture.politicalStrength)
+  handles.tribes?.setMap(texture)
+  handles.tribes?.setLook(dev.texture.politicalMode, dev.texture.politicalStrength)
   const relief = handles.relief
   if (!relief) return
   relief.material.map = texture
@@ -206,6 +209,8 @@ export function rebuildFills(context: LayerContext): void {
   const { scene, dev, sources, handles } = context
   disposeHandle(scene, handles.fills)
   handles.fills = null
+  disposeHandle(scene, handles.tribes)
+  handles.tribes = null
   if (!paintsExactFills(dev, sources)) return
   const relief = handles.relief
   const texture = handles.texture
@@ -235,6 +240,7 @@ export function rebuildFills(context: LayerContext): void {
   })
   handles.fills.object.scale.setY(relief.scale.y)
   scene.add(handles.fills.object)
+  rebuildTribes(context, grid, regions)
 }
 
 /**
@@ -364,11 +370,7 @@ export function rebuildBorders(context: LayerContext): void {
   const strokesByLevel = new Map(
     [...byLevel].map(([level, borders]) => [
       level,
-      [
-        ...buildBorderStrokes(borders, style, (pair) => patternForPair(context, pair)),
-        // A tribe's outline has no fill to reveal: it is drawn at level 0, at every zoom.
-        ...(level === 0 ? tribeStrokes(sources.tribeOutlines, style) : []),
-      ],
+      buildBorderStrokes(borders, style, (pair) => patternForPair(context, pair)),
     ])
   )
   if ([...strokesByLevel.values()].every((strokes) => strokes.length === 0)) return

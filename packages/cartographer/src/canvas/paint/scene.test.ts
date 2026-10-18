@@ -18,7 +18,7 @@ import {
   projectedFills,
   projectedRings,
   projectedTerritories,
-  projectedTribeOutlines,
+  projectedTribeFeathers,
 } from './scene'
 
 import type { SceneInputs } from './scene'
@@ -58,6 +58,7 @@ function inputs(document: YearDocument, overrides: Partial<SceneInputs> = {}): S
     extentOutline: [],
     borders: [],
     layers: DEFAULT_LAYERS,
+    tribeFeathers: [],
     colours: new Map<string, string>(),
     ...overrides,
   }
@@ -439,45 +440,55 @@ describe('tribes in the scene', () => {
       ).toEqual(['#aa0000'])
     })
 
-    it('gives the tribe an outline in its colour', () => {
+    it('lays each tribe’s fade over its box, through the view', () => {
+      const image = {} as CanvasImageSource
+      const view: Viewport = { scale: 2, originX: 10, originY: 20 }
       expect(
-        projectedTribeOutlines(withTribe(), anchors, COLOURS, tribeIds(withTribe().polities)).map(
-          (o) => o.colour
-        )
-      ).toEqual(['#8a2be2'])
+        projectedTribeFeathers([{ image, box: { x: 5, y: 6, width: 7, height: 8 } }], view)
+      ).toEqual([{ image, rect: { x: 20, y: 32, width: 14, height: 16 } }])
     })
   })
 
   describe('variants', () => {
-    it('leaves out a border with the tribe on one side', () => {
+    it('keeps the border between a tribe and a kingdom — the kingdom’s — and drops a tribe’s against the sea', () => {
       const kept = projectedBorders(
-        [border(['fr-couronne', 'hre']), border(['fr-couronne'])],
+        [border(['fr-couronne', 'hre']), border(['hre']), border(['fr-couronne'])],
         anchors,
         new Set(['hre'])
       )
-      expect(kept).toHaveLength(1)
+      expect(kept).toHaveLength(2)
+      expect(kept[0]?.hand.pattern).toBe('solid')
     })
 
-    it('outlines nobody when the year has no tribe', () => {
-      expect(projectedTribeOutlines(sharedBorderDocument(), anchors, COLOURS, NO_TRIBES)).toEqual(
-        []
-      )
+    it('drops the border between two tribes side by side', () => {
+      expect(
+        projectedBorders([border(['fr-couronne', 'hre'])], anchors, new Set(['fr-couronne', 'hre']))
+      ).toEqual([])
     })
 
-    it('puts the outline and the filtered borders into the scene', () => {
+    it('lays no fade when the year has no tribe', () => {
+      expect(projectedTribeFeathers([], NATIVE)).toEqual([])
+    })
+
+    it('puts the fades and the borders into the scene', () => {
       const document = withTribe()
+      const image = {} as CanvasImageSource
       const built = buildScene(
         document,
-        inputs(document, { colours: COLOURS, borders: [border(['fr-couronne', 'hre'])] })
+        inputs(document, {
+          colours: COLOURS,
+          borders: [border(['fr-couronne', 'hre'])],
+          tribeFeathers: [{ image, box: { x: 0, y: 0, width: 4, height: 4 } }],
+        })
       )
-      expect([built.tribeOutlines.length, built.borders.length]).toEqual([1, 0])
+      expect([built.tribeFeathers.length, built.borders.length]).toEqual([1, 1])
     })
   })
 
   describe('managed errors', () => {
-    it('outlines no tribe that has no colour', () => {
+    it('fills no tribe, even one with no colour', () => {
       expect(
-        projectedTribeOutlines(withTribe(), anchors, new Map(), tribeIds(withTribe().polities))
+        projectedFills(withTribe(), anchors, new Map(), tribeIds(withTribe().polities))
       ).toEqual([])
     })
   })
@@ -493,13 +504,6 @@ describe('tribes in the scene', () => {
     // It has no fill, but a click inside its outline still selects it (review QUAL-004).
     it('keeps the tribe selectable by a click inside its outline', () => {
       expect(projectedTerritories(withTribe(), anchors).map((t) => t.polity)).toContain('hre')
-    })
-
-    it('resolves the tribe’s ring through the shared anchor table', () => {
-      expect(
-        projectedTribeOutlines(withTribe(), anchors, COLOURS, tribeIds(withTribe().polities))[0]
-          ?.rings[0]?.[0]
-      ).toEqual(anchors[1])
     })
   })
 })

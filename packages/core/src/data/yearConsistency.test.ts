@@ -249,6 +249,21 @@ describe('assembleAuthoredYear', () => {
       expect(error.detail).toContain('2 anchor sources for 4 anchors')
     })
 
+    it('refuses an anchor at a longitude of 1e9, naming it, as a consistency failure', () => {
+      const files = validYear()
+      files.polities.anchors[2] = [1e9, 47]
+      const error = failureOf(files)
+      expect(error.failure).toBe('consistency')
+      expect(error.asset).toBe('yearPolities')
+      expect(error.detail).toContain('anchor 2 at (1000000000, 47) is not on the globe')
+    })
+
+    it('refuses an anchor whose latitude is past a pole', () => {
+      const files = validYear()
+      files.polities.anchors[0] = [0, -91]
+      expect(failureOf(files).detail).toContain('anchor 0 at (0, -91)')
+    })
+
     it('refuses an anchor citing a provenance nobody declared', () => {
       const files = validYear()
       files.polities.anchorSource = [0, 0, 0, 7]
@@ -305,6 +320,38 @@ describe('assembleAuthoredYear', () => {
       const files = validYear()
       files.polities.claims[0] = { polity: 'fr-couronne', rings: [[1, 2, 3]] }
       expect(assembleAuthoredYear(files, 'years/1100').polities.claims).toHaveLength(2)
+    })
+
+    it('accepts anchors exactly on the globe’s limits: ±180 in longitude, ±90 in latitude', () => {
+      const files = validYear()
+      files.polities.anchors = [
+        [-180, 90],
+        [180, 90],
+        [180, -90],
+        [-180, -90],
+      ]
+      expect(assembleAuthoredYear(files, 'years/1100').polities.anchors).toHaveLength(4)
+    })
+
+    it('refuses an anchor just past the limits, in longitude and in latitude', () => {
+      for (const [lon, lat] of [
+        [180.000001, 0],
+        [-180.000001, 0],
+        [0, 90.000001],
+        [0, -90.000001],
+      ] as [number, number][]) {
+        const files = validYear()
+        files.polities.anchors[1] = [lon, lat]
+        expect(failureOf(files).detail).toContain('is not on the globe')
+      }
+    })
+
+    it('refuses an anchor that is not a finite number, should one reach the assembly unparsed', () => {
+      for (const bad of [Number.NaN, Number.POSITIVE_INFINITY]) {
+        const files = validYear()
+        files.polities.anchors[1] = [bad, 47]
+        expect(failureOf(files).detail).toContain('is not on the globe')
+      }
     })
 
     it('refuses an index exactly at the anchor count', () => {

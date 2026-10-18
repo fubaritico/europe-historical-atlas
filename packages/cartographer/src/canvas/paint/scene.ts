@@ -1,6 +1,6 @@
 import { paintRanks } from '@europe-historical-atlas/core/data/paintOrder'
 import { handFor } from '@europe-historical-atlas/core/editor/borderHands'
-import { touchesTribe, tribeIds } from '@europe-historical-atlas/core/editor/tribes'
+import { isTribeEdge, tribeIds } from '@europe-historical-atlas/core/editor/tribes'
 
 import { remapToScreen } from '../../viewport/projection'
 import { backdropToScreen } from '../../viewport/viewport'
@@ -57,6 +57,11 @@ export interface SceneInputs {
   layers: LayerSettings
   /** Each polity's colour, by id — see `core/editor/polityColours`. */
   colours: ReadonlyMap<string, string>
+  /**
+   * Each tribe's fading colour as an image over its box **in backdrop pixels**, back to front — made once per
+   * version of the document by the caller (`canvas/tribeFeatherCache`), remapped through the view here.
+   */
+  tribeFeathers: readonly { image: CanvasImageSource; box: Rect }[]
   /** The baked terrain, or `null` while it is still being baked. */
   backdropImage: CanvasImageSource | null
   /**
@@ -178,21 +183,21 @@ export function projectedFills(
 }
 
 /**
- * Each tribe's rings, to be stroked dashed in its colour — the colour a fill would have had (the dev,
- * 2026-10-15: *« la couleur de remplissage sera plutôt la couleur des traits en pointillés »*).
- * @param document - the document to read
- * @param anchors - the projected anchor table, parallel to `document.anchors`
- * @param colours - each polity's colour, by id
- * @param tribes - the ids of the year's tribes (`tribeIds`), built once per scene
- * @returns one outline per tribe's claim
+ * Each tribe's fade on screen — its image, where its box lands through the view. The images are made once
+ * per version of the document (`canvas/tribeFeatherCache`); only this cheap remap runs per repaint.
+ * @param feathers - each tribe's image and its box, in backdrop pixels
+ * @param viewport - the current view
+ * @returns each image with its rectangle in screen pixels
  */
-export function projectedTribeOutlines(
-  document: YearDocument,
-  anchors: readonly Point[],
-  colours: ReadonlyMap<string, string>,
-  tribes: ReadonlySet<string>
-): { rings: Point[][]; colour: string }[] {
-  return colouredClaims(document, anchors, colours, tribes, true)
+export function projectedTribeFeathers(
+  feathers: SceneInputs['tribeFeathers'],
+  viewport: Viewport
+): CanvasScene['tribeFeathers'] {
+  return feathers.map(({ image, box }) => {
+    const [left, top] = backdropToScreen(viewport, [box.x, box.y])
+    const [right, bottom] = backdropToScreen(viewport, [box.x + box.width, box.y + box.height])
+    return { image, rect: { x: left, y: top, width: right - left, height: bottom - top } }
+  })
 }
 
 /**
@@ -208,8 +213,8 @@ export function projectedTerritories(
 ): PolityRings[] {
   // A claim naming a polity the registry lacks is not painted (`projectedFills`), so it is not
   // selectable either (QUAL-002); and the order is the paint order, so a click lands on the fill seen.
-  // A tribe is listed too, though it has no fill: a click inside its dashed outline selects it, which is
-  // the only way to select one with the white arrow (review QUAL-004, 2026-10-16).
+  // A tribe is listed too, though it has no fill: a click inside its outline selects it, which is the only
+  // way to select one with the white arrow (review QUAL-004, 2026-10-16).
   return claimsInPaintOrder(document).map((claim) => ({
     polity: claim.polity,
     rings: projectedRings({ ...document, claims: [claim] }, anchors),
@@ -218,7 +223,8 @@ export function projectedTerritories(
 
 /**
  * Each border as the painter takes it: its run on screen, and the hand it is drawn in. A border with a
- * tribe on either side is left out — the tribe's dashed outline is the line there (`core/editor/tribes`).
+ * tribe's edge alone — two tribes, or a tribe against the sea or unclaimed ground — is left out: the tribe's
+ * fading colour is its limit there. One between a tribe and a state is drawn, the state's (`core/editor/tribes`).
  * @param borders - the derived borders
  * @param anchors - every anchor, projected
  * @param tribes - the ids of the year's tribes
@@ -230,7 +236,7 @@ export function projectedBorders(
   tribes: ReadonlySet<string>
 ): CanvasScene['borders'] {
   return borders
-    .filter((border) => !touchesTribe(border, tribes))
+    .filter((border) => !isTribeEdge(border, tribes))
     .map((border) => ({
       points: border.run
         .map((index) => anchors[index])
@@ -259,7 +265,7 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
         : { image: inputs.backdropImage, rect: backdropRect(inputs.frame, inputs) },
     rings: projectedRings(document, anchors),
     fills: projectedFills(document, anchors, inputs.colours, tribes),
-    tribeOutlines: projectedTribeOutlines(document, anchors, inputs.colours, tribes),
+    tribeFeathers: projectedTribeFeathers(inputs.tribeFeathers, inputs.viewport),
     anchors,
     borders: projectedBorders(inputs.borders, anchors, tribes),
     layers: inputs.layers,

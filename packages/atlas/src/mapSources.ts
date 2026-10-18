@@ -76,17 +76,20 @@ export interface MapSources {
    */
   borderLevels: ReadonlyMap<string, number> | null
   /**
-   * Each tribe's rings in its colour, stroked dashed in place of a fill and of its borders — empty for a
-   * year with no tribe, and for a year read from the per-century payloads, which has no ranks.
+   * Each tribe's rings in its colour, drawn as that colour fading at its limit in place of a fill and of
+   * its borders (`core/editor/tribeFeather`, ATLAS-258) — empty for a year with no tribe, and for a year
+   * read from the per-century payloads, which has no ranks.
    */
-  tribeOutlines: TribeOutline[]
+  tribes: TribeArea[]
 }
 
-/** One tribe's claim as the border layer strokes it. */
-export interface TribeOutline {
+/** One tribe's ground as the tribe layer draws it. */
+export interface TribeArea {
+  /** The tribe's id — so its spill is cut over every polity's ground but its own. */
+  polity: string
   /** The `#rrggbb` the tribe would have been filled in. */
   colour: string
-  /** Its rings, closed, in grid coordinates. */
+  /** Its rings, outer and holes alike, in grid coordinates — projected against the year's own frame. */
   rings: UvPoint[][]
 }
 
@@ -108,7 +111,7 @@ export function createMapSources(): MapSources {
     derivedBorders: null,
     borderPatterns: null,
     borderLevels: null,
-    tribeOutlines: [],
+    tribes: [],
   }
 }
 

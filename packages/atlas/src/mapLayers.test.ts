@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
+import { TRIBE_FEATHER } from '@europe-historical-atlas/core/editor/tribeFeather'
 import * as fillModule from '@europe-historical-atlas/core/pipeline/fillTriangles'
 
 import { createDevState } from './devState'
@@ -13,6 +14,9 @@ import { createMapLayers } from './mapLayers'
 import { createMapSources, refreshReliefSource } from './mapSources'
 import { DEPTH_BIAS_UNIFORM } from './scene/depthBias'
 import { FILL_RENDER_ORDER } from './scene/fillLayer'
+import { PAPER_SHEET_RENDER_ORDER } from './scene/paperSheet'
+import { TRIBE_RENDER_ORDER } from './scene/tribeLayer'
+import * as patchModule from './tribePatches'
 
 import type { MapSources } from './mapSources'
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
@@ -111,6 +115,45 @@ function build(loaded = true): {
     refreshReliefSource(sources, dev.relief, dev.texture.seaLevel)
   }
   return { scene, sources, dev, layers: createMapLayers({ scene, dev, sources }) }
+}
+
+/** A tribe's ring in the middle of the map, beside nobody. */
+const TRIBE_RING = [
+  { u: 0.35, v: 0.35 },
+  { u: 0.65, v: 0.35 },
+  { u: 0.65, v: 0.65 },
+  { u: 0.35, v: 0.65 },
+]
+
+/**
+ * A scene with an authored year whose one region is filled, and one tribe beside it, laid on the relief.
+ * @returns what {@link build} returns, the fills and the tribe built
+ */
+function withTribe(): ReturnType<typeof build> {
+  const built = build()
+  built.sources.regionSet = { ...AUTHORED, authored: { bbox: META.bbox } } as unknown as RegionSet
+  built.sources.tintLevels = [[{ r: 200, g: 40, b: 10 }]]
+  built.sources.tribes = [{ polity: 'prussians', colour: '#41580b', rings: [TRIBE_RING] }]
+  built.layers.rebuildRelief()
+  built.layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))
+  built.layers.rebuildFills()
+  return built
+}
+
+/**
+ * The tribe mesh in a scene, found by its draw order.
+ * @param scene - the scene
+ * @returns the mesh, or `undefined` when none is drawn
+ */
+function tribeMesh(scene: Scene):
+  | {
+      renderOrder: number
+      geometry: BufferGeometry
+      material: { transparent: boolean; uniforms: Record<string, { value: unknown } | undefined> }
+    }
+  | undefined {
+  return scene.children.find((child) => child.renderOrder === TRIBE_RENDER_ORDER) as unknown as
+    ReturnType<typeof tribeMesh> | undefined
 }
 
 /** Read the geometry of whatever is at a scene slot — a `Mesh` or a line layer's object. */
@@ -250,27 +293,166 @@ describe('createMapLayers', () => {
       expect(inn).toBeCloseTo(1)
     })
 
-    it('strokes a tribe’s outline dashed after the borders, and alone when it has no border', () => {
+    it('draws no border stroke for a tribe, whose fading colour is its limit', () => {
       const { scene, sources, layers } = build()
       sources.derivedBorders = { between: [], frontier: [] }
-      sources.tribeOutlines = [
+      sources.tribes = [{ polity: 'prussians', colour: '#41580b', rings: [TRIBE_RING] }]
+      layers.rebuildBorders()
+      expect(borderStrokes(scene)).toHaveLength(0)
+    })
+
+    it('lays a tribe on the relief beside the fills, transparent, in the pass after their opaque one', () => {
+      const { scene, layers } = withTribe()
+      const tribe = tribeMesh(scene)
+      const fills = scene.children.find(
+        (child) => child.renderOrder === FILL_RENDER_ORDER
+      ) as unknown as { material: { transparent: boolean } } | undefined
+      expect(tribe?.material.transparent).toBe(true)
+      expect(fills?.material.transparent).toBe(false)
+      expect(tribe?.geometry.getAttribute('edgeDistance').count).toBeGreaterThan(0)
+      layers.dispose()
+    })
+
+    // QUAL-001: three sorts the transparent pass by renderOrder before depth, so a tribe ordered after the
+    // lines painted over the coast and the rivers.
+    it('draws the tribe before the coastline, the rhumbs, the rivers and the borders, after the paper sheet', () => {
+      const { scene, sources, layers } = withTribe()
+      sources.riverData = [
         {
-          colour: '#41580b',
-          rings: [
-            [
-              { u: 0.2, v: 0.2 },
-              { u: 0.4, v: 0.2 },
-              { u: 0.4, v: 0.4 },
-              { u: 0.2, v: 0.2 },
-            ],
+          rank: 1,
+          kind: 'River',
+          name: null,
+          points: [
+            { u: 0.3, v: 0.4 },
+            { u: 0.6, v: 0.5 },
           ],
         },
       ]
-      layers.rebuildBorders()
-      const strokes = borderStrokes(scene)
-      expect(strokes).toHaveLength(1)
-      expect(strokes[0]?.material.dashed).toBe(true)
-      expect(`#${strokes[0]?.material.color.getHexString() ?? ''}`).toBe('#41580b')
+      sources.derivedBorders = BORDERS
+      const lines = new Map<string, number[]>()
+      for (const [name, rebuild] of [
+        ['coastline', layers.rebuildCoastline],
+        ['rhumbs', layers.rebuildRhumb],
+        ['rivers', layers.rebuildRivers],
+        ['borders', layers.rebuildBorders],
+      ] as const) {
+        const before = new Set(scene.children)
+        rebuild()
+        const orders: number[] = []
+        for (const added of scene.children.filter((child) => !before.has(child)))
+          added.traverse((object) => {
+            const material = (object as { material?: { transparent?: boolean } }).material
+            if (material?.transparent === true) orders.push(object.renderOrder)
+          })
+        lines.set(name, orders)
+      }
+      const tribe = tribeMesh(scene)?.renderOrder ?? Number.NaN
+      for (const [name, orders] of lines) {
+        expect(orders.length, name).toBeGreaterThan(0)
+        for (const order of orders) expect(order, name).toBeGreaterThan(tribe)
+      }
+      expect(PAPER_SHEET_RENDER_ORDER).toBeLessThan(tribe)
+    })
+
+    it('writes the panel’s fade into the tribe’s uniforms each frame, with no rebuild', () => {
+      const { scene, dev, layers } = withTribe()
+      const tribe = tribeMesh(scene)
+      dev.tribes.mode = 'outset'
+      dev.tribes.widthKm = 30
+      layers.frame(0, 100)
+      expect(tribeMesh(scene)).toBe(tribe)
+      expect(tribe?.material.uniforms.featherWidth?.value).toBe(30)
+      expect(tribe?.material.uniforms.featherShift?.value).toBe(30)
+      dev.tribes.mode = 'inset'
+      layers.frame(0, 100)
+      expect(tribe?.material.uniforms.featherShift?.value).toBe(0)
+    })
+
+    it('starts the tribe from core’s default fade', () => {
+      const { scene } = withTribe()
+      expect(tribeMesh(scene)?.material.uniforms.featherWidth?.value).toBe(TRIBE_FEATHER.widthKm)
+    })
+
+    it('hangs a freshly baked texture on the tribe as on the fills', () => {
+      const { scene, layers } = withTribe()
+      const baked = new DataTexture(new Uint8Array(16), 2, 2)
+      layers.setTexture(baked)
+      expect(tribeMesh(scene)?.material.uniforms.map?.value).toBe(baked)
+    })
+
+    it('re-lays the same patches on a new relief instead of measuring the distances again', () => {
+      const measured = vi.spyOn(patchModule, 'tribePatches')
+      const { layers } = withTribe()
+      layers.rebuildSurface()
+      expect(measured).toHaveBeenCalledTimes(1)
+    })
+
+    it('re-lays the same patches when a height-curve slider moves, the land mask present', () => {
+      const measured = vi.spyOn(patchModule, 'tribePatches')
+      const { dev, layers } = withTribe()
+      dev.relief.peakTarget *= 1.5
+      layers.rebuildSurface()
+      expect(measured).toHaveBeenCalledTimes(1)
+    })
+
+    // QUAL-007: the fallback mask is derived afresh at every call, so keying on it never hit.
+    it('re-lays the same patches on a new relief with the land mask failed, at the same sea level', () => {
+      const measured = vi.spyOn(patchModule, 'tribePatches')
+      const { sources, layers } = withTribe()
+      sources.landMask = null
+      layers.rebuildFills()
+      layers.rebuildSurface()
+      expect(measured).toHaveBeenCalledTimes(2)
+    })
+
+    it('measures again when the sea level moves with the land mask failed: the land itself moved', () => {
+      const measured = vi.spyOn(patchModule, 'tribePatches')
+      const { sources, dev, layers } = withTribe()
+      sources.landMask = null
+      layers.rebuildFills()
+      dev.texture.seaLevel += 50
+      layers.rebuildFills()
+      expect(measured).toHaveBeenCalledTimes(3)
+    })
+
+    // ARCH-003: the regions cut a spill, so a new set of them is a new measure.
+    it('measures again when the year’s regions change, the tribes staying the same', () => {
+      const measured = vi.spyOn(patchModule, 'tribePatches')
+      const { sources, layers } = withTribe()
+      sources.regionSet = {
+        ...AUTHORED,
+        regions: [...AUTHORED.regions],
+        authored: { bbox: META.bbox },
+      } as unknown as RegionSet
+      layers.rebuildFills()
+      expect(measured).toHaveBeenCalledTimes(2)
+    })
+
+    it('measures again when the year’s frame changes', () => {
+      const measured = vi.spyOn(patchModule, 'tribePatches')
+      const { sources, layers } = withTribe()
+      const regions = sources.regionSet?.regions
+      sources.regionSet = {
+        ...AUTHORED,
+        regions,
+        authored: { bbox: { ...META.bbox, north: 61 } },
+      } as unknown as RegionSet
+      layers.rebuildFills()
+      expect(measured).toHaveBeenCalledTimes(2)
+    })
+
+    it('draws no tribe mesh for a year without a tribe', () => {
+      const { scene, sources, layers } = withTribe()
+      sources.tribes = []
+      layers.rebuildFills()
+      expect(tribeMesh(scene)).toBeUndefined()
+    })
+
+    it('frees the tribe mesh it replaces', () => {
+      const { scene, layers } = withTribe()
+      const freed = vi.spyOn(geometryOf(tribeMesh(scene)), 'dispose')
+      layers.rebuildFills()
+      expect(freed).toHaveBeenCalled()
     })
 
     it('builds one border layer per split level, hiding a vassal’s border from afar', () => {

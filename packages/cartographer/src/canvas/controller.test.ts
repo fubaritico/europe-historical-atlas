@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
+import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { openEmptyYear } from '../state/openEmptyYear'
@@ -25,6 +26,7 @@ import { CHROME_PAINT_STYLE } from './paint/style'
 import { drawOutlineAt } from './testGestureContext'
 
 import type { HistoryRelay } from './history/historyRelay'
+import type { RasterToImage } from './tribeFeatherCache'
 import type { SnapLine } from '../geometry/lineSnap'
 import type { NamedPolyline } from '../loaders/vectorLayers'
 import type { CartographerStoreHook } from '../state/store'
@@ -43,6 +45,14 @@ const BOX = { width: 800, height: 600 }
  * @returns an image source the wiring accepts
  */
 function backdropStandIn(): HTMLCanvasElement {
+  return document.createElement('canvas')
+}
+
+/**
+ * A stand-in for the browser's raster-to-canvas, for documents that hold no tribe: never asked.
+ * @returns an image source the wiring accepts
+ */
+function tribeImageStandIn(): HTMLCanvasElement {
   return document.createElement('canvas')
 }
 
@@ -137,6 +147,7 @@ function attach(maxSnapReachKm = Infinity): {
     colours: createPolityColourSource(AUTOMATIC_PALETTE),
     history,
     landMask: TEST_LAND_MASK,
+    tribeImage: tribeImageStandIn,
   })
   return { node, store, hovered, acted, resulted, history, dispose }
 }
@@ -491,6 +502,7 @@ describe('startCanvasController', () => {
           onResult: () => undefined,
           history: createHistoryRelay(),
           landMask: TEST_LAND_MASK,
+          tribeImage: tribeImageStandIn,
           maxSnapReachKm: Infinity,
           style: CHROME_PAINT_STYLE,
           overlay: document.createElement('canvas'),
@@ -1327,6 +1339,7 @@ describe('the tools on the canvas', () => {
         onResult: () => undefined,
         history: createHistoryRelay(),
         landMask: TEST_LAND_MASK,
+        tribeImage: tribeImageStandIn,
         maxSnapReachKm: Infinity,
         style: CHROME_PAINT_STYLE,
         overlay,
@@ -1404,6 +1417,7 @@ describe('the tools — what the review found', () => {
         onResult: () => undefined,
         history: createHistoryRelay(),
         landMask: TEST_LAND_MASK,
+        tribeImage: tribeImageStandIn,
         maxSnapReachKm: Infinity,
         style: CHROME_PAINT_STYLE,
         overlay,
@@ -1740,6 +1754,7 @@ function attachWithShore(
     onResult: resulted,
     history: createHistoryRelay(),
     landMask: TEST_LAND_MASK,
+    tribeImage: tribeImageStandIn,
     maxSnapReachKm: Infinity,
     style: CHROME_PAINT_STYLE,
     overlay,
@@ -2117,6 +2132,7 @@ describe('the Pen meeting a shared border, on the canvas', () => {
       onResult: () => undefined,
       history: createHistoryRelay(),
       landMask: TEST_LAND_MASK,
+      tribeImage: tribeImageStandIn,
       maxSnapReachKm: Infinity,
       style: CHROME_PAINT_STYLE,
       overlay,
@@ -2979,5 +2995,123 @@ describe('the extent’s handles, wired', () => {
 
     expect(store.getState().document.anchors.slice(4)).toEqual(before.slice(4))
     dispose()
+  })
+})
+
+/** A gesture the history records. */
+const TRIBE_MOVE = { kind: 'move-anchor', label: 'move anchor' } as const
+
+/**
+ * A canvas over a document whose Empire is a tribe, its static context recording every image drawn and its
+ * tribe images made by a counting stand-in.
+ * @returns the store, the images made, the images drawn, the frames and the teardown
+ */
+function attachWithTribe() {
+  const frames = frameControl()
+  const doc = sharedBorderDocument()
+  const hre = doc.polities.find((polity) => polity.id === 'hre')
+  if (hre) hre.rank = 'tribe'
+  const store = createCartographerStore({
+    edition: { document: doc, clone: cloneYearDocument },
+    viewport: { viewport: UNFRAMED },
+  })
+  const drawn: unknown[] = []
+  const node = canvasWithBox()
+  node.getContext = vi.fn(
+    () =>
+      new Proxy(
+        {},
+        {
+          get: (_, op) => (image: unknown) => {
+            if (op === 'drawImage') drawn.push(image)
+          },
+          set: () => true,
+        }
+      )
+  ) as unknown as typeof node.getContext
+  const tribeImage = vi.fn<RasterToImage>(() => document.createElement('canvas'))
+  const dispose = startCanvasController(node, {
+    store,
+    frame: TEST_BACKDROP_FRAME,
+    backdropImage: backdropStandIn(),
+    vectorLayers: {
+      coast: [],
+      rivers: [],
+      coastProvenance: { name: 'test coast', licence: 'test' },
+      riverProvenance: { name: 'test rivers', licence: 'test' },
+    },
+    onHover: () => undefined,
+    onFeature: () => undefined,
+    onAction: () => undefined,
+    onResult: () => undefined,
+    maxSnapReachKm: Infinity,
+    style: CHROME_PAINT_STYLE,
+    overlay: document.createElement('canvas'),
+    colours: createPolityColourSource(AUTOMATIC_PALETTE),
+    history: createHistoryRelay(),
+    landMask: TEST_LAND_MASK,
+    tribeImage,
+  })
+  const settle = (): void => {
+    while (frames.asked() > 0) frames.run()
+  }
+  return { store, tribeImage, drawn, settle, dispose }
+}
+
+// QUAL-005: the tribes' fade, from the document to the static canvas, through the injected image maker.
+describe('the tribes’ fade on the canvas', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  describe('happy path', () => {
+    it('draws the image the injected maker made for the tribe', () => {
+      const { tribeImage, drawn, settle, dispose } = attachWithTribe()
+      settle()
+      expect(tribeImage).toHaveBeenCalledTimes(1)
+      expect(drawn).toContain(tribeImage.mock.results[0]?.value)
+      dispose()
+    })
+  })
+
+  describe('variants', () => {
+    it('makes and draws a new image when an edit moves the tribe’s outline', () => {
+      const { store, tribeImage, drawn, settle, dispose } = attachWithTribe()
+      settle()
+      // Anchor 4 is the Empire's alone.
+      expect(store.getState().moveAnchors([{ index: 4, to: [4.5, 48] }], TRIBE_MOVE)).toBe(true)
+      settle()
+      expect(tribeImage).toHaveBeenCalledTimes(2)
+      const second: unknown = tribeImage.mock.results[1]?.value
+      expect(second).not.toBe(tribeImage.mock.results[0]?.value)
+      expect(drawn).toContain(second)
+      dispose()
+    })
+
+    it('draws the same image again after an edit that leaves the tribe alone', () => {
+      const { store, tribeImage, drawn, settle, dispose } = attachWithTribe()
+      settle()
+      drawn.length = 0
+      // Anchor 0 is France's alone; the fade is inset, so a neighbour's edit is nothing it reads.
+      expect(store.getState().moveAnchors([{ index: 0, to: [-0.5, 48] }], TRIBE_MOVE)).toBe(true)
+      settle()
+      expect(tribeImage).toHaveBeenCalledTimes(1)
+      expect(drawn).toContain(tribeImage.mock.results[0]?.value)
+      dispose()
+    })
+  })
+
+  // L3/L4: the maker's failure and a broken tribe are the cache's (`tribeFeatherCache.test.ts`).
+
+  describe('edge cases', () => {
+    it('makes no tribe image for a document without a tribe', () => {
+      const { store, tribeImage, settle, dispose } = attachWithTribe()
+      const hre = store.getState().document.polities.find((polity) => polity.id === 'hre')
+      if (hre) store.getState().editPolity({ ...hre, rank: 'empire' }, TRIBE_MOVE)
+      tribeImage.mockClear()
+      settle()
+      expect(tribeImage).not.toHaveBeenCalled()
+      dispose()
+    })
   })
 })

@@ -21,6 +21,7 @@ import {
   DEFAULT_RHUMB_PARAMS,
   DEFAULT_RIVER_PARAMS,
   DEFAULT_ROSE_PARAMS,
+  DEFAULT_TRIBE_PARAMS,
   DEFAULT_VASSAL_PARAMS,
 } from './devParams'
 
@@ -34,6 +35,7 @@ import type {
   RhumbDevParams,
   RiverDevParams,
   RoseDevParams,
+  TribeDevParams,
   VassalDevParams,
 } from './devParams'
 import type { TerrainTextureOptions } from '@europe-historical-atlas/core/pipeline/terrainCompose'
@@ -66,6 +68,8 @@ export interface DevState {
   political: PoliticalDevParams
   /** How the zoom reveals the levels of homage. */
   vassals: VassalDevParams
+  /** How a tribe's colour vanishes at its limit. */
+  tribes: TribeDevParams
   /** Compass rose. */
   rose: RoseDevParams
   /** The world rectangle the camera is clamped within. */
@@ -91,6 +95,7 @@ export function createDevState(): DevState {
     river: { ...DEFAULT_RIVER_PARAMS },
     political: { ...DEFAULT_POLITICAL_PARAMS },
     vassals: { ...DEFAULT_VASSAL_PARAMS },
+    tribes: { ...DEFAULT_TRIBE_PARAMS },
     rose: { ...DEFAULT_ROSE_PARAMS },
     extent: { ...DEFAULT_EXTENT_PARAMS },
     frame: { ...DEFAULT_FRAME_PARAMS },

@@ -253,3 +253,14 @@ target.z)` would be coherent with the navigation that already exists.
   `sources.regionTints`, which only the exact fill layer reads; the grid path kept in the dev panel for
   comparison bakes the compute's own tints. Remedy if that path ever ships again: a null tint per tribe in
   the compute request, keeping the regions' indices aligned. **Severity: cosmetic** — a comparison switch.
+- **`fillTriangles` slows sharply on a coarse grid** (measured 2026-10-18, ATLAS-258): the 137 polities of 1100
+  cut in ~0.45 s at 1280 or 640 cells across, ~1.1 s at 320, and **~237 s at 32** — a cell then holds hundreds
+  of edges, and each of its two planes is split along every one of them. Harmless at the relief's real
+  subdivision; it bit a test built at 32 segments (`tribeYear.test.ts` now builds at 640). Remedy if a coarse
+  grid is ever wanted (a phone's `segments` step-down, see the first entry): split a cell only by the edges
+  that cross the piece being split, or clip the ring to the cell first. **Severity: worth knowing.**
+- **A tribe's fade is cut at the coast per vertex** (ATLAS-258): an outset spill over the sea is dropped where
+  the vertices' interpolated land value falls under one half — at worst half a DEM cell either side of the
+  mask's coast, under the coastline's own stroke. The cut against a neighbour's ground is exact (it reads a
+  signed distance, not a flag). Remedy if it shows: a signed distance to the coast, as for the neighbours.
+  **Severity: cosmetic.**

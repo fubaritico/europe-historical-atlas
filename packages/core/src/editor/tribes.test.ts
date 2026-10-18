@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { isTribe, touchesTribe, tribeIds } from './tribes'
+import { isTribe, isTribeEdge, tribeIds } from './tribes'
 
 const POLITIES = [
   { id: 'prussians', rank: 'tribe' },
@@ -25,16 +25,20 @@ describe('tribes', () => {
       expect(isTribe({ rank: 'kingdom' })).toBe(false)
     })
 
-    it('finds a tribe on the far side of a border', () => {
-      expect(touchesTribe({ between: ['franks', 'prussians'] }, tribeIds(POLITIES))).toBe(true)
+    it('reads a border between a tribe and a kingdom as the kingdom’s, not a tribe’s edge', () => {
+      expect(isTribeEdge({ between: ['franks', 'prussians'] }, tribeIds(POLITIES))).toBe(false)
     })
 
-    it('finds a tribe alone against the sea', () => {
-      expect(touchesTribe({ between: ['cumans'] }, tribeIds(POLITIES))).toBe(true)
+    it('reads a border between two tribes as a tribe’s edge', () => {
+      expect(isTribeEdge({ between: ['prussians', 'cumans'] }, tribeIds(POLITIES))).toBe(true)
     })
 
-    it('finds no tribe between two kingdoms', () => {
-      expect(touchesTribe({ between: ['franks', 'nobody'] }, tribeIds(POLITIES))).toBe(false)
+    it('reads a tribe alone against the sea as a tribe’s edge', () => {
+      expect(isTribeEdge({ between: ['cumans'] }, tribeIds(POLITIES))).toBe(true)
+    })
+
+    it('reads a border between two kingdoms as no tribe’s edge', () => {
+      expect(isTribeEdge({ between: ['franks', 'nobody'] }, tribeIds(POLITIES))).toBe(false)
     })
   })
 
@@ -47,8 +51,8 @@ describe('tribes', () => {
 
   describe('unmanaged errors', () => {
     // L4: N/A — pure reads over arrays.
-    it('reads a border naming nobody as touching no tribe', () => {
-      expect(touchesTribe({ between: [] }, tribeIds(POLITIES))).toBe(false)
+    it('reads a border naming nobody as no tribe’s edge', () => {
+      expect(isTribeEdge({ between: [] }, tribeIds(POLITIES))).toBe(false)
     })
   })
 

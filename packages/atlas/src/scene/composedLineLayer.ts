@@ -393,34 +393,6 @@ export function patternStrokes(
 }
 
 /**
- * The passes of the tribes' outlines: one dashed stroke per colour, at a border edge's weight, drawn after
- * the borders — a tribe has neither fill nor borders, its outline is its line (`core/editor/tribes`, the
- * Cartographer's `paintTribeOutlines`). A pattern pass, so it thins with the zoom as a dashed border does.
- * @param outlines - each tribe's closed rings and its colour
- * @param style - the weight and opacity of a border edge
- * @returns the passes, one per colour, in first-seen order
- */
-export function tribeStrokes(
-  outlines: readonly { colour: string; rings: readonly (readonly UvPoint[])[] }[],
-  style: Pick<BorderStrokeStyle, 'edgeWidth' | 'opacity'>
-): ComposedStroke[] {
-  const byColour = new Map<string, UvSegment[]>()
-  for (const { colour, rings } of outlines) {
-    const bucket = byColour.get(colour) ?? []
-    for (const segment of polylinesToSegments(rings)) bucket.push(segment)
-    byColour.set(colour, bucket)
-  }
-  return [...byColour].map(([colour, segments]) => ({
-    segments,
-    color: colour,
-    width: style.edgeWidth,
-    opacity: style.opacity,
-    dashed: true,
-    role: 'pattern' as const,
-  }))
-}
-
-/**
  * Choose the passes that dress a set of derived borders.
  *
  * Pure, and separated from the drawing precisely so it can be exercised without a renderer: the ordering

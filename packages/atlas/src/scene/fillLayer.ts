@@ -260,13 +260,13 @@ export function fillVertexShader(levels: number): string {
 `
 }
 
-/** The fragment stage: the bake's blend, in sRGB as the bake does it, then back to linear for output. */
-const FRAGMENT_SHADER = /* glsl */ `
-  uniform sampler2D map;
-  uniform float strength;
+/**
+ * The bake's blend in GLSL, for every layer that tints the terrain — the fills and the tribes: the sRGB
+ * conversions, and the four formulas switched on a `mode` uniform numbered as {@link MODE_INDEX}. One chunk,
+ * so the two layers cannot blend a colour two ways.
+ */
+export const BLEND_GLSL = /* glsl */ `
   uniform int mode;
-  varying vec2 vUv;
-  varying vec3 vTint;
 
   vec3 toSrgb(vec3 c) {
     return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(vec3(0.0031308), c));
@@ -280,6 +280,15 @@ const FRAGMENT_SHADER = /* glsl */ `
     if (mode == 3) return (1.0 - 2.0 * top) * base * base + 2.0 * top * base;
     return top;
   }
+`
+
+/** The fragment stage: the bake's blend, in sRGB as the bake does it, then back to linear for output. */
+const FRAGMENT_SHADER = /* glsl */ `
+  uniform sampler2D map;
+  uniform float strength;
+  varying vec2 vUv;
+  varying vec3 vTint;
+  ${BLEND_GLSL}
   void main() {
     vec3 base = toSrgb(texture2D(map, vUv).rgb);
     vec3 tinted = base + (blend(base, vTint) - base) * strength;
