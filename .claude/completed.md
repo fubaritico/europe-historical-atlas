@@ -2,6 +2,30 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-10-19 — la gestion de l'incertitude, le README, la licence
+
+Une plage au journal, **19/10 16:10 → 19:34 (3 h 24, 121 actions)** ; le chantier ouvert le 05/10 totalise **93 h 14 sur
+16 plages**. **5 commits** `be2abdf`..`3c93e05`, **tous poussés** à la demande du dev, plus celui de cet état. Aucun code
+de production touché ; la gate a tourné à chaque commit (hooks), verte.
+
+- **Le sujet de départ, CORE-217 (la date historique), est devenu accessoire — assumé par le dev** : *« c'est très très
+  bien, c'est assumé […] j'ai pas perdu le fil »*. Il devient le premier palier d'autre chose.
+- **Mesuré** : Wikidata ne donne pas d'arbre de vassalité (France 1400 : 9 vassaux, moitié faux ; Anjou, Champagne, Blois
+  sans lien) ; les infobox de Wikipédia en anglais, 3 fiefs sur 6. Le dev : *« on n'a que dalle […] à part Euratlas »*.
+- **DESIGN-262, la gestion de l'incertitude** — une **initiative**, au-dessus des épiques : *« un système pour choisir »*,
+  *« une réflexion très lourde derrière pour un résultat simple et attractif devant »*. Plan `files/plans/evidence-system.md`
+  (concepts, principes, décisions du dev, paliers, lectures graduées) ; 15 termes au glossaire. Le tableau gagne une
+  colonne **Chantiers**, le périmètre `[DESIGN]`, l'étiquette « chantier · incertitude » ; REPO-261 (les vassaux directs
+  d'un territoire à une date) en Idées.
+- **Le dépôt prêt à passer en public** : audit propre (ni Euratlas, ni GPL, ni `.env`, historique compris) ; le README
+  réécrit comme la présentation de l'œuvre, sur la convention de ses autres dépôts ; **licence PolyForm Strict** pour le
+  code, le corpus et les années réservés — *« je ne veux pas qu'il y ait de produit commercial à partir de mon travail »*.
+- **Mes fautes** : « les plans sont gitignorés » affirmé sur la foi d'un CLAUDE.md périmé (corrigé) ; l'AGPL présentée comme
+  protectrice alors qu'elle n'empêche pas la vente ; un commit refusé par commitlint dont les fichiers sont partis sous le
+  message suivant (refait par `reset --soft`) ; deux `cd` (un sous-shell, un égaré) ; une requête SPARQL fausse donnée
+  d'abord sans l'exécuter ; *« comme un livre »* lu de travers (*« reviens sur ce que je t'ai écrit avant »*) ; une
+  question sur l'IA perdue en fin de message.
+
 ### 2026-10-18 — le code d'équerre, les vassaux par le zoom, les tribus au bord évanoui, un relief plus fin
 
 Une plage au journal, **18/10 14:22 → 23:59 (9 h 37, 1 619 actions)** ; le chantier ouvert le 05/10 totalise **89 h 43 sur
@@ -29,42 +53,4 @@ Une plage au journal, **18/10 14:22 → 23:59 (9 h 37, 1 619 actions)** ; le cha
   règle du worktree notée) ; *« le fond de la page »* lu d'abord comme le canevas ; trop de délégation à son goût
   (*« dis-moi pas que t'as encore délégué »*) ; « 13 cycles » annoncés pour 12 paires.
 
-### 2026-10-17 — Trello, la sauvegarde automatique, la Norvège rapide, le suzerain tapé, Wikidata, le double-clic
-
-Une plage au journal, **17/10 14:43 → 22:03 (7 h 19, 486 actions)** ; le chantier ouvert le 05/10 totalise **76 h 38 sur
-14 plages**. **8 commits** `218910a`..`7f0b2be`, **tous poussés** à la demande du dev, plus celui de cet état.
-**3 629 tests** (977 `core`, 1 686 Cartographe, 884 atlas, 82 plugin). Le détail de chaque livraison est sur sa carte.
-
-- **Le suivi passe sur Trello** (REPO-236) : compte dédié, skill `/trello`, 6 colonnes par maturité, tickets `[CARTO-41]`
-  à compteur unique, étiquettes, modèles, DoD ; « Fait » rempli de 113 cartes, **exhaustivité prouvée** (284 des 315
-  commits cités) ; Backlog tiré des plans (92) ; `next.md` allégé. Règle « un seul endroit par fait ».
-- **Livré et testé par le dev** : CARTO-240 (Norvège : 4,6 s → 55 ms, index par bandes de latitude, sortie identique à
-  l'octet), CARTO-238 palier 1 (brouillon sur disque, reprise à l'ouverture), CARTO-241 (suzerain par saisie),
-  CARTO-242 (créer au-dessus du pays sélectionné, dans son groupe), CARTO-243 palier 1 (Wikidata dans la fiche :
-  dates, suzerain, anachronisme — Tripoli n'existe pas en 1100 ; Mossoul était une catégorie), CARTO-246 (double-clic
-  sur la carte ouvre la fiche).
-- **Basic Memory** reçoit son rôle (décision du dev) : le graphe entre projets ; 13 notes dans `main/patterns/`.
-- **Échanges sur les sources** : lire et reporter à la main = permis ; décalquer un trait récent = non ; Shepherd 1911
-  (domaine public) = oui. Idées notées : ATLAS-244 (Wikipédia au clic), ATLAS-245 (drapeaux en 3D), CARTO-248.
-- **Mes fautes** : la page du dev rechargée plusieurs fois (sabotages et comparaisons dans `core`, `main.tsx`) ;
-  trois commandes interrompues avaient agi en partie (14 doublons dans Fait, archivés) ; un premier `.gitignore` qui
-  n'ignorait pas `.env.local` (corrigé avant toute fuite) ; mon e-mail dans un en-tête Wikidata sans accord ; le
-  « Gravité » puis « Basic Memory » mal présentés d'abord. Revues : une dizaine de vrais défauts attrapés avant commit.
-
-**Suite de la même plage, 17/10 22:39 → 18/10 01:19 (2 h 40)** — la plage entière fait **10 h 35, 560 actions** ; le chantier
-**79 h 54**. **4 commits** `d85bdb4`..`f10ac04`, tous poussés à sa demande. **3 642 tests** (977 · 1 699 · 884 · 82).
-
-- **CARTO-248** livré et testé (*« ça fonctionne. Aucun problème. »*) : le suzerain daté de Wikidata pour l'année éditée.
-  Sa 1100 commitée trois fois dans la soirée (`133dbfc`, `b53912d`, `f10ac04`) : *« ce sera tout pour ce soir »*.
-- **Fermés sur son verdict** : CARTO-235 (‹P›/‹A› répondent, sans code), REPO-234, CARTO-114 (*« là, j'arrive vraiment à
-  être rapide »*).
-- **Le point sur le tableau, et deux objectifs** : la **contribution des événements** et l'**interface de l'atlas** — à plat
-  (son zonage, puis Claude Design sur une capture où des événements sont déjà posés) et en 3D dans la carte (des essais
-  jetables). Le Cartographe est en pause. « À faire » ordonné par dépendance, de CORE-217 à CONTRIB-225 ; le Backlog en
-  cinq groupes. Le tableau gagne des couvertures de priorité, « Fait » se lit du plus récent au plus ancien, et la colonne
-  « À toi » devient **« À valider par le développeur »**. Vocabulaire : **ticket**, jamais « carte ».
-- **Mes fautes** : sa page a pu se recharger quand j'ai modifié `wikidataFacts.ts` (importé par `main.tsx`) ; le
-  doublon CONTRIB-250, créé sans voir CONTRIB-218 à 228 (ma lecture du tableau coupée à 80 lignes), archivé ; 8 tickets
-  posés en haut du Backlog au lieu du bas, redescendus ; un `perl` sans `use utf8` qui n'avait rien remplacé.
-
-> Older sessions (2026-09-12 → 2026-10-16) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-17) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

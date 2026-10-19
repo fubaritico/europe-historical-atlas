@@ -5,35 +5,36 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — après le soir du 18/10
+## ▶ ON REPREND ICI — mercredi 21/10, après le 19/10
 
-**Deux objectifs, décidés par le dev le 18/10** : la **contribution des événements**, et l'**interface de l'atlas** — à plat
-(son zonage dessiné puis sur Illustrator, ensuite Claude Design nourri d'une capture de la carte où des événements sont déjà
-posés) et en 3D dans la carte (des essais jetables, une idée à la fois, il juge le rendu). « À faire » est ordonné par
-dépendance ; son premier ticket est **CORE-217** (le type de date), puis **CORE-252** (le format d'un événement et 2-3
-événements de 1100 écrits à la main). Proposer, ne pas commencer sans son mot ([[do-not-start-unasked-work]]).
+**Le 19/10 a changé le fond du projet.** Le dev a posé **la gestion de l'incertitude** comme fondement de tout — une
+*initiative* au-dessus des épiques, **DESIGN-262**, dans la nouvelle colonne **Chantiers** du tableau. Le bloc
+*Foundations* de CLAUDE.md en donne l'essentiel ; le plan entier est `files/plans/evidence-system.md` (concepts §1,
+principes §2, ses décisions §8, paliers §10, lectures §7). **Entre-temps il lit** deux ou trois références du §7 et
+**l'introduction du PDF d'Euratlas** : lui demander ce qu'il en tire, et réviser le plan avec lui — il veut avoir du
+répondant. Proposer, ne pas commencer sans son mot ([[do-not-start-unasked-work]]).
 
-**Deux choix du dev en attente, nés du soir du 18/10** — lui reposer en une phrase chacun :
-- **Le relief plus fin** (`0ee299d`) : l'atlas lit le niveau 6 à 1 920 de large, mis en ligne pour qu'il **mesure le
-  chargement**. Selon son verdict : passer aussi le Cartographe dessus (une ligne, `main.tsx`) pour que les deux fonds
-  redeviennent identiques, ou revenir au niveau 5. Le 2 560 est dans la Corbeille (`europe-map-relief-2560`).
-- **Les tribus, inset ou outset** (ATLAS-258, fait) : le défaut est inset 30 km dans `core` ; l'outset s'essaie au panneau de
-  l'atlas. Son choix va dans `TRIBE_FEATHER`, pour les deux applications.
+**Le premier palier est CORE-217** (le type de date, approche validée le 19/10 : un dossier feuille `core/src/time/`,
+un instant et un intervalle, l'an zéro refusé à la lecture, Julien ↔ Grégorien par le jour julien). Il est en tête
+d'« À faire » sous DESIGN-262 ; rien n'est écrit.
 
-**À traiter à part, au calme** : la gate rouge sur du code juste quand tout tourne en parallèle (`known-issues.md`, la
-machine à 71 de charge sur 8 cœurs ; REPO-260, dans Idées) — plafonner les travailleurs de Vitest, puis remesurer.
+**En attente du dev, une phrase chacun** :
+- **Le dépôt public** : prêt (audit propre, README, licence PolyForm Strict, `0edb024`/`3c93e05`) ; c'est lui qui bascule
+  le réglage sur GitHub. **Le nom dans `LICENSE`** (« Stéphane Cottereau ») est déduit de son dossier : à lui confirmer.
+- **Le relief plus fin** (`0ee299d`, niveau 6 à 1 920) : son verdict sur le chargement → le Cartographe aussi, ou retour au 5.
+- **Les tribus, inset ou outset** (ATLAS-258) : son choix dans `TRIBE_FEATHER`.
 
-**Le tableau d'abord** : `/trello` → `list` — **lire toute la sortie**. Tout est commité et poussé (`6d3903f` + l'état de
-session ; vérifier par `git ls-remote origin main`). En français, un élément du tableau est un **ticket**, jamais une
-« carte » ([[say-ticket-not-carte]]).
+**À traiter à part** : la gate rouge sous charge (REPO-260, Idées).
+
+**Le tableau d'abord** : `/trello` → `list` — **lire toute la sortie**. Tout est commité et poussé (`git ls-remote origin
+main`). Un élément du tableau est un **ticket**, jamais une « carte » ([[say-ticket-not-carte]]).
 
 | où | ticket | état |
 | --- | --- | --- |
-| **À valider par le développeur** | CARTO-237 Ce qui reste d'Euratlas dans 1100 | mesuré le 18/10 (~33–37 % retracé) ; il décide quand la carte sera finie |
-| **À valider par le développeur** | CARTO-116 Trier les copies de `years/1100*` | sa décision ; rien supprimé sans lui |
-| **À valider par le développeur** | CARTO-122 Le menu d'empilement | replié dans la fenêtre (fait) ; le rôle `menu` est demandé au design system (`files/plans/cartographer/ds-request-menu-role.md`), à lui de le transmettre |
-| **En cours** | ATLAS-145 Séance : le style des frontières | une séance avec le dev ; il a déjà retouché les frontières le 18/10 (`eb62f4c`) |
-| **En cours** | ATLAS-152 Provenance et licence de 1100 affichées | entamé avant le 18/10 ; le commentaire du ticket dit ce qui reste |
+| **Chantiers** | DESIGN-262 La gestion de l'incertitude | l'initiative ; ses paliers en liste à cocher, ses tickets étiquetés « chantier · incertitude » |
+| **À faire**, en tête | CORE-217 Le type de date | palier 1 de DESIGN-262 |
+| **À valider par le développeur** | CARTO-237, CARTO-116, CARTO-122 | inchangés depuis le 18/10 |
+| **En cours** | ATLAS-145, ATLAS-152 | inchangés ; **à lui proposer** : ATLAS-152 (la provenance affichée) sous DESIGN-262, par son sujet — ma déduction |
 
 **À savoir pour coder** : un agent qui touche `core` ou une application pendant que la page du dev est ouverte travaille
 dans un **worktree** ([[agents-in-a-worktree-while-he-uses-the-app]]) — sinon Vite la recharge à chaque fichier. Le dev

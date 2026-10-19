@@ -22,6 +22,24 @@ region shows a historical event (battle, political decision, invention…), its 
 
 Full plan and milestones: **`files/plans/roadmap.md`**.
 
+## Foundations — the management of uncertainty (DESIGN-262, the dev's call, 2026-10-19)
+
+The ground every decision stands on — **think with these words and challenge with them**. Full text, read on
+demand: `files/plans/evidence-system.md`; definitions: `glossaire.md`.
+
+- **Theme**: *« une réflexion très lourde derrière pour un résultat simple et attractif devant »* — the rigour in the
+  machine (unseen), the simplicity in the **shell** (the atlas, which receives the contribution and is part of it).
+- **Concepts**: *truth* (never measured, never shown) · *claim* · *source* and its *reliability* · *evidence* · *attestation*
+  · *concordance* (computed, never typed — agreement, not truth) · *uncertainty* · *arbitration* (signed, the others kept)
+  · *traceability*. A **source register** in the contribution is where uncertainty is answered, by sources.
+- **No exception outside the machine**: a case that does not fit changes the model, never gets a side path.
+- **Uncertainty has three causes** (vague · divided history · we do not know) and **two marks**: **blur** = the limit is
+  uncertain, **hatching** = the belonging is; the *why* is on click. Nothing is shown more certain than it is.
+- **A polity is three things**: territory → the territory it depends on → the bond (the holder) last. First tier: direct vassals.
+- **The atlas shows vassals by *c* through *a***: sovereigns crisp first, each vassal entering as well as it is known.
+- **Order**: the machine and the system first, grounded on the literature of map representation; I bring graded
+  references (*found* / *from memory*) to the plan's §7, the dev reads them.
+
 ## Your role
 
 Help the developer — **do not agree blindly**. We are in a **research phase: challenge by default**.
@@ -124,6 +142,7 @@ Read @known-issues.md
 
 | File                      | When to load                                         |
 | ------------------------- | ---------------------------------------------------- |
+| `../../files/plans/evidence-system.md` | Any work touching a map's content, sources, contribution, or how a polity/vassal is shown |
 | `architecture.md`         | Stack, structure, scripts, 3D pipeline, editor–atlas parity |
 | `modular-architecture.md` | SOLID/pluggable/standalone rule — any module         |
 | `decision-tree.md`        | Skill triggers — check before coding                 |
