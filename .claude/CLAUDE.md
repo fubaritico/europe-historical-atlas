@@ -51,7 +51,8 @@ When the dev proposes something:
   `~/Desktop/<the name>.png` directly instead of asking for the file again. The name alone is the path.
 - **Never `cd` — always absolute paths.** The activity-log hook appends relative to `$PWD`, so any `cd`
   forks the journal into a second file and the work spans are under-reported (see `known-issues.md`).
-- **Plans = `.md` in `files/plans/`** (gitignored) — do NOT use the harness "plan mode".
+- **Plans = `.md` in `files/plans/`**, **committed like code** (`files/` stopped being gitignored when the
+  repo was set to go public) — do NOT use the harness "plan mode".
 - **Review → Test → Commit** per change — no accumulation; fix pre-existing issues a review surfaces in
   files you touch (no deferred tech debt).
 - **Risky actions** (`reset --hard`, `rm -rf`): explicit permission EVERY TIME.
