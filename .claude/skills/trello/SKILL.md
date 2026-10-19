@@ -52,6 +52,7 @@ drifts, and nothing fails when it does ([[distribute-notes-dont-pile-them]]).
 
 | column | holds | who moves a card in | to leave it |
 | --- | --- | --- | --- |
+| **Chantiers** | an **initiative** — above an epic: the ground the decisions of a whole stretch of work stand on (`DESIGN-262`, the management of uncertainty). **Outside the maturity flow**: it stays here its whole life, and does not count in En cours | the dev | never, while its tickets are being done |
 | **Idées** | a raw thought, the *Idée* template | anyone, the dev mostly | I shape it into the *Backlog* template, **he validates the wording** |
 | **Backlog** | a shaped ticket, validated as written, **unordered** | the dev, once I shaped it — **never me alone** | he decides to do it now |
 | **À faire** | what he decided to do, **in his order** | the dev | I start the top card, unless he names another |
@@ -76,7 +77,7 @@ verb takes either (`move CARTO-41 "En cours"` or `move 41 …`).
 
 Every title **starts with its scope in brackets** (the dev's call, 2026-10-17), so the board reads at a
 glance — **in capitals, it must jump out** (the dev, 2026-10-17): `[ATLAS]` · `[CARTO]` · `[CORE]` ·
-`[CONTRIB]` (places & events, Payload) · `[REPO]` (CI, lint, Trello, skills — none of the four). Two
+`[CONTRIB]` (places & events, Payload) · `[REPO]` (CI, lint, Trello, skills — none of the four) · `[DESIGN]` (the design of the system itself, across core, the apps and the contribution — the dev, 2026-10-19). Two
 scopes: `[ATLAS · CARTO]`. `prefix` upper-cases whatever it is given. The scope labels stay as well — a cue
 seen twice is wanted ([[redundant-cues-help-him-remember]]). `prefix N carto` sets or replaces it.
 
@@ -118,8 +119,9 @@ A label shows on the closed card and filters the board; a line in a description 
 | family | labels | rule |
 | --- | --- | --- |
 | **Gravité** | `critique` · `gênant` · `cosmétique` | one at most, only on a card that fixes a problem; a new feature carries none. `critique` = blocks the work (CLAUDE.md's *blocking*) — renamed so it never reads like the status `Bloqué` |
-| **Périmètre** | `atlas` · `Cartographe` · `core` · `données` (years/, relief, sources) · `outillage` (CI, lint, Trello, skills) | one, rarely two |
+| **Périmètre** | `atlas` · `Cartographe` · `core` · `données` (years/, relief, sources) · `outillage` (CI, lint, Trello, skills) · `design` | one, rarely two |
 | **Type** | `retour d'usage` (what the dev felt using the app) · `défaut` (a proven bug) · `fonction` · `dette` · `décision` (a question to settle) · `doc` | one |
+| **Chantier** | `chantier · incertitude`, one per initiative | on every ticket of an initiative, so one click filters it |
 | **Statut** | `Bloqué` | through `block` / `unblock` only |
 
 Every card I create gets its labels **in the same breath** (`tag`); the list lives in the script's
@@ -227,3 +229,18 @@ what comes from me goes to Idées.
 - **Guiding the dev through any web UI**: his browser is in French; look at the page (a screenshot of
   his, or my own tab, closed afterwards) before naming a button. Guessing English labels cost an
   angry quarter of an hour on 2026-10-17.
+
+## Initiatives — the hierarchy Trello does not have (the dev's call, 2026-10-19)
+
+Trello has no epic. In Jira terms our tickets are **stories**; an **initiative** sits above the epics, and
+it is the ground the decisions themselves stand on. Three pieces build it:
+
+1. **The `Chantiers` column**, leftmost, outside the flow Idées → Fait: the initiative's card lives there
+   for its whole life. It does not count in En cours' one-or-two.
+2. **Its checklist names the rungs**, one item each, with the link of the ticket that carries it once that
+   ticket exists (Trello previews it). A rung with no ticket yet is plain text; when its ticket is created,
+   the item gets the link in the same breath.
+3. **Every ticket of the initiative carries its `chantier · …` label**, so one click on the label filters
+   the whole of it. A new initiative is a new `chantier · …` label in `LABELS` — the dev's call.
+
+The first: **DESIGN-262**, the management of uncertainty (`files/plans/evidence-system.md`).

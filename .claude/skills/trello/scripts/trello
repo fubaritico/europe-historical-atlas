@@ -8,16 +8,19 @@ import { fileURLToPath } from 'node:url'
 
 /** The board this repository tracks its work on. */
 const BOARD = '6ad371ed842063195c4ceb77'
-/** The columns, in board order — a card matures left to right. `done` moves a card to the last one. */
-const COLUMNS = ['Idées', 'Backlog', 'À faire', 'En cours', 'À valider par le développeur', 'Fait']
+/**
+ * The columns, in board order — a card matures left to right. `done` moves a card to the last one.
+ * `Chantiers` stands outside that flow: an initiative stays there its whole life (the dev's call, 2026-10-19).
+ */
+const COLUMNS = ['Chantiers', 'Idées', 'Backlog', 'À faire', 'En cours', 'À valider par le développeur', 'Fait']
 
 /** The label a card waiting on another card carries; it keeps its column (the dev's call, 2026-10-17). */
 const BLOCKED = { name: 'Bloqué', color: 'red' }
 
-/** Every label of the board, by family — the dev's call, 2026-10-17. `setup` creates the missing ones. */
 /** A card's importance, shown as the colour of its cover — the header (the dev's call, 2026-10-18). */
 const PRIORITIES = { haute: 'red', moyenne: 'yellow', aucune: null }
 
+/** Every label of the board, by family — the dev's call, 2026-10-17. `setup` creates the missing ones. */
 const LABELS = [
   // severity — one at most, on a card that fixes a problem; the label is its only home
   { name: 'critique', color: 'red_dark' },
@@ -30,6 +33,7 @@ const LABELS = [
   { name: 'données', color: 'green' },
   { name: 'outillage', color: 'black' },
   { name: 'contrib', color: 'blue_dark' },
+  { name: 'design', color: 'red_light' },
   // type
   { name: "retour d'usage", color: 'pink' },
   { name: 'défaut', color: 'orange_dark' },
@@ -37,6 +41,8 @@ const LABELS = [
   { name: 'dette', color: 'yellow_dark' },
   { name: 'décision', color: 'purple_light' },
   { name: 'doc', color: 'black_light' },
+  // chantier — every ticket of an initiative carries its label, so one click filters the whole of it
+  { name: 'chantier · incertitude', color: 'green_dark' },
   // status
   BLOCKED,
 ]
@@ -102,7 +108,7 @@ async function listNamed(name) {
   return found
 }
 
-const SCOPES = 'ATLAS|CARTO|CORE|CONTRIB|REPO'
+const SCOPES = 'ATLAS|CARTO|CORE|CONTRIB|REPO|DESIGN'
 /** A title's ticket: `[CARTO-41 · ATLAS] title` → main scope, number (absent before numbering), second scope, bare title. */
 const TICKET = new RegExp(`^\\[(${SCOPES})(?:-(\\d+))?(?: · (${SCOPES}))?\\]\\s*(.*)$`, 'is')
 
@@ -225,7 +231,7 @@ const verbs = {
   async prefix(ref, scope) {
     const scopes = (scope ?? '').toUpperCase().split(' · ')
     if (!scopes.every((s) => new RegExp(`^(?:${SCOPES})$`).test(s)) || scopes.length > 2)
-      fail('prefix <card> <scope>  (atlas, carto, core, contrib, repo; two joined by " · ")')
+      fail(`prefix <card> <scope>  (${SCOPES.toLowerCase().split('|').join(', ')}; two joined by " · ")`)
     const c = await card(ref)
     // only a scope prefix is replaced — a title may legitimately start with a bracket ("[Save] …")
     const current = parseTicket(c.name)
