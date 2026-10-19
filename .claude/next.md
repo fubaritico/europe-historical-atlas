@@ -18,11 +18,13 @@ répondant. Proposer, ne pas commencer sans son mot ([[do-not-start-unasked-work
 un instant et un intervalle, l'an zéro refusé à la lecture, Julien ↔ Grégorien par le jour julien). Il est en tête
 d'« À faire » sous DESIGN-262 ; rien n'est écrit.
 
-**En attente du dev, une phrase chacun** :
-- **Le dépôt public** : prêt (audit propre, README, licence PolyForm Strict, `0edb024`/`3c93e05`) ; c'est lui qui bascule
-  le réglage sur GitHub. **Le nom dans `LICENSE`** (« Stéphane Cottereau ») est déduit de son dossier : à lui confirmer.
-- **Le relief plus fin** (`0ee299d`, niveau 6 à 1 920) : son verdict sur le chargement → le Cartographe aussi, ou retour au 5.
-- **Les tribus, inset ou outset** (ATLAS-258) : son choix dans `TRIBE_FEATHER`.
+**Décidé par le dev le soir du 19/10** :
+- **Le dépôt est public** (il l'a basculé). La licence reste au nom de « Stéphane Cottereau » pour l'instant ; il aurait
+  préféré une personne morale (Fubaritico) — possible seulement le jour où elle existe juridiquement (REPO-263, Idées).
+- **Le relief au niveau 6 lui va** — *« ça fonctionne »*. **À faire mercredi, à lui proposer d'abord** : passer le
+  Cartographe au même relief (une ligne, `packages/cartographer/src/main.tsx` → `/heightmaps/europe-dem-z6-1920`),
+  pour que les deux fonds redeviennent identiques ; puis son test dans l'appli.
+- **Les tribus lui vont telles quelles** : le défaut reste — dégradé inset, 30 km (`TRIBE_FEATHER`).
 
 **À traiter à part** : la gate rouge sous charge (REPO-260, Idées).
 

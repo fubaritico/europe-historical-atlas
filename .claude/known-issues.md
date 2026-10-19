@@ -37,9 +37,9 @@ Put here the know issues to avoid cluttering the context window.
   par paquet (`maxWorkers`) ou la concurrence de Turbo, puis remesurer la durée de la gate. **Sévérité : gênant** (une
   gate rouge sur du code juste, dès que tout tourne en même temps).
 - **Depuis le 18/10, l'atlas lit le relief du niveau 6 (1 920 de large) et le Cartographe celui du niveau 5 (1 280)** —
-  les deux fonds de carte ne sont plus cuits du même relief, ce que la table de parité promet (`0ee299d`). Voulu pour un
-  temps : le dev mesure d'abord le chargement en ligne. Remède : une ligne dans `packages/cartographer/src/main.tsx`
-  (`/heightmaps/europe-dem-z6-1920`) s'il garde, ou revenir au niveau 5 dans `atlas/src/mapPipeline.ts`. **Sévérité : à savoir.**
+  les deux fonds de carte ne sont plus cuits du même relief, ce que la table de parité promet (`0ee299d`). **Le dev garde le
+  niveau 6** (19/10 : *« ça fonctionne »*). Remède : une ligne dans `packages/cartographer/src/main.tsx`
+  (`/heightmaps/europe-dem-z6-1920`), puis son test. **Sévérité : à savoir.**
 - **`files/spikes/fetch-dem/fetch-dem.mjs` écrit dans `public/heightmaps` à la racine**, un chemin d'avant le monorepo :
   le 18/10, il a fallu déplacer le résultat à la main dans `packages/atlas/public/heightmaps/` et retirer les dossiers vides.
   Remède : pointer `publicDir` sur `packages/atlas/public/heightmaps`. **Sévérité : cosmétique.**
@@ -94,7 +94,7 @@ Put here the know issues to avoid cluttering the context window.
      une action composite n'a pas de contexte `secrets`. Ça marche parce que chacun des **cinq** paquets
      accorde Read à `europe-historical-atlas` (« Manage Actions access »). Un 403/404 sur un seul paquet
      à l'install veut dire que son accès n'a pas été accordé, pas que le token est faux.
-  3. **Le jour où le dépôt devient public, un visiteur qui le clone ne pourra pas l'installer** sans un
+  3. **Depuis le 19/10 le dépôt est public, et un visiteur qui le clone ne peut pas l'installer** sans un
      token GitHub à lui. La sortie est de publier le DS sur npmjs. **À décider à ce moment-là.**
   **Monter de version** : le DS sort ses cinq paquets à la même version, et un composant neuf est une
   mineure. En `0.x` le caret ne franchit pas une mineure, donc `^0.2.0` ne prendra jamais `0.3.0` seul —
