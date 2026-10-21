@@ -20,12 +20,13 @@ export interface ErrorNetDeps {
   /** What to listen on. Injected so a test never touches the real window. */
   target?: EventTarget
   /**
-   * The headline, in the reader's language.
+   * The headline, in the reader's language. Required: no label is written in the code (ATLAS-159).
    *
    * Deliberately vague about the cause, because by definition we do not know it: claiming more than we
-   * know is how the border notice ended up blaming invalid JSON for a file that was simply absent.
+   * know is how the border notice ended up blaming invalid JSON for a file that was simply absent. It takes
+   * no value, so building it cannot fail — the one message that must always show.
    */
-  title?: string
+  title: string
 }
 
 /** A mounted net. */
@@ -55,7 +56,7 @@ function describe(reason: unknown): string | undefined {
  */
 export function createErrorNet(deps: ErrorNetDeps): ErrorNet {
   const target = deps.target ?? window
-  const title = deps.title ?? 'Une erreur inattendue s’est produite. La carte peut être incomplète.'
+  const { title } = deps
 
   const onError = (event: Event): void => {
     const detail = describe((event as ErrorEvent).error) ?? (event as ErrorEvent).message

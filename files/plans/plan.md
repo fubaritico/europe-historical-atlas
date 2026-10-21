@@ -457,6 +457,13 @@ language it had never been designed to leave.
 **The atlas is in English by default** — the dev, 2026-10-21, replacing "French first": *« c'est international »*.
 **And it follows the browser's language like the Cartographer** (the dev, same evening): French for a browser
 whose first language is French, English for every other — the same `pickLocale(navigator.languages)`.
+
+**With a language switch, the order becomes** (the dev, 2026-10-21, both apps alike — the switch itself is not
+for now): (1) the language the reader chose, **saved in `localStorage`**; (2) otherwise the browser's, French if
+French; (3) otherwise English. An unreachable storage (private browsing, blocked) is logged — `console.warn`, the
+reader's machine and not a defect — and the browser's language is used; a saved value that names no known
+language is ignored the same way. To be coded **with the switch**, which is what writes the entry: read alone, it
+would be a branch nothing reaches.
 | **content tool** (Payload) | **EN and FR in the same form** | one form, both fields side by side, so an entry is never half-translated without anyone seeing it |
 
 **Two things this corrects in the row above**: the Cartographer's chrome is *not* part of the ICU

@@ -30,7 +30,7 @@ import { createWorkerMapCompute } from '@europe-historical-atlas/core/pipeline/w
 import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
 import { createLatestOnly } from '@europe-historical-atlas/core/utils/latestOnly'
 
-import { COMPUTE_PHASE_LABELS } from './computeLabels'
+import { COMPUTE_PHASE_MESSAGES } from './computeLabels'
 import { politicalPalette } from './devParams'
 import { paintsExactFills } from './mapLayerContext'
 import { refreshReliefSource } from './mapSources'
@@ -41,10 +41,12 @@ import type { DevState } from './devState'
 import type { MapLayers } from './mapLayers'
 import type { MapSources } from './mapSources'
 import type { MapUi } from './mapUi'
+import type { AtlasMessageKey } from './messages'
 import type { HeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
 import type { LandMaskSource } from '@europe-historical-atlas/core/data/landMask'
 import type { RegionSet, RegionSource } from '@europe-historical-atlas/core/data/regionSource'
 import type { RiverSet, RiverSource } from '@europe-historical-atlas/core/data/riverSource'
+import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 import type { MapCompute, ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 import type { ComputeWorkerHandle } from '@europe-historical-atlas/core/pipeline/workerCompute'
 import type { LatestOnly } from '@europe-historical-atlas/core/utils/latestOnly'
@@ -116,6 +118,8 @@ export interface MapPipelineDeps {
   layers: MapLayers
   /** Where progress is shown and failures are told. */
   ui: MapUi
+  /** The atlas's messages in the reader's language, for the progress captions. */
+  translate: Translate<AtlasMessageKey>
   /**
    * Create the compute worker. Injected because naming a worker module is bundler-specific, and a module
    * that carries one can neither be unit-tested nor moved to another bundler.
@@ -232,7 +236,7 @@ async function rebuildPolitical(context: PipelineContext): Promise<void> {
   if (!sources.heightmap) return
   const isCurrent = context.politicalGate.begin()
   const year = Math.round(dev.political.year / 100) * 100
-  ui.progress.begin(`Chargement de l'année ${String(year)}…`)
+  ui.progress.begin(context.translate('loadingYear', { year: String(year) }))
   try {
     const loaded = await context.assets.regions.load(year)
     if (context.isDisposed() || !isCurrent()) return
@@ -240,7 +244,7 @@ async function rebuildPolitical(context: PipelineContext): Promise<void> {
     // The bar spans two jobs, so each reports into its own slice rather than being told where it sits
     // in a sequence it knows nothing about.
     const report: ProgressReport = (fraction, phase) => {
-      ui.progress.report(fraction, COMPUTE_PHASE_LABELS[phase])
+      ui.progress.report(fraction, context.translate(COMPUTE_PHASE_MESSAGES[phase]))
     }
     const result = await context.box.compute.computePolitical(
       politicalRequest(dev, loaded),

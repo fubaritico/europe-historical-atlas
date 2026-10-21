@@ -15,8 +15,10 @@ import { createProgressOverlay } from './ui/progressOverlay'
 import { createSplash } from './ui/splash'
 import { PARCHMENT } from './viewport'
 
+import type { AtlasMessageKey } from './messages'
 import type { ProgressOverlay } from './ui/progressOverlay'
 import type { AssetKind } from '@europe-historical-atlas/core/data/assetError'
+import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 
 /** The map's surrounding interface. */
 export interface MapUi {
@@ -51,6 +53,8 @@ export interface MapUiOptions {
    * @returns `true` once teardown has run
    */
   isDisposed: () => boolean
+  /** The atlas's messages in the reader's language, chosen by the composition root. */
+  translate: Translate<AtlasMessageKey>
 }
 
 /**
@@ -66,10 +70,12 @@ export function createMapUi(options: MapUiOptions): MapUi {
   const splash = createSplash({ host: options.host, background: PARCHMENT })
   // Until this existed every failure ended in `console.error` and nothing else, so a relief that failed
   // to load showed a blank canvas and no explanation. A console is not a user interface.
-  const notices = createNoticeBoard({ host: options.host })
+  const { translate } = options
+  const notices = createNoticeBoard({ host: options.host, dismissLabel: translate('dismiss') })
   // The board above only hears about failures someone thought to catch. This hears the rest: without
   // it an uncaught error leaves a frozen canvas and not one word.
   const errorNet = createErrorNet({
+    title: translate('unexpectedError'),
     show: (notice) => {
       if (options.isDisposed()) return
       notices.show(notice)
@@ -85,7 +91,7 @@ export function createMapUi(options: MapUiOptions): MapUi {
     reportAssetFailure(asset: AssetKind, error: unknown): void {
       console.error(`asset ${asset} failed`, error)
       if (options.isDisposed()) return
-      const notice = assetNotice(asset, error)
+      const notice = assetNotice(asset, error, translate)
       notices.show(notice)
       // A blocking failure means there is no map behind the splash, so the splash stays and the message
       // lands on it. Dismissing it would reveal an empty canvas and call that an improvement.

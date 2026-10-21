@@ -1,7 +1,10 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
+
 import { createMapUi } from './mapUi'
+import { ATLAS_MESSAGES } from './messages'
 
 /** Mount an interface into a fresh host. */
 function mount(isDisposed: () => boolean = () => false): {
@@ -10,8 +13,31 @@ function mount(isDisposed: () => boolean = () => false): {
 } {
   const host = document.createElement('div')
   document.body.appendChild(host)
-  return { host, ui: createMapUi({ host, isDisposed }) }
+  return {
+    host,
+    ui: createMapUi({ host, isDisposed, translate: createTranslator(ATLAS_MESSAGES, 'fr') }),
+  }
 }
+
+describe('createMapUi — its words', () => {
+  it('names the dismiss button in the reader’s language', () => {
+    const { host, ui } = mount()
+    ui.reportAssetFailure('rivers', new Error('offline'))
+    expect(host.querySelector('button')?.getAttribute('aria-label')).toBe('Fermer')
+    ui.dispose()
+  })
+
+  // The one message that must always show: an error nothing anticipated, heard on the window.
+  it('heads an unexpected error with the catalogue’s sentence', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    const { host, ui } = mount()
+    window.dispatchEvent(new ErrorEvent('error', { error: new Error('boom') }))
+    expect(host.textContent).toContain(
+      'Une erreur inattendue s’est produite. La carte peut être incomplète.'
+    )
+    ui.dispose()
+  })
+})
 
 afterEach(() => {
   document.body.innerHTML = ''

@@ -10,6 +10,8 @@
 
 import Stats from 'three/addons/libs/stats.module.js'
 
+import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
+import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
 import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?worker'
 
 import { createDevPanel } from './devPanel'
@@ -21,6 +23,7 @@ import { createMapLayers } from './mapLayers'
 import { createMapPipeline } from './mapPipeline'
 import { createMapSources } from './mapSources'
 import { createMapUi } from './mapUi'
+import { ATLAS_MESSAGES } from './messages'
 // Vite resolves `?worker` into a constructor for the bundled worker module. It is the one
 // bundler-specific line in the compute, and it lives here on purpose: the client that talks to the
 // worker takes it as an injected `spawn`, so nothing below the composition root depends on Vite.
@@ -44,13 +47,19 @@ function bootstrap(): () => void {
   const dev = createDevState()
   const sources = createMapSources()
   const view = createViewport(canvas, dev)
-  const ui = createMapUi({ host: document.body, isDisposed })
+  // The browser's language when it is French, English otherwise (the dev, 2026-10-21); the page says
+  // which, so a screen reader pronounces it right.
+  const locale = pickLocale(navigator.languages)
+  document.documentElement.lang = locale
+  const translate = createTranslator(ATLAS_MESSAGES, locale)
+  const ui = createMapUi({ host: document.body, isDisposed, translate })
   const layers = createMapLayers({ scene: view.scene, dev, sources })
   const pipeline = createMapPipeline({
     dev,
     sources,
     layers,
     ui,
+    translate,
     spawn: () => new ComputeWorker(),
     isDisposed,
   })

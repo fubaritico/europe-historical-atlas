@@ -15,7 +15,7 @@ describe('createErrorNet', () => {
   })
 
   const net = (): ReturnType<typeof createErrorNet> =>
-    createErrorNet({ show: (n) => shown.push(n), target })
+    createErrorNet({ show: (n) => shown.push(n), target, title: 'Une erreur' })
 
   describe('happy path', () => {
     it('posts a blocking notice when nothing else caught the error', () => {
@@ -57,16 +57,8 @@ describe('createErrorNet', () => {
     })
   })
 
-  describe('managed errors', () => {
-    it('never claims a cause it does not know', () => {
-      // The border notice once blamed invalid JSON for a file that was simply absent. An
-      // unanticipated failure has, by definition, no known cause: the headline must not invent one.
-      net()
-      target.dispatchEvent(new Event('error'))
-
-      expect(shown[0]?.title).not.toMatch(/JSON|réseau|fichier/i)
-    })
-  })
+  // L3 (managed errors): the headline's wording — vague about a cause nobody knows — is the catalogue's,
+  // and messages.test.ts checks it in both languages.
 
   describe('unmanaged errors', () => {
     it('still posts when there is nothing to describe', () => {
@@ -97,7 +89,7 @@ describe('createErrorNet', () => {
 
     it('defaults to the real window when no target is injected', () => {
       const add = vi.spyOn(window, 'addEventListener')
-      const mounted = createErrorNet({ show: () => undefined })
+      const mounted = createErrorNet({ show: () => undefined, title: 'Une erreur' })
       expect(add).toHaveBeenCalledWith('error', expect.any(Function))
       mounted.dispose()
       add.mockRestore()

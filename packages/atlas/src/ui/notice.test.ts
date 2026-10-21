@@ -12,7 +12,7 @@ import {
 function mount(): { host: HTMLElement; board: ReturnType<typeof createNoticeBoard> } {
   const host = document.createElement('div')
   document.body.appendChild(host)
-  return { host, board: createNoticeBoard({ host }) }
+  return { host, board: createNoticeBoard({ host, dismissLabel: 'Fermer' }) }
 }
 
 /** Every posted panel, in document order. */

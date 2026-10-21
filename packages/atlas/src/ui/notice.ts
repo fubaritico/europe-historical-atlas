@@ -34,8 +34,11 @@ export interface NoticeBoardOptions {
   ink?: string
   /** Panel background. */
   background?: string
-  /** Accessible name of the button that dismisses a degraded notice. */
-  dismissLabel?: string
+  /**
+   * Accessible name of the button that dismisses a degraded notice, in the reader's language. Required:
+   * no label is written in the code (ATLAS-159).
+   */
+  dismissLabel: string
 }
 
 /** A mounted notice board. */
@@ -121,6 +124,9 @@ export function buildNoticePanel(notice: Notice, ink: string, background: string
   if (notice.detail !== undefined && notice.detail.length > 0) {
     const detail = document.createElement('p')
     detail.textContent = notice.detail
+    // The technical half — a path, a parser's words, a stack line — is English whatever the page's
+    // language, and says so, or a French voice reads it with French sounds (WCAG 3.1.2).
+    detail.lang = 'en'
     detail.style.cssText = 'margin:4px 0 0;opacity:0.72;font-size:12.5px'
     words.appendChild(detail)
   }
@@ -181,7 +187,7 @@ export function buildDismissButton(
 export function createNoticeBoard(options: NoticeBoardOptions): NoticeBoard {
   const ink = options.ink ?? '#4a3424'
   const background = options.background ?? 'rgba(239, 230, 210, 0.96)'
-  const dismissLabel = options.dismissLabel ?? 'Fermer'
+  const { dismissLabel } = options
 
   const element = buildNoticeBoardElement()
   options.host.appendChild(element)

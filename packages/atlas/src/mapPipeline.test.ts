@@ -7,10 +7,12 @@ import { projectRegions } from '@europe-historical-atlas/core/data/regionSource'
 import { toRegionPayload } from '@europe-historical-atlas/core/data/toRegionPayload'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 
 import { createDevState } from './devState'
 import { createMapPipeline, politicalRequest } from './mapPipeline'
 import { createMapSources } from './mapSources'
+import { ATLAS_MESSAGES } from './messages'
 
 import type { DevState } from './devState'
 import type { MapLayers } from './mapLayers'
@@ -119,6 +121,9 @@ function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
   return { promise, resolve }
 }
 
+/** The atlas in French, as a French browser gets it. */
+const FR = createTranslator(ATLAS_MESSAGES, 'fr')
+
 /** Let every pending microtask run. */
 const flush = () => new Promise((settle) => setTimeout(settle, 0))
 
@@ -147,6 +152,7 @@ function build(over: Partial<MapPipelineDeps> = {}): {
     sources: createMapSources(),
     layers: fakeLayers(),
     ui: fakeUi(),
+    translate: FR,
     // No worker in a test environment: the pipeline falls back to the inline compute, which is the
     // same implementation the worker runs, so this drives the real thing rather than a stand-in.
     spawn: (): never => {
@@ -273,6 +279,24 @@ describe('createMapPipeline', () => {
       expect(deps.sources.derivedBorders).toBe(exact)
       expect(asMock(deps.layers.rebuildBorders)).toHaveBeenCalledTimes(1)
       expect(warn).toHaveBeenCalledWith(expect.stringContaining('authored year'))
+    })
+
+    it('captions the bar with the year it loads, in the reader’s language', async () => {
+      const { deps, dev, pipeline } = build()
+      dev.political.year = 1100
+      await pipeline.start()
+      expect(asMock(deps.ui.progress.begin)).toHaveBeenCalledWith(
+        FR('loadingYear', { year: '1100' })
+      )
+    })
+
+    it('captions each compute phase as it runs', async () => {
+      const { deps, pipeline } = build()
+      await pipeline.start()
+      expect(asMock(deps.ui.progress.report)).toHaveBeenCalledWith(
+        expect.any(Number),
+        FR('phaseRasterise')
+      )
     })
 
     it('rounds the year to the century the dataset actually provides', async () => {
