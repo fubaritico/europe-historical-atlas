@@ -55,8 +55,18 @@ the console is the one place a later, subtler failure can be traced back to.
 - **The i18n engine throws** on a message called without a value it names, or on a malformed pattern. Every
   catalogue entry is checked by the tests, so this is meant to fail there, not in front of a reader.
 - **In the Cartographer, React error boundaries** keep the rest of the screen alive: where a component fails,
-  its place shows the error message, **centred vertically and horizontally**. Where the boundaries sit is
-  proposed systematically (in the shared `Panel` shell, plus one at the root) — pending the dev's answer.
+  its place shows the error message, **centred vertically and horizontally**. **One per zone of the
+  application** (the dev, 2026-10-21): every panel through the shared `Panel` shell, the status bar, the tool
+  rail and its menus, every contextual menu, the top bar and the future menu bar (CARTO-239), the canvas
+  zone, and one at the root. **The canvas zone's fallback offers « Retry »** (the dev, same evening): the drawn
+  image goes with the unmounted canvas, but the document lives in the store, so remounting reloads and re-bakes
+  the backdrop (a couple of seconds) and redraws the map as it was — nothing drawn is lost. Without its own
+  boundary, a render error there would take the whole application down behind the root's message. A **menu**'s
+  fallback offers « Close » (its dismissal lived in the component that failed); a **bar**'s takes one line.
+- **What a boundary does not see**: it catches what is thrown while a component renders, never in an event
+  handler, a `requestAnimationFrame` or a timer — where the canvas does nearly all its work, and where a label
+  written after a click is built. In the atlas those reach its error net (ATLAS-42); **the Cartographer has no
+  such net yet** — where to show them is asked of the dev (2026-10-21).
 - **In the atlas**, which has no React, the error net (ATLAS-42) shows any unexpected error on screen. Its own
   message takes no value, so it cannot fail this way.
 
