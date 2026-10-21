@@ -203,24 +203,30 @@ describe('pointInIndexedRings', () => {
   })
 
   describe('variants', () => {
-    it('agrees with pointInRings on 20 000 points over jagged rings, holes and exclaves', () => {
-      // The guarantee the speed-up rests on: the same answer, everywhere — CARTO-240.
-      const random = seeded(1100)
-      const outer = jaggedRing(random, 0, 0, 900)
-      const rings = [
-        outer,
-        jaggedRing(random, 0, 0, 120).map(([x, y]) => [x * 0.2, y * 0.2] as [number, number]),
-        jaggedRing(random, 12, 3, 300),
-      ]
-      const index = indexRings(rings)
-      let disagreements = 0
-      for (let i = 0; i < 20000; i += 1) {
-        const point: [number, number] = [-6 + random() * 22, -6 + random() * 12]
-        if (pointInIndexedRings(point, index) !== pointInRings(point, rings)) disagreements += 1
-      }
+    // 20 s, not Vitest's 5: an equivalence check heavy on purpose, which coverage instrumentation slows two to
+    // three times (5.7 s in CI's Sonar job, 2026-10-21). Fewer points would weaken the guarantee.
+    it(
+      'agrees with pointInRings on 20 000 points over jagged rings, holes and exclaves',
+      { timeout: 20_000 },
+      () => {
+        // The guarantee the speed-up rests on: the same answer, everywhere — CARTO-240.
+        const random = seeded(1100)
+        const outer = jaggedRing(random, 0, 0, 900)
+        const rings = [
+          outer,
+          jaggedRing(random, 0, 0, 120).map(([x, y]) => [x * 0.2, y * 0.2] as [number, number]),
+          jaggedRing(random, 12, 3, 300),
+        ]
+        const index = indexRings(rings)
+        let disagreements = 0
+        for (let i = 0; i < 20000; i += 1) {
+          const point: [number, number] = [-6 + random() * 22, -6 + random() * 12]
+          if (pointInIndexedRings(point, index) !== pointInRings(point, rings)) disagreements += 1
+        }
 
-      expect(disagreements).toBe(0)
-    })
+        expect(disagreements).toBe(0)
+      }
+    )
 
     it('agrees with pointInRings on points exactly at vertex latitudes, where the ray grazes a vertex', () => {
       const random = seeded(17)
