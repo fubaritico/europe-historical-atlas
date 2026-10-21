@@ -21,9 +21,12 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: echo "has=$([ -n "$SONAR_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
+      # One package at a time: four coverage runs in parallel, each with a Vitest worker per core, saturate
+      # the runner and push heavy tests past their timeout (REPO-260 — two of them on 2026-10-21). The job
+      # is never blocking, so the extra seconds cost nothing. Same two steps as `pnpm coverage`.
       - name: Generate coverage (lcov for Sonar)
         if: steps.check.outputs.has == 'true'
-        run: pnpm coverage
+        run: pnpm exec turbo coverage --concurrency=1 && node scripts/merge-coverage.mjs
 
       - name: SonarQube Scan
         if: steps.check.outputs.has == 'true'
