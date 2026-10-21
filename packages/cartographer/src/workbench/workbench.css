@@ -81,3 +81,19 @@
 .workbench__panel {
   background: var(--panel);
 }
+
+/* A panel-sized frame for a zone that failed, so its fallback is seen centred in the space it would hold. */
+.workbench__zone {
+  height: 200px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+
+.workbench__zone--map {
+  height: 320px;
+  background: var(--bg);
+}
+
+.workbench__zone--bar {
+  height: 30px;
+}

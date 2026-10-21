@@ -1,7 +1,17 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+import { LocaleContext } from '../../shared/localeContext'
 
 import { Shell } from './Shell'
+
+import type { ReactNode } from 'react'
+
+/** A zone whose render throws. */
+function FailingZone(): ReactNode {
+  // Render
+  throw new Error('the zone broke')
+}
 
 describe('Shell', () => {
   describe('happy path', () => {
@@ -60,6 +70,31 @@ describe('Shell', () => {
 
       const named = [...document.querySelectorAll('.empty-zone')].map((n) => n.textContent)
       expect(named).toEqual(['app bar', 'document bar', 'tools', 'panels'])
+    })
+
+    // One zone per boundary (the dev's call, 2026-10-21): the dock failing must not take the map down.
+    it('keeps the map standing when the dock fails', () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      render(
+        <LocaleContext value="en">
+          <Shell canvas={<div data-testid="map" />} dock={<FailingZone />} />
+        </LocaleContext>
+      )
+      expect(screen.getByTestId('map')).toBeDefined()
+      expect(document.querySelector('.shell__dock [role="alert"]')).not.toBeNull()
+      vi.restoreAllMocks()
+    })
+
+    it('offers « Retry » where the map failed, and nowhere else', () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      render(
+        <LocaleContext value="en">
+          <Shell canvas={<FailingZone />} dock={<FailingZone />} />
+        </LocaleContext>
+      )
+      expect(screen.getAllByRole('button', { name: 'Retry' })).toHaveLength(1)
+      expect(document.querySelector('.shell__canvas button')).not.toBeNull()
+      vi.restoreAllMocks()
     })
 
     it('leaves the status row present but empty when nothing is passed for it', () => {

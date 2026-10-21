@@ -1,8 +1,18 @@
 import { render, screen } from '@testing-library/react'
 import { createRef } from 'react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+import { LocaleContext } from '../shared/localeContext'
 
 import { Panel } from './Panel'
+
+import type { ReactNode } from 'react'
+
+/** A panel view whose render throws. */
+function FailingView(): ReactNode {
+  // Render
+  throw new Error('the view broke')
+}
 
 describe('Panel', () => {
   describe('happy path', () => {
@@ -55,7 +65,25 @@ describe('Panel', () => {
     })
   })
 
-  // L3: N/A — a shell refuses nothing. L4: N/A — no optional collaborator.
+  // L4: N/A — no optional collaborator.
+
+  describe('managed errors', () => {
+    // Every panel guarded by the shell they share (the dev's call, 2026-10-21): the view fails, the panel
+    // stays, with its name, and says so in place of the view.
+    it('keeps its name and shows the failure in place of a view that throws', () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      render(
+        <LocaleContext value="en">
+          <Panel title="Layers">
+            <FailingView />
+          </Panel>
+        </LocaleContext>
+      )
+      expect(screen.getByRole('heading', { level: 2, name: 'Layers' })).toBeDefined()
+      expect(screen.getByRole('alert').textContent).toContain('This area could not be shown.')
+      vi.restoreAllMocks()
+    })
+  })
 
   describe('edge cases', () => {
     it('renders no foot when none is given', () => {

@@ -6,6 +6,7 @@ import { createFetchLandMaskSource } from '@europe-historical-atlas/core/data/la
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { createFetchRiverSource } from '@europe-historical-atlas/core/data/riverSource'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
 import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?worker'
 import { DEFAULT_TERRAIN_OPTIONS } from '@europe-historical-atlas/core/pipeline/terrainOptions'
 import { createWorkerMapCompute } from '@europe-historical-atlas/core/pipeline/workerCompute'
@@ -14,8 +15,10 @@ import { createHistoryRelay } from './canvas/history/historyRelay'
 import { CHROME_PAINT_STYLE } from './canvas/paint/style'
 import { DraftRecoveryDialog } from './components/DraftRecoveryDialog'
 import { Editor } from './components/Editor'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { OverwriteDialog } from './components/OverwriteDialog'
 import { arrangeSelected } from './components/shared/arrange'
+import { LocaleContext } from './components/shared/localeContext'
 import { createSnapshotPicker } from './components/shared/snapshotPicker'
 import { listenForStackingKeys } from './components/shared/stackingShortcut'
 import { SnapshotDialog } from './components/SnapshotDialog'
@@ -298,30 +301,43 @@ listenForStackingKeys(document, (move) => {
  */
 const history = createHistoryRelay()
 
+/**
+ * The language the Cartographer speaks: the browser's when it is French, English otherwise (the dev,
+ * 2026-10-21). The page says which, so a screen reader pronounces it right.
+ */
+const locale = pickLocale(navigator.languages)
+document.documentElement.lang = locale
+
 createRoot(container).render(
   <StrictMode>
-    <Editor
-      name="Europe Historical Atlas Cartographer"
-      onSave={handleSave}
-      onOpenSnapshot={snapshotPicker.open}
-      history={history}
-      heading={<h1 style={visuallyHidden}>Cartographer — year {store.getState().document.year}</h1>}
-      store={store}
-      load={loadTheBackdrop}
-      style={CHROME_PAINT_STYLE}
-      label={`Map of the year ${String(store.getState().document.year)}, being edited`}
-      colours={colours}
-      wikidata={wikidata}
-      results={results}
-    />
-    <DraftRecoveryDialog offers={draftOffers} />
-    <OverwriteDialog questions={overwriteQuestions} />
-    <SnapshotDialog
-      picker={snapshotPicker}
-      source={drafts}
-      year={FIRST_YEAR}
-      now={() => new Date()}
-      onOpen={handleOpenSnapshot}
-    />
+    <LocaleContext value={locale}>
+      <ErrorBoundary zone="the Cartographer">
+        <Editor
+          name="Europe Historical Atlas Cartographer"
+          onSave={handleSave}
+          onOpenSnapshot={snapshotPicker.open}
+          history={history}
+          heading={
+            <h1 style={visuallyHidden}>Cartographer — year {store.getState().document.year}</h1>
+          }
+          store={store}
+          load={loadTheBackdrop}
+          style={CHROME_PAINT_STYLE}
+          label={`Map of the year ${String(store.getState().document.year)}, being edited`}
+          colours={colours}
+          wikidata={wikidata}
+          results={results}
+        />
+        <DraftRecoveryDialog offers={draftOffers} />
+        <OverwriteDialog questions={overwriteQuestions} />
+        <SnapshotDialog
+          picker={snapshotPicker}
+          source={drafts}
+          year={FIRST_YEAR}
+          now={() => new Date()}
+          onOpen={handleOpenSnapshot}
+        />
+      </ErrorBoundary>
+    </LocaleContext>
   </StrictMode>
 )

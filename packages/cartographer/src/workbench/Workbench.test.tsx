@@ -1,5 +1,7 @@
 import { act, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+
+import { LocaleContext } from '../components/shared/localeContext'
 
 import { WORKBENCH_ENTRIES } from './entries'
 import { Workbench } from './Workbench'
@@ -27,6 +29,7 @@ function goTo(hash: string) {
 
 afterEach(() => {
   window.location.hash = ''
+  vi.restoreAllMocks()
 })
 
 describe('Workbench', () => {
@@ -53,10 +56,15 @@ describe('Workbench', () => {
     })
 
     // The registry itself: a plate that throws would blank the whole page, and nothing else renders it.
+    // Mounted in a language, as `entry.tsx` mounts the page; the failed-zone plates write their caught
+    // error to the console by design, so it is kept quiet here.
     it.each(WORKBENCH_ENTRIES.map((entry) => [entry.id, entry] as const))(
       'mounts the real plate %s',
       (_, entry) => {
-        expect(() => render(<>{entry.render()}</>)).not.toThrow()
+        vi.spyOn(console, 'error').mockImplementation(() => undefined)
+        expect(() =>
+          render(<LocaleContext value="en">{entry.render()}</LocaleContext>)
+        ).not.toThrow()
       }
     )
   })

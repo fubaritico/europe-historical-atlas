@@ -5,6 +5,7 @@ import { ColorPicker } from '@fubaritico/react/ColorPicker'
 import { IconButton } from '@fubaritico/react/IconButton'
 import { Input } from '@fubaritico/react/Input'
 
+import { ErrorBoundary } from '../components/ErrorBoundary'
 import { PolityForm } from '../components/PolityForm'
 import { PolityList } from '../components/PolityList'
 import { PolityStackMenu } from '../components/PolityStackMenu'
@@ -12,6 +13,7 @@ import { DRAFT_ERRORS, EMPTY_DRAFT, RANKS } from '../components/shared/polityDra
 import { ToolRail } from '../components/ToolRail'
 
 import { BarIconCandidates } from './BarIconCandidates'
+import { BrokenZone } from './BrokenZone'
 import { IconSharpness } from './IconSharpness'
 
 import type { WorkbenchEntry } from './Workbench'
@@ -198,6 +200,45 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
           onEdit={() => undefined}
           onClose={() => undefined}
         />
+      </div>
+    ),
+  },
+  {
+    id: 'error-zone',
+    title: 'A zone that failed',
+    note: 'What an ErrorBoundary shows in place of a zone whose render threw — a panel, a bar, a menu: what failed, the error’s own words, centred both ways (the dev’s call, 2026-10-21). Framed at a panel’s size.',
+    width: 280,
+    render: () => (
+      <div className="workbench__zone">
+        <ErrorBoundary zone="a workbench plate">
+          <BrokenZone />
+        </ErrorBoundary>
+      </div>
+    ),
+  },
+  {
+    id: 'error-zone-retry',
+    title: 'The map that failed, with « Retry »',
+    note: 'The canvas zone’s fallback: « Retry » remounts it, which reloads and re-bakes the backdrop (a couple of seconds) and redraws the document from the store — nothing drawn is lost. Here the zone fails again, so the fallback comes back.',
+    width: 480,
+    render: () => (
+      <div className="workbench__zone workbench__zone--map">
+        <ErrorBoundary zone="a workbench plate" retry>
+          <BrokenZone />
+        </ErrorBoundary>
+      </div>
+    ),
+  },
+  {
+    id: 'error-zone-bar',
+    title: 'A bar that failed',
+    note: 'The app bar, the document bar and the status bar are 24 to 30 px high: their fallback takes one line, the error’s words cut short and whole on hover. Framed at the app bar’s 30 px.',
+    width: 480,
+    render: () => (
+      <div className="workbench__zone workbench__zone--bar">
+        <ErrorBoundary zone="a workbench plate" compact>
+          <BrokenZone />
+        </ErrorBoundary>
       </div>
     ),
   },

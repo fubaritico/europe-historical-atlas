@@ -1,3 +1,5 @@
+import { ErrorBoundary } from '../../ErrorBoundary'
+
 import { Placeholder } from './Placeholder'
 
 import type { ReactNode } from 'react'
@@ -73,19 +75,38 @@ export interface ShellProps {
  */
 export function Shell({ heading, appbar, docbar, rail, canvas, dock, status }: ShellProps) {
   // Render
+  // Each zone behind its own boundary, so one failing never takes the others down (the dev's call,
+  // 2026-10-21). The bars take the one-line fallback. The canvas may be retried: a remount reloads the
+  // backdrop and redraws the document, which lives in the store.
   return (
     <div className="shell">
-      <div className="shell__appbar">{appbar ?? <Placeholder name="app bar" />}</div>
-      <div className="shell__docbar">{docbar ?? <Placeholder name="document bar" />}</div>
+      <div className="shell__appbar">
+        <ErrorBoundary zone="the app bar" compact>
+          {appbar ?? <Placeholder name="app bar" />}
+        </ErrorBoundary>
+      </div>
+      <div className="shell__docbar">
+        <ErrorBoundary zone="the document bar" compact>
+          {docbar ?? <Placeholder name="document bar" />}
+        </ErrorBoundary>
+      </div>
       <div className="shell__body">
-        <div className="shell__rail">{rail ?? <Placeholder name="tools" />}</div>
+        <div className="shell__rail">
+          <ErrorBoundary zone="the tool rail">{rail ?? <Placeholder name="tools" />}</ErrorBoundary>
+        </div>
         <main className="shell__canvas">
           {heading}
-          {canvas}
+          <ErrorBoundary zone="the map" retry>
+            {canvas}
+          </ErrorBoundary>
         </main>
-        <div className="shell__dock">{dock ?? <Placeholder name="panels" />}</div>
+        <div className="shell__dock">
+          <ErrorBoundary zone="the dock">{dock ?? <Placeholder name="panels" />}</ErrorBoundary>
+        </div>
       </div>
-      {status ?? <div className="shell__status" />}
+      <ErrorBoundary zone="the status bar" compact>
+        {status ?? <div className="shell__status" />}
+      </ErrorBoundary>
     </div>
   )
 }

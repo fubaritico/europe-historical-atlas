@@ -1,6 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
+import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
+
+import { LocaleContext } from '../components/shared/localeContext'
+
 import { WORKBENCH_ENTRIES } from './entries'
 import { Workbench } from './Workbench'
 
@@ -32,8 +36,14 @@ if (!container) {
   throw new Error('Workbench: #root is missing from workbench.html — nothing to mount into.')
 }
 
+// The browser's language, as the application takes it (`main.tsx`).
+const locale = pickLocale(navigator.languages)
+document.documentElement.lang = locale
+
 createRoot(container).render(
   <StrictMode>
-    <Workbench entries={WORKBENCH_ENTRIES} />
+    <LocaleContext value={locale}>
+      <Workbench entries={WORKBENCH_ENTRIES} />
+    </LocaleContext>
   </StrictMode>
 )

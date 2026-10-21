@@ -1,3 +1,5 @@
+import { ErrorBoundary } from '../../ErrorBoundary'
+
 import { ToolFlyout } from './ToolFlyout'
 
 import type { ToolVariant } from './FlyoutItem'
@@ -33,12 +35,14 @@ export function GroupFlyout({
 
   // Render
   return (
-    <ToolFlyout
-      label={`${label} tools`}
-      variants={variants}
-      current={current}
-      onChoose={handleChoose}
-      onDismiss={close}
-    />
+    <ErrorBoundary zone="a tool group's menu" onDismiss={close}>
+      <ToolFlyout
+        label={`${label} tools`}
+        variants={variants}
+        current={current}
+        onChoose={handleChoose}
+        onDismiss={close}
+      />
+    </ErrorBoundary>
   )
 }

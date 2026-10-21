@@ -1,5 +1,7 @@
 import { useId } from 'react'
 
+import { ErrorBoundary } from '../ErrorBoundary'
+
 import type { ReactNode, Ref } from 'react'
 
 /** What every panel of the dock is made of. */
@@ -50,7 +52,10 @@ export function Panel({ title, fill = false, foot, children, ref }: PanelProps) 
           {title}
         </h2>
       </header>
-      <div className="panel__body">{children}</div>
+      {/* Every panel guarded by the shell they share: one failing leaves the others standing. */}
+      <div className="panel__body">
+        <ErrorBoundary zone={`the ${title} panel`}>{children}</ErrorBoundary>
+      </div>
       {foot}
     </section>
   )

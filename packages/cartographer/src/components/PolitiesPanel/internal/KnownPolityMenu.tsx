@@ -1,3 +1,4 @@
+import { ErrorBoundary } from '../../ErrorBoundary'
 import { PolityStackMenu } from '../../PolityStackMenu'
 import { arrangePolity } from '../../shared/arrange'
 
@@ -57,13 +58,15 @@ export function KnownPolityMenu({
 
   // Render
   return (
-    <PolityStackMenu
-      name={polity.name}
-      at={at}
-      moves={moves}
-      onChoose={handleChoose}
-      onEdit={handleEdit}
-      onClose={onClose}
-    />
+    <ErrorBoundary zone="the stacking menu" onDismiss={onClose}>
+      <PolityStackMenu
+        name={polity.name}
+        at={at}
+        moves={moves}
+        onChoose={handleChoose}
+        onEdit={handleEdit}
+        onClose={onClose}
+      />
+    </ErrorBoundary>
   )
 }

@@ -1147,3 +1147,48 @@
 .wikidata-panel__agrees {
   color: var(--ink-off);
 }
+
+/*
+ * A zone that failed (ErrorBoundary): its place keeps the zone's size and shows, centred both ways — the dev's
+ * call, 2026-10-21 — what failed, the error's own words, and « Retry » where the zone allows it.
+ */
+.error-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
+  height: 100%;
+  padding: 12px;
+  color: var(--ink);
+  font-size: 12px;
+  text-align: center;
+}
+
+.error-zone__title {
+  margin: 0;
+  color: var(--warn);
+}
+
+.error-zone__message {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 11px;
+}
+
+/* The bars' fallback: one line, no padding — a bar is 24 to 30 px high, the block would overflow it. */
+.error-zone--bar {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 0 8px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.error-zone--bar .error-zone__message {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
