@@ -8,9 +8,10 @@ paths:
 
 ### Le design system est branché — ce qu'il faut savoir pour s'en servir
 
-**`@fubaritico/react` en `0.2.1`, `tokens`/`styles` en `0.2.0`**, depuis GitHub Packages (token en
-local dans `~/.npmrc`, `github.token` en CI). Le ColorPicker arrive en **`0.3.0`** : alors monter les
-plages et ajouter le champ couleur, avec son état « automatic » = `null`. Le plan
+**Les quatre paquets `@fubaritico/*` en `0.7.0`** (21/10, CARTO-117), depuis GitHub Packages (token en
+local dans `~/.npmrc`, `github.token` en CI). **La 0.7.0 nomme chaque jeton de couleur d'après ce qu'il peint**
+(`--color-surface-raised`, `--color-text-secondary`…) : un rôle que `theme.css` ne pose pas reste au gris clair du
+DS, sans erreur, et `theme.test.ts` refuse une surcharge qui nomme un rôle disparu. Le plan
 (`files/plans/cartographer/design-system-integration.md`) est **fait jusqu'au pas 4**.
 
 1. **Une seule cascade, dans un seul module** : `styles/sheets.ts` — tokens → peau → thème → reset (dans

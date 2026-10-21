@@ -1,8 +1,10 @@
+import tokensSheet from '@fubaritico/tokens/css?raw'
 import { describe, expect, it } from 'vitest'
 
 import main from '../main.tsx?raw'
 import workbench from '../workbench/entry.tsx?raw'
 
+import editorChrome from './editor-chrome.css?raw'
 import sheets from './sheets.ts?raw'
 import shell from './shell.css?raw'
 import theme from './theme.css?raw'
@@ -45,24 +47,78 @@ function contrast(a: string, b: string): number {
 
 /** Text the form shows, against the surface it sits on — WCAG 1.4.3, 4.5:1. */
 const TEXT_PAIRS: readonly (readonly [string, string])[] = [
-  ['--color-foreground', '--color-background'], // a value typed in a field
-  ['--color-foreground', '--color-card'], // a label on the panel
-  ['--color-foreground-muted', '--color-card'], // a dimmed label, as Illustrator sets them
-  ['--color-muted-foreground', '--color-background'], // a placeholder
+  ['--color-text', '--color-surface'], // a value typed in a field
+  ['--color-text', '--color-surface-raised'], // a label on the panel
+  ['--color-text-secondary', '--color-surface-raised'], // a dimmed label, as Illustrator sets them
+  ['--color-text-placeholder', '--color-surface'], // a placeholder
+  ['--color-table-header-text', '--color-surface-raised'], // a table's column header
   // Not the primary button's caption: the ink on the hairline colour, chosen on sight by the dev on
   // 2026-10-09 — contrast is not a constraint he holds this tool to.
-  ['--color-secondary-foreground', '--color-secondary'],
-  ['--color-accent-foreground', '--color-accent'], // a button under the pointer
+  ['--color-text', '--color-fill'], // the secondary button
+  ['--color-text', '--color-hover'], // a button under the pointer
+  ['--color-text', '--color-pressed'], // the active item of a list
+  ['--color-text', '--color-selected'], // a selected row
 ]
 
 /** Boundaries the form relies on to be seen at all — WCAG 1.4.11, 3:1. */
 const BOUNDARY_PAIRS: readonly (readonly [string, string])[] = [
-  ['--color-input-border', '--color-background'], // a field's outline
-  ['--color-input', '--color-card'], // an outline button's border, on the panel
-  ['--color-ring', '--color-background'], // the focus ring around a field
-  ['--color-ring', '--color-card'], // the focus ring around a button
-  ['--color-destructive', '--color-background'], // an invalid field's outline
+  ['--color-border-strong', '--color-surface'], // a field's outline
+  ['--color-border-strong', '--color-surface-raised'], // an outline button's border, on the panel
+  ['--color-focus', '--color-surface'], // the focus ring around a field
+  ['--color-focus', '--color-surface-raised'], // the focus ring around a button
+  ['--color-destructive', '--color-surface'], // an invalid field's outline
 ]
+
+/** Every custom property the design system's tokens sheet defines. */
+const defined = new Set([...tokensSheet.matchAll(/(--[a-z0-9-]+):/g)].map(([, name]) => name ?? ''))
+
+/** The design system's roles the theme sets — every `--color-*` it declares; the rest is our palette. */
+const overridden = [...declared.keys()].filter((name) => name.startsWith('--color-'))
+
+/**
+ * The design system's roles the theme leaves at their default, each for a reason — none needs a colour
+ * the palette lacks. Proposed 2026-10-21 with the 0.7.0 move (CARTO-117), for the dev to confirm.
+ */
+const UNSET_ON_PURPOSE: ReadonlyMap<string, string> = new Map([
+  ...[
+    '--color-surface-inverse',
+    '--color-surface-inverse-hover',
+    '--color-surface-inverse-pressed',
+    '--color-surface-inverse-selected',
+    '--color-text-on-inverse',
+    '--color-text-on-inverse-strong',
+    '--color-text-on-inverse-secondary',
+    '--color-fill-on-inverse',
+    '--color-fill-on-inverse-hover',
+    '--color-border-on-inverse',
+  ].map((name) => [name, 'read by the `variant="dark"` panels, dark by default'] as const),
+  ['--color-overlay', 'the scrim behind a dialog, dark in either scheme'],
+  ['--color-text-on-destructive', 'white on the warning fill, meant white'],
+  ['--color-white', 'white by name'],
+  ['--color-success', 'no component here paints success'],
+  ['--color-success-hover', 'no component here paints success'],
+  ['--color-text-on-success', 'no component here paints success'],
+  [
+    '--color-warning',
+    'no component here paints a warning — refusals use --warn, through destructive',
+  ],
+  ['--color-rating-filled', 'no rating here'],
+  ['--color-rating-empty', 'no rating here'],
+  ['--color-skeleton-shimmer', 'no skeleton here'],
+])
+
+/** Every custom property a sheet reads through `var()`. */
+function reads(sheet: string): Set<string> {
+  return new Set([...sheet.matchAll(/var\((--[a-z0-9-]+)/g)].map(([, name]) => name ?? ''))
+}
+
+/** Every custom property a sheet declares. */
+function declares(sheet: string): Set<string> {
+  return new Set([...sheet.matchAll(/(--[a-z0-9-]+):/g)].map(([, name]) => name ?? ''))
+}
+
+/** Custom properties a component sets in its `style`, not a sheet. */
+const SET_BY_COMPONENTS = new Set(['--polity-depth']) // PolityOption: a row's depth in the tree
 
 describe('theme.css', () => {
   describe('happy path', () => {
@@ -96,6 +152,34 @@ describe('theme.css', () => {
       expect(source).not.toContain("import '@fubaritico/")
     })
 
+    // A role the design system renames or drops leaves our override pointing at nothing: no error, and
+    // its light default comes back — what fubaritico-ds 0.7.0 did to 22 of ours.
+    it('overrides only roles the design system defines', () => {
+      expect(overridden.length).toBeGreaterThan(0)
+      expect(overridden.filter((name) => !defined.has(name))).toEqual([])
+    })
+
+    // The other direction, and the one 0.7.0 broke silently: a role the design system defines and the
+    // theme does not set keeps its light value. Each one is set, or left on purpose with its reason.
+    it('sets every role of the design system, or leaves it on purpose', () => {
+      const roles = [...defined].filter((name) => /^--color-(?!primitive-)/.test(name))
+      const unset = roles.filter((name) => !declared.has(name)).sort()
+      expect(unset).toEqual([...UNSET_ON_PURPOSE.keys()].sort())
+    })
+
+    // A misspelt or vanished custom property fails silently in CSS: the declaration is dropped.
+    it('reads only custom properties our sheets declare or a component sets — editor-chrome.css', () => {
+      const known = new Set([
+        ...declared.keys(),
+        ...declares(shell),
+        ...declares(editorChrome),
+        ...SET_BY_COMPONENTS,
+      ])
+      const unknown = [...reads(editorChrome)].filter((name) => !known.has(name))
+      expect(reads(editorChrome).size).toBeGreaterThan(0)
+      expect(unknown).toEqual([])
+    })
+
     it('declares every colour the shell reads, so the palette lives in one place', () => {
       const read = new Set([...shell.matchAll(/var\((--[a-z-]+)\)/g)].map(([, name]) => name ?? ''))
       const layout = new Set(['--rail', '--dock-w'])
@@ -110,7 +194,7 @@ describe('theme.css', () => {
     // palette has no warning ink light enough. When a lighter one is chosen this fails — move the pair
     // into TEXT_PAIRS then. See known-issues.md.
     it('the field error message is still under 4.5:1 — a declared gap', () => {
-      expect(contrast('--color-destructive-hover', '--color-card')).toBeLessThan(4.5)
+      expect(contrast('--color-text-destructive', '--color-surface-raised')).toBeLessThan(4.5)
     })
   })
 
@@ -125,6 +209,10 @@ describe('theme.css', () => {
   describe('edge cases', () => {
     it('was actually read', () => {
       expect(declared.size).toBeGreaterThan(20)
+    })
+
+    it('read the design system tokens sheet', () => {
+      expect(defined.has('--color-surface')).toBe(true)
     })
 
     it('declares no colour in the light scheme or behind a switch — there is one theme', () => {

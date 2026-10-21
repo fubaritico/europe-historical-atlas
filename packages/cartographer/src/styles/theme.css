@@ -8,13 +8,17 @@
  * after `@fubaritico/tokens/css`, and `theme.test.ts` fails if that order is ever swapped.
  *
  * **Every colour here is ours**, from `files/plans/cartographer/design/chrome.css`, and each is declared
- * once: the palette first, then the design system's semantic tokens pointing at it. Nothing is invented,
+ * once: the palette first, then the design system's colour roles pointing at it. Nothing is invented,
  * and `theme.test.ts` checks the contrast of every pair the polity form will show.
  *
- * **The primitive greys (`--color-primitive-neutral-*`) are left alone, deliberately.** The skin reads
- * them in two places only: the `Listbox`, which has its own `variant="dark"` to use instead, and the
- * scrim behind a `Modal`, which is dark in either scheme. Inverting the grey scale would turn that scrim
- * light and mean "neutral-0" no longer means white.
+ * **Since fubaritico-ds 0.7.0 every role is named after what it paints** (`--color-<what>-<role>`), and
+ * a role left unset keeps the design system's light value — silently, so each one the chrome paints is
+ * set here. The roles left unset on purpose are listed, each with its reason, in `theme.test.ts`
+ * (`UNSET_ON_PURPOSE`): a role the design system adds fails that test until someone decides.
+ *
+ * **The primitive greys (`--color-primitive-neutral-*`) are left alone, deliberately.** Since 0.7.0 the
+ * skin reads them in the colour picker only. Inverting the grey scale would mean "neutral-0" no longer
+ * means white.
  */
 :root {
   /* — the palette — */
@@ -33,17 +37,25 @@
   --mark-ground: #efe6d2;
   --mark-ink: #5c3a2e;
 
-  /* — the design system's tokens, on the palette — */
-  --color-background: var(--bg);
-  --color-background-muted: var(--raised);
-  --color-foreground: var(--ink);
-  --color-foreground-muted: var(--ink-dim);
-  --color-muted: var(--raised);
-  --color-muted-foreground: var(--ink-dim);
+  /* — the design system's roles, on the palette — */
+  --color-surface: var(--bg); /* fields, checkboxes, outline buttons */
+  --color-surface-sunken: var(--raised); /* the tab track */
+  --color-surface-raised: var(--panel); /* card, menu, popover, tooltip */
+  --color-text: var(--ink);
+  --color-text-secondary: var(--ink-dim);
+  --color-text-placeholder: var(--ink-dim);
+  --color-text-disabled: var(--ink-off);
+  --color-table-header-text: var(--ink-dim);
+  --color-fill: var(--raised); /* the secondary button */
+  --color-fill-hover: var(--hover);
+  --color-hover: var(--hover); /* a ghost button or a list item under the pointer */
+  --color-pressed: var(--hover); /* the active item of a list */
+  --color-selected: var(--raised);
+  --color-track: var(--line); /* a slider's unfilled run */
   --color-border: var(--line);
-  --color-input: var(--ink-off); /* the outline button's border, read like a field's */
-  --color-input-border: var(--ink-off);
-  --color-ring: var(--accent);
+  --color-border-strong: var(--ink-off); /* a field's outline, and the outline button's border */
+  --color-border-strong-hover: var(--ink-dim);
+  --color-focus: var(--accent);
 
   /*
    * The primary button is filled with the secondary's hairline colour, edge and all, with the ink as its
@@ -52,16 +64,7 @@
    */
   --color-primary: var(--ink-off);
   --color-primary-hover: var(--ink-dim);
-  --color-primary-foreground: var(--ink);
-
-  --color-secondary: var(--raised);
-  --color-secondary-hover: var(--hover);
-  --color-secondary-foreground: var(--ink);
-  /* The design system's "accent" is a hover fill, not our selection blue. */
-  --color-accent: var(--hover);
-  --color-accent-foreground: var(--ink);
-  --color-card: var(--panel);
-  --color-card-foreground: var(--ink);
+  --color-text-on-primary: var(--ink);
 
   /*
    * The design's first rule: nothing is rounded. Every corner radius the skin reads goes to zero here,
@@ -77,6 +80,7 @@
   --radius-3xl: 0;
 
   --color-destructive: var(--warn);
-  /* The error message under a field. 3.89:1 on --panel, under the 4.5:1 text needs — see known-issues. */
   --color-destructive-hover: var(--warn);
+  /* The error message under a field. 3.89:1 on --panel, under the 4.5:1 text needs — see known-issues. */
+  --color-text-destructive: var(--warn);
 }

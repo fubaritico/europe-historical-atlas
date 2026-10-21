@@ -77,7 +77,7 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   09/10. Un fichier qui en contient une est peint en dernier, et `documentFaults` le dit une fois. **Sévérité : cosmétique.**
 - **Le texte d'erreur sous un champ n'atteint pas 4,5:1 — la palette n'a pas d'encre d'alerte assez claire.**
   Relevé au pas 3 du design system (09/10). Le DS colore le message d'erreur d'un champ avec
-  `--color-destructive-hover`, et notre seule teinte d'alerte est `--warn #c86a52` : **3,89:1** sur
+  `--color-text-destructive` (`--color-destructive-hover` avant la 0.7.0), et notre seule teinte d'alerte est `--warn #c86a52` : **3,89:1** sur
   `--panel`, **4,36:1** sur `--bg`. C'est du texte, donc WCAG 1.4.3 demande 4,5:1. La bordure rouge d'un
   champ invalide, elle, passe (3:1 suffit pour une bordure).
   **Le remède est une couleur, donc une décision du dev** : une encre d'alerte plus claire, réservée au

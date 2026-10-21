@@ -15,8 +15,9 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
     setupFiles: ['./vitest.setup.ts'],
     // Vitest empties every stylesheet by default, `?raw` included — so a test reading a sheet as text
-    // reads `''`, and a guard over it passes on nothing. Opened for our own sheets only.
-    css: { include: [/src\/.*\.css/] },
+    // reads `''`, and a guard over it passes on nothing. Opened for our own sheets, and for the design
+    // system's tokens, which `theme.test.ts` reads to check our overrides still name roles it defines.
+    css: { include: [/src\/.*\.css/, /@fubaritico\/tokens\/dist\/css\/variables\.css/] },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],

@@ -17,10 +17,10 @@
   },
   "dependencies": {
     "@europe-historical-atlas/core": "workspace:^",
-    "@fubaritico/behaviors": "^0.6.0",
-    "@fubaritico/react": "^0.6.0",
-    "@fubaritico/styles": "^0.6.0",
-    "@fubaritico/tokens": "^0.6.0",
+    "@fubaritico/behaviors": "^0.7.0",
+    "@fubaritico/react": "^0.7.0",
+    "@fubaritico/styles": "^0.7.0",
+    "@fubaritico/tokens": "^0.7.0",
     "react": "catalog:",
     "react-dom": "catalog:",
     "zustand": "catalog:"

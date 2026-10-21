@@ -43,7 +43,9 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
   **En CI, réglé le 21/10** (`d950e48`) : le job Sonar fait sa couverture paquet par paquet
   (`turbo coverage --concurrency=1`) — deux tests y dépassaient leur délai. Reste la gate locale.
 - **Le design system vient de GitHub Packages, et GitHub exige un token même pour l'installer.**
-  `@fubaritico/{tokens,styles,react,behaviors}` en `^0.6.0` (depuis le 09/10 en `0.2.0`). Le `.npmrc` du dépôt ne fait que **router**
+  `@fubaritico/{tokens,styles,react,behaviors}` en `^0.7.0` (depuis le 09/10 en `0.2.0` ; la 0.7.0 du 21/10 renomme
+  les jetons de couleur, CARTO-117). **Après une montée, relancer le serveur de dev** : un Vite déjà lancé garde les
+  chemins `.pnpm/…@0.6.0` résolus à son démarrage et sert l'ancienne peau sous le nouveau thème — vu le 21/10. Le `.npmrc` du dépôt ne fait que **router**
   le scope, sans aucun token : une ligne `${NODE_AUTH_TOKEN}` y faisait **ignorer tout le fichier** en
   local (variable absente), donc la requête partait sur npmjs et revenait en 404 — mesuré. Le token vit
   dans `~/.npmrc` en local, et `setup-node` (`registry-url` + `scope`) l'écrit en CI. Le vendoring en tarballs n'a vécu qu'une heure, jamais commité : le DS a publié le
@@ -60,7 +62,7 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
   3. **Depuis le 19/10 le dépôt est public, et un visiteur qui le clone ne peut pas l'installer** sans un
      token GitHub à lui. La sortie est de publier le DS sur npmjs. **À décider à ce moment-là.**
   **Monter de version** : le DS sort ses cinq paquets à la même version, et un composant neuf est une
-  mineure. En `0.x` le caret ne franchit pas une mineure, donc `^0.6.0` ne prendra jamais `0.7.0` seul —
+  mineure. En `0.x` le caret ne franchit pas une mineure, donc `^0.7.0` ne prendra jamais `0.8.0` seul —
   il faut bumper les quatre lignes ensemble.
   **Sévérité : à savoir.**
 - **Depuis le 12/10, `lint` attend `^lint` : si le plugin `eslint-plugin-eha` échoue à son propre lint,
