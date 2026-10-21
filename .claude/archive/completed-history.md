@@ -2,6 +2,33 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-10-18 — le code d'équerre, les vassaux par le zoom, les tribus au bord évanoui, un relief plus fin
+
+Une plage au journal, **18/10 14:22 → 23:59 (9 h 37, 1 619 actions)** ; le chantier ouvert le 05/10 totalise **89 h 43 sur
+15 plages**. **39 commits** `b9d3cc6`..`6d3903f`, **tous poussés** à la demande du dev, plus celui de cet état.
+**4 207 tests** (1 126 `core` · 1 931 Cartographe · 983 atlas · 167 plugin). Le détail de chaque livraison est sur son ticket.
+
+- **Le tableau** : l'audit d'Idées/Backlog (aucun fait, 9 en partie, passés en cours par le dev) ; la comparaison avec
+  Euratlas, ~33–37 % retracé (CARTO-237).
+- **Le Cartographe** : CARTO-121, CARTO-122 (la demande au design system rédigée), CARTO-195 (**la zone éditoriale
+  supprimée** — je l'avais inventée : *« n'en invente pas. Par pitié »*), CARTO-238 (la garde contre l'écrasement, les
+  snapshots), CARTO-257 (l'aimant au bord de la carte), CARTO-233 commité à 20 km, le fond gris de la page.
+- **Le code remis d'équerre, à la demande du dev** : un dossier par composant (`hooks/`, `internal/`, barrel) et quatre
+  règles de lint ; **zéro import circulaire**, types compris — son principe, *l'enfant déclare son type, celui du parent en
+  hérite* — tenu par `eha/no-import-cycle` ; le JSDoc imposé par `eslint-plugin-jsdoc` (286 manques documentés) ; Node
+  22.14 → 22.23 ; `viewport/`, `canvas/{tools,paint,history}`, `persistence/draft/`, `loaders/` ; plus aucun fichier non suivi
+  hors le sien. *« pas de dette, rien »*.
+- **L'atlas** : ATLAS-253 (de loin un vassal porte la couleur de son suzerain ; hommage limité à 8 niveaux) — *« ça réagit
+  bien »* ; ATLAS-258 (les tribus au bord évanoui, pareil dans les deux applis ; à travers une tribu un État montre sa
+  frontière) — *« les frontières sont respectées »* ; ses réglages (fleuves toujours visibles, frontières plus visibles) ;
+  le relief au niveau 6 sur 1 920, en ligne pour mesurer le chargement (2 560 : *« c'est trop »*).
+- **Idée notée** : ATLAS-259 (deux tribus voisines mêlant leurs couleurs).
+- **Mes fautes** : deux remplacements Perl ratés — le nom nu `vectorLayers` réécrit dans le code, puis quatre lignes collées
+  en tête d'`atlasBorders.ts` — rattrapés avant commit ; une consigne trop large qui a donné à une tribu une frontière
+  d'État ; un test cassé masqué par le cache de Turbo ; sa page rechargée sans fin par mes agents (*« c'est lourd »*,
+  règle du worktree notée) ; *« le fond de la page »* lu d'abord comme le canevas ; trop de délégation à son goût
+  (*« dis-moi pas que t'as encore délégué »*) ; « 13 cycles » annoncés pour 12 paires.
+
 ### 2026-10-17 — Trello, la sauvegarde automatique, la Norvège rapide, le suzerain tapé, Wikidata, le double-clic
 
 Une plage au journal, **17/10 14:43 → 22:03 (7 h 19, 486 actions)** ; le chantier ouvert le 05/10 totalise **76 h 38 sur

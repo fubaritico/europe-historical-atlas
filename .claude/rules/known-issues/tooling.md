@@ -40,6 +40,8 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
   (1 sur 17 passages, puis 5 tests d'un coup) — seul, il passe toujours. **Remède** : plafonner les travailleurs de Vitest
   par paquet (`maxWorkers`) ou la concurrence de Turbo, puis remesurer la durée de la gate. **Sévérité : gênant** (une
   gate rouge sur du code juste, dès que tout tourne en même temps).
+  **En CI, réglé le 21/10** (`d950e48`) : le job Sonar fait sa couverture paquet par paquet
+  (`turbo coverage --concurrency=1`) — deux tests y dépassaient leur délai. Reste la gate locale.
 - **Le design system vient de GitHub Packages, et GitHub exige un token même pour l'installer.**
   `@fubaritico/{tokens,styles,react,behaviors}` en `^0.6.0` (depuis le 09/10 en `0.2.0`). Le `.npmrc` du dépôt ne fait que **router**
   le scope, sans aucun token : une ligne `${NODE_AUTH_TOKEN}` y faisait **ignorer tout le fichier** en
@@ -107,7 +109,8 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
 - **`commitlint` avertit `footer-leading-blank` sur tout message long.** Il prend un paragraphe contenant un
   deux-points pour un footer. C'est un **warning**, il ne bloque pas, et il est revenu sur trois commits du
   27/09. **Cosmétique** ; le remède serait de désactiver la règle ou d'éviter les deux-points en fin de
-  message, ce qui n'en vaut pas le prix.
+  message, ce qui n'en vaut pas le prix. **Bloquant, lui : `body-max-line-length`** — une ligne du corps de plus de 100
+  caractères refuse le commit ; deux refus le 21/10. Écrire le corps en lignes de 90 au plus.
 - **Un motif `.gitignore` qui contient une barre oblique est ancré à la racine du dépôt.** C'est la cause
   du seul vrai incident du 24/09 : `public/borders/` a **cessé de matcher** le jour où le passage en
   monorepo a mis `public/` sous `packages/atlas/`, et les 21 fichiers GPL-3.0 sont partis sur GitHub au

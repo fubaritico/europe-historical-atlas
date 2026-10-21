@@ -2,6 +2,30 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-10-21 — les règles chargées au bon moment, l'audit des instructions, Node 24, la CI verte
+
+Une plage au journal, **21/10 17:24 → 19:48 (2 h 23, 212 actions)** ; le chantier ouvert le 05/10 totalise **95 h 43 sur
+17 plages**. **4 commits** `b3313d1`..`d950e48`, **tous poussés** à la demande du dev, plus celui de cet état. Aucun code
+de production touché — un délai de test dans `core`, la CI, la configuration de Claude.
+
+- **REPO-264** — parti d'une conversation du dev avec Gemini sur les `CLAUDE.md` par dossier. Mesuré : 126 Ko chargés à chaque
+  session, dont six règles que `CLAUDE.md` disait « NOT auto-loaded ». Retenu : des règles et des tranches de known-issues
+  à `paths:` (52 Ko au lancement), un hook qui nomme les règles d'après ses mots — *« je veux que ça soit automatique »* —,
+  `/rules` en filet, `claude-config.md` pour lire la doc de Claude Code avant de la configurer. Le dev : *« je ne comprends
+  pas que tu n'aies pas le réflexe »* de signaler les bonnes pratiques ; d'où la règle. `/review` apprend désormais **en
+  concertation** (étape 9), critères compris.
+- **`/doctor prompt-audit`** : ~60 constats, la section A appliquée, la B point par point par le dev (quatre skills Basic
+  Memory retirées, `find-skills` qui demande avant d'installer, `/commit` sur sa pratique ; l'accessibilité, l'insistance et
+  les résumés de revue gardés — *« on va pas commencer à tout effacer »*). Le plus lourd : `/review` ne voyait aucun `.tsx`,
+  et `draw-from-plate` disait `years/` jamais commité.
+- **REPO-265** — Node 24, à sa demande ; vérifié sous la 24 sans cache, testé par lui. Le calendrier : 26 devient LTS le 28/10.
+- **La CI était rouge depuis le 19/10** : un test lent sous couverture faisait échouer Sonar, et une condition `if:` du
+  déploiement le sautait alors — contre la règle « Sonar ne bloque jamais ». Corrigé (`980766d`, `d950e48`), tout vert ;
+  REPO-260 garde la gate locale.
+- **Mes fautes** : un `cd` ; deux messages refusés par commitlint (lignes > 100) ; le hook déclenché par les rapports de
+  mes agents, qui marquait cinq sujets comme demandés (corrigé, testé) ; un suivi de CI par SHA abrégé ; une question à
+  deux volets que le dev n'a pas comprise — un exemple concret, un point à la fois.
+
 ### 2026-10-19 — la gestion de l'incertitude, le README, la licence
 
 Une plage au journal, **19/10 16:10 → 19:34 (3 h 24, 121 actions)** ; le chantier ouvert le 05/10 totalise **93 h 14 sur
@@ -26,31 +50,4 @@ de production touché ; la gate a tourné à chaque commit (hooks), verte.
   d'abord sans l'exécuter ; *« comme un livre »* lu de travers (*« reviens sur ce que je t'ai écrit avant »*) ; une
   question sur l'IA perdue en fin de message.
 
-### 2026-10-18 — le code d'équerre, les vassaux par le zoom, les tribus au bord évanoui, un relief plus fin
-
-Une plage au journal, **18/10 14:22 → 23:59 (9 h 37, 1 619 actions)** ; le chantier ouvert le 05/10 totalise **89 h 43 sur
-15 plages**. **39 commits** `b9d3cc6`..`6d3903f`, **tous poussés** à la demande du dev, plus celui de cet état.
-**4 207 tests** (1 126 `core` · 1 931 Cartographe · 983 atlas · 167 plugin). Le détail de chaque livraison est sur son ticket.
-
-- **Le tableau** : l'audit d'Idées/Backlog (aucun fait, 9 en partie, passés en cours par le dev) ; la comparaison avec
-  Euratlas, ~33–37 % retracé (CARTO-237).
-- **Le Cartographe** : CARTO-121, CARTO-122 (la demande au design system rédigée), CARTO-195 (**la zone éditoriale
-  supprimée** — je l'avais inventée : *« n'en invente pas. Par pitié »*), CARTO-238 (la garde contre l'écrasement, les
-  snapshots), CARTO-257 (l'aimant au bord de la carte), CARTO-233 commité à 20 km, le fond gris de la page.
-- **Le code remis d'équerre, à la demande du dev** : un dossier par composant (`hooks/`, `internal/`, barrel) et quatre
-  règles de lint ; **zéro import circulaire**, types compris — son principe, *l'enfant déclare son type, celui du parent en
-  hérite* — tenu par `eha/no-import-cycle` ; le JSDoc imposé par `eslint-plugin-jsdoc` (286 manques documentés) ; Node
-  22.14 → 22.23 ; `viewport/`, `canvas/{tools,paint,history}`, `persistence/draft/`, `loaders/` ; plus aucun fichier non suivi
-  hors le sien. *« pas de dette, rien »*.
-- **L'atlas** : ATLAS-253 (de loin un vassal porte la couleur de son suzerain ; hommage limité à 8 niveaux) — *« ça réagit
-  bien »* ; ATLAS-258 (les tribus au bord évanoui, pareil dans les deux applis ; à travers une tribu un État montre sa
-  frontière) — *« les frontières sont respectées »* ; ses réglages (fleuves toujours visibles, frontières plus visibles) ;
-  le relief au niveau 6 sur 1 920, en ligne pour mesurer le chargement (2 560 : *« c'est trop »*).
-- **Idée notée** : ATLAS-259 (deux tribus voisines mêlant leurs couleurs).
-- **Mes fautes** : deux remplacements Perl ratés — le nom nu `vectorLayers` réécrit dans le code, puis quatre lignes collées
-  en tête d'`atlasBorders.ts` — rattrapés avant commit ; une consigne trop large qui a donné à une tribu une frontière
-  d'État ; un test cassé masqué par le cache de Turbo ; sa page rechargée sans fin par mes agents (*« c'est lourd »*,
-  règle du worktree notée) ; *« le fond de la page »* lu d'abord comme le canevas ; trop de délégation à son goût
-  (*« dis-moi pas que t'as encore délégué »*) ; « 13 cycles » annoncés pour 12 paires.
-
-> Older sessions (2026-09-12 → 2026-10-17) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-18) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

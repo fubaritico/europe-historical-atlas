@@ -5,28 +5,29 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — mercredi 21/10, après le 19/10
+## ▶ ON REPREND ICI — juste après le 21/10, sans doute la préparation de la contribution
 
-**Le 19/10 a changé le fond du projet.** Le dev a posé **la gestion de l'incertitude** comme fondement de tout — une
-*initiative* au-dessus des épiques, **DESIGN-262**, dans la nouvelle colonne **Chantiers** du tableau. Le bloc
-*Foundations* de CLAUDE.md en donne l'essentiel ; le plan entier est `files/plans/evidence-system.md` (concepts §1,
-principes §2, ses décisions §8, paliers §10, lectures §7). **Entre-temps il lit** deux ou trois références du §7 et
-**l'introduction du PDF d'Euratlas** : lui demander ce qu'il en tire, et réviser le plan avec lui — il veut avoir du
-répondant. Proposer, ne pas commencer sans son mot ([[do-not-start-unasked-work]]).
+**Le dev relance Claude Code pour vérifier ce qui a été mis en place le 21/10** (REPO-264) — au démarrage, regarder avec
+lui que : (1) `/context` montre ~50 Ko de fichiers mémoire au lancement, plus 126 ; (2) un message qui nomme un sujet
+(« le Cartographe », « la contribution ») fait arriver la ligne *Rules for the subject of this message* du hook, une fois par
+session ; (3) ouvrir un fichier d'un paquet charge ses règles (`Loaded …`). Le hook ignore les rapports d'agents. Un défaut
+→ le corriger d'abord, c'est l'outil de toutes les sessions suivantes.
 
-**Le premier palier est CORE-217** (le type de date, approche validée le 19/10 : un dossier feuille `core/src/time/`,
-un instant et un intervalle, l'an zéro refusé à la lecture, Julien ↔ Grégorien par le jour julien). Il est en tête
-d'« À faire » sous DESIGN-262 ; rien n'est écrit.
+**Puis, son mot du 21/10 au soir : « sans doute la préparation de la contribution »** — CORE-252 (le format d'un
+événement, 2-3 événements de 1100 à la main) est deuxième d'« À faire », sous DESIGN-262 ; les plans : `plan.md` (P7,
+Payload), `evidence-system.md` (le registre des sources est dans la contribution). **Proposer, ne pas commencer sans son
+mot** ([[do-not-start-unasked-work]]) — et lui demander d'abord ce qu'il a tiré de ses lectures du §7 et de l'introduction
+du PDF d'Euratlas, qu'il n'a pas encore rapportées.
 
-**Décidé par le dev le soir du 19/10** :
-- **Le dépôt est public** (il l'a basculé). La licence reste au nom de « Stéphane Cottereau » pour l'instant ; il aurait
-  préféré une personne morale (Fubaritico) — possible seulement le jour où elle existe juridiquement (REPO-263, Idées).
-- **Le relief au niveau 6 lui va** — *« ça fonctionne »*. **À faire mercredi, à lui proposer d'abord** : passer le
-  Cartographe au même relief (une ligne, `packages/cartographer/src/main.tsx` → `/heightmaps/europe-dem-z6-1920`),
-  pour que les deux fonds redeviennent identiques ; puis son test dans l'appli.
-- **Les tribus lui vont telles quelles** : le défaut reste — dégradé inset, 30 km (`TRIBE_FEATHER`).
+**Toujours en attente, à lui proposer** : CORE-217 (le type de date, en tête d'« À faire », approche validée le 19/10 : un
+dossier feuille `core/src/time/`, un instant et un intervalle, l'an zéro refusé à la lecture, Julien ↔ Grégorien par le
+jour julien) ; **le relief niveau 6 du Cartographe** (une ligne, `packages/cartographer/src/main.tsx` →
+`/heightmaps/europe-dem-z6-1920`, puis son test — `rules/known-issues/cartographer.md`).
 
-**À traiter à part** : la gate rouge sous charge (REPO-260, Idées).
+**Décidé le 21/10** : Node 24 (26 à reconsidérer après quelques mois de LTS) ; `/review` apprend en concertation (étape 9) ;
+les critères d'accessibilité de la revue restent tels quels — les constats sur ses décisions du Cartographe se marquent
+« ouvert par décision » ; les marques d'insistance de `CLAUDE.md` restent (ses repères de lecture) ; les résumés
+`skills/review/references/*.md` restent pour l'instant.
 
 **Le tableau d'abord** : `/trello` → `list` — **lire toute la sortie**. Tout est commité et poussé (`git ls-remote origin
 main`). Un élément du tableau est un **ticket**, jamais une « carte » ([[say-ticket-not-carte]]).
@@ -34,7 +35,7 @@ main`). Un élément du tableau est un **ticket**, jamais une « carte » ([[say
 | où | ticket | état |
 | --- | --- | --- |
 | **Chantiers** | DESIGN-262 La gestion de l'incertitude | l'initiative ; ses paliers en liste à cocher, ses tickets étiquetés « chantier · incertitude » |
-| **À faire**, en tête | CORE-217 Le type de date | palier 1 de DESIGN-262 |
+| **À faire**, en tête | CORE-217, puis CORE-252 | paliers de DESIGN-262 |
 | **À valider par le développeur** | CARTO-237, CARTO-116, CARTO-122 | inchangés depuis le 18/10 |
 | **En cours** | ATLAS-145, ATLAS-152 | inchangés ; **à lui proposer** : ATLAS-152 (la provenance affichée) sous DESIGN-262, par son sujet — ma déduction |
 
@@ -42,7 +43,7 @@ main`). Un élément du tableau est un **ticket**, jamais une « carte » ([[say
 dans un **worktree** ([[agents-in-a-worktree-while-he-uses-the-app]]) — sinon Vite la recharge à chaque fichier. Le dev
 préfère que je fasse moi-même une correction courte plutôt que de la déléguer. Basic Memory sert de graphe **entre
 projets** (`main/patterns/`). Une commande interrompue ou refusée a pu agir : relire l'état avant de relancer. Jamais de
-remplacement Perl sur un fichier de code sans relire le résultat — deux accidents le 18/10 ; l'outil d'édition vérifie.
+remplacement Perl sur un fichier de code sans relire le résultat. Un message de commit : lignes du corps ≤ 100 caractères.
 
 ## Where we are
 
@@ -57,7 +58,7 @@ three.js et le Cartographe émet le même, au même hash — vérifié par la CI
 | ----- | --------------------------------------------------------------------------- |
 | dépôt | `fubaritico/europe-historical-atlas`, **public** depuis le 19/10, branche `main`             |
 | site  | **https://europe-historical-atlas.netlify.app** — 1100 y est publié (16/10) |
-| CI    | sept jobs — validate ×3, build, sonarqube, quality-gate, deploy             |
+| CI    | sept jobs — validate ×3, build, sonarqube, quality-gate, deploy — **verte depuis le 21/10, sous Node 24** |
 | Sonar | `europe-historical-atlas` sous l'organisation `fubaritico`                  |
 
 **Quatre paquets**, orchestrés par **Turbo**, avec un **catalogue de versions** dans `pnpm-workspace.yaml` :
