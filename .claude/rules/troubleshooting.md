@@ -1,9 +1,16 @@
+---
+paths:
+  - "packages/atlas/**"
+  - "packages/core/src/pipeline/**"
+  - "**/eslint.config.js"
+  - "turbo.json"
+---
 # Troubleshooting & Architectural Decisions — europe-map
 
 > Issues hit and decisions made while building the 3D project. See `architecture.md` for the structure.
-> Fresh repo: fill this in as you go (invent nothing — add only after seeing the problem).
+> Add only after seeing the problem — invent nothing.
 
-## Anticipated gotchas (to confirm in practice)
+## Gotchas
 
 ### Raycasting is blind to GPU displacement
 
@@ -19,8 +26,7 @@ the vertex shader (GPU); the CPU geometry stays flat → the `Raycaster` hits th
 
 - Vite HMR (no reload): `import.meta.hot.data` / `import.meta.hot.dispose` to hand off the state.
 - Full refresh (F5): `sessionStorage` (throttled write + `beforeunload`).
-- Restore **synchronously before the first `render()`**.
-  Ref: document the real behavior once implemented (Phase 0.2).
+- Restore **synchronously before the first `render()`** — `packages/atlas/src/camera/cameraState.ts`.
 
 ### GPU leaks
 

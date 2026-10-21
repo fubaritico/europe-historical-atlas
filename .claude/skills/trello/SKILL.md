@@ -24,7 +24,7 @@ drifts, and nothing fails when it does ([[distribute-notes-dont-pile-them]]).
 | --- | --- | --- |
 | **the board** | the list of tasks and the state of each — what, its stage, blocked or not, who has the ball | — |
 | `files/plans/*.md` | a chantier's design: why, how, the trade-offs. Its card links the file in **Détails**; the plan's steps become a **checklist on the card** (`checklist`, `check`) | progress — ticked on the card, not in the file |
-| `.claude/known-issues.md` (+ `known-issues-atlas.md`) | a problem's mechanism: measure, cause, why the remedy. An entry **that asks for an action** gets a card naming it; an entry *« à savoir »* stays in the file with no card | the to-do — on the card |
+| `.claude/rules/known-issues/<package>.md` (index: `.claude/known-issues.md`) | a problem's mechanism: measure, cause, why the remedy. An entry **that asks for an action** gets a card naming it; an entry *« à savoir »* stays in the file with no card | the to-do — on the card |
 | `.claude/next.md` | the resume point: where we stopped, what is mid-flight and in what state, context that is not a task. Points to the cards in À valider par le développeur / En cours | **any list of tasks** |
 | `.claude/completed.md` | a short account of each session: time spans, the dev's own words, my faults — citing tickets (`CARTO-41`) | the detail of what shipped — in the Fait cards (description: what, commits, date) |
 | Basic Memory, `main` project, `patterns/` | what holds **across** projects — a tooling trap, a code pattern, a method (the dev's call, 2026-10-17); linked from `Cross-project engineering patterns — index` | anything specific to this project |
@@ -42,7 +42,7 @@ drifts, and nothing fails when it does ([[distribute-notes-dont-pile-them]]).
 
 1. `list`. Every card in **En cours** or **À valider par le développeur**: is `next.md` saying where it stands? Every card I
    touched this session: does it carry a comment saying where it stands?
-2. Every file of `files/plans/`, `known-issues.md` and `next.md` changed this session
+2. Every file of `files/plans/`, `.claude/known-issues.md`, `.claude/rules/known-issues/*.md` and `next.md` changed this session
    (`git diff --stat` + `git status`): does what it asks for have a card? Does every ticket it
    cites (` — CARTO-41`) name a card that exists, in a coherent column?
 3. Anything found out of step is fixed **then**, both sides — or said to the dev in one line if fixing it

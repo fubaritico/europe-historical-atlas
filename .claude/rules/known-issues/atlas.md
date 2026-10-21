@@ -1,8 +1,13 @@
+---
+paths:
+  - "packages/atlas/**"
+  - "packages/core/src/pipeline/**"
+---
 # Known issues — the atlas (3D)
 
-Open issues specific to `packages/atlas`, moved out of `known-issues.md` to keep the auto-loaded context under its limit. **Load before touching the atlas render, its pipeline wiring or its dev panel.**
+Open issues specific to `packages/atlas`: its render, its pipeline wiring, its dev panel. Loaded by path; indexed in `.claude/known-issues.md`.
 
-- **The relief mesh is built at 1280 segments, one vertex per DEM column** (2026-10-16): 1.49 M vertices,
+- **The relief mesh is built at 1280 segments** (2026-10-16; the slider's maximum — over a 1920-column DEM since 2026-10-18, so no longer one vertex per column): 1.49 M vertices,
   built in ~390 ms on the main thread at startup and on each relief slider (512 was ~140 ms), ~48 MB of
   vertex data. 60 fps on the dev's machine at both ends; the coasts are only sharp at the top. **Two
   consequences to plan for**: (1) a weak machine (a phone) may not hold the frame rate — remedy, the one
@@ -221,8 +226,8 @@ target.z)` would be coherent with the navigation that already exists.
 - **Texture regen is a full pixel pass** (~1.5M px): heavy dev-panel tweaks (`terrainTexture`) fire on
   release. Kept snappy by a trig-free integer hash (`utils/hash`); a supersample option was considered
   and declined (memory [[portolan-decor-and-line-rendering]] — baked lines hit the same resolution ceiling).
-- **DEM asset committed** (`public/heightmaps/europe-dem-z5.bin`, 2.98 MB) so the app runs after a clone;
-  its generator (`files/spikes/fetch-dem`) lives in gitignored `files/` — regenerating needs it.
+- **DEM assets committed** (`europe-dem-z6-1920.bin` read by the atlas, `europe-dem-z5.bin` by the Cartographer) so the
+  app runs after a clone; their generator `files/spikes/fetch-dem` is committed too.
 - **Camera reframing after the DEM widening**: the extent changed (bbox now W−45…E78.75), so a persisted
   camera pose can be off-frame → `sessionStorage.clear()` (map camera key `europe-map:map-camera`) for the framed default.
 - **Bundle > 500 KB** (three.js) — Vite warns at build; not optimized yet (code-split later if needed).
@@ -264,3 +269,12 @@ target.z)` would be coherent with the navigation that already exists.
   mask's coast, under the coastline's own stroke. The cut against a neighbour's ground is exact (it reads a
   signed distance, not a flag). Remedy if it shows: a signed distance to the coast, as for the neighbours.
   **Severity: cosmetic.**
+- **Le manifeste des années déclare la bbox du rendu, et personne ne vérifie qu'elle correspond au DEM.** — ATLAS-143
+  `years/index.json` porte la boîte géographique contre laquelle les années dessinées se projettent, et elle
+  **doit** être celle du DEM : si elle diffère, chaque frontière glisse hors du terrain qu'elle borde, sans
+  erreur nulle part. Le choix de la déclarer plutôt que de la lire du relief était volontaire — la prendre du
+  relief chargé rendrait la source dépendante de l'ordre de chargement, ce dont `mapSources` met en garde.
+  **Le remède existe déjà et n'est pas branché** : `boundsMatch` dans `assetError.ts`, appelé là où les deux
+  boîtes sont en main, c'est-à-dire dans le pipeline. C'est le contrôle `semantic` de la taxonomie.
+  **Sévérité : à savoir** — 1100 est publié depuis le 16/10 (`years: [1100]`) et sa bbox n'est comparée au DEM par
+  rien : à brancher.

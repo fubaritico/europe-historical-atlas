@@ -2,6 +2,17 @@
 
 Entries closed and moved out of `known-issues.md`. Kept for the lessons they carry.
 
+- **Les années enregistrées en local ne sont jamais commitées, et `years/index.json` est en `skip-worktree`
+  sur la machine du dev — clos le 16/10** (1100 publié, `skip-worktree` levé ; archivé le 21/10). Sa décision, 12/10 : *« ils sont pour nous pour travailler »* — retrouver ses
+  tracés, déboguer les outils, maîtriser le format. Les dossiers `packages/atlas/public/years/<année>/` sont
+  dans `.gitignore`. Le manifeste, lui, est **suivi** (commité avec `"years": []`, l'atlas en ligne le lit) et
+  une sauvegarde y ajoute l'année : d'où `git update-index --skip-worktree packages/atlas/public/years/index.json`,
+  pour que git ignore cette modification locale. **Trois conséquences** : (1) `git status` ne montre plus ce
+  fichier, même modifié — `git ls-files -v` l'affiche avec un `S` ; (2) **en local, l'atlas lit l'année
+  dessinée** pour 1100 au lieu du payload GPL, puisque le manifeste local la liste — voulu, c'est ce qui
+  permet de vérifier le format ; (3) le jour où une année doit vraiment être publiée, il faut d'abord
+  `git update-index --no-skip-worktree` sur ce fichier, sinon il ne partira pas. Réglage **par clone** :
+  une autre machine ne l'a pas. **Sévérité : à savoir.**
 - **Le contour de l'étendue et les frontières dérivées coûtaient des secondes sur la Norvège — réglé le 17/10** (CARTO-240).
   Ses 16 235 points (fjords, Islande, Groenland) faisaient marcher chaque test « ce point est-il dans ce pays ? » sur
   tous ses sommets : 4,6 s pour l'étendue, 4,8 s pour les frontières, à chaque geste. Remède : `indexRings` /

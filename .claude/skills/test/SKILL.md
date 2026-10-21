@@ -1,10 +1,10 @@
 ---
 name: test
-description: Write tests for a scene module, port, hook, or utility following the 5-level test policy. Use when creating or updating tests for any code unit.
+description: Write tests for any unit in the packages — a core module, an atlas scene module, a Cartographer component or hook, a lint rule — following the 5-level test policy. Use when creating or updating tests.
 allowed-tools: Read Write Glob Grep Bash(pnpm:*)
 argument-hint: "[ModuleName or path]"
 paths:
-  - src/**
+  - packages/*/src/**
 metadata:
   version: "2.0"
 ---
@@ -12,8 +12,8 @@ metadata:
 # Test
 
 Write tests following the mandatory 5-level test policy (see `.claude/rules/tests.md`).
-Stack: **Vitest** (to install in Phase 0.1). three.js runs in tests with a mocked renderer/context;
-DOM-dependent files opt into `jsdom`.
+Stack: **Vitest**, one config per package — `core` and `eslint-plugin-eha` under `node`, `atlas` and `cartographer`
+under `jsdom`. three.js runs in tests with a mocked renderer/context.
 
 ## Arguments
 
@@ -58,17 +58,18 @@ describe("ModuleName", () => {
 
 ## Layer-Specific Guidance
 
-### Scene modules / three.js (`src/scene`, `src/picking`)
+### Scene modules / three.js (`packages/atlas/src/{scene,picking}`)
 
 - Construct with **injected mocks** (renderer, scene, camera). Check each variant.
 - Verify `dispose()` frees geometries/materials/textures on teardown (L5).
 - Picking: mocked `Raycaster` → returns the right intersection (L2), nothing off-target (L3/L5).
 
-### Ports & utils (`src/data`, `src/camera`, `src/controls`)
+### Ports & utils (`packages/core/src/data`, `packages/atlas/src/{camera,controls}`)
 
 - Check return shape, valid combinations, error handling, cleanup.
 - `CameraStateStore`: save→restore round-trip identical (L1); empty/corrupt storage (L3–L4).
-- DOM-dependent files opt into jsdom via `// @vitest-environment jsdom`.
+- `core` runs under `node` and never takes a jsdom pragma — a stray `document` must fail there. `atlas` and
+  `cartographer` are jsdom by config; a React package needs its own `vitest.setup.ts` calling `cleanup()`.
 
 ## Rules
 

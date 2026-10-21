@@ -1,6 +1,6 @@
 ---
 name: memory-ingest
-description: "Process unstructured external input (meeting transcripts, conversation logs, pasted documents) into structured Basic Memory entities. Extracts entities, searches for existing matches, proposes new entities with approval, creates notes with observations and relations, and captures action items."
+description: "Process unstructured external input (meeting transcripts, conversation logs, documents) into structured Basic Memory entities, with approval. Use when explicitly asked to ingest something into Basic Memory — pasted reference material for this project is not that."
 ---
 
 # Memory Ingest
@@ -295,7 +295,7 @@ Follow-Up Reminders:
   - 2 weeks: Schedule follow-up call to discuss POC scope
 ```
 
-If using the **memory-tasks** skill, create Task notes for your action items. Otherwise, capture them as observations in the source note.
+Capture action items as observations in the source note; this project's tasks live on the Trello board (`/trello`).
 
 ## Guidelines
 

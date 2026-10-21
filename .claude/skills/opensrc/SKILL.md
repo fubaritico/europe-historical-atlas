@@ -1,12 +1,12 @@
 ---
 name: opensrc
 description: Fetch dependency source code to give AI agents deeper implementation context. Use when the agent needs to understand how a library works internally, read source code for a package, fetch implementation details for a dependency, or explore how an npm/PyPI/crates.io package is built. Triggers include "fetch source for", "read the source of", "how does X work internally", "get the implementation of", "opensrc path", or any task requiring access to dependency source code beyond types and docs.
-allowed-tools: Bash(opensrc:*)
+allowed-tools: Bash(opensrc:*) Bash(npx opensrc@0.6:*)
 ---
 
 # Source Code Fetching with opensrc
 
-Fetches dependency source code so agents can read implementations, not just types. Clones repositories at the correct version tag and caches them globally at `opensrc/`.
+Fetches dependency source code so agents can read implementations, not just types. Clones repositories at the correct version tag and, with `npx opensrc@0.6` (this project's command), clones them into the project's `opensrc/` folder (git-ignored).
 
 ## Core Pattern
 
@@ -57,7 +57,8 @@ For PyPI and crates.io, explicit versions or latest are used. For repos, use `@r
 
 ## Managing the Cache
 
-Source is cached globally at `~/.opensrc/` (override with `OPENSRC_HOME`).
+In this project, `npx opensrc@0.6` keeps the sources in `opensrc/` at the repository root (git-ignored), e.g.
+`opensrc/repos/github.com/pmndrs/zustand`. Other opensrc versions default to `~/.opensrc/` (override with `OPENSRC_HOME`).
 
 ```bash
 opensrc list                     # show all cached sources

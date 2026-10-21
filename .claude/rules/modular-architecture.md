@@ -1,3 +1,7 @@
+---
+paths:
+  - "packages/*/src/**"
+---
 # Rules — Modular / Pluggable Architecture (SOLID, standalone-testable)
 
 > **Essential, non-negotiable design rule.** Every element we assemble MUST be able to run

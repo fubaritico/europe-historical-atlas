@@ -1,6 +1,6 @@
 ---
 name: memory-lifecycle
-description: "Manage entity status transitions in Basic Memory: archive completed work, move notes between status folders, update frontmatter, and handle edge cases. Use when marking items complete, archiving old entities, or managing any folder-based status workflow."
+description: "Move Basic Memory notes between status folders (archive, reactivate) and update their status frontmatter. Use only for notes in Basic Memory — a ticket marked done is /trello."
 ---
 
 # Memory Lifecycle
@@ -9,7 +9,6 @@ Manage how entities move through status stages in Basic Memory. The core princip
 
 ## When to Use
 
-- User says something is "done", "finished", "completed", "submitted", "missed", or "cancelled"
 - Moving entities between status folders (active → archive, pipeline → active, etc.)
 - Reverting a mistaken completion
 - Periodic cleanup of stale active items
@@ -168,9 +167,7 @@ Some status changes don't require a folder move — "paused" or "blocked" items 
 
 ## Relationship to Other Skills
 
-- **memory-tasks**: Tasks are a specific lifecycle case. This skill covers the general pattern; memory-tasks covers task-specific fields (steps, current_step, context).
 - **memory-notes**: Use search-before-create (from memory-notes) to find the entity before transitioning it.
-- **memory-defrag**: Periodic defrag can identify stale active items that should be archived.
 
 ## Guidelines
 

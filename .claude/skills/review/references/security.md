@@ -1,7 +1,8 @@
 # Security — Review Rules
 
 > Authoritative rules live in the subagent prompt `.claude/agents/review/security.md` (SEC-0xx).
-> This project is front-end only (TypeScript + three.js + Vite, WebGL canvas + HTML overlays).
+> Two static bundles (a three.js atlas, a React Cartographer), plus the Cartographer's dev-server endpoints
+> (`packages/cartographer/src/devServer/`), which read request paths and bodies and write to disk — a trust boundary.
 
 Summary of what `review-security` checks (see the agent for full detail):
 
@@ -13,4 +14,4 @@ Summary of what `review-security` checks (see the agent for full detail):
 - **SEC-005** leaked internal error details; **SEC-006** logging sensitive data;
   **SEC-007** insecure URL scheme; **SEC-008** weak randomness / outdated crypto.
 
-Finding schema: `schema.json`. Verify uncertain API behavior via `opensrc/` or the web (no context7).
+Finding schema: `schema.json`. Verify uncertain API behavior via `opensrc/` (authoritative — context7 can lag a version) or the web.

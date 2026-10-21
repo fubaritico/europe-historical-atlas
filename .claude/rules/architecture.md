@@ -1,3 +1,11 @@
+---
+paths:
+  - "packages/**"
+  - "turbo.json"
+  - "pnpm-workspace.yaml"
+  - "package.json"
+  - "eslint.config.js"
+---
 # Architecture — europe-map
 
 > Interactive 3D historical atlas of Europe. WebGL rendering, camera navigation, per-polygon picking.
@@ -24,11 +32,11 @@
 > **One declared version per dependency**, in `pnpm-workspace.yaml`'s `catalog:`, referenced as `catalog:`
 > from every `package.json`. The bar for an entry is *shared* **and** *dangerous to mismatch*, not merely
 > shared: React is in there because the Payload admin will want it next and two Reacts in one workspace
-> give hook errors that read like application bugs; `three` has one consumer and stays inline.
+> give hook errors that read like application bugs; `three` is catalogued too.
 
 ## Project Structure
 
-> Split into a pnpm workspace on **2026-09-24**. Two packages, and the boundary between them is a
+> Split into a pnpm workspace on **2026-09-24**. Four packages since, and the boundary that matters is a
 > contract, not a folder: **`core` contains no three.js**, enforced by ESLint and proved by breaking it.
 > That is what keeps the worker chunk at 13.5 kB with no renderer in it.
 
@@ -119,7 +127,7 @@ Three applications will live here, not two, and they do not all render the same 
 |                     | what it is                                                                                            | renders with                     | state today              |
 | ------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------- | ------------------------ |
 | **atlas**           | the 3D map — the thing that gets published                                                            | three.js on a WebGL canvas       | built                    |
-| **cartographer**    | the territory editor — anchors, rings, borders                                                        | **2D canvas** + plain DOM chrome | designed, chrome running |
+| **cartographer**    | the territory editor — anchors, rings, borders                                                        | **2D canvas** + React/Zustand chrome | built |
 | **places & events** | the content the map shows: cities with icons and 3D models, events with their consequences and actors | **Payload** (headless Next CMS)  | planned                  |
 | **core**            | the format, the readers, the compositor, the maths                                                    | —                                | built, three-free        |
 
@@ -232,7 +240,7 @@ pnpm preview            # preview the atlas build
 pnpm type-check         # turbo type-check: one tsc per package
 pnpm lint               # turbo lint: one eslint per package, each with its own config
 pnpm test               # turbo test: one vitest per package, environments differ on purpose
-pnpm coverage           # turbo coverage, then merge the three lcov reports into one
+pnpm coverage           # turbo coverage, then merge the four lcov reports into one
 ```
 
 **`dev` is not `turbo dev`** on purpose: that would start both Vite servers at once, which is a surprise

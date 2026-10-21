@@ -18,8 +18,9 @@ coverage
 # Tooling caches
 .nx
 
-# Vendored dependency sources (opensrc skill) — for study only
-opensrc
+# Vendored dependency sources (opensrc skill) — for study only. Anchored: unanchored, it also matched
+# .claude/skills/opensrc/ and lint-staged refused to re-stage the skill (2026-10-21).
+/opensrc/
 
 # Project material. Plans and spikes are the portfolio and DO ship; the rest must not.
 #   resources/  — 170 MB, proprietary Euratlas vectors

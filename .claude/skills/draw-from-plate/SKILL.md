@@ -20,8 +20,9 @@ Read first: `files/plans/cartographer/drawing-as-claude.md` (how the Pen behaves
 ## Licence — before anything
 
 A plate from Euratlas, the Duby atlas or any copyrighted atlas is a **reference, never a source to publish**
-(memory `euratlas-data-and-licensing`). The year drawn from it stays local: `years/` is never committed, and
-at the end of a test the year is moved aside as `years/<year>.<name>/` and the dev's own year put back.
+(memory `euratlas-data-and-licensing`). Year folders are git-ignored **except `years/1100/`, which is tracked
+and published**: a year drawn from a plate is never committed — check `git status` before any commit after a drawing
+session, and at the end of a test move the year aside as `years/<year>.<name>/` and put the dev's own year back.
 
 ## Setup (once per session)
 
@@ -93,7 +94,7 @@ lord is drawn after the lord.
 vassals and sub-vassals included, with rank, status, suzerain and the plate's colour from
 `files/resources/euratlas/meta-1100.json` (applied by `apply-meta.py` after a save, then a reload). Not drawn, no plate:
 the Finns, Chudes, Mordvins, Burtas, Cheremiss; Norway, Sweden, Novgorod cut at 60°N, the Almoravids at 32°N. The night's
-defects, each with the tool it asks for: `files/plans/cartographer/general-test-defects.md`.
+defects, each with the tool it asks for: `files/plans/cartographer/general-test-night.md`, and `files/plans/cartographer/scenarii/s99-holes.md` from H-36 on.
 
 ## Tools added on the night of 2026-10-14
 

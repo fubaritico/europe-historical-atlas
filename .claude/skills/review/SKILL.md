@@ -15,8 +15,7 @@ Produces a structured JSON report with findings sorted by severity.
 
 ## Prerequisites
 
-- `pnpm type-check && pnpm lint && pnpm test` must PASS before triggering review (once the tooling is
-  installed — Phase 0.1). If any fail, fix them first — the reviewer assumes clean static analysis.
+- `pnpm type-check && pnpm lint && pnpm test` must pass before triggering review. If any fail, fix them first — the reviewer assumes clean static analysis.
 
 ## Execution Flow
 
@@ -29,7 +28,7 @@ Determine which files to review (priority order):
 3. Staged files (`git diff --cached --name-only`)
 4. Files in last commit (`git diff --name-only HEAD~1`)
 
-Filter to: `*.ts`, `*.js`, `*.json`, `*.glsl`, `index.html` (exclude `node_modules`, `build/`, `dist/`,
+Filter to: `*.{ts,tsx}`, `*.{js,mjs}`, `*.css`, `*.json`, `*.html` (exclude `node_modules`, `build/`, `dist/`,
 lock files, and archived config under `files/claude-archive/`).
 
 **Then widen the scope to the blast radius.** The changed files are where the diff *is*, not where it
@@ -87,8 +86,8 @@ JSDoc tag filed as `high`.
 
 Three checks, in this order — a review that ships a wrong finding costs more than one that finds nothing:
 
-1. **`needs_verification: true`** → run the `verification_query` against `opensrc/` (there is **no
-   context7** here) or the web. Common cases: three.js API shape, deprecated methods, Vite HMR behaviour.
+1. **`needs_verification: true`** → run the `verification_query` against `opensrc/` (authoritative —
+   context7 can lag a version) or the web. Common cases: three.js API shape, deprecated methods, Vite HMR behaviour.
    If the usage turns out correct, discard the finding and adjust the score.
 2. **Any finding carrying a computed figure** — a contrast ratio, a byte count, a complexity bound —
    **re-derive it yourself** from the `evidence` field. Agents produce confident arithmetic; on
@@ -113,6 +112,37 @@ files, repeat up to 3 times total.
 
 If violations remain after 3 iterations: present them and ask **store** (write to
 `review-results/YYYY-MM-DD_HHmmss.json`) or **ignore**.
+
+### Step 9 — What the review learns (proposed, never written alone)
+
+> The dev's call, 2026-10-21: the review improves the project's rules **and its own criteria**, because the
+> application grows and what suffices today will not later — **always in concert with him**. Adopted instead
+> of a snippet that had the agent write folder `CLAUDE.md`s on its own: a rule drawn from code the dev has not
+> tested yet is my choice filed as his decision.
+
+For each **confirmed** finding, and for what the review got wrong, ask one question each:
+
+1. **Would a rule have prevented this defect?**
+   - Detectable mechanically → propose an **ESLint rule in `eslint-plugin-eha`**: it cannot be forgotten
+     and costs no context.
+   - Otherwise, **only if the same kind of defect already happened once** (grep `.claude/rules/known-issues/`
+     and `.claude/rules/`) → propose **one line in the path-scoped rule** of its package. A rule drawn from a
+     single case is how constraints get invented.
+2. **Did the review's own criteria fall short?** Propose a change to `references/<dimension>.md` or to the
+   agent's prompt in `.claude/agents/review/<dimension>.md` when:
+   - a defect was found **outside** the agents (by verification, a test, the dev, the app) that a dimension
+     should have seen — the criterion it lacked;
+   - a dimension keeps returning findings discarded at Step 5 — the criterion that misleads it;
+   - a kind of code now exists that no dimension covers (a shader, a data licence, a worker boundary) — a
+     criterion, or a **fifth dimension**, named as such.
+3. **What can go?** A text line that a lint rule now enforces is removed; a criterion no change has touched
+   for long is named for removal. Adding without removing is how the auto-loaded context reached 126 KB.
+
+**Present it under the findings table** — `Proposition`, `Où` (lint rule / rule file / review criterion),
+`Pourquoi` (the finding, and the earlier case when there is one), `Retire` (what goes, or nothing). **Nothing
+is written before the dev says yes.** What he accepts ships in the same commit as the fix, and a new rule
+file gets its topic in `.claude/skills/rules/topics.json`. No proposal is a legitimate answer — say so in one
+line rather than inventing one.
 
 ## Output Format
 

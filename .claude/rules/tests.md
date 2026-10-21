@@ -1,10 +1,16 @@
+---
+paths:
+  - "**/*.test.{ts,tsx}"
+  - "**/vitest.config.ts"
+  - "**/vitest.setup.ts"
+---
 # Rules — Test Policy — europe-map
 
 > Every scene module, util, hook, port, or bug fix MUST ship with tests.
 > Nothing is "done" without tests, a `/commit`, and an `/end-session`.
 
-Stack: **Vitest** (to install in Phase 0.1). DOM/canvas tests opt into `jsdom`
-(`// @vitest-environment jsdom`). For real WebGL, mock the context (three.js can run in tests with a
+Stack: **Vitest**, one config per package — `core` and `eslint-plugin-eha` under `node`, `atlas` and `cartographer`
+under `jsdom`. For real WebGL, mock the context (three.js can run in tests with a
 mocked renderer/context — verify via `opensrc/three`).
 
 ## Mandatory sequence after every change

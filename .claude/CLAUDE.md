@@ -93,7 +93,7 @@ When the dev proposes something:
   Bring what breaks, who learns that it happened, and what the alternative costs. See
   `rules/error-handling.md`. Touching a file re-opens the error handling already in it.
 - **Always write tests** after any module/util/hook/fix (see `rules/tests.md`).
-- **Always run** the checks after every change (once tooling is in place: Phase 0.1) —
+- **Always run** the checks after every change —
   `pnpm type-check && pnpm lint && pnpm test` — then `/review`.
 - **Always ask** the dev to run `pnpm dev` (Vite server) after changing the 3D rendering.
 - **Knowledge base — one home per kind of fact** (the dev's call, 2026-10-17). This project's decisions go in
@@ -102,7 +102,7 @@ When the dev proposes something:
   method that would serve in another repository — feed it as such a lesson is learned, in the `main` project's
   `patterns/` folder, linked from `Cross-project engineering patterns — index`. Use the CLI when the MCP is not
   loaded: `basic-memory tool search-notes|write-note|edit-note … --project main`; search before writing.
-- **Model**: Haiku for questions/research, Sonnet for code/commits — suggest Haiku when appropriate.
+- **Model**: suggest a lighter model for a plain lookup or research; the dev chooses (`/model`).
 - **Never `--no-verify`** on commit without the dev's explicit agreement.
 - **Shared responsibility** — care about every line, review your own output before presenting it.
 - **Language**: reply to the developer in **French**; write file contents (config, rules, plans, code
@@ -138,18 +138,25 @@ Read @next.md
 
 Read @known-issues.md
 
-## Reference Files (load on demand — NOT auto-loaded)
+## Reference Files — how they load (2026-10-21)
 
-| File                      | When to load                                         |
-| ------------------------- | ---------------------------------------------------- |
-| `../../files/plans/evidence-system.md` | Any work touching a map's content, sources, contribution, or how a polity/vassal is shown |
-| `architecture.md`         | Stack, structure, scripts, 3D pipeline, editor–atlas parity |
-| `modular-architecture.md` | SOLID/pluggable/standalone rule — any module         |
-| `decision-tree.md`        | Skill triggers — check before coding                 |
-| `error-handling.md`       | Any fallback, `catch`, or default covering a failure |
-| `tests.md`                | Writing tests — 5-level policy                       |
-| `troubleshooting.md`      | Debug three.js/Vite/WebGL, architectural decisions   |
-| `../known-issues-atlas.md` | Before touching the atlas (render, pipeline wiring, dev panel) — its open issues |
-| `../archive/*.md`         | Older sessions and closed issues — when a past decision or lesson is in question |
+**A rule in `.claude/rules/` without `paths:` loads at every session; with `paths:` it loads when a matching file is
+read or written** (code.claude.com/docs/en/memory). Before 2026-10-21 this table said "NOT auto-loaded" — false:
+all six rules loaded every time. Three triggers now, one table (`.claude/skills/rules/topics.json`):
+`paths:` · the prompt hook `.claude/hooks/rules-for-prompt.mjs` (words of the dev's message) · `/rules` (my net).
 
-**Before coding**: ask which reference files are needed — do NOT start without the relevant files loaded.
+| File (under `.claude/rules/` unless said) | Loads |
+| --- | --- |
+| `error-handling.md`, `decision-tree.md` | **every session** — they govern before any file is touched |
+| `architecture.md` | `packages/**`, root configs |
+| `modular-architecture.md` | `packages/*/src/**` |
+| `tests.md` | test files, Vitest configs |
+| `troubleshooting.md` | `packages/atlas/**`, `core/src/pipeline/**`, ESLint configs, `turbo.json` |
+| `cartographer.md` | `packages/cartographer/**` — the design system, the skill before coding, step 4's decisions |
+| `claude-config.md` | `.claude/**`, `CLAUDE.md`, `AGENTS.md` — read the current Claude Code docs before configuring, warn against the guidance |
+| `known-issues/*.md` | by package — the map is `../known-issues.md` |
+| `files/plans/evidence-system.md` | hook or `/rules` (uncertainty, date, contribution) |
+| `../archive/*.md` | on demand — when a past decision or lesson is in question |
+
+**Before coding**: the rules of the place must be in context — touching its files loads them; for a discussion,
+the hook names them, and `/rules` covers what it missed.

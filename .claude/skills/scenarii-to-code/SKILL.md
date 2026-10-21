@@ -85,14 +85,15 @@ unfinished work. All cheap, none optional.
 
 ### a. Name what the rung does not do, in the commit
 
-And if it outlives the session, in `known-issues.md` **with a named trigger**. "Later" is not a trigger.
+And if it outlives the session, in its package's known-issues slice (`.claude/rules/known-issues/<package>.md`) **with a named trigger**. "Later" is not a trigger.
 "At 4d-3, which loads the DEM for real" is.
 
 ### b. Never write a promise a later rung must keep — except where it will be read
 
 This is the defect above. A JSDoc saying *"the cache belongs to the caller at step 4d"* is invisible to
-step 4d: nobody re-opens a module header to find out what they owe. The two files read **every session**
-are `.claude/next.md` and `.claude/known-issues.md`. A promise lives there or it does not exist.
+step 4d: nobody re-opens a module header to find out what they owe. The files read **every session**
+are `.claude/next.md` and the index `.claude/known-issues.md`. A promise lives in `next.md`, or in its package's
+slice with a named trigger — loaded whenever that package is touched — or it does not exist.
 
 A comment may say what is true **now** — *"the selection is empty until the tools arrive"* — never what
 someone else will do about it.
@@ -148,7 +149,7 @@ Three honest answers, and picking the wrong one is how specification gets invent
 | `s09-place-the-names` | labels, and size by rank never by area | 5 |
 | `s10-check-before-publishing` | the check report | 5 |
 | `s11-islands` | an island no polygon claims | 4d-2, 5 |
-| `s12-out-of-frame` | the editorial zone against the render frame | 4b (done), 5 |
+| `s12-out-of-frame` | the render frame (the editorial zone was removed 2026-10-18) | 4b (done) |
 | `s13-overrides` | `{Overrides}`, run borders, precedence | 5 |
 | `s14-history-panel` | `{History}`, rows, markers | 3 (done), 5 |
 | `s15-offline-and-online` | where a year goes, and how the atlas reads it | 5 |

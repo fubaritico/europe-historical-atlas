@@ -1,0 +1,267 @@
+{
+  "$comment": "One table, two readers: the prompt hook (.claude/hooks/rules-for-prompt.mjs) and the /rules skill. A word matches a word of the prompt, accents and case ignored, plural s/x allowed; a trailing * matches any ending; a word with a space matches as a phrase. Paths are relative to the repository root.",
+  "topics": {
+    "cartographer": {
+      "label": "le Cartographe",
+      "words": [
+        "cartographe",
+        "cartographer",
+        "editeur",
+        "canevas",
+        "plume",
+        "crayon",
+        "ancre",
+        "trace",
+        "polities",
+        "polity",
+        "etabli",
+        "workbench",
+        "design system",
+        "fubaritico",
+        "zustand",
+        "react",
+        "retracer",
+        "souder",
+        "creuser",
+        "recreuser",
+        "carto-*"
+      ],
+      "files": [
+        {
+          "path": ".claude/rules/cartographer.md"
+        },
+        {
+          "path": ".claude/rules/known-issues/cartographer.md"
+        },
+        {
+          "path": ".claude/rules/architecture.md"
+        },
+        {
+          "path": ".claude/rules/modular-architecture.md"
+        }
+      ]
+    },
+    "atlas": {
+      "label": "l'atlas",
+      "words": [
+        "atlas",
+        "three",
+        "threejs",
+        "webgl",
+        "shader",
+        "camera",
+        "rendu",
+        "render",
+        "3d",
+        "mesh",
+        "relief",
+        "picking",
+        "worker",
+        "atlas-*"
+      ],
+      "files": [
+        {
+          "path": ".claude/rules/known-issues/atlas.md"
+        },
+        {
+          "path": ".claude/rules/troubleshooting.md"
+        },
+        {
+          "path": ".claude/rules/architecture.md"
+        },
+        {
+          "path": ".claude/rules/modular-architecture.md"
+        }
+      ]
+    },
+    "core": {
+      "label": "core",
+      "words": [
+        "core",
+        "pipeline",
+        "jalon",
+        "derivation",
+        "core-*"
+      ],
+      "files": [
+        {
+          "path": ".claude/rules/known-issues/core.md"
+        },
+        {
+          "path": ".claude/rules/architecture.md"
+        },
+        {
+          "path": ".claude/rules/modular-architecture.md"
+        }
+      ]
+    },
+    "date": {
+      "label": "la date historique",
+      "words": [
+        "date",
+        "dater",
+        "calendrier",
+        "julien",
+        "gregorien",
+        "intervalle",
+        "an zero",
+        "core-217"
+      ],
+      "files": [
+        {
+          "path": "files/plans/plan.md",
+          "hint": "the historical-date section only (HistoricalDate, Julian)"
+        },
+        {
+          "path": "files/plans/evidence-system.md"
+        },
+        {
+          "path": ".claude/rules/known-issues/core.md"
+        }
+      ]
+    },
+    "uncertainty": {
+      "label": "la gestion de l'incertitude",
+      "words": [
+        "incertitude",
+        "incertain",
+        "uncertainty",
+        "source",
+        "fiabilite",
+        "concordance",
+        "attestation",
+        "preuve",
+        "evidence",
+        "revendication",
+        "claim",
+        "arbitrage",
+        "flou",
+        "hachure",
+        "vassal",
+        "vassalite",
+        "suzerain",
+        "euratlas",
+        "wikidata",
+        "design-262",
+        "verite"
+      ],
+      "files": [
+        {
+          "path": "files/plans/evidence-system.md"
+        },
+        {
+          "path": "files/plans/glossaire.md"
+        }
+      ]
+    },
+    "data": {
+      "label": "les données",
+      "words": [
+        "years",
+        "1100",
+        "heightmap",
+        "dem",
+        "manifeste",
+        "donnees"
+      ],
+      "files": [
+        {
+          "path": ".claude/rules/known-issues/data.md"
+        }
+      ]
+    },
+    "contribution": {
+      "label": "la contribution",
+      "words": [
+        "payload",
+        "contribution",
+        "contribuer",
+        "evenement",
+        "lieux",
+        "acteur",
+        "contrib-*"
+      ],
+      "files": [
+        {
+          "path": "files/plans/plan.md",
+          "hint": "the Payload / contribution sections only (P7)"
+        },
+        {
+          "path": "files/plans/evidence-system.md"
+        }
+      ]
+    },
+    "tests": {
+      "label": "les tests",
+      "words": [
+        "test",
+        "vitest",
+        "couverture",
+        "coverage",
+        "sabotage"
+      ],
+      "files": [
+        {
+          "path": ".claude/rules/tests.md"
+        },
+        {
+          "path": ".claude/rules/known-issues/testing.md"
+        }
+      ]
+    },
+    "tooling": {
+      "label": "l'outillage",
+      "words": [
+        "lint",
+        "eslint",
+        "turbo",
+        "integration continue",
+        "gate",
+        "pnpm",
+        "husky",
+        "commitlint",
+        "sonar",
+        "tsconfig",
+        "gitignore",
+        "prettier",
+        "build",
+        "netlify",
+        "node",
+        "plugin",
+        "repo-*"
+      ],
+      "files": [
+        {
+          "path": ".claude/rules/known-issues/tooling.md"
+        },
+        {
+          "path": ".claude/rules/troubleshooting.md"
+        }
+      ]
+    },
+    "claude": {
+      "label": "la configuration de Claude",
+      "words": [
+        "claude",
+        "skill",
+        "hook",
+        "contexte",
+        "context",
+        "prompt",
+        "gemini",
+        "agents.md",
+        "claude.md",
+        "subagent",
+        "sous-agent"
+      ],
+      "files": [
+        {
+          "path": ".claude/rules/claude-config.md"
+        },
+        {
+          "path": ".claude/skills/rules/SKILL.md"
+        }
+      ]
+    }
+  }
+}

@@ -1,6 +1,6 @@
 ---
 name: memory-research
-description: "Research an external subject using web search, synthesize findings into a structured Basic Memory entity. Use when asked to research a company, person, technology, or topic — or when a bare name or URL is provided that implies a research request."
+description: "Research an external subject on the web and, with approval, record it as a Basic Memory entity. Use when explicitly asked to research a subject for Basic Memory."
 ---
 
 # Memory Research
@@ -15,10 +15,7 @@ Research an external subject, synthesize what you find, and create a structured 
 - "What do you know about [subject]?"
 - "Evaluate [subject]"
 
-**Implicit triggers (also activate this skill):**
-- A bare name: "Terraform"
-- A URL: "https://example.com"
-- A name with context: "Acme Corp — saw them at the conference"
+
 
 ## Workflow
 

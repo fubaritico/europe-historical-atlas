@@ -19,6 +19,7 @@
 | Answer "how long / since when"       | `/timeline`       |
 | Fetch the SonarCloud report          | `/sonar`          |
 | Track a task — a card, its column, its label | `/trello` |
+| Reason about a subject whose rules are not loaded | `/rules` |
 
 > **This repository has React in it** — the Cartographer, since 2026-10-01. The line that used to stand
 > here said the archived React skills "do NOT apply to this 3D project", and it stopped being true the day
@@ -42,12 +43,12 @@
 ## Skills to create (as we go)
 
 - Generate a pluggable scene module (standalone renderer/mesh/light + mock).
-- Camera state persistence/restoration (hot-reload) — see roadmap Phase 0.2.
 
 ## Pre-flight — BEFORE writing code
 
 1. Confirm the approach with the dev (never code without confirming).
-2. Ask which reference files are needed; read the relevant `rules/*`.
+2. The rules of the place must be loaded: touching its files loads them; for a discussion the prompt hook names
+   them, and `/rules` covers what it missed.
 3. Check if a skill handles the task (table above).
 4. If yes → use the skill, do not write manually.
 5. If no → write the code following the patterns, then `pnpm type-check && pnpm lint && pnpm test` + `/review`.

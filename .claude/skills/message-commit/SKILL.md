@@ -15,12 +15,12 @@ Prepare and propose a conventional commit message only for the current changes.
 1. Run `git status` to see changed files
 2. Run `git diff --staged` and `git diff` to analyze all changes
 3. Identify the scope based on changed files:
-   - `src/scene` → scope `scene`
-   - `src/camera` → scope `camera`
-   - `src/controls` → scope `controls`
-   - `src/picking` → scope `picking`
-   - `src/data` (ports: heightmap, texture, regions) → scope `data`
-   - root / build config → scope `repo`
+   - `packages/atlas/src/{scene,camera,controls,picking,ui}` → that folder's name; `atlas` across several
+   - `packages/core/src/data` → `data`; `packages/core/src/editor` → `editor`; the rest of core → `core`
+   - `packages/cartographer/**` → `cartographer`
+   - `packages/eslint-plugin-eha/**` → `lint`
+   - `files/plans/**` → `plans`
+   - root config, CI, `.claude/` → `repo`
    - Multiple areas → use the most impacted scope
 4. Generate a conventional commit message
 

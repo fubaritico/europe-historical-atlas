@@ -21,7 +21,11 @@ own gate — not recalled.
 ```
 packages/cartographer/src/state/
 ├── store.ts          # combines the slices, and carries the middleware
-└── editionSlice.ts   # one slice: the document, its undo line, later the selection
+├── editionSlice.ts   # the document, its undo line, the selection
+├── toolSlice.ts      # the active tool — {Tools} alone writes it
+├── layersSlice.ts    # the layers panel
+├── viewportSlice.ts  # the view
+└── …                 # helpers: drawingTarget, openEmptyYear, polityColourSource
 ```
 
 **One bound store, built from slices, one slice per *owner of a piece of state*.** The
@@ -29,7 +33,7 @@ dev's call — *"si j'avais fait ça avec Redux il y aurait une slice par zone"*
 correction that came out of the code: a slice goes with **who writes a piece of state**,
 not with the panel that displays it. The document is read by the canvas *and* by
 `{Polities}`, `{Details}` and `{Overrides}`, so no panel owns it. The active tool belongs
-to `{Tools}` alone, so that one will be its own slice.
+to `{Tools}` alone, hence `toolSlice`.
 
 **A factory, never a module-level store.** `createCartographerStore(deps)` is built at the
 composition root (`main.tsx`), which `rules/modular-architecture.md` requires — and which
@@ -309,8 +313,8 @@ Follow `rules/tests.md` (5 levels) as for any other module.
 - **JSDoc on every exported slice, action type and notable constant.**
 - **Inject, never reach** — a store imported directly by a pure module is the global
   singleton `rules/modular-architecture.md` forbids. Pure logic takes data and returns
-  data; the store is wired at the composition root. Steps 4b and 4c add *pure* `viewport/` and
-  `geometry/` layers to this package, and they must not import `state/`.
+  data; the store is wired at the composition root. `viewport/` and `geometry/` are *pure* and
+  must not import `state/` — held by `packages/cartographer/eslint.config.js`.
 - **Name a slice after what it owns, never after the whole application.** `yearStore` was
   rejected on 2026-10-05 for exactly that: the Cartographer edits one year, so "year"
   claims everything and distinguishes nothing.

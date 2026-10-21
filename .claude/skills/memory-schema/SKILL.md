@@ -114,8 +114,8 @@ Look for clusters of notes that share structure but have no schema:
 
 2. **Infer a schema**: Use `schema_infer` to analyze existing notes and generate a suggested schema:
    ```python
-   schema_infer(noteType="Meeting")
-   schema_infer(noteType="Meeting", threshold=0.5)  # fields in 50%+ of notes
+   schema_infer(note_type="Meeting")
+   schema_infer(note_type="Meeting", threshold=0.5)  # fields in 50%+ of notes
    ```
    The threshold (0.0–1.0) controls how common a field must be to be included. Default is usually fine; lower it to catch rarer fields.
 
@@ -166,7 +166,7 @@ Check how well existing notes conform to their schema:
 
 ```python
 # Validate all notes of a type
-schema_validate(noteType="Meeting")
+schema_validate(note_type="Meeting")
 
 # Validate a single note
 schema_validate(identifier="meetings/2026-02-10-standup")
@@ -190,7 +190,7 @@ Validation reports:
 Over time, notes evolve and schemas lag behind. Use `schema_diff` to find divergence:
 
 ```python
-schema_diff(noteType="Meeting")
+schema_diff(note_type="Meeting")
 ```
 
 Diff reports:
@@ -202,7 +202,7 @@ Diff reports:
 
 When note structure changes:
 
-1. **Run diff** to see current state: `schema_diff(noteType="Meeting")`
+1. **Run diff** to see current state: `schema_diff(note_type="Meeting")`
 2. **Update the schema note** via `edit_note`:
    ```python
    edit_note(
@@ -214,7 +214,7 @@ When note structure changes:
    )
    ```
 3. **Add/remove/modify fields** in the `schema:` block
-4. **Re-validate** to confirm existing notes still pass: `schema_validate(noteType="Meeting")`
+4. **Re-validate** to confirm existing notes still pass: `schema_validate(note_type="Meeting")`
 5. **Fix outliers** — update notes that don't conform to the new schema
 
 ### Evolution Guidelines

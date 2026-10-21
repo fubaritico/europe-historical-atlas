@@ -129,6 +129,6 @@ description: Helps with components.
 - No uppercase letters in skill names
 - No consecutive hyphens (`--`) in names
 - Description is the primary mechanism for auto-triggering — invest time in keywords
-- `allowed-tools` uses space-separated format, not arrays
+- `allowed-tools` takes a space- or comma-separated string, or a YAML list
 - Reference files use relative paths from skill directory root
 - Test the skill by asking Claude a question that should trigger it

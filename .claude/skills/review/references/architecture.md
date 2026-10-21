@@ -3,7 +3,7 @@
 > Authoritative rules live in the subagent prompt `.claude/agents/review/architecture.md` (ARCH-0xx),
 > backed by `.claude/rules/architecture.md` and `.claude/rules/modular-architecture.md`.
 
-Single-app project: `src/{main,scene,camera,controls,picking,data,assets}`. Stack TS + three.js + Vite.
+pnpm workspace, four packages: `core` (pure TS), `atlas` (vanilla three.js), `cartographer` (2D canvas + React 19 + Zustand), `eslint-plugin-eha`.
 
 Summary of what `review-architecture` checks (see the agent for full detail):
 
