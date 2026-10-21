@@ -25,20 +25,27 @@ a Worker, and it would let the whole package run under Node.
 ```
 utils/   ← leaf: small pure helpers, importing nothing at all
 geo/     ← leaf: Mercator projection maths
-time/    ← leaf: the historical date — instant or interval, circa, Julian ↔ Gregorian, no year zero
+i18n/    ← leaf: the message engine — ICU MessageFormat, ours, and typed catalogues in fr and en
+time/    ← the historical date — instant or interval, circa, Julian ↔ Gregorian, no year zero; reads i18n/
 data/    ← the domain and its ports: heightmap, land mask, rivers, regions, asset errors
 pipeline/← the CPU work the map costs: rasterising, expanding claims, deriving borders, compositing
 editor/  ← the Cartographer's document model: anchors, rings, edits, history
 ```
 
 `data/` reads `geo/` and `utils/`. `pipeline/` and `editor/` read the layers above them, never each other.
-**Nothing reads `pipeline/`** except an application. `time/` reads only `utils/`; whatever is dated reads
-it. Each arrow is an ESLint rule, listed as a table in the root `eslint.config.js`.
+**Nothing reads `pipeline/`** except an application. `i18n/` reads only `utils/`; `time/` reads `utils/` and
+`i18n/` (its words); whatever is dated reads it. Each arrow is an ESLint rule, listed as a table in the root `eslint.config.js`.
 
 **Why a date is not a `Date`**: what this project dates is a year, an interval or a "circa", almost never a
 day, and a day of 1066 is Julian — a calendar neither `Date`, `Intl` nor `Temporal` has. `time/` holds the
 type, the reader that refuses a bad date with its reason (`readHistoricalDate`), the conversion through
 the Julian Day Number, and the text a reader sees ("1337–1453", "vers 1100", "44 av. J.-C.").
+
+**Why our own ICU engine**: no label is written in the code (the dev's call, 2026-10-21) — every text an
+application shows is a message in a catalogue, in French and English. The syntax is ICU MessageFormat, the
+standard translators read; the engine is ours, about two hundred lines over `Intl.PluralRules`, with no
+dependency. A missing translation fails `tsc`; a malformed message or a missing value throws, and the
+tests read every catalogue.
 
 ## It is not built, on purpose
 

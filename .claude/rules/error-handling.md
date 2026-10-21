@@ -47,6 +47,19 @@ application's) tag. Two levels, and the line is whether anything should have pre
 (`documentFaults`), or the log drowns everything else. A refusal with an on-screen answer still logs —
 the console is the one place a later, subtler failure can be traced back to.
 
+## A label that cannot be built throws, and a boundary keeps the screen — decided by the dev, 2026-10-21
+
+> *« On traduit en phase de développement, et en production il y aura toujours un label »* — so the code is
+> expected to work, and a message missing one of its values is a defect, not a case to word over.
+
+- **The i18n engine throws** on a message called without a value it names, or on a malformed pattern. Every
+  catalogue entry is checked by the tests, so this is meant to fail there, not in front of a reader.
+- **In the Cartographer, React error boundaries** keep the rest of the screen alive: where a component fails,
+  its place shows the error message, **centred vertically and horizontally**. Where the boundaries sit is
+  proposed systematically (in the shared `Panel` shell, plus one at the root) — pending the dev's answer.
+- **In the atlas**, which has no React, the error net (ATLAS-42) shows any unexpected error on screen. Its own
+  message takes no value, so it cannot fail this way.
+
 ## The distinction that makes the discussion tractable
 
 Not every substitution is equal, and the difference is not how bad the failure is — it is **whether

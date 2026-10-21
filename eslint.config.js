@@ -22,6 +22,7 @@ const LAYER = {
   geo: ['**/geo', '**/geo/**'],
   editor: ['**/editor', '**/editor/**'],
   time: ['**/time', '**/time/**'],
+  i18n: ['**/i18n', '**/i18n/**'],
   // The Cartographer's own layers. `geo` above stays reachable from them on purpose: projection maths is
   // a leaf of `core`, and `viewport/` reads it. Note `**/geo` cannot match `**/geometry` — a pattern segment
   // is matched whole — so the two keys do not collide.
@@ -50,7 +51,18 @@ const LAYER = {
 const BOUNDARIES = [
   {
     dir: 'packages/core/src/geo',
-    forbid: ['scene', 'camera', 'controls', 'ui', 'data', 'pipeline', 'editor', 'time', 'main'],
+    forbid: [
+      'scene',
+      'camera',
+      'controls',
+      'ui',
+      'data',
+      'pipeline',
+      'editor',
+      'time',
+      'i18n',
+      'main',
+    ],
     why: 'geo/ is pure projection maths — it must not import from any other layer.',
   },
   {
@@ -65,6 +77,7 @@ const BOUNDARIES = [
       'editor',
       'geo',
       'time',
+      'i18n',
       'main',
     ],
     why: 'utils/ is a leaf — small pure helpers, depending on nothing. Anything it would need to import belongs on the other side of the call.',
@@ -72,7 +85,23 @@ const BOUNDARIES = [
   {
     dir: 'packages/core/src/time',
     forbid: ['scene', 'camera', 'controls', 'ui', 'data', 'pipeline', 'editor', 'geo', 'main'],
-    why: 'time/ is the historical date — a leaf like geo/. It may read utils/; everything dated (data/, editor/, the apps) reads it, never the other way.',
+    why: 'time/ is the historical date — a leaf like geo/. It may read utils/ and i18n/ (its words); everything dated (data/, editor/, the apps) reads it, never the other way.',
+  },
+  {
+    dir: 'packages/core/src/i18n',
+    forbid: [
+      'scene',
+      'camera',
+      'controls',
+      'ui',
+      'data',
+      'pipeline',
+      'editor',
+      'geo',
+      'time',
+      'main',
+    ],
+    why: 'i18n/ is the message engine — a leaf. It may read utils/; whatever shows text reads it, and a catalogue lives with the code that shows it, never in here.',
   },
   {
     dir: 'packages/core/src/data',

@@ -452,7 +452,11 @@ language it had never been designed to leave.
 | | languages | why |
 |---|---|---|
 | **atlas** | **French and English**, French first | it is the published product, and its readers are not all French. This is what ICU was adopted *for* |
-| **Cartographer** | **English only** | an authoring tool with one author. Its chrome was converted on 2026-10-08 — ten strings, `lang="en"` — and it carries **no translation table at all** |
+| **Cartographer** | **French and English** — the dev's call, **2026-10-21**, replacing "English only" of 2026-10-08 | its contributors will be French speakers and English speakers alike, and *« ce n'est pas possible de mettre des labels en dur »*. It uses `core`'s engine with **its own label files, bundled with it** — never the JSON the contribution tool exports for content. **Its language is the browser's** (the dev, 2026-10-21): French if the first preferred language is French, English otherwise — `pickLocale(navigator.languages)`, the list passed in by the app so `core` never reads the browser |
+
+**The atlas is in English by default** — the dev, 2026-10-21, replacing "French first": *« c'est international »*.
+**And it follows the browser's language like the Cartographer** (the dev, same evening): French for a browser
+whose first language is French, English for every other — the same `pickLocale(navigator.languages)`.
 | **content tool** (Payload) | **EN and FR in the same form** | one form, both fields side by side, so an entry is never half-translated without anyone seeing it |
 
 **Two things this corrects in the row above**: the Cartographer's chrome is *not* part of the ICU

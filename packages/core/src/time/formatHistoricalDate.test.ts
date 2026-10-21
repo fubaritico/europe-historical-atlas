@@ -91,6 +91,15 @@ describe('formatHistoricalDate', () => {
       expect(formatHistoricalDate(instant({ year: -1 }), 'fr')).toBe('1 av. J.-C.')
     })
 
+    it('spaces the dash when an end has a month', () => {
+      const date: HistoricalDate = {
+        kind: 'interval',
+        from: moment({ month: 3 }),
+        to: moment({ year: 1150 }),
+      }
+      expect(formatHistoricalDate(date, 'en')).toBe('March 1100 – 1150')
+    })
+
     it('writes an interval across the era with a spaced dash', () => {
       const date: HistoricalDate = {
         kind: 'interval',
