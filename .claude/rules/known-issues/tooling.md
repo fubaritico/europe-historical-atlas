@@ -28,7 +28,8 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
 - **Le dépôt tourne sous Node 24 depuis le 21/10** (décision du dev : éviter les ennuis de compatibilité à venir).
   `.nvmrc` dit `24` — la CI et le déploiement Netlify le lisent par l'action `setup` — et `engines.node` exige `>=24`.
   En local : **24.22.1** par nvm (`nvm alias default 24`), les 22.14 et 22.23.3 restent installées. Gate entière et
-  build verts sous la 24, sans cache (`turbo … --force`), le lockfile inchangé. **Un terminal ou WebStorm ouvert
+  build verts sous la 24, sans cache (`turbo … --force`), le lockfile inchangé. **Le shell de Claude Code démarre sous la 22** (vu le 21/10, malgré `nvm alias default 24`) : préfixer chaque commande de
+  `PATH=~/.nvm/versions/node/v24.22.1/bin:$PATH`, ou la gate tourne sous une version que la CI n'a pas. **Un terminal ou WebStorm ouvert
   avant le changement garde la 22** — le relancer ; si WebStorm pointe sur un interpréteur Node explicite, le changer
   dans ses réglages. Node 24 est en maintenance depuis le 20/10, support jusqu'au 30/04/2028 ; **Node 26 devient LTS le
   28/10/2026** (support jusqu'au 30/04/2029) — à reconsidérer après quelques mois de LTS. Le seuil d'avant venait

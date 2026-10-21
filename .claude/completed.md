@@ -2,6 +2,28 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-10-21, le soir — le design system 0.7.0, la date historique, l'internationalisation maison
+
+Même plage au journal que la session de l'après-midi, **21/10 17:24 → 23:33 (6 h 08 en tout, ce soir ~20:01 → 23:33,
+environ 3 h 30)** ; le chantier ouvert le 05/10 totalise **99 h 28 sur 17 plages**. **6 commits** `aef0bf1`..`e61c84e`,
+**tous poussés**, plus celui de cet état. La vérification de REPO-264 a tenu : le hook a nommé les règles du sujet.
+
+- **CARTO-117** — fubaritico-ds 0.7.0, publié par le dev ce soir : les 22 surcharges de `theme.css` renommées, les rôles
+  que le chrome atteint posés en sombre, et une garde dans les deux sens (`UNSET_ON_PURPOSE`). Testé par lui. Un serveur
+  Vite lancé avant la montée servait encore la 0.6.0 : relancé.
+- **CORE-217** — `core/src/time/` : instant ou intervalle, « vers », l'an zéro refusé à la lecture avec la raison, Julien ↔
+  Grégorien par le jour julien. Décidé par le dev : une date mal formée est refusée en disant pourquoi.
+- **ATLAS-159, deux étapes et demie sur trois** — le dev : *« pas possible de mettre des labels en dur »*, tout de suite.
+  Un moteur ICU maison (`core/src/i18n/`, sans dépendance) ; l'atlas tire chaque phrase d'un catalogue fr/en, sa table
+  d'accords disparaît (testé par lui dans les deux langues, en ligne) ; dans le Cartographe, la langue à la racine,
+  `useTranslation` (son nom), une ErrorBoundary par zone. **Ses décisions** : le Cartographe aussi en fr/en, avec ses
+  propres fichiers ; la langue du navigateur, l'anglais sinon, l'atlas compris ; plus tard `localStorage` → navigateur →
+  anglais (ATLAS-266, en Idées) ; une valeur manquante lève ; des boundaries dans chaque zone, Réessayer sur la carte.
+- **Mes fautes** : du jargon qu'il n'a pas compris (« liste de saisie » pour le Typeahead, « l'anglais en tête des pages ») —
+  *« tout ça pour ça »*, *« de quoi tu parles ? »* ; le worktree supprimé juste après lui avoir dit de l'ouvrir ; un
+  commentaire Trello disant qu'il n'avait pas testé ; la boundary de la carte d'abord oubliée ; un sabotage resté sans
+  effet (`sed` de macOS) avant d'être refait ; un composant écrit de mémoire, vérifié dans la doc de React à sa demande.
+
 ### 2026-10-21 — les règles chargées au bon moment, l'audit des instructions, Node 24, la CI verte
 
 Une plage au journal, **21/10 17:24 → 19:48 (2 h 23, 212 actions)** ; le chantier ouvert le 05/10 totalise **95 h 43 sur
@@ -26,28 +48,4 @@ de production touché — un délai de test dans `core`, la CI, la configuration
   mes agents, qui marquait cinq sujets comme demandés (corrigé, testé) ; un suivi de CI par SHA abrégé ; une question à
   deux volets que le dev n'a pas comprise — un exemple concret, un point à la fois.
 
-### 2026-10-19 — la gestion de l'incertitude, le README, la licence
-
-Une plage au journal, **19/10 16:10 → 19:34 (3 h 24, 121 actions)** ; le chantier ouvert le 05/10 totalise **93 h 14 sur
-16 plages**. **5 commits** `be2abdf`..`3c93e05`, **tous poussés** à la demande du dev, plus celui de cet état. Aucun code
-de production touché ; la gate a tourné à chaque commit (hooks), verte.
-
-- **Le sujet de départ, CORE-217 (la date historique), est devenu accessoire — assumé par le dev** : *« c'est très très
-  bien, c'est assumé […] j'ai pas perdu le fil »*. Il devient le premier palier d'autre chose.
-- **Mesuré** : Wikidata ne donne pas d'arbre de vassalité (France 1400 : 9 vassaux, moitié faux ; Anjou, Champagne, Blois
-  sans lien) ; les infobox de Wikipédia en anglais, 3 fiefs sur 6. Le dev : *« on n'a que dalle […] à part Euratlas »*.
-- **DESIGN-262, la gestion de l'incertitude** — une **initiative**, au-dessus des épiques : *« un système pour choisir »*,
-  *« une réflexion très lourde derrière pour un résultat simple et attractif devant »*. Plan `files/plans/evidence-system.md`
-  (concepts, principes, décisions du dev, paliers, lectures graduées) ; 15 termes au glossaire. Le tableau gagne une
-  colonne **Chantiers**, le périmètre `[DESIGN]`, l'étiquette « chantier · incertitude » ; REPO-261 (les vassaux directs
-  d'un territoire à une date) en Idées.
-- **Le dépôt prêt à passer en public** : audit propre (ni Euratlas, ni GPL, ni `.env`, historique compris) ; le README
-  réécrit comme la présentation de l'œuvre, sur la convention de ses autres dépôts ; **licence PolyForm Strict** pour le
-  code, le corpus et les années réservés — *« je ne veux pas qu'il y ait de produit commercial à partir de mon travail »*.
-- **Mes fautes** : « les plans sont gitignorés » affirmé sur la foi d'un CLAUDE.md périmé (corrigé) ; l'AGPL présentée comme
-  protectrice alors qu'elle n'empêche pas la vente ; un commit refusé par commitlint dont les fichiers sont partis sous le
-  message suivant (refait par `reset --soft`) ; deux `cd` (un sous-shell, un égaré) ; une requête SPARQL fausse donnée
-  d'abord sans l'exécuter ; *« comme un livre »* lu de travers (*« reviens sur ce que je t'ai écrit avant »*) ; une
-  question sur l'IA perdue en fin de message.
-
-> Older sessions (2026-09-12 → 2026-10-18) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-19) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

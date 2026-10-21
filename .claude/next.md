@@ -5,49 +5,50 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — juste après le 21/10, sans doute la préparation de la contribution
+## ▶ ON REPREND ICI — demain matin, ATLAS-159 au même point : les catalogues des composants du Cartographe
 
-**Le dev relance Claude Code pour vérifier ce qui a été mis en place le 21/10** (REPO-264) — au démarrage, regarder avec
-lui que : (1) `/context` montre ~50 Ko de fichiers mémoire au lancement, plus 126 ; (2) un message qui nomme un sujet
-(« le Cartographe », « la contribution ») fait arriver la ligne *Rules for the subject of this message* du hook, une fois par
-session ; (3) ouvrir un fichier d'un paquet charge ses règles (`Loaded …`). Le hook ignore les rapports d'agents. Un défaut
-→ le corriger d'abord, c'est l'outil de toutes les sessions suivantes.
+**Le dev l'a demandé en partant (21/10, 23:35) : « on reprendra demain matin au même point ».** Tout est commité et poussé
+(`e61c84e`). ATLAS-159 est **En cours** : l'internationalisation maison, décidée ce soir — *« pas possible de mettre des
+labels en dur »*. Fait : le moteur (`core/src/i18n/`), l'atlas bilingue, et dans le Cartographe les fondations (étape 3a,
+`ec974b6`) : `LocaleContext` à la racine (`pickLocale(navigator.languages)`), `useTranslation(catalogue)`, une
+`ErrorBoundary` par zone. Les décisions sont dans `plan.md` P8 et `rules/error-handling.md`.
 
-**Puis, son mot du 21/10 au soir : « sans doute la préparation de la contribution »** — CORE-252 (le format d'un
-événement, 2-3 événements de 1100 à la main) est deuxième d'« À faire », sous DESIGN-262 ; les plans : `plan.md` (P7,
-Payload), `evidence-system.md` (le registre des sources est dans la contribution). **Proposer, ne pas commencer sans son
-mot** ([[do-not-start-unasked-work]]) — et lui demander d'abord ce qu'il a tiré de ses lectures du §7 et de l'introduction
-du PDF d'Euratlas, qu'il n'a pas encore rapportées.
+**Ce qui reste, dans l'ordre :**
+1. **3b — un catalogue par composant**, dans son dossier, et **un catalogue partagé des actions** (`components/shared/`) pour
+   ce que plusieurs menus offrent : enregistrer, ouvrir, annuler/rétablir, nouveau pays, supprimer, les quatre déplacements
+   d'empilement, fermer — un libellé par action (l'objection du dev : la même action dans un menu contextuel et la barre de
+   menus). ~70 textes inventoriés, plus les modules hors React (`arrange.ts`, `polityDraft.ts`, `wikidataView.ts`,
+   `polityDeletion.ts`, `stackingLabels.ts`) qui reçoivent le traducteur en paramètre. **Une aide de test** monte un
+   composant en anglais (31 fichiers de test, ~100 `render`). Deux commits : panneaux et dialogues, puis barres, rail, carte.
+2. **3c — les phrases des outils du canevas** (`canvas/tools/toolSession.ts`, `retrace.ts`, `borderSnap.ts`,
+   `state/toolSlice.ts`) : le traducteur est injecté dans le contrôleur.
+3. **Deux réponses du dev, attendues** : (a) une erreur levée pendant un geste n'est montrée nulle part — proposé : en rouge
+   dans la barre d'état, où s'écrivent les résultats ; (b) le texte brut de l'erreur dans une boundary (SEC-001) — proposé :
+   en développement seulement.
+4. **`/doctor prompt-audit`** : `.claude/` a changé, à lui faire taper.
 
-**Toujours en attente, à lui proposer** : CORE-217 (le type de date, en tête d'« À faire », approche validée le 19/10 : un
-dossier feuille `core/src/time/`, un instant et un intervalle, l'an zéro refusé à la lecture, Julien ↔ Grégorien par le
-jour julien) ; **le relief niveau 6 du Cartographe** (une ligne, `packages/cartographer/src/main.tsx` →
-`/heightmaps/europe-dem-z6-1920`, puis son test — `rules/known-issues/cartographer.md`).
+**Pour travailler** : quand il est dans le Cartographe, un **worktree** — et lui dire où il est, et ne jamais le supprimer
+après l'y avoir envoyé (faute du 21/10). Mon shell démarre sous Node 22 : forcer la 24 (`known-issues/tooling.md`). Parler
+avec **ses** mots (le Typeahead, pas une « liste de saisie »), un point à la fois.
 
-**Décidé le 21/10** : Node 24 (26 à reconsidérer après quelques mois de LTS) ; `/review` apprend en concertation (étape 9) ;
-les critères d'accessibilité de la revue restent tels quels — les constats sur ses décisions du Cartographe se marquent
-« ouvert par décision » ; les marques d'insistance de `CLAUDE.md` restent (ses repères de lecture) ; les résumés
-`skills/review/references/*.md` restent pour l'instant.
-
-**Le tableau d'abord** : `/trello` → `list` — **lire toute la sortie**. Tout est commité et poussé (`git ls-remote origin
-main`). Un élément du tableau est un **ticket**, jamais une « carte » ([[say-ticket-not-carte]]).
+**Le tableau** : `/trello` → `list`. Un élément du tableau est un **ticket**, jamais une « carte ».
 
 | où | ticket | état |
 | --- | --- | --- |
-| **Chantiers** | DESIGN-262 La gestion de l'incertitude | l'initiative ; ses paliers en liste à cocher, ses tickets étiquetés « chantier · incertitude » |
-| **À faire**, en tête | CORE-217, puis CORE-252 | paliers de DESIGN-262 |
-| **À valider par le développeur** | CARTO-237, CARTO-116, CARTO-122 | inchangés depuis le 18/10 |
-| **En cours** | ATLAS-145, ATLAS-152 | inchangés ; **à lui proposer** : ATLAS-152 (la provenance affichée) sous DESIGN-262, par son sujet — ma déduction |
+| **Chantiers** | DESIGN-262 La gestion de l'incertitude | l'initiative ; CORE-217 (son palier 1) est **Fait** |
+| **En cours** | ATLAS-159 L'atlas et le Cartographe en français et en anglais | 3a fait ; 3b et 3c restent |
+| **En cours** | ATLAS-145, ATLAS-152 | inchangés depuis le 18/10 |
+| **À valider par le développeur** | CARTO-237, CARTO-116, CARTO-122 | inchangés ; CARTO-122 : la demande de `role="menu"` est reçue par le DS, pas dans la 0.7.0 |
+| **À faire**, en tête | CORE-252 (le format d'un événement) | palier de DESIGN-262 ; vient après la mécanique |
+| **Idées** | ATLAS-266 Choisir la langue, et s'en souvenir | la règle `localStorage` → navigateur → anglais y est écrite |
 
-**À savoir pour coder** : un agent qui touche `core` ou une application pendant que la page du dev est ouverte travaille
-dans un **worktree** ([[agents-in-a-worktree-while-he-uses-the-app]]) — sinon Vite la recharge à chaque fichier. Le dev
-préfère que je fasse moi-même une correction courte plutôt que de la déléguer. Basic Memory sert de graphe **entre
-projets** (`main/patterns/`). Une commande interrompue ou refusée a pu agir : relire l'état avant de relancer. Jamais de
-remplacement Perl sur un fichier de code sans relire le résultat. Un message de commit : lignes du corps ≤ 100 caractères.
+**Toujours en attente, à lui proposer un jour** : le relief niveau 6 du Cartographe (une ligne, `main.tsx` →
+`/heightmaps/europe-dem-z6-1920`, `rules/known-issues/cartographer.md`) ; ce qu'il a tiré de ses lectures du §7 et de
+l'introduction du PDF d'Euratlas.
 
 ## Where we are
 
-**4 207 tests** (1 126 `core` · 1 931 Cartographe · 983 atlas · 167 plugin `eslint-plugin-eha`, 18/10), gate
+**4 387 tests** (1 262 `core` · 1 963 Cartographe · 995 atlas · 167 plugin `eslint-plugin-eha`, 21/10), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 
