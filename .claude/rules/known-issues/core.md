@@ -48,7 +48,12 @@ Open issues of `packages/core`: the document model, the history, the derivations
   reste à vérifier qu'il liste ces ancres orphelines (corrigé le 17/10 : l'entrée le disait absent). **Cosmétique tant que l'éditeur n'a pas d'interface** ;
   à ne pas « corriger » en supprimant l'override, ce serait le défaut inverse et plus grave.
 - **`packages/core/README.md` décrit un paquet qui va changer.** — REPO-229 Il annonce « le format, les lecteurs, le
-  compositeur, les maths ». Deux choses s'y ajouteront et n'y sont pas : le **type de date historique**
-  (`HistoricalDate`, plan P8) et les **tables de traduction** (ICU, même section). Cosmétique, à faire
-  quand l'un des deux arrive — mais un README de paquet est la première chose qu'un lecteur ouvre dans un
-  monorepo, donc il ne doit pas mentir longtemps.
+  compositeur, les maths ». ~~Le **type de date historique**~~ — **fait le 21/10** (CORE-217) : `time/` et
+  `editor/` sont dans le schéma des couches. Reste : les **tables de traduction** (ICU, plan P8), le compte des
+  suites (« Twenty suites », périmé) et l'introduction, qui ignore le Cartographe. Cosmétique — mais un README de
+  paquet est la première chose qu'un lecteur ouvre dans un monorepo, donc il ne doit pas mentir longtemps.
+- **Les années du format acceptent l'an 0** (21/10) : le `year` de chaque fichier d'année comme `existsFrom` et
+  `existsTo` d'un pays sont un même `z.int()` nu dans `yearFormat.ts` ; le type de date de `time/` refuse l'an 0,
+  eux non. Mesuré le 21/10 sur tout ce qui est commité (`years/index.json`, les trois fichiers de 1100) : aucun an 0. Remède : les faire passer par `time/` le jour où le format des
+  années change pour DESIGN-262 (palier 6, la scission territoire / dépendance / lien) — pas avant, ce serait une
+  migration des pays de 1100 pour un cas qu'aucun ne contient (mesuré le 21/10 : 142 pays, aucun an 0). **Sévérité : à savoir.**

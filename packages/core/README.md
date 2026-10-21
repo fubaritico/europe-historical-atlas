@@ -20,17 +20,25 @@ a Worker, and it would let the whole package run under Node.
 > two modules the same day (`editableFocus`, `motion`: browser concerns that had drifted in) and one
 > `as unknown as` cast that existed only to paper over the wrong lib.
 
-## The four layers, and which way they point
+## The layers, and which way they point
 
 ```
 utils/   ← leaf: small pure helpers, importing nothing at all
 geo/     ← leaf: Mercator projection maths
+time/    ← leaf: the historical date — instant or interval, circa, Julian ↔ Gregorian, no year zero
 data/    ← the domain and its ports: heightmap, land mask, rivers, regions, asset errors
 pipeline/← the CPU work the map costs: rasterising, expanding claims, deriving borders, compositing
+editor/  ← the Cartographer's document model: anchors, rings, edits, history
 ```
 
-`data/` reads `geo/` and `utils/`. `pipeline/` reads all three. **Nothing reads `pipeline/`** except an
-application. Each arrow is an ESLint rule, listed as a table in the root `eslint.config.js`.
+`data/` reads `geo/` and `utils/`. `pipeline/` and `editor/` read the layers above them, never each other.
+**Nothing reads `pipeline/`** except an application. `time/` reads only `utils/`; whatever is dated reads
+it. Each arrow is an ESLint rule, listed as a table in the root `eslint.config.js`.
+
+**Why a date is not a `Date`**: what this project dates is a year, an interval or a "circa", almost never a
+day, and a day of 1066 is Julian — a calendar neither `Date`, `Intl` nor `Temporal` has. `time/` holds the
+type, the reader that refuses a bad date with its reason (`readHistoricalDate`), the conversion through
+the Julian Day Number, and the text a reader sees ("1337–1453", "vers 1100", "44 av. J.-C.").
 
 ## It is not built, on purpose
 
