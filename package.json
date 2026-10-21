@@ -28,7 +28,7 @@
   "license": "SEE LICENSE IN LICENSE",
   "packageManager": "pnpm@10.7.1",
   "engines": {
-    "node": ">=22",
+    "node": ">=24",
     "pnpm": ">=10"
   },
   "devDependencies": {

@@ -25,11 +25,14 @@ paths:
 
 Open issues of the repository's tooling: install, lint, Turbo, CI, commits, ignores. Loaded by path; indexed in `.claude/known-issues.md`.
 
-- **Le lint demande Node ≥ 22.22.2 depuis le 18/10** : `eslint-plugin-jsdoc` 65 l'exige (`engines`). Node passé de
-  22.14 à **22.23.3** par nvm (`nvm alias default 22`, la 22.14 reste installée) ; `.nvmrc` dit `22`, donc la CI prend
-  la dernière 22. **Un terminal ou WebStorm ouvert avant la mise à jour garde la 22.14** — le relancer ; si WebStorm
-  pointe sur un interpréteur Node explicite, le changer dans ses réglages. Le plugin est en `~65.0.2` : une version a
-  au moins deux semaines avant d'entrer. **Sévérité : à savoir.**
+- **Le dépôt tourne sous Node 24 depuis le 21/10** (décision du dev : éviter les ennuis de compatibilité à venir).
+  `.nvmrc` dit `24` — la CI et le déploiement Netlify le lisent par l'action `setup` — et `engines.node` exige `>=24`.
+  En local : **24.22.1** par nvm (`nvm alias default 24`), les 22.14 et 22.23.3 restent installées. Gate entière et
+  build verts sous la 24, sans cache (`turbo … --force`), le lockfile inchangé. **Un terminal ou WebStorm ouvert
+  avant le changement garde la 22** — le relancer ; si WebStorm pointe sur un interpréteur Node explicite, le changer
+  dans ses réglages. Node 24 est en maintenance depuis le 20/10, support jusqu'au 30/04/2028 ; **Node 26 devient LTS le
+  28/10/2026** (support jusqu'au 30/04/2029) — à reconsidérer après quelques mois de LTS. Le seuil d'avant venait
+  d'`eslint-plugin-jsdoc` 65 (`engines` ≥ 22.22.2), que la 24 couvre. **Sévérité : à savoir.**
 - **Sous `turbo … --force`, des tests dépassent les 5 s de Vitest : la machine est saturée, pas le code** — REPO-260 (18/10, cause
   trouvée). Log capturé : `Error: Test timed out in 5000ms` sur un test de `core/geo/pointInRing` qui passe en **287 ms** au
   repos, pendant une charge moyenne de **71 sur 8 cœurs**. Turbo lance les quatre suites en parallèle, chaque Vitest ouvre un

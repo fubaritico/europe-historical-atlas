@@ -328,7 +328,7 @@ even to read a public package. Put a classic token with the single scope `read:p
 //npm.pkg.github.com/:_authToken=<your token>
 ```
 
-Node 22 (`.nvmrc`), pnpm 10.
+Node 24 (`.nvmrc`), pnpm 10.
 
 [⬆ Back to top](#table-of-contents)
 

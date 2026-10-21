@@ -9,7 +9,8 @@ changed and dropped is in `files/plans/eslint-plugin-eha/plan.md`.
 
 ## Why JavaScript
 
-ESLint imports the plugin as it is. Node 22.14 cannot load a `.ts` file without a flag, and a build step
+ESLint imports the plugin as it is. When it was written, Node 22.14 could not load a `.ts` file without a flag — Node 24,
+the repository's version since 2026-10-21, strips types unflagged, so that reason no longer holds — and a build step
 would put a `dist/` between a rule and every lint that runs it. The files are typed with JSDoc and checked
 by `tsc` (`checkJs`), and the typed lint of the repository reads them like any other source.
 
