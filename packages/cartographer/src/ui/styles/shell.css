@@ -1,0 +1,164 @@
+/*
+ * The editor's shell: the five zones, and nothing inside them.
+ *
+ * Every value here is LIFTED VERBATIM from `files/plans/cartographer/design/chrome.css`, the stylesheet
+ * Claude Design produced on 2026-09-22. None of it was chosen here. What is deliberately *not* lifted is
+ * the other ~700 lines: they style panels, forms, tabs and a check report that do not exist yet, and
+ * shipping CSS for absent markup is dead weight that also reads as a promise.
+ *
+ * **The naming is BEM, and that is what scopes it** — the dev's call, 2026-10-08, when he asked whether
+ * this was CSS modules: it is not, deliberately. A module would hash `.shell__rail` into
+ * `_rail_a1b2`, and a hashed name cannot sit beside or be overridden by a BEM class string coming from
+ * `fubaritico-ds`, whose `variants` package produces exactly those. So one block, `shell`, whose
+ * elements are its zones, plus `empty-zone` as a block of its own — a placeholder is not a zone, it sits
+ * inside one, and inside any of them.
+ *
+ * **The handoff's own class names were flat** (`.app`, `.body`, `.rail`, with no `__` anywhere), so the
+ * names here are ours and the *values* are its. What arrives with the design system is the same
+ * convention with its tokens overridden, which is what will give the editor its Illustrator look — so
+ * replacing this file should be a change of import, not a change of markup.
+ */
+
+/*
+ * The shell's layout sizes. Its colours (`--bg`, `--panel`, `--line`, `--ink`, `--ink-dim`) are declared
+ * once, in `styles/theme.css`, beside the design system's tokens that point at them.
+ */
+:root {
+  --rail: 38px;
+  --tab: 24px; /* a panel tab strip, and its square actions */
+  --dock-w: 280px;
+}
+
+/*
+ * The four rows, and the three columns inside the third.
+ *
+ * `minmax(0, 1fr)` rather than `1fr` in both, which is the handoff's own choice and not a detail: a bare
+ * `1fr` floors at the content's minimum size, so a canvas or a long list would push the grid wider than
+ * the window instead of being clipped by it.
+ *
+ * **The body declares its row too, and that is the half that was missing until 2026-10-14.** The shell's
+ * `minmax(0, 1fr)` bounds the body; it bounds nothing *inside* it. With no `grid-template-rows` the body's
+ * one row is implicit, so `auto`, so as tall as its tallest cell: 137 polities made the dock 3 646px, the
+ * row followed, and the canvas cell stretched with it — a map drawn mostly off-screen that no longer
+ * dragged. The list only scrolls if the row it sits in is held to the window.
+ */
+/*
+ * The page itself is the chrome's grey (the dev, 2026-10-18): the reset leaves `body` with no background, so
+ * whatever the shell does not cover — while the application starts, or if it fails to — showed white.
+ */
+body {
+  background: var(--bg);
+}
+
+.shell {
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: 30px 26px minmax(0, 1fr) 24px;
+  background: var(--bg);
+  color: var(--ink);
+  font:
+    12px system-ui,
+    sans-serif;
+}
+
+.shell__appbar {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+/* No panel fill: the open year's tab is the panel, the rest of the bar the app's ground (the handoff's). */
+.shell__docbar {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+
+.shell__body {
+  display: grid;
+  grid-template-columns: var(--rail) minmax(0, 1fr) var(--dock-w);
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+}
+
+.shell__rail {
+  /* Above the canvas's cell, which comes after it in the tree: a tool group's flyout opens over the map. */
+  position: relative;
+  z-index: 1;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+}
+
+/*
+ * The canvas's cell. `position: relative` is what the canvas inside it is absolutely positioned
+ * against — without it the canvas would size itself to the viewport and overflow every other zone.
+ */
+.shell__canvas {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/*
+ * No focus ring when the canvas was focused by the pointer — the author just clicked it, and the keys
+ * pressed while drawing would otherwise switch the ring back on. Reached by ‹Tab›, the ring stays:
+ * that reader needs to see where the focus landed. See `components/MapArea/utils/focusOrigin.ts`.
+ */
+.shell__canvas canvas[data-focus-origin='pointer'] {
+  outline: none;
+}
+
+.shell__dock {
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+}
+
+/*
+ * The status bar is a row of the shell, not something floating over the map.
+ *
+ * It was drawn over the canvas until 2026-10-08 because there was no shell to put it in. Now that the
+ * grid exists it takes its own 24px row, which is what the handoff specifies and what lets it hold the
+ * action description and a transient result side by side (`s02`) without covering the drawing.
+ */
+.shell__status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+  padding: 0 8px;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+  font:
+    11px ui-monospace,
+    monospace;
+  color: var(--ink-dim);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/*
+ * A zone nobody has built yet.
+ *
+ * It carries its own name, so the layout can be read at a glance and an empty zone is visibly empty
+ * rather than looking like a styling failure. Dim, non-selectable, and it disappears the moment real
+ * content is passed in.
+ */
+.empty-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  color: var(--ink-dim);
+  font:
+    10px ui-monospace,
+    monospace;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  opacity: 0.55;
+  user-select: none;
+  overflow: hidden;
+}

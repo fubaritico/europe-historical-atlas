@@ -217,7 +217,7 @@ Scenario: a loop of homage is never offered
 
 > **The dev's request, 2026-10-17** (the ticket): the suzerain was chosen in a drop-down of every polity of
 > the year, about 150 in 1100. The field is the design system's `Typeahead`, which brings the keyboard and
-> the combobox pattern; the search is `components/PolityForm/suzerainSearch.ts`. A suzerain held that the list does
+> the combobox pattern; the search is `ui/components/PolityForm/utils/suzerainSearch.ts`. A suzerain held that the list does
 > not offer (a loop already in a file) is shown as its id and warned once in the console. **Tested by the
 > dev, 2026-10-17** (the ticket); no walk written down.
 

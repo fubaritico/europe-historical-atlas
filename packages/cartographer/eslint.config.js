@@ -7,6 +7,15 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 
 import rootEslintConfig, { layerBoundary } from '../../eslint.config.js'
 
+/** Where the components live, from this package's root — read by the `eha` rules that police their folders. */
+const COMPONENTS_DIR = 'src/ui/components'
+
+/**
+ * Said by every layer the chrome sits on: the React chrome reads them, never the reverse — the dev, 2026-10-22, when
+ * all of it moved under `ui/` (`rules/architecture.md`, *Components*).
+ */
+const CHROME_ON_TOP = 'Nor may it import ui/: the chrome reads the layers, never the reverse.'
+
 /**
  * The whole-package ban, composed into every boundary row below rather than declared once.
  *
@@ -38,81 +47,63 @@ const CARTOGRAPHER_BOUNDARIES = [
   layerBoundary({ files: ['**/*.{ts,tsx}'], paths: CARTOGRAPHER_IS_2D }),
   layerBoundary({
     files: ['src/viewport/**/*.{ts,tsx}'],
-    forbid: ['state', 'geometry', 'canvas', 'main'],
+    forbid: ['state', 'geometry', 'canvas', 'ui', 'main'],
     paths: CARTOGRAPHER_IS_2D,
-    why: 'viewport/ is the screen↔backdrop arithmetic, and a viewport is data. It may read core’s geo/ for projection maths and nothing else: a pure layer reaching into the store would be the global singleton rules/modular-architecture.md forbids, and it could no longer be exercised with literals.',
+    why: `viewport/ is the screen↔backdrop arithmetic, and a viewport is data. It may read core’s geo/ for projection maths and nothing else: a pure layer reaching into the store would be the global singleton rules/modular-architecture.md forbids, and it could no longer be exercised with literals. ${CHROME_ON_TOP}`,
   }),
   layerBoundary({
     files: ['src/geometry/**/*.{ts,tsx}'],
-    forbid: ['state', 'canvas', 'main'],
+    forbid: ['state', 'canvas', 'ui', 'main'],
     paths: CARTOGRAPHER_IS_2D,
-    why: 'geometry/ is the arithmetic of the gestures — nearest anchor, marquee, ring closure, snapping to a polyline. It works in screen pixels on flat arrays and answers questions; it never edits a document and never reads a store. It may read `viewport/`, which is the leaf that defines screen space, and core’s geo/ and utils/.',
+    why: `geometry/ is the arithmetic of the gestures — nearest anchor, marquee, ring closure, snapping to a polyline. It works in screen pixels on flat arrays and answers questions; it never edits a document and never reads a store. It may read \`viewport/\`, which is the leaf that defines screen space, and core’s geo/ and utils/. ${CHROME_ON_TOP}`,
   }),
   layerBoundary({
     files: ['src/canvas/**/*.{ts,tsx}'],
-    forbid: ['main'],
+    forbid: ['ui', 'main'],
     paths: CARTOGRAPHER_IS_2D,
-    why: 'canvas/ is the painter, and it decides nothing: positions arrive already in screen pixels and colours arrive in a style object. It may read viewport/ and geometry/ for their types, and the store for what to draw — but never the composition root, which is what keeps it mountable in a harness. It takes a structural 2D context rather than CanvasRenderingContext2D, because jsdom has no 2D context and the alternative is not testing the painter at all.',
+    why: `canvas/ is the painter, and it decides nothing: positions arrive already in screen pixels and colours arrive in a style object. It may read viewport/ and geometry/ for their types, and the store for what to draw — but never the composition root, which is what keeps it mountable in a harness. It takes a structural 2D context rather than CanvasRenderingContext2D, because jsdom has no 2D context and the alternative is not testing the painter at all. ${CHROME_ON_TOP}`,
   }),
   layerBoundary({
-    files: ['src/components/**/*.{ts,tsx}'],
+    files: ['src/ui/**/*.{ts,tsx}'],
     forbid: ['main', 'workbench'],
     paths: CARTOGRAPHER_IS_2D,
-    why: 'components/ is the React chrome — it owns DOM elements and wires the layers together, so it may read all of them. It must not reach back into the composition root: a component that imports the entry would run the application to render itself. Nor into the workbench: a plate holds literal fixtures, and a component reading one would ship a fixture as data.',
+    why: 'ui/ is the React chrome — it owns DOM elements and wires the layers together, so it may read all of them. It must not reach back into the composition root: a component that imports the entry would run the application to render itself. Nor into the workbench: a plate holds literal fixtures, and a component, hook or util reading one would ship a fixture as data. The workbench row below wins for its own files.',
   }),
   layerBoundary({
-    files: ['src/workbench/**/*.{ts,tsx}'],
+    files: ['src/ui/workbench/**/*.{ts,tsx}'],
     forbid: ['main'],
     paths: CARTOGRAPHER_IS_2D,
-    why: 'workbench/ is a second root: a development page mounting pieces of the chrome alone, on literal data. It may read every layer, as main does, but never main itself — importing the entry would boot the whole editor, backdrop and all, behind a plate meant to load in a second.',
+    why: 'ui/workbench/ is a second root: a development page mounting pieces of the chrome alone, on literal data. It may read every layer, as main does, but never main itself — importing the entry would boot the whole editor, backdrop and all, behind a plate meant to load in a second.',
   }),
   layerBoundary({
     files: ['src/loaders/**/*.{ts,tsx}'],
-    forbid: ['state', 'canvas', 'components', 'main'],
+    forbid: ['state', 'canvas', 'ui', 'main'],
     paths: CARTOGRAPHER_IS_2D,
     why: 'loaders/ fetches, bakes and projects what the editor draws on. These modules sat beside the composition root until 2026-10-18, because they are what it wires together — but they are not it: they hold real logic and real tests, so they must not reach into the store, the painter, a component, or the entry. Found in review on 2026-10-07, when they had no row at all and only the package-wide three.js ban covered them; the atlas gets away with the same shape because nothing there interrogates its config, while this package has boundaries.test.ts precisely so a missing row cannot go quiet.',
   }),
   layerBoundary({
     files: ['src/persistence/**/*.{ts,tsx}'],
-    forbid: ['geometry', 'canvas', 'components', 'devServer', 'workbench', 'main'],
+    forbid: ['geometry', 'canvas', 'ui', 'devServer', 'workbench', 'main'],
     paths: CARTOGRAPHER_IS_2D,
     why: 'persistence/ is the editor seen from its year on disk — open it, save it, through a port. It talks to the store through a structural type and to the server over HTTP only: importing devServer/ would put the server’s validation in the browser bundle and blur the one seam the online tier will replace. It never knows how anything is drawn.',
   }),
   layerBoundary({
     files: ['src/devServer/**/*.{ts,tsx}'],
-    forbid: [
-      'state',
-      'viewport',
-      'geometry',
-      'canvas',
-      'components',
-      'persistence',
-      'workbench',
-      'main',
-    ],
+    forbid: ['state', 'viewport', 'geometry', 'canvas', 'ui', 'persistence', 'workbench', 'main'],
     paths: CARTOGRAPHER_IS_2D,
     why: 'devServer/ runs inside the Vite server, not the page: it validates a year through core and writes it to disk through an injected folder. It may reach into nothing of the application — the browser is on the other side of an HTTP request — and only the composition root names it, for the route the two share (yearWriteRoute.ts).',
   }),
   layerBoundary({
     files: ['src/wikidata/**/*.{ts,tsx}'],
-    forbid: [
-      'state',
-      'geometry',
-      'canvas',
-      'components',
-      'persistence',
-      'devServer',
-      'workbench',
-      'main',
-    ],
+    forbid: ['state', 'geometry', 'canvas', 'ui', 'persistence', 'devServer', 'workbench', 'main'],
     paths: CARTOGRAPHER_IS_2D,
     why: 'wikidata/ reads a public item and says what it holds — names, dates, what it belonged to (CARTO-243). It is a port and pure readers: it knows nothing of the store, the form or the year on disk, so the form and the year check can run it against a stub, and nothing of the editor leaks into a request sent outside.',
   }),
   layerBoundary({
     files: ['src/state/**/*.{ts,tsx}'],
-    forbid: ['geometry', 'canvas', 'main'],
+    forbid: ['geometry', 'canvas', 'ui', 'main'],
     paths: CARTOGRAPHER_IS_2D,
-    why: 'state/ owns what is being edited and must not know how it is *drawn*: the canvas and the tools read the store, never the reverse, which is what keeps the store exercisable without a canvas. `viewport/` is deliberately NOT on this list — it is a leaf of pure arithmetic, read from above exactly as core’s geo/ and utils/ are read by its data/, and step 4d puts the settled viewport in a slice. Forbidding it would have been a symmetry where the principle is a direction, and it would have blocked the case we want. What keeps per-frame pan and zoom out of the store is a rule about when `set` is called (rules/troubleshooting.md), not an import ban — a ban would equally block the committed value the static canvas reads.',
+    why: `state/ owns what is being edited and must not know how it is *drawn*: the canvas and the tools read the store, never the reverse, which is what keeps the store exercisable without a canvas. \`viewport/\` is deliberately NOT on this list — it is a leaf of pure arithmetic, read from above exactly as core’s geo/ and utils/ are read by its data/, and step 4d puts the settled viewport in a slice. Forbidding it would have been a symmetry where the principle is a direction, and it would have blocked the case we want. What keeps per-frame pan and zoom out of the store is a rule about when \`set\` is called (rules/troubleshooting.md), not an import ban — a ban would equally block the committed value the static canvas reads. ${CHROME_ON_TOP}`,
   }),
 ]
 
@@ -210,22 +201,23 @@ export default tseslint.config(
 
   // One entity per file, in a folder per component behind its barrel — the dev's call, 2026-10-18: *« quand
   // tu te balades d'entité en entité … c'est plus facile à lire quand on les a séparément »*. Held for the
-  // components already moved into their folder (`src/components/<Name>/`); a flat file is held the day it
-  // moves, so the migration goes folder by folder with the lint green at every step.
+  // components already moved into their folder (`src/ui/components/<Name>/` since 2026-10-22, when the React
+  // chrome moved under `ui/`). The two `eha` rules that read a component's folder are told where it is; their
+  // default is `src/components`.
   {
-    files: ['src/components/*/**/*.{ts,tsx}'],
+    files: ['src/ui/components/*/**/*.{ts,tsx}'],
     ignores: ['**/*.test.{ts,tsx}'],
     rules: {
       'react/no-multi-comp': 'error',
       'eha/one-hook-per-file': 'error',
       // A hook only that component uses in `hooks/`, a child only it uses in `internal/` (the dev, 2026-10-18).
-      'eha/component-folder-layout': 'error',
+      'eha/component-folder-layout': ['error', { componentsDir: COMPONENTS_DIR }],
     },
   },
   // A component's folder is private behind its barrel: from anywhere else, only `<Name>` itself is imported.
   {
     files: ['src/**/*.{ts,tsx}'],
-    rules: { 'eha/no-reach-into-component': 'error' },
+    rules: { 'eha/no-reach-into-component': ['error', { componentsDir: COMPONENTS_DIR }] },
   },
 
   // Architecture boundaries, last so nothing can replace the single `no-restricted-imports` rule after

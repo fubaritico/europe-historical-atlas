@@ -8,9 +8,9 @@ import { componentPathOf, componentsDirOf } from '../../utils/componentPath.js'
  * `<Name>` itself, its `index`, may be imported. Inside the folder, its files reach one another freely.
  * That covers its `utils/` and `i18n/` as much as its `hooks/` and `internal/`.
  *
- * **What several components use sits beside `components/`** (`src/hooks/`, `src/utils/`, `src/i18n/` — the
- * dev's call, 2026-10-22), so no folder in `components/` is open to all: the `shared/` exception of 2026-10-18
- * is gone with the folder.
+ * **What several components use sits beside `components/`** (in the Cartographer `src/ui/hooks/`, `src/ui/utils/`,
+ * `src/ui/i18n/` — the dev's call, 2026-10-22), so no folder in `components/` is open to all: the `shared/`
+ * exception of 2026-10-18 is gone with the folder.
  */
 
 /**
