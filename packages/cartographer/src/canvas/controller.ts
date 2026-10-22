@@ -413,7 +413,7 @@ function keyTakenFirst(it: LiveCanvas, event: KeyboardEvent): boolean {
 
 /**
  * Pan for an arrow key — a bare one: ‹cmd+↑› and its kin restack the selected polity
- * (`utils/stackingShortcut`), and must reach the page rather than move the map.
+ * (`ui/utils/stackingShortcut`), and must reach the page rather than move the map.
  * @param it - the attachment
  * @param event - the key event
  * @returns `true` when the key panned

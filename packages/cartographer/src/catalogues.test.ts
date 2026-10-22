@@ -23,7 +23,7 @@ import type { ComputePhase } from '@europe-historical-atlas/core/pipeline/mapCom
 // Every catalogue of the Cartographer, found by its file name rather than listed: a catalogue added later is
 // checked without anyone remembering to add it here (ATLAS-159).
 const MODULES = import.meta.glob<Record<string, unknown>>(
-  ['./**/i18n/index.ts', './i18n/*/index.ts'],
+  ['./**/i18n/index.ts', './**/i18n/*/index.ts'],
   { eager: true }
 )
 

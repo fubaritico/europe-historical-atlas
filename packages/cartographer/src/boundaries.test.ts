@@ -75,9 +75,10 @@ const LAYERS = {
   geometry: 'src/geometry/hitTest.ts',
   state: 'src/state/editionSlice.ts',
   canvas: 'src/canvas/paint/painter.ts',
-  components: 'src/components/Editor/Editor.tsx',
+  components: 'src/ui/components/Editor/Editor.tsx',
+  uiShared: 'src/ui/hooks/useTranslation.ts',
   loaders: 'src/loaders/vectorLayers.ts',
-  workbench: 'src/workbench/Workbench.tsx',
+  workbench: 'src/ui/workbench/Workbench.tsx',
   persistence: 'src/persistence/yearSession.ts',
   devServer: 'src/devServer/yearWritePlan.ts',
   wikidata: 'src/wikidata/wikidataFacts.ts',
@@ -173,6 +174,34 @@ describe('architecture boundaries', () => {
       expect(forbiddenPatterns(loaders)).toContain('**/canvas/**')
       // And the package ban survives the composition, which is the single-rule trap.
       expect(forbiddenPackages(loaders)).toContain('three')
+    })
+
+    it('keeps the whole chrome out of every layer it sits on, not only its components', () => {
+      // Since 2026-10-22 the chrome is one folder, `ui/`, and it reads the layers, never the reverse (the
+      // dev's call). A row still naming `components/` would let a layer import every hook, util and sheet.
+      for (const layer of [
+        'viewport',
+        'geometry',
+        'state',
+        'canvas',
+        'loaders',
+        'persistence',
+        'devServer',
+        'wikidata',
+      ]) {
+        expect(
+          forbiddenPatterns(resolved.get(layer) ?? {}),
+          `${layer} must not reach ui/`
+        ).toContain('**/ui/**')
+      }
+    })
+
+    it('holds what the components share to their direction, not only the components', () => {
+      // `ui/hooks/`, `ui/utils/`, `ui/i18n/`… had no row before the move: a hook could import the entry.
+      const shared = forbiddenPatterns(resolved.get('uiShared') ?? {})
+
+      expect(shared).toContain('**/main.{ts,tsx}')
+      expect(shared).toContain('**/workbench/**')
     })
 
     it('keeps the browser side and the server side of saving apart, both ways', () => {

@@ -18,7 +18,8 @@ decision already recorded in `rules/` — nothing is recalled. **React 19.3.0** 
 **One file, one component.** What only that component needs sits in its folder: its hooks in `hooks/`, its
 children in `internal/`, **its functions in `utils/`** (one per file — never beside the component in its
 `.tsx`), **its texts in `i18n/`** (`fr.json`, `en.json`, an `index.ts`). What several use goes **one level
-up, beside `components/`** — `src/hooks/`, `src/utils/`, `src/i18n/`. Nothing in `components/` but components.
+up, beside `components/` in `src/ui/`** — `ui/hooks/`, `ui/utils/`, `ui/i18n/`; what the canvas or the store also
+reads stays at the package root (`src/i18n/`). Nothing in `components/` but components, nothing React outside `ui/`.
 The table is in `rules/architecture.md`, *Components*.
 
 **A text comes from the language provider**: `useTranslation(ITS_MESSAGES)` in the component, no memo (`core`

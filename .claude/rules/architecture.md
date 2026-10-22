@@ -76,14 +76,24 @@ packages/
 │   ├── vitest.config.ts    # jsdom + the React plugin
 │   ├── vitest.setup.ts     # unmounts after each test; stands in for the canvas, ResizeObserver, <dialog>
 │   ├── workbench.html      # the workbench: chrome pieces mounted alone, never built (2026-10-09)
-│   └── src/                # 2D canvas and React chrome; styles/sheets.ts holds the one stylesheet order
+│   └── src/                # 2D canvas and React chrome; main.tsx, the composition root, wires the two
 │       ├── viewport/       # the screen↔backdrop arithmetic: projection, framing, zoom, reach — pure
+│       ├── geometry/       # the arithmetic of the gestures: hit tests, marquee, snaps — pure
 │       ├── canvas/         # the controller and the live canvas at the root; tools/ (gestures, snaps),
 │       │                   #   paint/ (painters, scene, style, cursors), history/ (undo keys and relay)
+│       ├── state/          # the store and its slices, read by the canvas and the chrome alike
 │       ├── persistence/    # the year on disk: open, save, snapshots; draft/ holds the automatic draft
 │       ├── loaders/        # fetch, bake and project the backdrop and the vector layers
-│       └── components/     # one folder per component: <Name>/<Name>.tsx and its test at the root,
-│                           #   hooks/ (its own hooks), internal/ (its own children), index.ts (2026-10-18)
+│       ├── wikidata/       # a public item read and said: names, dates, what it belonged to
+│       ├── devServer/      # runs in the Vite server, not the page: writes a year to disk
+│       ├── i18n/           # the language store, and the catalogues the canvas and the store read
+│       └── ui/             # the React chrome, all of it (2026-10-22) — outside it, only main imports it
+│           ├── components/ # one folder per component: <Name>/<Name>.tsx and its test at the root,
+│           │               #   hooks/ (its own hooks), internal/ (its own children), index.ts (2026-10-18)
+│           ├── hooks/ utils/ i18n/   # what several components share
+│           ├── styles/     # the sheets; styles/sheets.ts holds the one stylesheet order
+│           ├── icons/ testing/       # the glyphs; the render helpers of the chrome's tests
+│           └── workbench/  # the workbench page's plates
 └── eslint-plugin-eha/  # the lint rules of this repository: where each declaration sits (2026-10-12)
     ├── tsconfig.json       # JavaScript checked by tsc (`checkJs`): ESLint imports it with no build step
     ├── vitest.config.ts    # node: ESLint never runs in a page
@@ -101,7 +111,9 @@ rule at all: green over code nothing had checked.
 **Components: a folder each, a barrel each — and no barrel of barrels** (the dev's call, 2026-10-18, his
 convention in `vite-mf-monorepo`, `nextjs-multizone-tmdb` and `date-time-picker`). **One file, one component, and
 everything a component needs scoped to its folder** (the dev, 2026-10-22: *« les choses qui concernent des
-composants doivent être scopées par rapport aux composants »*). `components/<Name>/` holds:
+composants doivent être scopées par rapport aux composants »*). **Everything React is under `src/ui/`** (the dev,
+2026-10-22: *« tout ce qui concerne React, en fait, c'est de l'interface utilisateur »*), so the package root holds
+the layers and not fifty folders. `ui/components/<Name>/` holds:
 
 | where | what |
 | --- | --- |
@@ -113,12 +125,16 @@ composants doivent être scopées par rapport aux composants »*). `components/<
 | a types file at the root | the shapes its parts share (`polityFieldsProps.ts`, `layerListProps.ts`) |
 | `index.ts` | what the rest of the application uses — the folder's only door |
 
-**What several use goes up one level, beside `components/`**: `src/hooks/` (`useTranslation`, `useLocale`…),
-`src/utils/` (`polityDraft`, `arrange`, `statusBar`…), `src/i18n/` (the language store, its context, and the
-catalogues several parts read: `actions`, `tools`, `polity`, `border`, `colourPicker`, `app`). A shared
-*component* gets its own folder like any other (`ToolIcon/`, `Panel/`, `LocaleProvider/`). **There is no
-`components/shared/` any more** (removed 2026-10-22: it held no component). A stylesheet stays in `styles/`, the
-one module that orders the cascade. Four rules hold it: `react/no-multi-comp`, `eha/one-hook-per-file`,
+**What several components use goes up one level, beside `components/` in `ui/`**: `ui/hooks/` (`useTranslation`,
+`useLocale`…), `ui/utils/` (`polityDraft`, `arrange`, `statusBar`…), `ui/i18n/` (the language's React context, and
+the catalogues only the chrome reads: `actions`, `app`, `arrange`, `border`, `colourPicker`). **What the chrome
+shares with the rest stays at the package root**: `src/i18n/` keeps the language store and the catalogues the
+canvas and the store read (`tools`, `polity`). **A layer stays whole** — `canvas/`, `viewport/`, `geometry/`,
+`state/`… keep their files even where only the chrome imports one (the controller, `zoomLabel`): the chrome reads
+the layers, never the reverse, and `loaders/`, `persistence/`, `devServer/`, `wikidata/` are forbidden `ui/` by
+lint. A shared *component* gets its own folder like any other (`ToolIcon/`, `Panel/`, `LocaleProvider/`). **There
+is no `components/shared/` any more** (removed 2026-10-22: it held no component). A stylesheet stays in
+`ui/styles/`, the one module that orders the cascade. Four rules hold it: `react/no-multi-comp`, `eha/one-hook-per-file`,
 `eha/component-folder-layout` (what sits where), and `eha/no-reach-into-component` — over all of `src/` — so
 nothing outside a folder imports anything in it but its `index`. **No `components/index.ts`**: a barrel of every
 component is the one that makes cycles, and the subpath rule below already refuses it for `core`.

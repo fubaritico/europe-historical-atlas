@@ -14,7 +14,7 @@ local dans `~/.npmrc`, `github.token` en CI). **La 0.7.0 nomme chaque jeton de c
 DS, sans erreur, et `theme.test.ts` refuse une surcharge qui nomme un rôle disparu. Le plan
 (`files/plans/cartographer/design-system-integration.md`) est **fait jusqu'au pas 4**.
 
-1. **Une seule cascade, dans un seul module** : `styles/sheets.ts` — tokens → peau → thème → reset (dans
+1. **Une seule cascade, dans un seul module** : `ui/styles/sheets.ts` — tokens → peau → thème → reset (dans
    `@layer ui.reset`) → shell → `editor-chrome.css`. L'app et l'établi l'importent ; un test refuse tout
    import de feuille ailleurs. **Une règle hors layer bat tout layer** : c'est ce qui fait gagner nos
    surcharges, et c'est ce qui aurait fait perdre le DS contre un reset hors layer.
