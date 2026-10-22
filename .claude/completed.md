@@ -2,6 +2,27 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-10-22, le soir — `ui/` mergé, `?break=`, « entité politique », les sources, Payload vérifié
+
+Plage au journal **22/10 16:53 → 19:43 (2 h 49, 151 actions)** ; le chantier ouvert le 05/10 totalise **106 h 08 sur
+19 plages**. **7 commits** `403a72a`..`2e26931`, **non poussés**. La seconde moitié s'est faite **à distance** (Remote
+Control) : le dev l'a jugée *« ingérable »* et a fermé la session.
+
+- **CARTO-267** testé, commité, mergé, worktree supprimé avec sa permission → Fait. **ATLAS-159** testé en cinq gestes
+  écrits pour lui (la première consigne, floue, l'a fâché : *« faut surtout pas être précis »*) → Fait.
+- **`?break=<zone>`** (sa demande) : chaque boundary a une zone typée et stable ; en développement seulement, vérifié dans
+  le build. Idée des feature flags → CARTO-268.
+- **« entité politique »** remplace « pays » dans le Cartographe — sa décision ; le rang `country` et l'atlas gardent
+  « pays », mon choix, noté comme tel au glossaire.
+- **Les sources** : sa règle, *« on ne peut pas fermer la porte derrière nous »* — chaque année cite toutes ses sources ;
+  liste sur ATLAS-152, skill `/create-data-mention` (sa demande), bibliothèque de ses atlas `files/plans/sources/`. La
+  carte des Chaddadides (CC BY-SA) se déclare redessinée de Hewsen 2001 → référence, pas calque.
+- **Planification** (sa demande, à distance) : palier 2 de DESIGN-262 conçu → CORE-270 (Backlog), barème des sources
+  tranché par lui ; **CONTRIB-218** Payload vérifié dans le code → À valider.
+- **Mes fautes** : un `git add` de tout ce qui était modifié a embarqué ses données de 1100 dans un commit (défait par
+  `reset --soft`) ; « litiges » pour une guerre d'édition ; un éditeur écrit de mémoire dans une mention ; des réponses
+  qui renvoyaient à « un document » alors qu'il était loin de son écran.
+
 ### 2026-10-22, l'après-midi — tout le React du Cartographe dans `ui/` (CARTO-267)
 
 Le journal ne compte que **13:16 → 13:56 (78 actions)** ; le travail a duré plus longtemps, une partie n'a pas été
@@ -17,25 +38,4 @@ journalisée — aucune durée inventée ici. Fait dans un **worktree** (`~/Desk
 - **Mes fautes** : un premier traceur à expressions régulières qui ratait les `?raw` ; une première règle (« ce qui ne sert
   qu'à l'UI y va ») qui avalait tout `canvas/`, remplacée par « une couche reste entière » ; un `why` du lint cassé.
 
-### 2026-10-22 — tout le Cartographe en fr/en, des catalogues JSON par portée, la langue par un provider
-
-Une plage au journal, **22/10 10:20 → 13:14 (2 h 53, 376 actions)** ; le chantier ouvert le 05/10 totalise **102 h 25 sur
-18 plages**. **1 commit, `bc0be07`, non poussé** à la demande du dev (*« tu commites, tu ne pousses pas »*). Le dev
-n'a pas lancé le Cartographe : il réorganisait le dépôt du design system en parallèle.
-
-- **ATLAS-159, 3b et 3c d'un bloc** — après une première revue, le dev : *« il ne faut pas qu'il y ait de mélange entre
-  les langues […] c'est qu'il n'y a pas eu extraction de label »*. Tout texte vient d'un catalogue : panneaux,
-  dialogues, barres, rail, carte, canevas, noms d'étapes, couche disque, sélecteur de couleur du DS (ses `labels` et un
-  `describeColour` porté de ses seuils, testé mot pour mot contre l'original). La raison technique d'un échec va à la
-  console, la phrase le dit (ma décision, présentée). Chaque `select` fermé nomme tous ses membres : le test a trouvé
-  une soudure sur une frontière juste par hasard.
-- **Ses quatre remarques de structure, appliquées** : pourquoi des hooks et des `useMemo` pour traduire, *« elle est où la
-  locale ? »* → un `LocaleProvider` sur un store, plus de memo (`core` garde ses traducteurs) ; les fonctions à côté des
-  composants → `<Composant>/utils/` ; `components/shared/` → dissous, ce qui sert à plusieurs remonte à côté de
-  `components/` ; fr et en dans un même fichier → `i18n/fr.json` + `en.json` par portée, livrés tous deux. Mémoire
-  `scope-everything-to-its-component`.
-- **Mes fautes** : trois `cd` ; une règle de lint inventée pour imposer sa convention (*« qu'est-ce que c'est encore que ce
-  truc »*) ; des `useMemo` et des mots figés dans la langue de départ ; `errorReason.ts` supprimé sans chercher dans les
-  `.tsx` ; un sabotage de vérification qui modifiait les deux langues ; un exemple de couleur calculé en HSV au lieu de HSL.
-
-> Older sessions (2026-09-12 → 2026-10-21, the evening) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-22, the morning) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

@@ -2,6 +2,27 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-10-22 — tout le Cartographe en fr/en, des catalogues JSON par portée, la langue par un provider
+
+Une plage au journal, **22/10 10:20 → 13:14 (2 h 53, 376 actions)** ; le chantier ouvert le 05/10 totalise **102 h 25 sur
+18 plages**. **1 commit, `bc0be07`, non poussé** à la demande du dev (*« tu commites, tu ne pousses pas »*). Le dev
+n'a pas lancé le Cartographe : il réorganisait le dépôt du design system en parallèle.
+
+- **ATLAS-159, 3b et 3c d'un bloc** — après une première revue, le dev : *« il ne faut pas qu'il y ait de mélange entre
+  les langues […] c'est qu'il n'y a pas eu extraction de label »*. Tout texte vient d'un catalogue : panneaux,
+  dialogues, barres, rail, carte, canevas, noms d'étapes, couche disque, sélecteur de couleur du DS (ses `labels` et un
+  `describeColour` porté de ses seuils, testé mot pour mot contre l'original). La raison technique d'un échec va à la
+  console, la phrase le dit (ma décision, présentée). Chaque `select` fermé nomme tous ses membres : le test a trouvé
+  une soudure sur une frontière juste par hasard.
+- **Ses quatre remarques de structure, appliquées** : pourquoi des hooks et des `useMemo` pour traduire, *« elle est où la
+  locale ? »* → un `LocaleProvider` sur un store, plus de memo (`core` garde ses traducteurs) ; les fonctions à côté des
+  composants → `<Composant>/utils/` ; `components/shared/` → dissous, ce qui sert à plusieurs remonte à côté de
+  `components/` ; fr et en dans un même fichier → `i18n/fr.json` + `en.json` par portée, livrés tous deux. Mémoire
+  `scope-everything-to-its-component`.
+- **Mes fautes** : trois `cd` ; une règle de lint inventée pour imposer sa convention (*« qu'est-ce que c'est encore que ce
+  truc »*) ; des `useMemo` et des mots figés dans la langue de départ ; `errorReason.ts` supprimé sans chercher dans les
+  `.tsx` ; un sabotage de vérification qui modifiait les deux langues ; un exemple de couleur calculé en HSV au lieu de HSL.
+
 ### 2026-10-21, le soir — le design system 0.7.0, la date historique, l'internationalisation maison
 
 Même plage au journal que la session de l'après-midi, **21/10 17:24 → 23:33 (6 h 08 en tout, ce soir ~20:01 → 23:33,
