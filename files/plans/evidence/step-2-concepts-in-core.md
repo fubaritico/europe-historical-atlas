@@ -147,8 +147,9 @@ on 19/10.
 
 ## 8. Questions for the dev
 
-1. **The kinds of source** — `primary`, `historian-atlas`, `scholarly`, `encyclopaedia`, `crowd-database`: the
-   right five? And their **weights**, which are yours to set (plan §8, point 4).
+1. ~~**The kinds of source** and their weights~~ — **decided by the dev, 2026-10-22**: five kinds, weights
+   `primary` 4 · `historian-atlas` 3 · `scholarly` 3 · `encyclopaedia` 2 · `crowd-database` 1 (*« on peut partir sur ce
+   barème-là »*). Still a table the contributor can change, injected, never a default inside the computation.
 2. **A contradicting witness lowers concordance** — proposed above. The alternative is to count only support,
    which would make a contested claim look as good as an undisputed one.
 3. **When do two dates overlap** — is *circa 1100* in competition with *1105*? Proposed: an instant *circa* is
