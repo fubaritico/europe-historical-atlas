@@ -308,7 +308,7 @@ Each rung is verified and committed alone; each becomes a checklist item on DESI
 1. **The historical date** (CORE-217) — every claim is dated: a bond *1125–1284*, a dependence *circa 1100*.
    The machine cannot be written before its dates.
 2. **The concepts in `core`** — territory, dependence, bond; source, claim, evidence; attestation and
-   concordance computed. Pure, tested with literals.
+   concordance computed. Pure, tested with literals. — CORE-270; design proposed in `evidence/step-2-concepts-in-core.md` (22/10).
 3. **The source register** — the place in the contribution that lists the sources (§8, point 4), first in
    the Cartographer, which is where maps are contributed.
 4. **The first connector** (REPO-261) — *a territory, a date → the territories that depend on it*, each
