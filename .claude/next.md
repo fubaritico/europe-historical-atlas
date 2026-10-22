@@ -5,42 +5,39 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — demain matin, ATLAS-159 au même point : les catalogues des composants du Cartographe
+## ▶ ON REPREND ICI — une session neuve, tout de suite après celle du 22/10 matin
 
-**Le dev l'a demandé en partant (21/10, 23:35) : « on reprendra demain matin au même point ».** Tout est commité et poussé
-(`e61c84e`). ATLAS-159 est **En cours** : l'internationalisation maison, décidée ce soir — *« pas possible de mettre des
-labels en dur »*. Fait : le moteur (`core/src/i18n/`), l'atlas bilingue, et dans le Cartographe les fondations (étape 3a,
-`ec974b6`) : `LocaleContext` à la racine (`pickLocale(navigator.languages)`), `useTranslation(catalogue)`, une
-`ErrorBoundary` par zone. Les décisions sont dans `plan.md` P8 et `rules/error-handling.md`.
+**Le dev a fermé la session pour libérer la fenêtre de contexte : *« tu as une dernière chose à faire »* — il dira laquelle
+en rouvrant.** Tout est commité (`bc0be07`), **rien n'est poussé** : `git ls-remote origin main` est en retard d'un commit.
 
-**Ce qui reste, dans l'ordre :**
-1. **3b — un catalogue par composant**, dans son dossier, et **un catalogue partagé des actions** (`components/shared/`) pour
-   ce que plusieurs menus offrent : enregistrer, ouvrir, annuler/rétablir, nouveau pays, supprimer, les quatre déplacements
-   d'empilement, fermer — un libellé par action (l'objection du dev : la même action dans un menu contextuel et la barre de
-   menus). ~70 textes inventoriés, plus les modules hors React (`arrange.ts`, `polityDraft.ts`, `wikidataView.ts`,
-   `polityDeletion.ts`, `stackingLabels.ts`) qui reçoivent le traducteur en paramètre. **Une aide de test** monte un
-   composant en anglais (31 fichiers de test, ~100 `render`). Deux commits : panneaux et dialogues, puis barres, rail, carte.
-2. **3c — les phrases des outils du canevas** (`canvas/tools/toolSession.ts`, `retrace.ts`, `borderSnap.ts`,
-   `state/toolSlice.ts`) : le traducteur est injecté dans le contrôleur.
-3. **Deux réponses du dev, attendues** : (a) une erreur levée pendant un geste n'est montrée nulle part — proposé : en rouge
-   dans la barre d'état, où s'écrivent les résultats ; (b) le texte brut de l'erreur dans une boundary (SEC-001) — proposé :
-   en développement seulement.
-4. **`/doctor prompt-audit`** : `.claude/` a changé, à lui faire taper.
+**ATLAS-159 est En cours, le code est fini, le test du dev manque.** Tout texte du Cartographe vient d'un catalogue,
+`i18n/fr.json` + `en.json` par portée ; la langue vient de `LocaleProvider` ; `components/shared/` n'existe plus. La
+convention est dans `rules/architecture.md`, *Components*, et la mémoire `scope-everything-to-its-component`.
 
-**Pour travailler** : quand il est dans le Cartographe, un **worktree** — et lui dire où il est, et ne jamais le supprimer
-après l'y avoir envoyé (faute du 21/10). Mon shell démarre sous Node 22 : forcer la 24 (`known-issues/tooling.md`). Parler
-avec **ses** mots (le Typeahead, pas une « liste de saisie »), un point à la fois.
+**Ce qui attend le dev :**
+1. **Tester dans un navigateur en français** — les panneaux, le rail, le menu d'un pays au clic droit (« Premier plan »), une
+   suppression (« Son anneau disparaît »), un enregistrement (« 1100 enregistré · … »). Puis `done ATLAS-159` et pousser.
+2. **Deux réponses, toujours** : (a) une erreur levée pendant un geste n'est montrée nulle part — proposé : en rouge dans la
+   barre d'état ; (b) le texte brut de l'erreur sous une boundary et sous l'échec du fond (SEC-001) — proposé : en
+   développement seulement.
+3. **Valider une décision de moi** : la raison technique d'un échec (mots d'un serveur, du navigateur, toujours anglais) ne
+   s'écrit plus dans la barre d'état — elle va à la console, la phrase dit « (détail dans la console) ».
+4. **`/doctor prompt-audit`** : `.claude/` a changé (architecture, skill du modèle de composant), à lui faire taper.
+
+**Pour travailler** : quand il est dans le Cartographe, un **worktree** — et lui dire où il est. Mon shell démarre sous
+Node 22 : préfixer `PATH=~/.nvm/versions/node/v24.22.1/bin:$PATH`. **Jamais de `cd`** (trois le 22/10). Parler avec **ses**
+mots, un point à la fois.
 
 **Le tableau** : `/trello` → `list`. Un élément du tableau est un **ticket**, jamais une « carte ».
 
 | où | ticket | état |
 | --- | --- | --- |
 | **Chantiers** | DESIGN-262 La gestion de l'incertitude | l'initiative ; CORE-217 (son palier 1) est **Fait** |
-| **En cours** | ATLAS-159 L'atlas et le Cartographe en français et en anglais | 3a fait ; 3b et 3c restent |
+| **En cours** | ATLAS-159 L'atlas et le Cartographe en français et en anglais | codé, commité `bc0be07`, **attend son test** |
 | **En cours** | ATLAS-145, ATLAS-152 | inchangés depuis le 18/10 |
-| **À valider par le développeur** | CARTO-237, CARTO-116, CARTO-122 | inchangés ; CARTO-122 : la demande de `role="menu"` est reçue par le DS, pas dans la 0.7.0 |
+| **À valider par le développeur** | CARTO-237, CARTO-116, CARTO-122 | inchangés ; CARTO-122 attend le `role="menu"` du DS |
 | **À faire**, en tête | CORE-252 (le format d'un événement) | palier de DESIGN-262 ; vient après la mécanique |
-| **Idées** | ATLAS-266 Choisir la langue, et s'en souvenir | la règle `localStorage` → navigateur → anglais y est écrite |
+| **Idées** | ATLAS-266 Choisir la langue, et s'en souvenir | prêt côté code ; les noms d'étapes de l'historique restent à rendre traduisibles (commentaire du 22/10) |
 
 **Toujours en attente, à lui proposer un jour** : le relief niveau 6 du Cartographe (une ligne, `main.tsx` →
 `/heightmaps/europe-dem-z6-1920`, `rules/known-issues/cartographer.md`) ; ce qu'il a tiré de ses lectures du §7 et de
@@ -48,7 +45,7 @@ l'introduction du PDF d'Euratlas.
 
 ## Where we are
 
-**4 387 tests** (1 262 `core` · 1 963 Cartographe · 995 atlas · 167 plugin `eslint-plugin-eha`, 21/10), gate
+**4 617 tests** (1 263 `core` · 2 190 Cartographe · 995 atlas · 169 plugin `eslint-plugin-eha`, 22/10), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 

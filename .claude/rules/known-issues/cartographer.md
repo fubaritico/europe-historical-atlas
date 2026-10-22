@@ -161,3 +161,11 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   (`import.meta.env.DEV`), à décider avant la démonstration en ligne (CARTO-200). **Et ce qu'aucune boundary ne voit** : une
   erreur levée pendant un geste (gestionnaire d'événement, `requestAnimationFrame`) n'est montrée nulle part — le Cartographe n'a
   pas de filet de page ; proposé au dev : en rouge dans la barre d'état. **Sévérité : à savoir.**
+- **Les noms d'étapes de l'historique ne suivraient pas un changement de langue** — ATLAS-266 (22/10, revue ARCH-001). Tout
+  autre texte suit `LocaleProvider` ; un nom d'étape, lui, est écrit en texte dans `HistoryStep.label` (`core/editor/history`)
+  au moment du geste, donc « Annuler insérer une ancre » resterait en français après un passage à l'anglais. Sans effet tant
+  que la langue ne change pas en cours de session. Remède, avec ATLAS-266 : garder dans l'étape la clé et ses valeurs
+  (`kind` + `{count, name}`) et traduire à l'affichage, côté Cartographe — touche le format du brouillon et des
+  instantanés. **Et un piège de test** : `getByText` de Testing Library replie l'espace fine insécable (`\u202f`, avant
+  « ? » et « ; » en français) en espace dans le texte de la page, **pas** dans la chaîne attendue — comparer le
+  `textContent` exact. **Sévérité : à savoir.**
