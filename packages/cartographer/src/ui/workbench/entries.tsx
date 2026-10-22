@@ -210,7 +210,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
     width: 280,
     render: () => (
       <div className="workbench__zone">
-        <ErrorBoundary zone="a workbench plate">
+        <ErrorBoundary zone="dock">
           <BrokenZone />
         </ErrorBoundary>
       </div>
@@ -223,7 +223,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
     width: 480,
     render: () => (
       <div className="workbench__zone workbench__zone--map">
-        <ErrorBoundary zone="a workbench plate" retry>
+        <ErrorBoundary zone="map" retry>
           <BrokenZone />
         </ErrorBoundary>
       </div>
@@ -236,7 +236,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
     width: 480,
     render: () => (
       <div className="workbench__zone workbench__zone--bar">
-        <ErrorBoundary zone="a workbench plate" compact>
+        <ErrorBoundary zone="status-bar" compact>
           <BrokenZone />
         </ErrorBoundary>
       </div>

@@ -2,12 +2,15 @@ import { useId } from 'react'
 
 import { ErrorBoundary } from '../ErrorBoundary'
 
+import type { Zone } from '../ErrorBoundary'
 import type { ReactNode, Ref } from 'react'
 
 /** What every panel of the dock is made of. */
 export interface PanelProps {
   /** Its name — the tab in its head, and what assistive tech calls the region. */
   title: string
+  /** Its zone — stable whatever the language, for the console and `?break=` (`ErrorBoundary`). */
+  zone: Zone
   /**
    * Whether it takes the height the dock has left, its body scrolling inside it — `{Polities}`, the one
    * long list. Without it, the panel is as tall as what it holds.
@@ -34,13 +37,14 @@ export interface PanelProps {
  * cannot drift apart), and it holds no state and reaches no storage.
  * @param props - the name, whether it fills the dock, the foot and the view
  * @param props.title - its name, written as the tab in its head and naming the region
+ * @param props.zone - its zone, behind the boundary every panel shares
  * @param props.fill - whether it takes the height the dock has left, its body scrolling; `false` by default
  * @param props.foot - a bar pinned at its foot, under the body
  * @param props.children - the view the panel holds
  * @param props.ref - the panel's element, for a binding that hands the focus back into it
  * @returns the panel
  */
-export function Panel({ title, fill = false, foot, children, ref }: PanelProps) {
+export function Panel({ title, zone, fill = false, foot, children, ref }: PanelProps) {
   // Ids
   const heading = useId()
 
@@ -54,7 +58,7 @@ export function Panel({ title, fill = false, foot, children, ref }: PanelProps) 
       </header>
       {/* Every panel guarded by the shell they share: one failing leaves the others standing. */}
       <div className="panel__body">
-        <ErrorBoundary zone={`the ${title} panel`}>{children}</ErrorBoundary>
+        <ErrorBoundary zone={zone}>{children}</ErrorBoundary>
       </div>
       {foot}
     </section>

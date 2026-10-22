@@ -45,7 +45,7 @@ export function OverridesPanel({ store }: { store: CartographerStoreHook }) {
 
   // Render
   return (
-    <Panel title={t('title')}>
+    <Panel title={t('title')} zone="overrides-panel">
       <OverridesList rows={rows} onClear={handleClear} />
     </Panel>
   )

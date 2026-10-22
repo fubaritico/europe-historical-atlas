@@ -9,7 +9,9 @@ import { LocaleProvider } from '../LocaleProvider'
 
 import { ErrorBoundary } from './ErrorBoundary'
 import { ERROR_BOUNDARY_MESSAGES } from './i18n'
+import { ZoneBreaksContext } from './zoneBreaksContext'
 
+import type { Zone } from './zones'
 import type { Locale } from '@europe-historical-atlas/core/i18n/locale'
 import type { ReactNode } from 'react'
 
@@ -32,19 +34,27 @@ function Odd(): ReactNode {
 /** Render a boundary in a language, with the console's error kept quiet and observable. */
 function mount(
   children: ReactNode,
-  options: { retry?: boolean; compact?: boolean; onDismiss?: () => void; locale?: Locale } = {}
+  options: {
+    retry?: boolean
+    compact?: boolean
+    onDismiss?: () => void
+    locale?: Locale
+    breaks?: ReadonlySet<Zone>
+  } = {}
 ) {
   const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
   const view = render(
     <LocaleProvider store={createLocaleStore(options.locale ?? 'en')}>
-      <ErrorBoundary
-        zone="the map"
-        {...(options.retry === true ? { retry: true } : {})}
-        {...(options.compact === true ? { compact: true } : {})}
-        {...(options.onDismiss === undefined ? {} : { onDismiss: options.onDismiss })}
-      >
-        {children}
-      </ErrorBoundary>
+      <ZoneBreaksContext value={options.breaks ?? new Set()}>
+        <ErrorBoundary
+          zone="map"
+          {...(options.retry === true ? { retry: true } : {})}
+          {...(options.compact === true ? { compact: true } : {})}
+          {...(options.onDismiss === undefined ? {} : { onDismiss: options.onDismiss })}
+        >
+          {children}
+        </ErrorBoundary>
+      </ZoneBreaksContext>
     </LocaleProvider>
   )
   return { ...view, error }
@@ -108,7 +118,7 @@ describe('ErrorBoundary', () => {
     it('writes what it caught to the console, with the zone’s name', () => {
       const { error } = mount(<Fragile />)
       expect(error).toHaveBeenCalledWith(
-        '[Cartographer] the map failed',
+        '[Cartographer] zone map failed',
         expect.any(Error),
         expect.any(String)
       )
@@ -118,6 +128,49 @@ describe('ErrorBoundary', () => {
       mount(<Fragile />, { retry: true })
       await userEvent.click(screen.getByRole('button', { name: 'Retry' }))
       expect(screen.getByRole('alert').textContent).toContain('This area could not be shown.')
+    })
+  })
+
+  // `?break=<zone>` in development: the zone fails as a real one would, inside its own boundary.
+  describe('a zone broken on purpose', () => {
+    it('shows the fallback of the zone the address names, saying why', () => {
+      mount(<p>the map</p>, { breaks: new Set<Zone>(['map']) })
+      expect(screen.queryByText('the map')).toBeNull()
+      expect(screen.getByRole('alert').textContent).toContain('broken on purpose by ?break=map')
+    })
+
+    it('shows its zone when the address names another one', () => {
+      mount(<p>the map</p>, { breaks: new Set<Zone>(['dock']) })
+      expect(screen.getByText('the map').tagName).toBe('P')
+    })
+
+    it('fails again on « Retry » while the address still names it', async () => {
+      mount(<p>the map</p>, { breaks: new Set<Zone>(['map']), retry: true })
+      await userEvent.click(screen.getByRole('button', { name: 'Retry' }))
+      expect(screen.getByRole('alert').textContent).toContain('?break=map')
+    })
+
+    // The tripwire's own guard, so a build breaks nothing even if a provider were fed (review QUAL-002).
+    it('breaks nothing outside development, whatever the address names', () => {
+      vi.stubEnv('DEV', false)
+      try {
+        mount(<p>the map</p>, { breaks: new Set<Zone>(['map']) })
+        expect(screen.getByText('the map').tagName).toBe('P')
+      } finally {
+        vi.unstubAllEnvs()
+      }
+    })
+
+    it('breaks nothing without a provider, as in a build', () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      render(
+        <LocaleProvider store={createLocaleStore('en')}>
+          <ErrorBoundary zone="map">
+            <p>the map</p>
+          </ErrorBoundary>
+        </LocaleProvider>
+      )
+      expect(screen.getByText('the map').tagName).toBe('P')
     })
   })
 

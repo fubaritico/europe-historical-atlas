@@ -77,6 +77,7 @@ export function PolitiesPanel({ store, colours, onResult, wikidata }: PolitiesPa
     <Panel
       ref={panel}
       title={t('title')}
+      zone="polities-panel"
       fill
       foot={
         <PolitiesFoot store={store} onResult={onResult} onDone={focusList} wikidata={wikidata} />

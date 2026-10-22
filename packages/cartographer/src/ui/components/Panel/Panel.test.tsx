@@ -3,6 +3,7 @@ import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { createLocaleStore } from '../../../i18n/localeStore'
+import { ZoneBreaksContext } from '../ErrorBoundary'
 import { LocaleProvider } from '../LocaleProvider'
 
 import { Panel } from './Panel'
@@ -19,7 +20,7 @@ describe('Panel', () => {
   describe('happy path', () => {
     it('is a region named by its title, the title its head’s tab, the view in its body', () => {
       render(
-        <Panel title="Layers">
+        <Panel title="Layers" zone="layers-panel">
           <p>the view</p>
         </Panel>
       )
@@ -34,10 +35,14 @@ describe('Panel', () => {
 
   describe('variants', () => {
     it('is as tall as what it holds unless asked to fill the dock', () => {
-      const { rerender } = render(<Panel title="Line">x</Panel>)
+      const { rerender } = render(
+        <Panel title="Line" zone="line-panel">
+          x
+        </Panel>
+      )
       expect(screen.getByRole('region').classList.contains('panel--fill')).toBe(false)
       rerender(
-        <Panel title="Polities" fill>
+        <Panel title="Polities" zone="polities-panel" fill>
           x
         </Panel>
       )
@@ -46,7 +51,7 @@ describe('Panel', () => {
 
     it('pins a foot after the body, outside it', () => {
       render(
-        <Panel title="Polities" foot={<footer>actions</footer>}>
+        <Panel title="Polities" zone="polities-panel" foot={<footer>actions</footer>}>
           rows
         </Panel>
       )
@@ -58,7 +63,7 @@ describe('Panel', () => {
     it('hands its element to a ref, for a binding that gives the focus back into it', () => {
       const ref = createRef<HTMLElement>()
       render(
-        <Panel title="Polities" ref={ref}>
+        <Panel title="Polities" zone="polities-panel" ref={ref}>
           rows
         </Panel>
       )
@@ -75,7 +80,7 @@ describe('Panel', () => {
       vi.spyOn(console, 'error').mockImplementation(() => undefined)
       render(
         <LocaleProvider store={createLocaleStore('en')}>
-          <Panel title="Layers">
+          <Panel title="Layers" zone="layers-panel">
             <FailingView />
           </Panel>
         </LocaleProvider>
@@ -84,11 +89,32 @@ describe('Panel', () => {
       expect(screen.getByRole('alert').textContent).toContain('This area could not be shown.')
       vi.restoreAllMocks()
     })
+
+    // The zone reaches the boundary as given — not the title, which changes with the language (review QUAL-001).
+    it('stands behind the zone it is given, which `?break=` names', () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      render(
+        <LocaleProvider store={createLocaleStore('en')}>
+          <ZoneBreaksContext value={new Set(['layers-panel'] as const)}>
+            <Panel title="Layers" zone="layers-panel">
+              <p>the layers</p>
+            </Panel>
+          </ZoneBreaksContext>
+        </LocaleProvider>
+      )
+      expect(screen.queryByText('the layers')).toBeNull()
+      expect(screen.getByRole('alert').textContent).toContain('?break=layers-panel')
+      vi.restoreAllMocks()
+    })
   })
 
   describe('edge cases', () => {
     it('renders no foot when none is given', () => {
-      render(<Panel title="Overrides">x</Panel>)
+      render(
+        <Panel title="Overrides" zone="overrides-panel">
+          x
+        </Panel>
+      )
       expect(screen.getByRole('region').lastElementChild?.classList.contains('panel__body')).toBe(
         true
       )

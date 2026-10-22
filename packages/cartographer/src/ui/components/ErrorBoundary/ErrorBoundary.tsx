@@ -1,13 +1,15 @@
 import { Component } from 'react'
 
 import { ErrorFallback } from './internal/ErrorFallback'
+import { Tripwire } from './internal/Tripwire'
 
+import type { Zone } from './zones'
 import type { ErrorInfo, ReactNode } from 'react'
 
 /** How a zone is guarded. */
 export interface ErrorBoundaryProps {
-  /** Which zone, for the console line — "the tool rail", "the Polities panel". */
-  zone: string
+  /** Which zone — named in the console line, and what `?break=` names in development (`zones.ts`). */
+  zone: Zone
   /**
    * Whether its fallback offers « Retry », remounting the zone — the canvas. A remount reloads and re-bakes
    * the backdrop (a couple of seconds) and redraws the document, which lives in the store: nothing drawn is lost.
@@ -63,7 +65,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
    * @param info - the component stack React gives
    */
   override componentDidCatch(error: unknown, info: ErrorInfo): void {
-    console.error(`[Cartographer] ${this.props.zone} failed`, error, info.componentStack)
+    console.error(`[Cartographer] zone ${this.props.zone} failed`, error, info.componentStack)
   }
 
   /**
@@ -73,7 +75,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   override render(): ReactNode {
     const { error } = this.state
     const { retry, onDismiss, compact } = this.props
-    if (error === null) return this.props.children
+    if (error === null) return <Tripwire zone={this.props.zone}>{this.props.children}</Tripwire>
     const handleRetry = () => {
       this.setState({ error: null })
     }

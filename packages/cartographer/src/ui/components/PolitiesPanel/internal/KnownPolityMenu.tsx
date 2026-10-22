@@ -65,7 +65,7 @@ export function KnownPolityMenu({
 
   // Render
   return (
-    <ErrorBoundary zone="the stacking menu" onDismiss={onClose}>
+    <ErrorBoundary zone="stacking-menu" onDismiss={onClose}>
       <PolityStackMenu
         name={polity.name}
         at={at}

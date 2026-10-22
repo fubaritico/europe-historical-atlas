@@ -73,7 +73,7 @@ export function LinePanel({ store }: { store: CartographerStoreHook }) {
 
   // Render
   return (
-    <Panel title={t('title')}>
+    <Panel title={t('title')} zone="line-panel">
       <LineView
         segments={selection.segments.length}
         between={between}

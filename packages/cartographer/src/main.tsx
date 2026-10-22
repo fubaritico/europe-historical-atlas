@@ -39,7 +39,7 @@ import { createPolityColourSource } from './state/polityColourSource'
 import { createCartographerStore } from './state/store'
 import { DraftRecoveryDialog } from './ui/components/DraftRecoveryDialog'
 import { Editor } from './ui/components/Editor'
-import { ErrorBoundary } from './ui/components/ErrorBoundary'
+import { ErrorBoundary, ZoneBreaksContext, readZoneBreaks } from './ui/components/ErrorBoundary'
 import { LocaleProvider } from './ui/components/LocaleProvider'
 import { OverwriteDialog } from './ui/components/OverwriteDialog'
 import { PageHeading } from './ui/components/PageHeading'
@@ -317,32 +317,41 @@ listenForStackingKeys(document, (move) => {
  */
 const history = createHistoryRelay()
 
+/**
+ * The zones to make fail on purpose, `?break=polities-panel` in the address, so a boundary's fallback can be seen
+ * in its real place (the dev, 2026-10-22). **Development only**: a build turns `import.meta.env.DEV` into `false`
+ * and drops the reading, so no address can break the published Cartographer.
+ */
+const zoneBreaks = import.meta.env.DEV ? readZoneBreaks(window.location.search) : new Set<never>()
+
 createRoot(container).render(
   <StrictMode>
     <LocaleProvider store={localeStore}>
-      <ErrorBoundary zone="the Cartographer">
-        <Editor
-          onSave={handleSave}
-          onOpenSnapshot={snapshotPicker.open}
-          history={history}
-          heading={<PageHeading store={store} />}
-          store={store}
-          load={loadTheBackdrop}
-          style={CHROME_PAINT_STYLE}
-          colours={colours}
-          wikidata={wikidata}
-          results={results}
-        />
-        <DraftRecoveryDialog offers={draftOffers} now={() => new Date()} />
-        <OverwriteDialog questions={overwriteQuestions} now={() => new Date()} />
-        <SnapshotDialog
-          picker={snapshotPicker}
-          source={drafts}
-          year={FIRST_YEAR}
-          now={() => new Date()}
-          onOpen={handleOpenSnapshot}
-        />
-      </ErrorBoundary>
+      <ZoneBreaksContext value={zoneBreaks}>
+        <ErrorBoundary zone="cartographer">
+          <Editor
+            onSave={handleSave}
+            onOpenSnapshot={snapshotPicker.open}
+            history={history}
+            heading={<PageHeading store={store} />}
+            store={store}
+            load={loadTheBackdrop}
+            style={CHROME_PAINT_STYLE}
+            colours={colours}
+            wikidata={wikidata}
+            results={results}
+          />
+          <DraftRecoveryDialog offers={draftOffers} now={() => new Date()} />
+          <OverwriteDialog questions={overwriteQuestions} now={() => new Date()} />
+          <SnapshotDialog
+            picker={snapshotPicker}
+            source={drafts}
+            year={FIRST_YEAR}
+            now={() => new Date()}
+            onOpen={handleOpenSnapshot}
+          />
+        </ErrorBoundary>
+      </ZoneBreaksContext>
     </LocaleProvider>
   </StrictMode>
 )

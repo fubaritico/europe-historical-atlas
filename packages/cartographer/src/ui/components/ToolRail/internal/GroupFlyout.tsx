@@ -40,7 +40,7 @@ export function GroupFlyout({
 
   // Render
   return (
-    <ErrorBoundary zone="a tool group's menu" onDismiss={close}>
+    <ErrorBoundary zone="tool-menu" onDismiss={close}>
       <ToolFlyout
         label={t('groupLabel', { tool: label })}
         variants={variants}

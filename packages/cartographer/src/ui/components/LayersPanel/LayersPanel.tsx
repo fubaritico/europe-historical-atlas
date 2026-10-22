@@ -33,7 +33,7 @@ export function LayersPanel({ store }: { store: CartographerStoreHook }) {
 
   // Render
   return (
-    <Panel title={t('title')}>
+    <Panel title={t('title')} zone="layers-panel">
       <LayerList layers={layers} onVisible={setLayerVisible} onOpacity={setLayerOpacity} />
     </Panel>
   )
