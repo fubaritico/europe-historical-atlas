@@ -2,6 +2,28 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-10-21, le soir — le design system 0.7.0, la date historique, l'internationalisation maison
+
+Même plage au journal que la session de l'après-midi, **21/10 17:24 → 23:33 (6 h 08 en tout, ce soir ~20:01 → 23:33,
+environ 3 h 30)** ; le chantier ouvert le 05/10 totalise **99 h 28 sur 17 plages**. **6 commits** `aef0bf1`..`e61c84e`,
+**tous poussés**, plus celui de cet état. La vérification de REPO-264 a tenu : le hook a nommé les règles du sujet.
+
+- **CARTO-117** — fubaritico-ds 0.7.0, publié par le dev ce soir : les 22 surcharges de `theme.css` renommées, les rôles
+  que le chrome atteint posés en sombre, et une garde dans les deux sens (`UNSET_ON_PURPOSE`). Testé par lui. Un serveur
+  Vite lancé avant la montée servait encore la 0.6.0 : relancé.
+- **CORE-217** — `core/src/time/` : instant ou intervalle, « vers », l'an zéro refusé à la lecture avec la raison, Julien ↔
+  Grégorien par le jour julien. Décidé par le dev : une date mal formée est refusée en disant pourquoi.
+- **ATLAS-159, deux étapes et demie sur trois** — le dev : *« pas possible de mettre des labels en dur »*, tout de suite.
+  Un moteur ICU maison (`core/src/i18n/`, sans dépendance) ; l'atlas tire chaque phrase d'un catalogue fr/en, sa table
+  d'accords disparaît (testé par lui dans les deux langues, en ligne) ; dans le Cartographe, la langue à la racine,
+  `useTranslation` (son nom), une ErrorBoundary par zone. **Ses décisions** : le Cartographe aussi en fr/en, avec ses
+  propres fichiers ; la langue du navigateur, l'anglais sinon, l'atlas compris ; plus tard `localStorage` → navigateur →
+  anglais (ATLAS-266, en Idées) ; une valeur manquante lève ; des boundaries dans chaque zone, Réessayer sur la carte.
+- **Mes fautes** : du jargon qu'il n'a pas compris (« liste de saisie » pour le Typeahead, « l'anglais en tête des pages ») —
+  *« tout ça pour ça »*, *« de quoi tu parles ? »* ; le worktree supprimé juste après lui avoir dit de l'ouvrir ; un
+  commentaire Trello disant qu'il n'avait pas testé ; la boundary de la carte d'abord oubliée ; un sabotage resté sans
+  effet (`sed` de macOS) avant d'être refait ; un composant écrit de mémoire, vérifié dans la doc de React à sa demande.
+
 ### 2026-10-21 — les règles chargées au bon moment, l'audit des instructions, Node 24, la CI verte
 
 Une plage au journal, **21/10 17:24 → 19:48 (2 h 23, 212 actions)** ; le chantier ouvert le 05/10 totalise **95 h 43 sur

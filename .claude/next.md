@@ -5,10 +5,16 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — une session neuve, tout de suite après celle du 22/10 matin
+## ▶ ON REPREND ICI — le test du dossier `ui/` (CARTO-267), tout de suite
 
-**Le dev a fermé la session pour libérer la fenêtre de contexte : *« tu as une dernière chose à faire »* — il dira laquelle
-en rouvrant.** Tout est commité (`bc0be07`), **rien n'est poussé** : `git ls-remote origin main` est en retard d'un commit.
+**Le dev a fermé la session avant de tester : *« on reprend directement »*.** Le déplacement de tout le React du
+Cartographe sous `src/ui/` est fait dans le **worktree `~/Desktop/WebstormProjects/europe-map-ui`**, branche `ui-folder`,
+**indexé, pas commité** ; gate verte. Dans l'ordre :
+1. **Son test** — arrêter son serveur du Cartographe, `pnpm -C ~/Desktop/WebstormProjects/europe-map-ui dev:cartographer`,
+   l'éditeur s'ouvre, `/workbench.html` affiche ses planches.
+2. **`/commit`** dans le worktree, merge dans `main`, **sans pousser**. Le worktree n'est supprimé qu'avec sa permission.
+
+`main` porte `bc0be07` et les états de session, **rien n'est poussé**.
 
 **ATLAS-159 est En cours, le code est fini, le test du dev manque.** Tout texte du Cartographe vient d'un catalogue,
 `i18n/fr.json` + `en.json` par portée ; la langue vient de `LocaleProvider` ; `components/shared/` n'existe plus. La
@@ -22,7 +28,8 @@ convention est dans `rules/architecture.md`, *Components*, et la mémoire `scope
    développement seulement.
 3. **Valider une décision de moi** : la raison technique d'un échec (mots d'un serveur, du navigateur, toujours anglais) ne
    s'écrit plus dans la barre d'état — elle va à la console, la phrase dit « (détail dans la console) ».
-4. **`/doctor prompt-audit`** : `.claude/` a changé (architecture, skill du modèle de composant), à lui faire taper.
+4. **`/doctor prompt-audit`** : `.claude/` a changé (architecture, skill du modèle de composant, et `ui/` le 22/10 après-midi),
+   à lui faire taper — après le merge de `ui-folder`.
 
 **Pour travailler** : quand il est dans le Cartographe, un **worktree** — et lui dire où il est. Mon shell démarre sous
 Node 22 : préfixer `PATH=~/.nvm/versions/node/v24.22.1/bin:$PATH`. **Jamais de `cd`** (trois le 22/10). Parler avec **ses**
@@ -35,6 +42,7 @@ mots, un point à la fois.
 | **Chantiers** | DESIGN-262 La gestion de l'incertitude | l'initiative ; CORE-217 (son palier 1) est **Fait** |
 | **En cours** | ATLAS-159 L'atlas et le Cartographe en français et en anglais | codé, commité `bc0be07`, **attend son test** |
 | **En cours** | ATLAS-145, ATLAS-152 | inchangés depuis le 18/10 |
+| **À valider par le développeur** | CARTO-267 Tout le React du Cartographe dans `ui/` | dans le worktree, **attend son test** |
 | **À valider par le développeur** | CARTO-237, CARTO-116, CARTO-122 | inchangés ; CARTO-122 attend le `role="menu"` du DS |
 | **À faire**, en tête | CORE-252 (le format d'un événement) | palier de DESIGN-262 ; vient après la mécanique |
 | **Idées** | ATLAS-266 Choisir la langue, et s'en souvenir | prêt côté code ; les noms d'étapes de l'historique restent à rendre traduisibles (commentaire du 22/10) |

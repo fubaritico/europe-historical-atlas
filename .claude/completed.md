@@ -2,6 +2,21 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-10-22, l'après-midi — tout le React du Cartographe dans `ui/` (CARTO-267)
+
+Le journal ne compte que **13:16 → 13:56 (78 actions)** ; le travail a duré plus longtemps, une partie n'a pas été
+journalisée — aucune durée inventée ici. Fait dans un **worktree** (`~/Desktop/WebstormProjects/europe-map-ui`, branche
+`ui-folder`), **indexé, pas commité** : le dev testera à la reprise.
+
+- **Sa demande** : *« pour qu'il n'y ait pas 50 dossiers à la racine du projet »*, tout ce qui est React dans `ui/`, et
+  voir ce qui sert dehors. Puis, sur la fiabilité : *« si vraiment un script est fiable, tu utilises un script »* — prouvé :
+  le graphe des imports (résolu par le compilateur) après le déplacement est celui d'avant passé par la table, 1 234 liens ;
+  les mêmes tests par fichier ; gate verte, 4 620 tests.
+- **Ses décisions** : les couches ne peuvent plus importer `ui/` (lint, gardé dans `boundaries.test.ts`) ; tout `ui/` refuse
+  `main` et l'atelier ; *« les CSS, c'est de l'UI »* → `focusOrigin` dans `MapArea/utils`.
+- **Mes fautes** : un premier traceur à expressions régulières qui ratait les `?raw` ; une première règle (« ce qui ne sert
+  qu'à l'UI y va ») qui avalait tout `canvas/`, remplacée par « une couche reste entière » ; un `why` du lint cassé.
+
 ### 2026-10-22 — tout le Cartographe en fr/en, des catalogues JSON par portée, la langue par un provider
 
 Une plage au journal, **22/10 10:20 → 13:14 (2 h 53, 376 actions)** ; le chantier ouvert le 05/10 totalise **102 h 25 sur
@@ -23,26 +38,4 @@ n'a pas lancé le Cartographe : il réorganisait le dépôt du design system en 
   truc »*) ; des `useMemo` et des mots figés dans la langue de départ ; `errorReason.ts` supprimé sans chercher dans les
   `.tsx` ; un sabotage de vérification qui modifiait les deux langues ; un exemple de couleur calculé en HSV au lieu de HSL.
 
-### 2026-10-21, le soir — le design system 0.7.0, la date historique, l'internationalisation maison
-
-Même plage au journal que la session de l'après-midi, **21/10 17:24 → 23:33 (6 h 08 en tout, ce soir ~20:01 → 23:33,
-environ 3 h 30)** ; le chantier ouvert le 05/10 totalise **99 h 28 sur 17 plages**. **6 commits** `aef0bf1`..`e61c84e`,
-**tous poussés**, plus celui de cet état. La vérification de REPO-264 a tenu : le hook a nommé les règles du sujet.
-
-- **CARTO-117** — fubaritico-ds 0.7.0, publié par le dev ce soir : les 22 surcharges de `theme.css` renommées, les rôles
-  que le chrome atteint posés en sombre, et une garde dans les deux sens (`UNSET_ON_PURPOSE`). Testé par lui. Un serveur
-  Vite lancé avant la montée servait encore la 0.6.0 : relancé.
-- **CORE-217** — `core/src/time/` : instant ou intervalle, « vers », l'an zéro refusé à la lecture avec la raison, Julien ↔
-  Grégorien par le jour julien. Décidé par le dev : une date mal formée est refusée en disant pourquoi.
-- **ATLAS-159, deux étapes et demie sur trois** — le dev : *« pas possible de mettre des labels en dur »*, tout de suite.
-  Un moteur ICU maison (`core/src/i18n/`, sans dépendance) ; l'atlas tire chaque phrase d'un catalogue fr/en, sa table
-  d'accords disparaît (testé par lui dans les deux langues, en ligne) ; dans le Cartographe, la langue à la racine,
-  `useTranslation` (son nom), une ErrorBoundary par zone. **Ses décisions** : le Cartographe aussi en fr/en, avec ses
-  propres fichiers ; la langue du navigateur, l'anglais sinon, l'atlas compris ; plus tard `localStorage` → navigateur →
-  anglais (ATLAS-266, en Idées) ; une valeur manquante lève ; des boundaries dans chaque zone, Réessayer sur la carte.
-- **Mes fautes** : du jargon qu'il n'a pas compris (« liste de saisie » pour le Typeahead, « l'anglais en tête des pages ») —
-  *« tout ça pour ça »*, *« de quoi tu parles ? »* ; le worktree supprimé juste après lui avoir dit de l'ouvrir ; un
-  commentaire Trello disant qu'il n'avait pas testé ; la boundary de la carte d'abord oubliée ; un sabotage resté sans
-  effet (`sed` de macOS) avant d'être refait ; un composant écrit de mémoire, vérifié dans la doc de React à sa demande.
-
-> Older sessions (2026-09-12 → 2026-10-21, the afternoon) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-21, the evening) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
