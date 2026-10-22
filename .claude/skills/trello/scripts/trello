@@ -332,13 +332,17 @@ const verbs = {
     await api('DELETE', `/cards/${c.id}/idLabels/${l.id}`)
     console.warn(`#${c.idShort} untagged ${name}: ${c.name}`)
   },
-  /** checklist <number> <title> <item>…— a plan's steps as a checklist on its card. */
+  /**
+   * checklist <number> <title> <item>… — a plan's steps, or a year's sources, as a checklist on its card. A checklist
+   * of that title already on the card is added to, never doubled: a year's sources arrive one by one (2026-10-22).
+   */
   async checklist(number, title, ...items) {
     if (!title || items.length === 0) fail('checklist <number> <title> <item>…')
     const c = await card(number)
-    const list = await api('POST', `/cards/${c.id}/checklists`, { name: title })
+    const existing = (await api('GET', `/cards/${c.id}/checklists`)).find((l) => l.name === title)
+    const list = existing ?? (await api('POST', `/cards/${c.id}/checklists`, { name: title }))
     for (const name of items) await api('POST', `/checklists/${list.id}/checkItems`, { name })
-    console.warn(`#${c.idShort} checklist "${title}": ${items.length} items`)
+    console.warn(`#${c.idShort} checklist "${title}" ${existing ? 'extended' : 'created'}: ${items.length} items`)
   },
   /** check <number> <text> — ticks the one checklist item whose name contains the text. */
   async check(number, text) {

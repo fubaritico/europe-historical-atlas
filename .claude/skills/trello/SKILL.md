@@ -178,7 +178,7 @@ $S priority 7 haute                         # cover colour: haute = red, moyenne
 $S block 7 4 "attend la soudure"           # 7 depends on 4: label, link, comment on both
 $S unblock 7
 $S archive 7 "doublon de #9"               # my own mistakes only — undone from Trello's archive
-$S checklist 9 "Plan" "étape 1" "étape 2"   # a plan's steps on its card
+$S checklist 9 "Plan" "étape 1" "étape 2"   # a plan's steps on its card; a checklist of that title is extended
 $S check 9 "étape 1"                        # ticks the one item containing the text
 $S show 7                                  # title, column, description, comments
 $S setup                                   # creates the missing columns and the two template cards, restores order

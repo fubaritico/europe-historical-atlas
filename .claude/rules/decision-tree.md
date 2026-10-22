@@ -19,6 +19,7 @@
 | Answer "how long / since when"       | `/timeline`       |
 | Fetch the SonarCloud report          | `/sonar`          |
 | Track a task — a card, its column, its label | `/trello` |
+| Log a source used to draw a year, and its mention | `/create-data-mention` |
 | Reason about a subject whose rules are not loaded | `/rules` |
 
 > **This repository has React in it** — the Cartographer, since 2026-10-01. The line that used to stand
