@@ -2,8 +2,8 @@
   "toolsLabel": "Outils",
   "toolTitle": "{tool} ({key})",
   "groupLabel": "Outils {tool}",
-  "noTarget": "Pays actif — aucun",
-  "noTargetHint": "Pays actif — aucun\u202f: sélectionnez un pays pour choisir sa couleur",
+  "noTarget": "Entité politique active — aucune",
+  "noTargetHint": "Entité politique active — aucune\u202f: sélectionnez une entité politique pour choisir sa couleur",
   "colourOf": "Couleur de {name}",
   "colourHint": "Couleur de {name} — cliquez pour la changer"
 }

@@ -1,5 +1,5 @@
 {
   "moved": "{move} — {name}",
-  "needsPolity": "Sélectionnez d’abord un pays — {move}",
+  "needsPolity": "Sélectionnez d’abord une entité politique — {move}",
   "alreadyInPlace": "{move} — {name} : déjà en place"
 }

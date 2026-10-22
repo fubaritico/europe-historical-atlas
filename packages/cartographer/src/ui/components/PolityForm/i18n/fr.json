@@ -1,5 +1,5 @@
 {
-  "editTitle": "Modifier le pays",
+  "editTitle": "Modifier l’entité politique",
   "name": "Nom",
   "id": "Identifiant",
   "rank": "Rang",
@@ -12,10 +12,10 @@
   "stillExists": "existe encore",
   "none": "aucun",
   "suzerainPlaceholder": "Tapez un nom pour choisir…",
-  "suzerainList": "Pays",
-  "noSuzerainMatch": "Aucun pays ne correspond",
+  "suzerainList": "Entités politiques",
+  "noSuzerainMatch": "Aucune entité politique ne correspond",
   "removeSuzerain": "Retirer le suzerain {name}",
-  "nameMissing": "Un pays a besoin d’un nom.",
+  "nameMissing": "Une entité politique a besoin d’un nom.",
   "idMissing": "Il faut un identifiant — ce nom n’a pas permis d’en faire un.",
   "idTaken": "Cet identifiant est déjà pris dans cette année.",
   "notAYear": "Une année, en nombre entier."

@@ -2,7 +2,7 @@
   "reading": "Lecture de {id} sur Wikidata…",
   "failed": "Wikidata n’a pas répondu — le formulaire fonctionne sans (détail dans la console)",
   "unknown": "Wikidata ne connaît pas {id}",
-  "notASubject": "{id} est {kind, select, category {une catégorie de Wikipédia} disambiguation {une page d’homonymie} list {une liste de Wikipédia} other {{kind}}}, pas un pays — vérifiez l’identifiant",
+  "notASubject": "{id} est {kind, select, category {une catégorie de Wikipédia} disambiguation {une page d’homonymie} list {une liste de Wikipédia} other {{kind}}}, pas une entité politique — vérifiez l’identifiant",
   "anachronism": "Wikidata\u202f: {name} {span} — {when, select, notYet {n’existe pas encore en {year}} noLonger {n’existe plus en {year}} other {{when}}}",
   "vassalState": " · un État vassal",
   "proposals": "Ce que propose Wikidata",

@@ -480,7 +480,7 @@ describe('describeYearContents', () => {
 
   it('writes the counts the French way on a French page', () => {
     expect(describeYearContents({ polities: 52, vertices: 17104 }, persistenceWords('fr'))).toBe(
-      '52 pays · 17\u202f104 sommets'
+      '52 entités politiques · 17\u202f104 sommets'
     )
   })
 })

@@ -79,7 +79,7 @@ describe('polityDeletion', () => {
           { rings: 2, anchorsKept: 0, anchorsOrphaned: 0, bordersDropped: 0 },
           FR
         )
-      ).toBe('pays supprimé\u202f: Aquitaine — 2 anneaux · ctrl+Z l’annule')
+      ).toBe('entité politique supprimée\u202f: Aquitaine — 2 anneaux · ctrl+Z l’annule')
     })
   })
 

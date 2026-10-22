@@ -1,7 +1,7 @@
 {
-  "label": "Pays",
+  "label": "Entités politiques",
   "drawnAt": "Dessiné en {year}",
   "vassalOf": ", vassal de {name}",
   "noTerritory": "sans territoire",
-  "empty": "Aucun pays dans cette année pour l’instant."
+  "empty": "Aucune entité politique dans cette année pour l’instant."
 }

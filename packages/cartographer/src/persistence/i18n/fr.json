@@ -3,7 +3,7 @@
   "yesterday": "hier à {time}",
   "onDate": "le {date} à {time}",
   "unknownTime": "à une heure inconnue",
-  "contents": "{polities, plural, one {# pays} other {# pays}} · {vertices, plural, one {# sommet} other {# sommets}}",
+  "contents": "{polities, plural, one {# entité politique} other {# entités politiques}} · {vertices, plural, one {# sommet} other {# sommets}}",
   "folderHoldsOther": "le dossier {year} contient l’année {held} : il n’a pas été ouvert et l’enregistrement est bloqué",
   "readAfterDrawing": "{year} a été lu après le début du dessin : il n’a pas été ouvert et l’enregistrement est bloqué — rechargez pour l’ouvrir",
   "unreadable": "{year} n’a pas pu être lu : l’enregistrement est bloqué (détail dans la console)",

@@ -1,5 +1,5 @@
 {
-  "selectToDraw": "Sélectionnez un pays où dessiner",
+  "selectToDraw": "Sélectionnez une entité politique où dessiner",
   "zoomInTo": "{tool, select, draw {Zoomez pour dessiner dans {name}} edit {Zoomez pour modifier {name}} retrace {Zoomez pour retracer {name}} other {{tool}}}",
   "closing": "Fermeture du contour — {name}",
   "inserting": "Insertion d’un point — {name}",

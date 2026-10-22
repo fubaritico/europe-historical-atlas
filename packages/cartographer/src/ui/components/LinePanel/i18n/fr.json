@@ -1,6 +1,6 @@
 {
   "title": "Trait",
-  "hint": "Sélectionnez un tronçon du pays visé avec la flèche blanche pour en régler le trait.",
+  "hint": "Sélectionnez un tronçon de l’entité politique visée avec la flèche blanche pour en régler le trait.",
   "scope": "Appliquer à",
   "thisStretch": "Ce tronçon",
   "wholeBorder": "Toute la frontière",
