@@ -1,7 +1,7 @@
-import { reasonOf } from './errorReason'
 import { timeWords } from './timeWords'
 import { YearChangedOnDisk } from './yearArchive'
 
+import type { PersistenceWords } from './persistenceWords'
 import type { SavedYearSummary, YearArchive } from './yearArchive'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
@@ -44,8 +44,8 @@ export interface SessionStore {
 export interface OverwriteQuestion {
   /** The year. */
   year: number
-  /** When its files changed, worded — *"today at 14:02"* — or `null` when they are gone from disk. */
-  when: string | null
+  /** When its files changed, as an ISO time — the dialogue words it — or `null` when they are gone from disk. */
+  changedAt: string | null
 }
 
 /** What the session needs. */
@@ -65,6 +65,8 @@ export interface YearSessionDeps {
   confirmOverwrite: (question: OverwriteQuestion) => Promise<boolean>
   /** The clock, to word when the year changed. */
   now: () => Date
+  /** What it says — asked at each sentence, so it follows a change of language. */
+  words: () => PersistenceWords
 }
 
 /**
@@ -93,16 +95,17 @@ export interface YearSession {
 }
 
 /**
- * The status-bar line for a year's contents — *"52 polities · 17 104 vertices"* (`s04`).
+ * The status-bar line for a year's contents — *"52 polities · 17,104 vertices"* (`s04`), the numbers written
+ * the page's way.
  * @param summary - the counts
+ * @param words - the sentences
  * @returns the line, without the verb
  */
 export function describeYearContents(
-  summary: Pick<SavedYearSummary, 'polities' | 'vertices'>
+  summary: Pick<SavedYearSummary, 'polities' | 'vertices'>,
+  words: PersistenceWords
 ): string {
-  const polities = `${summary.polities.toLocaleString('en-US')} ${summary.polities === 1 ? 'polity' : 'polities'}`
-  const vertices = `${summary.vertices.toLocaleString('en-US')} ${summary.vertices === 1 ? 'vertex' : 'vertices'}`
-  return `${polities} · ${vertices}`
+  return words.t('contents', { polities: summary.polities, vertices: summary.vertices })
 }
 
 /**
@@ -152,13 +155,14 @@ function whyNotOpen(
   versionAtStart: number
 ): string | null {
   const yearName = String(deps.year)
+  const { t } = deps.words()
   if (opened.year !== deps.year) {
     console.error(`${LOG_TAG} the folder ${yearName} holds year ${String(opened.year)}`)
-    return `the folder ${yearName} holds year ${String(opened.year)}, so it was not opened and saving is blocked`
+    return t('folderHoldsOther', { year: yearName, held: String(opened.year) })
   }
   if (deps.store.getState().version !== versionAtStart) {
     console.warn(`${LOG_TAG} ${yearName} arrived after editing began, and was not opened`)
-    return `${yearName} was read after you started drawing, so it was not opened and saving is blocked — reload to open it`
+    return t('readAfterDrawing', { year: yearName })
   }
   return null
 }
@@ -177,13 +181,13 @@ async function openOnStartup(deps: YearSessionDeps, cell: SessionCell): Promise<
     if (listed.includes(deps.year)) opened = await deps.archive.open(deps.year)
   } catch (error: unknown) {
     console.error(`${LOG_TAG} ${yearName} could not be read from disk`, error)
-    block(deps, cell, `${yearName} could not be read, so saving is blocked: ${reasonOf(error)}`)
+    block(deps, cell, deps.words().t('unreadable', { year: yearName }))
     return
   }
 
   if (opened === null) {
     cell.phase = 'ready'
-    deps.report(`${yearName} has never been saved — starting from an empty map`)
+    deps.report(deps.words().t('neverSaved', { year: yearName }))
     return
   }
   const refusal = whyNotOpen(deps, opened, versionAtStart)
@@ -193,7 +197,12 @@ async function openOnStartup(deps: YearSessionDeps, cell: SessionCell): Promise<
   }
   deps.store.getState().open(opened)
   cell.phase = 'ready'
-  deps.report(`opened ${yearName} · ${describeYearContents(contentsOf(opened))}`)
+  deps.report(
+    deps.words().t('opened', {
+      year: yearName,
+      contents: describeYearContents(contentsOf(opened), deps.words()),
+    })
+  )
 }
 
 /**
@@ -203,10 +212,10 @@ async function openOnStartup(deps: YearSessionDeps, cell: SessionCell): Promise<
  * @returns the sentence for the author, or `null`
  */
 function whySaveRefused(deps: YearSessionDeps, cell: SessionCell): string | null {
-  if (cell.phase === 'opening')
-    return `still reading ${String(deps.year)} from disk — save again in a moment`
+  const { t } = deps.words()
+  if (cell.phase === 'opening') return t('stillReading', { year: String(deps.year) })
   if (cell.phase === 'blocked') return cell.blockedBecause
-  if (cell.saving) return 'the previous save is still running'
+  if (cell.saving) return t('saveRunning')
   return null
 }
 
@@ -230,7 +239,7 @@ async function saveYear(deps: YearSessionDeps, cell: SessionCell): Promise<boole
     // The question itself failed — the relay busy, a time out of range. `save` resolves either way, as
     // its contract says: reported like any other failed save, never thrown.
     console.error(`${LOG_TAG} ${String(deps.year)} was not saved`, error)
-    deps.report(`not saved: ${reasonOf(error)}`)
+    deps.report(deps.words().t('notSaved'))
     return false
   } finally {
     cell.saving = false
@@ -248,12 +257,17 @@ async function writeYear(deps: YearSessionDeps, overwrite: boolean): Promise<boo
   try {
     // The document is taken now, not when ‹ctrl+S› was pressed: after [Overwrite] it is the page as it is.
     const summary = await deps.archive.save(deps.store.getState().document, { overwrite })
-    deps.report(`saved ${String(summary.year)} · ${describeYearContents(summary)}`)
+    deps.report(
+      deps.words().t('saved', {
+        year: String(summary.year),
+        contents: describeYearContents(summary, deps.words()),
+      })
+    )
     return true
   } catch (error: unknown) {
     if (error instanceof YearChangedOnDisk && !overwrite) return askBeforeOverwriting(deps, error)
     console.error(`${LOG_TAG} ${String(deps.year)} was not saved`, error)
-    deps.report(`not saved: ${reasonOf(error)}`)
+    deps.report(deps.words().t('notSaved'))
     return false
   }
 }
@@ -268,14 +282,18 @@ async function askBeforeOverwriting(
   deps: YearSessionDeps,
   refusal: YearChangedOnDisk
 ): Promise<boolean> {
-  const when =
-    refusal.changedAt === null
-      ? null
-      : timeWords(new Date(refusal.changedAt).toISOString(), deps.now())
-  if (await deps.confirmOverwrite({ year: refusal.year, when })) return writeYear(deps, true)
-  const changed = `${String(refusal.year)} was changed on disk ${when ?? 'since it was opened'}`
-  console.warn(`${LOG_TAG} save cancelled: ${changed}`)
-  deps.report(`not saved — ${changed}; ‹ctrl+S› again to choose`)
+  const changedAt = refusal.changedAt === null ? null : new Date(refusal.changedAt).toISOString()
+  if (await deps.confirmOverwrite({ year: refusal.year, changedAt })) return writeYear(deps, true)
+  console.warn(
+    `${LOG_TAG} save cancelled: ${String(refusal.year)} was changed on disk${changedAt === null ? '' : ` at ${changedAt}`}.`
+  )
+  deps.report(
+    deps.words().t('notSavedChanged', {
+      known: changedAt === null ? 'no' : 'yes',
+      year: String(refusal.year),
+      when: changedAt === null ? '' : timeWords(changedAt, deps.now(), deps.words()),
+    })
+  )
   return false
 }
 

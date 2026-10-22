@@ -8,7 +8,9 @@ import {
   cloneYearDocument,
   createYearDocument,
 } from '@europe-historical-atlas/core/editor/yearDocument'
+import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 
+import { TOOL_MESSAGES } from '../i18n/tools'
 import { UNFRAMED } from '../viewport/viewport'
 
 import { describeDrawingTarget } from './drawingTarget'
@@ -343,8 +345,14 @@ describe('toolSlice — ⟨retrace⟩ (H-46)', () => {
 
 describe('modeLabel', () => {
   it('names a mode after the tool in hand, so ⟨retrace⟩ is never called the Pen', () => {
-    expect(modeLabel('draw', 'coast')).toBe('Pen — follow the coast')
-    expect(modeLabel('retrace', 'coast')).toBe('Retrace · Pen — follow the coast')
-    expect(modeLabel('retrace', 'pencil')).toBe('Retrace · Pencil — freehand')
+    const t = createTranslator(TOOL_MESSAGES, 'en')
+    expect(modeLabel('draw', 'coast', t)).toBe('Pen — follow the coast')
+    expect(modeLabel('retrace', 'coast', t)).toBe('Retrace · Pen — follow the coast')
+    expect(modeLabel('retrace', 'pencil', t)).toBe('Retrace · Pencil — freehand')
+  })
+
+  it('names them in French on a French page', () => {
+    const t = createTranslator(TOOL_MESSAGES, 'fr')
+    expect(modeLabel('retrace', 'river', t)).toBe('Retracer · Plume — suivre un fleuve')
   })
 })

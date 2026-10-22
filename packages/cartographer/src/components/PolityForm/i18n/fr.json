@@ -1,0 +1,22 @@
+{
+  "editTitle": "Modifier le pays",
+  "name": "Nom",
+  "id": "Identifiant",
+  "rank": "Rang",
+  "status": "Statut",
+  "existsFrom": "Existe depuis",
+  "existsTo": "Existe jusqu’à",
+  "suzerain": "Suzerain",
+  "colour": "Couleur",
+  "wikidata": "Identifiant Wikidata",
+  "stillExists": "existe encore",
+  "none": "aucun",
+  "suzerainPlaceholder": "Tapez un nom pour choisir…",
+  "suzerainList": "Pays",
+  "noSuzerainMatch": "Aucun pays ne correspond",
+  "removeSuzerain": "Retirer le suzerain {name}",
+  "nameMissing": "Un pays a besoin d’un nom.",
+  "idMissing": "Il faut un identifiant — ce nom n’a pas permis d’en faire un.",
+  "idTaken": "Cet identifiant est déjà pris dans cette année.",
+  "notAYear": "Une année, en nombre entier."
+}

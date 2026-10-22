@@ -8,10 +8,10 @@
 
 import { createTranslator } from '../i18n/catalogue'
 
-import { DATE_MESSAGES, MONTH_KEYS } from './dateMessages'
+import { DATE_MESSAGES, MONTH_KEYS } from './i18n'
 
-import type { DateMessageKey } from './dateMessages'
 import type { HistoricalDate, HistoricalMoment } from './historicalDate'
+import type { DateMessageKey } from './i18n'
 import type { Translate } from '../i18n/catalogue'
 import type { Locale } from '../i18n/locale'
 

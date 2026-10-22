@@ -3,7 +3,7 @@ import { isFollowingMode } from '../../state/toolSlice'
 import { screenToBackdrop } from '../../viewport/viewport'
 
 import type { SnapLayers } from './snapLayers'
-import type { SnapLayer, SnapVertex } from './toolSession'
+import type { SnapLayer, SnapVertex, WaterWords } from './toolSession'
 import type { SnapLine } from '../../geometry/lineSnap'
 import type { CartographerStoreHook } from '../../state/store'
 import type { Point } from '../../viewport/viewport'
@@ -71,13 +71,15 @@ export function layerLines(context: LayerHitContext, layer: SnapLayer): readonly
 }
 
 /**
- * What the line under a hit is called — `"coastline"`, a river's name verbatim (`snapLayersOf`).
+ * What the line under a hit is, for a sentence — the coast, or a river and its name (`snapLayersOf`).
  * @param context - the snap layers
  * @param hit - the vertex
- * @returns the line's label
+ * @returns the values the canvas's messages take
  */
-export function lineLabel(context: LayerHitContext, hit: SnapVertex): string {
-  return context.layers[hit.layer].label(hit.contour)
+export function waterOf(context: LayerHitContext, hit: SnapVertex): WaterWords {
+  if (hit.layer === 'coast') return { water: 'coast', river: '' }
+  const name = context.layers[hit.layer].name(hit.contour)
+  return name === null ? { water: 'unnamed', river: '' } : { water: 'river', river: name }
 }
 
 /**

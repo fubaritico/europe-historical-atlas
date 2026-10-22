@@ -1,0 +1,6 @@
+{
+  "toolName": "{tool, select, edit {Sélection directe} draw {Plume} retrace {Retracer} navigate {Main} other {{tool}}}",
+  "penMode": "{mode, select, free {Plume} coast {Plume — suivre la côte} river {Plume — suivre un fleuve} pencil {Crayon — à main levée} other {{mode}}}",
+  "modeUnder": "{tool} · {mode}",
+  "keyName": "{key, select, Space {Espace} other {{key}}}"
+}

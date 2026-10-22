@@ -1,9 +1,9 @@
 import { polityAt } from '../geometry/fillHit'
 import { nearestStretch } from '../geometry/stretchHit'
 
+import type { CanvasWords } from './canvasWords'
 import type { PolityRings } from '../geometry/fillHit'
 import type { Point } from '../viewport/viewport'
-import type { BorderRelation } from '@europe-historical-atlas/core/editor/borderRelation'
 import type { DerivedBorder } from '@europe-historical-atlas/core/editor/derivedBorders'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
@@ -15,15 +15,6 @@ import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocu
  * A border before a fill: a border lies on the edge of two fills, so the pointer on it is over one of them
  * too, and the border is the more specific thing to name. A coast is not named — the coastline says it.
  */
-
-/** How each relation is named in the bar — the chrome speaks English (P8). */
-const RELATION_WORDS: Readonly<Record<BorderRelation, string>> = {
-  sovereign: 'sovereign',
-  vassal: 'vassal',
-  'co-vassal': 'co-vassals',
-  unclaimed: 'unclaimed ground',
-  coastline: 'coast',
-}
 
 /** Everything {@link featureUnder} reads. */
 export interface FeatureInputs {
@@ -39,6 +30,8 @@ export interface FeatureInputs {
   at: Point
   /** How near a border the pointer must be, on screen. */
   radius: number
+  /** The canvas's words — a relation's and a rank's names, in the page's language. */
+  words: CanvasWords
 }
 
 /**
@@ -73,9 +66,14 @@ export function featureUnder(inputs: FeatureInputs): string | null {
     inputs.document.polities.find((polity) => polity.id === id)?.name ?? id
   const border = borderUnder(inputs)
   if (border !== null)
-    return `${border.between.map(nameOf).join(' – ')} · ${RELATION_WORDS[border.relation]}`
+    return inputs.words.t('borderUnder', {
+      names: border.between.map(nameOf).join(' – '),
+      relation: border.relation,
+    })
   const holder = polityAt(inputs.territories, inputs.at)
   if (holder === null) return null
   const rank = inputs.document.polities.find((polity) => polity.id === holder)?.rank ?? null
-  return rank === null ? nameOf(holder) : `${nameOf(holder)} · ${rank}`
+  if (rank === null) return nameOf(holder)
+  const { t, polity } = inputs.words
+  return t('polityUnder', { name: nameOf(holder), rank: polity('rankName', { rank }) })
 }

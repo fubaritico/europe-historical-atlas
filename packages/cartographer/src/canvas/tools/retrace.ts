@@ -14,6 +14,7 @@ import { layerLines, snapHit } from './layerHits'
 import { outlineOnScreen, placeClick, resolvedTarget, snapClick } from './toolGestures'
 import { clearOutline, sessionPointOf, targetHandles } from './toolSession'
 
+import type { CanvasMessageKey } from '../i18n'
 import type { GestureContext } from './toolGestures'
 import type { SnapLayer, SnapVertex } from './toolSession'
 import type { Point } from '../../viewport/viewport'
@@ -24,6 +25,7 @@ import type {
   RetraceRefusal,
 } from '@europe-historical-atlas/core/editor/retrace'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 
 /**
  * ⟨retrace⟩ — the correction tool (`H-46`, the dev, 2026-10-14): a first click on one of the target's
@@ -105,9 +107,8 @@ function vertexUnder(context: GestureContext, anchor: number): SnapVertex | null
 function startRetrace(context: GestureContext, polity: Polity, at: Point): boolean {
   const anchor = retraceAnchorUnder(context, polity.id, at)
   if (anchor === null) {
-    const message = `click an anchor of ${polity.name} to start the retrace`
-    console.warn(`${TAG} nothing retraced: ${message}.`)
-    context.report(message)
+    console.warn(`${TAG} nothing retraced: the press is on no anchor of ${polity.name}.`)
+    context.report(context.words.t('retraceStartPrompt', { name: polity.name }))
     return false
   }
   const point = sessionPointOf(context.store.getState().document, anchor)
@@ -195,25 +196,30 @@ export function replacedSide(
  * @param refusal - what the document answered
  * @param document - for the polities' names
  * @param targetName - the target's name
+ * @param t - the canvas's messages
  * @returns the reason
  */
 export function refusalReason(
   refusal: RetraceRefusal,
   document: YearDocument,
-  targetName: string
+  targetName: string,
+  t: Translate<CanvasMessageKey>
 ): string {
   switch (refusal.kind) {
     case 'no-ring':
-      return `the end is not on the same outline of ${targetName}`
+      return t('refusedNoRing', { name: targetName })
     case 'dressed-run':
-      return 'a border dressed by hand runs over this stretch — clear it in {Overrides} first'
+      return t('refusedDressedRun')
     case 'loop':
-      return `the new run passes again through an anchor ${nameOf(document, refusal.polity)} keeps`
+      return t('refusedLoop', { holder: nameOf(document, refusal.polity, t) })
     case 'too-short':
-      return `${nameOf(document, refusal.polity)} would be left with fewer than ${String(MIN_RING_ANCHORS)} anchors`
+      return t('refusedTooShort', {
+        holder: nameOf(document, refusal.polity, t),
+        min: MIN_RING_ANCHORS,
+      })
     case 'not-an-arc':
     case 'bad-anchor':
-      return 'the tool and the document disagree'
+      return t('refusedDisagree')
   }
 }
 
@@ -222,24 +228,31 @@ export function refusalReason(
  * @param refusal - what the document answered
  * @param document - for the polities' names
  * @param targetName - the target's name
+ * @param t - the canvas's messages
  * @returns the sentence, for the result zone
  */
 export function refusalMessage(
   refusal: RetraceRefusal,
   document: YearDocument,
-  targetName: string
+  targetName: string,
+  t: Translate<CanvasMessageKey>
 ): string {
-  return `not retraced: ${refusalReason(refusal, document, targetName)}`
+  return t('notRetraced', { reason: refusalReason(refusal, document, targetName, t) })
 }
 
 /**
  * A ring holder's name: a polity's, verbatim, or "a deliberate gap".
  * @param document - the document
  * @param polity - the polity's id, or `null` for a gap
+ * @param t - the canvas's messages, for the gap's words
  * @returns the name
  */
-function nameOf(document: YearDocument, polity: string | null): string {
-  if (polity === null) return 'a deliberate gap'
+function nameOf(
+  document: YearDocument,
+  polity: string | null,
+  t: Translate<CanvasMessageKey>
+): string {
+  if (polity === null) return t('deliberateGap')
   // An id the registry lacks is reported by `documentFaults`; here the id itself is the honest name.
   return document.polities.find((each) => each.id === polity)?.name ?? polity
 }
@@ -249,11 +262,21 @@ function nameOf(document: YearDocument, polity: string | null): string {
  * @param done - what the document answered
  * @param document - for the neighbours' names
  * @param targetName - the target's name
+ * @param t - the canvas's messages
  * @returns the sentence
  */
-export function doneMessage(done: RetraceDone, document: YearDocument, targetName: string): string {
-  const replaced = `${targetName}: ${String(done.removed)} ${done.removed === 1 ? 'anchor' : 'anchors'} replaced by ${String(done.added)}`
-  return `${replaced}${consequences(done, document)}`
+export function doneMessage(
+  done: RetraceDone,
+  document: YearDocument,
+  targetName: string,
+  t: Translate<CanvasMessageKey>
+): string {
+  return t('retraced', {
+    name: targetName,
+    removed: done.removed,
+    added: done.added,
+    consequences: consequences(done, document, t),
+  })
 }
 
 /**
@@ -263,22 +286,25 @@ export function doneMessage(done: RetraceDone, document: YearDocument, targetNam
  * @param effect.neighbours - the polities whose rings take the new run too
  * @param effect.untouched - the holders of rings that only touch the stretch
  * @param document - for the names
+ * @param t - the canvas's messages
  * @returns the clauses, each led by ` · `, or an empty string
  */
 function consequences(
   effect: { neighbours: readonly string[]; untouched: readonly (string | null)[] },
-  document: YearDocument
+  document: YearDocument,
+  t: Translate<CanvasMessageKey>
 ): string {
   const named = (holders: readonly (string | null)[]) =>
-    holders.map((holder) => nameOf(document, holder)).join(', ')
+    holders.map((holder) => nameOf(document, holder, t)).join(', ')
+  const { neighbours, untouched } = effect
   const follow =
-    effect.neighbours.length === 0
+    neighbours.length === 0
       ? ''
-      : ` · ${named(effect.neighbours)} ${effect.neighbours.length === 1 ? 'follows' : 'follow'}`
+      : t('follows', { count: neighbours.length, names: named(neighbours) })
   const keep =
-    effect.untouched.length === 0
+    untouched.length === 0
       ? ''
-      : ` · ${named(effect.untouched)} ${effect.untouched.length === 1 ? 'keeps its' : 'keep their'} points`
+      : t('keepsPoints', { count: untouched.length, names: named(untouched) })
   return `${follow}${keep}`
 }
 
@@ -324,24 +350,30 @@ function endRetrace(context: GestureContext, polity: Polity, before: number): vo
   const { document } = context.store.getState()
   const arcs = retraceArcs(document, polity.id, ends.from, ends.to)
   if (arcs === null) {
-    refuseEnd(context, before, refusalMessage({ kind: 'no-ring' }, document, polity.name))
+    refuseEnd(
+      context,
+      before,
+      refusalMessage({ kind: 'no-ring' }, document, polity.name, context.words.t)
+    )
     return
   }
   const replaced = replacedSide(context, arcs, ends, outlineOnScreen(context))
   const points: OutlinePoint[] = context.session.outline.slice(1, -1)
-  const step = { kind: RETRACE_KIND, label: `retrace ${polity.name}` }
+  const step = { kind: RETRACE_KIND, label: context.words.t('stepRetrace', { name: polity.name }) }
   const answer = context.store
     .getState()
     .retraceStretch(polity.id, ends.from, ends.to, replaced, points, step)
   if (!isRetraceRefusal(answer)) {
     clearOutline(context.session)
-    context.report(doneMessage(answer, context.store.getState().document, polity.name))
+    context.report(
+      doneMessage(answer, context.store.getState().document, polity.name, context.words.t)
+    )
     return
   }
   if (answer.kind === 'not-an-arc' || answer.kind === 'bad-anchor') {
     console.error(`${TAG} the document refused a retrace the tool had checked (${answer.kind}).`)
   }
-  refuseEnd(context, before, refusalMessage(answer, document, polity.name))
+  refuseEnd(context, before, refusalMessage(answer, document, polity.name, context.words.t))
 }
 
 /**
@@ -435,10 +467,9 @@ export function retraceView(
   if (outline.length === 0) {
     return {
       replaced: null,
-      sentence:
-        under === null
-          ? `Retracing ${polity.name} — click one of its anchors to start`
-          : `Retracing ${polity.name} — start on this anchor`,
+      sentence: context.words.t(under === null ? 'retracingToStart' : 'retracingStartHere', {
+        name: polity.name,
+      }),
     }
   }
   const from = outline[0]?.anchor ?? null
@@ -467,7 +498,7 @@ function endView(
   if (arcs === null) {
     return {
       replaced: null,
-      sentence: `Retracing ${polity.name} — this anchor is on another of its outlines`,
+      sentence: context.words.t('retracingOtherOutline', { name: polity.name }),
     }
   }
   const replaced = replacedSide(context, arcs, ends, [...outlineOnScreen(context), pointer])
@@ -476,12 +507,18 @@ function endView(
   if (isRetraceRefusal(check)) {
     return {
       replaced: null,
-      sentence: `Retracing ${polity.name} — cannot end here: ${refusalReason(check, document, polity.name)}`,
+      sentence: context.words.t('retracingCannotEnd', {
+        name: polity.name,
+        reason: refusalReason(check, document, polity.name, context.words.t),
+      }),
     }
   }
-  const count = `${String(replaced.length)} ${replaced.length === 1 ? 'anchor' : 'anchors'}`
   return {
     replaced: stretchOnScreen(context, ends.from, replaced, ends.to),
-    sentence: `Retracing ${polity.name} — replaces ${count}${consequences(check, document)} · ‹alt› the other side`,
+    sentence: context.words.t('retracingReplaces', {
+      name: polity.name,
+      count: replaced.length,
+      consequences: consequences(check, document, context.words.t),
+    }),
   }
 }

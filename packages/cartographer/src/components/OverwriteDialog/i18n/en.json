@@ -1,0 +1,5 @@
+{
+  "title": "The year changed on disk",
+  "question": "{known, select, yes {{year} was changed on disk {when}, since it was opened.} no {{year} is no longer on disk as it was opened.} other {{known}}} Overwrite it with this page?",
+  "overwrite": "Overwrite"
+}

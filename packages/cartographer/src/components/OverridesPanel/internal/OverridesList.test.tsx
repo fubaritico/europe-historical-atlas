@@ -1,10 +1,12 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
+import { renderInEnglish } from '../../../testing/renderInEnglish'
+
 import { OverridesList } from './OverridesList'
 
-import type { OverrideRow } from '../overrideRows'
+import type { OverrideRow } from '../utils/overrideRows'
 
 const DOTTED: OverrideRow = {
   kind: 'run',
@@ -18,7 +20,7 @@ describe('OverridesList', () => {
   describe('happy path', () => {
     it('lists an override with its hand and what it dresses, and clears it on [Clear]', async () => {
       const onClear = vi.fn()
-      render(<OverridesList rows={[DOTTED]} onClear={onClear} />)
+      renderInEnglish(<OverridesList rows={[DOTTED]} onClear={onClear} />)
       expect(screen.getByText(DOTTED.label)).toBeDefined()
       await userEvent.setup().click(screen.getByRole('button', { name: /^Clear dotted/ }))
       expect(onClear).toHaveBeenCalledWith(DOTTED)
@@ -27,7 +29,7 @@ describe('OverridesList', () => {
 
   describe('variants', () => {
     it('names a pair entry that states only a fact', () => {
-      render(
+      renderInEnglish(
         <OverridesList
           rows={[{ ...DOTTED, kind: 'pair', hand: null, label: 'whole border · A – B' }]}
           onClear={vi.fn()}
@@ -39,7 +41,7 @@ describe('OverridesList', () => {
 
   describe('managed errors', () => {
     it('marks an orphaned stretch, still listed and clearable', () => {
-      render(<OverridesList rows={[{ ...DOTTED, orphaned: true }]} onClear={vi.fn()} />)
+      renderInEnglish(<OverridesList rows={[{ ...DOTTED, orphaned: true }]} onClear={vi.fn()} />)
       expect(screen.getByRole('listitem').getAttribute('data-orphaned')).toBe('true')
       expect(screen.getByRole('button', { name: /^Clear/ })).toBeDefined()
     })
@@ -49,7 +51,7 @@ describe('OverridesList', () => {
 
   describe('edge cases', () => {
     it('says so when nothing is overridden', () => {
-      render(<OverridesList rows={[]} onClear={vi.fn()} />)
+      renderInEnglish(<OverridesList rows={[]} onClear={vi.fn()} />)
       expect(screen.getByText(/Nothing overridden/)).toBeDefined()
     })
   })

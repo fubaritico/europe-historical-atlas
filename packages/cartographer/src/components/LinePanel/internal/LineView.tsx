@@ -1,17 +1,14 @@
+import { useTranslation } from '../../../hooks/useTranslation'
+import { BORDER_MESSAGES } from '../../../i18n/border'
+import { LINE_PANEL_MESSAGES } from '../i18n'
+
 import { PatternButton } from './PatternButton'
 import { ScopeButton } from './ScopeButton'
 
 import type { LineScope } from '../lineScope'
 
 /** The patterns offered, in the order of the row; `null` is *Auto*, the relation's rule. */
-const PATTERNS: readonly { hand: string | null; label: string }[] = [
-  { hand: null, label: 'Auto' },
-  { hand: 'solid', label: 'Solid' },
-  { hand: 'dotted', label: 'Dotted' },
-  { hand: 'dashed', label: 'Dashed' },
-  { hand: 'double', label: 'Double' },
-  { hand: 'none', label: 'Hidden' },
-]
+const PATTERNS: readonly (string | null)[] = [null, 'solid', 'dotted', 'dashed', 'double', 'none']
 
 /** What the panel shows and reports. */
 export interface LineViewProps {
@@ -56,19 +53,16 @@ export function LineView({
   onScope,
   onHand,
 }: LineViewProps) {
+  // Context
+  const t = useTranslation(LINE_PANEL_MESSAGES)
+  const border = useTranslation(BORDER_MESSAGES)
+
   // Render
-  if (segments === 0)
-    return (
-      <p className="panel__hint">
-        Select a stretch of the aimed polity with the white arrow to style it.
-      </p>
-    )
+  if (segments === 0) return <p className="panel__hint">{t('hint')}</p>
   return (
     <>
-      <p className="line-panel__what">
-        {segments} {segments === 1 ? 'segment' : 'segments'} · {between}
-      </p>
-      <div className="line-panel__scope" role="radiogroup" aria-label="Apply to">
+      <p className="line-panel__what">{border('stretch', { count: segments, between })}</p>
+      <div className="line-panel__scope" role="radiogroup" aria-label={t('scope')}>
         {(['stretch', 'border'] as const).map((value) => (
           <ScopeButton
             key={value}
@@ -79,12 +73,12 @@ export function LineView({
           />
         ))}
       </div>
-      <div className="line-panel__patterns" role="group" aria-label="Pattern">
+      <div className="line-panel__patterns" role="group" aria-label={t('patterns')}>
         {PATTERNS.map((pattern) => (
           <PatternButton
-            key={pattern.label}
-            pattern={pattern}
-            chosen={!mixed && hand === pattern.hand}
+            key={pattern ?? 'auto'}
+            pattern={{ hand: pattern, label: border('handButton', { hand: pattern ?? 'auto' }) }}
+            chosen={!mixed && hand === pattern}
             onHand={onHand}
           />
         ))}

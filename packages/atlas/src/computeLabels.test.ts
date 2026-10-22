@@ -4,7 +4,7 @@ import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 import { LOCALES } from '@europe-historical-atlas/core/i18n/locale'
 
 import { COMPUTE_PHASE_MESSAGES } from './computeLabels'
-import { ATLAS_MESSAGES } from './messages'
+import { ATLAS_MESSAGES } from './i18n'
 
 import type { ComputePhase } from '@europe-historical-atlas/core/pipeline/mapCompute'
 

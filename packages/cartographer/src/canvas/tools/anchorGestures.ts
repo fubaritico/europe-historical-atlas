@@ -33,11 +33,11 @@ export interface AnchorGestureContext extends BorderSnapContext, FrameSnapContex
   editHandles?: () => readonly number[]
 }
 
-/** How `{History}` names an inserted anchor. */
-export const INSERT_ANCHOR_STEP = { kind: 'insert-anchor', label: 'insert anchor' } as const
+/** The step kind an inserted anchor is recorded under. */
+export const INSERT_ANCHOR_KIND = 'insert-anchor'
 
-/** How `{History}` names a removed anchor. */
-export const DELETE_ANCHOR_STEP = { kind: 'delete-anchor', label: 'delete anchor' } as const
+/** The step kind removed anchors are recorded under. */
+export const DELETE_ANCHOR_KIND = 'delete-anchor'
 
 /**
  * Every stretch of a polity's rings, as pairs of anchor indices — the closing one included.
@@ -119,7 +119,10 @@ export function insertOnStretch(
     console.warn(`${TAG} no anchor inserted: that stretch runs off the map.`)
     return true
   }
-  const index = context.store.getState().insertAnchor(hit.a, hit.b, point, INSERT_ANCHOR_STEP)
+  const index = context.store.getState().insertAnchor(hit.a, hit.b, point, {
+    kind: INSERT_ANCHOR_KIND,
+    label: context.words.t('stepInsertAnchor'),
+  })
   if (index === null) {
     console.error(
       `${TAG} the document refused a point between anchors ${String(hit.a)} and ${String(hit.b)}.`
@@ -190,7 +193,9 @@ export function deleteSelected(context: AnchorGestureContext): boolean {
     return true
   }
   const owner = resolvedOwner(context)
-  const removal = context.store.getState().deleteAnchors(kept, deleteStep(kept.length), owner)
+  const removal = context.store
+    .getState()
+    .deleteAnchors(kept, deleteStep(context, kept.length), owner)
   context.session.selected = []
   if (removal === null) {
     // The anchors were checked against the target's outline just above: no ring holding them is a defect.
@@ -217,18 +222,17 @@ export function deleteSelected(context: AnchorGestureContext): boolean {
 function sparedReport(context: AnchorGestureContext, spared: readonly string[]): string {
   if (spared.length === 0) return ''
   const names = namesOf(context.store.getState().document, spared).join(', ')
-  return ` · ${names} kept ${spared.length === 1 ? 'its' : 'their'} points (too few left to keep an outline)`
+  return context.words.t('keptPoints', { count: spared.length, names })
 }
 
 /**
  * How `{History}` and `[↶ Undo]` name a deletion — `s03`'s *"Undo — delete anchor"*, plural for several.
+ * @param context - the canvas's words
  * @param count - how many anchors
  * @returns the step
  */
-function deleteStep(count: number): { kind: string; label: string } {
-  return count === 1
-    ? DELETE_ANCHOR_STEP
-    : { kind: DELETE_ANCHOR_STEP.kind, label: `delete ${String(count)} anchors` }
+function deleteStep(context: AnchorGestureContext, count: number): { kind: string; label: string } {
+  return { kind: DELETE_ANCHOR_KIND, label: context.words.t('stepDeleteAnchors', { count }) }
 }
 
 /**
@@ -256,10 +260,12 @@ function ringRemovalReport(
   anchors: number,
   owner: string | undefined
 ): string {
-  const rings = `removed ${String(removal.rings)} ${removal.rings === 1 ? 'ring' : 'rings'} (${String(anchors)} ${anchors === 1 ? 'anchor' : 'anchors'})`
+  const { t } = context.words
+  const rings = t('removedRings', { rings: removal.rings, anchors })
   const others = removal.polities.filter((polity) => polity !== owner)
   if (others.length === 0) return rings
-  return `${rings} · points taken from ${namesOf(context.store.getState().document, others).join(', ')}`
+  const names = namesOf(context.store.getState().document, others).join(', ')
+  return rings + t('pointsTakenFrom', { names })
 }
 
 /**
@@ -274,8 +280,7 @@ function removalReport(
   count: number,
   polities: readonly string[]
 ): string {
-  const what = count === 1 ? 'an anchor' : `${String(count)} anchors`
-  if (polities.length < 2) return `removed ${what}`
+  // Held by one path, the names are not said: the paths' count chooses, in the catalogue.
   const names = namesOf(context.store.getState().document, polities).join(', ')
-  return `removed ${what} held by ${String(polities.length)} paths — ${names}`
+  return context.words.t('removedAnchors', { count, paths: polities.length, names })
 }

@@ -16,7 +16,7 @@ import {
 import { waterTaking } from './borderSnap'
 import { snapHit } from './layerHits'
 import {
-  MOVE_ANCHOR_STEP,
+  MOVE_ANCHOR_KIND,
   arrowDrag,
   arrowPress,
   arrowRelease,
@@ -131,7 +131,7 @@ describe('toolGestures', () => {
       expect(context.store.getState().undoLabel).toBe('draw outline of Reaume de France')
       arrowRelease(context, [0, 0])
       expect(onScreen(context, 1)[0]).toBeCloseTo(350, 6)
-      expect(context.store.getState().undoLabel).toBe(MOVE_ANCHOR_STEP.label)
+      expect(context.store.getState().undoLabel).toBe('move anchor')
     })
   })
 
@@ -783,7 +783,9 @@ describe('the Pen following the coast', () => {
       const { document } = context.store.getState()
       expect(document.anchors).toHaveLength(4)
       expect(document.claims.find((claim) => claim.polity === 'hre')?.rings[0]).toEqual([1, 2, 3])
-      context.store.getState().moveAnchors([{ index: 1, to: [5, 5] }], MOVE_ANCHOR_STEP)
+      context.store
+        .getState()
+        .moveAnchors([{ index: 1, to: [5, 5] }], { kind: MOVE_ANCHOR_KIND, label: 'move anchor' })
       expect(
         context.store.getState().document.claims.every((claim) => claim.rings[0]?.includes(1))
       ).toBe(true)
@@ -1234,7 +1236,7 @@ describe('the Pen following a river', () => {
       const { context, reports } = riverContext()
       penClick(context, [600, 300])
       penClick(context, [620, 300])
-      expect(reports).toEqual(['inserted 2 vertices from the unnamed river'])
+      expect(reports).toEqual(['inserted 2 vertices from an unnamed river'])
     })
   })
 

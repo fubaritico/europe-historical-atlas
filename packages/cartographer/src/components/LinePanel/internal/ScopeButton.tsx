@@ -1,3 +1,6 @@
+import { useTranslation } from '../../../hooks/useTranslation'
+import { LINE_PANEL_MESSAGES } from '../i18n'
+
 import type { LineScope } from '../lineScope'
 
 /**
@@ -20,6 +23,9 @@ export function ScopeButton({
   canDressBorder: boolean
   onScope: (scope: LineScope) => void
 }) {
+  // Context
+  const t = useTranslation(LINE_PANEL_MESSAGES)
+
   // Derived
   const unavailable = value === 'border' && !canDressBorder
 
@@ -42,10 +48,10 @@ export function ScopeButton({
       className="line-panel__choice"
       aria-checked={scope === value}
       aria-disabled={unavailable ? 'true' : undefined}
-      title={unavailable ? 'The stretch runs against more than one neighbour, or none' : undefined}
+      title={unavailable ? t('borderUnavailable') : undefined}
       onClick={handleClick}
     >
-      {value === 'stretch' ? 'This stretch' : 'Whole border'}
+      {value === 'stretch' ? t('thisStretch') : t('wholeBorder')}
     </button>
   )
 }

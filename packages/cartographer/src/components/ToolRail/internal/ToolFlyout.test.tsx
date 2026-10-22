@@ -1,6 +1,8 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+
+import { renderInEnglish } from '../../../testing/renderInEnglish'
 
 import { ToolFlyout } from './ToolFlyout'
 
@@ -20,7 +22,7 @@ const VARIANTS: ToolVariant[] = [
 function mount(current = 'a') {
   const onChoose = vi.fn()
   const onDismiss = vi.fn()
-  const view = render(
+  const view = renderInEnglish(
     <ToolFlyout
       label="Group"
       variants={VARIANTS}

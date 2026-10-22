@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-import { HOLD_TO_OPEN_MS } from '../railTools'
+import { HOLD_TO_OPEN_MS } from '../utils/railTools'
 
 import type { PointerEvent as ReactPointerEvent } from 'react'
 

@@ -1,3 +1,4 @@
+import type { CanvasWords } from './canvasWords'
 import type { HistoryRelay } from './history/historyRelay'
 import type { PaintStyle } from './paint/painter'
 import type { RasterToImage } from './tribeFeatherCache'
@@ -76,4 +77,10 @@ export interface CanvasControllerDeps {
   onFeature: (feature: string | null) => void
   /** How a tribe's fade becomes a drawable image — `rasterToCanvas` in the application, a stand-in in a test. */
   tribeImage: RasterToImage
+  /**
+   * Everything the canvas says, in the language of the moment (ATLAS-159) — `canvasWords` over the page's
+   * language, **asked at each gesture** rather than once: the canvas is mounted once, and the language can
+   * change under it (ATLAS-266).
+   */
+  words: () => CanvasWords
 }

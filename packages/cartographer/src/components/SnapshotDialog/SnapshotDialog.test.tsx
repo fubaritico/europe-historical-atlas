@@ -1,8 +1,9 @@
-import { act, render, screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createSnapshotPicker } from '../shared/snapshotPicker'
+import { renderInEnglish } from '../../testing/renderInEnglish'
+import { createSnapshotPicker } from '../../utils/snapshotPicker'
 
 import { SnapshotDialog } from './SnapshotDialog'
 
@@ -38,7 +39,7 @@ function mounted(
   const picker = createSnapshotPicker()
   const source = { listSnapshots: vi.fn(listSnapshots) }
   const onOpen = vi.fn()
-  render(
+  renderInEnglish(
     <SnapshotDialog picker={picker} source={source} year={1100} now={() => NOW} onOpen={onOpen} />
   )
   return { picker, source, onOpen, user: userEvent.setup() }
@@ -154,15 +155,13 @@ describe('SnapshotDialog', () => {
   })
 
   describe('managed errors', () => {
-    it('says why the list could not be read, and logs it as an error', async () => {
+    it('says the list could not be read, and logs why as an error', async () => {
       const { picker } = mounted(() => Promise.reject(new Error('the dev server is not running')))
 
       press(picker)
 
       expect(
-        await open().findByText(
-          'The snapshots could not be listed (the dev server is not running).'
-        )
+        await open().findByText('The snapshots could not be listed (details in the console).')
       ).toBeTruthy()
       expect(open().getByRole('button', { name: 'Open' }).hasAttribute('disabled')).toBe(true)
       expect(console.error).toHaveBeenCalledTimes(1)
@@ -174,13 +173,19 @@ describe('SnapshotDialog', () => {
   })
 
   describe('unmanaged errors', () => {
-    it('says a non-Error refusal of the list as text', async () => {
+    it('keeps a non-Error refusal of the list for the console, and says the list could not be read', async () => {
       // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- the case under test
       const { picker } = mounted(() => Promise.reject('offline'))
 
       press(picker)
 
-      expect(await open().findByText('The snapshots could not be listed (offline).')).toBeTruthy()
+      expect(
+        await open().findByText('The snapshots could not be listed (details in the console).')
+      ).toBeTruthy()
+      expect(console.error).toHaveBeenCalledWith(
+        '[Cartographer] the snapshots of 1100 could not be listed',
+        'offline'
+      )
     })
 
     it('stays closed, listing nothing, when the list arrives after the dialogue was closed', async () => {

@@ -1,10 +1,11 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
 import { testStore } from '../../canvas/testGestureContext'
+import { renderInEnglish } from '../../testing/renderInEnglish'
 
 import { OverridesPanel } from './OverridesPanel'
 
@@ -30,7 +31,7 @@ function mount(dress: (document: YearDocument) => void = () => undefined) {
   const document = sharedBorderDocument()
   dress(document)
   const store = testStore(document)
-  render(<OverridesPanel store={store} />)
+  renderInEnglish(<OverridesPanel store={store} />)
   return { store, user: userEvent.setup() }
 }
 

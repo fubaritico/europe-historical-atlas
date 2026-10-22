@@ -9,15 +9,15 @@ import { ErrorBoundary } from '../components/ErrorBoundary'
 import { PolityForm } from '../components/PolityForm'
 import { PolityList } from '../components/PolityList'
 import { PolityStackMenu } from '../components/PolityStackMenu'
-import { DRAFT_ERRORS, EMPTY_DRAFT, RANKS } from '../components/shared/polityDraft'
 import { ToolRail } from '../components/ToolRail'
+import { EMPTY_DRAFT, RANKS } from '../utils/polityDraft'
 
 import { BarIconCandidates } from './BarIconCandidates'
 import { BrokenZone } from './BrokenZone'
 import { IconSharpness } from './IconSharpness'
 
 import type { WorkbenchEntry } from './Workbench'
-import type { PolityRow } from '../components/shared/polityRows'
+import type { PolityRow } from '../utils/polityRows'
 
 /** Polities a new one could owe homage to, as the suzerain list offers them. */
 const SUZERAINS = [
@@ -328,7 +328,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
           suzerain: null,
           wikidata: 'Q70972',
         }}
-        errors={{ id: DRAFT_ERRORS.idTaken, existsFrom: DRAFT_ERRORS.notAYear }}
+        errors={{ id: 'idTaken', existsFrom: 'notAYear' }}
         suzerains={SUZERAINS}
         ranks={RANKS}
         {...INERT}

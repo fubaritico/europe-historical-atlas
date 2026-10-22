@@ -1,9 +1,11 @@
-import { statusOf } from '../shared/wikidataView'
+import { useTranslation } from '../../hooks/useTranslation'
 
+import { WIKIDATA_PANEL_MESSAGES } from './i18n'
 import { FoundFacts } from './internal/FoundFacts'
+import { statusOf } from './utils/wikidataStatus'
 
+import type { WikidataView } from '../../utils/wikidataView'
 import type { WikidataField } from '../../wikidata/wikidataFacts'
-import type { WikidataView } from '../shared/wikidataView'
 
 /**
  * What Wikidata says about the polity in the form (CARTO-243): its name, its years, its Wikipedia articles,
@@ -36,8 +38,11 @@ export interface WikidataPanelProps {
  * @returns the panel: the live region always, the facts when an item was found
  */
 export function WikidataPanel({ view, onUse }: WikidataPanelProps) {
+  // Context
+  const t = useTranslation(WIKIDATA_PANEL_MESSAGES)
+
   // Derived
-  const status = statusOf(view)
+  const status = statusOf(view, t)
   const warns = view.kind === 'unknown' || view.kind === 'found'
 
   // Render

@@ -1,0 +1,21 @@
+{
+  "save": "Save",
+  "open": "Open…",
+  "openSnapshot": "Open snapshot…",
+  "saveAs": "Save as…",
+  "undo": "Undo",
+  "redo": "Redo",
+  "undoStep": "Undo {step}",
+  "redoStep": "Redo {step}",
+  "newPolity": "New polity",
+  "editProperties": "Edit properties…",
+  "deletePolity": "Delete polity",
+  "close": "Close",
+  "ok": "OK",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "front": "Bring to Front",
+  "forward": "Bring Forward",
+  "backward": "Send Backward",
+  "back": "Send to Back"
+}

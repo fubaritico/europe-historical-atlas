@@ -1,5 +1,9 @@
 import { ColorField } from '@fubaritico/react/ColorField'
 
+import { useColourPickerWords } from '../../../hooks/useColourPickerWords'
+import { useTranslation } from '../../../hooks/useTranslation'
+import { POLITY_FORM_MESSAGES } from '../i18n'
+
 import type { HsvaColor } from '@fubaritico/behaviors'
 
 /**
@@ -20,6 +24,19 @@ export function ColourField({
   value: HsvaColor | null
   onChange: (colour: HsvaColor | null) => void
 }) {
+  // Context
+  const t = useTranslation(POLITY_FORM_MESSAGES)
+  const picker = useColourPickerWords()
+
   // Render
-  return <ColorField label="Colour" value={value} onChange={onChange} nullable density="compact" />
+  return (
+    <ColorField
+      label={t('colour')}
+      value={value}
+      onChange={onChange}
+      nullable
+      density="compact"
+      {...picker}
+    />
+  )
 }

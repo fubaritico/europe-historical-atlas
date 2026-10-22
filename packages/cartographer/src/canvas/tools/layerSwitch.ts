@@ -1,5 +1,6 @@
 import { modeLabel } from '../../state/toolSlice'
 
+import type { CanvasWords } from '../canvasWords'
 import type { SnapLayer } from './toolSession'
 import type { CartographerStoreHook } from '../../state/store'
 
@@ -15,6 +16,8 @@ export interface LayerSwitchContext {
   store: CartographerStoreHook
   /** Say what a gesture did, in the status bar's result zone. */
   report: (message: string) => void
+  /** What the canvas says, in the page's language. */
+  words: CanvasWords
 }
 
 /**
@@ -24,7 +27,7 @@ export interface LayerSwitchContext {
  */
 export function reachLayer(context: LayerSwitchContext, layer: SnapLayer): void {
   context.store.getState().reachLayer(layer)
-  context.report(modeLabel(context.store.getState().tool, layer))
+  context.report(modeLabel(context.store.getState().tool, layer, context.words.tools))
 }
 
 /**
@@ -34,5 +37,6 @@ export function reachLayer(context: LayerSwitchContext, layer: SnapLayer): void 
  */
 export function leaveLayer(context: LayerSwitchContext): void {
   const back = context.store.getState().leaveLayer()
-  if (back !== null) context.report(modeLabel(context.store.getState().tool, back))
+  if (back !== null)
+    context.report(modeLabel(context.store.getState().tool, back, context.words.tools))
 }

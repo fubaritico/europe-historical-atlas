@@ -1,0 +1,6 @@
+{
+  "toolName": "{tool, select, edit {Direct Selection} draw {Pen} retrace {Retrace} navigate {Hand} other {{tool}}}",
+  "penMode": "{mode, select, free {Pen} coast {Pen — follow the coast} river {Pen — follow a river} pencil {Pencil — freehand} other {{mode}}}",
+  "modeUnder": "{tool} · {mode}",
+  "keyName": "{key, select, Space {Space} other {{key}}}"
+}

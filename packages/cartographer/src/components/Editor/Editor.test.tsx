@@ -1,4 +1,4 @@
-import { act, render, within } from '@testing-library/react'
+import { act, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
@@ -10,6 +10,7 @@ import { createResultRelay } from '../../persistence/resultRelay'
 import { openEmptyYear } from '../../state/openEmptyYear'
 import { createPolityColourSource } from '../../state/polityColourSource'
 import { createCartographerStore } from '../../state/store'
+import { renderInEnglish } from '../../testing/renderInEnglish'
 import { UNFRAMED } from '../../viewport/viewport'
 
 import { Editor } from './Editor'
@@ -45,7 +46,7 @@ vi.mock('../MapArea', () => ({
  */
 function mount(results = createResultRelay()): void {
   handed = null
-  render(
+  renderInEnglish(
     <Editor
       store={createCartographerStore({
         edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
@@ -53,9 +54,7 @@ function mount(results = createResultRelay()): void {
       })}
       load={() => new Promise(() => undefined)}
       style={CHROME_PAINT_STYLE}
-      label="Map of the year 1100, being edited"
       heading={<h1>Cartographer — year 1100</h1>}
-      name="Europe Historical Atlas Cartographer"
       onSave={() => undefined}
       onOpenSnapshot={() => undefined}
       history={createHistoryRelay()}

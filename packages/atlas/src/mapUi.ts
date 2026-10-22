@@ -15,7 +15,7 @@ import { createProgressOverlay } from './ui/progressOverlay'
 import { createSplash } from './ui/splash'
 import { PARCHMENT } from './viewport'
 
-import type { AtlasMessageKey } from './messages'
+import type { AtlasMessageKey } from './i18n'
 import type { ProgressOverlay } from './ui/progressOverlay'
 import type { AssetKind } from '@europe-historical-atlas/core/data/assetError'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'

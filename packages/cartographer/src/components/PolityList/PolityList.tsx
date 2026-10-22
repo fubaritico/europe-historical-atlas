@@ -1,14 +1,17 @@
 import { ListboxList } from '@fubaritico/react/Listbox'
 import { useEffect } from 'react'
 
+import { useTranslation } from '../../hooks/useTranslation'
+
 import { useListCursor } from './hooks/useListCursor'
+import { POLITY_LIST_MESSAGES } from './i18n'
 import { PolitiesSubhead } from './internal/PolitiesSubhead'
 import { PolityOption } from './internal/PolityOption'
-import { optionId } from './optionId'
-import { scrollTopToShow } from './rowScroll'
+import { optionId } from './utils/optionId'
+import { showRow } from './utils/showRow'
 
+import type { PolityRow } from '../../utils/polityRows'
 import type { ViewportPoint } from '../../viewport/viewport'
-import type { PolityRow } from '../shared/polityRows'
 
 /** What the list shows and reports. Never the store: `PolitiesPanel` reads it and hands rows. */
 export interface PolityListProps {
@@ -30,29 +33,6 @@ export interface PolityListProps {
 }
 
 /**
- * Scroll the list, smoothly, to the target's row — centred, unless it is already wholly in view
- * (`scrollTopToShow`). Only the list scrolls, never the page; and at once when the system asks for less
- * motion.
- * @param targetId - the polity aimed at
- */
-function showRow(targetId: string): void {
-  const row = document.getElementById(optionId(targetId))
-  const list = row?.parentElement
-  // A target that no longer resolves — an undo took its polity away — has no row. Ordinary, and said
-  // where it matters: the status bar no longer names it, and the Pen refuses.
-  if (row === null || list === null || list === undefined) return
-  const top = scrollTopToShow({
-    rowTop: row.offsetTop,
-    rowHeight: row.offsetHeight,
-    scrollTop: list.scrollTop,
-    viewHeight: list.clientHeight,
-  })
-  if (top === null) return
-  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  list.scrollTo({ top, behavior: still ? 'auto' : 'smooth' })
-}
-
-/**
  * `{Polities}`' list: every polity of the year, the target marked, a click or ‹enter› aiming at one —
  * `s02`'s *"selecting the target is a gesture of `{Polities}`"*.
  *
@@ -70,6 +50,9 @@ function showRow(targetId: string): void {
  * @returns the subhead and the list, or the subhead and a line saying the year is empty
  */
 export function PolityList({ year, rows, targetId, onChoose, onMenu, onEdit }: PolityListProps) {
+  // Context
+  const t = useTranslation(POLITY_LIST_MESSAGES)
+
   // State
   const { activeId, active, onKeyDown } = useListCursor(rows, targetId, onChoose, onMenu)
 
@@ -83,7 +66,7 @@ export function PolityList({ year, rows, targetId, onChoose, onMenu, onEdit }: P
     <>
       <PolitiesSubhead year={year} count={rows.length} />
       {rows.length === 0 ? (
-        <p className="polities__empty">No polity in this year yet.</p>
+        <p className="polities__empty">{t('empty')}</p>
       ) : (
         <ListboxList
           variant="dark"
@@ -91,7 +74,7 @@ export function PolityList({ year, rows, targetId, onChoose, onMenu, onEdit }: P
           // The design system's list is a bare <ul>: the role is the consumer's to declare, and options
           // with no listbox around them are not read as a list at all.
           role="listbox"
-          aria-label="Polities"
+          aria-label={t('label')}
           tabIndex={0}
           {...(activeId === null || active < 0
             ? {}

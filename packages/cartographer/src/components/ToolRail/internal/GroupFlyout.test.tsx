@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { LocaleContext } from '../../shared/localeContext'
+import { createLocaleStore } from '../../../i18n/localeStore'
+import { LocaleProvider } from '../../LocaleProvider'
 
 import { GroupFlyout } from './GroupFlyout'
 
@@ -24,7 +25,7 @@ describe('GroupFlyout', () => {
     it('keeps its failure to its own place, beside the rail it opened from', () => {
       vi.spyOn(console, 'error').mockImplementation(() => undefined)
       render(
-        <LocaleContext value="en">
+        <LocaleProvider store={createLocaleStore('en')}>
           <p>the rail</p>
           <GroupFlyout
             label="Pen"
@@ -33,7 +34,7 @@ describe('GroupFlyout', () => {
             onVariant={() => undefined}
             close={() => undefined}
           />
-        </LocaleContext>
+        </LocaleProvider>
       )
       expect(screen.getByText('the rail').tagName).toBe('P')
       expect(screen.getByRole('alert').textContent).toContain('the flyout broke')

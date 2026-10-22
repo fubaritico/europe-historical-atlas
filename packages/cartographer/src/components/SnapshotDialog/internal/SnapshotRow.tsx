@@ -1,3 +1,5 @@
+import { useLocale } from '../../../hooks/useLocale'
+import { persistenceWords } from '../../../persistence/persistenceWords'
 import { timeWords } from '../../../persistence/timeWords'
 
 import type { SnapshotEntry } from '../../../persistence/draft/draftStore'
@@ -22,6 +24,12 @@ export function SnapshotRow({
   choose: (name: string) => void
   now: () => Date
 }) {
+  // Context
+  const locale = useLocale()
+
+  // Derived
+  const words = persistenceWords(locale)
+
   // Handlers
   const pick = (): void => {
     choose(entry.name)
@@ -31,7 +39,7 @@ export function SnapshotRow({
   return (
     <label className="snapshot-list__row">
       <input type="radio" name="snapshot" value={entry.name} checked={chosen} onChange={pick} />
-      {timeWords(entry.takenAt, now(), { seconds: true })}
+      {timeWords(entry.takenAt, now(), words, { seconds: true })}
     </label>
   )
 }

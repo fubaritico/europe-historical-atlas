@@ -2,10 +2,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
+import { persistenceWords } from '../persistenceWords'
+
 import { DRAFT_DELAY_MS, SNAPSHOT_EVERY_MS, createDraftKeeper } from './draftKeeper'
 
 import type { KeeperStore, KeeperTimers } from './draftKeeper'
 import type { Draft, DraftStore, SnapshotSink } from './draftStore'
+
+/** What the year on disk says, in English — the language these suites were written against. */
+const EN_WORDS = persistenceWords('en')
 
 /** The clock every draft is stamped with. */
 const NOW = new Date('2026-10-17T15:42:05.000Z')
@@ -99,6 +104,7 @@ function keeper(
     now,
     timers: clock.timers,
     report: (message) => reports.push(message),
+    words: () => EN_WORDS,
   })
   return { draftKeeper, ...memory, ...clock, reports }
 }
@@ -249,7 +255,7 @@ describe('createDraftKeeper', () => {
       await settle()
 
       expect(reports).toEqual([
-        'the draft is not kept (the dev server is down) — save with ‹ctrl+S› not to lose your work',
+        'the draft is not kept — save with ‹ctrl+S› not to lose your work (details in the console)',
       ])
       expect(console.error).toHaveBeenCalledTimes(1)
     })
@@ -281,7 +287,7 @@ describe('createDraftKeeper', () => {
       await draftKeeper.saved(state.version)
 
       expect(reports).toEqual([
-        'saved, but the old draft could not be removed (EACCES) — it may be offered at the next opening',
+        'saved, but the old draft could not be removed — it may be offered at the next opening (details in the console)',
       ])
     })
   })
@@ -304,7 +310,7 @@ describe('createDraftKeeper', () => {
 
       expect(reports).toHaveLength(1)
       expect(reports[0]).toBe(
-        'the draft is not kept (the document cannot be read) — save with ‹ctrl+S› not to lose your work'
+        'the draft is not kept — save with ‹ctrl+S› not to lose your work (details in the console)'
       )
     })
   })
@@ -446,7 +452,9 @@ describe('createDraftKeeper, the hourly snapshot (CARTO-238, rung 2a)', () => {
       await settle()
 
       expect(memory.written).toHaveLength(1)
-      expect(reports.at(-1)).toBe('the hourly snapshot of 1100 was not kept (disk full)')
+      expect(reports.at(-1)).toBe(
+        'the hourly snapshot of 1100 was not kept (details in the console)'
+      )
       expect(error).toHaveBeenCalledOnce()
     })
 

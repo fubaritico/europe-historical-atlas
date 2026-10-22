@@ -1,7 +1,8 @@
 import { act, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { LocaleContext } from '../components/shared/localeContext'
+import { LocaleProvider } from '../components/LocaleProvider'
+import { createLocaleStore } from '../i18n/localeStore'
 
 import { WORKBENCH_ENTRIES } from './entries'
 import { Workbench } from './Workbench'
@@ -63,7 +64,7 @@ describe('Workbench', () => {
       (_, entry) => {
         vi.spyOn(console, 'error').mockImplementation(() => undefined)
         expect(() =>
-          render(<LocaleContext value="en">{entry.render()}</LocaleContext>)
+          render(<LocaleProvider store={createLocaleStore('en')}>{entry.render()}</LocaleProvider>)
         ).not.toThrow()
       }
     )

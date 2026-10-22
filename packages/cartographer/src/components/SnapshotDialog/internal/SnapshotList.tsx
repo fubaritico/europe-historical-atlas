@@ -1,3 +1,6 @@
+import { useTranslation } from '../../../hooks/useTranslation'
+import { SNAPSHOT_DIALOG_MESSAGES } from '../i18n'
+
 import { SnapshotRow } from './SnapshotRow'
 
 import type { Listing } from '../listing'
@@ -25,28 +28,31 @@ export function SnapshotList({
   year: number
   now: () => Date
 }) {
+  // Context
+  const t = useTranslation(SNAPSHOT_DIALOG_MESSAGES)
+
   // Render
   if (listing.state === 'reading')
     return (
       <p className="snapshot-list__note" role="status">
-        Reading the snapshots…
+        {t('reading')}
       </p>
     )
   if (listing.state === 'failed')
     return (
       <p className="snapshot-list__note" role="alert">
-        The snapshots could not be listed ({listing.reason}).
+        {t('failed')}
       </p>
     )
   if (listing.entries.length === 0)
     return (
       <p className="snapshot-list__note" role="status">
-        No snapshot of {String(year)} yet — one is kept every hour of drawing.
+        {t('empty', { year: String(year) })}
       </p>
     )
   return (
     <fieldset className="snapshot-list">
-      <legend className="visually-hidden">Snapshots of {String(year)}, newest first</legend>
+      <legend className="visually-hidden">{t('legend', { year: String(year) })}</legend>
       {listing.entries.map((entry) => (
         <SnapshotRow
           key={entry.name}

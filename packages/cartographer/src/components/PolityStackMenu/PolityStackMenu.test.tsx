@@ -1,5 +1,6 @@
-import { render } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+
+import { renderInEnglish } from '../../testing/renderInEnglish'
 
 import { PolityStackMenu } from './PolityStackMenu'
 
@@ -16,7 +17,7 @@ function mountAt(at: { x: number; y: number }): HTMLElement {
   vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(
     new DOMRect(at.x, at.y, 180, 100)
   )
-  const { container } = render(
+  const { container } = renderInEnglish(
     <PolityStackMenu
       name="France"
       at={at}

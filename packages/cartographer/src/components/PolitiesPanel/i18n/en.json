@@ -1,0 +1,11 @@
+{
+  "title": "Polities",
+  "actionsLabel": "Polity actions",
+  "deleteNeedsPolity": "Select a polity to delete",
+  "deleteQuestion": "{what, select, none {Delete {name}?} rings {Delete {name}? Its {rings, plural, one {# ring goes} other {# rings go}}.} vassals {Delete {name}? Its {vassals, plural, one {# vassal becomes} other {# vassals become}} sovereign.} both {Delete {name}? Its {rings, plural, one {# ring goes} other {# rings go}}; its {vassals, plural, one {# vassal becomes} other {# vassals become}} sovereign.} other {{what}}}",
+  "deleteResult": "deleted {name} — {rings, plural, one {# ring} other {# rings}}{vassals, plural, =0 {} one {, # vassal now sovereign} other {, # vassals now sovereign}} · ctrl+Z brings it back",
+  "createStep": "create {name}",
+  "editStep": "edit {name}",
+  "deleteStep": "delete {name}",
+  "deleteGone": "nothing deleted: {name} is no longer in the year"
+}

@@ -178,7 +178,7 @@ describe('readEntity', () => {
     })
 
     it('says when an item is a Wikipedia category rather than a polity', () => {
-      expect(facts(MOSUL_CATEGORY).notASubject).toBe('a Wikipedia category')
+      expect(facts(MOSUL_CATEGORY).notASubject).toBe('category')
     })
 
     it('reads predecessors and successors from both pairs of properties', () => {
@@ -246,15 +246,21 @@ describe('yearOfTime', () => {
 describe('anachronism', () => {
   it('warns that the County of Tripoli does not exist yet in 1100', () => {
     // CARTO-243's first acceptance case, from the dev's own 1100.
-    expect(anachronism(1100, facts(TRIPOLI))).toBe(
-      'Wikidata: County of Tripoli 1102–1289 — does not exist yet in 1100'
-    )
+    expect(anachronism(1100, facts(TRIPOLI))).toEqual({
+      when: 'notYet',
+      name: 'County of Tripoli',
+      span: '1102–1289',
+      year: 1100,
+    })
   })
 
   it('warns that a polity no longer exists after its end', () => {
-    expect(anachronism(1300, facts(JERUSALEM))).toBe(
-      'Wikidata: Kingdom of Jerusalem 1099–1291 — no longer exists in 1300'
-    )
+    expect(anachronism(1300, facts(JERUSALEM))).toEqual({
+      when: 'noLonger',
+      name: 'Kingdom of Jerusalem',
+      span: '1099–1291',
+      year: 1300,
+    })
   })
 
   it('says nothing when the year lies within the dates, its bounds included', () => {

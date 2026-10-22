@@ -1,7 +1,6 @@
 import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import { reasonOf } from '../errorReason'
-
+import type { PersistenceWords } from '../persistenceWords'
 import type { Draft, DraftStore, SnapshotSink } from './draftStore'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
@@ -90,6 +89,8 @@ export interface DraftKeeperDeps {
   timers: KeeperTimers
   /** Where a message for the author goes — the status bar's result zone. */
   report: (message: string) => void
+  /** What it says — asked at each sentence, so it follows a change of language. */
+  words: () => PersistenceWords
 }
 
 /** The keeper. */
@@ -137,7 +138,7 @@ async function writeDraft(deps: DraftKeeperDeps, cell: KeeperCell): Promise<void
     await deps.drafts.write(draft)
     if (cell.failing) {
       cell.failing = false
-      deps.report(`the draft of ${yearName} is kept again`)
+      deps.report(deps.words().t('draftKeptAgain', { year: yearName }))
     }
     // Beside the queue: its own failures are caught inside, and it must not hold the next write.
     void snapshotIfDue(deps, cell, draft)
@@ -145,9 +146,7 @@ async function writeDraft(deps: DraftKeeperDeps, cell: KeeperCell): Promise<void
     if (cell.failing) return
     cell.failing = true
     console.error(`${LOG_TAG} the draft of ${yearName} could not be kept`, error)
-    deps.report(
-      `the draft is not kept (${reasonOf(error)}) — save with ‹ctrl+S› not to lose your work`
-    )
+    deps.report(deps.words().t('draftNotKept'))
   }
 }
 
@@ -167,7 +166,7 @@ async function snapshotIfDue(deps: DraftKeeperDeps, cell: KeeperCell, draft: Dra
     await deps.snapshots.snapshot(draft)
   } catch (error: unknown) {
     console.error(`${LOG_TAG} the hourly snapshot of ${String(deps.year)} was not kept`, error)
-    deps.report(`the hourly snapshot of ${String(deps.year)} was not kept (${reasonOf(error)})`)
+    deps.report(deps.words().t('hourlyNotKept', { year: String(deps.year) }))
   }
 }
 
@@ -208,9 +207,7 @@ async function removeAfterSave(
       `${LOG_TAG} the draft of ${String(deps.year)} could not be removed after the save`,
       error
     )
-    deps.report(
-      `saved, but the old draft could not be removed (${reasonOf(error)}) — it may be offered at the next opening`
-    )
+    deps.report(deps.words().t('oldDraftLeft'))
   }
 }
 

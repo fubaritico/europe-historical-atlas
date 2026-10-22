@@ -13,7 +13,7 @@
 
 import { isAssetError } from '@europe-historical-atlas/core/data/assetError'
 
-import type { AtlasMessageKey } from './messages'
+import type { AtlasMessageKey } from './i18n'
 import type { Notice } from './ui/notice'
 import type { AssetKind } from '@europe-historical-atlas/core/data/assetError'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'

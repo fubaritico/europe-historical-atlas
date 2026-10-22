@@ -8,14 +8,7 @@ import { screenToLonLatOnBackdrop } from '../../viewport/projection'
 import { TEST_BACKDROP_FRAME } from '../../viewport/testFrame'
 import { drawOutlineAt, testGestureContext, testPolity, testStore } from '../testGestureContext'
 
-import {
-  DELETE_ANCHOR_STEP,
-  INSERT_ANCHOR_STEP,
-  deleteSelected,
-  editHandlesOf,
-  insertOnStretch,
-  targetStretches,
-} from './anchorGestures'
+import { deleteSelected, editHandlesOf, insertOnStretch, targetStretches } from './anchorGestures'
 import { arrowDrag, arrowPress, arrowRelease, toolKey } from './toolGestures'
 
 import type { CartographerStoreHook } from '../../state/store'
@@ -70,7 +63,7 @@ describe('anchorGestures', () => {
       insertOnStretch(context, 'fr', [200, 103])
 
       expect(ringsOf(store, 'fr')).toEqual([[0, 4, 1, 2, 3]])
-      expect(store.getState().rows.at(-1)?.label).toBe(INSERT_ANCHOR_STEP.label)
+      expect(store.getState().rows.at(-1)?.label).toBe('insert anchor')
     })
 
     it('places the inserted anchor on the side, not under the pointer', () => {
@@ -93,7 +86,7 @@ describe('anchorGestures', () => {
       expect(toolKey(context, 'Delete')).toBe(true)
 
       expect(ringsOf(store, 'fr')).toEqual([[1, 2, 3]])
-      expect(store.getState().rows.at(-1)?.label).toBe(DELETE_ANCHOR_STEP.label)
+      expect(store.getState().rows.at(-1)?.label).toBe('delete anchor')
       expect(context.session.selected).toEqual([])
     })
   })
@@ -109,7 +102,7 @@ describe('anchorGestures', () => {
 
       expect(ringsOf(store, 'fr')).toEqual([[0, 1, 2, 3]])
       expect(store.getState().document.anchors).toHaveLength(4)
-      expect(store.getState().rows.map((row) => row.label)).not.toContain(INSERT_ANCHOR_STEP.label)
+      expect(store.getState().rows.map((row) => row.label)).not.toContain('insert anchor')
     })
 
     it('inserts into both polities when the stretch is their shared border', () => {

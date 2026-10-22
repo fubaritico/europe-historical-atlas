@@ -1,0 +1,8 @@
+{
+  "title": "Overrides",
+  "empty": "Nothing overridden: every line follows its rule.",
+  "fact": "fact",
+  "clear": "Clear",
+  "clearLabel": "Clear {hand} · {what}",
+  "clearStep": "clear {what}"
+}

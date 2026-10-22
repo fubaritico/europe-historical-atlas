@@ -2,7 +2,8 @@ import { render, screen } from '@testing-library/react'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { LocaleContext } from '../shared/localeContext'
+import { createLocaleStore } from '../../i18n/localeStore'
+import { LocaleProvider } from '../LocaleProvider'
 
 import { Panel } from './Panel'
 
@@ -73,11 +74,11 @@ describe('Panel', () => {
     it('keeps its name and shows the failure in place of a view that throws', () => {
       vi.spyOn(console, 'error').mockImplementation(() => undefined)
       render(
-        <LocaleContext value="en">
+        <LocaleProvider store={createLocaleStore('en')}>
           <Panel title="Layers">
             <FailingView />
           </Panel>
-        </LocaleContext>
+        </LocaleProvider>
       )
       expect(screen.getByRole('heading', { level: 2, name: 'Layers' })).toBeDefined()
       expect(screen.getByRole('alert').textContent).toContain('This area could not be shown.')

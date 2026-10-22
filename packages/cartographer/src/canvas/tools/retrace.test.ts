@@ -1,8 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
+
 import { FREE_POINT_PROVENANCE } from '../../state/editionSlice'
 import { screenToLonLatOnBackdrop } from '../../viewport/projection'
 import { TEST_BACKDROP_FRAME } from '../../viewport/testFrame'
+import { CANVAS_MESSAGES } from '../i18n'
 import { TEST_SHORE, testGestureContext, testPolity, testStore } from '../testGestureContext'
 
 import {
@@ -17,6 +20,9 @@ import type { SnapLine } from '../../geometry/lineSnap'
 import type { CartographerStoreHook } from '../../state/store'
 import type { Point } from '../../viewport/viewport'
 import type { RetraceRefusal } from '@europe-historical-atlas/core/editor/retrace'
+
+/** The canvas's messages, in English — the language these suites were written against. */
+const EN = createTranslator(CANVAS_MESSAGES, 'en')
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -224,10 +230,10 @@ describe('retrace', () => {
     it('words a refusal the tool should have prevented as a disagreement', () => {
       const { store } = openRetrace()
       const document = store.getState().document
-      expect(refusalMessage({ kind: 'not-an-arc' }, document, 'France')).toBe(
+      expect(refusalMessage({ kind: 'not-an-arc' }, document, 'France', EN)).toBe(
         'not retraced: the tool and the document disagree'
       )
-      expect(refusalMessage({ kind: 'bad-anchor' }, document, 'France')).toBe(
+      expect(refusalMessage({ kind: 'bad-anchor' }, document, 'France', EN)).toBe(
         'not retraced: the tool and the document disagree'
       )
     })
@@ -237,9 +243,9 @@ describe('retrace', () => {
     it('words every refusal a gesture can reach', () => {
       const { store } = openRetrace()
       const document = store.getState().document
-      const said = (refusal: RetraceRefusal) => refusalMessage(refusal, document, 'France')
+      const said = (refusal: RetraceRefusal) => refusalMessage(refusal, document, 'France', EN)
       expect(said({ kind: 'dressed-run' })).toBe(
-        'not retraced: a border dressed by hand runs over this stretch — clear it in {Overrides} first'
+        'not retraced: a border dressed by hand runs over this stretch — clear it in the Overrides panel first'
       )
       expect(said({ kind: 'loop', polity: 'hre' })).toBe(
         'not retraced: the new run passes again through an anchor Empire keeps'
@@ -252,7 +258,7 @@ describe('retrace', () => {
     it('names several neighbours that follow', () => {
       const { store } = openRetrace()
       const done = { removed: 2, added: 3, neighbours: ['hre', 'fr'], untouched: ['fr', null] }
-      expect(doneMessage(done, store.getState().document, 'X')).toBe(
+      expect(doneMessage(done, store.getState().document, 'X', EN)).toBe(
         'X: 2 anchors replaced by 3 · Empire, France follow · France, a deliberate gap keep their points'
       )
     })

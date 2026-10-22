@@ -4,12 +4,16 @@ import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/docum
 
 import { openEmptyYear } from '../state/openEmptyYear'
 
+import { persistenceWords } from './persistenceWords'
 import { YearChangedOnDisk } from './yearArchive'
 import { createYearSession, describeYearContents } from './yearSession'
 
 import type { YearArchive } from './yearArchive'
 import type { OverwriteQuestion, SessionStore } from './yearSession'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+
+/** What the year on disk says, in English — the language these suites were written against. */
+const EN_WORDS = persistenceWords('en')
 
 /** A store in memory: one document, a version, and `open` replacing both. */
 function memoryStore() {
@@ -60,6 +64,7 @@ function session(
     archive,
     year: 1100,
     report: (message) => reports.push(message),
+    words: () => EN_WORDS,
     confirmOverwrite,
     now: () => NOW,
   })
@@ -142,10 +147,14 @@ describe('createYearSession', () => {
       expect(archive.save).not.toHaveBeenCalled()
       expect(yearSession.phase()).toBe('blocked')
       expect(reports).toEqual([
-        '1100 could not be read, so saving is blocked: yearPolities (schema) …: anchors[3]: expected number',
-        '1100 could not be read, so saving is blocked: yearPolities (schema) …: anchors[3]: expected number',
+        '1100 could not be read, so saving is blocked (details in the console)',
+        '1100 could not be read, so saving is blocked (details in the console)',
       ])
-      expect(console.error).toHaveBeenCalled()
+      // The reader's own words are English whatever the page: the console has them, not the bar.
+      expect(console.error).toHaveBeenCalledWith(
+        '[Cartographer] 1100 could not be read from disk',
+        new Error('yearPolities (schema) …: anchors[3]: expected number')
+      )
     })
 
     it('blocks saving when the manifest cannot be read', async () => {
@@ -197,7 +206,7 @@ describe('createYearSession', () => {
       expect(reports).toEqual(['still reading 1100 from disk — save again in a moment'])
     })
 
-    it('says a refused save was not saved, with the server’s reason', async () => {
+    it('says a refused save was not saved, and leaves the server’s reason to the console', async () => {
       const { yearSession, reports } = session(
         stubArchive({
           save: () =>
@@ -208,10 +217,11 @@ describe('createYearSession', () => {
       const saved = await yearSession.save()
 
       expect(saved).toBe(false)
-      expect(reports.at(-1)).toBe(
-        'not saved: the files say year 1100, the save was addressed to 1110'
+      expect(reports.at(-1)).toBe('not saved (details in the console)')
+      expect(console.error).toHaveBeenCalledWith(
+        '[Cartographer] 1100 was not saved',
+        new Error('the files say year 1100, the save was addressed to 1110')
       )
-      expect(console.error).toHaveBeenCalled()
     })
 
     it('answers false to a save refused before it starts, so the draft is kept', async () => {
@@ -222,7 +232,7 @@ describe('createYearSession', () => {
   })
 
   describe('unmanaged errors', () => {
-    it('reports a thrown value that is not an Error, rather than losing it', async () => {
+    it('logs a thrown value that is not an Error, rather than losing it', async () => {
       const { yearSession, reports } = session(
         // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- the case under test
         stubArchive({ save: () => Promise.reject('Failed to fetch') })
@@ -230,7 +240,11 @@ describe('createYearSession', () => {
       await yearSession.openOnStartup()
       await yearSession.save()
 
-      expect(reports.at(-1)).toBe('not saved: Failed to fetch')
+      expect(reports.at(-1)).toBe('not saved (details in the console)')
+      expect(console.error).toHaveBeenCalledWith(
+        '[Cartographer] 1100 was not saved',
+        'Failed to fetch'
+      )
     })
 
     it('allows another save after a failed one', async () => {
@@ -278,7 +292,10 @@ describe('createYearSession, a save over a year changed on disk (CARTO-238, rung
       await yearSession.openOnStartup()
       await yearSession.save()
 
-      expect(confirmOverwrite).toHaveBeenCalledWith({ year: 1100, when: 'today at 14:02' })
+      expect(confirmOverwrite).toHaveBeenCalledWith({
+        year: 1100,
+        changedAt: new Date(CHANGED_AT).toISOString(),
+      })
     })
 
     it('on [Overwrite], saves again with overwrite, reports the save and answers true', async () => {
@@ -323,7 +340,7 @@ describe('createYearSession, a save over a year changed on disk (CARTO-238, rung
       await yearSession.openOnStartup()
       await yearSession.save()
 
-      expect(confirmOverwrite).toHaveBeenCalledWith({ year: 1100, when: null })
+      expect(confirmOverwrite).toHaveBeenCalledWith({ year: 1100, changedAt: null })
     })
   })
 
@@ -348,7 +365,7 @@ describe('createYearSession, a save over a year changed on disk (CARTO-238, rung
 
       expect(console.warn).toHaveBeenCalledTimes(1)
       expect(console.warn).toHaveBeenCalledWith(
-        '[Cartographer] save cancelled: 1100 was changed on disk today at 14:02'
+        `[Cartographer] save cancelled: 1100 was changed on disk at ${new Date(CHANGED_AT).toISOString()}.`
       )
     })
 
@@ -374,8 +391,12 @@ describe('createYearSession, a save over a year changed on disk (CARTO-238, rung
       await yearSession.openOnStartup()
 
       await expect(yearSession.save()).resolves.toBe(false)
-      expect(reports.at(-1)).toBe('not saved: a save is already asking')
+      expect(reports.at(-1)).toBe('not saved (details in the console)')
       expect(error).toHaveBeenCalledOnce()
+      expect(error).toHaveBeenCalledWith(
+        '[Cartographer] 1100 was not saved',
+        new Error('a save is already asking')
+      )
     })
 
     it('reports a failure of the overwrite save itself as not saved, without asking again', async () => {
@@ -389,8 +410,11 @@ describe('createYearSession, a save over a year changed on disk (CARTO-238, rung
       const saved = await yearSession.save()
 
       expect(confirmOverwrite).toHaveBeenCalledTimes(1)
-      expect(reports.at(-1)).toBe('not saved: the save failed on disk (ENOSPC)')
-      expect(console.error).toHaveBeenCalled()
+      expect(reports.at(-1)).toBe('not saved (details in the console)')
+      expect(console.error).toHaveBeenCalledWith(
+        '[Cartographer] 1100 was not saved',
+        new Error('the save failed on disk (ENOSPC)')
+      )
       expect(saved).toBe(false)
     })
 
@@ -404,7 +428,11 @@ describe('createYearSession, a save over a year changed on disk (CARTO-238, rung
 
       expect(await yearSession.save()).toBe(false)
       expect(confirmOverwrite).toHaveBeenCalledTimes(1)
-      expect(reports.at(-1)).toBe('not saved: 1100 was changed on disk since it was opened')
+      expect(reports.at(-1)).toBe('not saved (details in the console)')
+      expect(console.error).toHaveBeenCalledWith(
+        '[Cartographer] 1100 was not saved',
+        expect.any(YearChangedOnDisk)
+      )
     })
   })
 
@@ -444,9 +472,15 @@ describe('createYearSession, a save over a year changed on disk (CARTO-238, rung
 
 describe('describeYearContents', () => {
   it('names the counts in the singular for one, and groups thousands', () => {
-    expect(describeYearContents({ polities: 1, vertices: 1 })).toBe('1 polity · 1 vertex')
-    expect(describeYearContents({ polities: 52, vertices: 17104 })).toBe(
+    expect(describeYearContents({ polities: 1, vertices: 1 }, EN_WORDS)).toBe('1 polity · 1 vertex')
+    expect(describeYearContents({ polities: 52, vertices: 17104 }, EN_WORDS)).toBe(
       '52 polities · 17,104 vertices'
+    )
+  })
+
+  it('writes the counts the French way on a French page', () => {
+    expect(describeYearContents({ polities: 52, vertices: 17104 }, persistenceWords('fr'))).toBe(
+      '52 pays · 17\u202f104 sommets'
     )
   })
 })

@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
+import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
+
+import { CANVAS_MESSAGES } from '../i18n'
 
 import {
   actionSentence,
@@ -26,6 +29,10 @@ function here(lon: number, lat: number): SessionPoint {
   return { at: [lon, lat], provenance: { name: 'reported by eye', licence: 'fact' }, anchor: null }
 }
 
+/** The coast, and the Maas, as the Pen offers them. */
+const COAST = { water: 'coast', river: '' } as const
+const MAAS = { water: 'river', river: 'Maas' } as const
+
 /** A sentence's inputs with the Pen in hand, aimed at France, the pointer on the canvas. */
 function action(overrides: Partial<ActionInputs> = {}): ActionInputs {
   return {
@@ -41,6 +48,7 @@ function action(overrides: Partial<ActionInputs> = {}): ActionInputs {
     tooFar: false,
     session: idleSession(),
     retracing: null,
+    t: createTranslator(CANVAS_MESSAGES, 'en'),
     ...overrides,
   }
 }
@@ -76,7 +84,7 @@ describe('toolSession', () => {
     })
 
     it('wins over what the Pen would otherwise offer — no promise of a snap that will be refused', () => {
-      expect(actionSentence(action({ tooFar: true, snapping: 'Maas', closing: true }))).toBe(
+      expect(actionSentence(action({ tooFar: true, snapping: MAAS, closing: true }))).toBe(
         'Zoom in to draw in Reaume de France'
       )
     })
@@ -289,7 +297,7 @@ describe('toolSession', () => {
     // QUAL-003: over an existing anchor the bar says so, above the coast's sentences, under closing.
     it('names the shared anchor before the coast, and closing before the shared anchor', () => {
       const joining = 'Branching from a shared anchor — held by 1 path'
-      expect(actionSentence(action({ joining, snapping: 'coastline' }))).toBe(joining)
+      expect(actionSentence(action({ joining, snapping: COAST }))).toBe(joining)
       expect(actionSentence(action({ joining, closing: true }))).toBe(
         'Closing the outline of Reaume de France'
       )
@@ -297,7 +305,7 @@ describe('toolSession', () => {
 
     // QUAL-110: s02's "place points freely", for the coast — on screen, before the click.
     it('says the Pen will place points freely when the coast is out of reach', () => {
-      expect(actionSentence(action({ following: 'coastline' }))).toBe(
+      expect(actionSentence(action({ following: 'coast' }))).toBe(
         'Drawing in Reaume de France — no coastline within reach, placing points freely'
       )
     })
@@ -324,23 +332,23 @@ describe('toolSession', () => {
 
     // CARTO-257 — the coast comes first: near both, the Pen follows the coastline.
     it("names the coast before the map's edge", () => {
-      expect(actionSentence(action({ edge: 'corner', snapping: 'coastline' }))).toBe(
+      expect(actionSentence(action({ edge: 'corner', snapping: COAST }))).toBe(
         'Following the coastline for Reaume de France'
       )
     })
 
     it('says the Pen is following the coastline while it is within reach', () => {
-      expect(actionSentence(action({ snapping: 'coastline' }))).toBe(
+      expect(actionSentence(action({ snapping: COAST }))).toBe(
         'Following the coastline for Reaume de France'
       )
-      expect(actionSentence(action({ snapping: 'coastline', closing: true }))).toBe(
+      expect(actionSentence(action({ snapping: COAST, closing: true }))).toBe(
         'Closing the outline of Reaume de France'
       )
     })
 
     // s02 — "Following the Maas for Kingdom of France": the river's name verbatim, as the dataset has it.
     it('names the river under the pointer, verbatim', () => {
-      expect(actionSentence(action({ following: 'river', snapping: 'Maas' }))).toBe(
+      expect(actionSentence(action({ following: 'river', snapping: MAAS }))).toBe(
         'Following the Maas for Reaume de France'
       )
     })
@@ -457,7 +465,7 @@ describe('toolSession — ⟨retrace⟩ (H-46)', () => {
   })
 
   it('says the water a click would follow while the run is drawn', () => {
-    expect(actionSentence(action({ tool: 'retrace', snapping: 'coastline' }))).toBe(
+    expect(actionSentence(action({ tool: 'retrace', snapping: COAST }))).toBe(
       'Retracing Reaume de France — following the coastline'
     )
     expect(actionSentence(action({ tool: 'retrace', joining: 'Branching from…' }))).toBe(

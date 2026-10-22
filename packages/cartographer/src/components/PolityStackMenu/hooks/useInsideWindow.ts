@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from 'react'
 
-import { placeMenu } from '../../shared/menuPlacement'
+import { placeMenu } from '../utils/menuPlacement'
 
 import type { ViewportPoint } from '../../../viewport/viewport'
 import type { RefObject } from 'react'

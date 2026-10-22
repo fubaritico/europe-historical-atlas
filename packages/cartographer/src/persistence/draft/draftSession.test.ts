@@ -1,8 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { persistenceWords } from '../persistenceWords'
+
 import { openWithDraft, saveAndClearDraft } from './draftSession'
 
 import type { RecoveryOutcome } from './draftRecovery'
+
+/** What the year on disk says, in English — the language these suites were written against. */
+const EN_WORDS = persistenceWords('en')
 
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => undefined)
@@ -31,6 +36,7 @@ async function opening(
     },
     keeper,
     report: (message) => reports.push(message),
+    words: () => EN_WORDS,
   })
   return { order, reports, keeper }
 }
@@ -63,7 +69,7 @@ describe('openWithDraft', () => {
 
       expect(keeper.start).not.toHaveBeenCalled()
       expect(reports).toEqual([
-        'automatic drafts are off: the opening failed (unexpected) — save with ‹ctrl+S›',
+        'automatic drafts are off: the opening failed — save with ‹ctrl+S› (details in the console)',
       ])
     })
   })
@@ -81,10 +87,11 @@ describe('openWithDraft', () => {
           },
         },
         report: (message) => reports.push(message),
+        words: () => EN_WORDS,
       })
 
       expect(reports).toEqual([
-        'automatic drafts are off: they could not start (no subscription) — save with ‹ctrl+S›',
+        'automatic drafts are off: they could not start — save with ‹ctrl+S› (details in the console)',
       ])
     })
 
@@ -108,6 +115,7 @@ describe('openWithDraft', () => {
         },
         keeper: { start: () => undefined },
         report: () => undefined,
+        words: () => EN_WORDS,
       })
 
       expect(offered).toEqual([true])

@@ -1,4 +1,4 @@
-import { writeAction, writeFeature, writePosition, writeResult } from '../shared/statusBar'
+import { writeAction, writeFeature, writePosition, writeResult } from '../../utils/statusBar'
 
 import { FILL } from './areaStyle'
 import { useEditorAssets } from './hooks/useEditorAssets'

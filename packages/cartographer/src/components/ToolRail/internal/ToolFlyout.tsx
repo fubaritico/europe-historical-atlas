@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 
 import { useFlyoutFocus } from '../hooks/useFlyoutFocus'
+import { moveFocus } from '../utils/moveFocus'
 
 import { FlyoutItem } from './FlyoutItem'
 
@@ -19,18 +20,6 @@ export interface ToolFlyoutProps {
   onChoose: (id: string) => void
   /** Escape, or a click outside: close without choosing. */
   onDismiss: () => void
-}
-
-/**
- * Move the focus among the rows on ↑ and ↓, wrapping — the WAI-ARIA menu pattern, which keeps a
- * disabled row reachable so it can be discovered, but never chosen (A11Y-003).
- * @param event - the key event, on the menu
- */
-function moveFocus(event: KeyboardEvent<HTMLUListElement>): void {
-  const items = [...event.currentTarget.querySelectorAll<HTMLElement>('[role="menuitemradio"]')]
-  const at = items.findIndex((item) => item === document.activeElement)
-  const step = event.key === 'ArrowDown' ? 1 : -1
-  items[(at + step + items.length) % items.length]?.focus()
 }
 
 /**

@@ -1,4 +1,6 @@
+import { useTranslation } from '../../../hooks/useTranslation'
 import { ErrorBoundary } from '../../ErrorBoundary'
+import { TOOL_RAIL_MESSAGES } from '../i18n'
 
 import { ToolFlyout } from './ToolFlyout'
 
@@ -27,6 +29,9 @@ export function GroupFlyout({
   onVariant: (id: string) => void
   close: () => void
 }) {
+  // Context
+  const t = useTranslation(TOOL_RAIL_MESSAGES)
+
   // Handlers
   const handleChoose = (id: string) => {
     onVariant(id)
@@ -37,7 +42,7 @@ export function GroupFlyout({
   return (
     <ErrorBoundary zone="a tool group's menu" onDismiss={close}>
       <ToolFlyout
-        label={`${label} tools`}
+        label={t('groupLabel', { tool: label })}
         variants={variants}
         current={current}
         onChoose={handleChoose}

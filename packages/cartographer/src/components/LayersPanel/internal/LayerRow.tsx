@@ -1,6 +1,8 @@
 import { Slider } from '@fubaritico/react/Slider'
 
+import { useTranslation } from '../../../hooks/useTranslation'
 import { ChromeIcon } from '../../../icons/chromeIcons'
+import { LAYERS_PANEL_MESSAGES } from '../i18n'
 
 import type { LayerId } from '../../../state/layersSlice'
 import type { LayerListProps } from '../layerListProps'
@@ -15,9 +17,13 @@ import type { LayerListProps } from '../layerListProps'
  * @returns the row
  */
 export function LayerRow({ id, layers, onVisible, onOpacity }: LayerListProps & { id: LayerId }) {
+  // Context
+  const t = useTranslation(LAYERS_PANEL_MESSAGES)
+
   // Derived
   const { visible, opacity } = layers[id]
-  const verb = visible ? 'Hide' : 'Show'
+  const layer = t('layerName', { id })
+  const eye = t(visible ? 'hide' : 'show', { layer })
 
   // Handlers
   const handleEye = () => {
@@ -34,16 +40,16 @@ export function LayerRow({ id, layers, onVisible, onOpacity }: LayerListProps & 
         type="button"
         className="layer-row__eye"
         aria-pressed={visible}
-        aria-label={`${verb} ${id}`}
-        title={`${verb} ${id}`}
+        aria-label={eye}
+        title={eye}
         onClick={handleEye}
       >
         <ChromeIcon name={visible ? 'eyeOpen' : 'eyeShut'} size={15} />
       </button>
-      <span className="layer-row__name">{id}</span>
+      <span className="layer-row__name">{layer}</span>
       <Slider
         className="layer-row__opacity"
-        aria-label={`${id} opacity`}
+        aria-label={t('opacity', { layer })}
         min={0}
         max={100}
         value={opacity}

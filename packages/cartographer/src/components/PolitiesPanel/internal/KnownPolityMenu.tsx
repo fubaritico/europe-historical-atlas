@@ -1,9 +1,10 @@
+import { useLocale } from '../../../hooks/useLocale'
+import { arrangePolity, arrangeWords } from '../../../utils/arrange'
 import { ErrorBoundary } from '../../ErrorBoundary'
 import { PolityStackMenu } from '../../PolityStackMenu'
-import { arrangePolity } from '../../shared/arrange'
 
+import type { Restack } from '../../../utils/arrange'
 import type { ViewportPoint } from '../../../viewport/viewport'
-import type { Restack } from '../../shared/arrange'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
 
@@ -47,10 +48,16 @@ export function KnownPolityMenu({
   onEdit,
   onClose,
 }: KnownPolityMenuProps) {
+  // Context
+  const locale = useLocale()
+
+  // Derived
+  const words = arrangeWords(locale)
+
   // Handlers
   const handleChoose = (move: StackingMove) => {
     // The menu offers only the moves that change something; `arrangePolity` says a refusal loudly.
-    arrangePolity(restack, polity, move, onResult)
+    arrangePolity(restack, polity, move, onResult, words)
   }
   const handleEdit = () => {
     onEdit(polity.id)

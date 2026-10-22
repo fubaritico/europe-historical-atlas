@@ -1,11 +1,13 @@
 import { Typeahead } from '@fubaritico/react/Typeahead'
 import { useEffect, useRef, useState } from 'react'
 
-import { MAX_SUGGESTIONS, matchingOptions } from '../suzerainSearch'
+import { useTranslation } from '../../../hooks/useTranslation'
+import { POLITY_FORM_MESSAGES } from '../i18n'
+import { MAX_SUGGESTIONS, matchingOptions } from '../utils/suzerainSearch'
 
 import { HeldSuzerain } from './HeldSuzerain'
 
-import type { DraftOption } from '../../shared/polityDraft'
+import type { DraftOption } from '../../../utils/polityDraft'
 
 /**
  * The suzerain, chosen by typing (CARTO-241): about 150 polities in 1100 were too many to scroll in a list.
@@ -29,6 +31,9 @@ export function SuzerainField({
   value: string | null
   onSelect: (value: string | null) => void
 }) {
+  // Context
+  const t = useTranslation(POLITY_FORM_MESSAGES)
+
   // Refs
   const field = useRef<HTMLDivElement>(null)
 
@@ -65,18 +70,18 @@ export function SuzerainField({
     <div ref={field} className="ui-field suzerain-field">
       {/* Visual only: the field carries the same name as its `aria-label`. */}
       <span className="ui-field__label" aria-hidden="true">
-        Suzerain
+        {t('suzerain')}
       </span>
       <HeldSuzerain held={held} onRemove={handleRemove} />
       <Typeahead minChars={1} onSearch={setQuery} onSelect={handleSelect}>
-        <Typeahead.Input aria-label="Suzerain" placeholder="Type a name to choose…" />
-        <Typeahead.Menu aria-label="Polities">
+        <Typeahead.Input aria-label={t('suzerain')} placeholder={t('suzerainPlaceholder')} />
+        <Typeahead.Menu aria-label={t('suzerainList')}>
           {matches.map((option, index) => (
             <Typeahead.Item key={option.value} value={option.value} index={index}>
               <Typeahead.Highlight>{option.label}</Typeahead.Highlight>
             </Typeahead.Item>
           ))}
-          {matches.length === 0 && <Typeahead.Empty>No polity matches</Typeahead.Empty>}
+          {matches.length === 0 && <Typeahead.Empty>{t('noSuzerainMatch')}</Typeahead.Empty>}
         </Typeahead.Menu>
       </Typeahead>
     </div>

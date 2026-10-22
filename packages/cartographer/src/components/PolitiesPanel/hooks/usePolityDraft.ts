@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
+import { useTranslation } from '../../../hooks/useTranslation'
 import {
-  DRAFT_ERRORS,
   EMPTY_DRAFT,
   draftOf,
   rankChoices,
@@ -9,12 +9,15 @@ import {
   suzerainChoices,
   withId,
   withName,
-} from '../../shared/polityDraft'
+} from '../../../utils/polityDraft'
+import { POLITIES_PANEL_MESSAGES } from '../i18n'
 
 import type { CartographerStoreHook } from '../../../state/store'
+import type { DraftError, DraftField, PolityDraft } from '../../../utils/polityDraft'
 import type { PolityFormField } from '../../PolityForm'
-import type { DraftField, PolityDraft } from '../../shared/polityDraft'
+import type { PolitiesPanelMessageKey } from '../i18n'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
+import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 import type { HsvaColor } from '@fubaritico/behaviors'
 
 /**
@@ -30,24 +33,33 @@ import type { HsvaColor } from '@fubaritico/behaviors'
  * @param store - the store
  * @param polity - the form, read
  * @param editing - whether it changes an existing polity
+ * @param t - the panel's messages, for the history's name of the step
  * @returns the error to show beside a field, or `null` when the document took it
  */
 function commit(
   store: CartographerStoreHook,
   polity: YearPolity,
-  editing: boolean
-): Partial<Record<DraftField, string>> | null {
+  editing: boolean,
+  t: Translate<PolitiesPanelMessageKey>
+): Partial<Record<DraftField, DraftError>> | null {
   const { createPolity, editPolity, aimAt, target } = store.getState()
   if (editing) {
     // The suzerain list offers no loop and no chain too deep: a refusal here is a defect, said loudly.
-    if (editPolity(polity, { kind: 'edit-polity', label: `edit ${polity.name}` })) return null
+    if (editPolity(polity, { kind: 'edit-polity', label: t('editStep', { name: polity.name }) }))
+      return null
     console.error(`[Cartographer] the document refused the change to "${polity.id}".`)
     return {}
   }
-  if (!createPolity(polity, { kind: 'create-polity', label: `create ${polity.name}` }, target)) {
+  if (
+    !createPolity(
+      polity,
+      { kind: 'create-polity', label: t('createStep', { name: polity.name }) },
+      target
+    )
+  ) {
     // The form checked the id against its copy; the document holding it is the expected refusal.
     if (store.getState().document.polities.some((existing) => existing.id === polity.id))
-      return { id: DRAFT_ERRORS.idTaken }
+      return { id: 'idTaken' }
     // Any other refusal — a loop, a chain too deep — the suzerain list does not offer: a defect.
     console.error(`[Cartographer] the document refused to create "${polity.id}".`)
     return {}
@@ -87,9 +99,12 @@ export function usePolityDraft(
   // dialogue when a polity is added or undone, which the suzerain list and the taken ids depend on.
   store((state) => state.version)
 
+  // Context
+  const t = useTranslation(POLITIES_PANEL_MESSAGES)
+
   // State
   const [draft, setDraft] = useState<PolityDraft>(() => openingOf(editing))
-  const [errors, setErrors] = useState<Partial<Record<DraftField, string>>>({})
+  const [errors, setErrors] = useState<Partial<Record<DraftField, DraftError>>>({})
 
   // Derived
   const polities = store.getState().document.polities
@@ -123,7 +138,7 @@ export function usePolityDraft(
       setErrors(reading.errors)
       return
     }
-    const refused = commit(store, reading.polity, editing !== null)
+    const refused = commit(store, reading.polity, editing !== null, t)
     if (refused === null) close()
     else setErrors(refused)
   }

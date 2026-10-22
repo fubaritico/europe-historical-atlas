@@ -1,10 +1,12 @@
+import { useTranslation } from '../../hooks/useTranslation'
 import { describeDrawingTarget } from '../../state/drawingTarget'
+import { polityRows } from '../../utils/polityRows'
 import { Panel } from '../Panel'
 import { PolityList } from '../PolityList'
-import { polityRows } from '../shared/polityRows'
 
 import { useArrangeMenu } from './hooks/useArrangeMenu'
 import { usePolityForm } from './hooks/usePolityForm'
+import { POLITIES_PANEL_MESSAGES } from './i18n'
 import { EditDialog } from './internal/EditDialog'
 import { PolitiesFoot } from './internal/PolitiesFoot'
 import { PolityArrangeMenu } from './internal/PolityArrangeMenu'
@@ -48,6 +50,9 @@ export function PolitiesPanel({ store, colours, onResult, wikidata }: PolitiesPa
   // Store actions
   const chooseTarget = store((state) => state.chooseTarget)
 
+  // Context
+  const t = useTranslation(POLITIES_PANEL_MESSAGES)
+
   // State
   const { arranging, openMenu, closeMenu, panel } = useArrangeMenu()
   const form = usePolityForm(store)
@@ -71,7 +76,7 @@ export function PolitiesPanel({ store, colours, onResult, wikidata }: PolitiesPa
     // 2026-10-12.
     <Panel
       ref={panel}
-      title="Polities"
+      title={t('title')}
       fill
       foot={
         <PolitiesFoot store={store} onResult={onResult} onDone={focusList} wikidata={wikidata} />

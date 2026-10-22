@@ -6,12 +6,14 @@ import { TAG } from './consoleTag'
 import { layerLines } from './layerHits'
 import { sessionPointOf } from './toolSession'
 
+import type { CanvasMessageKey } from '../i18n'
 import type { BorderSnapContext } from './borderSnap'
 import type { FrameSnapContext } from './frameSnap'
 import type { SessionPoint } from './toolSession'
 import type { SnapLine } from '../../geometry/lineSnap'
 import type { Point } from '../../viewport/viewport'
 import type { Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
+import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 
 /*
  * The Pen's water, as points of the outline: what a snapped click lays, and what the click that closes
@@ -128,8 +130,9 @@ export function closingPoints(context: WaterClosingContext): SessionPoint[] {
 /**
  * What the result zone says of a closing that followed the water.
  * @param count - how many points it laid
+ * @param t - the canvas's messages
  * @returns the sentence
  */
-export function closingReport(count: number): string {
-  return `closed along the water, ${String(count)} ${count === 1 ? 'vertex' : 'vertices'} inserted`
+export function closingReport(count: number, t: Translate<CanvasMessageKey>): string {
+  return t('closedAlongWater', { count })
 }

@@ -1,7 +1,10 @@
+import { useTranslation } from '../../hooks/useTranslation'
 import { describeDrawingTarget } from '../../state/drawingTarget'
 import { isPenMode } from '../../state/toolSlice'
-import { pickedColour, recolouring } from '../shared/polityColourValue'
+import { pickedColour, recolouring } from '../../utils/polityColourValue'
 import { ToolRail } from '../ToolRail'
+
+import { TOOL_RAIL_PANEL_MESSAGES } from './i18n'
 
 import type { PolityColourSource } from '../../state/polityColourSource'
 import type { CartographerStoreHook } from '../../state/store'
@@ -38,6 +41,9 @@ export function ToolRailPanel({ store, colours }: ToolRailPanelProps) {
   const choosePenMode = store((state) => state.choosePenMode)
   const editPolity = store((state) => state.editPolity)
 
+  // Context
+  const t = useTranslation(TOOL_RAIL_PANEL_MESSAGES)
+
   // Derived
   const { document, target } = store.getState()
   const aimed = describeDrawingTarget(document, target)
@@ -53,7 +59,7 @@ export function ToolRailPanel({ store, colours }: ToolRailPanelProps) {
 
   const handleColour = (picked: HsvaColor | null) => {
     if (polity === undefined) return
-    const change = recolouring(polity, picked)
+    const change = recolouring(polity, picked, t('colourStep', { name: polity.name }))
     if (change === null) return
     if (!editPolity(change.polity, change.step))
       console.error(`[Cartographer] the colour of "${polity.id}" was refused by the document.`)

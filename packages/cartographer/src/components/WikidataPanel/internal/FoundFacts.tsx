@@ -1,9 +1,11 @@
+import { useTranslation } from '../../../hooks/useTranslation'
 import { nameOf, spanOf } from '../../../wikidata/wikidataFacts'
+import { WIKIDATA_PANEL_MESSAGES } from '../i18n'
 
 import { SuggestionLine } from './SuggestionLine'
 
+import type { WikidataView } from '../../../utils/wikidataView'
 import type { WikidataField } from '../../../wikidata/wikidataFacts'
-import type { WikidataView } from '../../shared/wikidataView'
 
 /**
  * The facts of an item found: name and years with its articles, then the suggestions.
@@ -19,6 +21,9 @@ export function FoundFacts({
   view: Extract<WikidataView, { kind: 'found' }>
   onUse: (field: WikidataField, value: string) => void
 }) {
+  // Context
+  const t = useTranslation(WIKIDATA_PANEL_MESSAGES)
+
   // Derived
   const { facts } = view
 
@@ -28,20 +33,22 @@ export function FoundFacts({
     <>
       <p className="wikidata-panel__summary">
         {nameOf(facts)} · {spanOf(facts)}
-        {facts.vassalState && ' · a vassal state'}
+        {facts.vassalState && t('vassalState')}
+        {/* Each link is named in its article's language, whatever the page's — a proper name, not a catalogue
+            entry — and says so, for a screen reader. */}
         {facts.wikipedia.en !== null && (
-          <a href={facts.wikipedia.en} target="_blank" rel="noreferrer">
+          <a href={facts.wikipedia.en} target="_blank" rel="noreferrer" lang="en">
             Wikipedia (en)
           </a>
         )}
         {facts.wikipedia.fr !== null && (
-          <a href={facts.wikipedia.fr} target="_blank" rel="noreferrer">
+          <a href={facts.wikipedia.fr} target="_blank" rel="noreferrer" lang="fr">
             Wikipédia (fr)
           </a>
         )}
       </p>
       {view.suggestions.length > 0 && (
-        <ul className="wikidata-panel__suggestions" aria-label="What Wikidata proposes">
+        <ul className="wikidata-panel__suggestions" aria-label={t('proposals')}>
           {view.suggestions.map((suggestion) => (
             <SuggestionLine key={suggestion.field} suggestion={suggestion} onUse={onUse} />
           ))}

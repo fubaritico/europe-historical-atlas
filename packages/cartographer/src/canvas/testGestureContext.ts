@@ -6,6 +6,7 @@ import { createCartographerStore } from '../state/store'
 import { projectToBackdrop, remapToScreen, screenToLonLatOnBackdrop } from '../viewport/projection'
 import { TEST_BACKDROP_FRAME } from '../viewport/testFrame'
 
+import { canvasWords } from './canvasWords'
 import { projectedTerritories } from './paint/scene'
 import { snapLayersOf } from './tools/snapLayers'
 import { idleSession } from './tools/toolSession'
@@ -106,6 +107,7 @@ export function testGestureContext(
     report: (message) => {
       reports.push(message)
     },
+    words: canvasWords('en'),
   }
   return { context, reports }
 }

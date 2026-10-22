@@ -1,7 +1,9 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { LocaleContext } from '../../shared/localeContext'
+import { createLocaleStore } from '../../../i18n/localeStore'
+import { renderInEnglish } from '../../../testing/renderInEnglish'
+import { LocaleProvider } from '../../LocaleProvider'
 
 import { Shell } from './Shell'
 
@@ -16,7 +18,7 @@ function FailingZone(): ReactNode {
 describe('Shell', () => {
   describe('happy path', () => {
     it('lays out the five zones and puts the canvas in its own', () => {
-      render(<Shell canvas={<div data-testid="map" />} />)
+      renderInEnglish(<Shell canvas={<div data-testid="map" />} />)
 
       const shell = document.querySelector('.shell')
       expect(shell).not.toBeNull()
@@ -36,7 +38,7 @@ describe('Shell', () => {
 
   describe('variants', () => {
     it('shows what a zone is given instead of its placeholder', () => {
-      render(
+      renderInEnglish(
         <Shell
           appbar={<span>the file</span>}
           docbar={<span>1100</span>}
@@ -55,7 +57,7 @@ describe('Shell', () => {
     // Guarded here as well as in `main.test.tsx`, because this is the component that decides it: a
     // heading loose in the body is reached by no landmark, and a screen reader navigates by landmarks.
     it('puts the heading inside the canvas landmark', () => {
-      render(<Shell heading={<h1>Cartographer</h1>} canvas={<div />} />)
+      renderInEnglish(<Shell heading={<h1>Cartographer</h1>} canvas={<div />} />)
 
       expect(document.querySelector('main.shell__canvas > h1')).not.toBeNull()
     })
@@ -66,7 +68,7 @@ describe('Shell', () => {
     // les zones vides pas encore faites". The plausible component renders `{appbar}` with no fallback,
     // so an unbuilt zone is invisible and the layout reads as a styling failure rather than as progress.
     it('names a zone nobody has built yet, rather than rendering nothing', () => {
-      render(<Shell canvas={<div />} />)
+      renderInEnglish(<Shell canvas={<div />} />)
 
       const named = [...document.querySelectorAll('.empty-zone')].map((n) => n.textContent)
       expect(named).toEqual(['app bar', 'document bar', 'tools', 'panels'])
@@ -75,10 +77,10 @@ describe('Shell', () => {
     // One zone per boundary (the dev's call, 2026-10-21): the dock failing must not take the map down.
     it('keeps the map standing when the dock fails', () => {
       vi.spyOn(console, 'error').mockImplementation(() => undefined)
-      render(
-        <LocaleContext value="en">
+      renderInEnglish(
+        <LocaleProvider store={createLocaleStore('en')}>
           <Shell canvas={<div data-testid="map" />} dock={<FailingZone />} />
-        </LocaleContext>
+        </LocaleProvider>
       )
       expect(screen.getByTestId('map')).toBeDefined()
       expect(document.querySelector('.shell__dock [role="alert"]')).not.toBeNull()
@@ -87,10 +89,10 @@ describe('Shell', () => {
 
     it('offers « Retry » where the map failed, and nowhere else', () => {
       vi.spyOn(console, 'error').mockImplementation(() => undefined)
-      render(
-        <LocaleContext value="en">
+      renderInEnglish(
+        <LocaleProvider store={createLocaleStore('en')}>
           <Shell canvas={<FailingZone />} dock={<FailingZone />} />
-        </LocaleContext>
+        </LocaleProvider>
       )
       expect(screen.getAllByRole('button', { name: 'Retry' })).toHaveLength(1)
       expect(document.querySelector('.shell__canvas button')).not.toBeNull()
@@ -98,7 +100,7 @@ describe('Shell', () => {
     })
 
     it('leaves the status row present but empty when nothing is passed for it', () => {
-      render(<Shell canvas={<div />} />)
+      renderInEnglish(<Shell canvas={<div />} />)
 
       const bar = document.querySelector('.shell__status')
       expect(bar).not.toBeNull()
@@ -108,7 +110,7 @@ describe('Shell', () => {
 
   describe('unmanaged errors', () => {
     it('treats an explicit null for a zone as an unfilled one', () => {
-      render(<Shell appbar={null} rail={null} canvas={<div />} />)
+      renderInEnglish(<Shell appbar={null} rail={null} canvas={<div />} />)
 
       const named = [...document.querySelectorAll('.empty-zone')].map((n) => n.textContent)
       expect(named).toContain('app bar')
@@ -117,14 +119,14 @@ describe('Shell', () => {
 
     it('renders with nothing but a canvas, which is the state the editor opens in', () => {
       expect(() => {
-        render(<Shell canvas={null} />)
+        renderInEnglish(<Shell canvas={null} />)
       }).not.toThrow()
     })
   })
 
   describe('edge cases', () => {
     it('declares exactly one landmark, so the main content is unambiguous', () => {
-      render(<Shell canvas={<div />} />)
+      renderInEnglish(<Shell canvas={<div />} />)
 
       expect(document.querySelectorAll('main')).toHaveLength(1)
     })

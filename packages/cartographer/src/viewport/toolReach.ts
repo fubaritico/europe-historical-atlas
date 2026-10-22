@@ -82,5 +82,15 @@ export function closeEnoughToEdit(reachKm: number, maxKm: number): boolean {
  * @returns `"10.3 km"`
  */
 export function reachLabel(reachKm: number): string {
-  return `${(Math.ceil(reachKm * 10) / 10).toFixed(1)} km`
+  return `${reachTenths(reachKm).toFixed(1)} km`
+}
+
+/**
+ * A reach to the tenth of a kilometre, **rounded up** — the one rounding {@link reachLabel} and the status
+ * bar's sentence share, so the console and the bar cannot say two figures.
+ * @param reachKm - the snap's reach on the ground
+ * @returns the reach, rounded up to a tenth
+ */
+export function reachTenths(reachKm: number): number {
+  return Math.ceil(reachKm * 10) / 10
 }

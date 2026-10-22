@@ -10,7 +10,7 @@
  * reaching a user as a blank step.
  */
 
-import type { AtlasMessageKey } from './messages'
+import type { AtlasMessageKey } from './i18n'
 import type { ComputePhase } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
 /** The message shown while each phase runs. Written as what the map is *about to* spend time on. */

@@ -1,0 +1,11 @@
+{
+  "title": "Pays",
+  "actionsLabel": "Actions sur les pays",
+  "deleteNeedsPolity": "Sélectionnez un pays à supprimer",
+  "deleteQuestion": "{what, select, none {Supprimer {name}\u202f?} rings {Supprimer {name}\u202f? {rings, plural, one {Son anneau disparaît} other {Ses # anneaux disparaissent}}.} vassals {Supprimer {name}\u202f? {vassals, plural, one {Son vassal devient souverain} other {Ses # vassaux deviennent souverains}}.} both {Supprimer {name}\u202f? {rings, plural, one {Son anneau disparaît} other {Ses # anneaux disparaissent}}\u202f; {vassals, plural, one {son vassal devient souverain} other {ses # vassaux deviennent souverains}}.} other {{what}}}",
+  "deleteResult": "pays supprimé\u202f: {name} — {rings, plural, one {# anneau} other {# anneaux}}{vassals, plural, =0 {} one {, # vassal désormais souverain} other {, # vassaux désormais souverains}} · ctrl+Z l’annule",
+  "createStep": "créer {name}",
+  "editStep": "modifier {name}",
+  "deleteStep": "supprimer {name}",
+  "deleteGone": "rien n’a été supprimé : {name} n’est plus dans l’année"
+}

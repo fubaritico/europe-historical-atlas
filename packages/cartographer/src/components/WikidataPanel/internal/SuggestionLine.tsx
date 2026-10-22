@@ -1,21 +1,9 @@
 import { Button } from '@fubaritico/react/Button'
 
+import { useTranslation } from '../../../hooks/useTranslation'
+import { WIKIDATA_PANEL_MESSAGES } from '../i18n'
+
 import type { WikidataField, WikidataSuggestion } from '../../../wikidata/wikidataFacts'
-
-/** How each field reads in the panel. */
-const FIELD_LABEL: Readonly<Record<WikidataField, string>> = {
-  name: 'Name',
-  existsFrom: 'Exists from',
-  existsTo: 'Exists to',
-  suzerain: 'Suzerain',
-}
-
-/** The verb of each suggestion's button — the same word shown and announced (review A11Y-001). */
-const VERB: Readonly<Record<WikidataSuggestion['state'], string>> = {
-  empty: 'Use',
-  differs: 'Replace',
-  same: 'Agrees',
-}
 
 /**
  * The line of one field Wikidata can fill.
@@ -34,8 +22,13 @@ export function SuggestionLine({
   suggestion: WikidataSuggestion
   onUse: (field: WikidataField, value: string) => void
 }) {
+  // Context
+  const t = useTranslation(WIKIDATA_PANEL_MESSAGES)
+
   // Derived
-  const verb = VERB[suggestion.state]
+  // The same verb shown and announced (review A11Y-001).
+  const verb = t('verb', { state: suggestion.state })
+  const field = t('fieldName', { field: suggestion.field })
   const agrees = suggestion.state === 'same'
 
   // Handlers
@@ -46,7 +39,7 @@ export function SuggestionLine({
   // Render
   return (
     <li className="wikidata-panel__suggestion">
-      <span className="wikidata-panel__field">{FIELD_LABEL[suggestion.field]}</span>
+      <span className="wikidata-panel__field">{field}</span>
       <span className="wikidata-panel__value">{suggestion.shown}</span>
       <Button
         type="button"
@@ -54,7 +47,7 @@ export function SuggestionLine({
         size="sm"
         onClick={handleUse}
         aria-disabled={agrees ? 'true' : undefined}
-        aria-label={`${verb} ${suggestion.shown} for ${FIELD_LABEL[suggestion.field]}`}
+        aria-label={t('suggestionLabel', { verb, value: suggestion.shown, field })}
       >
         {verb}
       </Button>

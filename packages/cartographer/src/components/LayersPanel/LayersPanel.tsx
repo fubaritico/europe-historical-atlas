@@ -1,5 +1,7 @@
+import { useTranslation } from '../../hooks/useTranslation'
 import { Panel } from '../Panel'
 
+import { LAYERS_PANEL_MESSAGES } from './i18n'
 import { LayerList } from './internal/LayerList'
 
 import type { CartographerStoreHook } from '../../state/store'
@@ -26,9 +28,12 @@ export function LayersPanel({ store }: { store: CartographerStoreHook }) {
   const setLayerVisible = store((state) => state.setLayerVisible)
   const setLayerOpacity = store((state) => state.setLayerOpacity)
 
+  // Context
+  const t = useTranslation(LAYERS_PANEL_MESSAGES)
+
   // Render
   return (
-    <Panel title="Layers">
+    <Panel title={t('title')}>
       <LayerList layers={layers} onVisible={setLayerVisible} onOpacity={setLayerOpacity} />
     </Panel>
   )

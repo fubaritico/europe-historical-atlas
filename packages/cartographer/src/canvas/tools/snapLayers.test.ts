@@ -31,16 +31,16 @@ describe('snapLayersOf', () => {
   })
 
   describe('variants', () => {
-    // s02 — "Following the coastline …", "Following the Maas …", "no river within reach".
-    it('names the coast by its noun and a river by its name, verbatim', () => {
-      expect([layers.coast.noun, layers.coast.label(0)]).toEqual(['coastline', 'coastline'])
-      expect([layers.river.noun, layers.river.label(0)]).toEqual(['river', 'Maas'])
+    // s02 — "Following the coastline …", "Following the Maas …": the coast has no name of its own.
+    it('names a river by its name, verbatim, and the coast by none', () => {
+      expect([layers.coast.noun, layers.coast.name(0)]).toEqual(['coastline', null])
+      expect([layers.river.noun, layers.river.name(0)]).toEqual(['river', 'Maas'])
     })
   })
 
   describe('managed errors', () => {
-    it('names a river the dataset leaves unnamed as such', () => {
-      expect(layers.river.label(1)).toBe('unnamed river')
+    it('gives no name to a river the dataset leaves unnamed, for the bar to say so', () => {
+      expect(layers.river.name(1)).toBeNull()
     })
   })
 

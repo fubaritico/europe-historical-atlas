@@ -1,13 +1,15 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+
+import { renderInEnglish } from '../../../testing/renderInEnglish'
 
 import { PolitiesActions } from './PolitiesActions'
 
 function mount(canDelete: boolean) {
   const onNew = vi.fn()
   const onDelete = vi.fn()
-  render(<PolitiesActions onNew={onNew} onDelete={onDelete} canDelete={canDelete} />)
+  renderInEnglish(<PolitiesActions onNew={onNew} onDelete={onDelete} canDelete={canDelete} />)
   return { onNew, onDelete, user: userEvent.setup() }
 }
 

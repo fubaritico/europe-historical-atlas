@@ -1,10 +1,4 @@
-import {
-  PEN_MODE_LABELS,
-  TOOL_LABELS,
-  isPenTool,
-  modeLabel,
-  nextPenMode,
-} from '../../state/toolSlice'
+import { isPenTool, modeLabel, nextPenMode } from '../../state/toolSlice'
 import { keepsItsOwnKeys } from '../history/historyShortcut'
 import { handInHand, refreshTools, showCursor } from '../liveCanvas'
 import { TOOL_KEYS } from '../navigation'
@@ -79,11 +73,14 @@ export function onToolKey(it: LiveCanvas, event: KeyboardEvent): boolean {
     else state.turnPenMode(mode)
     // Said in the result zone, a polite live region: focus is on the canvas, not on the rail's button
     // whose name changed, so the mode would otherwise change in silence (A11Y-010).
-    it.deps.onResult(modeLabel(tool, mode))
+    it.deps.onResult(modeLabel(tool, mode, it.deps.words().tools))
   } else if (tool !== state.tool) {
     state.selectTool(tool)
     // Said for the same reason as the Pen's mode: the focus is on the canvas, not on the rail.
-    it.deps.onResult(tool === 'draw' ? PEN_MODE_LABELS[state.penMode] : TOOL_LABELS[tool])
+    const { tools } = it.deps.words()
+    it.deps.onResult(
+      tool === 'draw' ? tools('penMode', { mode: state.penMode }) : tools('toolName', { tool })
+    )
   }
   return true
 }

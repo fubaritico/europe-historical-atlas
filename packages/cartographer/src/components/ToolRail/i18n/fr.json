@@ -1,0 +1,9 @@
+{
+  "toolsLabel": "Outils",
+  "toolTitle": "{tool} ({key})",
+  "groupLabel": "Outils {tool}",
+  "noTarget": "Pays actif — aucun",
+  "noTargetHint": "Pays actif — aucun\u202f: sélectionnez un pays pour choisir sa couleur",
+  "colourOf": "Couleur de {name}",
+  "colourHint": "Couleur de {name} — cliquez pour la changer"
+}

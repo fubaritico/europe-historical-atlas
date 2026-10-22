@@ -6,13 +6,12 @@ import { componentPathOf, componentsDirOf } from '../../utils/componentPath.js'
  * A component's folder is private behind its barrel — the dev's call, 2026-10-18: what sits in
  * `<Name>/hooks/` or `<Name>/internal/` is used by that component only, so from outside the folder only
  * `<Name>` itself, its `index`, may be imported. Inside the folder, its files reach one another freely.
+ * That covers its `utils/` and `i18n/` as much as its `hooks/` and `internal/`.
  *
- * **`shared/` is open to all** — what several components use, hooks in `shared/hooks/` and modules at its
- * root (the dev's call, 2026-10-18): it is no component's inside, so any file may import from it.
+ * **What several components use sits beside `components/`** (`src/hooks/`, `src/utils/`, `src/i18n/` — the
+ * dev's call, 2026-10-22), so no folder in `components/` is open to all: the `shared/` exception of 2026-10-18
+ * is gone with the folder.
  */
-
-/** The folder of what several components share — imported from anywhere. */
-const SHARED = 'shared'
 
 /**
  * The module a relative import names, as an absolute path — `null` for a package import.
@@ -34,7 +33,7 @@ const resolved = (importer, source) =>
 const reachedInto = (importer, source, componentsDir) => {
   const target = resolved(importer, source)
   const into = target === null ? null : componentPathOf(target, componentsDir)
-  if (into === null || into.folder === SHARED || /^index(\.tsx?)?$/.test(into.file)) return null
+  if (into === null || /^index(\.tsx?)?$/.test(into.file)) return null
   return componentPathOf(importer, componentsDir)?.folder === into.folder ? null : into.folder
 }
 

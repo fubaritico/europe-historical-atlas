@@ -1,4 +1,7 @@
+import { useTranslation } from '../../../hooks/useTranslation'
+import { ACTION_MESSAGES } from '../../../i18n/actions'
 import { BrandMark } from '../../../icons/brandMark'
+import { EDITOR_MESSAGES } from '../i18n'
 
 import { BarButton } from './BarButton'
 
@@ -37,6 +40,10 @@ export interface AppBarProps {
  * @returns the brand and the actions, the two ends of the bar
  */
 export function AppBar({ name, year, onSave, onOpenSnapshot }: AppBarProps) {
+  // Context
+  const t = useTranslation(EDITOR_MESSAGES)
+  const action = useTranslation(ACTION_MESSAGES)
+
   // Render
   return (
     <>
@@ -49,15 +56,18 @@ export function AppBar({ name, year, onSave, onOpenSnapshot }: AppBarProps) {
         <span className="app-brand__year">{year}</span>
       </div>
       <div className="bar-actions">
-        <BarButton label="Open…" unavailable="not built yet (s01)" />
+        <BarButton label={action('open')} unavailable={t('notBuilt', { scenarios: 's01' })} />
         <BarButton
-          label="Open snapshot…"
+          label={action('openSnapshot')}
           onPress={onOpenSnapshot}
-          hint="Open a snapshot of the year, kept every hour of drawing"
+          hint={t('openSnapshotHint')}
         />
-        <BarButton label="Save" onPress={onSave} hint="Save the year (⌘S / ctrl+S)" />
-        <BarButton label="Save as…" unavailable="not built yet (s04, s05)" />
-        <BarButton label="Registry" unavailable="not built yet (s07)" />
+        <BarButton label={action('save')} onPress={onSave} hint={t('saveHint')} />
+        <BarButton
+          label={action('saveAs')}
+          unavailable={t('notBuilt', { scenarios: 's04, s05' })}
+        />
+        <BarButton label={t('registry')} unavailable={t('notBuilt', { scenarios: 's07' })} />
       </div>
     </>
   )

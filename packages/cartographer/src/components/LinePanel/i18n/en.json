@@ -1,0 +1,9 @@
+{
+  "title": "Line",
+  "hint": "Select a stretch of the aimed polity with the white arrow to style it.",
+  "scope": "Apply to",
+  "thisStretch": "This stretch",
+  "wholeBorder": "Whole border",
+  "borderUnavailable": "The stretch runs against more than one neighbour, or none",
+  "patterns": "Pattern"
+}

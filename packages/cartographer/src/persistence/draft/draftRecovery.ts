@@ -1,7 +1,7 @@
-import { reasonOf } from '../errorReason'
 import { timeWords } from '../timeWords'
 import { documentFromFiles } from '../yearArchive'
 
+import type { PersistenceWords } from '../persistenceWords'
 import type { DraftOffer } from './draftOffers'
 import type { Draft, DraftStore } from './draftStore'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
@@ -52,6 +52,8 @@ export interface DraftRecoveryDeps {
   now: () => Date
   /** Where a message for the author goes — the status bar's result zone. */
   report: (message: string) => void
+  /** What it says — asked at each sentence, so it follows a change of language. */
+  words: () => PersistenceWords
   /**
    * Where a set-aside draft can be found, as the author reads it — `DRAFTS_FOLDER`, handed in by the
    * composition root: `persistence/` does not import `devServer/`.
@@ -63,19 +65,28 @@ export interface DraftRecoveryDeps {
  * Set the draft aside, reporting either outcome.
  * @param deps - the drafts, the year, where to report
  * @param because - the sentence that says why, before where it went
+ * @param logged - whether a failure's own words went to the console, which the sentence then says
  * @returns `clear` once it is set aside; `draft-left` when it could not be
  */
-async function setAside(deps: DraftRecoveryDeps, because: string): Promise<RecoveryOutcome> {
+async function setAside(
+  deps: DraftRecoveryDeps,
+  because: string,
+  logged: boolean
+): Promise<RecoveryOutcome> {
   const yearName = String(deps.year)
   try {
     await deps.drafts.setAside(deps.year)
-    deps.report(`${because} — it is set aside in ${deps.draftsFolder}`)
+    deps.report(
+      deps.words().t('draftSetAside', {
+        because,
+        folder: deps.draftsFolder,
+        logged: logged ? 'yes' : 'no',
+      })
+    )
     return 'clear'
   } catch (error: unknown) {
     console.error(`${LOG_TAG} the draft of ${yearName} could not be set aside`, error)
-    deps.report(
-      `${because}, and it could not be set aside (${reasonOf(error)}) — automatic drafts are off: move it out of ${deps.draftsFolder}, then reload`
-    )
+    deps.report(deps.words().t('draftSetAsideFailed', { because, folder: deps.draftsFolder }))
     return 'draft-left'
   }
 }
@@ -87,22 +98,23 @@ async function setAside(deps: DraftRecoveryDeps, because: string): Promise<Recov
  */
 async function readDraft(
   deps: DraftRecoveryDeps
-): Promise<{ document: YearDocument; when: string } | null | RecoveryOutcome> {
+): Promise<{ document: YearDocument; savedAt: string } | null | RecoveryOutcome> {
   const yearName = String(deps.year)
   let draft: Draft | null
   try {
     draft = await deps.drafts.read(deps.year)
   } catch (error: unknown) {
     console.error(`${LOG_TAG} the draft of ${yearName} could not be read`, error)
-    return setAside(deps, `a draft of ${yearName} could not be read (${reasonOf(error)})`)
+    return setAside(deps, deps.words().t('draftUnreadable', { year: yearName }), true)
   }
   if (draft === null) return null
-  const when = timeWords(draft.savedAt, deps.now())
+  const { savedAt } = draft
   try {
-    return { document: documentFromFiles(draft.files, `the draft of ${yearName}`), when }
+    return { document: documentFromFiles(draft.files, `the draft of ${yearName}`), savedAt }
   } catch (error: unknown) {
     console.error(`${LOG_TAG} the draft of ${yearName} cannot be opened`, error)
-    return setAside(deps, `the draft of ${yearName} ${when} cannot be opened (${reasonOf(error)})`)
+    const when = timeWords(savedAt, deps.now(), deps.words())
+    return setAside(deps, deps.words().t('draftCannotOpen', { year: yearName, when }), true)
   }
 }
 
@@ -111,37 +123,33 @@ async function readDraft(
  * like a refusal: the draft is never left where the first gesture would write over it.
  * @param deps - the store, the question, where to report
  * @param document - the draft, opened
- * @param when - its time, worded
+ * @param savedAt - its time, as an ISO time
  * @returns the outcome
  */
 async function askAndApply(
   deps: DraftRecoveryDeps,
   document: YearDocument,
-  when: string
+  savedAt: string
 ): Promise<RecoveryOutcome> {
   const yearName = String(deps.year)
+  const { t } = deps.words()
+  const when = timeWords(savedAt, deps.now(), deps.words())
   try {
     const versionAsked = deps.store.getState().version
-    const resume = await deps.ask({ year: deps.year, when })
-    if (!resume) return await setAside(deps, `the draft of ${yearName} ${when} was not resumed`)
+    const resume = await deps.ask({ year: deps.year, savedAt })
+    if (!resume) return await setAside(deps, t('draftNotResumed', { year: yearName, when }), false)
     // Drawn while the question was open (a key the dialogue did not catch): opening the draft would throw
     // that away. The draft is kept aside instead, and said.
     if (deps.store.getState().version !== versionAsked) {
       console.warn(`${LOG_TAG} the draft of ${yearName} was not resumed: the map changed meanwhile`)
-      return await setAside(
-        deps,
-        `the map changed while the draft of ${yearName} was offered, so it was not resumed`
-      )
+      return await setAside(deps, t('draftChangedWhileOffered', { year: yearName }), false)
     }
     deps.store.getState().open(document)
-    deps.report(`resumed the draft of ${yearName} ${when} — ‹ctrl+S› to save it`)
+    deps.report(t('draftResumed', { year: yearName, when }))
     return 'clear'
   } catch (error: unknown) {
     console.error(`${LOG_TAG} the draft of ${yearName} could not be offered`, error)
-    return setAside(
-      deps,
-      `the draft of ${yearName} ${when} could not be offered (${reasonOf(error)})`
-    )
+    return setAside(deps, t('draftNotOffered', { year: yearName, when }), true)
   }
 }
 
@@ -155,5 +163,5 @@ export async function offerDraft(deps: DraftRecoveryDeps): Promise<RecoveryOutco
   const read = await readDraft(deps)
   if (read === null) return 'clear'
   if (typeof read === 'string') return read
-  return askAndApply(deps, read.document, read.when)
+  return askAndApply(deps, read.document, read.savedAt)
 }

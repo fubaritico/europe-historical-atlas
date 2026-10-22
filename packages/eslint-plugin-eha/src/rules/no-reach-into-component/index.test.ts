@@ -58,14 +58,22 @@ describe('eha/no-reach-into-component', () => {
         from('Editor.tsx', "import { PolityList } from './PolityList'"),
         // A package is no component.
         from('Editor.tsx', "import { useState } from 'react'"),
-        // `shared/` is open to all: hooks and modules several components use.
-        from(
-          'Editor/Editor.tsx',
-          "import { autofocusOnOpen } from '../shared/hooks/autofocusOnOpen'"
-        ),
-        from('PolityList/PolityList.tsx', "import { polityRows } from '../shared/polityRows'"),
+        // What several components use sits beside `components/`, no folder's inside (the dev, 2026-10-22).
+        from('Editor/Editor.tsx', "import { useLocale } from '../../hooks/useLocale'"),
+        // A component's `utils/` and `i18n/` are its own, reached freely from inside the folder.
+        from('ToolRail/internal/ToolButton.tsx', "import { headLabel } from '../utils/headLabel'"),
       ],
       invalid: [
+        // A folder named `shared` is no exception any more: a folder in `components/` is a component's.
+        {
+          ...from('Editor/Editor.tsx', "import { polityRows } from '../shared/polityRows'"),
+          errors: [reaching('../shared/polityRows', 'shared')],
+        },
+        // Nor are a component's helpers and catalogue anyone else's.
+        {
+          ...from('Editor/Editor.tsx', "import { headLabel } from '../ToolRail/utils/headLabel'"),
+          errors: [reaching('../ToolRail/utils/headLabel', 'ToolRail')],
+        },
         {
           ...from('Editor.tsx', "import { Foot } from './PolitiesPanel/internal/PolitiesFoot'"),
           errors: [reaching('./PolitiesPanel/internal/PolitiesFoot', 'PolitiesPanel')],

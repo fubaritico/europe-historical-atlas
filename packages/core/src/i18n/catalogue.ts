@@ -16,12 +16,19 @@ import type { MessageNode, MessageValues } from './messageFormat'
 /** Every message, by language, then by key — each language holding every key. */
 export type Catalogue<Key extends string> = Readonly<Record<Locale, Readonly<Record<Key, string>>>>
 
-/** A catalogue's messages in one language, ready to be built. */
+/** A translator: builds the message under a key, in the language it was made for, from the values it names. */
 export type Translate<Key extends string> = (key: Key, values?: MessageValues) => string
 
 /**
- * The translator of a catalogue in one language. Every message is read **now**, so a malformed one fails
- * when the translator is made, not the first time it is shown.
+ * The translators already made, by catalogue then language. A catalogue is a module's constant, so it is the
+ * key: asked again — at every render, at every gesture — the same translator comes back, read once.
+ */
+const MADE = new WeakMap<object, Map<Locale, unknown>>()
+
+/**
+ * The translator of a catalogue in one language. Every message is read **the first time**, so a malformed one
+ * fails when the translator is first asked for, not the first time it is shown; the translator is then kept,
+ * so asking for it again costs a lookup — a component asks at every render, and needs no memo for it.
  * @param catalogue - the messages
  * @param locale - the language to speak
  * @returns a function building a message by its key
@@ -31,15 +38,22 @@ export function createTranslator<Key extends string>(
   catalogue: Catalogue<Key>,
   locale: Locale
 ): Translate<Key> {
+  const byLocale = MADE.get(catalogue) ?? new Map<Locale, unknown>()
+  MADE.set(catalogue, byLocale)
+  const made = byLocale.get(locale)
+  // Kept under the very catalogue it was made from, so it takes that catalogue's keys.
+  if (made !== undefined) return made as Translate<Key>
   const parsed = new Map<string, readonly MessageNode[]>()
   for (const [key, pattern] of Object.entries<string>(catalogue[locale])) {
     parsed.set(key, parseMessage(pattern))
   }
-  return (key, values = {}) => {
+  const translate: Translate<Key> = (key, values = {}) => {
     const nodes = parsed.get(key)
     if (nodes === undefined) throw new MessageFormatError(`no message "${key}" in ${locale}`)
     return renderMessage(nodes, values, locale)
   }
+  byLocale.set(locale, translate)
+  return translate
 }
 
 /**

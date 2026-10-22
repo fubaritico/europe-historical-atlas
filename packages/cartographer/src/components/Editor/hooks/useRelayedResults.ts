@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-import { writeResult } from '../../shared/statusBar'
+import { writeResult } from '../../../utils/statusBar'
 
 import type { ResultRelay } from '../../../persistence/resultRelay'
 import type { RefObject } from 'react'

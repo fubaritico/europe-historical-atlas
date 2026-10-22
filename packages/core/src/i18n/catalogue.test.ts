@@ -35,6 +35,12 @@ describe('catalogue', () => {
     it('builds a message that takes no value without any', () => {
       expect(createTranslator(CATALOGUE, 'fr')('loading')).toBe('Chargement du relief')
     })
+
+    // A component asks at every render: the catalogue is read once per language, then kept.
+    it('hands back the same translator for the same catalogue and language', () => {
+      expect(createTranslator(CATALOGUE, 'fr')).toBe(createTranslator(CATALOGUE, 'fr'))
+      expect(createTranslator(CATALOGUE, 'fr')).not.toBe(createTranslator(CATALOGUE, 'en'))
+    })
   })
 
   describe('managed errors', () => {

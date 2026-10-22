@@ -1,37 +1,13 @@
 import { ListboxItem } from '@fubaritico/react/Listbox'
 
-import type { ViewportPoint } from '../../../viewport/viewport'
-import type { PolityRow } from '../../shared/polityRows'
-import type { CSSProperties, MouseEvent } from 'react'
+import { useTranslation } from '../../../hooks/useTranslation'
+import { POLITY_MESSAGES } from '../../../i18n/polity'
+import { POLITY_LIST_MESSAGES } from '../i18n'
+import { rowGestures } from '../utils/rowGestures'
 
-/**
- * A row's three pointer gestures: a click aims at its polity, a double-click opens its dialogue (`s07`),
- * a right-click its menu (`s16`).
- * @param id - the row's polity
- * @param onChoose - aim at it
- * @param onMenu - open its menu at the pointer
- * @param onEdit - open its dialogue
- * @returns the row's handlers
- */
-function rowGestures(
-  id: string,
-  onChoose: (id: string) => void,
-  onMenu: (id: string, at: ViewportPoint) => void,
-  onEdit: (id: string) => void
-) {
-  return {
-    onClick: () => {
-      onChoose(id)
-    },
-    onDoubleClick: () => {
-      onEdit(id)
-    },
-    onContextMenu: (event: MouseEvent) => {
-      event.preventDefault()
-      onMenu(id, { x: event.clientX, y: event.clientY })
-    },
-  }
-}
+import type { PolityRow } from '../../../utils/polityRows'
+import type { ViewportPoint } from '../../../viewport/viewport'
+import type { CSSProperties } from 'react'
 
 /**
  * One row: the swatch, the name, the *"no territory"* chip and the rank and dates — `design/01`'s row.
@@ -62,6 +38,10 @@ export function PolityOption({
   onMenu: (id: string, at: ViewportPoint) => void
   onEdit: (id: string) => void
 }) {
+  // Context
+  const t = useTranslation(POLITY_LIST_MESSAGES)
+  const polity = useTranslation(POLITY_MESSAGES)
+
   // Render
   return (
     <ListboxItem
@@ -86,11 +66,11 @@ export function PolityOption({
       <span className="polity-row__name">{row.name}</span>
       {row.suzerainName === null ? null : (
         // The tree's hierarchy for assistive tech, which the indent does not reach (A11Y-002).
-        <span className="visually-hidden">, vassal of {row.suzerainName}</span>
+        <span className="visually-hidden">{t('vassalOf', { name: row.suzerainName })}</span>
       )}
       <span className="polity-row__tags">
-        {row.hasTerritory ? null : <span className="polity-row__chip">no territory</span>}
-        <span>{row.rank}</span>
+        {row.hasTerritory ? null : <span className="polity-row__chip">{t('noTerritory')}</span>}
+        <span>{row.rank === '' ? '' : polity('rankName', { rank: row.rank })}</span>
         <span className="polity-row__dates">{row.dates}</span>
       </span>
     </ListboxItem>

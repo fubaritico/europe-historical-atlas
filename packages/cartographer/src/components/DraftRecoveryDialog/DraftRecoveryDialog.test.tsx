@@ -2,20 +2,31 @@ import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 
+import { createLocaleStore } from '../../i18n/localeStore'
 import { createDraftOffers } from '../../persistence/draft/draftOffers'
+import { LocaleProvider } from '../LocaleProvider'
 
 import { DraftRecoveryDialog } from './DraftRecoveryDialog'
 
+import type { Locale } from '@europe-historical-atlas/core/i18n/locale'
+
 /** The question asked in every test. */
-const OFFER = { year: 1100, when: 'today at 15:42' }
+const OFFER = { year: 1100, savedAt: new Date(2026, 9, 17, 15, 42).toISOString() }
+
+/** The present the dialogue words the time against: the same day, later. */
+const NOW = () => new Date(2026, 9, 17, 16, 30)
 
 /** The dialogue element, open or not — the design system's Modal is a native `<dialog>`. */
 const dialog = () => document.querySelector('dialog')
 
 /** Mount the dialogue over a fresh relay, a question already asked. */
-function mounted() {
+function mounted(locale: Locale = 'en') {
   const offers = createDraftOffers()
-  render(<DraftRecoveryDialog offers={offers} />)
+  render(
+    <LocaleProvider store={createLocaleStore(locale)}>
+      <DraftRecoveryDialog offers={offers} now={NOW} />
+    </LocaleProvider>
+  )
   let answer: Promise<boolean> = Promise.resolve(false)
   act(() => {
     answer = offers.ask(OFFER)
@@ -41,6 +52,15 @@ describe('DraftRecoveryDialog', () => {
           'A draft of 1100 was kept today at 15:42, with work that was never saved. Resume it?'
         )
       ).toBeTruthy()
+    })
+
+    it('asks in French on a French page, the time worded the French way', () => {
+      mounted('fr')
+
+      // Compared as written: Testing Library would fold the narrow no-break space before « ? » into a space.
+      expect(document.querySelector('dialog[open] .draft-recovery__question')?.textContent).toBe(
+        'Un brouillon de 1100 a été gardé aujourd’hui à 15:42, avec un travail jamais enregistré. Le reprendre\u202f?'
+      )
     })
 
     it('answers resume on [Resume], and closes', async () => {
@@ -85,7 +105,11 @@ describe('DraftRecoveryDialog', () => {
 
   describe('edge cases', () => {
     it('stays closed while nothing is asked', () => {
-      render(<DraftRecoveryDialog offers={createDraftOffers()} />)
+      render(
+        <LocaleProvider store={createLocaleStore('en')}>
+          <DraftRecoveryDialog offers={createDraftOffers()} now={NOW} />
+        </LocaleProvider>
+      )
 
       expect(dialog()?.hasAttribute('open')).toBe(false)
       expect(screen.queryByText(/Resume it\?/)).toBeNull()

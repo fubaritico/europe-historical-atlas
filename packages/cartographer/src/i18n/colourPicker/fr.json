@@ -1,0 +1,17 @@
+{
+  "area": "Couleur",
+  "saturation": "Saturation",
+  "brightness": "Luminosité",
+  "hue": "Teinte",
+  "alpha": "Opacité",
+  "hex": "Couleur hexadécimale",
+  "automatic": "Automatique",
+  "automaticDescription": "Automatique, aucune couleur choisie",
+  "areaRoleDescription": "curseur à deux dimensions",
+  "hexInvalid": "Saisissez une couleur hexadécimale, par exemple #1976d2",
+  "picker": "Sélecteur de couleur",
+  "trigger": "Choisir la couleur",
+  "achromatic": "{shade, select, black {noir} white {blanc} darkGray {gris foncé} lightGray {gris clair} gray {gris} other {{shade}}}",
+  "chromatic": "{hue, select, red {rouge} orange {orange} yellow {jaune} green {vert} cyan {cyan} blue {bleu} purple {violet} pink {rose} other {{hue}}}{saturation, select, grayish { grisâtre} vivid { vif} none {} other {{saturation}}}{lightness, select, veryDark { très foncé} dark { foncé} light { clair} veryLight { très clair} none {} other {{lightness}}}",
+  "translucent": "{words}, opacité {percent} %"
+}

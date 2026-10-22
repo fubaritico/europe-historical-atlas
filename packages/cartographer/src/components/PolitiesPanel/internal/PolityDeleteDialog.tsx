@@ -3,10 +3,13 @@ import { Card } from '@fubaritico/react/Card'
 import { IconButton } from '@fubaritico/react/IconButton'
 import { Modal } from '@fubaritico/react/Modal'
 
-import { autofocusOnOpen } from '../../shared/hooks/autofocusOnOpen'
-import { deletionQuestion } from '../polityDeletion'
+import { autofocusOnOpen } from '../../../hooks/autofocusOnOpen'
+import { useTranslation } from '../../../hooks/useTranslation'
+import { ACTION_MESSAGES } from '../../../i18n/actions'
+import { POLITIES_PANEL_MESSAGES } from '../i18n'
+import { deletionQuestion } from '../utils/polityDeletion'
 
-import type { PendingDeletion } from '../polityDeletion'
+import type { PendingDeletion } from '../utils/polityDeletion'
 
 /**
  * The confirmation before a polity is deleted — `s07`'s D2, the dev's call of 2026-10-12: *every deletion is
@@ -36,26 +39,35 @@ export interface PolityDeleteDialogProps {
  * @returns the dialogue
  */
 export function PolityDeleteDialog({ pending, onConfirm, onCancel }: PolityDeleteDialogProps) {
+  // Context
+  const t = useTranslation(POLITIES_PANEL_MESSAGES)
+  const action = useTranslation(ACTION_MESSAGES)
+
   // Render
   return (
-    <Modal isOpen={pending !== null} onClose={onCancel} aria-label="Delete polity">
+    <Modal isOpen={pending !== null} onClose={onCancel} aria-label={action('deletePolity')}>
       <div className="polity-delete">
         <Card>
           <Card.Header>
-            Delete polity
-            <IconButton type="button" icon="XMark" aria-label="Close" onClick={onCancel} />
+            {action('deletePolity')}
+            <IconButton
+              type="button"
+              icon="XMark"
+              aria-label={action('close')}
+              onClick={onCancel}
+            />
           </Card.Header>
           <Card.Body>
             <p className="polity-delete__question">
-              {pending === null ? '' : deletionQuestion(pending)}
+              {pending === null ? '' : deletionQuestion(pending, t)}
             </p>
           </Card.Body>
           <Card.Footer align="end">
             <Button ref={autofocusOnOpen} type="button" variant="secondary" onClick={onCancel}>
-              Cancel
+              {action('cancel')}
             </Button>
             <Button type="button" onClick={onConfirm}>
-              Delete
+              {action('delete')}
             </Button>
           </Card.Footer>
         </Card>

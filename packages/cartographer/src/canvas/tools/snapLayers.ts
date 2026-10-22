@@ -12,14 +12,15 @@ export interface SnapLayerSpec {
   lines: readonly SnapLine[]
   /** What they were drawn from, recorded on every anchor snapped onto one. */
   provenance: Provenance
-  /** The layer in a sentence — *"no coastline within reach"*, *"no river within reach"*. */
+  /** The layer in the console's sentences, which speak English whatever the page — *"no coastline within reach"*. */
   noun: string
   /**
-   * One line in a sentence — *"Following the coastline"*, *"Following the Maas"* — by its index.
+   * One line's own name — a river's, verbatim (*"Maas"*) — by its index, or `null` when it has none: the
+   * coast, an unnamed river. The status bar words it in the page's language (`canvasMessages`, `water`).
    * @param line - the line's index in `lines`
-   * @returns its name
+   * @returns its name, or `null`
    */
-  label: (line: number) => string
+  name: (line: number) => string | null
 }
 
 /** A river centreline, as the Pen follows it: a line of the layer, and the name the bar reads. */
@@ -59,13 +60,13 @@ export function snapLayersOf(vectors: SnapSources): SnapLayers {
       lines: vectors.coast,
       provenance: vectors.coastProvenance,
       noun: 'coastline',
-      label: () => 'coastline',
+      name: () => null,
     },
     river: {
       lines: vectors.rivers,
       provenance: vectors.riverProvenance,
       noun: 'river',
-      label: (line) => vectors.rivers[line]?.name ?? 'unnamed river',
+      name: (line) => vectors.rivers[line]?.name ?? null,
     },
   }
 }

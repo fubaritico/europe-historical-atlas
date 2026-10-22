@@ -1,6 +1,8 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+
+import { renderInEnglish } from '../../../testing/renderInEnglish'
 
 import { BarButton } from './BarButton'
 
@@ -12,7 +14,7 @@ describe('BarButton', () => {
   describe('happy path', () => {
     it('acts on a click, with its hint as tooltip', async () => {
       const onPress = vi.fn()
-      render(<BarButton label="Save" onPress={onPress} hint="Save the year" />)
+      renderInEnglish(<BarButton label="Save" onPress={onPress} hint="Save the year" />)
       const button = screen.getByRole('button', { name: 'Save' })
 
       await userEvent.click(button)
@@ -25,7 +27,7 @@ describe('BarButton', () => {
 
   describe('variants', () => {
     it('names a glyph button by its label, the glyph in its place', () => {
-      render(<BarButton label="Undo" onPress={vi.fn()} icon={<svg />} variant="icon" />)
+      renderInEnglish(<BarButton label="Undo" onPress={vi.fn()} icon={<svg />} variant="icon" />)
       const button = screen.getByRole('button', { name: 'Undo' })
 
       expect(button.textContent).toBe('')
@@ -34,7 +36,7 @@ describe('BarButton', () => {
 
     it('acts on ‹enter› from the keyboard', async () => {
       const onPress = vi.fn()
-      render(<BarButton label="Save" onPress={onPress} />)
+      renderInEnglish(<BarButton label="Save" onPress={onPress} />)
       screen.getByRole('button', { name: 'Save' }).focus()
       await userEvent.keyboard('{Enter}')
       expect(onPress).toHaveBeenCalledOnce()
@@ -44,7 +46,7 @@ describe('BarButton', () => {
   describe('managed errors', () => {
     it('stays focusable when unavailable, says why, and warns on a click', async () => {
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-      render(<BarButton label="Open…" unavailable="not built yet (s01)" />)
+      renderInEnglish(<BarButton label="Open…" unavailable="not built yet (s01)" />)
       const button = screen.getByRole('button', { name: 'Open…' })
 
       expect(button.hasAttribute('disabled')).toBe(false)
@@ -57,7 +59,7 @@ describe('BarButton', () => {
 
   describe('unmanaged errors', () => {
     it('lets an action that throws propagate', () => {
-      render(
+      renderInEnglish(
         <BarButton
           label="Save"
           onPress={() => {
@@ -80,7 +82,7 @@ describe('BarButton', () => {
 
   describe('edge cases', () => {
     it('reaches the keyboard order when unavailable, unlike a native disabled button', async () => {
-      render(<BarButton label="Registry" unavailable="not built yet (s07)" />)
+      renderInEnglish(<BarButton label="Registry" unavailable="not built yet (s07)" />)
       await userEvent.tab()
       expect(document.activeElement?.textContent).toBe('Registry')
     })

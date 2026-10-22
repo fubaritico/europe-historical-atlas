@@ -2,11 +2,13 @@ import { Menu } from '@fubaritico/react/Menu'
 
 import { STACKING_MOVES } from '@europe-historical-atlas/core/editor/stacking'
 
-import { STACKING_LABELS } from '../shared/stackingLabels'
-import { STACKING_SHORTCUTS } from '../shared/stackingShortcut'
+import { useTranslation } from '../../hooks/useTranslation'
+import { ACTION_MESSAGES } from '../../i18n/actions'
 
 import { useDismiss } from './hooks/useDismiss'
 import { useInsideWindow } from './hooks/useInsideWindow'
+import { POLITY_STACK_MENU_MESSAGES } from './i18n'
+import { stackItem } from './utils/stackItem'
 
 import type { ViewportPoint } from '../../viewport/viewport'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
@@ -28,31 +30,6 @@ export interface PolityStackMenuProps {
   onEdit: () => void
   /** ‹escape›, a press outside, or a command chosen. */
   onClose: () => void
-}
-
-/**
- * One stacking command: its name, and its keys at the row's end — announced through `aria-keyshortcuts`,
- * the glyphs being hidden from a screen reader, which would spell them out.
- * @param move - the command
- * @param index - its place in the keyboard order
- * @param enabled - whether it would change anything
- * @returns the item
- */
-function stackItem(move: StackingMove, index: number, enabled: boolean) {
-  return (
-    <Menu.Item
-      key={move}
-      index={index}
-      value={move}
-      disabled={!enabled}
-      aria-keyshortcuts={STACKING_SHORTCUTS[move].aria}
-    >
-      <span className="polity-stack-menu__label">{STACKING_LABELS[move]}</span>
-      <kbd className="polity-stack-menu__keys" aria-hidden="true">
-        {STACKING_SHORTCUTS[move].shown}
-      </kbd>
-    </Menu.Item>
-  )
 }
 
 /**
@@ -81,6 +58,10 @@ export function PolityStackMenu({
   onEdit,
   onClose,
 }: PolityStackMenuProps) {
+  // Context
+  const t = useTranslation(POLITY_STACK_MENU_MESSAGES)
+  const action = useTranslation(ACTION_MESSAGES)
+
   // Refs
   const shell = useInsideWindow(at)
 
@@ -108,14 +89,14 @@ export function PolityStackMenu({
     <div ref={shell} className="polity-stack-menu" style={{ left: at.x, top: at.y }}>
       <Menu
         variant="dark"
-        aria-label={`Actions for ${name}`}
+        aria-label={t('menuLabel', { name })}
         onClose={onClose}
         onSelect={handleSelect}
       >
         <Menu.Item index={0} value={EDIT}>
-          Edit properties…
+          {action('editProperties')}
         </Menu.Item>
-        {STACKING_MOVES.map((move, index) => stackItem(move, index + 1, moves[move]))}
+        {STACKING_MOVES.map((move, index) => stackItem(move, action(move), index + 1, moves[move]))}
       </Menu>
     </div>
   )

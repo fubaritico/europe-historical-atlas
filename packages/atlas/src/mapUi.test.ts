@@ -3,8 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 
+import { ATLAS_MESSAGES } from './i18n'
 import { createMapUi } from './mapUi'
-import { ATLAS_MESSAGES } from './messages'
 
 /** Mount an interface into a fresh host. */
 function mount(isDisposed: () => boolean = () => false): {

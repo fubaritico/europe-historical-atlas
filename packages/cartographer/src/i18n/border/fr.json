@@ -1,0 +1,8 @@
+{
+  "handName": "{hand, select, auto {auto} solid {plein} dotted {pointillé} dashed {tirets} double {double} none {masqué} other {{hand}}}",
+  "handButton": "{hand, select, auto {Auto} solid {Plein} dotted {Pointillé} dashed {Tirets} double {Double} none {Masqué} other {{hand}}}",
+  "stretch": "{count, plural, one {# segment} other {# segments}} · {between}",
+  "orphaned": "orphelin",
+  "wholeBorder": "toute la frontière · {between}",
+  "dressStep": "{hand} {between}"
+}

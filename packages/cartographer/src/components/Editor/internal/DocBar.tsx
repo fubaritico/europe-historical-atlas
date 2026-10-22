@@ -1,4 +1,7 @@
+import { useTranslation } from '../../../hooks/useTranslation'
+import { ACTION_MESSAGES } from '../../../i18n/actions'
 import { ChromeIcon } from '../../../icons/chromeIcons'
+import { EDITOR_MESSAGES } from '../i18n'
 
 import { BarButton } from './BarButton'
 
@@ -41,13 +44,21 @@ export interface DocBarProps {
  * @returns the tab and the actions, the two ends of the bar
  */
 export function DocBar({ year, undoLabel, redoLabel, onUndo, onRedo, zoomRef }: DocBarProps) {
+  // Context
+  const t = useTranslation(EDITOR_MESSAGES)
+  const action = useTranslation(ACTION_MESSAGES)
+
+  // Derived
+  const undo = undoLabel === null ? null : action('undoStep', { step: undoLabel })
+  const redo = redoLabel === null ? null : action('redoStep', { step: redoLabel })
+
   // Render
   return (
     <>
       <div className="doc-tab">
         <BarButton
-          label={`Close ${String(year)}`}
-          unavailable="not built yet (s04)"
+          label={t('closeYear', { close: action('close'), year: String(year) })}
+          unavailable={t('notBuilt', { scenarios: 's04' })}
           icon={<ChromeIcon name="close" size={9} />}
           variant="icon"
         />
@@ -61,26 +72,22 @@ export function DocBar({ year, undoLabel, redoLabel, onUndo, onRedo, zoomRef }: 
         <BarButton
           icon={<ChromeIcon name="undo" size={14} />}
           variant="icon"
-          {...(undoLabel === null
-            ? { label: 'Undo', unavailable: 'nothing to undo' }
-            : {
-                label: `Undo ${undoLabel}`,
-                onPress: onUndo,
-                hint: `Undo ${undoLabel} (⌘Z / ctrl+Z)`,
-              })}
+          {...(undo === null
+            ? { label: action('undo'), unavailable: t('nothingToUndo') }
+            : { label: undo, onPress: onUndo, hint: t('undoHint', { label: undo }) })}
         />
         <BarButton
           icon={<ChromeIcon name="redo" size={14} />}
           variant="icon"
-          {...(redoLabel === null
-            ? { label: 'Redo', unavailable: 'nothing to redo' }
-            : {
-                label: `Redo ${redoLabel}`,
-                onPress: onRedo,
-                hint: `Redo ${redoLabel} (⌘⇧Z / ctrl+shift+Z)`,
-              })}
+          {...(redo === null
+            ? { label: action('redo'), unavailable: t('nothingToRedo') }
+            : { label: redo, onPress: onRedo, hint: t('redoHint', { label: redo }) })}
         />
-        <BarButton label="Check this year" unavailable="not built yet (s10)" variant="primary" />
+        <BarButton
+          label={t('checkYear')}
+          unavailable={t('notBuilt', { scenarios: 's10' })}
+          variant="primary"
+        />
       </div>
     </>
   )

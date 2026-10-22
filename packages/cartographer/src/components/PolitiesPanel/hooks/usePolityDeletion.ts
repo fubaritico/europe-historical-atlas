@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { useTranslation } from '../../../hooks/useTranslation'
 import { describeDrawingTarget } from '../../../state/drawingTarget'
-import { deletionResult, pendingDeletion } from '../polityDeletion'
+import { POLITIES_PANEL_MESSAGES } from '../i18n'
+import { deletionResult, pendingDeletion } from '../utils/polityDeletion'
 
 import type { CartographerStoreHook } from '../../../state/store'
-import type { PendingDeletion } from '../polityDeletion'
+import type { PendingDeletion } from '../utils/polityDeletion'
 
 /**
  * Deleting the selected polity: ask first (D2), then delete as one undoable step and say what went.
@@ -23,6 +25,9 @@ export function usePolityDeletion(
 ) {
   // Store actions
   const deletePolity = store((state) => state.deletePolity)
+
+  // Context
+  const t = useTranslation(POLITIES_PANEL_MESSAGES)
 
   // Refs
   const answered = useRef(false)
@@ -44,14 +49,14 @@ export function usePolityDeletion(
     if (pending !== null) {
       const report = deletePolity(pending.id, {
         kind: 'delete-polity',
-        label: `delete ${pending.name}`,
+        label: t('deleteStep', { name: pending.name }),
       })
       if (report === null) {
         console.error(
           `[Cartographer] "${pending.name}" was no longer in the year; nothing was deleted.`
         )
-        onResult(`nothing deleted: ${pending.name} is no longer in the year`)
-      } else onResult(deletionResult(pending, report))
+        onResult(t('deleteGone', { name: pending.name }))
+      } else onResult(deletionResult(pending, report, t))
     }
     answered.current = true
     setPending(null)

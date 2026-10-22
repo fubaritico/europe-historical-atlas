@@ -1,0 +1,8 @@
+{
+  "title": "Surcharges",
+  "empty": "Aucune surcharge : chaque trait suit sa règle.",
+  "fact": "fait",
+  "clear": "Effacer",
+  "clearLabel": "Effacer {hand} · {what}",
+  "clearStep": "effacer {what}"
+}

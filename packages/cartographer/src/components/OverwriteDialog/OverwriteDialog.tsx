@@ -3,7 +3,14 @@ import { Card } from '@fubaritico/react/Card'
 import { Modal } from '@fubaritico/react/Modal'
 import { useSyncExternalStore } from 'react'
 
-import { autofocusOnOpen } from '../shared/hooks/autofocusOnOpen'
+import { autofocusOnOpen } from '../../hooks/autofocusOnOpen'
+import { useLocale } from '../../hooks/useLocale'
+import { useTranslation } from '../../hooks/useTranslation'
+import { ACTION_MESSAGES } from '../../i18n/actions'
+import { persistenceWords } from '../../persistence/persistenceWords'
+import { timeWords } from '../../persistence/timeWords'
+
+import { OVERWRITE_MESSAGES } from './i18n'
 
 import type { QuestionRelay } from '../../persistence/questionRelay'
 import type { OverwriteQuestion } from '../../persistence/yearSession'
@@ -21,31 +28,28 @@ import type { OverwriteQuestion } from '../../persistence/yearSession'
 export interface OverwriteDialogProps {
   /** The relay the save asks through: `true` overwrites, `false` cancels. */
   questions: QuestionRelay<OverwriteQuestion>
-}
-
-/**
- * The question, worded for the author.
- * @param question - the year and when it changed
- * @returns the sentence
- */
-function overwriteSentence(question: OverwriteQuestion): string {
-  const year = String(question.year)
-  const changed =
-    question.when === null
-      ? `${year} is no longer on disk as it was opened`
-      : `${year} was changed on disk ${question.when}, since it was opened`
-  return `${changed}. Overwrite it with this page?`
+  /** The clock, to word when the year changed. */
+  now: () => Date
 }
 
 /**
  * Render the question, open while a save waits for an answer.
  * @param props - the relay
  * @param props.questions - the relay the save asks through: it holds the pending question and takes the answer
+ * @param props.now - the clock, to word when the year changed
  * @returns the dialogue
  */
-export function OverwriteDialog({ questions }: OverwriteDialogProps) {
+export function OverwriteDialog({ questions, now }: OverwriteDialogProps) {
+  // Context
+  const t = useTranslation(OVERWRITE_MESSAGES)
+  const action = useTranslation(ACTION_MESSAGES)
+  const locale = useLocale()
+
   // State
   const question = useSyncExternalStore(questions.subscribe, questions.current)
+
+  // Derived
+  const words = persistenceWords(locale)
 
   // Handlers
   const overwrite = (): void => {
@@ -57,21 +61,30 @@ export function OverwriteDialog({ questions }: OverwriteDialogProps) {
 
   // Render
   return (
-    <Modal isOpen={question !== null} onClose={cancel} aria-label="The year changed on disk">
+    <Modal isOpen={question !== null} onClose={cancel} aria-label={t('title')}>
       <div className="draft-recovery">
         <Card>
-          <Card.Header>The year changed on disk</Card.Header>
+          <Card.Header>{t('title')}</Card.Header>
           <Card.Body>
             <p className="draft-recovery__question">
-              {question === null ? '' : overwriteSentence(question)}
+              {question === null
+                ? ''
+                : t('question', {
+                    known: question.changedAt === null ? 'no' : 'yes',
+                    year: String(question.year),
+                    when:
+                      question.changedAt === null
+                        ? ''
+                        : timeWords(question.changedAt, now(), words),
+                  })}
             </p>
           </Card.Body>
           <Card.Footer align="end">
             <Button type="button" variant="secondary" onClick={overwrite}>
-              Overwrite
+              {t('overwrite')}
             </Button>
             <Button ref={autofocusOnOpen} type="button" onClick={cancel}>
-              Cancel
+              {action('cancel')}
             </Button>
           </Card.Footer>
         </Card>

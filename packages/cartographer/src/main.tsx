@@ -16,14 +16,13 @@ import { CHROME_PAINT_STYLE } from './canvas/paint/style'
 import { DraftRecoveryDialog } from './components/DraftRecoveryDialog'
 import { Editor } from './components/Editor'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { LocaleProvider } from './components/LocaleProvider'
 import { OverwriteDialog } from './components/OverwriteDialog'
-import { arrangeSelected } from './components/shared/arrange'
-import { LocaleContext } from './components/shared/localeContext'
-import { createSnapshotPicker } from './components/shared/snapshotPicker'
-import { listenForStackingKeys } from './components/shared/stackingShortcut'
+import { PageHeading } from './components/PageHeading'
 import { SnapshotDialog } from './components/SnapshotDialog'
 import { DRAFTS_FOLDER, DRAFT_ROUTE } from './devServer/draftRoute'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
+import { createLocaleStore } from './i18n/localeStore'
 import { bakeToBitmap, loadBackdrop } from './loaders/backdropSource'
 import { loadVectorLayers } from './loaders/vectorLayers'
 import {
@@ -35,6 +34,7 @@ import { createDraftOffers } from './persistence/draft/draftOffers'
 import { offerDraft } from './persistence/draft/draftRecovery'
 import { openWithDraft, saveAndClearDraft } from './persistence/draft/draftSession'
 import { createDevServerDraftStore } from './persistence/draft/draftStore'
+import { persistenceWords } from './persistence/persistenceWords'
 import { createQuestionRelay } from './persistence/questionRelay'
 import { createResultRelay } from './persistence/resultRelay'
 import { installSaveShortcut } from './persistence/saveShortcut'
@@ -44,6 +44,9 @@ import { createYearSession } from './persistence/yearSession'
 import { openEmptyYear } from './state/openEmptyYear'
 import { createPolityColourSource } from './state/polityColourSource'
 import { createCartographerStore } from './state/store'
+import { arrangeSelected, arrangeWords } from './utils/arrange'
+import { createSnapshotPicker } from './utils/snapshotPicker'
+import { listenForStackingKeys } from './utils/stackingShortcut'
 import { UNFRAMED } from './viewport/viewport'
 import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataSource'
 
@@ -100,21 +103,6 @@ if (!container) {
 
 /** The year the editor opens on. 1100 is the first century to be contributed (P3, measured against OHM). */
 const FIRST_YEAR = 1100
-
-/**
- * Off-screen but readable — the heading stays for a screen reader and leaves the canvas the whole surface.
- *
- * `display: none` would remove it from the accessibility tree, which is the opposite of the point: the
- * canvas carries only a name, so this heading is the only thing announcing what the page *is*.
- */
-const visuallyHidden = {
-  position: 'absolute',
-  width: 1,
-  height: 1,
-  overflow: 'hidden',
-  clip: 'rect(0 0 0 0)',
-  whiteSpace: 'nowrap',
-} as const
 
 const store = createCartographerStore({
   edition: {
@@ -208,6 +196,23 @@ const wikidata = createWikidataApiSource({
  * server only (`vite.config.ts`), so the built site answers a save with an error, said in the status bar.
  */
 const results = createResultRelay()
+/**
+ * The language the Cartographer speaks: the browser's when it is French, English otherwise (the dev,
+ * 2026-10-21) — held in a store, since a switch will change it (ATLAS-266). The page says which, so a screen
+ * reader pronounces it right, and keeps saying it when it changes.
+ */
+const localeStore = createLocaleStore(pickLocale(navigator.languages))
+document.documentElement.lang = localeStore.get()
+localeStore.subscribe(() => {
+  document.documentElement.lang = localeStore.get()
+})
+
+/**
+ * What the year on disk says in the status bar — read at each sentence, in the language of the moment.
+ * @returns the words, in the language the store holds now
+ */
+const diskWords = () => persistenceWords(localeStore.get())
+
 /** ‹ctrl+S› over a year changed on disk asks first (CARTO-238, rung 3) — answered in `OverwriteDialog`. */
 const overwriteQuestions = createQuestionRelay<OverwriteQuestion>('a save is already asking')
 const yearSession = createYearSession({
@@ -219,6 +224,7 @@ const yearSession = createYearSession({
   }),
   year: FIRST_YEAR,
   report: results.say,
+  words: diskWords,
   confirmOverwrite: overwriteQuestions.ask,
   now: () => new Date(),
 })
@@ -250,6 +256,7 @@ const draftKeeper = createDraftKeeper({
     },
   },
   report: results.say,
+  words: diskWords,
 })
 void openWithDraft({
   openYear: () => yearSession.openOnStartup(),
@@ -261,10 +268,12 @@ void openWithDraft({
       ask: draftOffers.ask,
       now: () => new Date(),
       report: results.say,
+      words: diskWords,
       draftsFolder: DRAFTS_FOLDER,
     }),
   keeper: draftKeeper,
   report: results.say,
+  words: diskWords,
 })
 /**
  * Save the year — ‹ctrl+S› anywhere, and the top bar's `[Save]`: one call, two triggers. A save that wrote
@@ -286,13 +295,20 @@ installSaveShortcut(window, handleSave)
 const snapshotPicker = createSnapshotPicker()
 const handleOpenSnapshot = (entry: SnapshotEntry): void => {
   void openSnapshot(
-    { store, snapshots: drafts, year: FIRST_YEAR, now: () => new Date(), report: results.say },
+    {
+      store,
+      snapshots: drafts,
+      year: FIRST_YEAR,
+      now: () => new Date(),
+      report: results.say,
+      words: diskWords,
+    },
     entry
   )
 }
 // ‹cmd+↑ ↓›, with ‹shift› to the end: the selected polity up or down the stacking order, from anywhere.
 listenForStackingKeys(document, (move) => {
-  arrangeSelected(store.getState(), move, results.say)
+  arrangeSelected(store.getState(), move, results.say, arrangeWords(localeStore.get()))
 })
 
 /**
@@ -301,35 +317,24 @@ listenForStackingKeys(document, (move) => {
  */
 const history = createHistoryRelay()
 
-/**
- * The language the Cartographer speaks: the browser's when it is French, English otherwise (the dev,
- * 2026-10-21). The page says which, so a screen reader pronounces it right.
- */
-const locale = pickLocale(navigator.languages)
-document.documentElement.lang = locale
-
 createRoot(container).render(
   <StrictMode>
-    <LocaleContext value={locale}>
+    <LocaleProvider store={localeStore}>
       <ErrorBoundary zone="the Cartographer">
         <Editor
-          name="Europe Historical Atlas Cartographer"
           onSave={handleSave}
           onOpenSnapshot={snapshotPicker.open}
           history={history}
-          heading={
-            <h1 style={visuallyHidden}>Cartographer — year {store.getState().document.year}</h1>
-          }
+          heading={<PageHeading store={store} />}
           store={store}
           load={loadTheBackdrop}
           style={CHROME_PAINT_STYLE}
-          label={`Map of the year ${String(store.getState().document.year)}, being edited`}
           colours={colours}
           wikidata={wikidata}
           results={results}
         />
-        <DraftRecoveryDialog offers={draftOffers} />
-        <OverwriteDialog questions={overwriteQuestions} />
+        <DraftRecoveryDialog offers={draftOffers} now={() => new Date()} />
+        <OverwriteDialog questions={overwriteQuestions} now={() => new Date()} />
         <SnapshotDialog
           picker={snapshotPicker}
           source={drafts}
@@ -338,6 +343,6 @@ createRoot(container).render(
           onOpen={handleOpenSnapshot}
         />
       </ErrorBoundary>
-    </LocaleContext>
+    </LocaleProvider>
   </StrictMode>
 )

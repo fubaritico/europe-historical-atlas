@@ -22,7 +22,7 @@ import { inDevicePixels } from './paint/style'
 import { penInsertHit } from './tools/anchorGestures'
 import { anchorHit, anchorSentence, borderRunTo, waterTaking } from './tools/borderSnap'
 import { frameEdgeUnder } from './tools/frameSnap'
-import { followedLayer, layerLines, lineLabel, snapHit } from './tools/layerHits'
+import { followedLayer, layerLines, snapHit, waterOf } from './tools/layerHits'
 import { retraceAnchorUnder, retraceView } from './tools/retrace'
 import { snapLayersOf } from './tools/snapLayers'
 import {
@@ -48,7 +48,7 @@ import type { CanvasControllerDeps } from './controllerDeps'
 import type { Painter2D } from './paint/painter'
 import type { RetraceView } from './tools/retrace'
 import type { GestureContext } from './tools/toolGestures'
-import type { SnapLayer, ToolSession } from './tools/toolSession'
+import type { SnapLayer, ToolSession, WaterWords } from './tools/toolSession'
 import type { TribeFeatherCache } from './tribeFeatherCache'
 import type { PixelSize, Point } from '../viewport/viewport'
 import type { DerivedBorder } from '@europe-historical-atlas/core/editor/derivedBorders'
@@ -172,6 +172,7 @@ export function gestureOf(it: LiveCanvas): GestureContext {
     editHandles: () => editHandlesIn(it),
     layers: snapLayersOf(it.deps.vectorLayers),
     report: joinedReports(it.deps.onResult),
+    words: it.deps.words(),
     flipSide: it.altHeld,
   }
 }
@@ -186,8 +187,8 @@ export interface SnapOffer {
   kind: 'anchor' | 'layer' | null
   /** The anchor under the pointer, when `kind` is `'anchor'`. */
   anchor: number | null
-  /** What the layer line is called — `"coastline"`, `"Maas"` — when `kind` is `'layer'`. */
-  lineLabel: string | null
+  /** What the layer line is — the coast, or a river and its name — when `kind` is `'layer'`. */
+  water: WaterWords | null
 }
 
 /** Nothing on offer. */
@@ -196,7 +197,7 @@ const NO_OFFER: SnapOffer = {
   preview: null,
   kind: null,
   anchor: null,
-  lineLabel: null,
+  water: null,
 }
 
 /**
@@ -277,7 +278,7 @@ function startOffer(it: LiveCanvas, gesture: GestureContext, pointer: Point): Sn
   const hit = target === null ? null : retraceAnchorUnder(gesture, target.id, pointer)
   if (hit === null) return NO_OFFER
   const at = anchorsOnScreen(it)[hit] ?? null
-  return { target: at, preview: null, kind: 'anchor', anchor: hit, lineLabel: null }
+  return { target: at, preview: null, kind: 'anchor', anchor: hit, water: null }
 }
 
 /**
@@ -294,7 +295,7 @@ function anchorOffer(it: LiveCanvas, gesture: GestureContext, hit: number): Snap
     run === null || run.length < 2
       ? null
       : run.map((index) => anchors[index]).filter((point) => point !== undefined)
-  return { target: anchors[hit] ?? null, preview, kind: 'anchor', anchor: hit, lineLabel: null }
+  return { target: anchors[hit] ?? null, preview, kind: 'anchor', anchor: hit, water: null }
 }
 
 /**
@@ -320,18 +321,8 @@ function lineOffer(
   const stretch = snapStretchTo(gesture, hit)
   // A one-point stretch is the vertex already placed: nothing to preview, so the band stays (QUAL-101).
   const preview = stretch === null || stretch.length < 2 ? null : stretch.map(toScreen)
-  const label = lineLabel(gesture, hit)
-  return { target: toScreen(vertex), preview, kind: 'layer', anchor: null, lineLabel: label }
-}
-
-/**
- * The noun of the layer the Pen follows — what the out-of-reach sentence names — or `null`.
- * @param gesture - the gesture context
- * @returns `"coastline"`, `"river"`, or `null` for the free Pen and the Pencil
- */
-function followedNoun(gesture: GestureContext): string | null {
-  const layer = followedLayer(gesture)
-  return layer === null ? null : gesture.layers[layer].noun
+  const water = waterOf(gesture, hit)
+  return { target: toScreen(vertex), preview, kind: 'layer', anchor: null, water }
 }
 
 /**
@@ -493,6 +484,7 @@ export function featureAt(it: LiveCanvas, at: Point): string | null {
     territories: projectedTerritories(document, anchors),
     at,
     radius: HANDLE_HIT_RADIUS * it.ratio,
+    words: it.deps.words(),
   })
 }
 
@@ -671,14 +663,15 @@ export function refreshTools(it: LiveCanvas): void {
     targetName: resolvedTarget(gestureOf(it))?.name ?? null,
     onCanvas: it.pointer !== null,
     closing: scene.closing,
-    snapping: offer.lineLabel,
+    snapping: offer.water,
     joining: offer.anchor === null ? null : anchorSentence(gestureOf(it), offer.anchor),
     edge: frameEdgeUnder(gestureOf(it), it.pointer),
-    following: followedNoun(gestureOf(it)),
+    following: followedLayer(gestureOf(it)),
     inserting,
     tooFar,
     session: it.session,
     retracing: retrace.sentence,
+    t: it.deps.words().t,
   })
   if (sentence !== it.sentence) {
     it.sentence = sentence

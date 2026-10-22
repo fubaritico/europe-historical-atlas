@@ -1,0 +1,12 @@
+{
+  "reading": "Reading {id} on Wikidata…",
+  "failed": "Wikidata did not answer — the form works without it (details in the console)",
+  "unknown": "Wikidata does not know {id}",
+  "notASubject": "{id} is {kind, select, category {a Wikipedia category} disambiguation {a disambiguation page} list {a Wikipedia list} other {{kind}}}, not a polity — check the id",
+  "anachronism": "Wikidata: {name} {span} — {when, select, notYet {does not exist yet in {year}} noLonger {no longer exists in {year}} other {{when}}}",
+  "vassalState": " · a vassal state",
+  "proposals": "What Wikidata proposes",
+  "fieldName": "{field, select, name {Name} existsFrom {Exists from} existsTo {Exists to} suzerain {Suzerain} other {{field}}}",
+  "verb": "{state, select, empty {Use} differs {Replace} same {Agrees} other {{state}}}",
+  "suggestionLabel": "{verb} {value} for {field}"
+}

@@ -1,0 +1,7 @@
+{
+  "title": "Calques",
+  "layerName": "{id, select, backdrop {fond} fills {aplats} coastline {côte} rivers {fleuves} borders {frontières} unclaimed {terres sans maître} other {{id}}}",
+  "hide": "Masquer {layer}",
+  "show": "Afficher {layer}",
+  "opacity": "Opacité : {layer}"
+}

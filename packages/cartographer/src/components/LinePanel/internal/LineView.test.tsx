@@ -1,6 +1,8 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+
+import { renderInEnglish } from '../../../testing/renderInEnglish'
 
 import { LineView } from './LineView'
 
@@ -27,7 +29,7 @@ function mount(overrides: Partial<LineViewProps> = {}) {
     onHand: vi.fn(),
     ...overrides,
   }
-  render(<LineView {...props} />)
+  renderInEnglish(<LineView {...props} />)
   return { ...props, user: userEvent.setup() }
 }
 

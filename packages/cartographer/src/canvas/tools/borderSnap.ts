@@ -8,6 +8,7 @@ import { TAG } from './consoleTag'
 import { nearestLayer } from './layerHits'
 import { sessionPointOf } from './toolSession'
 
+import type { CanvasWords } from '../canvasWords'
 import type { LayerHitContext } from './layerHits'
 import type { SessionPoint, SnapLayer, ToolSession } from './toolSession'
 import type { Point } from '../../viewport/viewport'
@@ -36,6 +37,8 @@ export interface BorderSnapContext extends LayerHitContext {
    * zone beside the action (`s02`).
    */
   report: (message: string) => void
+  /** What the canvas says, in the page's language. */
+  words: CanvasWords
 }
 
 /**
@@ -205,8 +208,7 @@ export function anchorClick(context: BorderSnapContext, at: readonly [number, nu
   context.session.outline.push(...joined)
   context.session.snap = null
   if (run !== null) {
-    const noun = joined.length === 1 ? 'anchor' : 'anchors'
-    context.report(`followed ${String(joined.length)} ${noun} of a shared border`)
+    context.report(context.words.t('followedBorder', { count: joined.length }))
   }
   return true
 }
@@ -220,7 +222,7 @@ export function anchorClick(context: BorderSnapContext, at: readonly [number, nu
  */
 export function anchorSentence(context: BorderSnapContext, hit: number): string {
   const paths = pathsHolding(context.store.getState().document, hit)
-  return `Branching from a shared anchor — held by ${String(paths)} ${paths === 1 ? 'path' : 'paths'}`
+  return context.words.t('branching', { paths })
 }
 
 /**

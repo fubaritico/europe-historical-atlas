@@ -99,21 +99,34 @@ owns a `lint` script. A single `eslint .` from the root would read the Cartograp
 rule at all: green over code nothing had checked.
 
 **Components: a folder each, a barrel each — and no barrel of barrels** (the dev's call, 2026-10-18, his
-convention in `vite-mf-monorepo`, `nextjs-multizone-tmdb` and `date-time-picker`). `components/<Name>/` holds
-the component and its test at the root, **its own hooks in `hooks/`**, **its own children in `internal/`**, one
-entity per file, and `index.ts` exporting only what the rest of the application uses. Every component is in its folder
-since 2026-10-18 (three commits, the lint green at each). **`internal/` does not nest**: a child that has
-children of its own gets its own top-level folder, even with a single user (`MapArea/`, `LayersPanel/`, the
-panels of `Editor`'s dock). A stylesheet stays in `styles/`, the one module that orders the cascade. Four rules
-hold it:
-`react/no-multi-comp`, `eha/one-hook-per-file`, `eha/component-folder-layout` (what sits where), and
-`eha/no-reach-into-component` — over all of `src/` — so nothing outside a folder imports its `hooks/` or
-`internal/`: they are private by construction. **Shared pieces** (the dev's call, 2026-10-18, option A of three): a hook several components use lives in
-`components/shared/hooks/`, a plain module they share at `components/shared/`'s root, and a shared component
-gets its own folder like any public one (`ToolIcon/`, `Panel/`). `shared/` is open to all —
-`no-reach-into-component` lets any file import from it. Moving the pure logic out of `components/` into its own
-layer (`src/hooks/`, a `polity/` domain) was option B: a separate chantier, not decided. **No `components/index.ts`**: a barrel of every component is the one that makes cycles,
-and the subpath rule below already refuses it for `core`.
+convention in `vite-mf-monorepo`, `nextjs-multizone-tmdb` and `date-time-picker`). **One file, one component, and
+everything a component needs scoped to its folder** (the dev, 2026-10-22: *« les choses qui concernent des
+composants doivent être scopées par rapport aux composants »*). `components/<Name>/` holds:
+
+| where | what |
+| --- | --- |
+| `<Name>.tsx`, `<Name>.test.tsx` | the component and its test, at the root |
+| `hooks/` | its own hooks, one per file |
+| `internal/` | its own children — **does not nest**: a child with children gets its own top-level folder |
+| `utils/` | its own functions, one per file — never beside the component in its `.tsx` |
+| `i18n/` | its own texts: `fr.json`, `en.json`, and an `index.ts` typing them (`Catalogue<keyof typeof en>`) |
+| a types file at the root | the shapes its parts share (`polityFieldsProps.ts`, `layerListProps.ts`) |
+| `index.ts` | what the rest of the application uses — the folder's only door |
+
+**What several use goes up one level, beside `components/`**: `src/hooks/` (`useTranslation`, `useLocale`…),
+`src/utils/` (`polityDraft`, `arrange`, `statusBar`…), `src/i18n/` (the language store, its context, and the
+catalogues several parts read: `actions`, `tools`, `polity`, `border`, `colourPicker`, `app`). A shared
+*component* gets its own folder like any other (`ToolIcon/`, `Panel/`, `LocaleProvider/`). **There is no
+`components/shared/` any more** (removed 2026-10-22: it held no component). A stylesheet stays in `styles/`, the
+one module that orders the cascade. Four rules hold it: `react/no-multi-comp`, `eha/one-hook-per-file`,
+`eha/component-folder-layout` (what sits where), and `eha/no-reach-into-component` — over all of `src/` — so
+nothing outside a folder imports anything in it but its `index`. **No `components/index.ts`**: a barrel of every
+component is the one that makes cycles, and the subpath rule below already refuses it for `core`.
+
+**Texts: one JSON per language, both bundled** (the dev, 2026-10-22; `plan.md` P8): never a French and an
+English object in one TypeScript file, never fetched. The language flows from `LocaleProvider` (a store, so a
+switch — ATLAS-266 — rewords everything); the canvas and the year on disk are handed a function that reads it at
+each sentence. `core` keeps each translator once made, so a component calls `useTranslation` with no memo.
 
 **Cross-package imports use subpath exports**: `@europe-historical-atlas/core/utils/math`, never a barrel. A single
 barrel would flatten the four layers into one namespace and put `pipeline/` behind the same entry as the

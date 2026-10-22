@@ -1,24 +1,23 @@
-/** The tooltip and the console's word when nobody is aimed at. */
-const NO_TARGET = 'Active polity — none selected: select a polity to set its colour'
-
-/** A click on the empty swatch does nothing, and says so (`rules/error-handling.md`). */
-function refuseColour(): void {
-  console.warn(`[Cartographer] colour refused: ${NO_TARGET}.`)
-}
+import { useTranslation } from '../../../hooks/useTranslation'
+import { TOOL_RAIL_MESSAGES } from '../i18n'
+import { refuseColour } from '../utils/refuseColour'
 
 /**
  * The swatch with nobody aimed at: struck through, and it says why it does nothing.
  * @returns the disabled swatch button, whose click only warns
  */
 export function EmptySwatch() {
+  // Context
+  const t = useTranslation(TOOL_RAIL_MESSAGES)
+
   // Render
   return (
     <button
       type="button"
       className="tool-rail__swatch"
-      aria-label="Active polity — none selected"
+      aria-label={t('noTarget')}
       aria-disabled="true"
-      title={NO_TARGET}
+      title={t('noTargetHint')}
       data-empty="true"
       onClick={refuseColour}
     />

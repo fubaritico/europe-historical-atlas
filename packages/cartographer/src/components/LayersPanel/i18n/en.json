@@ -1,0 +1,7 @@
+{
+  "title": "Layers",
+  "layerName": "{id, select, backdrop {backdrop} fills {fills} coastline {coastline} rivers {rivers} borders {borders} unclaimed {unclaimed} other {{id}}}",
+  "hide": "Hide {layer}",
+  "show": "Show {layer}",
+  "opacity": "{layer} opacity"
+}

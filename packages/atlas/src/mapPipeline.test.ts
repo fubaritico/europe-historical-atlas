@@ -10,9 +10,9 @@ import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocum
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 
 import { createDevState } from './devState'
+import { ATLAS_MESSAGES } from './i18n'
 import { createMapPipeline, politicalRequest } from './mapPipeline'
 import { createMapSources } from './mapSources'
-import { ATLAS_MESSAGES } from './messages'
 
 import type { DevState } from './devState'
 import type { MapLayers } from './mapLayers'

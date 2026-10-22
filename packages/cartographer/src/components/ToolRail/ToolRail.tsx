@@ -1,14 +1,19 @@
 import { useState } from 'react'
 
+import { useTranslation } from '../../hooks/useTranslation'
+import { TOOL_MESSAGES } from '../../i18n/tools'
+
+import { TOOL_RAIL_MESSAGES } from './i18n'
 import { ActiveSwatch } from './internal/ActiveSwatch'
 import { ToolButton } from './internal/ToolButton'
-import { RAIL_TOOLS } from './railTools'
+import { moveAlongToolbar } from './utils/moveAlongToolbar'
+import { railTools } from './utils/railTools'
+import { unwiredGroup } from './utils/unwiredGroup'
 
 import type { SwatchPolity } from './internal/SwatchPicker'
-import type { RailTool } from './railTools'
+import type { RailTool } from './utils/railTools'
 import type { EditorTool } from '../../state/toolSlice'
 import type { HsvaColor } from '@fubaritico/behaviors'
-import type { KeyboardEvent } from 'react'
 
 /** What the rail shows and reports. Never the store: `ToolRailPanel` reads it and hands literals. */
 export interface ToolRailProps {
@@ -26,31 +31,8 @@ export interface ToolRailProps {
   penMode: string
   /** A variant of the Pen's group was chosen. */
   onPenMode: (id: string) => void
-  /** The tools listed, top to bottom — {@link RAIL_TOOLS} unless a test or the workbench hands others. */
+  /** The tools listed, top to bottom — {@link railTools} unless a test or the workbench hands others. */
   tools?: readonly RailTool[]
-}
-
-/**
- * Move the focus along the toolbar on ↑ and ↓ — the WAI-ARIA toolbar pattern, vertical.
- * @param event - the key event, on the toolbar
- */
-function moveAlongToolbar(event: KeyboardEvent<HTMLDivElement>): void {
-  if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return
-  const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>('.tool-rail__tool')]
-  const at = buttons.findIndex((button) => button === document.activeElement)
-  if (at < 0) return
-  event.preventDefault()
-  const step = event.key === 'ArrowDown' ? 1 : -1
-  buttons[(at + step + buttons.length) % buttons.length]?.focus()
-}
-
-/**
- * What a group with no binding does when a variant is chosen: say so. Only the Pen heads a group today;
- * a second one that reached this without being wired would otherwise do nothing, silently.
- * @param id - the variant chosen
- */
-function unwiredGroup(id: string): void {
-  console.error(`[Cartographer] the tool rail has no binding for the variant "${id}".`)
 }
 
 /**
@@ -67,7 +49,7 @@ function unwiredGroup(id: string): void {
  * @param props.initiallyOpen - a group to show open from the start, as the workbench does; closed otherwise
  * @param props.penMode - the Pen's variant in use, marked in its group
  * @param props.onPenMode - takes a variant of the Pen's group, given its id
- * @param props.tools - the tools listed, top to bottom; {@link RAIL_TOOLS} by default
+ * @param props.tools - the tools listed, top to bottom; {@link railTools} by default
  * @returns the rail
  */
 export function ToolRail({
@@ -78,10 +60,17 @@ export function ToolRail({
   initiallyOpen,
   penMode,
   onPenMode,
-  tools = RAIL_TOOLS,
+  tools,
 }: ToolRailProps) {
+  // Context
+  const t = useTranslation(TOOL_RAIL_MESSAGES)
+  const toolNames = useTranslation(TOOL_MESSAGES)
+
   // State
   const [openGroup, setOpenGroup] = useState<EditorTool | null>(initiallyOpen ?? null)
+
+  // Derived
+  const listed = tools ?? railTools(toolNames)
 
   // Render
   return (
@@ -90,10 +79,10 @@ export function ToolRail({
         className="tool-rail__tools"
         role="toolbar"
         aria-orientation="vertical"
-        aria-label="Tools"
+        aria-label={t('toolsLabel')}
         onKeyDown={moveAlongToolbar}
       >
-        {tools.map((entry) => (
+        {listed.map((entry) => (
           <ToolButton
             key={entry.tool}
             entry={entry}

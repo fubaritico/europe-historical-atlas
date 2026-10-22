@@ -5,11 +5,15 @@ import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocum
 
 import { openEmptyYear } from '../state/openEmptyYear'
 
+import { persistenceWords } from './persistenceWords'
 import { openSnapshot } from './snapshotOpening'
 
 import type { Draft, SnapshotSink, SnapshotSource } from './draft/draftStore'
 import type { SnapshotOpeningDeps } from './snapshotOpening'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+
+/** What the year on disk says, in English — the language these suites were written against. */
+const EN_WORDS = persistenceWords('en')
 
 /** The present every test is set in: the afternoon of 2026-10-18, local time. */
 const NOW = new Date(2026, 9, 18, 16, 30)
@@ -66,6 +70,7 @@ async function opening(
     year: 1100,
     now: () => NOW,
     report: (message) => reports.push(message),
+    words: () => EN_WORDS,
   }
   const outcome = await openSnapshot(deps, CHOSEN)
   return { order, page, state, snapshots, reports, outcome }
@@ -139,7 +144,7 @@ describe('openSnapshot', () => {
   })
 
   describe('managed errors', () => {
-    it('opens nothing and reads nothing when the page cannot be kept first, and says why', async () => {
+    it('opens nothing and reads nothing when the page cannot be kept first, and logs why', async () => {
       const { state, snapshots, reports, outcome } = await opening({
         snapshot: () =>
           Promise.reject(new Error('only the Cartographer served by this machine may keep drafts')),
@@ -149,12 +154,16 @@ describe('openSnapshot', () => {
       expect(snapshots.readSnapshot).not.toHaveBeenCalled()
       expect(state.open).not.toHaveBeenCalled()
       expect(reports).toEqual([
-        'not opened — your page could not be kept first (only the Cartographer served by this machine may keep drafts)',
+        'not opened — your page could not be kept first (details in the console)',
       ])
       expect(console.error).toHaveBeenCalledTimes(1)
+      expect(console.error).toHaveBeenCalledWith(
+        '[Cartographer] the page of 1100 could not be kept before opening a snapshot',
+        new Error('only the Cartographer served by this machine may keep drafts')
+      )
     })
 
-    it('leaves the page untouched when the snapshot cannot be read, and says why', async () => {
+    it('leaves the page untouched when the snapshot cannot be read, and logs why', async () => {
       const { page, state, reports, outcome } = await opening({
         readSnapshot: () =>
           Promise.reject(
@@ -166,9 +175,13 @@ describe('openSnapshot', () => {
       expect(state.open).not.toHaveBeenCalled()
       expect(state.document).toBe(page)
       expect(reports).toEqual([
-        'the snapshot of today at 14:00:00 could not be opened (there is no snapshot "1100.2026-10-18T14-00-00Z.json" of 1100) — your page is as it was',
+        'the snapshot of today at 14:00:00 could not be opened — your page is as it was (details in the console)',
       ])
       expect(console.error).toHaveBeenCalledTimes(1)
+      expect(console.error).toHaveBeenCalledWith(
+        '[Cartographer] the snapshot 1100.2026-10-18T14-00-00Z.json could not be opened',
+        new Error('there is no snapshot "1100.2026-10-18T14-00-00Z.json" of 1100')
+      )
     })
   })
 
@@ -181,22 +194,25 @@ describe('openSnapshot', () => {
       expect(outcome).toBe(false)
       expect(state.open).not.toHaveBeenCalled()
       expect(state.document).toBe(page)
-      expect(reports).toHaveLength(1)
-      expect(reports[0]).toMatch(
-        /^the snapshot of today at 14:00:00 could not be opened \(.+\) — your page is as it was$/
-      )
+      expect(reports).toEqual([
+        'the snapshot of today at 14:00:00 could not be opened — your page is as it was (details in the console)',
+      ])
       expect(console.error).toHaveBeenCalledTimes(1)
     })
 
-    it('says a non-Error refusal of the page’s copy as text', async () => {
+    it('logs a non-Error refusal of the page’s copy as it came', async () => {
       const { reports } = await opening({
         // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- the case under test
         snapshot: () => Promise.reject('the server is down'),
       })
 
       expect(reports).toEqual([
-        'not opened — your page could not be kept first (the server is down)',
+        'not opened — your page could not be kept first (details in the console)',
       ])
+      expect(console.error).toHaveBeenCalledWith(
+        '[Cartographer] the page of 1100 could not be kept before opening a snapshot',
+        'the server is down'
+      )
     })
   })
 
@@ -215,6 +231,7 @@ describe('openSnapshot', () => {
           year: 1100,
           now: () => NOW,
           report: (message) => reports.push(message),
+          words: () => EN_WORDS,
         },
         {
           name: '1100.2026-10-17T23-10-00Z.json',

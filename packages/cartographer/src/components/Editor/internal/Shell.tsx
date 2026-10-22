@@ -82,17 +82,17 @@ export function Shell({ heading, appbar, docbar, rail, canvas, dock, status }: S
     <div className="shell">
       <div className="shell__appbar">
         <ErrorBoundary zone="the app bar" compact>
-          {appbar ?? <Placeholder name="app bar" />}
+          {appbar ?? <Placeholder zone="appBar" />}
         </ErrorBoundary>
       </div>
       <div className="shell__docbar">
         <ErrorBoundary zone="the document bar" compact>
-          {docbar ?? <Placeholder name="document bar" />}
+          {docbar ?? <Placeholder zone="docBar" />}
         </ErrorBoundary>
       </div>
       <div className="shell__body">
         <div className="shell__rail">
-          <ErrorBoundary zone="the tool rail">{rail ?? <Placeholder name="tools" />}</ErrorBoundary>
+          <ErrorBoundary zone="the tool rail">{rail ?? <Placeholder zone="tools" />}</ErrorBoundary>
         </div>
         <main className="shell__canvas">
           {heading}
@@ -101,7 +101,7 @@ export function Shell({ heading, appbar, docbar, rail, canvas, dock, status }: S
           </ErrorBoundary>
         </main>
         <div className="shell__dock">
-          <ErrorBoundary zone="the dock">{dock ?? <Placeholder name="panels" />}</ErrorBoundary>
+          <ErrorBoundary zone="the dock">{dock ?? <Placeholder zone="panels" />}</ErrorBoundary>
         </div>
       </div>
       <ErrorBoundary zone="the status bar" compact>

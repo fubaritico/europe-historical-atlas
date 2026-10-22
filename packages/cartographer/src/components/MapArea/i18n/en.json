@@ -1,0 +1,8 @@
+{
+  "instructions": "Arrow keys to pan the map, plus and minus or Page Up and Page Down to zoom. Hold Space to pan with the hand. P takes the Pen and A the white arrow. The Pen, the Pencil and the white arrow act only once zoomed in close enough; zoom in first. With the Pen, Backspace removes the last point, Escape abandons the outline and Enter closes it. With the white arrow, Delete or Backspace removes the selected anchor. Control or Command with Z undoes the last gesture; with Shift as well, it redoes it.",
+  "preparing": "Preparing the backdrop…",
+  "preparingLabel": "Preparing the backdrop",
+  "phase": "{phase, select, rasterise {tracing the territories} expand {expanding to the coasts} colours {assigning the colours} bake {compositing the relief} borders {deriving the borders} other {{phase}}}",
+  "failed": "The backdrop could not be prepared.",
+  "failedCost": "No year can be opened without it: the relief carries the coordinate system."
+}

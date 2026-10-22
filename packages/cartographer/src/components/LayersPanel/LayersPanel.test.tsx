@@ -1,9 +1,10 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 
 import { testStore } from '../../canvas/testGestureContext'
 import { DEFAULT_LAYERS } from '../../state/layersSlice'
+import { renderInEnglish } from '../../testing/renderInEnglish'
 
 import { LayersPanel } from './LayersPanel'
 
@@ -19,7 +20,7 @@ import { LayersPanel } from './LayersPanel'
  */
 function mount() {
   const store = testStore()
-  render(<LayersPanel store={store} />)
+  renderInEnglish(<LayersPanel store={store} />)
   return { store, user: userEvent.setup() }
 }
 

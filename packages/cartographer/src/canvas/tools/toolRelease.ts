@@ -1,4 +1,4 @@
-import { reachLabel } from '../../viewport/toolReach'
+import { reachLabel, reachTenths } from '../../viewport/toolReach'
 import { gestureOf, snapReachOf, tooFarToEdit } from '../liveCanvas'
 
 import { TAG } from './consoleTag'
@@ -27,12 +27,20 @@ import type { LiveCanvas } from '../liveCanvas'
  */
 export function refuseFromAfar(it: LiveCanvas, verb: 'draw' | 'edit'): void {
   const reach = snapReachOf(it)
-  const from = Number.isFinite(reach)
-    ? `the snap would reach ${reachLabel(reach)}`
-    : 'the view is not framed yet'
-  const message = `too far to ${verb} — zoom in (${from}; the tools act within ${String(it.deps.maxSnapReachKm)} km)`
-  console.warn(`${TAG} ${message}`)
-  it.deps.onResult(message)
+  const { t, locale } = it.deps.words()
+  // The console's figure (`reachLabel`), written the page's way: one decimal, *12.3* or *12,3*.
+  const why = Number.isFinite(reach)
+    ? t('reachWould', {
+        reach: reachTenths(reach).toLocaleString(locale, {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        }),
+      })
+    : t('notFramed')
+  console.warn(
+    `${TAG} too far to ${verb}: the snap would reach ${Number.isFinite(reach) ? reachLabel(reach) : 'nowhere (the view is not framed yet)'}, the tools act within ${String(it.deps.maxSnapReachKm)} km.`
+  )
+  it.deps.onResult(t('tooFar', { verb, why, km: it.deps.maxSnapReachKm }))
 }
 
 /**

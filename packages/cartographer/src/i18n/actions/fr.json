@@ -1,0 +1,21 @@
+{
+  "save": "Enregistrer",
+  "open": "Ouvrir…",
+  "openSnapshot": "Ouvrir un instantané…",
+  "saveAs": "Enregistrer sous…",
+  "undo": "Annuler",
+  "redo": "Rétablir",
+  "undoStep": "Annuler {step}",
+  "redoStep": "Rétablir {step}",
+  "newPolity": "Nouveau pays",
+  "editProperties": "Propriétés…",
+  "deletePolity": "Supprimer le pays",
+  "close": "Fermer",
+  "ok": "OK",
+  "cancel": "Annuler",
+  "delete": "Supprimer",
+  "front": "Premier plan",
+  "forward": "En avant",
+  "backward": "En arrière",
+  "back": "Arrière-plan"
+}

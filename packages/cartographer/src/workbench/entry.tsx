@@ -3,7 +3,8 @@ import { createRoot } from 'react-dom/client'
 
 import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
 
-import { LocaleContext } from '../components/shared/localeContext'
+import { LocaleProvider } from '../components/LocaleProvider'
+import { createLocaleStore } from '../i18n/localeStore'
 
 import { WORKBENCH_ENTRIES } from './entries'
 import { Workbench } from './Workbench'
@@ -42,8 +43,8 @@ document.documentElement.lang = locale
 
 createRoot(container).render(
   <StrictMode>
-    <LocaleContext value={locale}>
+    <LocaleProvider store={createLocaleStore(locale)}>
       <Workbench entries={WORKBENCH_ENTRIES} />
-    </LocaleContext>
+    </LocaleProvider>
   </StrictMode>
 )

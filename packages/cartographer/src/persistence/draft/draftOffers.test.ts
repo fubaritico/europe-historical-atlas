@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { createDraftOffers } from './draftOffers'
 
 /** The question asked in every test. */
-const OFFER = { year: 1100, when: 'today at 15:42' }
+const OFFER = { year: 1100, savedAt: '2026-10-17T13:42:00.000Z' }
 
 describe('createDraftOffers', () => {
   describe('happy path', () => {

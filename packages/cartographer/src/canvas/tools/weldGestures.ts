@@ -30,10 +30,10 @@ import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocu
  * them. The gestures' context extends this one; nothing here imports it.
  */
 export interface WeldContext
-  extends FrameSnapContext, Pick<BorderSnapContext, 'anchorsOnScreen' | 'report'> {}
+  extends FrameSnapContext, Pick<BorderSnapContext, 'anchorsOnScreen' | 'report' | 'words'> {}
 
-/** How `{History}` names a weld. */
-export const WELD_ANCHOR_STEP = { kind: 'weld-anchor', label: 'weld anchor' } as const
+/** The step kind a weld is recorded under. */
+export const WELD_ANCHOR_KIND = 'weld-anchor'
 
 /**
  * The rings of every polity but one.
@@ -131,33 +131,35 @@ function names(document: YearDocument, ids: readonly string[]): string {
  */
 export function releaseWeld(context: WeldContext, index: number, offer: WeldOffer): boolean {
   const state = context.store.getState()
+  const { t } = context.words
+  const step = { kind: WELD_ANCHOR_KIND, label: t('stepWeldAnchor') }
   const result: WeldDone | WeldRefusal | null =
     offer.kind === 'anchor'
-      ? state.weldAnchor(index, offer.into, WELD_ANCHOR_STEP)
-      : state.threadAnchor(index, offer.a, offer.b, offer.at, WELD_ANCHOR_STEP)
+      ? state.weldAnchor(index, offer.into, step)
+      : state.threadAnchor(index, offer.a, offer.b, offer.at, step)
   if (result === null) {
     // The offer is built to match what the document takes, so this is a defect — said loudly, and on
     // screen too, since the drag showed a snap the release does not keep.
     console.error(`${TAG} the document refused to weld anchor ${String(index)} the tool offered.`)
-    context.report('not welded — nothing to weld onto there')
+    context.report(t('notWelded', { why: 'nothing', min: MIN_RING_ANCHORS }))
     return false
   }
   if (isWeldRefusal(result)) {
-    const why =
-      result.refused === 'pinch'
-        ? 'the outline would pass twice through that point'
-        : `an outline would keep fewer than ${String(MIN_RING_ANCHORS)} anchors`
-    console.warn(`${TAG} anchor ${String(index)} not welded: ${why}.`)
-    context.report(`not welded — ${why}`)
+    console.warn(`${TAG} anchor ${String(index)} not welded: ${result.refused}.`)
+    context.report(t('notWelded', { why: result.refused, min: MIN_RING_ANCHORS }))
     return false
   }
   const document = context.store.getState().document
   const aimed = describeDrawingTarget(document, state.target)
   const others = result.polities.filter((polity) => polity !== aimed?.id)
-  const onto = offer.kind === 'anchor' ? 'anchor' : 'border'
   // Held by no other polity's claim — a deliberate gap's ring alone: no name to give (ARCH-004).
-  const whose = others.length > 0 ? `${names(document, others)}’s` : 'the'
-  context.report(`welded onto ${whose} ${onto}`)
+  context.report(
+    t('welded', {
+      whose: others.length > 0 ? 'named' : 'none',
+      onto: offer.kind,
+      names: names(document, others),
+    })
+  )
   return true
 }
 

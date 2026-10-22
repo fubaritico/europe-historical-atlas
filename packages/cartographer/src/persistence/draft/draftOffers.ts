@@ -11,8 +11,8 @@ import type { QuestionRelay } from '../questionRelay'
 export interface DraftOffer {
   /** The year the draft is of. */
   year: number
-  /** When it was written, already worded for the author — *"today at 15:42"*. */
-  when: string
+  /** When it was written, as an ISO time — the dialogue words it in the page's language. */
+  savedAt: string
 }
 
 /** The relay: `answer(true)` resumes the draft, `answer(false)` sets it aside. */

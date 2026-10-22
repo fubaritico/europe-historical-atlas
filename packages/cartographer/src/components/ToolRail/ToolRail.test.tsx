@@ -1,23 +1,29 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 
 import { TOOL_KEYS } from '../../canvas/navigation'
+import { TOOL_MESSAGES } from '../../i18n/tools'
 import { openEmptyYear } from '../../state/openEmptyYear'
 import { createPolityColourSource } from '../../state/polityColourSource'
 import { createCartographerStore } from '../../state/store'
 import { PEN_MODES } from '../../state/toolSlice'
+import { renderInEnglish } from '../../testing/renderInEnglish'
 import { UNFRAMED } from '../../viewport/viewport'
 import { ToolRailPanel } from '../ToolRailPanel'
 
-import { HOLD_TO_OPEN_MS, PEN_VARIANTS, RAIL_TOOLS } from './railTools'
 import { ToolRail } from './ToolRail'
+import { HOLD_TO_OPEN_MS, penVariants, railTools } from './utils/railTools'
 
-import type { RailTool } from './railTools'
 import type { ToolRailProps } from './ToolRail'
+import type { RailTool } from './utils/railTools'
+
+/** The tools' names, in English — the language these suites were written against. */
+const TOOLS_EN = createTranslator(TOOL_MESSAGES, 'en')
 
 /** One colour source for the mounts below, over the shipped palette. */
 const COLOURS = createPolityColourSource(AUTOMATIC_PALETTE)
@@ -34,7 +40,7 @@ afterEach(() => {
 function mount(overrides: Partial<ToolRailProps> = {}) {
   const onSelect = vi.fn()
   const onPenMode = vi.fn()
-  render(
+  renderInEnglish(
     <ToolRail
       tool="navigate"
       onSelect={onSelect}
@@ -128,7 +134,7 @@ describe('ToolRail', () => {
 
     // ARCH-002: a mode added to the store and not to the rail would be reached by ‹P› and shown nowhere.
     it('lists one row per Pen mode, in the store’s order', () => {
-      expect(PEN_VARIANTS.map((variant) => variant.id)).toEqual([...PEN_MODES])
+      expect(penVariants(TOOLS_EN).map((variant) => variant.id)).toEqual([...PEN_MODES])
     })
 
     it('reports the river Pen when its row is chosen', async () => {
@@ -141,7 +147,7 @@ describe('ToolRail', () => {
     it('opens the group on a press held long enough, and that press takes no tool', () => {
       vi.useFakeTimers()
       const onSelect = vi.fn()
-      render(
+      renderInEnglish(
         <ToolRail
           tool="navigate"
           onSelect={onSelect}
@@ -164,7 +170,7 @@ describe('ToolRail', () => {
     it('takes the tool on a press released before the hold', () => {
       vi.useFakeTimers()
       const onSelect = vi.fn()
-      render(
+      renderInEnglish(
         <ToolRail
           tool="navigate"
           onSelect={onSelect}
@@ -190,7 +196,7 @@ describe('ToolRail', () => {
 
     it('cancels the hold when the pointer leaves the button', () => {
       vi.useFakeTimers()
-      render(
+      renderInEnglish(
         <ToolRail
           tool="navigate"
           onSelect={vi.fn()}
@@ -299,7 +305,7 @@ describe('ToolRail — what the review found', () => {
   it('still takes the Pen from the keyboard after a hold opened its group', () => {
     vi.useFakeTimers()
     const onSelect = vi.fn()
-    render(
+    renderInEnglish(
       <ToolRail
         tool="navigate"
         onSelect={onSelect}
@@ -324,7 +330,7 @@ describe('ToolRail — what the review found', () => {
   // ARCH-016: the tooltips name the keys the canvas really binds.
   it('names in its tooltips the keys the canvas binds', () => {
     for (const [key, bound] of Object.entries(TOOL_KEYS)) {
-      const entry = RAIL_TOOLS.find((candidate) => candidate.tool === bound)
+      const entry = railTools(TOOLS_EN).find((candidate) => candidate.tool === bound)
       expect(entry?.key.toLowerCase()).toBe(key)
     }
   })
@@ -337,7 +343,7 @@ describe('ToolRailPanel — the Pen’s mode', () => {
       edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
       viewport: { viewport: UNFRAMED },
     })
-    render(<ToolRailPanel store={store} colours={COLOURS} />)
+    renderInEnglish(<ToolRailPanel store={store} colours={COLOURS} />)
     const user = userEvent.setup()
     await user.pointer({ keys: '[MouseRight]', target: tool('Pen') })
     await user.click(screen.getByRole('menuitemradio', { name: /follow the coast/ }))
@@ -359,7 +365,7 @@ describe('ToolRailPanel', () => {
   describe('happy path', () => {
     it('takes the tool through the store', async () => {
       const store = openStore()
-      render(<ToolRailPanel store={store} colours={COLOURS} />)
+      renderInEnglish(<ToolRailPanel store={store} colours={COLOURS} />)
       await userEvent.setup().click(tool('Pen'))
       expect(store.getState().tool).toBe('draw')
     })
@@ -368,7 +374,7 @@ describe('ToolRailPanel', () => {
   describe('variants', () => {
     it('presses the tool the store holds, whoever chose it', () => {
       const store = openStore()
-      render(<ToolRailPanel store={store} colours={COLOURS} />)
+      renderInEnglish(<ToolRailPanel store={store} colours={COLOURS} />)
       act(() => {
         store.getState().selectTool('edit')
       })
@@ -378,7 +384,7 @@ describe('ToolRailPanel', () => {
 
   describe('managed errors', () => {
     it('shows no swatch while nobody is aimed at', () => {
-      render(<ToolRailPanel store={openStore()} colours={COLOURS} />)
+      renderInEnglish(<ToolRailPanel store={openStore()} colours={COLOURS} />)
       expect(screen.getByRole('button', { name: /none selected/ })).toBeDefined()
     })
   })
@@ -387,7 +393,7 @@ describe('ToolRailPanel', () => {
     // An undo that takes the polity away empties the swatch on its own: the target stops resolving.
     it('empties the swatch when the aimed-at polity is undone', () => {
       const store = openStore()
-      render(<ToolRailPanel store={store} colours={COLOURS} />)
+      renderInEnglish(<ToolRailPanel store={store} colours={COLOURS} />)
       act(() => {
         store.getState().createPolity(
           {
@@ -431,7 +437,7 @@ describe('ToolRailPanel', () => {
         { kind: 'create-polity', label: 'create' }
       )
       store.getState().aimAt('fr')
-      render(<ToolRailPanel store={store} colours={COLOURS} />)
+      renderInEnglish(<ToolRailPanel store={store} colours={COLOURS} />)
       expect(
         screen.getByRole('button', { name: /Colour of .*France/ }).getAttribute('style')
       ).toContain('rgb(18, 52, 86)')

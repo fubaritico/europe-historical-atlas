@@ -1,6 +1,9 @@
+import { useTranslation } from '../../../hooks/useTranslation'
+import { OVERRIDES_PANEL_MESSAGES } from '../i18n'
+
 import { OverrideItem } from './OverrideItem'
 
-import type { OverrideRow } from '../overrideRows'
+import type { OverrideRow } from '../utils/overrideRows'
 
 /** What the list shows and reports. */
 export interface OverridesListProps {
@@ -18,11 +21,13 @@ export interface OverridesListProps {
  * @returns the list
  */
 export function OverridesList({ rows, onClear }: OverridesListProps) {
+  // Context
+  const t = useTranslation(OVERRIDES_PANEL_MESSAGES)
+
   // Render
-  if (rows.length === 0)
-    return <p className="panel__hint">Nothing overridden: every line follows its rule.</p>
+  if (rows.length === 0) return <p className="panel__hint">{t('empty')}</p>
   return (
-    <ul className="override-list" aria-label="Overrides">
+    <ul className="override-list" aria-label={t('title')}>
       {rows.map((row) => (
         <OverrideItem key={`${row.kind}:${String(row.index)}`} row={row} onClear={onClear} />
       ))}

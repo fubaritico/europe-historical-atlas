@@ -4,6 +4,7 @@ import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/docum
 import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { openEmptyYear } from '../../state/openEmptyYear'
+import { persistenceWords } from '../persistenceWords'
 
 import { offerDraft } from './draftRecovery'
 
@@ -11,6 +12,9 @@ import type { DraftOffer } from './draftOffers'
 import type { DraftRecoveryDeps } from './draftRecovery'
 import type { Draft, DraftStore } from './draftStore'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+
+/** What the year on disk says, in English — the language these suites were written against. */
+const EN_WORDS = persistenceWords('en')
 
 /** Where the drafts are kept, as the author is told. */
 const DRAFTS_FOLDER = 'packages/cartographer/.autosave/drafts'
@@ -67,6 +71,7 @@ async function offer(
           },
     now: () => NOW,
     report: (message) => reports.push(message),
+    words: () => EN_WORDS,
     draftsFolder: DRAFTS_FOLDER,
   }
   const outcome = await offerDraft(deps)
@@ -89,7 +94,7 @@ describe('offerDraft', () => {
 
       expect(outcome).toBe('clear')
 
-      expect(asked).toEqual([{ year: 1100, when: 'today at 15:42' }])
+      expect(asked).toEqual([{ year: 1100, savedAt: new Date(2026, 9, 17, 15, 42).toISOString() }])
       expect(state.open).toHaveBeenCalledTimes(1)
       expect(state.document.polities.length).toBe(sharedBorderDocument().polities.length)
       expect(reports).toEqual(['resumed the draft of 1100 today at 15:42 — ‹ctrl+S› to save it'])
@@ -132,7 +137,7 @@ describe('offerDraft', () => {
       expect(state.open).not.toHaveBeenCalled()
       expect(drafts.setAside).toHaveBeenCalledWith(1100)
       expect(reports[0]).toMatch(
-        /^the draft of 1100 today at 15:42 cannot be opened \(.+\) — it is set aside in /
+        /^the draft of 1100 today at 15:42 cannot be opened — it is set aside in .+ \(details in the console\)$/
       )
     })
 
@@ -144,7 +149,7 @@ describe('offerDraft', () => {
 
       expect(drafts.setAside).toHaveBeenCalledWith(1100)
       expect(reports).toEqual([
-        `a draft of 1100 could not be read (not a draft) — it is set aside in ${DRAFTS_FOLDER}`,
+        `a draft of 1100 could not be read — it is set aside in ${DRAFTS_FOLDER} (details in the console)`,
       ])
     })
 
@@ -158,7 +163,7 @@ describe('offerDraft', () => {
 
       expect(outcome).toBe('draft-left')
       expect(reports).toEqual([
-        `a draft of 1100 could not be read (HTTP 500), and it could not be set aside (EACCES) — automatic drafts are off: move it out of ${DRAFTS_FOLDER}, then reload`,
+        `a draft of 1100 could not be read, and it could not be set aside — automatic drafts are off: move it out of ${DRAFTS_FOLDER}, then reload (details in the console)`,
       ])
     })
   })
@@ -176,7 +181,7 @@ describe('offerDraft', () => {
       expect(drafts.setAside).toHaveBeenCalledWith(1100)
       expect(outcome).toBe('clear')
       expect(reports.at(-1)).toBe(
-        `the draft of 1100 today at 15:42 could not be offered (a draft is already being offered) — it is set aside in ${DRAFTS_FOLDER}`
+        `the draft of 1100 today at 15:42 could not be offered — it is set aside in ${DRAFTS_FOLDER} (details in the console)`
       )
     })
 

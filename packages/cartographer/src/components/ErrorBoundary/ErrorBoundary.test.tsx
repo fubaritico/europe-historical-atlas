@@ -4,10 +4,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { catalogueMismatches } from '@europe-historical-atlas/core/i18n/catalogue'
 
-import { LocaleContext } from '../shared/localeContext'
+import { createLocaleStore } from '../../i18n/localeStore'
+import { LocaleProvider } from '../LocaleProvider'
 
 import { ErrorBoundary } from './ErrorBoundary'
-import { ERROR_BOUNDARY_MESSAGES } from './messages'
+import { ERROR_BOUNDARY_MESSAGES } from './i18n'
 
 import type { Locale } from '@europe-historical-atlas/core/i18n/locale'
 import type { ReactNode } from 'react'
@@ -35,7 +36,7 @@ function mount(
 ) {
   const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
   const view = render(
-    <LocaleContext value={options.locale ?? 'en'}>
+    <LocaleProvider store={createLocaleStore(options.locale ?? 'en')}>
       <ErrorBoundary
         zone="the map"
         {...(options.retry === true ? { retry: true } : {})}
@@ -44,7 +45,7 @@ function mount(
       >
         {children}
       </ErrorBoundary>
-    </LocaleContext>
+    </LocaleProvider>
   )
   return { ...view, error }
 }

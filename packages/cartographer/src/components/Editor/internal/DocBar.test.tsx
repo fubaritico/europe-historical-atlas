@@ -1,6 +1,8 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+
+import { renderInEnglish } from '../../../testing/renderInEnglish'
 
 import { DocBar } from './DocBar'
 
@@ -25,7 +27,7 @@ function mount(overrides: Partial<DocBarProps> = {}): DocBarProps {
     zoomRef: () => undefined,
     ...overrides,
   }
-  render(<DocBar {...props} />)
+  renderInEnglish(<DocBar {...props} />)
   return props
 }
 

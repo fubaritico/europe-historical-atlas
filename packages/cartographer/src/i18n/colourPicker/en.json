@@ -1,0 +1,17 @@
+{
+  "area": "Color",
+  "saturation": "Saturation",
+  "brightness": "Brightness",
+  "hue": "Hue",
+  "alpha": "Opacity",
+  "hex": "Hex color",
+  "automatic": "Automatic",
+  "automaticDescription": "Automatic, no color selected",
+  "areaRoleDescription": "2D slider",
+  "hexInvalid": "Enter a hex color such as #1976d2",
+  "picker": "Color picker",
+  "trigger": "Choose color",
+  "achromatic": "{shade, select, black {black} white {white} darkGray {dark gray} lightGray {light gray} gray {gray} other {{shade}}}",
+  "chromatic": "{lightness, select, veryDark {very dark } dark {dark } light {light } veryLight {very light } none {} other {{lightness}}}{saturation, select, grayish {grayish } vivid {vivid } none {} other {{saturation}}}{hue, select, red {red} orange {orange} yellow {yellow} green {green} cyan {cyan} blue {blue} purple {purple} pink {pink} other {{hue}}}",
+  "translucent": "{words}, {percent}% opacity"
+}

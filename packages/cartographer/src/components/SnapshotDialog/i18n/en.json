@@ -1,0 +1,9 @@
+{
+  "title": "Open snapshot",
+  "warning": "Opening a snapshot replaces the page you are working on. Your page is kept first as a snapshot: you will find it in this list.",
+  "open": "Open",
+  "reading": "Reading the snapshots…",
+  "failed": "The snapshots could not be listed (details in the console).",
+  "empty": "No snapshot of {year} yet — one is kept every hour of drawing.",
+  "legend": "Snapshots of {year}, newest first"
+}

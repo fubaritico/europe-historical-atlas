@@ -1,0 +1,4 @@
+{
+  "rankName": "{rank, select, empire {empire} kingdom {royaume} principality {principauté} duchy {duché} county {comté} tribe {tribu} other {{rank}}}",
+  "statusName": "{status, select, country {pays} personal_union {union personnelle} condominium {condominium} other {{status}}}"
+}

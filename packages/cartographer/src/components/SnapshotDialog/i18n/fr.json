@@ -1,0 +1,9 @@
+{
+  "title": "Ouvrir un instantané",
+  "warning": "Ouvrir un instantané remplace la page sur laquelle vous travaillez. Votre page est d’abord gardée comme instantané : vous la retrouverez dans cette liste.",
+  "open": "Ouvrir",
+  "reading": "Lecture des instantanés…",
+  "failed": "Les instantanés n’ont pas pu être listés (détail dans la console).",
+  "empty": "Aucun instantané de {year} pour l’instant — un est gardé à chaque heure de dessin.",
+  "legend": "Instantanés de {year}, du plus récent au plus ancien"
+}

@@ -1,11 +1,13 @@
 import { useId, useRef } from 'react'
 
-import { startCanvasController } from '../../../canvas/controller'
-import { trackFocusOrigin } from '../../../canvas/focusOrigin'
+import { canvasWords } from '../../../canvas/canvasWords'
 import { rasterToCanvas } from '../../../canvas/tribeFeatherCache'
+import { useLocaleStore } from '../../../hooks/useLocaleStore'
+import { useTranslation } from '../../../hooks/useTranslation'
 import { MAX_SNAP_REACH_KM } from '../../../viewport/toolReach'
+import { MAP_AREA_MESSAGES } from '../i18n'
+import { startSurface } from '../utils/startSurface'
 
-import type { CanvasControllerDeps } from '../../../canvas/controller'
 import type { HistoryRelay } from '../../../canvas/history/historyRelay'
 import type { PaintStyle } from '../../../canvas/paint/painter'
 import type { VectorLayers } from '../../../loaders/vectorLayers'
@@ -60,22 +62,6 @@ export interface MapCanvasProps {
   landMask: LandMask
 }
 
-/**
- * What a keyboard reader is told the surface can do.
- *
- * **It names only the keys `controller.ts` actually binds**, which is what keeps it from going stale:
- * the arrows, `+`/`−` and PageUp/PageDown, ‹P› and ‹A›, the Pen's three keys, the white arrow's ‹delete›, and undo and redo. Promising a gesture
- * before it is wired is the defect this repository keeps finding in its own comments.
- */
-const CANVAS_INSTRUCTIONS =
-  'Arrow keys to pan the map, plus and minus or Page Up and Page Down to zoom. ' +
-  'Hold Space to pan with the hand. P takes the Pen and A the white arrow. ' +
-  'The Pen, the Pencil and the white arrow act only once zoomed in close enough; zoom in first. ' +
-  'With the Pen, Backspace removes the last point, ' +
-  'Escape abandons the outline and Enter closes it. ' +
-  'With the white arrow, Delete or Backspace removes the selected anchor. ' +
-  'Control or Command with Z undoes the last gesture; with Shift as well, it redoes it.'
-
 /** Off-screen but in the accessibility tree — the instruction text has nothing to show visually. */
 const offScreen = {
   position: 'absolute',
@@ -94,34 +80,6 @@ const OVERLAY_STYLE = {
   height: '100%',
   pointerEvents: 'none',
 } as const
-
-/**
- * Start the surface's controller once both canvases exist, and hand back its teardown.
- *
- * **A missing overlay throws rather than leaving the map inert.** The overlay comes first in the tree, so
- * its ref is attached before this runs; finding it `null` means that order was broken, a wiring fault.
- * Returning quietly would leave a canvas that never paints and never answers, with nothing said — the
- * same reasoning as the controller's own throw on a missing 2D context.
- * @param node - the drawing surface
- * @param overlay - the overlay canvas, or `null` if the tree order was broken
- * @param deps - everything the controller needs but the overlay
- * @returns the teardown
- */
-function startSurface(
-  node: HTMLCanvasElement,
-  overlay: HTMLCanvasElement | null,
-  deps: Omit<CanvasControllerDeps, 'overlay'>
-): () => void {
-  if (overlay === null) {
-    throw new Error('Cartographer: the overlay canvas was not mounted before the drawing surface.')
-  }
-  const forgetFocusOrigin = trackFocusOrigin(node)
-  const stopController = startCanvasController(node, { ...deps, overlay })
-  return () => {
-    stopController()
-    forgetFocusOrigin()
-  }
-}
 
 /**
  * The drawing surface.
@@ -146,6 +104,10 @@ function startSurface(
  * @returns the canvas element
  */
 export function MapCanvas({ label, ...controller }: MapCanvasProps) {
+  // Context
+  const t = useTranslation(MAP_AREA_MESSAGES)
+  const localeStore = useLocaleStore()
+
   // Ids
   const instructionsId = useId()
 
@@ -159,7 +121,7 @@ export function MapCanvas({ label, ...controller }: MapCanvasProps) {
   return (
     <>
       <span id={instructionsId} style={offScreen}>
-        {CANVAS_INSTRUCTIONS}
+        {t('instructions')}
       </span>
       <canvas ref={overlay} aria-hidden="true" style={OVERLAY_STYLE} />
       <canvas
@@ -179,6 +141,8 @@ export function MapCanvas({ label, ...controller }: MapCanvasProps) {
             ...controller,
             maxSnapReachKm: MAX_SNAP_REACH_KM,
             tribeImage: rasterToCanvas,
+            // Asked at each gesture: the canvas is started once, and the language can change under it.
+            words: () => canvasWords(localeStore.get()),
           })
         }}
       />

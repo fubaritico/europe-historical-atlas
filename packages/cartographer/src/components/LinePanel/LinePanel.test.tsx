@@ -1,10 +1,11 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
 import { testStore } from '../../canvas/testGestureContext'
+import { renderInEnglish } from '../../testing/renderInEnglish'
 
 import { LinePanel } from './LinePanel'
 
@@ -29,7 +30,7 @@ function mount(selected: readonly number[]) {
   const store = testStore(sharedBorderDocument())
   store.getState().chooseTarget('fr-couronne')
   store.getState().setSelectedAnchors(selected)
-  render(<LinePanel store={store} />)
+  renderInEnglish(<LinePanel store={store} />)
   return { store, user: userEvent.setup() }
 }
 

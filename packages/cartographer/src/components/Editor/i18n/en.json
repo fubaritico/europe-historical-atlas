@@ -1,0 +1,13 @@
+{
+  "notBuilt": "not built yet ({scenarios})",
+  "openSnapshotHint": "Open a snapshot of the year, kept every hour of drawing",
+  "saveHint": "Save the year (⌘S / ctrl+S)",
+  "registry": "Registry",
+  "closeYear": "{close} {year}",
+  "nothingToUndo": "nothing to undo",
+  "nothingToRedo": "nothing to redo",
+  "undoHint": "{label} (⌘Z / ctrl+Z)",
+  "redoHint": "{label} (⌘⇧Z / ctrl+shift+Z)",
+  "checkYear": "Check this year",
+  "placeholder": "{zone, select, appBar {app bar} docBar {document bar} tools {tools} panels {panels} other {{zone}}}"
+}

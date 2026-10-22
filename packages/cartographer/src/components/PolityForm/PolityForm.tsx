@@ -2,9 +2,12 @@ import { Button } from '@fubaritico/react/Button'
 import { Card } from '@fubaritico/react/Card'
 import { IconButton } from '@fubaritico/react/IconButton'
 
+import { useTranslation } from '../../hooks/useTranslation'
+import { ACTION_MESSAGES } from '../../i18n/actions'
+
 import { PolityFields } from './internal/PolityFields'
 
-import type { PolityFieldsProps } from './internal/PolityFields'
+import type { PolityFieldsProps } from './polityFieldsProps'
 import type { SubmitEvent } from 'react'
 
 /**
@@ -30,6 +33,9 @@ export interface PolityFormProps extends PolityFieldsProps {
  * @returns the form
  */
 export function PolityForm(props: PolityFormProps) {
+  // Context
+  const action = useTranslation(ACTION_MESSAGES)
+
   // Derived
   const { title, onSubmit, onCancel } = props
 
@@ -45,16 +51,16 @@ export function PolityForm(props: PolityFormProps) {
       <Card>
         <Card.Header>
           {title}
-          <IconButton type="button" icon="XMark" aria-label="Close" onClick={onCancel} />
+          <IconButton type="button" icon="XMark" aria-label={action('close')} onClick={onCancel} />
         </Card.Header>
         <Card.Body>
           <PolityFields {...props} />
         </Card.Body>
         <Card.Footer align="end">
           <Button type="button" variant="secondary" onClick={onCancel}>
-            Cancel
+            {action('cancel')}
           </Button>
-          <Button type="submit">OK</Button>
+          <Button type="submit">{action('ok')}</Button>
         </Card.Footer>
       </Card>
     </form>

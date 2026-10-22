@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -7,6 +7,7 @@ import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 import { createHistoryRelay } from '../../../canvas/history/historyRelay'
 import { openEmptyYear } from '../../../state/openEmptyYear'
 import { createCartographerStore } from '../../../state/store'
+import { renderInEnglish } from '../../../testing/renderInEnglish'
 import { UNFRAMED } from '../../../viewport/viewport'
 
 import { AppBarPanel } from './AppBarPanel'
@@ -28,14 +29,7 @@ const meta = () => document.querySelector('.doc-tab__meta')?.textContent
 describe('top bars, bound', () => {
   describe('happy path', () => {
     it('reads the open year from the store', () => {
-      render(
-        <AppBarPanel
-          store={store()}
-          name="Cartographer"
-          onSave={vi.fn()}
-          onOpenSnapshot={vi.fn()}
-        />
-      )
+      renderInEnglish(<AppBarPanel store={store()} onSave={vi.fn()} onOpenSnapshot={vi.fn()} />)
       expect(document.querySelector('.app-brand__year')?.textContent).toBe('1100')
     })
 
@@ -46,7 +40,7 @@ describe('top bars, bound', () => {
       history.register(answer)
       const undo = vi.spyOn(shared.getState(), 'undo')
       shared.setState({ undoLabel: 'Draw France' })
-      render(<DocBarPanel store={shared} history={history} />)
+      renderInEnglish(<DocBarPanel store={shared} history={history} />)
 
       await userEvent.click(screen.getByRole('button', { name: 'Undo Draw France' }))
       expect(answer).toHaveBeenCalledWith('undo')
@@ -58,7 +52,7 @@ describe('top bars, bound', () => {
     it('writes the zoom and follows the view, with no re-render', () => {
       const shared = store()
       const ratio = window.devicePixelRatio
-      render(<DocBarPanel store={shared} history={createHistoryRelay(vi.fn())} />)
+      renderInEnglish(<DocBarPanel store={shared} history={createHistoryRelay(vi.fn())} />)
       expect(meta()).toBe('@ —')
       act(() => {
         shared.getState().setViewport({ scale: 0.48 * ratio, originX: 0, originY: 0 })
@@ -72,7 +66,7 @@ describe('top bars, bound', () => {
       const shared = store()
       const warn = vi.fn()
       shared.setState({ undoLabel: 'Draw France' })
-      render(<DocBarPanel store={shared} history={createHistoryRelay(warn)} />)
+      renderInEnglish(<DocBarPanel store={shared} history={createHistoryRelay(warn)} />)
 
       await userEvent.click(screen.getByRole('button', { name: 'Undo Draw France' }))
       expect(warn).toHaveBeenCalledOnce()
@@ -84,7 +78,7 @@ describe('top bars, bound', () => {
   describe('edge cases', () => {
     it('stops following the view once unmounted', () => {
       const shared = store()
-      const { unmount } = render(
+      const { unmount } = renderInEnglish(
         <DocBarPanel store={shared} history={createHistoryRelay(vi.fn())} />
       )
       unmount()

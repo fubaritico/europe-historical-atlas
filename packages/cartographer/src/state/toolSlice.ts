@@ -17,6 +17,8 @@
  * is what `describeDrawingTarget` is for, and it is why this slice carries no `releaseTarget`.
  */
 
+import type { ToolMessageKey } from '../i18n/tools'
+import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 import type { StateCreator } from 'zustand'
 
 /**
@@ -45,27 +47,16 @@ export const PEN_MODES = ['free', 'coast', 'river', 'pencil'] as const
 export type PenMode = (typeof PEN_MODES)[number]
 
 /**
- * Each mode's name — the row of the Pen's group, the group head's name, and what ‹P› says in the status
- * bar when it changes the mode. Written once, here, so the three cannot disagree.
- */
-export const PEN_MODE_LABELS: Record<PenMode, string> = {
-  free: 'Pen',
-  coast: 'Pen — follow the coast',
-  river: 'Pen — follow a river',
-  pencil: 'Pencil — freehand',
-}
-
-/**
- * What a mode is called under the tool in hand — the Pen's own label, or ⟨retrace⟩'s with it, so the bar
- * never says "Pen" while the author holds ⟨retrace⟩.
+ * What a mode is called under the tool in hand — the Pen's own name, or ⟨retrace⟩'s with it, so the bar
+ * never says "Pen" while the author holds ⟨retrace⟩. The names are `toolMessages`', in the page's language.
  * @param tool - the tool in hand
  * @param mode - the mode
+ * @param t - the tools' names
  * @returns the label
  */
-export function modeLabel(tool: EditorTool, mode: PenMode): string {
-  return tool === 'retrace'
-    ? `${TOOL_LABELS.retrace} · ${PEN_MODE_LABELS[mode]}`
-    : PEN_MODE_LABELS[mode]
+export function modeLabel(tool: EditorTool, mode: PenMode, t: Translate<ToolMessageKey>): string {
+  const name = t('penMode', { mode })
+  return tool === 'retrace' ? t('modeUnder', { tool: t('toolName', { tool }), mode: name }) : name
 }
 
 /** The modes that follow a layer — the coast, or a river — as opposed to placing points freely. */
@@ -87,17 +78,6 @@ export function isFollowingMode(mode: PenMode): mode is FollowingMode {
  */
 export function isPenMode(id: string): id is PenMode {
   return PEN_MODES.some((mode) => mode === id)
-}
-
-/**
- * Each tool's name — the rail's button, and what a key that takes the tool says in the status bar. The
- * Pen's name is its mode's ({@link PEN_MODE_LABELS}) once it is in hand.
- */
-export const TOOL_LABELS: Record<EditorTool, string> = {
-  edit: 'Direct Selection',
-  draw: 'Pen',
-  retrace: 'Retrace',
-  navigate: 'Hand',
 }
 
 /**

@@ -1,10 +1,10 @@
 import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import { reasonOf } from './errorReason'
 import { timeWords } from './timeWords'
 import { documentFromFiles } from './yearArchive'
 
 import type { SnapshotSink, SnapshotSource } from './draft/draftStore'
+import type { PersistenceWords } from './persistenceWords'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /**
@@ -47,6 +47,8 @@ export interface SnapshotOpeningDeps {
   now: () => Date
   /** Where a message for the author goes — the status bar's result zone. */
   report: (message: string) => void
+  /** What it says — asked at each sentence, so it follows a change of language. */
+  words: () => PersistenceWords
 }
 
 /**
@@ -74,30 +76,28 @@ export async function openSnapshot(
       `${LOG_TAG} the page of ${yearName} could not be kept before opening a snapshot`,
       error
     )
-    deps.report(`not opened — your page could not be kept first (${reasonOf(error)})`)
+    deps.report(deps.words().t('snapshotPageNotKept'))
     return false
   }
-  const when = timeWords(chosen.takenAt, deps.now(), { seconds: true })
+  const when = timeWords(chosen.takenAt, deps.now(), deps.words(), { seconds: true })
   try {
     const snapshot = await deps.snapshots.readSnapshot(deps.year, chosen.name)
-    const document = documentFromFiles(snapshot.files, `the snapshot of ${when}`)
+    const document = documentFromFiles(snapshot.files, `the snapshot ${chosen.name}`)
     // Drawn while the page was being kept: that gesture is in no copy, so the page must not be replaced.
     if (deps.store.getState().version !== versionKept) {
       console.warn(
         `${LOG_TAG} the snapshot ${chosen.name} was not opened: the page changed meanwhile`
       )
-      deps.report('not opened — the page changed while it was being kept; open the snapshot again')
+      deps.report(deps.words().t('snapshotPageChanged'))
       return false
     }
     deps.store.getState().open(document)
   } catch (error: unknown) {
     // The page is untouched, and kept as a snapshot besides — harmless, and said.
     console.error(`${LOG_TAG} the snapshot ${chosen.name} could not be opened`, error)
-    deps.report(
-      `the snapshot of ${when} could not be opened (${reasonOf(error)}) — your page is as it was`
-    )
+    deps.report(deps.words().t('snapshotNotOpened', { when }))
     return false
   }
-  deps.report(`opened the snapshot of ${when} — your page was kept first, in the snapshots`)
+  deps.report(deps.words().t('snapshotOpened', { when }))
   return true
 }

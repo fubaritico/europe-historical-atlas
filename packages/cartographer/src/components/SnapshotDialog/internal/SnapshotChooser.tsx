@@ -2,17 +2,15 @@ import { Button } from '@fubaritico/react/Button'
 import { Card } from '@fubaritico/react/Card'
 import { useEffect, useState } from 'react'
 
-import { reasonOf } from '../../../persistence/errorReason'
-import { autofocusOnOpen } from '../../shared/hooks/autofocusOnOpen'
+import { autofocusOnOpen } from '../../../hooks/autofocusOnOpen'
+import { useTranslation } from '../../../hooks/useTranslation'
+import { ACTION_MESSAGES } from '../../../i18n/actions'
+import { SNAPSHOT_DIALOG_MESSAGES } from '../i18n'
 
 import { SnapshotList } from './SnapshotList'
 
 import type { SnapshotEntry, SnapshotSource } from '../../../persistence/draft/draftStore'
 import type { Listing } from '../listing'
-
-/** What the dialogue warns, every time it opens. */
-const WARNING =
-  'Opening a snapshot replaces the page you are working on. Your page is kept first as a snapshot: you will find it in this list.'
 
 /** What the dialogue's content needs. */
 export interface SnapshotChooserProps {
@@ -42,6 +40,10 @@ export interface SnapshotChooserProps {
  * @returns the card
  */
 export function SnapshotChooser({ source, year, now, onOpen, close }: SnapshotChooserProps) {
+  // Context
+  const t = useTranslation(SNAPSHOT_DIALOG_MESSAGES)
+  const action = useTranslation(ACTION_MESSAGES)
+
   // State
   const [listing, setListing] = useState<Listing>({ state: 'reading' })
   const [chosen, setChosen] = useState<string | null>(null)
@@ -66,7 +68,7 @@ export function SnapshotChooser({ source, year, now, onOpen, close }: SnapshotCh
       },
       (error: unknown) => {
         console.error(`[Cartographer] the snapshots of ${String(year)} could not be listed`, error)
-        if (current) setListing({ state: 'failed', reason: reasonOf(error) })
+        if (current) setListing({ state: 'failed' })
       }
     )
     return () => {
@@ -77,17 +79,17 @@ export function SnapshotChooser({ source, year, now, onOpen, close }: SnapshotCh
   // Render
   return (
     <Card>
-      <Card.Header>Open snapshot</Card.Header>
+      <Card.Header>{t('title')}</Card.Header>
       <Card.Body>
-        <p className="draft-recovery__question">{WARNING}</p>
+        <p className="draft-recovery__question">{t('warning')}</p>
         <SnapshotList listing={listing} chosen={chosen} choose={setChosen} year={year} now={now} />
       </Card.Body>
       <Card.Footer align="end">
         <Button ref={autofocusOnOpen} type="button" variant="secondary" onClick={close}>
-          Cancel
+          {action('cancel')}
         </Button>
         <Button type="button" onClick={openChosen} disabled={entry === undefined}>
-          Open
+          {t('open')}
         </Button>
       </Card.Footer>
     </Card>

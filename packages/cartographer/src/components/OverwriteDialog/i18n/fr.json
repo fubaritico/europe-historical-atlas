@@ -1,0 +1,5 @@
+{
+  "title": "L’année a changé sur le disque",
+  "question": "{known, select, yes {{year} a changé sur le disque {when}, depuis son ouverture.} no {{year} n’est plus sur le disque tel qu’il a été ouvert.} other {{known}}} L’écraser avec cette page\u202f?",
+  "overwrite": "Écraser"
+}

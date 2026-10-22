@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -7,8 +7,8 @@ import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 import { describeDrawingTarget } from '../../../state/drawingTarget'
 import { openEmptyYear } from '../../../state/openEmptyYear'
 import { createCartographerStore } from '../../../state/store'
+import { renderInEnglish } from '../../../testing/renderInEnglish'
 import { UNFRAMED } from '../../../viewport/viewport'
-import { DRAFT_ERRORS } from '../../shared/polityDraft'
 
 import { PolityDialog } from './PolityDialog'
 
@@ -37,7 +37,7 @@ function openDialog() {
     viewport: { viewport: UNFRAMED },
   })
   const onClose = vi.fn()
-  render(
+  renderInEnglish(
     <PolityDialog store={store} editing={null} isOpen onClose={onClose} wikidata={NO_WIKIDATA} />
   )
   return { store, onClose, user: userEvent.setup() }
@@ -136,7 +136,7 @@ describe('PolityDialog', () => {
       await user.type(field('Id'), 'hre')
       await user.click(screen.getByRole('button', { name: 'OK' }))
 
-      expect(screen.getByText(DRAFT_ERRORS.idTaken)).toBeTruthy()
+      expect(screen.getByText('This id is already used in this year.')).toBeTruthy()
       expect(store.getState().document.polities).toHaveLength(1)
       expect(store.getState().target).toBeNull()
       expect(onClose).not.toHaveBeenCalled()
@@ -156,7 +156,7 @@ describe('PolityDialog', () => {
       await user.type(field('Name'), 'France')
       await user.click(screen.getByRole('button', { name: 'OK' }))
 
-      expect(screen.getByText(DRAFT_ERRORS.idTaken)).toBeTruthy()
+      expect(screen.getByText('This id is already used in this year.')).toBeTruthy()
       expect(store.getState().target).toBeNull()
       expect(store.getState().tool).toBe('navigate')
       expect(onClose).not.toHaveBeenCalled()
@@ -171,7 +171,7 @@ describe('PolityDialog', () => {
       await user.type(field('Name'), 'France')
       await user.click(screen.getByRole('button', { name: 'OK' }))
 
-      expect(screen.queryByText(DRAFT_ERRORS.idTaken)).toBeNull()
+      expect(screen.queryByText('This id is already used in this year.')).toBeNull()
       expect(error).toHaveBeenCalledWith(expect.stringContaining('refused to create "france"'))
       expect(store.getState().target).toBeNull()
       expect(onClose).not.toHaveBeenCalled()
@@ -181,7 +181,7 @@ describe('PolityDialog', () => {
     it('refuses an empty form and says what is missing', async () => {
       const { store, user } = openDialog()
       await user.click(screen.getByRole('button', { name: 'OK' }))
-      expect(screen.getByText(DRAFT_ERRORS.nameMissing)).toBeTruthy()
+      expect(screen.getByText('A polity needs a name.')).toBeTruthy()
       expect(store.getState().document.polities).toHaveLength(0)
     })
   })

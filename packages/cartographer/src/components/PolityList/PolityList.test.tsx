@@ -1,9 +1,11 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+
+import { renderInEnglish } from '../../testing/renderInEnglish'
 
 import { PolityList } from './PolityList'
 
-import type { PolityRow } from '../shared/polityRows'
+import type { PolityRow } from '../../utils/polityRows'
 
 afterEach(() => {
   vi.unstubAllGlobals()
@@ -65,7 +67,7 @@ describe('PolityList — the target brought into view (the dev, 2026-10-14)', ()
   describe('happy path', () => {
     it('scrolls smoothly to centre the target’s row when it is out of view', () => {
       motion(false)
-      const { rerender } = render(list(null))
+      const { rerender } = renderInEnglish(list(null))
       const scrollTo = laidOut()
       rerender(list('p50'))
       expect(scrollTo).toHaveBeenCalledWith({ top: 910, behavior: 'smooth' })
@@ -75,7 +77,7 @@ describe('PolityList — the target brought into view (the dev, 2026-10-14)', ()
   describe('variants', () => {
     it('scrolls at once when the system asks for less motion', () => {
       motion(true)
-      const { rerender } = render(list(null))
+      const { rerender } = renderInEnglish(list(null))
       const scrollTo = laidOut()
       rerender(list('p50'))
       expect(scrollTo).toHaveBeenCalledWith({ top: 910, behavior: 'auto' })
@@ -84,7 +86,7 @@ describe('PolityList — the target brought into view (the dev, 2026-10-14)', ()
     // A row clicked in the list is in view: it must not move under the pointer.
     it('leaves the list where it is when the target’s row is already in view', () => {
       motion(false)
-      const { rerender } = render(list(null))
+      const { rerender } = renderInEnglish(list(null))
       const scrollTo = laidOut()
       rerender(list('p3'))
       expect(scrollTo).not.toHaveBeenCalled()
@@ -97,7 +99,7 @@ describe('PolityList — the target brought into view (the dev, 2026-10-14)', ()
     // A target an undo took away from the document has no row: nothing to bring into view.
     it('does nothing for a target that has no row', () => {
       motion(false)
-      const { rerender } = render(list(null))
+      const { rerender } = renderInEnglish(list(null))
       const scrollTo = laidOut()
       rerender(list('gone'))
       expect(scrollTo).not.toHaveBeenCalled()
@@ -107,7 +109,7 @@ describe('PolityList — the target brought into view (the dev, 2026-10-14)', ()
   describe('edge cases', () => {
     it('does not scroll when the target is cleared', () => {
       motion(false)
-      const { rerender } = render(list('p3'))
+      const { rerender } = renderInEnglish(list('p3'))
       const scrollTo = laidOut()
       rerender(list(null))
       expect(scrollTo).not.toHaveBeenCalled()

@@ -1,4 +1,4 @@
-import { act, render, screen, within } from '@testing-library/react'
+import { act, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -8,6 +8,7 @@ import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 import { openEmptyYear } from '../../state/openEmptyYear'
 import { createPolityColourSource } from '../../state/polityColourSource'
 import { createCartographerStore } from '../../state/store'
+import { renderInEnglish } from '../../testing/renderInEnglish'
 import { UNFRAMED } from '../../viewport/viewport'
 
 import { PolitiesPanel } from './PolitiesPanel'
@@ -24,7 +25,7 @@ function mount() {
     viewport: { viewport: UNFRAMED },
   })
   const results: (string | null)[] = []
-  render(
+  renderInEnglish(
     <PolitiesPanel
       store={store}
       colours={COLOURS}

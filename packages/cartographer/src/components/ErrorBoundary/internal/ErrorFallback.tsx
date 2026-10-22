@@ -1,7 +1,8 @@
 import { Button } from '@fubaritico/react/Button'
 
-import { useTranslation } from '../../shared/hooks/useTranslation'
-import { ERROR_BOUNDARY_MESSAGES } from '../messages'
+import { useTranslation } from '../../../hooks/useTranslation'
+import { ACTION_MESSAGES } from '../../../i18n/actions'
+import { ERROR_BOUNDARY_MESSAGES } from '../i18n'
 
 /** What a failed zone shows. */
 export interface ErrorFallbackProps {
@@ -28,6 +29,7 @@ export interface ErrorFallbackProps {
 export function ErrorFallback({ message, compact, onRetry, onDismiss }: ErrorFallbackProps) {
   // Context
   const t = useTranslation(ERROR_BOUNDARY_MESSAGES)
+  const action = useTranslation(ACTION_MESSAGES)
 
   // Render
   return (
@@ -44,7 +46,7 @@ export function ErrorFallback({ message, compact, onRetry, onDismiss }: ErrorFal
       )}
       {onDismiss === undefined ? null : (
         <Button type="button" variant="secondary" onClick={onDismiss}>
-          {t('dismiss')}
+          {action('close')}
         </Button>
       )}
     </div>

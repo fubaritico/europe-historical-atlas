@@ -1,0 +1,7 @@
+{
+  "label": "Polities",
+  "drawnAt": "Drawn at {year}",
+  "vassalOf": ", vassal of {name}",
+  "noTerritory": "no territory",
+  "empty": "No polity in this year yet."
+}

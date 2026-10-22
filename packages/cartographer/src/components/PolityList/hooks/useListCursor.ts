@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 
-import { listKeyAction } from '../listKeys'
-import { optionId } from '../optionId'
+import { listKeyAction } from '../utils/listKeys'
+import { optionId } from '../utils/optionId'
 
+import type { PolityRow } from '../../../utils/polityRows'
 import type { ViewportPoint } from '../../../viewport/viewport'
-import type { PolityRow } from '../../shared/polityRows'
 import type { KeyboardEvent } from 'react'
 
 /**

@@ -1,6 +1,8 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+
+import { renderInEnglish } from '../../../testing/renderInEnglish'
 
 import { AppBar } from './AppBar'
 
@@ -10,7 +12,7 @@ import { AppBar } from './AppBar'
  */
 function mount(onOpenSnapshot: () => void = vi.fn()): ReturnType<typeof vi.fn> {
   const onSave = vi.fn()
-  render(
+  renderInEnglish(
     <AppBar
       name="Europe Historical Atlas Cartographer"
       year={1100}

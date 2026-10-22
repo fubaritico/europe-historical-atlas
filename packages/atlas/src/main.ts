@@ -18,12 +18,12 @@ import { createDevPanel } from './devPanel'
 import { panelDepsFor } from './devPanelCallbacks'
 import { createDevState } from './devState'
 import { startFrameLoop } from './frameLoop'
+import { ATLAS_MESSAGES } from './i18n'
 import { createMapInteraction } from './mapInteraction'
 import { createMapLayers } from './mapLayers'
 import { createMapPipeline } from './mapPipeline'
 import { createMapSources } from './mapSources'
 import { createMapUi } from './mapUi'
-import { ATLAS_MESSAGES } from './messages'
 // Vite resolves `?worker` into a constructor for the bundled worker module. It is the one
 // bundler-specific line in the compute, and it lives here on purpose: the client that talks to the
 // worker takes it as an injected `spawn`, so nothing below the composition root depends on Vite.

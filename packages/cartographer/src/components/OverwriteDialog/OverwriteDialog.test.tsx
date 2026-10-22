@@ -1,15 +1,22 @@
-import { act, render, screen, within } from '@testing-library/react'
+import { act, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 
 import { createQuestionRelay } from '../../persistence/questionRelay'
+import { renderInEnglish } from '../../testing/renderInEnglish'
 
 import { OverwriteDialog } from './OverwriteDialog'
 
 import type { OverwriteQuestion } from '../../persistence/yearSession'
 
 /** The question asked in most tests. */
-const QUESTION: OverwriteQuestion = { year: 1100, when: 'today at 14:02' }
+const QUESTION: OverwriteQuestion = {
+  year: 1100,
+  changedAt: new Date(2026, 9, 17, 14, 2).toISOString(),
+}
+
+/** The present the dialogue words the time against: the same day, later. */
+const NOW = () => new Date(2026, 9, 17, 16, 30)
 
 /** The dialogue element, open or not — the design system's Modal is a native `<dialog>`. */
 const dialog = () => document.querySelector('dialog')
@@ -17,7 +24,7 @@ const dialog = () => document.querySelector('dialog')
 /** Mount the dialogue over a fresh relay, a question already asked. */
 function mounted(question: OverwriteQuestion = QUESTION) {
   const questions = createQuestionRelay<OverwriteQuestion>('a save is already asking')
-  render(<OverwriteDialog questions={questions} />)
+  renderInEnglish(<OverwriteDialog questions={questions} now={NOW} />)
   let answer: Promise<boolean> = Promise.resolve(true)
   act(() => {
     answer = questions.ask(question)
@@ -86,7 +93,7 @@ describe('OverwriteDialog', () => {
     })
 
     it('says the year is no longer on disk as it was opened when the time is unknown', () => {
-      mounted({ year: 1100, when: null })
+      mounted({ year: 1100, changedAt: null })
 
       expect(
         open().getByText('1100 is no longer on disk as it was opened. Overwrite it with this page?')
@@ -98,9 +105,10 @@ describe('OverwriteDialog', () => {
 
   describe('edge cases', () => {
     it('stays closed while nothing is asked', () => {
-      render(
+      renderInEnglish(
         <OverwriteDialog
           questions={createQuestionRelay<OverwriteQuestion>('a save is already asking')}
+          now={NOW}
         />
       )
 

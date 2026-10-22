@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, screen } from '@testing-library/react'
 import { StrictMode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -11,6 +11,7 @@ import { CHROME_PAINT_STYLE } from '../../canvas/paint/style'
 import { openEmptyYear } from '../../state/openEmptyYear'
 import { createPolityColourSource } from '../../state/polityColourSource'
 import { createCartographerStore } from '../../state/store'
+import { renderInEnglish } from '../../testing/renderInEnglish'
 import { TEST_BACKDROP_FRAME, TEST_LAND_MASK } from '../../viewport/testFrame'
 import { UNFRAMED } from '../../viewport/viewport'
 
@@ -88,7 +89,7 @@ function mount(load: BackdropLoad, strict = false): HTMLParagraphElement {
       history={createHistoryRelay()}
     />
   )
-  render(strict ? <StrictMode>{area}</StrictMode> : area)
+  renderInEnglish(strict ? <StrictMode>{area}</StrictMode> : area)
   return bar
 }
 
@@ -115,7 +116,7 @@ async function inAct(fn: () => void): Promise<void> {
 describe('BackdropWaiting', () => {
   describe('happy path', () => {
     it('announces the wait politely, with its progress', () => {
-      render(<BackdropWaiting fraction={0.4} phase="bake" />)
+      renderInEnglish(<BackdropWaiting fraction={0.4} phase="bake" />)
 
       const status = screen.getByRole('status')
 
@@ -127,13 +128,13 @@ describe('BackdropWaiting', () => {
     it('names what the bar measures, and keeps that name in step with the phase', () => {
       // A `<progress>` exposes its own value natively, so what a reader lacks is what is progressing.
       // Found in review; the atlas's own progress overlay already does this.
-      render(<BackdropWaiting fraction={0.4} phase="bake" />)
+      renderInEnglish(<BackdropWaiting fraction={0.4} phase="bake" />)
 
       expect(screen.getByRole('progressbar').getAttribute('aria-label')).toBe(
         'compositing the relief'
       )
 
-      render(<BackdropWaiting fraction={0} phase={null} />)
+      renderInEnglish(<BackdropWaiting fraction={0} phase={null} />)
 
       // Before the first announcement there is no phase, and the label must not read `undefined`.
       expect(screen.getAllByRole('progressbar').at(-1)?.getAttribute('aria-label')).toBe(
@@ -144,11 +145,11 @@ describe('BackdropWaiting', () => {
 
   describe('variants', () => {
     it('names the phase, and says nothing before the first announcement', () => {
-      render(<BackdropWaiting fraction={0} phase={null} />)
+      renderInEnglish(<BackdropWaiting fraction={0} phase={null} />)
 
       expect(screen.getByRole('status').textContent).not.toContain('composition')
 
-      render(<BackdropWaiting fraction={0.1} phase="bake" />)
+      renderInEnglish(<BackdropWaiting fraction={0.1} phase="bake" />)
 
       expect(screen.getAllByRole('status').at(-1)?.textContent).toContain('compositing the relief')
     })
@@ -156,7 +157,7 @@ describe('BackdropWaiting', () => {
 
   describe('edge cases', () => {
     it('shows a complete bar at 1 without claiming to be done', () => {
-      render(<BackdropWaiting fraction={1} phase="bake" />)
+      renderInEnglish(<BackdropWaiting fraction={1} phase="bake" />)
 
       expect(screen.getByRole('progressbar').getAttribute('value')).toBe('1')
       expect(screen.getByRole('status').textContent).toContain('Preparing')
@@ -169,7 +170,7 @@ describe('BackdropWaiting', () => {
 describe('BackdropFailure', () => {
   describe('happy path', () => {
     it('interrupts, and names which asset broke and how', () => {
-      render(
+      renderInEnglish(
         <BackdropFailure
           error={assetError('heightmap', 'transport', '/heightmaps/europe-dem-z5', 'HTTP 404')}
         />
@@ -184,7 +185,7 @@ describe('BackdropFailure', () => {
     })
 
     it('says why no year can be opened, which is the part that is not obvious', () => {
-      render(<BackdropFailure error={new Error('whatever')} />)
+      renderInEnglish(<BackdropFailure error={new Error('whatever')} />)
 
       expect(screen.getByRole('alert').textContent).toContain('the coordinate system')
     })
@@ -192,7 +193,7 @@ describe('BackdropFailure', () => {
 
   describe('variants', () => {
     it('falls back to the message of a plain error', () => {
-      render(<BackdropFailure error={new Error('the worker died')} />)
+      renderInEnglish(<BackdropFailure error={new Error('the worker died')} />)
 
       expect(screen.getByRole('alert').textContent).toContain('the worker died')
     })
@@ -200,13 +201,13 @@ describe('BackdropFailure', () => {
 
   describe('unmanaged errors', () => {
     it('shows something for a thrown non-error rather than rendering blank', () => {
-      render(<BackdropFailure error="a bare string" />)
+      renderInEnglish(<BackdropFailure error="a bare string" />)
 
       expect(screen.getByRole('alert').textContent).toContain('a bare string')
     })
 
     it('shows something for a thrown undefined', () => {
-      render(<BackdropFailure error={undefined} />)
+      renderInEnglish(<BackdropFailure error={undefined} />)
 
       expect(screen.getByRole('alert').textContent).toContain('undefined')
     })
@@ -215,7 +216,7 @@ describe('BackdropFailure', () => {
       // The case the previous test's name promised and did not exercise, found in review. `String()`
       // treats the two the same, so this hid no defect — but a test name that overstates its coverage is
       // how coverage gets believed instead of read.
-      render(<BackdropFailure error={null} />)
+      renderInEnglish(<BackdropFailure error={null} />)
 
       expect(screen.getByRole('alert').textContent).toContain('null')
     })
@@ -223,7 +224,7 @@ describe('BackdropFailure', () => {
 
   describe('edge cases', () => {
     it('offers no way to dismiss it — there is nothing behind it', () => {
-      render(<BackdropFailure error={new Error('x')} />)
+      renderInEnglish(<BackdropFailure error={new Error('x')} />)
 
       expect(screen.queryByRole('button')).toBeNull()
     })
@@ -441,7 +442,7 @@ describe('MapCanvas, re-rendered', () => {
           label="la carte"
         />
       )
-      const rendered = render(view())
+      const rendered = renderInEnglish(view())
       // Pan somewhere, as a reader would.
       await act(async () => {
         // A reachable view, not a marker. `originX: 123` was used until 2026-10-08 and stopped meaning

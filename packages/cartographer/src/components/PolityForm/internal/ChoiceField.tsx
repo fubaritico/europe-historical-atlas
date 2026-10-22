@@ -1,6 +1,9 @@
 import { Dropdown } from '@fubaritico/react/Dropdown'
 
-import type { DraftOption } from '../../shared/polityDraft'
+import { useTranslation } from '../../../hooks/useTranslation'
+import { POLITY_FORM_MESSAGES } from '../i18n'
+
+import type { DraftOption } from '../../../utils/polityDraft'
 
 /** The value standing for "none" in a list — the design system's Dropdown selects strings only. */
 const NONE = ''
@@ -25,6 +28,9 @@ export function ChoiceField({
   value: string | null
   onSelect: (value: string | null) => void
 }) {
+  // Context
+  const t = useTranslation(POLITY_FORM_MESSAGES)
+
   // Handlers
   const handleSelect = (selected: string) => {
     onSelect(selected === NONE ? null : selected)
@@ -41,7 +47,7 @@ export function ChoiceField({
         aria-label={label}
         selectedValue={value ?? NONE}
         onSelect={handleSelect}
-        options={[{ value: NONE, label: 'none' }, ...options]}
+        options={[{ value: NONE, label: t('none') }, ...options]}
       />
     </div>
   )

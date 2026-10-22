@@ -1,6 +1,8 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+
+import { renderInEnglish } from '../../../testing/renderInEnglish'
 
 import { ActiveSwatch } from './ActiveSwatch'
 
@@ -24,7 +26,7 @@ afterEach(() => {
  */
 function mount(polity: SwatchPolity | null = FRANCE, defaultOpen = false) {
   const onColour = vi.fn()
-  render(<ActiveSwatch polity={polity} onColour={onColour} defaultOpen={defaultOpen} />)
+  renderInEnglish(<ActiveSwatch polity={polity} onColour={onColour} defaultOpen={defaultOpen} />)
   return { onColour, user: userEvent.setup() }
 }
 

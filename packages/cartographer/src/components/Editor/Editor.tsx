@@ -1,7 +1,9 @@
 import { useRef } from 'react'
 
+import { useTranslation } from '../../hooks/useTranslation'
+import { APP_MESSAGES } from '../../i18n/app'
+import { writeResult } from '../../utils/statusBar'
 import { MapArea } from '../MapArea'
-import { writeResult } from '../shared/statusBar'
 import { ToolRailPanel } from '../ToolRailPanel'
 
 import { useRelayedResults } from './hooks/useRelayedResults'
@@ -42,12 +44,8 @@ export interface EditorProps {
   load: BackdropLoad
   /** The colours and sizes the painter reads. */
   style: PaintStyle
-  /** What a screen reader is told the drawing surface is. */
-  label: string
   /** The page's `<h1>`, which {@link Shell} places inside the canvas landmark. */
   heading: ReactNode
-  /** The application's name, written in the top bar beside the mark. */
-  name: string
   /** Save the open year — the top bar's `[Save]`, the same call as ‹ctrl+S›. */
   onSave: () => void
   /** Open the *Open snapshot* dialogue — the top bar's `[Open snapshot…]` (CARTO-238, rung 2b). */
@@ -75,9 +73,7 @@ export interface EditorProps {
  * @param props.store - the store the canvas draws from and every panel reads
  * @param props.load - how to fetch and bake the backdrop, handed to the map
  * @param props.style - the colours and sizes the painter reads
- * @param props.label - what a screen reader is told the drawing surface is
  * @param props.heading - the page's `<h1>`, placed by the shell inside the canvas landmark
- * @param props.name - the application's name, written in the top bar
  * @param props.onSave - saves the open year, called by the top bar's `[Save]`
  * @param props.onOpenSnapshot - opens the *Open snapshot* dialogue, called by the top bar
  * @param props.history - the canvas's undo and redo, for the document bar's buttons
@@ -90,9 +86,7 @@ export function Editor({
   store,
   load,
   style,
-  label,
   heading,
-  name,
   onSave,
   onOpenSnapshot,
   history,
@@ -100,6 +94,12 @@ export function Editor({
   wikidata,
   results,
 }: EditorProps) {
+  // Store
+  const year = store((state) => state.document.year)
+
+  // Context
+  const app = useTranslation(APP_MESSAGES)
+
   // Refs
   const status = useRef<HTMLElement | null>(null)
   const action = useRef<HTMLElement | null>(null)
@@ -118,16 +118,14 @@ export function Editor({
   return (
     <Shell
       heading={heading}
-      appbar={
-        <AppBarPanel store={store} name={name} onSave={onSave} onOpenSnapshot={onOpenSnapshot} />
-      }
+      appbar={<AppBarPanel store={store} onSave={onSave} onOpenSnapshot={onOpenSnapshot} />}
       docbar={<DocBarPanel store={store} history={history} />}
       canvas={
         <MapArea
           store={store}
           load={load}
           style={style}
-          label={label}
+          label={app('mapLabel', { year: String(year) })}
           statusRef={status}
           actionRef={action}
           resultRef={result}

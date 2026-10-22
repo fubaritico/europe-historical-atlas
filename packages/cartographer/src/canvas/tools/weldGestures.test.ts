@@ -7,7 +7,7 @@ import { TEST_BACKDROP_FRAME } from '../../viewport/testFrame'
 import { drawOutlineAt, testGestureContext, testPolity, testStore } from '../testGestureContext'
 
 import { arrowDrag, arrowPress, arrowRelease } from './toolGestures'
-import { WELD_ANCHOR_STEP, releaseWeld, weldOfferAt } from './weldGestures'
+import { releaseWeld, weldOfferAt } from './weldGestures'
 
 import type { CartographerStoreHook } from '../../state/store'
 
@@ -82,7 +82,7 @@ describe('weldGestures', () => {
       dragAnchor(context, [100, 100], [97, 101])
       expect(ringsOf(store, 'fr')).toEqual([[7, 1, 2, 3]])
       expect(ringsOf(store, 'march')).toEqual([[6, 7, 8, 9]])
-      expect(store.getState().rows.at(-1)?.label).toBe(WELD_ANCHOR_STEP.label)
+      expect(store.getState().rows.at(-1)?.label).toBe('weld anchor')
       expect(reports.at(-1)).toBe('welded onto Marca’s anchor')
     })
   })

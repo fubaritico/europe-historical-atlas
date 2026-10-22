@@ -44,11 +44,14 @@ const KIND = {
 /** The Holy Roman Empire, lord of every *State of the Holy Roman Empire*. */
 const HOLY_ROMAN_EMPIRE = 'Q12548'
 
+/** What kind of page about Wikipedia itself an item is — the panel words it in the page's language. */
+export type NotASubject = 'category' | 'disambiguation' | 'list'
+
 /** Items that are pages about Wikipedia itself, never a polity — an id entered by mistake. */
-const NOT_A_SUBJECT: Readonly<Record<string, string>> = {
-  Q4167836: 'a Wikipedia category',
-  Q4167410: 'a disambiguation page',
-  Q13406463: 'a Wikipedia list',
+const NOT_A_SUBJECT: Readonly<Record<string, NotASubject>> = {
+  Q4167836: 'category',
+  Q4167410: 'disambiguation',
+  Q13406463: 'list',
 }
 
 /** One item a polity belonged to, with the years the item gives for it. */
@@ -83,8 +86,8 @@ export interface WikidataFacts {
   successors: string[]
   /** Its Wikipedia articles, by language, as URLs. */
   wikipedia: { en: string | null; fr: string | null }
-  /** When the item is not a subject at all — *"a Wikipedia category"* — or `null`. */
-  notASubject: string | null
+  /** When the item is not a subject at all — a Wikipedia category — or `null`. */
+  notASubject: NotASubject | null
 }
 
 /** One snak of the API's answer — a claim's value or one of its qualifiers — reduced to what is read. */
@@ -294,20 +297,29 @@ export function spanOf(facts: WikidataFacts): string {
   return `${yearOrUnknown(facts.inception)}–${yearOrUnknown(facts.dissolved)}`
 }
 
+/** The year edited lies outside an item's dates — worded by the panel, in the page's language. */
+export interface Anachronism {
+  /** `notYet` — the item begins after the year; `noLonger` — it ended before. */
+  when: 'notYet' | 'noLonger'
+  /** The item's name ({@link nameOf}). */
+  name: string
+  /** Its years ({@link spanOf}). */
+  span: string
+  /** The year edited. */
+  year: number
+}
+
 /**
  * Whether the year edited falls outside the polity's Wikidata dates — *"County of Tripoli 1102–1289:
  * does not exist yet in 1100"*. A warning, never a refusal (the correction tools' rule).
  * @param year - the year being edited
  * @param facts - the item's facts
- * @returns the sentence for the author, or `null` when the dates hold the year or say nothing
+ * @returns what the warning says, or `null` when the dates hold the year or say nothing
  */
-export function anachronism(year: number, facts: WikidataFacts): string | null {
-  const span = spanOf(facts)
-  const name = nameOf(facts)
-  if (facts.inception !== null && facts.inception > year)
-    return `Wikidata: ${name} ${span} — does not exist yet in ${String(year)}`
-  if (facts.dissolved !== null && facts.dissolved < year)
-    return `Wikidata: ${name} ${span} — no longer exists in ${String(year)}`
+export function anachronism(year: number, facts: WikidataFacts): Anachronism | null {
+  const said = { name: nameOf(facts), span: spanOf(facts), year }
+  if (facts.inception !== null && facts.inception > year) return { when: 'notYet', ...said }
+  if (facts.dissolved !== null && facts.dissolved < year) return { when: 'noLonger', ...said }
   return null
 }
 

@@ -1,0 +1,13 @@
+{
+  "notBuilt": "pas encore construit ({scenarios})",
+  "openSnapshotHint": "Ouvrir un instantané de l’année, pris à chaque heure de dessin",
+  "saveHint": "Enregistrer l’année (⌘S / ctrl+S)",
+  "registry": "Registre",
+  "closeYear": "{close} {year}",
+  "nothingToUndo": "rien à annuler",
+  "nothingToRedo": "rien à rétablir",
+  "undoHint": "{label} (⌘Z / ctrl+Z)",
+  "redoHint": "{label} (⌘⇧Z / ctrl+maj+Z)",
+  "checkYear": "Vérifier cette année",
+  "placeholder": "{zone, select, appBar {barre de l’application} docBar {barre du document} tools {outils} panels {panneaux} other {{zone}}}"
+}

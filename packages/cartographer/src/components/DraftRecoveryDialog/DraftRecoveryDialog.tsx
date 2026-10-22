@@ -3,7 +3,13 @@ import { Card } from '@fubaritico/react/Card'
 import { Modal } from '@fubaritico/react/Modal'
 import { useSyncExternalStore } from 'react'
 
-import { autofocusOnOpen } from '../shared/hooks/autofocusOnOpen'
+import { autofocusOnOpen } from '../../hooks/autofocusOnOpen'
+import { useLocale } from '../../hooks/useLocale'
+import { useTranslation } from '../../hooks/useTranslation'
+import { persistenceWords } from '../../persistence/persistenceWords'
+import { timeWords } from '../../persistence/timeWords'
+
+import { DRAFT_RECOVERY_MESSAGES } from './i18n'
 
 import type { DraftOffers } from '../../persistence/draft/draftOffers'
 
@@ -20,17 +26,27 @@ import type { DraftOffers } from '../../persistence/draft/draftOffers'
 export interface DraftRecoveryDialogProps {
   /** The relay the opening asks through. */
   offers: DraftOffers
+  /** The clock, to word when the draft was kept. */
+  now: () => Date
 }
 
 /**
  * Render the question, open while the opening waits for an answer.
  * @param props - the relay
+ * @param props.now - the clock, to word when the draft was kept
  * @param props.offers - the relay the opening asks through: it holds the pending draft and takes the answer
  * @returns the dialogue
  */
-export function DraftRecoveryDialog({ offers }: DraftRecoveryDialogProps) {
+export function DraftRecoveryDialog({ offers, now }: DraftRecoveryDialogProps) {
+  // Context
+  const t = useTranslation(DRAFT_RECOVERY_MESSAGES)
+  const locale = useLocale()
+
   // State
   const offer = useSyncExternalStore(offers.subscribe, offers.current)
+
+  // Derived
+  const words = persistenceWords(locale)
 
   // Handlers
   const resume = (): void => {
@@ -42,23 +58,26 @@ export function DraftRecoveryDialog({ offers }: DraftRecoveryDialogProps) {
 
   // Render
   return (
-    <Modal isOpen={offer !== null} onClose={setAside} aria-label="Unsaved work found">
+    <Modal isOpen={offer !== null} onClose={setAside} aria-label={t('title')}>
       <div className="draft-recovery">
         <Card>
-          <Card.Header>Unsaved work found</Card.Header>
+          <Card.Header>{t('title')}</Card.Header>
           <Card.Body>
             <p className="draft-recovery__question">
               {offer === null
                 ? ''
-                : `A draft of ${String(offer.year)} was kept ${offer.when}, with work that was never saved. Resume it?`}
+                : t('question', {
+                    year: String(offer.year),
+                    when: timeWords(offer.savedAt, now(), words),
+                  })}
             </p>
           </Card.Body>
           <Card.Footer align="end">
             <Button type="button" variant="secondary" onClick={setAside}>
-              Set it aside
+              {t('setAside')}
             </Button>
             <Button ref={autofocusOnOpen} type="button" onClick={resume}>
-              Resume
+              {t('resume')}
             </Button>
           </Card.Footer>
         </Card>

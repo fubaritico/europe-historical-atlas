@@ -1,5 +1,8 @@
 import { useSyncExternalStore } from 'react'
 
+import { readHash } from './utils/readHash'
+import { subscribeToHash } from './utils/subscribeToHash'
+
 import './workbench.css'
 
 import type { ReactNode } from 'react'
@@ -25,26 +28,6 @@ export interface WorkbenchEntry {
 export interface WorkbenchProps {
   /** Every plate, in display order. */
   entries: readonly WorkbenchEntry[]
-}
-
-/**
- * Re-render on every hash change: the hash is the selected plate.
- * @param onChange - called on every hash change, to have React read the hash again
- * @returns the unsubscription
- */
-function subscribeToHash(onChange: () => void): () => void {
-  window.addEventListener('hashchange', onChange)
-  return () => {
-    window.removeEventListener('hashchange', onChange)
-  }
-}
-
-/**
- * The current hash, without its `#`.
- * @returns the selected plate's id, or `''` when there is no hash
- */
-function readHash(): string {
-  return window.location.hash.slice(1)
 }
 
 /**

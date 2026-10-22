@@ -2,6 +2,10 @@ import { ColorPicker } from '@fubaritico/react/ColorPicker'
 import { Popover } from '@fubaritico/react/Popover'
 import { useState } from 'react'
 
+import { useColourPickerWords } from '../../../hooks/useColourPickerWords'
+import { useTranslation } from '../../../hooks/useTranslation'
+import { TOOL_RAIL_MESSAGES } from '../i18n'
+
 import type { HsvaColor } from '@fubaritico/behaviors'
 
 /** The polity the swatch shows. */
@@ -33,12 +37,16 @@ export interface SwatchPickerProps {
  * @returns the swatch and its picker
  */
 export function SwatchPicker({ polity, onColour, defaultOpen }: SwatchPickerProps) {
+  // Context
+  const t = useTranslation(TOOL_RAIL_MESSAGES)
+  const { labels, describeColor } = useColourPickerWords()
+
   // State
   // The picker's value during a gesture: it moves with every sample, and only its end reaches the document.
   const [draft, setDraft] = useState<HsvaColor | null>(polity.picked)
 
   // Derived
-  const name = `Colour of ${polity.name}`
+  const name = t('colourOf', { name: polity.name })
 
   // Handlers
   const handleOpenChange = (open: boolean) => {
@@ -52,7 +60,7 @@ export function SwatchPicker({ polity, onColour, defaultOpen }: SwatchPickerProp
       <Popover.Trigger
         className="tool-rail__swatch"
         aria-label={name}
-        title={`${name} — click to change it`}
+        title={t('colourHint', { name: polity.name })}
         style={{ background: polity.colour }}
       />
       <Popover.Content className="tool-rail__picker">
@@ -62,6 +70,8 @@ export function SwatchPicker({ polity, onColour, defaultOpen }: SwatchPickerProp
           onChangeComplete={onColour}
           nullable
           density="compact"
+          labels={labels}
+          describeColor={describeColor}
         />
       </Popover.Content>
     </Popover>

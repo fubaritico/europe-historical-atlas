@@ -1,5 +1,4 @@
-import { reasonOf } from '../errorReason'
-
+import type { PersistenceWords } from '../persistenceWords'
 import type { DraftKeeper } from './draftKeeper'
 import type { RecoveryOutcome } from './draftRecovery'
 
@@ -22,6 +21,8 @@ export interface DraftOpeningDeps {
   keeper: Pick<DraftKeeper, 'start'>
   /** Where a message for the author goes. */
   report: (message: string) => void
+  /** What it says — asked at each sentence, so it follows a change of language. */
+  words: () => PersistenceWords
 }
 
 /**
@@ -41,9 +42,7 @@ export async function openWithDraft(deps: DraftOpeningDeps): Promise<void> {
     outcome = await deps.offerDraft()
   } catch (error: unknown) {
     console.error(`${LOG_TAG} the opening failed before drafts could start`, error)
-    deps.report(
-      `automatic drafts are off: the opening failed (${reasonOf(error)}) — save with ‹ctrl+S›`
-    )
+    deps.report(deps.words().t('draftsOffOpening'))
     return
   }
   if (outcome === 'draft-left') {
@@ -54,9 +53,7 @@ export async function openWithDraft(deps: DraftOpeningDeps): Promise<void> {
     deps.keeper.start()
   } catch (error: unknown) {
     console.error(`${LOG_TAG} the draft keeper could not start`, error)
-    deps.report(
-      `automatic drafts are off: they could not start (${reasonOf(error)}) — save with ‹ctrl+S›`
-    )
+    deps.report(deps.words().t('draftsOffStart'))
   }
 }
 

@@ -1,0 +1,9 @@
+{
+  "toolsLabel": "Tools",
+  "toolTitle": "{tool} ({key})",
+  "groupLabel": "{tool} tools",
+  "noTarget": "Active polity — none selected",
+  "noTargetHint": "Active polity — none selected: select a polity to set its colour",
+  "colourOf": "Colour of {name}",
+  "colourHint": "Colour of {name} — click to change it"
+}

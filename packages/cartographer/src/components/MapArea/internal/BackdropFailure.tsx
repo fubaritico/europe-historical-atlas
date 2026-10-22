@@ -1,6 +1,8 @@
 import { isAssetError } from '@europe-historical-atlas/core/data/assetError'
 
+import { useTranslation } from '../../../hooks/useTranslation'
 import { NOTICE } from '../areaStyle'
+import { MAP_AREA_MESSAGES } from '../i18n'
 
 /** What the failure state shows. */
 export interface BackdropFailureProps {
@@ -24,6 +26,9 @@ export interface BackdropFailureProps {
  * @returns the blocking notice
  */
 export function BackdropFailure({ error }: BackdropFailureProps) {
+  // Context
+  const t = useTranslation(MAP_AREA_MESSAGES)
+
   // Derived
   const detail = isAssetError(error)
     ? `${error.asset} (${error.failure}) — ${error.detail}`
@@ -34,9 +39,10 @@ export function BackdropFailure({ error }: BackdropFailureProps) {
   // Render
   return (
     <div style={NOTICE} role="alert">
-      <p>The backdrop could not be prepared.</p>
-      <p>{detail}</p>
-      <p>No year can be opened without it: the relief carries the coordinate system.</p>
+      <p>{t('failed')}</p>
+      {/* The program's own words — the file and how it failed — English whatever the page: said so. */}
+      <p lang="en">{detail}</p>
+      <p>{t('failedCost')}</p>
     </div>
   )
 }

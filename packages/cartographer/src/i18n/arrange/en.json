@@ -1,0 +1,5 @@
+{
+  "moved": "{move} — {name}",
+  "needsPolity": "Select a polity to {move}",
+  "alreadyInPlace": "{move} — {name}: already in place"
+}

@@ -1,10 +1,13 @@
 import { useState } from 'react'
 
+import { useTranslation } from '../../hooks/useTranslation'
+import { BORDER_MESSAGES } from '../../i18n/border'
 import { describeDrawingTarget } from '../../state/drawingTarget'
 import { Panel } from '../Panel'
 
+import { LINE_PANEL_MESSAGES } from './i18n'
 import { LineView } from './internal/LineView'
-import { readLineSelection } from './lineSelection'
+import { readLineSelection } from './utils/lineSelection'
 
 import type { LineScope } from './lineScope'
 import type { CartographerStoreHook } from '../../state/store'
@@ -35,6 +38,10 @@ export function LinePanel({ store }: { store: CartographerStoreHook }) {
   const dressSegments = store((state) => state.dressSegments)
   const dressPair = store((state) => state.dressPair)
 
+  // Context
+  const t = useTranslation(LINE_PANEL_MESSAGES)
+  const border = useTranslation(BORDER_MESSAGES)
+
   // State
   const [scope, setScope] = useState<LineScope>('stretch')
 
@@ -55,7 +62,10 @@ export function LinePanel({ store }: { store: CartographerStoreHook }) {
 
   // Handlers
   const handleHand = (hand: string | null) => {
-    const label = `${hand ?? 'auto'} ${between}`
+    const label = border('dressStep', {
+      hand: border('handName', { hand: hand ?? 'auto' }),
+      between,
+    })
     if (effectiveScope === 'border' && aimed !== null && selection.neighbour !== null)
       dressPair([aimed.id, selection.neighbour], hand, { kind: 'dress-pair', label })
     else dressSegments(selection.segments, hand, { kind: 'dress-run', label })
@@ -63,7 +73,7 @@ export function LinePanel({ store }: { store: CartographerStoreHook }) {
 
   // Render
   return (
-    <Panel title="Line">
+    <Panel title={t('title')}>
       <LineView
         segments={selection.segments.length}
         between={between}

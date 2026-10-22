@@ -1,0 +1,22 @@
+{
+  "editTitle": "Edit polity",
+  "name": "Name",
+  "id": "Id",
+  "rank": "Rank",
+  "status": "Status",
+  "existsFrom": "Exists from",
+  "existsTo": "Exists to",
+  "suzerain": "Suzerain",
+  "colour": "Colour",
+  "wikidata": "Wikidata id",
+  "stillExists": "still exists",
+  "none": "none",
+  "suzerainPlaceholder": "Type a name to choose…",
+  "suzerainList": "Polities",
+  "noSuzerainMatch": "No polity matches",
+  "removeSuzerain": "Remove the suzerain {name}",
+  "nameMissing": "A polity needs a name.",
+  "idMissing": "An id is needed — none could be made from this name.",
+  "idTaken": "This id is already used in this year.",
+  "notAYear": "A year, as a whole number."
+}

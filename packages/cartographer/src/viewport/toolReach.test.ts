@@ -3,7 +3,13 @@ import { describe, expect, it } from 'vitest'
 import { lonLatToBackdrop } from './projection'
 import { metresPerBackdropPixel } from './resolution'
 import { TEST_BACKDROP_FRAME } from './testFrame'
-import { MAX_SNAP_REACH_KM, closeEnoughToEdit, reachLabel, snapReachKm } from './toolReach'
+import {
+  MAX_SNAP_REACH_KM,
+  closeEnoughToEdit,
+  reachLabel,
+  reachTenths,
+  snapReachKm,
+} from './toolReach'
 import { UNFRAMED } from './viewport'
 
 import type { Viewport } from './viewport'
@@ -139,4 +145,13 @@ describe('reachLabel', () => {
       expect(reachLabel(10.2)).toBe('10.2 km')
     })
   })
+})
+
+describe('reachTenths', () => {
+  it('rounds a reach up to the tenth, the figure the label writes', () => {
+    expect(reachTenths(10.02)).toBe(10.1)
+    expect(reachTenths(12)).toBe(12)
+  })
+
+  // L2–L5: N/A — one rounding, whose edges `reachLabel`'s suite already walks.
 })

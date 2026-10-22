@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
+import { canvasWords } from './canvasWords'
 import { featureUnder } from './featureUnder'
 
 import type { FeatureInputs } from './featureUnder'
@@ -63,6 +64,7 @@ function inputs(at: Point, borders: readonly DerivedBorder[] = [SHARED, COAST]):
     ],
     at,
     radius: 8,
+    words: canvasWords('en'),
   }
 }
 

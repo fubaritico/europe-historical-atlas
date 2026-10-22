@@ -8,9 +8,10 @@ import type { LineVertex } from '../../geometry/lineSnap'
 import type { Rect } from '../../geometry/marquee'
 import type { EditorTool } from '../../state/toolSlice'
 import type { Point } from '../../viewport/viewport'
+import type { CanvasMessageKey } from '../i18n'
 import type { Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
-
+import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 /** A point of the outline in progress: where, and what it was taken from. */
 export interface SessionPoint {
   /** `[longitude, latitude]`. */
@@ -428,6 +429,14 @@ export function ringNeighbours(document: YearDocument, index: number): number[] 
   return [...around]
 }
 
+/** The water under a hit, as the canvas's messages name it: the coast, a named river, or an unnamed one. */
+export interface WaterWords {
+  /** `coast`, `river` or `unnamed` — the messages' `water` select. */
+  water: 'coast' | 'river' | 'unnamed'
+  /** The river's name, verbatim; empty for the coast and an unnamed river. */
+  river: string
+}
+
 /** What the status bar's action sentence is computed from. */
 export interface ActionInputs {
   /** The tool in hand. */
@@ -438,16 +447,13 @@ export interface ActionInputs {
   onCanvas: boolean
   /** Whether a click would close the outline now. */
   closing: boolean
+  /** What the Pen has within reach and would follow — the coast, or a river and its name — or `null`. */
+  snapping: WaterWords | null
   /**
-   * What the Pen has within reach and would follow — `"coastline"`, or a river's name verbatim
-   * (`"Maas"`) — or `null` when nothing is.
+   * The layer the Pen follows, or `null` for the free Pen and the Pencil — out of reach, a click places a
+   * free point.
    */
-  snapping: string | null
-  /**
-   * The layer the Pen follows, by its noun (`"coastline"`, `"river"` — `snapLayersOf`), or `null` for
-   * the free Pen and the Pencil — out of reach, a click places a free point.
-   */
-  following: string | null
+  following: SnapLayer | null
   /** The sentence for an existing anchor the Pen is over — `s02`'s branching line — or `null`. */
   joining: string | null
   /** The map's edge or corner a free point would land on (CARTO-257), or `null`. */
@@ -463,6 +469,8 @@ export interface ActionInputs {
    * run is drawn with no end anchor under the pointer.
    */
   retracing: string | null
+  /** The canvas's messages, in the page's language. */
+  t: Translate<CanvasMessageKey>
 }
 
 /**
@@ -472,18 +480,19 @@ export interface ActionInputs {
  * @returns the sentence
  */
 function penSentence(inputs: ActionInputs, targetName: string): string {
-  if (inputs.closing) return `Closing the outline of ${targetName}`
+  const { t } = inputs
+  const name = { name: targetName }
+  if (inputs.closing) return t('closing', name)
   if (inputs.joining !== null) return inputs.joining
-  if (inputs.inserting) return `Inserting a point into ${targetName}`
+  if (inputs.inserting) return t('inserting', name)
   // s02 — "Following the coastline for Kingdom of France", "Following the Maas for Kingdom of France".
-  if (inputs.snapping !== null) return `Following the ${inputs.snapping} for ${targetName}`
+  if (inputs.snapping !== null) return t('following', { ...name, ...inputs.snapping })
   // CARTO-257 — a free point near the frame lands on its edge, or in its corner.
-  if (inputs.edge === 'corner') return `Drawing in ${targetName} — in the map's corner`
-  if (inputs.edge === 'edge') return `Drawing in ${targetName} — on the map's edge`
+  if (inputs.edge !== null) return t('drawing', { ...name, edge: inputs.edge })
   // s02's "place points freely", before the click (QUAL-110). The polity is kept: the bar always names
   // whom the action is for.
-  if (inputs.following === null) return `Drawing in ${targetName}`
-  return `Drawing in ${targetName} — no ${inputs.following} within reach, placing points freely`
+  if (inputs.following === null) return t('drawing', { ...name, edge: 'none' })
+  return t('drawingNoWater', { ...name, layer: inputs.following })
 }
 
 /**
@@ -494,20 +503,14 @@ function penSentence(inputs: ActionInputs, targetName: string): string {
  * @returns the sentence
  */
 function retraceSentence(inputs: ActionInputs, targetName: string): string {
+  const { t } = inputs
+  const name = { name: targetName }
   if (inputs.retracing !== null) return inputs.retracing
-  if (inputs.snapping !== null) return `Retracing ${targetName} — following the ${inputs.snapping}`
-  if (inputs.joining !== null) return `Retracing ${targetName} — on a neighbour’s anchor`
+  if (inputs.snapping !== null) return t('retracingFollowing', { ...name, ...inputs.snapping })
+  if (inputs.joining !== null) return t('retracingNeighbour', name)
   // CARTO-257 — ⟨retrace⟩'s free points are clamped as the Pen's are, and said the same way.
-  if (inputs.edge === 'corner') return `Retracing ${targetName} — in the map's corner`
-  if (inputs.edge === 'edge') return `Retracing ${targetName} — on the map's edge`
-  return `Retracing ${targetName} — click one of its anchors to end`
-}
-
-/** What a tool would do, for the far-view sentence — *"Zoom in to retrace Almoravids"*. */
-const FAR_VERBS: Record<Exclude<EditorTool, 'navigate'>, string> = {
-  draw: 'draw in',
-  edit: 'edit',
-  retrace: 'retrace',
+  if (inputs.edge !== null) return t('retracing', { ...name, edge: inputs.edge })
+  return t('retracingToEnd', name)
 }
 
 /**
@@ -520,16 +523,18 @@ const FAR_VERBS: Record<Exclude<EditorTool, 'navigate'>, string> = {
  * @returns the sentence, or `null` when no action has a subject to name
  */
 export function actionSentence(inputs: ActionInputs): string | null {
-  const { tool, targetName, session } = inputs
+  const { tool, targetName, session, t } = inputs
   if (tool === 'navigate') return null
-  if (targetName === null) return inputs.onCanvas ? 'Select a polity to draw in' : null
-  // H-34: the bar says why the tool is waiting, and still names whom it would act for.
-  if (inputs.tooFar) return `Zoom in to ${FAR_VERBS[tool]} ${targetName}`
+  if (targetName === null) return inputs.onCanvas ? t('selectToDraw') : null
+  const name = { name: targetName }
+  // H-34: the bar says why the tool is waiting, and still names whom it would act for — *"Zoom in to
+  // retrace Almoravids"*.
+  if (inputs.tooFar) return t('zoomInTo', { ...name, tool })
   if (tool === 'retrace') return retraceSentence(inputs, targetName)
   if (tool === 'draw') return penSentence(inputs, targetName)
-  if (session.moving !== null) return `Moving path from ${targetName}`
-  if (inputs.inserting) return `Inserting a point into ${targetName}`
-  return session.selected.length === 0 ? null : `Selecting path from ${targetName}`
+  if (session.moving !== null) return t('moving', name)
+  if (inputs.inserting) return t('inserting', name)
+  return session.selected.length === 0 ? null : t('selecting', name)
 }
 
 /** What the overlay canvas paints, all of it in screen pixels. */

@@ -1,4 +1,7 @@
+import { useTranslation } from '../../../hooks/useTranslation'
+import { ACTION_MESSAGES } from '../../../i18n/actions'
 import { BarIcon } from '../../../icons/barIcons'
+import { POLITIES_PANEL_MESSAGES } from '../i18n'
 
 /**
  * `{Polities}`' action bar — a strip at the foot of the panel holding its commands (`s07`, *The panel's
@@ -37,14 +40,18 @@ export interface PolitiesActionsProps {
  * @returns the bar
  */
 export function PolitiesActions({ onNew, onDelete, canDelete }: PolitiesActionsProps) {
+  // Context
+  const t = useTranslation(POLITIES_PANEL_MESSAGES)
+  const action = useTranslation(ACTION_MESSAGES)
+
   // Render
   return (
-    <div className="polities__actions" role="toolbar" aria-label="Polity actions">
+    <div className="polities__actions" role="toolbar" aria-label={t('actionsLabel')}>
       <button
         type="button"
         className="polities__action"
-        aria-label="New polity"
-        title="New polity"
+        aria-label={action('newPolity')}
+        title={action('newPolity')}
         onClick={onNew}
       >
         <BarIcon name="plus" />
@@ -52,8 +59,8 @@ export function PolitiesActions({ onNew, onDelete, canDelete }: PolitiesActionsP
       <button
         type="button"
         className="polities__action"
-        aria-label="Delete polity"
-        title={canDelete ? 'Delete polity' : 'Select a polity to delete'}
+        aria-label={action('deletePolity')}
+        title={canDelete ? action('deletePolity') : t('deleteNeedsPolity')}
         disabled={!canDelete}
         onClick={onDelete}
       >

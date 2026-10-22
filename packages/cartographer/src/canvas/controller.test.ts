@@ -11,6 +11,7 @@ import { TEST_BACKDROP_FRAME, TEST_LAND_MASK } from '../viewport/testFrame'
 import { UNFRAMED } from '../viewport/viewport'
 import { screenToBackdrop } from '../viewport/viewport'
 
+import { canvasWords } from './canvasWords'
 import { startCanvasController } from './controller'
 import { createHistoryRelay } from './history/historyRelay'
 import { coloursOf } from './liveCanvas'
@@ -31,6 +32,9 @@ import type { SnapLine } from '../geometry/lineSnap'
 import type { NamedPolyline } from '../loaders/vectorLayers'
 import type { CartographerStoreHook } from '../state/store'
 import type { PenMode } from '../state/toolSlice'
+
+/** The canvas's words, in English — the language these suites were written against. */
+const EN_WORDS = canvasWords('en')
 
 /** The canvas box every test pretends to have, jsdom reporting every element as zero-sized. */
 const BOX = { width: 800, height: 600 }
@@ -148,6 +152,7 @@ function attach(maxSnapReachKm = Infinity): {
     history,
     landMask: TEST_LAND_MASK,
     tribeImage: tribeImageStandIn,
+    words: () => EN_WORDS,
   })
   return { node, store, hovered, acted, resulted, history, dispose }
 }
@@ -503,6 +508,7 @@ describe('startCanvasController', () => {
           history: createHistoryRelay(),
           landMask: TEST_LAND_MASK,
           tribeImage: tribeImageStandIn,
+          words: () => EN_WORDS,
           maxSnapReachKm: Infinity,
           style: CHROME_PAINT_STYLE,
           overlay: document.createElement('canvas'),
@@ -1340,6 +1346,7 @@ describe('the tools on the canvas', () => {
         history: createHistoryRelay(),
         landMask: TEST_LAND_MASK,
         tribeImage: tribeImageStandIn,
+        words: () => EN_WORDS,
         maxSnapReachKm: Infinity,
         style: CHROME_PAINT_STYLE,
         overlay,
@@ -1418,6 +1425,7 @@ describe('the tools — what the review found', () => {
         history: createHistoryRelay(),
         landMask: TEST_LAND_MASK,
         tribeImage: tribeImageStandIn,
+        words: () => EN_WORDS,
         maxSnapReachKm: Infinity,
         style: CHROME_PAINT_STYLE,
         overlay,
@@ -1755,6 +1763,7 @@ function attachWithShore(
     history: createHistoryRelay(),
     landMask: TEST_LAND_MASK,
     tribeImage: tribeImageStandIn,
+    words: () => EN_WORDS,
     maxSnapReachKm: Infinity,
     style: CHROME_PAINT_STYLE,
     overlay,
@@ -2133,6 +2142,7 @@ describe('the Pen meeting a shared border, on the canvas', () => {
       history: createHistoryRelay(),
       landMask: TEST_LAND_MASK,
       tribeImage: tribeImageStandIn,
+      words: () => EN_WORDS,
       maxSnapReachKm: Infinity,
       style: CHROME_PAINT_STYLE,
       overlay,
@@ -3051,6 +3061,7 @@ function attachWithTribe() {
     history: createHistoryRelay(),
     landMask: TEST_LAND_MASK,
     tribeImage,
+    words: () => EN_WORDS,
   })
   const settle = (): void => {
     while (frames.asked() > 0) frames.run()

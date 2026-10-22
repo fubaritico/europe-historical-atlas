@@ -1,4 +1,4 @@
-import { act, render, renderHook, screen } from '@testing-library/react'
+import { act, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -6,10 +6,11 @@ import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 
 import { openEmptyYear } from '../../../state/openEmptyYear'
 import { createCartographerStore } from '../../../state/store'
+import { renderHookInEnglish, renderInEnglish } from '../../../testing/renderInEnglish'
+import { wikidataViewOf } from '../../../utils/wikidataView'
 import { UNFRAMED } from '../../../viewport/viewport'
-import { WIKIDATA_DELAY_MS, useWikidataItem } from '../../shared/hooks/useWikidataItem'
-import { wikidataViewOf } from '../../shared/wikidataView'
 import { WikidataPanel } from '../../WikidataPanel'
+import { WIKIDATA_DELAY_MS, useWikidataItem } from '../hooks/useWikidataItem'
 
 import { PolityDialog } from './PolityDialog'
 
@@ -69,9 +70,12 @@ describe('wikidataViewOf', () => {
     const view = wikidataViewOf({ kind: 'found', facts: TRIPOLI }, EMPTY, 1100, [
       { id: 'jerusalem', name: 'Kingdom of Jerusalem', wikidata: 'Q55502' },
     ])
-    expect(view.kind === 'found' && view.warning).toBe(
-      'Wikidata: County of Tripoli 1102–1289 — does not exist yet in 1100'
-    )
+    expect(view.kind === 'found' && view.warning).toEqual({
+      when: 'notYet',
+      name: 'County of Tripoli',
+      span: '1102–1289',
+      year: 1100,
+    })
     expect(view.kind === 'found' && view.suggestions.map((s) => s.field)).toEqual([
       'name',
       'existsFrom',
@@ -82,7 +86,7 @@ describe('wikidataViewOf', () => {
 
   it('offers nothing and warns of nothing for a Wikipedia category but what it is', () => {
     const view = wikidataViewOf(
-      { kind: 'found', facts: { ...TRIPOLI, notASubject: 'a Wikipedia category' } },
+      { kind: 'found', facts: { ...TRIPOLI, notASubject: 'category' } },
       EMPTY,
       1100,
       []
@@ -103,7 +107,7 @@ describe('useWikidataItem', () => {
     it('reads the item a moment after the id is typed', async () => {
       vi.useFakeTimers()
       const { source } = tableSource({ Q272033: TRIPOLI })
-      const { result } = renderHook(() => useWikidataItem(source, 'Q272033'))
+      const { result } = renderHookInEnglish(() => useWikidataItem(source, 'Q272033'))
 
       expect(result.current).toEqual({ kind: 'reading', id: 'Q272033' })
       await act(async () => {
@@ -117,7 +121,7 @@ describe('useWikidataItem', () => {
   describe('variants', () => {
     it('reads nothing while the field does not hold an id', () => {
       const { source, asked } = tableSource({})
-      const { result } = renderHook(() => useWikidataItem(source, 'Tripoli'))
+      const { result } = renderHookInEnglish(() => useWikidataItem(source, 'Tripoli'))
 
       expect(result.current).toEqual({ kind: 'none' })
       expect(asked).toEqual([])
@@ -126,7 +130,7 @@ describe('useWikidataItem', () => {
     it('says an id Wikidata does not know', async () => {
       vi.useFakeTimers()
       const { source } = tableSource({})
-      const { result } = renderHook(() => useWikidataItem(source, 'Q9'))
+      const { result } = renderHookInEnglish(() => useWikidataItem(source, 'Q9'))
       await act(async () => {
         await vi.advanceTimersByTimeAsync(WIKIDATA_DELAY_MS)
       })
@@ -139,12 +143,12 @@ describe('useWikidataItem', () => {
     it('says Wikidata did not answer, and logs it, rather than blocking', async () => {
       vi.useFakeTimers()
       const source: WikidataSource = { read: () => Promise.reject(new Error('Failed to fetch')) }
-      const { result } = renderHook(() => useWikidataItem(source, 'Q1'))
+      const { result } = renderHookInEnglish(() => useWikidataItem(source, 'Q1'))
       await act(async () => {
         await vi.advanceTimersByTimeAsync(WIKIDATA_DELAY_MS)
       })
 
-      expect(result.current).toEqual({ kind: 'failed', id: 'Q1', reason: 'Failed to fetch' })
+      expect(result.current).toEqual({ kind: 'failed', id: 'Q1' })
       expect(console.warn).toHaveBeenCalledTimes(1)
     })
   })
@@ -155,9 +159,12 @@ describe('useWikidataItem', () => {
     it('reads only the last id typed, a keystroke restarting the wait', async () => {
       vi.useFakeTimers()
       const { source, asked } = tableSource({ Q272033: TRIPOLI })
-      const { result, rerender } = renderHook(({ typed }) => useWikidataItem(source, typed), {
-        initialProps: { typed: 'Q2720' },
-      })
+      const { result, rerender } = renderHookInEnglish(
+        ({ typed }) => useWikidataItem(source, typed),
+        {
+          initialProps: { typed: 'Q2720' },
+        }
+      )
       await act(async () => {
         await vi.advanceTimersByTimeAsync(WIKIDATA_DELAY_MS / 2)
       })
@@ -184,9 +191,12 @@ describe('useWikidataItem', () => {
               })
             : Promise.resolve({ found: new Map(), unknown: ids.slice() }),
       }
-      const { result, rerender } = renderHook(({ typed }) => useWikidataItem(source, typed), {
-        initialProps: { typed: 'Q1' },
-      })
+      const { result, rerender } = renderHookInEnglish(
+        ({ typed }) => useWikidataItem(source, typed),
+        {
+          initialProps: { typed: 'Q1' },
+        }
+      )
       await act(async () => {
         await vi.advanceTimersByTimeAsync(WIKIDATA_DELAY_MS)
       })
@@ -207,16 +217,18 @@ describe('useWikidataItem', () => {
 
 describe('WikidataPanel', () => {
   it('shows nothing while no id is typed', () => {
-    const { container } = render(<WikidataPanel view={{ kind: 'none' }} onUse={() => undefined} />)
+    const { container } = renderInEnglish(
+      <WikidataPanel view={{ kind: 'none' }} onUse={() => undefined} />
+    )
     expect(container.textContent).toBe('')
   })
 
   it('says what a category is, instead of offering anything', () => {
-    render(
+    renderInEnglish(
       <WikidataPanel
         view={{
           kind: 'found',
-          facts: { ...TRIPOLI, id: 'Q25167513', notASubject: 'a Wikipedia category' },
+          facts: { ...TRIPOLI, id: 'Q25167513', notASubject: 'category' },
           warning: null,
           suggestions: [],
         }}
@@ -229,7 +241,7 @@ describe('WikidataPanel', () => {
   })
 
   it('says the item calls itself a vassal state, and says nothing of it otherwise', () => {
-    const { container, rerender } = render(
+    const { container, rerender } = renderInEnglish(
       <WikidataPanel view={vassalView(true)} onUse={() => undefined} />
     )
     expect(container.querySelector('.wikidata-panel__summary')?.textContent).toContain(
@@ -241,7 +253,7 @@ describe('WikidataPanel', () => {
 
   it('offers Use for an empty field, Replace for a different one, and an inert Agrees for one that agrees', async () => {
     const onUse = vi.fn()
-    render(
+    renderInEnglish(
       <WikidataPanel
         view={{
           kind: 'found',
@@ -277,12 +289,12 @@ describe('WikidataPanel', () => {
 
 describe('WikidataPanel — the live region (review A11Y-010)', () => {
   it('is always there, empty while there is nothing to say', () => {
-    render(<WikidataPanel view={{ kind: 'none' }} onUse={() => undefined} />)
+    renderInEnglish(<WikidataPanel view={{ kind: 'none' }} onUse={() => undefined} />)
     expect(screen.getByRole('status').textContent).toBe('')
   })
 
   it('says it is reading, then that Wikidata does not know an id', () => {
-    const { rerender } = render(
+    const { rerender } = renderInEnglish(
       <WikidataPanel view={{ kind: 'reading', id: 'Q9' }} onUse={() => undefined} />
     )
     expect(screen.getByRole('status').textContent).toBe('Reading Q9 on Wikidata…')
@@ -291,12 +303,12 @@ describe('WikidataPanel — the live region (review A11Y-010)', () => {
   })
 
   it('holds the warning but neither the links nor the buttons', () => {
-    render(
+    renderInEnglish(
       <WikidataPanel
         view={{
           kind: 'found',
           facts: TRIPOLI,
-          warning: 'Wikidata: County of Tripoli 1102–1289 — does not exist yet in 1100',
+          warning: { when: 'notYet', name: 'County of Tripoli', span: '1102–1289', year: 1100 },
           suggestions: [{ field: 'existsFrom', value: '1102', shown: '1102', state: 'empty' }],
         }}
         onUse={() => undefined}
@@ -318,7 +330,7 @@ describe('PolityDialog with Wikidata (CARTO-243)', () => {
       viewport: { viewport: UNFRAMED },
     })
     const failing: WikidataSource = { read: () => Promise.reject(new Error('Failed to fetch')) }
-    render(
+    renderInEnglish(
       <PolityDialog
         store={store}
         editing={null}
@@ -332,7 +344,7 @@ describe('PolityDialog with Wikidata (CARTO-243)', () => {
     await user.type(screen.getByLabelText('Wikidata id'), 'Q1')
     expect(
       await screen.findByText(
-        'Wikidata did not answer (Failed to fetch) — the form works without it'
+        'Wikidata did not answer — the form works without it (details in the console)'
       )
     ).toBeTruthy()
     await user.type(screen.getByLabelText('Name'), 'County of Tripoli')
@@ -349,7 +361,7 @@ describe('PolityDialog with Wikidata (CARTO-243)', () => {
       viewport: { viewport: UNFRAMED },
     })
     const { source } = tableSource({ Q272033: TRIPOLI })
-    render(
+    renderInEnglish(
       <PolityDialog
         store={store}
         editing={null}

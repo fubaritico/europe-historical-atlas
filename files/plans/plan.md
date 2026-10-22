@@ -454,6 +454,13 @@ language it had never been designed to leave.
 | **atlas** | **French and English**, French first | it is the published product, and its readers are not all French. This is what ICU was adopted *for* |
 | **Cartographer** | **French and English** — the dev's call, **2026-10-21**, replacing "English only" of 2026-10-08 | its contributors will be French speakers and English speakers alike, and *« ce n'est pas possible de mettre des labels en dur »*. It uses `core`'s engine with **its own label files, bundled with it** — never the JSON the contribution tool exports for content. **Its language is the browser's** (the dev, 2026-10-21): French if the first preferred language is French, English otherwise — `pickLocale(navigator.languages)`, the list passed in by the app so `core` never reads the browser |
 
+**The label files' shape — the dev, 2026-10-22**: one `i18n/` folder per scope (a component, or one level up
+beside `components/` when several share it), holding **`fr.json` and `en.json`, both bundled** and chosen by the
+language from `LocaleProvider` — never the two languages in one TypeScript object, never fetched at runtime
+(the condition above). An `index.ts` types them (`Catalogue<keyof typeof en>`: a key missing from `fr.json`
+fails the type-check) and documents each message's values. The same shape in `core` (`time/i18n/`) and the atlas
+(`src/i18n/`).
+
 **The atlas is in English by default** — the dev, 2026-10-21, replacing "French first": *« c'est international »*.
 **And it follows the browser's language like the Cartographer** (the dev, same evening): French for a browser
 whose first language is French, English for every other — the same `pickLocale(navigator.languages)`.

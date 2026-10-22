@@ -1,9 +1,12 @@
 import { Modal } from '@fubaritico/react/Modal'
 
-import { PolityForm } from '../../PolityForm'
-import { useWikidataItem } from '../../shared/hooks/useWikidataItem'
-import { wikidataViewOf } from '../../shared/wikidataView'
+import { useTranslation } from '../../../hooks/useTranslation'
+import { ACTION_MESSAGES } from '../../../i18n/actions'
+import { wikidataViewOf } from '../../../utils/wikidataView'
+import { POLITY_FORM_MESSAGES, PolityForm } from '../../PolityForm'
 import { usePolityDraft } from '../hooks/usePolityDraft'
+import { useWikidataItem } from '../hooks/useWikidataItem'
+import { ignoreOverlayClick } from '../utils/ignoreOverlayClick'
 
 import type { CartographerStoreHook } from '../../../state/store'
 import type { WikidataField } from '../../../wikidata/wikidataFacts'
@@ -28,14 +31,6 @@ export interface PolityDialogProps {
 }
 
 /**
- * A click on the backdrop does nothing — deliberately: a dialogue holding typed work must not lose it to a
- * stray click (the design system's own warning). Escape, Cancel and the cross close it.
- */
-function ignoreOverlayClick(): void {
-  // Deliberately nothing.
-}
-
-/**
  * The polity's dialogue — `[+ New polity]` (`s02`'s *"create a polity from nothing"*, *"validating the
  * form hands me the Pen"*) and *[Edit properties…]* (`s07`'s *"the same form as creation opens, filled
  * with its current values"*, the id kept). The binding of the shell/view/binding split: the only place
@@ -52,6 +47,10 @@ function ignoreOverlayClick(): void {
  * @returns the dialogue
  */
 export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: PolityDialogProps) {
+  // Context
+  const form = useTranslation(POLITY_FORM_MESSAGES)
+  const action = useTranslation(ACTION_MESSAGES)
+
   // State
   const { draft, errors, suzerains, ranks, close, onField, onColour, onSubmit } = usePolityDraft(
     store,
@@ -61,7 +60,7 @@ export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: Poli
   const reading = useWikidataItem(wikidata, draft.wikidata)
 
   // Derived
-  const title = editing === null ? 'New polity' : 'Edit polity'
+  const title = editing === null ? action('newPolity') : form('editTitle')
   const { document } = store.getState()
   const others = document.polities.filter((polity) => polity.id !== editing?.id)
   const wikidataView = wikidataViewOf(reading, draft, document.year, others)

@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { LocaleContext } from '../../shared/localeContext'
+import { createLocaleStore } from '../../../i18n/localeStore'
+import { LocaleProvider } from '../../LocaleProvider'
 
 import { KnownPolityMenu } from './KnownPolityMenu'
 
@@ -39,7 +40,7 @@ describe('KnownPolityMenu', () => {
     it('keeps its failure to its own place, beside the panel it opened from', () => {
       vi.spyOn(console, 'error').mockImplementation(() => undefined)
       render(
-        <LocaleContext value="en">
+        <LocaleProvider store={createLocaleStore('en')}>
           <p>the panel</p>
           <KnownPolityMenu
             polity={POLITY}
@@ -50,7 +51,7 @@ describe('KnownPolityMenu', () => {
             onEdit={() => undefined}
             onClose={() => undefined}
           />
-        </LocaleContext>
+        </LocaleProvider>
       )
       expect(screen.getByText('the panel').tagName).toBe('P')
       expect(screen.getByRole('alert').textContent).toContain('the menu broke')

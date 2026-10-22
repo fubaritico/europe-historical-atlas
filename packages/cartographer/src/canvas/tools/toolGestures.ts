@@ -12,7 +12,7 @@ import { anchorClick, waterTaking } from './borderSnap'
 import { carvedReport } from './carving'
 import { TAG } from './consoleTag'
 import { freeLonLatAt, repeatsLast } from './frameSnap'
-import { followedLayer, layerLines, lineLabel, snapHit } from './layerHits'
+import { followedLayer, layerLines, snapHit, waterOf } from './layerHits'
 import { leaveLayer, reachLayer } from './layerSwitch'
 import {
   abandonGesture,
@@ -62,8 +62,8 @@ export interface GestureContext extends AnchorGestureContext, WaterClosingContex
 /** The step kind a closed outline is recorded under — what tells an undo that it is undoing a closing. */
 export const DRAW_OUTLINE_KIND = 'draw-outline'
 
-/** How `{History}` and `[↶ Undo]` name a moved anchor — `s03`'s *"Undo — move anchor"*. */
-export const MOVE_ANCHOR_STEP = { kind: 'move-anchor', label: 'move anchor' } as const
+/** The step kind moved anchors are recorded under — `s03`'s *"Undo — move anchor"*. */
+export const MOVE_ANCHOR_KIND = 'move-anchor'
 
 /**
  * Where the pointer is, in degrees — or `null` off the backdrop.
@@ -119,17 +119,18 @@ export function closeOutline(context: GestureContext, followWater = false): void
     console.warn(`${TAG} the outline was not closed: a ring needs at least three anchors.`)
     return
   }
-  const step = { kind: DRAW_OUTLINE_KIND, label: `draw outline of ${target.name}` }
+  const { t } = context.words
+  const step = { kind: DRAW_OUTLINE_KIND, label: t('stepDrawOutline', { name: target.name }) }
   // Laid only into what is handed to the document: a refused outline stays on screen as it was.
   const closing = followWater ? closingPoints(context) : []
   const outline = [...context.session.outline, ...closing]
   const carved: string[] = []
   const onCarved = (carving: Carving): void => {
-    carved.push(carvedReport(context.store.getState().document.polities, carving))
+    carved.push(carvedReport(context.store.getState().document.polities, carving, t))
   }
   if (context.store.getState().drawOutline(target.id, outline, step, onCarved)) {
     clearOutline(context.session)
-    if (closing.length > 0) context.report(closingReport(closing.length))
+    if (closing.length > 0) context.report(closingReport(closing.length, t))
     for (const message of carved) context.report(message)
     return
   }
@@ -286,7 +287,7 @@ export function snapClick(context: GestureContext, layer: SnapLayer, at: Point):
   else {
     const placed = placeOnLayer(context, stretch.slice(1), provenance)
     context.report(
-      `inserted ${String(placed)} ${placed === 1 ? 'vertex' : 'vertices'} from the ${lineLabel(context, hit)}`
+      context.words.t('insertedFromWater', { count: placed, ...waterOf(context, hit) })
     )
   }
   context.session.snap = hit
@@ -438,20 +439,19 @@ export function arrowRelease(context: GestureContext, at: Point): void {
     console.error(`${TAG} nothing moved: a selected anchor is no longer in the view's table.`)
     return
   }
-  if (!context.store.getState().moveAnchors(moves, moveStep(moves.length))) {
+  if (!context.store.getState().moveAnchors(moves, moveStep(context, moves.length))) {
     console.error(`${TAG} the document refused to move ${String(moves.length)} anchor(s).`)
   }
 }
 
 /**
  * How `{History}` and `[↶ Undo]` name a move — `s03`'s *"Undo — move anchor"*, plural for several.
+ * @param context - the canvas's words
  * @param count - how many anchors moved
  * @returns the step
  */
-function moveStep(count: number): { kind: string; label: string } {
-  return count === 1
-    ? MOVE_ANCHOR_STEP
-    : { kind: MOVE_ANCHOR_STEP.kind, label: `move ${String(count)} anchors` }
+function moveStep(context: GestureContext, count: number): { kind: string; label: string } {
+  return { kind: MOVE_ANCHOR_KIND, label: context.words.t('stepMoveAnchors', { count }) }
 }
 
 /**
