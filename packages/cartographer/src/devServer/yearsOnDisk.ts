@@ -1,5 +1,5 @@
-import type { SnapshotFolder, YearFolder } from './diskFolder'
-import type { DraftFolder } from './draftEndpoint'
+import type { SnapshotFolder, YearFolder } from './diskFolder.ts'
+import type { DraftFolder } from './draftEndpoint.ts'
 
 /**
  * The years folder on the real disk — the one implementation of {@link DiskFolder} that is not a map in

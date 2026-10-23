@@ -12,19 +12,19 @@ import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
-import { DRAFT_ROUTE, DRAFTS_FOLDER, SNAPSHOTS_FOLDER } from './src/devServer/draftRoute'
+import { DRAFT_ROUTE, DRAFTS_FOLDER, SNAPSHOTS_FOLDER } from './src/devServer/draftRoute.ts'
 import {
   createDraftFolderOnDisk,
   createSnapshotFolderOnDisk,
   createYearsFolderOnDisk,
-} from './src/devServer/yearsOnDisk'
-import { YEAR_WRITE_ROUTE } from './src/devServer/yearWriteRoute'
+} from './src/devServer/yearsOnDisk.ts'
+import { YEAR_WRITE_ROUTE } from './src/devServer/yearWriteRoute.ts'
 
-import type { DraftFolder } from './src/devServer/draftEndpoint'
-import type * as DraftEndpoint from './src/devServer/draftEndpoint'
-import type { BodyStream, ResponseSink } from './src/devServer/httpEndpoint'
-import type { SnapshotFolder, YearFolder } from './src/devServer/diskFolder'
-import type * as YearWriteEndpoint from './src/devServer/yearWriteEndpoint'
+import type { DraftFolder } from './src/devServer/draftEndpoint.ts'
+import type * as DraftEndpoint from './src/devServer/draftEndpoint.ts'
+import type { BodyStream, ResponseSink } from './src/devServer/httpEndpoint.ts'
+import type { SnapshotFolder, YearFolder } from './src/devServer/diskFolder.ts'
+import type * as YearWriteEndpoint from './src/devServer/yearWriteEndpoint.ts'
 import type { Plugin, ViteDevServer } from 'vite'
 
 /** The folder the atlas reads its years from — inside the shared `public/`. */

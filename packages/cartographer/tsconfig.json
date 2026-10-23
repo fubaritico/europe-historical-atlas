@@ -25,7 +25,11 @@
     // Naming `types` at all REPLACES the default, which is "every @types/* package in scope". That is
     // safe here and checked: this package pulls React and Vitest through explicit imports, not ambient
     // declarations, so there was nothing being picked up implicitly to lose.
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    // The dev server's modules are imported by `vite.config.ts` with their `.ts` extension, which Node's own
+    // loader requires — Vite 8 warns that it will load its config that way (2026-10-24). Allowed only because
+    // nothing here is emitted by tsc (`noEmit`, from the root).
+    "allowImportingTsExtensions": true
   },
   // `src`, so the *config* files at the package root are left out — the same boundary `core` and `atlas` draw.
   // Test files are inside it and are checked, which is deliberate: a suite that no longer compiles is a suite
