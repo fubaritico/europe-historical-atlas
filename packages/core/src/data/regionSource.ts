@@ -1,4 +1,5 @@
 import { latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
+import { fetchWithin } from '../utils/fetchWithin'
 
 import {
   assetError,
@@ -127,7 +128,7 @@ export function createFetchRegionSource(pathForYear: (year: number) => string): 
   return {
     async load(year: number): Promise<RegionSet> {
       const path = pathForYear(year)
-      const response = await fetch(path)
+      const response = await fetchWithin(path)
       if (!response.ok)
         throw assetError('regions', 'transport', path, `HTTP ${String(response.status)}`)
       return projectRegions(parseRegionPayload(await response.json(), path))

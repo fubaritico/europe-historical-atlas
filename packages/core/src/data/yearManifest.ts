@@ -16,6 +16,8 @@
 
 import { z } from 'zod/mini'
 
+import { fetchWithin } from '../utils/fetchWithin'
+
 import { assetError } from './assetError'
 import { projectRegions } from './regionSource'
 import { toRegionPayload } from './toRegionPayload'
@@ -98,7 +100,7 @@ export function createAuthoredYearSource(deps: AuthoredYearSourceDeps): RegionSo
   let manifest: Promise<YearManifest> | null = null
 
   const readManifest = async (): Promise<YearManifest> => {
-    const response = await fetch(deps.manifestUrl)
+    const response = await fetchWithin(deps.manifestUrl)
     if (!response.ok)
       throw assetError(
         'yearRegistry',

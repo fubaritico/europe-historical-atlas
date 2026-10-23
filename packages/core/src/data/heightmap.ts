@@ -1,3 +1,5 @@
+import { fetchWithin } from '../utils/fetchWithin'
+
 import {
   assetError,
   expectBounds,
@@ -93,13 +95,13 @@ export function createFetchHeightmapSource(basePath: string): HeightmapSource {
   return {
     async load(): Promise<Heightmap> {
       const metaPath = `${basePath}.json`
-      const metaRes = await fetch(metaPath)
+      const metaRes = await fetchWithin(metaPath)
       if (!metaRes.ok)
         throw assetError('heightmap', 'transport', metaPath, `HTTP ${String(metaRes.status)}`)
       const meta = parseHeightmapMeta(await metaRes.json(), metaPath)
 
       const binPath = `${basePath}.bin`
-      const binRes = await fetch(binPath)
+      const binRes = await fetchWithin(binPath)
       if (!binRes.ok)
         throw assetError('heightmap', 'transport', binPath, `HTTP ${String(binRes.status)}`)
       const data = new Int16Array(await binRes.arrayBuffer())

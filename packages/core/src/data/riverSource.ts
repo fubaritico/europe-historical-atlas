@@ -1,4 +1,5 @@
 import { type GeoBounds, latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
+import { fetchWithin } from '../utils/fetchWithin'
 
 import {
   assetError,
@@ -103,7 +104,7 @@ export function projectRivers(payload: RiverPayload): River[] {
 export function createFetchRiverSource(path: string): RiverSource {
   return {
     async load(): Promise<RiverSet> {
-      const response = await fetch(path)
+      const response = await fetchWithin(path)
       if (!response.ok)
         throw assetError('rivers', 'transport', path, `HTTP ${String(response.status)}`)
       const payload = parseRiverPayload(await response.json(), path)

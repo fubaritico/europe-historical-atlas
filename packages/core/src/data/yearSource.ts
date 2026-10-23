@@ -12,6 +12,8 @@
  * "this file is malformed" from "these files disagree".
  */
 
+import { fetchWithin } from '../utils/fetchWithin'
+
 import { assetError } from './assetError'
 import { yearBordersSchema, yearPolitiesSchema, yearRegistrySchema } from './yearFormat'
 
@@ -126,7 +128,7 @@ async function fetchAndRead<T>(
   path: string,
   parse: (value: unknown, source: string) => T
 ): Promise<T> {
-  const response = await fetch(path)
+  const response = await fetchWithin(path)
   if (!response.ok) throw assetError(asset, 'transport', path, `HTTP ${String(response.status)}`)
   return parse(await response.json(), path)
 }

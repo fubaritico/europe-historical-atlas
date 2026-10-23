@@ -113,10 +113,15 @@ describe('riverSource', () => {
           ],
         },
       ])
-      const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(body) })
+      const fetchMock = vi
+        .fn<(path: string, init?: RequestInit) => Promise<unknown>>()
+        .mockResolvedValue({ ok: true, json: () => Promise.resolve(body) })
       vi.stubGlobal('fetch', fetchMock)
       const loaded = await createFetchRiverSource('/rivers/x.json').load()
-      expect(fetchMock).toHaveBeenCalledWith('/rivers/x.json')
+      // Through the answer delay of REPO-275: the request carries its signal.
+      const [path, init] = fetchMock.mock.calls[0] ?? []
+      expect(path).toBe('/rivers/x.json')
+      expect(init?.signal).toBeInstanceOf(AbortSignal)
       expect(loaded.rivers).toHaveLength(1)
       expect(loaded.rivers[0]?.name).toBe('Rhine')
       vi.unstubAllGlobals()

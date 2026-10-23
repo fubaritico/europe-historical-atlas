@@ -1,3 +1,5 @@
+import { fetchWithin } from '../utils/fetchWithin'
+
 import {
   assetError,
   expectBounds,
@@ -178,13 +180,13 @@ export function createFetchLandMaskSource(basePath: string): LandMaskSource {
   return {
     async load(): Promise<LandMask> {
       const metaPath = `${basePath}.json`
-      const metaResponse = await fetch(metaPath)
+      const metaResponse = await fetchWithin(metaPath)
       if (!metaResponse.ok)
         throw assetError('landMask', 'transport', metaPath, `HTTP ${String(metaResponse.status)}`)
       const meta = parseLandMaskMeta(await metaResponse.json(), metaPath)
 
       const binPath = `${basePath}.bin`
-      const binResponse = await fetch(binPath)
+      const binResponse = await fetchWithin(binPath)
       if (!binResponse.ok)
         throw assetError('landMask', 'transport', binPath, `HTTP ${String(binResponse.status)}`)
       const bits = new Uint8Array(await binResponse.arrayBuffer())
