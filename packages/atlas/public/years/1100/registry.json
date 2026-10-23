@@ -74,10 +74,10 @@
       "rank": "duchy",
       "status": null,
       "suzerain": "kingdom-of-the-franks",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 911,
+      "existsTo": 1259,
       "colour": "#2e5ff0",
-      "wikidata": null
+      "wikidata": "Q842091"
     },
     {
       "id": "duchy-of-brittany",
@@ -85,10 +85,10 @@
       "rank": "duchy",
       "status": null,
       "suzerain": "kingdom-of-the-franks",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 939,
+      "existsTo": 1547,
       "colour": "#b3b3cc",
-      "wikidata": null
+      "wikidata": "Q71747"
     },
     {
       "id": "county-of-flanders",
@@ -107,10 +107,10 @@
       "rank": "county",
       "status": null,
       "suzerain": "kingdom-of-the-franks",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 778,
+      "existsTo": 1271,
       "colour": "#6588f1",
-      "wikidata": null
+      "wikidata": "Q1334322"
     },
     {
       "id": "kingdom-of-aragon-and-navarre",
@@ -536,8 +536,8 @@
       "rank": "emirate",
       "status": "country",
       "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1072,
+      "existsTo": 1251,
       "colour": "#1169a4",
       "wikidata": null
     },
@@ -547,8 +547,8 @@
       "rank": "emirate",
       "status": "country",
       "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1071,
+      "existsTo": 1202,
       "colour": "#dbd4db",
       "wikidata": null
     },
@@ -613,8 +613,8 @@
       "rank": "emirate",
       "status": "country",
       "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1100,
+      "existsTo": 1207,
       "colour": "#e3e8bf",
       "wikidata": null
     },
@@ -625,7 +625,7 @@
       "status": "country",
       "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
       "existsFrom": null,
-      "existsTo": null,
+      "existsTo": 1259,
       "colour": "#529c52",
       "wikidata": null
     },
@@ -658,7 +658,7 @@
       "status": "country",
       "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
       "existsFrom": null,
-      "existsTo": null,
+      "existsTo": 1154,
       "colour": "#47ca47",
       "wikidata": null
     },
@@ -668,10 +668,10 @@
       "rank": "emirate",
       "status": "country",
       "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 944,
+      "existsTo": 1128,
       "colour": "#1e731e",
-      "wikidata": null
+      "wikidata": "Q25400571"
     },
     {
       "id": "fatimid-caliphate",
@@ -722,11 +722,11 @@
       "name": "Kingdom of Kars",
       "rank": "kingdom",
       "status": "country",
-      "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
+      "suzerain": "emirate-of-erzurum",
       "existsFrom": null,
       "existsTo": null,
       "colour": "#ccd1e8",
-      "wikidata": null
+      "wikidata": "Q127063"
     },
     {
       "id": "lordship-of-syunik",
@@ -741,25 +741,25 @@
     },
     {
       "id": "lordship-of-ani",
-      "name": "Lordship of Ani",
+      "name": "Shaddadids of Ani",
       "rank": "lordship",
       "status": "country",
       "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
       "existsFrom": null,
-      "existsTo": null,
+      "existsTo": 1319,
       "colour": "#dbba9e",
-      "wikidata": null
+      "wikidata": "Q546010"
     },
     {
       "id": "kingdom-of-tashir-dzoraget",
-      "name": "Kingdom of Tashir-Dzoraget",
+      "name": "Kingdom of Lori",
       "rank": "kingdom",
       "status": "country",
       "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 879,
+      "existsTo": 1118,
       "colour": "#f5ebef",
-      "wikidata": null
+      "wikidata": "Q112745"
     },
     {
       "id": "kingdom-of-georgia",
@@ -1009,10 +1009,10 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 800,
+      "existsTo": 1521,
       "colour": "#829cf2",
-      "wikidata": null
+      "wikidata": "Q2460755"
     },
     {
       "id": "kingdom-of-strathclyde",
@@ -1053,10 +1053,10 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
+      "existsFrom": 965,
       "existsTo": null,
       "colour": "#faf7c4",
-      "wikidata": null
+      "wikidata": "Q756617"
     },
     {
       "id": "kingdom-of-norway",
@@ -1064,10 +1064,10 @@
       "rank": "kingdom",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 872,
+      "existsTo": 1397,
       "colour": "#b40b62",
-      "wikidata": null
+      "wikidata": "Q2196956"
     },
     {
       "id": "pomeranian-lordships",
@@ -1170,14 +1170,14 @@
     },
     {
       "id": "house-of-anjou",
-      "name": "House of Anjou",
+      "name": "county of Anjou",
       "rank": "house",
       "status": null,
       "suzerain": "kingdom-of-the-franks",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 930,
+      "existsTo": 1360,
       "colour": "#6289ff",
-      "wikidata": null
+      "wikidata": "Q2991084"
     },
     {
       "id": "march-of-merseburg",
@@ -1196,10 +1196,10 @@
       "rank": "duchy",
       "status": null,
       "suzerain": "kingdom-of-the-franks",
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 841,
+      "existsTo": 1449,
       "colour": "#3d65d9",
-      "wikidata": null
+      "wikidata": "Q7703611"
     },
     {
       "id": "county-of-roussillon",
@@ -1493,7 +1493,7 @@
       "rank": "tribe",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
+      "existsFrom": 987,
       "existsTo": null,
       "colour": null,
       "wikidata": null
@@ -1511,14 +1511,14 @@
     },
     {
       "id": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
-      "name": "Abbasid Caliphate of Baghdad under Seljuk Rule",
+      "name": "Seljuk Empire",
       "rank": "sultanate",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1037,
+      "existsTo": 1194,
       "colour": "#009900",
-      "wikidata": null
+      "wikidata": "Q3708094"
     },
     {
       "id": "kingdom-of-the-franks",
