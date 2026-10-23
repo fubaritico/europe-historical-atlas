@@ -63,8 +63,12 @@ type Claim =
   | { id; kind: 'dependence'; territory; on: string; date }        // Champagne depends on the Kingdom of France
   | { id; kind: 'holding';    territory; holder; date }            // the house of Blois holds Champagne
   | { id; kind: 'bond';       holder; for: string; of: string; date } // the count, for Champagne, is the man of the king
-  | { id; kind: 'existence';  territory; date }                    // Champagne exists over this interval
+  | { id; kind: 'begins';     territory; date }                    // the emirate of Kemakh-Erzincan begins in 1072
+  | { id; kind: 'ends';       territory; date }                    // … and ends in 1228
 ```
+
+**Existence is two claims, a beginning and an end** (the dev, 2026-10-23, §8 Q4): each is compared like any
+date, with its own precision — Gemini's *« fin Xe siècle – 1182 »* has a vague start and an exact end.
 
 **Evidence** is what one source says of one claim, and where:
 
@@ -74,16 +78,25 @@ interface Evidence {
   source: string                      // a source id
   stance: 'supports' | 'contradicts'
   locator: string                     // "p. 128", "plate 23", "statement Q842091/P17"
+  checked: 'to-verify' | 'verified'   // has anyone opened the source at that place? (the dev, 2026-10-23)
+  via: string | null                  // the tool that brought it — "gemini", a connector — never a source itself
 }
 ```
 
-**`existence` is a claim, not a field.** Today `existsFrom` / `existsTo` sit on `YearPolity` as facts. In the
-machine they are claims with evidence like the rest — principle 0, nothing outside the machine. This rung only
+**A tool that searches is not a witness** (the dev, 2026-10-23). Gemini — or any language model, me included —
+gathers: the sources **it cites** are entered in the register and give the evidence, marked *to-verify* until
+someone has opened them at that place, then *verified*. Models invent citations (a real book, a page that does not
+say it), hence the mark. Measured on his example (the emirate of Kemakh-Erzincan, 22/10): nearly every citation was
+Wikipedia, so the whole answer is **one witness**, an encyclopaedia. Whether *to-verify* weighs less in concordance
+is **not decided** — for now it is shown, not weighed.
+
+**Existence is claimed, not a field.** Today `existsFrom` / `existsTo` sit on `YearPolity` as facts. In the
+machine they are `begins` and `ends` claims with evidence like the rest — principle 0, nothing outside the machine. This rung only
 defines the kind; moving the year files' dates into it is rung 6.
 
 **The two other kinds of uncertainty** — *imprécision* (the thing was vague) and *litige* (history was divided) —
 are claims the contributor makes, **not computed** (plan §1). I propose they come with the rungs that draw them
-(a vague limit already exists for tribes; the disputed zone is rung 8), not here. **Question for the dev, §8 Q5.**
+(a vague limit already exists for tribes; the disputed zone is rung 8), not here — **decided by the dev, §8 Q5.**
 
 ## 5. The two computations
 
@@ -98,7 +111,8 @@ claims answer the same question when they have the same kind and subject and **t
 | `dependence` | the territory | `on` |
 | `holding` | the territory | `holder` |
 | `bond` | the holder and the land (`for`) | `of` |
-| `existence` | the territory | the interval itself — overlap is agreement, not competition (§8 Q4) |
+| `begins` | the territory | `date` — two beginnings agree when their windows overlap (§8 Q3) |
+| `ends` | the territory | `date` — likewise |
 
 ### Attestation — a count
 
@@ -150,14 +164,27 @@ on 19/10.
 1. ~~**The kinds of source** and their weights~~ — **decided by the dev, 2026-10-22**: five kinds, weights
    `primary` 4 · `historian-atlas` 3 · `scholarly` 3 · `encyclopaedia` 2 · `crowd-database` 1 (*« on peut partir sur ce
    barème-là »*). Still a table the contributor can change, injected, never a default inside the computation.
-2. **A contradicting witness lowers concordance** — proposed above. The alternative is to count only support,
-   which would make a contested claim look as good as an undisputed one.
-3. **When do two dates overlap** — is *circa 1100* in competition with *1105*? Proposed: an instant *circa* is
-   read as a window (±10 years?) — the number is yours, or the rule is.
-4. **Existence**: overlapping intervals agree; disjoint ones (*911–1259* and *1066–1300*) compete on their
-   ends. Fine, or is existence better split into two claims, a beginning and an end?
-5. **Vagueness and dispute** — modelled with their drawing rungs (7, 8), or as claim kinds now?
-6. **A holder** — a person or a house, both allowed (*Hugh, count of Champagne*; *the house of Blois*). Enough?
+2. ~~**A contradicting witness lowers concordance**~~ — **decided by the dev, 2026-10-23**, as proposed: it counts
+   in the denominator (*« on va déjà essayer de travailler comme ça, on verra si c'est cohérent »* — a trial, to be
+   judged on real cases). Counting only support was refused: a contested claim would look as good as an undisputed one.
+3. ~~**When do two dates overlap**~~ — **decided by the dev, 2026-10-23: both** (*« par défaut c'est plus ou moins
+   10 ans, et après ça reste réglable »*). A *circa* instant is read as a window of **±10 years by default**; a date
+   may carry its own margin (*circa 1100, ±5*), which wins over the default. The default lives in the contributor's
+   settings, injected beside the weights — never a constant inside the computation. So *circa 1100* (1090–1110)
+   competes with *1105*.
+4. ~~**Existence**~~ — **decided by the dev, 2026-10-23**: two claims, a beginning and an end, each compared as a
+   date (§4). One interval would have needed a rule of its own — an exception. Same day, same yes: **a tool that
+   searches (Gemini) is not a witness**; its cited sources are, marked *to-verify* / *verified* (§4).
+5. ~~**Vagueness and dispute**~~ — **decided by the dev, 2026-10-23**: modelled with their drawing rungs (the vague
+   limit with the tribes' feather, the dispute with the hatched zone, rung 8), as claims like the others; nothing in
+   this rung closes the door to them.
+6. ~~**A holder**~~ — **decided by the dev, 2026-10-23**: a person or a house, both allowed, as the sources say it
+   (*Mengücek Ahmed Gazi* in 1100, *the Mengüjekids* over the whole span). A bond of homage names a person when one
+   is known. **Every person and every house carries its Wikidata id** (*« faut blinder au niveau information »*): the
+   id identifies — it settles which Hugh — and is not a witness; Wikidata speaking on a claim is evidence of a
+   crowd-database (weight 1) like any other. `null` while not found (CARTO-269 asks to tell *not searched yet* from
+   *no item*). His idea, same day: a genealogy could be drawn from it (Wikidata's father, mother, family) — CORE-271
+   in Idées.
 
 ## 9. How it will be verified
 
