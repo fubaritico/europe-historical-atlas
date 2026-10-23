@@ -77,6 +77,51 @@ of paint over someone else's.
 - **Recommendation**: build on **3.x**, keep level 1 thin and level 3 out — then the move to 4 costs the theme
   file and the renamed types, not a re-skin. Re-check 4.0's status when CONTRIB-219 (creating the app) starts.
 
+## Decided by the dev, 2026-10-23
+
+| what | by |
+| --- | --- |
+| Payload 3.x, on Next with React 19 — *« ça me va »* | the dev |
+| level 1: a light theme, so the admin is recognised as the historical atlas of Europe's world — *« un rappel »* | the dev |
+| level 2: our own screens with the design system where Payload has none; level 3 left out | the dev |
+| **one form per language**, Payload's native `localized` fields and its locale selector — **replaces CONTRIB-222's fr/en side by side**; a half-translated entry is reported by the export script (CONTRIB-223), the one place that sees both languages at once (`plan.md` P8) | the dev, on my recommendation |
+| the arbiter is named: the dev signs his arbitrations | the dev |
+| the source register, and its two forms below | the dev — *« c'est exactement comme ça que je le voyais »* |
+
+### The source register — declare a source once, then link it to a year
+
+The goal, in the dev's words: the same as Euratlas's *periodis* PDF — **for each year, the sources that served to
+draw its outlines and the derived maps, and sometimes its names**, naming leaning mostly on Wikipedia (*« une
+bonne boussole »*). The register holds 20 to 25 sources at first (the dev's atlases bought or downloaded, kept in
+the git-ignored `files/resources/Atlases/`), so a year picks them from a dropdown. The fields follow the `Source` of
+`evidence/step-2-concepts-in-core.md` §2, which is the line `/create-data-mention` already logs on ATLAS-152.
+
+**1. A source — written once, in the register**
+
+| field | example | input |
+| --- | --- | --- |
+| title | *Historical Atlas* | text |
+| author | William Shepherd | text |
+| publisher, year of edition | Henry Holt, 1911 | text, number |
+| kind | historian's atlas | select: primary · historian-atlas · scholarly · encyclopaedia · crowd-database — weights 4 · 3 · 3 · 2 · 1 (CORE-270, the dev 2026-10-22) |
+| licence | public domain | select: public domain · CC0 · CC BY · CC BY-SA · all rights reserved |
+| permitted use | calque | **computed from the licence, never typed** — a source in copyright can only be a reference (my call, confirmed by the dev: a mis-click must not let one pass as traced) |
+| address | a Commons or archive.org URL | URL, optional — a printed book has none |
+| copy of | Armenica.org → Hewsen 2001 | relation to other sources: a copy is not a second witness (principle 3) |
+
+Wikipedia and Wikidata are entries like any other (encyclopaedia, crowd-database) — no exception outside the machine.
+
+**2. A source linked to a year — what the year's « Sources » page lists**
+
+| field | example | input |
+| --- | --- | --- |
+| year | 1100 | select |
+| source | Shepherd 1911 | **dropdown of the register** |
+| what it served for | outlines · names · bonds of vassalage | checkboxes |
+| how | traced · read (reference) | choice, bounded by the permitted use |
+| regions | Armenia, Georgia | text |
+| plate or page | pl. 66 | text |
+
 ## Not verified
 
 - the official v4 migration guide;
