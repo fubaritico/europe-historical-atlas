@@ -106,7 +106,7 @@ jobs:
           echo "id length: ${#NETLIFY_SITE_ID} characters (a Netlify id is 36)"
           echo "id starts with: ${NETLIFY_SITE_ID:0:8}"
           echo "--- sites this token can administer ---"
-          npx --yes netlify-cli@latest sites:list --json > /tmp/sites.json 2>/dev/null || true
+          npx --yes netlify-cli@27.14.2 sites:list --json > /tmp/sites.json 2>/dev/null || true
           node -e 'const s=require("/tmp/sites.json");s.forEach(x=>console.log(x.id,x.name))' \
             || echo "could not list the sites"
 
@@ -123,7 +123,7 @@ jobs:
           COMMIT_SHA: ${{ github.sha }}
         run: |
           subject=${COMMIT_SUBJECT%%$'\n'*}
-          npx --yes netlify-cli@latest deploy \
+          npx --yes netlify-cli@27.14.2 deploy \
             --prod \
             --no-build \
             --dir=site \
