@@ -15,6 +15,9 @@ the entire codebase (two static bundles, the Cartographer's dev-server endpoints
 **The OWASP Top 10 is revised by edition** (2017, 2021, 2025 — not every year): once a year, check owasp.org for a
 new edition, and when one is out, update the table below and the ten `references/` files to it (the dev, 2026-10-23).
 
+**When it runs**: before an application goes online (the Cartographer's demo, CARTO-200; the contribution tool) and
+once a year. Between runs, `/review`'s security reviewer reads the `references/` of the categories each diff touches.
+
 ## OWASP Top 10:2025 Categories
 
 | # | Category | Key Change from 2021 |

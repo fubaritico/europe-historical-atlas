@@ -1,78 +1,56 @@
 # A07:2025 — Authentication Failures
 
-OWASP Top 10 #7 (renamed from "Identification and Authentication Failures" in 2021).
-Weaknesses in authentication mechanisms.
+OWASP Top 10 #7. Weaknesses in confirming identity and managing sessions. **The repository has no authentication today**: the atlas is public and read-only, and the Cartographer authenticates a request by where it comes from (same machine). Accounts, login and a security layer are planned with the contribution tool (Payload 3.x on Next.js, `files/plans/plan.md` P7). Most items below are therefore `(planned)`; an auditor reports them as not applicable until that code exists.
 
 ## Checklist
 
 ### Critical
 
-#### OWASP-A07-001: Authentication bypass
-- **Where**: API middleware (`apps/api/src/middleware/auth.ts`)
-- **Check**: `requireAuth` properly validates JWT via `supabase.auth.getUser()` (not just decode)
-- **Check**: No fallback path that allows unauthenticated access
-- **Check**: Token extracted correctly from `Authorization: Bearer <token>` header
+#### OWASP-A07-001: The dev server's "same machine" check is the only authentication, and it holds
+- **Where**: `packages/cartographer/src/devServer/httpEndpoint.ts` (`isSameMachineRequest`, `LOOPBACK_HOST`), `draftEndpoint.ts` (`isFromHere`)
+- **Check**: The check cannot be passed by a page from another origin (its `Origin` differs) nor by a DNS-rebound name (its `Host` is not loopback); `LOOPBACK_HOST` is anchored at both ends
+- **Check**: It is never presented or reused as authentication for anything reachable off the machine (A01-002)
 
-#### OWASP-A07-002: Session fixation
-- **Where**: Auth flow (login, signup, token refresh)
-- **Check**: Session token regenerated after authentication state change
-- **Check**: Old tokens invalidated on logout
-- **Note**: Supabase handles this — verify no custom session logic bypasses it
+#### OWASP-A07-002: (planned) Authentication on every non-public route of the hosted tool
+- **Where**: a hosted server (Payload/Next today's plan; Express or another Node service if one is added) — the future auth collection, Next route handlers, server actions, any middleware
+- **Check**: Every route and server action that reads unpublished data or writes checks the session server-side; the admin UI hiding a button is not a check
+- **Check**: An error while verifying a session denies access (see A10)
 
 ### High
 
-#### OWASP-A07-003: Missing token expiry enforcement
-- **Where**: Auth configuration, token handling
-- **Check**: JWT has reasonable expiry (current: 600s / 10 min)
-- **Check**: Expired tokens are rejected server-side (not just client-side)
-- **Check**: Refresh token rotation implemented (old refresh tokens invalidated)
+#### OWASP-A07-003: (planned) Session tokens and cookies
+- **Where**: the future Payload auth configuration (`auth.tokenExpiration`, `cookies`)
+- **Check**: Expiry set to a deliberate value; cookies `HttpOnly`, `Secure`, `SameSite=Lax` or stricter; logout invalidates server-side
+- **Note**: Verify Payload's cookie and JWT defaults against `opensrc/` or its docs on the web, not from memory
 
-#### OWASP-A07-004: Insecure token storage
-- **Where**: Mobile — token persistence, Web — token storage
-- **Check**: Mobile tokens in `expo-secure-store` (not AsyncStorage)
-- **Check**: Web tokens in httpOnly cookies or secure memory (not plain localStorage)
-- **Accepted**: bare RN app uses AsyncStorage (learning reference, not published)
+#### OWASP-A07-004: (planned) No token in browser storage or URLs
+- **Where**: the future contribution UI, the Cartographer if it ever saves online (`s15`, the online saving tier named in `yearWriteEndpoint.ts`)
+- **Check**: Credentials ride in an `HttpOnly` cookie, never in `localStorage`, `sessionStorage` or a query string; today `sessionStorage` holds camera state only (`packages/atlas/src/camera/cameraState.ts`, `packages/atlas/src/controls/mapCameraStore.ts`)
 
-#### OWASP-A07-005: Missing MFA validation server-side
-- **Where**: API auth middleware, TOTP flow
-- **Check**: If MFA enrolled, server validates TOTP before granting full access
-- **Check**: MFA cannot be bypassed by replaying pre-MFA token
-
-#### OWASP-A07-006: OAuth misconfiguration
-- **Where**: OAuth setup (Google), redirect URIs
-- **Check**: Redirect URIs strictly validated (no open redirect)
-- **Check**: State parameter used to prevent CSRF on OAuth flow
-- **Check**: OAuth tokens not exposed in client-side URL fragments without handling
+#### OWASP-A07-005: (planned) Online saving from the Cartographer
+- **Where**: the future replacement for `PUT /__years/<year>` once saving goes online (a Netlify Function or the hosted tool)
+- **Check**: The same-machine lock is replaced by real authentication and authorization, not carried over; the body checks of `yearWritePlan.ts` stay
 
 ### Medium
 
-#### OWASP-A07-007: Weak session management
-- **Where**: Client auth hooks, session handling
-- **Check**: Session invalidated on sign-out (not just cleared client-side)
-- **Check**: Concurrent session handling defined (one device signs out, others?)
-- **Check**: Session expiry communicated to user (modal, redirect)
+#### OWASP-A07-006: (planned) Brute-force protection
+- **Where**: the future login, password-reset and email-verification routes
+- **Check**: `maxLoginAttempts` and `lockTime` set; rate limiting in front (A06-004)
 
-#### OWASP-A07-008: Missing brute-force protection on OTP/TOTP
-- **Where**: OTP verification, TOTP challenge screens
-- **Check**: Limited attempts before lockout
-- **Check**: Rate limiting on verification endpoint
-- **Note**: Likely handled by Supabase — verify
+#### OWASP-A07-007: (planned) Credential enumeration
+- **Where**: the future login, signup and password-reset flows
+- **Check**: The same answer whether the account exists or not
 
-#### OWASP-A07-009: Credential enumeration
-- **Where**: Login, signup, password reset flows
-- **Check**: Same response for valid/invalid email on login failure
-- **Check**: No timing side-channel revealing if user exists
-- **Note**: Supabase default behavior — verify not overridden
+#### OWASP-A07-008: (planned) Admin and default accounts
+- **Where**: the future Payload seed / first-user flow
+- **Check**: No default administrator with a known password; the first user is created deliberately
 
 ### Low
 
-#### OWASP-A07-010: Missing password strength requirements
-- **Where**: Signup form validation
-- **Check**: Minimum password length enforced (client + server)
-- **Check**: Common password list check
-- **Note**: May be Supabase-configured — check project settings
+#### OWASP-A07-009: (planned) Password policy
+- **Where**: the future auth collection's validation
+- **Check**: A minimum length and a check against common passwords
 
-#### OWASP-A07-011: Token in URL
-- **Where**: Deep links, navigation, API calls
-- **Check**: Tokens never passed as URL query parameters
-- **Check**: Magic links / OTP links handled securely (one-time use)
+#### OWASP-A07-010: CI and registry tokens are scoped and rotated
+- **Where**: `.github/actions/setup/action.yml` (`github.token`), the repository secrets used in `.github/workflows/ci.yml` and `sonarqube.yml`, the local `~/.npmrc` (not in the repository)
+- **Check**: The local GitHub Packages token is `read:packages` only; the Netlify and Sonar tokens are scoped to this site and project and can be revoked without breaking anything else

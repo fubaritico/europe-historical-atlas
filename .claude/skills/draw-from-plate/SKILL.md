@@ -1,6 +1,6 @@
 ---
 name: draw-from-plate
-description: Draw polities in the Cartographer from a georeferenced reference plate (a screenshot of a historical atlas, Euratlas 1100 so far), one polity at a time, reusing neighbours' anchors, and check each against the plate before the next. Use when copying a map into the Cartographer, tracing a reference, the "general test" / répétition générale, drawing a duchy, a vassal or a kingdom from a plate, or when the dev pastes atlas screenshots to draw.
+description: Draw polities in the Cartographer from a georeferenced plate of a historical atlas (traced only when its licence allows; a plate in copyright, Euratlas included, is read as a reference), one polity at a time, reusing neighbours' anchors, and check each against the plate before the next. Use when copying a map into the Cartographer, tracing a reference, the "general test" / répétition générale, drawing a duchy, a vassal or a kingdom from a plate, or when the dev pastes atlas screenshots to draw.
 allowed-tools: Bash Read Write Edit
 metadata:
   author: europe-map
@@ -19,10 +19,12 @@ Read first: `files/plans/cartographer/drawing-as-claude.md` (how the Pen behaves
 
 ## Licence — before anything
 
-A plate from Euratlas, the Duby atlas or any copyrighted atlas is a **reference, never a source to publish**
-(memory `euratlas-data-and-licensing`). Year folders are git-ignored **except `years/1100/`, which is tracked
-and published**: a year drawn from a plate is never committed — check `git status` before any commit after a drawing
-session, and at the end of a test move the year aside as `years/<year>.<name>/` and put the dev's own year back.
+**Every plate is a source of the year, and goes through `/create-data-mention` before the first stroke**: its licence
+decides whether it is a **calque** (traced: a public-domain or free plate, Shepherd 1911 for one) or a **référence**
+(read for the facts, the geometry drawn by us on the public-domain backdrop). Euratlas, the Duby atlas and every atlas
+in copyright are **références, never calques** (memory `euratlas-data-and-licensing`). So a plate in copyright is
+not traced here: it is read, and the polity drawn by hand. `years/1100/` is tracked and published — check
+`git status` before any commit after a drawing session.
 
 ## Setup (once per session)
 

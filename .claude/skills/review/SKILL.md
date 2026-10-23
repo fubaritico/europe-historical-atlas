@@ -54,7 +54,8 @@ scope (paths + content).
 
 Subagents (by `name` / `agent_type`):
 
-1. **`review-security`** — security vulnerabilities (XSS, injection, secrets, unvalidated input)
+1. **`review-security`** — security vulnerabilities (XSS, injection, secrets, unvalidated input), plus the OWASP
+   checklists of the categories the diff touches (`audit-owasp/references/`)
 2. **`review-architecture`** — architecture rules (DI/seams, SOLID, GPU-leak, structure)
 3. **`review-quality`** — code quality the lint cannot see (misleading JSDoc, dead code, untested branches)
 4. **`review-accessibility`** — WCAG 2.1 AA on HTML overlays + canvas fallback/keyboard equivalence

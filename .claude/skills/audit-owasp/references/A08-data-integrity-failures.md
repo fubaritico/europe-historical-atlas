@@ -1,70 +1,52 @@
 # A08:2025 — Software and Data Integrity Failures
 
-OWASP Top 10 #8 (same position as 2021). Code and infrastructure that does not protect against integrity violations.
+OWASP Top 10 #8. Code and data whose integrity is assumed rather than checked. Here: the year files the atlas trusts, the dev server's writes, the CI that builds and deploys, and the export the contribution tool will produce.
 
 ## Checklist
 
 ### High
 
-#### OWASP-A08-001: Untrusted deserialization
-- **Where**: API request handling, any JSON.parse of external data
-- **Check**: No `JSON.parse()` of user input without try/catch and schema validation
-- **Check**: No `eval()` or `Function()` to process data (also covered in A05)
-- **Check**: Zod validation on ALL request bodies before processing
+#### OWASP-A08-001: Untrusted data is parsed, not assumed
+- **Where**: `packages/core/src/data/yearFormat.ts`, `yearSource.ts`, `yearManifest.ts`, `yearConsistency.ts` (the atlas's readers); `packages/cartographer/src/devServer/yearWriteEndpoint.ts`, `draftBody.ts` (`JSON.parse` of request bodies); `packages/cartographer/src/wikidata/wikidataSource.ts` (`readBatchAnswer`), `wikidataFacts.ts` (`readEntity`)
+- **Check**: Every `JSON.parse` / `response.json()` result is typed `unknown` and narrowed by a schema or a field-by-field reader before use; no `as` cast stands in for validation
+- **Check**: The Wikidata answer is checked for `error` and `entities`, and an entity that does not read becomes `unknown`, never a half-filled fact
 
-#### OWASP-A08-002: Missing integrity checks on critical data
-- **Where**: Financial operations (balance, transactions, pots)
-- **Check**: Amounts validated server-side (not trusted from client)
-- **Check**: Running totals recomputed server-side, not accepted from client
-- **Check**: No client-side calculation accepted as source of truth
+#### OWASP-A08-002: The deployed bytes are the checked bytes
+- **Where**: `.github/workflows/ci.yml` (`deploy` downloads `atlas-${{ github.sha }}`), `build.yml` (worker-chunk and GPL guards, `upload-artifact`)
+- **Check**: Deploy never rebuilds; it ships the artefact the build job asserted on; deploy runs only on `main` after `quality-gate` succeeds
 
-#### OWASP-A08-003: Insecure CI/CD pipeline
-- **Where**: `.github/workflows/`, build scripts, Husky hooks
-- **Check**: No secrets in workflow files
-- **Check**: Actions use pinned versions (SHA, not `@latest`)
-- **Check**: No arbitrary code execution from PR comments
-- **Note**: If no CI/CD configured yet, note as informational
+#### OWASP-A08-003: CI pipeline integrity
+- **Where**: `.github/workflows/*.yml`, `.github/actions/setup/action.yml`
+- **Check**: No `pull_request_target`; untrusted text through `env:` only; third-party actions pinned (A03-003); no tool fetched at `@latest` with a secret (A03-002)
+
+#### OWASP-A08-004: Atomic and consistent writes
+- **Where**: `packages/cartographer/src/devServer/yearWriteEndpoint.ts` (`writeAll`), `draftEndpoint.ts` (`.tmp` then rename), `yearWritePlan.ts`
+- **Check**: All files of a year go to `.tmp` before any rename, the manifest last; a year's three files are cross-checked by core before writing
 
 ### Medium
 
-#### OWASP-A08-004: Missing subresource integrity (SRI)
-- **Where**: Web HTML, CDN script/style loading
-- **Check**: External scripts/styles have `integrity` attribute
-- **Check**: No CDN resources loaded without integrity verification
-- **Note**: If all resources bundled (Vite), this may not apply
+#### OWASP-A08-005: Local commit hooks are a convenience, CI is the gate
+- **Where**: `.husky/pre-commit`, `.husky/commit-msg`, `.lintstagedrc.json`, `commitlint.config.js`, `.github/workflows/validate.yml`
+- **Check**: Everything the hooks check is re-checked in CI (lint, type-check, test, `format:check`), since `--no-verify` skips the hooks
 
-#### OWASP-A08-005: Unsigned or unverified updates
-- **Where**: OTA updates (Expo Updates), package installation
-- **Check**: Expo Updates configured with code signing (if used)
-- **Check**: No custom update mechanism that bypasses store review
+#### OWASP-A08-006: Integrity of the compute worker's messages
+- **Where**: `packages/core/src/pipeline/computeServer.ts`, `workerCompute.ts`
+- **Check**: The worker is same-origin and bundled; an unknown command `kind` throws in `computeServer.ts`; a message whose `id` matches no pending call is dropped in `workerCompute.ts` — confirm that silence is a decision (`rules/error-handling.md`), not an accident
 
-#### OWASP-A08-006: Client-side data manipulation
-- **Where**: Financial forms, amount inputs
-- **Check**: Server re-validates all business rules (don't trust client validation alone)
-- **Check**: Optimistic updates don't persist on server rejection
-- **Check**: TanStack Query mutation error handling reverts optimistic state
+#### OWASP-A08-007: (planned) Integrity of the export from the contribution database
+- **Where**: the future export script from Payload's SQLite to static JSON (CONTRIB-223)
+- **Check**: The export's output goes through core's readers (the same schemas the atlas uses) before it is written into `public/`; a half-translated entry is reported (as `plan.md` P8 says), not shipped silently
 
 ### Low
 
-#### OWASP-A08-007: Missing file integrity monitoring
-- **Where**: Build outputs, deployment artifacts
-- **Check**: Build outputs deterministic or checksummed
-- **Note**: Informational for this project stage
+#### OWASP-A08-008: Third-party resources loaded at run time
+- **Where**: `packages/atlas/index.html`, `packages/cartographer/index.html`, `packages/cartographer/workbench.html`
+- **Check**: No script or stylesheet from a CDN; if one is ever added, it carries Subresource Integrity
 
-#### OWASP-A08-008: Auto-update without user consent
-- **Where**: Mobile app update mechanism
-- **Check**: Major updates require user acknowledgment
-- **Check**: No forced app reload without warning
-- **Note**: Informational — relevant when Expo Updates is configured
+#### OWASP-A08-009: Content Security Policy against injected scripts
+- **Where**: `packages/atlas/public/_headers`
+- **Check**: A CSP without `'unsafe-inline'` / `'unsafe-eval'` for scripts (none today — see A02-002)
 
-#### OWASP-A08-009: Unvalidated redirects from external sources
-- **Where**: OAuth callbacks, deep links, email links
-- **Check**: Redirect targets validated against allowlist
-- **Check**: No open redirect from OAuth `redirectTo` parameter
-- **Known**: SEC-006 (deferred — oauth.ts redirectTo not validated yet)
-
-#### OWASP-A08-010: Missing CSP for inline scripts
-- **Where**: Web HTML template, server response headers
-- **Check**: Content-Security-Policy restricts inline scripts
-- **Check**: No `unsafe-inline` or `unsafe-eval` in CSP
-- **Note**: Vite injects inline scripts — may need nonce-based CSP
+#### OWASP-A08-010: Provenance of the published data
+- **Where**: `packages/atlas/public/years/*/polities.json` (`sources`, `yearProvenanceSchema` in `yearFormat.ts`, cross-checked in `yearConsistency.ts`), `files/plans/sources/`
+- **Check**: Each published year declares its provenance; a source traced under a licence that forbids it never reaches `public/` (licence integrity, not only security)

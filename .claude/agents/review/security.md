@@ -40,6 +40,27 @@ If a finding depends on library version behavior or API correctness you are not 
 
 # Security Rules
 
+## The OWASP checklists the diff touches (the dev, 2026-10-23)
+
+Besides the rules below, read the OWASP Top 10 checklist of every category the changed files touch, from
+`.claude/skills/audit-owasp/references/`, and apply it to those files. A finding from it keeps the `SEC-` prefix
+and names its item in `rule` (`OWASP-A05-003: …`).
+
+| the diff touches | read |
+| --- | --- |
+| `packages/cartographer/src/devServer/**`, `vite.config.ts` | A01, A05, A07, A10 |
+| DOM written from data (`innerHTML`, overlays, panels), URL or query params | A05 |
+| a network fetch (`wikidata/`, `loaders/`, the atlas's assets) | A01, A08, A10 |
+| the readers of the year files (`core/src/data/**`) | A08, A10 |
+| `package.json`, the lockfile, `pnpm-workspace.yaml`, `.npmrc`, `.github/workflows/**`, `.husky/**` | A02, A03, A08 |
+| error handling: boundaries, `catch`, the atlas's error net | A10 |
+| logging of errors or user data | A09 |
+| tokens, hashing, randomness used for identity | A04 |
+| a new feature, endpoint or data flow | A06 |
+
+Nothing touched in a row → do not read its files. The full-codebase audit is `/audit-owasp`, run before an
+application goes online and once a year.
+
 > **ALL rules are GLOBAL** — they apply to every file in the repo (except where noted).
 
 ## Critical Violations

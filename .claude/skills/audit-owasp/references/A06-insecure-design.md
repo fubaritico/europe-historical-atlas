@@ -1,65 +1,51 @@
 # A06:2025 — Insecure Design
 
-OWASP Top 10 #6 (was #4 in 2021). Missing or ineffective security controls at the design level.
+OWASP Top 10 #6 (was #4 in 2021). Flaws in the design itself, which no implementation can fix. Here: the boundaries the design draws — what is trusted, what is written, what is published — and the contribution tool that will open them.
 
 ## Checklist
 
 ### High
 
-#### OWASP-A06-001: Missing rate limiting on auth endpoints
-- **Where**: API auth-related routes, login/signup flows
-- **Check**: Brute-force protection on authentication attempts
-- **Check**: Rate limiting on OTP verification, TOTP challenges
-- **Note**: May be handled by Supabase Auth (verify configuration)
+#### OWASP-A06-001: Every file the atlas reads is untrusted until parsed
+- **Where**: `packages/core/src/data/yearFormat.ts` (zod `strictObject` schemas), `yearSource.ts`, `yearManifest.ts`, `yearConsistency.ts`, `heightmap.ts`, `landMask.ts`, `riverSource.ts`, `regionSource.ts`, `assetError.ts`
+- **Check**: Every JSON payload goes through a schema before use (strict objects: an unknown key is an error); every binary payload's size is checked against its metadata before it is read; a failure becomes an `AssetError` with its kind, never a partial value
 
-#### OWASP-A06-002: Missing rate limiting on mutation endpoints
-- **Where**: API POST/PUT/DELETE routes
-- **Check**: No ability to spam create/update/delete operations
-- **Check**: At minimum, application-level throttling or Supabase plan limits
+#### OWASP-A06-002: The dev server writes only what core reads back
+- **Where**: `packages/cartographer/src/devServer/yearWritePlan.ts`, `yearWriteEndpoint.ts` (`writeAll`, two passes), `draftBody.ts` (`whyNotADraft`)
+- **Check**: A year is written only after `planYearWrite` has checked it with core's own readers; files are written to `.tmp` then renamed, so an interrupted save leaves the previous year whole
+- **Check**: A draft is deliberately not validated beyond its year (documented in `draftEndpoint.ts`) — confirm it is only ever read back by the editor and checked on reopening
 
-#### OWASP-A06-003: Business logic bypass
-- **Where**: API routes with financial operations (add money, withdraw, transfer)
-- **Check**: Race conditions on balance checks (read-then-write without atomicity)
-- **Check**: Negative amount bypass (can submit negative values to reverse operations?)
-- **Check**: Integer overflow on financial amounts
+#### OWASP-A06-003: Input bounds
+- **Where**: `packages/cartographer/src/devServer/httpEndpoint.ts` (`MAX_BODY_BYTES`, 32 MB), the schemas in `packages/core/src/data/yearFormat.ts`, `packages/cartographer/src/wikidata/wikidataSource.ts` (`WIKIDATA_BATCH`)
+- **Check**: The body cap applies before parsing; arrays and strings that drive a loop or an allocation (rings, anchors, ids) have a reasonable bound or a cost that is linear
 
-#### OWASP-A06-004: Missing input bounds
-- **Where**: API schemas, form validation
-- **Check**: Numeric inputs have min/max bounds (amounts, quantities)
-- **Check**: String inputs have max length limits
-- **Check**: Array inputs have max size limits
-- **Check**: File uploads (if any) have size + type limits
+#### OWASP-A06-004: (planned) Abuse limits on the hosted contribution tool
+- **Where**: a hosted server (Payload/Next today's plan; Express or another Node service if one is added)
+- **Check**: Rate limiting on login, password reset and every mutation; Payload's `maxLoginAttempts` / `lockTime` set on the auth collection
+- **Check**: An upload (a source scan, a plate) has a size and type limit
+- **Note**: Verify Payload's auth options against `opensrc/` or its docs on the web, not from memory
 
 ### Medium
 
-#### OWASP-A06-005: Lack of anti-automation
-- **Where**: Forms, public-facing endpoints
-- **Check**: CAPTCHA or equivalent on public-facing operations (signup, contact)
-- **Note**: For this project, Supabase Auth may handle this — verify
+#### OWASP-A06-005: Publication is a separate, reviewable step
+- **Where**: `.gitignore` (years un-ignored one by one), `.github/workflows/build.yml` and `ci.yml` (deploy of the artefact the gate checked), (planned) the export script from the Payload database to static JSON
+- **Check**: Nothing a contributor types reaches the published site without passing the gate: the export writes files that are committed and built like any other, rather than being served live
 
-#### OWASP-A06-006: Predictable resource identifiers
-- **Where**: API routes with ID parameters
-- **Check**: IDs are UUIDs (not sequential integers) — harder to enumerate
-- **Check**: No information leakage via ID format
+#### OWASP-A06-006: Concurrent writers do not lose work silently
+- **Where**: `packages/cartographer/src/devServer/yearWriteEndpoint.ts` (`If-Match` against `yearStamp`, 412), `packages/core/src/data/yearStamp.ts`
+- **Check**: A save conditional on the opened fingerprint is refused when the disk changed; the comparison happens just before the write
+- **Check**: (planned) The contribution tool keeps versions and an arbitration is signed with the others kept (DESIGN-262), so an edit never erases a competing claim
 
-#### OWASP-A06-007: Missing transaction isolation
-- **Where**: Financial operations (add/withdraw money, budget allocation)
-- **Check**: Read-then-write operations should be atomic or use optimistic locking
-- **Check**: Concurrent requests cannot double-spend or create negative balances
-
-#### OWASP-A06-008: Insufficient separation of environments
-- **Where**: Config files, env variables
-- **Check**: Dev/test credentials cannot accidentally reach production
-- **Check**: Dev-only endpoints (`/dev/*`) gated behind `NODE_ENV` check
+#### OWASP-A06-007: Separation of environments
+- **Where**: `packages/cartographer/vite.config.ts` (`apply: 'serve'`), `import.meta.env.DEV` gates, `packages/atlas/public/` shared as the Cartographer's `publicDir`
+- **Check**: Writing exists only in local development; the shared `public/` never receives drafts, snapshots or `.tmp` files that a build would publish
 
 ### Low
 
-#### OWASP-A06-009: Missing account lockout
-- **Where**: Auth flow
-- **Check**: Supabase config includes max failed attempts before lockout
-- **Note**: Informational — likely handled at Supabase level
+#### OWASP-A06-008: (planned) Account lifecycle
+- **Where**: the future Payload auth collection
+- **Check**: Lockout after failed attempts, email verification before contributing, a way to revoke a contributor
 
-#### OWASP-A06-010: No abuse monitoring
-- **Where**: API, auth flows
-- **Check**: Ability to detect unusual patterns (many failed logins, rapid operations)
-- **Note**: Informational for this project stage
+#### OWASP-A06-009: (planned) Abuse monitoring
+- **Where**: a hosted server (Payload/Next today's plan; Express or another Node service if one is added)
+- **Check**: Spikes of failed logins or mass edits are visible to the maintainer (see A09)

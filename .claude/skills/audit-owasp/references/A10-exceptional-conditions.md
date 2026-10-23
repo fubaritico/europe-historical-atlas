@@ -1,92 +1,64 @@
 # A10:2025 — Mishandling of Exceptional Conditions
 
-OWASP Top 10 #10 (new for 2025, replaces SSRF which was merged into A01). Programs that fail
-to prevent, detect, and respond to unusual situations — leading to crashes, unexpected behavior,
-information disclosure, and exploitable states.
-
-Key CWEs: CWE-209 (sensitive info in errors), CWE-248 (uncaught exceptions), CWE-636 (fail open),
-CWE-703 (improper exception handling), CWE-754 (missing unusual condition checks), CWE-756
-(missing custom error page).
+OWASP Top 10 #10 (new in 2025). Failing open, swallowing errors, leaking internals, leaving state half-changed. In this project, error handling is a decision of the developer's, never an implementation detail (`rules/error-handling.md`): an auditor flags any undiscussed fallback, swallowed `catch` or `?? default` standing in for a value that failed to arrive.
 
 ## Checklist
 
 ### Critical
 
-#### OWASP-A10-001: Fail-open auth middleware (CWE-636)
-- **Where**: API middleware (`apps/api/src/middleware/auth.ts`)
-- **Check**: If `requireAuth` throws an exception, the request MUST be denied (401), never passed through
-- **Check**: No `try { verifyToken() } catch { /* pass */ }` pattern — exception = deny access
-- **Check**: Auth middleware uses fail-closed pattern: any error → 401 response
+#### OWASP-A10-001: The dev server's lock fails closed
+- **Where**: `packages/cartographer/src/devServer/httpEndpoint.ts` (`isSameMachineRequest`), `draftEndpoint.ts` (`isFromHere`)
+- **Check**: A missing `Host` or `Origin` returns `false` (refused), never a pass; no `try/catch` around the check can turn an exception into acceptance
 
-#### OWASP-A10-002: Missing global error handler
-- **Where**: API Express app (`apps/api/src/index.ts`)
-- **Check**: Express global error handler registered (`app.use((err, req, res, next) => ...)`)
-- **Check**: Global handler returns generic message, never stack traces or internal details
-- **Check**: Global handler logs the full error server-side for debugging
+#### OWASP-A10-002: A failed write leaves the previous state whole and says so
+- **Where**: `packages/cartographer/src/devServer/yearWriteEndpoint.ts` (`writeAll`), `draftEndpoint.ts`, `httpEndpoint.ts` (`respond`)
+- **Check**: A disk error after some `.tmp` files are written leaves the year readable; the `catch` answers 500 and logs, it never continues as if saved
+- **Check**: Stray `.tmp` files left by an interrupted save are ignored by readers and git (`**/public/years/*.tmp`)
+
+#### OWASP-A10-003: (planned) The hosted tool fails closed
+- **Where**: a hosted server (Payload/Next today's plan; Express or another Node service if one is added) — auth middleware, access functions
+- **Check**: An exception while reading a session or evaluating an `access` function denies; no `catch { /* pass */ }` around authorization
 
 ### High
 
-#### OWASP-A10-003: Stack traces in error responses (CWE-209)
-- **Where**: API error handlers, catch blocks
-- **Check**: No `err.stack`, `err.message` from internal errors sent to client
-- **Check**: No `JSON.stringify(error)` that might serialize stack/internal paths
-- **Check**: Client receives only `{ "error": "Human-readable message" }` — no internals
-- **Overlap**: Also covered in A02-003, but A10 focuses on the exception handling path specifically
+#### OWASP-A10-004: Internals do not leak into answers
+- **Where**: `packages/cartographer/src/devServer/httpEndpoint.ts` (`diskCodeOf`), `vite.config.ts` (`mountEndpoint`'s 500), `packages/cartographer/src/ui/components/ErrorBoundary/`, `packages/atlas/src/ui/errorNet.ts`
+- **Check**: The dev server answers a fixed sentence and Node's code; stacks and paths stay in the terminal
+- **Check**: What the boundaries and the atlas's error net show on screen in a production build is a decision (showing raw error text "in development only" is pending with the dev)
 
-#### OWASP-A10-004: Uncaught promise rejections (CWE-248)
-- **Where**: All async handlers in API routes, web loaders, mobile screens
-- **Check**: Every `async` route handler wrapped in try/catch or uses Express async error forwarding
-- **Check**: No `.then()` chains without `.catch()`
-- **Check**: `process.on('unhandledRejection')` handler registered in API entry point
+#### OWASP-A10-005: Unhandled rejections
+- **Where**: every `async` path — the readers in `packages/core/src/data/`, `packages/core/src/pipeline/workerCompute.ts`, `packages/cartographer/src/wikidata/wikidataSource.ts`, the Cartographer's save and draft calls
+- **Check**: Every promise is awaited or has a rejection handler; the atlas's `errorNet.ts` listens to `unhandledrejection`; the Cartographer has no such net yet (A09-005)
 
-#### OWASP-A10-005: Sensitive data leaked in exception messages (CWE-209)
-- **Where**: Custom error classes, Supabase error forwarding
-- **Check**: Supabase `error.message` reviewed before forwarding to client (may contain SQL details)
-- **Check**: Zod validation errors sanitized (may reveal schema structure)
-- **Check**: No database connection strings, file paths, or internal IPs in error responses
+#### OWASP-A10-006: Untrusted input fails loudly and typed
+- **Where**: `packages/core/src/data/assetError.ts` (`transport | schema | consistency | semantic`), `yearSource.ts`, `packages/core/src/i18n/messageFormat.ts` (`MessageFormatError`)
+- **Check**: A bad file becomes an `AssetError` of its kind and a notice (`packages/atlas/src/ui/notice.ts`); a declared degraded mode (the land-mask fallback) announces itself; a missing message value throws rather than rendering a hole
 
 ### Medium
 
-#### OWASP-A10-006: Missing default cases (CWE-754)
-- **Where**: Switch statements, if/else chains in API handlers
-- **Check**: Switch on user input always has `default` case
-- **Check**: Enum-like checks have exhaustive handling or explicit fallback
-- **Check**: No silent pass-through when unexpected value received
+#### OWASP-A10-007: Exhaustive handling of kinds
+- **Where**: `switch` statements over a discriminated union — `packages/core/src/pipeline/computeServer.ts` (throws on an unknown command), the canvas tools and the endpoints' method dispatch
+- **Check**: An unknown case throws or refuses with a log; none falls through to a plausible default
 
-#### OWASP-A10-007: Partial transaction on exception
-- **Where**: Multi-step API operations (financial mutations, onboarding setup)
-- **Check**: If a multi-step operation fails mid-way, prior steps are rolled back
-- **Check**: Supabase RPCs used for atomic operations (single SQL transaction)
-- **Check**: No partial state committed when a later step throws
+#### OWASP-A10-008: Swallowed `catch` blocks
+- **Where**: every `catch {` and `catch (` in `packages/*/src` (e.g. `yearWriteEndpoint.ts` and `draftBody.ts` on `JSON.parse`, `yearsOnDisk.ts` on `ENOENT`, the `sessionStorage` stores in `packages/atlas/src/camera/cameraState.ts` and `controls/mapCameraStore.ts`)
+- **Check**: Each one answers, rethrows or logs, and its choice is the documented one; `yearsOnDisk.ts` turns only `ENOENT` into `null` and rethrows the rest
 
-#### OWASP-A10-008: Resource leaks in exception paths
-- **Where**: Database connections, file handles, external API calls
-- **Check**: Resources cleaned up in `finally` blocks, not just happy path
-- **Check**: Supabase client connections properly managed (SDK handles pooling, but verify custom clients)
-- **Check**: HTTP client timeouts set to prevent hanging on failed requests
+#### OWASP-A10-009: Silent substitution of a broken value
+- **Where**: all TypeScript under `packages/*/src`, in particular numeric paths (relief, projection, camera)
+- **Check**: No `?? default`, `|| 0` or comparison that turns a `NaN` or a missing value into a plausible one (the `reliefWorldY` sea-level case recorded in `rules/error-handling.md` is the pattern to look for)
 
-#### OWASP-A10-009: Error boundaries missing in client apps
-- **Where**: React web app, React Native mobile app
-- **Check**: React error boundaries at route/screen level (catch rendering errors)
-- **Check**: Error boundaries show user-friendly message, not crash dump
-- **Check**: Error boundaries report to error tracking service (if configured)
-
-#### OWASP-A10-010: TanStack Query error handling gaps
-- **Where**: Query/mutation hooks in web and mobile apps
-- **Check**: `onError` callbacks handle errors gracefully (toast, redirect, retry)
-- **Check**: Failed mutations don't leave UI in inconsistent state
-- **Check**: Network errors distinguished from server errors (different UX)
+#### OWASP-A10-010: Resources released on failure
+- **Where**: `packages/core/src/pipeline/workerCompute.ts` (`die`, pending calls rejected), the atlas's three.js teardown (`dispose()`), `packages/atlas/src/ui/errorNet.ts` (listener removal)
+- **Check**: A worker that dies rejects every pending call; GPU resources and listeners are released on teardown and on error paths
 
 ### Low
 
-#### OWASP-A10-011: Silent null/undefined handling
-- **Where**: All TypeScript code
-- **Check**: Optional chaining (`?.`) not used to silently swallow errors that should be caught
-- **Check**: Nullish coalescing (`??`) fallbacks are intentional, not hiding bugs
-- **Check**: `as` type assertions not masking potentially null values
+#### OWASP-A10-011: Network calls without a timeout
+- **Where**: `packages/cartographer/src/wikidata/wikidataSource.ts` (`deps.fetch`), the `fetch` calls in `packages/core/src/data/`
+- **Check**: None passes an `AbortSignal` today; decide whether a hung Wikidata request needs a timeout and what the author sees when it fires
 
-#### OWASP-A10-012: Missing timeout on external calls
-- **Where**: API routes calling external services (Supabase RPCs, GoCardless)
-- **Check**: HTTP requests have explicit timeout
-- **Check**: No indefinite `await` on external service calls
-- **Note**: Supabase client has default timeouts — verify custom fetch configs
+#### OWASP-A10-012: (planned) Partial operations in the contribution tool and its export
+- **Where**: the future Payload hooks and the export script to static JSON
+- **Check**: A multi-document change runs in a transaction; the export writes to temporary files and renames, like `writeAll`, so a failed export never leaves `public/` half-updated
+- **Note**: Verify Payload's transaction support on SQLite against `opensrc/` or its docs on the web, not from memory

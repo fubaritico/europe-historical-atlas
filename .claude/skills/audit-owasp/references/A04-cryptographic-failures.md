@@ -1,65 +1,52 @@
 # A04:2025 — Cryptographic Failures
 
-OWASP Top 10 #4 (was #2 in 2021). Failures related to cryptography (or lack thereof) that expose sensitive data.
+OWASP Top 10 #4 (was #2 in 2021). Exposure of sensitive data through weak or missing protection. Today the repository holds no personal data and no user secret; what is sensitive is the developer's tokens, and, later, contributors' accounts.
 
 ## Checklist
 
 ### Critical
 
 #### OWASP-A04-001: Hardcoded secrets in source code
-- **Where**: All files (except `.env*`)
-- **Patterns**: `sk-*`, `pk-*`, `supabase.*key`, `password =`, `secret =`, `token =`, API keys, connection strings
-- **Check**: No credentials, API keys, or tokens committed to version control
-- **Exception**: `.env.example` with placeholder values only
+- **Where**: all tracked files except `.env*`; in particular `.github/`, `scripts/`, `.claude/skills/*/scripts/`, `packages/*/src/`, `files/plans/`
+- **Check**: No GitHub, Netlify, Sonar or Trello token, no `ghp_` / `npm_` / `_authToken=` string; the repository is public, so anything committed is published
+- **Check**: `git log -p` is clean too — a secret removed in a later commit is still public
 
-#### OWASP-A04-002: Sensitive data in client bundle
-- **Where**: Web app source, mobile app source
-- **Check**: `SUPABASE_SERVICE_ROLE_KEY` never in client code
-- **Check**: No server-only secrets imported in client-side files
-- **Check**: Env vars prefixed correctly (VITE_* for web, EXPO_PUBLIC_* for mobile)
+#### OWASP-A04-002: Nothing secret in a client bundle
+- **Where**: `packages/atlas/src/`, `packages/cartographer/src/`, every `import.meta.env.*` read
+- **Check**: Only `VITE_`-prefixed values reach a bundle; none of them is a secret; no `.env*` file is read by a Vite config
 
 ### High
 
-#### OWASP-A04-003: Sensitive data stored without encryption
-- **Where**: Mobile — AsyncStorage, SecureStore usage
-- **Check**: Tokens, session data, PII stored in `expo-secure-store` (not AsyncStorage)
-- **Check**: Web — sensitive data not in plain localStorage (use httpOnly cookies or encrypted storage)
-- **Accepted exception**: bare RN app (`apps/mobile/`) uses AsyncStorage — learning reference only
+#### OWASP-A04-003: Transport is HTTPS
+- **Where**: `packages/cartographer/src/wikidata/wikidataSource.ts` (`WIKIDATA_ENDPOINT`), `wikidataFacts.ts` (Wikipedia links), the atlas's relative asset URLs, the site on Netlify
+- **Check**: Every absolute URL is `https://`; the atlas fetches only same-origin relative paths
 
-#### OWASP-A04-004: Weak or no transport encryption
-- **Where**: All HTTP calls, API client configs
-- **Check**: All production URLs use HTTPS
-- **Check**: No `http://` URLs except localhost/10.0.2.2 in dev configs
-- **Check**: No TLS downgrade options or certificate pinning bypass in production
-
-#### OWASP-A04-005: Sensitive data in URL parameters
-- **Where**: API calls, navigation
-- **Check**: Tokens, passwords, PII never passed as query parameters (visible in logs, history)
-- **Check**: OAuth redirect URIs don't leak tokens in URL fragments without proper handling
+#### OWASP-A04-004: (planned) Contributor credentials and sessions
+- **Where**: the future Payload 3.x application, a hosted server (Payload/Next today's plan; Express or another Node service if one is added)
+- **Check**: Passwords hashed by Payload's auth (never a custom scheme); `PAYLOAD_SECRET` long, random, from the environment; auth cookies `HttpOnly`, `Secure`, `SameSite`
+- **Check**: HTTPS enforced on the hosted tool, HSTS set
+- **Note**: Verify Payload's hashing and cookie defaults against `opensrc/` or its docs on the web, not from memory
 
 ### Medium
 
-#### OWASP-A04-006: Weak hashing for security purposes
-- **Where**: All files
-- **Check**: No MD5 or SHA1 for passwords, tokens, or integrity checks
-- **Check**: No `Math.random()` for security-sensitive operations (use `crypto.getRandomValues`)
+#### OWASP-A04-005: Sensitive data in logs
+- **Where**: every `console.warn` / `console.error`, in particular `packages/cartographer/src/devServer/httpEndpoint.ts` (full disk errors to the terminal), `.github/workflows/ci.yml` (the deploy's diagnostic step prints the site id's length and first 8 characters)
+- **Check**: No token or full secret printed; the partial site id printed in a public repository's CI logs is a decision, not an accident
 
-#### OWASP-A04-007: Sensitive data in logs
-- **Where**: All files with console.warn/error, logging utilities
-- **Check**: No logging of tokens, passwords, session IDs, or user PII
-- **Check**: Error handlers don't serialize full request/response with auth headers
+#### OWASP-A04-006: (planned) Contributor data in the static export
+- **Where**: the future export script from the Payload database to static JSON (CONTRIB-223)
+- **Check**: Emails, password hashes, session data and private notes never reach `public/`; only fields declared public are exported
 
-#### OWASP-A04-008: Missing data classification
-- **Where**: API responses
-- **Check**: Responses don't over-expose data (e.g., returning full user object with email when only name needed)
-- **Check**: `select()` in Supabase queries limits columns to what's needed
+#### OWASP-A04-007: Data in browser storage
+- **Where**: `packages/atlas/src/camera/cameraState.ts`, `packages/atlas/src/controls/mapCameraStore.ts` (`sessionStorage`)
+- **Check**: Only view state (camera position) is stored; no identity or token goes to Web Storage, now or with accounts
 
 ### Low
 
-#### OWASP-A04-009: Insecure random values
-- **Where**: Any generated IDs, tokens, or nonces in client code
-- **Check**: Use `crypto.randomUUID()` or `crypto.getRandomValues()` over `Math.random()`
+#### OWASP-A04-008: Weak hashing used for a security purpose
+- **Where**: `packages/core/src/data/yearStamp.ts` (the fingerprint behind `If-Match`), any hash in `packages/*/src`
+- **Check**: A fingerprint used for change detection only is fine; no non-cryptographic hash is ever used for integrity against an attacker or for a secret
 
-#### OWASP-A04-010: Missing cache control on sensitive responses
-- **Where**: API responses containing sensitive data
-- **Check**: Sensitive endpoints should set `Cache-Control: no-store` headers
+#### OWASP-A04-009: Insecure random values
+- **Where**: any `Math.random()` in `packages/*/src`
+- **Check**: Not used for an identifier that must be unguessable; (planned) tokens and ids in the contribution tool come from `crypto` / the framework

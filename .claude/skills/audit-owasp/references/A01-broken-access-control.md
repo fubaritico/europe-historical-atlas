@@ -1,101 +1,66 @@
 # A01:2025 — Broken Access Control
 
-OWASP Top 10 #1 (two consecutive cycles). Failures in enforcing that users cannot act outside
-their intended permissions. In 2025, SSRF (formerly A10:2021) is merged into this category.
+OWASP Top 10 #1. Users acting outside their intended permissions. Here there is no user and no production server: the one door today is the Cartographer's Vite dev server, which writes to disk; accounts arrive with the contribution tool (planned).
 
 ## Checklist
 
 ### Critical
 
-#### OWASP-A01-001: Missing authentication on data route
-- **Where**: API route files (`apps/api/src/routes/*.ts`)
-- **Check**: Every router MUST call `router.use(requireAuth)` — no data endpoint unprotected
-- **Exception**: `/health` (mounted on `app` directly, not a router)
+#### OWASP-A01-001: Dev-server endpoints answer only a page this machine served
+- **Where**: `packages/cartographer/src/devServer/httpEndpoint.ts` (`isSameMachineRequest`, `LOOPBACK_HOST`), `yearWriteEndpoint.ts`, `draftEndpoint.ts` (`isFromHere`), `snapshotEndpoint.ts`
+- **Check**: Every writing method (`PUT`, `POST`, `DELETE`) requires a loopback `Host` **and** an `Origin` equal to `http://<that host>` — the pair that shuts out another site and a DNS-rebound name
+- **Check**: A `GET` (which a browser sends without `Origin`) still requires a loopback `Host`, and no `Access-Control-Allow-*` header is set anywhere under `devServer/`, so another site cannot read the answer
+- **Check**: Every new route mounted in `vite.config.ts` goes through the same lock before it touches the disk — no handler reads or writes before the origin check
 
-#### OWASP-A01-002: Missing user_id filter on database query
-- **Where**: API route handlers
-- **Check**: Every `.from()` query MUST include `.eq('user_id', res.locals.userId)`
-- **Check**: Every `.rpc()` call MUST pass `p_user_id: res.locals.userId`
-- **Why**: Service role key bypasses RLS — this is the ONLY access control
+#### OWASP-A01-002: The writing dev server never leaves the loopback interface or the dev mode
+- **Where**: `packages/cartographer/vite.config.ts` (`saveYearsFromTheEditor`, `apply: 'serve'`), `packages/cartographer/package.json` (`dev` script)
+- **Check**: No `server.host`, `--host` or `0.0.0.0`: on a LAN interface, a non-browser client forges `Host` and `Origin` at will and the lock of A01-001 no longer holds
+- **Check**: The plugin keeps `apply: 'serve'`, so no build output carries a writing endpoint
 
-#### OWASP-A01-003: Insecure Direct Object Reference (IDOR)
-- **Where**: API routes with `:id` params
-- **Check**: After fetching by ID, verify the record belongs to the authenticated user
-- **Check**: Never trust client-provided `user_id` in request body for ownership
-
-#### OWASP-A01-004: Unvalidated URL in server-side fetch (SSRF)
-- **Where**: API routes, any server-side `fetch()` or HTTP client calls
-- **Check**: No user-provided URL passed directly to `fetch()`, `axios`, or similar
-- **Check**: If URL needed from user, validate against strict allowlist
-- **Check**: No ability to fetch `file://`, `gopher://`, or internal metadata endpoints
+#### OWASP-A01-003: (planned) Access rules on every Payload collection
+- **Where**: the future Payload 3.x application (`files/plans/contribution/payload-check.md`, `files/plans/plan.md` P7)
+- **Check**: Every collection and global declares `access` for `read`, `create`, `update`, `delete`; none relies on the default
+- **Check**: In 3.x the Local API bypasses access control unless `overrideAccess: false` is passed (4.0 changes the default, per `payload-check.md`): any Next route, server action or hook that calls it on behalf of a request passes the user and `overrideAccess: false`; only the export script runs with full access
+- **Note**: Verify the 3.x default against `opensrc/` or the Payload docs on the web, not from memory
 
 ### High
 
-#### OWASP-A01-005: Privilege escalation via body manipulation
-- **Where**: API POST/PUT handlers
-- **Check**: `user_id` must come from `res.locals.userId`, never from `req.body`
-- **Check**: Zod schemas for input must NOT include `user_id` field
+#### OWASP-A01-004: Drafts and snapshots are never served or published
+- **Where**: `packages/cartographer/src/devServer/draftRoute.ts` (`DRAFTS_FOLDER`, `SNAPSHOTS_FOLDER`), `packages/cartographer/vite.config.ts` (`publicDir`), `.gitignore` (`**/.autosave/`)
+- **Check**: Both folders stay outside `packages/atlas/public/` (which the dev server serves and every build copies) and stay git-ignored
 
-#### OWASP-A01-006: Missing authorization on destructive operations
-- **Where**: DELETE endpoints
-- **Check**: Record ownership verified before deletion (select + check user_id, or filter in WHERE)
+#### OWASP-A01-005: Only the data meant to ship reaches the published site
+- **Where**: `.gitignore` (`**/public/years/*/` with its `!` exceptions, `public/borders/`), `.github/workflows/build.yml` (the GPL guard), `.github/workflows/ci.yml` (`deploy`)
+- **Check**: A year is published only by an explicit un-ignore line; the borders guard walks every `packages/*/dist`; the deploy uploads the atlas artefact alone, never the Cartographer's `dist`
 
-#### OWASP-A01-007: Client-side route protection without server validation
-- **Where**: Web loaders, mobile navigation guards
-- **Check**: Client-side auth checks are supplementary — server MUST reject unauthorized requests independently
-- **Check**: Sensitive data never loaded in client bundle before auth check
+#### OWASP-A01-006: Outbound requests go only where the code says
+- **Where**: `packages/cartographer/src/wikidata/wikidataSource.ts` (`WIKIDATA_ENDPOINT`, `WIKIDATA_ID`, `requestUrl`), the readers in `packages/core/src/data/` (`yearSource.ts`, `yearManifest.ts`, `heightmap.ts`, `landMask.ts`, `riverSource.ts`, `regionSource.ts`)
+- **Check**: The Wikidata endpoint is a constant; ids are filtered by `WIKIDATA_ID` before the URL is built, and parameters go through `URLSearchParams`
+- **Check**: The atlas's asset paths are built from code constants and the manifest's years; no value read from a file or the address bar can turn a fetch into an absolute or other-origin URL
 
-#### OWASP-A01-008: Internal network access via user input (SSRF)
-- **Where**: API routes that proxy or fetch external resources
-- **Check**: Cannot reach `localhost`, `127.0.0.1`, `10.*`, `172.16-31.*`, `192.168.*` via user input
-- **Check**: Cannot access cloud metadata endpoints (`169.254.169.254`)
-- **Check**: DNS rebinding protection (resolve before fetching, validate IP)
-
-#### OWASP-A01-009: Open redirect enabling SSRF chain
-- **Where**: Redirect handling, OAuth callbacks
-- **Check**: `redirectTo` / `redirect_uri` parameters validated against allowlist
-- **Check**: No arbitrary URL in redirect target
-- **Known**: SEC-006 (deferred — oauth.ts redirectTo not validated yet)
+#### OWASP-A01-007: (planned) Object-level and field-level authorization in the contribution tool
+- **Where**: the future Payload collections, and a hosted server (Payload/Next today's plan; Express or another Node service if one is added)
+- **Check**: A contributor reads and edits only what their role allows (own drafts vs. published entries); a reviewer role signs an arbitration
+- **Check**: System fields (author, status, published flag, timestamps) carry field-level `access.update` so a request body cannot set them
+- **Check**: Every route of a hosted server sits behind the auth middleware; a `:id` route checks the record against the caller, not only its existence
 
 ### Medium
 
-#### OWASP-A01-010: Horizontal privilege escalation via query params
-- **Where**: API GET endpoints with filters
-- **Check**: Query params like `?user_id=X` cannot override `res.locals.userId`
+#### OWASP-A01-008: Development switches stay out of the reader's reach
+- **Where**: `packages/cartographer/src/main.tsx` (`?break=` through `import.meta.env.DEV`), `packages/cartographer/src/ui/components/ErrorBoundary/utils/readZoneBreaks.ts`, `packages/atlas/src/main.ts` + `devPanel.ts` (lil-gui and Stats, created in every build)
+- **Check**: `?break=` is read only under `import.meta.env.DEV` and is absent from the built bundle
+- **Check**: The atlas's dev panel only tunes render parameters in memory — it fetches nothing, writes nothing, and exposes no path or URL input
 
-#### OWASP-A01-011: Missing access control on file/asset URLs
-- **Where**: Any URL construction for user assets (avatars, documents)
-- **Check**: Supabase Storage URLs must use signed URLs or RLS-protected buckets
-
-#### OWASP-A01-012: Metadata manipulation
-- **Where**: API routes that accept `created_at`, `updated_at`, or system fields
-- **Check**: System fields must be server-set, never accepted from client input
-
-#### OWASP-A01-013: Webhook or callback URL injection (SSRF)
-- **Where**: Any webhook registration, notification URLs
-- **Check**: Callback URLs validated before server sends requests to them
-- **Check**: If webhooks used, URL scheme restricted to https
-- **Note**: May not apply if no webhook feature exists
-
-#### OWASP-A01-014: Image/avatar URL fetching (SSRF)
-- **Where**: Avatar loading, any server-side image processing
-- **Check**: If server fetches images from user-provided URLs, validate scheme + domain
-- **Check**: Timeout and size limits on fetched resources
-- **Note**: If avatar URLs are only used client-side (img src), SSRF doesn't apply — but verify
+#### OWASP-A01-009: (planned) Cross-origin and redirect rules of the hosted contribution tool
+- **Where**: the future `payload.config.ts` (`cors`, `csrf`, `serverURL`), the login flow
+- **Check**: `cors` and `csrf` list explicit origins, never `*`; the post-login redirect accepts only same-origin relative paths
 
 ### Low
 
-#### OWASP-A01-015: Verbose error revealing access control logic
-- **Where**: API error responses
-- **Check**: 404 (not found) should be returned instead of 403 (forbidden) to avoid confirming resource existence
+#### OWASP-A01-010: A refusal does not reveal more than it must
+- **Where**: `packages/cartographer/src/devServer/httpEndpoint.ts` (`respond`, `diskCodeOf`), each endpoint's `refuse`
+- **Check**: The page gets a fixed sentence and Node's error code; absolute paths and stacks go to the server terminal only
 
-#### OWASP-A01-016: Supabase Storage URL manipulation (SSRF)
-- **Where**: Supabase Storage URL construction
-- **Check**: Storage bucket paths not user-controllable for arbitrary file access
-- **Check**: Signed URL generation uses correct bucket/path validation
-
-#### OWASP-A01-017: Third-party API proxy without validation (SSRF)
-- **Where**: Any server route that proxies to external APIs
-- **Check**: Target API host hardcoded, not from user input
-- **Check**: Only expected paths/methods forwarded
-- **Note**: Relevant if GoCardless integration proxies requests
+#### OWASP-A01-011: (planned) The static export publishes only what is published
+- **Where**: the future export script from Payload's database to static JSON (CONTRIB-223)
+- **Check**: Draft, unreviewed or deleted entries and contributor identities are filtered out before writing into `public/`
