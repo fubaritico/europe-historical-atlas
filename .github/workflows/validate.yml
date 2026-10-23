@@ -16,7 +16,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup
       # One ESLint run per package, each resolving its own config. The Cartographer has its own
       # `eslint.config.js` — it re-imports the root one and adds React — while `core` and `atlas`
@@ -27,7 +27,7 @@ jobs:
   type-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup
       # One `tsc` per package, three in all, because each declares the environment it compiles
       # against: `core` has no DOM lib, which is what makes "no document in core" a compiler error
@@ -37,7 +37,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup
       # One Vitest per package, and their environments differ on purpose: `core` runs under **node**,
       # so a module reaching for a `document` fails here instead of in the worker; the atlas and the
@@ -47,7 +47,7 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup
       # Not a duplicate of the lint job: `lint-staged` formats what is *staged*, so it never sees a commit
       # made with `--no-verify`, a merge resolved in a web editor, or a file changed by a tool. This is the
