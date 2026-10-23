@@ -157,10 +157,10 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   un élément focalisable, ce qui touche la mise en page de toutes les zones — ouvert par ma décision, chemin rare. (2) **Une zone
   en panne le reste jusqu'au rechargement**, sauf la carte (« Réessayer ») et les menus (« Fermer ») — conforme à la décision du
   dev. (3) **Le message montre le texte brut de l'erreur** (SEC-001), qui peut nommer un chemin ou un détail interne : sans risque
-  tant que le Cartographe tourne chez le dev ; proposé au dev, **pas encore tranché** : ne l'afficher qu'en développement
-  (`import.meta.env.DEV`), à décider avant la démonstration en ligne (CARTO-200). **Et ce qu'aucune boundary ne voit** : une
+  tant que le Cartographe tourne chez le dev ; **décidé par le dev le 23/10** : le texte technique en développement seulement
+  (`import.meta.env.DEV`), une phrase simple en production — CARTO-274, avant la démonstration en ligne (CARTO-200). **Et ce qu'aucune boundary ne voit** : une
   erreur levée pendant un geste (gestionnaire d'événement, `requestAnimationFrame`) n'est montrée nulle part — le Cartographe n'a
-  pas de filet de page ; proposé au dev : en rouge dans la barre d'état. **Sévérité : à savoir.**
+  pas de filet de page ; **décidé par le dev le 23/10 : en rouge dans la barre d'état** — CARTO-273. **Sévérité : à savoir.**
 - **Les noms d'étapes de l'historique ne suivraient pas un changement de langue** — ATLAS-266 (22/10, revue ARCH-001). Tout
   autre texte suit `LocaleProvider` ; un nom d'étape, lui, est écrit en texte dans `HistoryStep.label` (`core/editor/history`)
   au moment du geste, donc « Annuler insérer une ancre » resterait en français après un passage à l'anglais. Sans effet tant
