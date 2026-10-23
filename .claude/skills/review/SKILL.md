@@ -56,10 +56,11 @@ Subagents (by `name` / `agent_type`):
 
 1. **`review-security`** — security vulnerabilities (XSS, injection, secrets, unvalidated input)
 2. **`review-architecture`** — architecture rules (DI/seams, SOLID, GPU-leak, structure)
-3. **`review-quality`** — code quality (JSDoc, `any`, `console.log`, dead code, GPU dispose)
+3. **`review-quality`** — code quality the lint cannot see (misleading JSDoc, dead code, untested branches)
 4. **`review-accessibility`** — WCAG 2.1 AA on HTML overlays + canvas fallback/keyboard equivalence
 
-Each subagent returns ONLY a JSON array of findings (no prose). Schema: `references/schema.json`.
+Each subagent returns JSON only: an array of findings, or the `clean` object (`checked`, `verdict`) when it
+has few or none. Schema: `references/schema.json`.
 An empty array is a legitimate, welcome answer — see the shared protocol appended to each agent file.
 
 ### Step 4 — Aggregate & Score
@@ -157,8 +158,8 @@ docs-only changes.
 
 ---
 
-IMPORTANT: Give the developer the table of findings (critical, high, medium, low), with columns:
-`ID`, `Sév`, `Catégorie`, `Description`, `Statut`. THIS IS MANDATORY.
+Give the developer the table of findings (critical, high, medium, low), with columns
+`ID`, `Sév`, `Catégorie`, `Description`, `Statut`.
 
 `Statut` must distinguish three outcomes, because they are not the same thing: **corrigé**,
 **corrigé autrement** (the finding held, the proposed remedy did not — say what you did instead), and

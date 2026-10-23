@@ -247,6 +247,8 @@ This preserves existing content and keeps the edit history clean.
 
 ## Writing Notes with Tools
 
+Where a note goes is set by CLAUDE.md's knowledge-base rule: the `main` project, the `patterns/` folder, linked from `Cross-project engineering patterns — index`. Without the MCP, the same calls are `basic-memory tool search-notes|write-note|edit-note … --project main`. The folders in the examples below are illustrative.
+
 ### Creating a Note
 
 ```python

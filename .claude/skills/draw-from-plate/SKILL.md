@@ -34,7 +34,8 @@ K=.claude/skills/draw-from-plate/scripts   # every script below is run with $S/v
 - **Plates**: `files/resources/euratlas/plates/plates.json` (gitignored), one entry per screenshot — image,
   meridians' x, parallels as `[y, lat]`. A new screenshot: `grid.py <image>` prints the graticule lines;
   read the labels on the image, add the entry. Shape: `assets/plates.example.json`.
-- **The page**: the dev's Cartographer runs on `http://localhost:5174/` — never start a second server. Wait
+- **The page**: the dev's own Cartographer (`pnpm dev:cartographer`, usually `http://localhost:5174/`) — find the
+  port his server is on, never start a second one. Wait
   for the backdrop. Inject the helpers in one line with the browser's JavaScript tool — Vite serves the file:
   `(0,eval)(await (await fetch('/@fs/<repo>/.claude/skills/draw-from-plate/scripts/page-helpers.js')).text());
   await __d.calib()`. Re-inject after any reload (Vite reloads the page when the Cartographer's code changes).
@@ -89,8 +90,9 @@ lord is drawn after the lord.
 
 ## What exists already (update at the end of a drawing session)
 
-**137 polities of Euratlas 1100** in `years/1100/` after the night of 2026-10-14 (the dev's own 1100 kept in
-`years/1100.avant-test-euratlas/`; backups `years/1100.euratlas-<count>/`). Everything the eight plates cover is drawn,
+**137 polities of Euratlas 1100** drawn on the night of 2026-10-14, kept in `years/1100.euratlas-137b/` (the reference
+of CARTO-237); `years/1100/` started from it and is now the dev's year, edited by him (`git status` before touching
+it). Everything the eight plates cover is drawn,
 vassals and sub-vassals included, with rank, status, suzerain and the plate's colour from
 `files/resources/euratlas/meta-1100.json` (applied by `apply-meta.py` after a save, then a reload). Not drawn, no plate:
 the Finns, Chudes, Mordvins, Burtas, Cheremiss; Norway, Sweden, Novgorod cut at 60°N, the Almoravids at 32°N. The night's

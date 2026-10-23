@@ -7,13 +7,11 @@ paths:
 
 Open issues of the data on disk: `years/`, the relief, the spikes that write them. Loaded by path; indexed in `.claude/known-issues.md`.
 
-- **Depuis le 13/10 au soir, `years/1100/` contient le tracé du test Euratlas, pas l'année du dev.** — CARTO-116 Son 1100
-  (France + Bourgogne) est rangé, intact, dans `years/1100.avant-test-euratlas/`. Le Cartographe ouvre donc
-  le test, et l'atlas local le montre à l'année 1100. **À la fin du test** : `years/1100` → `years/1100.test-
-  euratlas`, puis `years/1100.avant-test-euratlas` → `years/1100`. Les dossiers `years/1100.*` ne sont pas
-  commités ; `years/1100/`, lui, l'est depuis le 16/10 (entrée suivante — la licence reste ATLAS-142). **Depuis la nuit du 14/10**, `years/1100/` tient 137 pays, et les traces de la nuit
-  sont `years/1100.euratlas-{16,19,30,48,76,98,137,137b}/` et `1100.before-rename/` — toutes locales, à trier avec
-  le dev (aucune n'a été supprimée : `rm -rf` demande sa permission). **Sévérité : à savoir.**
+- **`years/1100/` est parti du tracé du test Euratlas (nuit du 14/10, 137 pays) et c'est désormais l'année du dev**,
+  qu'il renomme, redessine et complète d'identifiants Wikidata. Décidé le 23/10 : *« c'est la dernière version qui
+  prime »* ; son 1100 d'avant le test n'est plus gardé, et seule reste la référence `years/1100.euratlas-137b/`
+  (avec `1100.euratlas-137`), qui sert à CARTO-237. La part d'Euratlas qui y reste est mesurée par CARTO-237 ; la
+  licence de ce qui est publié reste ATLAS-142. **Sévérité : à savoir.**
 - **`files/spikes/fetch-dem/fetch-dem.mjs` écrit dans `public/heightmaps` à la racine**, un chemin d'avant le monorepo :
   le 18/10, il a fallu déplacer le résultat à la main dans `packages/atlas/public/heightmaps/` et retirer les dossiers vides.
   Remède : pointer `publicDir` sur `packages/atlas/public/heightmaps`. **Sévérité : cosmétique.**

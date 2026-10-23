@@ -43,10 +43,10 @@ If a finding depends on library/API behavior you are not 100% sure about, set `"
 > **Section headings group the rules; they do not set severity.** Severity comes from the anchors in
 > `references/schema.json` — a documentation or naming gap is never `high`.
 
-> pnpm workspace, four packages: `core` (pure TS — no three.js, React or zustand; `src/{utils,geo,data,pipeline,editor}`),
+> pnpm workspace, four packages: `core` (pure TS — no three.js, React or zustand; `src/{utils,geo,data,pipeline,editor,i18n,time}`),
 > `atlas` (vanilla three.js; `src/{main,scene,camera,controls,picking,ui}`), `cartographer` (2D canvas + React 19 + Zustand;
-> `src/{viewport,geometry,canvas,state,persistence,loaders,devServer,wikidata,components}`, one folder per
-> component — `.claude/rules/architecture.md`, *Components*), `eslint-plugin-eha`.
+> `src/{viewport,geometry,canvas,state,persistence,loaders,devServer,wikidata,i18n,ui}`, all React under `ui/`, one
+> folder per component in `ui/components/` — `.claude/rules/architecture.md`, *Components*), `eslint-plugin-eha`.
 > See `.claude/rules/architecture.md` (structure) and `.claude/rules/modular-architecture.md` (SOLID/DI).
 
 ## Rules
@@ -144,8 +144,7 @@ If a finding depends on library/API behavior you are not 100% sure about, set `"
 
 # Review protocol (shared by every dimension)
 
-> Rewritten 2026-09-16 from the review's own failures, not from theory. Each rule below exists because
-> something went wrong that day.
+> Each rule below was drawn from a defect this review once missed or misjudged; the anchors are those cases.
 
 ## 1. Review the blast radius, not the diff
 

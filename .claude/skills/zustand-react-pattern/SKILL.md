@@ -70,7 +70,7 @@ The v5 docs are explicit — *"instead of writing `create(...)`, you must explic
 provide the state type using `create<T>()(...)`"*.
 
 **v5 did not relax this.** Any note claiming v5 "improved type inference" so the plain
-form works is wrong; it was in the community skill this file replaces.
+form works is wrong.
 
 **The exception, from the same docs page**: with `combine`, `redux`, or any middleware
 that *creates* the state, the curried form is **not** recommended — the state can be
@@ -305,8 +305,7 @@ Follow `rules/tests.md` (5 levels) as for any other module.
 
 ## House rules that override any snippet found online
 
-- **No `console.log`** — `console.warn` / `console.error` only. The community skills this
-  file replaces used `console.log` in their logging and debugging examples.
+- **No `console.log`** — `console.warn` / `console.error` only, whatever a snippet found online uses.
 - **No explicit `any`** — the tsconfig is strict, and `exactOptionalPropertyTypes` plus
   `noUncheckedIndexedAccess` are on. The first of those is why an optional dep is passed
   with a conditional spread, never as `{ limit: undefined }`.

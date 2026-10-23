@@ -297,3 +297,15 @@ Entries closed and moved out of `known-issues.md`. Kept for the lessons they car
   répondent pas sur un pays neuf ou vide** : il faut cliquer l'outil dans la barre. **Le dev donnera le cas exact** ;
   le reproduire avant de toucher au code. **17/10** : (1) seuil passé à 20 km, non commité, le dev le jugera sur un très grand pays. **18/10** : (2) fermé — le dev : *« le P et le A s'activent bien maintenant au raccourci clavier »*, sans code écrit (CARTO-235, Fait). Reste (1). **Sévérité : gênant.**
   **Fermée le 18/10** : (1) commité à 20 km à la demande du dev (`8921dc4`, CARTO-233) ; (2) fermée le 18/10 sans code (CARTO-235).
+
+
+## Moved from `rules/known-issues/atlas.md`, 2026-10-23 (prompt audit: a fixed entry)
+
+- **The dismiss button's two accessibility defects are fixed** (A11Y-201, A11Y-202, found 2026-09-17).
+  The glyph was drawn at `opacity:0.65`, compositing to **3.71:1** against the panel — under the 4.5:1
+  floor of WCAG 1.4.3 for 19px non-bold text. Fixed by dropping the alpha entirely rather than picking a
+  better number: the ink is caller-supplied, so full ink means the control reads exactly as well as the
+  notice title above it, whatever ink is passed. The hit area was sized to the glyph, about 19×23 px; it
+  is now 32×32 with the glyph centred. **Note the criterion**: the familiar 44×44 is WCAG 2.5.5, which is
+  **AAA**. The AA bar is 2.5.8 (WCAG 2.2) at **24×24** — the old box failed that too. Both are guarded by
+  tests, so a restyle cannot quietly undo them.

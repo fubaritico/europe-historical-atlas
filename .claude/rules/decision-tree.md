@@ -22,12 +22,8 @@
 | Log a source used to draw a year, and its mention | `/create-data-mention` |
 | Reason about a subject whose rules are not loaded | `/rules` |
 
-> **This repository has React in it** — the Cartographer, since 2026-10-01. The line that used to stand
-> here said the archived React skills "do NOT apply to this 3D project", and it stopped being true the day
-> React arrived. Corrected 2026-10-05, same family as `CLAUDE.md`'s old "No React".
->
-> What is true is narrower, and it is measured rather than assumed. Of the six React skills archived under
-> `files/claude-archive/skills/`:
+> **This repository has React in it** — the Cartographer, since 2026-10-01. Of the six React skills archived
+> under `files/claude-archive/skills/`, measured one by one:
 >
 > | skill | state |
 > | --- | --- |

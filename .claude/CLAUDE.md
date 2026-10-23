@@ -60,23 +60,24 @@ When the dev proposes something:
   it is** (blocking / worth knowing / cosmetic) and **the way out**, in the same breath, short. Never
   hand back a list of risks without decisions; take the call and say what it costs. A caveat earns its
   place only if it changes what we do next.
-- **Any new term goes straight into `files/plans/glossaire.md`** — the shared vocabulary is what makes
-  the rest legible. Using a word that is not in there yet is a debt; adding it is part of the answer.
+- **Any new term of cartography or of the software itself goes straight into `files/plans/glossaire.md`** —
+  the shared vocabulary is what makes the rest legible; general tooling (build, packages, cache, CI) stays out.
+  Using such a word that is not in there yet is a debt; adding it is part of the answer.
 - **Discuss the approach FIRST, then execute the whole block** — confirm the _approach_ once. Once agreed
   (or "go"/"fais-le"), execute end-to-end without re-asking on each sub-step. Only stop again for a
   genuinely undecided fork or an irreversible/outward-facing action.
 - **A pasted `Screenshot …` name means `~/Desktop`** — the dev's screenshots always land there, so read
   `~/Desktop/<the name>.png` directly instead of asking for the file again. The name alone is the path.
-- **Never `cd` — always absolute paths.** The activity-log hook appends relative to `$PWD`, so any `cd`
-  forks the journal into a second file and the work spans are under-reported (see `known-issues.md`).
-- **Plans = `.md` in `files/plans/`**, **committed like code** (`files/` stopped being gitignored when the
-  repo was set to go public) — do NOT use the harness "plan mode".
+- **Never `cd` — always absolute paths.** A `cd` shifts the working directory under every later command,
+  and inside a compound command it triggers a permission prompt.
+- **Plans = `.md` in `files/plans/`**, **committed like code** (`files/plans/` and `files/spikes/` are
+  tracked; the rest of `files/`, `files/resources/` included, stays ignored) — do NOT use the harness "plan mode".
 - **Review → Test → Commit** per change — no accumulation; fix pre-existing issues a review surfaces in
   files you touch (no deferred tech debt).
 - **Risky actions** (`reset --hard`, `rm -rf`): explicit permission EVERY TIME.
-- **Announce every command (IMPORTANT)** — before running ANY script/command, state three things: the
-  **cause** (what triggered it), the **reason** (why this command), the **action** (what it does). Never
-  run a command silently.
+- **Announce every command** — before running a script or command, state its **cause** (what triggered it),
+  its **reason** (why this command) and its **action** (what it does), so the dev can follow and stop what
+  runs on his machine.
 - **Never hallucinate** — when uncertain, read the code first, search, bring sources via `opensrc`.
   **Verify three.js APIs against source** (`opensrc/`) or the web — never guess.
 - **Secrets** — in `.env*`, never in rules, memory, or code.
@@ -141,8 +142,7 @@ Read @known-issues.md
 ## Reference Files — how they load (2026-10-21)
 
 **A rule in `.claude/rules/` without `paths:` loads at every session; with `paths:` it loads when a matching file is
-read or written** (code.claude.com/docs/en/memory). Before 2026-10-21 this table said "NOT auto-loaded" — false:
-all six rules loaded every time. Three triggers now, one table (`.claude/skills/rules/topics.json`):
+read or written** (code.claude.com/docs/en/memory). Three triggers, one table (`.claude/skills/rules/topics.json`):
 `paths:` · the prompt hook `.claude/hooks/rules-for-prompt.mjs` (words of the dev's message) · `/rules` (my net).
 
 | File (under `.claude/rules/` unless said) | Loads |

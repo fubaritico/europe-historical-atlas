@@ -17,7 +17,7 @@ under `jsdom`. three.js runs in tests with a mocked renderer/context.
 
 ## Arguments
 
-`$ARGUMENTS` = module/port/util name or file path (e.g. `ReliefMesh`, `CameraStateStore`, `heightmap`)
+`$ARGUMENTS` = module/port/util name or file path (e.g. `reliefMesh`, `cameraState`, `heightmap`, `Panel`)
 
 ## Steps
 
@@ -81,9 +81,12 @@ describe("ModuleName", () => {
 
 ## File Naming
 
-| Layer             | Test file location                |
-| ----------------- | --------------------------------- |
-| Scene module      | `scene/ModuleName.test.ts`        |
-| Port / util       | `data/portName.test.ts`           |
-| Camera / controls | `camera/CameraStateStore.test.ts` |
-| Hook              | `hooks/useHook.test.ts`           |
+Beside the source, same camelCase name (`.tsx` for React):
+
+| Layer                  | Example                                                 |
+| ---------------------- | ------------------------------------------------------- |
+| Scene module           | `atlas/src/scene/reliefMesh.test.ts`                    |
+| Port / util            | `core/src/data/regionRaster.test.ts`                    |
+| Camera / controls      | `atlas/src/camera/cameraState.test.ts`                  |
+| Cartographer component | `cartographer/src/ui/components/<Name>/<Name>.test.tsx` |
+| Shared hook            | `cartographer/src/ui/hooks/useTranslation.test.tsx`     |

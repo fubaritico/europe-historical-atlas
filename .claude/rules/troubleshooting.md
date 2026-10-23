@@ -52,20 +52,15 @@ the vertex shader (GPU); the CPU geometry stays flat → the `Raycaster` hits th
 **Problem**: a bare `pnpm add -D eslint typescript typescript-eslint eslint-plugin-import` resolved to
 **ESLint 10** and **TypeScript 7**, which break peers: `typescript-eslint@8` requires `typescript <6.1`
 and `eslint-plugin-import` requires `eslint ≤9` → unmet peer warnings, typed linting broken.
-**Solution**: pin the known-good set — **eslint@^9**, **@eslint/js@^9**, **typescript@~5.7**,
-**typescript-eslint@^8**, **eslint-plugin-import@^2**. Re-run `pnpm add -D` with explicit versions.
-**Rule**: pin ESLint/TS majors; don't let `pnpm add` grab bleeding-edge majors for lint tooling.
+**Solution**: the known-good majors — ESLint 9, TypeScript 5, typescript-eslint 8, eslint-plugin-import 2 —
+are declared once in `pnpm-workspace.yaml`'s `catalog:`, and every `package.json` references `catalog:`.
+**Rule**: add or bump lint tooling in the catalogue, never with a bare `pnpm add -D`, which takes the newest major.
 
-### Quality tooling layout (single package, monorepo-ready)
+### Quality tooling layout
 ESLint 9 flat config (`eslint.config.js`) + Prettier (`.prettierrc`) + commitlint + husky (`pre-commit`
-= lint-staged + type-check; `commit-msg` = commitlint) + lint-staged. ~~**Decision: stay single-package**~~ — **split 2026-09-24** into
-`@europe-historical-atlas/core` (pure TS: `data/`, `pipeline/`, `geo/`, `utils/`) and `@europe-historical-atlas/atlas`.
-~~**pnpm workspaces alone, no Turbo**~~ — **Turbo added 2026-10-01**, and the refusal was not overturned so
-much as outgrown. It was refused when there were two packages, one lint run and one test run, where a cache
-would have saved seconds on a 12 s gate. What changed: a **third package** with its own ESLint config, and
-each package owning its `lint`, `type-check`, `test` and `coverage` — so something has to fan out across
-them, and `turbo <task>` is that something. Both thresholds `plan.md` named were crossed (a CI, shipped
-2026-09-24; and the gate). **Lerna stays refused** — it publishes, we publish nothing.
+= lint-staged + type-check; `commit-msg` = commitlint) + lint-staged, over a pnpm workspace of four packages
+fanned out by Turbo — why the split and why Turbo: `architecture.md`. **Lerna stays refused** — it
+publishes, we publish nothing.
 Prettier ignores `.claude`, `files`, `.husky`.
 
 ## History (to fill in)

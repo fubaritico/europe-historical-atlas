@@ -30,8 +30,7 @@ Update the session-state files CLAUDE.md imports — completed.md, next.md and t
      À valider par le développeur / En cours / top of À faire — never a list of tasks (that is the board)
    - the known-issues slices `.claude/rules/known-issues/<package>.md` — add new entries; a closed one moves to
      `.claude/archive/known-issues-closed.md`, never deleted
-5. **Keep each file loaded at launch under 200 lines** — the documented target (code.claude.com/docs/en/memory;
-   the "150k characters" that stood here until 2026-10-21 was my invention, never Claude Code's). Run
+5. **Keep each file loaded at launch under 200 lines** — the documented target (code.claude.com/docs/en/memory). Run
    `wc -l .claude/{CLAUDE,completed,known-issues,next}.md .claude/rules/{error-handling,decision-tree}.md`
    plus the memory `MEMORY.md` (its own cap: 200 lines or 25 KB); the path-scoped rules do not load at launch.
    A file past 200 lines is rotated or moved to its path-scoped home before writing:

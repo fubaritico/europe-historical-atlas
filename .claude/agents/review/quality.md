@@ -1,6 +1,6 @@
 ---
 name: review-quality
-description: Reviews code for quality issues (console.log, any types, missing JSDoc, imports, dead code). Use when running the /review skill.
+description: Reviews code for quality issues the lint gate cannot see (misleading or missing property JSDoc, dead code, untested branches, swallowed errors). Use when running the /review skill.
 tools: Read, Glob, Grep
 model: sonnet
 ---
@@ -52,6 +52,9 @@ If a finding depends on library/API behavior you are not 100% sure about, set `"
 > (`jsdoc/require-*`). Look for what they cannot see: a JSDoc that misstates behaviour, dead code, duplication, an
 > untested branch.
 
+> Duplication, magic values and GPU leaks belong to `review-architecture` (ARCH-013, ARCH-002, ARCH-006) — not
+> filed here, so one defect is not scored twice.
+
 ## Rules
 
 ### QUAL-003: Missing JSDoc on exported interface/type properties
@@ -73,28 +76,15 @@ If a finding depends on library/API behavior you are not 100% sure about, set `"
 
 - **Check**: commented-out blocks, unreachable code, TODO-only stubs
 
-### QUAL-009: Code duplication
-
-- **Check**: 3+ identical lines repeated that should be extracted
-
 ### QUAL-010: Stale or incorrect JSDoc
 
 - **Check**: JSDoc that no longer matches the signature
-
-### QUAL-011: GPU resource leak
-
-- **Check**: three.js geometries/materials/textures created in a module must be `dispose()`d on
-  teardown — flag a `scene.remove()` / unmount path with no matching `dispose()`
 
 ## Rules
 
 ### QUAL-012: Empty catch / lost error context
 
 - **Check**: no silent `catch {}` — log or rethrow with context
-
-### QUAL-013: Magic numbers / strings
-
-- **Check**: unexplained literals that should be named constants
 
 ### QUAL-014: Non-null assertion abuse
 
@@ -126,8 +116,7 @@ If a finding depends on library/API behavior you are not 100% sure about, set `"
 
 # Review protocol (shared by every dimension)
 
-> Rewritten 2026-09-16 from the review's own failures, not from theory. Each rule below exists because
-> something went wrong that day.
+> Each rule below was drawn from a defect this review once missed or misjudged; the anchors are those cases.
 
 ## 1. Review the blast radius, not the diff
 

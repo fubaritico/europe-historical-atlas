@@ -129,8 +129,6 @@ point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui 
 - **Ne pas poser une question qui n'a pas d'arbitrage.** Trois posées le 01/10, zéro nécessaire. Son test :
   *« c'est quoi la décision qu'il y a à prendre là ? »* Si la réponse est « aucune », on fait et on le dit.
 - **Tout problème arrive avec son remède et sa criticité.** Jamais une liste de risques sans décision.
-- **Tout terme nouveau va dans `glossaire.md`** — mais seulement s'il relève de la **cartographie** ou du
-  **logiciel lui-même**. L'outillage général (build, paquets, cache, CI) n'y entre pas.
 - **Ne jamais inscrire une déduction de moi comme une décision du dev.** Le tableau de `plan.md` porte
   une colonne `by` pour ça.
 - Docs et config en **anglais**, conversation en **français**. Annoncer chaque commande (cause / raison /

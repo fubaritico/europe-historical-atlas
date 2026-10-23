@@ -104,7 +104,7 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
   de correctif de sécurité dessus. **À savoir**, à reconsidérer quand la 10 aura quelques mois — et noter
   que la 10 change un comportement qui nous concerne : elle résout la config **par fichier** et non depuis
   le répertoire courant, ce qui rendrait les configs par paquet lisibles sans lancer `eslint` depuis chacun.
-- **Un clone `opensrc` est local à la machine, jamais au dépôt.** `opensrc/` est gitignoré (ligne 22), ce qui
+- **Un clone `opensrc` est local à la machine, jamais au dépôt.** `/opensrc/` est gitignoré, ce qui
   est voulu — three.js et Zustand (v5.0.15) y sont. Conséquence : sur une autre machine, il faut relancer
   `npx opensrc@0.6 path <pkg>`, et un agent qui suppose les sources présentes lira du vide. **Cosmétique**,
   mais c'est la raison pour laquelle une affirmation « vérifié dans la source » n'est pas reproductible

@@ -8,19 +8,21 @@ allowed-tools: Bash(opensrc:*) Bash(npx opensrc@0.6:*)
 
 Fetches dependency source code so agents can read implementations, not just types. Clones repositories at the correct version tag and, with `npx opensrc@0.6` (this project's command), clones them into the project's `opensrc/` folder (git-ignored).
 
+**In this project always run it as `npx opensrc@0.6`** — that version clones into the project's `opensrc/` folder,
+which is where the review agents and `CLAUDE.md` look; the bare `opensrc` writes to `~/.opensrc/` instead. The
+examples below omit the `npx opensrc@0.6` prefix for brevity.
+
 ## Core Pattern
 
 ```bash
-rg "parse" $(opensrc path zod)
-cat $(opensrc path zod)/src/types.ts
-find $(opensrc path zod) -name "*.test.ts"
+rg "parse" $(npx opensrc@0.6 path zod)
+cat $(npx opensrc@0.6 path zod)/src/types.ts
+find $(npx opensrc@0.6 path zod) -name "*.test.ts"
 ```
 
 `opensrc path <pkg>` prints the absolute path to cached source. If not cached, it fetches automatically. Progress goes to stderr, path to stdout, so `$(opensrc path ...)` works in subshells.
 
 ## Fetching Source Code
-
-Use opensrc@0.6 to have the expected result and experience: local `opensrc` folder into project.
 
 ```bash
 opensrc path zod
@@ -39,9 +41,8 @@ opensrc path pypi:flask@3.0.0
 opensrc path owner/repo@v1.0.0
 opensrc path owner/repo#main
 
-# COMMAND UPDATE: the 0.6 version is working as expected, it brings back repos in a local opensrc dir and updates/creates AGENTS.md
-npx opensrc@0.6 path <repo-git> # GitHub repo URL ex: https://github.com/tamagui/tamagui.git 
-# above commande fetches the repo if not present see online doc at: https://opensrc.sh/  
+# A GitHub repo by URL — fetched if absent; also updates AGENTS.md. Docs: https://opensrc.sh/
+npx opensrc@0.6 path https://github.com/owner/repo.git
 
 ```
 

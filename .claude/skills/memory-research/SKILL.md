@@ -9,13 +9,7 @@ Research an external subject, synthesize what you find, and create a structured 
 
 ## When to Use
 
-**Explicit triggers:**
-- "Research [subject]"
-- "Look up [subject]"
-- "What do you know about [subject]?"
-- "Evaluate [subject]"
-
-
+When the user asks for a subject to be researched and recorded in Basic Memory. A question about a subject, or research for this project's own work, is answered directly — this skill writes to the knowledge graph.
 
 ## Workflow
 

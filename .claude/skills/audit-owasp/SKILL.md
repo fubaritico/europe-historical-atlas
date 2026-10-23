@@ -3,14 +3,17 @@ name: audit-owasp
 description: Full-codebase OWASP Top 10 (2025) security audit using 10 parallel subagents (one per category). Produces structured JSON findings with severity scoring. Use when auditing security, checking OWASP compliance, running a security scan, or hardening the app.
 allowed-tools: Agent Read Glob Grep Bash(ls:*)
 metadata:
-  author: financial-app
+  author: europe-map
   version: "2.0"
 ---
 
 # Audit OWASP — Full-Codebase Security Audit
 
 Orchestrates 10 parallel domain-expert subagents — one per OWASP Top 10 (2025) category — to audit
-the entire codebase (API + web + mobile + shared packages) for security vulnerabilities.
+the entire codebase (two static bundles, the Cartographer's dev-server endpoints, core, the lint plugin).
+
+**The OWASP Top 10 is revised by edition** (2017, 2021, 2025 — not every year): once a year, check owasp.org for a
+new edition, and when one is out, update the table below and the ten `references/` files to it (the dev, 2026-10-23).
 
 ## OWASP Top 10:2025 Categories
 
@@ -37,20 +40,21 @@ the entire codebase (API + web + mobile + shared packages) for security vulnerab
 ### Step 1 — Scope Detection
 
 Scan the full codebase. Include:
-- `packages/reference/src/**/*.{ts,tsx}` (UI components — XSS vectors, `dangerouslySetInnerHTML`, URLs)
-- `packages/{behaviors,variants,shared}/src/**/*.{ts,tsx}` (services, resolvers, utils, vite plugins)
-- `packages/stencil/src/**/*.{ts,tsx}` (Web Components — `innerHTML`, attributes)
-- `apps/storybook-react/{.storybook,stories}/**` (preview, stories shipped on a public site)
-- Config files: `*.config.*`, `package.json`, `pnpm-workspace.yaml`, `.github/workflows/*`, `.husky/*`
+- `packages/atlas/src/**/*.ts` (vanilla three.js app — DOM overlays, URL params, fetched assets)
+- `packages/cartographer/src/**/*.{ts,tsx}` (React chrome under `ui/`; `devServer/` runs in the Vite server,
+  reads request paths and bodies and writes to disk — the one server-side trust boundary)
+- `packages/core/src/**/*.ts` (readers of the year files, pipeline, worker)
+- `packages/eslint-plugin-eha/src/**`
+- Config files: `*.config.*`, `package.json`, `pnpm-workspace.yaml`, `.npmrc`, `.github/workflows/*`, `.husky/*`
 
 Exclude: `node_modules/`, `build/`, `dist/`, `*.test.*`, `*.stories.*`, lock files, `*.d.ts`
 
 ### Step 2 — Load Context
 
 Read all files in scope. Group them by layer:
-- **UI layer**: `packages/reference/src/`, `packages/stencil/src/`
-- **Logic layer**: `packages/behaviors/src/`, `packages/variants/src/`, `packages/shared/src/`
-- **Showcase layer**: `apps/storybook-react/`
+- **UI layer**: `packages/atlas/src/`, `packages/cartographer/src/ui/`
+- **Logic layer**: `packages/core/src/`, the rest of `packages/cartographer/src/`
+- **Dev-server layer**: `packages/cartographer/src/devServer/`
 - **Supply-chain & CI layer**: root configs, `pnpm-workspace.yaml`, `.github/workflows/`, `.husky/`
 
 ### Step 3 — Dispatch 10 Parallel Subagents
@@ -90,23 +94,23 @@ Use severity levels:
 - low: best practice deviation, informational
 
 If a finding depends on runtime behavior or library version you're not 100% certain about,
-set "needs_verification": true and provide a "verification_query" for context7 lookup.
+set "needs_verification": true and provide a "verification_query" to check against `opensrc/` or the web.
 ```
 
 Agents and their scope:
 
 | # | Agent | Prefix | Layers to audit |
 |---|-------|--------|-----------------|
-| 1 | Broken Access Control (incl. SSRF) | OWASP-A01 | API, Web (loaders), Mobile (navigation), Shared (HTTP clients) |
-| 2 | Security Misconfiguration | OWASP-A02 | Config, API, Web |
+| 1 | Broken Access Control (incl. SSRF) | OWASP-A01 | Dev-server (path traversal), Logic (fetches) |
+| 2 | Security Misconfiguration | OWASP-A02 | Supply-chain & CI, Dev-server |
 | 3 | Software Supply Chain Failures | OWASP-A03 | All package.json files, lockfile, CI/CD configs |
 | 4 | Cryptographic Failures | OWASP-A04 | All layers |
-| 5 | Injection | OWASP-A05 | API, Web (.web.tsx), UI (.web.tsx) |
+| 5 | Injection | OWASP-A05 | UI, Dev-server |
 | 6 | Insecure Design | OWASP-A06 | All layers |
-| 7 | Authentication Failures | OWASP-A07 | API (auth middleware), Shared (auth), Web/Mobile (auth flows) |
+| 7 | Authentication Failures | OWASP-A07 | Dev-server (no auth today — check it is dev-only) |
 | 8 | Software & Data Integrity Failures | OWASP-A08 | All layers |
-| 9 | Security Logging & Alerting Failures | OWASP-A09 | API, Shared |
-| 10 | Mishandling Exceptional Conditions | OWASP-A10 | API (error handlers, middleware), Web/Mobile (error boundaries), Shared (hooks) |
+| 9 | Security Logging & Alerting Failures | OWASP-A09 | Dev-server, Logic |
+| 10 | Mishandling Exceptional Conditions | OWASP-A10 | Dev-server, UI (error boundaries, the atlas error net) |
 
 ### Step 4 — Aggregate & Score
 
@@ -143,10 +147,10 @@ Follow with:
 - Overall score + verdict
 - Top 3 priority fixes
 
-### Step 6 — Verify Ambiguous Findings (context7)
+### Step 6 — Verify Ambiguous Findings (opensrc / web)
 
 Before recommending fixes, check findings where `needs_verification: true`:
-1. Run the `verification_query` through context7
+1. Run the `verification_query` against `opensrc/` (authoritative — context7 can lag a version) or the web
 2. If confirmed → keep finding
 3. If disproved → discard, adjust score
 4. Report verification results to user
@@ -182,10 +186,5 @@ Do NOT auto-fix. Present recommendations and let the user decide.
 
 ## Known Accepted Risks (do NOT flag)
 
-These are documented in CLAUDE.md "Known Issues" and are intentionally accepted:
-- SEC-002: bare RN (`apps/mobile/`) uses plain AsyncStorage — learning reference, not published
-- SEC-006: `redirectTo` in oauth.ts not validated — deferred until login UI complete
-- ARCH-003b: factories read env vars directly — accepted DX trade-off
-- Google client IDs empty in .env — pending Google Cloud Console setup
+Only risks the dev has accepted, each with its reason, belong here:
 - `http://localhost` in dev configs — dev-only, not production
-- `http://10.0.2.2` in Android configs — emulator loopback, not production

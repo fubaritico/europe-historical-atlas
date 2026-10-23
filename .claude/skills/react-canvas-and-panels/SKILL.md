@@ -84,28 +84,15 @@ new one every render.
 
 ## How the store reaches a deep component
 
-**One React context, created at the composition root, holding the store handle.** Not prop-drilling:
-`{Polities}` is a tree and `{Details}` sits several levels down, so the handle would be threaded
-through components that have no use for it — which is the prop drilling `solid-react-principles`
-names. Zustand's own answer for a per-instance store is a context too.
+**As a prop.** `main.tsx` builds the store and `Editor` hands it down: each panel takes
+`{ store }: { store: CartographerStoreHook }` (`LayersPanel`, `PageHeading`, `MapCanvas`…). There is no
+store context today.
 
-The context holds **the handle, never a value**: a context carrying state re-renders every consumer,
-which is exactly what the store exists to avoid.
-
-```tsx
-const StoreContext = createContext<CartographerStoreHook | null>(null)
-
-/** Throws rather than returning a default: a component outside the provider is a wiring fault. */
-export function useCartographerStore(): CartographerStoreHook {
-  const store = use(StoreContext)
-  if (store === null) throw new Error('Cartographer: no store in context — mount the provider.')
-  return store
-}
-```
-
-The throw is a decision, not a detail (`rules/error-handling.md`): a silent default would render a
-panel showing someone else's empty document, and nothing would say so. Same argument as `#root` in
-`main.tsx`.
+If threading it through components that do not use it becomes a cost, the remedy is one React context
+created at the composition root that holds **the handle, never a value** (a context carrying state
+re-renders every consumer, which is what the store exists to avoid). Its hook throws outside the
+provider rather than returning a default (`rules/error-handling.md`), the same argument as `#root` in
+`main.tsx`. Adding it is the dev's call.
 
 ---
 

@@ -97,8 +97,7 @@ If a finding depends on library version behavior or API correctness you are not 
 
 # Review protocol (shared by every dimension)
 
-> Rewritten 2026-09-16 from the review's own failures, not from theory. Each rule below exists because
-> something went wrong that day.
+> Each rule below was drawn from a defect this review once missed or misjudged; the anchors are those cases.
 
 ## 1. Review the blast radius, not the diff
 

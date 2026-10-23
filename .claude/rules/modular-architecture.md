@@ -22,7 +22,7 @@ and test it — at 10k / 100k rows, check/uncheck, immediate update — without 
 1. **Dependency injection, always.** Collaborators (a state manager, a data source, a skin/resolver, a
    service, a router) are **passed in** (props / params / constructor / adapter), never
    `import`-and-instantiated in place. The unit declares _what it needs_, the caller _provides it_.
-2. **Standalone-runnable.** Each unit runs and renders on its own (its own story / test / harness),
+2. **Standalone-runnable.** Each unit runs and renders on its own (its own test, harness or workbench plate),
    with every dependency satisfied by a **mock or stub**. "Can I new it up with mocks only and exercise
    it?" must be **yes**.
 3. **Pluggable / unpluggable / replaceable.** Any implementation behind a seam can be swapped for
@@ -91,7 +91,7 @@ Principles do not catch erosion; these questions do. Run them on any diff:
 
 ## How to verify a unit is compliant (checklist)
 
-- [ ] Can I instantiate / render it in a test or story with **only mocks** for its collaborators?
+- [ ] Can I instantiate / render it in a test or on the workbench with **only mocks** for its collaborators?
 - [ ] Can I **swap** a collaborator for another implementation without editing the unit?
 - [ ] Does it import **zero** global singletons / ambient build artefacts / sibling internals?
 - [ ] Is every seam a **named contract** (interface/type), not a concrete import?

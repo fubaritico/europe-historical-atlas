@@ -207,8 +207,7 @@ what comes from me goes to Idées.
 
 ## Gotchas
 
-- **An interrupted command may already have acted.** Three times on 2026-10-17 the dev rejected or
-  interrupted a batch and part of it had already reached Trello (3 cards, then 14 duplicates in Fait).
+- **An interrupted command may already have acted** — part of a rejected batch can already be on the board.
   After any interruption or rejection: `list` first, compare with what the batch meant to do, and only
   then re-run — never re-run blind. A batch script should be idempotent where it can (skip a title that
   exists).

@@ -38,14 +38,6 @@ entities/
   pipeline/        # Future items, not yet started
 ```
 
-For tasks specifically:
-
-```
-tasks/
-  active/          # Work in progress
-  completed/       # Finished work
-```
-
 For any entity type with a clear lifecycle:
 
 ```
@@ -58,7 +50,7 @@ Pick folder names that match your domain. The pattern matters more than the spec
 
 ## Status Detection
 
-When the user mentions completion or status change, extract the intent:
+When the user asks to change the status of a named Basic Memory note, map their word to a status (a task or ticket said to be done goes to `/trello`, not here):
 
 | Signal | Status | Action |
 |--------|--------|--------|

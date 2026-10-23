@@ -252,7 +252,7 @@ pattern is not available by default — which is worth keeping, but it is not th
 | --- | --- | --- |
 | a polity's fill | a vector path from the outline, composited `overlay` on the backdrop (`canvas/paint/painter.ts`): the edge is exact | cut from the same outline into triangles on the relief's planes (`pipeline/fillTriangles`, atlas `scene/fillLayer`), blended in a shader: the edge is exact too since 2026-10-16 |
 | the relief | a flat image | a 3D mesh, with the shore ramp (`data/shoreRamp`) |
-| how a border is stroked | canvas strokes, every hand | three.js lines from `editor/borderHands`' table, minus weight and a dotted pattern (`known-issues-atlas.md`) |
+| how a border is stroked | canvas strokes, every hand | three.js lines from `editor/borderHands`' table, minus weight and a dotted pattern (`rules/known-issues/atlas.md`) |
 | a vassal | every polity in its own colour, with every border | from afar a vassal wears its suzerain's colour and no border parts them; its own colour and its border fade in by zoom (ATLAS-253) — levels from `editor/homageLevels`, the zoom read by `scene/homageReveal`, one line layer per split level (`scene/levelledBorderLayer`), the fills mixed across tint levels (`scene/fillLayer`) |
 
 **The direction**: geometry and decisions live in `core`; only the drawing — a 2D canvas on one side, the
