@@ -27,7 +27,7 @@ Scenario: a gesture is kept as a draft a moment later
   When I place an anchor and wait two seconds
   Then packages/cartographer/.autosave/drafts/1100.json holds the document with that anchor
   And nothing has changed under packages/atlas/public/years/
-  And the status bar says nothing about it
+  And nothing is said about it
 ```
 
 ```gherkin
@@ -37,7 +37,7 @@ Scenario: the page is closed, then reopened — the work is offered back
   Then once 1100 has been read, a dialogue asks "A draft of 1100 was kept today at 15:42, with work that was never saved. Resume it?"
   And [Resume] holds the focus
   When I press [Resume]
-  Then the map is the draft, and the status bar reads "resumed the draft of 1100 today at 15:42 — ‹ctrl+S› to save it"
+  Then the map is the draft, and a green toast reads "resumed the draft of 1100 today at 15:42 — ‹ctrl+S› to save it"
   And the disk is untouched until I press ‹ctrl+S›
 ```
 
@@ -47,7 +47,7 @@ Scenario: declining a draft keeps it
   When I press [Set it aside], or ‹escape›
   Then the saved year stays open
   And the draft is renamed 1100.set-aside-<date and time>.json in the same folder
-  And the status bar says where it went
+  And an orange toast says where it went
 ```
 
 ```gherkin
@@ -62,10 +62,10 @@ Scenario: a save removes the draft — unless I drew while it ran
 Scenario: the draft cannot be written — said once, and when it recovers
   Given the dev server answers the draft with an error
   When I keep drawing
-  Then the status bar reads "the draft is not kept (<reason>) — save with ‹ctrl+S› not to lose your work", once
+  Then the alarm dialogue reads "the draft is not kept (<reason>) — save with ‹ctrl+S› not to lose your work", once
   And the console logs it as an error, once
   When drafts can be written again
-  Then the status bar reads "the draft of 1100 is kept again"
+  Then a green toast reads "the draft of 1100 is kept again"
 ```
 
 ```gherkin
@@ -73,7 +73,7 @@ Scenario: a draft that cannot be opened is set aside, not overwritten
   Given the kept draft of 1100 is not a year core can read
   When I open the Cartographer
   Then nothing is offered
-  And the draft is set aside, and the status bar says why and where
+  And the draft is set aside, and an orange toast says why and where
 ```
 
 > **Proved by sabotage**, 2026-10-17: removing the draft on *every* successful save fails *"keeps the draft
@@ -100,14 +100,14 @@ Scenario: a save over a year changed on disk asks first
 Scenario: overwrite
   Given the dialogue is open
   When I press [Overwrite]
-  Then the page is written over the files, and the status bar reads "saved 1100 · …"
+  Then the page is written over the files, and a green toast reads "saved 1100 · …"
   And the next ‹ctrl+S› saves without asking — the page is now what is on disk
 
 Scenario: cancel
   Given the dialogue is open
   When I press [Cancel], or ‹escape›
   Then nothing is written, the page and its draft stay as they are
-  And the status bar reads "not saved — 1100 was changed on disk today at 14:02; ‹ctrl+S› again to choose"
+  And an orange toast reads "not saved — 1100 was changed on disk today at 14:02; ‹ctrl+S› again to choose"
   And the console warns it once
 
 Scenario: my own saves never ask
@@ -129,7 +129,7 @@ Scenario: an hour of drawing leaves a snapshot
   Given 1100 is open, and drafting started at 14:00
   When I place an anchor at 15:01, and the draft is written two seconds later
   Then packages/cartographer/.autosave/snapshots/ holds 1100.2026-10-18T15-01-02Z.json, the whole document
-  And the status bar says nothing about it
+  And nothing is said about it
 
 Scenario: nothing drawn, nothing taken
   Given 1100 is open and I have not drawn for two hours
@@ -138,7 +138,7 @@ Scenario: nothing drawn, nothing taken
 Scenario: a snapshot that cannot be kept is said, and the drawing goes on
   Given the dev server refuses the snapshot
   When an hour of drawing has passed and the draft is written
-  Then the status bar reads "the hourly snapshot of 1100 was not kept (<reason>)"
+  Then an orange toast reads "the hourly snapshot of 1100 was not kept (<reason>)"
   And the console logs it as an error
   And the draft itself is kept as before, and the next snapshot is tried an hour later
 ```
@@ -162,7 +162,7 @@ Scenario: open a snapshot
   And it warns: "Opening a snapshot replaces the page you are working on. Your page is kept first as a snapshot: you will find it in this list."
   When I choose "today at 14:00:00" and press [Open]
   Then the page is kept first as a snapshot, then the snapshot of 14:00 is open
-  And the status bar reads "opened the snapshot of today at 14:00:00 — your page was kept first, in the snapshots"
+  And a green toast reads "opened the snapshot of today at 14:00:00 — your page was kept first, in the snapshots"
   And the disk's year is untouched until I press ‹ctrl+S›
 
 Scenario: cancel
@@ -173,7 +173,7 @@ Scenario: no copy, no opening
   Given the page cannot be kept as a snapshot (the dev server refuses)
   When I press [Open]
   Then the page stays as it is, nothing is opened
-  And the status bar reads "not opened — your page could not be kept first (<reason>)"
+  And the alarm dialogue reads "not opened — your page could not be kept first (<reason>)"
 
 Scenario: no snapshot yet
   Given no snapshot of 1100 was ever kept
@@ -197,12 +197,12 @@ Scenario: no snapshot yet
   the document **in the page**, undoable; ‹ctrl+S› stays the only gesture that writes the year.
 - ~~**Rung 4 — the dev server is down**: the draft goes to the browser's storage, and the status bar says
   *"draft kept in the browser only"*.~~ **Dropped by the dev, 2026-10-18**: with the server down the page
-  stays, the status bar already says the draft is not kept, and the next draft once the server is back
+  stays, the alarm dialogue already says the draft is not kept, and the next draft once the server is back
   writes the whole document — only closing the tab meanwhile loses work, too narrow for a second store.
 - **A gesture made before drafting starts** (QUAL-002, review of 17/10, left open by Claude): drafting starts once
   the year is read and the offer answered; a gesture in that window is drafted only with the next one. The
   window is while the backdrop bakes and the tools still wait. Trigger to revisit: a loss seen in it.
-- **Drafting stays off when an old draft cannot be set aside** (ARCH-001): said in the status bar —
+- **Drafting stays off when an old draft cannot be set aside** (ARCH-001): said in the alarm dialogue —
   *"automatic drafts are off: move it out of …, then reload"*. Claude's call under the dev's go, to confirm.
 - **Walked in the dev's Chrome**: ~~not yet — every line above is asserted by a test, none was seen on screen.~~
   **Tested by the dev on 2026-10-17** (`f967d4d`, CARTO-238): *« ça marche »* — the draft offered back at the

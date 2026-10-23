@@ -94,6 +94,8 @@ function keeper(
   const memory = memoryStore()
   const clock = manualTimers()
   const reports: string[] = []
+  // How each was shown: `tone/topic`, in order.
+  const tones: string[] = []
   const draftKeeper = createDraftKeeper({
     store: memory.store,
     drafts,
@@ -103,10 +105,13 @@ function keeper(
     snapshots: drafts,
     now,
     timers: clock.timers,
-    report: (message) => reports.push(message),
+    report: (notice) => {
+      reports.push(notice.text)
+      tones.push(`${notice.tone}/${notice.topic}`)
+    },
     words: () => EN_WORDS,
   })
-  return { draftKeeper, ...memory, ...clock, reports }
+  return { draftKeeper, ...memory, ...clock, reports, tones }
 }
 
 /** Let every queued promise settle. */
@@ -244,7 +249,7 @@ describe('createDraftKeeper', () => {
       const { drafts } = memoryDrafts({
         write: () => Promise.reject(new Error('the dev server is down')),
       })
-      const { draftKeeper, change, elapse, reports } = keeper(drafts)
+      const { draftKeeper, change, elapse, reports, tones } = keeper(drafts)
       draftKeeper.start()
 
       change()
@@ -257,6 +262,7 @@ describe('createDraftKeeper', () => {
       expect(reports).toEqual([
         'the draft is not kept — save with ‹ctrl+S› not to lose your work (details in the console)',
       ])
+      expect(tones).toEqual(['alarm/draft'])
       expect(console.error).toHaveBeenCalledTimes(1)
     })
 
@@ -265,7 +271,7 @@ describe('createDraftKeeper', () => {
       const { drafts } = memoryDrafts({
         write: () => (fail ? Promise.reject(new Error('down')) : Promise.resolve()),
       })
-      const { draftKeeper, change, elapse, reports } = keeper(drafts)
+      const { draftKeeper, change, elapse, reports, tones } = keeper(drafts)
       draftKeeper.start()
 
       change()
@@ -277,11 +283,38 @@ describe('createDraftKeeper', () => {
       await settle()
 
       expect(reports.at(-1)).toBe('the draft of 1100 is kept again')
+      // A success of the topic: it closes the alarm the failure raised.
+      expect(tones).toEqual(['alarm/draft', 'success/draft'])
+    })
+
+    // The dev's rule (REPO-275): a draft write is never cut, but one the server has not confirmed is said.
+    it('says a draft the server has not confirmed within ten seconds, then that it is kept again', async () => {
+      let confirm: (() => void) | undefined
+      const { drafts } = memoryDrafts({
+        write: () =>
+          new Promise<void>((resolve) => {
+            confirm = resolve
+          }),
+      })
+      const { draftKeeper, change, elapse, reports, tones } = keeper(drafts)
+      draftKeeper.start()
+
+      change()
+      elapse(DRAFT_DELAY_MS)
+      await settle()
+      elapse(10_000)
+      expect(reports).toEqual([
+        'the draft is still waiting for the server’s confirmation — save with ‹ctrl+S› not to lose your work (details in the console)',
+      ])
+      confirm?.()
+      await settle()
+      expect(reports.at(-1)).toBe('the draft of 1100 is kept again')
+      expect(tones).toEqual(['alarm/draft', 'success/draft'])
     })
 
     it('reports a draft that could not be removed after a save, the save still a success', async () => {
       const { drafts } = memoryDrafts({ remove: () => Promise.reject(new Error('EACCES')) })
-      const { draftKeeper, state, reports } = keeper(drafts)
+      const { draftKeeper, state, reports, tones } = keeper(drafts)
       draftKeeper.start()
 
       await draftKeeper.saved(state.version)
@@ -289,6 +322,7 @@ describe('createDraftKeeper', () => {
       expect(reports).toEqual([
         'saved, but the old draft could not be removed — it may be offered at the next opening (details in the console)',
       ])
+      expect(tones).toEqual(['warning/draft'])
     })
   })
 
@@ -444,7 +478,7 @@ describe('createDraftKeeper, the hourly snapshot (CARTO-238, rung 2a)', () => {
       const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
       const memory = memoryDrafts({ snapshot: vi.fn(() => Promise.reject(new Error('disk full'))) })
       const clock = movingClock()
-      const { draftKeeper, change, elapse, reports } = keeper(memory.drafts, clock.now)
+      const { draftKeeper, change, elapse, reports, tones } = keeper(memory.drafts, clock.now)
       draftKeeper.start()
       clock.at(61)
       change()
@@ -455,6 +489,8 @@ describe('createDraftKeeper, the hourly snapshot (CARTO-238, rung 2a)', () => {
       expect(reports.at(-1)).toBe(
         'the hourly snapshot of 1100 was not kept (details in the console)'
       )
+      // The draft itself is kept: a warning.
+      expect(tones.at(-1)).toBe('warning/snapshot')
       expect(error).toHaveBeenCalledOnce()
     })
 

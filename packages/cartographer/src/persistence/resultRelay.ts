@@ -1,14 +1,16 @@
 /**
- * A message for the status bar's result zone, sent by something that lives outside React.
+ * A message for the status bar's result zone, sent by something that lives outside React — today the stacking
+ * keys' answers (`ui/utils/arrange.ts`), wired at the composition root.
  *
- * **Why a relay rather than a prop.** The year session is built at the composition root, before any
- * component exists — it opens the year at start-up, which belongs in the entry module and not in an effect
- * a remount would re-run. But the result zone is a node only `Editor` holds. So the session *says* things
- * into this relay, and `Editor` *attaches* the writer once it has the node.
+ * **Why a relay rather than a prop.** What says it is built at the composition root, before any component
+ * exists, but the result zone is a node only `Editor` holds. So it *says* things into this relay, and `Editor`
+ * *attaches* the writer once it has the node.
  *
- * **It keeps the last message until a writer attaches**: the start-up read can finish before the page has
- * mounted, and its answer — *"opened 1100 · 3 polities · 412 vertices"*, or why saving is blocked — must not
- * vanish because nobody was listening yet.
+ * **It keeps the last message until a writer attaches**, so nothing said before the page mounted vanishes
+ * because nobody was listening yet.
+ *
+ * **The year on disk no longer speaks here** (the dev, 2026-10-24: the status bar is the tool's): its notices
+ * go to a toast or the alarm dialogue (`notice.ts`).
  */
 
 /** The relay: one side says, the other side writes. */

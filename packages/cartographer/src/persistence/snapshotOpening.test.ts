@@ -64,16 +64,21 @@ async function opening(
     ...overrides,
   }
   const reports: string[] = []
+  // How each was shown: `tone/topic`, in order.
+  const tones: string[] = []
   const deps: SnapshotOpeningDeps = {
     store: { getState: () => state },
     snapshots,
     year: 1100,
     now: () => NOW,
-    report: (message) => reports.push(message),
+    report: (notice) => {
+      reports.push(notice.text)
+      tones.push(`${notice.tone}/${notice.topic}`)
+    },
     words: () => EN_WORDS,
   }
   const outcome = await openSnapshot(deps, CHOSEN)
-  return { order, page, state, snapshots, reports, outcome }
+  return { order, page, state, snapshots, reports, tones, outcome }
 }
 
 beforeEach(() => {
@@ -88,7 +93,7 @@ afterEach(() => {
 describe('openSnapshot, a gesture made while the page is being kept (QUAL-001)', () => {
   it('opens nothing when the page changed during its copy, and says to open it again', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-    const { state, page, reports, outcome } = await opening({}, true)
+    const { state, page, reports, tones, outcome } = await opening({}, true)
 
     expect(outcome).toBe(false)
     expect(state.open).not.toHaveBeenCalled()
@@ -96,6 +101,8 @@ describe('openSnapshot, a gesture made while the page is being kept (QUAL-001)',
     expect(reports.at(-1)).toBe(
       'not opened — the page changed while it was being kept; open the snapshot again'
     )
+    // Nothing lost, the gesture is to be made again: a warning.
+    expect(tones.at(-1)).toBe('warning/snapshot')
     expect(warn).toHaveBeenCalledOnce()
   })
 })
@@ -126,11 +133,12 @@ describe('openSnapshot', () => {
     })
 
     it('says the snapshot is open and the page was kept first', async () => {
-      const { reports } = await opening()
+      const { reports, tones } = await opening()
 
       expect(reports).toEqual([
         'opened the snapshot of today at 14:00:00 — your page was kept first, in the snapshots',
       ])
+      expect(tones).toEqual(['success/snapshot'])
       expect(console.error).not.toHaveBeenCalled()
     })
   })
@@ -145,7 +153,7 @@ describe('openSnapshot', () => {
 
   describe('managed errors', () => {
     it('opens nothing and reads nothing when the page cannot be kept first, and logs why', async () => {
-      const { state, snapshots, reports, outcome } = await opening({
+      const { state, snapshots, reports, tones, outcome } = await opening({
         snapshot: () =>
           Promise.reject(new Error('only the Cartographer served by this machine may keep drafts')),
       })
@@ -156,6 +164,7 @@ describe('openSnapshot', () => {
       expect(reports).toEqual([
         'not opened — your page could not be kept first (details in the console)',
       ])
+      expect(tones).toEqual(['alarm/snapshot'])
       expect(console.error).toHaveBeenCalledTimes(1)
       expect(console.error).toHaveBeenCalledWith(
         '[Cartographer] the page of 1100 could not be kept before opening a snapshot',
@@ -164,7 +173,7 @@ describe('openSnapshot', () => {
     })
 
     it('leaves the page untouched when the snapshot cannot be read, and logs why', async () => {
-      const { page, state, reports, outcome } = await opening({
+      const { page, state, reports, tones, outcome } = await opening({
         readSnapshot: () =>
           Promise.reject(
             new Error('there is no snapshot "1100.2026-10-18T14-00-00Z.json" of 1100')
@@ -178,6 +187,8 @@ describe('openSnapshot', () => {
         'the snapshot of today at 14:00:00 could not be opened — your page is as it was (details in the console)',
       ])
       expect(console.error).toHaveBeenCalledTimes(1)
+      // Not done: an alarm, though the page is untouched.
+      expect(tones).toEqual(['alarm/snapshot'])
       expect(console.error).toHaveBeenCalledWith(
         '[Cartographer] the snapshot 1100.2026-10-18T14-00-00Z.json could not be opened',
         new Error('there is no snapshot "1100.2026-10-18T14-00-00Z.json" of 1100')
@@ -230,7 +241,7 @@ describe('openSnapshot', () => {
           },
           year: 1100,
           now: () => NOW,
-          report: (message) => reports.push(message),
+          report: (notice) => reports.push(notice.text),
           words: () => EN_WORDS,
         },
         {

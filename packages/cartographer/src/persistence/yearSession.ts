@@ -1,6 +1,11 @@
+import { ANSWER_TIMEOUT_MS } from '@europe-historical-atlas/core/utils/fetchWithin'
+
+import { awaitConfirmation } from './awaitConfirmation'
 import { timeWords } from './timeWords'
 import { YearChangedOnDisk } from './yearArchive'
 
+import type { ConfirmationTimers } from './awaitConfirmation'
+import type { Notice, Report } from './notice'
 import type { PersistenceWords } from './persistenceWords'
 import type { SavedYearSummary, YearArchive } from './yearArchive'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
@@ -20,8 +25,8 @@ import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocu
  * acceptable, so the read is **not applied** and saving is blocked — the newest action wins, and the older
  * one is said out loud (D6).
  *
- * Every message goes to `report`, which the editor shows in the status bar's result zone, and every refusal
- * also goes to the console (`rules/error-handling.md`, *no refusal is silent*).
+ * Every message goes to `report` as a notice — a toast, or a dialogue when the year is at risk (`notice.ts`) —
+ * and every refusal also goes to the console (`rules/error-handling.md`, *no refusal is silent*).
  */
 
 /** The console tag this module's lines start with. */
@@ -56,8 +61,8 @@ export interface YearSessionDeps {
   archive: YearArchive
   /** The year this editor works on. */
   year: number
-  /** Where a message for the author goes — the status bar's result zone. */
-  report: (message: string) => void
+  /** Where a notice for the author goes — a toast, or the alarm dialogue. */
+  report: Report
   /**
    * Ask whether to write over a year changed on disk — the dialogue, through a question relay.
    * @returns `true` for [Overwrite], `false` for [Cancel]
@@ -67,6 +72,8 @@ export interface YearSessionDeps {
   now: () => Date
   /** What it says — asked at each sentence, so it follows a change of language. */
   words: () => PersistenceWords
+  /** The timer that says a save the server has not confirmed in time (REPO-275). */
+  timers: ConfirmationTimers
 }
 
 /**
@@ -136,7 +143,7 @@ interface SessionCell {
 function block(deps: YearSessionDeps, cell: SessionCell, reason: string): void {
   cell.phase = 'blocked'
   cell.blockedBecause = reason
-  deps.report(reason)
+  deps.report({ tone: 'alarm', topic: 'year', text: reason })
 }
 
 /**
@@ -187,7 +194,11 @@ async function openOnStartup(deps: YearSessionDeps, cell: SessionCell): Promise<
 
   if (opened === null) {
     cell.phase = 'ready'
-    deps.report(deps.words().t('neverSaved', { year: yearName }))
+    deps.report({
+      tone: 'info',
+      topic: 'year',
+      text: deps.words().t('neverSaved', { year: yearName }),
+    })
     return
   }
   const refusal = whyNotOpen(deps, opened, versionAtStart)
@@ -197,25 +208,28 @@ async function openOnStartup(deps: YearSessionDeps, cell: SessionCell): Promise<
   }
   deps.store.getState().open(opened)
   cell.phase = 'ready'
-  deps.report(
-    deps.words().t('opened', {
+  deps.report({
+    tone: 'success',
+    topic: 'year',
+    text: deps.words().t('opened', {
       year: yearName,
       contents: describeYearContents(contentsOf(opened), deps.words()),
-    })
-  )
+    }),
+  })
 }
 
 /**
- * Why a save must not start now — or `null` when it may.
+ * Why a save must not start now — or `null` when it may. A wait is a warning, a block stays an alarm.
  * @param deps - the year
  * @param cell - the session's memory
- * @returns the sentence for the author, or `null`
+ * @returns the notice for the author, or `null`
  */
-function whySaveRefused(deps: YearSessionDeps, cell: SessionCell): string | null {
+function whySaveRefused(deps: YearSessionDeps, cell: SessionCell): Notice | null {
   const { t } = deps.words()
-  if (cell.phase === 'opening') return t('stillReading', { year: String(deps.year) })
-  if (cell.phase === 'blocked') return cell.blockedBecause
-  if (cell.saving) return t('saveRunning')
+  if (cell.phase === 'opening')
+    return { tone: 'warning', topic: 'year', text: t('stillReading', { year: String(deps.year) }) }
+  if (cell.phase === 'blocked') return { tone: 'alarm', topic: 'year', text: cell.blockedBecause }
+  if (cell.saving) return { tone: 'warning', topic: 'year', text: t('saveRunning') }
   return null
 }
 
@@ -228,7 +242,7 @@ function whySaveRefused(deps: YearSessionDeps, cell: SessionCell): string | null
 async function saveYear(deps: YearSessionDeps, cell: SessionCell): Promise<boolean> {
   const refusal = whySaveRefused(deps, cell)
   if (refusal !== null) {
-    console.warn(`${LOG_TAG} save refused: ${refusal}`)
+    console.warn(`${LOG_TAG} save refused: ${refusal.text}`)
     deps.report(refusal)
     return false
   }
@@ -239,7 +253,7 @@ async function saveYear(deps: YearSessionDeps, cell: SessionCell): Promise<boole
     // The question itself failed — the relay busy, a time out of range. `save` resolves either way, as
     // its contract says: reported like any other failed save, never thrown.
     console.error(`${LOG_TAG} ${String(deps.year)} was not saved`, error)
-    deps.report(deps.words().t('notSaved'))
+    deps.report({ tone: 'alarm', topic: 'year', text: deps.words().t('notSaved') })
     return false
   } finally {
     cell.saving = false
@@ -256,18 +270,35 @@ async function saveYear(deps: YearSessionDeps, cell: SessionCell): Promise<boole
 async function writeYear(deps: YearSessionDeps, overwrite: boolean): Promise<boolean> {
   try {
     // The document is taken now, not when ‹ctrl+S› was pressed: after [Overwrite] it is the page as it is.
-    const summary = await deps.archive.save(deps.store.getState().document, { overwrite })
-    deps.report(
-      deps.words().t('saved', {
+    // Never cut, since it may land; said when the server has not confirmed it in time (the dev, REPO-275).
+    const summary = await awaitConfirmation(
+      deps.archive.save(deps.store.getState().document, { overwrite }),
+      {
+        timers: deps.timers,
+        delayMs: ANSWER_TIMEOUT_MS,
+        late: () => {
+          console.error(`${LOG_TAG} ${String(deps.year)}: no confirmation of the save yet`)
+          deps.report({
+            tone: 'alarm',
+            topic: 'year',
+            text: deps.words().t('saveUnconfirmed', { year: String(deps.year) }),
+          })
+        },
+      }
+    )
+    deps.report({
+      tone: 'success',
+      topic: 'year',
+      text: deps.words().t('saved', {
         year: String(summary.year),
         contents: describeYearContents(summary, deps.words()),
-      })
-    )
+      }),
+    })
     return true
   } catch (error: unknown) {
     if (error instanceof YearChangedOnDisk && !overwrite) return askBeforeOverwriting(deps, error)
     console.error(`${LOG_TAG} ${String(deps.year)} was not saved`, error)
-    deps.report(deps.words().t('notSaved'))
+    deps.report({ tone: 'alarm', topic: 'year', text: deps.words().t('notSaved') })
     return false
   }
 }
@@ -287,13 +318,16 @@ async function askBeforeOverwriting(
   console.warn(
     `${LOG_TAG} save cancelled: ${String(refusal.year)} was changed on disk${changedAt === null ? '' : ` at ${changedAt}`}.`
   )
-  deps.report(
-    deps.words().t('notSavedChanged', {
+  // The author's own answer: nothing is lost, ‹ctrl+S› asks again.
+  deps.report({
+    tone: 'warning',
+    topic: 'year',
+    text: deps.words().t('notSavedChanged', {
       known: changedAt === null ? 'no' : 'yes',
       year: String(refusal.year),
       when: changedAt === null ? '' : timeWords(changedAt, deps.now(), deps.words()),
-    })
-  )
+    }),
+  })
   return false
 }
 

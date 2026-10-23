@@ -5,6 +5,7 @@ import { LOCALES } from '@europe-historical-atlas/core/i18n/locale'
 import { parseMessage } from '@europe-historical-atlas/core/i18n/messageFormat'
 
 import type { SnapLayer, WaterWords, WeldOffer } from './canvas/tools/toolSession'
+import type { NoticeTopic } from './persistence/notice'
 import type { LayerId } from './state/layersSlice'
 import type { EditorTool, PenMode } from './state/toolSlice'
 import type {
@@ -64,6 +65,7 @@ const YES_NO = all<'yes' | 'no'>({ yes: true, no: true })
  * a defect reaches, and visibly. Keyed by catalogue, message and argument.
  */
 const CLOSED: Readonly<Record<string, readonly string[]>> = {
+  'ALARM_MESSAGES.title.topic': all<NoticeTopic>({ year: true, draft: true, snapshot: true }),
   'TOOL_MESSAGES.toolName.tool': all<EditorTool>({
     navigate: true,
     draw: true,
@@ -248,7 +250,7 @@ const SELECTS = CATALOGUES.flatMap(({ name, catalogue }) =>
 describe('the Cartographer catalogues', () => {
   describe('happy path', () => {
     it('finds the catalogues by their file names', () => {
-      expect(CATALOGUES.length).toBe(25)
+      expect(CATALOGUES.length).toBe(27)
     })
   })
 

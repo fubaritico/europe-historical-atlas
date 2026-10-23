@@ -1,6 +1,7 @@
 import { timeWords } from '../timeWords'
 import { documentFromFiles } from '../yearArchive'
 
+import type { Report } from '../notice'
 import type { PersistenceWords } from '../persistenceWords'
 import type { DraftOffer } from './draftOffers'
 import type { Draft, DraftStore } from './draftStore'
@@ -50,8 +51,8 @@ export interface DraftRecoveryDeps {
   ask: (offer: DraftOffer) => Promise<boolean>
   /** The clock, to word the draft's time. */
   now: () => Date
-  /** Where a message for the author goes — the status bar's result zone. */
-  report: (message: string) => void
+  /** Where a notice for the author goes — a toast, or the alarm dialogue. */
+  report: Report
   /** What it says — asked at each sentence, so it follows a change of language. */
   words: () => PersistenceWords
   /**
@@ -76,17 +77,24 @@ async function setAside(
   const yearName = String(deps.year)
   try {
     await deps.drafts.setAside(deps.year)
-    deps.report(
-      deps.words().t('draftSetAside', {
+    // Set aside, not lost: it waits in the folder the sentence names.
+    deps.report({
+      tone: 'warning',
+      topic: 'draft',
+      text: deps.words().t('draftSetAside', {
         because,
         folder: deps.draftsFolder,
         logged: logged ? 'yes' : 'no',
-      })
-    )
+      }),
+    })
     return 'clear'
   } catch (error: unknown) {
     console.error(`${LOG_TAG} the draft of ${yearName} could not be set aside`, error)
-    deps.report(deps.words().t('draftSetAsideFailed', { because, folder: deps.draftsFolder }))
+    deps.report({
+      tone: 'alarm',
+      topic: 'draft',
+      text: deps.words().t('draftSetAsideFailed', { because, folder: deps.draftsFolder }),
+    })
     return 'draft-left'
   }
 }
@@ -145,7 +153,11 @@ async function askAndApply(
       return await setAside(deps, t('draftChangedWhileOffered', { year: yearName }), false)
     }
     deps.store.getState().open(document)
-    deps.report(t('draftResumed', { year: yearName, when }))
+    deps.report({
+      tone: 'success',
+      topic: 'draft',
+      text: t('draftResumed', { year: yearName, when }),
+    })
     return 'clear'
   } catch (error: unknown) {
     console.error(`${LOG_TAG} the draft of ${yearName} could not be offered`, error)

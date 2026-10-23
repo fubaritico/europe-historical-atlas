@@ -58,7 +58,7 @@ describe('DraftRecoveryDialog', () => {
       mounted('fr')
 
       // Compared as written: Testing Library would fold the narrow no-break space before « ? » into a space.
-      expect(document.querySelector('dialog[open] .draft-recovery__question')?.textContent).toBe(
+      expect(document.querySelector('dialog[open] .short-dialogue__text')?.textContent).toBe(
         'Un brouillon de 1100 a été gardé aujourd’hui à 15:42, avec un travail jamais enregistré. Le reprendre\u202f?'
       )
     })

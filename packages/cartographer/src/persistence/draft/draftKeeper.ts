@@ -1,5 +1,9 @@
 import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import { ANSWER_TIMEOUT_MS } from '@europe-historical-atlas/core/utils/fetchWithin'
 
+import { awaitConfirmation } from '../awaitConfirmation'
+
+import type { Report } from '../notice'
 import type { PersistenceWords } from '../persistenceWords'
 import type { Draft, DraftStore, SnapshotSink } from './draftStore'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
@@ -13,7 +17,7 @@ import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocu
  * clock would lose up to 30 seconds and write the same document over and over.
  *
  * **Silent when it works, said when it fails** (`rules/error-handling.md`): a failed draft is reported once
- * in the status bar and logged as an error — the author's protection has stopped, and they must know to
+ * in the alarm dialogue and logged as an error — the author's protection has stopped, and they must know to
  * press ‹ctrl+S› — then said again when drafts resume. Never per write.
  *
  * **One write at a time, in order**: writes are queued, so a slow one cannot land after a newer one and put
@@ -87,8 +91,8 @@ export interface DraftKeeperDeps {
   now: () => Date
   /** The timer. */
   timers: KeeperTimers
-  /** Where a message for the author goes — the status bar's result zone. */
-  report: (message: string) => void
+  /** Where a notice for the author goes — a toast, or the alarm dialogue. */
+  report: Report
   /** What it says — asked at each sentence, so it follows a change of language. */
   words: () => PersistenceWords
 }
@@ -135,10 +139,25 @@ async function writeDraft(deps: DraftKeeperDeps, cell: KeeperCell): Promise<void
       savedAt: deps.now().toISOString(),
       files: saveYearDocument(deps.store.getState().document),
     }
-    await deps.drafts.write(draft)
+    // Never cut, since it may land; said once when the server has not confirmed it in time (REPO-275). The
+    // confirmation that comes later is said by the recovery below, as for a failed write.
+    await awaitConfirmation(deps.drafts.write(draft), {
+      timers: deps.timers,
+      delayMs: ANSWER_TIMEOUT_MS,
+      late: () => {
+        if (cell.failing) return
+        cell.failing = true
+        console.error(`${LOG_TAG} the draft of ${yearName}: no confirmation yet`)
+        deps.report({ tone: 'alarm', topic: 'draft', text: deps.words().t('draftUnconfirmed') })
+      },
+    })
     if (cell.failing) {
       cell.failing = false
-      deps.report(deps.words().t('draftKeptAgain', { year: yearName }))
+      deps.report({
+        tone: 'success',
+        topic: 'draft',
+        text: deps.words().t('draftKeptAgain', { year: yearName }),
+      })
     }
     // Beside the queue: its own failures are caught inside, and it must not hold the next write.
     void snapshotIfDue(deps, cell, draft)
@@ -146,7 +165,7 @@ async function writeDraft(deps: DraftKeeperDeps, cell: KeeperCell): Promise<void
     if (cell.failing) return
     cell.failing = true
     console.error(`${LOG_TAG} the draft of ${yearName} could not be kept`, error)
-    deps.report(deps.words().t('draftNotKept'))
+    deps.report({ tone: 'alarm', topic: 'draft', text: deps.words().t('draftNotKept') })
   }
 }
 
@@ -166,7 +185,12 @@ async function snapshotIfDue(deps: DraftKeeperDeps, cell: KeeperCell, draft: Dra
     await deps.snapshots.snapshot(draft)
   } catch (error: unknown) {
     console.error(`${LOG_TAG} the hourly snapshot of ${String(deps.year)} was not kept`, error)
-    deps.report(deps.words().t('hourlyNotKept', { year: String(deps.year) }))
+    // The draft itself is kept: nothing is lost, the next try is an hour away.
+    deps.report({
+      tone: 'warning',
+      topic: 'snapshot',
+      text: deps.words().t('hourlyNotKept', { year: String(deps.year) }),
+    })
   }
 }
 
@@ -207,7 +231,8 @@ async function removeAfterSave(
       `${LOG_TAG} the draft of ${String(deps.year)} could not be removed after the save`,
       error
     )
-    deps.report(deps.words().t('oldDraftLeft'))
+    // The year is saved; the old draft may only be offered again.
+    deps.report({ tone: 'warning', topic: 'draft', text: deps.words().t('oldDraftLeft') })
   }
 }
 

@@ -95,7 +95,7 @@ Scenario: the year is not listed in the manifest
 Scenario: the editor opens the saved year by itself
   Given years/index.json lists 1100 and years/1100/ holds its three files
   When I load http://localhost:5174/
-  Then the status bar reads "opened 1100 · 1 polity · 1,101 vertices" before the backdrop has finished baking
+  Then a green toast reads "opened 1100 · 1 polity · 1,101 vertices" before the backdrop has finished baking
   And {Polities} lists the saved polities
   And the undo line starts fresh on the opened year
 ```
@@ -104,7 +104,7 @@ Scenario: the editor opens the saved year by itself
 Scenario: a year never saved starts empty, and says so
   Given years/index.json does not list 1100
   When I load the Cartographer
-  Then the status bar reads "1100 has never been saved — starting from an empty map"
+  Then a toast reads "1100 has never been saved — starting from an empty map"
   And ‹ctrl+S› is allowed
 ```
 
@@ -112,7 +112,7 @@ Scenario: a year never saved starts empty, and says so
 Scenario: save in place
   Given I have drawn the Kingdom of France
   When I press ‹ctrl+S›
-  Then the status bar reads "saved 1100 · 1 polity · 1,101 vertices"
+  Then a green toast reads "saved 1100 · 1 polity · 1,101 vertices"
   And registry.json, polities.json and borders.json are written under years/1100/
   And years/index.json lists 1100, written last
   And the page does not reload, and the drawing stays on screen
@@ -132,7 +132,7 @@ Scenario: an unreadable year blocks saving rather than being overwritten
   Given years/index.json lists 1100 and its polities.json fails its schema
   When I load the Cartographer
   Then the editor starts on an empty map
-  And the status bar says why 1100 could not be read, and that saving is blocked
+  And the alarm dialogue says why 1100 could not be read, and that saving is blocked
   And ‹ctrl+S› writes nothing and repeats the reason
 ```
 
@@ -141,7 +141,7 @@ Scenario: drawing before the saved year arrives
   Given the start-up read is still in flight
   When I edit the empty map, and the read lands afterwards
   Then the read is not applied — my edit stays
-  And saving is blocked, and the status bar says to reload to open the year
+  And saving is blocked, and the alarm dialogue says to reload to open the year
 ```
 
 ```gherkin

@@ -8,6 +8,7 @@ import { persistenceWords } from './persistenceWords'
 import { YearChangedOnDisk } from './yearArchive'
 import { createYearSession, describeYearContents } from './yearSession'
 
+import type { ConfirmationTimers } from './awaitConfirmation'
 import type { YearArchive } from './yearArchive'
 import type { OverwriteQuestion, SessionStore } from './yearSession'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
@@ -41,6 +42,32 @@ function stubArchive(overrides: Partial<YearArchive> = {}): YearArchive {
   }
 }
 
+/** Timers run by hand: `elapse` fires whatever is due. */
+function manualTimers() {
+  let clock = 0
+  let next = 1
+  const due = new Map<number, { at: number; run: () => void }>()
+  const timers: ConfirmationTimers = {
+    set: (run, delayMs) => {
+      const handle = next++
+      due.set(handle, { at: clock + delayMs, run })
+      return handle
+    },
+    clear: (handle) => {
+      due.delete(handle)
+    },
+  }
+  const elapse = (ms: number): void => {
+    clock += ms
+    for (const [handle, timer] of [...due]) {
+      if (timer.at > clock) continue
+      due.delete(handle)
+      timer.run()
+    }
+  }
+  return { timers, elapse }
+}
+
 /** The clock every session reads: 18 October 2026, 16:00, local time. */
 const NOW = new Date(2026, 9, 18, 16, 0)
 
@@ -59,16 +86,23 @@ function session(
 ) {
   const { store, state } = memoryStore()
   const reports: string[] = []
+  // How each was shown: `tone/topic`, in order.
+  const tones: string[] = []
+  const { timers, elapse } = manualTimers()
   const yearSession = createYearSession({
     store,
     archive,
     year: 1100,
-    report: (message) => reports.push(message),
+    report: (notice) => {
+      reports.push(notice.text)
+      tones.push(`${notice.tone}/${notice.topic}`)
+    },
     words: () => EN_WORDS,
     confirmOverwrite,
     now: () => NOW,
+    timers,
   })
-  return { yearSession, state, reports, archive, confirmOverwrite }
+  return { yearSession, state, reports, tones, archive, confirmOverwrite, elapse }
 }
 
 /** An archive save refused once as changed on disk (at `changedAt`), then writing what it is given. */
@@ -93,21 +127,23 @@ afterEach(() => {
 describe('createYearSession', () => {
   describe('happy path', () => {
     it('opens the year at start-up when the manifest lists it, and says so', async () => {
-      const { yearSession, state, reports } = session()
+      const { yearSession, state, reports, tones } = session()
       await yearSession.openOnStartup()
 
       expect(state.document.polities.map((polity) => polity.id)).toEqual(['fr-couronne', 'hre'])
       expect(yearSession.phase()).toBe('ready')
       expect(reports).toEqual(['opened 1100 · 2 polities · 6 vertices'])
+      expect(tones).toEqual(['success/year'])
     })
 
     it('saves the working document, and says what it saved', async () => {
-      const { yearSession, state, reports, archive } = session()
+      const { yearSession, state, reports, tones, archive } = session()
       await yearSession.openOnStartup()
       await yearSession.save()
 
       expect(archive.save).toHaveBeenCalledWith(state.document, { overwrite: false })
       expect(reports.at(-1)).toBe('saved 1100 · 2 polities · 6 vertices')
+      expect(tones.at(-1)).toBe('success/year')
     })
 
     it('answers true when the year was written — what lets the draft keeper remove the draft', async () => {
@@ -120,7 +156,7 @@ describe('createYearSession', () => {
 
   describe('variants', () => {
     it('starts from the empty map when the year was never saved, and allows saving it', async () => {
-      const { yearSession, state, reports, archive } = session(
+      const { yearSession, state, reports, tones, archive } = session(
         stubArchive({ listedYears: () => Promise.resolve([]) })
       )
       await yearSession.openOnStartup()
@@ -128,14 +164,50 @@ describe('createYearSession', () => {
       expect(archive.open).not.toHaveBeenCalled()
       expect(state.document.polities).toEqual([])
       expect(reports).toEqual(['1100 has never been saved — starting from an empty map'])
+      expect(tones).toEqual(['info/year'])
       expect(yearSession.phase()).toBe('ready')
+    })
+
+    // The dev's rule (REPO-275): a save is never cut, but one the server has not confirmed in time is said.
+    it('says a save the server has not confirmed within ten seconds, then what it saved when it comes', async () => {
+      let confirm:
+        ((summary: { year: number; polities: number; vertices: number }) => void) | undefined
+      const { yearSession, reports, tones, elapse } = session(
+        stubArchive({
+          save: () =>
+            new Promise((resolve) => {
+              confirm = resolve
+            }),
+        })
+      )
+      await yearSession.openOnStartup()
+      const saving = yearSession.save()
+      await Promise.resolve()
+      elapse(10_000)
+      expect(reports.at(-1)).toBe(
+        '1100: still no confirmation from the server — the save may not have happened (details in the console)'
+      )
+      // The doubt is a dialogue; the confirmation, a toast of the same topic, which closes it.
+      expect(tones.at(-1)).toBe('alarm/year')
+      confirm?.({ year: 1100, polities: 2, vertices: 6 })
+      expect(await saving).toBe(true)
+      expect(reports.at(-1)).toBe('saved 1100 · 2 polities · 6 vertices')
+      expect(tones.at(-1)).toBe('success/year')
+    })
+
+    it('says nothing more when the save is confirmed in time', async () => {
+      const { yearSession, reports, elapse } = session()
+      await yearSession.openOnStartup()
+      await yearSession.save()
+      elapse(10_000)
+      expect(reports.at(-1)).toBe('saved 1100 · 2 polities · 6 vertices')
     })
   })
 
   describe('managed errors', () => {
     it('blocks saving when a listed year fails to open, so an empty map never overwrites it', async () => {
       // The plausible session starts empty and lets ‹ctrl+s› through: good files replaced by nothing.
-      const { yearSession, reports, archive } = session(
+      const { yearSession, reports, tones, archive } = session(
         stubArchive({
           open: () =>
             Promise.reject(new Error('yearPolities (schema) …: anchors[3]: expected number')),
@@ -150,6 +222,8 @@ describe('createYearSession', () => {
         '1100 could not be read, so saving is blocked (details in the console)',
         '1100 could not be read, so saving is blocked (details in the console)',
       ])
+      // Blocked is an alarm, at the opening and again at every ‹ctrl+S›.
+      expect(tones).toEqual(['alarm/year', 'alarm/year'])
       // The reader's own words are English whatever the page: the console has them, not the bar.
       expect(console.error).toHaveBeenCalledWith(
         '[Cartographer] 1100 could not be read from disk',
@@ -196,7 +270,7 @@ describe('createYearSession', () => {
     })
 
     it('refuses to save while the start-up read is still in flight', async () => {
-      const { yearSession, reports, archive } = session(
+      const { yearSession, reports, tones, archive } = session(
         stubArchive({ listedYears: () => new Promise(() => undefined) })
       )
       void yearSession.openOnStartup()
@@ -204,10 +278,12 @@ describe('createYearSession', () => {
 
       expect(archive.save).not.toHaveBeenCalled()
       expect(reports).toEqual(['still reading 1100 from disk — save again in a moment'])
+      // Nothing is lost, a gesture is to be made again: a warning.
+      expect(tones).toEqual(['warning/year'])
     })
 
     it('says a refused save was not saved, and leaves the server’s reason to the console', async () => {
-      const { yearSession, reports } = session(
+      const { yearSession, reports, tones } = session(
         stubArchive({
           save: () =>
             Promise.reject(new Error('the files say year 1100, the save was addressed to 1110')),
@@ -218,6 +294,7 @@ describe('createYearSession', () => {
 
       expect(saved).toBe(false)
       expect(reports.at(-1)).toBe('not saved (details in the console)')
+      expect(tones.at(-1)).toBe('alarm/year')
       expect(console.error).toHaveBeenCalledWith(
         '[Cartographer] 1100 was not saved',
         new Error('the files say year 1100, the save was addressed to 1110')
@@ -272,7 +349,7 @@ describe('createYearSession', () => {
             }
           })
       )
-      const { yearSession, reports } = session(stubArchive({ save }))
+      const { yearSession, reports, tones } = session(stubArchive({ save }))
       await yearSession.openOnStartup()
       const first = yearSession.save()
       await yearSession.save()
@@ -281,6 +358,7 @@ describe('createYearSession', () => {
 
       expect(save).toHaveBeenCalledTimes(1)
       expect(reports).toContain('the previous save is still running')
+      expect(tones[reports.indexOf('the previous save is still running')]).toBe('warning/year')
     })
   })
 })
@@ -347,7 +425,7 @@ describe('createYearSession, a save over a year changed on disk (CARTO-238, rung
   describe('managed errors', () => {
     it('on [Cancel], writes nothing more, reports when the year changed and answers false', async () => {
       const save = changedOnDiskOnce()
-      const { yearSession, reports } = session(stubArchive({ save }))
+      const { yearSession, reports, tones } = session(stubArchive({ save }))
       await yearSession.openOnStartup()
       const saved = await yearSession.save()
 
@@ -355,6 +433,8 @@ describe('createYearSession, a save over a year changed on disk (CARTO-238, rung
       expect(reports.at(-1)).toBe(
         'not saved — 1100 was changed on disk today at 14:02; ‹ctrl+S› again to choose'
       )
+      // The author's own answer: a warning, not an alarm.
+      expect(tones.at(-1)).toBe('warning/year')
       expect(saved).toBe(false)
     })
 

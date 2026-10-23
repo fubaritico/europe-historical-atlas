@@ -94,12 +94,18 @@ const UNSET_ON_PURPOSE: ReadonlyMap<string, string> = new Map([
   ['--color-overlay', 'the scrim behind a dialog, dark in either scheme'],
   ['--color-text-on-destructive', 'white on the warning fill, meant white'],
   ['--color-white', 'white by name'],
-  ['--color-success', 'no component here paints success'],
-  ['--color-success-hover', 'no component here paints success'],
-  ['--color-text-on-success', 'no component here paints success'],
+  [
+    '--color-success',
+    'the green toast’s border and glyph — the design system’s green, seen and kept by the dev (2026-10-24)',
+  ],
+  ['--color-success-hover', 'nothing here hovers on success'],
+  [
+    '--color-text-on-success',
+    'nothing here is filled with success: the toast keeps a neutral surface',
+  ],
   [
     '--color-warning',
-    'no component here paints a warning — refusals use --warn, through destructive',
+    'the orange toast’s border and glyph — the design system’s, seen and kept by the dev (2026-10-24)',
   ],
   ['--color-rating-filled', 'no rating here'],
   ['--color-rating-empty', 'no rating here'],

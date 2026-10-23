@@ -57,7 +57,7 @@ export interface EditorProps {
   /** Where the polity form reads Wikidata from (CARTO-243) — the public API, a stub in tests. */
   wikidata: WikidataSource
   /**
-   * Messages from outside React for the result zone — what opening and saving the year say
+   * Messages from outside React for the result zone — the stacking keys' answers
    * (`persistence/resultRelay.ts`).
    */
   results: ResultRelay

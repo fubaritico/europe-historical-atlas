@@ -1,3 +1,4 @@
+import type { Report } from '../notice'
 import type { PersistenceWords } from '../persistenceWords'
 import type { DraftKeeper } from './draftKeeper'
 import type { RecoveryOutcome } from './draftRecovery'
@@ -19,8 +20,8 @@ export interface DraftOpeningDeps {
   offerDraft: () => Promise<RecoveryOutcome>
   /** The keeper, started once the way is clear. */
   keeper: Pick<DraftKeeper, 'start'>
-  /** Where a message for the author goes. */
-  report: (message: string) => void
+  /** Where a notice for the author goes — a toast, or the alarm dialogue. */
+  report: Report
   /** What it says — asked at each sentence, so it follows a change of language. */
   words: () => PersistenceWords
 }
@@ -42,7 +43,7 @@ export async function openWithDraft(deps: DraftOpeningDeps): Promise<void> {
     outcome = await deps.offerDraft()
   } catch (error: unknown) {
     console.error(`${LOG_TAG} the opening failed before drafts could start`, error)
-    deps.report(deps.words().t('draftsOffOpening'))
+    deps.report({ tone: 'alarm', topic: 'draft', text: deps.words().t('draftsOffOpening') })
     return
   }
   if (outcome === 'draft-left') {
@@ -53,7 +54,7 @@ export async function openWithDraft(deps: DraftOpeningDeps): Promise<void> {
     deps.keeper.start()
   } catch (error: unknown) {
     console.error(`${LOG_TAG} the draft keeper could not start`, error)
-    deps.report(deps.words().t('draftsOffStart'))
+    deps.report({ tone: 'alarm', topic: 'draft', text: deps.words().t('draftsOffStart') })
   }
 }
 

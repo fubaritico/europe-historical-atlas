@@ -1,3 +1,5 @@
+import { createToaster } from '@fubaritico/behaviors'
+import { createToastApi } from '@fubaritico/react/Toast'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
@@ -10,6 +12,7 @@ import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
 import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?worker'
 import { DEFAULT_TERRAIN_OPTIONS } from '@europe-historical-atlas/core/pipeline/terrainOptions'
 import { createWorkerMapCompute } from '@europe-historical-atlas/core/pipeline/workerCompute'
+import { fetchWithin } from '@europe-historical-atlas/core/utils/fetchWithin'
 
 import { createHistoryRelay } from './canvas/history/historyRelay'
 import { CHROME_PAINT_STYLE } from './canvas/paint/style'
@@ -18,6 +21,7 @@ import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
 import { createLocaleStore } from './i18n/localeStore'
 import { bakeToBitmap, loadBackdrop } from './loaders/backdropSource'
 import { loadVectorLayers } from './loaders/vectorLayers'
+import { createAlarmBoard } from './persistence/alarmBoard'
 import {
   DRAFT_DELAY_MS,
   SNAPSHOT_EVERY_MS,
@@ -27,20 +31,24 @@ import { createDraftOffers } from './persistence/draft/draftOffers'
 import { offerDraft } from './persistence/draft/draftRecovery'
 import { openWithDraft, saveAndClearDraft } from './persistence/draft/draftSession'
 import { createDevServerDraftStore } from './persistence/draft/draftStore'
+import { routeNotices } from './persistence/noticeRouter'
 import { persistenceWords } from './persistence/persistenceWords'
 import { createQuestionRelay } from './persistence/questionRelay'
 import { createResultRelay } from './persistence/resultRelay'
 import { installSaveShortcut } from './persistence/saveShortcut'
+import { wantsSlowWrites, writesFetch } from './persistence/slowWrites'
 import { openSnapshot } from './persistence/snapshotOpening'
 import { createDevServerYearArchive } from './persistence/yearArchive'
 import { createYearSession } from './persistence/yearSession'
 import { openEmptyYear } from './state/openEmptyYear'
 import { createPolityColourSource } from './state/polityColourSource'
 import { createCartographerStore } from './state/store'
+import { AlarmDialog } from './ui/components/AlarmDialog'
 import { DraftRecoveryDialog } from './ui/components/DraftRecoveryDialog'
 import { Editor } from './ui/components/Editor'
 import { ErrorBoundary, ZoneBreaksContext, readZoneBreaks } from './ui/components/ErrorBoundary'
 import { LocaleProvider } from './ui/components/LocaleProvider'
+import { NoticeToaster, noticeToasts } from './ui/components/NoticeToaster'
 import { OverwriteDialog } from './ui/components/OverwriteDialog'
 import { PageHeading } from './ui/components/PageHeading'
 import { SnapshotDialog } from './ui/components/SnapshotDialog'
@@ -56,6 +64,7 @@ import './ui/styles/sheets'
 import type { SnapshotEntry } from './persistence/draft/draftStore'
 import type { OverwriteQuestion } from './persistence/yearSession'
 import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
+import type { ReactToastContent } from '@fubaritico/react/Toast'
 
 /**
  * The Cartographer's entry point, and its composition root: it builds the store and mounts the page.
@@ -180,22 +189,27 @@ const colours = createPolityColourSource(AUTOMATIC_PALETTE)
  * (CARTO-243). The public API, anonymously: only the ids are sent. Down the props, like the colours.
  */
 const wikidata = createWikidataApiSource({
-  fetch: (input, init) => fetch(input, init),
+  fetch: (input, init) => fetchWithin(input, init),
   endpoint: WIKIDATA_ENDPOINT,
 })
 
-/**
- * The year on disk: opened when the editor starts, saved on ‹ctrl+S› — local mode, through the dev server
- * (`files/plans/cartographer/save-open-plan.md`).
- *
- * **Started here, in the entry module, and not in a component's effect**: a component remounts and its
- * effect re-runs, and `StrictMode` runs it twice on purpose — a second start-up read racing the first is
- * exactly the shape `known-issues.md` records for the backdrop. This runs once because a module runs once.
- *
- * `/years` is read with a plain GET, the folder the atlas reads too; the write route is served by the dev
- * server only (`vite.config.ts`), so the built site answers a save with an error, said in the status bar.
- */
+/** The writes of the year and of the drafts — slowed by `?slow=save` in development (REPO-275). */
+const writeFetch = writesFetch(
+  (input, init) => fetchWithin(input, init),
+  wantsSlowWrites(window.location.search, import.meta.env.DEV),
+  (ms) =>
+    new Promise((resolve) => {
+      window.setTimeout(resolve, ms)
+    })
+)
 const results = createResultRelay()
+/**
+ * What the year on disk says — a toast, or the alarm dialogue when the work may be lost or was not done (the dev,
+ * 2026-10-24: the status bar is the tool's). The Cartographer's own stack of toasts, not the page's shared one.
+ */
+const toaster = createToaster<ReactToastContent>({ uid: 'cartographer' })
+const alarms = createAlarmBoard()
+const notices = routeNotices({ toasts: noticeToasts(createToastApi(() => toaster)), alarms })
 /**
  * The language the Cartographer speaks: the browser's when it is French, English otherwise (the dev,
  * 2026-10-21) — held in a store, since a switch will change it (ATLAS-266). The page says which, so a screen
@@ -208,25 +222,42 @@ localeStore.subscribe(() => {
 })
 
 /**
- * What the year on disk says in the status bar — read at each sentence, in the language of the moment.
+ * The words of the year on disk, for its toasts and its alarms — read at each sentence, in the language of the moment.
  * @returns the words, in the language the store holds now
  */
 const diskWords = () => persistenceWords(localeStore.get())
 
 /** ‹ctrl+S› over a year changed on disk asks first (CARTO-238, rung 3) — answered in `OverwriteDialog`. */
 const overwriteQuestions = createQuestionRelay<OverwriteQuestion>('a save is already asking')
+/**
+ * The year on disk: opened when the editor starts, saved on ‹ctrl+S› — local mode, through the dev server
+ * (`files/plans/cartographer/save-open-plan.md`).
+ *
+ * **Started here, in the entry module, and not in a component's effect**: a component remounts and its
+ * effect re-runs, and `StrictMode` runs it twice on purpose — a second start-up read racing the first is
+ * exactly the shape `known-issues.md` records for the backdrop. This runs once because a module runs once.
+ *
+ * `/years` is read with a plain GET, the folder the atlas reads too; the write route is served by the dev
+ * server only (`vite.config.ts`), so the built site answers a save with an error, said in the alarm dialogue.
+ */
 const yearSession = createYearSession({
   store,
   archive: createDevServerYearArchive({
-    fetch: (input, init) => fetch(input, init),
+    fetch: writeFetch,
     yearsBase: '/years',
     writeRoute: YEAR_WRITE_ROUTE,
   }),
   year: FIRST_YEAR,
-  report: results.say,
+  report: notices,
   words: diskWords,
   confirmOverwrite: overwriteQuestions.ask,
   now: () => new Date(),
+  timers: {
+    set: (run, delayMs) => window.setTimeout(run, delayMs),
+    clear: (handle) => {
+      window.clearTimeout(handle)
+    },
+  },
 })
 /**
  * The draft — the work since the last ‹ctrl+S›, kept on disk a moment after every gesture (CARTO-238).
@@ -237,7 +268,7 @@ const yearSession = createYearSession({
  * (`persistence/draft/draftSession.ts`).
  */
 const drafts = createDevServerDraftStore({
-  fetch: (input, init) => fetch(input, init),
+  fetch: writeFetch,
   route: DRAFT_ROUTE,
 })
 const draftOffers = createDraftOffers()
@@ -255,7 +286,7 @@ const draftKeeper = createDraftKeeper({
       window.clearTimeout(handle)
     },
   },
-  report: results.say,
+  report: notices,
   words: diskWords,
 })
 void openWithDraft({
@@ -267,12 +298,12 @@ void openWithDraft({
       store,
       ask: draftOffers.ask,
       now: () => new Date(),
-      report: results.say,
+      report: notices,
       words: diskWords,
       draftsFolder: DRAFTS_FOLDER,
     }),
   keeper: draftKeeper,
-  report: results.say,
+  report: notices,
   words: diskWords,
 })
 /**
@@ -300,7 +331,7 @@ const handleOpenSnapshot = (entry: SnapshotEntry): void => {
       snapshots: drafts,
       year: FIRST_YEAR,
       now: () => new Date(),
-      report: results.say,
+      report: notices,
       words: diskWords,
     },
     entry
@@ -343,6 +374,8 @@ createRoot(container).render(
           />
           <DraftRecoveryDialog offers={draftOffers} now={() => new Date()} />
           <OverwriteDialog questions={overwriteQuestions} now={() => new Date()} />
+          <AlarmDialog alarms={alarms} />
+          <NoticeToaster toaster={toaster} />
           <SnapshotDialog
             picker={snapshotPicker}
             source={drafts}

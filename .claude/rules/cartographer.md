@@ -8,7 +8,7 @@ paths:
 
 ### Le design system est branché — ce qu'il faut savoir pour s'en servir
 
-**Les quatre paquets `@fubaritico/*` en `0.7.0`** (21/10, CARTO-117), depuis GitHub Packages (token en
+**Les quatre paquets `@fubaritico/*` en `0.8.0`** (24/10, pour le `Toast` ; `0.7.0` le 21/10, CARTO-117), depuis GitHub Packages (token en
 local dans `~/.npmrc`, `github.token` en CI). **La 0.7.0 nomme chaque jeton de couleur d'après ce qu'il peint**
 (`--color-surface-raised`, `--color-text-secondary`…) : un rôle que `theme.css` ne pose pas reste au gris clair du
 DS, sans erreur, et `theme.test.ts` refuse une surcharge qui nomme un rôle disparu. Le plan

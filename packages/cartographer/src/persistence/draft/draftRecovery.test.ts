@@ -57,6 +57,8 @@ async function offer(
     }),
   }
   const reports: string[] = []
+  // How each was shown: `tone/topic`, in order.
+  const tones: string[] = []
   const asked: DraftOffer[] = []
   const deps: DraftRecoveryDeps = {
     drafts,
@@ -70,12 +72,15 @@ async function offer(
             return Promise.resolve(answer)
           },
     now: () => NOW,
-    report: (message) => reports.push(message),
+    report: (notice) => {
+      reports.push(notice.text)
+      tones.push(`${notice.tone}/${notice.topic}`)
+    },
     words: () => EN_WORDS,
     draftsFolder: DRAFTS_FOLDER,
   }
   const outcome = await offerDraft(deps)
-  return { state, reports, asked, outcome }
+  return { state, reports, tones, asked, outcome }
 }
 
 beforeEach(() => {
@@ -90,7 +95,7 @@ afterEach(() => {
 describe('offerDraft', () => {
   describe('happy path', () => {
     it('opens the draft when the author resumes it, and says so', async () => {
-      const { state, reports, asked, outcome } = await offer(stubDrafts(), true)
+      const { state, reports, tones, asked, outcome } = await offer(stubDrafts(), true)
 
       expect(outcome).toBe('clear')
 
@@ -98,6 +103,7 @@ describe('offerDraft', () => {
       expect(state.open).toHaveBeenCalledTimes(1)
       expect(state.document.polities.length).toBe(sharedBorderDocument().polities.length)
       expect(reports).toEqual(['resumed the draft of 1100 today at 15:42 — ‹ctrl+S› to save it'])
+      expect(tones).toEqual(['success/draft'])
     })
   })
 
@@ -105,13 +111,15 @@ describe('offerDraft', () => {
     it('sets the draft aside when the author declines, opening nothing', async () => {
       const drafts = stubDrafts()
 
-      const { state, reports } = await offer(drafts, false)
+      const { state, reports, tones } = await offer(drafts, false)
 
       expect(state.open).not.toHaveBeenCalled()
       expect(drafts.setAside).toHaveBeenCalledWith(1100)
       expect(reports).toEqual([
         `the draft of 1100 today at 15:42 was not resumed — it is set aside in ${DRAFTS_FOLDER}`,
       ])
+      // Set aside, not lost: a warning.
+      expect(tones).toEqual(['warning/draft'])
     })
 
     it('asks nothing and says nothing when there is no draft', async () => {
@@ -159,12 +167,13 @@ describe('offerDraft', () => {
         setAside: () => Promise.reject(new Error('EACCES')),
       })
 
-      const { reports, outcome } = await offer(drafts, true)
+      const { reports, tones, outcome } = await offer(drafts, true)
 
       expect(outcome).toBe('draft-left')
       expect(reports).toEqual([
         `a draft of 1100 could not be read, and it could not be set aside — automatic drafts are off: move it out of ${DRAFTS_FOLDER}, then reload (details in the console)`,
       ])
+      expect(tones).toEqual(['alarm/draft'])
     })
   })
 

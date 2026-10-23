@@ -232,16 +232,16 @@
 }
 
 /*
- * The two short questions — deleting a polity, resuming a draft (CARTO-238): as wide as the form, the
- * question in the panel's text.
+ * The short dialogues — deleting a polity, and the year on disk's: resuming a draft, overwriting, a snapshot,
+ * an alarm (CARTO-238, REPO-275): as wide as the form, the text in the panel's.
  */
 .polity-delete,
-.draft-recovery {
+.short-dialogue {
   width: 340px;
 }
 
 .polity-delete__question,
-.draft-recovery__question {
+.short-dialogue__text {
   margin: 0;
   color: var(--ink);
   font-size: 12px;

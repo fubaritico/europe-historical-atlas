@@ -59,11 +59,11 @@ export function DraftRecoveryDialog({ offers, now }: DraftRecoveryDialogProps) {
   // Render
   return (
     <Modal isOpen={offer !== null} onClose={setAside} aria-label={t('title')}>
-      <div className="draft-recovery">
+      <div className="short-dialogue">
         <Card>
           <Card.Header>{t('title')}</Card.Header>
           <Card.Body>
-            <p className="draft-recovery__question">
+            <p className="short-dialogue__text">
               {offer === null
                 ? ''
                 : t('question', {

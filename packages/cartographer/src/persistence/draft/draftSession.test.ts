@@ -24,6 +24,8 @@ async function opening(
 ) {
   const order: string[] = []
   const reports: string[] = []
+  // How each was shown: `tone/topic`, in order.
+  const tones: string[] = []
   const keeper = { start: vi.fn(() => order.push('start')) }
   await openWithDraft({
     openYear: async () => {
@@ -35,10 +37,13 @@ async function opening(
       return outcome()
     },
     keeper,
-    report: (message) => reports.push(message),
+    report: (notice) => {
+      reports.push(notice.text)
+      tones.push(`${notice.tone}/${notice.topic}`)
+    },
     words: () => EN_WORDS,
   })
-  return { order, reports, keeper }
+  return { order, reports, tones, keeper }
 }
 
 describe('openWithDraft', () => {
@@ -63,7 +68,7 @@ describe('openWithDraft', () => {
 
   describe('managed errors', () => {
     it('says drafting is off when the offer rejects, and does not start it', async () => {
-      const { keeper, reports } = await opening(undefined, () =>
+      const { keeper, reports, tones } = await opening(undefined, () =>
         Promise.reject(new Error('unexpected'))
       )
 
@@ -71,6 +76,7 @@ describe('openWithDraft', () => {
       expect(reports).toEqual([
         'automatic drafts are off: the opening failed — save with ‹ctrl+S› (details in the console)',
       ])
+      expect(tones).toEqual(['alarm/draft'])
     })
   })
 
@@ -86,7 +92,7 @@ describe('openWithDraft', () => {
             throw new Error('no subscription')
           },
         },
-        report: (message) => reports.push(message),
+        report: (notice) => reports.push(notice.text),
         words: () => EN_WORDS,
       })
 

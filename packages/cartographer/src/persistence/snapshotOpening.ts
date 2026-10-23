@@ -4,6 +4,7 @@ import { timeWords } from './timeWords'
 import { documentFromFiles } from './yearArchive'
 
 import type { SnapshotSink, SnapshotSource } from './draft/draftStore'
+import type { Report } from './notice'
 import type { PersistenceWords } from './persistenceWords'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
@@ -45,10 +46,33 @@ export interface SnapshotOpeningDeps {
   year: number
   /** The clock: for the page's snapshot, and to word the time of the one opened. */
   now: () => Date
-  /** Where a message for the author goes — the status bar's result zone. */
-  report: (message: string) => void
+  /** Where a notice for the author goes — a toast, or the alarm dialogue. */
+  report: Report
   /** What it says — asked at each sentence, so it follows a change of language. */
   words: () => PersistenceWords
+}
+
+/**
+ * Keep the page as a snapshot before it is replaced — or say it could not be, an alarm: nothing is opened.
+ * @param deps - the store, the snapshots, the year, the clock, where to report
+ * @returns `true` when the page is kept
+ */
+async function keepThePage(deps: SnapshotOpeningDeps): Promise<boolean> {
+  try {
+    await deps.snapshots.snapshot({
+      year: deps.year,
+      savedAt: deps.now().toISOString(),
+      files: saveYearDocument(deps.store.getState().document),
+    })
+    return true
+  } catch (error: unknown) {
+    console.error(
+      `${LOG_TAG} the page of ${String(deps.year)} could not be kept before opening a snapshot`,
+      error
+    )
+    deps.report({ tone: 'alarm', topic: 'snapshot', text: deps.words().t('snapshotPageNotKept') })
+    return false
+  }
 }
 
 /**
@@ -63,22 +87,8 @@ export async function openSnapshot(
   deps: SnapshotOpeningDeps,
   chosen: { name: string; takenAt: string }
 ): Promise<boolean> {
-  const yearName = String(deps.year)
   const versionKept = deps.store.getState().version
-  try {
-    await deps.snapshots.snapshot({
-      year: deps.year,
-      savedAt: deps.now().toISOString(),
-      files: saveYearDocument(deps.store.getState().document),
-    })
-  } catch (error: unknown) {
-    console.error(
-      `${LOG_TAG} the page of ${yearName} could not be kept before opening a snapshot`,
-      error
-    )
-    deps.report(deps.words().t('snapshotPageNotKept'))
-    return false
-  }
+  if (!(await keepThePage(deps))) return false
   const when = timeWords(chosen.takenAt, deps.now(), deps.words(), { seconds: true })
   try {
     const snapshot = await deps.snapshots.readSnapshot(deps.year, chosen.name)
@@ -88,16 +98,29 @@ export async function openSnapshot(
       console.warn(
         `${LOG_TAG} the snapshot ${chosen.name} was not opened: the page changed meanwhile`
       )
-      deps.report(deps.words().t('snapshotPageChanged'))
+      // Nothing lost: the author opens the snapshot again.
+      deps.report({
+        tone: 'warning',
+        topic: 'snapshot',
+        text: deps.words().t('snapshotPageChanged'),
+      })
       return false
     }
     deps.store.getState().open(document)
   } catch (error: unknown) {
     // The page is untouched, and kept as a snapshot besides — harmless, and said.
     console.error(`${LOG_TAG} the snapshot ${chosen.name} could not be opened`, error)
-    deps.report(deps.words().t('snapshotNotOpened', { when }))
+    deps.report({
+      tone: 'alarm',
+      topic: 'snapshot',
+      text: deps.words().t('snapshotNotOpened', { when }),
+    })
     return false
   }
-  deps.report(deps.words().t('snapshotOpened', { when }))
+  deps.report({
+    tone: 'success',
+    topic: 'snapshot',
+    text: deps.words().t('snapshotOpened', { when }),
+  })
   return true
 }

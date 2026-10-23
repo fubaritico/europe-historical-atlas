@@ -11,7 +11,30 @@ Scenario: save the work
   When I press ‹ctrl+s›
   Then the file is written
   And the title bar drops its modified marker
-  And the status bar reads "saved · 52 polities · 17 104 vertices"
+  And a green toast reads "saved · 52 polities · 17 104 vertices"
+```
+
+> **Where the year on disk speaks** — the dev's call, 2026-10-24: the status bar is the tool's (*« ça me sert à
+> savoir ce que je fais »*). What is done is a **toast** — green when done, orange when nothing is lost but a
+> gesture is to be made again; what may be lost or was not done is the **alarm dialogue**, closed with ‹OK›. One
+> toast per subject on screen: a newer one replaces it. To be judged in use (*« trop de toast, tu le toast »*).
+
+```gherkin
+Scenario: a save the server has not confirmed (REPO-275)
+  Given I press ‹ctrl+s›
+  When the server has not answered within ten seconds
+  Then the alarm dialogue reads "1100: still no confirmation from the server — the save may not have happened"
+  And the save is not cut: it goes on waiting
+  When the confirmation comes
+  Then the dialogue closes by itself, and a green toast reads "saved 1100 · …"
+```
+
+```gherkin
+Scenario: a save that fails
+  Given I press ‹ctrl+s›
+  When the server refuses the files
+  Then the alarm dialogue reads "not saved (details in the console)"
+  And ‹OK› closes it, the page as it was
 ```
 
 ```gherkin

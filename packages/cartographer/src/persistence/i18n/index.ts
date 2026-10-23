@@ -14,9 +14,10 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * Its messages, and the values they take:
  * - `today`, `yesterday`, `onDate`, `unknownTime` — A time
  * - `contents`, `folderHoldsOther`, `readAfterDrawing`, `unreadable`, `neverSaved`, `opened`,
- *   `stillReading`, `saveRunning`, `notSaved`, `saved`, `notSavedChanged` — The year on disk
+ *   `stillReading`, `saveRunning`, `notSaved`, `saved`, `saveUnconfirmed`, `notSavedChanged` — The year on
+ *   disk
  * - `snapshotPageNotKept`, `snapshotPageChanged`, `snapshotNotOpened`, `snapshotOpened` — A snapshot opened
- * - `draftsOffOpening`, `draftsOffStart`, `draftKeptAgain`, `draftNotKept`, `hourlyNotKept`,
+ * - `draftsOffOpening`, `draftsOffStart`, `draftKeptAgain`, `draftNotKept`, `draftUnconfirmed`, `hourlyNotKept`,
  *   `oldDraftLeft`, `draftSetAside`, `draftSetAsideFailed`, `draftUnreadable`, `draftCannotOpen`,
  *   `draftNotResumed`, `draftChangedWhileOffered`, `draftResumed`, `draftNotOffered` — The drafts
  */

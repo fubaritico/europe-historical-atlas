@@ -81,7 +81,7 @@ export function SnapshotChooser({ source, year, now, onOpen, close }: SnapshotCh
     <Card>
       <Card.Header>{t('title')}</Card.Header>
       <Card.Body>
-        <p className="draft-recovery__question">{t('warning')}</p>
+        <p className="short-dialogue__text">{t('warning')}</p>
         <SnapshotList listing={listing} chosen={chosen} choose={setChosen} year={year} now={now} />
       </Card.Body>
       <Card.Footer align="end">

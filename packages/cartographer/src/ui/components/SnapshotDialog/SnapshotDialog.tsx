@@ -40,7 +40,7 @@ export function SnapshotDialog({ picker, ...chooser }: SnapshotDialogProps) {
   // Render
   return (
     <Modal isOpen={open} onClose={picker.close} aria-label={t('title')}>
-      <div className="draft-recovery">
+      <div className="short-dialogue">
         {open ? <SnapshotChooser {...chooser} close={picker.close} /> : null}
       </div>
     </Modal>

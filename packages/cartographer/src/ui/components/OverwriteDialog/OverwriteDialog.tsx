@@ -62,11 +62,11 @@ export function OverwriteDialog({ questions, now }: OverwriteDialogProps) {
   // Render
   return (
     <Modal isOpen={question !== null} onClose={cancel} aria-label={t('title')}>
-      <div className="draft-recovery">
+      <div className="short-dialogue">
         <Card>
           <Card.Header>{t('title')}</Card.Header>
           <Card.Body>
-            <p className="draft-recovery__question">
+            <p className="short-dialogue__text">
               {question === null
                 ? ''
                 : t('question', {

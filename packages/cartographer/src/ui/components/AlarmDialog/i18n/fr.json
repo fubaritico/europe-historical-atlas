@@ -1,0 +1,3 @@
+{
+  "title": "{topic, select, year {L’année sur le disque} draft {Le brouillon automatique} snapshot {Les instantanés} other {{topic}}}"
+}
