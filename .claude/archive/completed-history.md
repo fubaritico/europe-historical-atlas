@@ -2,6 +2,21 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-10-22, l'après-midi — tout le React du Cartographe dans `ui/` (CARTO-267)
+
+Le journal ne compte que **13:16 → 13:56 (78 actions)** ; le travail a duré plus longtemps, une partie n'a pas été
+journalisée — aucune durée inventée ici. Fait dans un **worktree** (`~/Desktop/WebstormProjects/europe-map-ui`, branche
+`ui-folder`), **indexé, pas commité** : le dev testera à la reprise.
+
+- **Sa demande** : *« pour qu'il n'y ait pas 50 dossiers à la racine du projet »*, tout ce qui est React dans `ui/`, et
+  voir ce qui sert dehors. Puis, sur la fiabilité : *« si vraiment un script est fiable, tu utilises un script »* — prouvé :
+  le graphe des imports (résolu par le compilateur) après le déplacement est celui d'avant passé par la table, 1 234 liens ;
+  les mêmes tests par fichier ; gate verte, 4 620 tests.
+- **Ses décisions** : les couches ne peuvent plus importer `ui/` (lint, gardé dans `boundaries.test.ts`) ; tout `ui/` refuse
+  `main` et l'atelier ; *« les CSS, c'est de l'UI »* → `focusOrigin` dans `MapArea/utils`.
+- **Mes fautes** : un premier traceur à expressions régulières qui ratait les `?raw` ; une première règle (« ce qui ne sert
+  qu'à l'UI y va ») qui avalait tout `canvas/`, remplacée par « une couche reste entière » ; un `why` du lint cassé.
+
 ### 2026-10-22 — tout le Cartographe en fr/en, des catalogues JSON par portée, la langue par un provider
 
 Une plage au journal, **22/10 10:20 → 13:14 (2 h 53, 376 actions)** ; le chantier ouvert le 05/10 totalise **102 h 25 sur

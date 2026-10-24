@@ -5,28 +5,24 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — trois réponses du dev, puis la contribution
+## ▶ ON REPREND ICI — rien en attente, la suite est la contribution
 
-**22/10 au soir, fermé à distance** : le dev a jugé le travail en Remote Control *« ingérable »*. **À la reprise, il est
-devant son écran ; en remote, des messages courts, autonomes, une question à la fois, jamais « ouvre le document ».**
+**24/10, 02:05** : tout est commité **et poussé** (`main` = `5cb4b11`), l'arbre est propre — ses saisies Wikidata de 1100
+comprises. **Ses `years/1100/*.json` modifiés par ‹ctrl+S›** se commitent à part, nommés, quand il le dit.
 
-**Rien n'est poussé** : `main` porte 7 commits de plus qu'au matin, `403a72a`..`2e26931`. **`years/1100/polities.json`
-et `registry.json` sont modifiés, non commités, exprès** : ce sont ses saisies Wikidata en cours. Ne jamais les indexer
-avec autre chose ; les commiter à part, quand il le dit.
+**La suite, par son ordre** : la **contribution**. CONTRIB-218 (Payload) est tranché → Fait ; **CORE-270** (palier 2 de
+DESIGN-262) a ses six questions tranchées (`files/plans/evidence/step-2-concepts-in-core.md` §8) et attend qu'il le passe
+en À faire ; **CORE-252** (le format d'un événement) vient juste après.
 
-**Ce qui attend sa décision, dans l'ordre :**
-1. **CONTRIB-218 (Payload), À valider** — quatre recommandations dans `files/plans/contribution/payload-check.md` :
-   thème léger de l'admin avec nos jetons ; nos propres écrans avec le DS là où Payload n'a rien ; ne pas rhabiller ses
-   composants (la 4.0 refait son admin) ; partir sur la 3.x. Lui dire en trois phrases, pas lui envoyer le fichier.
-2. **CORE-270 (palier 2 de DESIGN-262), Backlog** — conception dans `files/plans/evidence/step-2-concepts-in-core.md`.
-   Question 1 (genres et poids des sources) **tranchée** ; il en reste cinq (§8), à lui poser **une par une, en entier**.
-   Il le passe en À faire ; aucun code avant.
-3. **Toujours en attente** : (a) une erreur levée pendant un geste n'est montrée nulle part — proposé : en rouge dans la
-   barre d'état ; (b) le texte brut de l'erreur sous une boundary — proposé : en développement seulement ; (c) l'atlas
-   garde « les pays » pour le lecteur — mon choix ; (d) CARTO-269, distinguer « pas encore cherché » de « aucun élément
-   Wikidata ».
-4. **`/doctor prompt-audit`** : `.claude/` a changé (la skill `create-data-mention`, le verbe `checklist`, l'arbre de
-   décision, `ui/`) — à lui faire taper.
+**À regarder dans une prochaine session** : le Claude du design system modifie sa skill Trello pour que les chantiers
+deviennent des **épiques** avec des tickets enfants (un système de parents) — à reprendre ici quand il le dira.
+
+**Décidé et noté, rien à faire maintenant** : les feature flags attendent un vrai besoin, surtout dans l'atlas, décrits
+d'abord en scénarios (CARTO-268) ; les Khazars sont deux entités, sans phases (une date vague = `circa` à marge large).
+
+**Où parlent les messages du Cartographe** (24/10) : la barre d'état est **à l'outil** ; l'année sur le disque parle en
+**toasts** (en bas au centre) et en **modale d'alarme** (`persistence/notice.ts`). Le hand-off du design system arrive à
+la **racine de ce dépôt** (`HANDOFF-from-fubaritico-ds.md`) : le lire avant de brancher une version.
 
 **Une source qu'il donne** → `/create-data-mention`, toujours ; la liste vit sur ATLAS-152. Ses atlas :
 `files/plans/sources/bibliotheque.md` (l'Italie et la Scandinavie manquent ; piste : Spruner-Menke 1880, domaine public).
@@ -38,20 +34,19 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 
 | où | ticket | état |
 | --- | --- | --- |
-| **Chantiers** | DESIGN-262 La gestion de l'incertitude | paliers 1 fait, 2 conçu (CORE-270) |
+| **Chantiers** | DESIGN-262 La gestion de l'incertitude | palier 1 fait, 2 conçu et tranché (CORE-270) |
 | **En cours** | ATLAS-145, ATLAS-152 | ATLAS-152 porte la liste « Sources de 1100 » et ses mentions |
-| **À valider par le développeur** | CONTRIB-218 Payload | **sa décision**, ci-dessus |
-| **À valider par le développeur** | CARTO-237, CARTO-116, CARTO-122 | inchangés ; CARTO-122 attend le `role="menu"` du DS |
-| **Backlog** | CORE-270 Les concepts de l'incertitude dans core | conçu, cinq questions restantes |
+| **À valider par le développeur** | — | vide |
+| **Backlog** | CORE-270 · CARTO-237 · CARTO-273 · CARTO-274 | CORE-270 prêt à passer en À faire ; 273/274 : ses décisions du 23/10 sur les erreurs |
 | **À faire**, en tête | CORE-252 (le format d'un événement) | vient **après** CORE-270, par sa décision du 19/10 |
-| **Idées** | CARTO-268 feature flags · CARTO-269 Wikidata absent | du 22/10 |
+| **Idées** | CARTO-268 feature flags · CORE-271 généalogie · CARTO-272 radar | CARTO-268 : pas encore |
 
 **Toujours en attente, à lui proposer un jour** : le relief niveau 6 du Cartographe (une ligne, `main.tsx` →
 `/heightmaps/europe-dem-z6-1920`, `rules/known-issues/cartographer.md`).
 
 ## Where we are
 
-**4 641 tests** (1 263 `core` · 2 214 Cartographe · 995 atlas · 169 plugin `eslint-plugin-eha`, 22/10 au soir), gate
+**4 703 tests** (1 280 `core` · 2 259 Cartographe · 995 atlas · 169 plugin `eslint-plugin-eha`, 24/10), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 
