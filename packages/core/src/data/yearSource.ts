@@ -31,7 +31,7 @@ export interface YearPaths {
 }
 
 /** A schema able to check an unknown value, which is all these readers need of one. */
-interface Checker<T> {
+export interface Checker<T> {
   /**
    * Check a value without throwing.
    * @param value - the value of no known shape
@@ -41,7 +41,7 @@ interface Checker<T> {
 }
 
 /** What a failed check reports. Structural, so nothing here depends on Zod's class hierarchy. */
-interface SchemaError {
+export interface SchemaError {
   /** Every problem found, not only the first — a schema checks the whole value. */
   issues: readonly { readonly path: readonly PropertyKey[]; readonly message: string }[]
 }
@@ -67,13 +67,18 @@ function describePath(path: readonly PropertyKey[]): string {
  * **Reports the first issue and counts the rest.** A schema finds every problem at once, which is more
  * than the hand-written readers could do — but `detail` is one clause by contract, and a reader fixing a
  * file wants somewhere to start rather than a wall. The count is what says the wall exists.
- * @param asset - which of the three files is being read
+ * @param asset - which file is being read
  * @param source - where it came from, for the message
  * @param schema - the schema to check against
  * @param value - the parsed JSON, of no known shape
  * @returns the typed payload
  */
-function checkPayload<T>(asset: AssetKind, source: string, schema: Checker<T>, value: unknown): T {
+export function checkPayload<T>(
+  asset: AssetKind,
+  source: string,
+  schema: Checker<T>,
+  value: unknown
+): T {
   const result = schema.safeParse(value)
   if (result.success) return result.data
   const [first] = result.error.issues

@@ -33,6 +33,11 @@ export interface HistoricalMoment {
   calendar: Calendar | null
   /** Approximate: "circa 1100". The year is the best estimate, not a bound. */
   circa: boolean
+  /**
+   * How many years either side a circa year may be — "circa 1100, ±5" is 1095–1105. `null` takes the default the
+   * contributor sets (±10, the dev 2026-10-23, CORE-270 §8 Q3), never a constant here. Only on a circa year.
+   */
+  margin: number | null
 }
 
 /** A date: one moment, or an interval between two. */
@@ -61,6 +66,8 @@ export type DateRefusal =
   | { kind: 'no-such-day'; end: DateEnd }
   /** An interval that ends before it begins. */
   | { kind: 'reversed' }
+  /** A margin on a year that is not circa: an exact year has none. */
+  | { kind: 'margin-without-circa'; end: DateEnd }
 
 /** {@link HistoricalMoment}, in shape only — the rules between its fields are {@link momentRefusal}'s. */
 const momentSchema: z.ZodMiniType<HistoricalMoment> = z.strictObject({
@@ -69,6 +76,7 @@ const momentSchema: z.ZodMiniType<HistoricalMoment> = z.strictObject({
   day: z.nullable(z.int().check(z.gte(1), z.lte(31))),
   calendar: z.nullable(z.enum(CALENDARS)),
   circa: z.boolean(),
+  margin: z.nullable(z.int().check(z.gte(1))),
 })
 
 /** {@link HistoricalDate}, in shape only. */
@@ -124,6 +132,8 @@ export function describeDateRefusal(refusal: DateRefusal): string {
       return `${refusal.end}: that month has no such day that year`
     case 'reversed':
       return 'the interval ends before it begins'
+    case 'margin-without-circa':
+      return `${refusal.end}: only a circa year has a margin`
   }
 }
 
@@ -152,6 +162,32 @@ export function isAfter(a: HistoricalMoment, b: HistoricalMoment): boolean {
 }
 
 /**
+ * A date as a field of a larger file: the shape and every rule of {@link readHistoricalDate}, as a schema to nest
+ * in another one. A refusal becomes an issue at that field, worded by {@link describeDateRefusal}.
+ */
+export const historicalDateSchema: z.ZodMiniType<HistoricalDate> = dateSchema.check(
+  z.superRefine((date, context) => {
+    const answer = check(date)
+    if (isDateRefusal(answer)) {
+      context.addIssue({ code: 'custom', message: describeDateRefusal(answer), input: date })
+    }
+  })
+)
+
+/**
+ * One end of a date as a field of a larger file — a place's beginning, its end — with every rule of an end. A
+ * refusal becomes an issue at that field.
+ */
+export const historicalMomentSchema: z.ZodMiniType<HistoricalMoment> = momentSchema.check(
+  z.superRefine((moment, context) => {
+    const refusal = momentRefusal(moment, 'at')
+    if (refusal !== null) {
+      context.addIssue({ code: 'custom', message: describeDateRefusal(refusal), input: moment })
+    }
+  })
+)
+
+/**
  * The shape, then the rules of each end, then the order of the two.
  * @param value - anything
  * @returns the date, or the first reason it fails
@@ -175,6 +211,7 @@ function check(value: unknown): HistoricalDate | DateRefusal {
 function momentRefusal(moment: HistoricalMoment, end: DateEnd): DateRefusal | null {
   const { year, month, day, calendar } = moment
   if (year === 0) return { kind: 'year-zero', end }
+  if (moment.margin !== null && !moment.circa) return { kind: 'margin-without-circa', end }
   if (day === null) return calendar === null ? null : { kind: 'calendar-without-day', end }
   if (month === null) return { kind: 'day-without-month', end }
   if (calendar === null) return { kind: 'day-without-calendar', end }

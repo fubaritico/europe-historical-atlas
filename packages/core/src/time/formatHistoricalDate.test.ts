@@ -6,7 +6,15 @@ import type { HistoricalDate, HistoricalMoment } from './historicalDate'
 
 /** A moment, a year by default. */
 function moment(fields: Partial<HistoricalMoment> = {}): HistoricalMoment {
-  return { year: 1100, month: null, day: null, calendar: null, circa: false, ...fields }
+  return {
+    year: 1100,
+    month: null,
+    day: null,
+    calendar: null,
+    circa: false,
+    margin: null,
+    ...fields,
+  }
 }
 
 /** An instant at that moment. */
@@ -35,7 +43,7 @@ describe('formatHistoricalDate', () => {
       ['fr', 'vers 1100'],
       ['en', 'c. 1100'],
     ] as const)('writes circa 1100 in %s as “%s”', (locale, text) => {
-      expect(formatHistoricalDate(instant({ circa: true }), locale)).toBe(text)
+      expect(formatHistoricalDate(instant({ circa: true, margin: null }), locale)).toBe(text)
     })
 
     it.each([
@@ -66,7 +74,7 @@ describe('formatHistoricalDate', () => {
     it('spaces the dash when an end has words in it', () => {
       const date: HistoricalDate = {
         kind: 'interval',
-        from: moment({ circa: true }),
+        from: moment({ circa: true, margin: null }),
         to: moment({ year: 1150 }),
       }
       expect(formatHistoricalDate(date, 'fr')).toBe('vers 1100 – 1150')

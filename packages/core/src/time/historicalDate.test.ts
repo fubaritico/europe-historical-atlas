@@ -6,7 +6,15 @@ import type { HistoricalMoment } from './historicalDate'
 
 /** A moment, a year by default. */
 function moment(fields: Partial<HistoricalMoment> = {}): HistoricalMoment {
-  return { year: 1100, month: null, day: null, calendar: null, circa: false, ...fields }
+  return {
+    year: 1100,
+    month: null,
+    day: null,
+    calendar: null,
+    circa: false,
+    margin: null,
+    ...fields,
+  }
 }
 
 /** Read with a silent, observable warn. */
@@ -49,6 +57,11 @@ describe('historicalDate', () => {
       expect(read({ kind: 'instant', at }).answer).toEqual({ kind: 'instant', at })
     })
 
+    it('reads circa 1100 with its own margin', () => {
+      const at = moment({ circa: true, margin: 5 })
+      expect(read({ kind: 'instant', at }).answer).toEqual({ kind: 'instant', at })
+    })
+
     it('reads 44 BC', () => {
       const at = moment({ year: -44 })
       expect(read({ kind: 'instant', at }).answer).toEqual({ kind: 'instant', at })
@@ -61,6 +74,18 @@ describe('historicalDate', () => {
   })
 
   describe('managed errors', () => {
+    it('refuses a margin on a year that is not circa', () => {
+      expect(read({ kind: 'instant', at: moment({ margin: 5 }) }).answer).toEqual({
+        kind: 'margin-without-circa',
+        end: 'at',
+      })
+    })
+
+    it('refuses a margin of zero', () => {
+      const answer = read({ kind: 'instant', at: moment({ circa: true, margin: 0 }) }).answer
+      expect(isDateRefusal(answer) && answer.kind).toBe('shape')
+    })
+
     it('refuses the year 0, naming the end', () => {
       expect(read({ kind: 'instant', at: moment({ year: 0 }) }).answer).toEqual({
         kind: 'year-zero',

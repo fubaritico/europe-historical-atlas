@@ -20,7 +20,8 @@ import type { GeoBounds } from '../geo/mercator'
  *
  * The three `year*` kinds are the Cartographer's format, one per file of a year's folder. Separate kinds
  * rather than one because a reader has to be told *which* file broke: losing the registry loses every name,
- * losing the polities loses the territory, losing the borders loses only the hand-set strokes.
+ * losing the polities loses the territory, losing the borders loses only the hand-set strokes. `content` is the
+ * contribution's export: the events pinned on the map (CMS-224).
  */
 export const ASSET_KINDS = [
   'heightmap',
@@ -30,6 +31,7 @@ export const ASSET_KINDS = [
   'yearRegistry',
   'yearPolities',
   'yearBorders',
+  'content',
 ] as const
 
 /** Which asset family failed. An identifier, not a sentence — the wording belongs to whoever shows it. */
