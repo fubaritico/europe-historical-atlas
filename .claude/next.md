@@ -5,14 +5,25 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — rien en attente, la suite est la contribution
+## ▶ ON REPREND ICI — l'outillage du CMS, CMS-276 en tête d'À faire
 
-**24/10, 02:05** : tout est commité **et poussé** (`main` = `5cb4b11`), l'arbre est propre — ses saisies Wikidata de 1100
-comprises. **Ses `years/1100/*.json` modifiés par ‹ctrl+S›** se commitent à part, nommés, quand il le dit.
+**25/10** : la contribution a pris le pas sur CORE-270 (*« il faut pouvoir contribuer »*, sa décision). Le **CMS** est né
+(`packages/cms`, Payload 3.92 sur Next 16 et SQLite, `pnpm dev:cms` sur le port 3100) — **son nom, sa décision** :
+*« un système de contribution mutualisée »*. Quatre commits `d7aa9d2`..`f74e0b3`, **non poussés**.
 
-**La suite, par son ordre** : la **contribution**. CMS-218 (Payload) est tranché → Fait ; **CORE-270** (palier 2 de
-DESIGN-262) a ses six questions tranchées (`files/plans/evidence/step-2-concepts-in-core.md` §8) et attend qu'il le passe
-en À faire ; **CORE-252** (le format d'un événement) vient juste après.
+**Demain, dans l'ordre** : le plan `files/plans/contribution/cms-tooling.md`, cinq tickets du chantier **CMS-285** en tête
+d'À faire — **CMS-276** les migrations (avant que sa base contienne quoi que ce soit), puis 277 la règle et la skill
+`/cms-field`, 278 les sauvegardes, 279 la base d'essai, 280 la carte du schéma et le détecteur.
+
+**Trois règles de la journée, à tenir dès la reprise** :
+- **Son serveur du CMS est le sien** : je ne le lance, ne le coupe ni ne le relance jamais. Mes relances du 25/10 ont fait
+  le « Failed to fetch » qu'il a vu.
+- **Aucun changement de champ sans migration** : en mode push, Payload pose une question dans le terminal (renommer ou
+  créer ?) et tout attend derrière — ça a bloqué son serveur, la base a été supprimée avec son accord.
+- **Un `rm -rf` ne se glisse jamais dans une commande** : refusé le 25/10, à raison.
+
+**En attente de son test** (À valider) : CMS-219, 220, 221, 224, CORE-252 — le bouton Wikidata sur Paris, puis une
+épingle dans l'atlas après `pnpm export:content`.
 
 **À regarder dans une prochaine session** : le Claude du design system modifie sa skill Trello pour que les chantiers
 deviennent des **épiques** avec des tickets enfants (un système de parents) — à reprendre ici quand il le dira.
@@ -34,11 +45,11 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 
 | où | ticket | état |
 | --- | --- | --- |
-| **Chantiers** | DESIGN-262 La gestion de l'incertitude | palier 1 fait, 2 conçu et tranché (CORE-270) |
+| **Chantiers** | DESIGN-262 La gestion de l'incertitude · **CMS-285 Le CMS** | DESIGN-262 : palier 2 conçu (CORE-270) ; CMS-285 : socle codé, outillage à faire |
 | **En cours** | ATLAS-145, ATLAS-152 | ATLAS-152 porte la liste « Sources de 1100 » et ses mentions |
-| **À valider par le développeur** | — | vide |
-| **Backlog** | CORE-270 · CARTO-237 · CARTO-273 · CARTO-274 | CORE-270 prêt à passer en À faire ; 273/274 : ses décisions du 23/10 sur les erreurs |
-| **À faire**, en tête | CORE-252 (le format d'un événement) | vient **après** CORE-270, par sa décision du 19/10 |
+| **À valider par le développeur** | CMS-219 · 220 · 221 · 224 · CORE-252 | le socle du CMS, codé le 25/10 |
+| **Backlog** | CORE-270 · CMS-281..283 · ATLAS-284 · CARTO-237 · CARTO-273 · CARTO-274 | CORE-270 passe après la contribution (25/10) ; 281–283 les écrans suivants |
+| **À faire**, en tête | CMS-276 → 280, l'outillage du CMS | dans cet ordre ; CMS-276 d'abord, base encore vide |
 | **Idées** | CARTO-268 feature flags · CORE-271 généalogie · CARTO-272 radar | CARTO-268 : pas encore |
 
 **Toujours en attente, à lui proposer un jour** : le relief niveau 6 du Cartographe (une ligne, `main.tsx` →

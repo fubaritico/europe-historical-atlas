@@ -43,6 +43,7 @@ const LABELS = [
   { name: 'doc', color: 'black_light' },
   // chantier — every ticket of an initiative carries its label, so one click filters the whole of it
   { name: 'chantier · incertitude', color: 'green_dark' },
+  { name: 'chantier · cms', color: 'blue_light' },
   // status
   BLOCKED,
 ]
