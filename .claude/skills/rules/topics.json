@@ -171,7 +171,7 @@
       ]
     },
     "contribution": {
-      "label": "la contribution",
+      "label": "la contribution et le CMS",
       "words": [
         "payload",
         "contribution",
@@ -179,9 +179,19 @@
         "evenement",
         "lieux",
         "acteur",
-        "contrib-*"
+        "contrib-*",
+        "cms",
+        "cms-*",
+        "migration",
+        "schema"
       ],
       "files": [
+        {
+          "path": ".claude/rules/known-issues/cms.md"
+        },
+        {
+          "path": "files/plans/contribution/cms-tooling.md"
+        },
         {
           "path": "files/plans/plan.md",
           "hint": "the Payload / contribution sections only (P7)"

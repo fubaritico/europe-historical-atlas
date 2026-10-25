@@ -9,7 +9,7 @@
 
 **25/10** : la contribution a pris le pas sur CORE-270 (*« il faut pouvoir contribuer »*, sa décision). Le **CMS** est né
 (`packages/cms`, Payload 3.92 sur Next 16 et SQLite, `pnpm dev:cms` sur le port 3100) — **son nom, sa décision** :
-*« un système de contribution mutualisée »*. Quatre commits `d7aa9d2`..`f74e0b3`, **non poussés**.
+*« un système de contribution mutualisée »*. Cinq commits `d7aa9d2`..`e4d1015`, **non poussés**.
 
 **Demain, dans l'ordre** : le plan `files/plans/contribution/cms-tooling.md`, cinq tickets du chantier **CMS-285** en tête
 d'À faire — **CMS-276** les migrations (avant que sa base contienne quoi que ce soit), puis 277 la règle et la skill

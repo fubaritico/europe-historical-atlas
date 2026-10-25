@@ -12,6 +12,7 @@
 | `rules/known-issues/core.md` | core: the document model, the history, the derivations, its README | `packages/core/**` |
 | `rules/known-issues/data.md` | the data on disk: `years/`, the relief, the spikes that write them | `packages/atlas/public/**`, `files/spikes/**` |
 | `rules/known-issues/tooling.md` | install, lint, Turbo, CI, commits, ignores, the plugin | root configs, `.github/**`, `scripts/**`, `packages/eslint-plugin-eha/**` |
+| `rules/known-issues/cms.md` | the CMS (Payload): its schema and migrations, its server, its generated files | `packages/cms/**` |
 | `rules/known-issues/testing.md` | proving that a test guards something | `**/*.test.{ts,tsx}`, `**/vitest.setup.ts` |
 
 **A new entry goes in its slice**, never here. One that fits none — a process lesson that must hold before any

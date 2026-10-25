@@ -2,6 +2,26 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-10-25 — la contribution d'abord : le CMS est né, son outillage planifié
+
+Une plage au journal : **25/10 14:43 → 17:37 (2 h 53)** ; le chantier ouvert le 05/10 totalise **115 h 25 sur 22 plages**.
+**5 commits** `d7aa9d2`..`e4d1015`, **non poussés**.
+
+- **Sa décision** : CORE-252 passe avant CORE-270 — *« il faut pouvoir contribuer »*, *« la véracité de ce qu'on saisit, on
+  verra ça après »*. Ce qui compte, c'est saisir quelque part, puis l'afficher dans l'atlas.
+- **Le CMS** — son nom : *« un système de contribution mutualisée »* ; `CONTRIB` devient `CMS` partout (21 tickets, l'étiquette,
+  les fichiers). Payload, cinq collections, le bouton « Chercher dans Wikidata » sur un lieu (position, existence P571/P576
+  avec la précision lue en « vers » et marge), l'export, les épingles dans l'atlas → CMS-219..224, CORE-252 en À valider.
+- **Ses demandes en cours de route** : un lieu existe dans le temps (*« s'il n'y a pas de date de fin, c'est que ça existe
+  encore »*) et a des périodes (CMS-281) ; seeder et voir le schéma ; sauvegarder et réimporter un contenu fourni.
+- **Le chantier CMS-285** : socle, outillage CMS-276..280 (plan `files/plans/contribution/cms-tooling.md`), écrans, atlas, en
+  ligne. CMS-222 archivé (dépassé par la saisie par langue du 23/10).
+- **Mes fautes** : *« l'endroit dans la source est facultatif »* écrit dans les plans et attribué à lui (*« j'ai rien dit de
+  ça moi »*, défait) ; un changement de schéma sans migration → la question de Payload a bloqué son serveur, base supprimée
+  avec son accord ; mes relances du serveur pendant qu'il l'utilisait (« Failed to fetch ») ; le générateur de Payload lancé
+  dans la racine du dépôt ; un `rm -rf` glissé dans une commande, refusé. *« Au bout de 10 minutes déjà, tu me fais chier »* —
+  il voulait construire, je théorisais.
+
 ### 2026-10-23 → 24/10 (nuit) — ses décisions en attente, l'audit, REPO-275, les toasts
 
 Deux plages au journal : **23/10 16:52 → 20:48 (3 h 56)** et **23:47 → 02:05 (2 h 18)**, soit **6 h 14** ; le chantier
@@ -25,25 +45,4 @@ ouvert le 05/10 totalise **112 h 24 sur 21 plages**. **12 commits** `9c67b15`..`
   hand-off cherché dans le dépôt du DS alors qu'il était à la racine du nôtre — le point de `theme.test.ts` manqué au
   premier passage ; un premier lot de commandes avec `rm -rf` refusé.
 
-### 2026-10-22, le soir — `ui/` mergé, `?break=`, « entité politique », les sources, Payload vérifié
-
-Plage au journal **22/10 16:53 → 19:43 (2 h 49, 151 actions)** ; le chantier ouvert le 05/10 totalise **106 h 08 sur
-19 plages**. **7 commits** `403a72a`..`2e26931`, **non poussés**. La seconde moitié s'est faite **à distance** (Remote
-Control) : le dev l'a jugée *« ingérable »* et a fermé la session.
-
-- **CARTO-267** testé, commité, mergé, worktree supprimé avec sa permission → Fait. **ATLAS-159** testé en cinq gestes
-  écrits pour lui (la première consigne, floue, l'a fâché : *« faut surtout pas être précis »*) → Fait.
-- **`?break=<zone>`** (sa demande) : chaque boundary a une zone typée et stable ; en développement seulement, vérifié dans
-  le build. Idée des feature flags → CARTO-268.
-- **« entité politique »** remplace « pays » dans le Cartographe — sa décision ; le rang `country` et l'atlas gardent
-  « pays », mon choix, noté comme tel au glossaire.
-- **Les sources** : sa règle, *« on ne peut pas fermer la porte derrière nous »* — chaque année cite toutes ses sources ;
-  liste sur ATLAS-152, skill `/create-data-mention` (sa demande), bibliothèque de ses atlas `files/plans/sources/`. La
-  carte des Chaddadides (CC BY-SA) se déclare redessinée de Hewsen 2001 → référence, pas calque.
-- **Planification** (sa demande, à distance) : palier 2 de DESIGN-262 conçu → CORE-270 (Backlog), barème des sources
-  tranché par lui ; **CMS-218** Payload vérifié dans le code → À valider.
-- **Mes fautes** : un `git add` de tout ce qui était modifié a embarqué ses données de 1100 dans un commit (défait par
-  `reset --soft`) ; « litiges » pour une guerre d'édition ; un éditeur écrit de mémoire dans une mention ; des réponses
-  qui renvoyaient à « un document » alors qu'il était loin de son écran.
-
-> Older sessions (2026-09-12 → 2026-10-22, the afternoon) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-22, the evening) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
