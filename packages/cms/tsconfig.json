@@ -1,0 +1,17 @@
+{
+  // Extends the workspace root, where the strictness lives. Next and Payload need three things on top: the JSX of
+  // React 19, the `next` plugin for the editor, and the `@payload-config` path every generated file imports.
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    // The root names `vite/client`; this package runs under Next and Node, not Vite.
+    "types": ["node"],
+    "allowJs": true,
+    "plugins": [{ "name": "next" }],
+    "paths": {
+      "@payload-config": ["./src/payload.config.ts"]
+    }
+  },
+  "include": ["next-env.d.ts", "src", ".next/types/**/*.ts"]
+}

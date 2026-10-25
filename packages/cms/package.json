@@ -1,0 +1,44 @@
+{
+  "name": "@europe-historical-atlas/cms",
+  "version": "1.0.0",
+  "description": "The CMS — the shared contribution system: places, events, actors and sources, entered in Payload and exported for the atlas.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "NODE_OPTIONS=--no-deprecation next dev --port 3100",
+    "export": "NODE_OPTIONS=--no-deprecation payload run src/export/run.ts",
+    "generate:importmap": "NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "generate:types": "NODE_OPTIONS=--no-deprecation payload generate:types",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@europe-historical-atlas/core": "workspace:^",
+    "@payloadcms/db-sqlite": "3.92.0",
+    "@payloadcms/next": "3.92.0",
+    "@payloadcms/translations": "3.92.0",
+    "@payloadcms/ui": "3.92.0",
+    "graphql": "^16.8.1",
+    "next": "16.3.3",
+    "payload": "3.92.0",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "eslint": "catalog:",
+    "eslint-plugin-eha": "workspace:*",
+    "globals": "catalog:",
+    "sass": "1.77.4",
+    "typescript-eslint": "catalog:",
+    "vitest": "catalog:"
+  }
+}

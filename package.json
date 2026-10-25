@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "pnpm --filter @europe-historical-atlas/atlas dev",
     "dev:cartographer": "pnpm --filter @europe-historical-atlas/cartographer dev",
+    "dev:cms": "pnpm --filter @europe-historical-atlas/cms dev",
+    "export:content": "pnpm --filter @europe-historical-atlas/cms export",
     "build": "turbo build",
     "preview": "pnpm --filter @europe-historical-atlas/atlas preview",
     "type-check": "turbo type-check",

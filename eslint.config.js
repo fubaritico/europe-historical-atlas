@@ -261,6 +261,11 @@ export default tseslint.config(
       '**/coverage/**',
       '**/files/**',
       '**/opensrc/**',
+      // Written by Payload itself (« do not modify it »): the CMS's admin routes and its generated types. Said here as
+      // well as in the CMS's own config, because lint-staged runs ESLint from the root.
+      'packages/cms/src/app/(payload)/**',
+      'packages/cms/src/payload-types.ts',
+      '**/next-env.d.ts',
       'pnpm-lock.yaml',
       'pnpm-workspace.yaml',
     ],

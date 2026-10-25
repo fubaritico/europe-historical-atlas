@@ -58,3 +58,12 @@ files/spikes/*/out/
 
 # The Cartographer's autosave: drafts and hourly snapshots, local to the machine (CARTO-238)
 **/.autosave/
+
+# The contribution tool (Payload): Next's build folder, and its SQLite database — the dev's local working base,
+# never committed. What ships is the export the atlas reads.
+**/.next/
+**/next-env.d.ts
+**/*.db
+**/*.db-journal
+**/*.db-wal
+**/*.db-shm

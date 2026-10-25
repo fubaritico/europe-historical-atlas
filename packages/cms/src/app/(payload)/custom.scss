@@ -1,0 +1,50 @@
+// Our own pieces of the admin, unlayered so they win over Payload's `@layer payload-default`
+// (files/plans/contribution/payload-check.md).
+
+// The Wikidata button beside a place's name: lowered by the height of the field's label, so it lines up with the
+// input rather than with the label.
+.wikidata-lookup {
+  flex: 1;
+  padding-top: calc(var(--base) * 1.1);
+
+  .btn {
+    margin: 0;
+  }
+}
+
+.wikidata-lookup__choices {
+  list-style: none;
+  margin: calc(var(--base) * 0.5) 0 0;
+  padding: 0;
+  border: 1px solid var(--theme-elevation-150);
+}
+
+.wikidata-lookup__choice {
+  display: block;
+  width: 100%;
+  padding: calc(var(--base) * 0.4) calc(var(--base) * 0.6);
+  border: 0;
+  border-bottom: 1px solid var(--theme-elevation-100);
+  background: var(--theme-elevation-0);
+  color: var(--theme-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--theme-elevation-100);
+  }
+}
+
+.wikidata-lookup__id {
+  color: var(--theme-elevation-500);
+}
+
+.wikidata-lookup__message {
+  margin: calc(var(--base) * 0.5) 0 0;
+
+  &--error {
+    color: var(--theme-error-500);
+  }
+}
