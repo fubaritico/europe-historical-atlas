@@ -18,6 +18,7 @@ import { requireHeightmap } from '@europe-historical-atlas/core/pipeline/inlineC
 import { composeSheetRgba } from '@europe-historical-atlas/core/pipeline/sheetCompose'
 import { terrainTextureSize } from '@europe-historical-atlas/core/pipeline/terrainCompose'
 
+import { rebuildEvents } from './mapEventLayer'
 import {
   BORDER_RENDER_ORDER,
   DRAPED_DEPTH_BIAS,
@@ -254,6 +255,7 @@ export function rebuildSurface(context: LayerContext): void {
   rebuildRivers(context)
   rebuildBorders(context)
   rebuildFills(context)
+  rebuildEvents(context)
 }
 
 /**

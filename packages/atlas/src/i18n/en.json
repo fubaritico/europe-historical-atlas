@@ -16,6 +16,8 @@
   "landMaskLoss": "The coastline is inferred from elevation: the Dutch polders fall under water and closed lakes show as plains.",
   "regionsLoss": "The map shows without its countries or their borders.",
   "riversLoss": "The map shows without its rivers.",
+  "contentFailed": "{failure, select, transport {The events could not be loaded} schema {The events are unreadable} consistency {The events are incomplete} semantic {The events do not match this map} other {The events failed}}",
+  "contentLoss": "The map shows without its events.",
   "yearRegistryLoss": "Countries show without a name, a rank or a bond of vassalage: the geometry is there, the identity is missing.",
   "yearPolitiesLoss": "The map shows without its countries or their borders.",
   "yearBordersLoss": "Borders show in their derived style: the strokes set by hand are lost.",

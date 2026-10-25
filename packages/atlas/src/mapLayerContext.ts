@@ -12,6 +12,7 @@ import type { DevState } from './devState'
 import type { MapSources } from './mapSources'
 import type { CompassRose } from './scene/compassRose'
 import type { DrapeProjection } from './scene/drapeProjection'
+import type { EventMarkers } from './scene/eventMarkers'
 import type { FillLayer } from './scene/fillLayer'
 import type { FrameLabels } from './scene/frameLabels'
 import type { GraticuleFrame } from './scene/graticuleFrame'
@@ -108,6 +109,8 @@ export interface LayerHandles {
    * instead of measuring every distance again.
    */
   tribeCut: { key: TribeCutKey; patches: TribePatch[] } | null
+  /** The events pinned on the relief (CMS-224), or `null` when there is none to pin. */
+  events: EventMarkers | null
   /** The compass rose. */
   compass: CompassRose | null
   /** The vellum the map is printed on. */

@@ -16,6 +16,7 @@ import { taperHeightmapToShore } from '@europe-historical-atlas/core/data/shoreR
 
 import type { BorderPattern } from '@europe-historical-atlas/core/data/borderStyles'
 import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
+import type { ContentEvent } from '@europe-historical-atlas/core/data/contentFormat'
 import type { Heightmap } from '@europe-historical-atlas/core/data/heightmap'
 import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
@@ -58,6 +59,8 @@ export interface MapSources {
   homageDepth: number
   /** The river centrelines, empty until they land. */
   riverData: River[]
+  /** The contribution's events (CMS-224), empty until they land or when there are none. */
+  events: ContentEvent[]
   /**
    * The border lines as the compute derived them.
    *
@@ -108,6 +111,7 @@ export function createMapSources(): MapSources {
     tintLevels: null,
     homageDepth: 0,
     riverData: [],
+    events: [],
     derivedBorders: null,
     borderPatterns: null,
     borderLevels: null,

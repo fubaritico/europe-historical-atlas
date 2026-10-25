@@ -16,6 +16,8 @@
   "landMaskLoss": "Le trait de côte est déduit de l’altitude : les polders néerlandais passent sous l’eau et les lacs fermés apparaissent comme des plaines.",
   "regionsLoss": "La carte s’affiche sans les pays ni leurs frontières.",
   "riversLoss": "La carte s’affiche sans le réseau hydrographique.",
+  "contentFailed": "{failure, select, transport {Les événements n’ont pas pu être chargés} schema {Les événements sont illisibles} consistency {Les événements sont incomplets} semantic {Les événements ne correspondent pas à cette carte} other {Les événements ont échoué}}",
+  "contentLoss": "La carte s’affiche sans ses événements.",
   "yearRegistryLoss": "Les pays s’affichent sans nom, sans rang et sans lien de vassalité : la géométrie est là, l’identité manque.",
   "yearPolitiesLoss": "La carte s’affiche sans les pays ni leurs frontières.",
   "yearBordersLoss": "Les frontières s’affichent avec leur style déduit : les traits posés à la main sont perdus.",

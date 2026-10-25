@@ -79,6 +79,7 @@ function fakeLayers(): MapLayers {
     'rebuildRivers',
     'rebuildBorders',
     'rebuildFills',
+    'rebuildEvents',
     'rebuildRose',
     'rebuildFrame',
     'setWireframe',
@@ -134,6 +135,7 @@ function fakeAssets(over: Partial<MapAssetSources> = {}): Partial<MapAssetSource
     landMask: { load: () => Promise.resolve(MASK) },
     rivers: { load: () => Promise.resolve({ source: 'test', bbox: META.bbox, rivers: [] }) },
     regions: { load: () => Promise.resolve(YEAR) },
+    content: { load: () => Promise.resolve({ version: 1, events: [] }) },
     ...over,
   }
 }
@@ -221,6 +223,13 @@ describe('createMapPipeline', () => {
       const { deps, pipeline } = build()
       await pipeline.start()
       expect(asMock(deps.layers.setTexture)).toHaveBeenCalledTimes(2)
+    })
+
+    it('pins the events when they land', async () => {
+      const { deps, pipeline } = build()
+      await pipeline.start()
+      await flush()
+      expect(asMock(deps.layers.rebuildEvents)).toHaveBeenCalled()
     })
 
     it('draws the rivers when they land', async () => {

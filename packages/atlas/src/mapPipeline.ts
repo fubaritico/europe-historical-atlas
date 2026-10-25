@@ -16,6 +16,7 @@ import {
   boundsDisagreement,
   boundsMatch,
 } from '@europe-historical-atlas/core/data/assetError'
+import { createFetchContentSource } from '@europe-historical-atlas/core/data/contentSource'
 import { createFetchHeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
 import { createFetchLandMaskSource } from '@europe-historical-atlas/core/data/landMask'
 import { createFetchRegionSource } from '@europe-historical-atlas/core/data/regionSource'
@@ -32,6 +33,7 @@ import { createLatestOnly } from '@europe-historical-atlas/core/utils/latestOnly
 
 import { COMPUTE_PHASE_MESSAGES } from './computeLabels'
 import { politicalPalette } from './devParams'
+import { loadContent } from './mapContent'
 import { paintsExactFills } from './mapLayerContext'
 import { refreshReliefSource } from './mapSources'
 import { wrapTerrainTexture } from './scene/terrainTexture'
@@ -42,6 +44,7 @@ import type { AtlasMessageKey } from './i18n'
 import type { MapLayers } from './mapLayers'
 import type { MapSources } from './mapSources'
 import type { MapUi } from './mapUi'
+import type { ContentSource } from '@europe-historical-atlas/core/data/contentSource'
 import type { HeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
 import type { LandMaskSource } from '@europe-historical-atlas/core/data/landMask'
 import type { RegionSet, RegionSource } from '@europe-historical-atlas/core/data/regionSource'
@@ -68,6 +71,9 @@ const POLITICAL_SPLIT = { fetch: 0.1, compute: 0.65, bake: 0.95 }
 const HEIGHTMAP_URL = '/heightmaps/europe-dem-z6-1920'
 const LAND_MASK_URL = '/masks/europe-land'
 const RIVERS_URL = '/rivers/europe-rivers.json'
+
+/** The contribution's export: the events pinned on the map (CMS-223, CMS-224). */
+const CONTENT_URL = '/content/events.json'
 const YEARS_BASE = '/years'
 const YEAR_MANIFEST_URL = '/years/index.json'
 
@@ -81,6 +87,8 @@ export interface MapAssetSources {
   rivers: RiverSource
   /** The polities of a year. */
   regions: RegionSource
+  /** The contribution's events. */
+  content: ContentSource
 }
 
 /**
@@ -100,6 +108,7 @@ export function createFetchAssets(): MapAssetSources {
     heightmap: createFetchHeightmapSource(HEIGHTMAP_URL),
     landMask: createFetchLandMaskSource(LAND_MASK_URL),
     rivers: createFetchRiverSource(RIVERS_URL),
+    content: createFetchContentSource(CONTENT_URL),
     regions: createAuthoredYearSource({
       manifestUrl: YEAR_MANIFEST_URL,
       yearsBase: YEARS_BASE,
@@ -374,6 +383,7 @@ async function startup(context: PipelineContext): Promise<void> {
   layers.rebuildCoastline()
   layers.rebuildRhumb()
   layers.rebuildRivers() // no-op until the river payload lands; whichever finishes last draws them
+  layers.rebuildEvents() // likewise for the contribution's events
   layers.rebuildRose()
   // There is a map to look at now, so the silhouette has done its job. The countries arriving later is
   // the progress panel's business, not the splash's.
@@ -503,6 +513,7 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
   return {
     async start(): Promise<void> {
       loadRivers(context)
+      void loadContent(context, context.assets.content)
       await startup(context).catch((error: unknown) => {
         // Anything escaping `startup` got past the mask's own catch, so it is the relief — the one asset
         // the map cannot do without. The splash stays up underneath the message.

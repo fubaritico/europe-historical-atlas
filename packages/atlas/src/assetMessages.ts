@@ -43,6 +43,7 @@ export const ASSET_POLICY: Record<AssetKind, AssetPolicy> = {
   yearRegistry: { severity: 'degraded', failed: 'yearRegistryFailed', loss: 'yearRegistryLoss' },
   yearPolities: { severity: 'degraded', failed: 'yearPolitiesFailed', loss: 'yearPolitiesLoss' },
   yearBorders: { severity: 'degraded', failed: 'yearBordersFailed', loss: 'yearBordersLoss' },
+  content: { severity: 'degraded', failed: 'contentFailed', loss: 'contentLoss' },
 }
 
 /**

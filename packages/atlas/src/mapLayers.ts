@@ -12,6 +12,7 @@
 
 import { lerp } from '@europe-historical-atlas/core/utils/math'
 
+import { rebuildEvents } from './mapEventLayer'
 import {
   rebuildBorders,
   rebuildCoastline,
@@ -78,6 +79,11 @@ export interface MapLayers {
    * @returns nothing
    */
   rebuildFills: () => void
+  /**
+   * Pin the contribution's events on the relief. A no-op until both the events and the relief are in.
+   * @returns nothing
+   */
+  rebuildEvents: () => void
   /**
    * Rebuild the relief, then everything laid on it — the coastline, the rivers, the borders and the fills.
    * They read their heights off the relief's grid when they are built, so a new grid leaves them on the
@@ -175,6 +181,7 @@ function frameRelief(context: LayerContext, zoom: number): void {
   if (handles.coastline) handles.coastline.object.scale.setY(relief.scale.y)
   if (handles.fills) handles.fills.object.scale.setY(relief.scale.y)
   if (handles.tribes) handles.tribes.object.scale.setY(relief.scale.y)
+  handles.events?.setReliefScale(relief.scale.y)
 }
 
 /**
@@ -348,6 +355,7 @@ function layerLifecycle(
       disposeHandle(scene, handles.borders)
       disposeHandle(scene, handles.fills)
       disposeHandle(scene, handles.tribes)
+      disposeHandle(scene, handles.events)
       disposeHandle(scene, handles.compass)
       disposeHandle(scene, handles.sheet)
       disposeHandle(scene, handles.frame)
@@ -380,6 +388,7 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
       fillCut: null,
       tribes: null,
       tribeCut: null,
+      events: null,
       compass: null,
       sheet: null,
       frame: null,
@@ -388,5 +397,12 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
       sheetTexture: null,
     },
   }
-  return { ...layerRebuilders(context), ...layerSetters(context), ...layerLifecycle(context) }
+  return {
+    ...layerRebuilders(context),
+    rebuildEvents(): void {
+      rebuildEvents(context)
+    },
+    ...layerSetters(context),
+    ...layerLifecycle(context),
+  }
 }
