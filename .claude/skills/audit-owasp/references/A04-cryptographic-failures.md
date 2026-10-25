@@ -34,7 +34,7 @@ OWASP Top 10 #4 (was #2 in 2021). Exposure of sensitive data through weak or mis
 - **Check**: No token or full secret printed; the partial site id printed in a public repository's CI logs is a decision, not an accident
 
 #### OWASP-A04-006: (planned) Contributor data in the static export
-- **Where**: the future export script from the Payload database to static JSON (CONTRIB-223)
+- **Where**: the future export script from the Payload database to static JSON (CMS-223)
 - **Check**: Emails, password hashes, session data and private notes never reach `public/`; only fields declared public are exported
 
 #### OWASP-A04-007: Data in browser storage

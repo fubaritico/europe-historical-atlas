@@ -77,7 +77,7 @@ verb takes either (`move CARTO-41 "En cours"` or `move 41 …`).
 
 Every title **starts with its scope in brackets** (the dev's call, 2026-10-17), so the board reads at a
 glance — **in capitals, it must jump out** (the dev, 2026-10-17): `[ATLAS]` · `[CARTO]` · `[CORE]` ·
-`[CONTRIB]` (places & events, Payload) · `[REPO]` (CI, lint, Trello, skills — none of the four) · `[DESIGN]` (the design of the system itself, across core, the apps and the contribution — the dev, 2026-10-19). Two
+`[CMS]` (the contribution system: places, events, sources — Payload; `[CONTRIB]` until 2026-10-25) · `[REPO]` (CI, lint, Trello, skills — none of the four) · `[DESIGN]` (the design of the system itself, across core, the apps and the contribution — the dev, 2026-10-19). Two
 scopes: `[ATLAS · CARTO]`. `prefix` upper-cases whatever it is given. The scope labels stay as well — a cue
 seen twice is wanted ([[redundant-cues-help-him-remember]]). `prefix N carto` sets or replaces it.
 
@@ -119,7 +119,7 @@ A label shows on the closed card and filters the board; a line in a description 
 | family | labels | rule |
 | --- | --- | --- |
 | **Gravité** | `critique` · `gênant` · `cosmétique` | one at most, only on a card that fixes a problem; a new feature carries none. `critique` = blocks the work (CLAUDE.md's *blocking*) — renamed so it never reads like the status `Bloqué` |
-| **Périmètre** | `atlas` · `Cartographe` · `core` · `données` (years/, relief, sources) · `outillage` (CI, lint, Trello, skills) · `design` | one, rarely two |
+| **Périmètre** | `atlas` · `Cartographe` · `core` · `CMS` (the contribution system, Payload) · `données` (years/, relief, sources) · `outillage` (CI, lint, Trello, skills) · `design` | one, rarely two |
 | **Type** | `retour d'usage` (what the dev felt using the app) · `défaut` (a proven bug) · `fonction` · `dette` · `décision` (a question to settle) · `doc` | one |
 | **Chantier** | `chantier · incertitude`, one per initiative | on every ticket of an initiative, so one click filters it |
 | **Statut** | `Bloqué` | through `block` / `unblock` only |

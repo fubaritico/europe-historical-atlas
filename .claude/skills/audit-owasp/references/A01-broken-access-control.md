@@ -62,5 +62,5 @@ OWASP Top 10 #1. Users acting outside their intended permissions. Here there is 
 - **Check**: The page gets a fixed sentence and Node's error code; absolute paths and stacks go to the server terminal only
 
 #### OWASP-A01-011: (planned) The static export publishes only what is published
-- **Where**: the future export script from Payload's database to static JSON (CONTRIB-223)
+- **Where**: the future export script from Payload's database to static JSON (CMS-223)
 - **Check**: Draft, unreviewed or deleted entries and contributor identities are filtered out before writing into `public/`

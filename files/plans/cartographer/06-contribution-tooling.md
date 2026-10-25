@@ -113,7 +113,7 @@ build; the Cartographer reads the registry from it.
 
 **To verify before committing** (not assumed): Payload's current major and whether it requires a Next.js
 host; available DB adapters (Postgres / SQLite for local-only authoring); confirmation that there is no
-polygon field type — which is _why_ geometry lives in Tool B. **Checked 2026-10-22 — CONTRIB-218: `../contribution/payload-check.md`** (3.92.0, Next required, SQLite stores a point, no polygon field, the admin customisable throughout).
+polygon field type — which is _why_ geometry lives in Tool B. **Checked 2026-10-22 — CMS-218: `../contribution/payload-check.md`** (3.92.0, Next required, SQLite stores a point, no polygon field, the admin customisable throughout).
 
 ## Tool B — **Cartographer** (2D canvas): territory
 

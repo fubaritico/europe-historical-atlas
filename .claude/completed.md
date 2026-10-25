@@ -8,7 +8,7 @@ Deux plages au journal : **23/10 16:52 → 20:48 (3 h 56)** et **23:47 → 02:05
 ouvert le 05/10 totalise **112 h 24 sur 21 plages**. **12 commits** `9c67b15`..`5cb4b11`, **tous poussés**.
 
 - **Ses décisions** : CARTO-237 → Backlog (le chantier de 1100 est loin d'être fini), CARTO-122 → Fait, CARTO-116 → une
-  idée (un gestionnaire automatique des sauvegardes). **CONTRIB-218 tranché** → Fait (Payload 3.x, thème léger, nos
+  idée (un gestionnaire automatique des sauvegardes). **CMS-218 tranché** → Fait (Payload 3.x, thème léger, nos
   écrans avec le DS, une saisie par langue, le registre des sources comme le « periodis » d'Euratlas). **CORE-270, les
   questions 2 à 6 tranchées**. Idées CORE-271 (généalogie) et CARTO-272 (radar, *« appuyée, pas vraie »*).
 - **`/doctor prompt-audit`** appliqué ; OWASP adapté et lu par `/review` à chaque diff.
@@ -41,7 +41,7 @@ Control) : le dev l'a jugée *« ingérable »* et a fermé la session.
   liste sur ATLAS-152, skill `/create-data-mention` (sa demande), bibliothèque de ses atlas `files/plans/sources/`. La
   carte des Chaddadides (CC BY-SA) se déclare redessinée de Hewsen 2001 → référence, pas calque.
 - **Planification** (sa demande, à distance) : palier 2 de DESIGN-262 conçu → CORE-270 (Backlog), barème des sources
-  tranché par lui ; **CONTRIB-218** Payload vérifié dans le code → À valider.
+  tranché par lui ; **CMS-218** Payload vérifié dans le code → À valider.
 - **Mes fautes** : un `git add` de tout ce qui était modifié a embarqué ses données de 1100 dans un commit (défait par
   `reset --soft`) ; « litiges » pour une guerre d'édition ; un éditeur écrit de mémoire dans une mention ; des réponses
   qui renvoyaient à « un document » alors qu'il était loin de son écran.

@@ -5,13 +5,13 @@
 ## Decisions of the dev, 2026-10-17
 
 - Columns **Idées → Backlog → À faire → En cours → À valider par le développeur → Fait**; blocked is a red label, not a column.
-- Every title starts with its **scope in brackets**: `[atlas]` `[carto]` `[core]` `[contrib]`, and `[repo]`
+- Every title starts with its **scope in brackets**: `[atlas]` `[carto]` `[core]` `[cms]` (`[contrib]` until 2026-10-25), and `[repo]`
   for what is none of the four. Scope **labels stay** too (redundant cues help him remember).
 - Severity is a label: `critique` / `gênant` / `cosmétique`.
 - **Fait is exhaustive**, newest at the top, going back to the first day — journals first, then `git log`
   for what they missed.
 - **The Backlog is built from the plans**, by scope, in the plans' order. A subject written in a plan he
-  decided enters Backlog directly; what comes from me goes to Idées. What no plan covers yet (contrib has
+  decided enters Backlog directly; what comes from me goes to Idées. What no plan covers yet (the CMS has
   no UI designed) goes to Idées.
 
 | # | step | state |

@@ -1,4 +1,4 @@
-# Payload, checked before committing to it — CONTRIB-218 (2026-10-22)
+# Payload, checked before committing to it — CMS-218 (2026-10-22)
 
 > What `cartographer/06-contribution-tooling.md` asked to verify, *« not assumed »*, plus the dev's question of
 > 2026-10-22: can the contribution forms and pages be customised, can our design system be used in them, and is
@@ -19,7 +19,7 @@
 | a point (lon/lat) | **yes, in SQLite too**, stored as GeoJSON text (`{"type":"Point","coordinates":[lon,lat]}`) | code: `drizzle/src/sqlite/schema/buildDrizzleTable.ts` |
 | spatial queries (*near*, *within*, *intersects*) | **Postgres (PostGIS) only** — the drizzle query builder handles them only when `adapter.name === 'postgres'`. **We need none**: the atlas reads an export and places points itself | code: `drizzle/src/queries/parseParams.ts` |
 | a polygon field | **none.** Field types: array, blocks, checkbox, code, collapsible, date, email, group, join, json, number, point, radio, relationship, richText, row, select, tabs, text, textarea, ui, upload. A geometry could only sit in `json`, unaided — **geometry stays in the Cartographer**, as planned | code: `payload/src/fields/config/types.ts` |
-| fr and en side by side (CONTRIB-222) | **not native**: one locale at a time, chosen in a selector at the top of the admin. Side by side means a custom view or field | docs: `configuration/localization.mdx` |
+| fr and en side by side (CMS-222) | **not native**: one locale at a time, chosen in a selector at the top of the admin. Side by side means a custom view or field | docs: `configuration/localization.mdx` |
 
 ## Customising — what Payload offers
 
@@ -75,7 +75,7 @@ of paint over someone else's.
   some admin component types renamed; a migration issue lists Node ≥ 24.15 and Next ≥ 16.4. **The official v4
   migration guide was not read.**
 - **Recommendation**: build on **3.x**, keep level 1 thin and level 3 out — then the move to 4 costs the theme
-  file and the renamed types, not a re-skin. Re-check 4.0's status when CONTRIB-219 (creating the app) starts.
+  file and the renamed types, not a re-skin. Re-check 4.0's status when CMS-219 (creating the app) starts.
 
 ## Decided by the dev, 2026-10-23
 
@@ -84,7 +84,7 @@ of paint over someone else's.
 | Payload 3.x, on Next with React 19 — *« ça me va »* | the dev |
 | level 1: a light theme, so the admin is recognised as the historical atlas of Europe's world — *« un rappel »* | the dev |
 | level 2: our own screens with the design system where Payload has none; level 3 left out | the dev |
-| **one form per language**, Payload's native `localized` fields and its locale selector — **replaces CONTRIB-222's fr/en side by side**; a half-translated entry is reported by the export script (CONTRIB-223), the one place that sees both languages at once (`plan.md` P8) | the dev, on my recommendation |
+| **one form per language**, Payload's native `localized` fields and its locale selector — **replaces CMS-222's fr/en side by side**; a half-translated entry is reported by the export script (CMS-223), the one place that sees both languages at once (`plan.md` P8) | the dev, on my recommendation |
 | the arbiter is named: the dev signs his arbitrations | the dev |
 | the source register, and its two forms below | the dev — *« c'est exactement comme ça que je le voyais »* |
 
@@ -125,5 +125,5 @@ Wikipedia and Wikidata are entries like any other (encyclopaedia, crowd-database
 ## Not verified
 
 - the official v4 migration guide;
-- that the SQLite file works with the Local API from a separate export script (CONTRIB-223) — expected, not run;
-- Payload running inside this pnpm workspace beside the catalogue (CONTRIB-219 will show it).
+- that the SQLite file works with the Local API from a separate export script (CMS-223) — expected, not run;
+- Payload running inside this pnpm workspace beside the catalogue (CMS-219 will show it).

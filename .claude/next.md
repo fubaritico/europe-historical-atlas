@@ -10,7 +10,7 @@
 **24/10, 02:05** : tout est commité **et poussé** (`main` = `5cb4b11`), l'arbre est propre — ses saisies Wikidata de 1100
 comprises. **Ses `years/1100/*.json` modifiés par ‹ctrl+S›** se commitent à part, nommés, quand il le dit.
 
-**La suite, par son ordre** : la **contribution**. CONTRIB-218 (Payload) est tranché → Fait ; **CORE-270** (palier 2 de
+**La suite, par son ordre** : la **contribution**. CMS-218 (Payload) est tranché → Fait ; **CORE-270** (palier 2 de
 DESIGN-262) a ses six questions tranchées (`files/plans/evidence/step-2-concepts-in-core.md` §8) et attend qu'il le passe
 en À faire ; **CORE-252** (le format d'un événement) vient juste après.
 

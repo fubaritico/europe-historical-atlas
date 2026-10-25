@@ -32,7 +32,7 @@ const LABELS = [
   { name: 'core', color: 'sky' },
   { name: 'données', color: 'green' },
   { name: 'outillage', color: 'black' },
-  { name: 'contrib', color: 'blue_dark' },
+  { name: 'CMS', color: 'blue_dark' },
   { name: 'design', color: 'red_light' },
   // type
   { name: "retour d'usage", color: 'pink' },
@@ -108,9 +108,15 @@ async function listNamed(name) {
   return found
 }
 
-const SCOPES = 'ATLAS|CARTO|CORE|CONTRIB|REPO|DESIGN'
+const SCOPES = 'ATLAS|CARTO|CORE|CMS|REPO|DESIGN'
+/**
+ * Scopes no longer given but still read, so a card that kept one — an archived card is never renamed — counts in the
+ * ticket counter and no number is given twice. `CONTRIB` became `CMS` on 2026-10-25 (the dev's call).
+ */
+const RETIRED_SCOPES = 'CONTRIB'
+const READ_SCOPES = `${SCOPES}|${RETIRED_SCOPES}`
 /** A title's ticket: `[CARTO-41 · ATLAS] title` → main scope, number (absent before numbering), second scope, bare title. */
-const TICKET = new RegExp(`^\\[(${SCOPES})(?:-(\\d+))?(?: · (${SCOPES}))?\\]\\s*(.*)$`, 'is')
+const TICKET = new RegExp(`^\\[(${READ_SCOPES})(?:-(\\d+))?(?: · (${READ_SCOPES}))?\\]\\s*(.*)$`, 'is')
 
 function parseTicket(title) {
   const m = title.match(TICKET)
@@ -140,7 +146,7 @@ async function nextTicket() {
 /** A card named by its ticket (`CARTO-41`, the scope is not checked) or by Trello's own number (`41`). */
 async function card(ref) {
   const fields = 'name,desc,idList,idShort,url'
-  const ticket = (ref ?? '').match(new RegExp(`^(?:${SCOPES})-(\\d+)$`, 'i'))
+  const ticket = (ref ?? '').match(new RegExp(`^(?:${READ_SCOPES})-(\\d+)$`, 'i'))
   if (ticket) {
     const open = await api('GET', `/boards/${BOARD}/cards`, { fields })
     const found = open.find((c) => parseTicket(c.name)?.number === Number(ticket[1]))
@@ -202,6 +208,7 @@ const verbs = {
     if (!title) fail('add <column> <title> [description] [label…]')
     const ticket = parseTicket(title)
     if (!ticket) fail(`a title starts with its scope: "[CARTO] …", "[ATLAS · CARTO] …" — got "${title}"`)
+    if (new RegExp(`^(?:${RETIRED_SCOPES})$`).test(ticket.scope)) fail(`[${ticket.scope}] is retired — use one of ${SCOPES}`)
     if (ticket.number) fail(`the script gives the number — write "[${ticket.scope}] …", not "[${ticket.scope}-${ticket.number}] …"`)
     title = ticketTitle({ ...ticket, number: await nextTicket() })
     const unknown = names.filter((n) => !LABELS.some((l) => l.name === n))
@@ -323,6 +330,14 @@ const verbs = {
       await api('POST', `/cards/${c.id}/idLabels`, { value: l.id })
     }
     console.warn(`#${c.idShort} tagged ${names.join(', ')}: ${c.name}`)
+  },
+  /** relabel <old> <new> — renames a label on the board; every card that carries it keeps it, under its new name. */
+  async relabel(from, to) {
+    if (!from || !to) fail('relabel <old name> <new name>')
+    const l = (await api('GET', `/boards/${BOARD}/labels`, { fields: 'name' })).find((x) => x.name === from)
+    if (!l) fail(`no label "${from}" on the board`)
+    await api('PUT', `/labels/${l.id}`, { name: to })
+    console.warn(`label renamed: ${from} → ${to}`)
   },
   /** untag <number> <label> — removes one label from a card. */
   async untag(number, name) {
