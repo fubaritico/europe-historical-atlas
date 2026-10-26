@@ -43,18 +43,30 @@ const wikidataId = z.nullable(
 /** A record's id, as the contribution tool gave it. */
 const recordId = z.string().check(z.minLength(1))
 
+/**
+ * The shapes an event stands on the map as, chosen once per type in the contribution (ATLAS-156): `pin` until a
+ * shape is chosen for it, `swords` the crossed swords of a battle, `tower` a siege or a taking, `crown` an accession.
+ */
+export const EVENT_ICONS = ['pin', 'swords', 'tower', 'crown'] as const
+
+/** One of {@link EVENT_ICONS}. */
+export type EventIcon = (typeof EVENT_ICONS)[number]
+
 /** What kind of event it is — a siege, a battle, a treaty. */
 export interface ContentEventType {
   /** The record's id in the contribution. */
   id: string
   /** Its name. */
   name: LocalizedText
+  /** The shape its events stand on the map as. */
+  icon: EventIcon
 }
 
 /** {@link ContentEventType}. */
 const eventTypeSchema: z.ZodMiniType<ContentEventType> = z.strictObject({
   id: recordId,
   name: localizedText,
+  icon: z.enum(EVENT_ICONS),
 })
 
 /** A named point on the map: a city, an abbey, a battlefield. */
@@ -169,11 +181,11 @@ export interface ContentFile {
   events: ContentEvent[]
 }
 
-/** {@link ContentFile}. */
+/** The version this code writes and reads — 2 since the event type carries its icon (2026-10-26). */
+export const CONTENT_FORMAT_VERSION = 2
+
+/** {@link ContentFile}. The writer's version and the reader's are one constant, so a bump cannot split them. */
 export const contentFileSchema: z.ZodMiniType<ContentFile> = z.strictObject({
-  version: z.literal(1),
+  version: z.literal(CONTENT_FORMAT_VERSION),
   events: z.array(eventSchema),
 })
-
-/** The version this code writes and reads. */
-export const CONTENT_FORMAT_VERSION = 1

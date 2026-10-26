@@ -6,7 +6,7 @@ import { toContent, toContentEvent } from './toContent'
 
 import type { DocEvent } from './toContent'
 
-const SIEGE = { id: 1, name: { fr: 'Siège', en: 'Siege' } }
+const SIEGE = { id: 1, name: { fr: 'Siège', en: 'Siege' }, icon: 'tower' as const }
 const JERUSALEM = {
   id: 2,
   name: { fr: 'Jérusalem', en: 'Jerusalem' },
@@ -42,7 +42,7 @@ describe('toContent', () => {
       expect(toContentEvent(capture())).toEqual({
         id: '10',
         title: { fr: 'Prise de Jérusalem', en: 'Capture of Jerusalem' },
-        type: { id: '1', name: { fr: 'Siège', en: 'Siege' } },
+        type: { id: '1', name: { fr: 'Siège', en: 'Siege' }, icon: 'tower' },
         date: {
           kind: 'instant',
           at: { year: 1099, month: 7, day: 15, calendar: 'julian', circa: false, margin: null },
@@ -90,7 +90,7 @@ describe('toContent', () => {
     })
 
     it('writes an empty file for no events', () => {
-      expect(toContent([])).toEqual({ version: 1, events: [] })
+      expect(toContent([])).toEqual({ version: 2, events: [] })
     })
   })
 
@@ -99,6 +99,12 @@ describe('toContent', () => {
       expect(() => toContentEvent(capture({ date: { start: { year: 0 } } }))).toThrow(
         '[CMS] event 10: L’an 0 n’existe pas'
       )
+    })
+
+    it('refuses an event whose type has no icon, rather than drawing it as a pin', () => {
+      expect(() =>
+        toContentEvent(capture({ type: { id: 1, name: { fr: 'Siège', en: null } } }))
+      ).toThrow('event 10, type: no icon')
     })
 
     it('refuses an event with no French title', () => {

@@ -17,6 +17,7 @@ import type {
   ContentFile,
   ContentPlace,
   ContentSource,
+  EventIcon,
   LocalizedText,
 } from '@europe-historical-atlas/core/data/contentFormat'
 import type { HistoricalMoment } from '@europe-historical-atlas/core/time/historicalDate'
@@ -38,6 +39,8 @@ export interface DocEventType {
   id: DocId
   /** Its name, every locale. */
   name: DocLocalized
+  /** The shape its events stand on the map as. */
+  icon?: EventIcon | null
 }
 
 /** A place; Payload stores a point as `[longitude, latitude]`. */
@@ -188,6 +191,20 @@ function toPlace(place: DocPlace): ContentPlace {
 }
 
 /**
+ * An event's type, with its icon. The column defaults to `pin`, so a type without one is a defect of the base, said
+ * loudly — never drawn as a pin.
+ * @param type - the type, resolved
+ * @param where - the event, for the error
+ * @returns it, as the atlas reads it
+ */
+function toContentType(type: DocEventType, where: string): ContentEventType {
+  if (type.icon === null || type.icon === undefined) {
+    throw new Error(`[CMS] ${where}, type: no icon`)
+  }
+  return { id: String(type.id), name: localized(type.name, `${where}, type`), icon: type.icon }
+}
+
+/**
  * One event, everything it points to written in.
  * @param event - the record, relations resolved
  * @returns it, as the atlas reads it
@@ -198,10 +215,7 @@ export function toContentEvent(event: DocEvent): ContentEvent {
   const type = resolved<DocEventType>(event.type, `${where}, type`)
   const date = toHistoricalDate(event.date ?? {})
   if (isDateRefusal(date)) throw new Error(`[CMS] ${where}: ${describeDateRefusalFr(date)}`)
-  const contentType: ContentEventType = {
-    id: String(type.id),
-    name: localized(type.name, `${where}, type`),
-  }
+  const contentType = toContentType(type, where)
   const actors = (event.actors ?? []).map((value): ContentActor => {
     const actor = resolved<DocActor>(value, `${where}, actor`)
     return {

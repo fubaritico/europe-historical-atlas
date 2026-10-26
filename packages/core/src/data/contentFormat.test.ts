@@ -13,7 +13,7 @@ function capture(overrides: Partial<Record<keyof ContentEvent, unknown>> = {}): 
   return {
     id: '10',
     title: { fr: 'Prise de Jérusalem', en: null },
-    type: { id: '1', name: { fr: 'Siège', en: 'Siege' } },
+    type: { id: '1', name: { fr: 'Siège', en: 'Siege' }, icon: 'tower' },
     date: {
       kind: 'instant',
       at: { year: 1099, month: null, day: null, calendar: null, circa: false, margin: null },
@@ -41,7 +41,7 @@ function capture(overrides: Partial<Record<keyof ContentEvent, unknown>> = {}): 
  * @returns whether the schema accepts it
  */
 function accepts(event: unknown): boolean {
-  return contentFileSchema.safeParse({ version: 1, events: [event] }).success
+  return contentFileSchema.safeParse({ version: 2, events: [event] }).success
 }
 
 describe('contentFileSchema', () => {
@@ -115,8 +115,18 @@ describe('contentFileSchema', () => {
       expect(accepts(capture({ place }))).toBe(false)
     })
 
-    it('refuses an unknown version', () => {
-      expect(contentFileSchema.safeParse({ version: 2, events: [] }).success).toBe(false)
+    it('refuses an unknown version, the first one included', () => {
+      expect(contentFileSchema.safeParse({ version: 1, events: [] }).success).toBe(false)
+    })
+
+    it('refuses an event type with an icon it does not know', () => {
+      const type = { id: '1', name: { fr: 'Siège', en: null }, icon: 'catapult' }
+      expect(accepts(capture({ type }))).toBe(false)
+    })
+
+    it('refuses an event type with no icon', () => {
+      const type = { id: '1', name: { fr: 'Siège', en: null } }
+      expect(accepts(capture({ type }))).toBe(false)
     })
   })
 
@@ -160,7 +170,7 @@ describe('contentFileSchema', () => {
         from: { year: 1100, month: null, day: null, calendar: null, circa: false, margin: null },
         to: { year: 1090, month: null, day: null, calendar: null, circa: false, margin: null },
       }
-      const result = contentFileSchema.safeParse({ version: 1, events: [capture({ date })] })
+      const result = contentFileSchema.safeParse({ version: 2, events: [capture({ date })] })
       expect(result.error?.issues[0]?.message).toBe('the interval ends before it begins')
     })
   })

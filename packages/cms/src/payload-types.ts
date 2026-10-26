@@ -179,6 +179,7 @@ export interface Event {
 export interface EventType {
   id: number
   name: string
+  icon: 'pin' | 'swords' | 'tower' | 'crown'
   updatedAt: string
   createdAt: string
 }
@@ -425,6 +426,7 @@ export interface EventsSelect<T extends boolean = true> {
  */
 export interface EventTypesSelect<T extends boolean = true> {
   name?: T
+  icon?: T
   updatedAt?: T
   createdAt?: T
 }

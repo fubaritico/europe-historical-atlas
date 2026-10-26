@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { isAssetError } from './assetError'
 import { createFetchContentSource, parseContentFile } from './contentSource'
 
-const EMPTY = { version: 1, events: [] }
+const EMPTY = { version: 2, events: [] }
 
 /**
  * Answer every fetch with one response.
@@ -41,7 +41,7 @@ describe('contentSource', () => {
     })
 
     it('refuses a file of the wrong shape, naming the field', () => {
-      expect(() => parseContentFile({ version: 1, events: 'none' }, 'here')).toThrow(/events/)
+      expect(() => parseContentFile({ version: 2, events: 'none' }, 'here')).toThrow(/events/)
     })
   })
 
@@ -53,7 +53,7 @@ describe('contentSource', () => {
 
   describe('edge cases', () => {
     it('refuses a newer version of the format', () => {
-      expect(() => parseContentFile({ version: 2, events: [] }, 'here')).toThrow()
+      expect(() => parseContentFile({ version: 3, events: [] }, 'here')).toThrow()
     })
   })
 })

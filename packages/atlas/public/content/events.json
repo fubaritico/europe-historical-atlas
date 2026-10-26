@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "events": [
     {
       "id": "11",
@@ -12,7 +12,8 @@
         "name": {
           "fr": "Polithique - Accession au trone",
           "en": null
-        }
+        },
+        "icon": "pin"
       },
       "date": {
         "kind": "instant",
@@ -73,7 +74,8 @@
         "name": {
           "fr": "Concile",
           "en": null
-        }
+        },
+        "icon": "pin"
       },
       "date": {
         "kind": "instant",
@@ -143,7 +145,8 @@
         "name": {
           "fr": "Conquest",
           "en": null
-        }
+        },
+        "icon": "pin"
       },
       "date": {
         "kind": "instant",
@@ -204,7 +207,8 @@
         "name": {
           "fr": "Bataille",
           "en": null
-        }
+        },
+        "icon": "swords"
       },
       "date": {
         "kind": "instant",
@@ -274,7 +278,8 @@
         "name": {
           "fr": "Bataille",
           "en": null
-        }
+        },
+        "icon": "swords"
       },
       "date": {
         "kind": "instant",
@@ -335,7 +340,8 @@
         "name": {
           "fr": "Intronisation",
           "en": null
-        }
+        },
+        "icon": "pin"
       },
       "date": {
         "kind": "instant",
@@ -412,7 +418,8 @@
         "name": {
           "fr": "Siège",
           "en": null
-        }
+        },
+        "icon": "pin"
       },
       "date": {
         "kind": "instant",
@@ -480,7 +487,8 @@
         "name": {
           "fr": "Bataille",
           "en": null
-        }
+        },
+        "icon": "swords"
       },
       "date": {
         "kind": "instant",
@@ -559,7 +567,8 @@
         "name": {
           "fr": "Polithique - Accession au trone",
           "en": null
-        }
+        },
+        "icon": "pin"
       },
       "date": {
         "kind": "instant",
@@ -618,7 +627,8 @@
         "name": {
           "fr": "Mort",
           "en": null
-        }
+        },
+        "icon": "pin"
       },
       "date": {
         "kind": "instant",
@@ -688,7 +698,8 @@
         "name": {
           "fr": "Bataille",
           "en": null
-        }
+        },
+        "icon": "swords"
       },
       "date": {
         "kind": "instant",

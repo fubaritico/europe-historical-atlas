@@ -20,6 +20,16 @@ function memoryStore() {
       records.set(collection, [...(records.get(collection) ?? []), { id, data }])
       return Promise.resolve(id)
     },
+    readField(collection, id, field) {
+      const found = (records.get(collection) ?? []).find((record) => record.id === id)
+      return Promise.resolve(found?.data[field])
+    },
+    update(collection, id, data) {
+      const found = (records.get(collection) ?? []).find((record) => record.id === id)
+      if (found === undefined) return Promise.reject(new Error(`no ${collection} ${String(id)}`))
+      found.data = { ...found.data, ...data }
+      return Promise.resolve()
+    },
   }
   return { store, records: (collection: SeedCollection) => records.get(collection) ?? [] }
 }
@@ -45,7 +55,7 @@ const YEAR_1100: SeedData = {
 
 /** One event at one place, with one actor, one source and one type. */
 const SMALL: SeedData = {
-  types: ['Bataille'],
+  types: [{ name: 'Bataille', icon: 'swords' }],
   sources: [
     {
       title: 'Gesta',
@@ -84,11 +94,11 @@ describe('seed', () => {
 
       const report = await seed(base.store, atParis, YEAR_1100)
 
-      expect(report.events).toEqual({ found: 0, created: EVENTS.length })
-      expect(report.places).toEqual({ found: 0, created: PLACES.length })
-      expect(report.actors).toEqual({ found: 0, created: ACTORS.length })
-      expect(report.sources).toEqual({ found: 0, created: SOURCES.length })
-      expect(report['event-types']).toEqual({ found: 0, created: TYPES.length })
+      expect(report.events).toEqual({ found: 0, created: EVENTS.length, updated: 0 })
+      expect(report.places).toEqual({ found: 0, created: PLACES.length, updated: 0 })
+      expect(report.actors).toEqual({ found: 0, created: ACTORS.length, updated: 0 })
+      expect(report.sources).toEqual({ found: 0, created: SOURCES.length, updated: 0 })
+      expect(report['event-types']).toEqual({ found: 0, created: TYPES.length, updated: 0 })
     })
 
     it('links an event to the ids of its type, place, actors and sources', async () => {
@@ -137,7 +147,7 @@ describe('seed', () => {
 
       const report = await seed(base.store, atParis, SMALL)
 
-      expect(report.actors).toEqual({ found: 1, created: 0 })
+      expect(report.actors).toEqual({ found: 1, created: 0, updated: 0 })
       expect(base.records('actors')).toEqual([
         { id: theirs, data: { wikidata: 'Q1', name: 'Tancrède (le sien)' } },
       ])
@@ -151,6 +161,27 @@ describe('seed', () => {
       const report = await seed(base.store, atParis, YEAR_1100)
 
       for (const count of Object.values(report)) expect(count.created).toBe(0)
+    })
+
+    it('gives a type the dev wrote its icon while it still holds the default pin', async () => {
+      const base = memoryStore()
+      const theirs = await base.store.create('event-types', { name: 'Bataille', icon: 'pin' })
+
+      const report = await seed(base.store, atParis, SMALL)
+
+      expect(base.records('event-types')).toEqual([
+        { id: theirs, data: { name: 'Bataille', icon: 'swords' } },
+      ])
+      expect(report['event-types']).toEqual({ found: 1, created: 0, updated: 1 })
+    })
+
+    it('never replaces an icon the dev chose', async () => {
+      const base = memoryStore()
+      await base.store.create('event-types', { name: 'Bataille', icon: 'tower' })
+
+      await seed(base.store, atParis, SMALL)
+
+      expect(base.records('event-types')[0]?.data.icon).toBe('tower')
     })
 
     it('does not ask Wikidata for a place already in the base', async () => {

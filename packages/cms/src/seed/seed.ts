@@ -1,4 +1,4 @@
-import type { SeedActor, SeedEvent, SeedMoment, SeedPlace, SeedSource } from './year1100'
+import type { SeedActor, SeedEvent, SeedMoment, SeedPlace, SeedSource, SeedType } from './year1100'
 import type { MomentFields } from '../fields/historicalDate'
 import type { WikidataPlace } from '../wikidata/wikidataPlace'
 import type { HistoricalMoment } from '@europe-historical-atlas/core/time/historicalDate'
@@ -29,6 +29,22 @@ export interface SeedStore {
    * @returns its id
    */
   create(collection: SeedCollection, data: Record<string, unknown>): Promise<SeedId>
+  /**
+   * One field of a record.
+   * @param collection - where
+   * @param id - the record
+   * @param field - the field
+   * @returns its value
+   */
+  readField(collection: SeedCollection, id: SeedId, field: string): Promise<unknown>
+  /**
+   * Change some fields of a record.
+   * @param collection - where
+   * @param id - the record
+   * @param data - the fields to change
+   * @returns once written
+   */
+  update(collection: SeedCollection, id: SeedId, data: Record<string, unknown>): Promise<void>
 }
 
 /** Read a place from Wikidata — `readPlaceEntity` over the network in `run.ts`, a literal in the tests. */
@@ -36,8 +52,8 @@ export type ReadWikidataPlace = (id: string) => Promise<WikidataPlace>
 
 /** What the seed wants written. */
 export interface SeedData {
-  /** The event types' names. */
-  types: readonly string[]
+  /** The event types. */
+  types: readonly SeedType[]
   /** The sources. */
   sources: readonly SeedSource[]
   /** The actors. */
@@ -54,6 +70,8 @@ export interface SeedCount {
   found: number
   /** Written by this run. */
   created: number
+  /** Already there, and given a value they still held the default of. */
+  updated: number
 }
 
 /** The run's account, per collection. */
@@ -131,6 +149,30 @@ async function settle(
     }
   }
   return ids
+}
+
+/**
+ * Give each type its icon where the base still holds the default pin — a type the dev wrote before the field existed
+ * took the pin from the column's default; a shape he chose himself is never replaced.
+ * @param store - the base
+ * @param types - the seed's types
+ * @param ids - their ids
+ * @param report - counted into
+ * @returns once written
+ */
+async function giveIcons(
+  store: SeedStore,
+  types: readonly SeedType[],
+  ids: ReadonlyMap<string, SeedId>,
+  report: SeedReport
+): Promise<void> {
+  for (const type of types) {
+    if (type.icon === 'pin') continue
+    const id = idOf(ids, type.name, 'type')
+    if ((await store.readField('event-types', id, 'icon')) !== 'pin') continue
+    await store.update('event-types', id, { icon: type.icon })
+    report['event-types'].updated += 1
+  }
 }
 
 /**
@@ -228,11 +270,11 @@ export async function seed(
   data: SeedData
 ): Promise<SeedReport> {
   const report: SeedReport = {
-    'event-types': { found: 0, created: 0 },
-    sources: { found: 0, created: 0 },
-    actors: { found: 0, created: 0 },
-    places: { found: 0, created: 0 },
-    events: { found: 0, created: 0 },
+    'event-types': { found: 0, created: 0, updated: 0 },
+    sources: { found: 0, created: 0, updated: 0 },
+    actors: { found: 0, created: 0, updated: 0 },
+    places: { found: 0, created: 0, updated: 0 },
+    events: { found: 0, created: 0, updated: 0 },
   }
   const read = await readMissingPlaces(store, readPlace, data.places)
   const batch = (
@@ -245,7 +287,7 @@ export async function seed(
     types: await batch(
       'event-types',
       'name',
-      data.types.map((name) => ({ key: name, data: () => ({ name }) }))
+      data.types.map((type) => ({ key: type.name, data: () => ({ ...type }) }))
     ),
     sources: await batch(
       'sources',
@@ -263,6 +305,7 @@ export async function seed(
       data.places.map((place) => ({ key: place.wikidata, data: () => placeFields(place, read) }))
     ),
   }
+  await giveIcons(store, data.types, links.types, report)
   await batch(
     'events',
     'title',

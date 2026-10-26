@@ -6,6 +6,8 @@
  * Angleterre » on the page) is kept and simply has no pin.
  */
 
+import type { EventIcon } from '@europe-historical-atlas/core/data/contentFormat'
+
 /** A place, named by its Wikidata item — the seed reads its position and existence from Wikidata, as the form does. */
 export interface SeedPlace {
   /** Its Wikidata id. */
@@ -70,18 +72,27 @@ export interface SeedEvent {
   wikidata?: string
 }
 
+/** An event type, and the shape its events stand on the map as. */
+export interface SeedType {
+  /** Its French name — also what finds it again. */
+  name: string
+  /** Its icon. */
+  icon: EventIcon
+}
+
 /**
  * The event types the seed needs. The first four are the dev's own (written 2026-10-26, spelling kept); the seed finds
- * them by name and creates only the others.
+ * them by name and creates only the others. The crossed swords are the one icon the dev has validated (2026-10-26);
+ * every other type keeps the pin until its shape is chosen.
  */
-export const TYPES: readonly string[] = [
-  'Bataille',
-  'Siège',
-  'Conquest',
-  'Polithique - Accession au trone',
-  'Mort',
-  'Concile',
-  'Intronisation',
+export const TYPES: readonly SeedType[] = [
+  { name: 'Bataille', icon: 'swords' },
+  { name: 'Siège', icon: 'pin' },
+  { name: 'Conquest', icon: 'pin' },
+  { name: 'Polithique - Accession au trone', icon: 'pin' },
+  { name: 'Mort', icon: 'pin' },
+  { name: 'Concile', icon: 'pin' },
+  { name: 'Intronisation', icon: 'pin' },
 ]
 
 /** The places, by their Wikidata items. */
