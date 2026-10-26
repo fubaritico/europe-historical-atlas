@@ -1,7 +1,9 @@
 import { Group } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
-import { EVENT_MARKER_STYLE, createEventMarkers } from './eventMarkers'
+import { BORDER_RENDER_ORDER } from '../mapLayerContext'
+
+import { EVENT_MARKER_STYLE, EVENT_RENDER_ORDER, createEventMarkers } from './eventMarkers'
 
 import type { Mesh, MeshBasicMaterial } from 'three'
 
@@ -28,6 +30,14 @@ describe('createEventMarkers', () => {
         .object.children[0] as Group
       const mesh = pin.children[0] as Mesh<never, MeshBasicMaterial>
       expect(mesh.material.color.getHexString()).toBe('00ff00')
+    })
+
+    it('draws the pins in the transparent pass, ordered after the borders', () => {
+      const pin = createEventMarkers([[0, 0, 0]]).object.children[0] as Group
+      const mesh = pin.children[0] as Mesh<never, MeshBasicMaterial>
+      expect(mesh.material.transparent).toBe(true)
+      expect(pin.renderOrder).toBe(EVENT_RENDER_ORDER)
+      expect(EVENT_RENDER_ORDER).toBeGreaterThan(BORDER_RENDER_ORDER)
     })
   })
 
