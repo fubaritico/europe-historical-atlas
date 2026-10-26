@@ -2,6 +2,26 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-10-26 — le premier événement qui se voit : l'icône bataille
+
+Une plage au journal : **26/10 20:33 → 23:45 (3 h 12)** ; le chantier ouvert le 05/10 totalise **118 h 46 sur 23 plages**.
+**4 commits** `8a3ad38`..`dd39fd0`, **tous poussés** (avec les 6 du 25/10).
+
+- **Le tableau** : CMS-219, 220 (sa question : *qu'est-ce qu'un lieu*), 221 (*« à la louche »*, à réitérer), 224 et CORE-252
+  → Fait.
+- *« Je ne sais même plus où j'en suis… je ne sais pas comment les lier »* → tout se lie dans l'événement. *« C'est toi
+  qui vas saisir »* → le seed de 1100 depuis la page Wikipédia, 11 événements, les Q lus aux liens de la page.
+- *« Il faut que je voie quelque chose »* : les épingles (CMS-224) existaient, l'atlas ne tournait pas — le port 5173
+  servait un autre de ses projets. Sous les frontières → corrigé.
+- **ATLAS-156, l'icône bataille**, réglée à l'œil toute la soirée : épées à 90° *« dans un carré »*, relevées, face à la
+  caméra, balancement, contre-jour qui suit la caméra (*« le même type de problème qu'avec les reliefs »*), halo ; de
+  loin l'image plate « C2 », choisie sur une planche de lisibilité (*« trop de détails »*), en fondu. Validée. *« Une
+  icône à la fois, chacune ses spécificités »* → ATLAS-286..288 ; ATLAS-289 (*« une centaine de choses… c'est
+  prioritaire »*) et CMS-290 en tête d'À faire.
+- **Mes fautes** : le pommeau réduit sur la 3D quand il parlait du SVG ; des icônes qui copiaient l'orientation de la
+  caméra au lieu de se tourner vers elle (balancement décentré) ; un `cd` ; des tests du lecteur restés en version 1,
+  vus par la seule gate complète ; deux sabotages ratés sur une ligne coupée par Prettier.
+
 ### 2026-10-25 — la contribution d'abord : le CMS est né, son outillage planifié
 
 Une plage au journal : **25/10 14:43 → 17:37 (2 h 53)** ; le chantier ouvert le 05/10 totalise **115 h 25 sur 22 plages**.
@@ -22,27 +42,4 @@ Une plage au journal : **25/10 14:43 → 17:37 (2 h 53)** ; le chantier ouvert l
   dans la racine du dépôt ; un `rm -rf` glissé dans une commande, refusé. *« Au bout de 10 minutes déjà, tu me fais chier »* —
   il voulait construire, je théorisais.
 
-### 2026-10-23 → 24/10 (nuit) — ses décisions en attente, l'audit, REPO-275, les toasts
-
-Deux plages au journal : **23/10 16:52 → 20:48 (3 h 56)** et **23:47 → 02:05 (2 h 18)**, soit **6 h 14** ; le chantier
-ouvert le 05/10 totalise **112 h 24 sur 21 plages**. **12 commits** `9c67b15`..`5cb4b11`, **tous poussés**.
-
-- **Ses décisions** : CARTO-237 → Backlog (le chantier de 1100 est loin d'être fini), CARTO-122 → Fait, CARTO-116 → une
-  idée (un gestionnaire automatique des sauvegardes). **CMS-218 tranché** → Fait (Payload 3.x, thème léger, nos
-  écrans avec le DS, une saisie par langue, le registre des sources comme le « periodis » d'Euratlas). **CORE-270, les
-  questions 2 à 6 tranchées**. Idées CORE-271 (généalogie) et CARTO-272 (radar, *« appuyée, pas vraie »*).
-- **`/doctor prompt-audit`** appliqué ; OWASP adapté et lu par `/review` à chaque diff.
-- **REPO-275 → Fait** : actions épinglées, CSP, Dependabot, délai de 10 s sur les lectures ; une écriture n'est jamais
-  coupée (*« si on n'a pas la confirmation, c'est qu'il y a un truc qui va pas »*). Après son test de `?slow=save` :
-  *« c'est pas une poubelle la barre de statut »* → toasts et modale d'alarme, le DS en 0.8.0, la pile en bas au centre ;
-  `?slow=save` gardé (*« très utile de garder ces flags »*).
-- Les avertissements du chargeur natif de Vite levés (`35e7888`) ; ses saisies Wikidata de 1100 commitées (`5cb4b11`).
-- **Les Khazars** : deux entités (le khaganat, le reste d'après 969), pas de phases — *« on va se passer de ce taux de
-  complexité »* ; une date vague est un `circa` à marge large.
-- **Feature flags** (CARTO-268) : le panorama fait ; OpenFeature comme standard, Flagsmith lui plaît, budget zéro ; *pas
-  encore* — surtout pour l'atlas, décrits d'abord en scénarios.
-- **Mes fautes** : avoir dit que toutes les copies de 1100 étaient les miennes (son 1100 d'avant le test en était) ; le
-  hand-off cherché dans le dépôt du DS alors qu'il était à la racine du nôtre — le point de `theme.test.ts` manqué au
-  premier passage ; un premier lot de commandes avec `rm -rf` refusé.
-
-> Older sessions (2026-09-12 → 2026-10-22, the evening) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-24, the night) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

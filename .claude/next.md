@@ -5,25 +5,28 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — l'outillage du CMS, CMS-276 en tête d'À faire
+## ▶ ON REPREND ICI — ATLAS-289 d'abord : des icônes qui tiennent à cent événements
 
-**25/10** : la contribution a pris le pas sur CORE-270 (*« il faut pouvoir contribuer »*, sa décision). Le **CMS** est né
-(`packages/cms`, Payload 3.92 sur Next 16 et SQLite, `pnpm dev:cms` sur le port 3100) — **son nom, sa décision** :
-*« un système de contribution mutualisée »*. Cinq commits `d7aa9d2`..`e4d1015`, **non poussés**.
+**26/10** : le premier événement qui se voit. 1100 est saisi par le seed (`pnpm seed:cms`, 11 événements tirés de la page
+Wikipédia « 1100 ») ; le type d'événement choisit son icône dans le CMS (format v2) ; **l'icône bataille est validée**
+(ATLAS-156, en cours) — épées 3D face à la caméra, contre-jour, halo, et de loin l'image plate en fondu. Les événements
+arrivent après la carte. Tout est poussé (`dd39fd0`).
 
-**Demain, dans l'ordre** : le plan `files/plans/contribution/cms-tooling.md`, cinq tickets du chantier **CMS-285** en tête
-d'À faire — **CMS-276** les migrations (avant que sa base contienne quoi que ce soit), puis 277 la règle et la skill
-`/cms-field`, 278 les sauvegardes, 279 la base d'essai, 280 la carte du schéma et le détecteur.
+**Demain, dans l'ordre d'À faire** : **ATLAS-289** — une géométrie et une matière par type d'icône, partagées
+(*« une centaine de choses… c'est prioritaire »*, le dev) ; puis les icônes une à une, **ATLAS-286** la tour, **287** la
+couronne, **288** les autres types (*« une icône à la fois, chacune ses spécificités »*) ; **CMS-290** (la gate rouge
+quand son serveur du CMS tourne) ; puis l'outillage du CMS, **CMS-276 → 280**.
 
-**Trois règles de la journée, à tenir dès la reprise** :
-- **Son serveur du CMS est le sien** : je ne le lance, ne le coupe ni ne le relance jamais. Mes relances du 25/10 ont fait
-  le « Failed to fetch » qu'il a vu.
-- **Aucun changement de champ sans migration** : en mode push, Payload pose une question dans le terminal (renommer ou
-  créer ?) et tout attend derrière — ça a bloqué son serveur, la base a été supprimée avec son accord.
-- **Un `rm -rf` ne se glisse jamais dans une commande** : refusé le 25/10, à raison.
+**Pour régler une icône** : `/icons.html` (les icônes 3D seules) et `/svg-icons.html` (la lisibilité des images plates,
+de 16 à 96 px, sur le parchemin et les couleurs de 1100) sur son serveur de l'atlas. **Quand deux formes coexistent (la
+3D et le SVG), dire laquelle on change avant de la changer.** Les réglages : `scene/eventIconMarkers.ts`
+(`ICON_CROSS_FADE`, `ICON_FLAT_SPAN`, `ICON_LIFT`, `ICON_HALO_SPAN`…), `eventIcons.ts` (`ICON_LIGHTING`).
 
-**En attente de son test** (À valider) : CMS-219, 220, 221, 224, CORE-252 — le bouton Wikidata sur Paris, puis une
-épingle dans l'atlas après `pnpm export:content`.
+**Trois règles du CMS, toujours** :
+- **Son serveur du CMS est le sien** : je ne le lance, ne le coupe ni ne le relance jamais.
+- **Aucun changement de champ qui retire ou renomme sans migration** (CMS-276) : en mode push, Payload pose une question
+  dans le terminal et tout attend derrière. Un champ **ajouté** passe sans question (vérifié le 26/10, `withDefault`).
+- **Un `rm -rf` ne se glisse jamais dans une commande.**
 
 **À regarder dans une prochaine session** : le Claude du design system modifie sa skill Trello pour que les chantiers
 deviennent des **épiques** avec des tickets enfants (un système de parents) — à reprendre ici quand il le dira.
@@ -46,10 +49,10 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 | où | ticket | état |
 | --- | --- | --- |
 | **Chantiers** | DESIGN-262 La gestion de l'incertitude · **CMS-285 Le CMS** | DESIGN-262 : palier 2 conçu (CORE-270) ; CMS-285 : socle codé, outillage à faire |
-| **En cours** | ATLAS-145, ATLAS-152 | ATLAS-152 porte la liste « Sources de 1100 » et ses mentions |
-| **À valider par le développeur** | CMS-219 · 220 · 221 · 224 · CORE-252 | le socle du CMS, codé le 25/10 |
+| **En cours** | ATLAS-156 · ATLAS-145 · ATLAS-152 | ATLAS-156 : l'icône bataille faite, les autres à venir ; ATLAS-152 porte les sources de 1100 |
+| **À valider par le développeur** | — | vide le 26/10 |
 | **Backlog** | CORE-270 · CMS-281..283 · ATLAS-284 · CARTO-237 · CARTO-273 · CARTO-274 | CORE-270 passe après la contribution (25/10) ; 281–283 les écrans suivants |
-| **À faire**, en tête | CMS-276 → 280, l'outillage du CMS | dans cet ordre ; CMS-276 d'abord, base encore vide |
+| **À faire**, en tête | ATLAS-289 · ATLAS-286..288 · CMS-290 · CMS-276 → 280 | dans cet ordre ; sa base du CMS contient 1100 |
 | **Idées** | CARTO-268 feature flags · CORE-271 généalogie · CARTO-272 radar | CARTO-268 : pas encore |
 
 **Toujours en attente, à lui proposer un jour** : le relief niveau 6 du Cartographe (une ligne, `main.tsx` →
@@ -57,7 +60,7 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 
 ## Where we are
 
-**4 703 tests** (1 280 `core` · 2 259 Cartographe · 995 atlas · 169 plugin `eslint-plugin-eha`, 24/10), gate
+**4 912 tests** (1 304 `core` · 2 259 Cartographe · 1 076 atlas · 104 CMS · 169 plugin `eslint-plugin-eha`, 26/10), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 
