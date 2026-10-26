@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { readPlace, searchPlaces } from './placeEndpoints'
+import { fetchPlaceEntity, readPlace, searchPlaces } from './placeEndpoints'
 import { WIKIDATA_USER_AGENT } from './wikidataPlace'
 
 import type { LookupRequest } from './placeEndpoints'
@@ -115,6 +115,18 @@ describe('placeEndpoints', () => {
         answering({ x: 1 })
       )
       expect(response.status).toBe(502)
+    })
+  })
+
+  describe('fetchPlaceEntity — the seed’s way in', () => {
+    it('reads the place of an item', async () => {
+      const body = { entities: { Q90: { id: 'Q90', labels: { fr: { value: 'Paris' } } } } }
+      const place = await fetchPlaceEntity('Q90', answering(body))
+      expect(place).toMatchObject({ wikidata: 'Q90', name: 'Paris' })
+    })
+
+    it('throws the status rather than answering for the form', async () => {
+      await expect(fetchPlaceEntity('Q90', answering({}, false))).rejects.toThrow('HTTP 503')
     })
   })
 })

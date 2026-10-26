@@ -9,6 +9,7 @@
     "export": "NODE_OPTIONS=--no-deprecation payload run src/export/run.ts",
     "generate:importmap": "NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "NODE_OPTIONS=--no-deprecation payload generate:types",
+    "seed": "NODE_OPTIONS=--no-deprecation payload run src/seed/run.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "type-check": "tsc --noEmit",

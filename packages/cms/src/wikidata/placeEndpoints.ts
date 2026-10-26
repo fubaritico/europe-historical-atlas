@@ -9,11 +9,43 @@ import {
   searchUrl,
 } from './wikidataPlace'
 
+import type { WikidataPlace } from './wikidataPlace'
 import type { FetchLike } from '@europe-historical-atlas/core/utils/fetchWithin'
 import type { Endpoint, PayloadRequest } from 'payload'
 
 /** What the handlers read of Payload's request — structural, so a test hands them a literal. */
 export type LookupRequest = Pick<PayloadRequest, 'user' | 'query' | 'routeParams'>
+
+/**
+ * Ask Wikidata and read its answer — the one way this package fetches from it. Throws on any failure: the routes
+ * turn that into the form's sentence, the seed lets it stop the run.
+ * @param fetchFile - how to fetch
+ * @param url - what to ask
+ * @param read - how to read the answer
+ * @returns what `read` made of it
+ */
+export async function fetchWikidata<T>(
+  fetchFile: FetchLike,
+  url: string,
+  read: (value: unknown) => T
+): Promise<T> {
+  const response = await fetchFile(url, { headers: { 'User-Agent': WIKIDATA_USER_AGENT } })
+  if (!response.ok) throw new Error(`HTTP ${String(response.status)}`)
+  return read(await response.json())
+}
+
+/**
+ * Read the place one item describes, throwing on any failure.
+ * @param id - its item
+ * @param fetchFile - how to fetch
+ * @returns the place
+ */
+export function fetchPlaceEntity(
+  id: string,
+  fetchFile: FetchLike = fetchWithin
+): Promise<WikidataPlace> {
+  return fetchWikidata(fetchFile, entityUrl(id), readPlaceEntity)
+}
 
 /** What the form is told when Wikidata cannot be reached — the gesture is to try again. */
 const UNREACHABLE = 'Wikidata ne répond pas, réessayez.'
@@ -31,9 +63,7 @@ async function askWikidata(
   read: (value: unknown) => unknown
 ): Promise<Response> {
   try {
-    const response = await fetchFile(url, { headers: { 'User-Agent': WIKIDATA_USER_AGENT } })
-    if (!response.ok) throw new Error(`HTTP ${String(response.status)}`)
-    return Response.json(read(await response.json()))
+    return Response.json(await fetchWikidata(fetchFile, url, read))
   } catch (error: unknown) {
     // The detail stays in the server's log; the form gets what it can act on.
     console.error(`[CMS] Wikidata failed on ${url}`, error)

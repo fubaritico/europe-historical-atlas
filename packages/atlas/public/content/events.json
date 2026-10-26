@@ -1,4 +1,751 @@
 {
   "version": 1,
-  "events": []
+  "events": [
+    {
+      "id": "11",
+      "title": {
+        "fr": "Couronnement de Baudouin Ier, roi de Jérusalem",
+        "en": null
+      },
+      "type": {
+        "id": "7",
+        "name": {
+          "fr": "Polithique - Accession au trone",
+          "en": null
+        }
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": 12,
+          "day": 25,
+          "calendar": "julian",
+          "circa": false,
+          "margin": null
+        }
+      },
+      "place": {
+        "id": "10",
+        "name": {
+          "fr": "Bethléem",
+          "en": null
+        },
+        "lon": 35.206111111111,
+        "lat": 31.704444444444,
+        "wikidata": "Q5776",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "actors": [
+        {
+          "id": "15",
+          "name": {
+            "fr": "Baudouin Ier de Jérusalem",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q51717"
+        }
+      ],
+      "description": {
+        "fr": "Baudouin de Boulogne, comte d’Édesse, succède à son frère Godefroy de Bouillon et devient le premier roi de Jérusalem ; couronné à Bethléem.",
+        "en": null
+      },
+      "sources": [
+        {
+          "id": "10",
+          "title": "L’épopée des Croisades",
+          "author": "René Grousset",
+          "url": "https://classiques.uqam.ca/classiques/grousset_rene/epopee_des_croisades/grousset_epopee_des_croisades.pdf"
+        }
+      ],
+      "wikidata": null
+    },
+    {
+      "id": "10",
+      "title": {
+        "fr": "Concile de Poitiers",
+        "en": null
+      },
+      "type": {
+        "id": "12",
+        "name": {
+          "fr": "Concile",
+          "en": null
+        }
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": 11,
+          "day": 18,
+          "calendar": "julian",
+          "circa": false,
+          "margin": null
+        }
+      },
+      "place": {
+        "id": "9",
+        "name": {
+          "fr": "Poitiers",
+          "en": null
+        },
+        "lon": 0.33527777777778,
+        "lat": 46.581111111111,
+        "wikidata": "Q6616",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "actors": [
+        {
+          "id": "18",
+          "name": {
+            "fr": "Guillaume IX d’Aquitaine",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q5351"
+        },
+        {
+          "id": "1",
+          "name": {
+            "fr": "Philippe Ier",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q58907"
+        }
+      ],
+      "description": {
+        "fr": "Guillaume IX d’Aquitaine disperse les prélats qui s’apprêtaient à excommunier de nouveau le roi Philippe Ier.",
+        "en": null
+      },
+      "sources": [
+        {
+          "id": "9",
+          "title": "Histoire complète de Bordeaux, vol. 1",
+          "author": "Patrice-John O’Reilly",
+          "url": "https://books.google.fr/books?id=X34BAAAAYAAJ&pg=PA260"
+        }
+      ],
+      "wikidata": null
+    },
+    {
+      "id": "9",
+      "title": {
+        "fr": "Prise de Barbastro",
+        "en": null
+      },
+      "type": {
+        "id": "10",
+        "name": {
+          "fr": "Conquest",
+          "en": null
+        }
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": 10,
+          "day": 18,
+          "calendar": "julian",
+          "circa": false,
+          "margin": null
+        }
+      },
+      "place": {
+        "id": "8",
+        "name": {
+          "fr": "Barbastro",
+          "en": null
+        },
+        "lon": 0.12718233613932553,
+        "lat": 42.036537153516456,
+        "wikidata": "Q502975",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "actors": [
+        {
+          "id": "17",
+          "name": {
+            "fr": "Pierre Ier d’Aragon",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q379748"
+        }
+      ],
+      "description": {
+        "fr": "Pierre Ier d’Aragon prend Barbastro.",
+        "en": null
+      },
+      "sources": [
+        {
+          "id": "8",
+          "title": "La frontière et les hommes, VIIIe-XIIe siècle",
+          "author": "Philippe Sénac",
+          "url": null
+        }
+      ],
+      "wikidata": null
+    },
+    {
+      "id": "8",
+      "title": {
+        "fr": "Embuscade du Nahr el-Kelb",
+        "en": null
+      },
+      "type": {
+        "id": "1",
+        "name": {
+          "fr": "Bataille",
+          "en": null
+        }
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": 10,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "place": {
+        "id": "7",
+        "name": {
+          "fr": "Nahr el-Kelb",
+          "en": null
+        },
+        "lon": 35.5962,
+        "lat": 33.95774,
+        "wikidata": "Q1963736",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "actors": [
+        {
+          "id": "15",
+          "name": {
+            "fr": "Baudouin Ier de Jérusalem",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q51717"
+        },
+        {
+          "id": "16",
+          "name": {
+            "fr": "Duqâq de Damas",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q261366"
+        }
+      ],
+      "description": {
+        "fr": "En route vers Jérusalem, Baudouin de Boulogne est attaqué au passage du fleuve par les hommes de Duqâq de Damas.",
+        "en": null
+      },
+      "sources": [
+        {
+          "id": "7",
+          "title": "Armes et combats dans l’univers médiéval, vol. 2",
+          "author": "Claude Gaier",
+          "url": null
+        }
+      ],
+      "wikidata": null
+    },
+    {
+      "id": "7",
+      "title": {
+        "fr": "Bataille de Malagón",
+        "en": null
+      },
+      "type": {
+        "id": "1",
+        "name": {
+          "fr": "Bataille",
+          "en": null
+        }
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": 9,
+          "day": 16,
+          "calendar": "julian",
+          "circa": false,
+          "margin": null
+        }
+      },
+      "place": {
+        "id": "6",
+        "name": {
+          "fr": "Malagón",
+          "en": null
+        },
+        "lon": -3.8547222222222,
+        "lat": 39.171666666667,
+        "wikidata": "Q1613270",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "actors": [
+        {
+          "id": "14",
+          "name": {
+            "fr": "Almoravides",
+            "en": null
+          },
+          "kind": "house",
+          "wikidata": "Q75613"
+        }
+      ],
+      "description": {
+        "fr": "Les Almoravides battent les Castillans près de l’actuelle Ciudad Real.",
+        "en": null
+      },
+      "sources": [
+        {
+          "id": "6",
+          "title": "La frontière entre chrétienté et Islam dans la péninsule Ibérique",
+          "author": "Pascal Buresi",
+          "url": null
+        }
+      ],
+      "wikidata": null
+    },
+    {
+      "id": "6",
+      "title": {
+        "fr": "Intronisation de l’antipape Théodoric",
+        "en": null
+      },
+      "type": {
+        "id": "13",
+        "name": {
+          "fr": "Intronisation",
+          "en": null
+        }
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": 9,
+          "day": 8,
+          "calendar": "julian",
+          "circa": false,
+          "margin": null
+        }
+      },
+      "place": {
+        "id": "5",
+        "name": {
+          "fr": "Rome",
+          "en": null
+        },
+        "lon": 12.482777777778,
+        "lat": 41.893055555556,
+        "wikidata": "Q220",
+        "existsFrom": {
+          "year": -753,
+          "month": 4,
+          "day": 21,
+          "calendar": "julian",
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "actors": [
+        {
+          "id": "12",
+          "name": {
+            "fr": "Théodoric (antipape)",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q356628"
+        },
+        {
+          "id": "13",
+          "name": {
+            "fr": "Pascal II",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q227967"
+        }
+      ],
+      "description": {
+        "fr": "À la mort de l’antipape Clément III, Théodoric, évêque de Sainte-Rufine, est intronisé à Rome contre le pape Pascal II.",
+        "en": null
+      },
+      "sources": [
+        {
+          "id": "5",
+          "title": "Histoire des conciles d’après les documents originaux",
+          "author": "Karl Joseph von Hefele",
+          "url": null
+        }
+      ],
+      "wikidata": null
+    },
+    {
+      "id": "5",
+      "title": {
+        "fr": "Prise de Haïfa",
+        "en": null
+      },
+      "type": {
+        "id": "8",
+        "name": {
+          "fr": "Siège",
+          "en": null
+        }
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": 8,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "place": {
+        "id": "4",
+        "name": {
+          "fr": "Haïfa",
+          "en": null
+        },
+        "lon": 34.99916666666667,
+        "lat": 32.81916666666667,
+        "wikidata": "Q41621",
+        "existsFrom": {
+          "year": 1761,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "actors": [
+        {
+          "id": "11",
+          "name": {
+            "fr": "Tancrède de Hauteville",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q51720"
+        }
+      ],
+      "description": {
+        "fr": "Avec l’appui de la flotte vénitienne, Tancrède prend Haïfa vers le 20 août.",
+        "en": null
+      },
+      "sources": [
+        {
+          "id": "4",
+          "title": "Chronologie de la première croisade, 1094-1100",
+          "author": "Heinrich Hagenmeyer",
+          "url": null
+        }
+      ],
+      "wikidata": "Q137785638"
+    },
+    {
+      "id": "4",
+      "title": {
+        "fr": "Bataille de Mélitène",
+        "en": null
+      },
+      "type": {
+        "id": "1",
+        "name": {
+          "fr": "Bataille",
+          "en": null
+        }
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": 8,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "place": {
+        "id": "3",
+        "name": {
+          "fr": "Malatya",
+          "en": null
+        },
+        "lon": 38.3094,
+        "lat": 38.35062,
+        "wikidata": "Q165995",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "actors": [
+        {
+          "id": "8",
+          "name": {
+            "fr": "Bohémond de Tarente",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q220806"
+        },
+        {
+          "id": "9",
+          "name": {
+            "fr": "Danichmend",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q714771"
+        },
+        {
+          "id": "10",
+          "name": {
+            "fr": "Gabriel de Mélitène",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q921391"
+        }
+      ],
+      "description": {
+        "fr": "Venu au secours du gouverneur arménien Gabriel, Bohémond, prince d’Antioche, est fait prisonnier par l’émir Danichmend ; Tancrède assure la régence.",
+        "en": null
+      },
+      "sources": [
+        {
+          "id": "3",
+          "title": "Vie et mort de Byzance",
+          "author": "Louis Bréhier",
+          "url": "https://classiques.uqam.ca/classiques/brehier_louis/monde_byzantin/brehier_vie_et_mort_byzance.pdf"
+        }
+      ],
+      "wikidata": "Q2219412"
+    },
+    {
+      "id": "3",
+      "title": {
+        "fr": "Couronnement d’Henri Ier Beauclerc",
+        "en": null
+      },
+      "type": {
+        "id": "7",
+        "name": {
+          "fr": "Polithique - Accession au trone",
+          "en": null
+        }
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": 8,
+          "day": 5,
+          "calendar": "julian",
+          "circa": false,
+          "margin": null
+        }
+      },
+      "place": null,
+      "actors": [
+        {
+          "id": "6",
+          "name": {
+            "fr": "Henri Ier Beauclerc",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q101384"
+        },
+        {
+          "id": "7",
+          "name": {
+            "fr": "Robert Courteheuse",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q220994"
+        }
+      ],
+      "description": {
+        "fr": "Trois jours après la mort de son frère, Henri est couronné roi d’Angleterre ; il écarte Robert Courteheuse et publie une Charte des libertés.",
+        "en": null
+      },
+      "sources": [
+        {
+          "id": "2",
+          "title": "Histoire d’Angleterre depuis la première invasion des Romains jusqu’à la paix de 1763",
+          "author": "Antoine François Bertrand de Molleville",
+          "url": "https://books.google.fr/books?id=mpQ9AAAAcAAJ&pg=PA179"
+        }
+      ],
+      "wikidata": null
+    },
+    {
+      "id": "2",
+      "title": {
+        "fr": "Mort de Guillaume le Roux",
+        "en": null
+      },
+      "type": {
+        "id": "11",
+        "name": {
+          "fr": "Mort",
+          "en": null
+        }
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": 8,
+          "day": 2,
+          "calendar": "julian",
+          "circa": false,
+          "margin": null
+        }
+      },
+      "place": {
+        "id": "2",
+        "name": {
+          "fr": "New Forest",
+          "en": null
+        },
+        "lon": -1.56666667,
+        "lat": 50.86666667,
+        "wikidata": "Q14524921",
+        "existsFrom": {
+          "year": 2005,
+          "month": 3,
+          "day": 1,
+          "calendar": "gregorian",
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "actors": [
+        {
+          "id": "4",
+          "name": {
+            "fr": "Guillaume le Roux",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q102005"
+        },
+        {
+          "id": "5",
+          "name": {
+            "fr": "Gautier Tirel",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q2389282"
+        }
+      ],
+      "description": {
+        "fr": "Le roi d’Angleterre meurt dans un accident de chasse dans la New Forest, d’une flèche attribuée à Gautier Tirel.",
+        "en": null
+      },
+      "sources": [],
+      "wikidata": null
+    },
+    {
+      "id": "1",
+      "title": {
+        "fr": "Bataille de l’Isbidh-rudh",
+        "en": null
+      },
+      "type": {
+        "id": "1",
+        "name": {
+          "fr": "Bataille",
+          "en": null
+        }
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": 5,
+          "day": 14,
+          "calendar": "julian",
+          "circa": false,
+          "margin": null
+        }
+      },
+      "place": {
+        "id": "1",
+        "name": {
+          "fr": "Hamadan",
+          "en": null
+        },
+        "lon": 48.516666666667,
+        "lat": 34.8,
+        "wikidata": "Q28587",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "actors": [
+        {
+          "id": "2",
+          "name": {
+            "fr": "Muhammad Ier",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q1296751"
+        },
+        {
+          "id": "3",
+          "name": {
+            "fr": "Barkyaruq",
+            "en": null
+          },
+          "kind": "person",
+          "wikidata": "Q387011"
+        }
+      ],
+      "description": {
+        "fr": "Près de Hamadan, le sultan seldjoukide Barkyaruq est battu par son frère Muhammad, de nouveau reconnu sultan à Bagdad le 25 mai.",
+        "en": null
+      },
+      "sources": [
+        {
+          "id": "1",
+          "title": "The Chronicle of Ibn al-Athir for the Crusading Period from al-Kamil fi’l-Ta’rikh, vol. 1",
+          "author": "D. S. Richards (trad.)",
+          "url": null
+        }
+      ],
+      "wikidata": null
+    }
+  ]
 }
