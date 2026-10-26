@@ -38,6 +38,7 @@ export { WORLD_WIDTH } from './mapLayerContext'
 export type { MapLayersDeps } from './mapLayerContext'
 
 import type { LayerContext, MapLayersDeps } from './mapLayerContext'
+import type { CameraPose } from './scene/eventMarkers'
 import type { DataTexture, Object3D } from 'three'
 
 /** The map's overlays, as one thing. */
@@ -80,7 +81,7 @@ export interface MapLayers {
    */
   rebuildFills: () => void
   /**
-   * Pin the contribution's events on the relief. A no-op until both the events and the relief are in.
+   * Stand the contribution's events on the relief. A no-op until the events are in and the map is drawn.
    * @returns nothing
    */
   rebuildEvents: () => void
@@ -147,6 +148,13 @@ export interface MapLayers {
    * @returns nothing
    */
   frame: (zoom: number, pixelsPerUnit: number) => void
+  /**
+   * Turn the event icons to the camera, so they always show their front, and sway them.
+   * @param camera - where the camera stands and how it is turned
+   * @param seconds - the time since the map started
+   * @returns nothing
+   */
+  faceCamera: (camera: CameraPose, seconds: number) => void
   /**
    * What a click raycasts against — the terrain itself, or `null` before it is built.
    *
@@ -330,7 +338,7 @@ function layerSetters(
  */
 function layerLifecycle(
   context: LayerContext
-): Pick<MapLayers, 'setResolution' | 'frame' | 'dispose' | 'pickTarget'> {
+): Pick<MapLayers, 'setResolution' | 'frame' | 'faceCamera' | 'dispose' | 'pickTarget'> {
   const { scene, handles } = context
   return {
     setResolution(width: number, height: number): void {
@@ -342,6 +350,10 @@ function layerLifecycle(
     frame(zoom: number, pixelsPerUnit: number): void {
       frameRelief(context, zoom)
       frameLineWork(context, zoom, pixelsPerUnit)
+      handles.events?.setZoom(zoom, pixelsPerUnit)
+    },
+    faceCamera(camera: CameraPose, seconds: number): void {
+      handles.events?.faceCamera(camera, seconds)
     },
     pickTarget(): Object3D | null {
       return handles.relief

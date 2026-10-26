@@ -44,6 +44,7 @@ export function startFrameLoop(view: Viewport, layers: MapLayers, stats: FrameSt
         window.innerHeight
       )
     )
+    layers.faceCamera(camera, timer.getElapsed())
     view.frame()
     view.render()
     stats.update()

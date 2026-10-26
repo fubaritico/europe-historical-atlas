@@ -62,6 +62,11 @@ export interface MapSources {
   /** The contribution's events (CMS-224), empty until they land or when there are none. */
   events: ContentEvent[]
   /**
+   * Whether the first year has been drawn — its countries on screen, or its failure said. The events wait for it:
+   * the map comes first, then what happened on it (the dev, 2026-10-26).
+   */
+  mapDrawn: boolean
+  /**
    * The border lines as the compute derived them.
    *
    * Kept so that restyling a stroke redraws rather than re-traces: only the smoothing changes the
@@ -112,6 +117,7 @@ export function createMapSources(): MapSources {
     homageDepth: 0,
     riverData: [],
     events: [],
+    mapDrawn: false,
     derivedBorders: null,
     borderPatterns: null,
     borderLevels: null,

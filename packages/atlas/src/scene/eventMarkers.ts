@@ -1,6 +1,15 @@
 import { CylinderGeometry, Group, Mesh, MeshBasicMaterial, SphereGeometry } from 'three'
 
 import type { WorldPoint } from './drapeProjection'
+import type { Quaternion, Vector3 } from 'three'
+
+/** Where the camera stands and how it is turned, in the world — a camera's own `position` and `quaternion` fit. */
+export interface CameraPose {
+  /** Where it stands. */
+  readonly position: Vector3
+  /** How it is turned. */
+  readonly quaternion: Quaternion
+}
 
 /** What the pins look like, in world units — the map is 12 wide. */
 export interface EventMarkerStyle {
@@ -39,6 +48,22 @@ export interface EventMarkers {
    * @returns nothing
    */
   setReliefScale: (scale: number) => void
+  /**
+   * Choose the markers' form for the camera's zoom: an icon is 3D close up, flat from afar, the one fading into the
+   * other; a pin is always a pin.
+   * @param zoom - the camera's zoom in `[0, 1]`, zoomed out at zero
+   * @param pixelsPerUnit - screen pixels per world unit where the camera looks (`scene/screenScale`)
+   * @returns nothing
+   */
+  setZoom: (zoom: number, pixelsPerUnit: number) => void
+  /**
+   * Turn the markers to the camera for this frame: an icon faces it, so it always shows its front, from above as
+   * from the side, then sways (the dev, 2026-10-26); a pin, round, does nothing.
+   * @param camera - where the camera stands and how it is turned
+   * @param seconds - the time since the map started
+   * @returns nothing
+   */
+  faceCamera: (camera: CameraPose, seconds: number) => void
   /** Free the GPU resources. */
   dispose(): void
 }
@@ -72,10 +97,42 @@ export function createEventMarkers(
     setReliefScale(scale: number): void {
       for (const { pin, ground } of pins) pin.position.setY(ground * scale)
     },
+    setZoom(): void {
+      // A pin has one form at every zoom.
+    },
+    faceCamera(): void {
+      // A pin is round: it faces every way already.
+    },
     dispose(): void {
       stem.dispose()
       head.dispose()
       material.dispose()
+    },
+  }
+}
+
+/**
+ * One handle over several kinds of markers — the pins and the icons — so the layers hold, scale and dispose them as
+ * one.
+ * @param parts - the markers to hold together
+ * @returns their handle
+ */
+export function combineEventMarkers(parts: readonly EventMarkers[]): EventMarkers {
+  const object = new Group()
+  for (const part of parts) object.add(part.object)
+  return {
+    object,
+    setReliefScale(scale: number): void {
+      for (const part of parts) part.setReliefScale(scale)
+    },
+    setZoom(zoom: number, pixelsPerUnit: number): void {
+      for (const part of parts) part.setZoom(zoom, pixelsPerUnit)
+    },
+    faceCamera(camera: CameraPose, seconds: number): void {
+      for (const part of parts) part.faceCamera(camera, seconds)
+    },
+    dispose(): void {
+      for (const part of parts) part.dispose()
     },
   }
 }

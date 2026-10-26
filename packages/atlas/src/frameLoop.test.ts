@@ -19,7 +19,7 @@ function harness(distance: number): {
   frames: [number, number][]
 } {
   const camera = new PerspectiveCamera(40, 1, 0.01, 100)
-  camera.position.set(0, distance, 0)
+  camera.position.set(0.5, distance, 3)
   const frames: [number, number][] = []
   const view = {
     camera,
@@ -29,6 +29,7 @@ function harness(distance: number): {
   } as unknown as Viewport
   const layers = {
     frame: (zoom: number, pixelsPerUnit: number) => frames.push([zoom, pixelsPerUnit]),
+    faceCamera: vi.fn(),
   } as unknown as MapLayers
   return { view, layers, frames }
 }
@@ -46,7 +47,19 @@ describe('startFrameLoop', () => {
     const stop = startFrameLoop(view, layers, { update: vi.fn() })
     stop()
 
-    expect(frames).toEqual([[0.3, pixelsPerWorldUnit(2, 40, window.innerHeight)]])
+    expect(frames).toEqual([
+      [0.3, pixelsPerWorldUnit(new Vector3(0.5, 2, 3).length(), 40, window.innerHeight)],
+    ])
+  })
+
+  it('hands the layers the camera’s orientation, to turn the icons to it', () => {
+    vi.stubGlobal('requestAnimationFrame', () => 1)
+    vi.stubGlobal('cancelAnimationFrame', vi.fn())
+    const { view, layers } = harness(2)
+
+    startFrameLoop(view, layers, { update: vi.fn() })()
+
+    expect(layers.faceCamera).toHaveBeenCalledWith(view.camera, expect.any(Number))
   })
 
   it('stops by cancelling the frame it asked for', () => {

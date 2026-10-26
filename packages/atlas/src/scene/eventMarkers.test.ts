@@ -1,9 +1,14 @@
-import { Group } from 'three'
+import { Group, Quaternion, Vector3 } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
 import { BORDER_RENDER_ORDER } from '../mapLayerContext'
 
-import { EVENT_MARKER_STYLE, EVENT_RENDER_ORDER, createEventMarkers } from './eventMarkers'
+import {
+  EVENT_MARKER_STYLE,
+  EVENT_RENDER_ORDER,
+  combineEventMarkers,
+  createEventMarkers,
+} from './eventMarkers'
 
 import type { Mesh, MeshBasicMaterial } from 'three'
 
@@ -53,6 +58,25 @@ describe('createEventMarkers', () => {
 
     it('builds an empty group for no events', () => {
       expect(createEventMarkers([]).object.children).toHaveLength(0)
+    })
+
+    it('holds several markers as one: scaled and freed together', () => {
+      const pins = createEventMarkers([[0, 0.2, 0]])
+      const more = createEventMarkers([[1, 0.1, 0]])
+      const disposes = [vi.spyOn(pins, 'dispose'), vi.spyOn(more, 'dispose')]
+      const faces = [vi.spyOn(pins, 'faceCamera'), vi.spyOn(more, 'faceCamera')]
+      const both = combineEventMarkers([pins, more])
+      const camera = { position: new Vector3(0, 1, 1), quaternion: new Quaternion() }
+      const zooms = [vi.spyOn(pins, 'setZoom'), vi.spyOn(more, 'setZoom')]
+      both.setReliefScale(2)
+      both.setZoom(0.7, 100)
+      for (const spy of zooms) expect(spy).toHaveBeenCalledWith(0.7, 100)
+      both.faceCamera(camera, 2)
+      both.dispose()
+      for (const spy of faces) expect(spy).toHaveBeenCalledWith(camera, 2)
+      expect(both.object.children).toEqual([pins.object, more.object])
+      expect(more.object.children[0]?.position.y).toBeCloseTo(0.2)
+      for (const spy of disposes) expect(spy).toHaveBeenCalledTimes(1)
     })
 
     it('frees the shared geometries and material on dispose', () => {

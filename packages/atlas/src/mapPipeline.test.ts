@@ -135,7 +135,7 @@ function fakeAssets(over: Partial<MapAssetSources> = {}): Partial<MapAssetSource
     landMask: { load: () => Promise.resolve(MASK) },
     rivers: { load: () => Promise.resolve({ source: 'test', bbox: META.bbox, rivers: [] }) },
     regions: { load: () => Promise.resolve(YEAR) },
-    content: { load: () => Promise.resolve({ version: 1, events: [] }) },
+    content: { load: () => Promise.resolve({ version: 2, events: [] }) },
     ...over,
   }
 }
@@ -225,11 +225,14 @@ describe('createMapPipeline', () => {
       expect(asMock(deps.layers.setTexture)).toHaveBeenCalledTimes(2)
     })
 
-    it('pins the events when they land', async () => {
+    it('stands the events once the countries are drawn, never before', async () => {
       const { deps, pipeline } = build()
       await pipeline.start()
       await flush()
-      expect(asMock(deps.layers.rebuildEvents)).toHaveBeenCalled()
+      const fills = asMock(deps.layers.rebuildFills).mock.invocationCallOrder
+      const events = asMock(deps.layers.rebuildEvents).mock.invocationCallOrder
+      expect(deps.sources.mapDrawn).toBe(true)
+      expect(Math.max(...events)).toBeGreaterThan(Math.max(...fills))
     })
 
     it('draws the rivers when they land', async () => {
@@ -355,6 +358,15 @@ describe('createMapPipeline', () => {
       await pipeline.start()
       expect(asMock(deps.ui.reportAssetFailure)).toHaveBeenCalledWith('regions', expect.anything())
       expect(asMock(deps.ui.progress.end)).toHaveBeenCalled()
+    })
+
+    it('still stands the events when the year cannot be fetched, under its failure', async () => {
+      const { deps, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.reject(new Error('404')) } }),
+      })
+      await pipeline.start()
+      expect(deps.sources.mapDrawn).toBe(true)
+      expect(asMock(deps.layers.rebuildEvents)).toHaveBeenCalled()
     })
 
     it('reports a missing relief as the blocking failure it is', async () => {

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { DataTexture, Scene, ShaderLib } from 'three'
+import { DataTexture, Quaternion, Scene, ShaderLib, Vector3 } from 'three'
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -19,9 +19,11 @@ import { TRIBE_RENDER_ORDER } from './scene/tribeLayer'
 import * as patchModule from './tribePatches'
 
 import type { MapSources } from './mapSources'
+import type { ContentEvent } from '@europe-historical-atlas/core/data/contentFormat'
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
+import type { Object3D } from 'three'
 import type {
   BufferGeometry,
   LineBasicMaterial,
@@ -178,8 +180,91 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
+/**
+ * A child, or the test fails here, naming it.
+ * @param parent - where to look
+ * @param index - which child
+ * @returns the child
+ */
+function child(parent: Object3D | undefined, index: number): Object3D {
+  const found = parent?.children[index]
+  if (found === undefined) throw new Error(`no child ${String(index)}`)
+  return found
+}
+
+/**
+ * The event layer's groups: the pins, and the icons' close-up and far-away forms.
+ * @param scene - the scene the layers drew into
+ * @returns the groups
+ */
+function eventGroups(scene: Scene): { pins: Object3D; close: Object3D; afar: Object3D } {
+  const events = child(scene, 0)
+  const icons = child(events, 1)
+  return { pins: child(events, 0), close: child(icons, 1), afar: child(icons, 2) }
+}
+
+/** A battle in the middle of the map's frame, for the event layer. */
+const BATTLE: ContentEvent = {
+  id: 'e1',
+  title: { fr: 'Bataille', en: null },
+  type: { id: 't', name: { fr: 'Bataille', en: null }, icon: 'swords' },
+  date: {
+    kind: 'instant',
+    at: { year: 1100, month: null, day: null, calendar: null, circa: false, margin: null },
+  },
+  place: {
+    id: 'p',
+    name: { fr: 'Lieu', en: null },
+    lon: 0,
+    lat: 48,
+    wikidata: null,
+    existsFrom: null,
+    existsTo: null,
+  },
+  actors: [],
+  description: null,
+  sources: [],
+  wikidata: null,
+}
+
 describe('createMapLayers', () => {
   describe('happy path', () => {
+    it('stands an event whose type has the pin as a pin, and a battle as an icon', () => {
+      const { scene, sources, layers } = build()
+      sources.events = [BATTLE, { ...BATTLE, id: 'e2', type: { ...BATTLE.type, icon: 'pin' } }]
+      sources.mapDrawn = true
+      layers.rebuildEvents()
+      const { pins, afar } = eventGroups(scene)
+      expect(pins.children).toHaveLength(1)
+      expect(afar.children).toHaveLength(1)
+    })
+
+    it('carries each frame’s zoom and camera to the icons', () => {
+      const { scene, sources, layers } = build()
+      sources.events = [BATTLE]
+      sources.mapDrawn = true
+      layers.rebuildEvents()
+      const { close, afar } = eventGroups(scene)
+      layers.frame(0, 100)
+      expect([close.visible, afar.visible]).toEqual([false, true])
+      layers.frame(1, 100)
+      expect([close.visible, afar.visible]).toEqual([true, false])
+      const icon = child(close, 1)
+      const before = icon.quaternion.clone()
+      layers.faceCamera({ position: new Vector3(3, 2, 5), quaternion: new Quaternion() }, 0)
+      expect(icon.quaternion.equals(before)).toBe(false)
+    })
+
+    it('stands no event before the map is drawn, and stands them once it is', () => {
+      const { scene, sources, layers } = build()
+      sources.events = [BATTLE]
+      layers.rebuildEvents()
+      expect(scene.children).toHaveLength(0)
+      sources.mapDrawn = true
+      layers.rebuildEvents()
+      expect(scene.children).toHaveLength(1)
+    })
+
     it('draws nothing until something is rebuilt', () => {
       expect(build().scene.children).toHaveLength(0)
     })

@@ -383,7 +383,6 @@ async function startup(context: PipelineContext): Promise<void> {
   layers.rebuildCoastline()
   layers.rebuildRhumb()
   layers.rebuildRivers() // no-op until the river payload lands; whichever finishes last draws them
-  layers.rebuildEvents() // likewise for the contribution's events
   layers.rebuildRose()
   // There is a map to look at now, so the silhouette has done its job. The countries arriving later is
   // the progress panel's business, not the splash's.
@@ -391,6 +390,13 @@ async function startup(context: PipelineContext): Promise<void> {
 
   // Stage two: the same map with the countries painted in and their borders drawn over it.
   await rebuildPolitical(context)
+  if (context.isDisposed()) return
+
+  // Stage three: the events, once the map is drawn (the dev, 2026-10-26) — on a failed year too, whose failure
+  // is on screen: valid events are not hidden because another file did not come. A no-op until they land; if
+  // they land later, `loadContent` draws them.
+  sources.mapDrawn = true
+  layers.rebuildEvents()
 }
 
 /**
