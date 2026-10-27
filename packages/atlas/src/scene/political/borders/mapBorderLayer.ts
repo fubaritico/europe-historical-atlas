@@ -12,7 +12,7 @@ import { DRAPED_DEPTH_BIAS } from '../../lines/depthBias'
 import { buildBorderStrokes } from './borderStrokes'
 import { createLevelledBorderLayer, splitBordersByLevel } from './levelledBorderLayer'
 
-import type { DevState } from '../../../devState'
+import type { DevState } from '../../../tunables/devState'
 import type { LayerContext } from '../../layers/layerContext'
 import type { BorderPattern } from '@europe-historical-atlas/core/data/borderStyles'
 

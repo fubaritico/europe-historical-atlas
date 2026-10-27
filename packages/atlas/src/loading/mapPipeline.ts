@@ -31,19 +31,20 @@ import { createWorkerMapCompute } from '@europe-historical-atlas/core/pipeline/w
 import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
 import { createLatestOnly } from '@europe-historical-atlas/core/utils/latestOnly'
 
+import { paintsExactFills } from '../scene/political/paintsExactFills'
+import { wrapTerrainTexture } from '../scene/relief/terrainTexture'
+import { refreshReliefSource } from '../sources/mapSources'
+import { politicalPalette } from '../tunables/params'
+
 import { COMPUTE_PHASE_MESSAGES } from './computeLabels'
-import { politicalPalette } from './devParams'
 import { loadContent } from './mapContent'
-import { refreshReliefSource } from './mapSources'
-import { paintsExactFills } from './scene/political/paintsExactFills'
-import { wrapTerrainTexture } from './scene/relief/terrainTexture'
 import { settleYearBorders } from './yearBorders'
 
-import type { DevState } from './devState'
-import type { AtlasMessageKey } from './i18n'
-import type { MapSources } from './mapSources'
-import type { MapUi } from './mapUi'
-import type { MapLayers } from './scene/layers/mapLayers'
+import type { MapUi } from '../app/mapUi'
+import type { AtlasMessageKey } from '../i18n'
+import type { MapLayers } from '../scene/layers/mapLayers'
+import type { MapSources } from '../sources/mapSources'
+import type { DevState } from '../tunables/devState'
 import type { ContentSource } from '@europe-historical-atlas/core/data/contentSource'
 import type { HeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
 import type { LandMaskSource } from '@europe-historical-atlas/core/data/landMask'
@@ -202,6 +203,7 @@ async function pushSources(context: PipelineContext): Promise<void> {
   const dem = context.sources.heightmap
   if (!dem) return
   const mask = context.sources.landMask
+  // Send the elevation and the mask, the mask packed to bits, or null when it failed.
   await context.box.compute.setSources({
     heightmap: { meta: dem.meta, data: dem.data },
     landMask: mask ? { meta: mask.meta, bits: mask.pack() } : null,
@@ -219,6 +221,7 @@ async function rebuildTexture(
   onProgress?: ProgressReport
 ): Promise<void> {
   if (!context.sources.heightmap) return
+  // Take a ticket: a bake started after this one makes this one stale.
   const isCurrent = context.bakeGate.begin()
   // When the fills carry an authored year's colour, the texture is the bare terrain they composite onto:
   // tinted twice, the colour would show the grid's staircase under the exact one.
@@ -227,6 +230,7 @@ async function rebuildTexture(
     : context.dev.texture
   const baked = await context.box.compute.bakeTerrain(options, onProgress)
   if (context.isDisposed() || !isCurrent()) return
+  // Wrap the baked pixels as a texture and hang it on the relief.
   context.layers.setTexture(wrapTerrainTexture(baked.rgba, baked.width, baked.height))
 }
 
@@ -244,9 +248,11 @@ async function rebuildPolitical(context: PipelineContext): Promise<void> {
   const { dev, sources, layers, ui } = context
   if (!sources.heightmap) return
   const isCurrent = context.politicalGate.begin()
+  // Snap the chosen year to its century, and open the progress bar on it.
   const year = Math.round(dev.political.year / 100) * 100
   ui.progress.begin(context.translate('loadingYear', { year: String(year) }))
   try {
+    // 1. Fetch the year's polities; drop out if torn down or overtaken by a newer year.
     const loaded = await context.assets.regions.load(year)
     if (context.isDisposed() || !isCurrent()) return
 
@@ -255,6 +261,7 @@ async function rebuildPolitical(context: PipelineContext): Promise<void> {
     const report: ProgressReport = (fraction, phase) => {
       ui.progress.report(fraction, context.translate(COMPUTE_PHASE_MESSAGES[phase]))
     }
+    // 2. Ask the compute for the year's tints and traced lines, in the bar's compute slice.
     const result = await context.box.compute.computePolitical(
       politicalRequest(dev, loaded),
       scaleProgress(report, POLITICAL_SPLIT.fetch, POLITICAL_SPLIT.compute)
@@ -265,18 +272,22 @@ async function rebuildPolitical(context: PipelineContext): Promise<void> {
     sources.regionSet = loaded
     settleYearBorders(sources, loaded, result, politicalPalette(dev.political))
 
+    // 3. Re-bake the terrain with the year's colours, in the bar's bake slice.
     await rebuildTexture(
       context,
       scaleProgress(report, POLITICAL_SPLIT.compute, POLITICAL_SPLIT.bake)
     )
     if (context.isDisposed() || !isCurrent()) return
 
+    // 4. Lay the fills and the border lines, then fill the bar.
     layers.rebuildFills()
     layers.rebuildBorders()
     ui.progress.report(1)
   } catch (error: unknown) {
+    // A failed fetch or compute is told as a failure of the year's file.
     ui.reportAssetFailure('regions', error)
   } finally {
+    // The bar closes whether the year landed, failed or was overtaken.
     ui.progress.end()
   }
 }
@@ -329,6 +340,7 @@ export function politicalRequest(
  */
 async function loadTerrain(context: PipelineContext): Promise<void> {
   const { sources, ui } = context
+  // Fetch both at once: a failed mask is told and becomes null, a failed relief rejects.
   const [dem, mask] = await Promise.all([
     context.assets.heightmap.load(),
     context.assets.landMask.load().catch((error: unknown) => {
@@ -338,6 +350,7 @@ async function loadTerrain(context: PipelineContext): Promise<void> {
   ])
   if (context.isDisposed()) return
   sources.heightmap = dem
+  // A mask cropped to another frame than the relief's is refused and told; the map goes on.
   if (mask && !boundsMatch(mask.meta.bbox, dem.meta.bbox, BBOX_TOLERANCE_DEG)) {
     ui.reportAssetFailure(
       'landMask',
@@ -365,10 +378,12 @@ async function loadTerrain(context: PipelineContext): Promise<void> {
  */
 async function startup(context: PipelineContext): Promise<void> {
   const { dev, sources, layers, ui } = context
+  // Load the relief and the mask; without a relief there is nothing to draw.
   await loadTerrain(context)
   if (context.isDisposed() || !sources.heightmap) return
   refreshReliefSource(sources, dev.relief, dev.texture.seaLevel) // draping is correct from here on, mesh or no mesh
   settleRivers(context) // when the rivers came first, they waited for the relief to drape on
+  // Hand the compute its own copy of the elevation and the mask.
   await pushSources(context)
   if (context.isDisposed()) return
 
@@ -412,10 +427,12 @@ function loadRivers(context: PipelineContext): void {
     .load()
     .then((loaded) => {
       if (context.isDisposed()) return
+      // Hold the rivers aside, and install them now if the relief is already in.
       context.pendingRivers.set = loaded
       settleRivers(context)
     })
     .catch((error: unknown) => {
+      // A failed river file is told; the map goes on without its rivers.
       context.ui.reportAssetFailure('rivers', error)
     })
 }
@@ -436,12 +453,15 @@ function settleRivers(context: PipelineContext): void {
   // Ready means draped for real: with no relief source yet, the drape puts every river at sea level
   // without a word (session review ARCH-001, 2026-10-12) — so the rivers wait for both.
   if (pending === null || dem === null || context.sources.reliefSource === null) return
+  // Consume the pending set, so it is settled only once.
   context.pendingRivers.set = null
+  // Refuse rivers whose box is not the relief's, and say so.
   const disagreement = boundsDisagreement(dem.meta.bbox, pending.bbox, 'rivers', RIVERS_URL)
   if (disagreement !== null) {
     context.ui.reportAssetFailure('rivers', disagreement)
     return
   }
+  // Install them and drape them on the relief.
   context.sources.riverData = pending.rivers
   context.layers.rebuildRivers()
 }
@@ -459,7 +479,9 @@ function settleRivers(context: PipelineContext): void {
 function failoverToInline(context: PipelineContext, error: Error): void {
   console.warn('map compute worker died — continuing on the main thread', error)
   if (context.isDisposed()) return
+  // Replace the dead worker with the inline compute, which yields a frame between its phases.
   context.box.compute = createInlineMapCompute({ yieldControl: nextFrame })
+  // It starts empty: hand it the sources again, then recompute the year on screen.
   void pushSources(context)
     .then(() => rebuildPolitical(context))
     .catch((failure: unknown) => {
@@ -486,6 +508,7 @@ function nextFrame(): Promise<void> {
  */
 function createCompute(context: PipelineContext): MapCompute {
   try {
+    // A worker, whose death mid-session hands over to the inline compute.
     return createWorkerMapCompute({
       spawn: context.spawn,
       onFatal: (error: Error) => {
@@ -494,6 +517,7 @@ function createCompute(context: PipelineContext): MapCompute {
     })
   } catch (error: unknown) {
     console.warn('map compute worker unavailable — computing on the main thread instead', error)
+    // No worker could be made at all: compute on this thread from the start.
     return createInlineMapCompute({ yieldControl: nextFrame })
   }
 }
@@ -504,6 +528,7 @@ function createCompute(context: PipelineContext): MapCompute {
  * @returns the pipeline
  */
 export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
+  // The pipeline's world: the host's deps, with the default ports under any the host replaced.
   const context: PipelineContext = {
     ...deps,
     assets: { ...createFetchAssets(), ...deps.assets },
@@ -514,10 +539,12 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
     box: { compute: null as unknown as MapCompute },
     pendingRivers: { set: null },
   }
+  // Built once the context exists, since the worker's failover writes back into it.
   context.box.compute = createCompute(context)
 
   return {
     async start(): Promise<void> {
+      // The rivers and the events load on their own, beside the startup, never awaited.
       loadRivers(context)
       void loadContent(context, context.assets.content)
       await startup(context).catch((error: unknown) => {
@@ -542,6 +569,7 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
         )
         return
       }
+      // Re-trace a payload year's lines at the new smoothing, then redraw them.
       try {
         const traced = await context.box.compute.deriveBorders(deps.dev.political.borderSmoothing)
         if (deps.isDisposed()) return

@@ -205,11 +205,13 @@ export function refreshReliefSource(
   seaLevel: number
 ): Heightmap | null {
   const { heightmap, landMask } = sources
+  // No elevation yet: nothing to derive, and no stale grid left behind.
   if (!heightmap) {
     sources.reliefSource = null
     sources.reliefInputs = null
     return null
   }
+  // What this grid would be derived from, to compare with what the current one was.
   const inputs: ReliefInputs = {
     heightmap,
     landMask,
@@ -217,12 +219,14 @@ export function refreshReliefSource(
     shoreRamp: shaping.shoreRamp,
     seaLevel,
   }
+  // Nothing changed: hand back the grid already derived.
   if (
     sources.reliefSource &&
     sources.reliefInputs &&
     sameReliefInputs(sources.reliefInputs, inputs)
   )
     return sources.reliefSource
+  // Otherwise smooth the DEM, lower it to the shore, and remember what it came from.
   const mask = maskOver(heightmap, landMask, seaLevel)
   sources.reliefSource = taperHeightmapToShore(
     smoothHeightmap(heightmap, shaping.smoothing),

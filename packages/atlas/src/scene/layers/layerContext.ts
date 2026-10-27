@@ -3,8 +3,8 @@
  * family's builder (`map…Layer`, in the family's folder) is handed. Nothing here draws.
  */
 
-import type { DevState } from '../../devState'
-import type { MapSources } from '../../mapSources'
+import type { MapSources } from '../../sources/mapSources'
+import type { DevState } from '../../tunables/devState'
 import type { CompassRose } from '../decor/rose/compassRose'
 import type { EventMarkers } from '../events/markers'
 import type { LineLayer } from '../lines/lineLayer'

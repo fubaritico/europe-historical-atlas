@@ -37,7 +37,7 @@ OWASP Top 10 #9. Not logging, not monitoring, not alerting on what matters. Toda
 - **Check**: Each starts with its application's tag (`[Cartographer]`, `[Cartographer dev server]`, the atlas's) so a line says who spoke
 
 #### OWASP-A09-007: No log per frame
-- **Where**: the render loops (`packages/atlas/src/frameLoop.ts`, the Cartographer's canvas painters)
+- **Where**: the render loops (`packages/atlas/src/app/frameLoop.ts`, the Cartographer's canvas painters)
 - **Check**: A check that would run on every repaint logs once per document version, never per frame — a flood hides the line that matters
 
 #### OWASP-A09-008: CI and deploy alerting

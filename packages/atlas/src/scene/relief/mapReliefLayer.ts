@@ -2,7 +2,7 @@
  * How the relief is put on the map: the terrain mesh, the wall around its edge, and the texture hung on it.
  */
 
-import { refreshReliefSource } from '../../mapSources'
+import { refreshReliefSource } from '../../sources/mapSources'
 import { disposeHandle } from '../layers/disposeHandle'
 import { WORLD_WIDTH } from '../world'
 

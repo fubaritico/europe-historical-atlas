@@ -189,7 +189,9 @@ target.z)` would be coherent with the navigation that already exists.
   `renderer.capabilities.maxTextureSize` if it ever bites. **Since 2026-10-16 the dev slider reaches supersample 4** (5120 px), past the 4096 of many mobile and integrated GPUs; the default stays 2. Whether to clamp, refuse or warn is an error-handling decision to take with the dev the day the default rises.
 - **The ESLint boundary glob `**/controls` is too broad** — it matched `utils/controls` as if it were the
   camera-controls layer. Worked around by renaming to `utils/controlSpec`; the config flaw remains and
-  will catch the next `something/controls`.
+  will catch the next `something/controls`. **Same shape since 2026-10-27** (ATLAS-291): `app`, `loading`,
+  `sources`, `tunables`, `devPanel` are generic words too — the Cartographer has a `ui/i18n/app`, the CMS a
+  `src/app`. Harmless while only atlas rows name them (said in `eslint.config.js`). **Severity: worth knowing.**
 - **Border contrast: why the line is a casing, and what is left** (A11Y-101). The original single brown
   ink `#5c3a2e` at 0.7 opacity gave ~1.6:1 against `palette1` `#b8554a` (blend computed in _linear_ space,
   as three composites with colour management on; naive sRGB gives 1.7:1 — neither rescues it), against a

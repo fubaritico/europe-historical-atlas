@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { catalogueMismatches, createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 import { LOCALES } from '@europe-historical-atlas/core/i18n/locale'
 
-import { ASSET_POLICY } from '../assetMessages'
+import { ASSET_POLICY } from '../app/assetMessages'
 
 import { ATLAS_MESSAGES } from '.'
 

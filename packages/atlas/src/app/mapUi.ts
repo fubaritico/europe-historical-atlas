@@ -8,15 +8,16 @@
  * caller ends up deciding that per catch block.
  */
 
+import { createErrorNet } from '../ui/errorNet'
+import { createNoticeBoard } from '../ui/notice'
+import { createProgressOverlay } from '../ui/progressOverlay'
+import { createSplash } from '../ui/splash'
+
 import { assetNotice } from './assetMessages'
-import { createErrorNet } from './ui/errorNet'
-import { createNoticeBoard } from './ui/notice'
-import { createProgressOverlay } from './ui/progressOverlay'
-import { createSplash } from './ui/splash'
 import { PARCHMENT } from './viewport'
 
-import type { AtlasMessageKey } from './i18n'
-import type { ProgressOverlay } from './ui/progressOverlay'
+import type { AtlasMessageKey } from '../i18n'
+import type { ProgressOverlay } from '../ui/progressOverlay'
 import type { AssetKind } from '@europe-historical-atlas/core/data/assetError'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 
@@ -89,6 +90,7 @@ export function createMapUi(options: MapUiOptions): MapUi {
       splash.dismiss()
     },
     reportAssetFailure(asset: AssetKind, error: unknown): void {
+      // The console line always; the notice only while the page is still up.
       console.error(`asset ${asset} failed`, error)
       if (options.isDisposed()) return
       const notice = assetNotice(asset, error, translate)

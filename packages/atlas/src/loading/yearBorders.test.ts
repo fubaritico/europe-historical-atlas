@@ -11,7 +11,8 @@ import {
 } from '@europe-historical-atlas/core/editor/yearDocument'
 import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
 
-import { createMapSources } from './mapSources'
+import { createMapSources } from '../sources/mapSources'
+
 import { settleYearBorders } from './yearBorders'
 
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'

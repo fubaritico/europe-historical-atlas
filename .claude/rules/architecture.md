@@ -63,13 +63,20 @@ packages/
 │   ├── public/         # DEM, land mask, rivers
 │   ├── vite.config.ts
 │   ├── vitest.config.ts    # jsdom: sessionStorage, lil-gui and ui/ are the subject
-│   └── src/
-│       ├── main.ts     # composition root: renderer, scene, camera, loop
-│       ├── scene/      # pluggable scene modules
+│   └── src/            # main.ts and folders, nothing else (2026-10-27, ATLAS-291 — files/plans/atlas/src-layout.md)
+│       ├── main.ts     # composition root: create, inject, connect, tear down
+│       ├── app/        # the running map: viewport, frameLoop, mapInteraction, mapUi, assetMessages
+│       ├── loading/    # what the map is made from, in what order: mapPipeline, mapContent, yearBorders
+│       ├── sources/    # what the map has been given so far (mapSources) — a leaf the loading fills, the layers read
+│       ├── tunables/   # the settings the whole map reads: devState, params/ (defaults and ranges) — a leaf
+│       ├── devPanel/   # the lil-gui panel over the settings, and what each control rebuilds
+│       ├── scene/      # everything drawn, one folder per family, each with its builder (`map…Layer`):
+│       │               #   layers/ relief/ lines/ waters/ decor/ sheet/ political/ events/
 │       ├── camera/     # camera + CameraStateStore (independent of everything else)
 │       ├── controls/   # navigation; depends on camera/ only
 │       ├── picking/    # raycasting: answers WHERE, never WHAT
-│       └── ui/         # plain DOM over the canvas
+│       ├── ui/         # plain DOM over the canvas
+│       └── bench/      # the icon benches, /icons.html and /svg-icons.html
 ├── cartographer/       # @europe-historical-atlas/cartographer — the territory editor
 │   ├── eslint.config.js    # re-imports the root config, then adds React; forbids `three`
 │   ├── vite.config.ts

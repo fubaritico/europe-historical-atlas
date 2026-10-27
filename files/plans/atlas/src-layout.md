@@ -45,8 +45,11 @@ src/
 ├── main.ts                 composition root — unchanged
 ├── app/                    the running map: viewport, frameLoop, mapInteraction, mapUi, assetMessages
 ├── loading/                what the map is made from, and the order it is paid in:
-│                           mapPipeline (split), mapSources, mapContent, yearBorders, computeLabels
-├── devPanel/               devPanel (split), devPanelCallbacks, devState, params/ (today's devParams/)
+│                           mapPipeline (split), mapContent, yearBorders, computeLabels
+├── sources/                what the map has been given so far: mapSources — a leaf the loading fills and the layers
+│                           read (split from loading/ on 2026-10-27, so scene/ need not read loading/)
+├── tunables/               the settings the whole map reads: devState, params/ (today's devParams/) — a leaf
+├── devPanel/               the panel that shows them: devPanel (split), devPanelCallbacks
 ├── scene/                  everything drawn, one folder per family; each family holds its three.js objects AND
 │   │                       its builder, `map…Layer` (how it is put on the map from the layers' context)
 │   ├── layers/             the handle over all of it: mapLayers; layerContext (the handles and the context),
@@ -87,7 +90,7 @@ tree is updated with the layout.
 | --- | --- | --- |
 | 1 | **The events**: `scene/events/` and `icons/`, `eventIcons` cut into one file per icon, body comments | it is where he was lost, and ATLAS-289 builds on it |
 | 2 | **The rest of `scene/`** by family, `tribePatches` and `mapTribeLayer` into `political/tribes/` | ends the import from `scene/` up into the root |
-| 3 | **The root** into `app/`, `loading/`, `devPanel/`; their ESLint rows; `architecture.md` | the root holds `main.ts` and folders |
+| 3 | **The root** into `app/`, `loading/`, `tunables/`, `devPanel/` (the settings are not the panel: the whole map reads them — split on 2026-10-27); their ESLint rows; `architecture.md` | the root holds `main.ts` and folders |
 | 4 | **The long files left** split by meaning: `devPanel`, `mapPipeline`, `mapControls` (`mapLayerBuilders` and `composedLineLayer` went with step 2) | a split is easier to review once the file has its home |
 
 Each step: the moves by `git mv` (history follows), imports rewritten, tests moved beside their file,

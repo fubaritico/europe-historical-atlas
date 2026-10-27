@@ -38,6 +38,15 @@ const LAYER = {
   // let `./main.tsx` through a boundary that forbids the composition root. Fifth instance of the family
   // known-issues records, and the reason the rule there is to write `{ts,tsx}` unless there is a reason.
   main: ['**/main', '**/main.{ts,tsx}'],
+  // The atlas's own layers (2026-10-27, ATLAS-291): the running map, what it is made from, what it has been
+  // given so far, the settings it reads, and the panel that shows them. **Atlas-only names**: generic words,
+  // matched at any depth like `**/controls` (see known-issues/atlas.md) — the Cartographer has a `ui/i18n/app`
+  // and the CMS a `src/app`, so never list these keys in another package's rows.
+  app: ['**/app', '**/app/**'],
+  loading: ['**/loading', '**/loading/**'],
+  sources: ['**/sources', '**/sources/**'],
+  tunables: ['**/tunables', '**/tunables/**'],
+  devPanel: ['**/devPanel', '**/devPanel/**'],
 }
 
 /**
@@ -123,28 +132,99 @@ const BOUNDARIES = [
   // policed by its own config, composed from LAYER through `layerBoundary`. See that function's header.
   {
     dir: 'packages/atlas/src/scene',
-    forbid: ['camera', 'controls', 'main'],
-    why: 'scene/ may depend on the core package but not on camera/, controls/, or main.',
+    forbid: ['camera', 'controls', 'app', 'loading', 'devPanel', 'main'],
+    why: 'scene/ draws what it is handed: it may read what the map has been given (sources/) and the settings (tunables/), but not the camera, the controls, the running map (app/), the loading that fills it, the dev panel or main.',
   },
   {
     dir: 'packages/atlas/src/camera',
-    forbid: ['scene', 'controls', 'data', 'pipeline', 'main'],
+    forbid: [
+      'scene',
+      'controls',
+      'data',
+      'pipeline',
+      'app',
+      'loading',
+      'sources',
+      'tunables',
+      'devPanel',
+      'main',
+    ],
     why: 'camera/ is independent — it must not import from scene/, controls/, the data layer, or main.',
   },
   {
     dir: 'packages/atlas/src/controls',
-    forbid: ['scene', 'pipeline', 'main'],
+    forbid: ['scene', 'pipeline', 'app', 'loading', 'sources', 'devPanel', 'main'],
     why: 'controls/ may depend on camera/ (the CameraControls contract) but not on scene/ or main.',
   },
   {
     dir: 'packages/atlas/src/picking',
-    forbid: ['scene', 'camera', 'controls', 'ui', 'pipeline', 'main'],
+    forbid: [
+      'scene',
+      'camera',
+      'controls',
+      'ui',
+      'pipeline',
+      'app',
+      'loading',
+      'sources',
+      'tunables',
+      'devPanel',
+      'main',
+    ],
     why: 'picking/ answers WHERE, never WHAT. It takes a camera and an object to cast against, and must know nothing of the scene that built them, of what is being computed, or of the DOM around it.',
   },
   {
     dir: 'packages/atlas/src/ui',
-    forbid: ['scene', 'camera', 'controls', 'data', 'pipeline', 'main'],
+    forbid: [
+      'scene',
+      'camera',
+      'controls',
+      'data',
+      'pipeline',
+      'app',
+      'loading',
+      'sources',
+      'tunables',
+      'devPanel',
+      'main',
+    ],
     why: 'ui/ is plain DOM over the canvas — it must know nothing of the scene, the data or what is being computed. The composition root drives it.',
+  },
+  {
+    dir: 'packages/atlas/src/tunables',
+    forbid: ['scene', 'picking', 'ui', 'app', 'loading', 'sources', 'devPanel', 'main'],
+    why: 'tunables/ is the settings the whole map reads, with their defaults and ranges — a leaf but for one type of the controls\u2019 (the camera\u2019s rectangle): it must know nothing of what reads it.',
+  },
+  {
+    dir: 'packages/atlas/src/sources',
+    forbid: [
+      'scene',
+      'camera',
+      'controls',
+      'picking',
+      'ui',
+      'app',
+      'loading',
+      'tunables',
+      'devPanel',
+      'main',
+    ],
+    why: 'sources/ is what the map has been given so far — a leaf the loading fills and the layers read: it knows only core.',
+  },
+  {
+    dir: 'packages/atlas/src/app',
+    forbid: ['loading', 'devPanel', 'main'],
+    why: 'app/ is the running map — the viewport, the loop, the pointer, the screens over the canvas. It is handed what it shows; it never loads it, and never knows the dev panel.',
+  },
+  {
+    dir: 'packages/atlas/src/loading',
+    forbid: ['camera', 'controls', 'picking', 'devPanel', 'main'],
+    why: 'loading/ is what the map is made from and the order it is paid in. It tells the screens (app/) and fills the layers (scene/), and knows nothing of the camera, the pointer or the dev panel.',
+  },
+  {
+    dir: 'packages/atlas/src/devPanel',
+    forbid: ['main'],
+    why: 'devPanel/ shows the settings and wires each control to the map: it may reach every layer below, but not the composition root.',
   },
 ]
 
@@ -413,7 +493,8 @@ export default tseslint.config(
   // Architecture boundaries — the dependency direction, enforced rather than documented.
   // Direction: geo/ and utils/ are leaves <- data/ (domain and ports) <- pipeline/ (the CPU work) ;
   // all four form the three-free core package. In the atlas: camera/ is independent, controls/ depends
-  // on camera/, scene/ renders, picking/ answers WHERE, ui/ is plain DOM, and main.ts is the
-  // composition root that may be imported by nobody.
+  // on camera/, scene/ renders, picking/ answers WHERE, ui/ is plain DOM, tunables/ is the settings (a
+  // leaf), app/ the running map, loading/ what the map is made from, devPanel/ the panel over the settings,
+  // and main.ts is the composition root that may be imported by nobody.
   ...BOUNDARIES.map(boundaryConfig)
 )

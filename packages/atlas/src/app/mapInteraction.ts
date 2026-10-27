@@ -18,10 +18,10 @@
  * reader the way back.
  */
 
-import { isEditableFocused } from './utils/editableFocus'
+import { isEditableFocused } from '../utils/editableFocus'
 
-import type { MapControls } from './controls/mapControls'
-import type { SurfaceHit, SurfacePicker } from './picking/surfacePicker'
+import type { MapControls } from '../controls/mapControls'
+import type { SurfaceHit, SurfacePicker } from '../picking/surfacePicker'
 
 /**
  * How long a single click waits to find out whether it was the first half of a double-click.
@@ -105,6 +105,7 @@ function applyClick(deps: MapInteractionDeps, hit: SurfaceHit | null): void {
 export function createMapInteraction(deps: MapInteractionDeps): MapInteraction {
   const keyTarget = deps.keyTarget ?? window
   const settleMs = deps.clickSettleMs ?? CLICK_SETTLE_MS
+  // The single click waiting out the settle delay, if any, and the way to drop it.
   let pending: ReturnType<typeof setTimeout> | null = null
   const cancelPending = (): void => {
     if (pending === null) return
@@ -118,6 +119,7 @@ export function createMapInteraction(deps: MapInteractionDeps): MapInteraction {
     // The browser sends a `click` at the end of a drag-pan too, and acting on it would answer every
     // release of the map with a flight nobody asked for. The controls own that distinction.
     if (deps.controls.pointerDragged) return
+    // Pick now, while the pointer is where it was clicked, and act only once the wait is over.
     const hit = hitOf(deps, me)
     cancelPending()
     pending = setTimeout(() => {
@@ -126,6 +128,7 @@ export function createMapInteraction(deps: MapInteractionDeps): MapInteraction {
     }, settleMs)
   }
   const onDoubleClick = (event: Event): void => {
+    // The single click still waiting was the first half of this one: drop it, then fly in.
     cancelPending()
     const hit = hitOf(deps, event as MouseEvent)
     if (!hit) return // the ray met nothing: the reader double-clicked past the edge of the world
@@ -137,6 +140,7 @@ export function createMapInteraction(deps: MapInteractionDeps): MapInteraction {
     if (ke.key !== 'Escape' || isEditableFocused()) return
     if (deps.controls.exitFocus()) ke.preventDefault()
   }
+  // Pointer gestures on the element, Escape on the key target.
   deps.element.addEventListener('dblclick', onDoubleClick)
   deps.element.addEventListener('click', onClick)
   keyTarget.addEventListener('keydown', onKeyDown)

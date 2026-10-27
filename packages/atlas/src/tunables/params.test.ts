@@ -12,12 +12,12 @@ import {
   POLITICAL_CONTROL_ORDER,
   asGroup,
   politicalRebuildFor,
-} from './devParams'
+} from './params'
 
-import type { PoliticalDevParams } from './devParams'
+import type { PoliticalDevParams } from './params'
 import type { ControlSpec } from '@europe-historical-atlas/core/utils/controlSpec'
 
-describe('devParams control tables', () => {
+describe('tunables/params control tables', () => {
   describe('happy path', () => {
     it.each(ALL_CONTROL_TABLES.map((table) => [table.name, table] as const))(
       'keeps every %s default inside its own declared range',

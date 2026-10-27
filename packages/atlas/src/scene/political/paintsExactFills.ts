@@ -2,8 +2,8 @@
  * Who carries a year's colour: the fill geometry, or the baked texture — asked by the bake, the fills and every frame.
  */
 
-import type { DevState } from '../../devState'
-import type { MapSources } from '../../mapSources'
+import type { MapSources } from '../../sources/mapSources'
+import type { DevState } from '../../tunables/devState'
 
 /**
  * Whether the year on screen is painted as geometry rather than through the texture: an authored year,

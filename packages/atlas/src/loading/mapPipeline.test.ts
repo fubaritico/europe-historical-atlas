@@ -9,15 +9,16 @@ import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/docum
 import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 
-import { createDevState } from './devState'
-import { ATLAS_MESSAGES } from './i18n'
-import { createMapPipeline, politicalRequest } from './mapPipeline'
-import { createMapSources } from './mapSources'
+import { ATLAS_MESSAGES } from '../i18n'
+import { createMapSources } from '../sources/mapSources'
+import { createDevState } from '../tunables/devState'
 
-import type { DevState } from './devState'
+import { createMapPipeline, politicalRequest } from './mapPipeline'
+
 import type { MapAssetSources, MapPipelineDeps } from './mapPipeline'
-import type { MapUi } from './mapUi'
-import type { MapLayers } from './scene/layers/mapLayers'
+import type { MapUi } from '../app/mapUi'
+import type { MapLayers } from '../scene/layers/mapLayers'
+import type { DevState } from '../tunables/devState'
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { RiverSet } from '@europe-historical-atlas/core/data/riverSource'

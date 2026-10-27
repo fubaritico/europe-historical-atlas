@@ -6,9 +6,9 @@
  * relief on their own — `rebuildEvents` is a no-op until both are in, and whichever lands last draws them.
  */
 
-import type { MapSources } from './mapSources'
-import type { MapUi } from './mapUi'
-import type { MapLayers } from './scene/layers/mapLayers'
+import type { MapUi } from '../app/mapUi'
+import type { MapLayers } from '../scene/layers/mapLayers'
+import type { MapSources } from '../sources/mapSources'
 import type { ContentSource } from '@europe-historical-atlas/core/data/contentSource'
 
 /** What loading the events reads and writes. */
@@ -35,6 +35,7 @@ export interface ContentLoadDeps {
 export async function loadContent(deps: ContentLoadDeps, source: ContentSource): Promise<void> {
   try {
     const loaded = await source.load()
+    // Once torn down nothing is written; otherwise the events are stored and pinned.
     if (deps.isDisposed()) return
     deps.sources.events = loaded.events
     deps.layers.rebuildEvents()

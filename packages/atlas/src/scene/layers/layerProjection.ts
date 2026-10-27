@@ -5,8 +5,8 @@
 import { createDrapeProjection } from '../relief/drapeProjection'
 import { WORLD_WIDTH } from '../world'
 
-import type { DevState } from '../../devState'
-import type { MapSources } from '../../mapSources'
+import type { MapSources } from '../../sources/mapSources'
+import type { DevState } from '../../tunables/devState'
 import type { DrapeProjection } from '../relief/drapeProjection'
 
 /**

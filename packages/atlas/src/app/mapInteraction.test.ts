@@ -2,11 +2,12 @@
 import { PerspectiveCamera, Vector3 } from 'three'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createMapControls } from './controls/mapControls'
+import { createMapControls } from '../controls/mapControls'
+
 import { createMapInteraction } from './mapInteraction'
 
 import type { MapInteractionDeps } from './mapInteraction'
-import type { SurfaceHit, SurfacePicker } from './picking/surfacePicker'
+import type { SurfaceHit, SurfacePicker } from '../picking/surfacePicker'
 import type { Mock } from 'vitest'
 
 /** A hit at a known place on the ground. */

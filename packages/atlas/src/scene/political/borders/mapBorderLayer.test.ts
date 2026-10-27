@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { createMapSources } from '../../../mapSources'
+import { createMapSources } from '../../../sources/mapSources'
 
 import { levelForPair, patternForPair } from './mapBorderLayer'
 
-import type { MapSources } from '../../../mapSources'
+import type { MapSources } from '../../../sources/mapSources'
 import type { LayerContext } from '../../layers/layerContext'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 

@@ -4,8 +4,9 @@ import { ASSET_KINDS, assetError } from '@europe-historical-atlas/core/data/asse
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 import { LOCALES } from '@europe-historical-atlas/core/i18n/locale'
 
+import { ATLAS_MESSAGES } from '../i18n'
+
 import { ASSET_POLICY, assetNotice } from './assetMessages'
-import { ATLAS_MESSAGES } from './i18n'
 
 import type { AssetKind } from '@europe-historical-atlas/core/data/assetError'
 

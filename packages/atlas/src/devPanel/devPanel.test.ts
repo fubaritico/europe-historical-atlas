@@ -3,12 +3,13 @@ import { beforeAll, describe, expect, it } from 'vitest'
 
 import { TRIBE_FEATHER } from '@europe-historical-atlas/core/editor/tribeFeather'
 
-import { createDevPanel } from './devPanel'
-import { createDevState } from './devState'
+import { createDevState } from '../tunables/devState'
 
-import type { MapControlsOptions } from './controls/mapControls'
+import { createDevPanel } from './devPanel'
+
 import type { DevPanelCallbacks } from './devPanel'
-import type { DevState } from './devState'
+import type { MapControlsOptions } from '../controls/mapControls'
+import type { DevState } from '../tunables/devState'
 import type GUI from 'lil-gui'
 
 beforeAll(() => {

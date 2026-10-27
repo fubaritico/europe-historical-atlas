@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { createDevState } from './devState'
+import { createDevState } from '../tunables/devState'
+
 import { createNavigation, createRenderTarget, createViewport } from './viewport'
 
 import type { RendererHandle } from './viewport'

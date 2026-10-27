@@ -2,7 +2,7 @@
  * The land as the shoreline, the rivers and the tribes read it: the mask asset, or its declared fallback.
  */
 
-import { shorelineMask } from '../mapSources'
+import { shorelineMask } from '../sources/mapSources'
 
 import type { LayerContext } from './layers/layerContext'
 import type { LandMask } from '@europe-historical-atlas/core/data/landMask'

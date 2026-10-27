@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { ALL_CONTROL_TABLES } from './devParams'
 import { createDevState, extentRect } from './devState'
+import { ALL_CONTROL_TABLES } from './params'
 
 describe('createDevState', () => {
   describe('happy path', () => {
@@ -14,7 +14,7 @@ describe('createDevState', () => {
 
   describe('variants', () => {
     it('covers every declared control table except the camera, which owns its own', () => {
-      // A group declared in devParams but missing here would be a folder the panel renders against
+      // A group declared in tunables/params but missing here would be a folder the panel renders against
       // nothing. Walked rather than listed, so adding a group fails this instead of going unnoticed.
       //
       // `camera` is the deliberate exception: its live values are `controls.options`, held by the map

@@ -8,15 +8,15 @@
 
 import { Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
 
-import { createSessionStorageMapCameraStore } from './controls/mapCameraStore'
-import { createMapControls } from './controls/mapControls'
-import { DEFAULT_CAMERA_TUNING } from './devParams'
-import { extentRect } from './devState'
-import { createDebugRect } from './scene/debugRect'
-import { prefersReducedMotion } from './utils/motion'
+import { createSessionStorageMapCameraStore } from '../controls/mapCameraStore'
+import { createMapControls } from '../controls/mapControls'
+import { createDebugRect } from '../scene/debugRect'
+import { extentRect } from '../tunables/devState'
+import { DEFAULT_CAMERA_TUNING } from '../tunables/params'
+import { prefersReducedMotion } from '../utils/motion'
 
-import type { MapControls } from './controls/mapControls'
-import type { DevState } from './devState'
+import type { MapControls } from '../controls/mapControls'
+import type { DevState } from '../tunables/devState'
 
 /** The parchment the map is drawn on, and the page behind the splash. */
 export const PARCHMENT = '#efe6d2'
@@ -116,8 +116,8 @@ export interface Viewport {
 }
 
 /**
-/**
- * A real renderer, antialiased and capped at two device pixels per CSS pixel.
+ * A real renderer, antialiased. The cap at two device pixels per CSS pixel is `createRenderTarget`'s, so it
+ * holds for an injected renderer too.
  * @param canvas - the canvas to render into
  * @returns the renderer
  */
@@ -137,6 +137,7 @@ export function createRenderTarget(
   fov: number,
   createRenderer: (canvas: HTMLCanvasElement) => RendererHandle = defaultRenderer
 ): { renderer: RendererHandle; scene: Scene; camera: PerspectiveCamera } {
+  // The renderer, sized to the window; the pixel ratio is capped at 2 to bound the buffer's size.
   const renderer = createRenderer(canvas)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   renderer.setSize(window.innerWidth, window.innerHeight)
@@ -165,6 +166,7 @@ export function createNavigation(
   domElement: HTMLElement,
   dev: DevState
 ): { controls: MapControls; saveCamera: () => void } {
+  // The navigation, built from the default camera tuning and the live extent.
   const reduceMotion = prefersReducedMotion()
   const controls = createMapControls(camera, domElement, {
     ...DEFAULT_CAMERA_TUNING,
@@ -180,6 +182,7 @@ export function createNavigation(
     edgeScrollMargin: EDGE_SCROLL_MARGIN,
   })
 
+  // Put back the viewpoint saved in sessionStorage, if a previous page left one.
   const store = createSessionStorageMapCameraStore()
   const persisted = store.load()
   if (persisted) controls.setState(persisted)
@@ -204,6 +207,7 @@ export function createViewport(
   dev: DevState,
   options: ViewportOptions = {}
 ): Viewport {
+  // The renderer, scene and camera, then the navigation, saving the viewpoint as the page unloads.
   const { renderer, scene, camera } = createRenderTarget(
     canvas,
     dev.framing.fov,

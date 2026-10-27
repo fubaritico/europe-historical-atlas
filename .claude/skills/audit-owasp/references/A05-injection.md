@@ -12,7 +12,7 @@ OWASP Top 10 #5 (was #3 in 2021). Untrusted data sent to an interpreter as part 
 - **Check**: Because `yearsOnDisk.ts` trusts its callers, any new route or verb validates its path segment the same way before touching the disk — `..`, `%2e%2e`, a backslash or an absolute path never reach `disk.*`
 
 #### OWASP-A05-002: HTML injection into the DOM
-- **Where**: `packages/atlas/src/ui/` (`notice.ts`, `errorNet.ts`, `splash.ts`, `progressOverlay.ts`), `packages/atlas/src/devPanel.ts` (lil-gui labels), `packages/cartographer/src/ui/`
+- **Where**: `packages/atlas/src/ui/` (`notice.ts`, `errorNet.ts`, `splash.ts`, `progressOverlay.ts`), `packages/atlas/src/devPanel/devPanel.ts` (lil-gui labels), `packages/cartographer/src/ui/`
 - **Check**: No `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `dangerouslySetInnerHTML`, `eval` or `new Function`; overlays write with `textContent`
 - **Check**: Text that comes from data — polity names from `years/*/registry.json`, Wikidata labels, error messages — is rendered as text (React children or `textContent`), never as markup
 

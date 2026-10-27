@@ -27,7 +27,7 @@ import {
 import { fillTriangles } from '@europe-historical-atlas/core/pipeline/fillTriangles'
 import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
 
-import type { TribeArea } from '../../../mapSources'
+import type { TribeArea } from '../../../sources/mapSources'
 import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
 import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'

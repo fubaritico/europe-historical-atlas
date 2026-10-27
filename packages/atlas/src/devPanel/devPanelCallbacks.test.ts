@@ -1,10 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import { createDevState } from '../tunables/devState'
+
 import { createPanelCallbacks } from './devPanelCallbacks'
-import { createDevState } from './devState'
 
 import type { PanelCallbackDeps } from './devPanelCallbacks'
-import type { MapLayers } from './scene/layers/mapLayers'
+import type { MapLayers } from '../scene/layers/mapLayers'
 
 /**
  * Callbacks over stand-in layers that record the order of their rebuilds.

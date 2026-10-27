@@ -6,16 +6,16 @@
  * accumulate in the composition root without ever breaking an import rule (ARCH-012).
  *
  * The dispatch itself lives elsewhere on purpose: which rebuild a *political* tunable needs is declared
- * beside the control table in `devParams`, walked key by key by a test. This module only says what each
+ * beside the control table in `tunables/params`, walked key by key by a test. This module only says what each
  * named action is.
  */
 
-import type { MapControls } from './controls/mapControls'
 import type { DevPanelCallbacks, DevPanelDeps } from './devPanel'
-import type { DevState } from './devState'
-import type { MapPipeline } from './mapPipeline'
-import type { MapLayers } from './scene/layers/mapLayers'
-import type { Viewport } from './viewport'
+import type { Viewport } from '../app/viewport'
+import type { MapControls } from '../controls/mapControls'
+import type { MapPipeline } from '../loading/mapPipeline'
+import type { MapLayers } from '../scene/layers/mapLayers'
+import type { DevState } from '../tunables/devState'
 
 /** What the panel drives. */
 export interface PanelCallbackDeps {
@@ -87,6 +87,7 @@ function rebuildCallbacks(
       layers.rebuildSurface()
     },
     rebuildTexture: (): void => {
+      // The bake is asynchronous: a failure is logged to the console rather than left unhandled.
       void pipeline.rebuildTexture().catch((error: unknown) => {
         console.error('terrain bake failed', error)
       })
@@ -151,6 +152,7 @@ function liveCallbacks(
       layers.setRoseOpacity(value)
     },
     setFov: (value: number): void => {
+      // The projection matrix is computed from the fov, so it is rebuilt after the change.
       view.camera.fov = value
       view.camera.updateProjectionMatrix()
     },

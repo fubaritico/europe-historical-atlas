@@ -2,11 +2,12 @@
 import { PerspectiveCamera, Vector3 } from 'three'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { startFrameLoop } from './frameLoop'
-import { pixelsPerWorldUnit } from './scene/screenScale'
+import { pixelsPerWorldUnit } from '../scene/screenScale'
 
-import type { MapLayers } from './scene/layers/mapLayers'
+import { startFrameLoop } from './frameLoop'
+
 import type { Viewport } from './viewport'
+import type { MapLayers } from '../scene/layers/mapLayers'
 
 /**
  * A view whose camera stands `distance` above its target, and layers that record each frame.

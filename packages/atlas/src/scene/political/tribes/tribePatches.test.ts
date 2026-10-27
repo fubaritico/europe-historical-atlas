@@ -5,7 +5,7 @@ import { signedDistanceField } from '@europe-historical-atlas/core/geo/signedDis
 import { tribePatches } from './tribePatches'
 
 import type { TribeGround, TribePatch } from './tribePatches'
-import type { TribeArea } from '../../../mapSources'
+import type { TribeArea } from '../../../sources/mapSources'
 
 const BOUNDS = { west: 0, south: 50, east: 10, north: 60 }
 const GRID = { segX: 64, segY: 64 }

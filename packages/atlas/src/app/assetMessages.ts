@@ -1,9 +1,9 @@
 /**
  * What to tell the reader when an asset fails, and how much it costs them.
  *
- * At the root for the same reason `computeLabels` is: `data/` must not hold a sentence in a particular
- * language, and `ui/` must not know what a land mask is. The composition root is the only place that
- * legitimately knows both. The sentences themselves are in `messages.ts`, in French and English
+ * In `app/`, beside the screens that say it (`mapUi`), for the same reason `loading/computeLabels` is
+ * outside `ui/`: `data/` must not hold a sentence in a particular language, and `ui/` must not know what a
+ * land mask is. The running map is where both meet. The sentences themselves are in `messages.ts`, in French and English
  * (ATLAS-159); this table only says which ones, and how bad it is.
  *
  * The degraded-mode policy lives here too, and that is deliberate. Which layers are essential and which
@@ -13,8 +13,8 @@
 
 import { isAssetError } from '@europe-historical-atlas/core/data/assetError'
 
-import type { AtlasMessageKey } from './i18n'
-import type { Notice } from './ui/notice'
+import type { AtlasMessageKey } from '../i18n'
+import type { Notice } from '../ui/notice'
 import type { AssetKind } from '@europe-historical-atlas/core/data/assetError'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 
@@ -61,6 +61,7 @@ export function assetNotice(
   error: unknown,
   translate: Translate<AtlasMessageKey>
 ): Notice {
+  // The headline: what failed and what the reader loses, joined into one sentence.
   const policy = ASSET_POLICY[asset]
   // A failure that is not an AssetError takes the message's `other` case: "… a échoué".
   const failure = isAssetError(error) ? error.failure : 'unknown'

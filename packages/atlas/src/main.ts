@@ -14,21 +14,21 @@ import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
 import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?worker'
 
-import { createDevPanel } from './devPanel'
-import { panelDepsFor } from './devPanelCallbacks'
-import { createDevState } from './devState'
-import { startFrameLoop } from './frameLoop'
+import { startFrameLoop } from './app/frameLoop'
+import { createMapInteraction } from './app/mapInteraction'
+import { createMapUi } from './app/mapUi'
+import { createViewport } from './app/viewport'
+import { createDevPanel } from './devPanel/devPanel'
+import { panelDepsFor } from './devPanel/devPanelCallbacks'
 import { ATLAS_MESSAGES } from './i18n'
-import { createMapInteraction } from './mapInteraction'
-import { createMapPipeline } from './mapPipeline'
-import { createMapSources } from './mapSources'
-import { createMapUi } from './mapUi'
+import { createMapPipeline } from './loading/mapPipeline'
 // Vite resolves `?worker` into a constructor for the bundled worker module. It is the one
 // bundler-specific line in the compute, and it lives here on purpose: the client that talks to the
 // worker takes it as an injected `spawn`, so nothing below the composition root depends on Vite.
 import { createSurfacePicker } from './picking/surfacePicker'
 import { createMapLayers } from './scene/layers/mapLayers'
-import { createViewport } from './viewport'
+import { createMapSources } from './sources/mapSources'
+import { createDevState } from './tunables/devState'
 
 /**
  * Assemble the map and start it.

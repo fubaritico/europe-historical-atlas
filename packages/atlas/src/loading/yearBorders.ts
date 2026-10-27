@@ -30,7 +30,7 @@ import {
 import { tribeIds } from '@europe-historical-atlas/core/editor/tribes'
 import { openYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import type { MapSources } from './mapSources'
+import type { MapSources } from '../sources/mapSources'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { AuthoredYear } from '@europe-historical-atlas/core/data/yearFormat'
@@ -69,6 +69,7 @@ export function settleYearBorders(
   computed: ComputedYear,
   palette: readonly [string, ...string[]]
 ): void {
+  // A payload year: the compute's tints and traced lines, one level, no patterns, no tribes.
   if (loaded.authored === undefined) {
     sources.regionTints = computed.tints
     sources.tintLevels = [computed.tints]
@@ -79,6 +80,7 @@ export function settleYearBorders(
     sources.tribes = []
     return
   }
+  // An authored year: its homage levels, then its exact lines drawn from its anchors.
   const { year, bbox } = loaded.authored
   const homage = homageLevels(year.registry.polities)
   const exact = exactBordersOf(year, bbox, sources.landMask, undefined, homage)
@@ -93,6 +95,7 @@ export function settleYearBorders(
     colours,
     homage
   )
+  // Write everything the layers read for the year, together.
   sources.regionTints = deepest
   sources.tintLevels = levels
   sources.homageDepth = homage.deepest
@@ -116,6 +119,7 @@ function colouredTribes(
   colours: ReadonlyMap<string, string>
 ): MapSources['tribes'] {
   const tribes = tribeIds(year.registry.polities)
+  // One area per region of a tribe, in the tribe's colour; any other region gives none.
   return regions.flatMap(({ polityId, rings }) => {
     if (polityId === undefined || !tribes.has(polityId)) return []
     const colour = colours.get(polityId)
@@ -147,10 +151,12 @@ function authoredTintsByLevel(
   homage: HomageLevels
 ): { deepest: (RgbColor | null)[]; levels: (RgbColor | null)[][] } {
   const tribes = tribeIds(year.registry.polities)
+  // A tribe's region gets no tint, at any level.
   const unlessTribe = (tint: RgbColor, index: number): RgbColor | null => {
     const polity = regions[index]?.polityId
     return polity !== undefined && tribes.has(polity) ? null : tint
   }
+  // The editor's levels without their last: the compute's own tints stand in for it.
   const below = authoredTintLevels(colours, regions, homage).slice(0, -1)
   const deepest = computed.map(unlessTribe)
   return { deepest, levels: [...below.map((level) => level.map(unlessTribe)), deepest] }
