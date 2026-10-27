@@ -10,6 +10,7 @@
 
 import { Group, Quaternion } from 'three'
 
+import { applyDepthBias, applyLiveDepthBias } from '../../depthBias'
 import { EVENT_RENDER_ORDER } from '../markers'
 
 import { billboardMaterials } from './billboardMaterials'
@@ -19,7 +20,7 @@ import { createIconTurner } from './facing'
 import { placeIcon, standForms } from './forms'
 import { createIconInstances } from './iconInstances'
 import { createIconLights } from './light/lighting'
-import { EVENT_ICON_HEIGHT, ICON_FLAT_SPAN, ICON_HALO_SPAN } from './settings'
+import { EVENT_ICON_HEIGHT, ICON_DEPTH_PULL, ICON_FLAT_SPAN, ICON_HALO_SPAN } from './settings'
 
 import type { LoadSvgTexture } from './billboardMaterials'
 import type { PlacedEventIcon } from './forms'
@@ -62,20 +63,45 @@ function buildForms(
 ) {
   const icons = placed.map((at) => placeIcon(at, height))
   const kinds = placed.map(({ kind }) => kind)
-  const instances = createIconInstances(kinds, height)
+  // Close up, the icons and their halo pulled toward the camera alike, so the slopes cut neither.
+  const depthPull = height * ICON_DEPTH_PULL
+  const instances = createIconInstances(kinds, height, depthPull)
   const materials = billboardMaterials(loadTexture)
+  applyDepthBias(materials.halo, 'built-in', depthPull)
   // The halos just before the icons, the drawings after the borders, like every marker.
   const halos = createBillboards(
     kinds.map(() => 'halo'),
     () => materials.halo,
     EVENT_RENDER_ORDER - 1
   )
+  // From afar, the flat drawings pulled too, by their own width — which the zoom changes, so the pull follows it.
+  const flatPull = { value: flatDepthPull(height * ICON_FLAT_SPAN) }
+  for (const kind of new Set(kinds)) applyLiveDepthBias(materials.flat(kind), 'built-in', flatPull)
   const flats = createBillboards(kinds, (kind) => materials.flat(kind), EVENT_RENDER_ORDER)
   const groups = iconGroups([halos.object, instances.object], flats.object)
   // Each square's place, gathered once: the forms' own vectors, kept up to date by `standForms`.
   const haloPositions = icons.map(({ haloAt }) => haloAt)
   const flatPositions = icons.map(({ flatAt }) => flatAt)
-  return { icons, instances, materials, halos, flats, groups, haloPositions, flatPositions }
+  return {
+    icons,
+    instances,
+    materials,
+    halos,
+    flats,
+    flatPull,
+    groups,
+    haloPositions,
+    flatPositions,
+  }
+}
+
+/**
+ * How far a flat drawing is pulled toward the camera: as many of its widths as a 3D icon is pulled of its heights.
+ * @param flatSize - how wide the drawing stands, in world units
+ * @returns the pull, in world units
+ */
+function flatDepthPull(flatSize: number): number {
+  return flatSize * ICON_DEPTH_PULL
 }
 
 /**
@@ -131,6 +157,7 @@ export function createEventIconMarkers(
       materials.setFlatOpacity(1 - near3d)
       // The flat icons keep a legible size on screen, whatever the zoom.
       flatSize = flatIconSize(height, pixelsPerUnit)
+      forms.flatPull.value = flatDepthPull(flatSize)
       flats.poseAll(flatPositions, facing, flatSize)
     },
     faceCamera(camera: CameraPose, seconds: number): void {

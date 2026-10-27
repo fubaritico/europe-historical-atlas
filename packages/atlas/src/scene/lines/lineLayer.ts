@@ -5,13 +5,20 @@ import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js
 
 import { hashInts } from '@europe-historical-atlas/core/utils/hash'
 
-import { applyDepthBias } from './depthBias'
+import { applyDepthBias } from '../depthBias'
 
 import type { UvPair } from '@europe-historical-atlas/core/pipeline/gridDrape'
 
 /** Fixed-point scale for hashing normalized `[0, 1]` coordinates: two shared endpoints must quantize to
  * the same integer key so their jitter matches (welds); 1e5 ≈ 5 decimals is finer than the DEM grid. */
 const HASH_QUANTIZATION = 100000
+
+/**
+ * How far (world units) the lines laid on the relief — rivers and borders — are pulled toward the camera,
+ * so the surface they sit on does not hide them. Replaced a vertical lift of 0.004 on 2026-10-16: the
+ * lift slid them up the screen at an oblique angle, off the colours they bound.
+ */
+export const DRAPED_DEPTH_BIAS = 0.006
 
 /** A line segment in normalized grid coordinates (two endpoints). */
 export type UvSegment = UvPair

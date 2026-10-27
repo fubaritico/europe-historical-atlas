@@ -6,17 +6,21 @@ import {
   Light,
   Matrix4,
   Quaternion,
+  ShaderLib,
   Texture,
   Vector3,
 } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
+import { DEPTH_BIAS_UNIFORM } from '../../depthBias'
+import { compileHook } from '../../testing/compileHook'
 import { EVENT_RENDER_ORDER } from '../markers'
 
 import { createEventIconMarkers } from './eventIconMarkers'
 import {
   EVENT_ICON_HEIGHT,
   ICON_CROSS_FADE,
+  ICON_DEPTH_PULL,
   ICON_FLAT_MIN_PIXELS,
   ICON_FLAT_RAISE,
   ICON_FLAT_SPAN,
@@ -136,6 +140,15 @@ function battles(count: number): PlacedEventIcon[] {
   return Array.from({ length: count }, (_, i) => ({ ground: [i, 0, 0], kind: 'swords' }))
 }
 
+/**
+ * How far a material pulls toward the camera once compiled.
+ * @param material - the material
+ * @returns the pull's uniform, or `undefined` for a material not pulled
+ */
+function pulled(material: Material): unknown {
+  return compileHook(material, ShaderLib.basic.vertexShader).uniforms[DEPTH_BIAS_UNIFORM]
+}
+
 describe('createEventIconMarkers', () => {
   describe('happy path', () => {
     it('stands one icon on each place', () => {
@@ -167,6 +180,31 @@ describe('createEventIconMarkers', () => {
       const [halosGroup, iconsGroup] = markers.object.children[1]?.children ?? []
       expect(iconsGroup?.renderOrder).toBe(EVENT_RENDER_ORDER)
       expect(halosGroup?.renderOrder).toBe(EVENT_RENDER_ORDER - 1)
+    })
+
+    it('pulls the 3D icons and their halo toward the camera alike, by an icon height', () => {
+      const markers = createEventIconMarkers(TWO, STUB, 0.5)
+      const pull = { value: 0.5 * ICON_DEPTH_PULL }
+      for (const mesh of instanced(markers.object))
+        expect(pulled(mesh.material as Material)).toEqual(pull)
+      expect(pulled(squareMaterial(markers.object, 'halo'))).toEqual(pull)
+    })
+
+    it('pulls every kind’s flat drawing toward the camera by its own width', () => {
+      const markers = createEventIconMarkers(TWO, STUB, 0.5)
+      const pull = { value: 0.5 * ICON_FLAT_SPAN * ICON_DEPTH_PULL }
+      expect(pulled(squareMaterial(markers.object, 'swords'))).toEqual(pull)
+      expect(pulled(squareMaterial(markers.object, 'tower'))).toEqual(pull)
+    })
+
+    it('pulls a flat drawing further as the zoom widens it, with no recompile', () => {
+      const markers = createEventIconMarkers(TWO, STUB)
+      // Compiled once, as three does at the first frame; the zoom then changes the drawing's width.
+      const pull = pulled(squareMaterial(markers.object, 'swords'))
+      markers.setZoom(0, 10)
+      const width = squarePose(markers.object, 'swords').scale.x
+      expect(width).toBeCloseTo(ICON_FLAT_MIN_PIXELS / 10)
+      expect(pull).toEqual({ value: width * ICON_DEPTH_PULL })
     })
 
     it('carries its own lights', () => {

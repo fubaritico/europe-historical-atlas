@@ -1,5 +1,5 @@
 /**
- * Pull a line toward the camera along its line of sight, so it wins the depth test without moving.
+ * Pull a line or a mesh toward the camera along its line of sight, so it wins the depth test without moving.
  *
  * The coastline used to be lifted straight up to clear the relief, and a lifted line seen at an angle
  * slides up the screen by about its own height: measured on 2026-10-16 as a visible shift of the whole
@@ -7,16 +7,19 @@
  * camera instead leaves its projection where it was — a point anywhere on that ray lands on the same
  * pixel — while bringing it nearer, so the terrain it sits on no longer hides it.
  *
- * Done in the vertex shader, in view space, because the ray depends on where the camera is each frame.
+ * Done in the vertex shader, in view space, because the ray depends on where the camera is each frame. Shared by the
+ * lines laid on the relief and the 3D event icons, which the slopes would otherwise cut into (ATLAS-296).
  */
 
-import type { LineBasicMaterial, WebGLProgramParametersWithUniforms } from 'three'
-import type { LineMaterial } from 'three/addons/lines/LineMaterial.js'
+import type { Material, WebGLProgramParametersWithUniforms } from 'three'
 
-/** The uniform the injected code reads, in world units. */
-export const DEPTH_BIAS_UNIFORM = 'lineDepthBias'
+/** The uniform the injected code reads, in world units — the same name in every material it rewrites, lines and meshes. */
+export const DEPTH_BIAS_UNIFORM = 'depthBias'
 
-/** The line of `project_vertex` after which the view-space position is final for built-in materials. */
+/**
+ * The line of `project_vertex` after which the view-space position is final for built-in materials — instanced ones
+ * included, since the chunk applies the instance's matrix before the model-view one.
+ */
 const BUILT_IN_ANCHOR = '#include <project_vertex>'
 
 /** The line of three's fat-line shader after which both view-space endpoints exist. */
@@ -38,7 +41,8 @@ export function pullTowardCamera(name: string): string {
 /**
  * Rewrite a vertex shader so it pulls its positions toward the camera.
  * @param vertexShader - the shader source
- * @param kind - `built-in` for a material using `project_vertex`, `fat` for three's `LineMaterial`
+ * @param kind - `built-in` for a material using `project_vertex` (lines and meshes alike), `fat` for three's
+ *   `LineMaterial`
  * @returns the rewritten source
  * @throws when the anchor the rewrite needs is not in the source — a three upgrade that moved it would
  *   otherwise leave the line unbiased, and hidden again, with nothing to say why
@@ -58,30 +62,43 @@ export function injectDepthBias(vertexShader: string, kind: 'built-in' | 'fat'):
 }
 
 /**
- * Make a line material pull its vertices toward the camera by `bias` world units.
- * @param material - the thin or fat line material
+ * Make a material pull its vertices toward the camera by `bias` world units. Each material keeps its own bias, even
+ * where two share a compiled program: three holds the uniforms per material (`WebGLRenderer.js`, `getProgram`).
+ * @param material - a built-in material (a thin line, a mesh) or a fat line's
  * @param kind - which shader it compiles
  * @param bias - how far toward the camera, in world units; zero or less leaves the material untouched
  * @returns nothing; the material is changed in place
  */
-export function applyDepthBias(
-  material: LineBasicMaterial | LineMaterial,
-  kind: 'built-in' | 'fat',
-  bias: number
-): void {
+export function applyDepthBias(material: Material, kind: 'built-in' | 'fat', bias: number): void {
   if (bias <= 0) return
+  applyLiveDepthBias(material, kind, { value: bias })
+}
+
+/** A pull toward the camera that may change after its material compiled. */
+export interface LiveDepthBias {
+  /** How far toward the camera, in world units — read again by three at every frame. */
+  value: number
+}
+
+/**
+ * Make a material pull its vertices toward the camera by however far `bias` says at each frame: the shader holds the
+ * object itself, so a new `value` reaches the next frame with no recompile — three uploads a material's uniforms again
+ * at its first draw of every render (`WebGLRenderer.js`, `setProgram`, `_currentMaterialId` reset after each render).
+ * @param material - a built-in material (a thin line, a mesh) or a fat line's
+ * @param kind - which shader it compiles
+ * @param bias - the pull, shared with whoever changes it
+ * @returns nothing; the material is changed in place
+ */
+export function applyLiveDepthBias(
+  material: Material,
+  kind: 'built-in' | 'fat',
+  bias: LiveDepthBias
+): void {
   // When three compiles the material: hand the bias to the shader and rewrite its vertex stage.
   material.onBeforeCompile = (shader: WebGLProgramParametersWithUniforms): void => {
-    shader.uniforms[DEPTH_BIAS_UNIFORM] = { value: bias }
+    shader.uniforms[DEPTH_BIAS_UNIFORM] = bias
     shader.vertexShader = injectDepthBias(shader.vertexShader, kind)
   }
   // Keeps three from sharing a compiled program with an unbiased material of the same type.
   material.customProgramCacheKey = (): string => `depth-bias-${kind}`
 }
-
-/**
- * How far (world units) the lines laid on the relief — rivers and borders — are pulled toward the camera,
- * so the surface they sit on does not hide them. Replaced a vertical lift of 0.004 on 2026-10-16: the
- * lift slid them up the screen at an oblique angle, off the colours they bound.
- */
-export const DRAPED_DEPTH_BIAS = 0.006

@@ -2,11 +2,12 @@ import { LineSegments, ShaderLib } from 'three'
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 import { describe, expect, it, vi } from 'vitest'
 
-import { DEPTH_BIAS_UNIFORM } from './depthBias'
+import { DEPTH_BIAS_UNIFORM } from '../depthBias'
+import { compileHook } from '../testing/compileHook'
+
 import { buildSegmentPositions, createLineLayer } from './lineLayer'
 
 import type { LineLayer, UvSegment } from './lineLayer'
-import type { WebGLProgramParametersWithUniforms } from 'three'
 
 /**
  * Run a layer material's compile hook against the shader three would hand it.
@@ -14,11 +15,8 @@ import type { WebGLProgramParametersWithUniforms } from 'three'
  * @param vertexShader - the source
  * @returns the uniforms the hook left
  */
-const compiledUniforms = (layer: LineLayer, vertexShader: string): Record<string, unknown> => {
-  const shader = { uniforms: {}, vertexShader } as unknown as WebGLProgramParametersWithUniforms
-  layer.object.material.onBeforeCompile(shader, undefined as never)
-  return shader.uniforms
-}
+const compiledUniforms = (layer: LineLayer, vertexShader: string): Record<string, unknown> =>
+  compileHook(layer.object.material, vertexShader).uniforms
 
 /** Identity-ish projection: normalized (u, v) → world [u, 0, v]. */
 const project = (u: number, v: number): [number, number, number] => [u, 0, v]

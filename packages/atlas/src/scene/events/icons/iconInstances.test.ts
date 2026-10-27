@@ -1,6 +1,8 @@
-import { InstancedMesh, Matrix4, Quaternion, Vector3 } from 'three'
+import { InstancedMesh, Matrix4, Quaternion, ShaderLib, Vector3 } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
+import { DEPTH_BIAS_UNIFORM } from '../../depthBias'
+import { compileHook } from '../../testing/compileHook'
 import { EVENT_RENDER_ORDER } from '../markers'
 
 import { createIconInstances } from './iconInstances'
@@ -29,7 +31,7 @@ function meshes(object: { children: unknown[] }): InstancedMesh[] {
 describe('createIconInstances', () => {
   describe('happy path', () => {
     it('builds one instanced mesh per piece of each kind present, sized to its icons', () => {
-      const instances = createIconInstances(['swords', 'tower', 'swords'], 0.5)
+      const instances = createIconInstances(['swords', 'tower', 'swords'], 0.5, 0)
       const counts = meshes(instances.object).map((mesh) => [mesh.name, mesh.count])
       // The swords have three colours, the tower two: stone and door.
       expect(counts).toEqual([
@@ -42,7 +44,7 @@ describe('createIconInstances', () => {
     })
 
     it('writes each icon’s pose into every piece of its kind, at its slot, scaled to the height', () => {
-      const instances = createIconInstances(['swords', 'tower', 'swords'], 0.5)
+      const instances = createIconInstances(['swords', 'tower', 'swords'], 0.5, 0)
       instances.poseAll([at(1), at(5), at(3)])
       const read = (name: string, slot: number): Vector3 => {
         const mesh = meshes(instances.object).find((each) => each.name === name)
@@ -62,7 +64,7 @@ describe('createIconInstances', () => {
 
   describe('variants', () => {
     it('hands every piece’s poses to the GPU in the same step', () => {
-      const instances = createIconInstances(['swords', 'crown'], 1)
+      const instances = createIconInstances(['swords', 'crown'], 1, 0)
       const before = meshes(instances.object).map((mesh) => mesh.instanceMatrix.version)
       instances.poseAll([at(0), at(1)])
       const after = meshes(instances.object).map((mesh) => mesh.instanceMatrix.version)
@@ -72,20 +74,36 @@ describe('createIconInstances', () => {
     })
 
     it('fades every kind’s pieces together', () => {
-      const instances = createIconInstances(['swords', 'tower'], 1)
+      const instances = createIconInstances(['swords', 'tower'], 1, 0)
       instances.setOpacity(0.3)
       for (const mesh of meshes(instances.object))
         expect((mesh.material as Material).opacity).toBe(0.3)
     })
 
+    it('pulls every piece toward the camera by the pull given, so the relief does not cut it', () => {
+      const instances = createIconInstances(['swords', 'tower'], 1, 0.07)
+      for (const mesh of meshes(instances.object)) {
+        const shader = compileHook(mesh.material as Material, ShaderLib.standard.vertexShader)
+        expect(shader.uniforms[DEPTH_BIAS_UNIFORM]).toEqual({ value: 0.07 })
+      }
+    })
+
+    it('leaves the pieces where they are with no pull', () => {
+      const instances = createIconInstances(['swords'], 1, 0)
+      for (const mesh of meshes(instances.object))
+        expect(
+          compileHook(mesh.material as Material, ShaderLib.standard.vertexShader).vertexShader
+        ).toBe(ShaderLib.standard.vertexShader)
+    })
+
     it('draws the instances after the borders, through their group', () => {
-      expect(createIconInstances(['tower'], 1).object.renderOrder).toBe(EVENT_RENDER_ORDER)
+      expect(createIconInstances(['tower'], 1, 0).object.renderOrder).toBe(EVENT_RENDER_ORDER)
     })
   })
 
   describe('managed errors', () => {
     it('refuses poses that are not one per icon', () => {
-      const instances = createIconInstances(['swords', 'tower'], 1)
+      const instances = createIconInstances(['swords', 'tower'], 1, 0)
       expect(() => {
         instances.poseAll([at(0)])
       }).toThrow(/1 poses for 2 icons/)
@@ -96,11 +114,11 @@ describe('createIconInstances', () => {
 
   describe('edge cases', () => {
     it('builds nothing for no icons', () => {
-      expect(meshes(createIconInstances([], 1).object)).toHaveLength(0)
+      expect(meshes(createIconInstances([], 1, 0).object)).toHaveLength(0)
     })
 
     it('frees each instance buffer, and each model’s geometry and material once, on dispose', () => {
-      const instances = createIconInstances(['crown', 'crown'], 1)
+      const instances = createIconInstances(['crown', 'crown'], 1, 0)
       const spies = meshes(instances.object).flatMap((mesh) => [
         vi.spyOn(mesh, 'dispose'),
         vi.spyOn(mesh.geometry, 'dispose'),

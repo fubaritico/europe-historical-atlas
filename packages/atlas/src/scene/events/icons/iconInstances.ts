@@ -7,6 +7,7 @@
 
 import { Group, InstancedMesh, Matrix4, Vector3 } from 'three'
 
+import { applyDepthBias } from '../../depthBias'
 import { EVENT_RENDER_ORDER } from '../markers'
 
 import { buildIconModel } from './meshes/iconModel'
@@ -56,9 +57,13 @@ interface KindInstances {
 /**
  * Per kind present: its model, built once, and an instanced mesh per piece sized to the kind's icons — all in one group.
  * @param counts - how many icons each kind holds
+ * @param depthPull - how far the pieces are pulled toward the camera, in world units (`ICON_DEPTH_PULL`)
  * @returns the group, and each kind's share
  */
-function kindInstances(counts: ReadonlyMap<EventIconKind, number>): {
+function kindInstances(
+  counts: ReadonlyMap<EventIconKind, number>,
+  depthPull: number
+): {
   object: Group
   byKind: Map<EventIconKind, KindInstances>
 } {
@@ -70,6 +75,8 @@ function kindInstances(counts: ReadonlyMap<EventIconKind, number>): {
   for (const [kind, count] of counts) {
     const model = buildIconModel(kind)
     const meshes = model.pieces.map((piece) => {
+      // Pulled toward the camera, so the relief does not cut the icon as it turns.
+      applyDepthBias(piece.material, 'built-in', depthPull)
       const mesh = new InstancedMesh(piece.geometry, piece.material, count)
       mesh.name = `${kind} ${piece.colour}`
       // Every instance turns every frame, so a bounding sphere would be stale by the next one and could cull an
@@ -87,17 +94,19 @@ function kindInstances(counts: ReadonlyMap<EventIconKind, number>): {
  * Build the instances for a set of icons.
  * @param kinds - each icon's kind, in the icons' order
  * @param height - how tall an icon stands, in world units
+ * @param depthPull - how far the icons are pulled toward the camera, in world units — 0 leaves them where they are
  * @returns the instances, every icon at the origin until it is posed
  */
 export function createIconInstances(
   kinds: readonly EventIconKind[],
-  height: number
+  height: number,
+  depthPull: number
 ): IconInstances {
   // 1. Each item's slot among those of its key, and how many each key holds.
   const { slots, counts } = slotsByKey(kinds)
 
   // 2. Per kind present, its model and its instanced pieces, in one group drawn after the borders.
-  const { object, byKind } = kindInstances(counts)
+  const { object, byKind } = kindInstances(counts, depthPull)
 
   // 3. Each icon's pieces, looked up once: its kind's meshes, which a pose is written into.
   const iconMeshes = kinds.map((kind) => {

@@ -1,25 +1,15 @@
-import { LineBasicMaterial, ShaderLib } from 'three'
+import { LineBasicMaterial, MeshStandardMaterial, ShaderChunk, ShaderLib } from 'three'
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 import { describe, expect, it } from 'vitest'
 
-import { DEPTH_BIAS_UNIFORM, applyDepthBias, injectDepthBias, pullTowardCamera } from './depthBias'
-
-import type { WebGLProgramParametersWithUniforms } from 'three'
-
-/**
- * Run a material's compile hook against a shader, as three would.
- * @param material - the material
- * @param vertexShader - the source handed to the hook
- * @returns what the hook left in the shader
- */
-const compile = (
-  material: LineBasicMaterial | LineMaterial,
-  vertexShader: string
-): WebGLProgramParametersWithUniforms => {
-  const shader = { uniforms: {}, vertexShader } as unknown as WebGLProgramParametersWithUniforms
-  material.onBeforeCompile(shader, undefined as never)
-  return shader
-}
+import {
+  DEPTH_BIAS_UNIFORM,
+  applyDepthBias,
+  applyLiveDepthBias,
+  injectDepthBias,
+  pullTowardCamera,
+} from './depthBias'
+import { compileHook } from './testing/compileHook'
 
 describe('depthBias', () => {
   describe('happy path', () => {
@@ -41,16 +31,57 @@ describe('depthBias', () => {
       expect(out.indexOf(pullTowardCamera('end'))).toBeLessThan(out.indexOf('vec4 clipStart'))
     })
 
+    it('rewrites the real shaders of the meshes it pulls — the icons’ standard one, the halo’s basic one', () => {
+      for (const shader of [ShaderLib.standard.vertexShader, ShaderLib.basic.vertexShader]) {
+        const out = injectDepthBias(shader, 'built-in')
+        expect(out.indexOf(pullTowardCamera('mvPosition'))).toBeGreaterThan(
+          out.indexOf('#include <project_vertex>')
+        )
+      }
+    })
+
+    it('pulls an instanced mesh where its instance is, since the chunk applies the instance before the anchor ends', () => {
+      const chunk = ShaderChunk.project_vertex
+      expect(chunk.indexOf('instanceMatrix * mvPosition')).toBeGreaterThan(-1)
+      expect(chunk.indexOf('instanceMatrix * mvPosition')).toBeLessThan(
+        chunk.indexOf('modelViewMatrix * mvPosition')
+      )
+    })
+
+    it('hands the bias to a mesh material when it compiles', () => {
+      const material = new MeshStandardMaterial()
+      applyDepthBias(material, 'built-in', 0.05)
+      expect(
+        compileHook(material, ShaderLib.standard.vertexShader).uniforms[DEPTH_BIAS_UNIFORM]
+      ).toEqual({ value: 0.05 })
+    })
+
     it('hands the bias to the program as a uniform when the material compiles', () => {
       const material = new LineBasicMaterial()
       applyDepthBias(material, 'built-in', 0.009)
-      const shader = compile(material, ShaderLib.basic.vertexShader)
+      const shader = compileHook(material, ShaderLib.basic.vertexShader)
       expect(shader.uniforms[DEPTH_BIAS_UNIFORM]).toEqual({ value: 0.009 })
       expect(shader.vertexShader).toContain(pullTowardCamera('mvPosition'))
     })
   })
 
   describe('variants', () => {
+    it('hands the shader the live pull itself, so a new value reaches it after compiling', () => {
+      const material = new MeshStandardMaterial()
+      const bias = { value: 0.02 }
+      applyLiveDepthBias(material, 'built-in', bias)
+      const shader = compileHook(material, ShaderLib.standard.vertexShader)
+      bias.value = 0.3
+      expect(shader.uniforms[DEPTH_BIAS_UNIFORM]).toEqual({ value: 0.3 })
+      expect(shader.vertexShader).toContain(pullTowardCamera('mvPosition'))
+    })
+
+    it('rewrites the material for a live pull of zero, which a later value may raise', () => {
+      const material = new MeshStandardMaterial()
+      applyLiveDepthBias(material, 'built-in', { value: 0 })
+      expect(material.customProgramCacheKey()).toBe('depth-bias-built-in')
+    })
+
     it('keeps a biased program apart from an unbiased one of the same type', () => {
       const biased = new LineBasicMaterial()
       applyDepthBias(biased, 'built-in', 0.009)
@@ -80,7 +111,7 @@ describe('depthBias', () => {
     it('leaves the material untouched with no bias', () => {
       const material = new LineBasicMaterial()
       applyDepthBias(material, 'built-in', 0)
-      expect(compile(material, ShaderLib.basic.vertexShader).vertexShader).toBe(
+      expect(compileHook(material, ShaderLib.basic.vertexShader).vertexShader).toBe(
         ShaderLib.basic.vertexShader
       )
     })

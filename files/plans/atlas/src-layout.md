@@ -55,11 +55,13 @@ src/
 │                           folders/ (one per system, as tunables/params/), devPanelCallbacks
 ├── scene/                  everything drawn, one folder per family; each family holds its three.js objects AND
 │   │                       its builder, `map…Layer` (how it is put on the map from the layers' context)
+│   ├── depthBias           (a file) pulls a line or a mesh toward the camera: the draped lines and the 3D icons
+│   ├── testing/            compileHook, the fake "three compiles the material" the tests share
 │   ├── layers/             the façade over all of it: mapLayers; layerContext (the handles and the context),
 │   │                       frameLayers (what every frame updates), rebuildSurface (the one order), layerProjection,
 │   │                       disposeHandle
 │   ├── relief/             reliefMesh, mapEdge (its wall), terrainTexture, drapeProjection, mapReliefLayer
-│   ├── lines/              lineLayer, polylines (chain geometry: offset, mitres, segments), depthBias
+│   ├── lines/              lineLayer (and DRAPED_DEPTH_BIAS), polylines (chain geometry: offset, mitres, segments)
 │   ├── waters/             riverLayer, mapRiverLayer, mapCoastLayer
 │   ├── decor/              rose/ (compassRose, compassRoseSvg, mapRoseLayer), rhumbs/ (rhumbNetwork, mapRhumbLayer)
 │   ├── sheet/              paperSheet, graticuleFrame, frameLabels, mapTitle, mapFrameLayer

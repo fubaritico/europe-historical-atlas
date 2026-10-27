@@ -10,12 +10,14 @@ import * as fillModule from '@europe-historical-atlas/core/pipeline/fillTriangle
 
 import { createMapSources, refreshReliefSource } from '../../sources/mapSources'
 import { createDevState } from '../../tunables/devState'
-import { DEPTH_BIAS_UNIFORM, DRAPED_DEPTH_BIAS } from '../lines/depthBias'
+import { DEPTH_BIAS_UNIFORM } from '../depthBias'
+import { DRAPED_DEPTH_BIAS } from '../lines/lineLayer'
 import { FILL_RENDER_ORDER } from '../political/fills/fillLayer'
 import { TRIBE_RENDER_ORDER } from '../political/tribes/tribeLayer'
 import * as patchModule from '../political/tribes/tribePatches'
 import { MAP_TITLE_OBJECT } from '../sheet/mapTitle'
 import { PAPER_SHEET_RENDER_ORDER } from '../sheet/paperSheet'
+import { compileHook } from '../testing/compileHook'
 
 import { createLayerProjection } from './layerProjection'
 import { createMapLayers } from './mapLayers'
@@ -26,12 +28,7 @@ import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { Object3D } from 'three'
-import type {
-  BufferGeometry,
-  LineBasicMaterial,
-  LineSegments,
-  WebGLProgramParametersWithUniforms,
-} from 'three'
+import type { BufferGeometry, LineBasicMaterial, LineSegments } from 'three'
 import type { LineSegments2 } from 'three/addons/lines/LineSegments2.js'
 
 // The vellum's bake stands in as a blank sheet of the right size: these tests check how the layers are laid,
@@ -703,11 +700,7 @@ describe('createMapLayers', () => {
       layers.rebuildCoastline()
       const material = (scene.children[0] as LineSegments<BufferGeometry, LineBasicMaterial>)
         .material
-      const shader = {
-        uniforms: {},
-        vertexShader: ShaderLib.basic.vertexShader,
-      } as unknown as WebGLProgramParametersWithUniforms
-      material.onBeforeCompile(shader, undefined as never)
+      const shader = compileHook(material, ShaderLib.basic.vertexShader)
       expect(shader.uniforms[DEPTH_BIAS_UNIFORM]).toEqual({ value: 0.013 })
     })
 
@@ -717,11 +710,7 @@ describe('createMapLayers', () => {
       const strokes = borderStrokes(scene)
       expect(strokes.length).toBeGreaterThan(0)
       for (const stroke of strokes) {
-        const shader = {
-          uniforms: {},
-          vertexShader: new LineMaterial().vertexShader,
-        } as unknown as WebGLProgramParametersWithUniforms
-        stroke.material.onBeforeCompile(shader, undefined as never)
+        const shader = compileHook(stroke.material, new LineMaterial().vertexShader)
         expect(shader.uniforms[DEPTH_BIAS_UNIFORM]).toEqual({ value: DRAPED_DEPTH_BIAS })
       }
     })
@@ -743,11 +732,10 @@ describe('createMapLayers', () => {
       const strokes = scene.children[0]?.children ?? []
       expect(strokes.length).toBeGreaterThan(0)
       for (const stroke of strokes) {
-        const shader = {
-          uniforms: {},
-          vertexShader: new LineMaterial().vertexShader,
-        } as unknown as WebGLProgramParametersWithUniforms
-        ;(stroke as LineSegments2).material.onBeforeCompile(shader, undefined as never)
+        const shader = compileHook(
+          (stroke as LineSegments2).material,
+          new LineMaterial().vertexShader
+        )
         expect(shader.uniforms[DEPTH_BIAS_UNIFORM]).toEqual({ value: DRAPED_DEPTH_BIAS })
       }
     })

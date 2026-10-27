@@ -1,13 +1,13 @@
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 import { describe, expect, it, vi } from 'vitest'
 
-import { DEPTH_BIAS_UNIFORM } from '../lines/depthBias'
+import { DEPTH_BIAS_UNIFORM } from '../depthBias'
+import { compileHook } from '../testing/compileHook'
 
 import { createRiverLayer, rankOpacity, rankRevealZoom, rankWidth } from './riverLayer'
 
 import type { RiverLayerOptions } from './riverLayer'
 import type { River } from '@europe-historical-atlas/core/data/riverSource'
-import type { WebGLProgramParametersWithUniforms } from 'three'
 import type { LineSegments2 } from 'three/addons/lines/LineSegments2.js'
 
 /** A flat projection — the layer under test is about grouping and reveal, not about terrain. */
@@ -58,11 +58,10 @@ describe('riverLayer', () => {
     it('pulls every rank toward the camera by the requested bias, so the relief does not hide it', () => {
       const layer = createRiverLayer([river(1), river(9)], { ...OPTS, depthBias: 0.006 })
       for (const child of layer.object.children) {
-        const shader = {
-          uniforms: {},
-          vertexShader: new LineMaterial().vertexShader,
-        } as unknown as WebGLProgramParametersWithUniforms
-        ;(child as LineSegments2).material.onBeforeCompile(shader, undefined as never)
+        const shader = compileHook(
+          (child as LineSegments2).material,
+          new LineMaterial().vertexShader
+        )
         expect(shader.uniforms[DEPTH_BIAS_UNIFORM]).toEqual({ value: 0.006 })
       }
       layer.dispose()

@@ -20,6 +20,15 @@ export const EVENT_ICON_HEIGHT = 0.05
  */
 export const ICON_LIFT: Record<EventIconKind, number> = { swords: 0.6, tower: 0, crown: 0 }
 
+/**
+ * How far the 3D icons and their halo are pulled toward the camera, in icon heights, and the flat drawings in their own
+ * widths, so a slope they stand on or turn into does not cut them (the dev, 2026-10-27: *« à l'instar des frontières,
+ * quoi qu'il arrive, les avoir toujours devant »*; the flat drawings too, same day). Along the line of sight, so
+ * nothing moves on screen (`../../depthBias`); one height clears the swords as they turn. A massif standing between
+ * the camera and the icon still hides it, as it should on a relief.
+ */
+export const ICON_DEPTH_PULL = 1
+
 /** How the icons sway about their own upright, either side of facing the camera (the dev, 2026-10-26). */
 export const ICON_SWAY = { amplitudeRad: (25 * Math.PI) / 180, periodSeconds: 4 }
 

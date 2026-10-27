@@ -9,7 +9,7 @@ import {
 
 import { maskOrFallback } from '../landMask'
 import { disposeHandle } from '../layers/disposeHandle'
-import { DRAPED_DEPTH_BIAS } from '../lines/depthBias'
+import { DRAPED_DEPTH_BIAS } from '../lines/lineLayer'
 
 import { createRiverLayer } from './riverLayer'
 

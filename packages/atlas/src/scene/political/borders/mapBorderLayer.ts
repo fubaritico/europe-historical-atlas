@@ -7,7 +7,7 @@ import { borderPatternFor } from '@europe-historical-atlas/core/data/borderStyle
 import { pairKey } from '@europe-historical-atlas/core/editor/atlasBorders'
 
 import { disposeHandle } from '../../layers/disposeHandle'
-import { DRAPED_DEPTH_BIAS } from '../../lines/depthBias'
+import { DRAPED_DEPTH_BIAS } from '../../lines/lineLayer'
 
 import { buildBorderStrokes } from './borderStrokes'
 import { createLevelledBorderLayer, splitBordersByLevel } from './levelledBorderLayer'
