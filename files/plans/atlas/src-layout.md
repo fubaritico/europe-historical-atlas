@@ -69,11 +69,12 @@ src/
 │   │   │                   tribes/ (tribePatches, tribeBuffers, tribeShader, tribeLayer, mapTribeLayer)
 │   ├── events/             mapEventLayer (the entry), eventPins (which events, where), markers (what every
 │   │   │                   marker answers to), pin (the plain pin)
-│   │   └── icons/          eventIconMarkers (the icons on the map), settings (how they stand: size, lift, sway,
-│   │       │               fade, flat and halo size — a look stays beside what it draws), facing (turned to the
-│   │       │               camera, swayed), crossFade (3D near, flat far), forms (an icon's three forms on the
-│   │       │               relief), kinds and palette (what the 3D and the flat share)
-│   │       ├── meshes/     the 3D models, one file per icon: swords, tower, crown; parts, eventIcons (the assembly)
+│   │   └── icons/          eventIconMarkers (the assembly), settings (how they stand), facing (turned to the camera,
+│   │       │               swayed), crossFade (3D near, flat far), forms (an icon's place: its pose and its squares'),
+│   │       │               iconInstances (the 3D icons as instances, ATLAS-289), billboards (facing squares as
+│   │       │               instances), billboardMaterials (the halo's and the drawings'), slots, kinds, palette
+│   │       ├── meshes/     the 3D models, one file per icon: swords, tower, crown; parts, iconModel (a kind's model,
+│   │       │               built once, fused per colour), eventIcons (one icon, for the bench)
 │   │       ├── flat/       the drawings seen from afar, one file per icon: swords, tower, crown; drawing (what a
 │   │       │               drawing is), eventIconSvg (the SVG made from one)
 │   │       └── light/      what detaches an icon from the map: lighting, halo

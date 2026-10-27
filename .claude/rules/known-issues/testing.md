@@ -41,3 +41,11 @@ Lessons on proving a test guards something. Read before writing or verifying a t
   emportant sa propre copie de ses points, ce que fait exactement `RegionPayload`.
   **La règle qui en sort** : pour vérifier une garde, écrire le code qu'un développeur écrirait sans y penser,
   pas une mutilation choisie au hasard. Consigné en mémoire [[verify-a-test-with-the-plausible-naive-code]].
+- **Un test rapide en local peut dépasser ses 5 s sous la couverture de la CI** (27/10, ATLAS-291/293). Les tests du cadre
+  recuisaient le parchemin en 1 024 × 1 024 à chaque reconstruction : 0,25 à 1,3 s en local, plus de 5 s sous
+  l'instrumentation du job Sonar, qui a échoué deux fois (`3447b2b`, `98d5f4a`) pendant que la gate locale passait.
+  **Remède appliqué** : un test qui vérifie un branchement remplace le calcul lourd par un faux (`vi.mock` du bake, une
+  image vide de la bonne taille) — le calcul a ses propres tests. **La règle** : un test qui construit une texture ou un
+  maillage réels se mesure aussi sous `vitest run --coverage` avant d'être commité ; et après un push, **lire la CI
+  jusqu'au bout**, Sonar compris — le déploiement passe même quand Sonar tombe. **Sévérité : à savoir.**
+

@@ -1,6 +1,6 @@
 /**
  * What every 3D icon is made of: parts — a geometry and a colour each — and the two steps every icon goes through,
- * whatever its shape: fitted one unit high, then given one faceted material per colour (`eventIcons`).
+ * whatever its shape: fitted one unit high, then fused per colour, each with one faceted material (`iconModel`).
  */
 
 import { Box3, MeshStandardMaterial, Vector3 } from 'three'

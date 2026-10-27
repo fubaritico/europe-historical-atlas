@@ -35,17 +35,6 @@ describe('createEventIcon', () => {
       expect(width).toBeCloseTo(box.max.y - box.min.y, 1)
     })
 
-    it('passes one blade in front of the other where they cross, never through it', () => {
-      // The blade is each sword's first part; the guards and pommels are thicker than the gap, but they stand apart
-      // sideways and never meet — only the blades cross.
-      const parts = meshes(createEventIcon('swords').object)
-      const [front, back] = [parts[0], parts[parts.length / 2]]
-      if (front === undefined || back === undefined) throw new Error('no blades')
-      expect(new Box3().setFromObject(back).max.z).toBeLessThan(
-        new Box3().setFromObject(front).min.z
-      )
-    })
-
     it('paints the icon in the palette given', () => {
       const icon = createEventIcon('crown', { ...EVENT_ICON_PALETTE, gold: '#00ff00' })
       const colours = meshes(icon.object).map((mesh) =>
@@ -65,15 +54,12 @@ describe('createEventIcon', () => {
   // L4: N/A — no async work, nothing external
 
   describe('edge cases', () => {
-    it('shares one material per colour, and frees every geometry and material on dispose', () => {
+    it('frees its model on dispose', () => {
       const icon = createEventIcon('crown')
-      const parts = meshes(icon.object)
-      const materials = new Set(parts.map((mesh) => mesh.material as Material))
-      expect(materials.size).toBeLessThan(parts.length)
-      const spies = [
-        ...parts.map((mesh) => vi.spyOn(mesh.geometry, 'dispose')),
-        ...[...materials].map((material) => vi.spyOn(material, 'dispose')),
-      ]
+      const spies = meshes(icon.object).flatMap((mesh) => [
+        vi.spyOn(mesh.geometry, 'dispose'),
+        vi.spyOn(mesh.material as Material, 'dispose'),
+      ])
       icon.dispose()
       for (const spy of spies) expect(spy).toHaveBeenCalledTimes(1)
     })

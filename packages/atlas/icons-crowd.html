@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Icon crowd — Historical Atlas</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #efe6d2;
+      }
+      #scene {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+      #count {
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        padding: 6px 10px;
+        font:
+          14px/1.4 system-ui,
+          sans-serif;
+        color: #3b2a1e;
+        background: rgb(255 248 232 / 0.9);
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+    <div id="count" aria-live="polite"></div>
+    <script type="module" src="/src/bench/iconCrowdBench.ts"></script>
+  </body>
+</html>

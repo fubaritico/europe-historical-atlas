@@ -3,12 +3,11 @@
  * runs over its facets (the dev, 2026-10-26). Pure arithmetic, exercised with literals.
  */
 
-import { Vector3 } from 'three'
+import { Matrix4, Quaternion, Vector3 } from 'three'
 
 import { ICON_SWAY } from './settings'
 
 import type { CameraPose } from '../markers'
-import type { Matrix4, Quaternion } from 'three'
 
 /** The vertical axis an icon sways about, in its own frame; also the camera's up, in the camera's frame. */
 export const UPRIGHT = new Vector3(0, 1, 0)
@@ -56,4 +55,35 @@ export function facingCamera(
   scratch: Matrix4
 ): Quaternion {
   return into.setFromRotationMatrix(scratch.lookAt(eye, at, up))
+}
+
+/** What a turned icon carries: where it stands, and the orientation written into it. */
+export interface Turned {
+  /** Where it stands, in the world. */
+  readonly position: Vector3
+  /** Its orientation, written at each frame. */
+  readonly quaternion: Quaternion
+}
+
+/**
+ * A turner for a set of icons, holding what it works in so a frame allocates nothing however many icons it turns.
+ * @returns the function that turns every icon toward a camera, then sways each about its own upright
+ */
+export function createIconTurner(): (
+  icons: readonly Turned[],
+  camera: CameraPose,
+  seconds: number
+) => void {
+  const sway = new Quaternion()
+  const up = new Vector3()
+  const look = new Matrix4()
+  return (icons, camera, seconds): void => {
+    // The camera's up, once for every icon.
+    cameraUp(camera, up)
+    // Each icon turned to face the camera, then swayed about its own upright, out of step with the one before.
+    icons.forEach((icon, index) => {
+      sway.setFromAxisAngle(UPRIGHT, iconSway(seconds, index))
+      facingCamera(icon.position, camera.position, up, icon.quaternion, look).multiply(sway)
+    })
+  }
 }

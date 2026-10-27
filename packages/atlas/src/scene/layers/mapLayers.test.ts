@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { DataTexture, Quaternion, Scene, ShaderLib, Vector3 } from 'three'
+import { DataTexture, InstancedMesh, Matrix4, Quaternion, Scene, ShaderLib, Vector3 } from 'three'
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -258,10 +258,16 @@ describe('createMapLayers', () => {
       expect([close.visible, afar.visible]).toEqual([false, true])
       layers.frame(1, 100)
       expect([close.visible, afar.visible]).toEqual([true, false])
-      const icon = child(close, 1)
-      const before = icon.quaternion.clone()
+      // The icon is an instance (ATLAS-289): its pose is read back from its kind's first piece.
+      const piece = child(close, 1).children[0] as InstancedMesh
+      const poseOf = (): Matrix4 => {
+        const matrix = new Matrix4()
+        piece.getMatrixAt(0, matrix)
+        return matrix
+      }
+      const before = poseOf()
       layers.faceCamera({ position: new Vector3(3, 2, 5), quaternion: new Quaternion() }, 0)
-      expect(icon.quaternion.equals(before)).toBe(false)
+      expect(poseOf().equals(before)).toBe(false)
     })
 
     it('stands no event before the map is drawn, and stands them once it is', () => {
