@@ -496,5 +496,24 @@ export default tseslint.config(
   // on camera/, scene/ renders, picking/ answers WHERE, ui/ is plain DOM, tunables/ is the settings (a
   // leaf), app/ the running map, loading/ what the map is made from, devPanel/ the panel over the settings,
   // and main.ts is the composition root that may be imported by nobody.
-  ...BOUNDARIES.map(boundaryConfig)
+  ...BOUNDARIES.map(boundaryConfig),
+
+  // The atlas's testing/ folders hold what its tests share (ATLAS-293): test code, kept out of coverage and of
+  // Sonar. Product code reaching into one would ship fixtures in the bundle with nothing to say so. Its own rule,
+  // not a pattern in the rows above: `no-restricted-imports` is one rule, and a second entry for it would erase
+  // every boundary under it.
+  {
+    files: ['packages/atlas/src/**/*.ts'],
+    ignores: ['**/*.test.ts', '**/testing/**'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ImportDeclaration[source.value=/(^|\\/)testing\\//]',
+          message:
+            'testing/ is test code: only a test or another testing/ module may import it — never the product.',
+        },
+      ],
+    },
+  }
 )

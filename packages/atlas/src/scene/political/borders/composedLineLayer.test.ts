@@ -1,68 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { offsetPolyline, polylinesToSegments } from '../../lines/polylines'
+import { run } from '../../lines/testing/lineFixtures'
 
-import {
-  buildBorderStrokes,
-  groupSegmentsByPattern,
-  inlayOpacityScale,
-  patternStrokes,
-} from './borderStrokes'
+import { buildBorderStrokes } from './borderStrokes'
 import { createComposedLineLayer } from './composedLineLayer'
+import { STYLE, borders, liveValues, project } from './testing/borderFixtures'
 
-import type { BorderStrokeStyle } from './borderStrokes'
-import type { ComposedLineLayer, ComposedStroke } from './composedLineLayer'
-import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
+import type { ComposedStroke } from './composedLineLayer'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
-
-/** A vertical two-point run, enough to make a pass non-empty. */
-function run(u: number): UvPoint[] {
-  return [
-    { u, v: 0 },
-    { u, v: 1 },
-  ]
-}
-
-/** Derived borders with whichever kinds the test needs, all under one pair. */
-function borders(between: number, frontier: number): RegionBorders {
-  return {
-    between:
-      between === 0
-        ? []
-        : [{ pair: [0, 1], lines: Array.from({ length: between }, (_, i) => run(i / 10)) }],
-    frontier: Array.from({ length: frontier }, (_, i) => run(0.5 + i / 10)),
-  }
-}
-
-const STYLE: BorderStrokeStyle = {
-  coreColor: '#ffffff',
-  coreWidth: 1.4,
-  edgeColor: '#000000',
-  edgeWidth: 3.2,
-  opacity: 0.9,
-  showFrontier: true,
-  frontierColor: '#888888',
-  frontierWidth: 1,
-  frontierOpacity: 0.45,
-  dashSize: 0.03,
-  gapSize: 0.024,
-  doubleGap: 0.002,
-}
-
-/** Project a grid coordinate onto a flat plane — the collaborator, mocked. */
-const project = (u: number, v: number): [number, number, number] => [u, 0, v]
-
-/** The live material property named on each pass — what the zoom link actually drives. */
-function liveValues(
-  layer: ComposedLineLayer,
-  property: 'linewidth' | 'opacity' | 'dashScale'
-): number[] {
-  return layer.object.children.map((child: object) => {
-    // Fat lines carry a LineMaterial; reading it back is the only way to prove the setter reached it.
-    const { material } = child as unknown as { material: Record<string, number> }
-    return material[property] ?? Number.NaN
-  })
-}
 
 describe('composedLineLayer', () => {
   describe('happy path', () => {
@@ -342,98 +287,7 @@ describe('composedLineLayer', () => {
     })
   })
 
-  describe('inlayOpacityScale', () => {
-    it('ramps from nothing at full zoom-out to full strength at the threshold', () => {
-      expect(inlayOpacityScale(0, 0.4)).toBe(0)
-      expect(inlayOpacityScale(0.2, 0.4)).toBeCloseTo(0.5)
-      expect(inlayOpacityScale(0.4, 0.4)).toBe(1)
-    })
-
-    it('holds at full strength beyond the threshold', () => {
-      expect(inlayOpacityScale(1, 0.4)).toBe(1)
-    })
-
-    it('never fades when the threshold is zero, instead of dividing by it', () => {
-      // The slider goes down to 0. `0 / 0` is NaN, and `clamp01` passes NaN straight through since both
-      // its comparisons are false against it — a NaN opacity throws nothing and WebGL drops the draw, so
-      // the casing would vanish silently at the default camera position.
-      expect(inlayOpacityScale(0, 0)).toBe(1)
-      expect(inlayOpacityScale(0.5, 0)).toBe(1)
-      expect(Number.isNaN(inlayOpacityScale(0, 0))).toBe(false)
-    })
-
-    it('clamps a negative threshold rather than inverting the ramp', () => {
-      expect(inlayOpacityScale(0.5, -1)).toBe(1)
-    })
-  })
-
-  describe('offsetPolyline', () => {
-    it('shifts a straight run sideways by exactly the distance asked', () => {
-      const shifted = offsetPolyline(run(0.5), 0.01)
-      // The run goes south; its left-hand normal points west, so the copy lands at u = 0.49.
-      for (const point of shifted) expect(point.u).toBeCloseTo(0.49)
-    })
-
-    it('shifts the other way for a negative distance', () => {
-      const shifted = offsetPolyline(run(0.5), -0.01)
-      for (const point of shifted) expect(point.u).toBeCloseTo(0.51)
-    })
-
-    it('keeps a closed run closed', () => {
-      const square: UvPoint[] = [
-        { u: 0.4, v: 0.4 },
-        { u: 0.6, v: 0.4 },
-        { u: 0.6, v: 0.6 },
-        { u: 0.4, v: 0.6 },
-        { u: 0.4, v: 0.4 },
-      ]
-      const shifted = offsetPolyline(square, 0.01)
-      const head = shifted[0]
-      const tail = shifted[shifted.length - 1]
-      expect(head).toEqual(tail)
-    })
-
-    it('clamps a hairpin instead of throwing the vertex off the map', () => {
-      // Two segments doubling back on each other: the exact mitre is at infinity.
-      const hairpin: UvPoint[] = [
-        { u: 0.5, v: 0.4 },
-        { u: 0.5, v: 0.5 },
-        { u: 0.5001, v: 0.4 },
-      ]
-      for (const point of offsetPolyline(hairpin, 0.01)) {
-        expect(Number.isFinite(point.u)).toBe(true)
-        expect(Math.abs(point.u - 0.5)).toBeLessThan(0.05)
-      }
-    })
-
-    it('returns the run untouched for a zero distance', () => {
-      const original = run(0.5)
-      expect(offsetPolyline(original, 0)).toEqual(original)
-    })
-
-    it('returns a single point untouched, having no direction to offset along', () => {
-      const lone: UvPoint[] = [{ u: 0.5, v: 0.5 }]
-      expect(offsetPolyline(lone, 0.01)).toEqual(lone)
-    })
-  })
-
   describe('edge cases', () => {
-    it('explodes a run into one fewer segment than it has points', () => {
-      expect(
-        polylinesToSegments([
-          [
-            { u: 0, v: 0 },
-            { u: 0, v: 1 },
-            { u: 0, v: 2 },
-          ],
-        ])
-      ).toHaveLength(2)
-    })
-
-    it('yields nothing for a run of a single point', () => {
-      expect(polylinesToSegments([[{ u: 0, v: 0 }]])).toEqual([])
-    })
-
     it('frees every pass on teardown', () => {
       const layer = createComposedLineLayer(buildBorderStrokes(borders(2, 2), STYLE), { project })
       layer.dispose()
@@ -462,111 +316,6 @@ describe('composedLineLayer', () => {
       // One handle, one scale: the reason the composed line is a group rather than a list of layers.
       expect(layer.object.scale.y).toBe(0.5)
       layer.dispose()
-    })
-  })
-})
-
-describe('groupSegmentsByPattern', () => {
-  const line = [
-    { u: 0, v: 0 },
-    { u: 1, v: 0 },
-  ]
-  const between = [
-    { pair: [0, 1] as const, lines: [line] },
-    { pair: [1, 2] as const, lines: [line] },
-  ]
-
-  describe('happy path', () => {
-    it('puts every pair drawn the same way into one bucket', () => {
-      const grouped = groupSegmentsByPattern(between, () => 'solid', 0.001)
-      expect(grouped.size).toBe(1)
-      expect(grouped.get('solid')).toHaveLength(2)
-    })
-  })
-
-  describe('variants', () => {
-    it('keeps patterns apart, since each is its own draw call', () => {
-      const grouped = groupSegmentsByPattern(
-        between,
-        (p) => (p[0] === 0 ? 'dashed' : 'solid'),
-        0.001
-      )
-      expect([...grouped.keys()].sort()).toEqual(['dashed', 'solid'])
-    })
-
-    it('doubles the geometry of a doubled border, shifting each half either way', () => {
-      const grouped = groupSegmentsByPattern(between, () => 'double', 0.001)
-      expect(grouped.get('double')).toHaveLength(4)
-    })
-  })
-
-  describe('managed errors', () => {
-    it('returns nothing for a year with no shared borders', () => {
-      expect(groupSegmentsByPattern([], () => 'solid', 0.001).size).toBe(0)
-    })
-  })
-
-  describe('unmanaged errors', () => {
-    it('drops a chain too short to make a segment rather than emitting a degenerate one', () => {
-      const grouped = groupSegmentsByPattern(
-        [{ pair: [0, 1] as const, lines: [[{ u: 0, v: 0 }]] }],
-        () => 'solid',
-        0.001
-      )
-      expect(grouped.get('solid')).toHaveLength(0)
-    })
-  })
-
-  describe('edge cases', () => {
-    it('leaves a doubled border on its true line at zero gap', () => {
-      const grouped = groupSegmentsByPattern(between, () => 'double', 0)
-      expect(grouped.get('double')?.[0]?.[0]).toEqual({ u: 0, v: 0 })
-    })
-  })
-})
-
-describe('patternStrokes', () => {
-  const segments = [
-    [
-      { u: 0, v: 0 },
-      { u: 1, v: 0 },
-    ],
-  ] as unknown as Parameters<typeof patternStrokes>[1]
-
-  describe('happy path', () => {
-    it('dresses a plain border as an edging with a core inside it', () => {
-      expect(patternStrokes('solid', segments, STYLE).map((s) => s.role)).toEqual(['edge', 'inlay'])
-    })
-  })
-
-  describe('variants', () => {
-    it('leaves a patterned border as one dark stroke, its meaning being its shape', () => {
-      expect(patternStrokes('dashed', segments, STYLE).map((s) => s.role)).toEqual(['pattern'])
-    })
-
-    it('marks a dashed pattern dashed and a doubled one not', () => {
-      expect(patternStrokes('dashed', segments, STYLE)[0]?.dashed).toBe(true)
-      expect(patternStrokes('double', segments, STYLE)[0]?.dashed).toBe(false)
-    })
-  })
-
-  describe('managed errors', () => {
-    it('skips an inlay that would cover the edging it sits inside', () => {
-      const wide = { ...STYLE, coreWidth: 3, edgeWidth: 3 }
-      expect(patternStrokes('solid', segments, wide).map((s) => s.role)).toEqual(['edge'])
-    })
-  })
-
-  describe('unmanaged errors', () => {
-    it('still emits its passes for an empty set, the caller deciding what is worth drawing', () => {
-      expect(patternStrokes('solid', [], STYLE)).toHaveLength(2)
-    })
-  })
-
-  describe('edge cases', () => {
-    it('draws the edging first, so the core lands on top of it', () => {
-      const [first, second] = patternStrokes('solid', segments, STYLE)
-      expect(first?.width).toBeGreaterThan(second?.width ?? 0)
     })
   })
 })

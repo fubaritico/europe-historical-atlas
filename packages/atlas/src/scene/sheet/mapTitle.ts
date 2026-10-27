@@ -102,6 +102,9 @@ export function buildMapTitleSvg(text: string, ink: string, roughness: number): 
   return `<svg width="${String(TITLE_WIDTH)}" height="${String(TITLE_HEIGHT)}" viewBox="0 0 ${String(TITLE_WIDTH)} ${String(TITLE_HEIGHT)}" xmlns="http://www.w3.org/2000/svg">${rough}${wrapped}</svg>`
 }
 
+/** The title's name in the scene (three.js `Object3D.name`), for whatever needs to find it there. */
+export const MAP_TITLE_OBJECT = 'map title'
+
 /**
  * Print the title on the sheet.
  * @param options - the name, where it sits, and how to rasterise it
@@ -148,8 +151,11 @@ export function createMapTitle(options: MapTitleOptions): MapTitle {
     opacity: options.opacity,
     depthWrite: false,
   })
+  // Named, so the title can be found in the scene by what it is rather than by where it was added.
+  const object = new Mesh(geometry, material)
+  object.name = MAP_TITLE_OBJECT
   return {
-    object: new Mesh(geometry, material),
+    object,
     dispose(): void {
       geometry.dispose()
       material.dispose()

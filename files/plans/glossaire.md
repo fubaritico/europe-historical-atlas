@@ -68,6 +68,9 @@
 | **raster** / rastériser | Transformer des lignes en grille de cases. Chaque case retient qui la possède.            |
 | **cell** / cellule      | Une case de cette grille. La nôtre fait 1,9 km de côté.                                   |
 | **texture**             | L'image peinte qu'on pose sur le relief : parchemin, altitudes, ombrage, grain.           |
+| **feuille** / sheet     | Le parchemin sur lequel la carte de l'atlas est imprimée : le grand rectangle beige sous tout le reste, qui déborde le relief tout autour. Il porte la bordure graduée, la marge et le titre (`scene/sheet/`). |
+| **bordure graduée** / frame | Le cadre qui entoure le relief sur la feuille : deux filets et une bande en blocs alternés, un bloc par degré (`graticuleFrame`). |
+| **marge**               | La bande de feuille entre la bordure graduée et le bord : les chiffres des degrés y sont écrits, et le titre de l'atlas en dessous. |
 | **bake** / cuisson      | Calculer cette image, pixel par pixel. ~1,5 million de pixels.                            |
 | **tint**                | La couleur d'un pays, appliquée dans la texture.                                          |
 | **derived border**      | La frontière **calculée**, jamais dessinée à part. Calculée depuis le **bout partagé** entre deux tracés — exacte, au lieu d'une marche de 1,9 km. **Décidé le 13/10 (D1, `borders/plan.md`)** : l'atlas aussi la prend là pour une année dessinée, pour que styles et surcharges lui parviennent ; le bord des aplats du raster ne sert plus que pour les siècles encore lus dans les fichiers GPL. Les **couleurs**, elles, restent sur le raster. |

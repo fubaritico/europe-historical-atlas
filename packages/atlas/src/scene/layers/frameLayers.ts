@@ -9,7 +9,12 @@ import { inlayOpacityScale } from '../political/borders/borderStrokes'
 import { homageDetail } from '../political/homageReveal'
 import { paintsExactFills } from '../political/paintsExactFills'
 
+import { layersWithRole } from './layerRoles'
+
 import type { LayerContext } from './layerContext'
+
+/** The layers laid on the relief, read once: the table does not change at run time. */
+const DRAPED_LAYERS = layersWithRole('draped')
 
 /**
  * Track the relief's live exaggeration with everything draped on it.
@@ -27,14 +32,14 @@ export function frameRelief(context: LayerContext, zoom: number): void {
   if (!relief) return
   // Zoom-linked vertical exaggeration: full at zoom-out, × `exaggZoomIn` at zoom-in.
   relief.scale.setY(dev.relief.exaggeration * (1 - (1 - dev.relief.exaggZoomIn) * zoom))
-  // Every layer laid on the relief takes the same vertical scale, so it stays on the surface.
-  handles.edge?.setReliefScale(relief.scale.y)
-  if (handles.rivers) handles.rivers.object.scale.setY(relief.scale.y)
-  if (handles.borders) handles.borders.object.scale.setY(relief.scale.y)
-  if (handles.coastline) handles.coastline.object.scale.setY(relief.scale.y)
-  if (handles.fills) handles.fills.object.scale.setY(relief.scale.y)
-  if (handles.tribes) handles.tribes.object.scale.setY(relief.scale.y)
-  handles.events?.setReliefScale(relief.scale.y)
+  // Every layer laid on the relief takes the same vertical scale, so it stays on the surface: one that keeps a height
+  // of its own (the wall, the events) is told the scale; the others are scaled as a whole.
+  for (const key of DRAPED_LAYERS) {
+    const layer = handles[key]
+    if (layer === null) continue
+    if ('setReliefScale' in layer) layer.setReliefScale(relief.scale.y)
+    else layer.object.scale.setY(relief.scale.y)
+  }
 }
 
 /**

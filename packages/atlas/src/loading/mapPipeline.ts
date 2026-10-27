@@ -20,7 +20,7 @@ import { loadContent } from './mapContent'
 import { rebuildPolitical } from './stages/political'
 import { loadRivers } from './stages/rivers'
 import { startup } from './stages/startup'
-import { rebuildTexture } from './stages/texture'
+import { pushSources, rebuildTexture } from './stages/texture'
 
 import type { MapPipelineDeps, PipelineContext } from './pipelineContext'
 import type { MapCompute, ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
@@ -72,7 +72,11 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
     pendingRivers: { set: null },
   }
   // Built once the context exists, since the worker's failover writes back into it.
-  context.box.compute = createCompute(context)
+  // Should the worker die, the compute on this thread starts empty: hand it the sources again, then recompute the
+  // year on screen — the pipeline's steps, passed in so the compute knows none of them.
+  context.box.compute = createCompute(context, () =>
+    pushSources(context).then(() => rebuildPolitical(context))
+  )
 
   return {
     async start(): Promise<void> {

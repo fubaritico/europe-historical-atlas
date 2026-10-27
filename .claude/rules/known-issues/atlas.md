@@ -24,16 +24,6 @@ Open issues specific to `packages/atlas`: its render, its pipeline wiring, its d
   `files/plans/cartographer/design/assets/europe-terrain.png`, 6.6 MB each. The second is what makes
   the design screens open standalone, so the duplication is deliberate — but it is a copy that can drift
   from its generator. Regenerate both from the spike if the texture defaults ever change.
-- **`buildTitle` in `scene/sheet/mapFrameLayer.ts` (`mapLayerBuilders.ts` until 2026-10-27) is reached by no test** (QUAL-021, found 2026-09-18, **left
-  open**). It is the only code turning the `frame.title*` tunables and `MAP_TITLE` into the mesh laid on
-  the sheet, and it is reachable only through `rebuildFrame`, which `mapLayers.test.ts` never calls.
-  `mapTitle.test.ts` covers `buildMapTitleSvg` and `createMapTitle` in isolation, so what is untested is
-  the **wiring** — the outer edge, the offset, the lift. Open rather than fixed because the file is in
-  the blast radius of the rename, not in its diff; it was already untested before. The atlas's name
-  growing from 16 to 23 characters passed through it with no test exercising the path.
-  **Narrowed 2026-10-27 (ATLAS-291)**: `mapLayers.test.ts` now builds the frame and the rose — the four objects laid,
-  a rebuild replacing rather than stacking, the old vellum freed, the two switches honoured, each guard broken on
-  purpose. What stays unasserted is the title's **position** (outer edge, offset, lift). **Severity: cosmetic.**
 - **The focus mode has no keyboard way in** (A11Y-301, found 2026-09-18, **left open by decision**).
   Escape _leaves_ the focus, so half the feature is keyboard-operable; nothing enters it. A
   keyboard-only reader can pan and zoom but can never reach the close-up the feature exists for, and

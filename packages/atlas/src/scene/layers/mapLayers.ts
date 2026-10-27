@@ -23,11 +23,18 @@ import { rebuildRivers } from '../waters/mapRiverLayer'
 import { disposeHandle } from './disposeHandle'
 import { frameLineWork, frameRelief } from './frameLayers'
 import { createLayerProjection } from './layerProjection'
+import { layersWithRole } from './layerRoles'
 import { rebuildSurface } from './rebuildSurface'
 
 import type { LayerContext, MapLayersDeps } from './layerContext'
 import type { CameraPose } from '../events/markers'
 import type { DataTexture, Object3D } from 'three'
+
+/** Every layer drawn on the scene but the relief, which is freed on its own terms. */
+const DRAWN_LAYERS = [...layersWithRole('draped'), ...layersWithRole('flat')]
+
+/** The textures held apart from the meshes they hang on. */
+const TEXTURES = layersWithRole('texture')
 
 /** The map's overlays, as one thing. */
 export interface MapLayers {
@@ -274,22 +281,9 @@ function layerLifecycle(
     dispose(): void {
       // Every layer taken off the scene and freed.
       disposeRelief(scene, handles.relief)
-      disposeHandle(scene, handles.edge)
-      disposeHandle(scene, handles.coastline)
-      disposeHandle(scene, handles.rhumb)
-      disposeHandle(scene, handles.rivers)
-      disposeHandle(scene, handles.borders)
-      disposeHandle(scene, handles.fills)
-      disposeHandle(scene, handles.tribes)
-      disposeHandle(scene, handles.events)
-      disposeHandle(scene, handles.compass)
-      disposeHandle(scene, handles.sheet)
-      disposeHandle(scene, handles.frame)
-      disposeHandle(scene, handles.labels)
-      disposeHandle(scene, handles.title)
-      // The two textures last: they are held apart from their meshes, so no mesh disposal frees them.
-      handles.texture?.dispose()
-      handles.sheetTexture?.dispose()
+      for (const key of DRAWN_LAYERS) disposeHandle(scene, handles[key])
+      // The textures last: they are held apart from their meshes, so no mesh disposal frees them.
+      for (const key of TEXTURES) handles[key]?.dispose()
     },
   }
 }

@@ -6,9 +6,6 @@
 import { createInlineMapCompute } from '@europe-historical-atlas/core/pipeline/inlineCompute'
 import { createWorkerMapCompute } from '@europe-historical-atlas/core/pipeline/workerCompute'
 
-import { rebuildPolitical } from './stages/political'
-import { pushSources } from './stages/texture'
-
 import type { PipelineContext } from './pipelineContext'
 import type { MapCompute } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
@@ -20,19 +17,22 @@ import type { MapCompute } from '@europe-historical-atlas/core/pipeline/mapCompu
  * console line is the outcome this exists to avoid.
  * @param context - the pipeline's world
  * @param error - what killed the worker
+ * @param restore - how the pipeline sets the new compute up again — its business, not the compute's
  * @returns nothing
  */
-function failoverToInline(context: PipelineContext, error: Error): void {
+function failoverToInline(
+  context: PipelineContext,
+  error: Error,
+  restore: () => Promise<void>
+): void {
   console.warn('map compute worker died — continuing on the main thread', error)
   if (context.isDisposed()) return
   // Replace the dead worker with the inline compute, which yields a frame between its phases.
   context.box.compute = createInlineMapCompute({ yieldControl: nextFrame })
-  // It starts empty: hand it the sources again, then recompute the year on screen.
-  void pushSources(context)
-    .then(() => rebuildPolitical(context))
-    .catch((failure: unknown) => {
-      console.error('main-thread fallback could not restore the map', failure)
-    })
+  // It starts empty: the pipeline sets it up again.
+  restore().catch((failure: unknown) => {
+    console.error('main-thread fallback could not restore the map', failure)
+  })
 }
 
 /**
@@ -50,15 +50,16 @@ function nextFrame(): Promise<void> {
 /**
  * Build the compute, preferring a worker and falling back to this thread.
  * @param context - the pipeline's world
+ * @param restore - how the pipeline sets a fresh compute up again, should the worker die mid-session
  * @returns the compute
  */
-export function createCompute(context: PipelineContext): MapCompute {
+export function createCompute(context: PipelineContext, restore: () => Promise<void>): MapCompute {
   try {
     // A worker, whose death mid-session hands over to the inline compute.
     return createWorkerMapCompute({
       spawn: context.spawn,
       onFatal: (error: Error) => {
-        failoverToInline(context, error)
+        failoverToInline(context, error, restore)
       },
     })
   } catch (error: unknown) {

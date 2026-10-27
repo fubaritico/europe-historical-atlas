@@ -309,3 +309,18 @@ Entries closed and moved out of `known-issues.md`. Kept for the lessons they car
   is now 32×32 with the glyph centred. **Note the criterion**: the familiar 44×44 is WCAG 2.5.5, which is
   **AAA**. The AA bar is 2.5.8 (WCAG 2.2) at **24×24** — the old box failed that too. Both are guarded by
   tests, so a restyle cannot quietly undo them.
+
+## Moved from `rules/known-issues/atlas.md`, 2026-10-27 (ATLAS-293: closed)
+
+- **`buildTitle` in `scene/sheet/mapFrameLayer.ts` (`mapLayerBuilders.ts` until 2026-10-27) is reached by no test** (QUAL-021, found 2026-09-18, **left
+  open**). It is the only code turning the `frame.title*` tunables and `MAP_TITLE` into the mesh laid on
+  the sheet, and it is reachable only through `rebuildFrame`, which `mapLayers.test.ts` never calls.
+  `mapTitle.test.ts` covers `buildMapTitleSvg` and `createMapTitle` in isolation, so what is untested is
+  the **wiring** — the outer edge, the offset, the lift. Open rather than fixed because the file is in
+  the blast radius of the rename, not in its diff; it was already untested before. The atlas's name
+  growing from 16 to 23 characters passed through it with no test exercising the path.
+  **Narrowed 2026-10-27 (ATLAS-291)**: `mapLayers.test.ts` now builds the frame and the rose — the four objects laid,
+  a rebuild replacing rather than stacking, the old vellum freed, the two switches honoured, each guard broken on
+  purpose. What stays unasserted is the title's **position** (outer edge, offset, lift). **Severity: cosmetic.**
+  **Closed 2026-10-27 (ATLAS-293)**: the title's position is tested too — it moves back by exactly its offset, the
+  band's thickening and the label lane's widening, and floats a hair above the sheet; each guard broken on purpose.

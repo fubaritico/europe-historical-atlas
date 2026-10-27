@@ -14,6 +14,7 @@ import { DEPTH_BIAS_UNIFORM, DRAPED_DEPTH_BIAS } from '../lines/depthBias'
 import { FILL_RENDER_ORDER } from '../political/fills/fillLayer'
 import { TRIBE_RENDER_ORDER } from '../political/tribes/tribeLayer'
 import * as patchModule from '../political/tribes/tribePatches'
+import { MAP_TITLE_OBJECT } from '../sheet/mapTitle'
 import { PAPER_SHEET_RENDER_ORDER } from '../sheet/paperSheet'
 
 import { createLayerProjection } from './layerProjection'
@@ -941,6 +942,18 @@ describe('createMapLayers', () => {
   })
 })
 
+// The title's centre on Z and its height, after a rebuild with the frame tuned as given.
+const titleAt = (tune: (frame: ReturnType<typeof createDevState>['frame']) => void) => {
+  const { scene, dev, layers } = build()
+  tune(dev.frame)
+  layers.rebuildFrame()
+  const title = scene.getObjectByName(MAP_TITLE_OBJECT) as unknown as { geometry: BufferGeometry }
+  title.geometry.computeBoundingBox()
+  const box = title.geometry.boundingBox
+  if (box === null) throw new Error('no title geometry')
+  return { z: (box.min.z + box.max.z) / 2, y: box.min.y, lift: dev.frame.lift }
+}
+
 // QUAL-021: the sheet's and the rose's builders were reached by no test until 2026-10-27.
 describe('rebuildFrame and rebuildRose', () => {
   describe('happy path', () => {
@@ -1006,6 +1019,17 @@ describe('rebuildFrame and rebuildRose', () => {
       layers.rebuildRose()
       layers.rebuildRose()
       expect(scene.children).toHaveLength(1)
+    })
+
+    it('places the title from the frame’s outer edge, so it keeps its distance as the frame grows', () => {
+      const base = titleAt(() => undefined)
+      expect(titleAt((frame) => (frame.titleOffset += 0.1)).z - base.z).toBeCloseTo(0.1)
+      expect(titleAt((frame) => (frame.bandWidth += 0.05)).z - base.z).toBeCloseTo(0.05)
+      expect(titleAt((frame) => (frame.labelLaneWidth += 0.07)).z - base.z).toBeCloseTo(0.07)
+      // Just above the sheet, so the two never contend for a pixel: a hair, well clear of the float32 rounding
+      // the vertex buffer adds (a few 1e-10), and far below a visible step.
+      expect(base.y - base.lift).toBeGreaterThan(1e-4)
+      expect(base.y - base.lift).toBeLessThan(0.01)
     })
 
     it('empties the scene of the frame and the rose on teardown', () => {

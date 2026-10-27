@@ -3,10 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
-import { projectRegions } from '@europe-historical-atlas/core/data/regionSource'
-import { toRegionPayload } from '@europe-historical-atlas/core/data/toRegionPayload'
-import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
-import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 
 import { ATLAS_MESSAGES } from '../i18n'
@@ -14,27 +10,16 @@ import { createMapSources } from '../sources/mapSources'
 import { createDevState } from '../tunables/devState'
 
 import { createMapPipeline } from './mapPipeline'
-import { politicalRequest } from './stages/political'
+import { AUTHORED_YEAR, META, YEAR } from './testing/yearFixtures'
 
 import type { MapAssetSources } from './assets'
 import type { MapPipelineDeps } from './pipelineContext'
 import type { MapUi } from '../app/mapUi'
 import type { MapLayers } from '../scene/layers/mapLayers'
 import type { DevState } from '../tunables/devState'
-import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { RiverSet } from '@europe-historical-atlas/core/data/riverSource'
 import type { Mock } from 'vitest'
-
-const META: HeightmapMeta = {
-  width: 4,
-  height: 4,
-  zoom: 5,
-  bbox: { west: -10, south: 35, east: 10, north: 60 },
-  min: 0,
-  max: 1000,
-  encoding: 'int16-le-metres',
-}
 
 /** A tiny relief: half sea, half land, so the mask has something to say. */
 const DEM = createHeightmap(
@@ -42,32 +27,6 @@ const DEM = createHeightmap(
   Int16Array.from([-9, -9, -9, -9, -9, 8, 8, -9, -9, 8, 8, -9, 0, 0, 0, 0])
 )
 const MASK = createElevationLandMask(DEM, 0)
-
-/** One polity covering the whole frame. */
-const YEAR: RegionSet = {
-  year: 1500,
-  regions: [
-    {
-      name: 'Somewhere',
-      subjectTo: null,
-      rings: [
-        [
-          { u: 0, v: 0 },
-          { u: 1, v: 0 },
-          { u: 1, v: 1 },
-          { u: 0, v: 1 },
-        ],
-      ],
-    },
-  ],
-} as unknown as RegionSet
-
-/** The same polity, but as the Cartographer authored it: France and the Empire sharing one limit. */
-const AUTHORED_FILES = { year: 1100, ...saveYearDocument(sharedBorderDocument()) }
-const AUTHORED_YEAR: RegionSet = {
-  ...projectRegions(toRegionPayload(AUTHORED_FILES, META.bbox)),
-  authored: { year: AUTHORED_FILES, bbox: META.bbox },
-}
 
 /** Read a fake's call record. The fakes are typed as the contracts they stand in for, not as mocks. */
 const asMock = (fn: unknown): Mock => fn as Mock
@@ -549,58 +508,5 @@ describe('createMapPipeline', () => {
         pipeline.dispose()
       }).not.toThrow()
     })
-  })
-})
-
-describe('politicalRequest', () => {
-  it('grows a payload year’s claims toward the coast by the tuned distance', () => {
-    const dev = createDevState()
-    dev.political.snapToCoast = 12
-
-    expect(politicalRequest(dev, YEAR).snapToCoast).toBe(12)
-  })
-
-  // The authored outline already runs along the shore: growing it spreads the fill past the drawn line.
-  it('never grows an authored year’s claims', () => {
-    const dev = createDevState()
-    dev.political.snapToCoast = 12
-
-    expect(politicalRequest(dev, AUTHORED_YEAR).snapToCoast).toBe(0)
-  })
-
-  it('paints an authored year in the editor’s colours, from the panel’s palette', () => {
-    const dev = createDevState()
-    dev.political.palette1 = '#010203'
-    dev.political.palette2 = '#040506'
-
-    const request = politicalRequest(dev, AUTHORED_YEAR)
-
-    // France and the Empire share a limit, so they take the first two slots, one each.
-    expect(
-      new Set(request.colours?.map((c) => `${String(c.r)},${String(c.g)},${String(c.b)}`))
-    ).toEqual(new Set(['1,2,3', '4,5,6']))
-  })
-
-  it('paints a polity whose author pinned a colour in that colour', () => {
-    const files = { year: 1100, ...saveYearDocument(sharedBorderDocument()) }
-    const france = files.registry.polities.find((polity) => polity.id === 'fr-couronne')
-    if (france) france.colour = '#123456'
-    const year: RegionSet = {
-      ...projectRegions(toRegionPayload(files, META.bbox)),
-      authored: { year: files, bbox: META.bbox },
-    }
-
-    const request = politicalRequest(createDevState(), year)
-    const index = year.regions.findIndex((region) => region.polityId === 'fr-couronne')
-
-    expect(request.colours?.[index]).toEqual({ r: 0x12, g: 0x34, b: 0x56 })
-  })
-
-  it('leaves a payload year to the palette and the name rules', () => {
-    expect(politicalRequest(createDevState(), YEAR).colours).toBeUndefined()
-  })
-
-  it('passes the year’s polities through untouched', () => {
-    expect(politicalRequest(createDevState(), AUTHORED_YEAR).regions).toBe(AUTHORED_YEAR.regions)
   })
 })

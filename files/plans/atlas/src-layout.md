@@ -103,3 +103,9 @@ Each step: the moves by `git mv` (history follows), imports rewritten, tests mov
 `/svg-icons.html`) to see that nothing moved on screen.
 
 **Worth knowing**: his atlas server reloads the page at each move — harmless, the atlas holds nothing unsaved.
+
+## Decided after the tidy-up (ATLAS-293)
+
+- **The list of layers stays written out in `scene/layers/layerContext.ts`; no registry** (the dev, 2026-10-27:
+  *« en termes de couches, on est pas mal »*). `LAYER_ROLES` gives each layer its role and fails type-check on a
+  missing one. **Trigger to revisit**: the layers multiply — the countries' names, the rest of the render.
