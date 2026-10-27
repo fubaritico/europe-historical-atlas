@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { edgeScrollDrive, keyboardDrive } from './mapControls'
+import { edgeScrollDrive, keyboardDrive } from './mapControlsDrive'
 
 describe('keyboardDrive', () => {
   describe('happy path', () => {

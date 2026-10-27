@@ -2,9 +2,11 @@
 import { PerspectiveCamera } from 'three'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { createMapControls, driveOrGlide, easeOutDecay } from './mapControls'
+import { createMapControls } from './mapControls'
+import { driveOrGlide, easeOutDecay } from './mapControlsDrive'
 
-import type { MapControls, MapControlsOptions } from './mapControls'
+import type { MapControlsOptions } from './controlsState'
+import type { MapControls } from './mapControls'
 
 /**
  * Fresh, fully-specified options for a controls instance under test.

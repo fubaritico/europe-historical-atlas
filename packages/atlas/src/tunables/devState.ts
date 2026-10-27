@@ -37,7 +37,7 @@ import type {
   TribeDevParams,
   VassalDevParams,
 } from './params'
-import type { MapRect } from '../controls/mapControls'
+import type { MapRect } from '../controls/controlsState'
 import type { TerrainTextureOptions } from '@europe-historical-atlas/core/pipeline/terrainCompose'
 
 /** The camera's own framing, which is not a map-controls option. */

@@ -10,7 +10,7 @@
  * named action is.
  */
 
-import type { DevPanelCallbacks, DevPanelDeps } from './devPanel'
+import type { DevPanelCallbacks, DevPanelDeps } from './panelContract'
 import type { Viewport } from '../app/viewport'
 import type { MapControls } from '../controls/mapControls'
 import type { MapPipeline } from '../loading/mapPipeline'

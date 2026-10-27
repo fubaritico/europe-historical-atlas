@@ -1,65 +1,21 @@
+/**
+ * The map's camera controls, as one handle: the drive at each frame (`mapControlsDrive`), the input listened to
+ * (`mapControlsInput`), the flights and the focus (`cameraFlight`, `focusMode`), the framing (`cameraFraming`).
+ */
+
 import { clamp } from '@europe-historical-atlas/core/utils/math'
 
-import { isEditableFocused } from '../utils/editableFocus'
-
-import { advanceFlight, interrupt } from './cameraFlight'
+import { interrupt } from './cameraFlight'
 import { clampTarget, footprintOffsets, placeCamera } from './cameraFraming'
-import {
-  createControlsState,
-  degToRad,
-  distanceForZoom,
-  viewportHeight,
-  viewportWidth,
-} from './controlsState'
+import { createControlsState } from './controlsState'
 import { clearFocus, enterFocus, isFocused, leaveFocus, leaveFocusTo } from './focusMode'
-
-// The options and the rectangle they clamp within live with the state every part of this reads, and
-// are re-exported here so no call site had to move.
-export type { MapControlsOptions, MapRect } from './controlsState'
+import { stepControls } from './mapControlsDrive'
+import { bindListeners } from './mapControlsInput'
 
 import type { ControlsState, MapControlsOptions, MapRect } from './controlsState'
 import type { MapCameraState } from './mapCameraStore'
 import type { CameraControls } from '../camera/cameraState'
 import type { PerspectiveCamera, Vector3 } from 'three'
-
-/**
- * How far the pointer may travel during a press and still count as a click, in CSS pixels.
- *
- * A hand holding a mouse button down moves a pixel or two, so a map that called any movement a drag
- * would answer almost no clicks. Four is the usual tolerance across map libraries.
- */
-const DRAG_CLICK_TOLERANCE_PX = 4
-
-/** Keys that pan the map (arrow keys). Held keys accumulate a continuous pan. */
-const PAN_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])
-
-/** Keys that zoom in (keyboard equivalent of wheel-up). */
-const ZOOM_IN_KEYS = new Set(['+', '=', 'PageUp'])
-/** Keys that zoom out (keyboard equivalent of wheel-down). */
-const ZOOM_OUT_KEYS = new Set(['-', '_', 'PageDown'])
-
-/**
- * Frame-rate-independent ease-out decay factor: multiply a velocity by this each frame to glide it toward
- * zero over roughly `tau` seconds (fast at first, ever slower). Shared by every inertial movement.
- * @param dt - frame delta in seconds
- * @param tau - decay time constant in seconds
- * @returns the per-frame multiplier in `[0, 1]`
- */
-export function easeOutDecay(dt: number, tau: number): number {
-  return Math.exp(-dt / tau)
-}
-
-/**
- * One inertial velocity step: snap to the input speed while it is non-zero (fast start), otherwise glide
- * and decelerate toward zero (ease-out).
- * @param velocity - the current velocity
- * @param drive - the input speed this frame (0 = no input)
- * @param decay - the per-frame decay factor from {@link easeOutDecay}
- * @returns the next velocity
- */
-export function driveOrGlide(velocity: number, drive: number, decay: number): number {
-  return drive !== 0 ? drive : velocity * decay
-}
 
 /**
  * A grand-strategy (EU4/Total War) map camera: pan the ground target with the arrow keys, zoom with the
@@ -149,225 +105,6 @@ export interface MapControls extends CameraControls {
 }
 
 /**
- * A wheel notch's or key press's worth of zoom-velocity impulse, which then eases out.
- * @param opts - the tuning
- * @param direction - `1` to zoom in, `-1` to zoom out
- * @returns the impulse
- */
-function zoomImpulse(opts: MapControlsOptions, direction: number): number {
-  return (direction * opts.zoomSpeed) / opts.smoothingTau
-}
-
-/**
- * The drive velocity the held pan keys ask for.
- * @param pressed - which keys are held
- * @param pan - the pan speed at this zoom
- * @returns the drive on X and Z
- */
-export function keyboardDrive(pressed: ReadonlySet<string>, pan: number): { x: number; z: number } {
-  let x = 0
-  let z = 0
-  if (pressed.has('ArrowUp')) z -= pan // north
-  if (pressed.has('ArrowDown')) z += pan
-  if (pressed.has('ArrowLeft')) x -= pan
-  if (pressed.has('ArrowRight')) x += pan
-  return { x, z }
-}
-
-/**
- * The drive velocity the pointer's nearness to an edge asks for.
- *
- * Nothing at all while the pointer is outside the viewport: a cursor that has left the window is not
- * asking for anything, and without this the map would scroll on forever after the pointer leaves.
- * @param pointerX - the pointer's X in CSS pixels
- * @param pointerY - its Y
- * @param vw - the viewport width
- * @param vh - the viewport height
- * @param margin - how close to an edge the scrolling starts
- * @param edge - the edge-scroll speed at this zoom
- * @returns the drive on X and Z
- */
-export function edgeScrollDrive(
-  pointerX: number,
-  pointerY: number,
-  vw: number,
-  vh: number,
-  margin: number,
-  edge: number
-): { x: number; z: number } {
-  if (pointerX < 0 || pointerX > vw || pointerY < 0 || pointerY > vh) return { x: 0, z: 0 }
-  let x = 0
-  let z = 0
-  if (pointerX < margin) x -= edge
-  else if (pointerX > vw - margin) x += edge
-  if (pointerY < margin) z -= edge
-  else if (pointerY > vh - margin) z += edge
-  return { x, z }
-}
-
-/**
- * Ease the pan velocity toward what the input asks for, and move the target by it.
- *
- * Ease-OUT: it snaps to full speed on input and glides to a stop on release, which is what makes the
- * map feel driven rather than dragged through treacle.
- * @param state - the controls' state
- * @param distance - the camera-to-target distance, which scales the apparent speed
- * @param delta - the frame time in seconds
- * @returns nothing
- */
-function driveTarget(state: ControlsState, distance: number, delta: number): void {
-  const { opts } = state
-  const pan = opts.panSpeed * (distance / opts.maxDistance)
-  const keys = keyboardDrive(state.pressed, pan)
-  const edge =
-    opts.enableEdgeScroll && !Number.isNaN(state.pointerX)
-      ? edgeScrollDrive(
-          state.pointerX,
-          state.pointerY,
-          viewportWidth(state),
-          viewportHeight(state),
-          opts.edgeScrollMargin,
-          opts.edgeScrollSpeed * (distance / opts.maxDistance)
-        )
-      : { x: 0, z: 0 }
-  const decay = easeOutDecay(delta, opts.smoothingTau)
-  state.velX = driveOrGlide(state.velX, keys.x + edge.x, decay)
-  state.velZ = driveOrGlide(state.velZ, keys.z + edge.z, decay)
-  state.target.x += state.velX * delta
-  state.target.z += state.velZ * delta
-}
-
-/**
- * Move the target by whatever the reader is asking for this frame.
- * @param state - the controls' state
- * @param delta - the frame time in seconds
- * @returns nothing
- */
-function driveFrame(state: ControlsState, delta: number): void {
-  // Distance scales pan and edge speed, so the map moves the same apparent amount at every zoom.
-  const distance = distanceForZoom(state.opts, state.zoom)
-  if (state.dragging) {
-    // A drag moves the target directly (grab-the-map); its velocity becomes release momentum.
-    state.velX = state.dragMovedX / delta
-    state.velZ = state.dragMovedZ / delta
-    state.dragMovedX = 0
-    state.dragMovedZ = 0
-  } else {
-    driveTarget(state, distance, delta)
-  }
-  // Zoom inertia: the wheel injects velocity, which eases out; integrate then clamp.
-  state.velZoom *= easeOutDecay(delta, state.opts.smoothingTau)
-  state.zoom = clamp(state.zoom + state.velZoom * delta, 0, 1)
-}
-
-/**
- * Advance the camera by one frame.
- * @param state - the controls' state
- * @param delta - the frame time in seconds
- * @returns nothing
- */
-function stepControls(state: ControlsState, delta: number): void {
-  if (delta > 0) {
-    const flight = state.flight
-    if (flight) advanceFlight(state, flight, delta)
-    else driveFrame(state, delta)
-  }
-  clampTarget(state)
-  placeCamera(state)
-}
-
-/**
- * The keyboard listeners: pan keys, and the keyboard equivalent of the wheel.
- * @param state - the controls' state
- * @returns the listeners, by event name
- */
-function createKeyListeners(state: ControlsState): {
-  keydown: (e: Event) => void
-  keyup: (e: Event) => void
-} {
-  return {
-    keydown: (e: Event): void => {
-      const ke = e as KeyboardEvent
-      if (isEditableFocused()) return // don't hijack keys while a form field (e.g. lil-gui) has focus
-      if (PAN_KEYS.has(ke.key) || ZOOM_IN_KEYS.has(ke.key) || ZOOM_OUT_KEYS.has(ke.key)) {
-        interrupt(state)
-      }
-      if (PAN_KEYS.has(ke.key)) {
-        state.pressed.add(ke.key)
-        ke.preventDefault() // stop the page from scrolling on arrow keys
-      } else if (ZOOM_IN_KEYS.has(ke.key)) {
-        state.velZoom += zoomImpulse(state.opts, 1) // keyboard equivalent of wheel-up (WCAG 2.1.1)
-        ke.preventDefault()
-      } else if (ZOOM_OUT_KEYS.has(ke.key)) {
-        state.velZoom += zoomImpulse(state.opts, -1)
-        ke.preventDefault()
-      }
-    },
-    keyup: (e: Event): void => {
-      state.pressed.delete((e as KeyboardEvent).key)
-    },
-  }
-}
-
-/**
- * The wheel and pointer listeners: zoom, and grab-the-map dragging.
- * @param state - the controls' state
- * @returns the listeners, by event name
- */
-function createPointerListeners(state: ControlsState): {
-  wheel: (e: Event) => void
-  pointerdown: (e: Event) => void
-  pointermove: (e: Event) => void
-  pointerup: () => void
-} {
-  return {
-    wheel: (e: Event): void => {
-      const we = e as WheelEvent
-      if (we.ctrlKey) return // let the browser's ctrl+wheel page zoom through (WCAG 1.4.4)
-      interrupt(state)
-      we.preventDefault() // stop the page from scrolling on wheel
-      state.velZoom += zoomImpulse(state.opts, -Math.sign(we.deltaY)) // wheel up = zoom in
-    },
-    pointerdown: (e: Event): void => {
-      const pe = e as PointerEvent
-      // Reset before the early return, so a press that cannot drag still reports itself as a click.
-      state.pointerTravel = 0
-      state.pointerDragged = false
-      if (!state.opts.enableDrag || pe.button !== 0) return
-      interrupt(state)
-      state.dragging = true
-      state.lastX = pe.clientX
-      state.lastY = pe.clientY
-    },
-    pointermove: (e: Event): void => {
-      const pe = e as PointerEvent
-      state.pointerX = pe.clientX
-      state.pointerY = pe.clientY
-      if (!state.dragging) return
-      state.pointerTravel += Math.hypot(pe.clientX - state.lastX, pe.clientY - state.lastY)
-      // Grab-the-map: the ground follows the cursor, so the target moves opposite to the drag. The
-      // amount moved is accumulated too, so a frame can turn it into release momentum.
-      const distance = distanceForZoom(state.opts, state.zoom)
-      const worldPerPixel =
-        (2 * distance * Math.tan(degToRad(state.camera.fov) / 2)) / viewportHeight(state)
-      const dx = -(pe.clientX - state.lastX) * worldPerPixel
-      const dz = -(pe.clientY - state.lastY) * worldPerPixel
-      state.target.x += dx
-      state.target.z += dz
-      state.dragMovedX += dx
-      state.dragMovedZ += dz
-      state.lastX = pe.clientX
-      state.lastY = pe.clientY
-    },
-    pointerup: (): void => {
-      // Settled before the `click` the browser is about to send, which is what lets the gestures ask.
-      state.pointerDragged = state.pointerTravel > DRAG_CLICK_TOLERANCE_PX
-      state.dragging = false
-    },
-  }
-}
-
-/**
  * The half of the handle that reads and writes the camera's position.
  *
  * `zoom` is deliberately NOT here. It is an accessor, and object spread *evaluates* accessors: coming
@@ -410,45 +147,16 @@ function controlsView(
       return { target: [state.target.x, 0, state.target.z], zoom: state.zoom }
     },
     setState(restored: MapCameraState): void {
+      // Snap the target and the zoom to the snapshot; the target stays on the ground plane.
       state.target.set(restored.target[0], 0, restored.target[2])
       state.zoom = clamp(restored.zoom, 0, 1)
       state.velX = state.velZ = state.velZoom = 0 // no residual inertia after a restore
       interrupt(state) // nor a flight left over from before the restore
       clearFocus(state) // nor a way back to a viewpoint the reader has just been taken away from
+      // Keep the restored view within the extent, then put the camera at that pose.
       clampTarget(state)
       placeCamera(state)
     },
-  }
-}
-
-/**
- * Attach every input listener, and hand back the one call that removes them all.
- *
- * Paired here rather than spelled out twice: six `addEventListener` calls answered by six
- * `removeEventListener` calls, kept in step by hand, is a listener leak waiting for someone to add a
- * seventh — and the map binds keys on `window`, so a leaked one outlives the canvas.
- * @param state - the controls' state
- * @param keyTarget - where keyboard input is read from
- * @returns a call that detaches everything
- */
-function bindListeners(state: ControlsState, keyTarget: EventTarget): () => void {
-  const keys = createKeyListeners(state)
-  const pointer = createPointerListeners(state)
-  const { domElement } = state
-  keyTarget.addEventListener('keydown', keys.keydown)
-  keyTarget.addEventListener('keyup', keys.keyup)
-  domElement.addEventListener('wheel', pointer.wheel, { passive: false })
-  domElement.addEventListener('pointerdown', pointer.pointerdown)
-  window.addEventListener('pointermove', pointer.pointermove)
-  window.addEventListener('pointerup', pointer.pointerup)
-  return (): void => {
-    keyTarget.removeEventListener('keydown', keys.keydown)
-    keyTarget.removeEventListener('keyup', keys.keyup)
-    domElement.removeEventListener('wheel', pointer.wheel)
-    domElement.removeEventListener('pointerdown', pointer.pointerdown)
-    window.removeEventListener('pointermove', pointer.pointermove)
-    window.removeEventListener('pointerup', pointer.pointerup)
-    state.pressed.clear()
   }
 }
 
@@ -467,12 +175,15 @@ export function createMapControls(
   options: MapControlsOptions,
   keyTarget: EventTarget = window
 ): MapControls {
+  // Build the state every part shares, and start listening to the reader's input.
   const state = createControlsState(camera, domElement, options)
   const detach = bindListeners(state, keyTarget)
 
+  // Clamp and place now, so the first frame is already framed correctly.
   clampTarget(state)
   placeCamera(state)
 
+  // The handle: the plain methods first, then the accessors and calls that need the live state.
   return {
     ...controlsView(state),
     target: state.target,

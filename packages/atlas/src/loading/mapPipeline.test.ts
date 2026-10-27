@@ -13,9 +13,11 @@ import { ATLAS_MESSAGES } from '../i18n'
 import { createMapSources } from '../sources/mapSources'
 import { createDevState } from '../tunables/devState'
 
-import { createMapPipeline, politicalRequest } from './mapPipeline'
+import { createMapPipeline } from './mapPipeline'
+import { politicalRequest } from './stages/political'
 
-import type { MapAssetSources, MapPipelineDeps } from './mapPipeline'
+import type { MapAssetSources } from './assets'
+import type { MapPipelineDeps } from './pipelineContext'
 import type { MapUi } from '../app/mapUi'
 import type { MapLayers } from '../scene/layers/mapLayers'
 import type { DevState } from '../tunables/devState'

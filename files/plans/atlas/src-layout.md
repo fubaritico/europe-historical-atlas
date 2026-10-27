@@ -44,15 +44,18 @@
 src/
 ├── main.ts                 composition root — unchanged
 ├── app/                    the running map: viewport, frameLoop, mapInteraction, mapUi, assetMessages
-├── loading/                what the map is made from, and the order it is paid in:
-│                           mapPipeline (split), mapContent, yearBorders, computeLabels
+├── loading/                what the map is made from, and the order it is paid in: mapPipeline (the façade),
+│                           assets (where the files live), pipelineContext, compute (worker or this thread),
+│                           stages/ (texture, political, terrain, rivers, startup), mapContent, yearBorders,
+│                           computeLabels
 ├── sources/                what the map has been given so far: mapSources — a leaf the loading fills and the layers
 │                           read (split from loading/ on 2026-10-27, so scene/ need not read loading/)
 ├── tunables/               the settings the whole map reads: devState, params/ (today's devParams/) — a leaf
-├── devPanel/               the panel that shows them: devPanel (split), devPanelCallbacks
+├── devPanel/               the panel that shows them: devPanel (the assembly), panelContract, addControl, reset,
+│                           folders/ (one per system, as tunables/params/), devPanelCallbacks
 ├── scene/                  everything drawn, one folder per family; each family holds its three.js objects AND
 │   │                       its builder, `map…Layer` (how it is put on the map from the layers' context)
-│   ├── layers/             the handle over all of it: mapLayers; layerContext (the handles and the context),
+│   ├── layers/             the façade over all of it: mapLayers; layerContext (the handles and the context),
 │   │                       frameLayers (what every frame updates), rebuildSurface (the one order), layerProjection,
 │   │                       disposeHandle
 │   ├── relief/             reliefMesh, mapEdge (its wall), terrainTexture, drapeProjection, mapReliefLayer
@@ -76,7 +79,9 @@ src/
 │   │       └── light/      what detaches an icon from the map: lighting, halo
 │   └── (root)              what several families share: world (the map's width), landMask (the land, or its
 │                           fallback), screenScale, svgTexture, fadeHidden, debugRect
-├── camera/  controls/  picking/  ui/  utils/  i18n/  bench/      unchanged (mapControls split in place)
+├── camera/  picking/  ui/  utils/  i18n/  bench/      unchanged
+├── controls/               mapControls (the façade), mapControlsDrive (each frame's motion), mapControlsInput
+│                           (keys, wheel, pointer; click vs drag), with cameraFlight, cameraFraming, focusMode
 ```
 
 **The ESLint boundaries keep working** for `scene/`, `camera/`, `controls/`, `picking/` and `ui/`: their globs match

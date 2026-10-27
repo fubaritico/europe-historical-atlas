@@ -7,8 +7,8 @@ import { createDevState } from '../tunables/devState'
 
 import { createDevPanel } from './devPanel'
 
-import type { DevPanelCallbacks } from './devPanel'
-import type { MapControlsOptions } from '../controls/mapControls'
+import type { DevPanelCallbacks } from './panelContract'
+import type { MapControlsOptions } from '../controls/controlsState'
 import type { DevState } from '../tunables/devState'
 import type GUI from 'lil-gui'
 
@@ -409,6 +409,54 @@ describe('createDevPanel', () => {
       // full texture bakes in a row.
       expect(calls.rebuildTexture).toBe(2) // once for the sea level above, once for the reset
       expect(calls.rebuildPolitical).toBe(1)
+      gui.destroy()
+    })
+
+    it('restores every settings object, the camera tuning and the field of view', () => {
+      const { gui, dev, calls, controls, controlsOptions } = build()
+      const objects = {
+        relief: dev.relief,
+        texture: dev.texture,
+        coast: dev.coast,
+        rhumb: dev.rhumb,
+        river: dev.river,
+        political: dev.political,
+        vassals: dev.vassals,
+        tribes: dev.tribes,
+        rose: dev.rose,
+        frame: dev.frame,
+        extent: dev.extent,
+      }
+      const before = structuredClone({
+        objects,
+        panSpeed: controlsOptions.panSpeed,
+        fov: dev.framing.fov,
+      })
+      // One numeric field of each object pushed off its default, behind lil-gui's back.
+      for (const object of Object.values(objects)) {
+        const record = object as unknown as Record<string, unknown>
+        const key = Object.keys(record).find((k) => typeof record[k] === 'number')
+        if (key === undefined) throw new Error('a settings object with no number to change')
+        record[key] = (record[key] as number) + 1
+      }
+      controlsOptions.panSpeed += 1
+      dev.framing.fov += 1
+      const reset = controls.find((c) => c.property === 'resetToDefaults')
+      ;(reset?.object as { resetToDefaults: () => void }).resetToDefaults()
+      expect(
+        structuredClone({ objects, panSpeed: controlsOptions.panSpeed, fov: dev.framing.fov })
+      ).toEqual(before)
+      // The values held by live materials and the camera are pushed back too.
+      for (const call of [
+        'setWireframe',
+        'setCoastColor',
+        'setRhumbColor',
+        'setRiverColor',
+        'setRoseOpacity',
+        'setFov',
+        'applyExtent',
+      ])
+        expect(calls[call]).toBe(1)
       gui.destroy()
     })
   })
