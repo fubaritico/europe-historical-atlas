@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "events": [
     {
       "id": "11",
@@ -13,7 +13,8 @@
           "fr": "Polithique - Accession au trone",
           "en": null
         },
-        "icon": "pin"
+        "icon": "pin",
+        "colour": "#ffc300"
       },
       "date": {
         "kind": "instant",
@@ -76,7 +77,8 @@
           "fr": "Concile",
           "en": null
         },
-        "icon": "pin"
+        "icon": "pin",
+        "colour": "#1565e8"
       },
       "date": {
         "kind": "instant",
@@ -148,7 +150,8 @@
           "fr": "Conquest",
           "en": null
         },
-        "icon": "pin"
+        "icon": "pin",
+        "colour": "#e3170a"
       },
       "date": {
         "kind": "instant",
@@ -211,7 +214,8 @@
           "fr": "Bataille",
           "en": null
         },
-        "icon": "swords"
+        "icon": "swords",
+        "colour": "#e3170a"
       },
       "date": {
         "kind": "instant",
@@ -283,7 +287,8 @@
           "fr": "Bataille",
           "en": null
         },
-        "icon": "swords"
+        "icon": "swords",
+        "colour": "#e3170a"
       },
       "date": {
         "kind": "instant",
@@ -346,7 +351,8 @@
           "fr": "Intronisation",
           "en": null
         },
-        "icon": "pin"
+        "icon": "pin",
+        "colour": "#d4148a"
       },
       "date": {
         "kind": "instant",
@@ -425,7 +431,8 @@
           "fr": "Siège",
           "en": null
         },
-        "icon": "tower"
+        "icon": "tower",
+        "colour": "#ff7a00"
       },
       "date": {
         "kind": "instant",
@@ -495,7 +502,8 @@
           "fr": "Bataille",
           "en": null
         },
-        "icon": "swords"
+        "icon": "swords",
+        "colour": "#e3170a"
       },
       "date": {
         "kind": "instant",
@@ -576,7 +584,8 @@
           "fr": "Polithique - Accession au trone",
           "en": null
         },
-        "icon": "pin"
+        "icon": "pin",
+        "colour": "#ffc300"
       },
       "date": {
         "kind": "instant",
@@ -637,7 +646,8 @@
           "fr": "Mort",
           "en": null
         },
-        "icon": "pin"
+        "icon": "pin",
+        "colour": "#8a2be2"
       },
       "date": {
         "kind": "instant",
@@ -709,7 +719,8 @@
           "fr": "Bataille",
           "en": null
         },
-        "icon": "swords"
+        "icon": "swords",
+        "colour": "#e3170a"
       },
       "date": {
         "kind": "instant",

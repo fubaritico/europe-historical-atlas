@@ -63,6 +63,11 @@ export interface ContentEventType {
   name: LocalizedText
   /** The shape its events stand on the map as. */
   icon: EventIcon
+  /**
+   * The colour its events' pins wear, as `#rrggbb` — one per type, so a pin says what kind of event it marks (the dev,
+   * 2026-10-27: « une épingle avec une couleur dédiée », ATLAS-298).
+   */
+  colour: string
 }
 
 /** {@link ContentEventType}. */
@@ -70,6 +75,7 @@ const eventTypeSchema: z.ZodMiniType<ContentEventType> = z.strictObject({
   id: recordId,
   name: localizedText,
   icon: z.enum(EVENT_ICONS),
+  colour: z.string().check(z.regex(/^#[0-9a-f]{6}$/, 'should be a colour like #e3170a')),
 })
 
 /** A named point on the map: a city, an abbey, a battlefield. */
@@ -192,9 +198,10 @@ export interface ContentFile {
 
 /**
  * The version this code writes and reads — 2 since the event type carries its icon (2026-10-26), 3 since an event
- * carries its siege engine (2026-10-27, ATLAS-286).
+ * carries its siege engine (2026-10-27, ATLAS-286), 4 since the event type carries its pins' colour (2026-10-27,
+ * ATLAS-298).
  */
-export const CONTENT_FORMAT_VERSION = 3
+export const CONTENT_FORMAT_VERSION = 4
 
 /** {@link ContentFile}. The writer's version and the reader's are one constant, so a bump cannot split them. */
 export const contentFileSchema: z.ZodMiniType<ContentFile> = z.strictObject({

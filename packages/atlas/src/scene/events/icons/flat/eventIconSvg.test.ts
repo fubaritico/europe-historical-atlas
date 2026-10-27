@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { EVENT_ICON_PALETTE } from '../palette'
 
 import { EVENT_ICON_SVG_STYLE, drawingSvg, eventIconSvg } from './eventIconSvg'
+import { PIN_DRAWING } from './pin'
 import { TOWER_DRAWING } from './tower'
 import { TREBUCHET_DRAWING } from './trebuchet'
 
@@ -102,6 +103,17 @@ describe('eventIconSvg', () => {
 
   // L3: N/A — every kind is a member of a closed union; nothing is refused
   // L4: N/A — no async work, nothing external
+
+  describe('the plain pin', () => {
+    it('draws the pin in the swords’ 44 frame, one dark silhouette with no line, ringed by the rim of 4', () => {
+      // ATLAS-298, « A » on the bench (the dev, 2026-10-27).
+      const svg = drawingSvg(PIN_DRAWING, EVENT_ICON_PALETTE, EVENT_ICON_SVG_STYLE)
+      expect(svg).toContain('viewBox="10 10 44 44"')
+      expect(widthOf(svg)).toBeCloseTo(EVENT_ICON_SVG_STYLE.rimWidth)
+      expect(svg).toContain(`fill="${EVENT_ICON_SVG_STYLE.silhouette}"`)
+      expect(svg).not.toContain(`stroke="${EVENT_ICON_SVG_STYLE.ink}"`)
+    })
+  })
 
   describe('edge cases', () => {
     it('gives every shape both its rim and its body, none drawn once', () => {

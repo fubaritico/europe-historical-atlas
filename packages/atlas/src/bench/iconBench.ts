@@ -9,6 +9,8 @@ import { Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
 
 import { createIconLights } from '../scene/events/icons/light/lighting'
 import { createEventIcon } from '../scene/events/icons/meshes/eventIcons'
+import { EVENT_MARKER_STYLE, createPinMarkers } from '../scene/events/pin'
+import { svgToTexture } from '../scene/svgTexture'
 
 import type { EventIconKind } from '../scene/events/icons/kinds'
 
@@ -38,6 +40,17 @@ const icons = KINDS.map((kind, index) => {
   return { large, small }
 })
 
+// The plain pin (ATLAS-298), behind the icons, as tall as they are: chosen here, « B » (the dev, 2026-10-27). One per
+// colour the contribution offers an event type (`cms/src/fields/eventColours`).
+const PIN_COLOURS = ['#e3170a', '#ff7a00', '#ffc300', '#1fa33a', '#1565e8', '#8a2be2', '#d4148a']
+const pins = PIN_COLOURS.map((colour, index) => {
+  const pin = createPinMarkers([{ ground: [0, 0, 0], colour }], svgToTexture).object
+  pin.scale.setScalar(0.8 / EVENT_MARKER_STYLE.height)
+  pin.position.set((index - (PIN_COLOURS.length - 1) / 2) * 0.55, 0.5, -1.6)
+  scene.add(pin)
+  return pin
+})
+
 /**
  * Fit the drawing buffer and the camera to the window.
  * @returns nothing
@@ -57,5 +70,7 @@ renderer.setAnimationLoop((time: number) => {
     large.animate(time / 1000)
     small.animate(time / 1000)
   }
+  // The pins turn slowly, so the light is seen running round the stem and the head.
+  for (const pin of pins) pin.rotation.y = time * 0.0004
   renderer.render(scene, camera)
 })

@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import { DEFAULT_EVENT_COLOUR } from '../fields/eventColours'
+
 import { eventMoment, existenceMoment, seed } from './seed'
 import { ENGINE_SOURCES, SIEGE_ENGINES } from './siegeEngineData'
 import { ACTORS, EVENTS, PLACES, SOURCES, TYPES } from './year1100'
@@ -57,7 +59,7 @@ const YEAR_1100: SeedData = {
 
 /** One event at one place, with one actor, one source and one type. */
 const SMALL: SeedData = {
-  types: [{ name: 'Bataille', icon: 'swords' }],
+  types: [{ name: 'Bataille', icon: 'swords', colour: '#ff7a00' }],
   sources: [
     {
       title: 'Gesta',
@@ -201,6 +203,34 @@ describe('seed', () => {
       await seed(base.store, atParis, SMALL)
 
       expect(base.records('event-types')[0]?.data.icon).toBe('tower')
+    })
+
+    it('gives a type the dev wrote its colour while it still holds the default red', async () => {
+      const base = memoryStore()
+      await base.store.create('event-types', {
+        name: 'Bataille',
+        icon: 'swords',
+        colour: DEFAULT_EVENT_COLOUR,
+      })
+
+      const report = await seed(base.store, atParis, SMALL)
+
+      expect(base.records('event-types')[0]?.data.colour).toBe('#ff7a00')
+      expect(report['event-types']).toEqual({ found: 1, created: 0, updated: 1 })
+    })
+
+    it('never replaces a colour the dev chose', async () => {
+      const base = memoryStore()
+      await base.store.create('event-types', {
+        name: 'Bataille',
+        icon: 'swords',
+        colour: '#1565e8',
+      })
+
+      const report = await seed(base.store, atParis, SMALL)
+
+      expect(base.records('event-types')[0]?.data.colour).toBe('#1565e8')
+      expect(report['event-types'].updated).toBe(0)
     })
 
     it('does not ask Wikidata for a place already in the base', async () => {

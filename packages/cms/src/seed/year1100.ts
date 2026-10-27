@@ -6,6 +6,7 @@
  * Angleterre » on the page) is kept and simply has no pin.
  */
 
+import type { EventColour } from '../fields/eventColours'
 import type { EventIcon } from '@europe-historical-atlas/core/data/contentFormat'
 
 /** A place, named by its Wikidata item — the seed reads its position and existence from Wikidata, as the form does. */
@@ -78,21 +79,25 @@ export interface SeedType {
   name: string
   /** Its icon. */
   icon: EventIcon
+  /** Its pins' colour. */
+  colour: EventColour
 }
 
 /**
  * The event types the seed needs. The first four are the dev's own (written 2026-10-26, spelling kept); the seed finds
  * them by name and creates only the others. The crossed swords are the first icon the dev validated (2026-10-26); the
  * siege takes the tower and its engin (2026-10-27, ATLAS-286); every other type keeps the pin until its shape is chosen.
+ * Each pin type has its own colour (ATLAS-298, the dev, 2026-10-27: « je te laisse libre du code couleur »): war in
+ * red, the throne in yellow, death in violet, the Church in blue and magenta.
  */
 export const TYPES: readonly SeedType[] = [
-  { name: 'Bataille', icon: 'swords' },
-  { name: 'Siège', icon: 'tower' },
-  { name: 'Conquest', icon: 'pin' },
-  { name: 'Polithique - Accession au trone', icon: 'pin' },
-  { name: 'Mort', icon: 'pin' },
-  { name: 'Concile', icon: 'pin' },
-  { name: 'Intronisation', icon: 'pin' },
+  { name: 'Bataille', icon: 'swords', colour: '#e3170a' },
+  { name: 'Siège', icon: 'tower', colour: '#ff7a00' },
+  { name: 'Conquest', icon: 'pin', colour: '#e3170a' },
+  { name: 'Polithique - Accession au trone', icon: 'pin', colour: '#ffc300' },
+  { name: 'Mort', icon: 'pin', colour: '#8a2be2' },
+  { name: 'Concile', icon: 'pin', colour: '#1565e8' },
+  { name: 'Intronisation', icon: 'pin', colour: '#d4148a' },
 ]
 
 /** The places, by their Wikidata items. */

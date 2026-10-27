@@ -1,3 +1,5 @@
+import { DEFAULT_EVENT_COLOUR } from '../fields/eventColours'
+
 import type { SeedPeriodEnd, SeedSiegeEngine } from './siegeEngineData'
 import type { SeedActor, SeedEvent, SeedMoment, SeedPlace, SeedSource, SeedType } from './year1100'
 import type { MomentFields } from '../fields/historicalDate'
@@ -156,8 +158,9 @@ async function settle(
 }
 
 /**
- * Give each type its icon where the base still holds the default pin — a type the dev wrote before the field existed
- * took the pin from the column's default; a shape he chose himself is never replaced.
+ * Give each type its icon where the base still holds the default pin, and its colour where it still holds the default
+ * red — a type the dev wrote before a field existed took the column's default; a shape or a colour he chose himself is
+ * never replaced.
  * @param store - the base
  * @param types - the seed's types
  * @param ids - their ids
@@ -171,10 +174,17 @@ async function giveIcons(
   report: SeedReport
 ): Promise<void> {
   for (const type of types) {
-    if (type.icon === 'pin') continue
     const id = idOf(ids, type.name, 'type')
-    if ((await store.readField('event-types', id, 'icon')) !== 'pin') continue
-    await store.update('event-types', id, { icon: type.icon })
+    const data: Record<string, unknown> = {}
+    if (type.icon !== 'pin' && (await store.readField('event-types', id, 'icon')) === 'pin')
+      data.icon = type.icon
+    if (
+      type.colour !== DEFAULT_EVENT_COLOUR &&
+      (await store.readField('event-types', id, 'colour')) === DEFAULT_EVENT_COLOUR
+    )
+      data.colour = type.colour
+    if (Object.keys(data).length === 0) continue
+    await store.update('event-types', id, data)
     report['event-types'].updated += 1
   }
 }

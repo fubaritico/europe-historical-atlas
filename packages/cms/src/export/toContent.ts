@@ -50,6 +50,8 @@ export interface DocEventType {
   name: DocLocalized
   /** The shape its events stand on the map as. */
   icon?: EventIcon | null
+  /** The colour its pins wear. */
+  colour?: string | null
 }
 
 /** A place; Payload stores a point as `[longitude, latitude]`. */
@@ -222,8 +224,8 @@ function toPlace(place: DocPlace): ContentPlace {
 }
 
 /**
- * An event's type, with its icon. The column defaults to `pin`, so a type without one is a defect of the base, said
- * loudly — never drawn as a pin.
+ * An event's type, with its icon and its pins' colour. Both columns have a default, so a type without one is a defect
+ * of the base, said loudly — never drawn as a pin, never given a colour here.
  * @param type - the type, resolved
  * @param where - the event, for the error
  * @returns it, as the atlas reads it
@@ -232,7 +234,15 @@ function toContentType(type: DocEventType, where: string): ContentEventType {
   if (type.icon === null || type.icon === undefined) {
     throw new Error(`[CMS] ${where}, type: no icon`)
   }
-  return { id: String(type.id), name: localized(type.name, `${where}, type`), icon: type.icon }
+  if (type.colour === null || type.colour === undefined) {
+    throw new Error(`[CMS] ${where}, type: no colour`)
+  }
+  return {
+    id: String(type.id),
+    name: localized(type.name, `${where}, type`),
+    icon: type.icon,
+    colour: type.colour,
+  }
 }
 
 /**

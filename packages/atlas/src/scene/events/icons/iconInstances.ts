@@ -17,7 +17,7 @@ import { slotsByKey } from './slots'
 import type { EventIconKind } from './kinds'
 import type { IconModel } from './meshes/iconModel'
 import type { EventIconPalette } from './palette'
-import type { Quaternion } from 'three'
+import type { BufferAttribute, InterleavedBufferAttribute, Quaternion } from 'three'
 
 /** Every icon of the map as instances, and what is set on them. */
 export interface IconInstances {
@@ -32,6 +32,17 @@ export interface IconInstances {
    * @throws when the poses are not one per icon — the caller's lists have fallen out of step, a defect
    */
   poseAll(poses: readonly IconPose[], seconds: number): void
+  /**
+   * Visit one icon's pieces as they are posed: each piece's triangles and where its last pose put them in the world —
+   * what its shadow is drawn from (`shadows/iconShadows`).
+   * @param index - the icon, in the order the kinds were given
+   * @param visit - called once per piece, with its positions (three per triangle) and its matrix; the matrix is reused
+   * @returns nothing
+   */
+  forEachPiece(
+    index: number,
+    visit: (positions: BufferAttribute | InterleavedBufferAttribute, matrix: Matrix4) => void
+  ): void
   /**
    * Fade every icon, for the cross-fade with the flat drawings.
    * @param opacity - 0 gone, 1 solid
@@ -58,7 +69,7 @@ interface PieceInstances {
   motion: string | null
 }
 
-/** One kind's share: its model, and its instanced pieces. */
+/** One kind's share: its model, its instanced pieces, and where each of its icons' shadow lies. */
 interface KindInstances {
   /** The model its pieces draw. */
   model: IconModel
@@ -136,6 +147,28 @@ function writePose(
 }
 
 /**
+ * How an icon's pieces are visited as posed, read back from the instances.
+ * @param iconMeshes - each icon's kind's pieces
+ * @param slots - each icon's rank among the icons of its kind
+ * @returns the visitor `IconInstances.forEachPiece` is
+ */
+function pieceVisitor(
+  iconMeshes: readonly KindInstances[],
+  slots: readonly number[]
+): IconInstances['forEachPiece'] {
+  const matrix = new Matrix4()
+  return (index, visit) => {
+    const own = iconMeshes[index]
+    const slot = slots[index]
+    if (own === undefined || slot === undefined) throw new Error(`[atlas] no icon ${String(index)}`)
+    for (const { mesh } of own.meshes) {
+      mesh.getMatrixAt(slot, matrix)
+      visit(mesh.geometry.getAttribute('position'), matrix)
+    }
+  }
+}
+
+/**
  * Build the instances for a set of icons.
  * @param kinds - each icon's kind, in the icons' order
  * @param height - how tall an icon stands, in world units
@@ -193,6 +226,7 @@ export function createIconInstances(
         model.fadeAt(seconds)
       }
     },
+    forEachPiece: pieceVisitor(iconMeshes, slots),
     setOpacity(opacity: number): void {
       for (const { model } of byKind.values()) model.setOpacity(opacity)
     },

@@ -1,6 +1,6 @@
 /**
- * The 3D icons' own lights: a rim against the light, a key on the reader's side, a low sky — turned with the camera
- * at every frame (`eventIconMarkers`), so the icons always read as volumes, whatever the point of view.
+ * The markers' lights: a rim against the light, a key on the reader's side, a low sky — turned with the camera at
+ * every frame (`../../markerLights`), so the icons and the pins always read as volumes, whatever the point of view.
  */
 
 import { DirectionalLight, Group, HemisphereLight } from 'three'
@@ -30,8 +30,8 @@ const KEY_FROM: [number, number, number] = [7, 5, 10]
 /**
  * The icons' lights, set in the camera's frame: the rig is turned with the camera at each frame, so the rim is
  * always behind an icon and the key always on the reader's side, whatever the point of view — lit in the world, one
- * point of view would show the volume and the next would lose it. The relief and the pins are unlit
- * (`MeshBasicMaterial`), so these light the icons and nothing else.
+ * point of view would show the volume and the next would lose it. The relief is unlit
+ * (`MeshBasicMaterial`), so these light the markers — the icons and the pins — and nothing else.
  * @param lighting - how bright each light is
  * @returns the rig — a group holding the rim, the key and the sky, in that order — to turn with the camera
  */

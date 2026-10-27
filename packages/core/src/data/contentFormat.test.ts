@@ -13,7 +13,7 @@ function capture(overrides: Partial<Record<keyof ContentEvent, unknown>> = {}): 
   return {
     id: '10',
     title: { fr: 'Prise de Jérusalem', en: null },
-    type: { id: '1', name: { fr: 'Siège', en: 'Siege' }, icon: 'tower' },
+    type: { id: '1', name: { fr: 'Siège', en: 'Siege' }, icon: 'tower', colour: '#ff7a00' },
     date: {
       kind: 'instant',
       at: { year: 1099, month: null, day: null, calendar: null, circa: false, margin: null },
@@ -121,7 +121,7 @@ describe('contentFileSchema', () => {
     })
 
     it('refuses an unknown version, the earlier ones included', () => {
-      for (const version of [1, 2, 4])
+      for (const version of [1, 2, 3, 5])
         expect(contentFileSchema.safeParse({ version, events: [] }).success).toBe(false)
     })
 
@@ -135,12 +135,26 @@ describe('contentFileSchema', () => {
     })
 
     it('refuses an event type with an icon it does not know', () => {
-      const type = { id: '1', name: { fr: 'Siège', en: null }, icon: 'catapult' }
+      const type = { id: '1', name: { fr: 'Siège', en: null }, icon: 'catapult', colour: '#ff7a00' }
       expect(accepts(capture({ type }))).toBe(false)
     })
 
+    it('refuses an event type with no colour, the version 3 shape', () => {
+      const type = { id: '1', name: { fr: 'Siège', en: null }, icon: 'tower' }
+      expect(accepts(capture({ type }))).toBe(false)
+    })
+
+    it('refuses an event type whose colour is not a #rrggbb colour', () => {
+      for (const colour of ['red', '#e31', '#E3170A', 'e3170a'])
+        expect(
+          accepts(
+            capture({ type: { id: '1', name: { fr: 'Siège', en: null }, icon: 'tower', colour } })
+          )
+        ).toBe(false)
+    })
+
     it('refuses an event type with no icon', () => {
-      const type = { id: '1', name: { fr: 'Siège', en: null } }
+      const type = { id: '1', name: { fr: 'Siège', en: null }, colour: '#ff7a00' }
       expect(accepts(capture({ type }))).toBe(false)
     })
   })

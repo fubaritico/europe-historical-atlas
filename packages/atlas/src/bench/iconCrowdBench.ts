@@ -40,7 +40,8 @@ const placed = Array.from({ length: n }, (_, i) => ({
   ],
   kind: KINDS[i % KINDS.length] ?? 'swords',
 }))
-const markers = createEventIconMarkers(placed, svgToTexture)
+// The bench's ground is flat, at zero.
+const markers = createEventIconMarkers(placed, svgToTexture, () => 0)
 scene.add(markers.object)
 markers.setZoom(zoom, 400)
 

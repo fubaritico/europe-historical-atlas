@@ -10,7 +10,12 @@ import { toContent, toContentEvent, toSiegeEnginePeriods } from './toContent'
 import type { DocEvent, DocSiegeEngine, ExportContext } from './toContent'
 import type { ContentEvent } from '@europe-historical-atlas/core/data/contentFormat'
 
-const SIEGE = { id: 1, name: { fr: 'Siège', en: 'Siege' }, icon: 'tower' as const }
+const SIEGE = {
+  id: 1,
+  name: { fr: 'Siège', en: 'Siege' },
+  icon: 'tower' as const,
+  colour: '#ff7a00',
+}
 const JERUSALEM = {
   id: 2,
   name: { fr: 'Jérusalem', en: 'Jerusalem' },
@@ -65,7 +70,7 @@ describe('toContent', () => {
       expect(exportEvent(capture())).toEqual({
         id: '10',
         title: { fr: 'Prise de Jérusalem', en: 'Capture of Jerusalem' },
-        type: { id: '1', name: { fr: 'Siège', en: 'Siege' }, icon: 'tower' },
+        type: { id: '1', name: { fr: 'Siège', en: 'Siege' }, icon: 'tower', colour: '#ff7a00' },
         date: {
           kind: 'instant',
           at: { year: 1099, month: 7, day: 15, calendar: 'julian', circa: false, margin: null },
@@ -127,8 +132,16 @@ describe('toContent', () => {
 
     it('refuses an event whose type has no icon, rather than drawing it as a pin', () => {
       expect(() =>
-        exportEvent(capture({ type: { id: 1, name: { fr: 'Siège', en: null } } }))
+        exportEvent(
+          capture({ type: { id: 1, name: { fr: 'Siège', en: null }, colour: '#ff7a00' } })
+        )
       ).toThrow('event 10, type: no icon')
+    })
+
+    it('refuses an event whose type has no colour, rather than giving it one', () => {
+      expect(() =>
+        exportEvent(capture({ type: { id: 1, name: { fr: 'Siège', en: null }, icon: 'tower' } }))
+      ).toThrow('event 10, type: no colour')
     })
 
     it('refuses an event with no French title', () => {
@@ -197,7 +210,7 @@ describe('toContent', () => {
     it('gives a battle no engin, and says nothing, even with no period at all', () => {
       const context = { periods: [], warn: vi.fn() }
       const battle = capture({
-        type: { id: 7, name: { fr: 'Bataille', en: null }, icon: 'swords' },
+        type: { id: 7, name: { fr: 'Bataille', en: null }, icon: 'swords', colour: '#e3170a' },
       })
       expect(toContentEvent(battle, context).engine).toBeNull()
       expect(context.warn).not.toHaveBeenCalled()

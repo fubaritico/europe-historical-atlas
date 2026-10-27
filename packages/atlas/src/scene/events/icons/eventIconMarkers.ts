@@ -5,13 +5,14 @@
  * reader (`billboards`), so a hundred events cost about as many draws as one. The pieces live beside it: the values
  * tuned on sight (`settings`), the turning (`facing`), the zoom (`crossFade`), an icon's place on the relief
  * (`forms`), the squares' materials (`billboardMaterials`), the models (`meshes/`), the drawing from afar (`flat/`),
- * the lights and the halo (`light/`).
+ * the halo (`light/`); the lights, shared with the pins, are the events' layer's (`../markerLights`).
  */
 
 import { Group, Quaternion } from 'three'
 
 import { applyDepthBias, applyLiveDepthBias } from '../../depthBias'
 import { EVENT_RENDER_ORDER } from '../markers'
+import { createIconShadows } from '../shadows/iconShadows'
 
 import { billboardMaterials } from './billboardMaterials'
 import { createBillboards } from './billboards'
@@ -19,33 +20,29 @@ import { flatIconSize, iconCrossFade } from './crossFade'
 import { createIconTurner } from './facing'
 import { placeIcon, standForms } from './forms'
 import { createIconInstances } from './iconInstances'
-import { createIconLights } from './light/lighting'
 import { EVENT_ICON_HEIGHT, ICON_DEPTH_PULL, ICON_FLAT_SPAN, ICON_HALO_SPAN } from './settings'
 
 import type { LoadSvgTexture } from './billboardMaterials'
 import type { PlacedEventIcon } from './forms'
 import type { CameraPose, EventMarkers } from '../markers'
+import type { GroundAt } from '../shadows/groundShadows'
 
 /**
- * The groups the icons sit in: the lights; close up, the halos and the 3D icons; from afar, the flat drawings.
+ * The groups the icons sit in: close up, the halos and the 3D icons; from afar, the flat drawings.
  * @param close - what is drawn close up, the halos first so they lie behind the icons
  * @param afar - what is drawn from afar
- * @returns the whole, and the lights and the two groups the zoom shows or hides
+ * @returns the whole, and the two groups the zoom shows or hides
  */
-function iconGroups(
-  close: Group[],
-  afar: Group
-): { object: Group; lights: Group; near: Group; far: Group } {
+function iconGroups(close: Group[], afar: Group): { object: Group; near: Group; far: Group } {
   const object = new Group()
-  const lights = createIconLights()
   const near = new Group()
   near.add(...close)
   // From afar: the flat drawings, hidden until the camera pulls out.
   const far = new Group()
   far.add(afar)
   far.visible = false
-  object.add(lights, near, far)
-  return { object, lights, near, far }
+  object.add(near, far)
+  return { object, near, far }
 }
 
 /**
@@ -53,12 +50,15 @@ function iconGroups(
  * their groups.
  * @param placed - each icon and where it stands
  * @param loadTexture - how a flat icon's SVG becomes a texture
+ * @param groundAt - the relief's height under any point, for the icons' shadows
  * @param height - how tall a 3D icon stands
- * @returns the forms, the instances that draw them, the squares' materials, the groups and the squares' places
+ * @returns the forms, the instances that draw them, their shadows, the squares' materials, the groups and the squares'
+ *   places
  */
 function buildForms(
   placed: readonly PlacedEventIcon[],
   loadTexture: LoadSvgTexture,
+  groundAt: GroundAt,
   height: number
 ) {
   const icons = placed.map((at) => placeIcon(at, height))
@@ -78,13 +78,16 @@ function buildForms(
   const flatPull = { value: flatDepthPull(height * ICON_FLAT_SPAN) }
   for (const kind of new Set(kinds)) applyLiveDepthBias(materials.flat(kind), 'built-in', flatPull)
   const flats = createBillboards(kinds, (kind) => materials.flat(kind), EVENT_RENDER_ORDER)
-  const groups = iconGroups([halos.object, instances.object], flats.object)
+  // Close up, each 3D icon casts its shadow on the relief, drawn from its own pose (ATLAS-298).
+  const shadows = createIconShadows(icons, instances, groundAt)
+  const groups = iconGroups([halos.object, instances.object, shadows.object], flats.object)
   // Each square's place, gathered once: the forms' own vectors, kept up to date by `standForms`.
   const haloPositions = icons.map(({ haloAt }) => haloAt)
   const flatPositions = icons.map(({ flatAt }) => flatAt)
   return {
     icons,
     instances,
+    shadows,
     materials,
     halos,
     flats,
@@ -106,6 +109,7 @@ function fadeForms(forms: ReturnType<typeof buildForms>, near3d: number): void {
   forms.groups.near.visible = near3d > 0
   forms.groups.far.visible = near3d < 1
   forms.instances.setOpacity(near3d)
+  forms.shadows.setOpacity(near3d)
   forms.materials.halo.opacity = near3d
   forms.materials.setFlatOpacity(1 - near3d)
 }
@@ -121,22 +125,25 @@ function flatDepthPull(flatSize: number): number {
 
 /**
  * Stand one icon on each place, in two forms the zoom chooses between (`setZoom`): close up, the 3D icon, turned to
- * the camera and swayed (`faceCamera`) under its own lights, a light halo behind it to detach it from the map; from
- * afar, its flat drawing ringed with light, at a fixed size on screen. The lights are a child of the group, so they
- * come and go with the icons and light nothing else: the relief and the pins are unlit materials.
+ * the camera and swayed (`faceCamera`) under the markers' lights (`../markerLights`, held beside it by the events'
+ * layer), a light halo behind it to detach it from the map; from afar, its flat drawing ringed with light, at a fixed
+ * size on screen. Close up, each 3D icon casts its shadow on the relief, as a pin does (`../shadows/iconShadows`).
  * @param placed - each icon and where it stands
  * @param loadTexture - how a flat icon's SVG becomes a texture
+ * @param groundAt - the relief's height under any point, for the shadows
  * @param height - how tall a 3D icon stands
  * @returns the icons, shaped like the pins' handle
  */
 export function createEventIconMarkers(
   placed: readonly PlacedEventIcon[],
   loadTexture: LoadSvgTexture,
+  groundAt: GroundAt,
   height: number = EVENT_ICON_HEIGHT
 ): EventMarkers {
-  const forms = buildForms(placed, loadTexture, height)
-  const { icons, instances, materials, halos, flats, groups, haloPositions, flatPositions } = forms
-  const { object, lights } = groups
+  const forms = buildForms(placed, loadTexture, groundAt, height)
+  const { icons, instances, shadows, materials, halos, flats, groups } = forms
+  const { haloPositions, flatPositions } = forms
+  const { object } = groups
 
   // The camera's orientation, which every square takes; the turner of the 3D icons, and those it turns.
   const facing = new Quaternion()
@@ -163,6 +170,7 @@ export function createEventIconMarkers(
     setReliefScale(scale: number): void {
       for (const forms of icons) standForms(forms, scale)
       poseAll()
+      shadows.setReliefScale(scale)
     },
     setZoom(zoom: number, pixelsPerUnit: number): void {
       fadeForms(forms, iconCrossFade(zoom))
@@ -172,16 +180,17 @@ export function createEventIconMarkers(
       flats.poseAll(flatPositions, facing, flatSize)
     },
     faceCamera(camera: CameraPose, seconds: number): void {
-      // The group holding the icons is never turned, so an orientation set here is the orientation in the world.
-      lights.quaternion.copy(camera.quaternion)
       facing.copy(camera.quaternion)
       now = seconds
       // The 3D icons whose kind faces the camera turned and swayed, the others left still; then every form posed.
       turnIcons(turning, camera, seconds)
       poseAll()
+      // The shadows drawn from the icons as they now stand.
+      shadows.faceCamera(camera, seconds)
     },
     dispose(): void {
       instances.dispose()
+      shadows.dispose()
       halos.dispose()
       flats.dispose()
       materials.dispose()

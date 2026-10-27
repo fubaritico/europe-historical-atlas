@@ -182,6 +182,7 @@ export interface EventType {
   id: number
   name: string
   icon: 'pin' | 'swords' | 'tower' | 'crown'
+  colour: '#e3170a' | '#ff7a00' | '#ffc300' | '#1fa33a' | '#1565e8' | '#8a2be2' | '#d4148a'
   updatedAt: string
   createdAt: string
 }
@@ -479,6 +480,7 @@ export interface EventsSelect<T extends boolean = true> {
 export interface EventTypesSelect<T extends boolean = true> {
   name?: T
   icon?: T
+  colour?: T
   updatedAt?: T
   createdAt?: T
 }

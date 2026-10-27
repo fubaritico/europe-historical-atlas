@@ -17,7 +17,7 @@ function event(id: string, place: Pick<ContentPlace, 'lon' | 'lat'> | null): Con
   return {
     id,
     title: { fr: `Événement ${id}`, en: null },
-    type: { id: 't', name: { fr: 'Siège', en: null }, icon: 'pin' },
+    type: { id: 't', name: { fr: 'Siège', en: null }, icon: 'pin', colour: '#e3170a' },
     date: {
       kind: 'instant',
       at: { year: 1099, month: null, day: null, calendar: null, circa: false, margin: null },

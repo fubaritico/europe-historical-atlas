@@ -1,4 +1,4 @@
-import { Quaternion, Vector3 } from 'three'
+import { Quaternion, Texture, Vector3 } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
 import { combineEventMarkers } from './markers'
@@ -11,8 +11,14 @@ describe('combineEventMarkers', () => {
 
   describe('happy path', () => {
     it('holds several markers as one: scaled and freed together', () => {
-      const pins = createPinMarkers([[0, 0.2, 0]])
-      const more = createPinMarkers([[1, 0.1, 0]])
+      const pins = createPinMarkers(
+        [{ ground: [0, 0.2, 0], colour: '#e3170a' }],
+        () => new Texture()
+      )
+      const more = createPinMarkers(
+        [{ ground: [1, 0.1, 0], colour: '#e3170a' }],
+        () => new Texture()
+      )
       const disposes = [vi.spyOn(pins, 'dispose'), vi.spyOn(more, 'dispose')]
       const faces = [vi.spyOn(pins, 'faceCamera'), vi.spyOn(more, 'faceCamera')]
       const both = combineEventMarkers([pins, more])
@@ -25,8 +31,8 @@ describe('combineEventMarkers', () => {
       both.dispose()
       for (const spy of faces) expect(spy).toHaveBeenCalledWith(camera, 2)
       expect(both.object.children).toEqual([pins.object, more.object])
-      expect(pins.object.children[0]?.position.y).toBeCloseTo(0.4)
-      expect(more.object.children[0]?.position.y).toBeCloseTo(0.2)
+      expect(pins.object.children[0]?.children[0]?.position.y).toBeCloseTo(0.4)
+      expect(more.object.children[0]?.children[0]?.position.y).toBeCloseTo(0.2)
       for (const spy of disposes) expect(spy).toHaveBeenCalledTimes(1)
     })
   })

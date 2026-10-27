@@ -10,8 +10,12 @@ import { svgToTexture } from '../svgTexture'
 
 import { eventPins } from './eventPins'
 import { createEventIconMarkers } from './icons/eventIconMarkers'
+import { createMarkerLights } from './markerLights'
 import { combineEventMarkers } from './markers'
-import { createPinMarkers } from './pin'
+import { EVENT_MARKER_STYLE, createPinMarkers, pinMeasures } from './pin'
+import { groundAtFrom } from './shadows/groundAt'
+import { createGroundShadows } from './shadows/groundShadows'
+import { SHADOW_SUN, pinFootprint } from './shadows/shadowFootprint'
 
 import type { LayerContext } from '../layers/layerContext'
 
@@ -42,6 +46,7 @@ export function rebuildEvents(context: LayerContext): void {
   const placed = pins.map((pin) => ({
     ground: projection.draped(pin.u, pin.v),
     icon: pin.event.type.icon,
+    colour: pin.event.type.colour,
   }))
 
   // 3. Split in two: the events whose type chose a shaped icon, and the plain pins.
@@ -49,10 +54,21 @@ export function rebuildEvents(context: LayerContext): void {
     icon === 'pin' ? [] : [{ ground, kind: icon }]
   )
 
-  // 4. Both kinds built, held as one handle, and added to the scene.
+  // 4. The lights, the pins' shadows and both kinds built, held as one handle, and added to the scene: one rig lights
+  // the pins and the icons alike, whichever the map holds; each pin and each icon casts its shadow to the south-east, on the relief.
+  const plain = placed.flatMap(({ ground, icon, colour }) =>
+    icon === 'pin' ? [{ ground, colour }] : []
+  )
+  const groundAt = groundAtFrom(projection)
   handles.events = combineEventMarkers([
-    createPinMarkers(placed.filter(({ icon }) => icon === 'pin').map(({ ground }) => ground)),
-    createEventIconMarkers(shaped, svgToTexture),
+    createMarkerLights(),
+    createGroundShadows(
+      plain.map(({ ground }) => ground),
+      pinFootprint(pinMeasures(EVENT_MARKER_STYLE), SHADOW_SUN),
+      groundAt
+    ),
+    createPinMarkers(plain, svgToTexture),
+    createEventIconMarkers(shaped, svgToTexture, groundAt),
   ])
   scene.add(handles.events.object)
 }

@@ -1,5 +1,15 @@
 // @vitest-environment jsdom
-import { DataTexture, InstancedMesh, Matrix4, Quaternion, Scene, ShaderLib, Vector3 } from 'three'
+import {
+  Color,
+  DataTexture,
+  InstancedMesh,
+  Light,
+  Matrix4,
+  Quaternion,
+  Scene,
+  ShaderLib,
+  Vector3,
+} from 'three'
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -27,7 +37,7 @@ import type { ContentEvent } from '@europe-historical-atlas/core/data/contentFor
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
-import type { Object3D } from 'three'
+import type { Mesh, MeshLambertMaterial, Object3D } from 'three'
 import type { BufferGeometry, LineBasicMaterial, LineSegments } from 'three'
 import type { LineSegments2 } from 'three/addons/lines/LineSegments2.js'
 
@@ -199,21 +209,31 @@ function child(parent: Object3D | undefined, index: number): Object3D {
 }
 
 /**
- * The event layer's groups: the pins, and the icons' close-up and far-away forms.
+ * The event layer's groups: the lights, the pins (after their shadows), and the icons' close-up and far-away forms.
  * @param scene - the scene the layers drew into
  * @returns the groups
  */
-function eventGroups(scene: Scene): { pins: Object3D; close: Object3D; afar: Object3D } {
+function eventGroups(scene: Scene): {
+  lights: Object3D
+  pins: Object3D
+  close: Object3D
+  afar: Object3D
+} {
   const events = child(scene, 0)
-  const icons = child(events, 1)
-  return { pins: child(events, 0), close: child(icons, 1), afar: child(icons, 2) }
+  const icons = child(events, 3)
+  return {
+    lights: child(events, 0),
+    pins: child(child(events, 2), 0),
+    close: child(icons, 0),
+    afar: child(icons, 1),
+  }
 }
 
 /** A battle in the middle of the map's frame, for the event layer. */
 const BATTLE: ContentEvent = {
   id: 'e1',
   title: { fr: 'Bataille', en: null },
-  type: { id: 't', name: { fr: 'Bataille', en: null }, icon: 'swords' },
+  type: { id: 't', name: { fr: 'Bataille', en: null }, icon: 'swords', colour: '#e3170a' },
   date: {
     kind: 'instant',
     at: { year: 1100, month: null, day: null, calendar: null, circa: false, margin: null },
@@ -244,6 +264,28 @@ describe('createMapLayers', () => {
       const { pins, afar } = eventGroups(scene)
       expect(pins.children).toHaveLength(1)
       expect(afar.children).toHaveLength(1)
+    })
+
+    it('paints a pin’s head in its event type’s colour', () => {
+      const { scene, sources, layers } = build()
+      sources.events = [{ ...BATTLE, type: { ...BATTLE.type, icon: 'pin', colour: '#1565e8' } }]
+      sources.mapDrawn = true
+      layers.rebuildEvents()
+      const head = child(child(eventGroups(scene).pins, 0), 1) as Mesh<never, MeshLambertMaterial>
+      expect(head.material.color.getHexString()).not.toBe(new Color('#e3170a').getHexString())
+      expect(head.material.color.b).toBeGreaterThan(head.material.color.r)
+    })
+
+    it('lights the pins when no event has an icon', () => {
+      const { scene, sources, layers } = build()
+      sources.events = [{ ...BATTLE, type: { ...BATTLE.type, icon: 'pin' } }]
+      sources.mapDrawn = true
+      layers.rebuildEvents()
+      const found: Light[] = []
+      eventGroups(scene).lights.traverse((object) => {
+        if (object instanceof Light) found.push(object)
+      })
+      expect(found.length).toBeGreaterThan(0)
     })
 
     it('carries each frame’s zoom and camera to the icons', () => {
