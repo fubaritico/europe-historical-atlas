@@ -6,7 +6,7 @@
 
 import { Quaternion, Vector3 } from 'three'
 
-import { ICON_FACES_CAMERA, ICON_FLAT_RAISE, ICON_LIFT, ICON_SIZE } from './settings'
+import { ICON_FACES_CAMERA, ICON_FLAT_RAISE, ICON_LIFT, ICON_SIZE, ICON_YAW } from './settings'
 
 import type { EventIconKind } from './kinds'
 import type { WorldPoint } from '../../relief/drapeProjection'
@@ -55,6 +55,9 @@ export function standForms(forms: PlacedForms, scale: number): void {
   forms.flatAt.setY(base + forms.size * (0.5 + ICON_FLAT_RAISE))
 }
 
+/** The upright an icon is turned about. */
+const UPRIGHT_AXIS = new Vector3(0, 1, 0)
+
 /**
  * Place one icon: its three forms over the same point, standing on the relief at its unscaled height until the first
  * frame scales it (`setReliefScale`).
@@ -66,7 +69,8 @@ export function placeIcon(at: PlacedEventIcon, height: number): PlacedForms {
   const [x, y, z] = at.ground
   const forms = {
     position: new Vector3(x, 0, z),
-    quaternion: new Quaternion(),
+    // Turned for good about its upright; a kind that follows the camera is turned again at every frame.
+    quaternion: new Quaternion().setFromAxisAngle(UPRIGHT_AXIS, ICON_YAW[at.kind]),
     haloAt: new Vector3(x, 0, z),
     flatAt: new Vector3(x, 0, z),
     ground: y,

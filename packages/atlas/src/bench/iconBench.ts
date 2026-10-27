@@ -1,7 +1,8 @@
 /**
  * The icons' bench (ATLAS-156): the event icons alone on the parchment, under the lights they have on the map, on the atlas's dev
  * server at `/icons.html`, never built. Two rows: the icons large and facing the viewer, to judge their shapes from
- * the front, and small, about the size they will have on the map, turning so every face is seen.
+ * the front, and small, about the size they will have on the map, turning so every face is seen. Every model that
+ * moves, moves — the siege's trebuchet was chosen here among three frames, « C » (the dev, 2026-10-27).
  */
 
 import { Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
@@ -27,14 +28,14 @@ lights.quaternion.copy(camera.quaternion)
 scene.add(lights)
 
 const KINDS: EventIconKind[] = ['swords', 'tower', 'crown']
-const turning = KINDS.flatMap((kind, index) => {
+const icons = KINDS.map((kind, index) => {
   const large = createEventIcon(kind)
   large.object.position.set((index - 1) * 1.3, 0, 0)
   const small = createEventIcon(kind)
   small.object.scale.setScalar(0.25)
   small.object.position.set((index - 1) * 0.5, 0, 1.4)
   scene.add(large.object, small.object)
-  return [small]
+  return { large, small }
 })
 
 /**
@@ -50,6 +51,11 @@ window.addEventListener('resize', resize)
 resize()
 
 renderer.setAnimationLoop((time: number) => {
-  for (const icon of turning) icon.object.rotation.y = time * 0.0004
+  // The small ones turn so every face is seen; the models that move, move, large and small.
+  for (const { large, small } of icons) {
+    small.object.rotation.y = time * 0.0004
+    large.animate(time / 1000)
+    small.animate(time / 1000)
+  }
   renderer.render(scene, camera)
 })

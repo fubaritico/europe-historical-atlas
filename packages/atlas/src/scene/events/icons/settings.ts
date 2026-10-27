@@ -30,20 +30,34 @@ export const ICON_LIFT: Record<EventIconKind, number> = { swords: 0.6, tower: 0,
 export const ICON_DEPTH_PULL = 1
 
 /**
- * How tall each kind's 3D model stands, in icon heights. The tower was cut down on sight (the dev, 2026-10-27: *« réduis
- * la taille de la tour »*).
+ * How tall each kind's 3D model stands, in icon heights. The siege's was cut down on sight when it was a tower (the dev,
+ * 2026-10-27: *« réduis la taille de la tour »*), 0.7; the trebuchet that replaced it twice that (*« deux fois plus
+ * grande par rapport à la taille de départ »*).
  */
-export const ICON_SIZE: Record<EventIconKind, number> = { swords: 1, tower: 0.7, crown: 1 }
+export const ICON_SIZE: Record<EventIconKind, number> = { swords: 1, tower: 1.4, crown: 1 }
 
 /**
- * Which kinds of 3D icon turn to face the camera, and sway as they do. The crossed swords float and turn; the tower
- * stands on the ground, still and upright, its door to the south (the dev, 2026-10-27: *« posée sur le sol, ne pas
- * suivre la caméra et ne pas être animée »*) — every kind has its own rule.
+ * Which kinds of 3D icon turn to face the camera, and sway as they do. The crossed swords float and turn; the siege
+ * stands on the ground and does not follow the camera (the dev, 2026-10-27, of the tower: *« posée sur le sol, ne pas
+ * suivre la caméra »*) — a trebuchet seen side on from the south, its arm throwing east — every kind has its own rule.
  */
 export const ICON_FACES_CAMERA: Record<EventIconKind, boolean> = {
   swords: true,
   tower: false,
   crown: true,
+}
+
+/**
+ * How a kind that does not follow the camera is turned about its upright, for good, in radians. The siege's
+ * trebuchet stands in a slight three-quarter turned toward the camera, which looks at the map from the south (the dev,
+ * 2026-10-27: *« un trois quarts légèrement tourné vers la caméra »*), facing left (*« face vers la gauche »*): its
+ * throw, built east, turned round to the west and 30° toward the reader.
+ * Turned toward its target was the other way he named — no event carries where its target stands, so not yet.
+ */
+export const ICON_YAW: Record<EventIconKind, number> = {
+  swords: 0,
+  tower: (-5 * Math.PI) / 6,
+  crown: 0,
 }
 
 /** How the icons sway about their own upright, either side of facing the camera (the dev, 2026-10-26). */

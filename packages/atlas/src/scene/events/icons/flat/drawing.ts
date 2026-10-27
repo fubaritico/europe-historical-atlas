@@ -17,8 +17,11 @@ export interface FlatShape {
 
 /** A kind's drawing: the part of the 64 × 64 field it fills, whether it is outlined, and its groups of shapes. */
 export interface Drawing {
-  /** The `viewBox`: cropped to the drawing, so none of the icon's pixels go to empty margin. */
-  viewBox: string
+  /**
+   * The `viewBox`, `[x, y, width, height]`: cropped to the drawing and its rim, so none of the icon's pixels go to
+   * empty margin. Its width also sets how thick the rim is drawn (`eventIconSvg`).
+   */
+  viewBox: [number, number, number, number]
   /** Whether the shapes get the thin dark outline — a detailed drawing does; flat colours read better without. */
   outlined: boolean
   /** Its groups of shapes, each with the transform it needs. */

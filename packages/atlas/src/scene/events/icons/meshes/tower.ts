@@ -1,5 +1,7 @@
 /**
- * The siege icon: a crenellated tower. A first draft, waiting for its own pass on sight (ATLAS-286).
+ * A crenellated tower, round, still — the siege icon's 3D model until 2026-10-27, **kept in reserve** (the dev: *« la
+ * tour, on la garde, on n'y touche pas, on la met en réserve »*); the siege now stands as a trebuchet (`./trebuchet`).
+ * Its flat drawing is still the siege's (`../flat/tower`).
  */
 
 import { BoxGeometry, LatheGeometry, Vector2 } from 'three'

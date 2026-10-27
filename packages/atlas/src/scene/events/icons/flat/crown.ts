@@ -6,7 +6,7 @@ import type { Drawing } from './drawing'
 
 /** A crown with its points and a stone, outlined. */
 export const CROWN_DRAWING: Drawing = {
-  viewBox: '0 0 64 64',
+  viewBox: [0, 0, 64, 64],
   outlined: true,
   groups: [
     {

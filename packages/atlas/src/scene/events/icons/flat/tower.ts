@@ -1,6 +1,7 @@
 /**
- * The siege icon's flat drawing, for afar — one dark silhouette, chosen on the legibility bench (`/svg-icons.html`,
- * « B », the dev, 2026-10-27). Its 3D model is `../meshes/tower`.
+ * A tower's flat drawing — one dark silhouette, chosen on the legibility bench (`/svg-icons.html`, « B », the dev,
+ * 2026-10-27), the siege's until a trebuchet replaced it the same evening; **kept in reserve** with its 3D model,
+ * `../meshes/tower`.
  */
 
 import type { Drawing } from './drawing'
@@ -11,8 +12,8 @@ import type { Drawing } from './drawing'
  * creusée dans la silhouette de la tour, le contour blanc suive »*).
  */
 export const TOWER_DRAWING: Drawing = {
-  // The tower and its rim run from 16 to 48 across and 10 to 60 down: a square of 50 about its middle.
-  viewBox: '7 10 50 50',
+  // The tower runs from 18 to 46 across and 12 to 58 down; with its rim, a square of 51 about its middle.
+  viewBox: [6.5, 9.5, 51, 51],
   outlined: false,
   groups: [
     {

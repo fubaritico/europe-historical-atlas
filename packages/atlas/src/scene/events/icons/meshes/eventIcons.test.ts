@@ -1,9 +1,9 @@
-import { Box3, Mesh } from 'three'
+import { Box3, BoxGeometry, Mesh, MeshStandardMaterial } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
 import { EVENT_ICON_PALETTE } from '../palette'
 
-import { createEventIcon } from './eventIcons'
+import { createEventIcon, iconOf } from './eventIcons'
 import { towerParts } from './tower'
 
 import type { EventIconKind } from '../kinds'
@@ -58,6 +58,37 @@ describe('createEventIcon', () => {
         (mesh.material as Material & { color: { getHexString: () => string } }).color.getHexString()
       )
       expect(colours).toContain('00ff00')
+    })
+
+    it('places a moving piece by its motion at each moment, and leaves a still model as it is', () => {
+      const siege = createEventIcon('tower')
+      const arm = meshes(siege.object).find((mesh) => !mesh.matrixAutoUpdate)
+      if (arm === undefined) throw new Error('no moving piece')
+      const before = arm.matrix.clone()
+      siege.animate(3.1)
+      expect(arm.matrix.equals(before)).toBe(false)
+      const swords = createEventIcon('swords')
+      expect(meshes(swords.object).every((mesh) => mesh.matrixAutoUpdate)).toBe(true)
+    })
+
+    it('writes a stand-in model’s placement straight into its piece’s matrix, at rest from the start', () => {
+      const icon = iconOf({
+        pieces: [
+          {
+            colour: 'wood',
+            geometry: new BoxGeometry(0.1, 0.1, 0.1),
+            material: new MeshStandardMaterial(),
+            motion: 'm',
+          },
+        ],
+        placeAt: (_motion, seconds, into) => into.makeTranslation(seconds + 1, 0, 0),
+        fadeAt: vi.fn(),
+        setOpacity: vi.fn(),
+        dispose: vi.fn(),
+      })
+      expect(meshes(icon.object)[0]?.matrix.elements[12]).toBe(1)
+      icon.animate(3)
+      expect(meshes(icon.object)[0]?.matrix.elements[12]).toBe(4)
     })
 
     it('draws in the transparent pass, after the borders', () => {

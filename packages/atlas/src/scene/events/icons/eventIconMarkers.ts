@@ -96,6 +96,21 @@ function buildForms(
 }
 
 /**
+ * Fade the two forms into each other: the 3D icons and their halo by the share given, the flat drawings by the rest —
+ * a form fully faded out not drawn at all.
+ * @param forms - the forms, as `buildForms` gives them
+ * @param near3d - how far in the 3D icons are, 0 to 1 (`iconCrossFade`)
+ * @returns nothing
+ */
+function fadeForms(forms: ReturnType<typeof buildForms>, near3d: number): void {
+  forms.groups.near.visible = near3d > 0
+  forms.groups.far.visible = near3d < 1
+  forms.instances.setOpacity(near3d)
+  forms.materials.halo.opacity = near3d
+  forms.materials.setFlatOpacity(1 - near3d)
+}
+
+/**
  * How far a flat drawing is pulled toward the camera: as many of its widths as a 3D icon is pulled of its heights.
  * @param flatSize - how wide the drawing stands, in world units
  * @returns the pull, in world units
@@ -129,13 +144,15 @@ export function createEventIconMarkers(
   const turning = icons.filter(({ turns }) => turns)
   // How wide a flat drawing stands, set by the zoom.
   let flatSize = height * ICON_FLAT_SPAN
+  // The moment of the last frame, for the models that move between frames (a trebuchet's arm).
+  let now = 0
 
   /**
    * Hand every form's pose to its instances: the 3D icons as they are turned, the squares turned as the camera is.
    * @returns nothing
    */
   const poseAll = (): void => {
-    instances.poseAll(icons)
+    instances.poseAll(icons, now)
     halos.poseAll(haloPositions, facing, height * ICON_HALO_SPAN)
     flats.poseAll(flatPositions, facing, flatSize)
   }
@@ -148,14 +165,7 @@ export function createEventIconMarkers(
       poseAll()
     },
     setZoom(zoom: number, pixelsPerUnit: number): void {
-      // How far in the 3D icons are; the flat ones get the rest.
-      const near3d = iconCrossFade(zoom)
-      // A form fully faded out is not drawn at all.
-      groups.near.visible = near3d > 0
-      groups.far.visible = near3d < 1
-      instances.setOpacity(near3d)
-      materials.halo.opacity = near3d
-      materials.setFlatOpacity(1 - near3d)
+      fadeForms(forms, iconCrossFade(zoom))
       // The flat icons keep a legible size on screen, whatever the zoom.
       flatSize = flatIconSize(height, pixelsPerUnit)
       forms.flatPull.value = flatDepthPull(flatSize)
@@ -165,6 +175,7 @@ export function createEventIconMarkers(
       // The group holding the icons is never turned, so an orientation set here is the orientation in the world.
       lights.quaternion.copy(camera.quaternion)
       facing.copy(camera.quaternion)
+      now = seconds
       // The 3D icons whose kind faces the camera turned and swayed, the others left still; then every form posed.
       turnIcons(turning, camera, seconds)
       poseAll()

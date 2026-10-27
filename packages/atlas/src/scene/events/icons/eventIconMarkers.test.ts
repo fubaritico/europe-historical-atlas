@@ -28,6 +28,7 @@ import {
   ICON_LIFT,
   ICON_SIZE,
   ICON_SWAY,
+  ICON_YAW,
 } from './settings'
 
 import type { PlacedEventIcon } from './forms'
@@ -171,6 +172,23 @@ describe('createEventIconMarkers', () => {
   })
 
   describe('variants', () => {
+    it('moves the siege’s trebuchet arm with the frame’s time, its frame left still', () => {
+      const markers = createEventIconMarkers(TWO, STUB)
+      const turnOf = (name: string): number => {
+        const mesh = instanced(markers.object).find((each) => each.name === name)
+        if (mesh === undefined) throw new Error(`no ${name}`)
+        const matrix = new Matrix4()
+        mesh.getMatrixAt(0, matrix)
+        const turn = new Quaternion()
+        matrix.decompose(new Vector3(), turn, new Vector3())
+        return turn.angleTo(new Quaternion())
+      }
+      // At the end of the throw, the arm is turned; the frame stands as it was, in its three-quarter.
+      markers.faceCamera(cameraAt(new Vector3(0, 5, 5), new Euler(-0.8, 0, 0)), 3.1)
+      expect(turnOf('tower wood arm')).toBeGreaterThan(1)
+      expect(turnOf('tower wood')).toBeCloseTo(Math.abs(ICON_YAW.tower))
+    })
+
     it('stands them the default height when none is given, each kind at its own size', () => {
       const markers = createEventIconMarkers(TWO, STUB)
       expect(iconPose(markers.object, 'swords').scale.y).toBeCloseTo(EVENT_ICON_HEIGHT)
@@ -277,14 +295,18 @@ describe('createEventIconMarkers', () => {
       expect(markers.object.children[0]?.quaternion.angleTo(camera.quaternion)).toBeCloseTo(0)
     })
 
-    it('leaves the tower upright and still, its door to the south, however the camera turns and time passes', () => {
+    it('leaves the siege upright and still in its three-quarter, however the camera turns and time passes', () => {
       const markers = createEventIconMarkers(TWO, STUB)
       const camera = cameraAt(new Vector3(4, 3, 6), new Euler(-0.4, 0.3, 0))
+      // Its throw, built east, turned to the west and toward the south, where the camera looks from: facing left.
+      const threeQuarter = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), ICON_YAW.tower)
       for (const seconds of [0, ICON_SWAY.periodSeconds / 4, 7.3]) {
         markers.faceCamera(camera, seconds)
-        expect(iconPose(markers.object, 'tower').quaternion.angleTo(new Quaternion())).toBeCloseTo(
-          0
-        )
+        const turn = iconPose(markers.object, 'tower').quaternion
+        expect(turn.angleTo(threeQuarter)).toBeCloseTo(0)
+        const throwsTo = new Vector3(1, 0, 0).applyQuaternion(turn)
+        expect(throwsTo.x).toBeLessThan(-0.8)
+        expect(throwsTo.z).toBeGreaterThan(0.3)
       }
     })
 
@@ -334,7 +356,8 @@ describe('createEventIconMarkers', () => {
       expect([close?.visible, afar?.visible]).toEqual([true, true])
       expect(squareMaterial(markers.object, 'swords').opacity).toBeCloseTo(0.5)
       expect(squareMaterial(markers.object, 'halo').opacity).toBeCloseTo(0.5)
-      for (const mesh of instanced(markers.object))
+      // Every piece but the trebuchet's stone, which fades on its own — gone at rest.
+      for (const mesh of instanced(markers.object).filter(({ name }) => !name.endsWith(' stone')))
         expect((mesh.material as Material).opacity).toBeCloseTo(0.5)
     })
 

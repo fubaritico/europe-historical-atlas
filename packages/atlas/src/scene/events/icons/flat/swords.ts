@@ -24,7 +24,7 @@ function flatSword(): FlatShape[] {
 /** The crossed swords seen from afar: two flat swords turned each way about the field's middle. */
 export const SWORDS_DRAWING: Drawing = {
   // The pair, crossed about the field's middle, reaches 22 from it with its pommels and their rim.
-  viewBox: '10 10 44 44',
+  viewBox: [10, 10, 44, 44],
   outlined: false,
   groups: [
     { transform: 'rotate(45 32 32)', shapes: flatSword() },

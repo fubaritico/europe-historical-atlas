@@ -18,6 +18,10 @@ export interface EventIconPalette {
   gold: string
   /** A crown's stones. */
   jewel: string
+  /** A trebuchet's timber. */
+  wood: string
+  /** A trebuchet's stone: a small grey ball (the dev, 2026-10-27). */
+  rock: string
 }
 
 /** The default colours — metals and stone that read on the parchment. */
@@ -29,4 +33,6 @@ export const EVENT_ICON_PALETTE: EventIconPalette = {
   door: '#3b2a1e',
   gold: '#d4a53a',
   jewel: '#9b1c1c',
+  wood: '#8a6440',
+  rock: '#8d8c87',
 }

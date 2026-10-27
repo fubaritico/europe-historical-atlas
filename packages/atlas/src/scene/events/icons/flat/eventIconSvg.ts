@@ -7,7 +7,7 @@ import { EVENT_ICON_PALETTE } from '../palette'
 
 import { CROWN_DRAWING } from './crown'
 import { SWORDS_DRAWING } from './swords'
-import { TOWER_DRAWING } from './tower'
+import { TREBUCHET_DRAWING } from './trebuchet'
 
 import type { Drawing, FlatShape, Paint } from './drawing'
 import type { EventIconKind } from '../kinds'
@@ -20,7 +20,11 @@ import type { EventIconPalette } from '../palette'
 export interface EventIconSvgStyle {
   /** The rim's colour — light, against the map's strong colours (the dev, 2026-10-26). */
   rim: string
-  /** The rim's width, in the drawing's units (the drawing is 64 across). */
+  /**
+   * The rim's width in a drawing as wide as the swords' (`RIM_REFERENCE_WIDTH`); a wider drawing gets a wider rim in
+   * its own units, so every icon's rim stands as thick on screen (the dev, 2026-10-27: *« est-ce que le liseré blanc
+   * autour est aussi épais que pour les épées ? »* — the trebuchet's, drawn 80 wide, was half as thick).
+   */
   rimWidth: number
   /** The outline's colour, on a drawing that has one. */
   ink: string
@@ -28,7 +32,7 @@ export interface EventIconSvgStyle {
   inkWidth: number
   /**
    * The silhouette: one dark brown filling the whole drawing, with no line — chosen on the legibility bench, « B »
-   * (the dev, 2026-10-27: *« un aplat marron foncé »*, then *« pas de trait noir »*), for the swords and the tower.
+   * (the dev, 2026-10-27: *« un aplat marron foncé »*, then *« pas de trait noir »*), for the swords and the siege.
    */
   silhouette: string
 }
@@ -42,10 +46,14 @@ export const EVENT_ICON_SVG_STYLE: EventIconSvgStyle = {
   silhouette: '#3b2a1e',
 }
 
+/** How wide the drawing is that `rimWidth` is set for: the swords', chosen with their rim on sight (2026-10-26). */
+const RIM_REFERENCE_WIDTH = 44
+
 /** Each kind's drawing, one file each beside this one; type-check asks for a new kind's line. */
 const DRAWINGS: Record<EventIconKind, Drawing> = {
   swords: SWORDS_DRAWING,
-  tower: TOWER_DRAWING,
+  // The siege's icon keeps its stored name, `tower`; its drawing is a trebuchet since 2026-10-27, the tower in reserve.
+  tower: TREBUCHET_DRAWING,
   crown: CROWN_DRAWING,
 }
 
@@ -91,15 +99,18 @@ export function drawingSvg(
             .join('')}</g>`
       )
       .join('')
-  // First pass: every shape in the rim colour with a wide stroke — the light ring around the silhouette.
+  // First pass: every shape in the rim colour with a wide stroke — the light ring around the silhouette, as thick on
+  // screen whatever the drawing's width.
+  const [, , width] = drawing.viewBox
+  const rimWidth = (style.rimWidth * width) / RIM_REFERENCE_WIDTH
   const rim = layer(
     () =>
-      `fill="${style.rim}" stroke="${style.rim}" stroke-width="${String(style.rimWidth)}" stroke-linejoin="round"`
+      `fill="${style.rim}" stroke="${style.rim}" stroke-width="${rimWidth.toFixed(2)}" stroke-linejoin="round"`
   )
   // Second pass, over it: the shapes in their colours, outlined if the drawing is.
   const outline = drawing.outlined
     ? ` stroke="${style.ink}" stroke-width="${String(style.inkWidth)}" stroke-linejoin="round"`
     : ''
   const body = layer((shape) => `fill="${colourOf(shape.colour)}"${outline}`)
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="${drawing.viewBox}">${rim}${body}</svg>`
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="${drawing.viewBox.join(' ')}">${rim}${body}</svg>`
 }

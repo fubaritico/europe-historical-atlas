@@ -2,17 +2,28 @@ import { describe, expect, it } from 'vitest'
 
 import { EVENT_ICON_PALETTE } from '../palette'
 
-import { EVENT_ICON_SVG_STYLE, eventIconSvg } from './eventIconSvg'
+import { EVENT_ICON_SVG_STYLE, drawingSvg, eventIconSvg } from './eventIconSvg'
+import { TOWER_DRAWING } from './tower'
+import { TREBUCHET_DRAWING } from './trebuchet'
 
 import type { EventIconKind } from '../kinds'
 
 const KINDS: EventIconKind[] = ['swords', 'tower', 'crown']
 
+/**
+ * The rim's width a drawing is given: its first stroke, the rim pass coming first.
+ * @param svg - the drawing
+ * @returns the width, in the drawing's units
+ */
+function widthOf(svg: string): number {
+  return Number(/stroke-width="([\d.]+)"/.exec(svg)?.[1])
+}
+
 describe('eventIconSvg', () => {
   describe('happy path', () => {
     it.each(KINDS)('draws the %s with an explicit size, so it rasterises', (kind) => {
       const svg = eventIconSvg(kind)
-      expect(svg).toMatch(/^<svg [^>]*width="128" height="128" viewBox="[\d ]+">/)
+      expect(svg).toMatch(/^<svg [^>]*width="128" height="128" viewBox="[-\d. ]+">/)
       expect(svg.endsWith('</svg>')).toBe(true)
     })
   })
@@ -51,16 +62,27 @@ describe('eventIconSvg', () => {
       expect(svg).not.toContain(`stroke="${EVENT_ICON_SVG_STYLE.ink}"`)
     })
 
-    it("cuts the tower's door into its outline, so the rim follows into the doorway", () => {
-      const svg = eventIconSvg('tower')
+    it("cuts the reserve tower's door into its outline, so the rim follows into the doorway", () => {
+      const svg = drawingSvg(TOWER_DRAWING, EVENT_ICON_PALETTE, EVENT_ICON_SVG_STYLE)
       // One shape, drawn twice — under, in the rim, then over, in the silhouette — and its outline climbs the doorway.
       const paths = [...svg.matchAll(/<path d="([^"]+)"/g)].map((match) => match[1])
       expect(paths).toHaveLength(2)
       for (const path of paths) expect(path).toContain('L28 48 Q32 43 36 48 L36 58')
+      expect(svg).toContain('viewBox="6.5 9.5 51 51"')
     })
 
-    it('crops the tower to its own extent, as the swords', () => {
-      expect(eventIconSvg('tower')).toContain('viewBox="7 10 50 50"')
+    it('draws the siege as the trebuchet, cropped to it and its stone', () => {
+      expect(eventIconSvg('tower')).toBe(
+        drawingSvg(TREBUCHET_DRAWING, EVENT_ICON_PALETTE, EVENT_ICON_SVG_STYLE)
+      )
+      expect(eventIconSvg('tower')).toContain('viewBox="-6 -6 82 82"')
+    })
+
+    it('draws every rim as thick on screen: wider in a wider drawing, in proportion to the swords’', () => {
+      const swords = widthOf(eventIconSvg('swords'))
+      expect(swords).toBe(EVENT_ICON_SVG_STYLE.rimWidth)
+      // The siege's drawing is 82 wide to the swords' 44.
+      expect(widthOf(eventIconSvg('tower'))).toBeCloseTo((swords * 82) / 44, 1)
     })
 
     it('outlines the detailed drawings', () => {
