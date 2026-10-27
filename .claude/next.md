@@ -27,7 +27,7 @@ décisions dans son tableau ; les cases 1–4 cochées sur le ticket) :
 propre) ; (2) lui faire regarder la tour immobile à Haïfa sur **son** serveur (5173) ; (3) commits séparés — étapes 1–4,
 puis la tour 3D — sans `importMap.js` ; `payload-types.ts` formaté avant (CMS-290) ; pousser.
 
-**Puis l'image plate de la tour, par `/tune-icon`** (la skill écrite ce soir, méthode des épées) : quatre variantes à
+**Puis l'image plate de la tour, par `/make-event-icon`** (la skill écrite ce soir, méthode des épées) : quatre variantes à
 mettre sur `/svg-icons.html` à côté de l'actuelle — A silhouette sombre `#5e4b36` et porte claire, **ma recommandation** ;
 B pierre claire et contour épais ; C pierre moyenne et contour épais ; D silhouette sombre sans porte. Toutes au
 `viewBox` recadré (`7.5 11 49 49`), trois merlons, sans trait fin. **Lui choisit, sur son serveur.**
@@ -43,7 +43,7 @@ portée `cms` dans les commits, la sécurité qui ignore le CMS. À passer avec 
 accepte**. Trois questions sont à lui : la « phase de recherche » de `CLAUDE.md` tient-elle encore ; retirer ce que
 ESLint et `tsc` font déjà respecter ; l'entrée `reliefWorldY` introuvable.
 
-**Pour régler une icône** : la skill `/tune-icon`. **Jamais de backtick, de `$(` ni de `$` dans un `perl -e` ou un `sed`
+**Pour régler une icône** : la skill `/make-event-icon`. **Jamais de backtick, de `$(` ni de `$` dans un `perl -e` ou un `sed`
 entre guillemets doubles** : le 27/10, ça a lancé le seed sur sa base — éditer par l'éditeur.
 
 **Trois règles du CMS, toujours** :

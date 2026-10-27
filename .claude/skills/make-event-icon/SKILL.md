@@ -1,13 +1,13 @@
 ---
-name: tune-icon
-description: Tune the look of an event icon on the atlas — its 3D model seen close up or its flat drawing seen from afar — the way the battle swords were tuned on 2026-10-26 — name the form, put candidates on the benches of the dev's own atlas server beside the current one, let him choose on sight, move the choice into the map, check it on the map. Use when an icon is unreadable, too big, too detailed, badly placed, or a new kind of icon is drawn (tower, crown, a city, a siege engin…).
+name: make-event-icon
+description: Make or tune an event icon on the atlas — its 3D model seen close up or its flat drawing seen from afar — the way the battle swords were tuned on 2026-10-26 — name the form, put candidates on the benches of the dev's own atlas server beside the current one, let him choose on sight, move the choice into the map, check it on the map. Use when an icon is unreadable, too big, too detailed, badly placed, or a new kind of icon is drawn (tower, crown, a city, a siege engin…).
 when_to_use: « l'icône », « le sprite », « l'image plate », « la tour », « les épées », « illisible », « réduis la taille », « plus de facettes », « simplifie », « renforce les traits », /icons.html, /svg-icons.html, ATLAS-156, ATLAS-286 to 288.
 metadata:
   author: europe-map
   version: "1.0"
 ---
 
-# Tune an icon
+# Make an event icon
 
 The method the battle swords were tuned with (2026-10-26, ATLAS-156), written down after it was lost once: on
 2026-10-27 the tower's flat drawing was tried on a board made outside the repository instead of on the dev's bench.
@@ -72,6 +72,14 @@ bon », never before.
   the drawing**, so no pixel goes to empty margin; a parchment-white rim (width 4 in a 64 field) to detach it from
   any country's colour; few shapes — « trop de détails » made the first ones unreadable; two parts never touch so they
   do not merge into another shape (the guards set below the crossing).
+- **A flat drawing is drawn in a 44 × 44 frame, the swords' own** (the dev, 2026-10-27: *« ça doit être 44 sur 44,
+  pour faire tenir une icône sprite dans les mêmes rapports de proportion d'épaisseur, pour avoir une unité entre les
+  icônes »*). Every sprite is shown at the same size on the map, so in one frame the same numbers mean the same
+  thickness on screen: timbers and blades about **7 units** (a sixth of the frame), the rim **4**. The rim is scaled
+  to the `viewBox`'s width in `flat/eventIconSvg` (`RIM_REFERENCE_WIDTH`), which keeps a drawing in another frame
+  right — but its own shapes are not, so a drawing outside 44 must be thought in proportions, which is how the
+  trebuchet came out thin on the map at first (drawn 80 wide, timbers of 5.5). **Since 2026-10-27, its silhouette is the
+  sprite outside 44**; redraw it into the frame the next time it is touched.
 - **3D model**: one unit high on its base (`meshes/iconModel` normalises it); `flatShading` gives each face one tone,
   so facets are what make it read; a light rim behind it that follows the camera; a halo to detach it from the map.
 - **One icon at a time**, each with its own specifics (« une icône à la fois, chacune ses spécificités »).
