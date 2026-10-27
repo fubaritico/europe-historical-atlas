@@ -5,7 +5,7 @@ import type { CollectionConfig } from 'payload'
 const ICON_LABELS: Record<EventIcon, string> = {
   pin: 'Épingle',
   swords: 'Épées croisées',
-  tower: 'Tour',
+  tower: 'Tour et engin de siège',
   crown: 'Couronne',
 }
 

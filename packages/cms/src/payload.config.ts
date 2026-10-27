@@ -10,6 +10,7 @@ import { Actors } from './collections/Actors'
 import { Events } from './collections/Events'
 import { EventTypes } from './collections/EventTypes'
 import { Places } from './collections/Places'
+import { SiegeEngines } from './collections/SiegeEngines'
 import { Sources } from './collections/Sources'
 import { Users } from './collections/Users'
 
@@ -42,7 +43,7 @@ export default buildConfig({
     importMap: { baseDir: path.resolve(dirname) },
     meta: { titleSuffix: ' — Atlas historique de l’Europe' },
   },
-  collections: [Events, EventTypes, Places, Actors, Sources, Users],
+  collections: [Events, EventTypes, SiegeEngines, Places, Actors, Sources, Users],
   localization: {
     locales: [
       { code: 'fr', label: 'Français' },

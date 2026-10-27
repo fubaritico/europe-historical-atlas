@@ -4,12 +4,13 @@ import config from '../payload.config'
 import { fetchPlaceEntity } from '../wikidata/placeEndpoints'
 
 import { seed } from './seed'
+import { ENGINE_SOURCES, SIEGE_ENGINES } from './siegeEngineData'
 import { ACTORS, EVENTS, PLACES, SOURCES, TYPES } from './year1100'
 
 import type { SeedCollection, SeedId, SeedStore } from './seed'
 
 /**
- * Seed the base with the events of 1100 (`pnpm seed:cms`): through Payload's Local API, so every record passes the
+ * Seed the base with the events of 1100 and the siege engins (`pnpm seed:cms`): through Payload's Local API, so every record passes the
  * same validation as the form, and the places read from Wikidata by the same fetch and reader as the form's button.
  * Anything wrong stops the run and names the record.
  */
@@ -43,10 +44,11 @@ const store: SeedStore = {
 
 const report = await seed(store, (id) => fetchPlaceEntity(id), {
   types: TYPES,
-  sources: SOURCES,
+  sources: [...SOURCES, ...ENGINE_SOURCES],
   actors: ACTORS,
   places: PLACES,
   events: EVENTS,
+  siegeEngines: SIEGE_ENGINES,
 })
 for (const [collection, count] of Object.entries(report)) {
   console.warn(

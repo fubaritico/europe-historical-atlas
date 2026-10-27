@@ -82,12 +82,12 @@ export interface SeedType {
 
 /**
  * The event types the seed needs. The first four are the dev's own (written 2026-10-26, spelling kept); the seed finds
- * them by name and creates only the others. The crossed swords are the one icon the dev has validated (2026-10-26);
- * every other type keeps the pin until its shape is chosen.
+ * them by name and creates only the others. The crossed swords are the first icon the dev validated (2026-10-26); the
+ * siege takes the tower and its engin (2026-10-27, ATLAS-286); every other type keeps the pin until its shape is chosen.
  */
 export const TYPES: readonly SeedType[] = [
   { name: 'Bataille', icon: 'swords' },
-  { name: 'Siège', icon: 'pin' },
+  { name: 'Siège', icon: 'tower' },
   { name: 'Conquest', icon: 'pin' },
   { name: 'Polithique - Accession au trone', icon: 'pin' },
   { name: 'Mort', icon: 'pin' },

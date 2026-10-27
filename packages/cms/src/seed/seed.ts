@@ -1,10 +1,12 @@
+import type { SeedPeriodEnd, SeedSiegeEngine } from './siegeEngineData'
 import type { SeedActor, SeedEvent, SeedMoment, SeedPlace, SeedSource, SeedType } from './year1100'
 import type { MomentFields } from '../fields/historicalDate'
 import type { WikidataPlace } from '../wikidata/wikidataPlace'
 import type { HistoricalMoment } from '@europe-historical-atlas/core/time/historicalDate'
 
 /** The collections the seed writes. */
-export type SeedCollection = 'event-types' | 'sources' | 'actors' | 'places' | 'events'
+export type SeedCollection =
+  'event-types' | 'sources' | 'siege-engines' | 'actors' | 'places' | 'events'
 
 /** A record's id, as Payload answers it. */
 export type SeedId = number | string
@@ -62,6 +64,8 @@ export interface SeedData {
   places: readonly SeedPlace[]
   /** The events. */
   events: readonly SeedEvent[]
+  /** The siege engins and their periods of use. */
+  siegeEngines: readonly SeedSiegeEngine[]
 }
 
 /** How many records of a collection were found already there, and how many were created. */
@@ -223,6 +227,36 @@ function placeFields(
   }
 }
 
+/**
+ * One end of a period of use in the form's fields: a year, approximate or not, with the default margin.
+ * @param end - the seed's end
+ * @returns the form's group
+ */
+function periodMoment(end: SeedPeriodEnd): MomentFields {
+  return { year: end.year, month: null, day: null, circa: end.circa, margin: null, calendar: null }
+}
+
+/**
+ * A siege engin's fields, its sources as ids.
+ * @param engine - the seed's engin
+ * @param sources - the sources' ids, by title
+ * @returns the fields to create it with
+ */
+function siegeEngineFields(
+  engine: SeedSiegeEngine,
+  sources: ReadonlyMap<string, SeedId>
+): Record<string, unknown> {
+  return {
+    name: engine.name,
+    engine: engine.engine,
+    inUse: {
+      start: periodMoment(engine.from),
+      ...(engine.to === undefined ? {} : { end: periodMoment(engine.to) }),
+    },
+    sources: engine.sources.map((title) => idOf(sources, title, 'source')),
+  }
+}
+
 /** The ids every relation of an event resolves to. */
 interface EventLinks {
   /** By type name. */
@@ -255,6 +289,21 @@ function eventFields(event: SeedEvent, links: EventLinks): Record<string, unknow
 }
 
 /**
+ * A report with nothing counted yet.
+ * @returns every collection at zero
+ */
+function emptyReport(): SeedReport {
+  return {
+    'event-types': { found: 0, created: 0, updated: 0 },
+    sources: { found: 0, created: 0, updated: 0 },
+    'siege-engines': { found: 0, created: 0, updated: 0 },
+    actors: { found: 0, created: 0, updated: 0 },
+    places: { found: 0, created: 0, updated: 0 },
+    events: { found: 0, created: 0, updated: 0 },
+  }
+}
+
+/**
  * Write the seed into the base. **Idempotent**: a record already there — found by its Wikidata id, its name or its
  * title — is reused and never changed, so the dev's own records stay as he wrote them and a second run creates
  * nothing. Every place missing from the base is read from Wikidata **before anything is written**: Wikidata
@@ -269,13 +318,7 @@ export async function seed(
   readPlace: ReadWikidataPlace,
   data: SeedData
 ): Promise<SeedReport> {
-  const report: SeedReport = {
-    'event-types': { found: 0, created: 0, updated: 0 },
-    sources: { found: 0, created: 0, updated: 0 },
-    actors: { found: 0, created: 0, updated: 0 },
-    places: { found: 0, created: 0, updated: 0 },
-    events: { found: 0, created: 0, updated: 0 },
-  }
+  const report = emptyReport()
   const read = await readMissingPlaces(store, readPlace, data.places)
   const batch = (
     collection: SeedCollection,
@@ -305,6 +348,14 @@ export async function seed(
       data.places.map((place) => ({ key: place.wikidata, data: () => placeFields(place, read) }))
     ),
   }
+  await batch(
+    'siege-engines',
+    'name',
+    data.siegeEngines.map((engine) => ({
+      key: engine.name,
+      data: () => siegeEngineFields(engine, links.sources),
+    }))
+  )
   await giveIcons(store, data.types, links.types, report)
   await batch(
     'events',

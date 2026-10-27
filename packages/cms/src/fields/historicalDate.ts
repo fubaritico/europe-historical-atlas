@@ -282,21 +282,43 @@ export function groupAt(data: Record<string, unknown>, path: string): MomentFiel
   return typeof at === 'object' && at !== null ? at : undefined
 }
 
-/** An event's date: a beginning, required, and an end for what lasted. */
-export const eventDateField: GroupField = {
-  name: 'date',
-  type: 'group',
-  label: 'Date',
-  admin: {
-    description:
-      'Une année suffit. Pour une durée (une guerre, un long siège), remplir aussi la fin.',
-  },
-  fields: [
-    momentGroup({ name: 'start', label: 'Début', required: true }),
-    momentGroup({
-      name: 'end',
-      label: 'Fin',
-      earlier: (data) => groupAt(data, 'date.start'),
-    }),
-  ],
+/** What a date field is called and how the form introduces it. */
+export interface DateFieldOptions {
+  /** The field's name in the document. */
+  name: string
+  /** Its label in the form. */
+  label: string
+  /** The sentence under it. */
+  description: string
 }
+
+/**
+ * A date as the form holds it: a beginning, required, and an end that may not come before it — read by the export
+ * as an instant when the end is empty, an interval otherwise.
+ * @param options - its name, label and description
+ * @returns the group field
+ */
+export function historicalDateField(options: DateFieldOptions): GroupField {
+  return {
+    name: options.name,
+    type: 'group',
+    label: options.label,
+    admin: { description: options.description },
+    fields: [
+      momentGroup({ name: 'start', label: 'Début', required: true }),
+      momentGroup({
+        name: 'end',
+        label: 'Fin',
+        earlier: (data) => groupAt(data, `${options.name}.start`),
+      }),
+    ],
+  }
+}
+
+/** An event's date: a beginning, required, and an end for what lasted. */
+export const eventDateField: GroupField = historicalDateField({
+  name: 'date',
+  label: 'Date',
+  description:
+    'Une année suffit. Pour une durée (une guerre, un long siège), remplir aussi la fin.',
+})

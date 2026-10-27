@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     events: Event
     'event-types': EventType
+    'siege-engines': SiegeEngine
     places: Place
     actors: Actor
     sources: Source
@@ -82,6 +83,7 @@ export interface Config {
   collectionsSelect: {
     events: EventsSelect<false> | EventsSelect<true>
     'event-types': EventTypesSelect<false> | EventTypesSelect<true>
+    'siege-engines': SiegeEnginesSelect<false> | SiegeEnginesSelect<true>
     places: PlacesSelect<false> | PlacesSelect<true>
     actors: ActorsSelect<false> | ActorsSelect<true>
     sources: SourcesSelect<false> | SourcesSelect<true>
@@ -267,6 +269,52 @@ export interface Source {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "siege-engines".
+ */
+export interface SiegeEngine {
+  id: number
+  name: string
+  engine: 'traction-trebuchet' | 'counterweight-trebuchet' | 'cannon'
+  /**
+   * Ce que disent les sources. Sans fin, l’engin est encore en usage. Quand deux périodes se chevauchent, la carte montre le plus récent.
+   */
+  inUse: {
+    start: {
+      year: number
+      month?: number | null
+      day?: number | null
+      circa?: boolean | null
+      /**
+       * Avec « vers » seulement. Vide : ±10 ans.
+       */
+      margin?: number | null
+      calendar?: ('julian' | 'gregorian') | null
+    }
+    end?: {
+      year?: number | null
+      month?: number | null
+      day?: number | null
+      circa?: boolean | null
+      /**
+       * Avec « vers » seulement. Vide : ±10 ans.
+       */
+      margin?: number | null
+      calendar?: ('julian' | 'gregorian') | null
+    }
+  }
+  /**
+   * Au moins une : une période sans source ne s’enregistre pas.
+   */
+  sources: (number | Source)[]
+  /**
+   * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem.
+   */
+  wikidata?: string | null
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -322,6 +370,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'event-types'
         value: number | EventType
+      } | null)
+    | ({
+        relationTo: 'siege-engines'
+        value: number | SiegeEngine
       } | null)
     | ({
         relationTo: 'places'
@@ -427,6 +479,42 @@ export interface EventsSelect<T extends boolean = true> {
 export interface EventTypesSelect<T extends boolean = true> {
   name?: T
   icon?: T
+  updatedAt?: T
+  createdAt?: T
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "siege-engines_select".
+ */
+export interface SiegeEnginesSelect<T extends boolean = true> {
+  name?: T
+  engine?: T
+  inUse?:
+    | T
+    | {
+        start?:
+          | T
+          | {
+              year?: T
+              month?: T
+              day?: T
+              circa?: T
+              margin?: T
+              calendar?: T
+            }
+        end?:
+          | T
+          | {
+              year?: T
+              month?: T
+              day?: T
+              circa?: T
+              margin?: T
+              calendar?: T
+            }
+      }
+  sources?: T
+  wikidata?: T
   updatedAt?: T
   createdAt?: T
 }

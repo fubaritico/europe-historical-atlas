@@ -1,4 +1,6 @@
 import { CONTENT_FORMAT_VERSION } from '@europe-historical-atlas/core/data/contentFormat'
+import { siegeEngineAt } from '@europe-historical-atlas/core/data/siegeEngines'
+import { formatHistoricalDate } from '@europe-historical-atlas/core/time/formatHistoricalDate'
 import { isDateRefusal } from '@europe-historical-atlas/core/time/historicalDate'
 
 import {
@@ -20,7 +22,14 @@ import type {
   EventIcon,
   LocalizedText,
 } from '@europe-historical-atlas/core/data/contentFormat'
-import type { HistoricalMoment } from '@europe-historical-atlas/core/time/historicalDate'
+import type {
+  SiegeEngine,
+  SiegeEnginePeriod,
+} from '@europe-historical-atlas/core/data/siegeEngines'
+import type {
+  HistoricalDate,
+  HistoricalMoment,
+} from '@europe-historical-atlas/core/time/historicalDate'
 
 /**
  * What Payload answers for these records with `locale: 'all'` and a depth that resolves every relation — declared
@@ -103,6 +112,28 @@ export interface DocEvent {
   sources?: (DocSource | DocId)[] | null
   /** Its Wikidata id. */
   wikidata?: string | null
+}
+
+/** A siege engin and when it was in use. */
+export interface DocSiegeEngine {
+  /** Its id. */
+  id: DocId
+  /** The drawing the atlas shows. */
+  engine: SiegeEngine
+  /** Its period of use, as the form holds it. */
+  inUse: EventDateFields | null | undefined
+}
+
+/** What every event is exported with: the engins' periods, and where a warning is said. */
+export interface ExportContext {
+  /** Every engin's period of use (`toSiegeEnginePeriods`). */
+  periods: readonly SiegeEnginePeriod[]
+  /**
+   * Say something the export goes on past — a siege no period covers.
+   * @param message - what to say
+   * @returns nothing
+   */
+  warn: (message: string) => void
 }
 
 /**
@@ -205,11 +236,12 @@ function toContentType(type: DocEventType, where: string): ContentEventType {
 }
 
 /**
- * One event, everything it points to written in.
+ * One event, everything it points to written in — and, when its type draws a tower, its siege engin.
  * @param event - the record, relations resolved
+ * @param context - the engins' periods, and where a warning goes
  * @returns it, as the atlas reads it
  */
-export function toContentEvent(event: DocEvent): ContentEvent {
+export function toContentEvent(event: DocEvent, context: ExportContext): ContentEvent {
   const where = `event ${String(event.id)}`
   if (event.type === null || event.type === undefined) throw new Error(`[CMS] ${where}: no type`)
   const type = resolved<DocEventType>(event.type, `${where}, type`)
@@ -234,6 +266,8 @@ export function toContentEvent(event: DocEvent): ContentEvent {
       url: present(source.url),
     }
   })
+  // A siege's tower comes with the engin of its period.
+  const engine = contentType.icon === 'tower' ? siegeEngine(date, where, context) : null
   return {
     id: String(event.id),
     title: localized(event.title, where),
@@ -247,14 +281,57 @@ export function toContentEvent(event: DocEvent): ContentEvent {
     description: optionalLocalized(event.description, `${where}, description`),
     sources,
     wikidata: present(event.wikidata),
+    engine,
   }
 }
 
 /**
  * Every event, as the file the atlas reads.
  * @param events - the records, relations resolved
+ * @param context - the engins' periods, and where a warning goes
  * @returns the content file
  */
-export function toContent(events: readonly DocEvent[]): ContentFile {
-  return { version: CONTENT_FORMAT_VERSION, events: events.map(toContentEvent) }
+export function toContent(events: readonly DocEvent[], context: ExportContext): ContentFile {
+  return {
+    version: CONTENT_FORMAT_VERSION,
+    events: events.map((event) => toContentEvent(event, context)),
+  }
+}
+
+/**
+ * Every engin's period, as `core` reads it. A period the form let through but that is no date stops the export and
+ * names the engin, as a refused event date does.
+ * @param engines - the records
+ * @returns the periods
+ */
+export function toSiegeEnginePeriods(engines: readonly DocSiegeEngine[]): SiegeEnginePeriod[] {
+  return engines.map((record) => {
+    const inUse = toHistoricalDate(record.inUse ?? {})
+    if (isDateRefusal(inUse)) {
+      throw new Error(`[CMS] siege engine ${String(record.id)}: ${describeDateRefusalFr(inUse)}`)
+    }
+    return { engine: record.engine, inUse }
+  })
+}
+
+/**
+ * The engin a siege is drawn with: the newest in use at its date. None in use: said, naming the siege and its date,
+ * and the map shows the tower alone (the dev, 2026-10-27).
+ * @param date - the siege's date
+ * @param where - the event, for the warning
+ * @param context - the periods, and where the warning goes
+ * @returns the engin, or `null`
+ */
+function siegeEngine(
+  date: HistoricalDate,
+  where: string,
+  context: ExportContext
+): SiegeEngine | null {
+  const engine = siegeEngineAt(context.periods, date)
+  if (engine === null) {
+    context.warn(
+      `[CMS] ${where}: no siege engine in use in ${formatHistoricalDate(date, 'fr')} — the map shows the tower alone`
+    )
+  }
+  return engine
 }

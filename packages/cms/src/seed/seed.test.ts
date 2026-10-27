@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { eventMoment, existenceMoment, seed } from './seed'
+import { ENGINE_SOURCES, SIEGE_ENGINES } from './siegeEngineData'
 import { ACTORS, EVENTS, PLACES, SOURCES, TYPES } from './year1100'
 
 import type { ReadWikidataPlace, SeedCollection, SeedData, SeedStore } from './seed'
@@ -44,13 +45,14 @@ const atParis: ReadWikidataPlace = (id) =>
     existsTo: null,
   })
 
-/** The real data of 1100. */
+/** The real data of 1100 and the siege engins, as `run.ts` hands them over. */
 const YEAR_1100: SeedData = {
   types: TYPES,
-  sources: SOURCES,
+  sources: [...SOURCES, ...ENGINE_SOURCES],
   actors: ACTORS,
   places: PLACES,
   events: EVENTS,
+  siegeEngines: SIEGE_ENGINES,
 }
 
 /** One event at one place, with one actor, one source and one type. */
@@ -80,6 +82,14 @@ const SMALL: SeedData = {
       wikidata: 'Q137785638',
     },
   ],
+  siegeEngines: [
+    {
+      name: 'Canon',
+      engine: 'cannon',
+      from: { year: 1374, circa: true },
+      sources: ['Gesta'],
+    },
+  ],
 }
 
 const nowhere: ReadWikidataPlace = (id) =>
@@ -97,7 +107,16 @@ describe('seed', () => {
       expect(report.events).toEqual({ found: 0, created: EVENTS.length, updated: 0 })
       expect(report.places).toEqual({ found: 0, created: PLACES.length, updated: 0 })
       expect(report.actors).toEqual({ found: 0, created: ACTORS.length, updated: 0 })
-      expect(report.sources).toEqual({ found: 0, created: SOURCES.length, updated: 0 })
+      expect(report.sources).toEqual({
+        found: 0,
+        created: SOURCES.length + ENGINE_SOURCES.length,
+        updated: 0,
+      })
+      expect(report['siege-engines']).toEqual({
+        found: 0,
+        created: SIEGE_ENGINES.length,
+        updated: 0,
+      })
       expect(report['event-types']).toEqual({ found: 0, created: TYPES.length, updated: 0 })
     })
 
@@ -223,6 +242,57 @@ describe('seed', () => {
       await expect(
         seed(base.store, atParis, { ...SMALL, events: [{ ...event, type: 'Siège' }] })
       ).rejects.toThrow('type « Siège » is not declared')
+    })
+
+    it('refuses an engin resting on a source the data does not declare', async () => {
+      const base = memoryStore()
+      const [cannon] = SMALL.siegeEngines
+      if (cannon === undefined) throw new Error('fixture')
+
+      await expect(
+        seed(base.store, atParis, {
+          ...SMALL,
+          siegeEngines: [{ ...cannon, sources: ['Chronique perdue'] }],
+        })
+      ).rejects.toThrow('source « Chronique perdue » is not declared')
+    })
+  })
+
+  describe('siege engins', () => {
+    it('writes an engin with its period, approximate, and its sources as ids', async () => {
+      const base = memoryStore()
+
+      await seed(base.store, atParis, YEAR_1100)
+
+      const counterweight = base
+        .records('siege-engines')
+        .find((record) => record.data.engine === 'counterweight-trebuchet')
+      const purton = base
+        .records('sources')
+        .filter((record) => String(record.data.author) === 'Peter Purton')
+        .map((record) => record.id)
+      expect(counterweight?.data).toEqual({
+        name: 'Trébuchet à contrepoids',
+        engine: 'counterweight-trebuchet',
+        inUse: {
+          start: { year: 1230, month: null, day: null, circa: true, margin: null, calendar: null },
+          end: { year: 1450, month: null, day: null, circa: true, margin: null, calendar: null },
+        },
+        sources: purton,
+      })
+    })
+
+    it('writes an engin still in use with no end, rather than an empty one', async () => {
+      const base = memoryStore()
+
+      await seed(base.store, atParis, SMALL)
+
+      expect(base.records('siege-engines')[0]?.data.inUse).not.toHaveProperty('end')
+    })
+
+    it('puts the siege on the tower in the data of 1100, and leaves the taking on the pin', () => {
+      expect(TYPES.find((type) => type.name === 'Siège')?.icon).toBe('tower')
+      expect(TYPES.find((type) => type.name === 'Conquest')?.icon).toBe('pin')
     })
   })
 
