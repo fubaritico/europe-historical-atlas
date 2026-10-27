@@ -231,6 +231,7 @@ const BATTLE: ContentEvent = {
   description: null,
   sources: [],
   wikidata: null,
+  engine: null,
 }
 
 describe('createMapLayers', () => {

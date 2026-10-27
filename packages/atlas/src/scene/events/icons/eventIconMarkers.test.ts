@@ -26,6 +26,7 @@ import {
   ICON_FLAT_SPAN,
   ICON_HALO_SPAN,
   ICON_LIFT,
+  ICON_SIZE,
   ICON_SWAY,
 } from './settings'
 
@@ -170,9 +171,12 @@ describe('createEventIconMarkers', () => {
   })
 
   describe('variants', () => {
-    it('stands them the default height when none is given', () => {
+    it('stands them the default height when none is given, each kind at its own size', () => {
       const markers = createEventIconMarkers(TWO, STUB)
-      expect(iconPose(markers.object, 'tower').scale.y).toBeCloseTo(EVENT_ICON_HEIGHT)
+      expect(iconPose(markers.object, 'swords').scale.y).toBeCloseTo(EVENT_ICON_HEIGHT)
+      expect(iconPose(markers.object, 'tower').scale.y).toBeCloseTo(
+        EVENT_ICON_HEIGHT * ICON_SIZE.tower
+      )
     })
 
     it('orders the 3D icons after the borders, and their halos just before them', () => {
@@ -273,6 +277,25 @@ describe('createEventIconMarkers', () => {
       expect(markers.object.children[0]?.quaternion.angleTo(camera.quaternion)).toBeCloseTo(0)
     })
 
+    it('leaves the tower upright and still, its door to the south, however the camera turns and time passes', () => {
+      const markers = createEventIconMarkers(TWO, STUB)
+      const camera = cameraAt(new Vector3(4, 3, 6), new Euler(-0.4, 0.3, 0))
+      for (const seconds of [0, ICON_SWAY.periodSeconds / 4, 7.3]) {
+        markers.faceCamera(camera, seconds)
+        expect(iconPose(markers.object, 'tower').quaternion.angleTo(new Quaternion())).toBeCloseTo(
+          0
+        )
+      }
+    })
+
+    it('still turns the swords beside a still tower', () => {
+      const markers = createEventIconMarkers(TWO, STUB)
+      const swords = (): Quaternion => iconPose(markers.object, 'swords').quaternion.clone()
+      const before = swords()
+      markers.faceCamera(cameraAt(new Vector3(4, 3, 6), new Euler(-0.4, 0.3, 0)), 0)
+      expect(swords().angleTo(before)).toBeGreaterThan(0.1)
+    })
+
     it('floats the crossed swords above their place, and stands the tower on it', () => {
       const markers = createEventIconMarkers(TWO, STUB)
       expect(iconPose(markers.object, 'swords').position.y).toBeCloseTo(
@@ -354,7 +377,7 @@ describe('createEventIconMarkers', () => {
       const markers = createEventIconMarkers(TWO, STUB)
       const halo = squarePose(markers.object, 'halo', 1)
       expect(halo.position.y).toBeCloseTo(
-        iconPose(markers.object, 'tower').position.y + EVENT_ICON_HEIGHT / 2
+        iconPose(markers.object, 'tower').position.y + (EVENT_ICON_HEIGHT * ICON_SIZE.tower) / 2
       )
       expect(halo.scale.x).toBeCloseTo(EVENT_ICON_HEIGHT * ICON_HALO_SPAN)
     })

@@ -21,7 +21,7 @@ describe('eventIconSvg', () => {
     it('rings the drawing with the light rim before painting it, so the rim is under it', () => {
       const svg = eventIconSvg('swords')
       const rim = svg.indexOf(`stroke="${EVENT_ICON_SVG_STYLE.rim}"`)
-      const body = svg.indexOf(`fill="${EVENT_ICON_SVG_STYLE.flatSteel}"`)
+      const body = svg.indexOf(`fill="${EVENT_ICON_SVG_STYLE.silhouette}"`)
       expect(rim).toBeGreaterThan(-1)
       expect(rim).toBeLessThan(body)
     })
@@ -36,19 +36,35 @@ describe('eventIconSvg', () => {
       expect(eventIconSvg('swords')).toContain('viewBox="10 10 44 44"')
     })
 
-    it('paints the swords in flat colours, grey blade and dark hilt, with no outline', () => {
-      const svg = eventIconSvg('swords', EVENT_ICON_PALETTE, {
+    it.each([
+      ['swords', ['#111111']],
+      ['tower', ['#111111']],
+    ] as const)('paints the %s as one silhouette, with no outline', (kind, colours) => {
+      const svg = eventIconSvg(kind, EVENT_ICON_PALETTE, {
         ...EVENT_ICON_SVG_STYLE,
-        flatSteel: '#111111',
-        flatHilt: '#222222',
+        silhouette: '#111111',
+        rim: '#eeeeee',
       })
-      expect(svg).toContain('fill="#111111"')
-      expect(svg).toContain('fill="#222222"')
+      // The body's shapes end on their fill; the rim's go on to their stroke.
+      const fills = new Set([...svg.matchAll(/fill="([^"]+)"\/>/g)].map((match) => match[1]))
+      expect(fills).toEqual(new Set(colours))
       expect(svg).not.toContain(`stroke="${EVENT_ICON_SVG_STYLE.ink}"`)
     })
 
+    it("cuts the tower's door into its outline, so the rim follows into the doorway", () => {
+      const svg = eventIconSvg('tower')
+      // One shape, drawn twice — under, in the rim, then over, in the silhouette — and its outline climbs the doorway.
+      const paths = [...svg.matchAll(/<path d="([^"]+)"/g)].map((match) => match[1])
+      expect(paths).toHaveLength(2)
+      for (const path of paths) expect(path).toContain('L28 48 Q32 43 36 48 L36 58')
+    })
+
+    it('crops the tower to its own extent, as the swords', () => {
+      expect(eventIconSvg('tower')).toContain('viewBox="7 10 50 50"')
+    })
+
     it('outlines the detailed drawings', () => {
-      expect(eventIconSvg('tower')).toContain(`stroke="${EVENT_ICON_SVG_STYLE.ink}"`)
+      expect(eventIconSvg('crown')).toContain(`stroke="${EVENT_ICON_SVG_STYLE.ink}"`)
     })
 
     it('paints in the palette and the style given', () => {

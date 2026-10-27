@@ -4,8 +4,8 @@
 
 import type { EventIconPalette } from '../palette'
 
-/** Where a shape's colour comes from: the 3D icon's palette, or the flat drawing's own colours. */
-export type Paint = keyof EventIconPalette | 'flatSteel' | 'flatHilt'
+/** Where a shape's colour comes from: the 3D icon's palette, or the flat drawing's one dark silhouette. */
+export type Paint = keyof EventIconPalette | 'silhouette'
 
 /** One shape of the drawing: its SVG element, and its colour. */
 export interface FlatShape {

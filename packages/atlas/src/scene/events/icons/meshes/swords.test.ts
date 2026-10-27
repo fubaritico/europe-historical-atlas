@@ -3,10 +3,35 @@ import { describe, expect, it } from 'vitest'
 
 import { swordParts } from './swords'
 
+/**
+ * How far one part of the first sword reaches along it: its geometry turned back upright, its extent on Y.
+ * @param index - the part, from the blade (0) to the pommel (3)
+ * @returns its lowest and highest point along the sword
+ */
+function alongSword(index: number): { min: number; max: number } {
+  const part = swordParts()[index]
+  if (part === undefined) throw new Error(`no part ${String(index)}`)
+  const geometry = part.geometry.clone().rotateZ(-Math.PI / 4)
+  geometry.computeBoundingBox()
+  const box = geometry.boundingBox
+  if (box === null) throw new Error('no box')
+  return { min: box.min.y, max: box.max.y }
+}
+
 describe('swordParts', () => {
-  // L1–L2: one shape, its proportions are swept in iconModel.test and eventIcons.test
+  // L1: one shape, its size is swept in iconModel.test and eventIcons.test
   // L3: N/A — nothing is refused
   // L4: N/A — no async work, nothing external
+
+  describe('variants', () => {
+    it('stands the blade at about twice the hilt, shorter than the flat drawing', () => {
+      // Shortened on sight past the flat sword's 35 to 16 (the dev, 2026-10-27).
+      const [blade, guard, pommel] = [alongSword(0), alongSword(1), alongSword(3)]
+      const ratio = (blade.max - guard.max) / (guard.max - pommel.min)
+      expect(ratio).toBeCloseTo(2, 1)
+      expect(ratio).toBeLessThan(35 / 16)
+    })
+  })
 
   describe('edge cases', () => {
     it('passes one blade in front of the other where they cross, never through it', () => {

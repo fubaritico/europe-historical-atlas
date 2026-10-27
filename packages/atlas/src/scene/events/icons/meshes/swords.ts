@@ -16,8 +16,8 @@ const SWORD_LEAN = Math.PI / 4
  */
 const SWORD_GAP = 0.08
 
-/** A sword's length, from the foot of its pommel (−0.01) to its point (1.265). */
-const SWORD_LENGTH = 1.275
+/** A sword's length, from the foot of its pommel (−0.01) to its point (1.085). */
+const SWORD_LENGTH = 1.095
 
 /**
  * Where on a sword the two cross, from its pommel: halfway along it, so that seen from the front the crossed pair fits
@@ -31,13 +31,15 @@ const SWORD_CROSSING = SWORD_LENGTH / 2 - 0.01
  * @returns its parts
  */
 function oneSword(): Part[] {
-  // The blade's outline, seen flat: a long rectangle ending in a point.
+  // The blade's outline, seen flat: a long rectangle ending in a point. 0.72 long, its bevelled point 0.02 further:
+  // about twice the hilt. Shortened on sight (the dev, 2026-10-27): 0.9, then 0.8 to stand as in the flat drawing
+  // (*« les mêmes proportions que dans le SVG »*), then shorter still (*« raccourcir encore un peu plus les lames »*).
   const blade = new Shape()
   blade.moveTo(-0.075, 0)
   blade.lineTo(0.075, 0)
-  blade.lineTo(0.075, 0.74)
-  blade.lineTo(0, 0.9)
-  blade.lineTo(-0.075, 0.74)
+  blade.lineTo(0.075, 0.56)
+  blade.lineTo(0, 0.72)
+  blade.lineTo(-0.075, 0.56)
   blade.closePath()
 
   // Given a thickness; the bevel raises a ridge along the blade, which catches the light.

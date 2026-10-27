@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { EVENT_ICON_PALETTE } from '../palette'
 
 import { createEventIcon } from './eventIcons'
+import { towerParts } from './tower'
 
 import type { EventIconKind } from '../kinds'
 import type { Material, Object3D } from 'three'
@@ -33,6 +34,22 @@ describe('createEventIcon', () => {
       const box = new Box3().setFromObject(createEventIcon('swords').object)
       const width = box.max.x - box.min.x
       expect(width).toBeCloseTo(box.max.y - box.min.y, 1)
+    })
+
+    it('turns the tower with at least 32 faces round its axis, round rather than octagonal', () => {
+      const [body] = towerParts()
+      const position = body?.geometry.getAttribute('position')
+      if (position === undefined) throw new Error('no tower body')
+      // Every direction round the axis a wall point stands in, to a tenth of a degree.
+      const directions = new Set<number>()
+      for (let index = 0; index < position.count; index++) {
+        const x = position.getX(index)
+        const z = position.getZ(index)
+        if (Math.hypot(x, z) < 1e-6) continue
+        const degrees = (Math.atan2(x, z) * 180) / Math.PI
+        directions.add(Math.round(((degrees + 360) % 360) * 10))
+      }
+      expect(directions.size).toBeGreaterThanOrEqual(32)
     })
 
     it('paints the icon in the palette given', () => {

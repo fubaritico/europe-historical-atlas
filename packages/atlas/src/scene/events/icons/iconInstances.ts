@@ -11,6 +11,7 @@ import { applyDepthBias } from '../../depthBias'
 import { EVENT_RENDER_ORDER } from '../markers'
 
 import { buildIconModel } from './meshes/iconModel'
+import { ICON_SIZE } from './settings'
 import { slotsByKey } from './slots'
 
 import type { EventIconKind } from './kinds'
@@ -116,9 +117,12 @@ export function createIconInstances(
     return own.meshes
   })
 
+  // Each icon's size: the icon height times its kind's (`ICON_SIZE`).
+  const sizes = kinds.map((kind) => height * ICON_SIZE[kind])
+
   // Worked in at every pose, never reallocated.
   const matrix = new Matrix4()
-  const scale = new Vector3(height, height, height)
+  const scale = new Vector3()
 
   return {
     object,
@@ -129,9 +133,10 @@ export function createIconInstances(
       poses.forEach(({ position, quaternion }, index) => {
         const meshes = iconMeshes[index]
         const slot = slots[index]
-        if (meshes === undefined || slot === undefined)
+        const size = sizes[index]
+        if (meshes === undefined || slot === undefined || size === undefined)
           throw new Error(`[atlas] no icon ${String(index)} to pose`)
-        matrix.compose(position, quaternion, scale)
+        matrix.compose(position, quaternion, scale.setScalar(size))
         for (const mesh of meshes) mesh.setMatrixAt(slot, matrix)
       })
       // Then every piece's buffer handed over at once.

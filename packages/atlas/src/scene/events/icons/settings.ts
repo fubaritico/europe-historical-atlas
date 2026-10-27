@@ -29,14 +29,33 @@ export const ICON_LIFT: Record<EventIconKind, number> = { swords: 0.6, tower: 0,
  */
 export const ICON_DEPTH_PULL = 1
 
+/**
+ * How tall each kind's 3D model stands, in icon heights. The tower was cut down on sight (the dev, 2026-10-27: *« réduis
+ * la taille de la tour »*).
+ */
+export const ICON_SIZE: Record<EventIconKind, number> = { swords: 1, tower: 0.7, crown: 1 }
+
+/**
+ * Which kinds of 3D icon turn to face the camera, and sway as they do. The crossed swords float and turn; the tower
+ * stands on the ground, still and upright, its door to the south (the dev, 2026-10-27: *« posée sur le sol, ne pas
+ * suivre la caméra et ne pas être animée »*) — every kind has its own rule.
+ */
+export const ICON_FACES_CAMERA: Record<EventIconKind, boolean> = {
+  swords: true,
+  tower: false,
+  crown: true,
+}
+
 /** How the icons sway about their own upright, either side of facing the camera (the dev, 2026-10-26). */
 export const ICON_SWAY = { amplitudeRad: (25 * Math.PI) / 180, periodSeconds: 4 }
 
 /**
  * The zoom (0 zoomed out, 1 in) around which the icons pass from flat to 3D (the dev, 2026-10-26), and the span over
- * which the one fades into the other — the vassals' reveal does the same (`scene/political/homageReveal`).
+ * which the one fades into the other — the vassals' reveal does the same (`scene/political/homageReveal`). Moved in from
+ * 0.45 so the flat drawing holds longer as the camera closes in (the dev, 2026-10-27: *« le sprite devrait survivre plus
+ * longtemps au zoom »*) — a first value, to be set on the map.
  */
-export const ICON_CROSS_FADE = { zoom: 0.45, span: 0.1 }
+export const ICON_CROSS_FADE = { zoom: 0.6, span: 0.1 }
 
 /**
  * How wide a flat icon is, in 3D icon heights. Its drawing is cropped to the swords (`flat/eventIconSvg`), so the

@@ -26,20 +26,20 @@ export interface EventIconSvgStyle {
   ink: string
   /** The outline's width. */
   inkWidth: number
-  /** A flat blade: grey, darker than the 3D steel, so it holds on the parchment (the dev, 2026-10-26). */
-  flatSteel: string
-  /** A flat hilt — guard, grip, pommel: dark, against the grey blade. */
-  flatHilt: string
+  /**
+   * The silhouette: one dark brown filling the whole drawing, with no line — chosen on the legibility bench, « B »
+   * (the dev, 2026-10-27: *« un aplat marron foncé »*, then *« pas de trait noir »*), for the swords and the tower.
+   */
+  silhouette: string
 }
 
-/** The default look: a parchment-white rim, a dark brown outline, a dark grey blade on a near-black hilt. */
+/** The default look: a parchment-white rim, a dark brown outline for a detailed drawing, a dark brown silhouette. */
 export const EVENT_ICON_SVG_STYLE: EventIconSvgStyle = {
   rim: '#fdf6e3',
   rimWidth: 4, // 6, thinned on sight (the dev, 2026-10-26)
   ink: '#3b2a1e',
   inkWidth: 0.9,
-  flatSteel: '#7b828c',
-  flatHilt: '#3b2a1e',
+  silhouette: '#3b2a1e',
 }
 
 /** Each kind's drawing, one file each beside this one; type-check asks for a new kind's line. */
@@ -62,10 +62,25 @@ export function eventIconSvg(
   palette: EventIconPalette = EVENT_ICON_PALETTE,
   style: EventIconSvgStyle = EVENT_ICON_SVG_STYLE
 ): string {
-  const drawing = DRAWINGS[kind]
-  // A shape's colour: the flat drawing's own for the sword, the 3D palette's for the others.
+  return drawingSvg(DRAWINGS[kind], palette, style)
+}
+
+/**
+ * Any drawing made into a flat icon, exactly as the map makes its own — what the legibility bench builds its
+ * candidates with, so the one chosen there is the one the map shows.
+ * @param drawing - the shapes, their crop and whether they are outlined
+ * @param palette - the colours of the shapes that take the 3D icon's
+ * @param style - the rim, the outline and the flat colours
+ * @returns the SVG markup, with an explicit size so it rasterises (`svgToTexture`)
+ */
+export function drawingSvg(
+  drawing: Drawing,
+  palette: EventIconPalette,
+  style: EventIconSvgStyle
+): string {
+  // A shape's colour: the flat drawing's own for a silhouette, the 3D palette's otherwise.
   const colourOf = (paint: Paint): string =>
-    paint === 'flatSteel' || paint === 'flatHilt' ? style[paint] : palette[paint]
+    paint === 'silhouette' ? style.silhouette : palette[paint]
   // The drawing's groups as SVG, each shape given the paint `paint` says.
   const layer = (paint: (shape: FlatShape) => string): string =>
     drawing.groups

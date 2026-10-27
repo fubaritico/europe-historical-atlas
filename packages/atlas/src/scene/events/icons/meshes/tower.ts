@@ -6,11 +6,17 @@ import { BoxGeometry, LatheGeometry, Vector2 } from 'three'
 
 import type { Part } from './parts'
 
-/** How many sides the tower has; a merlon stands on every other one. */
-const TOWER_SIDES = 8
+/**
+ * How many faces the body is turned with — enough for a round tower rather than an octagon (the dev, 2026-10-27:
+ * *« plus de facettes, plus de polygones pour être plus jolie »*).
+ */
+const TOWER_SEGMENTS = 32
+
+/** How many merlons crown the parapet, evenly round it. */
+const MERLONS = 8
 
 /**
- * A crenellated tower: an octagonal body turned from a profile, a merlon on every other side, a door.
+ * A crenellated tower: a round body turned from a profile, merlons round the parapet, a door.
  * @returns its parts
  */
 export function towerParts(): Part[] {
@@ -26,11 +32,11 @@ export function towerParts(): Part[] {
     new Vector2(0, 0.78),
   ]
 
-  // A merlon on every other side of the parapet, each turned to face outward.
-  const merlons: Part[] = Array.from({ length: TOWER_SIDES / 2 }, (_, index) => {
-    const angle = (index * 2 * Math.PI * 2) / TOWER_SIDES
+  // The merlons evenly round the parapet, each turned to face outward.
+  const merlons: Part[] = Array.from({ length: MERLONS }, (_, index) => {
+    const angle = (index * 2 * Math.PI) / MERLONS
     return {
-      geometry: new BoxGeometry(0.13, 0.14, 0.1),
+      geometry: new BoxGeometry(0.1, 0.14, 0.1),
       colour: 'stone',
       at: [Math.sin(angle) * 0.25, 0.85, Math.cos(angle) * 0.25],
       turn: angle,
@@ -39,7 +45,7 @@ export function towerParts(): Part[] {
 
   // The body, its merlons, and a door at its foot, on the front.
   return [
-    { geometry: new LatheGeometry(profile, TOWER_SIDES), colour: 'stone' },
+    { geometry: new LatheGeometry(profile, TOWER_SEGMENTS), colour: 'stone' },
     ...merlons,
     { geometry: new BoxGeometry(0.12, 0.2, 0.04), colour: 'door', at: [0, 0.12, 0.27] },
   ]

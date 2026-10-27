@@ -123,9 +123,10 @@ export function createEventIconMarkers(
   const { icons, instances, materials, halos, flats, groups, haloPositions, flatPositions } = forms
   const { object, lights } = groups
 
-  // The camera's orientation, which every square takes; the turner of the 3D icons.
+  // The camera's orientation, which every square takes; the turner of the 3D icons, and those it turns.
   const facing = new Quaternion()
   const turnIcons = createIconTurner()
+  const turning = icons.filter(({ turns }) => turns)
   // How wide a flat drawing stands, set by the zoom.
   let flatSize = height * ICON_FLAT_SPAN
 
@@ -143,7 +144,7 @@ export function createEventIconMarkers(
   return {
     object,
     setReliefScale(scale: number): void {
-      for (const forms of icons) standForms(forms, height, scale)
+      for (const forms of icons) standForms(forms, scale)
       poseAll()
     },
     setZoom(zoom: number, pixelsPerUnit: number): void {
@@ -164,8 +165,8 @@ export function createEventIconMarkers(
       // The group holding the icons is never turned, so an orientation set here is the orientation in the world.
       lights.quaternion.copy(camera.quaternion)
       facing.copy(camera.quaternion)
-      // Each 3D icon turned to face the camera and swayed; then every form posed at once.
-      turnIcons(icons, camera, seconds)
+      // The 3D icons whose kind faces the camera turned and swayed, the others left still; then every form posed.
+      turnIcons(turning, camera, seconds)
       poseAll()
     },
     dispose(): void {
