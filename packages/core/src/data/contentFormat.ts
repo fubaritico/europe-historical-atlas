@@ -19,6 +19,9 @@ import { z } from 'zod/mini'
 
 import { historicalDateSchema, historicalMomentSchema } from '../time/historicalDate'
 
+import { SIEGE_ENGINES } from './siegeEngines'
+
+import type { SiegeEngine } from './siegeEngines'
 import type { HistoricalDate, HistoricalMoment } from '../time/historicalDate'
 
 /** A text in the two languages of the project. */
@@ -158,6 +161,11 @@ export interface ContentEvent {
   sources: ContentSource[]
   /** Its Wikidata item, or `null`. */
   wikidata: string | null
+  /**
+   * The artillery in front of its tower, chosen by its date (`siegeEngines`); `null` when its type draws no tower, or
+   * when no period of use covers its date — the map then shows the tower alone (the dev, 2026-10-27).
+   */
+  engine: SiegeEngine | null
 }
 
 /** {@link ContentEvent}. */
@@ -171,6 +179,7 @@ const eventSchema: z.ZodMiniType<ContentEvent> = z.strictObject({
   description: z.nullable(localizedText),
   sources: z.array(sourceSchema),
   wikidata: wikidataId,
+  engine: z.nullable(z.enum(SIEGE_ENGINES)),
 })
 
 /** `content/events.json` — every event the atlas can show. */
@@ -181,8 +190,11 @@ export interface ContentFile {
   events: ContentEvent[]
 }
 
-/** The version this code writes and reads — 2 since the event type carries its icon (2026-10-26). */
-export const CONTENT_FORMAT_VERSION = 2
+/**
+ * The version this code writes and reads — 2 since the event type carries its icon (2026-10-26), 3 since an event
+ * carries its siege engine (2026-10-27, ATLAS-286).
+ */
+export const CONTENT_FORMAT_VERSION = 3
 
 /** {@link ContentFile}. The writer's version and the reader's are one constant, so a bump cannot split them. */
 export const contentFileSchema: z.ZodMiniType<ContentFile> = z.strictObject({

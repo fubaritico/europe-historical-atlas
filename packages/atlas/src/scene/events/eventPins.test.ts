@@ -37,6 +37,7 @@ function event(id: string, place: Pick<ContentPlace, 'lon' | 'lat'> | null): Con
     description: null,
     sources: [],
     wikidata: null,
+    engine: null,
   }
 }
 

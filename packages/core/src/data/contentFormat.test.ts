@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { contentFileSchema } from './contentFormat'
+import { CONTENT_FORMAT_VERSION, contentFileSchema } from './contentFormat'
 
 import type { ContentEvent } from './contentFormat'
 
@@ -31,6 +31,7 @@ function capture(overrides: Partial<Record<keyof ContentEvent, unknown>> = {}): 
     description: null,
     sources: [{ id: '4', title: 'Gesta Francorum', author: null, url: null }],
     wikidata: null,
+    engine: 'traction-trebuchet',
     ...overrides,
   }
 }
@@ -41,7 +42,7 @@ function capture(overrides: Partial<Record<keyof ContentEvent, unknown>> = {}): 
  * @returns whether the schema accepts it
  */
 function accepts(event: unknown): boolean {
-  return contentFileSchema.safeParse({ version: 2, events: [event] }).success
+  return contentFileSchema.safeParse({ version: CONTENT_FORMAT_VERSION, events: [event] }).success
 }
 
 describe('contentFileSchema', () => {
@@ -54,6 +55,10 @@ describe('contentFileSchema', () => {
   describe('variants', () => {
     it('accepts an event with no place', () => {
       expect(accepts(capture({ place: null }))).toBe(true)
+    })
+
+    it('accepts an event with no engin — a battle, or a siege no period covers', () => {
+      expect(accepts(capture({ engine: null }))).toBe(true)
     })
 
     it('accepts an interval date', () => {
@@ -115,8 +120,18 @@ describe('contentFileSchema', () => {
       expect(accepts(capture({ place }))).toBe(false)
     })
 
-    it('refuses an unknown version, the first one included', () => {
-      expect(contentFileSchema.safeParse({ version: 1, events: [] }).success).toBe(false)
+    it('refuses an unknown version, the earlier ones included', () => {
+      for (const version of [1, 2, 4])
+        expect(contentFileSchema.safeParse({ version, events: [] }).success).toBe(false)
+    })
+
+    it('refuses an engin it does not know — the catapult among them', () => {
+      expect(accepts(capture({ engine: 'catapult' }))).toBe(false)
+    })
+
+    it('refuses an event with no engine key, the version 2 shape', () => {
+      const { engine: _engine, ...withoutEngine } = capture() as Record<string, unknown>
+      expect(accepts(withoutEngine)).toBe(false)
     })
 
     it('refuses an event type with an icon it does not know', () => {
@@ -170,7 +185,10 @@ describe('contentFileSchema', () => {
         from: { year: 1100, month: null, day: null, calendar: null, circa: false, margin: null },
         to: { year: 1090, month: null, day: null, calendar: null, circa: false, margin: null },
       }
-      const result = contentFileSchema.safeParse({ version: 2, events: [capture({ date })] })
+      const result = contentFileSchema.safeParse({
+        version: CONTENT_FORMAT_VERSION,
+        events: [capture({ date })],
+      })
       expect(result.error?.issues[0]?.message).toBe('the interval ends before it begins')
     })
   })

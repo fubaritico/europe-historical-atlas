@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { CONTENT_FORMAT_VERSION } from '@europe-historical-atlas/core/data/contentFormat'
 import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
@@ -97,7 +98,7 @@ function fakeAssets(over: Partial<MapAssetSources> = {}): Partial<MapAssetSource
     landMask: { load: () => Promise.resolve(MASK) },
     rivers: { load: () => Promise.resolve({ source: 'test', bbox: META.bbox, rivers: [] }) },
     regions: { load: () => Promise.resolve(YEAR) },
-    content: { load: () => Promise.resolve({ version: 2, events: [] }) },
+    content: { load: () => Promise.resolve({ version: CONTENT_FORMAT_VERSION, events: [] }) },
     ...over,
   }
 }
