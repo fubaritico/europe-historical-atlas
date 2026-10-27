@@ -20,7 +20,6 @@ import { createDevState } from './devState'
 import { startFrameLoop } from './frameLoop'
 import { ATLAS_MESSAGES } from './i18n'
 import { createMapInteraction } from './mapInteraction'
-import { createMapLayers } from './mapLayers'
 import { createMapPipeline } from './mapPipeline'
 import { createMapSources } from './mapSources'
 import { createMapUi } from './mapUi'
@@ -28,6 +27,7 @@ import { createMapUi } from './mapUi'
 // bundler-specific line in the compute, and it lives here on purpose: the client that talks to the
 // worker takes it as an injected `spawn`, so nothing below the composition root depends on Vite.
 import { createSurfacePicker } from './picking/surfacePicker'
+import { createMapLayers } from './scene/layers/mapLayers'
 import { createViewport } from './viewport'
 
 /**

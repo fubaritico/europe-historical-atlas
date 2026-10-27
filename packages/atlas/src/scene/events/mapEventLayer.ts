@@ -1,11 +1,11 @@
 /**
  * How the events are pinned on the relief (CMS-224).
  *
- * Out of `mapLayerBuilders` for its length; same shape as the builders there: it takes the layers' context, holds
- * nothing, and leaves its handle in the context.
+ * Same shape as every family's builder (`map…Layer`): it takes the layers' context, holds nothing, and leaves its
+ * handle in the context.
  */
 
-import { disposeHandle } from '../../mapLayerContext'
+import { disposeHandle } from '../layers/disposeHandle'
 import { svgToTexture } from '../svgTexture'
 
 import { eventPins } from './eventPins'
@@ -13,7 +13,7 @@ import { createEventIconMarkers } from './icons/eventIconMarkers'
 import { combineEventMarkers } from './markers'
 import { createPinMarkers } from './pin'
 
-import type { LayerContext } from '../../mapLayerContext'
+import type { LayerContext } from '../layers/layerContext'
 
 /**
  * Stand the contribution's events on the relief: its type's icon where one is chosen (ATLAS-156), a pin otherwise.

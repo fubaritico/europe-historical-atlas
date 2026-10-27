@@ -198,7 +198,7 @@ const READ_EVERY_FRAME = new Set([
 ])
 
 /**
- * The vassals' reveal, read on every frame (`mapLayers.frameDetail`) — spelled out by key, as the camera's
+ * The vassals' reveal, read on every frame (`scene/layers/frameLayers`, `frameDetail`) — spelled out by key, as the camera's
  * are, so a vassal option added later and wired to nothing still fails the guard. Matched together with
  * its object (`dev.vassals`): the rivers' rebuilding controls share some of these keys.
  */

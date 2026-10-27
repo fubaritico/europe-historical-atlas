@@ -7,7 +7,7 @@ import { CylinderGeometry, Group, Mesh, MeshBasicMaterial, SphereGeometry } from
 import { EVENT_RENDER_ORDER } from './markers'
 
 import type { EventMarkers } from './markers'
-import type { WorldPoint } from '../drapeProjection'
+import type { WorldPoint } from '../relief/drapeProjection'
 
 /** What the pins look like, in world units — the map is 12 wide. */
 export interface EventMarkerStyle {

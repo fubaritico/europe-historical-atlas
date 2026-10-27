@@ -13,8 +13,8 @@
 import type { MapControls } from './controls/mapControls'
 import type { DevPanelCallbacks, DevPanelDeps } from './devPanel'
 import type { DevState } from './devState'
-import type { MapLayers } from './mapLayers'
 import type { MapPipeline } from './mapPipeline'
+import type { MapLayers } from './scene/layers/mapLayers'
 import type { Viewport } from './viewport'
 
 /** What the panel drives. */

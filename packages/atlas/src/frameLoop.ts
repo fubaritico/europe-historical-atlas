@@ -10,7 +10,7 @@ import { Timer } from 'three'
 
 import { pixelsPerWorldUnit } from './scene/screenScale'
 
-import type { MapLayers } from './mapLayers'
+import type { MapLayers } from './scene/layers/mapLayers'
 import type { Viewport } from './viewport'
 
 /** The slice of the stats overlay the loop drives. */

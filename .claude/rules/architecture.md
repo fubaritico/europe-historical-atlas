@@ -243,17 +243,17 @@ pattern is not available by default — which is worth keeping, but it is not th
 | the borders | one derivation from the outlines (`editor/derivedBorders`); the atlas receives it through `editor/atlasBorders`, so **the line is the same geometry in both** |
 | the paint order | `data/paintOrder`, through `data/toRegionPayload` on the atlas side |
 | the polity colours | `editor/polityColours` and `data/regionPalette` |
-| a tribe's look | its colour vanishing at its limit, no stroke (ATLAS-258): one signed distance (`geo/signedDistance`), one ramp and one default (`editor/tribeFeather`: `tribeOpacity`, `TRIBE_FEATHER`), the outset spill cut over other polities and the sea by the same rule; across a tribe a state shows its frontier stroke, never a border between two states, and a tribe's own edge is dropped (`editor/tribes`: `asSeenAcrossTribes`, `isTribeEdge`). The atlas evaluates the ramp in its shader per fragment (`scene/tribeLayer`, GLSL's `smoothstep` + core's `featherShiftKm`); the Cartographer per backdrop pixel into an image cached per document version (`canvas/paint/tribeFeathers`, `canvas/tribeFeatherCache`) |
+| a tribe's look | its colour vanishing at its limit, no stroke (ATLAS-258): one signed distance (`geo/signedDistance`), one ramp and one default (`editor/tribeFeather`: `tribeOpacity`, `TRIBE_FEATHER`), the outset spill cut over other polities and the sea by the same rule; across a tribe a state shows its frontier stroke, never a border between two states, and a tribe's own edge is dropped (`editor/tribes`: `asSeenAcrossTribes`, `isTribeEdge`). The atlas evaluates the ramp in its shader per fragment (`scene/political/tribes/tribeShader`, GLSL's `smoothstep` + core's `featherShiftKm`); the Cartographer per backdrop pixel into an image cached per document version (`canvas/paint/tribeFeathers`, `canvas/tribeFeatherCache`) |
 | the rivers | the same data and base style (`data/riverSource`, `data/riverDisplay`) |
 
 **Different — each application does it its own way:**
 
 | what | Cartographer | atlas |
 | --- | --- | --- |
-| a polity's fill | a vector path from the outline, composited `overlay` on the backdrop (`canvas/paint/painter.ts`): the edge is exact | cut from the same outline into triangles on the relief's planes (`pipeline/fillTriangles`, atlas `scene/fillLayer`), blended in a shader: the edge is exact too since 2026-10-16 |
+| a polity's fill | a vector path from the outline, composited `overlay` on the backdrop (`canvas/paint/painter.ts`): the edge is exact | cut from the same outline into triangles on the relief's planes (`pipeline/fillTriangles`, atlas `scene/political/fills/`), blended in a shader: the edge is exact too since 2026-10-16 |
 | the relief | a flat image | a 3D mesh, with the shore ramp (`data/shoreRamp`) |
 | how a border is stroked | canvas strokes, every hand | three.js lines from `editor/borderHands`' table, minus weight and a dotted pattern (`rules/known-issues/atlas.md`) |
-| a vassal | every polity in its own colour, with every border | from afar a vassal wears its suzerain's colour and no border parts them; its own colour and its border fade in by zoom (ATLAS-253) — levels from `editor/homageLevels`, the zoom read by `scene/homageReveal`, one line layer per split level (`scene/levelledBorderLayer`), the fills mixed across tint levels (`scene/fillLayer`) |
+| a vassal | every polity in its own colour, with every border | from afar a vassal wears its suzerain's colour and no border parts them; its own colour and its border fade in by zoom (ATLAS-253) — levels from `editor/homageLevels`, the zoom read by `scene/political/homageReveal`, one line layer per split level (`scene/political/borders/levelledBorderLayer`), the fills mixed across tint levels (`scene/political/fills/fillShader`) |
 
 **The direction**: geometry and decisions live in `core`; only the drawing — a 2D canvas on one side, the
 GPU on the other — belongs to each application. A difference in the second table is either a rendering

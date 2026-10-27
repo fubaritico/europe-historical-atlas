@@ -15,7 +15,7 @@ import { ICON_FLAT_RAISE, ICON_HALO_SPAN, ICON_LIFT } from './settings'
 
 import type { EventIconKind } from './kinds'
 import type { EventIcon } from './meshes/eventIcons'
-import type { WorldPoint } from '../../drapeProjection'
+import type { WorldPoint } from '../../relief/drapeProjection'
 import type { Texture } from 'three'
 
 /** An icon to stand on the relief. */

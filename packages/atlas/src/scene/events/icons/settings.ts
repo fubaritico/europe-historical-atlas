@@ -25,7 +25,7 @@ export const ICON_SWAY = { amplitudeRad: (25 * Math.PI) / 180, periodSeconds: 4 
 
 /**
  * The zoom (0 zoomed out, 1 in) around which the icons pass from flat to 3D (the dev, 2026-10-26), and the span over
- * which the one fades into the other — the vassals' reveal does the same (`scene/homageReveal`).
+ * which the one fades into the other — the vassals' reveal does the same (`scene/political/homageReveal`).
  */
 export const ICON_CROSS_FADE = { zoom: 0.45, span: 0.1 }
 

@@ -4,7 +4,7 @@
  * homage (`files/plans/atlas/vassal-lod.md`).
  *
  * One group of the dev-panel declaration table, declared like `river.ts`. Every field is read on each
- * frame (`scene/homageReveal`), so none of them needs a rebuild.
+ * frame (`scene/political/homageReveal`), so none of them needs a rebuild.
  */
 
 import type { ControlTable } from '@europe-historical-atlas/core/utils/controlSpec'

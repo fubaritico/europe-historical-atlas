@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { startFrameLoop } from './frameLoop'
 import { pixelsPerWorldUnit } from './scene/screenScale'
 
-import type { MapLayers } from './mapLayers'
+import type { MapLayers } from './scene/layers/mapLayers'
 import type { Viewport } from './viewport'
 
 /**

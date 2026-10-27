@@ -47,13 +47,20 @@ src/
 ├── loading/                what the map is made from, and the order it is paid in:
 │                           mapPipeline (split), mapSources, mapContent, yearBorders, computeLabels
 ├── devPanel/               devPanel (split), devPanelCallbacks, devState, params/ (today's devParams/)
-├── scene/                  everything drawn, one folder per family
-│   ├── layers/             the handle over all of it: mapLayers, mapLayerBuilders (split), mapLayerContext
-│   ├── relief/             reliefMesh, terrainTexture, drapeProjection
-│   ├── sheet/              paperSheet, mapEdge, graticuleFrame, frameLabels, mapTitle
-│   ├── decor/              compassRose, compassRoseSvg, rhumbNetwork
-│   ├── lines/              lineLayer, composedLineLayer (split), depthBias, riverLayer
-│   ├── political/          fillLayer, levelledBorderLayer, homageReveal, tribes/ (tribeLayer, mapTribeLayer, tribePatches)
+├── scene/                  everything drawn, one folder per family; each family holds its three.js objects AND
+│   │                       its builder, `map…Layer` (how it is put on the map from the layers' context)
+│   ├── layers/             the handle over all of it: mapLayers; layerContext (the handles and the context),
+│   │                       frameLayers (what every frame updates), rebuildSurface (the one order), layerProjection,
+│   │                       disposeHandle
+│   ├── relief/             reliefMesh, mapEdge (its wall), terrainTexture, drapeProjection, mapReliefLayer
+│   ├── lines/              lineLayer, polylines (chain geometry: offset, mitres, segments), depthBias
+│   ├── waters/             riverLayer, mapRiverLayer, mapCoastLayer
+│   ├── decor/              rose/ (compassRose, compassRoseSvg, mapRoseLayer), rhumbs/ (rhumbNetwork, mapRhumbLayer)
+│   ├── sheet/              paperSheet, graticuleFrame, frameLabels, mapTitle, mapFrameLayer
+│   ├── political/          tintOnRelief (what fills and tribes share), homageReveal,
+│   │   │                   fills/ (fillBuffers, fillShader, fillLayer, mapFillLayer),
+│   │   │                   borders/ (borderStrokes, composedLineLayer, levelledBorderLayer, mapBorderLayer),
+│   │   │                   tribes/ (tribePatches, tribeBuffers, tribeShader, tribeLayer, mapTribeLayer)
 │   ├── events/             mapEventLayer (the entry), eventPins (which events, where), markers (what every
 │   │   │                   marker answers to), pin (the plain pin)
 │   │   └── icons/          eventIconMarkers (the icons on the map), settings (how they stand: size, lift, sway,
@@ -64,7 +71,8 @@ src/
 │   │       ├── flat/       the drawings seen from afar, one file per icon: swords, tower, crown; drawing (what a
 │   │       │               drawing is), eventIconSvg (the SVG made from one)
 │   │       └── light/      what detaches an icon from the map: lighting, halo
-│   └── (root)              the helpers several families use: screenScale, svgTexture, fadeHidden, debugRect
+│   └── (root)              what several families share: world (the map's width), landMask (the land, or its
+│                           fallback), screenScale, svgTexture, fadeHidden, debugRect
 ├── camera/  controls/  picking/  ui/  utils/  i18n/  bench/      unchanged (mapControls split in place)
 ```
 
@@ -80,7 +88,7 @@ tree is updated with the layout.
 | 1 | **The events**: `scene/events/` and `icons/`, `eventIcons` cut into one file per icon, body comments | it is where he was lost, and ATLAS-289 builds on it |
 | 2 | **The rest of `scene/`** by family, `tribePatches` and `mapTribeLayer` into `political/tribes/` | ends the import from `scene/` up into the root |
 | 3 | **The root** into `app/`, `loading/`, `devPanel/`; their ESLint rows; `architecture.md` | the root holds `main.ts` and folders |
-| 4 | **The five long files** split: `devPanel`, `mapLayerBuilders`, `mapPipeline`, `mapControls`, `composedLineLayer` | a split is easier to review once the file has its home |
+| 4 | **The long files left** split by meaning: `devPanel`, `mapPipeline`, `mapControls` (`mapLayerBuilders` and `composedLineLayer` went with step 2) | a split is easier to review once the file has its home |
 
 Each step: the moves by `git mv` (history follows), imports rewritten, tests moved beside their file,
 `pnpm type-check && pnpm lint && pnpm test`, `/review`, and **he opens the atlas** (`/`, `/icons.html`,

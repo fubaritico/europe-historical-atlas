@@ -1,7 +1,7 @@
 import { Group } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
-import { BORDER_RENDER_ORDER } from '../../mapLayerContext'
+import { BORDER_RENDER_ORDER } from '../political/borders/mapBorderLayer'
 
 import { EVENT_RENDER_ORDER } from './markers'
 import { EVENT_MARKER_STYLE, createPinMarkers } from './pin'
