@@ -2,6 +2,22 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-10-27 — l'atlas rangé, les icônes instanciées
+
+Une plage au journal, l'après-midi du 27/10, jusqu'à 15 h 55. Commits jusqu'à `c1970d1`, **tous poussés** ; ATLAS-296 dans
+l'arbre, non commité.
+
+- **ATLAS-291** : l'atlas rangé par le sens comme le Cartographe (`app/`, `loading/`, `sources/`, `tunables/`, `devPanel/`,
+  `scene/` par familles, les modèles 3D dans `meshes/`), des commentaires dans le corps des fonctions — *« Moi, tout ce que je
+  veux, c'est que le code soit organisé »*. Plan : `files/plans/atlas/src-layout.md`. **ATLAS-293** : les points laissés
+  ouverts par les revues. **REPO-294** : Dependabot à zéro.
+- **ATLAS-289** : une géométrie et une matière par type d'icône, puis les halos et les images plates en instances
+  (*« pour que vraiment on ait terminé le sujet »*). Il a mesuré : 1 000 / 10 000 icônes à 16,7 ms, 100 000 vers 200 ms.
+- **ATLAS-296** ouvert à sa demande (les épées qui se fondent dans le relief) : codé, gate verte, review et test à faire.
+- **Mes fautes** : des récapitulatifs qui renvoyaient à « point N » et à des mots privés (« poignée », « feuille ») — *« plus
+  jamais ce genre de récap bidon »* ; une tartine pour expliquer les draw calls ; deux fois du contenu absurde écrit dans un
+  test ; un `rm -rf` glissé dans une commande, refusé ; le contexte épuisé avant la review.
+
 ### 2026-10-26 — le premier événement qui se voit : l'icône bataille
 
 Une plage au journal : **26/10 20:33 → 23:45 (3 h 12)** ; le chantier ouvert le 05/10 totalise **118 h 46 sur 23 plages**.

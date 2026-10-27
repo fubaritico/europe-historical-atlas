@@ -5,36 +5,19 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — ATLAS-286 : étapes 1–4 et tour 3D codées, NON commitées ; puis l'image plate de la tour
+## ▶ ON REPREND ICI — les épingles (ATLAS-298), tout de suite après la session du 27/10
 
-**27/10, fin à 18 h 37.** Poussés : ATLAS-296 (`0b9ca67`, épées, halo et images plates devant le relief) et la côte
-abaissée (`072efa5`) — CI verte jusqu'à Sonar.
+**27/10, fin à 21 h 56, tout poussé** (`072efa5..2eebda1`). Le siège est un trébuchet animé, en 3D et à plat —
+**ATLAS-286 en Fait** ; l'engin selon l'époque attend une année après 1200 (**ATLAS-299**, Backlog).
 
-**Dans l'arbre, rien de commité — ATLAS-286, les engins de siège** (plan `files/plans/contribution/siege-engines.md`, ses
-décisions dans son tableau ; les cases 1–4 cochées sur le ticket) :
-- **core** : `data/siegeEngines.ts` (la règle « le plus récent en usage »), format de contenu **v3** (`engine` sur chaque
-  événement), `public/content/events.json` réécrit ;
-- **CMS** : la collection « Engins de siège » (sources obligatoires), la tour libellée « Tour et engin de siège », l'export
-  qui donne son engin à chaque siège (avertit hors période), le seed (`seed/siegeEngineData.ts`, dates prudentes :
-  traction vers 808–1450, contrepoids vers 1230–1450, canon dès vers 1374 ; « Siège » → tour, « Conquest » reste épingle) ;
-- **sa base** : sauvegarde `packages/cms/.backups/cms-2026-10-27-before-siege-engines.db`, seed passé, export fait — la
-  Prise de Haïfa sort en tour + trébuchet à traction ;
-- **atlas, la tour 3D** : au sol, immobile, porte au sud (`ICON_FACES_CAMERA`), ronde à 32 faces, 8 merlons, taille 0,7
-  (`ICON_SIZE`) — **la taille est validée par lui** ; l'immobilité et les facettes, il ne l'a pas dit.
-- gate verte (atlas 1 144, CMS 119, core 1 320).
+**À la reprise** : **ATLAS-298** (Idées) — *« une épingle avec une couleur dédiée, représentée dans une légende, serait ce
+qu'il y a de mieux »*. Il veut reprendre là-dessus. Rien n'est conçu : d'abord lui faire dire ce qu'il veut voir (une
+couleur par type d'événement ? l'épingle seule de loin, ou à la place des images plates ? la légende où ?), et ce que ça
+change aux icônes dessinées — le ticket peut les remplacer en partie. ATLAS-297 (un calque par type) est voisin, en
+Backlog. Le ticket est à mettre en forme (modèle Backlog) avec ses mots, **lui** valide le texte.
 
-**À faire à la reprise, dans l'ordre** : (1) `/review` des étapes 2–4 et de la tour 3D (seule l'étape 1 a été revue :
-propre) ; (2) lui faire regarder la tour immobile à Haïfa sur **son** serveur (5173) ; (3) commits séparés — étapes 1–4,
-puis la tour 3D — sans `importMap.js` ; `payload-types.ts` formaté avant (CMS-290) ; pousser.
-
-**Puis l'image plate de la tour, par `/make-event-icon`** (la skill écrite ce soir, méthode des épées) : quatre variantes à
-mettre sur `/svg-icons.html` à côté de l'actuelle — A silhouette sombre `#5e4b36` et porte claire, **ma recommandation** ;
-B pierre claire et contour épais ; C pierre moyenne et contour épais ; D silhouette sombre sans porte. Toutes au
-`viewBox` recadré (`7.5 11 49 49`), trois merlons, sans trait fin. **Lui choisit, sur son serveur.**
-
-**À trancher avec lui avant d'aller loin dans les icônes** : **ATLAS-298** (Idées) — *« une épingle avec une couleur
-dédiée, représentée dans une légende, serait ce qu'il y a de mieux »* : ça pourrait remplacer les icônes dessinées. Et
-ATLAS-297 (un calque par type) attend en Backlog.
+**Ouvert par décision, à lui de trancher un jour** : les icônes animées (épées qui se balancent, trébuchet) ignorent
+« réduire les animations » du système — un constat de la revue du 27/10, ATLAS-300 dans Idées.
 
 **L'audit des instructions** (`/doctor prompt-audit`, 27/10) : rapport et diff proposé dans
 `files/prompt-audit-2026-10-27.md` (non versionné) — 36 constats, **rien d'appliqué**. Les plus lourds : le CMS absent des
@@ -43,7 +26,7 @@ portée `cms` dans les commits, la sécurité qui ignore le CMS. À passer avec 
 accepte**. Trois questions sont à lui : la « phase de recherche » de `CLAUDE.md` tient-elle encore ; retirer ce que
 ESLint et `tsc` font déjà respecter ; l'entrée `reliefWorldY` introuvable.
 
-**Pour régler une icône** : la skill `/make-event-icon`. **Jamais de backtick, de `$(` ni de `$` dans un `perl -e` ou un `sed`
+**Pour faire ou régler une icône** : la skill `/make-event-icon` (une image plate se dessine dans un cadre 44 × 44). **Jamais de backtick, de `$(` ni de `$` dans un `perl -e` ou un `sed`
 entre guillemets doubles** : le 27/10, ça a lancé le seed sur sa base — éditer par l'éditeur.
 
 **Trois règles du CMS, toujours** :
@@ -73,11 +56,11 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 | où | ticket | état |
 | --- | --- | --- |
 | **Chantiers** | DESIGN-262 La gestion de l'incertitude · **CMS-285 Le CMS** | DESIGN-262 : palier 2 conçu (CORE-270) ; CMS-285 : socle codé, outillage à faire |
-| **En cours** | ATLAS-286 · ATLAS-156 · ATLAS-145 · ATLAS-152 | ATLAS-286 : étapes 1–4 et tour 3D codées, non commitées ; ATLAS-156 : la bataille faite ; ATLAS-152 porte les sources de 1100 |
+| **En cours** | ATLAS-156 · ATLAS-145 · ATLAS-152 | ATLAS-156 : la bataille et le siège faits ; ATLAS-152 porte les sources de 1100 |
 | **À valider par le développeur** | — | vide le 26/10 |
-| **Backlog** | ATLAS-297 · CORE-270 · CMS-281..283 · ATLAS-284 · CARTO-237 · CARTO-273 · CARTO-274 | CORE-270 passe après la contribution (25/10) ; 281–283 les écrans suivants |
-| **À faire**, en tête | ATLAS-287 · ATLAS-288 · CMS-290 · CMS-276 → 280 | dans cet ordre ; ATLAS-296 fait le 27/10 |
-| **Idées** | ATLAS-298 épingle + légende · CARTO-268 feature flags · CORE-271 généalogie · CARTO-272 radar | CARTO-268 : pas encore |
+| **Backlog** | ATLAS-299 · ATLAS-297 · CORE-270 · CMS-281..283 · ATLAS-284 · CARTO-237 · CARTO-273 · CARTO-274 | CORE-270 passe après la contribution (25/10) ; 281–283 les écrans suivants |
+| **À faire**, en tête | ATLAS-287 · ATLAS-288 · CMS-290 · CMS-276 → 280 | dans cet ordre ; ATLAS-286 et 296 faits le 27/10 |
+| **Idées** | **ATLAS-298 épingle + légende — la reprise** · ATLAS-300 animations réduites · CARTO-268 feature flags · CORE-271 généalogie · CARTO-272 radar | CARTO-268 : pas encore |
 
 **Toujours en attente, à lui proposer un jour** : le relief niveau 6 du Cartographe (une ligne, `main.tsx` →
 `/heightmaps/europe-dem-z6-1920`, `rules/known-issues/cartographer.md`).

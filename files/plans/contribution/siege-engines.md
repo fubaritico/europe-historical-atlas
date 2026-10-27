@@ -4,17 +4,21 @@
 > catapulte ou canon, selon l'époque »*. The tower alone stands for the castle that protects a city (ATLAS-295). Which
 > engin goes with which period is **data, held in the contribution and backed by sources**: *« il faut juste que ce soit
 > présent dans la contribution et que tu cites quelque chose pour qu'on ait les données exactes »*.
+>
+> **Changed the same evening, on sight**: the tower is gone from the siege. The siege is the artillery piece alone,
+> changing with the period — for 1100 the traction trebuchet, animated in 3D and in profile from afar (ATLAS-286, done
+> 2026-10-27). The tower's model and drawing are kept in reserve (`meshes/tower`, `flat/tower`).
 
 ## Decisions
 
 | decision | by | when |
 | --- | --- | --- |
-| A siege is drawn as a tower and an engin of its period; a tower alone is a castle (a city's icon) | the dev | 2026-10-27 |
+| ~~A siege is drawn as a tower and an engin of its period~~ — superseded: a siege is drawn as **the engin of its period alone**; a tower alone is a castle (a city's icon, ATLAS-295) | the dev | 2026-10-27 |
 | The engins and their periods live in the contribution, each period backed by sources | the dev | 2026-10-27 |
 | Where periods overlap, the map shows **the newest engin already in use** | the dev (option *a*) | 2026-10-27 |
 | No catapult: the torsion engine (onager) is Roman, the medieval *mangonel* is a traction trebuchet | me, from Purton — the dev agreed with the model | 2026-10-27 |
 | The export picks each siege's engin; the atlas only draws what it is given | me — an argument, not law | 2026-10-27 |
-| A siege in no period: the export warns, naming it, and the map shows the tower alone | the dev | 2026-10-27 |
+| A siege in no period: the export warns, naming it, and the map shows the tower alone — **to take up again**, the tower having left the siege | the dev | 2026-10-27 |
 | The icon's stored value stays `tower` (renaming it rewrites a column, CMS-276); only its label changes | me — an argument, not law | 2026-10-27 |
 
 ## What the sources say
@@ -81,5 +85,8 @@ the event beats the table (`evidence-system.md`). Not built until a source asks 
 3. **CMS export** — each siege given its engin through step 1's function; the warning decided above.
 4. **CMS seed** — the four sources above in the register, the three engins with their periods; the dev reads the dates
    before they are committed.
-5. **atlas** — the traction trebuchet beside the tower, 3D and flat (ATLAS-286), on `/icons.html` then on the map; the
-   counterweight trebuchet and the cannon when a year after 1200 is published.
+5. **atlas** — done 2026-10-27 for 1100: the traction trebuchet, 3D (it loads, throws, the stone flies and fades; still,
+   a three-quarter facing left) and a profile silhouette from afar, chosen on the benches (`meshes/trebuchet`,
+   `flat/trebuchet`). **Not yet**: the atlas does not read an event's `engine` — every siege draws the traction
+   trebuchet. The counterweight trebuchet and the cannon, and the choice by `engine`, come with the first year
+   published after 1200; a siege with no engine then needs its answer again (the tower it used to fall back on is gone). — ATLAS-299.
