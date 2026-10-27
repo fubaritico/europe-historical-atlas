@@ -1021,13 +1021,25 @@ describe('rebuildFrame and rebuildRose', () => {
       expect(scene.children).toHaveLength(1)
     })
 
-    it('places the title from the frame’s outer edge, so it keeps its distance as the frame grows', () => {
+    // The title is placed from the frame's outer edge, so it keeps its distance as the frame grows.
+    it('moves the title back by exactly its offset', () => {
       const base = titleAt(() => undefined)
       expect(titleAt((frame) => (frame.titleOffset += 0.1)).z - base.z).toBeCloseTo(0.1)
+    })
+
+    it('moves the title back by as much as the graduated band thickens', () => {
+      const base = titleAt(() => undefined)
       expect(titleAt((frame) => (frame.bandWidth += 0.05)).z - base.z).toBeCloseTo(0.05)
+    })
+
+    it('moves the title back by as much as the degrees’ margin widens', () => {
+      const base = titleAt(() => undefined)
       expect(titleAt((frame) => (frame.labelLaneWidth += 0.07)).z - base.z).toBeCloseTo(0.07)
-      // Just above the sheet, so the two never contend for a pixel: a hair, well clear of the float32 rounding
-      // the vertex buffer adds (a few 1e-10), and far below a visible step.
+    })
+
+    it('floats the title a hair above the sheet, so the two never contend for a pixel', () => {
+      const base = titleAt(() => undefined)
+      // Well clear of the float32 rounding the vertex buffer adds (a few 1e-10), and far below a visible step.
       expect(base.y - base.lift).toBeGreaterThan(1e-4)
       expect(base.y - base.lift).toBeLessThan(0.01)
     })
