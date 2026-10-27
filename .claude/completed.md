@@ -2,44 +2,38 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
-### 2026-10-26 — le premier événement qui se voit : l'icône bataille
+### 2026-10-27 (fin d'après-midi) — les icônes devant le relief, les engins de siège dans la contribution
 
-Une plage au journal : **26/10 20:33 → 23:45 (3 h 12)** ; le chantier ouvert le 05/10 totalise **118 h 46 sur 23 plages**.
-**4 commits** `8a3ad38`..`dd39fd0`, **tous poussés** (avec les 6 du 25/10).
+Même plage au journal que l'entrée suivante : **27/10 11:06 → 18:37 (7 h 31)**, reprise à 16 h 45 ; le chantier ouvert le
+05/10 totalise **126 h 19 sur 24 plages**. **2 commits poussés** (`0b9ca67`, `072efa5`), CI verte jusqu'à Sonar ; le reste
+**dans l'arbre, non commité**.
 
-- **Le tableau** : CMS-219, 220 (sa question : *qu'est-ce qu'un lieu*), 221 (*« à la louche »*, à réitérer), 224 et CORE-252
-  → Fait.
-- *« Je ne sais même plus où j'en suis… je ne sais pas comment les lier »* → tout se lie dans l'événement. *« C'est toi
-  qui vas saisir »* → le seed de 1100 depuis la page Wikipédia, 11 événements, les Q lus aux liens de la page.
-- *« Il faut que je voie quelque chose »* : les épingles (CMS-224) existaient, l'atlas ne tournait pas — le port 5173
-  servait un autre de ses projets. Sous les frontières → corrigé.
-- **ATLAS-156, l'icône bataille**, réglée à l'œil toute la soirée : épées à 90° *« dans un carré »*, relevées, face à la
-  caméra, balancement, contre-jour qui suit la caméra (*« le même type de problème qu'avec les reliefs »*), halo ; de
-  loin l'image plate « C2 », choisie sur une planche de lisibilité (*« trop de détails »*), en fondu. Validée. *« Une
-  icône à la fois, chacune ses spécificités »* → ATLAS-286..288 ; ATLAS-289 (*« une centaine de choses… c'est
-  prioritaire »*) et CMS-290 en tête d'À faire.
-- **Mes fautes** : le pommeau réduit sur la 3D quand il parlait du SVG ; des icônes qui copiaient l'orientation de la
-  caméra au lieu de se tourner vers elle (balancement décentré) ; un `cd` ; des tests du lecteur restés en version 1,
-  vus par la seule gate complète ; deux sabotages ratés sur une ligne coupée par Prettier.
+- **ATLAS-296** → Fait : épées, halo **et images plates** devant le relief (*« ça doit être pareil pour les sprites »*). La
+  côte abaissée (`shoreLift` 0,002, *« un peu trop hauts »*).
+- **ATLAS-297** (un calque par type d'icône, *« on sépare »*) écrit, validé, en Backlog ; **ATLAS-298** sa nouvelle idée —
+  une épingle de couleur dédiée et une légende, *« ce qu'il y a de mieux »* — en Idées.
+- **ATLAS-286, les engins de siège** : le siège = une tour **et** son artillerie selon l'époque ; *« il faut que ce soit
+  présent dans la contribution et que tu cites »*. Plan `files/plans/contribution/siege-engines.md` ; ses choix : le plus
+  récent en usage, la tour seule hors période, des dates **prudentes**. Étapes 1–4 codées (format v3, collection, export,
+  seed passé sur sa base après sauvegarde). La tour 3D au sol, immobile, ronde, **taille validée**.
+- **Mes fautes** : l'anglais, plusieurs fois (*« t'oublies systématiquement la langue »*) ; des backticks dans un `perl -e`
+  qui ont **lancé le seed sur sa base** — intacte, vérifiée en lecture puis sur une copie ; une planche de lisibilité faite
+  hors du banc, la méthode des épées oubliée → la skill `/tune-icon`. *« Tu réagis comme si tu avais la tête à l'envers »*.
 
-### 2026-10-25 — la contribution d'abord : le CMS est né, son outillage planifié
+### 2026-10-27 — l'atlas rangé, les icônes instanciées
 
-Une plage au journal : **25/10 14:43 → 17:37 (2 h 53)** ; le chantier ouvert le 05/10 totalise **115 h 25 sur 22 plages**.
-**5 commits** `d7aa9d2`..`e4d1015`, **non poussés**.
+Une plage au journal, l'après-midi du 27/10, jusqu'à 15 h 55. Commits jusqu'à `c1970d1`, **tous poussés** ; ATLAS-296 dans
+l'arbre, non commité.
 
-- **Sa décision** : CORE-252 passe avant CORE-270 — *« il faut pouvoir contribuer »*, *« la véracité de ce qu'on saisit, on
-  verra ça après »*. Ce qui compte, c'est saisir quelque part, puis l'afficher dans l'atlas.
-- **Le CMS** — son nom : *« un système de contribution mutualisée »* ; `CONTRIB` devient `CMS` partout (21 tickets, l'étiquette,
-  les fichiers). Payload, cinq collections, le bouton « Chercher dans Wikidata » sur un lieu (position, existence P571/P576
-  avec la précision lue en « vers » et marge), l'export, les épingles dans l'atlas → CMS-219..224, CORE-252 en À valider.
-- **Ses demandes en cours de route** : un lieu existe dans le temps (*« s'il n'y a pas de date de fin, c'est que ça existe
-  encore »*) et a des périodes (CMS-281) ; seeder et voir le schéma ; sauvegarder et réimporter un contenu fourni.
-- **Le chantier CMS-285** : socle, outillage CMS-276..280 (plan `files/plans/contribution/cms-tooling.md`), écrans, atlas, en
-  ligne. CMS-222 archivé (dépassé par la saisie par langue du 23/10).
-- **Mes fautes** : *« l'endroit dans la source est facultatif »* écrit dans les plans et attribué à lui (*« j'ai rien dit de
-  ça moi »*, défait) ; un changement de schéma sans migration → la question de Payload a bloqué son serveur, base supprimée
-  avec son accord ; mes relances du serveur pendant qu'il l'utilisait (« Failed to fetch ») ; le générateur de Payload lancé
-  dans la racine du dépôt ; un `rm -rf` glissé dans une commande, refusé. *« Au bout de 10 minutes déjà, tu me fais chier »* —
-  il voulait construire, je théorisais.
+- **ATLAS-291** : l'atlas rangé par le sens comme le Cartographe (`app/`, `loading/`, `sources/`, `tunables/`, `devPanel/`,
+  `scene/` par familles, les modèles 3D dans `meshes/`), des commentaires dans le corps des fonctions — *« Moi, tout ce que je
+  veux, c'est que le code soit organisé »*. Plan : `files/plans/atlas/src-layout.md`. **ATLAS-293** : les points laissés
+  ouverts par les revues. **REPO-294** : Dependabot à zéro.
+- **ATLAS-289** : une géométrie et une matière par type d'icône, puis les halos et les images plates en instances
+  (*« pour que vraiment on ait terminé le sujet »*). Il a mesuré : 1 000 / 10 000 icônes à 16,7 ms, 100 000 vers 200 ms.
+- **ATLAS-296** ouvert à sa demande (les épées qui se fondent dans le relief) : codé, gate verte, review et test à faire.
+- **Mes fautes** : des récapitulatifs qui renvoyaient à « point N » et à des mots privés (« poignée », « feuille ») — *« plus
+  jamais ce genre de récap bidon »* ; une tartine pour expliquer les draw calls ; deux fois du contenu absurde écrit dans un
+  test ; un `rm -rf` glissé dans une commande, refusé ; le contexte épuisé avant la review.
 
-> Older sessions (2026-09-12 → 2026-10-24, the night) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-26) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

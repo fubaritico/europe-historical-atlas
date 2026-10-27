@@ -21,6 +21,7 @@
 | Track a task — a card, its column, its label | `/trello` |
 | Log a source used to draw a year, and its mention | `/create-data-mention` |
 | Reason about a subject whose rules are not loaded | `/rules` |
+| **Change how an icon looks** — its 3D model or its flat drawing | **`/tune-icon`** |
 
 > **This repository has React in it** — the Cartographer, since 2026-10-01. Of the six React skills archived
 > under `files/claude-archive/skills/`, measured one by one:

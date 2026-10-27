@@ -23,7 +23,8 @@ Open issues of `packages/cms`, the contribution system (Payload). Loaded by path
   parce que lint-staged lance ESLint depuis la racine. Après un changement de champ : `pnpm --filter
   @europe-historical-atlas/cms generate:types` et `generate:importmap`. **Sévérité : à savoir.**
 - **Le serveur du CMS réécrit `payload-types.ts` et `importMap.js` sans les formater** — CMS-290, à chaque rechargement de sa
-  config (26/10, mesuré) : tant qu'il tourne, `format:check` reste rouge sur ces deux fichiers, même juste après un
+  config (26/10, mesuré) ; **chaque `payload run` aussi** — le seed, l'export (27/10, mesuré : le fichier redevient non
+  formaté après chacun, serveur arrêté) : tant qu'il tourne, `format:check` reste rouge sur ces deux fichiers, même juste après un
   `prettier --write`. **Remède** : au commit, formater puis indexer le fichier aussitôt ; un `importMap.js` qui ne
   diffère que par le format n'est pas commité. **Sévérité : à savoir.**
 - **Next 16 écrit son propre `AGENTS.md` et `CLAUDE.md` dans le paquet** au premier `next dev` — `agentRules: false`
