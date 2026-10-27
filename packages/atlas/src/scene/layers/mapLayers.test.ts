@@ -34,6 +34,13 @@ import type {
 } from 'three'
 import type { LineSegments2 } from 'three/addons/lines/LineSegments2.js'
 
+// The vellum's bake stands in as a blank sheet of the right size: these tests check how the layers are laid,
+// replaced and freed, not the paper's fibre — `core`'s own suite does. Baked for real, every frame rebuild costs a
+// 1024 × 1024 pass, which coverage's instrumentation slows past the CI's five-second budget.
+vi.mock('@europe-historical-atlas/core/pipeline/sheetCompose', () => ({
+  composeSheetRgba: (size: number): Uint8Array => new Uint8Array(size * size * 4),
+}))
+
 const META: HeightmapMeta = {
   width: 8,
   height: 8,
