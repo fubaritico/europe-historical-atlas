@@ -2,6 +2,24 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
+### 2026-10-27 (nuit) — l'épingle, ses couleurs par type, les ombres portées
+
+Même plage au journal que les entrées du 27/10 — **11:06 → 23:26**, comptée d'un tenant (12 h 20) ; la reprise de nuit
+court de **22:01 à 23:26**. Le chantier ouvert le 05/10 totalise **131 h 08 sur 24 plages**. **Poussé** : `27e85a8` ;
+le plan des noms et le glossaire commités à la fermeture.
+
+- **ATLAS-298 → Fait** : l'épingle éclairée (« B », la troisième sur quatre), deux fois plus petite, sans spéculaire
+  (*« plus de contraste sans qu'il y ait un spéculaire »*), des couleurs vives ; **une couleur par type d'événement**
+  choisie dans le CMS (format v4 ; seed et export passés sur sa base après une copie) ; l'image plate « A » de loin
+  (*« j'aime bien la version penchée, mais on va faire la A »*) ; des ombres du nord-ouest à 20 % pour les épingles, le
+  trébuchet et les épées (*« même type d'ombre, même force »*), d'un seul bloc et floues. *« On a réussi notre test de
+  rendu »* ; les icônes manquantes viendront au fil de l'eau.
+- **ATLAS-301** créé, en tête d'À faire : le nom de chaque pays dans l'espace qu'il occupe — plan
+  `files/plans/atlas/country-names.md`, à démarrer le 28/10.
+- **Mes fautes** : la tige épaissie sans qu'il le demande (*« non non non… »*) ; l'ombre projetée livrée en plusieurs
+  morceaux nets avant l'ombre rastérisée ; la couleur par type proposée puis oubliée — *« je ne vois que des épingles
+  rouges »*.
+
 ### 2026-10-27 (soir) — le siège devient un trébuchet animé
 
 Même plage au journal que les deux entrées du 27/10 — **11:06 → 21:54**, comptée d'un tenant (10 h 48) ; la reprise du soir
@@ -18,22 +36,4 @@ court de **19:59 à 21:54**. Le chantier ouvert le 05/10 totalise **129 h 36 sur
   de faire »*) — et à l'envers de ses photos ; le glossaire rempli de ce qui n'y va pas (*« ça se transforme en
   dictionnaire »*) ; le liseré deux fois plus fin sur le trébuchet, vu par lui (*« est-ce que tu es sûr »*).
 
-### 2026-10-27 (fin d'après-midi) — les icônes devant le relief, les engins de siège dans la contribution
-
-Même plage au journal que l'entrée suivante : **27/10 11:06 → 18:37 (7 h 31)**, reprise à 16 h 45 ; le chantier ouvert le
-05/10 totalise **126 h 19 sur 24 plages**. **2 commits poussés** (`0b9ca67`, `072efa5`), CI verte jusqu'à Sonar ; le reste
-**dans l'arbre, non commité**.
-
-- **ATLAS-296** → Fait : épées, halo **et images plates** devant le relief (*« ça doit être pareil pour les sprites »*). La
-  côte abaissée (`shoreLift` 0,002, *« un peu trop hauts »*).
-- **ATLAS-297** (un calque par type d'icône, *« on sépare »*) écrit, validé, en Backlog ; **ATLAS-298** sa nouvelle idée —
-  une épingle de couleur dédiée et une légende, *« ce qu'il y a de mieux »* — en Idées.
-- **ATLAS-286, les engins de siège** : le siège = une tour **et** son artillerie selon l'époque ; *« il faut que ce soit
-  présent dans la contribution et que tu cites »*. Plan `files/plans/contribution/siege-engines.md` ; ses choix : le plus
-  récent en usage, la tour seule hors période, des dates **prudentes**. Étapes 1–4 codées (format v3, collection, export,
-  seed passé sur sa base après sauvegarde). La tour 3D au sol, immobile, ronde, **taille validée**.
-- **Mes fautes** : l'anglais, plusieurs fois (*« t'oublies systématiquement la langue »*) ; des backticks dans un `perl -e`
-  qui ont **lancé le seed sur sa base** — intacte, vérifiée en lecture puis sur une copie ; une planche de lisibilité faite
-  hors du banc, la méthode des épées oubliée → la skill `/tune-icon`. *« Tu réagis comme si tu avais la tête à l'envers »*.
-
-> Older sessions (2026-09-12 → 2026-10-27 après-midi) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-27 fin d'après-midi) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

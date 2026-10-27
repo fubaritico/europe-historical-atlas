@@ -5,16 +5,22 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — les épingles (ATLAS-298), tout de suite après la session du 27/10
+## ▶ ON REPREND ICI — les noms des pays (ATLAS-301), le matin du 28/10
 
-**27/10, fin à 21 h 56, tout poussé** (`072efa5..2eebda1`). Le siège est un trébuchet animé, en 3D et à plat —
-**ATLAS-286 en Fait** ; l'engin selon l'époque attend une année après 1200 (**ATLAS-299**, Backlog).
+**27/10, fin à 23 h 30, tout poussé** (`27e85a8`, plus le plan et le glossaire à la fermeture). Le test de rendu des
+épingles est réussi — **ATLAS-298 en Fait** : épingle éclairée colorée par type (couleur choisie dans le CMS, format
+v4), image plate de loin, ombres du nord-ouest pour les épingles, le trébuchet et les épées. Les icônes manquantes
+viendront au fil de l'eau.
 
-**À la reprise** : **ATLAS-298** (Idées) — *« une épingle avec une couleur dédiée, représentée dans une légende, serait ce
-qu'il y a de mieux »*. Il veut reprendre là-dessus. Rien n'est conçu : d'abord lui faire dire ce qu'il veut voir (une
-couleur par type d'événement ? l'épingle seule de loin, ou à la place des images plates ? la légende où ?), et ce que ça
-change aux icônes dessinées — le ticket peut les remplacer en partie. ATLAS-297 (un calque par type) est voisin, en
-Backlog. Le ticket est à mettre en forme (modèle Backlog) avec ses mots, **lui** valide le texte.
+**À la reprise** : **ATLAS-301**, en tête d'À faire — le nom de chaque pays écrit dans l'espace qu'il occupe, le plus
+gros possible avec une marge aux frontières, courbé le long de la forme, encre brun sombre en multiply, tout en fondu ;
+les vassaux affichés portent leur nom et réduisent celui du suzerain. Plan : `files/plans/atlas/country-names.md`.
+**Commencer par vérifier les références** (polylabel, le placement le long du squelette, `measureText` — toutes de
+mémoire), puis **l'étape 1** : le placement, pur, dans `core`. Deux questions à lui : ATLAS-301 remplace-t-il ATLAS-151
+(noms droits en HTML) ; les noms des vassaux suivent-ils le niveau d'affichage d'ATLAS-253 (ma déduction).
+
+**Sa copie de base** du 27/10 avant le seed : `packages/cms/cms-backup-2026-10-27-2300.db` (ignorée par git) — à lui
+de la supprimer.
 
 **Ouvert par décision, à lui de trancher un jour** : les icônes animées (épées qui se balancent, trébuchet) ignorent
 « réduire les animations » du système — un constat de la revue du 27/10, ATLAS-300 dans Idées.
@@ -59,15 +65,15 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 | **En cours** | ATLAS-156 · ATLAS-145 · ATLAS-152 | ATLAS-156 : la bataille et le siège faits ; ATLAS-152 porte les sources de 1100 |
 | **À valider par le développeur** | — | vide le 26/10 |
 | **Backlog** | ATLAS-299 · ATLAS-297 · CORE-270 · CMS-281..283 · ATLAS-284 · CARTO-237 · CARTO-273 · CARTO-274 | CORE-270 passe après la contribution (25/10) ; 281–283 les écrans suivants |
-| **À faire**, en tête | ATLAS-287 · ATLAS-288 · CMS-290 · CMS-276 → 280 | dans cet ordre ; ATLAS-286 et 296 faits le 27/10 |
-| **Idées** | **ATLAS-298 épingle + légende — la reprise** · ATLAS-300 animations réduites · CARTO-268 feature flags · CORE-271 généalogie · CARTO-272 radar | CARTO-268 : pas encore |
+| **À faire**, en tête | **ATLAS-301** · ATLAS-287 · ATLAS-288 · CMS-290 · CMS-276 → 280 | dans cet ordre ; ATLAS-286, 296 et 298 faits le 27/10 |
+| **Idées** | ATLAS-300 animations réduites · CARTO-268 feature flags · CORE-271 généalogie · CARTO-272 radar | CARTO-268 : pas encore |
 
 **Toujours en attente, à lui proposer un jour** : le relief niveau 6 du Cartographe (une ligne, `main.tsx` →
 `/heightmaps/europe-dem-z6-1920`, `rules/known-issues/cartographer.md`).
 
 ## Where we are
 
-**4 912 tests** (1 304 `core` · 2 259 Cartographe · 1 076 atlas · 104 CMS · 169 plugin `eslint-plugin-eha`, 26/10), gate
+**5 100 tests** (1 322 `core` · 2 259 Cartographe · 1 228 atlas · 122 CMS · 169 plugin `eslint-plugin-eha`, 27/10), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 

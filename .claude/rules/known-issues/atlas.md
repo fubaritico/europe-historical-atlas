@@ -265,3 +265,13 @@ target.z)` would be coherent with the navigation that already exists.
   boîtes sont en main, c'est-à-dire dans le pipeline. C'est le contrôle `semantic` de la taxonomie.
   **Sévérité : à savoir** — 1100 est publié depuis le 16/10 (`years: [1100]`) et sa bbox n'est comparée au DEM par
   rien : à brancher.
+- **The icons' shadows are rasterised on the CPU, up to fifteen times a second, for every icon** (2026-10-27, ATLAS-298,
+  review ARCH-001). `scene/events/shadows/iconShadows` slides each 3D icon's triangles along the light, fills them as one
+  shape and blurs it, in a 192 × 96 tile, then re-uploads the texture. Skipped while the 3D icons are faded out (from
+  afar); **still redrawn when nothing moves** — a static icon (a crown, the tower in reserve) costs as much as the
+  swaying swords. Harmless at 1100's few icons. **Remedy if it bites**: redraw only the icons whose pose changed (a
+  matrix compared to the last one), and a tower-like kind once. **Severity: worth knowing.**
+- **`scene/events/icons/` and `scene/events/shadows/` import each other** (2026-10-27, review ARCH-003): the icons build
+  their shadows (`iconShadows`), the pins' shadows read the icons' cross-fade (`icons/crossFade`). No file-level cycle.
+  **Remedy when the shadows serve elsewhere**: move `crossFade` beside `markers.ts`, inject the shadows' factory into
+  `createEventIconMarkers`. **Severity: cosmetic.**
