@@ -1,3 +1,7 @@
+/**
+ * The soft light disc behind a 3D icon, which detaches it from the map: a texture computed pixel by pixel.
+ */
+
 import { Color, DataTexture, RGBAFormat, SRGBColorSpace } from 'three'
 
 /** The halo's look: a soft light disc behind an icon, to detach its strong colours from the map (the dev, 2026-10-26). */
@@ -35,6 +39,7 @@ export function createHaloTexture(style: IconHaloStyle = ICON_HALO_STYLE): DataT
   // `getHex` answers in sRGB, the texture's space; `Color.r` would be the linear working value, a darker halo.
   const hex = new Color(style.colour).getHex()
   const [r, g, b] = [(hex >> 16) & 0xff, (hex >> 8) & 0xff, hex & 0xff]
+  // Every pixel the halo's colour; only its opacity changes, from full at the middle to none at the edge.
   const pixels = new Uint8Array(size * size * 4)
   const half = size / 2
   for (let y = 0; y < size; y += 1) {

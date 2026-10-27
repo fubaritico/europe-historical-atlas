@@ -12,7 +12,6 @@
 
 import { lerp } from '@europe-historical-atlas/core/utils/math'
 
-import { rebuildEvents } from './mapEventLayer'
 import {
   rebuildBorders,
   rebuildCoastline,
@@ -32,13 +31,14 @@ import {
   paintsExactFills,
 } from './mapLayerContext'
 import { inlayOpacityScale } from './scene/composedLineLayer'
+import { rebuildEvents } from './scene/events/mapEventLayer'
 import { homageDetail } from './scene/homageReveal'
 
 export { WORLD_WIDTH } from './mapLayerContext'
 export type { MapLayersDeps } from './mapLayerContext'
 
 import type { LayerContext, MapLayersDeps } from './mapLayerContext'
-import type { CameraPose } from './scene/eventMarkers'
+import type { CameraPose } from './scene/events/markers'
 import type { DataTexture, Object3D } from 'three'
 
 /** The map's overlays, as one thing. */

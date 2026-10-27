@@ -39,9 +39,12 @@ export function eventPins(
 ): EventPin[] {
   const pins: EventPin[] = []
   for (const event of events) {
+    // An event with no place is listed elsewhere, never pinned.
     if (event.place === null) continue
+    // Its longitude and latitude, as fractions across and down the map.
     const u = longitudeToHorizontal(event.place.lon, bounds)
     const v = latitudeToVertical(event.place.lat, bounds)
+    // Outside the map's frame: said, and left out.
     if (u < 0 || u > 1 || v < 0 || v > 1) {
       warn(
         `[Atlas] event ${event.id} (${event.title.fr}) is outside the map's frame and is not pinned`

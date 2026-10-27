@@ -5,13 +5,15 @@
  * nothing, and leaves its handle in the context.
  */
 
-import { eventPins } from './eventPins'
-import { disposeHandle } from './mapLayerContext'
-import { createEventIconMarkers } from './scene/eventIconMarkers'
-import { combineEventMarkers, createEventMarkers } from './scene/eventMarkers'
-import { svgToTexture } from './scene/svgTexture'
+import { disposeHandle } from '../../mapLayerContext'
+import { svgToTexture } from '../svgTexture'
 
-import type { LayerContext } from './mapLayerContext'
+import { eventPins } from './eventPins'
+import { createEventIconMarkers } from './icons/eventIconMarkers'
+import { combineEventMarkers } from './markers'
+import { createPinMarkers } from './pin'
+
+import type { LayerContext } from '../../mapLayerContext'
 
 /**
  * Stand the contribution's events on the relief: its type's icon where one is chosen (ATLAS-156), a pin otherwise.
@@ -22,6 +24,7 @@ import type { LayerContext } from './mapLayerContext'
  */
 export function rebuildEvents(context: LayerContext): void {
   const { scene, sources, handles, projection } = context
+  // 1. The markers drawn before, if any, removed and freed.
   disposeHandle(scene, handles.events)
   handles.events = null
   if (
@@ -32,17 +35,23 @@ export function rebuildEvents(context: LayerContext): void {
   ) {
     return
   }
+
+  // 2. Each event that has a place on the map, at its point on the relief, with the icon its type chose.
   const pins = eventPins(sources.events, sources.heightmap.meta.bbox)
   if (pins.length === 0) return
   const placed = pins.map((pin) => ({
     ground: projection.draped(pin.u, pin.v),
     icon: pin.event.type.icon,
   }))
+
+  // 3. Split in two: the events whose type chose a shaped icon, and the plain pins.
   const shaped = placed.flatMap(({ ground, icon }) =>
     icon === 'pin' ? [] : [{ ground, kind: icon }]
   )
+
+  // 4. Both kinds built, held as one handle, and added to the scene.
   handles.events = combineEventMarkers([
-    createEventMarkers(placed.filter(({ icon }) => icon === 'pin').map(({ ground }) => ground)),
+    createPinMarkers(placed.filter(({ icon }) => icon === 'pin').map(({ ground }) => ground)),
     createEventIconMarkers(shaped, svgToTexture),
   ])
   scene.add(handles.events.object)

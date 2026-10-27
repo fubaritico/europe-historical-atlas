@@ -4,7 +4,6 @@ import {
   Euler,
   Group,
   Light,
-  Matrix4,
   Quaternion,
   Sprite,
   Texture,
@@ -12,24 +11,19 @@ import {
 } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
+import { EVENT_RENDER_ORDER } from '../markers'
+
+import { createEventIconMarkers } from './eventIconMarkers'
 import {
   EVENT_ICON_HEIGHT,
   ICON_CROSS_FADE,
-  ICON_FLAT_MIN_PIXELS,
   ICON_FLAT_RAISE,
   ICON_FLAT_SPAN,
   ICON_LIFT,
   ICON_SWAY,
-  cameraUp,
-  createEventIconMarkers,
-  facingCamera,
-  flatIconSize,
-  iconCrossFade,
-  iconSway,
-} from './eventIconMarkers'
-import { EVENT_RENDER_ORDER } from './eventMarkers'
+} from './settings'
 
-import type { PlacedEventIcon } from './eventIconMarkers'
+import type { PlacedEventIcon } from './forms'
 import type { Material, Mesh } from 'three'
 
 const TWO: PlacedEventIcon[] = [
@@ -242,82 +236,5 @@ describe('createEventIconMarkers', () => {
     it('builds no icon, only the light, for no places', () => {
       expect(icons(createEventIconMarkers([], STUB).object)).toHaveLength(0)
     })
-  })
-})
-
-describe('iconSway', () => {
-  it('is still at the start', () => {
-    expect(iconSway(0, 0)).toBeCloseTo(0)
-  })
-
-  it('reaches its full swing a quarter of a period in', () => {
-    expect(iconSway(ICON_SWAY.periodSeconds / 4, 0)).toBeCloseTo(ICON_SWAY.amplitudeRad)
-  })
-
-  it('never swings past its swing', () => {
-    for (let second = 0; second < 8; second += 0.1) {
-      expect(Math.abs(iconSway(second, 3))).toBeLessThanOrEqual(ICON_SWAY.amplitudeRad + 1e-9)
-    }
-  })
-
-  it('sways two icons out of step', () => {
-    expect(iconSway(1, 1)).not.toBeCloseTo(iconSway(1, 0))
-  })
-})
-
-/**
- * Face an icon to a camera, the way a frame does.
- * @param at - where the icon stands
- * @param camera - the camera
- * @returns the icon's orientation
- */
-function face(at: Vector3, camera: ReturnType<typeof pose>): Quaternion {
-  const up = cameraUp(camera, new Vector3())
-  return facingCamera(at, camera.position, up, new Quaternion(), new Matrix4())
-}
-
-describe('facingCamera', () => {
-  it('faces a camera due south, level, with no turn', () => {
-    const at = new Vector3(0, 0, 0)
-    const turned = face(at, pose(new Vector3(0, 0, 5), new Euler()))
-    expect(turned.angleTo(new Quaternion())).toBeCloseTo(0)
-  })
-
-  it('leans back toward a camera above it, keeping its top toward the camera’s up', () => {
-    const at = new Vector3(0, 0, 0)
-    const above = pose(new Vector3(0, 5, 2), new Euler(-1.19, 0, 0))
-    const turned = face(at, above)
-    const front = new Vector3(0, 0, 1).applyQuaternion(turned)
-    expect(front.y).toBeGreaterThan(0.9)
-    expect(new Vector3(0, 1, 0).applyQuaternion(turned).z).toBeLessThan(0)
-  })
-
-  it('faces the camera’s position, not its orientation, when off the middle of the view', () => {
-    const at = new Vector3(3, 0, 0)
-    const camera = pose(new Vector3(0, 0, 5), new Euler())
-    const front = new Vector3(0, 0, 1).applyQuaternion(face(at, camera))
-    expect(front.x).toBeLessThan(-0.4)
-  })
-})
-
-describe('iconCrossFade', () => {
-  it('is the flat icon alone below the span and the 3D icon alone above it', () => {
-    expect(iconCrossFade(ICON_CROSS_FADE.zoom - ICON_CROSS_FADE.span)).toBe(0)
-    expect(iconCrossFade(ICON_CROSS_FADE.zoom + ICON_CROSS_FADE.span)).toBe(1)
-  })
-
-  it('is half and half at its middle, and grows with the zoom', () => {
-    expect(iconCrossFade(ICON_CROSS_FADE.zoom)).toBeCloseTo(0.5)
-    expect(iconCrossFade(ICON_CROSS_FADE.zoom + 0.02)).toBeGreaterThan(0.5)
-  })
-})
-
-describe('flatIconSize', () => {
-  it('is the 3D icon’s size when that is large enough on screen', () => {
-    expect(flatIconSize(0.05, 10_000)).toBeCloseTo(0.05 * ICON_FLAT_SPAN)
-  })
-
-  it('keeps its fewest pixels when the 3D icon would be smaller on screen', () => {
-    expect(flatIconSize(0.05, 10) * 10).toBeCloseTo(ICON_FLAT_MIN_PIXELS)
   })
 })

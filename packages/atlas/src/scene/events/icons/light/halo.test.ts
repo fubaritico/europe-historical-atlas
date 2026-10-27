@@ -1,7 +1,7 @@
 import { SRGBColorSpace } from 'three'
 import { describe, expect, it } from 'vitest'
 
-import { ICON_HALO_STYLE, createHaloTexture, haloAlpha } from './iconHalo'
+import { ICON_HALO_STYLE, createHaloTexture, haloAlpha } from './halo'
 
 /**
  * One pixel's RGBA.

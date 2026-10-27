@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { EVENT_ICON_PALETTE } from './eventIcons'
+import { EVENT_ICON_PALETTE } from '../palette'
+
 import { EVENT_ICON_SVG_STYLE, eventIconSvg } from './eventIconSvg'
 
-import type { EventIconKind } from './eventIcons'
+import type { EventIconKind } from '../kinds'
 
 const KINDS: EventIconKind[] = ['swords', 'tower', 'crown']
 

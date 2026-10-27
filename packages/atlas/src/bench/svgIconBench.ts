@@ -1,11 +1,11 @@
 /**
  * The flat icons' legibility bench (ATLAS-156): each kind's drawing at the sizes it has on the map, over the
  * parchment and the strong colours of 1100's countries — `/svg-icons.html` on the atlas's dev server, never built.
- * It shows the map's own drawings (`scene/eventIconSvg`); a candidate for a new icon is tried here before it moves
+ * It shows the map's own drawings (`scene/events/icons/flat/eventIconSvg`); a candidate for a new icon is tried here before it moves
  * there — the battle's was chosen this way, « C2 », on 2026-10-26.
  */
 
-import { eventIconSvg } from '../scene/eventIconSvg'
+import { eventIconSvg } from '../scene/events/icons/flat/eventIconSvg'
 
 /** The sizes a flat icon has on screen, in CSS pixels — 20 is its floor zoomed out. */
 const SIZES = [16, 20, 24, 32, 48, 96]

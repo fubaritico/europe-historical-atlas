@@ -19,8 +19,9 @@ quand son serveur du CMS tourne) ; puis l'outillage du CMS, **CMS-276 → 280**.
 
 **Pour régler une icône** : `/icons.html` (les icônes 3D seules) et `/svg-icons.html` (la lisibilité des images plates,
 de 16 à 96 px, sur le parchemin et les couleurs de 1100) sur son serveur de l'atlas. **Quand deux formes coexistent (la
-3D et le SVG), dire laquelle on change avant de la changer.** Les réglages : `scene/eventIconMarkers.ts`
-(`ICON_CROSS_FADE`, `ICON_FLAT_SPAN`, `ICON_LIFT`, `ICON_HALO_SPAN`…), `eventIcons.ts` (`ICON_LIGHTING`).
+3D et le SVG), dire laquelle on change avant de la changer.** Les réglages : `scene/events/icons/settings.ts`
+(`ICON_CROSS_FADE`, `ICON_FLAT_SPAN`, `ICON_LIFT`, `ICON_HALO_SPAN`…), `light/lighting.ts` (`ICON_LIGHTING`) ; les modèles 3D dans
+`meshes/` (`swords.ts`…), l'image plate dans `flat/`.
 
 **Trois règles du CMS, toujours** :
 - **Son serveur du CMS est le sien** : je ne le lance, ne le coupe ni ne le relance jamais.

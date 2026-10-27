@@ -18,7 +18,6 @@ import { requireHeightmap } from '@europe-historical-atlas/core/pipeline/inlineC
 import { composeSheetRgba } from '@europe-historical-atlas/core/pipeline/sheetCompose'
 import { terrainTextureSize } from '@europe-historical-atlas/core/pipeline/terrainCompose'
 
-import { rebuildEvents } from './mapEventLayer'
 import {
   BORDER_RENDER_ORDER,
   DRAPED_DEPTH_BIAS,
@@ -32,6 +31,7 @@ import { refreshReliefSource } from './mapSources'
 import { rebuildTribes } from './mapTribeLayer'
 import { createCompassRose } from './scene/compassRose'
 import { buildBorderStrokes } from './scene/composedLineLayer'
+import { rebuildEvents } from './scene/events/mapEventLayer'
 import { createFillLayer } from './scene/fillLayer'
 import { createFrameLabels } from './scene/frameLabels'
 import { createGraticuleFrame, labelLane } from './scene/graticuleFrame'

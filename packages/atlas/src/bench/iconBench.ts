@@ -6,9 +6,10 @@
 
 import { Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
 
-import { createEventIcon, createIconLights } from '../scene/eventIcons'
+import { createIconLights } from '../scene/events/icons/light/lighting'
+import { createEventIcon } from '../scene/events/icons/meshes/eventIcons'
 
-import type { EventIconKind } from '../scene/eventIcons'
+import type { EventIconKind } from '../scene/events/icons/kinds'
 
 const canvas = document.querySelector<HTMLCanvasElement>('#scene')
 if (canvas === null) throw new Error('[Atlas] icons bench: no #scene canvas')
