@@ -41,8 +41,9 @@ export interface CoastlineDevParams {
 /**
  * A single clean ink line on the land's edge, never hidden by it, which stays visible from far away — the
  * dev's tuning of 2026-10-16, once the line ran on the relief: *« un côté dessin et 3D en même temps »*.
- * His lift of 0.009 became the depth bias, the same clearance without the upward slide; half of it is
- * kept as a lift, for the raised look he asked to keep *« entre les deux »*.
+ * His lift of 0.009 became the depth bias, the same clearance without the upward slide; a part of it is
+ * kept as a lift, for the raised look he asked to keep *« entre les deux »* — 0.0045 at first, lowered to
+ * 0.002 on 2026-10-27: seen at an angle the line stood off the land's edge, *« un peu trop haut »*.
  */
 export const DEFAULT_COASTLINE_PARAMS: CoastlineDevParams = {
   color: MAP_INK,
@@ -50,7 +51,7 @@ export const DEFAULT_COASTLINE_PARAMS: CoastlineDevParams = {
   opacityZoomIn: 1,
   yLift: 0.002,
   depthBias: 0.009,
-  shoreLift: 0.0045,
+  shoreLift: 0.002,
   jitter: 0,
   strokes: 1,
 }
