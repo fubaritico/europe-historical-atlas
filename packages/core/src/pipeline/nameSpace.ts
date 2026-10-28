@@ -1,5 +1,5 @@
 /**
- * The space a name is written in: an owner's largest piece of a grid (ATLAS-301,
+ * The spaces a name is written in: each piece of an owner's cells on a grid (ATLAS-301,
  * `files/plans/atlas/country-names.md`, « the space »).
  *
  * **An owner** is whoever wears a colour at the display level being named — the caller resolves each cell
@@ -7,13 +7,14 @@
  * whose vassals are shown is what is left to it, with nothing computed here: its vassals' cells already
  * carry their own owner.
  *
- * **A polity in pieces** — islands, exclaves — is named in its largest, counted in cells. Pieces touch by a
- * side, never by a corner only: no name passes through a pinch one cell wide anyway.
+ * **A polity in pieces** — islands, exclaves — is named in every piece the name fits in (the dev, 2026-10-28;
+ * its largest only, until then). Pieces touch by a side, never by a corner only: no name passes through a
+ * pinch one cell wide anyway.
  */
 
 import { readAt } from '../utils/math'
 
-/** One owner's largest piece, cropped from the grid with a ring of outside cells around it. */
+/** One piece of an owner's cells, cropped from the grid with a ring of outside cells around it. */
 export interface NameSpace {
   /** The column of the grid the crop's column 0 stands on — one left of the piece, so may be `-1`. */
   readonly left: number
@@ -124,40 +125,39 @@ function cropOf(piece: Piece, id: number, label: Int32Array, width: number): Nam
 }
 
 /**
- * The largest piece of every owner of a grid.
+ * Every piece of every owner of a grid, each cropped as a space.
  *
  * The crop's ring of outside cells is what makes the frame of the map count as a border: a piece that
  * touches the grid's edge has outside cells beyond it, so a name keeps its margin from the edge too.
  * @param owners - row-major, the owner of each cell, any negative value for none (the sea, unclaimed land)
  * @param width - the grid's width in cells
  * @param height - the grid's height in cells
- * @returns each owner's largest piece, by owner; the first found on a tie
+ * @returns each owner's pieces, by owner, the largest first — the first found first on a tie
  * @throws when the grid's size is not `width × height`
  */
-export function largestPieces(
+export function ownerPieces(
   owners: ArrayLike<number>,
   width: number,
   height: number
-): Map<number, NameSpace> {
+): Map<number, NameSpace[]> {
   if (owners.length !== width * height)
     throw new Error(
       `[atlas] a grid of ${String(owners.length)} cells is not ${String(width)} × ${String(height)}`
     )
   const grid: OwnerGrid = { owners, width, height }
   const label = new Int32Array(width * height).fill(-1)
-  const largest = new Map<number, { piece: Piece; id: number }>()
+  const spaces = new Map<number, NameSpace[]>()
   let id = 0
   for (let start = 0; start < width * height; start += 1) {
     if (readAt(owners, start) < 0 || label[start] !== -1) continue
     const piece = flood(grid, start, id, label)
-    const best = largest.get(piece.owner)
-    if (best === undefined || piece.cells > best.piece.cells)
-      largest.set(piece.owner, { piece, id })
+    const space = cropOf(piece, id, label, width)
+    const held = spaces.get(piece.owner)
+    if (held === undefined) spaces.set(piece.owner, [space])
+    else held.push(space)
     id += 1
   }
-
-  const spaces = new Map<number, NameSpace>()
-  for (const [owner, { piece, id: pieceId }] of largest)
-    spaces.set(owner, cropOf(piece, pieceId, label, width))
+  // A stable sort: equal pieces keep the order the flood found them in.
+  for (const held of spaces.values()) held.sort((a, b) => b.cells - a.cells)
   return spaces
 }

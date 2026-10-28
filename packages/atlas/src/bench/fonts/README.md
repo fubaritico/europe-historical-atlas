@@ -1,0 +1,10 @@
+# The country names' candidate faces — bench only
+
+Read by `../nameBench.ts` (`/names.html`, the atlas's dev server, never built) to choose the face of the countries'
+names (ATLAS-301, `files/plans/atlas/country-names.md`). Nothing here ships with the atlas: the face chosen is cut to
+the names' letters at build (the plan's step 5), and the rest of this folder goes.
+
+| file                                                                                                                                                                           | face                                          | licence                                                                                                                                                                                |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `uncialantiqua.woff2`, `felipa.woff2`, `almendra.woff2`, `caesardressing.woff2`, `quintessential.woff2`, `fondamento.woff2`, `manufacturingconsent.woff2`, `germaniaone.woff2` | from Google Fonts, the Latin subset it serves | **SIL Open Font License 1.1** — each `-OFL.txt` beside its face                                                                                                                        |
+| `bulgariamoderna.otf`                                                                                                                                                          | Bulgaria Moderna, by Yanko Tsvetkov           | **CC BY-NC 4.0** — `bulgariamoderna-LICENSE.txt`: **non-commercial only**, the author credited. Unlike the rest of this repository, never to be used where the use could be commercial |
