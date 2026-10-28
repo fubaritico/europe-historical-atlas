@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { clamp, clamp01, easeInOut, lerp } from './math'
+import { clamp, clamp01, easeInOut, lerp, readAt } from './math'
 
 describe('math utils', () => {
   describe('happy path', () => {
@@ -100,6 +100,34 @@ describe('easeInOut', () => {
         expect(value).toBeGreaterThanOrEqual(0)
         expect(value).toBeLessThanOrEqual(1)
       }
+    })
+  })
+})
+
+describe('readAt', () => {
+  describe('happy path', () => {
+    it('reads the value at an index in range', () => {
+      expect(readAt(new Float32Array([1.5, 2.5]), 1)).toBe(2.5)
+    })
+  })
+
+  describe('variants', () => {
+    it('reads a plain array as well as a typed one', () => {
+      expect(readAt([4, 5, 6], 0)).toBe(4)
+    })
+  })
+
+  // L3: N/A — it has no handled error: a miss is carried, not handled.
+
+  describe('unmanaged errors', () => {
+    it('reads NaN past the end, never a plausible zero', () => {
+      expect(readAt([1, 2], 2)).toBeNaN()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('reads NaN at a negative index', () => {
+      expect(readAt([1, 2], -1)).toBeNaN()
     })
   })
 })

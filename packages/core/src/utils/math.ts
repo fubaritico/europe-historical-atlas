@@ -42,3 +42,18 @@ export function easeInOut(t: number): number {
   const x = clamp01(t)
   return x * x * (3 - 2 * x)
 }
+
+/**
+ * One value of a numeric array, for an index the caller has kept in range.
+ *
+ * `noUncheckedIndexedAccess` types every read as possibly `undefined`, and the habit it breeds — `a[i] ?? 0` —
+ * substitutes a plausible zero for an index gone wrong. This reads `NaN` instead: a miss is carried loudly
+ * through the arithmetic that follows, the way `easeInOut` carries a broken frame time (the dev's call,
+ * 2026-09-17), and never passes for a real value.
+ * @param array - the array
+ * @param index - the index, in range
+ * @returns the value, or `NaN` when the index is out of range
+ */
+export function readAt(array: ArrayLike<number>, index: number): number {
+  return array[index] ?? Number.NaN
+}

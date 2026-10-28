@@ -18,7 +18,12 @@
 | The short display name is **a field per language in the registry, entered in the Cartographer**; a polity without one carries no name, and the console says so | dev, 27/10 (*« on peut déjà faire comme ça »*) |
 | **Not baked into a map-wide texture**: one strip per name laid on the relief, with its own texture — a map-wide bake blurs at zoom, as the baked coastline did (rejected 2026-09) | Claude's proposal, 27/10 — the dev asked for « comme un layer » between the borders and the events; the strip is that layer, drawn crisp |
 | The names layer is drawn **between the borders and the events** | dev, 27/10 |
-| The vassals' names follow the **display level** already used for their colours and borders (`vassal-lod.md`, ATLAS-253), so a vassal's name comes in at the same zoom as its colour | Claude's inference, 27/10 — to confirm |
+| The vassals' names follow the **display level** already used for their colours and borders (`vassal-lod.md`, ATLAS-253), so a vassal's name comes in at the same zoom as its colour | dev, 28/10 (Claude's inference of 27/10, confirmed) |
+| **The bench's faces**: Uncial Antiqua, Felipa, Almendra, Caesar Dressing, Quintessential, Fondamento, Manufacturing Consent, Germania One (all OFL, Google Fonts) and Bulgaria Moderna (CC BY-NC, credited). **Norse and Syamsiah Arabic are out**, for their licences (no redistribution; personal use only) — no permission is asked for a face (*« il y en a d'autres qui ressemblent »*) | dev, 28/10 |
+| **Placed on a grid, not on outlines**: one distance field gives the margin, the most inner point and the fit; a cell's precision (a few km) | dev, 28/10, on Claude's proposal |
+| A name descending steeper than **80°** is read from the bottom up | Claude's choice, 28/10 — to confirm on sight |
+| The horizontal is kept when it is **within 10 %** of the best curved size | Claude's choice, 28/10 — to confirm on sight |
+| **ATLAS-301 closes ATLAS-151** (straight HTML names, judged unsightly); the **capitals' names** go with the cities layer, ATLAS-295 | dev, 28/10 |
 
 ## What exists, measured 27/10
 
@@ -30,35 +35,45 @@
   through one projection (`scene/relief/drapeProjection`) — the event shadows' grids (`scene/events/shadows/`) are
   the model for a strip laid on it.
 - `04-atlas-data.md`, « Labels & text », planned screen-space HTML labels, with big names « baked into the texture » —
-  superseded for the polities' names by this plan; ATLAS-151 (Backlog) carries the HTML version — **the dev decides
-  whether this ticket replaces it**.
+  superseded for the polities' names by this plan; ATLAS-151, the HTML version, closed by this ticket (28/10).
 
-## The method
+## The method — on a grid (28/10)
 
-1. **The space**: a polity's region at the display level — its own rings, minus its shown vassals' — shrunk inward by
-   the **margin**. A polity in pieces (islands, enclaves) is named in its **largest piece**.
-2. **The line**: the longest path through the middle of that space — its skeleton (medial axis), pruned to its main
-   branch and smoothed into a gentle curve; a nearly round space gets a straight horizontal line through its most
-   inner point. Reading direction: left to right, never upside down.
-3. **The size**: each letter's real width measured (`CanvasRenderingContext2D.measureText`, in the chosen face and its
-   letter spacing); a **binary search** on the size for the largest one whose whole band — the curve offset by half
-   the letter height either side — stays inside the shrunk space.
-4. **Collisions**: the largest names placed first; a smaller name that overlaps one already placed, or fits under a
-   minimum size, is left out at this level and comes in closer.
-5. **Fading**: every change of a name — shown, hidden, resized, moved when its vassals appear — is a cross-fade between
-   its old and new strip, never a jump.
+The plan first said polygon offset, a vector skeleton and polylabel; on 28/10 the dev chose a grid instead. Every
+cell of a grid at the display level carries its **owner** (the polity wearing that colour there), so a suzerain's
+space is what its shown vassals leave it, with nothing computed — and **two names can never overlap**, each
+staying in its own owner's cells: the collision pass is gone.
 
-**References** — all **from memory, to be found and verified before step 1** (graded for §7 of the evidence plan):
-- *polylabel* (Mapbox, ISC licence): the pole of inaccessibility of a polygon — the point farthest from its edges;
-  the anchor for round spaces. *From memory.*
-- Area names set along the skeleton of the area, a standard technique of automated cartography (curved labels in GIS
-  and in game maps). *From memory; the source paper not recalled — to find.*
-- `measureText` and the canvas text metrics. *From memory; check against MDN.*
+1. **The space** (`core/pipeline/nameSpace`): the owner's largest piece, cropped with a ring of outside cells, so
+   the map's frame counts as a border.
+2. **The distances** (`core/geo/distanceTransform`): each cell's exact Euclidean distance to the outside.
+3. **The line** (`core/pipeline/nameLine`): the horizontal through the most inner cell (the pole of
+   inaccessibility, read off the distances), or the **ridge** — the longest walk through cells at least a
+   threshold from the edge, between its two farthest ends, keeping to the thickest cells, fitted with a parabola
+   bent 60° at most. Three thresholds (¼, ½, ¾ of the thickest) give three ridges.
+4. **The size** (`core/pipeline/namePlacement`): halving for the largest size at which, across the line from the
+   letters' foot to their top, at both ends and every point between, every point keeps the margin. The largest of
+   the candidates wins, the horizontal kept within 10 %. Under `minSize`, the owner is returned as too small and
+   comes in closer.
+5. **Fading**: every change of a name is a cross-fade between its old and new strip, never a jump (step 3).
+
+**References** — checked on 28/10, graded for §7 of the evidence plan:
+- *polylabel* (Mapbox, ISC, 2.1.0): the pole of inaccessibility of a polygon, after Garcia-Castellanos & Lombardo
+  2007 — https://github.com/mapbox/polylabel. *Found.* Not used: the grid gives it directly.
+- Krumpe & Mendel, *Computing Curved Area Labels in Near-Real Time*, 2020, after Barrault 2001: curved area labels
+  along a pruned skeleton, fitted to arcs — https://arxiv.org/abs/2001.02938. *Found, read from its abstract.*
+- *A program for automatic name placement*, Auto-Carto 6: curved names bent 60° at most —
+  https://cartogis.org/docs/proceedings/archive/auto-carto-6/pdf/a-program-for-automatic-name-placement.pdf.
+  *Found, read from a summary.*
+- Felzenszwalb & Huttenlocher, *Distance Transforms of Sampled Functions*, Theory of Computing 8 (2012) —
+  https://theoryofcomputing.org/articles/v008a019/. *Found.*
+- `TextMetrics` (`width`, `actualBoundingBox*`), Baseline widely available since 2015 —
+  https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics. *Found.* The atlas must measure **after its face
+  has loaded**, or every size is computed for the fallback face, with no error.
 
 ## Steps — each verified and committed alone
 
-1. **core — the placement, pure**: space (rings minus vassals, shrunk by the margin), skeleton line, size by binary
-   search, collisions, the result per level. Tested with hand-written shapes: a rectangle (straight line, known
+1. **core — the placement, pure** (done 28/10): space, distances, line, size by halving, the result per level. Tested with hand-written shapes: a rectangle (straight line, known
    size), an L and a crescent (bent line), two neighbours (no overlap), a suzerain with a vassal (its name moves
    into what is left). Text measurement **injected** (a fixed width per letter in tests), since `core` has no canvas.
 2. **A bench on the dev's atlas server**: 1100's polities with their current formal names — long, so the hardest case
@@ -69,8 +84,6 @@
 4. **The short name per language**: a field in the registry (format), its input in the Cartographer's polity form, the
    atlas reading it — a polity without one is named nowhere, and said once in the console.
 
-## Open, for the dev
+## Out of this plan
 
-- Does ATLAS-301 replace ATLAS-151 (straight HTML names)?
-- Confirm the vassals' names follow the display level of ATLAS-253.
-- Capitals, seas and cities are out of this plan.
+- Capitals and cities (ATLAS-295), seas.
