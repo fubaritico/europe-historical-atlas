@@ -11,6 +11,7 @@
  */
 
 import type { TerrainTextureOptions } from './terrainCompose'
+import type { YearNames, YearNamesRequest } from './yearNames'
 import type { HeightmapMeta } from '../data/heightmap'
 import type { LandMaskMeta } from '../data/landMask'
 import type { RegionBorders } from '../data/regionBorders'
@@ -21,7 +22,7 @@ import type { RgbColor } from '../utils/color'
  * The phases a computation announces, in the order they run. Identifiers rather than sentences: a
  * compute module has no business holding the wording of a user-facing panel, let alone its language.
  */
-export type ComputePhase = 'rasterise' | 'expand' | 'colours' | 'bake' | 'borders'
+export type ComputePhase = 'rasterise' | 'expand' | 'colours' | 'bake' | 'borders' | 'names'
 
 /**
  * Announce what a computation is *about to* spend time on. Announced before the phase, never after —
@@ -134,12 +135,25 @@ export interface TerrainBake {
   ): Promise<TerrainBakeResult>
 }
 
+/** Place a year's country names at every display level (ATLAS-301). */
+export interface NameCompute {
+  /**
+   * Place a year's names, every level at once — about two seconds a level on 1100, so asked once per year.
+   * Reads none of the installed state: the request carries its regions, so the names never wait on a bake.
+   * @param request - the regions, the bearers by level, the names, the measured characters and the options
+   * @param onProgress - announces the placement before it runs
+   * @returns the names of each level
+   */
+  placeYearNames(request: YearNamesRequest, onProgress?: ProgressReport): Promise<YearNames>
+}
+
 /**
- * Both jobs plus the state they share. Consumers should depend on the narrow slice they use
+ * The three jobs, and the state two of them share — the names read none. Consumers should depend on the
+ * narrow slice they use
  * ({@link TerrainBake} for a texture tunable, {@link PoliticalCompute} for a change of year); this is
  * the handle the composition root holds, sets up and tears down.
  */
-export interface MapCompute extends PoliticalCompute, TerrainBake {
+export interface MapCompute extends PoliticalCompute, TerrainBake, NameCompute {
   /**
    * Install the sources both jobs read. Safe to call again when one of them arrives late — the relief
    * and the mask load independently, and whichever lands second must not discard the first.

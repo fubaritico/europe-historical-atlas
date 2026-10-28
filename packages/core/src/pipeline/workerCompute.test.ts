@@ -11,6 +11,7 @@ import type { ComputeCommand, ComputeEvent, WorkerScope } from './computeProtoco
 import type { ComputePhase, ComputeSources, MapCompute, PoliticalRequest } from './mapCompute'
 import type { TerrainTextureOptions } from './terrainCompose'
 import type { ComputeWorkerHandle } from './workerCompute'
+import type { YearNamesRequest } from './yearNames'
 import type { HeightmapMeta } from '../data/heightmap'
 import type { Region } from '../data/regionSource'
 
@@ -84,6 +85,32 @@ interface Loopback {
   terminated: () => boolean
 }
 
+/** One square polity, one letter, one level — the smallest year of names. */
+const NAMES_REQUEST: YearNamesRequest = {
+  regions: [
+    {
+      name: 'k',
+      subjectTo: null,
+      partOf: null,
+      polityId: 'k',
+      rings: [
+        [
+          { u: 0.05, v: 0.05 },
+          { u: 0.95, v: 0.05 },
+          { u: 0.95, v: 0.95 },
+          { u: 0.05, v: 0.95 },
+        ],
+      ],
+    },
+  ],
+  bearersByLevel: [['k']],
+  names: { k: 'K' },
+  glyphs: { K: { advance: 1, ascent: 1, descent: 0 } },
+  gridWidth: 20,
+  gridHeight: 20,
+  options: { margin: 1, minSize: 0.5, twoLineGain: 0.3, followShapeGain: 0.5 },
+}
+
 /**
  * Run a real {@link serveCompute} against a fake channel, so the client and the server are exercised
  * against each other rather than against a mock of what each believes the other does.
@@ -142,6 +169,13 @@ describe('createWorkerMapCompute', () => {
       expect(result.tints[0]).not.toEqual(result.tints[1])
     })
 
+    it('places a year’s names across the wire, with no sources installed', async () => {
+      const link = loopback(createInlineMapCompute())
+      const client = createWorkerMapCompute({ spawn: () => link.handle })
+      const names = await client.placeYearNames(NAMES_REQUEST)
+      expect(names.levels[0]?.placed.map(({ polity }) => polity)).toEqual(['k'])
+    })
+
     it('bakes a terrain image across the wire', async () => {
       const link = loopback(createInlineMapCompute())
       const client = createWorkerMapCompute({ spawn: () => link.handle })
@@ -158,6 +192,14 @@ describe('createWorkerMapCompute', () => {
       const seen: ComputePhase[] = []
       await client.computePolitical(REQUEST, (_, phase) => seen.push(phase))
       expect(seen).toEqual(['rasterise', 'expand', 'colours', 'borders'])
+    })
+
+    it('announces the names’ placement across the wire, before it runs', async () => {
+      const link = loopback(createInlineMapCompute())
+      const client = createWorkerMapCompute({ spawn: () => link.handle })
+      const seen: ComputePhase[] = []
+      await client.placeYearNames(NAMES_REQUEST, (_, phase) => seen.push(phase))
+      expect(seen).toEqual(['names'])
     })
   })
 

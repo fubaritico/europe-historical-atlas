@@ -8,7 +8,7 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *
  * Its messages, and the values they take:
  * - `loadingYear` — The progress caption while a year loads; `year` is given as text.
- * - `phaseRasterise`, `phaseExpand`, `phaseColours`, `phaseBake`, `phaseBorders` — The progress caption of
+ * - `phaseRasterise`, `phaseExpand`, `phaseColours`, `phaseBake`, `phaseBorders`, `phaseNames` — The progress caption of
  *   each compute phase.
  * - `heightmapFailed`, `landMaskFailed`, `regionsFailed`, `riversFailed`, `yearRegistryFailed`,
  *   `yearPolitiesFailed`, `yearBordersFailed` — What failed, per asset, with a case per `failure`:

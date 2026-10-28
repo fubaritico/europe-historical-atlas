@@ -7,7 +7,7 @@
  * talking.
  */
 
-import type { ComputeCommand, ComputeEvent } from './computeProtocol'
+import type { ComputeCommand, ComputeEvent, ComputePayload } from './computeProtocol'
 import type {
   ComputeSources,
   MapCompute,
@@ -17,6 +17,7 @@ import type {
   TerrainBakeResult,
 } from './mapCompute'
 import type { TerrainTextureOptions } from './terrainCompose'
+import type { YearNames, YearNamesRequest } from './yearNames'
 import type { RegionBorders } from '../data/regionBorders'
 
 /**
@@ -86,6 +87,38 @@ export function unwrapDone(event: ComputeEvent): ComputeEvent & { kind: 'done' }
 }
 
 /**
+ * The payload of a finished event, refused unless it answers the question asked.
+ * @param event - whatever came back for this call
+ * @param kind - the payload the question expects
+ * @param asked - the question, for the message
+ * @returns the payload, narrowed to its kind
+ * @throws when the worker failed, or answered another question
+ */
+export function answerOf<K extends ComputePayload['kind']>(
+  event: ComputeEvent,
+  kind: K,
+  asked: string
+): Extract<ComputePayload, { kind: K }> {
+  const { payload } = unwrapDone(event)
+  if (!isKind(payload, kind))
+    throw new Error(`map compute: answered a ${asked} request with ${payload.kind}`)
+  return payload
+}
+
+/**
+ * Whether a payload is of a kind.
+ * @param payload - the payload
+ * @param kind - the kind
+ * @returns whether it is
+ */
+function isKind<K extends ComputePayload['kind']>(
+  payload: ComputePayload,
+  kind: K
+): payload is Extract<ComputePayload, { kind: K }> {
+  return payload.kind === kind
+}
+
+/**
  * The typed {@link MapCompute} surface, over any transport that can send a command and answer it.
  *
  * Separated from the worker wiring because the two fail for unrelated reasons and are read for
@@ -109,34 +142,32 @@ export function mapComputeOver(send: SendCommand, dispose: () => void): MapCompu
       request: PoliticalRequest,
       onProgress?: ProgressReport
     ): Promise<PoliticalResult> {
-      const done = unwrapDone(
-        await send((id) => ({ kind: 'computePolitical', id, request }), onProgress)
-      )
-      if (done.payload.kind !== 'political') {
-        throw new Error(`map compute: answered a political request with ${done.payload.kind}`)
-      }
-      return done.payload.result
+      const event = await send((id) => ({ kind: 'computePolitical', id, request }), onProgress)
+      return answerOf(event, 'political', 'political').result
     },
 
     async deriveBorders(smoothing: number): Promise<RegionBorders> {
-      const done = unwrapDone(await send((id) => ({ kind: 'deriveBorders', id, smoothing })))
-      if (done.payload.kind !== 'borders') {
-        throw new Error(`map compute: answered a border request with ${done.payload.kind}`)
-      }
-      return done.payload.borders
+      const event = await send((id) => ({ kind: 'deriveBorders', id, smoothing }))
+      return answerOf(event, 'borders', 'border').borders
     },
 
     async bakeTerrain(
       textureOptions: TerrainTextureOptions,
       onProgress?: ProgressReport
     ): Promise<TerrainBakeResult> {
-      const done = unwrapDone(
-        await send((id) => ({ kind: 'bakeTerrain', id, options: textureOptions }), onProgress)
+      const event = await send(
+        (id) => ({ kind: 'bakeTerrain', id, options: textureOptions }),
+        onProgress
       )
-      if (done.payload.kind !== 'bake') {
-        throw new Error(`map compute: answered a bake request with ${done.payload.kind}`)
-      }
-      return done.payload.result
+      return answerOf(event, 'bake', 'bake').result
+    },
+
+    async placeYearNames(
+      request: YearNamesRequest,
+      onProgress?: ProgressReport
+    ): Promise<YearNames> {
+      const event = await send((id) => ({ kind: 'placeNames', id, request }), onProgress)
+      return answerOf(event, 'names', 'names').names
     },
 
     dispose,

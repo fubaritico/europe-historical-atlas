@@ -20,4 +20,5 @@ export const COMPUTE_PHASE_MESSAGES: Record<ComputePhase, AtlasMessageKey> = {
   colours: 'phaseColours',
   bake: 'phaseBake',
   borders: 'phaseBorders',
+  names: 'phaseNames',
 }

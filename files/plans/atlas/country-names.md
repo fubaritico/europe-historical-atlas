@@ -87,6 +87,12 @@ staying in its own owner's cells: the collision pass is gone.
    **Measured on 28/10** (1100, a 1200 × 1091 grid, formal names): **~1.8 s per display level** on the main thread —
    86 owners at level 0, 28 names placed. So the atlas places them **in the worker, once per year and level**, never on
    a zoom; the zoom only cross-fades between levels already placed.
+   **Step 3a, done 28/10**: the compute's third job, `placeYearNames` (`core/pipeline/yearNames`), every level in one
+   call; the page measures the characters into a table, and hands the bearers by level (`editor/regionBearers`).
+   **For 3b, Claude's proposal (review ARCH-001, 28/10)**: the placement holds the worker ~2 s a level, and a bake
+   asked meanwhile — a texture slider, the next year — would wait behind it. The names read none of the worker's
+   installed state, so **a second worker for the names alone** costs nothing but its start; the result goes through
+   the same « newest call wins » gate, so a year left before its names arrive never shows them.
 4. **The short name per language**: a field in the registry (format), its input in the Cartographer's polity form, the
    atlas reading it — a polity without one is named nowhere, and said once in the console.
 5. **The face cut to its letters** (the dev, 28/10, once the face is chosen): the shipped file holds only the letters

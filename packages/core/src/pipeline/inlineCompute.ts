@@ -14,6 +14,7 @@ import { pinnedRegionColor } from '../data/regionPalette'
 import { assignRegionColors, expandRegionsOverLand, rasteriseRegions } from '../data/regionRaster'
 
 import { composeTerrainRgba, terrainTextureSize } from './terrainCompose'
+import { placeYearNames } from './yearNames'
 
 import type {
   ComputeSources,
@@ -24,6 +25,7 @@ import type {
   TerrainBakeResult,
 } from './mapCompute'
 import type { AreaTint, TerrainTextureOptions } from './terrainCompose'
+import type { YearNames, YearNamesRequest } from './yearNames'
 import type { Heightmap } from '../data/heightmap'
 import type { LandMask } from '../data/landMask'
 import type { RegionBorders } from '../data/regionBorders'
@@ -274,6 +276,18 @@ export function deriveInstalledBorders(
 }
 
 /**
+ * Place a year's names on this thread, once the placement is announced — the announcer yields a frame, so a
+ * progress panel shows before the seconds the placement takes.
+ * @param request - the year's names to place
+ * @param announce - announces a phase, yielding before it runs
+ * @returns the names of each level
+ */
+async function announcedNames(request: YearNamesRequest, announce: Announce): Promise<YearNames> {
+  await announce(0, 'names')
+  return placeYearNames(request)
+}
+
+/**
  * Build a {@link MapCompute} that runs on the calling thread.
  * @param options - collaborators to swap out; every one has a working default
  * @returns the compute
@@ -323,6 +337,10 @@ export function createInlineMapCompute(options: InlineComputeOptions = {}): MapC
       const dem = requireHeightmap(heightmap)
       await announcer(onProgress, yieldControl)(0, 'bake')
       return bakeTerrainPixels(dem, landMask, textureOptions, political)
+    },
+
+    placeYearNames(request: YearNamesRequest, onProgress?: ProgressReport): Promise<YearNames> {
+      return announcedNames(request, announcer(onProgress, yieldControl))
     },
 
     dispose(): void {

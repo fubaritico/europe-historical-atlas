@@ -12,11 +12,12 @@ import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPale
 import { rasteriseRegions } from '@europe-historical-atlas/core/data/regionRaster'
 import { createAuthoredYearSource } from '@europe-historical-atlas/core/data/yearManifest'
 import { homageLevels } from '@europe-historical-atlas/core/editor/homageLevels'
-import { nameOwners } from '@europe-historical-atlas/core/editor/nameOwners'
 import { polityColours } from '@europe-historical-atlas/core/editor/polityColours'
+import { regionBearers } from '@europe-historical-atlas/core/editor/regionBearers'
 import { openYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import { latitudeToMercatorY } from '@europe-historical-atlas/core/geo/mercator'
 import { placeNames } from '@europe-historical-atlas/core/pipeline/namePlacement'
+import { ownerGrid } from '@europe-historical-atlas/core/pipeline/ownerGrid'
 
 import { START_SETTINGS, controls, cycleFacesWithArrows } from './nameBenchControls'
 
@@ -279,11 +280,9 @@ interface Placed {
  */
 function place(context: CanvasRenderingContext2D, prepared: Prepared, settings: Settings): Placed {
   const family = required(FACES[settings.face], `face ${String(settings.face)}`).family
-  const { owners, ids } = nameOwners(
+  const { owners, ids } = ownerGrid(
     prepared.raster.cells,
-    prepared.regionPolities,
-    prepared.homage,
-    settings.level
+    regionBearers(prepared.regionPolities, prepared.homage, settings.level)
   )
   const requests = ids.map((id, owner) => {
     const name = required(prepared.names.get(id), `name for ${id}`)

@@ -58,6 +58,10 @@ export function serveCompute(scope: WorkerScope, compute: MapCompute): void {
           // The pixels are nobody's afterwards: hand the buffer over rather than copy megabytes.
           return { payload: { kind: 'bake', result }, transfer: transferable(result.rgba) }
         }
+        case 'placeNames': {
+          const names = await compute.placeYearNames(command.request, onProgress)
+          return { payload: { kind: 'names', names }, transfer: [] }
+        }
         case 'dispose':
           compute.dispose()
           return { payload: { kind: 'ack' }, transfer: [] }

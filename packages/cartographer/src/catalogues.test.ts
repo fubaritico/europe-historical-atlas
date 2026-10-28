@@ -130,6 +130,7 @@ const CLOSED: Readonly<Record<string, readonly string[]>> = {
     colours: true,
     bake: true,
     borders: true,
+    names: true,
   }),
   'LAYERS_PANEL_MESSAGES.layerName.id': all<LayerId>({
     backdrop: true,

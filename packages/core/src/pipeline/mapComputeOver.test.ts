@@ -136,6 +136,21 @@ describe('mapComputeOver', () => {
       expect(sent.mock.calls[1]?.[1]).toBe(onProgress)
     })
 
+    it('returns the names placed, and refuses an answer of another kind', async () => {
+      const NAMES = { levels: [], gridWidth: 1, gridHeight: 1, unnamed: [] }
+      const named = answering((id) => ({
+        kind: 'done',
+        id,
+        payload: { kind: 'names', names: NAMES },
+      }))
+      const request = {} as Parameters<ReturnType<typeof mapComputeOver>['placeYearNames']>[0]
+      await expect(mapComputeOver(named.send, vi.fn()).placeYearNames(request)).resolves.toBe(NAMES)
+      const acked = answering((id) => ({ kind: 'done', id, payload: { kind: 'ack' } }))
+      await expect(mapComputeOver(acked.send, vi.fn()).placeYearNames(request)).rejects.toThrow(
+        /answered a names request with ack/
+      )
+    })
+
     it('hands disposal straight to the transport', () => {
       const dispose = vi.fn()
       mapComputeOver(vi.fn(), dispose).dispose()

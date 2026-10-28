@@ -10,7 +10,7 @@ import { COMPUTE_PHASE_MESSAGES } from './computeLabels'
 import type { ComputePhase } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
 /** Every phase the protocol declares, listed here so a new one has to be labelled deliberately. */
-const PHASES: ComputePhase[] = ['rasterise', 'expand', 'colours', 'bake', 'borders']
+const PHASES: ComputePhase[] = ['rasterise', 'expand', 'colours', 'bake', 'borders', 'names']
 
 describe('COMPUTE_PHASE_MESSAGES', () => {
   describe('happy path', () => {

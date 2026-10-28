@@ -2,7 +2,7 @@
   "instructions": "Les flèches déplacent la carte, plus et moins ou Page précédente et Page suivante zooment. Maintenir Espace déplace avec la main. P prend la Plume et A la flèche blanche. La Plume, le Crayon et la flèche blanche n’agissent qu’une fois assez zoomé : zoomez d’abord. Avec la Plume, Retour arrière retire le dernier point, Échap abandonne le contour et Entrée le ferme. Avec la flèche blanche, Suppr ou Retour arrière supprime l’ancre sélectionnée. Contrôle ou Commande avec Z annule le dernier geste ; avec Maj en plus, il le rétablit.",
   "preparing": "Préparation du fond de carte…",
   "preparingLabel": "Préparation du fond de carte",
-  "phase": "{phase, select, rasterise {tracé des territoires} expand {extension jusqu’aux côtes} colours {attribution des couleurs} bake {composition du relief} borders {calcul des frontières} other {{phase}}}",
+  "phase": "{phase, select, rasterise {tracé des territoires} expand {extension jusqu’aux côtes} colours {attribution des couleurs} bake {composition du relief} borders {calcul des frontières} names {placement des noms des pays} other {{phase}}}",
   "failed": "Le fond de carte n’a pas pu être préparé.",
   "failedCost": "Aucune année ne peut s’ouvrir sans lui : le relief porte le système de coordonnées."
 }

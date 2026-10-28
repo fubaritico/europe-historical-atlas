@@ -15,6 +15,7 @@ import type {
   TerrainBakeResult,
 } from './mapCompute'
 import type { TerrainTextureOptions } from './terrainCompose'
+import type { YearNames, YearNamesRequest } from './yearNames'
 import type { RegionBorders } from '../data/regionBorders'
 
 /** What the main thread asks the worker to do. `id` pairs an answer back to its question. */
@@ -24,6 +25,7 @@ export type ComputeCommand =
   | { kind: 'computePolitical'; id: number; request: PoliticalRequest }
   | { kind: 'deriveBorders'; id: number; smoothing: number }
   | { kind: 'bakeTerrain'; id: number; options: TerrainTextureOptions }
+  | { kind: 'placeNames'; id: number; request: YearNamesRequest }
   | { kind: 'dispose'; id: number }
 
 /**
@@ -35,6 +37,7 @@ export type ComputePayload =
   | { kind: 'political'; result: PoliticalResult }
   | { kind: 'borders'; borders: RegionBorders }
   | { kind: 'bake'; result: TerrainBakeResult }
+  | { kind: 'names'; names: YearNames }
 
 /** What the worker sends back. */
 export type ComputeEvent =
