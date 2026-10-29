@@ -71,6 +71,8 @@ export interface Config {
     'event-types': EventType
     'siege-engines': SiegeEngine
     places: Place
+    'place-periods': PlacePeriod
+    'importance-reasons': ImportanceReason
     actors: Actor
     sources: Source
     users: User
@@ -85,6 +87,8 @@ export interface Config {
     'event-types': EventTypesSelect<false> | EventTypesSelect<true>
     'siege-engines': SiegeEnginesSelect<false> | SiegeEnginesSelect<true>
     places: PlacesSelect<false> | PlacesSelect<true>
+    'place-periods': PlacePeriodsSelect<false> | PlacePeriodsSelect<true>
+    'importance-reasons': ImportanceReasonsSelect<false> | ImportanceReasonsSelect<true>
     actors: ActorsSelect<false> | ActorsSelect<true>
     sources: SourcesSelect<false> | SourcesSelect<true>
     users: UsersSelect<false> | UsersSelect<true>
@@ -315,6 +319,91 @@ export interface SiegeEngine {
   createdAt: string
 }
 /**
+ * Une ville telle qu’elle est à une date : son importance sur la carte, et ce qu’en disent les sources. Le lieu lui-même (son nom, sa position) se saisit une fois, dans « Lieux ».
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "place-periods".
+ */
+export interface PlacePeriod {
+  id: number
+  /**
+   * Choisi parmi les lieux déjà saisis dans « Lieux ».
+   */
+  place: number | Place
+  /**
+   * Une année suffit : la fiche vaut pour cette année. Remplir la fin en fait une durée. Un même lieu ne peut pas avoir deux fiches pour la même année.
+   */
+  date: {
+    start: {
+      year: number
+      month?: number | null
+      day?: number | null
+      circa?: boolean | null
+      /**
+       * Avec « vers » seulement. Vide : ±10 ans.
+       */
+      margin?: number | null
+      calendar?: ('julian' | 'gregorian') | null
+    }
+    end?: {
+      year?: number | null
+      month?: number | null
+      day?: number | null
+      circa?: boolean | null
+      /**
+       * Avec « vers » seulement. Vide : ±10 ans.
+       */
+      margin?: number | null
+      calendar?: ('julian' | 'gregorian') | null
+    }
+  }
+  /**
+   * Quand la ville apparaît sur la carte : une capitale se voit de loin, une grande ville en zoomant, une ville de près.
+   */
+  importance: 'capital' | 'large-city' | 'city'
+  /**
+   * Pourquoi elle a cette importance : pouvoir, religion, commerce… Facultatif. La liste se complète dans « Raisons d’importance ».
+   */
+  reasons?: (number | ImportanceReason)[] | null
+  /**
+   * Facultatif. Une ligne par chose qu’une source dit de la ville à cette date — par exemple : Buringh 2021, population, 25 000. La source se choisit dans « Sources », qui doit donc la contenir.
+   */
+  testimonies?:
+    | {
+        /**
+         * Choisie parmi celles déjà saisies dans « Sources ».
+         */
+        source: number | Source
+        /**
+         * De quoi parle la source : la population, l’importance, ou une raison.
+         */
+        subject: 'population' | 'importance' | 'reason'
+        population?: number | null
+        importance?: ('capital' | 'large-city' | 'city') | null
+        reason?: (number | null) | ImportanceReason
+        /**
+         * Où la source le dit : une page, une ligne, une colonne. Facultatif.
+         */
+        where?: string | null
+        id?: string | null
+      }[]
+    | null
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * Les raisons qu’on peut cocher sur une fiche « Ville à une date » : pouvoir, religion, commerce, population… Ajoutez-en autant qu’il faut.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "importance-reasons".
+ */
+export interface ImportanceReason {
+  id: number
+  name: string
+  updatedAt: string
+  createdAt: string
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -379,6 +468,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'places'
         value: number | Place
+      } | null)
+    | ({
+        relationTo: 'place-periods'
+        value: number | PlacePeriod
+      } | null)
+    | ({
+        relationTo: 'importance-reasons'
+        value: number | ImportanceReason
       } | null)
     | ({
         relationTo: 'actors'
@@ -548,6 +645,61 @@ export interface PlacesSelect<T extends boolean = true> {
         margin?: T
         calendar?: T
       }
+  updatedAt?: T
+  createdAt?: T
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "place-periods_select".
+ */
+export interface PlacePeriodsSelect<T extends boolean = true> {
+  place?: T
+  date?:
+    | T
+    | {
+        start?:
+          | T
+          | {
+              year?: T
+              month?: T
+              day?: T
+              circa?: T
+              margin?: T
+              calendar?: T
+            }
+        end?:
+          | T
+          | {
+              year?: T
+              month?: T
+              day?: T
+              circa?: T
+              margin?: T
+              calendar?: T
+            }
+      }
+  importance?: T
+  reasons?: T
+  testimonies?:
+    | T
+    | {
+        source?: T
+        subject?: T
+        population?: T
+        importance?: T
+        reason?: T
+        where?: T
+        id?: T
+      }
+  updatedAt?: T
+  createdAt?: T
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "importance-reasons_select".
+ */
+export interface ImportanceReasonsSelect<T extends boolean = true> {
+  name?: T
   updatedAt?: T
   createdAt?: T
 }
