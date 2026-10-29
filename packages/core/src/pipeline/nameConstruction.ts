@@ -6,7 +6,11 @@
  *    its axis held to {@link COMPACT_SLANT} (the dev, 29/10: *« au moins sur un arc […] ou sur un arc mais en
  *    diagonale »*, against the horizontal it was written on). **Cut where it enters a neighbour or a name already
  *    written**, the longest stretch kept: a line crossing an enclave (Rum in Byzantium) or a neighbour (Pomerania's
- *    arc over the Liutizians) holds the name on its own ground. One line, never two.
+ *    arc over the Liutizians) holds the name on its own ground. **Drawn over the land the names already written leave
+ *    free** (the dev, 29/10: *« décaler le nom sur la partie de leur terre que les petits laissent libre, plutôt que
+ *    le rétrécir sur place »*): a name another one cuts moves to the free part instead of shrinking where it stood —
+ *    on 1100, three countries more named, none lost, none shrunk by a sixth. It is tried beside the line over the whole
+ *    land, and the name takes the one it is written largest on. One line, never two.
  * 2. **The height** comes from the realm's thickness: a share of its median width across the line, over the middle of
  *    the land it crosses.
  * 3. **The length** comes from the spacing of the letters, stretched so the name covers a share of the line — the
@@ -26,6 +30,7 @@ import { readAt } from '../utils/math'
 
 import { axisArc, spaceAspect } from './nameArc'
 import { fits, lineLength, roomAcross } from './nameFit'
+import { COVERED } from './nameSpace'
 
 import type { Fitting, NameExtent } from './nameFit'
 import type { NameLine } from './nameLine'
@@ -104,20 +109,57 @@ function clearStretch(line: NameLine, room: Float32Array): NameLine {
 }
 
 /**
- * The line a realm's name is written along.
+ * The land of a realm the names already written leave free: its cells, less those another piece's name covers.
+ * @param space - the realm, with the cells the names cover marked in its `blocked`
+ * @returns the free land, row-major over the crop
+ */
+function freeLand(space: Fitting['space']): Uint8Array {
+  return space.mask.map((inside, at) =>
+    inside !== 0 && readAt(space.blocked, at) !== COVERED ? 1 : 0
+  )
+}
+
+/**
+ * The line along a land of the realm: the arc — its axis held to {@link COMPACT_SLANT} when compact — cut to its
+ * longest stretch clear of the neighbours and the names.
+ * @param fitting - the realm and its distances, its neighbours and the names already written
+ * @param land - the cells the arc is drawn over, row-major over the crop
+ * @returns the line; `null` for a land that gives none
+ */
+function lineOver(fitting: Fitting, land: Uint8Array): NameLine | null {
+  const { width } = fitting.space
+  const arc =
+    spaceAspect(land, width) < COMPACT_ASPECT
+      ? axisArc(land, width, COMPACT_SLANT)
+      : axisArc(land, width)
+  if (arc === null) return null
+  const clear = clearStretch(arc, roomAcross(fitting, arc, SEA_OPEN, 0))
+  return clear.points.length < 2 ? null : clear
+}
+
+/**
+ * The line a realm's name is written along, over its whole land.
  * @param fitting - the realm and its distances, its neighbours and the names already written
  * @returns the arc along it — its axis held to {@link COMPACT_SLANT} when compact — cut to its longest stretch clear
  *   of the neighbours and the names; `null` for a realm that gives none
  */
 export function nameLineOf(fitting: Fitting): NameLine | null {
-  const { space } = fitting
-  const arc =
-    spaceAspect(space.mask, space.width) < COMPACT_ASPECT
-      ? axisArc(space.mask, space.width, COMPACT_SLANT)
-      : axisArc(space.mask, space.width)
-  if (arc === null) return null
-  const clear = clearStretch(arc, roomAcross(fitting, arc, SEA_OPEN, 0))
-  return clear.points.length < 2 ? null : clear
+  return lineOver(fitting, fitting.space.mask)
+}
+
+/**
+ * The lines a realm's name is tried along: over its whole land, and — when names already written cover some of it —
+ * over the land they leave free (the dev, 2026-10-29: *« décaler le nom sur la partie de leur terre que les petits
+ * laissent libre, plutôt que le rétrécir sur place »*). Both, never the free one alone: on a realm of a few cells the
+ * free land can give a worse line than the whole, and the Strathclyde lost its name in the dev's atlas that way.
+ * @param fitting - the realm and its distances, its neighbours and the names already written
+ * @returns the lines, the whole land's first
+ */
+function nameLinesOf(fitting: Fitting): NameLine[] {
+  const land = freeLand(fitting.space)
+  const covered = land.some((free, at) => free === 0 && readAt(fitting.space.mask, at) !== 0)
+  const lines = [nameLineOf(fitting), covered ? lineOver(fitting, land) : null]
+  return lines.filter((line): line is NameLine => line !== null)
 }
 
 /**
@@ -168,8 +210,30 @@ export function constructName(
   name: ConstructedName,
   options: ConstructionOptions
 ): Construction | null {
-  const arc = nameLineOf(fitting)
-  if (arc === null) return null
+  // The line where the name is written largest; on a tie, the whole land's, where it stood before any was cut.
+  let best: Construction | null = null
+  for (const line of nameLinesOf(fitting)) {
+    const set = setAlong(fitting, line, name, options)
+    if (set !== null && (best === null || set.size > best.size)) best = set
+  }
+  return best
+}
+
+/**
+ * Set a name along one line: its height from the realm's thickness there, its spacing to the cover, smaller until it
+ * fits.
+ * @param fitting - the realm and its distances, its neighbours and the names already written
+ * @param arc - the line
+ * @param name - the name's measure, at a size of one
+ * @param options - the height's share, the cover, the most spacing and the sizes
+ * @returns the line, the size and the spacing; `null` when the name fits nowhere on it at the smallest size
+ */
+function setAlong(
+  fitting: Fitting,
+  arc: NameLine,
+  name: ConstructedName,
+  options: ConstructionOptions
+): Construction | null {
   const thickness = thicknessAlong(fitting, arc)
   const total = lineLength(arc)
   // The height from the thickness, the smallest size at least; smaller only when the name, unspaced, would outrun the

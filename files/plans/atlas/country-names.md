@@ -260,3 +260,30 @@ name over the Liutizians, seen the same way: *« c'est exactement la même chose
 | Kievan Rus | 10.5 | 4.1 — same |
 | Denmark | 1.9 | 5.4 |
 | names written | 320 | 332: six countries gain a name, Gwynedd loses it among the vassals |
+
+## The names that find no room — 29/10, evening
+
+The console listed twelve countries named at no level (ATLAS-310). Placed alone, with no other name, they fall in three
+groups: **too long** for their line (Mzab, Scrobbesbyrig — a short name entered saves them, the dev's); **too small**
+even for a short name, all coastal (Naples, Amalfi, Ragusa, Genoa, Dublin, Roussillon — the **offset label**, on the
+sea, to come); **crowded**: they fit alone, but larger neighbours' names, placed first, take their room (Merseburg,
+Hereford, Alpuente, Aragon and Navarre).
+
+The order of placement was measured first, on all 335 names of 1100 (`files/spikes/name-fixture/year.ts`):
+
+| variant | names | gained | lost | shrunk by more than 15 % |
+| --- | --- | --- | --- | --- |
+| today, largest first | 335 | — | — | — |
+| smallest first | 343 | 6 | Deheubarth, Zachlumia | 26 — Brittany 8 → 3.2 |
+| under 60 / 120 / 250 cells first | 339 / 339 / 343 | 3 / 4 / 6 | 1 / 2 / 2 | 8 / 15 / 19 |
+| **the line over the land left free**, largest first | **341** | **Gwynedd, Merseburg, State of the Church** | **none** | **none** |
+| smallest first, line over free land | 347 | 6 | none | 23 — Brittany 8 → 3.3 |
+| smallest first, no bite | 326 | 4 | 8 — Toulouse, Venice, Rum… | 71 |
+
+**Kept: the line over the land the names already written leave free** (the dev's *« décaler le nom […] plutôt que le
+rétrécir sur place »*), **tried beside the line over the whole land, the name taking the one it is written largest on**
+(`nameConstruction.nameLinesOf`). The free line alone made the Strathclyde lose its name in the dev's atlas — real
+letter widths, which the probe does not have — and shrank 15 names by 5 to 10 % on the probe; both lines together:
+350 names instead of 344 (with the dev's short names of the evening), Scrobbesbyrig, Merseburg and the State of the
+Church gained, none lost, none shrunk by 5 %. Reordering only changes who loses the room; the bite is needed. Left for the offset label: the six coastal countries, then the three
+crowded inland ones, with a leader line.

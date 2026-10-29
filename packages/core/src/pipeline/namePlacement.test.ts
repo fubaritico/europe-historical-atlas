@@ -343,6 +343,54 @@ describe('placeNames', () => {
       expect(placed).toHaveLength(0)
     })
 
+    // The dev, 29/10: « décaler le nom sur la partie de leur terre que les petits laissent libre, plutôt que le
+    // rétrécir sur place ».
+    it('moves a name to the land another name leaves free, as tall as that land alone allows', () => {
+      // A band twenty rows thick, the top nine covered by another piece's name along their whole length.
+      const thick = gridOf(80, 26, (_, y) => (y >= 3 && y < 23 ? 0 : -1))
+      const occupancy = createOccupancy(80, 26)
+      for (let y = 3; y < 12; y += 1) occupancy.cells.fill(pieceTag(1, 0), y * 80, (y + 1) * 80)
+      const [moved] = placeNames(
+        thick.owners,
+        80,
+        26,
+        [{ owner: 0, text: 'ABCD' }],
+        monospace,
+        OPTIONS,
+        occupancy
+      ).placed
+      // The free rows alone, eleven of them, with nothing written over them.
+      const alone = only(
+        gridOf(80, 17, (_, y) => (y >= 3 && y < 14 ? 0 : -1)),
+        'ABCD'
+      )
+      expect([moved?.glyphs.every(({ y }) => y >= 12), moved?.size]).toEqual([
+        true,
+        expect.closeTo(alone.size, 0),
+      ])
+    })
+
+    // The Strathclyde, 29/10: in the dev's atlas the free land alone gave it a worse line than its whole land.
+    it('keeps the line over the whole land when the free land would set the name smaller', () => {
+      // The band's right part covered by another name over two thirds of its height: the free land is an L, and its
+      // arc runs worse than the whole band's middle line, cut at the cover's edge to columns 0 to 29.
+      const thick = gridOf(80, 26, (_, y) => (y >= 3 && y < 23 ? 0 : -1))
+      const occupancy = createOccupancy(80, 26)
+      for (let y = 11; y < 21; y += 1)
+        occupancy.cells.fill(pieceTag(1, 0), y * 80 + 30, (y + 1) * 80)
+      const [kept] = placeNames(
+        thick.owners,
+        80,
+        26,
+        [{ owner: 0, text: 'ABCDEFGH' }],
+        monospace,
+        OPTIONS,
+        occupancy
+      ).placed
+      // Thirty cells of line, the most a long name covers (0.9), eight letters of one unit.
+      expect(kept?.size).toBeCloseTo((0.9 * 30) / 8, 1)
+    })
+
     it('marks the names it places in the shared cells, with its realm’s tag', () => {
       const occupancy = createOccupancy(60, 12)
       placeNames(BAND.owners, 60, 12, [{ owner: 0, text: 'AB' }], monospace, OPTIONS, occupancy)
