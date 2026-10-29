@@ -313,3 +313,7 @@ target.z)` would be coherent with the navigation that already exists.
   the relief's grid and the 143 k line instances, on this thread (hypothesis H5 of the plan, to confirm with
   `performance.mark`). **Remedy**: R5 — the cut in the worker, `renderer.compileAsync` before the first frame.
   **Severity: worth knowing.**
+- **The tribes' white ink is not blurred close up** (2026-10-29, `scene/political/names/nameLayer`): the blur's members are the
+  ordinary names' inks only; the inverted names are laid in the ordinary blend and stay crisp, on their thin brown edge, while
+  the other names soften. Not seen by the dev as a fault (*« là c'est parfait »*). **Remedy if it shows**: an inverted ink drawn
+  into a blur image of its own, laid in the ordinary blend — the multiplied quad cannot carry a white. **Severity: cosmetic.**

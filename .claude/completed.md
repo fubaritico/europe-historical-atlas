@@ -2,27 +2,6 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
-### 2026-10-28 soir → 29/10 nuit — les noms des pays, les frontières, le flou : un rendu de jeu vidéo (ATLAS-303)
-
-Plage au journal : **28/10 19:24 → 29/10 02:35** (7 h 10, une seule plage) ; le chantier ouvert le 05/10 totalise **138 h 21
-sur 25 plages**. **Poussé** : `ff2cc69`, `6a6cc21`, `f158f73` (noms, étapes 1 à 3a), `fd1ab77` (les noms posés sur la carte),
-`5202f7f` (frontières, flou, filigrane). Tout est consigné dans **ATLAS-303** (rendu au plus près d'un jeu vidéo), qui renvoie
-à ATLAS-301, ATLAS-145 et ATLAS-302.
-
-- **Les noms** (ATLAS-301) : Fondamento, multiply 75 % ; un nom par morceau, le complet s'il tient, sinon le court —
-  *« Kingdom of France → K. of France »* ; placement ~30 s → ~5 s ; débordement sur la mer et un peu sur les voisins, jamais
-  sur un autre nom ; *« je veux des noms, qu'on lit, qu'on comprend »* (aucune abréviation) ; *« dès que les vassaux ils
-  apparaissent, tout apparaît »* (aucune apparition progressive). Leçon pour la contribution : un nom d'usage court dès la
-  saisie, comme Crusader Kings.
-- **La séance des frontières** (ATLAS-145) : parchemin fin de loin ; brun + filet clair de près ; la frontière non revendiquée
-  en brun fin, parchemin côté non revendiqué, parchemin à 50 % au-delà ; vassaux en pointillés blancs.
-- **Le flou** (ATLAS-302) : un flou d'image sur les frontières, l'encre des noms et les icônes 3D, chacun son réglage, ombres
-  nettes (*« le marron, le blanc et le marron, ils se fondent un petit peu […] sans être plus épais »*) ; le filigrane des
-  noms à 40 % au zoom maximal, pour les villes.
-- **Mes fautes** : l'empilement de règles qui l'a perdu (abréviations « DAN », vagues, seuil de lisibilité) — *« j'ai
-  l'impression qu'on ne peut pas y arriver »* ; deux chiffres devinés dans des tests ; un `cd` ; une demande répétée après
-  un refus prise pour une nouvelle (*« pas again »*) ; un dégradé posé dans chaque trait alors qu'il voulait un flou d'image.
-
 ### 2026-10-29 (nuit, suite) — le diagnostic de performance de l'atlas (ATLAS-303 → ATLAS-304)
 
 Même plage au journal que l'entrée du 28/10 : **28/10 19:24 → 29/10 03:56** (8 h 32, le diagnostic de **02:39 à 03:56**) ; le
@@ -46,4 +25,22 @@ et script Trello à commiter. Sur Fable, effort maximal.
   `delete window.innerWidth` ; une série de mesures de 37 s sous un outil qui coupe à 45 ; le zoom écrit dans
   `sessionStorage` écrasé par la sauvegarde au déchargement.
 
-> Older sessions (2026-09-12 → 2026-10-27 nuit) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+### 2026-10-29 (jour) — les noms des pays jusqu'au bout, le démarrage, le panneau en développement seulement
+
+Plages au journal : **11:43 → 14:06** et **15:42 → 21:35** (8 h 16) ; le chantier ouvert le 05/10 totalise **148 h 22 sur 27
+plages**. **Poussé**, de `2f60766` à `47d6fd4`, CI verte, le site déployé avec tout `main`.
+
+- **Les noms** : la construction unique (ATLAS-301), puis ATLAS-308 (sous les icônes 3D), 309 (Venise), 310 (les pays sans
+  place, dits en console) ; le nom court saisi dans le Cartographe (CARTO-307) ; un nom coupé qui se décale sur la terre
+  libre (ATLAS-314) ; l'étiquette déportée sur la mer, ou sur un voisin avec sa ligne de points (ATLAS-315) ; les tribus en
+  blanc sur liseré brun, gardé très fin de près (*« là c'est parfait »*) ; la case « Toujours le nom court » (CARTO-318).
+- **Le reste** : le flou derrière un contrat (ATLAS-304/305) ; le halo des épingles (ATLAS-306) ; aucune frontière le long du
+  bord (CORE-313) ; ‹Entrée› ouvre la fiche (CARTO-312) ; le relief d'abord puis tout en fondu (ATLAS-316) ; le panneau et le
+  compteur sous `pnpm dev` seulement (ATLAS-317) ; le relief à 0,2 de près, son réglage ; le commentaire de clôture d'un
+  ticket (comment, où, avant → après) dans la skill Trello ; une poussée annule la CI en cours (`concurrency`).
+- **Mes fautes** : sa demande sur le démarrage mal lue (*« c'est épuisant de devoir répéter »*) ; trois `cd` ; un remède
+  faux pour les Obotrites (le nom court ne s'écrit que là où le complet ne tient pas — je ne l'avais pas relu) ; *« c'est
+  exactement ce que je veux »* pris pour l'option que j'écartais ; deux poussées à 15 s d'écart, l'ancienne déployée par-dessus
+  la nouvelle. La revue à plusieurs agents sautée le soir, à sa demande.
+
+> Older sessions (2026-09-12 → 2026-10-29 nuit, first half) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

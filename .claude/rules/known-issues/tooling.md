@@ -43,6 +43,9 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
   gate rouge sur du code juste, dès que tout tourne en même temps).
   **En CI, réglé le 21/10** (`d950e48`) : le job Sonar fait sa couverture paquet par paquet
   (`turbo coverage --concurrency=1`) — deux tests y dépassaient leur délai. Reste la gate locale.
+  **Revenu le 29/10 au contrôle avant commit** (`.husky/pre-commit` lance `pnpm run test`, les quatre suites ensemble) : des
+  tests du Cartographe au-delà de 5 s, verts seuls ; le même commit relancé une fois est passé (Turbo rejoue de son cache les
+  paquets déjà verts). Relancer **une** fois, jamais `--no-verify`.
 - **Le design system vient de GitHub Packages, et GitHub exige un token même pour l'installer.**
   `@fubaritico/{tokens,styles,react,behaviors}` en `^0.7.0` (depuis le 09/10 en `0.2.0` ; la 0.7.0 du 21/10 renomme
   les jetons de couleur, CARTO-117). **Après une montée, relancer le serveur de dev** : un Vite déjà lancé garde les

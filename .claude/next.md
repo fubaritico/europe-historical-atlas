@@ -5,50 +5,33 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — ATLAS-304, la performance de l'atlas (30/10, avec Opus 5.5)
+## ▶ ON REPREND ICI — le point de la journée du 29/10, puis la suite du menu
 
-**29/10, fin à 3 h 56.** Le diagnostic est fait, **rien n'est codé**. Tout est dans **ATLAS-304** — en tête d'À faire à sa
-demande, le texte complet en français, la liste des sept étapes — et dans `files/plans/atlas/performance.md`, le texte de
-référence avec la recette de la sonde. **Non commité** : ces notes, le plan, le glossaire (« rendu à la demande »), le script
-Trello (description et commentaires dans le corps de la requête) — `5202f7f` reste la tête, CI verte.
-
-**Ce qu'il a dit** : le Mac souffle dès le lancement ; 43 → 13 images/s sur le grand moniteur, le zoom plus fluide ; il veut
-plus de 30. **Ce que j'ai mesuré** (4,0 Mpx, chronomètre GPU du pilote) : un flou seul ≈ 1 ms, **les trois ensemble 9 à
-18 ms** selon le zoom, allumés dès que le zoom quitte 0 (`closeness = zoom / 0,4`) ; la boucle dessine à chaque
-rafraîchissement (8 ms de GPU au repos — la chauffe) ; ombres des icônes 10–14 ms, 13 fois/s, hors champ comprises ; base
-fixe ≈ 5,5 ms (relief 3, surfaces 2,5) ; au démarrage 2,2 s de fil principal bloqué.
-
-**Demain, dans l'ordre** : lui poser les quatre questions du ticket — son moniteur (`devicePixelRatio`, `innerWidth ×
-innerHeight`, à quel zoom les 43 et les 13) ; l'à-coup de 37 ms au premier zoom ; les icônes animées au repos (ATLAS-300) ;
-l'ordre R1 → mesure → R3 → R4. Puis **R1** (un seul jeu d'images pour les trois flous, sans profondeur, sans seconde
-résolution, seuil d'extinction), **mesurer avec la sonde du plan avant R2** — une seule sonde par page. Il teste sur le grand
-moniteur : plus de 30 images/s, le ventilateur silencieux au repos.
-
-**Aussi prêt pour demain, les noms des pays (ATLAS-301)** : à 4 h, à sa demande, un diagnostic de l'algorithme contre les
-deux captures du ticket (CK3, 1501) — dans `files/plans/atlas/country-names.md`, section « The gap to the reference », et en
-français en commentaire sur ATLAS-301. En une ligne : **cinq écarts de construction, pas de réglage** — longueur enchaînée
-à la taille (espacement fixe, plafond 30 cases), l'espace = la terre et non l'enveloppe (Byzance coupée par l'Égée), la
-comparaison à sept poids qui rebat les vainqueurs à chaque retouche (le mécanisme des effets de bord qu'il a vus), deux
-lignes, la courbure et la pente pénalisées. Axes A → F dans le plan ; d'abord figer six formes de 1100 en jeu d'essai. Rien
-n'est codé. La skill Trello a un verbe `attachments <ticket> [dossier]` pour lire ses captures.
+**29/10, fin à 22 h.** Tout est poussé (`47d6fd4`), CI verte, le site déployé avec tout `main`. Le dev reprend tout de suite :
+**faire le point de la journée** (l'entrée du 29/10 jour dans `completed.md`) et **choisir la suite** dans À faire — c'est
+lui qui tient l'ordre ; le haut d'À faire est ATLAS-287 (la couronne), ATLAS-288, puis l'outillage du CMS (276 → 280).
 
 **Ses arbitrages en attente** (une question à la fois) :
-- passer **ATLAS-145** (séance des frontières) et **ATLAS-302** (flou, encore dans Idées) en Fait — testés par lui ;
-- **ATLAS-301** reste ouvert pour l'étape 4 : le nom court saisi dans le Cartographe (sa leçon : des noms d'usage courts dès la
-  contribution, comme Crusader Kings) ;
+- passer en Fait **ATLAS-145** (séance des frontières), **ATLAS-302** (flou, encore dans Idées) et **ATLAS-301** (les noms :
+  l'étape 4, le nom court saisi, est livrée par CARTO-307) — testés par lui ;
+- **ATLAS-304** (performance) est en pause dans En cours : ses 13 images/s étaient mon onglet de mesure, R1 dort derrière le
+  contrat du flou (ATLAS-305) — le garder là, ou le sortir ;
 - **le Groenland et l'Islande** sont norvégiens dans `years/1100` (historiquement 1261–1262) — ses données ;
 - **l'erreur des noms** (police, worker) n'est dite qu'en console — proposition du 28/10, pas tranchée.
 
-**À savoir, laissé de côté** : 6 pays sans nom quand rien ne tient ; un nom sur chaque îlot ; le trait parchemin de la
-frontière collé au brun à un zoom seulement (écart en distance carte — un décalage en pixels dans le shader le réglerait) ; le
-flou ne suit aucune préférence système (A11Y-002) ; le filigrane à 40 % est son choix (A11Y-001).
+**À savoir, laissé de côté** : un nom sur chaque îlot ; le trait parchemin de la frontière collé au brun à un zoom seulement
+(un décalage en pixels dans le shader le réglerait) ; le flou ne suit aucune préférence système (A11Y-002) ; le filigrane à
+40 % est son choix (A11Y-001) ; l'encre blanche des tribus n'est pas floutée de près.
 
-**Pièges de ces deux soirs, à ne pas refaire** : empiler des règles visuelles (abréviations, vagues, seuil de lisibilité) —
-quand il est perdu, **s'arrêter et lui donner la règle en trois lignes** ; deviner un chiffre dans un test ; une demande
-répétée après un refus d'outil est **la même** demande ; « flou » = flou d'image, pas un dégradé dans le trait ; parler
-franglais. **Et ceux du 29/10** : deux sondes dans un même onglet (leurs chronomètres GPU se brisent, résultats nuls) ; une
-série de mesures de plus de 40 s sous un outil qui coupe à 45 ; `delete` d'une propriété de `window` ; écrire la caméra dans
-`sessionStorage` sans bloquer la sauvegarde au déchargement.
+**Clore un ticket** : depuis le 29/10, le commentaire de clôture dit comment, où (fichier:ligne) et la correction clé avant →
+après, posté par `commentfile` depuis un fichier (skill `/trello`, « The closing comment »).
+
+**Pièges, à ne pas refaire** : empiler des règles visuelles — quand il est perdu, **s'arrêter et lui donner la règle en trois
+lignes** ; deviner un chiffre dans un test ; une demande répétée après un refus d'outil est **la même** demande ; « flou » =
+flou d'image ; parler franglais ; deux sondes dans un même onglet ; `delete` d'une propriété de `window`. **Et ceux du
+29/10 jour** : **relire le code avant de proposer un remède** (le nom court ne s'écrit que là où le complet ne tient pas) ;
+**jamais de `cd`**, même pour revenir à la racine ; quand sa phrase peut désigner deux options, dire celle que je comprends
+avant d'agir.
 
 **Sa copie de base** du 27/10 avant le seed : `packages/cms/cms-backup-2026-10-27-2300.db` (ignorée par git) — à lui
 de la supprimer.
@@ -93,10 +76,10 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 | où | ticket | état |
 | --- | --- | --- |
 | **Chantiers** | DESIGN-262 La gestion de l'incertitude · **CMS-285 Le CMS** | DESIGN-262 : palier 2 conçu (CORE-270) ; CMS-285 : socle codé, outillage à faire |
-| **En cours** | ATLAS-303 · ATLAS-301 · ATLAS-145 · ATLAS-156 · ATLAS-152 | ATLAS-303 : le rendu (le point performance est ATLAS-304) ; ATLAS-301 : étape 4 restante ; ATLAS-145 : fait, à passer en Fait ; ATLAS-156 : bataille et siège faits ; ATLAS-152 : sources de 1100 |
+| **En cours** | ATLAS-303 · ATLAS-301 · ATLAS-145 · ATLAS-304 · ATLAS-156 · ATLAS-152 | ATLAS-303 : le rendu ; ATLAS-301 et ATLAS-145 : faits, à passer en Fait ; ATLAS-304 : en pause ; ATLAS-156 : bataille et siège faits ; ATLAS-152 : sources de 1100 |
 | **À valider par le développeur** | — | vide le 26/10 |
 | **Backlog** | ATLAS-299 · ATLAS-297 · CORE-270 · CMS-281..283 · ATLAS-284 · CARTO-237 · CARTO-273 · CARTO-274 | CORE-270 passe après la contribution (25/10) ; 281–283 les écrans suivants |
-| **À faire**, en tête | **ATLAS-304** · ATLAS-287 · ATLAS-288 · CMS-290 · CMS-276 → 280 | ATLAS-304 d'abord (sa demande du 29/10), puis dans cet ordre |
+| **À faire**, en tête | ATLAS-287 · ATLAS-288 · CMS-276 → 280 · … · CMS-290 | dans son ordre |
 | **Idées** | ATLAS-302 flou (fait, à passer en Fait) · ATLAS-300 animations réduites · CARTO-268 feature flags · CORE-271 généalogie · CARTO-272 radar | CARTO-268 : pas encore |
 
 **Toujours en attente, à lui proposer un jour** : le relief niveau 6 du Cartographe (une ligne, `main.tsx` →
@@ -104,7 +87,7 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 
 ## Where we are
 
-**5 362 tests** (1 494 `core` · 2 259 Cartographe · 1 318 atlas · 122 CMS · 169 plugin `eslint-plugin-eha`, 29/10), gate
+**5 539 tests** (1 584 `core` · 2 274 Cartographe · 1 390 atlas · 122 CMS · 169 plugin `eslint-plugin-eha`, 29/10 soir), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 
