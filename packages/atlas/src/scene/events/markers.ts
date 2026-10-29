@@ -52,8 +52,8 @@ export interface EventMarkers {
    */
   faceCamera: (camera: CameraPose, seconds: number) => void
   /**
-   * Blur the markers a little close up (ATLAS-302), or draw them crisp at `0` — the 3D icons only; a kind without a
-   * blur leaves it out.
+   * Blur the markers a little close up (ATLAS-302), or draw them crisp at a reach the blur's method does not draw (`0` always) — the 3D icons
+   * only; a kind without a blur leaves it out.
    * @param pixels - the blur's reach, in CSS pixels
    * @returns nothing
    */

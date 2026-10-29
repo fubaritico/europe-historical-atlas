@@ -36,7 +36,7 @@ export const NAME_HALO_CELLS = 0.8
  * @returns nothing
  */
 export function rebuildNames(context: LayerContext): void {
-  const { scene, sources, handles, projection } = context
+  const { scene, sources, handles, projection, blurMethod } = context
   disposeHandle(scene, handles.names)
   handles.names = null
   const { yearNames, nameSheet } = sources
@@ -50,6 +50,7 @@ export function rebuildNames(context: LayerContext): void {
     opacity: NAME_OPACITY,
     haloOpacity: NAME_HALO_OPACITY,
     haloCells: NAME_HALO_CELLS,
+    blurMethod,
   })
   handles.names.object.scale.setY(relief.scale.y)
   scene.add(handles.names.object)

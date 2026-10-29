@@ -1,10 +1,19 @@
+import { Mesh } from 'three'
 import { describe, expect, it } from 'vitest'
 
-import { createLevelledBorderLayer, splitBordersByLevel } from './levelledBorderLayer'
+import { createSeparateImagesBlur } from '../../blur/separateImages'
+import { createSharedImagesBlur } from '../../blur/sharedImages'
+
+import {
+  BORDER_BLUR_LAYER,
+  createLevelledBorderLayer,
+  splitBordersByLevel,
+} from './levelledBorderLayer'
 
 import type { ComposedLineLayer, ComposedStroke } from './composedLineLayer'
 import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
+import type { Object3D, ShaderMaterial } from 'three'
 
 /** A vertical two-point run. */
 function run(u: number): UvPoint[] {
@@ -98,6 +107,32 @@ describe('splitBordersByLevel', () => {
   })
 })
 
+/** How the blurs are drawn: the standard. */
+const TARGETS = createSeparateImagesBlur()
+
+/**
+ * Every line of a layer, the blur's quad left out.
+ * @param layer - the layer
+ * @returns its lines
+ */
+const lines = (layer: ReturnType<typeof createLevelledBorderLayer>): Object3D[] => {
+  const found: Object3D[] = []
+  for (const level of layer.levels.values())
+    level.object.traverse((child) => {
+      found.push(child)
+    })
+  return found
+}
+/**
+ * The blur's quad: the one mesh of the group never culled.
+ * @param layer - the layer
+ * @returns the quad, if still in the group
+ */
+const quadOf = (layer: ReturnType<typeof createLevelledBorderLayer>): Mesh | undefined =>
+  layer.object.children.find(
+    (child): child is Mesh => child instanceof Mesh && !child.frustumCulled
+  )
+
 describe('createLevelledBorderLayer', () => {
   const byLevel = new Map([
     [1, [stroke(0.6)]],
@@ -106,7 +141,7 @@ describe('createLevelledBorderLayer', () => {
 
   describe('happy path', () => {
     it('builds one composed layer per level, shallowest first in draw order', () => {
-      const layer = createLevelledBorderLayer(byLevel, { project, renderOrderBase: 10 })
+      const layer = createLevelledBorderLayer(byLevel, { project, renderOrderBase: 10 }, TARGETS)
       expect([...layer.levels.keys()]).toEqual([0, 1])
       const orders = layer.object.children.flatMap((level) =>
         level.children.map((pass) => pass.renderOrder)
@@ -116,7 +151,7 @@ describe('createLevelledBorderLayer', () => {
     })
 
     it('hides a level of homage until the detail reaches it, and keeps level 0 whole', () => {
-      const layer = createLevelledBorderLayer(byLevel, { project })
+      const layer = createLevelledBorderLayer(byLevel, { project }, TARGETS)
       layer.setDetail(0)
       expect(layer.levels.get(1)?.object.visible).toBe(false)
       expect(layer.levels.get(0)?.object.visible).toBe(true)
@@ -127,7 +162,7 @@ describe('createLevelledBorderLayer', () => {
 
   describe('variants', () => {
     it('fades a level in with the detail, every pass of it', () => {
-      const layer = createLevelledBorderLayer(byLevel, { project })
+      const layer = createLevelledBorderLayer(byLevel, { project }, TARGETS)
       layer.setDetail(0.5)
       expect(layer.levels.get(1)?.object.visible).toBe(true)
       expect(opacities(layer.levels.get(1))).toEqual([0.3])
@@ -137,7 +172,7 @@ describe('createLevelledBorderLayer', () => {
     })
 
     it('hands the zoom-out ease to every level, composed with the fade', () => {
-      const layer = createLevelledBorderLayer(byLevel, { project })
+      const layer = createLevelledBorderLayer(byLevel, { project }, TARGETS)
       layer.setDetail(0.5)
       layer.setOpacityScale(0.5)
       expect(opacities(layer.levels.get(0))).toEqual([0.2, 0.4])
@@ -154,7 +189,8 @@ describe('createLevelledBorderLayer', () => {
           // A vassals' parchment line stays as built; a close-up pass follows the closeness.
           [1, [stroke(0.5, 'vassal'), stroke(0.8, 'inlay')]],
         ]),
-        { project }
+        { project },
+        TARGETS
       )
       layer.setDetail(1)
       layer.setWidthScale(0.5)
@@ -171,13 +207,47 @@ describe('createLevelledBorderLayer', () => {
     })
   })
 
+  // ATLAS-302 / ATLAS-304: the borders' blur, drawn by the method the layer is handed.
+  describe('blur', () => {
+    it('moves every line to the borders’ blur layer and shows the quad once blurred, and back once not', () => {
+      const layer = createLevelledBorderLayer(byLevel, { project }, TARGETS)
+      layer.setBlur(1)
+      expect([
+        lines(layer).every((line) => line.layers.isEnabled(BORDER_BLUR_LAYER)),
+        quadOf(layer)?.visible,
+      ]).toEqual([true, true])
+      layer.setBlur(0)
+      expect([
+        lines(layer).every((line) => line.layers.isEnabled(0)),
+        quadOf(layer)?.visible,
+      ]).toEqual([true, false])
+      layer.dispose()
+    })
+
+    it('draws its blur through the method it is handed', () => {
+      const shared = createSharedImagesBlur()
+      const layer = createLevelledBorderLayer(byLevel, { project }, shared)
+      const material = quadOf(layer)?.material as ShaderMaterial | undefined
+      expect(material?.uniforms.blurred?.value).toBe(shared.images.result.texture)
+      layer.dispose()
+    })
+
+    it('takes its quad out of the group on teardown', () => {
+      const layer = createLevelledBorderLayer(byLevel, { project }, TARGETS)
+      layer.dispose()
+      expect(quadOf(layer)).toBeUndefined()
+    })
+  })
+
   // L3 (managed errors): N/A — nothing is refused; an empty level is simply not built.
 
   describe('unmanaged errors', () => {
     it('builds no layer for a level whose passes are empty', () => {
-      const layer = createLevelledBorderLayer(new Map([[2, [{ ...stroke(1), segments: [] }]]]), {
-        project,
-      })
+      const layer = createLevelledBorderLayer(
+        new Map([[2, [{ ...stroke(1), segments: [] }]]]),
+        { project },
+        TARGETS
+      )
       expect(layer.levels.size).toBe(0)
       layer.dispose()
     })
@@ -185,7 +255,7 @@ describe('createLevelledBorderLayer', () => {
 
   describe('edge cases', () => {
     it('frees every level on dispose', () => {
-      const layer = createLevelledBorderLayer(byLevel, { project })
+      const layer = createLevelledBorderLayer(byLevel, { project }, TARGETS)
       layer.dispose()
       expect(layer.levels.size).toBe(0)
       expect(layer.object.children).toHaveLength(0)

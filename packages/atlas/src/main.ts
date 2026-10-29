@@ -26,6 +26,7 @@ import { createMapPipeline } from './loading/mapPipeline'
 // bundler-specific line in the compute, and it lives here on purpose: the client that talks to the
 // worker takes it as an injected `spawn`, so nothing below the composition root depends on Vite.
 import { createSurfacePicker } from './picking/surfacePicker'
+import { createStandardBlur as standardBlur } from './scene/blur/standardBlur'
 import { createMapLayers } from './scene/layers/mapLayers'
 import { createMapSources } from './sources/mapSources'
 import { createDevState } from './tunables/devState'
@@ -53,7 +54,7 @@ function bootstrap(): () => void {
   document.documentElement.lang = locale
   const translate = createTranslator(ATLAS_MESSAGES, locale)
   const ui = createMapUi({ host: document.body, isDisposed, translate })
-  const layers = createMapLayers({ scene: view.scene, dev, sources })
+  const layers = createMapLayers({ scene: view.scene, dev, sources, blurMethod: standardBlur() })
   const pipeline = createMapPipeline({
     dev,
     sources,

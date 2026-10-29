@@ -77,7 +77,7 @@ export function levelForPair(context: LayerContext, pair: readonly [number, numb
  * @returns nothing
  */
 export function rebuildBorders(context: LayerContext): void {
-  const { scene, dev, sources, handles, projection } = context
+  const { scene, dev, sources, handles, projection, blurMethod } = context
   // Clear the line work on screen; nothing is redrawn without derived borders or with borders off.
   disposeHandle(scene, handles.borders)
   handles.borders = null
@@ -95,15 +95,19 @@ export function rebuildBorders(context: LayerContext): void {
   // Every level came out empty: no layer to build.
   if ([...strokesByLevel.values()].every((strokes) => strokes.length === 0)) return
   // One composed layer per level, draped on the relief, its depth test and dashes from the panel.
-  handles.borders = createLevelledBorderLayer(strokesByLevel, {
-    project: projection.draped,
-    split: projection.split,
-    depthBias: DRAPED_DEPTH_BIAS,
-    depthTest: !dev.political.borderOnTop,
-    renderOrderBase: BORDER_RENDER_ORDER,
-    dashSize: dev.political.borderDashSize,
-    gapSize: dev.political.borderDashGap,
-  })
+  handles.borders = createLevelledBorderLayer(
+    strokesByLevel,
+    {
+      project: projection.draped,
+      split: projection.split,
+      depthBias: DRAPED_DEPTH_BIAS,
+      depthTest: !dev.political.borderOnTop,
+      renderOrderBase: BORDER_RENDER_ORDER,
+      dashSize: dev.political.borderDashSize,
+      gapSize: dev.political.borderDashGap,
+    },
+    blurMethod
+  )
   // Fat lines are sized in screen pixels, so give them the viewport before showing the layer.
   handles.borders.setResolution(window.innerWidth, window.innerHeight)
   scene.add(handles.borders.object)

@@ -290,6 +290,8 @@ function layerLifecycle(
       for (const key of DRAWN_LAYERS) disposeHandle(scene, handles[key])
       // The textures last: they are held apart from their meshes, so no mesh disposal frees them.
       for (const key of TEXTURES) handles[key]?.dispose()
+      // The blur method they were handed, with whatever it holds across its blurs.
+      context.blurMethod.dispose()
     },
   }
 }

@@ -291,16 +291,19 @@ target.z)` would be coherent with the navigation that already exists.
 - **The names are drawn over the relief** (`depthTest` off, `scene/political/names/nameLayer`): a flat sheet at the ground's
   median height would otherwise be cut by the hills under it. Consequence: under a steep camera, a name behind a ridge shows
   through it. Chosen on purpose for legibility (the dev, 28/10); **severity: cosmetic**.
-- **The three blurs together are what drops the frame rate on a large screen** — ATLAS-304 (measured 2026-10-29,
-  `files/plans/atlas/performance.md`; `scene/screenBlur`, their layers in `scene/blurLayers`). Each frame it is on, a blur
+- **The three blurs together cost more than their sum, and grow with the pixels** — ATLAS-304 (measured 2026-10-29,
+  `files/plans/atlas/performance.md`; `scene/blur/`, their layers in `scene/blurLayers`). Each frame it is on, a blur
   draws its layer alone into a 4-sample image the size of the drawing buffer (with a depth buffer nothing reads), resolves
   it, blurs it across then down, resolves it again and lays it as a full-screen quad; the icons' draws the whole scene
   filtered to its layer, for the markers' lights. **They switch on as soon as the zoom leaves 0** (`frameLayers`:
   `closeness = zoom / borderInlayZoom`), not only close up. At 4.0 Mpx: one blur alone ≈ 1 ms of GPU, **the three together
-  9 ms at zoom 0.12 and 18 ms at zoom 0.5** — not additive, and growing with the pixels: 60 → 40 fps there, his 13 fps on
-  ~15 Mpx. With *borders over the relief* off the borders' blur is set to nought (the image holds no relief). **Remedy**:
-  the ticket's R1 — one target set shared by the three, no depth, no second resolve, a threshold — measured before any
-  half-resolution. **Severity: gênant.**
+  9 ms at zoom 0.12 and 18 ms at zoom 0.5** — not additive, and growing with the pixels: 60 → 40 fps there. With *borders
+  over the relief* off the borders' blur is set to nought (the image holds no relief). **R1 built 29/10 and kept dormant**: the
+  blur is a method injected into the layers (`scene/blur/`); the standard, in service, is the code of 28/10
+  (`separateImages`); `sharedImages` — one target set, one colour-only resolve, a 0.25 px threshold, 40 → 54–55 fps at
+  4 Mpx — waits for the quality levels (ATLAS-305). **His 13 fps were not this**: reproduced the same day, they were my measuring tab running beside his on one GPU
+  (`files/plans/atlas/performance.md`, the note at the top); his monitor is 2.9 Mpx and held ~44 fps alone. The ticket is
+  on hold. **Severity: worth knowing** (was gênant).
 - **The frame loop draws at every refresh, still or not** — ATLAS-304 (`app/frameLoop.ts`, measured 2026-10-29): zoomed out
   and untouched, 7.9 ms of GPU and 1.6 ms of CPU every 16.7 ms, forever — the fan the dev hears at launch. Nothing asks
   for a frame; nothing can skip one. **Remedy**: the ticket's R3, one invalidation gate (camera motion, a rebuild, the

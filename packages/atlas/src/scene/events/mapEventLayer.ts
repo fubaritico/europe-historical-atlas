@@ -27,7 +27,7 @@ import type { LayerContext } from '../layers/layerContext'
  * @returns nothing
  */
 export function rebuildEvents(context: LayerContext): void {
-  const { scene, sources, handles, projection } = context
+  const { scene, sources, handles, projection, blurMethod } = context
   // 1. The markers drawn before, if any, removed and freed.
   disposeHandle(scene, handles.events)
   handles.events = null
@@ -68,7 +68,7 @@ export function rebuildEvents(context: LayerContext): void {
       groundAt
     ),
     createPinMarkers(plain, svgToTexture),
-    createEventIconMarkers(shaped, svgToTexture, groundAt),
+    createEventIconMarkers(shaped, svgToTexture, groundAt, blurMethod),
   ])
   scene.add(handles.events.object)
 }

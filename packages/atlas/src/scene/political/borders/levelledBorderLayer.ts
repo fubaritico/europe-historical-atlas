@@ -13,7 +13,6 @@
 import { Group } from 'three'
 
 import { BLUR_LAYERS } from '../../blurLayers'
-import { createScreenBlur } from '../../screenBlur'
 import { levelOpacity } from '../homageReveal'
 
 import { createComposedLineLayer } from './composedLineLayer'
@@ -23,6 +22,7 @@ import type {
   ComposedLineLayerOptions,
   ComposedStroke,
 } from './composedLineLayer'
+import type { BlurMethod } from '../../blur/blurMethod'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
 
 /** The layer the borders' lines move to while blurred (ATLAS-302) — one the camera does not see. */
@@ -41,7 +41,7 @@ export interface LevelledBorderLayer extends Omit<ComposedLineLayer, 'object' | 
    */
   setDetail(detail: number): void
   /**
-   * Blur the line work a little (ATLAS-302), or draw it crisp at `0`.
+   * Blur the line work a little (ATLAS-302), or draw it crisp at a reach the blur's method does not draw (`0` always).
    * @param pixels - the blur's reach, in CSS pixels
    * @returns nothing
    */
@@ -78,16 +78,18 @@ export function splitBordersByLevel(
  * off a deeper level's line still lands above a shallower one's, as one layer's later passes do.
  * @param strokesByLevel - each level's passes, in draw order within it
  * @param options - projection and depth behaviour, shared by every level
+ * @param blurMethod - how the map's blurs are drawn (ATLAS-304)
  * @returns the layer handle
  */
 export function createLevelledBorderLayer(
   strokesByLevel: ReadonlyMap<number, readonly ComposedStroke[]>,
-  options: ComposedLineLayerOptions
+  options: ComposedLineLayerOptions,
+  blurMethod: BlurMethod
 ): LevelledBorderLayer {
   const object = new Group()
   const levels = new Map<number, ComposedLineLayer>()
   // The blur, at the line work's rank: off until the frame sets its reach.
-  const blur = createScreenBlur(object, {
+  const blur = blurMethod.create(object, {
     layer: BORDER_BLUR_LAYER,
     renderOrder: options.renderOrderBase ?? 0,
     blend: 'normal',

@@ -8,6 +8,16 @@
 > Everything under *Measured* was measured that night, in a probe described at the end so it can be replayed in five
 > minutes. Everything under *Hypotheses* was **not** — each line says how to test it. Nothing under *Remedies* is decided.
 
+> **The 13 fps were my measuring tab, not his screen — reproduced on 29/10 at midday.** His external monitor is
+> 2212 × 1319 at a pixel ratio of 1 (2.9 Mpx, less than the 4.0 Mpx measured below). With the code of that night, his
+> tab alone ran at ~44 fps, fluid. My automation tab, opened on the same server in a window of 2560 × 1319 at 2
+> (13.5 Mpx), ran itself at 12.8 fps with the GPU saturated (6 blits a frame), and **his counter fell back to ~13** while
+> it ran — the dev confirmed on sight. Two atlases drawing every frame share one GPU. So the night's *C1 → the fall to
+> 13 fps* and the extrapolation to ~15 Mpx do not explain his screen; the costs measured stay true, and the remedies
+> stay worth having (the dev, same day: *« les optimisations sont quand même très pertinentes »*), but the ticket is put
+> on hold. **The rule that comes out of it**: never leave a measuring tab open while he reads his own counter — close it,
+> or measure only with his tab closed.
+
 ## Measured
 
 **Method.** A tab of my own on the dev's server (`localhost:5173`), window 1440×700 CSS at a device pixel ratio of 2 =
@@ -52,7 +62,7 @@ blurs switch on** (shader compilation and target allocation), once per page.
 
 ## Causes, measured, by weight
 
-- **C1 — the three blurs together** (`scene/screenBlur.ts`). Each, every frame: its layer drawn alone into a 4-sample
+- **C1 — the three blurs together** (`scene/blur/separateImages.ts`, then `scene/screenBlur.ts`). Each, every frame: its layer drawn alone into a 4-sample
   image the size of the drawing buffer (with a depth buffer nothing reads), resolved (a blit), blurred across then down,
   resolved again, laid as a full-screen quad. They switch on as soon as the zoom leaves 0 — `closeness = zoom / 0.4`
   in `scene/layers/frameLayers.ts`, and a radius of 0.1 px runs the whole chain. Alone ≈ 1 ms; together 9 to 18 ms at
@@ -105,6 +115,35 @@ blurs switch on** (shader compilation and target allocation), once per page.
 
 **Order proposed**: R1 → measure → R3 → R4; the rest after. The dev's calls: R2's look, R3 against ATLAS-300, R7's
 sharpness, the blur's threshold.
+
+## R1, built and measured (29/10, midday)
+
+**Built, then set aside as a method** (the dev, same afternoon: *« un contrat d'interface commun, une injection »*, the
+standard staying *très haute*): the blur is a `BlurMethod` (`scene/blur/screenBlur.ts`) injected into the layers by
+`main.ts`. **`separateImages`** is the code of 28/10 unchanged, each blur with its own images — the standard, in service.
+**`sharedImages`** is R1, dormant for the lower quality levels (ATLAS-305): one image set for the three blurs, the
+capture resolved once, colour only, the passes capture → spare → result, `SHARED_BLUR_THRESHOLD` = 0.25 CSS px. **One correction to the plan above**: the capture keeps its depth
+buffer — the 3D icons' material (`icons/meshes/parts.ts`, `MeshStandardMaterial`, depth test and write on) needs it for
+its own faces — but `resolveDepthBuffer` and `storeMultisampledDepthBuffer` are off, so it is never copied nor kept
+(three 0.186, `WebGLTextures.updateMultisampleRenderTarget`).
+
+**Measured** with the same probe, same window (1440 × 700 CSS at 2 = 4.0 Mpx), zoom 0.5 pinned, in my own tab:
+
+| at zoom 0.5 | fps | GPU (ms) | copies a frame |
+| --- | --- | --- | --- |
+| no blur | 60 | 9.5 | 0 |
+| names only | 60 | 11.5 | 1 |
+| borders only | 60 | 10.8 | 1 |
+| borders + names | 60 | 14.3 | 2 |
+| names + icons | 60 | 15.4 | 2 |
+| **the three** | **54–55** | saturated (timer reads ~51) | **3** (6 before) |
+
+**Reading**: the three went from 40 fps to 54–55 fps on 4.0 Mpx; the copies halved; two blurs together now cost their
+sum. The three together are still just past the 16.7 ms budget — their sum (≈ 8 ms over the base) on a base that read
+9.5 ms today against 7.0 ms last night (same page, same zoom: the machine's state, not the code — hypothesis). Per
+blur: borders ≈ 1.3 ms, names ≈ 2 ms, icons ≈ 4 ms (drawn from the whole scene, for the markers' lights).
+**On ~15 Mpx** (a 5K screen at 2): the blurs' ≈ 8 ms scale with the pixels to ≈ 30 ms — R1 alone would not hold 30 fps
+there; at 3.7 Mpx (a 27-inch 2560 × 1440 at 1) it would. **His screen's pixel ratio decides whether R2 is needed.**
 
 ## The probe — how to replay the measurement
 

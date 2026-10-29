@@ -6,6 +6,7 @@
 
 import { Color, PerspectiveCamera, Scene, Vector3, WebGLRenderer } from 'three'
 
+import { createStandardBlur } from '../scene/blur/standardBlur'
 import { createEventIconMarkers } from '../scene/events/icons/eventIconMarkers'
 import { svgToTexture } from '../scene/svgTexture'
 
@@ -40,8 +41,8 @@ const placed = Array.from({ length: n }, (_, i) => ({
   ],
   kind: KINDS[i % KINDS.length] ?? 'swords',
 }))
-// The bench's ground is flat, at zero.
-const markers = createEventIconMarkers(placed, svgToTexture, () => 0)
+// The bench's ground is flat, at zero; its icons blurred with the map's standard blur, for the page's life.
+const markers = createEventIconMarkers(placed, svgToTexture, () => 0, createStandardBlur())
 scene.add(markers.object)
 markers.setZoom(zoom, 400)
 

@@ -1,6 +1,9 @@
 import { MultiplyBlending, NormalBlending } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
+import { createSeparateImagesBlur } from '../../blur/separateImages'
+import { createSharedImagesBlur } from '../../blur/sharedImages'
+
 import {
   NAME_BLUR_LAYER,
   NAME_RENDER_ORDER,
@@ -55,6 +58,7 @@ function options(): NameLayerOptions {
     opacity: 0.5,
     haloOpacity: 0.25,
     haloCells: 1,
+    blurMethod: createSeparateImagesBlur(),
   }
 }
 
@@ -238,6 +242,17 @@ describe('createNameLayer', () => {
       ])
       expect(edges(layer).every((edge) => edge.layers.isEnabled(0))).toBe(true)
       layer.setBlur(0)
+      expect(inks(layer).map((ink) => [ink.layers.isEnabled(0), ink.material.blending])).toEqual([
+        [true, MultiplyBlending],
+        [true, MultiplyBlending],
+      ])
+    })
+
+    // ATLAS-304: where the method draws no blur (under the lighter method's threshold), the ink stays on the camera's
+    // layer, so it must keep its own multiply.
+    it('keeps the ink crisp in multiply for a reach its blur method does not draw', () => {
+      const layer = createNameLayer({ ...options(), blurMethod: createSharedImagesBlur() })
+      layer.setBlur(0.2)
       expect(inks(layer).map((ink) => [ink.layers.isEnabled(0), ink.material.blending])).toEqual([
         [true, MultiplyBlending],
         [true, MultiplyBlending],

@@ -9,6 +9,7 @@ import {
   Scene,
   ShaderLib,
   Vector3,
+  WebGLRenderTarget,
 } from 'three'
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -20,6 +21,8 @@ import * as fillModule from '@europe-historical-atlas/core/pipeline/fillTriangle
 
 import { createMapSources, refreshReliefSource } from '../../sources/mapSources'
 import { createDevState } from '../../tunables/devState'
+import { createSeparateImagesBlur } from '../blur/separateImages'
+import { createSharedImagesBlur } from '../blur/sharedImages'
 import { DEPTH_BIAS_UNIFORM } from '../depthBias'
 import { DRAPED_DEPTH_BIAS } from '../lines/lineLayer'
 import { FILL_RENDER_ORDER } from '../political/fills/fillLayer'
@@ -33,6 +36,7 @@ import { createLayerProjection } from './layerProjection'
 import { createMapLayers } from './mapLayers'
 
 import type { MapSources } from '../../sources/mapSources'
+import type { BlurMethod } from '../blur/blurMethod'
 import type { ContentEvent } from '@europe-historical-atlas/core/data/contentFormat'
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
@@ -112,8 +116,16 @@ const AUTHORED = {
   authored: {},
 } as unknown as RegionSet
 
-/** A scene with layers over a fully loaded set of sources. */
-function build(loaded = true): {
+/**
+ * A scene with layers over a fully loaded set of sources.
+ * @param loaded - whether the sources are loaded
+ * @param blurMethod - how the blurs are drawn; the standard unless a test says otherwise
+ * @returns the scene, the sources, the tunables and the layers
+ */
+function build(
+  loaded = true,
+  blurMethod: BlurMethod = createSeparateImagesBlur()
+): {
   scene: Scene
   sources: MapSources
   dev: ReturnType<typeof createDevState>
@@ -132,7 +144,7 @@ function build(loaded = true): {
     sources.derivedBorders = BORDERS
     refreshReliefSource(sources, dev.relief, dev.texture.seaLevel)
   }
-  return { scene, sources, dev, layers: createMapLayers({ scene, dev, sources }) }
+  return { scene, sources, dev, layers: createMapLayers({ scene, dev, sources, blurMethod }) }
 }
 
 /** A tribe's ring in the middle of the map, beside nobody. */
@@ -968,6 +980,115 @@ describe('createMapLayers', () => {
       layers.rebuildBorders()
       layers.dispose()
       expect(scene.children).toHaveLength(0)
+    })
+
+    // ATLAS-304: the layers blur through the method they are handed. The lighter one gives the three blurs one set of
+    // images to take turns in; the standard, very high level, gives each its own.
+    it('lays the borders’, the names’ and the icons’ blurs from one image with the lighter method', () => {
+      const { scene, sources, layers } = build(true, createSharedImagesBlur())
+      layers.rebuildRelief()
+      layers.rebuildBorders()
+      sources.yearNames = {
+        levels: [
+          {
+            placed: [
+              {
+                polity: 'p',
+                text: 'A',
+                form: 'short',
+                piece: 0,
+                size: 2,
+                glyphs: [{ x: 5, y: 5, angle: 0 }],
+              },
+            ],
+            tooSmall: [],
+          },
+        ],
+        gridWidth: 11,
+        gridHeight: 11,
+        unnamed: [],
+      }
+      sources.nameSheet = {
+        image: document.createElement('canvas'),
+        halo: document.createElement('canvas'),
+        cells: new Map([['A', { u0: 0, u1: 1, v0: 0, v1: 1, advance: 0.5 }]]),
+        ascent: 0.75,
+        descent: 0.25,
+      }
+      layers.rebuildNames()
+      sources.events = [BATTLE]
+      sources.mapDrawn = true
+      layers.rebuildEvents()
+      const read = new Set<unknown>()
+      let quads = 0
+      scene.traverse((object) => {
+        const uniforms = (object as { material?: { uniforms?: { blurred?: { value: unknown } } } })
+          .material?.uniforms
+        if (uniforms?.blurred === undefined) return
+        quads += 1
+        read.add(uniforms.blurred.value)
+      })
+      expect([quads, read.size]).toEqual([3, 1])
+    })
+
+    it('lays the borders’, the names’ and the icons’ blurs each from an image of its own with the standard method', () => {
+      const { scene, sources, layers } = build()
+      layers.rebuildRelief()
+      layers.rebuildBorders()
+      sources.yearNames = {
+        levels: [
+          {
+            placed: [
+              {
+                polity: 'p',
+                text: 'A',
+                form: 'short',
+                piece: 0,
+                size: 2,
+                glyphs: [{ x: 5, y: 5, angle: 0 }],
+              },
+            ],
+            tooSmall: [],
+          },
+        ],
+        gridWidth: 11,
+        gridHeight: 11,
+        unnamed: [],
+      }
+      sources.nameSheet = {
+        image: document.createElement('canvas'),
+        halo: document.createElement('canvas'),
+        cells: new Map([['A', { u0: 0, u1: 1, v0: 0, v1: 1, advance: 0.5 }]]),
+        ascent: 0.75,
+        descent: 0.25,
+      }
+      layers.rebuildNames()
+      sources.events = [BATTLE]
+      sources.mapDrawn = true
+      layers.rebuildEvents()
+      const read = new Set<unknown>()
+      let quads = 0
+      scene.traverse((object) => {
+        const uniforms = (object as { material?: { uniforms?: { blurred?: { value: unknown } } } })
+          .material?.uniforms
+        if (uniforms?.blurred === undefined) return
+        quads += 1
+        read.add(uniforms.blurred.value)
+      })
+      expect([quads, read.size]).toEqual([3, 3])
+    })
+
+    // ATLAS-304: a blur's own images go with its layer, and the method the layers were handed goes with them.
+    it('frees a blur’s own images with its layer, and the blur method with the layers', () => {
+      const method = createSeparateImagesBlur()
+      const { layers } = build(true, method)
+      layers.rebuildRelief()
+      layers.rebuildBorders()
+      const images = vi.spyOn(WebGLRenderTarget.prototype, 'dispose')
+      const freed = vi.spyOn(method, 'dispose')
+      layers.dispose()
+      expect([images.mock.calls.length, freed.mock.calls.length]).toEqual([2, 1])
+      images.mockRestore()
     })
 
     it('frees the relief geometry on teardown, not just unparents it', () => {

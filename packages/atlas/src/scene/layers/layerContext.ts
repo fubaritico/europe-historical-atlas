@@ -5,6 +5,7 @@
 
 import type { MapSources } from '../../sources/mapSources'
 import type { DevState } from '../../tunables/devState'
+import type { BlurMethod } from '../blur/blurMethod'
 import type { CompassRose } from '../decor/rose/compassRose'
 import type { EventMarkers } from '../events/markers'
 import type { LineLayer } from '../lines/lineLayer'
@@ -83,6 +84,11 @@ export interface MapLayersDeps {
   dev: DevState
   /** What has been loaded so far. */
   sources: MapSources
+  /**
+   * How the map's blurs are drawn (ATLAS-304): the standard draws each with images of its own; a lighter method may be
+   * injected instead. Handed over: the layers free it with themselves.
+   */
+  blurMethod: BlurMethod
 }
 
 /** The layers plus the things they need, passed to every builder instead of captured in a closure. */

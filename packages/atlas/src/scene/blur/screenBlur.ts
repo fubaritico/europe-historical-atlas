@@ -16,6 +16,11 @@
  * multiplied into the map as the names' ink is — the objects drawn into the image with the ordinary blend, so their
  * colour and their coverage are kept, then laid as `colour × coverage + (1 − coverage)`, the factor three's multiply
  * leaves (`WebGLState.js`, `MultiplyBlending`).
+ *
+ * **Which images it draws with is a method, injected** (ATLAS-304, the dev, 2026-10-29: *« un contrat d'interface
+ * commun, une injection »*): the contract is `blurMethod`; `separateImages` is the standard, each blur with its own
+ * images, as built on 28/10; `sharedImages` is the lighter one, kept for the lower quality levels. This file holds what
+ * both draw with: the shaders, the pass, the quad and the drawing.
  */
 
 import {
@@ -27,11 +32,11 @@ import {
   PlaneGeometry,
   ShaderMaterial,
   Vector2,
-  WebGLRenderTarget,
 } from 'three'
 import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js'
 
-import type { Camera, Object3D, Scene, Texture, WebGLRenderer } from 'three'
+import type { ScreenBlur, ScreenBlurOptions } from './blurMethod'
+import type { Camera, Object3D, Scene, Texture, WebGLRenderTarget, WebGLRenderer } from 'three'
 
 /**
  * How far the outer samples of the blur reach, in steps: the classic five-sample Gaussian read between texels
@@ -103,34 +108,58 @@ void main() {
 }
 `
 
-/** How a blur is set up. */
-export interface ScreenBlurOptions {
-  /** The layer its objects move to while blurred — one the camera, which sees layer 0, does not. */
-  readonly layer: number
-  /** The rank the quad is drawn at: the objects' own. */
-  readonly renderOrder: number
-  /** How the image is laid back: over the map, or multiplied into it. */
-  readonly blend: 'normal' | 'multiply'
-  /** The objects blurred, read again at each switch on or off; every object under the source but the quad when left out. */
-  readonly members?: () => readonly Object3D[]
-  /**
-   * Draw the whole scene the quad is drawn in, not the source alone — for objects lit by lights held elsewhere in it
-   * (the event icons, ATLAS-302). Only the blur's layer is drawn either way; the scene's background is left out.
-   */
-  readonly wholeScene?: boolean
+/** The images a blur draws with, and the pass that blurs them. */
+export interface BlurImages {
+  /** The layer drawn alone, with four samples. */
+  readonly capture: WebGLRenderTarget
+  /** The image between the two directions of the blur. */
+  readonly spare: WebGLRenderTarget
+  /** The blurred image the quad reads — the capture itself when the blur comes back into it. */
+  readonly result: WebGLRenderTarget
+  /** The blur's material. */
+  readonly material: ShaderMaterial
+  /** The full-screen pass that draws it. */
+  readonly pass: FullScreenQuad
+  /** The image the blur reads. */
+  readonly read: { value: Texture | null }
+  /** Its outer samples' reach, in texture coordinates. */
+  readonly reach: { value: Vector2 }
 }
 
-/** A layer's blur, as one thing. */
-export interface ScreenBlur {
-  /** The quad laid over the screen; added beside the objects blurred, at their rank. */
-  readonly object: Mesh
-  /**
-   * How much to blur, in CSS pixels: `0` draws the objects as they are, crisp, and hides the quad.
-   * @param pixels - the blur's reach
-   */
-  setRadius: (pixels: number) => void
-  /** Free the images, the materials and the quad. */
-  dispose: () => void
+/**
+ * Put the blur's pass around a set of images.
+ * @param targets - the capture, the spare, and the image the result ends in
+ * @param targets.capture - the layer drawn alone
+ * @param targets.spare - the image between the two directions
+ * @param targets.result - the blurred image the quad reads
+ * @returns the images and the pass
+ */
+export function blurImages(targets: {
+  readonly capture: WebGLRenderTarget
+  readonly spare: WebGLRenderTarget
+  readonly result: WebGLRenderTarget
+}): BlurImages {
+  const read: { value: Texture | null } = { value: null }
+  const reach: { value: Vector2 } = { value: new Vector2() }
+  const material = new ShaderMaterial({
+    uniforms: { source: read, step: reach },
+    vertexShader: BLUR_VERTEX,
+    fragmentShader: BLUR_FRAGMENT,
+    blending: NoBlending,
+    depthTest: false,
+    depthWrite: false,
+  })
+  return { ...targets, material, pass: new FullScreenQuad(material), read, reach }
+}
+
+/**
+ * Free a set of images and its pass, each image once.
+ * @param images - the images and the pass
+ */
+export function freeBlurImages(images: BlurImages): void {
+  for (const image of new Set([images.capture, images.spare, images.result])) image.dispose()
+  images.material.dispose()
+  images.pass.dispose()
 }
 
 /**
@@ -147,51 +176,10 @@ function everyBut(source: Object3D, quad: Mesh): Object3D[] {
   return members
 }
 
-/** The images and the pass the blur draws with, kept for the layer's life. */
-interface BlurImages {
-  /** The layer's objects drawn alone, with as many samples as the screen's own smoothing; the blurred result ends here. */
-  readonly capture: WebGLRenderTarget
-  /** The image between the two directions of the blur. */
-  readonly spare: WebGLRenderTarget
-  /** The blur's material. */
-  readonly material: ShaderMaterial
-  /** The full-screen pass that draws it. */
-  readonly pass: FullScreenQuad
-  /** The image the blur reads. */
-  readonly read: { value: Texture | null }
-  /** Its outer samples' reach, in texture coordinates. */
-  readonly reach: { value: Vector2 }
-}
-
-/**
- * The images and the pass the blur draws with.
- * @returns them, the images at one texel until the first frame sizes them
- */
-function blurImages(): BlurImages {
-  const read: { value: Texture | null } = { value: null }
-  const reach: { value: Vector2 } = { value: new Vector2() }
-  const material = new ShaderMaterial({
-    uniforms: { source: read, step: reach },
-    vertexShader: BLUR_VERTEX,
-    fragmentShader: BLUR_FRAGMENT,
-    blending: NoBlending,
-    depthTest: false,
-    depthWrite: false,
-  })
-  return {
-    capture: new WebGLRenderTarget(1, 1, { samples: 4 }),
-    spare: new WebGLRenderTarget(1, 1),
-    material,
-    pass: new FullScreenQuad(material),
-    read,
-    reach,
-  }
-}
-
 /**
  * Run one direction of the blur from an image into another.
  * @param renderer - the renderer
- * @param images - the blur's images and pass
+ * @param images - the images and the pass
  * @param route - the image read and the image written
  * @param route.from - the image read
  * @param route.to - the image written
@@ -210,12 +198,12 @@ function blurPass(
 }
 
 /**
- * Draw the layer alone into the capture, blurred — then hand three back the target and the clear colour it was
- * drawing the map with.
+ * Draw the layer alone into the capture, blurred across into the spare and down into the result — then hand three
+ * back the target and the clear colour it was drawing the map with.
  * @param renderer - the renderer, mid-way through drawing the map
  * @param camera - the map's camera, turned to the blur's layer for this one render
  * @param source - the objects' root
- * @param images - the blur's images and pass
+ * @param images - the images and the pass
  * @param reach - the blur's layer, and its reach in CSS pixels
  * @param reach.layer - the layer
  * @param reach.radius - the reach
@@ -227,13 +215,11 @@ function drawBlurred(
   images: BlurImages,
   reach: { readonly layer: number; readonly radius: number }
 ): void {
-  const { capture, spare } = images
+  const { capture, spare, result } = images
   // The images follow the drawing buffer's size, device pixels included.
   const size = renderer.getDrawingBufferSize(new Vector2())
-  if (capture.width !== size.x || capture.height !== size.y) {
-    capture.setSize(size.x, size.y)
-    spare.setSize(size.x, size.y)
-  }
+  if (capture.width !== size.x || capture.height !== size.y)
+    for (const image of new Set([capture, spare, result])) image.setSize(size.x, size.y)
   const target = renderer.getRenderTarget()
   const clearColor = renderer.getClearColor(new Color())
   const clearAlpha = renderer.getClearAlpha()
@@ -245,10 +231,10 @@ function drawBlurred(
   camera.layers.set(reach.layer)
   renderer.render(source, camera)
   camera.layers.mask = seen
-  // 2. Blurred across, then down, back into the capture — which the quad reads.
+  // 2. Blurred across, then down into the result — which the quad reads.
   const pixels = reach.radius * renderer.getPixelRatio()
   blurPass(renderer, images, { from: capture, to: spare }, new Vector2(pixels / size.x, 0))
-  blurPass(renderer, images, { from: spare, to: capture }, new Vector2(0, pixels / size.y))
+  blurPass(renderer, images, { from: spare, to: result }, new Vector2(0, pixels / size.y))
   // 3. Back to where three was drawing the map.
   renderer.setRenderTarget(target)
   renderer.setClearColor(clearColor, clearAlpha)
@@ -286,14 +272,20 @@ function layQuad(
 }
 
 /**
- * Build a layer's blur, off until a radius is set.
+ * Build a layer's blur over a set of images — what every method does once it has chosen them.
  * @param source - the root of the objects blurred, drawn into the image each frame the blur is on
  * @param options - the blur's layer, its rank, how it is laid back, and which objects it blurs
- * @returns the blur
+ * @param images - the images it draws with, its own or shared
+ * @param shows - which reaches the method draws as a blur
+ * @returns the blur, whose `dispose` frees its quad only
  */
-export function createScreenBlur(source: Object3D, options: ScreenBlurOptions): ScreenBlur {
-  const images = blurImages()
-  const quad = layQuad(images.capture.texture, options.renderOrder, options.blend)
+export function createLayerBlur(
+  source: Object3D,
+  options: ScreenBlurOptions,
+  images: BlurImages,
+  shows: (pixels: number) => boolean
+): ScreenBlur {
+  const quad = layQuad(images.result.texture, options.renderOrder, options.blend)
   const members = options.members ?? ((): Object3D[] => everyBut(source, quad))
   let radius = 0
   quad.onBeforeRender = (renderer: WebGLRenderer, scene: Object3D, camera: Camera): void => {
@@ -310,18 +302,15 @@ export function createScreenBlur(source: Object3D, options: ScreenBlurOptions): 
   }
   return {
     object: quad,
-    setRadius(pixels: number): void {
-      const on = pixels > 0
+    setRadius(pixels: number): boolean {
+      const on = shows(pixels)
       if (on !== quad.visible)
         for (const member of members()) member.layers.set(on ? options.layer : 0)
       quad.visible = on
       radius = pixels
+      return on
     },
     dispose(): void {
-      images.capture.dispose()
-      images.spare.dispose()
-      images.material.dispose()
-      images.pass.dispose()
       quad.geometry.dispose()
       quad.material.dispose()
     },

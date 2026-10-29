@@ -21,6 +21,7 @@ import BORDERS from '../../public/years/1100/borders.json?raw'
 import POLITIES from '../../public/years/1100/polities.json?raw'
 import REGISTRY from '../../public/years/1100/registry.json?raw'
 import MANIFEST from '../../public/years/index.json?raw'
+import { createSeparateImagesBlur } from '../scene/blur/separateImages'
 import { createMapLayers } from '../scene/layers/mapLayers'
 import { TRIBE_RENDER_ORDER } from '../scene/political/tribes/tribeLayer'
 import { createMapSources, refreshReliefSource } from '../sources/mapSources'
@@ -86,7 +87,7 @@ function drawYear(loaded: RegionSet): {
   sources.regionSet = loaded
   const tints = loaded.regions.map(() => ({ r: 120, g: 90, b: 60 }))
   settleYearBorders(sources, loaded, { borders: { between: [], frontier: [] }, tints }, PALETTE)
-  const layers = createMapLayers({ scene, dev, sources })
+  const layers = createMapLayers({ scene, dev, sources, blurMethod: createSeparateImagesBlur() })
   layers.rebuildRelief()
   layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))
   layers.rebuildBorders()

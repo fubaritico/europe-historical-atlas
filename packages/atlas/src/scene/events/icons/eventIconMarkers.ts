@@ -12,7 +12,6 @@ import { Group, Quaternion } from 'three'
 
 import { BLUR_LAYERS } from '../../blurLayers'
 import { applyDepthBias, applyLiveDepthBias } from '../../depthBias'
-import { createScreenBlur } from '../../screenBlur'
 import { EVENT_RENDER_ORDER } from '../markers'
 import { createIconShadows } from '../shadows/iconShadows'
 
@@ -26,7 +25,7 @@ import { EVENT_ICON_HEIGHT, ICON_DEPTH_PULL, ICON_FLAT_SPAN, ICON_HALO_SPAN } fr
 
 import type { LoadSvgTexture } from './billboardMaterials'
 import type { PlacedEventIcon } from './forms'
-import type { ScreenBlur } from '../../screenBlur'
+import type { BlurMethod, ScreenBlur } from '../../blur/blurMethod'
 import type { CameraPose, EventMarkers } from '../markers'
 import type { GroundAt } from '../shadows/groundShadows'
 import type { Object3D } from 'three'
@@ -151,9 +150,10 @@ export const EVENT_BLUR_LAYER = BLUR_LAYERS.icons
  * the shadows, drawn on the CPU from the icons' shapes, stay crisp.
  * @param object - the icons' group, which the blur's quad joins
  * @param blurred - the roots of what is blurred: the 3D icons and their halos
+ * @param method - how the map's blurs are drawn
  * @returns the blur
  */
-function iconBlur(object: Group, blurred: readonly Object3D[]): ScreenBlur {
+function iconBlur(object: Group, blurred: readonly Object3D[], method: BlurMethod): ScreenBlur {
   // Read at each switch, so an object added under the icons or the halos later is blurred too.
   const members = (): Object3D[] => {
     const found: Object3D[] = []
@@ -163,7 +163,7 @@ function iconBlur(object: Group, blurred: readonly Object3D[]): ScreenBlur {
       })
     return found
   }
-  const blur = createScreenBlur(object, {
+  const blur = method.create(object, {
     layer: EVENT_BLUR_LAYER,
     renderOrder: EVENT_RENDER_ORDER,
     blend: 'normal',
@@ -182,6 +182,7 @@ function iconBlur(object: Group, blurred: readonly Object3D[]): ScreenBlur {
  * @param placed - each icon and where it stands
  * @param loadTexture - how a flat icon's SVG becomes a texture
  * @param groundAt - the relief's height under any point, for the shadows
+ * @param blurMethod - how the map's blurs are drawn (ATLAS-304)
  * @param height - how tall a 3D icon stands
  * @returns the icons, shaped like the pins' handle
  */
@@ -189,13 +190,13 @@ export function createEventIconMarkers(
   placed: readonly PlacedEventIcon[],
   loadTexture: LoadSvgTexture,
   groundAt: GroundAt,
+  blurMethod: BlurMethod,
   height: number = EVENT_ICON_HEIGHT
 ): EventMarkers {
   const forms = buildForms(placed, loadTexture, groundAt, height)
-  const { icons, instances, shadows, halos, flats, groups } = forms
-  const { haloPositions, flatPositions } = forms
+  const { icons, instances, shadows, halos, flats, groups, haloPositions, flatPositions } = forms
   const { object } = groups
-  const blur = iconBlur(object, [instances.object, halos.object])
+  const blur = iconBlur(object, [instances.object, halos.object], blurMethod)
 
   // The camera's orientation, which every square takes; the turner of the 3D icons, and those it turns.
   const facing = new Quaternion()

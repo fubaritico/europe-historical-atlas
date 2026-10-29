@@ -12,6 +12,7 @@ import {
 } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
+import { createSeparateImagesBlur } from '../../blur/separateImages'
 import { DEPTH_BIAS_UNIFORM } from '../../depthBias'
 import { compileHook } from '../../testing/compileHook'
 import { EVENT_RENDER_ORDER } from '../markers'
@@ -90,6 +91,9 @@ function iconPose(
 
 /** A flat ground, at zero, for the shadows. */
 const FLAT = (): number => 0
+
+/** How the blurs are drawn: the standard. */
+const TARGETS = createSeparateImagesBlur()
 
 /**
  * The icons' shadows' mesh: the one plain mesh among the markers.
@@ -178,7 +182,7 @@ function pulled(material: Material): unknown {
 describe('createEventIconMarkers', () => {
   describe('happy path', () => {
     it('stands one icon on each place', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       // The tower stands on its place; the swords float above theirs (see the edge cases).
       // Read back from a float32 instance buffer, so compared to its precision.
       const tower = iconPose(markers.object, 'tower').position
@@ -190,14 +194,14 @@ describe('createEventIconMarkers', () => {
     })
 
     it('scales each icon to the height given', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT, 0.5)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS, 0.5)
       expect(iconPose(markers.object, 'swords').scale.toArray()).toEqual([0.5, 0.5, 0.5])
     })
   })
 
   describe('variants', () => {
     it('moves the siege’s trebuchet arm with the frame’s time, its frame left still', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       const turnOf = (name: string): number => {
         const mesh = instanced(markers.object).find((each) => each.name === name)
         if (mesh === undefined) throw new Error(`no ${name}`)
@@ -214,7 +218,7 @@ describe('createEventIconMarkers', () => {
     })
 
     it('stands them the default height when none is given, each kind at its own size', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       expect(iconPose(markers.object, 'swords').scale.y).toBeCloseTo(EVENT_ICON_HEIGHT)
       expect(iconPose(markers.object, 'tower').scale.y).toBeCloseTo(
         EVENT_ICON_HEIGHT * ICON_SIZE.tower
@@ -222,14 +226,14 @@ describe('createEventIconMarkers', () => {
     })
 
     it('orders the 3D icons after the borders, and their halos just before them', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       const [halosGroup, iconsGroup] = markers.object.children[0]?.children ?? []
       expect(iconsGroup?.renderOrder).toBe(EVENT_RENDER_ORDER)
       expect(halosGroup?.renderOrder).toBe(EVENT_RENDER_ORDER - 1)
     })
 
     it('pulls the 3D icons and their halo toward the camera alike, by an icon height', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT, 0.5)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS, 0.5)
       const pull = { value: 0.5 * ICON_DEPTH_PULL }
       for (const mesh of instanced(markers.object))
         expect(pulled(mesh.material as Material)).toEqual(pull)
@@ -237,14 +241,14 @@ describe('createEventIconMarkers', () => {
     })
 
     it('pulls every kind’s flat drawing toward the camera by its own width', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT, 0.5)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS, 0.5)
       const pull = { value: 0.5 * ICON_FLAT_SPAN * ICON_DEPTH_PULL }
       expect(pulled(squareMaterial(markers.object, 'swords'))).toEqual(pull)
       expect(pulled(squareMaterial(markers.object, 'tower'))).toEqual(pull)
     })
 
     it('pulls a flat drawing further as the zoom widens it, with no recompile', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       // Compiled once, as three does at the first frame; the zoom then changes the drawing's width.
       const pull = pulled(squareMaterial(markers.object, 'swords'))
       markers.setZoom(0, 10)
@@ -255,8 +259,8 @@ describe('createEventIconMarkers', () => {
 
     it('draws every icon of a kind with one object per colour, however many icons there are', () => {
       // ATLAS-289: the 3D swords' three colours, the halos, the swords' flat drawing — five objects, whatever the count.
-      const one = allInstanced(createEventIconMarkers(battles(1), STUB, FLAT).object)
-      const hundred = allInstanced(createEventIconMarkers(battles(100), STUB, FLAT).object)
+      const one = allInstanced(createEventIconMarkers(battles(1), STUB, FLAT, TARGETS).object)
+      const hundred = allInstanced(createEventIconMarkers(battles(100), STUB, FLAT, TARGETS).object)
       expect(hundred).toHaveLength(one.length)
       expect(hundred.map((mesh) => mesh.count)).toEqual([100, 100, 100, 100, 100])
     })
@@ -269,7 +273,8 @@ describe('createEventIconMarkers', () => {
           { ground: [3, 0, 0], kind: 'swords' },
         ],
         STUB,
-        FLAT
+        FLAT,
+        TARGETS
       )
       expect(iconPose(markers.object, 'swords', 0).position.x).toBe(1)
       expect(iconPose(markers.object, 'swords', 1).position.x).toBe(3)
@@ -283,7 +288,7 @@ describe('createEventIconMarkers', () => {
   // The dev, 2026-10-29: « applique le même flou que les frontières sur les icônes 3D. Mais pas leur ombre ».
   describe('blur', () => {
     it('moves the 3D icons and their halos to the blur’s layer once blurred, never the shadow', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       markers.setBlur?.(1)
       expect(
         allInstanced(markers.object).some((mesh) => mesh.layers.isEnabled(EVENT_BLUR_LAYER))
@@ -296,7 +301,7 @@ describe('createEventIconMarkers', () => {
 
   describe('edge cases', () => {
     it('turns an icon to face the camera’s position at the still point of its sway', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       const camera = cameraAt(new Vector3(4, 3, 6), new Euler(-0.4, 0.3, 0))
       markers.faceCamera(camera, 0)
       // At time 0 only the first icon is at the still point of its sway; the next is out of step.
@@ -307,7 +312,7 @@ describe('createEventIconMarkers', () => {
     })
 
     it('sways an icon about its own upright, either side of facing the camera', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       const height = iconPose(markers.object, 'swords').position.y
       // A camera due south of the swords, level with them: facing it is no turn at all.
       const camera = cameraAt(new Vector3(1, height, 9), new Euler(0, 0, 0))
@@ -320,7 +325,7 @@ describe('createEventIconMarkers', () => {
     })
 
     it('leaves the siege upright and still in its three-quarter, however the camera turns and time passes', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       const camera = cameraAt(new Vector3(4, 3, 6), new Euler(-0.4, 0.3, 0))
       // Its throw, built east, turned to the west and toward the south, where the camera looks from: facing left.
       const threeQuarter = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), ICON_YAW.tower)
@@ -335,7 +340,7 @@ describe('createEventIconMarkers', () => {
     })
 
     it('still turns the swords beside a still tower', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       const swords = (): Quaternion => iconPose(markers.object, 'swords').quaternion.clone()
       const before = swords()
       markers.faceCamera(cameraAt(new Vector3(4, 3, 6), new Euler(-0.4, 0.3, 0)), 0)
@@ -343,7 +348,7 @@ describe('createEventIconMarkers', () => {
     })
 
     it('floats the crossed swords above their place, and stands the tower on it', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       expect(iconPose(markers.object, 'swords').position.y).toBeCloseTo(
         0.2 + ICON_LIFT.swords * EVENT_ICON_HEIGHT
       )
@@ -351,7 +356,7 @@ describe('createEventIconMarkers', () => {
     })
 
     it('keeps the swords floating as high above an exaggerated relief', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       markers.setReliefScale(3)
       expect(iconPose(markers.object, 'swords').position.y).toBeCloseTo(
         0.6 + ICON_LIFT.swords * EVENT_ICON_HEIGHT
@@ -359,13 +364,13 @@ describe('createEventIconMarkers', () => {
     })
 
     it('keeps an icon planted when the relief is exaggerated', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       markers.setReliefScale(3)
       expect(iconPose(markers.object, 'tower').position.y).toBeCloseTo(0.9)
     })
 
     it('shows only the flat icons far out and only the 3D ones close in', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       const [close, afar] = markers.object.children
       markers.setZoom(0, 100)
       expect([close?.visible, afar?.visible]).toEqual([false, true])
@@ -374,7 +379,7 @@ describe('createEventIconMarkers', () => {
     })
 
     it('fades the one into the other at the cross-fade’s middle, both half there', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       markers.setZoom(ICON_CROSS_FADE.zoom, 100)
       const [close, afar] = markers.object.children
       expect([close?.visible, afar?.visible]).toEqual([true, true])
@@ -388,7 +393,7 @@ describe('createEventIconMarkers', () => {
     })
 
     it('casts every icon’s shadow in one mesh, drawn from its pose as one shape', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       markers.faceCamera(cameraAt(new Vector3(4, 3, 6), new Euler(-0.4, 0.3, 0)), 0)
       const mesh = shadowMesh(markers.object)
       const alpha = (mesh.material.map?.image as { data: Uint8Array }).data.filter(
@@ -398,7 +403,7 @@ describe('createEventIconMarkers', () => {
     })
 
     it('centres a flat icon a little above its 3D twin’s middle, about as wide as the twin', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       const flatAt = (): number => squarePose(markers.object, 'swords').position.y
       const swordsAt = (): number => iconPose(markers.object, 'swords').position.y
       expect(flatAt()).toBeCloseTo(swordsAt() + EVENT_ICON_HEIGHT * (0.5 + ICON_FLAT_RAISE))
@@ -411,7 +416,7 @@ describe('createEventIconMarkers', () => {
     })
 
     it('turns the halos and the flat drawings as the camera is, as a sprite would', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       const camera = cameraAt(new Vector3(0, 5, 5), new Euler(-0.8, 0.4, 0))
       markers.faceCamera(camera, 0)
       for (const name of ['halo', 'swords', 'tower'])
@@ -421,19 +426,19 @@ describe('createEventIconMarkers', () => {
     })
 
     it('keeps a flat drawing its legible size on screen when the camera pulls far out', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       markers.setZoom(0, 10)
       expect(squarePose(markers.object, 'tower').scale.x * 10).toBeCloseTo(ICON_FLAT_MIN_PIXELS)
     })
 
     it('rasterises one flat drawing per kind, however many icons share it', () => {
       const load = vi.fn(() => new Texture())
-      createEventIconMarkers([...TWO, { ground: [0, 0, 0], kind: 'swords' }], load, FLAT)
+      createEventIconMarkers([...TWO, { ground: [0, 0, 0], kind: 'swords' }], load, FLAT, TARGETS)
       expect(load).toHaveBeenCalledTimes(2)
     })
 
     it('sets a halo behind each 3D icon, at its middle, as wide as its span', () => {
-      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       const halo = squarePose(markers.object, 'halo', 1)
       expect(halo.position.y).toBeCloseTo(
         iconPose(markers.object, 'tower').position.y + (EVENT_ICON_HEIGHT * ICON_SIZE.tower) / 2
@@ -443,7 +448,7 @@ describe('createEventIconMarkers', () => {
 
     it('frees the instances, the halo’s and the flat drawings’ textures on dispose', () => {
       const texture = new Texture()
-      const markers = createEventIconMarkers(TWO, () => texture, FLAT)
+      const markers = createEventIconMarkers(TWO, () => texture, FLAT, TARGETS)
       const halo = (squareMaterial(markers.object, 'halo') as Material & { map: Texture | null })
         .map
       const spies = [
@@ -456,7 +461,7 @@ describe('createEventIconMarkers', () => {
     })
 
     it('builds no icon, only the light, for no places', () => {
-      expect(allInstanced(createEventIconMarkers([], STUB, FLAT).object)).toHaveLength(0)
+      expect(allInstanced(createEventIconMarkers([], STUB, FLAT, TARGETS).object)).toHaveLength(0)
     })
   })
 })

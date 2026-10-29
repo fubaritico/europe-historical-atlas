@@ -33,14 +33,13 @@ import {
 import { clamp01 } from '@europe-historical-atlas/core/utils/math'
 
 import { BLUR_LAYERS } from '../../blurLayers'
-import { createScreenBlur } from '../../screenBlur'
 
 import { HALO_FIELD_EM } from './glyphSheet'
 import { nameGeometry } from './nameGeometry'
 
 import type { NameSheet } from '../../../sources/mapSources'
+import type { BlurMethod, ScreenBlur } from '../../blur/blurMethod'
 import type { WorldPoint } from '../../relief/drapeProjection'
-import type { ScreenBlur } from '../../screenBlur'
 import type { YearNames } from '@europe-historical-atlas/core/pipeline/yearNames'
 
 /** The layer the names' ink moves to while blurred — one the camera does not see, nor the borders' blur. */
@@ -70,6 +69,8 @@ export interface NameLayerOptions {
   readonly haloOpacity: number
   /** The white edge's width, in cells of the names' grid — the same on the map for every name, whatever its size. */
   readonly haloCells: number
+  /** How the map's blurs are drawn (ATLAS-304). */
+  readonly blurMethod: BlurMethod
 }
 
 /** When the white edge shows — the panel's, read every frame. */
@@ -131,7 +132,7 @@ export interface NameLayer {
   setZoom: (zoom: number, screen: NameScreen) => void
   /**
    * Blur the names' ink a little close up (the dev, 2026-10-29: *« applique le même flou sur les noms »*), or draw it
-   * crisp at `0`.
+   * crisp at a reach the blur's method does not draw (`0` always).
    * @param pixels - the blur's reach, in CSS pixels
    */
   setBlur: (pixels: number) => void
@@ -205,14 +206,16 @@ function levelMeshes(
  * The ink blurred close up, multiplied into the map as it is drawn; the white edge, gone by then, stays crisp.
  * @param object - the names' group, which the blur's quad joins
  * @param levels - every level's meshes
+ * @param method - how the map's blurs are drawn
  * @returns the blur, and the setter that blurs the ink
  */
 function inkBlur(
   object: Group,
-  levels: readonly LevelMeshes[]
+  levels: readonly LevelMeshes[],
+  method: BlurMethod
 ): { blur: ScreenBlur; setBlur: (pixels: number) => void } {
   const inks = levels.map(({ ink }) => ink)
-  const blur = createScreenBlur(object, {
+  const blur = method.create(object, {
     layer: NAME_BLUR_LAYER,
     renderOrder: NAME_RENDER_ORDER + 1,
     blend: 'multiply',
@@ -223,9 +226,9 @@ function inkBlur(
     blur,
     setBlur(pixels: number): void {
       // Drawn into the blur's image, the ink keeps its colour and its coverage in the ordinary blend; the image is
-      // multiplied into the map instead.
-      for (const ink of inks) ink.material.blending = pixels > 0 ? NormalBlending : MultiplyBlending
-      blur.setRadius(pixels)
+      // multiplied into the map instead. Where the method draws no blur, the ink is drawn crisp in multiply, as ever.
+      const on = blur.setRadius(pixels)
+      for (const ink of inks) ink.material.blending = on ? NormalBlending : MultiplyBlending
     },
   }
 }
@@ -284,7 +287,7 @@ export function createNameLayer(options: NameLayerOptions): NameLayer {
     for (const mesh of [built.edge, built.ink]) object.add(mesh)
     return built
   })
-  const blur = inkBlur(object, levels)
+  const blur = inkBlur(object, levels, options.blurMethod)
   const opacities = levelOpacities(levels, options)
   return {
     object,
