@@ -25,6 +25,12 @@ export interface CameraPose {
  */
 export const EVENT_RENDER_ORDER = 1000
 
+/**
+ * The halos' draw order (ATLAS-306): just before the markers they light, so a marker is drawn over its halo, and still
+ * above every layer's order, as the markers are.
+ */
+export const HALO_RENDER_ORDER = EVENT_RENDER_ORDER - 1
+
 /** The events marked on the relief, plus what keeps them on it. */
 export interface EventMarkers {
   /** The markers, to add to the scene. */

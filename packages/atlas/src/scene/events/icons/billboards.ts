@@ -1,5 +1,6 @@
 /**
- * Flat squares that always face the reader — the halos behind the 3D icons, the drawings seen from afar — drawn as
+ * Flat squares that always face the reader — the halos behind the 3D markers and the flat drawings, the drawings seen
+ * from afar — drawn as
  * instances (ATLAS-289): one `InstancedMesh` per material, holding every square that shows it. A sprite does the same
  * one draw at a time; here a hundred halos are one draw, and each kind's drawings one more.
  *

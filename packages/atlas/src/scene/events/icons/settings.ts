@@ -21,8 +21,8 @@ export const EVENT_ICON_HEIGHT = 0.05
 export const ICON_LIFT: Record<EventIconKind, number> = { swords: 0.6, tower: 0, crown: 0 }
 
 /**
- * How far the 3D icons and their halo are pulled toward the camera, in icon heights, and the flat drawings in their own
- * widths, so a slope they stand on or turn into does not cut them (the dev, 2026-10-27: *« à l'instar des frontières,
+ * How far the 3D markers and their halo are pulled toward the camera, in their heights (an icon's, a pin's), and the
+ * flat drawings and their halos in the drawings' widths (ATLAS-306), so a slope they stand on or turn into does not cut them (the dev, 2026-10-27: *« à l'instar des frontières,
  * quoi qu'il arrive, les avoir toujours devant »*; the flat drawings too, same day). Along the line of sight, so
  * nothing moves on screen (`../../depthBias`); one height clears the swords as they turn. A massif standing between
  * the camera and the icon still hides it, as it should on a relief.
@@ -84,5 +84,14 @@ export const ICON_FLAT_RAISE = 0.2
 /** The fewest pixels a flat icon keeps on screen, so it stays legible zoomed far out. */
 export const ICON_FLAT_MIN_PIXELS = 20
 
-/** How wide the halo behind a 3D icon is, in icon heights — 2.2, widened on sight (the dev, 2026-10-26). */
+/**
+ * How wide the halo behind a 3D marker is, in its heights — an icon's, and since ATLAS-306 a pin's — 2.2, widened on
+ * sight (the dev, 2026-10-26).
+ */
 export const ICON_HALO_SPAN = 2.6
+
+/**
+ * How wide the halo behind a flat drawing seen from afar is, in drawing widths (ATLAS-306) — so a battle drawn over a
+ * country's name still detaches from it (the dev, 2026-10-29). Proposed, to judge on the map.
+ */
+export const FLAT_HALO_SPAN = 2

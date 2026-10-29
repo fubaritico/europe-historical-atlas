@@ -15,12 +15,13 @@ import { describe, expect, it, vi } from 'vitest'
 import { createSeparateImagesBlur } from '../../blur/separateImages'
 import { DEPTH_BIAS_UNIFORM } from '../../depthBias'
 import { compileHook } from '../../testing/compileHook'
-import { EVENT_RENDER_ORDER } from '../markers'
+import { EVENT_RENDER_ORDER, HALO_RENDER_ORDER } from '../markers'
 import { SHADOW_OPACITY } from '../shadows/shadowFootprint'
 
 import { EVENT_BLUR_LAYER, createEventIconMarkers } from './eventIconMarkers'
 import {
   EVENT_ICON_HEIGHT,
+  FLAT_HALO_SPAN,
   ICON_CROSS_FADE,
   ICON_DEPTH_PULL,
   ICON_FLAT_MIN_PIXELS,
@@ -257,12 +258,25 @@ describe('createEventIconMarkers', () => {
       expect(pull).toEqual({ value: width * ICON_DEPTH_PULL })
     })
 
+    // ATLAS-306: the drawings' halos are drawn just before them and pulled with them, whatever the zoom.
+    it('draws the flat drawings’ halos just before them, pulled with them as the zoom widens them', () => {
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
+      const pull = pulled(squareMaterial(markers.object, 'flat halo'))
+      markers.setZoom(0, 10)
+      const width = squarePose(markers.object, 'swords').scale.x
+      expect(pull).toEqual({ value: width * ICON_DEPTH_PULL })
+      const order = (name: string): number | undefined =>
+        allInstanced(markers.object).find((mesh) => mesh.name === name)?.parent?.renderOrder
+      expect([order('flat halo'), order('swords')]).toEqual([HALO_RENDER_ORDER, EVENT_RENDER_ORDER])
+    })
+
     it('draws every icon of a kind with one object per colour, however many icons there are', () => {
-      // ATLAS-289: the 3D swords' three colours, the halos, the swords' flat drawing — five objects, whatever the count.
+      // ATLAS-289: the 3D swords' three colours, the halos, the swords' flat drawing and its halo (ATLAS-306) — six
+      // objects, whatever the count.
       const one = allInstanced(createEventIconMarkers(battles(1), STUB, FLAT, TARGETS).object)
       const hundred = allInstanced(createEventIconMarkers(battles(100), STUB, FLAT, TARGETS).object)
       expect(hundred).toHaveLength(one.length)
-      expect(hundred.map((mesh) => mesh.count)).toEqual([100, 100, 100, 100, 100])
+      expect(hundred.map((mesh) => mesh.count)).toEqual([100, 100, 100, 100, 100, 100])
     })
 
     it('poses the icons of one kind each in its own slot', () => {
@@ -385,6 +399,7 @@ describe('createEventIconMarkers', () => {
       expect([close?.visible, afar?.visible]).toEqual([true, true])
       expect(squareMaterial(markers.object, 'swords').opacity).toBeCloseTo(0.5)
       expect(squareMaterial(markers.object, 'halo').opacity).toBeCloseTo(0.5)
+      expect(squareMaterial(markers.object, 'flat halo').opacity).toBeCloseTo(0.5)
       // Every piece but the trebuchet's stone, which fades on its own — gone at rest.
       for (const mesh of instanced(markers.object).filter(({ name }) => !name.endsWith(' stone')))
         expect((mesh.material as Material).opacity).toBeCloseTo(0.5)
@@ -446,14 +461,28 @@ describe('createEventIconMarkers', () => {
       expect(halo.scale.x).toBeCloseTo(EVENT_ICON_HEIGHT * ICON_HALO_SPAN)
     })
 
+    // ATLAS-306: from afar too, so a drawing over a country's name detaches from it.
+    it('sets a halo behind each flat drawing, where it stands, its span times as wide', () => {
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
+      markers.setZoom(0, 100)
+      const drawing = squarePose(markers.object, 'tower')
+      const halo = squarePose(markers.object, 'flat halo', 1)
+      expect(halo.position.toArray()).toEqual(drawing.position.toArray())
+      expect(halo.scale.x).toBeCloseTo(drawing.scale.x * FLAT_HALO_SPAN)
+    })
+
     it('frees the instances, the halo’s and the flat drawings’ textures on dispose', () => {
       const texture = new Texture()
       const markers = createEventIconMarkers(TWO, () => texture, FLAT, TARGETS)
-      const halo = (squareMaterial(markers.object, 'halo') as Material & { map: Texture | null })
-        .map
+      const textureOf = (name: string): Texture => {
+        const { map } = squareMaterial(markers.object, name) as Material & { map: Texture | null }
+        if (map === null) throw new Error(`the ${name} has no texture`)
+        return map
+      }
       const spies = [
         vi.spyOn(texture, 'dispose'),
-        ...(halo ? [vi.spyOn(halo, 'dispose')] : []),
+        vi.spyOn(textureOf('halo'), 'dispose'),
+        vi.spyOn(textureOf('flat halo'), 'dispose'),
         ...allInstanced(markers.object).map((mesh) => vi.spyOn(mesh, 'dispose')),
       ]
       markers.dispose()

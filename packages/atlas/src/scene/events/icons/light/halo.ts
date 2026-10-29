@@ -14,8 +14,18 @@ export interface IconHaloStyle {
   size: number
 }
 
-/** The default halo: parchment white, soft; strengthened on sight from a peak of 0.75 (the dev, 2026-10-26). */
+/**
+ * The default halo: parchment white, soft; strengthened on sight from a peak of 0.75 (the dev, 2026-10-26). Kept behind
+ * the flat drawings seen from afar (the dev, 2026-10-29: *« il est bien quand c'est dézoomé »*).
+ */
 export const ICON_HALO_STYLE: IconHaloStyle = { colour: '#fff8e8', peak: 0.95, size: 64 }
+
+/**
+ * The halo behind a 3D marker seen close up, an icon or a pin: the same, softer — the dev, 2026-10-29, once the pins
+ * had it too: *« un petit peu fort quand c'est zoomé. Je dirai même qu'il est fort tout simplement »*. A peak to judge
+ * on the map (ATLAS-306).
+ */
+export const MARKER_HALO_STYLE: IconHaloStyle = { ...ICON_HALO_STYLE, peak: 0.6 }
 
 /**
  * How opaque the halo is at a distance from its middle: full at the middle, fading to nothing at the edge, eased so

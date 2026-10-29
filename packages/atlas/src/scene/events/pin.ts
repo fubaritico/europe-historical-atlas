@@ -12,9 +12,12 @@ import {
   MeshLambertMaterial,
   Quaternion,
   SphereGeometry,
+  Vector3,
 } from 'three'
 
 import { flatIconSize, iconCrossFade } from './icons/crossFade'
+import { createHaloSquares } from './icons/light/haloSquares'
+import { ICON_DEPTH_PULL, ICON_HALO_SPAN } from './icons/settings'
 import { EVENT_RENDER_ORDER } from './markers'
 import { createPinFlats } from './pinFlats'
 
@@ -138,6 +141,42 @@ function pinModels(placed: readonly PlacedPin[], style: EventMarkerStyle) {
 }
 
 /**
+ * Behind each 3D pin, the icons' halo (ATLAS-306): at its middle, as wide for its height as theirs, pulled toward the
+ * camera as the icons' is.
+ * @param placed - where each pin stands, on the relief before exaggeration
+ * @param style - its look: its height sets the halo's place and size
+ * @returns the halos, and what stands them on the scaled ground facing the camera
+ */
+function pinHalos(placed: readonly PlacedPin[], style: EventMarkerStyle) {
+  const halos = createHaloSquares(placed.length, 'marker', {
+    value: style.height * ICON_DEPTH_PULL,
+  })
+  const middles = placed.map(({ ground: [x, y, z] }) => new Vector3(x, y + style.height / 2, z))
+  return {
+    ...halos,
+    /**
+     * Fade the halos with the 3D pins, not drawn at all once gone.
+     * @param opacity - 0 gone, 1 whole
+     */
+    fade(opacity: number): void {
+      halos.object.visible = opacity > 0
+      halos.setOpacity(opacity)
+    },
+    /**
+     * Stand each halo at its pin's middle on the scaled ground, turned to the camera.
+     * @param scale - the relief's `scale.y`
+     * @param facing - the camera's orientation
+     */
+    stand(scale: number, facing: Quaternion): void {
+      placed.forEach(({ ground: [, y] }, index) =>
+        middles[index]?.setY(y * scale + style.height / 2)
+      )
+      halos.poseAll(middles, facing, style.height * ICON_HALO_SPAN)
+    },
+  }
+}
+
+/**
  * Build one pin per place: close up, a stem and a head in its type's colour, sharing their geometries and materials;
  * from afar, its flat drawing — the zoom fading the one into the other (`setZoom`).
  * @param placed - where each pin stands, on the relief before exaggeration, and its head's colour
@@ -159,16 +198,22 @@ export function createPinMarkers(
     loadTexture
   )
   flats.object.visible = false
+  const halos = pinHalos(placed, style)
   const object = new Group()
-  object.add(near, flats.object)
+  object.add(near, flats.object, halos.object)
   // The camera's orientation, which every drawing takes; how wide a drawing stands, set by the zoom.
   const facing = new Quaternion()
   let flatSize = 0
+  // The relief's vertical scale, which the halos stand on.
+  let reliefScale = 1
+  halos.stand(reliefScale, facing)
 
   return {
     object,
     setReliefScale(scale: number): void {
       for (const { pin, ground } of pins) pin.position.setY(ground * scale)
+      reliefScale = scale
+      halos.stand(scale, facing)
       flats.standAt(scale)
     },
     setZoom(zoom: number, pixelsPerUnit: number): void {
@@ -177,18 +222,21 @@ export function createPinMarkers(
       near.visible = near3d > 0
       flats.object.visible = near3d < 1
       models.setOpacity(near3d)
+      halos.fade(near3d)
       flats.setOpacity(1 - near3d)
       // The drawings keep a legible size on screen, whatever the zoom.
       flatSize = flatIconSize(style.height, pixelsPerUnit)
       flats.pose(facing, flatSize)
     },
     faceCamera(camera: CameraPose): void {
-      // The 3D pin is round and faces every way already; its drawing turns to the camera.
+      // The 3D pin is round and faces every way already; its halo and its drawing turn to the camera.
       facing.copy(camera.quaternion)
+      halos.stand(reliefScale, facing)
       flats.pose(facing, flatSize)
     },
     dispose(): void {
       models.dispose()
+      halos.dispose()
       flats.dispose()
     },
   }

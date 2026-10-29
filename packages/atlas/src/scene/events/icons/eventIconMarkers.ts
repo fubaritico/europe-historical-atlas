@@ -11,7 +11,7 @@
 import { Group, Quaternion } from 'three'
 
 import { BLUR_LAYERS } from '../../blurLayers'
-import { applyDepthBias, applyLiveDepthBias } from '../../depthBias'
+import { applyLiveDepthBias } from '../../depthBias'
 import { EVENT_RENDER_ORDER } from '../markers'
 import { createIconShadows } from '../shadows/iconShadows'
 
@@ -21,7 +21,14 @@ import { flatIconSize, iconCrossFade } from './crossFade'
 import { createIconTurner } from './facing'
 import { placeIcon, standForms } from './forms'
 import { createIconInstances } from './iconInstances'
-import { EVENT_ICON_HEIGHT, ICON_DEPTH_PULL, ICON_FLAT_SPAN, ICON_HALO_SPAN } from './settings'
+import { createHaloSquares, withHalos } from './light/haloSquares'
+import {
+  EVENT_ICON_HEIGHT,
+  FLAT_HALO_SPAN,
+  ICON_DEPTH_PULL,
+  ICON_FLAT_SPAN,
+  ICON_HALO_SPAN,
+} from './settings'
 
 import type { LoadSvgTexture } from './billboardMaterials'
 import type { PlacedEventIcon } from './forms'
@@ -31,9 +38,9 @@ import type { GroundAt } from '../shadows/groundShadows'
 import type { Object3D } from 'three'
 
 /**
- * The groups the icons sit in: close up, the halos and the 3D icons; from afar, the flat drawings.
+ * The groups the icons sit in: close up, the halos and the 3D icons; from afar, the flat drawings and their halos.
  * @param close - what is drawn close up, the halos first so they lie behind the icons
- * @param afar - what is drawn from afar
+ * @param afar - what is drawn from afar: the drawings with their halos
  * @returns the whole, and the two groups the zoom shows or hides
  */
 function iconGroups(close: Group[], afar: Group): { object: Group; near: Group; far: Group } {
@@ -70,17 +77,16 @@ function buildForms(
   const depthPull = height * ICON_DEPTH_PULL
   const instances = createIconInstances(kinds, height, depthPull)
   const materials = billboardMaterials(loadTexture)
-  applyDepthBias(materials.halo, 'built-in', depthPull)
   // The halos just before the icons, the drawings after the borders, like every marker.
-  const halos = createBillboards(
-    kinds.map(() => 'halo'),
-    () => materials.halo,
-    EVENT_RENDER_ORDER - 1
-  )
-  // From afar, the flat drawings pulled too, by their own width — which the zoom changes, so the pull follows it.
+  const halos = createHaloSquares(kinds.length, 'marker', { value: depthPull })
+  // From afar, the flat drawings pulled too, by their own width — which the zoom changes, so the pull follows it —
+  // each with its own halo behind it (ATLAS-306).
   const flatPull = { value: flatDepthPull(height * ICON_FLAT_SPAN) }
   for (const kind of new Set(kinds)) applyLiveDepthBias(materials.flat(kind), 'built-in', flatPull)
-  const flats = createBillboards(kinds, (kind) => materials.flat(kind), EVENT_RENDER_ORDER)
+  const flats = withHalos(
+    createBillboards(kinds, (kind) => materials.flat(kind), EVENT_RENDER_ORDER),
+    { count: kinds.length, fade: materials.setFlatOpacity, pull: flatPull, span: FLAT_HALO_SPAN }
+  )
   // Close up, each 3D icon casts its shadow on the relief, drawn from its own pose (ATLAS-298).
   const shadows = createIconShadows(icons, instances, groundAt)
   const groups = iconGroups([halos.object, instances.object, shadows.object], flats.object)
@@ -113,8 +119,8 @@ function fadeForms(forms: ReturnType<typeof buildForms>, near3d: number): void {
   forms.groups.far.visible = near3d < 1
   forms.instances.setOpacity(near3d)
   forms.shadows.setOpacity(near3d)
-  forms.materials.halo.opacity = near3d
-  forms.materials.setFlatOpacity(1 - near3d)
+  forms.halos.setOpacity(near3d)
+  forms.flats.setOpacity(1 - near3d)
 }
 
 /**

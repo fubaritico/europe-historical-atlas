@@ -2,7 +2,7 @@
  * The plain pins seen from afar (ATLAS-298): each pin's flat drawing (`icons/flat/pin`, « A ») on a square facing the
  * reader, as the icons' drawings are — one dark silhouette for every pin, its type's colour left to the 3D head close up
  * (the dev, 2026-10-27: « pas besoin de colorer l'image de l'épingle ») — one texture, rasterised once, all one draw
- * (`icons/billboards`). The 3D pin fades into it as the camera pulls out (`icons/crossFade`).
+ * (`icons/billboards`), each with the icons' halo behind it (ATLAS-306). The 3D pin fades into it as the camera pulls out (`icons/crossFade`).
  */
 
 import { Group, MeshBasicMaterial, Quaternion, Vector3 } from 'three'
@@ -12,8 +12,9 @@ import { applyLiveDepthBias } from '../depthBias'
 import { createBillboards } from './icons/billboards'
 import { EVENT_ICON_SVG_STYLE, drawingSvg } from './icons/flat/eventIconSvg'
 import { PIN_DRAWING } from './icons/flat/pin'
+import { withHalos } from './icons/light/haloSquares'
 import { EVENT_ICON_PALETTE } from './icons/palette'
-import { ICON_DEPTH_PULL } from './icons/settings'
+import { FLAT_HALO_SPAN, ICON_DEPTH_PULL } from './icons/settings'
 import { EVENT_RENDER_ORDER } from './markers'
 
 import type { LoadSvgTexture } from './icons/billboardMaterials'
@@ -42,7 +43,7 @@ export interface PinFlats {
    * @returns nothing
    */
   setOpacity: (opacity: number) => void
-  /** Free the squares, the material and its texture. */
+  /** Free the squares, their halos, the material and its texture. */
   dispose(): void
 }
 
@@ -63,11 +64,20 @@ export function createPinFlats(
   const material = new MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false })
   const pull = { value: 0 }
   applyLiveDepthBias(material, 'built-in', pull)
-  const squares = createBillboards(
+  // Each drawing with the icons' halo behind it, so it detaches from what it is drawn over (ATLAS-306).
+  const drawings = createBillboards(
     grounds.map(() => 'pin'),
     () => material,
     EVENT_RENDER_ORDER
   )
+  const squares = withHalos(drawings, {
+    count: grounds.length,
+    fade: (opacity) => {
+      material.opacity = opacity
+    },
+    pull,
+    span: FLAT_HALO_SPAN,
+  })
   const positions = grounds.map(([x, y, z]) => new Vector3(x, y + height / 2, z))
   const object = new Group()
   object.add(squares.object)
@@ -87,7 +97,7 @@ export function createPinFlats(
       squares.poseAll(positions, facing, size)
     },
     setOpacity(opacity: number): void {
-      material.opacity = opacity
+      squares.setOpacity(opacity)
     },
     dispose(): void {
       squares.dispose()

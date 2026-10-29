@@ -1,18 +1,20 @@
-import { Color, Group, Texture } from 'three'
+import { Color, Group, Matrix4, Quaternion, ShaderLib, Texture, Vector3 } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
+import { DEPTH_BIAS_UNIFORM } from '../depthBias'
 import { BORDER_RENDER_ORDER } from '../political/borders/mapBorderLayer'
+import { compileHook } from '../testing/compileHook'
 
 import { EVENT_ICON_SVG_STYLE, drawingSvg } from './icons/flat/eventIconSvg'
 import { PIN_DRAWING } from './icons/flat/pin'
 import { EVENT_ICON_PALETTE } from './icons/palette'
-import { ICON_CROSS_FADE } from './icons/settings'
-import { EVENT_RENDER_ORDER } from './markers'
+import { ICON_CROSS_FADE, ICON_DEPTH_PULL, ICON_HALO_SPAN } from './icons/settings'
+import { EVENT_RENDER_ORDER, HALO_RENDER_ORDER } from './markers'
 import { EVENT_MARKER_STYLE, createPinMarkers } from './pin'
 
 import type { PlacedPin } from './pin'
 import type { WorldPoint } from '../relief/drapeProjection'
-import type { Mesh, MeshLambertMaterial } from 'three'
+import type { InstancedMesh, Material, Mesh, MeshBasicMaterial, MeshLambertMaterial } from 'three'
 
 /**
  * A red pin at a point.
@@ -44,6 +46,15 @@ function near(markers: { object: Group }): Group {
  */
 function parts(markers: { object: Group }, index = 0): Mesh<never, MeshLambertMaterial>[] {
   return (near(markers).children[index] as Group).children as Mesh<never, MeshLambertMaterial>[]
+}
+
+/**
+ * The halos behind the 3D pins: the markers' third group, after the pins and their drawings.
+ * @param markers - the pins
+ * @returns the halos' instanced mesh
+ */
+function haloMesh(markers: { object: Group }): InstancedMesh {
+  return markers.object.children[2]?.children[0] as InstancedMesh
 }
 
 describe('createPinMarkers', () => {
@@ -118,6 +129,41 @@ describe('createPinMarkers', () => {
       expect(head?.material.opacity).toBeCloseTo(0.5)
     })
 
+    // ATLAS-306: the icons' halo behind the 3D pins too.
+    it('sets a halo behind each 3D pin, at its middle, as wide for its height as the icons’ is', () => {
+      const markers = createPinMarkers([at([1, 0.2, -1])], STUB)
+      const halo = haloMesh(markers)
+      const matrix = new Matrix4()
+      halo.getMatrixAt(0, matrix)
+      const [position, scale] = [new Vector3(), new Vector3()]
+      matrix.decompose(position, new Quaternion(), scale)
+      expect(position.toArray().map((value) => Number(value.toFixed(6)))).toEqual([
+        1,
+        0.2 + EVENT_MARKER_STYLE.height / 2,
+        -1,
+      ])
+      expect(scale.x).toBeCloseTo(EVENT_MARKER_STYLE.height * ICON_HALO_SPAN)
+    })
+
+    it('draws the halos just before the pins, pulled toward the camera by a pin height', () => {
+      const halo = haloMesh(createPinMarkers([at([0, 0, 0])], STUB))
+      const pull = compileHook(halo.material as Material, ShaderLib.basic.vertexShader).uniforms[
+        DEPTH_BIAS_UNIFORM
+      ]
+      expect([halo.parent?.renderOrder, pull]).toEqual([
+        HALO_RENDER_ORDER,
+        { value: EVENT_MARKER_STYLE.height * ICON_DEPTH_PULL },
+      ])
+    })
+
+    it('fades the halos with the 3D pins, and draws none once they are gone', () => {
+      const markers = createPinMarkers([at([0, 0, 0])], STUB)
+      markers.setZoom(ICON_CROSS_FADE.zoom, 100)
+      expect((haloMesh(markers).material as Material).opacity).toBeCloseTo(0.5)
+      markers.setZoom(0, 100)
+      expect(haloMesh(markers).parent?.visible).toBe(false)
+    })
+
     it('rasterises the chosen flat drawing once, for every pin', () => {
       const load = vi.fn<(svg: string) => Texture>(() => new Texture())
       createPinMarkers([at([0, 0, 0]), at([1, 0, 0]), at([2, 0, 0], '#0000ff')], load)
@@ -153,6 +199,21 @@ describe('createPinMarkers', () => {
         red?.material,
         blue?.material,
       ].map((resource) => vi.spyOn(resource as { dispose: () => void }, 'dispose'))
+      markers.dispose()
+      for (const spy of spies) expect(spy).toHaveBeenCalledTimes(1)
+    })
+
+    it('frees the halos’ squares, material and texture on dispose', () => {
+      const markers = createPinMarkers([at([0, 0, 0])], STUB)
+      const halo = haloMesh(markers)
+      const material = halo.material as MeshBasicMaterial
+      const { map } = material
+      if (map === null) throw new Error('the halo has no texture')
+      const spies = [
+        vi.spyOn(halo, 'dispose'),
+        vi.spyOn(material, 'dispose'),
+        vi.spyOn(map, 'dispose'),
+      ]
       markers.dispose()
       for (const spy of spies) expect(spy).toHaveBeenCalledTimes(1)
     })
