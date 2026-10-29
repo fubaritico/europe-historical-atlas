@@ -270,8 +270,9 @@ target.z)` would be coherent with the navigation that already exists.
   review ARCH-001). `scene/events/shadows/iconShadows` slides each 3D icon's triangles along the light, fills them as one
   shape and blurs it, in a 192 × 96 tile, then re-uploads the texture. Skipped while the 3D icons are faded out (from
   afar); **still redrawn when nothing moves** — a static icon (a crown, the tower in reserve) costs as much as the
-  swaying swords. Harmless at 1100's few icons. **Remedy if it bites**: redraw only the icons whose pose changed (a
-  matrix compared to the last one), and a tower-like kind once. **Severity: worth knowing.**
+  swaying swords. **Measured 2026-10-29** (ATLAS-304): at zoom 1, 43 frames of 195 carry a main-thread spike of 10–14 ms —
+  ~13 redraws a second, one texture upload each, icons off screen included. **Remedy**: the ticket's R4 — only the icons
+  in frame, only when their pose changed, a lighter raster. **Severity: gênant close up.**
 - **`scene/events/icons/` and `scene/events/shadows/` import each other** (2026-10-27, review ARCH-003): the icons build
   their shadows (`iconShadows`), the pins' shadows read the icons' cross-fade (`icons/crossFade`). No file-level cycle.
   **Remedy when the shadows serve elsewhere**: move `crossFade` beside `markers.ts`, inject the shadows' factory into
@@ -290,10 +291,23 @@ target.z)` would be coherent with the navigation that already exists.
 - **The names are drawn over the relief** (`depthTest` off, `scene/political/names/nameLayer`): a flat sheet at the ground's
   median height would otherwise be cut by the hills under it. Consequence: under a steep camera, a name behind a ridge shows
   through it. Chosen on purpose for legibility (the dev, 28/10); **severity: cosmetic**.
-- **The blurs — the borders', the names' ink and the 3D icons' — cost a render and two screen-sized images each, and the
-  borders' is off when they may be hidden** (2026-10-29, ATLAS-302, `scene/screenBlur`, their layers in `scene/blurLayers`).
-  The icons' draws the **whole scene** (filtered to its layer), for the markers' lights; all three cost nothing from afar. Each frame it is on, the borders are drawn alone into a 4-sample image the
-  size of the drawing buffer, then blurred through a second one — ~8 MB each at 1080p, four times that on a retina screen.
-  The image holds no relief, so with *borders over the relief* switched off (the mountains hiding them) the blur is set to
-  nought and the lines are drawn crisp, as before. **Remedy if it weighs on a phone**: blur at half resolution, or not at all
-  under a measured frame time. **Severity: worth knowing.**
+- **The three blurs together are what drops the frame rate on a large screen** — ATLAS-304 (measured 2026-10-29,
+  `files/plans/atlas/performance.md`; `scene/screenBlur`, their layers in `scene/blurLayers`). Each frame it is on, a blur
+  draws its layer alone into a 4-sample image the size of the drawing buffer (with a depth buffer nothing reads), resolves
+  it, blurs it across then down, resolves it again and lays it as a full-screen quad; the icons' draws the whole scene
+  filtered to its layer, for the markers' lights. **They switch on as soon as the zoom leaves 0** (`frameLayers`:
+  `closeness = zoom / borderInlayZoom`), not only close up. At 4.0 Mpx: one blur alone ≈ 1 ms of GPU, **the three together
+  9 ms at zoom 0.12 and 18 ms at zoom 0.5** — not additive, and growing with the pixels: 60 → 40 fps there, his 13 fps on
+  ~15 Mpx. With *borders over the relief* off the borders' blur is set to nought (the image holds no relief). **Remedy**:
+  the ticket's R1 — one target set shared by the three, no depth, no second resolve, a threshold — measured before any
+  half-resolution. **Severity: gênant.**
+- **The frame loop draws at every refresh, still or not** — ATLAS-304 (`app/frameLoop.ts`, measured 2026-10-29): zoomed out
+  and untouched, 7.9 ms of GPU and 1.6 ms of CPU every 16.7 ms, forever — the fan the dev hears at launch. Nothing asks
+  for a frame; nothing can skip one. **Remedy**: the ticket's R3, one invalidation gate (camera motion, a rebuild, the
+  panel, a resize, a visible animation). **Severity: gênant.**
+- **Startup blocks the main thread for 2.2 s while the fills and the borders are built**, then 249 ms for their first
+  frame (shader compilation), and **37 ms the first time the blurs switch on** (their shaders and targets) — ATLAS-304
+  (measured 2026-10-29 on the dev server, unminified; production not measured). The 2.2 s is the cut of the 137 polities on
+  the relief's grid and the 143 k line instances, on this thread (hypothesis H5 of the plan, to confirm with
+  `performance.mark`). **Remedy**: R5 — the cut in the worker, `renderer.compileAsync` before the first frame.
+  **Severity: worth knowing.**

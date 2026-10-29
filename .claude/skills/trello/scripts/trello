@@ -204,7 +204,10 @@ const verbs = {
       }
     }
   },
-  /** add <column> <title> [description] [label…] — labels checked against LABELS before anything is created. */
+  /**
+   * add <column> <title> [description] [label…] — labels checked against LABELS before anything is created. The
+   * description travels in the request's body, never in its URL: CloudFront refuses a URL past ~8 kB (414, 2026-10-29).
+   */
   async add(column, title, desc = '', ...names) {
     if (!title) fail('add <column> <title> [description] [label…]')
     const ticket = parseTicket(title)
@@ -217,7 +220,7 @@ const verbs = {
     const list = await listNamed(column)
     const ids = []
     for (const name of names) ids.push((await label(LABELS.find((l) => l.name === name))).id)
-    const created = await api('POST', '/cards', { idList: list.id, name: title, desc, pos: 'bottom', idLabels: ids.join(',') })
+    const created = await api('POST', '/cards', { idList: list.id, name: title, pos: 'bottom', idLabels: ids.join(',') }, { desc })
     console.warn(`#${created.idShort} added to ${column}: ${title}${names.length ? ` [${names.join(', ')}]` : ''}`)
   },
   /** priority <number> haute|moyenne|aucune — the card's cover colour, its importance at a glance. */
@@ -228,11 +231,14 @@ const verbs = {
     await api('PUT', `/cards/${c.id}`, {}, { cover: color === null ? { color: null } : { color, size: 'normal' } })
     console.warn(`#${c.idShort} priority ${level}: ${c.name}`)
   },
-  /** edit <number> <description> — replaces the description: how an Idée is shaped into the Backlog template. */
+  /**
+   * edit <number> <description> — replaces the description: how an Idée is shaped into the Backlog template. The text
+   * travels in the body, as `add`'s does.
+   */
   async edit(number, desc) {
     if (desc === undefined) fail('edit <number> <description>')
     const c = await card(number)
-    await api('PUT', `/cards/${c.id}`, { desc })
+    await api('PUT', `/cards/${c.id}`, {}, { desc })
     console.warn(`#${c.idShort} description replaced: ${c.name}`)
   },
   /** prefix <card> <scope> — changes a card's scope; its ticket number never changes (one is given if it has none). */
@@ -290,11 +296,11 @@ const verbs = {
     await api('PUT', `/cards/${c.id}`, { closed: 'true' })
     console.warn(`#${c.idShort} archived: ${c.name}`)
   },
-  /** comment <number> <text> */
+  /** comment <number> <text> — the text travels in the body, as `add`'s description does. */
   async comment(number, text) {
     if (!text) fail('comment <number> <text>')
     const c = await card(number)
-    await api('POST', `/cards/${c.id}/actions/comments`, { text })
+    await api('POST', `/cards/${c.id}/actions/comments`, {}, { text })
     console.warn(`#${c.idShort} commented: ${c.name}`)
   },
   /** block <number> <blocking number> <reason> — label, a link to the blocking card, a comment on both. */

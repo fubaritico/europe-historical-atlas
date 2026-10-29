@@ -2,38 +2,44 @@
 
 Put here the completed tasks and plans to avoid cluttering the context window.
 
-### 2026-10-27 (nuit) — l'épingle, ses couleurs par type, les ombres portées
+### 2026-10-28 soir → 29/10 nuit — les noms des pays, les frontières, le flou : un rendu de jeu vidéo (ATLAS-303)
 
-Même plage au journal que les entrées du 27/10 — **11:06 → 23:26**, comptée d'un tenant (12 h 20) ; la reprise de nuit
-court de **22:01 à 23:26**. Le chantier ouvert le 05/10 totalise **131 h 08 sur 24 plages**. **Poussé** : `27e85a8` ;
-le plan des noms et le glossaire commités à la fermeture.
+Plage au journal : **28/10 19:24 → 29/10 02:35** (7 h 10, une seule plage) ; le chantier ouvert le 05/10 totalise **138 h 21
+sur 25 plages**. **Poussé** : `ff2cc69`, `6a6cc21`, `f158f73` (noms, étapes 1 à 3a), `fd1ab77` (les noms posés sur la carte),
+`5202f7f` (frontières, flou, filigrane). Tout est consigné dans **ATLAS-303** (rendu au plus près d'un jeu vidéo), qui renvoie
+à ATLAS-301, ATLAS-145 et ATLAS-302.
 
-- **ATLAS-298 → Fait** : l'épingle éclairée (« B », la troisième sur quatre), deux fois plus petite, sans spéculaire
-  (*« plus de contraste sans qu'il y ait un spéculaire »*), des couleurs vives ; **une couleur par type d'événement**
-  choisie dans le CMS (format v4 ; seed et export passés sur sa base après une copie) ; l'image plate « A » de loin
-  (*« j'aime bien la version penchée, mais on va faire la A »*) ; des ombres du nord-ouest à 20 % pour les épingles, le
-  trébuchet et les épées (*« même type d'ombre, même force »*), d'un seul bloc et floues. *« On a réussi notre test de
-  rendu »* ; les icônes manquantes viendront au fil de l'eau.
-- **ATLAS-301** créé, en tête d'À faire : le nom de chaque pays dans l'espace qu'il occupe — plan
-  `files/plans/atlas/country-names.md`, à démarrer le 28/10.
-- **Mes fautes** : la tige épaissie sans qu'il le demande (*« non non non… »*) ; l'ombre projetée livrée en plusieurs
-  morceaux nets avant l'ombre rastérisée ; la couleur par type proposée puis oubliée — *« je ne vois que des épingles
-  rouges »*.
+- **Les noms** (ATLAS-301) : Fondamento, multiply 75 % ; un nom par morceau, le complet s'il tient, sinon le court —
+  *« Kingdom of France → K. of France »* ; placement ~30 s → ~5 s ; débordement sur la mer et un peu sur les voisins, jamais
+  sur un autre nom ; *« je veux des noms, qu'on lit, qu'on comprend »* (aucune abréviation) ; *« dès que les vassaux ils
+  apparaissent, tout apparaît »* (aucune apparition progressive). Leçon pour la contribution : un nom d'usage court dès la
+  saisie, comme Crusader Kings.
+- **La séance des frontières** (ATLAS-145) : parchemin fin de loin ; brun + filet clair de près ; la frontière non revendiquée
+  en brun fin, parchemin côté non revendiqué, parchemin à 50 % au-delà ; vassaux en pointillés blancs.
+- **Le flou** (ATLAS-302) : un flou d'image sur les frontières, l'encre des noms et les icônes 3D, chacun son réglage, ombres
+  nettes (*« le marron, le blanc et le marron, ils se fondent un petit peu […] sans être plus épais »*) ; le filigrane des
+  noms à 40 % au zoom maximal, pour les villes.
+- **Mes fautes** : l'empilement de règles qui l'a perdu (abréviations « DAN », vagues, seuil de lisibilité) — *« j'ai
+  l'impression qu'on ne peut pas y arriver »* ; deux chiffres devinés dans des tests ; un `cd` ; une demande répétée après
+  un refus prise pour une nouvelle (*« pas again »*) ; un dégradé posé dans chaque trait alors qu'il voulait un flou d'image.
 
-### 2026-10-27 (soir) — le siège devient un trébuchet animé
+### 2026-10-29 (nuit, suite) — le diagnostic de performance de l'atlas (ATLAS-303 → ATLAS-304)
 
-Même plage au journal que les deux entrées du 27/10 — **11:06 → 21:54**, comptée d'un tenant (10 h 48) ; la reprise du soir
-court de **19:59 à 21:54**. Le chantier ouvert le 05/10 totalise **129 h 36 sur 24 plages**. **Tout poussé** :
-`072efa5..2eebda1`, six commits.
+Même plage au journal que l'entrée du 28/10 : **28/10 19:24 → 29/10 03:56** (8 h 32, le diagnostic de **02:39 à 03:56**) ; le
+chantier ouvert le 05/10 totalise **139 h 43 sur 25 plages**. Rien de poussé (`5202f7f` reste la tête) ; notes, plan, glossaire
+et script Trello à commiter. Sur Fable, effort maximal.
 
-- **ATLAS-286 → Fait**, renommé *« une pièce d'artillerie, selon l'époque »* : plus de tour au siège. Pour 1100, le
-  trébuchet à traction — en 3D, il charge, lance, la pierre part presque droit et s'efface (*« le mouvement du trébuchet
-  est bon »*, *« très très bien »*), fixe en trois quarts face à gauche, deux fois la taille de la tour ; de loin, une
-  silhouette de profil juste après le lâcher (« C2 », bâti C, les triangles de la charpente ouverts). La tour en réserve,
-  3D et à plat. Le liseré des images plates suit la largeur du dessin. **ATLAS-299** (Backlog) : l'engin selon l'époque.
-- La skill `/tune-icon` → **`/make-event-icon`** ; sa règle nouvelle, le **cadre 44 × 44** pour toute image plate.
-- **Mes fautes** : le premier trébuchet livré sans passer par le banc (*« pourquoi tu ne fais pas comme on a l'habitude
-  de faire »*) — et à l'envers de ses photos ; le glossaire rempli de ce qui n'y va pas (*« ça se transforme en
-  dictionnaire »*) ; le liseré deux fois plus fin sur le trébuchet, vu par lui (*« est-ce que tu es sûr »*).
+- **Le point performance**, mesuré dans mon onglet sur son serveur avec le chronomètre GPU du pilote : les trois flous
+  **ensemble** (≈ 1 ms seuls, 9 à 18 ms ensemble, allumés dès que le zoom quitte 0), la boucle qui dessine à chaque
+  rafraîchissement (8 ms de GPU au repos — la chauffe), les ombres des icônes sur le CPU (10–14 ms, 13 fois/s, hors champ
+  comprises), la géométrie entière à chaque image (≈ 5,5 ms fixes), 2,2 s de fil principal bloqué au démarrage. Tout dans
+  `files/plans/atlas/performance.md` (mesures, hypothèses marquées, remèdes non décidés, la recette de la sonde) et, en
+  français, dans **ATLAS-304**, créé en tête d'À faire à sa demande pour commencer par là le 30/10 — *« un ticket de fixe
+  […] en résonance avec ton MD »*.
+- **Le script Trello** envoie description et commentaires dans le corps de la requête (9 ko dans l'URL : 414 de CloudFront) ;
+  « rendu à la demande » entre au glossaire.
+- **Mes fautes** : deux sondes empilées dans un onglet (leurs chronomètres GPU se brisent, résultats nuls) ;
+  `delete window.innerWidth` ; une série de mesures de 37 s sous un outil qui coupe à 45 ; le zoom écrit dans
+  `sessionStorage` écrasé par la sauvegarde au déchargement.
 
-> Older sessions (2026-09-12 → 2026-10-27 fin d'après-midi) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-27 nuit) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
