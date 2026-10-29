@@ -140,6 +140,12 @@ describe('constructName', () => {
   })
 
   describe('managed errors', () => {
+    // Venice, 29/10: Dalmatian islets 1.3 cells thick, named nowhere.
+    it('sets a realm thinner than the smallest size at the smallest size, never refusing it for its thinness', () => {
+      const strip = realm(60, 12, (x, y) => y === 5 && x >= 5 && x < 55)
+      expect(constructName(strip, FOUR, { ...OPTIONS, minSize: 1.5 })?.size).toBe(1.5)
+    })
+
     it('sets no name that fits only under the smallest size', () => {
       expect(constructName(BAND, FOUR, { ...OPTIONS, minSize: 50 })).toBeNull()
     })

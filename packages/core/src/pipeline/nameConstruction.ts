@@ -13,7 +13,9 @@
  *    height and the length are two things, as on the reference maps, where the size was bound to the line's thinnest
  *    crossing and a short name sat small in a long country.
  * 4. **The fit** is a rule, not a score: the letters keep off the neighbours and the names already written; the sea is
- *    open to them. A name that does not fit is set smaller until it does, or is not written.
+ *    open to them. A name that does not fit is set smaller until it does, or is not written. **A realm is never refused
+ *    for being thin**: its name starts at the smallest size at least, over the sea if need be — Venice, a string of
+ *    Dalmatian islets 1.3 cells thick, was named nowhere (the dev, 29/10, 16:36).
  *
  * Its settings are shares and sizes ({@link ConstructionOptions}: the height's share, the cover, the most spacing, the
  * smallest and largest sizes); there is no weight to tune, so nothing moves elsewhere when one
@@ -170,10 +172,11 @@ export function constructName(
   if (arc === null) return null
   const thickness = thicknessAlong(fitting, arc)
   const total = lineLength(arc)
-  // The height from the thickness; smaller only when the name, unspaced, would outrun the line.
+  // The height from the thickness, the smallest size at least; smaller only when the name, unspaced, would outrun the
+  // line — and then not written under the smallest size.
   let size = Math.min(
     options.maxSize,
-    (options.heightShare * thickness) / name.height,
+    Math.max(options.minSize, (options.heightShare * thickness) / name.height),
     (COVER_MOST * total) / name.length
   )
   if (!(size >= options.minSize)) return null
