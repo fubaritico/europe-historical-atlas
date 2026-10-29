@@ -27,8 +27,8 @@ et script Trello à commiter. Sur Fable, effort maximal.
 
 ### 2026-10-29 (jour) — les noms des pays jusqu'au bout, le démarrage, le panneau en développement seulement
 
-Plages au journal : **11:43 → 14:06** et **15:42 → 21:35** (8 h 16) ; le chantier ouvert le 05/10 totalise **148 h 22 sur 27
-plages**. **Poussé**, de `2f60766` à `47d6fd4`, CI verte, le site déployé avec tout `main`.
+Plages au journal : **11:43 → 14:06** et **15:42 → 22:55** (9 h 36) ; le chantier ouvert le 05/10 totalise **149 h 42 sur 27
+plages**. **Poussé**, de `2f60766` à `cdbf930`, CI verte, le site déployé avec tout `main` ; `5c36f35` et ces notes partent ensemble.
 
 - **Les noms** : la construction unique (ATLAS-301), puis ATLAS-308 (sous les icônes 3D), 309 (Venise), 310 (les pays sans
   place, dits en console) ; le nom court saisi dans le Cartographe (CARTO-307) ; un nom coupé qui se décale sur la terre
@@ -38,9 +38,14 @@ plages**. **Poussé**, de `2f60766` à `47d6fd4`, CI verte, le site déployé av
   bord (CORE-313) ; ‹Entrée› ouvre la fiche (CARTO-312) ; le relief d'abord puis tout en fondu (ATLAS-316) ; le panneau et le
   compteur sous `pnpm dev` seulement (ATLAS-317) ; le relief à 0,2 de près, son réglage ; le commentaire de clôture d'un
   ticket (comment, où, avant → après) dans la skill Trello ; une poussée annule la CI en cours (`concurrency`).
+- **L'audit des instructions** (`/doctor prompt-audit`, quatre agents) : rapport `files/prompt-audit-2026-10-29.md`. Appliqué à
+  sa demande : les 21 corrections sûres (`a9e3c0d` — le CMS entre dans les contrôles de sécurité, `/review` relit le travail
+  non commité, cinq paquets) et les 31 probables (`cdbf930` — le ton, l'historique, les contradictions) ; `reliefWorldY`
+  inscrit (`5c36f35`).
 - **Mes fautes** : sa demande sur le démarrage mal lue (*« c'est épuisant de devoir répéter »*) ; trois `cd` ; un remède
   faux pour les Obotrites (le nom court ne s'écrit que là où le complet ne tient pas — je ne l'avais pas relu) ; *« c'est
   exactement ce que je veux »* pris pour l'option que j'écartais ; deux poussées à 15 s d'écart, l'ancienne déployée par-dessus
-  la nouvelle. La revue à plusieurs agents sautée le soir, à sa demande.
+  la nouvelle. La revue à plusieurs agents sautée le soir, à sa demande. Puis une question posée sans arbitrage derrière
+  (*« Mais quelle décision ! »*), deux commits refusés pour une ligne de plus de 100 caractères, deux `cd` glissés sans effet.
 
 > Older sessions (2026-09-12 → 2026-10-29 nuit, first half) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

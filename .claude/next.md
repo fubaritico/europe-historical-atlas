@@ -7,9 +7,16 @@
 
 ## ▶ ON REPREND ICI — le point de la journée du 29/10, puis la suite du menu
 
-**29/10, fin à 22 h.** Tout est poussé (`47d6fd4`), CI verte, le site déployé avec tout `main`. Le dev reprend tout de suite :
-**faire le point de la journée** (l'entrée du 29/10 jour dans `completed.md`) et **choisir la suite** dans À faire — c'est
-lui qui tient l'ordre ; le haut d'À faire est ATLAS-287 (la couronne), ATLAS-288, puis l'outillage du CMS (276 → 280).
+**29/10, fin à 23 h.** Tout est poussé avec ces notes, CI verte. Le dev reprend tout de suite : **faire le point de la
+journée** (l'entrée du 29/10 jour dans `completed.md`) et **choisir la suite** dans À faire — c'est lui qui tient l'ordre ;
+le haut d'À faire est ATLAS-287 (la couronne), ATLAS-288, puis l'outillage du CMS (276 → 280).
+
+**L'audit des instructions du 29/10** (`files/prompt-audit-2026-10-29.md`, non versionné) remplace celui du 27/10 : ses
+parties A et B sont appliquées. Restent, sans urgence : les skills chargées dans tous ses projets (partie D — `supabase` se
+déclenche ici sur « migrations », « React », « audit » : la désinstaller au niveau global ?) et les points de la partie C,
+dont ses décisions — l'anglais des fichiers de session, `format:check` dans le contrôle local, la « phase de recherche »,
+la marche d'une planche « référence », l'accessibilité de l'admin du CMS. **Une seule question à la fois, et seulement s'il
+y a vraiment à trancher.**
 
 **Ses arbitrages en attente** (une question à la fois) :
 - passer en Fait **ATLAS-145** (séance des frontières), **ATLAS-302** (flou, encore dans Idées) et **ATLAS-301** (les noms :
@@ -38,13 +45,6 @@ de la supprimer.
 
 **Ouvert par décision, à lui de trancher un jour** : les icônes animées (épées qui se balancent, trébuchet) ignorent
 « réduire les animations » du système — un constat de la revue du 27/10, ATLAS-300 dans Idées.
-
-**L'audit des instructions** (`/doctor prompt-audit`, 27/10) : rapport et diff proposé dans
-`files/prompt-audit-2026-10-27.md` (non versionné) — 36 constats, **rien d'appliqué**. Les plus lourds : le CMS absent des
-instructions (« quatre paquets », « deux applications »), `/review` qui relit le dernier commit au lieu de l'arbre, pas de
-portée `cms` dans les commits, la sécurité qui ignore le CMS. À passer avec lui, constat par constat, **seulement ce qu'il
-accepte**. Trois questions sont à lui : la « phase de recherche » de `CLAUDE.md` tient-elle encore ; retirer ce que
-ESLint et `tsc` font déjà respecter ; l'entrée `reliefWorldY` introuvable.
 
 **Pour faire ou régler une icône** : la skill `/make-event-icon` (une image plate se dessine dans un cadre 44 × 44). **Jamais de backtick, de `$(` ni de `$` dans un `perl -e` ou un `sed`
 entre guillemets doubles** : le 27/10, ça a lancé le seed sur sa base — éditer par l'éditeur.
