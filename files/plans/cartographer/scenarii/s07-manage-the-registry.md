@@ -99,6 +99,28 @@ Scenario: the other tools ignore a double-click
   And a double-click on a row of {Polities} still opens that polity's form, whatever the tool
 ```
 
+### Opening the form with ‹enter› in {Polities} — built 2026-10-29
+
+```gherkin
+Scenario: ‹enter› opens the form of the polity chosen
+  Given I click "Normandie" in {Polities}
+  When I press ‹enter›
+  Then the form of Normandie opens, filled with its current values
+
+Scenario: with the keys, ‹enter› chooses, a second ‹enter› opens
+  Given the focus is in {Polities}
+  When I move to a row with ‹↓› and press ‹enter›
+  Then that polity is chosen, and no form opens
+  When I press ‹enter› again
+  Then its form opens
+  And ‹space› only ever chooses
+```
+
+> **The dev, 2026-10-29**: *« quand je sélectionne un item dans la liste […] si j'appuie sur la touche entrée, il faut
+> que ça ouvre la modale »* — chosen with the pointer, the keys had not moved, and ‹enter› read nothing. The keys' row
+> is the polity chosen until they move, as for the row's menu (`PolityList/utils/listKeys.formToOpen`). **Not walked
+> yet.**
+
 > **The dev's request, 2026-10-17** (the ticket): to change a polity's properties while working on the map,
 > without finding it in {Polities}. A point opens nothing because it may be held by several polities and
 > choosing one would be arbitrary. **Tested by the dev the same day**: *« le double-clic avec l'outil A

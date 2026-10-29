@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { listKeyAction } from '../utils/listKeys'
+import { formToOpen, listKeyAction } from '../utils/listKeys'
 import { optionId } from '../utils/optionId'
 
 import type { ViewportPoint } from '../../../../viewport/viewport'
@@ -34,7 +34,11 @@ function menuFromKeys(id: string | null, onMenu: (id: string, at: ViewportPoint)
 
 /**
  * The keys' cursor over the rows: which row it is on, kept in view, and what each key does — ↑ ↓ Home
- * End move it, ‹enter› or ‹space› choose, ‹shift+F10› or the menu key open the row's menu.
+ * End move it, ‹enter› or ‹space› choose, ‹shift+F10› or the menu key open the row's menu. **‹enter› on the polity
+ * already chosen opens its form** (the dev, 2026-10-29: *« quand je sélectionne un item dans la liste […] si
+ * j'appuie sur la touche entrée, il faut que ça ouvre la modale »*): chosen with the pointer, the keys have not moved,
+ * and ‹enter› read nothing; so the keys' row is the target until they move, as for the menu, and a second ‹enter›
+ * after choosing one with the keys opens it too.
  *
  * **It holds a polity's id, not a position**: a row inserted or undone above it must not move the
  * cursor onto another polity (QUAL-003).
@@ -42,13 +46,15 @@ function menuFromKeys(id: string | null, onMenu: (id: string, at: ViewportPoint)
  * @param targetId - the target, where the menu opens before the keys have moved
  * @param onChoose - a row chosen
  * @param onMenu - a row's menu asked for
+ * @param onEdit - a row's form asked for
  * @returns the active id, its position, and the key handler
  */
 export function useListCursor(
   rows: readonly PolityRow[],
   targetId: string | null,
   onChoose: (id: string) => void,
-  onMenu: (id: string, at: ViewportPoint) => void
+  onMenu: (id: string, at: ViewportPoint) => void,
+  onEdit: (id: string) => void
 ) {
   // State
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -65,6 +71,12 @@ export function useListCursor(
     }
     // ‹cmd+↑› and its kin restack the selected polity (`stackingShortcut`); the cursor stays where it is.
     if (event.metaKey || event.ctrlKey) return
+    const opened = formToOpen(event.key, activeId, targetId)
+    if (opened !== null) {
+      event.preventDefault()
+      onEdit(opened)
+      return
+    }
     const action = listKeyAction(active, event.key, rows.length)
     if (action === null) return
     event.preventDefault()

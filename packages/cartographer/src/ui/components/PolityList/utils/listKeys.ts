@@ -25,3 +25,19 @@ export function listKeyAction(at: number, key: string, count: number): ListKeyAc
   if ((key === 'Enter' || key === ' ') && at >= 0 && at < count) return { choose: at }
   return null
 }
+
+/**
+ * The polity whose form ‹enter› opens: the one chosen, when the keys are on it — or have not moved, as after a click
+ * with the pointer (the dev, 2026-10-29). On another row, ‹enter› chooses it instead ({@link listKeyAction}).
+ * @param key - the key, as `KeyboardEvent.key`
+ * @param keysOn - the polity the keys' cursor is on, or `null` before any move
+ * @param chosen - the polity chosen, or `null`
+ * @returns the polity whose form to open, or `null`
+ */
+export function formToOpen(
+  key: string,
+  keysOn: string | null,
+  chosen: string | null
+): string | null {
+  return key === 'Enter' && chosen !== null && (keysOn ?? chosen) === chosen ? chosen : null
+}

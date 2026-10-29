@@ -563,6 +563,27 @@ describe('PolitiesPanel — editing a polity (s07)', () => {
       expect(document.activeElement).toBe(screen.getByRole('listbox', { name: 'Polities' }))
     })
 
+    // The dev, 2026-10-29: « quand je sélectionne un item dans la liste […] si j'appuie sur la touche entrée, il faut que
+    // ça ouvre la modale ».
+    it('opens the form of the polity clicked in the list when ‹enter› is pressed', async () => {
+      const { user } = mountGroup()
+      await user.click(screen.getByText('Normandie'))
+      await user.keyboard('{Enter}')
+      expect(valueOf(open().getByLabelText('Name'))).toBe('Normandie')
+    })
+
+    it('chooses a polity with the arrows and ‹enter›, then opens it with a second ‹enter›', async () => {
+      const { store, user } = mountGroup()
+      screen.getByRole('listbox', { name: 'Polities' }).focus()
+      await user.keyboard('{ArrowDown}{ArrowDown}{Enter}')
+      expect(document.querySelector('dialog[open]')).toBeNull()
+      const chosen = store.getState().target
+      await user.keyboard('{Enter}')
+      expect(valueOf(open().getByLabelText('Name'))).toBe(
+        store.getState().document.polities.find(({ id }) => id === chosen)?.name
+      )
+    })
+
     // CARTO-307: left empty, the short name shows greyed what the atlas writes — the name without its title.
     it('suggests the name without its title, and keeps the short name typed', async () => {
       const { store, user } = mountGroup()

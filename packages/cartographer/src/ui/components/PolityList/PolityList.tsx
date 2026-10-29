@@ -46,7 +46,7 @@ export interface PolityListProps {
  * @param props.targetId - the id of the polity the tools act on, marked as selected, or `null`
  * @param props.onChoose - aims at a polity, given its id — a click, or ‹enter› on the active row
  * @param props.onMenu - opens a row's menu, given its id and where to open it in viewport pixels
- * @param props.onEdit - opens a polity's dialogue, given its id — a double-click
+ * @param props.onEdit - opens a polity's dialogue, given its id — a double-click, or ‹enter› on the polity chosen
  * @returns the subhead and the list, or the subhead and a line saying the year is empty
  */
 export function PolityList({ year, rows, targetId, onChoose, onMenu, onEdit }: PolityListProps) {
@@ -54,7 +54,7 @@ export function PolityList({ year, rows, targetId, onChoose, onMenu, onEdit }: P
   const t = useTranslation(POLITY_LIST_MESSAGES)
 
   // State
-  const { activeId, active, onKeyDown } = useListCursor(rows, targetId, onChoose, onMenu)
+  const { activeId, active, onKeyDown } = useListCursor(rows, targetId, onChoose, onMenu, onEdit)
 
   // Effects
   useEffect(() => {
