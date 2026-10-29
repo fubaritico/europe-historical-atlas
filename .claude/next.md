@@ -101,10 +101,11 @@ three.js et le Cartographe émet le même, au même hash — vérifié par la CI
 | CI    | sept jobs — validate ×3, build, sonarqube, quality-gate, deploy — **verte depuis le 21/10, sous Node 24** |
 | Sonar | `europe-historical-atlas` sous l'organisation `fubaritico`                  |
 
-**Quatre paquets**, orchestrés par **Turbo**, avec un **catalogue de versions** dans `pnpm-workspace.yaml` :
+**Cinq paquets**, orchestrés par **Turbo**, avec un **catalogue de versions** dans `pnpm-workspace.yaml` :
 `core` (pure TS, ni three.js ni DOM ni React ni zustand — tenu par ESLint et `tsc`, tests sous **`node`**),
 `atlas` (three.js vanille, `jsdom`), `cartographer` (React 19 + Vite, **sa propre config ESLint** qui
-réimporte la racine, son `publicDir` est celui de l'atlas), `eslint-plugin-eha` (nos règles de lint).
+réimporte la racine, son `publicDir` est celui de l'atlas), `cms` (Payload 3 + Next, son serveur est celui du dev,
+tests sous `node`), `eslint-plugin-eha` (nos règles de lint).
 
 **Trois faits de structure à ne pas re-découvrir** : *flat config n'a aucune cascade*, donc la config d'un
 paquet **réimporte** la racine et ESLint résout **une** config depuis le **répertoire courant** — d'où un

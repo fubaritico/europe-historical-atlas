@@ -43,10 +43,12 @@ If a finding depends on library/API behavior you are not 100% sure about, set `"
 > **Section headings group the rules; they do not set severity.** Severity comes from the anchors in
 > `references/schema.json` — a documentation or naming gap is never `high`.
 
-> pnpm workspace, four packages: `core` (pure TS — no three.js, React or zustand; `src/{utils,geo,data,pipeline,editor,i18n,time}`),
-> `atlas` (vanilla three.js; `src/{main,scene,camera,controls,picking,ui}`), `cartographer` (2D canvas + React 19 + Zustand;
-> `src/{viewport,geometry,canvas,state,persistence,loaders,devServer,wikidata,i18n,ui}`, all React under `ui/`, one
-> folder per component in `ui/components/` — `.claude/rules/architecture.md`, *Components*), `eslint-plugin-eha`.
+> pnpm workspace, five packages: `core` (pure TS — no three.js, React or zustand; `src/{utils,geo,data,pipeline,editor,i18n,time}`),
+> `atlas` (vanilla three.js; `main.ts` and folders only — `src/{app,bench,camera,controls,devPanel,i18n,loading,picking,scene,sources,tunables,ui,utils}`),
+> `cartographer` (2D canvas + React 19 + Zustand;
+> `src/{viewport,geometry,canvas,cursors,state,persistence,loaders,devServer,wikidata,i18n,ui}`, all React under `ui/`, one
+> folder per component in `ui/components/` — `.claude/rules/architecture.md`, *Components*), `cms` (Payload 3 on Next.js),
+> `eslint-plugin-eha`.
 > See `.claude/rules/architecture.md` (structure) and `.claude/rules/modular-architecture.md` (SOLID/DI).
 
 ## Rules

@@ -10,7 +10,8 @@ metadata:
 # Audit OWASP — Full-Codebase Security Audit
 
 Orchestrates 10 parallel domain-expert subagents — one per OWASP Top 10 (2025) category — to audit
-the entire codebase (two static bundles, the Cartographer's dev-server endpoints, core, the lint plugin).
+the entire codebase (two static bundles, the Cartographer's dev-server endpoints, the CMS — Payload on Next.js, with
+accounts and a database — core, the lint plugin).
 
 **The OWASP Top 10 is revised by edition** (2017, 2021, 2025 — not every year): once a year, check owasp.org for a
 new edition, and when one is out, update the table below and the ten `references/` files to it (the dev, 2026-10-23).
@@ -45,7 +46,9 @@ once a year. Between runs, `/review`'s security reviewer reads the `references/`
 Scan the full codebase. Include:
 - `packages/atlas/src/**/*.ts` (vanilla three.js app — DOM overlays, URL params, fetched assets)
 - `packages/cartographer/src/**/*.{ts,tsx}` (React chrome under `ui/`; `devServer/` runs in the Vite server,
-  reads request paths and bodies and writes to disk — the one server-side trust boundary)
+  reads request paths and bodies and writes to disk — a server-side trust boundary, with the CMS)
+- `packages/cms/src/**/*.{ts,tsx}` (Payload collections and their `access`, the `Users` auth collection,
+  `payload.config.ts`, the seed, the export to static JSON — a server with accounts and a SQLite database)
 - `packages/core/src/**/*.ts` (readers of the year files, pipeline, worker)
 - `packages/eslint-plugin-eha/src/**`
 - Config files: `*.config.*`, `package.json`, `pnpm-workspace.yaml`, `.npmrc`, `.github/workflows/*`, `.husky/*`
@@ -58,6 +61,7 @@ Read all files in scope. Group them by layer:
 - **UI layer**: `packages/atlas/src/`, `packages/cartographer/src/ui/`
 - **Logic layer**: `packages/core/src/`, the rest of `packages/cartographer/src/`
 - **Dev-server layer**: `packages/cartographer/src/devServer/`
+- **CMS layer**: `packages/cms/src/` (collections, access, auth, config, seed, export)
 - **Supply-chain & CI layer**: root configs, `pnpm-workspace.yaml`, `.github/workflows/`, `.husky/`
 
 ### Step 3 — Dispatch 10 Parallel Subagents
@@ -104,16 +108,16 @@ Agents and their scope:
 
 | # | Agent | Prefix | Layers to audit |
 |---|-------|--------|-----------------|
-| 1 | Broken Access Control (incl. SSRF) | OWASP-A01 | Dev-server (path traversal), Logic (fetches) |
-| 2 | Security Misconfiguration | OWASP-A02 | Supply-chain & CI, Dev-server |
+| 1 | Broken Access Control (incl. SSRF) | OWASP-A01 | Dev-server (path traversal), CMS (collection access, export), Logic (fetches) |
+| 2 | Security Misconfiguration | OWASP-A02 | Supply-chain & CI, Dev-server, CMS (`payload.config.ts`) |
 | 3 | Software Supply Chain Failures | OWASP-A03 | All package.json files, lockfile, CI/CD configs |
-| 4 | Cryptographic Failures | OWASP-A04 | All layers |
-| 5 | Injection | OWASP-A05 | UI, Dev-server |
+| 4 | Cryptographic Failures | OWASP-A04 | All layers, CMS sessions and secret first |
+| 5 | Injection | OWASP-A05 | UI, Dev-server, CMS (queries, seed, export) |
 | 6 | Insecure Design | OWASP-A06 | All layers |
-| 7 | Authentication Failures | OWASP-A07 | Dev-server (no auth today — check it is dev-only) |
+| 7 | Authentication Failures | OWASP-A07 | Dev-server (origin check, dev-only), CMS (the auth collection, sessions, first user) |
 | 8 | Software & Data Integrity Failures | OWASP-A08 | All layers |
-| 9 | Security Logging & Alerting Failures | OWASP-A09 | Dev-server, Logic |
-| 10 | Mishandling Exceptional Conditions | OWASP-A10 | Dev-server, UI (error boundaries, the atlas error net) |
+| 9 | Security Logging & Alerting Failures | OWASP-A09 | Dev-server, CMS, Logic |
+| 10 | Mishandling Exceptional Conditions | OWASP-A10 | Dev-server, CMS (hooks, export), UI (error boundaries, the atlas error net) |
 
 ### Step 4 — Aggregate & Score
 

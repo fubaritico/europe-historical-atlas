@@ -35,8 +35,8 @@ OWASP Top 10 #5 (was #3 in 2021). Untrusted data sent to an interpreter as part 
 - **Where**: `packages/core/src/i18n/messageFormat.ts`, `catalogue.ts`, the apps' `i18n/` label files
 - **Check**: Only catalogue entries are parsed as patterns; a value interpolated into a message (a name, a year) is substituted as text and never re-parsed as a pattern
 
-#### OWASP-A05-007: (planned) SQL injection in the contribution tool and its export
-- **Where**: the future Payload 3.x on `@payloadcms/db-sqlite` (Drizzle), the export script, a hosted server (Payload/Next today's plan; Express or another Node service if one is added)
+#### OWASP-A05-007: SQL injection in the CMS and its export
+- **Where**: `packages/cms` on `@payloadcms/db-sqlite` (Drizzle), `packages/cms/src/export/`, `packages/cms/src/seed/`, and (planned) the hosted server
 - **Check**: Queries go through Payload's API or Drizzle's builders; no raw SQL built with template literals or concatenation; a `where` received from a request cannot choose operators or fields outside an allowlist
 - **Note**: Verify how Payload passes `where` to Drizzle against `opensrc/` or its docs on the web, not from memory
 

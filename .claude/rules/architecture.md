@@ -36,7 +36,7 @@ paths:
 
 ## Project Structure
 
-> Split into a pnpm workspace on **2026-09-24**. Four packages since, and the boundary that matters is a
+> Split into a pnpm workspace on **2026-09-24**. Five packages since, and the boundary that matters is a
 > contract, not a folder: **`core` contains no three.js**, enforced by ESLint and proved by breaking it.
 > That is what keeps the worker chunk at 13.5 kB with no renderer in it.
 
@@ -57,6 +57,8 @@ packages/
 │       ├── geo/        # leaf: projection maths
 │       ├── data/       # domain + ports (heightmap, land mask, regions, rivers); reads geo/ + utils/
 │       ├── pipeline/   # the CPU work, worker-safe; reads data/, geo/, utils/
+│       ├── time/       # the historical date type
+│       ├── i18n/       # the translators (ICU)
 │       └── editor/     # the Cartographer's document model: anchors, rings, edits, history
 ├── atlas/              # @europe-historical-atlas/atlas — the 3D map
 │   ├── index.html      # Vite entry point (canvas)
@@ -101,6 +103,7 @@ packages/
 │           ├── styles/     # the sheets; styles/sheets.ts holds the one stylesheet order
 │           ├── icons/ testing/       # the glyphs; the render helpers of the chrome's tests
 │           └── workbench/  # the workbench page's plates
+├── cms/                # @europe-historical-atlas/cms — Payload 3 on Next: places and events; SQLite, local only; vitest under node
 └── eslint-plugin-eha/  # the lint rules of this repository: where each declaration sits (2026-10-12)
     ├── tsconfig.json       # JavaScript checked by tsc (`checkJs`): ESLint imports it with no build step
     ├── vitest.config.ts    # node: ESLint never runs in a page
@@ -164,7 +167,7 @@ Three applications will live here, not two, and they do not all render the same 
 | ------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------- | ------------------------ |
 | **atlas**           | the 3D map — the thing that gets published                                                            | three.js on a WebGL canvas       | built                    |
 | **cartographer**    | the territory editor — anchors, rings, borders                                                        | **2D canvas** + React/Zustand chrome | built |
-| **places & events** | the content the map shows: cities with icons and 3D models, events with their consequences and actors | **Payload** (headless Next CMS)  | planned                  |
+| **places & events** | the content the map shows: cities with icons and 3D models, events with their consequences and actors | **Payload** (headless Next CMS)  | built, local (`packages/cms`) |
 | **core**            | the format, the readers, the compositor, the maths                                                    | —                                | built, three-free        |
 
 **All three ship in this repository** — committed, never git-ignored. **Two of them go online now**:
@@ -277,7 +280,7 @@ pnpm preview            # preview the atlas build
 pnpm type-check         # turbo type-check: one tsc per package
 pnpm lint               # turbo lint: one eslint per package, each with its own config
 pnpm test               # turbo test: one vitest per package, environments differ on purpose
-pnpm coverage           # turbo coverage, then merge the four lcov reports into one
+pnpm coverage           # turbo coverage, then merge every package's lcov report into one
 ```
 
 **`dev` is not `turbo dev`** on purpose: that would start both Vite servers at once, which is a surprise

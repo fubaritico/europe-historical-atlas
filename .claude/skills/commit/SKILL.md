@@ -19,6 +19,8 @@ Done in `/trello`, step 6). Push only when he asks.
    - `packages/atlas/src/{scene,camera,controls,picking,ui}` → that folder's name; `atlas` across several
    - `packages/core/src/data` → `data`; `packages/core/src/editor` → `editor`; the rest of core → `core`
    - `packages/cartographer/**` → `cartographer`
+   - `packages/cms/**` → `cms`
+   - `packages/atlas/public/years/**` → `data`
    - `packages/eslint-plugin-eha/**` → `lint`
    - `files/plans/**` → `plans`
    - root config, CI, `.claude/` → `repo`

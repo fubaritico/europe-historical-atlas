@@ -2,7 +2,8 @@
 
 > Authoritative rules live in the subagent prompt `.claude/agents/review/security.md` (SEC-0xx).
 > Two static bundles (a three.js atlas, a React Cartographer), plus the Cartographer's dev-server endpoints
-> (`packages/cartographer/src/devServer/`), which read request paths and bodies and write to disk — a trust boundary.
+> (`packages/cartographer/src/devServer/`), which read request paths and bodies and write to disk — a trust boundary;
+> and the CMS (`packages/cms`, Payload with user accounts and a SQLite database) — a trust boundary too.
 
 Summary of what `review-security` checks (see the agent for full detail):
 

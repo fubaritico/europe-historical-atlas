@@ -24,9 +24,10 @@ Produces a structured JSON report with findings sorted by severity.
 Determine which files to review (priority order):
 
 1. User-specified files/directories
-2. Files changed on current branch vs main/master (`git diff --name-only main...HEAD`)
-3. Staged files (`git diff --cached --name-only`)
-4. Files in last commit (`git diff --name-only HEAD~1`)
+2. Uncommitted changes — the usual case, since review comes before commit on `main`: `git diff --name-only HEAD`
+   plus the untracked files of `git status --porcelain`
+3. Off `main`, the branch: `git diff --name-only main...HEAD`
+4. Only if the tree is clean: the last commit (`git diff --name-only HEAD~1`)
 
 Filter to: `*.{ts,tsx}`, `*.{js,mjs}`, `*.css`, `*.json`, `*.html` (exclude `node_modules`, `build/`, `dist/`,
 lock files, and archived config under `files/claude-archive/`).

@@ -3,7 +3,7 @@
 > Authoritative rules live in the subagent prompt `.claude/agents/review/architecture.md` (ARCH-0xx),
 > backed by `.claude/rules/architecture.md` and `.claude/rules/modular-architecture.md`.
 
-pnpm workspace, four packages: `core` (pure TS), `atlas` (vanilla three.js), `cartographer` (2D canvas + React 19 + Zustand), `eslint-plugin-eha`.
+pnpm workspace, five packages: `core` (pure TS), `atlas` (vanilla three.js), `cartographer` (2D canvas + React 19 + Zustand), `cms` (Payload 3 on Next.js), `eslint-plugin-eha`.
 
 Summary of what `review-architecture` checks (see the agent for full detail):
 

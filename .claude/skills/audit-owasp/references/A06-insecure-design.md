@@ -28,7 +28,7 @@ OWASP Top 10 #6 (was #4 in 2021). Flaws in the design itself, which no implement
 ### Medium
 
 #### OWASP-A06-005: Publication is a separate, reviewable step
-- **Where**: `.gitignore` (years un-ignored one by one), `.github/workflows/build.yml` and `ci.yml` (deploy of the artefact the gate checked), (planned) the export script from the Payload database to static JSON
+- **Where**: `.gitignore` (years un-ignored one by one), `.github/workflows/build.yml` and `ci.yml` (deploy of the artefact the gate checked), `packages/cms/src/export/` (the export from the Payload database to static JSON)
 - **Check**: Nothing a contributor types reaches the published site without passing the gate: the export writes files that are committed and built like any other, rather than being served live
 
 #### OWASP-A06-006: Concurrent writers do not lose work silently
@@ -42,8 +42,8 @@ OWASP Top 10 #6 (was #4 in 2021). Flaws in the design itself, which no implement
 
 ### Low
 
-#### OWASP-A06-008: (planned) Account lifecycle
-- **Where**: the future Payload auth collection
+#### OWASP-A06-008: Account lifecycle
+- **Where**: `packages/cms/src/collections/Users.ts` (the auth collection)
 - **Check**: Lockout after failed attempts, email verification before contributing, a way to revoke a contributor
 
 #### OWASP-A06-009: (planned) Abuse monitoring

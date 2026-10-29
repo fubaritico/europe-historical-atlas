@@ -33,8 +33,8 @@ OWASP Top 10 #8. Code and data whose integrity is assumed rather than checked. H
 - **Where**: `packages/core/src/pipeline/computeServer.ts`, `workerCompute.ts`
 - **Check**: The worker is same-origin and bundled; an unknown command `kind` throws in `computeServer.ts`; a message whose `id` matches no pending call is dropped in `workerCompute.ts` — confirm that silence is a decision (`rules/error-handling.md`), not an accident
 
-#### OWASP-A08-007: (planned) Integrity of the export from the contribution database
-- **Where**: the future export script from Payload's SQLite to static JSON (CMS-223)
+#### OWASP-A08-007: Integrity of the export from the contribution database
+- **Where**: `packages/cms/src/export/run.ts`, `toContent.ts` (Payload's SQLite to static JSON)
 - **Check**: The export's output goes through core's readers (the same schemas the atlas uses) before it is written into `public/`; a half-translated entry is reported (as `plan.md` P8 says), not shipped silently
 
 ### Low

@@ -58,7 +58,7 @@ are declared once in `pnpm-workspace.yaml`'s `catalog:`, and every `package.json
 
 ### Quality tooling layout
 ESLint 9 flat config (`eslint.config.js`) + Prettier (`.prettierrc`) + commitlint + husky (`pre-commit`
-= lint-staged + type-check; `commit-msg` = commitlint) + lint-staged, over a pnpm workspace of four packages
+= lint-staged + type-check + test; `commit-msg` = commitlint) + lint-staged, over a pnpm workspace of five packages
 fanned out by Turbo — why the split and why Turbo: `architecture.md`. **Lerna stays refused** — it
 publishes, we publish nothing.
 Prettier ignores `.claude`, `files`, `.husky`.

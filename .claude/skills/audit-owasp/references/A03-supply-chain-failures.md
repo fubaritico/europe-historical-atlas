@@ -47,8 +47,8 @@ OWASP Top 10 #3 (expanded from "Vulnerable and Outdated Components"). Compromise
 - **Where**: `.github/` (there is no `dependabot.yml` and no Renovate config)
 - **Check**: Some mechanism (Dependabot security updates at least) reports advisories on `pnpm-lock.yaml`
 
-#### OWASP-A03-010: (planned) The contribution tool's dependency tree
-- **Where**: the future Payload 3.x + Next.js + `@payloadcms/db-sqlite` application (`files/plans/contribution/payload-check.md`)
+#### OWASP-A03-010: The CMS's dependency tree
+- **Where**: `packages/cms/package.json` (Payload 3.x, Next.js, `@payloadcms/db-sqlite`)
 - **Check**: Its Next version sits inside Payload's supported peer range; it uses the catalogue's single React; advisories on Next and Payload are tracked
 - **Note**: Verify peer ranges against `opensrc/` or npm on the web, not from memory
 

@@ -53,7 +53,7 @@ If a finding depends on an ARIA pattern or API you are not 100% sure about, set 
 
 ### A11Y-001: Interactive element without an accessible name
 
-- **Check**: `<button>`, `<a>`, `<input>`, icon-only controls, and interactive `Host` elements must have
+- **Check**: `<button>`, `<a>`, `<input>` and icon-only controls must have
   visible text, `aria-label`, or `aria-labelledby`
 
 ### A11Y-002: Image without alt text

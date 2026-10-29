@@ -121,7 +121,7 @@ A label shows on the closed card and filters the board; a line in a description 
 | **Gravité** | `critique` · `gênant` · `cosmétique` | one at most, only on a card that fixes a problem; a new feature carries none. `critique` = blocks the work (CLAUDE.md's *blocking*) — renamed so it never reads like the status `Bloqué` |
 | **Périmètre** | `atlas` · `Cartographe` · `core` · `CMS` (the contribution system, Payload) · `données` (years/, relief, sources) · `outillage` (CI, lint, Trello, skills) · `design` | one, rarely two |
 | **Type** | `retour d'usage` (what the dev felt using the app) · `défaut` (a proven bug) · `fonction` · `dette` · `décision` (a question to settle) · `doc` | one |
-| **Chantier** | `chantier · incertitude`, one per initiative | on every ticket of an initiative, so one click filters it |
+| **Chantier** | `chantier · incertitude` · `chantier · cms`, one per initiative | on every ticket of an initiative, so one click filters it |
 | **Statut** | `Bloqué` | through `block` / `unblock` only |
 
 Every card I create gets its labels **in the same breath** (`tag`); the list lives in the script's
@@ -214,6 +214,8 @@ $S archive 7 "doublon de #9"               # my own mistakes only — undone fro
 $S checklist 9 "Plan" "étape 1" "étape 2"   # a plan's steps on its card; a checklist of that title is extended
 $S check 9 "étape 1"                        # ticks the one item containing the text
 $S show 7                                  # title, column, description, comments
+$S attachments 7 [folder]                  # a card's attachments; with a folder, saves each one there (his screenshots)
+$S relabel <old> <new>                     # renames a label; every card keeps it under its new name
 $S setup                                   # creates the missing columns and the two template cards, restores order
 ```
 
@@ -275,4 +277,4 @@ it is the ground the decisions themselves stand on. Three pieces build it:
 3. **Every ticket of the initiative carries its `chantier · …` label**, so one click on the label filters
    the whole of it. A new initiative is a new `chantier · …` label in `LABELS` — the dev's call.
 
-The first: **DESIGN-262**, the management of uncertainty (`files/plans/evidence-system.md`).
+Today: **DESIGN-262**, the management of uncertainty (`files/plans/evidence-system.md`), and **CMS-285**, the CMS.

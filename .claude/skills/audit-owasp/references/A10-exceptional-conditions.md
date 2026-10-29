@@ -58,7 +58,7 @@ OWASP Top 10 #10 (new in 2025). Failing open, swallowing errors, leaking interna
 - **Where**: `packages/cartographer/src/wikidata/wikidataSource.ts` (`deps.fetch`), the `fetch` calls in `packages/core/src/data/`
 - **Check**: None passes an `AbortSignal` today; decide whether a hung Wikidata request needs a timeout and what the author sees when it fires
 
-#### OWASP-A10-012: (planned) Partial operations in the contribution tool and its export
-- **Where**: the future Payload hooks and the export script to static JSON
+#### OWASP-A10-012: Partial operations in the CMS and its export
+- **Where**: the Payload hooks of `packages/cms/src/collections/`, `packages/cms/src/export/`
 - **Check**: A multi-document change runs in a transaction; the export writes to temporary files and renames, like `writeAll`, so a failed export never leaves `public/` half-updated
 - **Note**: Verify Payload's transaction support on SQLite against `opensrc/` or its docs on the web, not from memory

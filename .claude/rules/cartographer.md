@@ -41,8 +41,8 @@ rempli de la couleur du filet**, texte blanc, au survol le fond des champs.
 
 `/scenarii-to-code` (écrite le 06/10) : charger le `s00` du jeu, le scénario qui gouverne, et `s99` ;
 faire de chaque `Then` **une assertion ou un manque déclaré** ; et ne jamais écrire dans un commentaire
-une promesse qu'une étape ultérieure doit tenir — elle va dans `next.md` ou `known-issues.md`, les deux
-seuls fichiers relus à chaque session. Elle existe parce que `4d-1` a livré une JSDoc, écrite deux étapes
+une promesse qu'une étape ultérieure doit tenir — elle va dans `next.md`, relu à chaque session, ou dans la
+tranche known-issues de son paquet (`.claude/rules/known-issues/<paquet>.md`) avec un déclencheur nommé. Elle existe parce que `4d-1` a livré une JSDoc, écrite deux étapes
 plus tôt, promettant un cache que `4d-1` n'a pas construit.
 
 

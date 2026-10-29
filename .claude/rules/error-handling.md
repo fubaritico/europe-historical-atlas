@@ -100,4 +100,5 @@ Everything written before 2026-09-17 predates this rule and is **not retroactive
 would be a chantier of its own. But:
 
 - **Touching a file re-opens its error handling.** If a fallback is in code being changed, raise it.
-- The known silent ones are recorded in `known-issues.md` as they are found. `reliefWorldY` is the first.
+- The known silent ones are recorded, as they are found, in their package's known-issues slice
+  (`rules/known-issues/<package>.md`).

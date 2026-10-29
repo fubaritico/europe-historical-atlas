@@ -44,6 +44,10 @@ K=.claude/skills/draw-from-plate/scripts   # every script below is run with $S/v
 
 ## The procedure — one polity, all six steps, then the next
 
+> **Steps 2–3 (`plan.py`, colour seeds, `auto`/`autoC`) take geometry from the plate: only for a calque.** For a
+> **référence** — a plate in copyright, Euratlas included — the plate is read for facts and the outline is drawn by
+> hand on the public-domain backdrop.
+
 1. **Read the plate.** `ruler.py <image> x0 y0 x1 y1 <scale> out.png` enlarges the area with a pixel grid.
    Identify the polity's colour (`px.py`), its neighbours already drawn, its coast, and anything odd: an
    enclave, a county inside it, a label sitting on a border.
@@ -57,8 +61,11 @@ K=.claude/skills/draw-from-plate/scripts   # every script below is run with $S/v
    neighbours' anchors with `anchors.py <polity> lon,lat [lon,lat]`. Barcelona, Cerdanya and Besalú were
    all drawn this way.
 4. **Draw.** Create the polity (`__d.newPolity(name)`), then each step with `__d.hoverAt` + `__d.click` and
-   **read the status sentence of every step**: `Branching from a shared anchor` (an anchor will be reused),
-   `Following the <water>` (a water snap), `Closing the outline`, `Drawing in` (a free point). A step whose
+   **read the status sentence of every step**, in the page's language — fr: « Départ d’une ancre partagée » (an
+   anchor will be reused), « Suit … » (a water snap), « Fermeture du contour », « Dessin dans … » (a free point);
+   en: `Branching from a shared anchor`, `Following the <water>`, `Closing the outline`, `Drawing in`. **The helpers
+   match the English sentences and labels** (« New polity », « OK »): run them in a page set to English, or update
+   their patterns. A step whose
    sentence is not the one expected is a defect to fix now, not later. ‹ctrl+S› at the end (`__d.save()`).
 5. **Check against the plate.** `check.py <id>` — shared anchors and overlap with each polity: a neighbour
    drawn beside instead of on shows `shared=0`. `overlay.py <plate> x0,y0,x1,y1 out.png id,id,…` — the saved

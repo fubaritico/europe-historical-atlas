@@ -6,12 +6,13 @@
 camera (arrow keys), with clickable polygons. End goal: one map per century (1st → 21st); clicking a
 region shows a historical event (battle, political decision, invention…), its consequences and its actors.
 
-- **Stack**: **TypeScript** + **Vite** (bundler + HMR), web-only. **pnpm workspace of four packages** — three, plus
-  the lint plugin `eslint-plugin-eha` since 2026-10-12 — orchestrated by **Turbo**, with one declared version per dependency in `pnpm-workspace.yaml`'s catalogue.
-- **Two applications, and they do not render alike.** The **atlas** is a WebGL canvas in **vanilla
+- **Stack**: **TypeScript** + **Vite** (bundler + HMR), web-only. **pnpm workspace of five packages** — `core`, `atlas`,
+  `cartographer`, `cms` (Payload) and the lint plugin `eslint-plugin-eha` — orchestrated by **Turbo**, with one declared version per dependency in `pnpm-workspace.yaml`'s catalogue.
+- **Three applications, and they do not render alike.** The **atlas** is a WebGL canvas in **vanilla
   three.js** — no framework anywhere near the render loop. The **Cartographer** is a **2D canvas** with a
   **React + Zustand** chrome (the dev's call, 2026-09-29): its chrome *is* the application, which is what a
-  component library is for. `@europe-historical-atlas/core` is a resource, pure TypeScript, and is forbidden
+  component library is for. The **CMS** (`packages/cms`) is a Payload + Next app for places and events, local only,
+  its server the dev's. `@europe-historical-atlas/core` is a resource, pure TypeScript, and is forbidden
   three.js, React, react-dom and zustand **by ESLint**.
 - **The design system is `fubaritico-ds`**, as an external dependency (decided 2026-09-24): its `tokens` and
   `styles` cost the atlas **zero JavaScript**. `Lerna` and `Nx` remain refused; so do Storybook and Tailwind
@@ -25,7 +26,7 @@ Full plan and milestones: **`files/plans/roadmap.md`**.
 ## Foundations — the management of uncertainty (DESIGN-262, the dev's call, 2026-10-19)
 
 The ground every decision stands on — **think with these words and challenge with them**. Full text, read on
-demand: `files/plans/evidence-system.md`; definitions: `glossaire.md`.
+demand: `files/plans/evidence-system.md`; definitions: `files/plans/glossaire.md`.
 
 - **Theme**: *« une réflexion très lourde derrière pour un résultat simple et attractif devant »* — the rigour in the
   machine (unseen), the simplicity in the **shell** (the atlas, which receives the contribution and is part of it).

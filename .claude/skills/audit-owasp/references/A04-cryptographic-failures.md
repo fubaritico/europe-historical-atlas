@@ -21,8 +21,8 @@ OWASP Top 10 #4 (was #2 in 2021). Exposure of sensitive data through weak or mis
 - **Where**: `packages/cartographer/src/wikidata/wikidataSource.ts` (`WIKIDATA_ENDPOINT`), `wikidataFacts.ts` (Wikipedia links), the atlas's relative asset URLs, the site on Netlify
 - **Check**: Every absolute URL is `https://`; the atlas fetches only same-origin relative paths
 
-#### OWASP-A04-004: (planned) Contributor credentials and sessions
-- **Where**: the future Payload 3.x application, a hosted server (Payload/Next today's plan; Express or another Node service if one is added)
+#### OWASP-A04-004: Contributor credentials and sessions
+- **Where**: `packages/cms/src/collections/Users.ts` (`auth: true`), `packages/cms/src/payload.config.ts` (`secret` from `PAYLOAD_SECRET`), and (planned) the hosted server
 - **Check**: Passwords hashed by Payload's auth (never a custom scheme); `PAYLOAD_SECRET` long, random, from the environment; auth cookies `HttpOnly`, `Secure`, `SameSite`
 - **Check**: HTTPS enforced on the hosted tool, HSTS set
 - **Note**: Verify Payload's hashing and cookie defaults against `opensrc/` or its docs on the web, not from memory
@@ -33,8 +33,8 @@ OWASP Top 10 #4 (was #2 in 2021). Exposure of sensitive data through weak or mis
 - **Where**: every `console.warn` / `console.error`, in particular `packages/cartographer/src/devServer/httpEndpoint.ts` (full disk errors to the terminal), `.github/workflows/ci.yml` (the deploy's diagnostic step prints the site id's length and first 8 characters)
 - **Check**: No token or full secret printed; the partial site id printed in a public repository's CI logs is a decision, not an accident
 
-#### OWASP-A04-006: (planned) Contributor data in the static export
-- **Where**: the future export script from the Payload database to static JSON (CMS-223)
+#### OWASP-A04-006: Contributor data in the static export
+- **Where**: `packages/cms/src/export/` (the export from the Payload database to static JSON)
 - **Check**: Emails, password hashes, session data and private notes never reach `public/`; only fields declared public are exported
 
 #### OWASP-A04-007: Data in browser storage

@@ -9,8 +9,8 @@ paths:
 > Every scene module, util, hook, port, or bug fix MUST ship with tests.
 > Nothing is "done" without tests, a `/commit`, and an `/end-session`.
 
-Stack: **Vitest**, one config per package — `core` and `eslint-plugin-eha` under `node`, `atlas` and `cartographer`
-under `jsdom`. For real WebGL, mock the context (three.js can run in tests with a
+Stack: **Vitest**, one config per package — `core`, `cms` and `eslint-plugin-eha` under `node`, `atlas` and
+`cartographer` under `jsdom`. For real WebGL, mock the context (three.js can run in tests with a
 mocked renderer/context — verify via `opensrc/three`).
 
 ## Mandatory sequence after every change

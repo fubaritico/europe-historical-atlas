@@ -12,8 +12,8 @@ metadata:
 # Test
 
 Write tests following the mandatory 5-level test policy (see `.claude/rules/tests.md`).
-Stack: **Vitest**, one config per package — `core` and `eslint-plugin-eha` under `node`, `atlas` and `cartographer`
-under `jsdom`. three.js runs in tests with a mocked renderer/context.
+Stack: **Vitest**, one config per package — `core`, `cms` and `eslint-plugin-eha` under `node`, `atlas` and
+`cartographer` under `jsdom`. three.js runs in tests with a mocked renderer/context.
 
 ## Arguments
 
@@ -85,7 +85,7 @@ Beside the source, same camelCase name (`.tsx` for React):
 
 | Layer                  | Example                                                 |
 | ---------------------- | ------------------------------------------------------- |
-| Scene module           | `atlas/src/scene/reliefMesh.test.ts`                    |
+| Scene module           | `atlas/src/scene/relief/reliefMesh.test.ts`             |
 | Port / util            | `core/src/data/regionRaster.test.ts`                    |
 | Camera / controls      | `atlas/src/camera/cameraState.test.ts`                  |
 | Cartographer component | `cartographer/src/ui/components/<Name>/<Name>.test.tsx` |
