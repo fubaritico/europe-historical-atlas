@@ -20,9 +20,9 @@ import { readAt } from '../utils/math'
 import { constructName } from './nameConstruction'
 import { fittingOf, lineLength, pointAlong } from './nameFit'
 import { occupy, pieceTag, withOccupied } from './nameOccupancy'
-import { OFFSET_REACH, offsetName } from './nameOffset'
+import { OFFSET_REACH, leaderDots, offsetName } from './nameOffset'
 import { ownerRealms } from './nameRealm'
-import { widenedSpace } from './nameSpace'
+import { NEIGHBOUR, widenedSpace } from './nameSpace'
 
 import type { Construction, ConstructionOptions } from './nameConstruction'
 import type { NameOccupancy } from './nameOccupancy'
@@ -102,6 +102,11 @@ export interface PlacedName {
   readonly size: number
   /** Each letter's place, one per code point of the text, in reading order, along one line. */
   readonly glyphs: readonly PlacedGlyph[]
+  /**
+   * The dots tying a name written over a neighbour's land to its realm (`nameOffset.leaderDots`), each a
+   * `LEADER_DOT` drawn as a letter at the name's size; absent for every other name.
+   */
+  readonly leader?: readonly PlacedGlyph[]
 }
 
 /** The names of one display level. */
@@ -324,8 +329,9 @@ function placeInRealm(
 
 /**
  * A realm's name written beside it, on the open ground nearest it (`nameOffset`), when it is named in none of its
- * realms: **the shorter text first** — the full one would spread over the sea — each from the long name's smallest
- * size down to its own smallest, in a crop widened to hold the name wholly beside the realm on any side.
+ * realms: **the shorter text first** — the full one would spread over the sea — each from the offset size down to its
+ * own smallest, in a crop widened to hold the name wholly beside the realm on any side. **Where no open ground is that
+ * near — an enclave — over a neighbour's land, tied to the realm by a leader of dots.**
  * @param task - the owner's largest realm and its texts
  * @param grid - the grid, for the neighbours of the widened crop
  * @param options - the sizes and the bite
@@ -348,16 +354,44 @@ function placeOffset(
   const wide = widenedSpace(space, owner, grid, Math.ceil(extra) + 1)
   const tag = pieceTag(owner, piece)
   const open = occupancy === undefined ? wide : withOccupied(wide, occupancy, tag)
-  const fitting = fittingOf(open, options.neighbourBite)
-  for (const { text, name, minSize } of tries) {
-    const set = offsetName(fitting, name, { minSize, startSize: Math.max(minSize, startSize) })
-    if (set === null) continue
-    const glyphs = layOut(set, name, wide)
-    if (occupancy !== undefined)
-      occupy(occupancy, tag, { ...name, advances: name.advances, text, size: set.size, glyphs })
-    return { owner, text, piece, size: set.size, glyphs }
+  // On the sea first; then over the neighbours, their land opened and the map's frame kept closed.
+  for (const overNeighbours of [false, true]) {
+    const fitting = fittingOf(
+      overNeighbours ? neighboursOpened(open, grid) : open,
+      options.neighbourBite
+    )
+    for (const { text, name, minSize } of tries) {
+      const set = offsetName(fitting, name, { minSize, startSize })
+      if (set === null) continue
+      const glyphs = layOut(set, name, wide)
+      if (occupancy !== undefined)
+        occupy(occupancy, tag, { ...name, advances: name.advances, text, size: set.size, glyphs })
+      const placed = { owner, text, piece, size: set.size, glyphs }
+      if (!overNeighbours) return placed
+      const leader = leaderDots(set.line, name, set.size, wide.mask, wide.width).map(
+        ([x, y]): PlacedGlyph => ({ x: x + wide.left, y: y + wide.top, angle: 0 })
+      )
+      return { ...placed, leader }
+    }
   }
   return null
+}
+
+/**
+ * A space whose neighbours' land is open to a name, as the sea is, and whose cells past the map's frame stay closed —
+ * `blockedAround` marks both alike.
+ * @param space - the space
+ * @param grid - the grid, for its frame
+ * @returns the space, its neighbours' cells open
+ */
+function neighboursOpened(space: NameSpace, grid: OwnerGrid): NameSpace {
+  const blocked = space.blocked.map((cell, at) => {
+    const x = (at % space.width) + space.left
+    const y = Math.floor(at / space.width) + space.top
+    const inGrid = x >= 0 && y >= 0 && x < grid.width && y < grid.height
+    return cell === NEIGHBOUR && inGrid ? 0 : cell
+  })
+  return { ...space, blocked }
 }
 
 /**

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import { LEADER_DOT } from '@europe-historical-atlas/core/pipeline/nameOffset'
+
 import { SHEET_PAD } from './glyphSheet'
 import {
   HALO_MAX_EM,
@@ -47,7 +49,14 @@ function name(text: string, angle = 0): PlacedYearName {
 function input(names: PlacedYearName[]): NameGeometryInput {
   return {
     names,
-    sheet: { cells: new Map([['A', CELL]]), ascent: 0.75, descent: 0.25 },
+    sheet: {
+      cells: new Map([
+        ['A', CELL],
+        [LEADER_DOT, CELL],
+      ]),
+      ascent: 0.75,
+      descent: 0.25,
+    },
     grid: { width: 21, height: 21 },
     draped: (u, v) => [u * 20, 0, v * 20],
     haloCells: 1,
@@ -131,6 +140,23 @@ describe('nameGeometry', () => {
       // The first vertex is the tile's foot, at its left: the cell's bottom-left.
       expect([uv.getX(0), uv.getY(0)]).toEqual([0, 0])
       expect([uv.getX(VERTICES - 1), uv.getY(VERTICES - 1)]).toEqual([1, 1])
+    })
+  })
+
+  // ATLAS-315: a name written over a neighbour's land, tied to its country by dots.
+  describe('the leader', () => {
+    it('lays one tile per dot of the leader, after the name’s letters', () => {
+      const tied = { ...name('A'), leader: [0, 1, 2].map((at) => ({ x: 4 + at, y: 4, angle: 0 })) }
+      expect(nameGeometry(input([tied])).getAttribute('position').count).toBe(4 * VERTICES)
+    })
+
+    it('refuses a leader when the sheet has no dot', () => {
+      const tied = { ...name('A'), leader: [{ x: 4, y: 4, angle: 0 }] }
+      const noDot = {
+        ...input([tied]),
+        sheet: { ...input([]).sheet, cells: new Map([['A', CELL]]) },
+      }
+      expect(() => nameGeometry(noDot)).toThrow(/leader's dot has no cell/)
     })
   })
 

@@ -87,6 +87,11 @@ export interface PlacedYearName {
   readonly size: number
   /** Each letter's place, in cells of the names' grid, on its baseline. */
   readonly glyphs: readonly PlacedGlyph[]
+  /**
+   * The dots tying a name written over a neighbour's land to its polity (ATLAS-315), each a `nameOffset.LEADER_DOT`
+   * drawn as a letter at the name's size; absent for every other name.
+   */
+  readonly leader?: readonly PlacedGlyph[]
 }
 
 /** The names of one display level. */
@@ -173,13 +178,14 @@ function levelNames(
     })
   )
   return {
-    placed: placement.placed.map(({ owner, text, piece, size, glyphs }) => ({
+    placed: placement.placed.map(({ owner, text, piece, size, glyphs, leader }) => ({
       polity: polityOf(ids, owner),
       text,
       form: text === shortOf.get(owner) ? ('short' as const) : ('full' as const),
       piece,
       size,
       glyphs,
+      ...(leader === undefined ? {} : { leader }),
     })),
     tooSmall: placement.tooSmall.map((owner) => polityOf(ids, owner)),
   }

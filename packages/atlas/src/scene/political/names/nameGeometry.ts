@@ -13,6 +13,8 @@
 
 import { BufferGeometry, Float32BufferAttribute } from 'three'
 
+import { LEADER_DOT } from '@europe-historical-atlas/core/pipeline/nameOffset'
+
 import { HALO_FIELD_EM, SHEET_PAD } from './glyphSheet'
 
 import type { NameSheet } from '../../../sources/mapSources'
@@ -166,6 +168,16 @@ export function nameGeometry(input: NameGeometryInput): BufferGeometry {
         throw new Error(`[atlas] "${name.text}" has no place for its letter ${String(at)}`)
       writeTile({ ...place, size: name.size, cell }, input, out)
     })
+    // The leader of a name written over a neighbour's land (ATLAS-315): dots, letters of the same ink and size.
+    if (name.leader !== undefined) {
+      const dot = input.sheet.cells.get(LEADER_DOT)
+      if (dot === undefined)
+        throw new Error(
+          `[atlas] the leader's dot has no cell on the names' sheet, for "${name.text}"`
+        )
+      for (const place of name.leader)
+        writeTile({ ...place, size: name.size, cell: dot }, input, out)
+    }
     flatten(out.positions, first)
   }
   const geometry = new BufferGeometry()

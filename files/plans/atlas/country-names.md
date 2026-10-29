@@ -291,7 +291,14 @@ crowded inland ones, with a leader line.
 **The offset label, on the sea — built the same evening** (ATLAS-315, `nameOffset`): a realm named in none of its
 pieces gets its short name straight on the open ground nearest it, its middle within two letter heights of its land, at
 2.5 cells at most (4 at first — *« réduis la taille de ces textes »*; the panel's `offsetSize`), placed after every
-other name so it takes no one's room. The dev's console after it: Alpuente and Hereford only. Measured: Naples,
+other name so it takes no one's room. The dev's console after it: Alpuente and Hereford only.
+
+**The enclaves, the same evening**: where no open ground lies that near, the name is set the same way over a
+neighbour's land — its cells opened, the map's frame kept closed (`namePlacement.neighboursOpened`) — never over a name,
+and when it had to move away from its realm a leader of middle dots ties it back (`nameOffset.leaderDots`): letters of
+the names' own ink and face, drawn by the same tiles, so the leader follows the relief, the blur and the watermark. On
+1100 every country is named at every level; Alpuente, Hereford, Aragon and Navarre, Cilician Armenia and
+Blois-Champagne lie over their own land and a neighbour's, no dot needed. 3.3 s under Node. Measured: Naples,
 Amalfi, Ragusa, Genoa, Dublin, the Roussillon, Gwynedd and the Obotrites named, no other name moved, the placement
 3 → 4.7 s under Node. Left for the leader line: Hereford, Alpuente, Aragon and Navarre, Cilician Armenia,
 Blois-Champagne — no open ground that near.

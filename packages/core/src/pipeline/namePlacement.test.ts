@@ -415,6 +415,36 @@ describe('placeNames', () => {
       expect(placed[0]?.size).toBe(2)
     })
 
+    it('names an enclave over its neighbour’s land, with no dot when the name already lies on it', () => {
+      const enclave = gridOf(60, 60, (x, y) => (x >= 29 && x < 31 && y >= 29 && y < 31 ? 0 : 1))
+      const { placed } = place(enclave, [{ owner: 0, text: 'ABCD' }], SMALL)
+      expect([placed[0]?.text, placed[0]?.leader]).toEqual(['ABCD', []])
+    })
+
+    it('ties an enclave’s name to it with dots when the names around push it away', () => {
+      const enclave = gridOf(60, 60, (x, y) => (x >= 29 && x < 31 && y >= 29 && y < 31 ? 0 : 1))
+      // Another name covers every cell within four of the enclave.
+      const occupancy = createOccupancy(60, 60)
+      for (let y = 25; y < 35; y += 1)
+        for (let x = 25; x < 35; x += 1)
+          if (!(x >= 29 && x < 31 && y >= 29 && y < 31))
+            occupancy.cells[y * 60 + x] = pieceTag(1, 0)
+      const [named] = placeNames(
+        enclave.owners,
+        60,
+        60,
+        [{ owner: 0, text: 'ABCD' }],
+        monospace,
+        SMALL,
+        occupancy
+      ).placed
+      expect(named?.leader?.length ?? 0).toBeGreaterThan(0)
+    })
+
+    it('writes no leader for a name on the sea', () => {
+      expect(place(ISLET, [{ owner: 0, text: 'ABCD' }], SMALL).placed[0]?.leader).toBeUndefined()
+    })
+
     it('tries the short name first beside the realm — the full one would spread over the sea', () => {
       const { placed } = place(ISLET, [{ owner: 0, text: 'ABCDEFGHIJ', shorter: 'AB' }], SMALL)
       expect(placed[0]?.text).toBe('AB')

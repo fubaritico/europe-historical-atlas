@@ -7,6 +7,7 @@
 import { shortNameOf } from '@europe-historical-atlas/core/data/shortName'
 import { homageLevels } from '@europe-historical-atlas/core/editor/homageLevels'
 import { bearersByLevel } from '@europe-historical-atlas/core/editor/regionBearers'
+import { LEADER_DOT } from '@europe-historical-atlas/core/pipeline/nameOffset'
 import { NAME_GRID_WIDTH } from '@europe-historical-atlas/core/pipeline/yearNames'
 
 import { charactersOf, drawNameSheet } from '../../scene/political/names/glyphSheet'
@@ -130,12 +131,12 @@ function regionPolities(loaded: RegionSet): string[] {
 }
 
 /**
- * The sheet every form's letters are cut from, and their measures.
+ * The sheet every form's letters are cut from, and their measures — the leader's dot with them (ATLAS-315).
  * @param names - the names, every form
  * @returns the sheet and the measured characters
  */
 function sheetOf(names: WrittenNames): ReturnType<typeof drawNameSheet> {
-  const texts = [names.short, names.full].flatMap((form) => Object.values(form))
+  const texts = [names.short, names.full].flatMap((form) => Object.values(form)).concat(LEADER_DOT)
   return drawNameSheet(charactersOf(texts), NAME_FAMILY, {
     letters: document.createElement('canvas'),
     halo: document.createElement('canvas'),

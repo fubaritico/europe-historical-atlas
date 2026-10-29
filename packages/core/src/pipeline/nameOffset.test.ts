@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { fittingOf } from './nameFit'
-import { OFFSET_REACH, offsetName } from './nameOffset'
+import { OFFSET_REACH, leaderDots, offsetName } from './nameOffset'
 import { widenedSpace } from './nameSpace'
 import { piecesOf } from './testing/pieces'
 
@@ -107,6 +107,11 @@ describe('offsetName', () => {
   // L4: N/A — a fitting `placeNames` builds, and a measure it checked.
 
   describe('edge cases', () => {
+    it('writes nothing when the smallest size is above the start — an offset label is never larger', () => {
+      const islet = besideRealm(60, 60, (x, y) => (x >= 29 && x < 31 && y >= 29 && y < 31 ? 0 : -1))
+      expect(offsetName(islet, FOUR, { minSize: 50, startSize: 4 })).toBeNull()
+    })
+
     it('writes nothing when only open ground far from the realm would hold the name — it would read as another’s', () => {
       // An islet in a pond two cells wide, ringed by a neighbour five cells thick, the open sea beyond.
       const pond = besideRealm(80, 80, (x, y) => {
@@ -125,5 +130,43 @@ describe('offsetName', () => {
       })
       expect(offsetName(pinched, { length: 20, height: 1, letters: 20 }, SIZES)).toBeNull()
     })
+  })
+})
+
+/**
+ * A straight name's line, centred on a point.
+ * @param x - its centre's column
+ * @param y - its row
+ * @returns the line, four cells long
+ */
+const lineAt = (x: number, y: number) => ({
+  points: [
+    [x - 2, y],
+    [x + 2, y],
+  ] as [number, number][],
+  lengths: [0, 4],
+})
+
+// ATLAS-315: the dots tying a name written over a neighbour's land to its realm.
+describe('leaderDots', () => {
+  /** A realm of one cell at (20, 10) in a crop 40 wide. */
+  const mask = new Uint8Array(40 * 20).map((_, at) => (at === 10 * 40 + 20 ? 1 : 0))
+  it('runs from the name’s box to the realm, its dots half an em apart', () => {
+    const dots = leaderDots(lineAt(5, 10), FOUR, 1, mask, 40)
+    const xs = dots.map(([x]) => x)
+    // The box's right edge at 7, a gap of 0.3 em: the first dot at 7.3, the last no further than the realm, at 20.
+    expect([xs[0], xs.at(-1), (xs[1] ?? 0) - (xs[0] ?? 0)]).toEqual([
+      expect.closeTo(7.3, 5),
+      expect.closeTo(20, 0),
+      expect.closeTo(0.5, 5),
+    ])
+  })
+
+  it('draws no dot when the name’s box already holds the realm', () => {
+    expect(leaderDots(lineAt(20, 10), FOUR, 1, mask, 40)).toEqual([])
+  })
+
+  it('draws no dot for a realm with no cell', () => {
+    expect(leaderDots(lineAt(5, 10), FOUR, 1, new Uint8Array(40 * 20), 40)).toEqual([])
   })
 })
