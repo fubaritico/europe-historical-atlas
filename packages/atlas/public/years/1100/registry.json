@@ -4,7 +4,7 @@
   "polities": [
     {
       "id": "roman-empire",
-      "name": "Roman Empire",
+      "name": "Holy Roman Empire",
       "rank": "empire",
       "status": "country",
       "suzerain": null,
@@ -499,7 +499,7 @@
     },
     {
       "id": "empire-of-the-romans",
-      "name": "Empire of the Romans",
+      "name": "Byzantine Empire",
       "rank": "empire",
       "status": "country",
       "suzerain": null,
@@ -511,6 +511,7 @@
     {
       "id": "seljuk-sultanate-of-rum",
       "name": "Seljuk Sultanate of Rûm",
+      "shortName": "Sultanate of Rûm",
       "rank": "sultanate",
       "status": "country",
       "suzerain": null,
@@ -522,6 +523,7 @@
     {
       "id": "danishmendid-emirate",
       "name": "Danishmendid Emirate",
+      "shortName": "Danishmendid",
       "rank": "emirate",
       "status": "country",
       "suzerain": null,
@@ -549,7 +551,7 @@
       "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
       "existsFrom": 1071,
       "existsTo": 1202,
-      "colour": "#dbd4db",
+      "colour": "#023702",
       "wikidata": null
     },
     {
@@ -582,7 +584,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#f0e3c2",
+      "colour": "#897f65",
       "wikidata": null
     },
     {
@@ -593,7 +595,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#b5dbb5",
+      "colour": "#535953",
       "wikidata": null
     },
     {
@@ -604,7 +606,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#e8e3e3",
+      "colour": "#ae8b40",
       "wikidata": null
     },
     {
@@ -615,7 +617,7 @@
       "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
       "existsFrom": 1100,
       "existsTo": 1207,
-      "colour": "#e3e8bf",
+      "colour": "#0b720b",
       "wikidata": null
     },
     {
@@ -725,7 +727,7 @@
       "suzerain": "emirate-of-erzurum",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#ccd1e8",
+      "colour": "#2340c1",
       "wikidata": "Q127063"
     },
     {
@@ -736,7 +738,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#d9e8ba",
+      "colour": "#c8c100",
       "wikidata": null
     },
     {
@@ -747,7 +749,7 @@
       "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
       "existsFrom": null,
       "existsTo": 1319,
-      "colour": "#dbba9e",
+      "colour": "#b68459",
       "wikidata": "Q546010"
     },
     {
@@ -758,7 +760,7 @@
       "suzerain": "abbasid-caliphate-of-baghdad-under-seljuk-rule",
       "existsFrom": 879,
       "existsTo": 1118,
-      "colour": "#f5ebef",
+      "colour": "#bb718f",
       "wikidata": "Q112745"
     },
     {
@@ -769,7 +771,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#f2e3ff",
+      "colour": "#8c7a9c",
       "wikidata": null
     },
     {
@@ -780,7 +782,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#ccebeb",
+      "colour": "#45b8b8",
       "wikidata": null
     },
     {
@@ -802,7 +804,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#faebd6",
+      "colour": "#ae803e",
       "wikidata": null
     },
     {
@@ -1072,6 +1074,7 @@
     {
       "id": "pomeranian-lordships",
       "name": "Pomeranian Lordships",
+      "shortName": "Pomerania",
       "rank": "lordship",
       "status": "country",
       "suzerain": null,
@@ -1380,6 +1383,7 @@
     {
       "id": "finnish-tribes",
       "name": "Finnish tribes",
+      "shortName": "Finns",
       "rank": "tribe",
       "status": null,
       "suzerain": null,
@@ -1468,6 +1472,7 @@
     {
       "id": "vlach-populations",
       "name": "Vlach Populations",
+      "shortName": "Vlach",
       "rank": "tribe",
       "status": "country",
       "suzerain": null,
@@ -1490,6 +1495,7 @@
     {
       "id": "khazar-lordship-in-decay",
       "name": "Khazar Lordship in Decay",
+      "shortName": "Khazars",
       "rank": "tribe",
       "status": "country",
       "suzerain": null,
