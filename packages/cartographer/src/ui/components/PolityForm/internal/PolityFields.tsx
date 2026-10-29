@@ -1,5 +1,7 @@
 import { Input } from '@fubaritico/react/Input'
 
+import { shortNameOf } from '@europe-historical-atlas/core/data/shortName'
+
 import { autofocusOnOpen } from '../../../hooks/autofocusOnOpen'
 import { useTranslation } from '../../../hooks/useTranslation'
 import { WikidataPanel } from '../../WikidataPanel'
@@ -14,7 +16,7 @@ import { SuzerainField } from './SuzerainField'
 import type { PolityFieldsProps, PolityFormField } from '../polityFieldsProps'
 
 /**
- * The form's fields, in `s02`'s order, with the id after the name it is proposed from.
+ * The form's fields, in `s02`'s order: the short name under the name, then the id proposed from the name.
  * @param props - the draft, its errors, the choices offered, Wikidata's view and the callbacks
  * @returns the fields, as a fragment
  */
@@ -38,6 +40,13 @@ export function PolityFields(props: PolityFieldsProps) {
         ref={autofocusOnOpen}
         {...textField('name', props)}
         {...errorOf(t, errors.name)}
+      />
+      {/* CARTO-307: left empty, it shows greyed what the atlas writes instead — the rule's fallback, never the typed text. */}
+      <Input
+        label={t('shortName')}
+        placeholder={shortNameOf({ name: draft.name })}
+        message={t('shortNameHint')}
+        {...textField('shortName', props)}
       />
       <Input
         label={t('id')}

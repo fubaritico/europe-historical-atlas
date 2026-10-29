@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
+import { untitledName } from '../data/shortName'
+
 import { MAX_BEND } from './nameLine'
 import { DEFAULT_NAME_PLACEMENT, REALM_RING, placeNames } from './namePlacement'
 import { ownerRealms } from './nameRealm'
-import { untitledName } from './nameTitle'
 import { nameShape } from './testing/names1100'
 import { spaceLength } from './testing/spaceLength'
 
@@ -23,8 +24,9 @@ const measure: MeasureName = (text) => ({
 const OPTIONS: NamePlacementOptions = DEFAULT_NAME_PLACEMENT
 
 /**
- * Each country's short name, as the atlas writes it today (`nameTitle.untitledName`), frozen here so a change of the
- * rule cannot move the fixture's input unseen: a test below holds the two together.
+ * Each country's short name, as the atlas writes it for a polity with no short name entered (`data/shortName`, the
+ * formal name without its title), frozen here so a change of the rule cannot move the fixture's input unseen: a test
+ * below holds the two together.
  */
 const SHORT: Readonly<Record<string, string>> = {
   'empire-of-the-romans': 'Byzantine Empire',

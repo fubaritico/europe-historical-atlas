@@ -1,6 +1,8 @@
 {
   "editTitle": "Edit polity",
   "name": "Name",
+  "shortName": "Short name",
+  "shortNameHint": "Written on the map where the full name does not fit.",
   "id": "Id",
   "rank": "Rank",
   "status": "Status",

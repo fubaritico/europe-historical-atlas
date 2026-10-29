@@ -49,7 +49,7 @@ Scenario: reopen a polity's form and change it
   When I select "Royaume des Francs", on the canvas or in {Polities}
   And I press [Edit properties…]
   Then the same form as creation opens, filled with its current values
-  And I can change name, rank, status, dates, suzerain, colour and Wikidata id
+  And I can change name, short name, rank, status, dates, suzerain, colour and Wikidata id
   When I validate
   Then the change lands in the registry, not in the year file
   And every year using that polity shows it, without being opened
@@ -139,6 +139,36 @@ Scenario: a name in French
   And the English name is kept as an alias
 ```
 
+### The short name the atlas writes — built 2026-10-29 (CARTO-307)
+
+```gherkin
+Scenario: the form suggests the short name, and keeps the one typed
+  Given the polity form is open for "Kingdom of France"
+  Then under Name a field "Short name" reads "Written on the map where the full name does not fit."
+  And left empty, it shows "France" greyed — the name without its title, what the atlas writes instead
+  When I type "France" and press [OK]
+  Then the registry of the year holds "shortName": "France" beside "name": "Kingdom of France"
+
+Scenario: a polity with no short name
+  Given the short name is left empty
+  When I press [OK]
+  Then the registry holds no "shortName" for it — absent, never an empty string
+  And a year saved before the field existed opens as it was
+
+Scenario: the atlas writes the short name
+  Given "Kingdom of England" has the short name "England"
+  When the atlas places the year's names
+  Then "England" is written where "Kingdom of England" does not fit
+  And a polity with no short name is written without its title, « France » for « Kingdom of France »
+  And the console says once "[atlas] N countries have no short name — the map writes their name without its title: …"
+```
+
+> **The dev's call, 2026-10-29**: a usage name entered with the polity, as Crusader Kings does, after two evenings of
+> rules that shortened names badly; one short name, not one per language, for now; a polity without one is written
+> without its title and *« signalé par la console »* — *« faut afficher les informations, c'est primordial »*. The field
+> is the registry's one optional field, so the 1100 saved before it stays valid with no conversion
+> (`core/data/yearFormat.ts`). **Not walked yet.**
+
 ## Merging duplicates
 
 ```gherkin
@@ -220,6 +250,38 @@ Scenario: a loop of homage is never offered
 > the combobox pattern; the search is `ui/components/PolityForm/utils/suzerainSearch.ts`. A suzerain held that the list does
 > not offer (a loop already in a file) is shown as its id and warned once in the console. **Tested by the
 > dev, 2026-10-17** (the ticket); no walk written down.
+
+### The house that holds a polity — the owner, chosen by typing — **not built**, CMS-311
+
+```gherkin
+Scenario: a person is contributed with a house, or none
+  Given the contribution tool (the CMS) holds the actor « Capetians », a house
+  When I create the actor « Philip I », a person
+  Then I can give him a house, chosen among the actors that are houses — « Capetians »
+  And I can leave him with none
+
+Scenario: type a few letters to choose the owner
+  Given the polity form is open for "Kingdom of France"
+  Then a field "Owner" reads "Type a name to choose…", under "Suzerain"
+  When I type "cap"
+  Then the houses contributed whose name matches are offered, as the suzerain's are
+  When I choose « Capetians »
+  Then it is the owner held, shown above the field
+  When I press [OK]
+  Then the registry of the year names the owner by its identifier
+
+Scenario: remove the owner
+  Given « Capetians » is the owner held
+  When I press the cross beside it
+  Then the owner held reads "none"
+```
+
+> **The dev's request, 2026-10-29**: the house that holds a polity — *« pas la personne […] la France c'est Capet »* —
+> which explains the conflicts of suzerainty; contributed in the CMS, where a person actor may have a house, and
+> chosen in the Cartographer *« comme pour le suzerain, un autocomplete »*, as **owner**. **Not built**; three
+> questions open in [s99](s99-holes.md), `H-47`: which identifier names the house, how the Cartographer reaches the
+> CMS, and whether the owner is dated. It is the **holder** of the evidence system (`files/plans/evidence-system.md`
+> §4: territory → dependence → bond), whose place in the format is its step 6.
 
 ```gherkin
 Scenario: see the tree

@@ -60,6 +60,20 @@ describe('polityDraft', () => {
   })
 
   describe('variants', () => {
+    // CARTO-307: the name the atlas writes, typed beside the long one.
+    it('writes the short name typed, trimmed', () => {
+      const reading = readDraft(
+        draft({ name: 'Kingdom of France', id: 'france', shortName: '  France ' }),
+        NONE
+      )
+      expect(reading.ok && reading.polity.shortName).toBe('France')
+    })
+
+    it('leaves the short name out of the polity when none is typed — absent, never empty', () => {
+      const reading = readDraft(draft({ name: 'France', id: 'france', shortName: '   ' }), NONE)
+      expect(reading.ok && 'shortName' in reading.polity).toBe(false)
+    })
+
     // s02 — "explicit when given": the picker's HSVA becomes the file's #rrggbb.
     it("writes a chosen colour as the file's six-digit hex", () => {
       const reading = readDraft(
@@ -211,6 +225,14 @@ describe('draftOf', () => {
       const original = polity('fr')
       const reading = readDraft(draftOf(original), NONE)
       expect(reading).toEqual({ ok: true, polity: original })
+    })
+
+    it('reads back a polity with a short name, and fills the field with it', () => {
+      const original = { ...polity('fr'), shortName: 'France' }
+      expect([draftOf(original).shortName, readDraft(draftOf(original), NONE)]).toEqual([
+        'France',
+        { ok: true, polity: original },
+      ])
     })
 
     it('opens "automatic" for a polity with no colour of its own', () => {

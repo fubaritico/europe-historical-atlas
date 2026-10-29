@@ -96,6 +96,15 @@ describe('yearFormat schemas', () => {
       expect(yearPolitySchema.parse(bare)).toEqual(bare)
     })
 
+    // CARTO-307: the short name the atlas writes, absent from every year saved before it.
+    it('accepts a polity with a short name, and one without, as older years are', () => {
+      const named = withField(polity, { shortName: 'France' })
+      expect([yearPolitySchema.parse(named), yearPolitySchema.parse(polity)]).toEqual([
+        named,
+        polity,
+      ])
+    })
+
     it('accepts a suzerain, which is how vassalage is declared', () => {
       const vassal = withField(polity, { id: 'aquitaine', suzerain: 'fr-couronne' })
       expect(yearPolitySchema.safeParse(vassal).success).toBe(true)
@@ -138,6 +147,11 @@ describe('yearFormat schemas', () => {
       // vanish and the polity would quietly take a palette colour instead.
       const result = yearPolitySchema.safeParse(withField(polity, { colours: '#b8554a' }))
       expect(result.success).toBe(false)
+    })
+
+    it('refuses an empty short name, or one written as null — absent is how none is said', () => {
+      for (const shortName of ['', null])
+        expect(yearPolitySchema.safeParse(withField(polity, { shortName })).success).toBe(false)
     })
 
     it('refuses a colour that is not six hex digits', () => {

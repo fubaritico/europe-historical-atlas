@@ -563,6 +563,36 @@ describe('PolitiesPanel — editing a polity (s07)', () => {
       expect(document.activeElement).toBe(screen.getByRole('listbox', { name: 'Polities' }))
     })
 
+    // CARTO-307: left empty, the short name shows greyed what the atlas writes — the name without its title.
+    it('suggests the name without its title, and keeps the short name typed', async () => {
+      const { store, user } = mountGroup()
+      await user.dblClick(screen.getByText('Reaume de France'))
+      const name = open().getByLabelText('Name')
+      await user.clear(name)
+      await user.type(name, 'Kingdom of France')
+      const short = open().getByLabelText('Short name')
+      expect(short.getAttribute('placeholder')).toBe('France')
+      await user.type(short, 'France')
+      await user.click(open().getByRole('button', { name: 'OK' }))
+      expect(store.getState().document.polities[0]?.shortName).toBe('France')
+    })
+
+    // CARTO-307: cleared, the short name leaves the registry — absent, so the atlas writes the name without its title.
+    it('takes a short name off the polity when the field is cleared', async () => {
+      const { store, user } = mountGroup()
+      act(() => {
+        const france = store.getState().document.polities[0]
+        if (france === undefined) throw new Error('no polity')
+        store.getState().editPolity({ ...france, shortName: 'France' }, { kind: 'c', label: 'c' })
+      })
+      await user.dblClick(screen.getByText('Reaume de France'))
+      const short = open().getByLabelText('Short name')
+      expect(valueOf(short)).toBe('France')
+      await user.clear(short)
+      await user.click(open().getByRole('button', { name: 'OK' }))
+      expect('shortName' in (store.getState().document.polities[0] ?? {})).toBe(false)
+    })
+
     // s07 — "the same polity, with the same id".
     it('shows the id but does not let it change', async () => {
       const { user } = mountGroup()

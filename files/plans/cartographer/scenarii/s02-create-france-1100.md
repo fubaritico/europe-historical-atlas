@@ -15,11 +15,14 @@ Scenario: create a polity from nothing
   Given "europe-1100.json" is loaded
   When I press [+ New polity]
   Then {Details} opens an empty form
-  And the form asks for: name, rank, status, exists from, exists to, suzerain, colour, Wikidata id
+  And the form asks for: name, short name, rank, status, exists from, exists to, suzerain, colour, Wikidata id
   And the polity is created with no territory
   And it appears in {Polities} marked "no territory"
   And it becomes the selected polity
 ```
+
+> **The short name joined the list on 2026-10-29** (CARTO-307): under the name, optional — see
+> [s07](s07-manage-the-registry.md), « The short name the atlas writes ».
 
 ```gherkin
 Scenario: fill the identity by hand

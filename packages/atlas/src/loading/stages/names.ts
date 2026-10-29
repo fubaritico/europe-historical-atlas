@@ -4,9 +4,9 @@
  * placing every level takes seconds — and the progress bar does not carry them.
  */
 
+import { shortNameOf } from '@europe-historical-atlas/core/data/shortName'
 import { homageLevels } from '@europe-historical-atlas/core/editor/homageLevels'
 import { bearersByLevel } from '@europe-historical-atlas/core/editor/regionBearers'
-import { untitledName } from '@europe-historical-atlas/core/pipeline/nameTitle'
 import { NAME_GRID_WIDTH } from '@europe-historical-atlas/core/pipeline/yearNames'
 
 import { charactersOf, drawNameSheet } from '../../scene/political/names/glyphSheet'
@@ -20,10 +20,20 @@ import type { YearNames } from '@europe-historical-atlas/core/pipeline/yearNames
 
 /** A year's names as the map writes them, every form, by polity id. */
 interface WrittenNames {
-  /** The short names — the formal ones without their title, for now (CARTO-307). */
+  /** The short names — the registry's own, or the formal one without its title where it has none (CARTO-307). */
   readonly short: Record<string, string>
   /** The full names — the registry's own. */
   readonly full: Record<string, string>
+}
+
+/** What a polity gives the names: its id, its formal name, and the short one its author entered, if any. */
+interface NamedPolity {
+  /** Its id. */
+  readonly id: string
+  /** Its formal name, the registry's. */
+  readonly name: string
+  /** The name the map writes where the full one does not fit (CARTO-307); absent when none was entered. */
+  readonly shortName?: string
 }
 
 /**
@@ -32,15 +42,26 @@ interface WrittenNames {
  * @param params - the names' settings
  * @returns the names, by polity id
  */
-function writtenNames(
-  polities: readonly { id: string; name: string }[],
-  params: NameDevParams
-): WrittenNames {
+function writtenNames(polities: readonly NamedPolity[], params: NameDevParams): WrittenNames {
   const written = (text: string): string => (params.capitals ? text.toLocaleUpperCase('en') : text)
   return {
-    short: Object.fromEntries(polities.map(({ id, name }) => [id, written(untitledName(name))])),
+    short: Object.fromEntries(polities.map((polity) => [polity.id, written(shortNameOf(polity))])),
     full: Object.fromEntries(polities.map(({ id, name }) => [id, written(name)])),
   }
+}
+
+/**
+ * What the console says of the polities with no short name entered (CARTO-307, the dev, 2026-10-29: *« un pays sans
+ * nom court est signalé par la console »*): the map writes their formal name without its title instead. Said once a
+ * placement, as {@link unplacedNote}.
+ * @param polities - the year's polities
+ * @returns the warning, the polities by their formal name, in the registry's order; `null` when each has its short
+ *   name
+ */
+export function unshortenedNote(polities: readonly NamedPolity[]): string | null {
+  const bare = polities.filter(({ shortName }) => shortName === undefined).map(({ name }) => name)
+  if (bare.length === 0) return null
+  return `[atlas] ${String(bare.length)} countries have no short name — the map writes their name without its title: ${bare.join(', ')}.`
 }
 
 /**
@@ -61,6 +82,19 @@ export function unplacedNote(
   const listed = polities.filter(({ id }) => refused.has(id)).map(({ name }) => name)
   if (listed.length === 0) return null
   return `[atlas] No room for the name of ${String(listed.length)} countries, at one level at least: ${listed.join(', ')}.`
+}
+
+/**
+ * Say in the console, once a placement, every country the map writes short of its own: with no name at all, with no
+ * short name entered, or with no room for its name.
+ * @param placed - the year's names, every level
+ * @param polities - the year's registry
+ */
+function sayWhatIsMissing(placed: YearNames, polities: readonly NamedPolity[]): void {
+  if (placed.unnamed.length > 0)
+    console.warn(`[atlas] ${String(placed.unnamed.length)} countries have no name to write.`)
+  for (const note of [unshortenedNote(polities), unplacedNote(placed, polities)])
+    if (note !== null) console.warn(note)
 }
 
 /**
@@ -152,10 +186,7 @@ export async function rebuildYearNames(context: PipelineContext, loaded: RegionS
       options: namePlacement(dev.names),
     })
     if (context.isDisposed() || !isCurrent()) return
-    if (placed.unnamed.length > 0)
-      console.warn(`[atlas] ${String(placed.unnamed.length)} countries have no name to write.`)
-    const refused = unplacedNote(placed, authored.year.registry.polities)
-    if (refused !== null) console.warn(refused)
+    sayWhatIsMissing(placed, authored.year.registry.polities)
     sources.yearNames = placed
     sources.nameSheet = sheet
     layers.rebuildNames()

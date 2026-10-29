@@ -11,12 +11,12 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 import { projectRegions } from '../../../packages/core/src/data/regionSource'
+import { shortNameOf } from '../../../packages/core/src/data/shortName'
 import { toRegionPayload } from '../../../packages/core/src/data/toRegionPayload'
 import { assembleAuthoredYear } from '../../../packages/core/src/data/yearConsistency'
 import { homageLevels } from '../../../packages/core/src/editor/homageLevels'
 import { bearersByLevel } from '../../../packages/core/src/editor/regionBearers'
 import { DEFAULT_NAME_PLACEMENT } from '../../../packages/core/src/pipeline/namePlacement'
-import { untitledName } from '../../../packages/core/src/pipeline/nameTitle'
 import { NAME_GRID_WIDTH, placeYearNames } from '../../../packages/core/src/pipeline/yearNames'
 
 import type { GlyphMetric } from '../../../packages/core/src/pipeline/yearNames'
@@ -69,13 +69,13 @@ function place(): Row[] {
     }),
     homageLevels(polities)
   )
-  const texts = polities.flatMap(({ name }) => [name, untitledName(name)]).join('')
+  const texts = polities.flatMap((polity) => [polity.name, shortNameOf(polity)]).join('')
   const glyphs: Record<string, GlyphMetric> = {}
   for (const char of texts) glyphs[char] = { advance: 0.55, ascent: 0.72, descent: 0.22 }
   const names = placeYearNames({
     regions,
     bearersByLevel: levels,
-    names: Object.fromEntries(polities.map(({ id, name }) => [id, untitledName(name)])),
+    names: Object.fromEntries(polities.map((polity) => [polity.id, shortNameOf(polity)])),
     fullNames: Object.fromEntries(polities.map(({ id, name }) => [id, name])),
     glyphs,
     gridWidth: NAME_GRID_WIDTH,

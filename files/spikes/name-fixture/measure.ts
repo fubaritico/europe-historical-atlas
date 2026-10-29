@@ -6,8 +6,8 @@
  * Run from the repository root: `packages/core/node_modules/.bin/tsx files/spikes/name-fixture/measure.ts`
  */
 
+import { shortNameOf } from '../../../packages/core/src/data/shortName'
 import { DEFAULT_NAME_PLACEMENT, placeNames } from '../../../packages/core/src/pipeline/namePlacement'
-import { untitledName } from '../../../packages/core/src/pipeline/nameTitle'
 import { NAME_SHAPES } from '../../../packages/core/src/pipeline/testing/names1100'
 import { spaceLength } from '../../../packages/core/src/pipeline/testing/spaceLength'
 
@@ -50,7 +50,7 @@ const rows = [...NAME_SHAPES.values()].map((shape) => {
     shape.owners,
     shape.width,
     shape.height,
-    [{ owner: 0, text: shape.name, shorter: untitledName(shape.name) }],
+    [{ owner: 0, text: shape.name, shorter: shortNameOf(shape) }],
     measure,
     DEFAULT_NAME_PLACEMENT
   )

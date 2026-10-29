@@ -9,8 +9,9 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * Its messages, and the values they take:
  * - `editTitle` — The title when editing a polity; creating one is titled by the shared action « New polity
  *   ».
- * - `name`, `id`, `rank`, `status`, `existsFrom`, `existsTo`, `suzerain`, `colour`, `wikidata` — The
+ * - `name`, `shortName`, `id`, `rank`, `status`, `existsFrom`, `existsTo`, `suzerain`, `colour`, `wikidata` — The
  *   fields' labels, in `s02`'s order.
+ * - `shortNameHint` — What the short name is for, under its field (CARTO-307).
  * - `stillExists` — The end year's placeholder — empty means it still exists.
  * - `none` — The choice standing for no value in a list, and for no suzerain.
  * - `suzerainPlaceholder`, `suzerainList`, `noSuzerainMatch` — The suzerain search: its placeholder, its

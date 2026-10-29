@@ -708,3 +708,20 @@ or a sliver). **Warned, not refused**: an overlap with a neighbour past a thresh
 work is in progress (Pisa drawn over the Empire until the carve tool exists). The same check over a whole
 year lists the faulty rings of its polities: `[Check this year]` (`s10`), placed and unavailable today.
 **Not built yet** — next after deleting a ring.
+
+### H-47 · The owner of a polity: how it is named, reached and dated — **open, the dev, 2026-10-29** (CMS-311)
+
+[s07](s07-manage-the-registry.md), « The house that holds a polity ». Three questions, the dev's to settle before it is
+built:
+
+1. **Which identifier names the house in the registry** — the dev listed three: the Wikidata id, the name, or an id of
+   ours. Proposed: **our own id** for identity, Wikidata **to check**, the name **to show** — the registry's own lesson
+   (`core/data/yearFormat.ts`, `wikidata`): a Wikidata id identifies an entity *during a period*, and grouping by it
+   split the Kingdom of France into four (measured 2026-09-27). A name is not unique and changes.
+2. **How the Cartographer reaches the houses contributed** — it reads Wikidata live and never the CMS; the link between
+   the two applications is to be designed (the CMS stays local for now, `rules/architecture.md`).
+3. **Whether the owner is dated** — a house holds a land at a date (Naples is Angevin only from 1266, quoted from
+   memory). A registry is one year, so a field of the polity is dated by its file, as the suzerain is; the evidence
+   system wants the bond dated and sourced as a claim (`evidence-system.md` §4, step 6). Which comes first is the dev's
+   call.
+

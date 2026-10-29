@@ -10,6 +10,7 @@
 
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { rasteriseRegions } from '@europe-historical-atlas/core/data/regionRaster'
+import { shortNameOf } from '@europe-historical-atlas/core/data/shortName'
 import { createAuthoredYearSource } from '@europe-historical-atlas/core/data/yearManifest'
 import { homageLevels } from '@europe-historical-atlas/core/editor/homageLevels'
 import { polityColours } from '@europe-historical-atlas/core/editor/polityColours'
@@ -18,7 +19,6 @@ import { openYearDocument } from '@europe-historical-atlas/core/editor/yearDocum
 import { latitudeToMercatorY } from '@europe-historical-atlas/core/geo/mercator'
 import { createOccupancy } from '@europe-historical-atlas/core/pipeline/nameOccupancy'
 import { placeNames } from '@europe-historical-atlas/core/pipeline/namePlacement'
-import { untitledName } from '@europe-historical-atlas/core/pipeline/nameTitle'
 import { ownerGrid } from '@europe-historical-atlas/core/pipeline/ownerGrid'
 import { NAME_GRID_WIDTH as GRID_WIDTH } from '@europe-historical-atlas/core/pipeline/yearNames'
 
@@ -29,6 +29,7 @@ import { START_SETTINGS, controls, cycleFacesWithArrows } from './nameBenchContr
 import type { Settings } from './nameBenchControls'
 import type { RegionRaster } from '@europe-historical-atlas/core/data/regionRaster'
 import type { Region } from '@europe-historical-atlas/core/data/regionSource'
+import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { HomageLevels } from '@europe-historical-atlas/core/editor/homageLevels'
 import type {
   MeasureName,
@@ -108,8 +109,8 @@ interface Prepared {
   readonly homage: HomageLevels
   /** Each polity's colour, by id. */
   readonly colours: ReadonlyMap<string, string>
-  /** Each polity's name, by id. */
-  readonly names: ReadonlyMap<string, string>
+  /** Each polity's formal name and the short name its author entered, if any, by id. */
+  readonly names: ReadonlyMap<string, Pick<YearPolity, 'name' | 'shortName'>>
   /** The grid's height in cells, for the map's own proportions. */
   readonly height: number
 }
@@ -157,7 +158,7 @@ async function prepare(): Promise<Prepared> {
     raster: rasteriseRegions(set.regions, GRID_WIDTH, height),
     homage: homageLevels(year.registry.polities),
     colours: polityColours(openYearDocument(year), AUTOMATIC_PALETTE),
-    names: new Map(year.registry.polities.map(({ id, name }) => [id, name])),
+    names: new Map(year.registry.polities.map((polity) => [polity.id, polity])),
     height,
   }
 }
@@ -281,10 +282,11 @@ function place(context: CanvasRenderingContext2D, prepared: Prepared, settings: 
     regionBearers(prepared.regionPolities, prepared.homage, settings.level)
   )
   const requests = ids.map((id, owner) => {
-    const name = required(prepared.names.get(id), `name for ${id}`)
+    const polity = required(prepared.names.get(id), `name for ${id}`)
+    const { name } = polity
     const cased = (text: string): string =>
       settings.capitals ? text.toLocaleUpperCase('fr') : text
-    const short = untitledName(name)
+    const short = shortNameOf(polity)
     return short === name
       ? { owner, text: cased(name) }
       : { owner, text: cased(name), shorter: cased(short) }

@@ -17,6 +17,8 @@ import type { HsvaColor } from '@fubaritico/behaviors'
 export interface PolityDraft {
   /** As typed. */
   name: string
+  /** As typed: empty when the author gives none, and the atlas then writes the name without its title (CARTO-307). */
+  shortName: string
   /** As typed, or as proposed from the name while {@link PolityDraft.idEdited} is false. */
   id: string
   /** Whether the author has written the id themselves — from then on the name no longer proposes one. */
@@ -46,6 +48,7 @@ export interface PolityDraft {
 /** A blank form — what `[+ New polity]` opens. */
 export const EMPTY_DRAFT: PolityDraft = {
   name: '',
+  shortName: '',
   id: '',
   idEdited: false,
   rank: null,
@@ -130,6 +133,17 @@ function readYear(text: string): number | null | undefined {
 }
 
 /**
+ * The short name the form gives the polity, trimmed — **absent rather than empty** when none was typed: the format's
+ * one optional field, so a polity without it is written as a year saved before it was (CARTO-307).
+ * @param draft - the form
+ * @returns `{ shortName }`, or nothing
+ */
+function shortNameOf(draft: PolityDraft): Pick<YearPolity, 'shortName'> {
+  const shortName = draft.shortName.trim()
+  return shortName === '' ? {} : { shortName }
+}
+
+/**
  * Read the form into a polity, or say what stops it.
  *
  * **Only what would break the file is refused** — an empty name or id, an id the year already holds, a
@@ -163,6 +177,7 @@ export function readDraft(draft: PolityDraft, taken: ReadonlySet<string>): Draft
     polity: {
       id,
       name,
+      ...shortNameOf(draft),
       rank: draft.rank,
       status: draft.status,
       suzerain: draft.suzerain,
@@ -184,6 +199,8 @@ export function readDraft(draft: PolityDraft, taken: ReadonlySet<string>): Draft
 export function draftOf(polity: YearPolity): PolityDraft {
   return {
     name: polity.name,
+    // An absent short name is the author's « none », shown as the empty field it was left.
+    shortName: polity.shortName ?? '',
     id: polity.id,
     idEdited: true,
     rank: polity.rank,

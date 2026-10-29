@@ -8,7 +8,7 @@ import { createDevState } from '../../tunables/devState'
 import { namePlacement } from '../../tunables/params'
 import { AUTHORED_FILES, AUTHORED_YEAR, META, YEAR } from '../testing/yearFixtures'
 
-import { rebuildYearNames, unplacedNote } from './names'
+import { rebuildYearNames, unplacedNote, unshortenedNote } from './names'
 
 import type { MapLayers } from '../../scene/layers/mapLayers'
 import type { MapSources } from '../../sources/mapSources'
@@ -131,6 +131,26 @@ describe('rebuildYearNames', () => {
       expect(written.some((name) => name.startsWith('Kingdom of'))).toBe(false)
       // The letters as measured, unspaced: the spacing is the construction's (64 pixels at the sheet's 128 an em).
       expect(Object.values(request.glyphs)[0]?.advance).toBe(0.5)
+    })
+
+    // CARTO-307: the short name entered in the Cartographer is written as is.
+    it('writes a polity’s own short name as it was entered', async () => {
+      const [first, ...rest] = AUTHORED_FILES.registry.polities
+      if (first === undefined) throw new Error('no polity in the test year')
+      const registry = {
+        ...AUTHORED_FILES.registry,
+        polities: [{ ...first, shortName: 'Francia' }, ...rest],
+      }
+      const year = {
+        ...AUTHORED_YEAR,
+        authored: { year: { ...AUTHORED_FILES, registry }, bbox: META.bbox },
+      }
+      const { context, placeYearNames } = stage()
+      await rebuildYearNames(context, year)
+      const request = placeYearNames.mock.calls[0]?.[0] as Parameters<
+        PipelineContext['box']['names']['placeYearNames']
+      >[0]
+      expect(request.names[first.id]).toBe('Francia')
     })
 
     it('writes the names in capitals when the panel says so', async () => {
@@ -266,6 +286,33 @@ describe('unplacedNote', () => {
   })
 })
 
+// CARTO-307, the dev, 2026-10-29: « un pays sans nom court est signalé par la console ».
+describe('unshortenedNote', () => {
+  describe('happy path', () => {
+    it('names the polities with no short name entered, by their formal name', () => {
+      expect(
+        unshortenedNote([
+          { id: 'fr', name: 'Kingdom of France' },
+          { id: 'en', name: 'Kingdom of England', shortName: 'England' },
+          { id: 'cu', name: 'Cumans' },
+        ])
+      ).toBe(
+        '[atlas] 2 countries have no short name — the map writes their name without its title: Kingdom of France, Cumans.'
+      )
+    })
+  })
+
+  // L2, L3, L4: N/A — one list filtered into one sentence.
+
+  describe('edge cases', () => {
+    it('says nothing when every polity has its short name', () => {
+      expect(
+        unshortenedNote([{ id: 'en', name: 'Kingdom of England', shortName: 'England' }])
+      ).toBeNull()
+    })
+  })
+})
+
 describe('rebuildYearNames, the countries named nowhere', () => {
   it('warns once a placement of the countries it found no room for', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
@@ -275,6 +322,10 @@ describe('rebuildYearNames, the countries named nowhere', () => {
       Promise.resolve({ ...PLACED, levels: [{ placed: [], tooSmall: [first.id] }] })
     )
     await rebuildYearNames(context, AUTHORED_YEAR)
-    expect(warn.mock.calls.filter(([text]) => String(text).includes(first.name))).toHaveLength(1)
+    expect(warn.mock.calls.filter(([text]) => String(text).includes('No room'))).toHaveLength(1)
+    // The year's polities have no short name: that is said once too.
+    expect(warn.mock.calls.filter(([text]) => String(text).includes('no short name'))).toHaveLength(
+      1
+    )
   })
 })

@@ -64,6 +64,16 @@ export interface YearPolity {
   /** The name that year, as it was written — "Reaume de France" is period spelling, not a typo. */
   name: string
   /**
+   * The name the atlas writes on the map where the full one does not fit — « England » for « Kingdom of England »
+   * (CARTO-307, the dev, 2026-10-29: a usage name entered with the polity, as in Crusader Kings). **Absent when the
+   * author has given none**, and then the atlas writes the name without its title and says so in the console.
+   *
+   * **The one optional field of the registry**: the others are written `null` when empty, but a required field would
+   * have made every year saved before it invalid — a new format version and 1100's 137 polities to convert. Absent,
+   * older files read as they are, and a polity carries it from the first save that gives it one.
+   */
+  shortName?: string
+  /**
    * Its dignity: `empire`, `kingdom`, `duchy`, `county`… OHM's `border_type`.
    *
    * Left open rather than a union: OHM is a wiki, the vocabulary grows, and a closed union would reject
@@ -104,6 +114,7 @@ export interface YearPolity {
 export const yearPolitySchema: z.ZodMiniType<YearPolity> = z.strictObject({
   id: z.string().check(z.minLength(1)),
   name: z.string().check(z.minLength(1)),
+  shortName: z.exactOptional(z.string().check(z.minLength(1))),
   rank: z.nullable(z.string()),
   status: z.nullable(z.string()),
   suzerain: z.nullable(z.string()),

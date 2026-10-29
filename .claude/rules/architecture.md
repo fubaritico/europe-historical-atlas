@@ -252,6 +252,7 @@ pattern is not available by default — which is worth keeping, but it is not th
 | the polity colours | `editor/polityColours` and `data/regionPalette` |
 | a tribe's look | its colour vanishing at its limit, no stroke (ATLAS-258): one signed distance (`geo/signedDistance`), one ramp and one default (`editor/tribeFeather`: `tribeOpacity`, `TRIBE_FEATHER`), the outset spill cut over other polities and the sea by the same rule; across a tribe a state shows its frontier stroke, never a border between two states, and a tribe's own edge is dropped (`editor/tribes`: `asSeenAcrossTribes`, `isTribeEdge`). The atlas evaluates the ramp in its shader per fragment (`scene/political/tribes/tribeShader`, GLSL's `smoothstep` + core's `featherShiftKm`); the Cartographer per backdrop pixel into an image cached per document version (`canvas/paint/tribeFeathers`, `canvas/tribeFeatherCache`) |
 | the rivers | the same data and base style (`data/riverSource`, `data/riverDisplay`) |
+| a polity's short name | one rule (`data/shortName.shortNameOf`, CARTO-307): the short name entered, else the formal name without its title — the atlas writes it, the Cartographer's form shows it greyed while the field is empty |
 
 **Different — each application does it its own way:**
 
