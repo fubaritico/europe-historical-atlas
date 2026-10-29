@@ -2,6 +2,29 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-10-29 (nuit, suite) — le diagnostic de performance de l'atlas (ATLAS-303 → ATLAS-304)
+
+Même plage au journal que l'entrée du 28/10 : **28/10 19:24 → 29/10 03:56** (8 h 32, le diagnostic de **02:39 à 03:56**) ; le
+chantier ouvert le 05/10 totalise **139 h 43 sur 25 plages**. Rien de poussé (`5202f7f` reste la tête) ; notes, plan, glossaire
+et script Trello à commiter. Sur Fable, effort maximal.
+
+- **Le point performance**, mesuré dans mon onglet sur son serveur avec le chronomètre GPU du pilote : les trois flous
+  **ensemble** (≈ 1 ms seuls, 9 à 18 ms ensemble, allumés dès que le zoom quitte 0), la boucle qui dessine à chaque
+  rafraîchissement (8 ms de GPU au repos — la chauffe), les ombres des icônes sur le CPU (10–14 ms, 13 fois/s, hors champ
+  comprises), la géométrie entière à chaque image (≈ 5,5 ms fixes), 2,2 s de fil principal bloqué au démarrage. Tout dans
+  `files/plans/atlas/performance.md` (mesures, hypothèses marquées, remèdes non décidés, la recette de la sonde) et, en
+  français, dans **ATLAS-304**, créé en tête d'À faire à sa demande pour commencer par là le 30/10 — *« un ticket de fixe
+  […] en résonance avec ton MD »*.
+- **Le script Trello** envoie description et commentaires dans le corps de la requête (9 ko dans l'URL : 414 de CloudFront) ;
+  un verbe `attachments` lit et enregistre les captures d'un ticket ; « rendu à la demande » entre au glossaire.
+- **Les noms des pays (ATLAS-301), à 4 h, à sa demande** — *« Opus tournait en rond, chaque retouche avec des effets de
+  bord »* : les deux captures du ticket, l'atlas et l'algorithme lus côte à côte ; cinq écarts de construction (longueur
+  enchaînée à la taille, l'espace = la terre et non l'enveloppe, la comparaison à sept poids, deux lignes, courbure et pente
+  pénalisées) et six axes, dans le plan des noms et en commentaire sur le ticket. Rien de codé.
+- **Mes fautes** : deux sondes empilées dans un onglet (leurs chronomètres GPU se brisent, résultats nuls) ;
+  `delete window.innerWidth` ; une série de mesures de 37 s sous un outil qui coupe à 45 ; le zoom écrit dans
+  `sessionStorage` écrasé par la sauvegarde au déchargement.
+
 ### 2026-10-28 soir → 29/10 nuit — les noms des pays, les frontières, le flou : un rendu de jeu vidéo (ATLAS-303)
 
 Plage au journal : **28/10 19:24 → 29/10 02:35** (7 h 10, une seule plage) ; le chantier ouvert le 05/10 totalise **138 h 21

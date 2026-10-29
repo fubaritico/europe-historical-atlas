@@ -2,28 +2,27 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
-### 2026-10-29 (nuit, suite) — le diagnostic de performance de l'atlas (ATLAS-303 → ATLAS-304)
+### 2026-10-29 soir → 30/10 nuit — les villes : des règles de cartographe, trois sources, la fiche « Ville à une date »
 
-Même plage au journal que l'entrée du 28/10 : **28/10 19:24 → 29/10 03:56** (8 h 32, le diagnostic de **02:39 à 03:56**) ; le
-chantier ouvert le 05/10 totalise **139 h 43 sur 25 plages**. Rien de poussé (`5202f7f` reste la tête) ; notes, plan, glossaire
-et script Trello à commiter. Sur Fable, effort maximal.
+Dans la plage **29/10 15:42 → 30/10 00:54** (la session de 22:58 à 00:54, ≈ 2 h) ; le chantier ouvert le 05/10 totalise
+**151 h 40 sur 27 plages**. Commités, **non poussés** : `b3cafed` (les villes à une date), `898cd65` (les sources des villes).
 
-- **Le point performance**, mesuré dans mon onglet sur son serveur avec le chronomètre GPU du pilote : les trois flous
-  **ensemble** (≈ 1 ms seuls, 9 à 18 ms ensemble, allumés dès que le zoom quitte 0), la boucle qui dessine à chaque
-  rafraîchissement (8 ms de GPU au repos — la chauffe), les ombres des icônes sur le CPU (10–14 ms, 13 fois/s, hors champ
-  comprises), la géométrie entière à chaque image (≈ 5,5 ms fixes), 2,2 s de fil principal bloqué au démarrage. Tout dans
-  `files/plans/atlas/performance.md` (mesures, hypothèses marquées, remèdes non décidés, la recette de la sonde) et, en
-  français, dans **ATLAS-304**, créé en tête d'À faire à sa demande pour commencer par là le 30/10 — *« un ticket de fixe
-  […] en résonance avec ton MD »*.
-- **Le script Trello** envoie description et commentaires dans le corps de la requête (9 ko dans l'URL : 414 de CloudFront) ;
-  un verbe `attachments` lit et enregistre les captures d'un ticket ; « rendu à la demande » entre au glossaire.
-- **Les noms des pays (ATLAS-301), à 4 h, à sa demande** — *« Opus tournait en rond, chaque retouche avec des effets de
-  bord »* : les deux captures du ticket, l'atlas et l'algorithme lus côte à côte ; cinq écarts de construction (longueur
-  enchaînée à la taille, l'espace = la terre et non l'enveloppe, la comparaison à sept poids, deux lignes, courbure et pente
-  pénalisées) et six axes, dans le plan des noms et en commentaire sur le ticket. Rien de codé.
-- **Mes fautes** : deux sondes empilées dans un onglet (leurs chronomètres GPU se brisent, résultats nuls) ;
-  `delete window.innerWidth` ; une série de mesures de 37 s sous un outil qui coupe à 45 ; le zoom écrit dans
-  `sessionStorage` écrasé par la sauvegarde au déchargement.
+- **Le tableau** : ATLAS-301, 145 et 302 passés en Fait avec leur commentaire de clôture ; ATLAS-304 renvoyé dans À faire
+  (R3, dessiner au besoin) ; l'étape 5 des noms devient ATLAS-319 ; le CMS bilingue devient CMS-320.
+- **Les villes (ATLAS-295, en cours)** — à sa demande, les icônes suivantes attendent : *« on a beaucoup imité une
+  présentation de jeux vidéo […] il faut retrouver des règles cartographiques »*. Huit décisions dans
+  `files/plans/atlas/cities.md` : le point et le nom ensemble, par importance ; le filigrane des pays au dernier ordre de
+  villes ; l'importance datée et **jamais tirée de la population** (*« une ville peut être peu peuplée et être très
+  importante »*) ; deux formulaires, le lieu et la ville à une date ; une date ou une durée ; aucune fiche ne chevauche une
+  autre du même lieu, **validée à la saisie** ; l'écran fait de Formik + Zod + son design system.
+- **Les sources** : Bosker 2013, Buringh 2021, Chandler par Reba 2016, en amalgame, une colonne par source
+  (`files/spikes/city-sources/`) ; une première liste des villes de 1100 (`cities-1100.md`).
+- **Le CMS** : « Villes à une date » et « Raisons d'importance » ; le refus de chevauchement en une phrase, fr/en ; un texte
+  sous chaque champ. Testé par lui : *« c'est vérifié »*.
+- **Mes fautes** : le formulaire livré sans aucun texte (*« on comprend rien à ta merde ! Y'a pas de texte, y'a rien ! »*) ;
+  le message anglais de Payload laissé tel quel ; un test demandé sans les valeurs à saisir ; une phrase de réponse
+  incompréhensible (*« le pourquoi est au clic… »*) ; une durée proposée puis retirée puis remise — il le sentait : *« un
+  trou dans la raquette »*.
 
 ### 2026-10-29 (jour) — les noms des pays jusqu'au bout, le démarrage, le panneau en développement seulement
 
@@ -48,4 +47,4 @@ plages**. **Poussé**, de `2f60766` à `cdbf930`, CI verte, le site déployé av
   la nouvelle. La revue à plusieurs agents sautée le soir, à sa demande. Puis une question posée sans arbitrage derrière
   (*« Mais quelle décision ! »*), deux commits refusés pour une ligne de plus de 100 caractères, deux `cd` glissés sans effet.
 
-> Older sessions (2026-09-12 → 2026-10-29 nuit, first half) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-29 nuit) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

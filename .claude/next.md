@@ -5,11 +5,35 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — le point de la journée du 29/10, puis la suite du menu
+## ▶ ON REPREND ICI — les villes (ATLAS-295) : l'écran « Ville à une date » fait de Formik, Zod et son design system
 
-**29/10, fin à 23 h.** Tout est poussé avec ces notes, CI verte. Le dev reprend tout de suite : **faire le point de la
-journée** (l'entrée du 29/10 jour dans `completed.md`) et **choisir la suite** dans À faire — c'est lui qui tient l'ordre ;
-le haut d'À faire est ATLAS-287 (la couronne), ATLAS-288, puis l'outillage du CMS (276 → 280).
+**30/10, fin à 0 h 55.** Commités, **non poussés** : `b3cafed` (les fiches « Ville à une date » et « Raisons
+d'importance », le refus de chevauchement), `898cd65` (les trois sources des villes). Le dev a choisi les villes avant les
+icônes suivantes (ATLAS-287/288 attendent). **Lire d'abord `files/plans/atlas/cities.md`** : ses huit décisions, avec qui
+les a prises.
+
+**Ce qui marche, testé par lui** (*« c'est vérifié »*) : dans son CMS, une deuxième fiche du même lieu pour une année déjà
+couverte est refusée par une phrase en haut de la page et sous l'année (« Rome a déjà une fiche pour 1100… »), en
+français ou en anglais selon l'admin. Sa base tient **une fiche : Rome, 1100**, capitale ; aucune raison, aucune source
+saisie encore — le registre « Sources » est peut-être vide.
+
+**La suite, décidée (décision 8)** : remplacer l'écran d'édition de « Villes à une date » par le nôtre
+(`admin.components.views.edit.default`) — **Formik** (2.4.9) pour l'état, **Zod** (v4) pour les règles, **fubaritico-ds**
+pour les champs ; Payload reste la base et l'API. Ce qu'il veut, mot pour mot : *« ça valide à la saisie […] tant que tous
+les champs ne sont pas valides, il n'y a pas de bouton ajouter »*. Le comportement de son crochet
+`~/Desktop/useFormValidation.ts` est la spécification : une erreur seulement sur un champ touché, une validation
+silencieuse à l'ouverture pour griser le bouton, « le formulaire a changé » — Formik : `touched`, `validateOnMount` +
+`isValid`, `dirty` ; les lignes de sources par `FieldArray`. La règle du chevauchement se rejoue pendant la saisie avec
+`overlappingSheet` (`cms/src/fields/sheetOverlap.ts`), sur les fiches du lieu lues par l'API. **À installer** : `formik` et
+les paquets du design system dans le CMS (catalogue, jeton GitHub Packages) — l'annoncer avant. **À vérifier avant de
+coder** : comment la feuille de style du design system cohabite avec celle de Payload ; la traduction des erreurs Zod en
+erreurs Formik s'écrit chez nous (Formik attend Yup). **Chaque champ porte sa phrase d'aide**, dès le premier essai.
+
+**Ensuite, dans l'ordre du plan** : relire `files/plans/atlas/cities-1100.md` avec lui (les ordres de villes sont classés
+par population seule ; à relire par leur rôle) ; puis le calque des villes dans l'atlas (point et nom ensemble, par ordre).
+
+**Quand il teste** : lui donner les valeurs exactes à saisir et le résultat attendu, en trois lignes ; lire sa base en
+lecture seule (`sqlite3 "file:packages/cms/cms.db?mode=ro"`) plutôt que de deviner ce qu'il a enregistré.
 
 **L'audit des instructions du 29/10** (`files/prompt-audit-2026-10-29.md`, non versionné) remplace celui du 27/10 : ses
 parties A et B sont appliquées. Restent, sans urgence : les skills chargées dans tous ses projets (partie D — `supabase` se
@@ -19,10 +43,6 @@ la marche d'une planche « référence », l'accessibilité de l'admin du CMS. *
 y a vraiment à trancher.**
 
 **Ses arbitrages en attente** (une question à la fois) :
-- passer en Fait **ATLAS-145** (séance des frontières), **ATLAS-302** (flou, encore dans Idées) et **ATLAS-301** (les noms :
-  l'étape 4, le nom court saisi, est livrée par CARTO-307) — testés par lui ;
-- **ATLAS-304** (performance) est en pause dans En cours : ses 13 images/s étaient mon onglet de mesure, R1 dort derrière le
-  contrat du flou (ATLAS-305) — le garder là, ou le sortir ;
 - **le Groenland et l'Islande** sont norvégiens dans `years/1100` (historiquement 1261–1262) — ses données ;
 - **l'erreur des noms** (police, worker) n'est dite qu'en console — proposition du 28/10, pas tranchée.
 
@@ -76,11 +96,11 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 | où | ticket | état |
 | --- | --- | --- |
 | **Chantiers** | DESIGN-262 La gestion de l'incertitude · **CMS-285 Le CMS** | DESIGN-262 : palier 2 conçu (CORE-270) ; CMS-285 : socle codé, outillage à faire |
-| **En cours** | ATLAS-303 · ATLAS-301 · ATLAS-145 · ATLAS-304 · ATLAS-156 · ATLAS-152 | ATLAS-303 : le rendu ; ATLAS-301 et ATLAS-145 : faits, à passer en Fait ; ATLAS-304 : en pause ; ATLAS-156 : bataille et siège faits ; ATLAS-152 : sources de 1100 |
+| **En cours** | ATLAS-295 · ATLAS-303 · ATLAS-156 · ATLAS-152 | ATLAS-295 : les villes, l'écran Formik à faire ; ATLAS-303 : le rendu ; ATLAS-304 renvoyé dans À faire le 29/10 (R3, dessiner au besoin) ; ATLAS-156 : bataille et siège faits ; ATLAS-152 : sources de 1100 |
 | **À valider par le développeur** | — | vide le 26/10 |
 | **Backlog** | ATLAS-299 · ATLAS-297 · CORE-270 · CMS-281..283 · ATLAS-284 · CARTO-237 · CARTO-273 · CARTO-274 | CORE-270 passe après la contribution (25/10) ; 281–283 les écrans suivants |
-| **À faire**, en tête | ATLAS-287 · ATLAS-288 · CMS-276 → 280 · … · CMS-290 | dans son ordre |
-| **Idées** | ATLAS-302 flou (fait, à passer en Fait) · ATLAS-300 animations réduites · CARTO-268 feature flags · CORE-271 généalogie · CARTO-272 radar | CARTO-268 : pas encore |
+| **À faire**, en tête | ATLAS-287 · ATLAS-288 · CMS-276 → 280 · … · CMS-290 · ATLAS-304 (en bas) | dans son ordre |
+| **Idées** | ATLAS-319 police réduite aux lettres des noms · CMS-320 le CMS en fr/en · ATLAS-300 animations réduites · CARTO-268 feature flags · CORE-271 généalogie · CARTO-272 radar | CARTO-268 : pas encore |
 
 **Toujours en attente, à lui proposer un jour** : le relief niveau 6 du Cartographe (une ligne, `main.tsx` →
 `/heightmaps/europe-dem-z6-1920`, `rules/known-issues/cartographer.md`).
