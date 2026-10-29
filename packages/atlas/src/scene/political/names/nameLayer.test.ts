@@ -1,4 +1,4 @@
-import { MultiplyBlending, NormalBlending } from 'three'
+import { Color, MultiplyBlending, NormalBlending } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
 import { createSeparateImagesBlur } from '../../blur/separateImages'
@@ -59,6 +59,7 @@ function options(): NameLayerOptions {
     haloOpacity: 0.25,
     haloCells: 1,
     blurMethod: createSeparateImagesBlur(),
+    inverted: new Set(),
   }
 }
 
@@ -105,7 +106,13 @@ describe('levelWeight', () => {
 })
 
 describe('haloAtZoom', () => {
-  const screen = { haloWholeZoom: 0.2, haloGoneZoom: 0.6, watermarkZoom: 0.85, watermarkShare: 0.5 }
+  const screen = {
+    haloWholeZoom: 0.2,
+    haloGoneZoom: 0.6,
+    watermarkZoom: 0.85,
+    watermarkShare: 0.5,
+    tribeEdgeClose: 0.3,
+  }
 
   it('keeps the white edge whole up to its zoom, gone from the other, half-way between', () => {
     expect(haloAtZoom(0, screen)).toBe(1)
@@ -120,7 +127,13 @@ describe('haloAtZoom', () => {
 })
 
 describe('watermarkAtZoom', () => {
-  const screen = { haloWholeZoom: 0.1, haloGoneZoom: 0.4, watermarkZoom: 0.8, watermarkShare: 0.5 }
+  const screen = {
+    haloWholeZoom: 0.1,
+    haloGoneZoom: 0.4,
+    watermarkZoom: 0.8,
+    watermarkShare: 0.5,
+    tribeEdgeClose: 0.3,
+  }
 
   // The dev, 2026-10-29: « lorsqu'on est complètement zoomé, les noms deviennent à 50 % transparents. Tous ».
   it('keeps the names whole until the watermark’s zoom, and at its share at the closest', () => {
@@ -140,6 +153,20 @@ describe('watermarkAtZoom', () => {
     expect([watermarkAtZoom(0.99, late), watermarkAtZoom(1, late)]).toEqual([1, 0.5])
   })
 })
+
+/**
+ * The first level's four meshes when its polity is inverted: its own edge and ink, then the inverted ones.
+ * @returns the layer and the inverted pair
+ */
+function invertedKing(): {
+  layer: ReturnType<typeof createNameLayer>
+  edge: Mesh<never, ShaderMaterial> | undefined
+  ink: Mesh<never, ShaderMaterial> | undefined
+} {
+  const layer = createNameLayer({ ...options(), inverted: new Set(['king']) })
+  const [, , edge, ink] = meshes(layer)
+  return { layer, edge, ink }
+}
 
 describe('createNameLayer', () => {
   describe('happy path', () => {
@@ -168,6 +195,8 @@ describe('createNameLayer', () => {
         'fieldEm',
         'letters',
         'opacity',
+        'tone',
+        'width',
       ])
     })
   })
@@ -209,6 +238,7 @@ describe('createNameLayer', () => {
         haloGoneZoom: 0.4,
         watermarkZoom: 0.85,
         watermarkShare: 0.5,
+        tribeEdgeClose: 0.3,
       }
       const edge = (): number | undefined =>
         edges(layer)[0]?.material.uniforms.edge?.value as number | undefined
@@ -216,6 +246,65 @@ describe('createNameLayer', () => {
       expect(edge()).toBe(1)
       layer.setZoom(0.6, screen)
       expect(edge()).toBe(0)
+    })
+  })
+
+  // The dev, 2026-10-29: « pour les tribus, leur nom, tu vas inverser le noir et le blanc ».
+  describe('inverted names', () => {
+    it('writes an inverted polity’s name in white, laid over the map, on an edge of the ink’s colour', () => {
+      const { edge, ink } = invertedKing()
+      expect(ink?.material.blending).toBe(NormalBlending)
+      expect((ink?.material.uniforms.ink?.value as Color).getHexString()).toBe('ffffff')
+      expect((edge?.material.uniforms.tone?.value as Color).getHexString()).toBe(
+        new Color('#3b2614').getHexString()
+      )
+    })
+
+    it('keeps the white edge and the multiplied ink for the names that are not inverted', () => {
+      const layer = createNameLayer({ ...options(), inverted: new Set(['king']) })
+      const duke = meshes(layer).slice(4)
+      expect((duke[0]?.material.uniforms.tone?.value as Color).getHexString()).toBe('ffffff')
+      expect(duke[1]?.material.blending).toBe(MultiplyBlending)
+    })
+
+    it('shows the inverted names with their level, at its opacities', () => {
+      const { layer, edge, ink } = invertedKing()
+      layer.setDetail(0)
+      expect([ink?.visible, ink?.material.uniforms.opacity?.value]).toEqual([true, 0.5])
+      expect([edge?.visible, edge?.material.uniforms.opacity?.value]).toEqual([true, 0.25])
+    })
+
+    // The dev, 2026-10-29: « tu vois le liseré ? Tu le mets, très fin ».
+    it('keeps the inverted names’ edge close up, thinned to its share, where the white edge is gone', () => {
+      const { layer, edge } = invertedKing()
+      const ordinary = edges(layer)[0]
+      const screen = {
+        haloWholeZoom: 0.1,
+        haloGoneZoom: 0.4,
+        watermarkZoom: 0.85,
+        watermarkShare: 0.5,
+        tribeEdgeClose: 0.3,
+      }
+      const uniform = (mesh: typeof edge, name: string): unknown =>
+        mesh?.material.uniforms[name]?.value
+      layer.setZoom(0, screen)
+      expect([uniform(edge, 'edge'), uniform(edge, 'width')]).toEqual([1, 1])
+      layer.setZoom(0.6, screen)
+      expect([uniform(ordinary, 'edge'), uniform(edge, 'edge'), uniform(edge, 'width')]).toEqual([
+        0, 1, 0.3,
+      ])
+    })
+
+    it('frees the inverted names’ geometry and materials on disposal', () => {
+      const { layer, edge, ink } = invertedKing()
+      if (edge === undefined || ink === undefined) throw new Error('no inverted name')
+      const spies = [
+        vi.spyOn(ink.geometry, 'dispose'),
+        vi.spyOn(ink.material, 'dispose'),
+        vi.spyOn(edge.material, 'dispose'),
+      ]
+      layer.dispose()
+      expect(spies.map((spy) => spy.mock.calls.length)).toEqual([1, 1, 1])
     })
   })
 
@@ -231,6 +320,7 @@ describe('createNameLayer', () => {
         haloGoneZoom: 0.4,
         watermarkZoom: 0.85,
         watermarkShare: 0.5,
+        tribeEdgeClose: 0.3,
       })
       expect([
         inks(layer)[0]?.material.uniforms.opacity?.value,

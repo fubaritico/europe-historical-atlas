@@ -41,6 +41,7 @@ import type { NameSheet } from '../../../sources/mapSources'
 import type { BlurMethod, ScreenBlur } from '../../blur/blurMethod'
 import type { WorldPoint } from '../../relief/drapeProjection'
 import type { YearNames } from '@europe-historical-atlas/core/pipeline/yearNames'
+import type { Blending } from 'three'
 
 /** The layer the names' ink moves to while blurred — one the camera does not see, nor the borders' blur. */
 export const NAME_BLUR_LAYER = BLUR_LAYERS.names
@@ -71,6 +72,11 @@ export interface NameLayerOptions {
   readonly haloCells: number
   /** How the map's blurs are drawn (ATLAS-304). */
   readonly blurMethod: BlurMethod
+  /**
+   * The polities whose names are written inverted — white ink on an edge of the ink's colour: the tribes, an
+   * experiment of the dev's, 2026-10-29 (*« pour les tribus, leur nom, tu vas inverser le noir et le blanc »*).
+   */
+  readonly inverted: ReadonlySet<string>
 }
 
 /** When the white edge shows — the panel's, read every frame. */
@@ -83,6 +89,11 @@ export interface NameScreen {
   readonly watermarkZoom: number
   /** The share of their opacity the names keep at the closest zoom — a watermark under the cities to come. */
   readonly watermarkShare: number
+  /**
+   * The inverted names' edge at the closest zoom, as a share of its width from afar: it stays where the white edge goes,
+   * very thin (the dev, 2026-10-29: *« tu vois le liseré ? Tu le mets, très fin »*), narrowing as the white one fades.
+   */
+  readonly tribeEdgeClose: number
 }
 
 /**
@@ -168,6 +179,12 @@ interface LevelMeshes {
   readonly ink: Mesh<BufferGeometry, ShaderMaterial>
   /** The ink's opacity, likewise. */
   readonly inkOpacity: { value: number }
+  /** The level's inverted names — white ink on a dark edge — sharing its opacities; `null` when it has none. */
+  readonly inverted: {
+    readonly geometry: BufferGeometry
+    readonly edge: Mesh<BufferGeometry, ShaderMaterial>
+    readonly ink: Mesh<BufferGeometry, ShaderMaterial>
+  } | null
 }
 
 /**
@@ -178,34 +195,115 @@ interface LevelMeshes {
  * @param textures - the letters' and the edge field's textures
  * @param textures.letters - the letters
  * @param textures.halo - the edge field
- * @param screen - the uniform the edge follows the camera by
+ * @param screens - the uniforms the edges follow the camera by: the ordinary names', the inverted ones'
+ * @param screens.own - the ordinary names' edge, gone close up
+ * @param screens.inverted - the inverted names' edge, kept close up, thinner
  * @returns the meshes
  */
 function levelMeshes(
   names: NameLayerOptions['names']['levels'][number]['placed'],
   options: NameLayerOptions,
   textures: { readonly letters: CanvasTexture; readonly halo: CanvasTexture },
-  screen: ScreenUniforms
+  screens: { readonly own: ScreenUniforms; readonly inverted: ScreenUniforms }
 ): LevelMeshes {
-  const geometry = nameGeometry({
-    names,
-    sheet: options.sheet,
-    grid: { width: options.names.gridWidth, height: options.names.gridHeight },
-    draped: options.draped,
-    haloCells: options.haloCells,
-  })
+  const geometryOf = (placed: typeof names): BufferGeometry =>
+    nameGeometry({
+      names: placed,
+      sheet: options.sheet,
+      grid: { width: options.names.gridWidth, height: options.names.gridHeight },
+      draped: options.draped,
+      haloCells: options.haloCells,
+    })
+  const geometry = geometryOf(names.filter(({ polity }) => !options.inverted.has(polity)))
   const edgeOpacity = { value: 0 }
   const inkOpacity = { value: 0 }
+  const look = { textures, opacities: { edge: edgeOpacity, ink: inkOpacity }, screen: screens.own }
+  const [edge, ink] = edgeAndInk(geometry, look, {
+    edge: WHITE,
+    ink: options.ink,
+    blending: MultiplyBlending,
+  })
+  const invertedNames = names.filter(({ polity }) => options.inverted.has(polity))
+  if (invertedNames.length === 0)
+    return { geometry, edge, edgeOpacity, ink, inkOpacity, inverted: null }
+  // The ink white in the ordinary blend — multiplied, white would change nothing — on an edge of the ink's colour.
+  const flipped = geometryOf(invertedNames)
+  const [flippedEdge, flippedInk] = edgeAndInk(
+    flipped,
+    { ...look, screen: screens.inverted },
+    {
+      edge: options.ink,
+      ink: WHITE,
+      blending: NormalBlending,
+    }
+  )
+  return {
+    geometry,
+    edge,
+    edgeOpacity,
+    ink,
+    inkOpacity,
+    inverted: { geometry: flipped, edge: flippedEdge, ink: flippedInk },
+  }
+}
+
+/** What a level's edges and inks are drawn with, whatever their colours. */
+interface MeshLook {
+  /** The letters' and the edge field's textures. */
+  readonly textures: { readonly letters: CanvasTexture; readonly halo: CanvasTexture }
+  /** The edge's and the ink's opacities, written as the zoom's detail moves — shared by every pair of the level. */
+  readonly opacities: { readonly edge: { value: number }; readonly ink: { value: number } }
+  /** The uniforms the edge follows the camera by. */
+  readonly screen: ScreenUniforms
+}
+
+/** The white of the ordinary names' edge, and of the inverted names' ink. */
+const WHITE = '#ffffff'
+
+/**
+ * An edge and its ink over one geometry, hidden until a detail is set, drawn edge first.
+ * @param geometry - the tiles
+ * @param look - the textures, the opacities shared with the level, the camera's uniforms
+ * @param tones - the edge's colour, the ink's, and how the ink is laid
+ * @param tones.edge - the edge's colour, `#rrggbb`
+ * @param tones.ink - the ink's colour, `#rrggbb`
+ * @param tones.blending - multiplied into the map, or laid over it
+ * @returns the edge and the ink
+ */
+function edgeAndInk(
+  geometry: BufferGeometry,
+  look: MeshLook,
+  tones: { readonly edge: string; readonly ink: string; readonly blending: Blending }
+): [Mesh<BufferGeometry, ShaderMaterial>, Mesh<BufferGeometry, ShaderMaterial>] {
+  const { textures, opacities, screen } = look
   const edge = new Mesh(
     geometry,
-    haloMaterial(textures.letters, textures.halo, edgeOpacity, screen)
+    haloMaterial(
+      textures.letters,
+      textures.halo,
+      { opacity: opacities.edge, tone: tones.edge },
+      screen
+    )
   )
-  const ink = new Mesh(geometry, inkMaterial(textures.letters, options.ink, inkOpacity))
+  const ink = new Mesh(
+    geometry,
+    inkMaterial(textures.letters, tones.ink, opacities.ink, tones.blending)
+  )
   edge.renderOrder = NAME_RENDER_ORDER
   ink.renderOrder = NAME_RENDER_ORDER + 1
   edge.visible = false
   ink.visible = false
-  return { geometry, edge, edgeOpacity, ink, inkOpacity }
+  return [edge, ink]
+}
+
+/**
+ * A level's meshes, edges before inks: its own names', then its inverted names'.
+ * @param level - the level
+ * @returns the meshes
+ */
+function meshesOf(level: LevelMeshes): Mesh<BufferGeometry, ShaderMaterial>[] {
+  const own = [level.edge, level.ink]
+  return level.inverted === null ? own : [...own, level.inverted.edge, level.inverted.ink]
 }
 
 /**
@@ -269,8 +367,7 @@ function levelOpacities(
       levels.forEach((built, level) => {
         const weight = levelWeight(level, detail)
         weights[level] = weight
-        built.edge.visible = weight > 0
-        built.ink.visible = weight > 0
+        for (const mesh of meshesOf(built)) mesh.visible = weight > 0
       })
       show()
     },
@@ -293,13 +390,20 @@ function levelOpacities(
 export function createNameLayer(options: NameLayerOptions): NameLayer {
   const letters = sheetTexture(options.sheet.image)
   const halo = sheetTexture(options.sheet.halo)
-  // Shared by every level's edge: one write a frame follows the camera.
-  const screen: ScreenUniforms = { edge: { value: 0 } }
+  // Shared by every level's edge: one write a frame follows the camera. The inverted names' edge is always there,
+  // its width written instead.
+  const screen: ScreenUniforms = { edge: { value: 0 }, width: { value: 1 } }
+  const invertedScreen: ScreenUniforms = { edge: { value: 1 }, width: { value: 1 } }
   const object = new Group()
   object.renderOrder = NAME_RENDER_ORDER
   const levels = options.names.levels.map((level) => {
-    const built = levelMeshes(level.placed, options, { letters, halo }, screen)
-    for (const mesh of [built.edge, built.ink]) object.add(mesh)
+    const built = levelMeshes(
+      level.placed,
+      options,
+      { letters, halo },
+      { own: screen, inverted: invertedScreen }
+    )
+    for (const mesh of meshesOf(built)) object.add(mesh)
     return built
   })
   const blur = inkBlur(object, levels, options.blurMethod)
@@ -310,7 +414,9 @@ export function createNameLayer(options: NameLayerOptions): NameLayer {
       opacities.setDetail(detail)
     },
     setZoom(zoom: number, settings: NameScreen): void {
-      screen.edge.value = haloAtZoom(zoom, settings)
+      const halo = haloAtZoom(zoom, settings)
+      screen.edge.value = halo
+      invertedScreen.width.value = settings.tribeEdgeClose + (1 - settings.tribeEdgeClose) * halo
       opacities.setWatermark(watermarkAtZoom(zoom, settings))
     },
     setBlur(pixels: number): void {
@@ -320,10 +426,10 @@ export function createNameLayer(options: NameLayerOptions): NameLayer {
       opacities.setReveal(share)
     },
     dispose(): void {
-      for (const { geometry, edge, ink } of levels) {
-        geometry.dispose()
-        edge.material.dispose()
-        ink.material.dispose()
+      for (const level of levels) {
+        level.geometry.dispose()
+        level.inverted?.geometry.dispose()
+        for (const mesh of meshesOf(level)) mesh.material.dispose()
       }
       object.remove(blur.blur.object)
       blur.blur.dispose()
@@ -344,10 +450,12 @@ function sheetTexture(image: HTMLCanvasElement): CanvasTexture {
   return texture
 }
 
-/** The uniforms every level's edge shares, written as the camera moves. */
+/** The uniforms every level's edges share, written as the camera moves. */
 interface ScreenUniforms {
-  /** How much of the white edge shows at the camera's zoom, `0..1`. */
+  /** How much of the edge shows at the camera's zoom, `0..1`. */
   readonly edge: { value: number }
+  /** The edge's width at the camera's zoom, as a share of each name's own. */
+  readonly width: { value: number }
 }
 
 /** The vertex shader both materials share: the texture coordinates and each vertex's edge width, handed on. */
@@ -379,18 +487,20 @@ void main() {
 `
 
 /**
- * The ink: multiplied into the colour under it, over the relief — a name stands at its ground's median height, and
- * the hills rising through it would cut it.
+ * The ink: multiplied into the colour under it — or laid over it, for the inverted names' white — over the relief: a
+ * name stands at its ground's median height, and the hills rising through it would cut it.
  * @param letters - the letters' texture
  * @param ink - the ink, `#rrggbb`
  * @param opacity - the ink's opacity, held by the layer and changed with the zoom's detail
  * @param opacity.value - the opacity, `0..1`
+ * @param blending - multiplied, or in the ordinary blend
  * @returns the material
  */
 function inkMaterial(
   letters: CanvasTexture,
   ink: string,
-  opacity: { value: number }
+  opacity: { value: number },
+  blending: Blending
 ): ShaderMaterial {
   return new ShaderMaterial({
     uniforms: { letters: { value: letters }, ink: { value: new Color(ink) }, opacity },
@@ -398,7 +508,7 @@ function inkMaterial(
     fragmentShader: INK_FRAGMENT,
     transparent: true,
     premultipliedAlpha: true,
-    blending: MultiplyBlending,
+    blending,
     depthWrite: false,
     depthTest: false,
     side: DoubleSide,
@@ -417,28 +527,39 @@ uniform float opacity;
 varying vec2 vUv;
 varying float vHalo;
 uniform float edge;
+uniform float width;
+uniform vec3 tone;
 void main() {
   float away = texture2D(field, vUv).r * fieldEm;
-  float ring = 1.0 - smoothstep(vHalo * 0.66, vHalo, away);
+  float reach = vHalo * width;
+  float ring = 1.0 - smoothstep(reach * 0.66, reach, away);
   float onLetter = texture2D(letters, vUv).a;
-  gl_FragColor = vec4(1.0, 1.0, 1.0, ring * (1.0 - onLetter) * opacity * edge);
+  gl_FragColor = vec4(tone, ring * (1.0 - onLetter) * opacity * edge);
+  #include <colorspace_fragment>
 }
 `
 
+/** An edge's opacity and colour. */
+interface EdgeLook {
+  /** The opacity, `0..1`, held by the layer and changed with the zoom's detail. */
+  readonly opacity: { value: number }
+  /** The edge's colour, `#rrggbb`. */
+  readonly tone: string
+}
+
 /**
- * The letters' white edge, drawn from the sheet's field at each name's own width, over the colour in the ordinary
- * blend, under the ink.
+ * The letters' edge — white, or the ink's colour around the inverted names — drawn from the sheet's field at each
+ * name's own width, over the colour in the ordinary blend, under the ink.
  * @param letters - the letters' texture, so the edge stays off them
  * @param field - the edge field's texture
- * @param opacity - the edge's opacity, held by the layer and changed with the zoom's detail
- * @param opacity.value - the opacity, `0..1`
+ * @param look - the edge's opacity and colour
  * @param screen - the uniforms that follow the camera
  * @returns the material
  */
 function haloMaterial(
   letters: CanvasTexture,
   field: CanvasTexture,
-  opacity: { value: number },
+  look: EdgeLook,
   screen: ScreenUniforms
 ): ShaderMaterial {
   return new ShaderMaterial({
@@ -446,7 +567,8 @@ function haloMaterial(
       letters: { value: letters },
       field: { value: field },
       fieldEm: { value: HALO_FIELD_EM },
-      opacity,
+      opacity: look.opacity,
+      tone: { value: new Color(look.tone) },
       ...screen,
     },
     vertexShader: NAME_VERTEX,

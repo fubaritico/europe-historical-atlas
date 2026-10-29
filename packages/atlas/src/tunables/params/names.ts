@@ -18,6 +18,11 @@ export interface NameDevParams {
    * affiche le titre tel que tu le reçois »*).
    */
   capitals: boolean
+  /**
+   * The tribes' names inverted — white ink on a brown edge — an experiment of the dev's, 2026-10-29 (*« pour les
+   * tribus, leur nom, tu vas inverser le noir et le blanc »*): on until he judges it.
+   */
+  tribesInverted: boolean
   /** The letters' height, as a share of the country's thickness across its line. */
   heightShare: number
   /** The share of the country's length a name covers, its letters spaced to reach it. */
@@ -54,6 +59,11 @@ export interface NameDevParams {
   /** The zoom from which the white edge is gone (*« une fois que c'est zoomé, il n'y a plus de contours blancs »*). */
   haloGoneZoom: number
   /**
+   * The tribes' brown edge at the closest zoom, as a share of its width from afar — kept where the white edge goes, very
+   * thin (the dev, 2026-10-29: *« tu vois le liseré ? Tu le mets, très fin »*).
+   */
+  tribeEdgeClose: number
+  /**
    * The zoom from which every name fades toward a watermark, over the last steps of the zoom — the dev, 2026-10-29:
    * *« un troisième point de zoom où les noms deviennent à 50 % transparents »*.
    */
@@ -73,9 +83,12 @@ export interface NameDevParams {
  */
 export const DEFAULT_NAME_PARAMS: NameDevParams = {
   capitals: false,
+  tribesInverted: true,
   ...DEFAULT_NAME_PLACEMENT,
   haloWholeZoom: 0.1,
   haloGoneZoom: 0.4,
+  // « Très fin » — the dev, 2026-10-29; Claude's start, to tune on the map.
+  tribeEdgeClose: 0.35,
   // The last steps of the zoom — Claude's start, to tune on the map.
   watermarkZoom: 0.85,
   // 0.5 first, then « un peu plus de transparence au zoom complet » (the dev, 29/10).
@@ -86,6 +99,7 @@ export const DEFAULT_NAME_PARAMS: NameDevParams = {
 /** Range, step and label of every {@link NameDevParams} field. */
 export const NAME_CONTROLS: ControlTable<NameDevParams> = {
   capitals: { kind: 'boolean', label: 'capitals' },
+  tribesInverted: { kind: 'boolean', label: 'tribes inverted (white on brown)' },
   heightShare: {
     kind: 'number',
     min: 0.2,
@@ -129,6 +143,13 @@ export const NAME_CONTROLS: ControlTable<NameDevParams> = {
     label: 'white edge whole to (zoom)',
   },
   haloGoneZoom: { kind: 'number', min: 0, max: 1, step: 0.01, label: 'white edge gone at (zoom)' },
+  tribeEdgeClose: {
+    kind: 'number',
+    min: 0,
+    max: 1,
+    step: 0.05,
+    label: 'tribes edge close up (width)',
+  },
   watermarkZoom: { kind: 'number', min: 0, max: 1, step: 0.01, label: 'watermark from (zoom)' },
   watermarkShare: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'watermark opacity' },
   blur: { kind: 'number', min: 0, max: 4, step: 0.1, label: 'blur close up (px)' },
@@ -137,6 +158,7 @@ export const NAME_CONTROLS: ControlTable<NameDevParams> = {
 /** Display order of the names' controls that place them again — their placement's. */
 export const NAME_CONTROL_ORDER: (keyof NameDevParams)[] = [
   'capitals',
+  'tribesInverted',
   'heightShare',
   'cover',
   'trackingMost',
@@ -154,6 +176,7 @@ export const NAME_CONTROL_ORDER: (keyof NameDevParams)[] = [
 export const NAME_SCREEN_ORDER: (keyof NameDevParams)[] = [
   'haloWholeZoom',
   'haloGoneZoom',
+  'tribeEdgeClose',
   'watermarkZoom',
   'watermarkShare',
   'blur',

@@ -214,6 +214,7 @@ const TRIBES_READ_EVERY_FRAME = new Set(['mode', 'widthKm'])
 const NAMES_READ_EVERY_FRAME = new Set([
   'haloWholeZoom',
   'haloGoneZoom',
+  'tribeEdgeClose',
   'watermarkZoom',
   'watermarkShare',
   'blur',

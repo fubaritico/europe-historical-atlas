@@ -3,6 +3,8 @@
  * relief is built, and again whenever the relief is — every letter's vertex sits at the ground's height.
  */
 
+import { tribeIds } from '@europe-historical-atlas/core/editor/tribes'
+
 import { disposeHandle } from '../../layers/disposeHandle'
 
 import { createNameLayer } from './nameLayer'
@@ -36,7 +38,7 @@ export const NAME_HALO_CELLS = 0.8
  * @returns nothing
  */
 export function rebuildNames(context: LayerContext): void {
-  const { scene, sources, handles, projection, blurMethod } = context
+  const { scene, sources, handles, projection, blurMethod, dev } = context
   disposeHandle(scene, handles.names)
   handles.names = null
   const { yearNames, nameSheet } = sources
@@ -51,6 +53,9 @@ export function rebuildNames(context: LayerContext): void {
     haloOpacity: NAME_HALO_OPACITY,
     haloCells: NAME_HALO_CELLS,
     blurMethod,
+    inverted: dev.names.tribesInverted
+      ? tribeIds(sources.regionSet?.authored?.year.registry.polities ?? [])
+      : new Set(),
   })
   handles.names.object.scale.setY(relief.scale.y)
   scene.add(handles.names.object)
