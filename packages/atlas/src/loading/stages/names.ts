@@ -16,6 +16,7 @@ import { namePlacement } from '../../tunables/params'
 import type { NameDevParams } from '../../tunables/params'
 import type { PipelineContext } from '../pipelineContext'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
+import type { YearNames } from '@europe-historical-atlas/core/pipeline/yearNames'
 
 /** A year's names as the map writes them, every form, by polity id. */
 interface WrittenNames {
@@ -40,6 +41,26 @@ function writtenNames(
     short: Object.fromEntries(polities.map(({ id, name }) => [id, written(untitledName(name))])),
     full: Object.fromEntries(polities.map(({ id, name }) => [id, written(name)])),
   }
+}
+
+/**
+ * What the console says of the countries no level found room to name (ATLAS-310): a refusal is never silent (the
+ * dev, 2026-10-11), and a country named nowhere is one the reader cannot find on the map. Said once a placement, never
+ * a frame — the names are placed once a year, and again only when the panel moves them.
+ * @param placed - the year's names, every level
+ * @param polities - the year's registry, for the names said
+ * @returns the warning, the countries by their registry name, each once, in the registry's order; `null` when every
+ *   country shown is named somewhere
+ */
+export function unplacedNote(
+  placed: Pick<YearNames, 'levels'>,
+  polities: readonly { readonly id: string; readonly name: string }[]
+): string | null {
+  const refused = new Set(placed.levels.flatMap(({ tooSmall }) => tooSmall))
+  // The levels' owners are the registry's polities (`bearersByLevel`), so each refused id has its name there.
+  const listed = polities.filter(({ id }) => refused.has(id)).map(({ name }) => name)
+  if (listed.length === 0) return null
+  return `[atlas] No room for the name of ${String(listed.length)} countries, at one level at least: ${listed.join(', ')}.`
 }
 
 /**
@@ -133,6 +154,8 @@ export async function rebuildYearNames(context: PipelineContext, loaded: RegionS
     if (context.isDisposed() || !isCurrent()) return
     if (placed.unnamed.length > 0)
       console.warn(`[atlas] ${String(placed.unnamed.length)} countries have no name to write.`)
+    const refused = unplacedNote(placed, authored.year.registry.polities)
+    if (refused !== null) console.warn(refused)
     sources.yearNames = placed
     sources.nameSheet = sheet
     layers.rebuildNames()

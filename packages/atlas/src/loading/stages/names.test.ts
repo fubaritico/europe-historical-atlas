@@ -6,9 +6,9 @@ import { createLatestOnly } from '@europe-historical-atlas/core/utils/latestOnly
 import { createMapSources } from '../../sources/mapSources'
 import { createDevState } from '../../tunables/devState'
 import { namePlacement } from '../../tunables/params'
-import { AUTHORED_YEAR, META, YEAR } from '../testing/yearFixtures'
+import { AUTHORED_FILES, AUTHORED_YEAR, META, YEAR } from '../testing/yearFixtures'
 
-import { rebuildYearNames } from './names'
+import { rebuildYearNames, unplacedNote } from './names'
 
 import type { MapLayers } from '../../scene/layers/mapLayers'
 import type { MapSources } from '../../sources/mapSources'
@@ -216,5 +216,65 @@ describe('rebuildYearNames', () => {
       await rebuildYearNames(context, AUTHORED_YEAR)
       expect(context.nameFace).toBe(face)
     })
+  })
+})
+
+/**
+ * A placement whose levels refuse these countries.
+ * @param refused - the polities each level found no room for
+ * @returns the placement
+ */
+const levels = (...refused: string[][]): Pick<YearNames, 'levels'> => ({
+  levels: refused.map((tooSmall) => ({ placed: [], tooSmall })),
+})
+
+// ATLAS-310: a country no level names is said in the console, never left silent (the dev, 2026-10-11).
+describe('unplacedNote', () => {
+  const POLITIES = [
+    { id: 'duchy-of-naples', name: 'Duchy of Naples' },
+    { id: 'duchy-of-amalfi', name: 'Duchy of Amalfi' },
+    { id: 'republic-of-ragusa', name: 'Republic of Ragusa' },
+  ]
+
+  describe('happy path', () => {
+    it('names the countries no room was found for, by their registry name', () => {
+      expect(unplacedNote(levels(['duchy-of-naples', 'duchy-of-amalfi']), POLITIES)).toBe(
+        '[atlas] No room for the name of 2 countries, at one level at least: Duchy of Naples, Duchy of Amalfi.'
+      )
+    })
+  })
+
+  describe('variants', () => {
+    it('says a country refused at several levels once', () => {
+      expect(
+        unplacedNote(
+          levels(['republic-of-ragusa'], ['duchy-of-naples', 'republic-of-ragusa']),
+          POLITIES
+        )
+      ).toBe(
+        '[atlas] No room for the name of 2 countries, at one level at least: Duchy of Naples, Republic of Ragusa.'
+      )
+    })
+  })
+
+  // L3, L4: N/A — a message built from a placement and a registry, nothing refused.
+
+  describe('edge cases', () => {
+    it('says nothing when every country is named', () => {
+      expect(unplacedNote(levels([], []), POLITIES)).toBeNull()
+    })
+  })
+})
+
+describe('rebuildYearNames, the countries named nowhere', () => {
+  it('warns once a placement of the countries it found no room for', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const [first] = AUTHORED_FILES.registry.polities
+    if (first === undefined) throw new Error('no polity in the test year')
+    const { context } = stage(() =>
+      Promise.resolve({ ...PLACED, levels: [{ placed: [], tooSmall: [first.id] }] })
+    )
+    await rebuildYearNames(context, AUTHORED_YEAR)
+    expect(warn.mock.calls.filter(([text]) => String(text).includes(first.name))).toHaveLength(1)
   })
 })
