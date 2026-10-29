@@ -317,3 +317,8 @@ target.z)` would be coherent with the navigation that already exists.
   ordinary names' inks only; the inverted names are laid in the ordinary blend and stay crisp, on their thin brown edge, while
   the other names soften. Not seen by the dev as a fault (*« là c'est parfait »*). **Remedy if it shows**: an inverted ink drawn
   into a blur image of its own, laid in the ordinary blend — the multiplied quad cannot carry a white. **Severity: cosmetic.**
+- **`reliefWorldY` reads an invalid elevation (`NaN`) as sea level, silently** (`scene/relief/reliefMesh.ts:52`; found by a
+  test on 2026-09-17, the first case `rules/error-handling.md` was written for). Both of its `>` comparisons fail for
+  `NaN`, so the point is laid flat at 0 — a plausible answer nothing downstream can tell from a real one. It only happens
+  with a corrupt elevation file; the DEM is ours and committed. **Remedy if it bites**: let the `NaN` through (a hole that
+  shows) or refuse the file at its reader — an error-handling decision, to discuss then. **Severity: worth knowing.**
