@@ -8,8 +8,6 @@
  * in a module that can be exercised with a literal.
  */
 
-import Stats from 'three/addons/libs/stats.module.js'
-
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
 import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?worker'
@@ -19,8 +17,8 @@ import { startFrameLoop } from './app/frameLoop'
 import { createMapInteraction } from './app/mapInteraction'
 import { createMapUi } from './app/mapUi'
 import { createViewport } from './app/viewport'
-import { createDevPanel } from './devPanel/devPanel'
 import { panelDepsFor } from './devPanel/devPanelCallbacks'
+import { NO_DEV_TOOLS, mountDevTools } from './devPanel/devTools'
 import { ATLAS_MESSAGES } from './i18n'
 import { createMapPipeline } from './loading/mapPipeline'
 // Vite resolves `?worker` into a constructor for the bundled worker module. It is the one
@@ -81,10 +79,11 @@ function bootstrap(): () => void {
     picker: createSurfacePicker({ camera: view.camera, target: layers.pickTarget }),
     controls: view.controls,
   })
-  const gui = createDevPanel(panelDepsFor({ dev, layers, pipeline, view }))
-
-  const stats = new Stats()
-  document.body.appendChild(stats.dom)
+  // The settings' panel and the frame counter, under `pnpm dev` only (ATLAS-317). Written as the condition itself, so
+  // the build turns it to `false` and leaves the panel, lil-gui and the counter out of the deployed bundle.
+  const tools = import.meta.env.DEV
+    ? mountDevTools(panelDepsFor({ dev, layers, pipeline, view }), document.body)
+    : NO_DEV_TOOLS
 
   const onResize = (): void => {
     view.resize()
@@ -93,7 +92,7 @@ function bootstrap(): () => void {
   window.addEventListener('resize', onResize)
 
   void pipeline.start()
-  const stopLoop = startFrameLoop(view, layers, stats)
+  const stopLoop = startFrameLoop(view, layers, tools.stats)
 
   return (): void => {
     disposed = true // stop any in-flight load from building onto a dead scene
@@ -103,8 +102,7 @@ function bootstrap(): () => void {
     // alone, and a bake in flight has nothing left to hand its pixels to.
     pipeline.dispose()
     interaction.dispose()
-    gui.destroy()
-    stats.dom.remove()
+    tools.dispose()
     ui.dispose()
     layers.dispose()
     view.dispose() // persists the viewpoint before it takes the camera apart
