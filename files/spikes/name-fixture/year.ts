@@ -11,7 +11,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 import { projectRegions } from '../../../packages/core/src/data/regionSource'
-import { shortNameOf } from '../../../packages/core/src/data/shortName'
+import { fullNameOf, shortNameOf } from '../../../packages/core/src/data/shortName'
 import { toRegionPayload } from '../../../packages/core/src/data/toRegionPayload'
 import { assembleAuthoredYear } from '../../../packages/core/src/data/yearConsistency'
 import { homageLevels } from '../../../packages/core/src/editor/homageLevels'
@@ -76,7 +76,12 @@ function place(): Row[] {
     regions,
     bearersByLevel: levels,
     names: Object.fromEntries(polities.map((polity) => [polity.id, shortNameOf(polity)])),
-    fullNames: Object.fromEntries(polities.map(({ id, name }) => [id, name])),
+    fullNames: Object.fromEntries(
+      polities.flatMap((polity) => {
+        const full = fullNameOf(polity)
+        return full === null ? [] : [[polity.id, full]]
+      })
+    ),
     glyphs,
     gridWidth: NAME_GRID_WIDTH,
     gridHeight: Math.round((NAME_GRID_WIDTH * relief.height) / relief.width),

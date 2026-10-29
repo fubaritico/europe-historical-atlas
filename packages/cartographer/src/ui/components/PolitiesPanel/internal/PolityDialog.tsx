@@ -52,11 +52,8 @@ export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: Poli
   const action = useTranslation(ACTION_MESSAGES)
 
   // State
-  const { draft, errors, suzerains, ranks, close, onField, onColour, onSubmit } = usePolityDraft(
-    store,
-    editing,
-    onClose
-  )
+  const { draft, errors, suzerains, ranks, close, onField, onColour, onForceShortName, onSubmit } =
+    usePolityDraft(store, editing, onClose)
   const reading = useWikidataItem(wikidata, draft.wikidata)
 
   // Derived
@@ -83,6 +80,7 @@ export function PolityDialog({ store, editing, isOpen, onClose, wikidata }: Poli
         idLocked={editing !== null}
         onField={onField}
         onColour={onColour}
+        onForceShortName={onForceShortName}
         onSubmit={onSubmit}
         onCancel={close}
         wikidata={wikidataView}

@@ -10,7 +10,7 @@
 
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { rasteriseRegions } from '@europe-historical-atlas/core/data/regionRaster'
-import { shortNameOf } from '@europe-historical-atlas/core/data/shortName'
+import { fullNameOf, shortNameOf } from '@europe-historical-atlas/core/data/shortName'
 import { createAuthoredYearSource } from '@europe-historical-atlas/core/data/yearManifest'
 import { homageLevels } from '@europe-historical-atlas/core/editor/homageLevels'
 import { polityColours } from '@europe-historical-atlas/core/editor/polityColours'
@@ -110,7 +110,7 @@ interface Prepared {
   /** Each polity's colour, by id. */
   readonly colours: ReadonlyMap<string, string>
   /** Each polity's formal name and the short name its author entered, if any, by id. */
-  readonly names: ReadonlyMap<string, Pick<YearPolity, 'name' | 'shortName'>>
+  readonly names: ReadonlyMap<string, Pick<YearPolity, 'name' | 'shortName' | 'forceShortName'>>
   /** The grid's height in cells, for the map's own proportions. */
   readonly height: number
 }
@@ -283,13 +283,13 @@ function place(context: CanvasRenderingContext2D, prepared: Prepared, settings: 
   )
   const requests = ids.map((id, owner) => {
     const polity = required(prepared.names.get(id), `name for ${id}`)
-    const { name } = polity
+    const full = fullNameOf(polity)
     const cased = (text: string): string =>
       settings.capitals ? text.toLocaleUpperCase('fr') : text
     const short = shortNameOf(polity)
-    return short === name
-      ? { owner, text: cased(name) }
-      : { owner, text: cased(name), shorter: cased(short) }
+    return full === null || short === full
+      ? { owner, text: cased(short) }
+      : { owner, text: cased(full), shorter: cased(short) }
   })
   const started = performance.now()
   const placement = placeNames(

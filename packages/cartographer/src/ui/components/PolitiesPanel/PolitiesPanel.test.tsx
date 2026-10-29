@@ -614,6 +614,19 @@ describe('PolitiesPanel — editing a polity (s07)', () => {
       expect('shortName' in (store.getState().document.polities[0] ?? {})).toBe(false)
     })
 
+    // The dev, 2026-10-29: « je veux pouvoir, dans certains cas, forcer le nom court ».
+    it('forces the short name with the box under it, and takes it off when unticked', async () => {
+      const { store, user } = mountGroup()
+      await user.dblClick(screen.getByText('Reaume de France'))
+      await user.click(open().getByLabelText('Always the short name on the map'))
+      await user.click(open().getByRole('button', { name: 'OK' }))
+      expect(store.getState().document.polities[0]?.forceShortName).toBe(true)
+      await user.dblClick(screen.getByText('Reaume de France'))
+      await user.click(open().getByLabelText('Always the short name on the map'))
+      await user.click(open().getByRole('button', { name: 'OK' }))
+      expect('forceShortName' in (store.getState().document.polities[0] ?? {})).toBe(false)
+    })
+
     // s07 — "the same polity, with the same id".
     it('shows the id but does not let it change', async () => {
       const { user } = mountGroup()

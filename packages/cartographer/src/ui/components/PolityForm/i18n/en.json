@@ -3,6 +3,7 @@
   "name": "Name",
   "shortName": "Short name",
   "shortNameHint": "Written on the map where the full name does not fit.",
+  "forceShortName": "Always the short name on the map",
   "id": "Id",
   "rank": "Rank",
   "status": "Status",

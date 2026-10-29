@@ -26,6 +26,16 @@ export function untitledName(formal: string): string {
 }
 
 /**
+ * The full name the map may write for a polity, where it fits: its formal name — unless its author forced the short
+ * one everywhere ({@link YearPolity.forceShortName}).
+ * @param polity - its formal name, and whether its short name is forced
+ * @returns the formal name; `null` when only the short one is written
+ */
+export function fullNameOf(polity: Pick<YearPolity, 'name' | 'forceShortName'>): string | null {
+  return polity.forceShortName === true ? null : polity.name
+}
+
+/**
  * The short name the map writes for a polity.
  * @param polity - its formal name, and the short name its author entered, if any
  * @returns the short name entered, as is; the formal name without its title where none was

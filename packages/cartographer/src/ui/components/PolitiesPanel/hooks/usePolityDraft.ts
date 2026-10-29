@@ -87,7 +87,7 @@ function openingOf(editing: YearPolity | null): PolityDraft {
  * @param editing - the polity edited, or `null` when creating one
  * @param onClose - close the dialogue, after a commit or on cancel
  * @returns the draft and its errors, the suzerains and ranks to choose from, and the gestures: close, a field
- *   changed, the colour changed, submit
+ *   changed, the colour changed, the short name forced or not, submit
  */
 export function usePolityDraft(
   store: CartographerStoreHook,
@@ -132,6 +132,10 @@ export function usePolityDraft(
     setDraft((current) => ({ ...current, colour }))
   }
 
+  const onForceShortName = (force: boolean) => {
+    setDraft((current) => ({ ...current, forceShortName: force }))
+  }
+
   const onSubmit = () => {
     const reading = readDraft(draft, taken)
     if (!reading.ok) {
@@ -144,5 +148,5 @@ export function usePolityDraft(
   }
 
   // Return
-  return { draft, errors, suzerains, ranks, close, onField, onColour, onSubmit }
+  return { draft, errors, suzerains, ranks, close, onField, onColour, onForceShortName, onSubmit }
 }

@@ -74,6 +74,16 @@ describe('polityDraft', () => {
       expect(reading.ok && 'shortName' in reading.polity).toBe(false)
     })
 
+    // The dev, 2026-10-29: « je veux pouvoir, dans certains cas, forcer le nom court ».
+    it('writes the short name forced when the box is ticked, and nothing when it is not', () => {
+      const ticked = readDraft(draft({ name: 'France', id: 'france', forceShortName: true }), NONE)
+      const unticked = readDraft(draft({ name: 'France', id: 'france' }), NONE)
+      expect([
+        ticked.ok && ticked.polity.forceShortName,
+        unticked.ok && 'forceShortName' in unticked.polity,
+      ]).toEqual([true, false])
+    })
+
     // s02 — "explicit when given": the picker's HSVA becomes the file's #rrggbb.
     it("writes a chosen colour as the file's six-digit hex", () => {
       const reading = readDraft(
@@ -231,6 +241,14 @@ describe('draftOf', () => {
       const original = { ...polity('fr'), shortName: 'France' }
       expect([draftOf(original).shortName, readDraft(draftOf(original), NONE)]).toEqual([
         'France',
+        { ok: true, polity: original },
+      ])
+    })
+
+    it('reads back a polity whose short name is forced, its box ticked', () => {
+      const original = { ...polity('fr'), shortName: 'France', forceShortName: true as const }
+      expect([draftOf(original).forceShortName, readDraft(draftOf(original), NONE)]).toEqual([
+        true,
         { ok: true, polity: original },
       ])
     })

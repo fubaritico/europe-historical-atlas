@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { shortNameOf, untitledName } from './shortName'
+import { fullNameOf, shortNameOf, untitledName } from './shortName'
 
 describe('untitledName', () => {
   describe('happy path', () => {
@@ -72,4 +72,23 @@ describe('shortNameOf', () => {
       expect(shortNameOf({ name: 'Cumans' })).toBe('Cumans')
     })
   })
+})
+
+// The dev, 2026-10-29: « je veux pouvoir, dans certains cas, forcer le nom court ».
+describe('fullNameOf', () => {
+  describe('happy path', () => {
+    it('offers the formal name where it fits', () => {
+      expect(fullNameOf({ name: 'Kingdom of France' })).toBe('Kingdom of France')
+    })
+  })
+
+  describe('variants', () => {
+    it('offers no full name when the short one is forced', () => {
+      expect(
+        fullNameOf({ name: 'Obotrites Tribes Confederation', forceShortName: true })
+      ).toBeNull()
+    })
+  })
+
+  // L3, L4, L5: N/A — a field read.
 })

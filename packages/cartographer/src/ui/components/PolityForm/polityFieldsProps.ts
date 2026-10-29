@@ -3,8 +3,8 @@ import type { DraftError, DraftField, DraftOption, PolityDraft } from '../../uti
 import type { WikidataView } from '../../utils/wikidataView'
 import type { HsvaColor } from '@fubaritico/behaviors'
 
-/** The fields a form event can name: every text field and every list of the draft — the colour has its own. */
-export type PolityFormField = Exclude<keyof PolityDraft, 'idEdited' | 'colour'>
+/** The fields a form event can name: every text field and every list of the draft — the colour and the box their own. */
+export type PolityFormField = Exclude<keyof PolityDraft, 'idEdited' | 'colour' | 'forceShortName'>
 
 /** What the form's fields show and what they report — the form's own props extend these. */
 export interface PolityFieldsProps {
@@ -30,6 +30,11 @@ export interface PolityFieldsProps {
    * @param colour - the picked colour, or `null` for "automatic"
    */
   onColour: (colour: HsvaColor | null) => void
+  /**
+   * The box « force the short name » ticked or unticked.
+   * @param force - whether the short name is written everywhere
+   */
+  onForceShortName: (force: boolean) => void
   /** What Wikidata says about the id typed (CARTO-243). */
   wikidata: WikidataView
   /**

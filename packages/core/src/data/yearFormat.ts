@@ -74,6 +74,12 @@ export interface YearPolity {
    */
   shortName?: string
   /**
+   * The short name written everywhere, even where the full one fits — the dev, 2026-10-29, for the Obotrites, whose
+   * full name fits and makes *« un super gros nom »*: *« je veux avoir le choix […] forcer le nom court »*. **Absent
+   * unless forced**, optional for the same reason as {@link YearPolity.shortName}.
+   */
+  forceShortName?: true
+  /**
    * Its dignity: `empire`, `kingdom`, `duchy`, `county`… OHM's `border_type`.
    *
    * Left open rather than a union: OHM is a wiki, the vocabulary grows, and a closed union would reject
@@ -115,6 +121,7 @@ export const yearPolitySchema: z.ZodMiniType<YearPolity> = z.strictObject({
   id: z.string().check(z.minLength(1)),
   name: z.string().check(z.minLength(1)),
   shortName: z.exactOptional(z.string().check(z.minLength(1))),
+  forceShortName: z.exactOptional(z.literal(true)),
   rank: z.nullable(z.string()),
   status: z.nullable(z.string()),
   suzerain: z.nullable(z.string()),

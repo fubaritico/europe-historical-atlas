@@ -118,6 +118,30 @@ describe('rebuildYearNames', () => {
       expect(request.names[first.id]).toBe('Francia')
     })
 
+    // The dev, 2026-10-29: « je veux pouvoir, dans certains cas, forcer le nom court ».
+    it('offers only the short name of a polity whose short name is forced, its full name kept for the others', async () => {
+      const [first, second, ...rest] = AUTHORED_FILES.registry.polities
+      if (first === undefined || second === undefined)
+        throw new Error('two polities wanted in the test year')
+      const registry = {
+        ...AUTHORED_FILES.registry,
+        polities: [{ ...first, forceShortName: true as const }, second, ...rest],
+      }
+      const year = {
+        ...AUTHORED_YEAR,
+        authored: { year: { ...AUTHORED_FILES, registry }, bbox: META.bbox },
+      }
+      const { context, placeYearNames } = stage()
+      await rebuildYearNames(context, year)
+      const request = placeYearNames.mock.calls[0]?.[0] as Parameters<
+        PipelineContext['box']['names']['placeYearNames']
+      >[0]
+      expect([first.id in request.fullNames, request.fullNames[second.id]]).toEqual([
+        false,
+        second.name,
+      ])
+    })
+
     it('writes the names in capitals when the panel says so', async () => {
       const { context, placeYearNames } = stage()
       context.dev.names.capitals = true

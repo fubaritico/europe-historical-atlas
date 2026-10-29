@@ -185,6 +185,25 @@ Scenario: the atlas writes the short name
   And the console says once "[atlas] N countries have no short name — the map writes their name without its title: …"
 ```
 
+> **Built 2026-10-29 (uncommitted, the dev's request)** — the box « force the short name », for the Obotrites, whose full
+> name fits and makes *« un super gros nom »*: *« je veux avoir le choix. Je veux pouvoir, dans certains cas, forcer le nom
+> court »*, drawn at Illustrator's proportions (*« chartée à la Illustrator »*). Not walked yet.
+
+```gherkin
+Scenario: the short name forced everywhere
+  Given the polity form is open for "Obotrites Tribes Confederation", short name "Obotrites"
+  Then under Short name a box reads "Always the short name on the map" (« Toujours le nom court sur la carte »)
+  When I tick it and press [OK]
+  Then the registry of the year holds "forceShortName": true for it
+  And the atlas writes "Obotrites" everywhere, even where "Obotrites Tribes Confederation" would fit
+
+Scenario: the box unticked
+  Given the box is ticked
+  When I untick it and press [OK]
+  Then the registry holds no "forceShortName" for it — absent, never false
+  And the atlas writes the full name where it fits, as before
+```
+
 > **The dev's call, 2026-10-29**: a usage name entered with the polity, as Crusader Kings does, after two evenings of
 > rules that shortened names badly; one short name, not one per language, for now; a polity without one is written
 > without its title and *« signalé par la console »* — *« faut afficher les informations, c'est primordial »*. The field

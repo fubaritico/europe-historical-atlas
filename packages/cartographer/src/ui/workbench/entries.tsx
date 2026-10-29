@@ -32,6 +32,7 @@ const BLUE = { h: 214, s: 62, v: 68, a: 1 }
 const INERT = {
   onField: () => undefined,
   onColour: () => undefined,
+  onForceShortName: () => undefined,
   onSubmit: () => undefined,
   onCancel: () => undefined,
   onUseWikidata: () => undefined,
@@ -312,7 +313,7 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
   {
     id: 'polity-form-refused',
     title: 'Polity form, refused',
-    note: 'OK pressed with an id the year already holds and a year that is not a number: each message sits under its own field.',
+    note: 'OK pressed with an id the year already holds and a year that is not a number: each message sits under its own field. The short name is forced: its box ticked.',
     width: 360,
     render: () => (
       <PolityForm
@@ -320,6 +321,8 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
         draft={{
           ...EMPTY_DRAFT,
           name: 'Reaume de France',
+          shortName: 'France',
+          forceShortName: true,
           id: 'fr-couronne',
           idEdited: true,
           rank: 'kingdom',

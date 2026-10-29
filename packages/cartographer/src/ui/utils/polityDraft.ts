@@ -19,6 +19,8 @@ export interface PolityDraft {
   name: string
   /** As typed: empty when the author gives none, and the atlas then writes the name without its title (CARTO-307). */
   shortName: string
+  /** Whether the short name is written everywhere, even where the full one fits — the box under it. */
+  forceShortName: boolean
   /** As typed, or as proposed from the name while {@link PolityDraft.idEdited} is false. */
   id: string
   /** Whether the author has written the id themselves — from then on the name no longer proposes one. */
@@ -49,6 +51,7 @@ export interface PolityDraft {
 export const EMPTY_DRAFT: PolityDraft = {
   name: '',
   shortName: '',
+  forceShortName: false,
   id: '',
   idEdited: false,
   rank: null,
@@ -133,14 +136,18 @@ function readYear(text: string): number | null | undefined {
 }
 
 /**
- * The short name the form gives the polity, trimmed — **absent rather than empty** when none was typed: the format's
- * one optional field, so a polity without it is written as a year saved before it was (CARTO-307).
+ * The short name the form gives the polity, trimmed, and whether it is forced — each **absent rather than empty or
+ * false** when not given: optional fields of the format, so a polity without them is written as a year saved before
+ * they were (CARTO-307; the box, the dev, 2026-10-29).
  * @param draft - the form
- * @returns `{ shortName }`, or nothing
+ * @returns `{ shortName, forceShortName }`, each only when given
  */
-function shortNameOf(draft: PolityDraft): Pick<YearPolity, 'shortName'> {
+function shortNameOf(draft: PolityDraft): Pick<YearPolity, 'shortName' | 'forceShortName'> {
   const shortName = draft.shortName.trim()
-  return shortName === '' ? {} : { shortName }
+  return {
+    ...(shortName === '' ? {} : { shortName }),
+    ...(draft.forceShortName ? { forceShortName: true as const } : {}),
+  }
 }
 
 /**
@@ -201,6 +208,7 @@ export function draftOf(polity: YearPolity): PolityDraft {
     name: polity.name,
     // An absent short name is the author's « none », shown as the empty field it was left.
     shortName: polity.shortName ?? '',
+    forceShortName: polity.forceShortName === true,
     id: polity.id,
     idEdited: true,
     rank: polity.rank,

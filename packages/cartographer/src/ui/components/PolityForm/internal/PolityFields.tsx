@@ -1,7 +1,5 @@
 import { Input } from '@fubaritico/react/Input'
 
-import { shortNameOf } from '@europe-historical-atlas/core/data/shortName'
-
 import { autofocusOnOpen } from '../../../hooks/autofocusOnOpen'
 import { useTranslation } from '../../../hooks/useTranslation'
 import { WikidataPanel } from '../../WikidataPanel'
@@ -10,6 +8,7 @@ import { errorOf } from '../utils/errorOf'
 import { textField } from '../utils/textField'
 
 import { ColourField } from './ColourField'
+import { ShortNameFields } from './ShortNameFields'
 import { StandingFields } from './StandingFields'
 import { SuzerainField } from './SuzerainField'
 
@@ -41,13 +40,7 @@ export function PolityFields(props: PolityFieldsProps) {
         {...textField('name', props)}
         {...errorOf(t, errors.name)}
       />
-      {/* CARTO-307: left empty, it shows greyed what the atlas writes instead — the rule's fallback, never the typed text. */}
-      <Input
-        label={t('shortName')}
-        placeholder={shortNameOf({ name: draft.name })}
-        message={t('shortNameHint')}
-        {...textField('shortName', props)}
-      />
+      <ShortNameFields {...props} />
       <Input
         label={t('id')}
         readOnly={props.idLocked === true}

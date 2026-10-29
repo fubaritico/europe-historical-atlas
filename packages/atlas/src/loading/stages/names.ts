@@ -4,7 +4,7 @@
  * placing every level takes seconds — and the progress bar does not carry them.
  */
 
-import { shortNameOf } from '@europe-historical-atlas/core/data/shortName'
+import { fullNameOf, shortNameOf } from '@europe-historical-atlas/core/data/shortName'
 import { homageLevels } from '@europe-historical-atlas/core/editor/homageLevels'
 import { bearersByLevel } from '@europe-historical-atlas/core/editor/regionBearers'
 import { LEADER_DOT } from '@europe-historical-atlas/core/pipeline/nameOffset'
@@ -23,7 +23,7 @@ import type { YearNames } from '@europe-historical-atlas/core/pipeline/yearNames
 interface WrittenNames {
   /** The short names — the registry's own, or the formal one without its title where it has none (CARTO-307). */
   readonly short: Record<string, string>
-  /** The full names — the registry's own. */
+  /** The full names — the registry's own; none for a polity whose short name is forced. */
   readonly full: Record<string, string>
 }
 
@@ -35,6 +35,8 @@ interface NamedPolity {
   readonly name: string
   /** The name the map writes where the full one does not fit (CARTO-307); absent when none was entered. */
   readonly shortName?: string
+  /** Whether its short name is written everywhere, even where the full one fits; absent when not. */
+  readonly forceShortName?: true
 }
 
 /**
@@ -47,7 +49,12 @@ function writtenNames(polities: readonly NamedPolity[], params: NameDevParams): 
   const written = (text: string): string => (params.capitals ? text.toLocaleUpperCase('en') : text)
   return {
     short: Object.fromEntries(polities.map((polity) => [polity.id, written(shortNameOf(polity))])),
-    full: Object.fromEntries(polities.map(({ id, name }) => [id, written(name)])),
+    full: Object.fromEntries(
+      polities.flatMap((polity) => {
+        const full = fullNameOf(polity)
+        return full === null ? [] : [[polity.id, written(full)]]
+      })
+    ),
   }
 }
 

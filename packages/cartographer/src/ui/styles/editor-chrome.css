@@ -58,6 +58,37 @@
 }
 
 /*
+ * A box at Illustrator's proportions (the dev, 2026-10-29: *« chartée à la Illustrator »*): a small square with the
+ * fields' hairline, nothing rounded, its label at the fields' 12px type; ticked, it takes the primary button's fill —
+ * the hairline's colour, the theme's `primary` — and the fields' focus ring. It sits in the fields' second column,
+ * under the control it qualifies: the label column (88px) and the gap (8px) of `.ui-field`.
+ */
+.ui-checkbox {
+  --ui-checkbox-size: 12px;
+  --ui-checkbox-gap: 6px;
+  --ui-checkbox-font-family: inherit;
+  --ui-checkbox-label-size: 12px;
+  --ui-checkbox-label-color: var(--ink);
+  --ui-checkbox-border-color: var(--ink-off);
+  --ui-checkbox-border-hover: var(--ink);
+  --ui-checkbox-ring-color: var(--accent);
+  --ui-checkbox-ring-offset: 1px;
+}
+
+.ui-checkbox__box {
+  border-width: 1px;
+}
+
+.ui-checkbox__icon svg {
+  inline-size: 10px;
+  block-size: 10px;
+}
+
+.polity-form .ui-checkbox-field {
+  padding-inline-start: calc(88px + 8px);
+}
+
+/*
  * Every button at a field's proportions — the same 22px line, the same 12px type, the focus ring inside —
  * so a button reads like the fields it sits under rather than like a foreign widget (the dev's call,
  * 2026-10-09).

@@ -3,6 +3,7 @@
   "name": "Nom",
   "shortName": "Nom court",
   "shortNameHint": "Écrit sur la carte là où le nom complet ne tient pas.",
+  "forceShortName": "Toujours le nom court sur la carte",
   "id": "Identifiant",
   "rank": "Rang",
   "status": "Statut",
