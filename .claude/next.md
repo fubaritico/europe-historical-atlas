@@ -148,23 +148,11 @@ point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui 
 
 ## Comment répondre, dans ce projet
 
-- **Quand le dev nomme une convention, aller voir TOUS ses dépôts voisins, pas un.** C'est la faute du
-  01/10, qui a coûté la première heure de la session et une remise à zéro complète : il a dit que la
-  surcharge ESLint se met dans le paquet, j'ai ouvert **un seul** de ses sept dépôts, j'y ai vu une config
-  à la racine et j'ai généralisé. Un `find` sur les sept rend **9 configs par paquet**. Les dépôts sont au
-  même niveau que celui-ci, dans `~/Desktop/WebstormProjects/`.
-- **Avant de mesurer ce qu'un outil fait, lire comment il est appelé.** C'est le défaut sous le défaut, le
-  01/10 : j'ai mesuré correctement qu'une config ESLint imbriquée est ignorée par un `eslint .` lancé depuis
-  la racine — mais j'avais vérifié **la mauvaise proposition**. La question n'était pas « une config
-  imbriquée peut-elle marcher si je garde la commande de la racine ? », c'était « comment lance-t-il son
-  lint ? », et la réponse tenait dans une ligne de son `apps/home/package.json` : `"lint": "eslint ./src"`.
-  J'avais lu sa config, jamais les **scripts** qui la chargent. **Lire les `scripts` du `package.json`
-  avant de mesurer le comportement d'un outil** — de la rigueur dirigée vers la mauvaise question coûte
-  autant que pas de rigueur, et donne en plus de l'assurance.
-- **Quand il a tranché, exécuter — pas argumenter la mesure.** Même soir : il a redemandé deux fois, et
-  j'ai répondu par le détail technique au lieu de faire. *« Elle est où ma surcharge ? »*
-- **Ne pas poser une question qui n'a pas d'arbitrage.** Trois posées le 01/10, zéro nécessaire. Son test :
-  *« c'est quoi la décision qu'il y a à prendre là ? »* Si la réponse est « aucune », on fait et on le dit.
+- **Une convention qu'il nomme se vérifie dans tous ses dépôts voisins** (`~/Desktop/WebstormProjects/`), pas un seul.
+- **Lire les `scripts` du `package.json` avant de mesurer le comportement d'un outil** : c'est eux qui disent comment il
+  est lancé.
+- **Quand il a tranché, exécuter** — pas argumenter la mesure.
+- **Pas de question sans arbitrage** : son test, *« c'est quoi la décision qu'il y a à prendre là ? »*
 - **Tout problème arrive avec son remède et sa criticité.** Jamais une liste de risques sans décision.
 - **Ne jamais inscrire une déduction de moi comme une décision du dev.** Le tableau de `plan.md` porte
   une colonne `by` pour ça.

@@ -19,7 +19,7 @@ Update the session-state files CLAUDE.md imports — completed.md, next.md and t
    action timestamps, ignoring the unreliable process start/end markers).
    If the chantier spans several days, say so explicitly in the entry (e.g. "chantier du 15 au 17/09,
    3 plages, 4h20") rather than dating it as a single day.
-2. Read @.claude/CLAUDE.md to see the current Session State
+2. Work from the Session State already in context (CLAUDE.md's imports: completed.md, next.md, known-issues.md)
 3. Review the conversation history to identify:
    - What was completed this session (new items to add to `### Completed`)
    - What the next actionable step is (`### Next`)
@@ -51,5 +51,7 @@ Update the session-state files CLAUDE.md imports — completed.md, next.md and t
    session has its card, and each ticket it cites (`— CARTO-41`) names a card that exists in a coherent column. What
    shipped this session is a card in **Fait** (after the dev's test) — `completed.md` cites the ticket and
    does not re-describe it; `next.md` holds no task list, the board does.
-7. A decision of this project goes in its plan or `.claude/*.md`; a lesson about working with the dev in the file memory; a lesson that holds in other repositories in Basic Memory (`main/patterns/`).
-8. Propose all changes to the user before writing — do not write without confirmation
+7. **Scenarios** — if user-facing code shipped this session, run `/scenarii-to-code` §7d (the code → scenario audit)
+   and include its table in the proposal.
+8. A decision of this project goes in its plan or `.claude/*.md`; a lesson about working with the dev in the file memory; a lesson that holds in other repositories in Basic Memory (`main/patterns/`).
+9. Propose all changes to the user before writing — do not write without confirmation

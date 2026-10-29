@@ -1,11 +1,6 @@
 ---
 name: review
-description: Multi-agent code review for security, architecture, quality, and accessibility. Produces JSON findings and iterates up to 3 times.
-triggers:
-  - review code
-  - check compliance
-  - run review
-  - code review
+description: Multi-agent code review (security, architecture, quality, accessibility) of the uncommitted changes and their blast radius; JSON findings, verified before reporting, up to three fix rounds. Use after every change that passes the type-check, lint and test gate, before /commit, or when asked to review or check code.
 ---
 
 # Review — Multi-Agent Code Reviewer
@@ -65,25 +60,11 @@ Each subagent returns JSON only: an array of findings, or the `clean` object (`c
 has few or none. Schema: `references/schema.json`.
 An empty array is a legitimate, welcome answer — see the shared protocol appended to each agent file.
 
-### Step 4 — Aggregate & Score
+### Step 4 — Aggregate
 
-Merge findings. Per-category score:
-
-```
-category_score = max(0, 100 - (critical * 25) - (high * 10) - (medium * 3) - (low * 1))
-```
-
-Overall weights (sum = 100%): security 35%, architecture 30%, quality 25%, accessibility 10%.
-
-Verdict thresholds: `ready` = 80-100 **and** nothing critical/high left open; `needs-attention` = 60-79;
-`needs-work` = under 60.
-
-**Treat the number as a rough sort, never as a measurement.** It is an arithmetic dressing over severities
-an agent chose, so it is only as calibrated as they are — and it is more precise-looking than it deserves.
-Report it to one decimal at most, and **never let it override a reading of the findings themselves**: a
-score of 95 with one unfixed `high` is not a pass. When in doubt, say `needs-attention` and name what is
-open. On 2026-09-16 the skill produced a confident "95.5" from a set of severities that included a missing
-JSDoc tag filed as `high`.
+Merge findings, grouped by severity. The verdict comes from what is left open, never from a computed number:
+`ready` = nothing critical or high open; `needs-attention` = a high open; `needs-work` = a critical open — a
+number computed from severities the agents chose would only look more precise than they are.
 
 ### Step 5 — Verify before reporting
 
@@ -91,7 +72,7 @@ Three checks, in this order — a review that ships a wrong finding costs more t
 
 1. **`needs_verification: true`** → run the `verification_query` against `opensrc/` (authoritative —
    context7 can lag a version) or the web. Common cases: three.js API shape, deprecated methods, Vite HMR behaviour.
-   If the usage turns out correct, discard the finding and adjust the score.
+   If the usage turns out correct, discard the finding.
 2. **Any finding carrying a computed figure** — a contrast ratio, a byte count, a complexity bound —
    **re-derive it yourself** from the `evidence` field. Agents produce confident arithmetic; on
    2026-09-16 an accessibility figure was right, but only checking established that.
@@ -102,7 +83,7 @@ Three checks, in this order — a review that ships a wrong finding costs more t
 
 ### Step 6 — Report to User
 
-Present findings grouped by severity (critical first), then by category, followed by the score summary and
+Present findings grouped by severity (critical first), then by category, followed by the
 verdict. Say explicitly which findings you are **not** fixing and why — a finding left open by decision is
 a different thing from one that was missed, and the report must not blur them.
 

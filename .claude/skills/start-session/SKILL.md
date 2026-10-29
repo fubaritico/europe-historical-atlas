@@ -22,7 +22,7 @@ Gather all necessary written context from previous session.
      stood _before_ proposing any work.
      A `SessionStart` hook already injects a short version of this automatically; the report adds the
      per-span detail and the most-touched files.
-2. Read @.claude/CLAUDE.md to load current Session State and reference file list
+2. Work from the Session State already in context (CLAUDE.md's imports: completed.md, next.md, known-issues.md)
 3. **Load the rules of the subjects `### Next` points to** — `/rules` with those topics (since 2026-10-21
    most rules are path-scoped and the prompt hook names the rest; no need to ask the dev which files)
 4. Say in one line which rules are loaded, so the dev can name what is missing

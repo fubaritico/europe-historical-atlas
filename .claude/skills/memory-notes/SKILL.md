@@ -278,25 +278,7 @@ Basic Memory auto-generates frontmatter (including the permalink and memory URL)
 
 ### Editing an Existing Note
 
-Use `edit_note` to append, prepend, or find-and-replace within a note:
-
-```python
-# Append new observations
-edit_note(
-  identifier="API Design Decisions",
-  operation="append",
-  section="Observations",
-  content="- [decision] Use OpenAPI 3.1 for spec generation #api"
-)
-
-# Add a new relation
-edit_note(
-  identifier="API Design Decisions",
-  operation="append",
-  section="Relations",
-  content="- depends_on [[Rate Limiter]]"
-)
-```
+See *Granular Updates with `edit_note`* above.
 
 ### Moving a Note
 
@@ -313,16 +295,14 @@ The permalink stays the same after a move, so all `[[wiki-links]]` and `memory:/
 
 ## Best Practices
 
-1. **Start with context.** Before listing observations, explain *why* this note exists. Future-you (or your AI collaborator) will thank you.
+1. **Start with context.** Before listing observations, say why this note exists.
 
 2. **Favor completeness.** Write rich, substantive notes. Basic Memory's search pulls relevant chunks from note bodies, so longer notes with more context are *more* discoverable, not less. Use prose in the body to tell the full story — the background, the reasoning, the nuance. Then distill key facts into `[category] content` observations for structured queries. Both matter: prose gives meaning, observations give precision.
 
 3. **Build incrementally.** Add to existing notes rather than creating duplicates. Use `edit_note` to append new observations or relations as you learn more.
 
-4. **Review AI-generated content.** When an AI writes notes for you, review them for accuracy. The AI captures structure well but may miss nuance.
+4. **Use consistent titles.** Note titles are identifiers in the knowledge graph. `API Design Decisions` and `Api Design decisions` are different entities. Pick a convention and stick with it.
 
-5. **Use consistent titles.** Note titles are identifiers in the knowledge graph. `API Design Decisions` and `Api Design decisions` are different entities. Pick a convention and stick with it.
+5. **Link related concepts.** The value of a knowledge graph compounds with connections. A note with zero relations is an island — useful, but not as powerful as a connected one.
 
-6. **Link related concepts.** The value of a knowledge graph compounds with connections. A note with zero relations is an island — useful, but not as powerful as a connected one.
-
-7. **Let the graph grow naturally.** Don't try to design a perfect taxonomy upfront. Write notes as you work, add relations as connections emerge.
+6. **Let the graph grow naturally.** Don't try to design a perfect taxonomy upfront. Write notes as you work, add relations as connections emerge.

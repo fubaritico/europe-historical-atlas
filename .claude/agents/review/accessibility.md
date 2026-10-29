@@ -49,7 +49,10 @@ If a finding depends on an ARIA pattern or API you are not 100% sure about, set 
 > opaque to assistive tech: it MUST carry a text fallback / `aria-label`, and any map interaction
 > (navigation, picking) MUST have a keyboard-operable, DOM-accessible equivalent.
 
-## Critical Violations
+## Rules
+
+> **Section headings group the rules; they do not set severity.** Severity comes from the anchors in
+> `references/schema.json` — a documentation or naming gap is never `high`.
 
 ### A11Y-001: Interactive element without an accessible name
 
@@ -60,7 +63,7 @@ If a finding depends on an ARIA pattern or API you are not 100% sure about, set 
 
 - **Check**: `<img>` must have `alt` (empty `alt=""` only if purely decorative)
 
-## High Violations
+## Rules
 
 ### A11Y-003: Missing / wrong semantic role
 
@@ -79,7 +82,7 @@ If a finding depends on an ARIA pattern or API you are not 100% sure about, set 
 
 - **Check**: interactive targets ≥ 24×24px (WCAG 2.2, 2.5.8 — AA); 44×44 is 2.5.5, AAA, and is not required
 
-## Medium Violations
+## Rules
 
 ### A11Y-007: Color as the sole information channel
 
@@ -97,7 +100,7 @@ If a finding depends on an ARIA pattern or API you are not 100% sure about, set 
 
 - **Check**: status/notifications use `aria-live="polite"` (or `role="status"`/`"alert"`)
 
-## Low Violations
+## Rules
 
 ### A11Y-011: Animation without reduced-motion respect
 

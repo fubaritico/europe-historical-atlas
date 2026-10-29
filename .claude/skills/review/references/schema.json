@@ -8,7 +8,6 @@
     "scope",
     "files_reviewed",
     "findings",
-    "score",
     "verdict"
   ],
   "properties": {
@@ -32,9 +31,6 @@
         "$ref": "#/$defs/finding"
       }
     },
-    "score": {
-      "$ref": "#/$defs/score"
-    },
     "verdict": {
       "type": "string",
       "enum": [
@@ -42,7 +38,7 @@
         "needs-attention",
         "needs-work"
       ],
-      "description": "Overall verdict based on score thresholds"
+      "description": "Overall verdict, from the findings left open: ready = no critical or high open; needs-attention = a high open; needs-work = a critical open"
     }
   },
   "$defs": {
@@ -73,7 +69,7 @@
             "medium",
             "low"
           ],
-          "description": "critical: the app is broken or unsafe for every user, now. high: wrong runtime behaviour in a reachable case, or a resource leak. medium: correct today but will erode \u2014 duplication, a missing seam, an untested branch. low: readability, naming, documentation. A documentation or naming gap can NEVER be high: it cannot change what the program does."
+          "description": "critical: the app is broken or unsafe for every user, now. high: wrong runtime behaviour in a reachable case, or a resource leak. medium: correct today but will erode — duplication, a missing seam, an untested branch. low: readability, naming, documentation. A documentation or naming gap can NEVER be high: it cannot change what the program does."
         },
         "category": {
           "type": "string",
@@ -137,43 +133,6 @@
         "blast_radius": {
           "type": "string",
           "description": "What else reads or writes the state this finding touches, and whether you checked it. The two worst bugs of 2026-09-16 were both outside the diff."
-        }
-      }
-    },
-    "score": {
-      "type": "object",
-      "required": [
-        "security",
-        "architecture",
-        "quality",
-        "accessibility",
-        "overall"
-      ],
-      "properties": {
-        "security": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100
-        },
-        "architecture": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100
-        },
-        "quality": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100
-        },
-        "accessibility": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100
-        },
-        "overall": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100
         }
       }
     },

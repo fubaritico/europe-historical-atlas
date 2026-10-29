@@ -50,8 +50,23 @@ plus tôt, promettant un cache que `4d-1` n'a pas construit.
 
 1. **Le repère du canevas est celui du fond** — la seule boîte : la zone éditoriale est supprimée depuis le 18/10 (`s12`).
 2. **Deux canevas** : un statique redessiné au commit, un overlay au `pointermove`. La barre d'état
-   s'écrit **impérativement**. (`4d-1` n'en a qu'un : le second arrive avec l'élastique, à `4d-2`.)
+   s'écrit **impérativement**.
 3. **Le fond est cuit par le Cartographe** avec `bakeTerrainPixels(…, null)` — le `null` est l'année
    installée, donc le terrain nu, donc « tint politique retiré » sans rien à nettoyer.
 
+### Les skills React archivées — mesurées une par une (déplacé de `decision-tree.md`, 29/10)
 
+> **This repository has React in it** — the Cartographer, since 2026-10-01. Of the six React skills archived
+> under `files/claude-archive/skills/`, measured one by one:
+>
+> | skill | state |
+> | --- | --- |
+> | `react-canvas-and-panels` (**active**) | **this repository's own.** React owning an imperative canvas, and the panel pattern. Read it before writing a component here |
+> | `solid-react-principles` (284 lines) | applicable, and overlaps `modular-architecture.md`. Load on demand |
+> | `react-best-practices` | **well built and deliberately left archived, for a licence reason, not a quality one.** 70 rules in addressable files under a 7 kB entry, by Vercel Engineering — four of them are exactly our canvas seam. But there is **no LICENSE file**: the only claim is a `license: MIT` frontmatter line written by whoever packaged it, with no copyright holder, and the README describes an upstream repository that is not present. `files/` is gitignored and `.claude/` is not, so moving it in would commit 108 kB of third-party content on an unverifiable claim — in a repository that goes public. **What we do instead**: `react-canvas-and-panels` restates the few facts we need in our own words and cites the rules by name. Reopen only if the upstream and its licence are found |
+> | `composition-patterns` (946 lines) | generic, same licence question. Load on demand, do not commit |
+> | `new-react-component` | **dead**: it targets `packages/reference`, Storybook and Tailwind — none of which exist or are wanted here |
+> | `state-storage` | **two facts absorbed, the rest stays archived.** It was first dismissed here as redundant with `zustand-react-pattern` — that judgement was made on its *scope* without reading it, and it was wrong. It carries (a) the `useSyncExternalStore` derived-slice gotcha, which independently confirms the `History.rows` finding of 2026-10-05, and (b) "the lightest sufficient tier", which says panel-local state with one writer and one reader needs **no slice at all**. Both now live in `zustand-react-pattern`. What stays archived is design-system material — the Machine tier, Listbox/Typeahead/Toaster, the behaviour-hooks catalogue — which `fubaritico-ds` answers |
+> | `react-view-transitions` | out of scope |
+>
+> Stencil, Storybook, BEM and the monorepo DS skills stay archived and still do not apply.

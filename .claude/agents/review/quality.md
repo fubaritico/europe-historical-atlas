@@ -63,7 +63,8 @@ If a finding depends on library/API behavior you are not 100% sure about, set `"
 
 ### QUAL-005: Missing JSDoc on exported ports / public members
 
-- **Check**: every exported port interface, factory, and public method has JSDoc
+- **Check**: every exported port interface or type, and every public method of an object a factory returns, has
+  JSDoc — the exported functions themselves are the gate's
 
 ## Rules
 
@@ -91,7 +92,7 @@ If a finding depends on library/API behavior you are not 100% sure about, set `"
 - **Check**: `!` non-null assertions that hide a real `undefined` case (esp. with
   `noUncheckedIndexedAccess`) — narrow or handle explicitly instead
 
-## Rules (added 2026-09-16 — the hole two sets of sliders fell through)
+## Rules
 
 ### QUAL-020: A new branch, option or tunable with no test
 

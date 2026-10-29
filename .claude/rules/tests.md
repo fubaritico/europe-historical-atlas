@@ -6,8 +6,7 @@ paths:
 ---
 # Rules — Test Policy — europe-map
 
-> Every scene module, util, hook, port, or bug fix MUST ship with tests.
-> Nothing is "done" without tests, a `/commit`, and an `/end-session`.
+> Every scene module, util, hook, port, or bug fix ships with tests.
 
 Stack: **Vitest**, one config per package — `core`, `cms` and `eslint-plugin-eha` under `node`, `atlas` and
 `cartographer` under `jsdom`. For real WebGL, mock the context (three.js can run in tests with a
@@ -18,8 +17,7 @@ mocked renderer/context — verify via `opensrc/three`).
 1. **Write tests** — 5-level policy below.
 2. **`pnpm type-check && pnpm lint && pnpm test`** — all pass.
 3. **`/review`** — multi-agent review.
-4. **`/commit`** — conventional commit.
-5. **`/end-session`** — update session state before closing.
+4. **`/commit`** — once the dev has tested it.
 
 ## 5-Level Test Policy (mandatory)
 

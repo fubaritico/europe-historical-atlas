@@ -63,7 +63,7 @@ Check against the specification:
 - [ ] `name` matches directory name
 - [ ] `name` is lowercase, hyphens only, no consecutive hyphens, 1-64 chars
 - [ ] `description` is non-empty, max 1024 chars, includes trigger keywords
-- [ ] SKILL.md body has clear step-by-step instructions
+- [ ] SKILL.md body states the outcome, the constraints with their reasons, and how to verify; numbered steps only where order matters
 - [ ] Body is under 500 lines
 - [ ] Reference files (if any) are linked with clear "when to load" conditions
 - [ ] No secrets or credentials in the skill

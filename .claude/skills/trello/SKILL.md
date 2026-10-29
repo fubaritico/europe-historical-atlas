@@ -1,6 +1,6 @@
 ---
 name: trello
-description: Track the project's work as tickets on the europe-historical-atlas Trello board — list the board, add an idea or a backlog card from its template, move it, comment on it, mark it done against the Definition of Done. Use when the dev says Trello, ticket, carte, tableau, idée, backlog, "mets-le dans Trello", "c'est fait", "on en est où", and at every start-session and end-session, or when a task starts, finishes, waits on him or is tested.
+description: Track the project's work as tickets on the europe-historical-atlas Trello board — list the board, add an idea or a backlog card from its template, move it, comment on it, mark it done against the Definition of Done. Use when the dev says Trello, ticket, tableau, idée, backlog, "mets-le dans Trello", "c'est fait", "on en est où", and at every start-session and end-session, or when a task starts, finishes, waits on him or is tested.
 allowed-tools: Bash(/Users/stephanecottereau/Desktop/WebstormProjects/europe-map/.claude/skills/trello/scripts/trello:*)
 metadata:
   author: europe-map
@@ -100,7 +100,7 @@ description is French too, the dev reads it alone.
 **Critères d'acceptation** :
 - <a gesture he makes in the app> → <what he sees>
 - …
-**Appli** : atlas | Cartographe | les deux | core
+**Appli** : atlas | Cartographe | CMS | core | plusieurs
 **Dépend de** : <#N — pourquoi> (sinon : rien)
 **Détails** : <known-issues.md entry, a plan file, H-NN, a scenario sNN, a commit>
 ```

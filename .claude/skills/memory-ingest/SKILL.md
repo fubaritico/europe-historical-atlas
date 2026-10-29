@@ -80,7 +80,7 @@ Classify each entity as:
 
 ## Step 4: Research New Entities (Optional)
 
-For proposed entities where more context would be valuable, do a brief web search (2-3 queries max per entity):
+For proposed entities where more context would be valuable, do a brief web search (enough to fill the proposal):
 
 - **Organizations**: What they do, size, public/private, key products
 - **People**: Current role, background, expertise
@@ -112,6 +112,9 @@ Include enough context with each proposed entity for the user to make a quick de
 ## Step 6: Create the Source Note
 
 Create the primary note for the ingested content. This is the "record of what happened" — it preserves the raw material and adds structured metadata.
+
+**Destination**: the `main` project (`project="main"`, or `--project main` on the CLI); the folder is the one the dev
+names — the folders below are illustrative.
 
 ### Meeting / Conversation Note
 

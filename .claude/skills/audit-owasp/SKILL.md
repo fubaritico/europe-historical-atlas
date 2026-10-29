@@ -119,30 +119,10 @@ Agents and their scope:
 | 9 | Security Logging & Alerting Failures | OWASP-A09 | Dev-server, CMS, Logic |
 | 10 | Mishandling Exceptional Conditions | OWASP-A10 | Dev-server, CMS (hooks, export), UI (error boundaries, the atlas error net) |
 
-### Step 4 — Aggregate & Score
+### Step 4 — Aggregate
 
-Merge all findings into a single report. Calculate scores:
-
-```
-category_score = max(0, 100 - (critical * 25) - (high * 15) - (medium * 5) - (low * 1))
-```
-
-Weights for overall score:
-- A01 Broken Access Control: 15%
-- A02 Security Misconfiguration: 10%
-- A03 Software Supply Chain Failures: 8%
-- A04 Cryptographic Failures: 12%
-- A05 Injection: 15%
-- A06 Insecure Design: 8%
-- A07 Authentication Failures: 12%
-- A08 Software & Data Integrity Failures: 8%
-- A09 Security Logging & Alerting Failures: 5%
-- A10 Mishandling Exceptional Conditions: 7%
-
-Verdict thresholds:
-- 80-100 + no critical → `pass`
-- 60-79 → `needs-hardening`
-- < 60 or any critical remaining → `fail`
+Merge all findings into one report, counted by severity per category. The verdict comes from what is left
+open: `fail` if a critical remains; `needs-hardening` if a high remains; otherwise `pass`.
 
 ### Step 5 — Report to User
 
@@ -150,8 +130,8 @@ Present findings grouped by severity (critical first), then by OWASP category.
 Format as a readable table with columns: ID | Severity | File:Line | Title | CWE
 
 Follow with:
-- Score breakdown per category
-- Overall score + verdict
+- The count per category and severity
+- The verdict
 - Top 3 priority fixes
 
 ### Step 6 — Verify Ambiguous Findings (opensrc / web)
@@ -159,7 +139,7 @@ Follow with:
 Before recommending fixes, check findings where `needs_verification: true`:
 1. Run the `verification_query` against `opensrc/` (authoritative — context7 can lag a version) or the web
 2. If confirmed → keep finding
-3. If disproved → discard, adjust score
+3. If disproved → discard
 4. Report verification results to user
 
 ### Step 7 — Remediation Guidance
@@ -179,11 +159,6 @@ Do NOT auto-fix. Present recommendations and let the user decide.
   "owasp_version": "2025",
   "scope": { "files_scanned": 0, "layers": [] },
   "findings": [ /* array of finding objects */ ],
-  "scores": {
-    "A01": 0, "A02": 0, "A03": 0, "A04": 0, "A05": 0,
-    "A06": 0, "A07": 0, "A08": 0, "A09": 0, "A10": 0
-  },
-  "overall_score": 0,
   "verdict": "pass|needs-hardening|fail",
   "summary": {
     "critical": 0, "high": 0, "medium": 0, "low": 0, "total": 0

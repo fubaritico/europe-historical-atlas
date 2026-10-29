@@ -1,6 +1,6 @@
 ---
 name: create-data-mention
-description: Create the mention of a map or a text the dev used for a year — « crée une mention pour cette carte », « crée une mention pour ce texte ». Ask for its URL first, read its page (author, licence, the source it declares), classify it CALQUE or RÉFÉRENCE, add one line to the year's « Sources de <year> » checklist on its provenance ticket (ATLAS-152 for 1100), and post its attribution text in French and English. Use when the dev says « créer une mention », « une mention pour cette carte / ce texte », gives a map URL, a Wikimedia Commons file, an atlas or a text to cite, « la mention », « à citer », or names the regions a source helped draw.
+description: Cite a map, atlas or text the dev used to draw a year — classify it CALQUE or RÉFÉRENCE from its licence and declared source, log it on the year's provenance ticket (ATLAS-152 for 1100), and give its attribution in French and English. Use when the dev asks for a mention (« crée une mention pour cette carte / ce texte », « à citer »), gives a source's URL or a Commons file while drawing, or names the regions a source helped draw.
 when_to_use: The dev asks to create a mention from the elements he gives — a map, a text, an atlas — or pastes a source's URL while drawing a year.
 allowed-tools: WebFetch Bash(/Users/stephanecottereau/Desktop/WebstormProjects/europe-map/.claude/skills/trello/scripts/trello:*)
 metadata:

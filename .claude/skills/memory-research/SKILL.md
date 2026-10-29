@@ -15,7 +15,7 @@ When the user asks for a subject to be researched and recorded in Basic Memory. 
 
 ### Step 1: Web Research
 
-Search for current information across multiple sources. Aim for 3-5 searches to build a well-rounded picture:
+Search for current information across multiple sources, until the summary below can be filled from current sources:
 
 ```
 [subject name] site
@@ -104,7 +104,10 @@ If the user provided context with their request ("saw them at the conference"), 
 
 ### Step 5: Create the Entity
 
-After approval, create a structured note. Adapt the template to the entity type:
+After approval, create a structured note. Adapt the template to the entity type.
+
+**Destination**: the `main` project (`project="main"`, or `--project main` on the CLI); the folder is the one the dev
+names — the folders below are illustrative.
 
 #### Organization
 
@@ -217,10 +220,9 @@ This context is often the most valuable part — it's the user's relationship to
 ## Guidelines
 
 - **Always web search.** Don't rely on training data alone. Research should reflect current, verifiable information.
-- **Search Basic Memory first.** Check for existing entities before creating new ones. Update rather than duplicate.
+- **Check Basic Memory before proposing an entity.** Update rather than duplicate.
 - **Hedge uncertain information.** Use qualifiers for estimates, unverified claims, and inferred details.
 - **Store source URLs.** Include the URLs you consulted, either in observations or a Sources section. This enables the user to verify and dig deeper.
 - **Get approval before creating.** Present your findings and let the user decide whether to create the entity and what to include.
 - **Capture user context.** If the user told you *why* they're researching (met at a conference, evaluating as a vendor, etc.), that context belongs in the entity.
-- **Don't over-research.** 3-5 web searches is usually enough. The goal is a useful knowledge graph entry, not an exhaustive report.
 - **Link to existing knowledge.** Relate the new entity to things already in the knowledge graph. Connections compound value.

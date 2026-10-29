@@ -64,7 +64,10 @@ application goes online and once a year.
 
 > **ALL rules are GLOBAL** — they apply to every file in the repo (except where noted).
 
-## Critical Violations
+## Rules
+
+> **Section headings group the rules; they do not set severity.** Severity comes from the anchors in
+> `references/schema.json` — a documentation or naming gap is never `high`.
 
 ### SEC-001: Hardcoded secrets or credentials
 
@@ -84,7 +87,7 @@ application goes online and once a year.
 - **Files**: All
 - **Check**: No `eval()`, `new Function()`, `setTimeout`/`setInterval` with a string argument
 
-## High Violations
+## Rules
 
 ### SEC-004: Missing validation at trust boundaries
 
@@ -96,7 +99,7 @@ application goes online and once a year.
 - **Files**: All
 - **Check**: User-facing errors must not expose stack traces, absolute paths, or internal config
 
-## Medium Violations
+## Rules
 
 ### SEC-006: Logging sensitive data
 
@@ -108,7 +111,7 @@ application goes online and once a year.
 - **Files**: All (fetch, links, asset URLs)
 - **Check**: Use `https://` — no `http://` except `localhost`/`127.0.0.1` in dev
 
-## Low Violations
+## Rules
 
 ### SEC-008: Weak randomness / outdated crypto
 

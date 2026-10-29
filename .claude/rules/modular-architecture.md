@@ -4,10 +4,9 @@ paths:
 ---
 # Rules — Modular / Pluggable Architecture (SOLID, standalone-testable)
 
-> **Essential, non-negotiable design rule.** Every element we assemble MUST be able to run
-> **standalone**, be **pluggable / unpluggable / replaceable**, and **depend on a mock** for any
-> collaborator. No hard code-to-code coupling. If a unit can't be taken apart and tested on its own,
-> it's wrong — rework it before going further.
+> The design rule this codebase rests on: every unit runs **standalone**, is **replaceable behind a seam**, and
+> takes **mocks** for its collaborators — at the real seams (see *Pragmatic boundary*). A unit that cannot be
+> taken apart and tested on its own is reworked before going further.
 
 ## Why (the burn we refuse to repeat)
 
@@ -15,7 +14,7 @@ Tightly-coupled code that can't run in isolation is a trap: a whole subtree held
 dependency (e.g. an SDK-generated ambient type + build scripts + a global provider → the component is
 un-runnable standalone, untestable, un-profilable). We build the opposite: **drop-in / drop-out parts,
 no hostage chains.** This is the precondition for being able to take any element apart, mock its world,
-and test it — at 10k / 100k rows, check/uncheck, immediate update — without booting the whole app.
+and test it.
 
 ## The rule (apply to every component / module / package)
 
@@ -36,8 +35,7 @@ and test it — at 10k / 100k rows, check/uncheck, immediate update — without 
 
 - **S — Single responsibility:** one unit, one job (renderer renders; state manager holds state; data
   adapter fetches). Split when two reasons to change appear.
-- **O — Open/closed:** extend by composing / plugging a new implementation, not by editing the unit
-  (precedent: IconButton extends Button; media/clickable Card composes the surface).
+- **O — Open/closed:** extend by composing / plugging a new implementation, not by editing the unit.
 - **L — Liskov:** any implementation of a port is substitutable for another (mock ⇄ real) with no
   surprise to the consumer.
 - **I — Interface segregation:** small, focused ports — a consumer depends only on the slice it uses,

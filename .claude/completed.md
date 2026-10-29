@@ -1,6 +1,6 @@
 ## Completed
 
-Put here the completed tasks and plans to avoid cluttering the context window.
+The two latest sessions' account; older ones in `archive/completed-history.md`.
 
 ### 2026-10-29 (nuit, suite) — le diagnostic de performance de l'atlas (ATLAS-303 → ATLAS-304)
 

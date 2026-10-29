@@ -112,7 +112,7 @@ If a finding depends on library/API behavior you are not 100% sure about, set `"
 
 - **Check**: exported symbols with no consumer (dead public surface).
 
-## Rules (added 2026-09-16, from observed erosion)
+## Rules
 
 ### ARCH-012: Pure logic trapped in the composition root
 

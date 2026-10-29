@@ -56,7 +56,7 @@ When the dev proposes something:
 ## Critical Workflow Rules
 
 - **Be concise** — no recap, no enumerations, no unsolicited explanations. Act, then report briefly if needed.
-- **Every problem ships with a remedy and a stated severity (IMPORTANT)** — the dev reads everything
+- **Every problem ships with a remedy and a stated severity** — the dev reads everything
   alone and the chantier is large, so an unqualified alarm is a cost he pays for nothing. Say **how bad
   it is** (blocking / worth knowing / cosmetic) and **the way out**, in the same breath, short. Never
   hand back a list of risks without decisions; take the call and say what it costs. A caveat earns its
@@ -106,7 +106,6 @@ When the dev proposes something:
   loaded: `basic-memory tool search-notes|write-note|edit-note … --project main`; search before writing.
 - **Model**: suggest a lighter model for a plain lookup or research; the dev chooses (`/model`).
 - **Never `--no-verify`** on commit without the dev's explicit agreement.
-- **Shared responsibility** — care about every line, review your own output before presenting it.
 - **Language**: reply to the developer in **French**; write file contents (config, rules, plans, code
   comments) in **English**.
 

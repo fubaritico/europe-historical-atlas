@@ -63,7 +63,7 @@ const TEMPLATES = [
       '**Le remède** : <ce qu’on fera, une ou deux phrases>',
       "**Critères d'acceptation** :",
       '- <un geste dans l’appli> → <ce qu’on voit>',
-      '**Appli** : atlas | Cartographe | les deux | core',
+      '**Appli** : atlas | Cartographe | CMS | core | plusieurs',
       '**Dépend de** : <#N — pourquoi> (sinon : rien)',
       '**Détails** : <known-issues, plan, H-NN, scénario sNN, commit>',
     ].join('\n'),

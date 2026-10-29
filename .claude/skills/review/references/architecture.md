@@ -16,5 +16,7 @@ Summary of what `review-architecture` checks (see the agent for full detail):
 - **ARCH-006** GPU resource leak (missing `dispose()` on teardown).
 - **ARCH-007** SRP / over-broad module; **ARCH-008** barrel anti-patterns;
   **ARCH-009** undeclared/unused deps; **ARCH-010** naming; **ARCH-011** unused exports.
+- **ARCH-012** pure logic trapped in the composition root; **ARCH-013** copied instead of shared;
+  **ARCH-014** state kept in step by hand.
 
 Finding schema: `schema.json`.

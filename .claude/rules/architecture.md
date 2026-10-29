@@ -310,7 +310,7 @@ concatenates, so `sonar-project.properties` still reads one report. Verified: 98
 
 Conventional commits. Format: `type(scope): subject` (lowercase, no trailing period, ≤ 100 chars).
 Types: `build chore ci docs feat fix perf refactor revert style test`.
-Suggested scopes: `scene`, `camera`, `controls`, `picking`, `data`, `repo`.
+Scopes: by changed path, as `/commit` maps them.
 
 ## Forbidden
 

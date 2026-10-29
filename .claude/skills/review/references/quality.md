@@ -7,7 +7,8 @@
 
 Summary of what `review-quality` checks (see the agent for full detail):
 
-- **QUAL-003/005** missing JSDoc on exported interface properties / ports & public members.
+- **QUAL-003/005** missing JSDoc on exported interface properties / port types and the public methods a factory
+  returns (exported functions are the gate's).
 - **QUAL-007** god function past the lint budgets; **QUAL-008** dead code; **QUAL-010** stale JSDoc.
 - **QUAL-012** empty catch / lost error context; **QUAL-014** non-null assertion abuse.
 - **QUAL-020** a new branch or option with no test; **QUAL-021** a touched module with no tests.
