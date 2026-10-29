@@ -154,7 +154,12 @@ export const EVENT_BLUR_LAYER = BLUR_LAYERS.icons
  * The 3D icons and their halos blurred as the borders are (the dev, 2026-10-29: *« applique le même flou que les
  * frontières sur les icônes 3D. Mais pas leur ombre »*). Drawn from the whole scene, where the markers' lights stand;
  * the shadows, drawn on the CPU from the icons' shapes, stay crisp.
- * @param object - the icons' group, which the blur's quad joins
+ *
+ * **The quad is laid in a group of the markers' rank**: three sorts the transparent pass by the nearest group's
+ * `renderOrder` first, so the quad's own rank alone, in the icons' group of rank 0, laid the blurred icons before the
+ * names, whose ink was then multiplied over the blades (the dev, 2026-10-29, 16:24: *« les noms des pays semblent être
+ * devant la couche des icônes »*).
+ * @param object - the icons' group, which the blur's quad joins, in its own group
  * @param blurred - the roots of what is blurred: the 3D icons and their halos
  * @param method - how the map's blurs are drawn
  * @returns the blur
@@ -176,7 +181,10 @@ function iconBlur(object: Group, blurred: readonly Object3D[], method: BlurMetho
     wholeScene: true,
     members,
   })
-  object.add(blur.object)
+  const ranked = new Group()
+  ranked.renderOrder = EVENT_RENDER_ORDER
+  ranked.add(blur.object)
+  object.add(ranked)
   return blur
 }
 

@@ -7,6 +7,7 @@ import {
   MeshBasicMaterial,
   Quaternion,
   ShaderLib,
+  ShaderMaterial,
   Texture,
   Vector3,
 } from 'three'
@@ -36,7 +37,7 @@ import {
 
 import type { PlacedEventIcon } from './forms'
 import type { EventIconKind } from './kinds'
-import type { BufferGeometry, Material } from 'three'
+import type { BufferGeometry, Material, Object3D } from 'three'
 
 const TWO: PlacedEventIcon[] = [
   { ground: [1, 0.2, -1], kind: 'swords' },
@@ -310,6 +311,18 @@ describe('createEventIconMarkers', () => {
       expect(shadowMesh(markers.object).layers.isEnabled(0)).toBe(true)
       markers.setBlur?.(0)
       expect(allInstanced(markers.object).every((mesh) => mesh.layers.isEnabled(0))).toBe(true)
+    })
+
+    // The dev, 29/10, 16:24: the names' ink multiplied over the blurred blades — the quad was sorted at its group's rank.
+    it('lays the blurred icons at the markers’ rank among groups, after the names', () => {
+      const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
+      let quad: Object3D | undefined
+      markers.object.traverse((child) => {
+        if (child instanceof Mesh && child.material instanceof ShaderMaterial) quad = child
+      })
+      let group = quad?.parent ?? null
+      while (group !== null && !(group instanceof Group)) group = group.parent
+      expect(group?.renderOrder).toBe(EVENT_RENDER_ORDER)
     })
   })
 

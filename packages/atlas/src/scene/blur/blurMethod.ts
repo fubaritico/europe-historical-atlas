@@ -11,7 +11,11 @@ import type { Mesh, Object3D } from 'three'
 export interface ScreenBlurOptions {
   /** The layer its objects move to while blurred — one the camera, which sees layer 0, does not. */
   readonly layer: number
-  /** The rank the quad is drawn at: the objects' own. */
+  /**
+   * The rank the quad is drawn at: the objects' own. three sorts the transparent pass by the nearest group's
+   * `renderOrder` before an object's own, so the caller adds the quad under a group of the objects' rank — as the event
+   * icons do (`eventIconMarkers`), whose own group is at 0.
+   */
   readonly renderOrder: number
   /** How the image is laid back: over the map, or multiplied into it. */
   readonly blend: 'normal' | 'multiply'
