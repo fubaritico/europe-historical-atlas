@@ -5,6 +5,7 @@
 import { rebuildEvents } from '../events/mapEventLayer'
 import { rebuildBorders } from '../political/borders/mapBorderLayer'
 import { rebuildFills } from '../political/fills/mapFillLayer'
+import { rebuildNames } from '../political/names/mapNameLayer'
 import { rebuildRelief } from '../relief/mapReliefLayer'
 import { rebuildCoastline } from '../waters/mapCoastLayer'
 import { rebuildRivers } from '../waters/mapRiverLayer'
@@ -23,5 +24,6 @@ export function rebuildSurface(context: LayerContext): void {
   rebuildRivers(context)
   rebuildBorders(context)
   rebuildFills(context)
+  rebuildNames(context)
   rebuildEvents(context)
 }

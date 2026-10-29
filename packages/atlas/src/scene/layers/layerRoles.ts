@@ -32,6 +32,7 @@ export const LAYER_ROLES = {
   fillCut: 'cache',
   tribes: 'draped',
   tribeCut: 'cache',
+  names: 'draped',
   events: 'draped',
   compass: 'flat',
   sheet: 'flat',

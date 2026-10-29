@@ -2,7 +2,14 @@ import { describe, expect, it } from 'vitest'
 
 import { distanceToOutside } from '../geo/distanceTransform'
 
-import { MAX_BEND, horizontalLine, innermostCell, ridgeLine } from './nameLine'
+import {
+  MAX_BEND,
+  centreOfMass,
+  extendLine,
+  horizontalLine,
+  innermostCell,
+  ridgeLine,
+} from './nameLine'
 
 import type { NameLine } from './nameLine'
 
@@ -87,11 +94,31 @@ describe('horizontalLine', () => {
   })
 
   describe('variants', () => {
-    it('stops at the first outside cell on its row, not at the crop’s edge', () => {
-      // A notch at column 30 of every row: the most inner cell, found first, lies west of it.
-      const notched = cropOf(62, 10, (x, y) => x >= 1 && x <= 60 && y >= 1 && y <= 8 && x !== 30)
-      const { last } = ends(horizontalLine(notched.mask, notched.distances, notched.width))
-      expect(last[0]).toBe(29.5)
+    it('centres the line on the space’s centre of mass, as far as the nearer end of its run', () => {
+      // A band with a block below its west end: the mass leans west, and the line is cut evenly about it.
+      const leaning = cropOf(
+        62,
+        16,
+        (x, y) => (x >= 1 && x <= 60 && y >= 1 && y <= 8) || (x >= 1 && x <= 20 && y > 8 && y <= 14)
+      )
+      const centre = centreOfMass(leaning.mask, leaning.width)
+      if (centre === null) throw new Error('no centre')
+      const { first, last } = ends(horizontalLine(leaning.mask, leaning.distances, leaning.width))
+      expect(centre.x).toBeLessThan(30)
+      expect((first[0] + last[0]) / 2).toBeCloseTo(centre.x, 6)
+      expect(first[0]).toBe(0.5)
+    })
+
+    it('falls back to the most inner cell when the centre of mass lies outside the space', () => {
+      // Two blocks apart: the mass is in the gap between them.
+      const apart = cropOf(
+        30,
+        10,
+        (x, y) => y >= 1 && y <= 8 && ((x >= 1 && x <= 10) || (x >= 19 && x <= 28))
+      )
+      expect(centreOfMass(apart.mask, apart.width)).toBeNull()
+      const { first, last } = ends(horizontalLine(apart.mask, apart.distances, apart.width))
+      expect([first[0], last[0]]).toEqual([0.5, 10.5])
     })
   })
 
@@ -170,6 +197,77 @@ describe('ridgeLine', () => {
     it('has no line through a single cell, which gives no direction', () => {
       const dot = cropOf(3, 3, (x, y) => x === 1 && y === 1)
       expect(ridgeLine(dot.distances, 3, 3, 1)).toBeNull()
+    })
+  })
+})
+
+describe('extendLine', () => {
+  /** A straight line from (10, 5) to (14, 5), a point every unit. */
+  const straight: NameLine = {
+    points: [
+      [10, 5],
+      [11, 5],
+      [12, 5],
+      [13, 5],
+      [14, 5],
+    ],
+    lengths: [0, 1, 2, 3, 4],
+  }
+
+  describe('happy path', () => {
+    it('carries a straight line on past both ends, by as much each side', () => {
+      const longer = extendLine(straight, 2)
+      expect(ends(longer)).toEqual({ first: [8, 5], last: [16, 5] })
+      expect(longer.lengths[longer.lengths.length - 1]).toBeCloseTo(8, 9)
+    })
+  })
+
+  describe('variants', () => {
+    it('carries each end along its own last step, a bent line bent no further', () => {
+      const bent: NameLine = {
+        points: [
+          [0, 0],
+          [1, 0],
+          [1, 1],
+        ],
+        lengths: [0, 1, 2],
+      }
+      expect(ends(extendLine(bent, 1))).toEqual({ first: [-1, 0], last: [1, 2] })
+    })
+
+    it('keeps the points it adds no further apart than a line’s own', () => {
+      const longer = extendLine(straight, 3)
+      const steps = longer.lengths.slice(1).map((length, at) => length - (longer.lengths[at] ?? 0))
+      expect(Math.max(...steps)).toBeLessThanOrEqual(1)
+      expect(Math.max(...steps.slice(0, 6))).toBeLessThanOrEqual(0.5)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('refuses a line with two points on each other at an end', () => {
+      const stuck: NameLine = {
+        points: [
+          [0, 0],
+          [0, 0],
+          [1, 0],
+        ],
+        lengths: [0, 0, 1],
+      }
+      expect(() => extendLine(stuck, 1)).toThrow(/two points on each other/)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('refuses a line of one point, which has no direction to carry on', () => {
+      expect(() => extendLine({ points: [[0, 0]], lengths: [0] }, 1)).toThrow(
+        /cannot be carried on/
+      )
+    })
+  })
+
+  describe('edge cases', () => {
+    it('leaves the line as it is when carried on by nothing', () => {
+      expect(extendLine(straight, 0)).toBe(straight)
     })
   })
 })

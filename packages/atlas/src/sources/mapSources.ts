@@ -22,6 +22,7 @@ import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { River } from '@europe-historical-atlas/core/data/riverSource'
+import type { YearNames } from '@europe-historical-atlas/core/pipeline/yearNames'
 import type { RgbColor } from '@europe-historical-atlas/core/utils/color'
 
 /** Everything loaded, and everything derived from it. */
@@ -89,6 +90,44 @@ export interface MapSources {
    * read from the per-century payloads, which has no ranks.
    */
   tribes: TribeArea[]
+  /**
+   * The year's country names, placed at every display level (ATLAS-301) — `null` before they arrive, which is
+   * after the year is drawn: the names never hold the map back.
+   */
+  yearNames: YearNames | null
+  /** The image of the letters the names are drawn from, in their face — `null` before the face has loaded. */
+  nameSheet: NameSheet | null
+}
+
+/** Where one character sits in the {@link NameSheet}, and how far it reaches, at a font size of one. */
+export interface GlyphCell {
+  /** The cell's left edge in the sheet, `0..1`. */
+  readonly u0: number
+  /** Its right edge. */
+  readonly u1: number
+  /** Its top edge, `0..1` from the sheet's top. */
+  readonly v0: number
+  /** Its bottom edge. */
+  readonly v1: number
+  /** The character's advance, its width plus the spacing after it. */
+  readonly advance: number
+}
+
+/**
+ * The letters of the names drawn once in their face, white on transparent: each cell as wide as its
+ * character's advance, every cell as tall as the face's whole reach, its baseline at the same height in all.
+ */
+export interface NameSheet {
+  /** The drawn letters. */
+  readonly image: HTMLCanvasElement
+  /** Each pixel's distance to the nearest letter, laid out alike — the field the white edge is drawn from. */
+  readonly halo: HTMLCanvasElement
+  /** Each character's cell. */
+  readonly cells: ReadonlyMap<string, GlyphCell>
+  /** How far the face reaches above the baseline, at a font size of one — the top of every cell. */
+  readonly ascent: number
+  /** How far below — the bottom of every cell. */
+  readonly descent: number
 }
 
 /** One tribe's ground as the tribe layer draws it. */
@@ -122,6 +161,8 @@ export function createMapSources(): MapSources {
     borderPatterns: null,
     borderLevels: null,
     tribes: [],
+    yearNames: null,
+    nameSheet: null,
   }
 }
 

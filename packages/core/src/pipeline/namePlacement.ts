@@ -17,12 +17,16 @@
  */
 
 import { breakInTwo } from './nameBreak'
-import { fittingOf, horizontalFit, lineLength, pointAlong, ridgeFit } from './nameFit'
+import { chooseLine } from './nameCandidates'
+import { fittingOf, lineLength, pointAlong } from './nameFit'
+import { occupy, pieceTag, withOccupied } from './nameOccupancy'
 import { ownerPieces } from './nameSpace'
 
 import type { NameBreak } from './nameBreak'
-import type { Fitting, LineFit } from './nameFit'
+import type { NameWeights } from './nameChoice'
+import type { Fitting } from './nameFit'
 import type { NameLine } from './nameLine'
+import type { NameOccupancy } from './nameOccupancy'
 import type { NameSpace } from './nameSpace'
 
 /** A text's letters measured at a font size of one, in whatever unit the grid's cells are drawn at. */
@@ -48,24 +52,35 @@ export interface NameRequest {
   readonly owner: number
   /** The name, as it will be written. */
   readonly text: string
+  /**
+   * A shorter name, written in a piece where the name does not reach {@link NamePlacementOptions.longMinSize} — « France »
+   * where « Kingdom of France » does not fit (the dev, 2026-10-29: *« Kingdom of France → France »*).
+   */
+  readonly shorter?: string
 }
 
 /** What every name keeps to, in cells of the grid. */
 export interface NamePlacementOptions {
   /** The least room between a letter and its space's edge — a border, the coast or the map's frame. */
   readonly margin: number
-  /** The smallest font size worth writing; a name that only fits smaller is left for a closer zoom. */
+  /**
+   * How far a name may spill over its space's edge, in cells — a candidate that does pays for it in its score
+   * (the dev, 2026-10-28: *« un texte peut dépasser un peu de sa zone »*); `0` keeps every name inside.
+   */
+  readonly overflow: number
+  /**
+   * How far a spilling name may bite into a neighbour's cells, in cells (the dev, 2026-10-29: *« faudrait quand même que
+   * ça puisse chevaucher un petit peu entre voisins »*); never into another name. `0` keeps it off them.
+   */
+  readonly neighbourBite: number
+  /** The smallest font size worth writing; a name that only fits smaller is left out. */
   readonly minSize: number
-  /**
-   * How much larger two horizontal lines must make a name for them to be chosen over one, as a share of its
-   * size: `0.3` takes them when they make it 30 % larger.
-   */
-  readonly twoLineGain: number
-  /**
-   * How much larger following the space's shape must make a name for it to be chosen over the horizontal, as
-   * a share of its size — the price of the last resort, set above `twoLineGain` so that it stays the last.
-   */
-  readonly followShapeGain: number
+  /** The smallest size a name with a shorter one is written at; under it, the shorter one is written instead. */
+  readonly longMinSize: number
+  /** How much each criterion weighs when a name's candidates are compared (`nameChoice`). */
+  readonly weights: NameWeights
+  /** The largest size a name is written at, in cells — a vast space no longer makes a giant of its name. */
+  readonly maxSize: number
 }
 
 /** One letter placed: the middle of its foot on the baseline, and the direction of its line there. */
@@ -84,6 +99,8 @@ export interface PlacedName {
   readonly owner: number
   /** The name. */
   readonly text: string
+  /** Which of the owner's pieces it is written in, `0` the largest — the same numbering for every name of the owner. */
+  readonly piece: number
   /** The font size, in cells. */
   readonly size: number
   /**
@@ -207,48 +224,34 @@ function blockHeight(name: Measured, twoLines: NonNullable<Measured['twoLines']>
 }
 
 /**
- * The best setting of a name in a piece, chosen in the dev's order (2026-10-28): **straight across on one
- * line**; **straight across on two**, when they make it larger by `twoLineGain`; **along the space's shape, on
- * one line**, when it makes it larger by `followShapeGain` — the last resort. Along the shape on two lines is
- * never tried: a large name set slanting over two lines reads as neither. A setting under `minSize` is out,
- * so when straight across fits nowhere, the shape is taken whatever its price.
- *
- * Each step down the list is paid for by its gain: a setting's size is divided by the gains of the steps it
- * took, and the best of what is left wins — the first in the order on a tie.
+ * The best setting of a name in a piece, among its candidates (`nameCandidates`).
  * @param fitting - the piece and its distances
  * @param name - the name's measure
- * @param options - the margin, the smallest size and the two gains
+ * @param options - the margin, the overflow and the weights
+ * @param minSize - the smallest size it is written at
  * @returns the setting, or `null` when nothing fits at `minSize`
  */
-function setIn(fitting: Fitting, name: Measured, options: NamePlacementOptions): Setting | null {
-  const { margin, minSize, twoLineGain, followShapeGain } = options
-  const candidates: { fit: LineFit | null; broken: boolean; price: number }[] = [
-    { fit: horizontalFit(fitting, name, margin), broken: false, price: 1 },
-    {
-      fit:
-        name.twoLines === null
-          ? null
-          : horizontalFit(
-              fitting,
-              {
-                length: Math.max(name.twoLines.at.first, name.twoLines.at.second),
-                height: blockHeight(name, name.twoLines),
-              },
-              margin
-            ),
-      broken: true,
-      price: 1 + twoLineGain,
-    },
-    { fit: ridgeFit(fitting, name, margin), broken: false, price: 1 + followShapeGain },
-  ]
-  let chosen: Setting | null = null
-  let score = 0
-  for (const { fit, broken, price } of candidates) {
-    if (fit === null || fit.size < minSize || fit.size <= 0 || fit.size / price <= score) continue
-    chosen = { line: fit.line, size: fit.size, broken }
-    score = fit.size / price
-  }
-  return chosen
+function setIn(
+  fitting: Fitting,
+  name: Measured,
+  options: NamePlacementOptions,
+  minSize: number
+): Setting | null {
+  return chooseLine(fitting, {
+    one: name,
+    two:
+      name.twoLines === null
+        ? null
+        : {
+            length: Math.max(name.twoLines.at.first, name.twoLines.at.second),
+            height: blockHeight(name, name.twoLines),
+          },
+    margin: options.margin,
+    overflow: options.overflow,
+    minSize,
+    maxSize: options.maxSize,
+    weights: options.weights,
+  })
 }
 
 /**
@@ -317,6 +320,74 @@ function layOut(setting: Setting, name: Measured, space: NameSpace): PlacedGlyph
   return glyphs.map(({ x, y, angle }) => ({ x: x + space.left, y: y + space.top, angle }))
 }
 
+/** One piece of one owner to name, and the texts it tries. */
+interface Task {
+  /** The owner. */
+  readonly owner: number
+  /** The texts, in order. */
+  readonly tries: readonly Try[]
+  /** The piece. */
+  readonly space: NameSpace
+  /** Which of the owner's pieces it is. */
+  readonly piece: number
+}
+
+/**
+ * Every piece of every name, the largest first: where names would cover each other, the larger space keeps its own.
+ * @param names - the names asked for
+ * @param pieces - each owner's pieces
+ * @param measure - the measure
+ * @param options - the smallest sizes
+ * @returns the tasks
+ */
+function tasksOf(
+  names: readonly NameRequest[],
+  pieces: ReadonlyMap<number, readonly NameSpace[]>,
+  measure: MeasureName,
+  options: NamePlacementOptions
+): Task[] {
+  return names
+    .flatMap((request) => {
+      const tries = choices(request, measure, options)
+      return (pieces.get(request.owner) ?? []).map((space, piece) => ({
+        owner: request.owner,
+        tries,
+        space,
+        piece,
+      }))
+    })
+    .sort((a, b) => b.space.cells - a.space.cells)
+}
+
+/** One text tried in a piece, measured, with the smallest size it is written at. */
+interface Try {
+  /** The text. */
+  readonly text: string
+  /** Its measure. */
+  readonly name: Measured
+  /** The smallest size it is written at. */
+  readonly minSize: number
+}
+
+/**
+ * The texts a request tries in each piece, in order: its name — at the long name's smallest size when it has a shorter
+ * one — then the shorter one.
+ * @param request - the request
+ * @param measure - the measure
+ * @param options - the smallest sizes
+ * @returns the tries
+ * @throws when the measure does not describe a text
+ */
+function choices(request: NameRequest, measure: MeasureName, options: NamePlacementOptions): Try[] {
+  const { owner, text, shorter } = request
+  const name = measured(request, measure)
+  if (shorter === undefined || shorter === text) return [{ text, name, minSize: options.minSize }]
+  return [
+    { text, name, minSize: options.longMinSize },
+    { text: shorter, name: measured({ owner, text: shorter }, measure), minSize: options.minSize },
+  ]
+}
+
 /**
  * Refuse an owner asked for twice: its two names would be laid on each other.
  * @param names - the names asked for
@@ -338,11 +409,14 @@ function refuseRepeats(names: readonly NameRequest[]): void {
  * @param height - the grid's height in cells
  * @param names - the names to place, one per owner at most
  * @param measure - measures a name at a font size of one
- * @param options - the margin, the smallest size and the gain two lines must bring
+ * @param options - the margin, the overflow, the sizes and the weights
+ * @param occupancy - the cells names already cover on this grid, shared by the calls that place one level's forms:
+ *   given, every name keeps off the cells of other pieces' names and marks its own, the largest pieces first; left
+ *   out, the names are placed each in its own space alone
  * @returns the names written, one per piece they fit in, largest first; the owners left for a closer zoom;
  *   the owners with no cell
  * @throws when the grid's size is not `width × height`, an owner is asked for twice — two names in one
- *   space would be laid on each other — or a name's measure does not describe its text
+ *   space would be laid on each other — a name's measure does not describe its text, or the overflow is below zero
  */
 export function placeNames(
   owners: ArrayLike<number>,
@@ -350,31 +424,39 @@ export function placeNames(
   height: number,
   names: readonly NameRequest[],
   measure: MeasureName,
-  options: NamePlacementOptions
+  options: NamePlacementOptions,
+  occupancy?: NameOccupancy
 ): NamePlacement {
   refuseRepeats(names)
-  const pieces = ownerPieces(owners, width, height)
+  if (!(options.overflow >= 0))
+    throw new Error(`[atlas] an overflow of ${String(options.overflow)} cells: zero or more`)
+  if (!(options.neighbourBite >= 0))
+    throw new Error(
+      `[atlas] a bite of ${String(options.neighbourBite)} cells into a neighbour: zero or more`
+    )
+  // The ring around each piece holds the distances outside it, as far as a name may spill over, and a cell more.
+  const pieces = ownerPieces(owners, width, height, Math.ceil(options.overflow) + 2)
   const placed: PlacedName[] = []
-  const tooSmall: number[] = []
-  const absent: number[] = []
-
-  for (const request of names) {
-    const held = pieces.get(request.owner)
-    if (held === undefined) {
-      absent.push(request.owner)
-      continue
-    }
-    const name = measured(request, measure)
-    let any = false
-    for (const space of held) {
-      const setting = setIn(fittingOf(space), name, options)
+  const absent = names.flatMap(({ owner }) => (pieces.has(owner) ? [] : [owner]))
+  for (const { owner, tries, space, piece } of tasksOf(names, pieces, measure, options)) {
+    const tag = pieceTag(owner, piece)
+    const open = occupancy === undefined ? space : withOccupied(space, occupancy, tag)
+    const fitting = fittingOf(open, options.neighbourBite)
+    // The name where it reaches its size, the shorter one otherwise.
+    for (const { text, name, minSize } of tries) {
+      const setting = setIn(fitting, name, options, minSize)
       if (setting === null) continue
       const glyphs = layOut(setting, name, space)
-      placed.push({ owner: request.owner, text: request.text, size: setting.size, glyphs })
-      any = true
+      placed.push({ owner, text, piece, size: setting.size, glyphs })
+      if (occupancy !== undefined)
+        occupy(occupancy, tag, { ...name, text, size: setting.size, glyphs })
+      break
     }
-    if (!any) tooSmall.push(request.owner)
   }
+  const written = new Set(placed.map(({ owner }) => owner))
+  const tooSmall = names.flatMap(({ owner }) =>
+    pieces.has(owner) && !written.has(owner) ? [owner] : []
+  )
 
   placed.sort((a, b) => b.size - a.size)
   return { placed, tooSmall, absent }

@@ -16,6 +16,7 @@ import { polityColours } from '@europe-historical-atlas/core/editor/polityColour
 import { regionBearers } from '@europe-historical-atlas/core/editor/regionBearers'
 import { openYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import { latitudeToMercatorY } from '@europe-historical-atlas/core/geo/mercator'
+import { DEFAULT_NAME_WEIGHTS } from '@europe-historical-atlas/core/pipeline/nameChoice'
 import { placeNames } from '@europe-historical-atlas/core/pipeline/namePlacement'
 import { ownerGrid } from '@europe-historical-atlas/core/pipeline/ownerGrid'
 
@@ -297,9 +298,13 @@ function place(context: CanvasRenderingContext2D, prepared: Prepared, settings: 
     canvasMeasure(context, family, settings.spacing),
     {
       margin: settings.margin,
+      // The bench keeps every name inside; the overflow is tuned on the atlas itself, where the names are judged.
+      overflow: 0,
+      neighbourBite: 0,
       minSize: settings.minSize,
-      twoLineGain: settings.twoLineGain,
-      followShapeGain: settings.followShapeGain,
+      longMinSize: settings.minSize,
+      maxSize: 1000,
+      weights: DEFAULT_NAME_WEIGHTS,
     }
   )
   return { placement, took: performance.now() - started }
@@ -311,17 +316,8 @@ function place(context: CanvasRenderingContext2D, prepared: Prepared, settings: 
  * @returns the key
  */
 function placementKey(settings: Settings): string {
-  const { face, level, margin, minSize, spacing, capitals, twoLineGain, followShapeGain } = settings
-  return JSON.stringify([
-    face,
-    level,
-    margin,
-    minSize,
-    spacing,
-    capitals,
-    twoLineGain,
-    followShapeGain,
-  ])
+  const { face, level, margin, minSize, spacing, capitals } = settings
+  return JSON.stringify([face, level, margin, minSize, spacing, capitals])
 }
 
 /**

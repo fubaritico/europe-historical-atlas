@@ -1,8 +1,9 @@
 ---
 paths:
-  - "packages/atlas/**"
-  - "packages/core/src/pipeline/**"
+  - 'packages/atlas/**'
+  - 'packages/core/src/pipeline/**'
 ---
+
 # Known issues — the atlas (3D)
 
 Open issues specific to `packages/atlas`: its render, its pipeline wiring, its dev panel. Loaded by path; indexed in `.claude/known-issues.md`.
@@ -231,8 +232,8 @@ target.z)` would be coherent with the navigation that already exists.
   already handled.
 - **On an authored year, four dev-panel controls do nothing, and the panel does not say so** (2026-10-13,
   QUAL-001, **left open by decision**). The year's borders are exact and its colours are the Cartographer's
-  (`files/plans/borders/plan.md`, step 4), so *snap to coast*, *colour by suzerain*, the editorial name rules
-  and the *border smoothing* slider no longer apply. Only the smoothing slider says so (a console warning on
+  (`files/plans/borders/plan.md`, step 4), so _snap to coast_, _colour by suzerain_, the editorial name rules
+  and the _border smoothing_ slider no longer apply. Only the smoothing slider says so (a console warning on
   release); the other two quietly rebuild to the same picture. **What it costs**: a minute of puzzlement over
   a dead slider, on a dev tool. **Remedy if it bites**: grey the controls while the installed year is
   authored — which needs the year's kind to reach the panel after it is built. **Severity: cosmetic.**
@@ -275,3 +276,17 @@ target.z)` would be coherent with the navigation that already exists.
   their shadows (`iconShadows`), the pins' shadows read the icons' cross-fade (`icons/crossFade`). No file-level cycle.
   **Remedy when the shadows serve elsewhere**: move `crossFade` beside `markers.ts`, inject the shadows' factory into
   `createEventIconMarkers`. **Severity: cosmetic.**
+- **Placing a year's country names takes ~10.5 s for 1100's three levels, three forms** (measured under Node, 2026-10-29,
+  ATLAS-301 — ~30 s for the short names alone the evening before, which was ~13 s in the dev's browser). The size search reads
+  the room across each line once (`nameFit.roomAcross`) and makes 16 halvings; then three forms are placed, each piece's
+  distance to its neighbours and to the names already placed computed again (`nameOccupancy.withOccupied`, `nameFit.boundOf`).
+  In the names' own worker, so the map never waits. **Next if it bites**: the three levels share most pieces — cache by
+  piece; skip the distance to the names when none covers the crop (done) and recompute only the part of the crop they touch;
+  then several workers, one per level. **Severity: worth knowing.**
+- **Every islet of a polity carries its name** (2026-10-28, ATLAS-301): with names no longer refused for their size, Norway's
+  coast shows a « NORWAY » on many islands once zoomed in. It follows the dev's call that every piece carries the name, now
+  that nothing is too small. **Remedy if it clutters**: name a piece only above a share of the largest, or only the largest
+  piece of an island group. **Severity: cosmetic, to judge on the map.**
+- **The names are drawn over the relief** (`depthTest` off, `scene/political/names/nameLayer`): a flat sheet at the ground's
+  median height would otherwise be cut by the hills under it. Consequence: under a steep camera, a name behind a ridge shows
+  through it. Chosen on purpose for legibility (the dev, 28/10); **severity: cosmetic**.

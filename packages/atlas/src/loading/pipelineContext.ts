@@ -47,12 +47,20 @@ export interface MapPipelineDeps {
 
 /** Everything a pipeline call reads, including the compute it may have had to replace. */
 export interface PipelineContext extends MapPipelineDeps {
-  /** The compute, held in a box because a dying worker is replaced by the inline implementation. */
-  box: { compute: MapCompute }
+  /**
+   * The computes, held in a box because a dying worker is replaced by the inline implementation: the map's, and
+   * the names' own (ATLAS-301) — placing a year's names holds a worker for seconds, and a bake asked meanwhile must
+   * not wait behind them.
+   */
+  box: { compute: MapCompute; names: MapCompute }
+  /** The names' face, loading or loaded — asked once for the pipeline's life. */
+  nameFace: Promise<void> | null
   /** Only the newest bake may write back. */
   bakeGate: LatestOnly
   /** Only the newest year may write back — its own gate, or a bake would needlessly cancel a year. */
   politicalGate: LatestOnly
+  /** Only the newest names may write back — asked by a year, or again by the panel. */
+  namesGate: LatestOnly
   /** The five payload ports, defaults filled in. */
   assets: MapAssetSources
   /** The rivers once loaded, held until the relief is there to check their ground against. */

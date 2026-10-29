@@ -49,6 +49,7 @@ function logAllSettings(dev: DevState, controls: MapControls): void {
           river: dev.river,
           political: dev.political,
           vassals: dev.vassals,
+          names: dev.names,
           tribes: dev.tribes,
           rose: dev.rose,
           frame: dev.frame,
@@ -104,6 +105,7 @@ function rebuildCallbacks(
     rebuildPolitical: (): void => {
       void pipeline.rebuildPolitical()
     },
+
     rebuildBorders: (): void => {
       layers.rebuildBorders()
     },
@@ -174,6 +176,11 @@ export function createPanelCallbacks(deps: PanelCallbackDeps): DevPanelCallbacks
   return {
     ...rebuildCallbacks(deps),
     ...liveCallbacks(deps),
+    rebuildNames: (): void => {
+      // The placement is asynchronous; its failure is said by the names' own stage, and a defect before it reaches
+      // the error net as an unhandled rejection.
+      void deps.pipeline.rebuildNames()
+    },
     rebuildFrame: (): void => {
       deps.layers.rebuildFrame()
     },
@@ -204,6 +211,7 @@ export function panelDepsFor(deps: PanelCallbackDeps): DevPanelDeps {
     river: dev.river,
     political: dev.political,
     vassals: dev.vassals,
+    names: dev.names,
     tribes: dev.tribes,
     rose: dev.rose,
     frame: dev.frame,

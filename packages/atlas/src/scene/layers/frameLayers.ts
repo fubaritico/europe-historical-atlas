@@ -76,6 +76,10 @@ export function frameLineWork(context: LayerContext, zoom: number, pixelsPerUnit
   handles.rivers?.setZoom(zoom)
   const detail = frameDetail(context, zoom)
   handles.fills?.setDetail(detail)
+  // The names of the level the zoom shows, crossing over to the next as it nears it.
+  handles.names?.setDetail(detail)
+  // The names' white edge, by the zoom.
+  handles.names?.setZoom(zoom, dev.names)
   // The tribes' fade, from the panel's live trial: two uniforms, nothing rebuilt.
   handles.tribes?.setFeather(dev.tribes)
   if (handles.borders) {

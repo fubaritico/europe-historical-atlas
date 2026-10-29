@@ -48,6 +48,29 @@ function nextFrame(): Promise<void> {
 }
 
 /**
+ * Build the names' compute: a worker of its own, so placing a year's names never holds up a bake (review ARCH-001,
+ * 2026-10-28). It keeps no state between calls, so a dead worker is replaced on this thread with nothing to restore;
+ * the call it was serving fails, and the next year's names are asked of the replacement.
+ * @param context - the pipeline's world
+ * @returns the compute
+ */
+export function createNameCompute(context: PipelineContext): MapCompute {
+  try {
+    return createWorkerMapCompute({
+      spawn: context.spawn,
+      onFatal: (error: Error) => {
+        console.warn('names worker died — placing names on the main thread', error)
+        if (!context.isDisposed())
+          context.box.names = createInlineMapCompute({ yieldControl: nextFrame })
+      },
+    })
+  } catch (error: unknown) {
+    console.warn('names worker unavailable — placing names on the main thread instead', error)
+    return createInlineMapCompute({ yieldControl: nextFrame })
+  }
+}
+
+/**
  * Build the compute, preferring a worker and falling back to this thread.
  * @param context - the pipeline's world
  * @param restore - how the pipeline sets a fresh compute up again, should the worker die mid-session

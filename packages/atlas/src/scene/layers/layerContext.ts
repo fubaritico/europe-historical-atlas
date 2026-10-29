@@ -10,6 +10,7 @@ import type { EventMarkers } from '../events/markers'
 import type { LineLayer } from '../lines/lineLayer'
 import type { LevelledBorderLayer } from '../political/borders/levelledBorderLayer'
 import type { FillLayer } from '../political/fills/fillLayer'
+import type { NameLayer } from '../political/names/nameLayer'
 import type { TribeLayer } from '../political/tribes/tribeLayer'
 import type { TribeCutKey, TribePatch } from '../political/tribes/tribePatches'
 import type { DrapeProjection } from '../relief/drapeProjection'
@@ -56,6 +57,8 @@ export interface LayerHandles {
    * instead of measuring every distance again.
    */
   tribeCut: { key: TribeCutKey; patches: TribePatch[] } | null
+  /** The countries' names (ATLAS-301), or `null` before the year's names and their sheet are in. */
+  names: NameLayer | null
   /** The events pinned on the relief (CMS-224), or `null` when there is none to pin. */
   events: EventMarkers | null
   /** The compass rose. */

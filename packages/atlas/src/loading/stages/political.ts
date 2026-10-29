@@ -10,6 +10,7 @@ import { politicalPalette } from '../../tunables/params'
 import { COMPUTE_PHASE_MESSAGES } from '../computeLabels'
 import { settleYearBorders } from '../yearBorders'
 
+import { rebuildYearNames } from './names'
 import { rebuildTexture } from './texture'
 
 import type { DevState } from '../../tunables/devState'
@@ -73,6 +74,8 @@ export async function rebuildPolitical(context: PipelineContext): Promise<void> 
     layers.rebuildFills()
     layers.rebuildBorders()
     ui.progress.report(1)
+    // 5. The names, after the map and outside the bar: they take seconds, and the map does not wait for them.
+    void rebuildYearNames(context, loaded)
   } catch (error: unknown) {
     // A failed fetch or compute is told as a failure of the year's file.
     ui.reportAssetFailure('regions', error)

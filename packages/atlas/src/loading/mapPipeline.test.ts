@@ -42,6 +42,7 @@ function fakeLayers(): MapLayers {
     'rebuildRivers',
     'rebuildBorders',
     'rebuildFills',
+    'rebuildNames',
     'rebuildEvents',
     'rebuildRose',
     'rebuildFrame',

@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { createMapSources } from '../../sources/mapSources'
 import { createDevState } from '../../tunables/devState'
 
-import { frameRelief } from './frameLayers'
+import { frameLineWork, frameRelief } from './frameLayers'
 
 import type { LayerContext, LayerHandles } from './layerContext'
 
@@ -12,7 +12,7 @@ import type { LayerContext, LayerHandles } from './layerContext'
 const TOLD = ['edge', 'events'] as const
 
 /** The layers laid on the relief that are scaled as a whole. */
-const SCALED = ['coastline', 'rivers', 'borders', 'fills', 'tribes'] as const
+const SCALED = ['coastline', 'rivers', 'borders', 'fills', 'tribes', 'names'] as const
 
 /** The layers on the scene that are not on the relief, and must never follow it. */
 const FLAT = ['rhumb', 'compass', 'sheet', 'frame', 'labels', 'title'] as const
@@ -104,5 +104,30 @@ describe('frameRelief', () => {
       }).not.toThrow()
       expect(relief.scale.y).toBe(3)
     })
+  })
+})
+
+describe('frameLineWork', () => {
+  // The guard behind the panel's exemption of the names' sizes on screen (`devPanel.test`): they fire no callback, so
+  // only this says they reach the layer every frame.
+  it('hands the names’ layer the camera’s zoom and the panel’s settings, every frame', () => {
+    const setZoom = vi.fn()
+    const dev = createDevState()
+    const handles = {
+      rivers: null,
+      fills: null,
+      tribes: null,
+      borders: null,
+      coastline: null,
+      rhumb: null,
+      names: { setDetail: vi.fn(), setZoom },
+    }
+    const context = {
+      dev,
+      sources: createMapSources(),
+      handles: handles as unknown as LayerHandles,
+    } as unknown as LayerContext
+    frameLineWork(context, 0.5, 120)
+    expect(setZoom).toHaveBeenCalledWith(0.5, dev.names)
   })
 })

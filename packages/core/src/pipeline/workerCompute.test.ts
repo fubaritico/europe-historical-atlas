@@ -4,6 +4,7 @@ import { createLandMask } from '../data/landMask'
 
 import { serveCompute } from './computeServer'
 import { createInlineMapCompute } from './inlineCompute'
+import { DEFAULT_NAME_WEIGHTS } from './nameChoice'
 import { DEFAULT_TERRAIN_OPTIONS } from './terrainCompose'
 import { createWorkerMapCompute } from './workerCompute'
 
@@ -105,10 +106,19 @@ const NAMES_REQUEST: YearNamesRequest = {
   ],
   bearersByLevel: [['k']],
   names: { k: 'K' },
+  fullNames: {},
   glyphs: { K: { advance: 1, ascent: 1, descent: 0 } },
   gridWidth: 20,
   gridHeight: 20,
-  options: { margin: 1, minSize: 0.5, twoLineGain: 0.3, followShapeGain: 0.5 },
+  options: {
+    margin: 1,
+    overflow: 0,
+    neighbourBite: 0,
+    minSize: 0.5,
+    longMinSize: 0.5,
+    maxSize: 1000,
+    weights: DEFAULT_NAME_WEIGHTS,
+  },
 }
 
 /**

@@ -14,18 +14,25 @@
 
 import { readAt } from '../utils/math'
 
-/** One piece of an owner's cells, cropped from the grid with a ring of outside cells around it. */
+/** One piece of an owner's cells, cropped from the grid with a ring of outside cells around it — at least one cell wide. */
 export interface NameSpace {
-  /** The column of the grid the crop's column 0 stands on — one left of the piece, so may be `-1`. */
+  /** The column of the grid the crop's column 0 stands on — the ring's width left of the piece, so may be negative. */
   readonly left: number
-  /** The row of the grid the crop's row 0 stands on — one above the piece, so may be `-1`. */
+  /** The row of the grid the crop's row 0 stands on — the ring's width above the piece, so may be negative. */
   readonly top: number
-  /** The crop's width in cells, the piece's plus two. */
+  /** The crop's width in cells, the piece's plus the ring either side. */
   readonly width: number
-  /** The crop's height in cells, the piece's plus two. */
+  /** The crop's height in cells, the piece's plus the ring either side. */
   readonly height: number
   /** Row-major over the crop, `1` on the piece and `0` everywhere else — its first and last rows and columns always. */
   readonly mask: Uint8Array
+  /**
+   * Row-major over the crop, what a name may not cover freely: `1` on another owner's cell and past the grid's frame,
+   * which a name may bite into by a little (the dev, 2026-10-29: *« faudrait quand même que ça puisse chevaucher un
+   * petit peu entre voisins »*); `2` on another piece's name, which it never covers (`nameOccupancy`); `0` on the
+   * piece, the sea and unclaimed land.
+   */
+  readonly blocked: Uint8Array
   /** How many cells the piece holds. */
   readonly cells: number
 }
@@ -104,24 +111,65 @@ function flood(grid: OwnerGrid, start: number, id: number, label: Int32Array): P
   return piece
 }
 
+/** Where a crop stands on the grid, and its size. */
+interface CropFrame {
+  /** The grid's column of the crop's column 0. */
+  readonly left: number
+  /** The grid's row of the crop's row 0. */
+  readonly top: number
+  /** The crop's width in cells. */
+  readonly width: number
+  /** The crop's height in cells. */
+  readonly height: number
+}
+
+/**
+ * The cells of a crop a name may never reach: another owner's, and those past the grid's frame.
+ * @param owner - the piece's owner
+ * @param grid - the grid
+ * @param frame - where the crop stands
+ * @returns row-major over the crop, `1` where blocked
+ */
+function blockedAround(owner: number, grid: OwnerGrid, frame: CropFrame): Uint8Array {
+  const blocked = new Uint8Array(frame.width * frame.height)
+  for (let y = 0; y < frame.height; y += 1)
+    for (let x = 0; x < frame.width; x += 1) {
+      const gx = x + frame.left
+      const gy = y + frame.top
+      const inGrid = gx >= 0 && gy >= 0 && gx < grid.width && gy < grid.height
+      const other = inGrid ? readAt(grid.owners, gy * grid.width + gx) : owner
+      if (!inGrid || (other >= 0 && other !== owner)) blocked[y * frame.width + x] = 1
+    }
+  return blocked
+}
+
 /**
  * A piece cut out of the grid, with its ring of outside cells.
  * @param piece - the piece
  * @param id - its label
  * @param label - each cell's piece
- * @param width - the grid's width
+ * @param grid - the grid
+ * @param ring - the ring's width, in cells
  * @returns its space
  */
-function cropOf(piece: Piece, id: number, label: Int32Array, width: number): NameSpace {
-  const left = piece.minX - 1
-  const top = piece.minY - 1
-  const cropWidth = piece.maxX - piece.minX + 3
-  const cropHeight = piece.maxY - piece.minY + 3
+function cropOf(
+  piece: Piece,
+  id: number,
+  label: Int32Array,
+  grid: OwnerGrid,
+  ring: number
+): NameSpace {
+  const { width } = grid
+  const left = piece.minX - ring
+  const top = piece.minY - ring
+  const cropWidth = piece.maxX - piece.minX + 1 + 2 * ring
+  const cropHeight = piece.maxY - piece.minY + 1 + 2 * ring
   const mask = new Uint8Array(cropWidth * cropHeight)
   for (let y = piece.minY; y <= piece.maxY; y += 1)
     for (let x = piece.minX; x <= piece.maxX; x += 1)
       if (label[y * width + x] === id) mask[(y - top) * cropWidth + (x - left)] = 1
-  return { left, top, width: cropWidth, height: cropHeight, mask, cells: piece.cells }
+  const frame = { left, top, width: cropWidth, height: cropHeight }
+  return { ...frame, mask, blocked: blockedAround(piece.owner, grid, frame), cells: piece.cells }
 }
 
 /**
@@ -132,14 +180,19 @@ function cropOf(piece: Piece, id: number, label: Int32Array, width: number): Nam
  * @param owners - row-major, the owner of each cell, any negative value for none (the sea, unclaimed land)
  * @param width - the grid's width in cells
  * @param height - the grid's height in cells
+ * @param ring - the width of the ring of outside cells around each piece: one, or as wide as a name may spill over
+ *   its borders (`nameFit`), so the distances outside are read within the crop
  * @returns each owner's pieces, by owner, the largest first — the first found first on a tie
- * @throws when the grid's size is not `width × height`
+ * @throws when the grid's size is not `width × height`, or the ring is not a whole number of cells, one at least
  */
 export function ownerPieces(
   owners: ArrayLike<number>,
   width: number,
-  height: number
+  height: number,
+  ring = 1
 ): Map<number, NameSpace[]> {
+  if (!Number.isInteger(ring) || ring < 1)
+    throw new Error(`[atlas] a ring of ${String(ring)} cells: one whole cell at least`)
   if (owners.length !== width * height)
     throw new Error(
       `[atlas] a grid of ${String(owners.length)} cells is not ${String(width)} × ${String(height)}`
@@ -151,7 +204,7 @@ export function ownerPieces(
   for (let start = 0; start < width * height; start += 1) {
     if (readAt(owners, start) < 0 || label[start] !== -1) continue
     const piece = flood(grid, start, id, label)
-    const space = cropOf(piece, id, label, width)
+    const space = cropOf(piece, id, label, grid, ring)
     const held = spaces.get(piece.owner)
     if (held === undefined) spaces.set(piece.owner, [space])
     else held.push(space)

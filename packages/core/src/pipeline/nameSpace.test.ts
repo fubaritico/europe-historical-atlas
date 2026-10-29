@@ -43,6 +43,21 @@ describe('ownerPieces', () => {
       ])
     })
 
+    it('widens the ring of outside cells when asked, for the distances past the piece', () => {
+      const owners = gridOf(6, 4, (x, y) => (x >= 2 && x <= 4 && y >= 1 && y <= 2 ? 7 : -1))
+      const space = ownerPieces(owners, 6, 4, 3).get(7)?.[0]
+      expect(space).toMatchObject({ left: -1, top: -2, width: 9, height: 8, cells: 6 })
+      expect(space?.mask[3 * 9 + 3]).toBe(1)
+    })
+
+    it('blocks another owner’s cells in the crop, never the sea’s', () => {
+      // Owner 0 on columns 1..2, owner 1 on column 3, the sea on column 0 and 4.
+      const owners = gridOf(5, 1, (x) => (x === 1 || x === 2 ? 0 : x === 3 ? 1 : -1))
+      const space = ownerPieces(owners, 5, 1).get(0)?.[0]
+      // The crop's middle row: the sea at column 0, the piece, the neighbour at column 3.
+      expect(Array.from(space?.blocked.slice(4, 8) ?? [])).toEqual([0, 0, 0, 1])
+    })
+
     it('gives each owner its own space', () => {
       const owners = gridOf(4, 2, (x) => (x < 2 ? 0 : 1))
       const spaces = ownerPieces(owners, 4, 2)
@@ -65,6 +80,12 @@ describe('ownerPieces', () => {
     it('refuses a grid whose size is not width × height', () => {
       expect(() => ownerPieces(new Int32Array(5), 2, 3)).toThrow(/is not 2 × 3/)
     })
+
+    it('refuses a ring under one cell, or not a whole number of cells', () => {
+      const owners = gridOf(2, 2, () => 0)
+      expect(() => ownerPieces(owners, 2, 2, 0)).toThrow(/a ring of 0 cells/)
+      expect(() => ownerPieces(owners, 2, 2, 1.5)).toThrow(/a ring of 1.5 cells/)
+    })
   })
 
   // L4: N/A — synchronous walk over a grid it checks; nothing else can fail.
@@ -78,6 +99,8 @@ describe('ownerPieces', () => {
       ).get(0)?.[0]
       expect(space).toMatchObject({ left: -1, top: -1, width: 4, height: 4, cells: 4 })
       expect(space?.mask[0]).toBe(0)
+      // Past the frame, a name may not spill either.
+      expect(space?.blocked[0]).toBe(1)
       expect(space?.mask[5]).toBe(1)
     })
 

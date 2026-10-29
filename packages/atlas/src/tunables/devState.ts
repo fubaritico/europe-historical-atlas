@@ -16,6 +16,7 @@ import {
   DEFAULT_COASTLINE_PARAMS,
   DEFAULT_EXTENT_PARAMS,
   DEFAULT_FRAME_PARAMS,
+  DEFAULT_NAME_PARAMS,
   DEFAULT_POLITICAL_PARAMS,
   DEFAULT_RELIEF_PARAMS,
   DEFAULT_RHUMB_PARAMS,
@@ -29,6 +30,7 @@ import type {
   CoastlineDevParams,
   ExtentDevParams,
   FrameDevParams,
+  NameDevParams,
   PoliticalDevParams,
   ReliefDevParams,
   RhumbDevParams,
@@ -68,6 +70,8 @@ export interface DevState {
   political: PoliticalDevParams
   /** How the zoom reveals the levels of homage. */
   vassals: VassalDevParams
+  /** How the countries' names are written and placed. */
+  names: NameDevParams
   /** How a tribe's colour vanishes at its limit. */
   tribes: TribeDevParams
   /** Compass rose. */
@@ -96,6 +100,7 @@ export function createDevState(): DevState {
     river: { ...DEFAULT_RIVER_PARAMS },
     political: { ...DEFAULT_POLITICAL_PARAMS },
     vassals: { ...DEFAULT_VASSAL_PARAMS },
+    names: { ...DEFAULT_NAME_PARAMS },
     tribes: { ...DEFAULT_TRIBE_PARAMS },
     rose: { ...DEFAULT_ROSE_PARAMS },
     extent: { ...DEFAULT_EXTENT_PARAMS },

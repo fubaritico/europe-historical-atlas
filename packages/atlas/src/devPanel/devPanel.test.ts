@@ -64,6 +64,7 @@ function countingCallbacks(): { callbacks: DevPanelCallbacks; calls: Record<stri
     'rebuildRhumb',
     'rebuildRivers',
     'rebuildPolitical',
+    'rebuildNames',
     'rebuildBorders',
     'rebuildBorderGeometry',
     'rebuildRose',
@@ -123,6 +124,7 @@ function build(): {
     river: dev.river,
     political: dev.political,
     vassals: dev.vassals,
+    names: dev.names,
     tribes: dev.tribes,
     rose: dev.rose,
     frame: dev.frame,
@@ -208,6 +210,9 @@ const VASSALS_READ_EVERY_FRAME = new Set(['enabled', 'revealStart', 'revealEnd',
 /** The tribes' fade, written to a uniform on every frame (`mapLayers`) — spelled out by key, as above. */
 const TRIBES_READ_EVERY_FRAME = new Set(['mode', 'widthKm'])
 
+/** The names' white edge by zoom, handed to the names' layer on every frame (`frameLayers`) — spelled out by key, as above. */
+const NAMES_READ_EVERY_FRAME = new Set(['haloWholeZoom', 'haloGoneZoom'])
+
 /**
  * The flight controls, read once when a flight begins rather than every frame.
  *
@@ -216,6 +221,28 @@ const TRIBES_READ_EVERY_FRAME = new Set(['mode', 'widthKm'])
  * the camera actually reads.
  */
 const FLIGHT_CONTROLS = ['flyDurationMs', 'flyFocusZoom', 'flyArcZoom'] as const
+
+/**
+ * Whether a control fires no callback by design — its value read every frame, or when a flight begins.
+ * @param control - the control
+ * @param control.object - the object it writes
+ * @param control.property - the field it writes
+ * @param dev - the panel's dev state
+ * @returns whether it is exempt from the callback guard
+ */
+function readEveryFrame(
+  control: { object: unknown; property: string },
+  dev: ReturnType<typeof build>['dev']
+): boolean {
+  const { object, property } = control
+  return (
+    (object === dev.vassals && VASSALS_READ_EVERY_FRAME.has(property)) ||
+    (object === dev.tribes && TRIBES_READ_EVERY_FRAME.has(property)) ||
+    (object === dev.names && NAMES_READ_EVERY_FRAME.has(property)) ||
+    READ_EVERY_FRAME.has(property) ||
+    (FLIGHT_CONTROLS as readonly string[]).includes(property)
+  )
+}
 
 describe('createDevPanel', () => {
   describe('happy path', () => {
@@ -243,12 +270,7 @@ describe('createDevPanel', () => {
         )
         if (!match) continue
         nudge(match)
-        const exempt =
-          (match.object === dev.vassals && VASSALS_READ_EVERY_FRAME.has(match.property)) ||
-          (match.object === dev.tribes && TRIBES_READ_EVERY_FRAME.has(match.property)) ||
-          READ_EVERY_FRAME.has(match.property) ||
-          (FLIGHT_CONTROLS as readonly string[]).includes(match.property)
-        if (total(calls) === 0 && !exempt) inert.push(match.property)
+        if (total(calls) === 0 && !readEveryFrame(match, dev)) inert.push(match.property)
       }
       expect(inert).toEqual([])
       // Quadratic on purpose: the panel is rebuilt once per control, so a callback fired by one cannot

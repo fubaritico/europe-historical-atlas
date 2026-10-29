@@ -64,7 +64,7 @@ export function innermostCell(distances: Float32Array): number {
  * @param to - where it ends
  * @returns the line
  */
-function sampled(
+export function sampled(
   curve: (s: number) => readonly [number, number],
   from: number,
   to: number
@@ -84,22 +84,106 @@ function sampled(
 }
 
 /**
- * The horizontal line through the space's most inner cell, across the run of the space on its row.
+ * The direction of one step of a line, as a unit vector.
+ * @param from - the step's first point
+ * @param to - its last
+ * @returns the direction
+ * @throws when the two points are one — `sampled` never sets two points on each other, so it is a line built wrong
+ */
+function stepDirection(
+  from: readonly [number, number],
+  to: readonly [number, number]
+): readonly [number, number] {
+  const length = Math.hypot(to[0] - from[0], to[1] - from[1])
+  if (length === 0) throw new Error('[atlas] a name line has two points on each other')
+  return [(to[0] - from[0]) / length, (to[1] - from[1]) / length]
+}
+
+/**
+ * A line carried on past both its ends, straight along its first and last steps, with points about
+ * {@link STEP} apart as on every line — the room a name that may spill over its borders takes beyond where its
+ * space ends (`nameCandidates`).
+ * @param line - the line
+ * @param by - how far past each end, in cells; `0` or less leaves the line as it is
+ * @returns the longer line
+ * @throws when the line has fewer than two points, or two of them on each other at an end
+ */
+export function extendLine(line: NameLine, by: number): NameLine {
+  if (by <= 0) return line
+  const { points } = line
+  const first = points[0]
+  const second = points[1]
+  const beforeLast = points[points.length - 2]
+  const last = points[points.length - 1]
+  if (first === undefined || second === undefined || beforeLast === undefined || last === undefined)
+    throw new Error(`[atlas] a name line of ${String(points.length)} points cannot be carried on`)
+  const back = stepDirection(second, first)
+  const on = stepDirection(beforeLast, last)
+  const count = Math.ceil(by / STEP)
+  const before = Array.from({ length: count }, (_, i): readonly [number, number] => {
+    const t = (by * (count - i)) / count
+    return [first[0] + t * back[0], first[1] + t * back[1]]
+  })
+  const after = Array.from({ length: count }, (_, i): readonly [number, number] => {
+    const t = (by * (i + 1)) / count
+    return [last[0] + t * on[0], last[1] + t * on[1]]
+  })
+  const all = [...before, ...points, ...after]
+  let walked = 0
+  const lengths = all.map((point, i) => {
+    const previous = all[i - 1]
+    if (previous !== undefined) walked += Math.hypot(point[0] - previous[0], point[1] - previous[1])
+    return walked
+  })
+  return { points: all, lengths }
+}
+
+/**
+ * The space's centre of mass, when it lies inside the space.
+ * @param mask - the space, row-major over the crop, non-zero inside
+ * @param width - the crop's width
+ * @returns the centre, `x` exact and `y` on its row; `null` when it falls outside — a crescent, an L
+ */
+export function centreOfMass(mask: Uint8Array, width: number): { x: number; y: number } | null {
+  let sx = 0
+  let sy = 0
+  let cells = 0
+  mask.forEach((inside, at) => {
+    if (inside === 0) return
+    sx += at % width
+    sy += Math.floor(at / width)
+    cells += 1
+  })
+  if (cells === 0) return null
+  const x = sx / cells
+  const y = Math.round(sy / cells)
+  return mask[y * width + Math.round(x)] === 0 ? null : { x, y }
+}
+
+/**
+ * The horizontal line a name is centred on: through the space's centre of mass, as far either side of it as the
+ * space runs on that row — cut evenly, so the name sits on the centre (the dev, 2026-10-28: *« centrés par rapport
+ * à la masse du pays […] le premier test »*). Through the space's most inner cell, across its whole run, when the
+ * centre falls outside the space.
  * @param mask - the space, row-major over the crop, non-zero inside
  * @param distances - each cell's distance to the outside
  * @param width - the crop's width
  * @returns the line, read west to east
  */
 export function horizontalLine(mask: Uint8Array, distances: Float32Array, width: number): NameLine {
+  const centre = centreOfMass(mask, width)
   const pole = innermostCell(distances)
-  const x = pole % width
-  const y = (pole - x) / width
+  const anchor = centre ?? { x: pole % width, y: Math.floor(pole / width) }
+  const { y } = anchor
+  const x = Math.round(anchor.x)
   let west = x
   while (west > 0 && mask[y * width + west - 1] !== 0) west -= 1
   let east = x
   while (east < width - 1 && mask[y * width + east + 1] !== 0) east += 1
-  // To the edges of the run's end cells, half a cell past their centres.
-  return sampled((s) => [s, y], west - 0.5, east + 0.5)
+  // To the edges of the run's end cells, half a cell past their centres — evenly either side of the centre.
+  if (centre === null) return sampled((s) => [s, y], west - 0.5, east + 0.5)
+  const reach = Math.min(centre.x - (west - 0.5), east + 0.5 - centre.x)
+  return sampled((s) => [s, y], centre.x - reach, centre.x + reach)
 }
 
 /** A binary heap of cells, the cheapest on top. */
@@ -289,7 +373,7 @@ function ridgeWalk(
 }
 
 /** Where a walk is read from: its mean, its reading direction and the letters' up. */
-interface ReadingFrame {
+export interface ReadingFrame {
   /** The walk's mean point. */
   readonly origin: readonly [number, number]
   /** The reading direction, a unit vector pointing right — or upward, when the walk descends steeper than {@link STEEPEST_DESCENT}. */
@@ -303,7 +387,7 @@ interface ReadingFrame {
  * @param path - the walk's points
  * @returns its frame
  */
-function readingFrame(path: readonly (readonly [number, number])[]): ReadingFrame {
+export function readingFrame(path: readonly (readonly [number, number])[]): ReadingFrame {
   let mx = 0
   let my = 0
   for (const [x, y] of path) {
@@ -344,7 +428,7 @@ function det(m: readonly number[]): number {
  * @param points - the points, as `[s, t]`
  * @returns its three coefficients; a straight line through their mean where the points cannot tell a bend
  */
-function fitParabola(
+export function fitParabola(
   points: readonly (readonly [number, number])[]
 ): readonly [number, number, number] {
   let s0 = 0
@@ -390,7 +474,7 @@ const BEND_HALVINGS = 40
  * @param to - the last
  * @returns the bend, `a` itself when it turns little enough
  */
-function limitedBend(a: number, b: number, from: number, to: number): number {
+export function limitedBend(a: number, b: number, from: number, to: number): number {
   const turn = (bend: number): number =>
     Math.abs(Math.atan(2 * bend * to + b) - Math.atan(2 * bend * from + b))
   if (turn(a) <= MAX_BEND) return a

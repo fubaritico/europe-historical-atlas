@@ -8,6 +8,7 @@ import GUI from 'lil-gui'
 import { addCameraFolder } from './folders/camera'
 import { addCoastlineFolder } from './folders/coastline'
 import { addFrameFolder } from './folders/frame'
+import { addNameFolder } from './folders/names'
 import { addPoliticalFolder } from './folders/political'
 import { addReliefControls } from './folders/relief'
 import { addRhumbFolder } from './folders/rhumbs'
@@ -47,6 +48,7 @@ export function createDevPanel(deps: DevPanelDeps): GUI {
   addRiverFolder(gui, deps)
   addPoliticalFolder(gui, deps)
   addVassalFolder(gui, deps)
+  addNameFolder(gui, deps)
   addTribeFolder(gui, deps)
   addRoseFolder(gui, deps)
   addFrameFolder(gui, deps)

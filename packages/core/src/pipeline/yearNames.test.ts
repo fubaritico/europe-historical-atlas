@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { DEFAULT_NAME_WEIGHTS } from './nameChoice'
 import { placeYearNames, tableMeasure } from './yearNames'
 
 import type { GlyphMetric, YearNamesRequest } from './yearNames'
@@ -49,10 +50,19 @@ const REQUEST: YearNamesRequest = {
     ['king', 'duke'],
   ],
   names: { king: 'Kingdom', duke: 'Duchy' },
+  fullNames: {},
   glyphs: GLYPHS,
   gridWidth: 80,
   gridHeight: 20,
-  options: { margin: 1, minSize: 0.5, twoLineGain: 10, followShapeGain: 0.5 },
+  options: {
+    margin: 1,
+    overflow: 0,
+    neighbourBite: 0,
+    minSize: 0.5,
+    longMinSize: 0.5,
+    maxSize: 1000,
+    weights: DEFAULT_NAME_WEIGHTS,
+  },
 }
 
 describe('tableMeasure', () => {
@@ -107,6 +117,31 @@ describe('placeYearNames', () => {
       expect(levels[1]?.placed.map(({ polity }) => polity)).toEqual(['king'])
     })
 
+    // The dev, 2026-10-29: « Kingdom of France → France, et ça pour tout ».
+    it('writes the full name where it reaches the long name’s smallest size', () => {
+      const { levels } = placeYearNames({ ...REQUEST, fullNames: { king: 'Kingdom of All' } })
+      expect(levels[0]?.placed.map(({ form, text }) => [form, text])).toEqual([
+        ['full', 'Kingdom of All'],
+      ])
+    })
+
+    it('writes the short name instead where the full one would be smaller than that', () => {
+      // Forty letters in a kingdom forty cells across cannot reach 4 cells, even on two lines.
+      const { levels } = placeYearNames({
+        ...REQUEST,
+        fullNames: { king: 'Kingdom of All the Lands and All the Seas' },
+        options: { ...REQUEST.options, longMinSize: 4 },
+      })
+      expect(levels[0]?.placed.map(({ form, text }) => [form, text])).toEqual([
+        ['short', 'Kingdom'],
+      ])
+    })
+
+    it('writes one name a piece, never both forms', () => {
+      const { levels } = placeYearNames({ ...REQUEST, fullNames: { king: 'Kingdom of All' } })
+      expect(levels[1]?.placed.map(({ polity }) => polity).sort()).toEqual(['duke', 'king'])
+    })
+
     it('returns the grid its places are in', () => {
       expect(placeYearNames(REQUEST)).toMatchObject({ gridWidth: 80, gridHeight: 20 })
     })
@@ -116,6 +151,15 @@ describe('placeYearNames', () => {
     it('lists a polity whose name fits nowhere at the smallest size', () => {
       const tight = { ...REQUEST, options: { ...REQUEST.options, minSize: 50 } }
       expect(placeYearNames(tight).levels[0]?.tooSmall).toEqual(['king'])
+    })
+
+    it('counts a polity written when its short name fits where its full one does not', () => {
+      const tight = {
+        ...REQUEST,
+        fullNames: { king: 'Kingdom of All the Lands and All the Seas' },
+        options: { ...REQUEST.options, longMinSize: 4 },
+      }
+      expect(placeYearNames(tight).levels[0]?.tooSmall).toEqual([])
     })
 
     it('refuses a level whose bearers are not one per region', () => {

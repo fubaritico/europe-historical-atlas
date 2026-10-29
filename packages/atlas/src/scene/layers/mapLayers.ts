@@ -15,6 +15,7 @@ import { rebuildRose } from '../decor/rose/mapRoseLayer'
 import { rebuildEvents } from '../events/mapEventLayer'
 import { rebuildBorders } from '../political/borders/mapBorderLayer'
 import { rebuildFills } from '../political/fills/mapFillLayer'
+import { rebuildNames } from '../political/names/mapNameLayer'
 import { disposeRelief, rebuildRelief, setTexture } from '../relief/mapReliefLayer'
 import { rebuildFrame } from '../sheet/mapFrameLayer'
 import { rebuildCoastline } from '../waters/mapCoastLayer'
@@ -76,13 +77,18 @@ export interface MapLayers {
    */
   rebuildFills: () => void
   /**
+   * Lay the year's country names on the relief (ATLAS-301). A no-op until the names and their sheet are in.
+   * @returns nothing
+   */
+  rebuildNames: () => void
+  /**
    * Stand the contribution's events on the relief. A no-op until the events are in and the map is drawn.
    * @returns nothing
    */
   rebuildEvents: () => void
   /**
    * Rebuild the relief, then everything laid on it — the coastline, the rivers, the borders, the fills (and the
-   * tribes with them) and the events.
+   * tribes with them), the names and the events.
    * They read their heights off the relief's grid when they are built, so a new grid leaves them on the
    * old surface: under it in a valley, floating where the shore came down. One method, so the order lives
    * beside the layers rather than in each caller.
@@ -310,6 +316,7 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
       fillCut: null,
       tribes: null,
       tribeCut: null,
+      names: null,
       events: null,
       compass: null,
       sheet: null,
@@ -324,6 +331,9 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
     ...layerRebuilders(context),
     rebuildEvents(): void {
       rebuildEvents(context)
+    },
+    rebuildNames(): void {
+      rebuildNames(context)
     },
     ...layerSetters(context),
     ...layerLifecycle(context),

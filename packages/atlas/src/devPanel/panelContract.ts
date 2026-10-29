@@ -8,6 +8,7 @@ import type {
   CoastlineDevParams,
   ExtentDevParams,
   FrameDevParams,
+  NameDevParams,
   PoliticalDevParams,
   ReliefDevParams,
   RhumbDevParams,
@@ -38,6 +39,8 @@ export interface DevPanelCallbacks {
   rebuildRivers: () => void
   /** Reload and re-rasterise the political overlay (year or colouring changed). */
   rebuildPolitical: () => void
+  /** Place the year's names again (how they are written or their place chosen changed). */
+  rebuildNames: () => void
   /** Redraw the border lines from the geometry already traced (styling changed). */
   rebuildBorders: () => void
   /** Trace the border lines again from the political grid already held (smoothing changed). */
@@ -87,6 +90,8 @@ export interface DevPanelDeps {
   political: PoliticalDevParams
   /** How the zoom reveals the levels of homage. */
   vassals: VassalDevParams
+  /** How the countries' names are written and placed. */
+  names: NameDevParams
   /** How a tribe's colour vanishes at its limit. */
   tribes: TribeDevParams
   /** Compass-rose styling params. */

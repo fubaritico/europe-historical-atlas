@@ -17,10 +17,6 @@ export interface Settings {
   capitals: boolean
   /** Extra room after each letter, in ems. */
   spacing: number
-  /** How much larger two lines must make a name for it to be broken, as a share of its size on one. */
-  twoLineGain: number
-  /** How much larger following the shape must make a name for it to be chosen over the horizontal. */
-  followShapeGain: number
   /** The ink's colour. */
   ink: string
   /** The ink's opacity, `0..1`. */
@@ -37,10 +33,6 @@ export const START_SETTINGS: Readonly<Settings> = {
   minSize: 4,
   capitals: false,
   spacing: 0,
-  // Claude's start, 28/10: two lines when they make a name 30 % larger, or alone bring it to the smallest size.
-  twoLineGain: 0.3,
-  // Claude's start, 28/10: the shape is the last resort, so its price is above two lines'.
-  followShapeGain: 0.5,
   ink: '#3b2614',
   opacity: 0.5,
   blend: 'multiply',
@@ -170,12 +162,6 @@ export function controls(
     }),
     field('Encre', 'color', settings.ink, (s, input) => {
       s.ink = input.value
-    }),
-    slider('Gain pour 2 lignes', settings.twoLineGain, [0, 1, 0.05], (s, v) => {
-      s.twoLineGain = v
-    }),
-    slider('Gain pour suivre la forme', settings.followShapeGain, [0, 2, 0.05], (s, v) => {
-      s.followShapeGain = v
     }),
     slider('Opacité', settings.opacity, [0.2, 1, 0.05], (s, v) => {
       s.opacity = v

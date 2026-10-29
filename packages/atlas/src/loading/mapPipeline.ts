@@ -15,8 +15,9 @@
 import { createLatestOnly } from '@europe-historical-atlas/core/utils/latestOnly'
 
 import { createFetchAssets } from './assets'
-import { createCompute } from './compute'
+import { createCompute, createNameCompute } from './compute'
 import { loadContent } from './mapContent'
+import { rebuildYearNames } from './stages/names'
 import { rebuildPolitical } from './stages/political'
 import { loadRivers } from './stages/rivers'
 import { startup } from './stages/startup'
@@ -44,6 +45,11 @@ export interface MapPipeline {
    */
   rebuildPolitical: () => Promise<void>
   /**
+   * Place the year on screen's names again — how they are written or chosen changed in the panel.
+   * @returns once they are on the map, or given up
+   */
+  rebuildNames: () => Promise<void>
+  /**
    * Re-trace the border lines from the grid the compute already holds, then redraw them.
    *
    * The one border tunable that changes geometry rather than paint. It costs a trace, not a year.
@@ -52,6 +58,47 @@ export interface MapPipeline {
   rebuildBorderGeometry: () => Promise<void>
   /** Stop the worker and release what it holds. */
   dispose: () => void
+}
+
+/**
+ * Build the pipeline's two computes into its context — after the context exists, since a worker's failover writes
+ * back into it.
+ * @param context - the pipeline's world
+ */
+function installComputes(context: PipelineContext): void {
+  // Should the map's worker die, the compute on this thread starts empty: hand it the sources again, then recompute
+  // the year on screen — the pipeline's steps, passed in so the compute knows none of them.
+  context.box.compute = createCompute(context, () =>
+    pushSources(context).then(() => rebuildPolitical(context))
+  )
+  context.box.names = createNameCompute(context)
+}
+
+/**
+ * Re-trace a payload year's border lines at the panel's smoothing, then redraw them — an authored year's lines go
+ * through its anchors, so there is no raster trace to smooth.
+ * @param context - the pipeline's world
+ * @returns once the lines are redrawn, or the smoothing declined
+ */
+async function retraceBorders(context: PipelineContext): Promise<void> {
+  if (!context.sources.regionSet) return
+  // An authored year's lines go through its anchors (D3): there is no raster trace to smooth, and
+  // re-tracing one here would replace the exact lines with the raster's.
+  if (context.sources.regionSet.authored !== undefined) {
+    console.warn(
+      '[atlas] border smoothing does not apply to an authored year: its lines are exact.'
+    )
+    return
+  }
+  // Re-trace a payload year's lines at the new smoothing, then redraw them.
+  try {
+    const traced = await context.box.compute.deriveBorders(context.dev.political.borderSmoothing)
+    if (context.isDisposed()) return
+    context.sources.derivedBorders = traced
+    context.layers.rebuildBorders()
+  } catch (error: unknown) {
+    console.error('border derivation failed', error)
+  }
 }
 
 /**
@@ -68,15 +115,12 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
     // change of year fires a whole political rebuild. Sharing one would have a bake cancel a year.
     bakeGate: createLatestOnly(),
     politicalGate: createLatestOnly(),
-    box: { compute: null as unknown as MapCompute },
+    namesGate: createLatestOnly(),
+    box: { compute: null as unknown as MapCompute, names: null as unknown as MapCompute },
+    nameFace: null,
     pendingRivers: { set: null },
   }
-  // Built once the context exists, since the worker's failover writes back into it.
-  // Should the worker die, the compute on this thread starts empty: hand it the sources again, then recompute the
-  // year on screen — the pipeline's steps, passed in so the compute knows none of them.
-  context.box.compute = createCompute(context, () =>
-    pushSources(context).then(() => rebuildPolitical(context))
-  )
+  installComputes(context)
 
   return {
     async start(): Promise<void> {
@@ -95,30 +139,18 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
     rebuildPolitical(): Promise<void> {
       return rebuildPolitical(context)
     },
-    async rebuildBorderGeometry(): Promise<void> {
-      if (!deps.sources.regionSet) return
-      // An authored year's lines go through its anchors (D3): there is no raster trace to smooth, and
-      // re-tracing one here would replace the exact lines with the raster's.
-      if (deps.sources.regionSet.authored !== undefined) {
-        console.warn(
-          '[atlas] border smoothing does not apply to an authored year: its lines are exact.'
-        )
-        return
-      }
-      // Re-trace a payload year's lines at the new smoothing, then redraw them.
-      try {
-        const traced = await context.box.compute.deriveBorders(deps.dev.political.borderSmoothing)
-        if (deps.isDisposed()) return
-        deps.sources.derivedBorders = traced
-        deps.layers.rebuildBorders()
-      } catch (error: unknown) {
-        console.error('border derivation failed', error)
-      }
+    rebuildNames(): Promise<void> {
+      const year = deps.sources.regionSet
+      return year === null ? Promise.resolve() : rebuildYearNames(context, year)
+    },
+    rebuildBorderGeometry(): Promise<void> {
+      return retraceBorders(context)
     },
     dispose(): void {
       // Terminate before anything else: the worker is the only part of this that outlives the page's own
       // teardown if left alone, and a bake in flight has nothing left to hand its pixels to.
       context.box.compute.dispose()
+      context.box.names.dispose()
     },
   }
 }
