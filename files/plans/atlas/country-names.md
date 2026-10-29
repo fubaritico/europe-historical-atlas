@@ -116,7 +116,7 @@ staying in its own owner's cells: the collision pass is gone.
    short display name from the start, as Crusader Kings III names its realms — the night spent on rules that cut and
    abbreviate formal names (« Kingdom of France » → « K. of France ») is what a short name written by the contributor
    avoids. Until then, the title cut to its initials stands in (`loading/stages/names.ts`, `provisionalShortName`).
-5. **The face cut to its letters** (the dev, 28/10, once the face is chosen): the shipped file holds only the letters
+5. **The face cut to its letters** — ATLAS-319 (the dev, 28/10, once the face is chosen): the shipped file holds only the letters
    the names use, cut at build from every name in the data. Measured on 28/10 with the French alphabet, capitals and
    accents: Fondamento 23 → 12 KB, Caesar Dressing 30 → 12 KB, Uncial Antiqua 20 → 11 KB. **The build fails when a
    name holds a letter the file lacks** — otherwise that letter is drawn in a fallback face and measured at its
