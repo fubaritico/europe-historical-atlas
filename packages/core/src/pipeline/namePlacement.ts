@@ -20,11 +20,13 @@ import { readAt } from '../utils/math'
 import { constructName } from './nameConstruction'
 import { fittingOf, lineLength, pointAlong } from './nameFit'
 import { occupy, pieceTag, withOccupied } from './nameOccupancy'
+import { OFFSET_REACH, offsetName } from './nameOffset'
 import { ownerRealms } from './nameRealm'
+import { widenedSpace } from './nameSpace'
 
 import type { Construction, ConstructionOptions } from './nameConstruction'
 import type { NameOccupancy } from './nameOccupancy'
-import type { NameSpace } from './nameSpace'
+import type { NameSpace, OwnerGrid } from './nameSpace'
 
 /** A text's letters measured at a font size of one, in whatever unit the grid's cells are drawn at. */
 export interface NameMetrics {
@@ -65,6 +67,11 @@ export interface NamePlacementOptions extends ConstructionOptions {
   readonly neighbourBite: number
   /** The smallest size a name with a shorter one is written at; under it, the shorter one is written instead. */
   readonly longMinSize: number
+  /**
+   * The largest size an offset label is written at, beside a realm too small for its name (`nameOffset`, ATLAS-315):
+   * smaller than the names written inside their land (the dev, 2026-10-29: *« réduis la taille de ces textes »*).
+   */
+  readonly offsetSize: number
   /** The widest strait a realm spans, in cells: a country's pieces parted by less are named once. */
   readonly strait: number
   /** The smallest far realm named, as a share of the country's largest. */
@@ -122,7 +129,8 @@ export const REALM_RING = 4
  * into a neighbour (the dev, 2026-10-29: *« faudrait quand même que ça puisse chevaucher un petit peu entre voisins »*
  * — one cell at first, which crossed neighbours whole until the bite was bounded the same afternoon; bounded, one cell
  * left Aquitaine, Valencia and Strathclyde unnamed, three leave only Gwynedd among its vassals, measured on all of
- * 1100 by `files/spikes/name-fixture/year.ts`); the full name from 4 cells, the short one under it, nothing under 1.5.
+ * 1100 by `files/spikes/name-fixture/year.ts`); the full name from 4 cells, the short one under it, nothing under 1.5;
+ * an offset label beside a realm too small for its name at 2.5 cells at most (4 at first, *« réduis la taille »*).
  */
 export const DEFAULT_NAME_PLACEMENT: NamePlacementOptions = {
   heightShare: 0.6,
@@ -131,6 +139,7 @@ export const DEFAULT_NAME_PLACEMENT: NamePlacementOptions = {
   minSize: 1.5,
   maxSize: 80,
   longMinSize: 4,
+  offsetSize: 2.5,
   neighbourBite: 3,
   strait: 12,
   farShare: 0.2,
@@ -281,6 +290,77 @@ function tasksOf(
 }
 
 /**
+ * A realm's name written in it: the name where it reaches its size, the shorter one otherwise.
+ * @param task - the realm and its texts
+ * @param options - how a name is set, the sizes and the bite
+ * @param occupancy - the cells the level's names already cover, marked with this name's when it is placed
+ * @returns the name placed, or `null` when none fits
+ */
+function placeInRealm(
+  task: Task,
+  options: NamePlacementOptions,
+  occupancy: NameOccupancy | undefined
+): PlacedName | null {
+  const { owner, tries, space, piece } = task
+  const tag = pieceTag(owner, piece)
+  const open = occupancy === undefined ? space : withOccupied(space, occupancy, tag)
+  const fitting = fittingOf(open, options.neighbourBite)
+  for (const { text, name, minSize } of tries) {
+    const set = constructName(fitting, name, { ...options, minSize })
+    if (set === null) continue
+    const glyphs = layOut(set, name, space)
+    if (occupancy !== undefined)
+      occupy(occupancy, tag, {
+        ...name,
+        advances: spacedAdvances(name, set.tracking),
+        text,
+        size: set.size,
+        glyphs,
+      })
+    return { owner, text, piece, size: set.size, glyphs }
+  }
+  return null
+}
+
+/**
+ * A realm's name written beside it, on the open ground nearest it (`nameOffset`), when it is named in none of its
+ * realms: **the shorter text first** — the full one would spread over the sea — each from the long name's smallest
+ * size down to its own smallest, in a crop widened to hold the name wholly beside the realm on any side.
+ * @param task - the owner's largest realm and its texts
+ * @param grid - the grid, for the neighbours of the widened crop
+ * @param options - the sizes and the bite
+ * @param occupancy - the cells the level's names already cover, marked with this name's when it is placed
+ * @returns the name placed, or `null` when it fits beside the realm at no size
+ */
+function placeOffset(
+  task: Task,
+  grid: OwnerGrid,
+  options: NamePlacementOptions,
+  occupancy: NameOccupancy | undefined
+): PlacedName | null {
+  const { owner, space, piece } = task
+  const tries = [...task.tries].reverse()
+  const startSize = options.offsetSize
+  // Half the longest text at the start size, and the reach its middle may lie from the land.
+  const extra = Math.max(
+    ...tries.map(({ name }) => (name.length / 2 + OFFSET_REACH * name.height) * startSize)
+  )
+  const wide = widenedSpace(space, owner, grid, Math.ceil(extra) + 1)
+  const tag = pieceTag(owner, piece)
+  const open = occupancy === undefined ? wide : withOccupied(wide, occupancy, tag)
+  const fitting = fittingOf(open, options.neighbourBite)
+  for (const { text, name, minSize } of tries) {
+    const set = offsetName(fitting, name, { minSize, startSize: Math.max(minSize, startSize) })
+    if (set === null) continue
+    const glyphs = layOut(set, name, wide)
+    if (occupancy !== undefined)
+      occupy(occupancy, tag, { ...name, advances: name.advances, text, size: set.size, glyphs })
+    return { owner, text, piece, size: set.size, glyphs }
+  }
+  return null
+}
+
+/**
  * Refuse an owner asked for twice: its two names would be laid on each other.
  * @param names - the names asked for
  * @throws on the first owner repeated
@@ -330,28 +410,16 @@ export function placeNames(
     farCells: options.farCells,
     ring: REALM_RING,
   })
-  const placed: PlacedName[] = []
   const absent = names.flatMap(({ owner }) => (realms.has(owner) ? [] : [owner]))
-  for (const { owner, tries, space, piece } of tasksOf(names, realms, measure, options)) {
-    const tag = pieceTag(owner, piece)
-    const open = occupancy === undefined ? space : withOccupied(space, occupancy, tag)
-    const fitting = fittingOf(open, options.neighbourBite)
-    // The name where it reaches its size, the shorter one otherwise.
-    for (const { text, name, minSize } of tries) {
-      const set = constructName(fitting, name, { ...options, minSize })
-      if (set === null) continue
-      const glyphs = layOut(set, name, space)
-      placed.push({ owner, text, piece, size: set.size, glyphs })
-      if (occupancy !== undefined)
-        occupy(occupancy, tag, {
-          ...name,
-          advances: spacedAdvances(name, set.tracking),
-          text,
-          size: set.size,
-          glyphs,
-        })
-      break
-    }
+  const tasks = tasksOf(names, realms, measure, options)
+  const placed = tasks.flatMap((task) => placeInRealm(task, options, occupancy) ?? [])
+  // Last, so it takes no one's room: the offset label of each realm named nowhere (ATLAS-315).
+  const named = new Set(placed.map(({ owner }) => owner))
+  const grid = { owners, width, height }
+  for (const task of tasks) {
+    if (task.piece !== 0 || named.has(task.owner)) continue
+    const offset = placeOffset(task, grid, options, occupancy)
+    if (offset !== null) placed.push(offset)
   }
   const written = new Set(placed.map(({ owner }) => owner))
   const tooSmall = names.flatMap(({ owner }) =>

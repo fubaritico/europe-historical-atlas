@@ -42,6 +42,8 @@ export interface NameDevParams {
    * where « Kingdom of France » does not fit (the dev, 2026-10-29).
    */
   longMinSize: number
+  /** The largest size a name written beside a realm too small for it is set at, in cells (ATLAS-315). */
+  offsetSize: number
   /** The largest size a name is written at, in cells. */
   maxSize: number
   /**
@@ -111,6 +113,13 @@ export const NAME_CONTROLS: ControlTable<NameDevParams> = {
   neighbourBite: { kind: 'number', min: 0, max: 4, step: 0.25, label: 'bite into neighbours' },
   minSize: { kind: 'number', min: 1, max: 12, step: 0.5, label: 'smallest size' },
   longMinSize: { kind: 'number', min: 1, max: 20, step: 0.5, label: 'full name: smallest size' },
+  offsetSize: {
+    kind: 'number',
+    min: 1,
+    max: 8,
+    step: 0.25,
+    label: 'name beside its country: size',
+  },
   maxSize: { kind: 'number', min: 8, max: 120, step: 1, label: 'largest size' },
   haloWholeZoom: {
     kind: 'number',
@@ -137,6 +146,7 @@ export const NAME_CONTROL_ORDER: (keyof NameDevParams)[] = [
   'neighbourBite',
   'minSize',
   'longMinSize',
+  'offsetSize',
   'maxSize',
 ]
 
@@ -165,6 +175,7 @@ export function namePlacement(params: NameDevParams): NamePlacementOptions {
     farCells: params.farCells,
     neighbourBite: params.neighbourBite,
     longMinSize: params.longMinSize,
+    offsetSize: params.offsetSize,
     minSize: params.minSize,
     maxSize: params.maxSize,
   }

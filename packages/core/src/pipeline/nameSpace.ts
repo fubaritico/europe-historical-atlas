@@ -80,3 +80,34 @@ export function blockedAround(owner: number, grid: OwnerGrid, frame: CropFrame):
     }
   return blocked
 }
+
+/**
+ * A realm's space with a wider ring around it — the room an offset label (`nameOffset`) is looked for in, beside a realm
+ * too small to hold its name.
+ * @param space - the realm's space
+ * @param owner - its owner on the grid
+ * @param grid - the grid, for the neighbours in the wider ring
+ * @param extra - how many cells wider the ring is, each side
+ * @returns the same realm in the wider crop, its neighbours read again from the grid
+ */
+export function widenedSpace(
+  space: NameSpace,
+  owner: number,
+  grid: OwnerGrid,
+  extra: number
+): NameSpace {
+  const frame = {
+    left: space.left - extra,
+    top: space.top - extra,
+    width: space.width + 2 * extra,
+    height: space.height + 2 * extra,
+  }
+  const mask = new Uint8Array(frame.width * frame.height)
+  space.mask.forEach((inside, at) => {
+    if (inside === 0) return
+    const x = (at % space.width) + extra
+    const y = Math.floor(at / space.width) + extra
+    mask[y * frame.width + x] = 1
+  })
+  return { ...frame, mask, blocked: blockedAround(owner, grid, frame), cells: space.cells }
+}

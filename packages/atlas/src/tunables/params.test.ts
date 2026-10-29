@@ -196,6 +196,7 @@ describe('namePlacement', () => {
       minSize: 8,
       longMinSize: 9,
       maxSize: 10,
+      offsetSize: 11,
     }
     expect(namePlacement(params)).toEqual({
       heightShare: 1,
@@ -208,6 +209,7 @@ describe('namePlacement', () => {
       minSize: 8,
       longMinSize: 9,
       maxSize: 10,
+      offsetSize: 11,
     })
   })
 })

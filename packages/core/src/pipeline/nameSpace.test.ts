@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { NEIGHBOUR, widenedSpace } from './nameSpace'
 import { piecesOf } from './testing/pieces'
 
 /**
@@ -122,5 +123,37 @@ describe('the pieces of an owner, cropped as spaces', () => {
           ?.map(({ left }) => left)
       ).toEqual([-1, 3])
     })
+  })
+})
+
+// ATLAS-315: the room an offset label is looked for in, beside a realm too small for its name.
+describe('widenedSpace', () => {
+  // A realm of two cells, a neighbour five cells to its east.
+  const owners = new Int32Array(20 * 5).map((_, at) => {
+    const [x, y] = [at % 20, Math.floor(at / 20)]
+    if (y === 2 && (x === 5 || x === 6)) return 0
+    return x === 12 ? 1 : -1
+  })
+  const grid = { owners, width: 20, height: 5 }
+  const space = piecesOf(owners, 20, 5, 1).get(0)?.[0]
+
+  it('keeps the realm in the middle of a crop wider by as much each side', () => {
+    if (space === undefined) throw new Error('no realm')
+    const wide = widenedSpace(space, 0, grid, 4)
+    expect([wide.left, wide.width, wide.mask.reduce((n, v) => n + v, 0), wide.cells]).toEqual([
+      space.left - 4,
+      space.width + 8,
+      2,
+      2,
+    ])
+  })
+
+  it('reads the neighbours the wider ring reaches again from the grid', () => {
+    if (space === undefined) throw new Error('no realm')
+    const wide = widenedSpace(space, 0, grid, 6)
+    const column = 12 - wide.left
+    expect(wide.blocked.some((cell, at) => cell === NEIGHBOUR && at % wide.width === column)).toBe(
+      true
+    )
   })
 })

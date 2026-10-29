@@ -287,3 +287,12 @@ letter widths, which the probe does not have — and shrank 15 names by 5 to 10 
 350 names instead of 344 (with the dev's short names of the evening), Scrobbesbyrig, Merseburg and the State of the
 Church gained, none lost, none shrunk by 5 %. Reordering only changes who loses the room; the bite is needed. Left for the offset label: the six coastal countries, then the three
 crowded inland ones, with a leader line.
+
+**The offset label, on the sea — built the same evening** (ATLAS-315, `nameOffset`): a realm named in none of its
+pieces gets its short name straight on the open ground nearest it, its middle within two letter heights of its land, at
+2.5 cells at most (4 at first — *« réduis la taille de ces textes »*; the panel's `offsetSize`), placed after every
+other name so it takes no one's room. The dev's console after it: Alpuente and Hereford only. Measured: Naples,
+Amalfi, Ragusa, Genoa, Dublin, the Roussillon, Gwynedd and the Obotrites named, no other name moved, the placement
+3 → 4.7 s under Node. Left for the leader line: Hereford, Alpuente, Aragon and Navarre, Cilician Armenia,
+Blois-Champagne — no open ground that near.
+

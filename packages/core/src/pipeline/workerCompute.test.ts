@@ -116,6 +116,7 @@ const NAMES_REQUEST: YearNamesRequest = {
     neighbourBite: 0,
     minSize: 0.5,
     longMinSize: 0.5,
+    offsetSize: 2.5,
     maxSize: 1000,
     strait: 4,
     farShare: 0.2,

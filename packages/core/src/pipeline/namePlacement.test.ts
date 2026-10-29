@@ -23,6 +23,7 @@ const OPTIONS: NamePlacementOptions = {
   minSize: 0.5,
   maxSize: 1000,
   longMinSize: 0.5,
+  offsetSize: 4,
   neighbourBite: 0,
   strait: 4,
   farShare: 0.2,
@@ -395,6 +396,34 @@ describe('placeNames', () => {
       const occupancy = createOccupancy(60, 12)
       placeNames(BAND.owners, 60, 12, [{ owner: 0, text: 'AB' }], monospace, OPTIONS, occupancy)
       expect(occupancy.cells.includes(pieceTag(0, 0))).toBe(true)
+    })
+  })
+
+  // ATLAS-315: a realm too small to hold its name is named beside it, on the sea.
+  describe('the offset label', () => {
+    const ISLET = gridOf(60, 60, (x, y) => (x >= 29 && x < 31 && y >= 29 && y < 31 ? 0 : -1))
+    const SMALL = { ...OPTIONS, minSize: 1.5, longMinSize: 4 }
+
+    it('names an islet too small for its name beside it, and no longer counts it too small', () => {
+      const { placed, tooSmall } = place(ISLET, [{ owner: 0, text: 'ABCD' }], SMALL)
+      expect([placed.map(({ text }) => text), tooSmall]).toEqual([['ABCD'], []])
+    })
+
+    // The dev, 29/10: « réduis la taille de ces textes ».
+    it('sets the offset label no larger than its own size, under the names written in their land', () => {
+      const { placed } = place(ISLET, [{ owner: 0, text: 'ABCD' }], { ...SMALL, offsetSize: 2 })
+      expect(placed[0]?.size).toBe(2)
+    })
+
+    it('tries the short name first beside the realm — the full one would spread over the sea', () => {
+      const { placed } = place(ISLET, [{ owner: 0, text: 'ABCDEFGHIJ', shorter: 'AB' }], SMALL)
+      expect(placed[0]?.text).toBe('AB')
+    })
+
+    it('writes no offset label for a realm whose name holds inside it, sea all around', () => {
+      const island = gridOf(60, 60, (x, y) => (x >= 20 && x < 40 && y >= 25 && y < 35 ? 0 : -1))
+      const { placed } = place(island, [{ owner: 0, text: 'AB' }], SMALL)
+      expect(placed).toHaveLength(1)
     })
   })
 
