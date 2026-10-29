@@ -43,7 +43,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#cf4222",
+      "colour": "#9a8419",
       "wikidata": null
     },
     {
@@ -1082,7 +1082,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#bbc795",
+      "colour": "#909b6f",
       "wikidata": null
     },
     {
@@ -1099,12 +1099,14 @@
     {
       "id": "obotrites-tribes-confederation",
       "name": "Obotrites Tribes Confederation",
+      "shortName": "Obotrites",
+      "forceShortName": true,
       "rank": "tribe",
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#c6e5b5",
+      "colour": "#5e4836",
       "wikidata": null
     },
     {
@@ -1115,7 +1117,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#f2ebeb",
+      "colour": "#885050",
       "wikidata": null
     },
     {
@@ -1126,7 +1128,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#f2e6f2",
+      "colour": "#b0bb8a",
       "wikidata": null
     },
     {
@@ -1170,7 +1172,7 @@
       "suzerain": "kingdom-of-poland",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#fc5029",
+      "colour": "#b4a24c",
       "wikidata": null
     },
     {
@@ -1236,7 +1238,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#bfc2e0",
+      "colour": "#7d9f5e",
       "wikidata": null
     },
     {
@@ -1346,7 +1348,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#563030",
+      "colour": "#305156",
       "wikidata": null
     },
     {
@@ -1357,7 +1359,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#4b1313",
+      "colour": "#36134b",
       "wikidata": null
     },
     {
@@ -1368,7 +1370,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#ccff00",
+      "colour": "#4a8c24",
       "wikidata": null
     },
     {
@@ -1379,7 +1381,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#5d1919",
+      "colour": "#5d1939",
       "wikidata": null
     },
     {
@@ -1413,7 +1415,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": null,
+      "colour": "#0d8e63",
       "wikidata": null
     },
     {
@@ -1424,7 +1426,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#651e1e",
+      "colour": "#65391e",
       "wikidata": null
     },
     {
@@ -1457,7 +1459,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": null,
+      "colour": "#85655a",
       "wikidata": null
     },
     {
@@ -1468,7 +1470,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#745c5c",
+      "colour": "#714343",
       "wikidata": "Q1035516"
     },
     {
@@ -1479,7 +1481,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#99410e",
+      "colour": "#8b5434",
       "wikidata": "Q33543"
     },
     {
@@ -1496,13 +1498,14 @@
     {
       "id": "vlach-populations",
       "name": "Vlach Populations",
-      "shortName": "Vlach",
+      "shortName": "Vlachs",
+      "forceShortName": true,
       "rank": "tribe",
       "status": "country",
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#682560",
+      "colour": "#735a3e",
       "wikidata": null
     },
     {
@@ -1519,7 +1522,8 @@
     {
       "id": "khazar-lordship-in-decay",
       "name": "Khazar Lordship in Decay",
-      "shortName": "Khazars",
+      "shortName": "Khazar Lordship",
+      "forceShortName": true,
       "rank": "tribe",
       "status": "country",
       "suzerain": null,
