@@ -41,7 +41,8 @@ export interface ReliefDevParams {
 /** Tuned relief defaults — a low exaggeration that flattens further as the camera comes in. */
 export const DEFAULT_RELIEF_PARAMS: ReliefDevParams = {
   exaggeration: 0.75,
-  exaggZoomIn: 0.35,
+  // The dev's, from the panel, 2026-10-29 (0.35 before): the relief flatter close up.
+  exaggZoomIn: 0.2,
   smoothing: 0,
   shoreRamp: 12,
   plainsCeiling: 600,
