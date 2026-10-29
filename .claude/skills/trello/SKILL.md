@@ -149,13 +149,45 @@ A card reaches **Fait** only when its own acceptance criteria hold **and** all o
 4. **Used by me in the app** when it touches the Cartographer ([[test-it-yourself-in-the-app]]) —
    without reloading his page ([[never-reload-the-devs-page]]).
 5. **Tested by the dev** in the app, or the decision taken by him → only then `done`.
-6. **Committed** (`/commit`) — after his test, never before; the commit hash goes in a comment.
+6. **Committed** (`/commit`) — after his test, never before; the commit hash goes in **the closing comment** below.
 7. **Written where it lives** — a gesture shipped or changed in its scenario, same commit (`/scenarii-to-code`
    §7), a closed known-issue archived, a new term in `glossaire.md`, a walk in
    its scenario ([[every-walk-becomes-scenarios]]).
 
 A step that does not apply is said in the closing comment ("pas de rendu touché : pas de test dans
 l'appli"), never skipped in silence.
+
+### The closing comment — how it was done, where, and the key change (the dev's call, 2026-10-29)
+
+> *« Quand tu passes un ticket à fait, il faut que systématiquement tu expliques comment tu as réparé et que tu dises
+> où, donc le fichier, la ligne, et que tu puisses fournir un snippet, genre avant, après, qui soit démonstratif. »*
+
+**Every card moved to Fait gets this comment first, then `done`** — a fix or a feature alike. In French, the dev
+reads it alone:
+
+````
+**Ce qui a été fait** : <how it was fixed or built, two sentences at most, his words>
+**Où** : `packages/…/file.ts:123` (one line per place that carries the change; the line of the key change)
+**Avant → après** — <what the change makes different, one line>
+```ts
+// avant
+<the few lines as they were>
+// après
+<the same lines as they are now>
+```
+**Commit** : <hash(es)> — **testé par le dev** : « <his words> »
+````
+
+- **The key change, not the whole diff**: the few lines without which the fix does not hold — the condition that
+  changed, the call that moved, the value that was wrong. Five to fifteen lines; a second snippet only when the fix
+  lives in two places that each matter.
+- **A new feature has no « avant » code**: show the behaviour before in one line (`// avant : le nom complet partout
+  où il tient`) and the key lines added after.
+- **The line numbers are read from the committed file** (`git show <hash>:<path>` or `grep -n`), never guessed.
+- **Posted from a file**, never from the shell: write it with the Write tool in the scratchpad, then
+  `$S commentfile N <path>` — a snippet holds backticks and `$`, and a backtick through the shell once ran a command
+  on the dev's base ([[no-backticks-through-the-shell]]).
+- The steps of the DoD that did not apply are said in it too (*« pas de revue à plusieurs agents : à sa demande »*).
 
 ## The verbs — one command per gesture
 
@@ -171,6 +203,7 @@ $S prefix CARTO-41 "atlas · carto"           # change the scope; the number sta
 $S above CARTO-41 ATLAS-12                  # place a card just above another
 $S move 7 "En cours"
 $S comment 7 "commit 5c96eaf — testé par le dev : « c'est bon »"
+$S commentfile 7 /path/to/closing.md        # a comment read from a file — the closing comment, its snippets
 $S done 7                                  # → Fait
 $S tag 7 Cartographe défaut gênant          # labels from LABELS only
 $S untag 7 gênant
@@ -196,7 +229,7 @@ point: the dev reads `move 7 "En cours"`, not a curl. A multi-line description i
 | I start a card he chose | `move N "En cours"` |
 | a question or a test is his | `move N "À valider par le développeur"` + a comment saying exactly what he has to do or decide |
 | he reports a fault on a card in À valider par le développeur | `comment` his words, `move N "En cours"` |
-| he tested it, DoD met | `comment` the commit and his verdict, `done N` |
+| he tested it, DoD met | **the closing comment** (how, where, before → after, commit, his verdict) by `commentfile`, then `done N` |
 | he mentions a thought in passing | `add "Idées"` from the template, and tell him in one line |
 | a review or a test surfaces a new problem | `add "Idées"` — never straight into Backlog |
 | **end-session** | `list`, and every card I touched carries a comment saying where it stands |

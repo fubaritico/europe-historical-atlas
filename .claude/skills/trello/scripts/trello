@@ -303,6 +303,16 @@ const verbs = {
     await api('POST', `/cards/${c.id}/actions/comments`, {}, { text })
     console.warn(`#${c.idShort} commented: ${c.name}`)
   },
+  /**
+   * commentfile <number> <path> — the comment read from a file: text holding code (backticks, `$`) never goes through
+   * the shell. How the closing comment of a card done is posted (SKILL.md, « The closing comment »).
+   */
+  async commentfile(number, path) {
+    if (!path) fail('commentfile <number> <path>')
+    const text = readFileSync(resolve(process.cwd(), path), 'utf8').trim()
+    if (!text) fail(`commentfile: ${path} is empty`)
+    await verbs.comment(number, text)
+  },
   /** block <number> <blocking number> <reason> — label, a link to the blocking card, a comment on both. */
   async block(number, blocking, reason) {
     if (!reason) fail('block <number> <blocking number> <reason>')
