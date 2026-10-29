@@ -376,6 +376,28 @@ const verbs = {
     await api('PUT', `/cards/${c.id}/checkItem/${matches[0].id}`, { state: 'complete' })
     console.warn(`#${c.idShort} ticked: ${matches[0].name}`)
   },
+  /**
+   * attachments <number> [directory] — lists a card's attachments (the dev's screenshots, 2026-10-29); given a directory,
+   * saves each file in it under its own name. Trello serves an upload only with the key and token in an OAuth header.
+   */
+  async attachments(number, directory) {
+    const c = await card(number)
+    const found = await api('GET', `/cards/${c.id}/attachments`, { fields: 'name,url,bytes,mimeType,isUpload' })
+    if (found.length === 0) fail(`#${c.idShort} has no attachment`)
+    const { mkdir, writeFile } = await import('node:fs/promises')
+    if (directory) await mkdir(directory, { recursive: true })
+    for (const a of found) {
+      console.warn(`#${c.idShort} ${a.name} — ${a.mimeType ?? '?'}, ${Math.round((a.bytes ?? 0) / 1024)} kB, ${a.url}`)
+      if (!directory || !a.isUpload) continue
+      const response = await fetch(a.url, {
+        headers: { Authorization: `OAuth oauth_consumer_key="${TRELLO_API_KEY}", oauth_token="${TRELLO_TOKEN}"` },
+      })
+      if (!response.ok) fail(`GET ${a.url} → ${response.status}`)
+      const path = `${directory}/${a.name}`
+      await writeFile(path, Buffer.from(await response.arrayBuffer()))
+      console.warn(`  saved ${path}`)
+    }
+  },
   /** show <number> — title, column, description, checklists and comments. */
   async show(number) {
     const c = await card(number)

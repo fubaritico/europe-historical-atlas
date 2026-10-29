@@ -24,6 +24,14 @@ l'ordre R1 → mesure → R3 → R4. Puis **R1** (un seul jeu d'images pour les 
 résolution, seuil d'extinction), **mesurer avec la sonde du plan avant R2** — une seule sonde par page. Il teste sur le grand
 moniteur : plus de 30 images/s, le ventilateur silencieux au repos.
 
+**Aussi prêt pour demain, les noms des pays (ATLAS-301)** : à 4 h, à sa demande, un diagnostic de l'algorithme contre les
+deux captures du ticket (CK3, 1501) — dans `files/plans/atlas/country-names.md`, section « The gap to the reference », et en
+français en commentaire sur ATLAS-301. En une ligne : **cinq écarts de construction, pas de réglage** — longueur enchaînée
+à la taille (espacement fixe, plafond 30 cases), l'espace = la terre et non l'enveloppe (Byzance coupée par l'Égée), la
+comparaison à sept poids qui rebat les vainqueurs à chaque retouche (le mécanisme des effets de bord qu'il a vus), deux
+lignes, la courbure et la pente pénalisées. Axes A → F dans le plan ; d'abord figer six formes de 1100 en jeu d'essai. Rien
+n'est codé. La skill Trello a un verbe `attachments <ticket> [dossier]` pour lire ses captures.
+
 **Ses arbitrages en attente** (une question à la fois) :
 - passer **ATLAS-145** (séance des frontières) et **ATLAS-302** (flou, encore dans Idées) en Fait — testés par lui ;
 - **ATLAS-301** reste ouvert pour l'étape 4 : le nom court saisi dans le Cartographe (sa leçon : des noms d'usage courts dès la

@@ -122,3 +122,71 @@ staying in its own owner's cells: the collision pass is gone.
 ## Out of this plan
 
 - Capitals and cities (ATLAS-295), seas.
+
+## The gap to the reference — read on 2026-10-29, 4 am (Fable, at the dev's request)
+
+> The dev, 29/10: Opus went round in circles on the names, each retouch bringing a side effect; the only lead was
+> shorter names. He asked for a fresh reading of the two captures on ATLAS-301, of the atlas as it stands, and of the
+> algorithm. Nothing here is coded; it is what to build next, with the reason for each line.
+
+**What the reference does, always the same way** (the Crusader Kings III capture; the 1501 map confirms it). One name per
+realm, in spaced capitals, on **one gentle arc along the realm's length**; the letters' **height comes from the realm's
+thickness**, their **spread from the letter-spacing**, which covers 70–90 % of the length — CUMANIA across the whole
+steppe, SELJUK, SONG. BYZANTINE EMPIRE **crosses the Aegean** from one end of the realm to the other. FRANCE, NORWAY,
+ENGLAND are read **standing**, bottom to top. OTTOMAN EMPIRE (1501) bends 90° round the Marmara, GREAT HORDE slants 50°.
+**Never two lines.** A small realm has a small name, or none at that zoom. And the names are short: POLAND, HUNGARY,
+FATIMID — no « Kingdom of » anywhere at the sovereigns' level.
+
+**What the atlas does today** (zoomed out, 1100): EMPIRE OF THE ROMANS horizontal and small in the Balkan part alone —
+the Aegean splits the realm into two pieces, each named apart; CUMANS covers a quarter of the steppe; KINGDOM OF
+GEORGIA, DUKLJA, PRINCIPALITY OF CHERNIGOV, LORDSHIP OF PEREYASLAV over two lines; KINGDOM OF HUNGARY roughly follows
+its basin; almost no arc; sizes alike everywhere, with no clear relation to the area.
+
+**Why — five differences of construction, not of tuning** (`core/pipeline/nameCandidates`, `nameFit`, `nameChoice`,
+`nameArc`, `nameSpace`):
+
+1. **The name's length is chained to its size.** Tracking is fixed (0.12 em); to cover the shape the name must grow, and
+   the size is bounded by the thinnest crossing on its line, by the margin and by a 30-cell cap (`maxSize`). Hence a
+   short name in the middle of a long shape. In CK height and length are **two variables**: the height from the
+   thickness, the spacing stretched to fill the arc.
+2. **A name's space is the realm's land, not its hull.** A crescent's arc (Byzantium round the Aegean) runs through the
+   sea; the sea is *outside* (the overflow allowed is 1.75 cells, the Aegean is a hundred): the arc candidate dies at
+   size 0, the horizontal stops at the coast, and the Bosphorus cuts the realm into two pieces, each named. CK names the
+   realm **once**, on its hull, sea included.
+3. **The seven-weight comparison** (`scoreName`: size, centre, cover, bend, slant, border, two lines). Size dominates
+   (weight 1, relative to the largest candidate), so the winner is whichever line avoids the thin crossings — the
+   horizontal through the fat part, or two lines. Each shape picks a different winner by a hair: hence the mix of
+   horizontal / slanted / two-line names **and the side effects** — a weight moved reshuffles the winners map-wide.
+   That is the mechanism behind the circling. CK has **no competition**: one deterministic construction, three
+   parameters.
+4. **Two lines** — never in CK; here allowed whenever they enlarge the name, which kills the arc and the regularity.
+5. **The shape is penalised for what CK does**: bend (0.2) and slant (0.3) are maluses; in CK the curve follows the
+   shape and a standing name is ordinary.
+
+The dev's lead — shorter names — is right but second: the registry's short name (step 4) is the real answer, and until
+then « France » rather than « K. of France » (an abbreviation, which he refused). Alone it will not do: CUMANS is
+already short and covers a quarter.
+
+**The axes, in order:**
+
+- **A. One construction, no competition.** Per realm, the axis arc (`nameArc`: principal axis of the cells, a parabola on
+  the spine, bend ≤ 60°); the horizontal is its special case for a compact shape. The seven weights go; what stays are
+  hard rules (fits / does not; readable / not).
+- **B. Height and length decoupled.** Height = a share (≈ 0.6) of the median land thickness along the arc (the room
+  across, `nameFit.roomAcross`, read over the middle of the arc), with no 30-cell cap or a far higher one; length =
+  the tracking stretched between two bounds (0 to ≈ 0.6 em) to cover ≈ 75 % of the arc; the height yields to the length
+  only when, at the least tracking, the name outruns the arc.
+- **C. The space is the realm's hull.** The arc may cross the sea and unclaimed land — bounded by neighbours and other
+  names only (`Fitting.bound`, `covered`), no longer by `edge`; pieces of one realm parted by a strait are **one** space
+  to name (merge pieces whose hulls lie within a few cells); a far piece (Norway's Iceland) is named only above a share
+  of the largest (≈ 20 %).
+- **D. No two lines** — or only for a compact shape (aspect < 1.5) and a long name.
+- **E. The short name by default at the sovereigns' level**, the full one for the panel; until step 4, the title stripped
+  (« France »), not abbreviated.
+- **F. Standing reading past 80°** already exists (`STEEPEST_DESCENT`) and becomes ordinary once the slant malus is gone.
+
+**How not to circle tomorrow.** Freeze six shapes of 1100 as a fixture — Byzantium (a crescent round a sea), the Cumans
+(wide), France (compact), Norway (long and standing), Hungary (a basin), a small duchy — with the expected properties as
+tests (cover ≥ 0.6, bend ≤ 60°, one line, size monotonic in thickness), and the bench `/names.html` for the eye. **A
+construction with three parameters has no side effects; a score with seven weights has them by nature.** Every change is
+measured on the six before it is kept.

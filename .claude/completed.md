@@ -37,7 +37,11 @@ et script Trello à commiter. Sur Fable, effort maximal.
   français, dans **ATLAS-304**, créé en tête d'À faire à sa demande pour commencer par là le 30/10 — *« un ticket de fixe
   […] en résonance avec ton MD »*.
 - **Le script Trello** envoie description et commentaires dans le corps de la requête (9 ko dans l'URL : 414 de CloudFront) ;
-  « rendu à la demande » entre au glossaire.
+  un verbe `attachments` lit et enregistre les captures d'un ticket ; « rendu à la demande » entre au glossaire.
+- **Les noms des pays (ATLAS-301), à 4 h, à sa demande** — *« Opus tournait en rond, chaque retouche avec des effets de
+  bord »* : les deux captures du ticket, l'atlas et l'algorithme lus côte à côte ; cinq écarts de construction (longueur
+  enchaînée à la taille, l'espace = la terre et non l'enveloppe, la comparaison à sept poids, deux lignes, courbure et pente
+  pénalisées) et six axes, dans le plan des noms et en commentaire sur le ticket. Rien de codé.
 - **Mes fautes** : deux sondes empilées dans un onglet (leurs chronomètres GPU se brisent, résultats nuls) ;
   `delete window.innerWidth` ; une série de mesures de 37 s sous un outil qui coupe à 45 ; le zoom écrit dans
   `sessionStorage` écrasé par la sauvegarde au déchargement.
