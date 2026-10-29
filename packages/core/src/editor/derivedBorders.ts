@@ -28,6 +28,7 @@ import type { BorderRelation } from './borderRelation'
 import type { YearDocument } from './yearDocument'
 import type { LandMask } from '../data/landMask'
 import type { YearPolity } from '../data/yearFormat'
+import type { GeoBounds } from '../geo/mercator'
 import type { RingIndex } from '../geo/pointInRing'
 
 /** One border, ready to draw. */
@@ -71,6 +72,12 @@ export interface DerivationDeps {
    * fragments on the 1100 France (the Gironde, the Loire, the Breton rias; measured 2026-10-13).
    */
   coastSources?: ReadonlySet<number>
+  /**
+   * The map's frame: **a segment lying on one of its edges has nothing beyond it, and draws no border** — the map is cut
+   * there clean, as by a laser (the dev, 2026-10-29, Greenland traced along the frame's west and north edges: a
+   * frontier against unclaimed ground was drawn along the cut). Omit it and an edge is judged like any other run.
+   */
+  frame?: GeoBounds
 }
 
 /**
@@ -107,7 +114,34 @@ export function maskDerivationDeps(doc: YearDocument, mask: LandMask): Derivatio
         latitudeToVertical(lat, mask.meta.bbox)
       ),
     coastSources: coastSourceIds(doc, mask.meta.source),
+    // The mask covers the map exactly, so its box is the frame the Cartographer snaps to (CARTO-257).
+    frame: mask.meta.bbox,
   }
+}
+
+/** How near an edge of the frame an anchor counts as on it, in degrees: far under a cell, over a rounding. */
+const ON_FRAME_DEG = 1e-7
+
+const on = (value: number, edge: number): boolean => Math.abs(value - edge) <= ON_FRAME_DEG
+
+/**
+ * Whether a segment lies along one edge of the map's frame — both its ends on the same edge.
+ * @param a - one end, `[lon, lat]`
+ * @param b - the other
+ * @param frame - the map's frame
+ * @returns `true` when nothing lies beyond the segment
+ */
+function onFrameEdge(
+  a: readonly [number, number],
+  b: readonly [number, number],
+  frame: GeoBounds
+): boolean {
+  return (
+    (on(a[0], frame.west) && on(b[0], frame.west)) ||
+    (on(a[0], frame.east) && on(b[0], frame.east)) ||
+    (on(a[1], frame.south) && on(b[1], frame.south)) ||
+    (on(a[1], frame.north) && on(b[1], frame.north))
+  )
 }
 
 /** One claim resolved for inclusion tests: its rings in coordinates, and the box around them. */
@@ -547,14 +581,14 @@ function sameSide(a: FarSide | null | undefined, b: FarSide | null | undefined):
 }
 
 /**
- * What lies beyond one segment: the coast when both ends were taken from it, else whoever encloses the
- * point just outside it, else what the mask says of that point.
+ * What lies beyond one segment: nothing when it runs along the map's frame, the coast when both ends were taken from
+ * it, else whoever encloses the point just outside it, else what the mask says of that point.
  * @param from - the segment's first anchor
  * @param to - its second
  * @param owner - the polity holding it
  * @param own - the owner's rings, indexed
  * @param derivation - the document, the polities, the claims resolved and the mask
- * @returns the far side, or `null` when an anchor is missing
+ * @returns the far side; `null` when an anchor is missing, or when the segment lies on the frame — no border there
  */
 function segmentSide(
   from: number | undefined,
@@ -567,6 +601,7 @@ function segmentSide(
   const a = from === undefined ? undefined : doc.anchors[from]
   const b = doc.anchors[to]
   if (a === undefined || b === undefined) return null
+  if (deps.frame !== undefined && onFrameEdge(a, b, deps.frame)) return null
   // The coast is asked first: the author snapped both ends to it, so water lies beyond, however narrow.
   // Asked after inclusion (2026-10-15), the step outward crossed the Velebit channel into Venice's islands.
   if (onCoast(from, to, doc, deps)) return { far: null, dry: false }

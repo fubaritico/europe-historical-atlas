@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
+import { createLandMask } from '../data/landMask'
+
 import { borderRunsOf, collectBorderEdges } from './borderGraph'
-import { coastSourceIds, deriveBorders } from './derivedBorders'
+import { coastSourceIds, deriveBorders, maskDerivationDeps } from './derivedBorders'
 import { addAnchor, addPolity, closeRing } from './documentEdits'
 import { createYearDocument } from './yearDocument'
 
@@ -478,6 +480,73 @@ describe('deriveBorders — the far side, segment by segment', () => {
 
   // L4: N/A — the readers refuse a document whose anchors or sources are missing; the derivation skips a
   // segment whose anchor is absent, covered by 'survives a claim naming a polity the registry lacks'.
+})
+
+/** A square of land, its west side on the frame's west edge, everything around it dry and unclaimed. */
+function againstTheFrame(): YearDocument {
+  const doc = createYearDocument(1100, source)
+  anchors(doc, [
+    [0, 10],
+    [10, 10],
+    [10, 0],
+    [0, 0],
+  ])
+  addPolity(doc, polity('greenland'))
+  closeRing(doc, 'greenland', [0, 1, 2, 3])
+  return doc
+}
+
+/**
+ * Whether a border runs from one anchor to the next, either way.
+ * @param run - the border's anchors
+ * @param a - one anchor
+ * @param b - the other
+ * @returns whether the two are consecutive in it
+ */
+const runsOver = (run: readonly number[], a: number, b: number): boolean =>
+  run.some((anchor, at) => {
+    const next = run[at + 1]
+    return (anchor === a && next === b) || (anchor === b && next === a)
+  })
+
+// The dev, 2026-10-29: Greenland traced along the map's frame drew a frontier along the cut — « comme si ça avait été
+// découpé au laser », the edge must stay clean.
+describe('deriveBorders — the map’s frame', () => {
+  const FRAME = { west: 0, south: -50, east: 50, north: 50 }
+  describe('happy path', () => {
+    it('draws no border along the frame’s edge, and the frontier everywhere else', () => {
+      const borders = deriveBorders(againstTheFrame(), { isLand: () => true, frame: FRAME })
+      expect(borders.some(({ run }) => runsOver(run, 3, 0))).toBe(false)
+      expect(borders.some(({ run }) => runsOver(run, 1, 2))).toBe(true)
+      expect(borders.every(({ relation }) => relation === 'unclaimed')).toBe(true)
+    })
+  })
+
+  describe('variants', () => {
+    it('draws the frontier along the edge when no frame is given, as before', () => {
+      const borders = deriveBorders(againstTheFrame(), { isLand: () => true })
+      expect(borders.some(({ run }) => runsOver(run, 3, 0))).toBe(true)
+    })
+  })
+
+  // L3, L4: N/A — the frame is a box, and the segments read are the document's own.
+
+  describe('the mask’s frame', () => {
+    it('gives the derivation the land mask’s box as the frame, for both applications', () => {
+      const mask = createLandMask(
+        { width: 2, height: 2, scale: 1, bbox: FRAME, source: 'a test mask (public domain)' },
+        () => true
+      )
+      expect(maskDerivationDeps(againstTheFrame(), mask).frame).toEqual(FRAME)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('keeps a segment that only touches the frame at one end', () => {
+      const borders = deriveBorders(againstTheFrame(), { isLand: () => true, frame: FRAME })
+      expect(borders.some(({ run }) => runsOver(run, 0, 1))).toBe(true)
+    })
+  })
 
   describe('edge cases', () => {
     it('does not take a segment with only one coast end for coast', () => {

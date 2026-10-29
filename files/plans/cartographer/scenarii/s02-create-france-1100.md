@@ -551,6 +551,23 @@ Scenario: the coast comes first
   Then the Pen follows the coastline, as anywhere else
 ```
 
+### No border along the map's edge — built 2026-10-29
+
+```gherkin
+Scenario: an outline along the map's edge draws no border there
+  Given Greenland's outline runs along the map's west and north edges, every anchor there on the edge
+  When the borders are derived — in the Cartographer and in the atlas alike
+  Then no border is drawn along those edges: the fill stops there, cut clean
+  And its frontier with unclaimed ground is still drawn wherever it leaves the edge
+  And a segment that only touches the edge at one end is drawn as any other
+```
+
+> **The dev, 2026-10-29**: Greenland traced along the frame drew a frontier against unclaimed ground along the cut —
+> *« lorsqu'on trace une frontière sur le bord de la carte, ça n'affiche pas […] pour qu'on garde la découpe bien
+> nette, comme si ça avait été découpé au laser »*. Nothing lies beyond the frame, so a segment with both ends on one
+> edge has no far side (`editor/derivedBorders`, the frame from the land mask's box). On 1100 it removes four segments,
+> all Greenland's. **Not walked yet.**
+
 ```gherkin
 Scenario: follow a river
   Given the outline is open and its last vertex is on the Scheldt estuary
