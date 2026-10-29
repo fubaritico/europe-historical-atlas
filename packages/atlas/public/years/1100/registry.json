@@ -280,6 +280,7 @@
     {
       "id": "ibadi-pentapolis-of-the-mzab",
       "name": "Ibadi Pentapolis of the Mzab",
+      "shortName": "Mzab",
       "rank": "pentapolis",
       "status": "country",
       "suzerain": null,
@@ -887,6 +888,7 @@
     {
       "id": "lordship-of-scrobbesbyrig",
       "name": "Lordship of Scrobbesbyrig",
+      "shortName": "Scrob...",
       "rank": "lordship",
       "status": null,
       "suzerain": "kingdom-of-england",
@@ -1245,7 +1247,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#e6e6a1",
+      "colour": "#b3d24d",
       "wikidata": null
     },
     {
@@ -1289,7 +1291,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#dbf58c",
+      "colour": "#8ea838",
       "wikidata": null
     },
     {
@@ -1327,8 +1329,8 @@
     },
     {
       "id": "principality-of-ryazan",
-      "name": "Principality of Ryazan",
-      "rank": "tribe",
+      "name": "Principality of Mourom-Ryazan",
+      "rank": "principality",
       "status": null,
       "suzerain": null,
       "existsFrom": null,
@@ -1468,6 +1470,28 @@
       "existsTo": null,
       "colour": "#745c5c",
       "wikidata": "Q1035516"
+    },
+    {
+      "id": "mordves",
+      "name": "Mordvins",
+      "rank": "tribe",
+      "status": null,
+      "suzerain": null,
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": "#99410e",
+      "wikidata": "Q33543"
+    },
+    {
+      "id": "volga-bulgars",
+      "name": "Volga Bulgaria",
+      "rank": "tribe",
+      "status": null,
+      "suzerain": null,
+      "existsFrom": 601,
+      "existsTo": 1240,
+      "colour": "#cc8860",
+      "wikidata": "Q185488"
     },
     {
       "id": "vlach-populations",
