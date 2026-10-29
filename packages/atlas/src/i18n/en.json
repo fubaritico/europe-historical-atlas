@@ -5,6 +5,7 @@
   "phaseColours": "Choosing the colours…",
   "phaseBake": "Composing the texture…",
   "phaseBorders": "Drawing the borders…",
+  "phaseEvents": "Placing the events…",
   "phaseNames": "Placing the countries’ names…",
   "heightmapFailed": "{failure, select, transport {The relief could not be loaded} schema {The relief is unreadable} consistency {The relief is incomplete} semantic {The relief does not match this map} other {The relief failed}}",
   "landMaskFailed": "{failure, select, transport {The land mask could not be loaded} schema {The land mask is unreadable} consistency {The land mask is incomplete} semantic {The land mask does not match this map} other {The land mask failed}}",

@@ -29,6 +29,9 @@ export function createMarkerLights(lighting?: IconLighting): EventMarkers {
     setZoom(): void {
       // The lights light every zoom alike.
     },
+    setReveal(): void {
+      // A light has no opacity: what it lights fades in on its own.
+    },
     faceCamera(camera: CameraPose): void {
       // The rig is never under a turned group, so an orientation set here is the orientation in the world.
       object.quaternion.copy(camera.quaternion)

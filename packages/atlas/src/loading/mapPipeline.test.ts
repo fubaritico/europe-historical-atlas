@@ -11,6 +11,7 @@ import { createMapSources } from '../sources/mapSources'
 import { createDevState } from '../tunables/devState'
 
 import { createMapPipeline } from './mapPipeline'
+import { stubNameFace } from './testing/nameFaceStubs'
 import { AUTHORED_YEAR, META, YEAR } from './testing/yearFixtures'
 
 import type { MapAssetSources } from './assets'
@@ -44,6 +45,7 @@ function fakeLayers(): MapLayers {
     'rebuildFills',
     'rebuildNames',
     'rebuildEvents',
+    'setReveal',
     'rebuildRose',
     'rebuildFrame',
     'setWireframe',
@@ -72,6 +74,15 @@ function fakeUi(): MapUi {
     reportAssetFailure: vi.fn(),
     dispose: vi.fn(),
   }
+}
+
+/**
+ * When a mock was first called, against every other mock of the test.
+ * @param fn - the mock
+ * @returns its first call's order
+ */
+function firstCall(fn: unknown): number {
+  return Math.min(...asMock(fn).mock.invocationCallOrder)
 }
 
 /**
@@ -124,6 +135,11 @@ function build(over: Partial<MapPipelineDeps> = {}): {
     spawn: (): never => {
       throw new Error('no worker here')
     },
+    // The year's layers whole at once: the fade's own frames are `app/fadeIn`'s to test.
+    fadeIn: (set: (share: number) => void) => {
+      set(1)
+      return Promise.resolve()
+    },
     isDisposed: () => false,
     assets: fakeAssets(),
     ...over,
@@ -137,6 +153,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  vi.unstubAllGlobals()
   vi.restoreAllMocks()
 })
 
@@ -197,6 +214,94 @@ describe('createMapPipeline', () => {
       const events = asMock(deps.layers.rebuildEvents).mock.invocationCallOrder
       expect(deps.sources.mapDrawn).toBe(true)
       expect(Math.max(...events)).toBeGreaterThan(Math.max(...fills))
+    })
+
+    // The dev, 2026-10-29: « la carte en relief, c'est bien qu'on l'ait d'abord. Et ensuite, tout apparaît d'un seul
+    // coup en fondu, avec la barre de chargement qui indique bien tout ce qui se passe ».
+    it('hides the year’s layers before it draws them, and fades them in once the events are in', async () => {
+      const fadeIn = vi.fn((set: (share: number) => void) => {
+        set(1)
+        return Promise.resolve()
+      })
+      const { deps, pipeline } = build({ fadeIn })
+      await pipeline.start()
+      const hidden = asMock(deps.layers.setReveal).mock.calls[0]
+      expect(hidden).toEqual([0])
+      expect(firstCall(deps.layers.setReveal)).toBeLessThan(firstCall(deps.layers.rebuildFills))
+      expect(Math.max(...asMock(deps.layers.rebuildEvents).mock.invocationCallOrder)).toBeLessThan(
+        firstCall(fadeIn)
+      )
+      expect(asMock(deps.layers.setReveal).mock.calls.at(-1)).toEqual([1])
+    })
+
+    it('keeps one bar open over the year, its names and the events, closed before the fade', async () => {
+      const fadeIn = vi.fn((set: (share: number) => void) => {
+        set(1)
+        return Promise.resolve()
+      })
+      const { deps, pipeline } = build({ fadeIn })
+      await pipeline.start()
+      const ended = Math.min(...asMock(deps.ui.progress.end).mock.invocationCallOrder)
+      expect(asMock(deps.ui.progress.begin)).toHaveBeenCalledTimes(1)
+      expect(asMock(deps.ui.progress.report)).toHaveBeenCalledWith(
+        expect.any(Number),
+        FR('phaseEvents')
+      )
+      expect(Math.max(...asMock(deps.layers.rebuildEvents).mock.invocationCallOrder)).toBeLessThan(
+        ended
+      )
+      expect(ended).toBeLessThan(Math.min(...fadeIn.mock.invocationCallOrder))
+    })
+
+    it('waits for the events before it fades the year in', async () => {
+      const content = deferred<{ version: number; events: [] }>()
+      const fadeIn = vi.fn(() => Promise.resolve())
+      const { deps, pipeline } = build({
+        fadeIn,
+        assets: fakeAssets({ content: { load: () => content.promise } }),
+      })
+      const started = pipeline.start()
+      // Once the bar tells the events, the year and its names are in: only the events are awaited.
+      await vi.waitFor(() => {
+        expect(asMock(deps.ui.progress.report)).toHaveBeenCalledWith(
+          expect.any(Number),
+          FR('phaseEvents')
+        )
+      })
+      await flush()
+      expect(fadeIn).not.toHaveBeenCalled()
+      content.resolve({ version: CONTENT_FORMAT_VERSION, events: [] })
+      await started
+      expect(fadeIn).toHaveBeenCalledTimes(1)
+    })
+
+    it('places the year’s names before it fades the year in', async () => {
+      stubNameFace()
+      const fadeIn = vi.fn(() => Promise.resolve())
+      const { deps, pipeline } = build({
+        fadeIn,
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
+      })
+      await pipeline.start()
+      // The names laid on the map: their layer rebuilt once taken off, once placed — both before the fade.
+      const names = asMock(deps.layers.rebuildNames).mock.invocationCallOrder
+      expect([deps.sources.yearNames === null, names.length]).toEqual([false, 2])
+      expect(Math.max(...names)).toBeLessThan(firstCall(fadeIn))
+    })
+
+    it('draws a year changed later at once, under its own bar, with no fade', async () => {
+      const fadeIn = vi.fn((set: (share: number) => void) => {
+        set(1)
+        return Promise.resolve()
+      })
+      const { deps, pipeline } = build({ fadeIn })
+      await pipeline.start()
+      const reveals = asMock(deps.layers.setReveal).mock.calls.length
+      await pipeline.rebuildPolitical()
+      expect([fadeIn.mock.calls.length, asMock(deps.layers.setReveal).mock.calls.length]).toEqual([
+        1,
+        reveals,
+      ])
     })
 
     it('draws the rivers when they land', async () => {

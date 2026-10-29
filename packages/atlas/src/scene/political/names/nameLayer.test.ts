@@ -183,6 +183,17 @@ describe('createNameLayer', () => {
       ]).toEqual([0.5, 0.25])
     })
 
+    // The dev, 2026-10-29: the names fade in with the countries and the events at startup.
+    it('shows the names by the share they have come in, ink and edge alike', () => {
+      const layer = createNameLayer(options())
+      layer.setDetail(0)
+      layer.setReveal(0.5)
+      expect([
+        inks(layer)[0]?.material.uniforms.opacity?.value,
+        edges(layer)[0]?.material.uniforms.opacity?.value,
+      ]).toEqual([0.25, 0.125])
+    })
+
     it('crosses from one level to the next as the detail moves between them', () => {
       const layer = createNameLayer(options())
       layer.setDetail(0.5)

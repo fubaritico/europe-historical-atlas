@@ -124,10 +124,11 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
 
   return {
     async start(): Promise<void> {
-      // The rivers and the events load on their own, beside the startup, never awaited.
+      // The rivers and the events load on their own, beside the startup; the startup waits for the events before it
+      // fades the year in, the rivers never.
       loadRivers(context)
-      void loadContent(context, context.assets.content)
-      await startup(context).catch((error: unknown) => {
+      const content = loadContent(context, context.assets.content)
+      await startup(context, content).catch((error: unknown) => {
         // Anything escaping `startup` got past the mask's own catch, so it is the relief — the one asset
         // the map cannot do without. The splash stays up underneath the message.
         deps.ui.reportAssetFailure('heightmap', error)

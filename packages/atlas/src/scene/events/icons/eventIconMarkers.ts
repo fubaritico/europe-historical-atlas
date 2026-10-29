@@ -17,7 +17,7 @@ import { createIconShadows } from '../shadows/iconShadows'
 
 import { billboardMaterials } from './billboardMaterials'
 import { createBillboards } from './billboards'
-import { flatIconSize, iconCrossFade } from './crossFade'
+import { crossFading, flatIconSize, iconCrossFade } from './crossFade'
 import { createIconTurner } from './facing'
 import { placeIcon, standForms } from './forms'
 import { createIconInstances } from './iconInstances'
@@ -93,6 +93,10 @@ function buildForms(
   // Each square's place, gathered once: the forms' own vectors, kept up to date by `standForms`.
   const haloPositions = icons.map(({ haloAt }) => haloAt)
   const flatPositions = icons.map(({ flatAt }) => flatAt)
+  // The two forms faded into each other by the zoom, the whole by the startup's fade.
+  const fading = crossFading((near, far) => {
+    fadeForms({ groups, instances, shadows, halos, flats }, near, far)
+  })
   return {
     icons,
     instances,
@@ -104,23 +108,32 @@ function buildForms(
     groups,
     haloPositions,
     flatPositions,
+    fading,
   }
 }
 
 /**
- * Fade the two forms into each other: the 3D icons and their halo by the share given, the flat drawings by the rest —
- * a form fully faded out not drawn at all.
+ * Fade the two forms into each other: the 3D icons and their halo by the near share, the flat drawings by the far one
+ * — a form fully faded out not drawn at all.
  * @param forms - the forms, as `buildForms` gives them
- * @param near3d - how far in the 3D icons are, 0 to 1 (`iconCrossFade`)
+ * @param near - the 3D icons' share, 0 to 1
+ * @param far - the flat drawings' share, 0 to 1
  * @returns nothing
  */
-function fadeForms(forms: ReturnType<typeof buildForms>, near3d: number): void {
-  forms.groups.near.visible = near3d > 0
-  forms.groups.far.visible = near3d < 1
-  forms.instances.setOpacity(near3d)
-  forms.shadows.setOpacity(near3d)
-  forms.halos.setOpacity(near3d)
-  forms.flats.setOpacity(1 - near3d)
+function fadeForms(
+  forms: Pick<
+    ReturnType<typeof buildForms>,
+    'groups' | 'instances' | 'shadows' | 'halos' | 'flats'
+  >,
+  near: number,
+  far: number
+): void {
+  forms.groups.near.visible = near > 0
+  forms.groups.far.visible = far > 0
+  forms.instances.setOpacity(near)
+  forms.shadows.setOpacity(near)
+  forms.halos.setOpacity(near)
+  forms.flats.setOpacity(far)
 }
 
 /**
@@ -189,6 +202,28 @@ function iconBlur(object: Group, blurred: readonly Object3D[], method: BlurMetho
 }
 
 /**
+ * The forms at a zoom: the 3D icons faded into the flat ones, and the flat ones kept a legible size on screen.
+ * @param forms - the forms, as `buildForms` gives them
+ * @param at - the zoom, the screen pixels per world unit, and how tall a 3D icon stands
+ * @param at.zoom - the camera's zoom, `0..1`
+ * @param at.pixelsPerUnit - screen pixels per world unit where the camera looks
+ * @param at.height - how tall a 3D icon stands
+ * @param facing - the camera's orientation, which every square takes
+ * @returns how wide a flat drawing now stands
+ */
+function zoomForms(
+  forms: ReturnType<typeof buildForms>,
+  at: { zoom: number; pixelsPerUnit: number; height: number },
+  facing: Quaternion
+): number {
+  forms.fading.setNear(iconCrossFade(at.zoom))
+  const flatSize = flatIconSize(at.height, at.pixelsPerUnit)
+  forms.flatPull.value = flatDepthPull(flatSize)
+  forms.flats.poseAll(forms.flatPositions, facing, flatSize)
+  return flatSize
+}
+
+/**
  * Stand one icon on each place, in two forms the zoom chooses between (`setZoom`): close up, the 3D icon, turned to
  * the camera and swayed (`faceCamera`) under the markers' lights (`../markerLights`, held beside it by the events'
  * layer), a light halo behind it to detach it from the map; from afar, its flat drawing ringed with light, at a fixed
@@ -211,20 +246,15 @@ export function createEventIconMarkers(
   const { icons, instances, shadows, halos, flats, groups, haloPositions, flatPositions } = forms
   const { object } = groups
   const blur = iconBlur(object, [instances.object, halos.object], blurMethod)
-
   // The camera's orientation, which every square takes; the turner of the 3D icons, and those it turns.
   const facing = new Quaternion()
   const turnIcons = createIconTurner()
   const turning = icons.filter(({ turns }) => turns)
-  // How wide a flat drawing stands, set by the zoom.
+  // How wide a flat drawing stands, set by the zoom; the last frame's moment, for the models that move (a trebuchet).
   let flatSize = height * ICON_FLAT_SPAN
-  // The moment of the last frame, for the models that move between frames (a trebuchet's arm).
   let now = 0
 
-  /**
-   * Hand every form's pose to its instances: the 3D icons as they are turned, the squares turned as the camera is.
-   * @returns nothing
-   */
+  // Every form's pose handed to its instances: the 3D icons as they are turned, the squares as the camera is.
   const poseAll = (): void => {
     instances.poseAll(icons, now)
     halos.poseAll(haloPositions, facing, height * ICON_HALO_SPAN)
@@ -240,11 +270,7 @@ export function createEventIconMarkers(
       shadows.setReliefScale(scale)
     },
     setZoom(zoom: number, pixelsPerUnit: number): void {
-      fadeForms(forms, iconCrossFade(zoom))
-      // The flat icons keep a legible size on screen, whatever the zoom.
-      flatSize = flatIconSize(height, pixelsPerUnit)
-      forms.flatPull.value = flatDepthPull(flatSize)
-      flats.poseAll(flatPositions, facing, flatSize)
+      flatSize = zoomForms(forms, { zoom, pixelsPerUnit, height }, facing)
     },
     faceCamera(camera: CameraPose, seconds: number): void {
       facing.copy(camera.quaternion)
@@ -254,6 +280,9 @@ export function createEventIconMarkers(
       poseAll()
       // The shadows drawn from the icons as they now stand.
       shadows.faceCamera(camera, seconds)
+    },
+    setReveal(share: number): void {
+      forms.fading.setReveal(share)
     },
     setBlur(pixels: number): void {
       blur.setRadius(pixels)

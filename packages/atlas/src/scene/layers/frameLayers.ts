@@ -75,6 +75,20 @@ function frameNames(context: LayerContext, zoom: number, detail: number, closene
 }
 
 /**
+ * How far the year's layers have come in, for this frame: the fills' and the tribes' strength, the names' and the
+ * events' opacity, each multiplied by the startup's fade — the borders take it in `frameBorders`.
+ * @param context - the layers and what they read
+ */
+function frameReveal(context: LayerContext): void {
+  const { dev, handles, reveal } = context
+  const strength = dev.texture.politicalStrength * reveal.value
+  handles.fills?.setLook(dev.texture.politicalMode, strength)
+  handles.tribes?.setLook(dev.texture.politicalMode, strength)
+  handles.names?.setReveal(reveal.value)
+  handles.events?.setReveal(reveal.value)
+}
+
+/**
  * The borders for this frame.
  * @param context - the layers and what they read
  * @param at - where the camera stands
@@ -100,7 +114,9 @@ function frameBorders(
     lerp(dev.political.borderWidthZoomOut, patternAtZoomIn, zoom)
   )
   // Fainter from afar, and crossed from the parchment seen from afar to the close-up line work by its own zoom.
-  handles.borders.setOpacityScale(lerp(dev.political.borderOpacityZoomOut, 1, zoom))
+  handles.borders.setOpacityScale(
+    lerp(dev.political.borderOpacityZoomOut, 1, zoom) * context.reveal.value
+  )
   handles.borders.setCloseness(closeness)
   // The light blur grows with the close-up look (ATLAS-302); it reads the borders without the relief, so it is off
   // when the relief may hide them.
@@ -126,6 +142,7 @@ export function frameLineWork(context: LayerContext, zoom: number, pixelsPerUnit
   handles.rivers?.setZoom(zoom)
   const detail = frameDetail(context, zoom)
   handles.fills?.setDetail(detail)
+  frameReveal(context)
   // How close up the line work looks, `0` from afar: what crosses the borders to their close-up look and blurs them.
   const closeness = inlayOpacityScale(zoom, dev.political.borderInlayZoom)
   frameNames(context, zoom, detail, closeness)

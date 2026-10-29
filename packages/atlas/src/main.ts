@@ -14,6 +14,7 @@ import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
 import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?worker'
 
+import { pageFadeIn } from './app/fadeIn'
 import { startFrameLoop } from './app/frameLoop'
 import { createMapInteraction } from './app/mapInteraction'
 import { createMapUi } from './app/mapUi'
@@ -32,12 +33,22 @@ import { createMapSources } from './sources/mapSources'
 import { createDevState } from './tunables/devState'
 
 /**
+ * The page's canvas the map is drawn on.
+ * @returns it
+ * @throws when the page has none — `index.html` declares it, so a miss is a broken page
+ */
+function sceneCanvas(): HTMLCanvasElement {
+  const canvas = document.querySelector<HTMLCanvasElement>('#scene')
+  if (!canvas) throw new Error('Canvas #scene not found in index.html')
+  return canvas
+}
+
+/**
  * Assemble the map and start it.
  * @returns the teardown, which frees every GPU resource and stops the worker
  */
 function bootstrap(): () => void {
-  const canvas = document.querySelector<HTMLCanvasElement>('#scene')
-  if (!canvas) throw new Error('Canvas #scene not found in index.html')
+  const canvas = sceneCanvas()
 
   // Read through a call, not the binding: across an `await`, control-flow analysis still believes the
   // flag it narrowed cannot have changed — which is precisely what teardown does, and would turn every
@@ -62,6 +73,7 @@ function bootstrap(): () => void {
     ui,
     translate,
     spawn: () => new ComputeWorker(),
+    fadeIn: pageFadeIn,
     isDisposed,
   })
   const interaction = createMapInteraction({

@@ -15,7 +15,7 @@ import {
   Vector3,
 } from 'three'
 
-import { flatIconSize, iconCrossFade } from './icons/crossFade'
+import { crossFading, flatIconSize, iconCrossFade } from './icons/crossFade'
 import { createHaloSquares } from './icons/light/haloSquares'
 import { ICON_DEPTH_PULL, ICON_HALO_SPAN } from './icons/settings'
 import { EVENT_RENDER_ORDER } from './markers'
@@ -177,6 +177,40 @@ function pinHalos(placed: readonly PlacedPin[], style: EventMarkerStyle) {
 }
 
 /**
+ * A pin's three forms in one group — close up the 3D pins, from afar the flat drawings hidden until the camera pulls
+ * out, the halos behind — and their cross-fade.
+ * @param placed - where each pin stands, and its head's colour
+ * @param loadTexture - how the flat drawing's SVG becomes a texture
+ * @param style - its look
+ * @returns the forms, their group and their fade
+ */
+function pinForms(
+  placed: readonly PlacedPin[],
+  loadTexture: LoadSvgTexture,
+  style: EventMarkerStyle
+) {
+  const models = pinModels(placed, style)
+  const flats = createPinFlats(
+    placed.map(({ ground }) => ground),
+    style.height,
+    loadTexture
+  )
+  flats.object.visible = false
+  const halos = pinHalos(placed, style)
+  const object = new Group()
+  object.add(models.near, flats.object, halos.object)
+  const fading = crossFading((nearShare, farShare) => {
+    // The 3D pins fade into their drawings at the icons' zoom, a form fully faded out not drawn at all.
+    models.near.visible = nearShare > 0
+    flats.object.visible = farShare > 0
+    models.setOpacity(nearShare)
+    halos.fade(nearShare)
+    flats.setOpacity(farShare)
+  })
+  return { models, flats, halos, object, fading }
+}
+
+/**
  * Build one pin per place: close up, a stem and a head in its type's colour, sharing their geometries and materials;
  * from afar, its flat drawing — the zoom fading the one into the other (`setZoom`).
  * @param placed - where each pin stands, on the relief before exaggeration, and its head's colour
@@ -189,18 +223,8 @@ export function createPinMarkers(
   loadTexture: LoadSvgTexture,
   style: EventMarkerStyle = EVENT_MARKER_STYLE
 ): EventMarkers {
-  // Close up, the 3D pins; from afar, the flat drawings, hidden until the camera pulls out.
-  const models = pinModels(placed, style)
-  const { near, pins } = models
-  const flats = createPinFlats(
-    placed.map(({ ground }) => ground),
-    style.height,
-    loadTexture
-  )
-  flats.object.visible = false
-  const halos = pinHalos(placed, style)
-  const object = new Group()
-  object.add(near, flats.object, halos.object)
+  const { models, flats, halos, object, fading } = pinForms(placed, loadTexture, style)
+  const { pins } = models
   // The camera's orientation, which every drawing takes; how wide a drawing stands, set by the zoom.
   const facing = new Quaternion()
   let flatSize = 0
@@ -217,16 +241,13 @@ export function createPinMarkers(
       flats.standAt(scale)
     },
     setZoom(zoom: number, pixelsPerUnit: number): void {
-      // The 3D pins fade into their drawings at the icons' zoom, a form fully faded out not drawn at all.
-      const near3d = iconCrossFade(zoom)
-      near.visible = near3d > 0
-      flats.object.visible = near3d < 1
-      models.setOpacity(near3d)
-      halos.fade(near3d)
-      flats.setOpacity(1 - near3d)
+      fading.setNear(iconCrossFade(zoom))
       // The drawings keep a legible size on screen, whatever the zoom.
       flatSize = flatIconSize(style.height, pixelsPerUnit)
       flats.pose(facing, flatSize)
+    },
+    setReveal(share: number): void {
+      fading.setReveal(share)
     },
     faceCamera(camera: CameraPose): void {
       // The 3D pin is round and faces every way already; its halo and its drawing turn to the camera.

@@ -87,6 +87,13 @@ export interface MapLayers {
    */
   rebuildEvents: () => void
   /**
+   * How far the year's layers have come in, `0` hidden to `1` whole — the countries, their borders, their names and
+   * the events, faded in together over the relief at startup. The next frame applies it.
+   * @param share - the share of their opacity shown
+   * @returns nothing
+   */
+  setReveal: (share: number) => void
+  /**
    * Rebuild the relief, then everything laid on it — the coastline, the rivers, the borders, the fills (and the
    * tribes with them), the names and the events.
    * They read their heights off the relief's grid when they are built, so a new grid leaves them on the
@@ -327,12 +334,17 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
       title: null,
       sheetTexture: null,
     },
+    // Whole until a startup hides them to fade them in: a year changed later is drawn at once.
+    reveal: { value: 1 },
   }
   // The handle, assembled from its slices over that same context.
   return {
     ...layerRebuilders(context),
     rebuildEvents(): void {
       rebuildEvents(context)
+    },
+    setReveal(share: number): void {
+      context.reveal.value = share
     },
     rebuildNames(): void {
       rebuildNames(context)

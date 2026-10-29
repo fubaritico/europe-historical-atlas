@@ -34,6 +34,13 @@ export interface MapPipelineDeps {
    */
   spawn: () => ComputeWorkerHandle
   /**
+   * Fade the year's layers in at the end of the startup, from nothing to whole (`app/fadeIn`) — at once under reduced
+   * motion. Injected: the page's frames and clock are the host's.
+   * @param set - where each frame's share is written
+   * @returns once whole
+   */
+  fadeIn: (set: (share: number) => void) => Promise<void>
+  /**
    * Whether the app has been torn down.
    * @returns `true` once teardown has run
    */

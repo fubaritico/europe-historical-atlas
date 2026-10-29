@@ -6,6 +6,7 @@ import { createLatestOnly } from '@europe-historical-atlas/core/utils/latestOnly
 import { createMapSources } from '../../sources/mapSources'
 import { createDevState } from '../../tunables/devState'
 import { namePlacement } from '../../tunables/params'
+import { stubNameFace } from '../testing/nameFaceStubs'
 import { AUTHORED_FILES, AUTHORED_YEAR, META, YEAR } from '../testing/yearFixtures'
 
 import { rebuildYearNames, unplacedNote, unshortenedNote } from './names'
@@ -18,27 +19,6 @@ import type { YearNames } from '@europe-historical-atlas/core/pipeline/yearNames
 
 /** What the names' compute answers with. */
 const PLACED: YearNames = { levels: [], gridWidth: NAME_GRID_WIDTH, gridHeight: 1, unnamed: [] }
-
-/** A 2D context measuring every character the same, as jsdom has none. */
-const CONTEXT = {
-  font: '',
-  fillStyle: '',
-  textBaseline: '',
-  textAlign: '',
-  measureText: () => ({
-    width: 64,
-    actualBoundingBoxAscent: 90,
-    actualBoundingBoxDescent: 10,
-    fontBoundingBoxAscent: 100,
-    fontBoundingBoxDescent: 30,
-  }),
-  fillText: vi.fn(),
-  getImageData: (_x: number, _y: number, w: number, h: number) => ({
-    data: new Uint8ClampedArray(w * h * 4),
-  }),
-  createImageData: (w: number, h: number) => ({ data: new Uint8ClampedArray(w * h * 4) }),
-  putImageData: vi.fn(),
-}
 
 /** A context with the stage's collaborators, and its layers and compute as spies. */
 interface Stage {
@@ -71,22 +51,7 @@ function stage(answer: () => Promise<YearNames> = () => Promise.resolve(PLACED))
 }
 
 beforeEach(() => {
-  vi.stubGlobal(
-    'FontFace',
-    class {
-      /**
-       * Loads at once.
-       * @returns itself
-       */
-      load(): Promise<this> {
-        return Promise.resolve(this)
-      }
-    }
-  )
-  Object.defineProperty(document, 'fonts', { value: { add: vi.fn() }, configurable: true })
-  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
-    CONTEXT as unknown as CanvasRenderingContext2D
-  )
+  stubNameFace()
 })
 
 afterEach(() => {

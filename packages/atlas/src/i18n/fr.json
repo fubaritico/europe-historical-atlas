@@ -5,6 +5,7 @@
   "phaseColours": "Attribution des couleurs…",
   "phaseBake": "Composition de la texture…",
   "phaseBorders": "Tracé des frontières…",
+  "phaseEvents": "Pose des événements…",
   "phaseNames": "Placement des noms des pays…",
   "heightmapFailed": "{failure, select, transport {Le relief n’a pas pu être chargé} schema {Le relief est illisible} consistency {Le relief est incomplet} semantic {Le relief ne correspond pas à cette carte} other {Le relief a échoué}}",
   "landMaskFailed": "{failure, select, transport {Le masque des terres n’a pas pu être chargé} schema {Le masque des terres est illisible} consistency {Le masque des terres est incomplet} semantic {Le masque des terres ne correspond pas à cette carte} other {Le masque des terres a échoué}}",

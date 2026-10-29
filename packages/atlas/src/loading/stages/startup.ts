@@ -1,10 +1,12 @@
 /**
- * Bringing the map up in its deliberate stages: the terrain, then the year, then the events.
+ * Bringing the map up in its deliberate stages: the relief first; then, under one bar, the year, its names and the
+ * events, faded in together once all are in.
  */
 
 import { refreshReliefSource } from '../../sources/mapSources'
 
-import { rebuildPolitical } from './political'
+import { rebuildYearNames } from './names'
+import { barReport, centuryOf, startYear } from './political'
 import { settleRivers } from './rivers'
 import { loadTerrain } from './terrain'
 import { pushSources, rebuildTexture } from './texture'
@@ -12,16 +14,26 @@ import { pushSources, rebuildTexture } from './texture'
 import type { PipelineContext } from '../pipelineContext'
 
 /**
- * Bring the map up in deliberate stages: the terrain, then the same map with its countries, then the
- * events once the map is drawn.
- *
- * Two bakes and not one is the dev's call, made on screen: waiting for everything meant a blank parchment for
- * the whole load, and Europe appearing at once late reads worse than Europe appearing early and then
- * being coloured in. The cost is real — **it bakes twice** — and what was removed is only the waste.
- * @param context - the pipeline's world
- * @returns once the map is on screen
+ * How the startup's one bar is shared: the year — its fetch, compute, bake, fills and borders — then its names, then
+ * the events. **Claude's estimate, not a measure of the dev's browser**: the year about 3 s with its 2.2 s of fills
+ * and borders (`files/plans/atlas/performance.md`), the names about 3 s in their worker under Node; the events are a
+ * file already loading. To retune once timed on the dev's screen.
  */
-export async function startup(context: PipelineContext): Promise<void> {
+const STARTUP_SPLIT = { year: 0.6, names: 0.95 }
+
+/**
+ * Bring the map up in deliberate stages: **the relief first, alone**; then, under one bar that tells every step, the
+ * countries and their borders, their names and the events — **all faded in together** once the bar has told them all
+ * (the dev, 2026-10-29: *« la carte en relief, c'est bien qu'on l'ait d'abord. Et ensuite, tout apparaît d'un seul coup
+ * en fondu, avec la barre de chargement qui indique bien tout ce qui se passe »*).
+ *
+ * Two bakes and not one is the dev's call, made on screen: Europe appearing early reads better than a blank parchment
+ * for the whole load. The cost is real — **it bakes twice**.
+ * @param context - the pipeline's world
+ * @param content - the events loading beside the startup, settled once they are pinned or told failed
+ * @returns once the map is on screen, the year's layers whole
+ */
+export async function startup(context: PipelineContext, content: Promise<void>): Promise<void> {
   const { dev, sources, layers, ui } = context
   // Load the relief and the mask; without a relief there is nothing to draw.
   await loadTerrain(context)
@@ -44,17 +56,48 @@ export async function startup(context: PipelineContext): Promise<void> {
   layers.rebuildRhumb()
   layers.rebuildRivers() // no-op until the river payload lands; whichever finishes last draws them
   layers.rebuildRose()
-  // There is a map to look at now, so the silhouette has done its job. The countries arriving later is
-  // the progress panel's business, not the splash's.
+  // There is a map to look at now, so the silhouette has done its job; the bar tells the rest.
   ui.dismissSplash()
 
-  // Stage two: the same map with the countries painted in and their borders drawn over it.
-  await rebuildPolitical(context)
+  // Stage two, hidden until it is all in: the year, its names, the events — each told on the one bar.
+  layers.setReveal(0)
+  ui.progress.begin(context.translate('loadingYear', { year: String(centuryOf(context)) }))
+  try {
+    await bringTheYear(context, content)
+  } finally {
+    ui.progress.end()
+  }
   if (context.isDisposed()) return
+  // Stage three: all of it at once, faded in over the relief.
+  await context.fadeIn((share) => {
+    layers.setReveal(share)
+  })
+}
 
-  // Stage three: the events, once the map is drawn (the dev, 2026-10-26) — on a failed year too, whose failure
-  // is on screen: valid events are not hidden because another file did not come. A no-op until they land; if
-  // they land later, `loadContent` draws them.
+/**
+ * The year, its names and the events, each reporting into its share of the startup's bar.
+ * @param context - the pipeline's world
+ * @param content - the events loading beside the startup
+ * @returns once all three are in — or told failed
+ */
+async function bringTheYear(context: PipelineContext, content: Promise<void>): Promise<void> {
+  const { sources, layers, ui } = context
+  const report = barReport(context)
+  const year = await startYear(context, (fraction, phase) => {
+    report(fraction * STARTUP_SPLIT.year, phase)
+  })
+  if (context.isDisposed()) return
+  if (year !== null) {
+    report(STARTUP_SPLIT.year, 'names')
+    await rebuildYearNames(context, year)
+    if (context.isDisposed()) return
+  }
+  // The events, once the map is drawn (the dev, 2026-10-26) — on a failed year too, whose failure is on screen: valid
+  // events are not hidden because another file did not come.
+  ui.progress.report(STARTUP_SPLIT.names, context.translate('phaseEvents'))
+  await content
+  if (context.isDisposed()) return
   sources.mapDrawn = true
   layers.rebuildEvents()
+  ui.progress.report(1)
 }

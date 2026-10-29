@@ -252,6 +252,9 @@ export function createIconShadows(
     setZoom(): void {
       // The shadows fade with the 3D icons, through `setOpacity`.
     },
+    setReveal(): void {
+      // The icons' fade reaches the shadows through `setOpacity` too (`eventIconMarkers.fadeForms`).
+    },
     faceCamera(_camera, seconds: number): void {
       // Drawn again from the icons as they are posed now, at most every interval — and not at all while the 3D icons
       // are faded out, from afar: nothing would show it.

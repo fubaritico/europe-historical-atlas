@@ -120,12 +120,13 @@ describe('frameLineWork', () => {
       borders: null,
       coastline: null,
       rhumb: null,
-      names: { setDetail: vi.fn(), setZoom, setBlur: vi.fn() },
+      names: { setDetail: vi.fn(), setZoom, setBlur: vi.fn(), setReveal: vi.fn() },
     }
     const context = {
       dev,
       sources: createMapSources(),
       handles: handles as unknown as LayerHandles,
+      reveal: { value: 1 },
     } as unknown as LayerContext
     frameLineWork(context, 0.5, 120)
     expect(setZoom).toHaveBeenCalledWith(0.5, dev.names)
@@ -160,11 +161,45 @@ describe('frameLineWork', () => {
       dev,
       sources: createMapSources(),
       handles: handles as unknown as LayerHandles,
+      reveal: { value: 1 },
     } as unknown as LayerContext
     frameLineWork(context, 0.2, 120)
     expect(setBlur).toHaveBeenLastCalledWith(1)
     dev.political.borderOnTop = false
     frameLineWork(context, 0.2, 120)
     expect(setBlur).toHaveBeenLastCalledWith(0)
+  })
+
+  // The dev, 2026-10-29: everything but the relief fades in together at startup.
+  it('multiplies the countries’, the names’ and the events’ opacity by how far they have come in', () => {
+    const dev = createDevState()
+    const handles = {
+      rivers: null,
+      fills: { setDetail: vi.fn(), setLook: vi.fn() },
+      tribes: { setLook: vi.fn(), setFeather: vi.fn() },
+      borders: null,
+      coastline: null,
+      rhumb: null,
+      names: { setDetail: vi.fn(), setZoom: vi.fn(), setBlur: vi.fn(), setReveal: vi.fn() },
+      events: { setZoom: vi.fn(), setBlur: vi.fn(), setReveal: vi.fn() },
+    }
+    const context = {
+      dev,
+      sources: createMapSources(),
+      handles: handles as unknown as LayerHandles,
+      reveal: { value: 0.25 },
+    } as unknown as LayerContext
+    frameLineWork(context, 0.5, 120)
+    expect([
+      handles.fills.setLook.mock.lastCall,
+      handles.tribes.setLook.mock.lastCall,
+      handles.names.setReveal.mock.lastCall,
+      handles.events.setReveal.mock.lastCall,
+    ]).toEqual([
+      [dev.texture.politicalMode, dev.texture.politicalStrength * 0.25],
+      [dev.texture.politicalMode, dev.texture.politicalStrength * 0.25],
+      [0.25],
+      [0.25],
+    ])
   })
 })

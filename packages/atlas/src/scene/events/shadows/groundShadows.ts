@@ -214,6 +214,12 @@ export function createGroundShadows(
 
   // 2. Black, its darkness in the image's alpha; drawn before the markers, pulled toward the camera.
   const { object, material } = shadowMesh(geometry, texture, options)
+  // How far in the 3D pins are at the zoom, and how far the whole has come in at startup.
+  let near3d = 1
+  let reveal = 1
+  const fade = (): void => {
+    material.opacity = options.opacity * near3d * reveal
+  }
 
   return {
     object,
@@ -222,7 +228,12 @@ export function createGroundShadows(
     },
     setZoom(zoom: number): void {
       // A shadow fades with the 3D pins that cast it: from afar they are flat drawings, which cast none.
-      material.opacity = options.opacity * iconCrossFade(zoom)
+      near3d = iconCrossFade(zoom)
+      fade()
+    },
+    setReveal(share: number): void {
+      reveal = share
+      fade()
     },
     faceCamera(): void {
       // A shadow is fixed in the world: the sun does not turn with the camera.

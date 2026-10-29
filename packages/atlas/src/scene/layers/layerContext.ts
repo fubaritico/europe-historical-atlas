@@ -97,4 +97,10 @@ export interface LayerContext extends MapLayersDeps {
   projection: DrapeProjection
   /** The live handles, mutated in place as layers are rebuilt. */
   handles: LayerHandles
+  /**
+   * How far the year's layers have come in — the countries, their borders, their names and the events — `0` hidden,
+   * `1` whole: what they fade in with at startup, over the relief shown first (the dev, 2026-10-29). Applied by every
+   * frame, multiplied into each layer's own opacity.
+   */
+  reveal: { value: number }
 }

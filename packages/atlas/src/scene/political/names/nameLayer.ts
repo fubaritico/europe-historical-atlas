@@ -136,6 +136,12 @@ export interface NameLayer {
    * @param pixels - the blur's reach, in CSS pixels
    */
   setBlur: (pixels: number) => void
+  /**
+   * How far the names have come in, `0` hidden to `1` whole — the fade they arrive with at startup, with the
+   * countries and the events (the dev, 2026-10-29: *« tout apparaît d'un seul coup en fondu »*).
+   * @param share - the share of their opacity shown
+   */
+  setReveal: (share: number) => void
   /** Free the meshes, their materials and the sheet's texture. */
   dispose: () => void
 }
@@ -243,12 +249,17 @@ function inkBlur(
 function levelOpacities(
   levels: readonly LevelMeshes[],
   options: Pick<NameLayerOptions, 'opacity' | 'haloOpacity'>
-): { setDetail: (detail: number) => void; setWatermark: (share: number) => void } {
+): {
+  setDetail: (detail: number) => void
+  setWatermark: (share: number) => void
+  setReveal: (share: number) => void
+} {
   const weights = levels.map(() => 0)
   let watermark = 1
+  let reveal = 1
   const show = (): void => {
     levels.forEach(({ edgeOpacity, inkOpacity }, level) => {
-      const weight = (weights[level] ?? 0) * watermark
+      const weight = (weights[level] ?? 0) * watermark * reveal
       edgeOpacity.value = options.haloOpacity * weight
       inkOpacity.value = options.opacity * weight
     })
@@ -265,6 +276,10 @@ function levelOpacities(
     },
     setWatermark(share: number): void {
       watermark = share
+      show()
+    },
+    setReveal(share: number): void {
+      reveal = share
       show()
     },
   }
@@ -300,6 +315,9 @@ export function createNameLayer(options: NameLayerOptions): NameLayer {
     },
     setBlur(pixels: number): void {
       blur.setBlur(pixels)
+    },
+    setReveal(share: number): void {
+      opacities.setReveal(share)
     },
     dispose(): void {
       for (const { geometry, edge, ink } of levels) {

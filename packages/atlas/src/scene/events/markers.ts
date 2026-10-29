@@ -64,6 +64,12 @@ export interface EventMarkers {
    * @returns nothing
    */
   setBlur?: (pixels: number) => void
+  /**
+   * How far the markers have come in, `0` hidden to `1` whole — the fade they arrive with at startup, with the
+   * countries and their names (the dev, 2026-10-29). Multiplies the zoom's own fade between their forms.
+   * @param share - the share of their opacity shown
+   */
+  setReveal: (share: number) => void
   /** Free the GPU resources. */
   dispose(): void
 }
@@ -88,6 +94,9 @@ export function combineEventMarkers(parts: readonly EventMarkers[]): EventMarker
     },
     faceCamera(camera: CameraPose, seconds: number): void {
       for (const part of parts) part.faceCamera(camera, seconds)
+    },
+    setReveal(share: number): void {
+      for (const part of parts) part.setReveal(share)
     },
     setBlur(pixels: number): void {
       for (const part of parts) part.setBlur?.(pixels)
