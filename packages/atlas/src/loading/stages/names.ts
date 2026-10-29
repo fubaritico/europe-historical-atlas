@@ -6,77 +6,27 @@
 
 import { homageLevels } from '@europe-historical-atlas/core/editor/homageLevels'
 import { bearersByLevel } from '@europe-historical-atlas/core/editor/regionBearers'
+import { untitledName } from '@europe-historical-atlas/core/pipeline/nameTitle'
+import { NAME_GRID_WIDTH } from '@europe-historical-atlas/core/pipeline/yearNames'
 
 import { charactersOf, drawNameSheet } from '../../scene/political/names/glyphSheet'
 import { NAME_FACE_URL, NAME_FAMILY } from '../../scene/political/names/nameFace'
+import { namePlacement } from '../../tunables/params'
 
 import type { NameDevParams } from '../../tunables/params'
 import type { PipelineContext } from '../pipelineContext'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
-import type { NamePlacementOptions } from '@europe-historical-atlas/core/pipeline/namePlacement'
-import type { GlyphMetric } from '@europe-historical-atlas/core/pipeline/yearNames'
-
-/** The names' grid, in cells across — about 6 km a cell over the map's width, as on the bench. */
-export const NAME_GRID_WIDTH = 1200
-
-/**
- * The titles a formal name opens with, cut to their initials to make the short name the map writes where the formal one
- * does not fit — « Kingdom of France » becomes « K. of France » (the dev, 2026-10-29). **Provisional**: the short name
- * per language, entered in the Cartographer, is step 4 of the plan.
- */
-const TITLE =
-  /^((?:\p{Lu}[\p{L}'-]* )*?)((?:Grand |Palatine )?(?:Kingdom|Principality|Duchy|County|Republic|Lordship|Emirate|Caliphate|Imamate|Khanate|Sultanate|Margraviate|March|Despotate|Archbishopric|Bishopric|Empire|Barony|City|Dominions|Confederacy|Land|Lands|Realm)) of /u
-
-/**
- * The short name the map writes for a formal one, provisionally: its title cut to initials, the dynasty before it kept —
- * the dev's reading of 2026-10-29. A name with no title before its « of » — a people, « Roman Empire » — is short
- * already, and stays whole.
- * @param formal - the registry's name
- * @returns « K. of France » for « Kingdom of France », « Zirid E. of Ifriqiya » for « Zirid Emirate of Ifriqiya »; the
- *   name itself when it has no title before an « of »
- */
-export function provisionalShortName(formal: string): string {
-  return formal.replace(TITLE, (_, dynasty: string, title: string) => {
-    const initials = title.split(' ').map((word) => `${word.charAt(0)}.`)
-    return `${dynasty}${initials.join(' ')} of `
-  })
-}
-
-/**
- * How the names are placed, from the panel's settings.
- * @param params - the names' settings
- * @returns the placement's options
- */
-export function namePlacement(params: NameDevParams): NamePlacementOptions {
-  return {
-    margin: params.margin,
-    overflow: params.overflow,
-    neighbourBite: params.neighbourBite,
-    longMinSize: params.longMinSize,
-    minSize: params.minSize,
-    maxSize: params.maxSize,
-    weights: {
-      size: params.weightSize,
-      centre: params.weightCentre,
-      cover: params.weightCover,
-      bend: params.weightBend,
-      slant: params.weightSlant,
-      border: params.weightBorder,
-      twoLines: params.weightTwoLines,
-    },
-  }
-}
 
 /** A year's names as the map writes them, every form, by polity id. */
 interface WrittenNames {
-  /** The short names — the formal ones with their title cut to initials, for now. */
+  /** The short names — the formal ones without their title, for now (CARTO-307). */
   readonly short: Record<string, string>
   /** The full names — the registry's own. */
   readonly full: Record<string, string>
 }
 
 /**
- * Each polity's name as the map writes it, short and full, in capitals when the panel says so.
+ * Each polity's name as the map writes it, short and full, as it is written — in capitals only when the panel says so.
  * @param polities - the year's polities
  * @param params - the names' settings
  * @returns the names, by polity id
@@ -87,29 +37,9 @@ function writtenNames(
 ): WrittenNames {
   const written = (text: string): string => (params.capitals ? text.toLocaleUpperCase('en') : text)
   return {
-    short: Object.fromEntries(
-      polities.map(({ id, name }) => [id, written(provisionalShortName(name))])
-    ),
+    short: Object.fromEntries(polities.map(({ id, name }) => [id, written(untitledName(name))])),
     full: Object.fromEntries(polities.map(({ id, name }) => [id, written(name)])),
   }
-}
-
-/**
- * The letters' measures with the panel's letter spacing added to every advance — one spacing for every name.
- * @param glyphs - the letters as measured
- * @param tracking - the spacing, in ems
- * @returns the measures the placement reads
- */
-function tracked(
-  glyphs: Record<string, GlyphMetric>,
-  tracking: number
-): Record<string, GlyphMetric> {
-  return Object.fromEntries(
-    Object.entries(glyphs).map(([character, metric]) => [
-      character,
-      { ...metric, advance: metric.advance + tracking },
-    ])
-  )
 }
 
 /**
@@ -195,7 +125,7 @@ export async function rebuildYearNames(context: PipelineContext, loaded: RegionS
       ),
       names: names.short,
       fullNames: names.full,
-      glyphs: tracked(glyphs, dev.names.tracking),
+      glyphs,
       gridWidth: NAME_GRID_WIDTH,
       gridHeight,
       options: namePlacement(dev.names),

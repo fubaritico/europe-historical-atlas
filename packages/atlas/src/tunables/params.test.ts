@@ -7,10 +7,12 @@ import {
 
 import {
   ALL_CONTROL_TABLES,
+  DEFAULT_NAME_PARAMS,
   POLITICAL_CONTROLS,
   POLITICAL_CONTROL_GROUPS,
   POLITICAL_CONTROL_ORDER,
   asGroup,
+  namePlacement,
   politicalRebuildFor,
 } from './params'
 
@@ -175,6 +177,37 @@ describe('politicalRebuildFor', () => {
         seen.set(key, rebuild)
       }
       expect(seen.size).toBe(new Set(POLITICAL_CONTROL_ORDER).size)
+    })
+  })
+})
+
+describe('namePlacement', () => {
+  // Every panel number distinct, so a field sent to the wrong option cannot pass for the right one.
+  it('hands each of the panel’s settings to its own option', () => {
+    const params = {
+      ...DEFAULT_NAME_PARAMS,
+      heightShare: 1,
+      cover: 2,
+      trackingMost: 3,
+      strait: 4,
+      farShare: 5,
+      farCells: 6,
+      neighbourBite: 7,
+      minSize: 8,
+      longMinSize: 9,
+      maxSize: 10,
+    }
+    expect(namePlacement(params)).toEqual({
+      heightShare: 1,
+      cover: 2,
+      trackingMost: 3,
+      strait: 4,
+      farShare: 5,
+      farCells: 6,
+      neighbourBite: 7,
+      minSize: 8,
+      longMinSize: 9,
+      maxSize: 10,
     })
   })
 })

@@ -277,17 +277,16 @@ target.z)` would be coherent with the navigation that already exists.
   their shadows (`iconShadows`), the pins' shadows read the icons' cross-fade (`icons/crossFade`). No file-level cycle.
   **Remedy when the shadows serve elsewhere**: move `crossFade` beside `markers.ts`, inject the shadows' factory into
   `createEventIconMarkers`. **Severity: cosmetic.**
-- **Placing a year's country names takes ~10.5 s for 1100's three levels, three forms** (measured under Node, 2026-10-29,
-  ATLAS-301 — ~30 s for the short names alone the evening before, which was ~13 s in the dev's browser). The size search reads
-  the room across each line once (`nameFit.roomAcross`) and makes 16 halvings; then three forms are placed, each piece's
-  distance to its neighbours and to the names already placed computed again (`nameOccupancy.withOccupied`, `nameFit.boundOf`).
-  In the names' own worker, so the map never waits. **Next if it bites**: the three levels share most pieces — cache by
-  piece; skip the distance to the names when none covers the crop (done) and recompute only the part of the crop they touch;
-  then several workers, one per level. **Severity: worth knowing.**
-- **Every islet of a polity carries its name** (2026-10-28, ATLAS-301): with names no longer refused for their size, Norway's
-  coast shows a « NORWAY » on many islands once zoomed in. It follows the dev's call that every piece carries the name, now
-  that nothing is too small. **Remedy if it clutters**: name a piece only above a share of the largest, or only the largest
-  piece of an island group. **Severity: cosmetic, to judge on the map.**
+- **Placing a year's country names takes ~2.5 s for 1100's three levels** (measured under Node, 2026-10-29, afternoon,
+  `files/spikes/name-fixture/year.ts` — ~10.5 s the same morning with the size search, ~30 s the evening before). One
+  construction a realm, no candidates (`nameConstruction`); the room across a line is read once a line, the distance to
+  the names already placed recomputed per realm (`nameOccupancy.withOccupied`, `nameFit.boundOf`). In the names' own
+  worker, so the map never waits. **Next if it bites**: the three levels share most realms — cache by realm.
+  **Severity: worth knowing.**
+- **At the closest zoom the names' contrast is about 1.7:1** (review A11Y-005, 2026-10-29, computed, not measured on
+  screen): the watermark (`watermarkShare` 0.4 on `NAME_OPACITY` 0.75, so the ink at 0.3) multiplied on the fills, the
+  halo gone by then. From afar it is 3 to 4.7:1. **The dev's choice** (A11Y-001: the cities read over the names close up);
+  the remedy if it is reopened, a share of about 0.8 (0.6 effective, ~3:1). **Severity: worth knowing.**
 - **The names are drawn over the relief** (`depthTest` off, `scene/political/names/nameLayer`): a flat sheet at the ground's
   median height would otherwise be cut by the hills under it. Consequence: under a steep camera, a name behind a ridge shows
   through it. Chosen on purpose for legibility (the dev, 28/10); **severity: cosmetic**.

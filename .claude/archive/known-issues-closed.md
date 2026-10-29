@@ -324,3 +324,10 @@ Entries closed and moved out of `known-issues.md`. Kept for the lessons they car
   purpose. What stays unasserted is the title's **position** (outer edge, offset, lift). **Severity: cosmetic.**
   **Closed 2026-10-27 (ATLAS-293)**: the title's position is tested too — it moves back by exactly its offset, the
   band's thickening and the label lane's widening, and floats a hair above the sheet; each guard broken on purpose.
+
+- **Every islet of a polity carries its name** (2026-10-28, ATLAS-301): with names no longer refused for their size, Norway's
+  coast shows a « NORWAY » on many islands once zoomed in. It follows the dev's call that every piece carries the name, now
+  that nothing is too small. **Remedy if it clutters**: name a piece only above a share of the largest, or only the largest
+  piece of an island group. **Severity: cosmetic, to judge on the map.**
+  **Closed 2026-10-29** (ATLAS-301): a country's pieces are gathered into realms across straits, and a far realm is named
+  only from a fifth of the largest or 2 000 cells (`nameRealm`) — Norway is named on its mainland, Iceland and Greenland.

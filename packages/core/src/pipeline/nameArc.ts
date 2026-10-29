@@ -1,11 +1,13 @@
 /**
- * The gentle arc a name is first tried on (ATLAS-301): through the middle of its space, along the space's length,
+ * The gentle arc a name is written along (ATLAS-301): through the middle of its space, along the space's length,
  * bent with its spine — the line the dev's two reference maps write every name on (a Crusader Kings III map, a map of
  * 1501: LITHUANIA, CRIMEAN KHANATE, OTTOMAN EMPIRE), 2026-10-28.
  *
  * **The space's length** is its main axis, by the spread of all its cells. **Its spine** is the middle of each slice
  * across that axis; a parabola fitted to those middles, bent {@link MAX_BEND} at most, is the arc. **Cut evenly about
- * the point nearest the space's centre of mass**, so a name centred on it is centred on the country.
+ * the point nearest the space's centre of mass**, so a name centred on it is centred on the country. A compact space
+ * — {@link spaceAspect} under `nameConstruction`'s bound — has its axis and its spine's lean held to a slant
+ * (`steepest`), so its name is a diagonal and never stands.
  */
 
 import { readAt } from '../utils/math'
@@ -91,13 +93,15 @@ export function centredOn(line: NameLine, x: number, y: number): NameLine {
  * The gentle arc through the middle of a space, along its length.
  * @param mask - the space, row-major over the crop, non-zero inside
  * @param width - the crop's width
+ * @param steepest - the most the arc may slant from the horizontal, in radians: its axis (`readingFrame`) and the lean of
+ *   the spine fitted from it, so a compact space's name stays a diagonal; a right angle leaves both as they are
  * @returns the arc, read left to right — or upward when steep — and centred on the space's centre of mass; `null`
  *   for a space too small to give one
  */
-export function axisArc(mask: Uint8Array, width: number): NameLine | null {
+export function axisArc(mask: Uint8Array, width: number, steepest = Math.PI / 2): NameLine | null {
   const cells = cellsOf(mask, width)
   if (cells.length < 2) return null
-  const { origin, along, up } = readingFrame(cells)
+  const { origin, along, up } = readingFrame(cells, steepest)
   const projected = cells.map(([x, y]): readonly [number, number] => {
     const dx = x - origin[0]
     const dy = y - origin[1]
@@ -106,7 +110,13 @@ export function axisArc(mask: Uint8Array, width: number): NameLine | null {
   const [low, high] = span(projected.map(([s]) => s))
   const from = low - 0.5
   const to = high + 0.5
-  const [bend, b, k] = fitParabola(spine(projected))
+  const [bend, lean, k] = fitParabola(spine(projected))
+  // The spine's lean turns the arc from its axis by `-atan(lean)`: held so the whole stays within `steepest`.
+  const axis = Math.atan2(along[1], along[0])
+  const b =
+    steepest < Math.PI / 2
+      ? Math.tan(Math.min(axis + steepest, Math.max(axis - steepest, Math.atan(lean))))
+      : lean
   const a = limitedBend(bend, b, from, to)
   const arc = sampled(
     (s) => {
@@ -121,43 +131,22 @@ export function axisArc(mask: Uint8Array, width: number): NameLine | null {
 }
 
 /**
- * How long a space is along its main axis, in cells — what a name's coverage is measured against.
+ * How long a space is for its width: the spread of its cells along its main axis over the spread across it.
  * @param mask - the space, row-major over the crop, non-zero inside
  * @param width - the crop's width
- * @returns its extent along the axis
+ * @returns `1` for a round or square space, more the longer it is; `1` for a space of fewer than two cells
  */
-export function spaceLength(mask: Uint8Array, width: number): number {
+export function spaceAspect(mask: Uint8Array, width: number): number {
   const cells = cellsOf(mask, width)
-  if (cells.length === 0) return 0
-  const { origin, along } = readingFrame(cells)
-  const [low, high] = span(
-    cells.map(([x, y]) => (x - origin[0]) * along[0] + (y - origin[1]) * along[1])
-  )
-  return high - low + 1
-}
-
-/** A space's shape as a name's candidates are judged against it. */
-export interface SpaceShape {
-  /** Its centre of mass, in the crop's cells — inside the space or not. */
-  readonly centre: readonly [number, number]
-  /** Its length along its main axis, in cells. */
-  readonly length: number
-  /** The radius of a disc of its area, in cells: how far is far from its centre. */
-  readonly reach: number
-}
-
-/**
- * A space's centre, length and reach.
- * @param mask - the space, row-major over the crop, non-zero inside
- * @param width - the crop's width
- * @returns its shape
- */
-export function spaceShape(mask: Uint8Array, width: number): SpaceShape {
-  const cells = cellsOf(mask, width)
-  const { origin } = readingFrame(cells.length > 0 ? cells : [[0, 0]])
-  return {
-    centre: origin,
-    length: spaceLength(mask, width),
-    reach: Math.sqrt(cells.length / Math.PI),
+  if (cells.length < 2) return 1
+  const { origin, along, up } = readingFrame(cells)
+  let alongSpread = 0
+  let acrossSpread = 0
+  for (const [x, y] of cells) {
+    const dx = x - origin[0]
+    const dy = y - origin[1]
+    alongSpread += (dx * along[0] + dy * along[1]) ** 2
+    acrossSpread += (dx * up[0] + dy * up[1]) ** 2
   }
+  return acrossSpread > 0 ? Math.sqrt(alongSpread / acrossSpread) : Infinity
 }

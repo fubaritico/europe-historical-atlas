@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { COVERED, createOccupancy, occupy, pieceTag, withOccupied } from './nameOccupancy'
-import { ownerPieces } from './nameSpace'
+import { createOccupancy, occupy, pieceTag, withOccupied } from './nameOccupancy'
+import { COVERED } from './nameSpace'
+import { piecesOf } from './testing/pieces'
 
 import type { MarkedName } from './nameOccupancy'
 
@@ -77,8 +78,8 @@ describe('occupy', () => {
 })
 
 /** A piece of owner 0 on columns 2..7 of a band 12 cells long. */
-const space = (): ReturnType<typeof ownerPieces> =>
-  ownerPieces(
+const space = (): ReturnType<typeof piecesOf> =>
+  piecesOf(
     Int32Array.from({ length: 12 * 5 }, (_, at) => (at % 12 >= 2 && at % 12 <= 7 ? 0 : -1)),
     12,
     5
@@ -108,7 +109,7 @@ describe('withOccupied', () => {
     })
   })
 
-  // L3, L4: N/A — a space from `ownerPieces`, an occupancy of the same grid.
+  // L3, L4: N/A — a space from `piecesOf`, an occupancy of the same grid.
 
   describe('edge cases', () => {
     it('hands the space back as it is when no other name covers its crop', () => {

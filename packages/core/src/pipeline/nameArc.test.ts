@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { axisArc, centredOn, spaceLength, spaceShape } from './nameArc'
+import { axisArc, centredOn, spaceAspect } from './nameArc'
 
 import type { NameLine } from './nameLine'
 
@@ -70,8 +70,9 @@ describe('axisArc', () => {
       // A band with a block below its west end: the mass leans west, the arc is cut short to the east.
       const leaning = maskOf(60, 16, (x, y) => y < 8 || x < 20)
       const [first, last] = ends(axisArc(leaning, 60))
-      const centre = spaceShape(leaning, 60).centre
-      expect(Math.abs((first[0] + last[0]) / 2 - centre[0])).toBeLessThan(1)
+      // Its centre of mass, counted by hand: 8 rows of 60 and 8 rows of 20 at the west end.
+      const centreX = (8 * 60 * 29.5 + 8 * 20 * 9.5) / (8 * 60 + 8 * 20)
+      expect(Math.abs((first[0] + last[0]) / 2 - centreX)).toBeLessThan(1)
     })
   })
 
@@ -118,13 +119,16 @@ describe('centredOn', () => {
   })
 })
 
-describe('spaceShape', () => {
-  it('gives a band’s centre, its length along its axis, and the radius of a disc of its area', () => {
-    const { centre, length, reach } = spaceShape(BAND, 62)
-    expect(centre[0]).toBeCloseTo(30.5, 6)
-    expect(centre[1]).toBeCloseTo(4.5, 6)
-    expect(length).toBeCloseTo(60, 6)
-    expect(reach).toBeCloseTo(Math.sqrt(480 / Math.PI), 6)
-    expect(spaceLength(BAND, 62)).toBeCloseTo(60, 6)
+describe('spaceAspect', () => {
+  it('reads a square as long as it is wide', () => {
+    expect(spaceAspect(new Uint8Array(100).fill(1), 10)).toBeCloseTo(1, 5)
+  })
+
+  it('reads a band five times as long as high by its spread', () => {
+    expect(spaceAspect(new Uint8Array(50 * 10).fill(1), 50)).toBeCloseTo(5, 0)
+  })
+
+  it('reads a space of one cell as round', () => {
+    expect(spaceAspect(Uint8Array.of(0, 1, 0), 3)).toBe(1)
   })
 })

@@ -4,7 +4,6 @@ import { createLandMask } from '../data/landMask'
 
 import { serveCompute } from './computeServer'
 import { createInlineMapCompute } from './inlineCompute'
-import { DEFAULT_NAME_WEIGHTS } from './nameChoice'
 import { DEFAULT_TERRAIN_OPTIONS } from './terrainCompose'
 import { createWorkerMapCompute } from './workerCompute'
 
@@ -111,13 +110,16 @@ const NAMES_REQUEST: YearNamesRequest = {
   gridWidth: 20,
   gridHeight: 20,
   options: {
-    margin: 1,
-    overflow: 0,
+    heightShare: 0.6,
+    cover: 0.75,
+    trackingMost: 0.6,
     neighbourBite: 0,
     minSize: 0.5,
     longMinSize: 0.5,
     maxSize: 1000,
-    weights: DEFAULT_NAME_WEIGHTS,
+    strait: 4,
+    farShare: 0.2,
+    farCells: 1e9,
   },
 }
 

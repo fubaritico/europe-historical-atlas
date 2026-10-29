@@ -2,14 +2,16 @@
  * The cells of a display level's grid the names already placed cover (ATLAS-301): what keeps two names from being written
  * over each other — the dev, 2026-10-29: *« il faudrait que ça ne se chevauche pas »*.
  *
- * Each name placed marks the cells its letters cover, half a cell wider for their white edge, with the tag of its piece.
- * A later name sees the cells of every **other** piece as covered (`nameSpace`'s `blocked`), never to be entered — a
- * neighbour's cells it may bite into a little, another name's not at all:
- * its size search keeps off them by itself, smaller or on another line. Its own piece's cells stay open, so a piece's
- * forms — its abbreviation, its short name, its full one, never shown at once — do not push each other out.
+ * Each name placed marks the cells its letters cover, half a cell wider for their white edge, with the tag of its realm.
+ * A later name sees the cells of every **other** realm as covered (`nameSpace`'s `blocked`), never to be entered — a
+ * neighbour's cells it may bite into a little, another name's not at all: the construction sets it smaller until it
+ * keeps off them (`nameConstruction`). Its own realm's cells stay open, so the forms a realm tries — its full name, then
+ * its short one — never push each other out.
  */
 
 import { readAt } from '../utils/math'
+
+import { COVERED } from './nameSpace'
 
 import type { NameSpace } from './nameSpace'
 
@@ -22,9 +24,6 @@ export interface NameOccupancy {
   /** Row-major, the tag of the piece whose name covers each cell, `0` for none. */
   readonly cells: Float64Array
 }
-
-/** What a cell another piece's name covers reads as in a space's `blocked` — never covered again. */
-export const COVERED = 2
 
 /** How many pieces one owner's tags leave room for: an owner's islands, every one named, stay far below it. */
 const PIECES_PER_OWNER = 1 << 16

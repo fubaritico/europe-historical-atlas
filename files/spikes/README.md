@@ -22,5 +22,6 @@
 
 | [`terrain-bitmap`](terrain-bitmap/) | Can the atlas's **painted terrain texture** be baked outside the browser, so the Cartographer's interface can be designed over the real backdrop? | **done** ✅ (2560×2328 in 1.8 s, project defaults, no new dependency) |
 | [`coastline-volume`](coastline-volume/) | How many points must the Cartographer redraw on every `pointermove` of a pan — and does the coastline have to be **chained** into contours rather than drawn as loose segments? | **graduated** ✅ (95 212 segments → 2 029 contours at the atlas's resolution: 47× fewer sub-paths, half the points, and the prerequisite for `s02`'s sub-path insertion) |
+| [`name-fixture`](name-fixture/) | Does a change of the countries' names' construction make them better — measured on six frozen countries of 1100 rather than by eye across the map? | **in use** (feeds `core`'s `namePlacement.fixture.test.ts`) |
 
 _(Add a row per new spike. Mark `done` / `graduated` / `dropped` as they evolve.)_

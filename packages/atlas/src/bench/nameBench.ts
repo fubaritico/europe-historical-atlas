@@ -16,9 +16,13 @@ import { polityColours } from '@europe-historical-atlas/core/editor/polityColour
 import { regionBearers } from '@europe-historical-atlas/core/editor/regionBearers'
 import { openYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import { latitudeToMercatorY } from '@europe-historical-atlas/core/geo/mercator'
-import { DEFAULT_NAME_WEIGHTS } from '@europe-historical-atlas/core/pipeline/nameChoice'
+import { createOccupancy } from '@europe-historical-atlas/core/pipeline/nameOccupancy'
 import { placeNames } from '@europe-historical-atlas/core/pipeline/namePlacement'
+import { untitledName } from '@europe-historical-atlas/core/pipeline/nameTitle'
 import { ownerGrid } from '@europe-historical-atlas/core/pipeline/ownerGrid'
+import { NAME_GRID_WIDTH as GRID_WIDTH } from '@europe-historical-atlas/core/pipeline/yearNames'
+
+import { DEFAULT_NAME_PARAMS, namePlacement } from '../tunables/params'
 
 import { START_SETTINGS, controls, cycleFacesWithArrows } from './nameBenchControls'
 
@@ -82,9 +86,6 @@ const FACES: readonly Face[] = [
 
 /** The year on the bench. */
 const YEAR = 1100
-
-/** The names' grid, in cells across — about 6 km a cell over the map's width. */
-const GRID_WIDTH = 1200
 
 /** Canvas pixels per grid cell: twice the CSS pixel, for a sharp line on a retina screen. */
 const SCALE = 2
@@ -179,22 +180,14 @@ async function loadFaces(): Promise<void> {
  * A measure of names in a face, through the canvas, at a size of one.
  * @param context - a 2D context to measure with
  * @param family - the face's family
- * @param spacing - extra room after each letter, in ems
- * @returns the measure `placeNames` takes
+ * @returns the measure `placeNames` takes, the letters unspaced: the spacing is the construction's
  */
-function canvasMeasure(
-  context: CanvasRenderingContext2D,
-  family: string,
-  spacing: number
-): MeasureName {
+function canvasMeasure(context: CanvasRenderingContext2D, family: string): MeasureName {
   return (text) => {
     context.font = `${String(MEASURE_PX)}px "${family}"`
     const whole = context.measureText(text)
     return {
-      advances: Array.from(
-        text,
-        (letter) => context.measureText(letter).width / MEASURE_PX + spacing
-      ),
+      advances: Array.from(text, (letter) => context.measureText(letter).width / MEASURE_PX),
       ascent: whole.actualBoundingBoxAscent / MEASURE_PX,
       descent: whole.actualBoundingBoxDescent / MEASURE_PX,
     }
@@ -272,8 +265,10 @@ interface Placed {
 }
 
 /**
- * Place the names with the settings that move them — the face, the level, the margin, the smallest size, the
- * spacing, the capitals and the two gains; the ink, its opacity and its blend do not.
+ * Place the names with the settings that move them — the face, the level, the smallest size and the capitals; the ink,
+ * its opacity and its blend do not. The construction is the atlas's own (`DEFAULT_NAME_PARAMS`), its settings tuned on
+ * the atlas, where the names are judged: the full name where it fits, the untitled one otherwise, and no name over
+ * another's cells, as `placeYearNames` places a level.
  * @param context - a 2D context to measure with
  * @param prepared - the year
  * @param settings - what the dev tuned
@@ -287,7 +282,12 @@ function place(context: CanvasRenderingContext2D, prepared: Prepared, settings: 
   )
   const requests = ids.map((id, owner) => {
     const name = required(prepared.names.get(id), `name for ${id}`)
-    return { owner, text: settings.capitals ? name.toLocaleUpperCase('fr') : name }
+    const cased = (text: string): string =>
+      settings.capitals ? text.toLocaleUpperCase('fr') : text
+    const short = untitledName(name)
+    return short === name
+      ? { owner, text: cased(name) }
+      : { owner, text: cased(name), shorter: cased(short) }
   })
   const started = performance.now()
   const placement = placeNames(
@@ -295,17 +295,13 @@ function place(context: CanvasRenderingContext2D, prepared: Prepared, settings: 
     GRID_WIDTH,
     prepared.height,
     requests,
-    canvasMeasure(context, family, settings.spacing),
+    canvasMeasure(context, family),
     {
-      margin: settings.margin,
-      // The bench keeps every name inside; the overflow is tuned on the atlas itself, where the names are judged.
-      overflow: 0,
-      neighbourBite: 0,
+      ...namePlacement(DEFAULT_NAME_PARAMS),
       minSize: settings.minSize,
       longMinSize: settings.minSize,
-      maxSize: 1000,
-      weights: DEFAULT_NAME_WEIGHTS,
-    }
+    },
+    createOccupancy(GRID_WIDTH, prepared.height)
   )
   return { placement, took: performance.now() - started }
 }
@@ -316,13 +312,13 @@ function place(context: CanvasRenderingContext2D, prepared: Prepared, settings: 
  * @returns the key
  */
 function placementKey(settings: Settings): string {
-  const { face, level, margin, minSize, spacing, capitals } = settings
-  return JSON.stringify([face, level, margin, minSize, spacing, capitals])
+  const { face, level, minSize, capitals } = settings
+  return JSON.stringify([face, level, minSize, capitals])
 }
 
 /**
  * Redraw the map and its names with the settings, placing them again only when a setting that moves them
- * changed — a placement of 1100 takes about two seconds.
+ * changed — a level of 1100 takes close to a second (three levels in 2.5 s under Node, 29/10).
  * @param canvas - the bench's canvas
  * @param prepared - the year
  * @param settings - what the dev tuned

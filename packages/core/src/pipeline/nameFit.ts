@@ -1,35 +1,20 @@
 /**
- * Whether a name fits along a line in its space, and the largest size it fits at (ATLAS-301,
- * `files/plans/atlas/country-names.md`, « the size »): the fitting half of `namePlacement`, which chooses
- * between the lines this measures.
+ * Whether a name fits along a line in its space (ATLAS-301, `files/plans/atlas/country-names.md`): the fitting half of
+ * `nameConstruction`, which sets the name and asks this whether it holds.
  *
- * A name fits when the box its letters fill along the line keeps the margin from the space's edge, read off
- * the space's signed distances to its edge (`geo/distanceTransform`, inside and out) — a margin below zero lets the
- * letters spill over the border by that much; its largest size is found by halving. Two lines of a name
- * are fitted as one block, as tall as both.
+ * A name fits when the box its letters fill along the line keeps the margin from the space's edge, read off the space's
+ * signed distances to its edge (`geo/distanceTransform`, inside and out), and keeps off the neighbours and the names
+ * already written — a margin of `-Infinity` leaves only those, the sea open to the letters. The room across the line,
+ * read once a line (`roomAcross`), also gives the realm's thickness.
  */
 
 import { distanceToOutside } from '../geo/distanceTransform'
 import { readAt } from '../utils/math'
 
-import { horizontalLine, innermostCell, ridgeLine } from './nameLine'
-import { COVERED } from './nameOccupancy'
+import { COVERED, NEIGHBOUR } from './nameSpace'
 
 import type { NameLine } from './nameLine'
 import type { NameSpace } from './nameSpace'
-
-/**
- * The thicknesses of the space the ridge is walked through, as fractions of its thickest point: a thin
- * threshold lets the line run long, a thick one keeps it where the letters can be tall. Each gives a
- * candidate and the largest name wins.
- */
-const RIDGE_THRESHOLDS = [0.25, 0.5, 0.75] as const
-
-/**
- * How many halvings the search for the size makes: the size known to 1/65 536 of its first bound, far past what
- * a letter drawn on screen can show (40 cost three times the time for nothing, measured 2026-10-28).
- */
-const SIZE_HALVINGS = 16
 
 /**
  * A distance read between the cells' centres, linearly in both directions.
@@ -145,11 +130,10 @@ export function fittingOf(space: NameSpace, bite = 0): Fitting {
   }
 }
 
-/** What a neighbour's cell, or one past the frame, reads as in a space's `blocked`. */
-const NEIGHBOUR = 1
-
 /**
- * Each cell's distance to the edge of the nearest cell of a kind.
+ * Each cell's distance to the edge of the nearest cell of a kind, signed: positive outside those cells, negative inside
+ * them, as deep as the cell lies — so a bite of one cell lets a letter one cell in, never across (on 29/10 it was
+ * unsigned, every cell inside read half a cell, and a bite let a name cross a neighbour whole: Byzantium over Rum).
  *
  * A crop with no such cell — an island alone in the sea — is bounded by nothing: every cell is given a distance
  * farther than any in the crop. A finite one, since the fit reads it between cells, where `Infinity` times nought
@@ -162,7 +146,15 @@ function boundOf(space: NameSpace, kind: number): Float32Array {
   const { blocked, width, height } = space
   if (!blocked.includes(kind)) return new Float32Array(blocked.length).fill(width + height)
   const open = blocked.map((cell) => (cell === kind ? 0 : 1))
-  return distanceToOutside(open, width, height).map((distance) => distance - HALF_CELL)
+  const away = distanceToOutside(open, width, height)
+  const inside = distanceToOutside(
+    blocked.map((cell) => (cell === kind ? 1 : 0)),
+    width,
+    height
+  )
+  return away.map((distance, at) =>
+    readAt(open, at) === 0 ? HALF_CELL - readAt(inside, at) : distance - HALF_CELL
+  )
 }
 
 /**
@@ -269,7 +261,12 @@ function roomOneWay(
  * @param reach - the largest half-height the search will try: the walk stops there
  * @returns one room per point of the line, in cells; `-1` where the point itself is too close to the edge
  */
-function roomAcross(fitting: Fitting, line: NameLine, margin: number, reach: number): Float32Array {
+export function roomAcross(
+  fitting: Fitting,
+  line: NameLine,
+  margin: number,
+  reach: number
+): Float32Array {
   const { points } = line
   const room = new Float32Array(points.length)
   for (let i = 0; i < points.length; i += 1) {
@@ -311,7 +308,7 @@ function roomAcross(fitting: Fitting, line: NameLine, margin: number, reach: num
  * @param margin - the room to keep, in cells
  * @returns whether it fits
  */
-function fits(
+export function fits(
   fitting: Fitting,
   line: NameLine,
   room: Float32Array,
@@ -350,75 +347,4 @@ export interface NameExtent {
   readonly length: number
   /** Its letters' height. */
   readonly height: number
-}
-
-/**
- * The largest size a name fits at along a line.
- *
- * Searched by halving between nothing and a size that cannot fit — longer than the line, or taller than the
- * crop — since a name that fits at a size fits at every smaller one.
- * @param fitting - the space and its distances
- * @param line - the line
- * @param extent - the name's length and height at a size of one
- * @param margin - the room to keep, in cells
- * @returns the size, `0` when nothing fits
- */
-export function largestSize(
-  fitting: Fitting,
-  line: NameLine,
-  extent: NameExtent,
-  margin: number
-): number {
-  const { width, height } = fitting.space
-  let high = Math.min(lineLength(line) / extent.length, Math.max(width, height) / extent.height)
-  const room = roomAcross(fitting, line, margin, (extent.height * high) / 2)
-  if (fits(fitting, line, room, extent, high, margin)) return high
-  let low = 0
-  for (let i = 0; i < SIZE_HALVINGS; i += 1) {
-    const middle = (low + high) / 2
-    if (fits(fitting, line, room, extent, middle, margin)) low = middle
-    else high = middle
-  }
-  return low
-}
-
-/** A line a name can be written along in a space, and the largest size it fits at there. */
-export interface LineFit {
-  /** The line. */
-  readonly line: NameLine
-  /** The size, in cells; `0` when nothing fits. */
-  readonly size: number
-}
-
-/**
- * A name written straight across its space, through the space's most inner cell.
- * @param fitting - the space and its distances
- * @param extent - the name's length and height at a size of one
- * @param margin - the room to keep, in cells
- * @returns the horizontal and the size the name fits at along it
- */
-export function horizontalFit(fitting: Fitting, extent: NameExtent, margin: number): LineFit {
-  const line = horizontalLine(fitting.space.mask, fitting.distances, fitting.space.width)
-  return { line, size: largestSize(fitting, line, extent, margin) }
-}
-
-/**
- * A name written along its space's shape: the ridge, walked at several thicknesses, the one that lets the name
- * be largest kept.
- * @param fitting - the space and its distances
- * @param extent - the name's length and height at a size of one
- * @param margin - the room to keep, in cells
- * @returns the ridge and the size the name fits at along it, or `null` when the space gives no ridge
- */
-export function ridgeFit(fitting: Fitting, extent: NameExtent, margin: number): LineFit | null {
-  const { space, distances } = fitting
-  const thickest = readAt(distances, innermostCell(distances))
-  let best: LineFit | null = null
-  for (const fraction of RIDGE_THRESHOLDS) {
-    const line = ridgeLine(distances, space.width, space.height, Math.max(1, thickest * fraction))
-    if (line === null) continue
-    const size = largestSize(fitting, line, extent, margin)
-    if (best === null || size > best.size) best = { line, size }
-  }
-  return best
 }

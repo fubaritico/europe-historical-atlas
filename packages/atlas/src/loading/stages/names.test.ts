@@ -1,12 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { NAME_GRID_WIDTH } from '@europe-historical-atlas/core/pipeline/yearNames'
 import { createLatestOnly } from '@europe-historical-atlas/core/utils/latestOnly'
 
 import { createMapSources } from '../../sources/mapSources'
 import { createDevState } from '../../tunables/devState'
+import { namePlacement } from '../../tunables/params'
 import { AUTHORED_YEAR, META, YEAR } from '../testing/yearFixtures'
 
-import { NAME_GRID_WIDTH, namePlacement, provisionalShortName, rebuildYearNames } from './names'
+import { rebuildYearNames } from './names'
 
 import type { MapLayers } from '../../scene/layers/mapLayers'
 import type { MapSources } from '../../sources/mapSources'
@@ -117,18 +119,28 @@ describe('rebuildYearNames', () => {
   })
 
   describe('variants', () => {
-    it('writes the short names in capitals, spaced as the panel says', async () => {
+    // The dev, 2026-10-29: « on affiche le titre tel que tu le reçois, avec des majuscules et des minuscules ».
+    it('writes the names as they are written by default, the short ones without their title', async () => {
       const { context, placeYearNames } = stage()
-      context.dev.names.tracking = 0.25
       await rebuildYearNames(context, AUTHORED_YEAR)
       const request = placeYearNames.mock.calls[0]?.[0] as Parameters<
         PipelineContext['box']['names']['placeYearNames']
       >[0]
       const written = Object.values(request.names)
-      expect(written.every((name) => name === name.toUpperCase())).toBe(true)
-      expect(written.some((name) => name.startsWith('KINGDOM OF'))).toBe(false)
-      // 64 pixels at the sheet's 128 an em, and a quarter em of spacing.
-      expect(Object.values(request.glyphs)[0]?.advance).toBe(0.5 + 0.25)
+      expect(written.some((name) => name !== name.toUpperCase())).toBe(true)
+      expect(written.some((name) => name.startsWith('Kingdom of'))).toBe(false)
+      // The letters as measured, unspaced: the spacing is the construction's (64 pixels at the sheet's 128 an em).
+      expect(Object.values(request.glyphs)[0]?.advance).toBe(0.5)
+    })
+
+    it('writes the names in capitals when the panel says so', async () => {
+      const { context, placeYearNames } = stage()
+      context.dev.names.capitals = true
+      await rebuildYearNames(context, AUTHORED_YEAR)
+      const request = placeYearNames.mock.calls[0]?.[0] as Parameters<
+        PipelineContext['box']['names']['placeYearNames']
+      >[0]
+      expect(Object.values(request.names).every((name) => name === name.toUpperCase())).toBe(true)
     })
 
     it('takes the last year’s names off at once, before the new ones are placed', async () => {
@@ -204,30 +216,5 @@ describe('rebuildYearNames', () => {
       await rebuildYearNames(context, AUTHORED_YEAR)
       expect(context.nameFace).toBe(face)
     })
-  })
-})
-
-describe('provisionalShortName', () => {
-  it.each([
-    ['Kingdom of France', 'K. of France'],
-    ['Principality of Rostov-Suzdal', 'P. of Rostov-Suzdal'],
-    ['Kingdom of the Almoravids', 'K. of the Almoravids'],
-    ['Grand Duchy of Lithuania', 'G. D. of Lithuania'],
-    ['Zirid Emirate of Ifriqiya', 'Zirid E. of Ifriqiya'],
-    ['Banu Jami Lordship of Gabès', 'Banu Jami L. of Gabès'],
-    ['Palatine County of Chester', 'P. C. of Chester'],
-    ['Imamate of Oman', 'I. of Oman'],
-    ['State of the Church', 'State of the Church'],
-    ['Khazar Lordship in Decay', 'Khazar Lordship in Decay'],
-    ['Seljuk Empire', 'Seljuk Empire'],
-    ['Roman Empire', 'Roman Empire'],
-    ['Cumans', 'Cumans'],
-  ])('writes %s as %s', (formal, short) => {
-    expect(provisionalShortName(formal)).toBe(short)
-  })
-
-  // 1100 has « county of Anjou », in lower case: a title is read with its capital only.
-  it('leaves a title written without its capital whole', () => {
-    expect(provisionalShortName('county of Anjou')).toBe('county of Anjou')
   })
 })

@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 
-import { DEFAULT_NAME_WEIGHTS } from './nameChoice'
 import { placeYearNames, tableMeasure } from './yearNames'
 
 import type { GlyphMetric, YearNamesRequest } from './yearNames'
@@ -55,13 +54,16 @@ const REQUEST: YearNamesRequest = {
   gridWidth: 80,
   gridHeight: 20,
   options: {
-    margin: 1,
-    overflow: 0,
+    heightShare: 0.6,
+    cover: 0.75,
+    trackingMost: 0.6,
     neighbourBite: 0,
     minSize: 0.5,
     longMinSize: 0.5,
     maxSize: 1000,
-    weights: DEFAULT_NAME_WEIGHTS,
+    strait: 4,
+    farShare: 0.2,
+    farCells: 1e9,
   },
 }
 

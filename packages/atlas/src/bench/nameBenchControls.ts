@@ -9,14 +9,10 @@ export interface Settings {
   face: number
   /** The display level: 0 shows the sovereigns only. */
   level: number
-  /** The room between a letter and a border, in cells. */
-  margin: number
   /** The smallest size written, in cells. */
   minSize: number
   /** Whether the names are set in capitals. */
   capitals: boolean
-  /** Extra room after each letter, in ems. */
-  spacing: number
   /** The ink's colour. */
   ink: string
   /** The ink's opacity, `0..1`. */
@@ -29,10 +25,8 @@ export interface Settings {
 export const START_SETTINGS: Readonly<Settings> = {
   face: 5, // Fondamento, the dev's pick of 28/10, as the settings below
   level: 0,
-  margin: 2,
   minSize: 4,
   capitals: false,
-  spacing: 0,
   ink: '#3b2614',
   opacity: 0.5,
   blend: 'multiply',
@@ -148,14 +142,8 @@ export function controls(
     slider('Niveau', settings.level, [0, deepest, 1], (s, v) => {
       s.level = v
     }),
-    slider('Marge', settings.margin, [0, 6, 0.5], (s, v) => {
-      s.margin = v
-    }),
     slider('Taille min.', settings.minSize, [1, 12, 0.5], (s, v) => {
       s.minSize = v
-    }),
-    slider('Espacement', settings.spacing, [0, 0.5, 0.02], (s, v) => {
-      s.spacing = v
     }),
     field('Capitales', 'checkbox', settings.capitals, (s, input) => {
       s.capitals = input.checked

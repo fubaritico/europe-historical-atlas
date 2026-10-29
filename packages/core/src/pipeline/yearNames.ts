@@ -1,8 +1,8 @@
 /**
  * A year's country names, placed at every display level at once (ATLAS-301, step 3 of
  * `files/plans/atlas/country-names.md`): what the atlas asks its compute for once per year, never on a zoom —
- * a level takes about two seconds on 1100 (measured 2026-10-28), so the zoom only fades between levels
- * already placed.
+ * 1100's three levels take about 2.5 s under Node (measured 2026-10-29, `files/spikes/name-fixture/year.ts`), so the
+ * zoom only fades between levels already placed.
  *
  * **One name a piece, the full one where it fits** (the dev, 2026-10-29: *« Kingdom of France → France, et ça pour
  * tout »*): each piece is given the polity's full name where it reaches the long name's smallest size, its short one
@@ -27,6 +27,12 @@ import type {
   PlacedGlyph,
 } from './namePlacement'
 import type { Region } from '../data/regionSource'
+
+/**
+ * The names' grid, in cells across — about 6 km a cell over the map's width. Every length of the placement's settings
+ * is in its cells (the strait, the ring, the far realm's floor, the bite), and the names' fixture is cut from it.
+ */
+export const NAME_GRID_WIDTH = 1200
 
 /** One character measured at a font size of one. */
 export interface GlyphMetric {
@@ -60,7 +66,7 @@ export interface YearNamesRequest {
   readonly gridWidth: number
   /** The names' grid, in cells down. */
   readonly gridHeight: number
-  /** The margin, the smallest size and the two gains. */
+  /** How a name is set (its height, cover and spacing, its sizes), how far it bites into a neighbour, and the realms. */
   readonly options: NamePlacementOptions
 }
 

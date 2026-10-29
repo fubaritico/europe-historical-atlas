@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import { fittingOf, horizontalFit, lineLength, pointAlong, ridgeFit } from './nameFit'
-import { COVERED } from './nameOccupancy'
-import { ownerPieces } from './nameSpace'
+import { fits, fittingOf, lineLength, pointAlong, roomAcross } from './nameFit'
+import { sampled } from './nameLine'
+import { COVERED } from './nameSpace'
+import { piecesOf } from './testing/pieces'
 
 import type { Fitting } from './nameFit'
 import type { NameLine } from './nameLine'
@@ -26,7 +27,7 @@ const STRAIGHT: NameLine = {
  * @returns the band's fitting
  */
 function band(width: number, height: number, ring = 1): Fitting {
-  const space = ownerPieces(new Int32Array(width * height), width, height, ring).get(0)?.[0]
+  const space = piecesOf(new Int32Array(width * height), width, height, ring).get(0)?.[0]
   if (space === undefined) throw new Error('no band')
   return fittingOf(space)
 }
@@ -51,7 +52,7 @@ function shape(
   for (let y = 0; y < height; y += 1)
     for (let x = 0; x < width; x += 1)
       owners[y * width + x] = inside(x, y) ? 0 : neighbour(x, y) ? 1 : -1
-  const space = ownerPieces(owners, width, height, ring).get(0)?.[0]
+  const space = piecesOf(owners, width, height, ring).get(0)?.[0]
   if (space === undefined) throw new Error('no shape')
   return fittingOf(space)
 }
@@ -132,7 +133,7 @@ describe('fittingOf', () => {
   })
 
   // L2: N/A — one way to read a space.
-  // L3, L4: N/A — a mask from `ownerPieces`, which checks its grid.
+  // L3, L4: N/A — a mask from `piecesOf`, which checks its grid.
 
   describe('edge cases', () => {
     it('keeps the inside distances the lines are drawn from beside the signed ones', () => {
@@ -178,7 +179,56 @@ describe('pointAlong', () => {
   })
 })
 
-describe('horizontalFit', () => {
+/**
+ * The horizontal through a space's centre of mass, across the run of its row there: the line the fit is tried along.
+ * The construction writes along an arc since 29/10; a straight one is what these tests reason about.
+ * @param fitting - the space
+ * @returns the line, west to east
+ */
+function horizontalOf(fitting: Fitting): NameLine {
+  const { mask, width } = fitting.space
+  let [sx, sy, cells] = [0, 0, 0]
+  mask.forEach((inside, at) => {
+    if (inside === 0) return
+    sx += at % width
+    sy += Math.floor(at / width)
+    cells += 1
+  })
+  const [x, y] = [Math.round(sx / cells), Math.round(sy / cells)]
+  let [west, east] = [x, x]
+  while (mask[y * width + west - 1] === 1) west -= 1
+  while (mask[y * width + east + 1] === 1) east += 1
+  return sampled((s) => [s, y], west - 0.5, east + 0.5)
+}
+
+/**
+ * A name written straight across a space, at the largest size `fits` accepts — found by halving, as the construction's
+ * own shrinking never needs to: a test's oracle for what the fit lets through.
+ * @param fitting - the space and its distances
+ * @param extent - the name's length and height at a size of one
+ * @param margin - the room to keep, in cells; below zero, how far over the edge it may spill
+ * @returns the horizontal and the largest size it fits at, `0` when none
+ */
+function horizontalFit(
+  fitting: Fitting,
+  extent: { length: number; height: number },
+  margin: number
+): { line: NameLine; size: number } {
+  const line = horizontalOf(fitting)
+  const { width, height } = fitting.space
+  let high = Math.min(lineLength(line) / extent.length, Math.max(width, height) / extent.height)
+  const room = roomAcross(fitting, line, margin, (extent.height * high) / 2)
+  if (fits(fitting, line, room, extent, high, margin)) return { line, size: high }
+  let low = 0
+  for (let i = 0; i < 16; i += 1) {
+    const middle = (low + high) / 2
+    if (fits(fitting, line, room, extent, middle, margin)) low = middle
+    else high = middle
+  }
+  return { line, size: low }
+}
+
+describe('fits, along the horizontal', () => {
   describe('happy path', () => {
     it('lays a short name straight across a band, its size bounded by the band’s height', () => {
       const { line, size } = horizontalFit(band(60, 12), { length: 6, height: 1 }, 1)
@@ -292,42 +342,4 @@ describe('horizontalFit', () => {
       expect(size).toBeLessThan(1)
     })
   })
-})
-
-describe('ridgeFit', () => {
-  describe('happy path', () => {
-    it('writes a long name along a standing band, reading upward, larger than straight across', () => {
-      const column = band(12, 80)
-      const extent = { length: 12, height: 1 }
-      const along = ridgeFit(column, extent, 1)
-      if (along === null) throw new Error('no ridge')
-      const first = along.line.points[0]
-      const last = along.line.points[along.line.points.length - 1]
-      expect(first?.[1] ?? Number.NaN).toBeGreaterThan(last?.[1] ?? Number.NaN)
-      expect(along.size).toBeGreaterThan(horizontalFit(column, extent, 1).size * 3)
-    })
-  })
-
-  describe('variants', () => {
-    it('keeps every point of the letters the margin from the edge, along a slanted band pinched at its middle', () => {
-      const extent = { length: 8, height: 1 }
-      const along = ridgeFit(SLANTED_PINCH, extent, 3)
-      if (along === null) throw new Error('no ridge')
-      expect(along.size).toBeGreaterThan(0)
-      expect(leastSlack(SLANTED_PINCH, along.line, extent, along.size, 3)).toBeGreaterThanOrEqual(
-        -CELL_READING
-      )
-    })
-  })
-
-  // L2: the thicknesses tried are `nameLine`'s, asserted there.
-
-  describe('managed errors', () => {
-    it('gives no ridge in a space of one cell, which gives no direction', () => {
-      expect(ridgeFit(band(1, 1), { length: 1, height: 1 }, 0)).toBeNull()
-    })
-  })
-
-  // L4: N/A — `namePlacement` checks the measure before asking.
-  // L5: a ridge with no room for the margin is `horizontalFit`'s case, sized `0` by the same search.
 })

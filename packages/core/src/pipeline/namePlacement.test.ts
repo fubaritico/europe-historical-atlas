@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { DEFAULT_NAME_WEIGHTS } from './nameChoice'
-import { createOccupancy, occupy, pieceTag } from './nameOccupancy'
+import { createOccupancy, pieceTag } from './nameOccupancy'
 import { placeNames } from './namePlacement'
 
 import type { MeasureName, NamePlacementOptions, PlacedName } from './namePlacement'
@@ -14,17 +13,20 @@ const monospace: MeasureName = (text) => ({
 })
 
 /**
- * A margin of one cell, no overflow, any size worth writing, and the default weights — but a border touched and two lines made
- * too costly to be chosen, unless a test says otherwise.
+ * The construction as the atlas starts from it, any size worth writing, no bite into a neighbour, straits of four cells,
+ * and no far realm named by its size alone — unless a test says otherwise.
  */
 const OPTIONS: NamePlacementOptions = {
-  margin: 1,
-  overflow: 0,
-  neighbourBite: 0,
+  heightShare: 0.6,
+  cover: 0.75,
+  trackingMost: 0.6,
   minSize: 0.5,
-  longMinSize: 0.5,
   maxSize: 1000,
-  weights: { ...DEFAULT_NAME_WEIGHTS, border: 10, twoLines: 10 },
+  longMinSize: 0.5,
+  neighbourBite: 0,
+  strait: 4,
+  farShare: 0.2,
+  farCells: 1e9,
 }
 
 /** A grid of owners, with its size. */
@@ -49,607 +51,352 @@ function gridOf(width: number, height: number, ownerAt: (x: number, y: number) =
 }
 
 /**
- * How far a point lies from the edge of its owner's cells, by brute force: the nearest centre of a cell
- * that is not the owner's — the grid's frame counted as such — less half a cell.
+ * Place one name, or several, on a grid.
  * @param grid - the grid
- * @param owner - the owner
- * @param x - the point's column
- * @param y - its row
- * @returns the distance to the edge, in cells
+ * @param names - the names, by owner
+ * @param options - the options, the tests' own unless given
+ * @returns the placement
  */
-function clearance(grid: Grid, owner: number, x: number, y: number): number {
-  let nearest = Infinity
-  for (let row = -1; row <= grid.height; row += 1)
-    for (let col = -1; col <= grid.width; col += 1) {
-      const inGrid = row >= 0 && col >= 0 && row < grid.height && col < grid.width
-      if (inGrid && grid.owners[row * grid.width + col] === owner) continue
-      nearest = Math.min(nearest, Math.hypot(x - col, y - row))
-    }
-  return nearest - 0.5
+function place(
+  grid: Grid,
+  names: readonly { owner: number; text: string; shorter?: string }[],
+  options: NamePlacementOptions = OPTIONS
+): ReturnType<typeof placeNames> {
+  return placeNames(grid.owners, grid.width, grid.height, names, monospace, options)
 }
 
 /**
- * Whether every letter of a name keeps the margin plus half its height from its space's edge — what the
- * placement promises, checked without any of its own arithmetic. The letters are {@link monospace}'s, all
- * above their baseline, so a letter's middle is half its size above its place. It may sit between the samples
- * the placement read, so a quarter of a cell is allowed.
- * @param grid - the grid
- * @param name - the name placed
- * @param margin - the margin promised
- * @returns whether every letter keeps it
+ * How far a run of points slants from the horizontal, from its first to its last, in radians.
+ * @param points - the points, in order
+ * @returns the slant, from nought to a right angle; `NaN` for fewer than two points
  */
-function keepsClear(grid: Grid, name: PlacedName, margin: number): boolean {
-  const letters = Array.from(name.text)
-  // A space draws nothing — the one broken at sits past the end of the first line.
-  const half = name.size / 2
-  return name.glyphs.every(
-    ({ x, y, angle }, at) =>
-      letters[at] === ' ' ||
-      clearance(grid, name.owner, x + half * Math.sin(angle), y - half * Math.cos(angle)) >=
-        margin + half - 0.25
-  )
+function slantOf(points: readonly { readonly x: number; readonly y: number }[]): number {
+  const [first, last] = [points[0], points.at(-1)]
+  if (first === undefined || last === undefined || points.length < 2) return Number.NaN
+  return Math.abs(Math.atan2(last.y - first.y, last.x - first.x))
 }
 
-/** A band 60 cells long and 12 high, all of owner 0. */
-const BAND = gridOf(60, 12, () => 0)
+/**
+ * The one name placed for an owner.
+ * @param grid - the grid
+ * @param text - the name
+ * @param options - the options
+ * @returns it
+ */
+function only(grid: Grid, text: string, options: NamePlacementOptions = OPTIONS): PlacedName {
+  const placed = place(grid, [{ owner: 0, text }], options).placed[0]
+  if (placed === undefined) throw new Error(`"${text}" was not placed`)
+  return placed
+}
 
-const short: MeasureName = () => ({ advances: [1, 1], ascent: 1, descent: 0 })
+/**
+ * How far a name turns from its first letter to its last, in degrees.
+ * @param name - the name
+ * @returns the turn
+ */
+function turnOf(name: PlacedName): number {
+  const first = name.glyphs[0]?.angle ?? 0
+  const last = name.glyphs.at(-1)?.angle ?? 0
+  return (Math.abs(Math.atan2(Math.sin(last - first), Math.cos(last - first))) * 180) / Math.PI
+}
 
-const flat: MeasureName = (text) => ({
-  advances: Array.from(text, () => 1),
-  ascent: 0,
-  descent: 0,
-})
+/**
+ * The distance between two neighbouring letters' places.
+ * @param name - the name
+ * @returns it, from the first letter to the second
+ */
+function step(name: PlacedName): number {
+  const [a, b] = name.glyphs
+  return a === undefined || b === undefined ? Number.NaN : Math.hypot(b.x - a.x, b.y - a.y)
+}
 
+/** A measure one advance short of its text. */
+const tooFew: MeasureName = () => ({ advances: [1], ascent: 1, descent: 0 })
+
+/** A measure with no height. */
+const flat: MeasureName = (text) => ({ advances: Array.from(text, () => 1), ascent: 0, descent: 0 })
+
+/** A measure whose advances are not numbers. */
 const broken: MeasureName = (text) => ({
   advances: Array.from(text, () => Number.NaN),
   ascent: 1,
   descent: 0,
 })
 
-/**
- * How far a name's letters stray from the line through its first and last letter — near zero on one
- * line, about the gap between the lines on two. Spaces draw nothing and are left out.
- * @param name - the name placed
- * @returns the largest distance, in cells
- */
-const spread = (name: PlacedName | undefined): number => {
-  const letters = Array.from(name?.text ?? '')
-  const glyphs = (name?.glyphs ?? []).filter((_, at) => letters[at] !== ' ')
-  const first = glyphs[0]
-  const last = glyphs[glyphs.length - 1]
-  if (first === undefined || last === undefined) return Number.NaN
-  const length = Math.hypot(last.x - first.x, last.y - first.y)
-  return Math.max(
-    ...glyphs.map(
-      ({ x, y }) =>
-        Math.abs((last.x - first.x) * (first.y - y) - (first.x - x) * (last.y - first.y)) / length
-    )
-  )
-}
+/** A band 60 cells long and 12 high, all of owner 0. */
+const BAND = gridOf(60, 12, () => 0)
 
-// "p" reaches 0.3 below its baseline; the first line has none, so nothing of it sits under "AAAA".
-const descending: MeasureName = (text) => ({
-  advances: Array.from(text, () => 1),
-  ascent: 1,
-  descent: text.includes('p') ? 0.3 : 0,
-})
-
-/**
- * Weights from the tests' own, a few changed.
- * @param changed - the weights changed
- * @returns the options
- */
-const weighing = (changed: Partial<NamePlacementOptions['weights']>): NamePlacementOptions => ({
-  ...OPTIONS,
-  weights: { ...OPTIONS.weights, ...changed },
-})
-
-/**
- * How many points of the later of two names' letters fall in the cells the first one marks — its letters and their
- * edge. The letters are {@link monospace}'s, all above their baseline, read half a cell in from their box's sides.
- * @param placed - the two names, on a grid 44 cells across
- * @returns the points inside
- */
-const overlaps = (placed: readonly PlacedName[]): number => {
-  const [first, later] = [...placed].sort((p, q) => q.size - p.size)
-  if (first === undefined || later === undefined) return Number.NaN
-  const occupancy = createOccupancy(44, 12)
-  occupy(occupancy, 1, {
-    ...monospace(first.text),
-    text: first.text,
-    size: first.size,
-    glyphs: first.glyphs,
-  })
-  let inside = 0
-  const half = later.size / 2 - 0.5
-  for (const { x, y } of later.glyphs)
-    for (let along = -half; along <= half; along += 0.25)
-      for (let up = 0.5; up <= later.size - 0.5; up += 0.25)
-        if (occupancy.cells[Math.round(y - up) * 44 + Math.round(x + along)] === 1) inside += 1
-  return inside
-}
-
+// Rebuilt on 2026-10-29 from « The gap to the reference » (`files/plans/atlas/country-names.md`): one line, its height
+// from the country's thickness, its length from the spacing of its letters.
 describe('placeNames', () => {
   describe('happy path', () => {
-    it('writes a short name straight across a band, as tall as the band allows with its margin', () => {
-      const { placed } = placeNames(
-        BAND.owners,
-        60,
-        12,
-        [{ owner: 0, text: 'ABCDEF' }],
-        monospace,
-        OPTIONS
-      )
-      const [name] = placed
-      if (name === undefined) throw new Error('not placed')
-      // The band is 12 high: 12 = 2 × margin + size, less what the frame's ring costs at the cells' centres.
-      expect(name.size).toBeGreaterThan(8.5)
-      expect(name.size).toBeLessThanOrEqual(10)
-      expect(name.glyphs.every(({ angle }) => angle === 0)).toBe(true)
-      expect(keepsClear(BAND, name, OPTIONS.margin)).toBe(true)
+    it('writes a name along a band, its letters as tall as a share of the band’s thickness', () => {
+      const name = only(BAND, 'AB')
+      expect(name.size).toBeGreaterThan(0.6 * 12 - 1)
+      expect(name.size).toBeLessThanOrEqual(0.6 * 12)
+      expect(name.glyphs.every(({ y }) => Math.abs(y - (name.glyphs[0]?.y ?? 0)) < 1e-6)).toBe(true)
     })
 
     it('places one letter per code point, in reading order', () => {
-      const { placed } = placeNames(
-        BAND.owners,
-        60,
-        12,
-        [{ owner: 0, text: 'Œsel' }],
-        monospace,
-        OPTIONS
-      )
-      const glyphs = placed[0]?.glyphs ?? []
-      expect(glyphs).toHaveLength(4)
-      expect(glyphs.map(({ x }) => x)).toEqual([...glyphs.map(({ x }) => x)].sort((a, b) => a - b))
+      const name = only(BAND, 'ABCD')
+      const columns = name.glyphs.map(({ x }) => x)
+      expect(columns).toHaveLength(4)
+      expect([...columns].sort((a, b) => a - b)).toEqual(columns)
     })
 
     it('centres the name in its space', () => {
-      const { placed } = placeNames(
-        BAND.owners,
-        60,
-        12,
-        [{ owner: 0, text: 'ABCD' }],
-        monospace,
-        OPTIONS
-      )
-      const xs = (placed[0]?.glyphs ?? []).map(({ x }) => x)
-      expect((Math.min(...xs) + Math.max(...xs)) / 2).toBeCloseTo(29.5, 1)
+      const name = only(BAND, 'ABCD')
+      const middle = name.glyphs.reduce((sum, { x }) => sum + x, 0) / name.glyphs.length
+      expect(middle).toBeCloseTo(29.5, 0)
     })
   })
 
   describe('variants', () => {
-    it('numbers each piece a name is written in, the largest first', () => {
-      // An island of 8 columns, then a mainland of 24, both owner 0.
-      const islands = gridOf(40, 12, (x) => (x < 8 || x >= 16 ? 0 : -1))
-      const { placed } = placeNames(
-        islands.owners,
-        40,
-        12,
-        [{ owner: 0, text: 'AB' }],
-        monospace,
-        OPTIONS
+    it('spaces a name’s letters so it covers its share of the line', () => {
+      const name = only(BAND, 'ABCDEF')
+      const first = name.glyphs[0]?.x ?? 0
+      const last = name.glyphs.at(-1)?.x ?? 0
+      // From the first letter's left side to the last's right side: three quarters of the band's 60 cells.
+      expect(last - first + name.size).toBeCloseTo(0.75 * 60, 0)
+    })
+
+    it('spaces a short name in a long country no more than the most spacing allowed', () => {
+      const name = only(
+        gridOf(200, 12, () => 0),
+        'ABCD'
       )
-      const xs = (piece: number): number[] =>
-        (placed.find((name) => name.piece === piece)?.glyphs ?? []).map(({ x }) => x)
-      expect(placed.map(({ piece }) => piece).sort()).toEqual([0, 1])
-      expect(Math.min(...xs(0))).toBeGreaterThanOrEqual(16)
-      expect(Math.max(...xs(1))).toBeLessThan(8)
+      expect(step(name)).toBeCloseTo((1 + OPTIONS.trackingMost) * name.size, 3)
     })
 
-    it('spills a name over its border by the overflow, larger, when its border weight lets it', () => {
-      // A band 8 rows high in a sea: the name is held by the band's height.
-      const island = gridOf(80, 30, (_, y) => (y >= 11 && y < 19 ? 0 : -1))
-      const free = { ...OPTIONS, weights: { ...OPTIONS.weights, border: 0 } }
-      const size = (overflow: number): number =>
-        placeNames(island.owners, 80, 30, [{ owner: 0, text: 'ABCDEF' }], monospace, {
-          ...free,
-          overflow,
-        }).placed[0]?.size ?? Number.NaN
-      expect(size(3)).toBeGreaterThan(size(0) + 4)
-      // No taller than the band and the overflow either side.
-      expect(size(3)).toBeLessThanOrEqual(8 + 2 * 3)
+    it('sets a long name smaller so it covers nine tenths of its line at most, unspaced', () => {
+      const name = only(BAND, 'ABCDEFGHIJ')
+      expect(name.size).toBeCloseTo((0.9 * 60) / 10, 1)
+      expect(step(name)).toBeCloseTo(name.size, 3)
     })
 
-    // The dev, 2026-10-29: « il faudrait que ça ne se chevauche pas ».
-    it('keeps a name off the cells another piece’s name covers, when the level shares its cells', () => {
-      // Two islands a sea of three cells apart, each name spilling toward the other.
-      const islands = gridOf(44, 12, (x, y) =>
-        y >= 4 && y < 8 ? (x >= 2 && x < 20 ? 0 : x >= 23 && x < 41 ? 1 : -1) : -1
-      )
-      const free = { ...OPTIONS, overflow: 3, weights: { ...OPTIONS.weights, border: 0 } }
-      const asked = [
-        { owner: 0, text: 'ABCDEF' },
-        { owner: 1, text: 'ABCDEF' },
-      ]
-      const alone = placeNames(islands.owners, 44, 12, asked, monospace, free).placed
-      const shared = placeNames(
-        islands.owners,
-        44,
-        12,
-        asked,
-        monospace,
-        free,
-        createOccupancy(44, 12)
-      ).placed
-      expect(overlaps(alone)).toBeGreaterThan(0)
-      expect(shared).toHaveLength(2)
-      expect(overlaps(shared)).toBe(0)
-    })
-
-    it('marks the names it places in the shared cells, each with its piece’s tag', () => {
-      const occupancy = createOccupancy(60, 12)
-      placeNames(BAND.owners, 60, 12, [{ owner: 0, text: 'AB' }], monospace, OPTIONS, occupancy)
-      expect(occupancy.cells.some((cell) => cell === pieceTag(0, 0))).toBe(true)
-    })
-
-    it('sizes a long name by the band’s length rather than its height', () => {
-      const text = 'A'.repeat(30)
-      const { placed } = placeNames(BAND.owners, 60, 12, [{ owner: 0, text }], monospace, OPTIONS)
-      const size = placed[0]?.size ?? Number.NaN
-      expect(size * 30).toBeLessThanOrEqual(60)
-      expect(size).toBeLessThan(2)
+    it('writes a thicker country’s name taller', () => {
+      const thin = only(
+        gridOf(80, 12, () => 0),
+        'AB'
+      ).size
+      const thick = only(
+        gridOf(80, 20, () => 0),
+        'AB'
+      ).size
+      expect(thick / thin).toBeCloseTo(20 / 12, 0)
     })
 
     it('reads a name up a standing band, from the bottom', () => {
-      const column = gridOf(12, 80, () => 0)
-      const { placed } = placeNames(
-        column.owners,
-        12,
-        80,
-        [{ owner: 0, text: 'ABCDEFGHIJKL' }],
-        monospace,
-        OPTIONS
+      const name = only(
+        gridOf(12, 60, () => 0),
+        'ABCD'
       )
-      const name = placed[0]
-      if (name === undefined) throw new Error('not placed')
-      expect(name.glyphs.every(({ angle }) => Math.abs(angle + Math.PI / 2) < 0.1)).toBe(true)
-      expect(keepsClear(column, name, OPTIONS.margin)).toBe(true)
+      expect(name.glyphs[0]?.y ?? 0).toBeGreaterThan(name.glyphs.at(-1)?.y ?? 0)
     })
 
-    it('bends a name along a gentle arc, where a straight line would be shorter, inside it', () => {
-      // A slice of a ring 10 cells thick and 75 in radius, about 70° of it across the grid.
-      const arch = gridOf(90, 48, (x, y) => {
-        const r = Math.hypot(x - 45, y - 100)
-        return r >= 70 && r <= 80 ? 0 : -1
+    it('bends a name along an arch', () => {
+      const arch = gridOf(80, 44, (x, y) => {
+        const r = Math.hypot(x - 40, y - 42)
+        return r >= 22 && r <= 34 && y <= 42 ? 0 : -1
       })
-      const { placed } = placeNames(
-        arch.owners,
-        90,
-        48,
-        [{ owner: 0, text: 'ABCDEFGHIJ' }],
-        monospace,
-        OPTIONS
+      expect(turnOf(only(arch, 'ABCDEF'))).toBeGreaterThan(20)
+    })
+
+    // The dev, 29/10: the Holy Roman Empire, England and Novgorod were written straight across, small — « au moins sur
+    // un arc […] ou sur un arc mais en diagonale ».
+    it('writes a compact country standing upright on a diagonal, never straight across nor standing', () => {
+      const upright = gridOf(40, 50, (x, y) =>
+        ((x - 20) / 11) ** 2 + ((y - 25) / 13) ** 2 <= 1 ? 0 : -1
       )
-      const name = placed[0]
-      if (name === undefined) throw new Error('not placed')
-      const angles = name.glyphs.map(({ angle }) => angle)
-      expect(Math.max(...angles) - Math.min(...angles)).toBeGreaterThan(0.3)
-      expect(keepsClear(arch, name, OPTIONS.margin)).toBe(true)
+      const slant = slantOf(only(upright, 'ABCDEF').glyphs)
+      expect([slant > Math.PI / 8, slant <= Math.PI / 4 + 1e-6]).toEqual([true, true])
     })
 
-    it('keeps a name inside an L, clear of its inner corner', () => {
-      const ell = gridOf(50, 50, (x, y) => (x < 14 || y >= 36 ? 0 : -1))
-      const { placed } = placeNames(
-        ell.owners,
-        50,
-        50,
-        [{ owner: 0, text: 'ABCDEFGH' }],
-        monospace,
-        OPTIONS
-      )
-      const name = placed[0]
-      if (name === undefined) throw new Error('not placed')
-      expect(keepsClear(ell, name, OPTIONS.margin)).toBe(true)
+    it('names two neighbours each in its own country, every letter on its own side', () => {
+      const pair = gridOf(80, 12, (x) => (x < 40 ? 0 : 1))
+      const { placed } = place(pair, [
+        { owner: 0, text: 'AB' },
+        { owner: 1, text: 'CD' },
+      ])
+      const west = placed.find(({ owner }) => owner === 0)
+      const east = placed.find(({ owner }) => owner === 1)
+      const half = (west?.size ?? 0) / 2
+      expect(west?.glyphs.every(({ x }) => x + half <= 39.5 + 0.25)).toBe(true)
+      expect(east?.glyphs.every(({ x }) => x - half >= 39.5 - 0.25)).toBe(true)
     })
 
-    it('writes a name straight across a round space', () => {
-      const disc = gridOf(41, 41, (x, y) => (Math.hypot(x - 20, y - 20) <= 19 ? 0 : -1))
-      const { placed } = placeNames(
-        disc.owners,
-        41,
-        41,
-        [{ owner: 0, text: 'ABCDE' }],
-        monospace,
-        OPTIONS
-      )
-      expect(placed[0]?.glyphs.every(({ angle }) => angle === 0)).toBe(true)
+    it('moves a suzerain’s name into what its shown vassal leaves it', () => {
+      const shown = gridOf(60, 12, (x) => (x >= 40 ? 1 : 0))
+      const name = only(shown, 'ABCD')
+      const middle = name.glyphs.reduce((sum, { x }) => sum + x, 0) / name.glyphs.length
+      expect(middle).toBeCloseTo(19.5, 0)
     })
 
-    it('names two neighbours each in its own space', () => {
-      const pair = gridOf(80, 20, (x) => (x < 40 ? 0 : 1))
-      const { placed } = placeNames(
-        pair.owners,
-        80,
-        20,
-        [
-          { owner: 0, text: 'WEST' },
-          { owner: 1, text: 'EAST' },
-        ],
-        monospace,
-        OPTIONS
-      )
-      expect(placed).toHaveLength(2)
-      for (const name of placed) expect(keepsClear(pair, name, OPTIONS.margin)).toBe(true)
-    })
-
-    it('moves a suzerain’s name into what its shown vassal leaves it, smaller', () => {
-      // From afar the vassal wears its suzerain's colour: one owner. Closer, it is its own.
-      const afar = gridOf(80, 20, () => 0)
-      const closer = gridOf(80, 20, (x) => (x < 40 ? 0 : 1))
-      const names = [
-        { owner: 0, text: 'SUZERAIN' },
-        { owner: 1, text: 'VASSAL' },
-      ]
-      const before = placeNames(afar.owners, 80, 20, names, monospace, OPTIONS).placed
-      const after = placeNames(closer.owners, 80, 20, names, monospace, OPTIONS).placed
-      const suzerain = after.find(({ owner }) => owner === 0)
-      if (suzerain === undefined) throw new Error('not placed')
-      expect(before.map(({ owner }) => owner)).toEqual([0])
-      expect(suzerain.glyphs.every(({ x }) => x < 40)).toBe(true)
-      expect(suzerain.size).toBeLessThan(before[0]?.size ?? Number.NaN)
-      expect(after.some(({ owner }) => owner === 1)).toBe(true)
-    })
-
-    it('writes a name no larger than the largest size, however vast its space', () => {
-      const vast = gridOf(200, 200, () => 0)
-      const { placed } = placeNames(vast.owners, 200, 200, [{ owner: 0, text: 'AB' }], monospace, {
-        ...OPTIONS,
-        maxSize: 12,
-      })
-      expect(placed[0]?.size).toBe(12)
+    it('writes a name no larger than the largest size, however thick its country', () => {
+      expect(
+        only(
+          gridOf(200, 120, () => 0),
+          'AB',
+          { ...OPTIONS, maxSize: 7 }
+        ).size
+      ).toBe(7)
     })
 
     it('lists the names largest first', () => {
-      const unequal = gridOf(90, 30, (x, y) => (x < 60 ? 0 : y < 10 ? 1 : -1))
-      const { placed } = placeNames(
-        unequal.owners,
-        90,
-        30,
-        [
-          { owner: 1, text: 'SMALL' },
-          { owner: 0, text: 'LARGE' },
-        ],
-        monospace,
-        OPTIONS
-      )
+      const two = gridOf(120, 30, (x, y) => (x < 60 ? 0 : y < 10 ? 1 : -1))
+      const { placed } = place(two, [
+        { owner: 1, text: 'AB' },
+        { owner: 0, text: 'AB' },
+      ])
       expect(placed.map(({ owner }) => owner)).toEqual([0, 1])
     })
+  })
 
-    it('names an owner in every piece its name fits in, the largest first', () => {
-      const islands = gridOf(70, 20, (x) => (x < 10 ? 0 : x >= 20 ? 0 : -1))
-      const { placed } = placeNames(
-        islands.owners,
-        70,
-        20,
-        [{ owner: 0, text: 'ISLES' }],
-        monospace,
-        OPTIONS
-      )
-      expect(placed).toHaveLength(2)
-      expect(placed[0]?.glyphs.every(({ x }) => x >= 20)).toBe(true)
-      expect(placed[1]?.glyphs.every(({ x }) => x < 10)).toBe(true)
-      for (const name of placed) expect(keepsClear(islands, name, OPTIONS.margin)).toBe(true)
+  // Axis C: a country's land with the narrow seas inside it is one place to name.
+  describe('realms', () => {
+    /** Two blocks of one country parted by a sea two cells wide. */
+    const PARTED = gridOf(62, 12, (x) => (x === 30 || x === 31 ? -1 : 0))
+
+    it('names a country once across a strait narrower than the widest spanned', () => {
+      expect(place(PARTED, [{ owner: 0, text: 'ABCD' }]).placed).toHaveLength(1)
     })
 
-    it('leaves out a piece too small for the name, and names the others', () => {
-      // A piece one cell wide, where no letter of size 2 stands, beside a large one.
-      const islands = gridOf(70, 20, (x) => (x < 1 ? 0 : x >= 20 ? 0 : -1))
-      const { placed, tooSmall } = placeNames(
-        islands.owners,
-        70,
-        20,
-        [{ owner: 0, text: 'ISLES' }],
-        monospace,
-        { ...OPTIONS, minSize: 2 }
-      )
-      expect(placed).toHaveLength(1)
-      expect(tooSmall).toEqual([])
+    it('writes the name across the strait, its letters on both shores', () => {
+      const name = only(PARTED, 'ABCDEF')
+      expect(name.glyphs.some(({ x }) => x < 30)).toBe(true)
+      expect(name.glyphs.some(({ x }) => x > 31)).toBe(true)
+    })
+
+    it('names each shore apart when the strait is wider than the widest spanned', () => {
+      expect(
+        place(PARTED, [{ owner: 0, text: 'AB' }], { ...OPTIONS, strait: 1 }).placed
+      ).toHaveLength(2)
+    })
+
+    it('leaves a far islet unnamed, under its share of the country’s largest', () => {
+      const islet = gridOf(100, 30, (x, y) => (x < 60 || (x >= 90 && y < 4 && x < 94) ? 0 : -1))
+      expect(place(islet, [{ owner: 0, text: 'AB' }]).placed).toHaveLength(1)
+    })
+
+    it('names a far realm as large as a country of its own, whatever its share', () => {
+      const far = gridOf(140, 40, (x, y) => (x < 80 || (x >= 110 && y < 10) ? 0 : -1))
+      const { placed } = place(far, [{ owner: 0, text: 'AB' }], {
+        ...OPTIONS,
+        farShare: 0.5,
+        farCells: 250,
+      })
+      expect(placed.map(({ piece }) => piece).sort()).toEqual([0, 1])
     })
   })
 
-  describe('the comparison', () => {
-    /** A thick band on the diagonal. */
-    const DIAGONAL = gridOf(70, 70, (x, y) => (Math.abs(x - y) < 14 ? 0 : -1))
-
-    it('centres a name on the country’s centre of mass', () => {
-      // A band with a block below its west end: the mass leans west.
-      const leaning = gridOf(60, 16, (x, y) => (y < 8 || x < 20 ? 0 : -1))
-      const { placed } = placeNames(
-        leaning.owners,
-        60,
-        16,
-        [{ owner: 0, text: 'ABCDEF' }],
-        monospace,
-        OPTIONS
-      )
-      const xs = (placed[0]?.glyphs ?? []).map(({ x }) => x)
-      const middle = (Math.min(...xs) + Math.max(...xs)) / 2
-      // The cells' mean column: 60 × 8 of the band, 20 × 8 of the block.
-      const centre = (60 * 8 * 29.5 + 20 * 8 * 9.5) / (60 * 8 + 20 * 8)
-      expect(Math.abs(middle - centre)).toBeLessThan(3)
+  describe('the neighbours', () => {
+    // A band twelve cells thick, a neighbour cutting four rows into its top in the middle: the letters, as tall as the
+    // band allows, run into the neighbour there, and may bite into it by as much as the bite allows.
+    const HEMMED = gridOf(80, 20, (x, y) => {
+      const notch = x >= 35 && x < 45 && y >= 4 && y < 8
+      if (notch) return 1
+      return y >= 4 && y < 16 ? 0 : -1
     })
 
-    it('comes up to the border when touching it weighs nothing and makes the name larger', () => {
-      const kept = placeNames(BAND.owners, 60, 12, [{ owner: 0, text: 'AB' }], monospace, OPTIONS)
-      const free = placeNames(
-        BAND.owners,
-        60,
+    // A band with a neighbour's enclave across its middle, a strip of the band left above and below it: the line
+    // through the band crosses it.
+    const ENCLAVE = gridOf(80, 20, (x, y) => {
+      if (x >= 20 && x < 26 && y >= 6 && y < 14) return 1
+      return y >= 4 && y < 16 ? 0 : -1
+    })
+
+    it('lets no letter into a neighbour deeper than the bite, however tall the name', () => {
+      const { glyphs, size } = only(ENCLAVE, 'ABCDEF', { ...OPTIONS, neighbourBite: 1 })
+      expect(
+        glyphs.every(({ x }) => x - size / 2 >= 26 - 1 - 1e-6 || x + size / 2 <= 20 + 1 + 1e-6)
+      ).toBe(true)
+    })
+
+    it('writes a name on the longest stretch of its line a neighbour leaves', () => {
+      const { glyphs } = only(ENCLAVE, 'ABCDEF')
+      const middle = glyphs.reduce((sum, { x }) => sum + x, 0) / glyphs.length
+      expect(middle).toBeCloseTo((26 + 80) / 2, -0.5)
+    })
+
+    it('lets a name bite into a neighbour by the bite allowed, larger for it', () => {
+      const free = place(HEMMED, [{ owner: 0, text: 'ABC' }]).placed[0]?.size ?? 0
+      const biting = place(HEMMED, [{ owner: 0, text: 'ABC' }], { ...OPTIONS, neighbourBite: 2 })
+        .placed[0]
+      expect(biting?.size ?? 0).toBeGreaterThan(free)
+    })
+  })
+
+  describe('the names already written', () => {
+    it('keeps a name off the cells another realm’s name covers, when the level shares its cells', () => {
+      const pair = gridOf(80, 12, (x) => (x < 40 ? 0 : 1))
+      const occupancy = createOccupancy(80, 12)
+      occupancy.cells.fill(pieceTag(0, 0), 0, 80 * 12)
+      const { placed } = placeNames(
+        pair.owners,
+        80,
         12,
-        [{ owner: 0, text: 'AB' }],
+        [{ owner: 1, text: 'AB' }],
         monospace,
-        weighing({ border: 0 })
+        OPTIONS,
+        occupancy
       )
-      expect(free.placed[0]?.size ?? Number.NaN).toBeGreaterThan(kept.placed[0]?.size ?? Number.NaN)
+      expect(placed).toHaveLength(0)
     })
 
-    it('lays a name level when a slant weighs heavily, along the country when it weighs nothing', () => {
-      const name = [{ owner: 0, text: 'ABCDEF' }]
-      const level = placeNames(DIAGONAL.owners, 70, 70, name, monospace, weighing({ slant: 10 }))
-      const along = placeNames(DIAGONAL.owners, 70, 70, name, monospace, weighing({ slant: 0 }))
-      expect(level.placed[0]?.glyphs.every(({ angle }) => angle === 0)).toBe(true)
-      expect(along.placed[0]?.glyphs.some(({ angle }) => Math.abs(angle) > 0.5)).toBe(true)
-    })
-
-    it('never sets a name over two lines along a slant, straight across only', () => {
-      // On the diagonal, two lines along it would make the name largest; they are never tried.
-      const { placed } = placeNames(
-        DIAGONAL.owners,
-        70,
-        70,
-        [{ owner: 0, text: 'ABCDEF GHIJKL' }],
-        monospace,
-        weighing({ twoLines: 0, slant: 0, bend: 0 })
-      )
-      const name = placed[0]
-      if (name === undefined) throw new Error('not placed')
-      const tilted = name.glyphs.some(({ angle }) => angle !== 0)
-      expect(tilted ? spread(name) : 0).toBeLessThan(0.5)
-    })
-  })
-
-  describe('two lines', () => {
-    /** A square too narrow for "AAAA BBBB" on one line at a good size. */
-    const SQUARE = gridOf(20, 20, () => 0)
-    /** Two words. */
-    const TWO_WORDS = [{ owner: 0, text: 'AAAA BBBB' }]
-    /** Two lines free of charge. */
-    const FREE = { ...OPTIONS, weights: { ...OPTIONS.weights, twoLines: 0 } }
-
-    it('breaks a name over two lines when they make it larger and cost nothing, the first above', () => {
-      const one = placeNames(SQUARE.owners, 20, 20, TWO_WORDS, monospace, OPTIONS).placed[0]
-      const two = placeNames(SQUARE.owners, 20, 20, TWO_WORDS, monospace, FREE).placed[0]
-      if (two === undefined) throw new Error('not placed')
-      const firstY = two.glyphs.slice(0, 4).reduce((sum, { y }) => sum + y, 0) / 4
-      const secondY = two.glyphs.slice(5).reduce((sum, { y }) => sum + y, 0) / 4
-      expect(spread(two)).toBeGreaterThan(1)
-      expect(firstY).toBeLessThan(secondY)
-      expect(two.size).toBeGreaterThan(one?.size ?? Number.NaN)
-    })
-
-    it('keeps a name on one line when two lines weigh heavily', () => {
-      const { placed } = placeNames(SQUARE.owners, 20, 20, TWO_WORDS, monospace, OPTIONS)
-      expect(spread(placed[0])).toBeLessThan(0.5)
-    })
-
-    it('keeps a name of one word on one line, whatever two lines cost', () => {
-      const { placed } = placeNames(
-        SQUARE.owners,
-        20,
-        20,
-        [{ owner: 0, text: 'AAAABBBB' }],
-        monospace,
-        FREE
-      )
-      expect(spread(placed[0])).toBeLessThan(0.5)
-    })
-
-    it('spaces two lines by their own reach, not by the whole name’s', () => {
-      const room = gridOf(30, 20, () => 0)
-      const { placed } = placeNames(
-        room.owners,
-        30,
-        20,
-        [{ owner: 0, text: 'AAAA BBBp' }],
-        descending,
-        FREE
-      )
-      const name = placed[0]
-      const [first, second] = [name?.glyphs[0], name?.glyphs[5]]
-      if (name === undefined || first === undefined || second === undefined)
-        throw new Error('not placed')
-      // Across the line: the second baseline lies below the first by the second line's ascent and the gap,
-      // 1 + 0.15 × 1.3 letters — never by the whole name's height and the gap, 1.3 × 1.15.
-      const across =
-        (first.x - second.x) * Math.sin(first.angle) - (first.y - second.y) * Math.cos(first.angle)
-      expect(across / name.size).toBeCloseTo(1 + 0.15 * 1.3, 2)
-    })
-
-    it('places the space it breaks at, so every letter keeps its place', () => {
-      const { placed } = placeNames(SQUARE.owners, 20, 20, TWO_WORDS, monospace, FREE)
-      expect(placed[0]?.glyphs).toHaveLength(9)
+    it('marks the names it places in the shared cells, with its realm’s tag', () => {
+      const occupancy = createOccupancy(60, 12)
+      placeNames(BAND.owners, 60, 12, [{ owner: 0, text: 'AB' }], monospace, OPTIONS, occupancy)
+      expect(occupancy.cells.includes(pieceTag(0, 0))).toBe(true)
     })
   })
 
   describe('managed errors', () => {
-    it('refuses an overflow below zero, which would be a margin', () => {
-      expect(() =>
-        placeNames(BAND.owners, 60, 12, [{ owner: 0, text: 'AB' }], monospace, {
-          ...OPTIONS,
-          overflow: -1,
-        })
-      ).toThrow(/an overflow of -1 cells/)
-    })
-
     it('leaves a name that fits only under the smallest size for a closer zoom', () => {
-      const { placed, tooSmall } = placeNames(
-        BAND.owners,
-        60,
-        12,
-        [{ owner: 0, text: 'ABCDEF' }],
-        monospace,
-        { ...OPTIONS, minSize: 20 }
-      )
-      expect(placed).toEqual([])
-      expect(tooSmall).toEqual([0])
-    })
-
-    it('writes a name with no margin where the margin leaves no room, rather than leave it out', () => {
-      const sliver = gridOf(30, 2, () => 0)
-      const { placed, tooSmall } = placeNames(
-        sliver.owners,
-        30,
-        2,
-        [{ owner: 0, text: 'AB' }],
-        monospace,
-        OPTIONS
-      )
-      expect([placed.length, tooSmall]).toEqual([1, []])
-    })
-
-    it('leaves a space too thin for any letter for a closer zoom', () => {
-      const sliver = gridOf(30, 1, () => 0)
-      const { tooSmall } = placeNames(sliver.owners, 30, 1, [{ owner: 0, text: 'AB' }], monospace, {
+      const { placed, tooSmall } = place(BAND, [{ owner: 0, text: 'AB' }], {
         ...OPTIONS,
-        minSize: 2,
+        minSize: 20,
       })
-      expect(tooSmall).toEqual([0])
+      expect([placed, tooSmall]).toEqual([[], [0]])
+    })
+
+    it('writes the shorter name where the full one does not reach its smallest size', () => {
+      const placed = place(BAND, [{ owner: 0, text: 'ABCDEFGHIJKLMNOPQRST', shorter: 'AB' }], {
+        ...OPTIONS,
+        longMinSize: 4,
+      }).placed[0]
+      expect(placed?.text).toBe('AB')
     })
 
     it('returns an owner with no cell at this level as absent, and places nothing for it', () => {
-      const result = placeNames(
-        BAND.owners,
-        60,
-        12,
-        [{ owner: 9, text: 'HIDDEN' }],
-        monospace,
-        OPTIONS
-      )
-      expect(result).toEqual({ placed: [], tooSmall: [], absent: [9] })
+      const { placed, absent } = place(BAND, [{ owner: 7, text: 'AB' }])
+      expect([placed, absent]).toEqual([[], [7]])
     })
 
     it('refuses an owner asked for twice, whose two names would lie on each other', () => {
-      const twice = [
-        { owner: 0, text: 'ONE' },
-        { owner: 0, text: 'TWO' },
-      ]
-      expect(() => placeNames(BAND.owners, 60, 12, twice, monospace, OPTIONS)).toThrow(
-        /owner 0 is asked for twice/
-      )
+      expect(() =>
+        place(BAND, [
+          { owner: 0, text: 'AB' },
+          { owner: 0, text: 'CD' },
+        ])
+      ).toThrow(/asked for twice/)
     })
 
     it('refuses an empty name', () => {
+      expect(() => place(BAND, [{ owner: 0, text: '' }])).toThrow(/empty name/)
+    })
+
+    it('refuses a bite into a neighbour below zero', () => {
       expect(() =>
-        placeNames(BAND.owners, 60, 12, [{ owner: 0, text: '' }], monospace, OPTIONS)
-      ).toThrow(/empty name/)
+        place(BAND, [{ owner: 0, text: 'AB' }], { ...OPTIONS, neighbourBite: -1 })
+      ).toThrow(/bite/)
     })
   })
 
   describe('unmanaged errors', () => {
     it('refuses a measure with an advance too few for the text', () => {
       expect(() =>
-        placeNames(BAND.owners, 60, 12, [{ owner: 0, text: 'ABC' }], short, OPTIONS)
-      ).toThrow(/3 letters and was measured with 2 advances/)
+        placeNames(BAND.owners, 60, 12, [{ owner: 0, text: 'AB' }], tooFew, OPTIONS)
+      ).toThrow(/2 letters/)
     })
 
     it('refuses a measure with no height', () => {
@@ -661,43 +408,32 @@ describe('placeNames', () => {
     it('refuses a measure whose advances are not numbers', () => {
       expect(() =>
         placeNames(BAND.owners, 60, 12, [{ owner: 0, text: 'AB' }], broken, OPTIONS)
-      ).toThrow(/no length or no height/)
+      ).toThrow(/no length/)
     })
 
     it('refuses a grid whose size is not width × height', () => {
-      expect(() => placeNames(new Int32Array(3), 2, 2, [], monospace, OPTIONS)).toThrow(
-        /is not 2 × 2/
+      expect(() => placeNames(BAND.owners, 61, 12, [], monospace, OPTIONS)).toThrow(
+        /is not 61 × 12/
       )
     })
   })
 
   describe('edge cases', () => {
-    it('keeps the margin from the map’s frame as from a border', () => {
-      const { placed } = placeNames(
-        BAND.owners,
-        60,
-        12,
-        [{ owner: 0, text: 'AB' }],
-        monospace,
-        OPTIONS
-      )
-      const name = placed[0]
-      if (name === undefined) throw new Error('not placed')
-      expect(keepsClear(BAND, name, OPTIONS.margin)).toBe(true)
-    })
-
-    it('measures each name once, with its text', () => {
-      const measure = vi.fn(monospace)
-      placeNames(BAND.owners, 60, 12, [{ owner: 0, text: 'ABC' }], measure, OPTIONS)
-      expect(measure.mock.calls).toEqual([['ABC']])
-    })
-
     it('places nothing when no name is asked', () => {
-      expect(placeNames(BAND.owners, 60, 12, [], monospace, OPTIONS)).toEqual({
-        placed: [],
-        tooSmall: [],
-        absent: [],
-      })
+      expect(place(BAND, [])).toEqual({ placed: [], tooSmall: [], absent: [] })
+    })
+
+    it('measures each text once', () => {
+      const measure = vi.fn(monospace)
+      placeNames(BAND.owners, 60, 12, [{ owner: 0, text: 'AB', shorter: 'A' }], measure, OPTIONS)
+      expect(measure.mock.calls.map(([text]) => text)).toEqual(['AB', 'A'])
+    })
+
+    it('never spills past the map’s frame', () => {
+      const name = only(BAND, 'AB')
+      const half = name.size / 2
+      expect(name.glyphs.every(({ y }) => y - name.size >= -0.25 && y <= 11.75)).toBe(true)
+      expect(name.glyphs.every(({ x }) => x - half >= -0.75 && x + half <= 60.25)).toBe(true)
     })
   })
 })

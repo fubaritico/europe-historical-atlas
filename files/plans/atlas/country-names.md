@@ -38,6 +38,9 @@
 | **No name over another**: each name placed marks its cells, its white edge's half cell included; a later name keeps off every other piece's cells (its own piece's other forms excepted), smaller or on another line, the largest pieces first, the names before the abbreviations, the full names last (`core/pipeline/nameOccupancy`)                                                                                                                                                                                                                                                                                                                                                  | dev, 29/10, on Claude's proposal — the order is Claude's                                                                                 |
 | **The rule, as it stands (supersedes the readability, the waves, the abbreviation and the forms by zoom above)**: each piece carries **one** name — its full name where it reaches 4 cells, its short name otherwise, the short name being the full one with its title cut to initials (« K. of France », « Zirid E. of Ifriqiya »; a name with no title stays whole); **no abbreviation, nothing progressive**: a level shows all its names at once, the sovereigns from afar, everyone as soon as the vassals show (_« je veux des noms, qu'on lit, qu'on comprend »_, _« dès que les vassaux ils apparaissent, tout apparaît »_)                                                      | dev, 29/10                                                                                                                               |
 | **A watermark at the closest zoom**: over the last steps of the zoom (from 0.85, Claude's start) every name fades to **40 %** of its opacity (50 % first, then *« un peu plus de transparence au zoom complet »*), their blur its own and lighter than the borders' (0.6 px), ink and white edge alike, so the cities' dots and names can come over them (*« il faudrait limite qu'on n'ait que les noms en filigrane […] commençons à cinquante pour cent »*) | dev, 29/10 |
+| **A polity with no short name shows its name without its title** (« France »), and the console lists it — *« faut afficher les informations, c'est primordial »*; supersedes « a polity without one carries no name » above. The short name itself is entered in the Cartographer, CARTO-307 | dev, 29/10 midday |
+| **The name as it is written**, capitals and small letters, never forced to capitals; a little more line spacing if a name ever takes two lines — the aim being one line | dev, 29/10 midday (*« on essaye comme ça d'abord, on regarde ensuite, on décide »*) |
+| **The construction of « The gap to the reference » is the next work** (axes A → F), measured on six shapes of 1100 frozen as a fixture | dev, 29/10 midday (*« je te laisse la main »*) |
 | **The centring weight stays at 1**: proposed lower for Norway, measured useless once the overflow came — Norway's mainland went from 5.5 to 17.5 by the overflow alone                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Claude, 28/10 night, measured                                                                                                            |
 
 ## What exists, measured 27/10
@@ -190,3 +193,70 @@ already short and covers a quarter.
 tests (cover ≥ 0.6, bend ≤ 60°, one line, size monotonic in thickness), and the bench `/names.html` for the eye. **A
 construction with three parameters has no side effects; a score with seven weights has them by nature.** Every change is
 measured on the six before it is kept.
+
+## The construction, as built — 29/10, afternoon
+
+Axes A to F coded on the dev's « je te laisse la main », measured on the fixture first: six countries of 1100 frozen by
+`files/spikes/name-fixture/build-fixture.ts` into `core/src/pipeline/testing/names1100.json` (the owner grid the atlas
+places on, cropped with the neighbours), their properties asserted in `namePlacement.fixture.test.ts`, and a probe
+(`files/spikes/name-fixture/measure.ts`) printing each country's name, size, cover, turn, lines and places.
+
+- **Realms** (`nameRealm`, axis C): a country's pieces parted by a strait of 12 cells or less (~100 km) are one realm,
+  the sea between them open to the letters; a far realm is named from a fifth of the largest **or from 2 000 cells**
+  — the second rule is Claude's, found on the fixture: 1100 gives Norway Greenland (72 946 cells), its mainland
+  (11 299, larger than France) was under a fifth of it.
+- **One construction** (`nameConstruction`, axes A, B, D): the arc along the realm (aspect ≥ 1.4) or the horizontal
+  (compact); letters 0.6 of the median thickness on land over the line's middle; spacing stretched to cover 0.75 of
+  the line, 0.6 em at most; a long name set smaller to cover 0.9 at most, unspaced; shrunk by 8 % until the letters
+  keep off neighbours (a cell's bite) and other names. **No weight, no candidate, never two lines.**
+- **Removed**: `nameCandidates`, `nameChoice` (the seven weights), `nameBreak` (two lines), the ridge walk, the size
+  search, the margin and the overflow settings.
+- **The names** (axis E): the short form is the formal name without its title — « France », « Kievan Rus » — never
+  an abbreviation; the full one where it reaches 4 cells. No capitals by default. The registry's own short name is
+  CARTO-307.
+
+**Measured on the fixture** (letters 0.55 em, the defaults; `files/spikes/name-fixture/measure.ts`):
+
+| country | before: size, cover, places | after: size, cover, turn, places |
+| --- | --- | --- |
+| Byzantium | 7.4, 0.36, 5 | 16.3, 0.69, 39°, 1 |
+| Cumans | 18.5, 0.67, 1 | 19.9, 0.77, 17°, 1 |
+| France | 5.6, 0.50, 1 | 11.7, 0.84, 32°, 1 |
+| Norway | 30 on Greenland, 55 places | its mainland, Iceland and Greenland, 3 places |
+| Hungary | 8.3, 0.87, 1 | 10.2, 0.87, 50°, 1 |
+| Brittany | 4.7, two lines | 8, 0.83, 46°, one line |
+
+## The dev's look on the map — 29/10, 15:40
+
+*« C'est beaucoup mieux »*, then four screenshots. Three compact countries written straight across and small (the Holy
+Roman Empire, England, Novgorod lost at the top), and Byzantium's name over Rum, which could not be named. Pomerania's
+name over the Liutizians, seen the same way: *« c'est exactement la même chose »*.
+
+- **The cause of the fourth, a defect of 29/10, morning**: the distance to a neighbour was unsigned, so every cell inside
+  one read half a cell from its edge, and a bite of one cell let a name cross a neighbour whole. Signed now, as the
+  coast's: a bite lets a letter in by its depth, never across (`nameFit.boundOf`).
+- **The line is cut where it enters a neighbour or a name already written**, the longest stretch kept
+  (`nameConstruction.nameLineOf`): Byzantium is written west of Rum, Rum gets its own name.
+- **A compact realm is written on its arc too, its axis and its spine's lean held to 45°** (`COMPACT_SLANT`, Claude's
+  choice, to judge on the map): the horizontal through its middle ran short — cut by Novgorod's lakes, by the narrow row
+  through England's centre — and the long names were set small to fit it.
+- **The thickness is read over the middle of the land the line crosses**, not the middle of the line (16:02, Denmark
+  *« tout petit »*): Denmark's line runs from Jutland over Funen and the Belts to Zealand, its middle read the islands,
+  3 cells thick, for a land 11 to 16. Over the whole line instead, Denmark grew but seven others shrank (the Fatimids
+  19.8 → 14.9); over the land's middle, Denmark alone moved more than a tenth.
+- **The bite is three cells** (one at first): with the bite bounded, one cell left Aquitaine, Valencia and Strathclyde
+  unnamed; three leave only Gwynedd among the vassals.
+
+**Measured on all of 1100** (`files/spikes/name-fixture/year.ts`, every level, before → after):
+
+| country | before | after |
+| --- | --- | --- |
+| Holy Roman Empire | 9.7, straight across | 14.1, 46° |
+| Novgorod | 7.3, straight across | 16, 45° |
+| England | 4.2, straight across | 5.8, 45° |
+| Byzantium | 16.3, over Rum | 12.4, west of Rum |
+| Rum | not named | 12.8 |
+| Cumans | 19.9 | 14.3 — the big size crossed its neighbours |
+| Kievan Rus | 10.5 | 4.1 — same |
+| Denmark | 1.9 | 5.4 |
+| names written | 320 | 332: six countries gain a name, Gwynedd loses it among the vassals |
