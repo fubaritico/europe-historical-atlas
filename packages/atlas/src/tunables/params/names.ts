@@ -54,6 +54,18 @@ export interface NameDevParams {
   haloWholeZoom: number
   /** The zoom from which the white edge is gone (*« une fois que c'est zoomé, il n'y a plus de contours blancs »*). */
   haloGoneZoom: number
+  /**
+   * The zoom from which every name fades toward a watermark, over the last steps of the zoom — the dev, 2026-10-29:
+   * *« un troisième point de zoom où les noms deviennent à 50 % transparents »*.
+   */
+  watermarkZoom: number
+  /** The share of their opacity the names keep at the closest zoom (*« commençons à cinquante pour cent »*). */
+  watermarkShare: number
+  /**
+   * The names' own light blur close up, in CSS pixels — growing with the close-up look as the borders' does, lighter
+   * than theirs (the dev, 2026-10-29: *« un peu moins de flou sur les noms des pays »*).
+   */
+  blur: number
 }
 
 /**
@@ -81,6 +93,11 @@ export const DEFAULT_NAME_PARAMS: NameDevParams = {
   weightTwoLines: DEFAULT_NAME_WEIGHTS.twoLines,
   haloWholeZoom: 0.1,
   haloGoneZoom: 0.4,
+  // The last steps of the zoom — Claude's start, to tune on the map.
+  watermarkZoom: 0.85,
+  // 0.5 first, then « un peu plus de transparence au zoom complet » (the dev, 29/10).
+  watermarkShare: 0.4,
+  blur: 0.6,
 }
 
 /** Range, step and label of every {@link NameDevParams} field. */
@@ -108,6 +125,9 @@ export const NAME_CONTROLS: ControlTable<NameDevParams> = {
     label: 'white edge whole to (zoom)',
   },
   haloGoneZoom: { kind: 'number', min: 0, max: 1, step: 0.01, label: 'white edge gone at (zoom)' },
+  watermarkZoom: { kind: 'number', min: 0, max: 1, step: 0.01, label: 'watermark from (zoom)' },
+  watermarkShare: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'watermark opacity' },
+  blur: { kind: 'number', min: 0, max: 4, step: 0.1, label: 'blur close up (px)' },
 }
 
 /** Display order of the names' controls that place them again — their placement's. */
@@ -130,4 +150,10 @@ export const NAME_CONTROL_ORDER: (keyof NameDevParams)[] = [
 ]
 
 /** Display order of the names' controls read every frame — how they show on screen; nothing is placed again. */
-export const NAME_SCREEN_ORDER: (keyof NameDevParams)[] = ['haloWholeZoom', 'haloGoneZoom']
+export const NAME_SCREEN_ORDER: (keyof NameDevParams)[] = [
+  'haloWholeZoom',
+  'haloGoneZoom',
+  'watermarkZoom',
+  'watermarkShare',
+  'blur',
+]

@@ -25,7 +25,7 @@ export function borders(between: number, frontier: number): RegionBorders {
   }
 }
 
-/** A stroke style with every pass distinct: a wide dark edging, a narrow light core, a faint frontier. */
+/** A stroke style with every pass distinct: a wide dark edging, a narrow light core, a faint frontier, a parchment afar. */
 export const STYLE: BorderStrokeStyle = {
   coreColor: '#ffffff',
   coreWidth: 1.4,
@@ -36,6 +36,16 @@ export const STYLE: BorderStrokeStyle = {
   frontierColor: '#888888',
   frontierWidth: 1,
   frontierOpacity: 0.45,
+  parchmentColor: '#eeeeee',
+  farWidth: 2,
+  frontierFarWidth: 0.8,
+  frontierSideGap: 0.01,
+  frontierSideWidth: 1.2,
+  frontierFadeShare: 0.5,
+  vassalColor: '#fafafa',
+  vassalWidth: 0.6,
+  vassalDotSize: 0.7,
+  vassalDotGap: 1.3,
   dashSize: 0.03,
   gapSize: 0.024,
   doubleGap: 0.002,
@@ -57,7 +67,7 @@ export const project = (u: number, v: number): [number, number, number] => [u, 0
  */
 export function liveValues(
   layer: ComposedLineLayer,
-  property: 'linewidth' | 'opacity' | 'dashScale'
+  property: 'linewidth' | 'opacity' | 'dashScale' | 'dashSize' | 'gapSize'
 ): number[] {
   return layer.object.children.map((child: object) => {
     // Fat lines carry a LineMaterial; reading it back is the only way to prove the setter reached it.

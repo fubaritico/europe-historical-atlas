@@ -4,6 +4,7 @@ import {
   InstancedMesh,
   Matrix4,
   Mesh,
+  MeshBasicMaterial,
   Quaternion,
   ShaderLib,
   Texture,
@@ -16,7 +17,7 @@ import { compileHook } from '../../testing/compileHook'
 import { EVENT_RENDER_ORDER } from '../markers'
 import { SHADOW_OPACITY } from '../shadows/shadowFootprint'
 
-import { createEventIconMarkers } from './eventIconMarkers'
+import { EVENT_BLUR_LAYER, createEventIconMarkers } from './eventIconMarkers'
 import {
   EVENT_ICON_HEIGHT,
   ICON_CROSS_FADE,
@@ -33,7 +34,7 @@ import {
 
 import type { PlacedEventIcon } from './forms'
 import type { EventIconKind } from './kinds'
-import type { BufferGeometry, Material, MeshBasicMaterial } from 'three'
+import type { BufferGeometry, Material } from 'three'
 
 const TWO: PlacedEventIcon[] = [
   { ground: [1, 0.2, -1], kind: 'swords' },
@@ -98,7 +99,12 @@ const FLAT = (): number => 0
 function shadowMesh(object: Group): Mesh<BufferGeometry, MeshBasicMaterial> {
   let found: Mesh<BufferGeometry, MeshBasicMaterial> | undefined
   object.traverse((child) => {
-    if (child instanceof Mesh && !(child instanceof InstancedMesh))
+    // The blur's quad, in a shader material, left out.
+    if (
+      child instanceof Mesh &&
+      !(child instanceof InstancedMesh) &&
+      child.material instanceof MeshBasicMaterial
+    )
       found = child as Mesh<BufferGeometry, MeshBasicMaterial>
   })
   if (found === undefined) throw new Error('no shadow mesh')
@@ -273,6 +279,20 @@ describe('createEventIconMarkers', () => {
 
   // L3: N/A — nothing is refused: the places come already on the map
   // L4: N/A — no async work, nothing external
+
+  // The dev, 2026-10-29: « applique le même flou que les frontières sur les icônes 3D. Mais pas leur ombre ».
+  describe('blur', () => {
+    it('moves the 3D icons and their halos to the blur’s layer once blurred, never the shadow', () => {
+      const markers = createEventIconMarkers(TWO, STUB, FLAT)
+      markers.setBlur?.(1)
+      expect(
+        allInstanced(markers.object).some((mesh) => mesh.layers.isEnabled(EVENT_BLUR_LAYER))
+      ).toBe(true)
+      expect(shadowMesh(markers.object).layers.isEnabled(0)).toBe(true)
+      markers.setBlur?.(0)
+      expect(allInstanced(markers.object).every((mesh) => mesh.layers.isEnabled(0))).toBe(true)
+    })
+  })
 
   describe('edge cases', () => {
     it('turns an icon to face the camera’s position at the still point of its sway', () => {

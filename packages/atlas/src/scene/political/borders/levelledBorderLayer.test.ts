@@ -146,18 +146,19 @@ describe('createLevelledBorderLayer', () => {
     })
 
     // Each setter checked on a deeper level, not only level 0: a forwarding that stopped at the first
-    // level would leave every vassal border at its build-time width, dash and inlay.
-    it('hands width, inlay, dash and resolution to a level of homage too', () => {
+    // level would leave every vassal border at its build-time width, dash and closeness.
+    it('hands width, closeness, dash and resolution to a level of homage too', () => {
       const layer = createLevelledBorderLayer(
         new Map([
           [0, [stroke(0.4)]],
-          [1, [stroke(0.5), stroke(0.8, 'inlay')]],
+          // A vassals' parchment line stays as built; a close-up pass follows the closeness.
+          [1, [stroke(0.5, 'vassal'), stroke(0.8, 'inlay')]],
         ]),
         { project }
       )
       layer.setDetail(1)
       layer.setWidthScale(0.5)
-      layer.setInlayOpacity(0.25)
+      layer.setCloseness(0.25)
       layer.setDashScale(320)
       layer.setResolution(800, 600)
       const deeper = layer.levels.get(1)

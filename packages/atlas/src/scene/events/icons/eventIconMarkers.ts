@@ -10,7 +10,9 @@
 
 import { Group, Quaternion } from 'three'
 
+import { BLUR_LAYERS } from '../../blurLayers'
 import { applyDepthBias, applyLiveDepthBias } from '../../depthBias'
+import { createScreenBlur } from '../../screenBlur'
 import { EVENT_RENDER_ORDER } from '../markers'
 import { createIconShadows } from '../shadows/iconShadows'
 
@@ -24,8 +26,10 @@ import { EVENT_ICON_HEIGHT, ICON_DEPTH_PULL, ICON_FLAT_SPAN, ICON_HALO_SPAN } fr
 
 import type { LoadSvgTexture } from './billboardMaterials'
 import type { PlacedEventIcon } from './forms'
+import type { ScreenBlur } from '../../screenBlur'
 import type { CameraPose, EventMarkers } from '../markers'
 import type { GroundAt } from '../shadows/groundShadows'
+import type { Object3D } from 'three'
 
 /**
  * The groups the icons sit in: close up, the halos and the 3D icons; from afar, the flat drawings.
@@ -124,6 +128,53 @@ function flatDepthPull(flatSize: number): number {
 }
 
 /**
+ * Free the icons' forms, their shadows, their materials and their blur.
+ * @param forms - the icons' forms
+ * @param blur - their blur, taken out of their group
+ */
+function disposeIcons(forms: ReturnType<typeof buildForms>, blur: ScreenBlur): void {
+  forms.groups.object.remove(blur.object)
+  blur.dispose()
+  forms.instances.dispose()
+  forms.shadows.dispose()
+  forms.halos.dispose()
+  forms.flats.dispose()
+  forms.materials.dispose()
+}
+
+/** The layer the 3D icons and their halos move to while blurred — one the camera, nor the other blurs, sees. */
+export const EVENT_BLUR_LAYER = BLUR_LAYERS.icons
+
+/**
+ * The 3D icons and their halos blurred as the borders are (the dev, 2026-10-29: *« applique le même flou que les
+ * frontières sur les icônes 3D. Mais pas leur ombre »*). Drawn from the whole scene, where the markers' lights stand;
+ * the shadows, drawn on the CPU from the icons' shapes, stay crisp.
+ * @param object - the icons' group, which the blur's quad joins
+ * @param blurred - the roots of what is blurred: the 3D icons and their halos
+ * @returns the blur
+ */
+function iconBlur(object: Group, blurred: readonly Object3D[]): ScreenBlur {
+  // Read at each switch, so an object added under the icons or the halos later is blurred too.
+  const members = (): Object3D[] => {
+    const found: Object3D[] = []
+    for (const root of blurred)
+      root.traverse((child) => {
+        found.push(child)
+      })
+    return found
+  }
+  const blur = createScreenBlur(object, {
+    layer: EVENT_BLUR_LAYER,
+    renderOrder: EVENT_RENDER_ORDER,
+    blend: 'normal',
+    wholeScene: true,
+    members,
+  })
+  object.add(blur.object)
+  return blur
+}
+
+/**
  * Stand one icon on each place, in two forms the zoom chooses between (`setZoom`): close up, the 3D icon, turned to
  * the camera and swayed (`faceCamera`) under the markers' lights (`../markerLights`, held beside it by the events'
  * layer), a light halo behind it to detach it from the map; from afar, its flat drawing ringed with light, at a fixed
@@ -141,9 +192,10 @@ export function createEventIconMarkers(
   height: number = EVENT_ICON_HEIGHT
 ): EventMarkers {
   const forms = buildForms(placed, loadTexture, groundAt, height)
-  const { icons, instances, shadows, materials, halos, flats, groups } = forms
+  const { icons, instances, shadows, halos, flats, groups } = forms
   const { haloPositions, flatPositions } = forms
   const { object } = groups
+  const blur = iconBlur(object, [instances.object, halos.object])
 
   // The camera's orientation, which every square takes; the turner of the 3D icons, and those it turns.
   const facing = new Quaternion()
@@ -188,12 +240,11 @@ export function createEventIconMarkers(
       // The shadows drawn from the icons as they now stand.
       shadows.faceCamera(camera, seconds)
     },
+    setBlur(pixels: number): void {
+      blur.setRadius(pixels)
+    },
     dispose(): void {
-      instances.dispose()
-      shadows.dispose()
-      halos.dispose()
-      flats.dispose()
-      materials.dispose()
+      disposeIcons(forms, blur)
     },
   }
 }

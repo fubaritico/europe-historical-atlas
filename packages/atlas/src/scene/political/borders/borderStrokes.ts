@@ -35,6 +35,26 @@ export interface BorderStrokeStyle {
   frontierWidth: number
   /** Opacity of the frontier stroke — usually below the borders', being a limit rather than a treaty. */
   frontierOpacity: number
+  /** The parchment the line work is drawn in from afar, and the vassals' borders at every zoom. */
+  parchmentColor: string
+  /** Width of a border between sovereigns from afar, in parchment. */
+  farWidth: number
+  /** Width of the frontier from afar, in parchment. */
+  frontierFarWidth: number
+  /** How far beside the frontier its parchment line runs close up, on the unclaimed side, in grid units. */
+  frontierSideGap: number
+  /** Width of that parchment line. */
+  frontierSideWidth: number
+  /** Share of its opacity the fading line beyond it takes. */
+  frontierFadeShare: number
+  /** Colour of a border between vassals. */
+  vassalColor: string
+  /** Width of a border between vassals. */
+  vassalWidth: number
+  /** Length of each of its dots, in screen pixels. */
+  vassalDotSize: number
+  /** Gap between two of its dots, in screen pixels. */
+  vassalDotGap: number
   /** Dash length in screen pixels, for borders the style table marks as broken (`setDashScale`). */
   dashSize: number
   /** Gap length in screen pixels, for those same borders. */
@@ -98,21 +118,47 @@ export function groupSegmentsByPattern(
 }
 
 /**
+ * A border between vassals: one thin white stroke of dots (*« passe les frontières entre vassaux en blanc »*), whatever its pattern (the dev, 2026-10-29: *« entre
+ * vassaux plus fin, essayer de n'avoir que des points, pas de tirets »*) — each dot a dash about as long as the line is
+ * wide, which three cuts square (`LineMaterial`) and reads as a point at this size.
+ * @param segments - its stretches
+ * @param style - how to dress them
+ * @returns the pass
+ */
+function vassalStroke(segments: UvSegment[], style: BorderStrokeStyle): ComposedStroke {
+  return {
+    segments,
+    color: style.vassalColor,
+    width: style.vassalWidth,
+    opacity: style.opacity,
+    dashed: true,
+    dashSize: style.vassalDotSize,
+    gapSize: style.vassalDotGap,
+    role: 'vassal',
+  }
+}
+
+/**
  * The passes one pattern is drawn with.
  *
- * A border is dark at every scale. A patterned one stays a single dark stroke, because its meaning is in
- * its shape and a light inlay would break that shape up; a plain one takes the light inlay on top, which
- * the caller fades back out as the camera pulls away.
+ * A border between vassals is one thin dotted parchment stroke at every zoom (the dev, 2026-10-29: *« frontière entre
+ * vassaux couleur parchemin »*). Between sovereigns, a patterned border stays a single dark
+ * stroke, because its meaning is in its shape and a light inlay would break that shape up; a plain one is a thin
+ * parchment line from afar (*« couleur parchemin, un peu plus fin »*), and close up the dark edge with the light
+ * inlay on top — the caller crosses from one to the other with the zoom (`setCloseness`).
  * @param pattern - how this group is drawn
  * @param segments - its stretches
  * @param style - how to dress them
+ * @param vassal - whether the group lies between vassals — shown only once the zoom shows them
  * @returns the passes, in draw order
  */
 export function patternStrokes(
   pattern: BorderPattern,
   segments: UvSegment[],
-  style: BorderStrokeStyle
+  style: BorderStrokeStyle,
+  vassal = false
 ): ComposedStroke[] {
+  if (vassal) return [vassalStroke(segments, style)]
   // A patterned border: one dark stroke, dashed when the pattern says so.
   if (pattern !== 'solid') {
     return [
@@ -129,8 +175,15 @@ export function patternStrokes(
       },
     ]
   }
-  // A plain border: the dark edge first, the light inlay laid inside it.
+  // A plain border: the parchment line seen from afar, then the dark edge, the light inlay laid inside it.
   const strokes: ComposedStroke[] = [
+    {
+      segments,
+      color: style.parchmentColor,
+      width: style.farWidth,
+      opacity: style.opacity,
+      role: 'far',
+    },
     {
       segments,
       color: style.edgeColor,
@@ -163,28 +216,74 @@ export function patternStrokes(
  * @param borders - the derived stretches, by kind
  * @param style - how to dress them
  * @param patternFor - the pattern a pair of polities is drawn with
+ * @param vassal - whether the borders lie between vassals — a split level past the sovereigns'
  * @returns the passes, in draw order
  */
 export function buildBorderStrokes(
   borders: RegionBorders,
   style: BorderStrokeStyle,
-  patternFor: (pair: readonly [number, number]) => BorderPattern = () => 'solid'
+  patternFor: (pair: readonly [number, number]) => BorderPattern = () => 'solid',
+  vassal = false
 ): ComposedStroke[] {
   const strokes: ComposedStroke[] = []
   // The frontier goes down first so a negotiated border always wins where the two meet.
-  if (style.showFrontier && borders.frontier.length > 0) {
-    strokes.push({
-      segments: polylinesToSegments(borders.frontier),
+  if (style.showFrontier && borders.frontier.length > 0)
+    strokes.push(...frontierStrokes(borders.frontier, style))
+  // Then the borders between polities, pattern by pattern, each with its own passes.
+  const byPattern = groupSegmentsByPattern(borders.between, patternFor, style.doubleGap)
+  for (const [pattern, segments] of byPattern) {
+    if (segments.length > 0) strokes.push(...patternStrokes(pattern, segments, style, vassal))
+  }
+  return strokes
+}
+
+/**
+ * The passes of the frontier against land nobody claims (the dev, 2026-10-29): a thin parchment line from afar; close
+ * up, the dark stroke on the limit, a parchment one beside it on the unclaimed side, and beyond it the same line half
+ * gone, so the frontier fades into the ground nobody claims. An authored year's frontier
+ * runs with its polity on its left, north up (`core/editor/atlasBorders`), and a positive offset falls on its right.
+ * @param frontier - the frontier's runs
+ * @param style - how to dress them
+ * @returns the passes, in draw order
+ */
+export function frontierStrokes(
+  frontier: RegionBorders['frontier'],
+  style: BorderStrokeStyle
+): ComposedStroke[] {
+  const segments = polylinesToSegments(frontier)
+  const beside = (times: number): UvSegment[] =>
+    polylinesToSegments(frontier.map((line) => offsetPolyline(line, style.frontierSideGap * times)))
+  return [
+    {
+      segments,
+      color: style.parchmentColor,
+      width: style.frontierFarWidth,
+      opacity: style.frontierOpacity,
+      role: 'far',
+    },
+    // Beyond the parchment line, as far again, the same line half gone: the frontier fading into the unclaimed ground.
+    {
+      segments: beside(2),
+      color: style.parchmentColor,
+      width: style.frontierSideWidth,
+      opacity: style.opacity * style.frontierFadeShare,
+      role: 'side',
+    },
+    {
+      segments: beside(1),
+      color: style.parchmentColor,
+      width: style.frontierSideWidth,
+      // The vassals' parchment tone, at the borders' opacity (the dev, 2026-10-29: « comme le zoomé des frontières
+      // entre vassaux »), not the fainter frontier's.
+      opacity: style.opacity,
+      role: 'side',
+    },
+    {
+      segments,
       color: style.frontierColor,
       width: style.frontierWidth,
       opacity: style.frontierOpacity,
       role: 'frontier',
-    })
-  }
-  // Then the borders between polities, pattern by pattern, each with its own passes.
-  const byPattern = groupSegmentsByPattern(borders.between, patternFor, style.doubleGap)
-  for (const [pattern, segments] of byPattern) {
-    if (segments.length > 0) strokes.push(...patternStrokes(pattern, segments, style))
-  }
-  return strokes
+    },
+  ]
 }

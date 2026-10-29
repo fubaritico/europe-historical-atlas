@@ -17,6 +17,10 @@ import type { CameraPose, EventMarkers } from './markers'
  */
 export function createMarkerLights(lighting?: IconLighting): EventMarkers {
   const object = createIconLights(lighting)
+  // On every layer, so a blur drawing the icons alone on a layer of their own lights them too (ATLAS-302).
+  object.traverse((light) => {
+    light.layers.enableAll()
+  })
   return {
     object,
     setReliefScale(): void {

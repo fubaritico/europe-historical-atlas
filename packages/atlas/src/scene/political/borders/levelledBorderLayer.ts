@@ -12,6 +12,8 @@
 
 import { Group } from 'three'
 
+import { BLUR_LAYERS } from '../../blurLayers'
+import { createScreenBlur } from '../../screenBlur'
 import { levelOpacity } from '../homageReveal'
 
 import { createComposedLineLayer } from './composedLineLayer'
@@ -22,6 +24,9 @@ import type {
   ComposedStroke,
 } from './composedLineLayer'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
+
+/** The layer the borders' lines move to while blurred (ATLAS-302) — one the camera does not see. */
+export const BORDER_BLUR_LAYER = BLUR_LAYERS.borders
 
 /** The line work by level, behind one handle. */
 export interface LevelledBorderLayer extends Omit<ComposedLineLayer, 'object' | 'setFade'> {
@@ -35,6 +40,12 @@ export interface LevelledBorderLayer extends Omit<ComposedLineLayer, 'object' | 
    * @returns nothing
    */
   setDetail(detail: number): void
+  /**
+   * Blur the line work a little (ATLAS-302), or draw it crisp at `0`.
+   * @param pixels - the blur's reach, in CSS pixels
+   * @returns nothing
+   */
+  setBlur(pixels: number): void
 }
 
 /**
@@ -75,6 +86,12 @@ export function createLevelledBorderLayer(
 ): LevelledBorderLayer {
   const object = new Group()
   const levels = new Map<number, ComposedLineLayer>()
+  // The blur, at the line work's rank: off until the frame sets its reach.
+  const blur = createScreenBlur(object, {
+    layer: BORDER_BLUR_LAYER,
+    renderOrder: options.renderOrderBase ?? 0,
+    blend: 'normal',
+  })
   // One composed layer per level, shallowest first, its draw order following the level before.
   let renderOrderBase = options.renderOrderBase ?? 0
   for (const [level, strokes] of [...strokesByLevel].sort((a, b) => a[0] - b[0])) {
@@ -85,6 +102,7 @@ export function createLevelledBorderLayer(
     levels.set(level, layer)
     object.add(layer.object)
   }
+  object.add(blur.object)
   // The handle: setters shared by every level, and the fade by detail that tells the levels apart.
   return {
     object,
@@ -93,12 +111,17 @@ export function createLevelledBorderLayer(
     setDetail(detail: number): void {
       for (const [level, layer] of levels) layer.setFade(levelOpacity(detail, level))
     },
+    setBlur(pixels: number): void {
+      blur.setRadius(pixels)
+    },
     dispose(): void {
       for (const layer of levels.values()) {
         object.remove(layer.object)
         layer.dispose()
       }
       levels.clear()
+      object.remove(blur.object)
+      blur.dispose()
     },
   }
 }
@@ -112,7 +135,7 @@ function sharedSetters(
   levels: ReadonlyMap<number, ComposedLineLayer>
 ): Pick<
   LevelledBorderLayer,
-  'setResolution' | 'setWidthScale' | 'setInlayOpacity' | 'setOpacityScale' | 'setDashScale'
+  'setResolution' | 'setWidthScale' | 'setCloseness' | 'setOpacityScale' | 'setDashScale'
 > {
   // Apply one call to every level's layer.
   const each = (call: (layer: ComposedLineLayer) => void): void => {
@@ -129,9 +152,9 @@ function sharedSetters(
         layer.setWidthScale(scale, patternScale)
       })
     },
-    setInlayOpacity(scale: number): void {
+    setCloseness(closeness: number): void {
       each((layer) => {
-        layer.setInlayOpacity(scale)
+        layer.setCloseness(closeness)
       })
     },
     setOpacityScale(scale: number): void {

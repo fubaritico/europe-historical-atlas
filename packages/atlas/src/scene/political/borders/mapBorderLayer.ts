@@ -88,7 +88,8 @@ export function rebuildBorders(context: LayerContext): void {
   const strokesByLevel = new Map(
     [...byLevel].map(([level, borders]) => [
       level,
-      buildBorderStrokes(borders, style, (pair) => patternForPair(context, pair)),
+      // Past the sovereigns' level, the borders lie between vassals: one parchment line.
+      buildBorderStrokes(borders, style, (pair) => patternForPair(context, pair), level > 0),
     ])
   )
   // Every level came out empty: no layer to build.
@@ -124,6 +125,16 @@ function borderStrokeStyle(dev: DevState): Parameters<typeof buildBorderStrokes>
     frontierColor: dev.political.frontierColor,
     frontierWidth: dev.political.frontierWidth,
     frontierOpacity: dev.political.frontierOpacity,
+    parchmentColor: dev.political.borderParchmentColor,
+    farWidth: dev.political.borderFarWidth,
+    frontierFarWidth: dev.political.frontierFarWidth,
+    frontierSideGap: dev.political.frontierSideGap,
+    frontierSideWidth: dev.political.frontierSideWidth,
+    frontierFadeShare: dev.political.frontierFadeShare,
+    vassalColor: dev.political.vassalBorderColor,
+    vassalWidth: dev.political.vassalBorderWidth,
+    vassalDotSize: dev.political.vassalDotSize,
+    vassalDotGap: dev.political.vassalDotGap,
     dashSize: dev.political.borderDashSize,
     gapSize: dev.political.borderDashGap,
     doubleGap: dev.political.borderDoubleGap,

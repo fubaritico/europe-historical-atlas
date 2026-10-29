@@ -60,6 +60,56 @@ function frameDetail(context: LayerContext, zoom: number): number {
 }
 
 /**
+ * The names for this frame: the level the zoom shows, crossing over to the next as it nears it; their white edge by
+ * the zoom; and the light blur of the close-up look, as on the borders (ATLAS-302).
+ * @param context - the layers and what they read
+ * @param zoom - the camera's zoom in `[0, 1]`
+ * @param detail - the homage the zoom shows
+ * @param closeness - how close up the line work looks, `0..1`
+ */
+function frameNames(context: LayerContext, zoom: number, detail: number, closeness: number): void {
+  const { dev, handles } = context
+  handles.names?.setDetail(detail)
+  handles.names?.setZoom(zoom, dev.names)
+  handles.names?.setBlur(dev.names.blur * closeness)
+}
+
+/**
+ * The borders for this frame.
+ * @param context - the layers and what they read
+ * @param at - where the camera stands
+ * @param at.zoom - its zoom in `[0, 1]`
+ * @param at.detail - the homage the zoom shows
+ * @param at.closeness - how close up the line work looks, `0..1`
+ * @param at.pixelsPerUnit - screen pixels per world unit where it looks
+ */
+function frameBorders(
+  context: LayerContext,
+  at: { zoom: number; detail: number; closeness: number; pixelsPerUnit: number }
+): void {
+  const { dev, handles } = context
+  const { zoom, closeness } = at
+  if (!handles.borders) return
+  // The borders show the same homage depth as the fills, so a vassal's colour and its border arrive together.
+  handles.borders.setDetail(at.detail)
+  // A patterned border holds a plain border's weight at continent scale, then thins to the core's
+  // weight close up — hence the ratio rather than a knob: it is the same width the inlay uses.
+  const patternAtZoomIn = dev.political.borderWidth / dev.political.borderEdgeWidth
+  handles.borders.setWidthScale(
+    lerp(dev.political.borderWidthZoomOut, 1, zoom),
+    lerp(dev.political.borderWidthZoomOut, patternAtZoomIn, zoom)
+  )
+  // Fainter from afar, and crossed from the parchment seen from afar to the close-up line work by its own zoom.
+  handles.borders.setOpacityScale(lerp(dev.political.borderOpacityZoomOut, 1, zoom))
+  handles.borders.setCloseness(closeness)
+  // The light blur grows with the close-up look (ATLAS-302); it reads the borders without the relief, so it is off
+  // when the relief may hide them.
+  handles.borders.setBlur(dev.political.borderOnTop ? dev.political.borderBlur * closeness : 0)
+  // The dash pattern is in pixels; the line's length is in world units.
+  handles.borders.setDashScale(at.pixelsPerUnit)
+}
+
+/**
  * Thin, fade and reveal the line work as the camera moves.
  *
  * A weight that reads as a drawn border close up becomes a rope across the continent from far away, and
@@ -76,28 +126,14 @@ export function frameLineWork(context: LayerContext, zoom: number, pixelsPerUnit
   handles.rivers?.setZoom(zoom)
   const detail = frameDetail(context, zoom)
   handles.fills?.setDetail(detail)
-  // The names of the level the zoom shows, crossing over to the next as it nears it.
-  handles.names?.setDetail(detail)
-  // The names' white edge, by the zoom.
-  handles.names?.setZoom(zoom, dev.names)
+  // How close up the line work looks, `0` from afar: what crosses the borders to their close-up look and blurs them.
+  const closeness = inlayOpacityScale(zoom, dev.political.borderInlayZoom)
+  frameNames(context, zoom, detail, closeness)
+  // The 3D icons blurred as the borders are, their shadows crisp (ATLAS-302).
+  handles.events?.setBlur?.(dev.political.iconBlur * closeness)
   // The tribes' fade, from the panel's live trial: two uniforms, nothing rebuilt.
   handles.tribes?.setFeather(dev.tribes)
-  if (handles.borders) {
-    // The borders show the same homage depth as the fills, so a vassal's colour and its border arrive together.
-    handles.borders.setDetail(detail)
-    // A patterned border holds a plain border's weight at continent scale, then thins to the core's
-    // weight close up — hence the ratio rather than a knob: it is the same width the inlay uses.
-    const patternAtZoomIn = dev.political.borderWidth / dev.political.borderEdgeWidth
-    handles.borders.setWidthScale(
-      lerp(dev.political.borderWidthZoomOut, 1, zoom),
-      lerp(dev.political.borderWidthZoomOut, patternAtZoomIn, zoom)
-    )
-    // Fainter from afar, and the inlay faded in by its own zoom setting.
-    handles.borders.setOpacityScale(lerp(dev.political.borderOpacityZoomOut, 1, zoom))
-    handles.borders.setInlayOpacity(inlayOpacityScale(zoom, dev.political.borderInlayZoom))
-    // The dash pattern is in pixels; the line's length is in world units.
-    handles.borders.setDashScale(pixelsPerUnit)
-  }
+  frameBorders(context, { zoom, detail, closeness, pixelsPerUnit })
   // The coastline's opacity eased from its zoomed-out value to its zoomed-in one.
   handles.coastline?.setOpacity(lerp(dev.coast.opacity, dev.coast.opacityZoomIn, zoom))
   // The rhumb web fades as you zoom in, so it does not clutter the terrain it is drawn over.

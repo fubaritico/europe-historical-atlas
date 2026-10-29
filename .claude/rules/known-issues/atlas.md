@@ -290,3 +290,10 @@ target.z)` would be coherent with the navigation that already exists.
 - **The names are drawn over the relief** (`depthTest` off, `scene/political/names/nameLayer`): a flat sheet at the ground's
   median height would otherwise be cut by the hills under it. Consequence: under a steep camera, a name behind a ridge shows
   through it. Chosen on purpose for legibility (the dev, 28/10); **severity: cosmetic**.
+- **The blurs — the borders', the names' ink and the 3D icons' — cost a render and two screen-sized images each, and the
+  borders' is off when they may be hidden** (2026-10-29, ATLAS-302, `scene/screenBlur`, their layers in `scene/blurLayers`).
+  The icons' draws the **whole scene** (filtered to its layer), for the markers' lights; all three cost nothing from afar. Each frame it is on, the borders are drawn alone into a 4-sample image the
+  size of the drawing buffer, then blurred through a second one — ~8 MB each at 1080p, four times that on a retina screen.
+  The image holds no relief, so with *borders over the relief* switched off (the mountains hiding them) the blur is set to
+  nought and the lines are drawn crisp, as before. **Remedy if it weighs on a phone**: blur at half resolution, or not at all
+  under a measured frame time. **Severity: worth knowing.**

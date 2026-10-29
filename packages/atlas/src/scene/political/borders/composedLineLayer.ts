@@ -25,6 +25,10 @@ export interface ComposedStroke {
   opacity: number
   /** Break this pass into dashes. */
   dashed?: boolean
+  /** Its own dash length, in the layer's dash units — the layer's when left out. */
+  dashSize?: number
+  /** Its own gap length, likewise. */
+  gapSize?: number
   /**
    * What this pass is for.
    *
@@ -32,9 +36,10 @@ export interface ComposedStroke {
    * laid inside it, which a caller fades out as the camera pulls back — at small scale a light core
    * inside a dark edging stops reading as one line and starts reading as an alternation. `pattern` is a
    * border whose meaning is in its shape (a union, a contested limit), drawn as a single dark stroke so
-   * the shape stays legible.
+   * the shape stays legible. `far` is the parchment line a border or the frontier shows from afar, `side` the
+   * parchment line beside the frontier on the unclaimed side close up, `vassal` the parchment line between vassals.
    */
-  role: 'edge' | 'inlay' | 'pattern' | 'frontier'
+  role: 'edge' | 'inlay' | 'pattern' | 'frontier' | 'far' | 'side' | 'vassal'
 }
 
 /**
@@ -80,19 +85,18 @@ export interface ComposedLineLayer {
    */
   setWidthScale(scale: number, patternScale?: number): void
   /**
-   * Scale the opacity of the light inlay passes alone, leaving edges, patterns and frontiers as built.
-   *
-   * Fading it to nothing leaves a plain dark line — which is what a border should be at continent scale,
-   * and what separates best from the lighter fills. Nothing is rebuilt.
-   * @param scale - multiplier on the inlay passes' built opacity, 0 hiding them entirely
+   * Cross the line work from how it is seen from afar to how it is seen close up (29/10): the close-up passes — the
+   * brown edge, its light inlay, the frontier's two strokes — at `closeness`, the parchment line seen from afar at
+   * `1 - closeness`. Patterns and the vassals' borders stay as built. Nothing is rebuilt.
+   * @param closeness - `0` from afar, `1` close up
    * @returns nothing
    */
-  setInlayOpacity(scale: number): void
+  setCloseness(closeness: number): void
   /**
    * Rescale every pass's opacity by a factor of the opacity it was built with.
    *
-   * Composes with {@link setInlayOpacity}, which is applied on top for the inlay passes alone — so a
-   * caller can ease the whole line back at continent scale *and* drop the inlay entirely.
+   * Composes with {@link setCloseness}, which is applied on top to the passes seen from afar or close up — so a
+   * caller can ease the whole line back at continent scale *and* cross from one look to the other.
    * @param scale - multiplier on each pass's built opacity
    * @returns nothing
    */
@@ -118,6 +122,26 @@ export interface ComposedLineLayer {
   dispose(): void
 }
 
+/** The passes seen close up: they come in as the camera nears. */
+const CLOSE_UP_ROLES: ReadonlySet<ComposedStroke['role']> = new Set([
+  'edge',
+  'inlay',
+  'frontier',
+  'side',
+])
+
+/**
+ * How much of a pass shows at a closeness: a close-up pass as much as the closeness, the line seen from afar the rest,
+ * a pattern and a vassals' border whole.
+ * @param role - the pass's role
+ * @param closeness - `0` from afar, `1` close up
+ * @returns the multiplier on its opacity
+ */
+export function closenessFactor(role: ComposedStroke['role'], closeness: number): number {
+  if (CLOSE_UP_ROLES.has(role)) return closeness
+  return role === 'far' ? 1 - closeness : 1
+}
+
 /**
  * The three opacity scales of a composed layer, remembered so each composes with the others rather than
  * replacing them: they are set from different places in the same frame and must not fight. Every pass is
@@ -127,19 +151,47 @@ export interface ComposedLineLayer {
  */
 function opacityScales(
   layers: readonly { layer: { setOpacity: (opacity: number) => void }; stroke: ComposedStroke }[]
-): { set: (which: 'whole' | 'inlay' | 'fade', scale: number) => void } {
-  // Each scale starts at 1: every pass as it was built.
-  const scales = { whole: 1, inlay: 1, fade: 1 }
+): { set: (which: 'whole' | 'closeness' | 'fade', scale: number) => void } {
+  // Each scale starts at 1: every pass as it was built, seen close up.
+  const scales = { whole: 1, closeness: 1, fade: 1 }
   return {
     set(which, scale): void {
       scales[which] = scale
-      // Reapply all three to each pass from its built opacity; the inlay scale reaches inlays only.
+      // Reapply all three to each pass from its built opacity.
       for (const { layer, stroke } of layers)
         layer.setOpacity(
-          stroke.opacity * scales.whole * scales.fade * (stroke.role === 'inlay' ? scales.inlay : 1)
+          stroke.opacity *
+            scales.whole *
+            scales.fade *
+            closenessFactor(stroke.role, scales.closeness)
         )
     },
   }
+}
+
+/**
+ * One pass as a line layer.
+ * @param stroke - the pass
+ * @param renderOrder - its draw order
+ * @param options - projection and depth behaviour, and the layer's dash pattern
+ * @returns the line layer
+ */
+function passLayer(
+  stroke: ComposedStroke,
+  renderOrder: number,
+  options: ComposedLineLayerOptions
+): ReturnType<typeof createLineLayer> {
+  return createLineLayer(stroke.segments, {
+    ...options,
+    color: stroke.color,
+    width: stroke.width,
+    opacity: stroke.opacity,
+    renderOrder,
+    dashed: stroke.dashed ?? false,
+    // A pass with its own dash pattern — the vassals' dots — keeps it; any other takes the layer's.
+    ...(stroke.dashSize === undefined ? {} : { dashSize: stroke.dashSize }),
+    ...(stroke.gapSize === undefined ? {} : { gapSize: stroke.gapSize }),
+  })
 }
 
 /**
@@ -157,14 +209,7 @@ export function createComposedLineLayer(
   const layers = strokes
     .filter((stroke) => stroke.segments.length > 0)
     .map((stroke, index) => {
-      const layer = createLineLayer(stroke.segments, {
-        ...options,
-        color: stroke.color,
-        width: stroke.width,
-        opacity: stroke.opacity,
-        renderOrder: (options.renderOrderBase ?? 0) + index,
-        dashed: stroke.dashed ?? false,
-      })
+      const layer = passLayer(stroke, (options.renderOrderBase ?? 0) + index, options)
       group.add(layer.object)
       // The stroke is kept beside its layer so the live setters can scale from the *built* value rather
       // than compounding on whatever the previous frame left behind.
@@ -184,8 +229,8 @@ export function createComposedLineLayer(
       for (const { layer, stroke } of layers)
         layer.setWidth(stroke.width * (stroke.role === 'pattern' ? (patternScale ?? scale) : scale))
     },
-    setInlayOpacity(scale: number): void {
-      opacity.set('inlay', scale)
+    setCloseness(closeness: number): void {
+      opacity.set('closeness', closeness)
     },
     setDashScale(scale: number): void {
       for (const { layer } of layers) layer.setDashScale(scale)

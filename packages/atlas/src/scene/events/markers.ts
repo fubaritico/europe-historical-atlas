@@ -51,6 +51,13 @@ export interface EventMarkers {
    * @returns nothing
    */
   faceCamera: (camera: CameraPose, seconds: number) => void
+  /**
+   * Blur the markers a little close up (ATLAS-302), or draw them crisp at `0` — the 3D icons only; a kind without a
+   * blur leaves it out.
+   * @param pixels - the blur's reach, in CSS pixels
+   * @returns nothing
+   */
+  setBlur?: (pixels: number) => void
   /** Free the GPU resources. */
   dispose(): void
 }
@@ -75,6 +82,9 @@ export function combineEventMarkers(parts: readonly EventMarkers[]): EventMarker
     },
     faceCamera(camera: CameraPose, seconds: number): void {
       for (const part of parts) part.faceCamera(camera, seconds)
+    },
+    setBlur(pixels: number): void {
+      for (const part of parts) part.setBlur?.(pixels)
     },
     dispose(): void {
       for (const part of parts) part.dispose()

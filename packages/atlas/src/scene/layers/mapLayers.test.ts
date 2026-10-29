@@ -623,7 +623,8 @@ describe('createMapLayers', () => {
         ['1:1', 1],
       ])
       layers.rebuildBorders()
-      const levels = scene.children[0]?.children ?? []
+      // The levels' groups, the blur's quad beside them left out.
+      const levels = (scene.children[0]?.children ?? []).filter((child) => child.type === 'Group')
       expect(levels).toHaveLength(2)
       layers.frame(0, 100)
       expect(levels.map((level) => level.visible)).toEqual([true, false])

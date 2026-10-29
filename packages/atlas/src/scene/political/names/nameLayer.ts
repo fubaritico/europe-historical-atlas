@@ -26,17 +26,25 @@ import {
   LinearMipmapLinearFilter,
   Mesh,
   MultiplyBlending,
+  NormalBlending,
   ShaderMaterial,
 } from 'three'
 
 import { clamp01 } from '@europe-historical-atlas/core/utils/math'
+
+import { BLUR_LAYERS } from '../../blurLayers'
+import { createScreenBlur } from '../../screenBlur'
 
 import { HALO_FIELD_EM } from './glyphSheet'
 import { nameGeometry } from './nameGeometry'
 
 import type { NameSheet } from '../../../sources/mapSources'
 import type { WorldPoint } from '../../relief/drapeProjection'
+import type { ScreenBlur } from '../../screenBlur'
 import type { YearNames } from '@europe-historical-atlas/core/pipeline/yearNames'
+
+/** The layer the names' ink moves to while blurred — one the camera does not see, nor the borders' blur. */
+export const NAME_BLUR_LAYER = BLUR_LAYERS.names
 
 /** Drawn after the borders (`BORDER_RENDER_ORDER`, 10) and before the events (`EVENT_RENDER_ORDER`, 1000). */
 export const NAME_RENDER_ORDER = 20
@@ -70,6 +78,26 @@ export interface NameScreen {
   readonly haloWholeZoom: number
   /** The zoom from which it is gone. */
   readonly haloGoneZoom: number
+  /** The zoom from which the names fade to a watermark, toward the closest. */
+  readonly watermarkZoom: number
+  /** The share of their opacity the names keep at the closest zoom — a watermark under the cities to come. */
+  readonly watermarkShare: number
+}
+
+/**
+ * How much of the names shows at a zoom: whole, then fading to a watermark over the last steps of the zoom — the dev,
+ * 2026-10-29: *« lorsqu'on est complètement zoomé, les noms deviennent à 50 % transparents. Tous »*, so the cities'
+ * dots and names can come over them.
+ * @param zoom - the camera's zoom, `0` furthest out, `1` closest
+ * @param screen - where the fade starts and what share is kept at the closest
+ * @returns the multiplier on the names' opacity, `watermarkShare..1`
+ */
+export function watermarkAtZoom(zoom: number, screen: NameScreen): number {
+  const span = 1 - screen.watermarkZoom
+  // A fade starting at the closest zoom: a step there, rather than a division by nothing.
+  const t = span <= 0 ? (zoom >= 1 ? 1 : 0) : clamp01((zoom - screen.watermarkZoom) / span)
+  const eased = t * t * (3 - 2 * t)
+  return 1 - (1 - screen.watermarkShare) * eased
 }
 
 /**
@@ -101,6 +129,12 @@ export interface NameLayer {
    * @param screen - where the edge is whole and where it is gone
    */
   setZoom: (zoom: number, screen: NameScreen) => void
+  /**
+   * Blur the names' ink a little close up (the dev, 2026-10-29: *« applique le même flou sur les noms »*), or draw it
+   * crisp at `0`.
+   * @param pixels - the blur's reach, in CSS pixels
+   */
+  setBlur: (pixels: number) => void
   /** Free the meshes, their materials and the sheet's texture. */
   dispose: () => void
 }
@@ -168,6 +202,72 @@ function levelMeshes(
 }
 
 /**
+ * The ink blurred close up, multiplied into the map as it is drawn; the white edge, gone by then, stays crisp.
+ * @param object - the names' group, which the blur's quad joins
+ * @param levels - every level's meshes
+ * @returns the blur, and the setter that blurs the ink
+ */
+function inkBlur(
+  object: Group,
+  levels: readonly LevelMeshes[]
+): { blur: ScreenBlur; setBlur: (pixels: number) => void } {
+  const inks = levels.map(({ ink }) => ink)
+  const blur = createScreenBlur(object, {
+    layer: NAME_BLUR_LAYER,
+    renderOrder: NAME_RENDER_ORDER + 1,
+    blend: 'multiply',
+    members: () => inks,
+  })
+  object.add(blur.object)
+  return {
+    blur,
+    setBlur(pixels: number): void {
+      // Drawn into the blur's image, the ink keeps its colour and its coverage in the ordinary blend; the image is
+      // multiplied into the map instead.
+      for (const ink of inks) ink.material.blending = pixels > 0 ? NormalBlending : MultiplyBlending
+      blur.setRadius(pixels)
+    },
+  }
+}
+
+/**
+ * Each level's opacities: its weight by the zoom's detail, and the watermark of the closest zoom, composed into the
+ * ink's and the white edge's.
+ * @param levels - every level's meshes
+ * @param options - the ink's and the edge's opacities where a level is fully in
+ * @returns the two setters
+ */
+function levelOpacities(
+  levels: readonly LevelMeshes[],
+  options: Pick<NameLayerOptions, 'opacity' | 'haloOpacity'>
+): { setDetail: (detail: number) => void; setWatermark: (share: number) => void } {
+  const weights = levels.map(() => 0)
+  let watermark = 1
+  const show = (): void => {
+    levels.forEach(({ edgeOpacity, inkOpacity }, level) => {
+      const weight = (weights[level] ?? 0) * watermark
+      edgeOpacity.value = options.haloOpacity * weight
+      inkOpacity.value = options.opacity * weight
+    })
+  }
+  return {
+    setDetail(detail: number): void {
+      levels.forEach((built, level) => {
+        const weight = levelWeight(level, detail)
+        weights[level] = weight
+        built.edge.visible = weight > 0
+        built.ink.visible = weight > 0
+      })
+      show()
+    },
+    setWatermark(share: number): void {
+      watermark = share
+      show()
+    },
+  }
+}
+
+/**
  * Build the names' layer, every level hidden until a detail is set.
  * @param options - the names, the sheet, the projection and the ink
  * @returns the layer
@@ -184,19 +284,19 @@ export function createNameLayer(options: NameLayerOptions): NameLayer {
     for (const mesh of [built.edge, built.ink]) object.add(mesh)
     return built
   })
+  const blur = inkBlur(object, levels)
+  const opacities = levelOpacities(levels, options)
   return {
     object,
     setDetail(detail: number): void {
-      levels.forEach(({ edge, edgeOpacity, ink, inkOpacity }, level) => {
-        const weight = levelWeight(level, detail)
-        edgeOpacity.value = options.haloOpacity * weight
-        inkOpacity.value = options.opacity * weight
-        edge.visible = weight > 0
-        ink.visible = weight > 0
-      })
+      opacities.setDetail(detail)
     },
     setZoom(zoom: number, settings: NameScreen): void {
       screen.edge.value = haloAtZoom(zoom, settings)
+      opacities.setWatermark(watermarkAtZoom(zoom, settings))
+    },
+    setBlur(pixels: number): void {
+      blur.setBlur(pixels)
     },
     dispose(): void {
       for (const { geometry, edge, ink } of levels) {
@@ -204,6 +304,8 @@ export function createNameLayer(options: NameLayerOptions): NameLayer {
         edge.material.dispose()
         ink.material.dispose()
       }
+      object.remove(blur.blur.object)
+      blur.blur.dispose()
       letters.dispose()
       halo.dispose()
     },

@@ -211,7 +211,13 @@ const VASSALS_READ_EVERY_FRAME = new Set(['enabled', 'revealStart', 'revealEnd',
 const TRIBES_READ_EVERY_FRAME = new Set(['mode', 'widthKm'])
 
 /** The names' white edge by zoom, handed to the names' layer on every frame (`frameLayers`) — spelled out by key, as above. */
-const NAMES_READ_EVERY_FRAME = new Set(['haloWholeZoom', 'haloGoneZoom'])
+const NAMES_READ_EVERY_FRAME = new Set([
+  'haloWholeZoom',
+  'haloGoneZoom',
+  'watermarkZoom',
+  'watermarkShare',
+  'blur',
+])
 
 /**
  * The flight controls, read once when a flight begins rather than every frame.

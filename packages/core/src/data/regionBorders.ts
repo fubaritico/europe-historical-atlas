@@ -83,7 +83,9 @@ export interface RegionBorders {
   between: RegionBorderGroup[]
   /**
    * Runs where a polity meets land nobody claims. Empty unless `isLand` was supplied. Drawing this is
-   * what frees a map from having to declare nations all the way to its own edge.
+   * what frees a map from having to declare nations all the way to its own edge. An authored year's runs
+   * have their polity on their left, north up (`editor/atlasBorders`), so a line beside one can be laid on
+   * the unclaimed side; a raster-derived year's are not oriented.
    */
   frontier: RegionBorderLine[]
 }

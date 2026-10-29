@@ -46,6 +46,13 @@ export interface PoliticalDevParams {
    * a border behind a summit stays visible at an oblique angle, as on most strategy-game maps.
    */
   borderOnTop: boolean
+  /**
+   * A light blur over the borders close up, in CSS pixels — the brown, the cream and the brown melting a little into
+   * one another and into the colours beside them (the dev, 2026-10-29, ATLAS-302); `0` draws them crisp.
+   */
+  borderBlur: number
+  /** The 3D event icons' own light blur close up, in CSS pixels — their shadows stay crisp (ATLAS-302). */
+  iconBlur: number
   /** Border core colour (hex string) — the inner stroke of the composed line. */
   borderColor: string
   /** Border line opacity, applied to every stroke of the composed line. */
@@ -68,6 +75,39 @@ export interface PoliticalDevParams {
   /** Frontier stroke width in CSS pixels. */
   frontierWidth: number
   /**
+   * The parchment the borders are drawn in from afar, and the vassals' borders at every zoom (the dev, 2026-10-29:
+   * *« couleur parchemin »*; *« si le parchemin semble trop clair on essayera un peu plus foncé »*).
+   */
+  borderParchmentColor: string
+  /** Width of a border between sovereigns from afar, in parchment, in CSS pixels — thinner than its brown edge. */
+  borderFarWidth: number
+  /** Width of the frontier from afar, in parchment, in CSS pixels — thinner than its brown stroke. */
+  frontierFarWidth: number
+  /**
+   * How far beside the frontier its parchment line runs close up, on the unclaimed side, in normalized grid units —
+   * the dev, 2026-10-29: *« zoomé un trait marron et un trait couleur parchemin côté non revendiqué »*.
+   */
+  frontierSideGap: number
+  /** Width of that parchment line beside the frontier, in CSS pixels — its own, the brown stroke having `frontierWidth`. */
+  frontierSideWidth: number
+  /**
+   * Share of the parchment line's opacity a third line takes, laid beyond it on the unclaimed side, so the frontier
+   * fades out in two steps — the dev, 2026-10-29: *« un troisième tracé après le parchemin […] pour suggérer une
+   * légère disparition […] avec 50 % de transparence »*.
+   */
+  frontierFadeShare: number
+  /** Colour of a border between vassals — the dev, 2026-10-29: *« passe les frontières entre vassaux en blanc »*. */
+  vassalBorderColor: string
+  /** Width of a border between vassals, in CSS pixels (the dev, 2026-10-29: *« entre vassaux plus fin »*). */
+  vassalBorderWidth: number
+  /**
+   * Length of each dot of a border between vassals, in screen pixels — about its width, so the dash reads as a point
+   * (*« essayer de n'avoir que des points, pas de tirets »*).
+   */
+  vassalDotSize: number
+  /** Gap between two dots of a border between vassals, in screen pixels. */
+  vassalDotGap: number
+  /**
    * Dash length in screen pixels for the borders `data/borderStyles` marks as broken — a personal union is
    * a border the map should admit is a fiction.
    */
@@ -87,9 +127,8 @@ export interface PoliticalDevParams {
    */
   borderOpacityZoomOut: number
   /**
-   * Zoom fraction below which the light inlay is gone entirely, fading in over the range above it. The
-   * dark edge carries the border at every scale; the inlay is the refinement that appears close up,
-   * because at continent scale a light core inside a dark edging reads as an alternation, not a line.
+   * Zoom fraction at which the close-up line work is whole, fading in from the furthest zoom — the brown edge, its
+   * cream inlay and the frontier's two strokes — while the parchment line seen from afar fades out (29/10).
    */
   borderInlayZoom: number
   /** Colour areas by the power they answer to (`SUBJECTO`) rather than by polity. */
@@ -156,6 +195,10 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   // That only works if the two sit at *opposite ends* of the lightness scale, which is exactly what an
   // earlier gold-core-in-brown failed to do — and it landed within four units of pinned Spain, drawing a
   // gold border on a gold country.
+  // Claude's start, to tune on the map.
+  borderBlur: 1,
+  // The borders' less a little: « un tout petit peu moins de flou juste sur les icônes » (the dev, 29/10).
+  iconBlur: 0.75,
   borderColor: '#f3e7cd',
   // At 0.7 each stroke is 30 % of whatever lies under it, which collapses the casing back toward the
   // fill it is meant to separate from. 0.9 is what makes the line read as a border rather than a scratch.
@@ -171,7 +214,23 @@ export const DEFAULT_POLITICAL_PARAMS: PoliticalDevParams = {
   frontierOpacity: 0.75,
   // Thicker than a negotiated border: it is the edge of what the map knows, and reads as an outer limit
   // rather than as a line between two named things.
-  frontierWidth: 2.75,
+  // 2.75 until 29/10, thinned with its parchment side line by the dev on sight: « le trait brun et le trait blanc plus fin ».
+  // The brown stroke alone, thinned again on sight: « le trait marron, il est trop épais en zoomé » (the dev, 29/10).
+  frontierWidth: 1,
+  // The map's own paper (`app/viewport` PARCHMENT, #efe6d2) darkened a little on sight — the dev, 2026-10-29: « un peu
+  // plus foncé à la place du parchemin ».
+  borderParchmentColor: '#ddd0b3',
+  borderFarWidth: 3,
+  frontierFarWidth: 2,
+  // As close as it holds — the dev, 2026-10-29: « tu les rapproches le plus près possible […] ça peut pas être éloigné ».
+  frontierSideGap: 0.0001,
+  // « fais le trait blanc un petit peu plus épais » (the dev, 29/10).
+  frontierSideWidth: 2.25,
+  frontierFadeShare: 0.5,
+  vassalBorderColor: '#ffffff',
+  vassalBorderWidth: 1.5,
+  vassalDotSize: 1.5,
+  vassalDotGap: 2.5,
   // Screen pixels, the same size at every zoom: in world units (0.018, some 16 km) the dashes grew as the
   // camera came in, *« trop allongés »* (the dev, 2026-10-16). Retuned by the dev on 2026-10-18, with the
   // borders made more visible: short dashes, a gap half their length.
@@ -204,6 +263,8 @@ export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
   rasterScale: { kind: 'number', min: 1, max: 4, step: 1, label: 'raster scale (× DEM)' },
   borderSmoothing: { kind: 'number', min: 0, max: 4, step: 1, label: 'border smoothing' },
   borderOnTop: { kind: 'boolean', label: 'borders over relief' },
+  borderBlur: { kind: 'number', min: 0, max: 4, step: 0.25, label: 'border blur close up (px)' },
+  iconBlur: { kind: 'number', min: 0, max: 4, step: 0.05, label: '3D icon blur close up (px)' },
   borderColor: { kind: 'hexColor', label: 'border core colour' },
   borderOpacity: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'border opacity' },
   borderWidth: { kind: 'number', min: 0.5, max: 5, step: 0.05, label: 'border core width (px)' },
@@ -219,6 +280,46 @@ export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
   frontierColor: { kind: 'hexColor', label: 'frontier colour' },
   frontierOpacity: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'frontier opacity' },
   frontierWidth: { kind: 'number', min: 0.5, max: 5, step: 0.05, label: 'frontier width (px)' },
+  borderParchmentColor: { kind: 'hexColor', label: 'parchment (afar, vassals)' },
+  borderFarWidth: { kind: 'number', min: 0.5, max: 6, step: 0.25, label: 'border width afar (px)' },
+  frontierFarWidth: {
+    kind: 'number',
+    min: 0.5,
+    max: 6,
+    step: 0.25,
+    label: 'frontier width afar (px)',
+  },
+  vassalBorderColor: { kind: 'hexColor', label: 'vassal border colour' },
+  vassalBorderWidth: {
+    kind: 'number',
+    min: 0.5,
+    max: 4,
+    step: 0.25,
+    label: 'vassal border width (px)',
+  },
+  vassalDotSize: { kind: 'number', min: 0.5, max: 6, step: 0.25, label: 'vassal dot length (px)' },
+  vassalDotGap: { kind: 'number', min: 0.5, max: 10, step: 0.25, label: 'vassal dot gap (px)' },
+  frontierFadeShare: {
+    kind: 'number',
+    min: 0,
+    max: 1,
+    step: 0.05,
+    label: 'frontier fading line opacity',
+  },
+  frontierSideWidth: {
+    kind: 'number',
+    min: 0.5,
+    max: 5,
+    step: 0.25,
+    label: 'frontier parchment side width (px)',
+  },
+  frontierSideGap: {
+    kind: 'number',
+    min: 0.00005,
+    max: 0.003,
+    step: 0.00005,
+    label: 'frontier parchment side gap',
+  },
   borderDashSize: { kind: 'number', min: 1, max: 40, step: 0.5, label: 'dash length (px)' },
   borderDashGap: { kind: 'number', min: 1, max: 40, step: 0.5, label: 'dash gap (px)' },
   borderDoubleGap: {
@@ -241,7 +342,7 @@ export const POLITICAL_CONTROLS: ControlTable<PoliticalDevParams> = {
     min: 0,
     max: 1,
     step: 0.05,
-    label: 'cream inlay appears at zoom',
+    label: 'close-up line work whole at zoom',
   },
   colorBySuzerain: { kind: 'boolean', label: 'colour by suzerain' },
   snapToCoast: { kind: 'number', min: 0, max: 40, step: 1, label: 'snap to coast (cells)' },
@@ -278,16 +379,43 @@ export const POLITICAL_CONTROL_GROUPS: ControlGroup<PoliticalDevParams>[] = [
     ],
   },
   {
+    title: '2b \u00b7 blur close up',
+    keys: ['borderBlur', 'iconBlur'],
+  },
+  {
     title: '3 \u00b7 border at distance',
-    keys: ['borderWidthZoomOut', 'borderOpacityZoomOut', 'borderInlayZoom'],
+    keys: [
+      'borderParchmentColor',
+      'borderFarWidth',
+      'frontierFarWidth',
+      'borderWidthZoomOut',
+      'borderOpacityZoomOut',
+      'borderInlayZoom',
+    ],
   },
   {
     title: '4 \u00b7 border types',
-    keys: ['borderDashSize', 'borderDashGap', 'borderDoubleGap'],
+    keys: [
+      'borderDashSize',
+      'borderDashGap',
+      'borderDoubleGap',
+      'vassalBorderColor',
+      'vassalBorderWidth',
+      'vassalDotSize',
+      'vassalDotGap',
+    ],
   },
   {
     title: '5 \u00b7 frontier (unclaimed land)',
-    keys: ['showFrontier', 'frontierColor', 'frontierWidth', 'frontierOpacity'],
+    keys: [
+      'showFrontier',
+      'frontierColor',
+      'frontierWidth',
+      'frontierOpacity',
+      'frontierSideGap',
+      'frontierSideWidth',
+      'frontierFadeShare',
+    ],
   },
   {
     title: '6 \u00b7 geometry',
@@ -318,6 +446,8 @@ export const POLITICAL_CONTROL_ORDER: (keyof PoliticalDevParams)[] = [
   'rasterScale',
   'borderSmoothing',
   'borderOnTop',
+  'borderBlur',
+  'iconBlur',
   'borderColor',
   'borderWidth',
   'borderEdgeColor',
@@ -327,12 +457,22 @@ export const POLITICAL_CONTROL_ORDER: (keyof PoliticalDevParams)[] = [
   'frontierColor',
   'frontierWidth',
   'frontierOpacity',
+  'frontierSideGap',
+  'frontierSideWidth',
+  'frontierFadeShare',
+  'borderParchmentColor',
+  'borderFarWidth',
+  'frontierFarWidth',
   'borderWidthZoomOut',
   'borderOpacityZoomOut',
   'borderInlayZoom',
   'borderDashSize',
   'borderDashGap',
   'borderDoubleGap',
+  'vassalBorderColor',
+  'vassalBorderWidth',
+  'vassalDotSize',
+  'vassalDotGap',
   'palette1',
   'palette2',
   'palette3',
@@ -362,6 +502,8 @@ export type PoliticalRebuild = 'redraw' | 'trace' | 'full'
 const POLITICAL_REDRAW_ONLY: readonly (keyof PoliticalDevParams)[] = [
   'showBorders',
   'borderOnTop',
+  'borderBlur',
+  'iconBlur',
   'borderColor',
   'borderOpacity',
   'borderWidth',
@@ -371,9 +513,18 @@ const POLITICAL_REDRAW_ONLY: readonly (keyof PoliticalDevParams)[] = [
   'frontierColor',
   'frontierOpacity',
   'frontierWidth',
+  'borderParchmentColor',
+  'borderFarWidth',
+  'frontierFarWidth',
+  'frontierSideGap',
+  'frontierSideWidth',
   'borderDashSize',
   'borderDashGap',
   'borderDoubleGap',
+  'vassalBorderColor',
+  'vassalBorderWidth',
+  'vassalDotSize',
+  'vassalDotGap',
   'borderWidthZoomOut',
   'borderOpacityZoomOut',
   'borderInlayZoom',

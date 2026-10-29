@@ -37,6 +37,19 @@ describe('combineEventMarkers', () => {
     })
   })
 
+  describe('variants', () => {
+    it('hands the blur to the kinds that have one, and passes over the others', () => {
+      const pins = createPinMarkers(
+        [{ ground: [0, 0.2, 0], colour: '#e3170a' }],
+        () => new Texture()
+      )
+      const setBlur = vi.fn()
+      const both = combineEventMarkers([pins, { ...pins, setBlur }])
+      both.setBlur?.(1.5)
+      expect(setBlur).toHaveBeenCalledWith(1.5)
+    })
+  })
+
   describe('edge cases', () => {
     it('holds an empty group for no markers', () => {
       expect(combineEventMarkers([]).object.children).toHaveLength(0)

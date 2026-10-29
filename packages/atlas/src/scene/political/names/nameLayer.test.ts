@@ -1,7 +1,14 @@
 import { MultiplyBlending, NormalBlending } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
-import { NAME_RENDER_ORDER, createNameLayer, haloAtZoom, levelWeight } from './nameLayer'
+import {
+  NAME_BLUR_LAYER,
+  NAME_RENDER_ORDER,
+  createNameLayer,
+  haloAtZoom,
+  levelWeight,
+  watermarkAtZoom,
+} from './nameLayer'
 
 import type { NameLayerOptions } from './nameLayer'
 import type { PlacedYearName } from '@europe-historical-atlas/core/pipeline/yearNames'
@@ -59,7 +66,8 @@ function options(): NameLayerOptions {
  * @returns them, typed
  */
 const meshes = (layer: { object: { children: unknown[] } }): Mesh<never, ShaderMaterial>[] =>
-  layer.object.children as Mesh<never, ShaderMaterial>[]
+  // The blur's quad, never culled, left out: the letters' meshes alone.
+  (layer.object.children as Mesh<never, ShaderMaterial>[]).filter((mesh) => mesh.frustumCulled)
 
 /**
  * Each level's ink mesh.
@@ -93,7 +101,7 @@ describe('levelWeight', () => {
 })
 
 describe('haloAtZoom', () => {
-  const screen = { haloWholeZoom: 0.2, haloGoneZoom: 0.6 }
+  const screen = { haloWholeZoom: 0.2, haloGoneZoom: 0.6, watermarkZoom: 0.85, watermarkShare: 0.5 }
 
   it('keeps the white edge whole up to its zoom, gone from the other, half-way between', () => {
     expect(haloAtZoom(0, screen)).toBe(1)
@@ -104,6 +112,28 @@ describe('haloAtZoom', () => {
   it('steps at one zoom when the two are set alike, rather than dividing by nothing', () => {
     const step = { ...screen, haloWholeZoom: 0.5, haloGoneZoom: 0.5 }
     expect([haloAtZoom(0.49, step), haloAtZoom(0.5, step)]).toEqual([1, 0])
+  })
+})
+
+describe('watermarkAtZoom', () => {
+  const screen = { haloWholeZoom: 0.1, haloGoneZoom: 0.4, watermarkZoom: 0.8, watermarkShare: 0.5 }
+
+  // The dev, 2026-10-29: « lorsqu'on est complètement zoomé, les noms deviennent à 50 % transparents. Tous ».
+  it('keeps the names whole until the watermark’s zoom, and at its share at the closest', () => {
+    expect([
+      watermarkAtZoom(0.5, screen),
+      watermarkAtZoom(0.8, screen),
+      watermarkAtZoom(1, screen),
+    ]).toEqual([1, 1, 0.5])
+  })
+
+  it('fades between the two, half-way at half the span', () => {
+    expect(watermarkAtZoom(0.9, screen)).toBeCloseTo(0.75, 9)
+  })
+
+  it('steps at the closest zoom when the fade starts there, rather than dividing by nothing', () => {
+    const late = { ...screen, watermarkZoom: 1 }
+    expect([watermarkAtZoom(0.99, late), watermarkAtZoom(1, late)]).toEqual([1, 0.5])
   })
 })
 
@@ -159,7 +189,12 @@ describe('createNameLayer', () => {
 
     it('gives the white edge whole from afar and gone close up', () => {
       const layer = createNameLayer(options())
-      const screen = { haloWholeZoom: 0.1, haloGoneZoom: 0.4 }
+      const screen = {
+        haloWholeZoom: 0.1,
+        haloGoneZoom: 0.4,
+        watermarkZoom: 0.85,
+        watermarkShare: 0.5,
+      }
       const edge = (): number | undefined =>
         edges(layer)[0]?.material.uniforms.edge?.value as number | undefined
       layer.setZoom(0, screen)
@@ -171,6 +206,55 @@ describe('createNameLayer', () => {
 
   // L3: N/A — it refuses nothing itself; the geometry refuses a letter with no cell (`nameGeometry`).
   // L4: N/A — no async work.
+
+  describe('watermark', () => {
+    it('halves every name’s ink and white edge at the closest zoom, the level’s weight kept', () => {
+      const layer = createNameLayer(options())
+      layer.setDetail(0)
+      layer.setZoom(1, {
+        haloWholeZoom: 0.1,
+        haloGoneZoom: 0.4,
+        watermarkZoom: 0.85,
+        watermarkShare: 0.5,
+      })
+      expect([
+        inks(layer)[0]?.material.uniforms.opacity?.value,
+        edges(layer)[0]?.material.uniforms.opacity?.value,
+      ]).toEqual([0.25, 0.125])
+    })
+  })
+
+  // The dev, 2026-10-29: « applique le même flou sur les noms ». The ink is drawn into the blur's image in the
+  // ordinary blend, then multiplied into the map by the blur's quad; the white edge stays crisp.
+  describe('blur', () => {
+    it('moves the ink to its own layer in the ordinary blend once blurred, and back in multiply once not', () => {
+      const layer = createNameLayer(options())
+      layer.setBlur(1)
+      expect(
+        inks(layer).map((ink) => [ink.layers.isEnabled(NAME_BLUR_LAYER), ink.material.blending])
+      ).toEqual([
+        [true, NormalBlending],
+        [true, NormalBlending],
+      ])
+      expect(edges(layer).every((edge) => edge.layers.isEnabled(0))).toBe(true)
+      layer.setBlur(0)
+      expect(inks(layer).map((ink) => [ink.layers.isEnabled(0), ink.material.blending])).toEqual([
+        [true, MultiplyBlending],
+        [true, MultiplyBlending],
+      ])
+    })
+
+    it('multiplies the blurred ink into the map, at the ink’s rank', () => {
+      const layer = createNameLayer(options())
+      const quad = (layer.object.children as Mesh<never, ShaderMaterial>[]).find(
+        (mesh) => !mesh.frustumCulled
+      )
+      expect([quad?.material.blending, quad?.renderOrder]).toEqual([
+        MultiplyBlending,
+        NAME_RENDER_ORDER + 1,
+      ])
+    })
+  })
 
   describe('edge cases', () => {
     it('frees every level’s geometry, both materials, and both sheets’ textures, on disposal', () => {

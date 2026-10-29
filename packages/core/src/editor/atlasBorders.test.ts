@@ -116,6 +116,19 @@ describe('exactBordersOf', () => {
       const { borders } = exactBordersOf(authored(doc), bbox, uniformMask(false))
 
       expect(borders.between).toEqual([])
+      // The kingdom on the west, on the frontier's left, north up: the run heads north.
+      expect(borders.frontier).toEqual([[uv([10, 0]), uv([10, 10])]])
+    })
+
+    // So the atlas can lay a line beside a frontier on the unclaimed side (29/10).
+    it('runs a frontier with its polity on the left, north up, whichever side the polity is on', () => {
+      const doc = sideBySide()
+      const france = doc.polities.find((each) => each.id === 'france')
+      if (france) france.rank = 'tribe'
+
+      const { borders } = exactBordersOf(authored(doc), bbox, uniformMask(false))
+
+      // The kingdom on the east now: the run heads south.
       expect(borders.frontier).toEqual([[uv([10, 10]), uv([10, 0])]])
     })
 

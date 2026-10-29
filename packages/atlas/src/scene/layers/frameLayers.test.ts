@@ -120,7 +120,7 @@ describe('frameLineWork', () => {
       borders: null,
       coastline: null,
       rhumb: null,
-      names: { setDetail: vi.fn(), setZoom },
+      names: { setDetail: vi.fn(), setZoom, setBlur: vi.fn() },
     }
     const context = {
       dev,
@@ -129,5 +129,42 @@ describe('frameLineWork', () => {
     } as unknown as LayerContext
     frameLineWork(context, 0.5, 120)
     expect(setZoom).toHaveBeenCalledWith(0.5, dev.names)
+    // Past the close-up zoom, the names take the borders' whole blur.
+    expect(handles.names.setBlur).toHaveBeenCalledWith(dev.names.blur)
+  })
+
+  // ATLAS-302: the blur reads the borders without the relief, so it must be off when the relief may hide them.
+  it('blurs the borders by the panel’s reach times the closeness, and not at all when the relief may hide them', () => {
+    const setBlur = vi.fn()
+    const dev = createDevState()
+    dev.political.borderBlur = 2
+    dev.political.borderInlayZoom = 0.4
+    const borders = {
+      setDetail: vi.fn(),
+      setWidthScale: vi.fn(),
+      setOpacityScale: vi.fn(),
+      setCloseness: vi.fn(),
+      setDashScale: vi.fn(),
+      setBlur,
+    }
+    const handles = {
+      rivers: null,
+      fills: null,
+      tribes: null,
+      borders,
+      coastline: null,
+      rhumb: null,
+      names: null,
+    }
+    const context = {
+      dev,
+      sources: createMapSources(),
+      handles: handles as unknown as LayerHandles,
+    } as unknown as LayerContext
+    frameLineWork(context, 0.2, 120)
+    expect(setBlur).toHaveBeenLastCalledWith(1)
+    dev.political.borderOnTop = false
+    frameLineWork(context, 0.2, 120)
+    expect(setBlur).toHaveBeenLastCalledWith(0)
   })
 })

@@ -1,7 +1,7 @@
 import { latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
 
 import { handFor } from './borderHands'
-import { deriveBorders, maskDerivationDeps } from './derivedBorders'
+import { claimEnclosure, deriveBorders, maskDerivationDeps } from './derivedBorders'
 import { homageLevels } from './homageLevels'
 import { asSeenAcrossTribes, isTribeEdge, tribeIds } from './tribes'
 import { openYearDocument } from './yearDocument'
@@ -9,6 +9,7 @@ import { openYearDocument } from './yearDocument'
 import type { HandPattern } from './borderHands'
 import type { DerivedBorder } from './derivedBorders'
 import type { HomageLevels } from './homageLevels'
+import type { YearDocument } from './yearDocument'
 import type { BorderPattern } from '../data/borderStyles'
 import type { UvPoint } from '../data/coastlineSource'
 import type { LandMask } from '../data/landMask'
@@ -66,6 +67,62 @@ const ATLAS_PATTERN: Readonly<Record<Exclude<HandPattern, 'none'>, BorderPattern
 }
 
 /**
+ * How far beside a frontier its two sides are asked, in degrees — about two land-mask cells, as the derivation asks a
+ * run's far side (`derivedBorders`).
+ */
+const SIDE_OFFSET_DEG = 0.05
+
+/**
+ * Whether the polity a frontier bounds lies on the left of its run, north up — tried at the run's middle segment. A
+ * sliver narrower than the offset, where neither or both sides are its, is left as it runs.
+ * @param run - the frontier's anchors, in order
+ * @param owner - the polity it bounds
+ * @param doc - the document, for the anchors
+ * @param holds - whether a polity's claim encloses a point
+ * @returns `false` only when the polity is clearly on the right
+ */
+function heldOnTheLeft(
+  run: readonly number[],
+  owner: string,
+  doc: YearDocument,
+  holds: (polity: string, point: readonly [number, number]) => boolean
+): boolean {
+  const middle = Math.max(0, Math.floor((run.length - 2) / 2))
+  // Every index resolves (`assembleAuthoredYear` refused the year otherwise), and a run has two anchors at least.
+  const a = doc.anchors[run[middle] ?? -1]
+  const b = doc.anchors[run[middle + 1] ?? -1]
+  if (a === undefined || b === undefined) return true
+  const dx = b[0] - a[0]
+  const dy = b[1] - a[1]
+  const length = Math.hypot(dx, dy)
+  if (length === 0) return true
+  const [nx, ny] = [(-dy / length) * SIDE_OFFSET_DEG, (dx / length) * SIDE_OFFSET_DEG]
+  const mid: [number, number] = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
+  const left = holds(owner, [mid[0] + nx, mid[1] + ny])
+  const right = holds(owner, [mid[0] - nx, mid[1] - ny])
+  return !(right && !left)
+}
+
+/**
+ * A frontier's run with its polity on the left, north up — reversed when the polity is on the right.
+ * @param run - the frontier's anchors, in order
+ * @param owner - the polity it bounds, as the border names it
+ * @param doc - the document, for the anchors
+ * @param holds - whether a polity's claim encloses a point
+ * @returns the run, oriented
+ */
+function leftHanded(
+  run: number[],
+  owner: string | undefined,
+  doc: YearDocument,
+  holds: (polity: string, point: readonly [number, number]) => boolean
+): number[] {
+  // A frontier always names its one polity; without it, the run stays as it was derived.
+  if (owner === undefined || heldOnTheLeft(run, owner, doc, holds)) return run
+  return [...run].reverse()
+}
+
+/**
  * Derive an authored year's borders for the atlas.
  *
  * **Without a land mask, no frontier against unclaimed ground** — every far side nobody claims is read as
@@ -103,6 +160,7 @@ export function exactBordersOf(
         u: longitudeToHorizontal(lon, bbox),
         v: latitudeToVertical(lat, bbox),
       }))
+  const holds = claimEnclosure(doc)
   let undrawnHands = 0
   for (const border of derived) {
     if (isTribeEdge(border, tribes)) continue
@@ -114,7 +172,9 @@ export function exactBordersOf(
     if (line.length < 2) continue
     if (!hand.cased) {
       if (seen.hand !== null) undrawnHands += 1
-      borders.frontier.push(line)
+      // The polity a frontier bounds: its one side, or across a tribe the side that is not one.
+      const owner = seen.between.find((id) => !tribes.has(id))
+      borders.frontier.push(toGrid(leftHanded(border.run, owner, doc, holds)))
       continue
     }
     const key = borders.between.length

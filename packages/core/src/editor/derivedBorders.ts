@@ -158,6 +158,22 @@ function resolveClaims(doc: YearDocument): Map<string, ResolvedClaim> {
 }
 
 /**
+ * Whether a polity's own claim encloses a point, every claim resolved once for the document — what tells the atlas
+ * which side of a frontier its polity holds.
+ * @param doc - the document
+ * @returns the test, by polity id and `[lon, lat]`; `false` for a polity with no claim
+ */
+export function claimEnclosure(
+  doc: YearDocument
+): (polity: string, point: readonly [number, number]) => boolean {
+  const claims = resolveClaims(doc)
+  return (polity, point) => {
+    const claim = claims.get(polity)
+    return claim !== undefined && encloses(point, claim)
+  }
+}
+
+/**
  * Whether a point lies inside a resolved claim — its box first, then its rings.
  * @param point - `[lon, lat]`
  * @param claim - the claim, resolved
