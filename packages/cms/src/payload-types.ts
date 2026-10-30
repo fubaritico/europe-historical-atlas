@@ -59,264 +59,263 @@ export type SupportedTimezones =
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
-  | 'Pacific/Fiji'
+  | 'Pacific/Fiji';
 
 export interface Config {
   auth: {
-    users: UserAuthOperations
-  }
-  blocks: {}
+    users: UserAuthOperations;
+  };
+  blocks: {};
   collections: {
-    events: Event
-    'event-types': EventType
-    'siege-engines': SiegeEngine
-    places: Place
-    'place-periods': PlacePeriod
-    'importance-reasons': ImportanceReason
-    actors: Actor
-    sources: Source
-    users: User
-    'payload-kv': PayloadKv
-    'payload-locked-documents': PayloadLockedDocument
-    'payload-preferences': PayloadPreference
-    'payload-migrations': PayloadMigration
-  }
-  collectionsJoins: {}
+    events: Event;
+    'event-types': EventType;
+    'siege-engines': SiegeEngine;
+    places: Place;
+    'place-periods': PlacePeriod;
+    'importance-reasons': ImportanceReason;
+    actors: Actor;
+    sources: Source;
+    users: User;
+    'payload-kv': PayloadKv;
+    'payload-locked-documents': PayloadLockedDocument;
+    'payload-preferences': PayloadPreference;
+    'payload-migrations': PayloadMigration;
+  };
+  collectionsJoins: {};
   collectionsSelect: {
-    events: EventsSelect<false> | EventsSelect<true>
-    'event-types': EventTypesSelect<false> | EventTypesSelect<true>
-    'siege-engines': SiegeEnginesSelect<false> | SiegeEnginesSelect<true>
-    places: PlacesSelect<false> | PlacesSelect<true>
-    'place-periods': PlacePeriodsSelect<false> | PlacePeriodsSelect<true>
-    'importance-reasons': ImportanceReasonsSelect<false> | ImportanceReasonsSelect<true>
-    actors: ActorsSelect<false> | ActorsSelect<true>
-    sources: SourcesSelect<false> | SourcesSelect<true>
-    users: UsersSelect<false> | UsersSelect<true>
-    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>
-    'payload-locked-documents':
-      PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>
-    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>
-    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>
-  }
+    events: EventsSelect<false> | EventsSelect<true>;
+    'event-types': EventTypesSelect<false> | EventTypesSelect<true>;
+    'siege-engines': SiegeEnginesSelect<false> | SiegeEnginesSelect<true>;
+    places: PlacesSelect<false> | PlacesSelect<true>;
+    'place-periods': PlacePeriodsSelect<false> | PlacePeriodsSelect<true>;
+    'importance-reasons': ImportanceReasonsSelect<false> | ImportanceReasonsSelect<true>;
+    actors: ActorsSelect<false> | ActorsSelect<true>;
+    sources: SourcesSelect<false> | SourcesSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+  };
   db: {
-    defaultIDType: number
-  }
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('fr' | 'en') | ('fr' | 'en')[]
-  globals: {}
-  globalsSelect: {}
-  locale: 'fr' | 'en'
+    defaultIDType: number;
+  };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('fr' | 'en') | ('fr' | 'en')[];
+  globals: {};
+  globalsSelect: {};
+  locale: 'fr' | 'en';
   widgets: {
-    collections: CollectionsWidget
-  }
-  user: User
+    collections: CollectionsWidget;
+  };
+  user: User;
   jobs: {
-    tasks: unknown
-    workflows: unknown
-  }
+    tasks: unknown;
+    workflows: unknown;
+  };
 }
 export interface UserAuthOperations {
   forgotPassword: {
-    email: string
-    password: string
-  }
+    email: string;
+    password: string;
+  };
   login: {
-    email: string
-    password: string
-  }
+    email: string;
+    password: string;
+  };
   registerFirstUser: {
-    email: string
-    password: string
-  }
+    email: string;
+    password: string;
+  };
   unlock: {
-    email: string
-    password: string
-  }
+    email: string;
+    password: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "events".
  */
 export interface Event {
-  id: number
-  title: string
-  type: number | EventType
+  id: number;
+  title: string;
+  type: number | EventType;
   /**
    * Une année suffit. Pour une durée (une guerre, un long siège), remplir aussi la fin.
    */
   date: {
     start: {
-      year: number
-      month?: number | null
-      day?: number | null
-      circa?: boolean | null
+      year: number;
+      month?: number | null;
+      day?: number | null;
+      circa?: boolean | null;
       /**
        * Avec « vers » seulement. Vide : ±10 ans.
        */
-      margin?: number | null
-      calendar?: ('julian' | 'gregorian') | null
-    }
+      margin?: number | null;
+      calendar?: ('julian' | 'gregorian') | null;
+    };
     end?: {
-      year?: number | null
-      month?: number | null
-      day?: number | null
-      circa?: boolean | null
+      year?: number | null;
+      month?: number | null;
+      day?: number | null;
+      circa?: boolean | null;
       /**
        * Avec « vers » seulement. Vide : ±10 ans.
        */
-      margin?: number | null
-      calendar?: ('julian' | 'gregorian') | null
-    }
-  }
-  place?: (number | null) | Place
-  actors?: (number | Actor)[] | null
-  description?: string | null
-  sources?: (number | Source)[] | null
+      margin?: number | null;
+      calendar?: ('julian' | 'gregorian') | null;
+    };
+  };
+  place?: (number | null) | Place;
+  actors?: (number | Actor)[] | null;
+  description?: string | null;
+  sources?: (number | Source)[] | null;
   /**
    * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem.
    */
-  wikidata?: string | null
-  updatedAt: string
-  createdAt: string
+  wikidata?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "event-types".
  */
 export interface EventType {
-  id: number
-  name: string
-  icon: 'pin' | 'swords' | 'tower' | 'crown'
-  colour: '#e3170a' | '#ff7a00' | '#ffc300' | '#1fa33a' | '#1565e8' | '#8a2be2' | '#d4148a'
-  updatedAt: string
-  createdAt: string
+  id: number;
+  name: string;
+  icon: 'pin' | 'swords' | 'tower' | 'crown';
+  colour: '#e3170a' | '#ff7a00' | '#ffc300' | '#1fa33a' | '#1565e8' | '#8a2be2' | '#d4148a';
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "places".
  */
 export interface Place {
-  id: number
-  name: string
+  id: number;
+  name: string;
   /**
    * @minItems 2
    * @maxItems 2
    */
-  location: [number, number]
+  location: [number, number];
   /**
    * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem.
    */
-  wikidata?: string | null
+  wikidata?: string | null;
   /**
    * Sa fondation, ou sa première mention.
    */
   existsFrom?: {
-    year?: number | null
-    month?: number | null
-    day?: number | null
-    circa?: boolean | null
+    year?: number | null;
+    month?: number | null;
+    day?: number | null;
+    circa?: boolean | null;
     /**
      * Avec « vers » seulement. Vide : ±10 ans.
      */
-    margin?: number | null
-    calendar?: ('julian' | 'gregorian') | null
-  }
+    margin?: number | null;
+    calendar?: ('julian' | 'gregorian') | null;
+  };
   /**
    * Vide : le lieu existe encore aujourd’hui.
    */
   existsTo?: {
-    year?: number | null
-    month?: number | null
-    day?: number | null
-    circa?: boolean | null
+    year?: number | null;
+    month?: number | null;
+    day?: number | null;
+    circa?: boolean | null;
     /**
      * Avec « vers » seulement. Vide : ±10 ans.
      */
-    margin?: number | null
-    calendar?: ('julian' | 'gregorian') | null
-  }
-  updatedAt: string
-  createdAt: string
+    margin?: number | null;
+    calendar?: ('julian' | 'gregorian') | null;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "actors".
  */
 export interface Actor {
-  id: number
-  name: string
-  kind: 'person' | 'house'
+  id: number;
+  name: string;
+  kind: 'person' | 'house';
   /**
    * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem.
    */
-  wikidata?: string | null
-  updatedAt: string
-  createdAt: string
+  wikidata?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sources".
  */
 export interface Source {
-  id: number
-  title: string
-  author?: string | null
-  publisher?: string | null
-  editionYear?: number | null
-  kind?: ('primary' | 'historian-atlas' | 'scholarly' | 'encyclopaedia' | 'crowd-database') | null
-  licence?: ('public-domain' | 'cc0' | 'cc-by' | 'cc-by-sa' | 'all-rights-reserved') | null
-  url?: string | null
+  id: number;
+  title: string;
+  author?: string | null;
+  publisher?: string | null;
+  editionYear?: number | null;
+  kind?: ('primary' | 'historian-atlas' | 'scholarly' | 'encyclopaedia' | 'crowd-database') | null;
+  licence?: ('public-domain' | 'cc0' | 'cc-by' | 'cc-by-sa' | 'all-rights-reserved') | null;
+  url?: string | null;
   /**
    * Les sources qu’elle reprend : une carte redessinée d’après un atlas.
    */
-  copyOf?: (number | Source)[] | null
-  updatedAt: string
-  createdAt: string
+  copyOf?: (number | Source)[] | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "siege-engines".
  */
 export interface SiegeEngine {
-  id: number
-  name: string
-  engine: 'traction-trebuchet' | 'counterweight-trebuchet' | 'cannon'
+  id: number;
+  name: string;
+  engine: 'traction-trebuchet' | 'counterweight-trebuchet' | 'cannon';
   /**
    * Ce que disent les sources. Sans fin, l’engin est encore en usage. Quand deux périodes se chevauchent, la carte montre le plus récent.
    */
   inUse: {
     start: {
-      year: number
-      month?: number | null
-      day?: number | null
-      circa?: boolean | null
+      year: number;
+      month?: number | null;
+      day?: number | null;
+      circa?: boolean | null;
       /**
        * Avec « vers » seulement. Vide : ±10 ans.
        */
-      margin?: number | null
-      calendar?: ('julian' | 'gregorian') | null
-    }
+      margin?: number | null;
+      calendar?: ('julian' | 'gregorian') | null;
+    };
     end?: {
-      year?: number | null
-      month?: number | null
-      day?: number | null
-      circa?: boolean | null
+      year?: number | null;
+      month?: number | null;
+      day?: number | null;
+      circa?: boolean | null;
       /**
        * Avec « vers » seulement. Vide : ±10 ans.
        */
-      margin?: number | null
-      calendar?: ('julian' | 'gregorian') | null
-    }
-  }
+      margin?: number | null;
+      calendar?: ('julian' | 'gregorian') | null;
+    };
+  };
   /**
    * Au moins une : une période sans source ne s’enregistre pas.
    */
-  sources: (number | Source)[]
+  sources: (number | Source)[];
   /**
    * L’identifiant de l’élément, par exemple Q1218 pour Jérusalem.
    */
-  wikidata?: string | null
-  updatedAt: string
-  createdAt: string
+  wikidata?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Une ville telle qu’elle est à une date : son importance sur la carte, et ce qu’en disent les sources. Le lieu lui-même (son nom, sa position) se saisit une fois, dans « Lieux ».
@@ -325,46 +324,46 @@ export interface SiegeEngine {
  * via the `definition` "place-periods".
  */
 export interface PlacePeriod {
-  id: number
+  id: number;
   /**
    * Choisi parmi les lieux déjà saisis dans « Lieux ».
    */
-  place: number | Place
+  place: number | Place;
   /**
    * Une année suffit : la fiche vaut pour cette année. Remplir la fin en fait une durée. Un même lieu ne peut pas avoir deux fiches pour la même année.
    */
   date: {
     start: {
-      year: number
-      month?: number | null
-      day?: number | null
-      circa?: boolean | null
+      year: number;
+      month?: number | null;
+      day?: number | null;
+      circa?: boolean | null;
       /**
        * Avec « vers » seulement. Vide : ±10 ans.
        */
-      margin?: number | null
-      calendar?: ('julian' | 'gregorian') | null
-    }
+      margin?: number | null;
+      calendar?: ('julian' | 'gregorian') | null;
+    };
     end?: {
-      year?: number | null
-      month?: number | null
-      day?: number | null
-      circa?: boolean | null
+      year?: number | null;
+      month?: number | null;
+      day?: number | null;
+      circa?: boolean | null;
       /**
        * Avec « vers » seulement. Vide : ±10 ans.
        */
-      margin?: number | null
-      calendar?: ('julian' | 'gregorian') | null
-    }
-  }
+      margin?: number | null;
+      calendar?: ('julian' | 'gregorian') | null;
+    };
+  };
   /**
    * Quand la ville apparaît sur la carte : une capitale se voit de loin, une grande ville en zoomant, une ville de près.
    */
-  importance: 'capital' | 'large-city' | 'city'
+  importance: 'capital' | 'large-city' | 'city';
   /**
    * Pourquoi elle a cette importance : pouvoir, religion, commerce… Facultatif. La liste se complète dans « Raisons d’importance ».
    */
-  reasons?: (number | ImportanceReason)[] | null
+  reasons?: (number | ImportanceReason)[] | null;
   /**
    * Facultatif. Une ligne par chose qu’une source dit de la ville à cette date — par exemple : Buringh 2021, population, 25 000. La source se choisit dans « Sources », qui doit donc la contenir.
    */
@@ -373,23 +372,23 @@ export interface PlacePeriod {
         /**
          * Choisie parmi celles déjà saisies dans « Sources ».
          */
-        source: number | Source
+        source: number | Source;
         /**
          * De quoi parle la source : la population, l’importance, ou une raison.
          */
-        subject: 'population' | 'importance' | 'reason'
-        population?: number | null
-        importance?: ('capital' | 'large-city' | 'city') | null
-        reason?: (number | null) | ImportanceReason
+        subject: 'population' | 'importance' | 'reason';
+        population?: number | null;
+        importance?: ('capital' | 'large-city' | 'city') | null;
+        reason?: (number | null) | ImportanceReason;
         /**
          * Où la source le dit : une page, une ligne, une colonne. Facultatif.
          */
-        where?: string | null
-        id?: string | null
+        where?: string | null;
+        id?: string | null;
       }[]
-    | null
-  updatedAt: string
-  createdAt: string
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Les raisons qu’on peut cocher sur une fiche « Ville à une date » : pouvoir, religion, commerce, population… Ajoutez-en autant qu’il faut.
@@ -398,400 +397,400 @@ export interface PlacePeriod {
  * via the `definition` "importance-reasons".
  */
 export interface ImportanceReason {
-  id: number
-  name: string
-  updatedAt: string
-  createdAt: string
+  id: number;
+  name: string;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: number
-  updatedAt: string
-  createdAt: string
-  email: string
-  resetPasswordToken?: string | null
-  resetPasswordExpiration?: string | null
-  salt?: string | null
-  hash?: string | null
-  resetPasswordRequestedAt?: string | null
-  loginAttempts?: number | null
-  lockUntil?: string | null
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
   sessions?:
     | {
-        id: string
-        createdAt?: string | null
-        expiresAt: string
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
       }[]
-    | null
-  password?: string | null
-  collection: 'users'
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number
-  key: string
+  id: number;
+  key: string;
   data:
     | {
-        [k: string]: unknown
+        [k: string]: unknown;
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number
+  id: number;
   document?:
     | ({
-        relationTo: 'events'
-        value: number | Event
+        relationTo: 'events';
+        value: number | Event;
       } | null)
     | ({
-        relationTo: 'event-types'
-        value: number | EventType
+        relationTo: 'event-types';
+        value: number | EventType;
       } | null)
     | ({
-        relationTo: 'siege-engines'
-        value: number | SiegeEngine
+        relationTo: 'siege-engines';
+        value: number | SiegeEngine;
       } | null)
     | ({
-        relationTo: 'places'
-        value: number | Place
+        relationTo: 'places';
+        value: number | Place;
       } | null)
     | ({
-        relationTo: 'place-periods'
-        value: number | PlacePeriod
+        relationTo: 'place-periods';
+        value: number | PlacePeriod;
       } | null)
     | ({
-        relationTo: 'importance-reasons'
-        value: number | ImportanceReason
+        relationTo: 'importance-reasons';
+        value: number | ImportanceReason;
       } | null)
     | ({
-        relationTo: 'actors'
-        value: number | Actor
+        relationTo: 'actors';
+        value: number | Actor;
       } | null)
     | ({
-        relationTo: 'sources'
-        value: number | Source
+        relationTo: 'sources';
+        value: number | Source;
       } | null)
     | ({
-        relationTo: 'users'
-        value: number | User
-      } | null)
-  globalSlug?: string | null
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  globalSlug?: string | null;
   user: {
-    relationTo: 'users'
-    value: number | User
-  }
-  updatedAt: string
-  createdAt: string
+    relationTo: 'users';
+    value: number | User;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number
+  id: number;
   user: {
-    relationTo: 'users'
-    value: number | User
-  }
-  key?: string | null
+    relationTo: 'users';
+    value: number | User;
+  };
+  key?: string | null;
   value?:
     | {
-        [k: string]: unknown
+        [k: string]: unknown;
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null
-  updatedAt: string
-  createdAt: string
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number
-  name?: string | null
-  batch?: number | null
-  updatedAt: string
-  createdAt: string
+  id: number;
+  name?: string | null;
+  batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "events_select".
  */
 export interface EventsSelect<T extends boolean = true> {
-  title?: T
-  type?: T
+  title?: T;
+  type?: T;
   date?:
     | T
     | {
         start?:
           | T
           | {
-              year?: T
-              month?: T
-              day?: T
-              circa?: T
-              margin?: T
-              calendar?: T
-            }
+              year?: T;
+              month?: T;
+              day?: T;
+              circa?: T;
+              margin?: T;
+              calendar?: T;
+            };
         end?:
           | T
           | {
-              year?: T
-              month?: T
-              day?: T
-              circa?: T
-              margin?: T
-              calendar?: T
-            }
-      }
-  place?: T
-  actors?: T
-  description?: T
-  sources?: T
-  wikidata?: T
-  updatedAt?: T
-  createdAt?: T
+              year?: T;
+              month?: T;
+              day?: T;
+              circa?: T;
+              margin?: T;
+              calendar?: T;
+            };
+      };
+  place?: T;
+  actors?: T;
+  description?: T;
+  sources?: T;
+  wikidata?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "event-types_select".
  */
 export interface EventTypesSelect<T extends boolean = true> {
-  name?: T
-  icon?: T
-  colour?: T
-  updatedAt?: T
-  createdAt?: T
+  name?: T;
+  icon?: T;
+  colour?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "siege-engines_select".
  */
 export interface SiegeEnginesSelect<T extends boolean = true> {
-  name?: T
-  engine?: T
+  name?: T;
+  engine?: T;
   inUse?:
     | T
     | {
         start?:
           | T
           | {
-              year?: T
-              month?: T
-              day?: T
-              circa?: T
-              margin?: T
-              calendar?: T
-            }
+              year?: T;
+              month?: T;
+              day?: T;
+              circa?: T;
+              margin?: T;
+              calendar?: T;
+            };
         end?:
           | T
           | {
-              year?: T
-              month?: T
-              day?: T
-              circa?: T
-              margin?: T
-              calendar?: T
-            }
-      }
-  sources?: T
-  wikidata?: T
-  updatedAt?: T
-  createdAt?: T
+              year?: T;
+              month?: T;
+              day?: T;
+              circa?: T;
+              margin?: T;
+              calendar?: T;
+            };
+      };
+  sources?: T;
+  wikidata?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "places_select".
  */
 export interface PlacesSelect<T extends boolean = true> {
-  name?: T
-  location?: T
-  wikidata?: T
+  name?: T;
+  location?: T;
+  wikidata?: T;
   existsFrom?:
     | T
     | {
-        year?: T
-        month?: T
-        day?: T
-        circa?: T
-        margin?: T
-        calendar?: T
-      }
+        year?: T;
+        month?: T;
+        day?: T;
+        circa?: T;
+        margin?: T;
+        calendar?: T;
+      };
   existsTo?:
     | T
     | {
-        year?: T
-        month?: T
-        day?: T
-        circa?: T
-        margin?: T
-        calendar?: T
-      }
-  updatedAt?: T
-  createdAt?: T
+        year?: T;
+        month?: T;
+        day?: T;
+        circa?: T;
+        margin?: T;
+        calendar?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "place-periods_select".
  */
 export interface PlacePeriodsSelect<T extends boolean = true> {
-  place?: T
+  place?: T;
   date?:
     | T
     | {
         start?:
           | T
           | {
-              year?: T
-              month?: T
-              day?: T
-              circa?: T
-              margin?: T
-              calendar?: T
-            }
+              year?: T;
+              month?: T;
+              day?: T;
+              circa?: T;
+              margin?: T;
+              calendar?: T;
+            };
         end?:
           | T
           | {
-              year?: T
-              month?: T
-              day?: T
-              circa?: T
-              margin?: T
-              calendar?: T
-            }
-      }
-  importance?: T
-  reasons?: T
+              year?: T;
+              month?: T;
+              day?: T;
+              circa?: T;
+              margin?: T;
+              calendar?: T;
+            };
+      };
+  importance?: T;
+  reasons?: T;
   testimonies?:
     | T
     | {
-        source?: T
-        subject?: T
-        population?: T
-        importance?: T
-        reason?: T
-        where?: T
-        id?: T
-      }
-  updatedAt?: T
-  createdAt?: T
+        source?: T;
+        subject?: T;
+        population?: T;
+        importance?: T;
+        reason?: T;
+        where?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "importance-reasons_select".
  */
 export interface ImportanceReasonsSelect<T extends boolean = true> {
-  name?: T
-  updatedAt?: T
-  createdAt?: T
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "actors_select".
  */
 export interface ActorsSelect<T extends boolean = true> {
-  name?: T
-  kind?: T
-  wikidata?: T
-  updatedAt?: T
-  createdAt?: T
+  name?: T;
+  kind?: T;
+  wikidata?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sources_select".
  */
 export interface SourcesSelect<T extends boolean = true> {
-  title?: T
-  author?: T
-  publisher?: T
-  editionYear?: T
-  kind?: T
-  licence?: T
-  url?: T
-  copyOf?: T
-  updatedAt?: T
-  createdAt?: T
+  title?: T;
+  author?: T;
+  publisher?: T;
+  editionYear?: T;
+  kind?: T;
+  licence?: T;
+  url?: T;
+  copyOf?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-  updatedAt?: T
-  createdAt?: T
-  email?: T
-  resetPasswordToken?: T
-  resetPasswordExpiration?: T
-  salt?: T
-  hash?: T
-  resetPasswordRequestedAt?: T
-  loginAttempts?: T
-  lockUntil?: T
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
   sessions?:
     | T
     | {
-        id?: T
-        createdAt?: T
-        expiresAt?: T
-      }
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T
-  data?: T
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
-  document?: T
-  globalSlug?: T
-  user?: T
-  updatedAt?: T
-  createdAt?: T
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences_select".
  */
 export interface PayloadPreferencesSelect<T extends boolean = true> {
-  user?: T
-  key?: T
-  value?: T
-  updatedAt?: T
-  createdAt?: T
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations_select".
  */
 export interface PayloadMigrationsSelect<T extends boolean = true> {
-  name?: T
-  batch?: T
-  updatedAt?: T
-  createdAt?: T
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -799,17 +798,18 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface CollectionsWidget {
   data?: {
-    [k: string]: unknown
-  }
-  width: 'full'
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
-  [k: string]: unknown
+  [k: string]: unknown;
 }
+
 
 declare module 'payload' {
   export interface GeneratedTypes extends Config {}

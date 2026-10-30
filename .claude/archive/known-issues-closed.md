@@ -331,3 +331,10 @@ Entries closed and moved out of `known-issues.md`. Kept for the lessons they car
   piece of an island group. **Severity: cosmetic, to judge on the map.**
   **Closed 2026-10-29** (ATLAS-301): a country's pieces are gathered into realms across straits, and a far realm is named
   only from a fifth of the largest or 2 000 cells (`nameRealm`) — Norway is named on its mainland, Iceland and Greenland.
+- **The CMS server rewrote `payload-types.ts` and `importMap.js` without the repository's format** — CMS-290 (26/10,
+  measured): at every reload of its config, and at every `payload run` (the seed, the export). Payload writes double
+  quotes and no trailing comma; Prettier wanted the opposite. So git showed both files modified with nothing changed
+  but quotes, and `format:check` stayed red while the server ran. The remedy of the time was to format and stage them
+  by hand at each commit. **Closed 2026-10-30**: both in `.prettierignore` and committed as Payload writes them
+  (`generate:types` rerun; the output proven to differ from the committed file by format only — Prettier over it gives
+  the old file byte for byte). A reload now writes the same bytes, so no diff.

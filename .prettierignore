@@ -10,5 +10,9 @@ public/heightmaps
 pnpm-lock.yaml
 # Year files are written by the Cartographer and stay byte for byte as it saved them
 packages/atlas/public/years
+# Written by Payload in its own format, at every reload of the CMS server's config — kept byte for byte as it writes
+# them, so a reload leaves no diff (CMS-290)
+packages/cms/src/payload-types.ts
+packages/cms/src/app/(payload)/admin/importMap.js
 # The names' fixture is written by files/spikes/name-fixture/build-fixture.ts, its runs on one line
 **/pipeline/testing/*.json
