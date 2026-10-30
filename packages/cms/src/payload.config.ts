@@ -6,6 +6,7 @@ import { en } from '@payloadcms/translations/languages/en'
 import { fr } from '@payloadcms/translations/languages/fr'
 import { buildConfig } from 'payload'
 
+import { ATLAS_NAME } from './atlasName'
 import { Actors } from './collections/Actors'
 import { Events } from './collections/Events'
 import { EventTypes } from './collections/EventTypes'
@@ -15,9 +16,22 @@ import { Places } from './collections/Places'
 import { SiegeEngines } from './collections/SiegeEngines'
 import { Sources } from './collections/Sources'
 import { Users } from './collections/Users'
+import { brandMarkDataUri } from './components/BrandMark/utils/brandMarkDataUri'
 
 /** This file's folder: the import map and the generated types are written beside it. */
 const dirname = path.dirname(fileURLToPath(import.meta.url))
+
+/** The mark's component, in the import map's terms (from `src/`). */
+const BRAND_MARK_PATH = '/components/BrandMark/BrandMark#BrandMark'
+
+/** The mark in the navigation: a little larger than Payload's 18 px icon, the dev's ask (2026-10-30). */
+const NAV_MARK_SIDE = 24
+
+/** The mark on the login page, in place of Payload's logo. */
+const LOGIN_MARK_SIDE = 96
+
+/** The side the tab's icon is drawn at; the browser scales it to its 16 or 32 px. */
+const TAB_MARK_SIDE = 32
 
 /**
  * Read a setting `.env` must provide.
@@ -43,7 +57,18 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
-    meta: { titleSuffix: ' — Atlas historique de l’Europe' },
+    // Dark only, the dev's call (2026-10-30)
+    theme: 'dark',
+    components: {
+      graphics: {
+        Icon: { path: BRAND_MARK_PATH, clientProps: { side: NAV_MARK_SIDE, names: 'dashboard' } },
+        Logo: { path: BRAND_MARK_PATH, clientProps: { side: LOGIN_MARK_SIDE, names: 'atlas' } },
+      },
+    },
+    meta: {
+      titleSuffix: ` — ${ATLAS_NAME}`,
+      icons: [{ rel: 'icon', type: 'image/svg+xml', url: brandMarkDataUri(TAB_MARK_SIDE) }],
+    },
   },
   collections: [
     Events,

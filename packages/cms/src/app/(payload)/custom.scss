@@ -1,6 +1,17 @@
 // Our own pieces of the admin, unlayered so they win over Payload's `@layer payload-default`
 // (files/plans/contribution/payload-check.md).
 
+// The atlas's lambda in place of Payload's icon (`components/BrandMark`): its home link's box was 18 px, the mark is
+// 24 (`NAV_MARK_SIDE` in payload.config.ts).
+.step-nav__home {
+  width: 24px;
+  height: 24px;
+}
+
+.brand-mark {
+  display: block;
+}
+
 // The Wikidata button beside a place's name: lowered by the height of the field's label, so it lines up with the
 // input rather than with the label.
 .wikidata-lookup {

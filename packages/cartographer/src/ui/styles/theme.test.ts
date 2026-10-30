@@ -1,6 +1,8 @@
 import tokensSheet from '@fubaritico/tokens/css?raw'
 import { describe, expect, it } from 'vitest'
 
+import { BRAND_MARK_COLOURS } from '@europe-historical-atlas/core/utils/lettering'
+
 import main from '../../main.tsx?raw'
 
 import editorChrome from './editor-chrome.css?raw'
@@ -137,6 +139,13 @@ describe('theme.css', () => {
   })
 
   describe('variants', () => {
+    // A stylesheet cannot import core's constant, so this is what keeps the Cartographer's lambda the same colours
+    // as the CMS's, which draws from it.
+    it('paints the mark in core’s brand colours', () => {
+      expect(resolve('--mark-ground')).toBe(BRAND_MARK_COLOURS.ground)
+      expect(resolve('--mark-ink')).toBe(BRAND_MARK_COLOURS.ink)
+    })
+
     // Both sheets set the same properties on `:root`, unlayered, so the later wins: swapped, the
     // design system's light values would come back over ours.
     it('is imported after the tokens sheet', () => {
