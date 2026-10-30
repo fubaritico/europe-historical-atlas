@@ -9,6 +9,7 @@ import { EMPTY_MOMENT } from './sheetValues'
 import { validateSheet } from './validateSheet'
 
 import type { MomentValues, SheetValues } from './sheetValues'
+import type { OverlapCheck } from './validateSheet'
 
 /** The French texts, as the form says them. */
 const say = createTranslator(CITY_SHEET_MESSAGES, 'fr')
@@ -34,6 +35,35 @@ function withMoment(end: 'start' | 'end', values: Partial<MomentValues>): SheetV
   }
 }
 
+/** Rome's saved sheet, « vers 1100 », as the base holds it. */
+const savedRome = {
+  id: 1,
+  date: {
+    start: {
+      year: 1100,
+      month: null,
+      day: null,
+      circa: true,
+      margin: null,
+      calendar: 'julian' as const,
+    },
+    end: {
+      year: null,
+      month: null,
+      day: null,
+      circa: false,
+      margin: null,
+      calendar: 'julian' as const,
+    },
+  },
+}
+
+/** The overlap check against Rome's saved sheet, worded plainly for the test. */
+const overRome: OverlapCheck = {
+  saved: [savedRome],
+  refusal: (place) => `${place} already has a sheet`,
+}
+
 describe('validateSheet', () => {
   describe('happy path', () => {
     it('finds nothing wrong with Rome in 1100, a capital', () => {
@@ -55,6 +85,13 @@ describe('validateSheet', () => {
 
     it('takes a year before Christ', () => {
       expect(validateSheet(withMoment('start', { year: '-50' }), say)).toEqual({})
+    })
+    it('lets this very sheet keep its year: it is not compared with itself', () => {
+      expect(validateSheet(rome, say, { ...overRome, ownId: 1 })).toEqual({})
+    })
+
+    it('takes another year of the same place', () => {
+      expect(validateSheet(withMoment('start', { year: '1101' }), say, overRome)).toEqual({})
     })
   })
 
@@ -126,6 +163,25 @@ describe('validateSheet', () => {
         [say('reversed'), describeDateRefusalFr({ kind: 'reversed' })],
       ]
       for (const [ours, theirs] of pairs) expect(ours).toBe(theirs)
+    })
+    it('refuses, while typing, a year the place already has a sheet for — under the year', () => {
+      expect(validateSheet(rome, say, overRome)).toEqual({
+        date: { start: { year: 'Rome already has a sheet' } },
+      })
+    })
+
+    it('refuses a span that covers a saved year', () => {
+      const span = withMoment('end', { year: '1120' })
+      const early = { ...span, date: { ...span.date, start: { ...EMPTY_MOMENT, year: '1090' } } }
+      expect(validateSheet(early, say, overRome)).toEqual({
+        date: { start: { year: 'Rome already has a sheet' } },
+      })
+    })
+
+    it('says the date’s own refusal, not the overlap, while the date is not a date', () => {
+      expect(validateSheet(withMoment('start', { year: '0' }), say, overRome)).toEqual({
+        date: { start: { year: say('yearZero') } },
+      })
     })
   })
 

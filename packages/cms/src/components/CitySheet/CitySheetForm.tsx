@@ -10,11 +10,13 @@ import { useCallback } from 'react'
 
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 
+import { useOverlapCheck } from './hooks/useOverlapCheck'
 import { useSheetSubmit } from './hooks/useSheetSubmit'
 import { CITY_SHEET_MESSAGES } from './i18n'
 import { ImportanceField } from './internal/ImportanceField'
 import { MomentFields } from './internal/MomentFields'
 import { PlaceField } from './internal/PlaceField'
+import { PlaceSheets } from './internal/PlaceSheets'
 import { searchPlaces } from './utils/searchPlaces'
 import { validateSheet } from './utils/validateSheet'
 
@@ -69,7 +71,9 @@ export function CitySheetForm({
     (query: string) => searchPlaces(fetch, { api, locale: contentLocale }, query),
     [api, contentLocale]
   )
-  const validate = (values: SheetValues) => validateSheet(values, say)
+  const overlap = useOverlapCheck(api, locale, id)
+  const validate = (values: SheetValues) =>
+    validateSheet(values, say, overlap.current(values.place?.id ?? null))
 
   // Render
   return (
@@ -87,6 +91,7 @@ export function CitySheetForm({
             </p>
           )}
           <PlaceField search={search} say={say} />
+          <PlaceSheets read={overlap.read} onSheets={overlap.onSheets} say={say} />
           <fieldset className="city-sheet__date">
             <legend className="city-sheet__legend">{say('date')}</legend>
             <p className="city-sheet__help">{say('dateHelp')}</p>

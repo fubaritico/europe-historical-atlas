@@ -10,7 +10,7 @@ import { formatHistoricalDate } from '@europe-historical-atlas/core/time/formatH
 
 import { historicalDateField } from '../fields/historicalDate'
 import { relationId } from '../fields/relationId'
-import { overlappingSheet } from '../fields/sheetOverlap'
+import { OVERLAP_PATH, overlappingSheet } from '../fields/sheetOverlap'
 
 import { COLLECTION_MESSAGES } from './i18n'
 
@@ -45,8 +45,7 @@ const TRANSLATORS = {
   en: createTranslator(COLLECTION_MESSAGES, 'en'),
 } as const
 
-/** Where the overlap's refusal is shown: under the year the date begins with. */
-export const OVERLAP_PATH = 'date.start.year'
+export { OVERLAP_PATH } from '../fields/sheetOverlap'
 
 /**
  * The server's half of decision 7: a sheet whose date shares a year with another of the same place is refused at

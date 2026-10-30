@@ -6,6 +6,7 @@
   "placeNone": "No place of that name in « Places ».",
   "placeRemove": "Remove {name}",
   "placeSearchFailed": "The search for places did not go through. Try again in a moment.",
+  "placeSheetsFailed": "The sheets already entered for this place could not be read: a duplicate sheet will be refused when saved.",
   "date": "Date",
   "dateHelp": "A year is enough: the sheet holds for that year. Filling in the end makes it a span. A place cannot have two sheets for the same year.",
   "start": "Start",

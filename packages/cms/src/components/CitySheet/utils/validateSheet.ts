@@ -4,12 +4,14 @@ import { checkCitySheet, isSheetRefused } from '@europe-historical-atlas/core/da
 import { isDateRefusal } from '@europe-historical-atlas/core/time/historicalDate'
 
 import { toHistoricalDate } from '../../../fields/dateReading'
+import { OVERLAP_PATH, overlappingSheet } from '../../../fields/sheetOverlap'
 
 import { momentFields, readNumber } from './sheetValues'
 
 import type { CitySheetMessageKey } from '../i18n'
 import type { Say } from './say'
 import type { MomentValues, SheetValues } from './sheetValues'
+import type { SavedSheet } from '../../../fields/sheetOverlap'
 import type { CitySheetIssue } from '@europe-historical-atlas/core/data/citySheet'
 import type { DateRefusal, HistoricalDate } from '@europe-historical-atlas/core/time/historicalDate'
 import type { FormikErrors } from 'formik'
@@ -140,18 +142,54 @@ function withIssues(
   return all
 }
 
+/** What the overlap rule needs while typing: the place's saved sheets, this sheet's id, and the refusal's words. */
+export interface OverlapCheck {
+  /** The chosen place's saved sheets, as the base answered. */
+  saved: readonly SavedSheet[]
+  /** This sheet's id, so it is not compared with itself; absent for a new one. */
+  ownId?: number | string
+  /**
+   * The refusal, in the server's own words.
+   * @param placeName - the place's name
+   * @param date - the saved sheet's date
+   * @returns the sentence
+   */
+  refusal: (placeName: string, date: HistoricalDate) => string
+}
+
+/**
+ * The overlap rule of decision 7, played while typing against the place's saved sheets — `overlappingSheet`, the
+ * very function the server plays at save, so the two cannot disagree. Its sentence goes under the year, where the
+ * server puts it.
+ * @param errors - the errors so far
+ * @param values - the form's values, with a place chosen
+ * @param overlap - the saved sheets, the id and the words
+ * @returns the errors, with the overlap's when there is one
+ */
+function withOverlap(errors: Errors, values: SheetValues, overlap: OverlapCheck): Errors {
+  if (values.place === null) return errors
+  const date = { start: momentFields(values.date.start), end: momentFields(values.date.end) }
+  const hit = overlappingSheet(date, overlap.saved, overlap.ownId)
+  return hit === null
+    ? errors
+    : withError(errors, OVERLAP_PATH, overlap.refusal(values.place.name, hit.date))
+}
+
 /**
  * Every error of the form, each under its field — what Formik shows once a field is touched, and what keeps the
- * button greyed. The rules are `core`'s (`checkCitySheet`, the date's own); this only says where, and in which words.
+ * button greyed. The rules are `core`'s (`checkCitySheet`, the date's own) and the overlap's, when the place's saved
+ * sheets are known; this only says where, and in which words.
  * @param values - the form's values
  * @param say - the translator, in the admin's language
+ * @param overlap - the place's saved sheets and the refusal's words; absent until they are read
  * @returns the errors, `{}` when the sheet is valid
  */
-export function validateSheet(values: SheetValues, say: Say): Errors {
+export function validateSheet(values: SheetValues, say: Say, overlap?: OverlapCheck): Errors {
   let errors: Errors = {}
   const date = readDate(values, say)
   const dateRefused = Array.isArray(date)
   if (dateRefused) for (const [path, sentence] of date) errors = withError(errors, path, sentence)
+  else if (overlap !== undefined) errors = withOverlap(errors, values, overlap)
   const answer = checkCitySheet({
     place: values.place?.id,
     date: dateRefused ? undefined : date,

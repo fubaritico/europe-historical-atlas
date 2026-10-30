@@ -6,6 +6,7 @@
   "placeNone": "Aucun lieu de ce nom dans « Lieux ».",
   "placeRemove": "Retirer {name}",
   "placeSearchFailed": "La recherche des lieux n’a pas abouti. Réessayez dans un instant.",
+  "placeSheetsFailed": "Les fiches déjà saisies pour ce lieu n’ont pas pu être lues : une fiche en double sera refusée à l’enregistrement.",
   "date": "Date",
   "dateHelp": "Une année suffit : la fiche vaut pour cette année. Remplir la fin en fait une durée. Un même lieu ne peut pas avoir deux fiches pour la même année.",
   "start": "Début",

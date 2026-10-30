@@ -66,8 +66,12 @@ function startYear(): HTMLInputElement {
  * @returns the stand-in
  */
 function serverAnswers(status: number, json: unknown) {
-  const fetcher = vi.fn<typeof fetch>(() =>
-    Promise.resolve(new Response(JSON.stringify(json), { status }))
+  const fetcher = vi.fn<typeof fetch>((input) =>
+    Promise.resolve(
+      (input as string).startsWith('/api/place-periods?')
+        ? new Response(JSON.stringify({ docs: [] }), { status: 200 })
+        : new Response(JSON.stringify(json), { status })
+    )
   )
   vi.stubGlobal('fetch', fetcher)
   return fetcher
@@ -79,9 +83,28 @@ function serverAnswers(status: number, json: unknown) {
  */
 function serverWithPlaces() {
   const fetcher = vi.fn<typeof fetch>((input) => {
-    const json = (input as string).startsWith('/api/places')
+    const url = input as string
+    const json = url.startsWith('/api/places')
       ? { docs: [{ id: 5, name: 'Rome' }] }
-      : { doc: { id: 7 } }
+      : url.startsWith('/api/place-periods?')
+        ? { docs: [] }
+        : { doc: { id: 7 } }
+    return Promise.resolve(new Response(JSON.stringify(json), { status: 200 }))
+  })
+  vi.stubGlobal('fetch', fetcher)
+  return fetcher
+}
+
+/**
+ * The server holding Rome's sheet for 1100: the places' search answers Rome, Rome's sheets answer that one.
+ * @returns the stand-in
+ */
+function serverWithRome1100() {
+  const fetcher = vi.fn<typeof fetch>((input) => {
+    const url = input as string
+    const json = url.startsWith('/api/places')
+      ? { docs: [{ id: 5, name: 'Rome' }] }
+      : { docs: [{ id: 1, date: { start: { year: 1100, circa: true }, end: { year: null } } }] }
     return Promise.resolve(new Response(JSON.stringify(json), { status: 200 }))
   })
   vi.stubGlobal('fetch', fetcher)
@@ -126,7 +149,7 @@ describe('CitySheetForm', () => {
       await waitFor(() => {
         expect(toast.success).toHaveBeenCalledWith('Fiche enregistrée.')
       })
-      expect(fetcher.mock.calls[0]?.[0]).toBe('/api/place-periods/1')
+      expect(fetcher.mock.calls.some(([input]) => input === '/api/place-periods/1')).toBe(true)
       expect(router.refresh).toHaveBeenCalled()
     })
   })
@@ -181,6 +204,49 @@ describe('CitySheetForm', () => {
       expect(document.activeElement).toBe(screen.getByRole('combobox', { name: 'Lieu' }))
       expect(await screen.findByText('Choisissez un lieu.')).toBeTruthy()
     })
+    it('refuses a year the place already has a sheet for while it is typed — the button greyed, the sentence under the year', async () => {
+      serverWithRome1100()
+      renderForm({ ...empty, importance: 'capital' })
+      const user = userEvent.setup()
+      await user.type(screen.getByRole('combobox', { name: 'Lieu' }), 'Ro')
+      await user.click(await screen.findByRole('option', { name: 'Rome' }))
+      await user.type(startYear(), '1100')
+      await user.tab()
+      expect(await screen.findByText(/^Rome a déjà une fiche pour vers 1100\./)).toBeTruthy()
+      expect(screen.getByRole('button', { name: 'Ajouter' }).hasAttribute('disabled')).toBe(true)
+      await user.clear(startYear())
+      await user.type(startYear(), '1101')
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Ajouter' }).hasAttribute('disabled')).toBe(false)
+      })
+    })
+
+    it('greys the button once the place is chosen after its year: the sheets read run the check again', async () => {
+      serverWithRome1100()
+      renderForm({ ...empty, importance: 'capital' })
+      const user = userEvent.setup()
+      await user.type(startYear(), '1100')
+      await user.type(screen.getByRole('combobox', { name: 'Lieu' }), 'Ro')
+      await user.click(await screen.findByRole('option', { name: 'Rome' }))
+      await waitFor(() => {
+        expect(screen.getByText(/^Rome a déjà une fiche pour vers 1100\./)).toBeTruthy()
+      })
+      expect(screen.getByRole('button', { name: 'Ajouter' }).hasAttribute('disabled')).toBe(true)
+    })
+
+    it('keeps Rome’s own sheet valid: it is not compared with itself', async () => {
+      serverWithRome1100()
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      const [startCirca] = screen.getAllByLabelText('Vers (année estimée)', { selector: 'input' })
+      if (startCirca === undefined) throw new Error('no circa box')
+      await user.click(startCirca)
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Enregistrer' }).hasAttribute('disabled')).toBe(
+          false
+        )
+      })
+    })
   })
 
   describe('managed errors', () => {
@@ -215,6 +281,16 @@ describe('CitySheetForm', () => {
         expect.any(TypeError)
       )
     })
+    it('says when the place’s sheets could not be read: the overlap is then checked at save', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(() => Promise.reject(new TypeError('Failed to fetch')))
+      )
+      renderForm(rome, 1)
+      expect(
+        await screen.findByText(/^Les fiches déjà saisies pour ce lieu n’ont pas pu être lues/)
+      ).toBeTruthy()
+    })
   })
 
   describe('unmanaged errors', () => {
@@ -228,7 +304,7 @@ describe('CitySheetForm', () => {
       await user.clear(startYear())
       await user.type(startYear(), '1101')
       await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
-      expect(await screen.findByRole('alert')).toBeTruthy()
+      expect(await screen.findByText(/^Le serveur ne répond pas/)).toBeTruthy()
       expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('Le serveur ne répond pas'))
       expect(startYear().value).toBe('1101')
     })

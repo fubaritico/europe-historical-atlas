@@ -112,6 +112,12 @@ only once touched, the button greyed then enabled) needs a DOM: the CMS tests ru
   not `{}` (the create page crashed), and the importance's label sat beside its menu. Both fixed, the first with a test.
 - **The test account**: `claude-test@localhost.test` in his base, its password in `packages/cms/.env.test-user`
   (git-ignored, his eyes only), created with his yes — he deletes it from « Contributeurs » when he wants.
+- **Step 2, the overlap while typing** (2026-10-30): once a place is chosen the form reads its saved sheets and plays
+  `overlappingSheet`, the server's own function, in its validation, re-run when they arrive; the sentence is the
+  server's (`collections/i18n`). A read that fails — or a saved sheet whose date does not read — is said under the place
+  and in the console, and the overlap is then checked at save only (his decision for a failed save, applied to a
+  failed read; the second case would otherwise throw inside Formik's validation, where nothing catches it). Walked in
+  Chrome: 1100 typed, Rome picked by keyboard → the refusal under the year at once, the button greyed; 1101 clears it.
 - **Not in step 1**: the server running the same schema (a `beforeValidate` hook) — Payload's own field rules hold the
   same three fields today, so it joins with step 3, when the schema gains the reasons and the lines.
 - **To know — Payload's document lock**: Payload marks a document « being edited » from its own form only
