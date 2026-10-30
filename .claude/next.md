@@ -5,32 +5,42 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — les villes (ATLAS-295) : l'écran « Ville à une date » fait de Formik, Zod et son design system
+## ▶ ON REPREND ICI — les villes (ATLAS-295) : une légende par importance, puis les dessiner ; les sources de toute saisie
 
-**30/10, fin à 0 h 55.** Commités, **non poussés** : `b3cafed` (les fiches « Ville à une date » et « Raisons
-d'importance », le refus de chevauchement), `898cd65` (les trois sources des villes). Le dev a choisi les villes avant les
-icônes suivantes (ATLAS-287/288 attendent). **Lire d'abord `files/plans/atlas/cities.md`** : ses huit décisions, avec qui
-les a prises.
+**30/10, fin à 22 h 30**, une session menée en grande partie **par Remote Control, lui loin de l'écran** : je testais dans
+Chrome avec un compte de test et lui envoyais les captures. **11 commits non poussés**, de `736bc19` à `4a7a9ee` — pousser
+quand il le dira. **Rien n'est dessiné dans l'atlas** : l'écran de saisie est fini, l'export écrit les villes, l'atlas les
+lit sans les dessiner. Sa base tient **une ville** : Rome en 1100, capitale, quatre raisons.
 
-**Ce qui marche, testé par lui** (*« c'est vérifié »*) : dans son CMS, une deuxième fiche du même lieu pour une année déjà
-couverte est refusée par une phrase en haut de la page et sous l'année (« Rome a déjà une fiche pour 1100… »), en
-français ou en anglais selon l'admin. Sa base tient **une fiche : Rome, 1100**, capitale ; aucune raison, aucune source
-saisie encore — le registre « Sources » est peut-être vide.
+**Ce qu'il a demandé en fermant — à traiter dans cet ordre, en en parlant d'abord avec lui :**
+- **Une légende par importance des villes avant de dessiner** : *« il faut des points, mais il faut des points avec cercle,
+  il faut une légende différente par rapport à l'importance de la ville »* — une marque distincte pour la capitale, la
+  grande ville, la ville. Les règles des cartographes déjà réunies sont dans `files/plans/atlas/cities.md` (la taille et la
+  valeur, lues sans légende, Bertin ; le nom à droite du point, Imhof). Proposer des marques sur un banc, lui choisit.
+- **Un système de sources qui accompagne toute saisie** — lieux, événements, villes : *« ce n'est pas quand je voudrais, c'est
+  quand il faudra »* — donc il est dû, à concevoir. Aujourd'hui seules les villes ont des lignes « ce que dit telle source ».
+- **L'incertitude : n'en parler que quand un algorithme existe.** Il n'y en a aucun dans le code (seulement le « vers » d'une
+  date et sa marge, le flou des tribus, le registre des sources, les lignes de sources des villes) ; la machine de
+  `files/plans/evidence-system.md` n'est que sur le papier. **Ne plus écrire « incertain » comme si c'était calculé.**
 
-**La suite, décidée (décision 8)** : remplacer l'écran d'édition de « Villes à une date » par le nôtre
-(`admin.components.views.edit.default`) — **Formik** (2.4.9) pour l'état, **Zod** (v4) pour les règles, **fubaritico-ds**
-pour les champs ; Payload reste la base et l'API. Ce qu'il veut, mot pour mot : *« ça valide à la saisie […] tant que tous
-les champs ne sont pas valides, il n'y a pas de bouton ajouter »*. Le comportement de son crochet
-`~/Desktop/useFormValidation.ts` est la spécification : une erreur seulement sur un champ touché, une validation
-silencieuse à l'ouverture pour griser le bouton, « le formulaire a changé » — Formik : `touched`, `validateOnMount` +
-`isValid`, `dirty` ; les lignes de sources par `FieldArray`. La règle du chevauchement se rejoue pendant la saisie avec
-`overlappingSheet` (`cms/src/fields/sheetOverlap.ts`), sur les fiches du lieu lues par l'API. **À installer** : `formik` et
-les paquets du design system dans le CMS (catalogue, jeton GitHub Packages) — l'annoncer avant. **À vérifier avant de
-coder** : comment la feuille de style du design system cohabite avec celle de Payload ; la traduction des erreurs Zod en
-erreurs Formik s'écrit chez nous (Formik attend Yup). **Chaque champ porte sa phrase d'aide**, dès le premier essai.
+**En attente, non accepté** : le classement des villes par rôle politique — capitale = siège d'un souverain, grande ville =
+siège d'un vassal direct (nos données de 1100 : 88 souverains, 55 vassaux directs). Il a demandé que **chaque condition soit
+vérifiable, vérifiée, sourcée, et la source saisie dans le CMS** ; ma méthode (Wikidata « capitale » avec ses dates, sinon une
+source savante citée à l'endroit exact ; saisie par lots par un script Payload) attend son go.
 
-**Ensuite, dans l'ordre du plan** : relire `files/plans/atlas/cities-1100.md` avec lui (les ordres de villes sont classés
-par population seule ; à relire par leur rôle) ; puis le calque des villes dans l'atlas (point et nom ensemble, par ordre).
+**Décidé par lui ce jour** : l'importance qui ordonne la carte est **politique** ; le Saint-Empire **n'a pas de capitale**,
+aucune symbolique, pas Aix ; l'export **prépare** le fichier de l'atlas, jointures faites (*« comme en GraphQL »*) — écrit en
+tête de `core/src/data/contentFormat.ts` ; le reste des décisions de l'écran dans `files/plans/atlas/city-sheet-screen.md`.
+
+**Le compte de test** : `claude-test@localhost.test`, mot de passe dans `packages/cms/.env.test-user` (ignoré par git) — me
+connecter : mettre un temps `admin.autoLogin` avec `prefillOnly` dans `payload.config.ts` (lit ce fichier), cliquer, **retirer
+aussitôt**. Je ne lis jamais le mot de passe ni un jeton dans la conversation (refusé par les permissions). À lui de le
+supprimer dans « Contributeurs ».
+
+**Deux fautes de frappe dans ses raisons** : « pelrinage », « evêché » — à lui de les corriger dans « Raisons d'importance ».
+
+**Pour le design system** : son menu déroulant, ouvert vers le haut, cache le champ au-dessus ; il ne peut pas relier un texte
+d'aide au menu — deux demandes à transmettre à son Claude.
 
 **Quand il teste** : lui donner les valeurs exactes à saisir et le résultat attendu, en trois lignes ; lire sa base en
 lecture seule (`sqlite3 "file:packages/cms/cms.db?mode=ro"`) plutôt que de deviner ce qu'il a enregistré.
@@ -96,18 +106,18 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 | où | ticket | état |
 | --- | --- | --- |
 | **Chantiers** | DESIGN-262 La gestion de l'incertitude · **CMS-285 Le CMS** | DESIGN-262 : palier 2 conçu (CORE-270) ; CMS-285 : socle codé, outillage à faire |
-| **En cours** | ATLAS-295 · ATLAS-303 · ATLAS-156 · ATLAS-152 | ATLAS-295 : les villes, l'écran Formik à faire ; ATLAS-303 : le rendu ; ATLAS-304 renvoyé dans À faire le 29/10 (R3, dessiner au besoin) ; ATLAS-156 : bataille et siège faits ; ATLAS-152 : sources de 1100 |
-| **À valider par le développeur** | — | vide le 26/10 |
+| **En cours** | ATLAS-295 · ATLAS-303 · ATLAS-156 · ATLAS-152 | ATLAS-295 : l'écran fait, l'export écrit les villes, la légende puis le dessin à faire ; ATLAS-303 : le rendu ; ATLAS-304 renvoyé dans À faire le 29/10 (R3, dessiner au besoin) ; ATLAS-156 : bataille et siège faits ; ATLAS-152 : sources de 1100 |
+| **À valider par le développeur** | — | vide le 30/10 (CMS-290 passé en Fait) |
 | **Backlog** | ATLAS-299 · ATLAS-297 · CORE-270 · CMS-281..283 · ATLAS-284 · CARTO-237 · CARTO-273 · CARTO-274 | CORE-270 passe après la contribution (25/10) ; 281–283 les écrans suivants |
-| **À faire**, en tête | ATLAS-287 · ATLAS-288 · CMS-276 → 280 · … · CMS-290 · ATLAS-304 (en bas) | dans son ordre |
-| **Idées** | ATLAS-319 police réduite aux lettres des noms · CMS-320 le CMS en fr/en · ATLAS-300 animations réduites · CARTO-268 feature flags · CORE-271 généalogie · CARTO-272 radar | CARTO-268 : pas encore |
+| **À faire**, en tête | ATLAS-287 · ATLAS-288 · CMS-276 → 280 · … · ATLAS-304 (en bas) | dans son ordre |
+| **Idées** | ATLAS-321 la chapelle d'Aix en 3D · ATLAS-319 police réduite aux lettres des noms · CMS-320 le CMS en fr/en · ATLAS-300 animations réduites · CARTO-268 feature flags · CORE-271 généalogie · CARTO-272 radar | CARTO-268 : pas encore |
 
 **Toujours en attente, à lui proposer un jour** : le relief niveau 6 du Cartographe (une ligne, `main.tsx` →
 `/heightmaps/europe-dem-z6-1920`, `rules/known-issues/cartographer.md`).
 
 ## Where we are
 
-**5 539 tests** (1 584 `core` · 2 274 Cartographe · 1 390 atlas · 122 CMS · 169 plugin `eslint-plugin-eha`, 29/10 soir), gate
+**5 772 tests** (1 624 `core` · 2 275 Cartographe · 1 390 atlas · 314 CMS · 169 plugin `eslint-plugin-eha`, 30/10 soir), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 

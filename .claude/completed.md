@@ -2,6 +2,29 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
+### 2026-10-30 — l'écran « Ville à une date », une seule règle du formulaire à l'export, l'admin du CMS en sombre
+
+Plages au journal : **12:14 → 14:30** et **17:29 → 22:27** (7 h 13), la seconde presque entière **par Remote Control, le dev
+loin de l'écran** — je testais dans Chrome et lui envoyais les captures ; le chantier ouvert le 05/10 totalise **159 h 02 sur
+29 plages**. Commités, **non poussés** (11 commits en avance) : de `736bc19` à `4a7a9ee`.
+
+- **L'admin du CMS** en sombre, le lambda de l'atlas à la place des images de Payload (`f19aa90`) ; Formik et le design system
+  au catalogue ; les fichiers que Payload écrit hors du contrôle du format (CMS-290, Fait).
+- **L'écran « Ville à une date »** (ATLAS-295) : notre formulaire à la place de celui de Payload — valide à la saisie, bouton
+  grisé, lieu et source cherchés dans la base à chaque frappe, refus d'une fiche en double pendant la saisie, raisons en choix
+  multiple (fubaritico-ds 0.9.0, livré par son Claude dans la soirée), lignes de sources ; **une seule règle** dans `core`
+  pour le formulaire, le serveur et l'export. Ses mots : *« Il faut le griser, oui. Évidemment »*.
+- **L'export écrit les villes** dans le fichier de l'atlas, **préparées à l'export** — sa décision : *« les données, elles
+  arrivent préparées, comme en GraphQL »* ; l'atlas ne les dessine pas encore.
+- **Décidé par lui** : l'importance qui ordonne la carte est **politique** ; le Saint-Empire n'a pas de capitale, aucune
+  symbolique (*« Charlemagne, il est mort depuis 300 ans »*) ; une chapelle d'Aix en 3D un jour (ATLAS-321, Idées).
+- **Un compte de test** `claude-test@localhost.test` dans sa base, avec son accord, pour tester à sa place.
+- **Mes fautes** : un numéro à la place d'une chose (« décision 8 », « v5 ») — *« je te l'interdis »*, règle notée ; l'export
+  annoncé court alors qu'il n'exportait aucune ville ; « aucune jointure » quand l'export en est une ; mon choix de
+  recopier les enregistrements (25/10) écrit comme une décision ; un commentaire disant qu'un crochet passe après les règles
+  des champs (il passe avant) ; parler d'incertitude sans qu'aucun algorithme n'existe — *« toute cette branlette
+  intellectuelle »*.
+
 ### 2026-10-29 soir → 30/10 nuit — les villes : des règles de cartographe, trois sources, la fiche « Ville à une date »
 
 Dans la plage **29/10 15:42 → 30/10 00:54** (la session de 22:58 à 00:54, ≈ 2 h) ; le chantier ouvert le 05/10 totalise
@@ -24,27 +47,4 @@ Dans la plage **29/10 15:42 → 30/10 00:54** (la session de 22:58 à 00:54, ≈
   incompréhensible (*« le pourquoi est au clic… »*) ; une durée proposée puis retirée puis remise — il le sentait : *« un
   trou dans la raquette »*.
 
-### 2026-10-29 (jour) — les noms des pays jusqu'au bout, le démarrage, le panneau en développement seulement
-
-Plages au journal : **11:43 → 14:06** et **15:42 → 22:55** (9 h 36) ; le chantier ouvert le 05/10 totalise **149 h 42 sur 27
-plages**. **Poussé**, de `2f60766` à `cdbf930`, CI verte, le site déployé avec tout `main` ; `5c36f35` et ces notes partent ensemble.
-
-- **Les noms** : la construction unique (ATLAS-301), puis ATLAS-308 (sous les icônes 3D), 309 (Venise), 310 (les pays sans
-  place, dits en console) ; le nom court saisi dans le Cartographe (CARTO-307) ; un nom coupé qui se décale sur la terre
-  libre (ATLAS-314) ; l'étiquette déportée sur la mer, ou sur un voisin avec sa ligne de points (ATLAS-315) ; les tribus en
-  blanc sur liseré brun, gardé très fin de près (*« là c'est parfait »*) ; la case « Toujours le nom court » (CARTO-318).
-- **Le reste** : le flou derrière un contrat (ATLAS-304/305) ; le halo des épingles (ATLAS-306) ; aucune frontière le long du
-  bord (CORE-313) ; ‹Entrée› ouvre la fiche (CARTO-312) ; le relief d'abord puis tout en fondu (ATLAS-316) ; le panneau et le
-  compteur sous `pnpm dev` seulement (ATLAS-317) ; le relief à 0,2 de près, son réglage ; le commentaire de clôture d'un
-  ticket (comment, où, avant → après) dans la skill Trello ; une poussée annule la CI en cours (`concurrency`).
-- **L'audit des instructions** (`/doctor prompt-audit`, quatre agents) : rapport `files/prompt-audit-2026-10-29.md`. Appliqué à
-  sa demande : les 21 corrections sûres (`a9e3c0d` — le CMS entre dans les contrôles de sécurité, `/review` relit le travail
-  non commité, cinq paquets) et les 31 probables (`cdbf930` — le ton, l'historique, les contradictions) ; `reliefWorldY`
-  inscrit (`5c36f35`).
-- **Mes fautes** : sa demande sur le démarrage mal lue (*« c'est épuisant de devoir répéter »*) ; trois `cd` ; un remède
-  faux pour les Obotrites (le nom court ne s'écrit que là où le complet ne tient pas — je ne l'avais pas relu) ; *« c'est
-  exactement ce que je veux »* pris pour l'option que j'écartais ; deux poussées à 15 s d'écart, l'ancienne déployée par-dessus
-  la nouvelle. La revue à plusieurs agents sautée le soir, à sa demande. Puis une question posée sans arbitrage derrière
-  (*« Mais quelle décision ! »*), deux commits refusés pour une ligne de plus de 100 caractères, deux `cd` glissés sans effet.
-
-> Older sessions (2026-09-12 → 2026-10-29 nuit) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-29 jour) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

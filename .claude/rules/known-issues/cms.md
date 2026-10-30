@@ -29,3 +29,8 @@ Open issues of `packages/cms`, the contribution system (Payload). Loaded by path
 - **Next 16 écrit son propre `AGENTS.md` et `CLAUDE.md` dans le paquet** au premier `next dev` — `agentRules: false`
   dans `next.config.ts` l'en empêche (25/10). Et le CMS n'a pas de page à la racine : `/` renvoie vers `/admin` par une
   redirection de `next.config.ts`. **Cosmétique.**
+- **Deux pièges de Payload 3.92, payés le 30/10 sur l'écran « Ville à une date »** : (1) une vue d'édition à nous reçoit une
+  **nouvelle fiche comme `null`**, pas `{}`, quoi que dise le type (`@payloadcms/next`, `views/Document/index.js`) — la page
+  de création plantait ; (2) le crochet `beforeChange` **d'une collection passe avant les règles des champs**, pas après
+  (`collections/operations/utilities/update.ts`). Et Payload ne pose le **verrou d'édition** que depuis son propre formulaire :
+  le nôtre ne le pose pas — sans effet tant que le CMS est local et à lui seul. **Sévérité : à savoir.**

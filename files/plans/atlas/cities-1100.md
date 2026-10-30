@@ -50,7 +50,9 @@
 | Naples | Duchy of Naples | 30 → 30 | |
 
 **No capital marked**: the **Holy Roman Empire** — an itinerant court (Aachen crowns, Speyer buries, Regensburg and Goslar
-host); **Sweden** — no seat I can name with any confidence. The small sovereigns of Ireland, Wales and the Caucasus are
+host). **Decided by the dev, 30/10: no capital, and no symbolic one** — not Aachen, Charlemagne's seat three centuries
+gone; the importance that orders the map is political (`cities.md`, decision 4b). **Sweden** — no seat I can name with
+any confidence. The small sovereigns of Ireland, Wales and the Caucasus are
 left for a second pass.
 
 ## Large cities — with the vassals (0.45)

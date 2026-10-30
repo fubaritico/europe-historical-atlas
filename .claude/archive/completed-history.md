@@ -2,6 +2,29 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-10-29 (jour) — les noms des pays jusqu'au bout, le démarrage, le panneau en développement seulement
+
+Plages au journal : **11:43 → 14:06** et **15:42 → 22:55** (9 h 36) ; le chantier ouvert le 05/10 totalise **149 h 42 sur 27
+plages**. **Poussé**, de `2f60766` à `cdbf930`, CI verte, le site déployé avec tout `main` ; `5c36f35` et ces notes partent ensemble.
+
+- **Les noms** : la construction unique (ATLAS-301), puis ATLAS-308 (sous les icônes 3D), 309 (Venise), 310 (les pays sans
+  place, dits en console) ; le nom court saisi dans le Cartographe (CARTO-307) ; un nom coupé qui se décale sur la terre
+  libre (ATLAS-314) ; l'étiquette déportée sur la mer, ou sur un voisin avec sa ligne de points (ATLAS-315) ; les tribus en
+  blanc sur liseré brun, gardé très fin de près (*« là c'est parfait »*) ; la case « Toujours le nom court » (CARTO-318).
+- **Le reste** : le flou derrière un contrat (ATLAS-304/305) ; le halo des épingles (ATLAS-306) ; aucune frontière le long du
+  bord (CORE-313) ; ‹Entrée› ouvre la fiche (CARTO-312) ; le relief d'abord puis tout en fondu (ATLAS-316) ; le panneau et le
+  compteur sous `pnpm dev` seulement (ATLAS-317) ; le relief à 0,2 de près, son réglage ; le commentaire de clôture d'un
+  ticket (comment, où, avant → après) dans la skill Trello ; une poussée annule la CI en cours (`concurrency`).
+- **L'audit des instructions** (`/doctor prompt-audit`, quatre agents) : rapport `files/prompt-audit-2026-10-29.md`. Appliqué à
+  sa demande : les 21 corrections sûres (`a9e3c0d` — le CMS entre dans les contrôles de sécurité, `/review` relit le travail
+  non commité, cinq paquets) et les 31 probables (`cdbf930` — le ton, l'historique, les contradictions) ; `reliefWorldY`
+  inscrit (`5c36f35`).
+- **Mes fautes** : sa demande sur le démarrage mal lue (*« c'est épuisant de devoir répéter »*) ; trois `cd` ; un remède
+  faux pour les Obotrites (le nom court ne s'écrit que là où le complet ne tient pas — je ne l'avais pas relu) ; *« c'est
+  exactement ce que je veux »* pris pour l'option que j'écartais ; deux poussées à 15 s d'écart, l'ancienne déployée par-dessus
+  la nouvelle. La revue à plusieurs agents sautée le soir, à sa demande. Puis une question posée sans arbitrage derrière
+  (*« Mais quelle décision ! »*), deux commits refusés pour une ligne de plus de 100 caractères, deux `cd` glissés sans effet.
+
 ### 2026-10-29 (nuit, suite) — le diagnostic de performance de l'atlas (ATLAS-303 → ATLAS-304)
 
 Même plage au journal que l'entrée du 28/10 : **28/10 19:24 → 29/10 03:56** (8 h 32, le diagnostic de **02:39 à 03:56**) ; le
