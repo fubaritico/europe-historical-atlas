@@ -15,6 +15,18 @@ catalogs:
     '@eslint/js':
       specifier: ^9.39.5
       version: 9.39.5
+    '@fubaritico/behaviors':
+      specifier: ^0.8.0
+      version: 0.8.0
+    '@fubaritico/react':
+      specifier: ^0.8.0
+      version: 0.8.0
+    '@fubaritico/styles':
+      specifier: ^0.8.0
+      version: 0.8.0
+    '@fubaritico/tokens':
+      specifier: ^0.8.0
+      version: 0.8.0
     '@testing-library/dom':
       specifier: ^10.4.2
       version: 10.4.2
@@ -75,6 +87,9 @@ catalogs:
     eslint-plugin-react-refresh:
       specifier: ^0.5.7
       version: 0.5.7
+    formik:
+      specifier: ^2.4.9
+      version: 2.4.9
     globals:
       specifier: ^17.12.0
       version: 17.12.0
@@ -229,16 +244,16 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@fubaritico/behaviors':
-        specifier: ^0.8.0
+        specifier: 'catalog:'
         version: 0.8.0
       '@fubaritico/react':
-        specifier: ^0.8.0
+        specifier: 'catalog:'
         version: 0.8.0(next@16.4.3(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@fubaritico/styles':
-        specifier: ^0.8.0
+        specifier: 'catalog:'
         version: 0.8.0(@fubaritico/tokens@0.8.0)
       '@fubaritico/tokens':
-        specifier: ^0.8.0
+        specifier: 'catalog:'
         version: 0.8.0
       react:
         specifier: 'catalog:'
@@ -310,6 +325,15 @@ importers:
       '@europe-historical-atlas/core':
         specifier: workspace:^
         version: link:../core
+      '@fubaritico/react':
+        specifier: 'catalog:'
+        version: 0.8.0(next@16.4.3(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@fubaritico/styles':
+        specifier: 'catalog:'
+        version: 0.8.0(@fubaritico/tokens@0.8.0)
+      '@fubaritico/tokens':
+        specifier: 'catalog:'
+        version: 0.8.0
       '@payloadcms/db-sqlite':
         specifier: 3.92.0
         version: 3.92.0(payload@3.92.0(graphql@16.14.2)(typescript@5.7.3))
@@ -322,6 +346,9 @@ importers:
       '@payloadcms/ui':
         specifier: 3.92.0
         version: 3.92.0(@types/react@19.3.0)(next@16.4.3(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4))(payload@3.92.0(graphql@16.14.2)(typescript@5.7.3))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.7.3)
+      formik:
+        specifier: 'catalog:'
+        version: 2.4.9(@types/react@19.3.0)(react@19.3.0)
       graphql:
         specifier: ^16.8.1
         version: 16.14.2
@@ -1267,11 +1294,6 @@ packages:
       react: '>=19'
       react-dom: '>=19'
       react-router-dom: '>=7'
-    peerDependenciesMeta:
-      next:
-        optional: true
-      react-router-dom:
-        optional: true
 
   '@fubaritico/styles@0.8.0':
     resolution: {integrity: sha512-kwhgN5dNwVJyoATENzLFhQLnedCj3Ez3bsWgO/uG8ChiK/XLxPMkOWhOK86SIWfVZDxM+vkhBmvHZ7ScOUWGUw==, tarball: https://npm.pkg.github.com/download/@fubaritico/styles/0.8.0/ff27f8f13a0b88e92b5db55b0776b8403666b4ef}
@@ -1850,6 +1872,11 @@ packages:
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
 
+  '@types/hoist-non-react-statics@3.3.7':
+    resolution: {integrity: sha512-PQTyIulDkIDro8P+IHbKCsw7U2xxBYflVzW/FgWdCAePD9xGSidgA76/GeJ6lBKoblyhf9pBY763gbrN+1dI8g==}
+    peerDependencies:
+      '@types/react': '*'
+
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
@@ -2402,6 +2429,10 @@ packages:
   deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
 
+  deepmerge@2.2.1:
+    resolution: {integrity: sha512-R9hc1Xa/NOBi9WRVUWg19rl1UB7Tt4kuPd+thNJgFZoxXsTz7ncaPaeIm+40oSGuP33DfMb4sZt1QIGiJzC4EA==}
+    engines: {node: '>=0.10.0'}
+
   deepmerge@4.3.1:
     resolution: {integrity: sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==}
     engines: {node: '>=0.10.0'}
@@ -2851,6 +2882,11 @@ packages:
   formdata-polyfill@4.0.10:
     resolution: {integrity: sha512-buewHzMvYL29jdeQTVILecSaZKnt/RJWjoZCF5OW60Z67/GmSLBkOFM7qh1PI3zFNtJbaZL5eQu1vLfazOwj4g==}
     engines: {node: '>=12.20.0'}
+
+  formik@2.4.9:
+    resolution: {integrity: sha512-5nI94BMnlFDdQRBY4Sz39WkhxajZJ57Fzs8wVbtsQlm5ScKIR1QLYqv/ultBnobObtlUyxpxoLodpixrsf36Og==}
+    peerDependencies:
+      react: '>=16.8.0'
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -3359,6 +3395,9 @@ packages:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
     engines: {node: '>=10'}
 
+  lodash-es@4.18.1:
+    resolution: {integrity: sha512-J8xewKD/Gk22OZbhpOVSwcs60zhd95ESDwezOFuA3/099925PdHJ7OFHNTGtajL3AlZkykD32HykiMo+BIBI8A==}
+
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
 
@@ -3680,6 +3719,9 @@ packages:
     resolution: {integrity: sha512-JDk8dgif51OjFoDE70+OT9ICyYr+69HlmihNwp1+Nsfbna3t5sIiCa9ZJktDmQ4/1b/rn26hIAR2uYXDMr5r0Q==}
     peerDependencies:
       react: ^19.3.0
+
+  react-fast-compare@2.0.4:
+    resolution: {integrity: sha512-suNP+J1VU1MWFKcyt7RtjiSWUjvidmQSlqu+eHslq+342xCbGTYmC0mEhPCOHxlW0CywylOC1u2DFAT+bv4dBw==}
 
   react-image-crop@10.1.8:
     resolution: {integrity: sha512-4rb8XtXNx7ZaOZarKKnckgz4xLMvds/YrU6mpJfGhGAsy2Mg4mIw1x+DCCGngVGq2soTBVVOxx2s/C6mTX9+pA==}
@@ -4004,6 +4046,9 @@ packages:
 
   three@0.186.0:
     resolution: {integrity: sha512-cr/fIM2ddMSVbYVgkfD4jLJv7Fh/8ZTjvo+7gQeSVGUZHxpx9FDwoL5iC7hUz/LiRA8wMbqfnb90xKfm1/HHkQ==}
+
+  tiny-warning@1.0.3:
+    resolution: {integrity: sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==}
 
   tinybench@6.1.4:
     resolution: {integrity: sha512-9APumHG7r4yOk4X4WlkmE71aZcv1gvin1czO3OQ1U9iJcFA5Ja/ygyb0vPOVHTthFozUYs8CLoLUlM8grb2lTQ==}
@@ -5122,10 +5167,9 @@ snapshots:
       '@tanstack/react-virtual': 3.14.3(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       clsx: 2.1.1
       html-entities: 2.6.0
+      next: 16.4.3(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4)
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
-    optionalDependencies:
-      next: 16.4.3(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4)
 
   '@fubaritico/styles@0.8.0(@fubaritico/tokens@0.8.0)':
     dependencies:
@@ -5696,6 +5740,11 @@ snapshots:
   '@types/deep-eql@4.0.2': {}
 
   '@types/estree@1.0.9': {}
+
+  '@types/hoist-non-react-statics@3.3.7(@types/react@19.3.0)':
+    dependencies:
+      '@types/react': 19.3.0
+      hoist-non-react-statics: 3.3.2
 
   '@types/json-schema@7.0.15': {}
 
@@ -6293,6 +6342,8 @@ snapshots:
 
   deep-is@0.1.4: {}
 
+  deepmerge@2.2.1: {}
+
   deepmerge@4.3.1: {}
 
   define-data-property@1.1.4:
@@ -6858,6 +6909,20 @@ snapshots:
     dependencies:
       fetch-blob: 3.2.0
 
+  formik@2.4.9(@types/react@19.3.0)(react@19.3.0):
+    dependencies:
+      '@types/hoist-non-react-statics': 3.3.7(@types/react@19.3.0)
+      deepmerge: 2.2.1
+      hoist-non-react-statics: 3.3.2
+      lodash: 4.18.1
+      lodash-es: 4.18.1
+      react: 19.3.0
+      react-fast-compare: 2.0.4
+      tiny-warning: 1.0.3
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - '@types/react'
+
   fsevents@2.3.3:
     optional: true
 
@@ -7347,6 +7412,8 @@ snapshots:
     dependencies:
       p-locate: 5.0.0
 
+  lodash-es@4.18.1: {}
+
   lodash.merge@4.6.2: {}
 
   lodash@4.18.1: {}
@@ -7714,6 +7781,8 @@ snapshots:
     dependencies:
       react: 19.3.0
       scheduler: 0.28.0
+
+  react-fast-compare@2.0.4: {}
 
   react-image-crop@10.1.8(react@19.3.0):
     dependencies:
@@ -8111,6 +8180,8 @@ snapshots:
       real-require: 0.2.0
 
   three@0.186.0: {}
+
+  tiny-warning@1.0.3: {}
 
   tinybench@6.1.4: {}
 

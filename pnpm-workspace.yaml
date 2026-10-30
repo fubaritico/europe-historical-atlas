@@ -22,6 +22,15 @@ catalog:
   # State
   zustand: ^5.0.15
 
+  # Forms — the CMS's contribution screens first, the Cartographer's dialogues may follow
+  formik: ^2.4.9
+
+  # Design system — fubaritico-ds, from GitHub Packages; the Cartographer and the CMS on one version
+  '@fubaritico/behaviors': ^0.8.0
+  '@fubaritico/react': ^0.8.0
+  '@fubaritico/styles': ^0.8.0
+  '@fubaritico/tokens': ^0.8.0
+
   # Vite
   vite: ^8.3.3
   '@vitejs/plugin-react': ^6.1.1
