@@ -118,8 +118,15 @@ only once touched, the button greyed then enabled) needs a DOM: the CMS tests ru
   and in the console, and the overlap is then checked at save only (his decision for a failed save, applied to a
   failed read; the second case would otherwise throw inside Formik's validation, where nothing catches it). Walked in
   Chrome: 1100 typed, Rome picked by keyboard → the refusal under the year at once, the button greyed; 1101 clears it.
-- **Not in step 1**: the server running the same schema (a `beforeValidate` hook) — Payload's own field rules hold the
-  same three fields today, so it joins with step 3, when the schema gains the reasons and the lines.
+- **Step 3, the reasons and the lines** (2026-10-30): the reasons as checkboxes inside their own field (`ReasonsField`,
+  the multi-select replaces its inside); the lines as a Formik `FieldArray` — a source searched in the base (the place's
+  field made generic, `RecordField`), a subject, the one value it names, where. `core`'s schema gains both, and **the
+  server plays it too** (`collections/refuseInvalidSheet.ts`, a collection `beforeChange`, which Payload runs *before*
+  the fields' own rules — so a date that does not read is left to the date field). A test holds the form and the server
+  to the same verdict on the same sheets (`sheetCheckAgreement.test.ts`). The export is the one reader still to join.
+  Walked in Chrome on Rome, **not saved** (his sheet): its four saved reasons shown ticked, a line with « Vie et mort de
+  Byzance », population, 35 000 — the button enabled. To know: when the subject's menu opens upwards it covers the
+  source chosen above it while open — the design system's menu, for its list of requests.
 - **To know — Payload's document lock**: Payload marks a document « being edited » from its own form only
   (`@payloadcms/ui/dist/views/Edit`); our form replaces it, so a sheet open here is not shown locked to a second
   contributor. Harmless while the CMS is local and his alone; the day it is online, the last save wins on the same

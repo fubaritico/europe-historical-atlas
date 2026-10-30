@@ -6,7 +6,7 @@ import { isDateRefusal } from '@europe-historical-atlas/core/time/historicalDate
 import { toHistoricalDate } from '../../../fields/dateReading'
 import { OVERLAP_PATH, overlappingSheet } from '../../../fields/sheetOverlap'
 
-import { momentFields, readNumber } from './sheetValues'
+import { momentFields, readNumber, testimonyBody } from './sheetValues'
 
 import type { CitySheetMessageKey } from '../i18n'
 import type { Say } from './say'
@@ -131,15 +131,49 @@ function withIssues(
     if (issue.field === 'place') all = withError(all, 'place', say('placeMissing'))
     else if (issue.field === 'importance')
       all = withError(all, 'importance', say('importanceMissing'))
-    else if (!dateRefused) {
-      // The date's own reading accepted what the schema refuses: the two disagree, which is a defect — shown, and said.
-      console.error(
-        `[CMS] the city sheet's date passed its field and failed the schema: ${issue.detail}`
-      )
-      all = withError(all, 'date.start.year', say('unexpected', { detail: issue.detail }))
-    }
+    else if (issue.field === 'testimonies') all = withLineIssue(all, issue, say)
+    else if (issue.field !== 'date' || !dateRefused) all = withUnexpected(all, issue, say)
   }
   return all
+}
+
+/** What a line's field says when the schema refuses it, by the field. */
+const LINE_SENTENCES: Readonly<Record<string, CitySheetMessageKey>> = {
+  source: 'sourceMissing',
+  subject: 'subjectMissing',
+  population: 'populationInvalid',
+  importance: 'lineImportanceMissing',
+  reason: 'reasonMissing',
+}
+
+/**
+ * A line's issue, under its field: `testimonies.0.population`.
+ * @param errors - the errors so far
+ * @param issue - the schema's issue, its path from `testimonies` down
+ * @param say - the translator
+ * @returns the errors with it
+ */
+function withLineIssue(errors: Errors, issue: CitySheetIssue, say: Say): Errors {
+  const [, index, key] = issue.path
+  const sentence = typeof key === 'string' ? LINE_SENTENCES[key] : undefined
+  if (typeof index !== 'number' || sentence === undefined) return withUnexpected(errors, issue, say)
+  return withError(errors, `testimonies.${String(index)}.${key as string}`, say(sentence))
+}
+
+/**
+ * An issue the form has no sentence for — the schema and the form disagree, which is a defect: shown where the schema
+ * puts it, in its own words, and said in the console.
+ * @param errors - the errors so far
+ * @param issue - the schema's issue
+ * @param say - the translator
+ * @returns the errors with it
+ */
+function withUnexpected(errors: Errors, issue: CitySheetIssue, say: Say): Errors {
+  console.error(
+    `[CMS] the city sheet failed the schema where the form has no sentence: ${issue.path.join('.')} — ${issue.detail}`
+  )
+  const path = issue.field === 'date' ? 'date.start.year' : issue.path.join('.')
+  return withError(errors, path, say('unexpected', { detail: issue.detail }))
 }
 
 /** What the overlap rule needs while typing: the place's saved sheets, this sheet's id, and the refusal's words. */
@@ -194,6 +228,8 @@ export function validateSheet(values: SheetValues, say: Say, overlap?: OverlapCh
     place: values.place?.id,
     date: dateRefused ? undefined : date,
     importance: values.importance === '' ? undefined : values.importance,
+    reasons: values.reasons,
+    testimonies: values.testimonies.map(testimonyBody),
   })
   return isSheetRefused(answer) ? withIssues(errors, answer, dateRefused, say) : errors
 }

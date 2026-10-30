@@ -8,6 +8,7 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *
  * Its messages, and the values they take:
  * - `overlap` — A place already has a sheet for the year: `place`, its name; `date`, the saved sheet's date as text.
+ * - `invalid` — A sheet the shared schema refuses: `detail`, where and why, in the schema's words.
  */
 export type CollectionMessageKey = keyof typeof en
 

@@ -12,3 +12,13 @@ export function relationId(value: unknown): number | string | null {
   }
   return null
 }
+
+/**
+ * The ids a relationship with many holds, bare or populated — an empty list for none.
+ * @param value - the field's value
+ * @returns the ids, in order
+ */
+export function relationIds(value: unknown): (number | string)[] {
+  if (!Array.isArray(value)) return []
+  return value.map(relationId).filter((id): id is number | string => id !== null)
+}

@@ -18,17 +18,25 @@ vi.mock('./CitySheetForm', () => ({ CitySheetForm: () => null }))
  */
 function viewProps(doc: Record<string, unknown> | null, locale: { code: string } | undefined) {
   const findByID = vi.fn(() => Promise.resolve({ id: 5, name: 'Rome' }))
+  const find = vi.fn(({ collection }: { collection: string }) =>
+    Promise.resolve({
+      docs:
+        collection === 'sources'
+          ? [{ id: 4, title: 'Buringh 2021' }]
+          : [{ id: 1, name: 'Pouvoir' }],
+    })
+  )
   const props = {
     doc,
     initPageResult: {
       locale,
       req: {
         i18n: { language: 'en' },
-        payload: { findByID, config: { routes: { api: '/api', admin: '/admin' } } },
+        payload: { findByID, find, config: { routes: { api: '/api', admin: '/admin' } } },
       },
     },
   } as unknown as DocumentViewServerProps
-  return { props, findByID }
+  return { props, findByID, find }
 }
 
 /**
@@ -60,6 +68,17 @@ describe('CitySheetView', () => {
         expect.objectContaining({ collection: 'places', id: 5, fallbackLocale: 'fr' })
       )
       expect(form.key).toBe('1')
+    })
+
+    it('hands the form the reasons’ list and names the sources its lines cite', async () => {
+      const line = { id: 'r1', source: 4, subject: 'population', population: 35000 }
+      const { props } = viewProps({ id: 1, place: 5, testimonies: [line] }, { code: 'fr' })
+      const form = await formOf(props)
+      expect(form.props.reasons).toEqual([{ id: 1, name: 'Pouvoir' }])
+      expect(form.props.initialValues.testimonies[0]?.source).toEqual({
+        id: 4,
+        name: 'Buringh 2021',
+      })
     })
   })
 

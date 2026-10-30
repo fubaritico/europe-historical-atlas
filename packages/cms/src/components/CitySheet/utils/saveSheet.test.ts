@@ -12,6 +12,8 @@ const body: SheetBody = {
     end: { year: null, month: null, day: null, circa: false, margin: null, calendar: 'julian' },
   },
   importance: 'capital',
+  reasons: [],
+  testimonies: [],
 }
 
 /**

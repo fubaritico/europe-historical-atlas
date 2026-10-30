@@ -16,11 +16,19 @@ const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
 vi.mock('next/navigation', () => ({ useRouter: () => router }))
 vi.mock('@payloadcms/ui', () => ({ toast }))
 
+/** The CMS's reasons, as the server reads them. */
+const REASONS = [
+  { id: 1, name: 'Pouvoir' },
+  { id: 2, name: 'Religion' },
+]
+
 /** Rome in 1100, a capital — the sheet the dev's base holds. */
 const rome: SheetValues = {
   place: { id: 5, name: 'Rome' },
   date: { start: { ...EMPTY_MOMENT, year: '1100' }, end: EMPTY_MOMENT },
   importance: 'capital',
+  reasons: [],
+  testimonies: [],
 }
 
 /** A new sheet. */
@@ -28,6 +36,8 @@ const empty: SheetValues = {
   place: null,
   date: { start: EMPTY_MOMENT, end: EMPTY_MOMENT },
   importance: '',
+  reasons: [],
+  testimonies: [],
 }
 
 /**
@@ -45,6 +55,7 @@ function renderForm(values: SheetValues, id?: number) {
       contentLocale="fr"
       api="/api"
       admin="/admin"
+      reasons={REASONS}
     />
   )
 }
@@ -109,6 +120,34 @@ function serverWithRome1100() {
   })
   vi.stubGlobal('fetch', fetcher)
   return fetcher
+}
+
+/**
+ * The server for a line: the sources' search answers Buringh, Rome's sheets none, a save Rome's id.
+ * @returns the stand-in, to read the save's body
+ */
+function serverWithSources() {
+  const fetcher = vi.fn<typeof fetch>((input) => {
+    const url = input as string
+    const json = url.startsWith('/api/sources')
+      ? { docs: [{ id: 4, title: 'Buringh 2021' }] }
+      : url.startsWith('/api/place-periods?')
+        ? { docs: [] }
+        : { doc: { id: 1 } }
+    return Promise.resolve(new Response(JSON.stringify(json), { status: 200 }))
+  })
+  vi.stubGlobal('fetch', fetcher)
+  return fetcher
+}
+
+/**
+ * The body of the save the form sent.
+ * @param fetcher - the server's stand-in
+ * @returns the body, parsed
+ */
+function savedBody(fetcher: ReturnType<typeof serverWithSources>): Record<string, unknown> {
+  const save = fetcher.mock.calls.find(([input]) => input === '/api/place-periods/1')
+  return JSON.parse(save?.[1]?.body as string) as Record<string, unknown>
 }
 
 beforeEach(() => {
@@ -247,6 +286,60 @@ describe('CitySheetForm', () => {
         )
       })
     })
+
+    it('ticks a reason and saves it with the sheet', async () => {
+      const fetcher = serverWithSources()
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      await user.click(screen.getByLabelText('Religion'))
+      await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalled()
+      })
+      expect(savedBody(fetcher).reasons).toEqual([2])
+    })
+
+    it('adds a source’s line — the source searched, a population and its figure — and saves it', async () => {
+      const fetcher = serverWithSources()
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      await user.click(screen.getByRole('button', { name: 'Ajouter une source' }))
+      expect(screen.getByRole('button', { name: 'Enregistrer' }).hasAttribute('disabled')).toBe(
+        true
+      )
+      await user.type(screen.getByRole('combobox', { name: 'Source' }), 'Bur')
+      await user.click(await screen.findByRole('option', { name: 'Buringh 2021' }))
+      await user.click(screen.getByRole('button', { name: 'Sur quoi : Choisir' }))
+      await user.click(await screen.findByRole('option', { name: 'Population' }))
+      await user.type(screen.getByLabelText('Habitants'), '35000')
+      await user.type(screen.getByLabelText('Où'), 'p. 12')
+      await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalled()
+      })
+      expect(savedBody(fetcher).testimonies).toEqual([
+        {
+          source: 4,
+          subject: 'population',
+          population: 35000,
+          importance: null,
+          reason: null,
+          where: 'p. 12',
+        },
+      ])
+    })
+
+    it('removes a line, and the keyboard lands on the add button', async () => {
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      await user.click(screen.getByRole('button', { name: 'Ajouter une source' }))
+      expect(screen.getByRole('group', { name: 'Source 1' })).toBeTruthy()
+      await user.click(screen.getByRole('button', { name: 'Retirer la ligne 1' }))
+      expect(screen.queryByRole('group', { name: 'Source 1' })).toBeNull()
+      expect(document.activeElement).toBe(
+        screen.getByRole('button', { name: 'Ajouter une source' })
+      )
+    })
   })
 
   describe('managed errors', () => {
@@ -277,7 +370,7 @@ describe('CitySheetForm', () => {
         await screen.findByText('La recherche des lieux n’a pas abouti. Réessayez dans un instant.')
       ).toBeTruthy()
       expect(console.error).toHaveBeenCalledWith(
-        '[CMS] the search for places failed',
+        '[CMS] a search of the base failed',
         expect.any(TypeError)
       )
     })

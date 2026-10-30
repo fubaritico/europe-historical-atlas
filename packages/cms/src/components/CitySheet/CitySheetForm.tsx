@@ -6,21 +6,17 @@ import './citySheet.css'
 
 import { Button } from '@fubaritico/react/Button'
 import { Form, Formik } from 'formik'
-import { useCallback } from 'react'
 
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 
 import { useOverlapCheck } from './hooks/useOverlapCheck'
+import { useRecordSearches } from './hooks/useRecordSearches'
 import { useSheetSubmit } from './hooks/useSheetSubmit'
 import { CITY_SHEET_MESSAGES } from './i18n'
-import { ImportanceField } from './internal/ImportanceField'
-import { MomentFields } from './internal/MomentFields'
-import { PlaceField } from './internal/PlaceField'
-import { PlaceSheets } from './internal/PlaceSheets'
-import { searchPlaces } from './utils/searchPlaces'
+import { SheetFields } from './internal/SheetFields'
 import { validateSheet } from './utils/validateSheet'
 
-import type { SheetValues } from './utils/sheetValues'
+import type { RecordChoice, SheetValues } from './utils/sheetValues'
 import type { Locale } from '@europe-historical-atlas/core/i18n/locale'
 
 /** What the form is handed by its server half. */
@@ -37,6 +33,8 @@ export interface CitySheetFormProps {
   readonly api: string
   /** The admin's root: `/admin`. */
   readonly admin: string
+  /** Every reason of the CMS's list, in the admin's language — read when the page opens. */
+  readonly reasons: readonly RecordChoice[]
 }
 
 /**
@@ -53,6 +51,7 @@ export interface CitySheetFormProps {
  * @param props.contentLocale - the content language
  * @param props.api - the API's root
  * @param props.admin - the admin's root
+ * @param props.reasons - every reason of the CMS's list
  * @returns the form
  */
 export function CitySheetForm({
@@ -62,15 +61,12 @@ export function CitySheetForm({
   contentLocale,
   api,
   admin,
+  reasons,
 }: CitySheetFormProps) {
   const say = createTranslator(CITY_SHEET_MESSAGES, locale)
   const handleSubmit = useSheetSubmit(id === undefined ? { api, admin } : { id, api, admin }, say)
 
-  // Handlers
-  const search = useCallback(
-    (query: string) => searchPlaces(fetch, { api, locale: contentLocale }, query),
-    [api, contentLocale]
-  )
+  const searches = useRecordSearches(api, contentLocale)
   const overlap = useOverlapCheck(api, locale, id)
   const validate = (values: SheetValues) =>
     validateSheet(values, say, overlap.current(values.place?.id ?? null))
@@ -90,15 +86,7 @@ export function CitySheetForm({
               {status}
             </p>
           )}
-          <PlaceField search={search} say={say} />
-          <PlaceSheets read={overlap.read} onSheets={overlap.onSheets} say={say} />
-          <fieldset className="city-sheet__date">
-            <legend className="city-sheet__legend">{say('date')}</legend>
-            <p className="city-sheet__help">{say('dateHelp')}</p>
-            <MomentFields end="start" title={say('start')} say={say} />
-            <MomentFields end="end" title={say('end')} help={say('endHelp')} say={say} />
-          </fieldset>
-          <ImportanceField say={say} />
+          <SheetFields searches={searches} overlap={overlap} reasons={reasons} say={say} />
           <div className="city-sheet__actions">
             <Button type="submit" disabled={!isValid || !dirty || isSubmitting}>
               {isSubmitting ? say('saving') : id === undefined ? say('create') : say('save')}

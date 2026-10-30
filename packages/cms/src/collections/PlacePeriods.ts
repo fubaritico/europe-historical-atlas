@@ -13,6 +13,7 @@ import { relationId } from '../fields/relationId'
 import { OVERLAP_PATH, overlappingSheet } from '../fields/sheetOverlap'
 
 import { COLLECTION_MESSAGES } from './i18n'
+import { refuseInvalidSheet } from './refuseInvalidSheet'
 
 import type { EventDateFields } from '../fields/historicalDate'
 import type { SavedSheet } from '../fields/sheetOverlap'
@@ -127,7 +128,7 @@ export const PlacePeriods: CollectionConfig = {
     description:
       'Une ville telle qu’elle est à une date : son importance sur la carte, et ce qu’en disent les sources. Le lieu lui-même (son nom, sa position) se saisit une fois, dans « Lieux ».',
   },
-  hooks: { beforeValidate: [refuseOverlap] },
+  hooks: { beforeValidate: [refuseOverlap], beforeChange: [refuseInvalidSheet] },
   fields: [
     {
       name: 'place',

@@ -5,7 +5,7 @@ import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 import { describeDateRefusalFr } from '../../../fields/historicalDate'
 import { CITY_SHEET_MESSAGES } from '../i18n'
 
-import { EMPTY_MOMENT } from './sheetValues'
+import { EMPTY_MOMENT, emptyTestimony } from './sheetValues'
 import { validateSheet } from './validateSheet'
 
 import type { MomentValues, SheetValues } from './sheetValues'
@@ -19,6 +19,8 @@ const rome: SheetValues = {
   place: { id: 5, name: 'Rome' },
   date: { start: { ...EMPTY_MOMENT, year: '1100' }, end: EMPTY_MOMENT },
   importance: 'capital',
+  reasons: [],
+  testimonies: [],
 }
 
 /**
@@ -101,6 +103,8 @@ describe('validateSheet', () => {
         place: null,
         date: { start: EMPTY_MOMENT, end: EMPTY_MOMENT },
         importance: '',
+        reasons: [],
+        testimonies: [],
       }
       expect(validateSheet(empty, say)).toEqual({
         place: 'Choisissez un lieu.',
@@ -181,6 +185,38 @@ describe('validateSheet', () => {
     it('says the date’s own refusal, not the overlap, while the date is not a date', () => {
       expect(validateSheet(withMoment('start', { year: '0' }), say, overRome)).toEqual({
         date: { start: { year: say('yearZero') } },
+      })
+    })
+
+    it('puts each fault of a line under its own field, by its rank', () => {
+      const good = {
+        ...emptyTestimony(),
+        source: { id: 4, name: 'Buringh 2021' },
+        subject: 'population' as const,
+        population: '35000',
+      }
+      const lines = [
+        good,
+        { ...emptyTestimony(), subject: 'population' as const, population: '-3' },
+      ]
+      expect(validateSheet({ ...rome, testimonies: lines }, say)).toEqual({
+        testimonies: [
+          undefined,
+          { source: say('sourceMissing'), population: say('populationInvalid') },
+        ],
+      })
+    })
+
+    it('asks what a new line speaks about, and for the reason a reason line gives', () => {
+      const source = { id: 4, name: 'Buringh 2021' }
+      expect(
+        validateSheet({ ...rome, testimonies: [{ ...emptyTestimony(), source }] }, say)
+      ).toEqual({
+        testimonies: [{ subject: say('subjectMissing') }],
+      })
+      const reasonLine = { ...emptyTestimony(), source, subject: 'reason' as const }
+      expect(validateSheet({ ...rome, testimonies: [reasonLine] }, say)).toEqual({
+        testimonies: [{ reason: say('reasonMissing') }],
       })
     })
   })

@@ -2,24 +2,24 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { usePlaceSearch } from './usePlaceSearch'
+import { useRecordSearch } from './useRecordSearch'
 
-import type { PlaceChoice } from '../utils/sheetValues'
+import type { RecordChoice } from '../utils/sheetValues'
 
 /** Rome, as the base answers it. */
-const rome: PlaceChoice = { id: 5, name: 'Rome' }
+const rome: RecordChoice = { id: 5, name: 'Rome' }
 
 /** Rouen. */
-const rouen: PlaceChoice = { id: 6, name: 'Rouen' }
+const rouen: RecordChoice = { id: 6, name: 'Rouen' }
 
 afterEach(() => {
   vi.restoreAllMocks()
 })
 
-describe('usePlaceSearch', () => {
+describe('useRecordSearch', () => {
   describe('happy path', () => {
     it('offers what the base answers, and says it has answered only once it has', async () => {
-      const { result } = renderHook(() => usePlaceSearch(() => Promise.resolve([rome])))
+      const { result } = renderHook(() => useRecordSearch(() => Promise.resolve([rome])))
       act(() => {
         result.current.run('Ro')
       })
@@ -36,7 +36,7 @@ describe('usePlaceSearch', () => {
 
   describe('variants', () => {
     it('empties the list when the field is emptied', async () => {
-      const { result } = renderHook(() => usePlaceSearch(() => Promise.resolve([rome])))
+      const { result } = renderHook(() => useRecordSearch(() => Promise.resolve([rome])))
       act(() => {
         result.current.run('Ro')
       })
@@ -54,7 +54,7 @@ describe('usePlaceSearch', () => {
     it('says a failed search, then forgets it once the field is emptied', async () => {
       vi.spyOn(console, 'error').mockImplementation(() => undefined)
       const { result } = renderHook(() =>
-        usePlaceSearch(() => Promise.reject(new TypeError('Failed to fetch')))
+        useRecordSearch(() => Promise.reject(new TypeError('Failed to fetch')))
       )
       act(() => {
         result.current.run('Ro')
@@ -63,7 +63,7 @@ describe('usePlaceSearch', () => {
         expect(result.current.failed).toBe(true)
       })
       expect(console.error).toHaveBeenCalledWith(
-        '[CMS] the search for places failed',
+        '[CMS] a search of the base failed',
         expect.any(TypeError)
       )
       act(() => {
@@ -78,10 +78,10 @@ describe('usePlaceSearch', () => {
       vi.spyOn(console, 'error').mockImplementation(() => undefined)
       let failFirst: (error: Error) => void = () => undefined
       const search = vi
-        .fn<(query: string) => Promise<PlaceChoice[]>>()
+        .fn<(query: string) => Promise<RecordChoice[]>>()
         .mockImplementationOnce(() => new Promise((_resolve, reject) => (failFirst = reject)))
         .mockImplementationOnce(() => Promise.resolve([rouen]))
-      const { result } = renderHook(() => usePlaceSearch(search))
+      const { result } = renderHook(() => useRecordSearch(search))
       act(() => {
         result.current.run('R')
         result.current.run('Rou')
@@ -99,12 +99,12 @@ describe('usePlaceSearch', () => {
 
   describe('edge cases', () => {
     it('keeps the newest answer when an older one arrives late', async () => {
-      let answerFirst: (places: PlaceChoice[]) => void = () => undefined
+      let answerFirst: (places: RecordChoice[]) => void = () => undefined
       const search = vi
-        .fn<(query: string) => Promise<PlaceChoice[]>>()
+        .fn<(query: string) => Promise<RecordChoice[]>>()
         .mockImplementationOnce(() => new Promise((resolve) => (answerFirst = resolve)))
         .mockImplementationOnce(() => Promise.resolve([rouen]))
-      const { result } = renderHook(() => usePlaceSearch(search))
+      const { result } = renderHook(() => useRecordSearch(search))
       act(() => {
         result.current.run('R')
         result.current.run('Rou')

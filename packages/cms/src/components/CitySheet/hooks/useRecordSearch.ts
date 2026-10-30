@@ -1,15 +1,15 @@
 import { useRef, useState } from 'react'
 
-import type { PlaceChoice } from '../utils/sheetValues'
+import type { RecordChoice } from '../utils/sheetValues'
 
-/** What the place field reads of its search. */
-export interface PlaceSearch {
-  /** The places offered for what was last typed. */
-  matches: PlaceChoice[]
+/** What a record field — the place, a line's source — reads of its search. */
+export interface RecordSearch {
+  /** The records offered for what was last typed. */
+  matches: RecordChoice[]
   /** Whether the last search failed — the field says so in place of its help. */
   failed: boolean
   /**
-   * Whether the base has answered the search under way — until then the list says nothing, rather than « no place of
+   * Whether the base has answered the search under way — until then the list says nothing, rather than « none of
    * that name » for a name not yet looked up.
    */
   answered: boolean
@@ -18,14 +18,14 @@ export interface PlaceSearch {
 }
 
 /**
- * The place field's search: the newest answer only — an older one arriving late never replaces it — and a failure
+ * A record field's search: the newest answer only — an older one arriving late never replaces it — and a failure
  * said under the field and in the console, the list emptied (the dev, 2026-10-30: nothing silent).
- * @param search - the places matching a query, from the base
+ * @param search - the records matching a query, from the base
  * @returns the matches, whether the last search failed, and the search to run
  */
-export function usePlaceSearch(search: (query: string) => Promise<PlaceChoice[]>): PlaceSearch {
+export function useRecordSearch(search: (query: string) => Promise<RecordChoice[]>): RecordSearch {
   const latest = useRef(0)
-  const [matches, setMatches] = useState<PlaceChoice[]>([])
+  const [matches, setMatches] = useState<RecordChoice[]>([])
   const [failed, setFailed] = useState(false)
   const [answered, setAnswered] = useState(false)
 
@@ -46,7 +46,7 @@ export function usePlaceSearch(search: (query: string) => Promise<PlaceChoice[]>
       },
       (error: unknown) => {
         if (call !== latest.current) return
-        console.error('[CMS] the search for places failed', error)
+        console.error('[CMS] a search of the base failed', error)
         setFailed(true)
         setMatches([])
       }

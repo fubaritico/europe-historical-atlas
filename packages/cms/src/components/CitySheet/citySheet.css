@@ -112,3 +112,29 @@
 .city-sheet .ui-dropdown__control button {
   justify-content: flex-start;
 }
+
+.city-sheet__group,
+.city-sheet__line {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) * 0.6);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.city-sheet__line {
+  padding: calc(var(--base) * 0.8);
+  border: 1px solid var(--theme-elevation-150);
+}
+
+.city-sheet__line-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.city-sheet__boxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--base) * 0.4) calc(var(--base) * 1.2);
+}
