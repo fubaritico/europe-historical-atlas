@@ -92,6 +92,8 @@ const UNSET_ON_PURPOSE: ReadonlyMap<string, string> = new Map([
     '--color-fill-on-inverse',
     '--color-fill-on-inverse-hover',
     '--color-border-on-inverse',
+    '--color-border-strong-on-inverse',
+    '--color-text-destructive-on-inverse',
   ].map((name) => [name, 'read by the `variant="dark"` panels, dark by default'] as const),
   ['--color-overlay', 'the scrim behind a dialog, dark in either scheme'],
   ['--color-text-on-destructive', 'white on the warning fill, meant white'],

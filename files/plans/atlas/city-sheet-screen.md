@@ -125,7 +125,9 @@ only once touched, the button greyed then enabled) needs a DOM: the CMS tests ru
   the fields' own rules — so a date that does not read is left to the date field). A test holds the form and the server
   to the same verdict on the same sheets (`sheetCheckAgreement.test.ts`). The export is the one reader still to join.
   Walked in Chrome on Rome, **not saved** (his sheet): its four saved reasons shown ticked, a line with « Vie et mort de
-  Byzance », population, 35 000 — the button enabled. To know: when the subject's menu opens upwards it covers the
+  Byzance », population, 35 000 — the button enabled. **The multi-select arrived the same evening** (fubaritico-ds
+  0.9.0): the reasons are its removable badges, searched without case or accents, every sentence in the admin's
+  language; its strings are mapped back to the reasons' number ids (`utils/reasonIds.ts`). To know: when the subject's menu opens upwards it covers the
   source chosen above it while open — the design system's menu, for its list of requests.
 - **To know — Payload's document lock**: Payload marks a document « being edited » from its own form only
   (`@payloadcms/ui/dist/views/Edit`); our form replaces it, so a sheet open here is not shown locked to a second

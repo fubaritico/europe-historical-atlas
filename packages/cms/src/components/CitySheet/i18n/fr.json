@@ -87,5 +87,11 @@
   "populationInvalid": "Le nombre d’habitants, entier, à partir de 0.",
   "lineImportanceMissing": "Choisissez l’importance que donne la source.",
   "reasonMissing": "Choisissez la raison que donne la source.",
-  "lineImportanceHelp": "L’ordre de ville que la source lui donne."
+  "lineImportanceHelp": "L’ordre de ville que la source lui donne.",
+  "reasonsPlaceholder": "Tapez pour chercher une raison",
+  "reasonRemove": "Retirer {name}",
+  "reasonAdded": "Raison ajoutée : {name}",
+  "reasonRemoved": "Raison retirée : {name}",
+  "reasonResults": "{count, plural, =0 {aucune raison} one {# raison} other {# raisons}}",
+  "reasonNoResults": "Aucune raison de ce nom."
 }

@@ -7,7 +7,9 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * A text of the « Ville à une date » screen: a label, the sentence under a field, a refusal.
  *
  * Its messages that take values:
- * - `placeRemove`, `sourceRemove` — `name`, the place or the source held.
+ * - `placeRemove`, `sourceRemove`, `reasonRemove`, `reasonAdded`, `reasonRemoved` — `name`, the place, source or
+ *   reason.
+ * - `reasonResults` — `count`, how many reasons match.
  * - `removeLine`, `line` — `rank`, the line's rank from 1.
  * - `subjectNamed`, `reasonNamed`, `lineImportanceNamed` — `value`, what is chosen, or the invitation to choose.
  * - `importanceNamed` — `value`, the importance chosen, or the invitation to choose one.

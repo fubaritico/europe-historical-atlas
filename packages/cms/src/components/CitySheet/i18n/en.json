@@ -87,5 +87,11 @@
   "populationInvalid": "The number of inhabitants, whole, from 0.",
   "lineImportanceMissing": "Choose the importance the source gives.",
   "reasonMissing": "Choose the reason the source gives.",
-  "lineImportanceHelp": "The order of city the source gives it."
+  "lineImportanceHelp": "The order of city the source gives it.",
+  "reasonsPlaceholder": "Type to search a reason",
+  "reasonRemove": "Remove {name}",
+  "reasonAdded": "Reason added: {name}",
+  "reasonRemoved": "Reason removed: {name}",
+  "reasonResults": "{count, plural, =0 {no reason} one {# reason} other {# reasons}}",
+  "reasonNoResults": "No reason of that name."
 }

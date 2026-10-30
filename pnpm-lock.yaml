@@ -16,17 +16,17 @@ catalogs:
       specifier: ^9.39.5
       version: 9.39.5
     '@fubaritico/behaviors':
-      specifier: ^0.8.0
-      version: 0.8.0
+      specifier: ^0.9.0
+      version: 0.9.0
     '@fubaritico/react':
-      specifier: ^0.8.0
-      version: 0.8.0
+      specifier: ^0.9.0
+      version: 0.9.0
     '@fubaritico/styles':
-      specifier: ^0.8.0
-      version: 0.8.0
+      specifier: ^0.9.0
+      version: 0.9.0
     '@fubaritico/tokens':
-      specifier: ^0.8.0
-      version: 0.8.0
+      specifier: ^0.9.0
+      version: 0.9.0
     '@testing-library/dom':
       specifier: ^10.4.2
       version: 10.4.2
@@ -245,16 +245,16 @@ importers:
         version: link:../core
       '@fubaritico/behaviors':
         specifier: 'catalog:'
-        version: 0.8.0
+        version: 0.9.0
       '@fubaritico/react':
         specifier: 'catalog:'
-        version: 0.8.0(next@16.4.3(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        version: 0.9.0(next@16.4.3(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@fubaritico/styles':
         specifier: 'catalog:'
-        version: 0.8.0(@fubaritico/tokens@0.8.0)
+        version: 0.9.0(@fubaritico/tokens@0.9.0)
       '@fubaritico/tokens':
         specifier: 'catalog:'
-        version: 0.8.0
+        version: 0.9.0
       react:
         specifier: 'catalog:'
         version: 19.3.0
@@ -327,13 +327,13 @@ importers:
         version: link:../core
       '@fubaritico/react':
         specifier: 'catalog:'
-        version: 0.8.0(next@16.4.3(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        version: 0.9.0(next@16.4.3(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@fubaritico/styles':
         specifier: 'catalog:'
-        version: 0.8.0(@fubaritico/tokens@0.8.0)
+        version: 0.9.0(@fubaritico/tokens@0.9.0)
       '@fubaritico/tokens':
         specifier: 'catalog:'
-        version: 0.8.0
+        version: 0.9.0
       '@payloadcms/db-sqlite':
         specifier: 3.92.0
         version: 3.92.0(payload@3.92.0(graphql@16.14.2)(typescript@5.7.3))
@@ -1296,32 +1296,27 @@ packages:
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
 
-  '@fubaritico/behaviors@0.8.0':
-    resolution: {integrity: sha512-QPAbMSH04XJ3qbdijTwYxHUWkZAdth0VVPISY9yauzJnIqON6EiAqdoxIkrPX4Aw3j9XHNTaXJAG4R6Zw9p8/Q==, tarball: https://npm.pkg.github.com/download/@fubaritico/behaviors/0.8.0/d49a1a0a53882e8aa90d10808a369e614576f636}
+  '@fubaritico/behaviors@0.9.0':
+    resolution: {integrity: sha512-M7PQH1uvSMg/8syeQ9NkGrcBGqiT+iEFZ9IiujGdeqHO/wwoCOf2QwsuRNdlk4lZCx4+qiFpJjv3xyRhumNZ/w==, tarball: https://npm.pkg.github.com/download/@fubaritico/behaviors/0.9.0/2719deccc11a9acca75ea585f94c0a4cdeb368a0}
 
-  '@fubaritico/react@0.8.0':
-    resolution: {integrity: sha512-HPDiOyY4GzWJCMT6Xr5GlBDn0L/hzt6XpzC2oKK8FenEF+WDW4sp+74F6NGRRcyyUxgWlcb+xOo9bOkeLEZM5Q==, tarball: https://npm.pkg.github.com/download/@fubaritico/react/0.8.0/d8078953d81acf0a8fe44374d9982709107fc551}
+  '@fubaritico/react@0.9.0':
+    resolution: {integrity: sha512-BfdP2aav9Yn/Hkk1Te/h+8lmLBMGTymzHRdXaA+qViVs5My9Qg9K+tVZ14v23037FrgWKF7XTcxkL807cRGvjw==, tarball: https://npm.pkg.github.com/download/@fubaritico/react/0.9.0/b1a83fd31fea31edcda56ceaee310be2d32d0fab}
     peerDependencies:
       next: '>=14'
       react: '>=19'
       react-dom: '>=19'
       react-router-dom: '>=7'
-    peerDependenciesMeta:
-      next:
-        optional: true
-      react-router-dom:
-        optional: true
 
-  '@fubaritico/styles@0.8.0':
-    resolution: {integrity: sha512-kwhgN5dNwVJyoATENzLFhQLnedCj3Ez3bsWgO/uG8ChiK/XLxPMkOWhOK86SIWfVZDxM+vkhBmvHZ7ScOUWGUw==, tarball: https://npm.pkg.github.com/download/@fubaritico/styles/0.8.0/ff27f8f13a0b88e92b5db55b0776b8403666b4ef}
+  '@fubaritico/styles@0.9.0':
+    resolution: {integrity: sha512-FEURPzIbMxNY50g8oYjZxLono8BIv6REFrP+Pw/sgGobDi0wcZqxaSEICKVkSzoybvcW+F5zU8FjqlBua0IcKA==, tarball: https://npm.pkg.github.com/download/@fubaritico/styles/0.9.0/9f4ad7a4d43585712d3a6867077a746d7d953061}
     peerDependencies:
-      '@fubaritico/tokens': 0.8.0
+      '@fubaritico/tokens': 0.9.0
 
-  '@fubaritico/tokens@0.8.0':
-    resolution: {integrity: sha512-soh2fAr2mJ7uQBPXgCUUoYfx7RmysoMvm6enleva1LaZXYalD31ikjTeqkrniQyHNBDFHdXFAyD9ehnYWQUh1g==, tarball: https://npm.pkg.github.com/download/@fubaritico/tokens/0.8.0/3dd6252706ef7fd30af563fb1ae933cd353b640c}
+  '@fubaritico/tokens@0.9.0':
+    resolution: {integrity: sha512-jh2CLF04XAvT5ObDqcaXYHQ3UtDQGBzOA9BwV2ZvxfpzVdljQhDKJ3aYkbT/w1ogQ5WSL2wxG67iY4AajWet0w==, tarball: https://npm.pkg.github.com/download/@fubaritico/tokens/0.9.0/05212674786ec89ca823a6708d2565948d4e80c1}
 
-  '@fubaritico/variants@0.8.0':
-    resolution: {integrity: sha512-TCHVBP/+85wb1AWsEfAwrXpm0QClRysbgy0oflUwwLodJrARDEvz1S1Yve0pz8gLlObJ5k4/A48Cre28WwIFVA==, tarball: https://npm.pkg.github.com/download/@fubaritico/variants/0.8.0/9b49aa72705da714a465b9ac18d50bfa91bc15fb}
+  '@fubaritico/variants@0.9.0':
+    resolution: {integrity: sha512-bkQdT9qN3fNF1NJgy672oxtG73t+KAV0ooMCR52EmeK9TdOMdcqk21WKQddazIc/zjgwVQqujVkXxE7tQF4Svw==, tarball: https://npm.pkg.github.com/download/@fubaritico/variants/0.9.0/2d5006fef702bb33029e6bf15348d1ac1b772e8a}
 
   '@heroicons/react@2.2.0':
     resolution: {integrity: sha512-LMcepvRaS9LYHJGsF0zzmgKCUim/X3N/DQKc4jepAXJ7l8QxJ1PmxJzqplF2Z3FE4PqBAIGyJAQ/w4B5dsqbtQ==}
@@ -5173,29 +5168,28 @@ snapshots:
 
   '@floating-ui/utils@0.2.12': {}
 
-  '@fubaritico/behaviors@0.8.0': {}
+  '@fubaritico/behaviors@0.9.0': {}
 
-  '@fubaritico/react@0.8.0(next@16.4.3(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+  '@fubaritico/react@0.9.0(next@16.4.3(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
-      '@fubaritico/behaviors': 0.8.0
-      '@fubaritico/variants': 0.8.0
+      '@fubaritico/behaviors': 0.9.0
+      '@fubaritico/variants': 0.9.0
       '@heroicons/react': 2.2.0(react@19.3.0)
       '@tanstack/react-table': 8.21.3(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@tanstack/react-virtual': 3.14.3(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       clsx: 2.1.1
       html-entities: 2.6.0
+      next: 16.4.3(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4)
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
-    optionalDependencies:
-      next: 16.4.3(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4)
 
-  '@fubaritico/styles@0.8.0(@fubaritico/tokens@0.8.0)':
+  '@fubaritico/styles@0.9.0(@fubaritico/tokens@0.9.0)':
     dependencies:
-      '@fubaritico/tokens': 0.8.0
+      '@fubaritico/tokens': 0.9.0
 
-  '@fubaritico/tokens@0.8.0': {}
+  '@fubaritico/tokens@0.9.0': {}
 
-  '@fubaritico/variants@0.8.0':
+  '@fubaritico/variants@0.9.0':
     dependencies:
       class-variance-authority: 0.7.1
 

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import '../../testing/popoverStandIn'
+import '../../testing/resizeObserverStandIn'
 
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -44,9 +45,10 @@ const empty: SheetValues = {
  * The form, in French, on an existing sheet or a new one.
  * @param values - its values
  * @param id - its id, absent for a new one
+ * @param reasons - the CMS's reasons, its two by default
  * @returns the rendered form
  */
-function renderForm(values: SheetValues, id?: number) {
+function renderForm(values: SheetValues, id?: number, reasons: typeof REASONS = REASONS) {
   return render(
     <CitySheetForm
       initialValues={values}
@@ -55,7 +57,7 @@ function renderForm(values: SheetValues, id?: number) {
       contentLocale="fr"
       api="/api"
       admin="/admin"
-      reasons={REASONS}
+      reasons={reasons}
     />
   )
 }
@@ -287,16 +289,31 @@ describe('CitySheetForm', () => {
       })
     })
 
-    it('ticks a reason and saves it with the sheet', async () => {
+    it('chooses a reason by typing, without its accent, and saves its id as a number', async () => {
       const fetcher = serverWithSources()
       renderForm(rome, 1)
       const user = userEvent.setup()
-      await user.click(screen.getByLabelText('Religion'))
+      await user.type(screen.getByRole('combobox', { name: 'Raisons' }), 'relig')
+      await user.click(await screen.findByRole('option', { name: 'Religion' }))
+      expect(screen.getByRole('button', { name: 'Retirer Religion' })).toBeTruthy()
       await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
       await waitFor(() => {
         expect(toast.success).toHaveBeenCalled()
       })
       expect(savedBody(fetcher).reasons).toEqual([2])
+    })
+
+    it('says where reasons are entered when the list has none yet', () => {
+      renderForm(rome, 1, [])
+      expect(screen.getByText(/^Aucune raison saisie encore/)).toBeTruthy()
+    })
+
+    it('removes a reason by its badge', async () => {
+      renderForm({ ...rome, reasons: [1, 2] }, 1)
+      const user = userEvent.setup()
+      await user.click(screen.getByRole('button', { name: 'Retirer Pouvoir' }))
+      expect(screen.queryByRole('button', { name: 'Retirer Pouvoir' })).toBeNull()
+      expect(screen.getByRole('button', { name: 'Retirer Religion' })).toBeTruthy()
     })
 
     it('adds a source’s line — the source searched, a population and its figure — and saves it', async () => {

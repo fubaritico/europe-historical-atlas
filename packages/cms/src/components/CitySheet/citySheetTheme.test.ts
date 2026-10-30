@@ -58,6 +58,8 @@ const UNSET_ON_PURPOSE: ReadonlyMap<string, string> = new Map([
     '--color-fill-on-inverse',
     '--color-fill-on-inverse-hover',
     '--color-border-on-inverse',
+    '--color-border-strong-on-inverse',
+    '--color-text-destructive-on-inverse',
   ].map(
     (name) => [name, 'the `variant="dark"` parts, dark already; the screen uses none'] as const
   ),
