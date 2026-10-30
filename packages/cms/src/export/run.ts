@@ -11,6 +11,7 @@ import config from '../payload.config'
 import { toContent, toSiegeEnginePeriods } from './toContent'
 
 import type { DocEvent } from './toContent'
+import type { DocCitySheet } from './toContentCity'
 
 /** Where the atlas reads its content: its `public/`, served as `/content/events.json`. */
 const OUT = path.resolve(
@@ -19,9 +20,10 @@ const OUT = path.resolve(
 )
 
 /**
- * Export every event for the atlas (CMS-223): read them through Payload's Local API with every locale and every
- * relation resolved, and every siege engin's period; turn them into the content format, check the result against
- * `core`'s schema, write it.
+ * Export every event and every city at a date for the atlas (CMS-223, ATLAS-295): read them through Payload's Local
+ * API with every locale and every relation resolved, and every siege engin's period; turn them into the content
+ * format — each city sheet first checked by the schema the form and the server check it by — check the result
+ * against `core`'s content schema, write it.
  * Anything wrong stops the export and names the event — nothing half-written reaches the atlas.
  */
 const payload = await getPayload({ config })
@@ -39,15 +41,27 @@ const { docs } = await payload.find({
   pagination: false,
   sort: 'date.start.year',
 })
+const cities = await payload.find({
+  collection: 'place-periods',
+  locale: 'all',
+  depth: 2,
+  pagination: false,
+  sort: 'date.start.year',
+})
 const content = contentFileSchema.parse(
-  toContent(docs as unknown as DocEvent[], {
-    periods,
-    warn: (message) => {
-      console.warn(message)
-    },
-  })
+  toContent(
+    { events: docs as unknown as DocEvent[], cities: cities.docs as unknown as DocCitySheet[] },
+    {
+      periods,
+      warn: (message) => {
+        console.warn(message)
+      },
+    }
+  )
 )
 await mkdir(path.dirname(OUT), { recursive: true })
 await writeFile(OUT, `${JSON.stringify(content, null, 2)}\n`)
-console.warn(`[CMS] ${String(content.events.length)} event(s) written to ${OUT}`)
+console.warn(
+  `[CMS] ${String(content.events.length)} event(s) and ${String(content.cities.length)} city sheet(s) written to ${OUT}`
+)
 process.exit(0)

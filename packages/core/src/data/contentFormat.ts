@@ -1,10 +1,12 @@
 /**
  * The content the atlas shows on the map — events, where they happened, who took part, and where it is
- * written — as the contribution tool exports it (CORE-252, CMS-223).
+ * written; cities at a date, their importance and what the sources say of them — as the contribution tool exports it
+ * (CORE-252, CMS-223, ATLAS-295).
  *
- * **One file, every record inlined.** The contribution keeps sources, places, actors and event types as records of
- * their own, entered once and pointed to; the export writes each event with what it points to already resolved,
- * so the atlas reads one file and joins nothing. The split into an index and bodies per century (`plan.md` P7)
+ * **The export prepares the file, the joins done** (the dev, 2026-10-30: *« les données, elles arrivent préparées,
+ * comme en GraphQL »*). The contribution keeps sources, places, actors, reasons and event types as records of their
+ * own, entered once and pointed to by id; the export joins them once, when it writes, so each event and each city
+ * arrives with what it points to written in, and the atlas reads it as it is. The split into an index and bodies per century (`plan.md` P7)
  * waits for the day there are thousands.
  *
  * **Two languages per text, French always there**: French is the contribution's default language, so an entry
@@ -19,8 +21,10 @@ import { z } from 'zod/mini'
 
 import { historicalDateSchema, historicalMomentSchema } from '../time/historicalDate'
 
+import { CITY_IMPORTANCES } from './cityImportance'
 import { SIEGE_ENGINES } from './siegeEngines'
 
+import type { CityImportance } from './cityImportance'
 import type { SiegeEngine } from './siegeEngines'
 import type { HistoricalDate, HistoricalMoment } from '../time/historicalDate'
 
@@ -188,23 +192,94 @@ const eventSchema: z.ZodMiniType<ContentEvent> = z.strictObject({
   engine: z.nullable(z.enum(SIEGE_ENGINES)),
 })
 
-/** `content/events.json` — every event the atlas can show. */
+/** What a source says of a city, by what it speaks about: the one value its subject names. */
+export type ContentTestimonyValue =
+  /** How many people lived there. */
+  | { subject: 'population'; population: number }
+  /** Which order of city it was. */
+  | { subject: 'importance'; importance: CityImportance }
+  /** One reason for its importance, named. */
+  | { subject: 'reason'; reason: LocalizedText }
+
+/** One line of what the sources say of a city: the source written in, what it says, where it says it. */
+export type ContentTestimony = ContentTestimonyValue & {
+  /** The source. */
+  source: ContentSource
+  /** Where in it — a page, a line, a column — or `null`. */
+  where: string | null
+}
+
+/** {@link ContentTestimony}. */
+const testimonySchema: z.ZodMiniType<ContentTestimony> = z.discriminatedUnion('subject', [
+  z.strictObject({
+    source: sourceSchema,
+    where: z.nullable(z.string()),
+    subject: z.literal('population'),
+    population: z.int().check(z.gte(0)),
+  }),
+  z.strictObject({
+    source: sourceSchema,
+    where: z.nullable(z.string()),
+    subject: z.literal('importance'),
+    importance: z.enum(CITY_IMPORTANCES),
+  }),
+  z.strictObject({
+    source: sourceSchema,
+    where: z.nullable(z.string()),
+    subject: z.literal('reason'),
+    reason: localizedText,
+  }),
+])
+
+/**
+ * A city at a date — « Rome en 1100 » — as the atlas will draw it (ATLAS-295): the point and the name together, by
+ * order of importance as the zoom closes in. The atlas reads it already; it draws no city yet.
+ */
+export interface ContentCity {
+  /** The sheet's id in the contribution. */
+  id: string
+  /** The place, written in: its name, its position. */
+  place: ContentPlace
+  /** When the sheet holds: a year alone counts for that year, an interval for every year it covers. */
+  date: HistoricalDate
+  /** Its order on the map: a capital from afar, a large city as the zoom closes in, a city close up. */
+  importance: CityImportance
+  /** Why it has that importance, named. */
+  reasons: LocalizedText[]
+  /** What the sources say of it — the « why » the atlas can show on a click. */
+  testimonies: ContentTestimony[]
+}
+
+/** {@link ContentCity}. */
+const citySchema: z.ZodMiniType<ContentCity> = z.strictObject({
+  id: recordId,
+  place: placeSchema,
+  date: historicalDateSchema,
+  importance: z.enum(CITY_IMPORTANCES),
+  reasons: z.array(localizedText),
+  testimonies: z.array(testimonySchema),
+})
+
+/** `content/events.json` — every event and every city at a date the atlas can show. */
 export interface ContentFile {
   /** Format version, so a reader can refuse a shape it does not know. */
   version: number
   /** Every event, in the order the export wrote them. */
   events: ContentEvent[]
+  /** Every city at a date, in the order the export wrote them. */
+  cities: ContentCity[]
 }
 
 /**
  * The version this code writes and reads — 2 since the event type carries its icon (2026-10-26), 3 since an event
  * carries its siege engine (2026-10-27, ATLAS-286), 4 since the event type carries its pins' colour (2026-10-27,
- * ATLAS-298).
+ * ATLAS-298), 5 since the file carries the cities at a date (2026-10-30, ATLAS-295).
  */
-export const CONTENT_FORMAT_VERSION = 4
+export const CONTENT_FORMAT_VERSION = 5
 
 /** {@link ContentFile}. The writer's version and the reader's are one constant, so a bump cannot split them. */
 export const contentFileSchema: z.ZodMiniType<ContentFile> = z.strictObject({
   version: z.literal(CONTENT_FORMAT_VERSION),
   events: z.array(eventSchema),
+  cities: z.array(citySchema),
 })

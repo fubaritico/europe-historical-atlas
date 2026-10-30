@@ -110,7 +110,9 @@ function fakeAssets(over: Partial<MapAssetSources> = {}): Partial<MapAssetSource
     landMask: { load: () => Promise.resolve(MASK) },
     rivers: { load: () => Promise.resolve({ source: 'test', bbox: META.bbox, rivers: [] }) },
     regions: { load: () => Promise.resolve(YEAR) },
-    content: { load: () => Promise.resolve({ version: CONTENT_FORMAT_VERSION, events: [] }) },
+    content: {
+      load: () => Promise.resolve({ version: CONTENT_FORMAT_VERSION, events: [], cities: [] }),
+    },
     ...over,
   }
 }
@@ -254,7 +256,7 @@ describe('createMapPipeline', () => {
     })
 
     it('waits for the events before it fades the year in', async () => {
-      const content = deferred<{ version: number; events: [] }>()
+      const content = deferred<{ version: number; events: []; cities: [] }>()
       const fadeIn = vi.fn(() => Promise.resolve())
       const { deps, pipeline } = build({
         fadeIn,
@@ -270,7 +272,7 @@ describe('createMapPipeline', () => {
       })
       await flush()
       expect(fadeIn).not.toHaveBeenCalled()
-      content.resolve({ version: CONTENT_FORMAT_VERSION, events: [] })
+      content.resolve({ version: CONTENT_FORMAT_VERSION, events: [], cities: [] })
       await started
       expect(fadeIn).toHaveBeenCalledTimes(1)
     })

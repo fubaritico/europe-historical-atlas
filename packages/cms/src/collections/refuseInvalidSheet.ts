@@ -3,10 +3,8 @@ import { APIError } from 'payload'
 import { checkCitySheet, isSheetRefused } from '@europe-historical-atlas/core/data/citySheet'
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
-import { isDateRefusal } from '@europe-historical-atlas/core/time/historicalDate'
 
-import { toHistoricalDate } from '../fields/dateReading'
-import { relationId, relationIds } from '../fields/relationId'
+import { citySheetCandidate } from '../fields/citySheetCandidate'
 
 import { COLLECTION_MESSAGES } from './i18n'
 
@@ -16,31 +14,7 @@ import type { CollectionBeforeChangeHook } from 'payload'
 const BAD_REQUEST = 400
 
 /**
- * A city sheet as `core`'s schema reads it, from what Payload is about to save.
- * @param data - the sheet's fields
- * @returns the candidate, or `null` when its date does not read — the date field's rule says why
- */
-function candidate(data: Record<string, unknown>): Record<string, unknown> | null {
-  const date = toHistoricalDate(data.date ?? {})
-  if (isDateRefusal(date)) return null
-  const rows = Array.isArray(data.testimonies)
-    ? (data.testimonies as Record<string, unknown>[])
-    : []
-  return {
-    place: relationId(data.place),
-    date,
-    importance: data.importance,
-    reasons: relationIds(data.reasons),
-    testimonies: rows.map((row) => ({
-      ...row,
-      source: relationId(row.source),
-      reason: relationId(row.reason),
-    })),
-  }
-}
-
-/**
- * The server's half of decision 8: a city sheet is checked by the same schema as the form (`core/data/citySheet.ts`)
+ * The server's half of the one schema for the form, the server and the export: a city sheet is checked by the same schema as the form (`core/data/citySheet.ts`)
  * before it is saved, whatever reaches the API — every issue named under its path. A collection's `beforeChange` runs
  * **before** the fields' own rules (Payload 3.92.0, `collections/operations/utilities/update.ts`: collection, then
  * fields), on the whole sheet (the fields' `beforeValidate` has filled what an update left out). So a date that does
@@ -53,7 +27,7 @@ function candidate(data: Record<string, unknown>): Record<string, unknown> | nul
  * @throws {APIError} with every issue, when the schema refuses the sheet
  */
 export const refuseInvalidSheet: CollectionBeforeChangeHook = ({ data, req }) => {
-  const sheet = candidate(data)
+  const sheet = citySheetCandidate(data)
   if (sheet === null) return data
   const answer = checkCitySheet(sheet)
   if (!isSheetRefused(answer)) return data

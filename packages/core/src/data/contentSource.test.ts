@@ -4,7 +4,7 @@ import { isAssetError } from './assetError'
 import { CONTENT_FORMAT_VERSION } from './contentFormat'
 import { createFetchContentSource, parseContentFile } from './contentSource'
 
-const EMPTY = { version: CONTENT_FORMAT_VERSION, events: [] }
+const EMPTY = { version: CONTENT_FORMAT_VERSION, events: [], cities: [] }
 
 /**
  * Answer every fetch with one response.
@@ -43,7 +43,7 @@ describe('contentSource', () => {
 
     it('refuses a file of the wrong shape, naming the field', () => {
       expect(() =>
-        parseContentFile({ version: CONTENT_FORMAT_VERSION, events: 'none' }, 'here')
+        parseContentFile({ version: CONTENT_FORMAT_VERSION, events: 'none', cities: [] }, 'here')
       ).toThrow(/events/)
     })
   })
@@ -57,7 +57,7 @@ describe('contentSource', () => {
   describe('edge cases', () => {
     it('refuses a newer version of the format', () => {
       expect(() =>
-        parseContentFile({ version: CONTENT_FORMAT_VERSION + 1, events: [] }, 'here')
+        parseContentFile({ version: CONTENT_FORMAT_VERSION + 1, events: [], cities: [] }, 'here')
       ).toThrow()
     })
   })

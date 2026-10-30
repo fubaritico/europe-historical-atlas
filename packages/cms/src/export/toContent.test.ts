@@ -8,6 +8,7 @@ import {
 import { toContent, toContentEvent, toSiegeEnginePeriods } from './toContent'
 
 import type { DocEvent, DocSiegeEngine, ExportContext } from './toContent'
+import type { DocCitySheet } from './toContentCity'
 import type { ContentEvent } from '@europe-historical-atlas/core/data/contentFormat'
 
 const SIEGE = {
@@ -64,6 +65,18 @@ function capture(overrides: Partial<DocEvent> = {}): DocEvent {
   }
 }
 
+/** Rome in 1100, as the export reads it — its place resolved, no reason, no line. */
+const ROME_1100: DocCitySheet = {
+  id: 1,
+  place: { id: 5, name: { fr: 'Rome', en: 'Rome' }, location: [12.48, 41.89], wikidata: 'Q220' },
+  date: {
+    start: { year: 1100, month: null, day: null, circa: true, margin: null, calendar: 'julian' },
+  },
+  importance: 'capital',
+  reasons: [],
+  testimonies: [],
+}
+
 describe('toContent', () => {
   describe('happy path', () => {
     it('writes an event with everything it points to', () => {
@@ -100,7 +113,9 @@ describe('toContent', () => {
     })
 
     it('writes a file core’s schema accepts', () => {
-      expect(contentFileSchema.safeParse(toContent([capture()], QUIET)).success).toBe(true)
+      expect(
+        contentFileSchema.safeParse(toContent({ events: [capture()], cities: [] }, QUIET)).success
+      ).toBe(true)
     })
   })
 
@@ -118,8 +133,20 @@ describe('toContent', () => {
       expect(exportEvent(capture({ description: { fr: '', en: null } })).description).toBeNull()
     })
 
-    it('writes an empty file for no events', () => {
-      expect(toContent([], QUIET)).toEqual({ version: CONTENT_FORMAT_VERSION, events: [] })
+    it('writes an empty file for no events and no city', () => {
+      expect(toContent({ events: [], cities: [] }, QUIET)).toEqual({
+        version: CONTENT_FORMAT_VERSION,
+        events: [],
+        cities: [],
+      })
+    })
+
+    it('writes the city sheets beside the events, each joined in', () => {
+      const file = toContent({ events: [], cities: [ROME_1100] }, QUIET)
+      expect(file.cities.map((city) => [city.id, city.place.name.fr, city.importance])).toEqual([
+        ['1', 'Rome', 'capital'],
+      ])
+      expect(contentFileSchema.safeParse(file).success).toBe(true)
     })
   })
 
@@ -166,6 +193,13 @@ describe('toContent', () => {
     it('refuses a place with no position', () => {
       expect(() => exportEvent(capture({ place: { ...JERUSALEM, location: null } }))).toThrow(
         'place 2: no position'
+      )
+    })
+
+    it('stops the whole file on a city sheet the schema refuses', () => {
+      const refused = { ...ROME_1100, importance: null }
+      expect(() => toContent({ events: [capture()], cities: [refused] }, QUIET)).toThrow(
+        /city sheet 1: refused by the schema: importance/
       )
     })
   })

@@ -75,7 +75,11 @@ reading of the evening.
 
 ## Next — not decided
 
-0. The screen of decision 8, its approach proposed on 2026-10-30: `city-sheet-screen.md`.
+0. The screen of decision 8, its approach proposed on 2026-10-30: `city-sheet-screen.md`. Built the same day, and **the
+   export writes the cities** into the atlas's content file (format version 5, the one that adds them), each checked by
+   the one schema first — **prepared, the joins done at export** (the dev, 2026-10-30: *« les données, elles arrivent
+   préparées, comme en GraphQL »*): a city arrives with its place, reasons and sources written in. The atlas reads it
+   and draws no city yet.
 1. Where the cities of 1100 come from, and how they are entered (the field of importance in the CMS, then 30 to 40
    cities) — a first list, to be read by the dev: `cities-1100.md`.
 2. The point's look per order (Bertin: size and value), the name's place (Imhof / Yoeli) — on a bench, the dev chooses.

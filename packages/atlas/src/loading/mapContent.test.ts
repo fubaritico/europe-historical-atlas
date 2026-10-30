@@ -32,7 +32,7 @@ describe('loadContent', () => {
   describe('happy path', () => {
     it('writes the events and pins them', async () => {
       const d = deps()
-      await loadContent(d, answering({ version: 1, events: [EVENT] }))
+      await loadContent(d, answering({ version: 1, events: [EVENT], cities: [] }))
       expect(d.sources.events).toEqual([EVENT])
       expect(d.layers.rebuildEvents).toHaveBeenCalledTimes(1)
     })
@@ -41,7 +41,7 @@ describe('loadContent', () => {
   describe('variants', () => {
     it('pins nothing new for an empty file, and says nothing', async () => {
       const d = deps()
-      await loadContent(d, answering({ version: 1, events: [] }))
+      await loadContent(d, answering({ version: 1, events: [], cities: [] }))
       expect(d.sources.events).toEqual([])
       expect(d.ui.reportAssetFailure).not.toHaveBeenCalled()
     })
@@ -72,7 +72,7 @@ describe('loadContent', () => {
   describe('edge cases', () => {
     it('writes nothing once the app is torn down', async () => {
       const d = deps(true)
-      await loadContent(d, answering({ version: 1, events: [EVENT] }))
+      await loadContent(d, answering({ version: 1, events: [EVENT], cities: [] }))
       expect(d.sources.events).toEqual([])
       expect(d.layers.rebuildEvents).not.toHaveBeenCalled()
     })

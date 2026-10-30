@@ -42,8 +42,110 @@ function capture(overrides: Partial<Record<keyof ContentEvent, unknown>> = {}): 
  * @returns whether the schema accepts it
  */
 function accepts(event: unknown): boolean {
-  return contentFileSchema.safeParse({ version: CONTENT_FORMAT_VERSION, events: [event] }).success
+  return contentFileSchema.safeParse({
+    version: CONTENT_FORMAT_VERSION,
+    events: [event],
+    cities: [],
+  }).success
 }
+
+/**
+ * Rome in 1100, as the export writes it: its place written in, a reason named, a source's line.
+ * @param overrides - what a test changes
+ * @returns the city
+ */
+function rome(overrides: Record<string, unknown> = {}): unknown {
+  return {
+    id: '1',
+    place: {
+      id: '5',
+      name: { fr: 'Rome', en: 'Rome' },
+      lon: 12.48,
+      lat: 41.89,
+      wikidata: 'Q220',
+      existsFrom: null,
+      existsTo: null,
+    },
+    date: {
+      kind: 'instant',
+      at: { year: 1100, month: null, day: null, calendar: null, circa: true, margin: null },
+    },
+    importance: 'capital',
+    reasons: [{ fr: 'Évêché', en: null }],
+    testimonies: [
+      {
+        source: { id: '4', title: 'Buringh 2021', author: 'Eltjo Buringh', url: null },
+        where: 'p. 12',
+        subject: 'population',
+        population: 35000,
+      },
+    ],
+    ...overrides,
+  }
+}
+
+/**
+ * Parse a file holding one city and no event.
+ * @param city - the city
+ * @returns whether the schema accepts it
+ */
+function acceptsCity(city: unknown): boolean {
+  return contentFileSchema.safeParse({
+    version: CONTENT_FORMAT_VERSION,
+    events: [],
+    cities: [city],
+  }).success
+}
+
+describe('contentFileSchema — the cities at a date', () => {
+  describe('happy path', () => {
+    it('accepts Rome in 1100, its place written in, a reason named, a source’s line', () => {
+      expect(acceptsCity(rome())).toBe(true)
+    })
+  })
+
+  describe('variants', () => {
+    it('accepts a line about the importance and one about a named reason', () => {
+      const source = { id: '4', title: 'Buringh 2021', author: null, url: null }
+      const lines = [
+        { source, where: null, subject: 'importance', importance: 'large-city' },
+        { source, where: null, subject: 'reason', reason: { fr: 'Pèlerinage', en: 'Pilgrimage' } },
+      ]
+      expect(acceptsCity(rome({ testimonies: lines }))).toBe(true)
+    })
+
+    it('accepts a city with no reason and no line', () => {
+      expect(acceptsCity(rome({ reasons: [], testimonies: [] }))).toBe(true)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('refuses an importance the map does not have', () => {
+      expect(acceptsCity(rome({ importance: 'village' }))).toBe(false)
+    })
+
+    it('refuses a line about the population without its figure', () => {
+      const source = { id: '4', title: 'Buringh 2021', author: null, url: null }
+      expect(
+        acceptsCity(rome({ testimonies: [{ source, where: null, subject: 'population' }] }))
+      ).toBe(false)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('refuses a city whose place is only an id — the export joins it, the atlas never does', () => {
+      expect(acceptsCity(rome({ place: '5' }))).toBe(false)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('refuses a file of the format before the cities: it has no list of them', () => {
+      expect(
+        contentFileSchema.safeParse({ version: CONTENT_FORMAT_VERSION, events: [] }).success
+      ).toBe(false)
+    })
+  })
+})
 
 describe('contentFileSchema', () => {
   describe('happy path', () => {
@@ -121,8 +223,8 @@ describe('contentFileSchema', () => {
     })
 
     it('refuses an unknown version, the earlier ones included', () => {
-      for (const version of [1, 2, 3, 5])
-        expect(contentFileSchema.safeParse({ version, events: [] }).success).toBe(false)
+      for (const version of [1, 2, 3, 4, 6])
+        expect(contentFileSchema.safeParse({ version, events: [], cities: [] }).success).toBe(false)
     })
 
     it('refuses an engin it does not know — the catapult among them', () => {
@@ -202,6 +304,7 @@ describe('contentFileSchema', () => {
       const result = contentFileSchema.safeParse({
         version: CONTENT_FORMAT_VERSION,
         events: [capture({ date })],
+        cities: [],
       })
       expect(result.error?.issues[0]?.message).toBe('the interval ends before it begins')
     })

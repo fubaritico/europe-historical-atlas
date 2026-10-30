@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "events": [
     {
       "id": "11",
@@ -779,6 +779,61 @@
       ],
       "wikidata": null,
       "engine": null
+    }
+  ],
+  "cities": [
+    {
+      "id": "1",
+      "place": {
+        "id": "5",
+        "name": {
+          "fr": "Rome",
+          "en": null
+        },
+        "lon": 12.482777777778,
+        "lat": 41.893055555556,
+        "wikidata": "Q220",
+        "existsFrom": {
+          "year": -753,
+          "month": 4,
+          "day": 21,
+          "calendar": "julian",
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": true,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "evêché",
+          "en": null
+        },
+        {
+          "fr": "université",
+          "en": null
+        },
+        {
+          "fr": "pelrinage",
+          "en": null
+        },
+        {
+          "fr": "ville sainte",
+          "en": null
+        }
+      ],
+      "testimonies": []
     }
   ]
 }
