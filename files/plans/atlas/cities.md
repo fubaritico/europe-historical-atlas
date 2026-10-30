@@ -75,6 +75,7 @@ reading of the evening.
 
 ## Next — not decided
 
+0. The screen of decision 8, its approach proposed on 2026-10-30: `city-sheet-screen.md`.
 1. Where the cities of 1100 come from, and how they are entered (the field of importance in the CMS, then 30 to 40
    cities) — a first list, to be read by the dev: `cities-1100.md`.
 2. The point's look per order (Bertin: size and value), the name's place (Imhof / Yoeli) — on a bench, the dev chooses.

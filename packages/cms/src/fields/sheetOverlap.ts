@@ -1,9 +1,9 @@
 import { datesOverlap } from '@europe-historical-atlas/core/time/dateOverlap'
 import { isDateRefusal } from '@europe-historical-atlas/core/time/historicalDate'
 
-import { toHistoricalDate } from './historicalDate'
+import { toHistoricalDate } from './dateReading'
 
-import type { EventDateFields } from './historicalDate'
+import type { EventDateFields } from './dateReading'
 import type { HistoricalDate } from '@europe-historical-atlas/core/time/historicalDate'
 
 /** A city-at-a-date already saved, as much of it as the overlap needs. */

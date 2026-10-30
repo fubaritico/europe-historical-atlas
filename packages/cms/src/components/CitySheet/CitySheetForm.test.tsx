@@ -1,0 +1,265 @@
+// @vitest-environment jsdom
+import '../../testing/popoverStandIn'
+
+import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { CitySheetForm } from './CitySheetForm'
+import { EMPTY_MOMENT } from './utils/sheetValues'
+
+import type { SheetValues } from './utils/sheetValues'
+
+const router = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn() }))
+const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
+
+vi.mock('next/navigation', () => ({ useRouter: () => router }))
+vi.mock('@payloadcms/ui', () => ({ toast }))
+
+/** Rome in 1100, a capital — the sheet the dev's base holds. */
+const rome: SheetValues = {
+  place: { id: 5, name: 'Rome' },
+  date: { start: { ...EMPTY_MOMENT, year: '1100' }, end: EMPTY_MOMENT },
+  importance: 'capital',
+}
+
+/** A new sheet. */
+const empty: SheetValues = {
+  place: null,
+  date: { start: EMPTY_MOMENT, end: EMPTY_MOMENT },
+  importance: '',
+}
+
+/**
+ * The form, in French, on an existing sheet or a new one.
+ * @param values - its values
+ * @param id - its id, absent for a new one
+ * @returns the rendered form
+ */
+function renderForm(values: SheetValues, id?: number) {
+  return render(
+    <CitySheetForm
+      initialValues={values}
+      {...(id === undefined ? {} : { id })}
+      locale="fr"
+      contentLocale="fr"
+      api="/api"
+      admin="/admin"
+    />
+  )
+}
+
+/**
+ * The start's year field.
+ * @returns the input
+ */
+function startYear(): HTMLInputElement {
+  const [start] = screen.getAllByLabelText('Année')
+  if (!(start instanceof HTMLInputElement)) throw new Error('no year field')
+  return start
+}
+
+/**
+ * The server answering one response.
+ * @param status - the HTTP status
+ * @param json - the body
+ * @returns the stand-in
+ */
+function serverAnswers(status: number, json: unknown) {
+  const fetcher = vi.fn<typeof fetch>(() =>
+    Promise.resolve(new Response(JSON.stringify(json), { status }))
+  )
+  vi.stubGlobal('fetch', fetcher)
+  return fetcher
+}
+
+/**
+ * The server: the places' search answers Rome, a save answers the new sheet's id.
+ * @returns the stand-in, to read the save's body
+ */
+function serverWithPlaces() {
+  const fetcher = vi.fn<typeof fetch>((input) => {
+    const json = (input as string).startsWith('/api/places')
+      ? { docs: [{ id: 5, name: 'Rome' }] }
+      : { doc: { id: 7 } }
+    return Promise.resolve(new Response(JSON.stringify(json), { status: 200 }))
+  })
+  vi.stubGlobal('fetch', fetcher)
+  return fetcher
+}
+
+beforeEach(() => {
+  vi.spyOn(console, 'error').mockImplementation(() => undefined)
+})
+
+afterEach(() => {
+  cleanup()
+  vi.unstubAllGlobals()
+  vi.clearAllMocks()
+  vi.restoreAllMocks()
+})
+
+describe('CitySheetForm', () => {
+  describe('happy path', () => {
+    it('opens Rome with its place, its year, and the button greyed while nothing has changed', async () => {
+      renderForm(rome, 1)
+      expect(screen.getByText('Rome')).toBeTruthy()
+      expect(startYear().value).toBe('1100')
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Enregistrer' }).hasAttribute('disabled')).toBe(
+          true
+        )
+      })
+    })
+
+    it('enables the button once a valid change is typed, saves, and says so', async () => {
+      const fetcher = serverAnswers(200, { doc: { id: 1 } })
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      await user.clear(startYear())
+      await user.type(startYear(), '1101')
+      const save = screen.getByRole('button', { name: 'Enregistrer' })
+      await waitFor(() => {
+        expect(save.hasAttribute('disabled')).toBe(false)
+      })
+      await user.click(save)
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalledWith('Fiche enregistrée.')
+      })
+      expect(fetcher.mock.calls[0]?.[0]).toBe('/api/place-periods/1')
+      expect(router.refresh).toHaveBeenCalled()
+    })
+  })
+
+  describe('variants', () => {
+    it('opens a new sheet with its « Ajouter » greyed, and no error before anything is touched', async () => {
+      renderForm(empty)
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Ajouter' }).hasAttribute('disabled')).toBe(true)
+      })
+      expect(screen.queryByText('Il faut au moins une année.')).toBeNull()
+      expect(screen.queryByText('Choisissez un lieu.')).toBeNull()
+    })
+
+    it('says a field’s error once it is touched, and the help again once it is right', async () => {
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      await user.clear(startYear())
+      await user.tab()
+      expect(await screen.findByText('Il faut au moins une année.')).toBeTruthy()
+      await user.type(startYear(), '1100')
+      await waitFor(() => {
+        expect(screen.queryByText('Il faut au moins une année.')).toBeNull()
+      })
+    })
+    it('creates a sheet from nothing: the place searched and chosen, a year, an importance', async () => {
+      const fetcher = serverWithPlaces()
+      renderForm(empty)
+      const user = userEvent.setup()
+      await user.type(screen.getByRole('combobox', { name: 'Lieu' }), 'Ro')
+      await user.click(await screen.findByRole('option', { name: 'Rome' }))
+      // The search's field is gone: the focus goes to the place held, never to the page.
+      expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Retirer Rome' }))
+      await user.type(startYear(), '1100')
+      await user.click(screen.getByRole('button', { name: 'Importance : Choisir une importance' }))
+      await user.click(await screen.findByRole('option', { name: 'Capitale' }))
+      await user.click(screen.getByRole('button', { name: 'Ajouter' }))
+      await waitFor(() => {
+        expect(router.push).toHaveBeenCalledWith('/admin/collections/place-periods/7')
+      })
+      const save = fetcher.mock.calls.find(([input]) => input === '/api/place-periods')
+      expect(JSON.parse(save?.[1]?.body as string)).toMatchObject({
+        place: 5,
+        importance: 'capital',
+      })
+    })
+
+    it('removes the place held: the search comes back with the focus, and says a place is needed', async () => {
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      await user.click(screen.getByRole('button', { name: 'Retirer Rome' }))
+      expect(document.activeElement).toBe(screen.getByRole('combobox', { name: 'Lieu' }))
+      expect(await screen.findByText('Choisissez un lieu.')).toBeTruthy()
+    })
+  })
+
+  describe('managed errors', () => {
+    it('says the server’s refusal at the top, under its field, in a toast — and keeps what was typed', async () => {
+      const message = 'Rome a déjà une fiche pour 1101.'
+      serverAnswers(400, {
+        errors: [{ message, data: { errors: [{ path: 'date.start.year', message }] } }],
+      })
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      await user.clear(startYear())
+      await user.type(startYear(), '1101')
+      await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
+      expect((await screen.findAllByText(message)).length).toBe(2)
+      expect(toast.error).toHaveBeenCalledWith(message)
+      expect(startYear().value).toBe('1101')
+      expect(console.error).toHaveBeenCalled()
+    })
+    it('says a failed search of the places under the field, and in the console', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(() => Promise.reject(new TypeError('Failed to fetch')))
+      )
+      renderForm(empty)
+      const user = userEvent.setup()
+      await user.type(screen.getByRole('combobox', { name: 'Lieu' }), 'Ro')
+      expect(
+        await screen.findByText('La recherche des lieux n’a pas abouti. Réessayez dans un instant.')
+      ).toBeTruthy()
+      expect(console.error).toHaveBeenCalledWith(
+        '[CMS] the search for places failed',
+        expect.any(TypeError)
+      )
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('says a silent server in its own words, and keeps what was typed', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(() => Promise.reject(new TypeError('Failed to fetch')))
+      )
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      await user.clear(startYear())
+      await user.type(startYear(), '1101')
+      await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
+      expect(await screen.findByRole('alert')).toBeTruthy()
+      expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('Le serveur ne répond pas'))
+      expect(startYear().value).toBe('1101')
+    })
+    it('says an answer that is not Payload’s as a fault, not as a silence', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(() => Promise.resolve(new Response('<html>500</html>', { status: 500 })))
+      )
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      await user.clear(startYear())
+      await user.type(startYear(), '1101')
+      await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith(
+          expect.stringContaining('répondu de façon inattendue')
+        )
+      })
+    })
+  })
+
+  describe('edge cases', () => {
+    it('opens the new sheet at its own address once it is created', async () => {
+      serverAnswers(201, { doc: { id: 7 } })
+      renderForm({ ...rome, date: { start: { ...EMPTY_MOMENT, year: '' }, end: EMPTY_MOMENT } })
+      const user = userEvent.setup()
+      await user.type(startYear(), '1100')
+      await user.click(screen.getByRole('button', { name: 'Ajouter' }))
+      await waitFor(() => {
+        expect(router.push).toHaveBeenCalledWith('/admin/collections/place-periods/7')
+      })
+    })
+  })
+})

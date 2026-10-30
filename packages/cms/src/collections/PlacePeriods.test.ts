@@ -6,7 +6,9 @@ import {
   TESTIMONY_SUBJECTS,
 } from '@europe-historical-atlas/core/data/cityImportance'
 
-import { OVERLAP_PATH, PlacePeriods, refuseOverlap, relationId } from './PlacePeriods'
+import { relationId } from '../fields/relationId'
+
+import { OVERLAP_PATH, PlacePeriods, refuseOverlap } from './PlacePeriods'
 
 import type { CollectionBeforeValidateHook, Field } from 'payload'
 import type { Mock } from 'vitest'

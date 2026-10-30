@@ -9,6 +9,7 @@ import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
 import { formatHistoricalDate } from '@europe-historical-atlas/core/time/formatHistoricalDate'
 
 import { historicalDateField } from '../fields/historicalDate'
+import { relationId } from '../fields/relationId'
 import { overlappingSheet } from '../fields/sheetOverlap'
 
 import { COLLECTION_MESSAGES } from './i18n'
@@ -48,23 +49,9 @@ const TRANSLATORS = {
 export const OVERLAP_PATH = 'date.start.year'
 
 /**
- * The id a relationship holds, whether Payload hands it bare or populated.
- * @param value - the field's value
- * @returns the id, or `null` when none is chosen
- */
-export function relationId(value: unknown): number | string | null {
-  if (typeof value === 'number' || typeof value === 'string') return value
-  if (typeof value === 'object' && value !== null && 'id' in value) {
-    const id = value.id
-    return typeof id === 'number' || typeof id === 'string' ? id : null
-  }
-  return null
-}
-
-/**
  * The server's half of decision 7: a sheet whose date shares a year with another of the same place is refused at
- * save, named. The contribution screen to come will grey its button for the same rule while typing; this half holds
- * for whatever reaches the API another way.
+ * save, named. It holds for whatever reaches the API, the contribution screen included, which says this refusal under
+ * the year.
  *
  * `data` is read alone, never merged over the saved sheet: on an update Payload has already filled every field the
  * request left out from the saved document, groups included, before a collection hook runs (3.92.0,
@@ -131,6 +118,13 @@ export const PlacePeriods: CollectionConfig = {
   labels: { singular: 'Ville à une date', plural: 'Villes à une date' },
   admin: {
     defaultColumns: ['place', 'importance'],
+    // Our own form in place of Payload's, which validates only after a first save and never greys its button
+    // (decision 8; `files/plans/atlas/city-sheet-screen.md`). Payload keeps the header, the tabs and the list.
+    components: {
+      views: {
+        edit: { default: { Component: '/components/CitySheet/CitySheetView#CitySheetView' } },
+      },
+    },
     description:
       'Une ville telle qu’elle est à une date : son importance sur la carte, et ce qu’en disent les sources. Le lieu lui-même (son nom, sa position) se saisit une fois, dans « Lieux ».',
   },
