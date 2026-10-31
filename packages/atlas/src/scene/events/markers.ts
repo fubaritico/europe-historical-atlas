@@ -6,6 +6,7 @@
 import { Group } from 'three'
 
 import type { DetailView } from '../detail/detailView'
+import type { YearNames } from '@europe-historical-atlas/core/pipeline/yearNames'
 import type { Quaternion, Vector3 } from 'three'
 
 /** Where the camera stands and how it is turned, in the world — a camera's own `position` and `quaternion` fit. */
@@ -77,6 +78,12 @@ export interface EventMarkers {
    * @param view - the level's values, faded in time
    */
   setDetailView?: (view: DetailView) => void
+  /**
+   * Tell the markers where the countries' names are placed — the cities' points yield to them while they have no name
+   * (ATLAS-323); a kind it does not concern leaves it out.
+   * @param names - the year's names as placed, or `null` while there are none
+   */
+  setNameCover?: (names: YearNames | null) => void
   /** Free the GPU resources. */
   dispose(): void
 }
@@ -110,6 +117,9 @@ export function combineEventMarkers(parts: readonly EventMarkers[]): EventMarker
     },
     setDetailView(view: DetailView): void {
       for (const part of parts) part.setDetailView?.(view)
+    },
+    setNameCover(names: YearNames | null): void {
+      for (const part of parts) part.setNameCover?.(names)
     },
     dispose(): void {
       for (const part of parts) part.dispose()

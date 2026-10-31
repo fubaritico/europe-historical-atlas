@@ -48,6 +48,17 @@ describe('combineEventMarkers', () => {
       both.setBlur?.(1.5)
       expect(setBlur).toHaveBeenCalledWith(1.5)
     })
+
+    it('hands the countries’ names to the kinds that read them, and passes over the others', () => {
+      const pins = createPinMarkers(
+        [{ ground: [0, 0.2, 0], colour: '#e3170a' }],
+        () => new Texture()
+      )
+      const setNameCover = vi.fn()
+      const both = combineEventMarkers([pins, { ...pins, setNameCover }])
+      both.setNameCover?.(null)
+      expect(setNameCover).toHaveBeenCalledWith(null)
+    })
   })
 
   describe('edge cases', () => {

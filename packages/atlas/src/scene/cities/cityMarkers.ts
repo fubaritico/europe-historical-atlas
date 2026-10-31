@@ -20,6 +20,7 @@ import { NAME_RENDER_ORDER } from '../political/names/nameLayer'
 
 import { LABEL_RATIO } from './cityLabel'
 import { CITY_MARKS, cityMarkSvg } from './cityMarks'
+import { coveredByNames } from './nameCover'
 import { inNameReach, lookedAt } from './nameReach'
 
 import type { CityLabelImage, DrawCityLabel } from './cityLabel'
@@ -28,6 +29,7 @@ import type { LoadSvgTexture } from '../events/icons/billboardMaterials'
 import type { CameraPose, EventMarkers } from '../events/markers'
 import type { WorldPoint } from '../relief/drapeProjection'
 import type { CityImportance } from '@europe-historical-atlas/core/data/cityImportance'
+import type { YearNames } from '@europe-historical-atlas/core/pipeline/yearNames'
 import type { Texture } from 'three'
 
 /**
@@ -50,6 +52,10 @@ export interface PlacedCity {
   readonly importance: CityImportance
   /** Its name, as the map writes it. */
   readonly name: string
+  /** Its point in normalized grid coordinates, `u` west→east, `v` north→south — to tell whether a name covers it. */
+  readonly u: number
+  /** See {@link PlacedCity.u}. */
+  readonly v: number
 }
 
 /** One city's two sprites. */
@@ -68,10 +74,13 @@ interface CitySprites {
   inReach: boolean
   /** How far the name has faded toward its reach, `0` out to `1` in. */
   reach: number
+  /** Whether its point falls on a country's name seen from afar (`nameCover`): the point yields while it has no name. */
+  covered: boolean
 }
 
 /** The cities' markers: event markers that always take the level of detail. */
-export type CityMarkers = EventMarkers & Required<Pick<EventMarkers, 'setDetailView'>>
+export type CityMarkers = EventMarkers &
+  Required<Pick<EventMarkers, 'setDetailView' | 'setNameCover'>>
 
 /** What every sprite is sized and faded by, for this frame. */
 interface CityFrame {
@@ -128,7 +137,9 @@ function applyFrame(city: CitySprites, frame: CityFrame): void {
     fade(city.name, 0)
     return
   }
-  fade(city.point, view.cityPoints[city.importance] * reveal)
+  // A point on a country's name yields to it while the city has no name of its own; it comes back with its name.
+  const yields = city.covered ? view.cityNames[city.importance] : 1
+  fade(city.point, view.cityPoints[city.importance] * yields * reveal)
   fade(city.name, city.nameWidth === 0 ? 0 : view.cityNames[city.importance] * city.reach * reveal)
 }
 
@@ -202,6 +213,7 @@ function buildSprites(
       nameHeight: 0,
       inReach: true,
       reach: 1,
+      covered: false,
     }
   })
 }
@@ -260,6 +272,23 @@ function reachFollower(
     last = seconds
     followReach(sprites, camera, share, step)
   }
+}
+
+/**
+ * Mark which cities' points fall on a country's name seen from afar.
+ * @param cities - the cities
+ * @param sprites - their sprites, in the same order
+ * @param names - the year's names as placed, or `null` while there are none
+ */
+function markCovered(
+  cities: readonly PlacedCity[],
+  sprites: readonly CitySprites[],
+  names: YearNames | null
+): void {
+  const covered = coveredByNames(cities, names)
+  sprites.forEach((city, index) => {
+    city.covered = covered[index] === true
+  })
 }
 
 /**
@@ -323,6 +352,10 @@ export function createCityMarkers(
     },
     setReveal(share: number): void {
       frame.reveal = share
+      applyAll()
+    },
+    setNameCover(names: YearNames | null): void {
+      markCovered(cities, sprites, names)
       applyAll()
     },
     setDetailView(view: DetailView): void {

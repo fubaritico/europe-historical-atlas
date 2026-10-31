@@ -77,10 +77,14 @@ export function rebuildEvents(context: LayerContext): void {
         ground: projection.draped(u, v),
         importance: city.importance,
         name: city.place.name.fr,
+        u,
+        v,
       })),
       svgToTexture,
       context.cityLabels
     ),
   ])
+  // The countries' names already placed, if any: the cities' points on them yield (ATLAS-323).
+  handles.events.setNameCover?.(sources.yearNames)
   scene.add(handles.events.object)
 }

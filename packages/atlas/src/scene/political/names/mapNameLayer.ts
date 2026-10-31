@@ -10,6 +10,7 @@ import { disposeHandle } from '../../layers/disposeHandle'
 import { createNameLayer } from './nameLayer'
 
 import type { LayerContext } from '../../layers/layerContext'
+import type { YearNames } from '@europe-historical-atlas/core/pipeline/yearNames'
 
 /** The ink the names are written in — the dev's on the bench, 2026-10-28. */
 export const NAME_INK = '#3b2614'
@@ -32,6 +33,15 @@ export const NAME_HALO_OPACITY = 0.5
 export const NAME_HALO_CELLS = 0.8
 
 /**
+ * Tell the cities which names are drawn: their points on a country's name yield to it afar (ATLAS-323).
+ * @param context - the layers and what they read
+ * @param names - the names drawn, or `null` while there are none
+ */
+function tellTheCities(context: LayerContext, names: YearNames | null): void {
+  context.handles.events?.setNameCover?.(names)
+}
+
+/**
  * Lay the year's names on the relief, or take them off until their names, their sheet and the relief are all in.
  * Nothing is said when one is missing: the names arrive after the map by design, and this runs again when they do.
  * @param context - the layers and what they read
@@ -42,6 +52,8 @@ export function rebuildNames(context: LayerContext): void {
   disposeHandle(scene, handles.names)
   handles.names = null
   const { yearNames, nameSheet } = sources
+  // The cities' points yield only to names drawn (ATLAS-323): none until this layer is built again.
+  tellTheCities(context, null)
   const relief = handles.relief
   if (yearNames === null || nameSheet === null || relief === null) return
   handles.names = createNameLayer({
@@ -59,4 +71,5 @@ export function rebuildNames(context: LayerContext): void {
   })
   handles.names.object.scale.setY(relief.scale.y)
   scene.add(handles.names.object)
+  tellTheCities(context, yearNames)
 }

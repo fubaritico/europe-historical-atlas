@@ -28,8 +28,20 @@ const drawn: DrawCityLabel = () => Promise.resolve(LABEL)
 /** A texture stub for the marks. */
 const loadTexture = (): Texture => new Texture()
 
-const PARIS: PlacedCity = { ground: [1, 0.2, 2], importance: 'capital', name: 'Paris' }
-const COLOGNE: PlacedCity = { ground: [3, 0.1, 4], importance: 'large-city', name: 'Cologne' }
+const PARIS: PlacedCity = {
+  ground: [1, 0.2, 2],
+  importance: 'capital',
+  name: 'Paris',
+  u: 0.5,
+  v: 0.5,
+}
+const COLOGNE: PlacedCity = {
+  ground: [3, 0.1, 4],
+  importance: 'large-city',
+  name: 'Cologne',
+  u: 0.5,
+  v: 0.5,
+}
 
 /**
  * The view of a level of the pyramid.
@@ -63,8 +75,8 @@ const LOOKING_AT_ORIGIN = {
 }
 
 /** Paris at the origin, Cologne far off. */
-const NEAR: PlacedCity = { ground: [0, 0, 0], importance: 'capital', name: 'Paris' }
-const FAR: PlacedCity = { ground: [9, 0, 0], importance: 'capital', name: 'Rome' }
+const NEAR: PlacedCity = { ground: [0, 0, 0], importance: 'capital', name: 'Paris', u: 0.5, v: 0.5 }
+const FAR: PlacedCity = { ground: [9, 0, 0], importance: 'capital', name: 'Rome', u: 0.5, v: 0.5 }
 
 /** Let the names' promises settle. */
 const settle = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0))
@@ -171,6 +183,63 @@ describe('createCityMarkers', () => {
     })
   })
 
+  describe('the countries’ names over the points', () => {
+    /** One name of the first level, its letters across the middle of a 100 × 100 grid. */
+    const NAMES = {
+      levels: [
+        {
+          placed: [
+            {
+              polity: 'k',
+              text: 'Kingdom',
+              form: 'short' as const,
+              piece: 0,
+              size: 10,
+              glyphs: [40, 50, 60].map((x) => ({ x, y: 53, angle: 0 })),
+            },
+          ],
+          tooSmall: [],
+        },
+      ],
+      gridWidth: 100,
+      gridHeight: 100,
+      unnamed: [],
+    }
+
+    it('hides a capital’s point on a country’s name while it has no name, and brings it back with its name', async () => {
+      const markers = createCityMarkers([PARIS], loadTexture, drawn)
+      await settle()
+      markers.setNameCover(NAMES)
+
+      markers.setDetailView(level(0))
+      expect(city(markers.object, 0).point.visible).toBe(false)
+      markers.setDetailView(level(1))
+      expect(city(markers.object, 0).point.visible).toBe(true)
+    })
+
+    it('keeps a capital’s point clear of every name', async () => {
+      const clear: PlacedCity = { ...PARIS, u: 0.1, v: 0.1 }
+      const markers = createCityMarkers([clear], loadTexture, drawn)
+      await settle()
+      markers.setNameCover(NAMES)
+
+      markers.setDetailView(level(0))
+
+      expect(city(markers.object, 0).point.visible).toBe(true)
+    })
+
+    it('shows every point again when the names are taken off', async () => {
+      const markers = createCityMarkers([PARIS], loadTexture, drawn)
+      await settle()
+      markers.setNameCover(NAMES)
+      markers.setNameCover(null)
+
+      markers.setDetailView(level(0))
+
+      expect(city(markers.object, 0).point.visible).toBe(true)
+    })
+  })
+
   describe('the names’ reach', () => {
     it('hides the name of a city far from the camera, its point kept', async () => {
       const markers = createCityMarkers([NEAR, FAR], loadTexture, drawn)
@@ -189,7 +258,13 @@ describe('createCityMarkers', () => {
     it('keeps the name of a city at the bottom of the screen, nearer the camera than the centre', async () => {
       // 1.5 of ground from the centre toward the camera — past a circle of 1.45 around it, which cut it — yet only 1.06
       // from the camera, nearer than the centre itself.
-      const below: PlacedCity = { ground: [0, 0, 1.5], importance: 'city', name: 'Tyr' }
+      const below: PlacedCity = {
+        ground: [0, 0, 1.5],
+        importance: 'city',
+        name: 'Tyr',
+        u: 0.5,
+        v: 0.5,
+      }
       const markers = createCityMarkers([below], loadTexture, drawn)
       await settle()
       markers.setDetailView(level(3))
