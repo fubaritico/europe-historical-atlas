@@ -12,6 +12,7 @@
 
 import { rebuildRhumb } from '../decor/rhumbs/mapRhumbLayer'
 import { rebuildRose } from '../decor/rose/mapRoseLayer'
+import { createDetailState } from '../detail/detailView'
 import { rebuildEvents } from '../events/mapEventLayer'
 import { rebuildBorders } from '../political/borders/mapBorderLayer'
 import { rebuildFills } from '../political/fills/mapFillLayer'
@@ -154,9 +155,10 @@ export interface MapLayers {
    * @param zoom - the camera's zoom in `[0, 1]`, zoomed out at zero
    * @param pixelsPerUnit - screen pixels per world unit where the camera looks (`scene/screenScale`),
    *   which keeps a dash the same size on screen at every zoom
+   * @param seconds - the time since the map started: the levels of detail fade in time, not with the zoom
    * @returns nothing
    */
-  frame: (zoom: number, pixelsPerUnit: number) => void
+  frame: (zoom: number, pixelsPerUnit: number, seconds: number) => void
   /**
    * Turn the event icons to the camera, so they always show their front, and sway them.
    * @param camera - where the camera stands and how it is turned
@@ -279,10 +281,10 @@ function layerLifecycle(
       handles.rivers?.setResolution(width, height)
       handles.borders?.setResolution(width, height)
     },
-    frame(zoom: number, pixelsPerUnit: number): void {
+    frame(zoom: number, pixelsPerUnit: number, seconds: number): void {
       // The relief's scale first, then the line work, then the event icons, all for this zoom.
       frameRelief(context, zoom)
-      frameLineWork(context, zoom, pixelsPerUnit)
+      frameLineWork(context, zoom, pixelsPerUnit, seconds)
       handles.events?.setZoom(zoom, pixelsPerUnit)
     },
     faceCamera(camera: CameraPose, seconds: number): void {
@@ -336,6 +338,8 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
     },
     // Whole until a startup hides them to fade them in: a year changed later is drawn at once.
     reveal: { value: 1 },
+    // The level of detail the zoom chooses, fading in time toward what it shows.
+    detail: createDetailState(),
   }
   // The handle, assembled from its slices over that same context.
   return {

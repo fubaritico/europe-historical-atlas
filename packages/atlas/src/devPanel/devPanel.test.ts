@@ -201,24 +201,17 @@ const READ_EVERY_FRAME = new Set([
 ])
 
 /**
- * The vassals' reveal, read on every frame (`scene/layers/frameLayers`, `frameDetail`) — spelled out by key, as the camera's
- * are, so a vassal option added later and wired to nothing still fails the guard. Matched together with
- * its object (`dev.vassals`): the rivers' rebuilding controls share some of these keys.
+ * The vassals' switch, read on every frame (`scene/layers/frameLayers`) — spelled out by key, as the camera's are, so a
+ * vassal option added later and wired to nothing still fails the guard. Matched together with its object
+ * (`dev.vassals`): the rivers' rebuilding controls share some of these keys.
  */
-const VASSALS_READ_EVERY_FRAME = new Set(['enabled', 'revealStart', 'revealEnd', 'fade'])
+const VASSALS_READ_EVERY_FRAME = new Set(['enabled'])
 
 /** The tribes' fade, written to a uniform on every frame (`mapLayers`) — spelled out by key, as above. */
 const TRIBES_READ_EVERY_FRAME = new Set(['mode', 'widthKm'])
 
 /** The names' white edge by zoom, handed to the names' layer on every frame (`frameLayers`) — spelled out by key, as above. */
-const NAMES_READ_EVERY_FRAME = new Set([
-  'haloWholeZoom',
-  'haloGoneZoom',
-  'tribeEdgeClose',
-  'watermarkZoom',
-  'watermarkShare',
-  'blur',
-])
+const NAMES_READ_EVERY_FRAME = new Set(['haloWholeZoom', 'haloGoneZoom', 'tribeEdgeClose', 'blur'])
 
 /**
  * The flight controls, read once when a flight begins rather than every frame.
@@ -380,18 +373,12 @@ describe('createDevPanel', () => {
       expect(calls.rebuildRivers).toBe(1)
     })
 
-    it('writes the vassals’ reveal into the live object the frame reads, with no rebuild', () => {
+    it('writes the vassals’ switch into the live object the frame reads, with no rebuild', () => {
       const { dev, calls, controls } = build()
       const vassals = controls.filter((c) => c.object === dev.vassals)
-      expect(vassals.map((c) => c.property)).toEqual([
-        'enabled',
-        'revealStart',
-        'revealEnd',
-        'fade',
-      ])
+      expect(vassals.map((c) => c.property)).toEqual(['enabled'])
       for (const control of vassals) nudge(control)
       expect(dev.vassals.enabled).toBe(false)
-      expect(dev.vassals.revealStart).not.toBe(0.45)
       expect(total(calls)).toBe(0)
     })
 
@@ -426,7 +413,6 @@ describe('createDevPanel', () => {
       const before = dev.texture.seaLevel
       const seaLevel = controls.find((c) => c.property === 'seaLevel')
       if (seaLevel) nudge(seaLevel)
-      dev.vassals.revealStart = 0.9
       dev.vassals.enabled = false
       dev.tribes.mode = 'outset'
       const reset = controls.find((c) => c.property === 'resetToDefaults')
@@ -461,12 +447,15 @@ describe('createDevPanel', () => {
         panSpeed: controlsOptions.panSpeed,
         fov: dev.framing.fov,
       })
-      // One numeric field of each object pushed off its default, behind lil-gui's back.
+      // One field of each object pushed off its default, behind lil-gui's back: a number, else a switch (the vassals
+      // keep only theirs since the levels of detail).
       for (const object of Object.values(objects)) {
         const record = object as unknown as Record<string, unknown>
         const key = Object.keys(record).find((k) => typeof record[k] === 'number')
-        if (key === undefined) throw new Error('a settings object with no number to change')
-        record[key] = (record[key] as number) + 1
+        const flag = Object.keys(record).find((k) => typeof record[k] === 'boolean')
+        if (key !== undefined) record[key] = (record[key] as number) + 1
+        else if (flag !== undefined) record[flag] = !(record[flag] as boolean)
+        else throw new Error('a settings object with nothing to change')
       }
       controlsOptions.panSpeed += 1
       dev.framing.fov += 1

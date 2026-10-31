@@ -64,13 +64,6 @@ export interface NameDevParams {
    */
   tribeEdgeClose: number
   /**
-   * The zoom from which every name fades toward a watermark, over the last steps of the zoom — the dev, 2026-10-29:
-   * *« un troisième point de zoom où les noms deviennent à 50 % transparents »*.
-   */
-  watermarkZoom: number
-  /** The share of their opacity the names keep at the closest zoom (*« commençons à cinquante pour cent »*). */
-  watermarkShare: number
-  /**
    * The names' own light blur close up, in CSS pixels — growing with the close-up look as the borders' does, lighter
    * than theirs (the dev, 2026-10-29: *« un peu moins de flou sur les noms des pays »*).
    */
@@ -89,10 +82,6 @@ export const DEFAULT_NAME_PARAMS: NameDevParams = {
   haloGoneZoom: 0.4,
   // « Très fin » — the dev, 2026-10-29; Claude's start, to tune on the map.
   tribeEdgeClose: 0.35,
-  // The last steps of the zoom — Claude's start, to tune on the map.
-  watermarkZoom: 0.85,
-  // 0.5 first, then « un peu plus de transparence au zoom complet » (the dev, 29/10).
-  watermarkShare: 0.4,
   blur: 0.6,
 }
 
@@ -150,8 +139,6 @@ export const NAME_CONTROLS: ControlTable<NameDevParams> = {
     step: 0.05,
     label: 'tribes edge close up (width)',
   },
-  watermarkZoom: { kind: 'number', min: 0, max: 1, step: 0.01, label: 'watermark from (zoom)' },
-  watermarkShare: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'watermark opacity' },
   blur: { kind: 'number', min: 0, max: 4, step: 0.1, label: 'blur close up (px)' },
 }
 
@@ -177,8 +164,6 @@ export const NAME_SCREEN_ORDER: (keyof NameDevParams)[] = [
   'haloWholeZoom',
   'haloGoneZoom',
   'tribeEdgeClose',
-  'watermarkZoom',
-  'watermarkShare',
   'blur',
 ]
 

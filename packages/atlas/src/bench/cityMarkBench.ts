@@ -6,6 +6,7 @@
  * 2026-10-31, after the value alone (« C »), the size alone, rings around the point and a square for the capital.
  */
 
+import { CITY_NAME_TYPE } from '../scene/cities/cityLabel'
 import { cityMarkSvg } from '../scene/cities/cityMarks'
 import { NAME_FACE_URL } from '../scene/political/names/nameFace'
 
@@ -29,13 +30,6 @@ const GROUNDS: [string, string][] = [
   ['vert', '#6f8a52'],
 ]
 
-/** The name's size and letters per order: larger first, read with the mark (Bertin). */
-const NAME_STYLE: Readonly<Record<CityImportance, string>> = {
-  capital: 'font-size:15px;letter-spacing:0.08em;text-transform:uppercase',
-  'large-city': 'font-size:14px',
-  city: 'font-size:12px',
-}
-
 /**
  * The three orders on one ground: each mark, with its name to the right as the map would set it.
  * @param scale - the marks' scale
@@ -44,7 +38,9 @@ const NAME_STYLE: Readonly<Record<CityImportance, string>> = {
  */
 function legend(scale: number, withNames: boolean): string {
   return ORDERS.map(({ order, city }) => {
-    const name = withNames ? `<span class="name" style="${NAME_STYLE[order]}">${city}</span>` : ''
+    const name = withNames
+      ? `<span class="name" style="font-size:${String(CITY_NAME_TYPE[order].size)}px">${city}</span>`
+      : ''
     // The map's own document, inline so it stays crisp at its size: what the dev judges is what the layer loads.
     return `<div class="entry">${cityMarkSvg(order, scale)}${name}</div>`
   }).join('')

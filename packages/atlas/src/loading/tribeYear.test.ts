@@ -87,7 +87,13 @@ function drawYear(loaded: RegionSet): {
   sources.regionSet = loaded
   const tints = loaded.regions.map(() => ({ r: 120, g: 90, b: 60 }))
   settleYearBorders(sources, loaded, { borders: { between: [], frontier: [] }, tints }, PALETTE)
-  const layers = createMapLayers({ scene, dev, sources, blurMethod: createSeparateImagesBlur() })
+  const layers = createMapLayers({
+    scene,
+    dev,
+    sources,
+    blurMethod: createSeparateImagesBlur(),
+    cityLabels: () => new Promise(() => undefined),
+  })
   layers.rebuildRelief()
   layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))
   layers.rebuildBorders()

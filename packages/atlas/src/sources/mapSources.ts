@@ -16,7 +16,7 @@ import { taperHeightmapToShore } from '@europe-historical-atlas/core/data/shoreR
 
 import type { BorderPattern } from '@europe-historical-atlas/core/data/borderStyles'
 import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
-import type { ContentEvent } from '@europe-historical-atlas/core/data/contentFormat'
+import type { ContentCity, ContentEvent } from '@europe-historical-atlas/core/data/contentFormat'
 import type { Heightmap } from '@europe-historical-atlas/core/data/heightmap'
 import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
@@ -62,6 +62,8 @@ export interface MapSources {
   riverData: River[]
   /** The contribution's events (CMS-224), empty until they land or when there are none. */
   events: ContentEvent[]
+  /** The contribution's cities at a date (ATLAS-295), empty until they land or when there are none. */
+  cities: ContentCity[]
   /**
    * Whether the first year has been drawn — its countries on screen, or its failure said. The events wait for it:
    * the map comes first, then what happened on it (the dev, 2026-10-26).
@@ -156,6 +158,7 @@ export function createMapSources(): MapSources {
     homageDepth: 0,
     riverData: [],
     events: [],
+    cities: [],
     mapDrawn: false,
     derivedBorders: null,
     borderPatterns: null,

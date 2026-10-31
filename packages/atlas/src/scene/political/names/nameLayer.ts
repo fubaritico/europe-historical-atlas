@@ -85,31 +85,11 @@ export interface NameScreen {
   readonly haloWholeZoom: number
   /** The zoom from which it is gone. */
   readonly haloGoneZoom: number
-  /** The zoom from which the names fade to a watermark, toward the closest. */
-  readonly watermarkZoom: number
-  /** The share of their opacity the names keep at the closest zoom — a watermark under the cities to come. */
-  readonly watermarkShare: number
   /**
    * The inverted names' edge at the closest zoom, as a share of its width from afar: it stays where the white edge goes,
    * very thin (the dev, 2026-10-29: *« tu vois le liseré ? Tu le mets, très fin »*), narrowing as the white one fades.
    */
   readonly tribeEdgeClose: number
-}
-
-/**
- * How much of the names shows at a zoom: whole, then fading to a watermark over the last steps of the zoom — the dev,
- * 2026-10-29: *« lorsqu'on est complètement zoomé, les noms deviennent à 50 % transparents. Tous »*, so the cities'
- * dots and names can come over them.
- * @param zoom - the camera's zoom, `0` furthest out, `1` closest
- * @param screen - where the fade starts and what share is kept at the closest
- * @returns the multiplier on the names' opacity, `watermarkShare..1`
- */
-export function watermarkAtZoom(zoom: number, screen: NameScreen): number {
-  const span = 1 - screen.watermarkZoom
-  // A fade starting at the closest zoom: a step there, rather than a division by nothing.
-  const t = span <= 0 ? (zoom >= 1 ? 1 : 0) : clamp01((zoom - screen.watermarkZoom) / span)
-  const eased = t * t * (3 - 2 * t)
-  return 1 - (1 - screen.watermarkShare) * eased
 }
 
 /**
@@ -141,6 +121,12 @@ export interface NameLayer {
    * @param screen - where the edge is whole and where it is gone
    */
   setZoom: (zoom: number, screen: NameScreen) => void
+  /**
+   * Lay every name at a share of its opacity — the watermark the level of detail asks for (`scene/detail`), so the
+   * cities read over the names (the dev, 2026-10-31: 40 % then 25 %).
+   * @param share - `1` whole, less as a watermark
+   */
+  setWatermark: (share: number) => void
   /**
    * Blur the names' ink a little close up (the dev, 2026-10-29: *« applique le même flou sur les noms »*), or draw it
    * crisp at a reach the blur's method does not draw (`0` always).
@@ -417,11 +403,11 @@ export function createNameLayer(options: NameLayerOptions): NameLayer {
       const halo = haloAtZoom(zoom, settings)
       screen.edge.value = halo
       invertedScreen.width.value = settings.tribeEdgeClose + (1 - settings.tribeEdgeClose) * halo
-      opacities.setWatermark(watermarkAtZoom(zoom, settings))
     },
     setBlur(pixels: number): void {
       blur.setBlur(pixels)
     },
+    setWatermark: opacities.setWatermark,
     setReveal(share: number): void {
       opacities.setReveal(share)
     },

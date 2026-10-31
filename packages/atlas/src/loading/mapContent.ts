@@ -14,7 +14,7 @@ import type { ContentSource } from '@europe-historical-atlas/core/data/contentSo
 /** What loading the events reads and writes. */
 export interface ContentLoadDeps {
   /** Where the events are written once they land. */
-  sources: Pick<MapSources, 'events'>
+  sources: Pick<MapSources, 'events' | 'cities'>
   /** What pins them. */
   layers: Pick<MapLayers, 'rebuildEvents'>
   /** Where a failure is told. */
@@ -38,6 +38,7 @@ export async function loadContent(deps: ContentLoadDeps, source: ContentSource):
     // Once torn down nothing is written; otherwise the events are stored and pinned.
     if (deps.isDisposed()) return
     deps.sources.events = loaded.events
+    deps.sources.cities = loaded.cities
     deps.layers.rebuildEvents()
   } catch (error: unknown) {
     deps.ui.reportAssetFailure('content', error)

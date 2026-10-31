@@ -6,7 +6,9 @@
 import type { MapSources } from '../../sources/mapSources'
 import type { DevState } from '../../tunables/devState'
 import type { BlurMethod } from '../blur/blurMethod'
+import type { DrawCityLabel } from '../cities/cityLabel'
 import type { CompassRose } from '../decor/rose/compassRose'
+import type { DetailState } from '../detail/detailView'
 import type { EventMarkers } from '../events/markers'
 import type { LineLayer } from '../lines/lineLayer'
 import type { LevelledBorderLayer } from '../political/borders/levelledBorderLayer'
@@ -89,6 +91,11 @@ export interface MapLayersDeps {
    * injected instead. Handed over: the layers free it with themselves.
    */
   blurMethod: BlurMethod
+  /**
+   * How a city's name is drawn (`cities/cityLabel`): made once by the composition root, so its face is loaded once for
+   * the session, whatever the layers rebuild.
+   */
+  cityLabels: DrawCityLabel
 }
 
 /** The layers plus the things they need, passed to every builder instead of captured in a closure. */
@@ -103,4 +110,6 @@ export interface LayerContext extends MapLayersDeps {
    * frame, multiplied into each layer's own opacity.
    */
   reveal: { value: number }
+  /** The level of detail across frames (`scene/detail`): what the vassals, the names' watermark and the cities show. */
+  detail: DetailState
 }

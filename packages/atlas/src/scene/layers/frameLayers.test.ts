@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { createMapSources } from '../../sources/mapSources'
 import { createDevState } from '../../tunables/devState'
+import { createDetailState } from '../detail/detailView'
+import * as exactFills from '../political/paintsExactFills'
 
 import { frameLineWork, frameRelief } from './frameLayers'
 
@@ -120,18 +122,71 @@ describe('frameLineWork', () => {
       borders: null,
       coastline: null,
       rhumb: null,
-      names: { setDetail: vi.fn(), setZoom, setBlur: vi.fn(), setReveal: vi.fn() },
+      names: {
+        setDetail: vi.fn(),
+        setZoom,
+        setWatermark: vi.fn(),
+        setBlur: vi.fn(),
+        setReveal: vi.fn(),
+      },
     }
     const context = {
       dev,
       sources: createMapSources(),
       handles: handles as unknown as LayerHandles,
       reveal: { value: 1 },
+      detail: createDetailState(),
     } as unknown as LayerContext
-    frameLineWork(context, 0.5, 120)
+    frameLineWork(context, 0.5, 120, 0)
     expect(setZoom).toHaveBeenCalledWith(0.5, dev.names)
     // Past the close-up zoom, the names take the borders' whole blur.
     expect(handles.names.setBlur).toHaveBeenCalledWith(dev.names.blur)
+  })
+
+  // The levels of detail (`files/plans/atlas/detail-levels.md`): the frame hands their faded view to the names, the
+  // cities and the fills — two frames apart in time, since the first only snaps.
+  it('hands the level of detail’s view to the names, the cities and the fills, faded in time', () => {
+    const dev = createDevState()
+    const sources = createMapSources()
+    sources.homageDepth = 1
+    const handles = {
+      rivers: null,
+      fills: { setDetail: vi.fn(), setLook: vi.fn() },
+      tribes: null,
+      borders: null,
+      coastline: null,
+      rhumb: null,
+      names: {
+        setDetail: vi.fn(),
+        setZoom: vi.fn(),
+        setWatermark: vi.fn(),
+        setBlur: vi.fn(),
+        setReveal: vi.fn(),
+      },
+      events: { setReveal: vi.fn(), setBlur: vi.fn(), setDetailView: vi.fn() },
+    }
+    const context = {
+      dev,
+      sources,
+      handles: handles as unknown as LayerHandles,
+      reveal: { value: 1 },
+      detail: createDetailState(),
+    } as unknown as LayerContext
+    // A payload year: the bake carries every colour, so the fills show the whole homage whatever the level.
+    const exact = vi.spyOn(exactFills, 'paintsExactFills').mockReturnValue(true)
+
+    frameLineWork(context, 0, 120, 0)
+    frameLineWork(context, 0.9, 120, 10)
+
+    expect(handles.names.setWatermark.mock.calls.map(([share]) => share as number)).toEqual([
+      1, 0.25,
+    ])
+    expect(handles.fills.setDetail.mock.calls.map(([detail]) => detail as number)).toEqual([0, 1])
+    expect(handles.events.setDetailView).toHaveBeenCalledTimes(2)
+    exact.mockReturnValue(false)
+    frameLineWork(context, 0, 120, 20)
+    expect(handles.fills.setDetail).toHaveBeenLastCalledWith(sources.homageDepth)
+    exact.mockRestore()
   })
 
   // ATLAS-302: the blur reads the borders without the relief, so it must be off when the relief may hide them.
@@ -162,11 +217,12 @@ describe('frameLineWork', () => {
       sources: createMapSources(),
       handles: handles as unknown as LayerHandles,
       reveal: { value: 1 },
+      detail: createDetailState(),
     } as unknown as LayerContext
-    frameLineWork(context, 0.2, 120)
+    frameLineWork(context, 0.2, 120, 0)
     expect(setBlur).toHaveBeenLastCalledWith(1)
     dev.political.borderOnTop = false
-    frameLineWork(context, 0.2, 120)
+    frameLineWork(context, 0.2, 120, 0)
     expect(setBlur).toHaveBeenLastCalledWith(0)
   })
 
@@ -180,7 +236,13 @@ describe('frameLineWork', () => {
       borders: null,
       coastline: null,
       rhumb: null,
-      names: { setDetail: vi.fn(), setZoom: vi.fn(), setBlur: vi.fn(), setReveal: vi.fn() },
+      names: {
+        setDetail: vi.fn(),
+        setZoom: vi.fn(),
+        setWatermark: vi.fn(),
+        setBlur: vi.fn(),
+        setReveal: vi.fn(),
+      },
       events: { setZoom: vi.fn(), setBlur: vi.fn(), setReveal: vi.fn() },
     }
     const context = {
@@ -188,8 +250,9 @@ describe('frameLineWork', () => {
       sources: createMapSources(),
       handles: handles as unknown as LayerHandles,
       reveal: { value: 0.25 },
+      detail: createDetailState(),
     } as unknown as LayerContext
-    frameLineWork(context, 0.5, 120)
+    frameLineWork(context, 0.5, 120, 0)
     expect([
       handles.fills.setLook.mock.lastCall,
       handles.tribes.setLook.mock.lastCall,

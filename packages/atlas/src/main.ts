@@ -26,7 +26,9 @@ import { createMapPipeline } from './loading/mapPipeline'
 // worker takes it as an injected `spawn`, so nothing below the composition root depends on Vite.
 import { createSurfacePicker } from './picking/surfacePicker'
 import { createStandardBlur as standardBlur } from './scene/blur/standardBlur'
+import { canvasLabelDrawer } from './scene/cities/cityLabel'
 import { createMapLayers } from './scene/layers/mapLayers'
+import { NAME_FACE_URL } from './scene/political/names/nameFace'
 import { createMapSources } from './sources/mapSources'
 import { createDevState } from './tunables/devState'
 
@@ -39,6 +41,23 @@ function sceneCanvas(): HTMLCanvasElement {
   const canvas = document.querySelector<HTMLCanvasElement>('#scene')
   if (!canvas) throw new Error('Canvas #scene not found in index.html')
   return canvas
+}
+
+/**
+ * The map's layers, with the standard blur and the cities' names drawn in the countries' names' face — made once here,
+ * so the face loads once, at the first name.
+ * @param scene - the scene every layer is added to
+ * @param dev - the live tunables
+ * @param sources - what has been loaded so far
+ * @returns the layers
+ */
+function createLayers(
+  scene: Parameters<typeof createMapLayers>[0]['scene'],
+  dev: Parameters<typeof createMapLayers>[0]['dev'],
+  sources: Parameters<typeof createMapLayers>[0]['sources']
+): ReturnType<typeof createMapLayers> {
+  const cityLabels = canvasLabelDrawer(NAME_FACE_URL)
+  return createMapLayers({ scene, dev, sources, blurMethod: standardBlur(), cityLabels })
 }
 
 /**
@@ -63,7 +82,7 @@ function bootstrap(): () => void {
   document.documentElement.lang = locale
   const translate = createTranslator(ATLAS_MESSAGES, locale)
   const ui = createMapUi({ host: document.body, isDisposed, translate })
-  const layers = createMapLayers({ scene: view.scene, dev, sources, blurMethod: standardBlur() })
+  const layers = createLayers(view.scene, dev, sources)
   const pipeline = createMapPipeline({
     dev,
     sources,

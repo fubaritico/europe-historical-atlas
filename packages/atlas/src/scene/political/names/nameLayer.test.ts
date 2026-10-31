@@ -10,7 +10,6 @@ import {
   createNameLayer,
   haloAtZoom,
   levelWeight,
-  watermarkAtZoom,
 } from './nameLayer'
 
 import type { NameLayerOptions } from './nameLayer'
@@ -109,8 +108,6 @@ describe('haloAtZoom', () => {
   const screen = {
     haloWholeZoom: 0.2,
     haloGoneZoom: 0.6,
-    watermarkZoom: 0.85,
-    watermarkShare: 0.5,
     tribeEdgeClose: 0.3,
   }
 
@@ -123,34 +120,6 @@ describe('haloAtZoom', () => {
   it('steps at one zoom when the two are set alike, rather than dividing by nothing', () => {
     const step = { ...screen, haloWholeZoom: 0.5, haloGoneZoom: 0.5 }
     expect([haloAtZoom(0.49, step), haloAtZoom(0.5, step)]).toEqual([1, 0])
-  })
-})
-
-describe('watermarkAtZoom', () => {
-  const screen = {
-    haloWholeZoom: 0.1,
-    haloGoneZoom: 0.4,
-    watermarkZoom: 0.8,
-    watermarkShare: 0.5,
-    tribeEdgeClose: 0.3,
-  }
-
-  // The dev, 2026-10-29: « lorsqu'on est complètement zoomé, les noms deviennent à 50 % transparents. Tous ».
-  it('keeps the names whole until the watermark’s zoom, and at its share at the closest', () => {
-    expect([
-      watermarkAtZoom(0.5, screen),
-      watermarkAtZoom(0.8, screen),
-      watermarkAtZoom(1, screen),
-    ]).toEqual([1, 1, 0.5])
-  })
-
-  it('fades between the two, half-way at half the span', () => {
-    expect(watermarkAtZoom(0.9, screen)).toBeCloseTo(0.75, 9)
-  })
-
-  it('steps at the closest zoom when the fade starts there, rather than dividing by nothing', () => {
-    const late = { ...screen, watermarkZoom: 1 }
-    expect([watermarkAtZoom(0.99, late), watermarkAtZoom(1, late)]).toEqual([1, 0.5])
   })
 })
 
@@ -236,8 +205,6 @@ describe('createNameLayer', () => {
       const screen = {
         haloWholeZoom: 0.1,
         haloGoneZoom: 0.4,
-        watermarkZoom: 0.85,
-        watermarkShare: 0.5,
         tribeEdgeClose: 0.3,
       }
       const edge = (): number | undefined =>
@@ -281,8 +248,6 @@ describe('createNameLayer', () => {
       const screen = {
         haloWholeZoom: 0.1,
         haloGoneZoom: 0.4,
-        watermarkZoom: 0.85,
-        watermarkShare: 0.5,
         tribeEdgeClose: 0.3,
       }
       const uniform = (mesh: typeof edge, name: string): unknown =>
@@ -312,16 +277,11 @@ describe('createNameLayer', () => {
   // L4: N/A — no async work.
 
   describe('watermark', () => {
-    it('halves every name’s ink and white edge at the closest zoom, the level’s weight kept', () => {
+    it('halves every name’s ink and white edge at a watermark of one half, the level’s weight kept', () => {
       const layer = createNameLayer(options())
       layer.setDetail(0)
-      layer.setZoom(1, {
-        haloWholeZoom: 0.1,
-        haloGoneZoom: 0.4,
-        watermarkZoom: 0.85,
-        watermarkShare: 0.5,
-        tribeEdgeClose: 0.3,
-      })
+      layer.setZoom(1, { haloWholeZoom: 0.1, haloGoneZoom: 0.4, tribeEdgeClose: 0.3 })
+      layer.setWatermark(0.5)
       expect([
         inks(layer)[0]?.material.uniforms.opacity?.value,
         edges(layer)[0]?.material.uniforms.opacity?.value,

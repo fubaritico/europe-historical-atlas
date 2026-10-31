@@ -23,7 +23,7 @@
 
 | # | decision | by |
 | --- | --- | --- |
-| 1 | **The point and the name enter together, by order of importance**: the capitals from the start, the large cities with the vassals (0.45), the other cities at 0.8. A point stays alone only when its name finds no room — and the console says so. | the dev, 29/10, on my proposal |
+| 1 | ~~**The point and the name enter together, by order of importance**~~ — **replaced on 31/10 by the levels of detail** (`detail-levels.md`): a city's point comes a level before its name, and nothing follows the zoom continuously. The original: **The point and the name enter together, by order of importance**: the capitals from the start, the large cities with the vassals (0.45), the other cities at 0.8. A point stays alone only when its name finds no room — and the console says so. | the dev, 29/10, on my proposal |
 | 2 | **The country names fade to their watermark when the last order of cities arrives** — one threshold drives both, never two numbers tuned apart. | the dev, 29/10, on my proposal |
 | 3 | **A city's importance is dated** — three values, capital, large city, city — and belongs to the place's period in the CMS (CMS-281), not to the place. | the dev, 29/10, on my proposal |
 | 5 | **The contribution form of a city** (the dev, 29/10, on my sketch): one form a place and a period (« Paris en 1100 »). The contributor **chooses** the importance, **picks its reasons** in a multi-select — a list that grows (*« ça peut augmenter »*) — and **adds one line a source**: which source (from the CMS's source register), what it says (« 25 000 habitants », « capitale »), where in it. **The uncertainty is never typed**: below the lines the tool says how many sources there are and whether they agree. | the dev, 29/10 |

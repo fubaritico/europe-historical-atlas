@@ -5,6 +5,7 @@
 
 import { Group } from 'three'
 
+import type { DetailView } from '../detail/detailView'
 import type { Quaternion, Vector3 } from 'three'
 
 /** Where the camera stands and how it is turned, in the world — a camera's own `position` and `quaternion` fit. */
@@ -70,6 +71,12 @@ export interface EventMarkers {
    * @param share - the share of their opacity shown
    */
   setReveal: (share: number) => void
+  /**
+   * Show what the level of detail asks for (`scene/detail`) — the cities' points and names; a kind it does not concern
+   * leaves it out.
+   * @param view - the level's values, faded in time
+   */
+  setDetailView?: (view: DetailView) => void
   /** Free the GPU resources. */
   dispose(): void
 }
@@ -100,6 +107,9 @@ export function combineEventMarkers(parts: readonly EventMarkers[]): EventMarker
     },
     setBlur(pixels: number): void {
       for (const part of parts) part.setBlur?.(pixels)
+    },
+    setDetailView(view: DetailView): void {
+      for (const part of parts) part.setDetailView?.(view)
     },
     dispose(): void {
       for (const part of parts) part.dispose()

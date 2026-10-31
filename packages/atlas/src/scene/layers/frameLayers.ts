@@ -6,12 +6,12 @@
 import { lerp } from '@europe-historical-atlas/core/utils/math'
 
 import { inlayOpacityScale } from '../political/borders/borderStrokes'
-import { homageDetail } from '../political/homageReveal'
 import { paintsExactFills } from '../political/paintsExactFills'
 
 import { layersWithRole } from './layerRoles'
 
 import type { LayerContext } from './layerContext'
+import type { DetailView } from '../detail/detailView'
 
 /** The layers laid on the relief, read once: the table does not change at run time. */
 const DRAPED_LAYERS = layersWithRole('draped')
@@ -43,20 +43,20 @@ export function frameRelief(context: LayerContext, zoom: number): void {
 }
 
 /**
- * How much of the year's homage this frame's zoom shows — one number for the fills and the borders, so a
+ * How much of the year's homage the level of detail shows — one number for the fills and the borders, so a
  * vassal's colour and its border arrive together (ATLAS-253).
  *
  * **Only where the fills can follow**: when the texture carries the colour — a payload year, or the panel's
  * exact-fills switch off — the bake paints every polity in its own colour, so every border shows too
  * rather than hiding a line between two colours the map does tell apart.
  * @param context - the layers and what they read
- * @param zoom - the camera's zoom in `[0, 1]`
+ * @param view - the level of detail's values for this frame
  * @returns the detail, in `[0, homageDepth]`
  */
-function frameDetail(context: LayerContext, zoom: number): number {
+function frameDetail(context: LayerContext, view: DetailView): number {
   const { dev, sources } = context
   if (!paintsExactFills(dev, sources)) return sources.homageDepth
-  return homageDetail(zoom, sources.homageDepth, dev.vassals)
+  return view.vassals
 }
 
 /**
@@ -64,13 +64,21 @@ function frameDetail(context: LayerContext, zoom: number): number {
  * the zoom; and the light blur of the close-up look, as on the borders (ATLAS-302).
  * @param context - the layers and what they read
  * @param zoom - the camera's zoom in `[0, 1]`
- * @param detail - the homage the zoom shows
+ * @param view - what the level of detail shows of the names
+ * @param view.detail - the homage shown
+ * @param view.watermark - the share of their opacity the names keep
  * @param closeness - how close up the line work looks, `0..1`
  */
-function frameNames(context: LayerContext, zoom: number, detail: number, closeness: number): void {
+function frameNames(
+  context: LayerContext,
+  zoom: number,
+  view: { detail: number; watermark: number },
+  closeness: number
+): void {
   const { dev, handles } = context
-  handles.names?.setDetail(detail)
+  handles.names?.setDetail(view.detail)
   handles.names?.setZoom(zoom, dev.names)
+  handles.names?.setWatermark(view.watermark)
   handles.names?.setBlur(dev.names.blur * closeness)
 }
 
@@ -134,18 +142,26 @@ function frameBorders(
  * @param context - the layers and what they read
  * @param zoom - the camera's zoom in `[0, 1]`
  * @param pixelsPerUnit - screen pixels per world unit where the camera looks
+ * @param seconds - the time since the map started: the level of detail fades in time
  * @returns nothing
  */
-export function frameLineWork(context: LayerContext, zoom: number, pixelsPerUnit: number): void {
-  const { dev, handles } = context
-  // The river ranks revealed for this zoom, and the vassals' fills shown to the homage depth it reaches.
+export function frameLineWork(
+  context: LayerContext,
+  zoom: number,
+  pixelsPerUnit: number,
+  seconds: number
+): void {
+  const { dev, handles, sources } = context
+  // The river ranks revealed for this zoom; the level of detail the zoom chooses, faded in time (ATLAS-295).
   handles.rivers?.setZoom(zoom)
-  const detail = frameDetail(context, zoom)
+  const view = context.detail.frame(zoom, seconds, sources.homageDepth, dev.vassals.enabled)
+  const detail = frameDetail(context, view)
+  handles.events?.setDetailView?.(view)
   handles.fills?.setDetail(detail)
   frameReveal(context)
   // How close up the line work looks, `0` from afar: what crosses the borders to their close-up look and blurs them.
   const closeness = inlayOpacityScale(zoom, dev.political.borderInlayZoom)
-  frameNames(context, zoom, detail, closeness)
+  frameNames(context, zoom, { detail, watermark: view.watermark }, closeness)
   // The 3D icons blurred as the borders are, their shadows crisp (ATLAS-302).
   handles.events?.setBlur?.(dev.political.iconBlur * closeness)
   // The tribes' fade, from the panel's live trial: two uniforms, nothing rebuilt.

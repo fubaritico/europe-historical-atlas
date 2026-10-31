@@ -8,6 +8,7 @@ import {
   Quaternion,
   Scene,
   ShaderLib,
+  Sprite,
   Vector3,
   WebGLRenderTarget,
 } from 'three'
@@ -24,6 +25,7 @@ import { createDevState } from '../../tunables/devState'
 import { createSeparateImagesBlur } from '../blur/separateImages'
 import { createSharedImagesBlur } from '../blur/sharedImages'
 import { DEPTH_BIAS_UNIFORM } from '../depthBias'
+import { DETAIL_FADE_SECONDS } from '../detail/detailView'
 import { DRAPED_DEPTH_BIAS } from '../lines/lineLayer'
 import { FILL_RENDER_ORDER } from '../political/fills/fillLayer'
 import { TRIBE_RENDER_ORDER } from '../political/tribes/tribeLayer'
@@ -37,11 +39,12 @@ import { createMapLayers } from './mapLayers'
 
 import type { MapSources } from '../../sources/mapSources'
 import type { BlurMethod } from '../blur/blurMethod'
-import type { ContentEvent } from '@europe-historical-atlas/core/data/contentFormat'
+import type { DrawCityLabel } from '../cities/cityLabel'
+import type { ContentCity, ContentEvent } from '@europe-historical-atlas/core/data/contentFormat'
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
-import type { Mesh, MeshLambertMaterial, Object3D } from 'three'
+import type { Material, Mesh, MeshLambertMaterial, Object3D } from 'three'
 import type { BufferGeometry, LineBasicMaterial, LineSegments } from 'three'
 import type { LineSegments2 } from 'three/addons/lines/LineSegments2.js'
 
@@ -116,6 +119,10 @@ const AUTHORED = {
   authored: {},
 } as unknown as RegionSet
 
+/** A city's name drawn at once, 40 × 18 CSS pixels, the point 8 pixels left of it — no face, no canvas to wait for. */
+const NAME_STUB: DrawCityLabel = () =>
+  Promise.resolve({ canvas: document.createElement('canvas'), width: 40, height: 18, anchorX: -8 })
+
 /**
  * A scene with layers over a fully loaded set of sources.
  * @param loaded - whether the sources are loaded
@@ -144,7 +151,12 @@ function build(
     sources.derivedBorders = BORDERS
     refreshReliefSource(sources, dev.relief, dev.texture.seaLevel)
   }
-  return { scene, sources, dev, layers: createMapLayers({ scene, dev, sources, blurMethod }) }
+  return {
+    scene,
+    sources,
+    dev,
+    layers: createMapLayers({ scene, dev, sources, blurMethod, cityLabels: NAME_STUB }),
+  }
 }
 
 /** A tribe's ring in the middle of the map, beside nobody. */
@@ -266,6 +278,10 @@ const BATTLE: ContentEvent = {
   engine: null,
 }
 
+/** A clock for the frames: each call ten seconds on, past any fade of the levels of detail. */
+let clock = 0
+const tick = (): number => (clock += 10)
+
 describe('createMapLayers', () => {
   describe('happy path', () => {
     it('stands an event whose type has the pin as a pin, and a battle as an icon', () => {
@@ -300,15 +316,53 @@ describe('createMapLayers', () => {
       expect(found.length).toBeGreaterThan(0)
     })
 
+    it('draws the cities of a content that has no event, and frees them on the next build', () => {
+      const { scene, sources, layers } = build()
+      const paris: ContentCity = {
+        id: 'c1',
+        place: {
+          id: 'p',
+          name: { fr: 'Paris', en: null },
+          lon: 0,
+          lat: 48,
+          wikidata: null,
+          existsFrom: null,
+          existsTo: null,
+        },
+        date: BATTLE.date,
+        importance: 'capital',
+        reasons: [],
+        testimonies: [],
+      }
+      sources.cities = [paris]
+      sources.mapDrawn = true
+      const sprites = (): Sprite[] => {
+        const found: Sprite[] = []
+        scene.traverse((object) => {
+          if (object instanceof Sprite) found.push(object as Sprite)
+        })
+        return found
+      }
+
+      layers.rebuildEvents()
+      const first = sprites()
+      expect(first).toHaveLength(2) // the mark and the name
+      const freed = vi.spyOn(first[0]?.material as Material, 'dispose')
+      layers.rebuildEvents()
+
+      expect(sprites()).toHaveLength(2)
+      expect(freed).toHaveBeenCalled()
+    })
+
     it('carries each frame’s zoom and camera to the icons', () => {
       const { scene, sources, layers } = build()
       sources.events = [BATTLE]
       sources.mapDrawn = true
       layers.rebuildEvents()
       const { close, afar } = eventGroups(scene)
-      layers.frame(0, 100)
+      layers.frame(0, 100, tick())
       expect([close.visible, afar.visible]).toEqual([false, true])
-      layers.frame(1, 100)
+      layers.frame(1, 100, tick())
       expect([close.visible, afar.visible]).toEqual([true, false])
       // The icon is an instance (ATLAS-289): its pose is read back from its kind's first piece.
       const piece = child(close, 1).children[0] as InstancedMesh
@@ -437,9 +491,9 @@ describe('createMapLayers', () => {
       dev.relief.exaggeration = 2
       dev.relief.exaggZoomIn = 0.5
       layers.rebuildRelief()
-      layers.frame(0, 100)
+      layers.frame(0, 100, tick())
       const out = scene.children[0]?.scale.y ?? 0
-      layers.frame(1, 100)
+      layers.frame(1, 100, tick())
       const inn = scene.children[0]?.scale.y ?? 0
       expect(out).toBeCloseTo(2)
       expect(inn).toBeCloseTo(1)
@@ -511,12 +565,12 @@ describe('createMapLayers', () => {
       const tribe = tribeMesh(scene)
       dev.tribes.mode = 'outset'
       dev.tribes.widthKm = 30
-      layers.frame(0, 100)
+      layers.frame(0, 100, tick())
       expect(tribeMesh(scene)).toBe(tribe)
       expect(tribe?.material.uniforms.featherWidth?.value).toBe(30)
       expect(tribe?.material.uniforms.featherShift?.value).toBe(30)
       dev.tribes.mode = 'inset'
-      layers.frame(0, 100)
+      layers.frame(0, 100, tick())
       expect(tribe?.material.uniforms.featherShift?.value).toBe(0)
     })
 
@@ -638,12 +692,12 @@ describe('createMapLayers', () => {
       // The levels' groups, the blur's quad beside them left out.
       const levels = (scene.children[0]?.children ?? []).filter((child) => child.type === 'Group')
       expect(levels).toHaveLength(2)
-      layers.frame(0, 100)
+      layers.frame(0, 100, tick())
       expect(levels.map((level) => level.visible)).toEqual([true, false])
-      layers.frame(1, 100)
+      layers.frame(1, 100, tick())
       expect(levels.map((level) => level.visible)).toEqual([true, true])
       dev.vassals.enabled = false
-      layers.frame(0, 100)
+      layers.frame(0, 100, tick())
       expect(levels.map((level) => level.visible)).toEqual([true, true])
     })
 
@@ -657,12 +711,12 @@ describe('createMapLayers', () => {
       sources.borderPatterns = new Map([['0:0', 'solid']])
       sources.borderLevels = new Map([['0:0', 1]])
       layers.rebuildBorders()
-      layers.frame(0, 100)
+      layers.frame(0, 100, tick())
       expect(scene.children[0]?.children[0]?.visible).toBe(true)
     })
 
     it('mixes the fills toward the vassals as the zoom comes in, with no rebuild', () => {
-      const { scene, sources, dev, layers } = build()
+      const { scene, sources, layers } = build()
       sources.regionSet = AUTHORED
       sources.homageDepth = 1
       sources.tintLevels = [[{ r: 1, g: 2, b: 3 }], [{ r: 200, g: 40, b: 10 }]]
@@ -674,16 +728,16 @@ describe('createMapLayers', () => {
       ) as unknown as {
         material: { uniforms: { detail: { value: number } } }
       }
-      layers.frame(0, 100)
+      layers.frame(0, 100, tick())
       expect(fill.material.uniforms.detail.value).toBe(0)
-      layers.frame(dev.vassals.revealStart, 100)
+      layers.frame(0.5, 100, tick())
       expect(fill.material.uniforms.detail.value).toBe(1)
     })
 
-    // Three tint levels, so `revealEnd` — the deepest level's zoom — has a level to move. A frame test,
-    // not a call to homageDetail: it proves the live `dev.vassals` reaches the fills' uniform.
-    it('moves the fills’ detail at a fixed zoom when the deepest reveal or the fade span changes', () => {
-      const { scene, sources, dev, layers } = build()
+    // Three tint levels: the direct vassals at the second level of detail, the deeper ones at the third, each change
+    // faded in time — never with the zoom (`files/plans/atlas/detail-levels.md`).
+    it('shows the direct vassals at the second level and every level at the third, faded in time', () => {
+      const { scene, sources, layers } = build()
       sources.regionSet = AUTHORED
       sources.homageDepth = 2
       sources.tintLevels = [
@@ -691,7 +745,6 @@ describe('createMapLayers', () => {
         [{ r: 100, g: 20, b: 5 }],
         [{ r: 200, g: 40, b: 10 }],
       ]
-      Object.assign(dev.vassals, { enabled: true, revealStart: 0.45, revealEnd: 0.8, fade: 0.2 })
       layers.rebuildRelief()
       layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))
       layers.rebuildFills()
@@ -700,25 +753,22 @@ describe('createMapLayers', () => {
       ) as unknown as {
         material: { uniforms: { detail: { value: number } } }
       }
-      const detailAt = (zoom: number): number => {
-        layers.frame(zoom, 100)
+      const detailAt = (zoom: number, seconds: number): number => {
+        layers.frame(zoom, 100, seconds)
         return fill.material.uniforms.detail.value
       }
 
-      // Level 1 whole, level 2 halfway through its fade [0.6, 0.8] — smoothstep(0.5) = 0.5.
-      expect(detailAt(0.7)).toBeCloseTo(1.5)
-      dev.vassals.revealEnd = 1
-      expect(detailAt(0.7)).toBeCloseTo(1) // level 2 now fades over [0.8, 1]: not begun
-      dev.vassals.revealEnd = 0.8
-      dev.vassals.fade = 0.4
-      // Level 2 fades over [0.4, 0.8]: t = 0.75, smoothstep = 0.84375.
-      expect(detailAt(0.7)).toBeCloseTo(1.84375)
+      expect(detailAt(0, 0)).toBe(0)
+      // Into the third level: halfway through the fade, half the way to the deepest level.
+      expect(detailAt(0.9, DETAIL_FADE_SECONDS / 2)).toBeCloseTo(1)
+      expect(detailAt(0.9, 10)).toBe(2)
+      expect(detailAt(0.5, 20)).toBe(1)
     })
 
     it('reads the border dashes in screen pixels, from the scale the frame passes', () => {
       const { scene, layers } = build()
       layers.rebuildBorders()
-      layers.frame(0.5, 640)
+      layers.frame(0.5, 640, tick())
       for (const stroke of borderStrokes(scene)) expect(stroke.material.dashScale).toBe(640)
     })
 
@@ -730,7 +780,7 @@ describe('createMapLayers', () => {
       dev.relief.exaggZoomIn = 1
       layers.rebuildRelief()
       layers.rebuildBorders()
-      layers.frame(0, 100)
+      layers.frame(0, 100, tick())
       // The relief adds its wall between itself and the borders, so the borders are the third child.
       const relief = scene.children[0]?.scale.y ?? 0
       const borders = scene.children[2]?.scale.y ?? 0
@@ -743,7 +793,7 @@ describe('createMapLayers', () => {
       dev.relief.exaggZoomIn = 1
       layers.rebuildRelief()
       layers.rebuildCoastline()
-      layers.frame(0, 100)
+      layers.frame(0, 100, tick())
       const relief = scene.children[0]?.scale.y ?? 0
       const coastline = scene.children[2]?.scale.y ?? 0
       expect(relief).toBeCloseTo(3)
@@ -829,7 +879,7 @@ describe('createMapLayers', () => {
       layers.rebuildRelief()
       layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))
       layers.rebuildFills()
-      layers.frame(0, 100)
+      layers.frame(0, 100, tick())
       const fill = scene.children.find((child) => child.renderOrder === 1)
       expect(fill).toBeDefined()
       expect(fill?.scale.y).toBeCloseTo(2)
@@ -966,7 +1016,7 @@ describe('createMapLayers', () => {
     it('frames a map with nothing on it', () => {
       const { layers } = build(false)
       expect(() => {
-        layers.frame(0.5, 100)
+        layers.frame(0.5, 100, tick())
       }).not.toThrow()
     })
   })

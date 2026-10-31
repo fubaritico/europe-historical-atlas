@@ -14,7 +14,7 @@ const EVENT = { id: '10' } as ContentEvent
  */
 function deps(disposed = false): ContentLoadDeps {
   return {
-    sources: { events: [] },
+    sources: { events: [], cities: [] },
     layers: { rebuildEvents: vi.fn() },
     ui: { reportAssetFailure: vi.fn() },
     isDisposed: () => disposed,

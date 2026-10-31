@@ -44,7 +44,8 @@ export function startFrameLoop(view: Viewport, layers: MapLayers, stats: FrameSt
         camera.position.distanceTo(controls.target),
         camera.fov,
         window.innerHeight
-      )
+      ),
+      timer.getElapsed()
     )
     // 3. Turn what faces the camera towards it, update the debug overlays, draw, count the frame.
     layers.faceCamera(camera, timer.getElapsed())
