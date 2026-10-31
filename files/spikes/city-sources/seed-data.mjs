@@ -164,6 +164,53 @@ const WIKIDATA_CAPITALS = {
   Q1899: { polity: "Kievan Rus'", id: 'Q1108445', from: 882, to: 1132 },
 }
 
+/**
+ * The map of the Rus' principalities the dev gave (2026-10-31): « Князівства Київської Русі (1054–1132) », SeikoEn (2011),
+ * translated by Petriot333, after the maps of *Літопис руський* (transl. Makhnovets, 1989) — a RÉFÉRENCE (ATLAS-152). It
+ * places each principality's city in it; **the seat is read from the name** — the principality of Chernigov is
+ * Chernigov's — which the line says, so the reading stays a reading.
+ */
+const RUS_MAP = 'Князівства Київської Русі (1054–1132)'
+
+/** The seats the map gives the principalities the year's registry holds sovereign, by the city's Wikidata item. */
+const RUS_SEATS = {
+  Q157053: 'Tchernigov',
+  Q2337: 'Smolensk',
+  Q200797: 'Polotsk',
+  Q193342: 'Rostov-Souzdal',
+  Q162677: 'Mourom-Riazan',
+  Q2235: 'Novgorod',
+  Q639839: 'Pereïaslav',
+  Q33544: 'Volhynie',
+  Q146450: 'Galicie',
+}
+
+/**
+ * The cities the map shows that none of the three demographic sources attests: an item each, its French name, and the
+ * principality the map puts it in — a seat where {@link RUS_SEATS} names it, a city otherwise. No figure: the map is
+ * their one source.
+ */
+const MAP_CITIES = [
+  ['Q639839', 'Pereïaslav', 'Pereïaslav'],
+  ['Q15757', 'Souzdal', 'Rostov-Souzdal'],
+  ['Q33544', 'Volodymyr', 'Volhynie'],
+  ['Q146450', 'Halitch', 'Galicie'],
+  ['Q910505', 'Tmoutarakan', 'Tchernigov'],
+  ['Q1068190', 'Sarkel', 'Tchernigov'],
+]
+
+/**
+ * The map's line for a seat.
+ * @param {string} principality - the principality the map names after the city
+ * @returns the testimony
+ */
+const seatLine = (principality) => ({
+  source: RUS_MAP,
+  subject: 'importance',
+  importance: 'capital',
+  where: `siège de la principauté de ${principality} : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)`,
+})
+
 /** The register's title of Wikidata, the source of the eastern capitals. */
 const WIKIDATA = 'Wikidata'
 
@@ -251,7 +298,9 @@ function eastSheet([key, wikidata]) {
   if (roles.includes('capital')) {
     testimonies.push({ source: BOSKER, subject: 'importance', importance: 'capital', where: 'rôles de la ville en 1100' })
   }
-  const capital = claim !== undefined || roles.includes('capital')
+  const seat = RUS_SEATS[wikidata]
+  if (seat !== undefined) testimonies.push(seatLine(seat))
+  const capital = claim !== undefined || roles.includes('capital') || seat !== undefined
   const importance = capital ? 'capital' : roles.includes('archbishop') ? 'large-city' : 'city'
   return finish(row, wikidata, importance, roles, testimonies)
 }
@@ -289,8 +338,29 @@ function finish(row, wikidata, importance, roles, testimonies) {
   return { place: wikidata, year: YEAR, importance, reasons, testimonies }
 }
 
-const sheets = [...CITIES.map(sheet), ...EAST.map(eastSheet)]
-const places = [...CITIES, ...EAST].map(([, wikidata, name]) => ({ wikidata, name }))
+/**
+ * A city the map alone shows: a capital where it is a seat, a city otherwise, the map's line either way.
+ * @param {[string, string, string]} city - its Wikidata item, its French name, the principality the map puts it in
+ * @returns the sheet
+ */
+function mapSheet([wikidata, , principality]) {
+  const seat = RUS_SEATS[wikidata]
+  const line =
+    seat === undefined
+      ? {
+          source: RUS_MAP,
+          subject: 'importance',
+          importance: 'city',
+          where: `dans la principauté de ${principality} sur la carte (1054–1132)`,
+        }
+      : seatLine(seat)
+  return { place: wikidata, year: YEAR, importance: seat === undefined ? 'city' : 'capital', reasons: [], testimonies: [line] }
+}
+
+const sheets = [...CITIES.map(sheet), ...EAST.map(eastSheet), ...MAP_CITIES.map(mapSheet)]
+const places = [...CITIES, ...EAST, ...MAP_CITIES.map(([wikidata, name]) => ['', wikidata, name])].map(
+  ([, wikidata, name]) => ({ wikidata, name })
+)
 const reasons = [...new Set(sheets.flatMap((s) => s.reasons))].sort()
 const json = (value) => JSON.stringify(value, null, 2)
 
@@ -338,6 +408,15 @@ export interface SeedCity {
 
 /** The three open datasets the figures and roles come from. */
 export const CITY_SOURCES: readonly SeedSource[] = [
+  {
+    title: ${JSON.stringify(RUS_MAP)},
+    author: 'SeikoEn, traduit par Petriot333 — d’après les cartes de « Літопис руський » (trad. L. Ie. Makhnovets, 1989)',
+    publisher: 'Wikimedia Commons',
+    editionYear: 2011,
+    kind: 'crowd-database',
+    url: 'https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B8%D1%97%D0%B2%D1%81%D1%8C%D0%BA%D0%B0%D0%A0%D1%83%D1%81%D1%8C%D0%9A%D0%BD%D1%8F%D0%B7%D1%96%D0%B2%D1%81%D1%82%D0%B2%D0%B0.jpg',
+    licence: 'cc-by-sa',
+  },
   {
     title: ${JSON.stringify(WIKIDATA)},
     author: 'Contributeurs de Wikidata',

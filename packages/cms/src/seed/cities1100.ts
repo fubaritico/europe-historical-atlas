@@ -43,6 +43,16 @@ export interface SeedCity {
 /** The three open datasets the figures and roles come from. */
 export const CITY_SOURCES: readonly SeedSource[] = [
   {
+    title: 'Князівства Київської Русі (1054–1132)',
+    author:
+      'SeikoEn, traduit par Petriot333 — d’après les cartes de « Літопис руський » (trad. L. Ie. Makhnovets, 1989)',
+    publisher: 'Wikimedia Commons',
+    editionYear: 2011,
+    kind: 'crowd-database',
+    url: 'https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B8%D1%97%D0%B2%D1%81%D1%8C%D0%BA%D0%B0%D0%A0%D1%83%D1%81%D1%8C%D0%9A%D0%BD%D1%8F%D0%B7%D1%96%D0%B2%D1%81%D1%82%D0%B2%D0%B0.jpg',
+    licence: 'cc-by-sa',
+  },
+  {
     title: 'Wikidata',
     author: 'Contributeurs de Wikidata',
     publisher: 'Wikimedia Foundation',
@@ -514,6 +524,30 @@ export const CITY_PLACES: readonly SeedPlace[] = [
   {
     wikidata: 'Q26345',
     name: 'Kalmar',
+  },
+  {
+    wikidata: 'Q639839',
+    name: 'Pereïaslav',
+  },
+  {
+    wikidata: 'Q15757',
+    name: 'Souzdal',
+  },
+  {
+    wikidata: 'Q33544',
+    name: 'Volodymyr',
+  },
+  {
+    wikidata: 'Q146450',
+    name: 'Halitch',
+  },
+  {
+    wikidata: 'Q910505',
+    name: 'Tmoutarakan',
+  },
+  {
+    wikidata: 'Q1068190',
+    name: 'Sarkel',
   },
 ]
 
@@ -2518,9 +2552,16 @@ export const CITIES_1100: readonly SeedCity[] = [
   {
     place: 'Q2235',
     year: 1100,
-    importance: 'city',
+    importance: 'capital',
     reasons: [],
     testimonies: [
+      {
+        source: 'Князівства Київської Русі (1054–1132)',
+        subject: 'importance',
+        importance: 'capital',
+        where:
+          'siège de la principauté de Novgorod : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)',
+      },
       {
         source: 'European urban population, 700–2000',
         subject: 'population',
@@ -2533,9 +2574,16 @@ export const CITIES_1100: readonly SeedCity[] = [
   {
     place: 'Q157053',
     year: 1100,
-    importance: 'city',
+    importance: 'capital',
     reasons: [],
     testimonies: [
+      {
+        source: 'Князівства Київської Русі (1054–1132)',
+        subject: 'importance',
+        importance: 'capital',
+        where:
+          'siège de la principauté de Tchernigov : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)',
+      },
       {
         source: 'European urban population, 700–2000',
         subject: 'population',
@@ -2547,9 +2595,16 @@ export const CITIES_1100: readonly SeedCity[] = [
   {
     place: 'Q2337',
     year: 1100,
-    importance: 'city',
+    importance: 'capital',
     reasons: [],
     testimonies: [
+      {
+        source: 'Князівства Київської Русі (1054–1132)',
+        subject: 'importance',
+        importance: 'capital',
+        where:
+          'siège de la principauté de Smolensk : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)',
+      },
       {
         source: 'European urban population, 700–2000',
         subject: 'population',
@@ -2561,9 +2616,16 @@ export const CITIES_1100: readonly SeedCity[] = [
   {
     place: 'Q200797',
     year: 1100,
-    importance: 'city',
+    importance: 'capital',
     reasons: [],
     testimonies: [
+      {
+        source: 'Князівства Київської Русі (1054–1132)',
+        subject: 'importance',
+        importance: 'capital',
+        where:
+          'siège de la principauté de Polotsk : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)',
+      },
       {
         source: 'European urban population, 700–2000',
         subject: 'population',
@@ -2576,9 +2638,16 @@ export const CITIES_1100: readonly SeedCity[] = [
   {
     place: 'Q193342',
     year: 1100,
-    importance: 'city',
+    importance: 'capital',
     reasons: [],
     testimonies: [
+      {
+        source: 'Князівства Київської Русі (1054–1132)',
+        subject: 'importance',
+        importance: 'capital',
+        where:
+          'siège de la principauté de Rostov-Souzdal : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)',
+      },
       {
         source: 'European urban population, 700–2000',
         subject: 'population',
@@ -2696,9 +2765,16 @@ export const CITIES_1100: readonly SeedCity[] = [
   {
     place: 'Q162677',
     year: 1100,
-    importance: 'city',
+    importance: 'capital',
     reasons: [],
     testimonies: [
+      {
+        source: 'Князівства Київської Русі (1054–1132)',
+        subject: 'importance',
+        importance: 'capital',
+        where:
+          'siège de la principauté de Mourom-Riazan : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)',
+      },
       {
         source: 'European urban population, 700–2000',
         subject: 'population',
@@ -3075,6 +3151,93 @@ export const CITIES_1100: readonly SeedCity[] = [
         subject: 'population',
         population: 1000,
         where: '1100, estimée d’après un indice',
+      },
+    ],
+  },
+  {
+    place: 'Q639839',
+    year: 1100,
+    importance: 'capital',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'Князівства Київської Русі (1054–1132)',
+        subject: 'importance',
+        importance: 'capital',
+        where:
+          'siège de la principauté de Pereïaslav : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)',
+      },
+    ],
+  },
+  {
+    place: 'Q15757',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'Князівства Київської Русі (1054–1132)',
+        subject: 'importance',
+        importance: 'city',
+        where: 'dans la principauté de Rostov-Souzdal sur la carte (1054–1132)',
+      },
+    ],
+  },
+  {
+    place: 'Q33544',
+    year: 1100,
+    importance: 'capital',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'Князівства Київської Русі (1054–1132)',
+        subject: 'importance',
+        importance: 'capital',
+        where:
+          'siège de la principauté de Volhynie : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)',
+      },
+    ],
+  },
+  {
+    place: 'Q146450',
+    year: 1100,
+    importance: 'capital',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'Князівства Київської Русі (1054–1132)',
+        subject: 'importance',
+        importance: 'capital',
+        where:
+          'siège de la principauté de Galicie : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)',
+      },
+    ],
+  },
+  {
+    place: 'Q910505',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'Князівства Київської Русі (1054–1132)',
+        subject: 'importance',
+        importance: 'city',
+        where: 'dans la principauté de Tchernigov sur la carte (1054–1132)',
+      },
+    ],
+  },
+  {
+    place: 'Q1068190',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'Князівства Київської Русі (1054–1132)',
+        subject: 'importance',
+        importance: 'city',
+        where: 'dans la principauté de Tchernigov sur la carte (1054–1132)',
       },
     ],
   },

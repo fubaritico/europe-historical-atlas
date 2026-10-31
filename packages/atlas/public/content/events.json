@@ -783,6 +783,280 @@
   ],
   "cities": [
     {
+      "id": "113",
+      "place": {
+        "id": "121",
+        "name": {
+          "fr": "Sarkel",
+          "en": null
+        },
+        "lon": 42.273056,
+        "lat": 47.705,
+        "wikidata": "Q1068190",
+        "existsFrom": {
+          "year": 834,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "18",
+            "title": "Князівства Київської Русі (1054–1132)",
+            "author": "SeikoEn, traduit par Petriot333 — d’après les cartes de « Літопис руський » (trad. L. Ie. Makhnovets, 1989)",
+            "url": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B8%D1%97%D0%B2%D1%81%D1%8C%D0%BA%D0%B0%D0%A0%D1%83%D1%81%D1%8C%D0%9A%D0%BD%D1%8F%D0%B7%D1%96%D0%B2%D1%81%D1%82%D0%B2%D0%B0.jpg"
+          },
+          "where": "dans la principauté de Tchernigov sur la carte (1054–1132)",
+          "subject": "importance",
+          "importance": "city"
+        }
+      ]
+    },
+    {
+      "id": "112",
+      "place": {
+        "id": "120",
+        "name": {
+          "fr": "Tmoutarakan",
+          "en": null
+        },
+        "lon": 36.71406,
+        "lat": 45.21907,
+        "wikidata": "Q910505",
+        "existsFrom": {
+          "year": 550,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": true,
+          "margin": 50
+        },
+        "existsTo": {
+          "year": 1350,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": true,
+          "margin": 50
+        }
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "18",
+            "title": "Князівства Київської Русі (1054–1132)",
+            "author": "SeikoEn, traduit par Petriot333 — d’après les cartes de « Літопис руський » (trad. L. Ie. Makhnovets, 1989)",
+            "url": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B8%D1%97%D0%B2%D1%81%D1%8C%D0%BA%D0%B0%D0%A0%D1%83%D1%81%D1%8C%D0%9A%D0%BD%D1%8F%D0%B7%D1%96%D0%B2%D1%81%D1%82%D0%B2%D0%B0.jpg"
+          },
+          "where": "dans la principauté de Tchernigov sur la carte (1054–1132)",
+          "subject": "importance",
+          "importance": "city"
+        }
+      ]
+    },
+    {
+      "id": "111",
+      "place": {
+        "id": "119",
+        "name": {
+          "fr": "Halitch",
+          "en": null
+        },
+        "lon": 24.721666666667,
+        "lat": 49.112777777778,
+        "wikidata": "Q146450",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "18",
+            "title": "Князівства Київської Русі (1054–1132)",
+            "author": "SeikoEn, traduit par Petriot333 — d’après les cartes de « Літопис руський » (trad. L. Ie. Makhnovets, 1989)",
+            "url": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B8%D1%97%D0%B2%D1%81%D1%8C%D0%BA%D0%B0%D0%A0%D1%83%D1%81%D1%8C%D0%9A%D0%BD%D1%8F%D0%B7%D1%96%D0%B2%D1%81%D1%82%D0%B2%D0%B0.jpg"
+          },
+          "where": "siège de la principauté de Galicie : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)",
+          "subject": "importance",
+          "importance": "capital"
+        }
+      ]
+    },
+    {
+      "id": "110",
+      "place": {
+        "id": "118",
+        "name": {
+          "fr": "Volodymyr",
+          "en": null
+        },
+        "lon": 24.322222,
+        "lat": 50.848056,
+        "wikidata": "Q33544",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "18",
+            "title": "Князівства Київської Русі (1054–1132)",
+            "author": "SeikoEn, traduit par Petriot333 — d’après les cartes de « Літопис руський » (trad. L. Ie. Makhnovets, 1989)",
+            "url": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B8%D1%97%D0%B2%D1%81%D1%8C%D0%BA%D0%B0%D0%A0%D1%83%D1%81%D1%8C%D0%9A%D0%BD%D1%8F%D0%B7%D1%96%D0%B2%D1%81%D1%82%D0%B2%D0%B0.jpg"
+          },
+          "where": "siège de la principauté de Volhynie : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)",
+          "subject": "importance",
+          "importance": "capital"
+        }
+      ]
+    },
+    {
+      "id": "109",
+      "place": {
+        "id": "117",
+        "name": {
+          "fr": "Souzdal",
+          "en": null
+        },
+        "lon": 40.448888888889,
+        "lat": 56.421111111111,
+        "wikidata": "Q15757",
+        "existsFrom": {
+          "year": 1024,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "18",
+            "title": "Князівства Київської Русі (1054–1132)",
+            "author": "SeikoEn, traduit par Petriot333 — d’après les cartes de « Літопис руський » (trad. L. Ie. Makhnovets, 1989)",
+            "url": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B8%D1%97%D0%B2%D1%81%D1%8C%D0%BA%D0%B0%D0%A0%D1%83%D1%81%D1%8C%D0%9A%D0%BD%D1%8F%D0%B7%D1%96%D0%B2%D1%81%D1%82%D0%B2%D0%B0.jpg"
+          },
+          "where": "dans la principauté de Rostov-Souzdal sur la carte (1054–1132)",
+          "subject": "importance",
+          "importance": "city"
+        }
+      ]
+    },
+    {
+      "id": "108",
+      "place": {
+        "id": "116",
+        "name": {
+          "fr": "Pereïaslav",
+          "en": null
+        },
+        "lon": 31.445,
+        "lat": 50.065,
+        "wikidata": "Q639839",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "18",
+            "title": "Князівства Київської Русі (1054–1132)",
+            "author": "SeikoEn, traduit par Petriot333 — d’après les cartes de « Літопис руський » (trad. L. Ie. Makhnovets, 1989)",
+            "url": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B8%D1%97%D0%B2%D1%81%D1%8C%D0%BA%D0%B0%D0%A0%D1%83%D1%81%D1%8C%D0%9A%D0%BD%D1%8F%D0%B7%D1%96%D0%B2%D1%81%D1%82%D0%B2%D0%B0.jpg"
+          },
+          "where": "siège de la principauté de Pereïaslav : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)",
+          "subject": "importance",
+          "importance": "capital"
+        }
+      ]
+    },
+    {
       "id": "107",
       "place": {
         "id": "115",
@@ -807,9 +1081,20 @@
           "margin": null
         }
       },
-      "importance": "city",
+      "importance": "capital",
       "reasons": [],
       "testimonies": [
+        {
+          "source": {
+            "id": "18",
+            "title": "Князівства Київської Русі (1054–1132)",
+            "author": "SeikoEn, traduit par Petriot333 — d’après les cartes de « Літопис руський » (trad. L. Ie. Makhnovets, 1989)",
+            "url": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B8%D1%97%D0%B2%D1%81%D1%8C%D0%BA%D0%B0%D0%A0%D1%83%D1%81%D1%8C%D0%9A%D0%BD%D1%8F%D0%B7%D1%96%D0%B2%D1%81%D1%82%D0%B2%D0%B0.jpg"
+          },
+          "where": "siège de la principauté de Mourom-Riazan : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)",
+          "subject": "importance",
+          "importance": "capital"
+        },
         {
           "source": {
             "id": "15",
@@ -2309,9 +2594,20 @@
           "margin": null
         }
       },
-      "importance": "city",
+      "importance": "capital",
       "reasons": [],
       "testimonies": [
+        {
+          "source": {
+            "id": "18",
+            "title": "Князівства Київської Русі (1054–1132)",
+            "author": "SeikoEn, traduit par Petriot333 — d’après les cartes de « Літопис руський » (trad. L. Ie. Makhnovets, 1989)",
+            "url": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B8%D1%97%D0%B2%D1%81%D1%8C%D0%BA%D0%B0%D0%A0%D1%83%D1%81%D1%8C%D0%9A%D0%BD%D1%8F%D0%B7%D1%96%D0%B2%D1%81%D1%82%D0%B2%D0%B0.jpg"
+          },
+          "where": "siège de la principauté de Rostov-Souzdal : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)",
+          "subject": "importance",
+          "importance": "capital"
+        },
         {
           "source": {
             "id": "15",
@@ -2357,9 +2653,20 @@
           "margin": null
         }
       },
-      "importance": "city",
+      "importance": "capital",
       "reasons": [],
       "testimonies": [
+        {
+          "source": {
+            "id": "18",
+            "title": "Князівства Київської Русі (1054–1132)",
+            "author": "SeikoEn, traduit par Petriot333 — d’après les cartes de « Літопис руський » (trad. L. Ie. Makhnovets, 1989)",
+            "url": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B8%D1%97%D0%B2%D1%81%D1%8C%D0%BA%D0%B0%D0%A0%D1%83%D1%81%D1%8C%D0%9A%D0%BD%D1%8F%D0%B7%D1%96%D0%B2%D1%81%D1%82%D0%B2%D0%B0.jpg"
+          },
+          "where": "siège de la principauté de Polotsk : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)",
+          "subject": "importance",
+          "importance": "capital"
+        },
         {
           "source": {
             "id": "15",
@@ -2405,9 +2712,20 @@
           "margin": null
         }
       },
-      "importance": "city",
+      "importance": "capital",
       "reasons": [],
       "testimonies": [
+        {
+          "source": {
+            "id": "18",
+            "title": "Князівства Київської Русі (1054–1132)",
+            "author": "SeikoEn, traduit par Petriot333 — d’après les cartes de « Літопис руський » (trad. L. Ie. Makhnovets, 1989)",
+            "url": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B8%D1%97%D0%B2%D1%81%D1%8C%D0%BA%D0%B0%D0%A0%D1%83%D1%81%D1%8C%D0%9A%D0%BD%D1%8F%D0%B7%D1%96%D0%B2%D1%81%D1%82%D0%B2%D0%B0.jpg"
+          },
+          "where": "siège de la principauté de Smolensk : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)",
+          "subject": "importance",
+          "importance": "capital"
+        },
         {
           "source": {
             "id": "15",
@@ -2446,9 +2764,20 @@
           "margin": null
         }
       },
-      "importance": "city",
+      "importance": "capital",
       "reasons": [],
       "testimonies": [
+        {
+          "source": {
+            "id": "18",
+            "title": "Князівства Київської Русі (1054–1132)",
+            "author": "SeikoEn, traduit par Petriot333 — d’après les cartes de « Літопис руський » (trad. L. Ie. Makhnovets, 1989)",
+            "url": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B8%D1%97%D0%B2%D1%81%D1%8C%D0%BA%D0%B0%D0%A0%D1%83%D1%81%D1%8C%D0%9A%D0%BD%D1%8F%D0%B7%D1%96%D0%B2%D1%81%D1%82%D0%B2%D0%B0.jpg"
+          },
+          "where": "siège de la principauté de Tchernigov : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)",
+          "subject": "importance",
+          "importance": "capital"
+        },
         {
           "source": {
             "id": "15",
@@ -2494,9 +2823,20 @@
           "margin": null
         }
       },
-      "importance": "city",
+      "importance": "capital",
       "reasons": [],
       "testimonies": [
+        {
+          "source": {
+            "id": "18",
+            "title": "Князівства Київської Русі (1054–1132)",
+            "author": "SeikoEn, traduit par Petriot333 — d’après les cartes de « Літопис руський » (trad. L. Ie. Makhnovets, 1989)",
+            "url": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%B8%D1%97%D0%B2%D1%81%D1%8C%D0%BA%D0%B0%D0%A0%D1%83%D1%81%D1%8C%D0%9A%D0%BD%D1%8F%D0%B7%D1%96%D0%B2%D1%81%D1%82%D0%B2%D0%B0.jpg"
+          },
+          "where": "siège de la principauté de Novgorod : la principauté porte son nom et la carte l’y place (lecture de la carte, 1054–1132)",
+          "subject": "importance",
+          "importance": "capital"
+        },
         {
           "source": {
             "id": "15",

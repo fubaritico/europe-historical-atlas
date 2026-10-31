@@ -42,7 +42,7 @@ export interface SeedSource {
   /** Where it can be read, when the page gives an address. */
   url?: string
   /** Its licence, as the form lists them, when the work declares one. */
-  licence?: 'cc0' | 'cc-by'
+  licence?: 'cc0' | 'cc-by' | 'cc-by-sa'
 }
 
 /** One end of an event's date: the year 1100, a month and a day when the page gives them. */
