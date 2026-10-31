@@ -22,6 +22,11 @@ Gather all necessary written context from previous session.
      stood _before_ proposing any work.
      A `SessionStart` hook already injects a short version of this automatically; the report adds the
      per-span detail and the most-touched files.
+   - **Read the report whole — never through `tail` or `head`** — its first lines carry « Maintenant » and the
+     chantier's state, and **compare « Maintenant » with `date` and the environment's date** before saying how
+     long ago the last session ended. The hook's injected line can be stale (written at a `/clear` the night
+     before): on 2026-10-31 I trusted it, cut the report's header with `tail`, and told the dev the session had
+     ended « six minutes ago » when it was nineteen hours.
 2. Work from the Session State already in context (CLAUDE.md's imports: completed.md, next.md, known-issues.md)
 3. **Load the rules of the subjects `### Next` points to** — `/rules` with those topics (since 2026-10-21
    most rules are path-scoped and the prompt hook names the rest; no need to ask the dev which files)
