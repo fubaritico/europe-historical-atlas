@@ -1,5 +1,6 @@
 import { DEFAULT_EVENT_COLOUR } from '../fields/eventColours'
 
+import type { SeedCity, SeedTestimony } from './cities1100'
 import type { SeedPeriodEnd, SeedSiegeEngine } from './siegeEngineData'
 import type { SeedActor, SeedEvent, SeedMoment, SeedPlace, SeedSource, SeedType } from './year1100'
 import type { MomentFields } from '../fields/historicalDate'
@@ -8,7 +9,14 @@ import type { HistoricalMoment } from '@europe-historical-atlas/core/time/histor
 
 /** The collections the seed writes. */
 export type SeedCollection =
-  'event-types' | 'sources' | 'siege-engines' | 'actors' | 'places' | 'events'
+  | 'event-types'
+  | 'sources'
+  | 'siege-engines'
+  | 'actors'
+  | 'places'
+  | 'events'
+  | 'importance-reasons'
+  | 'place-periods'
 
 /** A record's id, as Payload answers it. */
 export type SeedId = number | string
@@ -26,6 +34,14 @@ export interface SeedStore {
    * @returns its id, or `null` when there is none
    */
   findId(collection: SeedCollection, field: string, value: string): Promise<SeedId | null>
+  /**
+   * The city sheet of a place whose date starts in a year — a sheet is found again by the two together, since a place
+   * has one a period.
+   * @param place - the place
+   * @param year - the year its date starts
+   * @returns its id, or `null` when there is none
+   */
+  findSheet(place: SeedId, year: number): Promise<SeedId | null>
   /**
    * Create a record, its texts in French.
    * @param collection - where
@@ -68,6 +84,10 @@ export interface SeedData {
   events: readonly SeedEvent[]
   /** The siege engins and their periods of use. */
   siegeEngines: readonly SeedSiegeEngine[]
+  /** The reasons a city's importance may give, by French name. */
+  reasons: readonly string[]
+  /** The cities at a date; their places are among `places`. */
+  cities: readonly SeedCity[]
 }
 
 /** How many records of a collection were found already there, and how many were created. */
@@ -298,6 +318,106 @@ function eventFields(event: SeedEvent, links: EventLinks): Record<string, unknow
   }
 }
 
+/** The ids a city sheet's relations resolve to. */
+interface SheetLinks {
+  /** By Wikidata id. */
+  places: ReadonlyMap<string, SeedId>
+  /** By title. */
+  sources: ReadonlyMap<string, SeedId>
+  /** By French name. */
+  reasons: ReadonlyMap<string, SeedId>
+}
+
+/**
+ * One source line of a city sheet, its relations as ids.
+ * @param line - the seed's line
+ * @param links - the ids of what it names
+ * @returns the line's fields
+ */
+function testimonyFields(line: SeedTestimony, links: SheetLinks): Record<string, unknown> {
+  const base = {
+    source: idOf(links.sources, line.source, 'source'),
+    subject: line.subject,
+    ...(line.where === undefined ? {} : { where: line.where }),
+  }
+  switch (line.subject) {
+    case 'population':
+      return { ...base, population: line.population }
+    case 'importance':
+      return { ...base, importance: line.importance }
+    case 'reason':
+      return { ...base, reason: idOf(links.reasons, line.reason, 'reason') }
+  }
+}
+
+/**
+ * A city sheet's fields, its relations as ids: a date that is its year alone.
+ * @param city - the seed's city
+ * @param links - the ids of what it names
+ * @returns the fields to create it with
+ */
+function sheetFields(city: SeedCity, links: SheetLinks): Record<string, unknown> {
+  return {
+    place: idOf(links.places, city.place, 'place'),
+    date: { start: eventMoment({ year: city.year }) },
+    importance: city.importance,
+    reasons: city.reasons.map((reason) => idOf(links.reasons, reason, 'reason')),
+    testimonies: city.testimonies.map((line) => testimonyFields(line, links)),
+  }
+}
+
+/**
+ * Find or create every city sheet — found again by its place and its year, so a sheet the dev wrote himself (Rome in
+ * 1100) is kept as he wrote it.
+ * @param store - the base
+ * @param cities - the seed's cities
+ * @param links - the ids of what they name
+ * @param report - counted into
+ * @returns once written
+ */
+async function settleSheets(
+  store: SeedStore,
+  cities: readonly SeedCity[],
+  links: SheetLinks,
+  report: SeedReport
+): Promise<void> {
+  for (const city of cities) {
+    const place = idOf(links.places, city.place, 'place')
+    if ((await store.findSheet(place, city.year)) === null) {
+      await store.create('place-periods', sheetFields(city, links))
+      report['place-periods'].created += 1
+    } else {
+      report['place-periods'].found += 1
+    }
+  }
+}
+
+/**
+ * Find or create the reasons, then the city sheets that name them.
+ * @param store - the base
+ * @param data - the seed's reasons and cities
+ * @param links - the places' and sources' ids, already settled
+ * @param report - counted into
+ * @returns once written
+ */
+async function settleCities(
+  store: SeedStore,
+  data: Pick<SeedData, 'reasons' | 'cities'>,
+  links: Pick<EventLinks, 'places' | 'sources'>,
+  report: SeedReport
+): Promise<void> {
+  const reasons = await settle(
+    store,
+    {
+      collection: 'importance-reasons',
+      field: 'name',
+      records: data.reasons.map((name) => ({ key: name, data: () => ({ name }) })),
+    },
+    report
+  )
+  await settleSheets(store, data.cities, { ...links, reasons }, report)
+}
+
 /**
  * A report with nothing counted yet.
  * @returns every collection at zero
@@ -310,33 +430,31 @@ function emptyReport(): SeedReport {
     actors: { found: 0, created: 0, updated: 0 },
     places: { found: 0, created: 0, updated: 0 },
     events: { found: 0, created: 0, updated: 0 },
+    'importance-reasons': { found: 0, created: 0, updated: 0 },
+    'place-periods': { found: 0, created: 0, updated: 0 },
   }
 }
 
-/**
- * Write the seed into the base. **Idempotent**: a record already there — found by its Wikidata id, its name or its
- * title — is reused and never changed, so the dev's own records stay as he wrote them and a second run creates
- * nothing. Every place missing from the base is read from Wikidata **before anything is written**: Wikidata
- * unreachable, or a place without coordinates, stops the run with the base untouched.
- * @param store - the base
- * @param readPlace - how to read a place from Wikidata
- * @param data - what to write
- * @returns how many records were found and created, per collection
- */
-export async function seed(
-  store: SeedStore,
-  readPlace: ReadWikidataPlace,
-  data: SeedData
-): Promise<SeedReport> {
-  const report = emptyReport()
-  const read = await readMissingPlaces(store, readPlace, data.places)
-  const batch = (
-    collection: SeedCollection,
-    field: string,
-    records: Batch['records']
-  ): Promise<Map<string, SeedId>> => settle(store, { collection, field, records }, report)
+/** Find or create one collection's records from their keys — `settle` bound to a base and a report. */
+type BatchOf = (
+  collection: SeedCollection,
+  field: string,
+  records: Batch['records']
+) => Promise<Map<string, SeedId>>
 
-  const links: EventLinks = {
+/**
+ * Find or create what events and city sheets name: the types, the sources, the actors and the places.
+ * @param batch - find or create one collection's records
+ * @param data - the seed's data
+ * @param read - what Wikidata gave the places missing from the base
+ * @returns the ids of all four
+ */
+async function settleLinks(
+  batch: BatchOf,
+  data: SeedData,
+  read: ReadonlyMap<string, WikidataPlace>
+): Promise<EventLinks> {
+  return {
     types: await batch(
       'event-types',
       'name',
@@ -358,6 +476,28 @@ export async function seed(
       data.places.map((place) => ({ key: place.wikidata, data: () => placeFields(place, read) }))
     ),
   }
+}
+
+/**
+ * Write the seed into the base. **Idempotent**: a record already there — found by its Wikidata id, its name or its
+ * title, a city sheet by its place and its year — is reused and never changed, so the dev's own records stay as he
+ * wrote them and a second run creates nothing. Every place missing from the base is read from Wikidata **before anything is written**: Wikidata
+ * unreachable, or a place without coordinates, stops the run with the base untouched.
+ * @param store - the base
+ * @param readPlace - how to read a place from Wikidata
+ * @param data - what to write
+ * @returns how many records were found and created, per collection
+ */
+export async function seed(
+  store: SeedStore,
+  readPlace: ReadWikidataPlace,
+  data: SeedData
+): Promise<SeedReport> {
+  const report = emptyReport()
+  const read = await readMissingPlaces(store, readPlace, data.places)
+  const batch: BatchOf = (collection, field, records) =>
+    settle(store, { collection, field, records }, report)
+  const links = await settleLinks(batch, data, read)
   await batch(
     'siege-engines',
     'name',
@@ -372,5 +512,6 @@ export async function seed(
     'title',
     data.events.map((event) => ({ key: event.title, data: () => eventFields(event, links) }))
   )
+  await settleCities(store, data, links, report)
   return report
 }

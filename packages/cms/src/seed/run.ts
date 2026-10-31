@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import config from '../payload.config'
 import { fetchPlaceEntity } from '../wikidata/placeEndpoints'
 
+import { CITIES_1100, CITY_PLACES, CITY_REASONS, CITY_SOURCES } from './cities1100'
 import { seed } from './seed'
 import { ENGINE_SOURCES, SIEGE_ENGINES } from './siegeEngineData'
 import { ACTORS, EVENTS, PLACES, SOURCES, TYPES } from './year1100'
@@ -10,7 +11,7 @@ import { ACTORS, EVENTS, PLACES, SOURCES, TYPES } from './year1100'
 import type { SeedCollection, SeedId, SeedStore } from './seed'
 
 /**
- * Seed the base with the events of 1100 and the siege engins (`pnpm seed:cms`): through Payload's Local API, so every record passes the
+ * Seed the base with the events of 1100, the siege engins and the cities of 1100 (`pnpm seed:cms`): through Payload's Local API, so every record passes the
  * same validation as the form, and the places read from Wikidata by the same fetch and reader as the form's button.
  * Anything wrong stops the run and names the record.
  */
@@ -22,6 +23,16 @@ const store: SeedStore = {
       collection,
       where: { [field]: { equals: value } },
       locale: 'fr',
+      limit: 1,
+      depth: 0,
+      pagination: false,
+    })
+    return docs[0]?.id ?? null
+  },
+  async findSheet(place: SeedId, year: number) {
+    const { docs } = await payload.find({
+      collection: 'place-periods',
+      where: { and: [{ place: { equals: place } }, { 'date.start.year': { equals: year } }] },
       limit: 1,
       depth: 0,
       pagination: false,
@@ -44,11 +55,13 @@ const store: SeedStore = {
 
 const report = await seed(store, (id) => fetchPlaceEntity(id), {
   types: TYPES,
-  sources: [...SOURCES, ...ENGINE_SOURCES],
+  sources: [...SOURCES, ...ENGINE_SOURCES, ...CITY_SOURCES],
   actors: ACTORS,
-  places: PLACES,
+  places: [...PLACES, ...CITY_PLACES],
   events: EVENTS,
   siegeEngines: SIEGE_ENGINES,
+  reasons: CITY_REASONS,
+  cities: CITIES_1100,
 })
 for (const [collection, count] of Object.entries(report)) {
   console.warn(

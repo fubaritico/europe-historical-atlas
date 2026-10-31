@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import { checkCitySheet, isSheetRefused } from '@europe-historical-atlas/core/data/citySheet'
+
+import { citySheetCandidate } from '../fields/citySheetCandidate'
 import { DEFAULT_EVENT_COLOUR } from '../fields/eventColours'
 
+import { CITIES_1100, CITY_PLACES, CITY_REASONS, CITY_SOURCES } from './cities1100'
 import { eventMoment, existenceMoment, seed } from './seed'
 import { ENGINE_SOURCES, SIEGE_ENGINES } from './siegeEngineData'
 import { ACTORS, EVENTS, PLACES, SOURCES, TYPES } from './year1100'
@@ -16,6 +20,13 @@ function memoryStore() {
   const store: SeedStore = {
     findId(collection, field, value) {
       const found = (records.get(collection) ?? []).find((record) => record.data[field] === value)
+      return Promise.resolve(found?.id ?? null)
+    },
+    findSheet(place, year) {
+      const found = (records.get('place-periods') ?? []).find((record) => {
+        const date = record.data.date as { start: { year: number } }
+        return record.data.place === place && date.start.year === year
+      })
       return Promise.resolve(found?.id ?? null)
     },
     create(collection, data) {
@@ -47,15 +58,20 @@ const atParis: ReadWikidataPlace = (id) =>
     existsTo: null,
   })
 
-/** The real data of 1100 and the siege engins, as `run.ts` hands them over. */
+/** The real data of 1100, the siege engins and the cities, as `run.ts` hands them over. */
 const YEAR_1100: SeedData = {
   types: TYPES,
-  sources: [...SOURCES, ...ENGINE_SOURCES],
+  sources: [...SOURCES, ...ENGINE_SOURCES, ...CITY_SOURCES],
   actors: ACTORS,
-  places: PLACES,
+  places: [...PLACES, ...CITY_PLACES],
   events: EVENTS,
   siegeEngines: SIEGE_ENGINES,
+  reasons: CITY_REASONS,
+  cities: CITIES_1100,
 }
+
+/** The places of the real data, each once — a city can also be an event's place (Poitiers). */
+const DISTINCT_PLACES = new Set(YEAR_1100.places.map((place) => place.wikidata)).size
 
 /** One event at one place, with one actor, one source and one type. */
 const SMALL: SeedData = {
@@ -68,6 +84,7 @@ const SMALL: SeedData = {
       editionYear: 1900,
       kind: 'primary',
       url: 'https://example.org/gesta',
+      licence: 'cc0',
     },
   ],
   actors: [{ wikidata: 'Q1', name: 'Tancrède', kind: 'person' }],
@@ -92,6 +109,20 @@ const SMALL: SeedData = {
       sources: ['Gesta'],
     },
   ],
+  reasons: ['archevêché'],
+  cities: [
+    {
+      place: 'Q41621',
+      year: 1100,
+      importance: 'large-city',
+      reasons: ['archevêché'],
+      testimonies: [
+        { source: 'Gesta', subject: 'population', population: 5000, where: 'p. 12' },
+        { source: 'Gesta', subject: 'importance', importance: 'large-city' },
+        { source: 'Gesta', subject: 'reason', reason: 'archevêché' },
+      ],
+    },
+  ],
 }
 
 const nowhere: ReadWikidataPlace = (id) =>
@@ -107,11 +138,11 @@ describe('seed', () => {
       const report = await seed(base.store, atParis, YEAR_1100)
 
       expect(report.events).toEqual({ found: 0, created: EVENTS.length, updated: 0 })
-      expect(report.places).toEqual({ found: 0, created: PLACES.length, updated: 0 })
+      expect(report.places.created).toBe(DISTINCT_PLACES)
       expect(report.actors).toEqual({ found: 0, created: ACTORS.length, updated: 0 })
       expect(report.sources).toEqual({
         found: 0,
-        created: SOURCES.length + ENGINE_SOURCES.length,
+        created: SOURCES.length + ENGINE_SOURCES.length + CITY_SOURCES.length,
         updated: 0,
       })
       expect(report['siege-engines']).toEqual({
@@ -120,6 +151,8 @@ describe('seed', () => {
         updated: 0,
       })
       expect(report['event-types']).toEqual({ found: 0, created: TYPES.length, updated: 0 })
+      expect(report['place-periods']).toEqual({ found: 0, created: CITIES_1100.length, updated: 0 })
+      expect(report['importance-reasons'].created).toBe(CITY_REASONS.length)
     })
 
     it('links an event to the ids of its type, place, actors and sources', async () => {
@@ -136,13 +169,14 @@ describe('seed', () => {
       })
     })
 
-    it('passes an event’s Wikidata id and a source’s address through', async () => {
+    it('passes an event’s Wikidata id and a source’s address and licence through', async () => {
       const base = memoryStore()
 
       await seed(base.store, atParis, SMALL)
 
       expect(base.records('events')[0]?.data.wikidata).toBe('Q137785638')
       expect(base.records('sources')[0]?.data.url).toBe('https://example.org/gesta')
+      expect(base.records('sources')[0]?.data.licence).toBe('cc0')
     })
 
     it('writes a place at the position Wikidata gives, as [lon, lat]', async () => {
@@ -323,6 +357,88 @@ describe('seed', () => {
     it('puts the siege on the tower in the data of 1100, and leaves the taking on the pin', () => {
       expect(TYPES.find((type) => type.name === 'Siège')?.icon).toBe('tower')
       expect(TYPES.find((type) => type.name === 'Conquest')?.icon).toBe('pin')
+    })
+  })
+
+  describe('city sheets', () => {
+    it('writes a sheet with its place, year, importance, reasons and source lines as ids', async () => {
+      const base = memoryStore()
+
+      await seed(base.store, atParis, SMALL)
+
+      const source = base.records('sources')[0]?.id
+      const reason = base.records('importance-reasons')[0]?.id
+      expect(base.records('place-periods')[0]?.data).toEqual({
+        place: base.records('places')[0]?.id,
+        date: {
+          start: { year: 1100, month: null, day: null, circa: false, margin: null, calendar: null },
+        },
+        importance: 'large-city',
+        reasons: [reason],
+        testimonies: [
+          { source, subject: 'population', population: 5000, where: 'p. 12' },
+          { source, subject: 'importance', importance: 'large-city' },
+          { source, subject: 'reason', reason },
+        ],
+      })
+    })
+
+    it('keeps a sheet the dev wrote for the same place and year, and writes none beside it', async () => {
+      const base = memoryStore()
+      const place = await base.store.create('places', { wikidata: 'Q41621' })
+      const theirs = await base.store.create('place-periods', {
+        place,
+        date: { start: { year: 1100 } },
+        importance: 'capital',
+      })
+
+      const report = await seed(base.store, atParis, SMALL)
+
+      expect(base.records('place-periods')).toEqual([
+        { id: theirs, data: { place, date: { start: { year: 1100 } }, importance: 'capital' } },
+      ])
+      expect(report['place-periods']).toEqual({ found: 1, created: 0, updated: 0 })
+    })
+
+    it('writes a sheet for another year of a place that already has one', async () => {
+      const base = memoryStore()
+      const place = await base.store.create('places', { wikidata: 'Q41621' })
+      await base.store.create('place-periods', { place, date: { start: { year: 1000 } } })
+
+      const report = await seed(base.store, atParis, SMALL)
+
+      expect(report['place-periods'].created).toBe(1)
+    })
+
+    it('reuses a reason the dev already wrote', async () => {
+      const base = memoryStore()
+      const theirs = await base.store.create('importance-reasons', { name: 'archevêché' })
+
+      await seed(base.store, atParis, SMALL)
+
+      expect(base.records('importance-reasons')).toHaveLength(1)
+      expect(base.records('place-periods')[0]?.data.reasons).toEqual([theirs])
+    })
+
+    it('refuses a sheet naming a reason the data does not declare', async () => {
+      const base = memoryStore()
+
+      await expect(seed(base.store, atParis, { ...SMALL, reasons: [] })).rejects.toThrow(
+        'reason « archevêché » is not declared'
+      )
+    })
+
+    it('writes every city of 1100 as a sheet the form’s own rule accepts', async () => {
+      const base = memoryStore()
+
+      await seed(base.store, atParis, YEAR_1100)
+
+      const refused = base.records('place-periods').filter((record) => {
+        // Read as the server's hook reads it — a date it cannot read refuses the sheet here too.
+        const candidate = citySheetCandidate(record.data)
+        return candidate === null || isSheetRefused(checkCitySheet(candidate))
+      })
+      expect(refused).toEqual([])
     })
   })
 
