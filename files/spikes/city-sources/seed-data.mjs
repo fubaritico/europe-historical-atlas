@@ -91,7 +91,7 @@ const CITIES = [
  * Hongrie, dans Pologne, les pays russes. Un peu la Scandinavie »*): Bosker gives them no role and seldom a figure, so
  * the rule above would keep none. **These are the cities Buringh attests there**, ranked a city — **a capital where
  * Wikidata dates the city « capital of » (P1376) a polity over 1100** ({@link WIKIDATA_CAPITALS}). Resolved like the
- * first list, the descriptions read (2026-10-31). Murom was not found and is left out.
+ * first list, the descriptions read (2026-10-31).
  */
 const EAST = [
   ['Esztergom', 'Q171353', 'Esztergom'],
@@ -117,10 +117,14 @@ const EAST = [
   ['Bergen', 'Q26793', 'Bergen'],
   // The second pass, the same evening (*« des zones où moi j'aurais vu plus de villes […] des gens de différentes
   // nations vont consulter l'Atlas »*): the Rus' south and east, the Caucasus, Mesopotamia and Persia, Ireland,
-  // Scotland, Wales's march, Sweden. Wasit and Perth were not found; Cardiff's item stood 22 km off the dataset's point,
+  // Scotland, Wales's march, Sweden. Wasit and Perth were not found, Murom added after; Cardiff's item stood 22 km off the dataset's point,
   // and is left out.
   ['Kursk', 'Q3159', 'Koursk'],
-  ['Rjazan', 'Q2746', 'Riazan'],
+  // Old Ryazan, the city of 1100, razed in 1237 — not today's Ryazan (Q2746), some 50 km north-west (the dev, 31/10).
+  ['Rjazan', 'Q4439776', 'Riazan'],
+  // Murom, the other seat of Murom-Ryazan until 1127 (the dev, 31/10): Buringh places it 57 km south of the town, so the
+  // first search, kept within 30 km, missed it; Wikidata's item gives the position, Buringh the figure.
+  ['Murom', 'Q162677', 'Mourom'],
   ['Vladimir', 'Q2684', 'Vladimir'],
   ['Vitebsk', 'Q102217', 'Vitebsk'],
   ['Derbent', 'Q131416', 'Derbent'],

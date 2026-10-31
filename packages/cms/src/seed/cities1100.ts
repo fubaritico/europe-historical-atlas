@@ -412,8 +412,12 @@ export const CITY_PLACES: readonly SeedPlace[] = [
     name: 'Koursk',
   },
   {
-    wikidata: 'Q2746',
+    wikidata: 'Q4439776',
     name: 'Riazan',
+  },
+  {
+    wikidata: 'Q162677',
+    name: 'Mourom',
   },
   {
     wikidata: 'Q2684',
@@ -2676,7 +2680,7 @@ export const CITIES_1100: readonly SeedCity[] = [
     ],
   },
   {
-    place: 'Q2746',
+    place: 'Q4439776',
     year: 1100,
     importance: 'city',
     reasons: [],
@@ -2686,6 +2690,20 @@ export const CITIES_1100: readonly SeedCity[] = [
         subject: 'population',
         population: 3000,
         where: '1100, estimée d’après un indice — Wikipedia: height circa 1100, assume 3 k -',
+      },
+    ],
+  },
+  {
+    place: 'Q162677',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 2000,
+        where: '1100, estimation imputée',
       },
     ],
   },

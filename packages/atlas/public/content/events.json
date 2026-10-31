@@ -783,6 +783,47 @@
   ],
   "cities": [
     {
+      "id": "107",
+      "place": {
+        "id": "115",
+        "name": {
+          "fr": "Mourom",
+          "en": null
+        },
+        "lon": 42.053839,
+        "lat": 55.580854,
+        "wikidata": "Q162677",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 2000
+        }
+      ]
+    },
+    {
       "id": "106",
       "place": {
         "id": "114",
@@ -1911,9 +1952,9 @@
           "fr": "Riazan",
           "en": null
         },
-        "lon": 39.7425,
-        "lat": 54.63,
-        "wikidata": "Q2746",
+        "lon": 40.427714,
+        "lat": 54.397114,
+        "wikidata": "Q4439776",
         "existsFrom": {
           "year": 1095,
           "month": null,
