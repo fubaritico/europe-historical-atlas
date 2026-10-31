@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>City marks — Historical Atlas</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      body {
+        margin: 0;
+        padding: 16px;
+        background: #efe6d2;
+        font:
+          14px/1.4 Georgia,
+          serif;
+        color: #3b2a1e;
+      }
+      h2 {
+        margin: 24px 0 8px;
+        font-size: 16px;
+      }
+      table {
+        border-collapse: collapse;
+      }
+      td,
+      th {
+        padding: 8px 14px;
+        vertical-align: middle;
+      }
+      th {
+        font-weight: normal;
+        font-size: 12px;
+        text-align: left;
+      }
+      td {
+        display: flex;
+        gap: 22px;
+        align-items: center;
+      }
+      tr {
+        display: flex;
+        align-items: stretch;
+      }
+      th:first-child {
+        width: 70px;
+      }
+      td:nth-child(2) {
+        width: 380px;
+      }
+      .entry {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .name {
+        font-family: Fondamento, Georgia, serif;
+        color: #2b1d14;
+        text-shadow:
+          0 0 2px #f4ecd8,
+          0 0 2px #f4ecd8,
+          0 0 3px #f4ecd8;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="bench"></div>
+    <script type="module" src="/src/bench/cityMarkBench.ts"></script>
+  </body>
+</html>

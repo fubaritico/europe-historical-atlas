@@ -73,12 +73,12 @@ packages/
 │       ├── tunables/   # the settings the whole map reads: devState, params/ (defaults and ranges) — a leaf
 │       ├── devPanel/   # the lil-gui panel over the settings, and what each control rebuilds
 │       ├── scene/      # everything drawn, one folder per family, each with its builder (`map…Layer`):
-│       │               #   layers/ relief/ lines/ waters/ decor/ sheet/ political/ events/
+│       │               #   layers/ relief/ lines/ waters/ decor/ sheet/ political/ events/ cities/
 │       ├── camera/     # camera + CameraStateStore (independent of everything else)
 │       ├── controls/   # navigation; depends on camera/ only
 │       ├── picking/    # raycasting: answers WHERE, never WHAT
 │       ├── ui/         # plain DOM over the canvas
-│       └── bench/      # the icon benches, /icons.html and /svg-icons.html
+│       └── bench/      # the benches: /icons.html, /svg-icons.html, /names.html, /cities.html
 ├── cartographer/       # @europe-historical-atlas/cartographer — the territory editor
 │   ├── eslint.config.js    # re-imports the root config, then adds React; forbids `three`
 │   ├── vite.config.ts
