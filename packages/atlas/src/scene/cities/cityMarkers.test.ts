@@ -4,9 +4,11 @@ import { describe, expect, it, vi } from 'vitest'
 import { DETAIL_LEVELS } from '../detail/detailLevels'
 import { DETAIL_FADE_SECONDS, viewOf } from '../detail/detailView'
 import { EVENT_RENDER_ORDER, HALO_RENDER_ORDER } from '../events/markers'
+import { BORDER_RENDER_ORDER } from '../political/borders/mapBorderLayer'
+import { NAME_RENDER_ORDER } from '../political/names/nameLayer'
 
 import { layoutLabel } from './cityLabel'
-import { createCityMarkers } from './cityMarkers'
+import { CITY_UNDER_NAMES_ORDER, createCityMarkers } from './cityMarkers'
 
 import type { CityLabelImage, DrawCityLabel } from './cityLabel'
 import type { PlacedCity } from './cityMarkers'
@@ -149,6 +151,23 @@ describe('createCityMarkers', () => {
       expect(markers.object.renderOrder).toBeLessThan(HALO_RENDER_ORDER)
       expect(city(markers.object, 0).point.material.depthTest).toBe(false)
       expect(city(markers.object, 0).name.material.depthTest).toBe(false)
+    })
+  })
+
+  describe('the order of the layers', () => {
+    it('draws the cities under the countries’ names afar, over them from the second level on', () => {
+      const markers = createCityMarkers([PARIS], loadTexture, drawn)
+
+      markers.setDetailView(level(0))
+      const afar = markers.object.renderOrder
+      markers.setDetailView(level(1))
+      const closer = markers.object.renderOrder
+
+      expect(afar).toBe(CITY_UNDER_NAMES_ORDER)
+      expect(afar).toBeGreaterThan(BORDER_RENDER_ORDER)
+      expect(afar).toBeLessThan(NAME_RENDER_ORDER)
+      expect(closer).toBeGreaterThan(NAME_RENDER_ORDER)
+      expect(closer).toBeLessThan(EVENT_RENDER_ORDER)
     })
   })
 

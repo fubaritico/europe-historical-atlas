@@ -83,6 +83,7 @@ describe('viewOf', () => {
       cityPoints: { capital: 1, 'large-city': 0, city: 0 },
       cityNames: { capital: 0, 'large-city': 0, city: 0 },
       nameReach: Number.POSITIVE_INFINITY,
+      citiesOverNames: false,
     })
   })
 
@@ -135,8 +136,16 @@ describe('fadeView', () => {
     const to = viewOf(entry(2), 2, true)
 
     // The reach is not faded: it is the zoom's, taken at once.
-    expect(fadeView(from, to, 0, 2)).toEqual({ ...from, nameReach: to.nameReach })
-    expect(fadeView(from, to, -1, 2)).toEqual({ ...from, nameReach: to.nameReach })
+    expect(fadeView(from, to, 0, 2)).toEqual({
+      ...from,
+      nameReach: to.nameReach,
+      citiesOverNames: to.citiesOverNames,
+    })
+    expect(fadeView(from, to, -1, 2)).toEqual({
+      ...from,
+      nameReach: to.nameReach,
+      citiesOverNames: to.citiesOverNames,
+    })
   })
 })
 

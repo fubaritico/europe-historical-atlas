@@ -29,6 +29,12 @@ export interface DetailLevel {
    * s'approche du plus haut niveau de zoom »*). `Infinity`: every name shows.
    */
   readonly nameReach: readonly [number, number]
+  /**
+   * Whether the cities are drawn over the countries' names, or under them — the order of the layers, per level (the
+   * dev, 2026-11-01: afar the capitals' points sit under the names still whole; from the next level on, over them, the
+   * names gone to their watermark). The first piece of an order of the layers by level, widened at its second case.
+   */
+  readonly citiesOverNames: boolean
 }
 
 /** No reach: every name the level shows, wherever it stands. */
@@ -52,6 +58,7 @@ export const DETAIL_LEVELS: readonly DetailLevel[] = [
     cityPoints: ['capital'],
     cityNames: [],
     nameReach: EVERYWHERE,
+    citiesOverNames: false,
   },
   {
     from: 0.45,
@@ -60,6 +67,7 @@ export const DETAIL_LEVELS: readonly DetailLevel[] = [
     cityPoints: ['capital', 'large-city'],
     cityNames: ['capital'],
     nameReach: EVERYWHERE,
+    citiesOverNames: true,
   },
   {
     from: 0.65,
@@ -68,6 +76,7 @@ export const DETAIL_LEVELS: readonly DetailLevel[] = [
     cityPoints: ALL_CITIES,
     cityNames: ALL_CITIES,
     nameReach: [1.5, 1.5],
+    citiesOverNames: true,
   },
   {
     from: 0.8,
@@ -76,6 +85,7 @@ export const DETAIL_LEVELS: readonly DetailLevel[] = [
     cityPoints: ALL_CITIES,
     cityNames: ALL_CITIES,
     nameReach: [1.45, 1.25],
+    citiesOverNames: true,
   },
 ]
 

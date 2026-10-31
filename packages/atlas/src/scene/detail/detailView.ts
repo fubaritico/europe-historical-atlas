@@ -25,6 +25,8 @@ export interface DetailView {
   cityNames: Record<CityImportance, number>
   /** How far from the point looked at a city's name shows, as a share of the camera's distance — not faded. */
   nameReach: number
+  /** Whether the cities are drawn over the countries' names — an order, not faded: it turns at the level's change. */
+  citiesOverNames: boolean
 }
 
 const share = (orders: readonly CityImportance[]): Record<CityImportance, number> =>
@@ -50,6 +52,7 @@ export function viewOf(level: DetailLevel, deepest: number, vassalsByLevel: bool
     cityPoints: share(level.cityPoints),
     cityNames: share(level.cityNames),
     nameReach: level.nameReach[0],
+    citiesOverNames: level.citiesOverNames,
   }
 }
 
@@ -94,6 +97,7 @@ export function fadeView(
     cityNames: each(current.cityNames, target.cityNames),
     // The reach is the zoom's, progressive within a level: it takes the target's at once.
     nameReach: target.nameReach,
+    citiesOverNames: target.citiesOverNames,
   }
 }
 

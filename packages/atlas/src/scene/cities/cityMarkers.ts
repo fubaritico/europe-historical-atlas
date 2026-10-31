@@ -16,6 +16,7 @@ import { CITY_IMPORTANCES } from '@europe-historical-atlas/core/data/cityImporta
 
 import { DETAIL_FADE_SECONDS, toward } from '../detail/detailView'
 import { EVENT_RENDER_ORDER } from '../events/markers'
+import { NAME_RENDER_ORDER } from '../political/names/nameLayer'
 
 import { LABEL_RATIO } from './cityLabel'
 import { CITY_MARKS, cityMarkSvg } from './cityMarks'
@@ -34,6 +35,12 @@ import type { Texture } from 'three'
  * and icons — three sorts the transparent pass by the nearest group's order.
  */
 export const CITY_RENDER_ORDER = EVENT_RENDER_ORDER - 1.5
+
+/**
+ * The cities' draw order under the countries' names, at the levels that ask for it (`detail/detailLevels`,
+ * `citiesOverNames`): over the borders (`BORDER_RENDER_ORDER`, 10), just under the names' group (`NAME_RENDER_ORDER`).
+ */
+export const CITY_UNDER_NAMES_ORDER = NAME_RENDER_ORDER - 0.5
 
 /** A city to draw: where it stands, its order, its name. */
 export interface PlacedCity {
@@ -320,6 +327,8 @@ export function createCityMarkers(
     },
     setDetailView(view: DetailView): void {
       frame.view = view
+      // The level's order of the layers: three sorts the transparent pass by the nearest group's order.
+      object.renderOrder = view.citiesOverNames ? CITY_RENDER_ORDER : CITY_UNDER_NAMES_ORDER
       applyAll()
     },
     dispose(): void {
