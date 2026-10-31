@@ -14,6 +14,7 @@ import { compileHook } from '../../testing/compileHook'
 import { EVENT_RENDER_ORDER } from '../markers'
 
 import { createIconInstances } from './iconInstances'
+import { ICON_SIZE } from './settings'
 
 import type { IconPose } from './iconInstances'
 import type { Material } from 'three'
@@ -102,7 +103,7 @@ describe('createIconInstances', () => {
       const matrix = new Matrix4()
       meshes(instances.object)[0]?.getMatrixAt(0, matrix)
       matrix.decompose(new Vector3(), new Quaternion(), scale)
-      expect(scale.toArray()).toEqual([0.5, 0.5, 0.5])
+      for (const axis of scale.toArray()) expect(axis).toBeCloseTo(0.5 * ICON_SIZE.swords)
     })
   })
 

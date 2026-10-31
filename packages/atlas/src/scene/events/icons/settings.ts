@@ -32,9 +32,10 @@ export const ICON_DEPTH_PULL = 1
 /**
  * How tall each kind's 3D model stands, in icon heights. The siege's was cut down on sight when it was a tower (the dev,
  * 2026-10-27: *« réduis la taille de la tour »*), 0.7; the trebuchet that replaced it twice that (*« deux fois plus
- * grande par rapport à la taille de départ »*).
+ * grande par rapport à la taille de départ »*). The battle's swords, 1 first, then 0.85 (the dev, 2026-10-31: *« réduis-la
+ * un petit peu »*).
  */
-export const ICON_SIZE: Record<EventIconKind, number> = { swords: 1, tower: 1.4, crown: 1 }
+export const ICON_SIZE: Record<EventIconKind, number> = { swords: 0.85, tower: 1.4, crown: 1 }
 
 /**
  * Which kinds of 3D icon turn to face the camera, and sway as they do. The crossed swords float and turn; the siege

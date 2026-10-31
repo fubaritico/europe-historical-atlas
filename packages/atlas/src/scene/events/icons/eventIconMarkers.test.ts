@@ -197,7 +197,8 @@ describe('createEventIconMarkers', () => {
 
     it('scales each icon to the height given', () => {
       const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS, 0.5)
-      expect(iconPose(markers.object, 'swords').scale.toArray()).toEqual([0.5, 0.5, 0.5])
+      for (const axis of iconPose(markers.object, 'swords').scale.toArray())
+        expect(axis).toBeCloseTo(0.5 * ICON_SIZE.swords)
     })
   })
 
@@ -221,7 +222,9 @@ describe('createEventIconMarkers', () => {
 
     it('stands them the default height when none is given, each kind at its own size', () => {
       const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
-      expect(iconPose(markers.object, 'swords').scale.y).toBeCloseTo(EVENT_ICON_HEIGHT)
+      expect(iconPose(markers.object, 'swords').scale.y).toBeCloseTo(
+        EVENT_ICON_HEIGHT * ICON_SIZE.swords
+      )
       expect(iconPose(markers.object, 'tower').scale.y).toBeCloseTo(
         EVENT_ICON_HEIGHT * ICON_SIZE.tower
       )
@@ -434,13 +437,17 @@ describe('createEventIconMarkers', () => {
       const markers = createEventIconMarkers(TWO, STUB, FLAT, TARGETS)
       const flatAt = (): number => squarePose(markers.object, 'swords').position.y
       const swordsAt = (): number => iconPose(markers.object, 'swords').position.y
-      expect(flatAt()).toBeCloseTo(swordsAt() + EVENT_ICON_HEIGHT * (0.5 + ICON_FLAT_RAISE))
+      expect(flatAt()).toBeCloseTo(
+        swordsAt() + EVENT_ICON_HEIGHT * ICON_SIZE.swords * (0.5 + ICON_FLAT_RAISE)
+      )
       markers.setZoom(ICON_CROSS_FADE.zoom, 10_000)
       expect(squarePose(markers.object, 'swords').scale.x).toBeCloseTo(
         EVENT_ICON_HEIGHT * ICON_FLAT_SPAN
       )
       markers.setReliefScale(3)
-      expect(flatAt()).toBeCloseTo(swordsAt() + EVENT_ICON_HEIGHT * (0.5 + ICON_FLAT_RAISE))
+      expect(flatAt()).toBeCloseTo(
+        swordsAt() + EVENT_ICON_HEIGHT * ICON_SIZE.swords * (0.5 + ICON_FLAT_RAISE)
+      )
     })
 
     it('turns the halos and the flat drawings as the camera is, as a sprite would', () => {
