@@ -1313,10 +1313,10 @@
       "rank": "principality",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 900,
+      "existsTo": 1397,
       "colour": "#3d7a3d",
-      "wikidata": null
+      "wikidata": "Q517333"
     },
     {
       "id": "principality-of-vholhynia",
@@ -1324,10 +1324,10 @@
       "rank": "principality",
       "status": null,
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 987,
+      "existsTo": 1452,
       "colour": "#4b9415",
-      "wikidata": null
+      "wikidata": "Q680472"
     },
     {
       "id": "principality-of-ryazan",
@@ -1335,10 +1335,10 @@
       "rank": "principality",
       "status": null,
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1013,
+      "existsTo": 1127,
       "colour": "#2f600a",
-      "wikidata": null
+      "wikidata": "Q549817"
     },
     {
       "id": "zhmuds",
