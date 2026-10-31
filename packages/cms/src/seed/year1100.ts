@@ -38,7 +38,7 @@ export interface SeedSource {
   /** The year of the edition cited. */
   editionYear: number
   /** Its kind, as the form lists them. */
-  kind: 'primary' | 'scholarly'
+  kind: 'primary' | 'scholarly' | 'crowd-database'
   /** Where it can be read, when the page gives an address. */
   url?: string
   /** Its licence, as the form lists them, when the work declares one. */

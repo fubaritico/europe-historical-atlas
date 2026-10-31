@@ -6,7 +6,9 @@
  * The rule (the dev, 2026-10-31): a **capital** where Bosker et al. (2013) say capital; a **large city** where they say
  * archbishopric — in the Middle Ages a religious seat is a political one; a **city** where all three sources give a
  * figure. Every figure and every role is a source line of its own, never averaged; a figure Bosker interpolated
- * between two centuries says so. The places are named by their Wikidata items, read by the seed as the form does.
+ * between two centuries says so. **The east and the north** (the dev, the same evening): the cities Buringh attests in
+ * Hungary, Poland, the Rus' lands and Scandinavia — a capital where Wikidata dates it so over 1100, a city otherwise.
+ * The places are named by their Wikidata items, read by the seed as the form does.
  */
 
 import type { SeedPlace, SeedSource } from './year1100'
@@ -40,6 +42,15 @@ export interface SeedCity {
 
 /** The three open datasets the figures and roles come from. */
 export const CITY_SOURCES: readonly SeedSource[] = [
+  {
+    title: 'Wikidata',
+    author: 'Contributeurs de Wikidata',
+    publisher: 'Wikimedia Foundation',
+    editionYear: 2026,
+    kind: 'crowd-database',
+    url: 'https://www.wikidata.org',
+    licence: 'cc0',
+  },
   {
     title:
       'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
@@ -311,6 +322,194 @@ export const CITY_PLACES: readonly SeedPlace[] = [
   {
     wikidata: 'Q3640',
     name: 'Ancyre',
+  },
+  {
+    wikidata: 'Q171353',
+    name: 'Esztergom',
+  },
+  {
+    wikidata: 'Q130212',
+    name: 'Székesfehérvár',
+  },
+  {
+    wikidata: 'Q134494',
+    name: 'Győr',
+  },
+  {
+    wikidata: 'Q26397',
+    name: 'Nitra',
+  },
+  {
+    wikidata: 'Q1780',
+    name: 'Presbourg',
+  },
+  {
+    wikidata: 'Q31487',
+    name: 'Cracovie',
+  },
+  {
+    wikidata: 'Q51432',
+    name: 'Gniezno',
+  },
+  {
+    wikidata: 'Q104725',
+    name: 'Płock',
+  },
+  {
+    wikidata: 'Q268',
+    name: 'Poznań',
+  },
+  {
+    wikidata: 'Q1792',
+    name: 'Gdańsk',
+  },
+  {
+    wikidata: 'Q1899',
+    name: 'Kiev',
+  },
+  {
+    wikidata: 'Q2235',
+    name: 'Novgorod',
+  },
+  {
+    wikidata: 'Q157053',
+    name: 'Tchernigov',
+  },
+  {
+    wikidata: 'Q2337',
+    name: 'Smolensk',
+  },
+  {
+    wikidata: 'Q200797',
+    name: 'Polotsk',
+  },
+  {
+    wikidata: 'Q193342',
+    name: 'Rostov',
+  },
+  {
+    wikidata: 'Q2214',
+    name: 'Pskov',
+  },
+  {
+    wikidata: 'Q26563',
+    name: 'Roskilde',
+  },
+  {
+    wikidata: 'Q2167',
+    name: 'Lund',
+  },
+  {
+    wikidata: 'Q25804',
+    name: 'Nidaros',
+  },
+  {
+    wikidata: 'Q26793',
+    name: 'Bergen',
+  },
+  {
+    wikidata: 'Q3159',
+    name: 'Koursk',
+  },
+  {
+    wikidata: 'Q2746',
+    name: 'Riazan',
+  },
+  {
+    wikidata: 'Q2684',
+    name: 'Vladimir',
+  },
+  {
+    wikidata: 'Q102217',
+    name: 'Vitebsk',
+  },
+  {
+    wikidata: 'Q131416',
+    name: 'Derbent',
+  },
+  {
+    wikidata: 'Q230104',
+    name: 'Nakhitchevan',
+  },
+  {
+    wikidata: 'Q636188',
+    name: 'Rayy',
+  },
+  {
+    wikidata: 'Q48195',
+    name: 'Bassora',
+  },
+  {
+    wikidata: 'Q83387',
+    name: 'Amid',
+  },
+  {
+    wikidata: 'Q283368',
+    name: 'Raqqa',
+  },
+  {
+    wikidata: 'Q186234',
+    name: 'Koufa',
+  },
+  {
+    wikidata: 'Q131350',
+    name: 'Nichapour',
+  },
+  {
+    wikidata: 'Q171714',
+    name: 'Kerman',
+  },
+  {
+    wikidata: 'Q1761',
+    name: 'Dublin',
+  },
+  {
+    wikidata: 'Q193452',
+    name: 'Armagh',
+  },
+  {
+    wikidata: 'Q36647',
+    name: 'Cork',
+  },
+  {
+    wikidata: 'Q183551',
+    name: 'Waterford',
+  },
+  {
+    wikidata: 'Q133315',
+    name: 'Limerick',
+  },
+  {
+    wikidata: 'Q23436',
+    name: 'Édimbourg',
+  },
+  {
+    wikidata: 'Q207736',
+    name: 'Saint Andrews',
+  },
+  {
+    wikidata: 'Q170263',
+    name: 'Chester',
+  },
+  {
+    wikidata: 'Q204720',
+    name: 'Hereford',
+  },
+  {
+    wikidata: 'Q201970',
+    name: 'Shrewsbury',
+  },
+  {
+    wikidata: 'Q25412',
+    name: 'Västerås',
+  },
+  {
+    wikidata: 'Q54757',
+    name: 'Visby',
+  },
+  {
+    wikidata: 'Q26345',
+    name: 'Kalmar',
   },
 ]
 
@@ -2120,6 +2319,744 @@ export const CITIES_1100: readonly SeedCity[] = [
         subject: 'population',
         population: 10000,
         where: '1100',
+      },
+    ],
+  },
+  {
+    place: 'Q171353',
+    year: 1100,
+    importance: 'capital',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'Wikidata',
+        subject: 'importance',
+        importance: 'capital',
+        where:
+          '« capitale de » (P1376) Kingdom of Hungary (Q171150), 1001–1256, sur l’item Q171353 — lu le 31/10/2026',
+      },
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 5000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q130212',
+    year: 1100,
+    importance: 'capital',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'Wikidata',
+        subject: 'importance',
+        importance: 'capital',
+        where:
+          '« capitale de » (P1376) Kingdom of Hungary (Q171150), 1000–1543, sur l’item Q130212 — lu le 31/10/2026',
+      },
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 3000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q134494',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 3000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q26397',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 2000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q1780',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 2000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q31487',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 5000,
+        where: '1100',
+      },
+    ],
+  },
+  {
+    place: 'Q51432',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 3000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q104725',
+    year: 1100,
+    importance: 'capital',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'Wikidata',
+        subject: 'importance',
+        importance: 'capital',
+        where:
+          '« capitale de » (P1376) Kingdom of Poland (Q8890160), 1079–1138, sur l’item Q104725 — lu le 31/10/2026',
+      },
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 2000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q268',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 2000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q1792',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 2000,
+        where: '1100, estimée d’après un indice — - 11th/12th c. 2-3 k',
+      },
+    ],
+  },
+  {
+    place: 'Q1899',
+    year: 1100,
+    importance: 'capital',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'Wikidata',
+        subject: 'importance',
+        importance: 'capital',
+        where:
+          "« capitale de » (P1376) Kievan Rus' (Q1108445), 882–1132, sur l’item Q1899 — lu le 31/10/2026",
+      },
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 20000,
+        where: '1100, estimation imputée',
+      },
+      {
+        source:
+          'Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)',
+        subject: 'population',
+        population: 50000,
+        where: '1100, certitude 1 dans les données',
+      },
+    ],
+  },
+  {
+    place: 'Q2235',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 25000,
+        where:
+          '1100, estimée d’après un indice — - LdM a 50-60 k in 12th-13th c, assume half, because this seems high',
+      },
+    ],
+  },
+  {
+    place: 'Q157053',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 22000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q2337',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 6000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q200797',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 4000,
+        where:
+          '1100, estimée d’après un indice — - LdM: end 10th c 10 churches, assume 0.4k, giving 4k inhab.',
+      },
+    ],
+  },
+  {
+    place: 'Q193342',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 10000,
+        where:
+          '1100, estimée d’après un indice — wikipedia one of the most important principalities, assume 10 k inhab',
+      },
+    ],
+  },
+  {
+    place: 'Q2214',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 3000,
+        where: '1100, estimation imputée',
+      },
+      {
+        source:
+          'Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)',
+        subject: 'population',
+        population: 9000,
+        where: '1100, certitude 1 dans les données',
+      },
+    ],
+  },
+  {
+    place: 'Q26563',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 7000,
+        where: '1100, estimée d’après un indice — wikipedia: archbishopric 1170 - LdM 73 ha',
+      },
+    ],
+  },
+  {
+    place: 'Q2167',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 1000,
+        where: '1100, estimée d’après un indice',
+      },
+    ],
+  },
+  {
+    place: 'Q25804',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 1000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q26793',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 2000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q3159',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 4000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q2746',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 3000,
+        where: '1100, estimée d’après un indice — Wikipedia: height circa 1100, assume 3 k -',
+      },
+    ],
+  },
+  {
+    place: 'Q2684',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 2000,
+        where: '1100, estimation imputée — wikipedia founded in 1108',
+      },
+    ],
+  },
+  {
+    place: 'Q102217',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 2000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q131416',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 8000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q230104',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 2000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q636188',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source:
+          'Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)',
+        subject: 'population',
+        population: 85000,
+        where: '1100, certitude 2 dans les données',
+      },
+    ],
+  },
+  {
+    place: 'Q48195',
+    year: 1100,
+    importance: 'city',
+    reasons: ['évêché'],
+    testimonies: [
+      {
+        source:
+          'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
+        subject: 'reason',
+        reason: 'évêché',
+        where: 'rôles de la ville en 1100',
+      },
+      {
+        source:
+          'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
+        subject: 'population',
+        population: 30000,
+        where: '1100',
+      },
+      {
+        source:
+          'Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)',
+        subject: 'population',
+        population: 60000,
+        where: '1100, certitude 2 dans les données',
+      },
+    ],
+  },
+  {
+    place: 'Q83387',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source:
+          'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
+        subject: 'population',
+        population: 15000,
+        where: '1100',
+      },
+      {
+        source:
+          'Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)',
+        subject: 'population',
+        population: 42000,
+        where: '1100, certitude 1 dans les données',
+      },
+    ],
+  },
+  {
+    place: 'Q283368',
+    year: 1100,
+    importance: 'city',
+    reasons: ['évêché'],
+    testimonies: [
+      {
+        source:
+          'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
+        subject: 'reason',
+        reason: 'évêché',
+        where: 'rôles de la ville en 1100',
+      },
+      {
+        source:
+          'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
+        subject: 'population',
+        population: 35000,
+        where: '1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé',
+      },
+    ],
+  },
+  {
+    place: 'Q186234',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source:
+          'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)',
+        subject: 'population',
+        population: 30000,
+        where: '1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé',
+      },
+    ],
+  },
+  {
+    place: 'Q131350',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source:
+          'Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)',
+        subject: 'population',
+        population: 100000,
+        where: '1100, certitude 1 dans les données',
+      },
+    ],
+  },
+  {
+    place: 'Q171714',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source:
+          'Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)',
+        subject: 'population',
+        population: 100000,
+        where: '1100, certitude 1 dans les données',
+      },
+    ],
+  },
+  {
+    place: 'Q1761',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 6000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q193452',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 3000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q36647',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 3000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q183551',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 3000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q133315',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 2000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q23436',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 2000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q207736',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 2000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q170263',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 3000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q204720',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 2000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q201970',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 2000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q25412',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 1000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q54757',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 1000,
+        where: '1100, estimation imputée',
+      },
+    ],
+  },
+  {
+    place: 'Q26345',
+    year: 1100,
+    importance: 'city',
+    reasons: [],
+    testimonies: [
+      {
+        source: 'European urban population, 700–2000',
+        subject: 'population',
+        population: 1000,
+        where: '1100, estimée d’après un indice',
       },
     ],
   },

@@ -783,6 +783,6694 @@
   ],
   "cities": [
     {
+      "id": "106",
+      "place": {
+        "id": "114",
+        "name": {
+          "fr": "Kalmar",
+          "en": null
+        },
+        "lon": 16.365633333333335,
+        "lat": 56.66428611111111,
+        "wikidata": "Q26345",
+        "existsFrom": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimée d’après un indice",
+          "subject": "population",
+          "population": 1000
+        }
+      ]
+    },
+    {
+      "id": "105",
+      "place": {
+        "id": "113",
+        "name": {
+          "fr": "Visby",
+          "en": null
+        },
+        "lon": 18.307108945039,
+        "lat": 57.628997457133,
+        "wikidata": "Q54757",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 1000
+        }
+      ]
+    },
+    {
+      "id": "104",
+      "place": {
+        "id": "112",
+        "name": {
+          "fr": "Västerås",
+          "en": null
+        },
+        "lon": 16.542157497094,
+        "lat": 59.617319380941,
+        "wikidata": "Q25412",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 1000
+        }
+      ]
+    },
+    {
+      "id": "103",
+      "place": {
+        "id": "111",
+        "name": {
+          "fr": "Shrewsbury",
+          "en": null
+        },
+        "lon": -2.7544444444444,
+        "lat": 52.708055555556,
+        "wikidata": "Q201970",
+        "existsFrom": {
+          "year": 1189,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 2000
+        }
+      ]
+    },
+    {
+      "id": "102",
+      "place": {
+        "id": "110",
+        "name": {
+          "fr": "Hereford",
+          "en": null
+        },
+        "lon": -2.7161111111111,
+        "lat": 52.056388888889,
+        "wikidata": "Q204720",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 2000
+        }
+      ]
+    },
+    {
+      "id": "101",
+      "place": {
+        "id": "109",
+        "name": {
+          "fr": "Chester",
+          "en": null
+        },
+        "lon": -2.8833333333333,
+        "lat": 53.2,
+        "wikidata": "Q170263",
+        "existsFrom": {
+          "year": 79,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 3000
+        }
+      ]
+    },
+    {
+      "id": "100",
+      "place": {
+        "id": "108",
+        "name": {
+          "fr": "Saint Andrews",
+          "en": null
+        },
+        "lon": -2.7988888888889,
+        "lat": 56.338888888889,
+        "wikidata": "Q207736",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 2000
+        }
+      ]
+    },
+    {
+      "id": "99",
+      "place": {
+        "id": "107",
+        "name": {
+          "fr": "Édimbourg",
+          "en": null
+        },
+        "lon": -3.1891666666666665,
+        "lat": 55.95333333333333,
+        "wikidata": "Q23436",
+        "existsFrom": {
+          "year": 650,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": true,
+          "margin": 50
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 2000
+        }
+      ]
+    },
+    {
+      "id": "98",
+      "place": {
+        "id": "106",
+        "name": {
+          "fr": "Limerick",
+          "en": null
+        },
+        "lon": -8.6238,
+        "lat": 52.6653,
+        "wikidata": "Q133315",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 2000
+        }
+      ]
+    },
+    {
+      "id": "97",
+      "place": {
+        "id": "105",
+        "name": {
+          "fr": "Waterford",
+          "en": null
+        },
+        "lon": -7.119,
+        "lat": 52.2583,
+        "wikidata": "Q183551",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 3000
+        }
+      ]
+    },
+    {
+      "id": "96",
+      "place": {
+        "id": "104",
+        "name": {
+          "fr": "Cork",
+          "en": null
+        },
+        "lon": -8.4730555555556,
+        "lat": 51.9,
+        "wikidata": "Q36647",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 3000
+        }
+      ]
+    },
+    {
+      "id": "95",
+      "place": {
+        "id": "103",
+        "name": {
+          "fr": "Armagh",
+          "en": null
+        },
+        "lon": -6.654444,
+        "lat": 54.349444,
+        "wikidata": "Q193452",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 3000
+        }
+      ]
+    },
+    {
+      "id": "94",
+      "place": {
+        "id": "102",
+        "name": {
+          "fr": "Dublin",
+          "en": null
+        },
+        "lon": -6.260277777777778,
+        "lat": 53.34972222222222,
+        "wikidata": "Q1761",
+        "existsFrom": {
+          "year": 841,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 6000
+        }
+      ]
+    },
+    {
+      "id": "93",
+      "place": {
+        "id": "101",
+        "name": {
+          "fr": "Kerman",
+          "en": null
+        },
+        "lon": 57.06777777777778,
+        "lat": 30.29111111111111,
+        "wikidata": "Q171714",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 100000
+        }
+      ]
+    },
+    {
+      "id": "92",
+      "place": {
+        "id": "100",
+        "name": {
+          "fr": "Nichapour",
+          "en": null
+        },
+        "lon": 58.795833333333334,
+        "lat": 36.21333333333333,
+        "wikidata": "Q131350",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 100000
+        }
+      ]
+    },
+    {
+      "id": "91",
+      "place": {
+        "id": "99",
+        "name": {
+          "fr": "Koufa",
+          "en": null
+        },
+        "lon": 44.4,
+        "lat": 32.03,
+        "wikidata": "Q186234",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 30000
+        }
+      ]
+    },
+    {
+      "id": "90",
+      "place": {
+        "id": "98",
+        "name": {
+          "fr": "Raqqa",
+          "en": null
+        },
+        "lon": 39.01,
+        "lat": 35.95,
+        "wikidata": "Q283368",
+        "existsFrom": {
+          "year": 244,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [
+        {
+          "fr": "évêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "évêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 35000
+        }
+      ]
+    },
+    {
+      "id": "89",
+      "place": {
+        "id": "97",
+        "name": {
+          "fr": "Amid",
+          "en": null
+        },
+        "lon": 40.236666666667,
+        "lat": 37.910833333333,
+        "wikidata": "Q83387",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 15000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 42000
+        }
+      ]
+    },
+    {
+      "id": "88",
+      "place": {
+        "id": "96",
+        "name": {
+          "fr": "Bassora",
+          "en": null
+        },
+        "lon": 47.81,
+        "lat": 30.515,
+        "wikidata": "Q48195",
+        "existsFrom": {
+          "year": 638,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [
+        {
+          "fr": "évêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "évêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 30000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 2 dans les données",
+          "subject": "population",
+          "population": 60000
+        }
+      ]
+    },
+    {
+      "id": "87",
+      "place": {
+        "id": "95",
+        "name": {
+          "fr": "Rayy",
+          "en": null
+        },
+        "lon": 51.434444444444445,
+        "lat": 35.5975,
+        "wikidata": "Q636188",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 2 dans les données",
+          "subject": "population",
+          "population": 85000
+        }
+      ]
+    },
+    {
+      "id": "86",
+      "place": {
+        "id": "94",
+        "name": {
+          "fr": "Nakhitchevan",
+          "en": null
+        },
+        "lon": 45.412222222222,
+        "lat": 39.208888888889,
+        "wikidata": "Q230104",
+        "existsFrom": {
+          "year": -1500,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 2000
+        }
+      ]
+    },
+    {
+      "id": "85",
+      "place": {
+        "id": "93",
+        "name": {
+          "fr": "Derbent",
+          "en": null
+        },
+        "lon": 48.28888888888889,
+        "lat": 42.05777777777778,
+        "wikidata": "Q131416",
+        "existsFrom": {
+          "year": 438,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 8000
+        }
+      ]
+    },
+    {
+      "id": "84",
+      "place": {
+        "id": "92",
+        "name": {
+          "fr": "Vitebsk",
+          "en": null
+        },
+        "lon": 30.166666666667,
+        "lat": 55.183333333333,
+        "wikidata": "Q102217",
+        "existsFrom": {
+          "year": 974,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 2000
+        }
+      ]
+    },
+    {
+      "id": "83",
+      "place": {
+        "id": "91",
+        "name": {
+          "fr": "Vladimir",
+          "en": null
+        },
+        "lon": 40.405833333333334,
+        "lat": 56.12861111111111,
+        "wikidata": "Q2684",
+        "existsFrom": {
+          "year": 990,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée — wikipedia founded in 1108",
+          "subject": "population",
+          "population": 2000
+        }
+      ]
+    },
+    {
+      "id": "82",
+      "place": {
+        "id": "90",
+        "name": {
+          "fr": "Riazan",
+          "en": null
+        },
+        "lon": 39.7425,
+        "lat": 54.63,
+        "wikidata": "Q2746",
+        "existsFrom": {
+          "year": 1095,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimée d’après un indice — Wikipedia: height circa 1100, assume 3 k -",
+          "subject": "population",
+          "population": 3000
+        }
+      ]
+    },
+    {
+      "id": "81",
+      "place": {
+        "id": "89",
+        "name": {
+          "fr": "Koursk",
+          "en": null
+        },
+        "lon": 36.187222222222,
+        "lat": 51.737222222222,
+        "wikidata": "Q3159",
+        "existsFrom": {
+          "year": 1032,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 4000
+        }
+      ]
+    },
+    {
+      "id": "80",
+      "place": {
+        "id": "88",
+        "name": {
+          "fr": "Bergen",
+          "en": null
+        },
+        "lon": 5.3233333333333,
+        "lat": 60.3925,
+        "wikidata": "Q26793",
+        "existsFrom": {
+          "year": 1070,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 2000
+        }
+      ]
+    },
+    {
+      "id": "79",
+      "place": {
+        "id": "87",
+        "name": {
+          "fr": "Nidaros",
+          "en": null
+        },
+        "lon": 10.4,
+        "lat": 63.44,
+        "wikidata": "Q25804",
+        "existsFrom": {
+          "year": 997,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 1000
+        }
+      ]
+    },
+    {
+      "id": "78",
+      "place": {
+        "id": "86",
+        "name": {
+          "fr": "Lund",
+          "en": null
+        },
+        "lon": 13.199164196669,
+        "lat": 55.708313018551,
+        "wikidata": "Q2167",
+        "existsFrom": {
+          "year": 950,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": true,
+          "margin": 50
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimée d’après un indice",
+          "subject": "population",
+          "population": 1000
+        }
+      ]
+    },
+    {
+      "id": "77",
+      "place": {
+        "id": "85",
+        "name": {
+          "fr": "Roskilde",
+          "en": null
+        },
+        "lon": 12.080833333333,
+        "lat": 55.641666666667,
+        "wikidata": "Q26563",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimée d’après un indice — wikipedia: archbishopric 1170 - LdM 73 ha",
+          "subject": "population",
+          "population": 7000
+        }
+      ]
+    },
+    {
+      "id": "76",
+      "place": {
+        "id": "84",
+        "name": {
+          "fr": "Pskov",
+          "en": null
+        },
+        "lon": 28.333333333333,
+        "lat": 57.816666666667,
+        "wikidata": "Q2214",
+        "existsFrom": {
+          "year": 903,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 3000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 9000
+        }
+      ]
+    },
+    {
+      "id": "75",
+      "place": {
+        "id": "83",
+        "name": {
+          "fr": "Rostov",
+          "en": null
+        },
+        "lon": 39.416666666666664,
+        "lat": 57.18333333333333,
+        "wikidata": "Q193342",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimée d’après un indice — wikipedia one of the most important principalities, assume 10 k inhab",
+          "subject": "population",
+          "population": 10000
+        }
+      ]
+    },
+    {
+      "id": "74",
+      "place": {
+        "id": "82",
+        "name": {
+          "fr": "Polotsk",
+          "en": null
+        },
+        "lon": 28.8,
+        "lat": 55.483333333333,
+        "wikidata": "Q200797",
+        "existsFrom": {
+          "year": 780,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimée d’après un indice — - LdM: end 10th c 10 churches, assume 0.4k, giving 4k inhab.",
+          "subject": "population",
+          "population": 4000
+        }
+      ]
+    },
+    {
+      "id": "73",
+      "place": {
+        "id": "81",
+        "name": {
+          "fr": "Smolensk",
+          "en": null
+        },
+        "lon": 32.045277777778,
+        "lat": 54.782777777778,
+        "wikidata": "Q2337",
+        "existsFrom": {
+          "year": 863,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 6000
+        }
+      ]
+    },
+    {
+      "id": "72",
+      "place": {
+        "id": "80",
+        "name": {
+          "fr": "Tchernigov",
+          "en": null
+        },
+        "lon": 31.294722222222223,
+        "lat": 51.49388888888889,
+        "wikidata": "Q157053",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 22000
+        }
+      ]
+    },
+    {
+      "id": "71",
+      "place": {
+        "id": "79",
+        "name": {
+          "fr": "Novgorod",
+          "en": null
+        },
+        "lon": 31.27579,
+        "lat": 58.52099,
+        "wikidata": "Q2235",
+        "existsFrom": {
+          "year": 859,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimée d’après un indice — - LdM a 50-60 k in 12th-13th c, assume half, because this seems high",
+          "subject": "population",
+          "population": 25000
+        }
+      ]
+    },
+    {
+      "id": "70",
+      "place": {
+        "id": "78",
+        "name": {
+          "fr": "Kiev",
+          "en": null
+        },
+        "lon": 30.523611111111,
+        "lat": 50.45,
+        "wikidata": "Q1899",
+        "existsFrom": {
+          "year": 482,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "17",
+            "title": "Wikidata",
+            "author": "Contributeurs de Wikidata",
+            "url": "https://www.wikidata.org"
+          },
+          "where": "« capitale de » (P1376) Kievan Rus' (Q1108445), 882–1132, sur l’item Q1899 — lu le 31/10/2026",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 20000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 50000
+        }
+      ]
+    },
+    {
+      "id": "69",
+      "place": {
+        "id": "77",
+        "name": {
+          "fr": "Gdańsk",
+          "en": null
+        },
+        "lon": 18.6540233,
+        "lat": 54.3482907,
+        "wikidata": "Q1792",
+        "existsFrom": {
+          "year": 997,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimée d’après un indice — - 11th/12th c. 2-3 k",
+          "subject": "population",
+          "population": 2000
+        }
+      ]
+    },
+    {
+      "id": "68",
+      "place": {
+        "id": "76",
+        "name": {
+          "fr": "Poznań",
+          "en": null
+        },
+        "lon": 16.933611111111112,
+        "lat": 52.40833333333333,
+        "wikidata": "Q268",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 2000
+        }
+      ]
+    },
+    {
+      "id": "67",
+      "place": {
+        "id": "75",
+        "name": {
+          "fr": "Płock",
+          "en": null
+        },
+        "lon": 19.7,
+        "lat": 52.55,
+        "wikidata": "Q104725",
+        "existsFrom": {
+          "year": 1237,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "17",
+            "title": "Wikidata",
+            "author": "Contributeurs de Wikidata",
+            "url": "https://www.wikidata.org"
+          },
+          "where": "« capitale de » (P1376) Kingdom of Poland (Q8890160), 1079–1138, sur l’item Q104725 — lu le 31/10/2026",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 2000
+        }
+      ]
+    },
+    {
+      "id": "66",
+      "place": {
+        "id": "74",
+        "name": {
+          "fr": "Gniezno",
+          "en": null
+        },
+        "lon": 17.6,
+        "lat": 52.533333333333,
+        "wikidata": "Q51432",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 3000
+        }
+      ]
+    },
+    {
+      "id": "65",
+      "place": {
+        "id": "73",
+        "name": {
+          "fr": "Cracovie",
+          "en": null
+        },
+        "lon": 19.937222222222,
+        "lat": 50.061388888889,
+        "wikidata": "Q31487",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 5000
+        }
+      ]
+    },
+    {
+      "id": "64",
+      "place": {
+        "id": "72",
+        "name": {
+          "fr": "Presbourg",
+          "en": null
+        },
+        "lon": 17.1093063,
+        "lat": 48.1516988,
+        "wikidata": "Q1780",
+        "existsFrom": {
+          "year": 907,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 2000
+        }
+      ]
+    },
+    {
+      "id": "63",
+      "place": {
+        "id": "71",
+        "name": {
+          "fr": "Nitra",
+          "en": null
+        },
+        "lon": 18.0875,
+        "lat": 48.314722222222,
+        "wikidata": "Q26397",
+        "existsFrom": {
+          "year": 826,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 2000
+        }
+      ]
+    },
+    {
+      "id": "62",
+      "place": {
+        "id": "70",
+        "name": {
+          "fr": "Győr",
+          "en": null
+        },
+        "lon": 17.634444444444,
+        "lat": 47.684166666667,
+        "wikidata": "Q134494",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 3000
+        }
+      ]
+    },
+    {
+      "id": "61",
+      "place": {
+        "id": "69",
+        "name": {
+          "fr": "Székesfehérvár",
+          "en": null
+        },
+        "lon": 18.410811,
+        "lat": 47.1910169,
+        "wikidata": "Q130212",
+        "existsFrom": {
+          "year": 972,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "17",
+            "title": "Wikidata",
+            "author": "Contributeurs de Wikidata",
+            "url": "https://www.wikidata.org"
+          },
+          "where": "« capitale de » (P1376) Kingdom of Hungary (Q171150), 1000–1543, sur l’item Q130212 — lu le 31/10/2026",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 3000
+        }
+      ]
+    },
+    {
+      "id": "60",
+      "place": {
+        "id": "68",
+        "name": {
+          "fr": "Esztergom",
+          "en": null
+        },
+        "lon": 18.740277777778,
+        "lat": 47.785555555556,
+        "wikidata": "Q171353",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "17",
+            "title": "Wikidata",
+            "author": "Contributeurs de Wikidata",
+            "url": "https://www.wikidata.org"
+          },
+          "where": "« capitale de » (P1376) Kingdom of Hungary (Q171150), 1001–1256, sur l’item Q171353 — lu le 31/10/2026",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 5000
+        }
+      ]
+    },
+    {
+      "id": "59",
+      "place": {
+        "id": "67",
+        "name": {
+          "fr": "Ancyre",
+          "en": null
+        },
+        "lon": 32.83869,
+        "lat": 39.93576,
+        "wikidata": "Q3640",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 10000
+        }
+      ]
+    },
+    {
+      "id": "58",
+      "place": {
+        "id": "66",
+        "name": {
+          "fr": "Durazzo",
+          "en": null
+        },
+        "lon": 19.445833333333333,
+        "lat": 41.31333333333333,
+        "wikidata": "Q83285",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 10000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimée d’après un indice — A. Ducellier (1981) La façade maritime de l'Albanie au Moyen Age, p. 687, gives a plan, durres ca 60 ha at most, assume 6 k",
+          "subject": "population",
+          "population": 6000
+        }
+      ]
+    },
+    {
+      "id": "57",
+      "place": {
+        "id": "65",
+        "name": {
+          "fr": "Ohrid",
+          "en": null
+        },
+        "lon": 20.801944444444,
+        "lat": 41.116944444444,
+        "wikidata": "Q1223508",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 10000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 3000
+        }
+      ]
+    },
+    {
+      "id": "56",
+      "place": {
+        "id": "64",
+        "name": {
+          "fr": "Tarse",
+          "en": null
+        },
+        "lon": 34.9,
+        "lat": 36.916666666667,
+        "wikidata": "Q134287",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 10000
+        }
+      ]
+    },
+    {
+      "id": "55",
+      "place": {
+        "id": "63",
+        "name": {
+          "fr": "Arles",
+          "en": null
+        },
+        "lon": 4.6286111111111,
+        "lat": 43.676944444444,
+        "wikidata": "Q48292",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 10000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 7000
+        }
+      ]
+    },
+    {
+      "id": "54",
+      "place": {
+        "id": "62",
+        "name": {
+          "fr": "Prague",
+          "en": null
+        },
+        "lon": 14.421388888888888,
+        "lat": 50.0875,
+        "wikidata": "Q1085",
+        "existsFrom": {
+          "year": 750,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": true,
+          "margin": 50
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "évêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "évêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 10000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 10000
+        }
+      ]
+    },
+    {
+      "id": "53",
+      "place": {
+        "id": "61",
+        "name": {
+          "fr": "York",
+          "en": null
+        },
+        "lon": -1.0833333333333,
+        "lat": 53.95,
+        "wikidata": "Q42462",
+        "existsFrom": {
+          "year": 71,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 11000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 8000
+        }
+      ]
+    },
+    {
+      "id": "52",
+      "place": {
+        "id": "60",
+        "name": {
+          "fr": "Reims",
+          "en": null
+        },
+        "lon": 4.0286111111111,
+        "lat": 49.265277777778,
+        "wikidata": "Q41876",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 12000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 9000
+        }
+      ]
+    },
+    {
+      "id": "51",
+      "place": {
+        "id": "59",
+        "name": {
+          "fr": "Tripoli",
+          "en": null
+        },
+        "lon": 35.83444444444444,
+        "lat": 34.43666666666667,
+        "wikidata": "Q168954",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "évêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "évêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 15000
+        }
+      ]
+    },
+    {
+      "id": "50",
+      "place": {
+        "id": "58",
+        "name": {
+          "fr": "Smyrne",
+          "en": null
+        },
+        "lon": 27.13838,
+        "lat": 38.41273,
+        "wikidata": "Q35997",
+        "existsFrom": {
+          "year": -2500,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": true,
+          "margin": 500
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 15000
+        }
+      ]
+    },
+    {
+      "id": "49",
+      "place": {
+        "id": "57",
+        "name": {
+          "fr": "Trébizonde",
+          "en": null
+        },
+        "lon": 39.7225,
+        "lat": 41.005,
+        "wikidata": "Q45301",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 15000
+        }
+      ]
+    },
+    {
+      "id": "48",
+      "place": {
+        "id": "56",
+        "name": {
+          "fr": "Malaga",
+          "en": null
+        },
+        "lon": -4.4166666666667,
+        "lat": 36.716666666667,
+        "wikidata": "Q8851",
+        "existsFrom": {
+          "year": -750,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": true,
+          "margin": 50
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 15000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 9000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 11000
+        }
+      ]
+    },
+    {
+      "id": "47",
+      "place": {
+        "id": "55",
+        "name": {
+          "fr": "Erfurt",
+          "en": null
+        },
+        "lon": 11.028888888888888,
+        "lat": 50.97805555555556,
+        "wikidata": "Q1729",
+        "existsFrom": {
+          "year": 742,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 15000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée — Russell '72: 120 ha -",
+          "subject": "population",
+          "population": 8000
+        }
+      ]
+    },
+    {
+      "id": "46",
+      "place": {
+        "id": "54",
+        "name": {
+          "fr": "Toulouse",
+          "en": null
+        },
+        "lon": 1.4433333333333334,
+        "lat": 43.60444444444445,
+        "wikidata": "Q7880",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [
+        {
+          "fr": "évêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "évêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 15000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 14000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 11000
+        }
+      ]
+    },
+    {
+      "id": "45",
+      "place": {
+        "id": "53",
+        "name": {
+          "fr": "Brescia",
+          "en": null
+        },
+        "lon": 10.220280555556,
+        "lat": 45.538888888889,
+        "wikidata": "Q6221",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [
+        {
+          "fr": "évêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "évêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 15000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 13000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 18000
+        }
+      ]
+    },
+    {
+      "id": "44",
+      "place": {
+        "id": "52",
+        "name": {
+          "fr": "Philippopolis",
+          "en": null
+        },
+        "lon": 24.741454,
+        "lat": 42.142086,
+        "wikidata": "Q459",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 20000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 9000
+        }
+      ]
+    },
+    {
+      "id": "43",
+      "place": {
+        "id": "51",
+        "name": {
+          "fr": "Tyr",
+          "en": null
+        },
+        "lon": 35.2,
+        "lat": 33.266666666667,
+        "wikidata": "Q82070",
+        "existsFrom": {
+          "year": -2750,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 20000
+        }
+      ]
+    },
+    {
+      "id": "42",
+      "place": {
+        "id": "50",
+        "name": {
+          "fr": "Andrinople",
+          "en": null
+        },
+        "lon": 26.57361,
+        "lat": 41.67304,
+        "wikidata": "Q43387",
+        "existsFrom": {
+          "year": 125,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 20000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 3000
+        }
+      ]
+    },
+    {
+      "id": "41",
+      "place": {
+        "id": "49",
+        "name": {
+          "fr": "Saragosse",
+          "en": null
+        },
+        "lon": -0.88333333333333,
+        "lat": 41.65,
+        "wikidata": "Q10305",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 20000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 8000
+        }
+      ]
+    },
+    {
+      "id": "40",
+      "place": {
+        "id": "48",
+        "name": {
+          "fr": "Valence",
+          "en": null
+        },
+        "lon": -0.3763888888888889,
+        "lat": 39.47,
+        "wikidata": "Q8818",
+        "existsFrom": {
+          "year": -138,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 20000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée — Chandler & Fox: 1100 44 ha, times 150/ha, 7 k",
+          "subject": "population",
+          "population": 12000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 13000
+        }
+      ]
+    },
+    {
+      "id": "39",
+      "place": {
+        "id": "47",
+        "name": {
+          "fr": "Rouen",
+          "en": null
+        },
+        "lon": 1.1025,
+        "lat": 49.443055555556,
+        "wikidata": "Q30974",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 13000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 13000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 20000
+        }
+      ]
+    },
+    {
+      "id": "38",
+      "place": {
+        "id": "9",
+        "name": {
+          "fr": "Poitiers",
+          "en": null
+        },
+        "lon": 0.33527777777778,
+        "lat": 46.581111111111,
+        "wikidata": "Q6616",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [
+        {
+          "fr": "évêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "évêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 16000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 8000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 20000
+        }
+      ]
+    },
+    {
+      "id": "37",
+      "place": {
+        "id": "46",
+        "name": {
+          "fr": "Metz",
+          "en": null
+        },
+        "lon": 6.1769444444444,
+        "lat": 49.119722222222,
+        "wikidata": "Q22690",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [
+        {
+          "fr": "évêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "évêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 21000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimée d’après un indice — chandler 7 fox: 17 parishes",
+          "subject": "population",
+          "population": 7000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 21000
+        }
+      ]
+    },
+    {
+      "id": "36",
+      "place": {
+        "id": "45",
+        "name": {
+          "fr": "Lyon",
+          "en": null
+        },
+        "lon": 4.835,
+        "lat": 45.7675,
+        "wikidata": "Q456",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 21000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée — Russell '72: 13th c. 72 ha",
+          "subject": "population",
+          "population": 9000
+        }
+      ]
+    },
+    {
+      "id": "35",
+      "place": {
+        "id": "44",
+        "name": {
+          "fr": "Trèves",
+          "en": null
+        },
+        "lon": 6.63935,
+        "lat": 49.75565,
+        "wikidata": "Q3138",
+        "existsFrom": {
+          "year": -16,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 22000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 11000
+        }
+      ]
+    },
+    {
+      "id": "34",
+      "place": {
+        "id": "43",
+        "name": {
+          "fr": "Narbonne",
+          "en": null
+        },
+        "lon": 3.0036111111111,
+        "lat": 43.184722222222,
+        "wikidata": "Q6555",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 22000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée — LdM: 1066 ca 22 ha (including extra muros)",
+          "subject": "population",
+          "population": 6000
+        }
+      ]
+    },
+    {
+      "id": "33",
+      "place": {
+        "id": "42",
+        "name": {
+          "fr": "Jérusalem",
+          "en": null
+        },
+        "lon": 35.234156,
+        "lat": 31.776679,
+        "wikidata": "Q1218",
+        "existsFrom": {
+          "year": -3500,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": true,
+          "margin": 500
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 24000
+        }
+      ]
+    },
+    {
+      "id": "32",
+      "place": {
+        "id": "41",
+        "name": {
+          "fr": "Césarée de Cappadoce",
+          "en": null
+        },
+        "lon": 35.4875,
+        "lat": 38.7225,
+        "wikidata": "Q48338",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 25000
+        }
+      ]
+    },
+    {
+      "id": "31",
+      "place": {
+        "id": "40",
+        "name": {
+          "fr": "Nicée",
+          "en": null
+        },
+        "lon": 29.719444444444,
+        "lat": 40.428888888889,
+        "wikidata": "Q217125",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 25000
+        }
+      ]
+    },
+    {
+      "id": "30",
+      "place": {
+        "id": "39",
+        "name": {
+          "fr": "León",
+          "en": null
+        },
+        "lon": -5.5669444444444,
+        "lat": 42.598888888889,
+        "wikidata": "Q15699",
+        "existsFrom": {
+          "year": -29,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "évêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "évêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 25000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 24000
+        }
+      ]
+    },
+    {
+      "id": "29",
+      "place": {
+        "id": "38",
+        "name": {
+          "fr": "Almería",
+          "en": null
+        },
+        "lon": -2.463888888888889,
+        "lat": 36.84166666666667,
+        "wikidata": "Q10400",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 25000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimée d’après un indice",
+          "subject": "population",
+          "population": 18000
+        }
+      ]
+    },
+    {
+      "id": "28",
+      "place": {
+        "id": "37",
+        "name": {
+          "fr": "Palma",
+          "en": null
+        },
+        "lon": 2.6497222222222,
+        "lat": 39.566666666667,
+        "wikidata": "Q8826",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 25000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 8000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 27000
+        }
+      ]
+    },
+    {
+      "id": "27",
+      "place": {
+        "id": "36",
+        "name": {
+          "fr": "Mayence",
+          "en": null
+        },
+        "lon": 8.27361111111111,
+        "lat": 49.99944444444444,
+        "wikidata": "Q1720",
+        "existsFrom": {
+          "year": -12,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 27000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 7000
+        }
+      ]
+    },
+    {
+      "id": "26",
+      "place": {
+        "id": "35",
+        "name": {
+          "fr": "Éphèse",
+          "en": null
+        },
+        "lon": 27.33939,
+        "lat": 37.94058,
+        "wikidata": "Q47611",
+        "existsFrom": {
+          "year": -950,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": true,
+          "margin": 50
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 30000
+        }
+      ]
+    },
+    {
+      "id": "25",
+      "place": {
+        "id": "34",
+        "name": {
+          "fr": "Iconium",
+          "en": null
+        },
+        "lon": 32.49213888888889,
+        "lat": 37.872769444444444,
+        "wikidata": "Q79857",
+        "existsFrom": {
+          "year": -700,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 30000
+        }
+      ]
+    },
+    {
+      "id": "24",
+      "place": {
+        "id": "33",
+        "name": {
+          "fr": "Naples",
+          "en": null
+        },
+        "lon": 14.248611111111112,
+        "lat": 40.83583333333333,
+        "wikidata": "Q2634",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 30000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 22000
+        }
+      ]
+    },
+    {
+      "id": "23",
+      "place": {
+        "id": "32",
+        "name": {
+          "fr": "Londres",
+          "en": null
+        },
+        "lon": -0.1275,
+        "lat": 51.507222222222,
+        "wikidata": "Q84",
+        "existsFrom": {
+          "year": 47,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "évêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "évêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 32000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimée d’après un indice — eleventh c. 15 k inhab., wikipedia 1100 15 k",
+          "subject": "population",
+          "population": 15000
+        }
+      ]
+    },
+    {
+      "id": "22",
+      "place": {
+        "id": "31",
+        "name": {
+          "fr": "Tolède",
+          "en": null
+        },
+        "lon": -4.0333333333333,
+        "lat": 39.866666666667,
+        "wikidata": "Q5836",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 35000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 35000
+        }
+      ]
+    },
+    {
+      "id": "21",
+      "place": {
+        "id": "30",
+        "name": {
+          "fr": "Cologne",
+          "en": null
+        },
+        "lon": 6.9577777777778,
+        "lat": 50.942222222222,
+        "wikidata": "Q365",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 35000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimée d’après un indice — Russell '72: 1106 185 ha",
+          "subject": "population",
+          "population": 20000
+        }
+      ]
+    },
+    {
+      "id": "20",
+      "place": {
+        "id": "29",
+        "name": {
+          "fr": "Damas",
+          "en": null
+        },
+        "lon": 36.291944444444,
+        "lat": 33.513055555556,
+        "wikidata": "Q3766",
+        "existsFrom": {
+          "year": -1500,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": true,
+          "margin": 500
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 40000
+        }
+      ]
+    },
+    {
+      "id": "19",
+      "place": {
+        "id": "28",
+        "name": {
+          "fr": "Édesse",
+          "en": null
+        },
+        "lon": 38.791666666667,
+        "lat": 37.158333333333,
+        "wikidata": "Q133118",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "évêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "évêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 30000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 41000
+        }
+      ]
+    },
+    {
+      "id": "18",
+      "place": {
+        "id": "27",
+        "name": {
+          "fr": "Antioche",
+          "en": null
+        },
+        "lon": 36.160555555555554,
+        "lat": 36.2025,
+        "wikidata": "Q80561",
+        "existsFrom": {
+          "year": -301,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 41000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 2 dans les données",
+          "subject": "population",
+          "population": 30000
+        }
+      ]
+    },
+    {
+      "id": "17",
+      "place": {
+        "id": "26",
+        "name": {
+          "fr": "Sébaste",
+          "en": null
+        },
+        "lon": 37.016666666667,
+        "lat": 39.75,
+        "wikidata": "Q107401",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 10000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 45000
+        }
+      ]
+    },
+    {
+      "id": "16",
+      "place": {
+        "id": "25",
+        "name": {
+          "fr": "Alexandrie",
+          "en": null
+        },
+        "lon": 29.8925,
+        "lat": 31.1975,
+        "wikidata": "Q87",
+        "existsFrom": {
+          "year": -331,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 45000
+        }
+      ]
+    },
+    {
+      "id": "15",
+      "place": {
+        "id": "24",
+        "name": {
+          "fr": "Milan",
+          "en": null
+        },
+        "lon": 9.19,
+        "lat": 45.466944444444,
+        "wikidata": "Q490",
+        "existsFrom": {
+          "year": -600,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 45000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimée d’après un indice — Chandler & Fox: 1170 234 ha",
+          "subject": "population",
+          "population": 23000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 42000
+        }
+      ]
+    },
+    {
+      "id": "14",
+      "place": {
+        "id": "23",
+        "name": {
+          "fr": "Thessalonique",
+          "en": null
+        },
+        "lon": 22.935555555555556,
+        "lat": 40.640277777777776,
+        "wikidata": "Q17151",
+        "existsFrom": {
+          "year": -315,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [
+        {
+          "fr": "évêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "évêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 35000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 35000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 50000
+        }
+      ]
+    },
+    {
+      "id": "13",
+      "place": {
+        "id": "22",
+        "name": {
+          "fr": "Salerne",
+          "en": null
+        },
+        "lon": 14.759444444444444,
+        "lat": 40.68055555555556,
+        "wikidata": "Q1083",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "large-city",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        },
+        {
+          "fr": "université",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "université",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 40000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée — Chandler & Fox 17 parishes 1074-1127",
+          "subject": "population",
+          "population": 6000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 50000
+        }
+      ]
+    },
+    {
+      "id": "12",
+      "place": {
+        "id": "21",
+        "name": {
+          "fr": "Venise",
+          "en": null
+        },
+        "lon": 12.331944444444,
+        "lat": 45.439722222222,
+        "wikidata": "Q641",
+        "existsFrom": {
+          "year": 421,
+          "month": 3,
+          "day": 25,
+          "calendar": "julian",
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 58000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 29000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 55000
+        }
+      ]
+    },
+    {
+      "id": "11",
+      "place": {
+        "id": "20",
+        "name": {
+          "fr": "Grenade",
+          "en": null
+        },
+        "lon": -3.6,
+        "lat": 37.175,
+        "wikidata": "Q8810",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 40000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 23000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 60000
+        }
+      ]
+    },
+    {
+      "id": "10",
+      "place": {
+        "id": "19",
+        "name": {
+          "fr": "Paris",
+          "en": null
+        },
+        "lon": 2.352222222222222,
+        "lat": 48.85666666666667,
+        "wikidata": "Q90",
+        "existsFrom": {
+          "year": -250,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": true,
+          "margin": 50
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "évêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "évêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 65000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimée d’après un indice — surface ca 230 ha in 1100 based on p. 176-177 in Boussard:  Atlas historique et culturel de la France, and 125 inhab./ha",
+          "subject": "population",
+          "population": 25000
+        }
+      ]
+    },
+    {
+      "id": "9",
+      "place": {
+        "id": "18",
+        "name": {
+          "fr": "Bougie",
+          "en": null
+        },
+        "lon": 5.064166666666667,
+        "lat": 36.75111111111111,
+        "wikidata": "Q59975",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 70000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 2 dans les données",
+          "subject": "population",
+          "population": 50000
+        }
+      ]
+    },
+    {
+      "id": "8",
+      "place": {
+        "id": "17",
+        "name": {
+          "fr": "Cordoue",
+          "en": null
+        },
+        "lon": -4.78,
+        "lat": 37.89,
+        "wikidata": "Q5818",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 80000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 80000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 2 dans les données",
+          "subject": "population",
+          "population": 60000
+        }
+      ]
+    },
+    {
+      "id": "7",
+      "place": {
+        "id": "16",
+        "name": {
+          "fr": "Séville",
+          "en": null
+        },
+        "lon": -5.995,
+        "lat": 37.38861111111111,
+        "wikidata": "Q8717",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 85000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimée d’après un indice",
+          "subject": "population",
+          "population": 76000
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "place": {
+        "id": "15",
+        "name": {
+          "fr": "Palerme",
+          "en": null
+        },
+        "lon": 13.361261944444445,
+        "lat": 38.115658055555556,
+        "wikidata": "Q2656",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 40000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100, estimation imputée",
+          "subject": "population",
+          "population": 42000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 90000
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "place": {
+        "id": "14",
+        "name": {
+          "fr": "Marrakech",
+          "en": null
+        },
+        "lon": -7.98108,
+        "lat": 31.62947,
+        "wikidata": "Q101625",
+        "existsFrom": {
+          "year": 1065,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 70000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 150000
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "place": {
+        "id": "13",
+        "name": {
+          "fr": "Fostat",
+          "en": null
+        },
+        "lon": 31.2375,
+        "lat": 30.005,
+        "wikidata": "Q839456",
+        "existsFrom": {
+          "year": 641,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": {
+          "year": 1168,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "évêché",
+          "en": null
+        },
+        {
+          "fr": "université",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "évêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "université",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 150000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 150000
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "place": {
+        "id": "12",
+        "name": {
+          "fr": "Constantinople",
+          "en": null
+        },
+        "lon": 28.976018,
+        "lat": 41.01224,
+        "wikidata": "Q16869",
+        "existsFrom": {
+          "year": 330,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": {
+          "year": 1922,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "archevêché",
+          "en": null
+        },
+        {
+          "fr": "université",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "archevêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "université",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 200000
+        },
+        {
+          "source": {
+            "id": "15",
+            "title": "European urban population, 700–2000",
+            "author": "Eltjo Buringh",
+            "url": "https://doi.org/10.17026/DANS-XZY-U62Q"
+          },
+          "where": "1100",
+          "subject": "population",
+          "population": 200000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 200000
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "place": {
+        "id": "11",
+        "name": {
+          "fr": "Bagdad",
+          "en": null
+        },
+        "lon": 44.36611111111111,
+        "lat": 33.31527777777778,
+        "wikidata": "Q1530",
+        "existsFrom": {
+          "year": 762,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [
+        {
+          "fr": "évêché",
+          "en": null
+        }
+      ],
+      "testimonies": [
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "importance",
+          "importance": "capital"
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "rôles de la ville en 1100",
+          "subject": "reason",
+          "reason": {
+            "fr": "évêché",
+            "en": null
+          }
+        },
+        {
+          "source": {
+            "id": "14",
+            "title": "From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)",
+            "author": "Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden",
+            "url": "https://doi.org/10.7910/DVN/24747"
+          },
+          "where": "1100 — à mi-chemin entre 1000 et 1200 : sans doute interpolé",
+          "subject": "population",
+          "population": 250000
+        },
+        {
+          "source": {
+            "id": "16",
+            "title": "Spatializing 6,000 years of global urbanization from 3700 BC to AD 2000 (données, d’après Chandler 1987)",
+            "author": "Meredith Reba, Femke Reitsma, Karen C. Seto",
+            "url": "https://figshare.com/articles/Chandler_Population_Data/2059494"
+          },
+          "where": "1100, certitude 1 dans les données",
+          "subject": "population",
+          "population": 150000
+        }
+      ]
+    },
+    {
       "id": "1",
       "place": {
         "id": "5",
@@ -817,7 +7505,7 @@
       "importance": "capital",
       "reasons": [
         {
-          "fr": "evêché",
+          "fr": "évêché",
           "en": null
         },
         {

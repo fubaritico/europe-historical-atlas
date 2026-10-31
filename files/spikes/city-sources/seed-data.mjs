@@ -86,6 +86,83 @@ const CITIES = [
   ['Ankara', 'Q3640', 'Ancyre'],
 ]
 
+/**
+ * The cities of Hungary, Poland, the Rus' lands and Scandinavia (the dev, 2026-10-31: *« ajoute plus de villes […] en
+ * Hongrie, dans Pologne, les pays russes. Un peu la Scandinavie »*): Bosker gives them no role and seldom a figure, so
+ * the rule above would keep none. **These are the cities Buringh attests there**, ranked a city — **a capital where
+ * Wikidata dates the city « capital of » (P1376) a polity over 1100** ({@link WIKIDATA_CAPITALS}). Resolved like the
+ * first list, the descriptions read (2026-10-31). Murom was not found and is left out.
+ */
+const EAST = [
+  ['Esztergom', 'Q171353', 'Esztergom'],
+  ['Szekesfehervar', 'Q130212', 'Székesfehérvár'],
+  ['Gyoer', 'Q134494', 'Győr'],
+  ['Nitra', 'Q26397', 'Nitra'],
+  ['Bratislava', 'Q1780', 'Presbourg'],
+  ['Krakow', 'Q31487', 'Cracovie'],
+  ['Gniezno', 'Q51432', 'Gniezno'],
+  ['Plock', 'Q104725', 'Płock'],
+  ['Poznan', 'Q268', 'Poznań'],
+  ['Gdansk', 'Q1792', 'Gdańsk'],
+  ['Kiev', 'Q1899', 'Kiev'],
+  ['Novgorod', 'Q2235', 'Novgorod'],
+  ['Cernigov', 'Q157053', 'Tchernigov'],
+  ['Smolensk', 'Q2337', 'Smolensk'],
+  ['Polock', 'Q200797', 'Polotsk'],
+  ['Rostov', 'Q193342', 'Rostov'],
+  ['Pskov', 'Q2214', 'Pskov'],
+  ['Roskilde', 'Q26563', 'Roskilde'],
+  ['Lund', 'Q2167', 'Lund'],
+  ['Trondheim', 'Q25804', 'Nidaros'],
+  ['Bergen', 'Q26793', 'Bergen'],
+  // The second pass, the same evening (*« des zones où moi j'aurais vu plus de villes […] des gens de différentes
+  // nations vont consulter l'Atlas »*): the Rus' south and east, the Caucasus, Mesopotamia and Persia, Ireland,
+  // Scotland, Wales's march, Sweden. Wasit and Perth were not found; Cardiff's item stood 22 km off the dataset's point,
+  // and is left out.
+  ['Kursk', 'Q3159', 'Koursk'],
+  ['Rjazan', 'Q2746', 'Riazan'],
+  ['Vladimir', 'Q2684', 'Vladimir'],
+  ['Vitebsk', 'Q102217', 'Vitebsk'],
+  ['Derbent', 'Q131416', 'Derbent'],
+  ['Nahicevan', 'Q230104', 'Nakhitchevan'],
+  ['Rayy', 'Q636188', 'Rayy'],
+  ['Basra', 'Q48195', 'Bassora'],
+  ['Diyarbakr', 'Q83387', 'Amid'],
+  ['Raqqa', 'Q283368', 'Raqqa'],
+  ['Kufa', 'Q186234', 'Koufa'],
+  ['Nishapur', 'Q131350', 'Nichapour'],
+  ['Kerman', 'Q171714', 'Kerman'],
+  ['Dublin', 'Q1761', 'Dublin'],
+  ['Armagh', 'Q193452', 'Armagh'],
+  ['Cork', 'Q36647', 'Cork'],
+  ['Waterford', 'Q183551', 'Waterford'],
+  ['Limerick', 'Q133315', 'Limerick'],
+  ['Edinburgh', 'Q23436', 'Édimbourg'],
+  ['St Andrews', 'Q207736', 'Saint Andrews'],
+  ['Chester', 'Q170263', 'Chester'],
+  ['Hereford', 'Q204720', 'Hereford'],
+  ['Shrewsbury', 'Q201970', 'Shrewsbury'],
+  ['Vasteras', 'Q25412', 'Västerås'],
+  ['Visby', 'Q54757', 'Visby'],
+  ['Kalmar', 'Q26345', 'Kalmar'],
+]
+
+/**
+ * The « capital of » (P1376) claims Wikidata dates over 1100, read on 2026-10-31 — one per city, the polity named as
+ * Wikidata names it. A claim with no start, or one that starts after 1100 (Novgorod's republic, from 1136), does not
+ * count: the seats of Novgorod, Chernigov, Smolensk, Polotsk, Rostov, Roskilde and Nidaros wait for a source of their
+ * own.
+ */
+const WIKIDATA_CAPITALS = {
+  Q171353: { polity: 'Kingdom of Hungary', id: 'Q171150', from: 1001, to: 1256 },
+  Q130212: { polity: 'Kingdom of Hungary', id: 'Q171150', from: 1000, to: 1543 },
+  Q104725: { polity: 'Kingdom of Poland', id: 'Q8890160', from: 1079, to: 1138 },
+  Q1899: { polity: "Kievan Rus'", id: 'Q1108445', from: 882, to: 1132 },
+}
+
+/** The register's title of Wikidata, the source of the eastern capitals. */
+const WIKIDATA = 'Wikidata'
+
 /** The register's titles of the three sources — what finds each again. */
 const BOSKER = 'From Baghdad to London: Unraveling Urban Development in Europe, the Middle East, and North Africa, 800–1800 (données)'
 const BURINGH = 'European urban population, 700–2000'
@@ -125,6 +202,11 @@ const inhabitants = (value) => (value === '' ? null : Math.round(Number(value) *
 /** Buringh's bases were read as Latin-1 somewhere upstream: « faÃ§ade » is « façade ». */
 const repair = (text) => (/Ã/.test(text) ? Buffer.from(text, 'latin1').toString('utf8') : text)
 
+/**
+ * A city of the first list: Bosker's roles rank it, and the three sources must all give a figure to a mere city.
+ * @param {[string, string]} city - its dataset name and Wikidata item
+ * @returns the sheet
+ */
 function sheet([key, wikidata]) {
   const row = rows.get(key)
   if (row === undefined) throw new Error(`[seed-data] ${key} is not in ${CSV}`)
@@ -139,6 +221,47 @@ function sheet([key, wikidata]) {
   if (roles.includes('capital')) {
     testimonies.push({ source: BOSKER, subject: 'importance', importance: 'capital', where: 'rôles de la ville en 1100' })
   }
+  return finish(row, wikidata, importance, roles, testimonies)
+}
+
+/**
+ * A city of the regions the first rule leaves empty: a capital where Wikidata dates it so over 1100 or Bosker says
+ * capital, a large city where Bosker says archbishopric, a city otherwise; one of the three sources must give it a
+ * figure, and Bosker's roles, where it gives them, are its reasons.
+ * @param {[string, string]} city - its dataset name and Wikidata item
+ * @returns the sheet
+ */
+function eastSheet([key, wikidata]) {
+  const row = rows.get(key)
+  if (row === undefined) throw new Error(`[seed-data] ${key} is not in ${CSV}`)
+  if (row.bosker === '' && row.buringh === '' && row.chandler === '') {
+    throw new Error(`[seed-data] no source gives ${key} a figure`)
+  }
+  const roles = row.roles === '' ? [] : row.roles.split(' ')
+  const claim = WIKIDATA_CAPITALS[wikidata]
+  const testimonies = []
+  if (claim !== undefined) {
+    const where = `« capitale de » (P1376) ${claim.polity} (${claim.id}), ${claim.from}–${claim.to}, sur l’item ${wikidata} — lu le 31/10/2026`
+    testimonies.push({ source: WIKIDATA, subject: 'importance', importance: 'capital', where })
+  }
+  if (roles.includes('capital')) {
+    testimonies.push({ source: BOSKER, subject: 'importance', importance: 'capital', where: 'rôles de la ville en 1100' })
+  }
+  const capital = claim !== undefined || roles.includes('capital')
+  const importance = capital ? 'capital' : roles.includes('archbishop') ? 'large-city' : 'city'
+  return finish(row, wikidata, importance, roles, testimonies)
+}
+
+/**
+ * A sheet's reasons and population lines, after its importance lines.
+ * @param row - the city's row in the merged sources
+ * @param {string} wikidata - its place's item
+ * @param {string} importance - its order
+ * @param {string[]} roles - Bosker's roles
+ * @param testimonies - the lines so far
+ * @returns the sheet
+ */
+function finish(row, wikidata, importance, roles, testimonies) {
   const reasons = roles.filter((role) => role in REASON_OF_ROLE).map((role) => REASON_OF_ROLE[role])
   for (const reason of reasons) {
     testimonies.push({ source: BOSKER, subject: 'reason', reason, where: 'rôles de la ville en 1100' })
@@ -162,8 +285,8 @@ function sheet([key, wikidata]) {
   return { place: wikidata, year: YEAR, importance, reasons, testimonies }
 }
 
-const sheets = CITIES.map(sheet)
-const places = CITIES.map(([, wikidata, name]) => ({ wikidata, name }))
+const sheets = [...CITIES.map(sheet), ...EAST.map(eastSheet)]
+const places = [...CITIES, ...EAST].map(([, wikidata, name]) => ({ wikidata, name }))
 const reasons = [...new Set(sheets.flatMap((s) => s.reasons))].sort()
 const json = (value) => JSON.stringify(value, null, 2)
 
@@ -175,7 +298,9 @@ const file = `/* eslint-disable max-lines -- generated data, one record a city: 
  * The rule (the dev, 2026-10-31): a **capital** where Bosker et al. (2013) say capital; a **large city** where they say
  * archbishopric — in the Middle Ages a religious seat is a political one; a **city** where all three sources give a
  * figure. Every figure and every role is a source line of its own, never averaged; a figure Bosker interpolated
- * between two centuries says so. The places are named by their Wikidata items, read by the seed as the form does.
+ * between two centuries says so. **The east and the north** (the dev, the same evening): the cities Buringh attests in
+ * Hungary, Poland, the Rus' lands and Scandinavia — a capital where Wikidata dates it so over 1100, a city otherwise.
+ * The places are named by their Wikidata items, read by the seed as the form does.
  */
 
 import type { SeedPlace, SeedSource } from './year1100'
@@ -209,6 +334,15 @@ export interface SeedCity {
 
 /** The three open datasets the figures and roles come from. */
 export const CITY_SOURCES: readonly SeedSource[] = [
+  {
+    title: ${JSON.stringify(WIKIDATA)},
+    author: 'Contributeurs de Wikidata',
+    publisher: 'Wikimedia Foundation',
+    editionYear: 2026,
+    kind: 'crowd-database',
+    url: 'https://www.wikidata.org',
+    licence: 'cc0',
+  },
   {
     title: ${JSON.stringify(BOSKER)},
     author: 'Maarten Bosker, Eltjo Buringh, Jan Luiten van Zanden',
