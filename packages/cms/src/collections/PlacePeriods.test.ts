@@ -9,6 +9,7 @@ import {
 import { relationId } from '../fields/relationId'
 
 import { OVERLAP_PATH, PlacePeriods, refuseOverlap } from './PlacePeriods'
+import { writeSheetTitle } from './writeSheetTitle'
 
 import type { CollectionBeforeValidateHook, Field } from 'payload'
 import type { Mock } from 'vitest'
@@ -216,6 +217,17 @@ describe('PlacePeriods', () => {
 
     it('is the hook the collection runs before validating', () => {
       expect(PlacePeriods.hooks?.beforeValidate).toContain(refuseOverlap)
+    })
+  })
+
+  describe('the title', () => {
+    it('writes the title at every save, after the sheet’s own rule', () => {
+      expect(PlacePeriods.hooks?.beforeChange?.at(-1)).toBe(writeSheetTitle)
+    })
+
+    it('names a sheet by its title in the list and the page, « Paris — 1100 »', () => {
+      expect(PlacePeriods.admin?.useAsTitle).toBe('title')
+      expect(PlacePeriods.admin?.defaultColumns?.[0]).toBe('title')
     })
   })
 

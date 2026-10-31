@@ -2,6 +2,8 @@ import { groupAt, momentGroup } from '../fields/historicalDate'
 import { wikidataField } from '../fields/wikidata'
 import { placeEndpoints } from '../wikidata/placeEndpoints'
 
+import { retitlePlaceSheets } from './retitleSheets'
+
 import type { CollectionConfig } from 'payload'
 
 /**
@@ -16,6 +18,8 @@ export const Places: CollectionConfig = {
   labels: { singular: 'Lieu', plural: 'Lieux' },
   admin: { useAsTitle: 'name' },
   endpoints: placeEndpoints,
+  // A renamed place renames its cities' sheets: « Paris — 1100 » is written from the place's name.
+  hooks: { afterChange: [retitlePlaceSheets] },
   fields: [
     {
       type: 'row',

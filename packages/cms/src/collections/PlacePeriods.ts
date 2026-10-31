@@ -14,6 +14,7 @@ import { OVERLAP_PATH, overlappingSheet } from '../fields/sheetOverlap'
 
 import { COLLECTION_MESSAGES } from './i18n'
 import { refuseInvalidSheet } from './refuseInvalidSheet'
+import { writeSheetTitle } from './writeSheetTitle'
 
 import type { EventDateFields } from '../fields/historicalDate'
 import type { SavedSheet } from '../fields/sheetOverlap'
@@ -117,7 +118,9 @@ export const PlacePeriods: CollectionConfig = {
   slug: 'place-periods',
   labels: { singular: 'Ville à une date', plural: 'Villes à une date' },
   admin: {
-    defaultColumns: ['place', 'importance'],
+    // « Paris — 1100 »: the place alone would read as a duplicate of its other sheets (the dev, 2026-10-31).
+    useAsTitle: 'title',
+    defaultColumns: ['title', 'importance'],
     // Our own form in place of Payload's, which validates only after a first save and never greys its button
     // (decision 8; `files/plans/atlas/city-sheet-screen.md`). Payload keeps the header, the tabs and the list.
     components: {
@@ -128,8 +131,19 @@ export const PlacePeriods: CollectionConfig = {
     description:
       'Une ville telle qu’elle est à une date : son importance sur la carte, et ce qu’en disent les sources. Le lieu lui-même (son nom, sa position) se saisit une fois, dans « Lieux ».',
   },
-  hooks: { beforeValidate: [refuseOverlap], beforeChange: [refuseInvalidSheet] },
+  hooks: { beforeValidate: [refuseOverlap], beforeChange: [refuseInvalidSheet, writeSheetTitle] },
   fields: [
+    {
+      name: 'title',
+      type: 'text',
+      label: 'Titre',
+      // Not required: a NOT NULL column added to a table that holds sheets would make Drizzle's push ask in the
+      // terminal (CMS-276). The hook writes it at every save; the sheets saved before it, `pnpm retitle` once.
+      admin: {
+        readOnly: true,
+        description: 'Écrit à l’enregistrement : le nom du lieu et la date.',
+      },
+    },
     {
       name: 'place',
       type: 'relationship',

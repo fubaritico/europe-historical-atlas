@@ -326,6 +326,10 @@ export interface SiegeEngine {
 export interface PlacePeriod {
   id: number;
   /**
+   * Écrit à l’enregistrement : le nom du lieu et la date.
+   */
+  title?: string | null;
+  /**
    * Choisi parmi les lieux déjà saisis dans « Lieux ».
    */
   place: number | Place;
@@ -652,6 +656,7 @@ export interface PlacesSelect<T extends boolean = true> {
  * via the `definition` "place-periods_select".
  */
 export interface PlacePeriodsSelect<T extends boolean = true> {
+  title?: T;
   place?: T;
   date?:
     | T
