@@ -132,8 +132,8 @@ as an error. **Verify it by mounting twice**, never by reading the code.
 
 **Do not put app-wide initialisation in a component's effect.** A component remounts and the effect
 re-runs; what must happen once belongs in the entry module. (This is the `advanced-init-once` rule of
-the archived Vercel skill, restated — see `rules/decision-tree.md` for why that skill is not
-committed.)
+the archived Vercel skill, restated — see `rules/cartographer.md` (its skills table, `react-best-practices`) for why that
+skill is not committed.)
 
 ---
 
@@ -182,7 +182,7 @@ zoom keeps working, which is the accessibility half of the same decision.
 ## Which outside rules apply, and which are traps
 
 From the archived Vercel skill (`files/claude-archive/skills/react-best-practices/rules/`, read on
-demand, **not committed** — see `rules/decision-tree.md`):
+demand, **not committed** — see `rules/cartographer.md`):
 
 | rule | here |
 | --- | --- |

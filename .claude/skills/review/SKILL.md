@@ -28,7 +28,7 @@ Filter to: `*.{ts,tsx}`, `*.{js,mjs}`, `*.css`, `*.json`, `*.html` (exclude `nod
 lock files, and archived config under `files/claude-archive/`).
 
 **Then widen the scope to the blast radius.** The changed files are where the diff *is*, not where it
-*bites* — on 2026-09-16 the two worst defects of the session were both in untouched code. Before
+*bites* — the worst defects often sit in code the diff did not touch. Before
 dispatching, list the state the diff reads or writes (module-level handles, params objects, shared grids,
 dispatch tables) and add every file that touches that state to the scope. Tell the agents which files are
 the diff and which are the radius, and instruct them to review both.
@@ -74,11 +74,10 @@ Three checks, in this order — a review that ships a wrong finding costs more t
    context7 can lag a version) or the web. Common cases: three.js API shape, deprecated methods, Vite HMR behaviour.
    If the usage turns out correct, discard the finding.
 2. **Any finding carrying a computed figure** — a contrast ratio, a byte count, a complexity bound —
-   **re-derive it yourself** from the `evidence` field. Agents produce confident arithmetic; on
-   2026-09-16 an accessibility figure was right, but only checking established that.
+   **re-derive it yourself** from the `evidence` field — agents produce confident arithmetic.
 3. **Any finding with a `suggestion`** — read `what_breaks_if_fixed_naively` and decide whether the
-   remedy actually holds. **Two remedies were wrong that day while both findings were right**; one would
-   have reintroduced the very bug the code existed to fix. Keep the finding, replace the remedy, and say
+   remedy actually holds — **a right finding often comes with a wrong remedy**, one that can reintroduce the
+   very bug the code exists to fix. Keep the finding, replace the remedy, and say
    plainly in the report that you did.
 
 ### Step 6 — Report to User

@@ -35,12 +35,12 @@ the vertex shader (GPU); the CPU geometry stays flat → the `Raycaster` hits th
 
 ## Architectural decisions
 
-- **Plain three.js in the atlas, and no framework near its render loop** — canvas + TS is enough there, and
-  the "revisit if a complex UI overlay justifies a framework" clause this entry used to carry **has been
-  answered, for the other application**: the Cartographer's chrome is **React + Zustand** (the dev's call,
-  2026-09-29) because its chrome *is* the application — panels, forms, a tree, a 51-row list. The atlas's own
-  DOM is a splash and a progress overlay, so it stays vanilla and takes only `fubaritico-ds`'s tokens and
-  styles, which cost it zero JavaScript. See `architecture.md`, "apps and resources".
+- **Plain three.js in the atlas, and no framework near its render loop.** The atlas's canvas is never a
+  React component (the dev, 2026-11-01). Its flat interface over the canvas — panels, buttons, menus, built
+  with the design system — is **not built yet, and React or not, Zustand or not, is undecided**; if React, a
+  root mounted beside the canvas, sharing state through a store that lives outside React. See
+  `architecture.md`, "apps and resources". The Cartographer's chrome is **React + Zustand** (the dev's call,
+  2026-09-29) because its chrome *is* the application.
   **What makes that safe is not the framework choice but one rule**: per-frame state never goes through a
   component. Camera, zoom, hover, a drag in progress — route any of those through component state and
   reconciliation runs at 60 Hz. The 2D canvas stays imperative; the document model lives in a plain store.

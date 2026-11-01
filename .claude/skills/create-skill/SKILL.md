@@ -93,6 +93,18 @@ Check against the specification:
 | `agent` | Subagent type when using `context: fork` |
 | `model` | Override model for this skill |
 | `effort` | Override effort level |
+| `when_to_use` | Extra trigger context (phrases, example requests), appended to `description` in the listing |
+| `arguments` | Named positional arguments, substituted as `$name` in the skill's content |
+| `disallowed-tools` | Tools removed while the skill is active (e.g. `AskUserQuestion` for a background loop) |
+| `background` | With `context: fork` only: `false` waits for the forked subagent's result in the same turn |
+| `hooks` | Hooks registered when the skill is invoked; they keep running for the rest of the session |
+| `shell` | Shell for injected `` !`command` `` blocks: `bash` (default) or `powershell` |
+
+**Two limits worth writing with**: `description` and `when_to_use` together are cut at **1,536 characters** in the listing,
+paid on every request — put the key use case first. `allowed-tools` pre-approves only **until the dev's next message**.
+
+Fields verified against https://code.claude.com/docs/en/skills.md (« Frontmatter reference ») on 2026-11-01 — re-check
+there before relying on one (`rules/claude-config.md`).
 
 ### Body Best Practices
 

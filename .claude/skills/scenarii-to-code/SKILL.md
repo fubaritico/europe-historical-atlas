@@ -34,7 +34,7 @@ files/plans/<application>/scenarii/
 └── s99-holes.md     what is NOT decided
 ```
 
-A new set — the atlas's, when it comes — goes in that shape, for one reason that is not tidiness:
+A new set — the CMS's, when it comes — goes in that shape, for one reason that is not tidiness:
 **this skill finds `s00` and `s99` by name.** Depart from it and the two files that say *"this is only a
 default"* and *"this is not decided"* stop being loaded.
 
@@ -123,7 +123,7 @@ Three honest answers, and picking the wrong one is how specification gets invent
 
 - **It is tooling** (a config, a cache, a CI job) — scenarios do not specify it, and the rules in
   `.claude/rules/` do.
-- **It belongs to an application specified by chapters** (the CMS, today; the atlas until 2026-11-01) — then the
+- **It belongs to an application specified by chapters** (the CMS, today) — then the
   chapter is the contract, and the same ladder in §4 applies to it unchanged.
 - **It is product work nobody has specified** — then stop and say so. Writing the code first and the
   scenario afterwards produces a scenario that describes the code, which is the one thing a scenario
@@ -207,7 +207,7 @@ history of a decision is what stops it being re-litigated.
 (`git log --since=<date>`, leaving out data, docs and tooling); for each, the governing `sNN`, the `Scenario:`
 that covers it (file:line), whether it was walked, or **none**. Read the code for each gap — never the commit
 message alone, it rounds off. Write the missing scenarios from the code, strike what contradicts it, and report
-the table. The first audit ran on 2026-10-18 (15–18/10).
+the table.
 
 **The code is evidence of behaviour, not of intent.** Writing a scenario from code describes what it does; if
 what it does was never asked for, the scenario says so (`> **Built … — not asked for, kept pending the dev**`)

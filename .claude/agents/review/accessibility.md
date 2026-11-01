@@ -51,8 +51,8 @@ If a finding depends on an ARIA pattern or API you are not 100% sure about, set 
 
 ## Rules
 
-> **Section headings group the rules; they do not set severity.** Severity comes from the anchors in
-> `references/schema.json` — a documentation or naming gap is never `high`.
+> **Section headings group the rules; they do not set severity.** Severity comes from the anchor table in
+> §2 of the review protocol below (the levels are those of `.claude/skills/review/references/schema.json`) — a documentation or naming gap is never `high`.
 
 ### A11Y-001: Interactive element without an accessible name
 

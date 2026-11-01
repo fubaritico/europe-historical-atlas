@@ -1,7 +1,7 @@
 ---
 name: rules
 description: Load the rule files, known issues and plans a subject or a place of the repository needs, from the one table the prompt hook also reads. Use when a subject comes up that the hook did not name, before reasoning about a package whose files are not open yet, at start-session for the subjects of next.md, after a compaction, or when the dev says "charge les règles", "rules", "va chercher les règles".
-argument-hint: "[topic…] — cartographer, atlas, core, date, uncertainty, data, contribution, tests, tooling"
+argument-hint: "[topic…] — cartographer, atlas, core, date, uncertainty, data, contribution, tests, tooling, claude"
 allowed-tools: Read Bash
 metadata:
   author: europe-map

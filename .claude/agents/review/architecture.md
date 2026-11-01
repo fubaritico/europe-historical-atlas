@@ -40,8 +40,8 @@ If a finding depends on library/API behavior you are not 100% sure about, set `"
 
 # Architecture Rules
 
-> **Section headings group the rules; they do not set severity.** Severity comes from the anchors in
-> `references/schema.json` — a documentation or naming gap is never `high`.
+> **Section headings group the rules; they do not set severity.** Severity comes from the anchor table in
+> §2 of the review protocol below (the levels are those of `.claude/skills/review/references/schema.json`) — a documentation or naming gap is never `high`.
 
 > pnpm workspace, five packages: `core` (pure TS — no three.js, React or zustand; `src/{utils,geo,data,pipeline,editor,i18n,time}`),
 > `atlas` (vanilla three.js; `main.ts` and folders only — `src/{app,bench,camera,controls,devPanel,i18n,loading,picking,scene,sources,tunables,ui,utils}`),

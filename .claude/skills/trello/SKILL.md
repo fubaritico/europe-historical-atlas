@@ -70,8 +70,7 @@ next card, not start it.
 board**, 1 to infinity, never reused (archived cards count) and **never changed** — not even when the
 card changes scope: `prefix CARTO-41 atlas` gives `[ATLAS-41]`. The script gives the number: `add` takes
 `"[CARTO] Title"` and refuses a number written by hand. Two scopes: `[ATLAS-12 · CARTO]`, the number on
-the first. Numbered on 2026-10-17 in true chronology — `REPO-1` is the first thing ever delivered (the
-quality gate, 12/09), Fait oldest first, then the columns left to right; from now on, creation order.
+the first. Numbers follow creation order.
 **Files cite the ticket** (`known-issues.md`, `next.md`, plans: `— CARTO-41`), never Trello's `#41`; every
 verb takes either (`move CARTO-41 "En cours"` or `move 41 …`).
 
@@ -114,7 +113,7 @@ the card says so in **Le remède** and goes to **À valider par le développeur*
 ## Labels — one home for severity, scope and type (the dev's call, 2026-10-17)
 
 A label shows on the closed card and filters the board; a line in a description does neither. So the
-**severity is a label and only a label** — the Backlog template no longer has a Gravité line.
+**severity is a label and only a label** — never a line in a description.
 
 | family | labels | rule |
 | --- | --- | --- |
@@ -191,7 +190,7 @@ reads it alone:
 
 ## The verbs — one command per gesture
 
-A card is named by its **number** on the board (`#7` → `7`). Always the absolute path:
+A card is named by its ticket (`CARTO-41`) or its Trello number (`#7` → `7`). Always the absolute path:
 
 ```bash
 S=/Users/stephanecottereau/Desktop/WebstormProjects/europe-map/.claude/skills/trello/scripts/trello
@@ -277,4 +276,4 @@ it is the ground the decisions themselves stand on. Three pieces build it:
 3. **Every ticket of the initiative carries its `chantier · …` label**, so one click on the label filters
    the whole of it. A new initiative is a new `chantier · …` label in `LABELS` — the dev's call.
 
-Today: **DESIGN-262**, the management of uncertainty (`files/plans/evidence-system.md`), and **CMS-285**, the CMS.
+The open initiatives are the tickets in **Chantiers** (`list`).

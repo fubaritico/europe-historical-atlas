@@ -124,23 +124,24 @@ Agents and their scope:
 Merge all findings into one report, counted by severity per category. The verdict comes from what is left
 open: `fail` if a critical remains; `needs-hardening` if a high remains; otherwise `pass`.
 
-### Step 5 — Report to User
+### Step 5 — Verify Ambiguous Findings (opensrc / web)
 
-Present findings grouped by severity (critical first), then by OWASP category.
+Before reporting anything — a wrong finding shown to the dev costs more than one never found — check every finding where
+`needs_verification: true`:
+1. Run the `verification_query` against `opensrc/` (authoritative — context7 can lag a version) or the web
+2. If confirmed → keep finding
+3. If disproved → discard, and keep a line for the report
+
+### Step 6 — Report to User
+
+Present the verified findings grouped by severity (critical first), then by OWASP category.
 Format as a readable table with columns: ID | Severity | File:Line | Title | CWE
 
 Follow with:
 - The count per category and severity
 - The verdict
 - Top 3 priority fixes
-
-### Step 6 — Verify Ambiguous Findings (opensrc / web)
-
-Before recommending fixes, check findings where `needs_verification: true`:
-1. Run the `verification_query` against `opensrc/` (authoritative — context7 can lag a version) or the web
-2. If confirmed → keep finding
-3. If disproved → discard
-4. Report verification results to user
+- What verification discarded, one line each
 
 ### Step 7 — Remediation Guidance
 

@@ -22,12 +22,9 @@ paths:
 | Tests     | Vitest              | ^5.0         |
 | Chrome    | React + Zustand     | 19 / 5       |
 
-> **Turbo arrived 2026-10-01**, on the dev's call, and the earlier entry here saying it was "measured and
-> refused" is superseded. What changed is the shape of the repo rather than anyone's mind: `plan.md` (P2)
-> recorded the two thresholds that would reverse the refusal — **a CI** (shipped 2026-09-24) and a gate
-> past ~30 s — and the third package pushed past them. Each package now owns its `lint`, `type-check`,
-> `test` and `coverage`, so *something* has to fan out across them; the root scripts are `turbo <task>`.
-> **Lerna is still refused**, and for a reason no threshold touches: it publishes, and we publish nothing.
+> **Turbo** fans out each package's `lint`, `type-check`, `test` and `coverage`; the root scripts are
+> `turbo <task>` (the dev's call, 2026-10-01, once a CI existed and the third package arrived). **Lerna is
+> refused**: it publishes, and we publish nothing.
 
 > **One declared version per dependency**, in `pnpm-workspace.yaml`'s `catalog:`, referenced as `catalog:`
 > from every `package.json`. The bar for an entry is *shared* **and** *dangerous to mismatch*, not merely
@@ -202,24 +199,43 @@ packages at one version. Read from its `INTEGRATION.md`, not assumed:
 | `@fubaritico/behaviors` | behaviour services (`TabsService`, colour conversions) | **none** |
 | `@fubaritico/react` | the React components — what the Cartographer installs | React |
 
+**What this repository installs** (checked in each `package.json`, 2026-11-01), four of the five, at the one version of
+`pnpm-workspace.yaml`'s catalogue: the **Cartographer** — `tokens`, `styles`, `behaviors`, `react`; the **CMS** — `tokens`,
+`styles`, `react`; the **atlas** — none yet; `core` and the lint plugin — none. `@fubaritico/variants` is installed and
+imported nowhere.
+
 The Stencil variant recorded here on 2026-09-24 is not published; it stays the design system's
 long-term plan, not something this repository can consume. Installing needs a token even though
-the packages are public — see `known-issues.md`.
+the packages are public — see `rules/known-issues/tooling.md`.
 
-**Three levels of consumption, and the atlas only ever needs the first:**
+**The atlas and the design system — what is decided and what is not** (the dev, 2026-11-01):
 
-1. **tokens + styles (+ variants)** — the whole visual language for **zero JavaScript**. The atlas's DOM
-   is a splash, a progress overlay and, at M2, event panels. It does not need components; it needs the
-   same colours, type and spacing as the other two apps.
+- **Decided**: the atlas will have a flat interface over the canvas — panels, buttons, menus, in HTML —
+  built with the design system. **Nothing is wired yet**: the atlas installs none of its packages. Its
+  interface elements *inside* the map, in 3D, are drawn by three.js, not by the design system.
+- **Decided**: the canvas is never a React component, unlike the Cartographer's.
+- **Undecided**: React or not, Zustand or not (*"probably a React instance"*) — to be read from the
+  interface's scenarios (ATLAS-329): how many panels, how much state they share with the map. If React, a
+  root mounted beside the canvas; the map and the interface share state through a store that lives outside
+  React (Zustand's `createStore` from `zustand/vanilla`, read in React by `useStore(store, selector)`).
+- **Undecided**: whether the 3D elements share the design system's redefined tokens (*"I don't want to
+  commit to that yet"*).
+- **To measure, not assumed**: whether the map's fast first display owes anything to the absence of a
+  framework. A React root mounted after the first frame should not delay it — a hypothesis either way.
+
+The three levels of consumption, and what each costs the atlas:
+
+1. **tokens + styles** — the whole visual language for **zero JavaScript**.
 2. **Stencil custom elements** — standard `HTMLElement`s, usable from vanilla TypeScript with no
-   framework. The fallback if the atlas ever wants a real component.
-3. **React components** — ~45 kB gzipped of React + ReactDOM on top of a 185 kB bundle, for an
-   application whose DOM is three elements. **Not for the atlas.**
+   framework; not published (see above).
+3. **React components** — ~45 kB gzipped of React + ReactDOM on top of a 185 kB bundle: the cost to
+   weigh if the atlas's interface grows into an application.
 
-**The cartographer reaches the opposite conclusion, for the same reason.** Its chrome *is* the
-application — panels, tab strips, a 51-row list, forms, dialogues, a splitter. That is what a component
-library is for, and whichever variant is ready when it is built (React or Stencil) earns its place. The
-2D canvas stays imperative either way.
+Whatever is chosen, **per-frame state (camera, zoom, hover) never goes through a component**
+(`troubleshooting.md`).
+
+**The design system is white-label: each application overrides it through its tokens** (colours, type,
+spacing). Nothing more to it (the dev, 2026-11-01).
 
 **Because the styles are shared across variants, all three applications look identical whichever level
 each one consumes.** That is the whole point of a multi-framework system, and it is what makes "React
@@ -296,14 +312,14 @@ concatenates, so `sonar-project.properties` still reads one report. Verified: 98
 1. **Heightmap → relief**: load the B&W bitmap, subdivided `PlaneGeometry`, **CPU** displacement
    (read pixels → per-vertex `z`, `computeVertexNormals()`). CPU because raycasting must hit the real
    relief (GPU displacement is invisible to the raycaster).
-2. **Texture**: `material.map` (colored/political map), UV alignment on the plane.
+2. **Texture**: `material.map` carries the baked terrain colour, UV-aligned on the plane; the countries' fills are separate meshes laid over the relief (`scene/political/fills/`).
 3. **Navigation**: camera moved with arrow keys (map-style pan).
 4. **Picking**: `Raycaster` on click → intersection → camera fly-to (tween position + target).
 
 ## Data Layers (Milestones 2+)
 
 - **Physical relief**: stable over time (a single heightmap).
-- **Historical regions**: versioned by date (GeoJSON/mask per century, then per decade).
+- **Historical regions**: versioned by date — one folder per year under `packages/atlas/public/years/` (`1100/`, listed in `index.json`), written by the Cartographer.
   The "click → region at time T" binding relies on this layer, not on the raw heightmap polygons.
 
 ## Git & Commits

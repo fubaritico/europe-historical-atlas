@@ -49,7 +49,7 @@ Open issues of `packages/core`: the document model, the history, the derivations
   à ne pas « corriger » en supprimant l'override, ce serait le défaut inverse et plus grave.
 - **`packages/core/README.md` décrit un paquet qui va changer.** — REPO-229 Il annonce « le format, les lecteurs, le
   compositeur, les maths ». ~~Le **type de date historique**~~ — **fait le 21/10** (CORE-217) : `time/` et
-  `editor/` sont dans le schéma des couches. Reste : les **tables de traduction** (ICU, plan P8), le compte des
+  `editor/` sont dans le schéma des couches, `i18n/` (ICU) aussi. Reste : le compte des
   suites (« Twenty suites », périmé) et l'introduction, qui ignore le Cartographe. Cosmétique — mais un README de
   paquet est la première chose qu'un lecteur ouvre dans un monorepo, donc il ne doit pas mentir longtemps.
 - **Les années du format acceptent l'an 0** (21/10) : le `year` de chaque fichier d'année comme `existsFrom` et
