@@ -10,29 +10,34 @@ Overall layout: a full-screen **3D viewport** with **HTML/CSS UI overlays** on t
 - **Viewport** — the 3D projection of the map.
 - **Dev stats panel** (dev only) — `Stats` (stats.js: FPS/ms/memory) + a `lil-gui` debug panel to tune
   parameters live (displacementScale, camera limits, fog…). Toggle off in prod.
-- **Camera navigation UI** — on-screen buttons (zoom in/out, pan left/right/up/down, get closer) that
-  dispatch the SAME commands as the keyboard (a single `CameraCommand` seam, two input sources).
+- ~~**Camera navigation UI** — on-screen buttons (zoom in/out, pan left/right/up/down, get closer) that
+  dispatch the SAME commands as the keyboard (a single `CameraCommand` seam, two input sources).~~ — *struck 2026-11-01
+  (`scenarii/s02-navigate.md`): not built, no seam; the buttons wait in ATLAS-149.*
 - **Time slider** (M2+) — advance/rewind century by century. Options to decide: a slider, or a date
   field with up/down arrows, or both. Later possibly decade granularity (see M4).
 - **Decorative border elements** — optional screen-edge chrome (frame/ornaments; ties to the compass rose).
 
 ## Camera model (inspired by grand-strategy games: EU4, Total War)
 
-- **Angled top-down camera** looking at the ground plane; **pan** across the map (arrow keys / WASD /
-  edge-scroll / drag), **zoom** with the wheel.
-- **Zoom-dependent tilt** (optional): zoomed out → more top-down, zoomed in → more oblique.
-- **Yaw rotation**: tentative — free during cruising, but locked/snapped to a default orientation when
-  zoomed out / at rest. Not finalized; keep "free with a default heading" and refine.
-- **Fly-to trajectory = an eased ARC**, never a straight line (aesthetic). The approach ends **locked at
-  ~45° pitch**, close-up and slightly top-down.
+- **Angled top-down camera** looking at the ground plane; **pan** across the map (arrow keys / ~~WASD~~ /
+  edge-scroll / drag), **zoom** with the wheel. *WASD struck 2026-11-01: the arrows only (`scenarii/s02-navigate.md`).*
+- **Zoom-dependent tilt** (optional): zoomed out → more top-down, zoomed in → more oblique. *Built: 55° → 30°.*
+- ~~**Yaw rotation**: tentative — free during cruising, but locked/snapped to a default orientation when
+  zoomed out / at rest. Not finalized; keep "free with a default heading" and refine.~~ — *struck 2026-11-01: no yaw,
+  north always up (`controls/cameraFraming.placeCamera`).*
+- **Fly-to trajectory = an eased ARC**, never a straight line (aesthetic). The approach ends ~~**locked at
+  ~45° pitch**~~, close-up and slightly top-down. *The pitch struck 2026-11-01: a flight lands at the zoom's own pitch,
+  30° at the closest (`scenarii/s03-click-and-focus.md`).*
 - **Navigation limits (this is how "max limits" are defined)**: clamp the camera's **ground target** to
   the map's bounding box (+ small margin), and clamp **zoom distance** to `[minDistance, maxDistance]`.
   This — not fog — is what bounds navigation.
 - **Fog**: a separate, purely aesthetic rendering effect (fade distant terrain, hide the finite plane's
   hard edge, add depth). Optional; decide independently of the limits.
-- **Click-to-approach + Escape-to-return**: on click, **push the current camera pose** (position +
+- ~~**Click-to-approach + Escape-to-return**: on click, **push the current camera pose** (position +
   target + zoom) onto a small stack and tween (along the arc) toward the clicked point; **Escape pops**
-  and tweens back to the pre-click pose. Reuses the `CameraStateStore` serialization (Phase 0.2).
+  and tweens back to the pre-click pose. Reuses the `CameraStateStore` serialization (Phase 0.2).~~ — *struck
+  2026-11-01: replaced by the focus mode (`focus-mode.md`) — a click recentres at the same zoom, a double-click enters
+  the focus, Escape goes back to one remembered view, no stack (`scenarii/s03-click-and-focus.md`).*
 
 ## Framing & off-field (hors-champ) — hide the map edges (to design)
 

@@ -11,20 +11,24 @@
 
 ## What exists (read from the code, 2026-10-29)
 
-- The zoom runs from 0 (afar) to 1 (close). Vassals reveal from 0.45 to 0.8 (`tunables/params/vassals.ts`); the borders'
-  inlay arrives at 0.4 (`political.ts`, `borderInlayZoom`); every country name fades to a 40 % watermark from 0.85
-  (`names.ts`, `watermarkZoom`, `watermarkShare`) — put there on 2026-10-29 for the cities to come.
+> **Struck 2026-11-01**: since 31/10 the levels of detail drive the vassals, the watermark and the cities, and the cities
+> are drawn — what exists now is in `scenarii/s04-levels-of-detail.md` and `scenarii/s06-the-cities.md`. Kept as the
+> state of 29/10.
+
+- The zoom runs from 0 (afar) to 1 (close). ~~Vassals reveal from 0.45 to 0.8~~ (`tunables/params/vassals.ts`); the borders'
+  inlay arrives at 0.4 (`political.ts`, `borderInlayZoom`); ~~every country name fades to a 40 % watermark from 0.85
+  (`names.ts`, `watermarkZoom`, `watermarkShare`)~~ — put there on 2026-10-29 for the cities to come.
 - A place in the CMS (`packages/cms/src/collections/Places.ts`) holds a name, a position, a Wikidata id and its dates
   (`existsFrom`, `existsTo`). **Nothing says how important it is.**
-- Ten places exist, every one attached to an event, and reach the atlas inside `public/content/events.json`. There is
-  no layer of cities.
+- Ten places exist, every one attached to an event, and reach the atlas inside `public/content/events.json`. ~~There is
+  no layer of cities.~~
 
 ## Decisions
 
 | # | decision | by |
 | --- | --- | --- |
 | 1 | ~~**The point and the name enter together, by order of importance**~~ — **replaced on 31/10 by the levels of detail** (`detail-levels.md`): a city's point comes a level before its name, and nothing follows the zoom continuously. The original: **The point and the name enter together, by order of importance**: the capitals from the start, the large cities with the vassals (0.45), the other cities at 0.8. A point stays alone only when its name finds no room — and the console says so. | the dev, 29/10, on my proposal |
-| 2 | **The country names fade to their watermark when the last order of cities arrives** — one threshold drives both, never two numbers tuned apart. | the dev, 29/10, on my proposal |
+| 2 | ~~**The country names fade to their watermark when the last order of cities arrives**~~ — **replaced on 31/10 by the levels of detail** (struck 2026-11-01): the names go to 40 % at the second level, with the capitals' names, and to 25 % at the third, with the last order. What it wanted holds by the table: one row drives both, never two numbers tuned apart (`scenarii/s04-levels-of-detail.md`). The original: one threshold drives both. | the dev, 29/10, on my proposal |
 | 3 | **A city's importance is dated** — three values, capital, large city, city — and belongs to the place's period in the CMS (CMS-281), not to the place. | the dev, 29/10, on my proposal |
 | 5 | **The contribution form of a city** (the dev, 29/10, on my sketch): one form a place and a period (« Paris en 1100 »). The contributor **chooses** the importance, **picks its reasons** in a multi-select — a list that grows (*« ça peut augmenter »*) — and **adds one line a source**: which source (from the CMS's source register), what it says (« 25 000 habitants », « capitale »), where in it. **The uncertainty is never typed**: below the lines the tool says how many sources there are and whether they agree. | the dev, 29/10 |
 | 5b | **Two forms, never mixed** (the dev, 29/10: *« faut pas s'en mêler les pinceaux »*): **the place**, entered once — name, position, dates of existence, the form that exists; and **the city at a time** (« Paris en 1100 »), a form of its own that picks its place from a list and holds the period, the importance, the reasons and the sources' lines. A place has as many as it has periods. **Its time is a date or a span, one relation either way** (the dev: *« ça peut être une date ou un range de date, mais la relation de données est la même »*) — the events' own date field (`cms/src/fields/historicalDate.ts`: a start, an optional end → `instant` or `interval`). Each source line says **what about** (population, importance, reason), so the tool can tell two figures of one population apart and say whether they agree. | the dev, 29/10 |
@@ -34,7 +38,7 @@
 | 4 | **Importance is not population**: *« une ville peut être peu peuplée et être très importante »*. The population is one piece of evidence among others — a seat of power, a religious seat (Rome, 35 thousand in 1000 and in 1200), a market — and the importance is a judgement with its reasons and its source, never computed from a figure. | the dev, 29/10 |
 | 4b | **The importance that orders the map is political** (the dev, 30/10: *« l'important, c'est l'importance politique »*). **No seat, no capital**: the Holy Roman Empire of 1100 has none — an itinerant court — and none is given it, not even a symbolic one (*« s'il n'y a pas de capitale, il n'y a pas de capitale »*). Aachen is no capital in 1100: Charlemagne's seat, three centuries gone (*« les gens s'en branlent »*); at most a small 3D model of its chapel one day, from his photos. | the dev, 30/10 |
 | 4c | **The first cities of 1100, ranked from the sources** (the dev asked for 50 to 60, 2026-10-31): a **capital** where Bosker et al. (2013) say capital; a **large city** where they say archbishopric; a **city** where all three sources give a figure — 59 cities, 23 + 26 + 10. **The archbishopric counts as political** — not an arbitration but how the Middle Ages were (the dev: *« le religieux et la politique, c'est la même chose […] c'est comme ça, c'est la vie »*). Every figure and role is a source line, never averaged; written by the seed (`files/spikes/city-sources/seed-data.mjs` → `cms/src/seed/cities1100.ts`). **Kiev and Novgorod are not among them**: Bosker gives them no role, and only two sources a figure. | the dev, 31/10, on my proposal |
-| 9 | **The marks** (the dev, 31/10, on the city marks' bench, « C4 avec le blanc à 60 % »): a **capital** and a **large city** are a dark ring around a dark point, the country's colour between them — the capital larger, its point larger (*« c'était mieux »*); a **city** a small dark point. **The light only around, never inside** (*« tu mets du blanc que autour »*), at 60 % so the rim takes the country's colour. The name to the right, larger and in capitals for a capital. Chosen after the value alone (dark disc for a capital, light for a large city), the size alone, and a square for the capital. The marks live in `atlas/src/scene/cities/cityMarks.ts`, the bench at `/cities.html`. | the dev, 31/10 |
+| 9 | **The marks** (the dev, 31/10, on the city marks' bench, « C4 avec le blanc à 60 % »): a **capital** and a **large city** are a dark ring around a dark point, the country's colour between them — the capital larger, its point larger (*« c'était mieux »*); a **city** a small dark point. **The light only around, never inside** (*« tu mets du blanc que autour »*), at 60 % so the rim takes the country's colour. The name to the right, larger ~~and in capitals~~ for a capital — **never in capitals** since 31/10 — a capital's name in capitals fought the countries' names afar (struck 2026-11-01; `scenarii/s06-the-cities.md`). Chosen after the value alone (dark disc for a capital, light for a large city), the size alone, and a square for the capital. The marks live in `atlas/src/scene/cities/cityMarks.ts`, the bench at `/cities.html`. | the dev, 31/10 |
 
 **To know**: in 1100 a *capital* is often an uncertain claim — the Empire's court is itinerant. In the uncertainty
 system (DESIGN-262) it is a claim with its source, never a truth.
@@ -82,7 +86,7 @@ reading of the evening.
    export writes the cities** into the atlas's content file (format version 5, the one that adds them), each checked by
    the one schema first — **prepared, the joins done at export** (the dev, 2026-10-30: *« les données, elles arrivent
    préparées, comme en GraphQL »*): a city arrives with its place, reasons and sources written in. The atlas reads it
-   and draws no city yet.
+   ~~and draws no city yet~~ — and draws them since 31/10 (`8b2fff2`; struck 2026-11-01, `scenarii/s06-the-cities.md`).
 1. Where the cities of 1100 come from, and how they are entered (the field of importance in the CMS, then 30 to 40
    cities) — a first list, to be read by the dev: `cities-1100.md`.
 2. ~~The point's look per order~~ — decided, row 9. The name's place beside it (Imhof / Yoeli) is set to the right on the bench; to confirm on the map.

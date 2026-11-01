@@ -4,7 +4,8 @@
 > en avoir besoin […] j'ai envie qu'on ait exactement la même approche qu'avec le cartographeur »* — and they are meant to
 > be handed to Claude Design. The atlas has never had its reader's gestures written as scenarios; the Cartographer has
 > eighteen (`files/plans/cartographer/scenarii/`). **This file is the state of things, read from the code on
-> 2026-11-01; the scenarios themselves are not written yet.** The split below was proposed and accepted in principle
+> 2026-11-01**; ~~the scenarios themselves are not written yet~~ — **written the same day**, `scenarii/s00` → `s10` and
+> `s99`; the contradictions below are struck in their plans, the holes are in `s99`. The split below was proposed and accepted in principle
 > the same night; the dev stopped the session to fix the cities' names first.
 
 ## Where to resume
@@ -105,7 +106,7 @@
   (`detailLevels.ts:58-87`, `cityMarkers.ts:130-144`).
 - Marks: capital ring + 60 % rim around a dark point, 15 px; large city the same, 11 px; city a dark point, 6 px;
   constant size on screen (`S/scene/cities/cityMarks.ts`).
-- Names: Fondamento 13/12/11 px, right of the mark, never in capitals, **always French** (`place.name.fr`,
+- Names: Fondamento ~~13/12/11 px~~ 17/16/15 px since `6c23c15` (ATLAS-325 — corrected 2026-11-01, writing s06), right of the mark, never in capitals, **always French** (`place.name.fr`,
   `S/scene/events/mapEventLayer.ts:79`).
 - **Reach**: a name shows while its city is within 1.5 × the camera's distance to the centre (third level), 1.45→1.25
   across the last; 10 % margin to leave; 0.6 s fade; points stay (`S/scene/cities/nameReach.ts`).

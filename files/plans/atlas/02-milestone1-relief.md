@@ -25,7 +25,9 @@
 
 ## 1.4 — Clickable polygons + fly-to
 
-- Raycasting on click → intersection. Camera **orients toward** the point and **moves closer** (eased arc).
+- Raycasting on click → intersection. ~~Camera **orients toward** the point and **moves closer** (eased arc).~~ — *struck
+  2026-11-01 (`scenarii/s03-click-and-focus.md`): a click recentres at the same zoom, straight; the double-click enters
+  the focus mode, along the arc (`focus-mode.md`). The polygons are not clickable: the click answers where, never what.*
 
 ## Picking architecture (geometry vs semantics)
 

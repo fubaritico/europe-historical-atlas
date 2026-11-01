@@ -38,8 +38,9 @@ There is **no photo texture** to source — the map is **generated in layers**, 
 - **Data-driven**: names from the same GeoJSON as the fills (`NAME`/`ADMIN`); capitals/cities from Natural
   Earth "populated places" (with a rank for declutter).
 - **Declutter by zoom**: nations when far, capitals/regions when close.
-- **Parchment styling**: serif font, faded-ink color, matches the vintage direction. Labels are clickable
-  (a label can be a nation's click target → event).
+- **Parchment styling**: serif font, faded-ink color, matches the vintage direction. ~~Labels are clickable
+  (a label can be a nation's click target → event).~~ — *struck 2026-11-01: nothing is clickable yet, the names are drawn
+  in the scene, not the DOM (`scenarii/s99-holes.md`, A-06; ATLAS-147).*
 - **Consistent** with the "native-TS overlays, no React" decision. Optional hybrid: a few timeless **sea
   names** baked into the texture (spaced italic caps, old-map look); everything else DOM.
 - **Caveat**: historically-accurate capitals per century (they move) are not a turnkey dataset — modern

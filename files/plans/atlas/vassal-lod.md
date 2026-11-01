@@ -24,8 +24,10 @@
 - **Split level of a border** — the first L at which its two sides wear different colours: 0 between two
   independent realms, `k+1` between two polities sharing an ancestor at depth `k`. A border is hidden below
   its split level and fades in at it.
-- **Zoom → L**, continuous, from dev-panel thresholds like the rivers' (`revealStart`, `revealEnd`, `fade`):
-  level 1 reveals at `revealStart`, the deepest at `revealEnd`.
+- ~~**Zoom → L**, continuous, from dev-panel thresholds like the rivers' (`revealStart`, `revealEnd`, `fade`):
+  level 1 reveals at `revealStart`, the deepest at `revealEnd`.~~ — *struck 2026-11-01: since 31/10 the levels of detail
+  choose L — none afar, the direct vassals from 0.45, every level from 0.65 — in a fade in time, never with the zoom
+  (`detail-levels.md`, `scenarii/s04-levels-of-detail.md`).*
 
 ## Steps
 
@@ -36,8 +38,9 @@
    two levels around it. No triangle is recut, no buffer rewritten while zooming.
 3. **atlas borders** — `exactBordersOf` gives each group its split level; one composed layer per level, its
    whole opacity set from the zoom (level 0 always shown).
-4. **dev panel** — a `vassals` group: `revealStart`, `revealEnd`, `fade`, and an off switch that shows every
-   polity in its own colour (today's look, for comparison).
+4. **dev panel** — a `vassals` group: ~~`revealStart`, `revealEnd`, `fade`, and~~ an off switch that shows every
+   polity in its own colour (today's look, for comparison). *The three sliders struck 2026-11-01: removed on 31/10 with
+   the levels of detail (the dev: « il y a trop de réglages »); the switch stayed.*
 5. **Parity table** in `.claude/rules/architecture.md`: a difference by design (the atlas only).
 
 **Aside, asked the same day**: rivers always shown, as in the Cartographer — no code, set the dev panel's

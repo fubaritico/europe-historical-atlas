@@ -13,8 +13,8 @@ A **scenario set** specifies an application by its gestures: Gherkin for the con
 blockquotes for the decisions already taken. Both are binding, and in different ways. This skill is the
 procedure for turning one into code without lying about how finished the result is.
 
-It is **not about one application.** The Cartographer has the only set today; the atlas is specified by
-numbered chapters instead, and will get a set the day its gestures need the same treatment. Everything
+It is **not about one application.** Two sets exist: the Cartographer's, written first, and the atlas's
+since 2026-11-01. The CMS has none yet. Everything
 below is the pattern; §6 lists what actually exists.
 
 **Why it exists.** On 2026-10-06 step 4d-1 shipped with a JSDoc — written two steps earlier, in the same
@@ -123,8 +123,8 @@ Three honest answers, and picking the wrong one is how specification gets invent
 
 - **It is tooling** (a config, a cache, a CI job) — scenarios do not specify it, and the rules in
   `.claude/rules/` do.
-- **It belongs to an application specified by chapters** (the atlas, today) — then the chapter is the
-  contract, and the same ladder in §4 applies to it unchanged.
+- **It belongs to an application specified by chapters** (the CMS, today; the atlas until 2026-11-01) — then the
+  chapter is the contract, and the same ladder in §4 applies to it unchanged.
 - **It is product work nobody has specified** — then stop and say so. Writing the code first and the
   scenario afterwards produces a scenario that describes the code, which is the one thing a scenario
   must never be.
@@ -157,9 +157,23 @@ Three honest answers, and picking the wrong one is how specification gets invent
 | `s17-tools-wait-for-the-zoom` | the tools' reach against the zoom | 5 (done) |
 | `s18-autosave` | the draft on disk, the snapshots | 5 (step 1 done) |
 
-**The atlas** — no set. It is specified by `files/plans/atlas/01-foundations.md` … `07-robustness.md`
-plus `focus-mode.md` and `readability-budgets.md`, which are chapters rather than gestures. Its own
-scenarii would go in `files/plans/atlas/scenarii/`, following §1.
+**The atlas** — `files/plans/atlas/scenarii/`, written 2026-11-01 (ATLAS-324) **from the code**, then checked
+against what the dev saw: each says when it was built and whether it was walked. 12 files, 10 holding Gherkin; its
+holes are `A-NN`, never to meet the Cartographer's `H-NN`. The chapters (`01-foundations.md` … `07-robustness.md`,
+`focus-mode.md`, `detail-levels.md`…) keep the reasons; a chapter line the code contradicted is struck there.
+
+| scenario | what it specifies |
+| --- | --- |
+| `s01-open-the-atlas` | the splash, the one bar, the year faded in over the relief |
+| `s02-navigate` | keys, wheel, drag, the window's edges, the limits, the view kept |
+| `s03-click-and-focus` | the click that recentres, the double-click into the focus, ‹escape› |
+| `s04-levels-of-detail` | the four stops, the fade in time, the two thresholds, the layers' order |
+| `s05-the-countries` | fills, borders, vassals, tribes, the countries' names |
+| `s06-the-cities` | marks, names, the names' reach, a point yielding to a name |
+| `s07-the-events` | pins, flat drawings, 3D icons, light and shadow |
+| `s08-the-sheet-and-its-decor` | the sheet, frame, title, relief, coast, rhumbs, rose, rivers |
+| `s09-when-something-is-missing` | the notices, blocking or degraded |
+| `s10-language-and-accessibility` | the language, reduced motion, keyboard, screen reader |
 
 **Places & events (Payload)** — nothing yet, and it is an application too (see
 `rules/architecture.md`, "apps and resources").

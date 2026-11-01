@@ -21,12 +21,16 @@
 
 ## 0.2 — Camera persistence across hot-reload (CRITICAL, done first)
 
-- `CameraStateStore` serializing camera state: `position` + `quaternion` (or world matrix), `fov`/focal,
-  and the controls `target`.
+- ~~`CameraStateStore` serializing camera state: `position` + `quaternion` (or world matrix), `fov`/focal,
+  and the controls `target`.~~
 - Two cases covered:
-  - **Vite HMR** (module replacement, no reload) → `import.meta.hot.data` / `import.meta.hot.dispose`
+  - **Vite HMR** (module replacement, no reload) → ~~`import.meta.hot.data`~~ / `import.meta.hot.dispose`
     to hand state to the new instance.
-  - **Full refresh (F5)** → `sessionStorage`, throttled write + on `beforeunload`.
+  - **Full refresh (F5)** → `sessionStorage`, ~~throttled write +~~ on `beforeunload`.
+
+  *Struck 2026-11-01 (`scenarii/s02-navigate.md`): the view kept is `{target, zoom}` (`controls/mapCameraStore.ts`), the
+  camera placed from them; written on `beforeunload` only, and a hot reload goes through the same session storage.
+  `camera/cameraState.ts`, the store this section describes, is no longer called (`scenarii/s99-holes.md`, A-11).*
 - **Synchronous restore BEFORE the first `render()`** → zero visible transition.
 - Same seam later powers **Escape-to-return** (push/pop camera pose).
 - Manual test: move the camera, edit code, verify the view is strictly identical.

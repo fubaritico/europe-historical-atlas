@@ -13,7 +13,8 @@
 - **Navigation limits** = clamp ground target to map bbox + clamp zoom `[min,max]` (not fog).
 - **M1 texture** = derived from the heightmap (hypsometric × hillshade), to decouple from sourcing.
 - **M1 "clickable polygon" = a point on the relief** (fly-to); regions are a later `RegionResolver` layer.
-- **Fly-to** follows an eased arc, ending locked at ~45° pitch (close-up).
+- **Fly-to** follows an eased arc, ending ~~locked at ~45° pitch~~ (close-up). *Struck 2026-11-01: at the zoom's own
+  pitch, 30° at the closest (`scenarii/s03-click-and-focus.md`).*
 - **Visual direction = vintage school-atlas / parchment** (muted brown nation colors, drawn coastlines,
   prominent + meaningful relief). See [04-atlas-data](04-atlas-data.md).
 - **Sea = stylized flat opaque** + coastal liseré + compass rose; not clickable at first.

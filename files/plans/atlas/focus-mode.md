@@ -55,10 +55,13 @@ a drag-pan makes, and the reader asked for it by clicking.
 ```
 e    = easeInOut(t)                    // the ground move, unchanged
 base = lerp(fromZoom, toZoom, e)       // what a straight flight would do
-dip  = sin(PI * t)                     // 0 at both ends, 1 in the middle
+dip  = sin(PI * t)                     // 0 at both ends, 1 in the middle — STRUCK 2026-11-01, see below
 zoom = lerp(base, peak, dip)
 peak = min(flyArcZoom, fromZoom, toZoom)
 ```
+
+> *Struck 2026-11-01*: the code's `dip` is `4t(1 − t)`, not `sin(πt)` — `Math.sin(Math.PI)` is 1.22e-16, not zero, so
+> the flight settled a hair short of its zoom (`controls/cameraFlight.flightZoom`). `scenarii/s03-click-and-focus.md`.
 
 `peak` is clamped below both ends so the curve always reads as an arc: a `flyArcZoom` above either end
 would make the middle of the trip *closer* than its extremities, which is not a flight, it is a bounce.
@@ -118,7 +121,7 @@ is a two-case rule written as one expression. Nothing else in this change swallo
 
 ## Wiring
 
-`src/mapInteraction.ts` keeps ownership of the gestures (ARCH-012: this is a rule about the map, not
+`app/mapInteraction.ts` (~~`src/mapInteraction.ts`~~, moved 2026-10-27 — struck 2026-11-01) keeps ownership of the gestures (ARCH-012: this is a rule about the map, not
 wiring). It gains a `keyTarget` seam defaulting to `window`, mirroring `createMapControls`, so Escape
 works without the canvas being focused and tests can inject an isolated target. `isEditableFocused` is
 honoured: Escape inside a lil-gui field cancels the edit, it does not leave the mode.
@@ -151,5 +154,5 @@ country focus wants. **Pitch has to become independent of zoom while a focus is 
 4. `controls/mapControls.ts` — `focusOn` / `panTo` / `exitFocus` / `focused` replace `flyTo` / `flying`.
 5. `devParams/camera.ts` — the sliders.
 6. `src/viewport.ts` — reduced motion collapses the duration.
-7. `src/mapInteraction.ts` — dblclick / click / Escape.
+7. `app/mapInteraction.ts` (~~`src/mapInteraction.ts`~~, moved 2026-10-27) — dblclick / click / Escape.
 8. Tests at every step, 5 levels.
