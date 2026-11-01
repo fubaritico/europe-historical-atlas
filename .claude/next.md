@@ -5,39 +5,37 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — les villes (ATLAS-295) : une légende par importance, puis les dessiner ; les sources de toute saisie
+## ▶ ON REPREND ICI — les scénarios de l'atlas (ATLAS-324, en tête d'À faire)
 
-**30/10, fin à 22 h 30**, une session menée en grande partie **par Remote Control, lui loin de l'écran** : je testais dans
-Chrome avec un compte de test et lui envoyais les captures. **11 commits non poussés**, de `736bc19` à `4a7a9ee` — pousser
-quand il le dira. **Rien n'est dessiné dans l'atlas** : l'écran de saisie est fini, l'export écrit les villes, l'atlas les
-lit sans les dessiner. Sa base tient **une ville** : Rome en 1100, capitale, quatre raisons.
+**01/11, fin à 1 h 45.** Tout est commité et poussé (`6c23c15` et les notes de session) ; la CI était verte jusqu'à `9af17e1`,
+vérifier le dernier envoi. Il a demandé de **reprendre tout de suite sur les scénarios**, au même point :
 
-**Ce qu'il a demandé en fermant — à traiter dans cet ordre, en en parlant d'abord avec lui :**
-- **Une légende par importance des villes avant de dessiner** : *« il faut des points, mais il faut des points avec cercle,
-  il faut une légende différente par rapport à l'importance de la ville »* — une marque distincte pour la capitale, la
-  grande ville, la ville. Les règles des cartographes déjà réunies sont dans `files/plans/atlas/cities.md` (la taille et la
-  valeur, lues sans légende, Bertin ; le nom à droite du point, Imhof). Proposer des marques sur un banc, lui choisit.
-- **Un système de sources qui accompagne toute saisie** — lieux, événements, villes : *« ce n'est pas quand je voudrais, c'est
-  quand il faudra »* — donc il est dû, à concevoir. Aujourd'hui seules les villes ont des lignes « ce que dit telle source ».
-- **L'incertitude : n'en parler que quand un algorithme existe.** Il n'y en a aucun dans le code (seulement le « vers » d'une
-  date et sa marge, le flou des tribus, le registre des sources, les lignes de sources des villes) ; la machine de
-  `files/plans/evidence-system.md` n'est que sur le papier. **Ne plus écrire « incertain » comme si c'était calculé.**
+1. Charger `/scenarii-to-code` (§1 la forme, §7 du code vers le scénario) et **`files/plans/atlas/scenarios-inventory.md`** —
+   l'inventaire complet lu dans le code le 01/11 (fichiers et lignes), les dix contradictions plan / code, les trous, le découpage.
+2. Créer `files/plans/atlas/scenarii/` sur le modèle du Cartographe : `s00-index`, un `sNN` par geste ou écran, `s99-holes`.
+3. **Écrire s04 (les paliers de détail) et s06 (les villes) d'abord**, puis s01 → s10. Chaque scénario : *construit le … (commit,
+   ticket)*, *parcouru* là où il l'a vu (ses captures du 31/10 et du 01/11 ; ATLAS-323 et 325 testés par lui).
+4. Barrer, jamais supprimer, chaque ligne de plan contredite, avec une note datée. Les trous vont dans `s99`, un par un, à lui
+   de trancher (langues mélangées, « réduire les animations », rien de cliquable, recharger en mode focus…).
+5. Les scénarios sont faits pour être **passés à Claude Design** ensuite.
 
-**En attente, non accepté** : le classement des villes par rôle politique — capitale = siège d'un souverain, grande ville =
-siège d'un vassal direct (nos données de 1100 : 88 souverains, 55 vassaux directs). Il a demandé que **chaque condition soit
-vérifiable, vérifiée, sourcée, et la source saisie dans le CMS** ; ma méthode (Wikidata « capitale » avec ses dates, sinon une
-source savante citée à l'endroit exact ; saisie par lots par un script Payload) attend son go.
+**Les villes, où on en est** (ATLAS-295, en cours) : **113 villes de 1100** dans sa base et dans le fichier de l'atlas ; dessinées
+par paliers de détail (`files/plans/atlas/detail-levels.md`, dix décisions), noms selon la distance à la caméra, un point de capitale
+sur un nom de pays cède (ATLAS-323). **En attente, à lui de trancher un jour** : les sièges que ni Wikidata ni la carte de la Rus'
+ne datent (Roskilde, Nidaros) ; les villes qu'aucune des trois sources n'atteste (la Géorgie — Koutaïssi, Tbilissi —, Uppsala,
+Sigtuna, Ispahan) — une source de plus, ou Wikidata seul, jamais inventées. **Toujours dû** (demandé le 30/10) : un système de
+sources qui accompagne toute saisie (lieux, événements). **L'incertitude** : n'en parler que quand un algorithme existe.
 
-**Décidé par lui ce jour** : l'importance qui ordonne la carte est **politique** ; le Saint-Empire **n'a pas de capitale**,
-aucune symbolique, pas Aix ; l'export **prépare** le fichier de l'atlas, jointures faites (*« comme en GraphQL »*) — écrit en
-tête de `core/src/data/contentFormat.ts` ; le reste des décisions de l'écran dans `files/plans/atlas/city-sheet-screen.md`.
+**Décidé par lui, à garder en tête** : l'importance qui ordonne la carte est **politique**, et au Moyen Âge le religieux en est
+(*« le religieux et la politique, c'est la même chose »*) ; le Saint-Empire **n'a pas de capitale** ; le zoom est **un défilement à
+crans** (*« des scroll top »*), plus rien de progressif sauf le rayon des noms ; **le nom du pays prime** sur un point sans nom.
 
 **Le compte de test** : `claude-test@localhost.test`, mot de passe dans `packages/cms/.env.test-user` (ignoré par git) — me
 connecter : mettre un temps `admin.autoLogin` avec `prefillOnly` dans `payload.config.ts` (lit ce fichier), cliquer, **retirer
 aussitôt**. Je ne lis jamais le mot de passe ni un jeton dans la conversation (refusé par les permissions). À lui de le
 supprimer dans « Contributeurs ».
 
-**Deux fautes de frappe dans ses raisons** : « pelrinage », « evêché » — à lui de les corriger dans « Raisons d'importance ».
+**Une faute de frappe dans ses raisons** : « pelrinage » — à lui de la corriger dans « Raisons d'importance » (« évêché » corrigé le 31/10).
 
 **Pour le design system** : son menu déroulant, ouvert vers le haut, cache le champ au-dessus ; il ne peut pas relier un texte
 d'aide au menu — deux demandes à transmettre à son Claude.
@@ -106,10 +104,10 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 | où | ticket | état |
 | --- | --- | --- |
 | **Chantiers** | DESIGN-262 La gestion de l'incertitude · **CMS-285 Le CMS** | DESIGN-262 : palier 2 conçu (CORE-270) ; CMS-285 : socle codé, outillage à faire |
-| **En cours** | ATLAS-295 · ATLAS-303 · ATLAS-156 · ATLAS-152 | ATLAS-295 : l'écran fait, l'export écrit les villes, la légende puis le dessin à faire ; ATLAS-303 : le rendu ; ATLAS-304 renvoyé dans À faire le 29/10 (R3, dessiner au besoin) ; ATLAS-156 : bataille et siège faits ; ATLAS-152 : sources de 1100 |
-| **À valider par le développeur** | — | vide le 30/10 (CMS-290 passé en Fait) |
+| **En cours** | ATLAS-295 · ATLAS-303 · ATLAS-156 · ATLAS-152 | ATLAS-295 : 113 villes saisies et dessinées par paliers, les villes sans source et les sièges sans date à trancher ; ATLAS-303 : le rendu ; ATLAS-156 : bataille et siège faits ; ATLAS-152 : sources de 1100 (la carte de la Rus' ajoutée le 01/11) |
+| **À valider par le développeur** | — | vide ; ATLAS-322, 323, 325 passés en Fait le 01/11 |
 | **Backlog** | ATLAS-299 · ATLAS-297 · CORE-270 · CMS-281..283 · ATLAS-284 · CARTO-237 · CARTO-273 · CARTO-274 | CORE-270 passe après la contribution (25/10) ; 281–283 les écrans suivants |
-| **À faire**, en tête | ATLAS-287 · ATLAS-288 · CMS-276 → 280 · … · ATLAS-304 (en bas) | dans son ordre |
+| **À faire**, en tête | **ATLAS-324 les scénarios de l'atlas** · ATLAS-287 · ATLAS-288 · CMS-276 → 280 · … · ATLAS-304 (en bas) | dans son ordre |
 | **Idées** | ATLAS-321 la chapelle d'Aix en 3D · ATLAS-319 police réduite aux lettres des noms · CMS-320 le CMS en fr/en · ATLAS-300 animations réduites · CARTO-268 feature flags · CORE-271 généalogie · CARTO-272 radar | CARTO-268 : pas encore |
 
 **Toujours en attente, à lui proposer un jour** : le relief niveau 6 du Cartographe (une ligne, `main.tsx` →
@@ -117,7 +115,7 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 
 ## Where we are
 
-**5 772 tests** (1 624 `core` · 2 275 Cartographe · 1 390 atlas · 314 CMS · 169 plugin `eslint-plugin-eha`, 30/10 soir), gate
+**5 873 tests** (1 624 `core` · 2 275 Cartographe · 1 456 atlas · 349 CMS · 169 plugin `eslint-plugin-eha`, 01/11 nuit), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 

@@ -2,6 +2,28 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-10-29 soir → 30/10 nuit — les villes : des règles de cartographe, trois sources, la fiche « Ville à une date »
+
+Dans la plage **29/10 15:42 → 30/10 00:54** (la session de 22:58 à 00:54, ≈ 2 h) ; le chantier ouvert le 05/10 totalise
+**151 h 40 sur 27 plages**. Commités, **non poussés** : `b3cafed` (les villes à une date), `898cd65` (les sources des villes).
+
+- **Le tableau** : ATLAS-301, 145 et 302 passés en Fait avec leur commentaire de clôture ; ATLAS-304 renvoyé dans À faire
+  (R3, dessiner au besoin) ; l'étape 5 des noms devient ATLAS-319 ; le CMS bilingue devient CMS-320.
+- **Les villes (ATLAS-295, en cours)** — à sa demande, les icônes suivantes attendent : *« on a beaucoup imité une
+  présentation de jeux vidéo […] il faut retrouver des règles cartographiques »*. Huit décisions dans
+  `files/plans/atlas/cities.md` : le point et le nom ensemble, par importance ; le filigrane des pays au dernier ordre de
+  villes ; l'importance datée et **jamais tirée de la population** (*« une ville peut être peu peuplée et être très
+  importante »*) ; deux formulaires, le lieu et la ville à une date ; une date ou une durée ; aucune fiche ne chevauche une
+  autre du même lieu, **validée à la saisie** ; l'écran fait de Formik + Zod + son design system.
+- **Les sources** : Bosker 2013, Buringh 2021, Chandler par Reba 2016, en amalgame, une colonne par source
+  (`files/spikes/city-sources/`) ; une première liste des villes de 1100 (`cities-1100.md`).
+- **Le CMS** : « Villes à une date » et « Raisons d'importance » ; le refus de chevauchement en une phrase, fr/en ; un texte
+  sous chaque champ. Testé par lui : *« c'est vérifié »*.
+- **Mes fautes** : le formulaire livré sans aucun texte (*« on comprend rien à ta merde ! Y'a pas de texte, y'a rien ! »*) ;
+  le message anglais de Payload laissé tel quel ; un test demandé sans les valeurs à saisir ; une phrase de réponse
+  incompréhensible (*« le pourquoi est au clic… »*) ; une durée proposée puis retirée puis remise — il le sentait : *« un
+  trou dans la raquette »*.
+
 ### 2026-10-29 (jour) — les noms des pays jusqu'au bout, le démarrage, le panneau en développement seulement
 
 Plages au journal : **11:43 → 14:06** et **15:42 → 22:55** (9 h 36) ; le chantier ouvert le 05/10 totalise **149 h 42 sur 27

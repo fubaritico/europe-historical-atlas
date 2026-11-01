@@ -2,6 +2,27 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
+### 2026-10-31 soir → 01/11 nuit — 113 villes, les paliers de détail, les villes sur la carte, l'inventaire des scénarios
+
+Plage **31/10 17:39 → 01/11 01:43** (8 h 03) ; le chantier ouvert le 05/10 totalise **167 h 08 sur 30 plages**. **14 commits, tous
+poussés**, de `8808863` à `6c23c15`, CI verte jusqu'au déploiement.
+
+- **Les villes dans le CMS** (ATLAS-295) : 59 par le seed (Bosker capitale → capitale, archevêché → grande ville, trois sources →
+  ville), puis l'Est et le Nord (capitales datées par Wikidata), Riazan déplacée à la Vieille Riazan, Mourom ajoutée, les sièges
+  de la Rus' lus sur une carte qu'il a donnée (mention RÉFÉRENCE sur ATLAS-152) — **113 villes**. Le titre « Paris — 1100 » d'une fiche.
+- **Les villes sur la carte** : marques choisies sur le banc (« C4 avec le blanc à 60 % ») ; **les paliers de détail** — le zoom en
+  défilement à crans, quatre paliers, fondu de 0,6 s, deux seuils (`files/plans/atlas/detail-levels.md`) ; noms selon la distance à
+  la caméra ; ATLAS-322 (ordre des couches par palier), **ATLAS-323** (un point de capitale sur un nom de pays cède — testé par lui),
+  **ATLAS-325** (noms plus grands, plus gras, nets — testé), passés en Fait. Ses retouches de 1100 commitées.
+- **Décidé par lui** : *« le religieux et la politique, c'est la même chose »* (l'archevêché est une importance politique) ; *« des
+  scroll top »* ; *« c'est le nom du pays qui est le plus important »* — après mon essai de faire contourner les capitales par les
+  noms, retiré avant commit : *« c'est mieux comme ça »*.
+- **Les scénarios de l'atlas** : l'inventaire fait (`files/plans/atlas/scenarios-inventory.md`), le découpage accepté, ATLAS-324 en
+  tête d'À faire — la session suivante reprend là.
+- **Mes fautes** : l'heure de reprise lue par `tail` sans la comparer à la date (19 h annoncées « 6 minutes ») — règle ajoutée à
+  `start-session` ; les villes dessinées sans test de profondeur, l'épingle passée derrière ; un changement des noms annoncé sans
+  vérifier qu'il s'était appliqué (*« c'est pas assez grand »* — rien n'avait changé) ; trois `cd`.
+
 ### 2026-10-30 — l'écran « Ville à une date », une seule règle du formulaire à l'export, l'admin du CMS en sombre
 
 Plages au journal : **12:14 → 14:30** et **17:29 → 22:27** (7 h 13), la seconde presque entière **par Remote Control, le dev
@@ -25,26 +46,4 @@ loin de l'écran** — je testais dans Chrome et lui envoyais les captures ; le 
   des champs (il passe avant) ; parler d'incertitude sans qu'aucun algorithme n'existe — *« toute cette branlette
   intellectuelle »*.
 
-### 2026-10-29 soir → 30/10 nuit — les villes : des règles de cartographe, trois sources, la fiche « Ville à une date »
-
-Dans la plage **29/10 15:42 → 30/10 00:54** (la session de 22:58 à 00:54, ≈ 2 h) ; le chantier ouvert le 05/10 totalise
-**151 h 40 sur 27 plages**. Commités, **non poussés** : `b3cafed` (les villes à une date), `898cd65` (les sources des villes).
-
-- **Le tableau** : ATLAS-301, 145 et 302 passés en Fait avec leur commentaire de clôture ; ATLAS-304 renvoyé dans À faire
-  (R3, dessiner au besoin) ; l'étape 5 des noms devient ATLAS-319 ; le CMS bilingue devient CMS-320.
-- **Les villes (ATLAS-295, en cours)** — à sa demande, les icônes suivantes attendent : *« on a beaucoup imité une
-  présentation de jeux vidéo […] il faut retrouver des règles cartographiques »*. Huit décisions dans
-  `files/plans/atlas/cities.md` : le point et le nom ensemble, par importance ; le filigrane des pays au dernier ordre de
-  villes ; l'importance datée et **jamais tirée de la population** (*« une ville peut être peu peuplée et être très
-  importante »*) ; deux formulaires, le lieu et la ville à une date ; une date ou une durée ; aucune fiche ne chevauche une
-  autre du même lieu, **validée à la saisie** ; l'écran fait de Formik + Zod + son design system.
-- **Les sources** : Bosker 2013, Buringh 2021, Chandler par Reba 2016, en amalgame, une colonne par source
-  (`files/spikes/city-sources/`) ; une première liste des villes de 1100 (`cities-1100.md`).
-- **Le CMS** : « Villes à une date » et « Raisons d'importance » ; le refus de chevauchement en une phrase, fr/en ; un texte
-  sous chaque champ. Testé par lui : *« c'est vérifié »*.
-- **Mes fautes** : le formulaire livré sans aucun texte (*« on comprend rien à ta merde ! Y'a pas de texte, y'a rien ! »*) ;
-  le message anglais de Payload laissé tel quel ; un test demandé sans les valeurs à saisir ; une phrase de réponse
-  incompréhensible (*« le pourquoi est au clic… »*) ; une durée proposée puis retirée puis remise — il le sentait : *« un
-  trou dans la raquette »*.
-
-> Older sessions (2026-09-12 → 2026-10-29 jour) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-30 nuit) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
