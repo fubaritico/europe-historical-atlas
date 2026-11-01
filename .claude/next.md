@@ -17,7 +17,11 @@
   sur un second site Netlify **`europe-historical-atlas-soon`**, le `.org` en domaine principal, les quatre autres en alias ;
   l'atlas reste sur `europe-historical-atlas.netlify.app`. **Après la validation d'OVH** : dans la zone DNS de chaque domaine,
   un A `@` → `75.2.60.5` et un CNAME `www` → `europe-historical-atlas-soon.netlify.app` (DNS gardé chez OVH pour le
-  courrier) ; les boîtes Zimbra `contact@` et `demandes@`. Le jour de l'ouverture : les domaines passent du site d'attente à celui de l'atlas, rien à changer chez OVH.
+  courrier) ; les boîtes Zimbra `contact@` et `demandes@`. **Le DNS est fait (02/11, nuit)** sur les cinq zones. **Le certificat
+  est cassé, par ma faute** : il ne couvre que `europe-historical-atlas.org` et son `www` ; les huit autres adresses
+  (`.com` `.eu` `.net` `.fr`, avec et sans `www`) donnent une erreur HTTPS depuis que je lui ai fait retirer et rajouter un
+  domaine qui marchait. « Renew certificate » ne les ajoute pas ; le message au forum de Netlify lui a été donné
+  (réinitialiser l'état SSL du projet). Seule l'adresse `.org` est à donner en attendant. Le jour de l'ouverture : les domaines passent du site d'attente à celui de l'atlas, rien à changer chez OVH.
 - **Le gestionnaire de sources** : CMS-332 (Backlog), `files/plans/contribution/source-manager.md`. Il **fait confiance à
   Commons** ; chaque mail part sur son clic.
 - **La Rus' de 1100** : la ligne d'ATLAS-152 dit « RÉFÉRENCE · géométrie redessinée », or ses tracés ont été reportés à la

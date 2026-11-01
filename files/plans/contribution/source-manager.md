@@ -98,6 +98,36 @@ Scenario: a year picks its sources
   is online (CMS-228), the job runs all the time.
 - **The mailbox's password lives in `packages/cms/.env`**, never in code (`CLAUDE.md`, « Secrets »).
 
+## Driven by voice — the CMS as an MCP server
+
+The dev, 2026-11-02: *"I tell you orally, by dictation: send a mail for such a reference."* Payload ships an official
+**MCP plugin** (`@payloadcms/plugin-mcp`; `opensrc/…/payload/packages/plugin-mcp`, `docs/plugins/mcp.mdx`, read
+2026-11-02): it exposes the collections at `/api/mcp`, behind an API key created in the admin, accepts **custom tools**
+(« Customizations »), and Claude Code connects to it in one line (`claude mcp add --transport http Payload
+http://127.0.0.1:3000/api/mcp`, with the key as a Bearer header — the key lives in the dev's settings, never in a file of the
+repository).
+
+```gherkin
+Scenario: ask for a permission by voice
+  Given the CMS running, and Claude connected to it by MCP
+  When the dev says « envoie la demande d'exploitation pour l'atlas des Vikings »
+  Then Claude finds the resource, has the CMS write the request, and shows the mail
+  And on the dev's « envoie », the mail leaves — his spoken word is the click
+  And the request is « envoyée », as from the screen
+
+Scenario: the answers by voice
+  When the dev says « qu'est-ce qui a répondu ? »
+  Then Claude lists the answers arrived since the last time, each with the tool's proposed reading
+  And on « classe celle de Penguin comme un accord », the request and the resource's verdict change
+
+Scenario: enter a resource by voice
+  When the dev gives a Commons address and says « saisis cette carte »
+  Then the resource is created and checked as from the screen, and its verdict told back
+```
+
+The tools to write: find a resource, enter one from an address, write a request, send it (only on the dev's word), list
+the answers, record a reading. Same rules as the screens — the tool proposes, the dev decides.
+
 ## What it holds — the relations
 
 | record | holds | linked to |
@@ -124,6 +154,7 @@ Scenario: a year picks its sources
 | four screens: entry, list with actions, request as a mail, a mailbox in the application | the dev |
 | no mail written by hand: the tool writes, sends, files the answers | the dev |
 | **every mail leaves on the dev's click** — the tool writes, the dev sends; the same for a reminder | the dev, 2026-11-01, on my recommendation |
+| **the whole plan is built, as written — the mailbox and the requests included — and Claude builds it.** *"What I want is to be able to pick, ask, finish. I don't have the time."* Nothing is to be removed or cut down | the dev, 2026-11-02 |
 | the mailbox carries the atlas's name | the dev |
 | the verdict is computed, never typed; an agreement or a refusal is proposed by the tool, confirmed by the dev | mine — to confirm |
 | a copy and its original are one witness | the glossary, `témoin` (CORE-270) |
