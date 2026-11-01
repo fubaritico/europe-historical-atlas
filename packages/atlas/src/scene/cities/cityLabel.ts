@@ -45,13 +45,27 @@ export interface CityNameType {
  * names in capitals fighting the countries' from afar.
  */
 export const CITY_NAME_TYPE: Readonly<Record<CityImportance, CityNameType>> = {
-  capital: { size: 13 },
-  'large-city': { size: 12 },
-  city: { size: 11 },
+  // Large enough for every letter to read, Hungarian names included (the dev, 2026-11-01: « il faut vraiment qu'on
+  // puisse bien lire les lettres »); the plan keeps the tuning's history.
+  capital: { size: 17 },
+  'large-city': { size: 16 },
+  city: { size: 15 },
 }
 
 /** The light edge under a name, the marks' own parchment at their rim's opacity. */
 const NAME_EDGE = 'rgba(244, 236, 216, 0.6)'
+
+/**
+ * The light edge's width, in CSS pixels, chosen on sight (the dev, 2026-11-01). It reaches half its width past the
+ * letters: {@link PAD} must stay at least that, or the edge is cut at the image's border.
+ */
+const NAME_EDGE_WIDTH = 3
+
+/**
+ * A stroke of the ink itself around each letter, in CSS pixels — a false bold: Fondamento's hairlines vanish at these
+ * sizes, and the dev saw « des pâtés marron et blanc » (2026-11-01).
+ */
+const NAME_INK_WEIGHT = 0.7
 
 /** Where a name sits, in CSS pixels — computed apart from the drawing, so it is tested with literals. */
 export interface LabelLayout {
@@ -117,11 +131,15 @@ export function canvasLabelDrawer(faceUrl: string): DrawCityLabel {
     context.font = font
     context.textBaseline = 'middle'
     context.lineJoin = 'round'
-    context.lineWidth = 3
+    context.lineWidth = NAME_EDGE_WIDTH
     context.strokeStyle = NAME_EDGE
     context.strokeText(name, layout.textX, layout.height / 2)
     context.fillStyle = CITY_MARK_INK
     context.fillText(name, layout.textX, layout.height / 2)
+    // The ink once more, as a thin stroke: the letters' hairlines thickened.
+    context.lineWidth = NAME_INK_WEIGHT
+    context.strokeStyle = CITY_MARK_INK
+    context.strokeText(name, layout.textX, layout.height / 2)
     return { canvas, width: layout.width, height: layout.height, anchorX: layout.anchorX }
   }
 }

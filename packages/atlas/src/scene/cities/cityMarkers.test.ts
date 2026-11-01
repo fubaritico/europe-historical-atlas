@@ -1,4 +1,4 @@
-import { Euler, Quaternion, Sprite, Texture, Vector3 } from 'three'
+import { Euler, LinearFilter, Quaternion, Sprite, Texture, Vector3 } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
 import { DETAIL_LEVELS } from '../detail/detailLevels'
@@ -163,6 +163,18 @@ describe('createCityMarkers', () => {
       expect(markers.object.renderOrder).toBeLessThan(HALO_RENDER_ORDER)
       expect(city(markers.object, 0).point.material.depthTest).toBe(false)
       expect(city(markers.object, 0).name.material.depthTest).toBe(false)
+    })
+  })
+
+  describe('the names’ sharpness', () => {
+    it('reads a name at full sharpness, never through blended smaller copies', async () => {
+      const markers = createCityMarkers([PARIS], loadTexture, drawn)
+      await settle()
+
+      const texture = city(markers.object, 0).name.material.map
+
+      expect(texture?.generateMipmaps).toBe(false)
+      expect(texture?.minFilter).toBe(LinearFilter)
     })
   })
 

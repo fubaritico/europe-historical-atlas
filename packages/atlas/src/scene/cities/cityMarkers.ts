@@ -10,7 +10,7 @@
  * whatever the depth (*« c'est très bien qu'elles apparaissent devant […] c'est plus important »*).
  */
 
-import { CanvasTexture, Group, SRGBColorSpace, Sprite, SpriteMaterial } from 'three'
+import { CanvasTexture, Group, LinearFilter, SRGBColorSpace, Sprite, SpriteMaterial } from 'three'
 
 import { CITY_IMPORTANCES } from '@europe-historical-atlas/core/data/cityImportance'
 
@@ -151,6 +151,10 @@ function applyFrame(city: CitySprites, frame: CityFrame): void {
 function takeName(city: CitySprites, label: CityLabelImage): void {
   const texture = new CanvasTexture(label.canvas)
   texture.colorSpace = SRGBColorSpace
+  // No smaller copies to blend: drawn at the screen's own density, a name read through its mipmaps turned to « des
+  // pâtés marron et blanc » (the dev, 2026-11-01).
+  texture.generateMipmaps = false
+  texture.minFilter = LinearFilter
   city.name.material.map = texture
   city.name.material.needsUpdate = true
   city.name.center.set(label.anchorX / label.width, 0.5)
