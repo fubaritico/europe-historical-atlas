@@ -47,7 +47,7 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
   tests du Cartographe au-delà de 5 s, verts seuls ; le même commit relancé une fois est passé (Turbo rejoue de son cache les
   paquets déjà verts). Relancer **une** fois, jamais `--no-verify`.
 - **Le design system vient de GitHub Packages, et GitHub exige un token même pour l'installer.**
-  `@fubaritico/{tokens,styles,react,behaviors}` en `^0.8.0` (depuis le 09/10 en `0.2.0` ; la 0.7.0 du 21/10 renomme
+  `@fubaritico/{tokens,styles,react,behaviors}` en `^0.9.0` (depuis le 09/10 en `0.2.0` ; la 0.7.0 du 21/10 renomme
   les jetons de couleur, CARTO-117). **Après une montée, relancer le serveur de dev** : un Vite déjà lancé garde les
   chemins `.pnpm/…@0.6.0` résolus à son démarrage et sert l'ancienne peau sous le nouveau thème — vu le 21/10. Le `.npmrc` du dépôt ne fait que **router**
   le scope, sans aucun token : une ligne `${NODE_AUTH_TOKEN}` y faisait **ignorer tout le fichier** en
@@ -66,7 +66,7 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
   3. **Depuis le 19/10 le dépôt est public, et un visiteur qui le clone ne peut pas l'installer** sans un
      token GitHub à lui. La sortie est de publier le DS sur npmjs. **À décider à ce moment-là.**
   **Monter de version** : le DS sort ses cinq paquets à la même version, et un composant neuf est une
-  mineure. En `0.x` le caret ne franchit pas une mineure, donc `^0.8.0` ne prendra jamais `0.9.0` seul —
+  mineure. En `0.x` le caret ne franchit pas une mineure, donc `^0.9.0` ne prendra jamais `0.10.0` seul —
   il faut bumper les quatre lignes ensemble.
   **Sévérité : à savoir.**
 - **Depuis le 12/10, `lint` attend `^lint` : si le plugin `eslint-plugin-eha` échoue à son propre lint,
@@ -108,8 +108,8 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
   que la 10 change un comportement qui nous concerne : elle résout la config **par fichier** et non depuis
   le répertoire courant, ce qui rendrait les configs par paquet lisibles sans lancer `eslint` depuis chacun.
 - **Un clone `opensrc` est local à la machine, jamais au dépôt.** `/opensrc/` est gitignoré, ce qui
-  est voulu — three.js et Zustand (v5.0.15) y sont. Conséquence : sur une autre machine, il faut relancer
-  `npx opensrc@0.6 path <pkg>`, et un agent qui suppose les sources présentes lira du vide. **Cosmétique**,
+  est voulu — three.js, Zustand et Payload y sont, versions dans `opensrc/sources.json`. Conséquence : sur une autre
+  machine, il faut relancer `npx opensrc@0.6 <pkg>` (la 0.6 n'a pas de commande `path`), et un agent qui suppose les sources présentes lira du vide. **Cosmétique**,
   mais c'est la raison pour laquelle une affirmation « vérifié dans la source » n'est pas reproductible
   ailleurs sans la commande.
 - **`commitlint` avertit `footer-leading-blank` sur tout message long.** Il prend un paragraphe contenant un

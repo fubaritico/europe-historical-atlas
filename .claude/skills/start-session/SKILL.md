@@ -25,14 +25,15 @@ Gather all necessary written context from previous session.
    - **Read the report whole — never through `tail` or `head`** — its first lines carry « Maintenant » and the
      chantier's state, and **compare « Maintenant » with `date` and the environment's date** before saying how
      long ago the last session ended. The hook's injected line can be stale (written at a `/clear` the night
-     before): on 2026-10-31 I trusted it, cut the report's header with `tail`, and told the dev the session had
-     ended « six minutes ago » when it was nineteen hours.
+     before).
 2. Work from the Session State already in context (CLAUDE.md's imports: completed.md, next.md, known-issues.md)
-3. **Load the rules of the subjects `### Next` points to** — `/rules` with those topics (since 2026-10-21
-   most rules are path-scoped and the prompt hook names the rest; no need to ask the dev which files)
+3. **Load the rules of the subjects `### Next` points to** — `/rules` with those topics (most rules are
+   path-scoped and the prompt hook names the rest; no need to ask the dev which files)
 4. Say in one line which rules are loaded, so the dev can name what is missing
 5. **Read the Trello board** — `/trello` skill, `list`, then its sync check. Tell the dev, in two lines,
    what waits on him in **À valider par le développeur** and what tops **À faire**: the board is the list of tasks, `next.md`
    only the resume point.
-6. Remind the user of the next step from `### Next` in CLAUDE.md, framed by the elapsed time from
+6. **The monthly version check** — read « Dernier contrôle des versions » in `next.md`. Over a month old (or absent):
+   say so in one line and propose `/repo-version-manager check`; it runs only if the dev says yes.
+7. Remind the user of the next step from `### Next` in CLAUDE.md, framed by the elapsed time from
    step 1 (e.g. "on reprend le chantier d'hier" vs "ça fait 2 mois, voici où on en était")

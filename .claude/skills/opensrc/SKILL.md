@@ -1,87 +1,42 @@
 ---
 name: opensrc
-description: Fetch dependency source code to give AI agents deeper implementation context. Use when the agent needs to understand how a library works internally, read source code for a package, fetch implementation details for a dependency, or explore how an npm/PyPI/crates.io package is built. Triggers include "fetch source for", "read the source of", "how does X work internally", "get the implementation of", "opensrc path", or any task requiring access to dependency source code beyond types and docs.
-allowed-tools: Bash(opensrc:*) Bash(npx opensrc@0.6:*)
+description: Fetch a dependency's source code into the project's opensrc/ folder to read its implementation, not just its types — verify a three.js API before using it, debug a library's behaviour, check an edge case the docs do not answer. Use when asked to fetch or read the source of a package, or how a library works internally.
+allowed-tools: Bash(npx opensrc@0.6:*)
 ---
 
-# Source Code Fetching with opensrc
+# Source code with opensrc
 
-Fetches dependency source code so agents can read implementations, not just types. Clones repositories at the correct version tag and, with `npx opensrc@0.6` (this project's command), clones them into the project's `opensrc/` folder (git-ignored).
+**In this project the command is always `npx opensrc@0.6`, at that version** (the dev's call): 0.6 clones into the
+project's `opensrc/` folder (git-ignored, never pushed), which is where the review agents and `CLAUDE.md` look; later
+versions write to `~/.opensrc/`, outside the project.
 
-**In this project always run it as `npx opensrc@0.6`** — that version clones into the project's `opensrc/` folder,
-which is where the review agents and `CLAUDE.md` look; the bare `opensrc` writes to `~/.opensrc/` instead. The
-examples below omit the `npx opensrc@0.6` prefix for brevity.
+## Fetch
 
-## Core Pattern
-
-```bash
-rg "parse" $(npx opensrc@0.6 path zod)
-cat $(npx opensrc@0.6 path zod)/src/types.ts
-find $(npx opensrc@0.6 path zod) -name "*.test.ts"
-```
-
-`opensrc path <pkg>` prints the absolute path to cached source. If not cached, it fetches automatically. Progress goes to stderr, path to stdout, so `$(opensrc path ...)` works in subshells.
-
-## Fetching Source Code
+0.6 has three commands — `list`, `remove`, `clean` — and fetching is the bare form, the names as arguments. **It has no
+`path` command**: `npx opensrc@0.6 path three` would fetch an npm package called `path`.
 
 ```bash
-opensrc path zod
-opensrc path pypi:requests
-opensrc path crates:serde
-opensrc path facebook/react
-
-# Multiple packages at once
-opensrc path zod react next
-opensrc path pypi:requests pypi:flask
-opensrc path crates:serde crates:tokio
-
-# Specific versions
-opensrc path zod@3.22.0
-opensrc path pypi:flask@3.0.0
-opensrc path owner/repo@v1.0.0
-opensrc path owner/repo#main
-
-# A GitHub repo by URL — fetched if absent; also updates AGENTS.md. Docs: https://opensrc.sh/
-npx opensrc@0.6 path https://github.com/owner/repo.git
-
+npx opensrc@0.6 three                          # npm: the version installed, read from pnpm-lock.yaml
+npx opensrc@0.6 three zustand                  # several at once
+npx opensrc@0.6 zod@3.22.0                     # a given version
+npx opensrc@0.6 pypi:requests crates:serde     # other registries, latest or @version
+npx opensrc@0.6 payloadcms/payload@v3.92.0     # a GitHub repository at a tag
+npx opensrc@0.6 list                           # what is fetched, with versions
 ```
 
-### Version Resolution
+Run from the repository root (or pass `--cwd <root>`), so the installed version is read from this workspace.
 
-For npm packages, opensrc auto-detects the installed version from lockfiles (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`). Use `--cwd` to resolve from a different project:
+## Read
 
-```bash
-opensrc path zod --cwd /path/to/project
-```
+The sources sit at `opensrc/repos/<host>/<owner>/<repo>/`, listed with their version in `opensrc/sources.json` — read
+them with the file tools, e.g. `opensrc/repos/github.com/mrdoob/three.js/src/`.
 
-For PyPI and crates.io, explicit versions or latest are used. For repos, use `@ref` or `#ref` to pin a branch, tag, or commit.
+## Keep, and update
 
-## Managing the Cache
+- **Every source is kept** (the dev, 2026-11-01): never `remove` nor `clean`. Many sources are no problem — none is pushed.
+- **Updating is fetching again.** For an npm package, the same command re-reads the installed version: « Already up to
+  date » if unchanged, a new clone if the lockfile moved (`dist/commands/fetch.js`, 0.6.0). A repository moves only when
+  given its new tag. When to do it is `/repo-version-manager`'s: after a bump, in the same breath.
 
-In this project, `npx opensrc@0.6` keeps the sources in `opensrc/` at the repository root (git-ignored), e.g.
-`opensrc/repos/github.com/pmndrs/zustand`. Other opensrc versions default to `~/.opensrc/` (override with `OPENSRC_HOME`).
-
-```bash
-opensrc list                     # show all cached sources
-opensrc list --json              # JSON output
-
-opensrc remove zod               # remove a package
-opensrc remove facebook/react    # remove a repo
-
-opensrc clean                    # remove everything
-opensrc clean --npm              # only npm packages
-opensrc clean --pypi             # only PyPI packages
-opensrc clean --crates           # only crates.io packages
-opensrc clean --packages         # all packages, keep repos
-opensrc clean --repos            # all repos, keep packages
-```
-
-## When to Fetch Source
-
-Fetch source when you need to:
-- Understand internal behavior that types don't reveal
-- Debug unexpected library behavior
-- Learn patterns from well-known implementations
-- Verify how a function handles edge cases
-
-Don't fetch source for simple API usage questions that docs or types can answer.
+Fetch source when the question is how the code behaves — internal behaviour, an edge case, an API to verify before use.
+Types and docs answer how to call it.

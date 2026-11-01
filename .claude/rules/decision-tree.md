@@ -19,6 +19,7 @@
 | End a work session                   | `/end-session`    |
 | Answer "how long / since when"       | `/timeline`       |
 | Fetch the SonarCloud report          | `/sonar`          |
+| Check or bump the dependencies' versions | `/repo-version-manager` |
 | Track a task — a card, its column, its label | `/trello` |
 | Log a source used to draw a year, and its mention | `/create-data-mention` |
 | Reason about a subject whose rules are not loaded | `/rules` |
