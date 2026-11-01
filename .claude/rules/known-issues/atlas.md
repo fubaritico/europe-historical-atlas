@@ -322,3 +322,8 @@ target.z)` would be coherent with the navigation that already exists.
   `NaN`, so the point is laid flat at 0 — a plausible answer nothing downstream can tell from a real one. It only happens
   with a corrupt elevation file; the DEM is ours and committed. **Remedy if it bites**: let the `NaN` through (a hole that
   shows) or refuse the file at its reader — an error-handling decision, to discuss then. **Severity: worth knowing.**
+- **`scene/cities/cityLabel.ts` says the countries' names are in capitals, and they are not** (found 2026-11-01 writing the
+  scenarios, `files/plans/atlas/scenarii/s99-holes.md` A-13): `CITY_NAME_TYPE`'s JSDoc and the module header justify the
+  cities' small letters by it, while the countries' names are written as entered, mixed case (`loading/stages/names.ts:49`,
+  the panel's `capitals` off). **Trigger**: the next change to that file — reword with the true reason, a capital's name in
+  capitals fought the countries' names afar (31/10). **Severity: cosmetic.**

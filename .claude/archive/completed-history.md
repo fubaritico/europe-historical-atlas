@@ -2,6 +2,29 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-10-30 — l'écran « Ville à une date », une seule règle du formulaire à l'export, l'admin du CMS en sombre
+
+Plages au journal : **12:14 → 14:30** et **17:29 → 22:27** (7 h 13), la seconde presque entière **par Remote Control, le dev
+loin de l'écran** — je testais dans Chrome et lui envoyais les captures ; le chantier ouvert le 05/10 totalise **159 h 02 sur
+29 plages**. Commités, **non poussés** (11 commits en avance) : de `736bc19` à `4a7a9ee`.
+
+- **L'admin du CMS** en sombre, le lambda de l'atlas à la place des images de Payload (`f19aa90`) ; Formik et le design system
+  au catalogue ; les fichiers que Payload écrit hors du contrôle du format (CMS-290, Fait).
+- **L'écran « Ville à une date »** (ATLAS-295) : notre formulaire à la place de celui de Payload — valide à la saisie, bouton
+  grisé, lieu et source cherchés dans la base à chaque frappe, refus d'une fiche en double pendant la saisie, raisons en choix
+  multiple (fubaritico-ds 0.9.0, livré par son Claude dans la soirée), lignes de sources ; **une seule règle** dans `core`
+  pour le formulaire, le serveur et l'export. Ses mots : *« Il faut le griser, oui. Évidemment »*.
+- **L'export écrit les villes** dans le fichier de l'atlas, **préparées à l'export** — sa décision : *« les données, elles
+  arrivent préparées, comme en GraphQL »* ; l'atlas ne les dessine pas encore.
+- **Décidé par lui** : l'importance qui ordonne la carte est **politique** ; le Saint-Empire n'a pas de capitale, aucune
+  symbolique (*« Charlemagne, il est mort depuis 300 ans »*) ; une chapelle d'Aix en 3D un jour (ATLAS-321, Idées).
+- **Un compte de test** `claude-test@localhost.test` dans sa base, avec son accord, pour tester à sa place.
+- **Mes fautes** : un numéro à la place d'une chose (« décision 8 », « v5 ») — *« je te l'interdis »*, règle notée ; l'export
+  annoncé court alors qu'il n'exportait aucune ville ; « aucune jointure » quand l'export en est une ; mon choix de
+  recopier les enregistrements (25/10) écrit comme une décision ; un commentaire disant qu'un crochet passe après les règles
+  des champs (il passe avant) ; parler d'incertitude sans qu'aucun algorithme n'existe — *« toute cette branlette
+  intellectuelle »*.
+
 ### 2026-10-29 soir → 30/10 nuit — les villes : des règles de cartographe, trois sources, la fiche « Ville à une date »
 
 Dans la plage **29/10 15:42 → 30/10 00:54** (la session de 22:58 à 00:54, ≈ 2 h) ; le chantier ouvert le 05/10 totalise

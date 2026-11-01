@@ -5,19 +5,22 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — les scénarios de l'atlas (ATLAS-324, en tête d'À faire)
+## ▶ ON REPREND ICI — l'interface au-dessus de la carte, en scénarios pour Claude Design (ATLAS-329, en tête d'À faire)
 
-**01/11, fin à 1 h 45.** Tout est commité et poussé (`6c23c15` et les notes de session) ; la CI était verte jusqu'à `9af17e1`,
-vérifier le dernier envoi. Il a demandé de **reprendre tout de suite sur les scénarios**, au même point :
+**01/11, fin à 3 h 06.** Les scénarios de la carte sont écrits (ATLAS-324, Fait) : `files/plans/atlas/scenarii/`, dix scénarios et
+quatorze trous, commit `5202b43` **non poussé** — à pousser quand il le dira. Il a fixé la suite :
 
-1. Charger `/scenarii-to-code` (§1 la forme, §7 du code vers le scénario) et **`files/plans/atlas/scenarios-inventory.md`** —
-   l'inventaire complet lu dans le code le 01/11 (fichiers et lignes), les dix contradictions plan / code, les trous, le découpage.
-2. Créer `files/plans/atlas/scenarii/` sur le modèle du Cartographe : `s00-index`, un `sNN` par geste ou écran, `s99-holes`.
-3. **Écrire s04 (les paliers de détail) et s06 (les villes) d'abord**, puis s01 → s10. Chaque scénario : *construit le … (commit,
-   ticket)*, *parcouru* là où il l'a vu (ses captures du 31/10 et du 01/11 ; ATLAS-323 et 325 testés par lui).
-4. Barrer, jamais supprimer, chaque ligne de plan contredite, avec une note datée. Les trous vont dans `s99`, un par un, à lui
-   de trancher (langues mélangées, « réduire les animations », rien de cliquable, recharger en mode focus…).
-5. Les scénarios sont faits pour être **passés à Claude Design** ensuite.
+1. **La liste des fonctions de l'interface** — celles déjà promises sont dans `files/plans/atlas/interface-scenarios.md` (siècle,
+   clic sur un pays, panneau d'un événement, bouton du focus, focus pays, boutons, langue, provenance, le pourquoi d'une
+   incertitude) ; **la lui présenter, il choisit**, une question à la fois.
+2. **Un scénario par fonction**, à la suite de s10 (`s11`…), du côté du lecteur, sans inventer de commande ; les trous dans `s99` (A-NN).
+3. **L'ambiance** : ses captures de l'atlas, de vieilles cartes, d'autres captures — **jamais commitées sous droits**, dans
+   `files/resources/` (ignoré) ; une carte du domaine public peut entrer, avec sa source.
+4. **Ensuite, retour au code** (*« il y a encore plein de choses qui nous attendent »*) — en tête : ATLAS-326 (le défilement par les
+   bords), puis la couronne ; ATLAS-327 et 328 en bas d'À faire.
+
+**Ses citations, dans un fichier neuf, en anglais** (01/11, mémoire notée) ; les textes à l'écran et les tickets restent en français.
+**À lui proposer d'abord** : taper `/doctor prompt-audit` (la skill `/scenarii-to-code` a changé le 01/11).
 
 **Les villes, où on en est** (ATLAS-295, en cours) : **113 villes de 1100** dans sa base et dans le fichier de l'atlas ; dessinées
 par paliers de détail (`files/plans/atlas/detail-levels.md`, dix décisions), noms selon la distance à la caméra, un point de capitale
@@ -35,7 +38,7 @@ connecter : mettre un temps `admin.autoLogin` avec `prefillOnly` dans `payload.c
 aussitôt**. Je ne lis jamais le mot de passe ni un jeton dans la conversation (refusé par les permissions). À lui de le
 supprimer dans « Contributeurs ».
 
-**Une faute de frappe dans ses raisons** : « pelrinage » — à lui de la corriger dans « Raisons d'importance » (« évêché » corrigé le 31/10).
+**Des fautes de frappe dans ses données du CMS** : « pelrinage » dans « Raisons d'importance » (« évêché » corrigé le 31/10) ; le type d'événement « Polithique - Accession au trone » — à lui de les corriger.
 
 **Pour le design system** : son menu déroulant, ouvert vers le haut, cache le champ au-dessus ; il ne peut pas relier un texte
 d'aide au menu — deux demandes à transmettre à son Claude.
@@ -105,9 +108,9 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 | --- | --- | --- |
 | **Chantiers** | DESIGN-262 La gestion de l'incertitude · **CMS-285 Le CMS** | DESIGN-262 : palier 2 conçu (CORE-270) ; CMS-285 : socle codé, outillage à faire |
 | **En cours** | ATLAS-295 · ATLAS-303 · ATLAS-156 · ATLAS-152 | ATLAS-295 : 113 villes saisies et dessinées par paliers, les villes sans source et les sièges sans date à trancher ; ATLAS-303 : le rendu ; ATLAS-156 : bataille et siège faits ; ATLAS-152 : sources de 1100 (la carte de la Rus' ajoutée le 01/11) |
-| **À valider par le développeur** | — | vide ; ATLAS-322, 323, 325 passés en Fait le 01/11 |
+| **À valider par le développeur** | — | vide ; ATLAS-324 passé en Fait le 01/11 (3 h) |
 | **Backlog** | ATLAS-299 · ATLAS-297 · CORE-270 · CMS-281..283 · ATLAS-284 · CARTO-237 · CARTO-273 · CARTO-274 | CORE-270 passe après la contribution (25/10) ; 281–283 les écrans suivants |
-| **À faire**, en tête | **ATLAS-324 les scénarios de l'atlas** · ATLAS-287 · ATLAS-288 · CMS-276 → 280 · … · ATLAS-304 (en bas) | dans son ordre |
+| **À faire**, en tête | **ATLAS-329 l'interface en scénarios** · ATLAS-326 le défilement par les bords · ATLAS-287 · ATLAS-288 · CMS-276 → 280 · … · ATLAS-304 · ATLAS-327 · ATLAS-328 (en bas) | dans son ordre |
 | **Idées** | ATLAS-321 la chapelle d'Aix en 3D · ATLAS-319 police réduite aux lettres des noms · CMS-320 le CMS en fr/en · ATLAS-300 animations réduites · CARTO-268 feature flags · CORE-271 généalogie · CARTO-272 radar | CARTO-268 : pas encore |
 
 **Toujours en attente, à lui proposer un jour** : le relief niveau 6 du Cartographe (une ligne, `main.tsx` →

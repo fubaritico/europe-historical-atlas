@@ -2,6 +2,22 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
+### 2026-11-01 nuit — les scénarios de l'atlas, écrits depuis le code
+
+Plage **01/11 01:51 → 03:06**, le prolongement de celle ouverte le 31/10 à 17:39 (9 h 19 en tout) ; le chantier ouvert le 05/10
+totalise **168 h 23 sur 30 plages**. **Un commit, non poussé** : `5202b43`.
+
+- **ATLAS-324** : `files/plans/atlas/scenarii/`, sur le modèle du Cartographe — l'index, **dix scénarios** (de l'ouverture aux
+  langues), chacun avec son *construit le* (commit, ticket) et son *parcouru* ; **quatorze trous** dans `s99` (A-01 → A-14) ;
+  chaque ligne de plan contredite barrée avec une note datée (`03-camera-ux`, `01-foundations`, `focus-mode`, `vassal-lod`,
+  `country-names`, `detail-levels`, `cities`…) ; deux termes au glossaire ; la skill `/scenarii-to-code` à jour.
+- **Décidé par lui** : trois tickets de correction — ATLAS-326 (*« si c'est juste un mouseleave et un window blur, on y va »*),
+  ATLAS-327 (A-01), ATLAS-328 (A-12) ; **ses citations en anglais** dans les fichiers neufs (mémoire notée) ; la suite,
+  **l'interface au-dessus de la carte décrite en scénarios pour Claude Design**, puis retour au code. Ses mots : *« je pense que tu
+  n'as rien oublié »*.
+- **Ma faute** : les noms des pays écrits « en capitales » d'après un commentaire de `cityLabel.ts`, sans lire la valeur
+  (`capitals` est éteint) — recopié dans trois fichiers avant de le voir ; corrigé, et le commentaire noté (A-13).
+
 ### 2026-10-31 soir → 01/11 nuit — 113 villes, les paliers de détail, les villes sur la carte, l'inventaire des scénarios
 
 Plage **31/10 17:39 → 01/11 01:43** (8 h 03) ; le chantier ouvert le 05/10 totalise **167 h 08 sur 30 plages**. **14 commits, tous
@@ -23,27 +39,4 @@ poussés**, de `8808863` à `6c23c15`, CI verte jusqu'au déploiement.
   `start-session` ; les villes dessinées sans test de profondeur, l'épingle passée derrière ; un changement des noms annoncé sans
   vérifier qu'il s'était appliqué (*« c'est pas assez grand »* — rien n'avait changé) ; trois `cd`.
 
-### 2026-10-30 — l'écran « Ville à une date », une seule règle du formulaire à l'export, l'admin du CMS en sombre
-
-Plages au journal : **12:14 → 14:30** et **17:29 → 22:27** (7 h 13), la seconde presque entière **par Remote Control, le dev
-loin de l'écran** — je testais dans Chrome et lui envoyais les captures ; le chantier ouvert le 05/10 totalise **159 h 02 sur
-29 plages**. Commités, **non poussés** (11 commits en avance) : de `736bc19` à `4a7a9ee`.
-
-- **L'admin du CMS** en sombre, le lambda de l'atlas à la place des images de Payload (`f19aa90`) ; Formik et le design system
-  au catalogue ; les fichiers que Payload écrit hors du contrôle du format (CMS-290, Fait).
-- **L'écran « Ville à une date »** (ATLAS-295) : notre formulaire à la place de celui de Payload — valide à la saisie, bouton
-  grisé, lieu et source cherchés dans la base à chaque frappe, refus d'une fiche en double pendant la saisie, raisons en choix
-  multiple (fubaritico-ds 0.9.0, livré par son Claude dans la soirée), lignes de sources ; **une seule règle** dans `core`
-  pour le formulaire, le serveur et l'export. Ses mots : *« Il faut le griser, oui. Évidemment »*.
-- **L'export écrit les villes** dans le fichier de l'atlas, **préparées à l'export** — sa décision : *« les données, elles
-  arrivent préparées, comme en GraphQL »* ; l'atlas ne les dessine pas encore.
-- **Décidé par lui** : l'importance qui ordonne la carte est **politique** ; le Saint-Empire n'a pas de capitale, aucune
-  symbolique (*« Charlemagne, il est mort depuis 300 ans »*) ; une chapelle d'Aix en 3D un jour (ATLAS-321, Idées).
-- **Un compte de test** `claude-test@localhost.test` dans sa base, avec son accord, pour tester à sa place.
-- **Mes fautes** : un numéro à la place d'une chose (« décision 8 », « v5 ») — *« je te l'interdis »*, règle notée ; l'export
-  annoncé court alors qu'il n'exportait aucune ville ; « aucune jointure » quand l'export en est une ; mon choix de
-  recopier les enregistrements (25/10) écrit comme une décision ; un commentaire disant qu'un crochet passe après les règles
-  des champs (il passe avant) ; parler d'incertitude sans qu'aucun algorithme n'existe — *« toute cette branlette
-  intellectuelle »*.
-
-> Older sessions (2026-09-12 → 2026-10-30 nuit) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-30) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
