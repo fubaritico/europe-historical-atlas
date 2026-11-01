@@ -1,7 +1,6 @@
 ---
 name: create-data-mention
 description: Cite a map, atlas or text the dev used to draw a year — classify it CALQUE or RÉFÉRENCE from its licence and declared source, log it on the year's provenance ticket (ATLAS-152 for 1100), and give its attribution in French and English. Use when the dev asks for a mention (« crée une mention pour cette carte / ce texte », « à citer »), gives a source's URL or a Commons file while drawing, or names the regions a source helped draw.
-when_to_use: The dev asks to create a mention from the elements he gives — a map, a text, an atlas — or pastes a source's URL while drawing a year.
 allowed-tools: WebFetch Bash(/Users/stephanecottereau/Desktop/WebstormProjects/europe-map/.claude/skills/trello/scripts/trello:*)
 metadata:
   author: europe-map
@@ -12,7 +11,8 @@ metadata:
 
 The dev's call, 2026-10-22: every source used to draw a year is cited, *« même si on se retrouve avec une liste
 longue comme le bras »* — taking from an open source means giving back on its terms (*« on ne peut pas fermer la
-porte derrière nous »*). The list lives on the year's provenance ticket, **ATLAS-152 for 1100**, not in a file.
+porte derrière nous »*). The list lives on the year's provenance ticket, **ATLAS-152 for 1100**, not in a file;
+for another year, ask the dev which ticket is its provenance ticket before writing the first line.
 
 ## What decides everything: CALQUE or RÉFÉRENCE
 
@@ -21,9 +21,9 @@ porte derrière nous »*). The list lives on the year's provenance ticket, **ATL
 | **CALQUE** | traces its geometry | **passes to the year**: CC BY-SA makes the year CC BY-SA | « adapté de … — modifications : … » |
 | **RÉFÉRENCE** | reads facts on it (who holds what, roughly where), draws his own geometry on the public-domain backdrop | passes nothing | « limites lues sur … » — owed in honesty, not by the licence |
 
-**Never CALQUE**: a source that forbids redistribution (Euratlas), one in copyright (the Duby atlas), and one whose
-free licence rests on a redraw of a protected work. **A licence is only as good as the rights of who gave it.**
-Facts are free, an author's drawing is not.
+**Never CALQUE**: a source that forbids redistribution (Euratlas), one in copyright (the Duby atlas), and, **outside
+Commons**, one whose free licence rests on a redraw of a protected work. On Commons the licence shown is trusted (step 3):
+Commons polices its own files, and if one is withdrawn, we redraw. Facts are free, an author's drawing is not.
 
 **A text** (a book, an article, a Wikipedia page) is a RÉFÉRENCE for the facts read in it; a passage copied word
 for word is a **citation**, in quotation marks with its author — never paraphrased into our text unattributed.
@@ -49,8 +49,12 @@ for word is a **citation**, in quotation marks with its author — never paraphr
       so) · **mon raisonnement** (an inference, e.g. "the uploader could not relicense the atlas" — say that no
       ruling or complaint confirms it). The 22/10 mention carried a publisher from memory; it was right, and only
       the search made it known.
-3. **Classify** —
-   - the declared source is in copyright and the map copies it closely → **RÉFÉRENCE**, whatever the licence shown;
+3. **Classify** — **Commons is trusted** (the dev, 2026-11-01: *"if Commons is wrong, it is not us who are wrong — if we
+   have to redraw, we redraw"*): a map under a free licence on Commons may be traced, whatever its remote origin, with its
+   whole chain credited in the mention; the origin is still read and written down. Reporting a map's lines by hand is
+   tracing it — a CALQUE.
+   - a source **outside Commons** whose declared source is in copyright and copied closely → **RÉFÉRENCE**, whatever the
+     licence shown;
    - the licence is NC or forbids redistribution → **RÉFÉRENCE**;
    - otherwise what the dev says he did. CALQUE under CC BY-SA → tell him **in the same answer** that the year
      becomes CC BY-SA and allows commercial use of that data (his `LICENSE` reserves the drawn years) — his call.
@@ -60,7 +64,7 @@ for word is a **citation**, in quotation marks with its author — never paraphr
 
    ```bash
    S=/Users/stephanecottereau/Desktop/WebstormProjects/europe-map/.claude/skills/trello/scripts/trello
-   $S checklist ATLAS-152 "Sources de 1100" "<regions> · <author> (<date>), d'après <declared source> · <licence> · RÉFÉRENCE|CALQUE (<why, in a few words>) · <url>"
+   $S checklist <the year's provenance ticket> "Sources de <year>" "<regions> · <author> (<date>), d'après <declared source> · <licence> · RÉFÉRENCE|CALQUE (<why, in a few words>) · <url>"
    ```
 
 5. **Post the mention**, French then English, as a comment on the same ticket — title, author, source, licence

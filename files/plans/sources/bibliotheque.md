@@ -32,6 +32,30 @@ Cancelled: *Historical Atlas of Britain*, *The Family Tree Historical Atlas of G
 
 Also owned before: the Duby *Atlas historique mondial* (Larousse) — memory `duby-atlas-is-a-reference-not-a-tracing-source`.
 
+## Downloaded, as PDF — `files/resources/Atlases/` (git-ignored), listed 2026-11-01
+
+Read from the file names only: authors, publishers and years not in the name are `?`, completed at first use. **A PDF grants
+no right**: a recent book is a reference whatever the file, until its publisher answers (`contribution/source-manager.md`).
+The two marked *public domain* are the ones that may be traced — to confirm against their title page at first use.
+
+| file | the work, as the name gives it | status |
+| --- | --- | --- |
+| `Shepherd W. Historical atlas (1911) Google, OCR.pdf` | William Shepherd, *Historical Atlas*, 1911 | **public domain** |
+| `Atlas-of-European-history-1909.pdf` | *Atlas of European History*, 1909 | **public domain**, by its date |
+| `Hrvatski_povijesni_atlas.pdf` | *Hrvatski povijesni atlas* (Croatian historical atlas) | ? — date unknown |
+| `Peguin mediaval Atlas.pdf`, `epdf.pub_the-penguin-atlas-of-medieval-history.pdf` | *The Penguin Atlas of Medieval History* (perhaps twice) | in copyright → reference |
+| `epdf.pub_the-penguin-historical-atlas-of-the-medieval-world2005.pdf` | *The Penguin Historical Atlas of the Medieval World*, 2005 | in copyright → reference |
+| `epdf.pub_the-penguin-historical-atlas-of-ancient-rome.pdf` | *The Penguin Historical Atlas of Ancient Rome* | in copyright → reference |
+| `epdf.pub_atlas-of-medieval-europe.pdf` | *Atlas of Medieval Europe* | in copyright → reference |
+| `epdf.pub_historical-atlas-of-islam.pdf` | *Historical Atlas of Islam* | in copyright → reference |
+| `epdf.pub_historical-atlas-of-the-celtic-world….pdf` | *Historical Atlas of the Celtic World* | in copyright → reference |
+| `epdf.pub_historical-atlas-of-the-vikings.pdf` | *Historical Atlas of the Vikings* | in copyright → reference — Scandinavia, one of the two gaps |
+| `epdf.pub_palgrave-concise-historical-atlas-of-central-asia….pdf` | *Palgrave Concise Historical Atlas of Central Asia* | in copyright → reference |
+| `epdf.pub_poland-a-historical-atlas.pdf` | *Poland: A Historical Atlas* | in copyright → reference |
+| `epdf.pub_the-palgrave-atlas-of-byzantine-history-historical-atlas.pdf` | *The Palgrave Atlas of Byzantine History* | in copyright → reference |
+| `Beidler J. The Family Tree Historical Atlas of Germany (2019), OCR.pdf` | J. Beidler, *The Family Tree Historical Atlas of Germany*, 2019 | in copyright → reference (its paper copy was cancelled above) |
+| two `.webloc` links | Brion de La Tour and Desnos, 1743–1805, David Rumsey Historical Map Collection | 18th-century plates; Rumsey's own terms to read before use |
+
 ## Candidates for the gaps — Italy and Scandinavia (searched 2026-10-22)
 
 | candidate | status | what was found | graded |

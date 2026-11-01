@@ -5,6 +5,24 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
+## En vol, 01/11 au soir — rien de commité encore
+
+- **L'audit des instructions** (`files/prompt-audit-2026-11-01.md`) : **fini**, retour par retour avec lui. Gardés par lui :
+  l'agent d'accessibilité tel quel (pas de contradiction, selon lui), les exemples Python/Rust d'`/opensrc`, et
+  **`/zustand-react-pattern` intact** (l'atlas aura peut-être Zustand). Créés en chemin : `/repo-version-manager`
+  (contrôle mensuel des versions), REPO-330, ATLAS-331, CMS-332.
+- **Les domaines** : commandés chez OVHcloud le 01/11 (n° 262643965, `.org` `.com` `.eu` `.net` `.fr`, 40,52 € TTC), « en
+  cours de validation ». **Fait le soir même** : la page « en construction » (le logo de l'écran de chargement, « Atlas en
+  construction », `contact@europe-historical-atlas.org` ; `~/Desktop/europe-historical-atlas-soon/`, hors du dépôt), déposée
+  sur un second site Netlify **`europe-historical-atlas-soon`**, le `.org` en domaine principal, les quatre autres en alias ;
+  l'atlas reste sur `europe-historical-atlas.netlify.app`. **Après la validation d'OVH** : dans la zone DNS de chaque domaine,
+  un A `@` → `75.2.60.5` et un CNAME `www` → `europe-historical-atlas-soon.netlify.app` (DNS gardé chez OVH pour le
+  courrier) ; les boîtes Zimbra `contact@` et `demandes@`. Le jour de l'ouverture : les domaines passent du site d'attente à celui de l'atlas, rien à changer chez OVH.
+- **Le gestionnaire de sources** : CMS-332 (Backlog), `files/plans/contribution/source-manager.md`. Il **fait confiance à
+  Commons** ; chaque mail part sur son clic.
+- **La Rus' de 1100** : la ligne d'ATLAS-152 dit « RÉFÉRENCE · géométrie redessinée », or ses tracés ont été reportés à la
+  main (un calque, gardé sous la confiance à Commons) — **à corriger**. Mourom-Riazan en 1100 : vassal de Tchernigov ? à lui.
+
 ## ▶ ON REPREND ICI — l'interface au-dessus de la carte, en scénarios pour Claude Design (ATLAS-329, en tête d'À faire)
 
 **01/11, fin à 3 h 06.** Les scénarios de la carte sont écrits (ATLAS-324, Fait) : `files/plans/atlas/scenarii/`, dix scénarios et
@@ -27,7 +45,8 @@ par paliers de détail (`files/plans/atlas/detail-levels.md`, dix décisions), n
 sur un nom de pays cède (ATLAS-323). **En attente, à lui de trancher un jour** : les sièges que ni Wikidata ni la carte de la Rus'
 ne datent (Roskilde, Nidaros) ; les villes qu'aucune des trois sources n'atteste (la Géorgie — Koutaïssi, Tbilissi —, Uppsala,
 Sigtuna, Ispahan) — une source de plus, ou Wikidata seul, jamais inventées. **Toujours dû** (demandé le 30/10) : un système de
-sources qui accompagne toute saisie (lieux, événements). **L'incertitude** : n'en parler que quand un algorithme existe.
+sources qui accompagne toute saisie (lieux, événements) — devenu le **gestionnaire de sources**, CMS-332 (01/11, Backlog ;
+`files/plans/contribution/source-manager.md`). **L'incertitude** : n'en parler que quand un algorithme existe.
 
 **Décidé par lui, à garder en tête** : l'importance qui ordonne la carte est **politique**, et au Moyen Âge le religieux en est
 (*« le religieux et la politique, c'est la même chose »*) ; le Saint-Empire **n'a pas de capitale** ; le zoom est **un défilement à
@@ -102,16 +121,7 @@ la **racine de ce dépôt** (`HANDOFF-from-fubaritico-ds.md`) : le lire avant de
 **Pour travailler** : mon shell démarre sous Node 22 : préfixer `PATH=~/.nvm/versions/node/v24.22.1/bin:$PATH`. **Jamais
 de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier. Parler avec **ses** mots, un point à la fois.
 
-**Le tableau** : `/trello` → `list`. Un élément du tableau est un **ticket**, jamais une « carte ».
-
-| où | ticket | état |
-| --- | --- | --- |
-| **Chantiers** | DESIGN-262 La gestion de l'incertitude · **CMS-285 Le CMS** | DESIGN-262 : palier 2 conçu (CORE-270) ; CMS-285 : socle codé, outillage à faire |
-| **En cours** | ATLAS-295 · ATLAS-303 · ATLAS-156 · ATLAS-152 | ATLAS-295 : 113 villes saisies et dessinées par paliers, les villes sans source et les sièges sans date à trancher ; ATLAS-303 : le rendu ; ATLAS-156 : bataille et siège faits ; ATLAS-152 : sources de 1100 (la carte de la Rus' ajoutée le 01/11) |
-| **À valider par le développeur** | — | vide ; ATLAS-324 passé en Fait le 01/11 (3 h) |
-| **Backlog** | ATLAS-299 · ATLAS-297 · CORE-270 · CMS-281..283 · ATLAS-284 · CARTO-237 · CARTO-273 · CARTO-274 | CORE-270 passe après la contribution (25/10) ; 281–283 les écrans suivants |
-| **À faire**, en tête | **ATLAS-329 l'interface en scénarios** · ATLAS-326 le défilement par les bords · ATLAS-287 · ATLAS-288 · CMS-276 → 280 · … · ATLAS-304 · ATLAS-327 · ATLAS-328 (en bas) | dans son ordre |
-| **Idées** | ATLAS-321 la chapelle d'Aix en 3D · ATLAS-319 police réduite aux lettres des noms · CMS-320 le CMS en fr/en · ATLAS-300 animations réduites · CARTO-268 feature flags · CORE-271 généalogie · CARTO-272 radar | CARTO-268 : pas encore |
+**Le tableau** : `/trello` → `list`. Un élément du tableau est un **ticket**, jamais une « carte ». C'est lui qui dit l'état de chaque ticket : il n'est plus recopié ici (01/11).
 
 **Toujours en attente, à lui proposer un jour** : le relief niveau 6 du Cartographe (une ligne, `main.tsx` →
 `/heightmaps/europe-dem-z6-1920`, `rules/known-issues/cartographer.md`).
@@ -129,8 +139,11 @@ three.js et le Cartographe émet le même, au même hash — vérifié par la CI
 | ----- | --------------------------------------------------------------------------- |
 | dépôt | `fubaritico/europe-historical-atlas`, **public** depuis le 19/10, branche `main`             |
 | site  | **https://europe-historical-atlas.netlify.app** — 1100 y est publié (16/10) |
-| CI    | sept jobs — validate ×3, build, sonarqube, quality-gate, deploy — **verte depuis le 21/10, sous Node 24** |
+| CI    | huit jobs — validate ×4 (lint, type-check, test, format), build, sonarqube, quality-gate, deploy — **verte depuis le 21/10, sous Node 24** |
 | Sonar | `europe-historical-atlas` sous l'organisation `fubaritico`                  |
+
+**Dernier contrôle des versions** : aucun encore (`/repo-version-manager`, créée le 01/11) — un premier coup d'œil le
+01/11 : 32 paquets ont plus récent, 7 majeures, 7 mineures, 18 correctifs ; pas de rapport écrit.
 
 **Cinq paquets**, orchestrés par **Turbo**, avec un **catalogue de versions** dans `pnpm-workspace.yaml` :
 `core` (pure TS, ni three.js ni DOM ni React ni zustand — tenu par ESLint et `tsc`, tests sous **`node`**),
@@ -161,7 +174,7 @@ en lancer un second ; lui donner l'adresse du sien.
 | **4** ✅ | Le **canevas 2D**, coupé en deux : l'**arithmétique** (hit-test, marquise, élastique, écran↔monde) qui est pure, et le **dessin**, une coquille sans logique | On dessine à l'écran | l'arithmétique se teste avec des littéraux — et c'est cette coupe qui la rend testable du tout |
 | **5** ◀ | Le **chrome** : `{Polities}` en arbre, les formulaires, `{Overrides}`, les trois marques d'année dérivée | L'application | les valeurs viennent de `design/chrome.css`, jamais son markup |
 
-Les étapes **4 et 5 créent `packages/cartographer/`** — un troisième paquet, comme la taxonomie du dev
+Les étapes **4 et 5 ont créé `packages/cartographer/`** — une application, comme la taxonomie du dev
 dans `architecture.md` : Payload est une app, l'atlas est une app, `core` est une ressource.
 
 **Comment** : chaque étape se vérifie et **se commite seule**, pas d'accumulation. `core` reste sans
