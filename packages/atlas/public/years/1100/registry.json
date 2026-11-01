@@ -142,7 +142,7 @@
       "suzerain": null,
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#fed881",
+      "colour": "#2784c7",
       "wikidata": null
     },
     {
@@ -164,7 +164,7 @@
       "suzerain": "county-of-barcelona",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#cfdefc",
+      "colour": "#2c9ff2",
       "wikidata": null
     },
     {
@@ -175,7 +175,7 @@
       "suzerain": "county-of-barcelona",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#fff0ff",
+      "colour": "#64abde",
       "wikidata": null
     },
     {
@@ -230,7 +230,7 @@
       "suzerain": "lordship-of-valencia",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#ad795a",
+      "colour": "#ca4c04",
       "wikidata": null
     },
     {
@@ -429,7 +429,7 @@
       "suzerain": "roman-empire",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#ebf9e3",
+      "colour": "#e49606",
       "wikidata": null
     },
     {
@@ -1216,7 +1216,7 @@
       "suzerain": "county-of-barcelona",
       "existsFrom": null,
       "existsTo": null,
-      "colour": "#fee5a6",
+      "colour": "#63beff",
       "wikidata": null
     },
     {
