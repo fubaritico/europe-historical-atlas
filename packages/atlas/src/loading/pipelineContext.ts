@@ -4,6 +4,7 @@
  */
 
 import type { MapAssetSources } from './assets'
+import type { NameCache } from './nameCache'
 import type { MapUi } from '../app/mapUi'
 import type { AtlasMessageKey } from '../i18n'
 import type { MapLayers } from '../scene/layers/mapLayers'
@@ -78,4 +79,6 @@ export interface PipelineContext extends MapPipelineDeps {
    * An authored year needs neither the grid nor a new bake when the bare terrain is already there.
    */
   held: { grid: boolean; bareTexture: boolean }
+  /** The names already placed, by year content and settings — a year seen again comes back without its placement. */
+  nameCache: NameCache
 }

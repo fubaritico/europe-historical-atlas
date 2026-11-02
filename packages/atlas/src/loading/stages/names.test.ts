@@ -6,6 +6,7 @@ import { createLatestOnly } from '@europe-historical-atlas/core/utils/latestOnly
 import { createMapSources } from '../../sources/mapSources'
 import { createDevState } from '../../tunables/devState'
 import { namePlacement } from '../../tunables/params'
+import { createNameCache } from '../nameCache'
 import { stubNameFace } from '../testing/nameFaceStubs'
 import { AUTHORED_FILES, AUTHORED_YEAR, META, YEAR } from '../testing/yearFixtures'
 
@@ -46,6 +47,7 @@ function stage(answer: () => Promise<YearNames> = () => Promise.resolve(PLACED))
     box: { names: { placeYearNames } },
     nameFace: null,
     namesGate: createLatestOnly(),
+    nameCache: createNameCache(),
   } as unknown as PipelineContext
   return { context, sources, rebuildNames, placeYearNames }
 }
@@ -80,6 +82,84 @@ describe('rebuildYearNames', () => {
       expect(Object.keys(request.names).length).toBeGreaterThan(0)
       expect(request.options).toEqual(namePlacement(context.dev.names))
       expect(request.gridHeight).toBe(Math.round((NAME_GRID_WIDTH * META.height) / META.width))
+    })
+  })
+
+  // ATLAS-333: a year seen again comes back without its placement.
+  describe('kept names', () => {
+    it('lays a year named before at once, without asking for a placement', async () => {
+      const { context, sources, placeYearNames } = stage()
+      await rebuildYearNames(context, AUTHORED_YEAR)
+      const sheet = sources.nameSheet
+      await rebuildYearNames(context, YEAR)
+      await rebuildYearNames(context, AUTHORED_YEAR)
+      expect(placeYearNames).toHaveBeenCalledTimes(1)
+      expect([sources.yearNames, sources.nameSheet]).toEqual([PLACED, sheet])
+    })
+
+    it('places the names again once the year is saved with other content', async () => {
+      const [first, ...rest] = AUTHORED_FILES.registry.polities
+      if (first === undefined) throw new Error('no polity in the test year')
+      const registry = {
+        ...AUTHORED_FILES.registry,
+        polities: [{ ...first, shortName: 'Francia' }, ...rest],
+      }
+      const saved = {
+        ...AUTHORED_YEAR,
+        authored: { year: { ...AUTHORED_FILES, registry }, bbox: META.bbox },
+      }
+      const { context, placeYearNames } = stage()
+      await rebuildYearNames(context, AUTHORED_YEAR)
+      await rebuildYearNames(context, saved)
+      expect(placeYearNames).toHaveBeenCalledTimes(2)
+    })
+
+    it('places the names again once a setting of theirs moved in the panel', async () => {
+      const { context, placeYearNames } = stage()
+      await rebuildYearNames(context, AUTHORED_YEAR)
+      context.dev.names.capitals = !context.dev.names.capitals
+      await rebuildYearNames(context, AUTHORED_YEAR)
+      expect(placeYearNames).toHaveBeenCalledTimes(2)
+    })
+
+    // A reader stepping quickly through the years: each placement still counts for when he comes back.
+    it('keeps a placement a newer year overtook, without laying it', async () => {
+      let release: (names: YearNames) => void = () => undefined
+      const slow = new Promise<YearNames>((resolve) => {
+        release = resolve
+      })
+      let calls = 0
+      const { context, sources, placeYearNames } = stage(() => {
+        calls += 1
+        return calls === 1 ? slow : Promise.resolve(PLACED)
+      })
+      const first = rebuildYearNames(context, AUTHORED_YEAR)
+      // The first request is now waiting on its placement; the second overtakes it.
+      await vi.waitFor(() => {
+        expect(placeYearNames).toHaveBeenCalledTimes(1)
+      })
+      await rebuildYearNames(context, YEAR)
+      const overtaken: YearNames = { ...PLACED, gridHeight: 7 }
+      release(overtaken)
+      await first
+      expect(sources.yearNames).toBeNull()
+
+      await rebuildYearNames(context, AUTHORED_YEAR)
+      expect(placeYearNames).toHaveBeenCalledTimes(1)
+      expect(sources.yearNames).toBe(overtaken)
+    })
+
+    it('keeps nothing from a placement that failed', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined)
+      let fail = true
+      const { context, sources, placeYearNames } = stage(() =>
+        fail ? Promise.reject(new Error('worker gone')) : Promise.resolve(PLACED)
+      )
+      await rebuildYearNames(context, AUTHORED_YEAR)
+      fail = false
+      await rebuildYearNames(context, AUTHORED_YEAR)
+      expect(placeYearNames).toHaveBeenCalledTimes(2)
+      expect(sources.yearNames).toBe(PLACED)
     })
   })
 

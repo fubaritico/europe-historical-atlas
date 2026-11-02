@@ -17,6 +17,7 @@ import { createLatestOnly } from '@europe-historical-atlas/core/utils/latestOnly
 import { createFetchAssets } from './assets'
 import { createCompute, createNameCompute } from './compute'
 import { loadContent } from './mapContent'
+import { createNameCache } from './nameCache'
 import { rebuildYearNames } from './stages/names'
 import { rebuildPolitical } from './stages/political'
 import { loadRivers } from './stages/rivers'
@@ -120,6 +121,7 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
     nameFace: null,
     pendingRivers: { set: null },
     held: { grid: false, bareTexture: false },
+    nameCache: createNameCache(),
   }
   installComputes(context)
 

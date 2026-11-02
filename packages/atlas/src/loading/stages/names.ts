@@ -13,8 +13,10 @@ import { NAME_GRID_WIDTH } from '@europe-historical-atlas/core/pipeline/yearName
 import { charactersOf, drawNameSheet } from '../../scene/political/names/glyphSheet'
 import { NAME_FACE_URL, NAME_FAMILY } from '../../scene/political/names/nameFace'
 import { namePlacement } from '../../tunables/params'
+import { namesKey } from '../nameCache'
 
 import type { NameDevParams } from '../../tunables/params'
+import type { CachedNames } from '../nameCache'
 import type { PipelineContext } from '../pipelineContext'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { YearNames } from '@europe-historical-atlas/core/pipeline/yearNames'
@@ -151,29 +153,55 @@ function sheetOf(names: WrittenNames): ReturnType<typeof drawNameSheet> {
 }
 
 /**
- * Ask for a year's names, and lay them on the map when they come back — unless the year has changed meanwhile.
- *
- * Only an authored year is named: a year read from the per-century payloads knows no polity by id, and its names
- * would be the payload's, which no one wrote for this map. Said once in the console.
+ * Lay the names already placed from this very year content and these settings, if there are some (ATLAS-333).
  * @param context - the pipeline's world
- * @param loaded - the year now on screen
+ * @param key - the year's key in the cache
+ * @returns `true` when they were there and are on the map
+ */
+function layKeptNames(context: PipelineContext, key: string): boolean {
+  const kept = context.nameCache.get(key)
+  if (kept === undefined) return false
+  layNames(context, kept)
+  return true
+}
+
+/**
+ * Lay a year's names on the map — placed just now, or kept from before.
+ * @param context - the pipeline's world
+ * @param names - the placement and its sheet
+ */
+function layNames(context: PipelineContext, names: CachedNames): void {
+  context.sources.yearNames = names.placed
+  context.sources.nameSheet = names.sheet
+  context.layers.rebuildNames()
+}
+
+/** What placing a year's names needs once it is known to be an authored year with a relief under it. */
+interface Placement {
+  /** The authored year. */
+  readonly authored: NonNullable<RegionSet['authored']>
+  /** Its key in the cache. */
+  readonly key: string
+  /** The relief, whose frame sizes the names' grid. */
+  readonly heightmap: NonNullable<PipelineContext['sources']['heightmap']>
+  /** Whether this request is still the newest. */
+  readonly isCurrent: () => boolean
+}
+
+/**
+ * Place a year's names in their worker, keep them, and lay them on the map unless a newer request came meanwhile.
+ * @param context - the pipeline's world
+ * @param loaded - the year
+ * @param placement - the authored year, its key, the relief, the gate
  * @returns once the names are on the map, or have been given up
  */
-export async function rebuildYearNames(context: PipelineContext, loaded: RegionSet): Promise<void> {
-  const { sources, layers, dev } = context
-  // A newer request — another year, or the panel again — supersedes this one.
-  const isCurrent = context.namesGate.begin()
-  // The last year's names come off at once: they name ground that is no longer theirs.
-  sources.yearNames = null
-  layers.rebuildNames()
-  const authored = loaded.authored
-  const heightmap = sources.heightmap
-  if (authored === undefined || heightmap === null) {
-    console.warn(
-      `[atlas] ${String(loaded.year)} is not an authored year: its countries are not named.`
-    )
-    return
-  }
+async function placeNames(
+  context: PipelineContext,
+  loaded: RegionSet,
+  placement: Placement
+): Promise<void> {
+  const { dev } = context
+  const { authored, key, heightmap, isCurrent } = placement
   try {
     await nameFace(context)
     if (context.isDisposed() || !isCurrent()) return
@@ -193,13 +221,46 @@ export async function rebuildYearNames(context: PipelineContext, loaded: RegionS
       gridHeight,
       options: namePlacement(dev.names),
     })
+    // Kept even when overtaken: the placement is right for its key, and the reader may come back to that year.
+    context.nameCache.set(key, { placed, sheet })
     if (context.isDisposed() || !isCurrent()) return
     sayWhatIsMissing(placed, authored.year.registry.polities)
-    sources.yearNames = placed
-    sources.nameSheet = sheet
-    layers.rebuildNames()
+    layNames(context, { placed, sheet })
   } catch (error: unknown) {
     // The map stands without its names; the console says why (to settle with the dev: a notice on screen?).
     console.error('[atlas] the countries’ names could not be placed', error)
   }
+}
+
+/**
+ * Ask for a year's names, and lay them on the map when they come back — unless the year has changed meanwhile.
+ * A year named before from the same content and settings is laid at once, from the cache.
+ *
+ * Only an authored year is named: a year read from the per-century payloads knows no polity by id, and its names
+ * would be the payload's, which no one wrote for this map. Said once in the console.
+ * @param context - the pipeline's world
+ * @param loaded - the year now on screen
+ * @returns once the names are on the map, or have been given up
+ */
+export async function rebuildYearNames(context: PipelineContext, loaded: RegionSet): Promise<void> {
+  const { sources, layers, dev } = context
+  // A newer request — another year, or the panel again — supersedes this one.
+  const isCurrent = context.namesGate.begin()
+  const authored = loaded.authored
+  const heightmap = sources.heightmap
+  const key =
+    authored === undefined
+      ? null
+      : namesKey(authored.year, { names: dev.names, bbox: authored.bbox, grid: heightmap?.meta })
+  if (key !== null && layKeptNames(context, key)) return
+  // The last year's names come off at once: they name ground that is no longer theirs.
+  sources.yearNames = null
+  layers.rebuildNames()
+  if (authored === undefined || key === null || heightmap === null) {
+    console.warn(
+      `[atlas] ${String(loaded.year)} is not an authored year: its countries are not named.`
+    )
+    return
+  }
+  await placeNames(context, loaded, { authored, key, heightmap, isCurrent })
 }
