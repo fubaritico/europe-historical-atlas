@@ -5,6 +5,47 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
+## ▶ ON REPREND ICI — 02/11, 4 h : de vraies cartes, et la vitesse
+
+**Le tournant de la nuit.** Il a vu les concurrents (YearMaps, Borders of Time, HistorIQly, Geographic History… ; la liste et
+leurs données : mémoire `cliopatria-is-cc-by`) et a failli tout arrêter : *« notre projet ne peut être rattrapé que par la
+qualité et la précision, sinon c'est un jouet »* — et *« ce n'est pas une démo, ce sera publié, j'ai dépensé de l'argent »*.
+Ce qui l'a retenu : sur la carte Cliopatria importée, **la pose des villes et le calcul des noms marchent bien**.
+
+**Sa décision** : on arrête l'interface de l'atlas (ATLAS-329, s11 → s15 écrits, la suite attend) ; **deux chantiers**, dans
+l'ordre du tableau, en tête d'À faire :
+1. **la vitesse** — ATLAS-333 : *« passer d'une année à l'autre en deux secondes »*, mesuré sur deux années aussi fines que la
+   1100 (Cliopatria aux côtes calées), pas sur des côtes grossières qui tromperaient la mesure ;
+2. **de vraies cartes, dans le Cartographe** — CARTO-334 (l'import Cliopatria, côtes calées sur le masque), CMS-335 (« tenue
+   par », proposé par Wikidata), CARTO-193 (le panneau Villes, les villes-témoins en rouge si du mauvais côté), CARTO-336 (les
+   panneaux repliables), CORE-337 (l'algorithme de vote : les cartes et les villes votent, net au-dessus de 75 %, hachuré
+   dessous ; d'abord la Catalogne de 1100).
+
+**Pourquoi trancher par vote** : il ne sait pas trancher quand deux ou trois sources diffèrent (*« la Catalogne, c'est tout
+le temps différent »*) ; la méthode tranche une fois, la machine l'applique à chaque année, il n'arbitre qu'une liste courte.
+
+**L'étude Cliopatria** : `files/spikes/cliopatria-import/` (`resolve.py` puis `convert.ts`, la fiche et ses mesures,
+`dependencies.md` : 344 dépendances). Sa règle (*« le plus récent l'emporte »*, trouvée en comparant avec YearMaps) a supprimé
+tout chevauchement. Cliopatria est dans `opensrc/` ; `shapely` dans un venv du dossier de travail (à recréer).
+
+**Fait cette nuit, non commité, à tester par lui** : **« Open… »** dans le Cartographe — la liste des années enregistrées
+(1100, 1200), le Cartographe se recharge sur l'année choisie (`?year=`), la page gardée d'abord ; revue faite, une haute
+corrigée (un geste pendant la sauvegarde), gate du Cartographe verte (2 301 tests). Les deux cartes Cliopatria sont dans
+`years/1100/` et `years/1200/`, côtes de Natural Earth (57 229 et 58 856 points) ; sa 1100 d'avant dans
+`years/1100.dev-2026-11-01/`. **Ce qui compte pour lui : Open, Save, Save as** — *« les snapshots, j'en ai plus rien à
+faire »* ; **Save as… demain**. Il nettoie les côtes seulement, jamais les frontières (l'algorithme des villes s'en
+chargera si le test de vitesse tient).
+
+**Un signal de vitesse, mauvais** : le test de l'atlas qui lit la 1100 publiée passe de quelques secondes à **2 minutes**
+avec la 1100 Cliopatria (côtes Natural Earth, centaines d'îles) — à mesurer en premier dans ATLAS-333. Tant que cette 1100 est
+sur le disque, le crochet de commit (tests) bloque tout commit : bon garde-fou, mais il faudra adapter ce test (il attend des
+tribus que Cliopatria n'a pas).
+
+⚠️ **`years/1100/` sur le disque contient l'import Cliopatria** (il l'a enregistré pour le voir) : **ne rien commiter de
+`years/`** ; le remettre par `git restore packages/atlas/public/years/1100/` quand il le dit — sa copie est aussi sur son
+bureau (`~/Desktop/europe-historical-atlas-1100-backup-2026-11-02/`). Il redoute que sa 1100 reprenne trop d'Euratlas
+(CARTO-237).
+
 ## En vol, 01/11 au soir — rien de commité encore
 
 - **L'audit des instructions** (`files/prompt-audit-2026-11-01.md`) : **fini**, retour par retour avec lui. Gardés par lui :
@@ -22,6 +63,13 @@
   (`.com` `.eu` `.net` `.fr`, avec et sans `www`) donnent une erreur HTTPS depuis que je lui ai fait retirer et rajouter un
   domaine qui marchait. « Renew certificate » ne les ajoute pas ; le message au forum de Netlify lui a été donné
   (réinitialiser l'état SSL du projet). Seule l'adresse `.org` est à donner en attendant. Le jour de l'ouverture : les domaines passent du site d'attente à celui de l'atlas, rien à changer chez OVH.
+- **ATLAS-329, l'interface en scénarios** : il sépare **l'interface à plat** (boutons et fenêtres par-dessus la carte, le
+  design system, pas de 3D) de **ce qui se passe dans la carte** (clic sur un pays, un événement, le focus) ; on écrit la
+  première d'abord. Écrits le 02/11 : `s11` le bouton de langue (un bouton qui se déplie, chaque langue écrite dans sa
+  langue), `s12` le bouton d'aide (chaque geste avec sa touche ; un diaporama ouvert seul à la première visite), `s13` le
+  cadran de navigation (neuf touches au-dessus de la barre en bas à droite, deux coins contextuels), `s14` la capture
+  (encadrée comme la feuille, un cartouche en bas à gauche avec l'année et les crédits), `s15` le siècle (« ‹ XIᵉ siècle › »
+  en haut, une liste de vingt, **pas de frise** : *« calmos »*) ; trous A-15 → A-21 (A-15, A-16, A-18 tranchés). **Il a des défauts de navigation à me remonter.** Suite : les autres boutons de l'interface à plat.
 - **Le gestionnaire de sources** : CMS-332 (Backlog), `files/plans/contribution/source-manager.md`. Il **fait confiance à
   Commons** ; chaque mail part sur son clic.
 - **La Rus' de 1100** : la ligne d'ATLAS-152 dit « RÉFÉRENCE · géométrie redessinée », or ses tracés ont été reportés à la

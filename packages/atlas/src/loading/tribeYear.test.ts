@@ -127,7 +127,10 @@ describe('an authored year with tribes, through the application’s path', () =>
 
   // The published year, imported as text and never written: its tribes, and its 137 polities' borders,
   // through the same path. Slow-ish (the borders of the whole year are derived), hence its own budget.
-  it('settles and draws the published 1100, one faded patch per tribe claim', () => {
+  // SKIPPED by the dev's call, 2026-11-02: `years/1100/` on disk now holds the Cliopatria import (no tribes, 748
+  // crumbs under 20 km²), which takes two minutes here. To reopen on a fixed fixture, not the published file
+  // (ATLAS-333).
+  it.skip('settles and draws the published 1100, one faded patch per tribe claim', () => {
     const manifest = JSON.parse(MANIFEST) as { bbox: GeoBounds }
     const authored = assembleAuthoredYear(
       {

@@ -25,4 +25,6 @@
 | [`city-sources`](city-sources/) | How large was each city of a year — three open demographic sources (Bosker 2013, Buringh 2021, Chandler via Reba 2016) side by side, one column a source, never averaged? | **in use** (informs the cities' importance, ATLAS-295) |
 | [`name-fixture`](name-fixture/) | Does a change of the countries' names' construction make them better — measured on six frozen countries of 1100 rather than by eye across the map? | **in use** (feeds `core`'s `namePlacement.fixture.test.ts`) |
 
+| [`cliopatria-import`](cliopatria-import/) | Can **Cliopatria** (CC BY 4.0, the data YearMaps runs on) open in the Cartographer as a year, to be looked at and retouched? | **first run** (1100: 106 polities, schema and assembly pass; coarser than the dev's 1100) |
+
 _(Add a row per new spike. Mark `done` / `graduated` / `dropped` as they evolve.)_
