@@ -725,3 +725,9 @@ built:
    system wants the bond dated and sourced as a claim (`evidence-system.md` §4, step 6). Which comes first is the dev's
    call.
 
+### H-48 · Open since 2026-11-02 — how another year is derived
+
+*Save as…* takes any name and a copy keeps the year of the map it comes from ([s19](s19-maps-as-folders.md), the dev,
+2026-11-02). The first design derived 1110 by *Save as…* « 1110 », the year written inside the files ([s04](s04-save-and-reopen.md),
+[s05](s05-derive-a-year.md)); that no longer holds. **To settle with the dev** the day a second year is derived from
+another: a field for the year in *Save as…*, a gesture of its own, or the year written by hand in the files.

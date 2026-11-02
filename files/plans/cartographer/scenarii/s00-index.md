@@ -41,7 +41,8 @@ Every control name below is **provisional**. It names an _intention_, not a deci
 | 15  | [offline and online](s15-offline-and-online.md)         | **integration, not interface** — where a saved year goes, and how the atlas reads it |
 | 16  | [stacking order](s16-stacking-order.md)                   | which fill is painted over which: Illustrator's four Arrange commands, from {Polities} |
 | 17  | [the tools wait for the zoom](s17-tools-wait-for-the-zoom.md) | from afar the overview, close up the tools: a snap reach on the ground decides (`H-34`) |
-| 18  | [nothing drawn is lost](s18-autosave.md)                  | the draft after every gesture, its recovery at the opening, the snapshots (CARTO-238) |
+| 18  | [nothing drawn is lost](s18-autosave.md)                  | ~~the draft~~, replaced 2026-11-02 by the automatic save of s19; rung 3 (the map changed on disk) stays (CARTO-238) |
+| 19  | [a map is a folder](s19-maps-as-folders.md)               | Open…, Save, Save as…, Save a copy; the question before opening; the view kept; the automatic save (CARTO-340) |
 
 ## The two tools — decided 2026-09-22
 

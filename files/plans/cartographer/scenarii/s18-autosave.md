@@ -1,4 +1,10 @@
-# 18 — Nothing drawn is lost: the draft and the snapshots
+# 18 — ~~Nothing drawn is lost: the draft~~ — replaced 2026-11-02 by the automatic save in `years/`
+
+> **Replaced by the dev, 2026-11-02, evening** ([s19](s19-maps-as-folders.md), *The automatic save*): *"what is saved
+> automatically is in the years folder and nowhere else — there is no draft, no snapshot."* The draft, its dialogue at
+> the opening, its endpoint and `.autosave/` are removed. **Rung 3** — the save over a map changed on disk asks first —
+> **stays**, and holds for every map. Everything else below is kept as written, for its history: none of it holds any
+> more.
 
 > [Index](s00-index.md) · CARTO-238, asked by the dev on 2026-10-17: *« la sauvegarde automatique toutes les
 > 30 secondes, et un snapshot complet toutes les heures […] on ne peut pas se permettre de perdre quelque
@@ -116,7 +122,13 @@ Scenario: my own saves never ask
   Then it saves without asking
 ```
 
-## Rung 2a — a snapshot every hour of work (2026-10-18)
+## ~~Rung 2a — a snapshot every hour of work (2026-10-18)~~
+
+> **Removed by the dev, 2026-11-02**, with rung 2b: *"I couldn't care less about snapshots. Remove that feature
+> entirely — we don't even know where the snapshots are."* A map is a folder of `years/` now, and a copy is made by
+> *Save as…* or *Save a copy* ([s19](s19-maps-as-folders.md)). Rungs 1 and 3 stay. Both rungs are kept below as
+> written, struck in spirit: none of their lines holds any more.
+
 
 > **Grafted on the draft**, not a clock of its own: the draft is written 2 s after every gesture; when one is
 > written and an hour has passed since the last snapshot, the same document is also kept as a snapshot. So
@@ -143,7 +155,7 @@ Scenario: a snapshot that cannot be kept is said, and the drawing goes on
   And the draft itself is kept as before, and the next snapshot is tried an hour later
 ```
 
-## Rung 2b — open a snapshot (2026-10-18)
+## ~~Rung 2b — open a snapshot (2026-10-18)~~ — removed 2026-11-02, see above
 
 > **The dev's words, 2026-10-18**: the button is *"Open snapshot"*, the dialogue's action *"Open"*, and *« un
 > warning qui dit qu'à l'ouverture, ça va écraser le travail, mais qu'une copie … a été faite avant l'ouverture …

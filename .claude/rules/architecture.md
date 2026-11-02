@@ -88,7 +88,7 @@ packages/
 │       ├── canvas/         # the controller and the live canvas at the root; tools/ (gestures, snaps),
 │       │                   #   paint/ (painters, scene, style, cursors), history/ (undo keys and relay)
 │       ├── state/          # the store and its slices, read by the canvas and the chrome alike
-│       ├── persistence/    # the year on disk: open, save, snapshots; draft/ holds the automatic draft
+│       ├── persistence/    # the maps on disk: open, save, save as, a copy, the automatic save (s19)
 │       ├── loaders/        # fetch, bake and project the backdrop and the vector layers
 │       ├── wikidata/       # a public item read and said: names, dates, what it belonged to
 │       ├── devServer/      # runs in the Vite server, not the page: writes a year to disk

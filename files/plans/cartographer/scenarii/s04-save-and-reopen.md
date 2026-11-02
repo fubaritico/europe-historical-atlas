@@ -45,6 +45,11 @@ Scenario: close with unsaved work
   And cancelling leaves everything exactly as it was
 ```
 
+> **Changed 2026-11-02** (the dev): *Save as…* takes **any name** and goes on working on the copy, after saving the
+> map it starts from; *Save a copy* is added — [s19](s19-maps-as-folders.md). The scenario below asked for a year and
+> closed the source: its lines « I am asked for the year », « "1100" is closed », « the undo history is emptied » no
+> longer hold, nor does « the year recorded inside the file is 1110 »: a copy keeps the year of the map it comes from (s19).
+
 ```gherkin
 Scenario: save as — and this is how a decade is derived
   Given "1100" is open and saved

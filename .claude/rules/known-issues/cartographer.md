@@ -169,7 +169,18 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   instantanés. **Et un piège de test** : `getByText` de Testing Library replie l'espace fine insécable (`\u202f`, avant
   « ? » et « ; » en français) en espace dans le texte de la page, **pas** dans la chaîne attendue — comparer le
   `textContent` exact. **Sévérité : à savoir.**
-- **An address with `?year=` that is not a year leaves the Cartographer blank** (2026-11-02, `persistence/openingYear.ts`): it
-  throws before anything mounts, said on the console — **my choice**, put to the dev twice and left unanswered: opening 1100
-  in its place would have him drawing on 1100 while believing it 1200. Only *Open…* writes the address. Remedy if he wants the
-  softer way: the alarm dialogue over an empty page. **Severity: cosmétique.**
+- **An address with `?map=` that cannot be a map's name leaves the Cartographer blank** (2026-11-02,
+  `persistence/openingMap.ts`; was `?year=` the same morning): it throws before anything mounts, said on the console —
+  **my choice**, never answered by the dev: opening 1100 in its place would have him drawing on 1100 while believing it
+  another map. A well-formed name with no folder opens nothing, saving blocked, said in the alarm (`noSuchMap`). Only
+  *Open…* and *Save as…* write the address. **Severity: cosmétique.**
+- **`packages/cartographer/.autosave/` is left on disk, unused** (2026-11-02): the snapshots and the draft are removed
+  (`s19`) — the automatic save is a map of `years/` now — but the folder still holds the old snapshots (26 files, 31 MB)
+  and drafts, git-ignored. My `rm -rf` was refused by the permissions, rightly. **Remedy**: the dev deletes it
+  (`! rm -rf ~/Desktop/WebstormProjects/europe-map/packages/cartographer/.autosave`). **Severity: cosmétique.**
+- **The automatic saves pile up in `years/`** (2026-11-02): one folder per opening of a map, kept by the dev's call
+  (*"for now we keep them"*), each listed in *Open…*. **Trigger to revisit**: the list grows too long to read. My
+  proposal of that evening, not taken: remove it at the tab's close when nothing is unsaved (a beacon), keep it
+  otherwise. **Severity: à savoir.**
+- **A view carried from one map to the next that cannot be read opens on the whole backdrop, said in the console**
+  (2026-11-02, `persistence/carriedView.ts`) — my choice, a comfort and not the map. **Severity: cosmétique.**

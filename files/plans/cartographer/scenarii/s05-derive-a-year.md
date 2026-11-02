@@ -6,7 +6,7 @@
 > **Rewritten 2026-09-22.** This file used to be built entirely on stretches shared between years, with
 > copy-on-write on every change. The dev settled it the other way: _"pour être tranquille, chaque année
 > dessinée est indépendante"_ (H-11), and gave the mechanism that replaces all of it — a plain
-> **Save as** ([s04](s04-save-and-reopen.md)).
+> **Save as** ([s04](s04-save-and-reopen.md)). **Changed 2026-11-02**: *Save as…* takes any name ([s19](s19-maps-as-folders.md)); a copy keeps the year of the map it comes from, so "type the year 1110" below no longer derives 1110 — how a year is derived is open (H-48).
 
 ## Creating the year
 
