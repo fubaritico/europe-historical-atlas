@@ -7,7 +7,10 @@ import { createFetchHeightmapSource } from '@europe-historical-atlas/core/data/h
 import { createFetchLandMaskSource } from '@europe-historical-atlas/core/data/landMask'
 import { createFetchRegionSource } from '@europe-historical-atlas/core/data/regionSource'
 import { createFetchRiverSource } from '@europe-historical-atlas/core/data/riverSource'
-import { createAuthoredYearSource } from '@europe-historical-atlas/core/data/yearManifest'
+import {
+  createAuthoredYearSource,
+  readYearManifest,
+} from '@europe-historical-atlas/core/data/yearManifest'
 
 import type { ContentSource } from '@europe-historical-atlas/core/data/contentSource'
 import type { HeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
@@ -67,4 +70,14 @@ export function createFetchAssets(): MapAssetSources {
       unauthored: createFetchRegionSource((year) => `/borders/europe-${String(year)}.json`),
     }),
   }
+}
+
+/**
+ * The years drawn in the Cartographer, in order — what the year switch offers (ATLAS-333, temporary).
+ * @returns the years of `years/index.json`, ascending
+ * @throws an asset error under `yearRegistry` when the manifest cannot be fetched or read
+ */
+export async function fetchAuthoredYears(): Promise<number[]> {
+  const manifest = await readYearManifest(YEAR_MANIFEST_URL)
+  return [...manifest.years].sort((a, b) => a - b)
 }

@@ -20,6 +20,7 @@ import { createViewport } from './app/viewport'
 import { panelDepsFor } from './devPanel/devPanelCallbacks'
 import { NO_DEV_TOOLS, mountDevTools } from './devPanel/devTools'
 import { ATLAS_MESSAGES } from './i18n'
+import { fetchAuthoredYears } from './loading/assets'
 import { createMapPipeline } from './loading/mapPipeline'
 // Vite resolves `?worker` into a constructor for the bundled worker module. It is the one
 // bundler-specific line in the compute, and it lives here on purpose: the client that talks to the
@@ -31,6 +32,12 @@ import { createMapLayers } from './scene/layers/mapLayers'
 import { NAME_FACE_URL } from './scene/political/names/nameFace'
 import { createMapSources } from './sources/mapSources'
 import { createDevState } from './tunables/devState'
+import { mountYearSwitch } from './ui/yearSwitch'
+
+import type { DevTools } from './devPanel/devTools'
+import type { AtlasMessageKey } from './i18n'
+import type { YearSwitch } from './ui/yearSwitch'
+import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 
 /**
  * The page's canvas the map is drawn on.
@@ -58,6 +65,49 @@ function createLayers(
 ): ReturnType<typeof createMapLayers> {
   const cityLabels = canvasLabelDrawer(NAME_FACE_URL)
   return createMapLayers({ scene, dev, sources, blurMethod: standardBlur(), cityLabels })
+}
+
+/**
+ * Start the map, then mount the temporary year switch (ATLAS-333) once the first year is on it, so a pick never
+ * overtakes the startup. A failure of either is not caught here: it reaches the error net like any unexpected one.
+ * @param deps - the tunables, the pipeline, the panel's redraw, the translator and the teardown flag
+ * @param deps.dev - the live tunables, whose political year a pick sets
+ * @param deps.pipeline - what starts the map and redraws a year
+ * @param deps.tools - the developer's tools, whose panel is redrawn so its year slider follows
+ * @param deps.translate - the reader's language
+ * @param deps.isDisposed - whether the map was torn down meanwhile
+ * @returns the switch's teardown, safe before it is mounted
+ */
+function startYearSwitch(deps: {
+  dev: ReturnType<typeof createDevState>
+  pipeline: ReturnType<typeof createMapPipeline>
+  tools: Pick<DevTools, 'refresh'>
+  translate: Translate<AtlasMessageKey>
+  isDisposed: () => boolean
+}): { dispose: () => void } {
+  let mounted: YearSwitch | null = null
+  void deps.pipeline
+    .start()
+    .then(() => fetchAuthoredYears())
+    .then((years) => {
+      if (deps.isDisposed()) return
+      mounted = mountYearSwitch({
+        host: document.body,
+        years,
+        current: () => deps.dev.political.year,
+        pick: (year) => {
+          deps.dev.political.year = year
+          deps.tools.refresh()
+          return deps.pipeline.rebuildPolitical()
+        },
+        label: deps.translate('yearSwitchLabel'),
+      })
+    })
+  return {
+    dispose(): void {
+      mounted?.dispose()
+    },
+  }
 }
 
 /**
@@ -101,7 +151,7 @@ function bootstrap(): () => void {
   // The settings' panel and the frame counter, under `pnpm dev` only (ATLAS-317). Written as the condition itself, so
   // the build turns it to `false` and leaves the panel, lil-gui and the counter out of the deployed bundle.
   const tools = import.meta.env.DEV
-    ? mountDevTools(panelDepsFor({ dev, layers, pipeline, view }), document.body)
+    ? mountDevTools(panelDepsFor({ dev, layers, pipeline, view }), document.body, window)
     : NO_DEV_TOOLS
 
   const onResize = (): void => {
@@ -110,7 +160,8 @@ function bootstrap(): () => void {
   }
   window.addEventListener('resize', onResize)
 
-  void pipeline.start()
+  // Temporary (ATLAS-333), to be removed with the atlas's own timeline (ATLAS-134).
+  const yearSwitch = startYearSwitch({ dev, pipeline, tools, translate, isDisposed })
   const stopLoop = startFrameLoop(view, layers, tools.stats)
 
   return (): void => {
@@ -122,6 +173,7 @@ function bootstrap(): () => void {
     pipeline.dispose()
     interaction.dispose()
     tools.dispose()
+    yearSwitch.dispose()
     ui.dispose()
     layers.dispose()
     view.dispose() // persists the viewpoint before it takes the camera apart

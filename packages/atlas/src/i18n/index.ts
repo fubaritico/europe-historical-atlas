@@ -19,6 +19,7 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `assetNotice` — A failure's headline: what failed, then what it costs.
  * - `unexpectedError` — The headline of an error nothing anticipated.
  * - `dismiss` — The accessible name of a notice's close button.
+ * - `yearSwitchLabel` — The accessible name of the temporary row of year buttons (ATLAS-333).
  */
 export type AtlasMessageKey = keyof typeof en
 

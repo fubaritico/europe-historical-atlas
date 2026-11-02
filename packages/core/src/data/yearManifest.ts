@@ -72,6 +72,22 @@ export function parseYearManifest(value: unknown, source: string): YearManifest 
   throw assetError('yearRegistry', 'schema', source, `${where === '' ? 'payload' : where}: ${why}`)
 }
 
+/**
+ * Fetch and read the year manifest.
+ *
+ * One reader for the region source and for anything that lists the years (the atlas's year switch, ATLAS-333), so
+ * the two can never disagree on which years exist.
+ * @param url - where the manifest lives, e.g. `/years/index.json`
+ * @returns the manifest
+ * @throws an asset error under `yearRegistry` when the transport fails or the payload does not match
+ */
+export async function readYearManifest(url: string): Promise<YearManifest> {
+  const response = await fetchWithin(url)
+  if (!response.ok)
+    throw assetError('yearRegistry', 'transport', url, `HTTP ${String(response.status)}`)
+  return parseYearManifest(await response.json(), url)
+}
+
 /** What {@link createAuthoredYearSource} needs. */
 export interface AuthoredYearSourceDeps {
   /** Where the manifest lives, e.g. `/years/index.json`. */
@@ -99,21 +115,9 @@ export interface AuthoredYearSourceDeps {
 export function createAuthoredYearSource(deps: AuthoredYearSourceDeps): RegionSource {
   let manifest: Promise<YearManifest> | null = null
 
-  const readManifest = async (): Promise<YearManifest> => {
-    const response = await fetchWithin(deps.manifestUrl)
-    if (!response.ok)
-      throw assetError(
-        'yearRegistry',
-        'transport',
-        deps.manifestUrl,
-        `HTTP ${String(response.status)}`
-      )
-    return parseYearManifest(await response.json(), deps.manifestUrl)
-  }
-
   return {
     async load(year: number): Promise<RegionSet> {
-      manifest ??= readManifest()
+      manifest ??= readYearManifest(deps.manifestUrl)
       const list = await manifest
       if (!list.years.includes(year)) return deps.unauthored.load(year)
       const folder = `${deps.yearsBase.replace(/\/$/, '')}/${String(year)}`

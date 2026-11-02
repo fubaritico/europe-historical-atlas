@@ -25,5 +25,6 @@
   "yearBordersLoss": "Borders show in their derived style: the strokes set by hand are lost.",
   "assetNotice": "{failed}. {loss}",
   "unexpectedError": "An unexpected error occurred. The map may be incomplete.",
-  "dismiss": "Close"
+  "dismiss": "Close",
+  "yearSwitchLabel": "Change the year"
 }

@@ -25,5 +25,6 @@
   "yearBordersLoss": "Les frontières s’affichent avec leur style déduit : les traits posés à la main sont perdus.",
   "assetNotice": "{failed}. {loss}",
   "unexpectedError": "Une erreur inattendue s’est produite. La carte peut être incomplète.",
-  "dismiss": "Fermer"
+  "dismiss": "Fermer",
+  "yearSwitchLabel": "Changer d’année"
 }
