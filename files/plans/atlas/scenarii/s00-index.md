@@ -55,4 +55,9 @@ as rules:
 | 08 | [the sheet and its decor](s08-the-sheet-and-its-decor.md) | frame, title, graduations, compass rose, rivers, coasts | written 01/11 |
 | 09 | [when something is missing](s09-when-something-is-missing.md) | the notices, blocking or not | written 01/11 |
 | 10 | [language and accessibility](s10-language-and-accessibility.md) | the language, reduced motion, the screen reader | written 01/11 |
+| 11 | [the language button](s11-the-language-button.md) | the interface: a button that unfolds the languages, kept for the next visit — **not built** (ATLAS-329) | written 02/11 |
+| 12 | [the help button](s12-the-help-button.md) | the interface: every gesture with its key, a short walkthrough opened by itself at the first visit — **not built** (ATLAS-135) | written 02/11 |
+| 13 | [the navigation pad](s13-the-navigation-pad.md) | the interface: a nine-key pad above the button bar, the keyboard's commands, two contextual corners — **not built** (ATLAS-149) | written 02/11 |
+| 14 | [the snapshot](s14-the-snapshot.md) | the interface: a PNG of the view, framed like the sheet, a cartouche with the year and the credits — **not built** | written 02/11 |
+| 15 | [choosing the century](s15-the-century.md) | the interface: « ‹ XIᵉ siècle › » at the top, a list of twenty, the undrawn greyed — **not built** (ATLAS-150) | written 02/11 |
 | 99 | [holes](s99-holes.md) | what is not decided | open |

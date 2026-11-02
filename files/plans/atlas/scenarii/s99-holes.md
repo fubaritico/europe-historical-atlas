@@ -118,3 +118,57 @@ Since 30/10 the cities ride in the content file beside the events; a failure of 
 pas pu être chargés. La carte s'affiche sans ses événements. » while the cities are gone too. Read from the code, not
 provoked. Found writing [s09](s09-when-something-is-missing.md). **Severity: cosmetic** — the notice understates. **Way
 out**: the loss reworded to name the places too (« sans ses événements ni ses lieux »), one line of the two catalogues.
+
+## Found writing the interface — s11 on
+
+### A-15 · Where the language button sits
+
+> **Settled 2026-11-02** by the dev: the interface's buttons sit in **one bar at the bottom right**; the navigation pad
+> appears above it ([s13](s13-the-navigation-pad.md)). Their order in the bar: to the mock-up.
+
+[s11](s11-the-language-button.md) puts it over the map, never on the sheet, and says no more. A corner shared with the
+other buttons of the interface (navigation, focus) is the likely answer — to settle with Claude Design's mock-up, once the
+other buttons are written. **Severity: a design question**, nothing breaks.
+
+### A-16 · Where the chosen language is kept, and for how long
+
+> **Settled 2026-11-02** by the dev: *"we just put something in the local storage, and that's it"* — `localStorage`, on
+> the reader's machine, kept until he clears it. Clearing it falls back to the browser's language (s10).
+
+The reader's choice must outlive the visit (s11, « the choice is kept »). Kept in the browser (`localStorage`, as the
+camera's view is in `sessionStorage`) is the obvious answer, with no account; how long, and whether clearing it falls back
+to the browser's language (s10) — to settle when it is built (ATLAS-266). **Severity: worth knowing.**
+
+### A-17 · The languages as banners waving in 3D
+
+The dev's first idea (a small window of flags floating in 3D) gave way to a button that unfolds; the options may one day
+become small banners in the map's style, each bearing its language's name — never a flag. Not decided; nothing else in s11
+would change. **Severity: none** — a possible enrichment.
+
+### A-19 · The navigation pad's two lower corners
+
+[s13](s13-the-navigation-pad.md) has seven fixed keys and two corners left **contextual**. The dev's leads (02/11):
+« revenir » in a focus, and going from one zoomed place to the next. My first proposal — « plonger » on the screen's
+centre, which would give the focus a way in without a mouse (A11Y-301) — he set aside: the focus is to become a
+**country's** focus (ATLAS-148), a large work, and the corners wait for it. **Severity: a design question.**
+
+### A-20 · The snapshot's size
+
+[s14](s14-the-snapshot.md): the picture at the screen's size, or larger for printing. Larger means drawing the scene once
+more at a higher definition — a second or two of waiting, and the GPU's texture limit to respect
+(`rules/known-issues/atlas.md`, « GPU max texture size is not checked »). **Severity: a design question.**
+
+### A-21 · Where the century's selector sits
+
+[s15](s15-the-century.md) puts it at the top; the dev hesitates between **centred** and **at the top left**. To the
+mock-up. The bottom is taken by the button bar (A-15), and a timeline along it is GeaCron's kind of feature, set aside.
+**Severity: a design question.**
+
+### A-18 · How « walkthrough seen » is kept
+
+> **Settled 2026-11-02** by the dev: `localStorage`, like the language (A-16). What stays open: whether a new slide shows
+> the walkthrough again to readers who saw the old one.
+
+[s12](s12-the-help-button.md) opens the walkthrough by itself at the very first visit only. Kept in the browser like the
+language (A-16); a reader who clears it sees it once more — acceptable. Whether a new slide (a feature shipped) shows it
+again to readers who saw the old one — to settle when the first slide is added. **Severity: worth knowing.**
