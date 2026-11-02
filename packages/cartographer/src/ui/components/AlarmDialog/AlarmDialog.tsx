@@ -13,7 +13,7 @@ import type { AlarmBoard } from '../../../persistence/alarmBoard'
 
 /**
  * What the year on disk says when the work may be lost or was not done — a save the server has not confirmed,
- * a failed save, drafts stopped (`persistence/notice.ts`). The dev's call, 2026-10-23: *« c'est visuel »*, not a
+ * a failed save, the automatic save stopped (`persistence/notice.ts`). The dev's call, 2026-10-23: *« c'est visuel »*, not a
  * line in the status bar. Open while an alarm waits; every alarm waiting is shown, oldest first, under the topic
  * of the newest. ‹OK›, ‹escape› and the backdrop close it — each means the author has read it.
  */

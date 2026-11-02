@@ -263,8 +263,8 @@
 }
 
 /*
- * The short dialogues — deleting a polity, and the year on disk's: resuming a draft, overwriting, a snapshot,
- * an alarm (CARTO-238, REPO-275): as wide as the form, the text in the panel's.
+ * The short dialogues — deleting a polity, and the map on disk's: resuming a draft, overwriting, opening a map,
+ * saving it as another, an alarm (CARTO-238, REPO-275): as wide as the form, the text in the panel's.
  */
 .polity-delete,
 .short-dialogue {
@@ -279,49 +279,65 @@
   line-height: 18px;
 }
 
-/* *Open…* (2026-11-02): the years saved under the warning, side by side, the open one written, not offered. */
-.year-choices {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+/* *Open…* (`s19`, the dev, 2026-11-02: *"a framed box, a darker ground, a border — as in a file dialogue"*): the
+   design system's listbox, on the app's darkest ground inside the dialogue's panel, with a field's border; each row
+   its icon and its name; the selection in the selection blue; the open map greyed and marked. Wider than the other
+   short dialogues: a map's name can be long, an autosave's longer still. */
+.short-dialogue--wide {
+  width: 460px;
+}
+
+.map-list {
+  --ui-listbox-bg: var(--bg);
+  --ui-listbox-border-color: var(--ink-off);
+  --ui-listbox-shadow: none;
+  --ui-listbox-max-block-size: 280px;
+  --ui-listbox-item-gap: 0;
   margin: 12px 0 0;
-  padding: 0;
-  list-style: none;
 }
 
-.year-choices__open {
-  display: inline-block;
-  padding: 6px 0;
-  color: var(--ink);
-  font-size: 12px;
+.map-list:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
-/* *Open snapshot* (CARTO-238, rung 2b): the list under the warning, one snapshot per line, and the line that
-   says why there is none — the dialogue's own type, not the browser's. */
-.snapshot-list {
-  display: grid;
-  gap: 4px;
-  margin: 12px 0 0;
-  padding: 0;
-  border: 0;
-}
-
-.snapshot-list__row {
+.map-list__row {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--ink);
+  padding: 4px 8px;
   font-size: 12px;
   line-height: 18px;
-  cursor: pointer;
 }
 
-.snapshot-list__note {
-  margin: 12px 0 0;
+.map-list__row[aria-selected='true'] {
+  background-color: var(--accent);
   color: var(--ink);
-  font-size: 12px;
-  line-height: 18px;
 }
+
+.map-icon {
+  flex: 0 0 auto;
+}
+
+.map-list__name {
+  overflow-wrap: anywhere;
+}
+
+.map-list__open {
+  margin-left: auto;
+  color: var(--ink-dim);
+  font-style: italic;
+}
+
+.map-list__hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 /*
  * `{Polities}`' list, after `design/01`: a subhead naming the year and the count, then one 24px row per
  * polity — its swatch, its name, the *"no territory"* chip, its rank and dates. The target is the

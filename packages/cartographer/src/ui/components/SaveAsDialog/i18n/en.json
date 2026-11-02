@@ -1,0 +1,7 @@
+{
+  "title": "Save as",
+  "text": "The map is saved first, then written under the new name; you go on working on the new map.",
+  "name": "Name of the new map",
+  "hint": "Letters, digits, \"-\", \"_\" and \".\"",
+  "saving": "Saving…"
+}

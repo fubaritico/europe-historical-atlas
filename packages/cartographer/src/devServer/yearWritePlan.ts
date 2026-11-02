@@ -1,4 +1,5 @@
 import { isAssetError } from '@europe-historical-atlas/core/data/assetError'
+import { isMapName, yearNamed } from '@europe-historical-atlas/core/data/mapName'
 import { assembleAuthoredYear } from '@europe-historical-atlas/core/data/yearConsistency'
 import { parseYearManifest } from '@europe-historical-atlas/core/data/yearManifest'
 import {
@@ -37,7 +38,9 @@ export interface PlannedFile {
 
 /** What a save will write, once every check has passed. */
 export interface YearWritePlan {
-  /** The year being saved. */
+  /** The map being saved — its folder's name under `years/` (`s19`). */
+  map: string
+  /** The year its files declare. */
   year: number
   /**
    * The three files of the year, then the manifest **last** when the year is new to it.
@@ -69,22 +72,13 @@ export type YearWriteDecision =
 
 /** What the endpoint received, already read off the request. */
 export interface YearWriteRequest {
-  /** The year as it appeared in the URL — `/__years/1100` gives `'1100'`. Still a string: unchecked. */
-  yearSegment: string
+  /** The map as it appeared in the URL — `/__years/1100-essai` gives `'1100-essai'`. Still a string: unchecked. */
+  mapSegment: string
   /** The request body, parsed as JSON — of no known shape yet. */
   body: unknown
   /** The current `years/index.json`, as text; `null` when the file does not exist. */
   manifestText: string | null
 }
-
-/**
- * A year in a path: a whole number of up to five digits, a minus before Christ — the one rule both
- * endpoints check (the year save here, the draft in `draftEndpoint.ts`). Digits only, so a path built from
- * it cannot climb out of its folder.
- */
-export const YEAR_DIGITS = '-?\\d{1,5}'
-
-const YEAR_SEGMENT = new RegExp(`^${YEAR_DIGITS}$`)
 
 /**
  * Build a refusal.
@@ -94,16 +88,6 @@ const YEAR_SEGMENT = new RegExp(`^${YEAR_DIGITS}$`)
  */
 function refuse(status: YearWriteRefusal['status'], reason: string): YearWriteDecision {
   return { accepted: false, refusal: { status, reason } }
-}
-
-/**
- * Read the year out of the URL segment.
- * @param segment - what followed `/__years/`
- * @returns the year, or `null` when the segment is not a whole number
- */
-function readYear(segment: string): number | null {
-  if (!YEAR_SEGMENT.test(segment)) return null
-  return Number(segment)
 }
 
 /**
@@ -173,38 +157,42 @@ function isRefusal(value: object): value is YearWriteRefusal {
 /**
  * Decide what a save writes, or why it writes nothing.
  *
- * In order, stopping at the first problem: the year in the URL, the manifest on disk, the three files against
- * their schemas and against each other, and the year inside them against the year in the URL — a folder named
- * 1110 holding a 1100 territory is the mistake `s04`'s *Save as* is written to prevent.
+ * In order, stopping at the first problem: the map's name in the URL, the three files against their schemas and
+ * against each other; then, **for a map named as a year only**, the year inside the files against its name — a folder
+ * named 1200 holding 1100 would be published by the atlas as 1200 (`s19`) — and the manifest, which lists the years the
+ * atlas reads. A map with any other name is a working map: the manifest is neither read nor written.
  *
  * **What is written is what `core` parsed, not what arrived.** The schemas are strict, so the two hold the
  * same fields; writing the parsed value means no stray key can ride along into the repository.
- * @param request - the year segment, the body and the current manifest
+ * @param request - the map segment, the body and the current manifest
  * @returns the plan, or the refusal
  */
 export function planYearWrite(request: YearWriteRequest): YearWriteDecision {
-  const year = readYear(request.yearSegment)
-  if (year === null)
-    return refuse(400, `"${request.yearSegment}" is not a year — expected a whole number`)
+  const map = request.mapSegment
+  if (!isMapName(map))
+    return refuse(
+      400,
+      `"${map}" is not a map's name — letters, digits, "-", "_" and "." only, starting with a letter or a digit`
+    )
 
-  const manifest = readManifest(request.manifestText)
-  if (isRefusal(manifest)) return refuse(manifest.status, manifest.reason)
-
-  const folder = `years/${String(year)}`
-  const authored = readYearFiles(request.body, folder)
+  const authored = readYearFiles(request.body, `years/${map}`)
   if (isRefusal(authored)) return refuse(authored.status, authored.reason)
+
+  const planned: PlannedFile[] = [
+    { relativePath: `${map}/registry.json`, text: formatYearJson(authored.registry) },
+    { relativePath: `${map}/polities.json`, text: formatYearJson(authored.polities) },
+    { relativePath: `${map}/borders.json`, text: formatYearJson(authored.borders) },
+  ]
+  const year = yearNamed(map)
+  if (year === null) return { accepted: true, plan: { map, year: authored.year, files: planned } }
 
   if (authored.year !== year)
     return refuse(
       422,
-      `the files say year ${String(authored.year)}, the save was addressed to ${String(year)}`
+      `A map named ${map} is the map of the year ${map}, which the atlas publishes — this map is ${String(authored.year)}. Choose another name`
     )
-
-  const planned: PlannedFile[] = [
-    { relativePath: `${String(year)}/registry.json`, text: formatYearJson(authored.registry) },
-    { relativePath: `${String(year)}/polities.json`, text: formatYearJson(authored.polities) },
-    { relativePath: `${String(year)}/borders.json`, text: formatYearJson(authored.borders) },
-  ]
+  const manifest = readManifest(request.manifestText)
+  if (isRefusal(manifest)) return refuse(manifest.status, manifest.reason)
   if (!manifest.years.includes(year)) {
     const listed: YearManifest = {
       ...manifest,
@@ -212,5 +200,5 @@ export function planYearWrite(request: YearWriteRequest): YearWriteDecision {
     }
     planned.push({ relativePath: 'index.json', text: formatYearJson(listed) })
   }
-  return { accepted: true, plan: { year, files: planned } }
+  return { accepted: true, plan: { map, year, files: planned } }
 }

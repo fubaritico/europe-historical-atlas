@@ -1,8 +1,8 @@
 {
   "save": "Save",
   "open": "Open…",
-  "openSnapshot": "Open snapshot…",
   "saveAs": "Save as…",
+  "saveCopy": "Save a copy",
   "undo": "Undo",
   "redo": "Redo",
   "undoStep": "Undo {step}",
@@ -17,5 +17,7 @@
   "front": "Bring to Front",
   "forward": "Bring Forward",
   "backward": "Send Backward",
-  "back": "Send to Back"
+  "back": "Send to Back",
+  "yes": "Yes",
+  "no": "No"
 }

@@ -35,7 +35,7 @@ describe('AlarmDialog', () => {
       mounted({ topic: 'year', text: 'not saved (details in the console)' })
 
       expect(dialog()?.hasAttribute('open')).toBe(true)
-      expect(dialog()?.getAttribute('aria-label')).toBe('The year on disk')
+      expect(dialog()?.getAttribute('aria-label')).toBe('The map on disk')
       expect(open().getByText('not saved (details in the console)')).toBeTruthy()
     })
 
@@ -53,12 +53,12 @@ describe('AlarmDialog', () => {
     it('shows every alarm waiting, under the topic of the newest', () => {
       mounted(
         { topic: 'year', text: 'no confirmation yet' },
-        { topic: 'draft', text: 'the draft is not kept' }
+        { topic: 'autosave', text: 'the automatic save is not written' }
       )
 
-      expect(dialog()?.getAttribute('aria-label')).toBe('The automatic draft')
+      expect(dialog()?.getAttribute('aria-label')).toBe('The automatic save')
       expect(open().getByText('no confirmation yet')).toBeTruthy()
-      expect(open().getByText('the draft is not kept')).toBeTruthy()
+      expect(open().getByText('the automatic save is not written')).toBeTruthy()
     })
 
     it('closes by itself when its only alarm is withdrawn — a save confirmed after its doubt', () => {
@@ -72,7 +72,7 @@ describe('AlarmDialog', () => {
     })
 
     it('closes on ‹escape›, as on [OK]', () => {
-      const { alarms } = mounted({ topic: 'snapshot', text: 'not opened' })
+      const { alarms } = mounted({ topic: 'autosave', text: 'not written' })
 
       // jsdom has no dialogue: in the browser ‹escape› closes it and `close` fires, the Modal's event.
       act(() => {

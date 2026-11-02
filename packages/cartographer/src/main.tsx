@@ -16,47 +16,39 @@ import { fetchWithin } from '@europe-historical-atlas/core/utils/fetchWithin'
 
 import { createHistoryRelay } from './canvas/history/historyRelay'
 import { CHROME_PAINT_STYLE } from './canvas/paint/style'
-import { DRAFTS_FOLDER, DRAFT_ROUTE } from './devServer/draftRoute'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
 import { createLocaleStore } from './i18n/localeStore'
 import { bakeToBitmap, loadBackdrop } from './loaders/backdropSource'
 import { loadVectorLayers } from './loaders/vectorLayers'
 import { createAlarmBoard } from './persistence/alarmBoard'
-import {
-  DRAFT_DELAY_MS,
-  SNAPSHOT_EVERY_MS,
-  createDraftKeeper,
-} from './persistence/draft/draftKeeper'
-import { createDraftOffers } from './persistence/draft/draftOffers'
-import { offerDraft } from './persistence/draft/draftRecovery'
-import { openWithDraft, saveAndClearDraft } from './persistence/draft/draftSession'
-import { createDevServerDraftStore } from './persistence/draft/draftStore'
+import { AUTOSAVE_DELAY_MS, createAutosaveKeeper } from './persistence/autosaveKeeper'
+import { carryView, takeCarriedView } from './persistence/carriedView'
+import { changeMap } from './persistence/mapChange'
 import { routeNotices } from './persistence/noticeRouter'
-import { openingYearOf } from './persistence/openingYear'
+import { addressForMap, openingMapOf } from './persistence/openingMap'
 import { persistenceWords } from './persistence/persistenceWords'
 import { createQuestionRelay } from './persistence/questionRelay'
 import { createResultRelay } from './persistence/resultRelay'
 import { installSaveShortcut } from './persistence/saveShortcut'
 import { wantsSlowWrites, writesFetch } from './persistence/slowWrites'
-import { openSnapshot } from './persistence/snapshotOpening'
 import { createDevServerYearArchive } from './persistence/yearArchive'
-import { changeYear } from './persistence/yearChange'
 import { createYearSession } from './persistence/yearSession'
 import { openEmptyYear } from './state/openEmptyYear'
 import { createPolityColourSource } from './state/polityColourSource'
 import { createCartographerStore } from './state/store'
 import { AlarmDialog } from './ui/components/AlarmDialog'
-import { DraftRecoveryDialog } from './ui/components/DraftRecoveryDialog'
 import { Editor } from './ui/components/Editor'
 import { ErrorBoundary, ZoneBreaksContext, readZoneBreaks } from './ui/components/ErrorBoundary'
 import { LocaleProvider } from './ui/components/LocaleProvider'
+import { MapDialog } from './ui/components/MapDialog'
 import { NoticeToaster, noticeToasts } from './ui/components/NoticeToaster'
 import { OverwriteDialog } from './ui/components/OverwriteDialog'
 import { PageHeading } from './ui/components/PageHeading'
-import { SnapshotDialog } from './ui/components/SnapshotDialog'
-import { YearDialog } from './ui/components/YearDialog'
+import { SaveAsDialog } from './ui/components/SaveAsDialog'
+import { SaveFirstDialog } from './ui/components/SaveFirstDialog'
 import { arrangeSelected, arrangeWords } from './ui/utils/arrange'
 import { createDialogueOpener } from './ui/utils/dialogueOpener'
+import { createMapNameStore } from './ui/utils/mapNameSource'
 import { listenForStackingKeys } from './ui/utils/stackingShortcut'
 import { UNFRAMED } from './viewport/viewport'
 import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataSource'
@@ -64,8 +56,7 @@ import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataS
 // Every sheet, in order, through one module the workbench imports too — see `ui/styles/sheets.ts`.
 import './ui/styles/sheets'
 
-import type { SnapshotEntry } from './persistence/draft/draftStore'
-import type { SnapshotOpeningDeps } from './persistence/snapshotOpening'
+import type { SaveFirstAnswer } from './persistence/mapChange'
 import type { OverwriteQuestion } from './persistence/yearSession'
 import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 import type { ReactToastContent } from '@fubaritico/react/Toast'
@@ -114,24 +105,35 @@ if (!container) {
   throw new Error('Cartographer: #root is missing from index.html — nothing to mount into.')
 }
 
-/** The year the editor opens on when the address names none. 1100 is the first century to be contributed (P3). */
-const FIRST_YEAR = 1100
+/** The map the editor opens on when the address names none — the published map of 1100, the first century (P3). */
+const FIRST_MAP = '1100'
 
 /**
- * The year this page edits: `?year=1200` in the address, written by *Open…* (`persistence/yearChange.ts`), or the first
- * year. A `year` that is not one throws here, before anything mounts — said on the console rather than opening 1100 in
- * its place (`persistence/openingYear.ts`).
+ * The map this page edits: `?map=1100-backup-2026-11-02` in the address, written by *Open…* and *Save as…*
+ * (`persistence/mapChange.ts`), or the first map. A `map` that cannot be a map's name throws here, before anything
+ * mounts — said on the console rather than opening 1100 in its place (`persistence/openingMap.ts`).
  */
-const YEAR = openingYearOf(window.location.search, FIRST_YEAR)
+const MAP = openingMapOf(window.location.search, FIRST_MAP)
+
+/** The map's name as the chrome reads it — *Save as…* changes it without a reload. */
+const mapName = createMapNameStore(MAP)
+
+/**
+ * The view the previous map was left on, when *Open…* brought the page here (`s19`): the map opens on it rather than
+ * on the whole backdrop. Taken once — a plain reload opens on the opening framing.
+ */
+const CARRIED_VIEW = takeCarriedView(window.sessionStorage)
 
 const store = createCartographerStore({
   edition: {
-    document: openEmptyYear(YEAR),
+    // The year of a map is in its files; until they are read, the page holds an empty 1100, never saved as such.
+    document: openEmptyYear(1100),
     clone: cloneYearDocument,
   },
-  // Opened unframed on purpose: nothing can know what fits until the canvas has a box, and the canvas
-  // replaces this at its first sizing. See `UNFRAMED`.
-  viewport: { viewport: UNFRAMED },
+  // Opened unframed on purpose, unless a view was carried from the previous map: nothing can know what fits until the
+  // canvas has a box, and the canvas replaces an unframed view at its first sizing, and holds a carried one. See
+  // `UNFRAMED`.
+  viewport: { viewport: CARRIED_VIEW ?? UNFRAMED },
 })
 
 /**
@@ -204,7 +206,7 @@ const wikidata = createWikidataApiSource({
   endpoint: WIKIDATA_ENDPOINT,
 })
 
-/** The writes of the year and of the drafts — slowed by `?slow=save` in development (REPO-275). */
+/** The writes of the maps and of their autosaves — slowed by `?slow=save` in development (REPO-275). */
 const writeFetch = writesFetch(
   (input, init) => fetchWithin(input, init),
   wantsSlowWrites(window.location.search, import.meta.env.DEV),
@@ -240,7 +242,7 @@ const diskWords = () => persistenceWords(localeStore.get())
 
 /** ‹ctrl+S› over a year changed on disk asks first (CARTO-238, rung 3) — answered in `OverwriteDialog`. */
 const overwriteQuestions = createQuestionRelay<OverwriteQuestion>('a save is already asking')
-/** The years on disk: read and written by the session, listed by *Open…*. */
+/** The maps on disk: read and written by the session, listed by *Open…*. */
 const yearArchive = createDevServerYearArchive({
   fetch: writeFetch,
   yearsBase: '/years',
@@ -261,7 +263,12 @@ const yearArchive = createDevServerYearArchive({
 const yearSession = createYearSession({
   store,
   archive: yearArchive,
-  year: YEAR,
+  map: MAP,
+  // *Save as…* made the page another map: the address and the top bar follow, with no reload.
+  onMapChanged: (map) => {
+    mapName.set(map)
+    window.history.replaceState(null, '', addressForMap(window.location.search, map))
+  },
   report: notices,
   words: diskWords,
   confirmOverwrite: overwriteQuestions.ask,
@@ -274,25 +281,15 @@ const yearSession = createYearSession({
   },
 })
 /**
- * The draft — the work since the last ‹ctrl+S›, kept on disk a moment after every gesture (CARTO-238).
- *
- * **The order is the whole point, and it is one chain**: open the year, *then* offer the draft the previous
- * session left, *then* start keeping drafts. Started any earlier, the keeper's first write would overwrite
- * the draft the offer exists to give back — and it starts only when the offer leaves the way clear
- * (`persistence/draft/draftSession.ts`).
+ * The automatic save — the page written as `years/<map>.autosave.<time of opening>` two seconds after each gesture,
+ * one folder per opening, kept (the dev, 2026-11-02; `persistence/autosaveKeeper.ts`). Started once the map is open
+ * and saving is allowed: an autosave of an empty or unreadable page would only be noise in *Open…*.
  */
-const drafts = createDevServerDraftStore({
-  fetch: writeFetch,
-  route: DRAFT_ROUTE,
-})
-const draftOffers = createDraftOffers()
-const draftKeeper = createDraftKeeper({
+const autosaveKeeper = createAutosaveKeeper({
   store,
-  drafts,
-  year: YEAR,
-  delayMs: DRAFT_DELAY_MS,
-  snapshotEveryMs: SNAPSHOT_EVERY_MS,
-  snapshots: drafts,
+  write: (document, map) => yearArchive.save(document, map, { overwrite: true }),
+  map: () => yearSession.map(),
+  delayMs: AUTOSAVE_DELAY_MS,
   now: () => new Date(),
   timers: {
     set: (run, delayMs) => window.setTimeout(run, delayMs),
@@ -303,75 +300,65 @@ const draftKeeper = createDraftKeeper({
   report: notices,
   words: diskWords,
 })
-void openWithDraft({
-  openYear: () => yearSession.openOnStartup(),
-  offerDraft: () =>
-    offerDraft({
-      drafts,
-      year: YEAR,
-      store,
-      ask: draftOffers.ask,
-      now: () => new Date(),
-      report: notices,
-      words: diskWords,
-      draftsFolder: DRAFTS_FOLDER,
-    }),
-  keeper: draftKeeper,
-  report: notices,
-  words: diskWords,
+void yearSession.openOnStartup().then(() => {
+  if (yearSession.phase() === 'ready') autosaveKeeper.start()
 })
-/**
- * Save the year — ‹ctrl+S› anywhere, and the top bar's `[Save]`: one call, two triggers. A save that wrote
- * the year tells the keeper, which removes the draft unless the author drew since the save took the document.
- */
+/** Save the map — ‹ctrl+S› anywhere, and the top bar's `[Save]`: one call, two triggers. */
 const handleSave = (): void => {
-  void saveAndClearDraft({
-    version: () => store.getState().version,
-    save: () => yearSession.save(),
-    keeper: draftKeeper,
-  })
+  void yearSession.save()
 }
 installSaveShortcut(window, handleSave)
 
-/**
- * *Open snapshot* (CARTO-238, rung 2b): the top bar's button opens the dialogue; opening keeps the page as a
- * snapshot first, then replaces it (`persistence/snapshotOpening.ts`).
- */
-const snapshotPicker = createDialogueOpener()
+/** *Open…*'s dialogue, and *Save as…*'s — one opener per dialogue. */
+const mapPicker = createDialogueOpener()
+const saveAsPicker = createDialogueOpener()
 
-/** *Open…*'s opener — one per dialogue, as *Open snapshot*'s. */
-const yearPicker = createDialogueOpener()
-
-/**
- * What keeping the page before replacing it needs — one object for *Open snapshot* and *Open…*, which both replace it.
- */
-const pageKeeping: SnapshotOpeningDeps = {
-  store,
-  snapshots: drafts,
-  year: YEAR,
-  now: () => new Date(),
-  report: notices,
-  words: diskWords,
-}
+/** *Open…* asks whether to save the map open when it holds changes (`s19`) — answered in `SaveFirstDialog`. */
+const saveFirstQuestions = createQuestionRelay<string, SaveFirstAnswer>(
+  'opening a map is already asking'
+)
 
 /**
- * Open another year: keep the page as a snapshot, then reload on the year chosen — or say why it stays.
- * @param year - the year chosen in the dialogue
+ * Open another map: ask whether to save the map open when it changed, carry the view, then reload on the map chosen —
+ * or say why the page stays.
+ * @param map - the map chosen in the dialogue
  */
-const handleOpenYear = (year: number): void => {
-  void changeYear(
+const handleOpenMap = (map: string): void => {
+  void changeMap(
     {
-      ...pageKeeping,
+      session: {
+        map: () => yearSession.map(),
+        isModified: () => yearSession.isModified(),
+        // Saved as ‹ctrl+S› saves.
+        save: () => yearSession.save(),
+      },
+      version: () => store.getState().version,
+      askSaveFirst: saveFirstQuestions.ask,
+      carryView: () => {
+        carryView(window.sessionStorage, store.getState().viewport)
+      },
       search: window.location.search,
       go: (address) => {
         window.location.assign(address)
       },
+      report: notices,
+      words: diskWords,
     },
-    year
+    map
   )
 }
-const handleOpenSnapshot = (entry: SnapshotEntry): void => {
-  void openSnapshot(pageKeeping, entry)
+
+/**
+ * *Save as…*: the session saves the map open, then writes the page under the name, and the page goes on as that map —
+ * its autosave following it under the new name.
+ * @param name - the name typed
+ * @returns done, or the refusal the form shows
+ */
+const handleSaveAs = (name: string) => yearSession.saveAs(name)
+
+/** *Save a copy*: the page written as `<map>.copy.<date and time>`, the page staying its map. */
+const handleSaveCopy = (): void => {
+  void yearSession.saveCopy()
 }
 // ‹cmd+↑ ↓›, with ‹shift› to the end: the selected polity up or down the stacking order, from anywhere.
 listenForStackingKeys(document, (move) => {
@@ -397,9 +384,11 @@ createRoot(container).render(
       <ZoneBreaksContext value={zoneBreaks}>
         <ErrorBoundary zone="cartographer">
           <Editor
+            onOpen={mapPicker.open}
             onSave={handleSave}
-            onOpenSnapshot={snapshotPicker.open}
-            onOpenYear={yearPicker.open}
+            onSaveAs={saveAsPicker.open}
+            onSaveCopy={handleSaveCopy}
+            mapName={mapName}
             history={history}
             heading={<PageHeading store={store} />}
             store={store}
@@ -409,23 +398,17 @@ createRoot(container).render(
             wikidata={wikidata}
             results={results}
           />
-          <DraftRecoveryDialog offers={draftOffers} now={() => new Date()} />
           <OverwriteDialog questions={overwriteQuestions} now={() => new Date()} />
           <AlarmDialog alarms={alarms} />
           <NoticeToaster toaster={toaster} />
-          <SnapshotDialog
-            picker={snapshotPicker}
-            source={drafts}
-            year={YEAR}
-            now={() => new Date()}
-            onOpen={handleOpenSnapshot}
-          />
-          <YearDialog
-            picker={yearPicker}
+          <MapDialog
+            picker={mapPicker}
             source={yearArchive}
-            year={YEAR}
-            onOpen={handleOpenYear}
+            currentMap={yearSession.map}
+            onOpen={handleOpenMap}
           />
+          <SaveFirstDialog questions={saveFirstQuestions} />
+          <SaveAsDialog picker={saveAsPicker} saveAs={handleSaveAs} />
         </ErrorBoundary>
       </ZoneBreaksContext>
     </LocaleProvider>

@@ -161,10 +161,10 @@ export async function fetchYearFiles(
 /**
  * Build the three paths of a year's folder from a base URL.
  * @param base - the folder holding the years, e.g. `/years`
- * @param forYear - the year to read
+ * @param forYear - the year to read, or the name of a Cartographer map's folder (`1100-essai`)
  * @returns the three file paths
  */
-export function yearPaths(base: string, forYear: number): YearPaths {
+export function yearPaths(base: string, forYear: number | string): YearPaths {
   const folder = `${base.replace(/\/$/, '')}/${String(forYear)}`
   return {
     registry: `${folder}/registry.json`,

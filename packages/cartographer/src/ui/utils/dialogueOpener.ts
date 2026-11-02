@@ -1,8 +1,8 @@
 /**
- * Whether a dialogue is open — one opener per dialogue: *Open snapshot* (CARTO-238, rung 2b), *Open…* (2026-11-02).
+ * Whether a dialogue is open — one opener per dialogue: *Open…* and *Save as…* (`s19`).
  * Set by the top bar's button, read by the dialogue mounted beside the editor. A tiny external store rather than
  * component state: the button and the dialogue sit in two different branches of the tree, and the composition root
- * wires them, as it wires the draft's dialogue.
+ * wires them.
  */
 
 /** A dialogue's opener: open, closed, and who listens. */

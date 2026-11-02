@@ -12,6 +12,7 @@ import { createPolityColourSource } from '../../../state/polityColourSource'
 import { createCartographerStore } from '../../../state/store'
 import { UNFRAMED } from '../../../viewport/viewport'
 import { renderInEnglish } from '../../testing/renderInEnglish'
+import { createMapNameStore } from '../../utils/mapNameSource'
 
 import { Editor } from './Editor'
 
@@ -55,9 +56,11 @@ function mount(results = createResultRelay()): void {
       load={() => new Promise(() => undefined)}
       style={CHROME_PAINT_STYLE}
       heading={<h1>Cartographer — year 1100</h1>}
+      onOpen={() => undefined}
       onSave={() => undefined}
-      onOpenSnapshot={() => undefined}
-      onOpenYear={() => undefined}
+      onSaveAs={() => undefined}
+      onSaveCopy={() => undefined}
+      mapName={createMapNameStore('1100')}
       history={createHistoryRelay()}
       colours={COLOURS}
       results={results}

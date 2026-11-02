@@ -1,6 +1,7 @@
 /**
- * A yes-or-no question asked by code that runs outside React, and answered in a dialogue only React renders —
- * *"resume the draft?"*, *"overwrite the year changed on disk?"* (CARTO-238).
+ * A question asked by code that runs outside React, and answered in a dialogue only React renders —
+ * *"overwrite the map changed on disk?"* (CARTO-238), yes or no; *"save the current map?"*
+ * (`s19`), yes, no, or dismissed — the answer's type is the relay's second parameter, `boolean` unless said.
  *
  * **Why a relay, as for the result zone** (`resultRelay.ts`): the asker — the opening, a save — lives in the
  * entry module or a session built there, before any component exists. It `ask`s and waits; the dialogue reads
@@ -8,14 +9,14 @@
  * cannot drift apart in how they wait.
  */
 
-/** The relay, for one kind of question. */
-export interface QuestionRelay<Question> {
+/** The relay, for one kind of question and its kind of answer. */
+export interface QuestionRelay<Question, Answer = boolean> {
   /**
    * Ask the author, and wait for the answer. One question at a time.
    * @param question - what is asked
-   * @returns `true` for yes, `false` for no
+   * @returns the answer — `true` for yes, `false` for no, for a yes-or-no question
    */
-  ask: (question: Question) => Promise<boolean>
+  ask: (question: Question) => Promise<Answer>
   /** The question waiting for an answer, or `null`. */
   current: () => Question | null
   /**
@@ -28,7 +29,7 @@ export interface QuestionRelay<Question> {
    * Answer the question waiting; nothing happens when none is.
    * @param yes - the answer
    */
-  answer: (yes: boolean) => void
+  answer: (yes: Answer) => void
 }
 
 /**
@@ -36,9 +37,11 @@ export interface QuestionRelay<Question> {
  * @param busy - the reason a second question is refused while one waits
  * @returns the relay
  */
-export function createQuestionRelay<Question>(busy: string): QuestionRelay<Question> {
+export function createQuestionRelay<Question, Answer = boolean>(
+  busy: string
+): QuestionRelay<Question, Answer> {
   let question: Question | null = null
-  let settle: ((yes: boolean) => void) | null = null
+  let settle: ((yes: Answer) => void) | null = null
   const listeners = new Set<() => void>()
   const notify = (): void => {
     for (const listener of listeners) listener()
@@ -47,7 +50,7 @@ export function createQuestionRelay<Question>(busy: string): QuestionRelay<Quest
     ask: (next) => {
       if (settle !== null) return Promise.reject(new Error(busy))
       question = next
-      const answered = new Promise<boolean>((resolve) => {
+      const answered = new Promise<Answer>((resolve) => {
         settle = resolve
       })
       notify()

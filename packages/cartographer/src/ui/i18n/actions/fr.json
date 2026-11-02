@@ -1,8 +1,8 @@
 {
   "save": "Enregistrer",
   "open": "Ouvrir…",
-  "openSnapshot": "Ouvrir un instantané…",
   "saveAs": "Enregistrer sous…",
+  "saveCopy": "Enregistrer une copie",
   "undo": "Annuler",
   "redo": "Rétablir",
   "undoStep": "Annuler {step}",
@@ -17,5 +17,7 @@
   "front": "Premier plan",
   "forward": "En avant",
   "backward": "En arrière",
-  "back": "Arrière-plan"
+  "back": "Arrière-plan",
+  "yes": "Oui",
+  "no": "Non"
 }

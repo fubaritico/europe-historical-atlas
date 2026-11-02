@@ -1,0 +1,11 @@
+{
+  "title": "Open a map",
+  "warning": "Choose the map to open. If the map open holds changes, you will be asked whether to save it first.",
+  "reading": "Reading the maps…",
+  "failed": "The maps could not be listed (details in the console).",
+  "empty": "No map yet.",
+  "legend": "The maps",
+  "isOpen": "open",
+  "autosave": "automatic save",
+  "open": "Open"
+}

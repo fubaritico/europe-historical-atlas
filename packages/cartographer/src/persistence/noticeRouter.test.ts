@@ -34,10 +34,10 @@ describe('routeNotices', () => {
     it('closes the alarm of a topic when that topic succeeds — a save confirmed after its doubt', () => {
       const { alarms, report } = router()
       report({ tone: 'alarm', topic: 'year', text: 'no confirmation yet' })
-      report({ tone: 'alarm', topic: 'draft', text: 'the draft is not kept' })
+      report({ tone: 'alarm', topic: 'autosave', text: 'the draft is not kept' })
       report({ tone: 'success', topic: 'year', text: 'saved 1100' })
 
-      expect(alarms.current()).toEqual([{ topic: 'draft', text: 'the draft is not kept' }])
+      expect(alarms.current()).toEqual([{ topic: 'autosave', text: 'the draft is not kept' }])
     })
 
     it.each(['info', 'warning'] as const)('leaves the alarms alone on %s, a toast', (tone) => {

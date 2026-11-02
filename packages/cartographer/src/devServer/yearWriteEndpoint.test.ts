@@ -30,6 +30,8 @@ function memoryFolder(
   const folder: YearFolder = {
     read: (path) => files.get(path) ?? null,
     modifiedAt: (path) => (files.has(path) ? (times[path] ?? 0) : null),
+    // The names at the root: every first segment of a path, folders and files alike, as `readdirSync` lists them.
+    listFolders: () => [...new Set([...files.keys()].map((path) => path.split('/')[0] ?? ''))],
     write: (path, text) => {
       log.push(`write ${path}`)
       files.set(path, text)
@@ -116,6 +118,7 @@ describe('handleYearWrite', () => {
 
       expect(response.status).toBe(200)
       expect(bodyOf(response)).toEqual({
+        map: '1100',
         year: 1100,
         written: ['1100/registry.json', '1100/polities.json', '1100/borders.json', 'index.json'],
         stamp: stampOnDisk(files),
@@ -149,6 +152,20 @@ describe('handleYearWrite', () => {
       }
     })
 
+    // s19: a working map is a folder of its own, which the atlas does not read.
+    it('writes a working map into its folder, leaving the manifest untouched', () => {
+      const { folder, files } = memoryFolder()
+      const response = handleYearWrite(saveRequest({ path: '/1100-backup-2026-11-02' }), folder)
+
+      expect(response.status).toBe(200)
+      expect(bodyOf(response).written).toEqual([
+        '1100-backup-2026-11-02/registry.json',
+        '1100-backup-2026-11-02/polities.json',
+        '1100-backup-2026-11-02/borders.json',
+      ])
+      expect(files.get('index.json')).toBe(MANIFEST)
+    })
+
     it('overwrites a saved year in place, leaving the manifest untouched', () => {
       const listed = JSON.stringify({ ...JSON.parse(MANIFEST), years: [1100] })
       const { folder, files } = memoryFolder({ 'index.json': listed, '1100/registry.json': 'old' })
@@ -177,6 +194,15 @@ describe('handleYearWrite', () => {
       expect(response.status).toBe(403)
     })
 
+    it('refuses a name with a slash or a leading dot, writing nothing', () => {
+      for (const path of ['/1100/x', '/.hidden']) {
+        const { folder, log } = memoryFolder()
+        const response = handleYearWrite(saveRequest({ path }), folder)
+
+        expect([response.status, log], path).toEqual([400, []])
+      }
+    })
+
     it('refuses a method other than PUT', () => {
       expect(handleYearWrite(saveRequest({ method: 'POST' }), memoryFolder().folder).status).toBe(
         405
@@ -195,7 +221,7 @@ describe('handleYearWrite', () => {
 
       expect(response.status).toBe(422)
       expect(bodyOf(response).reason).toBe(
-        'the files say year 1100, the save was addressed to 1110'
+        'A map named 1110 is the map of the year 1110, which the atlas publishes — this map is 1100. Choose another name'
       )
       expect(console.warn).toHaveBeenCalled()
     })
@@ -435,6 +461,7 @@ describe('createYearWriteMiddleware', () => {
         )
       },
       rename: () => undefined,
+      listFolders: () => [],
     }
     const req = streamOf([
       new TextEncoder().encode(JSON.stringify(saveYearDocument(sharedBorderDocument()))),
@@ -446,5 +473,83 @@ describe('createYearWriteMiddleware', () => {
     expect(sent.status).toBe(500)
     expect(JSON.parse(sent.body ?? '{}')).toEqual({ reason: 'the save failed on disk (EACCES)' })
     expect(console.error).toHaveBeenCalled()
+  })
+})
+
+/** A request for the list of the maps, from a page this server served — a GET carries no `Origin`. */
+function listRequest(overrides: Partial<EndpointRequest> = {}): EndpointRequest {
+  return {
+    method: 'GET',
+    path: '/',
+    host: 'localhost:5174',
+    origin: undefined,
+    body: '',
+    ...overrides,
+  }
+}
+
+/** A years folder holding maps, folders that are not maps, and files at the root. */
+function yearsOnDisk() {
+  return memoryFolder({
+    'index.json': MANIFEST,
+    '1200/registry.json': 'r',
+    '900/registry.json': 'r',
+    '1100/registry.json': 'r',
+    '1100-backup-2026-11-02/registry.json': 'r',
+    'stray/notes.txt': 'not a map',
+    '.git/registry.json': 'hidden',
+    'with space/registry.json': 'not a map name',
+  })
+}
+
+describe('handleYearWrite, the list of the maps (s19)', () => {
+  describe('happy path', () => {
+    it('lists every folder holding a map, in the order of their names, numbers read as numbers', () => {
+      const response = handleYearWrite(listRequest(), yearsOnDisk().folder)
+
+      expect(response.status).toBe(200)
+      expect(bodyOf(response)).toEqual({ maps: ['900', '1100', '1100-backup-2026-11-02', '1200'] })
+    })
+  })
+
+  describe('variants', () => {
+    it('answers the list for a path written with no slash at all', () => {
+      expect(bodyOf(handleYearWrite(listRequest({ path: '' }), yearsOnDisk().folder))).toEqual({
+        maps: ['900', '1100', '1100-backup-2026-11-02', '1200'],
+      })
+    })
+  })
+
+  describe('managed errors', () => {
+    it('refuses the list to a request whose Host is not this machine', () => {
+      const response = handleYearWrite(
+        listRequest({ host: 'evil.example:5174' }),
+        yearsOnDisk().folder
+      )
+
+      expect(response.status).toBe(403)
+      expect(console.warn).toHaveBeenCalled()
+    })
+
+    it('refuses a GET of one map: a map is read as plain files, not through the endpoint', () => {
+      const { folder, log } = yearsOnDisk()
+      const response = handleYearWrite(listRequest({ path: '/1100' }), folder)
+
+      expect([response.status, log]).toEqual([403, []])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('refuses the list to a request with no Host', () => {
+      expect(handleYearWrite(listRequest({ host: undefined }), yearsOnDisk().folder).status).toBe(
+        403
+      )
+    })
+  })
+
+  describe('edge cases', () => {
+    it('lists nothing in a folder with no map', () => {
+      expect(bodyOf(handleYearWrite(listRequest(), memoryFolder().folder))).toEqual({ maps: [] })
+    })
   })
 })

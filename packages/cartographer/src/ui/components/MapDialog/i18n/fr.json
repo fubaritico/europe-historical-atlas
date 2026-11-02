@@ -1,0 +1,11 @@
+{
+  "title": "Ouvrir une carte",
+  "warning": "Choisissez la carte à ouvrir. Si la carte ouverte a des modifications, il vous sera demandé s’il faut l’enregistrer d’abord.",
+  "reading": "Lecture des cartes…",
+  "failed": "Les cartes n’ont pas pu être listées (détail dans la console).",
+  "empty": "Aucune carte pour l’instant.",
+  "legend": "Les cartes",
+  "isOpen": "ouverte",
+  "autosave": "enregistrement automatique",
+  "open": "Ouvrir"
+}

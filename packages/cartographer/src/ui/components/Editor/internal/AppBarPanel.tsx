@@ -1,51 +1,37 @@
+import { useSyncExternalStore } from 'react'
+
 import { useTranslation } from '../../../hooks/useTranslation'
 import { APP_MESSAGES } from '../../../i18n/app'
 
 import { AppBar } from './AppBar'
 
-import type { CartographerStoreHook } from '../../../../state/store'
+import type { AppBarProps } from './AppBar'
+import type { MapNameSource } from '../../../utils/mapNameSource'
 
 /**
- * The top bar's binding: the one place it knows there is a store (`react-canvas-and-panels`). `AppBar` takes
- * values; this reads the slices and hands them over.
+ * The top bar's binding: the one place it knows where the map's name comes from (`react-canvas-and-panels`). `AppBar`
+ * takes values; this reads the name — which *Save as…* changes — and hands it over with the four gestures.
  */
 
-/** What the top bar's binding needs. */
-export interface AppBarPanelProps {
-  /** The store the open year is read from. */
-  store: CartographerStoreHook
-  /** Save the open year — the same call as ‹ctrl+S›, from the composition root. */
-  onSave: () => void
-  /** Open the *Open snapshot* dialogue. */
-  onOpenSnapshot: () => void
-  /** Open the *Open…* dialogue. */
-  onOpenYear: () => void
+/** What the top bar's binding needs: the four gestures, and where the map's name is read. */
+export interface AppBarPanelProps extends Omit<AppBarProps, 'name' | 'map'> {
+  /** The map open's name, which *Save as…* changes. */
+  mapName: MapNameSource
 }
 
 /**
- * The top bar, bound to the store.
- * @param props - the store, and what saving does
- * @param props.store - the store
- * @param props.onSave - save the open year
- * @param props.onOpenSnapshot - open the snapshot dialogue
- * @param props.onOpenYear - open the dialogue of the years
+ * The top bar, bound to the map's name.
+ * @param props - the name's source and the four gestures
+ * @param props.mapName - where the map's name is read
  * @returns the top bar
  */
-export function AppBarPanel({ store, onSave, onOpenSnapshot, onOpenYear }: AppBarPanelProps) {
-  // Store
-  const year = store((state) => state.document.year)
-
+export function AppBarPanel({ mapName, ...gestures }: AppBarPanelProps) {
   // Context
   const app = useTranslation(APP_MESSAGES)
 
+  // State
+  const map = useSyncExternalStore(mapName.subscribe, mapName.get)
+
   // Render
-  return (
-    <AppBar
-      name={app('name')}
-      year={year}
-      onSave={onSave}
-      onOpenSnapshot={onOpenSnapshot}
-      onOpenYear={onOpenYear}
-    />
-  )
+  return <AppBar name={app('name')} map={map} {...gestures} />
 }

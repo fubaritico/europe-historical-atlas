@@ -1,6 +1,5 @@
 /**
- * A folder on disk, as an endpoint needs it — paths relative to its root: `years/` for the year save,
- * `.autosave/drafts/` for the draft.
+ * A folder on disk, as an endpoint needs it — paths relative to its root: `years/`, where every map is saved.
  *
  * Injected so an endpoint runs against a map in memory under test, and against `node:fs` in
  * `vite.config.ts`. That is also why there is no Node type here: it compiles with the browser
@@ -27,15 +26,6 @@ export interface DiskFolder {
   rename: (fromPath: string, toPath: string) => void
 }
 
-/** The snapshots folder: a disk folder that can also list its files (CARTO-238, rung 2b). */
-export interface SnapshotFolder extends DiskFolder {
-  /**
-   * The names of the files in the folder.
-   * @returns the names, in no particular order — none when the folder does not exist yet
-   */
-  list: () => string[]
-}
-
 /** The years folder: a disk folder that can also say when a file was last written (CARTO-238, rung 3). */
 export interface YearFolder extends DiskFolder {
   /**
@@ -44,4 +34,9 @@ export interface YearFolder extends DiskFolder {
    * @returns milliseconds since the epoch, or `null` when there is no such file
    */
   modifiedAt: (relativePath: string) => number | null
+  /**
+   * The names of the folders at the folder's root — how the maps are listed (`s19`); never a file.
+   * @returns the names, in no particular order — none when the folder does not exist
+   */
+  listFolders: () => string[]
 }

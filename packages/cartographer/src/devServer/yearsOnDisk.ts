@@ -1,5 +1,4 @@
-import type { SnapshotFolder, YearFolder } from './diskFolder.ts'
-import type { DraftFolder } from './draftEndpoint.ts'
+import type { YearFolder } from './diskFolder.ts'
 
 /**
  * The years folder on the real disk — the one implementation of {@link DiskFolder} that is not a map in
@@ -45,6 +44,13 @@ export interface DiskCalls {
    * @throws an error carrying `code: 'ENOENT'` when there is no such file
    */
   modifiedAt: (path: string) => number
+  /**
+   * The names of the folders inside a folder — folders only, never a file such as `index.json`.
+   * @param path - an absolute path
+   * @returns the names
+   * @throws an error carrying `code: 'ENOENT'` when there is no such folder
+   */
+  listFolder: (path: string) => string[]
 }
 
 /**
@@ -68,7 +74,7 @@ function folderOf(path: string): string {
 /**
  * Build the years folder over a root and the disk calls.
  *
- * Every relative path it receives is built by the endpoint from a whole-number year and fixed names, so
+ * Every relative path it receives is built by the endpoint from a map's name (`isMapName`) and fixed names, so
  * joining with a slash cannot climb out of the root.
  * @param root - the absolute path of `years/`, with or without a trailing slash
  * @param disk - the file-system calls
@@ -105,62 +111,14 @@ export function createYearsFolderOnDisk(root: string, disk: DiskCalls): YearFold
         throw error
       }
     },
-  }
-}
-
-/** The disk calls the snapshots folder needs: the year folder's, plus listing one (rung 2b). */
-export interface SnapshotDiskCalls extends DiskCalls {
-  /**
-   * The names of the entries of a folder.
-   * @param path - an absolute path
-   * @returns the names
-   * @throws an error carrying `code: 'ENOENT'` when there is no such folder
-   */
-  listFolder: (path: string) => string[]
-}
-
-/**
- * Build the snapshots folder over a root and the disk calls — the year folder's behaviour, plus listing.
- * @param root - the absolute path of `.autosave/snapshots/`
- * @param disk - the file-system calls
- * @returns the folder
- */
-export function createSnapshotFolderOnDisk(root: string, disk: SnapshotDiskCalls): SnapshotFolder {
-  return {
-    ...createYearsFolderOnDisk(root, disk),
-    list: () => {
+    listFolders: () => {
       try {
-        return disk.listFolder(root.replace(/\/$/, ''))
+        return disk.listFolder(base)
       } catch (error: unknown) {
-        // No folder yet means no snapshot yet — the first is kept an hour into drawing. Anything else is thrown on.
+        // No folder means no map; anything else is thrown on, and the endpoint answers 500.
         if (isMissingFile(error)) return []
         throw error
       }
-    },
-  }
-}
-
-/** The disk calls the drafts folder needs: the year folder's, plus removing a file. */
-export interface DraftDiskCalls extends DiskCalls {
-  /**
-   * Remove a file.
-   * @param path - an absolute path
-   */
-  removeFile: (path: string) => void
-}
-
-/**
- * Build the drafts folder over a root and the disk calls — the year folder's behaviour, plus removal.
- * @param root - the absolute path of `.autosave/drafts/`
- * @param disk - the file-system calls
- * @returns the folder
- */
-export function createDraftFolderOnDisk(root: string, disk: DraftDiskCalls): DraftFolder {
-  const base = root.replace(/\/$/, '')
-  return {
-    ...createYearsFolderOnDisk(root, disk),
-    remove: (relativePath) => {
-      disk.removeFile(`${base}/${relativePath}`)
     },
   }
 }

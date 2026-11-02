@@ -45,11 +45,11 @@ export function slowWrites(
 }
 
 /**
- * The fetch for the writes of the year and of the drafts: slowed when the page asks for it, as is otherwise.
+ * The fetch for the writes of the maps and of their autosaves: slowed when the page asks for it, as is otherwise.
  * @param fetchFile - the fetch every request goes through
  * @param slow - whether the page asks for slow writes ({@link wantsSlowWrites})
  * @param wait - waits `ms`
- * @returns the fetch to give the archive and the drafts
+ * @returns the fetch to give the archive
  */
 export function writesFetch(
   fetchFile: FetchLike,

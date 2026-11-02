@@ -33,10 +33,10 @@ function memoryStore() {
 /** An archive stub whose three calls each answer as told. */
 function stubArchive(overrides: Partial<YearArchive> = {}): YearArchive {
   return {
-    listedYears: vi.fn(() => Promise.resolve([1100])),
+    listMaps: vi.fn(() => Promise.resolve(['1100'])),
     open: vi.fn(() => Promise.resolve(sharedBorderDocument())),
-    save: vi.fn((document: YearDocument) =>
-      Promise.resolve({ year: document.year, polities: document.polities.length, vertices: 6 })
+    save: vi.fn((document: YearDocument, map: string) =>
+      Promise.resolve({ map, polities: document.polities.length, vertices: 6 })
     ),
     ...overrides,
   }
@@ -82,17 +82,20 @@ function session(
   archive: YearArchive = stubArchive(),
   confirmOverwrite: (question: OverwriteQuestion) => Promise<boolean> = vi.fn(() =>
     Promise.resolve(false)
-  )
+  ),
+  map = '1100'
 ) {
   const { store, state } = memoryStore()
   const reports: string[] = []
   // How each was shown: `tone/topic`, in order.
   const tones: string[] = []
   const { timers, elapse } = manualTimers()
+  const onMapChanged = vi.fn()
   const yearSession = createYearSession({
     store,
     archive,
-    year: 1100,
+    map,
+    onMapChanged,
     report: (notice) => {
       reports.push(notice.text)
       tones.push(`${notice.tone}/${notice.topic}`)
@@ -102,16 +105,16 @@ function session(
     now: () => NOW,
     timers,
   })
-  return { yearSession, state, reports, tones, archive, confirmOverwrite, elapse }
+  return { yearSession, state, reports, tones, archive, confirmOverwrite, elapse, onMapChanged }
 }
 
 /** An archive save refused once as changed on disk (at `changedAt`), then writing what it is given. */
 function changedOnDiskOnce(changedAt: number | null = CHANGED_AT) {
   return vi
     .fn<YearArchive['save']>()
-    .mockRejectedValueOnce(new YearChangedOnDisk(1100, changedAt))
-    .mockImplementation((document) =>
-      Promise.resolve({ year: document.year, polities: document.polities.length, vertices: 6 })
+    .mockRejectedValueOnce(new YearChangedOnDisk('1100', changedAt))
+    .mockImplementation((document, map) =>
+      Promise.resolve({ map, polities: document.polities.length, vertices: 6 })
     )
 }
 
@@ -141,7 +144,7 @@ describe('createYearSession', () => {
       await yearSession.openOnStartup()
       await yearSession.save()
 
-      expect(archive.save).toHaveBeenCalledWith(state.document, { overwrite: false })
+      expect(archive.save).toHaveBeenCalledWith(state.document, '1100', { overwrite: false })
       expect(reports.at(-1)).toBe('saved 1100 · 2 polities · 6 vertices')
       expect(tones.at(-1)).toBe('success/year')
     })
@@ -155,23 +158,26 @@ describe('createYearSession', () => {
   })
 
   describe('variants', () => {
-    it('starts from the empty map when the year was never saved, and allows saving it', async () => {
+    // `s19`: a map is a folder; an address naming none opens nothing rather than an empty map saved under its name.
+    it('opens nothing and blocks saving when no map of that name is on disk, and says so', async () => {
       const { yearSession, state, reports, tones, archive } = session(
-        stubArchive({ listedYears: () => Promise.resolve([]) })
+        stubArchive({ listMaps: () => Promise.resolve(['1100']) }),
+        undefined,
+        '1300'
       )
       await yearSession.openOnStartup()
 
       expect(archive.open).not.toHaveBeenCalled()
       expect(state.document.polities).toEqual([])
-      expect(reports).toEqual(['1100 has never been saved — starting from an empty map'])
-      expect(tones).toEqual(['info/year'])
-      expect(yearSession.phase()).toBe('ready')
+      expect(reports).toEqual(['no map named 1300 — Open… lists the maps there are'])
+      expect(tones).toEqual(['alarm/year'])
+      expect(yearSession.phase()).toBe('blocked')
     })
 
     // The dev's rule (REPO-275): a save is never cut, but one the server has not confirmed in time is said.
     it('says a save the server has not confirmed within ten seconds, then what it saved when it comes', async () => {
       let confirm:
-        ((summary: { year: number; polities: number; vertices: number }) => void) | undefined
+        ((summary: { map: string; polities: number; vertices: number }) => void) | undefined
       const { yearSession, reports, tones, elapse } = session(
         stubArchive({
           save: () =>
@@ -189,7 +195,7 @@ describe('createYearSession', () => {
       )
       // The doubt is a dialogue; the confirmation, a toast of the same topic, which closes it.
       expect(tones.at(-1)).toBe('alarm/year')
-      confirm?.({ year: 1100, polities: 2, vertices: 6 })
+      confirm?.({ map: '1100', polities: 2, vertices: 6 })
       expect(await saving).toBe(true)
       expect(reports.at(-1)).toBe('saved 1100 · 2 polities · 6 vertices')
       expect(tones.at(-1)).toBe('success/year')
@@ -233,7 +239,7 @@ describe('createYearSession', () => {
 
     it('blocks saving when the manifest cannot be read', async () => {
       const { yearSession, archive } = session(
-        stubArchive({ listedYears: () => Promise.reject(new Error('HTTP 500')) })
+        stubArchive({ listMaps: () => Promise.reject(new Error('HTTP 500')) })
       )
       await yearSession.openOnStartup()
       await yearSession.save()
@@ -271,7 +277,7 @@ describe('createYearSession', () => {
 
     it('refuses to save while the start-up read is still in flight', async () => {
       const { yearSession, reports, tones, archive } = session(
-        stubArchive({ listedYears: () => new Promise(() => undefined) })
+        stubArchive({ listMaps: () => new Promise(() => undefined) })
       )
       void yearSession.openOnStartup()
       await yearSession.save()
@@ -328,7 +334,7 @@ describe('createYearSession', () => {
       const save = vi
         .fn<YearArchive['save']>()
         .mockRejectedValueOnce(new Error('down'))
-        .mockResolvedValueOnce({ year: 1100, polities: 2, vertices: 6 })
+        .mockResolvedValueOnce({ map: '1100', polities: 2, vertices: 6 })
       const { yearSession, reports } = session(stubArchive({ save }))
       await yearSession.openOnStartup()
       await yearSession.save()
@@ -343,9 +349,9 @@ describe('createYearSession', () => {
       let finish: () => void = () => undefined
       const save = vi.fn(
         () =>
-          new Promise<{ year: number; polities: number; vertices: number }>((resolve) => {
+          new Promise<{ map: string; polities: number; vertices: number }>((resolve) => {
             finish = () => {
-              resolve({ year: 1100, polities: 2, vertices: 6 })
+              resolve({ map: '1100', polities: 2, vertices: 6 })
             }
           })
       )
@@ -371,7 +377,7 @@ describe('createYearSession, a save over a year changed on disk (CARTO-238, rung
       await yearSession.save()
 
       expect(confirmOverwrite).toHaveBeenCalledWith({
-        year: 1100,
+        map: '1100',
         changedAt: new Date(CHANGED_AT).toISOString(),
       })
     })
@@ -386,7 +392,7 @@ describe('createYearSession, a save over a year changed on disk (CARTO-238, rung
       const saved = await yearSession.save()
 
       expect(save).toHaveBeenCalledTimes(2)
-      expect(save).toHaveBeenLastCalledWith(state.document, { overwrite: true })
+      expect(save).toHaveBeenLastCalledWith(state.document, '1100', { overwrite: true })
       expect(reports.at(-1)).toBe('saved 1100 · 2 polities · 6 vertices')
       expect(saved).toBe(true)
     })
@@ -418,7 +424,7 @@ describe('createYearSession, a save over a year changed on disk (CARTO-238, rung
       await yearSession.openOnStartup()
       await yearSession.save()
 
-      expect(confirmOverwrite).toHaveBeenCalledWith({ year: 1100, changedAt: null })
+      expect(confirmOverwrite).toHaveBeenCalledWith({ map: '1100', changedAt: null })
     })
   })
 
@@ -482,7 +488,7 @@ describe('createYearSession, a save over a year changed on disk (CARTO-238, rung
     it('reports a failure of the overwrite save itself as not saved, without asking again', async () => {
       const save = vi
         .fn<YearArchive['save']>()
-        .mockRejectedValueOnce(new YearChangedOnDisk(1100, CHANGED_AT))
+        .mockRejectedValueOnce(new YearChangedOnDisk('1100', CHANGED_AT))
         .mockRejectedValueOnce(new Error('the save failed on disk (ENOSPC)'))
       const confirmOverwrite = vi.fn(() => Promise.resolve(true))
       const { yearSession, reports } = session(stubArchive({ save }), confirmOverwrite)
@@ -501,7 +507,7 @@ describe('createYearSession, a save over a year changed on disk (CARTO-238, rung
     it('reports a second YearChangedOnDisk on the overwrite save as not saved, without asking again', async () => {
       const save = vi
         .fn<YearArchive['save']>()
-        .mockRejectedValue(new YearChangedOnDisk(1100, CHANGED_AT))
+        .mockRejectedValue(new YearChangedOnDisk('1100', CHANGED_AT))
       const confirmOverwrite = vi.fn(() => Promise.resolve(true))
       const { yearSession, reports } = session(stubArchive({ save }), confirmOverwrite)
       await yearSession.openOnStartup()
@@ -539,13 +545,186 @@ describe('createYearSession, a save over a year changed on disk (CARTO-238, rung
     it('asks again at the next ‹ctrl+S› after a cancel', async () => {
       const save = vi
         .fn<YearArchive['save']>()
-        .mockRejectedValue(new YearChangedOnDisk(1100, CHANGED_AT))
+        .mockRejectedValue(new YearChangedOnDisk('1100', CHANGED_AT))
       const { yearSession, confirmOverwrite } = session(stubArchive({ save }))
       await yearSession.openOnStartup()
       await yearSession.save()
       await yearSession.save()
 
       expect(confirmOverwrite).toHaveBeenCalledTimes(2)
+    })
+  })
+})
+
+// `s19`: Save as… and Save a copy, and whether the page holds changes.
+describe('createYearSession, a map saved as another', () => {
+  describe('happy path', () => {
+    it('saves the map open first, then writes the copy, and makes the page the new map', async () => {
+      const { yearSession, archive, onMapChanged, reports } = session()
+      await yearSession.openOnStartup()
+
+      expect(await yearSession.saveAs('1100-essai')).toEqual({ done: true })
+      const saved = vi.mocked(archive.save).mock.calls.map(([, map]) => map)
+      expect(saved).toEqual(['1100', '1100-essai'])
+      expect([yearSession.map(), onMapChanged.mock.calls]).toEqual(['1100-essai', [['1100-essai']]])
+      expect(reports.at(-1)).toBe('saved 1100-essai · 2 polities · 6 vertices')
+    })
+
+    it('saves the next ‹ctrl+S› as the new map, never as the one it started from', async () => {
+      const { yearSession, archive } = session()
+      await yearSession.openOnStartup()
+      await yearSession.saveAs('1100-essai')
+      await yearSession.save()
+
+      expect(vi.mocked(archive.save).mock.calls.at(-1)?.[1]).toBe('1100-essai')
+    })
+
+    it('writes a copy as <map>.copy.<time>, the page staying its map and still modified', async () => {
+      const { yearSession, archive, state, reports } = session()
+      await yearSession.openOnStartup()
+      state.version += 1
+
+      expect(await yearSession.saveCopy()).toBe(true)
+      expect(vi.mocked(archive.save).mock.calls.map(([, map]) => map)).toEqual([
+        `1100.copy.${NOW.toISOString().slice(0, 19).replaceAll(':', '-')}`,
+      ])
+      expect([yearSession.map(), yearSession.isModified()]).toEqual(['1100', true])
+      expect(reports.at(-1)).toMatch(/^copy saved as 1100\.copy\./)
+    })
+  })
+
+  describe('variants', () => {
+    it('holds no change once opened, a change after a gesture, none again once saved', async () => {
+      const { yearSession, state } = session()
+      await yearSession.openOnStartup()
+      const opened = yearSession.isModified()
+      state.version += 1
+      const drawn = yearSession.isModified()
+      await yearSession.save()
+
+      expect([opened, drawn, yearSession.isModified()]).toEqual([false, true, false])
+    })
+
+    // Review QUAL-002: a blocked page can save nothing, so Open… must not ask « save first? ».
+    it('holds no change while saving is blocked, a gesture drawn or not', async () => {
+      const { yearSession, state } = session(stubArchive({ listMaps: () => Promise.resolve([]) }))
+      await yearSession.openOnStartup()
+      state.version += 1
+
+      expect([yearSession.phase(), yearSession.isModified()]).toEqual(['blocked', false])
+    })
+
+    // Review ARCH-002: the autosave of a name past 99 characters would not be a name.
+    it('refuses a name too long for its autosave to be a name', async () => {
+      const { yearSession, archive } = session()
+      await yearSession.openOnStartup()
+      const outcome = await yearSession.saveAs(`a${'b'.repeat(99)}`)
+
+      expect(outcome).toEqual({ done: false, refusal: EN_WORDS.t('saveAsBadName') })
+      expect(archive.save).not.toHaveBeenCalled()
+    })
+
+    it('holds no change once saved as another map', async () => {
+      const { yearSession, state } = session()
+      await yearSession.openOnStartup()
+      state.version += 1
+      await yearSession.saveAs('1100-essai')
+
+      expect(yearSession.isModified()).toBe(false)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('refuses the name of the map open, pointing to Save, and writes nothing', async () => {
+      const { yearSession, archive } = session()
+      await yearSession.openOnStartup()
+
+      expect(await yearSession.saveAs('1100')).toEqual({
+        done: false,
+        refusal: 'This is the name of the map open — to save it under the same name, use Save',
+      })
+      expect(archive.save).not.toHaveBeenCalled()
+    })
+
+    it('refuses a name that cannot be a folder’s, and writes nothing', async () => {
+      const { yearSession, archive } = session()
+      await yearSession.openOnStartup()
+
+      const outcome = await yearSession.saveAs('1100/essai')
+      expect(outcome.done).toBe(false)
+      expect(outcome.done ? null : outcome.refusal).toMatch(/^A map's name is/)
+      expect(archive.save).not.toHaveBeenCalled()
+    })
+
+    // A folder named 1200 is the atlas's map of 1200: a copy of 1100 must not take that name.
+    it('refuses the name of another year, and writes nothing', async () => {
+      const { yearSession, archive } = session()
+      await yearSession.openOnStartup()
+
+      expect(await yearSession.saveAs('1200')).toEqual({
+        done: false,
+        refusal:
+          'A map named 1200 is the map of the year 1200, which the atlas publishes — this map is 1100. Choose another name',
+      })
+      expect(archive.save).not.toHaveBeenCalled()
+    })
+
+    it('refuses a name another map holds, the page staying the map it was', async () => {
+      const save = vi
+        .fn<YearArchive['save']>()
+        .mockImplementationOnce((document, map) =>
+          Promise.resolve({ map, polities: document.polities.length, vertices: 6 })
+        )
+        .mockRejectedValueOnce(new YearChangedOnDisk('1200-essai', CHANGED_AT))
+      const { yearSession, onMapChanged } = session(stubArchive({ save }))
+      await yearSession.openOnStartup()
+
+      expect(await yearSession.saveAs('1200-essai')).toEqual({
+        done: false,
+        refusal: 'A map named 1200-essai exists already — choose another name',
+      })
+      expect(yearSession.map()).toBe('1100')
+      expect(onMapChanged).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('writes no copy when the map open could not be saved first, its alarm saying why', async () => {
+      const save = vi.fn<YearArchive['save']>(() => Promise.reject(new Error('disk full')))
+      const { yearSession, reports } = session(stubArchive({ save }))
+      await yearSession.openOnStartup()
+
+      expect(await yearSession.saveAs('1100-essai')).toEqual({ done: false, refusal: null })
+      expect(save).toHaveBeenCalledOnce()
+      expect([yearSession.map(), reports.at(-1)]).toEqual([
+        '1100',
+        'not saved (details in the console)',
+      ])
+    })
+
+    it('says a copy that could not be written, the page as it was', async () => {
+      const save = vi.fn<YearArchive['save']>(() => Promise.reject(new Error('disk full')))
+      const { yearSession, reports, tones } = session(stubArchive({ save }))
+      await yearSession.openOnStartup()
+
+      expect(await yearSession.saveCopy()).toBe(false)
+      expect([reports.at(-1), tones.at(-1)]).toEqual([
+        'the copy was not saved (details in the console)',
+        'alarm/year',
+      ])
+    })
+  })
+
+  describe('edge cases', () => {
+    it('saves as and copies nothing while the map is still being read', async () => {
+      const { yearSession, archive } = session(
+        stubArchive({ listMaps: () => new Promise(() => undefined) })
+      )
+      void yearSession.openOnStartup()
+
+      expect(await yearSession.saveCopy()).toBe(false)
+      expect((await yearSession.saveAs('1100-essai')).done).toBe(false)
+      expect(archive.save).not.toHaveBeenCalled()
     })
   })
 })

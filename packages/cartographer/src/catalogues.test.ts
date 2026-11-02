@@ -65,7 +65,7 @@ const YES_NO = all<'yes' | 'no'>({ yes: true, no: true })
  * a defect reaches, and visibly. Keyed by catalogue, message and argument.
  */
 const CLOSED: Readonly<Record<string, readonly string[]>> = {
-  'ALARM_MESSAGES.title.topic': all<NoticeTopic>({ year: true, draft: true, snapshot: true }),
+  'ALARM_MESSAGES.title.topic': all<NoticeTopic>({ year: true, autosave: true }),
   'TOOL_MESSAGES.toolName.tool': all<EditorTool>({
     navigate: true,
     draw: true,
@@ -200,7 +200,6 @@ const CLOSED: Readonly<Record<string, readonly string[]>> = {
   'COLOUR_PICKER_MESSAGES.achromatic.shade': ['black', 'white', 'darkGray', 'lightGray', 'gray'],
   'OVERWRITE_MESSAGES.question.known': YES_NO,
   'PERSISTENCE_MESSAGES.notSavedChanged.known': YES_NO,
-  'PERSISTENCE_MESSAGES.draftSetAside.logged': YES_NO,
 }
 
 /**
@@ -251,7 +250,8 @@ const SELECTS = CATALOGUES.flatMap(({ name, catalogue }) =>
 describe('the Cartographer catalogues', () => {
   describe('happy path', () => {
     it('finds the catalogues by their file names', () => {
-      // 28 since *Open…*'s YearDialog (2026-11-02).
+      // 28 since s19 (2026-11-02): the snapshots' and the draft's dialogues gone, Save as…'s and the question before
+      // opening added.
       expect(CATALOGUES.length).toBe(28)
     })
   })

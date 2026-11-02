@@ -1,8 +1,9 @@
 {
   "notBuilt": "pas encore construit ({scenarios})",
-  "openSnapshotHint": "Ouvrir un instantané de l’année, pris à chaque heure de dessin",
-  "openYearHint": "Ouvrir une autre année enregistrée",
-  "saveHint": "Enregistrer l’année (⌘S / ctrl+S)",
+  "openHint": "Ouvrir une autre carte",
+  "saveHint": "Enregistrer la carte (⌘S / ctrl+S)",
+  "saveAsHint": "Enregistrer la carte sous un autre nom, et continuer sur la nouvelle",
+  "saveCopyHint": "Enregistrer une copie de la carte, et rester sur celle-ci",
   "registry": "Registre",
   "closeYear": "{close} {year}",
   "nothingToUndo": "rien à annuler",

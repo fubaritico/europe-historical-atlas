@@ -19,6 +19,7 @@ import type { ResultRelay } from '../../../persistence/resultRelay'
 import type { PolityColourSource } from '../../../state/polityColourSource'
 import type { CartographerStoreHook } from '../../../state/store'
 import type { WikidataSource } from '../../../wikidata/wikidataSource'
+import type { MapNameSource } from '../../utils/mapNameSource'
 import type { BackdropLoad } from '../MapArea'
 import type { ReactNode } from 'react'
 
@@ -46,12 +47,16 @@ export interface EditorProps {
   style: PaintStyle
   /** The page's `<h1>`, which {@link Shell} places inside the canvas landmark. */
   heading: ReactNode
-  /** Save the open year — the top bar's `[Save]`, the same call as ‹ctrl+S›. */
+  /** The top bar's *Open…*: the maps of `years/` (`s19`). */
+  onOpen: () => void
+  /** The top bar's `[Save]`, the same call as ‹ctrl+S›. */
   onSave: () => void
-  /** Open the *Open snapshot* dialogue — the top bar's `[Open snapshot…]` (CARTO-238, rung 2b). */
-  onOpenSnapshot: () => void
-  /** Open the *Open…* dialogue — the top bar's `[Open…]`, the years saved (2026-11-02). */
-  onOpenYear: () => void
+  /** The top bar's *Save as…*. */
+  onSaveAs: () => void
+  /** The top bar's *Save a copy*. */
+  onSaveCopy: () => void
+  /** The map open's name, which *Save as…* changes — written in the top bar. */
+  mapName: MapNameSource
   /** The canvas's undo and redo, for the document bar's buttons. */
   history: HistoryRelay
   /** Where the polities' colours come from — one source for the canvas and every panel. */
@@ -76,9 +81,11 @@ export interface EditorProps {
  * @param props.load - how to fetch and bake the backdrop, handed to the map
  * @param props.style - the colours and sizes the painter reads
  * @param props.heading - the page's `<h1>`, placed by the shell inside the canvas landmark
- * @param props.onSave - saves the open year, called by the top bar's `[Save]`
- * @param props.onOpenSnapshot - opens the *Open snapshot* dialogue, called by the top bar
- * @param props.onOpenYear - opens the *Open…* dialogue, called by the top bar
+ * @param props.onOpen - opens the *Open…* dialogue, called by the top bar
+ * @param props.onSave - saves the map open, called by the top bar's `[Save]`
+ * @param props.onSaveAs - opens the *Save as…* dialogue, called by the top bar
+ * @param props.onSaveCopy - saves a copy, called by the top bar
+ * @param props.mapName - the map open's name, for the top bar
  * @param props.history - the canvas's undo and redo, for the document bar's buttons
  * @param props.colours - where the polities' colours come from, for the canvas and the panels
  * @param props.wikidata - where the polity form reads Wikidata from
@@ -94,7 +101,8 @@ export function Editor({
   colours,
   wikidata,
   results,
-  // The top bar's three actions — onSave, onOpenSnapshot, onOpenYear — handed on as they are.
+  // The top bar's four gestures and the map's name — onOpen, onSave, onSaveAs, onSaveCopy, mapName — handed on as they
+  // are.
   ...bar
 }: EditorProps) {
   // Store
@@ -121,7 +129,7 @@ export function Editor({
   return (
     <Shell
       heading={heading}
-      appbar={<AppBarPanel store={store} {...bar} />}
+      appbar={<AppBarPanel {...bar} />}
       docbar={<DocBarPanel store={store} history={history} />}
       canvas={
         <MapArea

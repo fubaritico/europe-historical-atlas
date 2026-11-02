@@ -9,6 +9,7 @@ import { openEmptyYear } from '../../../../state/openEmptyYear'
 import { createCartographerStore } from '../../../../state/store'
 import { UNFRAMED } from '../../../../viewport/viewport'
 import { renderInEnglish } from '../../../testing/renderInEnglish'
+import { createMapNameStore } from '../../../utils/mapNameSource'
 
 import { AppBarPanel } from './AppBarPanel'
 import { DocBarPanel } from './DocBarPanel'
@@ -28,16 +29,23 @@ const meta = () => document.querySelector('.doc-tab__meta')?.textContent
 
 describe('top bars, bound', () => {
   describe('happy path', () => {
-    it('reads the open year from the store', () => {
+    // s19: the map's name, read from its source — and followed when *Save as…* changes it, with no reload.
+    it('writes the open map’s name and follows it when it changes', () => {
+      const mapName = createMapNameStore('1100')
       renderInEnglish(
         <AppBarPanel
-          store={store()}
+          mapName={mapName}
+          onOpen={vi.fn()}
           onSave={vi.fn()}
-          onOpenSnapshot={vi.fn()}
-          onOpenYear={vi.fn()}
+          onSaveAs={vi.fn()}
+          onSaveCopy={vi.fn()}
         />
       )
       expect(document.querySelector('.app-brand__year')?.textContent).toBe('1100')
+      act(() => {
+        mapName.set('1100-essai')
+      })
+      expect(document.querySelector('.app-brand__year')?.textContent).toBe('1100-essai')
     })
 
     it('undoes through the canvas’s relay, never the store straight (ARCH-101)', async () => {

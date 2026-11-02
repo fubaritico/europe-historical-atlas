@@ -9,10 +9,11 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * objection of 2026-10-21: the same command never reads two ways in two menus.
  *
  * Its messages, and the values they take:
- * - `save` — Write the year to disk.
- * - `open` — Open a year.
- * - `openSnapshot` — Open one of the year's snapshots.
- * - `saveAs` — Write the year under another name.
+ * - `save` — Write the map to disk.
+ * - `open` — Open a map.
+ * - `saveAs` — Write the map under another name, and go on as the new map.
+ * - `saveCopy` — Write a copy of the map, and stay on it.
+ * - `yes`, `no` — The answers to a question — *Open…*'s « save the current map? ».
  * - `undo` — Undo, with nothing to undo — the bare verb.
  * - `redo` — Redo, with nothing to redo — the bare verb.
  * - `undoStep` — Undo a named step; `step` is the history's name for it.

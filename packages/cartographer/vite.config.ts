@@ -1,43 +1,19 @@
-import {
-  mkdirSync,
-  readFileSync,
-  readdirSync,
-  renameSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs'
+import { mkdirSync, readFileSync, readdirSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
-import { DRAFT_ROUTE, DRAFTS_FOLDER, SNAPSHOTS_FOLDER } from './src/devServer/draftRoute.ts'
-import {
-  createDraftFolderOnDisk,
-  createSnapshotFolderOnDisk,
-  createYearsFolderOnDisk,
-} from './src/devServer/yearsOnDisk.ts'
+import { createYearsFolderOnDisk } from './src/devServer/yearsOnDisk.ts'
 import { YEAR_WRITE_ROUTE } from './src/devServer/yearWriteRoute.ts'
 
-import type { DraftFolder } from './src/devServer/draftEndpoint.ts'
-import type * as DraftEndpoint from './src/devServer/draftEndpoint.ts'
 import type { BodyStream, ResponseSink } from './src/devServer/httpEndpoint.ts'
-import type { SnapshotFolder, YearFolder } from './src/devServer/diskFolder.ts'
+import type { YearFolder } from './src/devServer/diskFolder.ts'
 import type * as YearWriteEndpoint from './src/devServer/yearWriteEndpoint.ts'
 import type { Plugin, ViteDevServer } from 'vite'
 
 /** The folder the atlas reads its years from — inside the shared `public/`. */
 const YEARS_DIR = fileURLToPath(new URL('../atlas/public/years/', import.meta.url))
-
-/**
- * Where the drafts are kept (CARTO-238) — **outside `public/`**, which the dev server serves and every build
- * publishes, and git-ignored (`.autosave` in `.gitignore`): a draft is the work since the last ‹ctrl+S›, on this machine.
- */
-const DRAFTS_DIR = fileURLToPath(new URL(`../../${DRAFTS_FOLDER}/`, import.meta.url))
-
-/** Where the hourly snapshots are kept (CARTO-238, rung 2a) — beside the drafts, git-ignored with them. */
-const SNAPSHOTS_DIR = fileURLToPath(new URL(`../../${SNAPSHOTS_FOLDER}/`, import.meta.url))
 
 /** `node:fs`'s synchronous calls, handed to the adapters, which hold the logic and its tests. */
 const disk = {
@@ -51,27 +27,19 @@ const disk = {
   rename: (fromPath: string, toPath: string) => {
     renameSync(fromPath, toPath)
   },
-  removeFile: (path: string) => {
-    rmSync(path)
-  },
+  // Folders only: `years/` also holds `index.json`, and a file is no map (review QUAL-001, 2026-11-02).
+  listFolder: (path: string) =>
+    readdirSync(path, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name),
   modifiedAt: (path: string) => statSync(path).mtimeMs,
 }
 
 /** The years folder on the real disk. */
 const yearsOnDisk: YearFolder = createYearsFolderOnDisk(YEARS_DIR, disk)
 
-/** The drafts folder on the real disk. */
-const draftsOnDisk: DraftFolder = createDraftFolderOnDisk(DRAFTS_DIR, disk)
-
-/** The snapshots folder on the real disk. */
-const snapshotsOnDisk: SnapshotFolder = createSnapshotFolderOnDisk(SNAPSHOTS_DIR, {
-  ...disk,
-  listFolder: (path: string) => readdirSync(path),
-})
-
 /** The endpoints' modules, as `ssrLoadModule` hands them back. */
 type YearEndpointModule = typeof YearWriteEndpoint
-type DraftEndpointModule = typeof DraftEndpoint
 
 /** A Connect middleware, as the endpoints build them. */
 type Middleware = (req: BodyStream, res: ResponseSink) => void
@@ -92,18 +60,6 @@ async function loadYearWriteMiddleware(server: ViteDevServer): Promise<Middlewar
     '/src/devServer/yearWriteEndpoint.ts'
   )) as YearEndpointModule
   return endpoint.createYearWriteMiddleware(yearsOnDisk)
-}
-
-/**
- * Load the draft endpoint the same way, for the same reason.
- * @param server - the dev server
- * @returns the endpoint's middleware, built on the real disk and the real clock
- */
-async function loadDraftMiddleware(server: ViteDevServer): Promise<Middleware> {
-  const endpoint = (await server.ssrLoadModule(
-    '/src/devServer/draftEndpoint.ts'
-  )) as DraftEndpointModule
-  return endpoint.createDraftMiddleware(draftsOnDisk, snapshotsOnDisk, () => new Date())
 }
 
 /**
@@ -140,8 +96,8 @@ function mountEndpoint(
 }
 
 /**
- * Save a year from the editor: `PUT /__years/<year>` writes into the atlas's `years/` folder; and keep its
- * draft between two saves: `/__drafts/<year>` (`draftEndpoint.ts`, CARTO-238).
+ * Save a map from the editor: `PUT /__years/<map>` writes into the atlas's `years/` folder, `GET /__years` lists the
+ * maps (`s19`). The autosave is a map like any other, written through the same route.
  *
  * `apply: 'serve'` — the dev server only. The built site has no server to write with, and saving online is
  * a later tier (`s15`). Authorised by the dev on 2026-10-12, with the checks the endpoint carries.
@@ -156,7 +112,6 @@ function saveYearsFromTheEditor(): Plugin {
     apply: 'serve',
     configureServer(server) {
       mountEndpoint(server, YEAR_WRITE_ROUTE, loadYearWriteMiddleware, 'save')
-      mountEndpoint(server, DRAFT_ROUTE, loadDraftMiddleware, 'draft')
     },
   }
 }

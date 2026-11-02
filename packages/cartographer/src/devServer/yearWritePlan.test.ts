@@ -34,10 +34,10 @@ describe('planYearWrite', () => {
   describe('happy path', () => {
     it('plans the three files of the year, then the manifest listing it', () => {
       const plan = accepted(
-        planYearWrite({ yearSegment: '1100', body: savedBody(), manifestText: EMPTY_MANIFEST })
+        planYearWrite({ mapSegment: '1100', body: savedBody(), manifestText: EMPTY_MANIFEST })
       )
 
-      expect(plan.year).toBe(1100)
+      expect([plan.map, plan.year]).toEqual(['1100', 1100])
       expect(plan.files.map((file) => file.relativePath)).toEqual([
         '1100/registry.json',
         '1100/polities.json',
@@ -48,7 +48,7 @@ describe('planYearWrite', () => {
 
     it('writes files that read back as what the editor saved', () => {
       const plan = accepted(
-        planYearWrite({ yearSegment: '1100', body: savedBody(), manifestText: EMPTY_MANIFEST })
+        planYearWrite({ mapSegment: '1100', body: savedBody(), manifestText: EMPTY_MANIFEST })
       )
       const polities = plan.files.find((file) => file.relativePath === '1100/polities.json')
 
@@ -59,7 +59,7 @@ describe('planYearWrite', () => {
 
     it('lists the year in the manifest it extends, keeping the frame', () => {
       const plan = accepted(
-        planYearWrite({ yearSegment: '1100', body: savedBody(), manifestText: EMPTY_MANIFEST })
+        planYearWrite({ mapSegment: '1100', body: savedBody(), manifestText: EMPTY_MANIFEST })
       )
       const manifest = plan.files.find((file) => file.relativePath === 'index.json')
 
@@ -71,10 +71,36 @@ describe('planYearWrite', () => {
   })
 
   describe('variants', () => {
+    // s19: a working map is any folder; the atlas reads only the years the manifest lists.
+    it('writes a working map into its own folder, without reading or touching the manifest', () => {
+      const plan = accepted(
+        planYearWrite({
+          mapSegment: '1100-backup-2026-11-02',
+          body: savedBody(),
+          manifestText: null,
+        })
+      )
+
+      expect([plan.map, plan.year]).toEqual(['1100-backup-2026-11-02', 1100])
+      expect(plan.files.map((file) => file.relativePath)).toEqual([
+        '1100-backup-2026-11-02/registry.json',
+        '1100-backup-2026-11-02/polities.json',
+        '1100-backup-2026-11-02/borders.json',
+      ])
+    })
+
+    it('writes a working map whatever year its files declare', () => {
+      const plan = accepted(
+        planYearWrite({ mapSegment: '1200-essai', body: savedBody(), manifestText: EMPTY_MANIFEST })
+      )
+
+      expect(plan.year).toBe(1100)
+    })
+
     it('leaves the manifest alone when the year is already listed', () => {
       const listed = JSON.stringify({ ...JSON.parse(EMPTY_MANIFEST), years: [1100] })
       const plan = accepted(
-        planYearWrite({ yearSegment: '1100', body: savedBody(), manifestText: listed })
+        planYearWrite({ mapSegment: '1100', body: savedBody(), manifestText: listed })
       )
 
       expect(plan.files.map((file) => file.relativePath)).not.toContain('index.json')
@@ -85,7 +111,7 @@ describe('planYearWrite', () => {
       for (const file of ['registry', 'polities', 'borders'])
         body[file] = { ...body[file], year: 1150 }
       const listed = JSON.stringify({ ...JSON.parse(EMPTY_MANIFEST), years: [1200, 1100] })
-      const plan = accepted(planYearWrite({ yearSegment: '1150', body, manifestText: listed }))
+      const plan = accepted(planYearWrite({ mapSegment: '1150', body, manifestText: listed }))
       const manifest = plan.files.find((file) => file.relativePath === 'index.json')
 
       expect((JSON.parse(manifest?.text ?? 'null') as { years: number[] }).years).toEqual([
@@ -97,7 +123,7 @@ describe('planYearWrite', () => {
       // `s15`: a manifest naming a year whose files are not all written is the one state the atlas cannot
       // read. The naive plan writes the manifest first, where it is easiest to compute.
       const plan = accepted(
-        planYearWrite({ yearSegment: '1100', body: savedBody(), manifestText: EMPTY_MANIFEST })
+        planYearWrite({ mapSegment: '1100', body: savedBody(), manifestText: EMPTY_MANIFEST })
       )
 
       expect(plan.files.at(-1)?.relativePath).toBe('index.json')
@@ -105,30 +131,47 @@ describe('planYearWrite', () => {
   })
 
   describe('managed errors', () => {
-    it('refuses a year that is not a whole number, with 400', () => {
+    it('refuses a name that would climb out of years/, with 400', () => {
       const decision = planYearWrite({
-        yearSegment: '../etc',
+        mapSegment: '../etc',
         body: savedBody(),
         manifestText: EMPTY_MANIFEST,
       })
 
       expect(decision).toEqual({
         accepted: false,
-        refusal: { status: 400, reason: '"../etc" is not a year — expected a whole number' },
+        refusal: {
+          status: 400,
+          reason:
+            '"../etc" is not a map\'s name — letters, digits, "-", "_" and "." only, starting with a letter or a digit',
+        },
       })
     })
 
-    it('refuses files that say another year than the one addressed, with 422', () => {
+    it('refuses a name with a slash or a leading dot, with 400', () => {
+      for (const mapSegment of ['1100/x', '.hidden', 'a/../b']) {
+        const decision = planYearWrite({
+          mapSegment,
+          body: savedBody(),
+          manifestText: EMPTY_MANIFEST,
+        })
+
+        expect(decision.accepted ? null : decision.refusal.status, mapSegment).toBe(400)
+      }
+    })
+
+    // s19: a folder named 1200 holding 1100 would be published by the atlas as 1200.
+    it('refuses a map named as a year whose files declare another year, with 422', () => {
       const decision = planYearWrite({
-        yearSegment: '1110',
+        mapSegment: '1110',
         body: savedBody(),
         manifestText: EMPTY_MANIFEST,
       })
 
-      expect(decision.accepted).toBe(false)
       expect(decision.accepted ? null : decision.refusal).toEqual({
         status: 422,
-        reason: 'the files say year 1100, the save was addressed to 1110',
+        reason:
+          'A map named 1110 is the map of the year 1110, which the atlas publishes — this map is 1100. Choose another name',
       })
     })
 
@@ -136,7 +179,7 @@ describe('planYearWrite', () => {
       const body = savedBody() as { registry: { polities: Record<string, unknown>[] } }
       const first = body.registry.polities[0]
       if (first !== undefined) first.rank = 42
-      const decision = planYearWrite({ yearSegment: '1100', body, manifestText: EMPTY_MANIFEST })
+      const decision = planYearWrite({ mapSegment: '1100', body, manifestText: EMPTY_MANIFEST })
 
       expect(decision.accepted ? null : decision.refusal.status).toBe(422)
       expect(decision.accepted ? '' : decision.refusal.reason).toContain('polities[0].rank')
@@ -146,21 +189,21 @@ describe('planYearWrite', () => {
       const body = savedBody() as { polities: { claims: { rings: number[][] }[] } }
       const ring = body.polities.claims[0]?.rings[0]
       if (ring !== undefined) ring[0] = 999
-      const decision = planYearWrite({ yearSegment: '1100', body, manifestText: EMPTY_MANIFEST })
+      const decision = planYearWrite({ mapSegment: '1100', body, manifestText: EMPTY_MANIFEST })
 
       expect(decision.accepted ? null : decision.refusal.status).toBe(422)
       expect(decision.accepted ? '' : decision.refusal.reason).toContain('consistency')
     })
 
     it('refuses to write when the manifest is missing, with 409', () => {
-      const decision = planYearWrite({ yearSegment: '1100', body: savedBody(), manifestText: null })
+      const decision = planYearWrite({ mapSegment: '1100', body: savedBody(), manifestText: null })
 
       expect(decision.accepted ? null : decision.refusal.status).toBe(409)
     })
 
     it('refuses to write over a manifest nobody can read, with 409', () => {
       const decision = planYearWrite({
-        yearSegment: '1100',
+        mapSegment: '1100',
         body: savedBody(),
         manifestText: '{ not json',
       })
@@ -175,7 +218,7 @@ describe('planYearWrite', () => {
   describe('unmanaged errors', () => {
     it('refuses a body that is not the three files, with 400', () => {
       for (const body of [null, [], 'text', 3]) {
-        const decision = planYearWrite({ yearSegment: '1100', body, manifestText: EMPTY_MANIFEST })
+        const decision = planYearWrite({ mapSegment: '1100', body, manifestText: EMPTY_MANIFEST })
 
         expect(decision.accepted ? null : decision.refusal.status).toBe(400)
       }
@@ -184,7 +227,7 @@ describe('planYearWrite', () => {
     it('refuses an object missing one of the three files, as a schema failure', () => {
       const { registry, polities } = savedBody() as Record<string, unknown>
       const decision = planYearWrite({
-        yearSegment: '1100',
+        mapSegment: '1100',
         body: { registry, polities },
         manifestText: EMPTY_MANIFEST,
       })
@@ -195,7 +238,7 @@ describe('planYearWrite', () => {
     it('refuses a stray key rather than writing it into the repository', () => {
       const body = savedBody() as { registry: Record<string, unknown> }
       body.registry.injected = '<script>'
-      const decision = planYearWrite({ yearSegment: '1100', body, manifestText: EMPTY_MANIFEST })
+      const decision = planYearWrite({ mapSegment: '1100', body, manifestText: EMPTY_MANIFEST })
 
       expect(decision.accepted).toBe(false)
     })
@@ -207,22 +250,44 @@ describe('planYearWrite', () => {
       for (const file of ['registry', 'polities', 'borders'])
         body[file] = { ...body[file], year: -52 }
       const plan = accepted(
-        planYearWrite({ yearSegment: '-52', body, manifestText: EMPTY_MANIFEST })
+        planYearWrite({ mapSegment: '-52', body, manifestText: EMPTY_MANIFEST })
       )
 
       expect(plan.files[0]?.relativePath).toBe('-52/registry.json')
     })
 
-    it('refuses a year with a decimal point or a leading plus', () => {
-      for (const yearSegment of ['1100.5', '+1100', '', '1100/']) {
+    it('refuses a name with a leading plus, an empty one, and one ending in a slash', () => {
+      for (const mapSegment of ['+1100', '', '1100/']) {
         const decision = planYearWrite({
-          yearSegment,
+          mapSegment,
           body: savedBody(),
           manifestText: EMPTY_MANIFEST,
         })
 
-        expect(decision.accepted ? null : decision.refusal.status, yearSegment).toBe(400)
+        expect(decision.accepted ? null : decision.refusal.status, mapSegment).toBe(400)
       }
+    })
+
+    it('takes a name with dots — a copy names itself so', () => {
+      const plan = accepted(
+        planYearWrite({
+          mapSegment: '1100.copy.2026-11-02T18-30-12',
+          body: savedBody(),
+          manifestText: null,
+        })
+      )
+
+      expect(plan.files[0]?.relativePath).toBe('1100.copy.2026-11-02T18-30-12/registry.json')
+    })
+
+    it('refuses a name past 128 characters', () => {
+      const decision = planYearWrite({
+        mapSegment: `a${'b'.repeat(128)}`,
+        body: savedBody(),
+        manifestText: null,
+      })
+
+      expect(decision.accepted ? null : decision.refusal.status).toBe(400)
     })
 
     it('saves an empty year — a map nothing has been drawn on yet', () => {
@@ -236,7 +301,7 @@ describe('planYearWrite', () => {
       body.polities.claims = []
 
       expect(
-        planYearWrite({ yearSegment: '1100', body, manifestText: EMPTY_MANIFEST }).accepted
+        planYearWrite({ mapSegment: '1100', body, manifestText: EMPTY_MANIFEST }).accepted
       ).toBe(true)
     })
   })

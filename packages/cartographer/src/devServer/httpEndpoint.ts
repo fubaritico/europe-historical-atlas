@@ -1,6 +1,6 @@
 /**
  * The HTTP plumbing every dev-server endpoint of the Cartographer shares — the year save
- * (`yearWriteEndpoint.ts`) and the draft (`draftEndpoint.ts`): the request and response a handler sees, the
+ * (`yearWriteEndpoint.ts`): the request and response a handler sees, the
  * same-machine lock, the body read whole under a cap, and the 500 a failing disk answers.
  *
  * **No Node type here**, as in the endpoints: it compiles with the browser application and runs in the
@@ -134,7 +134,7 @@ export type RequestHandler = (request: EndpointRequest) => EndpointResponse
 export interface EndpointWiring {
   /** Answer the request. */
   handle: RequestHandler
-  /** What a disk failure is called, for the log and the page — *"the save"*, *"the draft"*. */
+  /** What a disk failure is called, for the log and the page — *"the save"*. */
   what: string
 }
 
@@ -172,8 +172,7 @@ function respond(req: BodyStream, res: ResponseSink, body: string, wiring: Endpo
 
 /**
  * A Connect middleware that reads a request's body whole, caps its size at {@link MAX_BODY_BYTES}, and
- * hands it to the endpoint — the part every dev-server endpoint of the Cartographer shares (the year save,
- * the draft).
+ * hands it to the endpoint — the part every dev-server endpoint of the Cartographer shares.
  * @param wiring - the endpoint's handler and the name of what it writes
  * @returns the middleware
  */

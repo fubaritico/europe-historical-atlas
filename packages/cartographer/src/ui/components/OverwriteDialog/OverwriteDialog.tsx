@@ -71,7 +71,7 @@ export function OverwriteDialog({ questions, now }: OverwriteDialogProps) {
                 ? ''
                 : t('question', {
                     known: question.changedAt === null ? 'no' : 'yes',
-                    year: String(question.year),
+                    year: question.map,
                     when:
                       question.changedAt === null
                         ? ''

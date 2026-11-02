@@ -1,6 +1,5 @@
 import { assetError } from '@europe-historical-atlas/core/data/assetError'
 import { assembleAuthoredYear } from '@europe-historical-atlas/core/data/yearConsistency'
-import { parseYearManifest } from '@europe-historical-atlas/core/data/yearManifest'
 import {
   parseYearBorders,
   parseYearPolities,
@@ -17,7 +16,8 @@ import type { AssetKind } from '@europe-historical-atlas/core/data/assetError'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /**
- * Where the Cartographer's years are kept, seen from the browser — open one, save one, list them.
+ * Where the Cartographer's maps are kept, seen from the browser — open one, save one, list them. A map is a folder of
+ * `years/`, and its name is the folder's (`s19`, the dev, 2026-11-02).
  *
  * **A port, because the destination will change and the gesture will not** (`s15`): today the dev server
  * writes into the repository; later a Netlify Function will commit the same three files. The session that
@@ -30,8 +30,8 @@ import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 
 /** What a save reports back, for the status bar's *"saved · 52 polities · 17 104 vertices"* (`s04`). */
 export interface SavedYearSummary {
-  /** The year written. */
-  year: number
+  /** The map written. */
+  map: string
   /** How many polities the registry holds. */
   polities: number
   /** How many anchors the saved file holds — after the save dropped the ones nothing referenced. */
@@ -48,48 +48,50 @@ export interface SaveOptions {
 }
 
 /**
- * A save refused because the year's files changed on disk since the page opened them — a write by something
+ * A save refused because the map's files changed on disk since the page opened them — a write by something
  * else, which the page would otherwise have written over (CARTO-238, rung 3).
  */
 export class YearChangedOnDisk extends Error {
   /**
-   * @param year - the year refused
+   * @param map - the map refused
    * @param changedAt - when its files were last written, in milliseconds since the epoch, or `null` when
    *   they are gone
    */
   constructor(
-    readonly year: number,
+    readonly map: string,
     readonly changedAt: number | null
   ) {
-    super(`${String(year)} was changed on disk since it was opened`)
+    super(`${map} was changed on disk since it was opened`)
     this.name = 'YearChangedOnDisk'
   }
 }
 
-/** The years, as the editor reaches them. */
+/** The maps, as the editor reaches them. */
 export interface YearArchive {
   /**
-   * The years that have been saved, read from the manifest.
-   * @returns every listed year
-   * @throws an `AssetError` when the manifest cannot be fetched or read
+   * The maps there are — every folder of `years/` holding one, in the order of their names.
+   * @returns the maps' names
+   * @throws an `Error` when the list cannot be fetched or read
    */
-  listedYears: () => Promise<readonly number[]>
+  listMaps: () => Promise<readonly string[]>
   /**
-   * Read a year off disk and open it as a working document.
-   * @param year - the year to open
+   * Read a map off disk and open it as a working document.
+   * @param map - the map's name
    * @returns the document, ready to edit
    * @throws an `AssetError` naming the file and the field when any of the three is wrong
    */
-  open: (year: number) => Promise<YearDocument>
+  open: (map: string) => Promise<YearDocument>
   /**
-   * Write a document as its year's three files — only over the files it opened, unless told to overwrite.
+   * Write a document as a map's three files — only over the files it opened, unless told to overwrite. A map never
+   * opened by this page is expected absent from disk: one that is there is asked about too.
    * @param document - the working document
-   * @param options - whether to overwrite a year changed on disk
+   * @param map - the map to write it as — the page's own, or a new one for *Save as…* and *Save a copy*
+   * @param options - whether to overwrite a map changed on disk
    * @returns what was written
    * @throws {@link YearChangedOnDisk} when the files changed on disk since they were opened; an `Error`
    *   carrying the reason the save was refused, or the network failure
    */
-  save: (document: YearDocument, options?: SaveOptions) => Promise<SavedYearSummary>
+  save: (document: YearDocument, map: string, options?: SaveOptions) => Promise<SavedYearSummary>
 }
 
 /** What the dev-server archive needs. */
@@ -98,7 +100,7 @@ export interface DevServerYearArchiveDeps {
   fetch: typeof fetch
   /** Where the years are served from, e.g. `/years`. Read with a plain GET, like every other asset. */
   yearsBase: string
-  /** Where a save is sent, e.g. `/__years` — the dev server's write endpoint. */
+  /** Where a save is sent and the maps are listed, e.g. `/__years` — the dev server's endpoint. */
   writeRoute: string
 }
 
@@ -178,77 +180,67 @@ export async function refusalReason(response: Response): Promise<string> {
 }
 
 /**
- * Open a year's three files, already in hand, as a working document — through the same readers and
- * cross-checks as a year read off disk. How a draft (CARTO-238) is reopened: a draft the atlas could not
- * read is refused here exactly as a year would be.
- * @param files - an object holding `registry`, `polities` and `borders`
- * @param source - where they came from, for the error
- * @returns the document
- * @throws an `AssetError` naming the file and the field when any of the three is wrong
- */
-export function documentFromFiles(files: unknown, source: string): YearDocument {
-  const held = new Map<string, unknown>(
-    files !== null && typeof files === 'object' ? Object.entries(files) : []
-  )
-  return openYearDocument(
-    assembleAuthoredYear(
-      {
-        registry: parseYearRegistry(held.get('registry'), source),
-        polities: parseYearPolities(held.get('polities'), source),
-        borders: parseYearBorders(held.get('borders'), source),
-      },
-      source
-    )
-  )
-}
-
-/**
- * Write a document through the dev server, conditional on the fingerprint the page holds for its year —
+ * Write a document through the dev server, conditional on the fingerprint the page holds for that map —
  * and keep the new fingerprint the server answers with (CARTO-238, rung 3).
  * @param deps - the fetch and the write route
- * @param stamps - the fingerprint of each year as this page last read or wrote it
+ * @param stamps - the fingerprint of each map as this page last read or wrote it
  * @param document - the working document
- * @param options - whether to overwrite a year changed on disk
+ * @param map - the map to write
+ * @param options - whether to overwrite a map changed on disk
  * @returns what was written
  */
 async function saveThroughDevServer(
   deps: DevServerYearArchiveDeps,
-  stamps: Map<number, string | null>,
+  stamps: Map<string, string | null>,
   document: YearDocument,
+  map: string,
   options: SaveOptions
 ): Promise<SavedYearSummary> {
   const files = saveYearDocument(document)
   // A year this page never read is expected absent: files that appeared meanwhile are asked about too
   // (ARCH-002). `null` is a fingerprint lost to a defect — the save goes unconditional, as decided.
-  const held = stamps.get(document.year)
+  const held = stamps.get(map)
   const opened = held === undefined ? yearStamp(ABSENT_YEAR) : held
   const headers: Record<string, string> = { 'content-type': 'application/json' }
   if (opened !== null && options.overwrite !== true) headers['if-match'] = opened
-  const response = await deps.fetch(`${deps.writeRoute}/${String(document.year)}`, {
+  const response = await deps.fetch(`${deps.writeRoute}/${encodeURIComponent(map)}`, {
     method: 'PUT',
     headers,
     body: JSON.stringify(files),
   })
   if (response.status === 412) {
     const changedAt = await bodyField(response, 'changedAt')
-    throw new YearChangedOnDisk(document.year, typeof changedAt === 'number' ? changedAt : null)
+    throw new YearChangedOnDisk(map, typeof changedAt === 'number' ? changedAt : null)
   }
   if (!response.ok) throw new Error(await refusalReason(response))
   const stamp = await bodyField(response, 'stamp')
-  if (typeof stamp === 'string') stamps.set(document.year, stamp)
+  if (typeof stamp === 'string') stamps.set(map, stamp)
   else {
-    // The year was written, so the save is not failed — but our own server always sends the
+    // The map was written, so the save is not failed — but our own server always sends the
     // fingerprint, so its absence is a defect: said loudly, and the next save goes unconditional.
-    console.error(
-      `[Cartographer] the save of ${String(document.year)} came back with no fingerprint`
-    )
-    stamps.set(document.year, null)
+    console.error(`[Cartographer] the save of ${map} came back with no fingerprint`)
+    stamps.set(map, null)
   }
   return {
-    year: document.year,
+    map,
     polities: files.registry.polities.length,
     vertices: files.polities.anchors.length,
   }
+}
+
+/**
+ * Read the list of maps the dev server answered, refusing what is not one.
+ * @param value - the parsed body, `{ maps: [...] }`
+ * @param source - where it came from, for the error
+ * @returns the maps' names
+ * @throws an `AssetError` saying the answer is not a list of names
+ */
+function readMapList(value: unknown, source: string): readonly string[] {
+  const maps =
+    value !== null && typeof value === 'object' && 'maps' in value ? value.maps : undefined
+  if (!Array.isArray(maps) || !maps.every((name: unknown) => typeof name === 'string'))
+    throw assetError('yearRegistry', 'schema', source, 'the list of maps is not a list of names')
+  return maps
 }
 
 /**
@@ -259,28 +251,20 @@ async function saveThroughDevServer(
  */
 export function createDevServerYearArchive(deps: DevServerYearArchiveDeps): YearArchive {
   const base = deps.yearsBase.replace(/\/$/, '')
-  // The fingerprint of each year as this page last read or wrote it (CARTO-238, rung 3). A year with none —
+  // The fingerprint of each map as this page last read or wrote it (CARTO-238, rung 3). A map with none —
   // never opened, never saved — is expected absent from disk; `null` is a fingerprint lost to a defect.
-  const stamps = new Map<number, string | null>()
+  const stamps = new Map<string, string | null>()
   return {
-    listedYears: async () => {
-      const manifest = await readJson(
-        deps.fetch,
-        'yearRegistry',
-        `${base}/index.json`,
-        parseYearManifest
-      )
-      return manifest.years
-    },
+    listMaps: () => readJson(deps.fetch, 'yearRegistry', deps.writeRoute, readMapList),
 
-    open: async (year) => {
-      const paths = yearPaths(base, year)
+    open: async (map) => {
+      const paths = yearPaths(base, map)
       const [registry, polities, borders] = await Promise.all([
         readYearFile(deps.fetch, 'yearRegistry', paths.registry, parseYearRegistry),
         readYearFile(deps.fetch, 'yearPolities', paths.polities, parseYearPolities),
         readYearFile(deps.fetch, 'yearBorders', paths.borders, parseYearBorders),
       ])
-      const folder = `${base}/${String(year)}`
+      const folder = `${base}/${map}`
       const document = openYearDocument(
         assembleAuthoredYear(
           { registry: registry.value, polities: polities.value, borders: borders.value },
@@ -288,12 +272,13 @@ export function createDevServerYearArchive(deps: DevServerYearArchiveDeps): Year
         )
       )
       stamps.set(
-        year,
+        map,
         yearStamp({ registry: registry.text, polities: polities.text, borders: borders.text })
       )
       return document
     },
 
-    save: (document, options = {}) => saveThroughDevServer(deps, stamps, document, options),
+    save: (document, map, options = {}) =>
+      saveThroughDevServer(deps, stamps, document, map, options),
   }
 }

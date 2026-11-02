@@ -1,0 +1,7 @@
+{
+  "title": "Enregistrer sous",
+  "text": "La carte est d’abord enregistrée, puis écrite sous le nouveau nom ; vous continuez à travailler sur la nouvelle carte.",
+  "name": "Nom de la nouvelle carte",
+  "hint": "Lettres, chiffres, « - », « _ » et « . »",
+  "saving": "Enregistrement…"
+}

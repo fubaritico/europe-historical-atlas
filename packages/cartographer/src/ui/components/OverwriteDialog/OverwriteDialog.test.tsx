@@ -11,7 +11,7 @@ import type { OverwriteQuestion } from '../../../persistence/yearSession'
 
 /** The question asked in most tests. */
 const QUESTION: OverwriteQuestion = {
-  year: 1100,
+  map: '1100',
   changedAt: new Date(2026, 9, 17, 14, 2).toISOString(),
 }
 
@@ -93,7 +93,7 @@ describe('OverwriteDialog', () => {
     })
 
     it('says the year is no longer on disk as it was opened when the time is unknown', () => {
-      mounted({ year: 1100, changedAt: null })
+      mounted({ map: '1100', changedAt: null })
 
       expect(
         open().getByText('1100 is no longer on disk as it was opened. Overwrite it with this page?')

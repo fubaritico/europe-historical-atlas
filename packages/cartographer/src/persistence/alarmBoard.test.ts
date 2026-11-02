@@ -18,11 +18,11 @@ describe('createAlarmBoard', () => {
     it('replaces the alarm of the same topic, and keeps the others, oldest first', () => {
       const board = createAlarmBoard()
       board.raise({ topic: 'year', text: 'no confirmation yet' })
-      board.raise({ topic: 'draft', text: 'the draft is not kept' })
+      board.raise({ topic: 'autosave', text: 'the draft is not kept' })
       board.raise({ topic: 'year', text: 'not saved' })
 
       expect(board.current()).toEqual([
-        { topic: 'draft', text: 'the draft is not kept' },
+        { topic: 'autosave', text: 'the draft is not kept' },
         { topic: 'year', text: 'not saved' },
       ])
     })
@@ -30,10 +30,10 @@ describe('createAlarmBoard', () => {
     it('withdraws the alarm of a topic, and only that one', () => {
       const board = createAlarmBoard()
       board.raise({ topic: 'year', text: 'no confirmation yet' })
-      board.raise({ topic: 'draft', text: 'the draft is not kept' })
+      board.raise({ topic: 'autosave', text: 'the draft is not kept' })
       board.withdraw('year')
 
-      expect(board.current()).toEqual([{ topic: 'draft', text: 'the draft is not kept' }])
+      expect(board.current()).toEqual([{ topic: 'autosave', text: 'the draft is not kept' }])
     })
 
     it('tells its listeners of each change, and stops when asked', () => {

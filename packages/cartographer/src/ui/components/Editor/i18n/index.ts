@@ -9,8 +9,8 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *
  * Its messages, and the values they take:
  * - `notBuilt` — Why a button does nothing yet; `scenarios` names the scenarios that will build it.
- * - `openSnapshotHint` — The tooltip of *Open snapshot…*.
- * - `saveHint` — The tooltip of *Save*.
+ * - `openHint`, `saveHint`, `saveAsHint`, `saveCopyHint` — The tooltips of *Open…*, *Save*, *Save as…* and *Save a
+ *   copy* (`s19`).
  * - `registry` — The year's registry — a command not built yet.
  * - `closeYear` — Close the open year; `close` is the shared action's label, `year` the year as text.
  * - `nothingToUndo`, `nothingToRedo` — Why undo or redo is unavailable.

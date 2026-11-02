@@ -2,7 +2,7 @@
  * The alarms waiting for the author — the notices the dialogue shows (`notice.ts`).
  *
  * **Why a store outside React, as for the questions** (`questionRelay.ts`): what raises an alarm — the opening,
- * a save, the draft keeper — is built in the entry module before any component exists, and an alarm raised at
+ * a save, the automatic save — is built in the entry module before any component exists, and an alarm raised at
  * start-up must still be there when the dialogue mounts. The dialogue reads `current`, re-renders on `subscribe`
  * and calls `dismiss` when the author closes it.
  *

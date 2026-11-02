@@ -1,6 +1,13 @@
+import { isMapName } from '@europe-historical-atlas/core/data/mapName'
 import { yearStamp } from '@europe-historical-atlas/core/data/yearStamp'
 
-import { LOG_TAG, answer, createBodyMiddleware, isSameMachineRequest } from './httpEndpoint'
+import {
+  LOG_TAG,
+  LOOPBACK_HOST,
+  answer,
+  createBodyMiddleware,
+  isSameMachineRequest,
+} from './httpEndpoint'
 import { planYearWrite } from './yearWritePlan'
 
 import type { DiskFolder, YearFolder } from './diskFolder'
@@ -8,7 +15,9 @@ import type { BodyStream, EndpointRequest, EndpointResponse, ResponseSink } from
 import type { PlannedFile } from './yearWritePlan'
 
 /**
- * The dev server's year endpoint — `PUT /__years/<year>` writes a year into `packages/atlas/public/years/`.
+ * The dev server's map endpoint — `PUT /__years/<map>` writes a map into `packages/atlas/public/years/<map>/`, and
+ * `GET /__years` lists the maps there are (`s19`, the dev, 2026-11-02: *"a map exists, there is a folder for that
+ * map, I can open that map"*). Reading a map stays a plain GET of its files, like every other asset.
  *
  * **Why the dev server, and why only it.** The dev's call, 2026-10-12: save and reopen *in local mode*,
  * from the Cartographer running on his machine. The browser cannot write into the repository by itself; the
@@ -22,7 +31,7 @@ import type { PlannedFile } from './yearWritePlan'
  *   · only a request from the same machine — the `Host` is a loopback name and the `Origin` is that same
  *     host, which shuts out another site and a DNS-rebound name alike;
  *   · only `PUT`, only a body under {@link MAX_BODY_BYTES};
- *   · only a whole-number year, so the path is built from digits and fixed names and cannot climb out of
+ *   · only a map's name of letters, digits, `-`, `_` and `.` (`isMapName`, core/data/mapName), so the path cannot climb out of
  *     `years/`;
  *   · only three files that `core` reads back and cross-checks without complaint (`yearWritePlan.ts`).
  *
@@ -48,12 +57,11 @@ function writeAll(folder: DiskFolder, files: readonly PlannedFile[]): void {
 }
 
 /**
- * Where a year's three files sit in the years folder.
- * @param year - the year
+ * Where a map's three files sit in the years folder.
+ * @param folder - the map's name
  * @returns the three relative paths
  */
-function yearFilePaths(year: number): { registry: string; polities: string; borders: string } {
-  const folder = String(year)
+function yearFilePaths(folder: string): { registry: string; polities: string; borders: string } {
   return {
     registry: `${folder}/registry.json`,
     polities: `${folder}/polities.json`,
@@ -62,13 +70,13 @@ function yearFilePaths(year: number): { registry: string; polities: string; bord
 }
 
 /**
- * The fingerprint of a year's files as some reader sees them.
- * @param year - the year
+ * The fingerprint of a map's files as some reader sees them.
+ * @param map - the map's name
  * @param read - how to get a file's text, `null` when absent
  * @returns the fingerprint
  */
-function stampOf(year: number, read: (relativePath: string) => string | null): string {
-  const paths = yearFilePaths(year)
+function stampOf(map: string, read: (relativePath: string) => string | null): string {
+  const paths = yearFilePaths(map)
   return yearStamp({
     registry: read(paths.registry),
     polities: read(paths.polities),
@@ -77,16 +85,55 @@ function stampOf(year: number, read: (relativePath: string) => string | null): s
 }
 
 /**
- * When the most recent of a year's files was written, for the author — or `null` when none is there.
+ * When the most recent of a map's files was written, for the author — or `null` when none is there.
  * @param folder - the years folder
- * @param year - the year
+ * @param map - the map's name
  * @returns milliseconds since the epoch, or `null`
  */
-function lastChangeOf(folder: YearFolder, year: number): number | null {
-  const times = Object.values(yearFilePaths(year))
+function lastChangeOf(folder: YearFolder, map: string): number | null {
+  const times = Object.values(yearFilePaths(map))
     .map((path) => folder.modifiedAt(path))
     .filter((time): time is number => time !== null)
   return times.length === 0 ? null : Math.max(...times)
+}
+
+/**
+ * The maps in the years folder: every folder whose name is a map's and which holds a `registry.json`, in the order of
+ * their names. A folder of another name (`.git`, a stray copy with a space) is not one, and is left out.
+ * @param folder - the years folder
+ * @returns the maps' names
+ */
+export function listMaps(folder: YearFolder): string[] {
+  return folder
+    .listFolders()
+    .filter((name) => isMapName(name) && folder.modifiedAt(`${name}/registry.json`) !== null)
+    .sort((a, b) => a.localeCompare(b, 'en', { numeric: true }))
+}
+
+/**
+ * `GET /__years`: the list of the maps. A read, which a browser sends without an `Origin`: it needs a loopback `Host`,
+ * as any read here — and no CORS header lets another site read the answer.
+ * @param request - the request
+ * @param folder - where the years live
+ * @returns the list, or the refusal
+ */
+function answerTheList(request: EndpointRequest, folder: YearFolder): EndpointResponse {
+  if (request.host === undefined || !LOOPBACK_HOST.test(request.host)) {
+    console.warn(`${LOG_TAG} refused a list of the maps for the host ${String(request.host)}`)
+    return answer(403, { reason: 'only the Cartographer served by this machine may list the maps' })
+  }
+  return answer(200, { maps: listMaps(folder) })
+}
+
+/**
+ * The map named by a request's path: what follows the route, without its leading `/` nor its query —
+ * `GET /__years?x=1` is still the list (review SEC-003).
+ * @param path - the path after the route
+ * @returns the segment, empty for the route itself
+ */
+function segmentOf(path: string | undefined): string {
+  const [withoutQuery = ''] = (path ?? '').split('?')
+  return withoutQuery.replace(/^\//, '')
 }
 
 /**
@@ -96,12 +143,16 @@ function lastChangeOf(folder: YearFolder, year: number): number | null {
  * @returns the response to send
  */
 export function handleYearWrite(request: EndpointRequest, folder: YearFolder): EndpointResponse {
+  const segment = segmentOf(request.path)
+  if (request.method === 'GET' && segment === '') return answerTheList(request, folder)
   if (!isSameMachineRequest(request.host, request.origin)) {
     console.warn(`${LOG_TAG} refused a year write from another origin (${String(request.origin)})`)
     return answer(403, { reason: 'only the Cartographer served by this machine may save' })
   }
   if (request.method !== 'PUT')
-    return answer(405, { reason: `${String(request.method)} is not how a year is saved — use PUT` })
+    return answer(405, {
+      reason: `${String(request.method)} is not how a map is saved — use PUT, or GET the list`,
+    })
 
   let body: unknown
   try {
@@ -112,7 +163,7 @@ export function handleYearWrite(request: EndpointRequest, folder: YearFolder): E
   }
 
   const decision = planYearWrite({
-    yearSegment: (request.path ?? '').replace(/^\//, ''),
+    mapSegment: segment,
     body,
     manifestText: folder.read('index.json'),
   })
@@ -121,28 +172,27 @@ export function handleYearWrite(request: EndpointRequest, folder: YearFolder): E
     return answer(decision.refusal.status, { reason: decision.refusal.reason })
   }
 
-  const { year, files } = decision.plan
+  const { map, year, files } = decision.plan
   // CARTO-238 rung 3: compared as the write is about to happen, so nothing can slip in between.
   if (
     request.ifMatch !== undefined &&
-    stampOf(year, (path) => folder.read(path)) !== request.ifMatch
+    stampOf(map, (path) => folder.read(path)) !== request.ifMatch
   ) {
-    console.warn(
-      `${LOG_TAG} refused a year write: ${String(year)} changed on disk since it was opened`
-    )
+    console.warn(`${LOG_TAG} refused a map write: ${map} changed on disk since it was opened`)
     return answer(412, {
-      reason: `${String(year)} was changed on disk since it was opened`,
-      changedAt: lastChangeOf(folder, year),
+      reason: `${map} was changed on disk since it was opened`,
+      changedAt: lastChangeOf(folder, map),
     })
   }
 
   writeAll(folder, files)
   const written = new Map(files.map((file) => [file.relativePath, file.text]))
   return answer(200, {
+    map,
     year,
     written: files.map((file) => file.relativePath),
     // What the page now holds on disk — its next save is conditional on this.
-    stamp: stampOf(year, (path) => written.get(path) ?? null),
+    stamp: stampOf(map, (path) => written.get(path) ?? null),
   })
 }
 

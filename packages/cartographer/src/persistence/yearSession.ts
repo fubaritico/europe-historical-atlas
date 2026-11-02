@@ -1,3 +1,4 @@
+import { copyName, isNewMapName, yearNamed } from '@europe-historical-atlas/core/data/mapName'
 import { ANSWER_TIMEOUT_MS } from '@europe-historical-atlas/core/utils/fetchWithin'
 
 import { awaitConfirmation } from './awaitConfirmation'
@@ -45,10 +46,10 @@ export interface SessionStore {
   }
 }
 
-/** What the author is asked when a save would write over a year changed on disk (CARTO-238, rung 3). */
+/** What the author is asked when a save would write over a map changed on disk (CARTO-238, rung 3). */
 export interface OverwriteQuestion {
-  /** The year. */
-  year: number
+  /** The map. */
+  map: string
   /** When its files changed, as an ISO time — the dialogue words it — or `null` when they are gone from disk. */
   changedAt: string | null
 }
@@ -59,8 +60,13 @@ export interface YearSessionDeps {
   store: SessionStore
   /** Where the years are kept. */
   archive: YearArchive
-  /** The year this editor works on. */
-  year: number
+  /** The map this page opens on — the address's (`s19`); *Save as…* changes it afterwards. */
+  map: string
+  /**
+   * Told when *Save as…* has made the page another map — the address follows it.
+   * @param map - the map the page now is
+   */
+  onMapChanged: (map: string) => void
   /** Where a notice for the author goes — a toast, or the alarm dialogue. */
   report: Report
   /**
@@ -84,19 +90,41 @@ export interface YearSessionDeps {
  */
 export type SessionPhase = 'opening' | 'ready' | 'blocked'
 
-/** The session: two gestures, and a way to ask where it stands. */
+/** What *Save as…* answers: done, or why the name was refused — said under the field (`s19`). */
+export type SaveAsOutcome = { done: true } | { done: false; refusal: string | null }
+
+/** The session: the gestures on the map on disk, and a way to ask where it stands. */
 export interface YearSession {
   /**
-   * Open the year if the manifest lists it; otherwise leave the empty map as it is.
+   * Open the map if it is on disk; otherwise leave the empty map as it is, saving blocked, and say so.
    * Resolves either way: every failure is reported, none is thrown.
    */
   openOnStartup: () => Promise<void>
   /**
-   * Save the working document as its year.
+   * Save the working document as its map.
    * Resolves either way: a refused or failed save is reported, never thrown.
-   * @returns `true` when the year was written — what tells the draft keeper it may remove the draft
+   * @returns `true` when the map was written — what *Open…* reads before opening another
    */
   save: () => Promise<boolean>
+  /**
+   * *Save as…* (`s19`): save the map the page is, then write the page as a new map and go on working on it.
+   * @param name - the new map's name, as typed
+   * @returns done; or the refusal to show under the field — `null` when the failure was said elsewhere (the save
+   *   of the current map failed, and its alarm is up)
+   */
+  saveAs: (name: string) => Promise<SaveAsOutcome>
+  /**
+   * *Save a copy* (`s19`): write the page as `<map>.copy.<date and time>`, the page staying the map it is.
+   * @returns `true` when the copy was written
+   */
+  saveCopy: () => Promise<boolean>
+  /** The map the page is now. */
+  map: () => string
+  /**
+   * Whether the page holds changes since it was opened or last saved — what asks before opening another map. Never
+   * while saving is blocked: there is nothing it could save.
+   */
+  isModified: () => boolean
   /** Where the session stands now. */
   phase: () => SessionPhase
 }
@@ -132,6 +160,10 @@ interface SessionCell {
   blockedBecause: string
   /** A save is in flight — a second one waits for nothing and is refused. */
   saving: boolean
+  /** The map the page is. */
+  map: string
+  /** The store's version when the page was last opened or saved as its map — `null` before either. */
+  savedVersion: number | null
 }
 
 /**
@@ -152,18 +184,22 @@ function block(deps: YearSessionDeps, cell: SessionCell, reason: string): void {
  * Two reasons, each logged: the folder holds another year (the next save would write elsewhere), or the
  * author has edited since the read began (opening would throw that work away).
  * @param deps - the store and the year
+ * @param cell
  * @param opened - what was read
  * @param versionAtStart - the store's version when the read began
  * @returns the sentence that blocks saving, or `null`
  */
 function whyNotOpen(
   deps: YearSessionDeps,
+  cell: SessionCell,
   opened: YearDocument,
   versionAtStart: number
 ): string | null {
-  const yearName = String(deps.year)
+  const yearName = cell.map
   const { t } = deps.words()
-  if (opened.year !== deps.year) {
+  // Only a map named as a year must hold it: a working map holds whatever year it was copied from (`s19`).
+  const named = yearNamed(cell.map)
+  if (named !== null && opened.year !== named) {
     console.error(`${LOG_TAG} the folder ${yearName} holds year ${String(opened.year)}`)
     return t('folderHoldsOther', { year: yearName, held: String(opened.year) })
   }
@@ -180,12 +216,12 @@ function whyNotOpen(
  * @param cell - the session's memory
  */
 async function openOnStartup(deps: YearSessionDeps, cell: SessionCell): Promise<void> {
-  const yearName = String(deps.year)
+  const yearName = cell.map
   const versionAtStart = deps.store.getState().version
   let opened: YearDocument | null = null
   try {
-    const listed = await deps.archive.listedYears()
-    if (listed.includes(deps.year)) opened = await deps.archive.open(deps.year)
+    const listed = await deps.archive.listMaps()
+    if (listed.includes(cell.map)) opened = await deps.archive.open(cell.map)
   } catch (error: unknown) {
     console.error(`${LOG_TAG} ${yearName} could not be read from disk`, error)
     block(deps, cell, deps.words().t('unreadable', { year: yearName }))
@@ -193,21 +229,20 @@ async function openOnStartup(deps: YearSessionDeps, cell: SessionCell): Promise<
   }
 
   if (opened === null) {
-    cell.phase = 'ready'
-    deps.report({
-      tone: 'info',
-      topic: 'year',
-      text: deps.words().t('neverSaved', { year: yearName }),
-    })
+    // A map is a folder of `years/` (`s19`): an address naming none opens nothing, rather than an empty map a save
+    // would then write under a name nobody chose.
+    console.warn(`${LOG_TAG} no map named ${yearName} in years/`)
+    block(deps, cell, deps.words().t('noSuchMap', { map: yearName }))
     return
   }
-  const refusal = whyNotOpen(deps, opened, versionAtStart)
+  const refusal = whyNotOpen(deps, cell, opened, versionAtStart)
   if (refusal !== null) {
     block(deps, cell, refusal)
     return
   }
   deps.store.getState().open(opened)
   cell.phase = 'ready'
+  cell.savedVersion = deps.store.getState().version
   deps.report({
     tone: 'success',
     topic: 'year',
@@ -227,7 +262,7 @@ async function openOnStartup(deps: YearSessionDeps, cell: SessionCell): Promise<
 function whySaveRefused(deps: YearSessionDeps, cell: SessionCell): Notice | null {
   const { t } = deps.words()
   if (cell.phase === 'opening')
-    return { tone: 'warning', topic: 'year', text: t('stillReading', { year: String(deps.year) }) }
+    return { tone: 'warning', topic: 'year', text: t('stillReading', { year: cell.map }) }
   if (cell.phase === 'blocked') return { tone: 'alarm', topic: 'year', text: cell.blockedBecause }
   if (cell.saving) return { tone: 'warning', topic: 'year', text: t('saveRunning') }
   return null
@@ -248,11 +283,14 @@ async function saveYear(deps: YearSessionDeps, cell: SessionCell): Promise<boole
   }
   cell.saving = true
   try {
-    return await writeYear(deps, false)
+    const version = deps.store.getState().version
+    const written = await writeYear(deps, cell.map, false)
+    if (written) cell.savedVersion = version
+    return written
   } catch (error: unknown) {
     // The question itself failed — the relay busy, a time out of range. `save` resolves either way, as
     // its contract says: reported like any other failed save, never thrown.
-    console.error(`${LOG_TAG} ${String(deps.year)} was not saved`, error)
+    console.error(`${LOG_TAG} ${cell.map} was not saved`, error)
     deps.report({ tone: 'alarm', topic: 'year', text: deps.words().t('notSaved') })
     return false
   } finally {
@@ -264,24 +302,25 @@ async function saveYear(deps: YearSessionDeps, cell: SessionCell): Promise<boole
  * Write the working document — and, when the year changed on disk since it was opened, ask before writing
  * over it (CARTO-238, rung 3). Every outcome is reported; none is thrown.
  * @param deps - the store, the archive, where to report and whom to ask
- * @param overwrite - write even over a year changed on disk
- * @returns `true` when the year was written
+ * @param map - the map to write
+ * @param overwrite - write even over a map changed on disk
+ * @returns `true` when the map was written
  */
-async function writeYear(deps: YearSessionDeps, overwrite: boolean): Promise<boolean> {
+async function writeYear(deps: YearSessionDeps, map: string, overwrite: boolean): Promise<boolean> {
   try {
     // The document is taken now, not when ‹ctrl+S› was pressed: after [Overwrite] it is the page as it is.
     // Never cut, since it may land; said when the server has not confirmed it in time (the dev, REPO-275).
     const summary = await awaitConfirmation(
-      deps.archive.save(deps.store.getState().document, { overwrite }),
+      deps.archive.save(deps.store.getState().document, map, { overwrite }),
       {
         timers: deps.timers,
         delayMs: ANSWER_TIMEOUT_MS,
         late: () => {
-          console.error(`${LOG_TAG} ${String(deps.year)}: no confirmation of the save yet`)
+          console.error(`${LOG_TAG} ${map}: no confirmation of the save yet`)
           deps.report({
             tone: 'alarm',
             topic: 'year',
-            text: deps.words().t('saveUnconfirmed', { year: String(deps.year) }),
+            text: deps.words().t('saveUnconfirmed', { year: map }),
           })
         },
       }
@@ -290,14 +329,14 @@ async function writeYear(deps: YearSessionDeps, overwrite: boolean): Promise<boo
       tone: 'success',
       topic: 'year',
       text: deps.words().t('saved', {
-        year: String(summary.year),
+        year: summary.map,
         contents: describeYearContents(summary, deps.words()),
       }),
     })
     return true
   } catch (error: unknown) {
     if (error instanceof YearChangedOnDisk && !overwrite) return askBeforeOverwriting(deps, error)
-    console.error(`${LOG_TAG} ${String(deps.year)} was not saved`, error)
+    console.error(`${LOG_TAG} ${map} was not saved`, error)
     deps.report({ tone: 'alarm', topic: 'year', text: deps.words().t('notSaved') })
     return false
   }
@@ -314,9 +353,10 @@ async function askBeforeOverwriting(
   refusal: YearChangedOnDisk
 ): Promise<boolean> {
   const changedAt = refusal.changedAt === null ? null : new Date(refusal.changedAt).toISOString()
-  if (await deps.confirmOverwrite({ year: refusal.year, changedAt })) return writeYear(deps, true)
+  if (await deps.confirmOverwrite({ map: refusal.map, changedAt }))
+    return writeYear(deps, refusal.map, true)
   console.warn(
-    `${LOG_TAG} save cancelled: ${String(refusal.year)} was changed on disk${changedAt === null ? '' : ` at ${changedAt}`}.`
+    `${LOG_TAG} save cancelled: ${refusal.map} was changed on disk${changedAt === null ? '' : ` at ${changedAt}`}.`
   )
   // The author's own answer: nothing is lost, ‹ctrl+S› asks again.
   deps.report({
@@ -324,7 +364,7 @@ async function askBeforeOverwriting(
     topic: 'year',
     text: deps.words().t('notSavedChanged', {
       known: changedAt === null ? 'no' : 'yes',
-      year: String(refusal.year),
+      year: refusal.map,
       when: changedAt === null ? '' : timeWords(changedAt, deps.now(), deps.words()),
     }),
   })
@@ -332,15 +372,143 @@ async function askBeforeOverwriting(
 }
 
 /**
+ * Why a name cannot be what *Save as…* writes, said under the field — or `null` when it can (`s19`).
+ * @param deps - the store and the words
+ * @param cell - the session's memory
+ * @param name - the name typed
+ * @returns the sentence, or `null`
+ */
+function whyNotSaveAs(deps: YearSessionDeps, cell: SessionCell, name: string): string | null {
+  const { t } = deps.words()
+  if (name === cell.map) return t('saveAsSameName')
+  if (!isNewMapName(name)) return t('saveAsBadName')
+  // A map named as a year is the atlas's map of that year: it must hold it (the dev's « non », 2026-11-02).
+  const named = yearNamed(name)
+  const held = deps.store.getState().document.year
+  if (named !== null && named !== held) return t('saveAsOtherYear', { name, held: String(held) })
+  return null
+}
+
+/**
+ * Write the page as a map it is not — *Save as…*'s new map, *Save a copy*'s copy — said like a save when the server has
+ * not confirmed it in time (REPO-275). A refusal is thrown on, `YearChangedOnDisk` included: the caller words it.
+ * @param deps - the store, the archive, the timers, where to report
+ * @param map - the map to write
+ * @returns what was written
+ */
+function writeNewMap(deps: YearSessionDeps, map: string): Promise<SavedYearSummary> {
+  return awaitConfirmation(deps.archive.save(deps.store.getState().document, map), {
+    timers: deps.timers,
+    delayMs: ANSWER_TIMEOUT_MS,
+    late: () => {
+      console.error(`${LOG_TAG} ${map}: no confirmation of the save yet`)
+      deps.report({
+        tone: 'alarm',
+        topic: 'year',
+        text: deps.words().t('saveUnconfirmed', { year: map }),
+      })
+    },
+  })
+}
+
+/**
+ * *Save as…*: the current map saved first, then the page written as a new map that must not exist yet, and the page
+ * made that map.
+ * @param deps - the store, the archive, where to report, whom to tell of the new map
+ * @param cell - the session's memory
+ * @param name - the new map's name
+ * @returns done, or the refusal
+ */
+async function saveAs(
+  deps: YearSessionDeps,
+  cell: SessionCell,
+  name: string
+): Promise<SaveAsOutcome> {
+  const refusal = whyNotSaveAs(deps, cell, name)
+  if (refusal !== null) {
+    console.warn(`${LOG_TAG} save as refused: ${refusal}`)
+    return { done: false, refusal }
+  }
+  // The map it starts from is saved first (the dev: « ça déclenche l'enregistrement de la carte à partir de laquelle
+  // on a fait Save as »); a failed save is said by its own alarm, and nothing else happens.
+  if (!(await saveYear(deps, cell))) return { done: false, refusal: null }
+  // Held across the second write too: a ‹ctrl+S› meanwhile would save under the name the page is leaving.
+  cell.saving = true
+  try {
+    const version = deps.store.getState().version
+    const summary = await writeNewMap(deps, name)
+    cell.map = name
+    cell.savedVersion = version
+    deps.onMapChanged(name)
+    deps.report({
+      tone: 'success',
+      topic: 'year',
+      text: deps
+        .words()
+        .t('saved', { year: summary.map, contents: describeYearContents(summary, deps.words()) }),
+    })
+    return { done: true }
+  } catch (error: unknown) {
+    // A map of that name is already there: Save as never writes over another map.
+    if (error instanceof YearChangedOnDisk) {
+      console.warn(`${LOG_TAG} save as refused: a map named ${name} exists`)
+      return { done: false, refusal: deps.words().t('saveAsTaken', { name }) }
+    }
+    console.error(`${LOG_TAG} ${name} was not written`, error)
+    const reason = error instanceof Error ? error.message : String(error)
+    return { done: false, refusal: deps.words().t('saveAsFailed', { reason }) }
+  } finally {
+    cell.saving = false
+  }
+}
+
+/**
+ * *Save a copy*: the page written as `<map>.copy.<date and time>`; the page stays its map, still modified.
+ * @param deps - the store, the archive, the clock, where to report
+ * @param cell - the session's memory
+ * @returns `true` when the copy was written
+ */
+async function saveCopy(deps: YearSessionDeps, cell: SessionCell): Promise<boolean> {
+  const refusal = whySaveRefused(deps, cell)
+  if (refusal !== null) {
+    console.warn(`${LOG_TAG} copy refused: ${refusal.text}`)
+    deps.report(refusal)
+    return false
+  }
+  const name = copyName(cell.map, deps.now())
+  try {
+    await writeNewMap(deps, name)
+    deps.report({ tone: 'success', topic: 'year', text: deps.words().t('copySaved', { name }) })
+    return true
+  } catch (error: unknown) {
+    console.error(`${LOG_TAG} the copy ${name} was not written`, error)
+    deps.report({ tone: 'alarm', topic: 'year', text: deps.words().t('copyNotSaved') })
+    return false
+  }
+}
+
+/**
  * Build the session.
- * @param deps - the store, the archive, the year and where to report
+ * @param deps - the store, the archive, the map and where to report
  * @returns the session
  */
 export function createYearSession(deps: YearSessionDeps): YearSession {
-  const cell: SessionCell = { phase: 'opening', blockedBecause: '', saving: false }
+  const cell: SessionCell = {
+    phase: 'opening',
+    blockedBecause: '',
+    saving: false,
+    map: deps.map,
+    savedVersion: null,
+  }
   return {
     openOnStartup: () => openOnStartup(deps, cell),
     save: () => saveYear(deps, cell),
+    saveAs: (name) => saveAs(deps, cell, name),
+    saveCopy: () => saveCopy(deps, cell),
+    map: () => cell.map,
+    // A blocked page can save nothing: asking « save first? » would only offer a [Yes] that fails (review QUAL-002).
+    isModified: () =>
+      cell.phase !== 'blocked' && cell.savedVersion !== deps.store.getState().version,
     phase: () => cell.phase,
   }
 }

@@ -1,7 +1,7 @@
 import type { PersistenceWords } from './persistenceWords'
 
 /**
- * Times worded for the author — when a draft was kept, when a year changed on disk (CARTO-238). One home,
+ * Times worded for the author — when a map changed on disk (CARTO-238). One home,
  * so the dialogues and the status bar say a time the same way, in the page's language (ATLAS-159).
  */
 

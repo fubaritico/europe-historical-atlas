@@ -20,7 +20,7 @@ export type NoticeTone = 'success' | 'info' | 'warning' | 'alarm'
  * What a notice is about. A notice replaces the earlier one of its topic — one toast per topic on screen — and a
  * `success` withdraws the alarm of its topic: a save confirmed after its doubt closes it.
  */
-export type NoticeTopic = 'year' | 'draft' | 'snapshot'
+export type NoticeTopic = 'year' | 'autosave'
 
 /** One notice. */
 export interface Notice {
