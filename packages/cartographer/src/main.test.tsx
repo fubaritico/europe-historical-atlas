@@ -9,7 +9,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
  * this exists at all: the harness suite next door renders its own component and proves the toolchain, while
  * nothing exercised the file a browser actually loads.
  */
-describe('the application entry', () => {
+/**
+ * Each test imports the whole application afresh, ~1 s alone and past Vitest's 5 s when the five packages run at once
+ * (REPO-260: three refused commits on 2026-11-02, the machine's load at 110) — so this file is given 20 s.
+ */
+const ENTRY_TIMEOUT_MS = 20_000
+
+describe('the application entry', { timeout: ENTRY_TIMEOUT_MS }, () => {
   beforeEach(() => {
     vi.resetModules()
     document.body.replaceChildren()

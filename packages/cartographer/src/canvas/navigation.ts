@@ -14,7 +14,7 @@ import type { PixelSize, ScaleLimits } from '../viewport/viewport'
 /**
  * How far the view may be magnified past the backdrop's own resolution.
  *
- * **Thirty-two, raised from eight on 2026-10-08 because the first argument was borrowed and did not
+ * **Thirty-two (raised from eight on 2026-10-08), then 128 because the first argument was borrowed and did not
  * apply.** It read: at scale 8 one backdrop pixel covers eight screen pixels, so the ground resolution
  * is 7.6 km / 8 ≈ 0.95 km per screen pixel at 45°N — finer than the 1.9 km cells the political raster
  * works in. True, and beside the point: **the political raster is the atlas's.** This editor stores
@@ -24,8 +24,11 @@ import type { PixelSize, ScaleLimits } from '../viewport/viewport'
  *
  * **What the ceiling is really for**, then: at scale 32 one screen pixel is about **240 m** of ground,
  * which is far below anything the project measures itself against — a city on the wrong side of a
- * frontier, the accuracy criterion of `H-15`, is an error of kilometres. Past that a reader would be
- * placing anchors at a precision no source supports, which is a different kind of wrong.
+ * frontier, the accuracy criterion of `H-15`, is an error of kilometres.
+ *
+ * **128 since 2026-11-02**, about 60 m a screen pixel (the dev, redrawing Cliopatria's coasts by hand: *"more zoom,
+ * please"*): 32 was too coarse to lay a coast's anchors between the inlets — a gesture's precision, not a
+ * source's.
  *
  * **The blur is expected, not a reason to stop.** `s01` specifies it: *"the backdrop gives out before
  * the grid does"* — the terrain goes soft while the coastline, the rivers and the graticule stay sharp,
@@ -35,7 +38,7 @@ import type { PixelSize, ScaleLimits } from '../viewport/viewport'
  * **And it costs nothing.** Measured: culling and decimation make a repaint *cheaper* the further in
  * the view goes — 28 % of the coastline's points at scale 8 against 48 % at scale 2.
  */
-export const MAX_SCALE = 32
+export const MAX_SCALE = 128
 
 /** How much one press of a zoom key scales the view. A key is one discrete step, so it stays a factor. */
 export const KEY_ZOOM_STEP = 1.1
