@@ -45,8 +45,11 @@ export async function rebuildTexture(
   const options = paintsExactFills(context.dev, context.sources)
     ? { ...context.dev.texture, politicalStrength: 0 }
     : context.dev.texture
+  // Bare when nothing tints it: no grid held, or the tint turned off — what a change of year to an authored year reads.
+  const bare = !context.held.grid || options.politicalStrength === 0
   const baked = await context.box.compute.bakeTerrain(options, onProgress)
   if (context.isDisposed() || !isCurrent()) return
   // Wrap the baked pixels as a texture and hang it on the relief.
   context.layers.setTexture(wrapTerrainTexture(baked.rgba, baked.width, baked.height))
+  context.held.bareTexture = bare
 }

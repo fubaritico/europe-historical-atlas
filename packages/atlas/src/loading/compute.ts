@@ -29,7 +29,8 @@ function failoverToInline(
   if (context.isDisposed()) return
   // Replace the dead worker with the inline compute, which yields a frame between its phases.
   context.box.compute = createInlineMapCompute({ yieldControl: nextFrame })
-  // It starts empty: the pipeline sets it up again.
+  // It starts empty — no year's grid — and the pipeline sets it up again; the texture on the relief is untouched.
+  context.held.grid = false
   restore().catch((failure: unknown) => {
     console.error('main-thread fallback could not restore the map', failure)
   })

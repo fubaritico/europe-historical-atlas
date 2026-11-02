@@ -31,6 +31,7 @@ function contextWith(spawn: () => ComputeWorkerHandle, disposed = false): Pipeli
     spawn,
     isDisposed: () => disposed,
     box: { compute: null as unknown as MapCompute },
+    held: { grid: true, bareTexture: false },
   } as unknown as PipelineContext
 }
 
@@ -60,6 +61,8 @@ describe('createCompute', () => {
       worker.die()
       expect(context.box.compute).not.toBe(first)
       expect(restore).toHaveBeenCalledTimes(1)
+      // The new compute holds no year's grid: a change of year must not believe it can skip clearing one.
+      expect(context.held.grid).toBe(false)
     })
 
     it('computes on this thread from the start when no worker can be made', () => {

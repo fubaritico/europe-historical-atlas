@@ -6,6 +6,7 @@ import { authoredRegionColours } from '@europe-historical-atlas/core/editor/poli
 import { scaleProgress } from '@europe-historical-atlas/core/pipeline/inlineCompute'
 import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
 
+import { yearPaintsExactFills } from '../../scene/political/paintsExactFills'
 import { politicalPalette } from '../../tunables/params'
 import { COMPUTE_PHASE_MESSAGES } from '../computeLabels'
 import { settleYearBorders } from '../yearBorders'
@@ -13,10 +14,15 @@ import { settleYearBorders } from '../yearBorders'
 import { rebuildYearNames } from './names'
 import { rebuildTexture } from './texture'
 
+import type { AuthoredSet } from '../../scene/political/paintsExactFills'
 import type { DevState } from '../../tunables/devState'
 import type { PipelineContext } from '../pipelineContext'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
-import type { MapCompute, ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
+import type {
+  MapCompute,
+  PoliticalResult,
+  ProgressReport,
+} from '@europe-historical-atlas/core/pipeline/mapCompute'
 
 /**
  * How drawing a year divides the share of the bar it is given. Measured rather than chosen: the fetch is a local file,
@@ -57,27 +63,82 @@ async function drawYear(
   // 1. Fetch the year's polities; drop out if torn down or overtaken by a newer year.
   const loaded = await context.assets.regions.load(centuryOf(context))
   if (context.isDisposed() || !isCurrent()) return null
-  // 2. Ask the compute for the year's tints and traced lines, in the share's compute slice.
-  const result = await context.box.compute.computePolitical(
-    politicalRequest(dev, loaded),
-    scaleProgress(report, POLITICAL_SPLIT.fetch, POLITICAL_SPLIT.compute)
-  )
+  // 2. The year's tints and traced lines: from the compute's grid, or — for a year the fills paint — straight from it.
+  const exact = yearPaintsExactFills(dev, loaded)
+  const result = exact
+    ? await exactYearResult(context, loaded)
+    : await gridYearResult(
+        context,
+        loaded,
+        scaleProgress(report, POLITICAL_SPLIT.fetch, POLITICAL_SPLIT.compute)
+      )
   if (context.isDisposed() || !isCurrent()) return null
   // The year and its lines change together: a redraw between the two would read one year's pairs against the
   // other's polities, or one kind of year's patterns against the other kind's lines.
   sources.regionSet = loaded
   settleYearBorders(sources, loaded, result, politicalPalette(dev.political))
-  // 3. Re-bake the terrain with the year's colours, in the share's bake slice.
-  await rebuildTexture(
-    context,
-    scaleProgress(report, POLITICAL_SPLIT.compute, POLITICAL_SPLIT.bake)
-  )
-  if (context.isDisposed() || !isCurrent()) return null
+  // 3. Re-bake the terrain with the year's colours, in the share's bake slice — unless the fills paint the year and
+  //    the bare terrain they lie on is already on the relief: that bake would give it back pixel for pixel.
+  if (!(exact && context.held.bareTexture)) {
+    await rebuildTexture(
+      context,
+      scaleProgress(report, POLITICAL_SPLIT.compute, POLITICAL_SPLIT.bake)
+    )
+    if (context.isDisposed() || !isCurrent()) return null
+  }
   // 4. Lay the fills and the border lines — this thread's own work, said before it holds the page still.
   report(POLITICAL_SPLIT.bake, 'borders')
   layers.rebuildFills()
   layers.rebuildBorders()
   return loaded
+}
+
+/**
+ * A year through the compute's grid: rasterised, grown, coloured and traced — a per-century payload, or an authored
+ * year with the panel's *exact fills* off. The grid it installs tints the next bake.
+ * @param context - the pipeline's world
+ * @param loaded - the year
+ * @param report - where the compute's progress goes, when a bar is shown
+ * @returns the tints and the traced lines
+ */
+async function gridYearResult(
+  context: PipelineContext,
+  loaded: RegionSet,
+  report: ProgressReport | undefined
+): Promise<PoliticalResult> {
+  context.held.grid = true
+  return context.box.compute.computePolitical(politicalRequest(context.dev, loaded), report)
+}
+
+/**
+ * A year the fills paint, with no grid (ATLAS-333): its tints are the Cartographer's colours — what the compute would
+ * have handed back from the request (`politicalRequest`) — and its lines are drawn from its anchors by
+ * `settleYearBorders`, so none are traced. Measured on 1100, 02/11: 1.6 s of rasterising saved per change of year. The
+ * grid a previous year left in the compute is taken off, so no later bake tints the terrain with it.
+ * @param context - the pipeline's world
+ * @param loaded - the authored year
+ * @returns the tints, and no traced lines
+ */
+async function exactYearResult(
+  context: PipelineContext,
+  loaded: AuthoredSet
+): Promise<PoliticalResult> {
+  if (context.held.grid) {
+    // Written before the await, in the order the messages go to the compute: a newer year that sends its grid while
+    // this clear is on its way sets the flag back after this line, as the compute will hold its grid after the clear.
+    context.held.grid = false
+    try {
+      await context.box.compute.clearPolitical()
+    } catch (error: unknown) {
+      // Not cleared: the grid may still be there, so no later bake may believe the terrain bare. Told as the year's
+      // failure by the caller.
+      context.held.grid = true
+      throw error
+    }
+  }
+  const palette = politicalPalette(context.dev.political)
+  const tints = authoredRegionColours(loaded.authored.year, loaded.regions, palette)
+  return { tints, borders: { between: [], frontier: [] } }
 }
 
 /**

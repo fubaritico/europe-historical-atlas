@@ -72,4 +72,10 @@ export interface PipelineContext extends MapPipelineDeps {
   assets: MapAssetSources
   /** The rivers once loaded, held until the relief is there to check their ground against. */
   pendingRivers: { set: RiverSet | null }
+  /**
+   * What the map's compute and the relief hold, so a change of year redoes only what differs (ATLAS-333): whether the
+   * compute holds a year's grid — which tints any bake — and whether the texture on the relief is the bare terrain.
+   * An authored year needs neither the grid nor a new bake when the bare terrain is already there.
+   */
+  held: { grid: boolean; bareTexture: boolean }
 }

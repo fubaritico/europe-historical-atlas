@@ -351,6 +351,66 @@ describe('createMapPipeline', () => {
       expect(pixels(gridCalls.at(-1))).not.toEqual(pixels(gridCalls[0]))
     })
 
+    // ATLAS-333: the startup's bare terrain is the very texture an authored year's fills lie on.
+    it('bakes an authored year once, at the startup, and never again on a change to another', async () => {
+      const { deps, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
+      })
+      await pipeline.start()
+      expect(asMock(deps.layers.setTexture)).toHaveBeenCalledTimes(1)
+
+      await pipeline.rebuildPolitical()
+      expect(asMock(deps.layers.setTexture)).toHaveBeenCalledTimes(1)
+      expect(asMock(deps.layers.rebuildFills)).toHaveBeenCalledTimes(2)
+    })
+
+    it('bakes the bare terrain again on a change from a tinted year to an authored one', async () => {
+      let year: RegionSet = YEAR
+      const { deps, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(year) } }),
+      })
+      deps.dev.political.rasterScale = 4
+      await pipeline.start()
+      const calls = asMock(deps.layers.setTexture).mock.calls
+      expect(pixels(calls.at(-1))).not.toEqual(pixels(calls[0]))
+
+      year = AUTHORED_YEAR
+      await pipeline.rebuildPolitical()
+      expect(calls).toHaveLength(3)
+      expect(pixels(calls.at(-1))).toEqual(pixels(calls[0]))
+    })
+
+    it('keeps the texture on a change to an authored year when the year before was baked untinted', async () => {
+      let year: RegionSet = YEAR
+      const { deps, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(year) } }),
+      })
+      deps.dev.political.rasterScale = 4
+      deps.dev.texture.politicalStrength = 0
+      await pipeline.start()
+      const calls = asMock(deps.layers.setTexture).mock.calls
+      expect(pixels(calls.at(-1))).toEqual(pixels(calls[0]))
+
+      year = AUTHORED_YEAR
+      await pipeline.rebuildPolitical()
+      expect(calls).toHaveLength(2)
+    })
+
+    it('tints an authored year in the colours the grid would have handed back', async () => {
+      const exact = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
+      })
+      await exact.pipeline.start()
+      const grid = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
+      })
+      grid.dev.political.exactFills = false
+      await grid.pipeline.start()
+
+      expect(exact.deps.sources.regionTints).toEqual(grid.deps.sources.regionTints)
+      expect(exact.deps.sources.tintLevels).toEqual(grid.deps.sources.tintLevels)
+    })
+
     it('leaves an authored year’s exact lines when asked to re-trace, and says so', async () => {
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
       const { deps, pipeline } = build({

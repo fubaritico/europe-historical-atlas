@@ -119,6 +119,7 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
     box: { compute: null as unknown as MapCompute, names: null as unknown as MapCompute },
     nameFace: null,
     pendingRivers: { set: null },
+    held: { grid: false, bareTexture: false },
   }
   installComputes(context)
 
