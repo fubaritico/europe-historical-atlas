@@ -31,4 +31,5 @@ paths:
 - A `UserPromptSubmit` hook's `additionalContext` is capped at **10 000 characters**.
 - `.claude/CLAUDE.md` exists, so the root `AGENTS.md` (written by Turbo) is **not read** — import it if it ever matters.
 - **`/doctor prompt-audit`** audits CLAUDE.md, rules, skills, agents for stale or conflicting content and proposes
-  edits without applying them (needs ≥ 2.1.283) — `/end-session` asks the dev to run it when `.claude/` changed.
+  edits without applying them (needs ≥ 2.1.283) — **once a week** (the dev, 2026-11-02): `/end-session` asks him to run
+  it when the last audit, dated in `next.md`, is more than seven days old.

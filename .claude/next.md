@@ -139,6 +139,8 @@ three.js et le Cartographe émet le même, au même hash — vérifié par la CI
 
 **Dernier contrôle des versions** : aucun encore (`/repo-version-manager`, créée le 01/11) — un premier coup d'œil le
 01/11 : 32 paquets ont plus récent, 7 majeures, 7 mineures, 18 correctifs ; pas de rapport écrit.
+**Dernier audit des instructions** (`/doctor prompt-audit`, **une fois par semaine**, son choix du 02/11) : **le 01/11** — le
+prochain à lui demander à partir du 08/11.
 
 **Cinq paquets**, orchestrés par **Turbo**, avec un **catalogue de versions** dans `pnpm-workspace.yaml` :
 `core` (pure TS, ni three.js ni DOM ni React ni zustand — tenu par ESLint et `tsc`, tests sous **`node`**),

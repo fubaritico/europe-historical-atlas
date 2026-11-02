@@ -41,8 +41,9 @@ Update the session-state files CLAUDE.md imports — completed.md, next.md and t
      only their index. A new slice or rule file gets its topic in `.claude/skills/rules/topics.json`.
    Moving, never deleting: the archives are committed and read on demand.
 
-   **If `.claude/` changed this session** (`git diff --stat -- .claude` + `git status`), ask the dev to type
-   `/doctor prompt-audit` — a built-in command, I cannot run it myself. It reports stale references and
+   **Once a week** (the dev's call, 2026-11-02): if « Dernier audit des instructions » in `next.md` is more than seven
+   days old, ask the dev to type `/doctor prompt-audit` — a built-in command, I cannot run it myself — and set the date
+   when he has. It reports stale references and
    contradictions and changes nothing; I go through its findings with him, and only what he accepts is applied
    (`.claude/rules/claude-config.md`).
 6. **The Trello board — run the sync check of the `/trello` skill** (its section *Sync*): every card
