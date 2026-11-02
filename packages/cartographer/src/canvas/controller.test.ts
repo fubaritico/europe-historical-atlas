@@ -456,9 +456,9 @@ describe('startCanvasController', () => {
       const { node, store, dispose } = attach()
       const before = store.getState().viewport
 
-      // 'q', not 'a': 'a' became ⟨edit⟩ on 2026-10-09, and 'p' the Pen. The test's point stands and
-      // its example had to move — which is the useful half of it failing.
-      const typed = keyEvent('q')
+      // 'k': 'a' became ⟨edit⟩ on 2026-10-09, 'p' the Pen, and 'q' the Pen's double on 2026-11-02. The
+      // test's point stands and its example had to move — which is the useful half of it failing.
+      const typed = keyEvent('k')
       node.dispatchEvent(typed)
 
       expect(store.getState().viewport).toEqual(before)
@@ -732,6 +732,17 @@ describe('the tool keys and the cursor', () => {
 
       node.dispatchEvent(keyEvent('a'))
       expect(store.getState().tool).toBe('edit')
+      dispose()
+    })
+
+    it('puts the Pen in hand on ‹Q› and ⟨retrace⟩ on ‹W›, the doubles of ‹P› and ‹R›', () => {
+      const { node, store, dispose } = attach()
+
+      node.dispatchEvent(keyEvent('q'))
+      expect(store.getState().tool).toBe('draw')
+
+      node.dispatchEvent(keyEvent('w'))
+      expect(store.getState().tool).toBe('retrace')
       dispose()
     })
 

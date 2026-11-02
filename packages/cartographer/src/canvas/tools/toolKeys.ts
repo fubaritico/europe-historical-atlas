@@ -6,8 +6,8 @@ import { TOOL_KEYS } from '../navigation'
 import type { LiveCanvas } from '../liveCanvas'
 
 /*
- * The keys that change what the author holds rather than what the map shows: ‹P›, ‹A› and ‹R› take a
- * tool, ‹space› borrows the hand, ‹alt› turns ⟨retrace⟩ to the other side. Out of `controller.ts` on
+ * The keys that change what the author holds rather than what the map shows: ‹P› or ‹Q›, ‹A›, ‹R› or ‹W› take a
+ * tool (`TOOL_KEYS`), ‹space› borrows the hand, ‹alt› turns ⟨retrace⟩ to the other side. Out of `controller.ts` on
  * 2026-10-14, when ⟨retrace⟩ pushed it past its line budget — the controller keeps the listeners.
  */
 
@@ -55,9 +55,9 @@ export function releaseHeldKey(it: LiveCanvas, key: string): void {
 }
 
 /**
- * ‹P›, ‹A› and ‹R›: take the tool — and ‹P› with the Pen already in hand goes round its group, free → coast →
+ * ‹P› (or ‹Q›), ‹A› and ‹R› (or ‹W›): take the tool — and ‹P› with the Pen already in hand goes round its group, free → coast →
  * river → Pencil (the dev, 2026-10-11: pressing ‹P› again must change the Pen). ‹R› again does the same
- * under ⟨retrace⟩, which stays ⟨retrace⟩: its new run is placed in that mode, the Pencil included.
+ * under ⟨retrace⟩ — and their doubles alike, the key being read as its tool, which stays ⟨retrace⟩: its new run is placed in that mode, the Pencil included.
  * @param it - the attachment
  * @param event - the key event
  * @returns `true` when the key was a tool's, and was taken

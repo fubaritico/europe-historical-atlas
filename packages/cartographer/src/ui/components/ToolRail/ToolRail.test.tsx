@@ -328,11 +328,12 @@ describe('ToolRail — what the review found', () => {
   })
 
   // ARCH-016: the tooltips name the keys the canvas really binds.
+  // A tool may have two keys (‹P› and ‹Q›, ‹R› and ‹W›, 2026-11-02): the tooltip names the first, and the
+  // canvas must bind it to that tool. ‹Space› is held, not pressed: it is no tool key.
   it('names in its tooltips the keys the canvas binds', () => {
-    for (const [key, bound] of Object.entries(TOOL_KEYS)) {
-      const entry = railTools(TOOLS_EN).find((candidate) => candidate.tool === bound)
-      expect(entry?.key.toLowerCase()).toBe(key)
-    }
+    const keyed = railTools(TOOLS_EN).filter((entry) => entry.key !== 'Space')
+    expect(keyed.map((entry) => entry.key)).toEqual(['A', 'P', 'R'])
+    for (const entry of keyed) expect(TOOL_KEYS[entry.key.toLowerCase()]).toBe(entry.tool)
   })
 })
 
