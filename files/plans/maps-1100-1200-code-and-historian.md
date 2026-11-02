@@ -33,7 +33,7 @@ After `/start-session`, **before any work**, it tells the dev, in French, in a f
 1. *« Je suis l'instance du code. Pour l'historien, ouvre une deuxième fenêtre de terminal. »*
 2. *« Dans cette fenêtre : `cd ~/Desktop/WebstormProjects/europe-map` puis `claude`. »* — the dev's own terminal; the `cd`
    rule is Claude's, not his.
-3. *« Dis-lui : tu es l'instance historien, lis `files/plans/two-instances.md`. »*
+3. *« Dis-lui : tu es l'instance historien, lis `files/plans/maps-1100-1200-code-and-historian.md`. »*
 4. *« Quand elle aura répondu, dis-moi « c'est bon » : je vérifierai qu'on se voit, avec `ListAgents`. »*
 
 Then it checks with `ListAgents` that the historian is listed, sends it one message saying it is the code and which
@@ -50,8 +50,11 @@ tickets it holds, and starts its own work.
 
 The dev asks, by voice, about a country at a date (*« Mourom-Riazan en 1100, de qui dépend-il ? »*):
 
-1. **It researches**: Wikipedia (fr, en, and the country's own language), Wikidata, and beyond; the declared source of a
-   map, one hop up. Never a fact from memory left ungraded.
+1. **It researches, and climbs the chain of reference** (the dev, 2026-11-02 afternoon): *"Wikipedia is very, very good
+   if you know how to scrutinise the pages"* — bring back **the quotation** from the page **and the reference Wikipedia
+   gives for it**. Not on Wikipedia → find it on the web, where it is. A web page that gives no reference → cite the
+   page; a page written from a book → cite **the book**: *"you climb the thread of the reference."* Wikipedia in fr, en
+   and the country's own language; Wikidata; the declared source of a map. Never a fact from memory left ungraded.
 2. **It answers first**, short: the answer, and how sure — *lu sur la page*, *vérifié*, *de mémoire*.
 3. **It files it**, in the same breath, in the year's file (`files/plans/sources/1100.md`):
 
@@ -65,10 +68,29 @@ The dev asks, by voice, about a country at a date (*« Mourom-Riazan en 1100, de
    **Les sources divergent** : Wikipédia (fr) donne Mourom 989–1390 — à arbitrer par le dev.
    ```
 
+   **The year's file**, one per year (`1100.md`, `1200.md`): a short head saying what the file is, then **one section
+   per question**, newest at the bottom, titled by the entity and the question. Each holds the **answer** (one or two
+   lines), its **certainty** (*lu sur la page* / *vérifié* / *de mémoire*), and **one line per source**: the work at the
+   end of the chain (author, title, year, page when known), its **kind** (primary document, historian's atlas or book,
+   encyclopaedia, crowd database — what sets its reliability), **the quotation**, the page it was read on and its
+   address, the date read. **Sources that copy one another are grouped as one *témoin*** (`evidence-system.md`,
+   principle 3; `glossaire.md`) — which is why the chain is climbed. A divergence is written **« Les sources divergent »**, every answer kept with its sources — the dev
+   arbitrates. A question about a city adds its **coordinates** (below).
+
+   **Cities as markers of a territory — the *villes-témoins*** (the dev, same day): *"cities are markers for us on this subject"* — to settle
+   how far a polity extends at a date, the historian brings **cities with their coordinates** (lat, lon, from Wikidata
+   P625 or the cited page) and **the source that puts each city in that polity at that date**. Their section in the
+   year's file: one line per city — name, coordinates, the polity that holds it, its source. They are what the
+   Cartographer's cities layer (CARTO-193) checks a border against (`memory: cities-are-border-pivots`).
+
 4. **When a fact touches the map** (a suzerain, a border city), it sends the code instance a message — *« Mourom-Riazan est
    vassal de Tchernigov en 1100 »* — the code does not change the map itself: **the dev decides**, in the Cartographer.
-5. **Every source goes to the CMS** once CMS-338 exists — linked to its year and to its question. Until then, the files
-   are its home.
+5. **Everything collected goes into the CMS's base** (the dev: *"put it in the base, using the right skill"*) — every
+   source linked to its year and to its question, once CMS-338 exists; each city as a place with its coordinates and
+   dated holder (CMS-335). **No skill does this yet** (checked 2026-11-02: the collection `Sources` exists with `kind` and
+   `copyOf`, but no year nor question). *Proposed by Claude, not decided*: CMS-338 ships with a skill, made with
+   `/create-skill`, that reads a year's file and writes its sources through the CMS's own interface on the dev's
+   running server — never by the seed, which once ran on his base; until then the files are their home.
 
 **Who is vassal of whom** (`vassals-1100.md`, `vassals-1200.md`): one line per link, its sources beside it, however long
 the file grows (the dev: *« même s'il faut 10 000 lignes »*). The starting points: Cliopatria's 344 dependencies

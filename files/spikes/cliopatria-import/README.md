@@ -78,6 +78,13 @@ the Canaries, the Bissagos, far islets). Result: **57,229 anchors for 1100, 58,8
 kept in `years/1100.dev-2026-11-01/`); both pass `assembleAuthoredYear`. **The dev cleans the coasts only** — the borders
 are left to the cities' algorithm, if the speed test holds.
 
+**Dropped the same afternoon** (the dev, 2026-11-02, 15:25: *"you cannot correct tracings with 50,000 points — it is
+unplayable; I must draw the coasts myself"*): retouching Natural Earth's coasts in the Cartographer was ten times harder
+than drawing over Cliopatria's coarse ones. `years/1100/` and `years/1200/` were re-exported **without the land and lakes
+arguments** — `resolve.py` with the year only, then `convert.ts` — Cliopatria's own coasts: **5,489 anchors for 1100, 5,568
+for 1200**. The Natural Earth versions are kept in `years/1100.cliopatria-natural-earth-2026-11-02/` and
+`years/1200.cliopatria-natural-earth-2026-11-02/`. The coast step stays in `resolve.py`, used by nobody.
+
 **Every dependency Cliopatria states**, every year: [`dependencies.md`](dependencies.md) — 344 in all, 216 between 500 and
 1500. For 1100 only France's are there; the Holy Roman Empire's start in 1202 (Bohemia), 1260 (Bavaria, Brandenburg).
 
