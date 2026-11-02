@@ -327,3 +327,9 @@ target.z)` would be coherent with the navigation that already exists.
   cities' small letters by it, while the countries' names are written as entered, mixed case (`loading/stages/names.ts:49`,
   the panel's `capitals` off). **Trigger**: the next change to that file — reword with the true reason, a capital's name in
   capitals fought the countries' names afar (31/10). **Severity: cosmetic.**
+- **The Cliopatria 1100 takes two minutes to build where the dev's took seconds** — ATLAS-333 (measured 2026-11-02,
+  `loading/tribeYear.test.ts`, the published-1100 case timing out at 121 s). Same point count (57,229 against 58,481), but
+  **1,238 rings, 748 of them under 20 km²**, against 723 and 185: the islands the import gave to the nearest polity and the
+  coasts cut into many pieces. That test is **skipped by the dev's call** while `years/1100/` holds the import; to reopen on
+  a fixed fixture, not the published file. **Remedy to measure first**: drop the crumbs under a threshold in the import, or
+  merge them; then see what `fillTriangles` costs per ring. **Severity: gênant** — it is the speed chantier's first signal.

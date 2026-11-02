@@ -5,92 +5,38 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — 02/11, 4 h : de vraies cartes, et la vitesse
+## ▶ ON REPREND ICI — 02/11, 5 h : deux instances, les cartes de 1100 et 1200
 
-**Le tournant de la nuit.** Il a vu les concurrents (YearMaps, Borders of Time, HistorIQly, Geographic History… ; la liste et
-leurs données : mémoire `cliopatria-is-cc-by`) et a failli tout arrêter : *« notre projet ne peut être rattrapé que par la
-qualité et la précision, sinon c'est un jouet »* — et *« ce n'est pas une démo, ce sera publié, j'ai dépensé de l'argent »*.
-Ce qui l'a retenu : sur la carte Cliopatria importée, **la pose des villes et le calcul des noms marchent bien**.
+**Lire d'abord `files/plans/maps-1100-1200-code-and-historian.md`** : il dit qui tu es. **La première instance lancée est
+le code** — elle rappelle au dev de lancer la seconde, le guide, puis vérifie avec `ListAgents` ; **la seconde est
+l'historien**. Elles se parlent par `SendMessage`.
 
-**Sa décision** : on arrête l'interface de l'atlas (ATLAS-329, s11 → s15 écrits, la suite attend) ; **deux chantiers**, dans
-l'ordre du tableau, en tête d'À faire :
-1. **la vitesse** — ATLAS-333 : *« passer d'une année à l'autre en deux secondes »*, mesuré sur deux années aussi fines que la
-   1100 (Cliopatria aux côtes calées), pas sur des côtes grossières qui tromperaient la mesure ;
-2. **de vraies cartes, dans le Cartographe** — CARTO-334 (l'import Cliopatria, côtes calées sur le masque), CMS-335 (« tenue
-   par », proposé par Wikidata), CARTO-193 (le panneau Villes, les villes-témoins en rouge si du mauvais côté), CARTO-336 (les
-   panneaux repliables), CORE-337 (l'algorithme de vote : les cartes et les villes votent, net au-dessus de 75 %, hachuré
-   dessous ; d'abord la Catalogne de 1100).
+**La situation** : il nettoie les **côtes seulement** des cartes Cliopatria de 1100 et 1200 dans le Cartographe (des heures),
+jamais les frontières — l'algorithme des villes les retouchera si le test de vitesse tient. Sa phrase de la nuit, après
+avoir vu les concurrents (mémoire `cliopatria-is-cc-by`) : *« notre projet ne peut être rattrapé que par la qualité et la
+précision — ce n'est pas une démo, ce sera publié »*.
 
-**Pourquoi trancher par vote** : il ne sait pas trancher quand deux ou trois sources diffèrent (*« la Catalogne, c'est tout
-le temps différent »*) ; la méthode tranche une fois, la machine l'applique à chaque année, il n'arbitre qu'une liste courte.
+**Pour le code**, en tête d’À faire : **Save as…** — CARTO-340 (demain, demandé), **ATLAS-333** la vitesse (*« passer d'une année à
+l'autre en deux secondes »* ; premier signal : la 1100 Cliopatria se construit en 2 minutes, 748 miettes de moins de 20 km²
+contre 185), puis CARTO-334, CARTO-193, CARTO-336, CORE-337. **« Open… »** est construit et commité (`718971c`, CARTO-339), **à tester par
+lui** (À valider).
 
-**L'étude Cliopatria** : `files/spikes/cliopatria-import/` (`resolve.py` puis `convert.ts`, la fiche et ses mesures,
-`dependencies.md` : 344 dépendances). Sa règle (*« le plus récent l'emporte »*, trouvée en comparant avec YearMaps) a supprimé
-tout chevauchement. Cliopatria est dans `opensrc/` ; `shapely` dans un venv du dossier de travail (à recréer).
+**Pour l'historien** : ses questions sur un pays à une date, chaque source par question et par année
+(`files/plans/sources/1100.md`, `1200.md`), qui est vassal de qui en 1100 et 1200 ; puis CMS-338 (une source liée à une année
+et à la question qu'elle prouve) et CMS-335 (« tenue par »). Mémoire `answer-his-country-questions-with-sources`.
 
-**Fait cette nuit, non commité, à tester par lui** : **« Open… »** dans le Cartographe — la liste des années enregistrées
-(1100, 1200), le Cartographe se recharge sur l'année choisie (`?year=`), la page gardée d'abord ; revue faite, une haute
-corrigée (un geste pendant la sauvegarde), gate du Cartographe verte (2 301 tests). Les deux cartes Cliopatria sont dans
-`years/1100/` et `years/1200/`, côtes de Natural Earth (57 229 et 58 856 points) ; sa 1100 d'avant dans
-`years/1100.dev-2026-11-01/`. **Ce qui compte pour lui : Open, Save, Save as** — *« les snapshots, j'en ai plus rien à
-faire »* ; **Save as… demain**. Il nettoie les côtes seulement, jamais les frontières (l'algorithme des villes s'en
-chargera si le test de vitesse tient).
+**Sur le disque, non commité, à ne pas commiter** : `years/1100/` (Cliopatria), `years/1200/`, `years/index.json` (1100, 1200) ;
+sa 1100 d'avant dans `years/1100.dev-2026-11-01/` et sur son bureau (`europe-historical-atlas-1100-backup-2026-11-02/`). Le test
+de l'atlas qui lisait la 1100 publiée est mis de côté (`tribeYear.test.ts`, son choix). L'étude : `files/spikes/cliopatria-import/`
+(`resolve.py` demande `shapely`, un venv à recréer dans le dossier de travail).
 
-**Un signal de vitesse, mauvais** : le test de l'atlas qui lit la 1100 publiée passe de quelques secondes à **2 minutes**
-avec la 1100 Cliopatria (côtes Natural Earth, centaines d'îles) — à mesurer en premier dans ATLAS-333. Tant que cette 1100 est
-sur le disque, le crochet de commit (tests) bloque tout commit : bon garde-fou, mais il faudra adapter ce test (il attend des
-tribus que Cliopatria n'a pas).
+**Les domaines** : commandés et branchés le 02/11 (`.org` principal, `.com` `.eu` `.net` `.fr`), DNS chez OVH, page d'attente
+sur le site Netlify `europe-historical-atlas-soon` (la page : `~/Desktop/europe-historical-atlas-soon/`). **Le certificat
+ne couvre que `.org` et `www.org`, par ma faute** (j'ai fait retirer un domaine qui marchait) : le message au support de Netlify
+lui a été donné ; ne plus cliquer « Renew » (5 par semaine). Boîtes Zimbra `contact@` et `demandes@` à créer.
 
-⚠️ **`years/1100/` sur le disque contient l'import Cliopatria** (il l'a enregistré pour le voir) : **ne rien commiter de
-`years/`** ; le remettre par `git restore packages/atlas/public/years/1100/` quand il le dit — sa copie est aussi sur son
-bureau (`~/Desktop/europe-historical-atlas-1100-backup-2026-11-02/`). Il redoute que sa 1100 reprenne trop d'Euratlas
-(CARTO-237).
-
-## En vol, 01/11 au soir — rien de commité encore
-
-- **L'audit des instructions** (`files/prompt-audit-2026-11-01.md`) : **fini**, retour par retour avec lui. Gardés par lui :
-  l'agent d'accessibilité tel quel (pas de contradiction, selon lui), les exemples Python/Rust d'`/opensrc`, et
-  **`/zustand-react-pattern` intact** (l'atlas aura peut-être Zustand). Créés en chemin : `/repo-version-manager`
-  (contrôle mensuel des versions), REPO-330, ATLAS-331, CMS-332.
-- **Les domaines** : commandés chez OVHcloud le 01/11 (n° 262643965, `.org` `.com` `.eu` `.net` `.fr`, 40,52 € TTC), « en
-  cours de validation ». **Fait le soir même** : la page « en construction » (le logo de l'écran de chargement, « Atlas en
-  construction », `contact@europe-historical-atlas.org` ; `~/Desktop/europe-historical-atlas-soon/`, hors du dépôt), déposée
-  sur un second site Netlify **`europe-historical-atlas-soon`**, le `.org` en domaine principal, les quatre autres en alias ;
-  l'atlas reste sur `europe-historical-atlas.netlify.app`. **Après la validation d'OVH** : dans la zone DNS de chaque domaine,
-  un A `@` → `75.2.60.5` et un CNAME `www` → `europe-historical-atlas-soon.netlify.app` (DNS gardé chez OVH pour le
-  courrier) ; les boîtes Zimbra `contact@` et `demandes@`. **Le DNS est fait (02/11, nuit)** sur les cinq zones. **Le certificat
-  est cassé, par ma faute** : il ne couvre que `europe-historical-atlas.org` et son `www` ; les huit autres adresses
-  (`.com` `.eu` `.net` `.fr`, avec et sans `www`) donnent une erreur HTTPS depuis que je lui ai fait retirer et rajouter un
-  domaine qui marchait. « Renew certificate » ne les ajoute pas ; le message au forum de Netlify lui a été donné
-  (réinitialiser l'état SSL du projet). Seule l'adresse `.org` est à donner en attendant. Le jour de l'ouverture : les domaines passent du site d'attente à celui de l'atlas, rien à changer chez OVH.
-- **ATLAS-329, l'interface en scénarios** : il sépare **l'interface à plat** (boutons et fenêtres par-dessus la carte, le
-  design system, pas de 3D) de **ce qui se passe dans la carte** (clic sur un pays, un événement, le focus) ; on écrit la
-  première d'abord. Écrits le 02/11 : `s11` le bouton de langue (un bouton qui se déplie, chaque langue écrite dans sa
-  langue), `s12` le bouton d'aide (chaque geste avec sa touche ; un diaporama ouvert seul à la première visite), `s13` le
-  cadran de navigation (neuf touches au-dessus de la barre en bas à droite, deux coins contextuels), `s14` la capture
-  (encadrée comme la feuille, un cartouche en bas à gauche avec l'année et les crédits), `s15` le siècle (« ‹ XIᵉ siècle › »
-  en haut, une liste de vingt, **pas de frise** : *« calmos »*) ; trous A-15 → A-21 (A-15, A-16, A-18 tranchés). **Il a des défauts de navigation à me remonter.** Suite : les autres boutons de l'interface à plat.
-- **Le gestionnaire de sources** : CMS-332 (Backlog), `files/plans/contribution/source-manager.md`. Il **fait confiance à
-  Commons** ; chaque mail part sur son clic.
-- **La Rus' de 1100** : la ligne d'ATLAS-152 dit « RÉFÉRENCE · géométrie redessinée », or ses tracés ont été reportés à la
-  main (un calque, gardé sous la confiance à Commons) — **à corriger**. Mourom-Riazan en 1100 : vassal de Tchernigov ? à lui.
-
-## ▶ ON REPREND ICI — l'interface au-dessus de la carte, en scénarios pour Claude Design (ATLAS-329, en tête d'À faire)
-
-**01/11, fin à 3 h 06.** Les scénarios de la carte sont écrits (ATLAS-324, Fait) : `files/plans/atlas/scenarii/`, dix scénarios et
-quatorze trous, commit `5202b43` **non poussé** — à pousser quand il le dira. Il a fixé la suite :
-
-1. **La liste des fonctions de l'interface** — celles déjà promises sont dans `files/plans/atlas/interface-scenarios.md` (siècle,
-   clic sur un pays, panneau d'un événement, bouton du focus, focus pays, boutons, langue, provenance, le pourquoi d'une
-   incertitude) ; **la lui présenter, il choisit**, une question à la fois.
-2. **Un scénario par fonction**, à la suite de s10 (`s11`…), du côté du lecteur, sans inventer de commande ; les trous dans `s99` (A-NN).
-3. **L'ambiance** : ses captures de l'atlas, de vieilles cartes, d'autres captures — **jamais commitées sous droits**, dans
-   `files/resources/` (ignoré) ; une carte du domaine public peut entrer, avec sa source.
-4. **Ensuite, retour au code** (*« il y a encore plein de choses qui nous attendent »*) — en tête : ATLAS-326 (le défilement par les
-   bords), puis la couronne ; ATLAS-327 et 328 en bas d'À faire.
-
-**Ses citations, dans un fichier neuf, en anglais** (01/11, mémoire notée) ; les textes à l'écran et les tickets restent en français.
-**À lui proposer d'abord** : taper `/doctor prompt-audit` (la skill `/scenarii-to-code` a changé le 01/11).
+**Le gestionnaire de sources** : CMS-332, `files/plans/contribution/source-manager.md` — tout se construit tel qu'écrit, par
+moi, boîte mail comprise, chaque mail sur son clic, et piloté à la voix par le plugin MCP de Payload.
 
 **Les villes, où on en est** (ATLAS-295, en cours) : **113 villes de 1100** dans sa base et dans le fichier de l'atlas ; dessinées
 par paliers de détail (`files/plans/atlas/detail-levels.md`, dix décisions), noms selon la distance à la caméra, un point de capitale
@@ -174,9 +120,6 @@ la **racine de ce dépôt** (`HANDOFF-from-fubaritico-ds.md`) : le lire avant de
 de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier. Parler avec **ses** mots, un point à la fois.
 
 **Le tableau** : `/trello` → `list`. Un élément du tableau est un **ticket**, jamais une « carte ». C'est lui qui dit l'état de chaque ticket : il n'est plus recopié ici (01/11).
-
-**Toujours en attente, à lui proposer un jour** : le relief niveau 6 du Cartographe (une ligne, `main.tsx` →
-`/heightmaps/europe-dem-z6-1920`, `rules/known-issues/cartographer.md`).
 
 ## Where we are
 

@@ -169,3 +169,7 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   instantanés. **Et un piège de test** : `getByText` de Testing Library replie l'espace fine insécable (`\u202f`, avant
   « ? » et « ; » en français) en espace dans le texte de la page, **pas** dans la chaîne attendue — comparer le
   `textContent` exact. **Sévérité : à savoir.**
+- **An address with `?year=` that is not a year leaves the Cartographer blank** (2026-11-02, `persistence/openingYear.ts`): it
+  throws before anything mounts, said on the console — **my choice**, put to the dev twice and left unanswered: opening 1100
+  in its place would have him drawing on 1100 while believing it 1200. Only *Open…* writes the address. Remedy if he wants the
+  softer way: the alarm dialogue over an empty page. **Severity: cosmétique.**

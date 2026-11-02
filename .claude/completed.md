@@ -2,6 +2,25 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
+### 2026-11-01 soir → 02/11 matin — l'audit, les concurrents, Cliopatria, « Open… », deux instances pour demain
+
+Plage **01/11 19:14 → 02/11 04:50** (9 h 36) ; le chantier ouvert le 05/10 totalise **178 h 12 sur 31 plages**. **Neuf commits
+poussés**, de `6580917` à `40baea1` ; `years/` (Cliopatria 1100 et 1200) volontairement hors commit.
+
+- **L'audit des instructions** (`/doctor prompt-audit`) appliqué retour par retour ; `/repo-version-manager` créé ; `/opensrc` écrit pour
+  la vraie commande de la 0.6 (sans `path`).
+- **Les concurrents** (YearMaps, Borders of Time, HistorIQly…) : il a failli arrêter — *« ce n'est pas une démo, ce sera publié, j'ai
+  dépensé de l'argent »*. Ce qui l'a retenu : sur Cliopatria importé, **la pose des villes et des noms marche**. Sa décision : la
+  vitesse et de vraies cartes d'abord (ATLAS-333, CARTO-334, CMS-335, CARTO-193, CARTO-336, CORE-337), l'interface en pause (s11 → s15).
+- **Cliopatria** (CC BY 4.0) importé : sa règle *« le plus récent l'emporte »*, trouvée sur YearMaps, a supprimé tout chevauchement ;
+  côtes de Natural Earth ; 1100 et 1200 sur le disque pour son nettoyage, sa 1100 d'avant archivée.
+- **« Open… »** construit, revu (une haute corrigée), commité ; **les domaines** achetés et branchés, la page d'attente en ligne ; le
+  gestionnaire de sources écrit (CMS-332), *« tout tel qu'écrit, c'est toi qui le construis »* ; deux instances pour demain
+  (`files/plans/maps-1100-1200-code-and-historian.md`).
+- **Mes fautes** : **le certificat cassé** en lui faisant retirer un domaine qui marchait, pour un détail ; Mourom-Riazan déclaré
+  anachronique sur une seule source ; le budget zéro opposé à un achat qu'il voulait ; Chronas et les concurrents montrés six
+  semaines trop tard ; passé à l'anglais sans m'en rendre compte ; deux `cd` ; des messages de commit trop longs envoyés malgré le contrôle.
+
 ### 2026-11-01 nuit — les scénarios de l'atlas, écrits depuis le code
 
 Plage **01/11 01:51 → 03:06**, le prolongement de celle ouverte le 31/10 à 17:39 (9 h 19 en tout) ; le chantier ouvert le 05/10
@@ -18,25 +37,4 @@ totalise **168 h 23 sur 30 plages**. **Un commit, non poussé** : `5202b43`.
 - **Ma faute** : les noms des pays écrits « en capitales » d'après un commentaire de `cityLabel.ts`, sans lire la valeur
   (`capitals` est éteint) — recopié dans trois fichiers avant de le voir ; corrigé, et le commentaire noté (A-13).
 
-### 2026-10-31 soir → 01/11 nuit — 113 villes, les paliers de détail, les villes sur la carte, l'inventaire des scénarios
-
-Plage **31/10 17:39 → 01/11 01:43** (8 h 03) ; le chantier ouvert le 05/10 totalise **167 h 08 sur 30 plages**. **14 commits, tous
-poussés**, de `8808863` à `6c23c15`, CI verte jusqu'au déploiement.
-
-- **Les villes dans le CMS** (ATLAS-295) : 59 par le seed (Bosker capitale → capitale, archevêché → grande ville, trois sources →
-  ville), puis l'Est et le Nord (capitales datées par Wikidata), Riazan déplacée à la Vieille Riazan, Mourom ajoutée, les sièges
-  de la Rus' lus sur une carte qu'il a donnée (mention RÉFÉRENCE sur ATLAS-152) — **113 villes**. Le titre « Paris — 1100 » d'une fiche.
-- **Les villes sur la carte** : marques choisies sur le banc (« C4 avec le blanc à 60 % ») ; **les paliers de détail** — le zoom en
-  défilement à crans, quatre paliers, fondu de 0,6 s, deux seuils (`files/plans/atlas/detail-levels.md`) ; noms selon la distance à
-  la caméra ; ATLAS-322 (ordre des couches par palier), **ATLAS-323** (un point de capitale sur un nom de pays cède — testé par lui),
-  **ATLAS-325** (noms plus grands, plus gras, nets — testé), passés en Fait. Ses retouches de 1100 commitées.
-- **Décidé par lui** : *« le religieux et la politique, c'est la même chose »* (l'archevêché est une importance politique) ; *« des
-  scroll top »* ; *« c'est le nom du pays qui est le plus important »* — après mon essai de faire contourner les capitales par les
-  noms, retiré avant commit : *« c'est mieux comme ça »*.
-- **Les scénarios de l'atlas** : l'inventaire fait (`files/plans/atlas/scenarios-inventory.md`), le découpage accepté, ATLAS-324 en
-  tête d'À faire — la session suivante reprend là.
-- **Mes fautes** : l'heure de reprise lue par `tail` sans la comparer à la date (19 h annoncées « 6 minutes ») — règle ajoutée à
-  `start-session` ; les villes dessinées sans test de profondeur, l'épingle passée derrière ; un changement des noms annoncé sans
-  vérifier qu'il s'était appliqué (*« c'est pas assez grand »* — rien n'avait changé) ; trois `cd`.
-
-> Older sessions (2026-09-12 → 2026-10-30) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-10-31) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
