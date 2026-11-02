@@ -1,6 +1,7 @@
 {
   "notBuilt": "not built yet ({scenarios})",
   "openSnapshotHint": "Open a snapshot of the year, kept every hour of drawing",
+  "openYearHint": "Open another year saved",
   "saveHint": "Save the year (⌘S / ctrl+S)",
   "registry": "Registry",
   "closeYear": "{close} {year}",

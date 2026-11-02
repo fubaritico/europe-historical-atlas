@@ -7,7 +7,7 @@ import { SNAPSHOT_DIALOG_MESSAGES } from './i18n'
 import { SnapshotChooser } from './internal/SnapshotChooser'
 
 import type { SnapshotChooserProps } from './internal/SnapshotChooser'
-import type { SnapshotPicker } from '../../utils/snapshotPicker'
+import type { DialogueOpener } from '../../utils/dialogueOpener'
 
 /**
  * *Open snapshot* (CARTO-238, rung 2b): the year's kept snapshots, newest first, one to choose, and a warning
@@ -21,7 +21,7 @@ import type { SnapshotPicker } from '../../utils/snapshotPicker'
 /** What the dialogue needs: what its content needs, and the picker that opens and closes it. */
 export interface SnapshotDialogProps extends Omit<SnapshotChooserProps, 'close'> {
   /** Whether it is open — the top bar's button opens it. */
-  picker: SnapshotPicker
+  picker: DialogueOpener
 }
 
 /**

@@ -29,7 +29,14 @@ const meta = () => document.querySelector('.doc-tab__meta')?.textContent
 describe('top bars, bound', () => {
   describe('happy path', () => {
     it('reads the open year from the store', () => {
-      renderInEnglish(<AppBarPanel store={store()} onSave={vi.fn()} onOpenSnapshot={vi.fn()} />)
+      renderInEnglish(
+        <AppBarPanel
+          store={store()}
+          onSave={vi.fn()}
+          onOpenSnapshot={vi.fn()}
+          onOpenYear={vi.fn()}
+        />
+      )
       expect(document.querySelector('.app-brand__year')?.textContent).toBe('1100')
     })
 

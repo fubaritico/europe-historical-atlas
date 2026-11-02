@@ -57,6 +57,7 @@ function mount(results = createResultRelay()): void {
       heading={<h1>Cartographer — year 1100</h1>}
       onSave={() => undefined}
       onOpenSnapshot={() => undefined}
+      onOpenYear={() => undefined}
       history={createHistoryRelay()}
       colours={COLOURS}
       results={results}

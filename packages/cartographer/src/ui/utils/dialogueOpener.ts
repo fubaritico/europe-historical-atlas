@@ -1,12 +1,12 @@
 /**
- * Whether the *Open snapshot* dialogue is open (CARTO-238, rung 2b) — set by the top bar's button, read by the
- * dialogue mounted beside the editor. A tiny external store rather than component state: the button and the
- * dialogue sit in two different branches of the tree, and the composition root wires them, as it wires the
- * draft's dialogue.
+ * Whether a dialogue is open — one opener per dialogue: *Open snapshot* (CARTO-238, rung 2b), *Open…* (2026-11-02).
+ * Set by the top bar's button, read by the dialogue mounted beside the editor. A tiny external store rather than
+ * component state: the button and the dialogue sit in two different branches of the tree, and the composition root
+ * wires them, as it wires the draft's dialogue.
  */
 
-/** The picker. */
-export interface SnapshotPicker {
+/** A dialogue's opener: open, closed, and who listens. */
+export interface DialogueOpener {
   /** Whether the dialogue is open. */
   isOpen: () => boolean
   /** Open it. */
@@ -22,10 +22,10 @@ export interface SnapshotPicker {
 }
 
 /**
- * Build a picker, closed.
- * @returns the picker
+ * Build an opener, closed.
+ * @returns the opener
  */
-export function createSnapshotPicker(): SnapshotPicker {
+export function createDialogueOpener(): DialogueOpener {
   let open = false
   const listeners = new Set<() => void>()
   const set = (next: boolean): void => {

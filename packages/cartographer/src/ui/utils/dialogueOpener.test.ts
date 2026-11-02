@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { createSnapshotPicker } from './snapshotPicker'
+import { createDialogueOpener } from './dialogueOpener'
 
-describe('createSnapshotPicker', () => {
+describe('createDialogueOpener', () => {
   describe('happy path', () => {
     it('starts closed, opens, and closes', () => {
-      const picker = createSnapshotPicker()
+      const picker = createDialogueOpener()
       expect(picker.isOpen()).toBe(false)
 
       picker.open()
@@ -16,7 +16,7 @@ describe('createSnapshotPicker', () => {
     })
 
     it('tells a listener of each opening and closing', () => {
-      const picker = createSnapshotPicker()
+      const picker = createDialogueOpener()
       const listener = vi.fn()
       picker.subscribe(listener)
 
@@ -29,7 +29,7 @@ describe('createSnapshotPicker', () => {
 
   describe('variants', () => {
     it('tells every listener', () => {
-      const picker = createSnapshotPicker()
+      const picker = createDialogueOpener()
       const first = vi.fn()
       const second = vi.fn()
       picker.subscribe(first)
@@ -42,7 +42,7 @@ describe('createSnapshotPicker', () => {
     })
 
     it('stops telling a listener once it unsubscribes', () => {
-      const picker = createSnapshotPicker()
+      const picker = createDialogueOpener()
       const listener = vi.fn()
       const unsubscribe = picker.subscribe(listener)
 
@@ -53,8 +53,8 @@ describe('createSnapshotPicker', () => {
     })
 
     it('keeps two pickers apart', () => {
-      const one = createSnapshotPicker()
-      const other = createSnapshotPicker()
+      const one = createDialogueOpener()
+      const other = createDialogueOpener()
 
       one.open()
 
@@ -67,7 +67,7 @@ describe('createSnapshotPicker', () => {
 
   describe('edge cases', () => {
     it('tells no one when opened while open, or closed while closed', () => {
-      const picker = createSnapshotPicker()
+      const picker = createDialogueOpener()
       const listener = vi.fn()
       picker.subscribe(listener)
 
@@ -80,7 +80,7 @@ describe('createSnapshotPicker', () => {
     })
 
     it('leaves the others listening when one unsubscribes twice', () => {
-      const picker = createSnapshotPicker()
+      const picker = createDialogueOpener()
       const kept = vi.fn()
       const unsubscribe = picker.subscribe(vi.fn())
       picker.subscribe(kept)

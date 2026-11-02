@@ -167,7 +167,7 @@ describe('openSnapshot', () => {
       expect(tones).toEqual(['alarm/snapshot'])
       expect(console.error).toHaveBeenCalledTimes(1)
       expect(console.error).toHaveBeenCalledWith(
-        '[Cartographer] the page of 1100 could not be kept before opening a snapshot',
+        '[Cartographer] the page of 1100 could not be kept before it is replaced',
         new Error('only the Cartographer served by this machine may keep drafts')
       )
     })
@@ -221,7 +221,7 @@ describe('openSnapshot', () => {
         'not opened — your page could not be kept first (details in the console)',
       ])
       expect(console.error).toHaveBeenCalledWith(
-        '[Cartographer] the page of 1100 could not be kept before opening a snapshot',
+        '[Cartographer] the page of 1100 could not be kept before it is replaced',
         'the server is down'
       )
     })

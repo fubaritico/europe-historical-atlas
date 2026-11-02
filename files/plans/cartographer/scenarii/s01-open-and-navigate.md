@@ -2,7 +2,41 @@
 
 > [Index](s00-index.md) · shared Background applies.
 
-## Opening
+## Opening a year saved — built 2026-11-02
+
+> The dev, 2026-11-02: *"normally I should be able to do Open — why do I have to open snapshots? We do Open, 1100, 1200."*
+> A year is a folder of `years/`, listed in `years/index.json`; *Open…* lists those, never a file to pick. The page
+> reloads on the year chosen, the address carrying it (`persistence/openingYear.ts`, `persistence/yearChange.ts`,
+> `ui/components/YearDialog/`). **Not walked yet.**
+
+```gherkin
+Scenario: open another year saved
+  Given 1100 open, and the years saved are 1100 and 1200
+  When I press [Open…]
+  Then a dialogue « Open a year » warns that the Cartographer reloads on the year, the page kept first as a snapshot
+  And it writes « 1100 — open » and offers « Open 1200 »
+  When I press « Open 1200 »
+  Then my page of 1100 is kept as a snapshot of 1100
+  And the Cartographer reloads on 1200, the address reading ?year=1200, and the top bar reads 1200
+
+Scenario: the page cannot be kept
+  Given the snapshots cannot be written
+  When I open 1200 from the dialogue
+  Then nothing changes: 1100 stays open
+  And the alarm says the page could not be kept
+
+Scenario: an address with a year that is not one
+  Given the address reads ?year=abc
+  When the Cartographer starts
+  Then it opens nothing, and the console says the address asks for « abc », which is not a year
+  But with no year in the address it opens 1100, as before
+```
+
+> **A year that is not one is refused, not read as 1100** — my choice, put to the dev twice on 2026-11-02 and left
+> unanswered: opening 1100 in its place would have him drawing on 1100 while believing it 1200. To revisit if he wants
+> the softer way.
+
+## Opening a payload — the first design (2026-09), not how a year opens today
 
 ```gherkin
 Scenario: open a year that OHM supplies

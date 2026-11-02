@@ -1,0 +1,10 @@
+{
+  "title": "Open a year",
+  "warning": "Opening another year reloads the Cartographer on it. Your page is kept first as a snapshot of its year: you will find it under “Open snapshot…”.",
+  "reading": "Reading the years…",
+  "failed": "The years could not be listed (details in the console).",
+  "empty": "No year saved yet.",
+  "legend": "The years saved",
+  "openYear": "Open {year}",
+  "isOpen": "{year} — open"
+}

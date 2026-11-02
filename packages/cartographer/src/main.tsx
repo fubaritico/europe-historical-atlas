@@ -32,6 +32,7 @@ import { offerDraft } from './persistence/draft/draftRecovery'
 import { openWithDraft, saveAndClearDraft } from './persistence/draft/draftSession'
 import { createDevServerDraftStore } from './persistence/draft/draftStore'
 import { routeNotices } from './persistence/noticeRouter'
+import { openingYearOf } from './persistence/openingYear'
 import { persistenceWords } from './persistence/persistenceWords'
 import { createQuestionRelay } from './persistence/questionRelay'
 import { createResultRelay } from './persistence/resultRelay'
@@ -39,6 +40,7 @@ import { installSaveShortcut } from './persistence/saveShortcut'
 import { wantsSlowWrites, writesFetch } from './persistence/slowWrites'
 import { openSnapshot } from './persistence/snapshotOpening'
 import { createDevServerYearArchive } from './persistence/yearArchive'
+import { changeYear } from './persistence/yearChange'
 import { createYearSession } from './persistence/yearSession'
 import { openEmptyYear } from './state/openEmptyYear'
 import { createPolityColourSource } from './state/polityColourSource'
@@ -52,8 +54,9 @@ import { NoticeToaster, noticeToasts } from './ui/components/NoticeToaster'
 import { OverwriteDialog } from './ui/components/OverwriteDialog'
 import { PageHeading } from './ui/components/PageHeading'
 import { SnapshotDialog } from './ui/components/SnapshotDialog'
+import { YearDialog } from './ui/components/YearDialog'
 import { arrangeSelected, arrangeWords } from './ui/utils/arrange'
-import { createSnapshotPicker } from './ui/utils/snapshotPicker'
+import { createDialogueOpener } from './ui/utils/dialogueOpener'
 import { listenForStackingKeys } from './ui/utils/stackingShortcut'
 import { UNFRAMED } from './viewport/viewport'
 import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataSource'
@@ -62,6 +65,7 @@ import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataS
 import './ui/styles/sheets'
 
 import type { SnapshotEntry } from './persistence/draft/draftStore'
+import type { SnapshotOpeningDeps } from './persistence/snapshotOpening'
 import type { OverwriteQuestion } from './persistence/yearSession'
 import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 import type { ReactToastContent } from '@fubaritico/react/Toast'
@@ -110,12 +114,19 @@ if (!container) {
   throw new Error('Cartographer: #root is missing from index.html — nothing to mount into.')
 }
 
-/** The year the editor opens on. 1100 is the first century to be contributed (P3, measured against OHM). */
+/** The year the editor opens on when the address names none. 1100 is the first century to be contributed (P3). */
 const FIRST_YEAR = 1100
+
+/**
+ * The year this page edits: `?year=1200` in the address, written by *Open…* (`persistence/yearChange.ts`), or the first
+ * year. A `year` that is not one throws here, before anything mounts — said on the console rather than opening 1100 in
+ * its place (`persistence/openingYear.ts`).
+ */
+const YEAR = openingYearOf(window.location.search, FIRST_YEAR)
 
 const store = createCartographerStore({
   edition: {
-    document: openEmptyYear(FIRST_YEAR),
+    document: openEmptyYear(YEAR),
     clone: cloneYearDocument,
   },
   // Opened unframed on purpose: nothing can know what fits until the canvas has a box, and the canvas
@@ -229,6 +240,13 @@ const diskWords = () => persistenceWords(localeStore.get())
 
 /** ‹ctrl+S› over a year changed on disk asks first (CARTO-238, rung 3) — answered in `OverwriteDialog`. */
 const overwriteQuestions = createQuestionRelay<OverwriteQuestion>('a save is already asking')
+/** The years on disk: read and written by the session, listed by *Open…*. */
+const yearArchive = createDevServerYearArchive({
+  fetch: writeFetch,
+  yearsBase: '/years',
+  writeRoute: YEAR_WRITE_ROUTE,
+})
+
 /**
  * The year on disk: opened when the editor starts, saved on ‹ctrl+S› — local mode, through the dev server
  * (`files/plans/cartographer/save-open-plan.md`).
@@ -242,12 +260,8 @@ const overwriteQuestions = createQuestionRelay<OverwriteQuestion>('a save is alr
  */
 const yearSession = createYearSession({
   store,
-  archive: createDevServerYearArchive({
-    fetch: writeFetch,
-    yearsBase: '/years',
-    writeRoute: YEAR_WRITE_ROUTE,
-  }),
-  year: FIRST_YEAR,
+  archive: yearArchive,
+  year: YEAR,
   report: notices,
   words: diskWords,
   confirmOverwrite: overwriteQuestions.ask,
@@ -275,7 +289,7 @@ const draftOffers = createDraftOffers()
 const draftKeeper = createDraftKeeper({
   store,
   drafts,
-  year: FIRST_YEAR,
+  year: YEAR,
   delayMs: DRAFT_DELAY_MS,
   snapshotEveryMs: SNAPSHOT_EVERY_MS,
   snapshots: drafts,
@@ -294,7 +308,7 @@ void openWithDraft({
   offerDraft: () =>
     offerDraft({
       drafts,
-      year: FIRST_YEAR,
+      year: YEAR,
       store,
       ask: draftOffers.ask,
       now: () => new Date(),
@@ -323,19 +337,41 @@ installSaveShortcut(window, handleSave)
  * *Open snapshot* (CARTO-238, rung 2b): the top bar's button opens the dialogue; opening keeps the page as a
  * snapshot first, then replaces it (`persistence/snapshotOpening.ts`).
  */
-const snapshotPicker = createSnapshotPicker()
-const handleOpenSnapshot = (entry: SnapshotEntry): void => {
-  void openSnapshot(
+const snapshotPicker = createDialogueOpener()
+
+/** *Open…*'s opener — one per dialogue, as *Open snapshot*'s. */
+const yearPicker = createDialogueOpener()
+
+/**
+ * What keeping the page before replacing it needs — one object for *Open snapshot* and *Open…*, which both replace it.
+ */
+const pageKeeping: SnapshotOpeningDeps = {
+  store,
+  snapshots: drafts,
+  year: YEAR,
+  now: () => new Date(),
+  report: notices,
+  words: diskWords,
+}
+
+/**
+ * Open another year: keep the page as a snapshot, then reload on the year chosen — or say why it stays.
+ * @param year - the year chosen in the dialogue
+ */
+const handleOpenYear = (year: number): void => {
+  void changeYear(
     {
-      store,
-      snapshots: drafts,
-      year: FIRST_YEAR,
-      now: () => new Date(),
-      report: notices,
-      words: diskWords,
+      ...pageKeeping,
+      search: window.location.search,
+      go: (address) => {
+        window.location.assign(address)
+      },
     },
-    entry
+    year
   )
+}
+const handleOpenSnapshot = (entry: SnapshotEntry): void => {
+  void openSnapshot(pageKeeping, entry)
 }
 // ‹cmd+↑ ↓›, with ‹shift› to the end: the selected polity up or down the stacking order, from anywhere.
 listenForStackingKeys(document, (move) => {
@@ -363,6 +399,7 @@ createRoot(container).render(
           <Editor
             onSave={handleSave}
             onOpenSnapshot={snapshotPicker.open}
+            onOpenYear={yearPicker.open}
             history={history}
             heading={<PageHeading store={store} />}
             store={store}
@@ -379,9 +416,15 @@ createRoot(container).render(
           <SnapshotDialog
             picker={snapshotPicker}
             source={drafts}
-            year={FIRST_YEAR}
+            year={YEAR}
             now={() => new Date()}
             onOpen={handleOpenSnapshot}
+          />
+          <YearDialog
+            picker={yearPicker}
+            source={yearArchive}
+            year={YEAR}
+            onOpen={handleOpenYear}
           />
         </ErrorBoundary>
       </ZoneBreaksContext>

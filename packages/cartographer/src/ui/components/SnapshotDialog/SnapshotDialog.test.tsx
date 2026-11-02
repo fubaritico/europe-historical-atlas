@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { renderInEnglish } from '../../testing/renderInEnglish'
-import { createSnapshotPicker } from '../../utils/snapshotPicker'
+import { createDialogueOpener } from '../../utils/dialogueOpener'
 
 import { SnapshotDialog } from './SnapshotDialog'
 
@@ -36,7 +36,7 @@ function open() {
 function mounted(
   listSnapshots: (year: number) => Promise<SnapshotEntry[]> = () => Promise.resolve(ENTRIES)
 ) {
-  const picker = createSnapshotPicker()
+  const picker = createDialogueOpener()
   const source = { listSnapshots: vi.fn(listSnapshots) }
   const onOpen = vi.fn()
   renderInEnglish(
@@ -46,7 +46,7 @@ function mounted(
 }
 
 /** Open the picker, as the top bar's button does. */
-function press(picker: ReturnType<typeof createSnapshotPicker>): void {
+function press(picker: ReturnType<typeof createDialogueOpener>): void {
   act(() => {
     picker.open()
   })

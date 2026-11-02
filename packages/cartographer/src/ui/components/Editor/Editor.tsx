@@ -50,6 +50,8 @@ export interface EditorProps {
   onSave: () => void
   /** Open the *Open snapshot* dialogue — the top bar's `[Open snapshot…]` (CARTO-238, rung 2b). */
   onOpenSnapshot: () => void
+  /** Open the *Open…* dialogue — the top bar's `[Open…]`, the years saved (2026-11-02). */
+  onOpenYear: () => void
   /** The canvas's undo and redo, for the document bar's buttons. */
   history: HistoryRelay
   /** Where the polities' colours come from — one source for the canvas and every panel. */
@@ -76,6 +78,7 @@ export interface EditorProps {
  * @param props.heading - the page's `<h1>`, placed by the shell inside the canvas landmark
  * @param props.onSave - saves the open year, called by the top bar's `[Save]`
  * @param props.onOpenSnapshot - opens the *Open snapshot* dialogue, called by the top bar
+ * @param props.onOpenYear - opens the *Open…* dialogue, called by the top bar
  * @param props.history - the canvas's undo and redo, for the document bar's buttons
  * @param props.colours - where the polities' colours come from, for the canvas and the panels
  * @param props.wikidata - where the polity form reads Wikidata from
@@ -87,12 +90,12 @@ export function Editor({
   load,
   style,
   heading,
-  onSave,
-  onOpenSnapshot,
   history,
   colours,
   wikidata,
   results,
+  // The top bar's three actions — onSave, onOpenSnapshot, onOpenYear — handed on as they are.
+  ...bar
 }: EditorProps) {
   // Store
   const year = store((state) => state.document.year)
@@ -118,7 +121,7 @@ export function Editor({
   return (
     <Shell
       heading={heading}
-      appbar={<AppBarPanel store={store} onSave={onSave} onOpenSnapshot={onOpenSnapshot} />}
+      appbar={<AppBarPanel store={store} {...bar} />}
       docbar={<DocBarPanel store={store} history={history} />}
       canvas={
         <MapArea

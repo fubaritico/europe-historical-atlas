@@ -17,6 +17,7 @@
   "notSavedChanged": "{known, select, yes {non enregistré — {year} a changé sur le disque {when}} no {non enregistré — {year} a changé sur le disque depuis son ouverture} other {{known}}} ; ‹ctrl+S› de nouveau pour choisir",
   "snapshotPageNotKept": "non ouvert — votre page n’a pas pu être gardée d’abord (détail dans la console)",
   "snapshotPageChanged": "non ouvert — la page a changé pendant qu’elle était gardée ; ouvrez de nouveau l’instantané",
+  "yearPageChanged": "non ouvert — la page a changé pendant qu’elle était gardée ; choisissez de nouveau l’année",
   "snapshotNotOpened": "l’instantané pris {when} n’a pas pu être ouvert — votre page est restée telle quelle (détail dans la console)",
   "snapshotOpened": "instantané pris {when} ouvert — votre page a d’abord été gardée, parmi les instantanés",
   "draftsOffOpening": "brouillons automatiques désactivés : l’ouverture a échoué — enregistrez avec ‹ctrl+S› (détail dans la console)",

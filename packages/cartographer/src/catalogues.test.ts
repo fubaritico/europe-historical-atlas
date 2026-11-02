@@ -251,7 +251,8 @@ const SELECTS = CATALOGUES.flatMap(({ name, catalogue }) =>
 describe('the Cartographer catalogues', () => {
   describe('happy path', () => {
     it('finds the catalogues by their file names', () => {
-      expect(CATALOGUES.length).toBe(27)
+      // 28 since *Open…*'s YearDialog (2026-11-02).
+      expect(CATALOGUES.length).toBe(28)
     })
   })
 

@@ -53,11 +53,12 @@ export interface SnapshotOpeningDeps {
 }
 
 /**
- * Keep the page as a snapshot before it is replaced — or say it could not be, an alarm: nothing is opened.
+ * Keep the page as a snapshot before it is replaced — or say it could not be, an alarm: nothing is opened. Shared
+ * with changing the year (`yearChange.ts`), which replaces the page just as surely.
  * @param deps - the store, the snapshots, the year, the clock, where to report
  * @returns `true` when the page is kept
  */
-async function keepThePage(deps: SnapshotOpeningDeps): Promise<boolean> {
+export async function keepThePage(deps: SnapshotOpeningDeps): Promise<boolean> {
   try {
     await deps.snapshots.snapshot({
       year: deps.year,
@@ -67,12 +68,33 @@ async function keepThePage(deps: SnapshotOpeningDeps): Promise<boolean> {
     return true
   } catch (error: unknown) {
     console.error(
-      `${LOG_TAG} the page of ${String(deps.year)} could not be kept before opening a snapshot`,
+      `${LOG_TAG} the page of ${String(deps.year)} could not be kept before it is replaced`,
       error
     )
     deps.report({ tone: 'alarm', topic: 'snapshot', text: deps.words().t('snapshotPageNotKept') })
     return false
   }
+}
+
+/**
+ * Whether the page changed since it was sent to be kept — a gesture in no copy, so the page must not be replaced. Said
+ * when it did, a warning: nothing is lost, the author asks again. Shared with changing the year (`yearChange.ts`).
+ * @param deps - the store, and where and how to report
+ * @param versionKept - the store's version when the page was sent to be kept
+ * @param what - what was not opened, for the console: `the snapshot …`, `the year …`
+ * @param message - what the author is told: `snapshotPageChanged` or `yearPageChanged`
+ * @returns `true` when the page changed, and the replacing must not happen
+ */
+export function pageChangedSince(
+  deps: SnapshotOpeningDeps,
+  versionKept: number,
+  what: string,
+  message: 'snapshotPageChanged' | 'yearPageChanged'
+): boolean {
+  if (deps.store.getState().version === versionKept) return false
+  console.warn(`${LOG_TAG} ${what} was not opened: the page changed meanwhile`)
+  deps.report({ tone: 'warning', topic: 'snapshot', text: deps.words().t(message) })
+  return true
 }
 
 /**
@@ -94,16 +116,7 @@ export async function openSnapshot(
     const snapshot = await deps.snapshots.readSnapshot(deps.year, chosen.name)
     const document = documentFromFiles(snapshot.files, `the snapshot ${chosen.name}`)
     // Drawn while the page was being kept: that gesture is in no copy, so the page must not be replaced.
-    if (deps.store.getState().version !== versionKept) {
-      console.warn(
-        `${LOG_TAG} the snapshot ${chosen.name} was not opened: the page changed meanwhile`
-      )
-      // Nothing lost: the author opens the snapshot again.
-      deps.report({
-        tone: 'warning',
-        topic: 'snapshot',
-        text: deps.words().t('snapshotPageChanged'),
-      })
+    if (pageChangedSince(deps, versionKept, `the snapshot ${chosen.name}`, 'snapshotPageChanged')) {
       return false
     }
     deps.store.getState().open(document)

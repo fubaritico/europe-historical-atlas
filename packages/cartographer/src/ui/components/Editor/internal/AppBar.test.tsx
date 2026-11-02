@@ -7,10 +7,13 @@ import { renderInEnglish } from '../../../testing/renderInEnglish'
 import { AppBar } from './AppBar'
 
 /**
- * Render the bar with a spy on saving and one on opening a snapshot.
+ * Render the bar with a spy on saving, one on opening a snapshot and one on opening a year.
  * @returns the save spy
  */
-function mount(onOpenSnapshot: () => void = vi.fn()): ReturnType<typeof vi.fn> {
+function mount(
+  onOpenSnapshot: () => void = vi.fn(),
+  onOpenYear: () => void = vi.fn()
+): ReturnType<typeof vi.fn> {
   const onSave = vi.fn()
   renderInEnglish(
     <AppBar
@@ -18,6 +21,7 @@ function mount(onOpenSnapshot: () => void = vi.fn()): ReturnType<typeof vi.fn> {
       year={1100}
       onSave={onSave}
       onOpenSnapshot={onOpenSnapshot}
+      onOpenYear={onOpenYear}
     />
   )
   return onSave
@@ -54,6 +58,20 @@ describe('AppBar', () => {
         screen.getByRole('button', { name: 'Open snapshot…' }).getAttribute('aria-disabled')
       ).toBeNull()
     })
+
+    // 2026-11-02: [Open…] opens the dialogue of the years, and only that.
+    it('calls onOpenYear on [Open…], not onOpenSnapshot nor onSave', async () => {
+      const onOpenSnapshot = vi.fn()
+      const onOpenYear = vi.fn()
+      const onSave = mount(onOpenSnapshot, onOpenYear)
+
+      await userEvent.click(screen.getByRole('button', { name: 'Open…' }))
+
+      expect(onOpenYear).toHaveBeenCalledOnce()
+      expect(onOpenSnapshot).not.toHaveBeenCalled()
+      expect(onSave).not.toHaveBeenCalled()
+      expect(screen.getByRole('button', { name: 'Open…' }).getAttribute('aria-disabled')).toBeNull()
+    })
   })
 
   describe('variants', () => {
@@ -68,7 +86,6 @@ describe('AppBar', () => {
     it('marks every unbuilt action unavailable, naming the scenario it waits for', () => {
       mount()
       for (const [name, scenario] of [
-        ['Open…', 's01'],
         ['Save as…', 's04'],
         ['Registry', 's07'],
       ] as const) {

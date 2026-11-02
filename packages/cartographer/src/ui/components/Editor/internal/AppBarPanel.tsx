@@ -18,6 +18,8 @@ export interface AppBarPanelProps {
   onSave: () => void
   /** Open the *Open snapshot* dialogue. */
   onOpenSnapshot: () => void
+  /** Open the *Open…* dialogue. */
+  onOpenYear: () => void
 }
 
 /**
@@ -26,9 +28,10 @@ export interface AppBarPanelProps {
  * @param props.store - the store
  * @param props.onSave - save the open year
  * @param props.onOpenSnapshot - open the snapshot dialogue
+ * @param props.onOpenYear - open the dialogue of the years
  * @returns the top bar
  */
-export function AppBarPanel({ store, onSave, onOpenSnapshot }: AppBarPanelProps) {
+export function AppBarPanel({ store, onSave, onOpenSnapshot, onOpenYear }: AppBarPanelProps) {
   // Store
   const year = store((state) => state.document.year)
 
@@ -36,5 +39,13 @@ export function AppBarPanel({ store, onSave, onOpenSnapshot }: AppBarPanelProps)
   const app = useTranslation(APP_MESSAGES)
 
   // Render
-  return <AppBar name={app('name')} year={year} onSave={onSave} onOpenSnapshot={onOpenSnapshot} />
+  return (
+    <AppBar
+      name={app('name')}
+      year={year}
+      onSave={onSave}
+      onOpenSnapshot={onOpenSnapshot}
+      onOpenYear={onOpenYear}
+    />
+  )
 }

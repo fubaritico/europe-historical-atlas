@@ -279,6 +279,23 @@
   line-height: 18px;
 }
 
+/* *Open…* (2026-11-02): the years saved under the warning, side by side, the open one written, not offered. */
+.year-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.year-choices__open {
+  display: inline-block;
+  padding: 6px 0;
+  color: var(--ink);
+  font-size: 12px;
+}
+
 /* *Open snapshot* (CARTO-238, rung 2b): the list under the warning, one snapshot per line, and the line that
    says why there is none — the dialogue's own type, not the browser's. */
 .snapshot-list {

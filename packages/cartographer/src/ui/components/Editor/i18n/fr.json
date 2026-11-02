@@ -1,6 +1,7 @@
 {
   "notBuilt": "pas encore construit ({scenarios})",
   "openSnapshotHint": "Ouvrir un instantané de l’année, pris à chaque heure de dessin",
+  "openYearHint": "Ouvrir une autre année enregistrée",
   "saveHint": "Enregistrer l’année (⌘S / ctrl+S)",
   "registry": "Registre",
   "closeYear": "{close} {year}",

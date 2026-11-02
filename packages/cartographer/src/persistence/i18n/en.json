@@ -17,6 +17,7 @@
   "notSavedChanged": "{known, select, yes {not saved — {year} was changed on disk {when}} no {not saved — {year} was changed on disk since it was opened} other {{known}}}; ‹ctrl+S› again to choose",
   "snapshotPageNotKept": "not opened — your page could not be kept first (details in the console)",
   "snapshotPageChanged": "not opened — the page changed while it was being kept; open the snapshot again",
+  "yearPageChanged": "not opened — the page changed while it was being kept; choose the year again",
   "snapshotNotOpened": "the snapshot of {when} could not be opened — your page is as it was (details in the console)",
   "snapshotOpened": "opened the snapshot of {when} — your page was kept first, in the snapshots",
   "draftsOffOpening": "automatic drafts are off: the opening failed — save with ‹ctrl+S› (details in the console)",

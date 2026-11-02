@@ -28,6 +28,8 @@ export interface AppBarProps {
   onSave: () => void
   /** Open the *Open snapshot* dialogue (CARTO-238, rung 2b). */
   onOpenSnapshot: () => void
+  /** Open the *Open…* dialogue: the years saved, one to reload on (2026-11-02). */
+  onOpenYear: () => void
 }
 
 /**
@@ -37,9 +39,10 @@ export interface AppBarProps {
  * @param props.year - the open year
  * @param props.onSave - save the open year
  * @param props.onOpenSnapshot - open the snapshot dialogue
+ * @param props.onOpenYear - open the dialogue of the years
  * @returns the brand and the actions, the two ends of the bar
  */
-export function AppBar({ name, year, onSave, onOpenSnapshot }: AppBarProps) {
+export function AppBar({ name, year, onSave, onOpenSnapshot, onOpenYear }: AppBarProps) {
   // Context
   const t = useTranslation(EDITOR_MESSAGES)
   const action = useTranslation(ACTION_MESSAGES)
@@ -56,7 +59,7 @@ export function AppBar({ name, year, onSave, onOpenSnapshot }: AppBarProps) {
         <span className="app-brand__year">{year}</span>
       </div>
       <div className="bar-actions">
-        <BarButton label={action('open')} unavailable={t('notBuilt', { scenarios: 's01' })} />
+        <BarButton label={action('open')} onPress={onOpenYear} hint={t('openYearHint')} />
         <BarButton
           label={action('openSnapshot')}
           onPress={onOpenSnapshot}
