@@ -95,6 +95,14 @@ const EMPIRE_ON_GRID = {
   v1: latitudeToVertical(46, TEST_BACKDROP_FRAME.bounds),
 }
 
+const half = (feather: FeatherGround['feather']) =>
+  alphasIn(tribeFeatherRasters(withTribe(), COLOURS, ground({ feather }))[0], {
+    west: 2,
+    east: 4,
+    south: 46,
+    north: 48,
+  }).filter((alpha) => alpha > 0 && alpha < 255).length
+
 describe('tribeFeatherRasters', () => {
   describe('happy path', () => {
     it('makes one raster for the tribe, in its colour', () => {
@@ -107,6 +115,24 @@ describe('tribeFeatherRasters', () => {
       const [raster] = tribeFeatherRasters(withTribe(), COLOURS, ground())
       expect(alphaAt(raster, 3, 47)).toBe(255)
       expect(alphaAt(raster, 4.15, 47) ?? 0).toBe(0)
+    })
+  })
+
+  // The dev, 2026-11-02: the band — half the colour from the outline to an inner offset, the full colour deeper.
+  describe('the band', () => {
+    const EVEN = { mode: 'band', widthKm: 30, irregularity: 0 } as const
+
+    it('is half the colour just inside the outline and the full colour deep inside, nothing outside', () => {
+      const [raster] = tribeFeatherRasters(withTribe(), COLOURS, ground({ feather: EVEN }))
+      expect([
+        alphaAt(raster, 2.1, 47),
+        alphaAt(raster, 3, 47),
+        alphaAt(raster, 4.15, 47) ?? 0,
+      ]).toEqual([Math.round(featherModule.BAND_SHARE * 255), 255, 0])
+    })
+
+    it('undulates where it is told to: another width of band, the same tribe', () => {
+      expect(half({ ...EVEN, irregularity: 0.8, waveKm: 120 })).not.toBe(half(EVEN))
     })
   })
 

@@ -43,6 +43,7 @@ const ground = (over: Partial<TribeGround> = {}): TribeGround => ({
   land: LAND,
   bounds: BOUNDS,
   grid: GRID,
+  spill: true,
   reachKm: 60,
   ...over,
 })
@@ -118,6 +119,16 @@ describe('tribePatches', () => {
       const distances = [...(patch?.distances ?? [])]
       expect(distances.some((d) => d < 0)).toBe(true)
       expect(distances.some((d) => d > 0)).toBe(true)
+    })
+
+    // The dev, 2026-11-02: the band and the inset fade stay inside — their patch is the tribe's own box, nobody's ground
+    // measured (it cost 5 s for the Kimek-Kipchak on his 1100).
+    it('keeps a colour that stays inside to the tribe’s own box, and reads every vertex as free', () => {
+      const [spilling] = tribePatches([TRIBE], ground())
+      const [inside] = tribePatches([TRIBE], ground({ spill: false }))
+      if (!spilling || !inside) throw new Error('no patch')
+      expect(inside.triangles.length).toBeLessThan(spilling.triangles.length)
+      expect(inside.claimed.every((km) => km > 0)).toBe(true)
     })
 
     it('hands back one patch for each of two tribes', () => {

@@ -41,6 +41,8 @@ export interface DevPanelCallbacks {
   rebuildPolitical: () => void
   /** Place the year's names again (how they are written or their place chosen changed). */
   rebuildNames: () => void
+  /** Lay the fills and the tribes again (a tribe's colour now spilling past its limit, or no longer). */
+  rebuildFills: () => void
   /** Redraw the border lines from the geometry already traced (styling changed). */
   rebuildBorders: () => void
   /** Trace the border lines again from the political grid already held (smoothing changed). */

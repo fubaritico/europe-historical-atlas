@@ -53,6 +53,7 @@ function sameTribeCut(a: TribeCutKey, b: TribeCutKey): boolean {
     a.claims === b.claims &&
     a.segX === b.segX &&
     a.segY === b.segY &&
+    a.spill === b.spill &&
     sameBounds(a.bounds, b.bounds) &&
     sameLand(a, b)
   )
@@ -86,6 +87,7 @@ function cutTribes(
     landMask: sources.landMask,
     heightmap: sources.heightmap,
     seaLevel: dev.texture.seaLevel,
+    spill: dev.tribes.mode === 'outset',
   }
   // Reuse the last build when nothing it read has changed.
   const last = context.handles.tribeCut
@@ -97,6 +99,7 @@ function cutTribes(
     bounds: ground.bounds,
     grid,
     reachKm: TRIBE_FEATHER_REACH_KM,
+    spill: key.spill,
   })
   context.handles.tribeCut = { key, patches }
   return patches

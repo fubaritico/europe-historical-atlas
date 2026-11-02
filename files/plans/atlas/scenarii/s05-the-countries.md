@@ -73,17 +73,36 @@ Scenario: a border's hand
 
 ## The tribes
 
+~~Scenario: a tribe's colour vanishes toward its limit — whole deep inside, fading out over the 30 km before its outline.~~
+
+> **Replaced 2026-11-02, on the dev's word** — the fade cost 5 s for the Kimek-Kipchak on his 1100, and he asked for
+> Illustrator's offset path instead: *"the shape drawn, and inside it an inner offset; the full colour, and the offset at
+> half"*, then *"make it irregular, sometimes wider, sometimes thicker, to show the variation"*. Seen the same night:
+> *"we have created a cartographic language — the notion of uncertainty is well represented"*. The fade stays in the
+> settings panel (‹H›) beside the band, to compare.
+
 ```gherkin
-Scenario: a tribe's colour vanishes toward its limit
-  Given the Curonians, a tribe
-  Then their colour is whole deep inside and fades out over the 30 km before their outline
-  And no stroke runs along it
+Scenario: a tribe's band
+  Given the Kimek-Kipchak, a tribe
+  Then from its outline inwards, a band of half its colour, then its full colour deeper
+  And the band is 30 km wide on average, undulating between about 15 and 45 km along the outline
+  And the undulation is the same at each opening
+  And no stroke runs along the outline, and no colour passes it
   And where a tribe meets a kingdom, the kingdom's frontier stroke shows, never a border between two states
+
+Scenario: the band in the Cartographer
+  Given the same tribe open in the Cartographer
+  Then its band widens and narrows at the same places as in the atlas (`core/editor/tribeFeather`, `bandWidthKm`)
+
+Scenario: the band tuned
+  When I move « band irregularity » or « band wavelength » in the settings panel (‹H›)
+  Then the band changes at once, nothing rebuilt
+  And choosing the fade outside the limit lays the tribes again, its colour now measured against its neighbours
 ```
 
-> **30 km inset**, the dev's call of 18/10 (*"the blur's gradient should be spread twice as wide"*), twice
-> Claude's 15. The two narrowest tribes, the Semigallians and the Curonians, never reach their whole colour at that width.
-> The same ramp in the Cartographer (`core/editor/tribeFeather`).
+> **Built 2026-11-02 (ATLAS-333's measure, ATLAS-344).** The band costs 0.34 s for the Kimek-Kipchak where the fade cost
+> 5.1 s: a colour that stays inside measures nobody else's ground. **Not walked in the Cartographer yet**: whether its
+> band widens at the same places as the atlas's (the shader turns the relief's `v`, north at 1, to the frame's).
 
 ## The countries' names
 

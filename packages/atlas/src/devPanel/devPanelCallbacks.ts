@@ -105,7 +105,6 @@ function rebuildCallbacks(
     rebuildPolitical: (): void => {
       void pipeline.rebuildPolitical()
     },
-
     rebuildBorders: (): void => {
       layers.rebuildBorders()
     },
@@ -183,6 +182,9 @@ export function createPanelCallbacks(deps: PanelCallbackDeps): DevPanelCallbacks
     },
     rebuildFrame: (): void => {
       deps.layers.rebuildFrame()
+    },
+    rebuildFills: (): void => {
+      deps.layers.rebuildFills()
     },
     logAll: (): void => {
       logAllSettings(deps.dev, deps.view.controls)

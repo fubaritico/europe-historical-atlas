@@ -2,11 +2,24 @@
 import { DataTexture } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 
+import { bandWave } from '@europe-historical-atlas/core/editor/tribeFeather'
+
 import { MODE_INDEX } from '../tintOnRelief'
 
 import { options, uniform } from './testing/tribeFixtures'
 import { TRIBE_RENDER_ORDER, createTribeLayer } from './tribeLayer'
-import { TRIBE_FRAGMENT_SHADER, TRIBE_OPACITY_GLSL } from './tribeShader'
+import { BAND_WAVE_GLSL, TRIBE_FRAGMENT_SHADER, TRIBE_OPACITY_GLSL } from './tribeShader'
+
+const reference = (u: number, v: number, wave: number): number => {
+  const k = (2 * Math.PI) / wave
+  const [x, y] = [u * 8000, v * 8000]
+  return (
+    (Math.sin(k * (0.83 * x + 0.56 * y) + 1.3) +
+      Math.sin(1.37 * k * (-0.41 * x + 0.91 * y) + 4.1) +
+      Math.sin(0.71 * k * (0.97 * x - 0.24 * y) + 2.7)) /
+    3
+  )
+}
 
 describe('createTribeLayer', () => {
   describe('happy path', () => {
@@ -49,10 +62,58 @@ describe('createTribeLayer', () => {
       expect(uniform(layer, 'map')).toBe(baked)
     })
 
+    // The dev, 2026-11-02: the band's three uniforms, written at the making and again on each change.
+    it('writes the band, its irregularity and its wavelength, then a change of them', () => {
+      const layer = createTribeLayer(
+        options({ feather: { mode: 'band', widthKm: 30, irregularity: 0.5, waveKm: 200 } })
+      )
+      expect([
+        uniform(layer, 'featherBand'),
+        uniform(layer, 'featherIrregularity'),
+        uniform(layer, 'featherWave'),
+      ]).toEqual([1, 0.5, 200])
+      layer.setFeather({ mode: 'inset', widthKm: 30, irregularity: 0.25, waveKm: 90 })
+      expect([
+        uniform(layer, 'featherBand'),
+        uniform(layer, 'featherIrregularity'),
+        uniform(layer, 'featherWave'),
+      ]).toEqual([0, 0.25, 90])
+    })
+
+    it('pins the band’s wave GLSL, term for term with core’s', () => {
+      // An edit to either copy fails here: the text below, and core's values at three fixed points.
+      expect(BAND_WAVE_GLSL).toBe(`
+  float bandWave(vec2 at, float waveKm) {
+    float k = 6.283185307179586 / waveKm;
+    float x = at.x * 8000.0;
+    float y = at.y * 8000.0;
+    return (sin(k * (0.83 * x + 0.56 * y) + 1.3)
+      + sin(1.37 * k * (-0.41 * x + 0.91 * y) + 4.1)
+      + sin(0.71 * k * (0.97 * x - 0.24 * y) + 2.7)) / 3.0;
+  }
+`)
+      expect(TRIBE_FRAGMENT_SHADER).toContain(BAND_WAVE_GLSL)
+      for (const [u, v, wave] of [
+        [0.1, 0.2, 150],
+        [0.5, 0.5, 300],
+        [0.83, 0.07, 60],
+      ] as const)
+        expect(bandWave(u, v, wave)).toBeCloseTo(reference(u, v, wave), 12)
+    })
+
     it('pins the opacity GLSL its CPU mirror copies, and puts it in the fragment stage', () => {
       // An edit to the GLSL fails here until `shaderOpacity` — compared with core below — is edited to match.
       expect(TRIBE_OPACITY_GLSL).toBe(`
-    float opacity = smoothstep(0.0, 1.0, clamp((featherShift - vDistance) / featherWidth, 0.0, 1.0));
+    float fade = smoothstep(0.0, 1.0, clamp((featherShift - vDistance) / featherWidth, 0.0, 1.0));
+    float inside = 1.0 - step(0.0, vDistance);
+    vec2 framed = vec2(vUv.x, 1.0 - vUv.y);
+    float bandWidth = clamp(
+      featherWidth * (1.0 + featherIrregularity * bandWave(framed, featherWave)),
+      0.0,
+      60.0
+    );
+    float band = inside * mix(0.500, 1.0, step(bandWidth, -vDistance));
+    float opacity = mix(fade, band, featherBand);
     float beyond = step(0.000001, vDistance);
     float free = step(0.0, vClaimed) * step(0.5, vLand);
     opacity *= 1.0 - beyond * (1.0 - free);

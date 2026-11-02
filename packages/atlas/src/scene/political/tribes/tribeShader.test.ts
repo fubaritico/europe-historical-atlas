@@ -5,6 +5,7 @@ import {
   BEYOND_OUTLINE_KM,
   featherOpacity,
   tribeOpacity,
+  tribeOpacityAt,
 } from '@europe-historical-atlas/core/editor/tribeFeather'
 
 import { shaderOpacity } from './tribeShader'
@@ -29,6 +30,8 @@ describe('shaderOpacity', () => {
   const CLAIMED = [-5, -1e-6, 0, 5]
   const LAND = [true, false]
   const FEATHERS = [
+    { mode: 'band', widthKm: 30 },
+    { mode: 'band', widthKm: 15 },
     { mode: 'inset', widthKm: 30 },
     { mode: 'outset', widthKm: 30 },
     { mode: 'outset', widthKm: 15 },
@@ -36,7 +39,7 @@ describe('shaderOpacity', () => {
 
   describe('happy path', () => {
     // QUAL-004: the outset spill cut lived only in GLSL; its mirror answers as core over every combination.
-    it('answers as core’s tribeOpacity over a table of distance, neighbour and land, both modes', () => {
+    it('answers as core’s tribeOpacity over a table of distance, neighbour and land, every mode', () => {
       for (const feather of FEATHERS)
         for (const signedKm of DISTANCES)
           for (const claimedKm of CLAIMED)
@@ -52,6 +55,22 @@ describe('shaderOpacity', () => {
   })
 
   describe('variants', () => {
+    // The dev, 2026-11-02: the band's irregular offset, the shader's width at each fragment as core's at the point.
+    it('answers as core over the irregular band, point by point across the frame', () => {
+      const uneven = { mode: 'band', widthKm: 30, irregularity: 0.5, waveKm: 150 } as const
+      for (const [u, v] of [
+        [0.1, 0.2],
+        [0.37, 0.61],
+        [0.72, 0.05],
+        [0.9, 0.88],
+      ] as const)
+        for (const signedKm of [-50, -40, -30, -20, -10, -1, 0, 5])
+          expect(
+            shaderOpacity({ distance: signedKm, claimed: 5, land: 1, u, v }, uneven),
+            `u=${String(u)} v=${String(v)} d=${String(signedKm)}`
+          ).toBe(tribeOpacityAt(signedKm, uneven, () => ({ claimedKm: 5, land: true }), { u, v }))
+    })
+
     it('reads the ramp as core’s smoothstep of (shift − d) / width', () => {
       const t = (0 - -3.75) / 15
       expect(

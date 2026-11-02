@@ -9,8 +9,9 @@ import type { DevPanelDeps } from '../panelContract'
 import type GUI from 'lil-gui'
 
 /**
- * The tribes' vanishing edge — inset or outset, and its width. Every field is read on each frame and
- * written to a uniform, so none needs a callback.
+ * The tribes' limit — the band, a fade inside or outside, and its width. Each is written to a uniform, read at each
+ * frame; the mode also lays the tribes again, since a colour that spills (`outset`) measures its neighbours' ground
+ * and one that stays inside does not (`tribePatches`).
  * @param gui - where to add the folder
  * @param deps - what the panel binds to
  * @returns nothing
@@ -18,6 +19,12 @@ import type GUI from 'lil-gui'
 export function addTribeFolder(gui: GUI, deps: DevPanelDeps): void {
   const folder = gui.addFolder('tribes (vanishing edge)')
   for (const key of TRIBE_CONTROL_ORDER)
-    addControl(folder, deps.tribes, key, TRIBE_CONTROLS[key], noEffect)
+    addControl(
+      folder,
+      deps.tribes,
+      key,
+      TRIBE_CONTROLS[key],
+      key === 'mode' ? deps.callbacks.rebuildFills : noEffect
+    )
   folder.close()
 }

@@ -1,11 +1,16 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import {
+  BAND_SHARE,
   BEYOND_OUTLINE_KM,
   FEATHER_MODES,
+  TRIBE_FEATHER_REACH_KM as REACH,
   TRIBE_FEATHER,
   TRIBE_FEATHER_REACH_KM,
+  bandWave,
+  bandWidthKm,
   featherOpacity,
+  featherReachKm,
   featherShiftKm,
   tribeOpacity,
   tribeOpacityAt,
@@ -107,8 +112,46 @@ describe('TRIBE_FEATHER', () => {
     expect(TRIBE_FEATHER.widthKm).toBeLessThanOrEqual(TRIBE_FEATHER_REACH_KM)
   })
 
-  it('is one of the two modes', () => {
+  it('is one of the modes — the band, the dev’s choice of 2026-11-02', () => {
     expect(FEATHER_MODES).toContain(TRIBE_FEATHER.mode)
+    expect(TRIBE_FEATHER.mode).toBe('band')
+  })
+})
+
+// The dev, 2026-11-02: Illustrator's offset path inwards — the full colour, and the offset band at half.
+describe('featherOpacity, the band', () => {
+  describe('happy path', () => {
+    it('gives half the colour within 30 km inside the outline, the full colour deeper', () => {
+      expect([featherOpacity(-10, 30, 'band'), featherOpacity(-40, 30, 'band')]).toEqual([
+        BAND_SHARE,
+        1,
+      ])
+    })
+  })
+
+  describe('variants', () => {
+    it('steps at the width itself: half just short of it, full from it', () => {
+      expect([featherOpacity(-29.999, 30, 'band'), featherOpacity(-30, 30, 'band')]).toEqual([
+        BAND_SHARE,
+        1,
+      ])
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('stays NaN for a NaN distance', () => {
+      expect(featherOpacity(Number.NaN, 30, 'band')).toBeNaN()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('gives nothing on the outline and past it, nor half a colour outside', () => {
+      expect([featherOpacity(0, 30, 'band'), featherOpacity(5, 30, 'band')]).toEqual([0, 0])
+    })
+
+    it('is the full colour everywhere inside for a width of zero', () => {
+      expect(featherOpacity(-0.001, 0, 'band')).toBe(1)
+    })
   })
 })
 
@@ -224,6 +267,67 @@ describe('tribeOpacityAt', () => {
       const claimed = { claimedKm: -5, land: true }
       expect(tribeOpacityAt(BEYOND_OUTLINE_KM / 2, OUTSET, () => claimed)).toBeCloseTo(1, 9)
       expect(tribeOpacityAt(BEYOND_OUTLINE_KM, OUTSET, () => claimed)).toBe(0)
+    })
+  })
+})
+
+/** Ground nobody claims, dry — what the band never asks, being inside. */
+const FREE = () => ({ claimedKm: 5, land: true })
+
+// The dev, 2026-11-02: an irregular offset — "sometimes wider, sometimes thicker, to show the variation".
+describe('bandWidthKm', () => {
+  const UNEVEN = { mode: 'band', widthKm: 30, irregularity: 0.5, waveKm: 150 } as const
+  const SAMPLES = Array.from({ length: 400 }, (_, index) => ({
+    u: (index % 20) / 20,
+    v: Math.floor(index / 20) / 20,
+  }))
+
+  describe('happy path', () => {
+    it('varies along the frame between half and one and a half times the mean width', () => {
+      const widths = SAMPLES.map(({ u, v }) => bandWidthKm(UNEVEN, u, v))
+      expect(Math.min(...widths)).toBeGreaterThanOrEqual(15)
+      expect(Math.max(...widths)).toBeLessThanOrEqual(45)
+      expect(Math.max(...widths) - Math.min(...widths)).toBeGreaterThan(20)
+    })
+  })
+
+  describe('variants', () => {
+    it('keeps the band even with no irregularity, or none given', () => {
+      expect(bandWidthKm({ ...UNEVEN, irregularity: 0 }, 0.3, 0.7)).toBe(30)
+      expect(bandWidthKm({ mode: 'band', widthKm: 30 }, 0.3, 0.7)).toBe(30)
+    })
+
+    it('is the same at each opening: the wave holds no chance', () => {
+      expect(bandWave(0.31, 0.42, 150)).toBe(bandWave(0.31, 0.42, 150))
+    })
+
+    it('undulates the opacity at a point given, and keeps the mean width without one', () => {
+      const at = SAMPLES.find(({ u, v }) => bandWidthKm(UNEVEN, u, v) > 40)
+      if (!at) throw new Error('no wide point among the samples')
+      expect([tribeOpacityAt(-35, UNEVEN, FREE, at), tribeOpacityAt(-35, UNEVEN, FREE)]).toEqual([
+        BAND_SHARE,
+        1,
+      ])
+    })
+  })
+
+  // L3, L4: N/A — arithmetic on numbers.
+
+  describe('edge cases', () => {
+    it('never goes past the depth its distances are computed to, the band’s nor the fade’s', () => {
+      const widths = SAMPLES.map(({ u, v }) => bandWidthKm(UNEVEN, u, v))
+      expect(Math.max(...widths)).toBeLessThanOrEqual(featherReachKm(UNEVEN))
+      expect(featherReachKm({ mode: 'inset', widthKm: 30, irregularity: 0.5 })).toBe(30)
+    })
+
+    it('stays inside: the band shifts nothing past the outline', () => {
+      expect(featherShiftKm('band', 30)).toBe(0)
+    })
+
+    it('never goes past the reach the distances are computed to, nor under nought', () => {
+      const wild = { ...UNEVEN, widthKm: REACH, irregularity: 1 }
+      const widths = SAMPLES.map(({ u, v }) => bandWidthKm(wild, u, v))
+      expect([Math.max(...widths) <= REACH, Math.min(...widths) >= 0]).toEqual([true, true])
     })
   })
 })

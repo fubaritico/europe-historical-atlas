@@ -94,6 +94,22 @@ export interface TribeLayer {
 }
 
 /**
+ * The shader's uniforms for a tribe's limit, by name — one table for the material at its making and for each change.
+ * @param feather - the band or the fade, its width and its undulation
+ * @returns each uniform's slot
+ */
+function featherUniformSlots(feather: TribeFeather): Record<string, { value: number }> {
+  const { width, shift, band, irregularity, wave } = featherUniforms(feather)
+  return {
+    featherWidth: { value: width },
+    featherShift: { value: shift },
+    featherBand: { value: band },
+    featherIrregularity: { value: irregularity },
+    featherWave: { value: wave },
+  }
+}
+
+/**
  * Build the tribe layer.
  * @param options - the patches, the surface, the look and the fade
  * @returns the layer
@@ -108,16 +124,14 @@ export function createTribeLayer(options: TribeLayerOptions): TribeLayer {
   geometry.setAttribute('edgeDistance', new Float32BufferAttribute(distances, 1))
   geometry.setAttribute('claimedDistance', new Float32BufferAttribute(claimed, 1))
   geometry.setAttribute('land', new Float32BufferAttribute(land, 1))
-  // The material blends as the fills do, with the feather's width and shift as uniforms.
-  const feather = featherUniforms(options.feather)
+  // The material blends as the fills do, with the limit's width, shift, band and undulation as uniforms.
   const material = new ShaderMaterial({
     uniforms: {
       map: { value: options.map },
       strength: { value: options.strength },
       mode: { value: MODE_INDEX[options.mode] },
       plane: { value: [options.worldWidth, options.worldDepth] },
-      featherWidth: { value: feather.width },
-      featherShift: { value: feather.shift },
+      ...featherUniformSlots(options.feather),
     },
     vertexShader: TRIBE_VERTEX_SHADER,
     fragmentShader: TRIBE_FRAGMENT_SHADER,
@@ -142,9 +156,8 @@ export function createTribeLayer(options: TribeLayerOptions): TribeLayer {
       setUniform(material, 'strength', strength, 'tribe layer')
     },
     setFeather(next: TribeFeather): void {
-      const { width, shift } = featherUniforms(next)
-      setUniform(material, 'featherWidth', width, 'tribe layer')
-      setUniform(material, 'featherShift', shift, 'tribe layer')
+      for (const [name, slot] of Object.entries(featherUniformSlots(next)))
+        setUniform(material, name, slot.value, 'tribe layer')
     },
     dispose(): void {
       geometry.dispose()

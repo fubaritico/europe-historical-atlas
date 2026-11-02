@@ -68,6 +68,11 @@ export interface TribeGround {
   grid: FillGrid
   /** How far past the outline the patch extends, and the outline's distance is computed to. */
   reachKm: number
+  /**
+   * Whether the colour may spill past the outline — `outset` alone. Without it the patch is the tribe's own box and no
+   * other polity's ground is measured: that measure cost 5 s for the Kimek-Kipchak on the dev's 1100 (2026-11-02).
+   */
+  spill: boolean
 }
 
 /**
@@ -77,10 +82,10 @@ export interface TribeGround {
  * @returns one patch per tribe with any ground; a tribe with no ring point has none
  */
 export function tribePatches(tribes: readonly TribeArea[], ground: TribeGround): TribePatch[] {
-  const { claims, land, bounds, grid, reachKm } = ground
+  const { claims, land, bounds, grid, reachKm, spill } = ground
   return tribes.flatMap(({ polity, colour, rings }) => {
     // The tribe's box, grown by the reach; a tribe with no ring point has none.
-    const box = paddedBox(rings, bounds, reachKm)
+    const box = paddedBox(rings, bounds, spill ? reachKm : 0)
     if (box === null) return []
     // Cut the box into triangles lying on the relief, as the fills are.
     const ring = [
@@ -94,8 +99,15 @@ export function tribePatches(tribes: readonly TribeArea[], ground: TribeGround):
     if (triangles === undefined) throw new Error('[atlas] the tribe box was cut into nothing')
     // The distance fields: to the tribe's own outline, and to every other polity's ground.
     const distance = signedDistanceField(rings, bounds, reachKm)
-    const others = claims.filter((claim) => claim.polityId !== polity).map((claim) => claim.rings)
-    const claimedAt = unionDistanceField(others, bounds, CLAIM_CUT_REACH_KM, box)
+    // Nobody's ground is in the way of a colour that stays inside: every point reads as free, never measured.
+    const claimedAt = spill
+      ? unionDistanceField(
+          claims.filter((claim) => claim.polityId !== polity).map((claim) => claim.rings),
+          bounds,
+          CLAIM_CUT_REACH_KM,
+          box
+        )
+      : (): number => CLAIM_CUT_REACH_KM
     // Sample both fields, and the land, at every vertex.
     const count = Math.floor(triangles.length / 2)
     const distances = new Float32Array(count)
@@ -138,4 +150,6 @@ export interface TribeCutKey {
   heightmap: object | null
   /** The fallback's threshold — read only when there is no mask. */
   seaLevel: number
+  /** Whether the colour spills past the outline (`outset`): the patch's box and its neighbours' measure follow. */
+  spill: boolean
 }

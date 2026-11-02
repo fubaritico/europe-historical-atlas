@@ -1,5 +1,6 @@
 import {
   CLAIM_CUT_REACH_KM,
+  featherReachKm,
   featherShiftKm,
   tribeOpacityAt,
 } from '@europe-historical-atlas/core/editor/tribeFeather'
@@ -210,7 +211,12 @@ function featherRaster(
     sayNotANumber(polity)
     return null
   }
-  const distance = signedDistanceField(rings, frame.bounds, Math.max(MIN_REACH_KM, feather.widthKm))
+  // As deep as the limit is drawn: the band's widest where it undulates, the fade's width otherwise (core's rule).
+  const distance = signedDistanceField(
+    rings,
+    frame.bounds,
+    Math.max(MIN_REACH_KM, featherReachKm(feather))
+  )
   let claimedAt: SignedDistance | null = null
   const { r, g, b } = hexToRgb(colour)
   const pixels = new Uint8ClampedArray(box.width * box.height * 4)
@@ -218,10 +224,15 @@ function featherRaster(
     const v = (box.y + row + 0.5) / H
     for (let col = 0; col < box.width; col++) {
       const u = (box.x + col + 0.5) / W
-      const opacity = tribeOpacityAt(distance(u, v), feather, () => {
-        claimedAt ??= unionDistanceField(near, frame.bounds, CLAIM_CUT_REACH_KM, grown)
-        return { claimedKm: claimedAt(u, v), land: land.isLand(u, v) }
-      })
+      const opacity = tribeOpacityAt(
+        distance(u, v),
+        feather,
+        () => {
+          claimedAt ??= unionDistanceField(near, frame.bounds, CLAIM_CUT_REACH_KM, grown)
+          return { claimedKm: claimedAt(u, v), land: land.isLand(u, v) }
+        },
+        { u, v }
+      )
       if (Number.isNaN(opacity)) {
         sayNotANumber(polity)
         return null

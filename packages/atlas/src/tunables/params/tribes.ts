@@ -18,7 +18,7 @@ import type { TribeFeather } from '@europe-historical-atlas/core/editor/tribeFea
 import type { ControlTable } from '@europe-historical-atlas/core/utils/controlSpec'
 
 /** How a tribe's colour vanishes at its limit — core's own shape. */
-export type TribeDevParams = TribeFeather
+export type TribeDevParams = Required<TribeFeather>
 
 /** Core's default, copied so the live object can be tuned without touching it. */
 export const DEFAULT_TRIBE_PARAMS: TribeDevParams = { ...TRIBE_FEATHER }
@@ -28,16 +28,24 @@ export const DEFAULT_TRIBE_PARAMS: TribeDevParams = { ...TRIBE_FEATHER }
  * are computed to, and the tribes' meshes extend to: wider, an outset fade would end on the patch's edge.
  */
 export const TRIBE_CONTROLS: ControlTable<TribeDevParams> = {
-  mode: { kind: 'choice', options: FEATHER_MODES, label: 'fade inside / outside the limit' },
+  mode: { kind: 'choice', options: FEATHER_MODES, label: 'band / fade inside / outside the limit' },
   // Above zero: a width of zero is the hard edge the dashed outline was replaced to avoid.
   widthKm: {
     kind: 'number',
     min: 1,
     max: TRIBE_FEATHER_REACH_KM,
     step: 1,
-    label: 'fade width (km)',
+    label: 'band or fade width (km)',
   },
+  // The band's undulation (the dev, 2026-11-02): how much its width varies along the outline, and over what length.
+  irregularity: { kind: 'number', min: 0, max: 1, step: 0.05, label: 'band irregularity' },
+  waveKm: { kind: 'number', min: 40, max: 600, step: 10, label: 'band wavelength (km)' },
 }
 
 /** Display order of the tribe controls. */
-export const TRIBE_CONTROL_ORDER: (keyof TribeDevParams)[] = ['mode', 'widthKm']
+export const TRIBE_CONTROL_ORDER: (keyof TribeDevParams)[] = [
+  'mode',
+  'widthKm',
+  'irregularity',
+  'waveKm',
+]

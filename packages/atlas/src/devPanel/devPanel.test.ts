@@ -64,6 +64,7 @@ function countingCallbacks(): { callbacks: DevPanelCallbacks; calls: Record<stri
     'rebuildRhumb',
     'rebuildRivers',
     'rebuildPolitical',
+    'rebuildFills',
     'rebuildNames',
     'rebuildBorders',
     'rebuildBorderGeometry',
@@ -208,7 +209,7 @@ const READ_EVERY_FRAME = new Set([
 const VASSALS_READ_EVERY_FRAME = new Set(['enabled'])
 
 /** The tribes' fade, written to a uniform on every frame (`mapLayers`) — spelled out by key, as above. */
-const TRIBES_READ_EVERY_FRAME = new Set(['mode', 'widthKm'])
+const TRIBES_READ_EVERY_FRAME = new Set(['mode', 'widthKm', 'irregularity', 'waveKm'])
 
 /** The names' white edge by zoom, handed to the names' layer on every frame (`frameLayers`) — spelled out by key, as above. */
 const NAMES_READ_EVERY_FRAME = new Set(['haloWholeZoom', 'haloGoneZoom', 'tribeEdgeClose', 'blur'])
@@ -382,15 +383,19 @@ describe('createDevPanel', () => {
       expect(total(calls)).toBe(0)
     })
 
-    it('writes the tribes’ fade into the live object the frame reads, with no rebuild', () => {
+    it('writes the tribes’ limit into the live object the frame reads, rebuilding the tribes for the mode alone', () => {
       const { dev, calls, controls } = build()
       const tribes = controls.filter((c) => c.object === dev.tribes)
-      expect(tribes.map((c) => c.property)).toEqual(['mode', 'widthKm'])
-      const [mode, width] = tribes
-      if (mode) nudge(mode, 'outset')
-      if (width) nudge(width, 30)
-      expect(dev.tribes).toEqual({ mode: 'outset', widthKm: 30 })
+      expect(tribes.map((c) => c.property)).toEqual(['mode', 'widthKm', 'irregularity', 'waveKm'])
+      const [mode, width, irregularity, wave] = tribes
+      if (width) nudge(width, 20)
+      if (irregularity) nudge(irregularity, 0.25)
+      if (wave) nudge(wave, 300)
       expect(total(calls)).toBe(0)
+      // A colour that spills measures its neighbours' ground, one that stays inside does not: the mode lays them again.
+      if (mode) nudge(mode, 'outset')
+      expect(dev.tribes).toEqual({ mode: 'outset', widthKm: 20, irregularity: 0.25, waveKm: 300 })
+      expect(calls.rebuildFills).toBe(1)
     })
 
     it('starts the tribes’ fade from core’s default, the one the Cartographer draws', () => {
