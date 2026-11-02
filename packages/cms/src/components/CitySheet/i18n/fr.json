@@ -93,5 +93,18 @@
   "reasonAdded": "Raison ajoutée : {name}",
   "reasonRemoved": "Raison retirée : {name}",
   "reasonResults": "{count, plural, =0 {aucune raison} one {# raison} other {# raisons}}",
-  "reasonNoResults": "Aucune raison de ce nom."
+  "reasonNoResults": "Aucune raison de ce nom.",
+  "holder": "Tenue par",
+  "holderHelp": "Le pays qui tient la ville à cette date, par son nom — par exemple : République de Venise. Facultatif. C’est ce que le Cartographe compare au pays dessiné sous la ville.",
+  "holderQid": "Identifiant Wikidata du pays",
+  "holderQidHelp": "Celui du pays, pas de la ville — par exemple : Q4948 pour Venise. Facultatif : un pays qui n’en a pas se saisit par son nom seul. Vérifiez-le sur Wikidata : les cartes importées en portent de faux.",
+  "holderNameMissing": "Donnez le nom du pays : un identifiant seul ne se lit pas.",
+  "qidInvalid": "Un identifiant Wikidata s’écrit Q suivi de chiffres — par exemple : Q4948.",
+  "holderSubject": "Le pays qui la tient",
+  "lineHolder": "Pays",
+  "lineHolderHelp": "Le pays qui tient la ville selon cette source, par son nom.",
+  "lineHolderMissing": "Donnez le pays que nomme la source.",
+  "lineHolderQidHelp": "Facultatif — par exemple : Q4948.",
+  "quotation": "Citation",
+  "quotationHelp": "Les mots de la source, recopiés tels quels. Facultatif, mais c’est ce qui permet de vérifier la ligne sans le livre."
 }

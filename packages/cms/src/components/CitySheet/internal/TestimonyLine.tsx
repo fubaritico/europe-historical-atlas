@@ -19,11 +19,12 @@ const SUBJECT_KEYS: Readonly<Record<TestimonySubject, CitySheetMessageKey>> = {
   population: 'population',
   importance: 'lineImportance',
   reason: 'reason',
+  holder: 'holderSubject',
 }
 
 /**
- * One line of the sources: which source, what it speaks about, the one value that subject names, where in the source —
- * and a button to remove the line.
+ * One line of the sources: which source, what it speaks about, the one value that subject names, where in the source,
+ * its own words — and a button to remove the line.
  * @param props - the line's rank, the lists, the search and the removal
  * @param props.index - its rank in the lines, from 0
  * @param props.reasons - the reasons a line may give
@@ -62,6 +63,7 @@ export function TestimonyLine({
       />
       <TestimonyValueField index={index} reasons={reasons} say={say} />
       <TextField name={`${path}.where`} label={say('where')} help={say('whereHelp')} />
+      <TextField name={`${path}.quotation`} label={say('quotation')} help={say('quotationHelp')} />
       <div className="city-sheet__line-actions">
         <IconButton
           type="button"

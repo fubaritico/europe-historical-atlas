@@ -76,10 +76,12 @@ describe('toContentCity', () => {
           {
             source: { id: '4', title: 'Buringh 2021', author: 'Eltjo Buringh', url: null },
             where: 'p. 12',
+            quotation: null,
             subject: 'population',
             population: 35000,
           },
         ],
+        holder: null,
       })
     })
 
@@ -104,16 +106,61 @@ describe('toContentCity', () => {
         {
           source: expect.objectContaining({ id: '4' }) as unknown,
           where: null,
+          quotation: null,
           subject: 'reason',
           reason: { fr: 'Évêché', en: null },
         },
         {
           source: expect.objectContaining({ id: '4' }) as unknown,
           where: null,
+          quotation: null,
           subject: 'importance',
           importance: 'large-city',
         },
       ])
+    })
+
+    it('writes the holder, its quoted line, and a holder with no Wikidata id', () => {
+      const line = {
+        source: BURINGH,
+        subject: 'holder' as const,
+        holderName: 'Republic of Venice',
+        holderQid: 'Q4948',
+        where: 'p. 33',
+        quotation: 'the doge rules in the name of the emperor',
+      }
+      const city = toContentCity(
+        rome({ testimonies: [line], holderName: 'Republic of Venice', holderQid: 'Q4948' })
+      )
+      expect(city.holder).toEqual({ name: 'Republic of Venice', wikidata: 'Q4948' })
+      expect(city.testimonies).toEqual([
+        {
+          source: expect.objectContaining({ id: '4' }) as unknown,
+          where: 'p. 33',
+          quotation: 'the doge rules in the name of the emperor',
+          subject: 'holder',
+          holder: { name: 'Republic of Venice', wikidata: 'Q4948' },
+        },
+      ])
+      const nameOnly = toContentCity(rome({ holderName: 'Norse Greenland', holderQid: '' }))
+      expect(nameOnly.holder).toEqual({ name: 'Norse Greenland', wikidata: null })
+    })
+
+    it('writes a holder line whose Wikidata id was emptied as one with none', () => {
+      const line = {
+        source: BURINGH,
+        subject: 'holder' as const,
+        holderName: 'Norse Greenland',
+        holderQid: '',
+        where: null,
+      }
+      expect(toContentCity(rome({ testimonies: [line] })).testimonies[0]).toMatchObject({
+        holder: { name: 'Norse Greenland', wikidata: null },
+      })
+    })
+
+    it('writes no holder for a sheet whose holder was emptied in the admin', () => {
+      expect(toContentCity(rome({ holderName: '', holderQid: '' })).holder).toBeNull()
     })
 
     it('writes a city with no reason and no line', () => {

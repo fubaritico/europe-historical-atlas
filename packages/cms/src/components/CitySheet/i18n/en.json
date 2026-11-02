@@ -93,5 +93,18 @@
   "reasonAdded": "Reason added: {name}",
   "reasonRemoved": "Reason removed: {name}",
   "reasonResults": "{count, plural, =0 {no reason} one {# reason} other {# reasons}}",
-  "reasonNoResults": "No reason of that name."
+  "reasonNoResults": "No reason of that name.",
+  "holder": "Held by",
+  "holderHelp": "The polity holding the city at this date, by its name — for instance: Republic of Venice. Optional. It is what the Cartographer compares with the polity drawn under the city.",
+  "holderQid": "Wikidata id of the polity",
+  "holderQidHelp": "The polity’s, not the city’s — for instance: Q4948 for Venice. Optional: a polity that has none is entered by its name alone. Check it on Wikidata: imported maps carry wrong ones.",
+  "holderNameMissing": "Give the polity’s name: an id alone cannot be read.",
+  "qidInvalid": "A Wikidata id is Q followed by digits — for instance: Q4948.",
+  "holderSubject": "The polity holding it",
+  "lineHolder": "Polity",
+  "lineHolderHelp": "The polity holding the city according to this source, by its name.",
+  "lineHolderMissing": "Give the polity the source names.",
+  "lineHolderQidHelp": "Optional — for instance: Q4948.",
+  "quotation": "Quotation",
+  "quotationHelp": "The source’s own words, copied as they are. Optional, but it is what lets the line be checked without the book."
 }

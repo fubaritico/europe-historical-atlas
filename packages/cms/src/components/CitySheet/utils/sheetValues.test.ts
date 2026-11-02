@@ -30,6 +30,8 @@ describe('sheetValues', () => {
         importance: 'capital',
         reasons: [],
         testimonies: [],
+        holderName: '',
+        holderQid: '',
       })
     })
 
@@ -43,6 +45,8 @@ describe('sheetValues', () => {
         importance: 'capital',
         reasons: [],
         testimonies: [],
+        holderName: null,
+        holderQid: null,
       })
     })
   })
@@ -78,7 +82,10 @@ describe('sheetValues', () => {
         population: 35000,
         importance: null,
         reason: null,
+        holderName: null,
+        holderQid: null,
         where: 'p. 12',
+        quotation: null,
       }
       const values = sheetValues(
         { ...saved, reasons: [1, { id: 2 }], testimonies: [row] },
@@ -95,10 +102,65 @@ describe('sheetValues', () => {
           population: '35000',
           importance: '',
           reason: null,
+          holderName: '',
+          holderQid: '',
           where: 'p. 12',
+          quotation: '',
         },
       ])
       expect(sheetBody(values).testimonies).toEqual([row])
+    })
+
+    it('reads the holder and a quoted line naming it, and sends them back', () => {
+      const row = {
+        id: 'r2',
+        source: 4,
+        subject: 'holder',
+        population: null,
+        importance: null,
+        reason: null,
+        holderName: 'Republic of Venice',
+        holderQid: 'Q4948',
+        where: 'p. 33',
+        quotation: 'in the name of the emperor',
+      }
+      const doc = {
+        ...saved,
+        testimonies: [row],
+        holderName: 'Republic of Venice',
+        holderQid: 'Q4948',
+      }
+      const values = sheetValues(doc, 'Zadar', new Map([['4', 'Horvat 1924']]))
+      expect([values.holderName, values.holderQid]).toEqual(['Republic of Venice', 'Q4948'])
+      const body = sheetBody(values)
+      expect([body.holderName, body.holderQid]).toEqual(['Republic of Venice', 'Q4948'])
+      expect(body.testimonies).toEqual([row])
+    })
+
+    it('sends a holder left blank as none, and a line’s holder only when it speaks of one', () => {
+      const values = { ...sheetValues({}, null, new Map()), holderName: '  ', holderQid: '' }
+      expect(sheetBody(values)).toMatchObject({ holderName: null, holderQid: null })
+      const line = { ...emptyTestimony(), subject: 'population' as const, holderName: 'Venice' }
+      expect(testimonyBody(line)).toMatchObject({ holderName: null, holderQid: null })
+    })
+
+    it('cuts the blanks around a typed holder and its id, never around a quotation', () => {
+      const values = {
+        ...sheetValues({}, null, new Map()),
+        holderName: ' Venise ',
+        holderQid: 'Q4948 ',
+      }
+      expect(sheetBody(values)).toMatchObject({ holderName: 'Venise', holderQid: 'Q4948' })
+      const line = {
+        ...emptyTestimony(),
+        subject: 'holder' as const,
+        holderQid: ' Q4948',
+        quotation: ' « in the name » ',
+      }
+      expect(testimonyBody(line)).toMatchObject({
+        holderQid: 'Q4948',
+        quotation: ' « in the name » ',
+      })
     })
 
     it('sends only the value a line’s subject names, the others null', () => {
@@ -126,6 +188,8 @@ describe('sheetValues', () => {
         importance: '',
         reasons: [],
         testimonies: [],
+        holderName: '',
+        holderQid: '',
       })
     })
 

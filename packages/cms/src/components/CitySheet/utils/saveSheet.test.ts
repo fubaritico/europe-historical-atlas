@@ -14,6 +14,8 @@ const body: SheetBody = {
   importance: 'capital',
   reasons: [],
   testimonies: [],
+  holderName: null,
+  holderQid: null,
 }
 
 /**

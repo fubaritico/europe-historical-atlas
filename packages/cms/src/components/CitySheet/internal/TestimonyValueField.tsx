@@ -3,14 +3,15 @@ import { useFormikContext } from 'formik'
 import { importanceChoices } from '../utils/importanceChoices'
 
 import { ChoiceField } from './ChoiceField'
+import { HolderLineFields } from './HolderLineFields'
 import { NumberField } from './NumberField'
 
 import type { Say } from '../utils/say'
 import type { RecordChoice, SheetValues } from '../utils/sheetValues'
 
 /**
- * The one value a line's subject names: the inhabitants for the population, an importance, a reason — nothing until
- * the subject is chosen.
+ * The one value a line's subject names: the inhabitants for the population, an importance, a reason, the polity that
+ * held the city with its Wikidata id — nothing until the subject is chosen.
  * @param props - the line's rank, the reasons and the translator
  * @param props.index - the line's rank, from 0
  * @param props.reasons - the reasons a line may give
@@ -59,6 +60,8 @@ export function TestimonyValueField({
           named={(value) => say('reasonNamed', { value })}
         />
       )
+    case 'holder':
+      return <HolderLineFields path={path} say={say} />
     default:
       return null
   }

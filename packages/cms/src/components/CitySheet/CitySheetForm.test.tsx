@@ -2,7 +2,7 @@
 import '../../testing/popoverStandIn'
 import '../../testing/resizeObserverStandIn'
 
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -30,6 +30,8 @@ const rome: SheetValues = {
   importance: 'capital',
   reasons: [],
   testimonies: [],
+  holderName: '',
+  holderQid: '',
 }
 
 /** A new sheet. */
@@ -39,6 +41,8 @@ const empty: SheetValues = {
   importance: '',
   reasons: [],
   testimonies: [],
+  holderName: '',
+  holderQid: '',
 }
 
 /**
@@ -341,7 +345,46 @@ describe('CitySheetForm', () => {
           population: 35000,
           importance: null,
           reason: null,
+          holderName: null,
+          holderQid: null,
           where: 'p. 12',
+          quotation: null,
+        },
+      ])
+    })
+
+    it('adds a quoted line naming the holder, enters the holder, and saves both', async () => {
+      const fetcher = serverWithSources()
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      const holder = screen.getByRole('group', { name: 'Tenue par' })
+      await user.type(within(holder).getByLabelText('Pays'), 'Papal States')
+      await user.type(within(holder).getByLabelText('Identifiant Wikidata du pays'), 'Q170174')
+      await user.click(screen.getByRole('button', { name: 'Ajouter une source' }))
+      const line = screen.getByRole('group', { name: 'Source 1' })
+      await user.type(within(line).getByRole('combobox', { name: 'Source' }), 'Bur')
+      await user.click(await screen.findByRole('option', { name: 'Buringh 2021' }))
+      await user.click(within(line).getByRole('button', { name: 'Sur quoi : Choisir' }))
+      await user.click(await screen.findByRole('option', { name: 'Le pays qui la tient' }))
+      await user.type(within(line).getByLabelText('Pays'), 'Papal States')
+      await user.type(within(line).getByLabelText('Citation'), 'the Patrimony of Peter')
+      await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalled()
+      })
+      const body = savedBody(fetcher)
+      expect([body.holderName, body.holderQid]).toEqual(['Papal States', 'Q170174'])
+      expect(body.testimonies).toEqual([
+        {
+          source: 4,
+          subject: 'holder',
+          population: null,
+          importance: null,
+          reason: null,
+          holderName: 'Papal States',
+          holderQid: null,
+          where: null,
+          quotation: 'the Patrimony of Peter',
         },
       ])
     })

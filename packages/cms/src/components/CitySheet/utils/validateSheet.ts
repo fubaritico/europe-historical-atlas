@@ -6,7 +6,7 @@ import { isDateRefusal } from '@europe-historical-atlas/core/time/historicalDate
 import { toHistoricalDate } from '../../../fields/dateReading'
 import { OVERLAP_PATH, overlappingSheet } from '../../../fields/sheetOverlap'
 
-import { momentFields, readNumber, testimonyBody } from './sheetValues'
+import { momentFields, readNumber, sheetBody, testimonyBody } from './sheetValues'
 
 import type { CitySheetMessageKey } from '../i18n'
 import type { Say } from './say'
@@ -132,6 +132,9 @@ function withIssues(
     else if (issue.field === 'importance')
       all = withError(all, 'importance', say('importanceMissing'))
     else if (issue.field === 'testimonies') all = withLineIssue(all, issue, say)
+    else if (issue.field === 'holderName')
+      all = withError(all, 'holderName', say('holderNameMissing'))
+    else if (issue.field === 'holderQid') all = withError(all, 'holderQid', say('qidInvalid'))
     else if (issue.field !== 'date' || !dateRefused) all = withUnexpected(all, issue, say)
   }
   return all
@@ -144,6 +147,8 @@ const LINE_SENTENCES: Readonly<Record<string, CitySheetMessageKey>> = {
   population: 'populationInvalid',
   importance: 'lineImportanceMissing',
   reason: 'reasonMissing',
+  holderName: 'lineHolderMissing',
+  holderQid: 'qidInvalid',
 }
 
 /**
@@ -224,12 +229,15 @@ export function validateSheet(values: SheetValues, say: Say, overlap?: OverlapCh
   const dateRefused = Array.isArray(date)
   if (dateRefused) for (const [path, sentence] of date) errors = withError(errors, path, sentence)
   else if (overlap !== undefined) errors = withOverlap(errors, values, overlap)
+  const body = sheetBody(values)
   const answer = checkCitySheet({
     place: values.place?.id,
     date: dateRefused ? undefined : date,
     importance: values.importance === '' ? undefined : values.importance,
     reasons: values.reasons,
     testimonies: values.testimonies.map(testimonyBody),
+    holderName: body.holderName,
+    holderQid: body.holderQid,
   })
   return isSheetRefused(answer) ? withIssues(errors, answer, dateRefused, say) : errors
 }

@@ -23,6 +23,7 @@ import { historicalDateSchema, historicalMomentSchema } from '../time/historical
 
 import { CITY_IMPORTANCES } from './cityImportance'
 import { SIEGE_ENGINES } from './siegeEngines'
+import { WIKIDATA_ID } from './wikidataId'
 
 import type { CityImportance } from './cityImportance'
 import type { SiegeEngine } from './siegeEngines'
@@ -44,7 +45,7 @@ const localizedText: z.ZodMiniType<LocalizedText> = z.strictObject({
 
 /** A Wikidata entity id, checked in shape only. */
 const wikidataId = z.nullable(
-  z.string().check(z.regex(/^Q\d+$/, 'should be a Wikidata id like Q1218'))
+  z.string().check(z.regex(WIKIDATA_ID, 'should be a Wikidata id like Q1218'))
 )
 
 /** A record's id, as the contribution tool gave it. */
@@ -200,34 +201,62 @@ export type ContentTestimonyValue =
   | { subject: 'importance'; importance: CityImportance }
   /** One reason for its importance, named. */
   | { subject: 'reason'; reason: LocalizedText }
+  /** Which polity held it at that date (CMS-335). */
+  | { subject: 'holder'; holder: ContentHolder }
 
-/** One line of what the sources say of a city: the source written in, what it says, where it says it. */
+/** One line of what the sources say of a city: the source written in, what it says, where, and in its own words. */
 export type ContentTestimony = ContentTestimonyValue & {
   /** The source. */
   source: ContentSource
   /** Where in it — a page, a line, a column — or `null`. */
   where: string | null
+  /** The source's own words, quoted, or `null`. */
+  quotation: string | null
 }
+
+/** A polity that held a city at a date — « tenue par » (CMS-335). */
+export interface ContentHolder {
+  /** Its name, as entered in the contribution. */
+  name: string
+  /** Its Wikidata id — what a map's polity is compared by — or `null` for a polity that has none. */
+  wikidata: string | null
+}
+
+/** {@link ContentHolder}. */
+const holderSchema: z.ZodMiniType<ContentHolder> = z.strictObject({
+  name: z.string().check(z.minLength(1)),
+  wikidata: wikidataId,
+})
 
 /** {@link ContentTestimony}. */
 const testimonySchema: z.ZodMiniType<ContentTestimony> = z.discriminatedUnion('subject', [
   z.strictObject({
     source: sourceSchema,
     where: z.nullable(z.string()),
+    quotation: z.nullable(z.string()),
     subject: z.literal('population'),
     population: z.int().check(z.gte(0)),
   }),
   z.strictObject({
     source: sourceSchema,
     where: z.nullable(z.string()),
+    quotation: z.nullable(z.string()),
     subject: z.literal('importance'),
     importance: z.enum(CITY_IMPORTANCES),
   }),
   z.strictObject({
     source: sourceSchema,
     where: z.nullable(z.string()),
+    quotation: z.nullable(z.string()),
     subject: z.literal('reason'),
     reason: localizedText,
+  }),
+  z.strictObject({
+    source: sourceSchema,
+    where: z.nullable(z.string()),
+    quotation: z.nullable(z.string()),
+    subject: z.literal('holder'),
+    holder: holderSchema,
   }),
 ])
 
@@ -248,6 +277,8 @@ export interface ContentCity {
   reasons: LocalizedText[]
   /** What the sources say of it — the « why » the atlas can show on a click. */
   testimonies: ContentTestimony[]
+  /** The polity that held it at that date, or `null` before it is entered (CMS-335). */
+  holder: ContentHolder | null
 }
 
 /** {@link ContentCity}. */
@@ -258,6 +289,7 @@ const citySchema: z.ZodMiniType<ContentCity> = z.strictObject({
   importance: z.enum(CITY_IMPORTANCES),
   reasons: z.array(localizedText),
   testimonies: z.array(testimonySchema),
+  holder: z.nullable(holderSchema),
 })
 
 /** `content/events.json` — every event and every city at a date the atlas can show. */
@@ -273,9 +305,10 @@ export interface ContentFile {
 /**
  * The version this code writes and reads — 2 since the event type carries its icon (2026-10-26), 3 since an event
  * carries its siege engine (2026-10-27, ATLAS-286), 4 since the event type carries its pins' colour (2026-10-27,
- * ATLAS-298), 5 since the file carries the cities at a date (2026-10-30, ATLAS-295).
+ * ATLAS-298), 5 since the file carries the cities at a date (2026-10-30, ATLAS-295), 6 since a city carries its holder
+ * and a source line its quotation (2026-11-02, CMS-335).
  */
-export const CONTENT_FORMAT_VERSION = 5
+export const CONTENT_FORMAT_VERSION = 6
 
 /** {@link ContentFile}. The writer's version and the reader's are one constant, so a bump cannot split them. */
 export const contentFileSchema: z.ZodMiniType<ContentFile> = z.strictObject({

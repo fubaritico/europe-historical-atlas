@@ -47,8 +47,14 @@ export interface TestimonyValues {
   importance: CityImportance | ''
   /** The reason it gives, by its id — read when the subject is a reason; `null` before one is chosen. */
   reason: number | string | null
+  /** The polity it names, as typed — read when the subject is the holder. */
+  holderName: string
+  /** That polity's Wikidata id, as typed — read when the subject is the holder. */
+  holderQid: string
   /** Where in the source, as typed. */
   where: string
+  /** The source's own words, as typed. */
+  quotation: string
 }
 
 /** The form's values. */
@@ -63,6 +69,10 @@ export interface SheetValues {
   reasons: (number | string)[]
   /** The lines of the sources. */
   testimonies: TestimonyValues[]
+  /** The polity that held it, by its name, as typed — « tenue par ». */
+  holderName: string
+  /** That polity's Wikidata id, as typed. */
+  holderQid: string
 }
 
 /** One line as the collection stores it. */
@@ -79,8 +89,14 @@ export interface TestimonyBody {
   importance: CityImportance | null
   /** The reason, for a line about one. */
   reason: number | string | null
+  /** The polity, for a line about the holder. */
+  holderName: string | null
+  /** Its Wikidata id, for a line about the holder. */
+  holderQid: string | null
   /** Where in the source. */
   where: string | null
+  /** The source's own words. */
+  quotation: string | null
 }
 
 /** What the form sends to Payload's API. */
@@ -95,6 +111,10 @@ export interface SheetBody {
   reasons: (number | string)[]
   /** The lines; each keeps only the value its subject names, the others `null` as the collection holds them. */
   testimonies: TestimonyBody[]
+  /** The holder's name, `null` when none is typed. */
+  holderName: string | null
+  /** The holder's Wikidata id, `null` when none is typed. */
+  holderQid: string | null
 }
 
 /** A sheet as Payload hands it to the view — whatever it holds, read field by field. */
@@ -148,7 +168,10 @@ export function emptyTestimony(): TestimonyValues {
     population: '',
     importance: '',
     reason: null,
+    holderName: '',
+    holderQid: '',
     where: '',
+    quotation: '',
   }
 }
 
@@ -173,8 +196,20 @@ function testimonyValues(
     population: asText(row.population as number | null | undefined),
     importance: (row.importance as CityImportance | null | undefined) ?? '',
     reason: relationId(row.reason),
-    where: typeof row.where === 'string' ? row.where : '',
+    holderName: textOf(row.holderName),
+    holderQid: textOf(row.holderQid),
+    where: textOf(row.where),
+    quotation: textOf(row.quotation),
   }
+}
+
+/**
+ * A stored text as the input's text.
+ * @param value - the stored field
+ * @returns it, or `''` when the field holds no text
+ */
+function textOf(value: unknown): string {
+  return typeof value === 'string' ? value : ''
 }
 
 /**
@@ -199,6 +234,8 @@ export function sheetValues(
     importance: importance ?? '',
     reasons: relationIds(doc.reasons),
     testimonies: rows.map((row) => testimonyValues(row, sourceNames)),
+    holderName: textOf(doc.holderName),
+    holderQid: textOf(doc.holderQid),
   }
 }
 
@@ -240,7 +277,29 @@ export function sheetBody(values: SheetValues): SheetBody {
     importance: values.importance === '' ? null : values.importance,
     reasons: values.reasons,
     testimonies: values.testimonies.map(testimonyBody),
+    holderName: trimmed(values.holderName),
+    holderQid: trimmed(values.holderQid),
   }
+}
+
+/**
+ * A typed text as the collection stores it.
+ * @param text - the input's text
+ * @returns it, or `null` for an input left blank
+ */
+function typed(text: string): string | null {
+  return text.trim() === '' ? null : text
+}
+
+/**
+ * A typed name or id as the collection stores it, its blanks around cut — a Wikidata id pasted with a space would be
+ * refused although nothing looks wrong, and a name compared by the cities layer must not carry them. Never for a
+ * quotation, which is kept as written.
+ * @param text - the input's text
+ * @returns it trimmed, or `null` for an input left blank
+ */
+function trimmed(text: string): string | null {
+  return typed(text.trim())
 }
 
 /**
@@ -256,6 +315,18 @@ export function testimonyBody(line: TestimonyValues): TestimonyBody {
     population: line.subject === 'population' ? readNumber(line.population) : null,
     importance: line.subject === 'importance' && line.importance !== '' ? line.importance : null,
     reason: line.subject === 'reason' ? line.reason : null,
-    where: line.where.trim() === '' ? null : line.where,
+    ...lineHolder(line),
+    where: typed(line.where),
+    quotation: typed(line.quotation),
   }
+}
+
+/**
+ * A line's holder as the collection stores it: the polity and its id for a line about the holder, `null` otherwise.
+ * @param line - the form's line
+ * @returns the two fields
+ */
+function lineHolder(line: TestimonyValues): Pick<TestimonyBody, 'holderName' | 'holderQid'> {
+  if (line.subject !== 'holder') return { holderName: null, holderQid: null }
+  return { holderName: trimmed(line.holderName), holderQid: trimmed(line.holderQid) }
 }

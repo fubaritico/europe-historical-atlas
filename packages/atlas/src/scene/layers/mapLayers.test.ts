@@ -333,6 +333,7 @@ describe('createMapLayers', () => {
         importance: 'capital',
         reasons: [],
         testimonies: [],
+        holder: null,
       }
       sources.cities = [paris]
       sources.mapDrawn = true

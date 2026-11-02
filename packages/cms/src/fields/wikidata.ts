@@ -1,7 +1,6 @@
-import type { TextField } from 'payload'
+import { WIKIDATA_ID } from '@europe-historical-atlas/core/data/wikidataId'
 
-/** A Wikidata id: `Q` and digits. */
-const WIKIDATA_ID = /^Q\d+$/
+import type { TextField } from 'payload'
 
 /**
  * Say whether a typed Wikidata id has the right shape — never whether the item exists.

@@ -26,6 +26,7 @@ function city(id: string, lon: number, lat: number): ContentCity {
     importance: 'city',
     reasons: [],
     testimonies: [],
+    holder: null,
   } as unknown as ContentCity
 }
 

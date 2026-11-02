@@ -369,6 +369,14 @@ export interface PlacePeriod {
    */
   reasons?: (number | ImportanceReason)[] | null;
   /**
+   * Le pays qui tient la ville à cette date, par son nom — par exemple : République de Venise. Facultatif. C’est ce que le Cartographe compare au pays dessiné sous la ville.
+   */
+  holderName?: string | null;
+  /**
+   * Celui du pays, pas de la ville — par exemple : Q4948 pour Venise. Facultatif : un pays qui n’en a pas se saisit par son nom seul. Vérifiez-le sur Wikidata : les cartes importées en portent de faux.
+   */
+  holderQid?: string | null;
+  /**
    * Facultatif. Une ligne par chose qu’une source dit de la ville à cette date — par exemple : Buringh 2021, population, 25 000. La source se choisit dans « Sources », qui doit donc la contenir.
    */
   testimonies?:
@@ -378,16 +386,28 @@ export interface PlacePeriod {
          */
         source: number | Source;
         /**
-         * De quoi parle la source : la population, l’importance, ou une raison.
+         * De quoi parle la source : la population, l’importance, une raison, ou le pays qui tient la ville.
          */
-        subject: 'population' | 'importance' | 'reason';
+        subject: 'population' | 'importance' | 'reason' | 'holder';
         population?: number | null;
         importance?: ('capital' | 'large-city' | 'city') | null;
         reason?: (number | null) | ImportanceReason;
         /**
+         * Le pays qui tient la ville selon cette source, par son nom.
+         */
+        holderName?: string | null;
+        /**
+         * Facultatif — par exemple : Q4948.
+         */
+        holderQid?: string | null;
+        /**
          * Où la source le dit : une page, une ligne, une colonne. Facultatif.
          */
         where?: string | null;
+        /**
+         * Les mots de la source, recopiés tels quels. Facultatif, mais c’est ce qui permet de vérifier la ligne sans le livre.
+         */
+        quotation?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -684,6 +704,8 @@ export interface PlacePeriodsSelect<T extends boolean = true> {
       };
   importance?: T;
   reasons?: T;
+  holderName?: T;
+  holderQid?: T;
   testimonies?:
     | T
     | {
@@ -692,7 +714,10 @@ export interface PlacePeriodsSelect<T extends boolean = true> {
         population?: T;
         importance?: T;
         reason?: T;
+        holderName?: T;
+        holderQid?: T;
         where?: T;
+        quotation?: T;
         id?: T;
       };
   updatedAt?: T;

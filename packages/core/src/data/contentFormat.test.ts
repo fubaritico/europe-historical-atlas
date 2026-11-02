@@ -76,10 +76,12 @@ function rome(overrides: Record<string, unknown> = {}): unknown {
       {
         source: { id: '4', title: 'Buringh 2021', author: 'Eltjo Buringh', url: null },
         where: 'p. 12',
+        quotation: null,
         subject: 'population',
         population: 35000,
       },
     ],
+    holder: { name: 'Papal States', wikidata: 'Q170174' },
     ...overrides,
   }
 }
@@ -108,20 +110,56 @@ describe('contentFileSchema — the cities at a date', () => {
     it('accepts a line about the importance and one about a named reason', () => {
       const source = { id: '4', title: 'Buringh 2021', author: null, url: null }
       const lines = [
-        { source, where: null, subject: 'importance', importance: 'large-city' },
-        { source, where: null, subject: 'reason', reason: { fr: 'Pèlerinage', en: 'Pilgrimage' } },
+        { source, where: null, quotation: null, subject: 'importance', importance: 'large-city' },
+        {
+          source,
+          where: null,
+          quotation: null,
+          subject: 'reason',
+          reason: { fr: 'Pèlerinage', en: 'Pilgrimage' },
+        },
       ]
       expect(acceptsCity(rome({ testimonies: lines }))).toBe(true)
     })
 
-    it('accepts a city with no reason and no line', () => {
-      expect(acceptsCity(rome({ reasons: [], testimonies: [] }))).toBe(true)
+    it('accepts a city with no reason, no line and no holder', () => {
+      expect(acceptsCity(rome({ reasons: [], testimonies: [], holder: null }))).toBe(true)
+    })
+
+    it('accepts a line about the holder, quoted, and a holder with no Wikidata id', () => {
+      const source = {
+        id: '7',
+        title: 'The History of Iceland',
+        author: 'Gunnar Karlsson',
+        url: null,
+      }
+      const line = {
+        source,
+        where: 'p. 82–83',
+        quotation: 'By 1264, all Icelandic chieftains had sworn allegiance to the King of Norway',
+        subject: 'holder',
+        holder: { name: 'Icelandic Commonwealth', wikidata: 'Q62389' },
+      }
+      const city = rome({
+        testimonies: [line],
+        holder: { name: 'Norse Greenland', wikidata: null },
+      })
+      expect(acceptsCity(city)).toBe(true)
     })
   })
 
   describe('managed errors', () => {
     it('refuses an importance the map does not have', () => {
       expect(acceptsCity(rome({ importance: 'village' }))).toBe(false)
+    })
+
+    it('refuses a city written without its holder, as a file of version 5 was', () => {
+      const { holder: _dropped, ...older } = rome() as Record<string, unknown>
+      expect(acceptsCity(older)).toBe(false)
+    })
+
+    it('refuses a holder whose Wikidata id is not one', () => {
+      expect(acceptsCity(rome({ holder: { name: 'Venice', wikidata: 'Venice' } }))).toBe(false)
     })
 
     it('refuses a line about the population without its figure', () => {
@@ -223,7 +261,7 @@ describe('contentFileSchema', () => {
     })
 
     it('refuses an unknown version, the earlier ones included', () => {
-      for (const version of [1, 2, 3, 4, 6])
+      for (const version of [1, 2, 3, 4, 5, 7])
         expect(contentFileSchema.safeParse({ version, events: [], cities: [] }).success).toBe(false)
     })
 

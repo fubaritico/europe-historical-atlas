@@ -12,6 +12,7 @@ import type {
 import type { CitySheet } from '@europe-historical-atlas/core/data/citySheet'
 import type {
   ContentCity,
+  ContentHolder,
   ContentTestimony,
 } from '@europe-historical-atlas/core/data/contentFormat'
 
@@ -39,6 +40,12 @@ export interface DocTestimony {
   reason?: DocReason | DocId | null
   /** Where in the source. */
   where?: string | null
+  /** The polity's name, for a line about the holder. */
+  holderName?: string | null
+  /** The polity's Wikidata id, for a line about the holder. */
+  holderQid?: string | null
+  /** The source's own words. */
+  quotation?: string | null
 }
 
 /** A city at a date, its relations resolved. */
@@ -55,6 +62,10 @@ export interface DocCitySheet {
   reasons?: (DocReason | DocId)[] | null
   /** What the sources say. */
   testimonies?: DocTestimony[] | null
+  /** The polity that held it, by its name. */
+  holderName?: string | null
+  /** That polity's Wikidata id. */
+  holderQid?: string | null
 }
 
 /**
@@ -102,7 +113,11 @@ function toTestimony(
 ): ContentTestimony {
   // The schema refused a line without its source before this runs; a null here is the two readings disagreeing.
   if (row.source === null || row.source === undefined) throw new Error(`[CMS] ${where}: no source`)
-  const base = { source: toSource(row.source, `${where}, source`), where: present(row.where) }
+  const base = {
+    source: toSource(row.source, `${where}, source`),
+    where: present(row.where),
+    quotation: present(row.quotation),
+  }
   switch (line.subject) {
     case 'population':
       return { ...base, subject: 'population', population: line.population }
@@ -110,7 +125,19 @@ function toTestimony(
       return { ...base, subject: 'importance', importance: line.importance }
     case 'reason':
       return { ...base, subject: 'reason', reason: reasonName(row.reason, `${where}, reason`) }
+    case 'holder':
+      return { ...base, subject: 'holder', holder: toHolder(line.holderName, line.holderQid) }
   }
+}
+
+/**
+ * A holder as the atlas reads it, from what the schema read.
+ * @param name - the polity's name
+ * @param qid - its Wikidata id, when it has one
+ * @returns the holder
+ */
+function toHolder(name: string, qid: string | null | undefined): ContentHolder {
+  return { name, wikidata: qid ?? null }
 }
 
 /**
@@ -137,5 +164,9 @@ export function toContentCity(sheet: DocCitySheet): ContentCity {
       if (row === undefined) throw new Error(`[CMS] ${where}: line ${String(index + 1)} vanished`)
       return toTestimony(row, line, `${where}, line ${String(index + 1)}`)
     }),
+    holder:
+      read.holderName === null || read.holderName === undefined
+        ? null
+        : toHolder(read.holderName, read.holderQid),
   }
 }

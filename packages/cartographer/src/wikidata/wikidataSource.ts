@@ -1,3 +1,5 @@
+import { WIKIDATA_ID } from '@europe-historical-atlas/core/data/wikidataId'
+
 import { readEntity } from './wikidataFacts'
 
 import type { WikidataFacts } from './wikidataFacts'
@@ -19,7 +21,7 @@ import type { WikidataFacts } from './wikidataFacts'
 export const WIKIDATA_BATCH = 50
 
 /** A Wikidata id: Q followed by digits. */
-export const WIKIDATA_ID = /^Q\d+$/
+export { WIKIDATA_ID }
 
 /** What a read answers. */
 export interface WikidataAnswer {

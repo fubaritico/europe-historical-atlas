@@ -25,6 +25,20 @@ export function citySheetCandidate(data: Record<string, unknown>): Record<string
       ...row,
       source: relationId(row.source),
       reason: relationId(row.reason),
+      // The id is optional, so an emptied one is none; the name is not, and stays as typed for its own rule.
+      holderQid: filled(row.holderQid),
     })),
+    holderName: filled(data.holderName),
+    holderQid: filled(data.holderQid),
   }
+}
+
+/**
+ * An optional text field as the schema reads it: the admin saves an emptied field as `''`, which says no more than
+ * nothing — so it is read as nothing, not as a name or an id the schema would refuse.
+ * @param value - the field as stored
+ * @returns the text, or `null` for nothing
+ */
+function filled(value: unknown): unknown {
+  return value === '' || value === undefined ? null : value
 }

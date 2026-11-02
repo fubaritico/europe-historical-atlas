@@ -35,6 +35,8 @@
 
 import { z } from 'zod/mini'
 
+import { WIKIDATA_ID } from './wikidataId'
+
 /** A pinned colour, as a six-digit hex string. */
 const hexColour = z.nullable(
   z.string().check(z.regex(/^#[0-9a-fA-F]{6}$/, 'should be a #rrggbb hex colour'))
@@ -42,7 +44,7 @@ const hexColour = z.nullable(
 
 /** A Wikidata entity id. Checked in shape only — we never resolve it. */
 const wikidataId = z.nullable(
-  z.string().check(z.regex(/^Q\d+$/, 'should be a Wikidata id like Q70972'))
+  z.string().check(z.regex(WIKIDATA_ID, 'should be a Wikidata id like Q70972'))
 )
 
 /** A year, negative for BCE. Whole, because this project authors years and not instants. */

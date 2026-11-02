@@ -7,6 +7,8 @@
 
 import { z } from 'zod/mini'
 
+import { WIKIDATA_ID } from '@europe-historical-atlas/core/data/wikidataId'
+
 import type { HistoricalMoment } from '@europe-historical-atlas/core/time/historicalDate'
 
 /** How this tool introduces itself to Wikimedia, which asks every client to say who it is. */
@@ -67,8 +69,8 @@ export function entityUrl(id: string): string {
   return `https://www.wikidata.org/wiki/Special:EntityData/${encodeURIComponent(id)}.json`
 }
 
-/** A Wikidata item id. */
-export const WIKIDATA_ID = /^Q\d+$/
+/** A Wikidata item id — core's one pattern, re-exported for this module's readers. */
+export { WIKIDATA_ID }
 
 /** What the search answers — only the fields read. */
 const searchAnswer = z.object({

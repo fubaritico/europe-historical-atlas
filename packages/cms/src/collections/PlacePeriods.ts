@@ -36,6 +36,7 @@ const SUBJECT_LABELS: Readonly<Record<TestimonySubject, string>> = {
   population: 'Population',
   importance: 'Importance',
   reason: 'Raison',
+  holder: 'Tenue par',
 }
 
 /** The HTTP status of a refused save: the request is wrong, not the server. */
@@ -180,6 +181,26 @@ export const PlacePeriods: CollectionConfig = {
           'Pourquoi elle a cette importance : pouvoir, religion, commerce… Facultatif. La liste se complète dans « Raisons d’importance ».',
       },
     },
+    // « Tenue par » (CMS-335): two added columns, neither required, so the sheets already saved stay valid and the
+    // push mode adds them without a question (CMS-276).
+    {
+      name: 'holderName',
+      type: 'text',
+      label: 'Tenue par',
+      admin: {
+        description:
+          'Le pays qui tient la ville à cette date, par son nom — par exemple : République de Venise. Facultatif. C’est ce que le Cartographe compare au pays dessiné sous la ville.',
+      },
+    },
+    {
+      name: 'holderQid',
+      type: 'text',
+      label: 'Identifiant Wikidata du pays',
+      admin: {
+        description:
+          'Celui du pays, pas de la ville — par exemple : Q4948 pour Venise. Facultatif : un pays qui n’en a pas se saisit par son nom seul. Vérifiez-le sur Wikidata : les cartes importées en portent de faux.',
+      },
+    },
     {
       name: 'testimonies',
       type: 'array',
@@ -205,7 +226,8 @@ export const PlacePeriods: CollectionConfig = {
           required: true,
           options: TESTIMONY_SUBJECTS.map((value) => ({ value, label: SUBJECT_LABELS[value] })),
           admin: {
-            description: 'De quoi parle la source : la population, l’importance, ou une raison.',
+            description:
+              'De quoi parle la source : la population, l’importance, une raison, ou le pays qui tient la ville.',
           },
         },
         // One value a line, the one its subject names — required, so a « population » line cannot be saved without its
@@ -237,11 +259,39 @@ export const PlacePeriods: CollectionConfig = {
           admin: { condition: (_data, sibling) => sibling.subject === 'reason' },
         },
         {
+          name: 'holderName',
+          type: 'text',
+          label: 'Pays',
+          required: true,
+          admin: {
+            condition: (_data, sibling) => sibling.subject === 'holder',
+            description: 'Le pays qui tient la ville selon cette source, par son nom.',
+          },
+        },
+        {
+          name: 'holderQid',
+          type: 'text',
+          label: 'Identifiant Wikidata du pays',
+          admin: {
+            condition: (_data, sibling) => sibling.subject === 'holder',
+            description: 'Facultatif — par exemple : Q4948.',
+          },
+        },
+        {
           name: 'where',
           type: 'text',
           label: 'Où',
           admin: {
             description: 'Où la source le dit : une page, une ligne, une colonne. Facultatif.',
+          },
+        },
+        {
+          name: 'quotation',
+          type: 'textarea',
+          label: 'Citation',
+          admin: {
+            description:
+              'Les mots de la source, recopiés tels quels. Facultatif, mais c’est ce qui permet de vérifier la ligne sans le livre.',
           },
         },
       ],

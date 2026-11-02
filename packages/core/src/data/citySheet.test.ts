@@ -64,6 +64,29 @@ describe('checkCitySheet', () => {
       const line = { source: 4, subject: 'importance', importance: 'large-city' }
       expect(refusedPaths({ ...rome, testimonies: [line] })).toBe('accepted')
     })
+
+    it('reads the holder with its Wikidata id, and a quoted line naming it', () => {
+      const line = {
+        source: 4,
+        subject: 'holder',
+        holderName: 'Republic of Venice',
+        holderQid: 'Q4948',
+        quotation: 'samo u ime cara bizantinskoga',
+      }
+      const sheet = {
+        ...rome,
+        testimonies: [line],
+        holderName: 'Republic of Venice',
+        holderQid: 'Q4948',
+      }
+      expect(refusedPaths(sheet)).toBe('accepted')
+    })
+
+    it('reads a holder by its name alone, for a polity with no Wikidata id', () => {
+      const line = { source: 4, subject: 'holder', holderName: 'Norse Greenland', holderQid: null }
+      const sheet = { ...rome, testimonies: [line], holderName: 'Norse Greenland', holderQid: null }
+      expect(refusedPaths(sheet)).toBe('accepted')
+    })
   })
 
   describe('managed errors', () => {
@@ -92,6 +115,26 @@ describe('checkCitySheet', () => {
     it('refuses a line without its source, under the source', () => {
       const line = { subject: 'reason', reason: 2 }
       expect(refusedPaths({ ...rome, testimonies: [line] })).toEqual(['testimonies.0.source'])
+    })
+
+    it('refuses a holder’s Wikidata id without its name, under the name', () => {
+      expect(refusedPaths({ ...rome, holderName: '  ', holderQid: 'Q4948' })).toEqual([
+        'holderName',
+      ])
+      expect(refusedPaths({ ...rome, holderName: null, holderQid: 'Q4948' })).toEqual([
+        'holderName',
+      ])
+    })
+
+    it('refuses a holder’s id that is not a Wikidata id, under the id', () => {
+      expect(refusedPaths({ ...rome, holderName: 'Venice', holderQid: 'Venice' })).toEqual([
+        'holderQid',
+      ])
+    })
+
+    it('refuses a line about the holder without the polity it names, under the name', () => {
+      const line = { source: 4, subject: 'holder', holderName: '', holderQid: 'Q4948' }
+      expect(refusedPaths({ ...rome, testimonies: [line] })).toEqual(['testimonies.0.holderName'])
     })
 
     it('refuses a line that says nothing of what it speaks about, under the subject', () => {

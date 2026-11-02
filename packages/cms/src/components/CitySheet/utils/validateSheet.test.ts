@@ -21,6 +21,8 @@ const rome: SheetValues = {
   importance: 'capital',
   reasons: [],
   testimonies: [],
+  holderName: '',
+  holderQid: '',
 }
 
 /**
@@ -105,6 +107,8 @@ describe('validateSheet', () => {
         importance: '',
         reasons: [],
         testimonies: [],
+        holderName: '',
+        holderQid: '',
       }
       expect(validateSheet(empty, say)).toEqual({
         place: 'Choisissez un lieu.',
@@ -217,6 +221,26 @@ describe('validateSheet', () => {
       const reasonLine = { ...emptyTestimony(), source, subject: 'reason' as const }
       expect(validateSheet({ ...rome, testimonies: [reasonLine] }, say)).toEqual({
         testimonies: [{ reason: say('reasonMissing') }],
+      })
+    })
+
+    it('asks for the holder’s name when only its Wikidata id is typed, under the name', () => {
+      expect(validateSheet({ ...rome, holderQid: 'Q4948' }, say)).toEqual({
+        holderName: say('holderNameMissing'),
+      })
+    })
+
+    it('refuses a holder’s id that is not a Wikidata id, under the id', () => {
+      expect(validateSheet({ ...rome, holderName: 'Venise', holderQid: '4948' }, say)).toEqual({
+        holderQid: say('qidInvalid'),
+      })
+    })
+
+    it('asks a holder line for the polity it names, and checks its id', () => {
+      const source = { id: 4, name: 'Horvat 1924' }
+      const line = { ...emptyTestimony(), source, subject: 'holder' as const, holderQid: 'Venise' }
+      expect(validateSheet({ ...rome, testimonies: [line] }, say)).toEqual({
+        testimonies: [{ holderName: say('lineHolderMissing'), holderQid: say('qidInvalid') }],
       })
     })
   })

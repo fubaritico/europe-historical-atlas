@@ -11,6 +11,7 @@ import { relationId } from '../fields/relationId'
 import { OVERLAP_PATH, PlacePeriods, refuseOverlap } from './PlacePeriods'
 import { writeSheetTitle } from './writeSheetTitle'
 
+import type { TestimonySubject } from '@europe-historical-atlas/core/data/cityImportance'
 import type { CollectionBeforeValidateHook, Field } from 'payload'
 import type { Mock } from 'vitest'
 
@@ -240,17 +241,35 @@ describe('PlacePeriods', () => {
       expect(options(field(lineFields(), 'subject'))).toEqual([...TESTIMONY_SUBJECTS])
     })
 
-    it.each(TESTIMONY_SUBJECTS)('shows exactly the value field of a « %s » line', (subject) => {
-      const shown = ['population', 'importance', 'reason'].filter((name) =>
-        shows(field(lineFields(), name), subject)
-      )
-      expect(shown).toEqual([subject])
+    it.each(TESTIMONY_SUBJECTS)('shows exactly the value fields of a « %s » line', (subject) => {
+      const shown = Object.values(VALUE_FIELDS)
+        .flat()
+        .filter((name) => shows(field(lineFields(), name), subject))
+      expect(shown).toEqual(VALUE_FIELDS[subject])
     })
 
-    it.each(['population', 'importance', 'reason'])(
+    it.each(['population', 'importance', 'reason', 'holderName'])(
       'requires the « %s » of a line that speaks of it',
       (name) => {
         expect(field(lineFields(), name)).toMatchObject({ required: true })
+      }
+    )
+
+    it('leaves a holder line’s Wikidata id optional, for a polity that has none', () => {
+      expect(field(lineFields(), 'holderQid')).not.toHaveProperty('required', true)
+    })
+
+    it('shows a line’s quotation whatever its subject, never required', () => {
+      const quotation = field(lineFields(), 'quotation')
+      expect(quotation.admin?.condition).toBeUndefined()
+      expect(quotation).not.toHaveProperty('required', true)
+    })
+
+    // CMS-276: a required column added to a table that holds sheets makes the push mode ask in the terminal.
+    it.each(['holderName', 'holderQid'])(
+      'adds the sheet’s « %s » as an optional column, so the saved sheets stay valid',
+      (name) => {
+        expect(field(PlacePeriods.fields, name)).not.toHaveProperty('required', true)
       }
     )
 
@@ -262,6 +281,14 @@ describe('PlacePeriods', () => {
     })
   })
 })
+
+/** The fields that carry a line's value, by the subject that shows them. */
+const VALUE_FIELDS: Readonly<Record<TestimonySubject, readonly string[]>> = {
+  population: ['population'],
+  importance: ['importance'],
+  reason: ['reason'],
+  holder: ['holderName', 'holderQid'],
+}
 
 /** A named field, the kind that carries a value. */
 type NamedField = Extract<Field, { name: string }>
