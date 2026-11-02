@@ -28,7 +28,19 @@ Scenario: the events come with the map, not before
   When the atlas opens
   Then the events come in the year's one fade, after « Pose des événements… » (s01)
   And an event's file that fails leaves the map without them, and says so (s09)
+
+Scenario: a year shows its own events only
+  Given the events of 1100, and the map of 1100 on screen
+  When I go to 1200
+  Then none of 1100's events is pinned on 1200's map
+  And going back to 1100 pins them again
+  And a change to 1200 that fails leaves 1100's map and its events as they were
 ```
+
+> **Built 2026-11-02 (`eb15874`), on the dev's word** — *"the events are shown on one year only; there, the events of 1100
+> were shown on 1200"*. A date covers its year, an interval each year it covers, circa does not widen
+> (`core/time/dateOverlap`, `dateCoversYear`, his rule of 30/10). The cities still show on every year (ATLAS-341).
+> **Walked** by the dev, 03/11: *"I did see the events distributed by year; it works."*
 
 ## From afar a flat drawing, close up the 3D icon
 

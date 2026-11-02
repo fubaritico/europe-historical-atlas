@@ -1,5 +1,21 @@
 # Next — archive
 
+## Moved from next.md on 2026-11-03 (end of session)
+
+**L'audit des instructions du 29/10** (`files/prompt-audit-2026-10-29.md`, non versionné) remplace celui du 27/10 : ses
+parties A et B sont appliquées. Restent, sans urgence : les skills chargées dans tous ses projets (partie D — `supabase` se
+déclenche ici sur « migrations », « React », « audit » : la désinstaller au niveau global ?) et les points de la partie C,
+dont ses décisions — l'anglais des fichiers de session, `format:check` dans le contrôle local, la « phase de recherche »,
+la marche d'une planche « référence », l'accessibilité de l'admin du CMS. **Une seule question à la fois, et seulement s'il
+y a vraiment à trancher.**
+
+**Sa copie de base** du 27/10 avant le seed : `packages/cms/cms-backup-2026-10-27-2300.db` (ignorée par git) — à lui
+de la supprimer.
+
+**Où parlent les messages du Cartographe** (24/10) : la barre d'état est **à l'outil** ; l'année sur le disque parle en
+**toasts** (en bas au centre) et en **modale d'alarme** (`persistence/notice.ts`). Le hand-off du design system arrive à
+la **racine de ce dépôt** (`HANDOFF-from-fubaritico-ds.md`) : le lire avant de brancher une version.
+
 ## next.md on 2026-11-02, 5 a.m. — the top blocks of the night, replaced by the two-instance resume point
 
 > Moved verbatim at end-session.

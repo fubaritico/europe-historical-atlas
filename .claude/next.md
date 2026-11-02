@@ -5,26 +5,38 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — 02/11, 19 h 45 : la vitesse de l'atlas, étape 2 à tester
+## ▶ ON REPREND ICI — 03/11 au matin : CARTO-345, le plan du copier-coller de tracés
 
-**Il veut reprendre aussitôt, dans la foulée.** **ATLAS-333** (En cours) : l'étape 1 est commitée (`9359e29`, testée) ; **l'étape 2,
-le cache des noms par année, est écrite et non commitée** (`packages/atlas/src/loading/nameCache.ts`, `stages/names.ts`,
-`pipelineContext.ts`, `mapPipeline.ts`) — à lui de tester : 1100 → 1200 → 1100, les noms reviennent sans délai. Puis l'étape 3,
-mesurer dans Chrome sur la version de production (`files/plans/atlas/year-switch-speed.md`), puis le démarrage (le terrain
-nu cuit à la construction du site). **La compression** du relief et du masque (9,7 Mo bruts → 3,5 Mo) attend sa décision : un
-navigateur trop ancien, message ou fichiers bruts gardés — je recommande le message.
+**Mon premier travail** (sa demande, 03/11 vers 1 h : *« ton top défi pour demain matin »*) : **CARTO-345**, en tête
+d'À faire — **d'abord un plan** (`files/plans/cartographer/`), validé par lui avant le code : reprendre des tracés de sa
+1100 d'avant (`years/1100-backup-2026-11-02/`, jamais d'Euratlas) dans la carte qu'il nettoie — les tribus baltes, les
+tribus irlandaises (l'Irlande est vide) — et copier le tracé d'un pays sur un autre ; les tribus reprises prennent la
+bande intérieure. **Lui** : finir de nettoyer la 1100 (25 471 points le 02/11 au soir, 55–60 000 attendus), puis la
+même chose sur la 1200.
 
-**Deux instances** (`files/plans/maps-1100-1200-code-and-historian.md`) : moi le code, l'historien `europe-map-9b`. **À ma
-reprise : `ListAgents`, puis lui envoyer mon nouveau nom** — il garde ses messages d'ici là. Son résumé du 02/11 :
-`files/plans/sources/1100.md` créé, **non commité, attend l'accord du dev** (l'Islande et le Groenland indépendants en 1100 ;
-Man et les Îles norvégiennes ; Venise : le Dogado et six villes dalmates tenues au nom de Byzance depuis 1097 — divergence à
-arbitrer ; Biograd à tort dans Venise, Loreo à tort dans le Saint-Empire). **Il attend du dev** : l'arbitrage Islande/Groenland,
-les villes dans le CMS maintenant ou après CMS-338, le go des fichiers de vassaux.
+**L'historien** (`europe-map-9b`, `files/plans/maps-1100-1200-code-and-historian.md`) : sources, comparaisons, et
+**saisie directe dans la base du CMS** par le MCP. **Il attend du dev** : la clé (admin › MCP › API Keys : find /
+create / update sur places, place-periods, sources), `claude mcp add` lancé depuis le dossier europe-map (port 3100),
+puis `/mcp` dans sa fenêtre. Ensuite les pays des villes de 1100 d'abord (Groenland → Q16488964, Islande → Q62389, les
+villes de Venise → Q4948), puis une ligne à moi pour l'export — **à ce moment je commite `content/events.json`**, pas
+avant (sa décision). **Ouvert pour le dev** : ses choix dans `files/plans/sources/wikidata-1100.md` (il corrige
+`years/` lui-même) ; deux propositions de l'historien, non créées — un ticket « les liens de vassalité saisis avec
+leurs sources » et un champ de citation sur plusieurs lignes à demander au design system. **Un troisième Claude qui
+code** : envisagé par le dev le 03/11 ; ma réponse — un ticket indépendant, sa branche et sa copie, moi qui relis et
+fusionne ; commencer par un seul.
 
-**Le Cartographe** : une carte est un dossier de `years/` (CARTO-340, Fait, `s19`) ; il redessine les côtes de la 1100
-Cliopatria (`years/1100/`, ses ‹ctrl+S›, **non commitée**), sa 1100 d'avant dans `years/1100-backup-2026-11-02/` (identique à
-`1100.dev-2026-11-01/`, qu'il peut supprimer). **À lui** : supprimer `packages/cartographer/.autosave/` (mon `rm -rf` refusé), relancer
-`pnpm dev:cartographer` si « Ouvrir… » ne liste rien. Les enregistrements automatiques s'empilent dans `years/` : gardés, sa décision.
+**Où en sont les tickets** : CARTO-342 (panneaux, `a316444`) et ATLAS-344 (bande, `116415d`) passés en Fait le 03/11 ;
+**`116415d` non poussé**. **CARTO-193** (panneau Villes) En cours : attend les pays saisis par l'historien, puis son
+essai ville par ville. **ATLAS-333** (vitesse) En cours : à remesurer à sa taille réelle — ma prévision, ~1 s pour
+passer à 1100 depuis la bande ; puis reposer les noms gardés après la première image, garder les remplissages par
+année. **À lui** : supprimer `~/Desktop/WebstormProjects/europe-map-panels` (la copie des panneaux, inutile) et la mise de
+côté `stash@{0}` ; la décision sur le stockage du navigateur pour la disposition des panneaux
+(`rules/known-issues/cartographer.md`). Ses serveurs ont changé de port : **lire le titre de la page avant d'y ouvrir
+un onglet** (le 02/11, 5173 était son Cartographe).
+
+**Le Cartographe** : une carte est un dossier de `years/` (`s19`) et s'enregistre d'elle-même deux secondes après chaque
+geste, en plus de sa copie `.autosave` (gardées, sa décision). Sa 1100 d'avant dans `years/1100-backup-2026-11-02/`.
+**À lui** : supprimer `packages/cartographer/.autosave/`. Exporter le CMS : `pnpm export:content`, puis recharger.
 
 **Les domaines** : commandés et branchés le 02/11 (`.org` principal, `.com` `.eu` `.net` `.fr`), DNS chez OVH, page d'attente
 sur le site Netlify `europe-historical-atlas-soon` (la page : `~/Desktop/europe-historical-atlas-soon/`). **Le certificat
@@ -59,15 +71,7 @@ d'aide au menu — deux demandes à transmettre à son Claude.
 **Quand il teste** : lui donner les valeurs exactes à saisir et le résultat attendu, en trois lignes ; lire sa base en
 lecture seule (`sqlite3 "file:packages/cms/cms.db?mode=ro"`) plutôt que de deviner ce qu'il a enregistré.
 
-**L'audit des instructions du 29/10** (`files/prompt-audit-2026-10-29.md`, non versionné) remplace celui du 27/10 : ses
-parties A et B sont appliquées. Restent, sans urgence : les skills chargées dans tous ses projets (partie D — `supabase` se
-déclenche ici sur « migrations », « React », « audit » : la désinstaller au niveau global ?) et les points de la partie C,
-dont ses décisions — l'anglais des fichiers de session, `format:check` dans le contrôle local, la « phase de recherche »,
-la marche d'une planche « référence », l'accessibilité de l'admin du CMS. **Une seule question à la fois, et seulement s'il
-y a vraiment à trancher.**
-
 **Ses arbitrages en attente** (une question à la fois) :
-- **le Groenland et l'Islande** sont norvégiens dans `years/1100` (historiquement 1261–1262) — ses données ;
 - **l'erreur des noms** (police, worker) n'est dite qu'en console — proposition du 28/10, pas tranchée.
 
 **À savoir, laissé de côté** : un nom sur chaque îlot ; le trait parchemin de la frontière collé au brun à un zoom seulement
@@ -83,9 +87,6 @@ flou d'image ; parler franglais ; deux sondes dans un même onglet ; `delete` d'
 29/10 jour** : **relire le code avant de proposer un remède** (le nom court ne s'écrit que là où le complet ne tient pas) ;
 **jamais de `cd`**, même pour revenir à la racine ; quand sa phrase peut désigner deux options, dire celle que je comprends
 avant d'agir.
-
-**Sa copie de base** du 27/10 avant le seed : `packages/cms/cms-backup-2026-10-27-2300.db` (ignorée par git) — à lui
-de la supprimer.
 
 **Ouvert par décision, à lui de trancher un jour** : les icônes animées (épées qui se balancent, trébuchet) ignorent
 « réduire les animations » du système — un constat de la revue du 27/10, ATLAS-300 dans Idées.
@@ -105,10 +106,6 @@ deviennent des **épiques** avec des tickets enfants (un système de parents) �
 **Décidé et noté, rien à faire maintenant** : les feature flags attendent un vrai besoin, surtout dans l'atlas, décrits
 d'abord en scénarios (CARTO-268) ; les Khazars sont deux entités, sans phases (une date vague = `circa` à marge large).
 
-**Où parlent les messages du Cartographe** (24/10) : la barre d'état est **à l'outil** ; l'année sur le disque parle en
-**toasts** (en bas au centre) et en **modale d'alarme** (`persistence/notice.ts`). Le hand-off du design system arrive à
-la **racine de ce dépôt** (`HANDOFF-from-fubaritico-ds.md`) : le lire avant de brancher une version.
-
 **Une source qu'il donne** → `/create-data-mention`, toujours ; la liste vit sur ATLAS-152. Ses atlas :
 `files/plans/sources/bibliotheque.md` (l'Italie et la Scandinavie manquent ; piste : Spruner-Menke 1880, domaine public).
 
@@ -119,7 +116,7 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 
 ## Where we are
 
-**5 873 tests** (1 624 `core` · 2 275 Cartographe · 1 456 atlas · 349 CMS · 169 plugin `eslint-plugin-eha`, 01/11 nuit), gate
+**6 014 tests** (1 663 `core` · 2 316 Cartographe · 1 495 atlas · 371 CMS · 169 plugin `eslint-plugin-eha`, 03/11 nuit), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 

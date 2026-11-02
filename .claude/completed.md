@@ -2,6 +2,27 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
+### 2026-11-02 soir → 03/11 nuit — le panneau Villes, les panneaux déplaçables, la bande des tribus
+
+La plage du **02/11 15:03 → 03/11 00:41** (9 h 37) compte aussi l'après-midi déjà raconté ci-dessous ; le chantier ouvert le
+05/10 totalise **187 h 58 sur 32 plages**. **Onze commits poussés** jusqu'à `09f7829`, dont quatre de l'historien
+(`27edaad`, `6fdc022`, `ecd33d8` CMS-335, `3001afc` le MCP) ; **`116415d` commité, non poussé**. CI verte, Sonar compris.
+
+- **L'atlas** : les noms gardés par année, les boutons des années provisoires, le panneau de réglages caché derrière ‹H›,
+  une année n'affiche que ses événements (`c4b0352`, `ee03156`, `eb15874`, ATLAS-333).
+- **Le Cartographe** (`a316444`) : le panneau Villes et son verdict par identifiant Wikidata (CARTO-193) ; la carte
+  enregistrée d'elle-même, en plus de la copie `.autosave` ; les panneaux déplaçables, aimantés, redimensionnables
+  (CARTO-342 — *« ça marche très bien »*), le chrome non sélectionnable.
+- **La mesure** : à 25 471 points, passer à 1100 prenait 5,5 s — la tribu Kimek-Kipchak seule, 5,1 s, mesurant tous ses
+  voisins. **La bande intérieure** (son idée, le décalage d'Illustrator, puis irrégulière) la ramène à 0,34 s
+  (`116415d`, ATLAS-344). Ses mots : *« c'est super beau »*, *« on a créé un langage cartographique, la notion
+  d'incertitude, elle est bien représentée »*.
+- **Deux revues** : la première, lancée sur cinquante fichiers, n'a rien lu ; refaite par lots, elle a trouvé un vrai
+  défaut (les événements d'une année ratée revenaient sur l'ancienne carte), corrigé.
+- **Mes fautes** : un `cd` ; le dossier `Editor/utils` supprimé avec mon fichier, restauré de git ; une commande refusée
+  crue sans effet alors qu'elle avait agi ; mon onglet ouvert sur son Cartographe, le port ayant changé (rien écrit) ; la
+  première revue trop grosse ; deux messages de commit trop longs.
+
 ### 2026-11-02 après-midi — la vitesse d'un changement d'année, une carte est un dossier
 
 Plage **02/11 15:03 → 19:44** (4 h 40) ; le chantier ouvert le 05/10 totalise **183 h 02 sur 32 plages**. **Neuf commits
@@ -21,23 +42,4 @@ poussés**, de `9359e29` à `55d7a23`. Deux instances : moi le code, l'historien
   d'avant, injouables à retoucher ; un commit qui a emporté d'autres fichiers (défait aussitôt, rien poussé) ; ma question
   noyée sous les rapports — *« QUEL RÉPONSE »*.
 
-### 2026-11-01 soir → 02/11 matin — l'audit, les concurrents, Cliopatria, « Open… », deux instances pour demain
-
-Plage **01/11 19:14 → 02/11 04:50** (9 h 36) ; le chantier ouvert le 05/10 totalise **178 h 12 sur 31 plages**. **Neuf commits
-poussés**, de `6580917` à `40baea1` ; `years/` (Cliopatria 1100 et 1200) volontairement hors commit.
-
-- **L'audit des instructions** (`/doctor prompt-audit`) appliqué retour par retour ; `/repo-version-manager` créé ; `/opensrc` écrit pour
-  la vraie commande de la 0.6 (sans `path`).
-- **Les concurrents** (YearMaps, Borders of Time, HistorIQly…) : il a failli arrêter — *« ce n'est pas une démo, ce sera publié, j'ai
-  dépensé de l'argent »*. Ce qui l'a retenu : sur Cliopatria importé, **la pose des villes et des noms marche**. Sa décision : la
-  vitesse et de vraies cartes d'abord (ATLAS-333, CARTO-334, CMS-335, CARTO-193, CARTO-336, CORE-337), l'interface en pause (s11 → s15).
-- **Cliopatria** (CC BY 4.0) importé : sa règle *« le plus récent l'emporte »*, trouvée sur YearMaps, a supprimé tout chevauchement ;
-  côtes de Natural Earth ; 1100 et 1200 sur le disque pour son nettoyage, sa 1100 d'avant archivée.
-- **« Open… »** construit, revu (une haute corrigée), commité ; **les domaines** achetés et branchés, la page d'attente en ligne ; le
-  gestionnaire de sources écrit (CMS-332), *« tout tel qu'écrit, c'est toi qui le construis »* ; deux instances pour demain
-  (`files/plans/maps-1100-1200-code-and-historian.md`).
-- **Mes fautes** : **le certificat cassé** en lui faisant retirer un domaine qui marchait, pour un détail ; Mourom-Riazan déclaré
-  anachronique sur une seule source ; le budget zéro opposé à un achat qu'il voulait ; Chronas et les concurrents montrés six
-  semaines trop tard ; passé à l'anglais sans m'en rendre compte ; deux `cd` ; des messages de commit trop longs envoyés malgré le contrôle.
-
-> Older sessions (2026-09-12 → 2026-11-01 night) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-11-02 morning) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
