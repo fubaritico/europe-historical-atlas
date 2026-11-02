@@ -3137,3 +3137,87 @@ describe('the tribes’ fade on the canvas', () => {
     })
   })
 })
+
+/**
+ * A canvas over the two-polity fixture, its static context recording every name written.
+ * @returns the store, the names written, the frames and the teardown
+ */
+function attachWritingNames() {
+  const frames = frameControl()
+  const store = createCartographerStore({
+    edition: { document: sharedBorderDocument(), clone: cloneYearDocument },
+    viewport: { viewport: UNFRAMED },
+  })
+  const written: unknown[] = []
+  const node = canvasWithBox()
+  node.getContext = vi.fn(
+    () =>
+      new Proxy(
+        {},
+        {
+          get: (_, op) => (text: unknown) => {
+            if (op === 'fillText') written.push(text)
+          },
+          set: () => true,
+        }
+      )
+  ) as unknown as typeof node.getContext
+  const dispose = startCanvasController(node, {
+    store,
+    frame: TEST_BACKDROP_FRAME,
+    backdropImage: backdropStandIn(),
+    vectorLayers: {
+      coast: [],
+      rivers: [],
+      coastProvenance: { name: 'test coast', licence: 'test' },
+      riverProvenance: { name: 'test rivers', licence: 'test' },
+    },
+    onHover: () => undefined,
+    onFeature: () => undefined,
+    onAction: () => undefined,
+    onResult: () => undefined,
+    maxSnapReachKm: Infinity,
+    style: CHROME_PAINT_STYLE,
+    overlay: document.createElement('canvas'),
+    colours: createPolityColourSource(AUTOMATIC_PALETTE),
+    history: createHistoryRelay(),
+    landMask: TEST_LAND_MASK,
+    tribeImage: () => document.createElement('canvas'),
+    words: () => EN_WORDS,
+  })
+  const settle = (): void => {
+    while (frames.asked() > 0) frames.run()
+  }
+  return { store, written, settle, dispose }
+}
+
+// CARTO-193, the dev, 2026-11-02: a city's eye in `{Cities}` shows it on the canvas, at once.
+describe('the cities shown', () => {
+  const LYON = {
+    id: 'lyon',
+    name: 'Lyon',
+    lon: 1,
+    lat: 47,
+    date: {
+      kind: 'instant',
+      at: { year: 1100, month: null, day: null, calendar: null, circa: false, margin: null },
+    },
+    holder: null,
+    holderSources: [],
+  } as const
+
+  it('writes Lyon on the canvas once its eye shows it, and no more once hidden', () => {
+    const { store, written, settle, dispose } = attachWritingNames()
+    store.getState().setCities([LYON])
+    settle()
+    expect(written).toEqual([])
+    store.getState().setCityShown('lyon', true)
+    settle()
+    expect(written).toEqual(['Lyon'])
+    written.length = 0
+    store.getState().setCityShown('lyon', false)
+    settle()
+    expect(written).toEqual([])
+    dispose()
+  })
+})

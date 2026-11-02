@@ -729,6 +729,72 @@ describe('createYearSession, a map saved as another', () => {
   })
 })
 
+// The dev, 2026-11-02: "like in any software, like in IntelliJ, as you go, it saves" — the automatic save's second write.
+describe('createYearSession, the map saved silently', () => {
+  describe('happy path', () => {
+    it('writes 1100 over itself, says nothing, and holds no change any more', async () => {
+      const { yearSession, state, reports, archive } = session()
+      await yearSession.openOnStartup()
+      reports.length = 0
+      state.version += 1
+      expect(yearSession.isModified()).toBe(true)
+      await yearSession.saveSilently()
+      expect(archive.save).toHaveBeenLastCalledWith(state.document, '1100')
+      expect([reports, yearSession.isModified()]).toEqual([[], false])
+    })
+  })
+
+  describe('variants', () => {
+    it('leaves a save already running to finish, and writes nothing more', async () => {
+      let finish = (): void => undefined
+      const save = vi.fn(
+        (document: YearDocument, map: string) =>
+          new Promise<{ map: string; polities: number; vertices: number }>((resolve) => {
+            finish = () => {
+              resolve({ map, polities: document.polities.length, vertices: 6 })
+            }
+          })
+      )
+      const { yearSession } = session(stubArchive({ save }))
+      await yearSession.openOnStartup()
+      const running = yearSession.save()
+      await yearSession.saveSilently()
+      expect(save).toHaveBeenCalledTimes(1)
+      finish()
+      await running
+    })
+  })
+
+  describe('managed errors', () => {
+    it('throws a map changed on disk to the automatic save, which says it, and asks nothing', async () => {
+      const { yearSession, confirmOverwrite } = session(stubArchive({ save: changedOnDiskOnce() }))
+      await yearSession.openOnStartup()
+      await expect(yearSession.saveSilently()).rejects.toBeInstanceOf(YearChangedOnDisk)
+      expect(confirmOverwrite).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('throws a failed write, and the map still holds its change', async () => {
+      const { yearSession, state } = session(
+        stubArchive({ save: vi.fn(() => Promise.reject(new Error('disk full'))) })
+      )
+      await yearSession.openOnStartup()
+      state.version += 1
+      await expect(yearSession.saveSilently()).rejects.toThrow('disk full')
+      expect(yearSession.isModified()).toBe(true)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('writes nothing before the map is open', async () => {
+      const { yearSession, archive } = session()
+      await yearSession.saveSilently()
+      expect(archive.save).not.toHaveBeenCalled()
+    })
+  })
+})
+
 describe('describeYearContents', () => {
   it('names the counts in the singular for one, and groups thousands', () => {
     expect(describeYearContents({ polities: 1, vertices: 1 }, EN_WORDS)).toBe('1 polity · 1 vertex')

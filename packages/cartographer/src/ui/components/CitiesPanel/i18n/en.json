@@ -1,0 +1,23 @@
+{
+  "title": "Cities",
+  "allCities": "Every city of {year}",
+  "showAll": "Show every city",
+  "hideAll": "Hide every city",
+  "show": "Show {city}",
+  "hide": "Hide {city}",
+  "loading": "Reading the cities…",
+  "failed": "The cities could not be read: {reason}",
+  "none": "No city entered for {year}.",
+  "hint": "Double-click a city to see who holds it.",
+  "onMap": "On the map: {polity}",
+  "unclaimed": "On the map: no polity",
+  "closeDetail": "Close",
+  "bySources": "By the sources: {polity}",
+  "notEntered": "By the sources: not entered yet",
+  "agrees": "At the right place.",
+  "misplaced": "Not at the right place: the sources put it in {polity}.",
+  "toDeclare": "{polity} is not declared in this map: to declare.",
+  "cannotCompare": "{polity} has no Wikidata id: nothing to compare by.",
+  "source": "Source: {title}",
+  "sourceWhere": "Source: {title}, {where}"
+}

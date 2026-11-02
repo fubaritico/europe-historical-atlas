@@ -2,7 +2,7 @@ import { ErrorBoundary } from '../../ErrorBoundary'
 
 import { Placeholder } from './Placeholder'
 
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 
 /**
  * The editor's five zones, and no knowledge of what goes in them.
@@ -13,7 +13,7 @@ import type { ReactNode } from 'react'
  *
  * **The grid is the handoff's**, lifted into `styles/shell.css` rather than decided here — four rows (30px bar,
  * 26px document bar, the body, 24px status) and three columns inside the body (the tool rail, the
- * canvas, a 280px dock).
+ * canvas, the panels' column — `--dock-w` wide, gone when no panel is docked).
  *
  * **The class names are the whole contract with `shell.css`**, and nothing in the gate checks that the
  * two agree — a guard was written for it on 2026-10-08 and then removed, for a reason worth keeping: a
@@ -50,10 +50,15 @@ export interface ShellProps {
   rail?: ReactNode
   /** The map. The only zone that exists today. */
   canvas: ReactNode
-  /** The panels: `{Polities}`, `{Details}`, `{History}`, `{Overrides}`. Step 5. */
+  /** The panels' column: `{Polities}`, `{Line}`, `{Overrides}`, `{Layers}`, `{Cities}` — docked or floating (CARTO-342). */
   dock?: ReactNode
   /** The status bar: where the pointer is, what is being done and to whom. */
   status?: ReactNode
+  /**
+   * The panels' column width, in CSS pixels — or `null` when no panel is docked: the column disappears and the canvas
+   * takes its width (CARTO-342). The design's `--dock-w` when not given.
+   */
+  dockWidth?: number | null
 }
 
 /**
@@ -71,9 +76,25 @@ export interface ShellProps {
  * @param props.canvas - the map, the one zone always given
  * @param props.dock - the panels' content
  * @param props.status - the status bar; an empty status row when omitted
+ * @param props.dockWidth - the panels' column width, `null` when no panel is docked
  * @returns the five zones, laid out
  */
-export function Shell({ heading, appbar, docbar, rail, canvas, dock, status }: ShellProps) {
+export function Shell({
+  heading,
+  appbar,
+  docbar,
+  rail,
+  canvas,
+  dock,
+  status,
+  dockWidth,
+}: ShellProps) {
+  // Derived
+  const body =
+    dockWidth === undefined
+      ? undefined
+      : ({ '--dock-w': `${String(dockWidth ?? 0)}px` } as CSSProperties)
+
   // Render
   // Each zone behind its own boundary, so one failing never takes the others down (the dev's call,
   // 2026-10-21). The bars take the one-line fallback. The canvas may be retried: a remount reloads the
@@ -90,7 +111,7 @@ export function Shell({ heading, appbar, docbar, rail, canvas, dock, status }: S
           {docbar ?? <Placeholder zone="docBar" />}
         </ErrorBoundary>
       </div>
-      <div className="shell__body">
+      <div className="shell__body" style={body} data-dock={dockWidth === null ? 'none' : 'shown'}>
         <div className="shell__rail">
           <ErrorBoundary zone="tool-rail">{rail ?? <Placeholder zone="tools" />}</ErrorBoundary>
         </div>

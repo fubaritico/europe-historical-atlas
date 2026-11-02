@@ -934,8 +934,134 @@
   flex-direction: column;
 }
 
-.dock-stack > .panel + .panel {
+.dock-stack > .panel + .panel,
+.dock-stack > .panel-frame + .panel-frame {
   border-top: 1px solid var(--line);
+}
+
+/*
+ * A panel's frame (CARTO-342). **The docked panels fill the column exactly, together** (the dev, 2026-11-02: *"each
+ * panel must manage to resize itself so that the whole is only the zone's available height"*): each starts from its
+ * content's height — or the one the author dragged its foot to, set inline as its basis — then all grow or shrink to
+ * the column's height, never under their head, their body scrolling inside. A panel taken out leaves its room to the
+ * others; one put back takes its share.
+ */
+.dock-stack {
+  overflow: hidden;
+}
+
+.panel-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.dock-stack > .panel-frame {
+  flex: 1 1 auto;
+  min-height: calc(var(--tab) + 1px);
+}
+
+.panel-frame > .panel {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+}
+
+.panel-frame > .panel > .panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.panel-frame .panel__head {
+  cursor: grab;
+}
+
+/* A floating panel, or one being dragged: over the window, on the panel's fill, with a shadow to lift it. */
+.panel-frame[data-place='floating'],
+.panel-frame[data-dragging='true'] {
+  position: fixed;
+  z-index: 20;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 22%);
+}
+
+.panel-frame[data-dragging='true'] {
+  opacity: 0.92;
+}
+
+.panel-frame[data-dragging='true'] .panel__head {
+  cursor: grabbing;
+}
+
+/* The resize handles: thin strips on the edges, a square at the corner. */
+.panel-frame__resize {
+  position: absolute;
+  z-index: 1;
+}
+
+.panel-frame__resize--right {
+  top: 0;
+  right: -3px;
+  bottom: 0;
+  width: 6px;
+  cursor: ew-resize;
+}
+
+.panel-frame__resize--left {
+  top: 0;
+  bottom: 0;
+  left: -3px;
+  width: 6px;
+  cursor: ew-resize;
+}
+
+.panel-frame__resize--bottom {
+  right: 0;
+  bottom: -3px;
+  left: 0;
+  height: 6px;
+  cursor: ns-resize;
+}
+
+.panel-frame__resize--corner {
+  right: -4px;
+  bottom: -4px;
+  width: 12px;
+  height: 12px;
+  cursor: nwse-resize;
+}
+
+/* Where a dragged panel would dock: the selection blue, across the column. */
+.dock-stack {
+  position: relative;
+}
+
+.dock-insert {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--accent);
+  pointer-events: none;
+}
+
+.dock-insert[hidden] {
+  display: none;
+}
+
+/* The column's left edge: dragged, it widens or narrows the column. */
+.dock-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -3px;
+  z-index: 2;
+  width: 6px;
+  cursor: ew-resize;
 }
 
 /* The panel that takes what the dock has left — {Polities}: its body scrolls, its head and foot stay. */
@@ -1036,6 +1162,62 @@
   font-family: ui-monospace, monospace;
   font-size: 10.5px;
   text-align: right;
+}
+
+/* {Cities} (CARTO-193): the layers' rows, an eye and a name; the list scrolls past a dozen cities. */
+.city-row {
+  grid-template-columns: 24px minmax(0, 1fr);
+}
+
+.city-list {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.city-row__name {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: default;
+}
+
+.city-row__name:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.city-row[data-opened='true'] {
+  background: var(--hover);
+}
+
+.city-detail {
+  padding: 6px 10px;
+  border-top: 1px solid var(--line);
+  font-size: 11.5px;
+}
+
+.city-detail p {
+  margin: 0 0 4px;
+}
+
+.city-detail__name {
+  font-weight: 600;
+}
+
+.city-detail__line--source {
+  color: var(--ink-dim);
+}
+
+/* A city the map puts elsewhere, or whose holder it lacks: the palette's one alert ink, `--warn`. */
+.city-row[data-verdict='misplaced'] .layer-row__name,
+.city-row[data-verdict='toDeclare'] .layer-row__name,
+.city-detail[data-verdict='misplaced'] .city-detail__verdict,
+.city-detail[data-verdict='toDeclare'] .city-detail__verdict {
+  color: var(--warn);
+  font-weight: 600;
 }
 
 /* {Line}: the selected stretch's style — what it is, where a choice applies, and the patterns. */

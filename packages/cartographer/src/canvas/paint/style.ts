@@ -47,6 +47,12 @@ export const CHROME_PAINT_STYLE: PaintStyle = {
   riverStroke: riverStrokeCss(RIVER_DISPLAY),
   riverWidthMajor: RIVER_DISPLAY.widthMajor,
   riverWidthMinor: RIVER_DISPLAY.widthMinor,
+  // A city as a guide (CARTO-193): the borders' dark casing for the dot and the name, their cream core for the ring and
+  // the halo — the pair already chosen to read over every fill.
+  cityInk: '#5c3a2e',
+  cityHalo: '#f3e7cd',
+  cityRadius: 3,
+  cityFontSize: 11,
 }
 
 /**
@@ -80,5 +86,7 @@ export function inDevicePixels(style: PaintStyle, pixelRatio: number): PaintStyl
     coastWidth: style.coastWidth * pixelRatio,
     riverWidthMajor: style.riverWidthMajor * pixelRatio,
     riverWidthMinor: style.riverWidthMinor * pixelRatio,
+    cityRadius: style.cityRadius * pixelRatio,
+    cityFontSize: style.cityFontSize * pixelRatio,
   }
 }

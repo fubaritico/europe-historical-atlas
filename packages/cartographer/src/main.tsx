@@ -3,6 +3,7 @@ import { createToastApi } from '@fubaritico/react/Toast'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
+import { createFetchContentSource } from '@europe-historical-atlas/core/data/contentSource'
 import { createFetchHeightmapSource } from '@europe-historical-atlas/core/data/heightmap'
 import { createFetchLandMaskSource } from '@europe-historical-atlas/core/data/landMask'
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
@@ -19,13 +20,16 @@ import { CHROME_PAINT_STYLE } from './canvas/paint/style'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
 import { createLocaleStore } from './i18n/localeStore'
 import { bakeToBitmap, loadBackdrop } from './loaders/backdropSource'
+import { CONTENT_URL, loadCities } from './loaders/cityLoad'
 import { loadVectorLayers } from './loaders/vectorLayers'
 import { createAlarmBoard } from './persistence/alarmBoard'
 import { AUTOSAVE_DELAY_MS, createAutosaveKeeper } from './persistence/autosaveKeeper'
+import { writeCopyThenMap } from './persistence/autosaveWrite'
 import { carryView, takeCarriedView } from './persistence/carriedView'
 import { changeMap } from './persistence/mapChange'
 import { routeNotices } from './persistence/noticeRouter'
 import { addressForMap, openingMapOf } from './persistence/openingMap'
+import { readPanelLayout, writePanelLayout } from './persistence/panelLayoutStorage'
 import { persistenceWords } from './persistence/persistenceWords'
 import { createQuestionRelay } from './persistence/questionRelay'
 import { createResultRelay } from './persistence/resultRelay'
@@ -34,6 +38,7 @@ import { wantsSlowWrites, writesFetch } from './persistence/slowWrites'
 import { createDevServerYearArchive } from './persistence/yearArchive'
 import { createYearSession } from './persistence/yearSession'
 import { openEmptyYear } from './state/openEmptyYear'
+import { PANEL_IDS } from './state/panelsSlice'
 import { createPolityColourSource } from './state/polityColourSource'
 import { createCartographerStore } from './state/store'
 import { AlarmDialog } from './ui/components/AlarmDialog'
@@ -135,6 +140,19 @@ const store = createCartographerStore({
   // `UNFRAMED`.
   viewport: { viewport: CARRIED_VIEW ?? UNFRAMED },
 })
+
+// `{Cities}` (CARTO-193): the contribution's cities, read once beside the backdrop — guides, never part of the year.
+void loadCities(createFetchContentSource(CONTENT_URL), store.getState())
+
+// CARTO-342: the panels where the author left them last time, kept at each change of the layout.
+const keptLayout = readPanelLayout(window.localStorage, PANEL_IDS)
+if (keptLayout !== null) store.getState().setPanelLayout(keptLayout)
+store.subscribe(
+  (state) => state.panelLayout,
+  (layout) => {
+    writePanelLayout(window.localStorage, layout)
+  }
+)
 
 /**
  * The compute the backdrop is baked through — a worker, so the ~1.8 s bake is nobody's frozen tab.
@@ -287,7 +305,11 @@ const yearSession = createYearSession({
  */
 const autosaveKeeper = createAutosaveKeeper({
   store,
-  write: (document, map) => yearArchive.save(document, map, { overwrite: true }),
+  // The copy `<map>.autosave.<date>`, then the map open itself (the dev, 2026-11-02: "you keep everything").
+  write: writeCopyThenMap({
+    saveCopy: (document, map) => yearArchive.save(document, map, { overwrite: true }),
+    saveMap: () => yearSession.saveSilently(),
+  }),
   map: () => yearSession.map(),
   delayMs: AUTOSAVE_DELAY_MS,
   now: () => new Date(),

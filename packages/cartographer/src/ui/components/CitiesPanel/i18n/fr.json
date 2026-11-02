@@ -1,0 +1,23 @@
+{
+  "title": "Villes",
+  "allCities": "Toutes les villes de {year}",
+  "showAll": "Afficher toutes les villes",
+  "hideAll": "Masquer toutes les villes",
+  "show": "Afficher {city}",
+  "hide": "Masquer {city}",
+  "loading": "Lecture des villes…",
+  "failed": "Les villes n’ont pas pu être lues : {reason}",
+  "none": "Aucune ville saisie pour {year}.",
+  "hint": "Double-cliquez une ville pour savoir à qui elle appartient.",
+  "onMap": "Sur la carte : {polity}",
+  "unclaimed": "Sur la carte : aucun pays",
+  "closeDetail": "Fermer",
+  "bySources": "Selon les sources : {polity}",
+  "notEntered": "Selon les sources : pas encore renseigné",
+  "agrees": "Au bon endroit.",
+  "misplaced": "Pas au bon endroit : les sources la mettent dans {polity}.",
+  "toDeclare": "{polity} n’est pas déclaré dans cette carte : à déclarer.",
+  "cannotCompare": "{polity} n’a pas d’identifiant Wikidata : impossible de comparer.",
+  "source": "Source : {title}",
+  "sourceWhere": "Source : {title}, {where}"
+}

@@ -6,7 +6,7 @@ import {
   tribeIds,
 } from '@europe-historical-atlas/core/editor/tribes'
 
-import { remapToScreen } from '../../viewport/projection'
+import { lonLatToBackdrop, remapToScreen } from '../../viewport/projection'
 import { backdropToScreen } from '../../viewport/viewport'
 
 import type { CanvasScene } from './painter'
@@ -76,6 +76,8 @@ export interface SceneInputs {
    * that allocates on every pointer move.
    */
   vectorLayers: VectorLayers | null
+  /** The cities `{Cities}` shows (CARTO-193), with their positions in longitude and latitude. */
+  cities: readonly { readonly name: string; readonly lonLat: Point }[]
 }
 
 /**
@@ -286,6 +288,10 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
       })
     ),
     selected: inputs.selected,
+    cities: inputs.cities.map(({ name, lonLat }) => ({
+      name,
+      at: backdropToScreen(inputs.viewport, lonLatToBackdrop(lonLat, inputs.frame)),
+    })),
     vectors:
       inputs.vectorLayers === null
         ? null

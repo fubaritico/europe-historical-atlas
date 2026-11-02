@@ -69,7 +69,8 @@ export interface AutosaveKeeperDeps {
   /** The store whose document is saved. */
   store: AutosaveStore
   /**
-   * Write the page as a map of `years/` — the archive's save, over whatever an earlier write left there.
+   * Write the page as a map of `years/` — the copy, over whatever an earlier write left there, and since 2026-11-02 the
+   * map open after it (`autosaveWrite.ts`): a failure of either is said once, as the automatic save not kept.
    * @param document - the page
    * @param map - the autosave's name
    * @returns once written

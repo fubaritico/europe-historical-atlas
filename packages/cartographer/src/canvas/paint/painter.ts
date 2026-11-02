@@ -2,6 +2,8 @@ import { riverRankWidth, wholeRiverRank } from '@europe-historical-atlas/core/da
 
 import { boxesOverlap, detailThresholdSquared, visibleBox } from '../../viewport/culling'
 
+import { paintCities } from './cityPainter'
+
 import type { Rect } from '../../geometry/marquee'
 import type { LayerSetting, LayerSettings } from '../../state/layersSlice'
 import type { Box } from '../../viewport/culling'
@@ -92,6 +94,14 @@ export interface Painter2D {
   setLineDash: (segments: number[]) => void
   /** How a stroke ends — round, so a dotted hand reads as dots. */
   lineCap: CanvasLineCap
+  /** The face text is written in — a city's name (CARTO-193). */
+  font: string
+  /** Where text sits on its line — the middle, so a city's name is centred on its dot. */
+  textBaseline: CanvasTextBaseline
+  /** Write text in the current fill colour. */
+  fillText: (text: string, x: number, y: number) => void
+  /** Outline text in the current stroke colour — a name's halo. */
+  strokeText: (text: string, x: number, y: number) => void
 }
 
 /**
@@ -145,6 +155,14 @@ export interface PaintStyle {
   riverWidthMajor: number
   /** The finest tributary's width (rank 9) in screen pixels; the ranks between are interpolated. */
   riverWidthMinor: number
+  /** A city's dot and its name's ink (CARTO-193). */
+  cityInk: string
+  /** The light ring round a city's dot and the halo round its name, so both read over any fill. */
+  cityHalo: string
+  /** A city's dot's radius, in screen pixels. */
+  cityRadius: number
+  /** A city's name's size, in screen pixels. */
+  cityFontSize: number
 }
 
 /**
@@ -216,6 +234,8 @@ export interface CanvasScene {
   extentOutline: readonly (readonly Point[])[]
   /** Which anchors are selected, by the same index. */
   selected: ReadonlySet<number>
+  /** The cities `{Cities}` shows, each at its point on screen, with its name — guides for the borders (CARTO-193). */
+  cities: readonly { readonly name: string; readonly at: Point }[]
   /**
    * The coastline and the rivers — **in backdrop pixels, not screen pixels**, with the view to apply.
    *
@@ -652,6 +672,7 @@ export function paintCanvas(
   // Over the fills and the water, under the edit outlines: the borders belong to the map, the blue
   // strokes to the tool.
   paintBorders(ctx, scene, style)
+  paintCities(ctx, scene.cities, style)
   ctx.strokeStyle = style.pathStroke
   ctx.lineWidth = style.pathWidth
   for (const ring of scene.rings) strokeRing(ctx, ring)

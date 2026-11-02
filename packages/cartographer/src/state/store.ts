@@ -1,13 +1,17 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 
+import { createCitiesSlice } from './citiesSlice'
 import { createEditionSlice } from './editionSlice'
 import { createLayersSlice } from './layersSlice'
+import { createPanelsSlice } from './panelsSlice'
 import { createToolSlice } from './toolSlice'
 import { createViewportSlice } from './viewportSlice'
 
+import type { CitiesSlice } from './citiesSlice'
 import type { EditionDeps, EditionSlice } from './editionSlice'
 import type { LayersSlice } from './layersSlice'
+import type { PanelsSlice } from './panelsSlice'
 import type { ToolSlice } from './toolSlice'
 import type { ViewportDeps, ViewportSlice } from './viewportSlice'
 
@@ -36,7 +40,12 @@ import type { ViewportDeps, ViewportSlice } from './viewportSlice'
  * every store-level test drives it — including the two that are about this file rather than the slice: that
  * a selector subscription fires at wiring time, and that the store reads as a React hook.
  */
-export type CartographerStore = EditionSlice & ViewportSlice & ToolSlice & LayersSlice
+export type CartographerStore = EditionSlice &
+  ViewportSlice &
+  ToolSlice &
+  LayersSlice &
+  CitiesSlice &
+  PanelsSlice
 
 /**
  * What the store needs from the composition root, **one entry per slice that has dependencies**.
@@ -66,6 +75,8 @@ export function createCartographerStore(deps: CartographerStoreDeps) {
       ...createViewportSlice(deps.viewport)(...a),
       ...createToolSlice(...a),
       ...createLayersSlice(...a),
+      ...createCitiesSlice(...a),
+      ...createPanelsSlice(...a),
     }))
   )
 }

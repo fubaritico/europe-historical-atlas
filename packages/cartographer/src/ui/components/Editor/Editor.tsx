@@ -107,6 +107,8 @@ export function Editor({
 }: EditorProps) {
   // Store
   const year = store((state) => state.document.year)
+  const docked = store((state) => state.panelLayout.docked.length)
+  const dockWidth = store((state) => state.panelLayout.dockWidth)
 
   // Context
   const app = useTranslation(APP_MESSAGES)
@@ -148,6 +150,7 @@ export function Editor({
       rail={<ToolRailPanel store={store} colours={colours} />}
       dock={<Dock store={store} colours={colours} onResult={handleResult} wikidata={wikidata} />}
       status={<StatusRow action={action} result={result} position={status} feature={feature} />}
+      dockWidth={docked === 0 ? null : dockWidth}
     />
   )
 }

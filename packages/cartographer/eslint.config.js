@@ -178,6 +178,7 @@ export default tseslint.config(
             useColourPickerWords: 'context',
             useDismiss: 'effect',
             useEditorAssets: 'state',
+            useFrameGesture: 'handler',
             useFlyoutFocus: 'effect',
             useHoldToOpen: 'handler',
             useInsideWindow: 'ref',

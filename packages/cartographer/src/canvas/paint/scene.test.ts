@@ -60,12 +60,24 @@ function inputs(document: YearDocument, overrides: Partial<SceneInputs> = {}): S
     layers: DEFAULT_LAYERS,
     tribeFeathers: [],
     colours: new Map<string, string>(),
+    cities: [],
     ...overrides,
   }
 }
 
 describe('scene', () => {
   describe('happy path', () => {
+    // CARTO-193: a city shown sits where an anchor at the same longitude and latitude sits, through any view.
+    it('puts a city at 2° E, 46° N on the anchor at the same point, under a zoomed view', () => {
+      const document = sharedBorderDocument()
+      const viewport: Viewport = { scale: 3, originX: 40, originY: -25 }
+      const built = buildScene(
+        document,
+        inputs(document, { viewport, cities: [{ name: 'Corner', lonLat: [2, 46] }] })
+      )
+      expect(built.cities).toEqual([{ name: 'Corner', at: built.anchors[2] }])
+    })
+
     it('projects every anchor once, in document order', () => {
       const document = sharedBorderDocument()
 

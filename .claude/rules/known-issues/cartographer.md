@@ -184,3 +184,13 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   otherwise. **Severity: à savoir.**
 - **A view carried from one map to the next that cannot be read opens on the whole backdrop, said in the console**
   (2026-11-02, `persistence/carriedView.ts`) — my choice, a comfort and not the map. **Severity: cosmétique.**
+- **A panel docked or floated is mounted again, and loses what it held on its own** (2026-11-02, CARTO-342, review
+  ARCH-002): a docked panel lives in the column, a floating one in a portal on `body` — two parents, so React remounts it
+  on each move between them. What is in the store survives; a panel's own state does not (a list's scroll, an open
+  menu, a draft in `{Polities}`' dialogue). **Remedy if it bites**: one parent for every frame, the floating ones placed
+  by `position: fixed` — and then `dockGeometry`'s `:scope > .panel-frame` must leave the floating ones out.
+  **Severity: à savoir.**
+- **The panels' layout is written to `localStorage` with no guard** (2026-11-02, CARTO-342, review ARCH-003): storage
+  blocked by the browser, or full, throws — at opening it would stop the Cartographer, after a drag it would surface as
+  an error. Never seen in the dev's Chrome. **An error-handling decision for the dev** (`rules/error-handling.md`): my
+  proposal, a declared degraded mode — the layout not kept, said once in the console. **Severity: à savoir.**

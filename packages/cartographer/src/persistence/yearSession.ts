@@ -118,6 +118,14 @@ export interface YearSession {
    * @returns `true` when the copy was written
    */
   saveCopy: () => Promise<boolean>
+  /**
+   * Save the map the page is, saying nothing when it works — the automatic save's second write (the dev, 2026-11-02:
+   * *"like in any software, like in IntelliJ, as you go, it saves"*). A save already running is left to finish, said
+   * in the console only.
+   * @returns once written, or skipped
+   * @throws what the write throws, a map changed on disk included — the automatic save reports it, once
+   */
+  saveSilently: () => Promise<void>
   /** The map the page is now. */
   map: () => string
   /**
@@ -293,6 +301,29 @@ async function saveYear(deps: YearSessionDeps, cell: SessionCell): Promise<boole
     console.error(`${LOG_TAG} ${cell.map} was not saved`, error)
     deps.report({ tone: 'alarm', topic: 'year', text: deps.words().t('notSaved') })
     return false
+  } finally {
+    cell.saving = false
+  }
+}
+
+/**
+ * Save the working document over its map, with no word on success; see {@link YearSession.saveSilently}.
+ * @param deps - the store and the archive
+ * @param cell - the session's memory
+ * @returns once written, or skipped
+ */
+async function saveSilently(deps: YearSessionDeps, cell: SessionCell): Promise<void> {
+  if (cell.phase !== 'ready' || cell.saving) {
+    console.warn(
+      `${LOG_TAG} automatic save of ${cell.map} skipped: ${cell.saving ? 'a save is running' : cell.phase}`
+    )
+    return
+  }
+  cell.saving = true
+  try {
+    const version = deps.store.getState().version
+    await deps.archive.save(deps.store.getState().document, cell.map)
+    cell.savedVersion = version
   } finally {
     cell.saving = false
   }
@@ -505,6 +536,7 @@ export function createYearSession(deps: YearSessionDeps): YearSession {
     save: () => saveYear(deps, cell),
     saveAs: (name) => saveAs(deps, cell, name),
     saveCopy: () => saveCopy(deps, cell),
+    saveSilently: () => saveSilently(deps, cell),
     map: () => cell.map,
     // A blocked page can save nothing: asking « save first? » would only offer a [Yes] that fails (review QUAL-002).
     isModified: () =>

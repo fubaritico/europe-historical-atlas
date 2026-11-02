@@ -1,5 +1,6 @@
 import { TRIBE_FEATHER } from '@europe-historical-atlas/core/editor/tribeFeather'
 
+import { shownCityPoints } from '../state/citiesSlice'
 import { clampToCover, openingView } from '../viewport/framing'
 import { screenToLonLatOnBackdrop } from '../viewport/projection'
 import { panBy, zoomAbout } from '../viewport/viewport'
@@ -130,6 +131,7 @@ function repaint(it: LiveCanvas): void {
     // From the cache keyed on the edition's version: a pan repaints per pointer move, and never measures
     // a distance again.
     tribeFeathers: it.tribeFeathers.feathersOf(state.document, state.version, coloursOf(it)),
+    cities: shownCityPoints(state.cities, state.shownCities, state.document.year),
   })
   paintCanvas(it.ctx, it.size, scene, inDevicePixels(it.deps.style, it.ratio))
 }
@@ -587,6 +589,9 @@ function watchStore(it: LiveCanvas, paint: () => void): () => void {
     it.deps.store.subscribe((state) => state.version, paint),
     // `{Layers}`: an eye or an opacity changes what is drawn, never the document.
     it.deps.store.subscribe((state) => state.layers, paint),
+    // `{Cities}`: an eye shows a guide, and the cities arriving or the year changing changes which.
+    it.deps.store.subscribe((state) => state.shownCities, paint),
+    it.deps.store.subscribe((state) => state.cities, paint),
     it.deps.store.subscribe((state) => state.version, prune),
     it.deps.store.subscribe((state) => state.tool, restart),
     it.deps.store.subscribe((state) => state.target, restart),

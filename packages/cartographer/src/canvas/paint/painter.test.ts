@@ -77,6 +77,10 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
       record('setLineDash')(...segments)
     },
     lineCap: 'butt',
+    font: '',
+    textBaseline: 'alphabetic',
+    fillText: record('fillText'),
+    strokeText: record('strokeText'),
     get fillStyle(): string | CanvasGradient | CanvasPattern {
       return state.fillStyle
     },
@@ -132,6 +136,10 @@ const STYLE: PaintStyle = {
   riverStroke: 'rgba(74, 52, 36, 0.3)',
   riverWidthMajor: 1.25,
   riverWidthMinor: 0.95,
+  cityInk: '#5c3a2e',
+  cityHalo: '#f3e7cd',
+  cityRadius: 3,
+  cityFontSize: 11,
 }
 
 const SIZE: PixelSize = { width: 800, height: 600 }
@@ -164,6 +172,7 @@ function scene(overrides: Partial<CanvasScene> = {}): CanvasScene {
     borders: [],
     layers: DEFAULT_LAYERS,
     selected: new Set<number>(),
+    cities: [],
     vectors: null,
     ...overrides,
   }

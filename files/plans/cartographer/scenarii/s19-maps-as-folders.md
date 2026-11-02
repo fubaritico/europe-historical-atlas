@@ -182,8 +182,13 @@ Scenario: the page is saved automatically, as a map of years/
   Given I opened 1100 at 19:05:12 on 2 November 2026
   When I place an anchor and wait two seconds
   Then years/1100.autosave.2026-11-02T19-05-12/ holds the page with that anchor
-  And years/1100/ has not changed until I press ‹ctrl+S›
+  And ~~years/1100/ has not changed until I press ‹ctrl+S›~~ years/1100/ holds it too
   And nothing is said about it
+
+> **Changed 2026-11-02, late evening, on the dev's word**: *"you keep everything. I just want, as in any software, as in
+> IntelliJ, that as you go, it saves."* The map open is written too, at each pause, after its autosave — silently
+> (`yearSession.saveSilently`); the autosave copies stay. A save already running is left to finish; a failure, the map
+> changed on disk included, is said once by the automatic save's alarm, and nothing asks. **Not walked yet.**
 
 Scenario: one folder per opening, not one per gesture
   Given 1100 was opened at 19:05:12

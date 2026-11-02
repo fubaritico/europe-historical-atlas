@@ -13,6 +13,7 @@ export const ZONES = [
   'status-bar',
   'polities-panel',
   'layers-panel',
+  'cities-panel',
   'overrides-panel',
   'line-panel',
   'stacking-menu',

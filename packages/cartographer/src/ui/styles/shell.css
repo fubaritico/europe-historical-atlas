@@ -46,8 +46,22 @@
  * The page itself is the chrome's grey (the dev, 2026-10-18): the reset leaves `body` with no background, so
  * whatever the shell does not cover — while the application starts, or if it fails to — showed white.
  */
+/*
+ * An application, not a page (the dev, 2026-11-02: *"a select none in CSS, so that it really is software"*): a drag
+ * on the canvas, a panel pulled by its head or a double-click in a list never highlights the chrome's words. The
+ * floating panels and the dialogues sit outside `.shell`, hence `body`. Kept selectable: what the author types — a
+ * field — and an error's technical text, which is there to be copied.
+ */
 body {
   background: var(--bg);
+  user-select: none;
+}
+
+input,
+textarea,
+[contenteditable='true'],
+.error-zone__message {
+  user-select: text;
 }
 
 .shell {
@@ -55,6 +69,15 @@ body {
   display: grid;
   grid-template-rows: 30px 26px minmax(0, 1fr) 24px;
   background: var(--bg);
+}
+
+/*
+ * The chrome's ink and type — on the shell, and on a floating panel, which is laid outside the shell, straight in the
+ * page (CARTO-342): without it, {Layers} taken out of the column wrote its rows in the browser's black (the dev,
+ * 2026-11-02).
+ */
+.shell,
+.panel-frame[data-place='floating'] {
   color: var(--ink);
   font:
     12px system-ui,
@@ -113,8 +136,14 @@ body {
 }
 
 .shell__dock {
+  position: relative;
   background: var(--panel);
   border-left: 1px solid var(--line);
+}
+
+/* No panel docked: the column disappears and the canvas takes its width (CARTO-342). */
+.shell__body[data-dock='none'] > .shell__dock {
+  display: none;
 }
 
 /*

@@ -76,13 +76,11 @@ Scenario: a city on the wrong side of a border
   And clicking the row frames Lyon with both borders visible
 ```
 
-```gherkin
-Scenario: see who holds each city while drawing
-  Given the "cities" layer is on
-  Then each city is labelled with the polity whose cell it falls in
-  And the label updates as soon as a border is moved
-  And no witness list is needed for this to be useful
-```
+~~Scenario: see who holds each city while drawing — the "cities" layer on, each city labelled with the polity whose cell
+it falls in.~~
+
+> **Struck 2026-11-02, on the dev's word**: no layer labels every city. `{Cities}` lists them, an eye each, none shown at
+> opening, and a double-click says who holds one — [s20](s20-cities-panel.md).
 
 > **This is the atlas's accuracy criterion**, decided by the dev on 2026-09-22: _"ce qui serait gênant,
 > c'est de se retrouver avec une ville qui ne soit pas du bon côté d'une frontière."_ Nobody sees 20 km of

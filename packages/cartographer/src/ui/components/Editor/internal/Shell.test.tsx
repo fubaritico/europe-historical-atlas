@@ -124,6 +124,27 @@ describe('Shell', () => {
     })
   })
 
+  // CARTO-342, the dev, 2026-11-02: "when there is no panel left in the column, the column disappears".
+  describe('the panels’ column', () => {
+    it('is as wide as the store says while a panel is docked', () => {
+      const { container } = renderInEnglish(<Shell canvas={<canvas />} dockWidth={340} />)
+      const body = container.querySelector<HTMLElement>('.shell__body')
+      expect([body?.style.getPropertyValue('--dock-w'), body?.dataset.dock]).toEqual([
+        '340px',
+        'shown',
+      ])
+    })
+
+    it('disappears, the canvas taking its width, when no panel is docked', () => {
+      const { container } = renderInEnglish(<Shell canvas={<canvas />} dockWidth={null} />)
+      const body = container.querySelector<HTMLElement>('.shell__body')
+      expect([body?.style.getPropertyValue('--dock-w'), body?.dataset.dock]).toEqual([
+        '0px',
+        'none',
+      ])
+    })
+  })
+
   describe('edge cases', () => {
     it('declares exactly one landmark, so the main content is unambiguous', () => {
       renderInEnglish(<Shell canvas={<div />} />)
