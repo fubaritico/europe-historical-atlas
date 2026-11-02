@@ -2,6 +2,22 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-01 nuit — les scénarios de l'atlas, écrits depuis le code
+
+Plage **01/11 01:51 → 03:06**, le prolongement de celle ouverte le 31/10 à 17:39 (9 h 19 en tout) ; le chantier ouvert le 05/10
+totalise **168 h 23 sur 30 plages**. **Un commit, non poussé** : `5202b43`.
+
+- **ATLAS-324** : `files/plans/atlas/scenarii/`, sur le modèle du Cartographe — l'index, **dix scénarios** (de l'ouverture aux
+  langues), chacun avec son *construit le* (commit, ticket) et son *parcouru* ; **quatorze trous** dans `s99` (A-01 → A-14) ;
+  chaque ligne de plan contredite barrée avec une note datée (`03-camera-ux`, `01-foundations`, `focus-mode`, `vassal-lod`,
+  `country-names`, `detail-levels`, `cities`…) ; deux termes au glossaire ; la skill `/scenarii-to-code` à jour.
+- **Décidé par lui** : trois tickets de correction — ATLAS-326 (*« si c'est juste un mouseleave et un window blur, on y va »*),
+  ATLAS-327 (A-01), ATLAS-328 (A-12) ; **ses citations en anglais** dans les fichiers neufs (mémoire notée) ; la suite,
+  **l'interface au-dessus de la carte décrite en scénarios pour Claude Design**, puis retour au code. Ses mots : *« je pense que tu
+  n'as rien oublié »*.
+- **Ma faute** : les noms des pays écrits « en capitales » d'après un commentaire de `cityLabel.ts`, sans lire la valeur
+  (`capitals` est éteint) — recopié dans trois fichiers avant de le voir ; corrigé, et le commentaire noté (A-13).
+
 ### 2026-10-31 soir → 01/11 nuit — 113 villes, les paliers de détail, les villes sur la carte, l'inventaire des scénarios
 
 Plage **31/10 17:39 → 01/11 01:43** (8 h 03) ; le chantier ouvert le 05/10 totalise **167 h 08 sur 30 plages**. **14 commits, tous

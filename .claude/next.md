@@ -5,30 +5,26 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — 02/11, 5 h : deux instances, les cartes de 1100 et 1200
+## ▶ ON REPREND ICI — 02/11, 19 h 45 : la vitesse de l'atlas, étape 2 à tester
 
-**Lire d'abord `files/plans/maps-1100-1200-code-and-historian.md`** : il dit qui tu es. **La première instance lancée est
-le code** — elle rappelle au dev de lancer la seconde, le guide, puis vérifie avec `ListAgents` ; **la seconde est
-l'historien**. Elles se parlent par `SendMessage`.
+**Il veut reprendre aussitôt, dans la foulée.** **ATLAS-333** (En cours) : l'étape 1 est commitée (`9359e29`, testée) ; **l'étape 2,
+le cache des noms par année, est écrite et non commitée** (`packages/atlas/src/loading/nameCache.ts`, `stages/names.ts`,
+`pipelineContext.ts`, `mapPipeline.ts`) — à lui de tester : 1100 → 1200 → 1100, les noms reviennent sans délai. Puis l'étape 3,
+mesurer dans Chrome sur la version de production (`files/plans/atlas/year-switch-speed.md`), puis le démarrage (le terrain
+nu cuit à la construction du site). **La compression** du relief et du masque (9,7 Mo bruts → 3,5 Mo) attend sa décision : un
+navigateur trop ancien, message ou fichiers bruts gardés — je recommande le message.
 
-**La situation** : il nettoie les **côtes seulement** des cartes Cliopatria de 1100 et 1200 dans le Cartographe (des heures),
-jamais les frontières — l'algorithme des villes les retouchera si le test de vitesse tient. Sa phrase de la nuit, après
-avoir vu les concurrents (mémoire `cliopatria-is-cc-by`) : *« notre projet ne peut être rattrapé que par la qualité et la
-précision — ce n'est pas une démo, ce sera publié »*.
+**Deux instances** (`files/plans/maps-1100-1200-code-and-historian.md`) : moi le code, l'historien `europe-map-9b`. **À ma
+reprise : `ListAgents`, puis lui envoyer mon nouveau nom** — il garde ses messages d'ici là. Son résumé du 02/11 :
+`files/plans/sources/1100.md` créé, **non commité, attend l'accord du dev** (l'Islande et le Groenland indépendants en 1100 ;
+Man et les Îles norvégiennes ; Venise : le Dogado et six villes dalmates tenues au nom de Byzance depuis 1097 — divergence à
+arbitrer ; Biograd à tort dans Venise, Loreo à tort dans le Saint-Empire). **Il attend du dev** : l'arbitrage Islande/Groenland,
+les villes dans le CMS maintenant ou après CMS-338, le go des fichiers de vassaux.
 
-**Pour le code**, en tête d’À faire : **Save as…** — CARTO-340 (demain, demandé), **ATLAS-333** la vitesse (*« passer d'une année à
-l'autre en deux secondes »* ; premier signal : la 1100 Cliopatria se construit en 2 minutes, 748 miettes de moins de 20 km²
-contre 185), puis CARTO-334, CARTO-193, CARTO-336, CORE-337. **« Open… »** est construit et commité (`718971c`, CARTO-339), **à tester par
-lui** (À valider).
-
-**Pour l'historien** : ses questions sur un pays à une date, chaque source par question et par année
-(`files/plans/sources/1100.md`, `1200.md`), qui est vassal de qui en 1100 et 1200 ; puis CMS-338 (une source liée à une année
-et à la question qu'elle prouve) et CMS-335 (« tenue par »). Mémoire `answer-his-country-questions-with-sources`.
-
-**Sur le disque, non commité, à ne pas commiter** : `years/1100/` (Cliopatria), `years/1200/`, `years/index.json` (1100, 1200) ;
-sa 1100 d'avant dans `years/1100.dev-2026-11-01/` et sur son bureau (`europe-historical-atlas-1100-backup-2026-11-02/`). Le test
-de l'atlas qui lisait la 1100 publiée est mis de côté (`tribeYear.test.ts`, son choix). L'étude : `files/spikes/cliopatria-import/`
-(`resolve.py` demande `shapely`, un venv à recréer dans le dossier de travail).
+**Le Cartographe** : une carte est un dossier de `years/` (CARTO-340, Fait, `s19`) ; il redessine les côtes de la 1100
+Cliopatria (`years/1100/`, ses ‹ctrl+S›, **non commitée**), sa 1100 d'avant dans `years/1100-backup-2026-11-02/` (identique à
+`1100.dev-2026-11-01/`, qu'il peut supprimer). **À lui** : supprimer `packages/cartographer/.autosave/` (mon `rm -rf` refusé), relancer
+`pnpm dev:cartographer` si « Ouvrir… » ne liste rien. Les enregistrements automatiques s'empilent dans `years/` : gardés, sa décision.
 
 **Les domaines** : commandés et branchés le 02/11 (`.org` principal, `.com` `.eu` `.net` `.fr`), DNS chez OVH, page d'attente
 sur le site Netlify `europe-historical-atlas-soon` (la page : `~/Desktop/europe-historical-atlas-soon/`). **Le certificat

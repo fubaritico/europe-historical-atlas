@@ -2,6 +2,25 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
+### 2026-11-02 après-midi — la vitesse d'un changement d'année, une carte est un dossier
+
+Plage **02/11 15:03 → 19:44** (4 h 40) ; le chantier ouvert le 05/10 totalise **183 h 02 sur 32 plages**. **Neuf commits
+poussés**, de `9359e29` à `55d7a23`. Deux instances : moi le code, l'historien sur `files/plans/sources/`.
+
+- **La vitesse** (ATLAS-333, étape 1, `9359e29`) : mesuré qu'un changement d'année recuisait le terrain nu et calculait une
+  grille inutile (~6 s) ; sauté pour une année du Cartographe. Ses mots : *« ça charge plus vite »*. L'étape 2 (le cache des
+  noms) est écrite, **non commitée**. Le plan : `files/plans/atlas/year-switch-speed.md`.
+- **Le Cartographe, à sa demande pendant qu'il redessine les côtes** : ‹Q› / ‹W› doublent ‹P› / ‹R› ; le zoom monte à 128 ;
+  Cliopatria réexporté **avec ses propres côtes** (5 489 points au lieu de 57 229 : *« on ne peut pas corriger des tracés avec
+  50 000 points, c'est injouable »*).
+- **Une carte est un dossier** (CARTO-340, `5b823d5`, scénario `s19`) : « Ouvrir… » liste les dossiers dans un cadre
+  sélectionnable avec icônes, sa question avant d'ouvrir, la vue gardée ; « Enregistrer sous… », « Enregistrer une copie » ;
+  l'enregistrement automatique `<carte>.autosave.<date>` dans `years/`, gardé ; instantanés et brouillon retirés. Revue : une
+  haute corrigée (« Ouvrir… » n'aurait rien listé). Ses mots : *« voilà, ça c'est bien »*.
+- **Mes fautes** : le plan des deux instances pointait un fichier inexistant ; les côtes de Natural Earth imposées la nuit
+  d'avant, injouables à retoucher ; un commit qui a emporté d'autres fichiers (défait aussitôt, rien poussé) ; ma question
+  noyée sous les rapports — *« QUEL RÉPONSE »*.
+
 ### 2026-11-01 soir → 02/11 matin — l'audit, les concurrents, Cliopatria, « Open… », deux instances pour demain
 
 Plage **01/11 19:14 → 02/11 04:50** (9 h 36) ; le chantier ouvert le 05/10 totalise **178 h 12 sur 31 plages**. **Neuf commits
@@ -21,20 +40,4 @@ poussés**, de `6580917` à `40baea1` ; `years/` (Cliopatria 1100 et 1200) volon
   anachronique sur une seule source ; le budget zéro opposé à un achat qu'il voulait ; Chronas et les concurrents montrés six
   semaines trop tard ; passé à l'anglais sans m'en rendre compte ; deux `cd` ; des messages de commit trop longs envoyés malgré le contrôle.
 
-### 2026-11-01 nuit — les scénarios de l'atlas, écrits depuis le code
-
-Plage **01/11 01:51 → 03:06**, le prolongement de celle ouverte le 31/10 à 17:39 (9 h 19 en tout) ; le chantier ouvert le 05/10
-totalise **168 h 23 sur 30 plages**. **Un commit, non poussé** : `5202b43`.
-
-- **ATLAS-324** : `files/plans/atlas/scenarii/`, sur le modèle du Cartographe — l'index, **dix scénarios** (de l'ouverture aux
-  langues), chacun avec son *construit le* (commit, ticket) et son *parcouru* ; **quatorze trous** dans `s99` (A-01 → A-14) ;
-  chaque ligne de plan contredite barrée avec une note datée (`03-camera-ux`, `01-foundations`, `focus-mode`, `vassal-lod`,
-  `country-names`, `detail-levels`, `cities`…) ; deux termes au glossaire ; la skill `/scenarii-to-code` à jour.
-- **Décidé par lui** : trois tickets de correction — ATLAS-326 (*« si c'est juste un mouseleave et un window blur, on y va »*),
-  ATLAS-327 (A-01), ATLAS-328 (A-12) ; **ses citations en anglais** dans les fichiers neufs (mémoire notée) ; la suite,
-  **l'interface au-dessus de la carte décrite en scénarios pour Claude Design**, puis retour au code. Ses mots : *« je pense que tu
-  n'as rien oublié »*.
-- **Ma faute** : les noms des pays écrits « en capitales » d'après un commentaire de `cityLabel.ts`, sans lire la valeur
-  (`capitals` est éteint) — recopié dans trois fichiers avant de le voir ; corrigé, et le commentaire noté (A-13).
-
-> Older sessions (2026-09-12 → 2026-10-31) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-11-01 night) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
