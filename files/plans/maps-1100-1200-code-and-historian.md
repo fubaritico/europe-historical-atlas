@@ -88,9 +88,14 @@ The dev asks, by voice, about a country at a date (*« Mourom-Riazan en 1100, de
 5. **Everything collected goes into the CMS's base** (the dev: *"put it in the base, using the right skill"*) — every
    source linked to its year and to its question, once CMS-338 exists; each city as a place with its coordinates and
    dated holder (CMS-335). **No skill does this yet** (checked 2026-11-02: the collection `Sources` exists with `kind` and
-   `copyOf`, but no year nor question). *Proposed by Claude, not decided*: CMS-338 ships with a skill, made with
-   `/create-skill`, that reads a year's file and writes its sources through the CMS's own interface on the dev's
-   running server — never by the seed, which once ran on his base; until then the files are their home.
+   `copyOf`, but no year nor question). **The route, agreed by both instances and approved by the dev (2026-11-02
+   evening)**: ~~CMS-338 adds the fields *year* and *question* to `Sources`~~ — **changed the same evening, on the dev's word**:
+   what goes in first is what the Cartographer uses, the witness cities and their holder, « tenue par » (CMS-335,
+   `ecd33d8`); CMS-338 is parked, the questions stay in `sources/1100.md`. Then the branch installs `@payloadcms/plugin-mcp`
+   (`3001afc`) (the dev's choice in `contribution/source-manager.md`, « Driven by
+   voice »); once merged, he creates the API key in the admin and runs `claude mcp add` himself, and the historian enters
+   each source through the MCP tools, one by one, seen in the admin. No skill parses the file; one may come later if the
+   entry repeats. Never by the seed, which once ran on his base; until then the files are their home.
 
 **Who is vassal of whom** (`vassals-1100.md`, `vassals-1200.md`): one line per link, its sources beside it, however long
 the file grows (the dev: *« même s'il faut 10 000 lignes »*). The starting points: Cliopatria's 344 dependencies
