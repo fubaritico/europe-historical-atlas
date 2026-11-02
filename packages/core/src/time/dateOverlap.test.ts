@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { datesOverlap, yearSpanOf } from './dateOverlap'
+import { dateCoversYear, datesOverlap, yearSpanOf } from './dateOverlap'
 
 import type { HistoricalDate, HistoricalMoment } from './historicalDate'
 
@@ -88,6 +88,37 @@ describe('dateOverlap', () => {
 
     it('reads 1 BC and AD 1 as apart, there being no year 0 between them', () => {
       expect(datesOverlap(year(-1), year(1))).toBe(false)
+    })
+  })
+})
+
+// The rule the atlas's events and the Cartographer's cities are shown by (2026-11-02).
+describe('dateCoversYear', () => {
+  describe('happy path', () => {
+    it('covers 1100 with a date of 1100, not 1101', () => {
+      expect([dateCoversYear(year(1100), 1100), dateCoversYear(year(1100), 1101)]).toEqual([
+        true,
+        false,
+      ])
+    })
+  })
+
+  describe('variants', () => {
+    it('covers an interval’s first and last years and none after', () => {
+      expect([1098, 1099, 1101, 1102].map((at) => dateCoversYear(span(1099, 1101), at))).toEqual([
+        false,
+        true,
+        true,
+        false,
+      ])
+    })
+  })
+
+  // L3, L4: N/A — two comparisons.
+
+  describe('edge cases', () => {
+    it('does not widen a circa date to its margin', () => {
+      expect(dateCoversYear(year(1100, { circa: true, margin: 10 }), 1105)).toBe(false)
     })
   })
 })

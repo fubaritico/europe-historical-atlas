@@ -41,3 +41,15 @@ export function datesOverlap(a: HistoricalDate, b: HistoricalDate): boolean {
   const second = yearSpanOf(b)
   return first.from <= second.to && second.from <= first.to
 }
+
+/**
+ * Whether a date covers a year, by the same rule — what the atlas and the Cartographer show a year by: its events, its
+ * cities.
+ * @param date - a date, already read
+ * @param year - the year
+ * @returns `true` when the date covers it
+ */
+export function dateCoversYear(date: HistoricalDate, year: number): boolean {
+  const span = yearSpanOf(date)
+  return span.from <= year && year <= span.to
+}

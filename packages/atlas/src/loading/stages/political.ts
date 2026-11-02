@@ -60,8 +60,9 @@ async function drawYear(
   report: ProgressReport
 ): Promise<RegionSet | null> {
   const { dev, sources, layers } = context
+  const asked = centuryOf(context)
   // 1. Fetch the year's polities; drop out if torn down or overtaken by a newer year.
-  const loaded = await context.assets.regions.load(centuryOf(context))
+  const loaded = await context.assets.regions.load(asked)
   if (context.isDisposed() || !isCurrent()) return null
   // 2. The year's tints and traced lines: from the compute's grid, or — for a year the fills paint — straight from it.
   const exact = yearPaintsExactFills(dev, loaded)
@@ -90,6 +91,10 @@ async function drawYear(
   report(POLITICAL_SPLIT.bake, 'borders')
   layers.rebuildFills()
   layers.rebuildBorders()
+  // 5. The events of this year only, once its map is on screen: a change of year that fails leaves the map, and its
+  //    events, as they were (review QUAL-004). A no-op at startup, which pins them itself once the map is drawn.
+  sources.askedYear = asked
+  layers.rebuildEvents()
   return loaded
 }
 
@@ -193,6 +198,9 @@ export async function startYear(
   try {
     return await drawYear(context, isCurrent, report)
   } catch (error: unknown) {
+    // The first year failed: its events still stand, under its failure (the dev, 2026-10-26) — they are dated, and no
+    // other year's map is on screen to contradict them.
+    context.sources.askedYear = centuryOf(context)
     context.ui.reportAssetFailure('regions', error)
     return null
   }

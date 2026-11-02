@@ -287,6 +287,7 @@ describe('createMapLayers', () => {
     it('stands an event whose type has the pin as a pin, and a battle as an icon', () => {
       const { scene, sources, layers } = build()
       sources.events = [BATTLE, { ...BATTLE, id: 'e2', type: { ...BATTLE.type, icon: 'pin' } }]
+      sources.askedYear = 1100
       sources.mapDrawn = true
       layers.rebuildEvents()
       const { pins, afar } = eventGroups(scene)
@@ -297,6 +298,7 @@ describe('createMapLayers', () => {
     it('paints a pin’s head in its event type’s colour', () => {
       const { scene, sources, layers } = build()
       sources.events = [{ ...BATTLE, type: { ...BATTLE.type, icon: 'pin', colour: '#1565e8' } }]
+      sources.askedYear = 1100
       sources.mapDrawn = true
       layers.rebuildEvents()
       const head = child(child(eventGroups(scene).pins, 0), 1) as Mesh<never, MeshLambertMaterial>
@@ -307,6 +309,7 @@ describe('createMapLayers', () => {
     it('lights the pins when no event has an icon', () => {
       const { scene, sources, layers } = build()
       sources.events = [{ ...BATTLE, type: { ...BATTLE.type, icon: 'pin' } }]
+      sources.askedYear = 1100
       sources.mapDrawn = true
       layers.rebuildEvents()
       const found: Light[] = []
@@ -336,6 +339,7 @@ describe('createMapLayers', () => {
         holder: null,
       }
       sources.cities = [paris]
+      sources.askedYear = 1100
       sources.mapDrawn = true
       const sprites = (): Sprite[] => {
         const found: Sprite[] = []
@@ -358,6 +362,7 @@ describe('createMapLayers', () => {
     it('carries each frame’s zoom and camera to the icons', () => {
       const { scene, sources, layers } = build()
       sources.events = [BATTLE]
+      sources.askedYear = 1100
       sources.mapDrawn = true
       layers.rebuildEvents()
       const { close, afar } = eventGroups(scene)
@@ -382,9 +387,23 @@ describe('createMapLayers', () => {
       sources.events = [BATTLE]
       layers.rebuildEvents()
       expect(scene.children).toHaveLength(0)
+      sources.askedYear = 1100
       sources.mapDrawn = true
       layers.rebuildEvents()
       expect(scene.children).toHaveLength(1)
+    })
+
+    // The dev, 2026-11-02: the events of 1100 were still on the map of 1200.
+    it('takes the events of 1100 off when 1200 is asked, and stands them again on 1100', () => {
+      const { scene, sources, layers } = build()
+      sources.events = [{ ...BATTLE, type: { ...BATTLE.type, icon: 'pin' } }]
+      sources.mapDrawn = true
+      const pinsAt = (year: number): number => {
+        sources.askedYear = year
+        layers.rebuildEvents()
+        return eventGroups(scene).pins.children.length
+      }
+      expect([pinsAt(1100), pinsAt(1200), pinsAt(1100)]).toEqual([1, 0, 1])
     })
 
     it('draws nothing until something is rebuilt', () => {
@@ -1068,6 +1087,7 @@ describe('createMapLayers', () => {
       }
       layers.rebuildNames()
       sources.events = [BATTLE]
+      sources.askedYear = 1100
       sources.mapDrawn = true
       layers.rebuildEvents()
       const read = new Set<unknown>()
@@ -1115,6 +1135,7 @@ describe('createMapLayers', () => {
       }
       layers.rebuildNames()
       sources.events = [BATTLE]
+      sources.askedYear = 1100
       sources.mapDrawn = true
       layers.rebuildEvents()
       const read = new Set<unknown>()

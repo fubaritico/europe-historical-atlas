@@ -65,6 +65,11 @@ export interface MapSources {
   /** The contribution's cities at a date (ATLAS-295), empty until they land or when there are none. */
   cities: ContentCity[]
   /**
+   * The year last asked for — the events shown are those of this year only (the dev, 2026-11-02: *"the events are shown
+   * on one year only"*); `null` before a year is asked.
+   */
+  askedYear: number | null
+  /**
    * Whether the first year has been drawn — its countries on screen, or its failure said. The events wait for it:
    * the map comes first, then what happened on it (the dev, 2026-10-26).
    */
@@ -159,6 +164,7 @@ export function createMapSources(): MapSources {
     riverData: [],
     events: [],
     cities: [],
+    askedYear: null,
     mapDrawn: false,
     derivedBorders: null,
     borderPatterns: null,

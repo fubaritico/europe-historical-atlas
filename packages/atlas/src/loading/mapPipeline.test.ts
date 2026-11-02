@@ -291,6 +291,17 @@ describe('createMapPipeline', () => {
       expect(Math.max(...names)).toBeLessThan(firstCall(fadeIn))
     })
 
+    it('pins the events of the year drawn once a change of year has landed', async () => {
+      const { deps, pipeline } = build()
+      await pipeline.start()
+      asMock(deps.layers.rebuildEvents).mockClear()
+      deps.dev.political.year = 1200
+      await pipeline.rebuildPolitical()
+      expect([deps.sources.askedYear, asMock(deps.layers.rebuildEvents).mock.calls.length]).toEqual(
+        [1200, 1]
+      )
+    })
+
     it('draws a year changed later at once, under its own bar, with no fade', async () => {
       const fadeIn = vi.fn((set: (share: number) => void) => {
         set(1)
@@ -498,6 +509,20 @@ describe('createMapPipeline', () => {
       await pipeline.start()
       expect(deps.sources.mapDrawn).toBe(true)
       expect(asMock(deps.layers.rebuildEvents)).toHaveBeenCalled()
+      expect(deps.sources.askedYear).toBe(1100)
+    })
+
+    // The dev, 2026-11-02: the events of 1100 were still shown on the map of 1200; and a change that fails must not
+    // put 1200's events on 1100's map either (review QUAL-004).
+    it('keeps the year of the map on screen for the events when a change of year fails', async () => {
+      const load = vi.fn((year: number) =>
+        year === 1100 ? Promise.resolve(YEAR) : Promise.reject(new Error('404'))
+      )
+      const { deps, pipeline } = build({ assets: fakeAssets({ regions: { load } }) })
+      await pipeline.start()
+      deps.dev.political.year = 1200
+      await pipeline.rebuildPolitical()
+      expect(deps.sources.askedYear).toBe(1100)
     })
 
     it('reports a missing relief as the blocking failure it is', async () => {

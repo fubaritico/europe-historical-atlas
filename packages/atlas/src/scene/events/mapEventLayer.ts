@@ -11,6 +11,7 @@ import { disposeHandle } from '../layers/disposeHandle'
 import { svgToTexture } from '../svgTexture'
 
 import { eventPins } from './eventPins'
+import { eventsOfYear } from './eventsOfYear'
 import { createEventIconMarkers } from './icons/eventIconMarkers'
 import { createMarkerLights } from './markerLights'
 import { combineEventMarkers } from './markers'
@@ -22,9 +23,25 @@ import { SHADOW_SUN, pinFootprint } from './shadows/shadowFootprint'
 import type { LayerContext } from '../layers/layerContext'
 
 /**
+ * Whether the events can be pinned: the map drawn on its relief, a year asked, and something to pin.
+ * @param sources - what the map has been given
+ * @returns `true` once all of it is in
+ */
+function readyToPin(sources: LayerContext['sources']): boolean {
+  return (
+    sources.mapDrawn &&
+    sources.heightmap !== null &&
+    sources.reliefSource !== null &&
+    sources.askedYear !== null &&
+    (sources.events.length > 0 || sources.cities.length > 0)
+  )
+}
+
+/**
  * Stand the contribution's events on the relief: its type's icon where one is chosen (ATLAS-156), a pin otherwise —
  * and its cities, each with its mark and its name (ATLAS-295).
- * A no-op until the content is in and the map is drawn (`mapDrawn`) — whichever comes last draws them. The markers
+ * Only the events of the year asked are pinned; the cities are pinned whatever their date, for now (the dev, 2026-11-02).
+ * A no-op until the content is in, a year is asked and the map is drawn (`mapDrawn`) — whichever comes last draws them. The markers
  * follow the relief's exaggeration from the next frame on.
  * @param context - the layers and what they read
  * @returns nothing
@@ -34,17 +51,13 @@ export function rebuildEvents(context: LayerContext): void {
   // 1. The markers drawn before, if any, removed and freed.
   disposeHandle(scene, handles.events)
   handles.events = null
-  if (
-    !sources.mapDrawn ||
-    !sources.heightmap ||
-    !sources.reliefSource ||
-    (sources.events.length === 0 && sources.cities.length === 0)
-  ) {
-    return
-  }
+  if (!readyToPin(sources) || !sources.heightmap || sources.askedYear === null) return
 
-  // 2. Each event that has a place on the map, at its point on the relief, with the icon its type chose.
-  const pins = eventPins(sources.events, sources.heightmap.meta.bbox)
+  // 2. Each event of the year asked that has a place on the map, at its point on the relief, with the icon its type chose.
+  const pins = eventPins(
+    eventsOfYear(sources.events, sources.askedYear),
+    sources.heightmap.meta.bbox
+  )
   const placed = pins.map((pin) => ({
     ground: projection.draped(pin.u, pin.v),
     icon: pin.event.type.icon,
