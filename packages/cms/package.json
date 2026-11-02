@@ -25,6 +25,7 @@
     "@fubaritico/tokens": "catalog:",
     "@payloadcms/db-sqlite": "3.92.0",
     "@payloadcms/next": "3.92.0",
+    "@payloadcms/plugin-mcp": "3.92.0",
     "@payloadcms/translations": "3.92.0",
     "@payloadcms/ui": "3.92.0",
     "formik": "catalog:",

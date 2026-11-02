@@ -17,6 +17,7 @@ import { SiegeEngines } from './collections/SiegeEngines'
 import { Sources } from './collections/Sources'
 import { Users } from './collections/Users'
 import { brandMarkDataUri } from './components/BrandMark/utils/brandMarkDataUri'
+import { mcpAccess } from './mcp/mcpAccess'
 
 /** This file's folder: the import map and the generated types are written beside it. */
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -90,6 +91,7 @@ export default buildConfig({
     fallback: false,
   },
   i18n: { supportedLanguages: { fr, en }, fallbackLanguage: 'fr' },
+  plugins: [mcpAccess()],
   secret: required('PAYLOAD_SECRET'),
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
   db: sqliteAdapter({ client: { url: required('DATABASE_URL') } }),
