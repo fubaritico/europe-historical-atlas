@@ -535,6 +535,12 @@ export interface PayloadMcpApiKey {
      */
     update?: boolean | null;
   };
+  importanceReasons?: {
+    /**
+     * Allow clients to find importance-reasons.
+     */
+    find?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -915,6 +921,11 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         create?: T;
         update?: T;
+      };
+  importanceReasons?:
+    | T
+    | {
+        find?: T;
       };
   updatedAt?: T;
   createdAt?: T;
