@@ -21,6 +21,13 @@ dans `main` (sa copie principale n'a rien de la branche). **Ensuite**, étape 3 
 **Encore ouvert, ma proposition** : si le navigateur refuse de garder la copie, la barre d'état le dit, en rouge quand
 CARTO-273 existera.
 
+**Sa direction pour le langage visuel, 03/11 au soir** : *« de la classe — je veux du Versailles, du Napoléon, du
+Fontainebleau. Pense à la France »*. Trois époques françaises : **Fontainebleau** (la Renaissance de François Iᵉʳ — la
+galerie de Rosso, vers 1530–40, est le berceau des **cuirs découpés**), **Versailles** (Louis XIV : Le Brun, Le Pautre,
+Bérain), **l'Empire** (Percier et Fontaine). Elles recoupent son idée de designs qui alternent selon le siècle. **À lui
+soumettre** : un atlas de l'Europe habillé à la française d'un bout à l'autre, ou la France pour certains siècles
+seulement.
+
 **ATLAS-329 — l'interface de l'atlas** : Claude Design **en pause** jusqu'au 04/11, son résultat pris tel quel ; il
 m'enverra des écrans pour mon retour. La consigne : `~/Desktop/atlas-interface-brief.md` et `~/Desktop/atlas-design-prompt.txt`
 (sur son Bureau, hors dépôt). Le ton : `files/plans/atlas/interface-scenarios.md`, « The tone ». **Mon travail** : chercher
