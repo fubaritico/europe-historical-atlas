@@ -189,6 +189,7 @@ export default tseslint.config(
             usePolityDraft: 'state',
             usePolityForm: 'state',
             useRelayedResults: 'effect',
+            useShortcut: 'context',
             useToolTitle: 'context',
             useTranslation: 'context',
             useWikidataItem: 'state',

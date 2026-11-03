@@ -126,7 +126,7 @@ export interface PressedKey {
    * Read for a letter only when ‹alt› is held, because on a Mac ‹option› changes the character `key` gives (⌥⌘V
    * gives « √ »); otherwise `key`, which follows the layout.
    */
-  code: string
+  code?: string
   /** ‹cmd›. */
   metaKey: boolean
   /** ‹ctrl›. */

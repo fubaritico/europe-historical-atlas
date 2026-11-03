@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { listenForCommand, shownPlatform } from './commandKeys'
+import { listenForCommand, shownPlatform } from './commandListener'
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -48,6 +48,16 @@ describe('commandKeys', () => {
       stop()
 
       expect(onCopy).toHaveBeenCalledOnce()
+    })
+
+    it('hears ‹cmd+shift+S› as *Save as…*, and not ‹cmd+S›', () => {
+      const onSaveAs = vi.fn()
+      const stop = listenForCommand(document, 'saveAs', onSaveAs)
+      press(document.body, { key: 's', code: 'KeyS', metaKey: true })
+      press(document.body, { key: 'S', code: 'KeyS', metaKey: true, shiftKey: true })
+      stop()
+
+      expect(onSaveAs).toHaveBeenCalledOnce()
     })
 
     it('reads a Mac from the browser', () => {
@@ -107,6 +117,17 @@ describe('commandKeys', () => {
       press(document.body, { key: 'c', code: 'KeyC', metaKey: true })
 
       expect(onCopy).not.toHaveBeenCalled()
+    })
+
+    it('opens *Open…* once for a held ‹cmd+O›, taking every repetition from the browser', () => {
+      const onOpen = vi.fn()
+      const stop = listenForCommand(document, 'open', onOpen)
+      press(document.body, { key: 'o', code: 'KeyO', metaKey: true })
+      const repeated = press(document.body, { key: 'o', code: 'KeyO', metaKey: true, repeat: true })
+      stop()
+
+      expect(onOpen).toHaveBeenCalledOnce()
+      expect(repeated.defaultPrevented).toBe(true)
     })
   })
 })

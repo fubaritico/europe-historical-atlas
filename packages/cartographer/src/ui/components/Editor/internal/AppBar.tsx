@@ -1,3 +1,4 @@
+import { useShortcut } from '../../../hooks/useShortcut'
 import { useTranslation } from '../../../hooks/useTranslation'
 import { ACTION_MESSAGES } from '../../../i18n/actions'
 import { BrandMark } from '../../../icons/brandMark'
@@ -49,6 +50,7 @@ export function AppBar({ name, map, onOpen, onSave, onSaveAs, onSaveCopy }: AppB
   // Context
   const t = useTranslation(EDITOR_MESSAGES)
   const action = useTranslation(ACTION_MESSAGES)
+  const shortcut = useShortcut()
 
   // Render
   return (
@@ -62,9 +64,21 @@ export function AppBar({ name, map, onOpen, onSave, onSaveAs, onSaveCopy }: AppB
         <span className="app-brand__year">{map}</span>
       </div>
       <div className="bar-actions">
-        <BarButton label={action('open')} onPress={onOpen} hint={t('openHint')} />
-        <BarButton label={action('save')} onPress={onSave} hint={t('saveHint')} />
-        <BarButton label={action('saveAs')} onPress={onSaveAs} hint={t('saveAsHint')} />
+        <BarButton
+          label={action('open')}
+          onPress={onOpen}
+          hint={t('openHint', { keys: shortcut('open').shown })}
+        />
+        <BarButton
+          label={action('save')}
+          onPress={onSave}
+          hint={t('saveHint', { keys: shortcut('save').shown })}
+        />
+        <BarButton
+          label={action('saveAs')}
+          onPress={onSaveAs}
+          hint={t('saveAsHint', { keys: shortcut('saveAs').shown })}
+        />
         <BarButton label={action('saveCopy')} onPress={onSaveCopy} hint={t('saveCopyHint')} />
         <BarButton label={t('registry')} unavailable={t('notBuilt', { scenarios: 's07' })} />
       </div>

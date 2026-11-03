@@ -2,6 +2,7 @@ import { Menu } from '@fubaritico/react/Menu'
 
 import { STACKING_MOVES } from '@europe-historical-atlas/core/editor/stacking'
 
+import { useShortcut } from '../../hooks/useShortcut'
 import { useTranslation } from '../../hooks/useTranslation'
 import { ACTION_MESSAGES } from '../../i18n/actions'
 
@@ -61,6 +62,7 @@ export function PolityStackMenu({
   // Context
   const t = useTranslation(POLITY_STACK_MENU_MESSAGES)
   const action = useTranslation(ACTION_MESSAGES)
+  const shortcut = useShortcut()
 
   // Refs
   const shell = useInsideWindow(at)
@@ -96,7 +98,9 @@ export function PolityStackMenu({
         <Menu.Item index={0} value={EDIT}>
           {action('editProperties')}
         </Menu.Item>
-        {STACKING_MOVES.map((move, index) => stackItem(move, action(move), index + 1, moves[move]))}
+        {STACKING_MOVES.map((move, index) =>
+          stackItem(move, action(move), index + 1, moves[move], shortcut(move))
+        )}
       </Menu>
     </div>
   )

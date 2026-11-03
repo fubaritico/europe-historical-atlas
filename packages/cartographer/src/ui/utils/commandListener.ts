@@ -1,32 +1,15 @@
 import { isChord, platformOf } from '@europe-historical-atlas/core/i18n/shortcuts'
 
 import { keepsItsOwnKeys } from '../../canvas/history/historyShortcut'
+import { COMMAND_KEYS } from '../../i18n/commandKeys'
 
-import type { Chord, Platform, PlatformHints } from '@europe-historical-atlas/core/i18n/shortcuts'
+import type { Command } from '../../i18n/commandKeys'
+import type { Platform, PlatformHints } from '@europe-historical-atlas/core/i18n/shortcuts'
 
 /**
- * The commands' keys, as the dev validated them on 2026-11-03 (CARTO-345, `files/plans/cartographer/
- * copy-paste-between-maps.md`): what a label is written from (`core/i18n/shortcuts`), and what the page hears through
- * {@link listenForCommand}.
- *
- * **Heard through this table today: ‹cmd+C› only.** Save, undo and redo are still heard by their own modules
- * (`persistence/saveShortcut.ts`, `canvas/navigation.ts`'s `historyKey`), with the same keys written there; the paste
- * keys are not heard yet.
+ * A command's key heard on the page (CARTO-345) — its keys are `i18n/commandKeys.ts`'s, the one table every listener
+ * and every label reads.
  */
-export const COMMAND_KEYS = {
-  open: { key: 'o', command: true },
-  save: { key: 's', command: true },
-  saveAs: { key: 's', command: true, shift: true },
-  undo: { key: 'z', command: true },
-  redo: { key: 'z', command: true, shift: true },
-  copy: { key: 'c', command: true },
-  paste: { key: 'v', command: true },
-  pasteSheet: { key: 'v', command: true, shift: true },
-  pasteOutline: { key: 'v', command: true, alt: true },
-} as const satisfies Record<string, Chord>
-
-/** A command of {@link COMMAND_KEYS}. */
-export type Command = keyof typeof COMMAND_KEYS
 
 /**
  * The system the shortcuts are shown for, read once at the root.
@@ -66,7 +49,11 @@ function isPageCommand(event: KeyboardEvent, command: Command): boolean {
 }
 
 /**
- * Hear a command's key anywhere on the page but a text field or an open dialogue.
+ * Hear a command's key anywhere on the page but a text field or an open dialogue, once per press.
+ *
+ * **Left to a field and a dialogue on purpose**, unlike ‹cmd+S› (`persistence/saveShortcut.ts`): ‹cmd+C› there copies
+ * the text, and ‹cmd+O› heard inside *Open…*'s own dialogue would open it again over itself. The browser's own answer
+ * to ‹cmd+O› in a field — its file dialogue — is the cost, my choice of 2026-11-03.
  * @param target - where to listen
  * @param command - the command
  * @param onCommand - what it does
@@ -80,7 +67,8 @@ export function listenForCommand(
   const listener = (event: KeyboardEvent): void => {
     if (!isPageCommand(event, command)) return
     event.preventDefault()
-    onCommand()
+    // One gesture, one command: a held key repeats, and each repetition would open a dialogue again, as `saveShortcut`.
+    if (!event.repeat) onCommand()
   }
   target.addEventListener('keydown', listener)
   return () => {

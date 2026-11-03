@@ -1,3 +1,6 @@
+import { isChord } from '@europe-historical-atlas/core/i18n/shortcuts'
+
+import { COMMAND_KEYS } from '../i18n/commandKeys'
 import { coverScale } from '../viewport/framing'
 
 import type { EditorTool } from '../state/toolSlice'
@@ -190,8 +193,7 @@ export function historyKey(event: {
   altKey: boolean
   shiftKey: boolean
 }): 'undo' | 'redo' | null {
-  if (event.altKey || !(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'z') {
-    return null
-  }
-  return event.shiftKey ? 'redo' : 'undo'
+  // Both chords from the one table the menu's labels are written from (`i18n/commandKeys.ts`, CARTO-345).
+  if (isChord(event, COMMAND_KEYS.redo)) return 'redo'
+  return isChord(event, COMMAND_KEYS.undo) ? 'undo' : null
 }

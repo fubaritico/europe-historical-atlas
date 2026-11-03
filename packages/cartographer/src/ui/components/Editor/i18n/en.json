@@ -1,15 +1,15 @@
 {
   "notBuilt": "not built yet ({scenarios})",
-  "openHint": "Open another map",
-  "saveHint": "Save the map (⌘S / ctrl+S)",
-  "saveAsHint": "Save the map under another name, and go on working on the new one",
+  "openHint": "Open another map ({keys})",
+  "saveHint": "Save the map ({keys})",
+  "saveAsHint": "Save the map under another name, and go on working on the new one ({keys})",
   "saveCopyHint": "Save a copy of the map, and stay on this one",
   "registry": "Registry",
   "closeYear": "{close} {year}",
   "nothingToUndo": "nothing to undo",
   "nothingToRedo": "nothing to redo",
-  "undoHint": "{label} (⌘Z / ctrl+Z)",
-  "redoHint": "{label} (⌘⇧Z / ctrl+shift+Z)",
+  "undoHint": "{label} ({keys})",
+  "redoHint": "{label} ({keys})",
   "checkYear": "Check this year",
   "placeholder": "{zone, select, appBar {app bar} docBar {document bar} tools {tools} panels {panels} other {{zone}}}"
 }

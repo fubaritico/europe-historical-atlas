@@ -5,6 +5,8 @@ import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
 
 import { createLocaleStore } from '../../i18n/localeStore'
 import { LocaleProvider } from '../components/LocaleProvider'
+import { PlatformContext } from '../i18n/platformContext'
+import { shownPlatform } from '../utils/commandListener'
 
 import { WORKBENCH_ENTRIES } from './entries'
 import { Workbench } from './Workbench'
@@ -44,7 +46,9 @@ document.documentElement.lang = locale
 createRoot(container).render(
   <StrictMode>
     <LocaleProvider store={createLocaleStore(locale)}>
-      <Workbench entries={WORKBENCH_ENTRIES} />
+      <PlatformContext value={shownPlatform(navigator)}>
+        <Workbench entries={WORKBENCH_ENTRIES} />
+      </PlatformContext>
     </LocaleProvider>
   </StrictMode>
 )
