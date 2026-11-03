@@ -10,6 +10,7 @@ import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPale
 import { createFetchRiverSource } from '@europe-historical-atlas/core/data/riverSource'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
+import { shortcutLabel } from '@europe-historical-atlas/core/i18n/shortcuts'
 import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?worker'
 import { DEFAULT_TERRAIN_OPTIONS } from '@europe-historical-atlas/core/pipeline/terrainOptions'
 import { createWorkerMapCompute } from '@europe-historical-atlas/core/pipeline/workerCompute'
@@ -26,6 +27,7 @@ import { createAlarmBoard } from './persistence/alarmBoard'
 import { AUTOSAVE_DELAY_MS, createAutosaveKeeper } from './persistence/autosaveKeeper'
 import { writeCopyThenMap } from './persistence/autosaveWrite'
 import { carryView, takeCarriedView } from './persistence/carriedView'
+import { keepClipboard, keptClipboard } from './persistence/clipboardStorage'
 import { changeMap } from './persistence/mapChange'
 import { routeNotices } from './persistence/noticeRouter'
 import { addressForMap, openingMapOf } from './persistence/openingMap'
@@ -52,6 +54,8 @@ import { PageHeading } from './ui/components/PageHeading'
 import { SaveAsDialog } from './ui/components/SaveAsDialog'
 import { SaveFirstDialog } from './ui/components/SaveFirstDialog'
 import { arrangeSelected, arrangeWords } from './ui/utils/arrange'
+import { COMMAND_KEYS, listenForCommand, shownPlatform } from './ui/utils/commandKeys'
+import { clipboardWords, copySelection, heldSentence } from './ui/utils/copySelection'
 import { createDialogueOpener } from './ui/utils/dialogueOpener'
 import { createMapNameStore } from './ui/utils/mapNameSource'
 import { listenForStackingKeys } from './ui/utils/stackingShortcut'
@@ -386,6 +390,30 @@ const handleSaveCopy = (): void => {
 listenForStackingKeys(document, (move) => {
   arrangeSelected(store.getState(), move, results.say, arrangeWords(localeStore.get()))
 })
+
+/** The system the shortcuts are shown for, read once (CARTO-345, the shortcut converter). */
+const PLATFORM = shownPlatform(navigator)
+
+/**
+ * The words of the clipboard, in the language of the moment, with the paste shortcut as this system writes it.
+ * @returns the words
+ */
+const clipboardWordsNow = () =>
+  clipboardWords(localeStore.get(), shortcutLabel(COMMAND_KEYS.paste, PLATFORM, localeStore.get()))
+
+// ‹cmd+C›: the stretch or the polity selected, kept in the tab for the next map (CARTO-345).
+listenForCommand(document, 'copy', () => {
+  copySelection(store.getState(), {
+    map: yearSession.map(),
+    keep: (content) => keepClipboard(window.sessionStorage, content),
+    say: results.say,
+    words: clipboardWordsNow(),
+  })
+})
+
+/** What the clipboard holds as this map opens — said, so the author sees what ‹cmd+V› will paste. */
+const HELD = keptClipboard(window.sessionStorage)
+if (HELD !== null) results.say(heldSentence(HELD, clipboardWordsNow()))
 
 /**
  * The canvas's undo and redo, for the document bar's buttons — gesture first, as the keys (ARCH-101). Built

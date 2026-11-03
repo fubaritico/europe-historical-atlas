@@ -45,6 +45,7 @@ Every control name below is **provisional**. It names an _intention_, not a deci
 | 19  | [a map is a folder](s19-maps-as-folders.md)               | Open…, Save, Save as…, Save a copy; the question before opening; the view kept; the automatic save (CARTO-340) |
 | 20  | [the cities as guides](s20-cities-panel.md)               | `{Cities}`: an eye per city, none at opening; a double-click says who holds it (CARTO-193) |
 | 21  | [the panels moved and docked](s21-panels-moved-and-docked.md) | dragged by the head, floating or docked, magnetised to the right column, resized, kept (CARTO-342) |
+| 22  | [copy and paste between maps](s22-copy-paste.md) | a polity, a stretch, a sheet — copied in one map, pasted in place in another; the menu bar (CARTO-345) |
 
 ## The two tools — decided 2026-09-22
 

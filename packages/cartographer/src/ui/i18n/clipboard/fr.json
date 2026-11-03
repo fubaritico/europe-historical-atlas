@@ -1,0 +1,10 @@
+{
+  "copiedPolities": "Copié : {count, plural, one {{name}} other {# entités politiques}}, de {map} — {paste} dans une autre carte pour coller",
+  "copiedStretch": "Copié : un tronçon de {name}, {count} points, de {map} — sélectionnez une entité, puis {paste}",
+  "heldPolities": "Dans le presse-papier : {count, plural, one {{name}} other {# entités politiques}}, de {map}",
+  "heldStretch": "Dans le presse-papier : un tronçon de {name}, de {map}",
+  "nothingSelected": "Sélectionnez une entité politique ou un tronçon à copier",
+  "notARun": "Ces points ne se suivent pas sur un même contour : rien n’est copié",
+  "wholeRing": "C’est tout le contour : sélectionnez l’entité pour la copier",
+  "notKept": "La copie n’a pas pu être gardée : rien n’est copié"
+}
