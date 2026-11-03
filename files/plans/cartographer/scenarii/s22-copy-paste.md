@@ -5,7 +5,8 @@
 > each point at its coordinates; the weld onto the target map's points is the one exception, and it is what keeps the
 > rule of `s00` — two outlines over one place hold one anchor — true on arrival.
 >
-> **Step 1 built 2026-11-03 on the branch `carto-345` (worktree `europe-map-copypaste`) — not walked yet**: the four
+> **Step 1 built 2026-11-03 on the branch `carto-345` (worktree `europe-map-copypaste`) — walked by me through the menu
+> the same evening (below), not by the dev yet**: the four
 > copy scenarios and the clipboard's refusal, below the line « # 1 ». Everything after it is specified, not built.
 > **Declared gaps of step 1**: the refusal of the tab's storage is said in the status bar's result zone, **not in red** —
 > the red alarm of the status bar is CARTO-273, not built; ‹cmd+C› copies the polity selected only — several are step 7.
@@ -200,7 +201,12 @@ Scenario: the clipboard cannot be written
 
 ## The menu bar — Fichier and Édition
 
-> **Built 2026-11-03 on the branch `carto-345` — not walked yet** (CARTO-239, entered in CARTO-345). Beside the
+> **Built 2026-11-03 on the branch `carto-345` (CARTO-239, entered in CARTO-345); walked by me the same evening** in my
+> own Cartographer (port 5180, the worktree), in English: both menus and their keys, the hover from File to Edit, Copy
+> greyed then active once Kingdom of France was selected, Copy run from the menu (« Copied: Kingdom of France, from
+> 1100 — ⌘V in another map to paste », the focus back on Edit), « On the clipboard: … » after a reload, ‹cmd+O›
+> opening « Open a map », ‹→› ‹↓› ‹escape› on the titles, a menu where nothing can act focused itself. No console
+> error. **Not walked by the dev yet.** Beside the
 > application's name in the top bar; `role="menubar"`, a `menuitem` per title and per command. The buttons of the top
 > bar stay as they were. **Declared gap**: every paste is shown greyed — none is built yet (steps 3 to 6).
 
