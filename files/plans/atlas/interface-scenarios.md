@@ -43,6 +43,26 @@ for a historical atlas with a timeline; **Chronas** (chronas.org), named by me, 
 | the year's provenance and licence, shown | ATLAS-152 |
 | an uncertainty's *why*, on click — blur and hatching | DESIGN-262 (`files/plans/evidence-system.md`) |
 
+## The tone — decided by the dev, 2026-11-03
+
+**Not parchment everywhere**: a **camaieu**, one range of the map's own hues a little darker than its parchment; **brown
+buttons**, as the year buttons are today; **ornament, clearly** — friezes, frames, cartouches; **light gradients** on
+the surfaces, never flat and never glossy. Ornament drawn from Speed (1626) and Jolivet (1570), both public domain: the
+strapwork cartouche, the graduated frame, the title band, the medallions; the year on a cartouche after Kings and
+Generals. The loading screen takes Total War's composition only, the tip in a cartouche, the progress bar as the
+graduated frame filling — my proposal. **The research behind it**, its sources and their rights, and a first translation
+into interface pieces: [`ornament-17th-century.md`](ornament-17th-century.md) (2026-11-03) — Claude Design draws first,
+I rework, we finish the identity together (the dev, same day).
+
+**Open, the dev's idea of the same evening — one design per era?** Working with Claude Design, he found himself drawing
+« a 17th-century design, Versailles, Louis XIV » — the trap he wanted to avoid, the atlas running from the 1st century
+to the 21st. His thought: **ornament libraries from several eras, perhaps three designs that alternate with the century
+shown**. Not decided; Claude Design is paused until 2026-11-04, its result to be taken as it is and reviewed from his
+screens. My task for then: the research of ornament libraries by era, and the prompts to give Claude Design while he
+tests the Cartographer. Chosen over a dark,
+translucent game interface (Crusader Kings), which was the other way offered. **The loading screen is designed with
+the rest** (the dev, same day), from s01.
+
 ## The pictures — where they go
 
 **The repository is public.** A game's screenshot or a map still in copyright is never committed: it goes in

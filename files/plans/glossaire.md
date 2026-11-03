@@ -70,6 +70,10 @@
 | **texture**             | L'image peinte qu'on pose sur le relief : parchemin, altitudes, ombrage, grain.           |
 | **feuille** / sheet     | Le parchemin sur lequel la carte de l'atlas est imprimée : le grand rectangle beige sous tout le reste, qui déborde le relief tout autour. Il porte la bordure graduée, la marge et le titre (`scene/sheet/`). |
 | **bordure graduée** / frame | Le cadre qui entoure le relief sur la feuille : deux filets et une bande en blocs alternés, un bloc par degré (`graticuleFrame`). |
+| **cartouche**           | Sur une carte ancienne, une zone encadrée à l'intérieur de la carte pour le titre, la légende, l'échelle ou une note ; pour l'interface de l'atlas, la forme d'un panneau ou d'un cartouche d'année (`files/plans/atlas/ornament-17th-century.md`, 03/11). |
+| **cuirs découpés** / strapwork | L'ornement qui imite des bandes de cuir ou de métal découpées, enroulées et entrelacées — le décor des cartouches de cartes du Nord de l'Europe vers 1535–1630 (Vredeman de Vries, Ortelius, Hondius, Blaeu). |
+| **style auriculaire** / auricular | Des formes molles, lobées, comme du cartilage — le Nord de l'Europe dans la première moitié du XVIIᵉ siècle (Lutma, 1650–54), entre le maniérisme et le baroque. |
+| **filet d'encadrement** / neatline | La ligne imprimée qui entoure la carte, souvent double (un gras, un maigre) ; nos deux filets de la bordure graduée. |
 | **marge**               | La bande de feuille entre la bordure graduée et le bord : les chiffres des degrés y sont écrits, et le titre de l'atlas en dessous. |
 | **bake** / cuisson      | Calculer cette image, pixel par pixel. ~1,5 million de pixels.                            |
 | **tint**                | La couleur d'un pays, appliquée dans la texture.                                          |
