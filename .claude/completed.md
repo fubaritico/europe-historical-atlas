@@ -2,11 +2,34 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
+### 2026-11-03 — la clé du CMS, le copier-coller entre cartes (étapes 1 et 2), l'interface de l'atlas pour Claude Design
+
+Plage **03/11 12:22 → 18:49** (6 h 26) ; le chantier ouvert le 05/10 totalise **194 h 39 sur 33 plages**. **Sur `main`**, sept
+commits **non poussés** (`49a623d` → le commit de clôture) ; **sur la branche `carto-345`** (copie `europe-map-copypaste`),
+cinq commits, **non fusionnés** : le dev les essaie d'abord.
+
+- **Le CMS par le MCP** : la clé créée et branchée (`claude mcp add`, la clé dans `.env.local`) ; la skill `/enter-in-cms` porte
+  toute la méthode de l'historien (sa demande : *« la première fois ça va ; si ce n'est pas englobé dans une skill, vous
+  finissez par oublier »*) ; la clé lit aussi les raisons d'importance (`49a623d`). Le serveur s'est figé sur un index déjà
+  créé : mesuré sur une copie de la base, rien à réécrire, relancé ; README du CMS et tableau des pannes (`534871e`).
+- **CARTO-345, le copier-coller** : le plan, ses décisions une à une (collage en place, sans aperçu — *« tu colles, c'est
+  tout ; si problème, ctrl+Z »* —, la carte d'arrivée garde son terrain, les dates ignorées, soudure à 2 km, plusieurs
+  entités dans `{Polities}` jamais éditées ensemble), la barre de menus (CARTO-239) et le convertisseur de raccourcis
+  (`390e543`). Construit : le presse-papier et ‹cmd+C› (`d231fdb`), une table de touches pour tout (`bea262b`), la barre
+  Fichier / Édition (`3e1eadc`), essayée par moi dans mon propre Cartographe (`2714cb0`). Trois revues, tous les constats
+  traités ou laissés ouverts par décision dite.
+- **L'interface de l'atlas pour Claude Design** (ATLAS-329) : la consigne et ses six lots d'images, le ton (camaïeu, boutons
+  bruns, ornement, légers dégradés), la recherche sur l'ornement du XVIIᵉ siècle (`files/plans/atlas/ornament-17th-century.md`).
+  Ses mots : il tombe dans *« le design XVIIᵉ, Versailles, Louis XIV »* qu'il voulait éviter — d'où son idée de designs par époque.
+- **Mes fautes** : un `cd` (deux fois) ; une étape du ticket cochée par erreur, décochée (verbe `uncheck` ajouté) ; le texte à
+  coller donné en citation, ses barres partant avec la copie ; une cause du blocage du CMS affirmée avant d'être mesurée,
+  corrigée ; deux messages de commit trop longs.
+
 ### 2026-11-02 soir → 03/11 nuit — le panneau Villes, les panneaux déplaçables, la bande des tribus
 
-La plage du **02/11 15:03 → 03/11 00:41** (9 h 37) compte aussi l'après-midi déjà raconté ci-dessous ; le chantier ouvert le
+La plage du **02/11 15:03 → 03/11 00:41** (9 h 37) compte aussi l’après-midi, raconté dans l’archive ; le chantier ouvert le
 05/10 totalise **187 h 58 sur 32 plages**. **Onze commits poussés** jusqu'à `09f7829`, dont quatre de l'historien
-(`27edaad`, `6fdc022`, `ecd33d8` CMS-335, `3001afc` le MCP) ; **`116415d` commité, non poussé**. CI verte, Sonar compris.
+(`27edaad`, `6fdc022`, `ecd33d8` CMS-335, `3001afc` le MCP) ; `116415d` poussé le 03/11 au matin. CI verte, Sonar compris.
 
 - **L'atlas** : les noms gardés par année, les boutons des années provisoires, le panneau de réglages caché derrière ‹H›,
   une année n'affiche que ses événements (`c4b0352`, `ee03156`, `eb15874`, ATLAS-333).
@@ -23,23 +46,5 @@ La plage du **02/11 15:03 → 03/11 00:41** (9 h 37) compte aussi l'après-midi 
   crue sans effet alors qu'elle avait agi ; mon onglet ouvert sur son Cartographe, le port ayant changé (rien écrit) ; la
   première revue trop grosse ; deux messages de commit trop longs.
 
-### 2026-11-02 après-midi — la vitesse d'un changement d'année, une carte est un dossier
 
-Plage **02/11 15:03 → 19:44** (4 h 40) ; le chantier ouvert le 05/10 totalise **183 h 02 sur 32 plages**. **Neuf commits
-poussés**, de `9359e29` à `55d7a23`. Deux instances : moi le code, l'historien sur `files/plans/sources/`.
-
-- **La vitesse** (ATLAS-333, étape 1, `9359e29`) : mesuré qu'un changement d'année recuisait le terrain nu et calculait une
-  grille inutile (~6 s) ; sauté pour une année du Cartographe. Ses mots : *« ça charge plus vite »*. L'étape 2 (le cache des
-  noms) est écrite, **non commitée**. Le plan : `files/plans/atlas/year-switch-speed.md`.
-- **Le Cartographe, à sa demande pendant qu'il redessine les côtes** : ‹Q› / ‹W› doublent ‹P› / ‹R› ; le zoom monte à 128 ;
-  Cliopatria réexporté **avec ses propres côtes** (5 489 points au lieu de 57 229 : *« on ne peut pas corriger des tracés avec
-  50 000 points, c'est injouable »*).
-- **Une carte est un dossier** (CARTO-340, `5b823d5`, scénario `s19`) : « Ouvrir… » liste les dossiers dans un cadre
-  sélectionnable avec icônes, sa question avant d'ouvrir, la vue gardée ; « Enregistrer sous… », « Enregistrer une copie » ;
-  l'enregistrement automatique `<carte>.autosave.<date>` dans `years/`, gardé ; instantanés et brouillon retirés. Revue : une
-  haute corrigée (« Ouvrir… » n'aurait rien listé). Ses mots : *« voilà, ça c'est bien »*.
-- **Mes fautes** : le plan des deux instances pointait un fichier inexistant ; les côtes de Natural Earth imposées la nuit
-  d'avant, injouables à retoucher ; un commit qui a emporté d'autres fichiers (défait aussitôt, rien poussé) ; ma question
-  noyée sous les rapports — *« QUEL RÉPONSE »*.
-
-> Older sessions (2026-09-12 → 2026-11-02 morning) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-11-02 afternoon) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

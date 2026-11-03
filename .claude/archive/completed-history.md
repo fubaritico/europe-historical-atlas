@@ -2,6 +2,25 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-02 après-midi — la vitesse d'un changement d'année, une carte est un dossier
+
+Plage **02/11 15:03 → 19:44** (4 h 40) ; le chantier ouvert le 05/10 totalise **183 h 02 sur 32 plages**. **Neuf commits
+poussés**, de `9359e29` à `55d7a23`. Deux instances : moi le code, l'historien sur `files/plans/sources/`.
+
+- **La vitesse** (ATLAS-333, étape 1, `9359e29`) : mesuré qu'un changement d'année recuisait le terrain nu et calculait une
+  grille inutile (~6 s) ; sauté pour une année du Cartographe. Ses mots : *« ça charge plus vite »*. L'étape 2 (le cache des
+  noms) est écrite, **non commitée**. Le plan : `files/plans/atlas/year-switch-speed.md`.
+- **Le Cartographe, à sa demande pendant qu'il redessine les côtes** : ‹Q› / ‹W› doublent ‹P› / ‹R› ; le zoom monte à 128 ;
+  Cliopatria réexporté **avec ses propres côtes** (5 489 points au lieu de 57 229 : *« on ne peut pas corriger des tracés avec
+  50 000 points, c'est injouable »*).
+- **Une carte est un dossier** (CARTO-340, `5b823d5`, scénario `s19`) : « Ouvrir… » liste les dossiers dans un cadre
+  sélectionnable avec icônes, sa question avant d'ouvrir, la vue gardée ; « Enregistrer sous… », « Enregistrer une copie » ;
+  l'enregistrement automatique `<carte>.autosave.<date>` dans `years/`, gardé ; instantanés et brouillon retirés. Revue : une
+  haute corrigée (« Ouvrir… » n'aurait rien listé). Ses mots : *« voilà, ça c'est bien »*.
+- **Mes fautes** : le plan des deux instances pointait un fichier inexistant ; les côtes de Natural Earth imposées la nuit
+  d'avant, injouables à retoucher ; un commit qui a emporté d'autres fichiers (défait aussitôt, rien poussé) ; ma question
+  noyée sous les rapports — *« QUEL RÉPONSE »*.
+
 ### 2026-11-01 soir → 02/11 matin — l'audit, les concurrents, Cliopatria, « Open… », deux instances pour demain
 
 Plage **01/11 19:14 → 02/11 04:50** (9 h 36) ; le chantier ouvert le 05/10 totalise **178 h 12 sur 31 plages**. **Neuf commits

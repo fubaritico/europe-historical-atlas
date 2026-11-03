@@ -5,34 +5,44 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — 03/11 au matin : CARTO-345, le plan du copier-coller de tracés
+## ▶ ON REPREND ICI — 04/11 : il essaie le copier-coller, moi Claude Design et l'ornement par époque
 
-**Mon premier travail** (sa demande, 03/11 vers 1 h : *« ton top défi pour demain matin »*) : **CARTO-345**, en tête
-d'À faire — **d'abord un plan** (`files/plans/cartographer/`), validé par lui avant le code : reprendre des tracés de sa
-1100 d'avant (`years/1100-backup-2026-11-02/`, jamais d'Euratlas) dans la carte qu'il nettoie — les tribus baltes, les
-tribus irlandaises (l'Irlande est vide) — et copier le tracé d'un pays sur un autre ; les tribus reprises prennent la
-bande intérieure. **Lui** : finir de nettoyer la 1100 (25 471 points le 02/11 au soir, 55–60 000 attendus), puis la
-même chose sur la 1200.
+**Ce qu'il fait demain** (ses mots, 03/11 au soir) : **essayer mes ajouts au Cartographe**, pendant que je prépare **les
+consignes pour Claude Design**. Tous nos serveurs ont été arrêtés le 03/11 au soir pour repartir proprement : le sien
+du CMS **aussi** (je l'avais relancé depuis ma session) — il le relance lui-même (`pnpm dev:cms`).
 
-**L'historien** (`europe-map-9b`, `files/plans/maps-1100-1200-code-and-historian.md`) : sources, comparaisons, et
-**saisie directe dans la base du CMS** par le MCP. **Il attend du dev** : la clé (admin › MCP › API Keys : find /
-create / update sur places, place-periods, sources), `claude mcp add` lancé depuis le dossier europe-map (port 3100),
-puis `/mcp` dans sa fenêtre. Ensuite les pays des villes de 1100 d'abord (Groenland → Q16488964, Islande → Q62389, les
-villes de Venise → Q4948), puis une ligne à moi pour l'export — **à ce moment je commite `content/events.json`**, pas
-avant (sa décision). **Ouvert pour le dev** : ses choix dans `files/plans/sources/wikidata-1100.md` (il corrige
-`years/` lui-même) ; deux propositions de l'historien, non créées — un ticket « les liens de vassalité saisis avec
-leurs sources » et un champ de citation sur plusieurs lignes à demander au design system. **Un troisième Claude qui
-code** : envisagé par le dev le 03/11 ; ma réponse — un ticket indépendant, sa branche et sa copie, moi qui relis et
-fusionne ; commencer par un seul.
+**CARTO-345 — le copier-coller** (En cours) : plan `files/plans/cartographer/copy-paste-between-maps.md`, scénarios
+`scenarii/s22-copy-paste.md`. **Étapes 1 et 2 construites sur la branche `carto-345`**, copie de travail
+`~/Desktop/WebstormProjects/europe-map-copypaste` : `d231fdb` (presse-papier, ‹cmd+C›), `bea262b` (une table de touches, les
+raccourcis selon le système, ‹cmd+O› ‹cmd+shift+S›), `3e1eadc` (la barre de menus Fichier / Édition), `2714cb0` (l'essai
+écrit dans s22). **Pour qu'il essaie** : `pnpm dev:cartographer` depuis la copie, puis Édition › Copier, ‹cmd+O›, les
+menus au clavier — **les collages sont grisés, pas encore construits**. **Rien fusionné** : après son essai, je fusionne
+dans `main` (sa copie principale n'a rien de la branche). **Ensuite**, étape 3 : coller un tronçon sur un contour.
+**Encore ouvert, ma proposition** : si le navigateur refuse de garder la copie, la barre d'état le dit, en rouge quand
+CARTO-273 existera.
 
-**Où en sont les tickets** : CARTO-342 (panneaux, `a316444`) et ATLAS-344 (bande, `116415d`) passés en Fait le 03/11 ;
-**`116415d` non poussé**. **CARTO-193** (panneau Villes) En cours : attend les pays saisis par l'historien, puis son
-essai ville par ville. **ATLAS-333** (vitesse) En cours : à remesurer à sa taille réelle — ma prévision, ~1 s pour
-passer à 1100 depuis la bande ; puis reposer les noms gardés après la première image, garder les remplissages par
-année. **À lui** : supprimer `~/Desktop/WebstormProjects/europe-map-panels` (la copie des panneaux, inutile) et la mise de
-côté `stash@{0}` ; la décision sur le stockage du navigateur pour la disposition des panneaux
-(`rules/known-issues/cartographer.md`). Ses serveurs ont changé de port : **lire le titre de la page avant d'y ouvrir
-un onglet** (le 02/11, 5173 était son Cartographe).
+**ATLAS-329 — l'interface de l'atlas** : Claude Design **en pause** jusqu'au 04/11, son résultat pris tel quel ; il
+m'enverra des écrans pour mon retour. La consigne : `~/Desktop/atlas-interface-brief.md` et `~/Desktop/atlas-design-prompt.txt`
+(sur son Bureau, hors dépôt). Le ton : `files/plans/atlas/interface-scenarios.md`, « The tone ». **Mon travail** : chercher
+des **bibliothèques d'ornement de plusieurs époques** — son idée : peut-être **trois designs qui alternent selon le siècle**,
+l'atlas allant du Iᵉʳ au XXIᵉ siècle (il tombait dans *« le design XVIIᵉ, Versailles, Louis XIV »*) ; le XVIIᵉ est fait
+(`files/plans/atlas/ornament-17th-century.md`, sa question ouverte : quelle époque de cartouche). **Un texte à coller**
+se donne dans un fichier brut ou un bloc de code, **jamais en citation** (les barres partent avec la copie).
+
+**L'historien** (`europe-map-9b`) : rien saisi le 03/11 ; il commence par `/enter-in-cms`, qui vérifie d'abord la connexion
+`cms` (`claude mcp list`). La clé du dev lit places, villes à une date, sources (lire, créer, modifier) et les raisons
+d'importance (lire). Ce qu'il saisit, je le vérifie dans la base en lecture seule. **Toujours dû** : les pays des villes
+de 1100 (Groenland → Q16488964, Islande → Q62389, Venise → Q4948), puis l'export — **alors je commite
+`content/events.json`**, pas avant (sa décision).
+
+**Sur `main`, non poussés** : `49a623d` → le commit de clôture du 03/11 (la clé du CMS et `/enter-in-cms`, le README du
+CMS, le plan du copier-coller, `uncheck`, ces notes). `years/` et `content/events.json` restent hors commit (les siens).
+
+**Où en sont les tickets** : CARTO-345 En cours ; CARTO-239 (la barre de menus) en tête d'À faire, entrée dans CARTO-345 ;
+CMS-335 À valider ; **CARTO-193** (Villes) attend les pays de l'historien ; **ATLAS-333** (vitesse) à remesurer à sa
+taille réelle. **À lui** : supprimer `~/Desktop/WebstormProjects/europe-map-panels` et `stash@{0}` ; la décision sur le
+stockage du navigateur pour la disposition des panneaux (`rules/known-issues/cartographer.md`). **Lire le titre d'une
+page avant d'y ouvrir un onglet** : ses serveurs changent de port.
 
 **Le Cartographe** : une carte est un dossier de `years/` (`s19`) et s'enregistre d'elle-même deux secondes après chaque
 geste, en plus de sa copie `.autosave` (gardées, sa décision). Sa 1100 d'avant dans `years/1100-backup-2026-11-02/`.
@@ -100,12 +110,6 @@ entre guillemets doubles** : le 27/10, ça a lancé le seed sur sa base — édi
   dans le terminal et tout attend derrière. Un champ **ajouté** passe sans question (vérifié le 26/10, `withDefault`).
 - **Un `rm -rf` ne se glisse jamais dans une commande.**
 
-**À regarder dans une prochaine session** : le Claude du design system modifie sa skill Trello pour que les chantiers
-deviennent des **épiques** avec des tickets enfants (un système de parents) — à reprendre ici quand il le dira.
-
-**Décidé et noté, rien à faire maintenant** : les feature flags attendent un vrai besoin, surtout dans l'atlas, décrits
-d'abord en scénarios (CARTO-268) ; les Khazars sont deux entités, sans phases (une date vague = `circa` à marge large).
-
 **Une source qu'il donne** → `/create-data-mention`, toujours ; la liste vit sur ATLAS-152. Ses atlas :
 `files/plans/sources/bibliotheque.md` (l'Italie et la Scandinavie manquent ; piste : Spruner-Menke 1880, domaine public).
 
@@ -116,7 +120,7 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 
 ## Where we are
 
-**6 014 tests** (1 663 `core` · 2 316 Cartographe · 1 495 atlas · 371 CMS · 169 plugin `eslint-plugin-eha`, 03/11 nuit), gate
+**6 015 tests** sur `main` (1 663 `core` · 2 316 Cartographe · 1 495 atlas · 372 CMS · 169 plugin `eslint-plugin-eha`, 03/11 soir ; la branche `carto-345` : 1 704 `core`, 2 402 Cartographe), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 

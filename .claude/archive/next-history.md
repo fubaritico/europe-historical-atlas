@@ -1,5 +1,13 @@
 # Next — archive
 
+## Moved from next.md on 2026-11-03 (evening)
+
+**À regarder dans une prochaine session** : le Claude du design system modifie sa skill Trello pour que les chantiers
+deviennent des **épiques** avec des tickets enfants (un système de parents) — à reprendre ici quand il le dira.
+
+**Décidé et noté, rien à faire maintenant** : les feature flags attendent un vrai besoin, surtout dans l'atlas, décrits
+d'abord en scénarios (CARTO-268) ; les Khazars sont deux entités, sans phases (une date vague = `circa` à marge large).
+
 ## Moved from next.md on 2026-11-03 (end of session)
 
 **L'audit des instructions du 29/10** (`files/prompt-audit-2026-10-29.md`, non versionné) remplace celui du 27/10 : ses
