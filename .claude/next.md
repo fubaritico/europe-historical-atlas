@@ -55,11 +55,6 @@ page avant d'y ouvrir un onglet** : ses serveurs changent de port.
 geste, en plus de sa copie `.autosave` (gardées, sa décision). Sa 1100 d'avant dans `years/1100-backup-2026-11-02/`.
 **À lui** : supprimer `packages/cartographer/.autosave/`. Exporter le CMS : `pnpm export:content`, puis recharger.
 
-**Les domaines** : commandés et branchés le 02/11 (`.org` principal, `.com` `.eu` `.net` `.fr`), DNS chez OVH, page d'attente
-sur le site Netlify `europe-historical-atlas-soon` (la page : `~/Desktop/europe-historical-atlas-soon/`). **Le certificat
-ne couvre que `.org` et `www.org`, par ma faute** (j'ai fait retirer un domaine qui marchait) : le message au support de Netlify
-lui a été donné ; ne plus cliquer « Renew » (5 par semaine). Boîtes Zimbra `contact@` et `demandes@` à créer.
-
 **Le gestionnaire de sources** : CMS-332, `files/plans/contribution/source-manager.md` — tout se construit tel qu'écrit, par
 moi, boîte mail comprise, chaque mail sur son clic, et piloté à la voix par le plugin MCP de Payload.
 

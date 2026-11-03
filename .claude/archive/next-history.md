@@ -2,6 +2,11 @@
 
 ## Moved from next.md on 2026-11-03 (evening)
 
+**Les domaines** : commandés et branchés le 02/11 (`.org` principal, `.com` `.eu` `.net` `.fr`), DNS chez OVH, page d'attente
+sur le site Netlify `europe-historical-atlas-soon` (la page : `~/Desktop/europe-historical-atlas-soon/`). **Le certificat
+ne couvre que `.org` et `www.org`, par ma faute** (j'ai fait retirer un domaine qui marchait) : le message au support de Netlify
+lui a été donné ; ne plus cliquer « Renew » (5 par semaine). Boîtes Zimbra `contact@` et `demandes@` à créer.
+
 **À regarder dans une prochaine session** : le Claude du design system modifie sa skill Trello pour que les chantiers
 deviennent des **épiques** avec des tickets enfants (un système de parents) — à reprendre ici quand il le dira.
 
