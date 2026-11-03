@@ -11,5 +11,6 @@
   "undoHint": "{label} ({keys})",
   "redoHint": "{label} ({keys})",
   "checkYear": "Check this year",
+  "menuBar": "The Cartographer’s menus",
   "placeholder": "{zone, select, appBar {app bar} docBar {document bar} tools {tools} panels {panels} other {{zone}}}"
 }

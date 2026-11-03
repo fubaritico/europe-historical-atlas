@@ -197,3 +197,69 @@ Scenario: the clipboard cannot be written
   Then the status bar reads « La copie n’a pas pu être gardée : rien n’est copié » — in red once CARTO-273 is built
   And the console says why
 ```
+
+## The menu bar — Fichier and Édition
+
+> **Built 2026-11-03 on the branch `carto-345` — not walked yet** (CARTO-239, entered in CARTO-345). Beside the
+> application's name in the top bar; `role="menubar"`, a `menuitem` per title and per command. The buttons of the top
+> bar stay as they were. **Declared gap**: every paste is shown greyed — none is built yet (steps 3 to 6).
+
+```gherkin
+Scenario: open a menu, its commands with their keys
+  When I click « Fichier » in the top bar
+  Then a menu lists « Ouvrir… ⌘O », « Enregistrer ⌘S », « Enregistrer sous… ⇧⌘S », « Enregistrer une copie »
+  And off a Mac the keys read « Ctrl+O », « Ctrl+S », « Ctrl+Maj+S »
+
+Scenario: the pointer over the other title opens its menu
+  Given « Fichier » is open
+  When the pointer moves over « Édition »
+  Then « Édition » is open in its place
+
+Scenario: Édition names what it would undo and what it pastes onto
+  Given the last gesture was « Créer France » and « Kingdom of Poland » is selected
+  When I open « Édition »
+  Then it reads « Annuler Créer France ⌘Z », « Rétablir ⇧⌘Z » greyed, a hairline, « Copier ⌘C », a hairline,
+    « Coller les entités ⌘V », « Coller le tronçon sur Kingdom of Poland ⌘V »,
+    « Coller la fiche sur Kingdom of Poland… ⇧⌘V », « Coller le tracé sur Kingdom of Poland… ⌥⌘V »
+  And with no polity selected the pastes read « … sur l’entité sélectionnée »
+
+Scenario: a greyed command is shown and does nothing
+  When I click a greyed command
+  Then nothing happens, the menu stays open, and the console says the command cannot act now
+
+Scenario: the menus by keyboard
+  Given the focus is on « Édition »
+  When I press ‹↓›
+  Then its menu opens, its first command that can act focused
+  When I press ‹↓› again
+  Then the focus skips the greyed commands and the hairlines
+  When I press ‹→›
+  Then « Fichier » opens in its place, round the ends
+  When I press ‹escape›
+  Then the menu closes, the focus back on its title
+
+Scenario: the titles by keyboard, as a system's menu bar
+  Given the focus is on « Fichier »
+  When I press ‹→›
+  Then the focus is on « Édition », and no menu opens
+  And ‹Tab› reaches the bar once, on the title last focused
+  When I press ‹↑›
+  Then « Édition » opens on its last command
+  When I press ‹Tab›
+  Then the menu closes, and the focus goes on from the bar
+
+Scenario: a command chosen gives the focus back
+  When I choose a command with ‹entrée›
+  Then the menu closes and the focus is back on its title before the command runs
+  And a command that opens a dialogue takes the focus from there
+
+Scenario: a menu where nothing can act
+  Given every command of a menu is greyed
+  When I open it
+  Then the menu itself has the focus, and ‹escape› closes it
+
+Scenario: a press outside closes the menu
+  Given a menu is open
+  When I press anywhere outside the bar
+  Then it closes, and nothing else is done
+```

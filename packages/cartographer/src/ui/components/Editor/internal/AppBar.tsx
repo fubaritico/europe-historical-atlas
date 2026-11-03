@@ -6,6 +6,8 @@ import { EDITOR_MESSAGES } from '../i18n'
 
 import { BarButton } from './BarButton'
 
+import type { ReactNode } from 'react'
+
 /**
  * The top bar: the mark, the application's name and the open year on the left; the file's actions on the
  * right — after the design's `appbar` (`design/chrome.js`), 2026-10-13.
@@ -33,6 +35,8 @@ export interface AppBarProps {
   onSaveAs: () => void
   /** *Save a copy*: the map written as `<map>.copy.<date and time>`, the page staying the map it is. */
   onSaveCopy: () => void
+  /** The menu bar, beside the name (CARTO-345) — built by its binding, which knows the store. */
+  menus?: ReactNode
 }
 
 /**
@@ -44,9 +48,10 @@ export interface AppBarProps {
  * @param props.onSave - save the map open
  * @param props.onSaveAs - open the dialogue of *Save as…*
  * @param props.onSaveCopy - save a copy
+ * @param props.menus - the menu bar, beside the name
  * @returns the brand and the actions, the two ends of the bar
  */
-export function AppBar({ name, map, onOpen, onSave, onSaveAs, onSaveCopy }: AppBarProps) {
+export function AppBar({ name, map, onOpen, onSave, onSaveAs, onSaveCopy, menus }: AppBarProps) {
   // Context
   const t = useTranslation(EDITOR_MESSAGES)
   const action = useTranslation(ACTION_MESSAGES)
@@ -55,13 +60,16 @@ export function AppBar({ name, map, onOpen, onSave, onSaveAs, onSaveCopy }: AppB
   // Render
   return (
     <>
-      <div className="app-brand">
-        <BrandMark />
-        <span className="app-brand__name">{name}</span>
-        <span className="app-brand__sep" aria-hidden="true">
-          ·
-        </span>
-        <span className="app-brand__year">{map}</span>
+      <div className="app-start">
+        <div className="app-brand">
+          <BrandMark />
+          <span className="app-brand__name">{name}</span>
+          <span className="app-brand__sep" aria-hidden="true">
+            ·
+          </span>
+          <span className="app-brand__year">{map}</span>
+        </div>
+        {menus}
       </div>
       <div className="bar-actions">
         <BarButton

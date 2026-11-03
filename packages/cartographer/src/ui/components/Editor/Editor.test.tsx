@@ -60,6 +60,7 @@ function mount(results = createResultRelay()): void {
       onSave={() => undefined}
       onSaveAs={() => undefined}
       onSaveCopy={() => undefined}
+      onCopy={() => undefined}
       mapName={createMapNameStore('1100')}
       history={createHistoryRelay()}
       colours={COLOURS}

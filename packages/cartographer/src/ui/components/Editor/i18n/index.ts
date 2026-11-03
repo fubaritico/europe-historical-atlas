@@ -16,6 +16,7 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `nothingToUndo`, `nothingToRedo` — Why undo or redo is unavailable.
  * - `undoHint`, `redoHint` — The tooltip of undo and redo; `label` is the button's name, `keys` its shortcut.
  * - `checkYear` — Check the year — a command not built yet.
+ * - `menuBar` — The menu bar's accessible name (CARTO-345).
  * - `placeholder` — The shell's placeholders, where a zone is not given; `zone` is `appBar`, `docBar`,
  *   `tools` or `panels`.
  */

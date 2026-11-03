@@ -402,15 +402,16 @@ const PLATFORM = shownPlatform(navigator)
 const clipboardWordsNow = () =>
   clipboardWords(localeStore.get(), shortcutText('paste', PLATFORM, localeStore.get()).shown)
 
-// ‹cmd+C›: the stretch or the polity selected, kept in the tab for the next map (CARTO-345).
-listenForCommand(document, 'copy', () => {
+/** Copy the stretch or the polity selected, kept in the tab for the next map (CARTO-345) — ‹cmd+C› and Édition › Copier. */
+const handleCopy = (): void => {
   copySelection(store.getState(), {
     map: yearSession.map(),
     keep: (content) => keepClipboard(window.sessionStorage, content),
     say: results.say,
     words: clipboardWordsNow(),
   })
-})
+}
+listenForCommand(document, 'copy', handleCopy)
 
 /** What the clipboard holds as this map opens — said, so the author sees what ‹cmd+V› will paste. */
 const HELD = keptClipboard(window.sessionStorage)
@@ -444,6 +445,7 @@ createRoot(container).render(
               onSave={handleSave}
               onSaveAs={saveAsPicker.open}
               onSaveCopy={handleSaveCopy}
+              onCopy={handleCopy}
               mapName={mapName}
               history={history}
               heading={<PageHeading store={store} />}
