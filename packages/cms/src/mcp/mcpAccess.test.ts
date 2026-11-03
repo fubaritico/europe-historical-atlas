@@ -27,8 +27,13 @@ function operationBoxes(config: Config, group: string): string[] {
 
 describe('mcpAccess', () => {
   describe('happy path', () => {
-    it('reaches the places, the cities at a date and the sources, and nothing else', () => {
-      expect(Object.keys(MCP_COLLECTIONS).sort()).toEqual(['place-periods', 'places', 'sources'])
+    it('reaches the importance reasons, the places, the cities at a date and the sources, and nothing else', () => {
+      expect(Object.keys(MCP_COLLECTIONS).sort()).toEqual([
+        'importance-reasons',
+        'place-periods',
+        'places',
+        'sources',
+      ])
     })
 
     it('adds the collection of API keys and the /mcp endpoint', async () => {
@@ -52,8 +57,17 @@ describe('mcpAccess', () => {
       }
     )
 
-    it('describes a place’s position longitude first, as the point field stores it', () => {
-      expect(MCP_COLLECTIONS[Places.slug]?.description).toContain('[longitude, latitude]')
+    it('gives a key only the box find for the importance reasons', async () => {
+      const config = await applied()
+
+      expect(operationBoxes(config, 'importanceReasons')).toEqual(['find'])
+    })
+
+    it('describes a place’s position as the object the plugin’s tools take, not the stored tuple', () => {
+      const description = MCP_COLLECTIONS[Places.slug]?.description
+
+      expect(description).toContain('{ longitude, latitude }')
+      expect(description).not.toContain('[longitude, latitude]')
     })
   })
 
