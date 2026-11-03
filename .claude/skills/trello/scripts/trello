@@ -386,6 +386,16 @@ const verbs = {
     await api('PUT', `/cards/${c.id}/checkItem/${matches[0].id}`, { state: 'complete' })
     console.warn(`#${c.idShort} ticked: ${matches[0].name}`)
   },
+  /** uncheck <number> <text> — unticks the one checklist item whose name contains the text: a tick put by mistake. */
+  async uncheck(number, text) {
+    if (!text) fail('uncheck <number> <text>')
+    const c = await card(number)
+    const items = (await api('GET', `/cards/${c.id}/checklists`)).flatMap((l) => l.checkItems)
+    const matches = items.filter((i) => i.name.includes(text))
+    if (matches.length !== 1) fail(`${matches.length} items match "${text}" on #${c.idShort}: ${items.map((i) => i.name).join(' | ')}`)
+    await api('PUT', `/cards/${c.id}/checkItem/${matches[0].id}`, { state: 'incomplete' })
+    console.warn(`#${c.idShort} unticked: ${matches[0].name}`)
+  },
   /**
    * attachments <number> [directory] — lists a card's attachments (the dev's screenshots, 2026-10-29); given a directory,
    * saves each file in it under its own name. Trello serves an upload only with the key and token in an OAuth header.

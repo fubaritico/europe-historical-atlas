@@ -212,6 +212,7 @@ $S unblock 7
 $S archive 7 "doublon de #9"               # my own mistakes only — undone from Trello's archive
 $S checklist 9 "Plan" "étape 1" "étape 2"   # a plan's steps on its card; a checklist of that title is extended
 $S check 9 "étape 1"                        # ticks the one item containing the text
+$S uncheck 9 "étape 1"                      # unticks it — a tick put by mistake
 $S show 7                                  # title, column, description, comments
 $S attachments 7 [folder]                  # a card's attachments; with a folder, saves each one there (his screenshots)
 $S relabel <old> <new>                     # renames a label; every card keeps it under its new name
