@@ -35,6 +35,24 @@ connected (`/mcp`), and its tools are there. If not, **stop** and give the dev t
 
 The key acts as the dev's account: what the historian enters appears in the admin as entered by him.
 
+### When the connection fails — from what is seen to what to do
+
+Lived on 2026-11-03, the first time; the mechanism is in `.claude/rules/known-issues/cms.md` (« Un ajout de champ pur
+peut figer le serveur »). The same table is in `packages/cms/README.md`, for a person.
+
+| what is seen | what it means | what to do |
+| --- | --- | --- |
+| `cms` absent from `/mcp` | the session started before `claude mcp add` — a session never rereads it | a new session; `claude mcp list` in a terminal shows the truth |
+| `MCP server cms already exists` | the command was already run for this folder | nothing; `claude mcp list` |
+| ✘ *connection timed out after 30000ms* | **the CMS server is stuck, not the key** — a wrong key is refused at once | probe without a key (below); if the admin hangs too, his server's terminal holds the error |
+| `index … already exists` in his terminal | a schema push failed halfway after a field change; every request waits behind it | he stops his server; on **a copy** of `cms.db`, Payload's `pushSchema` without `apply` must list nothing; then he restarts — never a push tried on his base |
+| `401` on `/api/mcp` with the key | the key is wrong, or the variable was empty when `claude mcp add` ran | he reloads it from `.env.local`, `claude mcp remove cms`, adds it again |
+| a refusal on `importance-reasons` | the key's **find** box for it is not ticked | admin › MCP › API Keys, tick it |
+
+**The probe, without a key** (it changes nothing): a `POST` of an MCP `initialize` to `http://localhost:3100/api/mcp`
+answers **401 in milliseconds** when the server is healthy; no answer in 20 s means the server is stuck. The same for
+`/admin`: 200 healthy, nothing stuck. **His server is his**: I start it only when he asks, and say so.
+
 ## The frame — never crossed
 
 - **Through the MCP only.** Never the seed (`pnpm cms:seed` once ran on his base), never SQL that writes, never the

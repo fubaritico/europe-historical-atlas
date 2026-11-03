@@ -15,6 +15,15 @@ Open issues of `packages/cms`, the contribution system (Payload). Loaded by path
   base a été supprimée le 25/10, avec son accord (elle ne tenait que son compte). **Remède** : les migrations
   (`push: false`), CMS-276. **Jusque-là** : aucun changement de champ qui retire ou renomme une colonne, et le dire au
   dev avant qu'il relance. **Sévérité : bloquant dès qu'il y a du contenu.**
+- **Un ajout de champ pur peut figer le serveur, sans question dans le terminal** (03/11, `49a623d`) : une collection
+  ajoutée au plugin MCP a ajouté une colonne à la table des clés. Le push l'a créée (`importance_reasons_find`), puis a
+  échoué sur `CREATE INDEX payload_preferences_rels_order_idx` — *already exists* ; l'initialisation de Payload est restée
+  en échec, chaque requête attendait derrière (admin, API, `/api/mcp` : 20 à 90 s). Une première relance du dev a
+  redonné l'erreur. **Mesuré ensuite sur une copie identique de la base** (`pushSchema` sans `apply`) : plus aucune
+  instruction en attente ; relancé à 13:21, le serveur répond (admin 200, MCP 401 sans clé en 7 ms). **Mon hypothèse, non
+  prouvée** : deux pushes concurrents (Next initialise Payload par route), le second recréant l'index du premier. Base
+  intacte. **Remède** : après un changement de schéma, relancer jusqu'à ce que le push n'ait plus rien à faire — vérifié
+  sur une copie, jamais sur sa base ; le lui dire avant qu'il clique. Durable : les migrations, CMS-276. **Sévérité : gênant.**
 - **Le serveur du CMS est le sien** (25/10) : je ne le lance, ne le coupe ni ne le relance jamais. Mes relances pendant
   qu'il remplissait un lieu ont donné un « Failed to fetch » qu'il a pris pour un défaut du bouton. Je vérifie par des
   tests et des scripts sur une base à moi (CMS-279). **Sévérité : à savoir.**
