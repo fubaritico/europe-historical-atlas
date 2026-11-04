@@ -25,6 +25,18 @@ focus — interface too, but inside the 3D scene. The flat interface is written 
 | the snapshot: the view as a framed picture, with its cartouche | [s14](scenarii/s14-the-snapshot.md) — the dev, 02/11 |
 | choosing the century — a simple selector, not a timeline | [s15](scenarii/s15-the-century.md) — ATLAS-150 |
 
+**The synchronoptic frieze — the dev's call, 2026-11-05**, after Claude Design's mock-up (`Timeline.dc.html`):
+- **First a reading companion**: what happens around the year shown, to give context; a click shows the event on the
+  map. The map does not change year. **A click on an element that has a place on the map** (the dev, 2026-11-05): the
+  map focuses on it **and** the panel on the right opens with its text — a short editorial text, written by hand from
+  what is known, reworded.
+- **Once there are several maps**: a mark on the frieze where a year has its map (a small icon above the cursor), to
+  go straight to it. Moving along the frieze updates the map only the day every year has one.
+- **Its layers follow a synchronoptic book the dev owns** (old, numbered; scans to come). It is in copyright, the same
+  status as Euratlas and Duby: **facts and dates may be taken, its descriptions never**.
+- My proposal, not decided: its own epic after the map's interface; one line folded by default; an uncertain date
+  drawn with a blurred end — the same mark as on the map.
+
 **References for the mood, to hand Claude Design** — named, never copied: **GeaCron** (geacron.com), the dev's reference
 for a historical atlas with a timeline; **Chronas** (chronas.org), named by me, to be looked at by the dev.
 

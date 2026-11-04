@@ -52,7 +52,7 @@ the weld at paste (below), built on `core/editor/anchorWeld.ts`, which welds one
     that polity's outline and the stretch between them is replaced** — the gesture ⟨retracer⟩ already makes
     (`core/editor/retrace.ts`, a neighbour sharing the stretch follows), its new run taken from the clipboard instead
     of the pen. The rest of the outline does not move: nothing to realign. QGIS's *Reshape Features* is the same
-    gesture (« State of the art » below). **The paste that saves time — first in the order of work**;
+    gesture (« State of the art » below). Second in the order of work since 2026-11-04 (below);
   - **a whole polity** — clean only on free ground (an empty Ireland, a map started empty); elsewhere it is cut by
     what is there, as QGIS's *Avoid overlap* cuts a new polygon by its neighbours.
 
@@ -142,9 +142,14 @@ are any two maps of `years/`, `<copied polity>` the copied polity, `<target poli
 2. **The shortcut converter, then the menu bar, Fichier and Édition**, every item with its shortcut shown for the
    system it runs on — the home every paste below lands in; the stacking menu and the top bar's hints move onto the
    converter in the same step.
-3. **Paste a stretch onto an outline** — ⟨retracer⟩ fed by the clipboard: the paste that saves the most time.
-4. **Paste a whole polity** — in place, welded at 2 km, cut by what is there, its suzerain kept or dropped, the
+> **Order changed by the dev, 2026-11-04**, trying steps 1 and 2 in his Cartographer: *"you select the country,
+> ctrl+C, you open the other file, ctrl+V — there, you've copied the country; by default it appears at the top of
+> the list in {Polities}"* — and *"if one cannot paste, it is not finished"*. Copy alone gave him nothing to do: the
+> **whole polity's paste comes first**, the stretch's second.
+
+3. **Paste a whole polity** — **first since 2026-11-04**, at the top of `{Polities}`'s list; in place, welded at 2 km, cut by what is there, its suzerain kept or dropped, the
    question of a name already in the map.
+4. **Paste a stretch onto an outline** — ⟨retracer⟩ fed by the clipboard.
 5. **Paste an outline onto a polity** — in place of its own, or as one more island.
 6. **Paste a sheet onto a polity** — the dialogue, field by field.
 7. **Several polities selected in `{Polities}`**, no outline selected, copied and pasted together.
@@ -157,7 +162,8 @@ are any two maps of `years/`, `<copied polity>` the copied polity, `<target poli
 | a polity pasted into a year its dates leave out | **pasted, nothing said** — the dates do not matter to a paste (the dev: *"it's a productivity gesture, to save time"*, like the cities: comfort while drawing) | pasted and said (my proposal) · refused | **the dev**, 2026-11-03 |
 | paste in place; what is pasted stays selected | — | — | **the dev**, 2026-11-03 |
 | no preview, no validation: pasted at once, the weld and the cut with it, ‹ctrl+Z› if wrong | — | a preview with ‹entrée› / ‹échap› (my proposal, refused) | **the dev**, 2026-11-03 |
-| a stretch pasted onto an outline, first in the order of work | — | — | **the dev**, 2026-11-03, on my proposal |
+| ~~a stretch pasted onto an outline, first in the order of work~~ — **reversed**: the whole polity first | — | — | **the dev**, 2026-11-04 (2026-11-03 on my proposal) |
+| a pasted polity appears **at the top of `{Polities}`'s list** | — | — | **the dev**, 2026-11-04 |
 | the weld distance | **2 km** on the ground, edge points and coast points alike, each welded onto the nearest point or stretch — one constant, tuned by use (the dev: *"it's a matter of practice and trial"*) | a distance set at the paste, in a field | **the dev**, 2026-11-03, on my proposal |
 | an outline added as an island over the polity's own | **kept as two rings, nothing said** — the overlap is seen; the author needs the outline and disposes of it, the weld repairing (the dev: *"what would you merge? it makes a big mess"*) | merged into one ring · the overlap said in the status bar (my proposal) | **the dev**, 2026-11-03 |
 | one polity at a time, or several | **several, selected in `{Polities}` only, copied together and never edited together**: two selected, no outline is | one only (my proposal) | **the dev**, 2026-11-03 |

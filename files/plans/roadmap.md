@@ -23,6 +23,10 @@ Spikes/experiments (kept, reviewable code): [`files/spikes/`](../spikes/README.m
   polygons + camera fly-to. (detail: chapters 01–03)
 - **M2 — Interactive historical map**: click shows **event information** (battle, political decision,
   invention…, its **consequences** and **actors**). **20 historical maps, one per century (1st → 21st)**.
+  > **The dev's direction, 2026-11-05 — the span narrows**: *ideally from the 1st century BC* (or the Punic Wars, the
+  > rise of Rome) *to 1900*. Two reasons, his: what makes the atlas worth it is history more than a century away, and
+  > its look *"does not invite"* contemporary history. The thread: *"whose heirs are we"* — Greeks, Romans, but also
+  > Persians and Mesopotamians. **Start undecided**; signed years are already in `HistoricalDate` (plan.md).
 - **M3 — Single-century prototype**: logical click wiring — bind a click → geographic region at a point
   in time (see the data model in chapter 04).
 - **M4 — Multi-century / decade extension**: history "accelerates" (fast-moving borders in the
