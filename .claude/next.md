@@ -49,8 +49,8 @@ commite `content/events.json`**, pas avant (sa décision).
 `content/events.json` restent hors commit (les siens).
 
 **Où en sont les tickets** : CARTO-345 En cours ; CMS-335 **Fait** (04/11) ; **CARTO-193** (Villes) attend les pays de
-l'historien ; **ATLAS-333** (vitesse) à remesurer. **`stash@{0}`** garde l'état non commité de la copie `panels`, rangé
-avant sa suppression (05/11) : à jeter quand il le dit. **À lui** : la décision sur le stockage du navigateur pour la disposition des panneaux
+l'historien ; **ATLAS-333** (vitesse) à remesurer. **ATLAS-333** ne se ferme qu'une fois une seconde carte
+terminée par lui, côtes comprises (05/11). **À lui** : la décision sur le stockage du navigateur pour la disposition des panneaux
 (`rules/known-issues/cartographer.md`). **Lire le titre d'une page avant d'y ouvrir un onglet** : ses serveurs changent
 de port. **Un texte à coller** : dans un bloc de code, jamais en citation.
 
