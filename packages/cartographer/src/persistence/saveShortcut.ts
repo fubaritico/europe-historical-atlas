@@ -1,3 +1,7 @@
+import { isChord } from '@europe-historical-atlas/core/i18n/shortcuts'
+
+import { COMMAND_KEYS } from '../i18n/commandKeys'
+
 /**
  * ‹ctrl+S› — ‹cmd+S› on a Mac — saves the year, wherever the focus is.
  *
@@ -26,13 +30,13 @@ export interface SaveKeyEvent {
  * Whether a key asks to save: ‹ctrl+S› or ‹cmd+S›, without ‹alt› or ‹shift›.
  *
  * ‹shift› is left out on purpose: ‹ctrl+shift+S› is *Save as…* in every editor, and `[Save as…]` is a
- * gesture of its own (`s04`), not this one under another key.
+ * gesture of its own (`s04`, ‹cmd+shift+S› since CARTO-345), not this one under another key. The chord is the one
+ * table's (`i18n/commandKeys.ts`), which the menu's label is written from.
  * @param event - the key and its modifiers
  * @returns `true` for the save key
  */
 export function isSaveKey(event: SaveKeyEvent): boolean {
-  if (event.altKey || event.shiftKey) return false
-  return (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's'
+  return isChord(event, COMMAND_KEYS.save)
 }
 
 /** Where the shortcut listens — the window in the application, a stub in tests. */

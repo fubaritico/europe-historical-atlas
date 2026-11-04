@@ -35,10 +35,13 @@ describe('top bars, bound', () => {
       renderInEnglish(
         <AppBarPanel
           mapName={mapName}
+          store={store()}
+          history={createHistoryRelay(vi.fn())}
           onOpen={vi.fn()}
           onSave={vi.fn()}
           onSaveAs={vi.fn()}
           onSaveCopy={vi.fn()}
+          onCopy={vi.fn()}
         />
       )
       expect(document.querySelector('.app-brand__year')?.textContent).toBe('1100')

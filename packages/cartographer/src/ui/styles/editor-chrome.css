@@ -796,6 +796,107 @@
  * name beside it (2026-10-13). `align-self` keeps it off the bar's stretch, so the 5px is whole rather than
  * the half pixel centring in 29px would give; the name's 16px line height centres it on whole pixels too.
  */
+/* The left of the top bar: the application's name, then its menus (CARTO-345). */
+.app-start {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+/*
+ * The menu bar (CARTO-345, CARTO-239), after the dev's reference — Illustrator's menus on a Mac, 2026-11-03: a dense
+ * list, the name on the left and the keys on the right, a hairline between groups, a greyed command shown. The colours
+ * are the stacking menu's, the chrome's own palette.
+ */
+.menu-bar {
+  display: flex;
+  align-items: stretch;
+}
+
+.menu-bar__menu {
+  position: relative;
+  display: flex;
+}
+
+.menu-bar__title {
+  padding: 0 9px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  cursor: default;
+}
+
+.menu-bar__title:hover,
+.menu-bar__title[aria-expanded='true'] {
+  background: var(--hover);
+}
+
+.menu-bar__title:focus-visible,
+.menu-bar__item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.menu-bar__list {
+  /* Wide enough for « Coller le tracé sur Holy Roman Empire… » and its keys at 12px. */
+  --menu-bar-list-width: 260px;
+
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  min-width: var(--menu-bar-list-width);
+  padding: 4px 0;
+  border: 1px solid var(--line);
+  background: var(--raised);
+}
+
+.menu-bar__item {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  text-align: start;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.menu-bar__item:hover:not([aria-disabled='true']),
+.menu-bar__item:focus-visible {
+  background: var(--hover);
+}
+
+.menu-bar__item[aria-disabled='true'] {
+  color: var(--ink-off);
+}
+
+.menu-bar__label {
+  flex: 1;
+}
+
+/* A command's keys at the row's right end, quieter than its name — as the stacking menu's. */
+.menu-bar__keys {
+  margin-inline-start: 24px;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--ink-dim);
+}
+
+.menu-bar__separator {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--line);
+}
+
 .app-brand {
   align-self: flex-start;
   display: flex;

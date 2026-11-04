@@ -18,6 +18,7 @@ import { fetchWithin } from '@europe-historical-atlas/core/utils/fetchWithin'
 import { createHistoryRelay } from './canvas/history/historyRelay'
 import { CHROME_PAINT_STYLE } from './canvas/paint/style'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
+import { shortcutText } from './i18n/commandKeys'
 import { createLocaleStore } from './i18n/localeStore'
 import { bakeToBitmap, loadBackdrop } from './loaders/backdropSource'
 import { CONTENT_URL, loadCities } from './loaders/cityLoad'
@@ -26,6 +27,7 @@ import { createAlarmBoard } from './persistence/alarmBoard'
 import { AUTOSAVE_DELAY_MS, createAutosaveKeeper } from './persistence/autosaveKeeper'
 import { writeCopyThenMap } from './persistence/autosaveWrite'
 import { carryView, takeCarriedView } from './persistence/carriedView'
+import { keepClipboard, keptClipboard } from './persistence/clipboardStorage'
 import { changeMap } from './persistence/mapChange'
 import { routeNotices } from './persistence/noticeRouter'
 import { addressForMap, openingMapOf } from './persistence/openingMap'
@@ -51,7 +53,10 @@ import { OverwriteDialog } from './ui/components/OverwriteDialog'
 import { PageHeading } from './ui/components/PageHeading'
 import { SaveAsDialog } from './ui/components/SaveAsDialog'
 import { SaveFirstDialog } from './ui/components/SaveFirstDialog'
+import { PlatformContext } from './ui/i18n/platformContext'
 import { arrangeSelected, arrangeWords } from './ui/utils/arrange'
+import { listenForCommand, shownPlatform } from './ui/utils/commandListener'
+import { clipboardWords, copySelection, heldSentence } from './ui/utils/copySelection'
 import { createDialogueOpener } from './ui/utils/dialogueOpener'
 import { createMapNameStore } from './ui/utils/mapNameSource'
 import { listenForStackingKeys } from './ui/utils/stackingShortcut'
@@ -387,6 +392,35 @@ listenForStackingKeys(document, (move) => {
   arrangeSelected(store.getState(), move, results.say, arrangeWords(localeStore.get()))
 })
 
+/** The system the shortcuts are shown for, read once (CARTO-345, the shortcut converter). */
+const PLATFORM = shownPlatform(navigator)
+
+/**
+ * The words of the clipboard, in the language of the moment, with the paste shortcut as this system writes it.
+ * @returns the words
+ */
+const clipboardWordsNow = () =>
+  clipboardWords(localeStore.get(), shortcutText('paste', PLATFORM, localeStore.get()).shown)
+
+/** Copy the stretch or the polity selected, kept in the tab for the next map (CARTO-345) — ‹cmd+C› and Édition › Copier. */
+const handleCopy = (): void => {
+  copySelection(store.getState(), {
+    map: yearSession.map(),
+    keep: (content) => keepClipboard(window.sessionStorage, content),
+    say: results.say,
+    words: clipboardWordsNow(),
+  })
+}
+listenForCommand(document, 'copy', handleCopy)
+
+/** What the clipboard holds as this map opens — said, so the author sees what ‹cmd+V› will paste. */
+const HELD = keptClipboard(window.sessionStorage)
+if (HELD !== null) results.say(heldSentence(HELD, clipboardWordsNow()))
+
+// ‹cmd+O› and ‹cmd+shift+S›: *Open…* and *Save as…*, as their buttons and the menu (CARTO-345).
+listenForCommand(document, 'open', mapPicker.open)
+listenForCommand(document, 'saveAs', saveAsPicker.open)
+
 /**
  * The canvas's undo and redo, for the document bar's buttons — gesture first, as the keys (ARCH-101). Built
  * here because neither end owns the other: the controller registers once the backdrop is baked.
@@ -403,36 +437,39 @@ const zoneBreaks = import.meta.env.DEV ? readZoneBreaks(window.location.search) 
 createRoot(container).render(
   <StrictMode>
     <LocaleProvider store={localeStore}>
-      <ZoneBreaksContext value={zoneBreaks}>
-        <ErrorBoundary zone="cartographer">
-          <Editor
-            onOpen={mapPicker.open}
-            onSave={handleSave}
-            onSaveAs={saveAsPicker.open}
-            onSaveCopy={handleSaveCopy}
-            mapName={mapName}
-            history={history}
-            heading={<PageHeading store={store} />}
-            store={store}
-            load={loadTheBackdrop}
-            style={CHROME_PAINT_STYLE}
-            colours={colours}
-            wikidata={wikidata}
-            results={results}
-          />
-          <OverwriteDialog questions={overwriteQuestions} now={() => new Date()} />
-          <AlarmDialog alarms={alarms} />
-          <NoticeToaster toaster={toaster} />
-          <MapDialog
-            picker={mapPicker}
-            source={yearArchive}
-            currentMap={yearSession.map}
-            onOpen={handleOpenMap}
-          />
-          <SaveFirstDialog questions={saveFirstQuestions} />
-          <SaveAsDialog picker={saveAsPicker} saveAs={handleSaveAs} />
-        </ErrorBoundary>
-      </ZoneBreaksContext>
+      <PlatformContext value={PLATFORM}>
+        <ZoneBreaksContext value={zoneBreaks}>
+          <ErrorBoundary zone="cartographer">
+            <Editor
+              onOpen={mapPicker.open}
+              onSave={handleSave}
+              onSaveAs={saveAsPicker.open}
+              onSaveCopy={handleSaveCopy}
+              onCopy={handleCopy}
+              mapName={mapName}
+              history={history}
+              heading={<PageHeading store={store} />}
+              store={store}
+              load={loadTheBackdrop}
+              style={CHROME_PAINT_STYLE}
+              colours={colours}
+              wikidata={wikidata}
+              results={results}
+            />
+            <OverwriteDialog questions={overwriteQuestions} now={() => new Date()} />
+            <AlarmDialog alarms={alarms} />
+            <NoticeToaster toaster={toaster} />
+            <MapDialog
+              picker={mapPicker}
+              source={yearArchive}
+              currentMap={yearSession.map}
+              onOpen={handleOpenMap}
+            />
+            <SaveFirstDialog questions={saveFirstQuestions} />
+            <SaveAsDialog picker={saveAsPicker} saveAs={handleSaveAs} />
+          </ErrorBoundary>
+        </ZoneBreaksContext>
+      </PlatformContext>
     </LocaleProvider>
   </StrictMode>
 )

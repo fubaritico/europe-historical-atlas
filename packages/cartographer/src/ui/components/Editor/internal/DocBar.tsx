@@ -1,9 +1,11 @@
+import { useShortcut } from '../../../hooks/useShortcut'
 import { useTranslation } from '../../../hooks/useTranslation'
 import { ACTION_MESSAGES } from '../../../i18n/actions'
 import { ChromeIcon } from '../../../icons/chromeIcons'
 import { EDITOR_MESSAGES } from '../i18n'
 
 import { BarButton } from './BarButton'
+import { DocTab } from './DocTab'
 
 import type { Ref } from 'react'
 
@@ -47,6 +49,7 @@ export function DocBar({ year, undoLabel, redoLabel, onUndo, onRedo, zoomRef }: 
   // Context
   const t = useTranslation(EDITOR_MESSAGES)
   const action = useTranslation(ACTION_MESSAGES)
+  const shortcut = useShortcut()
 
   // Derived
   const undo = undoLabel === null ? null : action('undoStep', { step: undoLabel })
@@ -55,18 +58,7 @@ export function DocBar({ year, undoLabel, redoLabel, onUndo, onRedo, zoomRef }: 
   // Render
   return (
     <>
-      <div className="doc-tab">
-        <BarButton
-          label={t('closeYear', { close: action('close'), year: String(year) })}
-          unavailable={t('notBuilt', { scenarios: 's04' })}
-          icon={<ChromeIcon name="close" size={9} />}
-          variant="icon"
-        />
-        <span className="doc-tab__name">{year}</span>
-        <span className="doc-tab__meta">
-          @ <span ref={zoomRef}>—</span>
-        </span>
-      </div>
+      <DocTab year={year} zoomRef={zoomRef} />
       <div className="bar-actions">
         {/* Named after what it would revert, as the design has it; "nothing to undo" when there is none. */}
         <BarButton
@@ -74,14 +66,22 @@ export function DocBar({ year, undoLabel, redoLabel, onUndo, onRedo, zoomRef }: 
           variant="icon"
           {...(undo === null
             ? { label: action('undo'), unavailable: t('nothingToUndo') }
-            : { label: undo, onPress: onUndo, hint: t('undoHint', { label: undo }) })}
+            : {
+                label: undo,
+                onPress: onUndo,
+                hint: t('undoHint', { label: undo, keys: shortcut('undo').shown }),
+              })}
         />
         <BarButton
           icon={<ChromeIcon name="redo" size={14} />}
           variant="icon"
           {...(redo === null
             ? { label: action('redo'), unavailable: t('nothingToRedo') }
-            : { label: redo, onPress: onRedo, hint: t('redoHint', { label: redo }) })}
+            : {
+                label: redo,
+                onPress: onRedo,
+                hint: t('redoHint', { label: redo, keys: shortcut('redo').shown }),
+              })}
         />
         <BarButton
           label={t('checkYear')}

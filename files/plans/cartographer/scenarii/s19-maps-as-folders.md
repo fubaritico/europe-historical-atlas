@@ -235,3 +235,29 @@ Scenario: no snapshot, no draft
   And nothing is written outside years/ — no packages/cartographer/.autosave/
   And no dialogue offers a draft at the opening
 ```
+
+## The keys of Open… and Save as… — CARTO-345
+
+> **Built 2026-11-03 on the branch `carto-345` — not walked yet.** The keys the dev validated with the menu bar
+> (`../copy-paste-between-maps.md`), from the one table every listener and every label reads (`src/i18n/commandKeys.ts`).
+> Left to a text field and an open dialogue, unlike ‹cmd+S›: ‹cmd+O› inside *Open…*'s own dialogue would open it again.
+
+```gherkin
+Scenario: ‹cmd+O› opens « Open a map »
+  When I press ‹cmd+O› (‹ctrl+O› off a Mac) with the focus on the map or a panel
+  Then « Open a map » opens, as [Open…] opens it
+
+Scenario: ‹cmd+shift+S› asks for a name, as [Save as…]
+  When I press ‹cmd+shift+S›
+  Then the dialogue of Save as… opens
+  And ‹cmd+S› alone still saves the map, and opens nothing
+
+Scenario: a key held opens its dialogue once
+  When I hold ‹cmd+O›
+  Then « Open a map » opens once, and the repetitions do nothing
+
+Scenario: the tooltips say the keys of this system
+  When I hover [Save] on a Mac
+  Then its tooltip reads « Enregistrer la carte (⌘S) »
+  And off a Mac it reads « Enregistrer la carte (Ctrl+S) »
+```

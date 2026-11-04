@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createLocaleStore } from '../../i18n/localeStore'
 import { LocaleProvider } from '../components/LocaleProvider'
+import { PlatformContext } from '../i18n/platformContext'
 
 import { WORKBENCH_ENTRIES } from './entries'
 import entrySource from './entry.tsx?raw'
@@ -65,7 +66,11 @@ describe('Workbench', () => {
       (_, entry) => {
         vi.spyOn(console, 'error').mockImplementation(() => undefined)
         expect(() =>
-          render(<LocaleProvider store={createLocaleStore('en')}>{entry.render()}</LocaleProvider>)
+          render(
+            <LocaleProvider store={createLocaleStore('en')}>
+              <PlatformContext value="mac">{entry.render()}</PlatformContext>
+            </LocaleProvider>
+          )
         ).not.toThrow()
       }
     )

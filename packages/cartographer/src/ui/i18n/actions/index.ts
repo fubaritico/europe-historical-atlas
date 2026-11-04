@@ -27,6 +27,12 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `delete` — Confirm a deletion — the dialogue's own button, its subject already named.
  * - `front`, `forward`, `backward`, `back` — The four stacking commands — Illustrator's own names, in each
  *   language's Illustrator.
+ * - `menuFile`, `menuEdit` — The menu bar's two menus (CARTO-345).
+ * - `copy` — Copy the polity or the stretch selected.
+ * - `pastePolities` — Paste the polities copied, each whole, in place.
+ * - `pasteStretch`, `pasteSheet`, `pasteOutline` — Paste onto a polity; `name` is the polity selected, verbatim, or
+ *   `theSelection` when none is.
+ * - `theSelection` — What a paste onto a polity names when no polity is selected.
  */
 export type ActionMessageKey = keyof typeof en
 

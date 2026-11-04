@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { STACKING_SHORTCUTS, listenForStackingKeys, stackingMoveFor } from './stackingShortcut'
+import { listenForStackingKeys, stackingMoveFor } from './stackingShortcut'
 
 import type { StackingKeyTarget } from './stackingShortcut'
 
@@ -58,11 +58,6 @@ describe('stackingMoveFor', () => {
 
     it('takes ‹ctrl› for ‹cmd› off a Mac', () => {
       expect(stackingMoveFor(key('ArrowUp', { ctrl: true }))).toBe('forward')
-    })
-
-    it('shows each command’s keys and announces both modifiers', () => {
-      expect(STACKING_SHORTCUTS.front.shown).toBe('⇧⌘↑')
-      expect(STACKING_SHORTCUTS.back.aria).toContain('Control+Shift+ArrowDown')
     })
   })
 

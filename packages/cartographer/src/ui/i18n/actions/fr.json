@@ -19,5 +19,13 @@
   "backward": "En arrière",
   "back": "Arrière-plan",
   "yes": "Oui",
-  "no": "Non"
+  "no": "Non",
+  "menuFile": "Fichier",
+  "menuEdit": "Édition",
+  "copy": "Copier",
+  "pastePolities": "Coller les entités",
+  "pasteStretch": "Coller le tronçon sur {name}",
+  "pasteSheet": "Coller la fiche sur {name}…",
+  "pasteOutline": "Coller le tracé sur {name}…",
+  "theSelection": "l’entité sélectionnée"
 }

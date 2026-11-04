@@ -1,15 +1,16 @@
 {
   "notBuilt": "pas encore construit ({scenarios})",
-  "openHint": "Ouvrir une autre carte",
-  "saveHint": "Enregistrer la carte (⌘S / ctrl+S)",
-  "saveAsHint": "Enregistrer la carte sous un autre nom, et continuer sur la nouvelle",
+  "openHint": "Ouvrir une autre carte ({keys})",
+  "saveHint": "Enregistrer la carte ({keys})",
+  "saveAsHint": "Enregistrer la carte sous un autre nom, et continuer sur la nouvelle ({keys})",
   "saveCopyHint": "Enregistrer une copie de la carte, et rester sur celle-ci",
   "registry": "Registre",
   "closeYear": "{close} {year}",
   "nothingToUndo": "rien à annuler",
   "nothingToRedo": "rien à rétablir",
-  "undoHint": "{label} (⌘Z / ctrl+Z)",
-  "redoHint": "{label} (⌘⇧Z / ctrl+maj+Z)",
+  "undoHint": "{label} ({keys})",
+  "redoHint": "{label} ({keys})",
   "checkYear": "Vérifier cette année",
+  "menuBar": "Menus du Cartographe",
   "placeholder": "{zone, select, appBar {barre de l’application} docBar {barre du document} tools {outils} panels {panneaux} other {{zone}}}"
 }

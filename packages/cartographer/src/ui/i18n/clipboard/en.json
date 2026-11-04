@@ -1,0 +1,10 @@
+{
+  "copiedPolities": "Copied: {count, plural, one {{name}} other {# polities}}, from {map} — {paste} in another map to paste",
+  "copiedStretch": "Copied: a stretch of {name}, {count} points, from {map} — select a polity, then {paste}",
+  "heldPolities": "On the clipboard: {count, plural, one {{name}} other {# polities}}, from {map}",
+  "heldStretch": "On the clipboard: a stretch of {name}, from {map}",
+  "nothingSelected": "Select a polity or a stretch to copy",
+  "notARun": "These points do not follow one another on one outline: nothing is copied",
+  "wholeRing": "That is the whole outline: select the polity to copy it",
+  "notKept": "The copy could not be kept: nothing is copied"
+}

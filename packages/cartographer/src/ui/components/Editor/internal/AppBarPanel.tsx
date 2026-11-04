@@ -4,28 +4,41 @@ import { useTranslation } from '../../../hooks/useTranslation'
 import { APP_MESSAGES } from '../../../i18n/app'
 
 import { AppBar } from './AppBar'
+import { MenuBarPanel } from './MenuBarPanel'
 
 import type { AppBarProps } from './AppBar'
+import type { HistoryRelay } from '../../../../canvas/history/historyRelay'
+import type { CartographerStoreHook } from '../../../../state/store'
 import type { MapNameSource } from '../../../utils/mapNameSource'
 
 /**
  * The top bar's binding: the one place it knows where the map's name comes from (`react-canvas-and-panels`). `AppBar`
- * takes values; this reads the name — which *Save as…* changes — and hands it over with the four gestures.
+ * takes values; this reads the name — which *Save as…* changes — and hands it over with the four gestures, and puts the
+ * menu bar beside the name, bound to the store (CARTO-345).
  */
 
-/** What the top bar's binding needs: the four gestures, and where the map's name is read. */
-export interface AppBarPanelProps extends Omit<AppBarProps, 'name' | 'map'> {
+/** What the top bar's binding needs: the gestures, where the map's name is read, and what the menus read. */
+export interface AppBarPanelProps extends Omit<AppBarProps, 'name' | 'map' | 'menus'> {
   /** The map open's name, which *Save as…* changes. */
   mapName: MapNameSource
+  /** The store the menus read the history and the selection from. */
+  store: CartographerStoreHook
+  /** The canvas's undo and redo, for Édition's first two commands. */
+  history: HistoryRelay
+  /** Édition › Copier. */
+  onCopy: () => void
 }
 
 /**
- * The top bar, bound to the map's name.
- * @param props - the name's source and the four gestures
+ * The top bar, bound to the map's name, with the menu bar beside it.
+ * @param props - the name's source, the store, the relay and the gestures
  * @param props.mapName - where the map's name is read
+ * @param props.store - what the menus read
+ * @param props.history - the canvas's undo and redo
+ * @param props.onCopy - Édition › Copier
  * @returns the top bar
  */
-export function AppBarPanel({ mapName, ...gestures }: AppBarPanelProps) {
+export function AppBarPanel({ mapName, store, history, onCopy, ...gestures }: AppBarPanelProps) {
   // Context
   const app = useTranslation(APP_MESSAGES)
 
@@ -33,5 +46,12 @@ export function AppBarPanel({ mapName, ...gestures }: AppBarPanelProps) {
   const map = useSyncExternalStore(mapName.subscribe, mapName.get)
 
   // Render
-  return <AppBar name={app('name')} map={map} {...gestures} />
+  return (
+    <AppBar
+      name={app('name')}
+      map={map}
+      {...gestures}
+      menus={<MenuBarPanel store={store} history={history} onCopy={onCopy} {...gestures} />}
+    />
+  )
 }

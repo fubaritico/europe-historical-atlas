@@ -55,6 +55,8 @@ export interface EditorProps {
   onSaveAs: () => void
   /** The top bar's *Save a copy*. */
   onSaveCopy: () => void
+  /** Édition › Copier: the polity or the stretch selected, as ‹cmd+C› (CARTO-345). */
+  onCopy: () => void
   /** The map open's name, which *Save as…* changes — written in the top bar. */
   mapName: MapNameSource
   /** The canvas's undo and redo, for the document bar's buttons. */
@@ -85,6 +87,7 @@ export interface EditorProps {
  * @param props.onSave - saves the map open, called by the top bar's `[Save]`
  * @param props.onSaveAs - opens the *Save as…* dialogue, called by the top bar
  * @param props.onSaveCopy - saves a copy, called by the top bar
+ * @param props.onCopy - copies what is selected, called by the menu bar
  * @param props.mapName - the map open's name, for the top bar
  * @param props.history - the canvas's undo and redo, for the document bar's buttons
  * @param props.colours - where the polities' colours come from, for the canvas and the panels
@@ -101,6 +104,7 @@ export function Editor({
   colours,
   wikidata,
   results,
+  onCopy,
   // The top bar's four gestures and the map's name — onOpen, onSave, onSaveAs, onSaveCopy, mapName — handed on as they
   // are.
   ...bar
@@ -131,7 +135,7 @@ export function Editor({
   return (
     <Shell
       heading={heading}
-      appbar={<AppBarPanel {...bar} />}
+      appbar={<AppBarPanel {...bar} store={store} history={history} onCopy={onCopy} />}
       docbar={<DocBarPanel store={store} history={history} />}
       canvas={
         <MapArea

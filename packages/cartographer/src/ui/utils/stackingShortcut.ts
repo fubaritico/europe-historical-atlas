@@ -9,17 +9,13 @@
  * goes to the start of a field). The canvas and the list leave a modified arrow alone so it reaches here.
  */
 
+import { STACKING_MOVES } from '@europe-historical-atlas/core/editor/stacking'
+import { isChord } from '@europe-historical-atlas/core/i18n/shortcuts'
+
 import { keepsItsOwnKeys } from '../../canvas/history/historyShortcut'
+import { COMMAND_KEYS } from '../../i18n/commandKeys'
 
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
-
-/** How each command's keys are shown in the menu, and announced (`aria-keyshortcuts`). */
-export const STACKING_SHORTCUTS: Readonly<Record<StackingMove, { shown: string; aria: string }>> = {
-  front: { shown: '⇧⌘↑', aria: 'Meta+Shift+ArrowUp Control+Shift+ArrowUp' },
-  forward: { shown: '⌘↑', aria: 'Meta+ArrowUp Control+ArrowUp' },
-  backward: { shown: '⌘↓', aria: 'Meta+ArrowDown Control+ArrowDown' },
-  back: { shown: '⇧⌘↓', aria: 'Meta+Shift+ArrowDown Control+Shift+ArrowDown' },
-}
 
 /** A key and its modifiers, as much of a `KeyboardEvent` as the test needs. */
 export interface StackingKeyEvent {
@@ -41,10 +37,8 @@ export interface StackingKeyEvent {
  * @returns the command, or `null` for any other key
  */
 export function stackingMoveFor(event: StackingKeyEvent): StackingMove | null {
-  if (event.altKey || !(event.metaKey || event.ctrlKey)) return null
-  if (event.key === 'ArrowUp') return event.shiftKey ? 'front' : 'forward'
-  if (event.key === 'ArrowDown') return event.shiftKey ? 'back' : 'backward'
-  return null
+  // The four chords of the one table the menu's labels are written from (`i18n/commandKeys.ts`, CARTO-345).
+  return STACKING_MOVES.find((move) => isChord(event, COMMAND_KEYS[move])) ?? null
 }
 
 /** Where the shortcut listens — the page's document in the application, a stub in tests. */
