@@ -13,8 +13,8 @@ coller, c'est pas fini »*). Étapes 1 et 2 **fusionnées dans `main`** le 04/11
 la barre Fichier / Édition. **Le prochain travail** : *sélectionner un pays, ‹ctrl+C›, ouvrir l'autre carte, ‹ctrl+V›* —
 le pays collé **apparaît en haut de la liste de {Polities}**. Ordre inversé par lui : le pays entier d'abord, le tronçon
 ensuite (plan `files/plans/cartographer/copy-paste-between-maps.md`, « The order of work »). Pas fait : plusieurs pays
-sélectionnés dans {Polities}. Un essai que je lui donne **finit un geste entier** (mémoire `ship-a-whole-gesture`). La
-copie `europe-map-copypaste` ne sert plus : la supprimer quand il le dit. Ouvert, ma proposition : une copie que le
+sélectionnés dans {Polities}. Un essai que je lui donne **finit un geste entier** (mémoire `ship-a-whole-gesture`). Les
+copies `europe-map-copypaste` et `europe-map-panels` sont supprimées (05/11). Ouvert, ma proposition : une copie que le
 navigateur refuse de garder, dite en rouge quand CARTO-273 existera.
 
 **L'interface de l'atlas — ATLAS-329, la maquette d'ambiance est faite** (04/11 au soir, Claude Design). *« Un travail
@@ -49,8 +49,8 @@ commite `content/events.json`**, pas avant (sa décision).
 `content/events.json` restent hors commit (les siens).
 
 **Où en sont les tickets** : CARTO-345 En cours ; CMS-335 **Fait** (04/11) ; **CARTO-193** (Villes) attend les pays de
-l'historien ; **ATLAS-333** (vitesse) à remesurer. **À lui** : supprimer `~/Desktop/WebstormProjects/europe-map-panels`,
-`europe-map-copypaste` et `stash@{0}` ; la décision sur le stockage du navigateur pour la disposition des panneaux
+l'historien ; **ATLAS-333** (vitesse) à remesurer. **`stash@{0}`** garde l'état non commité de la copie `panels`, rangé
+avant sa suppression (05/11) : à jeter quand il le dit. **À lui** : la décision sur le stockage du navigateur pour la disposition des panneaux
 (`rules/known-issues/cartographer.md`). **Lire le titre d'une page avant d'y ouvrir un onglet** : ses serveurs changent
 de port. **Un texte à coller** : dans un bloc de code, jamais en citation.
 
