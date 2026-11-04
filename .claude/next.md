@@ -5,51 +5,54 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — 04/11 : il essaie le copier-coller, moi Claude Design et l'ornement par époque
+## ▶ ON REPREND ICI — 05/11 au matin : coller un pays entier (CARTO-345), avant tout le reste
 
-**Ce qu'il fait demain** (ses mots, 03/11 au soir) : **essayer mes ajouts au Cartographe**, pendant que je prépare **les
-consignes pour Claude Design**. Tous nos serveurs ont été arrêtés le 03/11 au soir pour repartir proprement : le sien
-du CMS **aussi** (je l'avais relancé depuis ma session) — il le relance lui-même (`pnpm dev:cms`).
+**L'ordre, le sien (05/11)** : **finir le copier-coller d'abord**, *« pour que j'aie un outil de production le plus
+exhaustif possible »* ; l'interface de l'atlas ensuite. **CARTO-345** (En cours) n'est pas fini (*« si on ne peut pas
+coller, c'est pas fini »*). Étapes 1 et 2 **fusionnées dans `main`** le 04/11 (`cc242a0`) : Copier, la table des touches,
+la barre Fichier / Édition. **Le prochain travail** : *sélectionner un pays, ‹ctrl+C›, ouvrir l'autre carte, ‹ctrl+V›* —
+le pays collé **apparaît en haut de la liste de {Polities}**. Ordre inversé par lui : le pays entier d'abord, le tronçon
+ensuite (plan `files/plans/cartographer/copy-paste-between-maps.md`, « The order of work »). Pas fait : plusieurs pays
+sélectionnés dans {Polities}. Un essai que je lui donne **finit un geste entier** (mémoire `ship-a-whole-gesture`). La
+copie `europe-map-copypaste` ne sert plus : la supprimer quand il le dit. Ouvert, ma proposition : une copie que le
+navigateur refuse de garder, dite en rouge quand CARTO-273 existera.
 
-**CARTO-345 — le copier-coller** (En cours) : plan `files/plans/cartographer/copy-paste-between-maps.md`, scénarios
-`scenarii/s22-copy-paste.md`. **Étapes 1 et 2 construites sur la branche `carto-345`**, copie de travail
-`~/Desktop/WebstormProjects/europe-map-copypaste` : `d231fdb` (presse-papier, ‹cmd+C›), `bea262b` (une table de touches, les
-raccourcis selon le système, ‹cmd+O› ‹cmd+shift+S›), `3e1eadc` (la barre de menus Fichier / Édition), `2714cb0` (l'essai
-écrit dans s22). **Pour qu'il essaie** : `pnpm dev:cartographer` depuis la copie, puis Édition › Copier, ‹cmd+O›, les
-menus au clavier — **les collages sont grisés, pas encore construits**. **Rien fusionné** : après son essai, je fusionne
-dans `main` (sa copie principale n'a rien de la branche). **Ensuite**, étape 3 : coller un tronçon sur un contour.
-**Encore ouvert, ma proposition** : si le navigateur refuse de garder la copie, la barre d'état le dit, en rouge quand
-CARTO-273 existera.
+**L'interface de l'atlas — ATLAS-329, la maquette d'ambiance est faite** (04/11 au soir, Claude Design). *« Un travail
+d'ambiance, pas de cohérence de ce qui est affiché »* : le contenu des pages est inventé, ne pas le juger. Le paquet :
+`files/resources/atlas-ui/` (README = ses règles : palette, fontes, cadre, capsule, boutons), les écrans :
+`files/resources/Europe Historical Atlas — Interface-png/` et `…-ios-and-tablet-png/`. **Mon rôle, le sien** : comme
+pour le Cartographe, **je reprends son travail** — jetons et styles dans `fubaritico-ds`, pas de retouches demandées à
+Claude Design. **Lui** : redessine dans Illustrator les **vignettes** (coins, fleurons, culs-de-lampe, filets), d'après
+des originaux libres — je lui donne les repères de taille (découpage en neuf, coin 48 px…). Mes retours écran par écran
+donnés le 04/11 (chiffres de Cinzel qui se lisent « IIOO », le XXIᵉ manquant, les étiquettes du pavé qui cachent les
+boutons, le panneau de détail sur le siècle). **Ses idées à garder** : un bandeau d'en-tête plus foncé ; le plein écran
+(ordinateur et iPad ; l'iPhone n'a que l'écran d'accueil). **Sa demande transmise à Claude Design** : la barre du site
+pliée au Λ sur l'atlas — Claude Design l'a pliée selon la largeur, pas tout à fait ma proposition (dit le 05/11).
+**Prochaine étape** : découper en tickets, avec lui. Ornements : `files/plans/atlas/ornament-by-era.md` (Fontainebleau,
+Versailles, l'Empire — l'Antiquité et le Moyen Âge à chercher quand il le dit).
 
-**Sa direction pour le langage visuel, 03/11 au soir** : *« de la classe — je veux du Versailles, du Napoléon, du
-Fontainebleau. Pense à la France »*. Trois époques françaises : **Fontainebleau** (la Renaissance de François Iᵉʳ — la
-galerie de Rosso, vers 1530–40, est le berceau des **cuirs découpés**), **Versailles** (Louis XIV : Le Brun, Le Pautre,
-Bérain), **l'Empire** (Percier et Fontaine). Elles recoupent son idée de designs qui alternent selon le siècle. **À lui
-soumettre** : un atlas de l'Europe habillé à la française d'un bout à l'autre, ou la France pour certains siècles
-seulement.
+**Ses décisions du 05/11, écrites** : l'atlas va **idéalement du Iᵉʳ siècle av. J.-C. (ou des guerres puniques) à 1900**
+(`roadmap.md`) — pas d'habillage contemporain ; **un habillage par époque** (glossaire) ; **la frise synchronoptique**
+d'abord compagnon de lecture, son clic centre la carte et ouvre le panneau de droite (`interface-scenarios.md`,
+ATLAS-358 en Idées) ; ses couches d'après **son ouvrage synchronoptique** (scans à venir ; les faits, jamais les
+textes) ; **le nom des mers** (ATLAS-359 en Idées). Il demande à Claude Design la version tablette et téléphone : faite.
 
-**ATLAS-329 — l'interface de l'atlas** : Claude Design **en pause** jusqu'au 04/11, son résultat pris tel quel ; il
-m'enverra des écrans pour mon retour. La consigne : `~/Desktop/atlas-interface-brief.md` et `~/Desktop/atlas-design-prompt.txt`
-(sur son Bureau, hors dépôt). Le ton : `files/plans/atlas/interface-scenarios.md`, « The tone ». **Mon travail** : chercher
-des **bibliothèques d'ornement de plusieurs époques** — son idée : peut-être **trois designs qui alternent selon le siècle**,
-l'atlas allant du Iᵉʳ au XXIᵉ siècle (il tombait dans *« le design XVIIᵉ, Versailles, Louis XIV »*) ; le XVIIᵉ est fait
-(`files/plans/atlas/ornament-17th-century.md`, sa question ouverte : quelle époque de cartouche). **Un texte à coller**
-se donne dans un fichier brut ou un bloc de code, **jamais en citation** (les barres partent avec la copie).
+**Playwright** (04/11) : l'épopée REPO-346 (Chantiers), REPO-347 l'installation puis dix lots, en Backlog ; plan
+`files/plans/e2e/playwright.md`. Pas pour maintenant. Bloquant connu : le dossier des cartes est en dur
+(`packages/cartographer/vite.config.ts:16`), un test écrirait sa 1100.
 
-**L'historien** (`europe-map-9b`) : rien saisi le 03/11 ; il commence par `/enter-in-cms`, qui vérifie d'abord la connexion
-`cms` (`claude mcp list`). La clé du dev lit places, villes à une date, sources (lire, créer, modifier) et les raisons
-d'importance (lire). Ce qu'il saisit, je le vérifie dans la base en lecture seule. **Toujours dû** : les pays des villes
-de 1100 (Groenland → Q16488964, Islande → Q62389, Venise → Q4948), puis l'export — **alors je commite
-`content/events.json`**, pas avant (sa décision).
+**L'historien** (`europe-map-9b`) : il commence par `/enter-in-cms`, qui vérifie d'abord la connexion `cms`. **Toujours
+dû** : les pays des villes de 1100 (Groenland → Q16488964, Islande → Q62389, Venise → Q4948), puis l'export — **alors je
+commite `content/events.json`**, pas avant (sa décision).
 
-**Sur `main`, non poussés** : `49a623d` → le commit de clôture du 03/11 (la clé du CMS et `/enter-in-cms`, le README du
-CMS, le plan du copier-coller, `uncheck`, ces notes). `years/` et `content/events.json` restent hors commit (les siens).
+**Sur `main`, non poussés** : depuis `49a623d`, dont la fusion `cc242a0` et le commit de clôture du 05/11. `years/` et
+`content/events.json` restent hors commit (les siens).
 
-**Où en sont les tickets** : CARTO-345 En cours ; CARTO-239 (la barre de menus) en tête d'À faire, entrée dans CARTO-345 ;
-CMS-335 À valider ; **CARTO-193** (Villes) attend les pays de l'historien ; **ATLAS-333** (vitesse) à remesurer à sa
-taille réelle. **À lui** : supprimer `~/Desktop/WebstormProjects/europe-map-panels` et `stash@{0}` ; la décision sur le
-stockage du navigateur pour la disposition des panneaux (`rules/known-issues/cartographer.md`). **Lire le titre d'une
-page avant d'y ouvrir un onglet** : ses serveurs changent de port.
+**Où en sont les tickets** : CARTO-345 En cours ; CMS-335 **Fait** (04/11) ; **CARTO-193** (Villes) attend les pays de
+l'historien ; **ATLAS-333** (vitesse) à remesurer. **À lui** : supprimer `~/Desktop/WebstormProjects/europe-map-panels`,
+`europe-map-copypaste` et `stash@{0}` ; la décision sur le stockage du navigateur pour la disposition des panneaux
+(`rules/known-issues/cartographer.md`). **Lire le titre d'une page avant d'y ouvrir un onglet** : ses serveurs changent
+de port. **Un texte à coller** : dans un bloc de code, jamais en citation.
 
 **Le Cartographe** : une carte est un dossier de `years/` (`s19`) et s'enregistre d'elle-même deux secondes après chaque
 geste, en plus de sa copie `.autosave` (gardées, sa décision). Sa 1100 d'avant dans `years/1100-backup-2026-11-02/`.
@@ -74,11 +77,6 @@ crans** (*« des scroll top »*), plus rien de progressif sauf le rayon des noms
 connecter : mettre un temps `admin.autoLogin` avec `prefillOnly` dans `payload.config.ts` (lit ce fichier), cliquer, **retirer
 aussitôt**. Je ne lis jamais le mot de passe ni un jeton dans la conversation (refusé par les permissions). À lui de le
 supprimer dans « Contributeurs ».
-
-**Des fautes de frappe dans ses données du CMS** : « pelrinage » dans « Raisons d'importance » (« évêché » corrigé le 31/10) ; le type d'événement « Polithique - Accession au trone » — à lui de les corriger.
-
-**Pour le design system** : son menu déroulant, ouvert vers le haut, cache le champ au-dessus ; il ne peut pas relier un texte
-d'aide au menu — deux demandes à transmettre à son Claude.
 
 **Quand il teste** : lui donner les valeurs exactes à saisir et le résultat attendu, en trois lignes ; lire sa base en
 lecture seule (`sqlite3 "file:packages/cms/cms.db?mode=ro"`) plutôt que de deviner ce qu'il a enregistré.
@@ -122,7 +120,7 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 
 ## Where we are
 
-**6 015 tests** sur `main` (1 663 `core` · 2 316 Cartographe · 1 495 atlas · 372 CMS · 169 plugin `eslint-plugin-eha`, 03/11 soir ; la branche `carto-345` : 1 704 `core`, 2 402 Cartographe), gate
+**6 142 tests** sur `main` (1 704 `core` · 2 402 Cartographe · 1 495 atlas · 372 CMS · 169 plugin `eslint-plugin-eha`, 04/11, après la fusion de `carto-345`), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 

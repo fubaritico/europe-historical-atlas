@@ -1,5 +1,12 @@
 # Next — archive
 
+## Moved from next.md on 2026-11-05 (to keep it under 200 lines), verbatim
+
+**Des fautes de frappe dans ses données du CMS** : « pelrinage » dans « Raisons d'importance » (« évêché » corrigé le 31/10) ; le type d'événement « Polithique - Accession au trone » — à lui de les corriger.
+
+**Pour le design system** : son menu déroulant, ouvert vers le haut, cache le champ au-dessus ; il ne peut pas relier un texte
+d'aide au menu — deux demandes à transmettre à son Claude.
+
 ## Moved from next.md on 2026-11-03 (evening)
 
 **Les domaines** : commandés et branchés le 02/11 (`.org` principal, `.com` `.eu` `.net` `.fr`), DNS chez OVH, page d'attente

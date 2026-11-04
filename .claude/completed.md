@@ -2,6 +2,26 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
+### 2026-11-04 soir → 05/11 nuit — la barre de menus fusionnée, Playwright en épopée, l'interface de l'atlas par Claude Design
+
+Deux plages, **04/11 18:57 → 21:31** et **23:07 → 00:40** (4 h 06) ; le chantier ouvert le 05/10 totalise **198 h 52 sur
+35 plages**. **Sur `main`**, la fusion `cc242a0` (`carto-345`, étapes 1 et 2 du copier-coller) et le commit de clôture,
+**non poussés**.
+
+- **CMS-335 fait** (*« validé et testé, l'information est affichée dans le Cartographe »*). **CARTO-345** : la branche
+  fusionnée à sa demande, contrôles verts (6 142 tests) ; son essai : copier sans coller ne lui donne rien à faire —
+  *« si on ne peut pas coller, c'est pas fini »* ; l'ordre inversé, le pays entier d'abord.
+- **Playwright** (sa demande) : l'épopée REPO-346, l'installation REPO-347 et dix lots en Backlog, le plan
+  `files/plans/e2e/playwright.md` ; le piège trouvé : le dossier des cartes en dur, un test écrirait sa 1100.
+- **L'interface de l'atlas** : la recherche des ornements par époque (`ornament-by-era.md`, par un agent) ; la maquette
+  d'ambiance de Claude Design, bureau puis tablette et téléphone, mes retours écran par écran ; ses décisions —
+  l'atlas jusqu'à 1900, un habillage par époque, la frise synchronoptique (ATLAS-358), le nom des mers (ATLAS-359).
+  Ses mots : *« j'ai hâte de voir ça sur un grand écran. Très hâte. »*
+- **Mes fautes** : lui donner à essayer une étape qui ne finissait aucun geste (copier sans coller), puis expliquer au
+  lieu d'écouter — *« tu me fais chier, en fait »* (mémoire `ship-a-whole-gesture`) ; une première réponse sur la
+  rosace hors de son propos (*« des éléments décoratifs, tu comprends ça ? »*) ; juger le contenu inventé d'une maquette
+  d'ambiance.
+
 ### 2026-11-03 — la clé du CMS, le copier-coller entre cartes (étapes 1 et 2), l'interface de l'atlas pour Claude Design
 
 Plage **03/11 12:22 → 18:49** (6 h 26) ; le chantier ouvert le 05/10 totalise **194 h 39 sur 33 plages**. **Sur `main`**, sept
@@ -25,26 +45,4 @@ cinq commits, **non fusionnés** : le dev les essaie d'abord.
   coller donné en citation, ses barres partant avec la copie ; une cause du blocage du CMS affirmée avant d'être mesurée,
   corrigée ; deux messages de commit trop longs.
 
-### 2026-11-02 soir → 03/11 nuit — le panneau Villes, les panneaux déplaçables, la bande des tribus
-
-La plage du **02/11 15:03 → 03/11 00:41** (9 h 37) compte aussi l’après-midi, raconté dans l’archive ; le chantier ouvert le
-05/10 totalise **187 h 58 sur 32 plages**. **Onze commits poussés** jusqu'à `09f7829`, dont quatre de l'historien
-(`27edaad`, `6fdc022`, `ecd33d8` CMS-335, `3001afc` le MCP) ; `116415d` poussé le 03/11 au matin. CI verte, Sonar compris.
-
-- **L'atlas** : les noms gardés par année, les boutons des années provisoires, le panneau de réglages caché derrière ‹H›,
-  une année n'affiche que ses événements (`c4b0352`, `ee03156`, `eb15874`, ATLAS-333).
-- **Le Cartographe** (`a316444`) : le panneau Villes et son verdict par identifiant Wikidata (CARTO-193) ; la carte
-  enregistrée d'elle-même, en plus de la copie `.autosave` ; les panneaux déplaçables, aimantés, redimensionnables
-  (CARTO-342 — *« ça marche très bien »*), le chrome non sélectionnable.
-- **La mesure** : à 25 471 points, passer à 1100 prenait 5,5 s — la tribu Kimek-Kipchak seule, 5,1 s, mesurant tous ses
-  voisins. **La bande intérieure** (son idée, le décalage d'Illustrator, puis irrégulière) la ramène à 0,34 s
-  (`116415d`, ATLAS-344). Ses mots : *« c'est super beau »*, *« on a créé un langage cartographique, la notion
-  d'incertitude, elle est bien représentée »*.
-- **Deux revues** : la première, lancée sur cinquante fichiers, n'a rien lu ; refaite par lots, elle a trouvé un vrai
-  défaut (les événements d'une année ratée revenaient sur l'ancienne carte), corrigé.
-- **Mes fautes** : un `cd` ; le dossier `Editor/utils` supprimé avec mon fichier, restauré de git ; une commande refusée
-  crue sans effet alors qu'elle avait agi ; mon onglet ouvert sur son Cartographe, le port ayant changé (rien écrit) ; la
-  première revue trop grosse ; deux messages de commit trop longs.
-
-
-> Older sessions (2026-09-12 → 2026-11-02 afternoon) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-11-03 night) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
