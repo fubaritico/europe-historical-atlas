@@ -2,15 +2,6 @@ import type { MenuDefinition, MenuEntry } from '../../MenuBar'
 import type { EditorMenuGestures, EditorMenuState, EditorMenuWords } from '../editorMenusProps'
 
 /**
- * A paste not built yet (CARTO-345, steps 3 to 6). **Never reached while its command is greyed** — the menu bar runs no
- * greyed command (`MenuBar/utils/commandToRun`); it is here so the day a paste is enabled without being wired, the
- * console says so rather than nothing.
- */
-function notYet(): void {
-  console.warn('[Cartographer] this paste is not built yet.')
-}
-
-/**
  * The *Fichier* menu: the four gestures of the maps on disk (`s19`).
  * @param gestures - what they do
  * @param words - the words and the keys
@@ -59,46 +50,35 @@ function fileMenu(gestures: EditorMenuGestures, words: EditorMenuWords): MenuDef
 }
 
 /**
- * The pastes of the *Édition* menu — « Coller les entités » active when the clipboard holds polities, « Coller le
- * tronçon sur … » when it holds a stretch and a polity is selected (2026-11-05); the sheet's greyed until it is built
- * (CARTO-345).
- * @param name - the polity a paste onto a polity names
- * @param state - what the clipboard holds
- * @param onPaste - what « Coller les entités » does
+ * The copies of the *Édition* menu (the dev, 2026-11-05): « Copier », the polity whole or the points selected, under
+ * ‹cmd+C›; « Copier la fiche », the polity selected's sheet alone, under ‹shift+cmd+C›.
+ * @param state - what is selected
+ * @param gestures - what they do
  * @param words - the words and the keys
- * @returns the three pastes
+ * @returns the two copies
  */
-function pasteEntries(
-  name: string,
+function copyEntries(
   state: EditorMenuState,
-  onPaste: () => void,
+  gestures: EditorMenuGestures,
   words: EditorMenuWords
 ): MenuEntry[] {
   const { action, shortcut } = words
   return [
     {
       kind: 'command',
-      id: 'pastePolities',
-      label: action('pastePolities'),
-      keys: shortcut('paste'),
-      enabled: state.canPastePolities,
-      onChoose: onPaste,
+      id: 'copy',
+      label: action('copy'),
+      keys: shortcut('copy'),
+      enabled: state.canCopy,
+      onChoose: gestures.onCopy,
     },
     {
       kind: 'command',
-      id: 'pastePoints',
-      label: action('pastePoints', { name }),
-      keys: shortcut('paste'),
-      enabled: state.canPastePoints,
-      onChoose: onPaste,
-    },
-    {
-      kind: 'command',
-      id: 'pasteSheet',
-      label: action('pasteSheet', { name }),
-      keys: shortcut('pasteSheet'),
-      enabled: false,
-      onChoose: notYet,
+      id: 'copySheet',
+      label: action('copySheet'),
+      keys: shortcut('copySheet'),
+      enabled: state.selected !== null,
+      onChoose: gestures.onCopySheet,
     },
   ]
 }
@@ -165,17 +145,18 @@ function editMenu(
         onChoose: gestures.onRedo,
       },
       { kind: 'separator', id: 'history' },
-      {
-        kind: 'command',
-        id: 'copy',
-        label: action('copy'),
-        keys: shortcut('copy'),
-        enabled: state.canCopy,
-        onChoose: gestures.onCopy,
-      },
+      ...copyEntries(state, gestures, words),
       selectAllEntry(state.selected, gestures.onSelectAll, words),
       { kind: 'separator', id: 'clipboard' },
-      ...pasteEntries(state.selected ?? action('theSelection'), state, gestures.onPaste, words),
+      // One paste, named after what the clipboard holds (the dev, 2026-11-05: « le menu Edit s'adapte »).
+      {
+        kind: 'command',
+        id: 'paste',
+        label: state.paste.label,
+        keys: shortcut('paste'),
+        enabled: state.paste.enabled,
+        onChoose: gestures.onPaste,
+      },
     ],
   }
 }

@@ -28,11 +28,13 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `front`, `forward`, `backward`, `back` — The four stacking commands — Illustrator's own names, in each
  *   language's Illustrator.
  * - `menuFile`, `menuEdit` — The menu bar's two menus (CARTO-345).
- * - `copy` — Copy the polity or the stretch selected.
+ * - `copy` — Copy the polity selected, sheet and outline, or the points selected.
+ * - `copySheet` — Copy the polity selected's sheet alone.
+ * - `paste` — Paste, the clipboard empty.
  * - `pastePolities` — Paste the polities copied, each whole, in place.
  * - `selectAll` — Select every point of the polity selected, none selected; `selectAllOf` the same, `name` the polity.
- * - `pastePoints`, `pasteSheet` — Paste onto a polity; `name` is the polity selected, verbatim, or
- *   `theSelection` when none is.
+ * - `pastePoints`, `pasteSheet` — Paste onto a polity what the clipboard holds of another: `from` the polity copied,
+ *   `name` the polity pasted onto, verbatim, or `theSelection` when none is.
  * - `theSelection` — What a paste onto a polity names when no polity is selected.
  */
 export type ActionMessageKey = keyof typeof en

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { copyPoints, copyPolities, readClipboard } from './clipboard'
+import { copyPoints, copyPolities, copySheet, readClipboard } from './clipboard'
 import { sharedBorderDocument } from './documentFixtures'
 
 import type { PointsCopy } from './clipboard'
@@ -362,6 +362,35 @@ describe('clipboard', () => {
       doc.anchorSource[1] = 9
 
       expect(() => copyPolities(doc, ['fr-couronne'], '1100')).toThrow(/anchor 1 cannot be copied/)
+    })
+  })
+
+  // The dev, 2026-11-05: ‹shift+cmd+C› copies a polity's sheet alone, its outline left behind.
+  describe('a sheet alone', () => {
+    it('copies a polity’s sheet without its outline, its suzerain by name', () => {
+      const doc = sharedBorderDocument()
+      const hre = doc.polities.find((polity) => polity.id === 'hre')
+      if (hre !== undefined) hre.suzerain = 'fr-couronne'
+      const copy = copySheet(doc, 'hre', '1100')
+
+      expect(copy).toEqual({
+        kind: 'sheet',
+        map: '1100',
+        polity: hre,
+        suzerainName: 'Reaume de France',
+      })
+      expect(readClipboard(JSON.parse(JSON.stringify(copy)))).toEqual(copy)
+    })
+
+    it('copies nothing for a polity the map does not hold', () => {
+      expect(copySheet(sharedBorderDocument(), 'nowhere', '1100')).toBeNull()
+    })
+
+    it('reads back nothing from a vassal’s sheet copied without its suzerain’s name', () => {
+      const copy = copySheet(sharedBorderDocument(), 'hre', '1100')
+      const bad = { ...copy, polity: { ...copy?.polity, suzerain: 'fr-couronne' } }
+
+      expect(readClipboard(JSON.parse(JSON.stringify(bad)))).toBeNull()
     })
   })
 

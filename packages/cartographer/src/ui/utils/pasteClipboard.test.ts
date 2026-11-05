@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { MAX_HOMAGE_DEPTH } from '@europe-historical-atlas/core/data/paintOrder'
-import { copyPolities } from '@europe-historical-atlas/core/editor/clipboard'
+import { copyPolities, copySheet } from '@europe-historical-atlas/core/editor/clipboard'
 import {
   AQUITAINE_IDENTITY,
   sharedBorderDocument,
@@ -82,8 +82,15 @@ function copiedEmpire(): ClipboardContent {
  */
 function paste(store: ReturnType<typeof storeOn>, content: ClipboardContent | null) {
   const said: string[] = []
-  const { document, target, pastePolities, pastePoints, chooseTarget, raiseWarning } =
-    store.getState()
+  const {
+    document,
+    target,
+    pastePolities,
+    pastePoints,
+    chooseTarget,
+    raiseWarning,
+    askSheetPaste,
+  } = store.getState()
   const ids = pasteClipboard({
     content,
     document,
@@ -92,6 +99,7 @@ function paste(store: ReturnType<typeof storeOn>, content: ClipboardContent | nu
     pastePoints,
     chooseTarget,
     raiseWarning,
+    askSheetPaste,
     say: (message) => said.push(message),
     words: WORDS,
   })
@@ -319,6 +327,28 @@ describe('pasteClipboard', () => {
     })
   })
 
+  // The dev, 2026-11-05: ‹cmd+V› with a sheet on the clipboard opens its dialogue onto the polity selected.
+  describe('a sheet', () => {
+    it('opens the sheet’s paste onto the polity selected, recording nothing yet', () => {
+      const store = storeOn(sharedBorderDocument())
+      store.getState().chooseTarget('fr-couronne')
+      const { ids } = paste(store, copySheet(sharedBorderDocument(), 'hre', '1100'))
+
+      expect(ids).toEqual([])
+      expect(store.getState().sheetPasteFor).toBe('fr-couronne')
+      expect(store.getState().canUndo).toBe(false)
+    })
+
+    it('asks for a polity when a sheet is pasted with none selected', () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const store = storeOn(sharedBorderDocument())
+      const { said } = paste(store, copySheet(sharedBorderDocument(), 'hre', '1100'))
+
+      expect(said).toEqual(['Sélectionnez l’entité sur laquelle coller la fiche, puis ⌘V'])
+      expect(store.getState().sheetPasteFor).toBeNull()
+    })
+  })
+
   describe('unmanaged errors', () => {
     it('throws when the store answers fewer polities than were pasted', () => {
       expect(() =>
@@ -329,6 +359,7 @@ describe('pasteClipboard', () => {
           pastePolities: () => [],
           pastePoints: vi.fn(),
           raiseWarning: vi.fn(),
+          askSheetPaste: vi.fn(),
           chooseTarget: vi.fn(),
           say: vi.fn(),
           words: WORDS,

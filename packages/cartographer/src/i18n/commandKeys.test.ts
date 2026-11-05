@@ -5,16 +5,16 @@ import { COMMAND_KEYS, shortcutText } from './commandKeys'
 describe('commandKeys', () => {
   describe('happy path', () => {
     it('writes a command’s shortcut for the system and the language', () => {
-      expect(shortcutText('pasteSheet', 'other', 'fr')).toEqual({
-        shown: 'Ctrl+Maj+V',
-        aria: 'Meta+Shift+V Control+Shift+V',
+      expect(shortcutText('copySheet', 'other', 'fr')).toEqual({
+        shown: 'Ctrl+Maj+C',
+        aria: 'Meta+Shift+C Control+Shift+C',
       })
     })
   })
 
   describe('variants', () => {
     it('writes it in the Mac’s symbols on a Mac', () => {
-      expect(shortcutText('pasteSheet', 'mac', 'fr').shown).toBe('⇧⌘V')
+      expect(shortcutText('copySheet', 'mac', 'fr').shown).toBe('⇧⌘C')
     })
   })
 

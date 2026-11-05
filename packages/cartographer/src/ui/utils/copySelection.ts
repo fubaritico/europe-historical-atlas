@@ -1,4 +1,4 @@
-import { copyPoints, copyPolities } from '@europe-historical-atlas/core/editor/clipboard'
+import { copyPoints, copyPolities, copySheet } from '@europe-historical-atlas/core/editor/clipboard'
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 
 import { CANVAS_MESSAGES } from '../../canvas/i18n'
@@ -83,6 +83,13 @@ export function firstName(polities: readonly CopiedPolity[]): string {
  * @returns the sentence
  */
 export function copiedSentence(content: ClipboardContent, words: ClipboardWords): string {
+  if (content.kind === 'sheet') {
+    return words.clipboard('copiedSheet', {
+      name: content.polity.name,
+      map: content.map,
+      paste: words.paste,
+    })
+  }
   if (content.kind === 'points') {
     return words.clipboard('copiedPoints', {
       name: content.polity,
@@ -108,6 +115,9 @@ export function copiedSentence(content: ClipboardContent, words: ClipboardWords)
 export function heldSentence(content: ClipboardContent, words: ClipboardWords): string {
   if (content.kind === 'points') {
     return words.clipboard('heldPoints', { name: content.polity, map: content.map })
+  }
+  if (content.kind === 'sheet') {
+    return words.clipboard('heldSheet', { name: content.polity.name, map: content.map })
   }
   return words.clipboard('heldPolities', {
     count: content.polities.length,
@@ -160,5 +170,31 @@ export function copySelection(selection: CopySelection, deps: CopyDeps): Clipboa
   if (alone > 0) console.warn(`[Cartographer] copy left ${String(alone)} points out, alone.`)
   const left = alone > 0 ? [deps.words.clipboard('copiedAlone', { count: alone })] : []
   deps.say([copiedSentence(copy, deps.words), ...left].join(' · '))
+  return copy
+}
+
+/**
+ * ‹shift+cmd+C› — « Copier la fiche » (the dev, 2026-11-05): the polity selected's sheet alone, its outline left
+ * behind, kept in the tab and said.
+ * @param selection - the map and the polity selected
+ * @param deps - the map's name, the keeper, the status bar, the words
+ * @returns what was copied, or `null` when nothing was — said, either way
+ */
+export function copySheetOfSelection(
+  selection: Pick<CopySelection, 'document' | 'target'>,
+  deps: CopyDeps
+): ClipboardContent | null {
+  const copy =
+    selection.target === null ? null : copySheet(selection.document, selection.target, deps.map)
+  if (copy === null) {
+    console.warn('[Cartographer] sheet copy refused: no polity selected.')
+    deps.say(deps.words.clipboard('nothingSelected'))
+    return null
+  }
+  if (!deps.keep(copy)) {
+    deps.say(deps.words.clipboard('notKept'))
+    return null
+  }
+  deps.say(copiedSentence(copy, deps.words))
   return copy
 }

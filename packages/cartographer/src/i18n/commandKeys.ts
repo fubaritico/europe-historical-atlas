@@ -12,8 +12,8 @@ import type { Chord, Platform } from '@europe-historical-atlas/core/i18n/shortcu
  * chrome. The keys the dev validated on 2026-11-03, in `files/plans/cartographer/copy-paste-between-maps.md`; the
  * stacking keys are his of 2026-10-16 (`s16`).
  *
- * **Of the paste keys, ‹cmd+V› alone is heard** (2026-11-05, the polities' and the stretch's paste); the sheet's is
- * written for the menu's label only. The outline's, ‹alt+cmd+V›, went with « Coller le tracé », struck by the dev
+ * **One paste key, ‹cmd+V›: it pastes what the clipboard holds** — polities, points, or a sheet onto the polity
+ * selected (the dev, 2026-11-05); ‹shift+cmd+C› copies a polity's sheet alone, ‹cmd+C› the polity whole. The outline's, ‹alt+cmd+V›, went with « Coller le tracé », struck by the dev
  * on 2026-11-05.
  */
 export const COMMAND_KEYS = {
@@ -23,9 +23,9 @@ export const COMMAND_KEYS = {
   undo: { key: 'z', command: true },
   redo: { key: 'z', command: true, shift: true },
   copy: { key: 'c', command: true },
+  copySheet: { key: 'c', command: true, shift: true },
   selectAll: { key: 'a', command: true },
   paste: { key: 'v', command: true },
-  pasteSheet: { key: 'v', command: true, shift: true },
   front: { key: 'ArrowUp', command: true, shift: true },
   forward: { key: 'ArrowUp', command: true },
   backward: { key: 'ArrowDown', command: true },

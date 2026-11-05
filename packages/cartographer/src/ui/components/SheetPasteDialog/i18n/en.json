@@ -1,0 +1,18 @@
+{
+  "title": "Paste the sheet of {from} onto {name}",
+  "intro": "Tick the fields to take from the sheet copied in {map}. The outline of {name} does not change.",
+  "here": "Here",
+  "copied": "Copied",
+  "paste": "Paste",
+  "none": "—",
+  "yes": "yes",
+  "no": "no",
+  "notOffered": "not in this map",
+  "same": "Nothing to paste: the sheets of {from} and {name} are the same",
+  "pasted": "Sheet pasted onto {name}: {count, plural, one {one field taken} other {# fields taken}}",
+  "nothingChosen": "No field ticked: nothing is pasted",
+  "nameTaken": "This name is another polity's in this map: nothing is pasted",
+  "homage": "This suzerain would close a loop of homage or seat {name} too low in the chain: nothing is pasted",
+  "noPolity": "{name} is no longer in this map: nothing is pasted",
+  "step": "Paste the sheet onto {name}"
+}

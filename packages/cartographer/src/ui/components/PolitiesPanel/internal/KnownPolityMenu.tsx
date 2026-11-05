@@ -5,6 +5,7 @@ import { PolityStackMenu } from '../../PolityStackMenu'
 
 import type { ViewportPoint } from '../../../../viewport/viewport'
 import type { Restack } from '../../../utils/arrange'
+import type { PasteCommand } from '../../../utils/pasteCommand'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
 
@@ -22,6 +23,12 @@ interface KnownPolityMenuProps {
   onResult: (message: string | null) => void
   /** Open the polity's dialogue. */
   onEdit: (id: string) => void
+  /** Copy a polity — whole, or its sheet alone. */
+  onCopy: (id: string, what: 'all' | 'sheet') => void
+  /** The paste onto this polity, named after what the clipboard holds. */
+  paste: PasteCommand
+  /** Paste onto a polity. */
+  onPaste: (id: string) => void
   /** Close the menu. */
   onClose: () => void
 }
@@ -36,6 +43,9 @@ interface KnownPolityMenuProps {
  * @param props.restack - records a move as one step, `false` when the document refuses it
  * @param props.onResult - says what the command did
  * @param props.onEdit - opens the polity's dialogue, given its id
+ * @param props.onCopy - copies a polity, whole or its sheet alone, given its id
+ * @param props.paste - the paste onto this polity, named after what the clipboard holds
+ * @param props.onPaste - pastes onto a polity, given its id
  * @param props.onClose - closes the menu
  * @returns the menu
  */
@@ -46,6 +56,9 @@ export function KnownPolityMenu({
   restack,
   onResult,
   onEdit,
+  onCopy,
+  paste,
+  onPaste,
   onClose,
 }: KnownPolityMenuProps) {
   // Context
@@ -62,6 +75,15 @@ export function KnownPolityMenu({
   const handleEdit = () => {
     onEdit(polity.id)
   }
+  const handleCopy = () => {
+    onCopy(polity.id, 'all')
+  }
+  const handleCopySheet = () => {
+    onCopy(polity.id, 'sheet')
+  }
+  const handlePaste = () => {
+    onPaste(polity.id)
+  }
 
   // Render
   return (
@@ -72,6 +94,10 @@ export function KnownPolityMenu({
         moves={moves}
         onChoose={handleChoose}
         onEdit={handleEdit}
+        onCopy={handleCopy}
+        onCopySheet={handleCopySheet}
+        paste={paste}
+        onPaste={handlePaste}
         onClose={onClose}
       />
     </ErrorBoundary>

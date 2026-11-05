@@ -2,6 +2,10 @@ import { useEffect } from 'react'
 
 import { availableMoves } from '@europe-historical-atlas/core/editor/stacking'
 
+import { useTranslation } from '../../../hooks/useTranslation'
+import { ACTION_MESSAGES } from '../../../i18n/actions'
+import { pasteCommand } from '../../../utils/pasteCommand'
+
 import { KnownPolityMenu } from './KnownPolityMenu'
 
 import type { CartographerStoreHook } from '../../../../state/store'
@@ -54,8 +58,16 @@ export function PolityArrangeMenu({
   // The document is mutated in place: the version is what changes when the order does.
   store((state) => state.version)
 
+  // What the clipboard holds, as the root says it — the paste is named after it.
+  const held = store((state) => state.held)
+
   // Store actions
   const restackPolity = store((state) => state.restackPolity)
+  const askCopy = store((state) => state.askCopy)
+  const askPaste = store((state) => state.askPaste)
+
+  // Context
+  const action = useTranslation(ACTION_MESSAGES)
 
   // Derived
   const { document } = store.getState()
@@ -81,6 +93,9 @@ export function PolityArrangeMenu({
       restack={restackPolity}
       onResult={onResult}
       onEdit={onEdit}
+      onCopy={askCopy}
+      paste={pasteCommand(held, polity.name, action)}
+      onPaste={askPaste}
       onClose={onClose}
     />
   )

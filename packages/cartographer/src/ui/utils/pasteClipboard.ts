@@ -41,8 +41,10 @@ export interface PasteDeps {
   pastePoints: EditionActions['pastePoints']
   /** Select a polity — the one pasted last. */
   chooseTarget: (polityId: string | null) => void
-  /** Raise a warning in the warning dialogue — a suzerain left uncarved, its outline open (the dev, 2026-11-05). */
+  /** Raise a warning in the warning dialogue — a vassal refused over a suzerain still open (the dev, 2026-11-05). */
   raiseWarning: (text: string) => void
+  /** Open the sheet's paste dialogue onto a polity — what ‹cmd+V› does with a sheet on the clipboard. */
+  askSheetPaste: (polityId: string) => void
   /** Say a sentence in the status bar's result zone. */
   say: (message: string) => void
   /** The words. */
@@ -240,6 +242,23 @@ function pasteThePoints(copied: CopiedPoints, deps: PasteDeps): string[] {
 }
 
 /**
+ * A sheet on the clipboard: its dialogue onto the polity selected, field by field (`s22` « # 3 ») — or, with none
+ * selected, the status bar says which to select.
+ * @param deps - the map's selection, the dialogue, the status bar, the words
+ * @returns nothing pasted yet — the dialogue does it
+ */
+function pasteTheSheet(deps: PasteDeps): string[] {
+  const { target, words } = deps
+  if (target === null || !deps.document.polities.some((polity) => polity.id === target)) {
+    console.warn('[Cartographer] sheet paste refused: no polity selected.')
+    deps.say(words.clipboard('sheetNoTarget', { paste: words.paste }))
+    return []
+  }
+  deps.askSheetPaste(target)
+  return []
+}
+
+/**
  * Paste what the clipboard holds into the map open, select what was pasted, and say it.
  * @param deps - the clipboard, the store's paste and selection, the status bar, the words
  * @returns the polities pasted, by their id in the map — empty when nothing was, which is said
@@ -252,6 +271,7 @@ export function pasteClipboard(deps: PasteDeps): string[] {
     return []
   }
   if (content.kind === 'points') return pasteThePoints(content, deps)
+  if (content.kind === 'sheet') return pasteTheSheet(deps)
   const answers = deps.pastePolities(content.polities, {
     kind: 'paste-polities',
     label: words.clipboard('pasteStep', {

@@ -22,5 +22,8 @@
   "nothingPasted": "Rien n’est collé sur {name}",
   "pastePointsStep": "Coller des points sur {name}",
   "followed": "{names} le suit aussi",
-  "selectAllNoTarget": "Sélectionnez d’abord une entité : tout sélectionner prend tous ses points"
+  "selectAllNoTarget": "Sélectionnez d’abord une entité : tout sélectionner prend tous ses points",
+  "sheetNoTarget": "Sélectionnez l’entité sur laquelle coller la fiche, puis {paste}",
+  "copiedSheet": "Copié : la fiche de {name}, de {map} — sélectionnez une entité, puis {paste}",
+  "heldSheet": "Dans le presse-papier : la fiche de {name}, de {map}"
 }

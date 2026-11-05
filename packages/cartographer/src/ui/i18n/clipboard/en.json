@@ -22,5 +22,8 @@
   "nothingPasted": "Nothing is pasted onto {name}",
   "pastePointsStep": "Paste points onto {name}",
   "followed": "{names} follows it too",
-  "selectAllNoTarget": "Select a polity first: select all takes all its points"
+  "selectAllNoTarget": "Select a polity first: select all takes all its points",
+  "sheetNoTarget": "Select the polity to paste the sheet onto, then {paste}",
+  "copiedSheet": "Copied: the sheet of {name}, from {map} — select a polity, then {paste}",
+  "heldSheet": "On the clipboard: the sheet of {name}, from {map}"
 }

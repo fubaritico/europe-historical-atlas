@@ -24,9 +24,11 @@
   "menuEdit": "Edit",
   "copy": "Copy",
   "pastePolities": "Paste polities",
-  "pastePoints": "Paste the points onto {name}",
+  "pastePoints": "Paste the points of {from} onto {name}",
   "selectAll": "Select all",
   "selectAllOf": "Select all: {name}",
-  "pasteSheet": "Paste the sheet onto {name}…",
-  "theSelection": "the selected polity"
+  "pasteSheet": "Paste the sheet of {from} onto {name}…",
+  "theSelection": "the selected polity",
+  "copySheet": "Copy the sheet",
+  "paste": "Paste"
 }

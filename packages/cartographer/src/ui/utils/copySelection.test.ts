@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
-import { clipboardWords, copySelection, heldSentence } from './copySelection'
+import { clipboardWords, copySelection, copySheetOfSelection, heldSentence } from './copySelection'
 
 import type { CopyDeps, CopySelection } from './copySelection'
 import type { ClipboardContent } from '@europe-historical-atlas/core/editor/clipboard'
@@ -174,6 +174,31 @@ describe('copySelection', () => {
       copySelection(selection({ document, selectedAnchors: [1, 2] }), deps())
 
       expect(JSON.stringify(document)).toBe(before)
+    })
+  })
+
+  // The dev, 2026-11-05: ‹shift+cmd+C› copies the polity selected's sheet alone.
+  describe('the sheet alone', () => {
+    it('copies the sheet of the polity selected, says it, and an opened map says it held', () => {
+      const to = deps()
+      const copy = copySheetOfSelection(selection({ selectedAnchors: [1, 2] }), to)
+      if (copy === null) throw new Error('France’s sheet is copied')
+
+      expect(copy.kind).toBe('sheet')
+      expect(to.said).toEqual([
+        'Copié : la fiche de Reaume de France, de 1100-backup-2026-11-02 — sélectionnez une entité, puis ⌘V',
+      ])
+      expect(heldSentence(copy, clipboardWords('fr', '⌘V'))).toBe(
+        'Dans le presse-papier : la fiche de Reaume de France, de 1100-backup-2026-11-02'
+      )
+    })
+
+    it('copies nothing with no polity selected, and says so', () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const to = deps()
+
+      expect(copySheetOfSelection(selection({ target: null }), to)).toBeNull()
+      expect(to.said).toEqual(['Sélectionnez une entité politique ou des points à copier'])
     })
   })
 })

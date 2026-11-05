@@ -1,0 +1,18 @@
+{
+  "title": "Coller la fiche de {from} sur {name}",
+  "intro": "Cochez les champs à reprendre de la fiche copiée dans {map}. Le tracé de {name} ne change pas.",
+  "here": "Ici",
+  "copied": "Copiée",
+  "paste": "Coller",
+  "none": "—",
+  "yes": "oui",
+  "no": "non",
+  "notOffered": "absent de cette carte",
+  "same": "Rien à coller : les fiches de {from} et de {name} sont les mêmes",
+  "pasted": "Fiche collée sur {name} : {count, plural, one {un champ repris} other {# champs repris}}",
+  "nothingChosen": "Aucun champ coché : rien n’est collé",
+  "nameTaken": "Ce nom est déjà celui d’une autre entité de cette carte : rien n’est collé",
+  "homage": "Ce suzerain fermerait une boucle d’hommage ou placerait {name} trop bas dans la chaîne : rien n’est collé",
+  "noPolity": "{name} n’est plus dans cette carte : rien n’est collé",
+  "step": "Coller la fiche sur {name}"
+}

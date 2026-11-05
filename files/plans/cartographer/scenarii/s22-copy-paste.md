@@ -236,26 +236,46 @@ Scenario: a whole outline onto a polity already drawn
 
 # 3 — a sheet onto an existing polity
 
+> **The dev, 2026-11-05 night**: *"in the context menu, two choices — ctrl+C copies everything, ctrl+shift+C copies only
+> the sheet; ctrl+C in the map copies only the points selected; then in the target file the Edit menu adapts to what
+> is on the clipboard."* So one paste, under ‹cmd+V›, named after what the clipboard holds; ‹shift+cmd+V› is gone.
+> Built in the worktree (`core/editor/pasteSheet.ts`, `ui/components/SheetPasteDialog/`, `state/clipboardSlice.ts`,
+> `ui/utils/pasteCommand.ts`). **Not walked yet.**
+
+Scenario: a polity's menu offers the clipboard
+  When I right-click <copied polity> in {Polities}
+  Then its menu reads « Modifier les propriétés… », « Copier » ‹⌘C›, « Copier la fiche » ‹⇧⌘C›, the paste, then the four
+    stacking commands
+  And the paste is named after what the clipboard holds — « Coller la fiche de <copied polity> sur <this polity>… »,
+    « Coller les points de … sur … », « Coller les entités » — greyed « Coller » when it holds nothing
+
+Scenario: copy a polity's sheet alone
+  When I select <copied polity> and press ‹shift+cmd+C›, or choose « Copier la fiche »
+  Then the clipboard holds its sheet, not its outline
+  And the status bar reads « Copié : la fiche de <copied polity>, de <source map> — sélectionnez une entité, puis ⌘V »
+
 Scenario: paste a sheet, field by field
-  Given <copied polity> is copied from <source map>
-  When I open the menu of <target polity> in <target map> and choose « Coller la fiche… »
-  Then a dialogue lists each field that differs, with <target polity>'s value and <copied polity>'s
-  And each line has a box, ticked
-  And the polity's id is never offered
+  Given a sheet is copied from <source map>
+  When I select <target polity> in <target map> and press ‹cmd+V›, or choose the paste in Édition or in its menu
+  Then a dialogue lists each field that differs, with <target polity>'s value and the copied one, each box ticked
+  And the polity's id is never offered, and its outline does not change
   When I untick « Nom » and press [Coller]
-  Then <target polity> takes every ticked value and keeps its name
-  And one ‹ctrl+Z› gives every field back
+  Then <target polity> takes every ticked value and keeps its name, one step of the history
+  And the status bar reads « Fiche collée sur <target polity> : <n> champs repris »
 
 Scenario: a sheet that differs in nothing
-  Given <copied polity>'s sheet and <target polity>'s are the same in every field offered
-  When I choose « Coller la fiche… »
-  Then the status bar reads « Rien à coller : les fiches sont les mêmes », and no dialogue opens
+  Given the copied sheet and <target polity>'s are the same in every field offered
+  When I paste it
+  Then no dialogue opens, and the status bar reads « Rien à coller : les fiches de … et de … sont les mêmes »
 
 Scenario: a suzerain absent from the map is not offered
-  Given <copied polity>'s sheet names a suzerain whose name <target map> does not hold
-  # « whose id » struck 2026-11-05: a suzerain is found by its name, as in « paste a polity » (the dev)
+  Given the copied sheet names a suzerain whose name <target map> does not hold
   When the dialogue opens
   Then the line « Suzerain » is shown, unticked and greyed, with « absent de cette carte »
+
+Scenario: a name another polity bears, or a suzerain that would loop
+  When the fields ticked would give <target polity> another polity's name, or a suzerain closing a loop of homage
+  Then nothing is pasted, and the status bar says why
 
 # What the clipboard cannot hold
 

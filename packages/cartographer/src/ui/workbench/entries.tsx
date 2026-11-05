@@ -189,16 +189,23 @@ export const WORKBENCH_ENTRIES: readonly WorkbenchEntry[] = [
   {
     id: 'polity-stack-menu',
     title: 'Stacking menu',
-    note: "A {Polities} row's menu (s16), opened at a point: Edit properties… then the four Arrange commands, Bring to Front and Bring Forward disabled — the polity is already at the front among its siblings. The design system's Menu, placed by our shell.",
+    note: "A {Polities} row's menu (s16), opened at a point: Edit properties…, Copy, Copy the sheet, the paste named after the clipboard (CARTO-345), then the four Arrange commands, Bring to Front and Bring Forward disabled — the polity is already at the front among its siblings. The design system's Menu, placed by our shell.",
     width: 300,
     render: () => (
-      <div className="workbench__panel" style={{ height: 140 }}>
+      <div className="workbench__panel" style={{ height: 220 }}>
         <PolityStackMenu
           name="Reaume de France"
           at={{ x: 40, y: 40 }}
           moves={{ front: false, forward: false, backward: true, back: true }}
           onChoose={() => undefined}
           onEdit={() => undefined}
+          onCopy={() => undefined}
+          onCopySheet={() => undefined}
+          paste={{
+            label: 'Coller la fiche de Republic of Venice sur Reaume de France…',
+            enabled: true,
+          }}
+          onPaste={() => undefined}
           onClose={() => undefined}
         />
       </div>

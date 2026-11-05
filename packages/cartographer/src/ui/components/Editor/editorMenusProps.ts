@@ -1,5 +1,6 @@
 import type { Command, ShortcutText } from '../../../i18n/commandKeys'
 import type { ActionMessageKey } from '../../i18n/actions'
+import type { PasteCommand } from '../../utils/pasteCommand'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 
 /** What the menus read of the editor: the history, the selection, the clipboard. */
@@ -12,10 +13,8 @@ export interface EditorMenuState {
   selected: string | null
   /** Whether something is selected that ‹cmd+C› copies — a polity, or two anchors and more. */
   canCopy: boolean
-  /** Whether the clipboard holds polities, which « Coller les entités » pastes. */
-  canPastePolities: boolean
-  /** Whether the clipboard holds points and a polity is selected, which « Coller les points sur … » pastes onto. */
-  canPastePoints: boolean
+  /** The one paste, named after what the clipboard holds (`ui/utils/pasteCommand`). */
+  paste: PasteCommand
 }
 
 /** What the menus' commands do. */
@@ -38,6 +37,8 @@ export interface EditorMenuGestures {
   onPaste: () => void
   /** Select every point of the polity selected. */
   onSelectAll: () => void
+  /** Copy the polity selected's sheet alone. */
+  onCopySheet: () => void
 }
 
 /** The words and the keys the menus are written with. */

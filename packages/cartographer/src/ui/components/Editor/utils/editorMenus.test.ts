@@ -31,6 +31,7 @@ function gestures(): EditorMenuGestures {
     onCopy: vi.fn(),
     onPaste: vi.fn(),
     onSelectAll: vi.fn(),
+    onCopySheet: vi.fn(),
   }
 }
 
@@ -47,8 +48,7 @@ function menus(over: Partial<EditorMenuState> = {}, to = gestures()): MenuDefini
       redoLabel: null,
       selected: null,
       canCopy: false,
-      canPastePolities: false,
-      canPastePoints: false,
+      paste: { label: 'Coller', enabled: false },
       ...over,
     },
     to,
@@ -105,18 +105,30 @@ describe('editorMenus', () => {
       expect(to.onCopy).toHaveBeenCalledOnce()
     })
 
-    it('names the polity selected in the pastes onto a polity', () => {
-      expect(find(menus({ selected: 'Kingdom of Poland' }), 'pasteSheet').label).toBe(
-        'Coller la fiche sur Kingdom of Poland…'
+    // The dev, 2026-11-05: one paste, named after what the clipboard holds (`ui/utils/pasteCommand`).
+    it('shows the one paste as the state names it, under ⌘V, and pastes through the gesture', () => {
+      const to = gestures()
+      const paste = find(
+        menus({ paste: { label: 'Coller la fiche de Venise sur Venise…', enabled: true } }, to),
+        'paste'
       )
+      paste.onChoose()
+
+      expect([paste.label, paste.enabled, paste.keys?.shown]).toEqual([
+        'Coller la fiche de Venise sur Venise…',
+        true,
+        '⌘V',
+      ])
+      expect(to.onPaste).toHaveBeenCalledOnce()
     })
 
-    it('shows the pastes with their keys, ⌘V and ⇧⌘V', () => {
-      const all = menus()
+    it('offers « Copier la fiche » under ⇧⌘C for the polity selected', () => {
+      const to = gestures()
+      const copy = find(menus({ selected: 'Republic of Venice' }, to), 'copySheet')
+      copy.onChoose()
 
-      expect(
-        ['pastePolities', 'pastePoints', 'pasteSheet'].map((id) => find(all, id).keys?.shown)
-      ).toEqual(['⌘V', '⌘V', '⇧⌘V'])
+      expect([copy.label, copy.enabled, copy.keys?.shown]).toEqual(['Copier la fiche', true, '⇧⌘C'])
+      expect(to.onCopySheet).toHaveBeenCalledOnce()
     })
   })
 
@@ -136,37 +148,8 @@ describe('editorMenus', () => {
       expect(find(menus(), 'copy').enabled).toBe(false)
     })
 
-    it('lights « Coller les entités » when the clipboard holds polities, and pastes through the gesture', () => {
-      const to = gestures()
-      const paste = find(menus({ canPastePolities: true }, to), 'pastePolities')
-      paste.onChoose()
-
-      expect(paste.enabled).toBe(true)
-      expect(to.onPaste).toHaveBeenCalledOnce()
-    })
-
-    it('keeps the paste of points and the sheet greyed while the clipboard holds polities', () => {
-      const all = menus({ canPastePolities: true, selected: 'Kingdom of Poland' })
-
-      expect(['pastePoints', 'pasteSheet'].map((id) => find(all, id).enabled)).toEqual([
-        false,
-        false,
-      ])
-    })
-
-    it('lights « Coller les points sur … » for points held, the polity selected named', () => {
-      const to = gestures()
-      const paste = find(
-        menus({ canPastePoints: true, selected: 'Kingdom of Poland' }, to),
-        'pastePoints'
-      )
-      paste.onChoose()
-
-      expect([paste.enabled, paste.label]).toEqual([
-        true,
-        'Coller les points sur Kingdom of Poland',
-      ])
-      expect(to.onPaste).toHaveBeenCalledOnce()
+    it('greys « Copier la fiche » with no polity selected', () => {
+      expect(find(menus(), 'copySheet').enabled).toBe(false)
     })
 
     // open-outlines.md, the dev, 2026-11-05: ‹cmd+A›, its scope the polity selected, named in the menu.
@@ -193,12 +176,11 @@ describe('editorMenus', () => {
       expect(menus()[1]?.entries.some((entry) => entry.id === 'pasteOutline')).toBe(false)
     })
 
-    it('greys every paste with an empty clipboard, and names the selection when none is', () => {
-      const all = menus()
-      const pastes = ['pastePolities', 'pastePoints', 'pasteSheet'].map((id) => find(all, id))
-
-      expect(pastes.every((each) => !each.enabled)).toBe(true)
-      expect(find(all, 'pastePoints').label).toBe('Coller les points sur l’entité sélectionnée')
+    it('greys the paste with an empty clipboard', () => {
+      expect([find(menus(), 'paste').label, find(menus(), 'paste').enabled]).toEqual([
+        'Coller',
+        false,
+      ])
     })
   })
 

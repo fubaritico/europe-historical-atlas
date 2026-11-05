@@ -294,6 +294,28 @@
   align-items: flex-start;
 }
 
+/* « Coller la fiche… » (CARTO-345, `s22` « # 3 »): a box and the field's name, the map's value, the copied one. */
+.sheet-paste {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.sheet-paste th,
+.sheet-paste td {
+  padding: 4px 8px 4px 0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.sheet-paste thead th {
+  color: var(--ink-off);
+  font-weight: normal;
+}
+
 .short-dialogue__sign {
   flex: 0 0 auto;
   width: 28px;

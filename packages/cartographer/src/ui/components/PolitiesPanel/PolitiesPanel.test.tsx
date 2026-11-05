@@ -360,7 +360,8 @@ describe('PolitiesPanel — the stacking menu (s16)', () => {
         .getAllByRole('option')
         .filter((option) => option.getAttribute('aria-disabled') === 'true')
         .map((option) => option.querySelector('.polity-stack-menu__label')?.textContent)
-      expect(disabled).toEqual(['Bring to Front', 'Bring Forward'])
+      // The paste is greyed too: the clipboard holds nothing (CARTO-345).
+      expect(disabled).toEqual(['Paste', 'Bring to Front', 'Bring Forward'])
     })
 
     // The tree's depth on each row, for the separators (s16).

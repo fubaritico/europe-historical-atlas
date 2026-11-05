@@ -24,6 +24,10 @@ function mountAt(at: { x: number; y: number }): HTMLElement {
       moves={ALL}
       onChoose={vi.fn()}
       onEdit={vi.fn()}
+      onCopy={vi.fn()}
+      onCopySheet={vi.fn()}
+      paste={{ label: 'Paste', enabled: false }}
+      onPaste={vi.fn()}
       onClose={vi.fn()}
     />
   )
@@ -54,6 +58,24 @@ describe('PolityStackMenu', () => {
     it('opens at the point when it fits', () => {
       const shell = mountAt({ x: 100, y: 100 })
       expect([shell.style.left, shell.style.top]).toEqual(['100px', '100px'])
+    })
+  })
+
+  // The dev, 2026-11-05: Copy and Copy the sheet in a polity's menu, and the paste named after the clipboard.
+  describe('the clipboard’s commands', () => {
+    it('lists Copy and Copy the sheet with their keys, then the paste as it is named', () => {
+      const shell = mountAt({ x: 100, y: 100 })
+      const rows = [...shell.querySelectorAll('[role="option"]')].map((option) => [
+        option.querySelector('.polity-stack-menu__label')?.textContent ?? option.textContent,
+        option.querySelector('kbd')?.textContent ?? null,
+        option.getAttribute('aria-disabled') === 'true',
+      ])
+
+      expect(rows.slice(1, 4)).toEqual([
+        ['Copy', '⌘C', false],
+        ['Copy the sheet', '⇧⌘C', false],
+        ['Paste', '⌘V', true],
+      ])
     })
   })
 

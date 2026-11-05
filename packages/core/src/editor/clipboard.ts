@@ -83,7 +83,22 @@ export interface CopiedPoints {
 }
 
 /** What the clipboard holds. */
-export type ClipboardContent = CopiedPolities | CopiedPoints
+export type ClipboardContent = CopiedPolities | CopiedPoints | CopiedSheet
+
+/**
+ * A polity's sheet copied alone, without its outline — « Copier la fiche », ‹shift+cmd+C› (the dev, 2026-11-05: the
+ * polity whole with ‹cmd+C›, its sheet alone with ‹shift+cmd+C›). Pasted onto a polity of another map, field by field.
+ */
+export interface CopiedSheet {
+  /** What the clipboard holds. */
+  kind: 'sheet'
+  /** The map it was copied from. */
+  map: string
+  /** The sheet, copied. */
+  polity: YearPolity
+  /** Its suzerain's name in the map it was copied from, or `null` when it is sovereign. */
+  suzerainName: string | null
+}
 
 /**
  * A point of the document, resolved with its provenance.
@@ -147,6 +162,24 @@ export function copyPolities(
       }
     })
   return polities.length === 0 ? null : { kind: 'polities', map, polities }
+}
+
+/**
+ * Copy a polity's sheet alone, its outline left behind.
+ * @param doc - the map being copied from
+ * @param polityId - the polity selected
+ * @param map - the map's name
+ * @returns the copy, or `null` when no polity of the map has that id
+ */
+export function copySheet(doc: YearDocument, polityId: string, map: string): CopiedSheet | null {
+  const polity = doc.polities.find((each) => each.id === polityId)
+  if (polity === undefined) return null
+  return {
+    kind: 'sheet',
+    map,
+    polity: structuredClone(polity),
+    suzerainName: nameOf(doc, polity.suzerain),
+  }
 }
 
 /**
@@ -289,6 +322,16 @@ const clipboardSchema: z.ZodMiniType<ClipboardContent> = z.discriminatedUnion('k
       )
       .check(z.minLength(1)),
   }),
+  z
+    .strictObject({
+      kind: z.literal('sheet'),
+      map: z.string(),
+      polity: yearPolitySchema,
+      suzerainName: z.nullable(z.string()),
+    })
+    .check(
+      z.refine((copied) => (copied.polity.suzerain === null) === (copied.suzerainName === null))
+    ),
   z.strictObject({
     kind: z.literal('points'),
     map: z.string(),

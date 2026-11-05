@@ -1,8 +1,10 @@
 import { useSyncExternalStore } from 'react'
 
+import { summariseClipboard } from '../../../../state/clipboardSlice'
 import { useShortcut } from '../../../hooks/useShortcut'
 import { useTranslation } from '../../../hooks/useTranslation'
 import { ACTION_MESSAGES } from '../../../i18n/actions'
+import { pasteCommand } from '../../../utils/pasteCommand'
 import { MenuBar } from '../../MenuBar'
 import { EDITOR_MESSAGES } from '../i18n'
 import { editorMenus } from '../utils/editorMenus'
@@ -13,12 +15,15 @@ import type { CartographerStoreHook } from '../../../../state/store'
 import type { EditorMenuGestures } from '../editorMenusProps'
 
 /** What the menu bar's binding needs: the store, the canvas's history, the clipboard, and the gestures. */
-export interface MenuBarPanelProps extends Omit<EditorMenuGestures, 'onUndo' | 'onRedo'> {
+export interface MenuBarPanelProps extends Omit<
+  EditorMenuGestures,
+  'onUndo' | 'onRedo' | 'onCopySheet'
+> {
   /** The store the history's state and the selection are read from. */
   store: CartographerStoreHook
   /** The canvas's undo and redo, gesture first — never `store.undo()` straight (ARCH-101). */
   history: HistoryRelay
-  /** What the clipboard holds, which lights « Coller les entités ». */
+  /** What the clipboard holds, which names and lights the paste. */
   clipboard: HeldClipboard
 }
 
@@ -41,14 +46,17 @@ export function MenuBarPanel({ store, history, clipboard, ...gestures }: MenuBar
     (state) => state.document.polities.find((each) => each.id === state.target)?.name ?? null
   )
 
+  // Store actions
+  const askCopy = store((state) => state.askCopy)
+
   // Context
   const t = useTranslation(EDITOR_MESSAGES)
   const action = useTranslation(ACTION_MESSAGES)
   const shortcut = useShortcut()
 
   // State
-  // What kind the clipboard holds — a string, compared by value; `null` for an empty clipboard.
-  const held = useSyncExternalStore(clipboard.subscribe, () => clipboard.get()?.kind ?? null)
+  // What the clipboard holds — the same object until it changes (`heldClipboard`).
+  const content = useSyncExternalStore(clipboard.subscribe, clipboard.get)
 
   // Handlers
   const handleUndo = () => {
@@ -56,6 +64,10 @@ export function MenuBarPanel({ store, history, clipboard, ...gestures }: MenuBar
   }
   const handleRedo = () => {
     history.run('redo')
+  }
+  const handleCopySheet = () => {
+    const { target } = store.getState()
+    if (target !== null) askCopy(target, 'sheet')
   }
 
   // Derived
@@ -65,10 +77,9 @@ export function MenuBarPanel({ store, history, clipboard, ...gestures }: MenuBar
       redoLabel,
       selected,
       canCopy: selected !== null || anchors >= 2,
-      canPastePolities: held === 'polities',
-      canPastePoints: held === 'points' && selected !== null,
+      paste: pasteCommand(summariseClipboard(content), selected, action),
     },
-    { ...gestures, onUndo: handleUndo, onRedo: handleRedo },
+    { ...gestures, onUndo: handleUndo, onRedo: handleRedo, onCopySheet: handleCopySheet },
     { action, shortcut }
   )
 

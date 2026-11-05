@@ -49,6 +49,9 @@ describe('KnownPolityMenu', () => {
             restack={() => true}
             onResult={() => undefined}
             onEdit={() => undefined}
+            onCopy={() => undefined}
+            paste={{ label: 'Paste', enabled: false }}
+            onPaste={() => undefined}
             onClose={() => undefined}
           />
         </LocaleProvider>

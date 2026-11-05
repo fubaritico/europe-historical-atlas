@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 
 import { createCitiesSlice } from './citiesSlice'
+import { createClipboardSlice } from './clipboardSlice'
 import { createEditionSlice } from './editionSlice'
 import { createLayersSlice } from './layersSlice'
 import { createPanelsSlice } from './panelsSlice'
@@ -9,6 +10,7 @@ import { createToolSlice } from './toolSlice'
 import { createViewportSlice } from './viewportSlice'
 
 import type { CitiesSlice } from './citiesSlice'
+import type { ClipboardSlice } from './clipboardSlice'
 import type { EditionDeps, EditionSlice } from './editionSlice'
 import type { LayersSlice } from './layersSlice'
 import type { PanelsSlice } from './panelsSlice'
@@ -45,7 +47,8 @@ export type CartographerStore = EditionSlice &
   ToolSlice &
   LayersSlice &
   CitiesSlice &
-  PanelsSlice
+  PanelsSlice &
+  ClipboardSlice
 
 /**
  * What the store needs from the composition root, **one entry per slice that has dependencies**.
@@ -77,6 +80,7 @@ export function createCartographerStore(deps: CartographerStoreDeps) {
       ...createLayersSlice(...a),
       ...createCitiesSlice(...a),
       ...createPanelsSlice(...a),
+      ...createClipboardSlice(...a),
     }))
   )
 }

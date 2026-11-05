@@ -39,6 +39,7 @@ import { installSaveShortcut } from './persistence/saveShortcut'
 import { wantsSlowWrites, writesFetch } from './persistence/slowWrites'
 import { createDevServerYearArchive } from './persistence/yearArchive'
 import { createYearSession } from './persistence/yearSession'
+import { summariseClipboard } from './state/clipboardSlice'
 import { createHeldClipboard } from './state/heldClipboard'
 import { openEmptyYear } from './state/openEmptyYear'
 import { PANEL_IDS } from './state/panelsSlice'
@@ -54,10 +55,16 @@ import { OverwriteDialog } from './ui/components/OverwriteDialog'
 import { PageHeading } from './ui/components/PageHeading'
 import { SaveAsDialog } from './ui/components/SaveAsDialog'
 import { SaveFirstDialog } from './ui/components/SaveFirstDialog'
+import { SheetPasteDialog } from './ui/components/SheetPasteDialog'
 import { PlatformContext } from './ui/i18n/platformContext'
 import { arrangeSelected, arrangeWords } from './ui/utils/arrange'
 import { listenForCommand, shownPlatform } from './ui/utils/commandListener'
-import { clipboardWords, copySelection, heldSentence } from './ui/utils/copySelection'
+import {
+  clipboardWords,
+  copySelection,
+  copySheetOfSelection,
+  heldSentence,
+} from './ui/utils/copySelection'
 import { createDialogueOpener } from './ui/utils/dialogueOpener'
 import { createMapNameStore } from './ui/utils/mapNameSource'
 import { pasteClipboard } from './ui/utils/pasteClipboard'
@@ -425,21 +432,40 @@ const clipboard = createHeldClipboard(HELD, (content) =>
   keepClipboard(window.sessionStorage, content)
 )
 
-/** Copy the stretch or the polity selected, kept in the tab for the next map (CARTO-345) — ‹cmd+C› and Édition › Copier. */
+/**
+ * Where a copy goes and is said: the map's name, the tab's clipboard, the status bar, the words of the moment.
+ * @returns the copy's dependencies
+ */
+const copyDeps = () => ({
+  map: yearSession.map(),
+  keep: clipboard.hold,
+  say: results.say,
+  words: clipboardWordsNow(),
+})
+
+/** Copy the points or the polity selected, kept in the tab for the next map (CARTO-345) — ‹cmd+C› and Édition › Copier. */
 const handleCopy = (): void => {
-  copySelection(store.getState(), {
-    map: yearSession.map(),
-    keep: clipboard.hold,
-    say: results.say,
-    words: clipboardWordsNow(),
-  })
+  copySelection(store.getState(), copyDeps())
 }
 listenForCommand(document, 'copy', handleCopy)
 
+/** Copy the polity selected's sheet alone (the dev, 2026-11-05) — ‹shift+cmd+C› and « Copier la fiche ». */
+const handleCopySheet = (): void => {
+  copySheetOfSelection(store.getState(), copyDeps())
+}
+listenForCommand(document, 'copySheet', handleCopySheet)
+
 /** Paste what the clipboard holds — polities into this map, a stretch onto the polity selected — one step (CARTO-345). */
 const handlePaste = (): void => {
-  const { document, target, pastePolities, pastePoints, chooseTarget, raiseWarning } =
-    store.getState()
+  const {
+    document,
+    target,
+    pastePolities,
+    pastePoints,
+    chooseTarget,
+    raiseWarning,
+    askSheetPaste,
+  } = store.getState()
   pasteClipboard({
     content: clipboard.get(),
     document,
@@ -448,11 +474,40 @@ const handlePaste = (): void => {
     pastePoints,
     chooseTarget,
     raiseWarning,
+    askSheetPaste,
     say: results.say,
     words: clipboardWordsNow(),
   })
 }
 listenForCommand(document, 'paste', handlePaste)
+
+// What the clipboard holds, said to the store, so a polity's menu and Édition can light their commands (CARTO-345).
+const summarise = (): void => {
+  store.getState().setHeld(summariseClipboard(clipboard.get()))
+}
+summarise()
+clipboard.subscribe(summarise)
+
+// A polity's menu (the dev, 2026-11-05): « Copier » and « Copier la fiche » copy that polity — whole, even with
+// points selected, or its sheet alone; « Coller … » pastes onto it, as ‹cmd+V›.
+store.subscribe(
+  (state) => state.copyAsked,
+  (asked) => {
+    if (asked === null) return
+    store.getState().chooseTarget(asked.polity)
+    const state = store.getState()
+    if (asked.what === 'sheet') copySheetOfSelection(state, copyDeps())
+    else copySelection({ ...state, selectedAnchors: [] }, copyDeps())
+  }
+)
+store.subscribe(
+  (state) => state.pasteAsked,
+  (asked) => {
+    if (asked === null) return
+    store.getState().chooseTarget(asked.polity)
+    handlePaste()
+  }
+)
 
 /**
  * ‹cmd+A› — Édition › Tout sélectionner (`open-outlines.md`): every point of the polity selected, the white arrow
@@ -513,6 +568,7 @@ createRoot(container).render(
             />
             <OverwriteDialog questions={overwriteQuestions} now={() => new Date()} />
             <AlarmDialog alarms={alarms} />
+            <SheetPasteDialog store={store} clipboard={clipboard} say={results.say} />
             <NoticeToaster toaster={toaster} />
             <MapDialog
               picker={mapPicker}
