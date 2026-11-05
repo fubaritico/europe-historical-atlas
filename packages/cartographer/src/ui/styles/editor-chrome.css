@@ -357,6 +357,30 @@
   text-transform: uppercase;
 }
 
+/*
+ * A panel's filter (CARTO-360): the design system's field at the head of a long list, full width, the magnifier at its
+ * end. The browser's own clearing cross of a search field is hidden: it would sit on the magnifier, and ‹esc› clears.
+ */
+.list-filter {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.list-filter .ui-input {
+  width: 100%;
+}
+
+.list-filter input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+/* A suzerain listed only to hold its vassal found under a filter — greyed, as a hidden layer is. */
+.polity-row[data-dimmed='true'] .polity-row__name,
+.polity-row[data-dimmed='true'] .polity-row__tags {
+  color: var(--ink-off);
+}
+
 .polities__empty {
   margin: 0;
   padding: 8px 10px;

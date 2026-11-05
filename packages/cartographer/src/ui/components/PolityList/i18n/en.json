@@ -3,5 +3,8 @@
   "drawnAt": "Drawn at {year}",
   "vassalOf": ", vassal of {name}",
   "noTerritory": "no territory",
-  "empty": "No polity in this year yet."
+  "empty": "No polity in this year yet.",
+  "filter": "Filter the polities",
+  "countOf": "{found} of {total}",
+  "noMatch": "No polity answers “{query}”."
 }

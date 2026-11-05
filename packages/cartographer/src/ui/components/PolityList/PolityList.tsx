@@ -2,8 +2,10 @@ import { ListboxList } from '@fubaritico/react/Listbox'
 import { useEffect } from 'react'
 
 import { useTranslation } from '../../hooks/useTranslation'
+import { ListFilter } from '../ListFilter'
 
 import { useListCursor } from './hooks/useListCursor'
+import { useRowFilter } from './hooks/useRowFilter'
 import { POLITY_LIST_MESSAGES } from './i18n'
 import { PolitiesSubhead } from './internal/PolitiesSubhead'
 import { PolityOption } from './internal/PolityOption'
@@ -40,6 +42,10 @@ export interface PolityListProps {
  * cursor through `aria-activedescendant`, ‹enter› or ‹space› chooses. The target is the selected option
  * — the persistent state — and the keys' cursor is the active one, two states kept apart as the design
  * system keeps them.
+ *
+ * **A filter at its head** (CARTO-360): the rows whose name holds what is typed, each under its suzerains, greyed
+ * when they do not answer themselves (`filterRows`). The keys' cursor walks the rows shown. What is typed is the
+ * list's own — one writer, one reader, no slice — so it empties when the panel is docked or floated (CARTO-342).
  * @param props - the rows, the target and the choice
  * @param props.year - the year being drawn, written in the subhead
  * @param props.rows - the rows to show, already sorted
@@ -47,14 +53,15 @@ export interface PolityListProps {
  * @param props.onChoose - aims at a polity, given its id — a click, or ‹enter› on the active row
  * @param props.onMenu - opens a row's menu, given its id and where to open it in viewport pixels
  * @param props.onEdit - opens a polity's dialogue, given its id — a double-click, or ‹enter› on the polity chosen
- * @returns the subhead and the list, or the subhead and a line saying the year is empty
+ * @returns the filter, the subhead and the list — or a line saying the year is empty, or that nothing answers
  */
 export function PolityList({ year, rows, targetId, onChoose, onMenu, onEdit }: PolityListProps) {
   // Context
   const t = useTranslation(POLITY_LIST_MESSAGES)
 
   // State
-  const { activeId, active, onKeyDown } = useListCursor(rows, targetId, onChoose, onMenu, onEdit)
+  const { query, setQuery, filtered, keysTarget } = useRowFilter(rows, targetId)
+  const cursor = useListCursor(filtered.rows, keysTarget, onChoose, onMenu, onEdit)
 
   // Effects
   useEffect(() => {
@@ -64,9 +71,14 @@ export function PolityList({ year, rows, targetId, onChoose, onMenu, onEdit }: P
   // Render
   return (
     <>
-      <PolitiesSubhead year={year} count={rows.length} />
+      {rows.length === 0 ? null : (
+        <ListFilter value={query} onChange={setQuery} label={t('filter')} />
+      )}
+      <PolitiesSubhead year={year} count={filtered.found} total={rows.length} />
       {rows.length === 0 ? (
         <p className="polities__empty">{t('empty')}</p>
+      ) : filtered.rows.length === 0 ? (
+        <p className="polities__empty">{t('noMatch', { query: query.trim() })}</p>
       ) : (
         <ListboxList
           variant="dark"
@@ -76,18 +88,19 @@ export function PolityList({ year, rows, targetId, onChoose, onMenu, onEdit }: P
           role="listbox"
           aria-label={t('label')}
           tabIndex={0}
-          {...(activeId === null || active < 0
+          {...(cursor.activeId === null || cursor.active < 0
             ? {}
-            : { 'aria-activedescendant': optionId(activeId) })}
-          onKeyDown={onKeyDown}
+            : { 'aria-activedescendant': optionId(cursor.activeId) })}
+          onKeyDown={cursor.onKeyDown}
         >
-          {rows.map((row) => (
+          {filtered.rows.map((row) => (
             <PolityOption
               key={row.id}
               row={row}
               id={optionId(row.id)}
               selected={row.id === targetId}
-              active={row.id === activeId}
+              active={row.id === cursor.activeId}
+              dimmed={filtered.dimmed.has(row.id)}
               onChoose={onChoose}
               onMenu={onMenu}
               onEdit={onEdit}

@@ -220,3 +220,64 @@ describe('CitiesPanel', () => {
     })
   })
 })
+
+/** The panel's filter. */
+function filter(): HTMLElement {
+  return screen.getByRole('searchbox', { name: 'Filter the cities' })
+}
+
+// CARTO-360, the dev, 2026-11-05: a field at the head of the list; the eye at its head acts on the cities found.
+describe('CitiesPanel — the filter (CARTO-360)', () => {
+  describe('happy path', () => {
+    it('lists only Paris for « par », and its eye shows Paris alone', async () => {
+      const { store, user } = mount()
+      await user.type(filter(), 'par')
+      expect(screen.getAllByRole('listitem').map((row) => row.textContent)).toEqual(['Paris'])
+      expect(screen.getByText('The city found')).toBeTruthy()
+      await user.click(screen.getByRole('button', { name: 'Show the cities found' }))
+      expect([...store.getState().shownCities]).toEqual(['paris'])
+    })
+  })
+
+  describe('variants', () => {
+    it('hides the cities found and leaves shown the cities the filter left out', async () => {
+      const { store, user } = mount()
+      store.getState().setCitiesShown(['paris', 'metz'], true)
+      await user.type(filter(), 'par')
+      await user.click(screen.getByRole('button', { name: 'Hide the cities found' }))
+      expect([...store.getState().shownCities]).toEqual(['metz'])
+    })
+
+    it('keeps the eye for every city of 1100 when every city answers the filter', async () => {
+      const { user } = mount([PARIS, { ...METZ, name: 'Pavie' }])
+      await user.type(filter(), 'p')
+      expect(screen.getAllByRole('listitem')).toHaveLength(2)
+      expect(screen.getByRole('button', { name: 'Show every city' })).toBeTruthy()
+    })
+
+    it('names the eye for every city of 1100 again once ‹esc› clears the filter', async () => {
+      const { user } = mount()
+      await user.type(filter(), 'par{Escape}')
+      expect(screen.getAllByRole('listitem')).toHaveLength(2)
+      expect(screen.getByRole('button', { name: 'Show every city' })).toBeTruthy()
+    })
+
+    it('counts the cities found when several answer', async () => {
+      const { user } = mount([PARIS, METZ, { ...PARIS, id: 'pavia', name: 'Pavie' }])
+      await user.type(filter(), 'pa')
+      expect(screen.getByText('The 2 cities found')).toBeTruthy()
+    })
+  })
+
+  // L3–L4: N/A — nothing is refused, nothing is read.
+
+  describe('edge cases', () => {
+    it('says that no city answers, in place of the list, and keeps the filter', async () => {
+      const { user } = mount()
+      await user.type(filter(), 'kiev')
+      expect(screen.queryByRole('listitem')).toBeNull()
+      expect(screen.getByText('No city answers “kiev”.')).toBeTruthy()
+      expect(filter()).toBeTruthy()
+    })
+  })
+})

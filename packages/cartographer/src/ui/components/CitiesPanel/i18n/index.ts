@@ -23,6 +23,10 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *   sources' holder.
  * - `source`, `sourceWhere` — A source saying who held it; `title` is its title, `where` where in it.
  * - `closeDetail` — The button that closes a city's detail.
+ * - `filter` — The filter field's accessible name (CARTO-360).
+ * - `foundCities` — The row of the list's own eye while a filter is typed; `count` is how many cities answer it.
+ * - `showFound`, `hideFound` — That eye's name then, as it would act on the cities found.
+ * - `noMatch` — Said in place of the list when no city answers the filter; `query` is what was typed.
  */
 export type CitiesPanelMessageKey = keyof typeof en
 

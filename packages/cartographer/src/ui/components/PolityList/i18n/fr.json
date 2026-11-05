@@ -3,5 +3,8 @@
   "drawnAt": "Dessiné en {year}",
   "vassalOf": ", vassal de {name}",
   "noTerritory": "sans territoire",
-  "empty": "Aucune entité politique dans cette année pour l’instant."
+  "empty": "Aucune entité politique dans cette année pour l’instant.",
+  "filter": "Filtrer les entités politiques",
+  "countOf": "{found} sur {total}",
+  "noMatch": "Aucune entité politique ne répond à « {query} »."
 }
