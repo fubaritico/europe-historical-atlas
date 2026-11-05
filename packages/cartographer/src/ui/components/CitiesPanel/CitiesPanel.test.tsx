@@ -145,12 +145,22 @@ describe('CitiesPanel', () => {
       expect(detail).not.toContain('right place')
     })
 
-    it('shows every city of 1100 on the eye for them all, then hides them all', async () => {
+    // The dev, 2026-11-05: a box in place of the round eye heading the list.
+    it('shows every city of 1100 by the box heading the list, then hides them all', async () => {
       const { store, user } = mount()
-      await user.click(screen.getByRole('button', { name: 'Show every city' }))
+      await user.click(screen.getByRole('checkbox', { name: 'Show all the cities of 1100' }))
       expect([...store.getState().shownCities].sort()).toEqual(['metz', 'paris'])
-      await user.click(screen.getByRole('button', { name: 'Hide every city' }))
+      await user.click(screen.getByRole('checkbox', { name: 'Show all the cities of 1100' }))
       expect(store.getState().shownCities.size).toBe(0)
+    })
+
+    // The dev, 2026-11-05: the cities shown drawn as points, in their holder's colour.
+    it('draws the cities as points by the second box, and back', async () => {
+      const { store, user } = mount()
+      await user.click(screen.getByRole('checkbox', { name: 'Show as points' }))
+      expect(store.getState().citiesAsPoints).toBe(true)
+      await user.click(screen.getByRole('checkbox', { name: 'Show as points' }))
+      expect(store.getState().citiesAsPoints).toBe(false)
     })
 
     it('opens the detail of Metz on ‹enter›, its name focused', async () => {
@@ -229,12 +239,11 @@ function filter(): HTMLElement {
 // CARTO-360, the dev, 2026-11-05: a field at the head of the list; the eye at its head acts on the cities found.
 describe('CitiesPanel — the filter (CARTO-360)', () => {
   describe('happy path', () => {
-    it('lists only Paris for « par », and its eye shows Paris alone', async () => {
+    it('lists only Paris for « par », and its box shows Paris alone', async () => {
       const { store, user } = mount()
       await user.type(filter(), 'par')
       expect(screen.getAllByRole('listitem').map((row) => row.textContent)).toEqual(['Paris'])
-      expect(screen.getByText('The city found')).toBeTruthy()
-      await user.click(screen.getByRole('button', { name: 'Show the cities found' }))
+      await user.click(screen.getByRole('checkbox', { name: 'Show the city found' }))
       expect([...store.getState().shownCities]).toEqual(['paris'])
     })
   })
@@ -244,28 +253,28 @@ describe('CitiesPanel — the filter (CARTO-360)', () => {
       const { store, user } = mount()
       store.getState().setCitiesShown(['paris', 'metz'], true)
       await user.type(filter(), 'par')
-      await user.click(screen.getByRole('button', { name: 'Hide the cities found' }))
+      await user.click(screen.getByRole('checkbox', { name: 'Show the city found' }))
       expect([...store.getState().shownCities]).toEqual(['metz'])
     })
 
-    it('keeps the eye for every city of 1100 when every city answers the filter', async () => {
+    it('keeps the box for every city of 1100 when every city answers the filter', async () => {
       const { user } = mount([PARIS, { ...METZ, name: 'Pavie' }])
       await user.type(filter(), 'p')
       expect(screen.getAllByRole('listitem')).toHaveLength(2)
-      expect(screen.getByRole('button', { name: 'Show every city' })).toBeTruthy()
+      expect(screen.getByRole('checkbox', { name: 'Show all the cities of 1100' })).toBeTruthy()
     })
 
-    it('names the eye for every city of 1100 again once ‹esc› clears the filter', async () => {
+    it('names the box for every city of 1100 again once ‹esc› clears the filter', async () => {
       const { user } = mount()
       await user.type(filter(), 'par{Escape}')
       expect(screen.getAllByRole('listitem')).toHaveLength(2)
-      expect(screen.getByRole('button', { name: 'Show every city' })).toBeTruthy()
+      expect(screen.getByRole('checkbox', { name: 'Show all the cities of 1100' })).toBeTruthy()
     })
 
     it('counts the cities found when several answer', async () => {
       const { user } = mount([PARIS, METZ, { ...PARIS, id: 'pavia', name: 'Pavie' }])
       await user.type(filter(), 'pa')
-      expect(screen.getByText('The 2 cities found')).toBeTruthy()
+      expect(screen.getByRole('checkbox', { name: 'Show the 2 cities found' })).toBeTruthy()
     })
   })
 

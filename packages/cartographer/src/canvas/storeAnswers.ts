@@ -4,6 +4,7 @@ import { editHandlesIn, gestureOf, refreshTools } from './liveCanvas'
 import { keepOutlineInHand } from './tools/resumeOutline'
 
 import type { LiveCanvas } from './liveCanvas'
+import type { CartographerStoreHook } from '../state/store'
 import type { EditorTool } from '../state/toolSlice'
 
 /**
@@ -69,5 +70,26 @@ export function answerOutlinesAndSelection(
         answerSelectAll(it, paint)
       }
     ),
+  ]
+}
+
+/**
+ * Repaint on what guides the drawing without changing the map: `{Layers}`' eyes and opacities, and `{Cities}` — an eye
+ * shows a guide, the cities arriving or the year changing changes which, and their points drawn or not (2026-11-05).
+ * @param it - the attachment, of which only the store is read
+ * @param it.deps - its collaborators
+ * @param it.deps.store - the store whose guides are watched
+ * @param paint - the coalesced repaint
+ * @returns the unsubscribers
+ */
+export function paintOnGuides(
+  it: { deps: { store: CartographerStoreHook } },
+  paint: () => void
+): (() => void)[] {
+  return [
+    it.deps.store.subscribe((state) => state.layers, paint),
+    it.deps.store.subscribe((state) => state.shownCities, paint),
+    it.deps.store.subscribe((state) => state.cities, paint),
+    it.deps.store.subscribe((state) => state.citiesAsPoints, paint),
   ]
 }

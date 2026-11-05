@@ -1,8 +1,6 @@
 {
   "title": "Villes",
-  "allCities": "Toutes les villes de {year}",
-  "showAll": "Afficher toutes les villes",
-  "hideAll": "Masquer toutes les villes",
+  "showAll": "Afficher toutes les villes de {year}",
   "show": "Afficher {city}",
   "hide": "Masquer {city}",
   "loading": "Lecture des villes…",
@@ -21,8 +19,7 @@
   "source": "Source : {title}",
   "sourceWhere": "Source : {title}, {where}",
   "filter": "Filtrer les villes",
-  "foundCities": "{count, plural, one {La ville trouvée} other {Les # villes trouvées}}",
-  "showFound": "Afficher les villes trouvées",
-  "hideFound": "Masquer les villes trouvées",
-  "noMatch": "Aucune ville ne répond à « {query} »."
+  "showFound": "{count, plural, one {Afficher la ville trouvée} other {Afficher les # villes trouvées}}",
+  "noMatch": "Aucune ville ne répond à « {query} ».",
+  "asPoints": "Afficher comme des points"
 }

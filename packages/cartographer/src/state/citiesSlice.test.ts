@@ -99,8 +99,15 @@ describe('citiesSlice', () => {
 
     it('gives the canvas the shown cities of the year open only, longitude first', () => {
       expect(shownCityPoints([LYON, ZADAR, PARIS_1200], new Set(['lyon', 'paris']), 1100)).toEqual([
-        { name: 'Lyon', lonLat: [4.83, 45.76] },
+        { name: 'Lyon', lonLat: [4.83, 45.76], holder: null },
       ])
+    })
+
+    it('draws the cities as points, or as a dot and its name', () => {
+      const store = testStore()
+      store.getState().setCitiesAsPoints(true)
+
+      expect(store.getState().citiesAsPoints).toBe(true)
     })
   })
 

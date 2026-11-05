@@ -174,6 +174,7 @@ function scene(overrides: Partial<CanvasScene> = {}): CanvasScene {
     layers: DEFAULT_LAYERS,
     selected: new Set<number>(),
     cities: [],
+    citiesAsPoints: false,
     vectors: null,
     ...overrides,
   }

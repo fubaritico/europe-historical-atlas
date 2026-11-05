@@ -14,6 +14,7 @@ import { TEST_BACKDROP_FRAME } from '../../viewport/testFrame'
 import {
   backdropRect,
   buildScene,
+  holderColour,
   projectedBorders,
   projectedFills,
   projectedRings,
@@ -61,6 +62,7 @@ function inputs(document: YearDocument, overrides: Partial<SceneInputs> = {}): S
     tribeFeathers: [],
     colours: new Map<string, string>(),
     cities: [],
+    citiesAsPoints: false,
     ...overrides,
   }
 }
@@ -73,9 +75,9 @@ describe('scene', () => {
       const viewport: Viewport = { scale: 3, originX: 40, originY: -25 }
       const built = buildScene(
         document,
-        inputs(document, { viewport, cities: [{ name: 'Corner', lonLat: [2, 46] }] })
+        inputs(document, { viewport, cities: [{ name: 'Corner', lonLat: [2, 46], holder: null }] })
       )
-      expect(built.cities).toEqual([{ name: 'Corner', at: built.anchors[2] }])
+      expect(built.cities).toEqual([{ name: 'Corner', at: built.anchors[2], colour: null }])
     })
 
     it('projects every anchor once, in document order', () => {
@@ -519,5 +521,37 @@ describe('tribes in the scene', () => {
     it('keeps the tribe selectable by a click inside its outline', () => {
       expect(projectedTerritories(withTribe(), anchors).map((t) => t.polity)).toContain('hre')
     })
+  })
+})
+// The dev, 2026-11-05: a city's point takes the colour of the polity holding it by the sources, matched by Wikidata.
+describe('holderColour', () => {
+  it('gives the colour of the map’s polity carrying the holder’s Wikidata id', () => {
+    const document = sharedBorderDocument()
+    const hre = document.polities.find((polity) => polity.id === 'hre')
+    if (hre !== undefined) hre.wikidata = 'Q12548'
+
+    expect(holderColour(document, new Map([['hre', '#3355aa']]), 'Q12548')).toBe('#3355aa')
+  })
+
+  it('gives no colour for a holder not entered, or one no polity of the map carries', () => {
+    const document = sharedBorderDocument()
+
+    expect(holderColour(document, new Map([['hre', '#3355aa']]), null)).toBeNull()
+    expect(holderColour(document, new Map([['hre', '#3355aa']]), 'Q999')).toBeNull()
+  })
+
+  it('colours a city held by a polity of the map only when the cities are drawn as points', () => {
+    const document = sharedBorderDocument()
+    const hre = document.polities.find((polity) => polity.id === 'hre')
+    if (hre !== undefined) hre.wikidata = 'Q12548'
+    const held = inputs(document, {
+      colours: new Map([['hre', '#3355aa']]),
+      cities: [{ name: 'Aachen', lonLat: [6, 50], holder: 'Q12548' }],
+    })
+
+    expect(buildScene(document, { ...held, citiesAsPoints: true }).cities[0]?.colour).toBe(
+      '#3355aa'
+    )
+    expect(buildScene(document, held).cities[0]?.colour).toBeNull()
   })
 })

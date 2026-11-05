@@ -1,8 +1,6 @@
 {
   "title": "Cities",
-  "allCities": "Every city of {year}",
-  "showAll": "Show every city",
-  "hideAll": "Hide every city",
+  "showAll": "Show all the cities of {year}",
   "show": "Show {city}",
   "hide": "Hide {city}",
   "loading": "Reading the cities…",
@@ -21,8 +19,7 @@
   "source": "Source: {title}",
   "sourceWhere": "Source: {title}, {where}",
   "filter": "Filter the cities",
-  "foundCities": "{count, plural, one {The city found} other {The # cities found}}",
-  "showFound": "Show the cities found",
-  "hideFound": "Hide the cities found",
-  "noMatch": "No city answers “{query}”."
+  "showFound": "{count, plural, one {Show the city found} other {Show the # cities found}}",
+  "noMatch": "No city answers “{query}”.",
+  "asPoints": "Show as points"
 }

@@ -1,14 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 
-import { citiesOfYear } from '../../../state/citiesSlice'
 import { useTranslation } from '../../hooks/useTranslation'
 import { Panel } from '../Panel'
 
+import { useCitiesView } from './hooks/useCitiesView'
 import { CITIES_PANEL_MESSAGES } from './i18n'
 import { CityDetail } from './internal/CityDetail'
 import { CityList } from './internal/CityList'
 import { citiesStatus } from './utils/citiesStatus'
-import { cityVerdicts } from './utils/cityVerdict'
 
 import type { CartographerStoreHook } from '../../../state/store'
 
@@ -33,6 +32,7 @@ export function CitiesPanel({ store }: { store: CartographerStoreHook }) {
   const all = store((state) => state.cities)
   const load = store((state) => state.citiesLoad)
   const shown = store((state) => state.shownCities)
+  const asPoints = store((state) => state.citiesAsPoints)
   const document = store((state) => state.document)
   // Rendered again on each version: the document is mutated in place, so its identity does not say it changed.
   store((state) => state.version)
@@ -40,6 +40,7 @@ export function CitiesPanel({ store }: { store: CartographerStoreHook }) {
   // Store actions
   const setCityShown = store((state) => state.setCityShown)
   const setCitiesShown = store((state) => state.setCitiesShown)
+  const setCitiesAsPoints = store((state) => state.setCitiesAsPoints)
 
   // Context
   const t = useTranslation(CITIES_PANEL_MESSAGES)
@@ -48,11 +49,7 @@ export function CitiesPanel({ store }: { store: CartographerStoreHook }) {
   const [opened, setOpened] = useState<string | null>(null)
 
   // Derived
-  const cities = useMemo(() => citiesOfYear(all, document.year), [all, document.year])
-  // Computed at each render, so a city's verdict follows a border moved.
-  const verdicts = cityVerdicts(document, cities)
-  const openedCity = cities.find(({ id }) => id === opened) ?? null
-  const openedVerdict = openedCity === null ? undefined : verdicts.get(openedCity.id)
+  const { cities, verdicts, openedCity, openedVerdict } = useCitiesView(all, document, opened)
   const status = citiesStatus(load, cities.length, document.year)
 
   // Handlers
@@ -75,6 +72,8 @@ export function CitiesPanel({ store }: { store: CartographerStoreHook }) {
             verdicts={verdicts}
             onShown={setCityShown}
             onAllShown={setCitiesShown}
+            asPoints={asPoints}
+            onAsPoints={setCitiesAsPoints}
             onOpen={setOpened}
           />
           {openedCity === null || openedVerdict === undefined ? (

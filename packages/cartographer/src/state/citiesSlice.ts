@@ -60,6 +60,12 @@ export interface CitiesState {
   citiesLoad: CitiesLoad
   /** The ids of the cities shown on the canvas. */
   shownCities: ReadonlySet<string>
+  /**
+   * Whether the cities shown are drawn as points — a dot in the colour of the polity holding each by the sources,
+   * ringed, no name — rather than as a dot and its name (the dev, 2026-11-05: *"I need visual milestones"*, to slalom
+   * a border between the cities of two polities).
+   */
+  citiesAsPoints: boolean
 }
 
 /** What may be done to the cities. */
@@ -86,6 +92,11 @@ export interface CitiesActions {
    * @param shown - whether they are drawn
    */
   setCitiesShown: (ids: readonly string[], shown: boolean) => void
+  /**
+   * Draw the cities shown as points, or as a dot and its name.
+   * @param asPoints - whether they are points
+   */
+  setCitiesAsPoints: (asPoints: boolean) => void
 }
 
 /** The slice: the cities, which are shown, and the ways to change it. */
@@ -107,16 +118,30 @@ export function citiesOfYear(cities: readonly CityMark[], year: number): CityMar
  * @param cities - every city
  * @param shown - the ids shown
  * @param year - the year open
- * @returns each shown city's name and position, longitude first
+ * @returns each shown city's name, position — longitude first — and its holder's Wikidata id by the sources
  */
 export function shownCityPoints(
   cities: readonly CityMark[],
   shown: ReadonlySet<string>,
   year: number
-): { name: string; lonLat: [number, number] }[] {
+): ShownCity[] {
   return citiesOfYear(cities, year)
     .filter(({ id }) => shown.has(id))
-    .map(({ name, lon, lat }) => ({ name, lonLat: [lon, lat] }))
+    .map(({ name, lon, lat, holder }) => ({
+      name,
+      lonLat: [lon, lat],
+      holder: holder?.wikidata ?? null,
+    }))
+}
+
+/** A city shown on the canvas: its name, its point, and the Wikidata id of the polity holding it by the sources. */
+export interface ShownCity {
+  /** Its name. */
+  name: string
+  /** Its point, `[longitude, latitude]`. */
+  lonLat: [number, number]
+  /** The holder's Wikidata id by the sources — what a map's polity is matched by — or `null` when none is entered. */
+  holder: string | null
 }
 
 /**
@@ -134,6 +159,10 @@ export const createCitiesSlice: StateCreator<
   cities: [],
   citiesLoad: { state: 'loading' },
   shownCities: new Set(),
+  citiesAsPoints: false,
+  setCitiesAsPoints: (asPoints): void => {
+    set({ citiesAsPoints: asPoints })
+  },
   setCities: (cities): void => {
     set({ cities, citiesLoad: { state: 'loaded' } })
   },

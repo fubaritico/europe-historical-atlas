@@ -13,6 +13,7 @@ import { canvasWords } from './canvasWords'
 import { startCanvasController } from './controller'
 import { createHistoryRelay } from './history/historyRelay'
 import { CHROME_PAINT_STYLE } from './paint/style'
+import { paintOnGuides } from './storeAnswers'
 import { testPolity } from './testGestureContext'
 
 import type { CartographerStoreHook } from '../state/store'
@@ -140,6 +141,22 @@ describe('storeAnswers', () => {
   })
 
   describe('variants', () => {
+    // s20 — the cities as points: ticking the box redraws the map, nothing else changes.
+    it('repaints once when the cities are asked as points', () => {
+      const store = createCartographerStore({
+        edition: { document: openEmptyYear(1100), clone: cloneYearDocument },
+        viewport: { viewport: UNFRAMED },
+      })
+      const paint = vi.fn()
+      const unsubscribe = paintOnGuides({ deps: { store } }, paint)
+      store.getState().setCitiesAsPoints(true)
+
+      expect(paint).toHaveBeenCalledTimes(1)
+      unsubscribe.forEach((each) => {
+        each()
+      })
+    })
+
     it('keeps the outline in hand when another tool is taken', () => {
       const { store, dispose } = threePointsInFrance()
       store.getState().selectTool('navigate')

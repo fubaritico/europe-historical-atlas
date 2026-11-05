@@ -4,6 +4,7 @@ import { boxesOverlap, detailThresholdSquared, visibleBox } from '../../viewport
 
 import { paintCities } from './cityPainter'
 
+import type { CityOnScreen } from './cityPainter'
 import type { Rect } from '../../geometry/marquee'
 import type { LayerSetting, LayerSettings } from '../../state/layersSlice'
 import type { Box } from '../../viewport/culling'
@@ -240,7 +241,9 @@ export interface CanvasScene {
   /** Which anchors are selected, by the same index. */
   selected: ReadonlySet<number>
   /** The cities `{Cities}` shows, each at its point on screen, with its name — guides for the borders (CARTO-193). */
-  cities: readonly { readonly name: string; readonly at: Point }[]
+  cities: readonly CityOnScreen[]
+  /** Whether the cities are drawn as points in their holder's colour, rather than as a dot and its name. */
+  citiesAsPoints: boolean
   /**
    * The coastline and the rivers — **in backdrop pixels, not screen pixels**, with the view to apply.
    *
@@ -678,7 +681,7 @@ export function paintCanvas(
   // Over the fills and the water, under the edit outlines: the borders belong to the map, the blue
   // strokes to the tool.
   paintBorders(ctx, scene, style)
-  paintCities(ctx, scene.cities, style)
+  paintCities(ctx, scene.cities, style, scene.citiesAsPoints)
   ctx.strokeStyle = style.pathStroke
   ctx.lineWidth = style.pathWidth
   for (const ring of scene.rings) strokeRing(ctx, ring)

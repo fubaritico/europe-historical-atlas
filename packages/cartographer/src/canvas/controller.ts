@@ -32,7 +32,7 @@ import {
 import { paintCanvas } from './paint/painter'
 import { buildScene } from './paint/scene'
 import { inDevicePixels } from './paint/style'
-import { answerOutlinesAndSelection } from './storeAnswers'
+import { answerOutlinesAndSelection, paintOnGuides } from './storeAnswers'
 import { arrowDoubleClick } from './tools/arrowDoubleClick'
 import { pencilCancel, pencilDrag, pencilEnd, pencilStart } from './tools/pencil'
 import { arrowDrag, arrowPress, resolvedTarget, toolKey } from './tools/toolGestures'
@@ -133,6 +133,7 @@ function repaint(it: LiveCanvas): void {
     // a distance again.
     tribeFeathers: it.tribeFeathers.feathersOf(state.document, state.version, coloursOf(it)),
     cities: shownCityPoints(state.cities, state.shownCities, state.document.year),
+    citiesAsPoints: state.citiesAsPoints,
   })
   paintCanvas(it.ctx, it.size, scene, inDevicePixels(it.deps.style, it.ratio))
 }
@@ -588,11 +589,8 @@ function watchStore(it: LiveCanvas, paint: () => void): () => void {
     it.deps.store.subscribe((state) => state.viewport, paint, { fireImmediately: true }),
     it.deps.store.subscribe((state) => state.viewport, refresh),
     it.deps.store.subscribe((state) => state.version, paint),
-    // `{Layers}`: an eye or an opacity changes what is drawn, never the document.
-    it.deps.store.subscribe((state) => state.layers, paint),
-    // `{Cities}`: an eye shows a guide, and the cities arriving or the year changing changes which.
-    it.deps.store.subscribe((state) => state.shownCities, paint),
-    it.deps.store.subscribe((state) => state.cities, paint),
+    // `{Layers}` and `{Cities}`: what guides the drawing changes what is drawn, never the document.
+    ...paintOnGuides(it, paint),
     it.deps.store.subscribe((state) => state.version, prune),
     // Another mode of the Pen offers another layer: refresh what is offered, and keep the outline in
     // hand — switching from the coast to a river mid-border is what the two modes are for.

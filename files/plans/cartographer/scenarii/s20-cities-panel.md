@@ -113,3 +113,30 @@ Scenario: nothing answers
 > - **a double-click on the canvas**: the white arrow's double-click there opens the polity's form (CARTO-246), so a
 >   city is double-clicked in the list only — how to tell the two apart on the canvas is the dev's call;
 > - the check before publishing (s10, *a city on the wrong side of a border*) is not built.
+
+## The cities as points — visual milestones for a border (the dev, 2026-11-05/06)
+
+> *"I need visual milestones"* — to slalom a border between the cities of two polities. The holder is the one the
+> sources give (CMS-335, the historian's testimonies), matched to a polity of the map by its Wikidata id, as the verdict
+> is. Built and **walked by the dev** on Sarkel (green, its holder's colour, *"normal colour, no overlay — it works"*);
+> the points made smaller at his word.
+
+```gherkin
+Scenario: two boxes head the list
+  Given {Cities} open on 1100
+  Then two boxes head the list: « Afficher toutes les villes de 1100 » — in place of the round eye — and « Afficher
+    comme des points »
+  And under a filter the first reads « Afficher les <n> villes trouvées »
+
+Scenario: the cities shown as points
+  Given cities shown on the canvas
+  When I tick « Afficher comme des points »
+  Then each city shown is a dot in the colour of the polity holding it by the sources, inside a light ring and a dark
+    one, painted as it is — no overlay — and no name
+  And a dot of one colour on another polity's ground shows at once that the border passes on the wrong side of it
+
+Scenario: a city whose holder cannot be coloured
+  Given a city whose holder is not entered, has no Wikidata id, or is not a polity of the map
+  When the cities are shown as points
+  Then it is a hollow grey ring: nothing is coloured that the sources do not say
+```

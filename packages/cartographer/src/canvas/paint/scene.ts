@@ -77,8 +77,36 @@ export interface SceneInputs {
    * that allocates on every pointer move.
    */
   vectorLayers: VectorLayers | null
-  /** The cities `{Cities}` shows (CARTO-193), with their positions in longitude and latitude. */
-  cities: readonly { readonly name: string; readonly lonLat: Point }[]
+  /**
+   * The cities `{Cities}` shows (CARTO-193), with their positions in longitude and latitude and the Wikidata id of the
+   * polity holding each by the sources, or `null` when none is entered.
+   */
+  cities: readonly {
+    readonly name: string
+    readonly lonLat: Point
+    readonly holder: string | null
+  }[]
+  /** Whether the cities are drawn as points in their holder's colour, rather than as a dot and its name. */
+  citiesAsPoints: boolean
+}
+
+/**
+ * The colour of the polity holding a city by the sources — the map's polity carrying its Wikidata id, as `{Cities}`'
+ * verdict matches them (`cityVerdict`) — painted on the city's point, so a point of one colour on another's ground
+ * shows at once (the dev, 2026-11-05).
+ * @param document - the map
+ * @param colours - each polity's colour, by id
+ * @param holder - the holder's Wikidata id by the sources, or `null` when none is entered
+ * @returns the colour, or `null` when no holder is entered or no polity of the map carries it
+ */
+export function holderColour(
+  document: YearDocument,
+  colours: ReadonlyMap<string, string>,
+  holder: string | null
+): string | null {
+  if (holder === null) return null
+  const polity = document.polities.find((each) => each.wikidata === holder)
+  return polity === undefined ? null : (colours.get(polity.id) ?? null)
 }
 
 /**
@@ -297,10 +325,13 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
       })
     ),
     selected: inputs.selected,
-    cities: inputs.cities.map(({ name, lonLat }) => ({
+    cities: inputs.cities.map(({ name, lonLat, holder }) => ({
       name,
       at: backdropToScreen(inputs.viewport, lonLatToBackdrop(lonLat, inputs.frame)),
+      // Read only as points: a named city's dot keeps its ink.
+      colour: inputs.citiesAsPoints ? holderColour(document, inputs.colours, holder) : null,
     })),
+    citiesAsPoints: inputs.citiesAsPoints,
     vectors:
       inputs.vectorLayers === null
         ? null

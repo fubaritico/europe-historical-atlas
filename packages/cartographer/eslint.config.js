@@ -176,6 +176,7 @@ export default tseslint.config(
           hooks: {
             useArrangeMenu: 'state',
             useCloseOutside: 'effect',
+            useCitiesView: 'derived',
             useColourPickerWords: 'context',
             useDismiss: 'effect',
             useEditorAssets: 'state',

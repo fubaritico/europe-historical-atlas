@@ -398,6 +398,15 @@
  * A panel's filter (CARTO-360): the design system's field at the head of a long list, full width, the magnifier at its
  * end. The browser's own clearing cross of a search field is hidden: it would sit on the magnifier, and ‹esc› clears.
  */
+/* {Cities}' two boxes heading its list (the dev, 2026-11-05): every city shown, and shown as points. */
+.city-boxes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
 .list-filter {
   flex: 0 0 auto;
   padding: 6px 10px;

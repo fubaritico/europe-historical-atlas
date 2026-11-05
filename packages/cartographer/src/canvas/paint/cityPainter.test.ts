@@ -38,7 +38,7 @@ describe('paintCities', () => {
   describe('happy path', () => {
     it('paints Lyon as a dot at its point and its name beside it, halo under ink', () => {
       const { ctx, calls } = recorder()
-      paintCities(ctx, [{ name: 'Lyon', at: [100, 50] }], STYLE)
+      paintCities(ctx, [{ name: 'Lyon', at: [100, 50], colour: null }], STYLE, false)
       expect(calls.map(({ op }) => op)).toEqual(['arc', 'stroke', 'fill', 'strokeText', 'fillText'])
       expect(calls[0]?.args.slice(0, 3)).toEqual([100, 50, 3])
       expect(calls[4]).toEqual({
@@ -57,10 +57,11 @@ describe('paintCities', () => {
       paintCities(
         ctx,
         [
-          { name: 'Lyon', at: [100, 50] },
-          { name: 'Zadar', at: [300, 80] },
+          { name: 'Lyon', at: [100, 50], colour: null },
+          { name: 'Zadar', at: [300, 80], colour: null },
         ],
-        STYLE
+        STYLE,
+        false
       )
       expect(calls.filter(({ op }) => op === 'fillText').map(({ args }) => args[0])).toEqual([
         'Lyon',
@@ -69,12 +70,36 @@ describe('paintCities', () => {
     })
   })
 
+  // The dev, 2026-11-05: as points, each city a dot in its holder's colour, ringed, no name.
+  describe('as points', () => {
+    it('paints a dot in the holder’s colour inside a dark ring and a light one, and no name', () => {
+      const { ctx, calls } = recorder()
+      paintCities(ctx, [{ name: 'Lyon', at: [100, 50], colour: '#3355aa' }], STYLE, true)
+
+      expect(calls.map(({ op }) => op)).toEqual(['arc', 'fill', 'arc', 'fill', 'arc', 'fill'])
+      expect(calls.filter(({ op }) => op === 'fill').map(({ fill }) => fill)).toEqual([
+        '#5c3a2e',
+        '#f3e7cd',
+        '#3355aa',
+      ])
+      expect(calls[4]?.args.slice(0, 3)).toEqual([100, 50, 3])
+      expect(calls[0]?.args.slice(0, 3)).toEqual([100, 50, 5])
+    })
+
+    it('paints a city whose holder is unknown as a hollow ring, coloured by nothing', () => {
+      const { ctx, calls } = recorder()
+      paintCities(ctx, [{ name: 'Lyon', at: [100, 50], colour: null }], STYLE, true)
+
+      expect(calls.map(({ op }) => op)).toEqual(['arc', 'fill', 'arc', 'fill', 'arc', 'stroke'])
+    })
+  })
+
   // L3, L4: N/A — drawing literals.
 
   describe('edge cases', () => {
     it('paints nothing and sets no face when no city is shown', () => {
       const { ctx, calls } = recorder()
-      paintCities(ctx, [], STYLE)
+      paintCities(ctx, [], STYLE, false)
       expect([calls.length, ctx.font]).toEqual([0, ''])
     })
   })

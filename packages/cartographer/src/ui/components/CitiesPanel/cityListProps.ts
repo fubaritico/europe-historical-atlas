@@ -18,8 +18,12 @@ export interface CityListProps {
   verdicts: ReadonlyMap<string, CityVerdict>
   /** A city's eye was toggled. */
   onShown: (id: string, shown: boolean) => void
-  /** The eye heading the list was toggled: every city listed, shown or hidden at once. */
+  /** The box heading the list was ticked or not: every city listed, shown or hidden at once. */
   onAllShown: (ids: readonly string[], shown: boolean) => void
+  /** Whether the cities shown are drawn as points in their holder's colour. */
+  asPoints: boolean
+  /** The box « Afficher comme des points » was ticked or not. */
+  onAsPoints: (asPoints: boolean) => void
   /** A city was double-clicked: its detail opens. */
   onOpen: (id: string) => void
 }
