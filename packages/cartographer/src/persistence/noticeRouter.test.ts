@@ -25,7 +25,7 @@ describe('routeNotices', () => {
       const { show, alarms, report } = router()
       report({ tone: 'alarm', topic: 'year', text: 'not saved' })
 
-      expect(alarms.current()).toEqual([{ topic: 'year', text: 'not saved' }])
+      expect(alarms.current()).toEqual([{ topic: 'year', text: 'not saved', sign: 'warning' }])
       expect(show).not.toHaveBeenCalled()
     })
   })
@@ -37,7 +37,9 @@ describe('routeNotices', () => {
       report({ tone: 'alarm', topic: 'autosave', text: 'the draft is not kept' })
       report({ tone: 'success', topic: 'year', text: 'saved 1100' })
 
-      expect(alarms.current()).toEqual([{ topic: 'autosave', text: 'the draft is not kept' }])
+      expect(alarms.current()).toEqual([
+        { topic: 'autosave', text: 'the draft is not kept', sign: 'warning' },
+      ])
     })
 
     it.each(['info', 'warning'] as const)('leaves the alarms alone on %s, a toast', (tone) => {
@@ -45,7 +47,7 @@ describe('routeNotices', () => {
       report({ tone: 'alarm', topic: 'year', text: 'not saved' })
       report({ tone, topic: 'year', text: 'the previous save is still running' })
 
-      expect(alarms.current()).toEqual([{ topic: 'year', text: 'not saved' }])
+      expect(alarms.current()).toEqual([{ topic: 'year', text: 'not saved', sign: 'warning' }])
       expect(show).toHaveBeenCalledWith(tone, 'the previous save is still running', 'year')
     })
   })

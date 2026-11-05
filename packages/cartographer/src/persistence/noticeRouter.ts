@@ -32,7 +32,7 @@ export interface NoticeRoutes {
 export function routeNotices(routes: NoticeRoutes): Report {
   return (notice) => {
     if (notice.tone === 'alarm') {
-      routes.alarms.raise({ topic: notice.topic, text: notice.text })
+      routes.alarms.raise({ topic: notice.topic, text: notice.text, sign: 'warning' })
       return
     }
     // A topic that turns out well closes its doubt — a save confirmed after its delay: the toast says the rest.

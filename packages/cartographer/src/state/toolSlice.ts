@@ -134,6 +134,11 @@ export interface ToolState {
    */
   warning: { text: string } | null
   /**
+   * An error the canvas raised for the same dialogue, under the error sign — the dev, 2026-11-06: an overlap the geometry
+   * refused to compute is said *in an error dialogue*. A new object each time, as {@link warning}.
+   */
+  error: { text: string } | null
+  /**
    * The polity whose form is open, or `null` (CARTO-246). Here rather than in `{Polities}` so the list's
    * double-click and the map's ask for the same thing, and the panel — which owns the form — opens it; the
    * canvas never knows the form. Outside the undo line, like the tool and the target. It may name a polity
@@ -222,23 +227,34 @@ export interface ToolActions {
    * @param text - the sentence, in the page's language
    */
   raiseWarning: (text: string) => void
+  /**
+   * Raise an error in the same dialogue, under the error sign.
+   * @param text - the sentence, in the page's language
+   */
+  raiseError: (text: string) => void
 }
 
 /** The slice: the tool, the target, and the two ways they change. */
 export type ToolSlice = ToolState & ToolActions
 
 /**
- * The polity form's, the white arrow's selection's and the warning's actions — out of the undo line, like the tool.
+ * The polity form's, the white arrow's selection's, the warning's and the error's actions — out of the undo line, like
+ * the tool.
  * @param set - the store's setter
  * @param get - the store's getter
- * @returns the five actions
+ * @returns the six actions
  */
 function formAndSelection(
   set: (partial: Partial<ToolState>) => void,
   get: () => ToolSlice
 ): Pick<
   ToolActions,
-  'openPolityForm' | 'closePolityForm' | 'setSelectedAnchors' | 'askSelectAll' | 'raiseWarning'
+  | 'openPolityForm'
+  | 'closePolityForm'
+  | 'setSelectedAnchors'
+  | 'askSelectAll'
+  | 'raiseWarning'
+  | 'raiseError'
 > {
   return {
     openPolityForm: (polityId: string): void => {
@@ -256,6 +272,9 @@ function formAndSelection(
     },
     raiseWarning: (text: string): void => {
       set({ warning: { text } })
+    },
+    raiseError: (text: string): void => {
+      set({ error: { text } })
     },
   }
 }
@@ -282,6 +301,7 @@ export const createToolSlice: StateCreator<
   selectedAnchors: [],
   selectAllAsked: 0,
   warning: null,
+  error: null,
   polityForm: null,
   ...formAndSelection(set, get),
   penMode: 'free',

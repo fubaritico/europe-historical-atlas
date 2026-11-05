@@ -55,5 +55,7 @@
   "keptOutline": "Outline of {name} kept, open: take it up with the Pen by one of its ends",
   "carveHeld": "{name} is not carved out of {suzerain}: the outline of {suzerain} is still open. The two overlap until you close it.",
   "closeOverOpenSuzerain": "{name} is not closed: the outline of its suzerain, {suzerain}, is still open, and a vassal is carved only out of a closed outline. The outline of {name} is erased: close {suzerain} first, then draw {name} again.",
+  "overlapPair": "{a} and {b}",
+  "overlapRefused": "The hatching between {pairs} cannot be drawn: one of their outlines has a shape the computation cannot read, such as a point placed twice or a line crossing itself. That overlap is not hatched; the rest of the map is. Touch up the outline to see it.",
   "pasteOverOpenSuzerain": "A piece is not pasted: it would close {name}, and the outline of its suzerain, {suzerain}, is still open. Close {suzerain} first, then paste again."
 }

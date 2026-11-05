@@ -17,6 +17,7 @@ import type { VectorLayers } from '../../loaders/vectorLayers'
 import type { LayerSettings } from '../../state/layersSlice'
 import type { BackdropFrame } from '../../viewport/projection'
 import type { Point, Viewport } from '../../viewport/viewport'
+import type { OverlapPiece } from '../overlapCache'
 import type { DerivedBorder } from '@europe-historical-atlas/core/editor/derivedBorders'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
@@ -88,6 +89,11 @@ export interface SceneInputs {
   }[]
   /** Whether the cities are drawn as points in their holder's colour, rather than as a dot and its name. */
   citiesAsPoints: boolean
+  /**
+   * Where the polities' outlines overlap (CARTO-364), each piece **in backdrop pixels** with the polities covering it —
+   * computed once per version by the caller (`canvas/overlapCache`), remapped through the view here.
+   */
+  overlaps: readonly OverlapPiece[]
 }
 
 /**
@@ -293,6 +299,35 @@ export function projectedBorders(
 }
 
 /**
+ * Each overlap on screen, in the colours of the polities covering it, in turn (CARTO-364). A polity with no colour is
+ * one the registry lacks — not painted (`projectedFills`), so not hatched either; a piece left with fewer than two
+ * colours is no longer an overlap on screen.
+ * @param overlaps - the overlaps, in backdrop pixels
+ * @param colours - each polity's colour, by id
+ * @param viewport - the current view
+ * @returns the pieces to hatch
+ */
+export function projectedHatches(
+  overlaps: SceneInputs['overlaps'],
+  colours: ReadonlyMap<string, string>,
+  viewport: Viewport
+): CanvasScene['hatches'] {
+  return overlaps.flatMap(({ polities, rings }) => {
+    const inks = polities.flatMap((polity) => {
+      const colour = colours.get(polity)
+      return colour === undefined ? [] : [colour]
+    })
+    if (inks.length < 2) return []
+    return [
+      {
+        rings: rings.map((ring) => ring.map((point) => backdropToScreen(viewport, point))),
+        colours: inks,
+      },
+    ]
+  })
+}
+
+/**
  * Everything to paint, for one document and one view.
  *
  * The anchors are remapped **once** and the rings read that result, which is what keeps a shared anchor
@@ -332,6 +367,8 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
       colour: inputs.citiesAsPoints ? holderColour(document, inputs.colours, holder) : null,
     })),
     citiesAsPoints: inputs.citiesAsPoints,
+    hatches: projectedHatches(inputs.overlaps, inputs.colours, inputs.viewport),
+    hatchOrigin: backdropToScreen(inputs.viewport, [0, 0]),
     vectors:
       inputs.vectorLayers === null
         ? null

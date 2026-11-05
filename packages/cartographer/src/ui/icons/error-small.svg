@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A stand-in for the dev's error sign (CARTO-364, 2026-11-06): he is drawing his own, which takes this place. Drawn on
+     the warning sign's grid, a red disc and the same exclamation mark. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 430">
+    <circle cx="250" cy="215" r="205" fill="#C62828" />
+    <g fill="#FFFFFF">
+        <path d="M 218 90 C 216 70, 284 70, 282 90 L 268 260 C 267 272, 233 272, 232 260 Z" />
+        <circle cx="250" cy="322" r="30" />
+    </g>
+</svg>

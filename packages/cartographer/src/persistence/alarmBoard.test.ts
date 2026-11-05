@@ -6,9 +6,9 @@ describe('createAlarmBoard', () => {
   describe('happy path', () => {
     it('holds an alarm until the author dismisses it', () => {
       const board = createAlarmBoard()
-      board.raise({ topic: 'year', text: 'not saved' })
+      board.raise({ topic: 'year', text: 'not saved', sign: 'warning' })
 
-      expect(board.current()).toEqual([{ topic: 'year', text: 'not saved' }])
+      expect(board.current()).toEqual([{ topic: 'year', text: 'not saved', sign: 'warning' }])
       board.dismiss()
       expect(board.current()).toEqual([])
     })
@@ -17,33 +17,35 @@ describe('createAlarmBoard', () => {
   describe('variants', () => {
     it('replaces the alarm of the same topic, and keeps the others, oldest first', () => {
       const board = createAlarmBoard()
-      board.raise({ topic: 'year', text: 'no confirmation yet' })
-      board.raise({ topic: 'autosave', text: 'the draft is not kept' })
-      board.raise({ topic: 'year', text: 'not saved' })
+      board.raise({ topic: 'year', text: 'no confirmation yet', sign: 'warning' })
+      board.raise({ topic: 'autosave', text: 'the draft is not kept', sign: 'warning' })
+      board.raise({ topic: 'year', text: 'not saved', sign: 'warning' })
 
       expect(board.current()).toEqual([
-        { topic: 'autosave', text: 'the draft is not kept' },
-        { topic: 'year', text: 'not saved' },
+        { topic: 'autosave', text: 'the draft is not kept', sign: 'warning' },
+        { topic: 'year', text: 'not saved', sign: 'warning' },
       ])
     })
 
     it('withdraws the alarm of a topic, and only that one', () => {
       const board = createAlarmBoard()
-      board.raise({ topic: 'year', text: 'no confirmation yet' })
-      board.raise({ topic: 'autosave', text: 'the draft is not kept' })
+      board.raise({ topic: 'year', text: 'no confirmation yet', sign: 'warning' })
+      board.raise({ topic: 'autosave', text: 'the draft is not kept', sign: 'warning' })
       board.withdraw('year')
 
-      expect(board.current()).toEqual([{ topic: 'autosave', text: 'the draft is not kept' }])
+      expect(board.current()).toEqual([
+        { topic: 'autosave', text: 'the draft is not kept', sign: 'warning' },
+      ])
     })
 
     it('tells its listeners of each change, and stops when asked', () => {
       const board = createAlarmBoard()
       const listener = vi.fn()
       const stop = board.subscribe(listener)
-      board.raise({ topic: 'year', text: 'not saved' })
+      board.raise({ topic: 'year', text: 'not saved', sign: 'warning' })
       board.dismiss()
       stop()
-      board.raise({ topic: 'year', text: 'not saved' })
+      board.raise({ topic: 'year', text: 'not saved', sign: 'warning' })
 
       expect(listener).toHaveBeenCalledTimes(2)
     })

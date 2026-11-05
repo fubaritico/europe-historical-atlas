@@ -17,6 +17,7 @@ import {
   holderColour,
   projectedBorders,
   projectedFills,
+  projectedHatches,
   projectedRings,
   projectedTerritories,
   projectedTribeFeathers,
@@ -63,6 +64,7 @@ function inputs(document: YearDocument, overrides: Partial<SceneInputs> = {}): S
     colours: new Map<string, string>(),
     cities: [],
     citiesAsPoints: false,
+    overlaps: [],
     ...overrides,
   }
 }
@@ -553,5 +555,52 @@ describe('holderColour', () => {
       '#3355aa'
     )
     expect(buildScene(document, held).cities[0]?.colour).toBeNull()
+  })
+})
+
+// CARTO-364 — an overlap on screen, in the colours of the polities covering it.
+describe('projectedHatches', () => {
+  const PIECE = {
+    polities: ['france', 'empire'],
+    rings: [
+      [
+        [0, 0],
+        [10, 0],
+        [10, 10],
+      ] as const,
+    ],
+  }
+  const COLOURS = new Map([
+    ['france', '#0000ff'],
+    ['empire', '#ffff00'],
+  ])
+
+  it('gives each piece its polities’ colours in turn, through the view', () => {
+    const [hatch] = projectedHatches([PIECE], COLOURS, { scale: 2, originX: 5, originY: 0 })
+
+    expect(hatch?.colours).toEqual(['#0000ff', '#ffff00'])
+    expect(hatch?.rings[0]?.[1]).toEqual([25, 0])
+  })
+
+  it('leaves out a polity with no colour, and a piece left with one colour', () => {
+    expect(projectedHatches([PIECE], new Map([['france', '#0000ff']]), NATIVE)).toEqual([])
+  })
+
+  // Review QUAL-004: the overlaps handed in reach the scene's hatches.
+  it('hands the overlaps to the painter as hatches', () => {
+    const document = sharedBorderDocument()
+    const scene = buildScene(document, inputs(document, { overlaps: [PIECE], colours: COLOURS }))
+
+    expect(scene.hatches.map((hatch) => hatch.colours)).toEqual([['#0000ff', '#ffff00']])
+  })
+
+  it('pins the stripes to the backdrop’s origin on screen', () => {
+    const document = sharedBorderDocument()
+    const scene = buildScene(
+      document,
+      inputs(document, { viewport: { scale: 1, originX: 40, originY: 7 } })
+    )
+
+    expect(scene.hatchOrigin).toEqual([40, 7])
   })
 })

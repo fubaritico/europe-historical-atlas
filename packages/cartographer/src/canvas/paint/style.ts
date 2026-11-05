@@ -53,6 +53,8 @@ export const CHROME_PAINT_STYLE: PaintStyle = {
   cityHalo: '#f3e7cd',
   cityRadius: 3,
   cityFontSize: 11,
+  // An overlap's stripes (CARTO-364): wide enough to read a colour, narrow enough to read two in a small piece.
+  hatchWidth: 10,
 }
 
 /**
@@ -88,5 +90,6 @@ export function inDevicePixels(style: PaintStyle, pixelRatio: number): PaintStyl
     riverWidthMinor: style.riverWidthMinor * pixelRatio,
     cityRadius: style.cityRadius * pixelRatio,
     cityFontSize: style.cityFontSize * pixelRatio,
+    hatchWidth: style.hatchWidth * pixelRatio,
   }
 }

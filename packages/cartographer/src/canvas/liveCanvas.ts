@@ -45,6 +45,7 @@ import { weldTargetOnScreen } from './tools/weldGestures'
 
 import type { AnchorCache } from './anchorCache'
 import type { CanvasControllerDeps } from './controllerDeps'
+import type { CanvasOverlaps } from './overlapsOnCanvas'
 import type { Painter2D } from './paint/painter'
 import type { RetraceView } from './tools/retrace'
 import type { GestureContext } from './tools/toolGestures'
@@ -87,6 +88,8 @@ export interface LiveCanvas {
   anchors: AnchorCache
   /** The tribes' fading colour as images, recomputed only when the document changes (ATLAS-258). */
   tribeFeathers: TribeFeatherCache
+  /** Where the outlines overlap, and the last refusals said (CARTO-364). */
+  overlaps: CanvasOverlaps
   /** The overlay canvas and its context. */
   overlay: { node: HTMLCanvasElement; ctx: Painter2D }
   /** What the tools hold between two clicks — never the document's. */

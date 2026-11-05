@@ -18,6 +18,11 @@ export interface Alarm {
   topic: NoticeTopic
   /** The sentence the author reads. */
   text: string
+  /**
+   * The sign beside it: `warning` for what may be lost or was not done, `error` for what the application could not
+   * compute (the dev, 2026-11-06: an error dialogue beside the warning ones).
+   */
+  sign: 'warning' | 'error'
 }
 
 /** The board. */

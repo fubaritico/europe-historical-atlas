@@ -21,7 +21,7 @@ export type NoticeTone = 'success' | 'info' | 'warning' | 'alarm'
  * `success` withdraws the alarm of its topic: a save confirmed after its doubt closes it. `carving` is the canvas's: a
  * vassal not closed over a suzerain still open (`open-outlines.md`), raised as an alarm only.
  */
-export type NoticeTopic = 'year' | 'autosave' | 'carving'
+export type NoticeTopic = 'year' | 'autosave' | 'carving' | 'overlap'
 
 /** One notice. */
 export interface Notice {

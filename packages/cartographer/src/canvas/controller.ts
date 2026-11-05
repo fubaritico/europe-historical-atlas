@@ -1,11 +1,9 @@
-import { TRIBE_FEATHER } from '@europe-historical-atlas/core/editor/tribeFeather'
-
 import { shownCityPoints } from '../state/citiesSlice'
 import { clampToCover, openingView } from '../viewport/framing'
 import { screenToLonLatOnBackdrop } from '../viewport/projection'
 import { panBy, zoomAbout } from '../viewport/viewport'
 
-import { createAnchorCache } from './anchorCache'
+import { documentCaches } from './documentCaches'
 import { hearPageHistory, onModifiedKey } from './history/historyAnswer'
 import {
   bordersOf,
@@ -29,6 +27,7 @@ import {
   scaleLimitsFor,
   wheelZoomFactor,
 } from './navigation'
+import { overlapsToPaint } from './overlapsOnCanvas'
 import { paintCanvas } from './paint/painter'
 import { buildScene } from './paint/scene'
 import { inDevicePixels } from './paint/style'
@@ -45,7 +44,6 @@ import {
 } from './tools/toolKeys'
 import { keyRefusedFromAfar, releaseTool } from './tools/toolRelease'
 import { dropDrag, idleSession, targetHandles } from './tools/toolSession'
-import { createTribeFeatherCache } from './tribeFeatherCache'
 
 import type { CanvasControllerDeps } from './controllerDeps'
 import type { LiveCanvas } from './liveCanvas'
@@ -134,6 +132,7 @@ function repaint(it: LiveCanvas): void {
     tribeFeathers: it.tribeFeathers.feathersOf(state.document, state.version, coloursOf(it)),
     cities: shownCityPoints(state.cities, state.shownCities, state.document.year),
     citiesAsPoints: state.citiesAsPoints,
+    overlaps: overlapsToPaint(it),
   })
   paintCanvas(it.ctx, it.size, scene, inDevicePixels(it.deps.style, it.ratio))
 }
@@ -627,11 +626,7 @@ function freshCanvas(
     size: { width: 0, height: 0 },
     pressAt: null,
     dragging: false,
-    anchors: createAnchorCache(deps.frame),
-    tribeFeathers: createTribeFeatherCache(
-      { frame: deps.frame, feather: TRIBE_FEATHER, land: deps.landMask },
-      deps.tribeImage
-    ),
+    ...documentCaches(deps),
     overlay: { node: deps.overlay, ctx: overlayCtx },
     session: idleSession(),
     pointer: null,

@@ -73,6 +73,9 @@ catalog:
   # Validation
   zod: ^4.6.6
 
+  # Geometry — where polities' outlines overlap (CARTO-364); MIT, the clipping Turf uses
+  polygon-clipping: ^0.15.7
+
   # Task orchestration
   turbo: ^2.11.6
 

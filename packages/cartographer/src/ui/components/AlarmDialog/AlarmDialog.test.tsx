@@ -3,6 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 
 import { createAlarmBoard } from '../../../persistence/alarmBoard'
+import errorUrl from '../../icons/error-small.svg'
+import warningUrl from '../../icons/warning-small.svg'
 import { renderInEnglish } from '../../testing/renderInEnglish'
 
 import { AlarmDialog } from './AlarmDialog'
@@ -32,7 +34,7 @@ function mounted(...raised: Alarm[]) {
 describe('AlarmDialog', () => {
   describe('happy path', () => {
     it('opens on an alarm, titled after its topic, with its sentence', () => {
-      mounted({ topic: 'year', text: 'not saved (details in the console)' })
+      mounted({ topic: 'year', text: 'not saved (details in the console)', sign: 'warning' })
 
       expect(dialog()?.hasAttribute('open')).toBe(true)
       expect(dialog()?.getAttribute('aria-label')).toBe('The map on disk')
@@ -40,7 +42,7 @@ describe('AlarmDialog', () => {
     })
 
     it('closes on [OK], every alarm read', async () => {
-      const { alarms, user } = mounted({ topic: 'year', text: 'not saved' })
+      const { alarms, user } = mounted({ topic: 'year', text: 'not saved', sign: 'warning' })
 
       await user.click(open().getByRole('button', { name: 'OK' }))
 
@@ -50,10 +52,24 @@ describe('AlarmDialog', () => {
   })
 
   describe('variants', () => {
+    // CARTO-364 — the dev, 2026-11-06: an error dialogue beside the warning ones.
+    it('heads an error with the error sign, and titles it after its topic', () => {
+      mounted({ topic: 'overlap', text: 'the hatching cannot be drawn', sign: 'error' })
+
+      expect(dialog()?.getAttribute('aria-label')).toBe('The hatching')
+      expect(document.querySelector('dialog[open] img')?.getAttribute('src')).toBe(errorUrl)
+    })
+
+    it('heads a warning with the warning sign', () => {
+      mounted({ topic: 'year', text: 'not saved', sign: 'warning' })
+
+      expect(document.querySelector('dialog[open] img')?.getAttribute('src')).toBe(warningUrl)
+    })
+
     it('shows every alarm waiting, under the topic of the newest', () => {
       mounted(
-        { topic: 'year', text: 'no confirmation yet' },
-        { topic: 'autosave', text: 'the automatic save is not written' }
+        { topic: 'year', text: 'no confirmation yet', sign: 'warning' },
+        { topic: 'autosave', text: 'the automatic save is not written', sign: 'warning' }
       )
 
       expect(dialog()?.getAttribute('aria-label')).toBe('The automatic save')
@@ -62,7 +78,7 @@ describe('AlarmDialog', () => {
     })
 
     it('closes by itself when its only alarm is withdrawn — a save confirmed after its doubt', () => {
-      const { alarms } = mounted({ topic: 'year', text: 'no confirmation yet' })
+      const { alarms } = mounted({ topic: 'year', text: 'no confirmation yet', sign: 'warning' })
 
       act(() => {
         alarms.withdraw('year')
@@ -72,7 +88,7 @@ describe('AlarmDialog', () => {
     })
 
     it('closes on ‹escape›, as on [OK]', () => {
-      const { alarms } = mounted({ topic: 'autosave', text: 'not written' })
+      const { alarms } = mounted({ topic: 'autosave', text: 'not written', sign: 'warning' })
 
       // jsdom has no dialogue: in the browser ‹escape› closes it and `close` fires, the Modal's event.
       act(() => {

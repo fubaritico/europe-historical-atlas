@@ -3,8 +3,10 @@ import { riverRankWidth, wholeRiverRank } from '@europe-historical-atlas/core/da
 import { boxesOverlap, detailThresholdSquared, visibleBox } from '../../viewport/culling'
 
 import { paintCities } from './cityPainter'
+import { paintHatches } from './hatchPainter'
 
 import type { CityOnScreen } from './cityPainter'
+import type { HatchOnScreen } from './hatchPainter'
 import type { Rect } from '../../geometry/marquee'
 import type { LayerSetting, LayerSettings } from '../../state/layersSlice'
 import type { Box } from '../../viewport/culling'
@@ -103,6 +105,12 @@ export interface Painter2D {
   fillText: (text: string, x: number, y: number) => void
   /** Outline text in the current stroke colour — a name's halo. */
   strokeText: (text: string, x: number, y: number) => void
+  /** Keep what is drawn next inside the current path — an overlap's hatching (CARTO-364). */
+  clip: (fillRule?: 'nonzero' | 'evenodd') => void
+  /** Push the state: the clip, the colours, the blend. */
+  save: () => void
+  /** Pop it. */
+  restore: () => void
 }
 
 /**
@@ -164,6 +172,8 @@ export interface PaintStyle {
   cityRadius: number
   /** A city's name's size, in screen pixels. */
   cityFontSize: number
+  /** One stripe of an overlap's hatching, measured along the screen's horizontal, in screen pixels (CARTO-364). */
+  hatchWidth: number
 }
 
 /**
@@ -244,6 +254,10 @@ export interface CanvasScene {
   cities: readonly CityOnScreen[]
   /** Whether the cities are drawn as points in their holder's colour, rather than as a dot and its name. */
   citiesAsPoints: boolean
+  /** Where the polities' outlines overlap, each piece in the colours of every polity covering it (CARTO-364). */
+  hatches: readonly HatchOnScreen[]
+  /** Where the backdrop's origin lies on screen: the stripes are counted from it, so a pan carries them. */
+  hatchOrigin: Point
   /**
    * The coastline and the rivers — **in backdrop pixels, not screen pixels**, with the view to apply.
    *
@@ -470,6 +484,36 @@ function paintAnchors(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): vo
 }
 
 /**
+ * Hatch where outlines overlap (CARTO-364) — part of the tint, so under the fills' layer and at its opacity, the relief
+ * laid again under the stripes at its own.
+ * @param ctx - the context
+ * @param size - the canvas, in device pixels
+ * @param scene - what to draw
+ * @param style - the colours and sizes
+ */
+function paintOverlaps(
+  ctx: Painter2D,
+  size: PixelSize,
+  scene: CanvasScene,
+  style: PaintStyle
+): void {
+  if (scene.hatches.length === 0 || !layerAlpha(ctx, scene.layers.fills)) return
+  const alpha = ctx.globalAlpha
+  const relief = scene.layers.backdrop
+  paintHatches(ctx, scene.hatches, {
+    background: style.background,
+    ground: relief.visible ? scene.backdrop : null,
+    groundAlpha: relief.opacity / 100,
+    blend: style.fillBlend,
+    alpha,
+    width: style.hatchWidth,
+    origin: scene.hatchOrigin,
+    size,
+  })
+  ctx.globalAlpha = 1
+}
+
+/**
  * Fill every polity's territory in its colour, blended into the relief — the atlas's tint, previewed.
  *
  * **The blend is set and reset here**, the same discipline as the vectors' transform: an `overlay` left
@@ -677,6 +721,7 @@ export function paintCanvas(
   // a shoreline blended into its country's colour would lose the contrast it is drawn for.
   paintFills(ctx, scene, style)
   paintTribeFeathers(ctx, scene, style)
+  paintOverlaps(ctx, size, scene, style)
   paintVectors(ctx, size, scene, style)
   // Over the fills and the water, under the edit outlines: the borders belong to the map, the blue
   // strokes to the tool.

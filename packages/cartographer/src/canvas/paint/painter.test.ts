@@ -81,6 +81,9 @@ function recordingContext(): { ctx: Painter2D; calls: Call[] } {
     textBaseline: 'alphabetic',
     fillText: record('fillText'),
     strokeText: record('strokeText'),
+    clip: record('clip'),
+    save: record('save'),
+    restore: record('restore'),
     get fillStyle(): string | CanvasGradient | CanvasPattern {
       return state.fillStyle
     },
@@ -140,6 +143,7 @@ const STYLE: PaintStyle = {
   cityHalo: '#f3e7cd',
   cityRadius: 3,
   cityFontSize: 11,
+  hatchWidth: 6,
 }
 
 const SIZE: PixelSize = { width: 800, height: 600 }
@@ -175,6 +179,8 @@ function scene(overrides: Partial<CanvasScene> = {}): CanvasScene {
     selected: new Set<number>(),
     cities: [],
     citiesAsPoints: false,
+    hatches: [],
+    hatchOrigin: [0, 0],
     vectors: null,
     ...overrides,
   }
@@ -1153,5 +1159,42 @@ describe('paintCanvas — a tribe’s fade', () => {
       paintCanvas(ctx, SIZE, scene({ tribeFeathers: [FEATHER] }), STYLE)
       expect(calls.filter((call) => call.op === 'setLineDash' && call.args.length > 0)).toEqual([])
     })
+  })
+})
+
+// CARTO-364 — the overlaps are part of the tint: under the fills' layer, after the tribes, before the borders.
+describe('paintCanvas — the overlaps hatched', () => {
+  const HATCH = {
+    rings: [
+      [
+        [10, 10],
+        [30, 10],
+        [30, 30],
+      ] as const,
+    ],
+    colours: ['#0000ff', '#ffff00'],
+  }
+
+  it('clips to each overlap and hatches it', () => {
+    const { ctx, calls } = recordingContext()
+    paintCanvas(ctx, SIZE, scene({ hatches: [HATCH] }), STYLE)
+
+    expect(ops(calls)).toContain('clip')
+  })
+
+  it('hatches nothing when the fills’ layer is hidden', () => {
+    const { ctx, calls } = recordingContext()
+    const layers = { ...DEFAULT_LAYERS, fills: { visible: false, opacity: 100 } }
+    paintCanvas(ctx, SIZE, scene({ hatches: [HATCH], layers }), STYLE)
+
+    expect(ops(calls)).not.toContain('clip')
+  })
+
+  it('hands the context back at full opacity', () => {
+    const { ctx } = recordingContext()
+    const layers = { ...DEFAULT_LAYERS, fills: { visible: true, opacity: 40 } }
+    paintCanvas(ctx, SIZE, scene({ hatches: [HATCH], layers }), STYLE)
+
+    expect(ctx.globalAlpha).toBe(1)
   })
 })

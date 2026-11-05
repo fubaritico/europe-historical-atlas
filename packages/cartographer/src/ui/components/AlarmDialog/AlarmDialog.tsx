@@ -6,6 +6,7 @@ import { useSyncExternalStore } from 'react'
 import { autofocusOnOpen } from '../../hooks/autofocusOnOpen'
 import { useTranslation } from '../../hooks/useTranslation'
 import { ACTION_MESSAGES } from '../../i18n/actions'
+import errorUrl from '../../icons/error-small.svg'
 import warningUrl from '../../icons/warning-small.svg'
 
 import { ALARM_MESSAGES } from './i18n'
@@ -44,6 +45,8 @@ export function AlarmDialog({ alarms }: AlarmDialogProps) {
   // Derived
   const newest = waiting.at(-1)
   const title = newest === undefined ? '' : t('title', { topic: newest.topic })
+  // The newest alarm's sign heads the dialogue: an error under the error sign, the rest under the warning one.
+  const sign = newest?.sign === 'error' ? errorUrl : warningUrl
 
   // Handlers
   const close = (): void => {
@@ -58,8 +61,9 @@ export function AlarmDialog({ alarms }: AlarmDialogProps) {
           <Card.Header>{title}</Card.Header>
           <Card.Body>
             <div className="short-dialogue__alert">
-              {/* The dev's warning sign, simplified for its size (`icons/warning-small.svg`): it marks, the text says. */}
-              <img className="short-dialogue__sign" src={warningUrl} alt="" />
+              {/* The dev's warning sign, simplified for its size (`icons/warning-small.svg`), or the error sign: it marks, the
+                  text says. */}
+              <img className="short-dialogue__sign" src={sign} alt="" />
               <div>
                 {waiting.map((alarm) => (
                   <p key={alarm.topic} className="short-dialogue__text">

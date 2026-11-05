@@ -16,6 +16,7 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "polygon-clipping": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

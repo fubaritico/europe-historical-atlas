@@ -695,6 +695,35 @@ Scenario: the outline crosses a polity that already exists
   And I am offered: take the ground · leave it · adjust the outline
 ```
 
+```gherkin
+# CARTO-364 — the dev, 2026-11-06: "if one entity's outline spills over another's, it makes a zone hatched in the
+# colour of the one and of the other". A mechanism, not a statement: a slip and a disputed ground look alike.
+Scenario: the ground two polities cover is hatched
+  Given the Kingdom of France and the Holy Roman Empire are drawn side by side
+  When I drag a point of France's border a few kilometres into the Empire
+  Then the ground both cover is hatched at 45°, a blue stripe and a yellow one in turn, over the relief
+  And the stripes keep their width on screen at any zoom, and travel with the ground when I pan
+  And ‹cmd+Z› takes the hatching away with the overlap
+
+Scenario: four polities over one ground
+  Given four polities cover the same ground
+  Then it is hatched in four colours in turn, one piece, not six pairs one over another
+
+Scenario: a vassal is not an overlap
+  Given the Duchy of Aquitaine is drawn inside the Kingdom of France, its suzerain
+  Then nothing is hatched between them, at any depth of homage
+
+Scenario: an overlap the computation refuses
+  Given an outline the geometry cannot read — a point placed twice, a line crossing itself
+  Then its overlap is not hatched, and the rest of the map is
+  And an error dialogue names the two polities and says to touch up the outline
+  And it is said once: a gesture elsewhere does not open it again
+```
+
+> **The hatching does not resolve H-05b below**: the overlap is shown, never settled. Declaring a disputed zone with
+> its source, so the atlas shows only those, is set aside (the dev, 2026-11-06: « restons simples »). Measured on his
+> 1100 the same day: 17 overlaps, 11 under 1 km², the largest 24 km² (Paramara and Chaulukya).
+
 > **H-05b — and only between peers.** `rasteriseRegions` today resolves overlap by "later index wins",
 > silently, which in an editor would let the newest polity eat its neighbour with no trace. It stays open
 > for two polities with no dependency between them, because contested ground is a _fact_ nobody can guess.

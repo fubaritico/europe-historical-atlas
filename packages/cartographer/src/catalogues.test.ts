@@ -65,7 +65,12 @@ const YES_NO = all<'yes' | 'no'>({ yes: true, no: true })
  * a defect reaches, and visibly. Keyed by catalogue, message and argument.
  */
 const CLOSED: Readonly<Record<string, readonly string[]>> = {
-  'ALARM_MESSAGES.title.topic': all<NoticeTopic>({ year: true, autosave: true, carving: true }),
+  'ALARM_MESSAGES.title.topic': all<NoticeTopic>({
+    year: true,
+    autosave: true,
+    carving: true,
+    overlap: true,
+  }),
   'TOOL_MESSAGES.toolName.tool': all<EditorTool>({
     navigate: true,
     draw: true,

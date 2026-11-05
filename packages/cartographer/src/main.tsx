@@ -262,7 +262,15 @@ const notices = routeNotices({ toasts: noticeToasts(createToastApi(() => toaster
 store.subscribe(
   (state) => state.warning,
   (warning) => {
-    if (warning !== null) alarms.raise({ topic: 'carving', text: warning.text })
+    if (warning !== null) alarms.raise({ topic: 'carving', text: warning.text, sign: 'warning' })
+  }
+)
+// An error the canvas raised — an overlap the geometry refused to compute — goes to the same dialogue, under the error
+// sign (the dev, 2026-11-06: « que ça déclenche une modale d'erreur »).
+store.subscribe(
+  (state) => state.error,
+  (error) => {
+    if (error !== null) alarms.raise({ topic: 'overlap', text: error.text, sign: 'error' })
   }
 )
 /**
