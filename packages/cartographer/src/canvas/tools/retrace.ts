@@ -3,9 +3,9 @@ import {
   isRetraceRefusal,
   retraceArcs,
 } from '@europe-historical-atlas/core/editor/retrace'
+import { smallerSide } from '@europe-historical-atlas/core/geo/retraceSide'
 
 import { nearestAmong } from '../../geometry/hitTest'
-import { smallerSide } from '../../geometry/retraceSide'
 import { MIN_RING_ANCHORS } from '../../geometry/ringClosure'
 import { backdropToLonLat } from '../../viewport/projection'
 

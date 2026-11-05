@@ -59,13 +59,14 @@ function fileMenu(gestures: EditorMenuGestures, words: EditorMenuWords): MenuDef
 }
 
 /**
- * The pastes of the *Édition* menu — « Coller les entités » active when the clipboard holds polities (2026-11-05),
- * the others greyed until each is built (CARTO-345).
+ * The pastes of the *Édition* menu — « Coller les entités » active when the clipboard holds polities, « Coller le
+ * tronçon sur … » when it holds a stretch and a polity is selected (2026-11-05); the sheet's greyed until it is built
+ * (CARTO-345).
  * @param name - the polity a paste onto a polity names
  * @param state - what the clipboard holds
  * @param onPaste - what « Coller les entités » does
  * @param words - the words and the keys
- * @returns the four pastes
+ * @returns the three pastes
  */
 function pasteEntries(
   name: string,
@@ -88,22 +89,14 @@ function pasteEntries(
       id: 'pasteStretch',
       label: action('pasteStretch', { name }),
       keys: shortcut('paste'),
-      enabled: false,
-      onChoose: notYet,
+      enabled: state.canPasteStretch,
+      onChoose: onPaste,
     },
     {
       kind: 'command',
       id: 'pasteSheet',
       label: action('pasteSheet', { name }),
       keys: shortcut('pasteSheet'),
-      enabled: false,
-      onChoose: notYet,
-    },
-    {
-      kind: 'command',
-      id: 'pasteOutline',
-      label: action('pasteOutline', { name }),
-      keys: shortcut('pasteOutline'),
       enabled: false,
       onChoose: notYet,
     },

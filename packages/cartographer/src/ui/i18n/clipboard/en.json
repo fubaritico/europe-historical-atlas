@@ -5,13 +5,20 @@
   "heldStretch": "On the clipboard: a stretch of {name}, from {map}",
   "nothingSelected": "Select a polity or a stretch to copy",
   "notARun": "These points do not follow one another on one outline: nothing is copied",
-  "wholeRing": "That is the whole outline: select the polity to copy it",
   "notKept": "The copy could not be kept: nothing is copied",
   "pasted": "{polities, plural, one {Pasted: {name}} other {Pasted: # polities}}, from {map} — {count} points, {welded} of them welded to the neighbours",
   "pastedSovereign": "Pasted as sovereign: its suzerain, {suzerain}, is not in this map",
   "nameTaken": "{name} is already in this map: two polities cannot bear the same name — nothing is pasted",
   "homageTooDeep": "{name} is not pasted: its suzerain, {suzerain}, would seat it too deep in the chain of homage",
   "nothingToPaste": "The clipboard is empty: copy a polity first",
-  "stretchNotYet": "Pasting a stretch is not possible yet: copy a polity",
-  "pasteStep": "{count, plural, one {Paste {name}} other {Paste # polities}}"
+  "pasteStep": "{count, plural, one {Paste {name}} other {Paste # polities}}",
+  "stretchNoTarget": "Select the polity to paste the stretch onto, then {paste}",
+  "pastedOutline": "Pasted onto {name}: an outline of {count} points, {welded} of them welded to the neighbours",
+  "pastedStretch": "Pasted onto {name}: a stretch of {count} points",
+  "stretchNoOutline": "{name} has no outline to hook this stretch onto: copy a whole outline",
+  "stretchTooFar": "This end is {km} km from the outline of {name}: nothing is pasted",
+  "stretchSameEnd": "Both ends of this stretch fall on the same point of {name}: nothing is pasted",
+  "stretchRefused": "Stretch not pasted: {reason}",
+  "pasteStretchStep": "Paste a stretch onto {name}",
+  "stretchFollowed": "{names} follows it too"
 }

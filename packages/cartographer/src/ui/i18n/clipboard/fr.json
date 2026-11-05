@@ -5,13 +5,20 @@
   "heldStretch": "Dans le presse-papier : un tronçon de {name}, de {map}",
   "nothingSelected": "Sélectionnez une entité politique ou un tronçon à copier",
   "notARun": "Ces points ne se suivent pas sur un même contour : rien n’est copié",
-  "wholeRing": "C’est tout le contour : sélectionnez l’entité pour la copier",
   "notKept": "La copie n’a pas pu être gardée : rien n’est copié",
   "pasted": "{polities, plural, one {Collé : {name}} other {Collé : # entités politiques}}, de {map} — {count} points, dont {welded} soudés aux voisins",
   "pastedSovereign": "Collé souverain : son suzerain, {suzerain}, n’est pas dans cette carte",
   "nameTaken": "{name} est déjà dans cette carte : deux entités politiques ne peuvent pas porter le même nom — rien n’est collé",
   "homageTooDeep": "{name} n’est pas collé : son suzerain, {suzerain}, le placerait trop bas dans la chaîne d’hommage",
   "nothingToPaste": "Le presse-papier est vide : copiez d’abord une entité politique",
-  "stretchNotYet": "Coller un tronçon n’est pas encore possible : copiez une entité politique",
-  "pasteStep": "{count, plural, one {Coller {name}} other {Coller # entités politiques}}"
+  "pasteStep": "{count, plural, one {Coller {name}} other {Coller # entités politiques}}",
+  "stretchNoTarget": "Sélectionnez l’entité sur laquelle coller le tronçon, puis {paste}",
+  "pastedOutline": "Collé sur {name} : un tracé de {count} points, dont {welded} soudés aux voisins",
+  "pastedStretch": "Collé sur {name} : un tronçon de {count} points",
+  "stretchNoOutline": "{name} n’a pas de tracé où accrocher ce tronçon : copiez un tracé entier",
+  "stretchTooFar": "Ce bout est à {km} km du tracé de {name} : rien n’est collé",
+  "stretchSameEnd": "Les deux bouts de ce tronçon tombent sur le même point de {name} : rien n’est collé",
+  "stretchRefused": "Tronçon non collé : {reason}",
+  "pasteStretchStep": "Coller un tronçon sur {name}",
+  "stretchFollowed": "{names} le suit aussi"
 }

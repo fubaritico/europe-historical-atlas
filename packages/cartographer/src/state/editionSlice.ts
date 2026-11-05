@@ -21,6 +21,10 @@ import {
 } from '@europe-historical-atlas/core/editor/documentEdits'
 import { createHistory } from '@europe-historical-atlas/core/editor/history'
 import { isPolityPasteRefusal, pastePolity } from '@europe-historical-atlas/core/editor/paste'
+import {
+  isStretchPasteRefusal,
+  pasteStretch,
+} from '@europe-historical-atlas/core/editor/pasteStretch'
 import { PASTE_WELD_KM } from '@europe-historical-atlas/core/editor/pasteWeld'
 import { isRetraceRefusal, retraceStretch } from '@europe-historical-atlas/core/editor/retrace'
 import { restack } from '@europe-historical-atlas/core/editor/stacking'
@@ -30,7 +34,7 @@ import type { AnchorRemoval } from '@europe-historical-atlas/core/editor/anchorE
 import type { WeldDone, WeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
 import type { Segment } from '@europe-historical-atlas/core/editor/borderOverrides'
 import type { Carving } from '@europe-historical-atlas/core/editor/carve'
-import type { CopiedPolity } from '@europe-historical-atlas/core/editor/clipboard'
+import type { CopiedPolity, CopiedStretch } from '@europe-historical-atlas/core/editor/clipboard'
 import type {
   AnchorMove,
   OutlinePoint,
@@ -44,6 +48,10 @@ import type {
   HistoryStep,
 } from '@europe-historical-atlas/core/editor/history'
 import type { PolityPasteRefusal, PolityPasted } from '@europe-historical-atlas/core/editor/paste'
+import type {
+  StretchPasteRefusal,
+  StretchPasted,
+} from '@europe-historical-atlas/core/editor/pasteStretch'
 import type { RetraceDone, RetraceRefusal } from '@europe-historical-atlas/core/editor/retrace'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
@@ -169,6 +177,19 @@ export interface EditionActions {
     polities: readonly CopiedPolity[],
     step: HistoryStep
   ) => (PolityPasted | PolityPasteRefusal)[]
+  /**
+   * Paste a stretch from the clipboard onto a polity, as one undoable step (`s22` « # 2 »): a whole outline as one
+   * more ring of it, welded onto the map; a part of an outline merged into its outline, as ⟨retracer⟩ does.
+   * @param stretch - the copied stretch
+   * @param polityId - the polity selected
+   * @param step - how the gesture is named — *"paste a stretch onto Kingdom of Poland"*
+   * @returns what was done, or why nothing was — and then nothing was recorded
+   */
+  pasteStretch: (
+    stretch: CopiedStretch,
+    polityId: string,
+    step: HistoryStep
+  ) => StretchPasted | StretchPasteRefusal
   /**
    * Dress some segments of the borders with a hand — or give them back to the rule with `null` — as one
    * undoable step (`s13`: *give a line a pattern*). The unit is the segment, so half a border may be
@@ -506,33 +527,50 @@ function backToTheLine(
 }
 
 /**
- * Pasting polities from the clipboard, one recorded step for all of them (`s22`).
+ * Pasting from the clipboard, each paste one recorded step (`s22`): polities, all of them in one step; a stretch.
  *
- * **The one action that can throw after writing**: `pastePolity` refuses before it writes, but a defect met in its
- * weld — or the second polity's, after the first was written — leaves the map partly written. So a throw puts the map
+ * **The actions that can throw after writing**: a paste refuses before it writes, but a defect met in its weld — or
+ * the second polity's, after the first was written — leaves the map partly written. So a throw puts the map
  * back as the line holds it, the state before the paste, and **is thrown again**: the defect stays loud, and the map
  * on screen is never one no step records (reviews ARCH-001 and QUAL-001, 2026-11-05).
  * @param record - the runner every recorded action goes through
  * @param restore - put the map back as the line's current row holds it
- * @returns `pastePolities`
+ * @returns `pastePolities` and `pasteStretch`
  */
 function pasteActions(
   record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean,
   restore: () => void
-): Pick<EditionActions, 'pastePolities'> {
+): Pick<EditionActions, 'pastePolities' | 'pasteStretch'> {
+  /**
+   * Run a paste as one recorded step, putting the map back and throwing again when it fails after writing.
+   * @param edit - the paste, on the working document
+   * @param step - the step's name
+   */
+  const guarded = (edit: (document: YearDocument) => boolean, step: HistoryStep): void => {
+    try {
+      record(edit, step)
+    } catch (error) {
+      restore()
+      throw error
+    }
+  }
   return {
     pastePolities: (polities, step): (PolityPasteRefusal | PolityPasted)[] => {
       const answers: (PolityPasteRefusal | PolityPasted)[] = []
-      try {
-        record((document) => {
-          for (const copied of polities) answers.push(pastePolity(document, copied, PASTE_WELD_KM))
-          return answers.some((answer) => !isPolityPasteRefusal(answer))
-        }, step)
-      } catch (error) {
-        restore()
-        throw error
-      }
+      guarded((document) => {
+        for (const copied of polities) answers.push(pastePolity(document, copied, PASTE_WELD_KM))
+        return answers.some((answer) => !isPolityPasteRefusal(answer))
+      }, step)
       return answers
+    },
+    pasteStretch: (stretch, polityId, step): StretchPasteRefusal | StretchPasted => {
+      // Overwritten at once: `record` runs the edit synchronously, and the answer comes back out of it.
+      let answer: StretchPasteRefusal | StretchPasted = { refused: 'no-polity' }
+      guarded((document) => {
+        answer = pasteStretch(document, stretch, polityId, PASTE_WELD_KM)
+        return !isStretchPasteRefusal(answer)
+      }, step)
+      return answer
     },
   }
 }

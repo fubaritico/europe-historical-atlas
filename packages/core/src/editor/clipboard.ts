@@ -60,7 +60,13 @@ export interface CopiedStretch {
   map: string
   /** The name of the polity whose ring it was copied from, said back in the status bar. */
   polity: string
-  /** The points, in the ring's order — two at least. */
+  /**
+   * Whether it is a whole ring, closure implied — copied as a stretch since 2026-11-05 (the dev: there is no outline
+   * replacement; a whole outline is a stretch like any other). A whole ring pasted onto a polity becomes one more ring
+   * of it; an open stretch is merged into the polity's outline.
+   */
+  closed: boolean
+  /** The points, in the ring's order — two at least, three at least when closed. */
   points: ClipboardPoint[]
 }
 
@@ -76,8 +82,6 @@ export type StretchRefusal =
   | 'too-few'
   /** The anchors do not follow one another on any single ring. */
   | 'not-a-run'
-  /** They are a whole ring: that is a polity's outline, copied by copying the polity. */
-  | 'whole-ring'
 
 /**
  * A point of the document, resolved with its provenance.
@@ -142,29 +146,36 @@ export function copyPolities(
   return polities.length === 0 ? null : { kind: 'polities', map, polities }
 }
 
+/** Where a run of anchors starts on a ring, and whether it is the whole ring. */
+interface RunOnRing {
+  /** The position on the ring the run starts at — the ring's first for a whole ring. */
+  start: number
+  /** Whether the anchors are every anchor of the ring. */
+  closed: boolean
+}
+
 /**
  * Where a set of anchors runs along a ring: the position the run starts at, when the anchors follow one another.
  * @param ring - the ring's anchors
  * @param anchors - the anchors selected
- * @returns the start of the run; `'whole-ring'` when they are every anchor of it; `null` when they are not one run
+ * @returns the run, or `null` when they are not one run of this ring
  */
-function runStart(
-  ring: readonly number[],
-  anchors: ReadonlySet<number>
-): number | 'whole-ring' | null {
+function runOn(ring: readonly number[], anchors: ReadonlySet<number>): RunOnRing | null {
   const inside = ring.map((index) => anchors.has(index))
   const count = inside.filter(Boolean).length
   if (count !== anchors.size || new Set(ring).size !== ring.length) return null
-  if (count === ring.length) return 'whole-ring'
+  if (count === ring.length) return { start: 0, closed: true }
   // One run on a closed ring is one place where an outside anchor is followed by an inside one.
   const starts = inside.flatMap((isIn, at) =>
     isIn && inside[(at - 1 + ring.length) % ring.length] === false ? [at] : []
   )
-  return starts.length === 1 ? (starts[0] ?? null) : null
+  const start = starts.length === 1 ? starts[0] : undefined
+  return start === undefined ? null : { start, closed: false }
 }
 
 /**
- * Copy a stretch: anchors that follow one another on one ring, in the ring's order.
+ * Copy a stretch: anchors that follow one another on one ring, in the ring's order — or every anchor of a ring, a
+ * stretch closed on itself (the dev, 2026-11-05: a whole outline is a stretch like any other).
  *
  * The ring searched first is the selected polity's, so a border two polities share is copied as the one aimed at
  * runs it; any other ring holding the run answers as well.
@@ -185,13 +196,14 @@ export function copyStretch(
   const claims = [...doc.claims].sort(
     (a, b) => Number(b.polity === aimedAt) - Number(a.polity === aimedAt)
   )
-  let wholeRing = false
   for (const claim of claims) {
     for (const ring of claim.rings) {
-      const start = runStart(ring, selected)
-      if (start === 'whole-ring') wholeRing = true
-      if (typeof start !== 'number') continue
-      const run = [...ring.slice(start), ...ring.slice(0, start)].slice(0, selected.size)
+      const run = runOn(ring, selected)
+      if (run === null) continue
+      const ordered = [...ring.slice(run.start), ...ring.slice(0, run.start)].slice(
+        0,
+        selected.size
+      )
       const owner = doc.polities.find((polity) => polity.id === claim.polity)
       // A claim names a polity of the registry: the document is cross-checked when it opens.
       if (owner === undefined) {
@@ -201,11 +213,12 @@ export function copyStretch(
         kind: 'stretch',
         map,
         polity: owner.name,
-        points: run.map((index) => pointOf(doc, index)),
+        closed: run.closed,
+        points: ordered.map((index) => pointOf(doc, index)),
       }
     }
   }
-  return wholeRing ? 'whole-ring' : 'not-a-run'
+  return 'not-a-run'
 }
 
 /** A finite `[longitude, latitude]`. */
@@ -243,12 +256,16 @@ const clipboardSchema: z.ZodMiniType<ClipboardContent> = z.discriminatedUnion('k
       )
       .check(z.minLength(1)),
   }),
-  z.strictObject({
-    kind: z.literal('stretch'),
-    map: z.string(),
-    polity: z.string(),
-    points: z.array(pointSchema).check(z.minLength(MIN_STRETCH_POINTS)),
-  }),
+  z
+    .strictObject({
+      kind: z.literal('stretch'),
+      map: z.string(),
+      polity: z.string(),
+      closed: z.boolean(),
+      points: z.array(pointSchema).check(z.minLength(MIN_STRETCH_POINTS)),
+    })
+    // A closed stretch is a ring, and a ring of fewer points encloses nothing.
+    .check(z.refine((stretch) => !stretch.closed || stretch.points.length >= MIN_RING_ANCHORS)),
 ])
 
 /**

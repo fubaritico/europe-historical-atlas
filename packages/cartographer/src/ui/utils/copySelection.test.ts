@@ -122,12 +122,12 @@ describe('copySelection', () => {
       ])
     })
 
-    it('copies nothing and says so when the anchors are the whole outline', () => {
-      vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    it('copies the whole outline as a closed stretch, a whole outline being a stretch like any other', () => {
       const to = deps()
+      const copy = copySelection(selection({ selectedAnchors: [0, 1, 2, 3] }), to)
 
-      expect(copySelection(selection({ selectedAnchors: [0, 1, 2, 3] }), to)).toBeNull()
-      expect(to.said).toEqual(['C’est tout le contour : sélectionnez l’entité pour la copier'])
+      expect(copy).toMatchObject({ kind: 'stretch', closed: true })
+      expect(to.said[0]).toMatch(/^Copié : un tronçon de Reaume de France, 4 points/)
     })
 
     it('says the copy was not kept when the tab’s storage refuses it', () => {

@@ -162,6 +162,15 @@ Scenario: paste twice
 > it takes the place; you paste, there is something, we weld."* An outline selected whole is **a stretch like any
 > other**; to replace a polity's outline, the author deletes it in the target map, then pastes. The replacement and
 > the island of the earlier version are struck below.
+>
+> **Built 2026-11-05, wired to ‹cmd+V› and Édition › Coller le tronçon sur … the same evening** (`core/editor/
+> pasteStretch.ts`, `ui/utils/pasteClipboard.ts`): a whole outline copied as a closed stretch; pasted onto the polity
+> selected, a whole outline as one more ring of it, welded at 2 km; a part merged between the anchors its ends hook
+> onto, the smaller change as ⟨retracer⟩ chooses (`core/geo/retraceSide.ts`, moved down from the Cartographer so both
+> read one rule), a neighbour over the whole replaced stretch following; every refusal below said, ⟨retracer⟩'s in its
+> own words. « Coller le tracé » removed from the menu, with its key ‹alt+cmd+V›. **Not walked yet** — neither by me
+> nor by the dev; merged at his word. **Declared gap**: the pasted points are not selected (the canvas owns the
+> selection of anchors; the store only reads it).
 
 Scenario: copy a stretch
   When I select anchors that follow one another on <copied polity>'s outline

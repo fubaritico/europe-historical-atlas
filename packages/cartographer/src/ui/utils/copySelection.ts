@@ -1,8 +1,10 @@
 import { copyPolities, copyStretch } from '@europe-historical-atlas/core/editor/clipboard'
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 
+import { CANVAS_MESSAGES } from '../../canvas/i18n'
 import { CLIPBOARD_MESSAGES } from '../i18n/clipboard'
 
+import type { CanvasMessageKey } from '../../canvas/i18n'
 import type { ClipboardMessageKey } from '../i18n/clipboard'
 import type { ClipboardContent, CopiedPolity } from '@europe-historical-atlas/core/editor/clipboard'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
@@ -31,6 +33,8 @@ export interface ClipboardWords {
   clipboard: Translate<ClipboardMessageKey>
   /** The paste shortcut, as the system writes it — ⌘V, or Ctrl+V. */
   paste: string
+  /** The canvas's sentences — ⟨retracer⟩'s refusals, which a stretch's paste says in its words. */
+  canvas: Translate<CanvasMessageKey>
 }
 
 /**
@@ -40,7 +44,11 @@ export interface ClipboardWords {
  * @returns the words
  */
 export function clipboardWords(locale: Locale, paste: string): ClipboardWords {
-  return { clipboard: createTranslator(CLIPBOARD_MESSAGES, locale), paste }
+  return {
+    clipboard: createTranslator(CLIPBOARD_MESSAGES, locale),
+    paste,
+    canvas: createTranslator(CANVAS_MESSAGES, locale),
+  }
 }
 
 /** Where a copy goes and is said — injected, so a test hands in a map and a list of sentences. */
@@ -118,7 +126,6 @@ function copyOf(selection: CopySelection, map: string): ClipboardContent | Clipb
   if (selectedAnchors.length >= 2) {
     const stretch = copyStretch(document, selectedAnchors, map, target)
     if (stretch === 'not-a-run' || stretch === 'too-few') return 'notARun'
-    if (stretch === 'whole-ring') return 'wholeRing'
     return stretch
   }
   const polities = target === null ? null : copyPolities(document, [target], map)

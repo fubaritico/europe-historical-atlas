@@ -427,12 +427,15 @@ const handleCopy = (): void => {
 }
 listenForCommand(document, 'copy', handleCopy)
 
-/** Paste the polities the clipboard holds into this map, one step of the history (CARTO-345) — ‹cmd+V› and Édition. */
+/** Paste what the clipboard holds — polities into this map, a stretch onto the polity selected — one step (CARTO-345). */
 const handlePaste = (): void => {
-  const { pastePolities, chooseTarget } = store.getState()
+  const { document, target, pastePolities, pasteStretch, chooseTarget } = store.getState()
   pasteClipboard({
     content: clipboard.get(),
+    document,
+    target,
     pastePolities,
+    pasteStretch,
     chooseTarget,
     say: results.say,
     words: clipboardWordsNow(),

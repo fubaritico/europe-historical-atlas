@@ -47,6 +47,7 @@ function menus(over: Partial<EditorMenuState> = {}, to = gestures()): MenuDefini
       selected: null,
       canCopy: false,
       canPastePolities: false,
+      canPasteStretch: false,
       ...over,
     },
     to,
@@ -109,12 +110,12 @@ describe('editorMenus', () => {
       )
     })
 
-    it('shows the pastes with their keys, ⌘V, ⇧⌘V and ⌥⌘V', () => {
+    it('shows the pastes with their keys, ⌘V and ⇧⌘V', () => {
       const all = menus()
 
       expect(
-        ['pastePolities', 'pasteSheet', 'pasteOutline'].map((id) => find(all, id).keys?.shown)
-      ).toEqual(['⌘V', '⇧⌘V', '⌥⌘V'])
+        ['pastePolities', 'pasteStretch', 'pasteSheet'].map((id) => find(all, id).keys?.shown)
+      ).toEqual(['⌘V', '⌘V', '⇧⌘V'])
     })
   })
 
@@ -143,19 +144,37 @@ describe('editorMenus', () => {
       expect(to.onPaste).toHaveBeenCalledOnce()
     })
 
-    it('keeps the other pastes greyed while the clipboard holds polities, none of them built', () => {
+    it('keeps the stretch and the sheet greyed while the clipboard holds polities', () => {
       const all = menus({ canPastePolities: true, selected: 'Kingdom of Poland' })
 
-      expect(
-        ['pasteStretch', 'pasteSheet', 'pasteOutline'].map((id) => find(all, id).enabled)
-      ).toEqual([false, false, false])
+      expect(['pasteStretch', 'pasteSheet'].map((id) => find(all, id).enabled)).toEqual([
+        false,
+        false,
+      ])
+    })
+
+    it('lights « Coller le tronçon sur … » for a stretch held, the polity selected named', () => {
+      const to = gestures()
+      const paste = find(
+        menus({ canPasteStretch: true, selected: 'Kingdom of Poland' }, to),
+        'pasteStretch'
+      )
+      paste.onChoose()
+
+      expect([paste.enabled, paste.label]).toEqual([
+        true,
+        'Coller le tronçon sur Kingdom of Poland',
+      ])
+      expect(to.onPaste).toHaveBeenCalledOnce()
+    })
+
+    it('no longer offers « Coller le tracé », struck by the dev', () => {
+      expect(menus()[1]?.entries.some((entry) => entry.id === 'pasteOutline')).toBe(false)
     })
 
     it('greys every paste with an empty clipboard, and names the selection when none is', () => {
       const all = menus()
-      const pastes = ['pastePolities', 'pasteStretch', 'pasteSheet', 'pasteOutline'].map((id) =>
-        find(all, id)
-      )
+      const pastes = ['pastePolities', 'pasteStretch', 'pasteSheet'].map((id) => find(all, id))
 
       expect(pastes.every((each) => !each.enabled)).toBe(true)
       expect(find(all, 'pasteStretch').label).toBe('Coller le tronçon sur l’entité sélectionnée')

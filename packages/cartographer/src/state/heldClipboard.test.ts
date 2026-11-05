@@ -8,6 +8,7 @@ const STRETCH: ClipboardContent = {
   kind: 'stretch',
   map: '1100',
   polity: 'Kingdom of Poland',
+  closed: false,
   points: [
     { at: [18, 52], provenance: { name: 'reported by eye', licence: 'fact' } },
     { at: [19, 52], provenance: { name: 'reported by eye', licence: 'fact' } },

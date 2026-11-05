@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { MAX_HOMAGE_DEPTH } from '@europe-historical-atlas/core/data/paintOrder'
-import { copyPolities, copyStretch } from '@europe-historical-atlas/core/editor/clipboard'
+import { copyPolities } from '@europe-historical-atlas/core/editor/clipboard'
 import {
   AQUITAINE_IDENTITY,
   sharedBorderDocument,
@@ -17,12 +17,30 @@ import { UNFRAMED } from '../../viewport/viewport'
 import { clipboardWords } from './copySelection'
 import { pasteClipboard } from './pasteClipboard'
 
-import type { ClipboardContent } from '@europe-historical-atlas/core/editor/clipboard'
+import type {
+  ClipboardContent,
+  CopiedStretch,
+} from '@europe-historical-atlas/core/editor/clipboard'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 // s22-copy-paste.md, « # 1 — a whole polity ».
 
 const WORDS = clipboardWords('fr', '⌘V')
+
+const EYE = { name: 'reported by eye', licence: 'fact' }
+
+/** France's western edge bent out to 0.5° W, its ends 0.37 km from France's anchors 0 and 3. */
+const WEST_BULGE: CopiedStretch = {
+  kind: 'stretch',
+  map: '1100-backup',
+  polity: 'Kingdom of Poland',
+  closed: false,
+  points: [
+    { at: [0.005, 48], provenance: EYE },
+    { at: [-0.5, 47], provenance: EYE },
+    { at: [0.005, 46], provenance: EYE },
+  ],
+}
 
 /**
  * A store open on a map.
@@ -54,10 +72,13 @@ function copiedEmpire(): ClipboardContent {
  */
 function paste(store: ReturnType<typeof storeOn>, content: ClipboardContent | null) {
   const said: string[] = []
-  const { pastePolities, chooseTarget } = store.getState()
+  const { document, target, pastePolities, pasteStretch, chooseTarget } = store.getState()
   const ids = pasteClipboard({
     content,
+    document,
+    target,
     pastePolities,
+    pasteStretch,
     chooseTarget,
     say: (message) => said.push(message),
     words: WORDS,
@@ -93,6 +114,53 @@ describe('pasteClipboard', () => {
   })
 
   describe('variants', () => {
+    it('merges a stretch into the polity selected, one step, and says it', () => {
+      const store = storeOn(sharedBorderDocument())
+      store.getState().chooseTarget('fr-couronne')
+      const { ids, said } = paste(store, WEST_BULGE)
+
+      expect(ids).toEqual(['fr-couronne'])
+      expect(said).toEqual(['Collé sur Reaume de France : un tronçon de 3 points'])
+      expect(store.getState().undoLabel).toBe('Coller un tronçon sur Reaume de France')
+      store.getState().undo()
+      expect(store.getState().document.claims[0]?.rings[0]).toEqual([0, 1, 2, 3])
+    })
+
+    it('names the neighbour who follows the stretch', () => {
+      const store = storeOn(sharedBorderDocument())
+      store.getState().chooseTarget('fr-couronne')
+      const { said } = paste(store, {
+        ...WEST_BULGE,
+        points: [
+          { at: [2.005, 48], provenance: EYE },
+          { at: [2.3, 47], provenance: EYE },
+          { at: [2.005, 46], provenance: EYE },
+        ],
+      })
+
+      expect(said).toEqual([
+        'Collé sur Reaume de France : un tronçon de 3 points — Sacrum Imperium le suit aussi',
+      ])
+    })
+
+    it('adds a whole outline to the polity selected and says how much was welded', () => {
+      const store = storeOn(sharedBorderDocument())
+      store.getState().chooseTarget('fr-couronne')
+      const { said } = paste(store, {
+        ...WEST_BULGE,
+        closed: true,
+        points: [
+          { at: [0.005, 48], provenance: EYE },
+          { at: [-1, 48], provenance: EYE },
+          { at: [-1, 47], provenance: EYE },
+        ],
+      })
+
+      expect(said).toEqual([
+        'Collé sur Reaume de France : un tracé de 3 points, dont 1 soudés aux voisins',
+      ])
+    })
+
     it('says a vassal was pasted sovereign when its suzerain is not in the map', () => {
       const source = sharedBorderDocument()
       source.polities.push(AQUITAINE_IDENTITY)
@@ -187,16 +255,48 @@ describe('pasteClipboard', () => {
       warn.mockRestore()
     })
 
-    it('says a stretch cannot be pasted yet, and records nothing', () => {
-      const stretch = copyStretch(sharedBorderDocument(), [1, 2], '1100', 'hre')
-      if (typeof stretch === 'string') throw new Error('fixture: no stretch')
-      const store = storeOn(createYearDocument(1200))
-      const { said } = paste(store, stretch)
+    it('asks for a polity when a stretch is pasted with none selected, and records nothing', () => {
+      const store = storeOn(sharedBorderDocument())
+      const { said } = paste(store, WEST_BULGE)
+
+      expect(said).toEqual(['Sélectionnez l’entité sur laquelle coller le tronçon, puis ⌘V'])
+      expect(store.getState().canUndo).toBe(false)
+    })
+
+    it('says how far an end of the stretch lies from the polity’s outline', () => {
+      const store = storeOn(sharedBorderDocument())
+      store.getState().chooseTarget('fr-couronne')
+      const far = {
+        ...WEST_BULGE,
+        points: WEST_BULGE.points.map((point, at) =>
+          at === 0 ? { ...point, at: [-0.5, 48] as [number, number] } : point
+        ),
+      }
+      const { said } = paste(store, far)
+
+      expect(said[0]).toMatch(
+        /^Ce bout est à 37,\d km du tracé de Reaume de France : rien n’est collé$/
+      )
+    })
+
+    it('refuses in ⟨retracer⟩’s own words where it would refuse', () => {
+      const document = sharedBorderDocument()
+      document.runs.push({ run: [0, 1], hand: 'dotted', source: null, note: null })
+      const store = storeOn(document)
+      store.getState().chooseTarget('fr-couronne')
+      // Hooked onto anchors 1 and 3, the smaller side replaces anchor 0, which the dressed run covers.
+      const { said } = paste(store, {
+        ...WEST_BULGE,
+        points: [
+          { at: [2.001, 48], provenance: EYE },
+          { at: [0.5, 47], provenance: EYE },
+          { at: [0.005, 46], provenance: EYE },
+        ],
+      })
 
       expect(said).toEqual([
-        'Coller un tronçon n’est pas encore possible : copiez une entité politique',
+        'Tronçon non collé : une frontière réglée à la main longe ce tronçon — effacez-la d’abord dans le panneau Surcharges',
       ])
-      expect(store.getState().canUndo).toBe(false)
     })
   })
 
@@ -205,7 +305,10 @@ describe('pasteClipboard', () => {
       expect(() =>
         pasteClipboard({
           content: copiedEmpire(),
+          document: createYearDocument(1200),
+          target: null,
           pastePolities: () => [],
+          pasteStretch: vi.fn(),
           chooseTarget: vi.fn(),
           say: vi.fn(),
           words: WORDS,

@@ -1,4 +1,5 @@
-import type { Point } from '../viewport/viewport'
+/** A point: `[x, y]` in any plane unit — screen pixels for the Cartographer, degrees for a paste. */
+export type Point = readonly [number, number]
 
 /**
  * Which way round a ring ⟨retrace⟩ replaces (`H-46`): between two anchors of a closed ring there are two

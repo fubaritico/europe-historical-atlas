@@ -14,7 +14,7 @@ describe('commandKeys', () => {
 
   describe('variants', () => {
     it('writes it in the Mac’s symbols on a Mac', () => {
-      expect(shortcutText('pasteOutline', 'mac', 'fr').shown).toBe('⌥⌘V')
+      expect(shortcutText('pasteSheet', 'mac', 'fr').shown).toBe('⇧⌘V')
     })
   })
 

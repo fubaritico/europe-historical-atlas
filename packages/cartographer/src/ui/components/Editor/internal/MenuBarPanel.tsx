@@ -47,10 +47,8 @@ export function MenuBarPanel({ store, history, clipboard, ...gestures }: MenuBar
   const shortcut = useShortcut()
 
   // State
-  const canPastePolities = useSyncExternalStore(
-    clipboard.subscribe,
-    () => clipboard.get()?.kind === 'polities'
-  )
+  // What kind the clipboard holds — a string, compared by value; `null` for an empty clipboard.
+  const held = useSyncExternalStore(clipboard.subscribe, () => clipboard.get()?.kind ?? null)
 
   // Handlers
   const handleUndo = () => {
@@ -67,7 +65,8 @@ export function MenuBarPanel({ store, history, clipboard, ...gestures }: MenuBar
       redoLabel,
       selected,
       canCopy: selected !== null || anchors >= 2,
-      canPastePolities,
+      canPastePolities: held === 'polities',
+      canPasteStretch: held === 'stretch' && selected !== null,
     },
     { ...gestures, onUndo: handleUndo, onRedo: handleRedo },
     { action, shortcut }

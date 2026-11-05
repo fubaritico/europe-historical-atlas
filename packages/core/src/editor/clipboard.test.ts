@@ -40,6 +40,7 @@ describe('clipboard', () => {
         kind: 'stretch',
         map: '1100',
         polity: 'Reaume de France',
+        closed: false,
         points: [
           { at: [2, 48], provenance: EYE },
           { at: [2, 46], provenance: EYE },
@@ -49,6 +50,24 @@ describe('clipboard', () => {
   })
 
   describe('variants', () => {
+    it('copies every anchor of a ring as a closed stretch, from the ring’s first anchor', () => {
+      const copy = copyStretch(sharedBorderDocument(), [2, 0, 3, 1], '1100', 'fr-couronne')
+
+      expect(copy).toMatchObject({ kind: 'stretch', closed: true })
+      expect(positions(copy)).toEqual([
+        [0, 48],
+        [2, 48],
+        [2, 46],
+        [0, 46],
+      ])
+    })
+
+    it('reads back a closed stretch as it was copied', () => {
+      const copy = copyStretch(sharedBorderDocument(), [0, 1, 2, 3], '1100', 'fr-couronne')
+
+      expect(readClipboard(JSON.parse(JSON.stringify(copy)))).toEqual(copy)
+    })
+
     it('copies several polities in the order the map lists them, not the order selected', () => {
       const copy = copyPolities(sharedBorderDocument(), ['hre', 'fr-couronne'], '1100')
 
@@ -119,10 +138,19 @@ describe('clipboard', () => {
       expect(copyStretch(sharedBorderDocument(), [0, 4], '1100', null)).toBe('not-a-run')
     })
 
-    it('refuses a whole ring, which is the polity’s outline', () => {
-      expect(copyStretch(sharedBorderDocument(), [0, 1, 2, 3], '1100', 'fr-couronne')).toBe(
-        'whole-ring'
-      )
+    it('reads back nothing from a closed stretch of two points, which encloses nothing', () => {
+      const bad = {
+        kind: 'stretch',
+        map: '1100',
+        polity: 'x',
+        closed: true,
+        points: [
+          { at: [0, 0], provenance: EYE },
+          { at: [1, 1], provenance: EYE },
+        ],
+      }
+
+      expect(readClipboard(bad)).toBeNull()
     })
 
     it('reads back nothing from a value that is not a clipboard', () => {

@@ -14,6 +14,8 @@ export interface EditorMenuState {
   canCopy: boolean
   /** Whether the clipboard holds polities, which « Coller les entités » pastes. */
   canPastePolities: boolean
+  /** Whether the clipboard holds a stretch and a polity is selected, which « Coller le tronçon sur … » pastes onto. */
+  canPasteStretch: boolean
 }
 
 /** What the menus' commands do. */
