@@ -194,3 +194,10 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   blocked by the browser, or full, throws — at opening it would stop the Cartographer, after a drag it would surface as
   an error. Never seen in the dev's Chrome. **An error-handling decision for the dev** (`rules/error-handling.md`): my
   proposal, a declared degraded mode — the layout not kept, said once in the console. **Severity: à savoir.**
+- **A stretch pasted leaves its points unselected** (2026-11-05, CARTO-345, `s22` « # 2 ») — the scenario asks for them
+  selected; the canvas owns the white arrow's selection and the store only reads it (`setSelectedAnchors` is the canvas
+  telling the store), so nothing outside the canvas can select anchors today. **Trigger**: the dev's walk of the stretch's
+  paste — if he misses the selection, a way for the store to hand the canvas a selection. **Severity: cosmétique.**
+- **A name already in the map is refused in the status bar, not by the dialogue `s22` describes** (2026-11-05) — that
+  dialogue sends the author to the paste of a stretch, which exists since `e833792`. **Trigger**: the sheet's paste,
+  built with its own dialogue — both dialogues in one block. **Severity: à savoir.**

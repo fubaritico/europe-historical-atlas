@@ -158,7 +158,9 @@ are any two maps of `years/`, `<copied polity>` the copied polity, `<target poli
    hybrid cases: you paste, there is nothing, it takes the place; there is something, we weld."* A whole outline is
    copied as a stretch (step 4), and three pastes remain: **a polity, a stretch, a sheet**.
 6. **Paste a sheet onto a polity** — the dialogue, field by field.
-7. **Several polities selected in `{Polities}`**, no outline selected, copied and pasted together.
+7. **Several polities selected in `{Polities}`**, no outline selected, copied and pasted together. **Put off by the
+   dev, 2026-11-05**, after pasting Livonia: *"one by one is already not bad, because it quickly becomes a mess"* —
+   the paste itself takes several (`pastePolities`, one step), only the selection in the list is not built.
 
 > **Order changed again by the dev, 2026-11-05**: the name-conflict dialogue sends the author to the paste of a
 > stretch, so a polity's paste shipped alone would point at a gesture that does not exist — *"implement every case of paste before

@@ -5,22 +5,26 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — après le 05/11 : les collages dans `core`, dans une session neuve (CARTO-345)
+## ▶ ON REPREND ICI — après une coupure de 2-3 jours (05/11 au soir) : essayer le tronçon, puis la fiche (CARTO-345)
 
-**L'ordre, le sien (05/11)** : finir le copier-coller d'abord, *« pour que j'aie un outil de production le plus exhaustif
-possible »* ; l'interface de l'atlas ensuite. **CARTO-345** (En cours) : Copier, la table des touches et la barre Fichier /
-Édition sont dans `main` (`cc242a0`, 04/11). **Le prochain travail** : **tous les collages construits dans `core`, avec
-leurs tests, avant l'interface** (*« implémenter tous les cas de collage avant le parcours via l'UI »*), sur une branche,
-chacun commité seul, fusionné après son essai — le pays entier d'abord (un ou plusieurs, en haut de {Polities}), puis le
-tronçon, puis la fiche ; les menus, la boîte du nom déjà pris et la marche dans l'appli ensuite, d'un bloc. **Le contrat** :
-`files/plans/cartographer/scenarii/s22-copy-paste.md`, réécrit le 05/11, et ses décisions dans le plan
-`copy-paste-between-maps.md`. **Sa règle** : *« on colle, il n'y a rien, ça remplace ; il y a quelque chose, on soude »* —
-pas de « Coller le tracé », pas de remplacement (on supprime, on colle) ; une partie de tracé **se fond** dans le tracé (⟨retracer⟩
-nourri par le presse-papier), un tracé entier sur un pays dessiné **se superpose** ; on colle des points, pas leur rôle.
-**Dans le code à changer** : `core/src/editor/clipboard.ts` refuse un anneau entier (`'whole-ring'`) — un tracé entier se
-copie désormais comme un tronçon fermé. Les briques : `anchorWeld.ts`, `carve.ts`, `retrace.ts`. **Lui parler par son
-cas** (sa Pologne), jamais par « tronçon » ni « bouts » : ils l'ont perdu le 05/11. Ouvert, ma proposition : une copie que
-le navigateur refuse de garder, dite en rouge quand CARTO-273 existera.
+**Où on en est** (CARTO-345, En cours) : le collage d'**un pays entier** est dans `main`, branché sur ‹⌘V› et Édition ›
+Coller les entités — **essayé par lui, la Livonie a marché** (05/11). Le collage d'**un tronçon** est dans `main` aussi
+(`e833792`), branché sur ‹⌘V› et Édition › Coller le tronçon sur … — **personne ne l'a essayé** : fusionné à sa demande
+(*« on s'en branle, fusionne, ça avance pas »*). **Au retour** : lui faire essayer le tronçon sur sa Pologne (dans la
+sauvegarde, ‹A›, quelques points qui se suivent, ‹⌘C› ; dans sa 1100, la Pologne sélectionnée, ‹⌘V›) ; puis **la fiche**
+(Coller la fiche…, la boîte champ par champ, `s22` « # 3 »), **construite et branchée d'un bloc** jusqu'à ce qu'il puisse
+l'essayer — jamais un morceau dans `core` seul (sa colère du 05/11). Restent ouverts : la boîte du nom déjà pris (dit
+dans la barre d'état aujourd'hui) ; les points d'un tronçon collé ne sont pas sélectionnés. **Mis de côté par lui** : la
+sélection de plusieurs pays. **Ses décisions du 05/11**, dans le plan `copy-paste-between-maps.md` : pas de découpe ni de
+creusement (*« quand tu colles, tu colles »*) ; le suzerain retrouvé par son nom ; entre deux points soudés, le tracé suit
+le voisin. **Lui parler par son cas** (sa Pologne), jamais par « tronçon » ni « bouts ».
+
+**Sa demande de fin de session** : CARTO-360 (Idées) — un champ de recherche dans {Polities} et {Cities}, filtre ou
+défilement jusqu'au meilleur résultat.
+
+**La copie à part** `~/Desktop/WebstormProjects/europe-map-copypaste` (branche `carto-345-paste`, au niveau de `main`) : on
+y a construit le collage. Elle garde, ignorées par git, une copie de sa sauvegarde et `1100-essai-collage` (sa 1100 du
+05/11 après-midi) — mes essais. À lui de dire si on la garde pour la fiche ou si on la supprime.
 
 **L'interface de l'atlas — ATLAS-329, la maquette d'ambiance de Claude Design, v2** (05/11). Le contenu des pages est
 inventé, ne pas le juger. **Tout ce que Claude Design fait pour l'écran de l'atlas vit dans `files/resources/claude-design/`**
@@ -41,16 +45,13 @@ guerres, politique, personnalités, civilisation), un nom et des dates, le texte
 a un lieu sur la carte ou encadre l'année, **les événements du CMS partagés avec la carte** (`interface-scenarios.md`) ;
 **le nom des mers** (ATLAS-359, Idées). **À lui** : CARTO-239 (la barre de menus) est construite et encore en À faire.
 
-**Playwright** (04/11) : l'épopée REPO-346 (Chantiers), REPO-347 l'installation puis dix lots, en Backlog ; plan
-`files/plans/e2e/playwright.md`. Pas pour maintenant. Bloquant connu : le dossier des cartes est en dur
-(`packages/cartographer/vite.config.ts:16`), un test écrirait sa 1100.
-
 **L'historien** (`europe-map-9b`) : il commence par `/enter-in-cms`, qui vérifie d'abord la connexion `cms`. **Toujours
 dû** : les pays des villes de 1100 (Groenland → Q16488964, Islande → Q62389, Venise → Q4948), puis l'export — **alors je
 commite `content/events.json`**, pas avant (sa décision).
 
-**Sur `main`, non poussés** : depuis `49a623d`, dont la fusion `cc242a0` et le commit de clôture du 05/11. `years/` et
-`content/events.json` restent hors commit (les siens).
+**Sur `main`, non poussés** : depuis `49a623d` — dont le collage (`41a184c` → `e833792`), `3b90207` de l'historien (la
+Serbie et la Dioclée en 1100) et le commit de clôture du 05/11 au soir. `years/` et `content/events.json` restent hors
+commit (les siens).
 
 **Où en sont les tickets** : CARTO-345 En cours ; **CARTO-193** (Villes) attend les pays de l'historien ; **ATLAS-333**
 (vitesse) ne se ferme qu'une fois une seconde carte terminée par lui, côtes comprises (05/11). **À lui** : la décision sur
@@ -122,7 +123,7 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 
 ## Where we are
 
-**6 142 tests** sur `main` (1 704 `core` · 2 402 Cartographe · 1 495 atlas · 372 CMS · 169 plugin `eslint-plugin-eha`, 04/11, après la fusion de `carto-345`), gate
+**6 261 tests** sur `main` (1 783 `core` · 2 424 Cartographe · 1 495 atlas · 372 CMS · 169 plugin `eslint-plugin-eha`, 05/11 au soir, après le collage), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 

@@ -2,6 +2,25 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
+### 2026-11-05 après-midi — le collage d'un pays entier et d'un tronçon, branchés et fusionnés
+
+La même plage que l'entrée ci-dessous, **05/11 12:48 → 19:07** (6 h 18) ; le chantier ouvert le 05/10 totalise **205 h 26 sur
+36 plages**. **Sur `main`**, six commits **non poussés** depuis `6b906bf` (`41a184c` → `e833792`, plus `3b90207` de
+l'historien), et le commit de clôture.
+
+- **CARTO-345, le pays entier** : la fiche, les points en place sous leur source, en haut de {Polities}, le suzerain retrouvé
+  **par son nom** (sa décision, sur une mesure : 9 vassaux sur 56 par l'identifiant, 29 par le nom), la soudure à 2 km — le
+  tracé suit le voisin entre deux soudures (sa décision) ; **pas de découpe ni de creusement** (*« quand tu colles, tu
+  colles »*). Branché sur ‹⌘V› et Édition — **essayé par lui : la Livonie a marché**.
+- **Le tronçon** : un tracé entier copié comme un tronçon fermé, collé comme un contour de plus ; une partie fondue dans le
+  tracé comme ⟨retracer⟩. Branché et fusionné **sans essai**, à sa demande. « Coller le tracé » retiré du menu. La sélection
+  de plusieurs pays, remise à plus tard (*« un par un, c'est déjà pas mal »*). Son idée de fin : CARTO-360, une recherche
+  dans {Polities} et {Cities}.
+- **Mes fautes** : un collage resté dans `core` sans rien à essayer, une heure durant (*« y'a toujours pas d'UI »*,
+  *« ça avance pas »*) — l'ordre « tout dans `core` d'abord » était le sien, mais je n'ai pas dit à temps que rien ne
+  serait essayable avant longtemps ; « tout l'écran » qui l'a perdu ; une décision du 03/11 qu'il ne se rappelait pas
+  (*« tu me prêtes des décisions »*), dite comme si elle allait de soi.
+
 ### 2026-11-05 — les trois collages tranchés, la frise d'après Peters, la v2 de Claude Design
 
 Plage **05/11 12:48 → 14:20** (1 h 32) ; le chantier ouvert le 05/10 totalise **200 h 40 sur 36 plages**. Aucun code :
@@ -20,24 +39,4 @@ des décisions, écrites dans les plans, et le commit de clôture, **non poussé
   frontière »*) — l'exemple de sa Pologne a fait comprendre ; j'avais gardé mon idée du 03/11, le tronçon qui remplace,
   contre sa règle du jour.
 
-### 2026-11-04 soir → 05/11 nuit — la barre de menus fusionnée, Playwright en épopée, l'interface de l'atlas par Claude Design
-
-Deux plages, **04/11 18:57 → 21:31** et **23:07 → 00:40** (4 h 06) ; le chantier ouvert le 05/10 totalise **198 h 52 sur
-35 plages**. **Sur `main`**, la fusion `cc242a0` (`carto-345`, étapes 1 et 2 du copier-coller) et le commit de clôture,
-**non poussés**.
-
-- **CMS-335 fait** (*« validé et testé, l'information est affichée dans le Cartographe »*). **CARTO-345** : la branche
-  fusionnée à sa demande, contrôles verts (6 142 tests) ; son essai : copier sans coller ne lui donne rien à faire —
-  *« si on ne peut pas coller, c'est pas fini »* ; l'ordre inversé, le pays entier d'abord.
-- **Playwright** (sa demande) : l'épopée REPO-346, l'installation REPO-347 et dix lots en Backlog, le plan
-  `files/plans/e2e/playwright.md` ; le piège trouvé : le dossier des cartes en dur, un test écrirait sa 1100.
-- **L'interface de l'atlas** : la recherche des ornements par époque (`ornament-by-era.md`, par un agent) ; la maquette
-  d'ambiance de Claude Design, bureau puis tablette et téléphone, mes retours écran par écran ; ses décisions —
-  l'atlas jusqu'à 1900, un habillage par époque, la frise synchronoptique (ATLAS-358), le nom des mers (ATLAS-359).
-  Ses mots : *« j'ai hâte de voir ça sur un grand écran. Très hâte. »*
-- **Mes fautes** : lui donner à essayer une étape qui ne finissait aucun geste (copier sans coller), puis expliquer au
-  lieu d'écouter — *« tu me fais chier, en fait »* (mémoire `ship-a-whole-gesture`) ; une première réponse sur la
-  rosace hors de son propos (*« des éléments décoratifs, tu comprends ça ? »*) ; juger le contenu inventé d'une maquette
-  d'ambiance.
-
-> Older sessions (2026-09-12 → 2026-11-03) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-11-04) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
