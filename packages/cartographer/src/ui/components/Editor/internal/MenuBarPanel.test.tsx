@@ -2,10 +2,12 @@ import { act, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
+import { copyPolities, copyStretch } from '@europe-historical-atlas/core/editor/clipboard'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { createHistoryRelay } from '../../../../canvas/history/historyRelay'
+import { createHeldClipboard } from '../../../../state/heldClipboard'
 import { createCartographerStore } from '../../../../state/store'
 import { UNFRAMED } from '../../../../viewport/viewport'
 import { renderInEnglish } from '../../../testing/renderInEnglish'
@@ -28,8 +30,9 @@ function store() {
  * @param shared - the store
  * @returns the user, the copy recorder and the history's answer
  */
-function mount(shared = store()) {
+function mount(shared = store(), clipboard = createHeldClipboard(null, () => true)) {
   const onCopy = vi.fn()
+  const onPaste = vi.fn()
   const answered = vi.fn()
   const history = createHistoryRelay(vi.fn())
   history.register(answered)
@@ -42,9 +45,11 @@ function mount(shared = store()) {
       onSaveAs={vi.fn()}
       onSaveCopy={vi.fn()}
       onCopy={onCopy}
+      onPaste={onPaste}
+      clipboard={clipboard}
     />
   )
-  return { user: userEvent.setup(), onCopy, answered }
+  return { user: userEvent.setup(), onCopy, onPaste, answered }
 }
 
 /**
@@ -82,9 +87,48 @@ describe('MenuBarPanel', () => {
 
       expect(onCopy).toHaveBeenCalledOnce()
     })
+
+    it('pastes through the gesture handed when the clipboard holds polities', async () => {
+      const copied = copyPolities(sharedBorderDocument(), ['hre'], '1100-backup')
+      if (copied === null) throw new Error('fixture: nothing copied')
+      const { user, onPaste } = mount(
+        store(),
+        createHeldClipboard(copied, () => true)
+      )
+      await user.click(await editCommand(user, /^Paste polities/))
+
+      expect(onPaste).toHaveBeenCalledOnce()
+    })
   })
 
   describe('variants', () => {
+    it('lights Paste polities as soon as a copy is held, with no other change in the store', async () => {
+      const clipboard = createHeldClipboard(null, () => true)
+      const copied = copyPolities(sharedBorderDocument(), ['hre'], '1100')
+      if (copied === null) throw new Error('fixture: nothing copied')
+      const { user } = mount(store(), clipboard)
+      act(() => {
+        clipboard.hold(copied)
+      })
+
+      expect((await editCommand(user, /^Paste polities/)).getAttribute('aria-disabled')).toBe(
+        'false'
+      )
+    })
+
+    it('greys Paste polities while the clipboard holds a stretch', async () => {
+      const stretch = copyStretch(sharedBorderDocument(), [1, 2], '1100', 'hre')
+      if (typeof stretch === 'string') throw new Error('fixture: no stretch')
+      const { user } = mount(
+        store(),
+        createHeldClipboard(stretch, () => true)
+      )
+
+      expect((await editCommand(user, /^Paste polities/)).getAttribute('aria-disabled')).toBe(
+        'true'
+      )
+    })
+
     it('lets Copy act on two anchors selected, with no polity', async () => {
       const shared = store()
       act(() => {

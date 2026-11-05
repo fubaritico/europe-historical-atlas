@@ -16,6 +16,7 @@ import { StatusRow } from './internal/StatusRow'
 import type { HistoryRelay } from '../../../canvas/history/historyRelay'
 import type { PaintStyle } from '../../../canvas/paint/painter'
 import type { ResultRelay } from '../../../persistence/resultRelay'
+import type { HeldClipboard } from '../../../state/heldClipboard'
 import type { PolityColourSource } from '../../../state/polityColourSource'
 import type { CartographerStoreHook } from '../../../state/store'
 import type { WikidataSource } from '../../../wikidata/wikidataSource'
@@ -57,6 +58,10 @@ export interface EditorProps {
   onSaveCopy: () => void
   /** Édition › Copier: the polity or the stretch selected, as ‹cmd+C› (CARTO-345). */
   onCopy: () => void
+  /** Édition › Coller les entités: what the clipboard holds, as ‹cmd+V› (CARTO-345). */
+  onPaste: () => void
+  /** What the clipboard holds, which lights « Coller les entités ». */
+  clipboard: HeldClipboard
   /** The map open's name, which *Save as…* changes — written in the top bar. */
   mapName: MapNameSource
   /** The canvas's undo and redo, for the document bar's buttons. */
@@ -88,6 +93,8 @@ export interface EditorProps {
  * @param props.onSaveAs - opens the *Save as…* dialogue, called by the top bar
  * @param props.onSaveCopy - saves a copy, called by the top bar
  * @param props.onCopy - copies what is selected, called by the menu bar
+ * @param props.onPaste - pastes what the clipboard holds, called by the menu bar
+ * @param props.clipboard - what the clipboard holds, for the menu bar
  * @param props.mapName - the map open's name, for the top bar
  * @param props.history - the canvas's undo and redo, for the document bar's buttons
  * @param props.colours - where the polities' colours come from, for the canvas and the panels
@@ -104,9 +111,8 @@ export function Editor({
   colours,
   wikidata,
   results,
-  onCopy,
-  // The top bar's four gestures and the map's name — onOpen, onSave, onSaveAs, onSaveCopy, mapName — handed on as they
-  // are.
+  // The top bar's gestures, the map's name and the clipboard — onOpen, onSave, onSaveAs, onSaveCopy, onCopy, onPaste,
+  // mapName, clipboard — handed on as they are.
   ...bar
 }: EditorProps) {
   // Store
@@ -135,7 +141,7 @@ export function Editor({
   return (
     <Shell
       heading={heading}
-      appbar={<AppBarPanel {...bar} store={store} history={history} onCopy={onCopy} />}
+      appbar={<AppBarPanel {...bar} store={store} history={history} />}
       docbar={<DocBarPanel store={store} history={history} />}
       canvas={
         <MapArea

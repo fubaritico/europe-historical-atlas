@@ -7,6 +7,7 @@ import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 import { createHistoryRelay } from '../../../canvas/history/historyRelay'
 import { CHROME_PAINT_STYLE } from '../../../canvas/paint/style'
 import { createResultRelay } from '../../../persistence/resultRelay'
+import { createHeldClipboard } from '../../../state/heldClipboard'
 import { openEmptyYear } from '../../../state/openEmptyYear'
 import { createPolityColourSource } from '../../../state/polityColourSource'
 import { createCartographerStore } from '../../../state/store'
@@ -61,6 +62,8 @@ function mount(results = createResultRelay()): void {
       onSaveAs={() => undefined}
       onSaveCopy={() => undefined}
       onCopy={() => undefined}
+      onPaste={() => undefined}
+      clipboard={createHeldClipboard(null, () => true)}
       mapName={createMapNameStore('1100')}
       history={createHistoryRelay()}
       colours={COLOURS}

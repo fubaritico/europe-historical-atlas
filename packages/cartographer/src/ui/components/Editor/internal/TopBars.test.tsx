@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { createHistoryRelay } from '../../../../canvas/history/historyRelay'
+import { createHeldClipboard } from '../../../../state/heldClipboard'
 import { openEmptyYear } from '../../../../state/openEmptyYear'
 import { createCartographerStore } from '../../../../state/store'
 import { UNFRAMED } from '../../../../viewport/viewport'
@@ -42,6 +43,8 @@ describe('top bars, bound', () => {
           onSaveAs={vi.fn()}
           onSaveCopy={vi.fn()}
           onCopy={vi.fn()}
+          onPaste={vi.fn()}
+          clipboard={createHeldClipboard(null, () => true)}
         />
       )
       expect(document.querySelector('.app-brand__year')?.textContent).toBe('1100')

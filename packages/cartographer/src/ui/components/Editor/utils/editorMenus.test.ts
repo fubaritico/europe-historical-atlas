@@ -29,6 +29,7 @@ function gestures(): EditorMenuGestures {
     onUndo: vi.fn(),
     onRedo: vi.fn(),
     onCopy: vi.fn(),
+    onPaste: vi.fn(),
   }
 }
 
@@ -40,7 +41,14 @@ function gestures(): EditorMenuGestures {
  */
 function menus(over: Partial<EditorMenuState> = {}, to = gestures()): MenuDefinition[] {
   return editorMenus(
-    { undoLabel: null, redoLabel: null, selected: null, canCopy: false, ...over },
+    {
+      undoLabel: null,
+      redoLabel: null,
+      selected: null,
+      canCopy: false,
+      canPastePolities: false,
+      ...over,
+    },
     to,
     WORDS
   )
@@ -126,7 +134,24 @@ describe('editorMenus', () => {
       expect(find(menus(), 'copy').enabled).toBe(false)
     })
 
-    it('greys every paste, not built yet, and names the selection when none is', () => {
+    it('lights « Coller les entités » when the clipboard holds polities, and pastes through the gesture', () => {
+      const to = gestures()
+      const paste = find(menus({ canPastePolities: true }, to), 'pastePolities')
+      paste.onChoose()
+
+      expect(paste.enabled).toBe(true)
+      expect(to.onPaste).toHaveBeenCalledOnce()
+    })
+
+    it('keeps the other pastes greyed while the clipboard holds polities, none of them built', () => {
+      const all = menus({ canPastePolities: true, selected: 'Kingdom of Poland' })
+
+      expect(
+        ['pasteStretch', 'pasteSheet', 'pasteOutline'].map((id) => find(all, id).enabled)
+      ).toEqual([false, false, false])
+    })
+
+    it('greys every paste with an empty clipboard, and names the selection when none is', () => {
       const all = menus()
       const pastes = ['pastePolities', 'pasteStretch', 'pasteSheet', 'pasteOutline'].map((id) =>
         find(all, id)

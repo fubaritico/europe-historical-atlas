@@ -6,5 +6,12 @@
   "nothingSelected": "Select a polity or a stretch to copy",
   "notARun": "These points do not follow one another on one outline: nothing is copied",
   "wholeRing": "That is the whole outline: select the polity to copy it",
-  "notKept": "The copy could not be kept: nothing is copied"
+  "notKept": "The copy could not be kept: nothing is copied",
+  "pasted": "{polities, plural, one {Pasted: {name}} other {Pasted: # polities}}, from {map} — {count} points, {welded} of them welded to the neighbours",
+  "pastedSovereign": "Pasted as sovereign: its suzerain, {suzerain}, is not in this map",
+  "nameTaken": "{name} is already in this map: two polities cannot bear the same name — nothing is pasted",
+  "homageTooDeep": "{name} is not pasted: its suzerain, {suzerain}, would seat it too deep in the chain of homage",
+  "nothingToPaste": "The clipboard is empty: copy a polity first",
+  "stretchNotYet": "Pasting a stretch is not possible yet: copy a polity",
+  "pasteStep": "{count, plural, one {Paste {name}} other {Paste # polities}}"
 }

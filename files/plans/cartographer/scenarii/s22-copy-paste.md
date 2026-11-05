@@ -69,8 +69,17 @@ Scenario: the menu says what can be pasted
 # absent from 1100, pasted one after the other: 22 896 of 45 461 points welded, the year re-read without a fault,
 # 116 ms for the slowest paste (Norway, 209 rings). An islet the weld would leave under three points keeps its own.
 # The cut by what is there and the vassal carved out of its suzerain, struck 2026-11-05 (the dev: « quand tu colles,
-# tu colles »): the whole polity's paste is built in core. Declared gaps: the status bar, the selection, the dialogue
-# and ‹ctrl+V› come with the interface, after every paste is built.
+# tu colles »): the whole polity's paste is built in core.
+# Wired 2026-11-05, at the dev's request (« y'a toujours pas d'UI »): ‹cmd+V› and Édition › Coller les entités paste
+# the polities the clipboard holds, one step of the history, the last one selected, the status bar saying it —
+# « Collé : <name>, de <source map> — <n> points, dont <w> soudés aux voisins », and « · Collé souverain : … » after it.
+# Walked by me in my own Cartographer (worktree, port 5180) the same evening: Prussians copied from
+# 1100-backup-2026-11-02, pasted into a copy of the dev's 1100 — at the top of {Polities}, selected, « 177 points, 2 of
+# them welded to the neighbours »; Paste polities again refused (« Prussians is already in this map: two polities
+# cannot bear the same name — nothing is pasted »); one ‹cmd+Z› back to 105 polities. Not walked by the dev yet.
+# Declared gaps: a name already in the map is said in the status bar, not in the dialogue below — that dialogue sends
+# the author to the paste of a stretch, not built; a stretch on the clipboard is refused with « Coller un tronçon n’est
+# pas encore possible ».
 
 Scenario: paste a polity onto free ground
   Given <copied polity> is copied from <source map>
@@ -263,7 +272,9 @@ Scenario: the clipboard cannot be written
 > opening « Open a map », ‹→› ‹↓› ‹escape› on the titles, a menu where nothing can act focused itself. No console
 > error. **Not walked by the dev yet.** Beside the
 > application's name in the top bar; `role="menubar"`, a `menuitem` per title and per command. The buttons of the top
-> bar stay as they were. **Declared gap**: every paste is shown greyed — none is built yet (steps 3 to 6).
+> bar stay as they were. **Declared gap**: ~~every paste is shown greyed — none is built yet (steps 3 to 6)~~ — since 2026-11-05 « Coller
+> les entités » is active when the clipboard holds polities; the stretch, the sheet and « Coller le tracé » (struck by
+> the dev the same day, still shown) stay greyed.
 
 ```gherkin
 Scenario: open a menu, its commands with their keys

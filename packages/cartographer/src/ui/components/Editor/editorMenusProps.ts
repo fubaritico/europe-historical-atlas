@@ -12,6 +12,8 @@ export interface EditorMenuState {
   selected: string | null
   /** Whether something is selected that ‹cmd+C› copies — a polity, or two anchors and more. */
   canCopy: boolean
+  /** Whether the clipboard holds polities, which « Coller les entités » pastes. */
+  canPastePolities: boolean
 }
 
 /** What the menus' commands do. */
@@ -30,6 +32,8 @@ export interface EditorMenuGestures {
   onRedo: () => void
   /** Copy what is selected. */
   onCopy: () => void
+  /** Paste what the clipboard holds. */
+  onPaste: () => void
 }
 
 /** The words and the keys the menus are written with. */

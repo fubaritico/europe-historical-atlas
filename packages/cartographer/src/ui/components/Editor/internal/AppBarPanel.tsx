@@ -8,6 +8,7 @@ import { MenuBarPanel } from './MenuBarPanel'
 
 import type { AppBarProps } from './AppBar'
 import type { HistoryRelay } from '../../../../canvas/history/historyRelay'
+import type { HeldClipboard } from '../../../../state/heldClipboard'
 import type { CartographerStoreHook } from '../../../../state/store'
 import type { MapNameSource } from '../../../utils/mapNameSource'
 
@@ -27,6 +28,10 @@ export interface AppBarPanelProps extends Omit<AppBarProps, 'name' | 'map' | 'me
   history: HistoryRelay
   /** Édition › Copier. */
   onCopy: () => void
+  /** Édition › Coller les entités, and ‹cmd+V›. */
+  onPaste: () => void
+  /** What the clipboard holds, which lights Coller les entités. */
+  clipboard: HeldClipboard
 }
 
 /**
@@ -36,9 +41,19 @@ export interface AppBarPanelProps extends Omit<AppBarProps, 'name' | 'map' | 'me
  * @param props.store - what the menus read
  * @param props.history - the canvas's undo and redo
  * @param props.onCopy - Édition › Copier
+ * @param props.onPaste - Édition › Coller les entités
+ * @param props.clipboard - what the clipboard holds
  * @returns the top bar
  */
-export function AppBarPanel({ mapName, store, history, onCopy, ...gestures }: AppBarPanelProps) {
+export function AppBarPanel({
+  mapName,
+  store,
+  history,
+  onCopy,
+  onPaste,
+  clipboard,
+  ...gestures
+}: AppBarPanelProps) {
   // Context
   const app = useTranslation(APP_MESSAGES)
 
@@ -51,7 +66,16 @@ export function AppBarPanel({ mapName, store, history, onCopy, ...gestures }: Ap
       name={app('name')}
       map={map}
       {...gestures}
-      menus={<MenuBarPanel store={store} history={history} onCopy={onCopy} {...gestures} />}
+      menus={
+        <MenuBarPanel
+          store={store}
+          history={history}
+          clipboard={clipboard}
+          onCopy={onCopy}
+          onPaste={onPaste}
+          {...gestures}
+        />
+      }
     />
   )
 }

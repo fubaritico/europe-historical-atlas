@@ -20,6 +20,8 @@ import {
   updatePolity,
 } from '@europe-historical-atlas/core/editor/documentEdits'
 import { createHistory } from '@europe-historical-atlas/core/editor/history'
+import { isPolityPasteRefusal, pastePolity } from '@europe-historical-atlas/core/editor/paste'
+import { PASTE_WELD_KM } from '@europe-historical-atlas/core/editor/pasteWeld'
 import { isRetraceRefusal, retraceStretch } from '@europe-historical-atlas/core/editor/retrace'
 import { restack } from '@europe-historical-atlas/core/editor/stacking'
 
@@ -28,6 +30,7 @@ import type { AnchorRemoval } from '@europe-historical-atlas/core/editor/anchorE
 import type { WeldDone, WeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
 import type { Segment } from '@europe-historical-atlas/core/editor/borderOverrides'
 import type { Carving } from '@europe-historical-atlas/core/editor/carve'
+import type { CopiedPolity } from '@europe-historical-atlas/core/editor/clipboard'
 import type {
   AnchorMove,
   OutlinePoint,
@@ -40,6 +43,7 @@ import type {
   HistoryRow,
   HistoryStep,
 } from '@europe-historical-atlas/core/editor/history'
+import type { PolityPasteRefusal, PolityPasted } from '@europe-historical-atlas/core/editor/paste'
 import type { RetraceDone, RetraceRefusal } from '@europe-historical-atlas/core/editor/retrace'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
@@ -154,6 +158,17 @@ export interface EditionActions {
    * @returns what went, or `null` when no polity has that id — and nothing happened
    */
   deletePolity: (polityId: string, step: HistoryStep) => RemovalReport | null
+  /**
+   * Paste polities from the clipboard, sheet and outline, welded onto the map — **one undoable step for all of
+   * them** (`s22`, CARTO-345): one ‹ctrl+Z› takes the paste back whole.
+   * @param polities - the copied polities, in the order they were copied
+   * @param step - how the gesture is named — *"paste Kingdom of Poland"*
+   * @returns per polity, what was pasted or why it was not; nothing is recorded when none was pasted
+   */
+  pastePolities: (
+    polities: readonly CopiedPolity[],
+    step: HistoryStep
+  ) => (PolityPasted | PolityPasteRefusal)[]
   /**
    * Dress some segments of the borders with a hand — or give them back to the rule with `null` — as one
    * undoable step (`s13`: *give a line a pattern*). The unit is the segment, so half a border may be
@@ -473,6 +488,56 @@ function polityActions(
 }
 
 /**
+ * Put the working document back as the line's current row holds it — what a gesture that failed after writing
+ * undoes, since no step recorded it.
+ * @param line - the undo line
+ * @param publish - hand the document to the store, bumping the version
+ * @returns the function that puts it back
+ * @throws when no row is current — exactly one always is, so the line and the slice disagree
+ */
+function backToTheLine(
+  line: History<YearDocument>,
+  publish: (document: YearDocument) => void
+): () => void {
+  return () => {
+    const at = line.rows.find((row) => row.current)?.index ?? null
+    publish(required(at === null ? null : line.goTo(at), 'the current row'))
+  }
+}
+
+/**
+ * Pasting polities from the clipboard, one recorded step for all of them (`s22`).
+ *
+ * **The one action that can throw after writing**: `pastePolity` refuses before it writes, but a defect met in its
+ * weld — or the second polity's, after the first was written — leaves the map partly written. So a throw puts the map
+ * back as the line holds it, the state before the paste, and **is thrown again**: the defect stays loud, and the map
+ * on screen is never one no step records (reviews ARCH-001 and QUAL-001, 2026-11-05).
+ * @param record - the runner every recorded action goes through
+ * @param restore - put the map back as the line's current row holds it
+ * @returns `pastePolities`
+ */
+function pasteActions(
+  record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean,
+  restore: () => void
+): Pick<EditionActions, 'pastePolities'> {
+  return {
+    pastePolities: (polities, step): (PolityPasteRefusal | PolityPasted)[] => {
+      const answers: (PolityPasteRefusal | PolityPasted)[] = []
+      try {
+        record((document) => {
+          for (const copied of polities) answers.push(pastePolity(document, copied, PASTE_WELD_KM))
+          return answers.some((answer) => !isPolityPasteRefusal(answer))
+        }, step)
+      } catch (error) {
+        restore()
+        throw error
+      }
+      return answers
+    },
+  }
+}
+
+/**
  * Closing an outline, which carves a vassal's suzerain in the same step (`s08`, 2026-10-15).
  * @param record - the runner every recorded action goes through
  * @returns `drawOutline`
@@ -590,6 +655,7 @@ export function editionActions(
     },
     // `addPolity` copies what it keeps, so the caller's object cannot be mutated from here later.
     ...polityActions(record),
+    ...pasteActions(record, backToTheLine(line, publish)),
     ...overrideActions(record),
     ...outlineActions(record),
     moveAnchors: (moves, step): boolean => record((document) => moveAnchors(document, moves), step),

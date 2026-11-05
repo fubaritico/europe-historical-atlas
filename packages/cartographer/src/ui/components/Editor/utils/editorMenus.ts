@@ -59,12 +59,20 @@ function fileMenu(gestures: EditorMenuGestures, words: EditorMenuWords): MenuDef
 }
 
 /**
- * The pastes of the *Édition* menu — greyed until each is built (CARTO-345, steps 3 to 6).
+ * The pastes of the *Édition* menu — « Coller les entités » active when the clipboard holds polities (2026-11-05),
+ * the others greyed until each is built (CARTO-345).
  * @param name - the polity a paste onto a polity names
+ * @param state - what the clipboard holds
+ * @param onPaste - what « Coller les entités » does
  * @param words - the words and the keys
  * @returns the four pastes
  */
-function pasteEntries(name: string, words: EditorMenuWords): MenuEntry[] {
+function pasteEntries(
+  name: string,
+  state: EditorMenuState,
+  onPaste: () => void,
+  words: EditorMenuWords
+): MenuEntry[] {
   const { action, shortcut } = words
   return [
     {
@@ -72,8 +80,8 @@ function pasteEntries(name: string, words: EditorMenuWords): MenuEntry[] {
       id: 'pastePolities',
       label: action('pastePolities'),
       keys: shortcut('paste'),
-      enabled: false,
-      onChoose: notYet,
+      enabled: state.canPastePolities,
+      onChoose: onPaste,
     },
     {
       kind: 'command',
@@ -149,7 +157,7 @@ function editMenu(
         onChoose: gestures.onCopy,
       },
       { kind: 'separator', id: 'clipboard' },
-      ...pasteEntries(state.selected ?? action('theSelection'), words),
+      ...pasteEntries(state.selected ?? action('theSelection'), state, gestures.onPaste, words),
     ],
   }
 }

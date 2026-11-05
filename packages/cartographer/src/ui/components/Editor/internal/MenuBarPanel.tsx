@@ -1,3 +1,5 @@
+import { useSyncExternalStore } from 'react'
+
 import { useShortcut } from '../../../hooks/useShortcut'
 import { useTranslation } from '../../../hooks/useTranslation'
 import { ACTION_MESSAGES } from '../../../i18n/actions'
@@ -6,26 +8,30 @@ import { EDITOR_MESSAGES } from '../i18n'
 import { editorMenus } from '../utils/editorMenus'
 
 import type { HistoryRelay } from '../../../../canvas/history/historyRelay'
+import type { HeldClipboard } from '../../../../state/heldClipboard'
 import type { CartographerStoreHook } from '../../../../state/store'
 import type { EditorMenuGestures } from '../editorMenusProps'
 
-/** What the menu bar's binding needs: the store, the canvas's history, and the gestures of the maps and the copy. */
+/** What the menu bar's binding needs: the store, the canvas's history, the clipboard, and the gestures. */
 export interface MenuBarPanelProps extends Omit<EditorMenuGestures, 'onUndo' | 'onRedo'> {
   /** The store the history's state and the selection are read from. */
   store: CartographerStoreHook
   /** The canvas's undo and redo, gesture first — never `store.undo()` straight (ARCH-101). */
   history: HistoryRelay
+  /** What the clipboard holds, which lights « Coller les entités ». */
+  clipboard: HeldClipboard
 }
 
 /**
  * The menu bar, bound to the store (CARTO-345): the one place it knows there is a store. `MenuBar` takes menus; this
- * reads the history and the selection and builds them (`utils/editorMenus`).
- * @param props - the store, the relay and the gestures
+ * reads the history, the selection and the clipboard, and builds them (`utils/editorMenus`).
+ * @param props - the store, the relay, the clipboard and the gestures
  * @param props.store - the store
  * @param props.history - the canvas's undo and redo
+ * @param props.clipboard - what the clipboard holds
  * @returns the menu bar
  */
-export function MenuBarPanel({ store, history, ...gestures }: MenuBarPanelProps) {
+export function MenuBarPanel({ store, history, clipboard, ...gestures }: MenuBarPanelProps) {
   // Store
   const undoLabel = store((state) => state.undoLabel)
   const redoLabel = store((state) => state.redoLabel)
@@ -40,6 +46,12 @@ export function MenuBarPanel({ store, history, ...gestures }: MenuBarPanelProps)
   const action = useTranslation(ACTION_MESSAGES)
   const shortcut = useShortcut()
 
+  // State
+  const canPastePolities = useSyncExternalStore(
+    clipboard.subscribe,
+    () => clipboard.get()?.kind === 'polities'
+  )
+
   // Handlers
   const handleUndo = () => {
     history.run('undo')
@@ -50,7 +62,13 @@ export function MenuBarPanel({ store, history, ...gestures }: MenuBarPanelProps)
 
   // Derived
   const menus = editorMenus(
-    { undoLabel, redoLabel, selected, canCopy: selected !== null || anchors >= 2 },
+    {
+      undoLabel,
+      redoLabel,
+      selected,
+      canCopy: selected !== null || anchors >= 2,
+      canPastePolities,
+    },
     { ...gestures, onUndo: handleUndo, onRedo: handleRedo },
     { action, shortcut }
   )

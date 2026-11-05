@@ -7,12 +7,13 @@ import type { Chord, Platform } from '@europe-historical-atlas/core/i18n/shortcu
  * Every command's keys, written once (CARTO-345, the shortcut converter): what a label is written from
  * ({@link shortcutText}), and what each listener hears — saving (`persistence/saveShortcut.ts`, everywhere, a text
  * field included), undo and redo (`canvas/navigation.ts`), the stacking moves (`ui/utils/stackingShortcut.ts`), and
- * copying, *Open…* and *Save as…* (`ui/utils/commandListener.ts`, left to a text field and an open dialogue). So a
+ * copying, pasting, *Open…* and *Save as…* (`ui/utils/commandListener.ts`, left to a text field and an open dialogue). So a
  * label and a key cannot disagree. At the package root because the canvas and the year on disk read it as much as the
  * chrome. The keys the dev validated on 2026-11-03, in `files/plans/cartographer/copy-paste-between-maps.md`; the
  * stacking keys are his of 2026-10-16 (`s16`).
  *
- * **The paste keys are not heard yet** — they are written for the menu's labels.
+ * **Of the paste keys, ‹cmd+V› alone is heard** (2026-11-05, the polities' paste); the sheet's and the outline's are
+ * written for the menu's labels only.
  */
 export const COMMAND_KEYS = {
   open: { key: 'o', command: true },

@@ -4,7 +4,7 @@ import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 import { CLIPBOARD_MESSAGES } from '../i18n/clipboard'
 
 import type { ClipboardMessageKey } from '../i18n/clipboard'
-import type { ClipboardContent } from '@europe-historical-atlas/core/editor/clipboard'
+import type { ClipboardContent, CopiedPolity } from '@europe-historical-atlas/core/editor/clipboard'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 import type { Locale } from '@europe-historical-atlas/core/i18n/locale'
@@ -56,13 +56,13 @@ export interface CopyDeps {
 }
 
 /**
- * The first copied polity's name — the one a sentence names when one was copied.
- * @param content - polities copied
+ * The first copied polity's name — the one a sentence names when one was copied or pasted.
+ * @param polities - polities copied
  * @returns its name
- * @throws when the copy holds none, which its schema forbids
+ * @throws when there is none, which a copy's schema forbids
  */
-function firstName(content: Extract<ClipboardContent, { kind: 'polities' }>): string {
-  const first = content.polities[0]
+export function firstName(polities: readonly CopiedPolity[]): string {
+  const first = polities[0]
   if (first === undefined) throw new Error('[Cartographer] a copy of polities holds none.')
   return first.polity.name
 }
@@ -84,7 +84,7 @@ export function copiedSentence(content: ClipboardContent, words: ClipboardWords)
   }
   return words.clipboard('copiedPolities', {
     count: content.polities.length,
-    name: firstName(content),
+    name: firstName(content.polities),
     map: content.map,
     paste: words.paste,
   })
@@ -102,7 +102,7 @@ export function heldSentence(content: ClipboardContent, words: ClipboardWords): 
   }
   return words.clipboard('heldPolities', {
     count: content.polities.length,
-    name: firstName(content),
+    name: firstName(content.polities),
     map: content.map,
   })
 }

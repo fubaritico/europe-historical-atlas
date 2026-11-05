@@ -6,5 +6,12 @@
   "nothingSelected": "Sélectionnez une entité politique ou un tronçon à copier",
   "notARun": "Ces points ne se suivent pas sur un même contour : rien n’est copié",
   "wholeRing": "C’est tout le contour : sélectionnez l’entité pour la copier",
-  "notKept": "La copie n’a pas pu être gardée : rien n’est copié"
+  "notKept": "La copie n’a pas pu être gardée : rien n’est copié",
+  "pasted": "{polities, plural, one {Collé : {name}} other {Collé : # entités politiques}}, de {map} — {count} points, dont {welded} soudés aux voisins",
+  "pastedSovereign": "Collé souverain : son suzerain, {suzerain}, n’est pas dans cette carte",
+  "nameTaken": "{name} est déjà dans cette carte : deux entités politiques ne peuvent pas porter le même nom — rien n’est collé",
+  "homageTooDeep": "{name} n’est pas collé : son suzerain, {suzerain}, le placerait trop bas dans la chaîne d’hommage",
+  "nothingToPaste": "Le presse-papier est vide : copiez d’abord une entité politique",
+  "stretchNotYet": "Coller un tronçon n’est pas encore possible : copiez une entité politique",
+  "pasteStep": "{count, plural, one {Coller {name}} other {Coller # entités politiques}}"
 }

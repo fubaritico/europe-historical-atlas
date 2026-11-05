@@ -39,6 +39,7 @@ import { installSaveShortcut } from './persistence/saveShortcut'
 import { wantsSlowWrites, writesFetch } from './persistence/slowWrites'
 import { createDevServerYearArchive } from './persistence/yearArchive'
 import { createYearSession } from './persistence/yearSession'
+import { createHeldClipboard } from './state/heldClipboard'
 import { openEmptyYear } from './state/openEmptyYear'
 import { PANEL_IDS } from './state/panelsSlice'
 import { createPolityColourSource } from './state/polityColourSource'
@@ -59,6 +60,7 @@ import { listenForCommand, shownPlatform } from './ui/utils/commandListener'
 import { clipboardWords, copySelection, heldSentence } from './ui/utils/copySelection'
 import { createDialogueOpener } from './ui/utils/dialogueOpener'
 import { createMapNameStore } from './ui/utils/mapNameSource'
+import { pasteClipboard } from './ui/utils/pasteClipboard'
 import { listenForStackingKeys } from './ui/utils/stackingShortcut'
 import { UNFRAMED } from './viewport/viewport'
 import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataSource'
@@ -402,20 +404,41 @@ const PLATFORM = shownPlatform(navigator)
 const clipboardWordsNow = () =>
   clipboardWords(localeStore.get(), shortcutText('paste', PLATFORM, localeStore.get()).shown)
 
+/** What the clipboard holds as this map opens — said, so the author sees what ‹cmd+V› will paste. */
+const HELD = keptClipboard(window.sessionStorage)
+if (HELD !== null) results.say(heldSentence(HELD, clipboardWordsNow()))
+
+/**
+ * What the clipboard holds — kept in the tab for the next map, held for this page: what ‹cmd+V› pastes and what lights
+ * Édition › Coller les entités. One writer for both.
+ */
+const clipboard = createHeldClipboard(HELD, (content) =>
+  keepClipboard(window.sessionStorage, content)
+)
+
 /** Copy the stretch or the polity selected, kept in the tab for the next map (CARTO-345) — ‹cmd+C› and Édition › Copier. */
 const handleCopy = (): void => {
   copySelection(store.getState(), {
     map: yearSession.map(),
-    keep: (content) => keepClipboard(window.sessionStorage, content),
+    keep: clipboard.hold,
     say: results.say,
     words: clipboardWordsNow(),
   })
 }
 listenForCommand(document, 'copy', handleCopy)
 
-/** What the clipboard holds as this map opens — said, so the author sees what ‹cmd+V› will paste. */
-const HELD = keptClipboard(window.sessionStorage)
-if (HELD !== null) results.say(heldSentence(HELD, clipboardWordsNow()))
+/** Paste the polities the clipboard holds into this map, one step of the history (CARTO-345) — ‹cmd+V› and Édition. */
+const handlePaste = (): void => {
+  const { pastePolities, chooseTarget } = store.getState()
+  pasteClipboard({
+    content: clipboard.get(),
+    pastePolities,
+    chooseTarget,
+    say: results.say,
+    words: clipboardWordsNow(),
+  })
+}
+listenForCommand(document, 'paste', handlePaste)
 
 // ‹cmd+O› and ‹cmd+shift+S›: *Open…* and *Save as…*, as their buttons and the menu (CARTO-345).
 listenForCommand(document, 'open', mapPicker.open)
@@ -446,6 +469,8 @@ createRoot(container).render(
               onSaveAs={saveAsPicker.open}
               onSaveCopy={handleSaveCopy}
               onCopy={handleCopy}
+              onPaste={handlePaste}
+              clipboard={clipboard}
               mapName={mapName}
               history={history}
               heading={<PageHeading store={store} />}
