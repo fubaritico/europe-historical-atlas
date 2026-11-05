@@ -41,8 +41,8 @@ the weld at paste (below), built on `core/editor/anchorWeld.ts`, which welds one
 - **What was pasted stays selected**, as it has just arrived: the author may move it — that is his business, not
   the paste's.
 - **No preview, no validation** (the dev, 2026-11-03: *"you paste, that's all; if there's a problem, ctrl+Z —
-  simple"*): the paste is written at once, the weld and the cut with it, and the status bar says what was done — how
-  many points, how many welded, what was cut. One ‹ctrl+Z› takes it all back. A paste that cannot be made writes
+  simple"*): the paste is written at once, the weld with it, and the status bar says what was done — how
+  many points, how many welded. One ‹ctrl+Z› takes it all back. A paste that cannot be made writes
   nothing and says why. **The weld is the one
   exception to « in place »**: a pasted point within the weld distance of a point of the target map is replaced by
   that point — the target's point stays, the pasted one goes — so a pasted point moves by that distance at most, and
@@ -53,8 +53,10 @@ the weld at paste (below), built on `core/editor/anchorWeld.ts`, which welds one
     (`core/editor/retrace.ts`, a neighbour sharing the stretch follows), its new run taken from the clipboard instead
     of the pen. The rest of the outline does not move: nothing to realign. QGIS's *Reshape Features* is the same
     gesture (« State of the art » below). Second in the order of work since 2026-11-04 (below);
-  - **a whole polity** — clean only on free ground (an empty Ireland, a map started empty); elsewhere it is cut by
-    what is there, as QGIS's *Avoid overlap* cuts a new polygon by its neighbours.
+  - **a whole polity** — pasted whole, welded at 2 km; where it overlaps a polity of the map, the overlap stays, seen
+    on the map, for the author to arrange (the dev, 2026-11-05: *"when you paste, you paste"*). ~~Elsewhere it is cut
+    by what is there, as QGIS's *Avoid overlap* cuts a new polygon by its neighbours~~ — struck the same day, with the
+    vassal carved out of its suzerain.
 
 ## Several polities — copied together, never edited together (the dev, 2026-11-03)
 
@@ -125,7 +127,7 @@ inventory of the other menus (Affichage…) stays CARTO-239's, with the dev.
   - ~~« Coller le tracé » in the menu of a polity of the target map — **the outline onto it**~~ — struck 2026-11-05:
     a whole outline is copied as a stretch and pasted with ‹ctrl+V› (below);
   - « Coller la fiche… » in the same menu — **the sheet onto it**, field by field.
-- **Each paste is one step of the history**: one ‹ctrl+Z› takes it back whole, weld and cut included.
+- **Each paste is one step of the history**: one ‹ctrl+Z› takes it back whole, weld included.
 
 ## Scenarios
 
@@ -148,7 +150,7 @@ are any two maps of `years/`, `<copied polity>` the copied polity, `<target poli
 > the list in {Polities}"* — and *"if one cannot paste, it is not finished"*. Copy alone gave him nothing to do: the
 > **whole polity's paste comes first**, the stretch's second.
 
-3. **Paste a whole polity** — **first since 2026-11-04**, at the top of `{Polities}`'s list; in place, welded at 2 km, cut by what is there, its suzerain kept or dropped, the
+3. **Paste a whole polity** — **first since 2026-11-04**, at the top of `{Polities}`'s list; in place, welded at 2 km, ~~cut by what is there~~ (struck 2026-11-05), its suzerain kept or dropped, the
    question of a name already in the map.
 4. **Paste a stretch onto an outline** — ⟨retracer⟩ fed by the clipboard.
 5. ~~**Paste an outline onto a polity** — in place of its own, or as one more island.~~ — **struck by the dev,
@@ -167,17 +169,17 @@ are any two maps of `years/`, `<copied polity>` the copied polity, `<target poli
 
 | what | my proposal | the alternative | by |
 | --- | --- | --- | --- |
-| a pasted polity over ground already held: who wins | **the target wins**: the paste takes the free ground only, the rest is cut and said — what is there was drawn or cleaned by hand. To let the paste win, the author first removes the target polity's outline, then pastes (the dev: *"and if you don't like it, ctrl+Z"*) | the paste wins, and the target's polities are carved | **the dev**, 2026-11-03, on my proposal |
+| ~~a pasted polity over ground already held: who wins~~ — **struck 2026-11-05**: no cut, and no vassal carved out of its suzerain; the pasted polity keeps its whole outline, the overlap is seen (the dev: *"when you paste, you paste"*; he did not recall the call below) | ~~**the target wins**~~: the paste takes the free ground only, the rest is cut and said — what is there was drawn or cleaned by hand. To let the paste win, the author first removes the target polity's outline, then pastes (the dev: *"and if you don't like it, ctrl+Z"*) | the paste wins, and the target's polities are carved | **the dev**, 2026-11-03, on my proposal |
 | a polity pasted into a year its dates leave out | **pasted, nothing said** — the dates do not matter to a paste (the dev: *"it's a productivity gesture, to save time"*, like the cities: comfort while drawing) | pasted and said (my proposal) · refused | **the dev**, 2026-11-03 |
 | paste in place; what is pasted stays selected | — | — | **the dev**, 2026-11-03 |
-| no preview, no validation: pasted at once, the weld and the cut with it, ‹ctrl+Z› if wrong | — | a preview with ‹entrée› / ‹échap› (my proposal, refused) | **the dev**, 2026-11-03 |
+| no preview, no validation: pasted at once, the weld with it, ‹ctrl+Z› if wrong | — | a preview with ‹entrée› / ‹échap› (my proposal, refused) | **the dev**, 2026-11-03 |
 | ~~a stretch pasted onto an outline, first in the order of work~~ — **reversed**: the whole polity first | — | — | **the dev**, 2026-11-04 (2026-11-03 on my proposal) |
 | a pasted polity appears **at the top of `{Polities}`'s list** | — | — | **the dev**, 2026-11-04 |
 | a pasted polity whose name is already in the map | **refused by a dialogue** that says two polities cannot bear the same name, and explains how to carry only the outline over: copy the whole outline in the source map as a stretch, select the polity in `{Polities}` here — its outline deleted first if it is to be replaced — and ‹ctrl+V› | — | **the dev**, 2026-11-05 |
 | a stretch pasted onto a polity | **nothing drawn → it takes the place** (a whole outline only); **something drawn → it is welded** — no « Coller le tracé », no hybrid case | « Coller le tracé », replace or add as an island (struck) | **the dev**, 2026-11-05 |
 | a part of an outline pasted onto a polity already drawn | **merged into its outline**: its two ends welded onto it, the path between them replaced, as ⟨retracer⟩ does (the dev: *"it needs a merge, a fusion"*) | lying apart as an open line — a new kind of object in the document (my alternative, not taken) | **the dev**, 2026-11-05, on my proposal |
 | the weld distance | **2 km** on the ground, edge points and coast points alike, each welded onto the nearest point or stretch — one constant, tuned by use (the dev: *"it's a matter of practice and trial"*) | a distance set at the paste, in a field | **the dev**, 2026-11-03, on my proposal |
-| between two pasted points welded onto one neighbour's outline | **the pasted outline follows the neighbour's points** — the target map's border wins, as it wins the cut; otherwise a sliver or an overlap stays between two welds, the second geometry `s00` forbids | each pasted point welded alone, the straight segments between them kept | **the dev**, 2026-11-05, on my proposal |
+| between two pasted points welded onto one neighbour's outline | **the pasted outline follows the neighbour's points** — the target map's border wins; otherwise a sliver or an overlap stays between two welds, the second geometry `s00` forbids | each pasted point welded alone, the straight segments between them kept | **the dev**, 2026-11-05, on my proposal |
 | the coast | **no weld onto the coast layer**: welding onto the target map's own points covers it. Measured 2026-11-05, the backup's 54 166 coast points against `1100`: 23 112 fall exactly on a point of `1100`, 30 802 have none within reach (Ireland, the Baltic — free coast, already on Natural Earth's), 252 lie under 2 km of one | a coast port injected into `core` | **me — measured**, the dev agreed the coasts are the same (2026-11-05) |
 | how a pasted vassal's suzerain is found in the target map | **by its name**, never its id — measured on the backup's 56 vassals pasted into `1100`: 9 found by id, 29 by name (20 held under Cliopatria's id), none where one id names two polities. A name is already what tells one polity from another in a map (the dialogue of a name taken) | by its id (what the scenario first said, and what was first built) | **the dev**, 2026-11-05, on my proposal, after the review (ARCH-001) |
 | a copied id another polity of the target map uses | **the first free `<id>-<n>`**, counting from 2 — an id is a map's own, never a match across maps | refuse the paste | **me — proposed**, built 2026-11-05 |

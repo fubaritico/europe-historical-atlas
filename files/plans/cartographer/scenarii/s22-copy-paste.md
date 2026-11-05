@@ -68,8 +68,9 @@ Scenario: the menu says what can be pasted
 # dev, 2026-11-05); the count of welded points returned for the status bar. Measured on the backup's 118 polities
 # absent from 1100, pasted one after the other: 22 896 of 45 461 points welded, the year re-read without a fault,
 # 116 ms for the slowest paste (Norway, 209 rings). An islet the weld would leave under three points keeps its own.
-# Declared gaps: no cut by what is there and no vassal carved out of its suzerain (rung 3); the status bar, the
-# selection, the dialogue and ‹ctrl+V› come with the interface, after every paste is built.
+# The cut by what is there and the vassal carved out of its suzerain, struck 2026-11-05 (the dev: « quand tu colles,
+# tu colles »): the whole polity's paste is built in core. Declared gaps: the status bar, the selection, the dialogue
+# and ‹ctrl+V› come with the interface, after every paste is built.
 
 Scenario: paste a polity onto free ground
   Given <copied polity> is copied from <source map>
@@ -95,8 +96,10 @@ Scenario: a pasted tribe takes the inner band
 Scenario: paste a polity over ground already held
   Given <target map> has <target polity> over part of what <copied polity> covers
   When I press ‹ctrl+V›
-  Then the pasted outline is cut where it overlaps <target polity>: <target polity> keeps its ground
-  And the status bar says how much was cut, and from whom
+  Then <copied polity> is pasted whole, welded to its neighbours at the weld distance
+  And where it overlaps <target polity>, both keep their outline: the overlap is seen, for the author to arrange
+  # « the pasted outline is cut where it overlaps <target polity> » and « the status bar says how much was cut »,
+  # struck 2026-11-05 — the dev: « quand tu colles, tu colles ».
 
 Scenario: paste a polity into a year its dates leave out
   Given <copied polity>'s sheet says it exists from 1120
@@ -117,7 +120,8 @@ Scenario: paste a polity whose suzerain is not in the map
 Scenario: paste a polity whose suzerain is in the map
   Given <copied polity> is a vassal of a polity whose name <target map> holds, whatever its id there
   When I press ‹ctrl+V›
-  Then <copied polity> is pasted as that polity's vassal, and carved out of it as a vassal is
+  Then <copied polity> is pasted as that polity's vassal, its outline whole
+  # « and carved out of it as a vassal is », struck 2026-11-05 — the dev: « quand tu colles, tu colles ».
 
 Scenario: paste a polity whose name is already in the map
   Given <target map> already has a polity named as <copied polity>
