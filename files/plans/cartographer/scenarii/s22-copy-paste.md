@@ -240,7 +240,11 @@ Scenario: a whole outline onto a polity already drawn
 > the sheet; ctrl+C in the map copies only the points selected; then in the target file the Edit menu adapts to what
 > is on the clipboard."* So one paste, under ‹cmd+V›, named after what the clipboard holds; ‹shift+cmd+V› is gone.
 > Built in the worktree (`core/editor/pasteSheet.ts`, `ui/components/SheetPasteDialog/`, `state/clipboardSlice.ts`,
-> `ui/utils/pasteCommand.ts`). **Not walked yet.**
+> `ui/utils/pasteCommand.ts`). **Walked by the dev the same night**: the Seljuks' sheet copied (« Copy sheet »), the
+> target map opened, the Seljuks right-clicked on the map, « Paste sheet… », the start, end and colour ticked — they are
+> in the sheet. And a polity: the Kingdom of Lori pasted whole, sovereign — its suzerain « Seljuk Empire » in the backup
+> is « Great Seljuk Empire » in his 1100, the name rule — then given to the Seljuks by hand. Labels shortened at his
+> word (« dix fois trop longs »).
 
 Scenario: a polity's menu offers the clipboard
   When I right-click <copied polity> in {Polities}
