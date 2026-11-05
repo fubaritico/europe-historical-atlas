@@ -19,5 +19,10 @@
   "toDeclare": "{polity} n’est pas déclaré dans cette carte : à déclarer.",
   "cannotCompare": "{polity} n’a pas d’identifiant Wikidata : impossible de comparer.",
   "source": "Source : {title}",
-  "sourceWhere": "Source : {title}, {where}"
+  "sourceWhere": "Source : {title}, {where}",
+  "filter": "Filtrer les villes",
+  "foundCities": "{count, plural, one {La ville trouvée} other {Les # villes trouvées}}",
+  "showFound": "Afficher les villes trouvées",
+  "hideFound": "Masquer les villes trouvées",
+  "noMatch": "Aucune ville ne répond à « {query} »."
 }

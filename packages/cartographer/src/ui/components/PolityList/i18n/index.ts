@@ -13,6 +13,9 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *   suzerain's.
  * - `noTerritory` — The chip of a polity with nothing drawn.
  * - `empty` — Said in place of the list when the year holds no polity.
+ * - `filter` — The filter field's accessible name (CARTO-360).
+ * - `countOf` — The subhead's count while a filter is typed; `found` answer it, out of `total`.
+ * - `noMatch` — Said in place of the list when no polity answers the filter; `query` is what was typed.
  */
 export type PolityListMessageKey = keyof typeof en
 

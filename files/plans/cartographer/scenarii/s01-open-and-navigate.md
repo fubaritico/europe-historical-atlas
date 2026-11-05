@@ -121,6 +121,25 @@ Scenario: select a polity from the list
 > **Hole H-03** is about *when* they appear once ⟨edit⟩ is active — 894 of them at continent scale is a
 > smear. See [99-holes](s99-holes.md).
 
+```gherkin
+# CARTO-360, built 2026-11-05 — the dev's ask; used by Claude in the app, not walked by the dev yet.
+Scenario: filter {Polities} by a part of a name
+  Given the map of 1100 is open, 144 polities in {Polities}
+  When I type "bohe" in the field at the head of {Polities}, the one with the magnifier
+  Then the list shows "Kingdom of Bohemia" under "Holy Roman Empire", the Empire greyed
+  And the subhead counts "1 of 144"
+  And no letter typed there picks a tool
+
+Scenario: clear the filter of {Polities}
+  Given "bohe" is typed in the filter
+  When I press ‹esc› in the field
+  Then the field is empty, the whole tree is listed again, none greyed, and the subhead counts 144
+
+Scenario: no polity answers
+  When I type "kiev" and no polity of the year holds it
+  Then the panel says "No polity answers “kiev”." in place of the list
+```
+
 ## Moving around
 
 ```gherkin

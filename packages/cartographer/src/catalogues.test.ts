@@ -251,8 +251,9 @@ describe('the Cartographer catalogues', () => {
   describe('happy path', () => {
     it('finds the catalogues by their file names', () => {
       // 28 since s19 (2026-11-02): the snapshots' and the draft's dialogues gone, Save as…'s and the question before
-      // opening added; 29 with {Cities} (CARTO-193), 30 with the panels’ frame (CARTO-342), 31 with the clipboard (CARTO-345).
-      expect(CATALOGUES.length).toBe(31)
+      // opening added; 29 with {Cities} (CARTO-193), 30 with the panels’ frame (CARTO-342), 31 with the clipboard (CARTO-345),
+      // 32 with the panels' filter (CARTO-360).
+      expect(CATALOGUES.length).toBe(32)
     })
   })
 

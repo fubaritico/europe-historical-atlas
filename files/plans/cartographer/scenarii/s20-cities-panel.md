@@ -75,6 +75,37 @@ Scenario: no city that year
   Then the panel says "No city entered for <year>."
 ```
 
+## Filtering the list — CARTO-360, built 2026-11-05
+
+> **The dev, 2026-11-05**: a search field at the head of {Polities} and {Cities}, *"it saves an enormous amount of
+> time"*; filtering the list, his choice of the two ways the ticket named, and a little magnifier in the field.
+> **Proposed by Claude, taken by his « vazy »**: case and accents ignored, a match anywhere in the name; ‹esc› clears;
+> the eye heading the list acts on the cities found. **Used by Claude in the app on 2026-11-05, not walked by the dev yet.**
+
+```gherkin
+Scenario: filter the cities by a part of their name
+  When I type "nov" in the field at the head of {Cities}
+  Then the list shows only the cities whose name holds "nov", case and accents ignored
+  And the eye heading the list reads "The city found", or "The 2 cities found"
+
+Scenario: the eye acts on the cities found
+  Given "nov" is typed in the filter
+  When I click the eye heading the list
+  Then the cities found are drawn, and no other
+
+Scenario: clear the filter
+  Given "nov" is typed in the filter
+  When I press ‹esc› in the field
+  Then the field is empty, and the list shows every city of the year again
+
+Scenario: nothing answers
+  When I type "kiev" and no city of the year holds it
+  Then the panel says "No city answers “kiev”." in place of the list, and the field stays
+```
+
+> **What it does not do**: what is typed is the panel's own, so it empties when the panel is docked or floated
+> (CARTO-342) — the same as the list's scroll.
+
 > **What this rung does not do** (CARTO-193, the ticket's next rungs):
 > - **the city in red on the canvas** — the alert is in the list and the detail only;
 > - **the comparison is by Wikidata id**: a wrong id in the map's registry reads as a misplaced city — which is how it is

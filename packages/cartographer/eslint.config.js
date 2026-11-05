@@ -191,6 +191,7 @@ export default tseslint.config(
             usePolityDraft: 'state',
             usePolityForm: 'state',
             useRelayedResults: 'effect',
+            useRowFilter: 'state',
             useTabStop: 'state',
             useShortcut: 'context',
             useToolTitle: 'context',
