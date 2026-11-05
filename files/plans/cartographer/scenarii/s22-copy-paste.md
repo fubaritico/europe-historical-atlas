@@ -62,10 +62,14 @@ Scenario: the menu says what can be pasted
 # 1 — a whole polity
 # Built in core, rung 1, 2026-11-05 (branch carto-345-paste, `core/editor/paste.ts`), no interface yet: the sheet,
 # every point in place under its own source, the end of the list, the free id, the suzerain kept or dropped, the
-# name already in the map refused, the dates and a tribe's rank as copied. Declared gaps of this rung: no weld (rung
-# 2 — the pasted outline will also follow a neighbour's points between two welds, the dev, 2026-11-05), no cut by
-# what is there and no vassal carved out of its suzerain (rung 3); the status bar, the selection, the dialogue and
-# ‹ctrl+V› come with the interface, after every paste is built.
+# name already in the map refused, the dates and a tribe's rank as copied.
+# Rung 2, 2026-11-05 (`core/editor/pasteWeld.ts`): the weld at 2 km — onto a point of the map, else onto a stretch
+# (the neighbour gains the point), and between two welded points the pasted outline follows the neighbour's (the
+# dev, 2026-11-05); the count of welded points returned for the status bar. Measured on the backup's 118 polities
+# absent from 1100, pasted one after the other: 22 896 of 45 461 points welded, the year re-read without a fault,
+# 116 ms for the slowest paste (Norway, 209 rings). An islet the weld would leave under three points keeps its own.
+# Declared gaps: no cut by what is there and no vassal carved out of its suzerain (rung 3); the status bar, the
+# selection, the dialogue and ‹ctrl+V› come with the interface, after every paste is built.
 
 Scenario: paste a polity onto free ground
   Given <copied polity> is copied from <source map>

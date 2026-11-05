@@ -9,6 +9,7 @@
  */
 
 import { addOutline, addPolity } from './documentEdits'
+import { weldPastedRings } from './pasteWeld'
 import { MIN_RING_ANCHORS } from './yearDocument'
 
 import type { CopiedPolity } from './clipboard'
@@ -20,6 +21,8 @@ export interface PolityPasted {
   id: string
   /** How many points it brought, every ring together. */
   points: number
+  /** How many of them took a point of the map — welded onto a point, or onto a stretch (`pasteWeld.ts`). */
+  welded: number
   /**
    * The name of its suzerain when the target map does not hold it, and it was therefore pasted sovereign;
    * `null` when it was pasted as it was copied.
@@ -93,16 +96,22 @@ function assertPastable(copied: CopiedPolity): void {
  * Its suzerain is found in the map **by its name**, never its id (the dev, 2026-11-05: of the backup's 56 vassals
  * pasted into `1100`, 9 find their suzerain by id, 29 by name — the 20 others hold it under Cliopatria's id). Found,
  * the polity is that one's vassal; not found, it is pasted sovereign and the suzerain's name is said back (`s22`).
+ *
+ * **Welded onto the map** (`pasteWeld.ts`): a point within `weldKm` of the map's takes it, and the map's neighbours
+ * gain the points put on their stretches.
  * @param doc - the target map, edited in place
  * @param copied - the polity from the clipboard
+ * @param weldKm - the weld distance, `PASTE_WELD_KM` in the application
  * @returns what was pasted, or why nothing was
- * @throws as {@link assertPastable} does, before anything is written; and when the document refuses a ring once the
- *   sheet is in — a defect no paste reaches today (the ring is long enough, the polity just added, no point names an
- *   anchor), which leaves the map **partly written**: the caller puts back the snapshot it took before the gesture
+ * @throws as {@link assertPastable} does, before anything is written; and, once the sheet is in, on a defect the weld
+ *   meets (a point of the map with no source, a stretch in no ring, a point that is no number) or a ring the document
+ *   refuses — none of which a paste reaches today. Those leave the map **partly written**, the sheet in and points
+ *   perhaps put on the neighbours' stretches: the caller puts back the snapshot it took before the gesture
  */
 export function pastePolity(
   doc: YearDocument,
-  copied: CopiedPolity
+  copied: CopiedPolity,
+  weldKm: number
 ): PolityPasted | PolityPasteRefusal {
   assertPastable(copied)
   if (doc.polities.some((polity) => polity.name === copied.polity.name)) {
@@ -117,12 +126,15 @@ export function pastePolity(
   const sheet = { ...copied.polity, id, suzerain: suzerain?.id ?? null }
   if (!addPolity(doc, sheet)) return { refused: 'homage' }
 
-  for (const ring of copied.rings) {
-    // The polity was just added, the ring is long enough and no point names an anchor: a refusal here is a defect.
-    if (!addOutline(doc, id, ring)) {
+  // Every ring welded onto the map before any enters it, so the pasted rings never weld onto one another.
+  const rings = weldPastedRings(doc, copied.rings, weldKm)
+  for (const ring of rings) {
+    // The polity was just added, the ring is long enough and its anchors are the map's: a refusal is a defect.
+    if (!addOutline(doc, id, ring.points)) {
       throw new Error(`[Cartographer] the document refused a ring of "${copied.polity.name}".`)
     }
   }
   const points = copied.rings.reduce((sum, ring) => sum + ring.length, 0)
-  return { id, points, sovereignWithout }
+  const welded = rings.reduce((sum, ring) => sum + ring.welded, 0)
+  return { id, points, welded, sovereignWithout }
 }
