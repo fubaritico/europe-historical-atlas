@@ -5,37 +5,41 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — 05/11 au matin : coller un pays entier (CARTO-345), avant tout le reste
+## ▶ ON REPREND ICI — après le 05/11 : les collages dans `core`, dans une session neuve (CARTO-345)
 
-**L'ordre, le sien (05/11)** : **finir le copier-coller d'abord**, *« pour que j'aie un outil de production le plus
-exhaustif possible »* ; l'interface de l'atlas ensuite. **CARTO-345** (En cours) n'est pas fini (*« si on ne peut pas
-coller, c'est pas fini »*). Étapes 1 et 2 **fusionnées dans `main`** le 04/11 (`cc242a0`) : Copier, la table des touches,
-la barre Fichier / Édition. **Le prochain travail** : *sélectionner un pays, ‹ctrl+C›, ouvrir l'autre carte, ‹ctrl+V›* —
-le pays collé **apparaît en haut de la liste de {Polities}**. Ordre inversé par lui : le pays entier d'abord, le tronçon
-ensuite (plan `files/plans/cartographer/copy-paste-between-maps.md`, « The order of work »). Pas fait : plusieurs pays
-sélectionnés dans {Polities}. Un essai que je lui donne **finit un geste entier** (mémoire `ship-a-whole-gesture`). Les
-copies `europe-map-copypaste` et `europe-map-panels` sont supprimées (05/11). Ouvert, ma proposition : une copie que le
-navigateur refuse de garder, dite en rouge quand CARTO-273 existera.
+**L'ordre, le sien (05/11)** : finir le copier-coller d'abord, *« pour que j'aie un outil de production le plus exhaustif
+possible »* ; l'interface de l'atlas ensuite. **CARTO-345** (En cours) : Copier, la table des touches et la barre Fichier /
+Édition sont dans `main` (`cc242a0`, 04/11). **Le prochain travail** : **tous les collages construits dans `core`, avec
+leurs tests, avant l'interface** (*« implémenter tous les cas de collage avant le parcours via l'UI »*), sur une branche,
+chacun commité seul, fusionné après son essai — le pays entier d'abord (un ou plusieurs, en haut de {Polities}), puis le
+tronçon, puis la fiche ; les menus, la boîte du nom déjà pris et la marche dans l'appli ensuite, d'un bloc. **Le contrat** :
+`files/plans/cartographer/scenarii/s22-copy-paste.md`, réécrit le 05/11, et ses décisions dans le plan
+`copy-paste-between-maps.md`. **Sa règle** : *« on colle, il n'y a rien, ça remplace ; il y a quelque chose, on soude »* —
+pas de « Coller le tracé », pas de remplacement (on supprime, on colle) ; une partie de tracé **se fond** dans le tracé (⟨retracer⟩
+nourri par le presse-papier), un tracé entier sur un pays dessiné **se superpose** ; on colle des points, pas leur rôle.
+**Dans le code à changer** : `core/src/editor/clipboard.ts` refuse un anneau entier (`'whole-ring'`) — un tracé entier se
+copie désormais comme un tronçon fermé. Les briques : `anchorWeld.ts`, `carve.ts`, `retrace.ts`. **Lui parler par son
+cas** (sa Pologne), jamais par « tronçon » ni « bouts » : ils l'ont perdu le 05/11. Ouvert, ma proposition : une copie que
+le navigateur refuse de garder, dite en rouge quand CARTO-273 existera.
 
-**L'interface de l'atlas — ATLAS-329, la maquette d'ambiance est faite** (04/11 au soir, Claude Design). *« Un travail
-d'ambiance, pas de cohérence de ce qui est affiché »* : le contenu des pages est inventé, ne pas le juger. Le paquet :
-`files/resources/atlas-ui/` (README = ses règles : palette, fontes, cadre, capsule, boutons), les écrans :
-`files/resources/Europe Historical Atlas — Interface-png/` et `…-ios-and-tablet-png/`. **Mon rôle, le sien** : comme
-pour le Cartographe, **je reprends son travail** — jetons et styles dans `fubaritico-ds`, pas de retouches demandées à
-Claude Design. **Lui** : redessine dans Illustrator les **vignettes** (coins, fleurons, culs-de-lampe, filets), d'après
-des originaux libres — je lui donne les repères de taille (découpage en neuf, coin 48 px…). Mes retours écran par écran
-donnés le 04/11 (chiffres de Cinzel qui se lisent « IIOO », le XXIᵉ manquant, les étiquettes du pavé qui cachent les
-boutons, le panneau de détail sur le siècle). **Ses idées à garder** : un bandeau d'en-tête plus foncé ; le plein écran
-(ordinateur et iPad ; l'iPhone n'a que l'écran d'accueil). **Sa demande transmise à Claude Design** : la barre du site
-pliée au Λ sur l'atlas — Claude Design l'a pliée selon la largeur, pas tout à fait ma proposition (dit le 05/11).
-**Prochaine étape** : découper en tickets, avec lui. Ornements : `files/plans/atlas/ornament-by-era.md` (Fontainebleau,
-Versailles, l'Empire — l'Antiquité et le Moyen Âge à chercher quand il le dit).
+**L'interface de l'atlas — ATLAS-329, la maquette d'ambiance de Claude Design, v2** (05/11). Le contenu des pages est
+inventé, ne pas le juger. **Tout ce que Claude Design fait pour l'écran de l'atlas vit dans `files/resources/claude-design/`**
+(sa décision, 05/11) : `atlas-html/` (README = ses règles : palette, fontes, cadre, capsule, boutons ; `planches/` ;
+`images/`, nos captures), `atlas-png/` (les écrans, bureau, tablette, téléphone ; les modifiés marqués « v2 »),
+`prompts_claude_design.md` (ses prompts du logo par époque). **Une seule version, pas d'historique** (sa décision) : la
+v1 est à la corbeille. **Mon rôle** : je reprends son travail — jetons et styles dans `fubaritico-ds`. **Lui** : dessine
+dans Illustrator les ornements et les cartouches du logo (*« Claude Design est catastrophique pour les ornements »*) ;
+je lui donne les repères de taille. **Ses idées à garder** : un bandeau d'en-tête plus foncé ;
+le plein écran (ordinateur et iPad). **Prochaine étape** : découper en tickets, avec lui. Ornements et logo par époque :
+`files/plans/atlas/ornament-by-era.md` (§ 5b : ses quatre époques ; les deux du XXᵉ hors de l'atlas ; « Fontainebleau »
+mal placé au XIXᵉ ; les Temps modernes XVIIᵉ ou XVIIIᵉ, à lui de choisir).
 
-**Ses décisions du 05/11, écrites** : l'atlas va **idéalement du Iᵉʳ siècle av. J.-C. (ou des guerres puniques) à 1900**
-(`roadmap.md`) — pas d'habillage contemporain ; **un habillage par époque** (glossaire) ; **la frise synchronoptique**
-d'abord compagnon de lecture, son clic centre la carte et ouvre le panneau de droite (`interface-scenarios.md`,
-ATLAS-358 en Idées) ; ses couches d'après **son ouvrage synchronoptique** (scans à venir ; les faits, jamais les
-textes) ; **le nom des mers** (ATLAS-359 en Idées). Il demande à Claude Design la version tablette et téléphone : faite.
+**Ses décisions du 05/11, écrites** : l'atlas va **idéalement du Iᵉʳ siècle av. J.-C. à 1900** (`roadmap.md`), sans
+habillage contemporain ; **un habillage par époque** (glossaire) ; **la frise synchronoptique** (ATLAS-358, Idées),
+d'après **Arno Peters, *Synchronoptische Weltgeschichte*** (son scan de cinquante ans) : **cinq couches** (période,
+guerres, politique, personnalités, civilisation), un nom et des dates, le texte au clic dans le panneau, seulement ce qui
+a un lieu sur la carte ou encadre l'année, **les événements du CMS partagés avec la carte** (`interface-scenarios.md`) ;
+**le nom des mers** (ATLAS-359, Idées). **À lui** : CARTO-239 (la barre de menus) est construite et encore en À faire.
 
 **Playwright** (04/11) : l'épopée REPO-346 (Chantiers), REPO-347 l'installation puis dix lots, en Backlog ; plan
 `files/plans/e2e/playwright.md`. Pas pour maintenant. Bloquant connu : le dossier des cartes est en dur
@@ -48,11 +52,9 @@ commite `content/events.json`**, pas avant (sa décision).
 **Sur `main`, non poussés** : depuis `49a623d`, dont la fusion `cc242a0` et le commit de clôture du 05/11. `years/` et
 `content/events.json` restent hors commit (les siens).
 
-**Où en sont les tickets** : CARTO-345 En cours ; CMS-335 **Fait** (04/11) ; **CARTO-193** (Villes) attend les pays de
-l'historien ; **ATLAS-333** (vitesse) à remesurer. **ATLAS-333** ne se ferme qu'une fois une seconde carte
-terminée par lui, côtes comprises (05/11). **À lui** : la décision sur le stockage du navigateur pour la disposition des panneaux
-(`rules/known-issues/cartographer.md`). **Lire le titre d'une page avant d'y ouvrir un onglet** : ses serveurs changent
-de port. **Un texte à coller** : dans un bloc de code, jamais en citation.
+**Où en sont les tickets** : CARTO-345 En cours ; **CARTO-193** (Villes) attend les pays de l'historien ; **ATLAS-333**
+(vitesse) ne se ferme qu'une fois une seconde carte terminée par lui, côtes comprises (05/11). **À lui** : la décision sur
+le stockage du navigateur pour la disposition des panneaux (`rules/known-issues/cartographer.md`).
 
 **Le Cartographe** : une carte est un dossier de `years/` (`s19`) et s'enregistre d'elle-même deux secondes après chaque
 geste, en plus de sa copie `.autosave` (gardées, sa décision). Sa 1100 d'avant dans `years/1100-backup-2026-11-02/`.

@@ -2,6 +2,24 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
+### 2026-11-05 — les trois collages tranchés, la frise d'après Peters, la v2 de Claude Design
+
+Plage **05/11 12:48 → 14:20** (1 h 32) ; le chantier ouvert le 05/10 totalise **200 h 40 sur 36 plages**. Aucun code :
+des décisions, écrites dans les plans, et le commit de clôture, **non poussé**.
+
+- **CARTO-345, ses décisions** (plan `copy-paste-between-maps.md`, scénarios `s22` réécrits) : un nom déjà dans la carte
+  est refusé par une boîte de dialogue ; **pas de remplacement de tracé** — on supprime, on colle (*« restons simple dans
+  la mécanique : on colle, il n'y a rien, ça remplace ; il y a quelque chose, on soude »*) ; une partie de tracé se fond
+  dans le tracé (*« il faut un merge, une fusion »*), un tracé entier se superpose à l'ancien ; on colle des points, pas
+  leur rôle. **Tous les collages dans `core` avant l'interface** (son ordre).
+- **ATLAS-358, la frise** : son scan reconnu — Arno Peters, *Synchronoptische Weltgeschichte* ; **cinq couches**, un nom et
+  des dates, jamais de texte, les mêmes événements que la carte (*« c'est ce que j'attendais »*). Le texte pour Claude
+  Design donné ; la v2 rangée dans `files/resources/claude-design/` (sa décision), la v1 à la corbeille. Ses prompts du
+  logo par époque notés dans `ornament-by-era.md` ; les ornements, il les dessine.
+- **Mes fautes** : « tronçon » et « bouts » l'ont perdu deux fois (*« je ne sais pas ce qu'est un morceau de
+  frontière »*) — l'exemple de sa Pologne a fait comprendre ; j'avais gardé mon idée du 03/11, le tronçon qui remplace,
+  contre sa règle du jour.
+
 ### 2026-11-04 soir → 05/11 nuit — la barre de menus fusionnée, Playwright en épopée, l'interface de l'atlas par Claude Design
 
 Deux plages, **04/11 18:57 → 21:31** et **23:07 → 00:40** (4 h 06) ; le chantier ouvert le 05/10 totalise **198 h 52 sur
@@ -22,27 +40,4 @@ Deux plages, **04/11 18:57 → 21:31** et **23:07 → 00:40** (4 h 06) ; le chan
   rosace hors de son propos (*« des éléments décoratifs, tu comprends ça ? »*) ; juger le contenu inventé d'une maquette
   d'ambiance.
 
-### 2026-11-03 — la clé du CMS, le copier-coller entre cartes (étapes 1 et 2), l'interface de l'atlas pour Claude Design
-
-Plage **03/11 12:22 → 18:49** (6 h 26) ; le chantier ouvert le 05/10 totalise **194 h 39 sur 33 plages**. **Sur `main`**, sept
-commits **non poussés** (`49a623d` → le commit de clôture) ; **sur la branche `carto-345`** (copie `europe-map-copypaste`),
-cinq commits, **non fusionnés** : le dev les essaie d'abord.
-
-- **Le CMS par le MCP** : la clé créée et branchée (`claude mcp add`, la clé dans `.env.local`) ; la skill `/enter-in-cms` porte
-  toute la méthode de l'historien (sa demande : *« la première fois ça va ; si ce n'est pas englobé dans une skill, vous
-  finissez par oublier »*) ; la clé lit aussi les raisons d'importance (`49a623d`). Le serveur s'est figé sur un index déjà
-  créé : mesuré sur une copie de la base, rien à réécrire, relancé ; README du CMS et tableau des pannes (`534871e`).
-- **CARTO-345, le copier-coller** : le plan, ses décisions une à une (collage en place, sans aperçu — *« tu colles, c'est
-  tout ; si problème, ctrl+Z »* —, la carte d'arrivée garde son terrain, les dates ignorées, soudure à 2 km, plusieurs
-  entités dans `{Polities}` jamais éditées ensemble), la barre de menus (CARTO-239) et le convertisseur de raccourcis
-  (`390e543`). Construit : le presse-papier et ‹cmd+C› (`d231fdb`), une table de touches pour tout (`bea262b`), la barre
-  Fichier / Édition (`3e1eadc`), essayée par moi dans mon propre Cartographe (`2714cb0`). Trois revues, tous les constats
-  traités ou laissés ouverts par décision dite.
-- **L'interface de l'atlas pour Claude Design** (ATLAS-329) : la consigne et ses six lots d'images, le ton (camaïeu, boutons
-  bruns, ornement, légers dégradés), la recherche sur l'ornement du XVIIᵉ siècle (`files/plans/atlas/ornament-17th-century.md`).
-  Ses mots : il tombe dans *« le design XVIIᵉ, Versailles, Louis XIV »* qu'il voulait éviter — d'où son idée de designs par époque.
-- **Mes fautes** : un `cd` (deux fois) ; une étape du ticket cochée par erreur, décochée (verbe `uncheck` ajouté) ; le texte à
-  coller donné en citation, ses barres partant avec la copie ; une cause du blocage du CMS affirmée avant d'être mesurée,
-  corrigée ; deux messages de commit trop longs.
-
-> Older sessions (2026-09-12 → 2026-11-03 night) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-11-03) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
