@@ -60,6 +60,12 @@ Scenario: the menu says what can be pasted
   # « Coller le tracé… » struck 2026-11-05 — the dev: there is no outline replacement; a whole outline is a stretch
 
 # 1 — a whole polity
+# Built in core, rung 1, 2026-11-05 (branch carto-345-paste, `core/editor/paste.ts`), no interface yet: the sheet,
+# every point in place under its own source, the end of the list, the free id, the suzerain kept or dropped, the
+# name already in the map refused, the dates and a tribe's rank as copied. Declared gaps of this rung: no weld (rung
+# 2 — the pasted outline will also follow a neighbour's points between two welds, the dev, 2026-11-05), no cut by
+# what is there and no vassal carved out of its suzerain (rung 3); the status bar, the selection, the dialogue and
+# ‹ctrl+V› come with the interface, after every paste is built.
 
 Scenario: paste a polity onto free ground
   Given <copied polity> is copied from <source map>
@@ -95,14 +101,17 @@ Scenario: paste a polity into a year its dates leave out
   Then <copied polity> is pasted, its dates as they were, like any other paste
   And nothing is said about its dates: the paste is a gesture of comfort while drawing, not a check
 
+# The suzerain is found by its name, never its id (the dev, 2026-11-05, on a measure: of the backup's 56 vassals
+# pasted into 1100, 9 find their suzerain by id, 29 by name). « whose id <target map> holds » struck the same day.
+
 Scenario: paste a polity whose suzerain is not in the map
-  Given <copied polity> is a vassal of a polity whose id <target map> does not hold
+  Given <copied polity> is a vassal of a polity whose name <target map> does not hold
   When I press ‹ctrl+V›
   Then <copied polity> is pasted as sovereign
   And the status bar reads « Collé souverain : son suzerain, <its name>, n'est pas dans cette carte »
 
 Scenario: paste a polity whose suzerain is in the map
-  Given <copied polity> is a vassal of a polity whose id <target map> holds
+  Given <copied polity> is a vassal of a polity whose name <target map> holds, whatever its id there
   When I press ‹ctrl+V›
   Then <copied polity> is pasted as that polity's vassal, and carved out of it as a vassal is
 
@@ -223,7 +232,8 @@ Scenario: a sheet that differs in nothing
   Then the status bar reads « Rien à coller : les fiches sont les mêmes », and no dialogue opens
 
 Scenario: a suzerain absent from the map is not offered
-  Given <copied polity>'s sheet names a suzerain whose id <target map> does not hold
+  Given <copied polity>'s sheet names a suzerain whose name <target map> does not hold
+  # « whose id » struck 2026-11-05: a suzerain is found by its name, as in « paste a polity » (the dev)
   When the dialogue opens
   Then the line « Suzerain » is shown, unticked and greyed, with « absent de cette carte »
 

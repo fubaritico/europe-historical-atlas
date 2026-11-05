@@ -55,6 +55,15 @@ describe('clipboard', () => {
       expect(copy?.polities.map((each) => each.polity.id)).toEqual(['fr-couronne', 'hre'])
     })
 
+    it('copies a vassal with its suzerain’s name, and a sovereign with none', () => {
+      const doc = sharedBorderDocument()
+      const hre = doc.polities.find((polity) => polity.id === 'hre')
+      if (hre !== undefined) hre.suzerain = 'fr-couronne'
+      const copy = copyPolities(doc, ['fr-couronne', 'hre'], '1100')
+
+      expect(copy?.polities.map((each) => each.suzerainName)).toEqual([null, 'Reaume de France'])
+    })
+
     it('copies a polity with no territory with no ring', () => {
       const doc = sharedBorderDocument()
       doc.claims = doc.claims.filter((claim) => claim.polity !== 'hre')
@@ -120,6 +129,23 @@ describe('clipboard', () => {
       expect(readClipboard({ kind: 'stretch', map: '1100', polity: 'x', points: [] })).toBeNull()
     })
 
+    it('reads back nothing from a polity holding a ring of two points, which encloses nothing', () => {
+      const copy = copyPolities(sharedBorderDocument(), ['fr-couronne'], '1100')
+      copy?.polities[0]?.rings[0]?.splice(2)
+
+      expect(readClipboard(JSON.parse(JSON.stringify(copy)))).toBeNull()
+    })
+
+    it('reads back nothing from a vassal copied without its suzerain’s name', () => {
+      const doc = sharedBorderDocument()
+      const hre = doc.polities.find((polity) => polity.id === 'hre')
+      if (hre !== undefined) hre.suzerain = 'fr-couronne'
+      const copy = copyPolities(doc, ['hre'], '1100')
+      if (copy?.polities[0] !== undefined) copy.polities[0].suzerainName = null
+
+      expect(readClipboard(JSON.parse(JSON.stringify(copy)))).toBeNull()
+    })
+
     it('reads back nothing from a point that is not finite', () => {
       const bad = {
         kind: 'stretch',
@@ -155,6 +181,14 @@ describe('clipboard', () => {
       doc.polities = doc.polities.filter((polity) => polity.id !== 'hre')
 
       expect(() => copyStretch(doc, [4, 5], '1100', null)).toThrow(/names no polity/)
+    })
+
+    it('throws rather than copy a vassal whose suzerain the registry does not hold', () => {
+      const doc = sharedBorderDocument()
+      const hre = doc.polities.find((polity) => polity.id === 'hre')
+      if (hre !== undefined) hre.suzerain = 'nowhere'
+
+      expect(() => copyPolities(doc, ['hre'], '1100')).toThrow(/"nowhere" names no polity/)
     })
 
     it('throws rather than copy a point whose source the map does not declare', () => {

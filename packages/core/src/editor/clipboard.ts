@@ -4,10 +4,8 @@
  *
  * **Coordinates, never anchor indices.** An index means something in one anchor table only; the map a copy is pasted
  * into has its own. So what is copied is resolved: every point at its `[longitude, latitude]`, with the provenance it
- * was recorded under — a point keeps its source wherever it goes. Pasting puts each point **in place**, at those
- * coordinates, and the weld then makes the ones that meet the target map's points share them, so the rule that two
- * outlines over one place hold one anchor (`s00`) holds again on arrival — in the same map, a pasted point falls
- * exactly on its original and is welded onto it.
+ * was recorded under — a point keeps its source wherever it goes. Pasting (`paste.ts`) puts each point **in place**,
+ * at those coordinates, as a new anchor of the target map: it shares none with the map's own.
  *
  * **What it holds is either polities or a stretch** — one pastes what one selected: a polity whole, sheet and
  * outline, or several from `{Polities}`; or a run of anchors that follow one another on one ring.
@@ -16,6 +14,8 @@
 import { z } from 'zod/mini'
 
 import { yearPolitySchema } from '../data/yearFormat'
+
+import { MIN_RING_ANCHORS } from './yearDocument'
 
 import type { Provenance } from './documentEdits'
 import type { YearDocument } from './yearDocument'
@@ -33,6 +33,11 @@ export interface ClipboardPoint {
 export interface CopiedPolity {
   /** The sheet, copied — id included, though a paste never trusts it to be free. */
   polity: YearPolity
+  /**
+   * Its suzerain's name in the map it was copied from, or `null` when it is sovereign — said back when the target
+   * map does not hold that suzerain, since only its id travels in the sheet.
+   */
+  suzerainName: string | null
   /** Every ring of its claim, each point in place; empty for a polity with no territory. */
   rings: ClipboardPoint[][]
 }
@@ -95,6 +100,23 @@ function pointOf(doc: YearDocument, index: number): ClipboardPoint {
 }
 
 /**
+ * A polity's name, by its id.
+ * @param doc - the map
+ * @param id - the polity's id, or `null`
+ * @returns its name, or `null` when the id is `null`
+ * @throws when the id names no polity of the map — a suzerain the registry lacks is refused when a map opens, so
+ *   this is a defect said loudly, never a name made up
+ */
+function nameOf(doc: YearDocument, id: string | null): string | null {
+  if (id === null) return null
+  const found = doc.polities.find((polity) => polity.id === id)
+  if (found === undefined) {
+    throw new Error(`[Cartographer] the suzerain "${id}" names no polity of the map.`)
+  }
+  return found.name
+}
+
+/**
  * Copy polities, sheet and outline, resolved into points.
  * @param doc - the map being copied from
  * @param polityIds - the polities selected
@@ -113,6 +135,7 @@ export function copyPolities(
       const claim = doc.claims.find((each) => each.polity === polity.id)
       return {
         polity: structuredClone(polity),
+        suzerainName: nameOf(doc, polity.suzerain),
         rings: (claim?.rings ?? []).map((ring) => ring.map((index) => pointOf(doc, index))),
       }
     })
@@ -203,7 +226,21 @@ const clipboardSchema: z.ZodMiniType<ClipboardContent> = z.discriminatedUnion('k
     kind: z.literal('polities'),
     map: z.string(),
     polities: z
-      .array(z.strictObject({ polity: yearPolitySchema, rings: z.array(z.array(pointSchema)) }))
+      .array(
+        z
+          .strictObject({
+            polity: yearPolitySchema,
+            suzerainName: z.nullable(z.string()),
+            // A ring of fewer points encloses nothing, and no map holds one: a clipboard carrying it is not one.
+            rings: z.array(z.array(pointSchema).check(z.minLength(MIN_RING_ANCHORS))),
+          })
+          // A vassal is copied with its suzerain's name, a sovereign with none.
+          .check(
+            z.refine(
+              (copied) => (copied.polity.suzerain === null) === (copied.suzerainName === null)
+            )
+          )
+      )
       .check(z.minLength(1)),
   }),
   z.strictObject({
