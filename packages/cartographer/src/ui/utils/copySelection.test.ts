@@ -2,7 +2,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
-import { clipboardWords, copySelection, copySheetOfSelection, heldSentence } from './copySelection'
+import {
+  answerCopyRequest,
+  clipboardWords,
+  copySelection,
+  copySheetOfSelection,
+  heldSentence,
+} from './copySelection'
 
 import type { CopyDeps, CopySelection } from './copySelection'
 import type { ClipboardContent } from '@europe-historical-atlas/core/editor/clipboard'
@@ -199,6 +205,21 @@ describe('copySelection', () => {
 
       expect(copySheetOfSelection(selection({ target: null }), to)).toBeNull()
       expect(to.said).toEqual(['Sélectionnez une entité politique ou des points à copier'])
+    })
+  })
+
+  // Review ARCH-002, 2026-11-05: a polity's menu copies the polity whole, even with points selected.
+  describe('a polity’s menu', () => {
+    it('copies the polity whole with points selected, which ‹cmd+C› would copy instead', () => {
+      const to = deps()
+
+      expect(answerCopyRequest(selection({ selectedAnchors: [1, 2] }), 'all', to)?.kind).toBe(
+        'polities'
+      )
+    })
+
+    it('copies the sheet alone', () => {
+      expect(answerCopyRequest(selection(), 'sheet', deps())?.kind).toBe('sheet')
     })
   })
 })

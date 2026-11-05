@@ -198,3 +198,21 @@ export function copySheetOfSelection(
   deps.say(copiedSentence(copy, deps.words))
   return copy
 }
+
+/**
+ * A polity's menu's copy (the dev, 2026-11-05): « Copier l'entité » copies the polity whole — even with points
+ * selected, which ‹cmd+C› would copy instead — « Copier la fiche » its sheet alone.
+ * @param selection - the map, the polity — selected by the menu before this runs — and the points selected
+ * @param what - the polity whole, or its sheet alone
+ * @param deps - the map's name, the keeper, the status bar, the words
+ * @returns what was copied, or `null` when nothing was — said, either way
+ */
+export function answerCopyRequest(
+  selection: CopySelection,
+  what: 'all' | 'sheet',
+  deps: CopyDeps
+): ClipboardContent | null {
+  if (what === 'sheet') return copySheetOfSelection(selection, deps)
+  // A copy, not the canvas's selection: the points stay selected on the map.
+  return copySelection({ ...selection, selectedAnchors: [] }, deps)
+}

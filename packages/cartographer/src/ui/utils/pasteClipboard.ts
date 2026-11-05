@@ -22,6 +22,9 @@ import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocu
  * open, in place, welded to their neighbours at 2 km, in **one step** of the history; the last one pasted is
  * selected, and the status bar says what was done — or why nothing was.
  *
+ * **A sheet on the clipboard opens its dialogue** onto the polity selected (`s22` « # 3 »), field by field; this pastes
+ * nothing itself and says nothing on success — the dialogue does both.
+ *
  * **Points on the clipboard are pasted onto the polity selected** (`open-outlines.md`), one step: each whole outline
  * added, each piece merged into its outline by the nearest points or left open when nothing is drawn — a piece
  * ⟨retracer⟩ refuses is named in its words.
@@ -261,7 +264,8 @@ function pasteTheSheet(deps: PasteDeps): string[] {
 /**
  * Paste what the clipboard holds into the map open, select what was pasted, and say it.
  * @param deps - the clipboard, the store's paste and selection, the status bar, the words
- * @returns the polities pasted, by their id in the map — empty when nothing was, which is said
+ * @returns the polities pasted, by their id in the map — empty when nothing was, which is said; empty for a sheet,
+ *   whose dialogue pastes
  */
 export function pasteClipboard(deps: PasteDeps): string[] {
   const { content, words } = deps

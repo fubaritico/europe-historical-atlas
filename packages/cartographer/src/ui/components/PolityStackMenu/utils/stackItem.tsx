@@ -87,7 +87,7 @@ export function headItems(
     <Menu.Item key={EDIT} index={0} value={EDIT}>
       {action('editProperties')}
     </Menu.Item>,
-    commandItem(COPY, action('copy'), 1, true, shortcut('copy')),
+    commandItem(COPY, action('copyPolity'), 1, true, shortcut('copy')),
     commandItem(COPY_SHEET, action('copySheet'), 2, true, shortcut('copySheet')),
     commandItem(PASTE, paste.label, 3, paste.enabled, shortcut('paste')),
   ]

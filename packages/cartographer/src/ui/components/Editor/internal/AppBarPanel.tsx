@@ -8,7 +8,6 @@ import { MenuBarPanel } from './MenuBarPanel'
 
 import type { AppBarProps } from './AppBar'
 import type { HistoryRelay } from '../../../../canvas/history/historyRelay'
-import type { HeldClipboard } from '../../../../state/heldClipboard'
 import type { CartographerStoreHook } from '../../../../state/store'
 import type { MapNameSource } from '../../../utils/mapNameSource'
 
@@ -32,8 +31,8 @@ export interface AppBarPanelProps extends Omit<AppBarProps, 'name' | 'map' | 'me
   onPaste: () => void
   /** Édition › Tout sélectionner, and ‹cmd+A›. */
   onSelectAll: () => void
-  /** What the clipboard holds, which lights Coller les entités. */
-  clipboard: HeldClipboard
+  /** Édition › Copier la fiche, and ‹shift+cmd+C›. */
+  onCopySheet: () => void
 }
 
 /**
@@ -45,7 +44,7 @@ export interface AppBarPanelProps extends Omit<AppBarProps, 'name' | 'map' | 'me
  * @param props.onCopy - Édition › Copier
  * @param props.onPaste - Édition › Coller les entités
  * @param props.onSelectAll - Édition › Tout sélectionner
- * @param props.clipboard - what the clipboard holds
+ * @param props.onCopySheet - Édition › Copier la fiche
  * @returns the top bar
  */
 export function AppBarPanel({
@@ -55,7 +54,7 @@ export function AppBarPanel({
   onCopy,
   onPaste,
   onSelectAll,
-  clipboard,
+  onCopySheet,
   ...gestures
 }: AppBarPanelProps) {
   // Context
@@ -74,10 +73,10 @@ export function AppBarPanel({
         <MenuBarPanel
           store={store}
           history={history}
-          clipboard={clipboard}
           onCopy={onCopy}
           onPaste={onPaste}
           onSelectAll={onSelectAll}
+          onCopySheet={onCopySheet}
           {...gestures}
         />
       }

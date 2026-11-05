@@ -63,7 +63,7 @@ describe('PolityStackMenu', () => {
 
   // The dev, 2026-11-05: Copy and Copy the sheet in a polity's menu, and the paste named after the clipboard.
   describe('the clipboard’s commands', () => {
-    it('lists Copy and Copy the sheet with their keys, then the paste as it is named', () => {
+    it('lists Copy polity and Copy sheet with their keys, then the paste as it is named', () => {
       const shell = mountAt({ x: 100, y: 100 })
       const rows = [...shell.querySelectorAll('[role="option"]')].map((option) => [
         option.querySelector('.polity-stack-menu__label')?.textContent ?? option.textContent,
@@ -72,8 +72,8 @@ describe('PolityStackMenu', () => {
       ])
 
       expect(rows.slice(1, 4)).toEqual([
-        ['Copy', '⌘C', false],
-        ['Copy the sheet', '⇧⌘C', false],
+        ['Copy polity', '⌘C', false],
+        ['Copy sheet', '⇧⌘C', false],
         ['Paste', '⌘V', true],
       ])
     })

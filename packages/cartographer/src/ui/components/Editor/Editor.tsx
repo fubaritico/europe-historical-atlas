@@ -16,7 +16,6 @@ import { StatusRow } from './internal/StatusRow'
 import type { HistoryRelay } from '../../../canvas/history/historyRelay'
 import type { PaintStyle } from '../../../canvas/paint/painter'
 import type { ResultRelay } from '../../../persistence/resultRelay'
-import type { HeldClipboard } from '../../../state/heldClipboard'
 import type { PolityColourSource } from '../../../state/polityColourSource'
 import type { CartographerStoreHook } from '../../../state/store'
 import type { WikidataSource } from '../../../wikidata/wikidataSource'
@@ -62,8 +61,8 @@ export interface EditorProps {
   onPaste: () => void
   /** Édition › Tout sélectionner: every point of the polity selected, as ‹cmd+A› (`open-outlines.md`). */
   onSelectAll: () => void
-  /** What the clipboard holds, which lights « Coller les entités ». */
-  clipboard: HeldClipboard
+  /** Édition › Copier la fiche: the polity selected's sheet alone, as ‹shift+cmd+C› (CARTO-345). */
+  onCopySheet: () => void
   /** The map open's name, which *Save as…* changes — written in the top bar. */
   mapName: MapNameSource
   /** The canvas's undo and redo, for the document bar's buttons. */
@@ -97,7 +96,7 @@ export interface EditorProps {
  * @param props.onCopy - copies what is selected, called by the menu bar
  * @param props.onPaste - pastes what the clipboard holds, called by the menu bar
  * @param props.onSelectAll - selects every point of the polity selected, called by the menu bar
- * @param props.clipboard - what the clipboard holds, for the menu bar
+ * @param props.onCopySheet - copies the polity selected's sheet alone, called by the menu bar
  * @param props.mapName - the map open's name, for the top bar
  * @param props.history - the canvas's undo and redo, for the document bar's buttons
  * @param props.colours - where the polities' colours come from, for the canvas and the panels
@@ -115,7 +114,7 @@ export function Editor({
   wikidata,
   results,
   // The top bar's gestures, the map's name and the clipboard — onOpen, onSave, onSaveAs, onSaveCopy, onCopy, onPaste,
-  // onSelectAll, mapName, clipboard — handed on as they are.
+  // onSelectAll, onCopySheet, mapName — handed on as they are.
   ...bar
 }: EditorProps) {
   // Store

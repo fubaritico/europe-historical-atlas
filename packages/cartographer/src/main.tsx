@@ -60,6 +60,7 @@ import { PlatformContext } from './ui/i18n/platformContext'
 import { arrangeSelected, arrangeWords } from './ui/utils/arrange'
 import { listenForCommand, shownPlatform } from './ui/utils/commandListener'
 import {
+  answerCopyRequest,
   clipboardWords,
   copySelection,
   copySheetOfSelection,
@@ -495,9 +496,7 @@ store.subscribe(
   (asked) => {
     if (asked === null) return
     store.getState().chooseTarget(asked.polity)
-    const state = store.getState()
-    if (asked.what === 'sheet') copySheetOfSelection(state, copyDeps())
-    else copySelection({ ...state, selectedAnchors: [] }, copyDeps())
+    answerCopyRequest(store.getState(), asked.what, copyDeps())
   }
 )
 store.subscribe(
@@ -555,7 +554,7 @@ createRoot(container).render(
               onCopy={handleCopy}
               onPaste={handlePaste}
               onSelectAll={handleSelectAll}
-              clipboard={clipboard}
+              onCopySheet={handleCopySheet}
               mapName={mapName}
               history={history}
               heading={<PageHeading store={store} />}

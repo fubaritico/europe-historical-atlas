@@ -24,11 +24,11 @@
   "menuEdit": "Édition",
   "copy": "Copier",
   "pastePolities": "Coller les entités",
-  "pastePoints": "Coller les points de {from} sur {name}",
+  "pastePoints": "Coller les points",
   "selectAll": "Tout sélectionner",
   "selectAllOf": "Tout sélectionner : {name}",
-  "pasteSheet": "Coller la fiche de {from} sur {name}…",
-  "theSelection": "l’entité sélectionnée",
+  "pasteSheet": "Coller la fiche…",
   "copySheet": "Copier la fiche",
-  "paste": "Coller"
+  "paste": "Coller",
+  "copyPolity": "Copier l’entité"
 }

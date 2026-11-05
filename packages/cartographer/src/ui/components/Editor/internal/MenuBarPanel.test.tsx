@@ -7,12 +7,14 @@ import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/docum
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { createHistoryRelay } from '../../../../canvas/history/historyRelay'
-import { createHeldClipboard } from '../../../../state/heldClipboard'
+import { summariseClipboard } from '../../../../state/clipboardSlice'
 import { createCartographerStore } from '../../../../state/store'
 import { UNFRAMED } from '../../../../viewport/viewport'
 import { renderInEnglish } from '../../../testing/renderInEnglish'
 
 import { MenuBarPanel } from './MenuBarPanel'
+
+import type { ClipboardContent } from '@europe-historical-atlas/core/editor/clipboard'
 
 /**
  * A store on the shared-border fixture — France and the Empire — nothing selected.
@@ -30,7 +32,10 @@ function store() {
  * @param shared - the store
  * @returns the user, the copy recorder and the history's answer
  */
-function mount(shared = store(), clipboard = createHeldClipboard(null, () => true)) {
+function mount(shared = store(), held: ClipboardContent | null = null) {
+  act(() => {
+    shared.getState().setHeld(summariseClipboard(held))
+  })
   const onCopy = vi.fn()
   const onPaste = vi.fn()
   const answered = vi.fn()
@@ -47,7 +52,7 @@ function mount(shared = store(), clipboard = createHeldClipboard(null, () => tru
       onCopy={onCopy}
       onPaste={onPaste}
       onSelectAll={vi.fn()}
-      clipboard={clipboard}
+      onCopySheet={vi.fn()}
     />
   )
   return { user: userEvent.setup(), onCopy, onPaste, answered }
@@ -67,19 +72,14 @@ async function editCommand(user: ReturnType<typeof userEvent.setup>, name: RegEx
 describe('MenuBarPanel', () => {
   describe('happy path', () => {
     // The dev, 2026-11-05: one paste, named after what the clipboard holds and the polity selected.
-    it('names the paste of a sheet after the polity copied and the polity selected', async () => {
+    it('names the paste after a sheet held, short', async () => {
       const shared = store()
       act(() => {
         shared.getState().chooseTarget('fr-couronne')
       })
-      const { user } = mount(
-        shared,
-        createHeldClipboard(copySheet(sharedBorderDocument(), 'hre', '1100'), () => true)
-      )
+      const { user } = mount(shared, copySheet(sharedBorderDocument(), 'hre', '1100'))
 
-      expect((await editCommand(user, /Paste the sheet/)).textContent).toContain(
-        'Paste the sheet of Sacrum Imperium onto Reaume de France…'
-      )
+      expect((await editCommand(user, /^Paste sheet/)).getAttribute('aria-disabled')).toBe('false')
     })
 
     it('copies through the gesture handed, once a polity is selected', async () => {
@@ -88,7 +88,7 @@ describe('MenuBarPanel', () => {
         shared.getState().chooseTarget('fr-couronne')
       })
       const { user, onCopy } = mount(shared)
-      await user.click(await editCommand(user, /^Copy(?! the sheet)/))
+      await user.click(await editCommand(user, /^Copy(?! sheet)/))
 
       expect(onCopy).toHaveBeenCalledOnce()
     })
@@ -96,10 +96,7 @@ describe('MenuBarPanel', () => {
     it('pastes through the gesture handed when the clipboard holds polities', async () => {
       const copied = copyPolities(sharedBorderDocument(), ['hre'], '1100-backup')
       if (copied === null) throw new Error('fixture: nothing copied')
-      const { user, onPaste } = mount(
-        store(),
-        createHeldClipboard(copied, () => true)
-      )
+      const { user, onPaste } = mount(store(), copied)
       await user.click(await editCommand(user, /^Paste polities/))
 
       expect(onPaste).toHaveBeenCalledOnce()
@@ -108,12 +105,12 @@ describe('MenuBarPanel', () => {
 
   describe('variants', () => {
     it('lights Paste polities as soon as a copy is held, with no other change in the store', async () => {
-      const clipboard = createHeldClipboard(null, () => true)
+      const shared = store()
       const copied = copyPolities(sharedBorderDocument(), ['hre'], '1100')
       if (copied === null) throw new Error('fixture: nothing copied')
-      const { user } = mount(store(), clipboard)
+      const { user } = mount(shared)
       act(() => {
-        clipboard.hold(copied)
+        shared.getState().setHeld(summariseClipboard(copied))
       })
 
       expect((await editCommand(user, /^Paste polities/)).getAttribute('aria-disabled')).toBe(
@@ -124,14 +121,9 @@ describe('MenuBarPanel', () => {
     it('names the paste after points held, greyed with no polity to paste them onto', async () => {
       const stretch = copyPoints(sharedBorderDocument(), [1, 2], '1100', 'hre').copy
       if (stretch === null) throw new Error('fixture: no points')
-      const { user } = mount(
-        store(),
-        createHeldClipboard(stretch, () => true)
-      )
+      const { user } = mount(store(), stretch)
 
-      expect((await editCommand(user, /^Paste the points/)).getAttribute('aria-disabled')).toBe(
-        'true'
-      )
+      expect((await editCommand(user, /^Paste points/)).getAttribute('aria-disabled')).toBe('true')
     })
 
     it('lets Copy act on two anchors selected, with no polity', async () => {
@@ -141,7 +133,7 @@ describe('MenuBarPanel', () => {
       })
       const { user } = mount(shared)
 
-      expect((await editCommand(user, /^Copy(?! the sheet)/)).getAttribute('aria-disabled')).toBe(
+      expect((await editCommand(user, /^Copy(?! sheet)/)).getAttribute('aria-disabled')).toBe(
         'false'
       )
     })
@@ -162,7 +154,7 @@ describe('MenuBarPanel', () => {
     it('greys Copy with nothing selected', async () => {
       const { user } = mount()
 
-      expect((await editCommand(user, /^Copy(?! the sheet)/)).getAttribute('aria-disabled')).toBe(
+      expect((await editCommand(user, /^Copy(?! sheet)/)).getAttribute('aria-disabled')).toBe(
         'true'
       )
     })
@@ -174,7 +166,7 @@ describe('MenuBarPanel', () => {
       })
       const { user } = mount(shared)
 
-      expect((await editCommand(user, /^Copy(?! the sheet)/)).getAttribute('aria-disabled')).toBe(
+      expect((await editCommand(user, /^Copy(?! sheet)/)).getAttribute('aria-disabled')).toBe(
         'true'
       )
     })
@@ -188,10 +180,7 @@ describe('MenuBarPanel', () => {
       act(() => {
         shared.getState().chooseTarget('hre')
       })
-      const { user } = mount(
-        shared,
-        createHeldClipboard(copySheet(sharedBorderDocument(), 'fr-couronne', '1100'), () => true)
-      )
+      const { user } = mount(shared, copySheet(sharedBorderDocument(), 'fr-couronne', '1100'))
       const polity = shared.getState().document.polities.find((each) => each.id === 'hre')
       act(() => {
         if (polity !== undefined)
@@ -203,9 +192,7 @@ describe('MenuBarPanel', () => {
             )
       })
 
-      expect((await editCommand(user, /Paste the sheet/)).textContent).toContain(
-        'Regnum Teutonicum'
-      )
+      expect((await editCommand(user, /^Select all/)).textContent).toContain('Regnum Teutonicum')
     })
   })
 })

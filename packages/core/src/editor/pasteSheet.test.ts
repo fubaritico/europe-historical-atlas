@@ -98,6 +98,33 @@ describe('pasteSheet', () => {
     })
   })
 
+  // Review QUAL-001, 2026-11-05: a sheet without a short name takes it away; a free name is taken.
+  describe('what a sheet takes away', () => {
+    it('drops the short name and its pin when the copied sheet has neither', () => {
+      const doc = sharedBorderDocument()
+      const france = doc.polities[0]
+      if (france !== undefined) {
+        france.shortName = 'France'
+        france.forceShortName = true
+      }
+
+      expect(
+        pasteSheet(doc, franceElsewhere(), 'fr-couronne', ['shortName', 'forceShortName'])
+      ).toBe(true)
+      expect(doc.polities[0]).not.toHaveProperty('shortName')
+      expect(doc.polities[0]).not.toHaveProperty('forceShortName')
+    })
+
+    it('takes a name no other polity of the map bears', () => {
+      const doc = sharedBorderDocument()
+
+      expect(
+        pasteSheet(doc, franceElsewhere({ name: 'Royaume de France' }), 'fr-couronne', ['name'])
+      ).toBe(true)
+      expect(doc.polities[0]?.name).toBe('Royaume de France')
+    })
+  })
+
   describe('managed errors', () => {
     it('lists nothing when the sheets are the same', () => {
       expect(sheetDifferences(sharedBorderDocument(), franceElsewhere(), 'fr-couronne')).toEqual([])
