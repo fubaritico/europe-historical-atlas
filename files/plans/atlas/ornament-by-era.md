@@ -227,6 +227,28 @@ manuscript/Gothic design (illuminated borders, Gothic tracery) — which leaves 
 three) and a **display face per era** for titles only: Cormorant SC / Cinzel, IM Fell French Canon, Bodoni Moda. The
 reader's text never changes; the era is said by the titles and the frames.
 
+## 5b. The logo by era — the dev's prompts to Claude Design (2026-11-05)
+
+The dev asked Claude Design for **one declension of the Λ logo per period** — the logo first, the rest of the dress
+after — though the mock-up's mood stays 17th-century and neoclassical. His six prompts:
+`files/resources/claude-design/prompts_claude_design.md` (ignored, copied from his Desktop): **Antiquity** (a Roman
+pediment, Greek key or laurel) · **Middle Ages** (a gothic arch, a shield, knotwork) · **Early modern** (neoclassical:
+double fillet, bead-and-reel, oval medallion, rosettes) · **19th century** (Empire: double frame, laurel wreath, bees)
+· and two **20th-century** bonuses (Art Nouveau, Constructivism).
+
+What I read against what is decided (not his decision until he says so):
+- **The two 20th-century bonuses fall outside the atlas**, which stops at 1900 with no contemporary dress (the dev,
+  2026-11-05). Four declensions, then — and the four match the French manuals' periods, which answers § 4's gap: the
+  Middle Ages gets its own (the fourth design § 4 proposed).
+- **« Fontainebleau » names the 19th-century prompt**; in § 1 Fontainebleau is the Renaissance of François Iᵉʳ (16th).
+  The Empire's model is Percier and Fontaine (§ 3). A word to change if the prompt is sent again.
+- **« Early modern » is written 18th-century neoclassical**, where the mock-up's mood and § 2 are Versailles, the 17th.
+  Either is in period for 1492–1789; the choice is his.
+
+**Who draws the ornaments — the dev, 2026-11-05**: Claude Design is *"catastrophic at ornament"*; he draws the
+vectors himself in Illustrator (or Adobe Animate), from the plates of § 1–3. Claude Design keeps the layout and the
+mood; I turn his vectors into the interface (SVG on the camaieu's tokens).
+
 ## 6. What comes next
 
 1. The dev chooses: three designs by century, or one; and whether the gap (6th–14th) gets a fourth.

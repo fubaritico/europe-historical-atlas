@@ -85,7 +85,7 @@ Mac's symbols on a Mac (⌘Z, ⇧⌘Z), ‹Ctrl› elsewhere (Ctrl+Z, Ctrl+Maj+Z
 | Édition | Coller les entités | ⌘V | the clipboard holds one polity or several |
 | Édition | Coller le tronçon sur *‹the selected polity›* | ⌘V | the clipboard holds a stretch and one polity is selected |
 | Édition | Coller la fiche sur *‹the selected polity›*… | ⇧⌘V | the clipboard holds one polity and one polity is selected |
-| Édition | Coller le tracé sur *‹the selected polity›*… | ⌥⌘V | the clipboard holds one polity and one polity is selected |
+| ~~Édition~~ | ~~Coller le tracé sur *‹the selected polity›*…~~ — struck 2026-11-05, the dev: no outline replacement, a whole outline is a stretch | ~~⌥⌘V~~ | — |
 
 **What it looks like** (the dev, 2026-11-03, a screenshot of Illustrator's *Window* menu on a Mac): a dense list,
 one line per command — its name on the left, its shortcut on the right in the Mac's symbols (⇧⌘F9), a tick before an
@@ -122,7 +122,8 @@ inventory of the other menus (Affichage…) stays CARTO-239's, with the dev.
 - **Three pastes, three gestures**:
   - ‹ctrl+V› — what the clipboard holds: **a stretch**, onto the polity selected in the target map; **a whole
     polity**, a new polity of the target map, at its place;
-  - « Coller le tracé » in the menu of a polity of the target map — **the outline onto it**;
+  - ~~« Coller le tracé » in the menu of a polity of the target map — **the outline onto it**~~ — struck 2026-11-05:
+    a whole outline is copied as a stretch and pasted with ‹ctrl+V› (below);
   - « Coller la fiche… » in the same menu — **the sheet onto it**, field by field.
 - **Each paste is one step of the history**: one ‹ctrl+Z› takes it back whole, weld and cut included.
 
@@ -150,9 +151,17 @@ are any two maps of `years/`, `<copied polity>` the copied polity, `<target poli
 3. **Paste a whole polity** — **first since 2026-11-04**, at the top of `{Polities}`'s list; in place, welded at 2 km, cut by what is there, its suzerain kept or dropped, the
    question of a name already in the map.
 4. **Paste a stretch onto an outline** — ⟨retracer⟩ fed by the clipboard.
-5. **Paste an outline onto a polity** — in place of its own, or as one more island.
+5. ~~**Paste an outline onto a polity** — in place of its own, or as one more island.~~ — **struck by the dev,
+   2026-11-05**: *"there is no outline replacement; to replace one, delete it in the target and paste the other. No
+   hybrid cases: you paste, there is nothing, it takes the place; there is something, we weld."* A whole outline is
+   copied as a stretch (step 4), and three pastes remain: **a polity, a stretch, a sheet**.
 6. **Paste a sheet onto a polity** — the dialogue, field by field.
 7. **Several polities selected in `{Polities}`**, no outline selected, copied and pasted together.
+
+> **Order changed again by the dev, 2026-11-05**: the name-conflict dialogue sends the author to the paste of a
+> stretch, so a polity's paste shipped alone would point at a gesture that does not exist — *"implement every case of paste before
+> the user journey through the UI"*. Hence **every paste of steps 3 to 7 is built first, in `core`, with its tests**;
+> the menu items, the dialogues and the walk in the app come after, all together.
 
 ## Decisions for the dev — my proposal for each
 
@@ -164,6 +173,9 @@ are any two maps of `years/`, `<copied polity>` the copied polity, `<target poli
 | no preview, no validation: pasted at once, the weld and the cut with it, ‹ctrl+Z› if wrong | — | a preview with ‹entrée› / ‹échap› (my proposal, refused) | **the dev**, 2026-11-03 |
 | ~~a stretch pasted onto an outline, first in the order of work~~ — **reversed**: the whole polity first | — | — | **the dev**, 2026-11-04 (2026-11-03 on my proposal) |
 | a pasted polity appears **at the top of `{Polities}`'s list** | — | — | **the dev**, 2026-11-04 |
+| a pasted polity whose name is already in the map | **refused by a dialogue** that says two polities cannot bear the same name, and explains how to carry only the outline over: copy the whole outline in the source map as a stretch, select the polity in `{Polities}` here — its outline deleted first if it is to be replaced — and ‹ctrl+V› | — | **the dev**, 2026-11-05 |
+| a stretch pasted onto a polity | **nothing drawn → it takes the place** (a whole outline only); **something drawn → it is welded** — no « Coller le tracé », no hybrid case | « Coller le tracé », replace or add as an island (struck) | **the dev**, 2026-11-05 |
+| a part of an outline pasted onto a polity already drawn | **merged into its outline**: its two ends welded onto it, the path between them replaced, as ⟨retracer⟩ does (the dev: *"it needs a merge, a fusion"*) | lying apart as an open line — a new kind of object in the document (my alternative, not taken) | **the dev**, 2026-11-05, on my proposal |
 | the weld distance | **2 km** on the ground, edge points and coast points alike, each welded onto the nearest point or stretch — one constant, tuned by use (the dev: *"it's a matter of practice and trial"*) | a distance set at the paste, in a field | **the dev**, 2026-11-03, on my proposal |
 | an outline added as an island over the polity's own | **kept as two rings, nothing said** — the overlap is seen; the author needs the outline and disposes of it, the weld repairing (the dev: *"what would you merge? it makes a big mess"*) | merged into one ring · the overlap said in the status bar (my proposal) | **the dev**, 2026-11-03 |
 | one polity at a time, or several | **several, selected in `{Polities}` only, copied together and never edited together**: two selected, no outline is | one only (my proposal) | **the dev**, 2026-11-03 |

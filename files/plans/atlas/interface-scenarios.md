@@ -25,15 +25,41 @@ focus — interface too, but inside the 3D scene. The flat interface is written 
 | the snapshot: the view as a framed picture, with its cartouche | [s14](scenarii/s14-the-snapshot.md) — the dev, 02/11 |
 | choosing the century — a simple selector, not a timeline | [s15](scenarii/s15-the-century.md) — ATLAS-150 |
 
-**The synchronoptic frieze — the dev's call, 2026-11-05**, after Claude Design's mock-up (`Timeline.dc.html`):
+**The synchronoptic frieze — the dev's call, 2026-11-05**, after Claude Design's mock-up (its screens in `files/resources/claude-design/atlas-png/`, « 15 · La frise
+synchronoptique » and « 25 · Téléphone — la frise »; every file Claude Design makes for the atlas's screen lives in
+`files/resources/claude-design/` since 2026-11-05, the dev's call):
 - **First a reading companion**: what happens around the year shown, to give context; a click shows the event on the
   map. The map does not change year. **A click on an element that has a place on the map** (the dev, 2026-11-05): the
   map focuses on it **and** the panel on the right opens with its text — a short editorial text, written by hand from
   what is known, reworded.
 - **Once there are several maps**: a mark on the frieze where a year has its map (a small icon above the cursor), to
   go straight to it. Moving along the frieze updates the map only the day every year has one.
-- **Its layers follow a synchronoptic book the dev owns** (old, numbered; scans to come). It is in copyright, the same
-  status as Euratlas and Duby: **facts and dates may be taken, its descriptions never**.
+- **Its layers follow a synchronoptic book the dev owns**: Arno Peters, *Synchronoptische Weltgeschichte* (1952), in
+  its French edition — recognised from the dev's scan of 2026-11-05 (fifty years of the 11th century), confirmed by
+  him. Peters died in 2002, so it is in copyright until 2072, the same status as Euratlas and Duby: **facts and dates
+  may be taken, its descriptions never**. Its choice of facts is known to lean (from memory): every fact taken is
+  checked against a second source, as the cities are against Wikidata.
+- **What the scan shows**: one column per year; from top to bottom a wavy band naming the century with a one-line
+  summary of it, **civilisation** (inventions, works, buildings — one vertical text per year), **people** (a horizontal
+  band per person, as long as their life, the name large: grey-green for thinkers, pink for rulers), **politics** (one
+  vertical text per year) and **wars** (a frame across their duration). Three shapes, then: **an instant**, **a span**,
+  **a summary**. Read closer: the top holds two layers, **economy and techniques** above **civilisation**, and the
+  people split into thinkers above and rulers below — six layers and the century's band.
+- **A condensed selection, not Peters' six — the dev's call, 2026-11-05, on my proposal** (*"that is what I expected"*):
+  - **five layers**: period · wars · politics · people · civilisation — economy, techniques and sciences folded into
+    civilisation (Claude Design's mock-up has six: its « Économie, techniques, sciences » goes);
+  - **kept from Peters**: the column per year and the three shapes — the instant (a lozenge), the span (a bar: a reign,
+    a war, a building site), the period (the band);
+  - **left out**: **every text** — on the frieze a name and dates only; the text is ours, in the right-hand panel on
+    click (no typesetting to fight, and the copyright settled with it) · **the world off the map** (the Incas, China,
+    Japan): an element enters only if it has a place on the map, or if it frames the year shown (a reign, the
+    Investiture Controversy) · **density**: a few elements per layer at once, the rest by zooming in time, as the map's
+    detail levels do;
+  - **one data, two views**: the frieze's elements are the CMS's events — the map and the frieze read the same ones,
+    selected once by the historian.
+- **Claude Design's v2 applies it** (2026-11-05, screens 15 and 25 in `files/resources/claude-design/atlas-png/`). Two
+  defects to settle when building it, mine to fix, nothing to ask back: a name too long for its bar is cut
+  (« PREMIÈRE C… ») — write it beside the bar, as a lozenge's; the year's line crosses the names — break it behind them.
 - My proposal, not decided: its own epic after the map's interface; one line folded by default; an uncertain date
   drawn with a blurred end — the same mark as on the map.
 

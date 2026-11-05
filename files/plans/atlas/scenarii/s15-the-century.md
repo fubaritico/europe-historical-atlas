@@ -8,6 +8,8 @@
 >
 > **Not a timeline.** A frieze along the bottom with several political layers — as GeaCron offers, the dev's reference — is
 > a feature as large as the map itself (the dev: *"careful, calm down"*). This scenario is a simple selector, nothing more.
+> **Since 2026-11-05 the frieze is decided, as a separate feature** (ATLAS-358, `../interface-scenarios.md`): this
+> selector stays what it is.
 
 ## The selector
 

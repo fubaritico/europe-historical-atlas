@@ -27,6 +27,7 @@ Nearly all of Europe, by the dev's own reckoning — **except Scandinavia and It
 | 9 | *Historical Atlas of the World* | ? | Chambers, 1970 | world, general |
 | 10 | « Atlas historique » — title unknown | ? | ? | ? |
 | 11 | *Atlas historique de la Russie. Puissance et instabilité d'un empire européen* | ? | ? | Russia, mostly from Muscovy on |
+| 12 | *Synchronoptische Weltgeschichte*, French edition — not an atlas | Arno Peters (†2002) | 1952 for the original | the synchronoptic frieze (ATLAS-358): facts and dates only, in copyright until 2072 — identified 2026-11-05 from his scan |
 
 Cancelled: *Historical Atlas of Britain*, *The Family Tree Historical Atlas of Germany*.
 

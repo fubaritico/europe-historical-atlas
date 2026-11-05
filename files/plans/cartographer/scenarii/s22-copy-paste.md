@@ -55,8 +55,9 @@ Scenario: the menu says what can be pasted
   Given the clipboard holds a stretch
   When I open Édition
   Then « Coller le tronçon sur … » is active when one polity is selected, greyed otherwise
-  And « Coller les entités », « Coller la fiche… » and « Coller le tracé… » are greyed
+  And « Coller les entités » and « Coller la fiche… » are greyed
   And every item shows its shortcut, ⌘ on a Mac, Ctrl elsewhere
+  # « Coller le tracé… » struck 2026-11-05 — the dev: there is no outline replacement; a whole outline is a stretch
 
 # 1 — a whole polity
 
@@ -108,24 +109,64 @@ Scenario: paste a polity whose suzerain is in the map
 Scenario: paste a polity whose name is already in the map
   Given <target map> already has a polity named as <copied polity>
   When I press ‹ctrl+V›
-  Then a question reads « <target map> a déjà <copied polity>. Coller son tracé sur elle, ou en faire une seconde entité ? »
-  And [Coller le tracé] does what « Coller le tracé » does
-  And [Seconde entité] pastes it under a new id, its name followed by « (2) »
-  And [Annuler] changes nothing
+  Then nothing is pasted, and the history gains no step
+  And a dialogue reads « Ce pays est déjà dans cette carte » — two polities cannot bear the same name
+  And it explains how to carry only the outline over: in <source map>, select every point of <copied polity>'s
+    outline and copy them; here, select <copied polity> in {Polities} — after deleting its outline, if it is to be
+    replaced — and press ‹ctrl+V›
+  And [Fermer] closes it
+  # The question « Coller son tracé sur elle, ou en faire une seconde entité ? » and its three buttons, struck
+  # 2026-11-05 — the dev: « vous ne pouvez pas coller deux pays ayant le même nom », and no hybrid case.
+
+Scenario: a name differently written is another polity
+  Given <target map> has « Principality of Polotsky » and <copied polity> is « Principality of Polotsk »
+  When I press ‹ctrl+V›
+  Then <copied polity> is pasted as any polity is, at the top of {Polities}
+  And it is for the author to delete the one not wanted — nothing tells the two apart, not even Wikidata (measured
+    2026-11-05: Q200797 and Q517333 in the two maps of 1100)
 
 Scenario: paste twice
   Given <copied polity> was pasted into <target map>
   When I press ‹ctrl+V› again
-  Then the question of a name already in the map is asked
+  Then the dialogue of a name already in the map opens
 
-# 2 — an outline onto an existing polity
+# 2 — a stretch onto a polity: one rule, the dev's (2026-11-05)
+
+> **The dev, 2026-11-05**: *"there is no outline replacement. Keep the mechanics simple: you paste, there is nothing,
+> it takes the place; you paste, there is something, we weld."* An outline selected whole is **a stretch like any
+> other**; to replace a polity's outline, the author deletes it in the target map, then pastes. The replacement and
+> the island of the earlier version are struck below.
 
 Scenario: copy a stretch
   When I select anchors that follow one another on <copied polity>'s outline
   And I press ‹ctrl+C›
   Then the status bar reads « Copié : un tronçon de <copied polity>, <n> points, de <source map> — sélectionnez une entité, puis ⌘V »
 
+Scenario: copy a whole outline
+  When I select every anchor of one of <copied polity>'s rings
+  And I press ‹ctrl+C›
+  Then the clipboard holds a stretch, closed, and the status bar reads as for any stretch
+  # The refusal « a whole ring is copied by copying the polity » (step 1, built 2026-11-03), struck 2026-11-05.
+
+Scenario: paste a stretch onto a polity with nothing drawn
+  Given a whole outline is copied from <source map>
+  And <target polity> has no outline in <target map>
+  When I select <target polity> and press ‹ctrl+V›
+  Then the copied outline becomes <target polity>'s, its points in place
+  And where it comes within the weld distance of a neighbour's or of the coast, it takes their points
+  And <target polity> keeps its own sheet
+  And one ‹ctrl+Z› gives <target polity> back with nothing drawn
+
+Scenario: an open stretch onto a polity with nothing drawn
+  Given an open stretch is copied — not a whole outline
+  And <target polity> has no outline
+  When I press ‹ctrl+V›
+  Then nothing is pasted, and the history gains no step
+  And the status bar reads « <target polity> n'a pas de tracé où accrocher ce tronçon : copiez un tracé entier »
+
 Scenario: paste a stretch onto a polity's outline
+  # Confirmed by the dev, 2026-11-05: a part of an outline, pasted, is merged into the outline already there —
+  # « il faut un merge, une fusion ». The document holds closed outlines only, so an open part cannot lie apart.
   Given a stretch of <copied polity> is copied from <source map>
   And <target map> is open, with <target polity> drawn otherwise over the same ground
   When I select <target polity> and press ‹ctrl+V›
@@ -149,24 +190,20 @@ Scenario: a stretch refused where ⟨retracer⟩ would refuse
   When I press ‹ctrl+V›
   Then nothing is pasted, and the status bar says why, in ⟨retracer⟩'s own words
 
-Scenario: paste an outline in place of a polity's
-  Given <copied polity> is copied from <source map>
-  And <target map> is open, with <target polity> drawn otherwise
-  When I open the menu of <target polity> and choose « Coller le tracé »
-  Then a question reads « Coller le tracé de <copied polity> sur <target polity> ? »
-  When I press [Remplacer son tracé]
-  Then <target polity> has the copied outline only, welded to its neighbours, and keeps its own sheet
-  And its old outline's points that nothing else holds leave at the next save, as a removed polity's do
+Scenario: a whole outline onto a polity already drawn
+  # Confirmed by the dev, 2026-11-05: the two outlines overlap and it looks messy, which is the point — the author's
+  # first reflex is to delete the old one. To carry only a part over, he copies a part, and it is merged (above).
+  Given a whole outline is copied
+  And <target polity> already has an outline in <target map>
+  When I select <target polity> and press ‹ctrl+V›
+  Then the copied outline is added to <target polity> as one more ring, its points in place
+  And every pasted point within the weld distance of a point of <target map> takes that point
+  And the two rings are never merged: where they overlap, it is seen on the map (the dev, 2026-11-03)
 
-Scenario: paste an outline as one more island
-  When I press [Ajouter comme île] in the same question
-  Then <target polity> keeps its outline and gains the copied one as one more ring
-
-Scenario: paste an outline onto the polity it overlaps
-  Given the copied outline overlaps <target polity>'s own
-  When I press [Ajouter comme île]
-  Then the two rings are kept as they are, never merged — the overlap is seen on the map, and the weld repairs what
-    the author keeps
+# Struck 2026-11-05 — the dev: « il n'y a pas de remplacement de tracé »; « on ne commence pas à faire des cas hybrides ».
+# ~~Scenario: paste an outline in place of a polity's~~ — « Coller le tracé », [Remplacer son tracé]
+# ~~Scenario: paste an outline as one more island~~ — [Ajouter comme île]
+# ~~Scenario: paste an outline onto the polity it overlaps~~
 
 # 3 — a sheet onto an existing polity
 
@@ -226,7 +263,8 @@ Scenario: Édition names what it would undo and what it pastes onto
   When I open « Édition »
   Then it reads « Annuler Créer France ⌘Z », « Rétablir ⇧⌘Z » greyed, a hairline, « Copier ⌘C », a hairline,
     « Coller les entités ⌘V », « Coller le tronçon sur Kingdom of Poland ⌘V »,
-    « Coller la fiche sur Kingdom of Poland… ⇧⌘V », « Coller le tracé sur Kingdom of Poland… ⌥⌘V »
+    « Coller la fiche sur Kingdom of Poland… ⇧⌘V »
+  # « Coller le tracé sur … ⌥⌘V » struck 2026-11-05 (the dev: no outline replacement)
   And with no polity selected the pastes read « … sur l’entité sélectionnée »
 
 Scenario: a greyed command is shown and does nothing
