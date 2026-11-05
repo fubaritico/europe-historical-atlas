@@ -6,7 +6,7 @@ import { carveOutOfSuzerain } from './carve'
 import { addAnchor, addPolity, closeRing } from './documentEdits'
 import { createYearDocument } from './yearDocument'
 
-import type { Carving, CarvingFault } from './carve'
+import type { Carving, CarvingFault, CarvingHeld } from './carve'
 import type { YearDocument } from './yearDocument'
 import type { YearPolity } from '../data/yearFormat'
 
@@ -56,7 +56,7 @@ function closeAndCarve(
   doc: YearDocument,
   polityId: string,
   ring: number[]
-): Carving | CarvingFault | null {
+): Carving | CarvingFault | CarvingHeld | null {
   closeRing(doc, polityId, ring)
   const claim = doc.claims.find((each) => each.polity === polityId)
   const closed = claim?.rings.at(-1)
@@ -97,6 +97,20 @@ describe('carveOutOfSuzerain', () => {
   })
 
   describe('variants', () => {
+    // The dev, 2026-11-05 (open-outlines.md): the suzerain is not carved while its outline is open.
+    it('holds the carving back, writing nothing to the suzerain, while its outline is open', () => {
+      const doc = france()
+      const suzerain = doc.claims.find((claim) => claim.polity === 'france')
+      if (suzerain !== undefined) suzerain.open = [0]
+      const before = [...(suzerain?.rings[0] ?? [])]
+      const [inner] = anchors(doc, [[10, 10]])
+      const carving = closeAndCarve(doc, 'aquitaine', [0, 1, inner ?? -1, 5])
+
+      expect(carving).toEqual({ suzerain: 'france', held: 'open-outline' })
+      expect(suzerain?.rings).toEqual([before])
+      expect(suzerain?.open).toEqual([0])
+    })
+
     it('leaves a hole, by the vassal’s own anchors, for a vassal wholly inside', () => {
       const doc = france()
       const hole = anchors(doc, [

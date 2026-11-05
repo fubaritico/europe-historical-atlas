@@ -19,12 +19,13 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *   `retracingCannotEnd`, `retracingReplaces` — The action under the pointer
  * - `tooFar`, `reachWould`, `notFramed`, `insertedFromWater`, `followedBorder`, `closedAlongWater`,
  *   `carved`, `removedAnchors`, `removedRings`, `pointsTakenFrom`, `keptPoints`, `notWelded`, `welded`,
- *   `retraceStartPrompt`, `notRetraced`, `retraced`, `follows`, `keepsPoints` — What a gesture did
+ *   `retraceStartPrompt`, `notRetraced`, `retraced`, `follows`, `keepsPoints`, `resumedOutline`, `keptOutline`, `carveHeld`, `closeOverOpenSuzerain`, `pasteOverOpenSuzerain` — What
+ *   a gesture did
  * - `refusedNoRing`, `refusedDressedRun`, `refusedLoop`, `refusedTooShort`, `refusedDisagree`,
  *   `deliberateGap` — Why a retrace is refused
  * - `borderUnder`, `polityUnder` — What is under the pointer
  * - `stepInsertAnchor`, `stepDeleteAnchors`, `stepMoveAnchors`, `stepWeldAnchor`, `stepDrawOutline`,
- *   `stepRetrace` — The history's names
+ *   `stepRetrace`, `stepKeepOutline` — The history's names
  */
 export type CanvasMessageKey = keyof typeof en
 

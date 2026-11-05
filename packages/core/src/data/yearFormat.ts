@@ -35,6 +35,7 @@
 
 import { z } from 'zod/mini'
 
+import { CLOSED_RING_FLOOR, OPEN_RING_FLOOR } from './ringFloors'
 import { WIKIDATA_ID } from './wikidataId'
 
 /** A pinned colour, as a six-digit hex string. */
@@ -175,16 +176,42 @@ export interface YearClaim {
    * Every ring, outer and hole alike, each an ordered list of indices into {@link YearPolities.anchors}.
    *
    * Which ring is a hole and which is a second piece is decided by inclusion, not declared — the same
-   * even-odd contract the atlas already consumes. Fewer than three indices cannot enclose an area.
+   * even-odd contract the atlas already consumes. A closed ring holds three indices at least, an open one two
+   * (`files/plans/cartographer/open-outlines.md`).
    */
   rings: number[][]
+  /**
+   * The positions in {@link rings} of the outlines left open — an outline the author stopped without closing it
+   * (the dev, 2026-11-05). **Written only when there is one**, so a year with every outline closed reads and writes
+   * byte for byte as before; absent, every ring is closed. Ascending, each once.
+   */
+  open?: number[] | undefined
+}
+
+/**
+ * Whether a claim's open positions name rings it has, ascending and each once, and every ring holds its floor.
+ * @param claim - the claim read
+ * @returns `true` when it holds together
+ */
+export function claimHoldsTogether(claim: YearClaim): boolean {
+  const open = claim.open ?? []
+  const named = open.every(
+    (at, i) => at < claim.rings.length && (i === 0 || at > (open[i - 1] ?? -1))
+  )
+  const floors = claim.rings.every(
+    (ring, at) => ring.length >= (open.includes(at) ? OPEN_RING_FLOOR : CLOSED_RING_FLOOR)
+  )
+  return named && floors
 }
 
 /** {@link YearClaim}. */
-export const yearClaimSchema: z.ZodMiniType<YearClaim> = z.strictObject({
-  polity: z.string().check(z.minLength(1)),
-  rings: z.array(z.array(anchorIndex).check(z.minLength(3))),
-})
+export const yearClaimSchema: z.ZodMiniType<YearClaim> = z
+  .strictObject({
+    polity: z.string().check(z.minLength(1)),
+    rings: z.array(z.array(anchorIndex).check(z.minLength(OPEN_RING_FLOOR))),
+    open: z.optional(z.array(z.int().check(z.nonnegative())).check(z.minLength(1))),
+  })
+  .check(z.refine(claimHoldsTogether))
 
 /** Ground the author left unclaimed on purpose, so the pre-publication check stops reporting it. */
 export interface DeliberateGap {

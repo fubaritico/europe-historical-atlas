@@ -30,6 +30,7 @@ function gestures(): EditorMenuGestures {
     onRedo: vi.fn(),
     onCopy: vi.fn(),
     onPaste: vi.fn(),
+    onSelectAll: vi.fn(),
   }
 }
 
@@ -47,7 +48,7 @@ function menus(over: Partial<EditorMenuState> = {}, to = gestures()): MenuDefini
       selected: null,
       canCopy: false,
       canPastePolities: false,
-      canPasteStretch: false,
+      canPastePoints: false,
       ...over,
     },
     to,
@@ -114,7 +115,7 @@ describe('editorMenus', () => {
       const all = menus()
 
       expect(
-        ['pastePolities', 'pasteStretch', 'pasteSheet'].map((id) => find(all, id).keys?.shown)
+        ['pastePolities', 'pastePoints', 'pasteSheet'].map((id) => find(all, id).keys?.shown)
       ).toEqual(['⌘V', '⌘V', '⇧⌘V'])
     })
   })
@@ -144,28 +145,48 @@ describe('editorMenus', () => {
       expect(to.onPaste).toHaveBeenCalledOnce()
     })
 
-    it('keeps the stretch and the sheet greyed while the clipboard holds polities', () => {
+    it('keeps the paste of points and the sheet greyed while the clipboard holds polities', () => {
       const all = menus({ canPastePolities: true, selected: 'Kingdom of Poland' })
 
-      expect(['pasteStretch', 'pasteSheet'].map((id) => find(all, id).enabled)).toEqual([
+      expect(['pastePoints', 'pasteSheet'].map((id) => find(all, id).enabled)).toEqual([
         false,
         false,
       ])
     })
 
-    it('lights « Coller le tronçon sur … » for a stretch held, the polity selected named', () => {
+    it('lights « Coller les points sur … » for points held, the polity selected named', () => {
       const to = gestures()
       const paste = find(
-        menus({ canPasteStretch: true, selected: 'Kingdom of Poland' }, to),
-        'pasteStretch'
+        menus({ canPastePoints: true, selected: 'Kingdom of Poland' }, to),
+        'pastePoints'
       )
       paste.onChoose()
 
       expect([paste.enabled, paste.label]).toEqual([
         true,
-        'Coller le tronçon sur Kingdom of Poland',
+        'Coller les points sur Kingdom of Poland',
       ])
       expect(to.onPaste).toHaveBeenCalledOnce()
+    })
+
+    // open-outlines.md, the dev, 2026-11-05: ‹cmd+A›, its scope the polity selected, named in the menu.
+    it('offers « Tout sélectionner » with the polity selected named, under ⌘A', () => {
+      const to = gestures()
+      const all = find(menus({ selected: 'Republic of Venice' }, to), 'selectAll')
+      all.onChoose()
+
+      expect([all.enabled, all.label, all.keys?.shown]).toEqual([
+        true,
+        'Tout sélectionner : Republic of Venice',
+        '⌘A',
+      ])
+      expect(to.onSelectAll).toHaveBeenCalledOnce()
+    })
+
+    it('greys « Tout sélectionner » with no polity selected', () => {
+      const all = find(menus({ selected: null }, gestures()), 'selectAll')
+
+      expect([all.enabled, all.label]).toEqual([false, 'Tout sélectionner'])
     })
 
     it('no longer offers « Coller le tracé », struck by the dev', () => {
@@ -174,10 +195,10 @@ describe('editorMenus', () => {
 
     it('greys every paste with an empty clipboard, and names the selection when none is', () => {
       const all = menus()
-      const pastes = ['pastePolities', 'pasteStretch', 'pasteSheet'].map((id) => find(all, id))
+      const pastes = ['pastePolities', 'pastePoints', 'pasteSheet'].map((id) => find(all, id))
 
       expect(pastes.every((each) => !each.enabled)).toBe(true)
-      expect(find(all, 'pasteStretch').label).toBe('Coller le tronçon sur l’entité sélectionnée')
+      expect(find(all, 'pastePoints').label).toBe('Coller les points sur l’entité sélectionnée')
     })
   })
 

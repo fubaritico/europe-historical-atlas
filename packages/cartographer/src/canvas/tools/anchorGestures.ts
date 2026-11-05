@@ -1,3 +1,5 @@
+import { isRingOpen, segmentCount } from '@europe-historical-atlas/core/editor/outlines'
+
 import { nearestStretch } from '../../geometry/stretchHit'
 import { describeDrawingTarget } from '../../state/drawingTarget'
 import { screenToLonLatOnBackdrop } from '../../viewport/projection'
@@ -40,7 +42,8 @@ export const INSERT_ANCHOR_KIND = 'insert-anchor'
 export const DELETE_ANCHOR_KIND = 'delete-anchor'
 
 /**
- * Every stretch of a polity's rings, as pairs of anchor indices — the closing one included.
+ * Every stretch of a polity's rings, as pairs of anchor indices — the closing one included, except an open outline's
+ * (`open-outlines.md`): its two ends are joined by no stretch.
  * @param document - the document to read
  * @param polityId - whose rings
  * @returns each stretch once per ring that runs over it
@@ -49,10 +52,11 @@ export function targetStretches(document: YearDocument, polityId: string): [numb
   const stretches: [number, number][] = []
   for (const claim of document.claims) {
     if (claim.polity !== polityId) continue
-    for (const ring of claim.rings) {
+    for (const [position, ring] of claim.rings.entries()) {
+      const segments = segmentCount(ring, isRingOpen(claim, position))
       ring.forEach((index, at) => {
         const next = ring[(at + 1) % ring.length]
-        if (next !== undefined && ring.length > 1) stretches.push([index, next])
+        if (next !== undefined && at < segments) stretches.push([index, next])
       })
     }
   }

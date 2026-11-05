@@ -12,7 +12,6 @@ import {
   dressPair,
   dressSegments,
 } from '@europe-historical-atlas/core/editor/borderOverrides'
-import { addOutlineCarving } from '@europe-historical-atlas/core/editor/carve'
 import {
   addPolity,
   moveAnchors,
@@ -21,20 +20,19 @@ import {
 } from '@europe-historical-atlas/core/editor/documentEdits'
 import { createHistory } from '@europe-historical-atlas/core/editor/history'
 import { isPolityPasteRefusal, pastePolity } from '@europe-historical-atlas/core/editor/paste'
-import {
-  isStretchPasteRefusal,
-  pasteStretch,
-} from '@europe-historical-atlas/core/editor/pasteStretch'
+import { isPointsPasteRefusal, pastePoints } from '@europe-historical-atlas/core/editor/pastePoints'
 import { PASTE_WELD_KM } from '@europe-historical-atlas/core/editor/pasteWeld'
 import { isRetraceRefusal, retraceStretch } from '@europe-historical-atlas/core/editor/retrace'
 import { restack } from '@europe-historical-atlas/core/editor/stacking'
 
+import { outlineActions } from './outlineActions'
+
+import type { OutlineActions } from './outlineActions'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { AnchorRemoval } from '@europe-historical-atlas/core/editor/anchorEdits'
 import type { WeldDone, WeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
 import type { Segment } from '@europe-historical-atlas/core/editor/borderOverrides'
-import type { Carving } from '@europe-historical-atlas/core/editor/carve'
-import type { CopiedPolity, CopiedStretch } from '@europe-historical-atlas/core/editor/clipboard'
+import type { CopiedPoints, CopiedPolity } from '@europe-historical-atlas/core/editor/clipboard'
 import type {
   AnchorMove,
   OutlinePoint,
@@ -49,9 +47,9 @@ import type {
 } from '@europe-historical-atlas/core/editor/history'
 import type { PolityPasteRefusal, PolityPasted } from '@europe-historical-atlas/core/editor/paste'
 import type {
-  StretchPasteRefusal,
-  StretchPasted,
-} from '@europe-historical-atlas/core/editor/pasteStretch'
+  PointsPasteRefusal,
+  PointsPasted,
+} from '@europe-historical-atlas/core/editor/pastePoints'
 import type { RetraceDone, RetraceRefusal } from '@europe-historical-atlas/core/editor/retrace'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
@@ -119,7 +117,7 @@ export interface EditionState {
  * {@link EditionActions.drawOutline}, {@link EditionActions.moveAnchors} — so no caller can do the first half
  * and forget the commit.
  */
-export interface EditionActions {
+export interface EditionActions extends OutlineActions {
   /** Record a finished gesture. One gesture is one step — never one per pointer move. */
   commit: (step: HistoryStep) => void
   /**
@@ -178,18 +176,18 @@ export interface EditionActions {
     step: HistoryStep
   ) => (PolityPasted | PolityPasteRefusal)[]
   /**
-   * Paste a stretch from the clipboard onto a polity, as one undoable step (`s22` « # 2 »): a whole outline as one
-   * more ring of it, welded onto the map; a part of an outline merged into its outline, as ⟨retracer⟩ does.
-   * @param stretch - the copied stretch
+   * Paste points from the clipboard onto a polity, as one undoable step (`open-outlines.md`): each whole outline added,
+   * each piece merged into its outline by the nearest points, or left open when nothing is drawn.
+   * @param copied - the copied points
    * @param polityId - the polity selected
-   * @param step - how the gesture is named — *"paste a stretch onto Kingdom of Poland"*
-   * @returns what was done, or why nothing was — and then nothing was recorded
+   * @param step - how the gesture is named — *"paste points onto Republic of Venice"*
+   * @returns what was done, the pieces left out named, or why nothing was — nothing recorded when nothing was put down
    */
-  pasteStretch: (
-    stretch: CopiedStretch,
+  pastePoints: (
+    copied: CopiedPoints,
     polityId: string,
     step: HistoryStep
-  ) => StretchPasted | StretchPasteRefusal
+  ) => PointsPasted | PointsPasteRefusal
   /**
    * Dress some segments of the borders with a hand — or give them back to the rule with `null` — as one
    * undoable step (`s13`: *give a line a pattern*). The unit is the segment, so half a border may be
@@ -216,26 +214,6 @@ export interface EditionActions {
    * @returns `false` when there is no such override — and nothing happened
    */
   clearOverride: (kind: 'run' | 'pair', index: number, step: HistoryStep) => boolean
-  /**
-   * Give a polity a closed outline, as one undoable step — what the Pen does when the ring closes.
-   *
-   * The points are the session's until now; they enter the document here, all at once, each under its
-   * own provenance — reported by eye, or snapped onto the coast. One step takes the whole outline back.
-   * @param polityId - who the outline is drawn for
-   * @param points - each anchor and its provenance, in order, closure implied
-   *
-   * **A vassal's outline carves its suzerain's own domain** in the same step (`s08`, the dev, 2026-10-15):
-   * the ground under it is no longer the suzerain's own, the new limit shares its anchors.
-   * @param step - how `{History}` and `[↶ Undo]` will name the gesture
-   * @param onCarved - told what a carving did, for the status bar; a carving that failed is logged here
-   * @returns `false` when the polity is unknown or the points enclose nothing — and nothing happened
-   */
-  drawOutline: (
-    polityId: string,
-    points: readonly OutlinePoint[],
-    step: HistoryStep,
-    onCarved?: (carving: Carving) => void
-  ) => boolean
   /**
    * Move anchors, as one undoable step — the white arrow's drag, committed on release: one anchor, or
    * the whole selection, keeping their relative positions (`s03`). Every ring holding any follows.
@@ -535,12 +513,12 @@ function backToTheLine(
  * on screen is never one no step records (reviews ARCH-001 and QUAL-001, 2026-11-05).
  * @param record - the runner every recorded action goes through
  * @param restore - put the map back as the line's current row holds it
- * @returns `pastePolities` and `pasteStretch`
+ * @returns `pastePolities` and `pastePoints`
  */
 function pasteActions(
   record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean,
   restore: () => void
-): Pick<EditionActions, 'pastePolities' | 'pasteStretch'> {
+): Pick<EditionActions, 'pastePolities' | 'pastePoints'> {
   /**
    * Run a paste as one recorded step, putting the map back and throwing again when it fails after writing.
    * @param edit - the paste, on the working document
@@ -563,39 +541,16 @@ function pasteActions(
       }, step)
       return answers
     },
-    pasteStretch: (stretch, polityId, step): StretchPasteRefusal | StretchPasted => {
+    pastePoints: (copied, polityId, step): PointsPasteRefusal | PointsPasted => {
       // Overwritten at once: `record` runs the edit synchronously, and the answer comes back out of it.
-      let answer: StretchPasteRefusal | StretchPasted = { refused: 'no-polity' }
+      let answer: PointsPasteRefusal | PointsPasted = { refused: 'no-polity' }
       guarded((document) => {
-        answer = pasteStretch(document, stretch, polityId, PASTE_WELD_KM)
-        return !isStretchPasteRefusal(answer)
+        answer = pastePoints(document, copied, polityId, PASTE_WELD_KM)
+        // A step only when something was put down: every piece left out writes nothing.
+        return !isPointsPasteRefusal(answer) && answer.outlines + answer.open + answer.merged > 0
       }, step)
       return answer
     },
-  }
-}
-
-/**
- * Closing an outline, which carves a vassal's suzerain in the same step (`s08`, 2026-10-15).
- * @param record - the runner every recorded action goes through
- * @returns `drawOutline`
- */
-function outlineActions(
-  record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean
-): Pick<EditionActions, 'drawOutline'> {
-  return {
-    drawOutline: (polityId, points, step, onCarved): boolean =>
-      record((document) => {
-        const drawn = addOutlineCarving(document, polityId, points)
-        if (!drawn.closed || drawn.carving === null) return drawn.closed
-        // A carving that could not be done leaves the overlap, for the author to correct — said loudly.
-        if ('reason' in drawn.carving) {
-          console.error(
-            `[Cartographer] the outline of "${polityId}" was closed but not carved out of "${drawn.carving.suzerain}": ${drawn.carving.reason}; they overlap.`
-          )
-        } else onCarved?.(drawn.carving)
-        return true
-      }, step),
   }
 }
 

@@ -122,6 +122,18 @@ export interface ToolState {
    */
   selectedAnchors: readonly number[]
   /**
+   * How many times ‹cmd+A› was asked — Édition › Tout sélectionner (`open-outlines.md`). A counter, so asking twice
+   * is two changes the canvas hears; the canvas owns the selection, and answers by selecting every point of the
+   * polity selected. Out of the undo line, like the selection itself.
+   */
+  selectAllAsked: number
+  /**
+   * A warning the canvas raised for the warning dialogue (`AlarmDialog`) — the dev, 2026-11-05: a suzerain not carved
+   * because its outline is open is said *in a dialogue*, not in the status bar. A new object each time, so the same
+   * sentence twice is two warnings; the root raises it on the alarm board.
+   */
+  warning: { text: string } | null
+  /**
    * The polity whose form is open, or `null` (CARTO-246). Here rather than in `{Polities}` so the list's
    * double-click and the map's ask for the same thing, and the panel — which owns the form — opens it; the
    * canvas never knows the form. Outside the undo line, like the tool and the target. It may name a polity
@@ -200,10 +212,53 @@ export interface ToolActions {
    * @param anchors - the selected anchor indices
    */
   setSelectedAnchors: (anchors: readonly number[]) => void
+  /**
+   * ‹cmd+A›: take the white arrow and ask the canvas to select every point of the polity selected — the tool first,
+   * so the canvas's restart for a new tool runs before the selection is made.
+   */
+  askSelectAll: () => void
+  /**
+   * Raise a warning in the warning dialogue.
+   * @param text - the sentence, in the page's language
+   */
+  raiseWarning: (text: string) => void
 }
 
 /** The slice: the tool, the target, and the two ways they change. */
 export type ToolSlice = ToolState & ToolActions
+
+/**
+ * The polity form's, the white arrow's selection's and the warning's actions — out of the undo line, like the tool.
+ * @param set - the store's setter
+ * @param get - the store's getter
+ * @returns the five actions
+ */
+function formAndSelection(
+  set: (partial: Partial<ToolState>) => void,
+  get: () => ToolSlice
+): Pick<
+  ToolActions,
+  'openPolityForm' | 'closePolityForm' | 'setSelectedAnchors' | 'askSelectAll' | 'raiseWarning'
+> {
+  return {
+    openPolityForm: (polityId: string): void => {
+      set({ polityForm: polityId })
+    },
+    closePolityForm: (): void => {
+      set({ polityForm: null })
+    },
+    setSelectedAnchors: (anchors): void => {
+      set({ selectedAnchors: [...anchors] })
+    },
+    askSelectAll: (): void => {
+      get().selectTool('edit')
+      set({ selectAllAsked: get().selectAllAsked + 1 })
+    },
+    raiseWarning: (text: string): void => {
+      set({ warning: { text } })
+    },
+  }
+}
 
 /**
  * Open a tool slice.
@@ -225,16 +280,10 @@ export const createToolSlice: StateCreator<
   tool: 'navigate',
   target: null,
   selectedAnchors: [],
+  selectAllAsked: 0,
+  warning: null,
   polityForm: null,
-  openPolityForm: (polityId: string): void => {
-    set({ polityForm: polityId })
-  },
-  closePolityForm: (): void => {
-    set({ polityForm: null })
-  },
-  setSelectedAnchors: (anchors): void => {
-    set({ selectedAnchors: [...anchors] })
-  },
+  ...formAndSelection(set, get),
   penMode: 'free',
   layerReturn: 'free',
   selectTool: (tool: EditorTool): void => {

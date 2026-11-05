@@ -22,7 +22,8 @@ import { footOnSegment, groundKm } from '../geo/groundDistance'
 import { SpatialCells, inGeoBox, paddedBox } from '../geo/spatialCells'
 
 import { everyRing, insertAnchorOnStretch } from './anchorEdits'
-import { MIN_RING_ANCHORS, referencedAnchors } from './yearDocument'
+import { openRings, outlineFloor, segmentCount } from './outlines'
+import { referencedAnchors } from './yearDocument'
 
 import type { ClipboardPoint } from './clipboard'
 import type { OutlinePoint, Provenance } from './documentEdits'
@@ -191,8 +192,12 @@ function stretchesIn(doc: YearDocument, box: GeoBox, km: number): Stretches {
     placed: new SpatialCells(box, km),
   }
   const seen = new Set<string>()
+  const open = openRings(doc.claims)
   for (const ring of everyRing(doc)) {
+    // An open outline's two ends are joined by no stretch: nothing is put on that line.
+    const segments = segmentCount(ring, open.has(ring))
     ring.forEach((a, position) => {
+      if (position >= segments) return
       const b = ring[(position + 1) % ring.length]
       if (b === undefined || b === a || seen.has(stretchKey(a, b))) return
       const from = positionOf(doc, a)
@@ -213,7 +218,10 @@ function stretchesIn(doc: YearDocument, box: GeoBox, km: number): Stretches {
  */
 function ringsHolding(doc: YearDocument, anchors: ReadonlySet<number>): Map<number, number[][]> {
   const found = new Map<number, number[][]>()
+  const open = openRings(doc.claims)
   for (const ring of everyRing(doc)) {
+    // A pasted outline never follows an open outline of the map: its two ends are joined by no border to follow.
+    if (open.has(ring)) continue
     for (const index of new Set(ring)) {
       if (!anchors.has(index)) continue
       const list = found.get(index)
@@ -225,13 +233,17 @@ function ringsHolding(doc: YearDocument, anchors: ReadonlySet<number>): Map<numb
 }
 
 /**
- * How many points a ring keeps once consecutive repeats are dropped, the closing pair included.
+ * How many points a ring keeps once consecutive repeats are dropped — the closing pair included, but for an open
+ * piece, whose two ends are not joined.
  * @param onAnchor - the map's anchor each pasted point took, `null` for none — each a point of its own
+ * @param open - whether the pasted ring is an open piece
  * @returns the count
  */
-function keptCount(onAnchor: readonly (number | null)[]): number {
+function keptCount(onAnchor: readonly (number | null)[], open: boolean): number {
   const keys = onAnchor.map((anchor, at) => anchor ?? `own:${String(at)}`)
-  return keys.filter((key, at) => key !== keys[(at + 1) % keys.length]).length
+  const last = keys.length - 1
+  return keys.filter((key, at) => (open && at === last) || key !== keys[(at + 1) % keys.length])
+    .length
 }
 
 /**
@@ -371,21 +383,23 @@ function weldOntoStretches(
 
 /**
  * The map's anchor each pasted point lies near — `null` for none — or `null` for the whole ring when the weld would
- * leave it under {@link MIN_RING_ANCHORS} points.
+ * leave it under its floor (`outlineFloor`) points.
  * @param doc - the map
  * @param anchors - the map's anchors near the paste, filed by cell
  * @param ring - the pasted points
  * @param km - the weld distance
+ * @param open - whether the pasted ring is an open piece, which stands on two points
  * @returns the anchor per point, or `null` when the ring is not to be welded
  */
 function anchorsOf(
   doc: YearDocument,
   anchors: SpatialCells<number>,
   ring: readonly ClipboardPoint[],
-  km: number
+  km: number,
+  open: boolean
 ): (number | null)[] | null {
   const onAnchor = ring.map((point) => nearestAnchor(doc, anchors.near(point.at), point.at, km))
-  return keptCount(onAnchor) < MIN_RING_ANCHORS ? null : onAnchor
+  return keptCount(onAnchor, open) < outlineFloor(open) ? null : onAnchor
 }
 
 /**
@@ -395,13 +409,15 @@ function anchorsOf(
  * @param ring - the pasted points
  * @param onAnchor - the map's anchor each took, `null` for none
  * @param rings - the map's rings holding each welded anchor
- * @returns the outline's points, closure implied
+ * @param open - whether the pasted ring is an open piece: nothing is followed, nor dropped, across its two ends
+ * @returns the outline's points, closure implied for a closed ring
  */
 function outlineOf(
   doc: YearDocument,
   ring: readonly ClipboardPoint[],
   onAnchor: readonly (number | null)[],
-  rings: ReadonlyMap<number, number[][]>
+  rings: ReadonlyMap<number, number[][]>,
+  open: boolean
 ): OutlinePoint[] {
   const points: OutlinePoint[] = []
   const take = (index: number): void => {
@@ -414,12 +430,15 @@ function outlineOf(
       return
     }
     take(anchor)
-    const next = onAnchor[(at + 1) % ring.length] ?? null
+    const next = open && at === ring.length - 1 ? null : (onAnchor[(at + 1) % ring.length] ?? null)
     if (next !== null && next !== anchor) followedRun(doc, rings, anchor, next).forEach(take)
   })
+  const last = points.length - 1
   return points.filter(
     (point, at) =>
-      point.anchor === undefined || point.anchor !== points[(at + 1) % points.length]?.anchor
+      point.anchor === undefined ||
+      (open && at === last) ||
+      point.anchor !== points[(at + 1) % points.length]?.anchor
   )
 }
 
@@ -442,19 +461,21 @@ function unwelded(ring: readonly ClipboardPoint[]): WeldedRing {
  * **The map they weld onto is the map before the paste**, read once for all the rings — the rings do not weld onto
  * one another, and a polity of two hundred islands (Norway in the backup) costs one reading, not two hundred.
  *
- * **A ring the weld would leave under {@link MIN_RING_ANCHORS} points keeps its own points** — an islet narrower than
+ * **A ring the weld would leave under its floor (`outlineFloor`) points keeps its own points** — an islet narrower than
  * the weld distance, met wholly by the map's points (my choice, 2026-11-05). Decided before anything is written when
  * the map's points close it; when points put on stretches close it, those points stay on the neighbour's stretches,
  * where they change no shape.
  * @param doc - the target map, before the pasted outlines enter it; gains the points put on its stretches
  * @param rings - the pasted rings, closure implied
  * @param km - the weld distance, {@link PASTE_WELD_KM} in the application; above zero
+ * @param open - per ring, whether it is an open piece (`open-outlines.md`) — a ring past the list's end is closed
  * @returns per ring, the points to close it with and how many copied points were welded
  */
 export function weldPastedRings(
   doc: YearDocument,
   rings: readonly (readonly ClipboardPoint[])[],
-  km: number
+  km: number,
+  open: readonly boolean[] = []
 ): WeldedRing[] {
   if (rings.length === 0) return []
   const box = paddedBox(
@@ -466,13 +487,14 @@ export function weldPastedRings(
     const at = positionOf(doc, index)
     if (inGeoBox(at, box)) anchors.addPoint(index, at)
   }
-  const welds = rings.map((ring) => anchorsOf(doc, anchors, ring, km))
+  const isOpen = (at: number): boolean => open[at] === true
+  const welds = rings.map((ring, at) => anchorsOf(doc, anchors, ring, km, isOpen(at)))
   const stretches = stretchesIn(doc, box, km)
   rings.forEach((ring, at) => {
     const onAnchor = welds[at]
     if (!onAnchor) return
     weldOntoStretches(doc, ring, onAnchor, stretches, km)
-    if (keptCount(onAnchor) < MIN_RING_ANCHORS) welds[at] = null
+    if (keptCount(onAnchor, isOpen(at)) < outlineFloor(isOpen(at))) welds[at] = null
   })
   const welded = welds.flatMap((onAnchor) => (onAnchor ?? []).filter((index) => index !== null))
   const holding = ringsHolding(doc, new Set(welded))
@@ -480,7 +502,7 @@ export function weldPastedRings(
     const onAnchor = welds[at] ?? null
     if (onAnchor === null) return unwelded(ring)
     return {
-      points: outlineOf(doc, ring, onAnchor, holding),
+      points: outlineOf(doc, ring, onAnchor, holding, isOpen(at)),
       welded: onAnchor.filter((index) => index !== null).length,
     }
   })

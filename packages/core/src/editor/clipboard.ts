@@ -7,17 +7,22 @@
  * was recorded under — a point keeps its source wherever it goes. Pasting (`paste.ts`) puts each point **in place**,
  * at those coordinates, as a new anchor of the target map: it shares none with the map's own.
  *
- * **What it holds is either polities or a stretch** — one pastes what one selected: a polity whole, sheet and
- * outline, or several from `{Polities}`; or a run of anchors that follow one another on one ring.
+ * **What it holds is either polities or points** — one pastes what one selected: a polity whole, sheet and outline,
+ * or several from `{Polities}`; or **any points**, whatever they make (the dev, 2026-11-05: *"it's the points we
+ * want … that they make one or several outlines is not my business"*). The points are sorted into **pieces** along
+ * the outlines they lie on — a whole closed outline, or a run of points that follow one another
+ * (`files/plans/cartographer/open-outlines.md`).
  */
 
 import { z } from 'zod/mini'
 
 import { yearPolitySchema } from '../data/yearFormat'
 
-import { MIN_RING_ANCHORS } from './yearDocument'
+import { everyOutline, isRingOpen, outlineFloor } from './outlines'
+import { MIN_OPEN_ANCHORS } from './yearDocument'
 
 import type { Provenance } from './documentEdits'
+import type { OutlineOf } from './outlines'
 import type { YearDocument } from './yearDocument'
 import type { YearPolity } from '../data/yearFormat'
 
@@ -29,7 +34,7 @@ export interface ClipboardPoint {
   provenance: Provenance
 }
 
-/** One copied polity: its sheet, and its rings resolved into points, closure implied. */
+/** One copied polity: its sheet, and its rings resolved into points. */
 export interface CopiedPolity {
   /** The sheet, copied — id included, though a paste never trusts it to be free. */
   polity: YearPolity
@@ -40,6 +45,8 @@ export interface CopiedPolity {
   suzerainName: string | null
   /** Every ring of its claim, each point in place; empty for a polity with no territory. */
   rings: ClipboardPoint[][]
+  /** The positions in {@link rings} of its open outlines, as the claim holds them; absent when every one is closed. */
+  open?: number[] | undefined
 }
 
 /** Polities copied from a map — one, or several selected in `{Polities}`. */
@@ -52,36 +59,31 @@ export interface CopiedPolities {
   polities: CopiedPolity[]
 }
 
-/** A stretch copied from a map: anchors that follow one another on one ring. */
-export interface CopiedStretch {
-  /** What the clipboard holds. */
-  kind: 'stretch'
-  /** The map it was copied from. */
-  map: string
-  /** The name of the polity whose ring it was copied from, said back in the status bar. */
-  polity: string
+/** One piece of the points copied: a whole closed outline, or points that follow one another along one. */
+export interface CopiedPiece {
   /**
-   * Whether it is a whole ring, closure implied — copied as a stretch since 2026-11-05 (the dev: there is no outline
-   * replacement; a whole outline is a stretch like any other). A whole ring pasted onto a polity becomes one more ring
-   * of it; an open stretch is merged into the polity's outline.
+   * Whether it is a whole closed outline, closure implied. Pasted, it is added as one more outline; a piece that is
+   * not closed is merged into the polity's outline, or left open when nothing is drawn.
    */
   closed: boolean
-  /** The points, in the ring's order — two at least, three at least when closed. */
+  /** The points, in the outline's order — two at least, three when closed. */
   points: ClipboardPoint[]
 }
 
+/** Points copied from a map, sorted into pieces along the outlines they lie on. */
+export interface CopiedPoints {
+  /** What the clipboard holds. */
+  kind: 'points'
+  /** The map they were copied from. */
+  map: string
+  /** The name of the polity the points were copied from — the one aimed at, said back in the status bar. */
+  polity: string
+  /** The pieces, the polity aimed at's first. */
+  pieces: CopiedPiece[]
+}
+
 /** What the clipboard holds. */
-export type ClipboardContent = CopiedPolities | CopiedStretch
-
-/** The fewest points a stretch has: its two ends. */
-const MIN_STRETCH_POINTS = 2
-
-/** Why a selection of anchors is not a stretch that can be copied. */
-export type StretchRefusal =
-  /** Fewer than two anchors. */
-  | 'too-few'
-  /** The anchors do not follow one another on any single ring. */
-  | 'not-a-run'
+export type ClipboardContent = CopiedPolities | CopiedPoints
 
 /**
  * A point of the document, resolved with its provenance.
@@ -141,84 +143,106 @@ export function copyPolities(
         polity: structuredClone(polity),
         suzerainName: nameOf(doc, polity.suzerain),
         rings: (claim?.rings ?? []).map((ring) => ring.map((index) => pointOf(doc, index))),
+        ...(claim?.open === undefined ? {} : { open: [...claim.open] }),
       }
     })
   return polities.length === 0 ? null : { kind: 'polities', map, polities }
 }
 
-/** Where a run of anchors starts on a ring, and whether it is the whole ring. */
-interface RunOnRing {
-  /** The position on the ring the run starts at — the ring's first for a whole ring. */
-  start: number
-  /** Whether the anchors are every anchor of the ring. */
-  closed: boolean
-}
-
 /**
- * Where a set of anchors runs along a ring: the position the run starts at, when the anchors follow one another.
- * @param ring - the ring's anchors
- * @param anchors - the anchors selected
- * @returns the run, or `null` when they are not one run of this ring
+ * The runs of selected anchors along one outline: positions that follow one another, each run as long as it goes —
+ * across the closing segment of a closed ring, never past an open outline's ends. A whole closed ring is one run,
+ * starting at its first anchor.
+ * @param outline - the outline
+ * @param selected - the anchors still to place
+ * @returns each run's positions, in the outline's order, and whether it is the whole closed ring
  */
-function runOn(ring: readonly number[], anchors: ReadonlySet<number>): RunOnRing | null {
-  const inside = ring.map((index) => anchors.has(index))
-  const count = inside.filter(Boolean).length
-  if (count !== anchors.size || new Set(ring).size !== ring.length) return null
-  if (count === ring.length) return { start: 0, closed: true }
-  // One run on a closed ring is one place where an outside anchor is followed by an inside one.
-  const starts = inside.flatMap((isIn, at) =>
-    isIn && inside[(at - 1 + ring.length) % ring.length] === false ? [at] : []
-  )
-  const start = starts.length === 1 ? starts[0] : undefined
-  return start === undefined ? null : { start, closed: false }
+function runsAlong(
+  outline: OutlineOf,
+  selected: ReadonlySet<number>
+): { positions: number[]; whole: boolean }[] {
+  const { ring, open } = outline
+  const inside = ring.map((index) => selected.has(index))
+  const count = ring.length
+  if (inside.every(Boolean)) {
+    return [{ positions: ring.map((_index, at) => at), whole: !open }]
+  }
+  const before = (at: number): boolean =>
+    open ? (inside[at - 1] ?? false) : (inside[(at - 1 + count) % count] ?? false)
+  const runs: { positions: number[]; whole: boolean }[] = []
+  for (let start = 0; start < count; start += 1) {
+    if (!inside[start] || before(start)) continue
+    const positions: number[] = []
+    for (let at = start; positions.length < count; at += 1) {
+      const wrapped = open ? at : at % count
+      if (wrapped >= count || !inside[wrapped]) break
+      positions.push(wrapped)
+    }
+    runs.push({ positions, whole: false })
+  }
+  return runs
+}
+
+/** Points copied, and how many selected points stood alone — no neighbour selected along any outline. */
+export interface PointsCopy {
+  /** The copy, or `null` when no two selected points follow one another anywhere. */
+  copy: CopiedPoints | null
+  /** The selected points left out, alone on every outline they lie on: a single point is no piece. */
+  alone: number
 }
 
 /**
- * Copy a stretch: anchors that follow one another on one ring, in the ring's order — or every anchor of a ring, a
- * stretch closed on itself (the dev, 2026-11-05: a whole outline is a stretch like any other).
- *
- * The ring searched first is the selected polity's, so a border two polities share is copied as the one aimed at
- * runs it; any other ring holding the run answers as well.
+ * Copy any points selected, sorted into pieces along the outlines they lie on — the polity aimed at's outlines first,
+ * so a border two polities share is copied as the one aimed at runs it. A point shared by two outlines goes into the
+ * first piece that takes it.
  * @param doc - the map being copied from
  * @param anchors - the anchors selected
  * @param map - the map's name
- * @param aimedAt - the polity selected, whose rings are searched first, or `null`
- * @returns the copy, or why the anchors are not a stretch
+ * @param aimedAt - the polity selected, whose outlines are read first, or `null`
+ * @returns the copy and the points left out
  */
-export function copyStretch(
+export function copyPoints(
   doc: YearDocument,
   anchors: readonly number[],
   map: string,
   aimedAt: string | null
-): CopiedStretch | StretchRefusal {
-  const selected = new Set(anchors)
-  if (selected.size < MIN_STRETCH_POINTS) return 'too-few'
-  const claims = [...doc.claims].sort(
+): PointsCopy {
+  const remaining = new Set(anchors)
+  const outlines = everyOutline(doc.claims).sort(
     (a, b) => Number(b.polity === aimedAt) - Number(a.polity === aimedAt)
   )
-  for (const claim of claims) {
-    for (const ring of claim.rings) {
-      const run = runOn(ring, selected)
-      if (run === null) continue
-      const ordered = [...ring.slice(run.start), ...ring.slice(0, run.start)].slice(
-        0,
-        selected.size
-      )
-      const owner = doc.polities.find((polity) => polity.id === claim.polity)
-      // A claim names a polity of the registry: the document is cross-checked when it opens.
-      if (owner === undefined) {
-        throw new Error(`[Cartographer] the claim of "${claim.polity}" names no polity of the map.`)
-      }
-      return {
-        kind: 'stretch',
-        map,
-        polity: owner.name,
-        closed: run.closed,
-        points: ordered.map((index) => pointOf(doc, index)),
-      }
+  const pieces: CopiedPiece[] = []
+  let owner: string | null = null
+  for (const outline of outlines) {
+    for (const run of runsAlong(outline, remaining)) {
+      if (run.positions.length < MIN_OPEN_ANCHORS) continue
+      const indices = run.positions.flatMap((at) => outline.ring.slice(at, at + 1))
+      pieces.push({ closed: run.whole, points: indices.map((index) => pointOf(doc, index)) })
+      for (const index of indices) remaining.delete(index)
+      owner ??= outline.polity
     }
   }
-  return 'not-a-run'
+  const name = owner === null ? null : nameOf(doc, owner)
+  const copy = name === null ? null : { kind: 'points' as const, map, polity: name, pieces }
+  return { copy, alone: remaining.size }
+}
+
+/**
+ * Whether a copied polity's open positions name rings it has, ascending and each once, and every ring holds its
+ * floor — the year file's rule (`claimHoldsTogether`), on rings of points rather than of indices.
+ * @param rings - the copied rings
+ * @param open - their open positions, or none
+ * @returns `true` when they hold together
+ */
+function openPositionsHold(
+  rings: readonly unknown[][],
+  open: readonly number[] | undefined
+): boolean {
+  const positions = open ?? []
+  const named = positions.every(
+    (at, i) => at < rings.length && (i === 0 || at > (positions[i - 1] ?? -1))
+  )
+  return named && rings.every((ring, at) => ring.length >= outlineFloor(isRingOpen({ open }, at)))
 }
 
 /** A finite `[longitude, latitude]`. */
@@ -233,6 +257,11 @@ const pointSchema = z.strictObject({
   }),
 })
 
+/** {@link CopiedPiece}: a closed piece is a ring of three points at least, an open one a line of two. */
+const pieceSchema = z
+  .strictObject({ closed: z.boolean(), points: z.array(pointSchema) })
+  .check(z.refine((piece) => piece.points.length >= outlineFloor(!piece.closed)))
+
 /** {@link ClipboardContent}, as it is read back from the tab's storage. */
 const clipboardSchema: z.ZodMiniType<ClipboardContent> = z.discriminatedUnion('kind', [
   z.strictObject({
@@ -244,8 +273,9 @@ const clipboardSchema: z.ZodMiniType<ClipboardContent> = z.discriminatedUnion('k
           .strictObject({
             polity: yearPolitySchema,
             suzerainName: z.nullable(z.string()),
-            // A ring of fewer points encloses nothing, and no map holds one: a clipboard carrying it is not one.
-            rings: z.array(z.array(pointSchema).check(z.minLength(MIN_RING_ANCHORS))),
+            // An open outline stands on two points, a closed ring on three; the claim's own rule says which is which.
+            rings: z.array(z.array(pointSchema).check(z.minLength(MIN_OPEN_ANCHORS))),
+            open: z.optional(z.array(z.int().check(z.nonnegative())).check(z.minLength(1))),
           })
           // A vassal is copied with its suzerain's name, a sovereign with none.
           .check(
@@ -253,19 +283,18 @@ const clipboardSchema: z.ZodMiniType<ClipboardContent> = z.discriminatedUnion('k
               (copied) => (copied.polity.suzerain === null) === (copied.suzerainName === null)
             )
           )
+          // The open positions as the year file holds them: rings it has, ascending, each ring over its floor (review
+          // SEC-001, 2026-11-05).
+          .check(z.refine((copied) => openPositionsHold(copied.rings, copied.open)))
       )
       .check(z.minLength(1)),
   }),
-  z
-    .strictObject({
-      kind: z.literal('stretch'),
-      map: z.string(),
-      polity: z.string(),
-      closed: z.boolean(),
-      points: z.array(pointSchema).check(z.minLength(MIN_STRETCH_POINTS)),
-    })
-    // A closed stretch is a ring, and a ring of fewer points encloses nothing.
-    .check(z.refine((stretch) => !stretch.closed || stretch.points.length >= MIN_RING_ANCHORS)),
+  z.strictObject({
+    kind: z.literal('points'),
+    map: z.string(),
+    polity: z.string(),
+    pieces: z.array(pieceSchema).check(z.minLength(1)),
+  }),
 ])
 
 /**

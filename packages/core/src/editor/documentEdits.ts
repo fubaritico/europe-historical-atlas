@@ -9,6 +9,7 @@
 
 import { effectiveSuzerains, vassalsOf, wouldExceedHomageDepth } from '../data/paintOrder'
 
+import { outlineFloor, pushRing, setRingOpen } from './outlines'
 import { MIN_RING_ANCHORS, referencedAnchors } from './yearDocument'
 
 import type { YearDocument } from './yearDocument'
@@ -187,12 +188,27 @@ export function updatePolity(doc: YearDocument, polity: YearPolity): boolean {
  * @returns `false` when the polity is unknown or the ring cannot enclose an area
  */
 export function closeRing(doc: YearDocument, polityId: string, ring: number[]): boolean {
-  if (ring.length < MIN_RING_ANCHORS) return false
+  return placeRing(doc, polityId, ring, false)
+}
+
+/**
+ * Give a polity a ring, closed or open (`editor/outlines.ts`).
+ * @param doc - the document to edit
+ * @param polityId - who is drawing
+ * @param ring - the anchor indices, in order
+ * @param open - whether the author left it open — a line of two points stands, a closed ring needs three
+ * @returns `false` when the polity is unknown, an index is not an anchor, or the ring is under its floor
+ */
+function placeRing(doc: YearDocument, polityId: string, ring: number[], open: boolean): boolean {
+  if (ring.length < outlineFloor(open)) return false
   if (!doc.polities.some((polity) => polity.id === polityId)) return false
   if (ring.some((index) => index < 0 || index >= doc.anchors.length)) return false
-  const claim = doc.claims.find((existing) => existing.polity === polityId)
-  if (claim) claim.rings.push([...ring])
-  else doc.claims.push({ polity: polityId, rings: [[...ring]] })
+  let claim = doc.claims.find((existing) => existing.polity === polityId)
+  if (claim === undefined) {
+    claim = { polity: polityId, rings: [] }
+    doc.claims.push(claim)
+  }
+  pushRing(claim, [...ring], open)
   return true
 }
 
@@ -245,33 +261,80 @@ export interface OutlinePoint {
  * it is the session's, not the document's, so ‹escape› has nothing to take back and one `ctrl+z` removes
  * the lot — `H-10`'s *one gesture is one step*, applied to the outline. Refusals are checked **before**
  * anything is written, so a refused outline leaves no anchor and no source behind.
+ *
+ * **Or an open one** (the dev, 2026-11-05): the Pen commits the outline it holds when the author changes polity,
+ * closed or not, and a pasted piece with nothing to merge into stays open (`files/plans/cartographer/open-outlines.md`).
  * @param doc - the document to edit
  * @param polityId - who the outline is drawn for
- * @param points - each anchor, in order, closure implied, with its own provenance
- * @returns `false` when the polity is unknown, the points cannot enclose an area, or a point names an
+ * @param points - each anchor, in order, with its own provenance
+ * @param open - whether the outline is left open
+ * @returns `false` when the polity is unknown, the points are under the outline's floor, or a point names an
  *   anchor the document does not hold — and nothing was written
  */
 export function addOutline(
   doc: YearDocument,
   polityId: string,
-  points: readonly OutlinePoint[]
+  points: readonly OutlinePoint[],
+  open: boolean
 ): boolean {
-  if (points.length < MIN_RING_ANCHORS) return false
+  if (points.length < outlineFloor(open)) return false
   if (!doc.polities.some((polity) => polity.id === polityId)) return false
+  const ring = anchorsFor(doc, points)
+  return ring !== null && placeRing(doc, polityId, ring, open)
+}
+
+/**
+ * The anchors some outline points are: an existing anchor by its index, a new point added under its own provenance.
+ * **The one place a drawn or pasted point becomes an anchor** — and every index is checked before the first point is
+ * added, so a refusal leaves no anchor and no source behind.
+ * @param doc - the document, gaining the new points
+ * @param points - the points, in order
+ * @returns their anchors, or `null` when a point names an anchor the document does not hold — nothing written
+ */
+export function anchorsFor(doc: YearDocument, points: readonly OutlinePoint[]): number[] | null {
   const count = doc.anchors.length
-  if (
-    points.some(
-      (point) => typeof point.anchor === 'number' && !(point.anchor >= 0 && point.anchor < count)
-    )
-  ) {
-    return false
-  }
-  const ring = points.map((point) =>
+  const outside = (point: OutlinePoint): boolean =>
+    typeof point.anchor === 'number' && !(point.anchor >= 0 && point.anchor < count)
+  if (points.some(outside)) return null
+  return points.map((point) =>
     typeof point.anchor === 'number'
       ? point.anchor
       : addAnchor(doc, [point.at[0], point.at[1]], declareSource(doc, point.provenance))
   )
-  return closeRing(doc, polityId, ring)
+}
+
+/**
+ * Put back an outline the Pen resumed (`open-outlines.md`, the dev, 2026-11-05: *"stop it, resume it"*): the ring at
+ * its position replaced by the points in hand, open or now closed, in place — the claim's other rings keep theirs.
+ * Refusals are checked **before** anything is written, as {@link addOutline}'s.
+ * @param doc - the document to edit
+ * @param polityId - whose outline
+ * @param at - the ring's position in the polity's claim
+ * @param expected - the anchors the ring held when the Pen took it up — a ring that changed since is not replaced
+ * @param points - each anchor, in order, with its own provenance
+ * @param open - whether the outline stays open
+ * @returns `false` when the polity holds no such ring, it changed since, the points are under the floor, or a point
+ *   names an anchor the document does not hold — and nothing was written
+ */
+export function replaceOutline(
+  doc: YearDocument,
+  polityId: string,
+  at: number,
+  expected: readonly number[],
+  points: readonly OutlinePoint[],
+  open: boolean
+): boolean {
+  const claim = doc.claims.find((existing) => existing.polity === polityId)
+  const ring = claim?.rings[at]
+  if (claim === undefined || ring === undefined) return false
+  if (ring.length !== expected.length || ring.some((index, i) => index !== expected[i]))
+    return false
+  if (points.length < outlineFloor(open)) return false
+  const anchors = anchorsFor(doc, points)
+  if (anchors === null) return false
+  claim.rings[at] = anchors
+  setRingOpen(claim, at, open)
+  return true
 }
 
 /**

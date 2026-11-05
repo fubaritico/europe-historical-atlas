@@ -24,7 +24,9 @@
   "menuEdit": "Edit",
   "copy": "Copy",
   "pastePolities": "Paste polities",
-  "pasteStretch": "Paste the stretch onto {name}",
+  "pastePoints": "Paste the points onto {name}",
+  "selectAll": "Select all",
+  "selectAllOf": "Select all: {name}",
   "pasteSheet": "Paste the sheet onto {name}…",
   "theSelection": "the selected polity"
 }

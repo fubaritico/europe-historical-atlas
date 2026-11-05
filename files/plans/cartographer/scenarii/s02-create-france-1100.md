@@ -1034,3 +1034,39 @@ Scenario: the visible border between two anchors does not snap (H-38, open)
   And a click there places a point beside France, not on it
 ```
 
+
+### An outline may stay open (the dev, 2026-11-05 — `open-outlines.md`)
+
+> *"An outline must be allowed not to be closed. One must be able to stop it, resume it."* — *"Closed or not, an
+> outline is saved when you change polity."* — then, the same evening: *"as soon as you leave the outline, for whatever
+> reason, it is saved, and you can resume it"*: another polity, another tool, ‹escape›. Built 2026-11-05 evening in the
+> worktree; **not walked yet**.
+
+```gherkin
+Scenario: leaving the outline keeps it, open
+  Given the Pen in France, three points placed, the outline not closed
+  When I select another polity, or take another tool, or press ‹escape›
+  Then France's outline is kept, open — stroked without the line between its two ends, filled as if closed by it
+  And the bar reads "Tracé de Reaume de France gardé, ouvert : reprenez-le à la plume par une de ses extrémités"
+  And one ‹ctrl+Z› takes it back
+
+Scenario: resume an open outline by one of its ends
+  Given France has an open outline, and the Pen in France with nothing in hand
+  When I click one of its two ends
+  Then its points come into the Pen, the end clicked last, and the next click goes on from there
+  And the bar reads "Tracé ouvert de Reaume de France repris : continuez-le, ou cliquez son autre extrémité pour le fermer"
+
+Scenario: close a resumed outline on its other end
+  Given France's open outline taken up, and points added after it
+  When I click its other end
+  Then the outline is closed, in its place — France's other outlines untouched
+```
+
+```gherkin
+Scenario: a vassal is not closed over a suzerain still open
+  Given France's outline is open, and the Sacrum Imperium, France's vassal, drawn inside it with the Pen
+  When I click the Sacrum Imperium's first point to close it
+  Then nothing is written, the outline in hand is erased
+  And the warning dialogue « Le découpage du suzerain » says it, under the dev's warning sign: close France first,
+    then draw the Sacrum Imperium again
+```

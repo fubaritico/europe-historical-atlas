@@ -23,6 +23,7 @@ export const COMMAND_KEYS = {
   undo: { key: 'z', command: true },
   redo: { key: 'z', command: true, shift: true },
   copy: { key: 'c', command: true },
+  selectAll: { key: 'a', command: true },
   paste: { key: 'v', command: true },
   pasteSheet: { key: 'v', command: true, shift: true },
   front: { key: 'ArrowUp', command: true, shift: true },

@@ -156,84 +156,78 @@ Scenario: paste twice
   When I press ‹ctrl+V› again
   Then the dialogue of a name already in the map opens
 
-# 2 — a stretch onto a polity: one rule, the dev's (2026-11-05)
+# 2 — points onto a polity: the dev's rule of 2026-11-05 evening (`open-outlines.md`)
 
-> **The dev, 2026-11-05**: *"there is no outline replacement. Keep the mechanics simple: you paste, there is nothing,
-> it takes the place; you paste, there is something, we weld."* An outline selected whole is **a stretch like any
-> other**; to replace a polity's outline, the author deletes it in the target map, then pastes. The replacement and
-> the island of the earlier version are struck below.
+> **The dev, 2026-11-05 evening**, trying to carry his backup's Venice — about twenty pieces — into his 1100: *"it's
+> the points we want. That they make one or several outlines is not my business. I want to copy something."* So
+> ‹cmd+C› copies **any points**, sorted into pieces along the outlines they lie on; ‹cmd+V› puts every piece down on
+> the polity selected; ‹cmd+A› selects every point of the polity selected. The rule of the afternoon stands within it:
+> no outline replacement — a whole outline is added, a part is merged.
 >
-> **Built 2026-11-05, wired to ‹cmd+V› and Édition › Coller le tronçon sur … the same evening** (`core/editor/
-> pasteStretch.ts`, `ui/utils/pasteClipboard.ts`): a whole outline copied as a closed stretch; pasted onto the polity
-> selected, a whole outline as one more ring of it, welded at 2 km; a part merged between the anchors its ends hook
-> onto, the smaller change as ⟨retracer⟩ chooses (`core/geo/retraceSide.ts`, moved down from the Cartographer so both
-> read one rule), a neighbour over the whole replaced stretch following; every refusal below said, ⟨retracer⟩'s in its
-> own words. « Coller le tracé » removed from the menu, with its key ‹alt+cmd+V›. **Not walked yet** — neither by me
-> nor by the dev; merged at his word. **Declared gap**: the pasted points are not selected (the canvas owns the
-> selection of anchors; the store only reads it).
+> **Built and wired 2026-11-05 evening** (worktree `europe-map-copypaste`, `core/editor/clipboard.ts` `copyPoints`,
+> `core/editor/pastePoints.ts`, `ui/utils/copySelection.ts`, `ui/utils/pasteClipboard.ts`, ‹cmd+A› through the store
+> to the canvas, `canvas/storeAnswers.ts`). **Walked by the dev the same evening** on his backup's Venice: ‹cmd+A›,
+> ‹cmd+C›, *Open…* a copy of his 1100, Venice's outline deleted, ‹cmd+V› — *"OK"*. **Declared gap**: the pasted points are not selected.
+> **My choice, to confirm with the dev**: a piece ⟨retracer⟩ refuses is left out and named, the others pasted.
 
-Scenario: copy a stretch
-  When I select anchors that follow one another on <copied polity>'s outline
-  And I press ‹ctrl+C›
-  Then the status bar reads « Copié : un tronçon de <copied polity>, <n> points, de <source map> — sélectionnez une entité, puis ⌘V »
+Scenario: select every point of a polity
+  Given <copied polity> is selected
+  When I press ‹ctrl+A›, or choose Édition › Tout sélectionner : <copied polity>
+  Then the white arrow is taken, and every point of <copied polity> is selected
+  And in a text field ‹ctrl+A› selects the text, as everywhere
 
-Scenario: copy a whole outline
-  When I select every anchor of one of <copied polity>'s rings
-  And I press ‹ctrl+C›
-  Then the clipboard holds a stretch, closed, and the status bar reads as for any stretch
-  # The refusal « a whole ring is copied by copying the polity » (step 1, built 2026-11-03), struck 2026-11-05.
+Scenario: select all with no polity selected
+  Given no polity is selected
+  Then Édition › Tout sélectionner is greyed
+  And ‹ctrl+A› selects nothing, and the status bar reads « Sélectionnez d’abord une entité : tout sélectionner prend tous ses points »
 
-Scenario: paste a stretch onto a polity with nothing drawn
-  Given a whole outline is copied from <source map>
-  And <target polity> has no outline in <target map>
-  When I select <target polity> and press ‹ctrl+V›
-  Then the copied outline becomes <target polity>'s, its points in place
-  And where it comes within the weld distance of a neighbour's or of the coast, it takes their points
-  And <target polity> keeps its own sheet
-  And one ‹ctrl+Z› gives <target polity> back with nothing drawn
+Scenario: copy points
+  When I select two points or more of <copied polity> and press ‹ctrl+C›
+  Then the clipboard holds the points, sorted into pieces: every outline selected whole is a closed piece, every run of
+    points that follow one another is a piece of its own
+  And the status bar reads « Copié : <n> points de <copied polity>, de <source map> — sélectionnez une entité, puis ⌘V »
 
-Scenario: an open stretch onto a polity with nothing drawn
-  Given an open stretch is copied — not a whole outline
-  And <target polity> has no outline
+Scenario: a point selected alone is left out, and said
+  Given a selected point none of whose neighbours along an outline is selected
+  When I press ‹ctrl+C›
+  Then it is left out, and the status bar adds « un point seul laissé de côté : aucun voisin sélectionné »
+  And when every selected point is alone, nothing is copied: « Aucun de ces points n’a de voisin sélectionné sur un tracé : rien n’est copié »
+
+Scenario: paste points onto a polity
+  Given points of <copied polity> are copied from <source map>
+  When I select <target polity> in <target map> and press ‹ctrl+V›
+  Then every whole outline copied is added to <target polity>, welded at 2 km — its outline when nothing is drawn
+  And every other piece is merged into <target polity>'s outline: each end hooks onto the nearest point of it, however
+    far (the dev: « tu prends le point le plus proche pour le merger avec »), and the part between them is replaced —
+    the smaller change, as ⟨retracer⟩ chooses; a neighbour over the whole replaced part follows
+  And one ‹ctrl+Z› takes the whole paste back
+  And the status bar reads « Collé sur <target polity> : <n> points, dont <w> soudés aux voisins — <k> tracés ajoutés — <m> parties fondues dans le tracé »
+
+Scenario: a piece onto a polity with nothing drawn
+  Given <target polity> has nothing drawn
+  When I paste a piece that is not a whole outline
+  Then it becomes an open outline of <target polity> — « un tracé laissé ouvert » — to be resumed with the Pen
+
+Scenario: a piece that joins the two ends of an open outline
+  Given <target polity>'s outline is open
+  When I paste a piece whose ends lie nearest its two ends
+  Then the piece closes it, as Illustrator joins two ends
+
+Scenario: a piece refused where ⟨retracer⟩ would refuse
+  Given a border styled by hand covers the part a piece would replace
   When I press ‹ctrl+V›
-  Then nothing is pasted, and the history gains no step
-  And the status bar reads « <target polity> n'a pas de tracé où accrocher ce tronçon : copiez un tracé entier »
-
-Scenario: paste a stretch onto a polity's outline
-  # Confirmed by the dev, 2026-11-05: a part of an outline, pasted, is merged into the outline already there —
-  # « il faut un merge, une fusion ». The document holds closed outlines only, so an open part cannot lie apart.
-  Given a stretch of <copied polity> is copied from <source map>
-  And <target map> is open, with <target polity> drawn otherwise over the same ground
-  When I select <target polity> and press ‹ctrl+V›
-  Then the stretch's two ends hook onto the nearest anchors of <target polity>'s outline
-  And the part of <target polity>'s outline between them is replaced by the stretch, its points at their coordinates — the
-    smaller change, as ⟨retracer⟩ chooses
-  And a neighbour whose outline ran over the whole replaced part takes the stretch too, as ⟨retracer⟩ does
-  And the pasted points are selected
-  And the status bar says how many points were pasted onto <target polity>
-  And one ‹ctrl+Z› gives <target polity>'s outline back — the way to undo a wrong side, too
-
-Scenario: a stretch whose ends are too far from the outline
-  Given an end of the copied stretch lies farther than the weld distance from <target polity>'s outline
-  When I press ‹ctrl+V›
-  Then nothing is pasted, and the history gains no step
-  And the status bar reads « Ce bout est à <d> km du tracé de <target polity> : rien n'est collé »
-
-Scenario: a stretch refused where ⟨retracer⟩ would refuse
-  Given a third polity touches the part of <target polity>'s outline the stretch would replace (a triple point)
-  Or a border styled by hand covers it
-  When I press ‹ctrl+V›
-  Then nothing is pasted, and the status bar says why, in ⟨retracer⟩'s own words
+  Then that piece is left out, the others are pasted, and the status bar adds « Une partie non collée : <⟨retracer⟩'s reason> »
+  And when every piece is left out, nothing is recorded: « Rien n’est collé sur <target polity> »
 
 Scenario: a whole outline onto a polity already drawn
-  # Confirmed by the dev, 2026-11-05: the two outlines overlap and it looks messy, which is the point — the author's
-  # first reflex is to delete the old one. To carry only a part over, he copies a part, and it is merged (above).
+  # Confirmed by the dev, 2026-11-05: the two outlines overlap and it looks messy, which is the point.
   Given a whole outline is copied
   And <target polity> already has an outline in <target map>
   When I select <target polity> and press ‹ctrl+V›
-  Then the copied outline is added to <target polity> as one more ring, its points in place
-  And every pasted point within the weld distance of a point of <target map> takes that point
-  And the two rings are never merged: where they overlap, it is seen on the map (the dev, 2026-11-03)
+  Then the copied outline is added as one more outline, its points in place, never merged with the other
+
+# Struck 2026-11-05 evening — the dev's rule above: « Ce bout est à <d> km … rien n'est collé » (an end hooks onto the
+# nearest point, however far); « … n'a pas de tracé où accrocher ce tronçon » (a piece becomes an open outline).
 
 # Struck 2026-11-05 — the dev: « il n'y a pas de remplacement de tracé »; « on ne commence pas à faire des cas hybrides ».
 # ~~Scenario: paste an outline in place of a polity's~~ — « Coller le tracé », [Remplacer son tracé]

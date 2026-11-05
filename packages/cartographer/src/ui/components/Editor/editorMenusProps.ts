@@ -14,8 +14,8 @@ export interface EditorMenuState {
   canCopy: boolean
   /** Whether the clipboard holds polities, which « Coller les entités » pastes. */
   canPastePolities: boolean
-  /** Whether the clipboard holds a stretch and a polity is selected, which « Coller le tronçon sur … » pastes onto. */
-  canPasteStretch: boolean
+  /** Whether the clipboard holds points and a polity is selected, which « Coller les points sur … » pastes onto. */
+  canPastePoints: boolean
 }
 
 /** What the menus' commands do. */
@@ -36,6 +36,8 @@ export interface EditorMenuGestures {
   onCopy: () => void
   /** Paste what the clipboard holds. */
   onPaste: () => void
+  /** Select every point of the polity selected. */
+  onSelectAll: () => void
 }
 
 /** The words and the keys the menus are written with. */

@@ -151,13 +151,15 @@ describe('toolGestures', () => {
       expect(context.session.outline).toHaveLength(2)
     })
 
-    // s02 — "When I press ‹escape› / Then the whole outline in progress is abandoned".
-    it('abandons the outline on ‹escape›, leaving the polity with no territory', () => {
+    // s02, rewritten by the dev on 2026-11-05 (open-outlines.md): ‹escape› leaves the outline, and keeps it, open.
+    it('keeps the outline, open, on ‹escape›, the hand emptied', () => {
       const context = openContext()
       for (const at of TRIANGLE) penClick(context, at)
       toolKey(context, 'Escape')
       expect(context.session.outline).toEqual([])
-      expect(context.store.getState().document.claims).toEqual([])
+      expect(context.store.getState().document.claims).toEqual([
+        { polity: 'fr', rings: [[0, 1, 2]], open: [0] },
+      ])
     })
 
     // s03 — "every path holding any of them follows": the anchor is one index in both rings.

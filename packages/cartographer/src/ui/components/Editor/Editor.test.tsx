@@ -63,6 +63,7 @@ function mount(results = createResultRelay()): void {
       onSaveCopy={() => undefined}
       onCopy={() => undefined}
       onPaste={() => undefined}
+      onSelectAll={() => undefined}
       clipboard={createHeldClipboard(null, () => true)}
       mapName={createMapNameStore('1100')}
       history={createHistoryRelay()}

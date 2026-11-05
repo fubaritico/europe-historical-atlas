@@ -161,6 +161,7 @@ function scene(overrides: Partial<CanvasScene> = {}): CanvasScene {
   return {
     backdrop: null,
     rings: [],
+    openRings: [],
     fills: [],
     tribeFeathers: [],
     anchors: [],
@@ -253,6 +254,22 @@ describe('painter', () => {
       expect(path[1]?.args).toEqual([100, 100])
       expect(path[1]?.strokeStyle).toBe('#5b93d6')
       expect(path[1]?.lineWidth).toBe(1)
+    })
+
+    // open-outlines.md: an open outline is stroked as Illustrator strokes an open path — no line between its ends.
+    it('strokes an open outline without the line between its two ends', () => {
+      const { ctx, calls } = recordingContext()
+
+      paintCanvas(ctx, SIZE, scene({ openRings: [SQUARE] }), STYLE)
+
+      const start = calls.findIndex((call) => call.op === 'moveTo')
+      const path = calls
+        .slice(start - 1)
+        .filter((call) =>
+          ['beginPath', 'moveTo', 'lineTo', 'closePath', 'stroke'].includes(call.op)
+        )
+
+      expect(ops(path)).toEqual(['beginPath', 'moveTo', 'lineTo', 'lineTo', 'lineTo', 'stroke'])
     })
 
     it('draws a handle per anchor, white inside a blue outline', () => {

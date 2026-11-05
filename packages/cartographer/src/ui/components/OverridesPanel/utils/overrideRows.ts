@@ -1,4 +1,5 @@
 import { segmentKey } from '@europe-historical-atlas/core/editor/borderOverrides'
+import { isRingOpen, ringSegments } from '@europe-historical-atlas/core/editor/outlines'
 
 import type { BorderMessageKey } from '../../../i18n/border'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
@@ -42,11 +43,8 @@ function holdersOf(doc: YearDocument, run: readonly number[]): string[] {
   }
   const holders: string[] = []
   for (const claim of doc.claims) {
-    const holds = claim.rings.some((ring) =>
-      ring.some((a, at) => {
-        const b = ring[(at + 1) % ring.length]
-        return b !== undefined && keys.has(segmentKey(a, b))
-      })
+    const holds = claim.rings.some((ring, position) =>
+      ringSegments(ring, isRingOpen(claim, position)).some(([a, b]) => keys.has(segmentKey(a, b)))
     )
     if (holds && !holders.includes(claim.polity)) holders.push(claim.polity)
   }

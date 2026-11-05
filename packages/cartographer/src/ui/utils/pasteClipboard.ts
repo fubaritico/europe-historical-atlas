@@ -1,5 +1,5 @@
 import { isPolityPasteRefusal } from '@europe-historical-atlas/core/editor/paste'
-import { isStretchPasteRefusal } from '@europe-historical-atlas/core/editor/pasteStretch'
+import { isPointsPasteRefusal } from '@europe-historical-atlas/core/editor/pastePoints'
 
 import { refusalReason } from '../../canvas/tools/retrace'
 
@@ -7,16 +7,14 @@ import { firstName } from './copySelection'
 
 import type { ClipboardWords } from './copySelection'
 import type { EditionActions } from '../../state/editionSlice'
+import type { Carving, CarvingHeld } from '@europe-historical-atlas/core/editor/carve'
 import type {
   ClipboardContent,
+  CopiedPoints,
   CopiedPolity,
-  CopiedStretch,
 } from '@europe-historical-atlas/core/editor/clipboard'
 import type { PolityPasteRefusal, PolityPasted } from '@europe-historical-atlas/core/editor/paste'
-import type {
-  StretchPasteRefusal,
-  StretchPasted,
-} from '@europe-historical-atlas/core/editor/pasteStretch'
+import type { PointsPasted } from '@europe-historical-atlas/core/editor/pastePoints'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /**
@@ -24,8 +22,9 @@ import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocu
  * open, in place, welded to their neighbours at 2 km, in **one step** of the history; the last one pasted is
  * selected, and the status bar says what was done — or why nothing was.
  *
- * **A stretch on the clipboard is pasted onto the polity selected** (`s22` « # 2 »), one step: a whole outline as one
- * more ring of it, a part of an outline merged into its outline as ⟨retracer⟩ does — refused in ⟨retracer⟩'s words.
+ * **Points on the clipboard are pasted onto the polity selected** (`open-outlines.md`), one step: each whole outline
+ * added, each piece merged into its outline by the nearest points or left open when nothing is drawn — a piece
+ * ⟨retracer⟩ refuses is named in its words.
  */
 
 /** What a paste needs: the clipboard, the map and its selection, the store's pastes, the status bar, the words. */
@@ -34,14 +33,16 @@ export interface PasteDeps {
   content: ClipboardContent | null
   /** The map open — the polity selected is named from it. */
   document: YearDocument
-  /** The polity selected, which a stretch is pasted onto, or `null`. */
+  /** The polity selected, which points are pasted onto, or `null`. */
   target: string | null
   /** The store's paste of polities, one recorded step. */
   pastePolities: EditionActions['pastePolities']
-  /** The store's paste of a stretch, one recorded step. */
-  pasteStretch: EditionActions['pasteStretch']
+  /** The store's paste of points, one recorded step. */
+  pastePoints: EditionActions['pastePoints']
   /** Select a polity — the one pasted last. */
   chooseTarget: (polityId: string | null) => void
+  /** Raise a warning in the warning dialogue — a suzerain left uncarved, its outline open (the dev, 2026-11-05). */
+  raiseWarning: (text: string) => void
   /** Say a sentence in the status bar's result zone. */
   say: (message: string) => void
   /** The words. */
@@ -128,88 +129,114 @@ function pastedSentence(map: string, answered: readonly Answered[], words: Clipb
 }
 
 /**
- * The sentence a refused stretch says.
- * @param refusal - why it was refused
- * @param name - the polity it was pasted onto
- * @param deps - the map, for ⟨retracer⟩'s words, and the words
- * @returns the sentence
+ * The names of the neighbours whose outline took a piece too.
+ * @param ids - their ids
+ * @param document - the map
+ * @returns their names
+ * @throws when an id names no polity of the map — a ring's holder is a polity of the registry, the map cross-checked
  */
-function stretchRefusal(
-  refusal: StretchPasteRefusal,
-  name: string,
-  deps: Pick<PasteDeps, 'document' | 'words'>
-): string {
-  const { clipboard, canvas, paste } = deps.words
-  switch (refusal.refused) {
-    case 'no-polity':
-      return clipboard('stretchNoTarget', { paste })
-    case 'no-outline':
-      return clipboard('stretchNoOutline', { name })
-    case 'too-far':
-      return clipboard('stretchTooFar', { name, km: Math.round(refusal.km * 10) / 10 })
-    case 'same-end':
-      return clipboard('stretchSameEnd', { name })
-    case 'retrace':
-      return clipboard('stretchRefused', {
-        reason: refusalReason(refusal.why, deps.document, name, canvas),
-      })
-  }
-}
-
-/**
- * The sentence a pasted stretch says.
- * @param done - what was done
- * @param name - the polity it was pasted onto
- * @param deps - the map, for the neighbours' names, and the words
- * @returns the sentence
- */
-function stretchSentence(
-  done: StretchPasted,
-  name: string,
-  deps: Pick<PasteDeps, 'document' | 'words'>
-): string {
-  const { clipboard } = deps.words
-  if (done.kind === 'ring') {
-    return clipboard('pastedOutline', { name, count: done.points, welded: done.welded })
-  }
-  const names = done.neighbours.map((id) => {
-    const neighbour = deps.document.polities.find((polity) => polity.id === id)
-    // A ring's holder is a polity of the registry: the map is cross-checked when it opens.
-    if (neighbour === undefined)
+function neighbourNames(ids: readonly string[], document: YearDocument): string[] {
+  return ids.map((id) => {
+    const neighbour = document.polities.find((polity) => polity.id === id)
+    if (neighbour === undefined) {
       throw new Error(`[Cartographer] the neighbour "${id}" is not in the map.`)
+    }
     return neighbour.name
   })
-  const pasted = clipboard('pastedStretch', { name, count: done.points })
-  return names.length === 0
-    ? pasted
-    : `${pasted} — ${clipboard('stretchFollowed', { names: names.join(', ') })}`
 }
 
 /**
- * Paste a stretch onto the polity selected, and say it.
- * @param stretch - the stretch the clipboard holds
- * @param deps - the map, its selection, the store's paste, the status bar, the words
- * @returns the polity it was pasted onto, alone — empty when nothing was pasted, which is said
+ * The sentence a paste of points says: how many points, the outlines added, the pieces merged or left open, the
+ * neighbours that followed, and every piece left out in ⟨retracer⟩'s words.
+ * @param done - what was done
+ * @param name - the polity it was pasted onto
+ * @param deps - the map, for the neighbours' names and ⟨retracer⟩'s words, and the words
+ * @returns the sentence
  */
-function pasteTheStretch(stretch: CopiedStretch, deps: PasteDeps): string[] {
+function pointsSentence(
+  done: PointsPasted,
+  name: string,
+  deps: Pick<PasteDeps, 'document' | 'words'>
+): string {
+  const { clipboard, canvas } = deps.words
+  const put = done.outlines + done.open + done.merged > 0
+  const head = put
+    ? clipboard('pastedPoints', { name, count: done.points, welded: done.welded })
+    : clipboard('nothingPasted', { name })
+  const counts = [
+    ...(done.outlines > 0 ? [clipboard('pastedOutlines', { count: done.outlines })] : []),
+    ...(done.merged > 0 ? [clipboard('pastedMerged', { count: done.merged })] : []),
+    ...(done.open > 0 ? [clipboard('pastedOpen', { count: done.open })] : []),
+  ]
+  const names = neighbourNames(done.neighbours, deps.document)
+  const followed = names.length > 0 ? [clipboard('followed', { names: names.join(', ') })] : []
+  const leftOut = done.leftOut.flatMap((why) =>
+    why.kind === 'suzerain-open'
+      ? []
+      : [clipboard('pieceLeftOut', { reason: refusalReason(why, deps.document, name, canvas) })]
+  )
+  return [[head, ...counts].join(' — '), ...followed, ...leftOut].join(' · ')
+}
+
+/**
+ * What a piece that closed a vassal's open outline did to its suzerain: carved, said in the status bar; held back,
+ * its outline open, said in the warning dialogue (the dev, 2026-11-05) — as the Pen's closing says it.
+ * @param carving - what the carving answered
+ * @param name - the vassal's name
+ * @param deps - the map, the words and the dialogue
+ * @returns the status bar's sentence, or none when the dialogue says it
+ */
+function carvingSentence(
+  carving: Carving | CarvingHeld,
+  name: string,
+  deps: Pick<PasteDeps, 'document' | 'words' | 'raiseWarning'>
+): string[] {
+  const suzerain = neighbourNames([carving.suzerain], deps.document).join('')
+  if ('held' in carving) {
+    console.warn(`[Cartographer] "${carving.suzerain}" was not carved: its outline is open.`)
+    deps.raiseWarning(deps.words.canvas('carveHeld', { name, suzerain }))
+    return []
+  }
+  return [deps.words.canvas('carved', { name: suzerain, crossings: carving.crossings })]
+}
+
+/**
+ * Paste points onto the polity selected, and say it.
+ * @param copied - the points the clipboard holds
+ * @param deps - the map, its selection, the store's paste, the status bar, the words
+ * @returns the polity they were pasted onto, alone — empty when nothing was put down, which is said
+ */
+function pasteThePoints(copied: CopiedPoints, deps: PasteDeps): string[] {
   const { target, words } = deps
   const name = deps.document.polities.find((polity) => polity.id === target)?.name
   if (target === null || name === undefined) {
-    console.warn('[Cartographer] paste refused: a stretch needs a polity selected.')
-    deps.say(words.clipboard('stretchNoTarget', { paste: words.paste }))
+    console.warn('[Cartographer] paste refused: points need a polity selected.')
+    deps.say(words.clipboard('pointsNoTarget', { paste: words.paste }))
     return []
   }
-  const answer = deps.pasteStretch(stretch, target, {
-    kind: 'paste-stretch',
-    label: words.clipboard('pasteStretchStep', { name }),
+  const answer = deps.pastePoints(copied, target, {
+    kind: 'paste-points',
+    label: words.clipboard('pastePointsStep', { name }),
   })
-  if (isStretchPasteRefusal(answer)) {
-    console.warn(`[Cartographer] stretch paste refused: ${answer.refused}.`)
-    deps.say(stretchRefusal(answer, name, deps))
+  if (isPointsPasteRefusal(answer)) {
+    console.warn(`[Cartographer] points paste refused: ${answer.refused}.`)
+    deps.say(words.clipboard('pointsNoTarget', { paste: words.paste }))
     return []
   }
-  deps.say(stretchSentence(answer, name, deps))
-  return [target]
+  // A piece that would have closed a vassal over a suzerain still open is said in the warning dialogue (2026-11-05).
+  for (const why of answer.leftOut) {
+    if (why.kind !== 'suzerain-open') continue
+    const suzerain = neighbourNames([why.suzerain], deps.document).join('')
+    deps.raiseWarning(words.canvas('pasteOverOpenSuzerain', { name, suzerain }))
+  }
+  if (answer.leftOut.length > 0) {
+    console.warn(
+      `[Cartographer] paste left out ${String(answer.leftOut.length)} pieces: ${answer.leftOut.map((why) => why.kind).join(', ')}.`
+    )
+  }
+  const carved = answer.carved.flatMap((carving) => carvingSentence(carving, name, deps))
+  deps.say([pointsSentence(answer, name, deps), ...carved].join(' · '))
+  return answer.outlines + answer.open + answer.merged > 0 ? [target] : []
 }
 
 /**
@@ -224,7 +251,7 @@ export function pasteClipboard(deps: PasteDeps): string[] {
     deps.say(words.clipboard('nothingToPaste'))
     return []
   }
-  if (content.kind === 'stretch') return pasteTheStretch(content, deps)
+  if (content.kind === 'points') return pasteThePoints(content, deps)
   const answers = deps.pastePolities(content.polities, {
     kind: 'paste-polities',
     label: words.clipboard('pasteStep', {

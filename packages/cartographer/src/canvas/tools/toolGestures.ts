@@ -9,11 +9,12 @@ import { lonLatToScreen, screenToLonLatOnBackdrop } from '../../viewport/project
 
 import { deleteSelected, editHandlesOf, insertOnStretch, penInsertHit } from './anchorGestures'
 import { anchorClick, waterTaking } from './borderSnap'
-import { carvedReport } from './carving'
+import { carvingAnswer, refusedOverOpenSuzerain } from './carving'
 import { TAG } from './consoleTag'
 import { freeLonLatAt, repeatsLast } from './frameSnap'
 import { followedLayer, layerLines, snapHit, waterOf } from './layerHits'
 import { leaveLayer, reachLayer } from './layerSwitch'
+import { closeInHand, keepOutlineInHand, resumeClick } from './resumeOutline'
 import {
   abandonGesture,
   clearOutline,
@@ -31,7 +32,6 @@ import type { WeldContext } from './weldGestures'
 import type { PolityRings } from '../../geometry/fillHit'
 import type { SnapLine } from '../../geometry/lineSnap'
 import type { Point } from '../../viewport/viewport'
-import type { Carving } from '@europe-historical-atlas/core/editor/carve'
 import type { AnchorMove, Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
 
 /**
@@ -120,15 +120,14 @@ export function closeOutline(context: GestureContext, followWater = false): void
     return
   }
   const { t } = context.words
+  if (refusedOverOpenSuzerain(context, target)) return
   const step = { kind: DRAW_OUTLINE_KIND, label: t('stepDrawOutline', { name: target.name }) }
   // Laid only into what is handed to the document: a refused outline stays on screen as it was.
   const closing = followWater ? closingPoints(context) : []
   const outline = [...context.session.outline, ...closing]
   const carved: string[] = []
-  const onCarved = (carving: Carving): void => {
-    carved.push(carvedReport(context.store.getState().document.polities, carving, t))
-  }
-  if (context.store.getState().drawOutline(target.id, outline, step, onCarved)) {
+  const onCarved = carvingAnswer(context, target.name, carved)
+  if (closeInHand(context, target.id, outline, step, onCarved)) {
     clearOutline(context.session)
     if (closing.length > 0) context.report(closingReport(closing.length, t))
     for (const message of carved) context.report(message)
@@ -156,6 +155,8 @@ export function penClick(context: GestureContext, at: Point): void {
     closeOutline(context, true)
     return
   }
+  // An end of an open outline, nothing in hand: the Pen takes it up and goes on from there (open-outlines.md).
+  if (resumeClick(context, at)) return
   // The target's own stretch before the layer: there the idle Pen edits the outline it already has.
   // On its own coast this rarely bites — coast anchors are dense, so an anchor is nearly always the
   // nearer hit, and that one is reused by the layer click.
@@ -560,7 +561,9 @@ function editKey(context: GestureContext, key: string): boolean {
 }
 
 /**
- * The Pen's keys: ‹backspace› takes back the last anchor, ‹escape› abandons the outline, ‹enter› closes it.
+ * The Pen's keys: ‹backspace› takes back the last anchor, ‹escape› ends the outline and keeps it, open — the dev,
+ * 2026-11-05: *"as soon as you leave the outline, for whatever reason, it is saved"* (`open-outlines.md`) — and
+ * ‹enter› closes it. Under ⟨retrace⟩, ‹escape› still drops the run: it is no outline.
  *
  * Under ⟨edit⟩, ‹escape› drops the selection, and ‹delete› or ‹backspace› removes the selected anchor —
  * the same thing, as in Illustrator (`s03`).
@@ -575,7 +578,11 @@ export function toolKey(context: GestureContext, key: string): boolean {
   if (key === 'Backspace') {
     context.session.outline.pop()
     context.session.snap = null
-  } else if (key === 'Escape') clearOutline(context.session)
+  } else if (key === 'Escape') {
+    const { target } = context.store.getState()
+    if (tool === 'draw' && target !== null) keepOutlineInHand(context, target)
+    clearOutline(context.session)
+  }
   // A retrace ends on an anchor of the outline it corrects, never by closing its own run.
   else if (key === 'Enter' && tool === 'draw') closeOutline(context)
   else return false

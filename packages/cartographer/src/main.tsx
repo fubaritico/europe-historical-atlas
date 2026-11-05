@@ -248,6 +248,15 @@ const results = createResultRelay()
 const toaster = createToaster<ReactToastContent>({ uid: 'cartographer' })
 const alarms = createAlarmBoard()
 const notices = routeNotices({ toasts: noticeToasts(createToastApi(() => toaster)), alarms })
+
+// A warning the canvas raised — a suzerain left uncarved, its outline open — goes to the warning dialogue (the dev,
+// 2026-11-05: « c'est indiqué par une modale d'avertissement »).
+store.subscribe(
+  (state) => state.warning,
+  (warning) => {
+    if (warning !== null) alarms.raise({ topic: 'carving', text: warning.text })
+  }
+)
 /**
  * The language the Cartographer speaks: the browser's when it is French, English otherwise (the dev,
  * 2026-10-21) — held in a store, since a switch will change it (ATLAS-266). The page says which, so a screen
@@ -429,19 +438,36 @@ listenForCommand(document, 'copy', handleCopy)
 
 /** Paste what the clipboard holds — polities into this map, a stretch onto the polity selected — one step (CARTO-345). */
 const handlePaste = (): void => {
-  const { document, target, pastePolities, pasteStretch, chooseTarget } = store.getState()
+  const { document, target, pastePolities, pastePoints, chooseTarget, raiseWarning } =
+    store.getState()
   pasteClipboard({
     content: clipboard.get(),
     document,
     target,
     pastePolities,
-    pasteStretch,
+    pastePoints,
     chooseTarget,
+    raiseWarning,
     say: results.say,
     words: clipboardWordsNow(),
   })
 }
 listenForCommand(document, 'paste', handlePaste)
+
+/**
+ * ‹cmd+A› — Édition › Tout sélectionner (`open-outlines.md`): every point of the polity selected, the white arrow
+ * taken. With none selected, the status bar says so.
+ */
+const handleSelectAll = (): void => {
+  const { target, askSelectAll } = store.getState()
+  if (target === null) {
+    console.warn('[Cartographer] select all refused: no polity selected.')
+    results.say(clipboardWordsNow().clipboard('selectAllNoTarget'))
+    return
+  }
+  askSelectAll()
+}
+listenForCommand(document, 'selectAll', handleSelectAll)
 
 // ‹cmd+O› and ‹cmd+shift+S›: *Open…* and *Save as…*, as their buttons and the menu (CARTO-345).
 listenForCommand(document, 'open', mapPicker.open)
@@ -473,6 +499,7 @@ createRoot(container).render(
               onSaveCopy={handleSaveCopy}
               onCopy={handleCopy}
               onPaste={handlePaste}
+              onSelectAll={handleSelectAll}
               clipboard={clipboard}
               mapName={mapName}
               history={history}

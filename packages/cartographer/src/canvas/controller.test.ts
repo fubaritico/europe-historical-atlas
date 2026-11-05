@@ -1161,7 +1161,8 @@ describe('the tools from too far out (H-34)', () => {
       dispose()
     })
 
-    it('refuses Enter on an outline in hand from afar, and lets Escape throw it away', () => {
+    // open-outlines.md, the dev, 2026-11-05: ‹escape› leaves the outline, and leaving it keeps it, open.
+    it('refuses Enter on an outline in hand from afar, and keeps it open on Escape', () => {
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
       const { node, store, resulted, dispose } = attach(TEN_KM)
       aimAtFrance(store)
@@ -1175,7 +1176,9 @@ describe('the tools from too far out (H-34)', () => {
       node.dispatchEvent(keyEvent('Escape'))
       viewAtScale(store, 8)
       node.dispatchEvent(keyEvent('Enter'))
-      expect(store.getState().document.claims).toEqual([])
+      expect(store.getState().document.claims).toEqual([
+        { polity: 'fr', rings: [[0, 1, 2]], open: [0] },
+      ])
       warn.mockRestore()
       dispose()
     })
@@ -1320,15 +1323,17 @@ describe('the tools on the canvas', () => {
   })
 
   describe('unmanaged errors', () => {
-    // An outline begun for one polity must never be closed into another.
-    it('abandons the outline in progress when the tool changes', () => {
+    // An outline begun for one polity is never closed into another; leaving it keeps it, open (open-outlines.md).
+    it('keeps the outline in progress, open, when the tool changes — the next Enter closes nothing', () => {
       const { node, store, dispose } = attach()
       aimAtFrance(store)
       for (const at of CANVAS_TRIANGLE) click(node, at)
       node.dispatchEvent(keyEvent('a'))
       node.dispatchEvent(keyEvent('p'))
       node.dispatchEvent(keyEvent('Enter'))
-      expect(store.getState().document.claims).toEqual([])
+      expect(store.getState().document.claims).toEqual([
+        { polity: 'fr', rings: [[0, 1, 2]], open: [0] },
+      ])
       dispose()
     })
   })
@@ -1679,9 +1684,11 @@ describe('undo and redo from the keyboard', () => {
       const { node, store, dispose } = attach()
       aimAtFrance(store)
       for (const at of [...CANVAS_TRIANGLE, [301, 201] as const]) click(node, at)
-      // The first press reopens the outline into the hand; Escape lets it go; the next undoes the creation.
+      // The first press reopens the outline into the hand; Escape keeps it, open (open-outlines.md); the next takes
+      // that back; the last undoes the creation.
       node.dispatchEvent(chord({ key: 'z', ctrlKey: true }))
       node.dispatchEvent(keyEvent('Escape'))
+      node.dispatchEvent(chord({ key: 'z', ctrlKey: true }))
       node.dispatchEvent(chord({ key: 'z', ctrlKey: true }))
       expect(store.getState().document.polities).toEqual([])
       expect(node.style.cursor).toBe('not-allowed')
@@ -1804,7 +1811,8 @@ describe('the Pen following the coast, on the canvas', () => {
       click(node, [160, 218])
       expect(resulted).toHaveBeenLastCalledWith('inserted 10 vertices from the coastline')
       node.dispatchEvent(keyEvent('Escape'))
-      expect(store.getState().document.claims).toEqual([])
+      // Left on ‹escape›, the outline is kept, open (open-outlines.md).
+      expect(store.getState().document.claims).toMatchObject([{ polity: 'fr', open: [0] }])
       dispose()
     })
   })

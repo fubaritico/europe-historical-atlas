@@ -1,4 +1,5 @@
 import { isWeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
+import { everyOutline, segmentCount } from '@europe-historical-atlas/core/editor/outlines'
 import { MIN_RING_ANCHORS } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { nearestAmong } from '../../geometry/hitTest'
@@ -13,6 +14,7 @@ import type { FrameSnapContext } from './frameSnap'
 import type { WeldOffer } from './toolSession'
 import type { Point } from '../../viewport/viewport'
 import type { WeldDone, WeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
+import type { OutlineOf } from '@europe-historical-atlas/core/editor/outlines'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /*
@@ -41,22 +43,21 @@ export const WELD_ANCHOR_KIND = 'weld-anchor'
  * @param polityId - the polity left out
  * @returns the other polities' rings
  */
-function otherRings(document: YearDocument, polityId: string): number[][] {
-  return document.claims
-    .filter((claim) => claim.polity !== polityId)
-    .flatMap((claim) => claim.rings)
+function otherRings(document: YearDocument, polityId: string): OutlineOf[] {
+  return everyOutline(document.claims.filter((claim) => claim.polity !== polityId))
 }
 
 /**
- * The stretches of a set of rings, as pairs of anchors, the closing one included.
- * @param rings - the rings
- * @returns each stretch once per ring
+ * The stretches of a set of outlines, as pairs of anchors — the closing one included, except an open outline's.
+ * @param outlines - the outlines
+ * @returns each stretch once per outline
  */
-function stretchesOf(rings: readonly number[][]): [number, number][] {
-  return rings.flatMap((ring) =>
-    ring.length < 2
-      ? []
-      : ring.map((index, at): [number, number] => [index, ring[(at + 1) % ring.length] ?? index])
+function stretchesOf(outlines: readonly OutlineOf[]): [number, number][] {
+  return outlines.flatMap(({ ring, open }) =>
+    ring.flatMap((index, at): [number, number][] => {
+      const next = ring[(at + 1) % ring.length]
+      return next === undefined || at >= segmentCount(ring, open) ? [] : [[index, next]]
+    })
   )
 }
 
@@ -88,10 +89,12 @@ export function weldOfferAt(
   const { document, target, viewport } = context.store.getState()
   const aimed = describeDrawingTarget(document, target)
   if (aimed === null) return null
-  const own = document.claims.filter((claim) => claim.polity === aimed.id).flatMap((c) => c.rings)
-  const held = new Set(own.flat())
+  const own = everyOutline(document.claims.filter((claim) => claim.polity === aimed.id))
+  const held = new Set(own.flatMap((outline) => outline.ring))
   const others = otherRings(document, aimed.id)
-  const anchors = [...new Set(others.flat())].filter((i) => i !== index && !held.has(i))
+  const anchors = [...new Set(others.flatMap((outline) => outline.ring))].filter(
+    (i) => i !== index && !held.has(i)
+  )
   const screen = context.anchorsOnScreen()
   const into = nearestAmong(screen, anchors, [at[0], at[1]], context.radius)
   const point = into === null ? undefined : document.anchors[into]
@@ -101,7 +104,7 @@ export function weldOfferAt(
   // is a move, not a weld. So is a stretch only rings already holding the anchor run over — a neighbour
   // sharing it already: no ring could take it, and the document would refuse what was offered (ARCH-002).
   const ownKeys = new Set(stretchesOf(own).map(stretchKey))
-  const lacking = others.filter((ring) => !ring.includes(index))
+  const lacking = others.filter((outline) => !outline.ring.includes(index))
   const stretches = stretchesOf(lacking).filter(
     (s) => s[0] !== index && s[1] !== index && !ownKeys.has(stretchKey(s))
   )

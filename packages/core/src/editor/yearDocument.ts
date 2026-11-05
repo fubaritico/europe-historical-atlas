@@ -17,6 +17,10 @@
  * command that knows how to undo itself corrupts the history silently when it is wrong.
  */
 
+import { CLOSED_RING_FLOOR, OPEN_RING_FLOOR } from '../data/ringFloors'
+
+import { keepRings, outlineFloor } from './outlines'
+
 import type { YearFiles } from '../data/yearConsistency'
 import type {
   AuthoredYear,
@@ -35,7 +39,13 @@ import type {
  * cell. **The one floor for the whole editor** — closing, drawing, duplicating, removing a point, saving,
  * and the Pen's closing offer — so no two of them can disagree on what a ring is (QUAL-002).
  */
-export const MIN_RING_ANCHORS = 3
+export const MIN_RING_ANCHORS = CLOSED_RING_FLOOR
+
+/**
+ * The fewest anchors an **open** outline can have — a line (`files/plans/cartographer/open-outlines.md`). It encloses
+ * nothing until a third point, and is kept: the author stopped it, and resumes it.
+ */
+export const MIN_OPEN_ANCHORS = OPEN_RING_FLOOR
 
 /** A year being edited. Flat on purpose: the three files are a storage layout, not a working one. */
 export interface YearDocument {
@@ -110,6 +120,7 @@ export function cloneYearDocument(doc: YearDocument): YearDocument {
     claims: doc.claims.map((claim) => ({
       polity: claim.polity,
       rings: claim.rings.map((ring) => [...ring]),
+      ...openOf(claim),
     })),
     deliberateGaps: doc.deliberateGaps.map((gap) => ({
       ring: [...gap.ring],
@@ -197,6 +208,16 @@ function compactAnchors(doc: YearDocument): CompactedAnchors {
 }
 
 /**
+ * A claim's open positions, copied, as a spread — nothing when every ring is closed, so the key is never written empty.
+ * @param claim - the claim
+ * @param claim.open - the positions of its open rings
+ * @returns `{ open }` or `{}`
+ */
+function openOf(claim: { open?: number[] | undefined }): { open?: number[] } {
+  return claim.open === undefined ? {} : { open: [...claim.open] }
+}
+
+/**
  * Save a document, with every reference rewritten through one mapping.
  * @param doc - the document to save
  * @returns the three files, ready to write
@@ -230,10 +251,11 @@ export function saveYearDocument(doc: YearDocument): YearFiles {
       sources: doc.sources.map((provenance) => ({ ...provenance })),
       anchors,
       anchorSource,
-      claims: doc.claims.map((claim) => ({
-        polity: claim.polity,
-        rings: claim.rings.map(rewrite).filter((ring) => ring.length >= MIN_RING_ANCHORS),
-      })),
+      claims: doc.claims.map((claim) => {
+        const saved = { polity: claim.polity, rings: claim.rings.map(rewrite), ...openOf(claim) }
+        keepRings(saved, (ring, _at, open) => ring.length >= outlineFloor(open))
+        return saved
+      }),
       deliberateGaps: doc.deliberateGaps
         .map((gap) => ({ ring: rewrite(gap.ring), reason: gap.reason }))
         .filter((gap) => gap.ring.length >= MIN_RING_ANCHORS),

@@ -44,6 +44,7 @@ describe('top bars, bound', () => {
           onSaveCopy={vi.fn()}
           onCopy={vi.fn()}
           onPaste={vi.fn()}
+          onSelectAll={vi.fn()}
           clipboard={createHeldClipboard(null, () => true)}
         />
       )

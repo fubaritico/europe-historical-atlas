@@ -6,6 +6,7 @@ import { useSyncExternalStore } from 'react'
 import { autofocusOnOpen } from '../../hooks/autofocusOnOpen'
 import { useTranslation } from '../../hooks/useTranslation'
 import { ACTION_MESSAGES } from '../../i18n/actions'
+import warningUrl from '../../icons/warning-small.svg'
 
 import { ALARM_MESSAGES } from './i18n'
 
@@ -15,7 +16,9 @@ import type { AlarmBoard } from '../../../persistence/alarmBoard'
  * What the year on disk says when the work may be lost or was not done — a save the server has not confirmed,
  * a failed save, the automatic save stopped (`persistence/notice.ts`). The dev's call, 2026-10-23: *« c'est visuel »*, not a
  * line in the status bar. Open while an alarm waits; every alarm waiting is shown, oldest first, under the topic
- * of the newest. ‹OK›, ‹escape› and the backdrop close it — each means the author has read it.
+ * of the newest. ‹OK›, ‹escape› and the backdrop close it — each means the author has read it. The canvas raises one
+ * too: a vassal not closed over a suzerain still open (`open-outlines.md`, the dev, 2026-11-05: « une modale
+ * d'avertissement »), under the dev's warning sign.
  */
 
 /** What the dialogue needs. */
@@ -54,11 +57,17 @@ export function AlarmDialog({ alarms }: AlarmDialogProps) {
         <Card>
           <Card.Header>{title}</Card.Header>
           <Card.Body>
-            {waiting.map((alarm) => (
-              <p key={alarm.topic} className="short-dialogue__text">
-                {alarm.text}
-              </p>
-            ))}
+            <div className="short-dialogue__alert">
+              {/* The dev's warning sign, simplified for its size (`icons/warning-small.svg`): it marks, the text says. */}
+              <img className="short-dialogue__sign" src={warningUrl} alt="" />
+              <div>
+                {waiting.map((alarm) => (
+                  <p key={alarm.topic} className="short-dialogue__text">
+                    {alarm.text}
+                  </p>
+                ))}
+              </div>
+            </div>
           </Card.Body>
           <Card.Footer align="end">
             <Button ref={autofocusOnOpen} type="button" onClick={close}>

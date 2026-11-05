@@ -30,6 +30,8 @@ export interface AppBarPanelProps extends Omit<AppBarProps, 'name' | 'map' | 'me
   onCopy: () => void
   /** Édition › Coller les entités, and ‹cmd+V›. */
   onPaste: () => void
+  /** Édition › Tout sélectionner, and ‹cmd+A›. */
+  onSelectAll: () => void
   /** What the clipboard holds, which lights Coller les entités. */
   clipboard: HeldClipboard
 }
@@ -42,6 +44,7 @@ export interface AppBarPanelProps extends Omit<AppBarProps, 'name' | 'map' | 'me
  * @param props.history - the canvas's undo and redo
  * @param props.onCopy - Édition › Copier
  * @param props.onPaste - Édition › Coller les entités
+ * @param props.onSelectAll - Édition › Tout sélectionner
  * @param props.clipboard - what the clipboard holds
  * @returns the top bar
  */
@@ -51,6 +54,7 @@ export function AppBarPanel({
   history,
   onCopy,
   onPaste,
+  onSelectAll,
   clipboard,
   ...gestures
 }: AppBarPanelProps) {
@@ -73,6 +77,7 @@ export function AppBarPanel({
           clipboard={clipboard}
           onCopy={onCopy}
           onPaste={onPaste}
+          onSelectAll={onSelectAll}
           {...gestures}
         />
       }

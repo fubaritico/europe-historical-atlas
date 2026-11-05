@@ -201,6 +201,11 @@ export interface CanvasScene {
   /** The closed outlines of the open document, each a run of projected anchors. */
   rings: readonly (readonly Point[])[]
   /**
+   * The outlines left open (`open-outlines.md`), each a run of projected anchors — stroked without the line between
+   * their two ends, as Illustrator strokes an open path; their fill is in {@link fills}, closed by that line.
+   */
+  openRings: readonly (readonly Point[])[]
+  /**
    * Each polity's territory, filled in its colour: all its rings in one path, so a ring inside another
    * is a hole by the even-odd rule — `H-07`'s *"inclusion decides"*.
    */
@@ -274,8 +279,9 @@ const FULL_TURN = Math.PI * 2
  * a real context and a stray `moveTo` on a fake, which would make a test pass for the wrong reason.
  * @param ctx - the context to draw into
  * @param ring - the outline, in screen pixels
+ * @param open - an open outline: no line between its two ends (`open-outlines.md`)
  */
-function strokeRing(ctx: Painter2D, ring: readonly Point[]): void {
+function strokeRing(ctx: Painter2D, ring: readonly Point[], open = false): void {
   const first = ring[0]
   if (first === undefined || ring.length < 2) return
   ctx.beginPath()
@@ -284,7 +290,7 @@ function strokeRing(ctx: Painter2D, ring: readonly Point[]): void {
     const point = ring[index]
     if (point !== undefined) ctx.lineTo(point[0], point[1])
   }
-  ctx.closePath()
+  if (!open) ctx.closePath()
   ctx.stroke()
 }
 
@@ -676,6 +682,7 @@ export function paintCanvas(
   ctx.strokeStyle = style.pathStroke
   ctx.lineWidth = style.pathWidth
   for (const ring of scene.rings) strokeRing(ctx, ring)
+  for (const ring of scene.openRings) strokeRing(ctx, ring, true)
   paintExtentOutline(ctx, scene, style)
   paintSnapAnchors(ctx, size, scene, style)
   paintAnchors(ctx, scene, style)

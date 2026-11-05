@@ -463,7 +463,7 @@ describe('addOutline', () => {
     it('adds the anchors and closes them into a ring for the polity', () => {
       const doc = createYearDocument(1100)
       addPolity(doc, polity('fr', 'France'))
-      expect(addOutline(doc, 'fr', TRIANGLE)).toBe(true)
+      expect(addOutline(doc, 'fr', TRIANGLE, false)).toBe(true)
       expect(doc.anchors).toEqual(TRIANGLE_AT)
       expect(doc.claims).toEqual([{ polity: 'fr', rings: [[0, 1, 2]] }])
     })
@@ -471,7 +471,7 @@ describe('addOutline', () => {
     it('records every new anchor under the provenance given', () => {
       const doc = createYearDocument(1100)
       addPolity(doc, polity('fr', 'France'))
-      addOutline(doc, 'fr', TRIANGLE)
+      addOutline(doc, 'fr', TRIANGLE, false)
       expect(doc.sources).toEqual([{ id: 0, ...BY_EYE }])
       expect(doc.anchorSource).toEqual([0, 0, 0])
     })
@@ -481,8 +481,8 @@ describe('addOutline', () => {
     it('reuses a provenance already declared rather than declaring it twice', () => {
       const doc = createYearDocument(1100, [{ id: 0, ...BY_EYE }])
       addPolity(doc, polity('fr', 'France'))
-      addOutline(doc, 'fr', TRIANGLE)
-      addOutline(doc, 'fr', TRIANGLE)
+      addOutline(doc, 'fr', TRIANGLE, false)
+      addOutline(doc, 'fr', TRIANGLE, false)
       expect(doc.sources).toHaveLength(1)
       expect(doc.claims[0]?.rings).toHaveLength(2)
     })
@@ -490,7 +490,7 @@ describe('addOutline', () => {
     it('appends after the anchors already there, so no existing index moves', () => {
       const doc = sharedBorderDocument()
       const before = doc.anchors.length
-      addOutline(doc, 'fr-couronne', TRIANGLE)
+      addOutline(doc, 'fr-couronne', TRIANGLE, false)
       expect(doc.claims.find((claim) => claim.polity === 'fr-couronne')?.rings[1]).toEqual([
         before,
         before + 1,
@@ -503,7 +503,7 @@ describe('addOutline', () => {
     // Checked before writing: a refused outline leaves nothing behind for the save to clean up.
     it('refuses an unknown polity and writes nothing', () => {
       const doc = createYearDocument(1100)
-      expect(addOutline(doc, 'nobody', TRIANGLE)).toBe(false)
+      expect(addOutline(doc, 'nobody', TRIANGLE, false)).toBe(false)
       expect(doc.anchors).toEqual([])
       expect(doc.sources).toEqual([])
     })
@@ -511,7 +511,7 @@ describe('addOutline', () => {
     it('refuses two points, which enclose nothing, and writes nothing', () => {
       const doc = createYearDocument(1100)
       addPolity(doc, polity('fr', 'France'))
-      expect(addOutline(doc, 'fr', TRIANGLE.slice(0, 2))).toBe(false)
+      expect(addOutline(doc, 'fr', TRIANGLE.slice(0, 2), false)).toBe(false)
       expect(doc.anchors).toEqual([])
       expect(doc.claims).toEqual([])
     })
@@ -526,7 +526,8 @@ describe('addOutline', () => {
       addOutline(
         doc,
         'fr',
-        points.map((at) => ({ at, provenance: BY_EYE }))
+        points.map((at) => ({ at, provenance: BY_EYE })),
+        false
       )
       if (points[0]) points[0][0] = 99
       expect(doc.anchors[0]).toEqual([-4, 47])
@@ -539,11 +540,16 @@ describe('addOutline', () => {
       const doc = sharedBorderDocument()
       const before = doc.anchors.length
       addPolity(doc, polity('lu', 'Lotharingia'))
-      addOutline(doc, 'lu', [
-        { at: [4, 48], provenance: BY_EYE, anchor: 4 },
-        { at: [4, 46], provenance: BY_EYE, anchor: 5 },
-        { at: [6, 47], provenance: BY_EYE },
-      ])
+      addOutline(
+        doc,
+        'lu',
+        [
+          { at: [4, 48], provenance: BY_EYE, anchor: 4 },
+          { at: [4, 46], provenance: BY_EYE, anchor: 5 },
+          { at: [6, 47], provenance: BY_EYE },
+        ],
+        false
+      )
       expect(doc.anchors).toHaveLength(before + 1)
       expect(doc.claims.find((claim) => claim.polity === 'lu')?.rings[0]).toEqual([4, 5, before])
     })
@@ -553,11 +559,16 @@ describe('addOutline', () => {
       const before = doc.anchors.length
       addPolity(doc, polity('lu', 'Lotharingia'))
       expect(
-        addOutline(doc, 'lu', [
-          { at: [4, 48], provenance: BY_EYE, anchor: 99 },
-          { at: [4, 46], provenance: BY_EYE },
-          { at: [6, 47], provenance: BY_EYE },
-        ])
+        addOutline(
+          doc,
+          'lu',
+          [
+            { at: [4, 48], provenance: BY_EYE, anchor: 99 },
+            { at: [4, 46], provenance: BY_EYE },
+            { at: [6, 47], provenance: BY_EYE },
+          ],
+          false
+        )
       ).toBe(false)
       expect(doc.anchors).toHaveLength(before)
     })
@@ -567,11 +578,16 @@ describe('addOutline', () => {
       const doc = createYearDocument(1100)
       addPolity(doc, polity('fr', 'France'))
       const coast = { name: 'Natural Earth 10m land minus lakes', licence: 'public domain' }
-      addOutline(doc, 'fr', [
-        { at: [-4, 47], provenance: BY_EYE },
-        { at: [-2, 48], provenance: coast },
-        { at: [-2, 46], provenance: coast },
-      ])
+      addOutline(
+        doc,
+        'fr',
+        [
+          { at: [-4, 47], provenance: BY_EYE },
+          { at: [-2, 48], provenance: coast },
+          { at: [-2, 46], provenance: coast },
+        ],
+        false
+      )
       expect(doc.sources).toEqual([
         { id: 0, ...BY_EYE },
         { id: 1, ...coast },

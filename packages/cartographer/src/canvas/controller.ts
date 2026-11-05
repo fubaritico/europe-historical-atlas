@@ -32,6 +32,7 @@ import {
 import { paintCanvas } from './paint/painter'
 import { buildScene } from './paint/scene'
 import { inDevicePixels } from './paint/style'
+import { answerOutlinesAndSelection } from './storeAnswers'
 import { arrowDoubleClick } from './tools/arrowDoubleClick'
 import { pencilCancel, pencilDrag, pencilEnd, pencilStart } from './tools/pencil'
 import { arrowDrag, arrowPress, resolvedTarget, toolKey } from './tools/toolGestures'
@@ -593,11 +594,11 @@ function watchStore(it: LiveCanvas, paint: () => void): () => void {
     it.deps.store.subscribe((state) => state.shownCities, paint),
     it.deps.store.subscribe((state) => state.cities, paint),
     it.deps.store.subscribe((state) => state.version, prune),
-    it.deps.store.subscribe((state) => state.tool, restart),
-    it.deps.store.subscribe((state) => state.target, restart),
     // Another mode of the Pen offers another layer: refresh what is offered, and keep the outline in
     // hand — switching from the coast to a river mid-border is what the two modes are for.
     it.deps.store.subscribe((state) => state.penMode, refresh),
+    // Leaving the outline — another polity, another tool — keeps it; ‹cmd+A› selects (open-outlines.md).
+    ...answerOutlinesAndSelection(it, paint, restart),
   ]
   return (): void => {
     for (const stop of stops) stop()

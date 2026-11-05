@@ -1,4 +1,9 @@
 import { coveringRun, segmentKey } from '@europe-historical-atlas/core/editor/borderOverrides'
+import {
+  isRingOpen,
+  ringSegments,
+  segmentCount,
+} from '@europe-historical-atlas/core/editor/outlines'
 
 import type { Segment } from '@europe-historical-atlas/core/editor/borderOverrides'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
@@ -43,8 +48,10 @@ export function selectedSegments(
   const seen = new Set<string>()
   for (const claim of doc.claims) {
     if (claim.polity !== target) continue
-    for (const ring of claim.rings)
+    for (const [position, ring] of claim.rings.entries())
       ring.forEach((a, at) => {
+        // An open outline's two ends are joined by no segment to dress (open-outlines.md).
+        if (at >= segmentCount(ring, isRingOpen(claim, position))) return
         const b = ring[(at + 1) % ring.length]
         if (b === undefined || !chosen.has(a) || !chosen.has(b) || a === b) return
         const key = segmentKey(a, b)
@@ -57,24 +64,27 @@ export function selectedSegments(
 }
 
 /**
- * Every polity but one whose rings hold a segment.
+ * Every polity but one, by the segments its rings hold — read once per selection, so asking a segment costs a
+ * lookup rather than a walk of the whole map (the dev, 2026-11-05: Venice's 461 points selected took 1 133 ms to
+ * read, every segment walking every ring of the map).
  * @param doc - the document
- * @param segment - the segment
  * @param except - the polity left out — the target
- * @returns the others holding it
+ * @returns each segment's holders but `except`, by segment key
  */
-function othersHolding(doc: YearDocument, segment: Segment, except: string): string[] {
-  const key = segmentKey(segment[0], segment[1])
-  const holders = new Set<string>()
+function holdersBySegment(doc: YearDocument, except: string): Map<string, Set<string>> {
+  const holders = new Map<string, Set<string>>()
   for (const claim of doc.claims) {
     if (claim.polity === except) continue
-    for (const ring of claim.rings)
-      ring.forEach((a, at) => {
-        const b = ring[(at + 1) % ring.length]
-        if (b !== undefined && segmentKey(a, b) === key) holders.add(claim.polity)
-      })
+    for (const [position, ring] of claim.rings.entries()) {
+      for (const [a, b] of ringSegments(ring, isRingOpen(claim, position))) {
+        const key = segmentKey(a, b)
+        const found = holders.get(key)
+        if (found === undefined) holders.set(key, new Set([claim.polity]))
+        else found.add(claim.polity)
+      }
+    }
   }
-  return [...holders]
+  return holders
 }
 
 /**
@@ -103,7 +113,11 @@ export function readLineSelection(
 ): LineSelection {
   if (target === null) return { segments: [], neighbour: null, hand: null, mixed: false }
   const segments = selectedSegments(doc, target, selected)
-  const neighbour = commonNeighbour(segments.map((segment) => othersHolding(doc, segment, target)))
+  const holders = holdersBySegment(doc, target)
+  const others = (segment: Segment): string[] => [
+    ...(holders.get(segmentKey(segment[0], segment[1])) ?? []),
+  ]
+  const neighbour = commonNeighbour(segments.map(others))
   const hands = new Set(
     segments.map((segment) => doc.runs[coveringRun(doc, segment[0], segment[1])]?.hand ?? null)
   )

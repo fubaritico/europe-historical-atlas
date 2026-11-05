@@ -66,7 +66,7 @@ export function MenuBarPanel({ store, history, clipboard, ...gestures }: MenuBar
       selected,
       canCopy: selected !== null || anchors >= 2,
       canPastePolities: held === 'polities',
-      canPasteStretch: held === 'stretch' && selected !== null,
+      canPastePoints: held === 'points' && selected !== null,
     },
     { ...gestures, onUndo: handleUndo, onRedo: handleRedo },
     { action, shortcut }

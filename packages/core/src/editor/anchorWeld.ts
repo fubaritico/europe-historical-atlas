@@ -1,6 +1,6 @@
 import { edgeAt, everyRing, runStepAt } from './anchorEdits'
 import { moveAnchor } from './documentEdits'
-import { MIN_RING_ANCHORS } from './yearDocument'
+import { openRings, outlineFloor, setRingOpen } from './outlines'
 
 import type { YearDocument } from './yearDocument'
 
@@ -31,7 +31,7 @@ export interface WeldRefusal {
   /**
    * `'pinch'`: a ring already held the anchor welded onto — or, threading, the anchor threaded — elsewhere:
    * it would visit one point twice;
-   * `'collapse'`: a ring would be left with fewer than {@link MIN_RING_ANCHORS} anchors.
+   * `'collapse'`: a ring would be left with fewer anchors than its floor — three closed, two open.
    */
   refused: 'pinch' | 'collapse'
 }
@@ -73,18 +73,30 @@ export function isWeldRefusal(result: WeldDone | WeldRefusal): result is WeldRef
   return 'refused' in result
 }
 
+/** A ring with an anchor welded, and whether the weld closed it. */
+interface Welded {
+  /** The new ring. */
+  ring: number[]
+  /** Whether an open outline was closed — one end welded onto the other, as Illustrator joins two ends. */
+  closes: boolean
+}
+
 /**
- * A ring with one anchor replaced by another, consecutive repeats dropped — the closing pair included.
- * @param ring - the ring's anchors, closure implied
+ * A ring with one anchor replaced by another, consecutive repeats dropped — the closing pair included for a closed
+ * ring. **An open outline whose two ends meet is closed** (`open-outlines.md`): its last anchor, now its first, is
+ * dropped, and the line between them becomes its closing segment — never a segment lost in silence.
+ * @param ring - the ring's anchors
  * @param from - the anchor replaced
  * @param into - the anchor it becomes
- * @returns the new ring
+ * @param open - whether the ring is an open outline
+ * @returns the new ring, and whether it closed
  */
-function welded(ring: readonly number[], from: number, into: number): number[] {
+function welded(ring: readonly number[], from: number, into: number, open: boolean): Welded {
   const replaced = ring.map((at) => (at === from ? into : at))
   const kept = replaced.filter((at, i) => i === 0 || at !== replaced[i - 1])
-  if (kept.length > 1 && kept[0] === kept.at(-1)) kept.pop()
-  return kept
+  const ends = kept.length > 1 && kept[0] === kept.at(-1)
+  if (ends) kept.pop()
+  return { ring: kept, closes: open && ends }
 }
 
 /**
@@ -97,6 +109,50 @@ function holders(doc: YearDocument, index: number): string[] {
   return doc.claims
     .filter((claim) => claim.rings.some((ring) => ring.includes(index)))
     .map((claim) => claim.polity)
+}
+
+/** A ring a weld touches: the ring itself, whether it is open, and what the weld makes of it. */
+interface WeldPlan extends Welded {
+  /** The ring, live. */
+  live: number[]
+  /** Whether it is an open outline. */
+  open: boolean
+}
+
+/**
+ * What a weld makes of each ring holding the anchor dragged, nothing written yet.
+ * @param doc - the document
+ * @param rings - the rings holding `from`, live
+ * @param from - the anchor dragged
+ * @param into - the anchor it is dropped on
+ * @returns one plan per ring
+ */
+function weldPlans(
+  doc: YearDocument,
+  rings: readonly number[][],
+  from: number,
+  into: number
+): WeldPlan[] {
+  const opened = openRings(doc.claims)
+  return rings.map((live) => {
+    const open = opened.has(live)
+    return { live, open, ...welded(live, from, into, open) }
+  })
+}
+
+/**
+ * Mark closed every open outline a weld joined end to end.
+ * @param doc - the document
+ * @param plans - the weld's plans
+ */
+function closeJoined(doc: YearDocument, plans: readonly WeldPlan[]): void {
+  for (const { live, closes } of plans) {
+    if (!closes) continue
+    for (const claim of doc.claims) {
+      const at = claim.rings.indexOf(live)
+      if (at >= 0) setRingOpen(claim, at, false)
+    }
+  }
 }
 
 /**
@@ -118,10 +174,15 @@ export function weldAnchor(
     return null
   const rings = everyRing(doc).filter((ring) => ring.includes(from))
   if (rings.length === 0) return null
-  const next = rings.map((ring) => welded(ring, from, into))
-  if (next.some((ring) => ring.filter((at) => at === into).length > 1)) return { refused: 'pinch' }
-  if (next.some((ring) => ring.length < MIN_RING_ANCHORS)) return { refused: 'collapse' }
-  rings.forEach((ring, i) => ring.splice(0, ring.length, ...(next[i] ?? ring)))
+  const plans = weldPlans(doc, rings, from, into)
+  if (plans.some(({ ring }) => ring.filter((at) => at === into).length > 1))
+    return { refused: 'pinch' }
+  // An open outline stands on two points, a closed ring on three — and one the weld closes is closed (open-outlines.md).
+  if (plans.some(({ ring, open, closes }) => ring.length < outlineFloor(open && !closes))) {
+    return { refused: 'collapse' }
+  }
+  closeJoined(doc, plans)
+  for (const { live, ring } of plans) live.splice(0, live.length, ...ring)
   for (const dressed of doc.runs) dressed.run = weldedRun(dressed.run, from, into)
   return { polities: holders(doc, into) }
 }
@@ -147,11 +208,13 @@ export function threadAnchor(
   point: [number, number]
 ): WeldDone | WeldRefusal | null {
   if (index === a || index === b || doc.anchors[index] === undefined) return null
-  const rings = everyRing(doc).filter((ring) => edgeAt(ring, a, b) >= 0)
+  const open = openRings(doc.claims)
+  const edge = (ring: readonly number[]) => edgeAt(ring, a, b, open.has(ring))
+  const rings = everyRing(doc).filter((ring) => edge(ring) >= 0)
   if (rings.length === 0) return null
   if (rings.some((ring) => ring.includes(index))) return { refused: 'pinch' }
   moveAnchor(doc, index, point)
-  for (const ring of rings) ring.splice(edgeAt(ring, a, b) + 1, 0, index)
+  for (const ring of rings) ring.splice(edge(ring) + 1, 0, index)
   // A hand-set stroke over that stretch keeps covering all of it (s13).
   for (const dressed of doc.runs) {
     const at = runStepAt(dressed.run, a, b)

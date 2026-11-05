@@ -1,4 +1,5 @@
 import { paintOrder } from '../data/paintOrder'
+import { claimHoldsTogether } from '../data/yearFormat'
 
 import type { YearDocument } from './yearDocument'
 
@@ -27,6 +28,12 @@ export function documentFaults(doc: YearDocument): string[] {
           `a ring of "${claim.polity}" points past the anchor table: ${outside.join(', ')}`
         )
       }
+    }
+    // The open positions are kept in step with the rings by `outlines.ts`; one naming no ring is a writer that was not.
+    if (!claimHoldsTogether(claim)) {
+      faults.push(
+        `the open outlines of "${claim.polity}" name ${(claim.open ?? []).join(', ')}, against ${String(claim.rings.length)} rings, or a ring is under its floor`
+      )
     }
   }
   // Painted last rather than lost (`paintOrder`), and said here once per version, not per frame.

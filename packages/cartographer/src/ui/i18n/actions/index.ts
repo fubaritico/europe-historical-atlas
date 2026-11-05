@@ -30,7 +30,8 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `menuFile`, `menuEdit` — The menu bar's two menus (CARTO-345).
  * - `copy` — Copy the polity or the stretch selected.
  * - `pastePolities` — Paste the polities copied, each whole, in place.
- * - `pasteStretch`, `pasteSheet` — Paste onto a polity; `name` is the polity selected, verbatim, or
+ * - `selectAll` — Select every point of the polity selected, none selected; `selectAllOf` the same, `name` the polity.
+ * - `pastePoints`, `pasteSheet` — Paste onto a polity; `name` is the polity selected, verbatim, or
  *   `theSelection` when none is.
  * - `theSelection` — What a paste onto a polity names when no polity is selected.
  */

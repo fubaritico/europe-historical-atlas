@@ -1,5 +1,6 @@
 import { paintRanks } from '@europe-historical-atlas/core/data/paintOrder'
 import { handFor } from '@europe-historical-atlas/core/editor/borderHands'
+import { isRingOpen } from '@europe-historical-atlas/core/editor/outlines'
 import {
   asSeenAcrossTribes,
   isTribeEdge,
@@ -103,12 +104,19 @@ export function backdropRect(frame: BackdropFrame, inputs: SceneInputs): Rect {
  * them. Who holds what is `{Polities}`'s question, and it reads the document directly.
  * @param document - the document to read
  * @param anchors - the projected anchor table, parallel to `document.anchors`
+ * @param which - every outline, the closed ones only, or the open ones only (`open-outlines.md`)
  * @returns one run of positions per ring
  */
-export function projectedRings(document: YearDocument, anchors: readonly Point[]): Point[][] {
+export function projectedRings(
+  document: YearDocument,
+  anchors: readonly Point[],
+  which: 'all' | 'closed' | 'open' = 'all'
+): Point[][] {
   const rings: Point[][] = []
   for (const claim of document.claims) {
-    for (const ring of claim.rings) {
+    for (const [at, ring] of claim.rings.entries()) {
+      // The fills take every outline, an open one closed by the line between its ends; the strokes split them.
+      if (which !== 'all' && isRingOpen(claim, at) !== (which === 'open')) continue
       const run: Point[] = []
       for (const index of ring) {
         const point = anchors[index]
@@ -273,7 +281,8 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
       inputs.backdropImage === null
         ? null
         : { image: inputs.backdropImage, rect: backdropRect(inputs.frame, inputs) },
-    rings: projectedRings(document, anchors),
+    rings: projectedRings(document, anchors, 'closed'),
+    openRings: projectedRings(document, anchors, 'open'),
     fills: projectedFills(document, anchors, inputs.colours, tribes),
     tribeFeathers: projectedTribeFeathers(inputs.tribeFeathers, inputs.viewport),
     anchors,

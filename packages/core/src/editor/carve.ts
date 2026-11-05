@@ -27,6 +27,7 @@ import { MIN_RING_ANCHORS } from './yearDocument'
 
 import type { OutlinePoint } from './documentEdits'
 import type { YearDocument } from './yearDocument'
+import type { YearClaim } from '../data/yearFormat'
 
 /** What a carving did — for the status bar, and for a test to read. */
 export interface Carving {
@@ -46,6 +47,18 @@ export interface CarvingFault {
   reason: string
 }
 
+/**
+ * A carving held back: the suzerain's own outline is still open, and a carving reads closed areas (the dev, 2026-11-05:
+ * the suzerain is not carved while its outline is open, and a warning dialogue says so — `open-outlines.md`). The
+ * vassal and the suzerain overlap until it is closed.
+ */
+export interface CarvingHeld {
+  /** The suzerain left uncarved. */
+  suzerain: string
+  /** Why. */
+  held: 'open-outline'
+}
+
 /** A crossing found on a segment: where along it, and the anchor placed there. */
 interface Crossing {
   /** How far along the segment, from its first anchor, 0 to 1. */
@@ -61,6 +74,21 @@ const END_TOLERANCE = 1e-9
 const SIDE_STEP = 1e-3
 
 /**
+ * The suzerain a vassal's outline could not be carved out of, because its own outline is open — asked **before** the
+ * vassal is closed: the closing is refused then, nothing written (the dev, 2026-11-05: a vassal is never left over a
+ * suzerain it cannot be carved from — `open-outlines.md`).
+ * @param doc - the document
+ * @param vassalId - the polity about to be closed
+ * @returns the suzerain's id, or `null` when the closing may go on
+ */
+export function openSuzerainOf(doc: YearDocument, vassalId: string): string | null {
+  const suzerain = doc.polities.find((polity) => polity.id === vassalId)?.suzerain ?? null
+  if (suzerain === null) return null
+  const domain = ownDomainOf(doc, suzerain)
+  return domain !== null && 'held' in domain ? suzerain : null
+}
+
+/**
  * Close an outline for a polity and carve it out of its suzerain's own domain — what the Pen does at close,
  * in one edit so one undo takes both back.
  * @param doc - the document
@@ -73,8 +101,8 @@ export function addOutlineCarving(
   doc: YearDocument,
   polityId: string,
   points: readonly OutlinePoint[]
-): { closed: false } | { closed: true; carving: Carving | CarvingFault | null } {
-  if (!addOutline(doc, polityId, points)) return { closed: false }
+): { closed: false } | { closed: true; carving: Carving | CarvingFault | CarvingHeld | null } {
+  if (!addOutline(doc, polityId, points, false)) return { closed: false }
   const ring = doc.claims.find((claim) => claim.polity === polityId)?.rings.at(-1)
   // `addOutline` has just pushed this ring: its absence is a defect, reported as a fault, never skipped.
   if (ring === undefined) {
@@ -88,23 +116,36 @@ export function addOutlineCarving(
 }
 
 /**
+ * A suzerain's own domain, if it has one and it can be carved.
+ * @param doc - the document
+ * @param suzerain - the suzerain's id
+ * @returns its claim; `null` with no own domain; held back when one of its outlines is open
+ */
+function ownDomainOf(doc: YearDocument, suzerain: string): YearClaim | CarvingHeld | null {
+  const claim = doc.claims.find((each) => each.polity === suzerain)
+  if (claim === undefined || claim.rings.length === 0) return null
+  return claim.open === undefined ? claim : { suzerain, held: 'open-outline' }
+}
+
+/**
  * Carve a vassal's newly closed outline out of its suzerain's own domain.
  * @param doc - the document, the outline already closed into it
  * @param vassalId - the polity whose outline was closed
  * @param ring - the outline's anchors — the ring as it sits in the document, edited in place by crossings
  * @returns what was carved; `null` when there was nothing to carve (no suzerain, no own domain, no overlap);
  *   a fault when it could not be done — and then the document is exactly as it was before the call:
- *   crossing anchors already placed are taken back out (review QUAL-001, 2026-10-15)
+ *   crossing anchors already placed are taken back out (review QUAL-001, 2026-10-15); held back, and nothing
+ *   written, when the suzerain's own outline is open (`CarvingHeld`)
  */
 export function carveOutOfSuzerain(
   doc: YearDocument,
   vassalId: string,
   ring: number[]
-): Carving | CarvingFault | null {
+): Carving | CarvingFault | CarvingHeld | null {
   const suzerain = doc.polities.find((polity) => polity.id === vassalId)?.suzerain ?? null
   if (suzerain === null) return null
-  const claim = doc.claims.find((each) => each.polity === suzerain)
-  if (claim === undefined || claim.rings.length === 0) return null
+  const claim = ownDomainOf(doc, suzerain)
+  if (claim === null || 'held' in claim) return claim
 
   const putBack = snapshotOf(doc)
   const crossings = placeCrossings(doc, claim.rings, ring)
@@ -269,7 +310,8 @@ function insertAlong(
   ordered: readonly number[]
 ): void {
   for (const each of everyRing(doc)) {
-    const position = edgeAt(each, from, to)
+    // Every ring as closed: a carving reads areas, an open outline's closing line among its segments.
+    const position = edgeAt(each, from, to, false)
     if (position < 0) continue
     const forward = each[position] === from
     each.splice(position + 1, 0, ...(forward ? ordered : [...ordered].reverse()))

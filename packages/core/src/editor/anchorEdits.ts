@@ -1,5 +1,5 @@
 import { addAnchor, declareSource } from './documentEdits'
-import { MIN_RING_ANCHORS } from './yearDocument'
+import { keepRings, openRings, outlineFloor, segmentCount } from './outlines'
 
 import type { Provenance } from './documentEdits'
 import type { YearDocument } from './yearDocument'
@@ -32,14 +32,16 @@ export function everyRing(doc: YearDocument): number[][] {
 }
 
 /**
- * The position of the stretch joining two anchors in a ring, either way round, the closing one included.
- * @param ring - the ring's anchor indices, closure implied
+ * The position of the stretch joining two anchors in a ring, either way round — the closing one included for a
+ * closed ring, never for an open outline, whose two ends are not joined by a line (`editor/outlines.ts`).
+ * @param ring - the ring's anchor indices
  * @param a - one anchor
  * @param b - the other
+ * @param open - whether the ring is an open outline
  * @returns the position after which the new anchor goes, or `-1` when they are not neighbours
  */
-export function edgeAt(ring: readonly number[], a: number, b: number): number {
-  for (let at = 0; at < ring.length; at += 1) {
+export function edgeAt(ring: readonly number[], a: number, b: number, open: boolean): number {
+  for (let at = 0; at < segmentCount(ring, open); at += 1) {
     const next = ring[(at + 1) % ring.length]
     const here = ring[at]
     if ((here === a && next === b) || (here === b && next === a)) return at
@@ -79,10 +81,12 @@ export function insertAnchorOnStretch(
   point: [number, number],
   provenance: Provenance
 ): number | null {
-  const rings = everyRing(doc).filter((ring) => edgeAt(ring, a, b) >= 0)
+  const open = openRings(doc.claims)
+  const edge = (ring: readonly number[]) => edgeAt(ring, a, b, open.has(ring))
+  const rings = everyRing(doc).filter((ring) => edge(ring) >= 0)
   if (rings.length === 0) return null
   const index = addAnchor(doc, point, declareSource(doc, provenance))
-  for (const ring of rings) ring.splice(edgeAt(ring, a, b) + 1, 0, index)
+  for (const ring of rings) ring.splice(edge(ring) + 1, 0, index)
   // A hand-set stroke over that stretch keeps covering all of it (s13).
   for (const dressed of doc.runs) {
     const at = runStepAt(dressed.run, a, b)
@@ -102,7 +106,7 @@ export interface AnchorRemoval {
   rings: number
   /**
    * The other polities whose outline kept the points, because losing them would have left it under
-   * {@link MIN_RING_ANCHORS} — a neighbour's outline is never deleted by a gesture on the owner's points.
+   * its floor — three points closed, two open — a neighbour's outline is never deleted by a gesture on the owner's points.
    */
   spared: string[]
 }
@@ -129,7 +133,7 @@ export function removeAnchor(doc: YearDocument, index: number): AnchorRemoval | 
  * and deleting a neighbour's outline unsaid would be the inverse defect.
  *
  * **Nothing refuses a deletion** (the dev, 2026-10-14: *« y'a rien qui doit m'empêcher d'enlever des
- * points. Rien. »*). A ring left under {@link MIN_RING_ANCHORS} cannot enclose an area and would vanish
+ * points. Rien. »*). A ring left under its floor (`outlineFloor`) cannot stand and would vanish
  * silently on the next open (`s03`), so it never stays: **an owner's ring that would fall short goes
  * whole**, as if all its points had been selected; **another polity's, or a deliberate gap's, keeps the
  * points** it would have lost, and is named in `spared`. The anchors stay in the table, as every anchor
@@ -146,9 +150,12 @@ export function removeAnchors(
   owner?: string
 ): AnchorRemoval | null {
   const selected = new Set(indices)
-  // Whole, or too few points left to enclose an area: either way the owner's ring goes.
+  // An open outline's floor is a line, a closed ring's a triangle (open-outlines.md).
+  const open = openRings(doc.claims)
+  const floor = (ring: readonly number[]) => outlineFloor(open.has(ring))
+  // Whole, or too few points left to stand: either way the owner's ring goes.
   const goesWhole = (ring: readonly number[]) =>
-    ring.filter((at) => !selected.has(at)).length < MIN_RING_ANCHORS
+    ring.filter((at) => !selected.has(at)).length < floor(ring)
   const ownerRings = new Set(
     doc.claims.find((claim) => claim.polity === owner)?.rings.filter(goesWhole) ?? []
   )
@@ -160,7 +167,7 @@ export function removeAnchors(
   const touches = (ring: readonly number[]) => ring.some((at) => gone.has(at))
   // Any other ring that would fall short keeps its points: it is not this gesture's to delete.
   const spares = (ring: number[]) =>
-    !ownerRings.has(ring) && ring.filter((at) => !gone.has(at)).length < MIN_RING_ANCHORS
+    !ownerRings.has(ring) && ring.filter((at) => !gone.has(at)).length < floor(ring)
   const holding = doc.claims.filter((claim) =>
     claim.rings.some((ring) => ownerRings.has(ring) || touches(ring))
   )
@@ -174,9 +181,7 @@ export function removeAnchors(
     .map((claim) => claim.polity)
   const thinned = (ring: number[]): number[] =>
     spares(ring) ? [...ring] : ring.filter((at) => !gone.has(at))
-  for (const claim of holding) {
-    claim.rings = claim.rings.filter((ring) => !ownerRings.has(ring)).map(thinned)
-  }
+  for (const claim of holding) keepRings(claim, (ring) => !ownerRings.has(ring), thinned)
   // Only a claim this gesture emptied goes (ARCH-003): an untouched one is not this gesture's to edit.
   doc.claims = doc.claims.filter((claim) => !holding.includes(claim) || claim.rings.length > 0)
   for (const gap of doc.deliberateGaps) gap.ring = thinned(gap.ring)

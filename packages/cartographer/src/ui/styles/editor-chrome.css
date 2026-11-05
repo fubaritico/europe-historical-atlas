@@ -287,6 +287,21 @@
   width: 460px;
 }
 
+/* The warning dialogue (`AlarmDialog`): the dev's warning sign beside the text, its top on the text's first line. */
+.short-dialogue__alert {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.short-dialogue__sign {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 24px;
+  /* Off the dialogue's edge (the dev, 2026-11-05). */
+  margin-inline-start: 8px;
+}
+
 .map-list {
   --ui-listbox-bg: var(--bg);
   --ui-listbox-border-color: var(--ink-off);

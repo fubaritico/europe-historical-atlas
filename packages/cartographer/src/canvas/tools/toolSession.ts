@@ -1,4 +1,5 @@
 import { extentMembers } from '@europe-historical-atlas/core/editor/extent'
+import { isRingOpen, ringNeighboursAt } from '@europe-historical-atlas/core/editor/outlines'
 
 import { normaliseRect } from '../../geometry/marquee'
 import { isClosingOffered } from '../../geometry/ringClosure'
@@ -6,6 +7,7 @@ import { isPenTool } from '../../state/toolSlice'
 
 import type { LineVertex } from '../../geometry/lineSnap'
 import type { Rect } from '../../geometry/marquee'
+import type { ResumedOutline } from '../../state/outlineActions'
 import type { EditorTool } from '../../state/toolSlice'
 import type { Point } from '../../viewport/viewport'
 import type { CanvasMessageKey } from '../i18n'
@@ -87,6 +89,12 @@ export interface ToolSession {
   strokes: PencilStroke[]
   /** The Pencil's drag in progress: when and where it last placed a point — `null` between drags. */
   drawing: PencilSample | null
+  /**
+   * The open outline the Pen took up by one of its ends (`open-outlines.md`, the dev, 2026-11-05: *"stop it, resume
+   * it"*) — whose, where, and what it held — so the outline in hand is put back in its place, open or closed;
+   * `null` for a new outline.
+   */
+  resumed: (ResumedOutline & { polity: string }) | null
 }
 
 /**
@@ -152,6 +160,7 @@ export function idleSession(): ToolSession {
     start: null,
     strokes: [],
     drawing: null,
+    resumed: null,
   }
 }
 
@@ -217,6 +226,7 @@ export function clearOutline(session: ToolSession): void {
   session.snap = null
   session.start = null
   session.strokes = []
+  session.resumed = null
   if (session.drawing !== null) session.drawing.stroke = null
 }
 
@@ -238,6 +248,7 @@ export function abandonGesture(session: ToolSession): boolean {
   session.start = null
   session.strokes = []
   session.drawing = null
+  session.resumed = null
   return busy
 }
 
@@ -370,13 +381,14 @@ export function isolatedAnchors(
   const near = new Set<number>()
   const minGapSquared = minGap * minGap
   for (const claim of document.claims) {
-    for (const ring of claim.rings) {
+    for (const [position, ring] of claim.rings.entries()) {
+      // An open outline's two ends are not neighbours (open-outlines.md).
+      const open = isRingOpen(claim, position)
       ring.forEach((index, at) => {
         if (!wanted.has(index)) return
         const here = onScreen[index]
-        const neighbours = [ring.at(at - 1), ring[(at + 1) % ring.length]]
-        for (const other of neighbours) {
-          const there = other === undefined ? undefined : onScreen[other]
+        for (const other of ringNeighboursAt(ring, at, open)) {
+          const there = onScreen[other]
           if (here === undefined || there === undefined) continue
           const dx = here[0] - there[0]
           const dy = here[1] - there[1]
@@ -417,13 +429,13 @@ export function penSnapAnchors(
 export function ringNeighbours(document: YearDocument, index: number): number[] {
   const around = new Set<number>()
   for (const claim of document.claims) {
-    for (const ring of claim.rings) {
+    for (const [position, ring] of claim.rings.entries()) {
       const at = ring.indexOf(index)
       if (at < 0) continue
-      const before = ring[(at - 1 + ring.length) % ring.length]
-      const after = ring[(at + 1) % ring.length]
-      if (before !== undefined && before !== index) around.add(before)
-      if (after !== undefined && after !== index) around.add(after)
+      // An open outline's end drags one stretch, not a phantom one to its other end (open-outlines.md).
+      for (const other of ringNeighboursAt(ring, at, isRingOpen(claim, position))) {
+        if (other !== index) around.add(other)
+      }
     }
   }
   return [...around]

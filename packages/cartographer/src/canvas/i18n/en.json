@@ -49,5 +49,11 @@
   "stepMoveAnchors": "{count, plural, one {move anchor} other {move # anchors}}",
   "stepWeldAnchor": "weld anchor",
   "stepDrawOutline": "draw outline of {name}",
-  "stepRetrace": "retrace {name}"
+  "stepRetrace": "retrace {name}",
+  "resumedOutline": "Open outline of {name} taken up: go on, or click its other end to close it",
+  "stepKeepOutline": "keep outline of {name}",
+  "keptOutline": "Outline of {name} kept, open: take it up with the Pen by one of its ends",
+  "carveHeld": "{name} is not carved out of {suzerain}: the outline of {suzerain} is still open. The two overlap until you close it.",
+  "closeOverOpenSuzerain": "{name} is not closed: the outline of its suzerain, {suzerain}, is still open, and a vassal is carved only out of a closed outline. The outline of {name} is erased: close {suzerain} first, then draw {name} again.",
+  "pasteOverOpenSuzerain": "A piece is not pasted: it would close {name}, and the outline of its suzerain, {suzerain}, is still open. Close {suzerain} first, then paste again."
 }

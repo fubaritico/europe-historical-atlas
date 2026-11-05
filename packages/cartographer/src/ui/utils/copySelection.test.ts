@@ -55,13 +55,23 @@ describe('copySelection', () => {
       ])
     })
 
-    it('copies two anchors that follow one another as a stretch, rather than the polity', () => {
+    it('copies two anchors that follow one another as points, rather than the polity', () => {
       const to = deps()
       copySelection(selection({ selectedAnchors: [1, 2] }), to)
 
-      expect(to.kept.map((each) => each.kind)).toEqual(['stretch'])
+      expect(to.kept.map((each) => each.kind)).toEqual(['points'])
       expect(to.said).toEqual([
-        'Copié : un tronçon de Reaume de France, 2 points, de 1100-backup-2026-11-02 — sélectionnez une entité, puis ⌘V',
+        'Copié : 2 points de Reaume de France, de 1100-backup-2026-11-02 — sélectionnez une entité, puis ⌘V',
+      ])
+    })
+
+    // The dev, 2026-11-05: "it's the points we want" — whatever they make.
+    it('copies the points of a whole outline and of part of another, and counts them all', () => {
+      const to = deps()
+      copySelection(selection({ selectedAnchors: [0, 1, 2, 3, 4, 5] }), to)
+
+      expect(to.said).toEqual([
+        'Copié : 6 points de Reaume de France, de 1100-backup-2026-11-02 — sélectionnez une entité, puis ⌘V',
       ])
     })
   })
@@ -101,7 +111,7 @@ describe('copySelection', () => {
 
       expect(copySelection(selection({ target: null }), to)).toBeNull()
       expect(to.kept).toEqual([])
-      expect(to.said).toEqual(['Sélectionnez une entité politique ou un tronçon à copier'])
+      expect(to.said).toEqual(['Sélectionnez une entité politique ou des points à copier'])
     })
 
     it('copies nothing when the polity aimed at is no longer in the map', () => {
@@ -109,25 +119,35 @@ describe('copySelection', () => {
       const to = deps()
 
       expect(copySelection(selection({ target: 'gone' }), to)).toBeNull()
-      expect(to.said).toEqual(['Sélectionnez une entité politique ou un tronçon à copier'])
+      expect(to.said).toEqual(['Sélectionnez une entité politique ou des points à copier'])
     })
 
-    it('copies nothing and says so when the anchors do not follow one another', () => {
+    it('copies nothing and says so when no selected point has a selected neighbour', () => {
       vi.spyOn(console, 'warn').mockImplementation(() => undefined)
       const to = deps()
 
       expect(copySelection(selection({ selectedAnchors: [0, 2] }), to)).toBeNull()
       expect(to.said).toEqual([
-        'Ces points ne se suivent pas sur un même contour : rien n’est copié',
+        'Aucun de ces points n’a de voisin sélectionné sur un tracé : rien n’est copié',
       ])
     })
 
-    it('copies the whole outline as a closed stretch, a whole outline being a stretch like any other', () => {
+    it('copies the pieces and says the point left out alone', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const to = deps()
+      const copy = copySelection(selection({ selectedAnchors: [1, 2, 5] }), to)
+
+      expect(copy).toMatchObject({ kind: 'points' })
+      expect(to.said[0]).toMatch(/ · un point seul laissé de côté : aucun voisin sélectionné$/)
+      expect(warn).toHaveBeenCalledOnce()
+    })
+
+    it('copies a whole outline as a closed piece', () => {
       const to = deps()
       const copy = copySelection(selection({ selectedAnchors: [0, 1, 2, 3] }), to)
 
-      expect(copy).toMatchObject({ kind: 'stretch', closed: true })
-      expect(to.said[0]).toMatch(/^Copié : un tronçon de Reaume de France, 4 points/)
+      expect(copy).toMatchObject({ kind: 'points', pieces: [{ closed: true }] })
+      expect(to.said[0]).toMatch(/^Copié : 4 points de Reaume de France/)
     })
 
     it('says the copy was not kept when the tab’s storage refuses it', () => {

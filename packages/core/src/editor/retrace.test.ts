@@ -60,6 +60,7 @@ describe('retrace', () => {
         ring: ringOf(doc, 'fr-couronne'),
         forward: [middle],
         backward: [0, 3],
+        only: null,
       })
     })
   })

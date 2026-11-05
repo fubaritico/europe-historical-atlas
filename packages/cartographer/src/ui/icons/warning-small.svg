@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The dev's warning sign (warning.svg, 2026-11-05), simplified for 24 px and less: no inner black outline, which falls
+     under a pixel there and smears grey; the exclamation mark a little bolder. Same triangle, same gradient. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 430">
+    <defs>
+        <linearGradient id="warningSmallGrad" x1="100%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stop-color="#E66A00" />
+            <stop offset="100%" stop-color="#FBC02D" />
+        </linearGradient>
+    </defs>
+    <path d="M 223.7 26.8 C 235.3 6.7 264.7 6.7 276.3 26.8 L 489.1 395.2 C 500.7 415.3 486.2 430 462.8 430 L 37.2 430 C 13.8 430 -0.7 415.3 10.9 395.2 Z" fill="url(#warningSmallGrad)" />
+    <g fill="#000000">
+        <path d="M 218 120 C 216 100, 284 100, 282 120 L 268 290 C 267 302, 233 302, 232 290 Z" />
+        <circle cx="250" cy="352" r="30" />
+    </g>
+</svg>

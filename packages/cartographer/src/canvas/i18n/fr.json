@@ -18,7 +18,7 @@
   "retracingOtherOutline": "Retracer {name} — cette ancre est sur un autre de ses contours",
   "retracingCannotEnd": "Retracer {name} — impossible de finir ici : {reason}",
   "retracingReplaces": "Retracer {name} — remplace {count, plural, one {# ancre} other {# ancres}}{consequences} · ‹alt› l’autre côté",
-  "tooFar": "{verb, select, draw {trop loin pour dessiner} edit {trop loin pour modifier} other {{verb}}} — zoomez ({why}\u202f; les outils agissent à moins de {km} km)",
+  "tooFar": "{verb, select, draw {trop loin pour dessiner} edit {trop loin pour modifier} other {{verb}}} — zoomez ({why} ; les outils agissent à moins de {km} km)",
   "reachWould": "l’aimant porterait à {reach} km",
   "notFramed": "la vue n’est pas encore cadrée",
   "insertedFromWater": "{count, plural, one {# sommet inséré} other {# sommets insérés}} depuis {water, select, coast {la côte} river {le fleuve {river}} unnamed {un fleuve sans nom} other {{water}}}",
@@ -49,5 +49,11 @@
   "stepMoveAnchors": "{count, plural, one {déplacer une ancre} other {déplacer # ancres}}",
   "stepWeldAnchor": "souder une ancre",
   "stepDrawOutline": "tracer le contour — {name}",
-  "stepRetrace": "retracer {name}"
+  "stepRetrace": "retracer {name}",
+  "resumedOutline": "Tracé ouvert de {name} repris : continuez-le, ou cliquez son autre extrémité pour le fermer",
+  "stepKeepOutline": "garder le tracé — {name}",
+  "keptOutline": "Tracé de {name} gardé, ouvert : reprenez-le à la plume par une de ses extrémités",
+  "carveHeld": "{name} n’est pas découpé dans {suzerain} : le contour de {suzerain} est encore ouvert. Les deux se recouvrent tant que vous ne l’avez pas fermé.",
+  "closeOverOpenSuzerain": "{name} n’est pas fermé : le contour de son suzerain, {suzerain}, est encore ouvert, et un vassal ne se découpe que dans un contour fermé. Le tracé de {name} est effacé : fermez d’abord {suzerain}, puis redessinez {name}.",
+  "pasteOverOpenSuzerain": "Une partie n’est pas collée : elle fermerait {name}, et le contour de son suzerain, {suzerain}, est encore ouvert. Fermez d’abord {suzerain}, puis collez de nouveau."
 }

@@ -1,4 +1,4 @@
-import { copyPolities, copyStretch } from '@europe-historical-atlas/core/editor/clipboard'
+import { copyPoints, copyPolities } from '@europe-historical-atlas/core/editor/clipboard'
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 
 import { CANVAS_MESSAGES } from '../../canvas/i18n'
@@ -13,8 +13,9 @@ import type { Locale } from '@europe-historical-atlas/core/i18n/locale'
 
 /**
  * ‹cmd+C› — Édition › Copier (CARTO-345, `files/plans/cartographer/copy-paste-between-maps.md`): **one copies what one
- * selected**. Anchors selected with the white arrow, two or more, are a stretch; otherwise the polity selected is
- * copied whole, sheet and outline. Nothing in the map changes, and the history gains no step.
+ * selected**. Points selected with the white arrow, two or more, are copied whatever they make (the dev, 2026-11-05,
+ * `open-outlines.md`); otherwise the polity selected is copied whole, sheet and outline. Nothing in the map changes,
+ * and the history gains no step.
  */
 
 /** What a copy reads of the store: the map, the polity selected, the anchors selected. */
@@ -33,7 +34,7 @@ export interface ClipboardWords {
   clipboard: Translate<ClipboardMessageKey>
   /** The paste shortcut, as the system writes it — ⌘V, or Ctrl+V. */
   paste: string
-  /** The canvas's sentences — ⟨retracer⟩'s refusals, which a stretch's paste says in its words. */
+  /** The canvas's sentences — ⟨retracer⟩'s refusals, which a paste of points says in its words. */
   canvas: Translate<CanvasMessageKey>
 }
 
@@ -82,10 +83,10 @@ export function firstName(polities: readonly CopiedPolity[]): string {
  * @returns the sentence
  */
 export function copiedSentence(content: ClipboardContent, words: ClipboardWords): string {
-  if (content.kind === 'stretch') {
-    return words.clipboard('copiedStretch', {
+  if (content.kind === 'points') {
+    return words.clipboard('copiedPoints', {
       name: content.polity,
-      count: content.points.length,
+      count: content.pieces.reduce((sum, piece) => sum + piece.points.length, 0),
       map: content.map,
       paste: words.paste,
     })
@@ -105,8 +106,8 @@ export function copiedSentence(content: ClipboardContent, words: ClipboardWords)
  * @returns the sentence
  */
 export function heldSentence(content: ClipboardContent, words: ClipboardWords): string {
-  if (content.kind === 'stretch') {
-    return words.clipboard('heldStretch', { name: content.polity, map: content.map })
+  if (content.kind === 'points') {
+    return words.clipboard('heldPoints', { name: content.polity, map: content.map })
   }
   return words.clipboard('heldPolities', {
     count: content.polities.length,
@@ -115,21 +116,28 @@ export function heldSentence(content: ClipboardContent, words: ClipboardWords): 
   })
 }
 
+/** What the selection copies, and the points it left out alone. */
+interface CopyOf {
+  /** The copy, or the message saying why there is none. */
+  copy: ClipboardContent | ClipboardMessageKey
+  /** Points selected left out: none of their neighbours along an outline was selected. */
+  alone: number
+}
+
 /**
- * What the selection copies: a stretch when anchors are selected, otherwise the polity selected.
+ * What the selection copies: the points when two or more are selected, otherwise the polity selected.
  * @param selection - the map and what is selected
  * @param map - the map's name
- * @returns the copy, or the message saying why there is none
+ * @returns the copy, or the message saying why there is none, and the points left out
  */
-function copyOf(selection: CopySelection, map: string): ClipboardContent | ClipboardMessageKey {
+function copyOf(selection: CopySelection, map: string): CopyOf {
   const { document, target, selectedAnchors } = selection
   if (selectedAnchors.length >= 2) {
-    const stretch = copyStretch(document, selectedAnchors, map, target)
-    if (stretch === 'not-a-run' || stretch === 'too-few') return 'notARun'
-    return stretch
+    const points = copyPoints(document, selectedAnchors, map, target)
+    return { copy: points.copy ?? 'pointsAlone', alone: points.alone }
   }
   const polities = target === null ? null : copyPolities(document, [target], map)
-  return polities ?? 'nothingSelected'
+  return { copy: polities ?? 'nothingSelected', alone: 0 }
 }
 
 /**
@@ -139,7 +147,7 @@ function copyOf(selection: CopySelection, map: string): ClipboardContent | Clipb
  * @returns what was copied, or `null` when nothing was — said, either way
  */
 export function copySelection(selection: CopySelection, deps: CopyDeps): ClipboardContent | null {
-  const copy = copyOf(selection, deps.map)
+  const { copy, alone } = copyOf(selection, deps.map)
   if (typeof copy === 'string') {
     console.warn(`[Cartographer] copy refused: ${copy}.`)
     deps.say(deps.words.clipboard(copy))
@@ -149,6 +157,8 @@ export function copySelection(selection: CopySelection, deps: CopyDeps): Clipboa
     deps.say(deps.words.clipboard('notKept'))
     return null
   }
-  deps.say(copiedSentence(copy, deps.words))
+  if (alone > 0) console.warn(`[Cartographer] copy left ${String(alone)} points out, alone.`)
+  const left = alone > 0 ? [deps.words.clipboard('copiedAlone', { count: alone })] : []
+  deps.say([copiedSentence(copy, deps.words), ...left].join(' · '))
   return copy
 }

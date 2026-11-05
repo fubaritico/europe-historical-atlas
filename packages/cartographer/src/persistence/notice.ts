@@ -18,9 +18,10 @@ export type NoticeTone = 'success' | 'info' | 'warning' | 'alarm'
 
 /**
  * What a notice is about. A notice replaces the earlier one of its topic — one toast per topic on screen — and a
- * `success` withdraws the alarm of its topic: a save confirmed after its doubt closes it.
+ * `success` withdraws the alarm of its topic: a save confirmed after its doubt closes it. `carving` is the canvas's: a
+ * vassal not closed over a suzerain still open (`open-outlines.md`), raised as an alarm only.
  */
-export type NoticeTopic = 'year' | 'autosave'
+export type NoticeTopic = 'year' | 'autosave' | 'carving'
 
 /** One notice. */
 export interface Notice {

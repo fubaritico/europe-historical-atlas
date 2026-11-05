@@ -24,7 +24,9 @@
   "menuEdit": "Édition",
   "copy": "Copier",
   "pastePolities": "Coller les entités",
-  "pasteStretch": "Coller le tronçon sur {name}",
+  "pastePoints": "Coller les points sur {name}",
+  "selectAll": "Tout sélectionner",
+  "selectAllOf": "Tout sélectionner : {name}",
   "pasteSheet": "Coller la fiche sur {name}…",
   "theSelection": "l’entité sélectionnée"
 }

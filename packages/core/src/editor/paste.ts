@@ -9,8 +9,8 @@
  */
 
 import { addOutline, addPolity } from './documentEdits'
+import { isRingOpen, outlineFloor } from './outlines'
 import { weldPastedRings } from './pasteWeld'
-import { MIN_RING_ANCHORS } from './yearDocument'
 
 import type { CopiedPolity } from './clipboard'
 import type { YearDocument } from './yearDocument'
@@ -73,14 +73,13 @@ function freeId(id: string, taken: ReadonlySet<string>): string {
  * Check that a copied polity is one a map could have given — the clipboard's reader refuses anything else, so what
  * fails here is a defect.
  * @param copied - the polity from the clipboard
- * @throws when a ring holds fewer than {@link MIN_RING_ANCHORS} points, or a vassal comes without its suzerain's name
+ * @throws when a ring holds fewer points than its floor — three closed, two open — or a vassal comes without its
+ *   suzerain's name
  */
 function assertPastable(copied: CopiedPolity): void {
   const { name, suzerain } = copied.polity
-  if (copied.rings.some((ring) => ring.length < MIN_RING_ANCHORS)) {
-    throw new Error(
-      `[Cartographer] "${name}" cannot be pasted: a ring of fewer than ${String(MIN_RING_ANCHORS)} points.`
-    )
+  if (copied.rings.some((ring, at) => ring.length < outlineFloor(isRingOpen(copied, at)))) {
+    throw new Error(`[Cartographer] "${name}" cannot be pasted: a ring under its floor of points.`)
   }
   if (suzerain !== null && copied.suzerainName === null) {
     throw new Error(
@@ -127,10 +126,15 @@ export function pastePolity(
   if (!addPolity(doc, sheet)) return { refused: 'homage' }
 
   // Every ring welded onto the map before any enters it, so the pasted rings never weld onto one another.
-  const rings = weldPastedRings(doc, copied.rings, weldKm)
-  for (const ring of rings) {
+  const rings = weldPastedRings(
+    doc,
+    copied.rings,
+    weldKm,
+    copied.rings.map((_ring, at) => isRingOpen(copied, at))
+  )
+  for (const [at, ring] of rings.entries()) {
     // The polity was just added, the ring is long enough and its anchors are the map's: a refusal is a defect.
-    if (!addOutline(doc, id, ring.points)) {
+    if (!addOutline(doc, id, ring.points, isRingOpen(copied, at))) {
       throw new Error(`[Cartographer] the document refused a ring of "${copied.polity.name}".`)
     }
   }

@@ -16,7 +16,7 @@
  * with the land mask and an inclusion test.
  */
 
-import { MIN_RING_ANCHORS } from './yearDocument'
+import { isRingOpen, outlineFloor, segmentCount } from './outlines'
 
 import type { YearDocument } from './yearDocument'
 
@@ -67,7 +67,8 @@ function ownersKey(owners: readonly string[]): string {
  * Every edge of every claim, with the polities holding it.
  *
  * A ring's closure is implied, so the last vertex joins back to the first and that edge counts like any
- * other — a boundary that stopped one segment short of closing would leave a gap nobody drew.
+ * other — a boundary that stopped one segment short of closing would leave a gap nobody drew. **An open outline
+ * has no such edge** (`editor/outlines.ts`): the author stopped it, and its two ends are not joined by a border.
  *
  * **Declared gaps and dressed runs are not owners.** A `deliberateGaps` ring is unclaimed ground by
  * definition, and a run override is dress rather than a claim; counting either as an owner would invent a
@@ -78,9 +79,10 @@ function ownersKey(owners: readonly string[]): string {
 export function collectBorderEdges(doc: YearDocument): Map<string, BorderEdge> {
   const edges = new Map<string, BorderEdge>()
   for (const claim of doc.claims) {
-    for (const ring of claim.rings) {
-      if (ring.length < MIN_RING_ANCHORS) continue
-      for (let i = 0; i < ring.length; i += 1) {
+    for (const [at, ring] of claim.rings.entries()) {
+      const open = isRingOpen(claim, at)
+      if (ring.length < outlineFloor(open)) continue
+      for (let i = 0; i < segmentCount(ring, open); i += 1) {
         const a = ring[i]
         const b = ring[(i + 1) % ring.length]
         if (a === undefined || b === undefined || a === b) continue

@@ -2,7 +2,7 @@ import { act, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
-import { copyPolities, copyStretch } from '@europe-historical-atlas/core/editor/clipboard'
+import { copyPoints, copyPolities } from '@europe-historical-atlas/core/editor/clipboard'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
@@ -46,6 +46,7 @@ function mount(shared = store(), clipboard = createHeldClipboard(null, () => tru
       onSaveCopy={vi.fn()}
       onCopy={onCopy}
       onPaste={onPaste}
+      onSelectAll={vi.fn()}
       clipboard={clipboard}
     />
   )
@@ -116,9 +117,9 @@ describe('MenuBarPanel', () => {
       )
     })
 
-    it('greys Paste polities while the clipboard holds a stretch', async () => {
-      const stretch = copyStretch(sharedBorderDocument(), [1, 2], '1100', 'hre')
-      if (typeof stretch === 'string') throw new Error('fixture: no stretch')
+    it('greys Paste polities while the clipboard holds points', async () => {
+      const stretch = copyPoints(sharedBorderDocument(), [1, 2], '1100', 'hre').copy
+      if (stretch === null) throw new Error('fixture: no points')
       const { user } = mount(
         store(),
         createHeldClipboard(stretch, () => true)
@@ -158,7 +159,7 @@ describe('MenuBarPanel', () => {
       expect((await editCommand(user, /^Copy/)).getAttribute('aria-disabled')).toBe('true')
     })
 
-    it('greys Copy with one anchor selected, a point being no stretch', async () => {
+    it('greys Copy with one anchor selected, a point alone being no piece', async () => {
       const shared = store()
       act(() => {
         shared.getState().setSelectedAnchors([1])

@@ -246,7 +246,7 @@ describe('pastePolity', () => {
       const copy = copiedSquare({ suzerain: null }, null)
       copy.rings[0]?.pop()
 
-      expect(() => pastePolity(doc, copy, KM)).toThrow(/fewer than 3 points/)
+      expect(() => pastePolity(doc, copy, KM)).toThrow(/a ring under its floor of points/)
       expect(doc.polities).toEqual([])
     })
 

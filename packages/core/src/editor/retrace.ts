@@ -1,5 +1,5 @@
 import { addAnchor, declareSource } from './documentEdits'
-import { MIN_RING_ANCHORS } from './yearDocument'
+import { everyOutline, isRingOpen, outlineFloor } from './outlines'
 
 import type { OutlinePoint } from './documentEdits'
 import type { YearDocument } from './yearDocument'
@@ -31,6 +31,11 @@ export interface RetraceArcs {
   forward: number[]
   /** Walking it the other way. */
   backward: number[]
+  /**
+   * On an open outline, the one arc a retrace may replace — the other crosses the straight line between its two
+   * ends, which is no segment (`editor/outlines.ts`); `null` on a closed ring, where both are.
+   */
+  only: 'forward' | 'backward' | null
 }
 
 /**
@@ -49,9 +54,13 @@ export function retraceArcs(
 ): RetraceArcs | null {
   if (from === to) return null
   const claim = doc.claims.find((held) => held.polity === polityId)
-  const ring = claim?.rings.find((each) => each.includes(from) && each.includes(to))
-  if (ring === undefined) return null
-  return { ring, forward: walk(ring, from, to, 1), backward: walk(ring, from, to, -1) }
+  const at = claim?.rings.findIndex((each) => each.includes(from) && each.includes(to)) ?? -1
+  const ring = claim?.rings[at]
+  if (claim === undefined || ring === undefined) return null
+  // Walking forward from `from` wraps past the last anchor exactly when `to` comes before it.
+  const forwardWraps = ring.indexOf(from) > ring.indexOf(to)
+  const only = isRingOpen(claim, at) ? (forwardWraps ? 'backward' : 'forward') : null
+  return { ring, forward: walk(ring, from, to, 1), backward: walk(ring, from, to, -1), only }
 }
 
 /**
@@ -96,6 +105,8 @@ export interface Follower {
   polity: string | null
   /** `1` when it walks the stretch from `from` to `to` in its stored order, `-1` the other way. */
   step: 1 | -1
+  /** Whether it is an open outline — spliced in place, never rotated, so its two ends stay its ends. */
+  open: boolean
 }
 
 /** What a retrace's stretch holds, once checked: the rings that take the new run, and those that do not. */
@@ -117,18 +128,22 @@ export interface RetraceCheck {
  * @param from - one end
  * @param between - the anchors strictly between, from `from`
  * @param to - the other end
+ * @param open - whether the ring is an open outline, walked without wrapping
  * @returns the direction it walks the stretch, or `null` when it does not run over it
  */
 function stretchStep(
   ring: readonly number[],
   from: number,
   between: readonly number[],
-  to: number
+  to: number,
+  open: boolean
 ): 1 | -1 | null {
   const start = ring.indexOf(from)
   if (start < 0) return null
   const count = ring.length
-  const at = (offset: number) => ring[(((start + offset) % count) + count) % count]
+  // An open outline is walked without wrapping: its two ends are not joined.
+  const at = (offset: number) =>
+    open ? ring[start + offset] : ring[(((start + offset) % count) + count) % count]
   for (const step of [1, -1] as const) {
     const runs = between.every((index, k) => at(step * (k + 1)) === index)
     if (runs && at(step * (between.length + 1)) === to) return step
@@ -141,10 +156,12 @@ function stretchStep(
  * @param doc - the document to read
  * @returns the rings, live, each with its polity (`null` for a gap)
  */
-function everyHeldRing(doc: YearDocument): { ring: number[]; polity: string | null }[] {
+function everyHeldRing(
+  doc: YearDocument
+): { ring: number[]; polity: string | null; open: boolean }[] {
   return [
-    ...doc.claims.flatMap((claim) => claim.rings.map((ring) => ({ ring, polity: claim.polity }))),
-    ...doc.deliberateGaps.map((gap) => ({ ring: gap.ring, polity: null })),
+    ...everyOutline(doc.claims),
+    ...doc.deliberateGaps.map((gap) => ({ ring: gap.ring, polity: null, open: false })),
   ]
 }
 
@@ -168,12 +185,10 @@ export function checkRetrace(
 ): RetraceCheck | RetraceRefusal {
   const arcs = retraceArcs(doc, polityId, from, to)
   if (arcs === null) return { kind: 'no-ring' }
-  if (!sameRun(replaced, arcs.forward) && !sameRun(replaced, arcs.backward)) {
-    return { kind: 'not-an-arc' }
-  }
+  if (!isAnArc(arcs, replaced)) return { kind: 'not-an-arc' }
   const followers: Follower[] = []
   for (const held of everyHeldRing(doc)) {
-    const step = stretchStep(held.ring, from, replaced, to)
+    const step = stretchStep(held.ring, from, replaced, to, held.open)
     if (step !== null) followers.push({ ...held, step })
   }
   const gone = new Set(replaced)
@@ -195,6 +210,17 @@ export function checkRetrace(
     ),
   ]
   return { followers, neighbours, untouched: [...untouched] }
+}
+
+/**
+ * Whether a stretch is one of the arcs a retrace may replace — on an open outline, the one way between the anchors.
+ * @param arcs - the arcs between the two anchors
+ * @param replaced - the anchors named
+ * @returns `true` when it is one of them
+ */
+function isAnArc(arcs: RetraceArcs, replaced: readonly number[]): boolean {
+  const forward = arcs.only !== 'backward' && sameRun(replaced, arcs.forward)
+  return forward || (arcs.only !== 'forward' && sameRun(replaced, arcs.backward))
 }
 
 /**
@@ -261,7 +287,9 @@ export function retraceStretch(
       : addAnchor(doc, [point.at[0], point.at[1]], declareSource(doc, point.provenance))
   )
   for (const follower of check.followers) {
-    const rebuilt = spliced(follower.ring, from, replaced.length, laid, follower.step)
+    const rebuilt = follower.open
+      ? splicedOpen(follower.ring, from, replaced.length, laid, follower.step)
+      : spliced(follower.ring, from, replaced.length, laid, follower.step)
     follower.ring.splice(0, follower.ring.length, ...rebuilt)
   }
   return {
@@ -321,10 +349,31 @@ function refuseOnRings(
     if (twice || reused.some((index) => kept.includes(index))) {
       return { kind: 'loop', polity: follower.polity }
     }
-    if (kept.length + added < MIN_RING_ANCHORS)
+    if (kept.length + added < outlineFloor(follower.open))
       return { kind: 'too-short', polity: follower.polity }
   }
   return null
+}
+
+/**
+ * An open outline with its stretch replaced in place — never rotated: its first and last anchors are its two ends.
+ * @param ring - the outline
+ * @param from - where the stretch starts
+ * @param length - how many anchors the stretch holds between its ends
+ * @param laid - the new run, from `from` towards `to`
+ * @param step - which way the outline walks the stretch
+ * @returns the rebuilt outline
+ */
+function splicedOpen(
+  ring: readonly number[],
+  from: number,
+  length: number,
+  laid: readonly number[],
+  step: 1 | -1
+): number[] {
+  const start = ring.indexOf(from)
+  if (step === 1) return [...ring.slice(0, start + 1), ...laid, ...ring.slice(start + 1 + length)]
+  return [...ring.slice(0, start - length), ...[...laid].reverse(), ...ring.slice(start)]
 }
 
 /**

@@ -86,10 +86,10 @@ function pasteEntries(
     },
     {
       kind: 'command',
-      id: 'pasteStretch',
-      label: action('pasteStretch', { name }),
+      id: 'pastePoints',
+      label: action('pastePoints', { name }),
       keys: shortcut('paste'),
-      enabled: state.canPasteStretch,
+      enabled: state.canPastePoints,
       onChoose: onPaste,
     },
     {
@@ -101,6 +101,30 @@ function pasteEntries(
       onChoose: notYet,
     },
   ]
+}
+
+/**
+ * « Tout sélectionner » — its scope the polity selected, named, so the author sees whose points it takes (the dev,
+ * 2026-11-05, `open-outlines.md`); greyed with none selected.
+ * @param selected - the polity selected's name, or `null`
+ * @param onSelectAll - what it does
+ * @param words - the words and the keys
+ * @returns the entry
+ */
+function selectAllEntry(
+  selected: string | null,
+  onSelectAll: () => void,
+  words: EditorMenuWords
+): MenuEntry {
+  const { action, shortcut } = words
+  return {
+    kind: 'command',
+    id: 'selectAll',
+    label: selected === null ? action('selectAll') : action('selectAllOf', { name: selected }),
+    keys: shortcut('selectAll'),
+    enabled: selected !== null,
+    onChoose: onSelectAll,
+  }
 }
 
 /**
@@ -149,6 +173,7 @@ function editMenu(
         enabled: state.canCopy,
         onChoose: gestures.onCopy,
       },
+      selectAllEntry(state.selected, gestures.onSelectAll, words),
       { kind: 'separator', id: 'clipboard' },
       ...pasteEntries(state.selected ?? action('theSelection'), state, gestures.onPaste, words),
     ],
