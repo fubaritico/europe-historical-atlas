@@ -24,7 +24,8 @@ défilement jusqu'au meilleur résultat.
 
 **La copie à part** `~/Desktop/WebstormProjects/europe-map-copypaste` (branche `carto-345-paste`, au niveau de `main`) : on
 y a construit le collage. Elle garde, ignorées par git, une copie de sa sauvegarde et `1100-essai-collage` (sa 1100 du
-05/11 après-midi) — mes essais. À lui de dire si on la garde pour la fiche ou si on la supprime.
+05/11 après-midi) — mes essais, à recopier au retour. **Gardée pour la fiche** (sa décision, 05/11) : la remettre
+au niveau de `main` avant de travailler.
 
 **L'interface de l'atlas — ATLAS-329, la maquette d'ambiance de Claude Design, v2** (05/11). Le contenu des pages est
 inventé, ne pas le juger. **Tout ce que Claude Design fait pour l'écran de l'atlas vit dans `files/resources/claude-design/`**
