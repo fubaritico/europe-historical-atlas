@@ -137,8 +137,9 @@ three.js et le Cartographe émet le même, au même hash — vérifié par la CI
 | CI    | huit jobs — validate ×4 (lint, type-check, test, format), build, sonarqube, quality-gate, deploy — **verte depuis le 21/10, sous Node 24** |
 | Sonar | `europe-historical-atlas` sous l'organisation `fubaritico`                  |
 
-**Dernier contrôle des versions** : aucun encore (`/repo-version-manager`, créée le 01/11) — un premier coup d'œil le
-01/11 : 32 paquets ont plus récent, 7 majeures, 7 mineures, 18 correctifs ; pas de rapport écrit.
+**Dernier contrôle des versions** : 2026-11-06 — 35 à jour proposées (8 alertes de sécurité, toutes dans le CMS), 0
+montées, rapport `files/versions/2026-11-06.md`. **Le kit MCP forcé en 1.32.0** (six failles) : d'accord sur le
+principe, **à faire à la prochaine relance de son CMS** — pas tant que l'historien y travaille (06/11).
 **Dernier audit des instructions** (`/doctor prompt-audit`, une fois par semaine) : **01/11** ; le suivant dès le 08/11.
 
 **Cinq paquets**, orchestrés par **Turbo**, avec un **catalogue de versions** dans `pnpm-workspace.yaml` :
