@@ -24,7 +24,8 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   niveau 6** (19/10 : *« ça fonctionne »*). Remède : une ligne dans `packages/cartographer/src/main.tsx`
   (`/heightmaps/europe-dem-z6-1920`), puis son test. **Sévérité : à savoir.**
 - **Recreuser un vassal après coup est impossible depuis l'outil** — CARTO-189 (16/10). Le creusement ne tourne qu'à la fermeture
-  d'un contour neuf (`addOutlineCarving`) ; un vassal dessiné avant, ou recouvert de nouveau par une retouche du
+  d'un contour neuf (`addOutlineCarving`), à la fermeture d'un tracé ouvert repris (05/11, `outlineActions.keepOutline`) et
+  au collage de points qui ferment un anneau (`core/editor/pastePoints`) — vérifié le 06/11 ; un vassal dessiné avant, ou recouvert de nouveau par une retouche du
   suzerain, garde la couleur du suzerain par-dessus (la Champagne, la Frise : recreusées au script). Remède : un geste
   « recreuser » sur un vassal sélectionné, qui appelle `carveOutOfSuzerain` sur chacun de ses anneaux. **Sévérité : à savoir.**
 - **Un test du contrôleur qui échoue en fait tomber deux autres, les tests ‹espace›** — CARTO-124 (14/10). Il lève avant son
@@ -160,7 +161,8 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   tant que le Cartographe tourne chez le dev ; **décidé par le dev le 23/10** : le texte technique en développement seulement
   (`import.meta.env.DEV`), une phrase simple en production — CARTO-274, avant la démonstration en ligne (CARTO-200). **Et ce qu'aucune boundary ne voit** : une
   erreur levée pendant un geste (gestionnaire d'événement, `requestAnimationFrame`) n'est montrée nulle part — le Cartographe n'a
-  pas de filet de page ; **décidé par le dev le 23/10 : en rouge dans la barre d'état** — CARTO-273. **Sévérité : à savoir.**
+  pas de filet de page ; **décidé par le dev le 06/11** (remplace le rouge de la barre d'état du 23/10) : **une fenêtre
+  d'erreur à la fin du geste, le geste annulé**, comme le refus d'un vassal sur un suzerain ouvert — CARTO-273. **Sévérité : à savoir.**
 - **Les noms d'étapes de l'historique ne suivraient pas un changement de langue** — ATLAS-266 (22/10, revue ARCH-001). Tout
   autre texte suit `LocaleProvider` ; un nom d'étape, lui, est écrit en texte dans `HistoryStep.label` (`core/editor/history`)
   au moment du geste, donc « Annuler insérer une ancre » resterait en français après un passage à l'anglais. Sans effet tant

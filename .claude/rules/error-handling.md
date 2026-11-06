@@ -47,6 +47,18 @@ application's) tag. Two levels, and the line is whether anything should have pre
 (`documentFaults`), or the log drowns everything else. A refusal with an on-screen answer still logs —
 the console is the one place a later, subtler failure can be traced back to.
 
+## An error reaches the screen, not only the console — decided by the dev, 2026-11-06
+
+> *« Un utilisateur ou même un développeur, moi en l'occurrence, n'aura pas le réflexe de regarder dans les outils de
+> web development. On doit être notifié dans l'interface utilisateur d'une erreur tout en gardant le console erreur. »*
+
+Wherever the code writes a **`console.error`**, the user is **also told on screen, in an error dialog** (a modal); the
+`console.error` stays. A `console.warn` — a gesture the tool declines — stays in the console. First case: ATLAS-328,
+a saved view that cannot be read. **In the Cartographer, during a gesture** (the dev, same day — it replaces the red
+status bar of CARTO-273): the dialog opens **at the end of the gesture**, *« pour être moins agressif »*, and **the
+gesture is cancelled**. The model is the refusal of 2026-11-05 — a vassal laid on a suzerain whose outline is open:
+`ui/components/AlarmDialog` with its warning icon, through `persistence/notice.ts` (`49b115a`).
+
 ## A label that cannot be built throws, and a boundary keeps the screen — decided by the dev, 2026-10-21
 
 > *« On traduit en phase de développement, et en production il y aura toujours un label »* — so the code is
@@ -68,8 +80,8 @@ the console is the one place a later, subtler failure can be traced back to.
 - **What a boundary does not see**: it catches what is thrown while a component renders, never in an event
   handler, a `requestAnimationFrame` or a timer — where the canvas does nearly all its work, and where a label
   written after a click is built. In the atlas those reach its error net (ATLAS-42); **the Cartographer has no
-  such net yet** — the dev's call, 2026-10-23: **in red in the status bar**, in place of its usual message until
-  the next gesture; never a dialogue, which would break the drawing. To be built — CARTO-273.
+  such net yet** — ~~the dev's call, 2026-10-23: in red in the status bar~~ **replaced on 2026-11-06**: an error dialog
+  at the end of the gesture, the gesture cancelled (« An error reaches the screen », above). To be built — CARTO-273.
 - **In the atlas**, which has no React, the error net (ATLAS-42) shows any unexpected error on screen. Its own
   message takes no value, so it cannot fail this way.
 

@@ -17,6 +17,26 @@
 
 Spikes/experiments (kept, reviewable code): [`files/spikes/`](../spikes/README.md).
 
+## What makes the difference — the sourced mass (the dev, 2026-11-06)
+
+> *"We will end up with ten billion sources, ten billion place names, ten billion cities […] that is really what will
+> make the difference."*
+
+The atlas stands out by the **mass of sourced data** behind each map, not by its rendering: every source, place name
+and city is entered with its source, linked to a year or an event. Hence every tool — the CMS's screens, the
+Cartographer's Villes panel (CARTO-363), the export — is built for **thousands to millions of rows** (search, filters,
+fluid lists, batch entry), never for a few dozen handled one by one.
+
+**How a year is made — three layers** (the dev, 2026-11-06; the epic ATLAS-153, glossary « les trois couches »), over
+the whole span, from the 1st or 2nd century BC to 1900:
+
+1. **Cliopatria** — its borders imported as the base (CC BY 4.0), coasts set on our land mask (CARTO-334).
+2. **The atlases** — the borders corrected from the dev's library: some twenty printed atlases he bought and some
+   twenty in PDF (`files/plans/sources/bibliotheque.md`). Each is a source entered in the CMS, and **cited** wherever one
+   of its maps is used — a plate in copyright is read as a reference, never traced.
+3. **The cities** — corrected again from who holds which city at that date, as the historian enters them, each with its
+   source: a city's holder gives the topography (the cities epic, CARTO-363).
+
 ## Milestones overview
 
 - **M1 — 3D navigable map**: relief from heightmap, texture, arrow-key camera navigation, clickable

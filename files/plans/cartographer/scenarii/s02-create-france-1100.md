@@ -43,6 +43,7 @@ Scenario: fill the identity by hand
 > stops working and two neighbours can come out identical.
 
 ```gherkin
+# Superseded 2026-11-06 (CARTO-186 archived): identities come from the Cliopatria import, never built.
 Scenario: pull the identity from OHM instead of typing it
   Given OHM holds "Kingdom of France" at 1100 with a Wikidata id and no geometry
   When I press [Import identity from OHM…]

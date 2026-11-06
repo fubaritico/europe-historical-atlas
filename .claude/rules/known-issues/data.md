@@ -7,11 +7,11 @@ paths:
 
 Open issues of the data on disk: `years/`, the relief, the spikes that write them. Loaded by path; indexed in `.claude/known-issues.md`.
 
-- **`years/1100/` est parti du tracé du test Euratlas (nuit du 14/10, 137 pays) et c'est désormais l'année du dev**,
-  qu'il renomme, redessine et complète d'identifiants Wikidata. Décidé le 23/10 : *« c'est la dernière version qui
-  prime »* ; son 1100 d'avant le test n'est plus gardé, et seule reste la référence `years/1100.euratlas-137b/`
-  (avec `1100.euratlas-137`), qui sert à CARTO-237. La part d'Euratlas qui y reste est mesurée par CARTO-237 ; la
-  licence de ce qui est publié reste ATLAS-142. **Sévérité : à savoir.**
+- **`years/1100/` est la 1100 du dev refaite depuis Cliopatria (CC BY 4.0) depuis le 06/11** (`b02ce87`, poussé) : celle
+  publiée depuis le 16/10 était partie du tracé du test Euratlas (nuit du 14/10, 137 pays), interdit par la licence
+  d'Euratlas — ATLAS-142, fait. **L'historique git garde l'ancienne** : pas réécrit, décision du dev du 06/11. Les
+  dossiers `1100-backup-2026-11-02/` et `1100.euratlas-137*` restent sur sa machine, ignorés par git, **jamais à
+  publier**. CARTO-237 (mesurer ce qui reste d'Euratlas) est sans objet. **Sévérité : à savoir.**
 - **`files/spikes/fetch-dem/fetch-dem.mjs` écrit dans `public/heightmaps` à la racine**, un chemin d'avant le monorepo :
   le 18/10, il a fallu déplacer le résultat à la main dans `packages/atlas/public/heightmaps/` et retirer les dossiers vides.
   Remède : pointer `publicDir` sur `packages/atlas/public/heightmaps`. **Sévérité : cosmétique.**

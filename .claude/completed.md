@@ -2,6 +2,24 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
+### 2026-11-06 — le tableau remis d'aplomb, 1100 refaite depuis Cliopatria publiée
+
+Deux plages, **06/11 11:26 → 15:24 et 17:30 → 18:22** (4 h 49) ; le chantier ouvert le 05/10 totalise **216 h 48 sur 38
+plages**. **Sur `main`, poussé** : `b02ce87` (1100 depuis Cliopatria) et le commit de clôture.
+
+- **Le tableau relu ticket par ticket avec lui** (*« le board est ta mémoire »*) : une quinzaine de tickets archivés — sans
+  objet (CARTO-182, 183, 185, 186, 187, CORE-211, ATLAS-143…), doublons, faux problèmes au regard du couplage lâche
+  (CARTO-173, 175, 177, 178) ; réécrits avec leurs scénarios (CARTO-188, 189, 192) ; des tickets de correction
+  (ATLAS-373, CARTO-375, 377, 380, CARTO-180) ; de nouvelles épiques (ATLAS-329, ATLAS-153 « les trois couches »).
+- **Ses règles du jour** : une erreur s'affiche dans une fenêtre, la console gardée (`rules/error-handling.md`) ; la fiche
+  porte le détenteur le plus probable avec son QID ; la recherche continue jusqu'au nom (*« insister, insister »*,
+  `/enter-in-cms`, et `/find-sources` de l'historien) ; la vérification d'une année ne bloque jamais, même la CI ;
+  `/trello` compare le tableau au code et aux commits à chaque début et fin de session.
+- **1100 refaite depuis Cliopatria, publiée** (`b02ce87`) — celle partie d'Euratlas reste dans l'historique, son choix.
+  L'historien : lots « Catalogne » et « Navarre et Aragon » vérifiés ; JSTOR ouvert, le Pass de la BnF commandé (CMS-362).
+- **Mes fautes** : CARTO-180 dit « vrai blocage » sur une mauvaise lecture de son « non » ; une explication de « moitié »
+  qu'il n'a pas comprise (ATLAS-143) ; lui avoir prêté un refus d'outil ; « à toi de le passer dans Fait » pour un doublon.
+
 ### 2026-11-05 soir → 06/11 nuit — CARTO-345 fermé, les villes en points, les hachures, les épiques
 
 La même plage que les deux entrées du 05/11, **05/11 12:48 → 06/11 01:15** (12 h 26) ; le chantier ouvert le 05/10 totalise
@@ -22,23 +40,5 @@ La même plage que les deux entrées du 05/11, **05/11 12:48 → 06/11 01:15** (
   une déclaration analytique collée aux hachures (*« tout de suite, tu fonces »*) ; une fusion au lieu d'un rebase, qui
   l'a perdu ; des bandes à largeur fixe à l'écran, qui bougent au zoom.
 
-### 2026-11-05 après-midi — le collage d'un pays entier et d'un tronçon, branchés et fusionnés
 
-La même plage que l'entrée ci-dessous, **05/11 12:48 → 19:07** (6 h 18) ; le chantier ouvert le 05/10 totalise **205 h 26 sur
-36 plages**. **Sur `main`**, six commits **non poussés** depuis `6b906bf` (`41a184c` → `e833792`, plus `3b90207` de
-l'historien), et le commit de clôture.
-
-- **CARTO-345, le pays entier** : la fiche, les points en place sous leur source, en haut de {Polities}, le suzerain retrouvé
-  **par son nom** (sa décision, sur une mesure : 9 vassaux sur 56 par l'identifiant, 29 par le nom), la soudure à 2 km — le
-  tracé suit le voisin entre deux soudures (sa décision) ; **pas de découpe ni de creusement** (*« quand tu colles, tu
-  colles »*). Branché sur ‹⌘V› et Édition — **essayé par lui : la Livonie a marché**.
-- **Le tronçon** : un tracé entier copié comme un tronçon fermé, collé comme un contour de plus ; une partie fondue dans le
-  tracé comme ⟨retracer⟩. Branché et fusionné **sans essai**, à sa demande. « Coller le tracé » retiré du menu. La sélection
-  de plusieurs pays, remise à plus tard (*« un par un, c'est déjà pas mal »*). Son idée de fin : CARTO-360, une recherche
-  dans {Polities} et {Cities}.
-- **Mes fautes** : un collage resté dans `core` sans rien à essayer, une heure durant (*« y'a toujours pas d'UI »*,
-  *« ça avance pas »*) — l'ordre « tout dans `core` d'abord » était le sien, mais je n'ai pas dit à temps que rien ne
-  serait essayable avant longtemps ; « tout l'écran » qui l'a perdu ; une décision du 03/11 qu'il ne se rappelait pas
-  (*« tu me prêtes des décisions »*), dite comme si elle allait de soi.
-
-> Older sessions (2026-09-12 → 2026-11-05 midi) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-11-05 après-midi) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

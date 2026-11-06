@@ -5,55 +5,55 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — le 06/11 : l'épique des villes, CARTO-370 d'abord
+## ▶ ON REPREND ICI — après le 06/11 : le panneau Villes, CARTO-370 d'abord
 
-**Le sujet de demain** (sa décision, 06/11) : **l'épique CARTO-363, « Saisir les villes vite et juste »** (colonne
-Épiques) — des milliers de villes à saisir pour une date, parce que *l'appartenance des villes donne la topographie* : qui
-tient une ville, donc qui est le seigneur, donc jusqu'où va un pays. **D'abord CARTO-370** : l'entonnoir à côté du filtre
-par nom, la fenêtre des filtres avancés, le filtre par pays (les entités de {Polities} en cases à cocher, le détenteur
-**selon les sources**). Puis les autres tickets de l'épique, dans À faire (point de couleur, coordonnées, filtres par
-état, filtres gardés et purgeables, liste fluide). **Pas que ça demain** (ses mots), et *« j'espère que ça va
-torcher »*. **CARTO-371 attend sa décision** sur le stockage du navigateur refusé (bloqué ou plein) — la même que pour la
-disposition des panneaux : la lui poser quand on y arrive. **Le rouge** du panneau = « pas au bon endroit » et « pays à
-déclarer », pas « sans détenteur » (vérifié le 06/11).
+**Le sujet** (sa décision, redite le 06/11 au soir : _« c'est vraiment un outil… c'est génial ce que ça peut faire »_) :
+**l'épique CARTO-363, « Saisir les villes vite et juste »** — _l'appartenance des villes donne la topographie_. **D'abord
+CARTO-370** (l'entonnoir, la fenêtre des filtres avancés, le filtre par pays selon les sources), puis les autres tickets
+de l'épique dans À faire. **CARTO-371 attend sa décision** sur le stockage du navigateur refusé — la lui poser quand on y
+arrive. **Le rouge** du panneau = « pas au bon endroit » et « pays à déclarer » (sa capture du 06/11 : Almudévar, Bolea,
+Molina de Aragón).
 
-**L'historien, pendant ce temps** : *« on continuera exactement la même chose »* — des paires de villes qui se font face
-(le détenteur de Gray d'abord, puis l'ouest du Vivarais et du Forez, puis d'autres frontières), chaque lot vérifié par moi
-en lecture seule ; **c'est moi qui lui donne des tickets plus simples, entre ses pauses** (sa décision, 06/11). Fait le
-06/11 : la frontière France / Empire, 52 villes-témoins (`files/plans/sources/1100.md`) ; son idée, CARTO-366 (Backlog).
+**Le tableau a été relu ticket par ticket le 06/11** (le Backlog épuré, _« on s'arrête là »_). La skill `/trello`
+compare désormais le tableau au code et aux commits, à chaque début et fin de session.
 
-**À lui rappeler CHAQUE JOUR — CMS-362** (sa demande, 06/11, jusqu'à ce qu'il ait ouvert un compte ou dise stop) : un
-compte sur Cairn, JSTOR ou Brepols, parce que les sources reposent sur Wikipédia et que les articles savants derrière un
-compte les élèveraient ; il choisit un site sur le prix.
+**L'historien** (`europe-map-e6`) : des paires de villes qui se font face, chaque lot vérifié par moi en lecture seule ;
+c'est moi qui lui donne des tickets plus simples, entre ses pauses. **À lui transmettre à son retour** (le dev : « laisse-le
+finir ») — le lot « Navarre et Aragon », **trois fautes** : la source 206 (« Sos, castillo ») citée par aucune ligne → la
+rattacher à Sos ; Horta (273) et Siurana (204), la taïfa de Tortosa finie en 1099 → **qui l'a remplacée**, à deux ou trois
+degrés ; Velilla de Cinca (263), la ligne nomme la source de la taïfa de Lérida. Et **Caspe, Azaila, Híjar, Alcañiz,
+Morella** : un détenteur et son QID chacune, la recherche poussée, puis trancher. **Lui dire de relire** `/enter-in-cms`
+(« When the sources stop short ») et `/find-sources`. Après son export, **je commite `content/events.json`**.
 
-**À lui, en attente** : `pnpm export:content` (lots 3 à 6) ; son icône `error.svg` sur le bureau, à la place de la mienne
-(`ui/icons/error-small.svg`) ; **à arbitrer** : le suzerain du royaume d'Arles (sous la France dans son registre, vérifié le
-06/11 ; sous l'Empire depuis 1032) et les lectures divergentes de l'historien — Mézières, Tournai, la rive gauche de
-Chalon, Beaucaire, Louhans, Seurre, Attigny (`files/plans/sources/1100.md`).
+**CMS-362 fait** : JSTOR ouvert, le Pass Recherche de la BnF commandé (retiré sur place, puis `bdl.bnf.fr`) —
+`.claude/skills/find-sources/references/reading-accounts.md`. Le rappel quotidien s'arrête.
 
-**Plus tard** : forcer le kit MCP en 1.32.0 à la prochaine relance de son CMS (ci-dessous, les versions) ; **CARTO-365**, des
-hachures qui ne bougent pas au zoom — cuites, comme une texture, dans l'atlas aussi (*« sinon ça vibre »*).
+**À lui, en attente** : la carte de 1100 montre-t-elle le 1ᵉʳ janvier ou le 31 décembre (Barbastro, prise le 18/10/1100) ?
+`pnpm export:content` ; son icône `error.svg` à la place de la mienne ; **à arbitrer** : le suzerain du royaume d'Arles et
+les lectures divergentes de l'historien (`files/plans/sources/1100.md`).
 
-**L'interface de l'atlas — ATLAS-329, la maquette d'ambiance de Claude Design, v2** (05/11). Le contenu des pages est
-inventé, ne pas le juger. **Tout ce que Claude Design fait pour l'écran de l'atlas vit dans `files/resources/claude-design/`**
-(sa décision, 05/11) : `atlas-html/` (README = ses règles : palette, fontes, cadre, capsule, boutons ; `planches/` ;
-`images/`, nos captures), `atlas-png/` (les écrans, bureau, tablette, téléphone ; les modifiés marqués « v2 »),
-`prompts_claude_design.md` (ses prompts du logo par époque). **Une seule version, pas d'historique** (sa décision) : la
-v1 est à la corbeille. **Mon rôle** : je reprends son travail — jetons et styles dans `fubaritico-ds`. **Lui** : dessine
-dans Illustrator les ornements et les cartouches du logo (*« Claude Design est catastrophique pour les ornements »*) ;
-je lui donne les repères de taille. **Ses idées à garder** : un bandeau d'en-tête plus foncé ;
-le plein écran (ordinateur et iPad). **Prochaine étape** : découper en tickets, avec lui. Ornements et logo par époque :
-`files/plans/atlas/ornament-by-era.md` (§ 5b : ses quatre époques ; les deux du XXᵉ hors de l'atlas ; « Fontainebleau »
-mal placé au XIXᵉ ; les Temps modernes XVIIᵉ ou XVIIIᵉ, à lui de choisir).
+**Plus tard** : forcer le kit MCP en 1.32.0 à la prochaine relance de son CMS ; **CARTO-365**, des hachures cuites comme
+une texture (_« sinon ça vibre »_).
 
-**Ses décisions du 05/11, écrites dans leurs plans** : l'atlas du Iᵉʳ siècle av. J.-C. à 1900 (`roadmap.md`), un habillage
-par époque (glossaire), la frise d'après Arno Peters (ATLAS-358, `interface-scenarios.md`), le nom des mers (ATLAS-359).
+**L'interface de l'atlas — l'épique ATLAS-329** : la maquette de Claude Design (v2, son contenu inventé, ne pas le juger)
+vit dans `files/resources/claude-design/`, une seule version. Je reprends son travail en jetons et styles dans
+`fubaritico-ds` ; lui dessine dans Illustrator ornements et cartouches. **Prochaine étape** : la découper en tickets, avec
+lui. Ornements par époque : `files/plans/atlas/ornament-by-era.md`.
 
-**L'historien** (`europe-map-9b`) : il commence par `/enter-in-cms`, qui vérifie d'abord la connexion `cms`. Après
-l'export, **je commite `content/events.json`**, pas avant (sa décision) ; `years/` reste hors commit. Tout est poussé (06/11).
+**En cours — où en est chaque ticket** (il juge l'état, plusieurs sujets en parallèle) :
 
-**Où en sont les tickets** : CARTO-345 et CARTO-364 Fait ; **CARTO-193** (Villes) attend les pays de l'historien ;
-**ATLAS-333** (vitesse) ne se ferme qu'une fois une seconde carte terminée par lui, côtes comprises (05/11).
+- CMS-338, chaque source liée à une année et à sa question — ce que l'historien fait depuis le 05/11 ; l'écran manque.
+- CARTO-334, l'import de Cliopatria aux côtes calées — 1100 faite et publiée (`b02ce87`) ; l'outil reste un script.
+- ATLAS-156, les repères 3D des villes et événements — les icônes en cours (épique icônes).
+- ATLAS-152, la provenance de 1100 affichée — la liste des sources tenue sur le ticket.
+- ATLAS-295, les villes sur la carte — 113 villes de 1100, par paliers de détail.
+- ATLAS-333, changer d'année en deux secondes — se ferme quand une seconde carte est finie par lui.
+- CORE-337, trancher entre les cartes — les hachures faites (CARTO-364), le vote pas encore.
+- CARTO-193, chaque ville du bon côté — attend les pays de l'historien.
+- CMS-279, une base d'essai — commencée.
+- ATLAS-134 et ATLAS-136, maquettes et légende — sous l'épique ATLAS-329.
+- CMS-281 et CMS-282, les écrans des périodes d'un lieu et du registre des sources — l'habillage de Payload fait (CMS-283).
+- CMS-225, amorcer les événements depuis Wikidata.
 
 **Le Cartographe** : une carte est un dossier de `years/` (`s19`) et s'enregistre d'elle-même deux secondes après chaque
 geste, en plus de sa copie `.autosave` (gardées, sa décision). Sa 1100 d'avant dans `years/1100-backup-2026-11-02/`.
@@ -130,7 +130,7 @@ three.js et le Cartographe émet le même, au même hash — vérifié par la CI
 |       |                                                                             |
 | ----- | --------------------------------------------------------------------------- |
 | dépôt | `fubaritico/europe-historical-atlas`, **public** depuis le 19/10, branche `main`             |
-| site  | **https://europe-historical-atlas.netlify.app** — 1100 y est publié (16/10) |
+| site  | **https://europe-historical-atlas.netlify.app** — 1100 y est publié, refaite depuis Cliopatria le 06/11 (`b02ce87`) |
 | CI    | huit jobs — validate ×4 (lint, type-check, test, format), build, sonarqube, quality-gate, deploy — **verte depuis le 21/10, sous Node 24** |
 | Sonar | `europe-historical-atlas` sous l'organisation `fubaritico`                  |
 

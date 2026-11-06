@@ -172,3 +172,27 @@ mock-up. The bottom is taken by the button bar (A-15), and a timeline along it i
 [s12](s12-the-help-button.md) opens the walkthrough by itself at the very first visit only. Kept in the browser like the
 language (A-16); a reader who clears it sees it once more — acceptable. Whether a new slide (a feature shipped) shows it
 again to readers who saw the old one — to settle when the first slide is added. **Severity: worth knowing.**
+### A-22 · The share link's form
+
+[s16](s16-the-share-link.md): the address readable — `?year=1100&zoom=0.6&at=2.35,48.85&focus=Q70972` — or compact. A
+readable one can be read and corrected by hand, and says what it opens; a compact one is shorter in a message. Either
+way the coordinates are the map's longitude and latitude, never the scene's units, so a change of the relief's framing
+never breaks a shared link. **Severity: a design question.**
+
+### A-23 · Sharing from a phone
+
+[s16](s16-the-share-link.md) copies the address to the clipboard. On a phone, the system's share sheet (messages, mail)
+is what a reader expects, and browsers offer it to a page. Whether the button opens it there, and keeps the clipboard on
+a desktop — with the phone's navigation itself (ATLAS-137). **Severity: a design question.**
+
+### A-24 · The list's filter and the search
+
+[s17](s17-the-map-as-a-list.md) puts a filter at the head of the list; ATLAS-139 asks for a search of a place or an event.
+One field may serve both — typing in it filters the list and offers the places — or two, the list's filter staying
+inside the year shown while the search reaches every year. **Severity: a design question.**
+
+### A-25 · The list's key
+
+[s17](s17-the-map-as-a-list.md) opens the list with ‹L›. A single letter heard on the whole page is what WCAG 2.1.4 asks to
+be adjustable; the arrow keys and ‹+›/‹−› are taken by the map (s02). ‹L› or a modified key — with the help's table of
+keys (s12). **Severity: a design question.**

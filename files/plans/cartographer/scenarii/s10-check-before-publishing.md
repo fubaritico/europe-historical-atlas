@@ -3,6 +3,14 @@
 > [Index](s00-index.md) · without this there is no way to know when a year is finished. It is a lint for
 > a map.
 
+> **Where it stands, 2026-11-06** (CARTO-192, rewritten with the dev): not built. Only the file's own faults are said, in
+> the console (`core/editor/documentFaults.ts`). **Proposed, to be validated by him**: one check written once in `core`,
+> called by the Cartographer's [Check this year] **and** by a script in the CI before the site is deployed — a year
+> « publishable: no » is not deployed. The check is aimed at what the eye cannot see; a hole he sees, he fills (his
+> rule of loose coupling). **Nothing blocks, the CI included** — the dev, same day:
+> making it blocking is *"a very bad idea"*; a broken ring is seen while drawing and felt through the snap. Everything
+> is reported as a warning; a forbidden source (Euratlas, GPL) reads « publishable: no », first, as a fault.
+
 ```gherkin
 Scenario: run the check
   Given "1100" is open
@@ -122,3 +130,22 @@ Scenario: accept a problem deliberately
 > **Hole H-25**: what is the target? Unclaimed land will never reach 0 % — some ground genuinely belonged
 > to nobody. Either the check learns which areas are deliberate, as above, or the figure is meaningless
 > as a completion gauge.
+
+## Added 2026-11-06 — the dev, rewriting CARTO-192
+
+```gherkin
+Scenario: a lake left full
+  Given the land mask holds Lake Geneva as water
+  And the County of Geneva's outline covers it
+  When I check the year
+  Then it is reported: "Lake Geneva is not cut out of the County of Geneva"
+  And clicking the row frames the lake
+  And a lake crossed by a border is reported the same way (CARTO-377)
+
+Scenario: the CI checks before the site is deployed
+  Given a year pushed with a stretch traced from Euratlas
+  When the CI runs before deploying
+  Then the year is deployed all the same — the CI never blocks (the dev, 2026-11-06)
+  And its log says first, as a fault: the year, the polity, the stretch, "publishable: no"
+  And a ring that crosses itself is reported the same way, as a warning
+```

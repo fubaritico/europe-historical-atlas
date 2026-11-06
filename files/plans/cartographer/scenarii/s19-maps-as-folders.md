@@ -121,6 +121,11 @@ Scenario: save as cannot save the map it starts from
 > that a name which is a year (« 1110 ») write that year inside the files, as the first design did
 > ([s04](s04-save-and-reopen.md), 2026-09-22); the dev answered *"no"* (2026-11-02) — read by Claude as a refusal of that
 > proposal, said back to him. Deriving another year is therefore not *Save as…* any more; how it is done is open.
+>
+> **Replaced 2026-11-06 by the dev — that « no » was misread** (CARTO-180): *« si je fais enregistrer sous, ça
+> enregistre sous. Ça crée un dossier du numéro d'année »*. A name that is a year (« 1110 ») **writes that year inside the
+> files**: the copy is the map of 1110. Only the name's syntax is checked — a year is four digits — and a map that
+> already exists is never overwritten. The refusal « this map is 1100 » goes. Not built yet.
 
 ```gherkin
 Scenario: save as under the name of the current map is refused

@@ -266,6 +266,12 @@ Draw 1100. Replace the GPL payload. **Then and only then** `public/borders/` can
 the deployed atlas gains its fills and borders. This is the step that turns the project from a consumer
 of someone else's dataset into its own source.
 
+> **Where it stands, 2026-11-06** (ATLAS-142): the 1100 published on 16/10 had started from a tracing of Euratlas
+> plates, whose vectors may not be traced (Euratlas's licence; Borders of Time says the same of its own use). It is
+> replaced by the dev's 1100 rebuilt from **Cliopatria** (CC BY 4.0), cleaned by him (`b02ce87`, pushed). The git
+> history keeps the old one: **not rewritten**, the dev's call. How every year is made from now on: the three layers
+> (`roadmap.md`, ATLAS-153).
+
 **Also the day the README gets its picture** — see the section on the deferred screenshot below. Not a
 loose end: it is the first moment an image of this project shows history rather than terrain.
 

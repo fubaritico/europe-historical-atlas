@@ -139,6 +139,10 @@ Scenario: open the registry
 
 ## Naming
 
+> **The first two scenarios are superseded on 2026-11-06** (CARTO-187 archived): a map is one date (H-14) and every map
+> is independent (CORE-211), so a polity bears the name of its date in that year's registry — no dated names. The
+> short name below is built.
+
 ```gherkin
 Scenario: a polity is renamed over time
   Given "Kingdom of France" exists from 987
@@ -211,6 +215,10 @@ Scenario: the box unticked
 > (`core/data/yearFormat.ts`). **Not walked yet.**
 
 ## Merging duplicates
+
+> **Superseded on 2026-11-06** (the dev, archiving CARTO-185): a duplicate is prevented, not merged — two polities of a
+> map never bear the same name (his rule, 2026-11-05). Pasting already refuses a taken name (`core/editor/paste.ts`);
+> the new-polity form will too — CARTO-380. The scenario below is kept as history; it was never built.
 
 ```gherkin
 Scenario: two entries are the same polity
@@ -522,6 +530,9 @@ Scenario: the rank list offers every rank the year uses
 > Cartographer, as the code itself records.
 
 ## Import
+
+> **Superseded on 2026-11-06** (CARTO-186 archived): identities arrive with the borders — the Cliopatria import gives
+> every polity its name and Wikidata QID (107 of 107 in 1100's registry). Kept as history; never built.
 
 ```gherkin
 Scenario: import identities in bulk from OHM

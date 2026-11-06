@@ -63,10 +63,35 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   researched first (climb the chain of reference: the quotation, then the work Wikipedia or the page cites).
 - **A divergence is kept, never settled.** Two sources that disagree are two lines, each with its own value. The dev
   arbitrates; the concordance is computed, never typed (`evidence-system.md`).
+- **The sheet shows the most probable holder, with its QID — even where the sources diverge** (the dev, 2026-11-06:
+  *« sinon ça ne servirait à rien de faire une assertion sur la probabilité d'un ensemble de sources »*). The lines
+  keep every reading, the contrary one included; the sheet's `holderName` + `holderQid` is the reading the sources
+  make most probable, and the summary to the code instance says why. A holder with no QID only when there is truly
+  none to name (« Aucun — ville abandonnée »), declared as such.
 - **The map is the dev's.** A fact that changes a border or a suzerain is entered as a source line *and* sent to the
   code instance; nobody touches `years/` — he decides in the Cartographer.
 - **His server is his.** If `localhost:3100` does not answer, tell him; never start, stop or restart it.
 - **The key never enters the conversation** — not read, not echoed, not written in a file of the repository.
+
+## When the sources stop short — research until there is a name (the dev, 2026-11-06)
+
+> *"You must always insist, insist until you have an answer."* And: *"At some point you have to decide. But you name
+> the source."*
+
+- **Every sheet gets an entity, an identity, an identifier**: a holder and its QID. « Musulmane », « chrétienne »,
+  « taïfa non établie » are not holders — they are where the research goes on.
+- **Climb two or three degrees of separation.** The polity a source names ended before the date → who replaced it
+  (Wikidata « replaced by », « followed by », the polity's own page) → who held the place at the date. A neighbouring
+  town of the same district whose holder is known at that date is a degree too. Lived on 06/11: the taifa of Tortosa
+  ends in 1099 on Wikidata → who took Tortosa → so who held Siurana and Horta in 1100.
+- **Where to look, beyond Wikipedia**: `/find-sources` — the libraries in their order, archive.org among them, and the
+  reading accounts once the dev opens them (CMS-362).
+- **Then decide.** When the search ends with no source naming the holder at the date, the most probable one is entered
+  anyway, with its QID. **The line names the source it stands on** — the one that names the predecessor's or the
+  neighbour's holder — with its quotation. The line does not announce a deduction; the reasoning is written in the
+  year's file (`files/plans/sources/1100.md`), the home of the questions.
+- **A source created is cited by a line of the same batch.** A source attached to nothing is a fault (06/11, « Sos,
+  castillo », created and never cited).
 
 ## The order — sources first, then the place, then the city at a date
 

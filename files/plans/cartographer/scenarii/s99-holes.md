@@ -216,7 +216,7 @@ required field asks the author instead of answering for them. And there is **no 
 and refusing a space would be the tool manufacturing a law where `s00` says every rule here is a default.
 What is refused is what genuinely breaks a file: an empty id, and one already taken.
 
-### H-01 · Where does the OHM identity import read from?
+### H-01 · Where does the OHM identity import read from? — without object since 2026-11-06 (CARTO-186 archived: identities come from the Cliopatria import)
 
 Live Overpass query, or the `relations.json` the spike already caches? Live is current and slow; cached
 is instant and stale. The cache already holds all 2 059 relations with names, ranks, statuses and
@@ -259,7 +259,9 @@ anchors along the Meuse at 1100. That is H-06, untouched. What is refused is sha
 holds it. Accepted — there is one contributed year today, and the cost only begins at the second. Nothing
 in the format forbids adding sharing later, since anchors are stored once with stable ids.
 
-### H-13 · GPL: read-only, or marked contamination?
+### H-13 · Settled 2026-11-06 — no GPL map is opened (CARTO-182 and CARTO-183 archived; every year starts from Cliopatria, ATLAS-153)
+
+Was: GPL: read-only, or marked contamination?
 
 Scenario [01](s01-open-and-navigate.md) opens GPL payloads read-only; scenario
 [04](s04-save-and-reopen.md) imagines a stretch copied out of one and the file marked derived. **The first
@@ -334,6 +336,11 @@ tracing surface.
 **Open**: two points or three? And does the placement persist with the plate, as a sidecar?
 
 ### H-26 · An enclosed unclaimed hole should perhaps go to its neighbour, like an island
+
+> **Settled 2026-11-06 by the dev — no question at closing** (CARTO-173 archived): *« je crée un trou, je vois qu'il y a
+> un trou. J'en ai rien à foutre de savoir à qui appartient le trou, puisqu'après je vais le remplir »*. The drawing
+> stays free, loosely coupled to the political entity: a hole shows on the map, and the author fills it. Nothing asks
+> who holds it when an outline closes.
 
 Raised by the dev 2026-09-22, closing the session: _"les trous sont un peu comme des îles — mets dans une
 nation voisine."_
@@ -727,7 +734,17 @@ built:
 
 ### H-48 · Open since 2026-11-02 — how another year is derived
 
+> **Settled 2026-11-06 by the dev** (CARTO-180): *Save as…* « 1110 » writes the year 1110 inside the copy — the first
+> design, which a misread « no » of 02/11 had dropped. See [s19](s19-maps-as-folders.md).
+
 *Save as…* takes any name and a copy keeps the year of the map it comes from ([s19](s19-maps-as-folders.md), the dev,
 2026-11-02). The first design derived 1110 by *Save as…* « 1110 », the year written inside the files ([s04](s04-save-and-reopen.md),
 [s05](s05-derive-a-year.md)); that no longer holds. **To settle with the dev** the day a second year is derived from
 another: a field for the year in *Save as…*, a gesture of its own, or the year written by hand in the files.
+
+### H-49 · Dropping a row *between* two rows of {Polities} — **open, 2026-11-06** (CARTO-188)
+
+Dragging a row *onto* another changes homage, after a confirmation ([s08](s08-vassalage.md), « Changing homage by
+dragging a row »). Dropping it *between* two vassals of the same lord is what reorders layers in Illustrator. Two
+readings: it changes the stacking order, as the Arrange commands do (`ui/utils/arrange.ts`), or it does nothing. The
+dev's call when CARTO-188 is pulled.

@@ -338,3 +338,22 @@ Entries closed and moved out of `known-issues.md`. Kept for the lessons they car
   by hand at each commit. **Closed 2026-10-30**: both in `.prettierignore` and committed as Payload writes them
   (`generate:types` rerun; the output proven to differ from the committed file by format only — Prettier over it gives
   the old file byte for byte). A reload now writes the same bytes, so no diff.
+
+
+## The atlas
+
+- **The map's thickness is cut at the wrong edge.** `createMapEdge` builds two walls and only one of them
+  belongs where it is:
+  - the **section** — sea level up to the land's surface — exists only where there is land at the map's
+    boundary. That is the "épaisseur de l'Afrique" the dev asked for, and it is correctly placed.
+  - the **board** — a uniform skirt below sea level, the whole way round, open ocean included. On screen
+    _downward_ and _outward_ are the same direction as soon as the camera tilts, so it projects across
+    the margin and fills the graduated band's transparent blocks with its own flat colour. **Measured:
+    0.06 of depth covered 23 px against a 17 px band; at 0.165 it swallowed the band and part of the
+    label lane.** Any positive depth intrudes — it is geometry, not tuning.
+    `edgeDepth` is therefore **0**. The board can only come back once the thickness is carried by the
+    **sheet's outer edge** instead of the map's — which is what the dev's own drawing showed: the _paper_
+    has a thickness, not the inner rectangle. Not built.
+  **Closed 2026-11-06 by the dev's call (ATLAS-161 archived)**: as built today all is well — the board's depth stays 0, so
+  the graduated band is never eaten, and the land's section is kept where land meets the map's edge. A thickness on the
+  sheet's outer edge is not wanted: the sheet matches the page on purpose, so that no second edge shows (`scene/sheet/paperSheet.ts`).

@@ -13,7 +13,7 @@
 Scenario: the bar of buttons
   Given the atlas open
   Then the interface's buttons sit in one bar at the bottom right of the screen — the language (s11), the help (s12), the
-    navigation pad's toggle
+    navigation pad's toggle, the snapshot (s14), the share link (s16), the list (s17)
   When I click the pad's toggle
   Then the pad appears above the bar
   When I click it again

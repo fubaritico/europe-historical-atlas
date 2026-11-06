@@ -1,5 +1,10 @@
 # 06 — Replace a year we cannot publish: 1500
 
+> **Superseded on 2026-11-06** (the dev, archiving CARTO-183): every year now starts from Cliopatria (CC BY 4.0), then
+> the dev's atlases, then the historian's cities — the three layers, `roadmap.md` « How a year is made », ATLAS-153.
+> 1500 will be made that way when he chooses it; the OHM route below is kept as history. The licence rule still holds:
+> a GPL map may be read, never imported.
+>
 > [Index](s00-index.md) · `public/borders/europe-1500.json` is `historical-basemaps`, **GPL-3.0**. It is
 > complete (~97 % of Europe) and unpublishable. OHM covers 55 % there, measured, and is CC0.
 

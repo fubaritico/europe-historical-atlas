@@ -68,18 +68,6 @@ target.z)` would be coherent with the navigation that already exists.
   2026-09-18 — it was landing in the middle of a visual regression and made the change unreadable).
   Mixing may stay in sRGB; only the last step converts. **Retuning the frame and the edge is part of the
   fix, not a follow-up.**
-- **The map's thickness is cut at the wrong edge.** `createMapEdge` builds two walls and only one of them
-  belongs where it is:
-  - the **section** — sea level up to the land's surface — exists only where there is land at the map's
-    boundary. That is the "épaisseur de l'Afrique" the dev asked for, and it is correctly placed.
-  - the **board** — a uniform skirt below sea level, the whole way round, open ocean included. On screen
-    _downward_ and _outward_ are the same direction as soon as the camera tilts, so it projects across
-    the margin and fills the graduated band's transparent blocks with its own flat colour. **Measured:
-    0.06 of depth covered 23 px against a 17 px band; at 0.165 it swallowed the band and part of the
-    label lane.** Any positive depth intrudes — it is geometry, not tuning.
-    `edgeDepth` is therefore **0**. The board can only come back once the thickness is carried by the
-    **sheet's outer edge** instead of the map's — which is what the dev's own drawing showed: the _paper_
-    has a thickness, not the inner rectangle. Not built.
 - **The frame writes no depth, so anything drawn after it paints over it** — fixed 2026-09-18 by
   `FRAME_RENDER_ORDER`, and worth keeping because the failure mode is invisible. It cannot write depth
   (it would z-fight with the sheet four thousandths below it), so its visibility depended on landing in
@@ -264,8 +252,12 @@ target.z)` would be coherent with the navigation that already exists.
   relief chargé rendrait la source dépendante de l'ordre de chargement, ce dont `mapSources` met en garde.
   **Le remède existe déjà et n'est pas branché** : `boundsMatch` dans `assetError.ts`, appelé là où les deux
   boîtes sont en main, c'est-à-dire dans le pipeline. C'est le contrôle `semantic` de la taxonomie.
-  **Sévérité : à savoir** — 1100 est publié depuis le 16/10 (`years: [1100]`) et sa bbox n'est comparée au DEM par
-  rien : à brancher.
+  **Sévérité : à savoir — non branché par décision du dev (06/11, ATLAS-143 archivé)** : le Cartographe et l'atlas
+  dessinent sur le même relief, donc un décalage ne vient que d'un **fichier de relief remplacé par un autre qui couvre
+  une autre zone** (arrivé une fois, en septembre). **Déclencheur** : un changement du fichier du relief — rejouer alors
+  `boundsMatch` à la main. **Et une dette, à retirer, ATLAS-373** : la ligne 70 va encore
+  chercher les frontières GPL (`/borders/europe-<année>.json`) pour une année non dessinée — code mort, le sélecteur
+  n'offre que les années dessinées.
 - **The icons' shadows are rasterised on the CPU, up to fifteen times a second, for every icon** (2026-10-27, ATLAS-298,
   review ARCH-001). `scene/events/shadows/iconShadows` slides each 3D icon's triangles along the light, fills them as one
   shape and blurs it, in a 192 × 96 tile, then re-uploads the texture. Skipped while the 3D icons are faded out (from

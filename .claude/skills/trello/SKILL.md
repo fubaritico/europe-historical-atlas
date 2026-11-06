@@ -38,7 +38,26 @@ drifts, and nothing fails when it does ([[distribute-notes-dont-pile-them]]).
   commit in a comment;
 - a card done → the session's `completed.md` account cites the ticket, never re-describes it.
 
-**The sync check — run it at every `/end-session`, and at `/start-session` before proposing work:**
+**The work check — the board against the code and the commits, never against `next.md` alone** (the dev, 2026-11-06:
+*« la skill ne fait rien en termes de vérification du travail »*). `next.md` covers one session to the next; the board is
+my memory of the whole work ([[the-board-is-my-memory]]), so it is checked against what was really built:
+
+- **At `/end-session` — the board up to date before closing**: for every subject worked on, read the session's commits
+  (`git log --since=<span start> --stat`) and the files touched; each ticket they serve gets its comment (what was done,
+  commits), its column (À valider, Fait — with the closing comment — or still En cours), and its epic's item ticked.
+- **At `/start-session` — a safety check**: the commits since the last session end (`git log --since`), and every ticket in
+  **En cours** and **À faire** read against the code (`git log --grep=<ticket>`, `grep` for what its criteria name). A ticket
+  whose work is in the code but whose card says otherwise is moved, with the evidence in a comment, and said to the dev.
+  **Where it goes**: to **Fait**, with the closing comment, only when the dev already tested that work (under another
+  ticket, or said so) or when nothing is there to test (a doc); otherwise to **À valider par le développeur** — the DoD's
+  step 5 is never skipped because the code was found rather than written.
+- **My latitude, and when to ask** (the dev, 2026-11-06): I decide what to do with a ticket the code settles — move it,
+  close it, archive a duplicate or a ticket a later decision made pointless — with the evidence in a comment. **In real
+  doubt, I ask**, and the question carries the ticket's own description and the why (what the code shows, what it does
+  not), so he decides without opening the card.
+- **An epic's checklist is read the same way**: an item whose ticket is in Fait is ticked; one archived is removed (`unitem`).
+
+**The sync check — run it with the work check, at every `/end-session` and `/start-session`:**
 
 1. `list`. Every card in **En cours** or **À valider par le développeur**: is `next.md` saying where it stands? Every card I
    touched this session: does it carry a comment saying where it stands?
@@ -56,7 +75,7 @@ drifts, and nothing fails when it does ([[distribute-notes-dont-pile-them]]).
 | **Idées** | a raw thought, the *Idée* template | anyone, the dev mostly | I shape it into the *Backlog* template, **he validates the wording** |
 | **Backlog** | a shaped ticket, validated as written, **unordered** | the dev, once I shaped it — **never me alone** | he decides to do it now |
 | **À faire** | what he decided to do, **in his order** | the dev | I start the top card, unless he names another |
-| **En cours** | what I am working on, **one or two cards at most** | me, when I start | the DoD's steps 1–4 are done → À valider par le développeur |
+| **En cours** | what we are working on — **several subjects run in parallel, no cap** (the dev, 2026-11-06) | me when I start, **and the dev**, who judges too what is in progress or done | the DoD's steps 1–4 are done → À valider par le développeur |
 | **À valider par le développeur** | waiting on his gesture: test it in the app, or decide a question | me, the moment the ball is his | he tested it → Fait; he found a fault → back to En cours with a comment |
 | **Fait** | acceptance criteria **and** DoD met, **newest on top** (the dev's call, 2026-10-18) — `done` places it there | me, after **his** test or decision | — |
 
@@ -119,7 +138,7 @@ A label shows on the closed card and filters the board; a line in a description 
 | --- | --- | --- |
 | **Gravité** | `critique` · `gênant` · `cosmétique` | one at most, only on a card that fixes a problem; a new feature carries none. `critique` = blocks the work (CLAUDE.md's *blocking*) — renamed so it never reads like the status `Bloqué` |
 | **Périmètre** | `atlas` · `Cartographe` · `core` · `CMS` (the contribution system, Payload) · `données` (years/, relief, sources) · `outillage` (CI, lint, Trello, skills) · `design` | one, rarely two |
-| **Type** | `retour d'usage` (what the dev felt using the app) · `défaut` (a proven bug) · `fonction` · `dette` · `décision` (a question to settle) · `doc` | one |
+| **Type** | `retour d'usage` (what the dev felt using the app) · `défaut` (a proven bug) · `fonctionnalité` (a feature; may become `feature` beside `bug` if the labels crowd, the dev 2026-11-06) · `dette` · `décision` (a question to settle) · `doc` | one |
 | **Épique** | `épique · incertitude` · `épique · cms` · `épique · villes`…, one per epic | on every ticket of an epic, so one click filters it |
 | **Statut** | `Bloqué` | through `block` / `unblock` only |
 
@@ -195,7 +214,7 @@ A card is named by its ticket (`CARTO-41`) or its Trello number (`#7` → `7`). 
 ```bash
 S=/Users/stephanecottereau/Desktop/WebstormProjects/europe-map/.claude/skills/trello/scripts/trello
 $S list                                    # every column and its cards
-$S add "Idées" "[CARTO] Title" "description" fonction Cartographe   # description = a filled template; labels optional
+$S add "Idées" "[CARTO] Title" "description" fonctionnalité Cartographe   # description = a filled template; labels optional
 $S edit 7 $'**Le problème…** : …\n…'     # replace the description (shape an Idée)
 $S rename 7 "New title"
 $S prefix CARTO-41 "atlas · carto"           # change the scope; the number stays
@@ -213,6 +232,7 @@ $S archive 7 "doublon de #9"               # my own mistakes only — undone fro
 $S checklist 9 "Plan" "étape 1" "étape 2"   # a plan's steps on its card; a checklist of that title is extended
 $S check 9 "étape 1"                        # ticks the one item containing the text
 $S uncheck 9 "étape 1"                      # unticks it — a tick put by mistake
+$S unitem 9 "CMS-130"                       # removes the one item containing the text — a ticket archived or out of the epic
 $S show 7                                  # title, column, description, comments
 $S attachments 7 [folder]                  # a card's attachments; with a folder, saves each one there (his screenshots)
 $S relabel <old> <new>                     # renames a label; every card keeps it under its new name
@@ -228,7 +248,8 @@ point: the dev reads `move 7 "En cours"`, not a curl. A multi-line description i
 
 | moment | gesture |
 | --- | --- |
-| **start-session** | `list`, then tell the dev what is in **À valider par le développeur** (it waits on him) and the top of **À faire** |
+| **start-session** | `list`, then tell the dev what is in **À valider par le développeur** (it waits on him) and the top of **À faire**. **His moves are the state** — never propose to revert them. **Deduce from the work done** (`completed.md`, `next.md`, the commits) which card has moved on and say it, so he does not have to retouch the board himself (the dev, 2026-11-06: *« tu ne te souviens pas, alors je retouche »*) |
+| **end-session** (before the row below) | every subject worked on this session: its card's column matches where it really is — moved, or said to him in one line |
 | I start a card he chose | `move N "En cours"` |
 | a question or a test is his | `move N "À valider par le développeur"` + a comment saying exactly what he has to do or decide |
 | he reports a fault on a card in À valider par le développeur | `comment` his words, `move N "En cours"` |

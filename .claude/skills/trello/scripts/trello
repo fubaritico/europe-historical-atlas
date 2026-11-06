@@ -38,7 +38,7 @@ const LABELS = [
   // type
   { name: "retour d'usage", color: 'pink' },
   { name: 'défaut', color: 'orange_dark' },
-  { name: 'fonction', color: 'lime' },
+  { name: 'fonctionnalité', color: 'lime' },
   { name: 'dette', color: 'yellow_dark' },
   { name: 'décision', color: 'purple_light' },
   { name: 'doc', color: 'black_light' },
@@ -47,6 +47,9 @@ const LABELS = [
   { name: 'épique · cms', color: 'blue_light' },
   { name: 'épique · playwright', color: 'lime_dark' },
   { name: 'épique · villes', color: 'orange_light' },
+  { name: 'épique · interface atlas', color: 'pink_dark' },
+  { name: 'épique · icônes', color: 'yellow_light' },
+  { name: 'épique · trois couches', color: 'red_dark' },
   // status
   BLOCKED,
 ]
@@ -406,6 +409,16 @@ const verbs = {
     if (matches.length !== 1) fail(`${matches.length} items match "${text}" on #${c.idShort}: ${items.map((i) => i.name).join(' | ')}`)
     await api('PUT', `/cards/${c.id}/checkItem/${matches[0].id}`, { state: 'incomplete' })
     console.warn(`#${c.idShort} unticked: ${matches[0].name}`)
+  },
+  /** unitem <number> <text> — removes the one checklist item whose name contains the text: a ticket archived or moved out of an epic. */
+  async unitem(number, text) {
+    if (!text) fail('unitem <number> <text>')
+    const c = await card(number)
+    const items = (await api('GET', `/cards/${c.id}/checklists`)).flatMap((l) => l.checkItems)
+    const matches = items.filter((i) => i.name.includes(text))
+    if (matches.length !== 1) fail(`${matches.length} items match "${text}" on #${c.idShort}: ${items.map((i) => i.name).join(' | ')}`)
+    await api('DELETE', `/checklists/${matches[0].idChecklist}/checkItems/${matches[0].id}`)
+    console.warn(`#${c.idShort} item removed: ${matches[0].name}`)
   },
   /**
    * attachments <number> [directory] — lists a card's attachments (the dev's screenshots, 2026-10-29); given a directory,

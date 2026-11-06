@@ -29,7 +29,7 @@ Every control name below is **provisional**. It names an _intention_, not a deci
 | 03  | [edit an existing border](s03-edit-existing-border.md)    | improve what was imported: move, insert, delete vertices                            |
 | 04  | [save and reopen](s04-save-and-reopen.md)                 | the round trip — an editor that only exports is a sketchpad                         |
 | 05  | [derive a year](s05-derive-a-year.md)                     | 1100 → 1110: seed, add, remove, modify, and the diff                                |
-| 06  | [replace a GPL year](s06-replace-a-gpl-year.md)           | 1500: what may be taken from a map we cannot ship                                   |
+| 06  | [replace a GPL year](s06-replace-a-gpl-year.md)           | 1500: what may be taken from a map we cannot ship — superseded by the three layers (06/11) |
 | 07  | [manage the registry](s07-manage-the-registry.md)         | identity without geography: rename, **merge duplicates**, hierarchy, delete         |
 | 08  | [vassalage](s08-vassalage.md)                             | declare a suzerain, the five hands, the weight by depth, the empires view           |
 | 09  | [place the names](s09-place-the-names.md)                 | anchors, typography by rank, semantic zoom, collisions                              |

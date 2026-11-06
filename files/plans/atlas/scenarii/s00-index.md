@@ -59,5 +59,7 @@ as rules:
 | 12 | [the help button](s12-the-help-button.md) | the interface: every gesture with its key, a short walkthrough opened by itself at the first visit — **not built** (ATLAS-135) | written 02/11 |
 | 13 | [the navigation pad](s13-the-navigation-pad.md) | the interface: a nine-key pad above the button bar, the keyboard's commands, two contextual corners — **not built** (ATLAS-149) | written 02/11 |
 | 14 | [the snapshot](s14-the-snapshot.md) | the interface: a PNG of the view, framed like the sheet, a cartouche with the year and the credits — **not built** | written 02/11 |
-| 15 | [choosing the century](s15-the-century.md) | the interface: « ‹ XIᵉ siècle › » at the top, a list of twenty, the undrawn greyed — **not built** (ATLAS-150) | written 02/11 |
+| 15 | [choosing the century](s15-the-century.md) | the interface: « ‹ XIᵉ siècle › » at the top, a list of twenty, the undrawn greyed — **not built** (ATLAS-358, the frieze; ATLAS-150 archived as its duplicate, 06/11) | written 02/11 |
+| 16 | [the share link](s16-the-share-link.md) | the interface: a share button, the address that reopens the same year, view and focus — **not built** (ATLAS-138) | written 06/11 |
+| 17 | [the map as a list](s17-the-map-as-a-list.md) | the interface: what the map shows as a tree — sovereigns, vassals, cities, events — reached by the keyboard and heard by a screen reader, a line chosen moves the map — **not built** (ATLAS-140) | written 06/11 |
 | 99 | [holes](s99-holes.md) | what is not decided | open |

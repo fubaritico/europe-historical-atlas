@@ -23,6 +23,7 @@ file is touched — goes below this table.
 
 **Two entries to have in mind at every session**, whatever the subject:
 
-- **`years/1100/` started from the Euratlas test and is now the dev's year**; how much Euratlas remains is CARTO-237,
-  the licence ATLAS-142 — detail in `data.md`.
+- **`years/1100/` is the dev's 1100 rebuilt from Cliopatria since 2026-11-06** (`b02ce87`); the one started from the
+  Euratlas test is out of the site, kept only in the git history by his call — never publish a folder traced from
+  Euratlas. Detail in `data.md`.
 - **The gate goes red under load on correct code** — REPO-260; detail in `tooling.md`.

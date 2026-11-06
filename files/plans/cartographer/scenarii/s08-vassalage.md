@@ -78,6 +78,14 @@ Scenario: a vassal drawn outside its lord stays a vassal
 > no longer *causes* vassalage — and a vassal holding ground away from its lord is ordinary medieval
 > geography, so requiring inclusion would forbid a fact.
 
+### Changing homage by dragging a row — not built (CARTO-188, ergonomics, Backlog)
+
+> **Where it stands, 2026-11-06** (checked in the code): {Polities} has no drag and no `[+ New polity inside]`. A
+> suzerain is changed in the polity's form, field « Suzerain » — which already leaves out every polity that would close
+> a loop of homage or seat it deeper than `MAX_HOMAGE_DEPTH` (`core/data/paintOrder.ts`) — or by pasting a sheet. The
+> stacking order is changed by the four Arrange commands (`ui/utils/arrange.ts`), never by dragging. **The dev,
+> 2026-11-06: ergonomics, not a lack** — Illustrator's gesture, which his hand knows; kept in Backlog.
+
 ```gherkin
 Scenario: moving a polity in the tree is a change of homage, and says so
   Given "Duchy of Aquitaine" is nested under France
@@ -87,7 +95,34 @@ Scenario: moving a polity in the tree is a change of homage, and says so
   And cancelling moves nothing
   When I drag it to the root instead
   Then I am asked the same way, and it becomes sovereign
+
+Scenario: the move is one step of the history
+  Given I confirmed "Aquitaine would owe England"
+  Then {History} shows one step for it
+  When I press ‹ctrl+z›
+  Then Aquitaine is nested under France again, and its border with France is dotted again
+
+Scenario: a row that cannot take it does not open under the pointer
+  Given "Duchy of Normandy" owes "Kingdom of France"
+  When I drag "Kingdom of France" over "Duchy of Normandy"
+  Then the row does not light up as a target — France under Normandy would close a loop of homage
+  And dropping there moves nothing, and the console warns once "[Cartographer] … would close a loop of homage"
+  And the same holds for a row that would seat the polity deeper than the map allows
+
+Scenario: no geometry moves
+  Given "Duchy of Aquitaine" is dragged under England and confirmed
+  Then no anchor moves, no outline is carved or merged
+  And only what the relation decides changes: the hand of its borders and its place in the stacking groups
+
+Scenario: create a vassal inside its lord from the tree
+  Given "Kingdom of France" is selected in {Polities}
+  When I press [+ New polity inside]
+  Then the form opens with « Suzerain » set to "Kingdom of France"
 ```
+
+> **Open — H-49**: in Illustrator, dropping a row *between* two rows reorders the layers. Here, between two vassals of
+> the same lord, should it change the stacking order (as the Arrange commands do), or do nothing? Not decided; the
+> dev's call when the ticket is pulled.
 
 > **This is where Illustrator's vocabulary stops being free.** There, nesting controls stacking and
 > visibility; here it declares a legal tie. The two gestures look identical, so a silent reparent would turn
@@ -235,6 +270,46 @@ Scenario: a new vassal's outline over a co-vassal overlaps it, carves nothing of
 > vassals recarved in `years/1100` that night were drawn before the Pen knew how, and recarved outside the
 > tool (`completed` archive, 15/10). Recarving an existing vassal from the tool is not possible yet
 > (`known-issues.md`, CARTO-189).
+
+## A vassal covered again after it was carved — not built (CARTO-189)
+
+> **Rewritten 2026-11-06 with the dev**, once the 1100 is Cliopatria's: an imported map holds no covered vassal —
+> Cliopatria draws a vassal and its suzerain as two separate outlines, and the import cut what still overlapped
+> (`files/spikes/cliopatria-import/README.md`, 162 cuts). The carving runs at three moments only — a new outline
+> closed (`core/editor/carve.ts`), an open outline resumed and closed (`state/outlineActions.ts`, 05/11), points pasted
+> that close a ring (`core/editor/pastePoints.ts`). **Three gestures can still lay a suzerain over its vassal, and
+> nothing gives the vassal its ground back.** That is a debt: the rule « a vassal is a neighbour, never under its
+> suzerain » is kept at the moments the tool thought of, not by the document.
+
+```gherkin
+Scenario: the suzerain retouched over its vassal
+  Given "County of Champagne" is a vassal of France, carved out of France's own domain
+  When I retrace France's limit with the Pen across Champagne's ground
+  Then France's own domain covers part of Champagne again
+  And Champagne is not carved back, and nothing says so
+
+Scenario: a vassal pasted whole into a map
+  Given a map where France holds its own domain
+  When I paste "Duchy of Normandy", vassal of France, copied from another map
+  Then Normandy keeps its whole outline, over France's own domain (the dev, 05/11: "when you paste, you paste")
+  And France is not carved, and the overlap is not hatched — a vassal over its suzerain is vassalage, not an overlap
+
+Scenario: a suzerain given afterwards
+  Given "County of Anjou" and France overlap, Anjou with no suzerain
+  When I make France Anjou's suzerain in its sheet
+  Then the overlap stays as it was — the sheet does not carve
+
+Scenario: recarving a vassal from the tool — the remedy, not built
+  Given Champagne lies under France's own domain, by any of the three gestures above
+  When I select Champagne and ask to recarve it
+  Then the ground under Champagne is no longer France's own domain, by the same anchors
+  And the status bar reads "carved out of Kingdom of France's own domain"
+  And one undo puts both back as they were
+  When I ask to recarve a polity with no suzerain
+  Then nothing changes and the status bar says why
+```
+
+> Where the gesture lives — {Polities}' action bar, a shortcut, the Édition menu — is the dev's to choose (CARTO-189).
 
 ## Aiming at a suzerain — built 2026-10-15 (`186d017`)
 
