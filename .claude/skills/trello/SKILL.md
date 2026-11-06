@@ -23,7 +23,7 @@ drifts, and nothing fails when it does ([[distribute-notes-dont-pile-them]]).
 | home | what lives there | what no longer does |
 | --- | --- | --- |
 | **the board** | the list of tasks and the state of each — what, its stage, blocked or not, who has the ball | — |
-| `files/plans/*.md` | a chantier's design: why, how, the trade-offs. Its card links the file in **Détails**; the plan's steps become a **checklist on the card** (`checklist`, `check`) | progress — ticked on the card, not in the file |
+| `files/plans/*.md` | an epic's or a ticket's design: why, how, the trade-offs. Its card links the file in **Détails**; the plan's steps become a **checklist on the card** (`checklist`, `check`) | progress — ticked on the card, not in the file |
 | `.claude/rules/known-issues/<package>.md` (index: `.claude/known-issues.md`) | a problem's mechanism: measure, cause, why the remedy. An entry **that asks for an action** gets a card naming it; an entry *« à savoir »* stays in the file with no card | the to-do — on the card |
 | `.claude/next.md` | the resume point: where we stopped, what is mid-flight and in what state, context that is not a task. Points to the cards in À valider par le développeur / En cours | **any list of tasks** |
 | `.claude/completed.md` | a short account of each session: time spans, the dev's own words, my faults — citing tickets (`CARTO-41`) | the detail of what shipped — in the Fait cards (description: what, commits, date) |
@@ -52,7 +52,7 @@ drifts, and nothing fails when it does ([[distribute-notes-dont-pile-them]]).
 
 | column | holds | who moves a card in | to leave it |
 | --- | --- | --- | --- |
-| **Chantiers** | an **initiative** — above an epic: the ground the decisions of a whole stretch of work stand on (`DESIGN-262`, the management of uncertainty). **Outside the maturity flow**: it stays here its whole life, and does not count in En cours | the dev | never, while its tickets are being done |
+| **Épiques** | an **epic** — a series of tickets toward one aim (`DESIGN-262`, the management of uncertainty; `CARTO-363`, entering the cities fast and right). **Outside the maturity flow**: it stays here its whole life, and does not count in En cours | the dev | never, while its tickets are being done |
 | **Idées** | a raw thought, the *Idée* template | anyone, the dev mostly | I shape it into the *Backlog* template, **he validates the wording** |
 | **Backlog** | a shaped ticket, validated as written, **unordered** | the dev, once I shaped it — **never me alone** | he decides to do it now |
 | **À faire** | what he decided to do, **in his order** | the dev | I start the top card, unless he names another |
@@ -120,7 +120,7 @@ A label shows on the closed card and filters the board; a line in a description 
 | **Gravité** | `critique` · `gênant` · `cosmétique` | one at most, only on a card that fixes a problem; a new feature carries none. `critique` = blocks the work (CLAUDE.md's *blocking*) — renamed so it never reads like the status `Bloqué` |
 | **Périmètre** | `atlas` · `Cartographe` · `core` · `CMS` (the contribution system, Payload) · `données` (years/, relief, sources) · `outillage` (CI, lint, Trello, skills) · `design` | one, rarely two |
 | **Type** | `retour d'usage` (what the dev felt using the app) · `défaut` (a proven bug) · `fonction` · `dette` · `décision` (a question to settle) · `doc` | one |
-| **Chantier** | `chantier · incertitude` · `chantier · cms`, one per initiative | on every ticket of an initiative, so one click filters it |
+| **Épique** | `épique · incertitude` · `épique · cms` · `épique · villes`…, one per epic | on every ticket of an epic, so one click filters it |
 | **Statut** | `Bloqué` | through `block` / `unblock` only |
 
 Every card I create gets its labels **in the same breath** (`tag`); the list lives in the script's
@@ -216,6 +216,7 @@ $S uncheck 9 "étape 1"                      # unticks it — a tick put by mist
 $S show 7                                  # title, column, description, comments
 $S attachments 7 [folder]                  # a card's attachments; with a folder, saves each one there (his screenshots)
 $S relabel <old> <new>                     # renames a label; every card keeps it under its new name
+$S rename-column <old> <new>               # renames a column; its cards stay in it
 $S setup                                   # creates the missing columns and the two template cards, restores order
 ```
 
@@ -264,17 +265,18 @@ what comes from me goes to Idées.
   his, or my own tab, closed afterwards) before naming a button. Guessing English labels cost an
   angry quarter of an hour on 2026-10-17.
 
-## Initiatives — the hierarchy Trello does not have (the dev's call, 2026-10-19)
+## Epics — the hierarchy Trello does not have (the dev's call, 2026-10-19; named epics on 2026-11-06)
 
-Trello has no epic. In Jira terms our tickets are **stories**; an **initiative** sits above the epics, and
-it is the ground the decisions themselves stand on. Three pieces build it:
+Trello has no epic. In Jira terms our tickets are **stories**, and an **epic** groups the tickets toward one aim. The
+dev, 2026-11-06: *« ce qu'on appelle chantier ne sont pas des chantiers, ce sont des épiques »* — the column and the
+labels were renamed (`rename-column`, `relabel`); the 19/10 word « initiative », above the epics, is dropped. Three
+pieces build an epic:
 
-1. **The `Chantiers` column**, leftmost, outside the flow Idées → Fait: the initiative's card lives there
-   for its whole life. It does not count in En cours' one-or-two.
-2. **Its checklist names the rungs**, one item each, with the link of the ticket that carries it once that
-   ticket exists (Trello previews it). A rung with no ticket yet is plain text; when its ticket is created,
-   the item gets the link in the same breath.
-3. **Every ticket of the initiative carries its `chantier · …` label**, so one click on the label filters
-   the whole of it. A new initiative is a new `chantier · …` label in `LABELS` — the dev's call.
+1. **The `Épiques` column**, leftmost, outside the flow Idées → Fait: the epic's card lives there for its whole life.
+   It does not count in En cours' one-or-two.
+2. **Its checklist names the tickets**, one item each, with the ticket's number once it exists. A rung with no ticket
+   yet is plain text; when its ticket is created, the item gets the number in the same breath.
+3. **Every ticket of the epic carries its `épique · …` label**, so one click on the label filters the whole of it. A
+   new epic is a new `épique · …` label in `LABELS`.
 
-The open initiatives are the tickets in **Chantiers** (`list`).
+The open epics are the tickets in **Épiques** (`list`).

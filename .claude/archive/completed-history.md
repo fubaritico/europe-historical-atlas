@@ -2,6 +2,24 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-05 — les trois collages tranchés, la frise d'après Peters, la v2 de Claude Design
+
+Plage **05/11 12:48 → 14:20** (1 h 32) ; le chantier ouvert le 05/10 totalise **200 h 40 sur 36 plages**. Aucun code :
+des décisions, écrites dans les plans, et le commit de clôture, **non poussé**.
+
+- **CARTO-345, ses décisions** (plan `copy-paste-between-maps.md`, scénarios `s22` réécrits) : un nom déjà dans la carte
+  est refusé par une boîte de dialogue ; **pas de remplacement de tracé** — on supprime, on colle (*« restons simple dans
+  la mécanique : on colle, il n'y a rien, ça remplace ; il y a quelque chose, on soude »*) ; une partie de tracé se fond
+  dans le tracé (*« il faut un merge, une fusion »*), un tracé entier se superpose à l'ancien ; on colle des points, pas
+  leur rôle. **Tous les collages dans `core` avant l'interface** (son ordre).
+- **ATLAS-358, la frise** : son scan reconnu — Arno Peters, *Synchronoptische Weltgeschichte* ; **cinq couches**, un nom et
+  des dates, jamais de texte, les mêmes événements que la carte (*« c'est ce que j'attendais »*). Le texte pour Claude
+  Design donné ; la v2 rangée dans `files/resources/claude-design/` (sa décision), la v1 à la corbeille. Ses prompts du
+  logo par époque notés dans `ornament-by-era.md` ; les ornements, il les dessine.
+- **Mes fautes** : « tronçon » et « bouts » l'ont perdu deux fois (*« je ne sais pas ce qu'est un morceau de
+  frontière »*) — l'exemple de sa Pologne a fait comprendre ; j'avais gardé mon idée du 03/11, le tronçon qui remplace,
+  contre sa règle du jour.
+
 ### 2026-11-04 soir → 05/11 nuit — la barre de menus fusionnée, Playwright en épopée, l'interface de l'atlas par Claude Design
 
 Deux plages, **04/11 18:57 → 21:31** et **23:07 → 00:40** (4 h 06) ; le chantier ouvert le 05/10 totalise **198 h 52 sur

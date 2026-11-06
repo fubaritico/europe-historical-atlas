@@ -5,26 +5,34 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — après une coupure de 2-3 jours (05/11 au soir) : essayer le tronçon, puis la fiche (CARTO-345)
+## ▶ ON REPREND ICI — le 06/11 : l'épique des villes, CARTO-370 d'abord
 
-**Où on en est** (CARTO-345, En cours) : le collage d'**un pays entier** est dans `main`, branché sur ‹⌘V› et Édition ›
-Coller les entités — **essayé par lui, la Livonie a marché** (05/11). Le collage d'**un tronçon** est dans `main` aussi
-(`e833792`), branché sur ‹⌘V› et Édition › Coller le tronçon sur … — **personne ne l'a essayé** : fusionné à sa demande
-(*« on s'en branle, fusionne, ça avance pas »*). **Au retour** : lui faire essayer le tronçon sur sa Pologne (dans la
-sauvegarde, ‹A›, quelques points qui se suivent, ‹⌘C› ; dans sa 1100, la Pologne sélectionnée, ‹⌘V›) ; puis **la fiche**
-(Coller la fiche…, la boîte champ par champ, `s22` « # 3 »), **construite et branchée d'un bloc** jusqu'à ce qu'il puisse
-l'essayer — jamais un morceau dans `core` seul (sa colère du 05/11). Restent ouverts : la boîte du nom déjà pris (dit
-dans la barre d'état aujourd'hui) ; les points d'un tronçon collé ne sont pas sélectionnés. **Mis de côté par lui** : la
-sélection de plusieurs pays. **Ses décisions du 05/11**, dans le plan `copy-paste-between-maps.md` : pas de découpe ni de
-creusement (*« quand tu colles, tu colles »*) ; le suzerain retrouvé par son nom ; entre deux points soudés, le tracé suit
-le voisin. **Lui parler par son cas** (sa Pologne), jamais par « tronçon » ni « bouts ».
+**Le sujet de demain** (sa décision, 06/11) : **l'épique CARTO-363, « Saisir les villes vite et juste »** (colonne
+Épiques) — des milliers de villes à saisir pour une date, parce que *l'appartenance des villes donne la topographie* : qui
+tient une ville, donc qui est le seigneur, donc jusqu'où va un pays. **D'abord CARTO-370** : l'entonnoir à côté du filtre
+par nom, la fenêtre des filtres avancés, le filtre par pays (les entités de {Polities} en cases à cocher, le détenteur
+**selon les sources**). Puis les autres tickets de l'épique, dans À faire (point de couleur, coordonnées, filtres par
+état, filtres gardés et purgeables, liste fluide). **Pas que ça demain** (ses mots), et *« j'espère que ça va
+torcher »*. **CARTO-371 attend sa décision** sur le stockage du navigateur refusé (bloqué ou plein) — la même que pour la
+disposition des panneaux : la lui poser quand on y arrive. **Le rouge** du panneau = « pas au bon endroit » et « pays à
+déclarer », pas « sans détenteur » (vérifié le 06/11).
 
-**Sa demande de fin de session** : CARTO-360 (Idées) — un champ de recherche dans {Polities} et {Cities}, filtre ou
-défilement jusqu'au meilleur résultat.
+**L'historien, pendant ce temps** : *« on continuera exactement la même chose »* — des paires de villes qui se font face
+(le détenteur de Gray d'abord, puis l'ouest du Vivarais et du Forez, puis d'autres frontières), chaque lot vérifié par moi
+en lecture seule ; **c'est moi qui lui donne des tickets plus simples, entre ses pauses** (sa décision, 06/11). Fait le
+06/11 : la frontière France / Empire, 52 villes-témoins (`files/plans/sources/1100.md`) ; son idée, CARTO-366 (Backlog).
 
-**La copie à part** `~/Desktop/WebstormProjects/europe-map-copypaste` (branche `carto-345-paste`, au niveau de `main`) : on
-y a construit le collage. Elle garde, ignorées par git, une copie de sa sauvegarde et `1100-essai-collage` (sa 1100 du
-05/11 après-midi), à recopier. **Gardée pour la fiche** (sa décision) : la remettre au niveau de `main`.
+**À lui rappeler CHAQUE JOUR — CMS-362** (sa demande, 06/11, jusqu'à ce qu'il ait ouvert un compte ou dise stop) : un
+compte sur Cairn, JSTOR ou Brepols, parce que les sources reposent sur Wikipédia et que les articles savants derrière un
+compte les élèveraient ; il choisit un site sur le prix.
+
+**À lui, en attente** : `pnpm export:content` (lots 3 à 6) ; son icône `error.svg` sur le bureau, à la place de la mienne
+(`ui/icons/error-small.svg`) ; **à arbitrer** : le suzerain du royaume d'Arles (sous la France dans son registre, vérifié le
+06/11 ; sous l'Empire depuis 1032) et les lectures divergentes de l'historien — Mézières, Tournai, la rive gauche de
+Chalon, Beaucaire, Louhans, Seurre, Attigny (`files/plans/sources/1100.md`).
+
+**Plus tard** : forcer le kit MCP en 1.32.0 à la prochaine relance de son CMS (ci-dessous, les versions) ; **CARTO-365**, des
+hachures qui ne bougent pas au zoom — cuites, comme une texture, dans l'atlas aussi (*« sinon ça vibre »*).
 
 **L'interface de l'atlas — ATLAS-329, la maquette d'ambiance de Claude Design, v2** (05/11). Le contenu des pages est
 inventé, ne pas le juger. **Tout ce que Claude Design fait pour l'écran de l'atlas vit dans `files/resources/claude-design/`**
@@ -38,28 +46,17 @@ le plein écran (ordinateur et iPad). **Prochaine étape** : découper en ticket
 `files/plans/atlas/ornament-by-era.md` (§ 5b : ses quatre époques ; les deux du XXᵉ hors de l'atlas ; « Fontainebleau »
 mal placé au XIXᵉ ; les Temps modernes XVIIᵉ ou XVIIIᵉ, à lui de choisir).
 
-**Ses décisions du 05/11, écrites** : l'atlas va **idéalement du Iᵉʳ siècle av. J.-C. à 1900** (`roadmap.md`), sans
-habillage contemporain ; **un habillage par époque** (glossaire) ; **la frise synchronoptique** (ATLAS-358, Idées),
-d'après **Arno Peters, *Synchronoptische Weltgeschichte*** (son scan de cinquante ans) : **cinq couches** (période,
-guerres, politique, personnalités, civilisation), un nom et des dates, le texte au clic dans le panneau, seulement ce qui
-a un lieu sur la carte ou encadre l'année, **les événements du CMS partagés avec la carte** (`interface-scenarios.md`) ;
-**le nom des mers** (ATLAS-359, Idées). **À lui** : CARTO-239 (la barre de menus) est construite et encore en À faire.
+**Ses décisions du 05/11, écrites dans leurs plans** : l'atlas du Iᵉʳ siècle av. J.-C. à 1900 (`roadmap.md`), un habillage
+par époque (glossaire), la frise d'après Arno Peters (ATLAS-358, `interface-scenarios.md`), le nom des mers (ATLAS-359).
 
-**L'historien** (`europe-map-9b`) : il commence par `/enter-in-cms`, qui vérifie d'abord la connexion `cms`. **Toujours
-dû** : les pays des villes de 1100 (Groenland → Q16488964, Islande → Q62389, Venise → Q4948), puis l'export — **alors je
-commite `content/events.json`**, pas avant (sa décision).
+**L'historien** (`europe-map-9b`) : il commence par `/enter-in-cms`, qui vérifie d'abord la connexion `cms`. Après
+l'export, **je commite `content/events.json`**, pas avant (sa décision) ; `years/` reste hors commit. Tout est poussé (06/11).
 
-**Sur `main`, non poussés** : depuis `49a623d` — dont le collage (`41a184c` → `e833792`), `3b90207` de l'historien (la
-Serbie et la Dioclée en 1100) et le commit de clôture du 05/11 au soir. `years/` et `content/events.json` restent hors
-commit (les siens).
-
-**Où en sont les tickets** : CARTO-345 En cours ; **CARTO-193** (Villes) attend les pays de l'historien ; **ATLAS-333**
-(vitesse) ne se ferme qu'une fois une seconde carte terminée par lui, côtes comprises (05/11). **À lui** : la décision sur
-le stockage du navigateur pour la disposition des panneaux (`rules/known-issues/cartographer.md`).
+**Où en sont les tickets** : CARTO-345 et CARTO-364 Fait ; **CARTO-193** (Villes) attend les pays de l'historien ;
+**ATLAS-333** (vitesse) ne se ferme qu'une fois une seconde carte terminée par lui, côtes comprises (05/11).
 
 **Le Cartographe** : une carte est un dossier de `years/` (`s19`) et s'enregistre d'elle-même deux secondes après chaque
 geste, en plus de sa copie `.autosave` (gardées, sa décision). Sa 1100 d'avant dans `years/1100-backup-2026-11-02/`.
-**À lui** : supprimer `packages/cartographer/.autosave/`. Exporter le CMS : `pnpm export:content`, puis recharger.
 
 **Le gestionnaire de sources** : CMS-332, `files/plans/contribution/source-manager.md` — tout se construit tel qu'écrit, par
 moi, boîte mail comprise, chaque mail sur son clic, et piloté à la voix par le plugin MCP de Payload.

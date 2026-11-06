@@ -10,9 +10,10 @@ import { fileURLToPath } from 'node:url'
 const BOARD = '6ad371ed842063195c4ceb77'
 /**
  * The columns, in board order — a card matures left to right. `done` moves a card to the last one.
- * `Chantiers` stands outside that flow: an initiative stays there its whole life (the dev's call, 2026-10-19).
+ * `Épiques` stands outside that flow: an epic stays there its whole life (the dev's call, 2026-10-19; named epics, not
+ * chantiers, 2026-11-06).
  */
-const COLUMNS = ['Chantiers', 'Idées', 'Backlog', 'À faire', 'En cours', 'À valider par le développeur', 'Fait']
+const COLUMNS = ['Épiques', 'Idées', 'Backlog', 'À faire', 'En cours', 'À valider par le développeur', 'Fait']
 
 /** The label a card waiting on another card carries; it keeps its column (the dev's call, 2026-10-17). */
 const BLOCKED = { name: 'Bloqué', color: 'red' }
@@ -41,10 +42,11 @@ const LABELS = [
   { name: 'dette', color: 'yellow_dark' },
   { name: 'décision', color: 'purple_light' },
   { name: 'doc', color: 'black_light' },
-  // chantier — every ticket of an initiative carries its label, so one click filters the whole of it
-  { name: 'chantier · incertitude', color: 'green_dark' },
-  { name: 'chantier · cms', color: 'blue_light' },
-  { name: 'chantier · playwright', color: 'lime_dark' },
+  // épique — every ticket of an epic carries its label, so one click filters the whole of it (2026-11-06: epics)
+  { name: 'épique · incertitude', color: 'green_dark' },
+  { name: 'épique · cms', color: 'blue_light' },
+  { name: 'épique · playwright', color: 'lime_dark' },
+  { name: 'épique · villes', color: 'orange_light' },
   // status
   BLOCKED,
 ]
@@ -356,6 +358,14 @@ const verbs = {
     if (!l) fail(`no label "${from}" on the board`)
     await api('PUT', `/labels/${l.id}`, { name: to })
     console.warn(`label renamed: ${from} → ${to}`)
+  },
+  /** rename-column <old> <new> — renames a column; its cards stay in it, in their order. */
+  async 'rename-column'(from, to) {
+    if (!from || !to) fail('rename-column <old name> <new name>')
+    const found = (await lists()).find((list) => list.name === from)
+    if (!found) fail(`no column "${from}" on the board`)
+    await api('PUT', `/lists/${found.id}`, { name: to })
+    console.warn(`column renamed: ${from} → ${to}`)
   },
   /** untag <number> <label> — removes one label from a card. */
   async untag(number, name) {
