@@ -1,6 +1,27 @@
 import { act } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type { Root } from 'react-dom/client'
+
+/**
+ * Every React root the entry creates, so each is unmounted after its test. Left mounted, an application stays on the
+ * page after its test, and the design system's toaster keeps watching the page (`useTopModalDialog`): its observer
+ * then fires once the environment is torn down and prints `Element is not defined` (2026-11-06, a debt the dev named).
+ */
+const roots = vi.hoisted((): Root[] => [])
+
+vi.mock('react-dom/client', async (original) => {
+  const actual = await original<typeof import('react-dom/client')>()
+  return {
+    ...actual,
+    createRoot: (...args: Parameters<typeof actual.createRoot>) => {
+      const root = actual.createRoot(...args)
+      roots.push(root)
+      return root
+    },
+  }
+})
+
 /**
  * The entry point's own suite.
  *
@@ -45,6 +66,9 @@ describe('the application entry', { timeout: ENTRY_TIMEOUT_MS }, () => {
   })
 
   afterEach(() => {
+    act(() => {
+      for (const root of roots.splice(0)) root.unmount()
+    })
     vi.unstubAllGlobals()
   })
 
