@@ -28,6 +28,7 @@ import { AUTOSAVE_DELAY_MS, createAutosaveKeeper } from './persistence/autosaveK
 import { writeCopyThenMap } from './persistence/autosaveWrite'
 import { carryView, takeCarriedView } from './persistence/carriedView'
 import { keepClipboard, keptClipboard } from './persistence/clipboardStorage'
+import { guardedStorage } from './persistence/guardedStorage'
 import { changeMap } from './persistence/mapChange'
 import { routeNotices } from './persistence/noticeRouter'
 import { addressForMap, openingMapOf } from './persistence/openingMap'
@@ -41,6 +42,7 @@ import { createDevServerYearArchive } from './persistence/yearArchive'
 import { createYearSession } from './persistence/yearSession'
 import { summariseClipboard } from './state/clipboardSlice'
 import { createHeldClipboard } from './state/heldClipboard'
+import { keepCityFilters } from './state/keepCityFilters'
 import { openEmptyYear } from './state/openEmptyYear'
 import { PANEL_IDS } from './state/panelsSlice'
 import { createPolityColourSource } from './state/polityColourSource'
@@ -159,15 +161,21 @@ const store = createCartographerStore({
 // `{Cities}` (CARTO-193): the contribution's cities, read once beside the backdrop — guides, never part of the year.
 void loadCities(createFetchContentSource(CONTENT_URL), store.getState())
 
+// The page's storage, guarded (CARTO-371): the browser refusing it keeps nothing, said once in the console.
+const pageStorage = guardedStorage(() => window.localStorage)
+
 // CARTO-342: the panels where the author left them last time, kept at each change of the layout.
-const keptLayout = readPanelLayout(window.localStorage, PANEL_IDS)
+const keptLayout = readPanelLayout(pageStorage, PANEL_IDS)
 if (keptLayout !== null) store.getState().setPanelLayout(keptLayout)
 store.subscribe(
   (state) => state.panelLayout,
   (layout) => {
-    writePanelLayout(window.localStorage, layout)
+    writePanelLayout(pageStorage, layout)
   }
 )
+
+// CARTO-371: the cities' filters as the author left them, kept at each tick.
+keepCityFilters(store, pageStorage)
 
 /**
  * The compute the backdrop is baked through — a worker, so the ~1.8 s bake is nobody's frozen tab.

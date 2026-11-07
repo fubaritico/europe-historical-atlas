@@ -191,6 +191,18 @@ Scenario: untick them all
   When I click « Tout décocher »
   Then no box is ticked, countries and states, the list shows every city of the year again, and the funnel is at rest
 
+Scenario: the filters kept at a refresh — CARTO-371, the dev, 2026-11-07: « je ne veux pas repartir de zéro »
+  Given the Empire and « Pas au bon endroit » ticked
+  When I refresh the page
+  Then both are still ticked, the funnel says so, and the list shows the same cities
+  And « Tout décocher » is the purge: nothing ticked, kept so at the next refresh
+
+Scenario: the browser refuses its storage — the dev, 2026-11-07: « si le navigateur refuse, on ne le fait pas »
+  Given site data blocked for the Cartographer in Chrome, or the storage full
+  When I tick a filter, or move a panel, and refresh
+  Then nothing was kept — the filters as none, the panels as at first — and the Cartographer works as usual
+  And the console says it once: "the browser refuses its storage"
+
 Scenario: by state — CARTO-369, the dev, 2026-11-07
   When I open the advanced filters
   Then « Par vérification » (the map checked against the sources; my word, taken by the dev — « état » read as a State) heads

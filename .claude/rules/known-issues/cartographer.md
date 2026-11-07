@@ -192,10 +192,6 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   menu, a draft in `{Polities}`' dialogue). **Remedy if it bites**: one parent for every frame, the floating ones placed
   by `position: fixed` — and then `dockGeometry`'s `:scope > .panel-frame` must leave the floating ones out.
   **Severity: à savoir.**
-- **The panels' layout is written to `localStorage` with no guard** (2026-11-02, CARTO-342, review ARCH-003): storage
-  blocked by the browser, or full, throws — at opening it would stop the Cartographer, after a drag it would surface as
-  an error. Never seen in the dev's Chrome. **An error-handling decision for the dev** (`rules/error-handling.md`): my
-  proposal, a declared degraded mode — the layout not kept, said once in the console. **Severity: à savoir.**
 - **A stretch pasted leaves its points unselected** (2026-11-05, CARTO-345, `s22` « # 2 ») — the scenario asks for them
   selected; the canvas owns the white arrow's selection and the store only reads it (`setSelectedAnchors` is the canvas
   telling the store), so nothing outside the canvas can select anchors today. **Trigger**: the dev's walk of the stretch's

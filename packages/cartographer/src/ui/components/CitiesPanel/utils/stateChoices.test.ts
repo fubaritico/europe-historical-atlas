@@ -1,6 +1,6 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
 
-import { STATE_ORDER, stateChoices } from './stateChoices'
+import { STATE_ORDER, isOfferedState, stateChoices } from './stateChoices'
 
 import type { CityVerdict, CityVerdictKind } from './cityVerdict'
 import type { CityMark } from '../../../../state/citiesSlice'
@@ -54,6 +54,18 @@ describe('stateChoices', () => {
       const { cities, verdicts } = year(['notEntered', 'toDeclare'])
       expect(stateChoices(cities, verdicts).map(({ kind }) => kind)).toEqual([...STATE_ORDER])
       expect(STATE_ORDER).not.toContain('notEntered')
+    })
+  })
+
+  describe('managed errors', () => {
+    // Review of CARTO-371: a state read back from the browser that no box stands for must not filter.
+    it('offers « misplaced » and « agrees », not « notEntered » nor a name read back that is no state', () => {
+      expect(['misplaced', 'agrees', 'notEntered', 'foo'].map(isOfferedState)).toEqual([
+        true,
+        true,
+        false,
+        false,
+      ])
     })
   })
 

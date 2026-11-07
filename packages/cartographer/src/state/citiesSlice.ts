@@ -129,6 +129,12 @@ export interface CitiesActions {
   /** Untick every holder and every state: the list shows every city of the year again. */
   untickCityFilters: () => void
   /**
+   * Tick the holders and the states kept from the last session (CARTO-371), in place of those ticked.
+   * @param holders - the holders' keys
+   * @param states - the states
+   */
+  setCityFilters: (holders: readonly string[], states: readonly string[]) => void
+  /**
    * Choose a city, or none.
    * @param id - the city's id, or `null`
    */
@@ -205,15 +211,19 @@ export interface ShownCity {
 }
 
 /**
- * The advanced filters' actions (CARTO-370, CARTO-369): tick a holder, tick a state, untick both kinds at once.
+ * The advanced filters' actions (CARTO-370, CARTO-369, CARTO-371): tick a holder, tick a state, untick both kinds at
+ * once, and put back those kept from the last session.
  * @param set - the store's setter
  * @param get - the store's getter
- * @returns the three actions
+ * @returns the four actions
  */
 function filterActions(
   set: (partial: Partial<CitiesState>) => void,
   get: () => CitiesState
-): Pick<CitiesActions, 'setCityHolderTicked' | 'setCityStateTicked' | 'untickCityFilters'> {
+): Pick<
+  CitiesActions,
+  'setCityHolderTicked' | 'setCityStateTicked' | 'untickCityFilters' | 'setCityFilters'
+> {
   return {
     setCityHolderTicked: (key, ticked): void => {
       const next = new Set(get().cityHolders)
@@ -229,6 +239,9 @@ function filterActions(
     },
     untickCityFilters: (): void => {
       set({ cityHolders: new Set(), cityStates: new Set() })
+    },
+    setCityFilters: (holders, states): void => {
+      set({ cityHolders: new Set(holders), cityStates: new Set(states) })
     },
   }
 }

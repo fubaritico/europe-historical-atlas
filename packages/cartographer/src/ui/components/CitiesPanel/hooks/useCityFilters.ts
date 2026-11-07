@@ -1,6 +1,6 @@
 import { polityRows } from '../../../utils/polityRows'
 import { holderChoices } from '../utils/holderChoices'
-import { stateChoices } from '../utils/stateChoices'
+import { isOfferedState, stateChoices } from '../utils/stateChoices'
 import { tickedHolders } from '../utils/tickedHolders'
 
 import type { CityMark } from '../../../../state/citiesSlice'
@@ -46,7 +46,10 @@ export function useCityFilters(
     ticked: tickedHolders(holders, choices.keys),
     onTick,
     states: stateChoices(cities, verdicts),
-    tickedStates,
+    // Only the states the dialogue offers filter (review of CARTO-371): one read back from the browser that no box
+    // stands for would empty the list with nothing to untick. The closed set, not the year's counts — a state ticked
+    // with no city in it stays ticked.
+    tickedStates: new Set([...tickedStates].filter((state) => isOfferedState(state))),
     onTickState,
     onUntickAll,
   }

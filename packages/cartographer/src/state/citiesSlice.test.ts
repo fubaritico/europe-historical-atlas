@@ -150,6 +150,15 @@ describe('citiesSlice — the holders ticked', () => {
   })
 
   describe('variants', () => {
+    // CARTO-371: the filters kept from the last session, put back at opening.
+    it('puts back the holders and the states kept, in place of those ticked', () => {
+      const store = testStore()
+      store.getState().setCityHolderTicked('wd:Q70972', true)
+      store.getState().setCityFilters(['wd:Q12548'], ['misplaced'])
+      expect([...store.getState().cityHolders]).toEqual(['wd:Q12548'])
+      expect([...store.getState().cityStates]).toEqual(['misplaced'])
+    })
+
     it('unticks every holder and every state at once', () => {
       const store = testStore()
       store.getState().setCityHolderTicked('wd:Q12548', true)
