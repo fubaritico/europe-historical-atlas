@@ -1,10 +1,12 @@
-import { act, screen } from '@testing-library/react'
+import { act, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 
+import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
 import { testStore } from '../../../canvas/testGestureContext'
+import { createPolityColourSource } from '../../../state/polityColourSource'
 import { renderInEnglish } from '../../testing/renderInEnglish'
 
 import { CitiesPanel } from './CitiesPanel'
@@ -63,8 +65,17 @@ function documentWithIds(): YearDocument {
 function mount(cities: readonly CityMark[] | null = [PARIS, METZ, LATER]) {
   const store = testStore(documentWithIds())
   if (cities !== null) store.getState().setCities(cities)
-  renderInEnglish(<CitiesPanel store={store} />)
-  return { store, user: userEvent.setup() }
+  const panel = <CitiesPanel store={store} colours={createPolityColourSource(AUTOMATIC_PALETTE)} />
+  const { unmount } = renderInEnglish(panel)
+  return {
+    store,
+    user: userEvent.setup(),
+    /** Unmount the panel and mount it again over the same store — a panel docked or floated (CARTO-342). */
+    remount: () => {
+      unmount()
+      renderInEnglish(panel)
+    },
+  }
 }
 
 /**
@@ -287,6 +298,222 @@ describe('CitiesPanel — the filter (CARTO-360)', () => {
       expect(screen.queryByRole('listitem')).toBeNull()
       expect(screen.getByText('No city answers “kiev”.')).toBeTruthy()
       expect(filter()).toBeTruthy()
+    })
+  })
+})
+
+/** A city the sources give to a holder no polity of the map carries. */
+const VENICE_HOLDER = { name: 'Repubblica di Venezia', wikidata: 'Q4948' }
+const TREVISO: CityMark = {
+  ...METZ,
+  id: 'treviso',
+  name: 'Treviso',
+  lon: 12,
+  holder: VENICE_HOLDER,
+}
+
+/**
+ * Open the advanced filters by the funnel.
+ * @param user - the user
+ * @returns the dialogue
+ */
+async function openFilters(user: ReturnType<typeof userEvent.setup>): Promise<HTMLElement> {
+  await user.click(screen.getByRole('button', { name: 'Advanced filters' }))
+  return screen.getByRole('dialog', { name: 'Advanced filters' })
+}
+
+/**
+ * The names of the cities in the panel's list, read from the page even while the dialogue makes it inert.
+ * @returns their names
+ */
+function listedBehind(): (string | null)[] {
+  return [...document.querySelectorAll('.city-list > li')].map((row) => row.textContent)
+}
+
+/** The names of the cities listed — in the panel's list, never the dialogue's boxes. */
+function listed(): (string | null)[] {
+  return within(screen.getByRole('list', { name: 'Cities' }))
+    .getAllByRole('listitem')
+    .map((row) => row.textContent)
+}
+
+const funnel = () => screen.getByRole('button', { name: /^Advanced filters/ })
+
+// CARTO-370, the dev, 2026-11-06/07 (`s20`, « The advanced filters »): a funnel opens a dialogue; the polities of the
+// map ticked keep the cities the sources give them; the holders not on the map and « No holder » too.
+describe('CitiesPanel — the advanced filters (CARTO-370)', () => {
+  describe('happy path', () => {
+    it('keeps only Metz once the Empire is ticked, and counts it on the box heading the list', async () => {
+      const { store, user } = mount([PARIS, METZ, TREVISO])
+      const dialogue = await openFilters(user)
+      await user.click(within(dialogue).getByRole('checkbox', { name: 'Sacrum Imperium (1)' }))
+      expect([...store.getState().cityHolders]).toEqual(['wd:Q12548'])
+      await user.click(within(dialogue).getByRole('button', { name: 'Close' }))
+      expect(listed()).toEqual(['Metz'])
+      expect(screen.getByRole('checkbox', { name: 'Show the city found' })).toBeTruthy()
+    })
+  })
+
+  describe('variants', () => {
+    // The map's polities as {Polities} lists them, the front first: the Empire is painted over France in the fixture.
+    it('lists the map polities, then Venice as not on the map, then the cities with no holder', async () => {
+      const { user } = mount([PARIS, METZ, TREVISO])
+      const dialogue = await openFilters(user)
+      const boxes = within(dialogue)
+        .getAllByRole('checkbox')
+        .map((box) => box.getAttribute('aria-label') ?? box.closest('label')?.textContent)
+      expect(boxes).toEqual([
+        'Sacrum Imperium (1)',
+        'Reaume de France (0)',
+        'Repubblica di Venezia (1)',
+        'No holder (1)',
+      ])
+    })
+
+    it('keeps the cities of either holder when two are ticked: Metz and Treviso', async () => {
+      const { user } = mount([PARIS, METZ, TREVISO])
+      const dialogue = await openFilters(user)
+      await user.click(within(dialogue).getByRole('checkbox', { name: 'Sacrum Imperium (1)' }))
+      await user.click(
+        within(dialogue).getByRole('checkbox', { name: 'Repubblica di Venezia (1)' })
+      )
+      await user.click(within(dialogue).getByRole('button', { name: 'Close' }))
+      expect(listed()).toEqual(['Metz', 'Treviso'])
+    })
+
+    it('applies a box at once, the dialogue still open: Metz alone behind it', async () => {
+      const { user } = mount([PARIS, METZ, TREVISO])
+      const dialogue = await openFilters(user)
+      await user.click(within(dialogue).getByRole('checkbox', { name: 'Sacrum Imperium (1)' }))
+      expect(listedBehind()).toEqual(['Metz'])
+    })
+
+    it('counts the cities found by the holders on the box heading the list: the 2 of the Empire', () => {
+      const { store } = mount([PARIS, METZ, { ...METZ, id: 'trier', name: 'Trier' }])
+      act(() => {
+        store.getState().setCityHolderTicked('wd:Q12548', true)
+      })
+      expect(screen.getByRole('checkbox', { name: 'Show the 2 cities found' })).toBeTruthy()
+    })
+
+    it('marks the funnel active once a holder is ticked, at rest before', () => {
+      const { store } = mount([PARIS, METZ])
+      expect(funnel().getAttribute('data-active')).toBe('false')
+      act(() => {
+        store.getState().setCityHolderTicked('wd:Q12548', true)
+      })
+      expect(funnel().getAttribute('data-active')).toBe('true')
+    })
+
+    // ‹esc› closes the dialogue in the browser (`<dialog>`'s own cancel): jsdom's stand-in has none — walked in the app.
+
+    it('keeps the holders ticked when the panel is mounted again, docked or floated', () => {
+      const { store, remount } = mount([PARIS, METZ])
+      act(() => {
+        store.getState().setCityHolderTicked('wd:Q12548', true)
+      })
+      remount()
+      expect(listed()).toEqual(['Metz'])
+      expect(
+        screen.getByRole('button', { name: 'Advanced filters: 1 country ticked' })
+      ).toBeTruthy()
+    })
+
+    // The dev, 2026-11-07: « il nous faut le quick filter pour les listes longues ».
+    it("narrows both sections by the dialogue's filter: « ven » leaves Venice alone", async () => {
+      const { user } = mount([PARIS, METZ, TREVISO])
+      const dialogue = await openFilters(user)
+      await user.type(
+        within(dialogue).getByRole('searchbox', { name: 'Filter the countries' }),
+        'ven'
+      )
+      expect(
+        within(dialogue)
+          .getAllByRole('checkbox')
+          .map((box) => box.closest('label')?.textContent)
+      ).toEqual(['Repubblica di Venezia (1)'])
+      expect(within(dialogue).getByText('No country answers “ven”.')).toBeTruthy()
+    })
+
+    it("empties the dialogue's filter when it closes", async () => {
+      const { user } = mount([PARIS, METZ, TREVISO])
+      let dialogue = await openFilters(user)
+      await user.type(
+        within(dialogue).getByRole('searchbox', { name: 'Filter the countries' }),
+        'ven'
+      )
+      await user.click(within(dialogue).getByRole('button', { name: 'Close' }))
+      dialogue = await openFilters(user)
+      expect(within(dialogue).getAllByRole('checkbox')).toHaveLength(4)
+    })
+
+    it('keeps Paris alone by « No holder »', async () => {
+      const { user } = mount([PARIS, METZ, TREVISO])
+      const dialogue = await openFilters(user)
+      await user.click(within(dialogue).getByRole('checkbox', { name: 'No holder (1)' }))
+      await user.click(within(dialogue).getByRole('button', { name: 'Close' }))
+      expect(listed()).toEqual(['Paris'])
+    })
+
+    it('applies the name filter with the holders: « tre » under the Empire and Venice keeps Treviso', async () => {
+      const { store, user } = mount([PARIS, METZ, TREVISO])
+      act(() => {
+        store.getState().setCityHolderTicked('wd:Q12548', true)
+        store.getState().setCityHolderTicked('wd:Q4948', true)
+      })
+      await user.type(filter(), 'tre')
+      expect(listed()).toEqual(['Treviso'])
+    })
+
+    it('names the funnel with the count of holders ticked, and unticks them all', async () => {
+      const { store, user } = mount([PARIS, METZ, TREVISO])
+      act(() => {
+        store.getState().setCityHolderTicked('wd:Q12548', true)
+        store.getState().setCityHolderTicked('wd:Q4948', true)
+      })
+      expect(
+        screen.getByRole('button', { name: 'Advanced filters: 2 countries ticked' }).textContent
+      ).toBe('2')
+      await user.click(screen.getByRole('button', { name: 'Advanced filters: 2 countries ticked' }))
+      await user.click(screen.getByRole('button', { name: 'Untick all' }))
+      expect(store.getState().cityHolders.size).toBe(0)
+      expect(listed()).toEqual(['Paris', 'Metz', 'Treviso'])
+    })
+  })
+
+  // L3–L4: N/A — nothing is refused, nothing is read.
+
+  describe('edge cases', () => {
+    it('greys a polity of the map with no Wikidata id: it cannot be ticked', async () => {
+      const { store, user } = mount([PARIS, METZ])
+      act(() => {
+        const france = store.getState().document.polities.find(({ id }) => id !== 'hre')
+        if (france === undefined) throw new Error('the fixture has France')
+        france.wikidata = null
+        store.getState().setCities([PARIS, METZ])
+      })
+      const dialogue = await openFilters(user)
+      const box = within(dialogue).getByRole('checkbox', {
+        name: 'Reaume de France — no Wikidata id',
+      })
+      expect(box.hasAttribute('disabled')).toBe(true)
+    })
+
+    it('says no city answers the filters when a holder ticked holds none, and nothing is typed', () => {
+      const { store } = mount([PARIS, METZ])
+      act(() => {
+        store.getState().setCityHolderTicked('wd:Q70972', true)
+      })
+      expect(screen.getByText('No city answers the filters.')).toBeTruthy()
+    })
+
+    it('filters nothing by a holder ticked that no box of this map stands for', () => {
+      const { store } = mount([PARIS, METZ])
+      act(() => {
+        store.getState().setCityHolderTicked('wd:Q4948', true)
+      })
+      expect(listed()).toEqual(['Paris', 'Metz'])
+      expect(screen.getByRole('button', { name: 'Advanced filters' })).toBeTruthy()
     })
   })
 })

@@ -23,6 +23,7 @@ function row(id: string): PolityRow {
     hasTerritory: true,
     depth: 0,
     suzerainName: null,
+    wikidata: null,
   }
 }
 

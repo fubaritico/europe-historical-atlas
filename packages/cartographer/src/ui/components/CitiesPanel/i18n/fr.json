@@ -21,5 +21,19 @@
   "filter": "Filtrer les villes",
   "showFound": "{count, plural, one {Afficher la ville trouvée} other {Afficher les # villes trouvées}}",
   "noMatch": "Aucune ville ne répond à « {query} ».",
-  "asPoints": "Afficher comme des points"
+  "asPoints": "Afficher comme des points",
+  "filters": "Filtres avancés",
+  "filtersOn": "{count, plural, one {Filtres avancés : # pays coché} other {Filtres avancés : # pays cochés}}",
+  "byHolder": "Par pays, selon les sources",
+  "byHolderHint": "Une ville reste quand le pays qui la tient selon les sources est coché.",
+  "holderCount": "{name} ({count})",
+  "noWikidata": "{name} — sans identifiant Wikidata",
+  "offMap": "Pas encore sur la carte",
+  "offMapHint": "Les détenteurs que donnent les sources et qu’aucun pays de cette carte ne porte.",
+  "noHolder": "Sans détenteur ({count})",
+  "untickAll": "Tout décocher",
+  "closeFilters": "Fermer",
+  "noMatchFilters": "Aucune ville ne répond aux filtres.",
+  "filterHolders": "Filtrer les pays",
+  "noHolderMatch": "Aucun pays ne répond à « {query} »."
 }

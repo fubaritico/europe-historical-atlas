@@ -415,6 +415,96 @@
 
 .list-filter .ui-input {
   width: 100%;
+  min-width: 0;
+}
+
+/* A field with buttons at its right — `{Cities}`' funnel (CARTO-370). */
+.list-filter:has(.list-filter__action) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.list-filter__action {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 3px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-dim);
+  cursor: pointer;
+}
+
+.list-filter__action:hover {
+  color: var(--ink);
+}
+
+/* A filter on: the funnel in the accent, the count beside it. */
+.list-filter__action[data-active='true'] {
+  color: var(--accent);
+}
+
+.list-filter__action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.list-filter__count {
+  font-size: 11px;
+  line-height: 12px;
+}
+
+/* « Filtres avancés » (CARTO-370): two sections of boxes, the map's polities as the tree of {Polities}. */
+.city-filters__section + .city-filters__section {
+  margin-top: 14px;
+}
+
+.city-filters__heading {
+  margin: 0 0 4px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.city-filters__list {
+  max-height: 260px;
+  margin: 6px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.city-filters__box {
+  --polity-indent: calc(12px + 8px);
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  padding-inline-start: calc(var(--polity-depth, 0) * var(--polity-indent));
+}
+
+/* The dialogue's filter field: no panel hairline, the sections under it. */
+.short-dialogue .list-filter {
+  padding: 0 0 10px;
+  border-bottom: 0;
+}
+
+/* A suzerain kept only to hold a vassal found under the filter — greyed, as in {Polities}. */
+.city-filters__box[data-dimmed='true'] .ui-checkbox__label {
+  color: var(--ink-off);
+}
+
+/* A round dot, as the cities drawn as points: square beside the box, it read as a second box (Claude in the app, 07/11). */
+.city-filters__box > .polity-row__swatch {
+  flex: 0 0 auto;
+  border-radius: 50%;
 }
 
 .list-filter input::-webkit-search-cancel-button {

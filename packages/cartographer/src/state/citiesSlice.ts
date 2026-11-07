@@ -66,6 +66,11 @@ export interface CitiesState {
    * a border between the cities of two polities).
    */
   citiesAsPoints: boolean
+  /**
+   * The holders ticked in the advanced filters (CARTO-370), by {@link holderKey}: `{Cities}` lists only the cities the
+   * sources give to one of them; none ticked, no filter. Keyed by Wikidata id, so it means the same in every map.
+   */
+  cityHolders: ReadonlySet<string>
 }
 
 /** What may be done to the cities. */
@@ -97,10 +102,32 @@ export interface CitiesActions {
    * @param asPoints - whether they are points
    */
   setCitiesAsPoints: (asPoints: boolean) => void
+  /**
+   * Tick or untick a holder in the advanced filters.
+   * @param key - the holder's key ({@link holderKey})
+   * @param ticked - whether it is ticked
+   */
+  setCityHolderTicked: (key: string, ticked: boolean) => void
+  /** Untick every holder: the list shows every city of the year again. */
+  untickCityHolders: () => void
 }
 
 /** The slice: the cities, which are shown, and the ways to change it. */
 export type CitiesSlice = CitiesState & CitiesActions
+
+/** The key of « Sans détenteur » in the advanced filters: the cities nobody has entered a holder for. */
+export const NO_HOLDER = 'none'
+
+/**
+ * A holder's key in the advanced filters (CARTO-370): its Wikidata id — what a map's polity is matched by, as the verdict
+ * and the points' colour are — or its name for a holder that has none, or {@link NO_HOLDER}.
+ * @param holder - the holder by the sources, or `null` while not entered
+ * @returns its key
+ */
+export function holderKey(holder: CityHolder | null): string {
+  if (holder === null) return NO_HOLDER
+  return holder.wikidata === null ? `name:${holder.name}` : `wd:${holder.wikidata}`
+}
 
 /**
  * The cities whose date covers a year, in the export's order — the dev's rule of 2026-10-30 (`core/time/dateOverlap`):
@@ -160,6 +187,16 @@ export const createCitiesSlice: StateCreator<
   citiesLoad: { state: 'loading' },
   shownCities: new Set(),
   citiesAsPoints: false,
+  cityHolders: new Set(),
+  setCityHolderTicked: (key, ticked): void => {
+    const next = new Set(get().cityHolders)
+    if (ticked) next.add(key)
+    else next.delete(key)
+    set({ cityHolders: next })
+  },
+  untickCityHolders: (): void => {
+    set({ cityHolders: new Set() })
+  },
   setCitiesAsPoints: (asPoints): void => {
     set({ citiesAsPoints: asPoints })
   },

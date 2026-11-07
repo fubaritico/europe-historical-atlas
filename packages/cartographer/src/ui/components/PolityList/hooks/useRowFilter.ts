@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
-import { filterRows } from '../utils/filterRows'
+import { filterRows } from '../../../utils/filterRows'
 
+import type { FilteredRows } from '../../../utils/filterRows'
 import type { PolityRow } from '../../../utils/polityRows'
-import type { FilteredRows } from '../utils/filterRows'
 
 /** What the list's filter holds: the text typed, its setter, the rows that answer it, the target the keys see. */
 export interface RowFilter {
@@ -12,7 +12,7 @@ export interface RowFilter {
   /** Change what is typed. */
   setQuery: (query: string) => void
   /** The rows that answer it, under their suzerains (`filterRows`). */
-  filtered: FilteredRows
+  filtered: FilteredRows<PolityRow>
   /**
    * The target as the keys see it — `null` when the filter hides its row, so ‹enter› or the menu key never act on a
    * polity the reader cannot see (review QUAL-001). The row stays the target: marked, and brought into view again.

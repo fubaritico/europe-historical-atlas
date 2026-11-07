@@ -26,6 +26,17 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `filter` — The filter field's accessible name (CARTO-360).
  * - `showFound` — That box while a filter is typed; `count` is how many cities answer it.
  * - `noMatch` — Said in place of the list when no city answers the filter; `query` is what was typed.
+ * - `noMatchFilters` — The same, when nothing is typed and the advanced filters let no city through (CARTO-370).
+ * - `filters` — The funnel's name and the advanced filters' title.
+ * - `filtersOn` — The funnel's name while holders are ticked; `count` is how many.
+ * - `byHolder`, `byHolderHint` — The section of the map's polities, and what ticking one does.
+ * - `holderCount` — A box: `name` is the holder's, `count` how many cities of the year the sources give it.
+ * - `noWikidata` — A polity of the map without a Wikidata id, greyed; `name` is its name.
+ * - `offMap`, `offMapHint` — The section of the holders no polity of the map carries.
+ * - `noHolder` — The box of the cities nobody has entered a holder for; `count` is how many.
+ * - `untickAll`, `closeFilters` — The dialogue's two buttons.
+ * - `filterHolders` — The filter field at the head of the dialogue: its accessible name.
+ * - `noHolderMatch` — Said in a section when no country of it answers the filter; `query` is what was typed.
  */
 export type CitiesPanelMessageKey = keyof typeof en
 

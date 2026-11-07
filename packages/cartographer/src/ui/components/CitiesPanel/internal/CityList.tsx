@@ -1,27 +1,34 @@
 import { useState } from 'react'
 
 import { useTranslation } from '../../../hooks/useTranslation'
-import { matchesFilter } from '../../../utils/matchesFilter'
 import { ListFilter } from '../../ListFilter'
 import { CITIES_PANEL_MESSAGES } from '../i18n'
+import { citiesFound } from '../utils/citiesFound'
 
 import { CityBoxes } from './CityBoxes'
+import { CityFilters } from './CityFilters'
 import { CityRow } from './CityRow'
 
+import type { CityFiltersProps } from '../cityFiltersProps'
 import type { CityListProps } from '../cityListProps'
 import type { ChangeEvent } from 'react'
+
+/** What the list is handed: the cities and their callbacks, the year open, and the advanced filters. */
+type CityListWithFiltersProps = CityListProps & { year: number; filters: CityFiltersProps }
 
 /**
  * The cities of the year, each with its eye, under two boxes (the dev, 2026-11-05): « Afficher toutes les villes » —
  * **all those listed**: under the filter at its head (CARTO-360), the cities whose name holds what is typed, and the box
  * says so (« Afficher les 2 villes trouvées ») — and « Afficher comme des points », in their holder's colour.
- * What is typed is the list's own — one writer, one reader, no slice.
- * @param props - the cities, which are shown and opened, and the callbacks
+ * What is typed is the list's own — one writer, one reader, no slice. The holders ticked in the advanced filters
+ * (CARTO-370) are the store's, so they outlive the panel docked or floated; they narrow the list together with the name.
+ * @param props - the cities, which are shown and opened, the advanced filters, and the callbacks
  * @param props.year - the year open, named on the box for them all
- * @param props.cities - the cities of the year, before the filter
+ * @param props.cities - the cities of the year, before the filters
+ * @param props.filters - the advanced filters: what they offer, the holders ticked, and their callbacks
  * @returns the filter and the list, or the filter and a line saying that no city answers
  */
-export function CityList({ year, cities, ...props }: CityListProps & { year: number }) {
+export function CityList({ year, cities, filters, ...props }: CityListWithFiltersProps) {
   // Context
   const t = useTranslation(CITIES_PANEL_MESSAGES)
 
@@ -29,7 +36,7 @@ export function CityList({ year, cities, ...props }: CityListProps & { year: num
   const [query, setQuery] = useState('')
 
   // Derived
-  const found = cities.filter(({ name }) => matchesFilter(name, query))
+  const found = citiesFound(cities, query, filters.ticked)
   const filtered = found.length < cities.length
   const allShown = found.length > 0 && found.every(({ id }) => props.shown.has(id))
 
@@ -47,9 +54,16 @@ export function CityList({ year, cities, ...props }: CityListProps & { year: num
   // Render
   return (
     <>
-      <ListFilter value={query} onChange={setQuery} label={t('filter')} />
+      <ListFilter
+        value={query}
+        onChange={setQuery}
+        label={t('filter')}
+        actions={<CityFilters {...filters} />}
+      />
       {found.length === 0 ? (
-        <p className="panel__hint">{t('noMatch', { query: query.trim() })}</p>
+        <p className="panel__hint">
+          {query.trim() === '' ? t('noMatchFilters') : t('noMatch', { query: query.trim() })}
+        </p>
       ) : (
         <>
           <CityBoxes

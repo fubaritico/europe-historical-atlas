@@ -48,6 +48,24 @@ describe('ListFilter', () => {
   })
 
   describe('variants', () => {
+    // CARTO-370: `{Cities}`' funnel sits at the right of the field.
+    it('shows the buttons it is given beside the field', () => {
+      renderInEnglish(
+        <ListFilter
+          value=""
+          onChange={vi.fn()}
+          label="Filter the cities"
+          actions={<button type="button">Advanced filters</button>}
+        />
+      )
+      const button = screen.getByRole('button', { name: 'Advanced filters' })
+      // At the right of the field: after it in the page, in the same box.
+      expect([
+        field().compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING,
+        button.parentElement?.className,
+      ]).toEqual([Node.DOCUMENT_POSITION_FOLLOWING, 'list-filter'])
+    })
+
     it('clears the text on ‹esc› and keeps ‹esc› from the page', async () => {
       const seen = vi.fn()
       const page = vi.fn()

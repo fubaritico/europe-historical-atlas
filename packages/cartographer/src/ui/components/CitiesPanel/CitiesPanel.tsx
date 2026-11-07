@@ -4,11 +4,13 @@ import { useTranslation } from '../../hooks/useTranslation'
 import { Panel } from '../Panel'
 
 import { useCitiesView } from './hooks/useCitiesView'
+import { useCityFilters } from './hooks/useCityFilters'
 import { CITIES_PANEL_MESSAGES } from './i18n'
-import { CityDetail } from './internal/CityDetail'
+import { CityDetailOrHint } from './internal/CityDetailOrHint'
 import { CityList } from './internal/CityList'
 import { citiesStatus } from './utils/citiesStatus'
 
+import type { PolityColourSource } from '../../../state/polityColourSource'
 import type { CartographerStoreHook } from '../../../state/store'
 
 /**
@@ -21,13 +23,23 @@ import type { CartographerStoreHook } from '../../../state/store'
  * one writer, one reader, no slice.
  */
 
+/** What `{Cities}` is handed. */
+export interface CitiesPanelProps {
+  /** The store the cities and the document live in. */
+  store: CartographerStoreHook
+  /** The polities' colours, for the advanced filters' swatches — the canvas reads the same source. */
+  colours: PolityColourSource
+}
+
 /**
  * `{Cities}`, bound to the store.
- * @param props - the store
+ * @param props - the store and the polities' colours
  * @param props.store - the store the cities and the document live in
+ * @param props.colours - where the polities' colours come from, for the advanced filters' swatches — the canvas reads
+ *   the same source
  * @returns the panel
  */
-export function CitiesPanel({ store }: { store: CartographerStoreHook }) {
+export function CitiesPanel({ store, colours }: CitiesPanelProps) {
   // Store
   const all = store((state) => state.cities)
   const load = store((state) => state.citiesLoad)
@@ -51,6 +63,7 @@ export function CitiesPanel({ store }: { store: CartographerStoreHook }) {
   // Derived
   const { cities, verdicts, openedCity, openedVerdict } = useCitiesView(all, document, opened)
   const status = citiesStatus(load, cities.length, document.year)
+  const filters = useCityFilters(store, colours, cities)
 
   // Handlers
   const handleClose = () => {
@@ -75,17 +88,13 @@ export function CitiesPanel({ store }: { store: CartographerStoreHook }) {
             asPoints={asPoints}
             onAsPoints={setCitiesAsPoints}
             onOpen={setOpened}
+            filters={filters}
           />
-          {openedCity === null || openedVerdict === undefined ? (
-            <p className="panel__hint">{t('hint')}</p>
-          ) : (
-            <CityDetail
-              name={openedCity.name}
-              verdict={openedVerdict}
-              sources={openedCity.holderSources}
-              onClose={handleClose}
-            />
-          )}
+          <CityDetailOrHint
+            openedCity={openedCity}
+            openedVerdict={openedVerdict}
+            onClose={handleClose}
+          />
         </>
       )}
     </Panel>

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { filterRows } from './filterRows'
 
-import type { PolityRow } from '../../../utils/polityRows'
+import type { PolityRow } from './polityRows'
 
 /** A row of the tree, at its depth. */
 function row(name: string, depth: number): PolityRow {
@@ -15,6 +15,7 @@ function row(name: string, depth: number): PolityRow {
     hasTerritory: true,
     depth,
     suzerainName: null,
+    wikidata: null,
   }
 }
 

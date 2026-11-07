@@ -29,6 +29,8 @@ export interface PolityRow {
   depth: number
   /** Its suzerain's name, verbatim — what the tree says to assistive tech — or `null` at the top. */
   suzerainName: string | null
+  /** Its Wikidata id, or `null` — what `{Cities}`' advanced filters match the sources' holders by (CARTO-370). */
+  wikidata: string | null
 }
 
 /**
@@ -71,6 +73,7 @@ export function polityRows(
       hasTerritory: hasExtent(document, polity.id),
       depth,
       suzerainName,
+      wikidata: polity.wikidata,
     })
     // Front first: the list order is back to front, so each level is read backwards.
     for (const vassal of [...(children.get(polity.id) ?? [])].reverse()) {

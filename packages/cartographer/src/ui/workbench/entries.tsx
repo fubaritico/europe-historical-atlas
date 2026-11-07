@@ -57,6 +57,7 @@ const PLATE_ROWS: PolityRow[] = [
     hasTerritory: true,
     depth: 0,
     suzerainName: null,
+    wikidata: null,
   },
   {
     id: 'fr-couronne',
@@ -67,6 +68,7 @@ const PLATE_ROWS: PolityRow[] = [
     hasTerritory: true,
     depth: 0,
     suzerainName: null,
+    wikidata: null,
   },
   {
     id: 'aq',
@@ -77,6 +79,7 @@ const PLATE_ROWS: PolityRow[] = [
     hasTerritory: true,
     depth: 1,
     suzerainName: 'Reaume de France',
+    wikidata: null,
   },
   {
     id: 'pl',
@@ -87,6 +90,7 @@ const PLATE_ROWS: PolityRow[] = [
     hasTerritory: false,
     depth: 0,
     suzerainName: null,
+    wikidata: null,
   },
 ]
 

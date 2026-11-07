@@ -21,5 +21,19 @@
   "filter": "Filter the cities",
   "showFound": "{count, plural, one {Show the city found} other {Show the # cities found}}",
   "noMatch": "No city answers “{query}”.",
-  "asPoints": "Show as points"
+  "asPoints": "Show as points",
+  "filters": "Advanced filters",
+  "filtersOn": "{count, plural, one {Advanced filters: # country ticked} other {Advanced filters: # countries ticked}}",
+  "byHolder": "By country, by the sources",
+  "byHolderHint": "A city stays when the country holding it by the sources is ticked.",
+  "holderCount": "{name} ({count})",
+  "noWikidata": "{name} — no Wikidata id",
+  "offMap": "Not on the map yet",
+  "offMapHint": "The holders the sources give that no country of this map carries.",
+  "noHolder": "No holder ({count})",
+  "untickAll": "Untick all",
+  "closeFilters": "Close",
+  "noMatchFilters": "No city answers the filters.",
+  "filterHolders": "Filter the countries",
+  "noHolderMatch": "No country answers “{query}”."
 }

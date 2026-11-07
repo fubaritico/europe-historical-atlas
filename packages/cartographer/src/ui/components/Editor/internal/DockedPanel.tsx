@@ -38,6 +38,6 @@ export function DockedPanel({ id, ...deps }: PanelDeps & { id: PanelId }) {
     case 'layers':
       return <LayersPanel store={deps.store} />
     case 'cities':
-      return <CitiesPanel store={deps.store} />
+      return <CitiesPanel store={deps.store} colours={deps.colours} />
   }
 }

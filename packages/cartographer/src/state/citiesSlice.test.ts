@@ -4,7 +4,7 @@ import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocu
 
 import { UNFRAMED } from '../viewport/viewport'
 
-import { citiesOfYear, shownCityPoints } from './citiesSlice'
+import { NO_HOLDER, citiesOfYear, holderKey, shownCityPoints } from './citiesSlice'
 import { openEmptyYear } from './openEmptyYear'
 import { createCartographerStore } from './store'
 
@@ -133,6 +133,54 @@ describe('citiesSlice', () => {
       const version = store.getState().version
       store.getState().setCityShown('lyon', true)
       expect(store.getState().version).toBe(version)
+    })
+  })
+})
+
+// CARTO-370, `s20`: the holders ticked in the advanced filters, keyed by Wikidata id, out of the undo line.
+describe('citiesSlice — the holders ticked', () => {
+  describe('happy path', () => {
+    it('ticks the Empire then unticks it', () => {
+      const store = testStore()
+      store.getState().setCityHolderTicked('wd:Q12548', true)
+      expect([...store.getState().cityHolders]).toEqual(['wd:Q12548'])
+      store.getState().setCityHolderTicked('wd:Q12548', false)
+      expect(store.getState().cityHolders.size).toBe(0)
+    })
+  })
+
+  describe('variants', () => {
+    it('unticks every holder at once', () => {
+      const store = testStore()
+      store.getState().setCityHolderTicked('wd:Q12548', true)
+      store.getState().setCityHolderTicked(NO_HOLDER, true)
+      store.getState().untickCityHolders()
+      expect(store.getState().cityHolders.size).toBe(0)
+    })
+
+    it('keys a holder by its Wikidata id, by its name without one, and « none » when not entered', () => {
+      expect([
+        holderKey({ name: 'Saint-Empire', wikidata: 'Q12548' }),
+        holderKey({ name: 'Taïfa de Molina', wikidata: null }),
+        holderKey(null),
+      ]).toEqual(['wd:Q12548', 'name:Taïfa de Molina', 'none'])
+    })
+  })
+
+  // L3–L4: N/A — plain values, nothing refused.
+
+  describe('edge cases', () => {
+    it('stays out of the undo line: ticking a holder leaves the version as it was', () => {
+      const store = testStore()
+      const version = store.getState().version
+      store.getState().setCityHolderTicked('wd:Q12548', true)
+      expect(store.getState().version).toBe(version)
+    })
+
+    it('keys two holders of one Wikidata id alike, whatever their names', () => {
+      expect(holderKey({ name: 'Empire', wikidata: 'Q12548' })).toBe(
+        holderKey({ name: 'Sacrum Imperium', wikidata: 'Q12548' })
+      )
     })
   })
 })

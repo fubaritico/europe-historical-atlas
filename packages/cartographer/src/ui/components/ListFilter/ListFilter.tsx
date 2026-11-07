@@ -4,7 +4,7 @@ import { useTranslation } from '../../hooks/useTranslation'
 
 import { LIST_FILTER_MESSAGES } from './i18n'
 
-import type { ChangeEvent, KeyboardEvent } from 'react'
+import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react'
 
 /** What the field shows and reports. The text typed is its owner's: the field holds nothing. */
 export interface ListFilterProps {
@@ -14,6 +14,8 @@ export interface ListFilterProps {
   onChange: (value: string) => void
   /** The field's accessible name — what it filters (« Filtrer les villes »). */
   label: string
+  /** Buttons at the right of the field — `{Cities}`' funnel (CARTO-370) — or nothing. */
+  actions?: ReactNode
 }
 
 /**
@@ -25,9 +27,10 @@ export interface ListFilterProps {
  * @param props.value - what is typed
  * @param props.onChange - reports the new text
  * @param props.label - the field's accessible name
- * @returns the field
+ * @param props.actions - buttons at the right of the field, or nothing
+ * @returns the field, and its buttons
  */
-export function ListFilter({ value, onChange, label }: ListFilterProps) {
+export function ListFilter({ value, onChange, label, actions }: ListFilterProps) {
   // Context
   const t = useTranslation(LIST_FILTER_MESSAGES)
 
@@ -57,6 +60,7 @@ export function ListFilter({ value, onChange, label }: ListFilterProps) {
         spellCheck={false}
         autoComplete="off"
       />
+      {actions}
     </div>
   )
 }
