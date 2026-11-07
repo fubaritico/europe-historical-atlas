@@ -3,28 +3,36 @@ import { Checkbox } from '@fubaritico/react/Checkbox'
 import { useTranslation } from '../../../hooks/useTranslation'
 import { CITIES_PANEL_MESSAGES } from '../i18n'
 
-import { FilterBox } from './FilterBox'
+import { TreeBox } from './TreeBox'
 
-import type { CityFiltersProps } from '../cityFiltersProps'
 import type { MapHolderChoice } from '../utils/holderChoices'
 import type { CSSProperties } from 'react'
 
 /**
  * One polity of the map in the advanced filters: a dot of its colour, its box, indented as {Polities} indents it; greyed
- * without a Wikidata id, and greyed too when the filter keeps it only to hold a vassal found under it.
- * @param props - the polity, whether it is kept only for the tree, the holders ticked and the callback
+ * without a Wikidata id, and greyed too when the filter keeps it only to hold a vassal found under it. Its box stands for
+ * it and its whole descent (CARTO-388): ticking France ticks Champagne and Normandy under it.
+ * @param props - the polity, whether it is kept only for the tree, its keys, the holders ticked and the callback
  * @param props.choice - the polity
  * @param props.dimmed - whether it is kept only to hold a vassal found under it
+ * @param props.keys - its key and its descent's
  * @param props.ticked - the holders ticked
- * @param props.onTick - its box was ticked or unticked
+ * @param props.onTickHolders - its keys were ticked or unticked, all at once
  * @returns the row
  */
 export function MapHolderRow({
   choice,
   dimmed,
+  keys,
   ticked,
-  onTick,
-}: Pick<CityFiltersProps, 'ticked' | 'onTick'> & { choice: MapHolderChoice; dimmed: boolean }) {
+  onTickHolders,
+}: {
+  choice: MapHolderChoice
+  dimmed: boolean
+  keys: readonly string[]
+  ticked: ReadonlySet<string>
+  onTickHolders: (keys: readonly string[], ticked: boolean) => void
+}) {
   // Context
   const t = useTranslation(CITIES_PANEL_MESSAGES)
 
@@ -51,11 +59,11 @@ export function MapHolderRow({
           readOnly
         />
       ) : (
-        <FilterBox
-          boxKey={choice.key}
+        <TreeBox
+          keys={keys}
           label={t('holderCount', { name: choice.name, count: String(choice.count) })}
           ticked={ticked}
-          onTick={onTick}
+          onTickHolders={onTickHolders}
         />
       )}
     </li>

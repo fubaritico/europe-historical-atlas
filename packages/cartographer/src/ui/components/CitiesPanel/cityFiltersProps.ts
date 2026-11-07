@@ -14,6 +14,8 @@ export interface CityFiltersProps {
   ticked: ReadonlySet<string>
   /** A box was ticked or unticked. */
   onTick: (key: string, ticked: boolean) => void
+  /** A suzerain's box was ticked or unticked: its keys and its descent's, in one change (CARTO-388). */
+  onTickHolders: (keys: readonly string[], ticked: boolean) => void
   /** The states the dialogue offers, and how many cities each holds (CARTO-369). */
   states: readonly StateChoice[]
   /** The states ticked. */

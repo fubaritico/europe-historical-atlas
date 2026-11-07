@@ -197,6 +197,18 @@ Scenario: the filters kept at a refresh — CARTO-371, the dev, 2026-11-07: « j
   Then both are still ticked, the funnel says so, and the list shows the same cities
   And « Tout décocher » is the purge: nothing ticked, kept so at the next refresh
 
+Scenario: a suzerain ticks its descent — CARTO-388, the dev, 2026-11-08 (walked: « l'état intermédiaire… ça fonctionne »)
+  # The map's « Royaume de France » is the royal domain, its vassals carved out; a city is filtered by who holds it
+  # directly. Ticking France asks « under the crown », so its box stands for France and its whole descent.
+  When I tick « Royaume de France » in the advanced filters
+  Then the boxes of its vassals, and of their vassals, are ticked with it
+  And the list keeps the cities of the royal domain and of every vassal — Troyes by Champagne, Rouen by Normandy
+  When I untick « Comté de Champagne » alone
+  Then the cities of Champagne leave the list, and France's box shows the mixed state, a dash
+  When I click France's box again
+  Then its whole descent is ticked again
+  And unticking France unticks its whole descent
+
 Scenario: the sort — CARTO-382, the dev's icon, 2026-11-07: « l'icône du tri est le bouton qui ouvre un menu déroulant »
   When I click the sort icon, beside the funnel
   Then a menu offers « Ordre de l'export » (ticked at first), « Par nom », « Par vérification », « Par détenteur »

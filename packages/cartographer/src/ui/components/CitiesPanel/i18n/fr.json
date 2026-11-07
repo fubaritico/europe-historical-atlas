@@ -25,7 +25,7 @@
   "filters": "Filtres avancés",
   "filtersOn": "{count, plural, one {Filtres avancés : # filtre coché} other {Filtres avancés : # filtres cochés}}",
   "byHolder": "Par pays, selon les sources",
-  "byHolderHint": "Une ville reste quand le pays qui la tient selon les sources est coché.",
+  "byHolderHint": "Une ville reste quand le pays qui la tient selon les sources est coché. Cocher un suzerain coche aussi ses vassaux.",
   "holderCount": "{name} ({count})",
   "noWikidata": "{name} — sans identifiant Wikidata",
   "offMap": "Pas encore sur la carte",

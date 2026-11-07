@@ -123,6 +123,12 @@ export interface CitiesActions {
    */
   setCityHolderTicked: (key: string, ticked: boolean) => void
   /**
+   * Tick or untick several holders at once, in one change — a suzerain and its descent (CARTO-388).
+   * @param keys - the holders' keys
+   * @param ticked - whether they are ticked
+   */
+  setCityHoldersTicked: (keys: readonly string[], ticked: boolean) => void
+  /**
    * Tick or untick a state in the advanced filters.
    * @param state - the state, a city's verdict
    * @param ticked - whether it is ticked
@@ -247,13 +253,25 @@ function filterActions(
   get: () => CitiesState
 ): Pick<
   CitiesActions,
-  'setCityHolderTicked' | 'setCityStateTicked' | 'untickCityFilters' | 'setCityFilters'
+  | 'setCityHolderTicked'
+  | 'setCityHoldersTicked'
+  | 'setCityStateTicked'
+  | 'untickCityFilters'
+  | 'setCityFilters'
 > {
   return {
     setCityHolderTicked: (key, ticked): void => {
       const next = new Set(get().cityHolders)
       if (ticked) next.add(key)
       else next.delete(key)
+      set({ cityHolders: next })
+    },
+    setCityHoldersTicked: (keys, ticked): void => {
+      const next = new Set(get().cityHolders)
+      for (const key of keys) {
+        if (ticked) next.add(key)
+        else next.delete(key)
+      }
       set({ cityHolders: next })
     },
     setCityStateTicked: (state, ticked): void => {

@@ -25,7 +25,7 @@
   "filters": "Advanced filters",
   "filtersOn": "{count, plural, one {Advanced filters: # filter ticked} other {Advanced filters: # filters ticked}}",
   "byHolder": "By country, by the sources",
-  "byHolderHint": "A city stays when the country holding it by the sources is ticked.",
+  "byHolderHint": "A city stays when the country holding it by the sources is ticked. Ticking a suzerain ticks its vassals too.",
   "holderCount": "{name} ({count})",
   "noWikidata": "{name} — no Wikidata id",
   "offMap": "Not on the map yet",

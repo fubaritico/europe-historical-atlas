@@ -35,6 +35,7 @@ export function useCityFilters(
 
   // Store actions
   const onTick = store((state) => state.setCityHolderTicked)
+  const onTickHolders = store((state) => state.setCityHoldersTicked)
   const onTickState = store((state) => state.setCityStateTicked)
   const onUntickAll = store((state) => state.untickCityFilters)
   const onSort = store((state) => state.setCitySort)
@@ -47,6 +48,7 @@ export function useCityFilters(
     choices,
     ticked: tickedHolders(holders, choices.keys),
     onTick,
+    onTickHolders,
     states: stateChoices(cities, verdicts),
     // Only the states the dialogue offers filter (review of CARTO-371): one read back from the browser that no box
     // stands for would empty the list with nothing to untick. The closed set, not the year's counts — a state ticked

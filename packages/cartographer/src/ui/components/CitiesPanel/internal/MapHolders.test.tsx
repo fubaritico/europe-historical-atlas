@@ -32,7 +32,7 @@ const CHAMPAGNE: MapHolderChoice = {
  * @returns the callback a box reports to
  */
 function mount(ticked: readonly string[] = [], query = '') {
-  const onTick = vi.fn()
+  const onTickHolders = vi.fn()
   const choices: HolderChoices = {
     onMap: [FRANCE, CHAMPAGNE],
     offMap: [],
@@ -40,9 +40,14 @@ function mount(ticked: readonly string[] = [], query = '') {
     keys: new Set(['wd:Q70972', 'none']),
   }
   renderInEnglish(
-    <MapHolders choices={choices} query={query} ticked={new Set(ticked)} onTick={onTick} />
+    <MapHolders
+      choices={choices}
+      query={query}
+      ticked={new Set(ticked)}
+      onTickHolders={onTickHolders}
+    />
   )
-  return onTick
+  return onTickHolders
 }
 
 /**
@@ -61,22 +66,23 @@ const swatch = (name: string) => rowOf(name).querySelector('.polity-row__swatch'
 // CARTO-370, `s20`: the polities of the map as {Polities} lists them — swatch, tree, count; greyed without an id.
 describe('MapHolders', () => {
   describe('happy path', () => {
+    // Champagne has no Wikidata id: France's box stands for France's key alone (CARTO-388).
     it('reports France ticked when its box is clicked', async () => {
-      const onTick = mount()
+      const onTickHolders = mount()
       await userEvent
         .setup()
         .click(screen.getByRole('checkbox', { name: 'Royaume de France (12)' }))
-      expect(onTick).toHaveBeenCalledWith('wd:Q70972', true)
+      expect(onTickHolders).toHaveBeenCalledWith(['wd:Q70972'], true)
     })
   })
 
   describe('variants', () => {
     it('reports France unticked when it was ticked', async () => {
-      const onTick = mount(['wd:Q70972'])
+      const onTickHolders = mount(['wd:Q70972'])
       await userEvent
         .setup()
         .click(screen.getByRole('checkbox', { name: 'Royaume de France (12)' }))
-      expect(onTick).toHaveBeenCalledWith('wd:Q70972', false)
+      expect(onTickHolders).toHaveBeenCalledWith(['wd:Q70972'], false)
     })
 
     it('indents the Champagne one step under France, as the tree of {Polities}', () => {
