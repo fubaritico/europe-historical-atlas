@@ -32,6 +32,15 @@ opened is written here, in « Opened », as he opens them.
   Library Collection 1**, Brill Online Journals, Cairn books, the ISTEX national licences, Gale and ProQuest archives —
   find a journal there by title, then read the article. Gallica stays free without it.
 
+## A copy found online — read it, never link it (the dev, 2026-11-07)
+
+> *"He can, because it is as if he had read it, or I had read it — whatever the way, we need references."*
+
+A book in copyright found as a digitised copy online (archive.org uploaded by an individual, a scan on a personal site)
+**may be read** for the facts and the short quotation a source line needs. Its address **never goes into the base**: the
+source keeps its URL empty, and the line's « where » says how it was read (« lu sur l'image de la page d'une copie
+numérisée »), so the page and the quotation stay checkable in the printed book. First case: source 286, Monsalvo Antón.
+
 ## The candidates, best value first
 
 | account | what it gives us | cost (read 06/11) | how to open it |

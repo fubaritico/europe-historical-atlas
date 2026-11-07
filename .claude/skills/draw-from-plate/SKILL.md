@@ -14,7 +14,7 @@ dev, watching me redraw Navarre three times: *"prends ton temps — tu vas à to
 recommencer"*. Then, on Barcelona drawn the slow way: *"quand tu prends ton temps, ça va mieux"*. **The
 procedure below is the slow way. Do not skip a step to go faster: every skipped check cost a redraw.**
 
-Read first: `files/plans/cartographer/drawing-as-claude.md` (how the Pen behaves under my hands) and
+Read first: `/use-cartographer` (how an agent uses the Cartographer — its journal, local, says how the Pen behaves under my hands) and
 `files/plans/cartographer/scenarii/s99-holes.md` from `H-36` on (what the tool still gets wrong).
 
 ## Licence — before anything
