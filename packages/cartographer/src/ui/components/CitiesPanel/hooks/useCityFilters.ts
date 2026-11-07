@@ -1,39 +1,53 @@
 import { polityRows } from '../../../utils/polityRows'
 import { holderChoices } from '../utils/holderChoices'
+import { stateChoices } from '../utils/stateChoices'
 import { tickedHolders } from '../utils/tickedHolders'
 
 import type { CityMark } from '../../../../state/citiesSlice'
 import type { PolityColourSource } from '../../../../state/polityColourSource'
 import type { CartographerStoreHook } from '../../../../state/store'
 import type { CityFiltersProps } from '../cityFiltersProps'
+import type { CityVerdict } from '../utils/cityVerdict'
 
 /**
- * The advanced filters bound to the store (CARTO-370): what they offer for the year open, the holders ticked that one
- * of their boxes stands for, and the store's two actions. Computed at each render, as the verdicts are, so a polity
- * added or renamed in the map is in the dialogue at once.
- * @param store - the store the holders ticked and the document live in
+ * The advanced filters bound to the store (CARTO-370, CARTO-369): what they offer for the year open — the holders and
+ * the states, each with its count — what is ticked, and the store's actions. Computed at each render, as the verdicts
+ * are, so a polity added or renamed in the map, or a border moved, is in the dialogue at once.
+ * @param store - the store the holders and states ticked and the document live in
  * @param colours - the polities' colours, for the swatches
  * @param cities - the cities of the year open
+ * @param verdicts - each city's verdict, by id — its state
  * @returns the filters' props
  */
 export function useCityFilters(
   store: CartographerStoreHook,
   colours: PolityColourSource,
-  cities: readonly CityMark[]
+  cities: readonly CityMark[],
+  verdicts: ReadonlyMap<string, CityVerdict>
 ): CityFiltersProps {
   // Store
   const document = store((state) => state.document)
   const holders = store((state) => state.cityHolders)
+  const tickedStates = store((state) => state.cityStates)
   // The document is mutated in place: the version is what says a polity was added or recoloured.
   const version = store((state) => state.version)
 
   // Store actions
   const onTick = store((state) => state.setCityHolderTicked)
-  const onUntickAll = store((state) => state.untickCityHolders)
+  const onTickState = store((state) => state.setCityStateTicked)
+  const onUntickAll = store((state) => state.untickCityFilters)
 
   // Derived
   const choices = holderChoices(polityRows(document, colours.coloursOf(document, version)), cities)
 
   // Return
-  return { choices, ticked: tickedHolders(holders, choices.keys), onTick, onUntickAll }
+  return {
+    choices,
+    ticked: tickedHolders(holders, choices.keys),
+    onTick,
+    states: stateChoices(cities, verdicts),
+    tickedStates,
+    onTickState,
+    onUntickAll,
+  }
 }

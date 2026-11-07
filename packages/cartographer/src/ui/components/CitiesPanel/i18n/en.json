@@ -23,7 +23,7 @@
   "noMatch": "No city answers “{query}”.",
   "asPoints": "Show as points",
   "filters": "Advanced filters",
-  "filtersOn": "{count, plural, one {Advanced filters: # country ticked} other {Advanced filters: # countries ticked}}",
+  "filtersOn": "{count, plural, one {Advanced filters: # filter ticked} other {Advanced filters: # filters ticked}}",
   "byHolder": "By country, by the sources",
   "byHolderHint": "A city stays when the country holding it by the sources is ticked.",
   "holderCount": "{name} ({count})",
@@ -40,5 +40,11 @@
   "dotVassal": "{name} — overlord: {suzerain}",
   "dotOffMap": "{name} — not on the map yet",
   "dotNotEntered": "Holder not entered yet",
-  "coordinates": "Coordinates: {position}"
+  "coordinates": "Coordinates: {position}",
+  "byState": "By verification",
+  "byStateHint": "The map checked against the sources: a city stays when its result is ticked. “No holder” is with the countries, below.",
+  "stateMisplaced": "Not at the right place ({count})",
+  "stateToDeclare": "Holder not on the map yet ({count})",
+  "stateCannotCompare": "Cannot be compared ({count})",
+  "stateAgrees": "At the right place ({count})"
 }

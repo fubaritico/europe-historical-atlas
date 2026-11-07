@@ -3,7 +3,7 @@ import { Checkbox } from '@fubaritico/react/Checkbox'
 import { useTranslation } from '../../../hooks/useTranslation'
 import { CITIES_PANEL_MESSAGES } from '../i18n'
 
-import { HolderBox } from './HolderBox'
+import { FilterBox } from './FilterBox'
 
 import type { CityFiltersProps } from '../cityFiltersProps'
 import type { MapHolderChoice } from '../utils/holderChoices'
@@ -51,8 +51,8 @@ export function MapHolderRow({
           readOnly
         />
       ) : (
-        <HolderBox
-          holderKey={choice.key}
+        <FilterBox
+          boxKey={choice.key}
           label={t('holderCount', { name: choice.name, count: String(choice.count) })}
           ticked={ticked}
           onTick={onTick}

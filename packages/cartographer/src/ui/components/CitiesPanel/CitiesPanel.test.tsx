@@ -450,6 +450,17 @@ function listed(): (string | null)[] {
 
 const funnel = () => screen.getByRole('button', { name: /^Advanced filters/ })
 
+/**
+ * The countries' boxes of the dialogue — its two sections of holders, not « By verification » at its head (CARTO-369).
+ * @param dialogue - the advanced filters
+ * @returns the boxes
+ */
+function countryBoxes(dialogue: HTMLElement): HTMLElement[] {
+  return within(dialogue)
+    .getAllByRole('checkbox')
+    .filter((box) => box.closest('section')?.getAttribute('aria-label') !== 'By verification')
+}
+
 // CARTO-370, the dev, 2026-11-06/07 (`s20`, « The advanced filters »): a funnel opens a dialogue; the polities of the
 // map ticked keep the cities the sources give them; the holders not on the map and « No holder » too.
 describe('CitiesPanel — the advanced filters (CARTO-370)', () => {
@@ -470,9 +481,9 @@ describe('CitiesPanel — the advanced filters (CARTO-370)', () => {
     it('lists the map polities, then Venice as not on the map, then the cities with no holder', async () => {
       const { user } = mount([PARIS, METZ, TREVISO])
       const dialogue = await openFilters(user)
-      const boxes = within(dialogue)
-        .getAllByRole('checkbox')
-        .map((box) => box.getAttribute('aria-label') ?? box.closest('label')?.textContent)
+      const boxes = countryBoxes(dialogue).map(
+        (box) => box.getAttribute('aria-label') ?? box.closest('label')?.textContent
+      )
       expect(boxes).toEqual([
         'Sacrum Imperium (1)',
         'Reaume de France (0)',
@@ -525,9 +536,7 @@ describe('CitiesPanel — the advanced filters (CARTO-370)', () => {
       })
       remount()
       expect(listed()).toEqual(['Metz'])
-      expect(
-        screen.getByRole('button', { name: 'Advanced filters: 1 country ticked' })
-      ).toBeTruthy()
+      expect(screen.getByRole('button', { name: 'Advanced filters: 1 filter ticked' })).toBeTruthy()
     })
 
     // The dev, 2026-11-07: « il nous faut le quick filter pour les listes longues ».
@@ -538,11 +547,9 @@ describe('CitiesPanel — the advanced filters (CARTO-370)', () => {
         within(dialogue).getByRole('searchbox', { name: 'Filter the countries' }),
         'ven'
       )
-      expect(
-        within(dialogue)
-          .getAllByRole('checkbox')
-          .map((box) => box.closest('label')?.textContent)
-      ).toEqual(['Repubblica di Venezia (1)'])
+      expect(countryBoxes(dialogue).map((box) => box.closest('label')?.textContent)).toEqual([
+        'Repubblica di Venezia (1)',
+      ])
       expect(within(dialogue).getByText('No country answers “ven”.')).toBeTruthy()
     })
 
@@ -555,7 +562,7 @@ describe('CitiesPanel — the advanced filters (CARTO-370)', () => {
       )
       await user.click(within(dialogue).getByRole('button', { name: 'Close' }))
       dialogue = await openFilters(user)
-      expect(within(dialogue).getAllByRole('checkbox')).toHaveLength(4)
+      expect(countryBoxes(dialogue)).toHaveLength(4)
     })
 
     it('keeps Paris alone by « No holder »', async () => {
@@ -583,9 +590,9 @@ describe('CitiesPanel — the advanced filters (CARTO-370)', () => {
         store.getState().setCityHolderTicked('wd:Q4948', true)
       })
       expect(
-        screen.getByRole('button', { name: 'Advanced filters: 2 countries ticked' }).textContent
+        screen.getByRole('button', { name: 'Advanced filters: 2 filters ticked' }).textContent
       ).toBe('2')
-      await user.click(screen.getByRole('button', { name: 'Advanced filters: 2 countries ticked' }))
+      await user.click(screen.getByRole('button', { name: 'Advanced filters: 2 filters ticked' }))
       await user.click(screen.getByRole('button', { name: 'Untick all' }))
       expect(store.getState().cityHolders.size).toBe(0)
       expect(listed()).toEqual(['Paris', 'Metz', 'Treviso'])
@@ -642,6 +649,94 @@ function rowOf(name: string): HTMLElement {
 
 // CARTO-384, the dev, 2026-11-07: a click on a city's point on the map chooses it in the list, which scrolls to it;
 // a double-click, in the list or on the point, opens its information box in place of the detail under the list.
+/** A city of the Empire by the sources that the map puts in France — 1° E is France's ground in the fixture. */
+const WESTMETZ: CityMark = { ...METZ, id: 'westmetz', name: 'Westmetz', lon: 1 }
+
+// CARTO-369, the dev, 2026-11-07 (`s20`, « By verification »): the states of a city, at the head of the dialogue.
+describe('CitiesPanel — the advanced filters by state (CARTO-369)', () => {
+  describe('happy path', () => {
+    it('keeps only Westmetz once « Not at the right place » is ticked', async () => {
+      const { store, user } = mount([PARIS, METZ, TREVISO, WESTMETZ])
+      const dialogue = await openFilters(user)
+      await user.click(
+        within(dialogue).getByRole('checkbox', { name: 'Not at the right place (1)' })
+      )
+      expect([...store.getState().cityStates]).toEqual(['misplaced'])
+      await user.click(within(dialogue).getByRole('button', { name: 'Close' }))
+      expect(listed()).toEqual(['Westmetz'])
+    })
+  })
+
+  describe('variants', () => {
+    it('keeps the cities of either state ticked: Treviso not drawn, Westmetz misplaced', async () => {
+      const { user } = mount([PARIS, METZ, TREVISO, WESTMETZ])
+      const dialogue = await openFilters(user)
+      await user.click(
+        within(dialogue).getByRole('checkbox', { name: 'Not at the right place (1)' })
+      )
+      await user.click(
+        within(dialogue).getByRole('checkbox', { name: 'Holder not on the map yet (1)' })
+      )
+      expect(listedBehind()).toEqual(['Treviso', 'Westmetz'])
+    })
+
+    it('applies a state and a holder together: the Empire at the right place keeps Metz alone', async () => {
+      const { user } = mount([PARIS, METZ, TREVISO, WESTMETZ])
+      const dialogue = await openFilters(user)
+      await user.click(within(dialogue).getByRole('checkbox', { name: 'Sacrum Imperium (2)' }))
+      await user.click(within(dialogue).getByRole('checkbox', { name: 'At the right place (1)' }))
+      expect(listedBehind()).toEqual(['Metz'])
+    })
+
+    it('counts the states and the holders ticked together on the funnel', async () => {
+      const { user } = mount([PARIS, METZ, TREVISO, WESTMETZ])
+      const dialogue = await openFilters(user)
+      await user.click(within(dialogue).getByRole('checkbox', { name: 'Sacrum Imperium (2)' }))
+      await user.click(
+        within(dialogue).getByRole('checkbox', { name: 'Not at the right place (1)' })
+      )
+      await user.click(within(dialogue).getByRole('button', { name: 'Close' }))
+      expect(funnel().getAttribute('aria-label') ?? funnel().textContent).toContain(
+        'Advanced filters: 2 filters ticked'
+      )
+    })
+
+    it('unticks the states with the holders by « Untick all »', async () => {
+      const { store, user } = mount([PARIS, METZ, TREVISO, WESTMETZ])
+      const dialogue = await openFilters(user)
+      await user.click(
+        within(dialogue).getByRole('checkbox', { name: 'Not at the right place (1)' })
+      )
+      await user.click(within(dialogue).getByRole('button', { name: 'Untick all' }))
+      expect(store.getState().cityStates.size).toBe(0)
+      expect(listedBehind()).toEqual(['Paris', 'Metz', 'Treviso', 'Westmetz'])
+    })
+  })
+
+  describe('edge cases', () => {
+    it('offers a state no city is in, counted 0, so the section keeps its shape', async () => {
+      const { user } = mount([PARIS, METZ, TREVISO, WESTMETZ])
+      const dialogue = await openFilters(user)
+      expect(
+        within(dialogue).getByRole('checkbox', { name: 'Cannot be compared (0)' })
+      ).toBeTruthy()
+    })
+
+    it('says no city answers when the state ticked holds none of the holder ticked', async () => {
+      const { user } = mount([PARIS, METZ, TREVISO, WESTMETZ])
+      const dialogue = await openFilters(user)
+      await user.click(within(dialogue).getByRole('checkbox', { name: 'Sacrum Imperium (2)' }))
+      await user.click(
+        within(dialogue).getByRole('checkbox', { name: 'Holder not on the map yet (1)' })
+      )
+      await user.click(within(dialogue).getByRole('button', { name: 'Close' }))
+      expect(screen.getByText('No city answers the filters.')).toBeTruthy()
+    })
+  })
+
+  // L3, L4: N/A — ticking a box refuses nothing; the states come from the verdicts, tested in cityVerdict.
+})
+
 describe('CitiesPanel — the city chosen and its box (CARTO-384)', () => {
   describe('happy path', () => {
     it('marks Metz and scrolls to its row when the map chooses it', () => {

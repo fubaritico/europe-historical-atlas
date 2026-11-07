@@ -7,6 +7,7 @@ import { useTranslation } from '../../../hooks/useTranslation'
 import { ListFilter } from '../../ListFilter'
 import { CITIES_PANEL_MESSAGES } from '../i18n'
 
+import { CityStates } from './CityStates'
 import { MapHolders } from './MapHolders'
 import { OffMapHolders } from './OffMapHolders'
 
@@ -21,10 +22,10 @@ export interface CityFiltersDialogProps extends CityFiltersProps {
 }
 
 /**
- * « Filtres avancés » (CARTO-370, `s20`): the polities of the map, then the holders no polity of the map carries and
- * « Sans détenteur ». **A box applies at once**: the list behind follows, there is no OK. A filter field heads it, as
- * the panels' (the dev, 2026-11-07: *« il nous faut le quick filter pour les listes longues »*): it narrows both
- * sections; what is typed is the dialogue's own, emptied when it closes.
+ * « Filtres avancés » (CARTO-370, CARTO-369, `s20`): the states of a city, then the polities of the map, then the holders
+ * no polity of the map carries and « Sans détenteur ». **A box applies at once**: the list behind follows, there is no
+ * OK. A filter field heads the countries, as the panels' (the dev, 2026-11-07: *« il nous faut le quick filter pour les
+ * listes longues »*): it narrows their two sections; what is typed is the dialogue's own, emptied when it closes.
  * @param props - the choices, the holders ticked, the callbacks, and whether it is open
  * @param props.open - whether it is open
  * @param props.onClose - closes it
@@ -56,6 +57,7 @@ export function CityFiltersDialog({
         <Card>
           <Card.Header>{t('filters')}</Card.Header>
           <Card.Body>
+            <CityStates {...boxes} />
             <ListFilter value={query} onChange={setQuery} label={t('filterHolders')} />
             <MapHolders {...boxes} query={query} />
             <OffMapHolders {...boxes} query={query} />

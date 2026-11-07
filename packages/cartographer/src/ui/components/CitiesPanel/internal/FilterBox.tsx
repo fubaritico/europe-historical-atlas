@@ -1,31 +1,31 @@
 import { Checkbox } from '@fubaritico/react/Checkbox'
 
 /**
- * One holder's box.
- * @param props - its key, its label, the holders ticked and the callback
- * @param props.holderKey - its key in the filter
+ * One box of the advanced filters — a holder (CARTO-370) or a state (CARTO-369), ticked by its key in its own set.
+ * @param props - its key, its label, the keys ticked of its kind and the callback
+ * @param props.boxKey - its key in the filter: a holder's (`holderKey`) or a state's
  * @param props.label - its label, its count in it
- * @param props.ticked - the holders ticked
+ * @param props.ticked - the keys ticked of its kind
  * @param props.onTick - it was ticked or unticked
  * @returns the box
  */
-export function HolderBox({
-  holderKey,
+export function FilterBox({
+  boxKey,
   label,
   ticked,
   onTick,
 }: {
-  holderKey: string
+  boxKey: string
   label: string
   ticked: ReadonlySet<string>
   onTick: (key: string, ticked: boolean) => void
 }) {
   // Derived
-  const checked = ticked.has(holderKey)
+  const checked = ticked.has(boxKey)
 
   // Handlers
   const handleChange = () => {
-    onTick(holderKey, !checked)
+    onTick(boxKey, !checked)
   }
 
   // Render

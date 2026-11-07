@@ -4,7 +4,7 @@ import { CITIES_PANEL_MESSAGES } from '../i18n'
 
 /** What the funnel shows and reports. */
 export interface FiltersFunnelProps {
-  /** How many holders are ticked: `0` at rest. */
+  /** How many holders and states are ticked, both kinds together (CARTO-369): `0` at rest. */
   ticked: number
   /** The funnel was clicked: the advanced filters open. */
   onOpen: () => void
@@ -12,9 +12,9 @@ export interface FiltersFunnelProps {
 
 /**
  * The funnel at the right of the name filter (CARTO-370, the dev's drawing): it opens the advanced filters, and says when
- * holders are ticked — filled with the accent, their count beside it, and in its name.
- * @param props - how many holders are ticked, and what a click does
- * @param props.ticked - how many holders are ticked
+ * filters are ticked — holders or states — filled with the accent, their count beside it, and in its name.
+ * @param props - how many filters are ticked, and what a click does
+ * @param props.ticked - how many holders and states are ticked
  * @param props.onOpen - opens the advanced filters
  * @returns the button
  */

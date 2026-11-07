@@ -28,7 +28,10 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `noMatch` — Said in place of the list when no city answers the filter; `query` is what was typed.
  * - `noMatchFilters` — The same, when nothing is typed and the advanced filters let no city through (CARTO-370).
  * - `filters` — The funnel's name and the advanced filters' title.
- * - `filtersOn` — The funnel's name while holders are ticked; `count` is how many.
+ * - `filtersOn` — The funnel's name while holders or states are ticked; `count` is how many, both kinds together.
+ * - `byState`, `byStateHint` — The section of the states (CARTO-369), and what ticking one does.
+ * - `stateMisplaced`, `stateToDeclare`, `stateCannotCompare`, `stateAgrees` — A state's box; `count` is how many cities
+ *   of the year are in it.
  * - `byHolder`, `byHolderHint` — The section of the map's polities, and what ticking one does.
  * - `holderCount` — A box: `name` is the holder's, `count` how many cities of the year the sources give it.
  * - `noWikidata` — A polity of the map without a Wikidata id, greyed; `name` is its name.

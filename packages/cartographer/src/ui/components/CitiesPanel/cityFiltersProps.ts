@@ -1,10 +1,11 @@
 import type { HolderChoices } from './utils/holderChoices'
+import type { StateChoice } from './utils/stateChoices'
 
 /*
  * The advanced filters' props, apart from their components — the list, the funnel and the dialogue read the same shape.
  */
 
-/** What the advanced filters show and report (CARTO-370). */
+/** What the advanced filters show and report (CARTO-370, CARTO-369). */
 export interface CityFiltersProps {
   /** What the dialogue offers for the year open, and how many cities each holder holds. */
   choices: HolderChoices
@@ -12,6 +13,12 @@ export interface CityFiltersProps {
   ticked: ReadonlySet<string>
   /** A box was ticked or unticked. */
   onTick: (key: string, ticked: boolean) => void
-  /** « Tout décocher » was clicked. */
+  /** The states the dialogue offers, and how many cities each holds (CARTO-369). */
+  states: readonly StateChoice[]
+  /** The states ticked. */
+  tickedStates: ReadonlySet<string>
+  /** A state's box was ticked or unticked. */
+  onTickState: (state: string, ticked: boolean) => void
+  /** « Tout décocher » was clicked: every holder and every state unticked. */
   onUntickAll: () => void
 }

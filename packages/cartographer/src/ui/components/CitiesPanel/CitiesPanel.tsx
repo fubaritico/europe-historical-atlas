@@ -65,7 +65,7 @@ export function CitiesPanel({ store, colours }: CitiesPanelProps) {
   // Derived
   const { cities, verdicts, openedCity, openedVerdict } = useCitiesView(all, document, opened)
   const status = citiesStatus(load, cities.length, document.year)
-  const filters = useCityFilters(store, colours, cities)
+  const filters = useCityFilters(store, colours, cities, verdicts)
   const dotOf = useHolderDots(store, colours)
 
   // Render

@@ -7,8 +7,8 @@ import type { CityFiltersProps } from '../cityFiltersProps'
 
 /**
  * The advanced filters (CARTO-370): the funnel at the right of the name filter, and the dialogue it opens. Whether it is
- * open is its own — one writer, one reader, no slice; the holders ticked are the store's.
- * @param props - what the filters offer, the holders ticked, and the callbacks
+ * open is its own — one writer, one reader, no slice; the holders and the states ticked are the store's (CARTO-369).
+ * @param props - what the filters offer, the holders and states ticked, and the callbacks
  * @returns the funnel, and the dialogue while open
  */
 export function CityFilters(props: CityFiltersProps) {
@@ -26,7 +26,7 @@ export function CityFilters(props: CityFiltersProps) {
   // Render
   return (
     <>
-      <FiltersFunnel ticked={props.ticked.size} onOpen={handleOpen} />
+      <FiltersFunnel ticked={props.ticked.size + props.tickedStates.size} onOpen={handleOpen} />
       <CityFiltersDialog open={open} onClose={handleClose} {...props} />
     </>
   )

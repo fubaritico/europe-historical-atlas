@@ -23,7 +23,7 @@
   "noMatch": "Aucune ville ne répond à « {query} ».",
   "asPoints": "Afficher comme des points",
   "filters": "Filtres avancés",
-  "filtersOn": "{count, plural, one {Filtres avancés : # pays coché} other {Filtres avancés : # pays cochés}}",
+  "filtersOn": "{count, plural, one {Filtres avancés : # filtre coché} other {Filtres avancés : # filtres cochés}}",
   "byHolder": "Par pays, selon les sources",
   "byHolderHint": "Une ville reste quand le pays qui la tient selon les sources est coché.",
   "holderCount": "{name} ({count})",
@@ -40,5 +40,11 @@
   "dotVassal": "{name} — suzerain : {suzerain}",
   "dotOffMap": "{name} — pas encore sur la carte",
   "dotNotEntered": "Détenteur pas encore renseigné",
-  "coordinates": "Coordonnées : {position}"
+  "coordinates": "Coordonnées : {position}",
+  "byState": "Par vérification",
+  "byStateHint": "La carte comparée aux sources : une ville reste quand son résultat est coché. « Sans détenteur » est avec les pays, plus bas.",
+  "stateMisplaced": "Pas au bon endroit ({count})",
+  "stateToDeclare": "Détenteur pas encore sur la carte ({count})",
+  "stateCannotCompare": "Comparaison impossible ({count})",
+  "stateAgrees": "Au bon endroit ({count})"
 }

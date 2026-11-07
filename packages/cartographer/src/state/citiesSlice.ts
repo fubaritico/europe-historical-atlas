@@ -72,6 +72,11 @@ export interface CitiesState {
    */
   cityHolders: ReadonlySet<string>
   /**
+   * The states ticked in the advanced filters (CARTO-369) — a city's verdict, `misplaced`, `toDeclare`… as `{Cities}`
+   * names them: it lists only the cities in one of them; none ticked, no filter by state.
+   */
+  cityStates: ReadonlySet<string>
+  /**
    * The city chosen — by a click on its point with the white arrow, or on its name in `{Cities}` (CARTO-384): its row
    * is marked and the list scrolls to it. `null` when none is.
    */
@@ -115,8 +120,14 @@ export interface CitiesActions {
    * @param ticked - whether it is ticked
    */
   setCityHolderTicked: (key: string, ticked: boolean) => void
-  /** Untick every holder: the list shows every city of the year again. */
-  untickCityHolders: () => void
+  /**
+   * Tick or untick a state in the advanced filters.
+   * @param state - the state, a city's verdict
+   * @param ticked - whether it is ticked
+   */
+  setCityStateTicked: (state: string, ticked: boolean) => void
+  /** Untick every holder and every state: the list shows every city of the year again. */
+  untickCityFilters: () => void
   /**
    * Choose a city, or none.
    * @param id - the city's id, or `null`
@@ -194,6 +205,35 @@ export interface ShownCity {
 }
 
 /**
+ * The advanced filters' actions (CARTO-370, CARTO-369): tick a holder, tick a state, untick both kinds at once.
+ * @param set - the store's setter
+ * @param get - the store's getter
+ * @returns the three actions
+ */
+function filterActions(
+  set: (partial: Partial<CitiesState>) => void,
+  get: () => CitiesState
+): Pick<CitiesActions, 'setCityHolderTicked' | 'setCityStateTicked' | 'untickCityFilters'> {
+  return {
+    setCityHolderTicked: (key, ticked): void => {
+      const next = new Set(get().cityHolders)
+      if (ticked) next.add(key)
+      else next.delete(key)
+      set({ cityHolders: next })
+    },
+    setCityStateTicked: (state, ticked): void => {
+      const next = new Set(get().cityStates)
+      if (ticked) next.add(state)
+      else next.delete(state)
+      set({ cityStates: next })
+    },
+    untickCityFilters: (): void => {
+      set({ cityHolders: new Set(), cityStates: new Set() })
+    },
+  }
+}
+
+/**
  * Open a cities slice: none read yet, none shown.
  * @param set - the store's setter
  * @param get - the store's getter
@@ -221,15 +261,8 @@ export const createCitiesSlice: StateCreator<
   closeCity: (): void => {
     set({ openedCity: null })
   },
-  setCityHolderTicked: (key, ticked): void => {
-    const next = new Set(get().cityHolders)
-    if (ticked) next.add(key)
-    else next.delete(key)
-    set({ cityHolders: next })
-  },
-  untickCityHolders: (): void => {
-    set({ cityHolders: new Set() })
-  },
+  cityStates: new Set(),
+  ...filterActions(set, get),
   setCitiesAsPoints: (asPoints): void => {
     set({ citiesAsPoints: asPoints })
   },

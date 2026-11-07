@@ -185,11 +185,23 @@ Scenario: with the name filter
 Scenario: the funnel says a filter is on
   Given two countries ticked
   Then the funnel is filled with the accent and carries « 2 »
-  And its name reads « Filtres avancés : 2 pays cochés »
+  And its name reads « Filtres avancés : 2 filtres cochés » — the states ticked count with the countries (CARTO-369)
 
 Scenario: untick them all
   When I click « Tout décocher »
-  Then no box is ticked, the list shows every city of the year again, and the funnel is at rest
+  Then no box is ticked, countries and states, the list shows every city of the year again, and the funnel is at rest
+
+Scenario: by state — CARTO-369, the dev, 2026-11-07
+  When I open the advanced filters
+  Then « Par vérification » (the map checked against the sources; my word, taken by the dev — « état » read as a State) heads
+    the dialogue: « Pas au bon endroit (n) », « Détenteur pas encore sur la carte (n) »,
+    « Comparaison impossible (n) », « Au bon endroit (n) » — every state, a state with no city counted 0
+  And « Sans détenteur » stays with the countries, under « Pas encore sur la carte », where CARTO-370 put it
+  When I tick « Pas au bon endroit »
+  Then only the cities the map puts elsewhere stay in the list, and « Afficher les N villes trouvées » shows them
+  When I tick « Détenteur pas encore sur la carte » too
+  Then the cities of either state stay
+  And with a country ticked, only its cities in those states stay
 
 Scenario: filter the dialogue's lists — the dev, 2026-11-07, after trying it: « il nous faut le quick filter pour les listes longues »
   Given the dialogue open

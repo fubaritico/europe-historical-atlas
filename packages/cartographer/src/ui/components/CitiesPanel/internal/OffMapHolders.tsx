@@ -3,7 +3,7 @@ import { useTranslation } from '../../../hooks/useTranslation'
 import { matchesFilter } from '../../../utils/matchesFilter'
 import { CITIES_PANEL_MESSAGES } from '../i18n'
 
-import { HolderBox } from './HolderBox'
+import { FilterBox } from './FilterBox'
 
 import type { CityFiltersProps } from '../cityFiltersProps'
 
@@ -50,7 +50,7 @@ export function OffMapHolders({
         <ul className="city-filters__list">
           {boxes.map(({ key, label }) => (
             <li key={key} className="city-filters__box">
-              <HolderBox holderKey={key} label={label} ticked={ticked} onTick={onTick} />
+              <FilterBox boxKey={key} label={label} ticked={ticked} onTick={onTick} />
             </li>
           ))}
         </ul>

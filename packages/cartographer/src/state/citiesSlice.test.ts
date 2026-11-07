@@ -150,12 +150,23 @@ describe('citiesSlice — the holders ticked', () => {
   })
 
   describe('variants', () => {
-    it('unticks every holder at once', () => {
+    it('unticks every holder and every state at once', () => {
       const store = testStore()
       store.getState().setCityHolderTicked('wd:Q12548', true)
       store.getState().setCityHolderTicked(NO_HOLDER, true)
-      store.getState().untickCityHolders()
+      store.getState().setCityStateTicked('misplaced', true)
+      store.getState().untickCityFilters()
       expect(store.getState().cityHolders.size).toBe(0)
+      expect(store.getState().cityStates.size).toBe(0)
+    })
+
+    // CARTO-369: the states ticked, as the holders are.
+    it('ticks « not at the right place » and « to declare », then unticks the first', () => {
+      const store = testStore()
+      store.getState().setCityStateTicked('misplaced', true)
+      store.getState().setCityStateTicked('toDeclare', true)
+      store.getState().setCityStateTicked('misplaced', false)
+      expect([...store.getState().cityStates]).toEqual(['toDeclare'])
     })
 
     it('keys a holder by its Wikidata id, by its name without one, and « none » when not entered', () => {
