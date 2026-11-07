@@ -16,8 +16,11 @@ opened is written here, in « Opened », as he opens them.
 
 - **BnF, Pass Recherche illimité** — ordered online by the dev on 2026-11-06, with the bibliography as « justificatif
   de recherche ». The BnF validates the file within three working days and debits only then; a confirmation e-mail
-  gives how to collect the pass; it is collected in person at François-Mitterrand, after that e-mail. Remote access
-  (`bdl.bnf.fr`) once it is collected.
+  gives how to collect the pass; it is collected in person at François-Mitterrand, after that e-mail.
+  **Activated on 2026-11-07** (the BnF's e-mail, « Votre Pass a été activé »): **the online resources and the digital
+  loan are open from his personal space now**, before the card is collected; collecting it (pôle INFORMATION, hall of
+  François-Mitterrand or Richelieu, with an ID) only adds the reading rooms, the museum and the exhibitions. So
+  `bdl.bnf.fr` is usable from his Chrome, logged in by him — one article at a time, as for JSTOR.
 
 ## The candidates, best value first
 

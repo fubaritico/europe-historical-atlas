@@ -36,7 +36,14 @@ the reasoning goes in the year's file (`files/plans/sources/1100.md`). Concepts:
    one language misses the literature of the others (Siurana is *Šiurāna*; Lleida is *Lārida*, *Lérida*, *Ilerda*).
 2. **Wikipedia is a map to the literature, not a witness to rely on.** Read the page in every language that has one;
    list the works its footnotes cite; those works are what the next steps look for.
-3. **Search the open libraries, in this order**, stopping a library when it has given what it has:
+3. **The dev's atlases on disk first** — `files/resources/other-historical-atlases-pdf/` (git-ignored; the list, each
+   one's status and licence: `files/plans/sources/bibliotheque.md`). Extract their text into the scratchpad once per
+   session (`pypdf` in a scratchpad venv; Read cannot render single pages without poppler, so split a scan into
+   four-page PDFs and read each whole), search it for every name of the place, read the map's legend and date on the
+   page image. Kind `historian-atlas`. **An atlas in copyright is a reference**: its facts are cited, its plates never
+   traced (Shepherd 1911 and the 1909 *Atlas of European History* are public domain). Forgotten on 07/11 until the dev
+   reminded me — the reason this step stands before the libraries.
+4. **Search the open libraries, in this order**, stopping a library when it has given what it has:
 
    | library | what it holds | how to search it |
    | --- | --- | --- |
@@ -54,12 +61,12 @@ the reasoning goes in the year's file (`files/plans/sources/1100.md`). Concepts:
 
    The region chooses the first stop: Spain → Dialnet, IFC, RACO; France → Persée, Gallica; the Empire → dMGH,
    Regesta Imperii (regesta-imperii.de, in the browser).
-4. **Read the passage, not the abstract.** Download the text into its own folder of the scratchpad (`<theme>/<lot>/`),
+5. **Read the passage, not the abstract.** Download the text into its own folder of the scratchpad (`<theme>/<lot>/`),
    search it for every name of the place, read the paragraphs around each hit, copy the sentence. A book read by OCR:
    look at the page image before keeping a quotation whose letters are doubtful.
-5. **When the sources stop short, climb** — the method is `/enter-in-cms` « When the sources stop short »: the polity
+6. **When the sources stop short, climb** — the method is `/enter-in-cms` « When the sources stop short »: the polity
    that ended before the date → who replaced it → who held the place; a neighbouring town of the same district.
-6. **Behind an account**, only for what the open libraries lack: JSTOR, then the others the dev opened
+7. **Behind an account**, only for what the open libraries lack: JSTOR, then the others the dev opened
    (`references/reading-accounts.md`). In **his** Chrome, where he is logged in, one article at a time, read on screen
    (`get_page_text`, or the page image); the quotation and its page noted as for any other text. Never while he tests
    the Cartographer in the same browser.

@@ -33,7 +33,7 @@ Cancelled: *Historical Atlas of Britain*, *The Family Tree Historical Atlas of G
 
 Also owned before: the Duby *Atlas historique mondial* (Larousse) — memory `duby-atlas-is-a-reference-not-a-tracing-source`.
 
-## Downloaded, as PDF — `files/resources/Atlases/` (git-ignored), listed 2026-11-01
+## Downloaded, as PDF — `files/resources/other-historical-atlases-pdf/` (git-ignored), listed 2026-11-01
 
 Read from the file names only: authors, publishers and years not in the name are `?`, completed at first use. **A PDF grants
 no right**: a recent book is a reference whatever the file, until its publisher answers (`contribution/source-manager.md`).
