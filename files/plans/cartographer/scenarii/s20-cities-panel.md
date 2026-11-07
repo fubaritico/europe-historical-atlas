@@ -183,7 +183,7 @@ Scenario: nothing answers the filters
 
 > **Built 2026-11-07 (CARTO-370). Used by Claude in the app the same evening** on 1100: « Comté de Barcelone (12) » ticked
 > keeps its twelve cities, all in red — a holder to declare — and the funnel turns blue with « 1 ». The swatch, square
-> beside the box, read as a second box: drawn as a round dot since. **Not walked by the dev yet.** ‹esc› closing the
+> beside the box, read as a second box: drawn as a round dot since. **Tried by the dev the same evening** — *"it is much more practical like this"* once the dialogue's filter was added at his word — **and validated** (*"I validate 370"*). ‹esc› closing the
 > dialogue is the browser's `<dialog>`, unobservable in jsdom: to check in the
 > app, not tried yet. **What it does not do**: the filters are forgotten at a reload
 > (CARTO-371, which awaits the dev's decision on a browser's storage refused); the sort is CARTO-382; the filter by

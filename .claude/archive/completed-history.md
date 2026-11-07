@@ -2,6 +2,26 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-05 soir → 06/11 nuit — CARTO-345 fermé, les villes en points, les hachures, les épiques
+
+La même plage que les deux entrées du 05/11, **05/11 12:48 → 06/11 01:15** (12 h 26) ; le chantier ouvert le 05/10 totalise
+**211 h 34 sur 36 plages**. **Sur `main`, poussé** jusqu'au commit de clôture (`49b115a` → `62309fd`).
+
+- **CARTO-345 fait** : les points quelconques copiés et fondus par les plus proches, ‹⌘A›, les tracés ouverts (*« dès que
+  tu sors du tracé, ça le valide, et tu peux le reprendre »*), le vassal refusé sur un suzerain ouvert dans une fenêtre
+  d'avertissement à son icône, la fiche collée champ par champ, des libellés courts (*« dix fois trop longs »*) — **essayé
+  par lui** : Venise, Lori, les Seldjoukides (*« bonne surprise »*). La copie à part supprimée à sa demande.
+- **Les villes en points** (`be59d43`, CARTO-193) : la couleur du détenteur selon les sources — essayé sur Sarkel.
+- **CARTO-364 fait** (`f56678e`) : les chevauchements hachurés, N couleurs (*« ça n'arrivera jamais, mais il faut le
+  calculer comme ça »*), une forme refusée dite dans une fenêtre d'erreur — *« le principe, il marche »* ; les bandes
+  bougent au zoom : **CARTO-365**. Le contrôle des versions (8 failles, toutes dans le CMS ; le kit MCP forcé à la
+  prochaine relance). Une dette des tests réglée (`62309fd`, *« une erreur de débutant »*).
+- **Les chantiers deviennent des épiques** (*« ce sont des épiques »*) ; l'épique des villes, **CARTO-363**, et ses six
+  tickets, CARTO-370 en tête. L'historien : lots 3 à 6 vérifiés dans la base.
+- **Mes fautes** : sa demande sur le panneau Villes rangée dans Idées (*« c'est pas une idée, c'est un truc à faire »*) ;
+  une déclaration analytique collée aux hachures (*« tout de suite, tu fonces »*) ; une fusion au lieu d'un rebase, qui
+  l'a perdu ; des bandes à largeur fixe à l'écran, qui bougent au zoom.
+
 ### 2026-11-05 après-midi — le collage d'un pays entier et d'un tronçon, branchés et fusionnés
 
 La même plage que l'entrée ci-dessous, **05/11 12:48 → 19:07** (6 h 18) ; le chantier ouvert le 05/10 totalise **205 h 26 sur

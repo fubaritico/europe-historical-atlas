@@ -5,28 +5,30 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — après le 06/11 : le panneau Villes, CARTO-370 d'abord
+## ▶ ON REPREND ICI — après le 07/11 : CARTO-367, le point de couleur du détenteur, dans un worktree
 
-**Le sujet** (sa décision, redite le 06/11 au soir : _« c'est vraiment un outil… c'est génial ce que ça peut faire »_) :
-**l'épique CARTO-363, « Saisir les villes vite et juste »** — _l'appartenance des villes donne la topographie_. **D'abord
-CARTO-370** (l'entonnoir, la fenêtre des filtres avancés, le filtre par pays selon les sources), puis les autres tickets
-de l'épique dans À faire. **CARTO-371 attend sa décision** sur le stockage du navigateur refusé — la lui poser quand on y
-arrive. **Le rouge** du panneau = « pas au bon endroit » et « pays à déclarer » (sa capture du 06/11 : Almudévar, Bolea,
-Molina de Aragón).
+**Le sujet** : l'épique **CARTO-363, « Saisir les villes vite et juste »** (_l'appartenance des villes donne la topographie_).
+**CARTO-370 est fait** (`c6096fe`, validé par lui le 07/11). **Ensuite : CARTO-367** — entre l'œil et le nom de chaque ligne de
+{Cities}, le point de la couleur du détenteur selon les sources, cerné de blanc, le même que sur la carte (`holderColour`,
+`canvas/paint/scene.ts`) ; un cercle vide sans détenteur ou hors de la carte ; **au survol, une bulle** (`Tooltip` du design
+system) : « Comté de Champagne, vassal du Royaume de France » (le suzerain direct, lu dans le registre), « Comté de Barcelone
+— pas encore sur la carte », « Détenteur pas encore renseigné » — tout est sur le ticket. **Dans un worktree** tant que son
+Cartographe tourne (je l'ai oublié le 07/11 : `EnterWorktree`, lui dire où). Puis les autres tickets de l'épique dans À faire
+(368, 369, 371, 372, et CARTO-382, le tri, dont l'icône est la sienne — `ui/icons/listIcons.tsx` `sort`, le `Dropdown` du
+design system). **CARTO-371 attend sa décision** sur le stockage du navigateur refusé — la lui poser quand on y arrive.
 
-**Le tableau a été relu ticket par ticket le 06/11** (le Backlog épuré, _« on s'arrête là »_). La skill `/trello`
-compare désormais le tableau au code et aux commits, à chaque début et fin de session.
+**À lui, dans l'arbre de travail, non commité — sa décision** : la retouche de 1100 par l'historien (Almudévar, Bolea,
+Gurrea passés à Saragosse : `years/1100/polities.json`, et le scénario `s03` qu'il a écrit) ; `years/index.json` qui annonce
+**1200** (son « Enregistrer sous » ; le dossier `years/1200/` existe) — commiter l'un ou l'autre le publie. **Les numéros des
+ports fixes** (REPO-383 ; ma proposition : l'atlas 5173, le Cartographe 5174).
 
-**L'historien** (`europe-map-e6`) : des paires de villes qui se font face, chaque lot vérifié par moi en lecture seule ;
-c'est moi qui lui donne des tickets plus simples, entre ses pauses. **À lui transmettre à son retour** (le dev : « laisse-le
-finir ») — le lot « Navarre et Aragon », **trois fautes** : la source 206 (« Sos, castillo ») citée par aucune ligne → la
-rattacher à Sos ; Horta (273) et Siurana (204), la taïfa de Tortosa finie en 1099 → **qui l'a remplacée**, à deux ou trois
-degrés ; Velilla de Cinca (263), la ligne nomme la source de la taïfa de Lérida. Et **Caspe, Azaila, Híjar, Alcañiz,
-Morella** : un détenteur et son QID chacune, la recherche poussée, puis trancher. **Lui dire de relire** `/enter-in-cms`
-(« When the sources stop short ») et `/find-sources`. Après son export, **je commite `content/events.json`**.
+**Dessiner dans le Cartographe** (un agent, lui ou moi) : la skill **`/use-cartographer`** (07/11) ; son journal est
+`references/journal.md`, local. **Un seul agent par carte** : une carte s'enregistre seule deux secondes après chaque geste.
 
-**CMS-362 fait** : JSTOR ouvert, le Pass Recherche de la BnF commandé (retiré sur place, puis `bdl.bnf.fr`) —
-`.claude/skills/find-sources/references/reading-accounts.md`. Le rappel quotidien s'arrête.
+**L'historien** (`europe-map-e6`) : ses lots se vérifient en lecture seule dans la base, et je lui réponds ; il peut lire une
+copie en ligne d'un livre sous droits, jamais liée dans la base (sa décision du 07/11, `/find-sources`). **Dimanche 08/11**
+(sa décision du 06/11) : *« racler les fonds de tiroir »* — toutes les bibliothèques gratuites de `/find-sources`, les
+confrontations ; JSTOR gratuit, 9 lectures restantes en novembre. Après son export, **je commite `content/events.json`**.
 
 **À lui, en attente** : la carte de 1100 montre-t-elle le 1ᵉʳ janvier ou le 31 décembre (Barbastro, prise le 18/10/1100) ?
 `pnpm export:content` ; son icône `error.svg` à la place de la mienne ; **à arbitrer** : le suzerain du royaume d'Arles et
@@ -120,7 +122,7 @@ de `cd`.** **Jamais de `git add` d'une liste calculée** : nommer chaque fichier
 
 ## Where we are
 
-**6 261 tests** sur `main` (1 783 `core` · 2 424 Cartographe · 1 495 atlas · 372 CMS · 169 plugin `eslint-plugin-eha`, 05/11 au soir, après le collage), gate
+**6 489 tests** sur `main` (1 849 `core` · 2 604 Cartographe · 1 495 atlas · 372 CMS · 169 plugin `eslint-plugin-eha`, 07/11, après CARTO-370), gate
 verte sur cinq contrôles (`lint`, `type-check`, `test`, `build`, `format:check`). Le chunk worker reste sans
 three.js et le Cartographe émet le même, au même hash — vérifié par la CI.
 
@@ -151,8 +153,7 @@ paquet **réimporte** la racine et ESLint résout **une** config depuis le **ré
 production n'a jamais · la **couverture est fusionnée** par `scripts/merge-coverage.mjs`, parce que chaque
 paquet écrit `SF:src/…` et que Sonar résout depuis la racine (sinon **0 % sans erreur**).
 
-**Un seul serveur de dev** : le dev fait tourner le sien (`pnpm dev:cartographer`, souvent sur 5174). Ne pas
-en lancer un second ; lui donner l'adresse du sien.
+**Un seul serveur de dev, le sien** : jamais un second ; son port bouge (5173 le 07/11, REPO-383) — lire le titre d'abord.
 
 ## ▶ P4, LE CARTOGRAPHE — les cinq étapes
 

@@ -2,6 +2,32 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
+### 2026-11-07 — les filtres avancés des villes, la skill pour dessiner, les lots de l'historien vérifiés
+
+Une plage, **07/11 18:57 → 20:19** (1 h 22) ; le chantier ouvert le 05/10 totalise **218 h 19 sur 39 plages**. **Sur `main`,
+non poussé** : `c6096fe` (CARTO-370), `b6d0a2a` (la skill), et le commit de clôture ; l'historien a commité `a070c03` et
+`d7b6276` (ses notes de sources).
+
+- **CARTO-370 fait, essayé et validé par lui** (*« c'est beaucoup plus pratique comme ça »*, *« je valide le 370 »*) :
+  l'entonnoir (son dessin, de son projet React Native) ouvre « Filtres avancés » ; à ma proposition, prise par lui
+  (*« plus on peut visualiser les choses mieux, c'est tout l'intérêt de ce panneau »*), la rubrique « Pas encore sur la
+  carte » et « Sans détenteur » ; après son essai, **le filtre en tête de la fenêtre** (*« il nous faut le quick filter
+  pour les listes longues »*). Revue à cinq relecteurs, constats corrigés ; essayé par moi sur 1100 (le comté de Barcelone,
+  12 villes, toutes à déclarer).
+- **La skill `/use-cartographer`** (`b6d0a2a`), à sa demande (*« une skill »*, des mots déclencheurs « dessine »,
+  « retouche ») : le mode d'emploi vérifié contre le code — une carte s'enregistre seule deux secondes après chaque geste,
+  d'où un seul agent par carte et une copie avant d'y toucher ; le journal `drawing-as-claude.md` déplacé dans
+  `references/journal.md`, **toujours local** (sa décision du 12/10).
+- **Ses décisions** : l'historien **peut lire une copie en ligne** d'un livre sous droits (*« peu importe la manière, on a
+  besoin de références »*), jamais liée dans la base (`/find-sources`) ; la bulle du détenteur et de son suzerain au survol
+  du point (CARTO-367). Nouveaux tickets : CARTO-381 (panneau flottant hors de la fenêtre), CARTO-382 (le tri, dans
+  l'épique), REPO-383 (des ports fixes).
+- **L'historien** : les lots « Navarre et Aragon » et la source 286 (Monsalvo Antón) vérifiés en lecture seule ; Horta
+  corrigée ; il a retouché la frontière Aragon–Saragosse dans le Cartographe (non commité, à lui).
+- **Mes fautes** : un `cd` dans une commande ; tout fait dans son dépôt **au lieu d'un worktree** pendant que son
+  Cartographe tournait (il l'a relevé) ; ‹échap› écrit « vérifié dans l'appli » sans l'avoir essayé — corrigé avant le
+  commit.
+
 ### 2026-11-06 — le tableau remis d'aplomb, 1100 refaite depuis Cliopatria publiée
 
 Deux plages, **06/11 11:26 → 15:24 et 17:30 → 18:22** (4 h 49) ; le chantier ouvert le 05/10 totalise **216 h 48 sur 38
@@ -20,25 +46,4 @@ plages**. **Sur `main`, poussé** : `b02ce87` (1100 depuis Cliopatria) et le com
 - **Mes fautes** : CARTO-180 dit « vrai blocage » sur une mauvaise lecture de son « non » ; une explication de « moitié »
   qu'il n'a pas comprise (ATLAS-143) ; lui avoir prêté un refus d'outil ; « à toi de le passer dans Fait » pour un doublon.
 
-### 2026-11-05 soir → 06/11 nuit — CARTO-345 fermé, les villes en points, les hachures, les épiques
-
-La même plage que les deux entrées du 05/11, **05/11 12:48 → 06/11 01:15** (12 h 26) ; le chantier ouvert le 05/10 totalise
-**211 h 34 sur 36 plages**. **Sur `main`, poussé** jusqu'au commit de clôture (`49b115a` → `62309fd`).
-
-- **CARTO-345 fait** : les points quelconques copiés et fondus par les plus proches, ‹⌘A›, les tracés ouverts (*« dès que
-  tu sors du tracé, ça le valide, et tu peux le reprendre »*), le vassal refusé sur un suzerain ouvert dans une fenêtre
-  d'avertissement à son icône, la fiche collée champ par champ, des libellés courts (*« dix fois trop longs »*) — **essayé
-  par lui** : Venise, Lori, les Seldjoukides (*« bonne surprise »*). La copie à part supprimée à sa demande.
-- **Les villes en points** (`be59d43`, CARTO-193) : la couleur du détenteur selon les sources — essayé sur Sarkel.
-- **CARTO-364 fait** (`f56678e`) : les chevauchements hachurés, N couleurs (*« ça n'arrivera jamais, mais il faut le
-  calculer comme ça »*), une forme refusée dite dans une fenêtre d'erreur — *« le principe, il marche »* ; les bandes
-  bougent au zoom : **CARTO-365**. Le contrôle des versions (8 failles, toutes dans le CMS ; le kit MCP forcé à la
-  prochaine relance). Une dette des tests réglée (`62309fd`, *« une erreur de débutant »*).
-- **Les chantiers deviennent des épiques** (*« ce sont des épiques »*) ; l'épique des villes, **CARTO-363**, et ses six
-  tickets, CARTO-370 en tête. L'historien : lots 3 à 6 vérifiés dans la base.
-- **Mes fautes** : sa demande sur le panneau Villes rangée dans Idées (*« c'est pas une idée, c'est un truc à faire »*) ;
-  une déclaration analytique collée aux hachures (*« tout de suite, tu fonces »*) ; une fusion au lieu d'un rebase, qui
-  l'a perdu ; des bandes à largeur fixe à l'écran, qui bougent au zoom.
-
-
-> Older sessions (2026-09-12 → 2026-11-05 après-midi) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-11-06 nuit) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
