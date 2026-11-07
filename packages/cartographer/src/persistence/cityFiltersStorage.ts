@@ -61,6 +61,27 @@ export function readCityFilters(storage: PageStorage): StoredCityFilters | null 
   return { holders, states }
 }
 
+/** Where in the page's storage the order of the list is kept (CARTO-382) — a key of its own, beside the filters. */
+export const CITY_SORT_KEY = 'cartographer:city-sort'
+
+/**
+ * The order of the list kept from the last session, as written — the store checks it is one of its orders.
+ * @param storage - the page's storage
+ * @returns the order's name, or `null` when none is kept
+ */
+export function readCitySort(storage: PageStorage): string | null {
+  return storage.getItem(CITY_SORT_KEY)
+}
+
+/**
+ * Keep the order of the list for the next session.
+ * @param storage - the page's storage
+ * @param sort - the order's name
+ */
+export function writeCitySort(storage: PageStorage, sort: string): void {
+  storage.setItem(CITY_SORT_KEY, sort)
+}
+
 /**
  * Keep the filters for the next session.
  * @param storage - the page's storage

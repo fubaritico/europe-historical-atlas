@@ -197,6 +197,18 @@ Scenario: the filters kept at a refresh — CARTO-371, the dev, 2026-11-07: « j
   Then both are still ticked, the funnel says so, and the list shows the same cities
   And « Tout décocher » is the purge: nothing ticked, kept so at the next refresh
 
+Scenario: the sort — CARTO-382, the dev's icon, 2026-11-07: « l'icône du tri est le bouton qui ouvre un menu déroulant »
+  When I click the sort icon, beside the funnel
+  Then a menu offers « Ordre de l'export » (ticked at first), « Par nom », « Par vérification », « Par détenteur »
+  When I choose « Par nom »
+  Then the list is in alphabetical order, accents ignored, and the icon is in the accent
+  When I choose « Par vérification »
+  Then the map to correct comes first (« Pas au bon endroit », then « Détenteur pas encore sur la carte »), then the
+    cities with no holder, then « Comparaison impossible », then « Au bon endroit » — the export's order kept within each
+  When I choose « Par détenteur »
+  Then the cities are grouped by the holder the sources give, the groups by name, the cities with no holder last
+  And under a filter, the cities found are sorted; at a refresh, the order chosen is kept with the filters
+
 Scenario: the browser refuses its storage — the dev, 2026-11-07: « si le navigateur refuse, on ne le fait pas »
   Given site data blocked for the Cartographer in Chrome, or the storage full
   When I tick a filter, or move a panel, and refresh

@@ -29,6 +29,7 @@ export function useCityFilters(
   const document = store((state) => state.document)
   const holders = store((state) => state.cityHolders)
   const tickedStates = store((state) => state.cityStates)
+  const sort = store((state) => state.citySort)
   // The document is mutated in place: the version is what says a polity was added or recoloured.
   const version = store((state) => state.version)
 
@@ -36,6 +37,7 @@ export function useCityFilters(
   const onTick = store((state) => state.setCityHolderTicked)
   const onTickState = store((state) => state.setCityStateTicked)
   const onUntickAll = store((state) => state.untickCityFilters)
+  const onSort = store((state) => state.setCitySort)
 
   // Derived
   const choices = holderChoices(polityRows(document, colours.coloursOf(document, version)), cities)
@@ -52,5 +54,7 @@ export function useCityFilters(
     tickedStates: new Set([...tickedStates].filter((state) => isOfferedState(state))),
     onTickState,
     onUntickAll,
+    sort,
+    onSort,
   }
 }

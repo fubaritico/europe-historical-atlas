@@ -46,5 +46,11 @@
   "stateMisplaced": "Pas au bon endroit ({count})",
   "stateToDeclare": "Détenteur pas encore sur la carte ({count})",
   "stateCannotCompare": "Comparaison impossible ({count})",
-  "stateAgrees": "Au bon endroit ({count})"
+  "stateAgrees": "Au bon endroit ({count})",
+  "sortBy": "Trier les villes",
+  "sortOn": "Trier les villes : {order}",
+  "sortExport": "Ordre de l’export",
+  "sortName": "Par nom",
+  "sortVerification": "Par vérification",
+  "sortHolder": "Par détenteur"
 }

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
-import { CITY_FILTERS_KEY } from '../persistence/cityFiltersStorage'
+import { CITY_FILTERS_KEY, CITY_SORT_KEY } from '../persistence/cityFiltersStorage'
 import { UNFRAMED } from '../viewport/viewport'
 
 import { keepCityFilters } from './keepCityFilters'
@@ -67,6 +67,31 @@ describe('keepCityFilters', () => {
       store.getState().setCityStateTicked('misplaced', true)
       store.getState().untickCityFilters()
       expect(JSON.parse(items.get(CITY_FILTERS_KEY) ?? 'null')).toEqual({ holders: [], states: [] })
+    })
+  })
+
+  // CARTO-382: the order of the list, kept with the filters under a key of its own.
+  describe('the order', () => {
+    it('writes the order chosen, and puts it back at the next opening', () => {
+      const first = testStore()
+      const { storage, items } = memory()
+      keepCityFilters(first, storage)
+      first.getState().setCitySort('name')
+      expect(items.get(CITY_SORT_KEY)).toBe('name')
+      const next = testStore()
+      keepCityFilters(next, storage)
+      expect(next.getState().citySort).toBe('name')
+    })
+
+    it('opens in the export’s order, said in the console, on an order kept that is none', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { storage, items } = memory()
+      items.set(CITY_SORT_KEY, 'by-moon')
+      const store = testStore()
+      keepCityFilters(store, storage)
+      expect(store.getState().citySort).toBe('export')
+      expect(String(warn.mock.calls[0]?.[0])).toContain('is not one')
+      warn.mockRestore()
     })
   })
 

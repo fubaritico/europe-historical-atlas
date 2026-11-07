@@ -1,5 +1,6 @@
 import type { HolderChoices } from './utils/holderChoices'
 import type { StateChoice } from './utils/stateChoices'
+import type { CitySort } from '../../../state/citiesSlice'
 
 /*
  * The advanced filters' props, apart from their components — the list, the funnel and the dialogue read the same shape.
@@ -21,4 +22,8 @@ export interface CityFiltersProps {
   onTickState: (state: string, ticked: boolean) => void
   /** « Tout décocher » was clicked: every holder and every state unticked. */
   onUntickAll: () => void
+  /** The order of the list (CARTO-382) — it lives with the filters, and is kept at a refresh with them. */
+  sort: CitySort
+  /** An order was chosen in the sort menu. */
+  onSort: (sort: CitySort) => void
 }

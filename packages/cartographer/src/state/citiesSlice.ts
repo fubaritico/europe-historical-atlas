@@ -76,6 +76,8 @@ export interface CitiesState {
    * names them: it lists only the cities in one of them; none ticked, no filter by state.
    */
   cityStates: ReadonlySet<string>
+  /** The order of `{Cities}`' list (CARTO-382): the export's, by name, by verification, or by holder. */
+  citySort: CitySort
   /**
    * The city chosen — by a click on its point with the white arrow, or on its name in `{Cities}` (CARTO-384): its row
    * is marked and the list scrolls to it. `null` when none is.
@@ -135,6 +137,11 @@ export interface CitiesActions {
    */
   setCityFilters: (holders: readonly string[], states: readonly string[]) => void
   /**
+   * Order the list of `{Cities}` (CARTO-382).
+   * @param sort - the order
+   */
+  setCitySort: (sort: CitySort) => void
+  /**
    * Choose a city, or none.
    * @param id - the city's id, or `null`
    */
@@ -153,6 +160,24 @@ export type CitiesSlice = CitiesState & CitiesActions
 
 /** The key of « Sans détenteur » in the advanced filters: the cities nobody has entered a holder for. */
 export const NO_HOLDER = 'none'
+
+/**
+ * The orders `{Cities}`' list can take (CARTO-382, the dev, 2026-11-07): the export's as it comes, by name, by
+ * verification — the map to correct first — or grouped by the holder the sources give.
+ */
+export const CITY_SORTS = ['export', 'name', 'verification', 'holder'] as const
+
+/** One of {@link CITY_SORTS}. */
+export type CitySort = (typeof CITY_SORTS)[number]
+
+/**
+ * Whether a value is one of the orders — the one read back from the browser, of no known shape.
+ * @param value - anything
+ * @returns `true` for an order the list knows
+ */
+export function isCitySort(value: unknown): value is CitySort {
+  return (CITY_SORTS as readonly unknown[]).includes(value)
+}
 
 /**
  * A holder's key in the advanced filters (CARTO-370): its Wikidata id — what a map's polity is matched by, as the verdict
@@ -275,6 +300,10 @@ export const createCitiesSlice: StateCreator<
     set({ openedCity: null })
   },
   cityStates: new Set(),
+  citySort: 'export',
+  setCitySort: (sort): void => {
+    set({ citySort: sort })
+  },
   ...filterActions(set, get),
   setCitiesAsPoints: (asPoints): void => {
     set({ citiesAsPoints: asPoints })

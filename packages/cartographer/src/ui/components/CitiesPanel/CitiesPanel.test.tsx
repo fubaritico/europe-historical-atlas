@@ -737,6 +737,51 @@ describe('CitiesPanel — the advanced filters by state (CARTO-369)', () => {
   // L3, L4: N/A — ticking a box refuses nothing; the states come from the verdicts, tested in cityVerdict.
 })
 
+// CARTO-382, the dev, 2026-11-07 (`s20`, « The sort »): his icon opens the design system's Dropdown.
+describe('CitiesPanel — the sort (CARTO-382)', () => {
+  describe('happy path', () => {
+    it('sorts the list by name once « By name » is chosen in the menu', async () => {
+      const { store, user } = mount([PARIS, TREVISO, WESTMETZ, METZ])
+      await user.click(screen.getByRole('button', { name: 'Sort the cities: The export’s order' }))
+      await user.click(screen.getByRole('option', { name: 'By name' }))
+      expect(store.getState().citySort).toBe('name')
+      expect(listed()).toEqual(['Metz', 'Paris', 'Treviso', 'Westmetz'])
+    })
+  })
+
+  describe('variants', () => {
+    it('puts the map to correct first by verification: Westmetz misplaced, Treviso not drawn', () => {
+      const { store } = mount([PARIS, METZ, TREVISO, WESTMETZ])
+      act(() => {
+        store.getState().setCitySort('verification')
+      })
+      expect(listed()).toEqual(['Westmetz', 'Treviso', 'Paris', 'Metz'])
+    })
+
+    it('sorts the cities found, under a filter', () => {
+      const { store } = mount([PARIS, METZ, TREVISO, WESTMETZ])
+      act(() => {
+        store.getState().setCityHolderTicked('wd:Q12548', true)
+        store.getState().setCitySort('name')
+      })
+      expect(listed()).toEqual(['Metz', 'Westmetz'])
+    })
+  })
+
+  describe('edge cases', () => {
+    it('names the order in use on its button, and marks it active out of the export’s order', () => {
+      const { store } = mount([PARIS, METZ])
+      act(() => {
+        store.getState().setCitySort('holder')
+      })
+      const button = screen.getByRole('button', { name: 'Sort the cities: By holder' })
+      expect(button.closest('.city-sort')?.getAttribute('data-active')).toBe('true')
+    })
+  })
+
+  // L3, L4: N/A — choosing an order refuses nothing; an order read back that is none is keepCityFilters'.
+})
+
 describe('CitiesPanel — the city chosen and its box (CARTO-384)', () => {
   describe('happy path', () => {
     it('marks Metz and scrolls to its row when the map chooses it', () => {

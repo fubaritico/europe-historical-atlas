@@ -46,5 +46,11 @@
   "stateMisplaced": "Not at the right place ({count})",
   "stateToDeclare": "Holder not on the map yet ({count})",
   "stateCannotCompare": "Cannot be compared ({count})",
-  "stateAgrees": "At the right place ({count})"
+  "stateAgrees": "At the right place ({count})",
+  "sortBy": "Sort the cities",
+  "sortOn": "Sort the cities: {order}",
+  "sortExport": "The export’s order",
+  "sortName": "By name",
+  "sortVerification": "By verification",
+  "sortHolder": "By holder"
 }
