@@ -39,5 +39,6 @@
   "dotHolder": "{name}",
   "dotVassal": "{name} — suzerain : {suzerain}",
   "dotOffMap": "{name} — pas encore sur la carte",
-  "dotNotEntered": "Détenteur pas encore renseigné"
+  "dotNotEntered": "Détenteur pas encore renseigné",
+  "coordinates": "Coordonnées : {position}"
 }

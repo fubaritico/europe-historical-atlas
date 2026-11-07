@@ -52,6 +52,13 @@ describe('CityDialog', () => {
       expect(dialogue.textContent).toContain('On the map: Sacrum Imperium')
       expect(dialogue.textContent).toContain('At the right place.')
     })
+
+    // CARTO-368, the dev, 2026-11-07: the box says where the city is, not only whom it belongs to.
+    it("gives Metz's coordinates first, as the status bar writes a position", () => {
+      mount()
+      const lines = screen.getByRole('region', { name: 'Metz' }).querySelectorAll('p')
+      expect(lines[0]?.textContent).toBe('Coordinates: 6°11′E 49°07′N')
+    })
   })
 
   describe('variants', () => {
@@ -65,6 +72,21 @@ describe('CityDialog', () => {
   // L3–L4: N/A — it shows what it is handed.
 
   describe('edge cases', () => {
+    // The letters are French in either language, as the status bar's (`viewport/coordinateLabel`): `O`, never `W`.
+    it('writes a city west of Greenwich with its letter, never a minus sign', () => {
+      const onClose = vi.fn()
+      renderInEnglish(
+        <CityDialog
+          openedCity={{ ...METZ, name: 'Huesca', lon: -0.41, lat: 42.14 }}
+          openedVerdict={AGREES}
+          onClose={onClose}
+        />
+      )
+      expect(screen.getByRole('dialog', { name: 'Huesca' }).textContent).toContain(
+        'Coordinates: 0°25′O 42°08′N'
+      )
+    })
+
     it('shows nothing with no city open', () => {
       mount(false)
       expect(screen.queryByRole('dialog')).toBeNull()

@@ -1,5 +1,6 @@
 /**
- * Where the pointer is, written the way a map writes it.
+ * A position written the way a map writes it — where the pointer is, in the status bar, and where a city is, in its
+ * information box (CARTO-368), so the two read against each other.
  *
  * `s01` asks for `"2°21′E 48°51′N"` — degrees and minutes, with a hemisphere letter. Two decisions are
  * taken from the atlas rather than re-made, its margin labels having settled them on 2026-09-17:
@@ -10,7 +11,7 @@
  *   the one that differs from English and the one that would be silently wrong if copied.
  *
  * It is written here rather than shared with the atlas's `degreeLabel`: that one rounds to whole degrees
- * for a graduated margin, this one carries minutes for a live readout. Same subject, different jobs —
+ * for a graduated margin, this one carries minutes for a readout. Same subject, different jobs —
  * and unifying them would mean one function with a mode, which is how both end up awkward. If a third
  * caller appears, the shared piece moves to `core/geo`.
  */
@@ -41,7 +42,7 @@ export function degreesAndMinutes(degrees: number, positive: string, negative: s
 }
 
 /**
- * A position, written for the status bar.
+ * A position, written for the status bar and a city's information box.
  * @param lonLat - the position in degrees, longitude first
  * @returns the label, e.g. `2°21′E 48°51′N`
  */

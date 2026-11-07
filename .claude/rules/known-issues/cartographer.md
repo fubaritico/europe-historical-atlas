@@ -203,3 +203,8 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
 - **A name already in the map is refused in the status bar, not by the dialogue `s22` describes** (2026-11-05) — that
   dialogue sends the author to the paste of a stretch, which exists since `e833792`. **Trigger**: the sheet's paste,
   built with its own dialogue — both dialogues in one block. **Severity: à savoir.**
+- **The hemisphere letters stay French in the English interface** (2026-11-07, CARTO-368 review A11Y-001 · ARCH-001):
+  `viewport/coordinateLabel` writes `E`/`O` and `N`/`S` whatever the language, by its decision of 2026-09-17 (*"the
+  letters are French because the interface is"*), so the status bar and a city's box read « 0°25′O » under « Coordinates ».
+  **Trigger**: the language switch, ATLAS-266 — the letters from the catalogue, both callers and their tests in one pass,
+  the dev's call. **Severity: cosmétique.**

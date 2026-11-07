@@ -40,6 +40,7 @@ export function CityDialog({
             <Card.Body>
               <CityDetail
                 name={openedCity.name}
+                at={[openedCity.lon, openedCity.lat]}
                 verdict={openedVerdict}
                 sources={openedCity.holderSources}
               />

@@ -39,5 +39,6 @@
   "dotHolder": "{name}",
   "dotVassal": "{name} — overlord: {suzerain}",
   "dotOffMap": "{name} — not on the map yet",
-  "dotNotEntered": "Holder not entered yet"
+  "dotNotEntered": "Holder not entered yet",
+  "coordinates": "Coordinates: {position}"
 }

@@ -300,4 +300,24 @@ Scenario: an anchor wins over a city's point
 > ring, round the whole row, never round the name's text**. ‹enter› on the map, and the click that drops the city, are
 > his request of the same walk. ‹esc› and the click outside are the design system's `Modal` over
 > the browser's `<dialog>`, unobservable in jsdom. **What it does not do**: a city the filters hide is chosen but has no
-> row to scroll to; the coordinates in the box are CARTO-368.
+> row to scroll to; the coordinates in the box are CARTO-368, below.
+
+## Where the city is — its coordinates in the box (CARTO-368, the dev, 2026-11-07)
+
+> *"On a double-click, the city's sheet says whom it belongs to, but not where it is."* **Proposed by Claude**: written
+> as the status bar writes the pointer's position (`s01`, `viewport/coordinateLabel`) — degrees and minutes, a
+> hemisphere letter, never a minus sign, the letters French (`O` for *ouest*) whatever the language — so the box and
+> the bar can be read against each other; the box's first line.
+
+```gherkin
+Scenario: the box gives the city's coordinates
+  When I open Metz's information box
+  Then its first line reads "Coordinates: 6°11′E 49°07′N", then who holds it by the sources and on the map
+
+Scenario: a city west of Greenwich
+  When I open Huesca's box
+  Then it reads "Coordinates: 0°25′O 42°08′N" — a letter, never a minus sign
+```
+
+> **Built 2026-11-07 (CARTO-368). Walked by the dev the same evening** on Huesca: *"we do have the coordinates in the
+> little modal"*. **What it does not do**: the hemisphere letters stay French in English (`known-issues/cartographer.md`).
