@@ -449,6 +449,17 @@
   color: var(--accent);
 }
 
+/* The sort (CARTO-382): the Dropdown's own box takes no room of its own beside the funnel; in the accent while the list
+   is not in the export's order. */
+.city-sort {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.city-sort[data-active='true'] .list-filter__action {
+  color: var(--accent);
+}
+
 .list-filter__action:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -2px;

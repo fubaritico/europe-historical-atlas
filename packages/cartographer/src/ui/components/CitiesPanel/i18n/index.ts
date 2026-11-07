@@ -32,6 +32,8 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `byState`, `byStateHint` — The section of the states (CARTO-369), and what ticking one does.
  * - `stateMisplaced`, `stateToDeclare`, `stateCannotCompare`, `stateAgrees` — A state's box; `count` is how many cities
  *   of the year are in it.
+ * - `sortBy` — The sort menu's name (CARTO-382); `sortOn` — its button's, `order` the order in use.
+ * - `sortExport`, `sortName`, `sortVerification`, `sortHolder` — The orders in the menu.
  * - `byHolder`, `byHolderHint` — The section of the map's polities, and what ticking one does.
  * - `holderCount` — A box: `name` is the holder's, `count` how many cities of the year the sources give it.
  * - `noWikidata` — A polity of the map without a Wikidata id, greyed; `name` is its name.

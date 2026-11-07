@@ -15,6 +15,15 @@ export const STATE_ORDER = [
   'agrees',
 ] as const satisfies readonly CityVerdictKind[]
 
+/**
+ * Whether a state is one the dialogue offers — the closed set of {@link STATE_ORDER}, whatever the year holds.
+ * @param state - a state ticked, perhaps read back from the browser
+ * @returns `true` when a box stands for it
+ */
+export function isOfferedState(state: string): boolean {
+  return (STATE_ORDER as readonly string[]).includes(state)
+}
+
 /** A state the dialogue offers, and how many cities of the year are in it. */
 export interface StateChoice {
   /** The state, a city's verdict. */

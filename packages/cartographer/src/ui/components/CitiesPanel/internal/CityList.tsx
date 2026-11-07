@@ -4,12 +4,12 @@ import { useTranslation } from '../../../hooks/useTranslation'
 import { showRow } from '../../../utils/showRow'
 import { ListFilter } from '../../ListFilter'
 import { CITIES_PANEL_MESSAGES } from '../i18n'
-import { citiesFound } from '../utils/citiesFound'
+import { citiesListed } from '../utils/citiesListed'
 import { cityRowId } from '../utils/cityRowId'
 
 import { CityBoxes } from './CityBoxes'
-import { CityFilters } from './CityFilters'
 import { CityRow } from './CityRow'
+import { CityTools } from './CityTools'
 
 import type { CityFiltersProps } from '../cityFiltersProps'
 import type { CityListProps } from '../cityListProps'
@@ -41,7 +41,7 @@ export function CityList({ year, cities, filters, ...props }: CityListWithFilter
   const [query, setQuery] = useState('')
 
   // Derived
-  const found = citiesFound(cities, query, filters, props.verdicts)
+  const found = citiesListed(cities, query, filters, props.verdicts)
   const filtered = found.length < cities.length
   const allShown = found.length > 0 && found.every(({ id }) => props.shown.has(id))
 
@@ -68,7 +68,7 @@ export function CityList({ year, cities, filters, ...props }: CityListWithFilter
         value={query}
         onChange={setQuery}
         label={t('filter')}
-        actions={<CityFilters {...filters} />}
+        actions={<CityTools {...filters} />}
       />
       {found.length === 0 ? (
         <p className="panel__hint">

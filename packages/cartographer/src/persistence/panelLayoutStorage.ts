@@ -9,6 +9,8 @@
  * The shape is declared here structurally: persistence never imports the store (`eslint.config.js`).
  */
 
+import type { PageStorage } from './guardedStorage'
+
 /** Where in the page's storage the layout is kept. */
 export const PANEL_LAYOUT_KEY = 'cartographer:panel-layout'
 
@@ -36,19 +38,11 @@ export interface StoredPanelLayout<Id extends string> {
   readonly heights: Readonly<Partial<Record<Id, number>>>
 }
 
-/** The page's storage, reduced to what this reads and writes — `localStorage` in the page, a map in a test. */
-export interface LayoutStorage {
-  /**
-   * @param key - the key
-   * @returns the value, or `null`
-   */
-  getItem: (key: string) => string | null
-  /**
-   * @param key - the key
-   * @param value - the value
-   */
-  setItem: (key: string, value: string) => void
-}
+/**
+ * The page's storage, reduced to what this reads and writes — the guarded `localStorage` in the page (`guardedStorage`,
+ * CARTO-371: a refusal keeps nothing and is said once), a map in a test.
+ */
+export type LayoutStorage = PageStorage
 
 /**
  * Whether a value is a finite number.

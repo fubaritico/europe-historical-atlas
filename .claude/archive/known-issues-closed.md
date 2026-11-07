@@ -357,3 +357,10 @@ Entries closed and moved out of `known-issues.md`. Kept for the lessons they car
   **Closed 2026-11-06 by the dev's call (ATLAS-161 archived)**: as built today all is well — the board's depth stays 0, so
   the graduated band is never eaten, and the land's section is kept where land meets the map's edge. A thickness on the
   sheet's outer edge is not wanted: the sheet matches the page on purpose, so that no second edge shows (`scene/sheet/paperSheet.ts`).
+
+- **The panels' layout is written to `localStorage` with no guard** (2026-11-02, CARTO-342, review ARCH-003): storage
+  blocked by the browser, or full, throws — at opening it would stop the Cartographer, after a drag it would surface as
+  an error. Never seen in the dev's Chrome.
+  **Closed 2026-11-07 by the dev's call, with CARTO-371** (*"si le navigateur refuse, on ne le fait pas"*): the page's
+  storage goes through `persistence/guardedStorage` — a refusal keeps nothing, the Cartographer carries on as at first,
+  the console says it once. The cities' filters use the same guard.

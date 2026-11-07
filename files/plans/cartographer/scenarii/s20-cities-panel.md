@@ -191,6 +191,42 @@ Scenario: untick them all
   When I click « Tout décocher »
   Then no box is ticked, countries and states, the list shows every city of the year again, and the funnel is at rest
 
+Scenario: the filters kept at a refresh — CARTO-371, the dev, 2026-11-07: « je ne veux pas repartir de zéro »
+  Given the Empire and « Pas au bon endroit » ticked
+  When I refresh the page
+  Then both are still ticked, the funnel says so, and the list shows the same cities
+  And « Tout décocher » is the purge: nothing ticked, kept so at the next refresh
+
+Scenario: a suzerain ticks its descent — CARTO-388, the dev, 2026-11-08 (walked: « l'état intermédiaire… ça fonctionne »)
+  # The map's « Royaume de France » is the royal domain, its vassals carved out; a city is filtered by who holds it
+  # directly. Ticking France asks « under the crown », so its box stands for France and its whole descent.
+  When I tick « Royaume de France » in the advanced filters
+  Then the boxes of its vassals, and of their vassals, are ticked with it
+  And the list keeps the cities of the royal domain and of every vassal — Troyes by Champagne, Rouen by Normandy
+  When I untick « Comté de Champagne » alone
+  Then the cities of Champagne leave the list, and France's box shows the mixed state, a dash
+  When I click France's box again
+  Then its whole descent is ticked again
+  And unticking France unticks its whole descent
+
+Scenario: the sort — CARTO-382, the dev's icon, 2026-11-07: « l'icône du tri est le bouton qui ouvre un menu déroulant »
+  When I click the sort icon, beside the funnel
+  Then a menu offers « Ordre de l'export » (ticked at first), « Par nom », « Par vérification », « Par détenteur »
+  When I choose « Par nom »
+  Then the list is in alphabetical order, accents ignored, and the icon is in the accent
+  When I choose « Par vérification »
+  Then the map to correct comes first (« Pas au bon endroit », then « Détenteur pas encore sur la carte »), then the
+    cities with no holder, then « Comparaison impossible », then « Au bon endroit » — the export's order kept within each
+  When I choose « Par détenteur »
+  Then the cities are grouped by the holder the sources give, the groups by name, the cities with no holder last
+  And under a filter, the cities found are sorted; at a refresh, the order chosen is kept with the filters
+
+Scenario: the browser refuses its storage — the dev, 2026-11-07: « si le navigateur refuse, on ne le fait pas »
+  Given site data blocked for the Cartographer in Chrome, or the storage full
+  When I tick a filter, or move a panel, and refresh
+  Then nothing was kept — the filters as none, the panels as at first — and the Cartographer works as usual
+  And the console says it once: "the browser refuses its storage"
+
 Scenario: by state — CARTO-369, the dev, 2026-11-07
   When I open the advanced filters
   Then « Par vérification » (the map checked against the sources; my word, taken by the dev — « état » read as a State) heads

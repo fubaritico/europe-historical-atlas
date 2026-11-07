@@ -1,6 +1,6 @@
 import { polityRows } from '../../../utils/polityRows'
 import { holderChoices } from '../utils/holderChoices'
-import { stateChoices } from '../utils/stateChoices'
+import { isOfferedState, stateChoices } from '../utils/stateChoices'
 import { tickedHolders } from '../utils/tickedHolders'
 
 import type { CityMark } from '../../../../state/citiesSlice'
@@ -29,13 +29,16 @@ export function useCityFilters(
   const document = store((state) => state.document)
   const holders = store((state) => state.cityHolders)
   const tickedStates = store((state) => state.cityStates)
+  const sort = store((state) => state.citySort)
   // The document is mutated in place: the version is what says a polity was added or recoloured.
   const version = store((state) => state.version)
 
   // Store actions
   const onTick = store((state) => state.setCityHolderTicked)
+  const onTickHolders = store((state) => state.setCityHoldersTicked)
   const onTickState = store((state) => state.setCityStateTicked)
   const onUntickAll = store((state) => state.untickCityFilters)
+  const onSort = store((state) => state.setCitySort)
 
   // Derived
   const choices = holderChoices(polityRows(document, colours.coloursOf(document, version)), cities)
@@ -45,9 +48,15 @@ export function useCityFilters(
     choices,
     ticked: tickedHolders(holders, choices.keys),
     onTick,
+    onTickHolders,
     states: stateChoices(cities, verdicts),
-    tickedStates,
+    // Only the states the dialogue offers filter (review of CARTO-371): one read back from the browser that no box
+    // stands for would empty the list with nothing to untick. The closed set, not the year's counts — a state ticked
+    // with no city in it stays ticked.
+    tickedStates: new Set([...tickedStates].filter((state) => isOfferedState(state))),
     onTickState,
     onUntickAll,
+    sort,
+    onSort,
   }
 }

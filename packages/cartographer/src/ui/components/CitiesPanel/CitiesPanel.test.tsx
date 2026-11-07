@@ -3,7 +3,10 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
-import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
+import {
+  AQUITAINE_IDENTITY,
+  sharedBorderDocument,
+} from '@europe-historical-atlas/core/editor/documentFixtures'
 
 import { testStore } from '../../../canvas/testGestureContext'
 import { createPolityColourSource } from '../../../state/polityColourSource'
@@ -735,6 +738,165 @@ describe('CitiesPanel — the advanced filters by state (CARTO-369)', () => {
   })
 
   // L3, L4: N/A — ticking a box refuses nothing; the states come from the verdicts, tested in cityVerdict.
+})
+
+// CARTO-382, the dev, 2026-11-07 (`s20`, « The sort »): his icon opens the design system's Dropdown.
+describe('CitiesPanel — the sort (CARTO-382)', () => {
+  describe('happy path', () => {
+    it('sorts the list by name once « By name » is chosen in the menu', async () => {
+      const { store, user } = mount([PARIS, TREVISO, WESTMETZ, METZ])
+      await user.click(screen.getByRole('button', { name: 'Sort the cities: The export’s order' }))
+      await user.click(screen.getByRole('option', { name: 'By name' }))
+      expect(store.getState().citySort).toBe('name')
+      expect(listed()).toEqual(['Metz', 'Paris', 'Treviso', 'Westmetz'])
+    })
+  })
+
+  describe('variants', () => {
+    it('puts the map to correct first by verification: Westmetz misplaced, Treviso not drawn', () => {
+      const { store } = mount([PARIS, METZ, TREVISO, WESTMETZ])
+      act(() => {
+        store.getState().setCitySort('verification')
+      })
+      expect(listed()).toEqual(['Westmetz', 'Treviso', 'Paris', 'Metz'])
+    })
+
+    it('sorts the cities found, under a filter', () => {
+      const { store } = mount([PARIS, METZ, TREVISO, WESTMETZ])
+      act(() => {
+        store.getState().setCityHolderTicked('wd:Q12548', true)
+        store.getState().setCitySort('name')
+      })
+      expect(listed()).toEqual(['Metz', 'Westmetz'])
+    })
+  })
+
+  describe('edge cases', () => {
+    it('names the order in use on its button, and marks it active out of the export’s order', () => {
+      const { store } = mount([PARIS, METZ])
+      act(() => {
+        store.getState().setCitySort('holder')
+      })
+      const button = screen.getByRole('button', { name: 'Sort the cities: By holder' })
+      expect(button.closest('.city-sort')?.getAttribute('data-active')).toBe('true')
+    })
+  })
+
+  // L3, L4: N/A — choosing an order refuses nothing; an order read back that is none is keepCityFilters'.
+})
+
+/**
+ * A box of the advanced filters, by its label.
+ * @param dialogue - the dialogue
+ * @param name - the box's label
+ * @returns its input
+ */
+function box(dialogue: HTMLElement, name: string): HTMLInputElement {
+  return within(dialogue).getByRole('checkbox', { name })
+}
+
+// CARTO-388, the dev, 2026-11-08: « si je coche le royaume de France, ça devrait inclure ses vassaux aussi ».
+describe('CitiesPanel — a suzerain ticks its descent (CARTO-388)', () => {
+  const AQUITAINE = { name: 'Duché d’Aquitaine', wikidata: 'Q1033' }
+  const BORDEAUX: CityMark = {
+    ...PARIS,
+    id: 'bordeaux',
+    name: 'Bordeaux',
+    lon: 0.5,
+    holder: AQUITAINE,
+  }
+  const ROUEN: CityMark = { ...PARIS, id: 'rouen', name: 'Rouen', holder: FRANCE }
+
+  /**
+   * The panel over France and its vassal Aquitaine, with a city of each and Metz of the Empire.
+   * @returns the store and a user
+   */
+  function mountWithAVassal() {
+    const document = documentWithIds()
+    document.polities.push({ ...AQUITAINE_IDENTITY, wikidata: AQUITAINE.wikidata })
+    const store = testStore(document)
+    store.getState().setCities([ROUEN, BORDEAUX, METZ])
+    renderInEnglish(
+      <CitiesPanel store={store} colours={createPolityColourSource(AUTOMATIC_PALETTE)} />
+    )
+    return { store, user: userEvent.setup() }
+  }
+
+  describe('happy path', () => {
+    it('keeps Rouen and Bordeaux once France is ticked, Aquitaine ticked with it', async () => {
+      const { user } = mountWithAVassal()
+      const dialogue = await openFilters(user)
+      await user.click(box(dialogue, 'Reaume de France (1)'))
+      expect(box(dialogue, 'Duché d’Aquitaine (1)').checked).toBe(true)
+      expect(listedBehind()).toEqual(['Rouen', 'Bordeaux'])
+    })
+  })
+
+  describe('variants', () => {
+    it('shows France mixed once Aquitaine alone is unticked, and drops Bordeaux', async () => {
+      const { user } = mountWithAVassal()
+      const dialogue = await openFilters(user)
+      await user.click(box(dialogue, 'Reaume de France (1)'))
+      await user.click(box(dialogue, 'Duché d’Aquitaine (1)'))
+      const france = box(dialogue, 'Reaume de France (1)')
+      expect(france.indeterminate).toBe(true)
+      expect(france.checked).toBe(false)
+      expect(listedBehind()).toEqual(['Rouen'])
+    })
+
+    it('ticks the whole descent again from the mixed state', async () => {
+      const { user } = mountWithAVassal()
+      const dialogue = await openFilters(user)
+      await user.click(box(dialogue, 'Reaume de France (1)'))
+      await user.click(box(dialogue, 'Duché d’Aquitaine (1)'))
+      await user.click(box(dialogue, 'Reaume de France (1)'))
+      expect(box(dialogue, 'Reaume de France (1)').checked).toBe(true)
+      expect(listedBehind()).toEqual(['Rouen', 'Bordeaux'])
+    })
+  })
+
+  describe('edge cases', () => {
+    // Review of CARTO-388: the tree is the whole list's, never the rows the dialogue's filter kept.
+    it('ticks Aquitaine with France even while the dialogue’s filter hides Aquitaine', async () => {
+      const { store, user } = mountWithAVassal()
+      const dialogue = await openFilters(user)
+      await user.type(
+        within(dialogue).getByRole('searchbox', { name: 'Filter the countries' }),
+        'reaume'
+      )
+      expect(within(dialogue).queryByRole('checkbox', { name: 'Duché d’Aquitaine (1)' })).toBeNull()
+      await user.click(box(dialogue, 'Reaume de France (1)'))
+      expect([...store.getState().cityHolders].sort()).toEqual(['wd:Q1033', 'wd:Q70972'])
+    })
+
+    it('ticks France and its descent in one change of the store', async () => {
+      const { store, user } = mountWithAVassal()
+      const changes = vi.fn()
+      store.subscribe((state) => state.cityHolders, changes)
+      const dialogue = await openFilters(user)
+      await user.click(box(dialogue, 'Reaume de France (1)'))
+      expect(changes).toHaveBeenCalledTimes(1)
+    })
+
+    it('unticks France and its descent together', async () => {
+      const { store, user } = mountWithAVassal()
+      const dialogue = await openFilters(user)
+      await user.click(box(dialogue, 'Reaume de France (1)'))
+      await user.click(box(dialogue, 'Reaume de France (1)'))
+      expect(store.getState().cityHolders.size).toBe(0)
+      expect(listedBehind()).toEqual(['Rouen', 'Bordeaux', 'Metz'])
+    })
+
+    it('ticks a vassal alone, its suzerain shown mixed', async () => {
+      const { user } = mountWithAVassal()
+      const dialogue = await openFilters(user)
+      await user.click(box(dialogue, 'Duché d’Aquitaine (1)'))
+      expect(box(dialogue, 'Reaume de France (1)').indeterminate).toBe(true)
+      expect(listedBehind()).toEqual(['Bordeaux'])
+    })
+  })
+
+  // L3, L4: a polity missing from the tree is keysOf's error, tested in holderTree.
 })
 
 describe('CitiesPanel — the city chosen and its box (CARTO-384)', () => {
