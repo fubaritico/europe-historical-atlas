@@ -21,6 +21,16 @@ opened is written here, in « Opened », as he opens them.
   loan are open from his personal space now**, before the card is collected; collecting it (pôle INFORMATION, hall of
   François-Mitterrand or Richelieu, with an ID) only adds the reading rooms, the museum and the exhibitions. So
   `bdl.bnf.fr` is usable from his Chrome, logged in by him — one article at a time, as for JSTOR.
+  **First logged in on 2026-11-07, at `catalogue.bnf.fr`.** **Before every use of the BnF, remind him to check that he is
+  still logged in** (the dev, 07/11: *"remind me to check the connection, I may well have forgotten"*) — say it before
+  opening the page, not after a refusal.
+  **Measured on the first trial (07/11)**: logged in, `bdl.bnf.fr` passes the BnF sign-on (`idppub.bnf.fr`) by itself and
+  opens the EBSCO Discovery Service through the proxy `bnf.idm.oclc.org`. Its results page comes with a **« Full Text »
+  filter on by default** that empties most searches — « Clear all filters » first. Its article search is thin for local
+  medieval Iberia (« Tortosa Almoravid »: one hit, a general chronology). The **Encyclopaedia of Islam is not in the
+  offer** (the title search finds nothing). What the Publication Finder does list, remote with the Pass: **JSTOR Public
+  Library Collection 1**, Brill Online Journals, Cairn books, the ISTEX national licences, Gale and ProQuest archives —
+  find a journal there by title, then read the article. Gallica stays free without it.
 
 ## The candidates, best value first
 

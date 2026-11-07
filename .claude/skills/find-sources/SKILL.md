@@ -43,6 +43,8 @@ the reasoning goes in the year's file (`files/plans/sources/1100.md`). Concepts:
    page image. Kind `historian-atlas`. **An atlas in copyright is a reference**: its facts are cited, its plates never
    traced (Shepherd 1911 and the 1909 *Atlas of European History* are public domain). Forgotten on 07/11 until the dev
    reminded me — the reason this step stands before the libraries.
+   **His paper atlases** (same file, « Ordered or owned »: García de Cortázar for Iberia, Nicolle for Islam, the Duby…):
+   I cannot open them — ask him for a photo of the plate, its legend and its date, read from `~/Desktop`.
 4. **Search the open libraries, in this order**, stopping a library when it has given what it has:
 
    | library | what it holds | how to search it |
