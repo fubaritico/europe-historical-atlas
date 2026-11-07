@@ -38,6 +38,11 @@ Scenario: show every city at once
   Then every city of 1100 is drawn
   And the same eye hides them all
 
+Scenario: the list takes the panel's height — CARTO-385, the dev, 2026-11-07 (walked: « c bon ca fonctionne »)
+  When I drag {Cities} taller
+  Then the list reaches the bottom of the panel, a city's detail staying under it
+  And when I drag it short, the list keeps three rows and the panel scrolls
+
 Scenario: who holds a city — at the right place
   Given the sources say Metz was held by the Holy Roman Empire, Q12548, by Duby p. 46
   And the map's polity under Metz carries Q12548

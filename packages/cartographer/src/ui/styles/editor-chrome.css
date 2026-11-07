@@ -1425,13 +1425,26 @@
   text-align: right;
 }
 
-/* {Cities} (CARTO-193): the layers' rows, an eye and a name; the list scrolls past a dozen cities. */
+/* {Cities} (CARTO-193): the layers' rows, an eye and a name. */
 .city-row {
   grid-template-columns: 24px minmax(0, 1fr);
 }
 
+/*
+ * The list takes the height the panel has, whatever the author drags it to (CARTO-385, the dev, 2026-11-07: it stopped at
+ * 240px). The body is a column so the list can grow; the filter, the boxes and the detail keep their own height, the
+ * detail staying under the list. A panel left to its own height starts from 240px of list, as before. Never under three
+ * rows (review of CARTO-385): in a short panel, a city's detail open, the list would shrink to nothing; at its floor the
+ * body scrolls instead, as before. It works only while the list is a direct child of the body — pinned by a test.
+ */
+.panel__body:has(> .city-list) {
+  display: flex;
+  flex-direction: column;
+}
+
 .city-list {
-  max-height: 240px;
+  flex: 1 1 240px;
+  min-height: 72px;
   overflow-y: auto;
 }
 

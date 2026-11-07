@@ -46,3 +46,36 @@ describe('editor-chrome.css — the {Polities} list', () => {
 
   // L4: N/A — a static sheet read at build time, nothing asynchronous or optional.
 })
+
+// CARTO-385: the {Cities} list stopped at 240px however tall the panel was dragged.
+describe('editor-chrome.css — the {Cities} list', () => {
+  describe('happy path', () => {
+    it('grows to the height the panel has and scrolls inside it', () => {
+      const list = rule('.city-list')
+      expect(list).toContain('flex: 1 1 240px;')
+      expect(list).toContain('overflow-y: auto;')
+    })
+  })
+
+  describe('variants', () => {
+    it('lays the panel body holding the list in a column, so the list can grow in it', () => {
+      const body = rule('.panel__body:has(> .city-list)')
+      expect(body).toContain('display: flex;')
+      expect(body).toContain('flex-direction: column;')
+    })
+  })
+
+  describe('edge cases', () => {
+    it('no longer caps the list at a fixed height', () => {
+      expect(rule('.city-list')).not.toContain('max-height')
+    })
+
+    // Review of CARTO-385: with `min-height: 0`, a short panel with a city's detail open shrank the list to nothing.
+    it('keeps three rows of 24px at least, so a short panel scrolls rather than hiding the list', () => {
+      expect(rule('.city-list')).toContain('min-height: 72px;')
+    })
+  })
+
+  // L3: N/A — the reader's own error is tested once, under {Polities}.
+  // L4: N/A — a static sheet read at build time, nothing asynchronous or optional.
+})

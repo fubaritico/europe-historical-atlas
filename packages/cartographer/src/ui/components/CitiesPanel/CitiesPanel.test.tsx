@@ -248,6 +248,22 @@ function filter(): HTMLElement {
 }
 
 // CARTO-360, the dev, 2026-11-05: a field at the head of the list; the eye at its head acts on the cities found.
+// CARTO-385: the list grows to the panel's height only as a direct child of the panel's body — the stylesheet's
+// `.panel__body:has(> .city-list)` makes that body a column. A wrapper between them would bring the 240px cap back.
+describe('CitiesPanel — the list in the panel (CARTO-385)', () => {
+  describe('happy path', () => {
+    it('renders the list of 1100 as a direct child of the panel body', () => {
+      mount()
+      const list = screen.getByRole('list', { name: 'Cities' })
+      expect(list.classList.contains('city-list')).toBe(true)
+      expect(list.parentElement?.classList.contains('panel__body')).toBe(true)
+    })
+  })
+
+  // L2: N/A — one layout, whatever the cities. L3, L4: N/A — nothing to fail in rendering the list.
+  // L5: the stylesheet's own floor and basis are pinned in editor-chrome.test.ts.
+})
+
 describe('CitiesPanel — the filter (CARTO-360)', () => {
   describe('happy path', () => {
     it('lists only Paris for « par », and its box shows Paris alone', async () => {
