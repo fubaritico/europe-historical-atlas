@@ -43,6 +43,18 @@ Scenario: the list takes the panel's height — CARTO-385, the dev, 2026-11-07 (
   Then the list reaches the bottom of the panel, a city's detail staying under it
   And when I drag it short, the list keeps three rows and the panel scrolls
 
+Scenario: the holder's dot on each row — CARTO-367, the dev, 2026-11-07
+  When {Cities} lists the cities of 1100
+  Then between the eye and the name, each row has a dot of its holder's colour by the sources, ringed in light ink —
+    the colour of its point on the canvas
+  And a hollow ring when no holder is entered, when the holder has no Wikidata id, or when no polity of the map carries it
+
+Scenario: the holder's bubble
+  When I hover Troyes's dot
+  Then a bubble says "Comté de Champagne — suzerain : Royaume de France", the direct suzerain read in the map's registry
+  And over a city of Barcelona's: "Comté de Barcelone — pas encore sur la carte"
+  And over a city with no holder: "Détenteur pas encore renseigné"
+
 Scenario: who holds a city — at the right place
   Given the sources say Metz was held by the Holy Roman Empire, Q12548, by Duby p. 46
   And the map's polity under Metz carries Q12548

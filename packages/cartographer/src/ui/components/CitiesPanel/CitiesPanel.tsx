@@ -5,6 +5,7 @@ import { Panel } from '../Panel'
 
 import { useCitiesView } from './hooks/useCitiesView'
 import { useCityFilters } from './hooks/useCityFilters'
+import { useHolderDots } from './hooks/useHolderDots'
 import { CITIES_PANEL_MESSAGES } from './i18n'
 import { CityDetailOrHint } from './internal/CityDetailOrHint'
 import { CityList } from './internal/CityList'
@@ -27,7 +28,7 @@ import type { CartographerStoreHook } from '../../../state/store'
 export interface CitiesPanelProps {
   /** The store the cities and the document live in. */
   store: CartographerStoreHook
-  /** The polities' colours, for the advanced filters' swatches — the canvas reads the same source. */
+  /** The polities' colours, for the advanced filters' swatches and the rows' dots — the canvas reads the same source. */
   colours: PolityColourSource
 }
 
@@ -64,6 +65,7 @@ export function CitiesPanel({ store, colours }: CitiesPanelProps) {
   const { cities, verdicts, openedCity, openedVerdict } = useCitiesView(all, document, opened)
   const status = citiesStatus(load, cities.length, document.year)
   const filters = useCityFilters(store, colours, cities)
+  const dotOf = useHolderDots(store, colours)
 
   // Handlers
   const handleClose = () => {
@@ -83,6 +85,7 @@ export function CitiesPanel({ store, colours }: CitiesPanelProps) {
             shown={shown}
             opened={opened}
             verdicts={verdicts}
+            dotOf={dotOf}
             onShown={setCityShown}
             onAllShown={setCitiesShown}
             asPoints={asPoints}

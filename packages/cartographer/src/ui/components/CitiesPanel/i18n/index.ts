@@ -37,6 +37,8 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `untickAll`, `closeFilters` — The dialogue's two buttons.
  * - `filterHolders` — The filter field at the head of the dialogue: its accessible name.
  * - `noHolderMatch` — Said in a section when no country of it answers the filter; `query` is what was typed.
+ * - `dotHolder`, `dotVassal`, `dotOffMap`, `dotNotEntered` — The bubble over a row's dot (CARTO-367): `name` is the
+ *   holder's, `suzerain` its direct suzerain's in the map's registry; `noWikidata` serves a holder without an id.
  */
 export type CitiesPanelMessageKey = keyof typeof en
 

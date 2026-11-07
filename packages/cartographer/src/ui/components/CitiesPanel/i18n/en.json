@@ -35,5 +35,9 @@
   "closeFilters": "Close",
   "noMatchFilters": "No city answers the filters.",
   "filterHolders": "Filter the countries",
-  "noHolderMatch": "No country answers “{query}”."
+  "noHolderMatch": "No country answers “{query}”.",
+  "dotHolder": "{name}",
+  "dotVassal": "{name} — overlord: {suzerain}",
+  "dotOffMap": "{name} — not on the map yet",
+  "dotNotEntered": "Holder not entered yet"
 }

@@ -15,6 +15,7 @@ import {
   backdropRect,
   buildScene,
   holderColour,
+  polityCarrying,
   projectedBorders,
   projectedFills,
   projectedHatches,
@@ -525,6 +526,21 @@ describe('tribes in the scene', () => {
     })
   })
 })
+// CARTO-367: the one rule by which a holder of the sources is found on the map — the point's and the dot's alike.
+describe('polityCarrying', () => {
+  it('finds the Empire by its Wikidata id', () => {
+    const document = sharedBorderDocument()
+    const hre = document.polities.find((polity) => polity.id === 'hre')
+    if (hre !== undefined) hre.wikidata = 'Q12548'
+
+    expect(polityCarrying(document, 'Q12548')?.id).toBe('hre')
+  })
+
+  it('finds nobody for an id no polity of the map carries', () => {
+    expect(polityCarrying(sharedBorderDocument(), 'Q999')).toBeUndefined()
+  })
+})
+
 // The dev, 2026-11-05: a city's point takes the colour of the polity holding it by the sources, matched by Wikidata.
 describe('holderColour', () => {
   it('gives the colour of the map’s polity carrying the holder’s Wikidata id', () => {

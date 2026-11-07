@@ -1,4 +1,4 @@
-import { act, screen, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 
@@ -262,6 +262,88 @@ describe('CitiesPanel — the list in the panel (CARTO-385)', () => {
 
   // L2: N/A — one layout, whatever the cities. L3, L4: N/A — nothing to fail in rendering the list.
   // L5: the stylesheet's own floor and basis are pinned in editor-chrome.test.ts.
+})
+
+/**
+ * The dot of a city's row.
+ * @param city - the city's name
+ * @returns its dot
+ */
+function dotOfRow(city: string): HTMLElement {
+  const name = screen.getByRole('button', { name: city })
+  const dot = name.closest('li')?.querySelector<HTMLElement>('.city-row__dot')
+  if (dot === null || dot === undefined) throw new Error(`no dot on the row of ${city}`)
+  return dot
+}
+
+describe('CitiesPanel — the holder’s dot (CARTO-367)', () => {
+  describe('happy path', () => {
+    it('colours Metz’s dot in the Empire’s colour, the one its point has on the canvas', () => {
+      const { store } = mount()
+      const empire = store.getState().document.polities.find(({ id }) => id === 'hre')
+      if (empire === undefined) throw new Error('the fixture lost the Empire')
+      const colour = createPolityColourSource(AUTOMATIC_PALETTE)
+        .coloursOf(store.getState().document, store.getState().version)
+        .get(empire.id)
+      if (colour === undefined) throw new Error('the palette gave the Empire no colour')
+      const dot = dotOfRow('Metz')
+      expect(dot.getAttribute('data-empty')).toBe('false')
+      // jsdom writes an inline colour as rgb(): the expected one is written the same way, through a probe.
+      const probe = window.document.createElement('span')
+      probe.style.background = colour
+      expect(dot.style.background).toBe(probe.style.background)
+    })
+
+    it('names the Empire in a bubble when Metz’s dot is hovered', async () => {
+      const { user } = mount()
+      await user.hover(dotOfRow('Metz'))
+      expect((await screen.findByRole('tooltip')).textContent).toBe('Sacrum Imperium')
+    })
+  })
+
+  describe('variants', () => {
+    it('rings Paris’s dot hollow and says its holder is not entered yet', async () => {
+      const { user } = mount()
+      const dot = dotOfRow('Paris')
+      expect(dot.getAttribute('data-empty')).toBe('true')
+      expect(dot.style.background).toBe('')
+      await user.hover(dot)
+      expect((await screen.findByRole('tooltip')).textContent).toBe('Holder not entered yet')
+    })
+  })
+
+  describe('edge cases', () => {
+    // Review of CARTO-367: the document is edited in place, so only the version says the suzerain changed.
+    it('names France as the Empire’s overlord once the Empire is made its vassal in the map', async () => {
+      const { store, user } = mount()
+      const empire = store.getState().document.polities.find(({ id }) => id === 'hre')
+      if (empire === undefined) throw new Error('the fixture lost the Empire')
+      act(() => {
+        store
+          .getState()
+          .editPolity(
+            { ...empire, suzerain: 'fr-couronne' },
+            { kind: 'edit-polity', label: 'edit polity' }
+          )
+      })
+      await user.hover(dotOfRow('Metz'))
+      expect((await screen.findByRole('tooltip')).textContent).toBe(
+        'Sacrum Imperium — overlord: Reaume de France'
+      )
+    })
+
+    it('takes the bubble away once the pointer leaves the dot', async () => {
+      const { user } = mount()
+      await user.hover(dotOfRow('Metz'))
+      await screen.findByRole('tooltip')
+      await user.unhover(dotOfRow('Metz'))
+      await waitFor(() => {
+        expect(screen.queryByRole('tooltip')).toBeNull()
+      })
+    })
+  })
+
+  // L3, L4: the dot's own cases — a holder off the map, without an id, a suzerain the registry lacks — are holderDot's.
 })
 
 describe('CitiesPanel — the filter (CARTO-360)', () => {

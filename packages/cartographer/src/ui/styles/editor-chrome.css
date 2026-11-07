@@ -1425,9 +1425,25 @@
   text-align: right;
 }
 
-/* {Cities} (CARTO-193): the layers' rows, an eye and a name. */
+/* {Cities} (CARTO-193): the layers' rows, an eye, the holder's dot (CARTO-367) and a name. */
 .city-row {
-  grid-template-columns: 24px minmax(0, 1fr);
+  grid-template-columns: 24px 12px minmax(0, 1fr);
+}
+
+/*
+ * The holder's dot (CARTO-367, the dev, 2026-11-07): its colour ringed in the light ink, as the city's point on the canvas
+ * is ringed; a hollow ring when no holder is entered or the map lacks it — nothing coloured that the sources do not say.
+ */
+.city-row__dot {
+  justify-self: center;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px var(--ink);
+}
+
+.city-row__dot[data-empty='true'] {
+  background: transparent;
 }
 
 /*

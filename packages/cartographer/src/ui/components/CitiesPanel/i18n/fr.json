@@ -35,5 +35,9 @@
   "closeFilters": "Fermer",
   "noMatchFilters": "Aucune ville ne répond aux filtres.",
   "filterHolders": "Filtrer les pays",
-  "noHolderMatch": "Aucun pays ne répond à « {query} »."
+  "noHolderMatch": "Aucun pays ne répond à « {query} ».",
+  "dotHolder": "{name}",
+  "dotVassal": "{name} — suzerain : {suzerain}",
+  "dotOffMap": "{name} — pas encore sur la carte",
+  "dotNotEntered": "Détenteur pas encore renseigné"
 }

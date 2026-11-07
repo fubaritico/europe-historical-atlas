@@ -111,8 +111,22 @@ export function holderColour(
   holder: string | null
 ): string | null {
   if (holder === null) return null
-  const polity = document.polities.find((each) => each.wikidata === holder)
+  const polity = polityCarrying(document, holder)
   return polity === undefined ? null : (colours.get(polity.id) ?? null)
+}
+
+/**
+ * The polity of the map that carries a holder's Wikidata id — the one rule by which a holder of the sources is found on
+ * the map, for the city's point here and for its dot and bubble in `{Cities}` (CARTO-367).
+ * @param document - the map
+ * @param wikidata - the holder's Wikidata id by the sources
+ * @returns the first polity carrying it, or `undefined` when none of the map does
+ */
+export function polityCarrying(
+  document: YearDocument,
+  wikidata: string
+): YearDocument['polities'][number] | undefined {
+  return document.polities.find((each) => each.wikidata === wikidata)
 }
 
 /**

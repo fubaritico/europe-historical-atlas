@@ -1,4 +1,5 @@
 import type { CityVerdict } from './utils/cityVerdict'
+import type { HolderDot } from './utils/holderDot'
 import type { CityMark } from '../../../state/citiesSlice'
 
 /*
@@ -16,6 +17,8 @@ export interface CityListProps {
   opened: string | null
   /** Each city's verdict, by id — a city the map puts elsewhere, or whose holder it lacks, is marked. */
   verdicts: ReadonlyMap<string, CityVerdict>
+  /** A city's dot: its holder's colour by the sources, and what its bubble says (CARTO-367). */
+  dotOf: (city: CityMark) => HolderDot
   /** A city's eye was toggled. */
   onShown: (id: string, shown: boolean) => void
   /** The box heading the list was ticked or not: every city listed, shown or hidden at once. */
