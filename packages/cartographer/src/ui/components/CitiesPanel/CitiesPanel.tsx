@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 import { useTranslation } from '../../hooks/useTranslation'
 import { Panel } from '../Panel'
 
@@ -7,7 +5,7 @@ import { useCitiesView } from './hooks/useCitiesView'
 import { useCityFilters } from './hooks/useCityFilters'
 import { useHolderDots } from './hooks/useHolderDots'
 import { CITIES_PANEL_MESSAGES } from './i18n'
-import { CityDetailOrHint } from './internal/CityDetailOrHint'
+import { CityDialog } from './internal/CityDialog'
 import { CityList } from './internal/CityList'
 import { citiesStatus } from './utils/citiesStatus'
 
@@ -20,9 +18,9 @@ import type { CartographerStoreHook } from '../../../state/store'
  * the map; a city the map puts elsewhere, or whose holder the map lacks, is marked in yellow in the list, a city with
  * no holder entered in red (CARTO-386).
  *
- * The shell/view/binding split (`react-canvas-and-panels`): {@link CityList} and {@link CityDetail} take values,
- * {@link CitiesPanel} is the one place that knows there is a store. Which city's detail is open is the panel's own:
- * one writer, one reader, no slice.
+ * The shell/view/binding split (`react-canvas-and-panels`): {@link CityList} and {@link CityDialog} take values,
+ * {@link CitiesPanel} is the one place that knows there is a store. Which city is chosen and which one's box is open
+ * are the store's (CARTO-384): the white arrow writes them from the canvas, a click on the point or a double-click.
  */
 
 /** What `{Cities}` is handed. */
@@ -48,6 +46,8 @@ export function CitiesPanel({ store, colours }: CitiesPanelProps) {
   const shown = store((state) => state.shownCities)
   const asPoints = store((state) => state.citiesAsPoints)
   const document = store((state) => state.document)
+  const selected = store((state) => state.selectedCity)
+  const opened = store((state) => state.openedCity)
   // Rendered again on each version: the document is mutated in place, so its identity does not say it changed.
   store((state) => state.version)
 
@@ -55,23 +55,18 @@ export function CitiesPanel({ store, colours }: CitiesPanelProps) {
   const setCityShown = store((state) => state.setCityShown)
   const setCitiesShown = store((state) => state.setCitiesShown)
   const setCitiesAsPoints = store((state) => state.setCitiesAsPoints)
+  const selectCity = store((state) => state.selectCity)
+  const openCity = store((state) => state.openCity)
+  const closeCity = store((state) => state.closeCity)
 
   // Context
   const t = useTranslation(CITIES_PANEL_MESSAGES)
-
-  // State
-  const [opened, setOpened] = useState<string | null>(null)
 
   // Derived
   const { cities, verdicts, openedCity, openedVerdict } = useCitiesView(all, document, opened)
   const status = citiesStatus(load, cities.length, document.year)
   const filters = useCityFilters(store, colours, cities)
   const dotOf = useHolderDots(store, colours)
-
-  // Handlers
-  const handleClose = () => {
-    setOpened(null)
-  }
 
   // Render
   return (
@@ -84,6 +79,7 @@ export function CitiesPanel({ store, colours }: CitiesPanelProps) {
             year={document.year}
             cities={cities}
             shown={shown}
+            selected={selected}
             opened={opened}
             verdicts={verdicts}
             dotOf={dotOf}
@@ -91,14 +87,12 @@ export function CitiesPanel({ store, colours }: CitiesPanelProps) {
             onAllShown={setCitiesShown}
             asPoints={asPoints}
             onAsPoints={setCitiesAsPoints}
-            onOpen={setOpened}
+            onSelect={selectCity}
+            onOpen={openCity}
             filters={filters}
           />
-          <CityDetailOrHint
-            openedCity={openedCity}
-            openedVerdict={openedVerdict}
-            onClose={handleClose}
-          />
+          <p className="panel__hint">{t('hint')}</p>
+          <CityDialog openedCity={openedCity} openedVerdict={openedVerdict} onClose={closeCity} />
         </>
       )}
     </Panel>

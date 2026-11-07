@@ -1,6 +1,6 @@
 import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
@@ -8,11 +8,15 @@ import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/docum
 import { testStore } from '../../../canvas/testGestureContext'
 import { createPolityColourSource } from '../../../state/polityColourSource'
 import { renderInEnglish } from '../../testing/renderInEnglish'
+import { showRow } from '../../utils/showRow'
 
 import { CitiesPanel } from './CitiesPanel'
 
 import type { CityMark } from '../../../state/citiesSlice'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+
+// The scroll is jsdom's blind spot (nothing is laid out): what is checked is which row it is asked for.
+vi.mock('../../utils/showRow', () => ({ showRow: vi.fn() }))
 
 const in1100 = {
   kind: 'instant',
@@ -621,6 +625,89 @@ describe('CitiesPanel — the advanced filters (CARTO-370)', () => {
       })
       expect(listed()).toEqual(['Paris', 'Metz'])
       expect(screen.getByRole('button', { name: 'Advanced filters' })).toBeTruthy()
+    })
+  })
+})
+
+/**
+ * A city's row in the list.
+ * @param name - the city's name
+ * @returns its row
+ */
+function rowOf(name: string): HTMLElement {
+  const row = screen.getByRole('button', { name }).closest('li')
+  if (row === null) throw new Error(`no row for ${name}`)
+  return row
+}
+
+// CARTO-384, the dev, 2026-11-07: a click on a city's point on the map chooses it in the list, which scrolls to it;
+// a double-click, in the list or on the point, opens its information box in place of the detail under the list.
+describe('CitiesPanel — the city chosen and its box (CARTO-384)', () => {
+  describe('happy path', () => {
+    it('marks Metz and scrolls to its row when the map chooses it', () => {
+      const { store } = mount()
+      vi.mocked(showRow).mockClear()
+      act(() => {
+        store.getState().selectCity('metz')
+      })
+      expect(rowOf('Metz').getAttribute('data-selected')).toBe('true')
+      expect(rowOf('Paris').getAttribute('data-selected')).toBe('false')
+      expect(vi.mocked(showRow)).toHaveBeenCalledWith('city-row-metz')
+    })
+
+    it("opens Metz's box when the map opens it, Metz chosen in the list", () => {
+      const { store } = mount()
+      act(() => {
+        store.getState().openCity('metz')
+      })
+      expect(screen.getByRole('dialog', { name: 'Metz' })).toBeDefined()
+      expect(rowOf('Metz').getAttribute('data-selected')).toBe('true')
+    })
+  })
+
+  describe('variants', () => {
+    it('chooses Metz on a click on its name', async () => {
+      const { store, user } = mount()
+      await user.click(screen.getByRole('button', { name: 'Metz' }))
+      expect(store.getState().selectedCity).toBe('metz')
+    })
+
+    it("opens Metz's box on a double-click on its name", async () => {
+      const { store, user } = mount()
+      await user.dblClick(screen.getByRole('button', { name: 'Metz' }))
+      expect(store.getState().openedCity).toBe('metz')
+      expect(screen.getByRole('dialog', { name: 'Metz' })).toBeDefined()
+    })
+
+    it('closes the box on « Close », Metz staying chosen, the hint still under the list', async () => {
+      const { store, user } = mount()
+      await user.dblClick(screen.getByRole('button', { name: 'Metz' }))
+      await user.click(screen.getByRole('button', { name: 'Close' }))
+      expect([store.getState().openedCity, store.getState().selectedCity]).toEqual([null, 'metz'])
+      expect(screen.queryByRole('dialog')).toBeNull()
+      expect(screen.getByText('Double-click a city to see who holds it.')).toBeDefined()
+    })
+  })
+
+  // L3–L4: N/A — the panel reads the store and forwards.
+
+  describe('edge cases', () => {
+    it('opens no box for a city of another year chosen on the map', () => {
+      const { store } = mount()
+      act(() => {
+        store.getState().openCity('later')
+      })
+      expect(screen.queryByRole('dialog')).toBeNull()
+    })
+
+    it('keeps Metz chosen and its box open when the panel is docked or floated', () => {
+      const { store, remount } = mount()
+      act(() => {
+        store.getState().openCity('metz')
+      })
+      remount()
+      expect(screen.getByRole('dialog', { name: 'Metz' })).toBeDefined()
+      expect(rowOf('Metz').getAttribute('data-selected')).toBe('true')
     })
   })
 })

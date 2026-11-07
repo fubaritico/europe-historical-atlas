@@ -99,7 +99,7 @@ describe('citiesSlice', () => {
 
     it('gives the canvas the shown cities of the year open only, longitude first', () => {
       expect(shownCityPoints([LYON, ZADAR, PARIS_1200], new Set(['lyon', 'paris']), 1100)).toEqual([
-        { name: 'Lyon', lonLat: [4.83, 45.76], holder: null },
+        { id: 'lyon', name: 'Lyon', lonLat: [4.83, 45.76], holder: null },
       ])
     })
 
@@ -181,6 +181,65 @@ describe('citiesSlice — the holders ticked', () => {
       expect(holderKey({ name: 'Empire', wikidata: 'Q12548' })).toBe(
         holderKey({ name: 'Sacrum Imperium', wikidata: 'Q12548' })
       )
+    })
+  })
+})
+
+// CARTO-384, the dev, 2026-11-07: a click on a city's point chooses it in {Cities}; a double-click opens its box.
+describe('citiesSlice — the city chosen and the city opened', () => {
+  describe('happy path', () => {
+    it('chooses Lyon, none opened', () => {
+      const store = testStore()
+      store.getState().selectCity('lyon')
+      expect([store.getState().selectedCity, store.getState().openedCity]).toEqual(['lyon', null])
+    })
+
+    it('opens Lyon, and chooses it with it', () => {
+      const store = testStore()
+      store.getState().openCity('lyon')
+      expect([store.getState().selectedCity, store.getState().openedCity]).toEqual(['lyon', 'lyon'])
+    })
+  })
+
+  describe('variants', () => {
+    it('closes the box and keeps Lyon chosen', () => {
+      const store = testStore()
+      store.getState().openCity('lyon')
+      store.getState().closeCity()
+      expect([store.getState().selectedCity, store.getState().openedCity]).toEqual(['lyon', null])
+    })
+
+    it('chooses none', () => {
+      const store = testStore()
+      store.getState().selectCity('lyon')
+      store.getState().selectCity(null)
+      expect(store.getState().selectedCity).toBeNull()
+    })
+
+    it('opens Zadar over Lyon: one box, the city last opened', () => {
+      const store = testStore()
+      store.getState().openCity('lyon')
+      store.getState().openCity('zadar')
+      expect([store.getState().selectedCity, store.getState().openedCity]).toEqual([
+        'zadar',
+        'zadar',
+      ])
+    })
+  })
+
+  // L3–L4: N/A — plain values, nothing refused.
+
+  describe('edge cases', () => {
+    it('opens nothing and chooses nothing at opening', () => {
+      const store = testStore()
+      expect([store.getState().selectedCity, store.getState().openedCity]).toEqual([null, null])
+    })
+
+    it('stays out of the undo line: choosing and opening a city leave the version as it was', () => {
+      const store = testStore()
+      const version = store.getState().version
+      store.getState().openCity('lyon')
+      expect(store.getState().version).toBe(version)
     })
   })
 })

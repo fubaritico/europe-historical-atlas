@@ -1,7 +1,7 @@
 /**
- * Where `{Polities}` scrolls to bring the target's row into view (the dev, 2026-10-14: 137 polities, and
- * the one chosen on the map had to be looked for). Pure arithmetic over the list's measures, so the rule is
- * exercised with numbers — jsdom lays nothing out.
+ * Where a list scrolls to bring a row into view — `{Polities}`' target (the dev, 2026-10-14: 137 polities, and
+ * the one chosen on the map had to be looked for), `{Cities}`' city chosen on the map (CARTO-384). Pure arithmetic
+ * over the list's measures, so the rule is exercised with numbers — jsdom lays nothing out.
  */
 
 /** A row and the scrolling list around it, in CSS pixels. */

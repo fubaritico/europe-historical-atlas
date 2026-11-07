@@ -1,12 +1,13 @@
 # 20 — `{Cities}`: the contribution's cities as guides for the borders
 
-> [Index](s00-index.md) · CARTO-193 · H-15. **The dev, 2026-11-02**: *"I need a panel showing cities. It would be like
+> [Index](s00-index.md) · CARTO-193 · H-15. **The dev, 2026-11-02**: _"I need a panel showing cities. It would be like
 > the polities, except there is a little eye, as for the layers, to show the city or not, so that I have a guide to
 > place my borders. And when you double-click a city, you know whom it belongs to — on the map. Or not on the map: it
-> may be a political entity not declared yet, which would have to be declared."* And, the same evening: *"the panel
-> lists the cities, but none shows by itself: I choose, city by city, the ones I show to set my borders."*
+> may be a political entity not declared yet, which would have to be declared."_ And, the same evening: _"the panel
+> lists the cities, but none shows by itself: I choose, city by city, the ones I show to set my borders."_
 >
 > **Decided by the dev, 2026-11-02:**
+>
 > - the panel lists the contribution's cities of the year open, **an eye per city, none shown at opening**;
 > - a city shown is **a point and its name** on the canvas, at its position;
 > - **a double-click says who holds it**: the polity the map has under it, and the one the sources give.
@@ -15,8 +16,8 @@
 > the export the atlas reads (`content/events.json`), so the CMS's server need not run while drawing.
 >
 > **Built 2026-11-02 (uncommitted, CARTO-193), the holder read from the export since CMS-335 (`ecd33d8`) — not walked
-> yet.** The dev, the same evening: *"we need both: if it is not at the right place, say so; if the country does not
-> exist on the map yet, say so."*
+> yet.** The dev, the same evening: _"we need both: if it is not at the right place, say so; if the country does not
+> exist on the map yet, say so."_
 
 ```gherkin
 Background:
@@ -59,29 +60,30 @@ Scenario: who holds a city — at the right place
   Given the sources say Metz was held by the Holy Roman Empire, Q12548, by Duby p. 46
   And the map's polity under Metz carries Q12548
   When I double-click "Metz" in the list
-  Then the panel says "By the sources: <the holder's name>", "Source: Duby, p. 46", "On the map: <the polity's name>"
+  Then ~~the panel says~~ Metz's information box says (CARTO-384, 2026-11-07) "By the sources: <the holder's name>", "Source: Duby, p. 46", "On the map: <the polity's name>"
   And "At the right place."
 
 Scenario: not at the right place
   Given the map's polity under Metz carries another id, or no polity is under it
-  Then the panel says "Not at the right place: the sources put it in <the holder>."
+  Then ~~the panel~~ the box says "Not at the right place: the sources put it in <the holder>."
   And Metz's name is in yellow in the list — the map to correct, move the border (CARTO-386, the dev, 2026-11-07)
 
 Scenario: a polity to declare
   Given no polity of the map carries the holder's id
-  Then the panel says "<the holder> is not declared in this map: to declare."
+  Then ~~the panel~~ the box says "<the holder> is not declared in this map: to declare."
   And the city's name is in yellow in the list — the map to complete (CARTO-386, my proposal, to confirm by the dev)
 
 Scenario: nothing to compare by
   Given the holder has no Wikidata id
-  Then the panel says "<the holder> has no Wikidata id: nothing to compare by."
+  Then ~~the panel~~ the box says "<the holder> has no Wikidata id: nothing to compare by."
   And the city's name is not marked in the list
 
 Scenario: not entered yet
   Given nobody has entered the holder
-  Then the panel says "By the sources: not entered yet" and "On the map: …", and gives no verdict
+  Then ~~the panel~~ the box says "By the sources: not entered yet" and "On the map: …", and gives no verdict
   And the city's name is in red in the list — a holder to enter (CARTO-386, the dev, 2026-11-07)
-  And [Close] takes the detail away and gives the hint back: "Double-click a city to see who holds it."
+  And [Close] takes the ~~detail~~ box away ~~and gives the hint back~~ — the hint "Double-click a city to see who
+    holds it." stays under the list (CARTO-384, 2026-11-07)
 
 Scenario: the cities could not be read
   Given the export cannot be read
@@ -96,8 +98,8 @@ Scenario: no city that year
 
 ## Filtering the list — CARTO-360, built 2026-11-05
 
-> **The dev, 2026-11-05**: a search field at the head of {Polities} and {Cities}, *"it saves an enormous amount of
-> time"*; filtering the list, his choice of the two ways the ticket named, and a little magnifier in the field.
+> **The dev, 2026-11-05**: a search field at the head of {Polities} and {Cities}, _"it saves an enormous amount of
+> time"_; filtering the list, his choice of the two ways the ticket named, and a little magnifier in the field.
 > **Proposed by Claude, taken by his « vazy »**: case and accents ignored, a match anywhere in the name; ‹esc› clears;
 > the eye heading the list acts on the cities found. **Used by Claude in the app on 2026-11-05, not walked by the dev yet.**
 
@@ -126,19 +128,21 @@ Scenario: nothing answers
 > (CARTO-342) — the same as the list's scroll.
 
 > **What this rung does not do** (CARTO-193, the ticket's next rungs):
+>
 > - **the city in red on the canvas** — the alert is in the list and the detail only;
 > - **the comparison is by Wikidata id**: a wrong id in the map's registry reads as a misplaced city — which is how it is
 >   found (`files/plans/sources/wikidata-1100.md`, 11 wrong in 1100);
-> - **a double-click on the canvas**: the white arrow's double-click there opens the polity's form (CARTO-246), so a
->   city is double-clicked in the list only — how to tell the two apart on the canvas is the dev's call;
-> - the check before publishing (s10, *a city on the wrong side of a border*) is not built.
+> - ~~**a double-click on the canvas**: the white arrow's double-click there opens the polity's form (CARTO-246), so a
+>   city is double-clicked in the list only — how to tell the two apart on the canvas is the dev's call;~~ — settled
+>   2026-11-07 by CARTO-384, below: on a city's point it opens the city's box, elsewhere in a fill the polity's form;
+> - the check before publishing (s10, _a city on the wrong side of a border_) is not built.
 
 ## The advanced filters — by country, by the sources (CARTO-370, the dev, 2026-11-06/07)
 
-> **The dev, 2026-11-06**: the advanced filters do not all fit in the panel (*"one has to be reasonable"*): a funnel
+> **The dev, 2026-11-06**: the advanced filters do not all fit in the panel (_"one has to be reasonable"_): a funnel
 > beside the name filter opens a dialogue of advanced filters, the first of them **by country** — the entities of
 > {Polities}, ticked; a city stays when its holder by the sources is ticked. **Proposed by Claude, taken by the dev on
-> 2026-11-07** (*"the better we can see things, that is the whole point of this panel"*): a section « Pas encore sur la
+> 2026-11-07** (_"the better we can see things, that is the whole point of this panel"_): a section « Pas encore sur la
 > carte » — the holders the sources give that no polity of the map carries, and « Sans détenteur » — so that every
 > city, the red ones first, can be reached by the filter. The funnel is the dev's own drawing (`~/Desktop/Icons`).
 >
@@ -202,7 +206,7 @@ Scenario: nothing answers the filters
 
 > **Built 2026-11-07 (CARTO-370). Used by Claude in the app the same evening** on 1100: « Comté de Barcelone (12) » ticked
 > keeps its twelve cities, all in red — a holder to declare — and the funnel turns blue with « 1 ». The swatch, square
-> beside the box, read as a second box: drawn as a round dot since. **Tried by the dev the same evening** — *"it is much more practical like this"* once the dialogue's filter was added at his word — **and validated** (*"I validate 370"*). ‹esc› closing the
+> beside the box, read as a second box: drawn as a round dot since. **Tried by the dev the same evening** — _"it is much more practical like this"_ once the dialogue's filter was added at his word — **and validated** (_"I validate 370"_). ‹esc› closing the
 > dialogue is the browser's `<dialog>`, unobservable in jsdom: to check in the
 > app, not tried yet. **What it does not do**: the filters are forgotten at a reload
 > (CARTO-371, which awaits the dev's decision on a browser's storage refused); the sort is CARTO-382; the filter by
@@ -211,9 +215,9 @@ Scenario: nothing answers the filters
 
 ## The cities as points — visual milestones for a border (the dev, 2026-11-05/06)
 
-> *"I need visual milestones"* — to slalom a border between the cities of two polities. The holder is the one the
+> _"I need visual milestones"_ — to slalom a border between the cities of two polities. The holder is the one the
 > sources give (CMS-335, the historian's testimonies), matched to a polity of the map by its Wikidata id, as the verdict
-> is. Built and **walked by the dev** on Sarkel (green, its holder's colour, *"normal colour, no overlay — it works"*);
+> is. Built and **walked by the dev** on Sarkel (green, its holder's colour, _"normal colour, no overlay — it works"_);
 > the points made smaller at his word.
 
 ```gherkin
@@ -235,3 +239,65 @@ Scenario: a city whose holder cannot be coloured
   When the cities are shown as points
   Then it is a hollow grey ring: nothing is coloured that the sources do not say
 ```
+
+## The city chosen on the map, and its information box (CARTO-384, the dev, 2026-11-07)
+
+> _"A city's point on the map does not lead to the city in the Cities panel, and its sheet opens at the bottom of the
+> panel."_ **Decided by the dev**: a click on a city's point selects it in the list and scrolls to it, as a click on a
+> polity with the white arrow ‹A› does in {Polities}; a double-click, in the list or on the point, opens its information
+> box instead of the sheet under the list — **a modal, like the advanced filters', for now** (_"floating — floating
+> where, floating how? To define in a ticket"_: CARTO-387).
+>
+> **Proposed by Claude, taken by his go**: an anchor of the polity aimed at wins over a city's point under it, as the
+> press grabs the anchor first; choosing a city leaves the polity aimed at and the points selected as they were; a click
+> on the city's name in the list chooses it too.
+
+```gherkin
+Scenario: a click on a city's point chooses it in the list
+  Given Troyes is shown on the canvas and {Cities} lists it below the fold
+  When I click Troyes' point with the white arrow
+  Then Troyes' row is ringed in the list, and the list has scrolled to it
+  And the polity aimed at and the points selected are as they were
+
+Scenario: a double-click on a city's point opens its box
+  When I double-click Troyes' point with the white arrow
+  Then Troyes' information box opens, a modal named "Troyes", with who holds it by the sources and on the map
+  And Troyes is chosen in the list
+  And no polity's form opens
+
+Scenario: a double-click on a city's name opens the same box
+  When I double-click "Troyes" in the list, or press ‹enter› on it
+  Then the same box opens
+
+Scenario: ‹enter› opens the box of the city chosen — the dev, 2026-11-07: "double-clicking with the Mac's mouse is a real chore"
+  Given Troyes is chosen, by a click on its point or on its name
+  When I press ‹enter›
+  Then Troyes' information box opens
+
+Scenario: a click off every city drops the city chosen
+  Given Troyes is chosen by a click on its point
+  When I click in France's fill, away from every city
+  Then France becomes the polity aimed at, and no city is chosen
+
+Scenario: close the box
+  When I click « Fermer », press ‹esc› or click outside it
+  Then the box closes and Troyes stays chosen
+
+Scenario: a city hidden is not there to be clicked
+  Given Troyes' eye is off
+  When I click where Troyes is, inside France's fill
+  Then France becomes the polity aimed at, and no city is chosen
+
+Scenario: an anchor wins over a city's point
+  Given France is aimed at and one of its anchors lies on a city's point
+  When I double-click there
+  Then no box opens, and the console says a point opens no form
+```
+
+> **Built 2026-11-07 (CARTO-384). Walked by the dev the same evening** on Huesca: _"it works"_. His walk changed two
+> things: ‹enter› on the name did not open the box in his Chrome — the box takes the focus as it opens, and the click
+> the browser sends for the key landed on its « Fermer » — so the key keeps that click from following; and **one focus
+> ring, round the whole row, never round the name's text**. ‹enter› on the map, and the click that drops the city, are
+> his request of the same walk. ‹esc› and the click outside are the design system's `Modal` over
+> the browser's `<dialog>`, unobservable in jsdom. **What it does not do**: a city the filters hide is chosen but has no
+> row to scroll to; the coordinates in the box are CARTO-368.

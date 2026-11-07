@@ -71,6 +71,13 @@ export interface CitiesState {
    * sources give to one of them; none ticked, no filter. Keyed by Wikidata id, so it means the same in every map.
    */
   cityHolders: ReadonlySet<string>
+  /**
+   * The city chosen — by a click on its point with the white arrow, or on its name in `{Cities}` (CARTO-384): its row
+   * is marked and the list scrolls to it. `null` when none is.
+   */
+  selectedCity: string | null
+  /** The city whose information box is open — a double-click on its point or its name (CARTO-384) — or `null`. */
+  openedCity: string | null
 }
 
 /** What may be done to the cities. */
@@ -110,6 +117,18 @@ export interface CitiesActions {
   setCityHolderTicked: (key: string, ticked: boolean) => void
   /** Untick every holder: the list shows every city of the year again. */
   untickCityHolders: () => void
+  /**
+   * Choose a city, or none.
+   * @param id - the city's id, or `null`
+   */
+  selectCity: (id: string | null) => void
+  /**
+   * Open a city's information box; the city is chosen with it.
+   * @param id - the city's id
+   */
+  openCity: (id: string) => void
+  /** Close the information box; the city stays chosen. */
+  closeCity: () => void
 }
 
 /** The slice: the cities, which are shown, and the ways to change it. */
@@ -154,7 +173,8 @@ export function shownCityPoints(
 ): ShownCity[] {
   return citiesOfYear(cities, year)
     .filter(({ id }) => shown.has(id))
-    .map(({ name, lon, lat, holder }) => ({
+    .map(({ id, name, lon, lat, holder }) => ({
+      id,
       name,
       lonLat: [lon, lat],
       holder: holder?.wikidata ?? null,
@@ -163,6 +183,8 @@ export function shownCityPoints(
 
 /** A city shown on the canvas: its name, its point, and the Wikidata id of the polity holding it by the sources. */
 export interface ShownCity {
+  /** Its sheet's id — what a click on its point chooses (CARTO-384). */
+  id: string
   /** Its name. */
   name: string
   /** Its point, `[longitude, latitude]`. */
@@ -188,6 +210,17 @@ export const createCitiesSlice: StateCreator<
   shownCities: new Set(),
   citiesAsPoints: false,
   cityHolders: new Set(),
+  selectedCity: null,
+  openedCity: null,
+  selectCity: (id): void => {
+    set({ selectedCity: id })
+  },
+  openCity: (id): void => {
+    set({ selectedCity: id, openedCity: id })
+  },
+  closeCity: (): void => {
+    set({ openedCity: null })
+  },
   setCityHolderTicked: (key, ticked): void => {
     const next = new Set(get().cityHolders)
     if (ticked) next.add(key)

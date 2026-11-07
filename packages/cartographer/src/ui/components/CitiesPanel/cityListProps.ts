@@ -13,7 +13,9 @@ export interface CityListProps {
   cities: readonly CityMark[]
   /** The ids of the cities shown on the canvas. */
   shown: ReadonlySet<string>
-  /** The city whose detail is open, or `null`. */
+  /** The city chosen — on the map with the white arrow, or by a click on its name — marked and scrolled to, or `null`. */
+  selected: string | null
+  /** The city whose information box is open, or `null`. */
   opened: string | null
   /**
    * Each city's verdict, by id — a city the map puts elsewhere, or whose holder it lacks, is marked in yellow; one with
@@ -30,6 +32,8 @@ export interface CityListProps {
   asPoints: boolean
   /** The box « Afficher comme des points » was ticked or not. */
   onAsPoints: (asPoints: boolean) => void
-  /** A city was double-clicked: its detail opens. */
+  /** A city's name was clicked: it is chosen. */
+  onSelect: (id: string) => void
+  /** A city's name was double-clicked, or ‹enter› pressed on it: its information box opens. */
   onOpen: (id: string) => void
 }

@@ -2,6 +2,7 @@ import { ListboxList } from '@fubaritico/react/Listbox'
 import { useEffect } from 'react'
 
 import { useTranslation } from '../../hooks/useTranslation'
+import { showRow } from '../../utils/showRow'
 import { ListFilter } from '../ListFilter'
 
 import { useListCursor } from './hooks/useListCursor'
@@ -10,7 +11,6 @@ import { POLITY_LIST_MESSAGES } from './i18n'
 import { PolitiesSubhead } from './internal/PolitiesSubhead'
 import { PolityOption } from './internal/PolityOption'
 import { optionId } from './utils/optionId'
-import { showRow } from './utils/showRow'
 
 import type { ViewportPoint } from '../../../viewport/viewport'
 import type { PolityRow } from '../../utils/polityRows'
@@ -65,7 +65,7 @@ export function PolityList({ year, rows, targetId, onChoose, onMenu, onEdit }: P
 
   // Effects
   useEffect(() => {
-    if (targetId !== null) showRow(targetId)
+    if (targetId !== null) showRow(optionId(targetId))
   }, [targetId])
 
   // Render

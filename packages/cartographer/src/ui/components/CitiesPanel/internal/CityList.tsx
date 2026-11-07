@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useTranslation } from '../../../hooks/useTranslation'
+import { showRow } from '../../../utils/showRow'
 import { ListFilter } from '../../ListFilter'
 import { CITIES_PANEL_MESSAGES } from '../i18n'
 import { citiesFound } from '../utils/citiesFound'
+import { cityRowId } from '../utils/cityRowId'
 
 import { CityBoxes } from './CityBoxes'
 import { CityFilters } from './CityFilters'
@@ -22,6 +24,8 @@ type CityListWithFiltersProps = CityListProps & { year: number; filters: CityFil
  * says so (« Afficher les 2 villes trouvées ») — and « Afficher comme des points », in their holder's colour.
  * What is typed is the list's own — one writer, one reader, no slice. The holders ticked in the advanced filters
  * (CARTO-370) are the store's, so they outlive the panel docked or floated; they narrow the list together with the name.
+ * **The city chosen is scrolled to** (CARTO-384) — on the map with the white arrow, as `{Polities}` scrolls to the
+ * polity chosen there; a city the filters hide has no row, and nothing scrolls.
  * @param props - the cities, which are shown and opened, the advanced filters, and the callbacks
  * @param props.year - the year open, named on the box for them all
  * @param props.cities - the cities of the year, before the filters
@@ -50,6 +54,11 @@ export function CityList({ year, cities, filters, ...props }: CityListWithFilter
   const handleAsPoints = (event: ChangeEvent<HTMLInputElement>) => {
     props.onAsPoints(event.target.checked)
   }
+
+  // Effects
+  useEffect(() => {
+    if (props.selected !== null) showRow(cityRowId(props.selected))
+  }, [props.selected])
 
   // Render
   return (

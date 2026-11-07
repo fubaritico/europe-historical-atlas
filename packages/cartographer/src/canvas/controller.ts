@@ -336,7 +336,8 @@ function onPointerLeave(it: LiveCanvas): void {
 
 /**
  * Listen for a double-click on the canvas: with the white arrow, it opens the form of the polity under it
- * (CARTO-246); any other tool, or the hand borrowed, ignores it.
+ * (CARTO-246) — or, on a shown city's point, that city's information box (CARTO-384); any other tool, or the hand
+ * borrowed, ignores it.
  * @param it - the attachment
  * @returns a function that stops listening
  */

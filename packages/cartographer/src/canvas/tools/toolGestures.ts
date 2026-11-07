@@ -10,6 +10,7 @@ import { lonLatToScreen, screenToLonLatOnBackdrop } from '../../viewport/project
 import { deleteSelected, editHandlesOf, insertOnStretch, penInsertHit } from './anchorGestures'
 import { anchorClick, waterTaking } from './borderSnap'
 import { carvingAnswer, refusedOverOpenSuzerain } from './carving'
+import { chooseCityAt, openChosenCity } from './cityHit'
 import { TAG } from './consoleTag'
 import { freeLonLatAt, repeatsLast } from './frameSnap'
 import { followedLayer, layerLines, snapHit, waterOf } from './layerHits'
@@ -493,9 +494,10 @@ export function selectionMoves(
 }
 
 /**
- * A click of the white arrow off any handle and stretch: a click in a polity's fill makes it the
- * target, the tool staying the arrow (the dev, 2026-10-11); over unclaimed ground it deselects, as
- * Illustrator does — and the anchors selected are dropped.
+ * A click of the white arrow off any handle and stretch: **on a city's point** it chooses the city in `{Cities}`,
+ * the target and the anchors selected left as they were (CARTO-384); in a polity's fill it makes the polity the
+ * target, the tool staying the arrow (the dev, 2026-10-11); over unclaimed ground it deselects, as Illustrator
+ * does — and the anchors selected are dropped.
  *
  * **With ‹shift› it does nothing**: ‹shift› adds to a selection, and a click that changed the target
  * would empty it instead (review QUAL-010).
@@ -504,7 +506,7 @@ export function selectionMoves(
  * @param shift - whether ‹shift› was held
  */
 function arrowClick(context: GestureContext, at: Point, shift: boolean): void {
-  if (shift) return
+  if (shift || chooseCityAt(context, at)) return
   context.session.selected = []
   const target = resolvedTarget(context)
   const under = polityAt(context.territoriesOnScreen(), at)
@@ -543,7 +545,8 @@ function marqueeSelect(
 }
 
 /**
- * The white arrow's keys: ‹escape› drops the selection, ‹delete› or ‹backspace› removes the anchor.
+ * The white arrow's keys: ‹escape› drops the selection, ‹delete› or ‹backspace› removes the anchor, ‹enter› opens
+ * the box of the city chosen (CARTO-384).
  * @param context - the session and the store
  * @param key - the key, as `KeyboardEvent.key`
  * @returns whether the key was taken
@@ -557,6 +560,7 @@ function editKey(context: GestureContext, key: string): boolean {
     if (!drawing) session.selected = []
     return true
   }
+  if (key === 'Enter') return openChosenCity(context)
   return key === 'Delete' || key === 'Backspace' ? deleteSelected(context) : false
 }
 
