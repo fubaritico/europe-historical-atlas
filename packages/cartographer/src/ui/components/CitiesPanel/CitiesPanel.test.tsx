@@ -121,6 +121,10 @@ describe('CitiesPanel', () => {
         'Not at the right place: the sources put it in Sacrum Imperium.'
       )
       expect(screen.getByRole('listitem').getAttribute('data-verdict')).toBe('misplaced')
+      // The detail carries it too: its verdict line takes the same yellow (CARTO-386).
+      expect(screen.getByRole('region', { name: 'Metz' }).getAttribute('data-verdict')).toBe(
+        'misplaced'
+      )
     })
 
     it('agrees by the Wikidata id when the sources write the Empire under another name', async () => {
@@ -137,6 +141,9 @@ describe('CitiesPanel', () => {
         'Repubblica di Venezia is not declared in this map: to declare.'
       )
       expect(screen.getByRole('listitem').getAttribute('data-verdict')).toBe('toDeclare')
+      expect(screen.getByRole('region', { name: 'Metz' }).getAttribute('data-verdict')).toBe(
+        'toDeclare'
+      )
     })
 
     it('says a holder with no Wikidata id cannot be compared', async () => {
@@ -148,8 +155,10 @@ describe('CitiesPanel', () => {
       )
     })
 
-    it('says the holder is not entered yet, and gives no verdict', async () => {
+    it('says the holder is not entered yet, gives no verdict, and marks the row for the red', async () => {
       const { user } = mount()
+      const row = screen.getByRole('button', { name: 'Paris' }).closest('li')
+      expect(row?.getAttribute('data-verdict')).toBe('notEntered')
       const detail = await detailOf(user, 'Paris')
       expect(detail).toContain('By the sources: not entered yet')
       expect(detail).toContain('On the map: Reaume de France')

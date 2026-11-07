@@ -15,7 +15,10 @@ export interface CityListProps {
   shown: ReadonlySet<string>
   /** The city whose detail is open, or `null`. */
   opened: string | null
-  /** Each city's verdict, by id — a city the map puts elsewhere, or whose holder it lacks, is marked. */
+  /**
+   * Each city's verdict, by id — a city the map puts elsewhere, or whose holder it lacks, is marked in yellow; one with
+   * no holder entered, in red (CARTO-386).
+   */
   verdicts: ReadonlyMap<string, CityVerdict>
   /** A city's dot: its holder's colour by the sources, and what its bubble says (CARTO-367). */
   dotOf: (city: CityMark) => HolderDot

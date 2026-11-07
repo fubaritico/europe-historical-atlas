@@ -1501,11 +1501,21 @@
   color: var(--ink-dim);
 }
 
-/* A city the map puts elsewhere, or whose holder it lacks: the palette's one alert ink, `--warn`. */
+/*
+ * Two levels of alert (CARTO-386, the dev, 2026-11-07). In yellow, the map to correct: a city whose holder the map puts
+ * elsewhere — move the border — or whose holder the map has not drawn yet. In red, the research to do: a city nobody
+ * has entered a holder for. A holder without a Wikidata id cannot be compared, and is not marked. An alert stays in its
+ * colour on a hidden city, over the hidden row's dimming (same weight, written after): the eye says it is hidden.
+ */
 .city-row[data-verdict='misplaced'] .layer-row__name,
 .city-row[data-verdict='toDeclare'] .layer-row__name,
 .city-detail[data-verdict='misplaced'] .city-detail__verdict,
 .city-detail[data-verdict='toDeclare'] .city-detail__verdict {
+  color: var(--caution);
+  font-weight: 600;
+}
+
+.city-row[data-verdict='notEntered'] .layer-row__name {
   color: var(--warn);
   font-weight: 600;
 }

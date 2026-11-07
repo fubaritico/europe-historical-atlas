@@ -47,6 +47,65 @@ describe('editor-chrome.css — the {Polities} list', () => {
   // L4: N/A — a static sheet read at build time, nothing asynchronous or optional.
 })
 
+/**
+ * The declarations of the rule whose selector list holds a selector — alone or in a group — comments removed and
+ * whitespace collapsed. `sheetRule` reads a rule by its whole selector; this one finds a member of a group.
+ * @param selector - one selector, exactly as written in the sheet
+ * @returns the declarations
+ * @throws when no rule of the sheet lists it
+ */
+function declarationsFor(selector: string): string {
+  const code = chrome.replace(/\/\*[\s\S]*?\*\//g, '')
+  for (const block of code.split('}')) {
+    const [selectors = '', body = ''] = block.split('{')
+    if (selectors.split(',').some((each) => each.trim() === selector))
+      return body.replace(/\s+/g, ' ')
+  }
+  throw new Error(`${selector} is in no rule of editor-chrome.css`)
+}
+
+const row = (verdict: string): string => `.city-row[data-verdict='${verdict}'] .layer-row__name`
+const detail = (verdict: string): string =>
+  `.city-detail[data-verdict='${verdict}'] .city-detail__verdict`
+
+// CARTO-386, the dev, 2026-11-07: yellow for the map to correct, red for a city with no holder.
+describe('editor-chrome.css — the {Cities} alerts', () => {
+  describe('happy path', () => {
+    it('writes a city the map puts on the wrong side in the caution ink, yellow, in the list and the detail', () => {
+      expect(declarationsFor(row('misplaced'))).toContain('color: var(--caution);')
+      expect(declarationsFor(detail('misplaced'))).toContain('color: var(--caution);')
+    })
+
+    it('writes a city with no holder in the alert ink, red', () => {
+      expect(declarationsFor(row('notEntered'))).toContain('color: var(--warn);')
+    })
+  })
+
+  describe('variants', () => {
+    it('gives a holder the map has not drawn yet the same yellow, in the list and the detail', () => {
+      expect(declarationsFor(row('toDeclare'))).toContain('color: var(--caution);')
+      expect(declarationsFor(detail('toDeclare'))).toContain('color: var(--caution);')
+    })
+  })
+
+  describe('managed errors', () => {
+    it('names a selector no rule lists', () => {
+      expect(() => declarationsFor('.no-such-rule')).toThrow(
+        '.no-such-rule is in no rule of editor-chrome.css'
+      )
+    })
+  })
+
+  describe('edge cases', () => {
+    it('leaves unmarked a holder without a Wikidata id, and a city at the right place', () => {
+      expect(() => declarationsFor(row('cannotCompare'))).toThrow()
+      expect(() => declarationsFor(row('agrees'))).toThrow()
+    })
+  })
+
+  // L4: N/A — a static sheet read at build time, nothing asynchronous or optional.
+})
+
 // CARTO-385: the {Cities} list stopped at 240px however tall the panel was dragged.
 describe('editor-chrome.css — the {Cities} list', () => {
   describe('happy path', () => {

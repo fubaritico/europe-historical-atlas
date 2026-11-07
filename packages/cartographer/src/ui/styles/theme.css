@@ -32,7 +32,8 @@
   --ink-dim: #a49a8c; /* secondary text — 5.23:1 on --panel */
   --ink-off: #7d7468; /* a field's boundary — 3.54:1 on --bg, over 1.4.11's 3:1 */
   --accent: #5b93d6; /* selection blue — RESERVED, never served to a polity; the focus ring */
-  --warn: #c86a52; /* refusal, an invalid field */
+  --warn: #c86a52; /* refusal, an invalid field; a city with no holder (CARTO-386) */
+  --caution: #d9b44a; /* to correct on the map: a city on the wrong side, a holder not drawn yet (CARTO-386) */
   /* The mark's two colours are the atlas's, as its favicon has them: the page's vellum, the border brown. */
   --mark-ground: #efe6d2;
   --mark-ink: #5c3a2e;

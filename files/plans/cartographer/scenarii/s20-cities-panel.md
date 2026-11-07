@@ -65,20 +65,22 @@ Scenario: who holds a city — at the right place
 Scenario: not at the right place
   Given the map's polity under Metz carries another id, or no polity is under it
   Then the panel says "Not at the right place: the sources put it in <the holder>."
-  And Metz's name is in the alert ink in the list
+  And Metz's name is in yellow in the list — the map to correct, move the border (CARTO-386, the dev, 2026-11-07)
 
 Scenario: a polity to declare
   Given no polity of the map carries the holder's id
   Then the panel says "<the holder> is not declared in this map: to declare."
-  And the city's name is in the alert ink in the list
+  And the city's name is in yellow in the list — the map to complete (CARTO-386, my proposal, to confirm by the dev)
 
 Scenario: nothing to compare by
   Given the holder has no Wikidata id
   Then the panel says "<the holder> has no Wikidata id: nothing to compare by."
+  And the city's name is not marked in the list
 
 Scenario: not entered yet
   Given nobody has entered the holder
   Then the panel says "By the sources: not entered yet" and "On the map: …", and gives no verdict
+  And the city's name is in red in the list — a holder to enter (CARTO-386, the dev, 2026-11-07)
   And [Close] takes the detail away and gives the hint back: "Double-click a city to see who holds it."
 
 Scenario: the cities could not be read

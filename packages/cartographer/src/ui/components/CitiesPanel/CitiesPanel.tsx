@@ -17,7 +17,8 @@ import type { CartographerStoreHook } from '../../../state/store'
 /**
  * `{Cities}` (CARTO-193, the dev, 2026-11-02) — the contribution's cities of the year open, as guides for the
  * borders: each shown or hidden by its own eye, none at opening; a double-click says who holds it, by the sources and on
- * the map; a city the map puts elsewhere, or whose holder the map lacks, is marked in the list.
+ * the map; a city the map puts elsewhere, or whose holder the map lacks, is marked in yellow in the list, a city with
+ * no holder entered in red (CARTO-386).
  *
  * The shell/view/binding split (`react-canvas-and-panels`): {@link CityList} and {@link CityDetail} take values,
  * {@link CitiesPanel} is the one place that knows there is a store. Which city's detail is open is the panel's own:
