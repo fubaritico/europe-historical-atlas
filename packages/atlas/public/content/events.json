@@ -783,6 +783,3949 @@
   ],
   "cities": [
     {
+      "id": "339",
+      "place": {
+        "id": "347",
+        "name": {
+          "fr": "Sintra",
+          "en": null
+        },
+        "lon": -9.390417,
+        "lat": 38.797361,
+        "wikidata": "Q190187",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 12, p. 239",
+          "quotation": "Santarem surrendered on April 30, followd by Lisbon on May 5, and Sintra on May 8, 1093.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille, depuis le 8 mai 1093",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "304",
+            "title": "Portugaliae Monumenta Historica, Scriptores I — Chronica Gothorum",
+            "author": null,
+            "url": "https://archive.org/details/portugaliaemonumentahistoricascrv1"
+          },
+          "where": "p. 11",
+          "quotation": "Mense Julio iterum capta fuit Sintria a Comite D. Hernico genero D. Alfonsi Regis marito fiiie sue Regine D. Tarasie. Audientes enim Sarraceni mortem Regis D. Alfonsi, ceperunt rebellare.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille jusqu'à la révolte de ses Sarrasins à la mort d'Alphonse VI, reprise par le comte Henri en juillet 1109",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "338",
+      "place": {
+        "id": "346",
+        "name": {
+          "fr": "Lisbonne",
+          "en": null
+        },
+        "lon": -9.139016,
+        "lat": 38.708042,
+        "wikidata": "Q597",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 12, p. 244",
+          "quotation": "There the Murâbit governor of Sevilla, Sir, had followed up his conquest of Badajoz with a campaign in central Portugal, in the course of which be seems to have retaken Lisbon itself.",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides — reprise par Sīr en 1094",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "301",
+            "title": "The Kingdom of León-Castilla under Queen Urraca",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/urraca/urraca1.htm"
+          },
+          "where": "ch. 1, p. 22 (note 40 : Menéndez Pidal, España del Cid 2:794)",
+          "quotation": "Raymond moved to defend his southernmost possessions but in November of that year was defeated when he attempted to regain Lisbon, itself captured by the Africans.",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides — Raymond échoue à la reprendre en novembre 1094",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 12, p. 239",
+          "quotation": "Santarem surrendered on April 30, followd by Lisbon on May 5, and Sintra on May 8, 1093.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille, depuis le 5 mai 1093 (avant la perte de 1094)",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "304",
+            "title": "Portugaliae Monumenta Historica, Scriptores I — Chronica Gothorum",
+            "author": null,
+            "url": "https://archive.org/details/portugaliaemonumentahistoricascrv1"
+          },
+          "where": "p. 10",
+          "quotation": "Et in eadem hebdomada pridie Non. Maii feria quinta cepit Vlixbonam.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille, depuis 1093",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 231",
+          "quotation": "l'émir Syr ben Aby Beker conquit les villes de San- tarem, Badajoz, Oporto, Evora, Lisbonne",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille jusqu'en 504 H (1110-1111), conquise alors par Sīr (lecture divergente)",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "290",
+            "title": "Historia de Portugal desde o começo da monarchia até o fim do reinado de Affonso III, t. I (7.ª ed.)",
+            "author": "Alexandre Herculano",
+            "url": "https://archive.org/details/historiadeportug01herc"
+          },
+          "where": "t. I, p. 253",
+          "quotation": "marchara para o sul e aj)ossara-se de Santarém, Lisboa e Cintra",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — prise en 1093, sans perte mentionnée (lecture divergente)",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
+    },
+    {
+      "id": "337",
+      "place": {
+        "id": "345",
+        "name": {
+          "fr": "Santarém",
+          "en": null
+        },
+        "lon": -8.686944,
+        "lat": 39.239167,
+        "wikidata": "Q273877",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 12, p. 239",
+          "quotation": "Santarem surrendered on April 30, followd by Lisbon on May 5, and Sintra on May 8, 1093.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille, depuis le 30 avril 1093",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 12, p. 250",
+          "quotation": "The commander at Santarem, Soeiro Mendes, and the commander around Coimbra, Soeiro Fromariques, both appear there.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — un commandant chrétien, Soeiro Mendes, en février 1095",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "304",
+            "title": "Portugaliae Monumenta Historica, Scriptores I — Chronica Gothorum",
+            "author": null,
+            "url": "https://archive.org/details/portugaliaemonumentahistoricascrv1"
+          },
+          "where": "p. 10",
+          "quotation": "Rex donnus Aldefonsus cepit ciuitatem Santarem anno Regni sui xxviii., mense v. sexto die mensis.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille, depuis 1093",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "304",
+            "title": "Portugaliae Monumenta Historica, Scriptores I — Chronica Gothorum",
+            "author": null,
+            "url": "https://archive.org/details/portugaliaemonumentahistoricascrv1"
+          },
+          "where": "p. 11",
+          "quotation": "Rex Cyrus cepit Santarem septimo cal. junii.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille jusqu'au 26 mai 1111 — prise par Sīr",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "301",
+            "title": "The Kingdom of León-Castilla under Queen Urraca",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/urraca/urraca1.htm"
+          },
+          "where": "ch. 2, p. 64",
+          "quotation": "He was tied down there, particularly at Santarem, through 1109 and in 1110 was defeated badly. On May 26, 1111 Santarem fell",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille jusqu'au 26 mai 1111",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 231",
+          "quotation": "l'émir Syr ben Aby Beker conquit les villes de San- tarem, Badajoz, Oporto, Evora, Lisbonne",
+          "subject": "holder",
+          "holder": {
+            "name": "conquise par Sīr en 504 H (1110-1111)",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "336",
+      "place": {
+        "id": "344",
+        "name": {
+          "fr": "Salamanque",
+          "en": null
+        },
+        "lon": -5.664167,
+        "lat": 40.965,
+        "wikidata": "Q15695",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "301",
+            "title": "The Kingdom of León-Castilla under Queen Urraca",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/urraca/urraca1.htm"
+          },
+          "where": "ch. 1, p. 34",
+          "quotation": "Count Raymond was almost certainly busy by this time with the repopulation of Salamanca and Ávila.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — repeuplée par le comte Raymond vers 1100",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 15, p. 321",
+          "quotation": "Salamanca continued to be an isolated outpost whose resettlement and fortification had hardly begun.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — avant-poste isolé en 1104",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 539",
+          "quotation": "Auila, Segouia, Salamanca, Sepuluega, Coria,",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "335",
+      "place": {
+        "id": "343",
+        "name": {
+          "fr": "Ségovie",
+          "en": null
+        },
+        "lon": -4.118333,
+        "lat": 40.948056,
+        "wikidata": "Q15684",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 10, p. 202",
+          "quotation": "The resettlement of Segovia represented a long step south in the trans-Duero",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — repeuplée sous Alphonse VI",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 539",
+          "quotation": "Auila, Segouia, Salamanca, Sepuluega, Coria,",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "334",
+      "place": {
+        "id": "342",
+        "name": {
+          "fr": "Ávila",
+          "en": null
+        },
+        "lon": -4.696222,
+        "lat": 40.654347,
+        "wikidata": "Q15688",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "301",
+            "title": "The Kingdom of León-Castilla under Queen Urraca",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/urraca/urraca1.htm"
+          },
+          "where": "ch. 1, p. 34",
+          "quotation": "Count Raymond was almost certainly busy by this time with the repopulation of Salamanca and Ávila.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — repeuplée par le comte Raymond vers 1100",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 539",
+          "quotation": "Auila, Segouia, Salamanca, Sepuluega, Coria,",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "333",
+      "place": {
+        "id": "341",
+        "name": {
+          "fr": "Coria",
+          "en": null
+        },
+        "lon": -6.537222,
+        "lat": 39.981944,
+        "wikidata": "Q142778",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 12, p. 255",
+          "quotation": "As late as October 1, 1096, a private document will cite Henry as count in Tordesillas and Raymond as holding Coria and Zamora.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — le comte Raymond la tient en octobre 1096",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 15, p. 308",
+          "quotation": "In 1101 his grandfather still held that advance post",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — avant-poste encore tenu en 1101",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "301",
+            "title": "The Kingdom of León-Castilla under Queen Urraca",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/urraca/urraca1.htm"
+          },
+          "where": "ch. 1, p. 21",
+          "quotation": "It is not, however, until October 1, 1096 that he is formally cited as",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — Raymond « tenente in coria » (1096)",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 539",
+          "quotation": "Auila, Segouia, Salamanca, Sepuluega, Coria,",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — avec Tolède",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "332",
+      "place": {
+        "id": "340",
+        "name": {
+          "fr": "Sigüenza",
+          "en": null
+        },
+        "lon": -2.639167,
+        "lat": 41.069167,
+        "wikidata": "Q47475",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 14, p. 291",
+          "quotation": "Toward the north the road ran past the craggy fastnesses of Atienza, Sigüenza, and Medinaceli, all still firmly in Muslim hands",
+          "subject": "holder",
+          "holder": {
+            "name": "musulmane en 1098, maître non nommé (seul témoin)",
+            "wikidata": null
+          }
+        },
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 14, p. 291",
+          "quotation": "the route that bound the taifa of Zaragoza to Andalucía",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Saragosse — sur la route qui reliait la taïfa de Saragosse à l'Andalousie (le voisin le plus proche nommé)",
+            "wikidata": "Q33061"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Taïfa de Saragosse",
+        "wikidata": "Q33061"
+      }
+    },
+    {
+      "id": "331",
+      "place": {
+        "id": "339",
+        "name": {
+          "fr": "Atienza",
+          "en": null
+        },
+        "lon": -2.87,
+        "lat": 41.199167,
+        "wikidata": "Q524820",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 14, p. 291",
+          "quotation": "Toward the north the road ran past the craggy fastnesses of Atienza, Sigüenza, and Medinaceli, all still firmly in Muslim hands",
+          "subject": "holder",
+          "holder": {
+            "name": "musulmane en 1098, maître non nommé",
+            "wikidata": null
+          }
+        },
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 14, p. 291",
+          "quotation": "the route that bound the taifa of Zaragoza to Andalucía",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Saragosse — sur la route qui reliait la taïfa de Saragosse à l'Andalousie (le voisin le plus proche nommé)",
+            "wikidata": "Q33061"
+          }
+        },
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 539",
+          "quotation": "Olmedo, Madrit, Atienga, Ribas, Osraa, con",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille, conquise avec Tolède en 1085 (lecture divergente, tardive)",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "305",
+            "title": "El repertorio cerámico de época almorávide del cerro de la Defensa de Uclés (Arqueología y Territorio Medieval 32, e9384)",
+            "author": "David Gallego Valle, Jesús Manuel Molero García, María Victoria Gutiérrez Calderón",
+            "url": "https://revistaselectronicas.ujaen.es/index.php/ATM/article/download/9384/10008/72265"
+          },
+          "where": "p. 4",
+          "quotation": "plazas en el río Henares (Medinaceli, Atienza, Hita y Guadalajara)",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille en 1109 (lecture divergente, ne dit rien de 1100)",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Taïfa de Saragosse",
+        "wikidata": "Q33061"
+      }
+    },
+    {
+      "id": "330",
+      "place": {
+        "id": "338",
+        "name": {
+          "fr": "Medinaceli",
+          "en": null
+        },
+        "lon": -2.435278,
+        "lat": 41.172222,
+        "wikidata": "Q484628",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 14, p. 291",
+          "quotation": "Toward the north the road ran past the craggy fastnesses of Atienza, Sigüenza, and Medinaceli, all still firmly in Muslim hands",
+          "subject": "holder",
+          "holder": {
+            "name": "musulmane en 1098, maître non nommé",
+            "wikidata": null
+          }
+        },
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 14, p. 291",
+          "quotation": "the route that bound the taifa of Zaragoza to Andalucía",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Saragosse — sur la route qui reliait la taïfa de Saragosse à l'Andalousie (le voisin le plus proche nommé)",
+            "wikidata": "Q33061"
+          }
+        },
+        {
+          "source": {
+            "id": "303",
+            "title": "España Sagrada, t. XXIII — Anales Toledanos I et II",
+            "author": "Enrique Flórez (éd.)",
+            "url": "https://archive.org/details/espaasagradath23fluoft"
+          },
+          "where": "Anales Toledanos I, p. 386",
+          "quotation": "El Rey D. Alfonso prisó á Medinacelim en el mes de Julio, EraMCXLlI.",
+          "subject": "holder",
+          "holder": {
+            "name": "musulmane jusqu'en juillet 1104, prise par Alphonse VI",
+            "wikidata": null
+          }
+        },
+        {
+          "source": {
+            "id": "301",
+            "title": "The Kingdom of León-Castilla under Queen Urraca",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/urraca/urraca1.htm"
+          },
+          "where": "ch. 1, p. 33",
+          "quotation": "In 1104, seventy-five kilometers southeast of Osma Alfonso took Medinaceli.",
+          "subject": "holder",
+          "holder": {
+            "name": "prise par Alphonse VI en 1104",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 539",
+          "quotation": "de Toledo, Medinacelim, Talauera, Coymbria,",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille, conquise avec Tolède en 1085 (lecture divergente, tardive)",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Taïfa de Saragosse",
+        "wikidata": "Q33061"
+      }
+    },
+    {
+      "id": "329",
+      "place": {
+        "id": "337",
+        "name": {
+          "fr": "Escalona",
+          "en": null
+        },
+        "lon": -4.405278,
+        "lat": 40.170833,
+        "wikidata": "Q616621",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 539",
+          "quotation": "Valeranica, Maura, Escalona, Fita, Con-",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — conquise avec Tolède (seul témoin, tardif)",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "328",
+      "place": {
+        "id": "336",
+        "name": {
+          "fr": "Maqueda",
+          "en": null
+        },
+        "lon": -4.371667,
+        "lat": 40.064722,
+        "wikidata": "Q1631202",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 11, p. 221",
+          "quotation": "Presumably both of these fortresses were still in Christian hands for we hear of no towns captured by the Murâbit forces.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — encore chrétienne en 1090 (avec Madrid)",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 539",
+          "quotation": "suegra, Maqueda, Buetrago».",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — avec Tolède",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "305",
+            "title": "El repertorio cerámico de época almorávide del cerro de la Defensa de Uclés (Arqueología y Territorio Medieval 32, e9384)",
+            "author": "David Gallego Valle, Jesús Manuel Molero García, María Victoria Gutiérrez Calderón",
+            "url": "https://revistaselectronicas.ujaen.es/index.php/ATM/article/download/9384/10008/72265"
+          },
+          "where": "p. 4",
+          "quotation": "y Alamín, Maquea y Tala - vera, en la del Alberche-Tajo.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille encore en 1109",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "327",
+      "place": {
+        "id": "335",
+        "name": {
+          "fr": "Talavera de la Reina",
+          "en": null
+        },
+        "lon": -4.833333,
+        "lat": 39.966667,
+        "wikidata": "Q181359",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 539",
+          "quotation": "de Toledo, Medinacelim, Talauera, Coymbria,",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — conquise avec Tolède",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "303",
+            "title": "España Sagrada, t. XXIII — Anales Toledanos I et II",
+            "author": "Enrique Flórez (éd.)",
+            "url": "https://archive.org/details/espaasagradath23fluoft"
+          },
+          "where": "Anales Toledanos II, p. 403 — lu sur l'image de la page",
+          "quotation": "Prisieron Moros Talavera en XVI. dias de Agosto Era MCXVII.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille jusqu'au 16 août 1109 (l'imprimé porte MCXVII, la marge 1109)",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 231",
+          "quotation": "il commença par s'emparer de la ville de Thalabout^, qu'd emporta à l'assaut, ainsi que vingt-sept châteaux forts des environs de Tolède",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — prise d'assaut par Ali en 1109",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "301",
+            "title": "The Kingdom of León-Castilla under Queen Urraca",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/urraca/urraca1.htm"
+          },
+          "where": "ch. 2, p. 64",
+          "quotation": "In the latter days of the summer of 1109 the leader of the Murâbits, Ali ben Yusuf, had taken Talavera de la Reina to the west of Toledo.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — prise à la fin de l'été 1109",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "326",
+      "place": {
+        "id": "334",
+        "name": {
+          "fr": "Alcalá de Henares",
+          "en": null
+        },
+        "lon": -3.364305,
+        "lat": 40.481815,
+        "wikidata": "Q46940",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 17, p. 361",
+          "quotation": "Only largely local forces were available in August for an unsuccessful siege of Alcalá de Henares, which had passed into Muslim hands sometime in late 1108 or early 1109.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille jusqu'à la fin de 1108 ou au début de 1109 (seul témoin)",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "303",
+            "title": "España Sagrada, t. XXIII — Anales Toledanos I et II",
+            "author": "Enrique Flórez (éd.)",
+            "url": "https://archive.org/details/espaasagradath23fluoft"
+          },
+          "where": "Anales Toledanos I, p. 387 — lu sur l'image de la page",
+          "quotation": "è fueron cercar à Alcalá , que era de Moros , Era MCXLVII.",
+          "subject": "holder",
+          "holder": {
+            "name": "musulmane en 1109 (rien sur 1100)",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "301",
+            "title": "The Kingdom of León-Castilla under Queen Urraca",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/urraca/urraca1.htm"
+          },
+          "where": "ch. 2, p. 55",
+          "quotation": "Well to the northeast of Toledo, Alcala fell to the Muslims in the spring of 1109 and a Christian counterattack was mounted in August.",
+          "subject": "holder",
+          "holder": {
+            "name": "tombe aux musulmans au printemps 1109",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "325",
+      "place": {
+        "id": "333",
+        "name": {
+          "fr": "Madrid",
+          "en": null
+        },
+        "lon": -3.703333,
+        "lat": 40.416944,
+        "wikidata": "Q2807",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "301",
+            "title": "The Kingdom of León-Castilla under Queen Urraca",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/urraca/urraca1.htm"
+          },
+          "where": "ch. 1, p. 19–20",
+          "quotation": "was governor of Madrid in 1095.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — Pedro Ansúrez gouverneur en 1095",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 539",
+          "quotation": "Olmedo, Madrit, Atienga, Ribas, Osraa, con",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — avec Tolède",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 231",
+          "quotation": "il conquit également Madjrêt et Oued el-Hidjâra*",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — conquise par les Almoravides en 1109 seulement",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "324",
+      "place": {
+        "id": "332",
+        "name": {
+          "fr": "Guadalajara",
+          "en": null
+        },
+        "lon": -3.166667,
+        "lat": 40.633333,
+        "wikidata": "Q11953",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 14, p. 290",
+          "quotation": "When the king does come back into sight on September 30, 1098, he is at Guadalajara,",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — le roi y est le 30 septembre 1098",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 539",
+          "quotation": "esta es Guadalfaia",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — avec Tolède",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 231",
+          "quotation": "il conquit également Madjrêt et Oued el-Hidjâra*",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — conquise par les Almoravides en 1109 seulement",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 232",
+          "quotation": "Zend Gharsvs, maître de l'Oued el-Hidjâra",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — un seigneur chrétien « maître de l'Oued el-Hidjâra » en 1113",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "305",
+            "title": "El repertorio cerámico de época almorávide del cerro de la Defensa de Uclés (Arqueología y Territorio Medieval 32, e9384)",
+            "author": "David Gallego Valle, Jesús Manuel Molero García, María Victoria Gutiérrez Calderón",
+            "url": "https://revistaselectronicas.ujaen.es/index.php/ATM/article/download/9384/10008/72265"
+          },
+          "where": "p. 4",
+          "quotation": "aunque también se mantuvo el control de los corredores y plazas en el río Henares (Medinaceli, Atienza, Hita y Guadalajara)",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille encore en 1109",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "323",
+      "place": {
+        "id": "331",
+        "name": {
+          "fr": "Hita",
+          "en": null
+        },
+        "lon": -3.049444,
+        "lat": 40.824722,
+        "wikidata": "Q1769186",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 14, p. 285",
+          "quotation": "From the new realms of Toledo appear the names of Alvar Fáñez of Zorita and Fernán Pérez of Hita.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — Fernán Pérez « of Hita » en 1097",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 14, p. 291",
+          "quotation": "lay an area of Christian repopulation and infiltration, composed of tiny places like Hita.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — repeuplement chrétien (1098)",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 539",
+          "quotation": "Valeranica, Maura, Escalona, Fita, Con-",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — conquise avec Tolède",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "305",
+            "title": "El repertorio cerámico de época almorávide del cerro de la Defensa de Uclés (Arqueología y Territorio Medieval 32, e9384)",
+            "author": "David Gallego Valle, Jesús Manuel Molero García, María Victoria Gutiérrez Calderón",
+            "url": "https://revistaselectronicas.ujaen.es/index.php/ATM/article/download/9384/10008/72265"
+          },
+          "where": "p. 4",
+          "quotation": "plazas en el río Henares (Medinaceli, Atienza, Hita y Guadalajara)",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille encore en 1109",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "322",
+      "place": {
+        "id": "330",
+        "name": {
+          "fr": "Oreja (château)",
+          "en": null
+        },
+        "lon": -3.498,
+        "lat": 40.039,
+        "wikidata": "Q8342488",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 521",
+          "quotation": "suegra, Mora, Ocanna, Oreia, Vcles, Huepte,",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — parmi les châteaux de Zaida (tradition tardive, seul témoin pour 1100)",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "303",
+            "title": "España Sagrada, t. XXIII — Anales Toledanos I et II",
+            "author": "Enrique Flórez (éd.)",
+            "url": "https://archive.org/details/espaasagradath23fluoft"
+          },
+          "where": "Anales Toledanos II, p. 403 — lu sur l'image de la page",
+          "quotation": "El Rey Moro Azmazdalí prisó Oreja, Era MCLI.",
+          "subject": "holder",
+          "holder": {
+            "name": "chrétienne jusqu'en 1113 — Mazdalî la prend",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "321",
+      "place": {
+        "id": "329",
+        "name": {
+          "fr": "Zorita de los Canes",
+          "en": null
+        },
+        "lon": -2.8875,
+        "lat": 40.332778,
+        "wikidata": "Q1657998",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 9, p. 174",
+          "quotation": "As we have already seen, Alfonso VI held Canales, Canturias, and Zorita well before the fall of the city of Toledo itself.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — tenue bien avant la prise de Tolède",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 14, p. 285",
+          "quotation": "From the new realms of Toledo appear the names of Alvar Fáñez of Zorita and Fernán Pérez of Hita.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — Alvar Fáñez « of Zorita » en 1097",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 521",
+          "quotation": "Corita, Amassatrigo, et Cuenca.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — parmi les châteaux de Zaida",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "320",
+      "place": {
+        "id": "328",
+        "name": {
+          "fr": "Calatrava la Vieja",
+          "en": null
+        },
+        "lon": -3.832522,
+        "lat": 39.074339,
+        "wikidata": "Q371063",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 11, p. 222",
+          "quotation": "From that secure base Sir was able to begin to operate militarily on the southern fringes of the meseta of Castilla la Nueva and secured a forward position there at Calatrava.",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides — poste avancé de Sīr depuis 1091",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 221",
+          "quotation": "pour restaurer et fortifier Kalat-Rabah^, kasbah des Musulmans.",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides — kasbah fortifiée en 484 H (1091)",
+            "wikidata": "Q75613"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
+    },
+    {
+      "id": "319",
+      "place": {
+        "id": "327",
+        "name": {
+          "fr": "Consuegra",
+          "en": null
+        },
+        "lon": -3.606389,
+        "lat": 39.461944,
+        "wikidata": "Q919046",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "303",
+            "title": "España Sagrada, t. XXIII — Anales Toledanos I et II",
+            "author": "Enrique Flórez (éd.)",
+            "url": "https://archive.org/details/espaasagradath23fluoft"
+          },
+          "where": "Anales Toledanos I, p. 385 (marge : 1099)",
+          "quotation": "en Sant Servando sobre Toledo , é en su tor- nada prisó á Consuegra en el mes de Junio",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, depuis juin 1099",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 14, p. 294",
+          "quotation": "Instead they ended by concentrating on a siege of the castle of Consuegra, which had defied them successfully in 1097. This time they achieved at least that end for the castle fell to them sometime in June.",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, depuis juin 1099 (elle avait résisté en 1097)",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 553",
+          "quotation": "que ueno ella a Consuegra que era suya",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille avant 1099 — Zaida vient à Consuegra, « qui était sienne »",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
+    },
+    {
+      "id": "318",
+      "place": {
+        "id": "326",
+        "name": {
+          "fr": "Ocaña",
+          "en": null
+        },
+        "lon": -3.496667,
+        "lat": 39.956944,
+        "wikidata": "Q957767",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 521",
+          "quotation": "suegra, Mora, Ocanna, Oreia, Vcles, Huepte,",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — parmi les châteaux de Zaida (tradition tardive)",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "305",
+            "title": "El repertorio cerámico de época almorávide del cerro de la Defensa de Uclés (Arqueología y Territorio Medieval 32, e9384)",
+            "author": "David Gallego Valle, Jesús Manuel Molero García, María Victoria Gutiérrez Calderón",
+            "url": "https://revistaselectronicas.ujaen.es/index.php/ATM/article/download/9384/10008/72265"
+          },
+          "where": "p. 3",
+          "quotation": "Tras la batalla de Uclés, los almorávides ganaron varias plazas estratégicas en la zona de Cuenca y la mesa de Ocaña.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille jusqu'en 1108 — les Almoravides gagnent la mesa de Ocaña après Uclés",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "317",
+      "place": {
+        "id": "325",
+        "name": {
+          "fr": "Cuenca",
+          "en": null
+        },
+        "lon": -2.134444,
+        "lat": 40.071667,
+        "wikidata": "Q15098",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 14, p. 286–287",
+          "quotation": "to the southern edge of the Sierra de Albarracín in the east at Belmonte and Cuenca.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — ligne de défense de 1097, de Consuegra à Belmonte et Cuenca",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 14, p. 287",
+          "quotation": "attacked the eastern end of the Christian line in the Cuenca district and there defeated Alvar Fáñez before withdrawing in its turn.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — Alvar Fáñez battu dans le district de Cuenca (1097)",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 9, p. 174",
+          "quotation": "The lands of the present province of Cuenca seem to have been left to al-Qadir, who took up his residence in the city of the same name in preparation for his descent on Valencia.",
+          "subject": "holder",
+          "holder": {
+            "name": "laissée à al-Qādir en 1085 (avant la Castille ; autre date)",
+            "wikidata": null
+          }
+        },
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 553",
+          "quotation": "entrego de Cuenca al rey et de todo lo al.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — livrée au roi par Zaida (tradition tardive)",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "303",
+            "title": "España Sagrada, t. XXIII — Anales Toledanos I et II",
+            "author": "Enrique Flórez (éd.)",
+            "url": "https://archive.org/details/espaasagradath23fluoft"
+          },
+          "where": "Anales Toledanos I, p. 387 — lu sur l'image de la page",
+          "quotation": "Albar Hannez prisó Cuenca de Moros en el mes de Julio , Era MCXLIX.",
+          "subject": "holder",
+          "holder": {
+            "name": "musulmane en 1111, reprise par Alvar Fáñez en juillet (donc perdue entre-temps)",
+            "wikidata": "Q75613"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "316",
+      "place": {
+        "id": "324",
+        "name": {
+          "fr": "Huete",
+          "en": null
+        },
+        "lon": -2.688889,
+        "lat": 40.1475,
+        "wikidata": "Q1827689",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 17, p. 351",
+          "quotation": "it seems to be clear that Huete, like Uclés a center of repopulation southeast of the Tajo and some thirty-five kilometers northeast of the latter city, also fell in the ensuing summer.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille jusqu'à l'été 1108",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 555, ch. 884",
+          "quotation": "Estonces se perdieron Cuenca, Amassatrigo, / Huepte, Vcles.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — perdue après Uclés",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "305",
+            "title": "El repertorio cerámico de época almorávide del cerro de la Defensa de Uclés (Arqueología y Territorio Medieval 32, e9384)",
+            "author": "David Gallego Valle, Jesús Manuel Molero García, María Victoria Gutiérrez Calderón",
+            "url": "https://revistaselectronicas.ujaen.es/index.php/ATM/article/download/9384/10008/72265"
+          },
+          "where": "p. 3",
+          "quotation": "Tras la toma de Toledo por Alfonso VI en 1085, Uclés y otros enclaves cercanos, caso de Huete, pasa - ron a la órbita cristiana",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — chrétienne après 1085",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "315",
+      "place": {
+        "id": "323",
+        "name": {
+          "fr": "Uclés",
+          "en": null
+        },
+        "lon": -2.862222,
+        "lat": 39.981944,
+        "wikidata": "Q959012",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "300",
+            "title": "The Kingdom of León-Castilla under King Alfonso VI, 1065–1109",
+            "author": "Bernard F. Reilly",
+            "url": "http://libro.uca.edu/alfonso6/alfonso10.htm"
+          },
+          "where": "ch. 17, p. 349",
+          "quotation": "The united army then marched to Uclés itself where the town proper fell immediately into their hands on May 27, the Christian defenders retreating into its alcázar or citadel.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille jusqu'au 27 mai 1108",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 228, année 502",
+          "quotation": "Etant arrivé sous les murs de la forteresse d'Akelych, habitée par une forte garnison de Chrétiens",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — forte garnison chrétienne en 1108",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "302",
+            "title": "Primera Crónica General de España, t. I (Nueva Biblioteca de Autores Españoles 5)",
+            "author": "Ramón Menéndez Pidal (éd.)",
+            "url": "https://archive.org/details/PrimeraCrnicaGeneral"
+          },
+          "where": "p. 521",
+          "quotation": "suegra, Mora, Ocanna, Oreia, Vcles, Huepte,",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — parmi les châteaux de Zaida",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "305",
+            "title": "El repertorio cerámico de época almorávide del cerro de la Defensa de Uclés (Arqueología y Territorio Medieval 32, e9384)",
+            "author": "David Gallego Valle, Jesús Manuel Molero García, María Victoria Gutiérrez Calderón",
+            "url": "https://revistaselectronicas.ujaen.es/index.php/ATM/article/download/9384/10008/72265"
+          },
+          "where": "p. 3",
+          "quotation": "Tras la toma de Toledo por Alfonso VI en 1085, Uclés y otros enclaves cercanos, caso de Huete, pasa - ron a la órbita cristiana",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — chrétienne dans les années qui suivent 1085",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "290",
+            "title": "Historia de Portugal desde o começo da monarchia até o fim do reinado de Affonso III, t. I (7.ª ed.)",
+            "author": "Alexandre Herculano",
+            "url": "https://archive.org/details/historiadeportug01herc"
+          },
+          "where": "t. I, p. 254",
+          "quotation": "Romperam as hostilidades pelo cerco d'Uclés, forte povoação da fronteira christan.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — place-frontière chrétienne en 1108",
+            "wikidata": "Q179293"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
+    },
+    {
+      "id": "314",
+      "place": {
+        "id": "322",
+        "name": {
+          "fr": "Ston",
+          "en": null
+        },
+        "lon": 17.6961,
+        "lat": 42.8361,
+        "wikidata": "Q86659764",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "295",
+            "title": "Geschichte der Serben, Bd. I (bis 1371)",
+            "author": "Constantin Jireček",
+            "url": "https://archive.org/details/geschichtederser00jire"
+          },
+          "where": "p. 118–119",
+          "quotation": "Die Burg Stagno (slaw. Ston",
+          "subject": "holder",
+          "holder": {
+            "name": "Zachlumie — forteresse des Zachlumiens",
+            "wikidata": "Q1311704"
+          }
+        },
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 224 — lu sur une copie numérisée",
+          "quotation": "Bosnia and Zahumlje also seceded from Dukljan control.",
+          "subject": "holder",
+          "holder": {
+            "name": "Zachlumie — fait sécession de la Dioclée dans les années 1090",
+            "wikidata": "Q1311704"
+          }
+        },
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 206 — lu sur une copie numérisée",
+          "quotation": "His territory stretched along the coast as far north as Ston, and included a portion of Zahumlje as well as Trebinje and Duklja.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée jusqu'à Ston (années 1040, pas 1100)",
+            "wikidata": "Q1252942"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Zachlumie",
+        "wikidata": "Q1311704"
+      }
+    },
+    {
+      "id": "313",
+      "place": {
+        "id": "321",
+        "name": {
+          "fr": "Trebinje",
+          "en": null
+        },
+        "lon": 18.3487,
+        "lat": 42.7093,
+        "wikidata": "Q690052",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 224 — lu sur une copie numérisée",
+          "quotation": "Duklja became much weaker and was left with little terri- tory other than Duklja itself and Trebinje.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée — il ne lui reste guère que la Dioclée et Trebinje (années 1090)",
+            "wikidata": "Q1252942"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Dioclée",
+        "wikidata": "Q1252942"
+      }
+    },
+    {
+      "id": "312",
+      "place": {
+        "id": "320",
+        "name": {
+          "fr": "Raguse (Dubrovnik)",
+          "en": null
+        },
+        "lon": 18.1083,
+        "lat": 42.6403,
+        "wikidata": "Q1722",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 278 — lu sur une copie numérisée",
+          "quotation": "By 1030 (and possibly as far back as 1018) it is found as a separate theme under its own strategos.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — thème à part vers 1030, liens étroits avec l'Empire",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "298",
+            "title": "Popa Dukljanina letopis po latinsku i toga nekoliko i još nešto po hrvatsku (Chronique du Prêtre de Dioclée)",
+            "author": "Ivan Crnčić (éd.), d'après le manuscrit de Jerolim Kaletić",
+            "url": "https://archive.org/details/popa_dukljanina_letopis_po_latinsku_1874-ivan_crncic"
+          },
+          "where": "ch. XLII, p. 55",
+          "quotation": "Praeterea rex eepit eivitatem Ragu- sium, et aedifieavit ibi eastellum.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée — Bodin la prend et y bâtit un château (lecture divergente)",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "295",
+            "title": "Geschichte der Serben, Bd. I (bis 1371)",
+            "author": "Constantin Jireček",
+            "url": "https://archive.org/details/geschichtederser00jire"
+          },
+          "where": "p. 242",
+          "quotation": "Ob diese Erzählung einen historischen Kern hat, ist zu bezweifeln.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — le récit de la prise par Bodin est mis en doute",
+            "wikidata": "Q12544"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      }
+    },
+    {
+      "id": "311",
+      "place": {
+        "id": "319",
+        "name": {
+          "fr": "Cattaro (Kotor)",
+          "en": null
+        },
+        "lon": 18.7712,
+        "lat": 42.4254,
+        "wikidata": "Q171080",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 206 — lu sur une copie numérisée",
+          "quotation": "maintained other courts in Trebinje and the coastal cities of Kotor and Bar.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée — une cour de Vojislav (années 1040)",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "298",
+            "title": "Popa Dukljanina letopis po latinsku i toga nekoliko i još nešto po hrvatsku (Chronique du Prêtre de Dioclée)",
+            "author": "Ivan Crnčić (éd.), d'après le manuscrit de Jerolim Kaletić",
+            "url": "https://archive.org/details/popa_dukljanina_letopis_po_latinsku_1874-ivan_crncic"
+          },
+          "where": "ch. XLIV, p. 56",
+          "quotation": "potionem mortiferam conficiens in Ga¬ taro, quo manebat.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée — la reine Jaquinta y réside, après la mort de Bodin",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 231 — lu sur une copie numérisée",
+          "quotation": "She succeeded in giving Vladimir in Kotor a dose of a slow-working poison.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée (après 1101)",
+            "wikidata": "Q1252942"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Dioclée",
+        "wikidata": "Q1252942"
+      }
+    },
+    {
+      "id": "310",
+      "place": {
+        "id": "318",
+        "name": {
+          "fr": "Dulcigno (Ulcinj)",
+          "en": null
+        },
+        "lon": 19.2056,
+        "lat": 41.9236,
+        "wikidata": "Q189969",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 223 — lu sur une copie numérisée",
+          "quotation": "Under Bar as suffragan bishops would be: Kotor, Ulcinj, Svac, Skadar, Drivast, Pula (Polati), Serbia, Bosnia, and Trebinje.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée — évêché suffragant de Bar (1089), par l'Église seulement",
+            "wikidata": "Q1252942"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Dioclée",
+        "wikidata": "Q1252942"
+      }
+    },
+    {
+      "id": "309",
+      "place": {
+        "id": "317",
+        "name": {
+          "fr": "Antivari (Bar)",
+          "en": null
+        },
+        "lon": 19.134,
+        "lat": 42.0936,
+        "wikidata": "Q1190321",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 223 — lu sur une copie numérisée",
+          "quotation": "By supporting the pope against an antipope in 1089, he got the bishop of Bar raised to the rank of archbishop.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée — évêché élevé en archevêché à la demande de Bodin (1089)",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "295",
+            "title": "Geschichte der Serben, Bd. I (bis 1371)",
+            "author": "Constantin Jireček",
+            "url": "https://archive.org/details/geschichtederser00jire"
+          },
+          "where": "p. 233",
+          "quotation": "daß das Grenzgebiet mit Skutari und Antivari seitdem den Serben blieb.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée — serbe depuis les années 1040",
+            "wikidata": "Q1252942"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Dioclée",
+        "wikidata": "Q1252942"
+      }
+    },
+    {
+      "id": "308",
+      "place": {
+        "id": "316",
+        "name": {
+          "fr": "Scutari (Shkodër)",
+          "en": null
+        },
+        "lon": 19.5121,
+        "lat": 42.0681,
+        "wikidata": "Q131638",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "298",
+            "title": "Popa Dukljanina letopis po latinsku i toga nekoliko i još nešto po hrvatsku (Chronique du Prêtre de Dioclée)",
+            "author": "Ivan Crnčić (éd.), d'après le manuscrit de Jerolim Kaletić",
+            "url": "https://archive.org/details/popa_dukljanina_letopis_po_latinsku_1874-ivan_crncic"
+          },
+          "where": "ch. XLII, p. 55",
+          "quotation": "Praeterea rex eepit eivitatem Ragu- sium, et aedifieavit ibi eastellum. Et. postea reversns est in Seodarim.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée — Bodin y revient après Raguse",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "295",
+            "title": "Geschichte der Serben, Bd. I (bis 1371)",
+            "author": "Constantin Jireček",
+            "url": "https://archive.org/details/geschichtederser00jire"
+          },
+          "where": "p. 241",
+          "quotation": "Bei Skutari wurden die Anführer des Kreuzheeres von Bodin",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée — Bodin y reçoit les chefs de la croisade (1096-1097)",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "299",
+            "title": "The Palgrave Atlas of Byzantine History",
+            "author": "John Haldon",
+            "url": null
+          },
+          "where": "p. 117",
+          "quotation": "those of Raymond of Toulouse marched along the Adriatic shore lands of Croatia to enter Byzantine territory north of Dyrrhachion (mod. Durrës).",
+          "subject": "holder",
+          "holder": {
+            "name": "hors de l'Empire byzantin : la croisade n'y entre qu'au nord de Durazzo (1096-1097)",
+            "wikidata": "Q1252942"
+          }
+        },
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 206 — lu sur une copie numérisée",
+          "quotation": "Vojislav established his capital at Skadar (Scutari, Skhoder)",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée — capitale de Vojislav (années 1040)",
+            "wikidata": "Q1252942"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Dioclée",
+        "wikidata": "Q1252942"
+      }
+    },
+    {
+      "id": "307",
+      "place": {
+        "id": "315",
+        "name": {
+          "fr": "Sirmium (Sremska Mitrovica)",
+          "en": null
+        },
+        "lon": 19.6125,
+        "lat": 44.97,
+        "wikidata": "Q242733",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 211 — lu sur une copie numérisée",
+          "quotation": "But though Beograd remained imperial, Sirmium was lost to the Hungarians who were in possession of it in 1071.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Hongrie, depuis 1071",
+            "wikidata": "Q171150"
+          }
+        },
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 235 — lu sur une copie numérisée",
+          "quotation": "the empire recovered Branicevo, Beograd, Zemun, and the region of Sirmium (which had been Hungarian since the 1060s).",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Hongrie « depuis les années 1060 », jusqu'à la reprise byzantine de 1126 (deux dates chez le même auteur)",
+            "wikidata": "Q171150"
+          }
+        },
+        {
+          "source": {
+            "id": "295",
+            "title": "Geschichte der Serben, Bd. I (bis 1371)",
+            "author": "Constantin Jireček",
+            "url": "https://archive.org/details/geschichtederser00jire"
+          },
+          "where": "p. 229",
+          "quotation": "Sirmium wurde für ByzaDz abermals ein unsicherer Besitz, wie einst im 6. Jahrhundert.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin, possession incertaine (vague, non daté)",
+            "wikidata": "Q12544"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Royaume de Hongrie",
+        "wikidata": "Q171150"
+      }
+    },
+    {
+      "id": "306",
+      "place": {
+        "id": "314",
+        "name": {
+          "fr": "Braničevo",
+          "en": null
+        },
+        "lon": 21.1917,
+        "lat": 44.7375,
+        "wikidata": "Q3396259",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "299",
+            "title": "The Palgrave Atlas of Byzantine History",
+            "author": "John Haldon",
+            "url": null
+          },
+          "where": "carte 10.1",
+          "quotation": "20 Braniscevo-Nis (Naissos)",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — district vers 1118 (pas de témoin daté de 1100)",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 234 — lu sur une copie numérisée",
+          "quotation": "local inhabitants of the important Byzantine border town of Branicevo",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — ville-frontière byzantine (années 1120)",
+            "wikidata": "Q12544"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      }
+    },
+    {
+      "id": "305",
+      "place": {
+        "id": "313",
+        "name": {
+          "fr": "Belgrade",
+          "en": null
+        },
+        "lon": 20.4569,
+        "lat": 44.8178,
+        "wikidata": "Q3711",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 211 — lu sur une copie numérisée",
+          "quotation": "In any case, Beograd was clearly imperial when the First Crusade passed through it in 1096.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — impériale au passage de la première croisade (1096)",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "295",
+            "title": "Geschichte der Serben, Bd. I (bis 1371)",
+            "author": "Constantin Jireček",
+            "url": "https://archive.org/details/geschichtederser00jire"
+          },
+          "where": "p. 244",
+          "quotation": "König Stephan IL eroberte Belgrad",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin jusqu'à sa prise par Étienne II de Hongrie (années 1120)",
+            "wikidata": "Q12544"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      }
+    },
+    {
+      "id": "304",
+      "place": {
+        "id": "312",
+        "name": {
+          "fr": "Niš",
+          "en": null
+        },
+        "lon": 21.8961,
+        "lat": 43.3192,
+        "wikidata": "Q129259",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "295",
+            "title": "Geschichte der Serben, Bd. I (bis 1371)",
+            "author": "Constantin Jireček",
+            "url": "https://archive.org/details/geschichtederser00jire"
+          },
+          "where": "p. 240 (d'après Albert d'Aix)",
+          "quotation": "Seine ungeordneten und raubsüchtigen Scharen wurden in Nis vom Statthalter Niketas freundlich empfangen",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — le gouverneur Nicétas reçoit la croisade (1096)",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "299",
+            "title": "The Palgrave Atlas of Byzantine History",
+            "author": "John Haldon",
+            "url": null
+          },
+          "where": "carte 10.1",
+          "quotation": "20 Braniscevo-Nis (Naissos)",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — district vers 1118",
+            "wikidata": "Q12544"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      }
+    },
+    {
+      "id": "303",
+      "place": {
+        "id": "311",
+        "name": {
+          "fr": "Vranje",
+          "en": null
+        },
+        "lon": 21.8972,
+        "lat": 42.5542,
+        "wikidata": "Q211645",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "297",
+            "title": "The Alexiad (ed. and transl. Elizabeth A. Dawes)",
+            "author": "Anne Comnène",
+            "url": null
+          },
+          "where": "livre IX, ch. 4 — lu sur une copie numérisée",
+          "quotation": "proceeding to Branea laid that all waste, carried off a tremendous amount of plunder from it and then returned to his own country.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — pillée par Vukan, qui rentre ensuite chez lui (vers 1093)",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "295",
+            "title": "Geschichte der Serben, Bd. I (bis 1371)",
+            "author": "Constantin Jireček",
+            "url": "https://archive.org/details/geschichtederser00jire"
+          },
+          "where": "p. 239",
+          "quotation": "Die Serben verheerten ungehindert das offene Land bei Vranja und Skopje",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — les Serbes ravagent la campagne autour",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 226 — lu sur une copie numérisée",
+          "quotation": "taking the cities of Vranje, Skopje, and Tetovo.",
+          "subject": "holder",
+          "holder": {
+            "name": "Rascie — prise par Vukan vers 1093 (lecture divergente)",
+            "wikidata": "Q1311990"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      }
+    },
+    {
+      "id": "302",
+      "place": {
+        "id": "310",
+        "name": {
+          "fr": "Skopje",
+          "en": null
+        },
+        "lon": 21.4317,
+        "lat": 41.9961,
+        "wikidata": "Q384",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "297",
+            "title": "The Alexiad (ed. and transl. Elizabeth A. Dawes)",
+            "author": "Anne Comnène",
+            "url": null
+          },
+          "where": "livre IX, ch. 4 — lu sur une copie numérisée",
+          "quotation": "However, when the Emperor had occupied Scopia, Bolcanus sent envoys with overtures of peace",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — base de l'empereur contre Vukan",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "295",
+            "title": "Geschichte der Serben, Bd. I (bis 1371)",
+            "author": "Constantin Jireček",
+            "url": "https://archive.org/details/geschichtederser00jire"
+          },
+          "where": "p. 241",
+          "quotation": "Die Wege von Alessio nach Prizren und Skopje waren also damals für die Byzantiner ganz sicher.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin (vers 1107-1108)",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 226 — lu sur une copie numérisée",
+          "quotation": "began to expand along the Vardar obtaining much booty and taking the cities of Vranje, Skopje, and Tetovo.",
+          "subject": "holder",
+          "holder": {
+            "name": "Rascie — prise par Vukan vers 1093, temporairement (lecture divergente)",
+            "wikidata": "Q1311990"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      }
+    },
+    {
+      "id": "301",
+      "place": {
+        "id": "309",
+        "name": {
+          "fr": "Prizren",
+          "en": null
+        },
+        "lon": 20.74,
+        "lat": 42.23,
+        "wikidata": "Q200061",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "295",
+            "title": "Geschichte der Serben, Bd. I (bis 1371)",
+            "author": "Constantin Jireček",
+            "url": "https://archive.org/details/geschichtederser00jire"
+          },
+          "where": "p. 241",
+          "quotation": "Die Wege von Alessio nach Prizren und Skopje waren also damals für die Byzantiner ganz sicher.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — route sûre pour les Byzantins (vers 1107-1108)",
+            "wikidata": "Q12544"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      }
+    },
+    {
+      "id": "300",
+      "place": {
+        "id": "308",
+        "name": {
+          "fr": "Lipljan",
+          "en": null
+        },
+        "lon": 21.1242,
+        "lat": 42.5222,
+        "wikidata": "Q994730",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "297",
+            "title": "The Alexiad (ed. and transl. Elizabeth A. Dawes)",
+            "author": "Anne Comnène",
+            "url": null
+          },
+          "where": "livre IX, ch. 4 — lu sur une copie numérisée",
+          "quotation": "(this is a small fort lying at the foot of the Zygum, which separates Dalmatia from our territory)",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — petit fort du côté romain du Zygum",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "297",
+            "title": "The Alexiad (ed. and transl. Elizabeth A. Dawes)",
+            "author": "Anne Comnène",
+            "url": null
+          },
+          "where": "livre IX, ch. 10 — lu sur une copie numérisée",
+          "quotation": "When Bolcanus heard that the Emperor had arrived at Lipenium and saw him in occupation",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — l'empereur l'occupe de nouveau au traité avec Vukan",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "295",
+            "title": "Geschichte der Serben, Bd. I (bis 1371)",
+            "author": "Constantin Jireček",
+            "url": "https://archive.org/details/geschichtederser00jire"
+          },
+          "where": "p. 238–239",
+          "quotation": "Die Byzantiner hatten ihr Grenzlager am Südende des Amselfeldes in dem kleinen Städtchen Lipljan, Sitz eines Bischofs.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — camp-frontière au sud du Kosovo",
+            "wikidata": "Q12544"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      }
+    },
+    {
+      "id": "299",
+      "place": {
+        "id": "307",
+        "name": {
+          "fr": "Zvečan",
+          "en": null
+        },
+        "lon": 20.8415,
+        "lat": 42.8998,
+        "wikidata": "Q2631834",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "297",
+            "title": "The Alexiad (ed. and transl. Elizabeth A. Dawes)",
+            "author": "Anne Comnène",
+            "url": null
+          },
+          "where": "livre IX, ch. 4 — lu sur une copie numérisée",
+          "quotation": "Bolcanus, hearing of the Emperor’s advent, moved away from there and occupied Sphentzanium, which is a fort situated above the Zygum, just mentioned, in the borderland between the Roman boundaries and Dalmatia.",
+          "subject": "holder",
+          "holder": {
+            "name": "Serbes de Vukan (Bolcanus), fort frontalier, vers 1093",
+            "wikidata": "Q1311990"
+          }
+        },
+        {
+          "source": {
+            "id": "295",
+            "title": "Geschichte der Serben, Bd. I (bis 1371)",
+            "author": "Constantin Jireček",
+            "url": "https://archive.org/details/geschichtederser00jire"
+          },
+          "where": "p. 238",
+          "quotation": "Die serbische Grenzburg war Zvecan",
+          "subject": "holder",
+          "holder": {
+            "name": "Rascie — le Sphentzanion de l'Alexiade est Zvečan",
+            "wikidata": "Q1311990"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Grande principauté de Serbie (Rascie)",
+        "wikidata": "Q1311990"
+      }
+    },
+    {
+      "id": "298",
+      "place": {
+        "id": "306",
+        "name": {
+          "fr": "Ras (Stari Ras)",
+          "en": null
+        },
+        "lon": 20.4228,
+        "lat": 43.1189,
+        "wikidata": "Q917814",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 225 — lu sur une copie numérisée",
+          "quotation": "His state was centered in the vicinity of modern Novi Pazar.",
+          "subject": "holder",
+          "holder": {
+            "name": "Rascie de Vukan, centrée près de l'actuel Novi Pazar",
+            "wikidata": "Q1311990"
+          }
+        },
+        {
+          "source": {
+            "id": "295",
+            "title": "Geschichte der Serben, Bd. I (bis 1371)",
+            "author": "Constantin Jireček",
+            "url": "https://archive.org/details/geschichtederser00jire"
+          },
+          "where": "p. 239",
+          "quotation": "Ras wird nicht erwähnt; dieser exponierte Posten war wohl von den Griechen geräumt worden.",
+          "subject": "holder",
+          "holder": {
+            "name": "Rascie — poste sans doute évacué par les Grecs dans les années 1090",
+            "wikidata": "Q1311990"
+          }
+        },
+        {
+          "source": {
+            "id": "295",
+            "title": "Geschichte der Serben, Bd. I (bis 1371)",
+            "author": "Constantin Jireček",
+            "url": "https://archive.org/details/geschichtederser00jire"
+          },
+          "where": "p. 215",
+          "quotation": "Der Mittelpunkt des östlichen Gebietes wurde das Tal der Raska bei dem jetzigen Novipazar mit der Burg Ras, in welcher bis zum Anfang der Regierung des Kaisers Manuel zeitweilig eine griechische Besatzung lagerte.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin, par moments, jusqu'au début du règne de Manuel (lecture divergente, non datée)",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "298",
+            "title": "Popa Dukljanina letopis po latinsku i toga nekoliko i još nešto po hrvatsku (Chronique du Prêtre de Dioclée)",
+            "author": "Ivan Crnčić (éd.), d'après le manuscrit de Jerolim Kaletić",
+            "url": "https://archive.org/details/popa_dukljanina_letopis_po_latinsku_1874-ivan_crncic"
+          },
+          "where": "ch. XLII, p. 54",
+          "quotation": "Bodinus cum fratribus perrexit Rassam. et debellando obtinuit eam, atque possedit eam.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée — conquise par Bodin vers 1083-1084 (avant la rupture des années 1090)",
+            "wikidata": "Q1252942"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Grande principauté de Serbie (Rascie)",
+        "wikidata": "Q1311990"
+      }
+    },
+    {
+      "id": "297",
+      "place": {
+        "id": "305",
+        "name": {
+          "fr": "Mértola",
+          "en": null
+        },
+        "lon": -7.65,
+        "lat": 37.6333,
+        "wikidata": "Q551056",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "287",
+            "title": "Histoire des Musulmans d'Espagne jusqu'à la conquête de l'Andalousie par les Almoravides (711–1110), t. IV",
+            "author": "Reinhart Dozy",
+            "url": "https://archive.org/details/histoiredesmusul04dozyuoft"
+          },
+          "where": "t. IV, p. 242–243",
+          "quotation": "qui commandaient l'un à Ronda, l'autre à Mertola",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides — le fils d'al-Mu'tamid qui y commandait se rend après Séville (1091)",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "290",
+            "title": "Historia de Portugal desde o começo da monarchia até o fim do reinado de Affonso III, t. I (7.ª ed.)",
+            "author": "Alexandre Herculano",
+            "url": "https://archive.org/details/historiadeportug01herc"
+          },
+          "where": "t. I, p. 253",
+          "quotation": "achou-se pacifico senhor de todos os paizes mohametanos desde os limites de Saragoça até a margem esquerda do Tejo",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides — tous les pays musulmans jusqu'à la rive gauche du Tage (1103, sans nommer la ville)",
+            "wikidata": "Q75613"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
+    },
+    {
+      "id": "296",
+      "place": {
+        "id": "304",
+        "name": {
+          "fr": "Sagonte (Murviedro)",
+          "en": null
+        },
+        "lon": -0.2783,
+        "lat": 39.68,
+        "wikidata": "Q47483",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "288",
+            "title": "Recherches sur l'histoire et la littérature de l'Espagne pendant le moyen âge, t. II (3e éd.)",
+            "author": "Reinhart Dozy",
+            "url": "https://archive.org/details/recherchessurlhi02dozyuoft"
+          },
+          "where": "t. II, p. 193",
+          "quotation": "Le 24 juin (1098), il prit possession de Murviédro",
+          "subject": "holder",
+          "holder": {
+            "name": "Seigneurie de Valence — prise par le Cid le 24 juin 1098",
+            "wikidata": "Q15714699"
+          }
+        },
+        {
+          "source": {
+            "id": "294",
+            "title": "Señorío de Valencia",
+            "author": null,
+            "url": "https://es.wikipedia.org/wiki/Se%C3%B1or%C3%ADo_de_Valencia"
+          },
+          "where": "§ Consolidación",
+          "quotation": "y en 1098 conquistó definitivamente la imponente ciudad fortificada de Sagunto",
+          "subject": "holder",
+          "holder": {
+            "name": "Seigneurie de Valence — conquise par le Cid en 1098",
+            "wikidata": "Q15714699"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Seigneurie de Valence",
+        "wikidata": "Q15714699"
+      }
+    },
+    {
+      "id": "295",
+      "place": {
+        "id": "303",
+        "name": {
+          "fr": "Alzira",
+          "en": null
+        },
+        "lon": -0.435,
+        "lat": 39.15,
+        "wikidata": "Q931780",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "288",
+            "title": "Recherches sur l'histoire et la littérature de l'Espagne pendant le moyen âge, t. II (3e éd.)",
+            "author": "Reinhart Dozy",
+            "url": "https://archive.org/details/recherchessurlhi02dozyuoft"
+          },
+          "where": "t. II, p. 142",
+          "quotation": "fit prendre possession d'Alcira par un de ses capitaines",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, occupée par un de leurs capitaines en 1092 (aucune source lue ne dit que le Cid l'ait reprise)",
+            "wikidata": "Q75613"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
+    },
+    {
+      "id": "294",
+      "place": {
+        "id": "302",
+        "name": {
+          "fr": "Xàtiva",
+          "en": null
+        },
+        "lon": -0.5192,
+        "lat": 38.9887,
+        "wikidata": "Q738013",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "287",
+            "title": "Histoire des Musulmans d'Espagne jusqu'à la conquête de l'Andalousie par les Almoravides (711–1110), t. IV",
+            "author": "Reinhart Dozy",
+            "url": "https://archive.org/details/histoiredesmusul04dozyuoft"
+          },
+          "where": "t. IV, p. 243",
+          "quotation": "Peu de temps après , ils prirent M urcie , Dénia , Xativa",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, peu après 1091",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "288",
+            "title": "Recherches sur l'histoire et la littérature de l'Espagne pendant le moyen âge, t. II (3e éd.)",
+            "author": "Reinhart Dozy",
+            "url": "https://archive.org/details/recherchessurlhi02dozyuoft"
+          },
+          "where": "t. II, p. 190",
+          "quotation": "Ceux-ci leur envoyèrent le général Abou-'l-Fath * , qui partit de Xativa avec quelques troupes",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides — une troupe almoravide en part vers Murviedro (vers 1098)",
+            "wikidata": "Q75613"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
+    },
+    {
+      "id": "293",
+      "place": {
+        "id": "301",
+        "name": {
+          "fr": "Dénia",
+          "en": null
+        },
+        "lon": 0.1086,
+        "lat": 38.8403,
+        "wikidata": "Q646725",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 223",
+          "quotation": "Eu A85 (1092 J. C), Voussef ben Tachefyn donna ordre à son kaïd Ben Aycha de se porter à Daniéta",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, 485 H (1092) — « Daniéta », Dénia en note",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "287",
+            "title": "Histoire des Musulmans d'Espagne jusqu'à la conquête de l'Andalousie par les Almoravides (711–1110), t. IV",
+            "author": "Reinhart Dozy",
+            "url": "https://archive.org/details/histoiredesmusul04dozyuoft"
+          },
+          "where": "t. IV, p. 243",
+          "quotation": "Peu de temps après , ils prirent M urcie , Dénia , Xativa",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides (d'après le Cartâs)",
+            "wikidata": "Q75613"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
+    },
+    {
+      "id": "292",
+      "place": {
+        "id": "300",
+        "name": {
+          "fr": "Baeza",
+          "en": null
+        },
+        "lon": -3.4667,
+        "lat": 37.9833,
+        "wikidata": "Q488555",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 221 et sa note",
+          "quotation": "Il conquit ensuite successivement les places de Byasa, Oubeda",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, safar 484 (1091) — « Byasa », Baeza en note",
+            "wikidata": "Q75613"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
+    },
+    {
+      "id": "291",
+      "place": {
+        "id": "299",
+        "name": {
+          "fr": "Úbeda",
+          "en": null
+        },
+        "lon": -3.3717,
+        "lat": 38.0117,
+        "wikidata": "Q329984",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 221 et sa note",
+          "quotation": "Il conquit ensuite successivement les places de Byasa, Oubeda",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, safar 484 (1091) — « Oubeda », Úbeda en note",
+            "wikidata": "Q75613"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
+    },
+    {
+      "id": "290",
+      "place": {
+        "id": "298",
+        "name": {
+          "fr": "Jaén",
+          "en": null
+        },
+        "lon": -3.7889,
+        "lat": 37.7697,
+        "wikidata": "Q15681",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 220",
+          "quotation": "son kaïd Bathy, qui assiégea cette place et s'en empara pour les Morabethyn",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, 484 H (1091) — « Gyan », Jaén en note",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "290",
+            "title": "Historia de Portugal desde o começo da monarchia até o fim do reinado de Affonso III, t. I (7.ª ed.)",
+            "author": "Alexandre Herculano",
+            "url": "https://archive.org/details/historiadeportug01herc"
+          },
+          "where": "t. I, p. 252",
+          "quotation": "Seyr pôde em breve assenhorear-se de Jaen e de Córdova",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides — Seyr prend Jaén et Cordoue",
+            "wikidata": "Q75613"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
+    },
+    {
+      "id": "289",
+      "place": {
+        "id": "297",
+        "name": {
+          "fr": "Murcie",
+          "en": null
+        },
+        "lon": -1.1303,
+        "lat": 37.9833,
+        "wikidata": "Q12225",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 222",
+          "quotation": "le kaïd Youssef ben Daoud ben Aycha conquit la ville et la province de Murcie",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, 484 H (1091)",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "287",
+            "title": "Histoire des Musulmans d'Espagne jusqu'à la conquête de l'Andalousie par les Almoravides (711–1110), t. IV",
+            "author": "Reinhart Dozy",
+            "url": "https://archive.org/details/histoiredesmusul04dozyuoft"
+          },
+          "where": "t. IV, p. 243",
+          "quotation": "Peu de temps après , ils prirent M urcie , Dénia , Xativa",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, peu après Alméria (d'après le Cartâs)",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "293",
+            "title": "Historical Atlas — pl. 66–67, « Europe and the Mediterranean Lands about 1097 »",
+            "author": "William R. Shepherd",
+            "url": null
+          },
+          "where": "pl. 66, lu sur l'image de la planche : « Murcia » dans « DOMINIONS OF THE ALMORAVIDS »",
+          "quotation": null,
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, vers 1097",
+            "wikidata": "Q75613"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
+    },
+    {
+      "id": "288",
+      "place": {
+        "id": "296",
+        "name": {
+          "fr": "Badajoz",
+          "en": null
+        },
+        "lon": -6.9706,
+        "lat": 38.8779,
+        "wikidata": "Q15679",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [
+        {
+          "source": {
+            "id": "287",
+            "title": "Histoire des Musulmans d'Espagne jusqu'à la conquête de l'Andalousie par les Almoravides (711–1110), t. IV",
+            "author": "Reinhart Dozy",
+            "url": "https://archive.org/details/histoiredesmusul04dozyuoft"
+          },
+          "where": "t. IV, p. 244",
+          "quotation": "envoya une armée contre Motavvakkil au commencement de l'année 1094, et cette armée conquit le pays, sans en excepter la capitale",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, depuis le début de 1094 (Motavvakkil tué)",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "293",
+            "title": "Historical Atlas — pl. 66–67, « Europe and the Mediterranean Lands about 1097 »",
+            "author": "William R. Shepherd",
+            "url": null
+          },
+          "where": "pl. 66, lu sur l'image de la planche : « Badajoz » dans « DOMINIONS OF THE ALMORAVIDS »",
+          "quotation": null,
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, vers 1097",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 231",
+          "quotation": "l'émir Syr ben Aby Beker conquit les villes de Santarem, Badajoz, Oporto, Evora, Lisbonne",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, mais conquise seulement en 504 H / 1110 (lecture divergente)",
+            "wikidata": "Q75613"
+          }
+        }
+      ],
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
+    },
+    {
       "id": "287",
       "place": {
         "id": "295",
@@ -1178,11 +5121,41 @@
             "name": "Musulmane — prise éphémère en 1117, définitive en 1232",
             "wikidata": null
           }
+        },
+        {
+          "source": {
+            "id": "285",
+            "title": "Batalla de Morella",
+            "author": null,
+            "url": "https://es.wikipedia.org/wiki/Batalla_de_Morella"
+          },
+          "where": "introduction (1084 ; d'après Boix Jovaní 2005)",
+          "quotation": "entonces perteneciente a la demarcación de Tortosa del rey taifa de Lérida",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Tortosa — Morella dans la démarcation de Tortosa du roi de Lérida, en 1084",
+            "wikidata": "Q605930"
+          }
+        },
+        {
+          "source": {
+            "id": "282",
+            "title": "Sulayman Sayyid al-Dawla",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Sulayman_Sayyid_al-Dawla"
+          },
+          "where": "dernière phrase (d'après Viguera Molins, EI2 « Ṭurṭūsha »)",
+          "quotation": "The Almoravids took Tortosa sometime after their capture of Valencia in 1102.",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Tortosa — houdide jusqu'après 1102 (Tortosa, dont dépend le lieu)",
+            "wikidata": "Q605930"
+          }
         }
       ],
       "holder": {
-        "name": "Musulmane (taïfa non établie)",
-        "wikidata": null
+        "name": "Taïfa de Tortosa",
+        "wikidata": "Q605930"
       }
     },
     {
@@ -1289,6 +5262,36 @@
           "subject": "holder",
           "holder": {
             "name": "Taïfa de Molina — une indépendance seulement possible",
+            "wikidata": "Q2232777"
+          }
+        },
+        {
+          "source": {
+            "id": "17",
+            "title": "Wikidata",
+            "author": "Contributeurs de Wikidata",
+            "url": "https://www.wikidata.org"
+          },
+          "where": "Q2232777, propriétés P571 et P576",
+          "quotation": "inception 1080 ; dissolved, abolished or demolished date 1129",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Molina — de 1080 à 1129",
+            "wikidata": "Q2232777"
+          }
+        },
+        {
+          "source": {
+            "id": "286",
+            "title": "Atlas histórico de la España medieval",
+            "author": "José María Monsalvo Antón",
+            "url": null
+          },
+          "where": "p. 91-92, les taïfas de la Marche moyenne — lu dans le texte OCR d'une copie numérisée (archive.org, dépôt d'un particulier)",
+          "quotation": "otras dos pequeñas taifas perduraron, además de una más efímera formada en Molina de Aragón",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Molina — une taïfa éphémère, sans date",
             "wikidata": "Q2232777"
           }
         }
@@ -1634,12 +5637,12 @@
             "author": null,
             "url": "https://en.wikipedia.org/wiki/Sulayman_Sayyid_al-Dawla"
           },
-          "where": "monnayage",
-          "quotation": "from 1090 down to 1099 (AH 492)",
+          "where": "monnayage ; dernière phrase (d'après Tibi 1986, p. 230, et Viguera Molins, EI2 « Ṭurṭūsha »)",
+          "quotation": "the sequence struck at Tortosa goes from 1090 down to 1099 (AH 492) … The Almoravids took Tortosa sometime after their capture of Valencia in 1102.",
           "subject": "holder",
           "holder": {
-            "name": "Almoravides — monnaies de Sulayman à Tortosa jusqu'en 1099 seulement",
-            "wikidata": "Q75613"
+            "name": "Taïfa de Tortosa — les monnaies de Sulayman y courent jusqu'en 1099, les Almoravides la prennent après Valence (1102)",
+            "wikidata": "Q605930"
           }
         },
         {
@@ -1656,11 +5659,41 @@
             "name": "Almoravides dès 1098-1099",
             "wikidata": "Q75613"
           }
+        },
+        {
+          "source": {
+            "id": "148",
+            "title": "Reflexiones acerca del cadiazgo de Lérida en las épocas de taifas y almorávide",
+            "author": "Rachid El Hour",
+            "url": "https://dialnet.unirioja.es/descarga/articulo/8945590.pdf"
+          },
+          "where": "p. 410 ; p. 411",
+          "quotation": "mientras que Munḏir ‛Imād al-Dawla reinó en esta última ciudad, Tortosa y Denia … A principios del siglo VI/XII, los almorávides se apoderaron de todos los reinos de taifas, salvo las taifas de Alpuente, Albarracín y las de la Marca Superior.",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa houdide de Lérida-Tortosa — les taïfas de la Marche supérieure épargnées par les Almoravides au début du XIIe siècle",
+            "wikidata": "Q605930"
+          }
+        },
+        {
+          "source": {
+            "id": "286",
+            "title": "Atlas histórico de la España medieval",
+            "author": "José María Monsalvo Antón",
+            "url": null
+          },
+          "where": "p. 106, carte « Ocupación almorávide de la península » : Tortosa au nord de la limite de 1099, atteinte par une flèche violette depuis Valence — lu sur l'image de la page d'une copie numérisée (archive.org, dépôt d'un particulier)",
+          "quotation": "Límite de conquistas almorávides en 1099 … Conquistas de Ali ibn Yusuf entre 1108-1115",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Tortosa — hors de la limite des conquêtes almoravides de 1099 ; prise par Ali ibn Yusuf entre 1108 et 1115",
+            "wikidata": "Q605930"
+          }
         }
       ],
       "holder": {
-        "name": "Almoravides",
-        "wikidata": "Q75613"
+        "name": "Taïfa de Tortosa",
+        "wikidata": "Q605930"
       }
     },
     {
@@ -1698,18 +5731,48 @@
             "author": null,
             "url": "https://www.enciclopedia.cat/gran-enciclopedia-catalana/horta-de-sant-joan"
           },
-          "where": "histoire",
-          "quotation": "citat encara com a fronterer el 1153 ... conquerit ... devers el 1163",
+          "where": "la història",
+          "quotation": "El terme del castell d’Horta és citat encara com a fronterer el 1153, en la delimitació del castell de Miravet. Sembla que fou conquerit en temps del rei Alfons I el Cast, devers el 1163",
           "subject": "holder",
           "holder": {
-            "name": "Musulmane — encore frontière en 1153, conquise vers 1163 (arrière-pays de Tortosa)",
+            "name": "Musulmane — encore frontière en 1153 (délimitation de Miravet), conquise vers 1163 ; la source ne nomme pas de taïfa",
+            "wikidata": null
+          }
+        },
+        {
+          "source": {
+            "id": "282",
+            "title": "Sulayman Sayyid al-Dawla",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Sulayman_Sayyid_al-Dawla"
+          },
+          "where": "dernière phrase (d'après Viguera Molins, EI2 « Ṭurṭūsha »)",
+          "quotation": "The Almoravids took Tortosa sometime after their capture of Valencia in 1102.",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Tortosa — houdide jusqu'après 1102 (Tortosa, dont dépend le lieu)",
+            "wikidata": "Q605930"
+          }
+        },
+        {
+          "source": {
+            "id": "148",
+            "title": "Reflexiones acerca del cadiazgo de Lérida en las épocas de taifas y almorávide",
+            "author": "Rachid El Hour",
+            "url": "https://dialnet.unirioja.es/descarga/articulo/8945590.pdf"
+          },
+          "where": "p. 410 ; p. 411",
+          "quotation": "mientras que Munḏir ‛Imād al-Dawla reinó en esta última ciudad, Tortosa y Denia … A principios del siglo VI/XII, los almorávides se apoderaron de todos los reinos de taifas, salvo las taifas de Alpuente, Albarracín y las de la Marca Superior.",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa houdide de Lérida-Tortosa (Tortosa, dont dépend le lieu)",
             "wikidata": "Q605930"
           }
         }
       ],
       "holder": {
-        "name": "Almoravides",
-        "wikidata": "Q75613"
+        "name": "Taïfa de Tortosa",
+        "wikidata": "Q605930"
       }
     },
     {
@@ -1769,11 +5832,41 @@
             "name": "Musulmane — premières mentions sûres en 1157",
             "wikidata": null
           }
+        },
+        {
+          "source": {
+            "id": "284",
+            "title": "Alcañiz en época islámica",
+            "author": "José Antonio Benavente Serrano, Carmelo Lasa Gracia",
+            "url": "https://dialnet.unirioja.es/descarga/articulo/2029544.pdf"
+          },
+          "where": "p. 233 (d'après Viguera 1981 ; Molina et Ávila 1984)",
+          "quotation": "La capital de esta importante región fue Zaragoza, a cuyo distrito perteneció Alcañiz",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Saragosse — Alcaniz du district de Saragosse",
+            "wikidata": "Q33061"
+          }
+        },
+        {
+          "source": {
+            "id": "284",
+            "title": "Alcañiz en época islámica",
+            "author": "José Antonio Benavente Serrano, Carmelo Lasa Gracia",
+            "url": "https://dialnet.unirioja.es/descarga/articulo/2029544.pdf"
+          },
+          "where": "p. 234 ; planches 6 et 7, p. 265-266",
+          "quotation": "Qānīš. Es el nombre de un castillo (ḥiṣn) en el al-Andalus dependiente de (min a mal) Zaragoza",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Saragosse — un château dépendant de Saragosse (Yāqūt) ; trésor de dirhams frappés à Saragosse à l'époque des taïfas",
+            "wikidata": "Q33061"
+          }
         }
       ],
       "holder": {
-        "name": "Musulmane (taïfa non établie)",
-        "wikidata": null
+        "name": "Taïfa de Saragosse",
+        "wikidata": "Q33061"
       }
     },
     {
@@ -1818,11 +5911,26 @@
             "name": "Musulmane jusque sous Raymond-Bérenger IV (après 1137)",
             "wikidata": null
           }
+        },
+        {
+          "source": {
+            "id": "284",
+            "title": "Alcañiz en época islámica",
+            "author": "José Antonio Benavente Serrano, Carmelo Lasa Gracia",
+            "url": "https://dialnet.unirioja.es/descarga/articulo/2029544.pdf"
+          },
+          "where": "p. 233 (d'après Viguera 1981 ; Molina et Ávila 1984)",
+          "quotation": "La capital de esta importante región fue Zaragoza, a cuyo distrito perteneció Alcañiz",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Saragosse — le district de Saragosse (Alcañiz, voisine)",
+            "wikidata": "Q33061"
+          }
         }
       ],
       "holder": {
-        "name": "Musulmane (taïfa non établie)",
-        "wikidata": null
+        "name": "Taïfa de Saragosse",
+        "wikidata": "Q33061"
       }
     },
     {
@@ -1931,11 +6039,26 @@
             "name": "Musulmane, peu attestée ; aragonaise en 1196",
             "wikidata": null
           }
+        },
+        {
+          "source": {
+            "id": "284",
+            "title": "Alcañiz en época islámica",
+            "author": "José Antonio Benavente Serrano, Carmelo Lasa Gracia",
+            "url": "https://dialnet.unirioja.es/descarga/articulo/2029544.pdf"
+          },
+          "where": "p. 233 (d'après Viguera 1981 ; Molina et Ávila 1984)",
+          "quotation": "La capital de esta importante región fue Zaragoza, a cuyo distrito perteneció Alcañiz",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Saragosse — le district de Saragosse (Alcañiz, voisine)",
+            "wikidata": "Q33061"
+          }
         }
       ],
       "holder": {
-        "name": "Musulmane (taïfa non établie)",
-        "wikidata": null
+        "name": "Taïfa de Saragosse",
+        "wikidata": "Q33061"
       }
     },
     {
@@ -1995,11 +6118,26 @@
             "name": "Musulmane jusqu'en 1169 (date divergente)",
             "wikidata": null
           }
+        },
+        {
+          "source": {
+            "id": "284",
+            "title": "Alcañiz en época islámica",
+            "author": "José Antonio Benavente Serrano, Carmelo Lasa Gracia",
+            "url": "https://dialnet.unirioja.es/descarga/articulo/2029544.pdf"
+          },
+          "where": "p. 233 (d'après Viguera 1981 ; Molina et Ávila 1984)",
+          "quotation": "La capital de esta importante región fue Zaragoza, a cuyo distrito perteneció Alcañiz",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Saragosse — le district de Saragosse (Alcañiz, voisine)",
+            "wikidata": "Q33061"
+          }
         }
       ],
       "holder": {
-        "name": "Musulmane (taïfa non établie)",
-        "wikidata": null
+        "name": "Taïfa de Saragosse",
+        "wikidata": "Q33061"
       }
     },
     {
@@ -2284,6 +6422,21 @@
           "holder": {
             "name": "Royaume d'Aragon seulement à partir de 1101 (tenentes) — peut-être une autre Velilla",
             "wikidata": "Q199442"
+          }
+        },
+        {
+          "source": {
+            "id": "148",
+            "title": "Reflexiones acerca del cadiazgo de Lérida en las épocas de taifas y almorávide",
+            "author": "Rachid El Hour",
+            "url": "https://dialnet.unirioja.es/descarga/articulo/8945590.pdf"
+          },
+          "where": "p. 410 (citant Turk 1978, p. 165)",
+          "quotation": "el Valle de Cinca, extremo nor-oriental de la frontera hūdí, donde Zaragoza ejercía menos su influencia a causa de la rivalidad del señor disidente en Lérida",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Lérida — la vallée de la Cinca, frontière houdide sous le seigneur de Lérida",
+            "wikidata": "Q2166417"
           }
         }
       ],
@@ -5696,6 +9849,21 @@
             "name": "Royaume d'Aragon et de Pampelune — le tenente Galindo Sánchez (1104)",
             "wikidata": "Q199442"
           }
+        },
+        {
+          "source": {
+            "id": "206",
+            "title": "Inventario Fortificaciones Aragonesas, fiche CV.28 — Sos, castillo",
+            "author": "Clúa Méndez",
+            "url": "https://castillosenaragon.es/wp-content/uploads/2019/04/CV.-28.-FICHA-SOS-castillo.pdf"
+          },
+          "where": "Descripción",
+          "quotation": "La roca septentrional ocupa una posición estratégica con amplísima visibilidad hacia el N, hasta las montañas pirenaicas y la frontera con Navarra, es la llamada Peña Felicia, donde Ramiro II edificó el castillo.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume d'Aragon — Ramire II y bâtit le château face à la Navarre (1134-1137, après la date)",
+            "wikidata": "Q199442"
+          }
         }
       ],
       "holder": {
@@ -6667,11 +10835,41 @@
             "name": "Taïfa de Tortosa (Siurana résiste encore après la chute de Tortosa, jusqu'en 1153)",
             "wikidata": "Q605930"
           }
+        },
+        {
+          "source": {
+            "id": "282",
+            "title": "Sulayman Sayyid al-Dawla",
+            "author": null,
+            "url": "https://en.wikipedia.org/wiki/Sulayman_Sayyid_al-Dawla"
+          },
+          "where": "dernière phrase (d'après Viguera Molins, EI2 « Ṭurṭūsha »)",
+          "quotation": "The Almoravids took Tortosa sometime after their capture of Valencia in 1102.",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Tortosa — houdide jusqu'après 1102 (Tortosa, dont dépend le lieu)",
+            "wikidata": "Q605930"
+          }
+        },
+        {
+          "source": {
+            "id": "148",
+            "title": "Reflexiones acerca del cadiazgo de Lérida en las épocas de taifas y almorávide",
+            "author": "Rachid El Hour",
+            "url": "https://dialnet.unirioja.es/descarga/articulo/8945590.pdf"
+          },
+          "where": "p. 410 ; p. 411",
+          "quotation": "mientras que Munḏir ‛Imād al-Dawla reinó en esta última ciudad, Tortosa y Denia … A principios del siglo VI/XII, los almorávides se apoderaron de todos los reinos de taifas, salvo las taifas de Alpuente, Albarracín y las de la Marca Superior.",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa houdide de Lérida-Tortosa (Tortosa, dont dépend le lieu)",
+            "wikidata": "Q605930"
+          }
         }
       ],
       "holder": {
-        "name": "Almoravides",
-        "wikidata": "Q75613"
+        "name": "Taïfa de Tortosa",
+        "wikidata": "Q605930"
       }
     },
     {
@@ -7392,7 +11590,7 @@
             "id": "148",
             "title": "Reflexiones acerca del cadiazgo de Lérida en las épocas de taifas y almorávide",
             "author": "Rachid El Hour",
-            "url": null
+            "url": "https://dialnet.unirioja.es/descarga/articulo/8945590.pdf"
           },
           "where": "p. 410 ; p. 411 (les Almoravides en 504/1110)",
           "quotation": "Lérida entra en una nueva fase de su historia y se independiza –de nuevo– de Zaragoza … Parece ser que los almorávides habían entrado en Lérida tras la toma de Zaragoza en 504/1110",
@@ -7490,6 +11688,21 @@
           "holder": {
             "name": "Almoravides dès 1098-1099 (lecture divergente)",
             "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "286",
+            "title": "Atlas histórico de la España medieval",
+            "author": "José María Monsalvo Antón",
+            "url": null
+          },
+          "where": "p. 106, carte « Ocupación almorávide de la península » — lu sur l'image de la page d'une copie numérisée (archive.org, dépôt d'un particulier)",
+          "quotation": "Lérida (1114) … Límite de conquistas almorávides en 1099",
+          "subject": "holder",
+          "holder": {
+            "name": "Taïfa de Lérida — hors de la limite almoravide de 1099, prise en 1114 (date divergente)",
+            "wikidata": "Q2166417"
           }
         }
       ],
@@ -15874,9 +20087,87 @@
           "quotation": null,
           "subject": "population",
           "population": 6000
+        },
+        {
+          "source": {
+            "id": "291",
+            "title": "Atlas of Medieval Europe",
+            "author": "Angus MacKay, David Ditchburn (dir.) — section « The Spanish and Portuguese Reconquest to c. 1140 », D. Lomax",
+            "url": null
+          },
+          "where": "p. 75 (M. Angold)",
+          "quotation": "he defeated the Normans at Larissa (1083) and recovered Dyrrachion (1085).",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — reprise aux Normands en 1085",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "296",
+            "title": "The Early Medieval Balkans: A Critical Survey from the Sixth to the Late Twelfth Century",
+            "author": "John V. A. Fine, Jr.",
+            "url": null
+          },
+          "where": "p. 223 — lu sur une copie numérisée",
+          "quotation": "In 1085 the Norman leader Robert Guiscard died, and the Byzan- tines were quickly able to regain Durazzo.",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — reprise en 1085",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "297",
+            "title": "The Alexiad (ed. and transl. Elizabeth A. Dawes)",
+            "author": "Anne Comnène",
+            "url": null
+          },
+          "where": "livre XIV — lu sur une copie numérisée",
+          "quotation": "many again were entrusted with the guarding of Dyrrachium so that it might not be re-taken by the Franks",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — garnison contre les Francs (vers 1107)",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "299",
+            "title": "The Palgrave Atlas of Byzantine History",
+            "author": "John Haldon",
+            "url": null
+          },
+          "where": "p. 117",
+          "quotation": "those of Raymond of Toulouse marched along the Adriatic shore lands of Croatia to enter Byzantine territory north of Dyrrhachion (mod. Durrës).",
+          "subject": "holder",
+          "holder": {
+            "name": "Empire byzantin — la croisade entre en terre byzantine au nord de Durazzo (1096-1097)",
+            "wikidata": "Q12544"
+          }
+        },
+        {
+          "source": {
+            "id": "298",
+            "title": "Popa Dukljanina letopis po latinsku i toga nekoliko i još nešto po hrvatsku (Chronique du Prêtre de Dioclée)",
+            "author": "Ivan Crnčić (éd.), d'après le manuscrit de Jerolim Kaletić",
+            "url": "https://archive.org/details/popa_dukljanina_letopis_po_latinsku_1874-ivan_crncic"
+          },
+          "where": "ch. XLII, p. 54",
+          "quotation": "tulit, atque obtinuit rex Bodinus totani terraiu Duracinoruui et ipsam civitatem Durachium. Post haec facta pače cum imperatore, reddidit illi civitatem.",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Dioclée — Bodin la prend puis la rend à l'empereur (1085, lecture divergente)",
+            "wikidata": "Q1252942"
+          }
         }
       ],
-      "holder": null
+      "holder": {
+        "name": "Empire byzantin",
+        "wikidata": "Q12544"
+      }
     },
     {
       "id": "57",
@@ -16665,9 +20956,57 @@
           "quotation": null,
           "subject": "population",
           "population": 11000
+        },
+        {
+          "source": {
+            "id": "287",
+            "title": "Histoire des Musulmans d'Espagne jusqu'à la conquête de l'Andalousie par les Almoravides (711–1110), t. IV",
+            "author": "Reinhart Dozy",
+            "url": "https://archive.org/details/histoiredesmusul04dozyuoft"
+          },
+          "where": "t. IV, p. 234",
+          "quotation": "il ôla la petite principauté de Malaga à Temîm",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides — Temîm dépossédé en 1090",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 219",
+          "quotation": "et son frère Temym, ex-émir de Malaga",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides — Temîm, « ex-émir de Malaga », envoyé au Maroc",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "291",
+            "title": "Atlas of Medieval Europe",
+            "author": "Angus MacKay, David Ditchburn (dir.) — section « The Spanish and Portuguese Reconquest to c. 1140 », D. Lomax",
+            "url": null
+          },
+          "where": "p. 34, carte « The Spanish and Portuguese Reconquest to c. 1140 », lue sur l'image",
+          "quotation": null,
+          "subject": "holder",
+          "holder": {
+            "name": "Musulmane, au sud de la frontière vers 1090 (la carte ne nomme pas de dynastie)",
+            "wikidata": "Q75613"
+          }
         }
       ],
-      "holder": null
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
     },
     {
       "id": "47",
@@ -17415,9 +21754,102 @@
           "quotation": null,
           "subject": "population",
           "population": 13000
+        },
+        {
+          "source": {
+            "id": "288",
+            "title": "Recherches sur l'histoire et la littérature de l'Espagne pendant le moyen âge, t. II (3e éd.)",
+            "author": "Reinhart Dozy",
+            "url": "https://archive.org/details/recherchessurlhi02dozyuoft"
+          },
+          "where": "t. II, p. 195–196",
+          "quotation": "Sa veuve Chimène tâcha encore de défendre Valence contre les attaques sans cesse renouvelées des Almoravides, et pendant deux années elle y réussit",
+          "subject": "holder",
+          "holder": {
+            "name": "Seigneurie de Valence — Chimène, veuve du Cid, la tient deux ans ; les Almoravides y entrent le 5 mai 1102",
+            "wikidata": "Q15714699"
+          }
+        },
+        {
+          "source": {
+            "id": "287",
+            "title": "Histoire des Musulmans d'Espagne jusqu'à la conquête de l'Andalousie par les Almoravides (711–1110), t. IV",
+            "author": "Reinhart Dozy",
+            "url": "https://archive.org/details/histoiredesmusul04dozyuoft"
+          },
+          "where": "t. IV, p. 245",
+          "quotation": "sa veuve Chimène s'y maintint encore pendant plus de deux années",
+          "subject": "holder",
+          "holder": {
+            "name": "Seigneurie de Valence — Chimène s'y maintient jusqu'en 1102",
+            "wikidata": "Q15714699"
+          }
+        },
+        {
+          "source": {
+            "id": "291",
+            "title": "Atlas of Medieval Europe",
+            "author": "Angus MacKay, David Ditchburn (dir.) — section « The Spanish and Portuguese Reconquest to c. 1140 », D. Lomax",
+            "url": null
+          },
+          "where": "p. 141",
+          "quotation": "Although the Cid had taken Valencia in 1094, it was reconquered by the Muslims in 1102",
+          "subject": "holder",
+          "holder": {
+            "name": "Seigneurie de Valence — prise par le Cid en 1094, reprise par les musulmans en 1102",
+            "wikidata": "Q15714699"
+          }
+        },
+        {
+          "source": {
+            "id": "294",
+            "title": "Señorío de Valencia",
+            "author": null,
+            "url": "https://es.wikipedia.org/wiki/Se%C3%B1or%C3%ADo_de_Valencia"
+          },
+          "where": "§ Disolución",
+          "quotation": "su esposa Jimena, convertida en señora de Valencia, consiguió defender la ciudad",
+          "subject": "holder",
+          "holder": {
+            "name": "Seigneurie de Valence — Chimène, señora de Valencia, jusqu'au 5 mai 1102",
+            "wikidata": "Q15714699"
+          }
+        },
+        {
+          "source": {
+            "id": "293",
+            "title": "Historical Atlas — pl. 66–67, « Europe and the Mediterranean Lands about 1097 »",
+            "author": "William R. Shepherd",
+            "url": null
+          },
+          "where": "pl. 66, lu sur l'image de la planche : « Valencia » dans « DOMINIONS OF THE ALMORAVIDS »",
+          "quotation": null,
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, vers 1097 (lecture divergente : la planche ignore la seigneurie du Cid)",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 223",
+          "quotation": "s'empara alors de Chekoura, puis de Valence, qui lui fut livrée par la fuite du gouverneur de cette ville",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, livrée en 485 H / 1092 (autre date, avant la prise par le Cid en 1094)",
+            "wikidata": "Q75613"
+          }
         }
       ],
-      "holder": null
+      "holder": {
+        "name": "Seigneurie de Valence",
+        "wikidata": "Q15714699"
+      }
     },
     {
       "id": "39",
@@ -18325,9 +22757,57 @@
           "quotation": null,
           "subject": "population",
           "population": 18000
+        },
+        {
+          "source": {
+            "id": "287",
+            "title": "Histoire des Musulmans d'Espagne jusqu'à la conquête de l'Andalousie par les Almoravides (711–1110), t. IV",
+            "author": "Reinhart Dozy",
+            "url": "https://archive.org/details/histoiredesmusul04dozyuoft"
+          },
+          "where": "t. IV, p. 243",
+          "quotation": "alors les Almoravides entrèrent dans Almérie, tambour battant et enseignes déployées",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, après Séville (1091)",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 222",
+          "quotation": "le kaïd Mohammed ben Aycha se porta contre Alméria",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, 484 H (1091)",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "293",
+            "title": "Historical Atlas — pl. 66–67, « Europe and the Mediterranean Lands about 1097 »",
+            "author": "William R. Shepherd",
+            "url": null
+          },
+          "where": "pl. 66, lu sur l'image de la planche : « Almeria » dans « DOMINIONS OF THE ALMORAVIDS »",
+          "quotation": null,
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, vers 1097",
+            "wikidata": "Q75613"
+          }
         }
       ],
-      "holder": null
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
     },
     {
       "id": "28",
@@ -18882,9 +23362,72 @@
           "quotation": null,
           "subject": "population",
           "population": 35000
+        },
+        {
+          "source": {
+            "id": "287",
+            "title": "Histoire des Musulmans d'Espagne jusqu'à la conquête de l'Andalousie par les Almoravides (711–1110), t. IV",
+            "author": "Reinhart Dozy",
+            "url": "https://archive.org/details/histoiredesmusul04dozyuoft"
+          },
+          "where": "t. IV, p. 194–195",
+          "quotation": "L'empereur accepta ces conditions, et le 25 mai 108S , il fit son entrée dans l'ancienne capitale du royaume visigolh",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — Alphonse VI y entre le 25 mai 1085",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "291",
+            "title": "Atlas of Medieval Europe",
+            "author": "Angus MacKay, David Ditchburn (dir.) — section « The Spanish and Portuguese Reconquest to c. 1140 », D. Lomax",
+            "url": null
+          },
+          "where": "p. 33 et p. 35 (D. Lomax)",
+          "quotation": "There the Almoravids made their principal attacks in the period 1086–1139, and it was Toledo’s resistance",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — conquise par Alphonse VI en 1085, tenue contre les Almoravides 1086–1139",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "293",
+            "title": "Historical Atlas — pl. 66–67, « Europe and the Mediterranean Lands about 1097 »",
+            "author": "William R. Shepherd",
+            "url": null
+          },
+          "where": "pl. 66, lu sur l'image de la planche : « Toledo » sous « New Castile », dans « KINGDOM OF CASTILE »",
+          "quotation": null,
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille, vers 1097",
+            "wikidata": "Q179293"
+          }
+        },
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 219",
+          "quotation": "il arriva jusqu'à Tolède, oii il assiégea Alphonse",
+          "subject": "holder",
+          "holder": {
+            "name": "Royaume de Castille — assiégée par Yousouf, non prise",
+            "wikidata": "Q179293"
+          }
         }
       ],
-      "holder": null
+      "holder": {
+        "name": "Royaume de Castille",
+        "wikidata": "Q179293"
+      }
     },
     {
       "id": "21",
@@ -19838,9 +24381,87 @@
           "quotation": null,
           "subject": "population",
           "population": 60000
+        },
+        {
+          "source": {
+            "id": "287",
+            "title": "Histoire des Musulmans d'Espagne jusqu'à la conquête de l'Andalousie par les Almoravides (711–1110), t. IV",
+            "author": "Reinhart Dozy",
+            "url": "https://archive.org/details/histoiredesmusul04dozyuoft"
+          },
+          "where": "t. IV, p. 230",
+          "quotation": "le dimanche 10 novembre 1090, Yousof étant arrivé à deux parasanges de Grenade",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, depuis novembre 1090 (Abd Allah déposé)",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 219",
+          "quotation": "Lfne fois maître de Grenade et de ses environs",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, après deux mois de siège",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "290",
+            "title": "Historia de Portugal desde o começo da monarchia até o fim do reinado de Affonso III, t. I (7.ª ed.)",
+            "author": "Alexandre Herculano",
+            "url": "https://archive.org/details/historiadeportug01herc"
+          },
+          "where": "t. I, p. 252",
+          "quotation": "marchou para Granada, onde não tardou a de23òr o amir AbduUah Ibn Balkin",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides — l'émir Abd Allah ibn Buluggin déposé",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "292",
+            "title": "Historical Atlas of the Islamic World",
+            "author": "Malise Ruthven, Azim Nanji",
+            "url": null
+          },
+          "where": "p. 73, carte « Ghana and Mali Empires » : légende, et « Gharnata (Granada) » dans la teinte",
+          "quotation": "Almoravid state, 1100",
+          "subject": "holder",
+          "holder": {
+            "name": "État almoravide, 1100",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "293",
+            "title": "Historical Atlas — pl. 66–67, « Europe and the Mediterranean Lands about 1097 »",
+            "author": "William R. Shepherd",
+            "url": null
+          },
+          "where": "pl. 66, lu sur l'image de la planche : « Granada » dans « DOMINIONS OF THE ALMORAVIDS »",
+          "quotation": null,
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, vers 1097",
+            "wikidata": "Q75613"
+          }
         }
       ],
-      "holder": null
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
     },
     {
       "id": "10",
@@ -20066,9 +24687,72 @@
           "quotation": null,
           "subject": "population",
           "population": 60000
+        },
+        {
+          "source": {
+            "id": "287",
+            "title": "Histoire des Musulmans d'Espagne jusqu'à la conquête de l'Andalousie par les Almoravides (711–1110), t. IV",
+            "author": "Reinhart Dozy",
+            "url": "https://archive.org/details/histoiredesmusul04dozyuoft"
+          },
+          "where": "t. IV, p. 238 et sa note",
+          "quotation": "que l'on promena en triomphe (26 mars 1091)",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, depuis le 26 mars 1091 (en août selon Ibn al-Khatîb)",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 221",
+          "quotation": "la place, où il entra victorieux, le mercredi 3 de safar, an 48/i (1091 J. G.)",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, depuis le 3 safar 484 (1091)",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "290",
+            "title": "Historia de Portugal desde o começo da monarchia até o fim do reinado de Affonso III, t. I (7.ª ed.)",
+            "author": "Alexandre Herculano",
+            "url": "https://archive.org/details/historiadeportug01herc"
+          },
+          "where": "t. I, p. 252",
+          "quotation": "Seyr pôde em breve assenhorear-se de Jaen e de Córdova",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides — Seyr prend Jaén et Cordoue",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "293",
+            "title": "Historical Atlas — pl. 66–67, « Europe and the Mediterranean Lands about 1097 »",
+            "author": "William R. Shepherd",
+            "url": null
+          },
+          "where": "pl. 66, lu sur l'image de la planche : « Cordova » dans « DOMINIONS OF THE ALMORAVIDS »",
+          "quotation": null,
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, vers 1097",
+            "wikidata": "Q75613"
+          }
         }
       ],
-      "holder": null
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
     },
     {
       "id": "7",
@@ -20133,9 +24817,57 @@
           "quotation": null,
           "subject": "population",
           "population": 76000
+        },
+        {
+          "source": {
+            "id": "287",
+            "title": "Histoire des Musulmans d'Espagne jusqu'à la conquête de l'Andalousie par les Almoravides (711–1110), t. IV",
+            "author": "Reinhart Dozy",
+            "url": "https://archive.org/details/histoiredesmusul04dozyuoft"
+          },
+          "where": "t. IV, p. 240",
+          "quotation": "et le dimanche 7 septembre, il fit livrer l'assaut",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, assaut du dimanche 7 septembre 1091",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "289",
+            "title": "Roudh el-Kartas. Histoire des souverains du Maghreb (Espagne et Maroc) et annales de la ville de Fès (trad. A. Beaumier)",
+            "author": "Ibn Abî Zar'",
+            "url": "https://archive.org/details/roudhelkartashis00ibnauoft"
+          },
+          "where": "p. 222",
+          "quotation": "L'entrée de Syr ben Aby Beker à Séville, prise au nom des Morabethyn, eut lieu le dimanche y 2 de radjeb liSli",
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, radjeb 484 (1091)",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "293",
+            "title": "Historical Atlas — pl. 66–67, « Europe and the Mediterranean Lands about 1097 »",
+            "author": "William R. Shepherd",
+            "url": null
+          },
+          "where": "pl. 66, lu sur l'image de la planche : « Seville » dans « DOMINIONS OF THE ALMORAVIDS »",
+          "quotation": null,
+          "subject": "holder",
+          "holder": {
+            "name": "Almoravides, vers 1097",
+            "wikidata": "Q75613"
+          }
         }
       ],
-      "holder": null
+      "holder": {
+        "name": "Empire almoravide",
+        "wikidata": "Q75613"
+      }
     },
     {
       "id": "6",
