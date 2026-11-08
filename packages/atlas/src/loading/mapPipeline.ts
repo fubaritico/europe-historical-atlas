@@ -20,11 +20,13 @@ import { loadContent } from './mapContent'
 import { createNameCache } from './nameCache'
 import { rebuildYearNames } from './stages/names'
 import { rebuildPolitical } from './stages/political'
+import { prepareAside } from './stages/prepareAside'
 import { loadRivers } from './stages/rivers'
 import { startup } from './stages/startup'
 import { pushSources, rebuildTexture } from './stages/texture'
 
 import type { MapPipelineDeps, PipelineContext } from './pipelineContext'
+import type { PrepareOutcome } from './stages/prepareAside'
 import type { MapCompute, ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
 /** The map's compute, sequenced. */
@@ -57,6 +59,19 @@ export interface MapPipeline {
    * @returns once the lines are back on screen
    */
   rebuildBorderGeometry: () => Promise<void>
+  /**
+   * Prepare a map in the background and set it aside, never shown (ATLAS-333, the maps kept ready around the one shown).
+   * @param year - the map
+   * @param isCurrent - whether it is still wanted
+   * @returns how it ended
+   */
+  prepareAside: (year: number, isCurrent: () => boolean) => Promise<PrepareOutcome>
+  /**
+   * Free every map set aside but these.
+   * @param years - the maps to keep
+   * @returns nothing
+   */
+  keepYears: (years: readonly number[]) => void
   /** Stop the worker and release what it holds. */
   dispose: () => void
 }
@@ -120,7 +135,7 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
     box: { compute: null as unknown as MapCompute, names: null as unknown as MapCompute },
     nameFace: null,
     pendingRivers: { set: null },
-    held: { grid: false, bareTexture: false },
+    held: { grid: false, bareTexture: false, drawing: 0 },
     nameCache: createNameCache(),
     // The browser's own clock and measures: a change of year's steps are read in its Performance panel.
     clock: deps.clock ?? performance,
@@ -152,6 +167,12 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
     },
     rebuildBorderGeometry(): Promise<void> {
       return retraceBorders(context)
+    },
+    prepareAside(year: number, isCurrent: () => boolean): Promise<PrepareOutcome> {
+      return prepareAside(context, year, isCurrent)
+    },
+    keepYears(years: readonly number[]): void {
+      deps.layers.keepYears(years)
     },
     dispose(): void {
       // Terminate before anything else: the worker is the only part of this that outlives the page's own

@@ -353,3 +353,13 @@ target.z)` would be coherent with the navigation that already exists.
   still hangs its texture. For an authored year that texture is the bare terrain, so the map only changes when the year
   on screen was drawn through the grid (the dev panel's _exact fills_ off) **and** the worker failed. **Remedy if it
   bites**: `Promise.allSettled`, then rethrow the first failure, the bake's winning when both fail. **Severity: cosmetic.**
+- **A map prepared in the background may be stamped with settings changed during its cut** (review ARCH-006 of
+  2026-11-08, ATLAS-333, `loading/stages/prepareAside.ts`): the cut reads the grid, the palette and the tribes' settings
+  before the worker's wait, the shelf stamps the map when it is laid. A setting of the dev panel moved during that wait,
+  its own rebuild done, leaves a neighbour built under the old one and taken for current. **Only the dev panel reaches
+  it** — no reader can. **Remedy if it bites**: read the stamp before the cut and hand it to the shelf. **Severity:
+  cosmetic.**
+- **The way a year is laid is written twice** (review ARCH-008, same day): `installYear` (`political.ts`) and `layAside`
+  (`prepareAside.ts`) lay the year's sources, cuts, fills, borders and events in the same order. A new layer added to
+  one must be added to the other. **Remedy at a third copy**: one `layYear`, with the timing and the settling as seams.
+  **Severity: worth knowing.**

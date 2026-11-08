@@ -7,6 +7,7 @@ import {
   expectInteger,
   expectString,
   field,
+  httpError,
   parseAsset,
   parseFileBytes,
 } from './assetError'
@@ -185,8 +186,7 @@ export function createFetchLandMaskSource(basePath: string): LandMaskSource {
     async load(onBytes?: ByteReport): Promise<LandMask> {
       const metaPath = `${basePath}.json`
       const metaResponse = await fetchWithin(metaPath)
-      if (!metaResponse.ok)
-        throw assetError('landMask', 'transport', metaPath, `HTTP ${String(metaResponse.status)}`)
+      if (!metaResponse.ok) throw httpError('landMask', metaPath, metaResponse.status)
       const json: unknown = await metaResponse.json()
       const meta = parseLandMaskMeta(json, metaPath)
       // The size is read only when the download is counted (review ARCH-001).
@@ -197,8 +197,7 @@ export function createFetchLandMaskSource(basePath: string): LandMaskSource {
 
       const binPath = `${basePath}.bin`
       const binResponse = await fetchWithin(binPath)
-      if (!binResponse.ok)
-        throw assetError('landMask', 'transport', binPath, `HTTP ${String(binResponse.status)}`)
+      if (!binResponse.ok) throw httpError('landMask', binPath, binResponse.status)
       const bits = new Uint8Array(await readBytes(binResponse, counted))
 
       const expected = Math.ceil((meta.width * meta.height) / 8)

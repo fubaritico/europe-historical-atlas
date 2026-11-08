@@ -192,7 +192,7 @@ function settlerOf(
 }
 
 /** A year prepared in the worker: its fills cut, its tribes measured, the year settled, and the grid they lie on. */
-interface WorkerCut {
+export interface WorkerCut {
   /** The relief's subdivision. */
   readonly grid: FillGrid
   /** One fill per polity, its vertices shared and its triangles as indices. */
@@ -215,7 +215,7 @@ interface WorkerCut {
  *   or say what they wait for, as they always did
  * @throws what the bake or the cut throws — the caller tells it as the year's failure
  */
-async function prepareYear(
+export async function prepareYear(
   context: PipelineContext,
   loaded: RegionSet,
   report: ProgressReport
@@ -303,7 +303,7 @@ interface DrawnYear {
  * @param context - the pipeline's world
  * @returns the year on screen, or `null` when there is none to set aside
  */
-function shownYearToShelve(context: PipelineContext): number | null {
+export function shownYearToShelve(context: PipelineContext): number | null {
   const { sources, dev } = context
   if (sources.askedYear === null || sources.regionSet === null) return null
   return paintsExactFills(dev, sources) ? sources.askedYear : null
@@ -314,7 +314,7 @@ function shownYearToShelve(context: PipelineContext): number | null {
  * here — the placement is kept in the names' cache all the same (`placeNames`), and laid when the year comes back.
  * @param context - the pipeline's world
  */
-function setShownYearAside(context: PipelineContext): void {
+export function setShownYearAside(context: PipelineContext): void {
   const shown = shownYearToShelve(context)
   if (shown === null) return
   context.namesGate.begin()
@@ -409,6 +409,8 @@ export async function rebuildPolitical(context: PipelineContext): Promise<void> 
   const isCurrent = context.politicalGate.begin()
   ui.progress.begin(context.translate('loadingYear', { year: String(centuryOf(context)) }))
   const asked = centuryOf(context)
+  // Counted until it settles: a map prepared in the background waits for it (`prepareAside`).
+  context.held.drawing += 1
   try {
     const drawn = await timedStep(context.clock, asked, 'total', () =>
       drawYear(context, isCurrent, barReport(context))
@@ -425,6 +427,7 @@ export async function rebuildPolitical(context: PipelineContext): Promise<void> 
   } finally {
     // The bar closes whether the year landed, failed or was overtaken.
     ui.progress.end()
+    context.held.drawing -= 1
   }
 }
 

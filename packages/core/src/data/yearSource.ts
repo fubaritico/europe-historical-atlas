@@ -14,7 +14,7 @@
 
 import { fetchWithin } from '../utils/fetchWithin'
 
-import { assetError } from './assetError'
+import { assetError, httpError } from './assetError'
 import { yearBordersSchema, yearPolitiesSchema, yearRegistrySchema } from './yearFormat'
 
 import type { AssetKind } from './assetError'
@@ -134,7 +134,7 @@ async function fetchAndRead<T>(
   parse: (value: unknown, source: string) => T
 ): Promise<T> {
   const response = await fetchWithin(path)
-  if (!response.ok) throw assetError(asset, 'transport', path, `HTTP ${String(response.status)}`)
+  if (!response.ok) throw httpError(asset, path, response.status)
   return parse(await response.json(), path)
 }
 

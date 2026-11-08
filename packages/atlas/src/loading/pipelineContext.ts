@@ -80,9 +80,10 @@ export interface PipelineContext extends MapPipelineDeps {
   /**
    * What the map's compute and the relief hold, so a change of year redoes only what differs (ATLAS-333): whether the
    * compute holds a year's grid — which tints any bake — and whether the texture on the relief is the bare terrain.
-   * An authored year needs neither the grid nor a new bake when the bare terrain is already there.
+   * An authored year needs neither the grid nor a new bake when the bare terrain is already there. And how many changes
+   * of year are being drawn: a map prepared in the background is never laid while one is (ATLAS-333).
    */
-  held: { grid: boolean; bareTexture: boolean }
+  held: { grid: boolean; bareTexture: boolean; drawing: number }
   /** The names already placed, by year content and settings — a year seen again comes back without its placement. */
   nameCache: NameCache
   /** Where a change of year's steps are measured, the default filled in. */

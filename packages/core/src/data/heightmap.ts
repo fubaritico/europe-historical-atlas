@@ -8,6 +8,7 @@ import {
   expectNumber,
   expectString,
   field,
+  httpError,
   parseAsset,
   parseFileBytes,
 } from './assetError'
@@ -101,8 +102,7 @@ export function createFetchHeightmapSource(basePath: string): HeightmapSource {
     async load(onBytes?: ByteReport): Promise<Heightmap> {
       const metaPath = `${basePath}.json`
       const metaRes = await fetchWithin(metaPath)
-      if (!metaRes.ok)
-        throw assetError('heightmap', 'transport', metaPath, `HTTP ${String(metaRes.status)}`)
+      if (!metaRes.ok) throw httpError('heightmap', metaPath, metaRes.status)
       const json: unknown = await metaRes.json()
       const meta = parseHeightmapMeta(json, metaPath)
       // The size is read only when the download is counted (review ARCH-001).
@@ -113,8 +113,7 @@ export function createFetchHeightmapSource(basePath: string): HeightmapSource {
 
       const binPath = `${basePath}.bin`
       const binRes = await fetchWithin(binPath)
-      if (!binRes.ok)
-        throw assetError('heightmap', 'transport', binPath, `HTTP ${String(binRes.status)}`)
+      if (!binRes.ok) throw httpError('heightmap', binPath, binRes.status)
       const data = new Int16Array(await readBytes(binRes, counted))
 
       // The grid says how many samples it holds; the file has to hold that many. Short of it, the map

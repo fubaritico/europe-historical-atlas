@@ -225,16 +225,28 @@ export interface MapLayers {
    * @returns whether {@link MapLayers.restoreYear} would bring it back
    */
   holdsYear: (year: number) => boolean
+  /**
+   * Free every year set aside but these — the maps either side of the one shown (the dev's video buffer, 2026-11-08).
+   * @param years - the years to keep, if they are aside
+   * @returns nothing
+   */
+  keepYears: (years: readonly number[]) => void
+  /**
+   * Free the year on screen, whatever of it is laid, its sources emptied — a map half laid in the background and failing
+   * (review ARCH-004).
+   * @returns nothing
+   */
+  discardYear: () => void
   /** Remove every layer from the scene and free its GPU resources. */
   dispose: () => void
 }
 
 /**
- * How many years are kept aside besides the one on screen: the maps either side, and room for a reader going back and
- * forth (the dev, 2026-11-08: *« la date d'avant et la date d'après, au pire »*). To measure against the GPU's memory
- * once the years ahead are prepared too.
+ * How many years the shelf may hold, a ceiling: the window is three maps — the one shown, the one before, the one after
+ * (the dev, 2026-11-08 evening: *"like a video player's buffer"*), trimmed by `keepYears` — and a map prepared in the
+ * background is built while the one shown is aside too, three years aside for that instant.
  */
-export const YEAR_SHELF_CAPACITY = 4
+export const YEAR_SHELF_CAPACITY = 3
 
 /**
  * The calls that rebuild geometry.
@@ -340,7 +352,13 @@ function layerYears(
   viewport: ViewportSize
 ): Pick<
   MapLayers,
-  'shelveYear' | 'restoreYear' | 'holdsYear' | 'primeFillCut' | 'primeTribeCut'
+  | 'shelveYear'
+  | 'restoreYear'
+  | 'holdsYear'
+  | 'keepYears'
+  | 'discardYear'
+  | 'primeFillCut'
+  | 'primeTribeCut'
 > & {
   disposeYears: () => void
 } {
@@ -365,6 +383,8 @@ function layerYears(
     holdsYear(year: number): boolean {
       return shelf.holds(year, stamp())
     },
+    keepYears: shelf.keepOnly,
+    discardYear: shelf.discard,
     primeFillCut(regions, grid, fills): void {
       primeFillCut(context, regions, grid, fills)
     },
@@ -462,7 +482,7 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
   }
   // The viewport last told, and the years set aside, shared by the slices that read them.
   const viewport: ViewportSize = { size: null }
-  const years = layerYears(context, viewport)
+  const { disposeYears, ...years } = layerYears(context, viewport)
   // The handle, assembled from its slices over that same context.
   return {
     ...layerRebuilders(context),
@@ -476,11 +496,7 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
       rebuildNames(context)
     },
     ...layerSetters(context),
-    shelveYear: years.shelveYear,
-    restoreYear: years.restoreYear,
-    holdsYear: years.holdsYear,
-    primeFillCut: years.primeFillCut,
-    primeTribeCut: years.primeTribeCut,
-    ...layerLifecycle(context, viewport, years.disposeYears),
+    ...years,
+    ...layerLifecycle(context, viewport, disposeYears),
   }
 }

@@ -18,7 +18,7 @@ import { z } from 'zod/mini'
 
 import { fetchWithin } from '../utils/fetchWithin'
 
-import { assetError } from './assetError'
+import { assetError, httpError } from './assetError'
 import { projectRegions } from './regionSource'
 import { toRegionPayload } from './toRegionPayload'
 import { assembleAuthoredYear } from './yearConsistency'
@@ -83,8 +83,7 @@ export function parseYearManifest(value: unknown, source: string): YearManifest 
  */
 export async function readYearManifest(url: string): Promise<YearManifest> {
   const response = await fetchWithin(url)
-  if (!response.ok)
-    throw assetError('yearRegistry', 'transport', url, `HTTP ${String(response.status)}`)
+  if (!response.ok) throw httpError('yearRegistry', url, response.status)
   return parseYearManifest(await response.json(), url)
 }
 

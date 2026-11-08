@@ -80,9 +80,10 @@ export function createFetchWithin(fetchFile: FetchLike, ms: number): FetchLike {
     if (!READ_METHODS.has(methodOf(input, init))) return fetchFile(input, init)
     const controller = new AbortController()
     const timer = setTimeout(() => {
-      controller.abort(
-        new Error(`no answer from ${addressOf(input)} within ${String(ms / 1000)} s`)
-      )
+      // Named as the platform names a timeout, so a caller can tell it from a defect (`isRecoverableLoadFailure`).
+      const timeout = new Error(`no answer from ${addressOf(input)} within ${String(ms / 1000)} s`)
+      timeout.name = 'TimeoutError'
+      controller.abort(timeout)
     }, ms)
     try {
       return await fetchFile(input, {

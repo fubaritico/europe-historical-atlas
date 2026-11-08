@@ -116,6 +116,14 @@ describe('createFetchWithin', () => {
         'no answer from /heightmaps/europe-dem-z6-1920.bin within 10 s'
       )
     })
+
+    // ATLAS-333: a timeout is told from a defect by its name, as the platform names one.
+    it('names the rejection a TimeoutError', async () => {
+      const held = heldFetch()
+      const request = createFetchWithin(held.fetchFile, 1000)('/a')
+      vi.advanceTimersByTime(1000)
+      await expect(request).rejects.toMatchObject({ name: 'TimeoutError' })
+    })
   })
 
   describe('unmanaged errors', () => {

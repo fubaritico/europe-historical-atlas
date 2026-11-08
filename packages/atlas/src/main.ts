@@ -16,11 +16,13 @@ import { startFrameLoop } from './app/frameLoop'
 import { createMapInteraction } from './app/mapInteraction'
 import { createMapUi } from './app/mapUi'
 import { pageAfterPaint } from './app/pageAfterPaint'
+import { createQuietTime } from './app/quietTime'
 import { createViewport } from './app/viewport'
 import { panelDepsFor } from './devPanel/devPanelCallbacks'
 import { NO_DEV_TOOLS, mountDevTools } from './devPanel/devTools'
 import { ATLAS_MESSAGES } from './i18n'
 import { fetchAuthoredYears } from './loading/assets'
+import { createMapBuffer } from './loading/mapBuffer'
 import { createMapPipeline } from './loading/mapPipeline'
 // Vite resolves `?worker` into a constructor for the bundled worker module. It is the one
 // bundler-specific line in the compute, and it lives here on purpose: the client that talks to the
@@ -34,8 +36,11 @@ import { createMapSources } from './sources/mapSources'
 import { createDevState } from './tunables/devState'
 import { mountYearSwitch } from './ui/yearSwitch'
 
+import type { QuietTime } from './app/quietTime'
 import type { DevTools } from './devPanel/devTools'
 import type { AtlasMessageKey } from './i18n'
+import type { MapBuffer } from './loading/mapBuffer'
+import type { MapSources } from './sources/mapSources'
 import type { YearSwitch } from './ui/yearSwitch'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 
@@ -68,6 +73,29 @@ function createLayers(
 }
 
 /**
+ * The maps kept ready around the one shown — the dev's video buffer (ATLAS-333) — over the pipeline and the page's waits.
+ * @param pipeline - what prepares a map aside and frees the others
+ * @param quiet - the page's waits
+ * @param years - the years having a map
+ * @returns the buffer
+ */
+function bufferOver(
+  pipeline: ReturnType<typeof createMapPipeline>,
+  quiet: QuietTime,
+  years: readonly number[]
+): MapBuffer {
+  return createMapBuffer({
+    years,
+    prepare: (year, isCurrent) => pipeline.prepareAside(year, isCurrent),
+    keepOnly: (kept) => {
+      pipeline.keepYears(kept)
+    },
+    whenQuiet: quiet.whenQuiet,
+    sleep: quiet.sleep,
+  })
+}
+
+/**
  * Start the map, then mount the temporary year switch (ATLAS-333) once the first year is on it, so a pick never
  * overtakes the startup. A failure of either is not caught here: it reaches the error net like any unexpected one.
  * @param deps - the tunables, the pipeline, the panel's redraw, the translator and the teardown flag
@@ -76,6 +104,7 @@ function createLayers(
  * @param deps.tools - the developer's tools, whose panel is redrawn so its year slider follows
  * @param deps.translate - the reader's language
  * @param deps.isDisposed - whether the map was torn down meanwhile
+ * @param deps.sources - the map's sources, whose year drawn the maps kept ready follow
  * @returns the switch's teardown, safe before it is mounted
  */
 function startYearSwitch(deps: {
@@ -84,27 +113,42 @@ function startYearSwitch(deps: {
   tools: Pick<DevTools, 'refresh'>
   translate: Translate<AtlasMessageKey>
   isDisposed: () => boolean
+  sources: Pick<MapSources, 'askedYear'>
 }): { dispose: () => void } {
   let mounted: YearSwitch | null = null
+  let buffer: MapBuffer | null = null
+  const quiet = createQuietTime(window, () => performance.now())
   void deps.pipeline
     .start()
     .then(() => fetchAuthoredYears())
     .then((years) => {
       if (deps.isDisposed()) return
+      const ready = bufferOver(deps.pipeline, quiet, years)
+      buffer = ready
+      // The year drawn, not the one asked: a change overtaken or failing leaves the map — and its window — where it is
+      // (review ARCH-007).
+      const follow = (): void => {
+        const drawn = deps.sources.askedYear
+        if (drawn !== null) ready.shown(drawn)
+      }
+      follow()
       mounted = mountYearSwitch({
         host: document.body,
         years,
         current: () => deps.dev.political.year,
-        pick: (year) => {
+        pick: async (year) => {
           deps.dev.political.year = year
           deps.tools.refresh()
-          return deps.pipeline.rebuildPolitical()
+          await deps.pipeline.rebuildPolitical()
+          follow()
         },
         label: deps.translate('yearSwitchLabel'),
       })
     })
   return {
     dispose(): void {
+      buffer?.dispose()
+      quiet.dispose()
       mounted?.dispose()
     },
   }
@@ -161,7 +205,7 @@ function bootstrap(): () => void {
   window.addEventListener('resize', onResize)
 
   // Temporary (ATLAS-333), to be removed with the atlas's own timeline (ATLAS-134).
-  const yearSwitch = startYearSwitch({ dev, pipeline, tools, translate, isDisposed })
+  const yearSwitch = startYearSwitch({ dev, pipeline, tools, translate, isDisposed, sources })
   const stopLoop = startFrameLoop(view, layers, tools.stats)
 
   return (): void => {

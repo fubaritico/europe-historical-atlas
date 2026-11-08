@@ -9,7 +9,7 @@ When the code reaches a point where something can be missing, wrong or absent, t
 one thing to do about it:
 
 - **surface it** — throw, reject, post a notice, refuse to continue;
-- **handle it** — a declared degraded mode that does less and *says so*;
+- **handle it** — a declared degraded mode that does less and _says so_;
 - **substitute** — a fallback value that lets the code carry on.
 
 **Choosing between those is the dev's call, every time.** It is a product decision: it settles what the
@@ -31,8 +31,8 @@ Bring three things to the question, not one: **what breaks**, **who learns that 
 
 ## No refusal is silent — decided by the dev, 2026-10-11
 
-> *"Faut prévenir, faut tout couvrir parce que tu vas voir que ça va devenir extrêmement subtil. On ne
-> peut pas se permettre de laisser les choses sans message."*
+> _"Faut prévenir, faut tout couvrir parce que tu vas voir que ça va devenir extrêmement subtil. On ne
+> peut pas se permettre de laisser les choses sans message."_
 
 Whatever the branch chosen above, **something is said**. A guard that returns early, a refused gesture,
 an entry a painter skips: each one logs, at least to the console, with the `[Cartographer]` (or the
@@ -49,31 +49,36 @@ the console is the one place a later, subtler failure can be traced back to.
 
 ## An error reaches the screen, not only the console — decided by the dev, 2026-11-06
 
-> *« Un utilisateur ou même un développeur, moi en l'occurrence, n'aura pas le réflexe de regarder dans les outils de
-> web development. On doit être notifié dans l'interface utilisateur d'une erreur tout en gardant le console erreur. »*
+> _« Un utilisateur ou même un développeur, moi en l'occurrence, n'aura pas le réflexe de regarder dans les outils de
+> web development. On doit être notifié dans l'interface utilisateur d'une erreur tout en gardant le console erreur. »_
 
 Wherever the code writes a **`console.error`**, the user is **also told on screen, in an error dialog** (a modal); the
 `console.error` stays. A `console.warn` — a gesture the tool declines — stays in the console. First case: ATLAS-328,
 a saved view that cannot be read. **In the Cartographer, during a gesture** (the dev, same day — it replaces the red
-status bar of CARTO-273): the dialog opens **at the end of the gesture**, *« pour être moins agressif »*, and **the
+status bar of CARTO-273): the dialog opens **at the end of the gesture**, _« pour être moins agressif »_, and **the
 gesture is cancelled**. The model is the refusal of 2026-11-05 — a vassal laid on a suzerain whose outline is open:
 `ui/components/AlarmDialog` with its warning icon, through `persistence/notice.ts` (`49b115a`).
 
 ## The atlas shows a whole map or an error screen, never a half-made map — decided by the dev, 2026-11-08
 
-> *"Always out of a will for quality and to stand apart from the competitors: give the greatest care to the
-> presentation, and never show the wings and the machinery of the application."* — and the screens of Claude Design are
+> _"Always out of a will for quality and to stand apart from the competitors: give the greatest care to the
+> presentation, and never show the wings and the machinery of the application."_ — and the screens of Claude Design are
 > the reference, for how things are shown when they work and when they do not.
 
-**This replaces, in the atlas, the toast at the bottom over the relief** (`ui/notice.ts`, the *degraded* severity of
+**This replaces, in the atlas, the toast at the bottom over the relief** (`ui/notice.ts`, the _degraded_ severity of
 `app/assetMessages.ts`): it came from a time of setting up and research, before the screens were designed — waiting for
 the relief and then telling a problem was convenient for us, not for the reader. Two cases, each with a human-friendly
 message saying **where** it broke:
 
-| when | what the reader sees |
-| --- | --- |
-| **before the first map is shown** — the splash and its bar are up | the splash gives way to **an error screen**, of the same kind, saying intelligibly at which step the loading failed. **Never the map as far as it got**, even when the failure would once have been a degraded mode (the land mask, the rivers, the events, the year's file) |
-| **after the first map is shown** — the atlas and its interface are up, the relief in cache, a later map fails to load | **a modal over a veil**, the cause in plain words, and **« Réessayer »** when the failure is recoverable |
+| when                                                                                                                  | what the reader sees                                                                                                                                                                                                                                                         |
+| --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **before the first map is shown** — the splash and its bar are up                                                     | the splash gives way to **an error screen**, of the same kind, saying intelligibly at which step the loading failed. **Never the map as far as it got**, even when the failure would once have been a degraded mode (the land mask, the rivers, the events, the year's file) |
+| **after the first map is shown** — the atlas and its interface are up, the relief in cache, a later map fails to load | **a modal over a veil**, the cause in plain words, and **« Réessayer »** when the failure is recoverable                                                                                                                                                                     |
+
+**A map prepared in the background, unasked** (the dev, same evening: _"you have to qualify the error before taking a
+decision on screen"_): a recoverable failure is retried until it works, each failure a `console.error`; an irreversible
+one is a `console.error` only, and reaches the screen when the reader asks for that map — its ordinary loading meets it
+(`files/plans/atlas/year-switch-speed.md`, the window of three maps).
 
 **Every point where the loading can break is listed, each with its message and whether it is recoverable** — a network
 failure is, a file the code cannot read is not — and the two cases are built from that list. The `console.error` stays
@@ -84,15 +89,15 @@ blocking one — and an unexpected throw after the relief keeps the splash with 
 
 ## A label that cannot be built throws, and a boundary keeps the screen — decided by the dev, 2026-10-21
 
-> *« On traduit en phase de développement, et en production il y aura toujours un label »* — so the code is
+> _« On traduit en phase de développement, et en production il y aura toujours un label »_ — so the code is
 > expected to work, and a message missing one of its values is a defect, not a case to word over.
 
 - **The i18n engine throws** on a message called without a value it names, or on a malformed pattern. Every
   catalogue entry is checked by the tests, so this is meant to fail there, not in front of a reader.
 - **In the Cartographer, React error boundaries** keep the rest of the screen alive: where a component fails,
   its place shows the error message, **centred vertically and horizontally** — **the technical text in development
-  only, a plain sentence in production** (the dev, 2026-10-23: *« un message beaucoup plus human-friendly en prod »*,
-  and in development *« quelque chose de beaucoup plus informatif pour le développeur »*; CARTO-274). **One per zone of the
+  only, a plain sentence in production** (the dev, 2026-10-23: _« un message beaucoup plus human-friendly en prod »_,
+  and in development _« quelque chose de beaucoup plus informatif pour le développeur »_; CARTO-274). **One per zone of the
   application** (the dev, 2026-10-21): every panel through the shared `Panel` shell, the status bar, the tool
   rail and its menus, every contextual menu, the top bar and the future menu bar (CARTO-239), the canvas
   zone, and one at the root. **The canvas zone's fallback offers « Retry »** (the dev, same evening): the drawn
@@ -113,17 +118,17 @@ blocking one — and an unexpected throw after the relief keeps the splash with 
 Not every substitution is equal, and the difference is not how bad the failure is — it is **whether
 anyone finds out**.
 
-| | example in this codebase | verdict |
-|---|---|---|
-| **Declared degraded mode** — does less, and announces it | the land mask fails → the shoreline falls back to an elevation threshold, **and a notice is posted**; the severity is declared per asset in `assetMessages`, never inferred from which `catch` fired | a decision, taken and written down (roadmap 07) |
-| **Loud propagation** — the wrong value stays visibly wrong | `easeInOut` carries a `NaN` through, so a broken frame time shows up at once as a camera that has gone nowhere | the dev's call, 2026-09-17 |
-| **Silent substitution** — a plausible answer replaces a broken one | `reliefWorldY` reads a `NaN` elevation as **sea level**, because its two `>` comparisons both fail for `NaN` | never discussed; found by a test on 2026-09-17, and precisely what this rule exists to prevent |
+|                                                                    | example in this codebase                                                                                                                                                                             | verdict                                                                                        |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **Declared degraded mode** — does less, and announces it           | the land mask fails → the shoreline falls back to an elevation threshold, **and a notice is posted**; the severity is declared per asset in `assetMessages`, never inferred from which `catch` fired | a decision, taken and written down (roadmap 07)                                                |
+| **Loud propagation** — the wrong value stays visibly wrong         | `easeInOut` carries a `NaN` through, so a broken frame time shows up at once as a camera that has gone nowhere                                                                                       | the dev's call, 2026-09-17                                                                     |
+| **Silent substitution** — a plausible answer replaces a broken one | `reliefWorldY` reads a `NaN` elevation as **sea level**, because its two `>` comparisons both fail for `NaN`                                                                                         | never discussed; found by a test on 2026-09-17, and precisely what this rule exists to prevent |
 
 The last row is the dangerous shape, and the reason is worth stating: **sea level is a plausible
 answer.** Nothing downstream can tell it apart from a real one. A `NaN` that stays a `NaN` is a defect
 that reports itself; a `NaN` that becomes zero is a defect that has been hidden.
 
-## What this does *not* mean
+## What this does _not_ mean
 
 It is not a ban on fallbacks. The land mask's degraded mode is a fallback, it was the right call, and
 the map would be worse without it — a blank canvas is not more honest than an approximate shoreline, it

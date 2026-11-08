@@ -7,7 +7,7 @@
 
 import { fetchWithin } from '../utils/fetchWithin'
 
-import { assetError } from './assetError'
+import { httpError } from './assetError'
 import { contentFileSchema } from './contentFormat'
 import { checkPayload } from './yearSource'
 
@@ -41,8 +41,7 @@ export function createFetchContentSource(path: string): ContentSource {
   return {
     async load(): Promise<ContentFile> {
       const response = await fetchWithin(path)
-      if (!response.ok)
-        throw assetError('content', 'transport', path, `HTTP ${String(response.status)}`)
+      if (!response.ok) throw httpError('content', path, response.status)
       return parseContentFile(await response.json(), path)
     },
   }

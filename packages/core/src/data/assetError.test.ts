@@ -12,7 +12,9 @@ import {
   expectNumber,
   expectString,
   field,
+  httpError,
   isAssetError,
+  isRecoverableLoadFailure,
   parseAsset,
 } from './assetError'
 
@@ -202,4 +204,86 @@ describe('boundsDisagreement', () => {
   })
 
   // L4: N/A — two numbers compared per edge; malformed boxes are the readers' job.
+})
+
+// ATLAS-333, the dev, 2026-11-08: a map prepared in the background is retried when its failure is recoverable.
+describe('isRecoverableLoadFailure', () => {
+  describe('happy path', () => {
+    it('retries a server failing on its side, never a file it says is absent', () => {
+      expect([
+        isRecoverableLoadFailure(httpError('yearPolities', '/years/1200/polities.json', 503)),
+        isRecoverableLoadFailure(httpError('yearPolities', '/years/1200/polities.json', 404)),
+      ]).toEqual([true, false])
+    })
+  })
+
+  describe('variants', () => {
+    it('retries a timeout or a request asked too often', () => {
+      const statuses = [408, 425, 429]
+      expect(statuses.map((s) => isRecoverableLoadFailure(httpError('regions', '/x', s)))).toEqual([
+        true,
+        true,
+        true,
+      ])
+    })
+
+    it('gives up on any other status the server meant', () => {
+      const statuses = [400, 403, 410]
+      expect(statuses.map((s) => isRecoverableLoadFailure(httpError('regions', '/x', s)))).toEqual([
+        false,
+        false,
+        false,
+      ])
+    })
+
+    it('retries a transport failure with no answer at all', () => {
+      expect(isRecoverableLoadFailure(assetError('regions', 'transport', '/x', 'network'))).toBe(
+        true
+      )
+    })
+
+    it('retries a fetch the network rejected, or a server that did not answer in time', () => {
+      const timeout = new Error('no answer from /x within 10 s')
+      timeout.name = 'TimeoutError'
+      expect([
+        isRecoverableLoadFailure(new TypeError('Failed to fetch')),
+        isRecoverableLoadFailure(timeout),
+      ]).toEqual([true, true])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('gives up on a file that arrived and cannot be read', () => {
+      const failures = ['schema', 'consistency', 'semantic'] as const
+      expect(
+        failures.map((f) => isRecoverableLoadFailure(assetError('yearPolities', f, '/x', 'bad')))
+      ).toEqual([false, false, false])
+    })
+
+    it('gives up on a body that is not JSON', () => {
+      expect(isRecoverableLoadFailure(new SyntaxError('Unexpected token <'))).toBe(false)
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    // Review QUAL-002: only what is known to pass is retried — a stray failure is not retried forever.
+    it('gives up on any throw it does not know to pass', () => {
+      expect([
+        isRecoverableLoadFailure(new RangeError('Invalid array length')),
+        isRecoverableLoadFailure(new Error('something else')),
+        isRecoverableLoadFailure('a string'),
+      ]).toEqual([false, false, false])
+    })
+  })
+
+  describe('edge cases', () => {
+    it('keeps the status on the error, beside its message', () => {
+      const error = httpError('regions', '/x', 500)
+      expect([error.status, error.failure, error.message]).toEqual([
+        500,
+        'transport',
+        'regions (transport) /x: HTTP 500',
+      ])
+    })
+  })
 })

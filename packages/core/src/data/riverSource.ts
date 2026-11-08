@@ -2,7 +2,6 @@ import { type GeoBounds, latitudeToVertical, longitudeToHorizontal } from '../ge
 import { fetchWithin } from '../utils/fetchWithin'
 
 import {
-  assetError,
   expectArray,
   expectBounds,
   expectLonLat,
@@ -10,6 +9,7 @@ import {
   expectNumber,
   expectString,
   field,
+  httpError,
   parseAsset,
 } from './assetError'
 
@@ -105,8 +105,7 @@ export function createFetchRiverSource(path: string): RiverSource {
   return {
     async load(): Promise<RiverSet> {
       const response = await fetchWithin(path)
-      if (!response.ok)
-        throw assetError('rivers', 'transport', path, `HTTP ${String(response.status)}`)
+      if (!response.ok) throw httpError('rivers', path, response.status)
       const payload = parseRiverPayload(await response.json(), path)
       return { source: payload.source, bbox: payload.bbox, rivers: projectRivers(payload) }
     },

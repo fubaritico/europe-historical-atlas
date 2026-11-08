@@ -1,17 +1,24 @@
 # 15 — Choosing the century
 
 > [Index](s00-index.md) · **the interface over the map** (ATLAS-329, ATLAS-150), written 2026-11-02 for Claude Design.
-> **Not built** — the atlas shows one year, 1100. The dev's words: *"I see it at the top — centred, or at the top left with a
+> **Not built** — the atlas shows one year, 1100. The dev's words: _"I see it at the top — centred, or at the top left with a
 > left-right button […] for now we would have only 20 centuries, 20 dates, in our first version, before taking on the
-> decades."* He liked the centuries as the label: *"first century, second century — since that is all we'll have at the
-> start, it goes down better."*
+> decades."_ He liked the centuries as the label: _"first century, second century — since that is all we'll have at the
+> start, it goes down better."_
 >
 > **Not a timeline.** A frieze along the bottom with several political layers — as GeaCron offers, the dev's reference — is
-> a feature as large as the map itself (the dev: *"careful, calm down"*). This scenario is a simple selector, nothing more.
+> a feature as large as the map itself (the dev: _"careful, calm down"_). This scenario is a simple selector, nothing more.
 > **Since 2026-11-05 the frieze is decided, as a separate feature** (ATLAS-358, `../interface-scenarios.md`): this
 > selector stays what it is.
 
 ## The selector
+
+> **Built 2026-11-08 under the temporary year buttons (ATLAS-333)** — the maps ready around the one shown, the dev's
+> video buffer: _"next, previous, a bit like a video player's buffer"_. A map that fails to be made ready is retried
+> while the failure is the network's, and said in the console only when it is the file's — the reader learns of it on
+> asking for that map. **Walked by the dev on the built site, same evening**: a first try showed 1200 a moment late
+> (its names' layer built on showing, 152 ms) — laid ahead since; then _"nothing to say"_. Measured on the built site:
+> a first visit to a prepared map, one frame of 43 ms (its buffers sent to the GPU); every return after, 8 ms.
 
 ```gherkin
 Scenario: the century shown
@@ -23,6 +30,13 @@ Scenario: the next and the previous century
   Then the map of the next century comes in, and the label reads « XIIᵉ siècle »
   When I click the left arrow « ‹ »
   Then the previous one comes in
+
+Scenario: the map before and the map after are ready
+  Given the atlas showing the map of 1100, left alone a moment
+  When I go to the next map, 1200
+  Then it comes in within a frame, its names a moment after
+  And the map after it, and 1100 before it, are made ready in turn while I leave the map alone
+  And no more than three maps are kept: the one shown, the one before, the one after
 
 Scenario: the list of the centuries
   When I click the century's name

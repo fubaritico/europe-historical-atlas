@@ -31,7 +31,7 @@ function contextWith(spawn: () => ComputeWorkerHandle, disposed = false): Pipeli
     spawn,
     isDisposed: () => disposed,
     box: { compute: null as unknown as MapCompute },
-    held: { grid: true, bareTexture: false },
+    held: { grid: true, bareTexture: false, drawing: 0 },
   } as unknown as PipelineContext
 }
 

@@ -59,6 +59,8 @@ export interface AssetError extends Error {
   readonly source: string
   /** What went wrong, in one clause — a field path, a byte count, a mismatched box. */
   readonly detail: string
+  /** The HTTP status the server answered, for a `transport` failure it answered at all. */
+  readonly status?: number
 }
 
 /**
@@ -85,6 +87,47 @@ export function assetError(
     source,
     detail,
   })
+}
+
+/**
+ * Build the {@link AssetError} of a server that answered with a failure status.
+ * @param asset - which asset family failed
+ * @param source - where it was loaded from
+ * @param status - the HTTP status
+ * @returns the error, ready to throw — a `transport` failure carrying its status
+ */
+export function httpError(asset: AssetKind, source: string, status: number): AssetError {
+  return Object.assign(assetError(asset, 'transport', source, `HTTP ${String(status)}`), { status })
+}
+
+/** The statuses a later try may get past: the server timed out, was asked too often, or failed on its side. */
+const PASSING_STATUSES = new Set([408, 425, 429])
+
+/**
+ * Whether a load that failed may work if tried again (the dev, 2026-11-08: *"qualify the error before taking a
+ * decision on screen"*) — the network, never the file.
+ *
+ * **Recoverable, and only these** (review QUAL-002 — a list of what passes, never of what does not):
+ * - a `transport` failure with no answer from the server, or a passing status (408, 425, 429, 5xx);
+ * - a fetch the browser rejected for the network — a `TypeError`, as the platform reports it;
+ * - a read the server did not answer in time — `fetchWithin`'s `TimeoutError`.
+ *
+ * **Everything else is irreversible**: a status the server meant (404 and the other 4xx), a file that arrived and cannot
+ * be read (`schema`, `consistency`, `semantic`, a body that is not JSON), any other throw. One case cannot be told: a
+ * reader's own defect that throws a `TypeError` reads as the network, and is tried again — said in the console at every
+ * try, never silent.
+ *
+ * Meant for what a load throws, never the compute: a defect of the code there is irreversible, said by the caller.
+ * @param error - what the load threw
+ * @returns `true` when trying again may get past it
+ */
+export function isRecoverableLoadFailure(error: unknown): boolean {
+  if (isAssetError(error)) {
+    if (error.failure !== 'transport') return false
+    const { status } = error
+    return status === undefined || status >= 500 || PASSING_STATUSES.has(status)
+  }
+  return error instanceof TypeError || (error instanceof Error && error.name === 'TimeoutError')
 }
 
 /**

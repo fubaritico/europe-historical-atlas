@@ -119,6 +119,20 @@ describe('createYearShelf', () => {
         true,
       ])
     })
+
+    // The dev, 2026-11-08 evening: three maps, like a video player's buffer.
+    it('frees every year aside outside the window, keeping those in it', () => {
+      const { shelf, draw } = map(3)
+      const far = draw(1000)
+      shelf.shelve(1000, 's')
+      const before = draw(1100)
+      shelf.shelve(1100, 's')
+      shelf.keepOnly([1200, 1300, 1100])
+      expect([far.fills.dispose.mock.calls.length, before.fills.dispose.mock.calls.length]).toEqual(
+        [1, 0]
+      )
+      expect([shelf.holds(1000, 's'), shelf.holds(1100, 's')]).toEqual([false, true])
+    })
   })
 
   describe('managed errors', () => {
@@ -156,6 +170,21 @@ describe('createYearShelf', () => {
   describe('unmanaged errors', () => {
     it('answers false for a year never set aside', () => {
       expect(map().shelf.restore(1300, 's')).toBe(false)
+    })
+
+    // Review ARCH-004: a map half laid in the background and failing is freed whatever of it is on screen.
+    it('frees what is on screen and empties the year, leaving the years aside alone', () => {
+      const { scene, sources, handles, shelf, draw } = map()
+      const kept = draw(1100)
+      shelf.shelve(1100, 's')
+      const half = draw(1200)
+      handles.borders = null
+      shelf.discard()
+      expect([half.fills.dispose.mock.calls.length, kept.fills.dispose.mock.calls.length]).toEqual([
+        1, 0,
+      ])
+      expect([handles.fills, sources.regionSet, shelf.holds(1100, 's')]).toEqual([null, null, true])
+      expect(scene.children).not.toContain(half.fills.object)
     })
   })
 

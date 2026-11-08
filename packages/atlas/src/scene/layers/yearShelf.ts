@@ -9,7 +9,8 @@
  * it is freed, and the year is built again.
  *
  * **Bounded**: a year costs tens of megabytes of GPU memory, and many maps are meant (centuries and emblematic years).
- * Past its capacity the shelf frees the year left longest ago.
+ * The window of maps around the one shown is kept (`keepOnly`, the dev's video buffer); past its capacity, a ceiling
+ * under that, the shelf frees the year left longest ago.
  */
 
 import type { LayerHandles } from './layerContext'
@@ -96,6 +97,17 @@ export interface YearShelf {
    * @returns whether {@link YearShelf.restore} would bring it back
    */
   holds: (year: number, stamp: string) => boolean
+  /**
+   * Free every year set aside but these — the window of maps around the one shown (the dev, 2026-11-08: *"next,
+   * previous, a bit like a video player's buffer"*).
+   * @param years - the years to keep, if they are aside
+   */
+  keepOnly: (years: readonly number[]) => void
+  /**
+   * Free the year layers on screen, whatever is there, and empty the year's sources — a map half laid in the background
+   * and failing, taken off before the one shown is put back (review ARCH-004).
+   */
+  discard: () => void
   /** Free every year set aside — at teardown. */
   dispose: () => void
 }
@@ -254,6 +266,18 @@ function refuseOverScreen(handles: LayerHandles, year: number): void {
 }
 
 /**
+ * Free a year set aside, if it is.
+ * @param shelf - the years set aside
+ * @param year - the year
+ */
+function freeShelved(shelf: Map<number, ShelvedYear>, year: number): void {
+  const shelved = shelf.get(year)
+  if (shelved === undefined) return
+  shelf.delete(year)
+  freeLayers(shelved.layers)
+}
+
+/**
  * The years set aside, for one map.
  * @param deps - the scene, the sources, the handles and how many years to keep
  * @returns the shelf
@@ -269,18 +293,11 @@ export function createYearShelf(deps: YearShelfDeps): YearShelf {
   // In the order they were left, the one left longest ago first.
   const shelf = new Map<number, ShelvedYear>()
 
-  const free = (year: number): void => {
-    const shelved = shelf.get(year)
-    if (shelved === undefined) return
-    shelf.delete(year)
-    freeLayers(shelved.layers)
-  }
-
   return {
     shelve(year, stamp) {
       refuseNothingOnScreen(handles, year)
       // A year already aside is replaced by what is on screen now.
-      free(year)
+      freeShelved(shelf, year)
       shelf.set(year, {
         stamp,
         sources: takeSources(sources),
@@ -289,7 +306,7 @@ export function createYearShelf(deps: YearShelfDeps): YearShelf {
       // Past the capacity, the year left longest ago goes.
       for (const oldest of shelf.keys()) {
         if (shelf.size <= capacity) break
-        free(oldest)
+        freeShelved(shelf, oldest)
       }
     },
 
@@ -312,8 +329,17 @@ export function createYearShelf(deps: YearShelfDeps): YearShelf {
       return shelf.get(year)?.stamp === stamp
     },
 
+    keepOnly(years) {
+      for (const year of [...shelf.keys()]) if (!years.includes(year)) freeShelved(shelf, year)
+    },
+
+    discard() {
+      takeSources(sources)
+      freeLayers(takeLayers(scene, handles))
+    },
+
     dispose() {
-      for (const year of [...shelf.keys()]) free(year)
+      for (const year of [...shelf.keys()]) freeShelved(shelf, year)
     },
   }
 }

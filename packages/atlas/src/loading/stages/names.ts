@@ -170,6 +170,96 @@ async function bakedNamesFor(
 }
 
 /**
+ * A year's names and their sheet — from the build when it placed them for this key, else placed in their worker — kept
+ * in the names' cache under the key, even when overtaken: the placement is right for its key, and the reader may come
+ * to that year.
+ * @param context - the pipeline's world
+ * @param loaded - the year
+ * @param placement - the authored year, its key, the relief, the gate
+ * @returns the names and their sheet; `null` when torn down or overtaken before they were placed
+ * @throws what the placement throws
+ */
+async function namesOf(
+  context: PipelineContext,
+  loaded: RegionSet,
+  placement: Placement
+): Promise<CachedNames | null> {
+  const { dev } = context
+  const { authored, key, heightmap, isCurrent } = placement
+  const fromBuild = bakedNamesFor(context, loaded.year, key)
+  await nameFace(context)
+  if (context.isDisposed() || !isCurrent()) return null
+  const names = writtenNames(authored.year.registry.polities, dev.names)
+  const { sheet, glyphs } = sheetOf(names)
+  const placed =
+    (await fromBuild) ??
+    (await context.box.names.placeYearNames(
+      yearNamesRequest({
+        loaded: { ...loaded, authored },
+        names,
+        glyphs,
+        meta: heightmap.meta,
+        params: dev.names,
+      })
+    ))
+  const cached = { placed, sheet }
+  context.nameCache.set(key, cached)
+  return cached
+}
+
+/**
+ * Place a year's names ahead, into the names' cache, without laying them (ATLAS-333, the maps prepared around the one
+ * shown): the year, once shown, lays them from the cache at once.
+ * @param context - the pipeline's world
+ * @param loaded - the year prepared
+ * @param isCurrent - whether the preparation is still wanted
+ * @returns once they are in the cache, or nothing is to be placed
+ * @throws what the placement throws — the caller says it; the year shown then places them as it always did
+ */
+export async function warmYearNames(
+  context: PipelineContext,
+  loaded: RegionSet,
+  isCurrent: () => boolean
+): Promise<void> {
+  const authored = loaded.authored
+  const heightmap = context.sources.heightmap
+  const key = cacheKeyOf(context, loaded)
+  if (authored === undefined || heightmap === null || key === null) return
+  if (context.nameCache.get(key) !== undefined) return
+  await namesOf(context, loaded, { authored, key, heightmap, isCurrent })
+}
+
+/**
+ * A year's key in the names' cache, under the settings of now.
+ * @param context - the pipeline's world
+ * @param loaded - the year
+ * @returns the key; `null` for a year not authored, or with no relief in yet — it is never named
+ */
+function cacheKeyOf(context: PipelineContext, loaded: RegionSet): string | null {
+  const authored = loaded.authored
+  const heightmap = context.sources.heightmap
+  if (authored === undefined || heightmap === null) return null
+  return namesKey(authored.year, {
+    names: context.dev.names,
+    bbox: authored.bbox,
+    grid: heightmap.meta,
+  })
+}
+
+/**
+ * Lay the names placed ahead for the year the sources hold now (ATLAS-333) — a map prepared in the background, so it is
+ * set aside with its names and comes back with them: building their layer cost ~150 ms on its first showing (measured
+ * on the built site, 2026-11-08).
+ * @param context - the pipeline's world
+ * @param loaded - the year being laid
+ * @returns `true` when they were in the cache and are laid; `false` leaves the year to place them when shown
+ */
+export function layWarmNames(context: PipelineContext, loaded: RegionSet): boolean {
+  const key = cacheKeyOf(context, loaded)
+  return key !== null && layKeptNames(context, key)
+}
+
+/**
  * Place a year's names in their worker, keep them, and lay them on the map unless a newer request came meanwhile.
  * The names the build placed are laid instead when they are this year's (`bakedNamesFor`), read while the face loads.
  * @param context - the pipeline's world
@@ -182,30 +272,12 @@ async function placeNames(
   loaded: RegionSet,
   placement: Placement
 ): Promise<void> {
-  const { dev } = context
-  const { authored, key, heightmap, isCurrent } = placement
+  const { authored, isCurrent } = placement
   try {
-    const fromBuild = bakedNamesFor(context, loaded.year, key)
-    await nameFace(context)
-    if (context.isDisposed() || !isCurrent()) return
-    const names = writtenNames(authored.year.registry.polities, dev.names)
-    const { sheet, glyphs } = sheetOf(names)
-    const placed =
-      (await fromBuild) ??
-      (await context.box.names.placeYearNames(
-        yearNamesRequest({
-          loaded: { ...loaded, authored },
-          names,
-          glyphs,
-          meta: heightmap.meta,
-          params: dev.names,
-        })
-      ))
-    // Kept even when overtaken: the placement is right for its key, and the reader may come back to that year.
-    context.nameCache.set(key, { placed, sheet })
-    if (context.isDisposed() || !isCurrent()) return
-    sayWhatIsMissing(placed, authored.year.registry.polities)
-    layNames(context, { placed, sheet })
+    const cached = await namesOf(context, loaded, placement)
+    if (cached === null || context.isDisposed() || !isCurrent()) return
+    sayWhatIsMissing(cached.placed, authored.year.registry.polities)
+    layNames(context, cached)
   } catch (error: unknown) {
     // The map stands without its names; the console says why (to settle with the dev: a notice on screen?).
     console.error('[atlas] the countries’ names could not be placed', error)
