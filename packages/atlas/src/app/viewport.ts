@@ -15,8 +15,12 @@ import { extentRect } from '../tunables/devState'
 import { DEFAULT_CAMERA_TUNING } from '../tunables/params'
 import { prefersReducedMotion } from '../utils/motion'
 
+import { createGpuUpload } from './gpuUpload'
+
+import type { UploadRenderer } from './gpuUpload'
 import type { MapControls } from '../controls/mapControls'
 import type { DevState } from '../tunables/devState'
+import type { Object3D } from 'three'
 
 /** The parchment the map is drawn on, and the page behind the splash. */
 export const PARCHMENT = '#efe6d2'
@@ -38,7 +42,7 @@ const EDGE_SCROLL_MARGIN = 24
  * unconditionally cannot be exercised at all. A real `WebGLRenderer` satisfies this shape, which is the
  * direction that matters.
  */
-export interface RendererHandle {
+export interface RendererHandle extends UploadRenderer {
   /** The canvas the renderer draws into, and the element pointer events are read from. */
   readonly domElement: HTMLElement
   /**
@@ -52,12 +56,6 @@ export interface RendererHandle {
    * @param height - the height
    */
   setSize(width: number, height: number): void
-  /**
-   * Draw one frame.
-   * @param scene - what to draw
-   * @param camera - where from
-   */
-  render(scene: Scene, camera: PerspectiveCamera): void
   /** Free the GPU resources. */
   dispose(): void
 }
@@ -106,6 +104,12 @@ export interface Viewport {
    * @returns nothing
    */
   render(): void
+  /**
+   * Send objects off every scene to the GPU unseen, drawn once into a target of one pixel (`gpuUpload`, ATLAS-396).
+   * @param objects - the objects, a map set aside
+   * @returns nothing
+   */
+  uploadUnseen: (objects: readonly Object3D[]) => void
   /**
    * Persist the current viewpoint, so a reload comes back to it with no transition.
    * @returns nothing
@@ -196,6 +200,35 @@ export function createNavigation(
 }
 
 /**
+ * The extent (red) and the live frustum footprint on the ground (blue), toggled from the panel.
+ * @param scene - the scene they are drawn in
+ * @param controls - the navigation whose extent and footprint they show
+ * @returns their switch, their update for a frame, and their teardown
+ */
+function createFrustumOverlays(
+  scene: Scene,
+  controls: Pick<MapControls, 'getExtent' | 'getFootprint'>
+): { setVisible: (visible: boolean) => void; update: () => void; dispose: () => void } {
+  const extent = createDebugRect('#c0392b')
+  const footprint = createDebugRect('#2980b9')
+  scene.add(extent.object, footprint.object)
+  return {
+    setVisible(visible) {
+      extent.setVisible(visible)
+      footprint.setVisible(visible)
+    },
+    update() {
+      extent.update(controls.getExtent(), 0.05)
+      footprint.update(controls.getFootprint(), 0.05)
+    },
+    dispose() {
+      extent.dispose()
+      footprint.dispose()
+    },
+  }
+}
+
+/**
  * Build the viewport and restore the persisted viewpoint before the first frame.
  * @param canvas - the canvas to render into
  * @param dev - the live tunables the camera reads
@@ -216,10 +249,8 @@ export function createViewport(
   const { controls, saveCamera } = createNavigation(camera, renderer.domElement, dev)
   window.addEventListener('beforeunload', saveCamera)
 
-  // The extent (red) and the live frustum footprint on the ground (blue), toggled from the panel.
-  const extentOverlay = createDebugRect('#c0392b')
-  const footprintOverlay = createDebugRect('#2980b9')
-  scene.add(extentOverlay.object, footprintOverlay.object)
+  const overlays = createFrustumOverlays(scene, controls)
+  const unseen = createGpuUpload(renderer, camera)
 
   return {
     scene,
@@ -228,14 +259,9 @@ export function createViewport(
     applyExtent(): void {
       controls.setExtent(extentRect(dev.extent))
     },
-    setFrustumDebug(visible: boolean): void {
-      extentOverlay.setVisible(visible)
-      footprintOverlay.setVisible(visible)
-    },
+    setFrustumDebug: overlays.setVisible,
     frame(): void {
-      if (!dev.debug.showFrustum) return
-      extentOverlay.update(controls.getExtent(), 0.05)
-      footprintOverlay.update(controls.getFootprint(), 0.05)
+      if (dev.debug.showFrustum) overlays.update()
     },
     resize(): void {
       camera.aspect = window.innerWidth / window.innerHeight
@@ -245,13 +271,14 @@ export function createViewport(
     render(): void {
       renderer.render(scene, camera)
     },
+    uploadUnseen: unseen.upload,
     saveCamera,
     dispose(): void {
       saveCamera() // capture the exact current viewpoint before anything is taken apart
       window.removeEventListener('beforeunload', saveCamera)
       controls.dispose()
-      extentOverlay.dispose()
-      footprintOverlay.dispose()
+      overlays.dispose()
+      unseen.dispose()
       renderer.dispose()
     },
   }

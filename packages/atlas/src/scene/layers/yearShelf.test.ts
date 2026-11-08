@@ -172,6 +172,17 @@ describe('createYearShelf', () => {
       expect(map().shelf.restore(1300, 's')).toBe(false)
     })
 
+    // ATLAS-396: what sending a year aside to the GPU unseen draws.
+    it('names the objects of a year aside, and none of a year not aside', () => {
+      const { shelf, draw } = map()
+      const { fills, borders, events } = draw(1100)
+      shelf.shelve(1100, 's')
+      expect([shelf.objectsOf(1100), shelf.objectsOf(1200)]).toEqual([
+        [fills.object, borders.object, events.object],
+        [],
+      ])
+    })
+
     // Review ARCH-004: a map half laid in the background and failing is freed whatever of it is on screen.
     it('frees what is on screen and empties the year, leaving the years aside alone', () => {
       const { scene, sources, handles, shelf, draw } = map()

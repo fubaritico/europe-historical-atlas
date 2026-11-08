@@ -142,9 +142,11 @@ function build(
   sources: MapSources
   dev: ReturnType<typeof createDevState>
   layers: ReturnType<typeof createMapLayers>
+  uploadUnseen: ReturnType<typeof vi.fn>
 } {
   const scene = new Scene()
   const dev = createDevState()
+  const uploadUnseen = vi.fn()
   // The production default builds the relief at the DEM's 1280 segments: 1.4 s a test here, past the
   // 5 s timeout on the CI's runners. Nothing in this suite depends on the mesh being that fine.
   dev.relief.segments = 16
@@ -162,7 +164,15 @@ function build(
     scene,
     sources,
     dev,
-    layers: createMapLayers({ scene, dev, sources, blurMethod, cityLabels: NAME_STUB }),
+    layers: createMapLayers({
+      scene,
+      dev,
+      sources,
+      blurMethod,
+      cityLabels: NAME_STUB,
+      uploadUnseen,
+    }),
+    uploadUnseen,
   }
 }
 
@@ -1327,6 +1337,17 @@ describe('the years set aside', () => {
   })
 
   describe('variants', () => {
+    // ATLAS-396: a year aside sent to the GPU unseen, through the renderer the composition root hands in.
+    it('hands the objects of 1100, aside, to the upload unseen', () => {
+      const { scene, layers, uploadUnseen } = shown()
+      const before = [...scene.children]
+      layers.shelveYear(1100)
+      const aside = before.filter((object) => !scene.children.includes(object))
+      layers.uploadYear(1100)
+      expect(uploadUnseen).toHaveBeenCalledWith(expect.arrayContaining(aside))
+      expect(aside.length).toBeGreaterThan(0)
+    })
+
     it('holds no year once a setting its countries are built under has moved', () => {
       const { dev, layers } = shown()
       layers.shelveYear(1100)

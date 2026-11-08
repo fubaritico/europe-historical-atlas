@@ -93,6 +93,7 @@ function drawYear(loaded: RegionSet): {
     sources,
     blurMethod: createSeparateImagesBlur(),
     cityLabels: () => new Promise(() => undefined),
+    uploadUnseen: () => undefined,
   })
   layers.rebuildRelief()
   layers.setTexture(new DataTexture(new Uint8Array(16), 2, 2))

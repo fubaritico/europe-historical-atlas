@@ -6,7 +6,8 @@
  * names placed into their cache. **Then one block, with no wait in it**: the map shown set aside, the prepared one laid
  * where it was, set aside in turn, and the map shown put back — the screen never draws between two lines of it, so the
  * reader never sees the prepared map. The block costs the page what laying a year does (~100 ms, its countries and
- * borders): it runs only when the map is quiet (`mapBuffer`).
+ * borders) and what sending it to the GPU unseen does (ATLAS-396 — what its first showing paid before, 43 ms): it runs
+ * only when the map is quiet (`mapBuffer`).
  *
  * **What it refuses, and why**: a map not to be laid now — a change of year being drawn, or the shown map's names not
  * landed yet, which setting it aside would give up — answers `later`; a year the texture carries, or a map shown through
@@ -85,6 +86,9 @@ function layAside(context: PipelineContext, year: number, loaded: RegionSet, cut
     // showing). Not in the cache — their placement failed — it places them when shown, as any year.
     layWarmNames(context, loaded)
     layers.shelveYear(year)
+    // And to the GPU, unseen: its first showing then uploads nothing (43 ms on the built site, ATLAS-396), and the page's
+    // copy of its buffers is let go now rather than when it is shown.
+    layers.uploadYear(year)
   } catch (error: unknown) {
     // Never a background task leaving the reader a half-made map: what was laid goes, the map shown comes back, and
     // the failure is thrown on after.

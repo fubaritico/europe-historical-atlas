@@ -109,6 +109,12 @@ export interface YearShelf {
    * and failing, taken off before the one shown is put back (review ARCH-004).
    */
   discard: () => void
+  /**
+   * The objects of a year set aside — what sending it to the GPU unseen draws (ATLAS-396).
+   * @param year - the year
+   * @returns its layers' objects; none for a year not aside
+   */
+  objectsOf: (year: number) => Object3D[]
   /** Free every year set aside — at teardown. */
   dispose: () => void
 }
@@ -269,6 +275,21 @@ function refuseOverScreen(handles: LayerHandles, year: number): void {
 }
 
 /**
+ * The objects of a year's layers, the absent ones left out.
+ * @param layers - the year's layers; none for a year not aside
+ * @returns their objects
+ */
+function objectsOfLayers(layers: YearLayers | undefined): Object3D[] {
+  const objects: Object3D[] = []
+  if (layers === undefined) return objects
+  for (const key of YEAR_LAYERS) {
+    const layer: { object: Object3D } | null = layers[key]
+    if (layer !== null) objects.push(layer.object)
+  }
+  return objects
+}
+
+/**
  * Free a year set aside, if it is.
  * @param shelf - the years set aside
  * @param year - the year
@@ -328,9 +349,7 @@ export function createYearShelf(deps: YearShelfDeps): YearShelf {
       return true
     },
 
-    holds(year, stamp) {
-      return shelf.get(year)?.stamp === stamp
-    },
+    holds: (year, stamp) => shelf.get(year)?.stamp === stamp,
 
     keepOnly(years) {
       for (const year of [...shelf.keys()]) if (!years.includes(year)) freeShelved(shelf, year)
@@ -340,6 +359,8 @@ export function createYearShelf(deps: YearShelfDeps): YearShelf {
       takeSources(sources)
       freeLayers(takeLayers(scene, handles))
     },
+
+    objectsOf: (year) => objectsOfLayers(shelf.get(year)?.layers),
 
     dispose() {
       for (const year of [...shelf.keys()]) freeShelved(shelf, year)

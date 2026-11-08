@@ -26,7 +26,7 @@ import type { PaperSheet } from '../sheet/paperSheet'
 import type { RiverLayer } from '../waters/riverLayer'
 import type { IndexedFill } from '@europe-historical-atlas/core/pipeline/indexFill'
 import type { TribePatch } from '@europe-historical-atlas/core/pipeline/tribePatches'
-import type { DataTexture, Scene } from 'three'
+import type { DataTexture, Object3D, Scene } from 'three'
 
 /** Every layer currently on screen, or `null` where one has not been built yet. */
 export interface LayerHandles {
@@ -98,6 +98,11 @@ export interface MapLayersDeps {
    * the session, whatever the layers rebuild.
    */
   cityLabels: DrawCityLabel
+  /**
+   * Send objects to the GPU unseen (`app/gpuUpload`, ATLAS-396): a map prepared in the background, so its first showing
+   * uploads nothing. The renderer's, handed in by the composition root — the layers never hold the renderer.
+   */
+  uploadUnseen: (objects: readonly Object3D[]) => void
 }
 
 /** The layers plus the things they need, passed to every builder instead of captured in a closure. */

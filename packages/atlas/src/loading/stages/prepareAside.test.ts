@@ -73,6 +73,17 @@ describe('prepareAside', () => {
   })
 
   describe('variants', () => {
+    // ATLAS-396: its first showing was one frame of 43 ms on the built site, the buffers sent to the GPU then.
+    it('sends 1200 to the GPU unseen once it is aside, before 1100 comes back', async () => {
+      const { deps, pipeline } = await startedOn1100()
+      await pipeline.prepareAside(1200, () => true)
+      expect(asMock(deps.layers.uploadYear).mock.calls).toEqual([[1200]])
+      const [, aside] = asMock(deps.layers.shelveYear).mock.invocationCallOrder
+      const [upload] = asMock(deps.layers.uploadYear).mock.invocationCallOrder
+      const back = asMock(deps.layers.restoreYear).mock.invocationCallOrder.at(-1)
+      expect([(aside ?? 0) < (upload ?? 0), (upload ?? 0) < (back ?? 0)]).toEqual([true, true])
+    })
+
     // Measured on the built site, 2026-11-08: building the names' layer on a first showing cost ~150 ms.
     it('sets 1200 aside with its names laid, so it shows whole', async () => {
       const { deps, pipeline } = await startedOn1100()

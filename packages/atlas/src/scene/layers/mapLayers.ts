@@ -237,6 +237,12 @@ export interface MapLayers {
    * @returns nothing
    */
   discardYear: () => void
+  /**
+   * Send a year set aside to the GPU unseen, so its first showing uploads nothing (ATLAS-396).
+   * @param year - the year, aside
+   * @returns nothing
+   */
+  uploadYear: (year: number) => void
   /** Remove every layer from the scene and free its GPU resources. */
   dispose: () => void
 }
@@ -357,6 +363,7 @@ function layerYears(
   | 'holdsYear'
   | 'keepYears'
   | 'discardYear'
+  | 'uploadYear'
   | 'primeFillCut'
   | 'primeTribeCut'
 > & {
@@ -380,11 +387,12 @@ function layerYears(
       if (handles.events === null) rebuildEvents(context)
       return true
     },
-    holdsYear(year: number): boolean {
-      return shelf.holds(year, stamp())
-    },
+    holdsYear: (year: number): boolean => shelf.holds(year, stamp()),
     keepYears: shelf.keepOnly,
     discardYear: shelf.discard,
+    uploadYear(year: number): void {
+      context.uploadUnseen(shelf.objectsOf(year))
+    },
     primeFillCut(regions, grid, fills): void {
       primeFillCut(context, regions, grid, fills)
     },

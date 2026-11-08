@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { BufferGeometry, Mesh, WebGLRenderTarget } from 'three'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createDevState } from '../tunables/devState'
@@ -9,6 +10,7 @@ import type { RendererHandle } from './viewport'
 
 /** A renderer that records what it was told, and needs no WebGL context. */
 function fakeRenderer(canvas: HTMLCanvasElement): RendererHandle & {
+  targets: unknown[]
   sized: [number, number][]
   frames: number
   disposed: number
@@ -16,9 +18,14 @@ function fakeRenderer(canvas: HTMLCanvasElement): RendererHandle & {
   const handle = {
     domElement: canvas,
     sized: [] as [number, number][],
+    targets: [] as unknown[],
     frames: 0,
     disposed: 0,
     setPixelRatio: vi.fn(),
+    getRenderTarget: () => null,
+    setRenderTarget(target: unknown): void {
+      handle.targets.push(target)
+    },
     setSize(width: number, height: number): void {
       handle.sized.push([width, height])
     },
@@ -166,6 +173,21 @@ describe('createViewport', () => {
       const { renderer, view } = mount()
       view.render()
       expect(renderer.frames).toBe(1)
+    })
+
+    // ATLAS-396, review QUAL-003: a map set aside sent to the GPU unseen, through this renderer.
+    it('draws objects off screen into a target of its own, the canvas set back after, freed at teardown', () => {
+      const { renderer, view } = mount()
+      const dispose = vi.spyOn(WebGLRenderTarget.prototype, 'dispose')
+      view.uploadUnseen([new Mesh(new BufferGeometry())])
+      const { targets } = renderer
+      expect([renderer.frames, targets[0] instanceof WebGLRenderTarget, targets[1]]).toEqual([
+        1,
+        true,
+        null,
+      ])
+      view.dispose()
+      expect(dispose).toHaveBeenCalledOnce()
     })
   })
 

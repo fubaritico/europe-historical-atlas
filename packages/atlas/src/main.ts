@@ -61,15 +61,24 @@ function sceneCanvas(): HTMLCanvasElement {
  * @param scene - the scene every layer is added to
  * @param dev - the live tunables
  * @param sources - what has been loaded so far
+ * @param uploadUnseen - the viewport's way to send a map set aside to the GPU unseen (ATLAS-396)
  * @returns the layers
  */
 function createLayers(
   scene: Parameters<typeof createMapLayers>[0]['scene'],
   dev: Parameters<typeof createMapLayers>[0]['dev'],
-  sources: Parameters<typeof createMapLayers>[0]['sources']
+  sources: Parameters<typeof createMapLayers>[0]['sources'],
+  uploadUnseen: Parameters<typeof createMapLayers>[0]['uploadUnseen']
 ): ReturnType<typeof createMapLayers> {
   const cityLabels = canvasLabelDrawer(NAME_FACE_URL)
-  return createMapLayers({ scene, dev, sources, blurMethod: standardBlur(), cityLabels })
+  return createMapLayers({
+    scene,
+    dev,
+    sources,
+    blurMethod: standardBlur(),
+    cityLabels,
+    uploadUnseen,
+  })
 }
 
 /**
@@ -176,7 +185,7 @@ function bootstrap(): () => void {
   document.documentElement.lang = locale
   const translate = createTranslator(ATLAS_MESSAGES, locale)
   const ui = createMapUi({ host: document.body, isDisposed, translate })
-  const layers = createLayers(view.scene, dev, sources)
+  const layers = createLayers(view.scene, dev, sources, view.uploadUnseen)
   const pipeline = createMapPipeline({
     dev,
     sources,

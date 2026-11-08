@@ -70,6 +70,7 @@ export function fakeLayers(): MapLayers {
     'holdsYear',
     'keepYears',
     'discardYear',
+    'uploadYear',
     'primeFillCut',
     'primeTribeCut',
   ]
