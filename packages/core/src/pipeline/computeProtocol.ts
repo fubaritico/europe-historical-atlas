@@ -8,6 +8,7 @@
  */
 
 import type { FillGrid } from './fillTriangles'
+import type { IndexedFill } from './indexFill'
 import type {
   ComputePhase,
   ComputeSources,
@@ -46,7 +47,7 @@ export type ComputePayload =
   | { kind: 'borders'; borders: RegionBorders }
   | { kind: 'bake'; result: TerrainBakeResult }
   | { kind: 'names'; names: YearNames }
-  | { kind: 'fills'; fills: Float32Array[] }
+  | { kind: 'fills'; fills: IndexedFill[] }
   | { kind: 'tribes'; patches: TribePatch[] }
   | { kind: 'settled'; settled: SettledYear }
 

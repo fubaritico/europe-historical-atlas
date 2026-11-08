@@ -23,6 +23,7 @@ import type { PipelineContext } from '../pipelineContext'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
 import type { FillGrid } from '@europe-historical-atlas/core/pipeline/fillTriangles'
+import type { IndexedFill } from '@europe-historical-atlas/core/pipeline/indexFill'
 import type {
   MapCompute,
   PoliticalResult,
@@ -194,8 +195,8 @@ function settlerOf(
 interface WorkerCut {
   /** The relief's subdivision. */
   readonly grid: FillGrid
-  /** One triangle list per polity. */
-  readonly fills: Float32Array[]
+  /** One fill per polity, its vertices shared and its triangles as indices. */
+  readonly fills: IndexedFill[]
   /** The tribes' patches, measured in the worker too, with their settings; `null` for a year with no tribe. */
   readonly tribes: MeasuredTribes | null
   /** Its colours, tints by level, exact lines and tribes. */

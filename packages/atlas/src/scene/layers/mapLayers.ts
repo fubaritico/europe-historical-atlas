@@ -34,6 +34,7 @@ import type { LayerContext, MapLayersDeps } from './layerContext'
 import type { CameraPose } from '../events/markers'
 import type { MeasuredTribes } from '../political/tribes/mapTribeLayer'
 import type { Region } from '@europe-historical-atlas/core/data/regionSource'
+import type { IndexedFill } from '@europe-historical-atlas/core/pipeline/indexFill'
 import type { DataTexture, Object3D } from 'three'
 
 /** Every layer drawn on the scene but the relief, which is freed on its own terms. */
@@ -205,7 +206,7 @@ export interface MapLayers {
   primeFillCut: (
     regions: readonly Region[],
     grid: { segX: number; segY: number },
-    fills: Float32Array[]
+    fills: IndexedFill[]
   ) => void
   /**
    * Hand the tribe layer patches measured elsewhere — in the worker (ATLAS-333) — for the year the sources hold now,

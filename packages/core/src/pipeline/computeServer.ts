@@ -49,7 +49,13 @@ async function runYearCommand(
     case 'cutFills': {
       const fills = await compute.cutFills(command.regions, command.grid)
       // Megabytes of triangles nobody here reads again: handed over, not copied.
-      return { payload: { kind: 'fills', fills }, transfer: fills.flatMap(transferable) }
+      return {
+        payload: { kind: 'fills', fills },
+        transfer: fills.flatMap(({ vertices, indices }) => [
+          ...transferable(vertices),
+          ...transferable(indices),
+        ]),
+      }
     }
     case 'cutTribes': {
       const patches = await compute.cutTribes(command.tribes, command.request)

@@ -1414,7 +1414,7 @@ describe('primeFillCut', () => {
       built.layers.primeFillCut(
         regions,
         { segX, segY },
-        regions.map(() => new Float32Array(6))
+        regions.map(() => ({ vertices: new Float32Array(6), indices: Uint32Array.of(0, 1, 2) }))
       )
       built.layers.rebuildFills()
       expect(spy).not.toHaveBeenCalled()

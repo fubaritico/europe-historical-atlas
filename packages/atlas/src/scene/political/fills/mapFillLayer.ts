@@ -3,6 +3,7 @@
  */
 
 import { fillTriangles } from '@europe-historical-atlas/core/pipeline/fillTriangles'
+import { indexFill } from '@europe-historical-atlas/core/pipeline/indexFill'
 
 import { disposeHandle } from '../../layers/disposeHandle'
 import { releaseAfterUpload } from '../../layers/releaseAfterUpload'
@@ -15,6 +16,7 @@ import { createFillLayer } from './fillLayer'
 
 import type { LayerContext } from '../../layers/layerContext'
 import type { Region } from '@europe-historical-atlas/core/data/regionSource'
+import type { IndexedFill } from '@europe-historical-atlas/core/pipeline/indexFill'
 
 /**
  * Name what a fill is waiting for, for the warning.
@@ -40,13 +42,13 @@ function cutFills(
   context: LayerContext,
   regions: readonly Region[],
   grid: { segX: number; segY: number }
-): Float32Array[] {
+): IndexedFill[] {
   // Reuse the last cut when neither the year's polities nor the grid has changed.
   const last = context.handles.fillCut
   if (last?.regions === regions && last.segX === grid.segX && last.segY === grid.segY)
     return last.fills
   // Otherwise cut anew, and keep the cut for next time.
-  const fills = fillTriangles(regions, grid)
+  const fills = fillTriangles(regions, grid).map((fill) => indexFill(fill))
   primeFillCut(context, regions, grid, fills)
   return fills
 }
@@ -65,7 +67,7 @@ export function primeFillCut(
   context: LayerContext,
   regions: readonly Region[],
   grid: { segX: number; segY: number },
-  fills: Float32Array[]
+  fills: IndexedFill[]
 ): void {
   context.handles.fillCut = { regions, segX: grid.segX, segY: grid.segY, fills }
 }

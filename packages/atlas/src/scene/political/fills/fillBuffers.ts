@@ -5,12 +5,13 @@
 import { planeHeightIn } from '@europe-historical-atlas/core/pipeline/gridDrape'
 
 import type { TintSurface } from '../tintOnRelief'
+import type { IndexedFill } from '@europe-historical-atlas/core/pipeline/indexFill'
 import type { RgbColor } from '@europe-historical-atlas/core/utils/color'
 
 /** What the fills' geometry is built from: the triangles, their tints by level, and the surface. */
 export interface FillGeometry extends TintSurface {
-  /** Each polity's triangles, flat `u, v`, three vertices each — `fillTriangles`' output. */
-  fills: readonly Float32Array[]
+  /** Each polity's triangles, their vertices shared — the cut's output (`indexFill`). */
+  fills: readonly IndexedFill[]
   /**
    * Each display level's tints, level 0 first, each one per polity in the fills' order. The last level
    * decides what is filled: `null` there leaves the polity unfilled at every level. A year with no homage
@@ -20,38 +21,47 @@ export interface FillGeometry extends TintSurface {
 }
 
 /**
- * The positions and per-level tints of every filled triangle, in world space.
+ * The positions and per-level tints of every filled polity's vertices, in world space, and its triangles as indices.
  *
- * Two passes: the first counts the vertices of the filled polities, so every buffer is allocated once at
- * its exact size; the second resolves each polity's tints and writes its vertices.
+ * Two passes: the first counts the vertices and indices of the filled polities, so every buffer is allocated once at
+ * its exact size; the second resolves each polity's tints and writes its vertices and its triangles. A vertex is never
+ * shared between two polities: each has its own tints.
  * @param options - the fills, their tints by level and the surface
- * @returns three floats per vertex, and three bytes per vertex for each level
+ * @returns three floats per vertex, three bytes per vertex for each level, and three indices per triangle
  * @throws when no level is given, or when a filled polity has no tint at a lower level — the levels are
  *   built from one registry, so either is a defect, and a guessed colour would paint a vassal in nobody's
  */
 export function fillBuffers(options: FillGeometry): {
   positions: Float32Array
   tints: Uint8Array[]
+  indices: Uint32Array
 } {
   // The deepest level decides which polities are filled at all.
   const levels = options.tintLevels
   const deepest = levels[levels.length - 1]
   if (deepest === undefined) throw new Error('fill layer: no tint level given')
-  // 1. Count the vertices of the filled polities, so every buffer is allocated at its exact size.
+  // 1. Count the vertices and indices of the filled polities, so every buffer is allocated at its exact size.
   let vertices = 0
-  options.fills.forEach((fill, i) => {
-    if (deepest[i]) vertices += Math.floor(fill.length / 2)
-  })
-  // 2. One position buffer, and one tint buffer per level.
-  const positions = new Float32Array(vertices * 3)
-  const tints = levels.map(() => new Uint8Array(vertices * 3))
-  // 3. Write each filled polity's vertices and tints, one polity after the other.
-  let at = 0
+  let corners = 0
   options.fills.forEach((fill, i) => {
     if (!deepest[i]) return
-    at = writeFill(fill, polityTints(levels, i), { positions, tints }, at, options)
+    vertices += Math.floor(fill.vertices.length / 2)
+    corners += fill.indices.length
   })
-  return { positions, tints }
+  // 2. One position buffer, one tint buffer per level, one index buffer.
+  const positions = new Float32Array(vertices * 3)
+  const tints = levels.map(() => new Uint8Array(vertices * 3))
+  const indices = new Uint32Array(corners)
+  // 3. Write each filled polity's triangles, vertices and tints, one polity after the other.
+  let at = 0
+  let corner = 0
+  options.fills.forEach((fill, i) => {
+    if (!deepest[i]) return
+    // Its triangles, shifted past the vertices of the polities written before it.
+    for (const index of fill.indices) indices[corner++] = at + index
+    at = writeFill(fill.vertices, polityTints(levels, i), { positions, tints }, at, options)
+  })
+  return { positions, tints, indices }
 }
 
 /**
@@ -77,8 +87,8 @@ function polityTints(levels: FillGeometry['tintLevels'], polity: number): RgbCol
  *
  * One tight loop per buffer, no call per vertex but the plane's (ATLAS-333): the 2.17 million vertices of 1100 took
  * ~420 ms of the page in Chrome when each read its four nodes through a reader and wrote its tints through a
- * `forEach` (measured 2026-11-08).
- * @param fill - the polity's triangles, flat `u, v`
+ * `forEach` (measured 2026-11-08) — and shared, a fifth as many are placed.
+ * @param fill - the polity's distinct vertices, flat `u, v`
  * @param own - its tint at every level
  * @param buffers - the buffers, written in place
  * @param buffers.positions - three floats per vertex

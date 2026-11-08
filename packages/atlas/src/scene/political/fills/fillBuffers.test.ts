@@ -91,13 +91,50 @@ describe('fillBuffers', () => {
           ],
         })
       )
-      const lordVertices = Math.floor((fills[0]?.length ?? 0) / 2)
+      const lordVertices = Math.floor((fills[0]?.vertices.length ?? 0) / 2)
       const last = positions.length - 3
       expect(tints).toHaveLength(2)
       expect(Array.from(tints[0]?.slice(last, last + 3) ?? [])).toEqual([10, 20, 30])
       expect(Array.from(tints[1]?.slice(last, last + 3) ?? [])).toEqual([200, 100, 50])
       expect(Array.from(tints[1]?.slice(0, 3) ?? [])).toEqual([10, 20, 30])
       expect(lordVertices).toBeGreaterThan(0)
+    })
+
+    // ATLAS-333: each polity's indices point at its own vertices, past those of the polities written before it.
+    it('draws the vassal’s triangles on the vassal’s vertices, not on its lord’s', () => {
+      const fills = twoPolities()
+      const { positions, indices } = fillBuffers(
+        options({
+          fills,
+          tintLevels: [
+            [LORD, LORD],
+            [LORD, VASSAL],
+          ],
+        })
+      )
+      const lord = fills[0]
+      const vassal = fills[1]
+      if (lord === undefined || vassal === undefined) throw new Error('test: two polities')
+      const drawn = Array.from(indices.slice(lord.indices.length)).map((index) =>
+        Math.round(((positions[3 * index] ?? 0) / WORLD_WIDTH + 0.5) * 1e6)
+      )
+      const cut = Array.from(vassal.indices).map((index) =>
+        Math.round((vassal.vertices[2 * index] ?? 0) * 1e6)
+      )
+      expect(drawn).toEqual(cut)
+    })
+
+    it('starts the indices at the first written vertex when the polity before is unfilled', () => {
+      const { indices } = fillBuffers(
+        options({
+          fills: twoPolities(),
+          tintLevels: [
+            [null, VASSAL],
+            [null, VASSAL],
+          ],
+        })
+      )
+      expect(Math.min(...indices)).toBe(0)
     })
   })
 

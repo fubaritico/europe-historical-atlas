@@ -9,6 +9,7 @@
 
 import type { ComputeCommand, ComputeEvent, ComputePayload } from './computeProtocol'
 import type { FillGrid } from './fillTriangles'
+import type { IndexedFill } from './indexFill'
 import type {
   ComputeSources,
   FillRegion,
@@ -131,7 +132,7 @@ function isKind<K extends ComputePayload['kind']>(
  */
 function cutsOver(send: SendCommand): Pick<MapCompute, 'cutFills' | 'cutTribes' | 'settleYear'> {
   return {
-    async cutFills(regions: readonly FillRegion[], grid: FillGrid): Promise<Float32Array[]> {
+    async cutFills(regions: readonly FillRegion[], grid: FillGrid): Promise<IndexedFill[]> {
       // The outlines alone cross over: a region's other fields are nothing the cut reads, and all copied.
       const outlines = regions.map(({ rings }) => ({ rings }))
       const event = await send((id) => ({ kind: 'cutFills', id, regions: outlines, grid }))

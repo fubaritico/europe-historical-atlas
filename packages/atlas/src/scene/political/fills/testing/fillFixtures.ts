@@ -7,6 +7,7 @@ import { DataTexture, Raycaster, Vector3 } from 'three'
 
 import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { fillTriangles } from '@europe-historical-atlas/core/pipeline/fillTriangles'
+import { indexFill } from '@europe-historical-atlas/core/pipeline/indexFill'
 
 import {
   createReliefMesh,
@@ -103,7 +104,7 @@ export const options = (over: Partial<FillLayerOptions> = {}): FillLayerOptions 
       },
     ],
     GRID
-  ),
+  ).map((fill) => indexFill(fill)),
   tintLevels: [[{ r: 200, g: 40, b: 10 }]],
   grid: GRID,
   nodes: meshNodeHeights(relief),
@@ -142,7 +143,7 @@ export const twoPolities = (): FillLayerOptions['fills'] =>
       },
     ],
     GRID
-  )
+  ).map((fill) => indexFill(fill))
 
 /** The suzerain's tint. */
 export const LORD = { r: 10, g: 20, b: 30 }

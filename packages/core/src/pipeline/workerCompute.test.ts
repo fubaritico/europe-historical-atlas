@@ -7,6 +7,7 @@ import { toRegionPayload } from '../data/toRegionPayload'
 
 import { serveCompute } from './computeServer'
 import { fillTriangles } from './fillTriangles'
+import { indexFill } from './indexFill'
 import { createInlineMapCompute } from './inlineCompute'
 import { DEFAULT_TERRAIN_OPTIONS } from './terrainCompose'
 import { createWorkerMapCompute } from './workerCompute'
@@ -222,7 +223,7 @@ describe('createWorkerMapCompute', () => {
 
   describe('variants', () => {
     // ATLAS-333: the fills' cut leaves the main thread.
-    it('cuts a square polity across the wire as the main thread would, and hands the triangles over', async () => {
+    it('cuts a square polity across the wire as the main thread would, its vertices shared, and hands both buffers over', async () => {
       const link = loopback(createInlineMapCompute())
       const client = createWorkerMapCompute({ spawn: () => link.handle })
       const square = [
@@ -233,8 +234,12 @@ describe('createWorkerMapCompute', () => {
       ]
       const grid = { segX: 4, segY: 4 }
       const fills = await client.cutFills([{ rings: [square] }], grid)
-      expect(fills).toEqual(fillTriangles([{ rings: [square] }], grid))
-      expect(link.transfers.at(-1)).toEqual(fills.map((fill) => fill.buffer))
+      expect(fills).toEqual(
+        fillTriangles([{ rings: [square] }], grid).map((fill) => indexFill(fill))
+      )
+      expect(link.transfers.at(-1)).toEqual(
+        fills.flatMap((fill) => [fill.vertices.buffer, fill.indices.buffer])
+      )
     })
 
     // ATLAS-333: the year settled across the wire, as the main thread would settle it.

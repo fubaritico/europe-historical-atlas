@@ -27,6 +27,7 @@ import {
   Float32BufferAttribute,
   Mesh,
   ShaderMaterial,
+  Uint32BufferAttribute,
   Uint8BufferAttribute,
 } from 'three'
 
@@ -87,9 +88,10 @@ export interface FillLayer {
  */
 export function createFillLayer(options: FillLayerOptions): FillLayer {
   // The geometry: the positions, and one tint attribute per level of homage.
-  const { positions, tints } = fillBuffers(options)
+  const { positions, tints, indices } = fillBuffers(options)
   const geometry = new BufferGeometry()
   geometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
+  geometry.setIndex(new Uint32BufferAttribute(indices, 1))
   tints.forEach((bytes, level) => {
     geometry.setAttribute(tintAttribute(level), new Uint8BufferAttribute(bytes, 3, true))
   })

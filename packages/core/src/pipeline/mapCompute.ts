@@ -11,6 +11,7 @@
  */
 
 import type { FillGrid } from './fillTriangles'
+import type { IndexedFill } from './indexFill'
 import type { SettleRequest, SettledYear } from './settleYear'
 import type { TerrainTextureOptions } from './terrainCompose'
 import type { TribeGround, TribeOutline, TribePatch } from './tribePatches'
@@ -167,9 +168,9 @@ export interface FillCompute {
    * Cut every polity on the relief's grid. Reads none of the installed state.
    * @param regions - the polities' outlines, in the order the fills are laid
    * @param grid - the relief's subdivision
-   * @returns one flat `u, v` list per polity, three vertices per triangle
+   * @returns each polity's triangles, their vertices shared (`indexFill`)
    */
-  cutFills(regions: readonly FillRegion[], grid: FillGrid): Promise<Float32Array[]>
+  cutFills(regions: readonly FillRegion[], grid: FillGrid): Promise<IndexedFill[]>
 }
 
 /** What a year's tribes are measured against in the compute — {@link TribeGround} with the land left to it. */

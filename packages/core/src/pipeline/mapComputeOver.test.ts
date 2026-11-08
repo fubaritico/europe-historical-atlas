@@ -153,7 +153,7 @@ describe('mapComputeOver', () => {
 
     // ATLAS-333: only the outlines cross the wire, and an answer of another kind is refused.
     it('sends the fills’ cut the outlines alone, returns the triangles, and refuses an answer of another kind', async () => {
-      const FILLS = [new Float32Array(6)]
+      const FILLS = [{ vertices: new Float32Array(6), indices: Uint32Array.of(0, 1, 2) }]
       const cut = answering((id) => ({
         kind: 'done',
         id,
