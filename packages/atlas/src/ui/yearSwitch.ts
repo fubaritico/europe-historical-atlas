@@ -69,7 +69,9 @@ function buildRow(label: string): HTMLElement {
   element.setAttribute('aria-label', label)
   element.style.cssText = [
     'position:fixed',
-    'top:12px',
+    // Below the 24 px band where the map scrolls toward the edge (`app/viewport.ts`): at 12 px, reaching a button
+    // sent the map up (the dev, 2026-11-08).
+    'top:40px',
     'left:50%',
     'transform:translateX(-50%)',
     'display:flex',
