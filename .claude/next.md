@@ -140,7 +140,7 @@ three.js et le Cartographe émet le même, au même hash — vérifié par la CI
 **Dernier contrôle des versions** : 2026-11-06 — 35 à jour proposées (8 alertes de sécurité, toutes dans le CMS), 0
 montées, rapport `files/versions/2026-11-06.md`. **Le kit MCP forcé en 1.32.0** (six failles) : d'accord sur le
 principe, **à faire à la prochaine relance de son CMS** — pas tant que l'historien y travaille (06/11).
-**Dernier audit des instructions** (`/doctor prompt-audit`, une fois par semaine) : **01/11** ; le suivant dès le 08/11.
+**Dernier audit des instructions** (`/doctor prompt-audit`, une fois par semaine) : **08/11** (rapport `files/prompt-audit-2026-11-08.md`, rien appliqué, 41 constats à prendre avec lui) ; le suivant dès le 15/11.
 
 **Cinq paquets**, orchestrés par **Turbo**, avec un **catalogue de versions** dans `pnpm-workspace.yaml` :
 `core` (pure TS, ni three.js ni DOM ni React ni zustand — tenu par ESLint et `tsc`, tests sous **`node`**),
