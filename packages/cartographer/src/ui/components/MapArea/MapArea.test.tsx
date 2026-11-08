@@ -22,7 +22,7 @@ import { MapArea } from './MapArea'
 
 import type { BackdropLoad } from './editorAssets'
 import type { EditorAssets } from './editorAssets'
-import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
+import type { OpeningProgress } from '../../../loaders/opening'
 
 /** One colour source for the mounts below, over the shipped palette. */
 const COLOURS = createPolityColourSource(AUTOMATIC_PALETTE)
@@ -116,7 +116,7 @@ async function inAct(fn: () => void): Promise<void> {
 describe('BackdropWaiting', () => {
   describe('happy path', () => {
     it('announces the wait politely, with its progress', () => {
-      renderInEnglish(<BackdropWaiting fraction={0.4} phase="bake" />)
+      renderInEnglish(<BackdropWaiting fraction={0.4} step="relief" />)
 
       const status = screen.getByRole('status')
 
@@ -125,18 +125,18 @@ describe('BackdropWaiting', () => {
       expect(screen.getByRole('progressbar').getAttribute('value')).toBe('0.4')
     })
 
-    it('names what the bar measures, and keeps that name in step with the phase', () => {
+    it('names what the bar measures, and keeps that name in step with the step running', () => {
       // A `<progress>` exposes its own value natively, so what a reader lacks is what is progressing.
       // Found in review; the atlas's own progress overlay already does this.
-      renderInEnglish(<BackdropWaiting fraction={0.4} phase="bake" />)
+      renderInEnglish(<BackdropWaiting fraction={0.4} step="relief" />)
 
       expect(screen.getByRole('progressbar').getAttribute('aria-label')).toBe(
         'compositing the relief'
       )
 
-      renderInEnglish(<BackdropWaiting fraction={0} phase={null} />)
+      renderInEnglish(<BackdropWaiting fraction={0} step={null} />)
 
-      // Before the first announcement there is no phase, and the label must not read `undefined`.
+      // Before the first announcement there is no step, and the label must not read `undefined`.
       expect(screen.getAllByRole('progressbar').at(-1)?.getAttribute('aria-label')).toBe(
         'Preparing the backdrop'
       )
@@ -144,12 +144,12 @@ describe('BackdropWaiting', () => {
   })
 
   describe('variants', () => {
-    it('names the phase, and says nothing before the first announcement', () => {
-      renderInEnglish(<BackdropWaiting fraction={0} phase={null} />)
+    it('names the step, and says nothing before the first announcement', () => {
+      renderInEnglish(<BackdropWaiting fraction={0} step={null} />)
 
       expect(screen.getByRole('status').textContent).not.toContain('composition')
 
-      renderInEnglish(<BackdropWaiting fraction={0.1} phase="bake" />)
+      renderInEnglish(<BackdropWaiting fraction={0.1} step="relief" />)
 
       expect(screen.getAllByRole('status').at(-1)?.textContent).toContain('compositing the relief')
     })
@@ -157,7 +157,7 @@ describe('BackdropWaiting', () => {
 
   describe('edge cases', () => {
     it('shows a complete bar at 1 without claiming to be done', () => {
-      renderInEnglish(<BackdropWaiting fraction={1} phase="bake" />)
+      renderInEnglish(<BackdropWaiting fraction={1} step="relief" />)
 
       expect(screen.getByRole('progressbar').getAttribute('value')).toBe('1')
       expect(screen.getByRole('status').textContent).toContain('Preparing')
@@ -254,7 +254,7 @@ describe('MapArea', () => {
 
   describe('variants', () => {
     it('shows the progress the loader reports, as it reports it', async () => {
-      let report: ProgressReport | null = null
+      let report: OpeningProgress | null = null
       const backdrop = readyBackdrop()
       let release: (() => void) | null = null
       const load: BackdropLoad = (onProgress) => {
@@ -270,7 +270,7 @@ describe('MapArea', () => {
         mount(load)
       })
       await inAct(() => {
-        report?.(0.75, 'bake')
+        report?.(0.75, 'relief')
       })
 
       expect(screen.getByRole('progressbar').getAttribute('value')).toBe('0.75')
@@ -374,7 +374,7 @@ describe('MapArea', () => {
     })
 
     it('still reports progress under StrictMode, the sink being handed over only once', async () => {
-      let report: ProgressReport | null = null
+      let report: OpeningProgress | null = null
       const backdrop = readyBackdrop()
       let release: (() => void) | null = null
       const load: BackdropLoad = (onProgress) => {
@@ -390,7 +390,7 @@ describe('MapArea', () => {
         mount(load, true)
       })
       await inAct(() => {
-        report?.(0.5, 'bake')
+        report?.(0.5, 'relief')
       })
 
       // The same defect one level down, and the one that would have gone unnoticed: `load` receives the

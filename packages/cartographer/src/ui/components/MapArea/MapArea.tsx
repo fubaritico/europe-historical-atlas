@@ -88,7 +88,7 @@ export function MapArea({
   history,
 }: MapAreaProps) {
   // State
-  const { assets, error, fraction, phase } = useEditorAssets(load)
+  const { assets, error, fraction, step } = useEditorAssets(load)
 
   // Handlers
   const handleHover = (lonLat: [number, number] | null) => {
@@ -106,7 +106,7 @@ export function MapArea({
 
   // Render
   if (error !== null) return <BackdropFailure error={error} />
-  if (assets === null) return <BackdropWaiting fraction={fraction} phase={phase} />
+  if (assets === null) return <BackdropWaiting fraction={fraction} step={step} />
   return (
     <div style={FILL}>
       <MapCanvas

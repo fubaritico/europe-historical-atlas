@@ -10,8 +10,8 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  * - `instructions` — What a keyboard reader is told the surface can do. **It names only the keys
  *   `controller.ts` actually binds**, which is what keeps it from going stale.
  * - `preparing` — The waiting line while the backdrop is baked.
- * - `preparingLabel` — The progress bar's name before the first phase is announced.
- * - `phase` — The phase about to run; `phase` is a `ComputePhase`.
+ * - `preparingLabel` — The progress bar's name before the first step is announced.
+ * - `step` — The step of the opening running now; `step` is an `OpeningStep`.
  * - `failed`, `failedCost` — The blocking notice when the backdrop could not be baked: its headline, and
  *   what it costs.
  */

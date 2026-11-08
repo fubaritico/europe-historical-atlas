@@ -20,8 +20,10 @@ import { CHROME_PAINT_STYLE } from './canvas/paint/style'
 import { YEAR_WRITE_ROUTE } from './devServer/yearWriteRoute'
 import { shortcutText } from './i18n/commandKeys'
 import { createLocaleStore } from './i18n/localeStore'
+import { createAfterPaint } from './loaders/afterPaint'
 import { bakeToBitmap, loadBackdrop } from './loaders/backdropSource'
 import { CONTENT_URL, loadCities } from './loaders/cityLoad'
+import { openEditor } from './loaders/opening'
 import { loadVectorLayers } from './loaders/vectorLayers'
 import { createAlarmBoard } from './persistence/alarmBoard'
 import { AUTOSAVE_DELAY_MS, createAutosaveKeeper } from './persistence/autosaveKeeper'
@@ -78,9 +80,9 @@ import { WIKIDATA_ENDPOINT, createWikidataApiSource } from './wikidata/wikidataS
 // Every sheet, in order, through one module the workbench imports too — see `ui/styles/sheets.ts`.
 import './ui/styles/sheets'
 
+import type { OpeningProgress } from './loaders/opening'
 import type { SaveFirstAnswer } from './persistence/mapChange'
 import type { OverwriteQuestion } from './persistence/yearSession'
-import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 import type { ReactToastContent } from '@fubaritico/react/Toast'
 
 /**
@@ -209,28 +211,42 @@ const compute = createWorkerMapCompute({
  * The atlas declares the same two strings in `mapPipeline.ts`, and they are left as two declarations
  * rather than shared through `core`: a deployment path is not domain code, and the cost of them drifting
  * is a loud `transport` failure at startup, not a silent wrong picture. Worth a line, not a module.
- * @param onProgress - told each phase of the bake before it runs, for the waiting notice's bar
+ * @param onProgress - told how far the whole opening has got, and which step runs, for the waiting bar
  * @returns the baked backdrop and the coastline and river layers projected into its frame
  */
-const loadTheBackdrop = async (onProgress: ProgressReport) => {
-  const backdrop = await loadBackdrop({
-    heightmap: createFetchHeightmapSource('/heightmaps/europe-dem-z5'),
-    landMask: createFetchLandMaskSource('/masks/europe-land'),
-    compute,
-    toImage: bakeToBitmap,
-    options: DEFAULT_TERRAIN_OPTIONS,
-    onProgress,
-  })
-  // After the bake, and reusing its mask rather than fetching three megabytes again. The order is not
-  // arbitrary: the shoreline is traced through that mask, and the frame it is projected into is the one
-  // the DEM declared — so neither can be had before the backdrop is.
-  const vectors = await loadVectorLayers({
-    mask: backdrop.mask,
-    rivers: createFetchRiverSource('/rivers/europe-rivers.json'),
-    frame: backdrop.frame,
-  })
-  return { backdrop, vectors }
-}
+const loadTheBackdrop = (onProgress: OpeningProgress) =>
+  openEditor(
+    {
+      loadBackdrop: (onBake) =>
+        loadBackdrop({
+          heightmap: createFetchHeightmapSource('/heightmaps/europe-dem-z5'),
+          landMask: createFetchLandMaskSource('/masks/europe-land'),
+          compute,
+          toImage: bakeToBitmap,
+          options: DEFAULT_TERRAIN_OPTIONS,
+          onProgress: onBake,
+        }),
+      // After the bake, and reusing its mask rather than fetching three megabytes again. The order is not
+      // arbitrary: the shoreline is traced through that mask, and the frame it is projected into is the one
+      // the DEM declared — so neither can be had before the backdrop is.
+      loadVectors: (backdrop) =>
+        loadVectorLayers({
+          mask: backdrop.mask,
+          rivers: createFetchRiverSource('/rivers/europe-rivers.json'),
+          frame: backdrop.frame,
+        }),
+      afterPaint: createAfterPaint({
+        hidden: () => document.visibilityState === 'hidden',
+        requestFrame: (callback) => {
+          window.requestAnimationFrame(callback)
+        },
+        queueTask: (callback) => {
+          window.setTimeout(callback, 0)
+        },
+      }),
+    },
+    onProgress
+  )
 
 /**
  * The polities' colours, for the canvas and every panel alike — one source, with the palette given here

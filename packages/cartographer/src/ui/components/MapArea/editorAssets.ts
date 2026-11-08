@@ -1,16 +1,16 @@
 import type { Backdrop } from '../../../loaders/backdropSource'
+import type { OpeningProgress } from '../../../loaders/opening'
 import type { VectorLayers } from '../../../loaders/vectorLayers'
-import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
 /**
  * How to fetch and bake the backdrop.
  *
  * A function rather than a ready promise, so the area can supply its own progress sink and show a
  * real wait instead of a guessed one. It is still called **once** — see `MapArea`.
- * @param onProgress - announced before each phase of the bake
+ * @param onProgress - told how far the whole opening has got, and which step runs (CARTO-393)
  * @returns the drawable backdrop and the frame it defines
  */
-export type BackdropLoad = (onProgress: ProgressReport) => Promise<EditorAssets>
+export type BackdropLoad = (onProgress: OpeningProgress) => Promise<EditorAssets>
 
 /**
  * Everything the canvas needs before it can draw.

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
+import type { OpeningStep } from '../../../../loaders/opening'
 import type { BackdropLoad, EditorAssets } from '../editorAssets'
-import type { ComputePhase } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
 /** What the area needs to know while the backdrop is on its way. */
 export interface EditorAssetsState {
@@ -9,10 +9,10 @@ export interface EditorAssetsState {
   assets: EditorAssets | null
   /** Whatever was thrown, if anything was. */
   error: unknown
-  /** Progress through the bake, in `[0, 1]`. */
+  /** Progress through the whole opening, in `[0, 1]`. */
   fraction: number
-  /** The phase about to run, or `null` before the first announcement. */
-  phase: ComputePhase | null
+  /** The step running, or `null` before the first announcement. */
+  step: OpeningStep | null
 }
 
 /**
@@ -39,18 +39,18 @@ export interface EditorAssetsState {
  * and later make a state write on an unmounted tree a silent no-op. It is kept because the flag is the
  * same mechanism the correctness above needs, so there is nothing extra to carry.
  * @param load - how to fetch and bake the backdrop, called once for the component's life
- * @returns the assets once in, whatever was thrown, and the bake's progress so far
+ * @returns the assets once in, whatever was thrown, and the opening's progress so far
  */
 export function useEditorAssets(load: BackdropLoad): EditorAssetsState {
   // Refs
   const inFlight = useRef<Promise<EditorAssets> | null>(null)
-  const progress = useRef<(at: number, running: ComputePhase) => void>(() => undefined)
+  const progress = useRef<(at: number, running: OpeningStep) => void>(() => undefined)
 
   // State
   const [assets, setAssets] = useState<EditorAssets | null>(null)
   const [error, setError] = useState<unknown>(null)
   const [fraction, setFraction] = useState(0)
-  const [phase, setPhase] = useState<ComputePhase | null>(null)
+  const [step, setStep] = useState<OpeningStep | null>(null)
 
   // Effects
   useEffect(() => {
@@ -58,7 +58,7 @@ export function useEditorAssets(load: BackdropLoad): EditorAssetsState {
     progress.current = (at, running) => {
       if (ignore) return
       setFraction(at)
-      setPhase(running)
+      setStep(running)
     }
     inFlight.current ??= load((at, running) => {
       progress.current(at, running)
@@ -77,5 +77,5 @@ export function useEditorAssets(load: BackdropLoad): EditorAssetsState {
   }, [load])
 
   // Return
-  return { assets, error, fraction, phase }
+  return { assets, error, fraction, step }
 }
