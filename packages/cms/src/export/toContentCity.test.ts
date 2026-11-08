@@ -48,6 +48,7 @@ function rome(overrides: Partial<DocCitySheet> = {}): DocCitySheet {
         where: 'p. 12',
       },
     ],
+    showInAtlas: true,
     ...overrides,
   }
 }
@@ -82,6 +83,7 @@ describe('toContentCity', () => {
           },
         ],
         holder: null,
+        showInAtlas: true,
       })
     })
 
@@ -163,6 +165,11 @@ describe('toContentCity', () => {
       expect(toContentCity(rome({ holderName: '', holderQid: '' })).holder).toBeNull()
     })
 
+    // CMS-391, the dev, 2026-11-08: unticked by default, the atlas shows only the cities ticked.
+    it('writes Rome unticked when its box is not ticked', () => {
+      expect(toContentCity(rome({ showInAtlas: false })).showInAtlas).toBe(false)
+    })
+
     it('writes a city with no reason and no line', () => {
       const city = toContentCity(rome({ reasons: null, testimonies: null }))
       expect([city.reasons, city.testimonies]).toEqual([[], []])
@@ -170,6 +177,13 @@ describe('toContentCity', () => {
   })
 
   describe('managed errors', () => {
+    // CMS-391: a base the server has not brought up to date has no box — every city would leave the atlas unseen.
+    it('stops on a sheet with no « show in the atlas » box, naming it and the remedy', () => {
+      expect(() => toContentCity(rome({ showInAtlas: null }))).toThrow(
+        'city sheet 1: no « show in the atlas » box — start the CMS once'
+      )
+    })
+
     it('stops on a sheet the schema refuses, naming it and where', () => {
       const line = { source: BURINGH, subject: 'population' as const, population: null }
       expect(() => toContentCity(rome({ testimonies: [line] }))).toThrow(

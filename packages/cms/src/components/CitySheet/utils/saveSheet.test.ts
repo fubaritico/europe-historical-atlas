@@ -16,6 +16,7 @@ const body: SheetBody = {
   testimonies: [],
   holderName: null,
   holderQid: null,
+  showInAtlas: false,
 }
 
 /**

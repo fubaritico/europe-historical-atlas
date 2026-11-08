@@ -66,6 +66,8 @@ export interface DocCitySheet {
   holderName?: string | null
   /** That polity's Wikidata id. */
   holderQid?: string | null
+  /** Whether the atlas shows it (CMS-391). */
+  showInAtlas?: boolean | null
 }
 
 /**
@@ -152,6 +154,13 @@ export function toContentCity(sheet: DocCitySheet): ContentCity {
   // The three guards below are unreachable while the schema refuses such a sheet first (`checked`): each is the
   // schema and this reading disagreeing — a defect, said loudly rather than written as a hole in the file.
   if (sheet.place === null || sheet.place === undefined) throw new Error(`[CMS] ${where}: no place`)
+  // The box has a default, so every sheet carries it once the column exists; none here is a base the server has not
+  // brought up to date yet — the export stops, rather than hiding every city from the atlas.
+  if (typeof sheet.showInAtlas !== 'boolean') {
+    throw new Error(
+      `[CMS] ${where}: no « show in the atlas » box — start the CMS once so the base gains its column`
+    )
+  }
   const rows = sheet.testimonies ?? []
   return {
     id: String(sheet.id),
@@ -168,5 +177,6 @@ export function toContentCity(sheet: DocCitySheet): ContentCity {
       read.holderName === null || read.holderName === undefined
         ? null
         : toHolder(read.holderName, read.holderQid),
+    showInAtlas: sheet.showInAtlas,
   }
 }

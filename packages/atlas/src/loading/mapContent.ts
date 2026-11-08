@@ -38,7 +38,8 @@ export async function loadContent(deps: ContentLoadDeps, source: ContentSource):
     // Once torn down nothing is written; otherwise the events are stored and pinned.
     if (deps.isDisposed()) return
     deps.sources.events = loaded.events
-    deps.sources.cities = loaded.cities
+    // Only the cities whose sheet is ticked « show in the atlas » (CMS-391): the rest serve the Cartographer's borders.
+    deps.sources.cities = loaded.cities.filter(({ showInAtlas }) => showInAtlas)
     deps.layers.rebuildEvents()
   } catch (error: unknown) {
     deps.ui.reportAssetFailure('content', error)

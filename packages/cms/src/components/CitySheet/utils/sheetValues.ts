@@ -73,6 +73,8 @@ export interface SheetValues {
   holderName: string
   /** That polity's Wikidata id, as typed. */
   holderQid: string
+  /** Whether the atlas shows it (CMS-391) — unticked for a new sheet, as the collection's default. */
+  showInAtlas: boolean
 }
 
 /** One line as the collection stores it. */
@@ -115,6 +117,8 @@ export interface SheetBody {
   holderName: string | null
   /** The holder's Wikidata id, `null` when none is typed. */
   holderQid: string | null
+  /** Whether the atlas shows it (CMS-391). */
+  showInAtlas: boolean
 }
 
 /** A sheet as Payload hands it to the view — whatever it holds, read field by field. */
@@ -236,6 +240,8 @@ export function sheetValues(
     testimonies: rows.map((row) => testimonyValues(row, sourceNames)),
     holderName: textOf(doc.holderName),
     holderQid: textOf(doc.holderQid),
+    // Ticked only when the base says so: a new sheet starts unticked, the collection's default (CMS-391).
+    showInAtlas: doc.showInAtlas === true,
   }
 }
 
@@ -279,6 +285,7 @@ export function sheetBody(values: SheetValues): SheetBody {
     testimonies: values.testimonies.map(testimonyBody),
     holderName: trimmed(values.holderName),
     holderQid: trimmed(values.holderQid),
+    showInAtlas: values.showInAtlas,
   }
 }
 

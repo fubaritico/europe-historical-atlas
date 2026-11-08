@@ -106,5 +106,7 @@
   "lineHolderMissing": "Donnez le pays que nomme la source.",
   "lineHolderQidHelp": "Facultatif — par exemple : Q4948.",
   "quotation": "Citation",
-  "quotationHelp": "Les mots de la source, recopiés tels quels. Facultatif, mais c’est ce qui permet de vérifier la ligne sans le livre."
+  "quotationHelp": "Les mots de la source, recopiés tels quels. Facultatif, mais c’est ce qui permet de vérifier la ligne sans le livre.",
+  "showInAtlas": "Afficher la ville dans l’atlas",
+  "showInAtlasHelp": "Cochée, la ville apparaît dans l’atlas publié. Décochée, elle reste dans la contribution et dans le Cartographe, qui s’en sert pour placer les frontières."
 }

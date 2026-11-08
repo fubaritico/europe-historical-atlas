@@ -40,7 +40,8 @@ export const MCP_COLLECTIONS = {
     enabled: ENTER_NEVER_DELETE,
     description:
       'A city at a date (« Ville à une date »): its importance, the polity holding it (holderName, holderQid) ' +
-      'and its source lines, each with a subject, a source and a quotation.',
+      'and its source lines, each with a subject, a source and a quotation; `showInAtlas` (false by default) ' +
+      'decides whether the published atlas shows it — every city still reaches the Cartographer.',
   },
   [Sources.slug]: {
     enabled: ENTER_NEVER_DELETE,

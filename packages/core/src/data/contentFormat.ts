@@ -279,6 +279,11 @@ export interface ContentCity {
   testimonies: ContentTestimony[]
   /** The polity that held it at that date, or `null` before it is entered (CMS-335). */
   holder: ContentHolder | null
+  /**
+   * Whether the atlas shows it (CMS-391, the dev, 2026-11-08: the historian's research brought too many cities to show
+   * them all) — ticked on its sheet, unticked by default. Every city still reaches the Cartographer, for the borders.
+   */
+  showInAtlas: boolean
 }
 
 /** {@link ContentCity}. */
@@ -290,6 +295,7 @@ const citySchema: z.ZodMiniType<ContentCity> = z.strictObject({
   reasons: z.array(localizedText),
   testimonies: z.array(testimonySchema),
   holder: z.nullable(holderSchema),
+  showInAtlas: z.boolean(),
 })
 
 /** `content/events.json` — every event and every city at a date the atlas can show. */
@@ -306,9 +312,10 @@ export interface ContentFile {
  * The version this code writes and reads — 2 since the event type carries its icon (2026-10-26), 3 since an event
  * carries its siege engine (2026-10-27, ATLAS-286), 4 since the event type carries its pins' colour (2026-10-27,
  * ATLAS-298), 5 since the file carries the cities at a date (2026-10-30, ATLAS-295), 6 since a city carries its holder
- * and a source line its quotation (2026-11-02, CMS-335).
+ * and a source line its quotation (2026-11-02, CMS-335), 7 since a city says whether the atlas shows it (2026-11-08,
+ * CMS-391) — an export of 6 is refused, and a new export mends it.
  */
-export const CONTENT_FORMAT_VERSION = 6
+export const CONTENT_FORMAT_VERSION = 7
 
 /** {@link ContentFile}. The writer's version and the reader's are one constant, so a bump cannot split them. */
 export const contentFileSchema: z.ZodMiniType<ContentFile> = z.strictObject({

@@ -3,9 +3,15 @@ import { describe, expect, it, vi } from 'vitest'
 import { loadContent } from './mapContent'
 
 import type { ContentLoadDeps } from './mapContent'
-import type { ContentEvent, ContentFile } from '@europe-historical-atlas/core/data/contentFormat'
+import type {
+  ContentCity,
+  ContentEvent,
+  ContentFile,
+} from '@europe-historical-atlas/core/data/contentFormat'
 
 const EVENT = { id: '10' } as ContentEvent
+const ROME = { id: 'rome', showInAtlas: true } as ContentCity
+const OSTIA = { id: 'ostia', showInAtlas: false } as ContentCity
 
 /**
  * Collaborators that record what they are told.
@@ -39,6 +45,13 @@ describe('loadContent', () => {
   })
 
   describe('variants', () => {
+    // CMS-391, the dev, 2026-11-08: the atlas shows only the cities whose sheet is ticked.
+    it('keeps Rome, ticked « show in the atlas », and leaves Ostia, unticked, out', async () => {
+      const d = deps()
+      await loadContent(d, answering({ version: 1, events: [], cities: [ROME, OSTIA] }))
+      expect(d.sources.cities).toEqual([ROME])
+    })
+
     it('pins nothing new for an empty file, and says nothing', async () => {
       const d = deps()
       await loadContent(d, answering({ version: 1, events: [], cities: [] }))

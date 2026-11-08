@@ -82,6 +82,7 @@ function rome(overrides: Record<string, unknown> = {}): unknown {
       },
     ],
     holder: { name: 'Papal States', wikidata: 'Q170174' },
+    showInAtlas: true,
     ...overrides,
   }
 }
@@ -260,8 +261,18 @@ describe('contentFileSchema', () => {
       expect(accepts(capture({ place }))).toBe(false)
     })
 
+    // CMS-391: a city says whether the atlas shows it; a file of version 6, without it, is refused.
+    it('refuses a city that does not say whether the atlas shows it', () => {
+      const { showInAtlas: _shown, ...without } = rome() as Record<string, unknown>
+      expect(acceptsCity(without)).toBe(false)
+    })
+
+    it('accepts a city the atlas does not show', () => {
+      expect(acceptsCity(rome({ showInAtlas: false }))).toBe(true)
+    })
+
     it('refuses an unknown version, the earlier ones included', () => {
-      for (const version of [1, 2, 3, 4, 5, 7])
+      for (const version of [1, 2, 3, 4, 5, 6, 8])
         expect(contentFileSchema.safeParse({ version, events: [], cities: [] }).success).toBe(false)
     })
 

@@ -32,7 +32,18 @@ describe('sheetValues', () => {
         testimonies: [],
         holderName: '',
         holderQid: '',
+        showInAtlas: false,
       })
+    })
+
+    // CMS-391: the box as the base holds it, a new sheet unticked.
+    it('reads a sheet ticked « show in the atlas » as ticked, and sends it back so', () => {
+      const values = sheetValues({ ...saved, showInAtlas: true }, 'Rome', new Map())
+      expect([values.showInAtlas, sheetBody(values).showInAtlas]).toEqual([true, true])
+    })
+
+    it('starts a new sheet unticked', () => {
+      expect(sheetValues({}, null, new Map()).showInAtlas).toBe(false)
     })
 
     it('sends back what it read, to the field', () => {
@@ -47,6 +58,7 @@ describe('sheetValues', () => {
         testimonies: [],
         holderName: null,
         holderQid: null,
+        showInAtlas: false,
       })
     })
   })
@@ -129,6 +141,7 @@ describe('sheetValues', () => {
         testimonies: [row],
         holderName: 'Republic of Venice',
         holderQid: 'Q4948',
+        showInAtlas: false,
       }
       const values = sheetValues(doc, 'Zadar', new Map([['4', 'Horvat 1924']]))
       expect([values.holderName, values.holderQid]).toEqual(['Republic of Venice', 'Q4948'])
@@ -149,6 +162,7 @@ describe('sheetValues', () => {
         ...sheetValues({}, null, new Map()),
         holderName: ' Venise ',
         holderQid: 'Q4948 ',
+        showInAtlas: false,
       }
       expect(sheetBody(values)).toMatchObject({ holderName: 'Venise', holderQid: 'Q4948' })
       const line = {
@@ -190,6 +204,7 @@ describe('sheetValues', () => {
         testimonies: [],
         holderName: '',
         holderQid: '',
+        showInAtlas: false,
       })
     })
 

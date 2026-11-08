@@ -6,6 +6,7 @@ import { MomentFields } from './MomentFields'
 import { PlaceSheets } from './PlaceSheets'
 import { ReasonsField } from './ReasonsField'
 import { RecordField } from './RecordField'
+import { ShowInAtlasField } from './ShowInAtlasField'
 import { TestimoniesField } from './TestimoniesField'
 
 import type { OverlapWiring } from '../hooks/useOverlapCheck'
@@ -14,8 +15,8 @@ import type { Say } from '../utils/say'
 import type { RecordChoice } from '../utils/sheetValues'
 
 /**
- * Every field of the sheet, in the order it is entered: the place, the date, the importance, the reasons, the polity
- * that held it, the lines of the sources.
+ * Every field of the sheet, in the order it is entered: the place, the date, the importance, whether the atlas shows
+ * it, the reasons, the polity that held it, the lines of the sources.
  * @param props - the searches, the overlap's wiring, the reasons and the translator
  * @param props.searches - the searches of the places and the sources
  * @param props.overlap - the overlap rule's wiring, fed the chosen place's sheets
@@ -45,6 +46,7 @@ export function SheetFields({
         <MomentFields end="end" title={say('end')} help={say('endHelp')} say={say} />
       </fieldset>
       <ImportanceField say={say} />
+      <ShowInAtlasField say={say} />
       <ReasonsField reasons={reasons} say={say} />
       <HolderFields say={say} />
       <TestimoniesField reasons={reasons} searchSources={searches.sources} say={say} />

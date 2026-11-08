@@ -32,6 +32,7 @@ const rome: SheetValues = {
   testimonies: [],
   holderName: '',
   holderQid: '',
+  showInAtlas: false,
 }
 
 /** A new sheet. */
@@ -43,6 +44,7 @@ const empty: SheetValues = {
   testimonies: [],
   holderName: '',
   holderQid: '',
+  showInAtlas: false,
 }
 
 /**
@@ -291,6 +293,23 @@ describe('CitySheetForm', () => {
           false
         )
       })
+    })
+
+    // CMS-391, the dev, 2026-11-08: a box, unticked by default, says whether the atlas shows the city.
+    it('saves Rome ticked « Afficher la ville dans l’atlas » once its box is ticked', async () => {
+      const fetcher = serverWithSources()
+      renderForm(rome, 1)
+      const user = userEvent.setup()
+      const box = screen.getByRole('checkbox', {
+        name: 'Afficher la ville dans l’atlas',
+      })
+      expect(box).toHaveProperty('checked', false)
+      await user.click(box)
+      await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalled()
+      })
+      expect(savedBody(fetcher).showInAtlas).toBe(true)
     })
 
     it('chooses a reason by typing, without its accent, and saves its id as a number', async () => {

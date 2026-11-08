@@ -233,6 +233,20 @@ describe('PlacePeriods', () => {
   })
 
   describe('the form', () => {
+    // CMS-391, the dev, 2026-11-08: a box, unticked by default — a city created is not shown in the atlas.
+    it('offers « Afficher la ville dans l’atlas », a box unticked by default, with its sentence', () => {
+      const box = field(PlacePeriods.fields, 'showInAtlas') as NamedField & {
+        type?: string
+        defaultValue?: unknown
+        admin?: { description?: unknown }
+      }
+      expect([box.type, box.defaultValue, typeof box.admin?.description]).toEqual([
+        'checkbox',
+        false,
+        'string',
+      ])
+    })
+
     it('offers the importances core knows, in its order', () => {
       expect(options(field(PlacePeriods.fields, 'importance'))).toEqual([...CITY_IMPORTANCES])
     })

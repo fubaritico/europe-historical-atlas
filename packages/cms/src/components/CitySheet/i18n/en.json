@@ -106,5 +106,7 @@
   "lineHolderMissing": "Give the polity the source names.",
   "lineHolderQidHelp": "Optional — for instance: Q4948.",
   "quotation": "Quotation",
-  "quotationHelp": "The source’s own words, copied as they are. Optional, but it is what lets the line be checked without the book."
+  "quotationHelp": "The source’s own words, copied as they are. Optional, but it is what lets the line be checked without the book.",
+  "showInAtlas": "Show the city in the atlas",
+  "showInAtlasHelp": "Ticked, the city appears in the published atlas. Unticked, it stays in the contribution and in the Cartographer, which uses it to place the borders."
 }

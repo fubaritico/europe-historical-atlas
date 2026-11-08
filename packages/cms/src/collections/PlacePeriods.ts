@@ -170,6 +170,18 @@ export const PlacePeriods: CollectionConfig = {
           'Quand la ville apparaît sur la carte : une capitale se voit de loin, une grande ville en zoomant, une ville de près.',
       },
     },
+    // CMS-391: an added column with its default, so the push mode adds it without a question (CMS-276) and every sheet
+    // already saved reads unticked.
+    {
+      name: 'showInAtlas',
+      type: 'checkbox',
+      label: 'Afficher la ville dans l’atlas',
+      defaultValue: false,
+      admin: {
+        description:
+          'Cochée, la ville apparaît dans l’atlas publié. Décochée, elle reste dans la contribution et dans le Cartographe, qui s’en sert pour placer les frontières.',
+      },
+    },
     {
       name: 'reasons',
       type: 'relationship',

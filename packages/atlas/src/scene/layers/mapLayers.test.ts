@@ -337,6 +337,7 @@ describe('createMapLayers', () => {
         reasons: [],
         testimonies: [],
         holder: null,
+        showInAtlas: true,
       }
       sources.cities = [paris]
       sources.askedYear = 1100

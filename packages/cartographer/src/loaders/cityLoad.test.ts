@@ -23,6 +23,7 @@ const SARKEL: ContentCity = {
   reasons: [],
   testimonies: [],
   holder: null,
+  showInAtlas: false,
 }
 
 afterEach(() => {

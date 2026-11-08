@@ -23,6 +23,7 @@ const rome: SheetValues = {
   testimonies: [],
   holderName: '',
   holderQid: '',
+  showInAtlas: false,
 }
 
 /**
@@ -109,6 +110,7 @@ describe('validateSheet', () => {
         testimonies: [],
         holderName: '',
         holderQid: '',
+        showInAtlas: false,
       }
       expect(validateSheet(empty, say)).toEqual({
         place: 'Choisissez un lieu.',

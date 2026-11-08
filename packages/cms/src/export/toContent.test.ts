@@ -75,6 +75,7 @@ const ROME_1100: DocCitySheet = {
   importance: 'capital',
   reasons: [],
   testimonies: [],
+  showInAtlas: false,
 }
 
 describe('toContent', () => {
