@@ -194,18 +194,36 @@ export async function rasterisePolitical(
 }
 
 /**
+ * The bake's rows, told under its phase (CARTO-393). Synchronous, as the rows go: the bake holds its thread, so
+ * in a worker each report is a message the page reads while the rows go on, and inline nothing could repaint
+ * before the end anyway.
+ * @param onProgress - where the bake is announced, or `undefined` when nobody listens
+ * @returns the rows' report, or `undefined` with nobody to tell
+ */
+function bakeRows(
+  onProgress: ProgressReport | undefined
+): ((fraction: number) => void) | undefined {
+  if (!onProgress) return undefined
+  return (fraction) => {
+    onProgress(fraction, 'bake')
+  }
+}
+
+/**
  * Bake the terrain pixels, tinted by the installed year when there is one.
  * @param dem - the elevation grid
  * @param mask - which cells are land, or `null` to fall back on an elevation threshold
  * @param textureOptions - the look being composited
  * @param political - the installed year, or `null` for bare terrain
+ * @param onRows - told the share of the rows already composited, for a bar that moves during the bake
  * @returns the pixels and the size they were baked at
  */
 export function bakeTerrainPixels(
   dem: Heightmap,
   mask: LandMask | null,
   textureOptions: TerrainTextureOptions,
-  political: Pick<PoliticalRaster, 'raster' | 'tints'> | null
+  political: Pick<PoliticalRaster, 'raster' | 'tints'> | null,
+  onRows?: (fraction: number) => void
 ): TerrainBakeResult {
   // The seam the compositor sees: a colour claimed at a coordinate, and nothing about history.
   const tint: AreaTint | undefined = political
@@ -223,7 +241,8 @@ export function bakeTerrainPixels(
     dem,
     textureOptions,
     mask ?? createElevationLandMask(dem, textureOptions.seaLevel),
-    tint
+    tint,
+    onRows
   )
   const { width, height } = terrainTextureSize(dem, textureOptions)
   return { rgba, width, height }
@@ -336,7 +355,7 @@ export function createInlineMapCompute(options: InlineComputeOptions = {}): MapC
     ): Promise<TerrainBakeResult> {
       const dem = requireHeightmap(heightmap)
       await announcer(onProgress, yieldControl)(0, 'bake')
-      return bakeTerrainPixels(dem, landMask, textureOptions, political)
+      return bakeTerrainPixels(dem, landMask, textureOptions, political, bakeRows(onProgress))
     },
 
     placeYearNames(request: YearNamesRequest, onProgress?: ProgressReport): Promise<YearNames> {

@@ -39,6 +39,31 @@
 > unanswered: opening 1100 in its place would have him drawing on 1100 while believing it 1200. To revisit if he wants
 > the softer way.
 
+## Waiting for the backdrop — one bar for the whole opening
+
+> **Built 2026-11-08 (CARTO-393)**, at the dev's ask: *"the loading bar does not show the progress"* — it sat at 0 %
+> for the whole wait. Tried by Claude in the app on 2026-11-08 (the bar moved in 55 steps); not walked by the dev yet.
+> Not a stream, by measure: the downloads are a twentieth of the wait, the rest is computed (`loaders/opening.ts`).
+
+```gherkin
+Scenario: the bar follows the opening, step by step
+  Given the Cartographer is starting
+  When it downloads the relief and the land mask
+  Then the bar reads 0 % and the line under it "downloading the relief and the land mask"
+  When it composites the relief
+  Then the line reads "compositing the relief" and the bar moves from 5 % to 73 % as the rows are done
+  When it traces the coast and the rivers
+  Then the line reads "tracing the coast and the rivers" at 73 %
+  When it starts the canvas
+  Then the line reads "drawing the map" at 92 %, painted before the canvas holds the page still
+  And the bar never goes back
+
+Scenario: opened in a hidden tab
+  Given the Cartographer is opened in a tab not shown
+  When the coast and the rivers are in
+  Then the canvas starts without waiting for a frame the hidden tab will not paint
+```
+
 ## Opening a payload — the first design (2026-09), not how a year opens today
 
 ```gherkin

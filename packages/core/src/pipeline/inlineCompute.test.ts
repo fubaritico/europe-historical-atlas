@@ -149,6 +149,22 @@ describe('createInlineMapCompute', () => {
       expect(result.borders.between.length + result.borders.frontier.length).toBeGreaterThan(0)
     })
 
+    it('tells the bake row by row, under the bake phase', async () => {
+      const compute = createInlineMapCompute()
+      await compute.setSources(sources())
+      const told: [number, string][] = []
+
+      await compute.bakeTerrain(OPTIONS, (fraction, phase) => {
+        told.push([fraction, phase])
+      })
+
+      // The announcement before the bake, then one report per row of the 8: CARTO-393, a bar that moves.
+      expect(told).toEqual([
+        [0, 'bake'],
+        ...Array.from({ length: 8 }, (_, row) => [row / 8, 'bake']),
+      ])
+    })
+
     it('bakes an RGBA buffer sized by the texture options', async () => {
       const compute = createInlineMapCompute()
       await compute.setSources(sources())

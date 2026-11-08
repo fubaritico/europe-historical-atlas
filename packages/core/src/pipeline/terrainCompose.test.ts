@@ -7,6 +7,7 @@ import { findControlInconsistencies, findGroupingProblems } from '../utils/contr
 import {
   BLEND_MODES,
   DEFAULT_TERRAIN_OPTIONS,
+  ROW_REPORTS,
   TERRAIN_CONTROLS,
   TERRAIN_CONTROL_GROUPS,
   blendChannel,
@@ -180,6 +181,32 @@ describe('terrainCompose', () => {
       const included = composeTerrainRgba(hm, { ...base, elevationIncludesSea: true })
       expect(excluded[0]).toBe(OPTS.sea.r)
       expect(included[0]).toBeLessThan(OPTS.sea.r)
+    })
+
+    it('tells the share of rows composited before each row of a small bake, and changes no pixel', () => {
+      const hm = createHeightmap(meta(4, 3, 900), new Int16Array(12).fill(900))
+      const told: number[] = []
+
+      const reported = composeTerrainRgba(hm, OPTS, undefined, undefined, (fraction) => {
+        told.push(fraction)
+      })
+
+      expect(told).toEqual([0, 1 / 3, 2 / 3])
+      expect(reported).toEqual(composeTerrainRgba(hm, OPTS))
+    })
+
+    it('tells a tall bake at most ROW_REPORTS times, in order', () => {
+      // 200 rows: one report every 4 rows, so 50 — a worker posts each one, and 200 would cost for nothing.
+      const hm = createHeightmap(meta(2, 200, 900), new Int16Array(400).fill(900))
+      const told: number[] = []
+
+      composeTerrainRgba(hm, OPTS, undefined, undefined, (fraction) => {
+        told.push(fraction)
+      })
+
+      expect(told).toHaveLength(ROW_REPORTS)
+      expect(told.at(-1)).toBe(196 / 200)
+      expect(told.every((fraction, i) => i === 0 || fraction > (told[i - 1] ?? 1))).toBe(true)
     })
 
     it('scales the baked buffer by the supersample factor on each axis', () => {

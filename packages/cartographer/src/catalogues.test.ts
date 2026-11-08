@@ -5,6 +5,7 @@ import { LOCALES } from '@europe-historical-atlas/core/i18n/locale'
 import { parseMessage } from '@europe-historical-atlas/core/i18n/messageFormat'
 
 import type { SnapLayer, WaterWords, WeldOffer } from './canvas/tools/toolSession'
+import type { OpeningStep } from './loaders/opening'
 import type { NoticeTopic } from './persistence/notice'
 import type { LayerId } from './state/layersSlice'
 import type { EditorTool, PenMode } from './state/toolSlice'
@@ -19,7 +20,6 @@ import type { HandPattern } from '@europe-historical-atlas/core/editor/borderHan
 import type { BorderRelation } from '@europe-historical-atlas/core/editor/borderRelation'
 import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
 import type { MessageNode } from '@europe-historical-atlas/core/i18n/messageFormat'
-import type { ComputePhase } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
 // Every catalogue of the Cartographer, found by its file name rather than listed: a catalogue added later is
 // checked without anyone remembering to add it here (ATLAS-159).
@@ -129,13 +129,11 @@ const CLOSED: Readonly<Record<string, readonly string[]>> = {
     unclaimed: true,
     coastline: true,
   }),
-  'MAP_AREA_MESSAGES.phase.phase': all<ComputePhase>({
-    rasterise: true,
-    expand: true,
-    colours: true,
-    bake: true,
-    borders: true,
-    names: true,
+  'MAP_AREA_MESSAGES.step.step': all<OpeningStep>({
+    download: true,
+    relief: true,
+    coast: true,
+    surface: true,
   }),
   'LAYERS_PANEL_MESSAGES.layerName.id': all<LayerId>({
     backdrop: true,

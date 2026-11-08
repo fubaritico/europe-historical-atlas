@@ -470,6 +470,12 @@ function composeTerrainRow(
 }
 
 /**
+ * How many times, at most, a bake tells how far it has got — enough for a bar to move by steps of 2 %, few
+ * enough that a worker's messages cost nothing beside the rows (CARTO-393: the bar sat at 0 for the whole bake).
+ */
+export const ROW_REPORTS = 50
+
+/**
  * Composite the terrain into an RGBA byte buffer: parchment base, hypsometric tint over land, the
  * greyscale heightmap layer, DEM hillshade multiplied on top (sea samples get the flat `sea` tone, and
  * the greyscale layer only if `elevationIncludesSea`), then a vellum paper grain modulated over
@@ -481,13 +487,15 @@ function composeTerrainRow(
  * @param options - the texture options
  * @param landMask - which cells are land; falls back to thresholding elevation when omitted
  * @param areaTint - an optional colour claimed over part of the map (the political layer)
+ * @param onRows - told the share of the rows already composited, in `[0, 1)`, {@link ROW_REPORTS} times at most
  * @returns an `RGBA` `Uint8Array` of length `width * height * 4`, at the size {@link terrainTextureSize} gives
  */
 export function composeTerrainRgba(
   heightmap: Heightmap,
   options: TerrainTextureOptions,
   landMask?: LandMask,
-  areaTint?: AreaTint
+  areaTint?: AreaTint,
+  onRows?: (fraction: number) => void
 ): Uint8Array {
   // The elevation fallback is a documented degraded mode, not an equivalent: it drowns land lying below
   // sea level and dries out every lake above it.
@@ -509,7 +517,9 @@ export function composeTerrainRgba(
     outWidth,
   }
 
+  const stride = Math.max(1, Math.ceil(outHeight / ROW_REPORTS))
   for (let oy = 0; oy < outHeight; oy++) {
+    if (oy % stride === 0) onRows?.(oy / outHeight)
     const fy = outHeight > 1 ? (oy * (height - 1)) / (outHeight - 1) : 0
     composeTerrainRow(rgba, context, oy, fy, snowDropByRow[oy] ?? 0)
   }

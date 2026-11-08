@@ -26,7 +26,8 @@ export type ComputePhase = 'rasterise' | 'expand' | 'colours' | 'bake' | 'border
 
 /**
  * Announce what a computation is *about to* spend time on. Announced before the phase, never after —
- * a label that names what has just finished tells the reader about a wait that is already over.
+ * a label that names what has just finished tells the reader about a wait that is already over. A long
+ * phase may then report its own progress under the same name: the bake does, row by row (CARTO-393).
  * @param fraction - progress so far, in `[0, 1]`
  * @param phase - the phase about to run
  */
@@ -126,7 +127,7 @@ export interface TerrainBake {
   /**
    * Bake the terrain, tinted by whichever political layer is currently installed.
    * @param options - the texture options
-   * @param onProgress - announces the bake before it runs
+   * @param onProgress - announces the bake before it runs, then tells its rows as they go
    * @returns the composited pixels and their dimensions
    */
   bakeTerrain(

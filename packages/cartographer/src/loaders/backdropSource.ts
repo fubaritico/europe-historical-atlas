@@ -89,7 +89,7 @@ export interface BackdropDeps {
   toImage: (baked: TerrainBakeResult) => Promise<CanvasImageSource>
   /** The look to composite; the atlas's own defaults keep the two pictures identical. */
   options: TerrainTextureOptions
-  /** Announced before each phase, for whatever is showing the wait. */
+  /** Announced before the bake, then told its rows as they go, for whatever is showing the wait. */
   onProgress?: ProgressReport
 }
 
