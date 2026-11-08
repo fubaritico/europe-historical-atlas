@@ -9,6 +9,7 @@
 
 **Je suis l'historien, dans le worktree `.claude/worktrees/historian`** (branche `historian-1108`, sur `main` à `196eed5`).
 **Son programme, dans l'ordre** (dicté le 08/11 au soir) :
+
 1. **Restaurer 1200** dans le worktree : `years/1200/` y est abîmée par ma série automatique (Skye → toute la Grande-Bretagne
    donnée à Mann, restes de contours aux Lofoten, Samsø effacée) ; la copie d'avant est `years/1200.before-claude-2026-11-08`
    — la recopier par-dessus, **mon serveur coupé**, puis vérifier avec `shape.mjs`. Rien de cela n'est commité ; `main` a la bonne.
@@ -24,24 +25,23 @@
    une île à la fois avec une capture, avant de lancer une série. Le ranger dans la skill comme script réutilisable.
 
 **L'instance principale (le code), la prochaine session** (sa décision, 08/11, transmise par elle) : elle travaille avec
-l'historien, qui tient l'entretien du contexte, et peut lui déléguer des tickets. **Son fil : ATLAS-333, la vitesse du
-changement d'année pour la réglette de la frise** — worktree **`.claude/worktrees/baked-years`**, branche
-`atlas-baked-years`, deux commits non fusionnés (`1dbb65e` les noms cuits au build, `d24b9e0` les années mises de côté) et
-une étape **non commitée, gate verte** (les découpes des pays et des tribus dans le worker, les événements gardés avec leur
-année, les mesures). **Le point de reprise exact** : section « Where we stopped » de `files/plans/atlas/year-switch-speed.md`
-**du worktree**. D'abord la question laissée au dev — *commiter cette étape sur la branche, sur la foi des mesures, et passer
-aux tampons des pays dans le worker ?* — puis `/review` avant le commit. **1200 est publiée dans `main` depuis le 08/11 au
-soir** (décision du dev) : ne pas commiter la copie de `years/1200/` ni l'`index.json` de ce worktree par-dessus — fusionner
-`main` d'abord. La barre mesurée d'ATLAS-333 (partie D) partira de celle de
-CARTO-393, qui fait déjà avancer celle de l'atlas pendant la composition du relief.
+l'historien, qui tient l'entretien du contexte, et peut lui déléguer des tickets. **ATLAS-333, la vitesse du changement de
+carte, est dans `main` et poussée depuis le 08/11 au soir** (la branche `atlas-baked-years` fusionnée ; essayée par lui sur la
+version buildée : _« là, rien à redire »_) — l'écran d'accueil et sa barre mesurée jusqu'à la première carte entière, les
+découpes et le règlement d'une année dans le worker, les sommets partagés, **le tampon de trois cartes** (sa décision : la
+carte affichée, la précédente, la suivante, _« comme un buffer de lecteur vidéo »_), une préparation qui échoue qualifiée
+réparable ou irréversible. Mesures : une carte pas prête 0,3 à 0,4 s ; une voisine préparée, une image de 43 ms ; un retour,
+8 ms. **La suite, dans À faire, dans son ordre** : **ATLAS-396** (les trois points qui restent : les 43 ms, les tampons dans
+le worker, la carte d'une date), ATLAS-394 et 395 (l'écran d'erreur, la fenêtre d'erreur). Le détail : `files/plans/atlas/
+year-switch-speed.md`, « Where we stopped ».
 
 **L'épique des villes, CARTO-363** : tout ce qui était dans À faire est fait et validé (367 à 371, 382, 384 à 391) ; CMS-391
 montre dans l'atlas les seules villes cochées. **Ouverts, à sa décision** : une ville choisie puis écartée par un filtre
 reste choisie (revue QUAL-004 de CARTO-390) ; CARTO-387, la boîte de la ville en panneau flottant. **Puis son plan** :
 reprendre la retouche des frontières dans le Cartographe.
 
-**Publier une année n'est plus bloqué** (le dev, 08/11 : *« il n'y a rien de bloquant dans le fait d'ajouter des
-années, des cartes »*) : 1100 retouchée par l'historien (la Catalogne) et 1200 sont commitées et poussées le 08/11 au soir.
+**Publier une année n'est plus bloqué** (le dev, 08/11 : _« il n'y a rien de bloquant dans le fait d'ajouter des
+années, des cartes »_) : 1100 retouchée par l'historien (la Catalogne) et 1200 sont commitées et poussées le 08/11 au soir.
 **Les numéros des ports fixes** (REPO-383 ; ma proposition : l'atlas 5173, le Cartographe 5174).
 
 **Dessiner dans le Cartographe** (un agent, lui ou moi) : la skill **`/use-cartographer`** (07/11) ; son journal est
@@ -75,11 +75,11 @@ par paliers de détail (`files/plans/atlas/detail-levels.md`, dix décisions), n
 sur un nom de pays cède (ATLAS-323). **En attente, à lui de trancher un jour** : les sièges que ni Wikidata ni la carte de la Rus'
 ne datent (Roskilde, Nidaros) ; les villes qu'aucune des trois sources n'atteste (la Géorgie — Koutaïssi, Tbilissi —, Uppsala,
 Sigtuna, Ispahan) — une source de plus, ou Wikidata seul, jamais inventées.
- **L'incertitude** : n'en parler que quand un algorithme existe.
+**L'incertitude** : n'en parler que quand un algorithme existe.
 
 **Décidé par lui, à garder en tête** : l'importance qui ordonne la carte est **politique**, et au Moyen Âge le religieux en est
-(*« le religieux et la politique, c'est la même chose »*) ; le Saint-Empire **n'a pas de capitale** ; le zoom est **un défilement à
-crans** (*« des scroll top »*), plus rien de progressif sauf le rayon des noms ; **le nom du pays prime** sur un point sans nom.
+(_« le religieux et la politique, c'est la même chose »_) ; le Saint-Empire **n'a pas de capitale** ; le zoom est **un défilement à
+crans** (_« des scroll top »_), plus rien de progressif sauf le rayon des noms ; **le nom du pays prime** sur un point sans nom.
 
 **Le compte de test** : `claude-test@localhost.test`, mot de passe dans `packages/cms/.env.test-user` (ignoré par git) — me
 connecter : mettre un temps `admin.autoLogin` avec `prefillOnly` dans `payload.config.ts` (lit ce fichier), cliquer, **retirer
@@ -90,6 +90,7 @@ supprimer dans « Contributeurs ».
 lecture seule (`sqlite3 "file:packages/cms/cms.db?mode=ro"`) plutôt que de deviner ce qu'il a enregistré.
 
 **Ses arbitrages en attente** (une question à la fois) :
+
 - **l'erreur des noms** (police, worker) n'est dite qu'en console — proposition du 28/10, pas tranchée.
 
 **À savoir, laissé de côté** : un nom sur chaque îlot ; le trait parchemin de la frontière collé au brun à un zoom seulement
@@ -106,6 +107,7 @@ après, posté par `commentfile` depuis un fichier (skill `/trello`, « The clos
 entre guillemets doubles** : le 27/10, ça a lancé le seed sur sa base — éditer par l'éditeur.
 
 **Trois règles du CMS, toujours** :
+
 - **Son serveur du CMS est le sien** : je ne le lance, ne le coupe ni ne le relance jamais.
 - **Aucun changement de champ qui retire ou renomme sans migration** (CMS-276) : en mode push, Payload pose une question
   dans le terminal et tout attend derrière. Un champ **ajouté** passe sans question (vérifié le 26/10, `withDefault`).
@@ -128,12 +130,12 @@ three.js et le Cartographe émet le même, au même hash — vérifié par la CI
 `git log origin/main..main` lit une référence de suivi **qui peut être périmée** : pour la vraie réponse,
 `git ls-remote origin main` contre `git rev-parse HEAD`.
 
-|       |                                                                             |
-| ----- | --------------------------------------------------------------------------- |
-| dépôt | `fubaritico/europe-historical-atlas`, **public** depuis le 19/10, branche `main`             |
-| site  | **https://europe-historical-atlas.netlify.app** — 1100 y est publié, refaite depuis Cliopatria le 06/11 (`b02ce87`) |
+|       |                                                                                                                                            |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| dépôt | `fubaritico/europe-historical-atlas`, **public** depuis le 19/10, branche `main`                                                           |
+| site  | **https://europe-historical-atlas.netlify.app** — 1100 y est publié, refaite depuis Cliopatria le 06/11 (`b02ce87`)                        |
 | CI    | huit jobs — validate ×4 (lint, type-check, test, format), build, sonarqube, quality-gate, deploy — **verte depuis le 21/10, sous Node 24** |
-| Sonar | `europe-historical-atlas` sous l'organisation `fubaritico`                  |
+| Sonar | `europe-historical-atlas` sous l'organisation `fubaritico`                                                                                 |
 
 **Dernier contrôle des versions** : 2026-11-06 — 35 à jour proposées (8 alertes de sécurité, toutes dans le CMS), 0
 montées, rapport `files/versions/2026-11-06.md`. **Le kit MCP forcé en 1.32.0** (six failles) : d'accord sur le
@@ -147,7 +149,7 @@ principe, **à faire à la prochaine relance de son CMS** — pas tant que l'his
 réimporte la racine, son `publicDir` est celui de l'atlas), `cms` (Payload 3 + Next, son serveur est celui du dev,
 tests sous `node`), `eslint-plugin-eha` (nos règles de lint).
 
-**Trois faits de structure à ne pas re-découvrir** : *flat config n'a aucune cascade*, donc la config d'un
+**Trois faits de structure à ne pas re-découvrir** : _flat config n'a aucune cascade_, donc la config d'un
 paquet **réimporte** la racine et ESLint résout **une** config depuis le **répertoire courant** — d'où un
 `lint` par paquet · `core` tourne sous **`node`** parce que jsdom lui prêterait un `document` que la
 production n'a jamais · la **couverture est fusionnée** par `scripts/merge-coverage.mjs`, parce que chaque
@@ -158,17 +160,17 @@ seulement depuis un worktree, après avoir lu le titre des pages sur les ports o
 
 ## ▶ P4, LE CARTOGRAPHE — les cinq étapes
 
-> **À relire à chaque ouverture de session** — demande du dev, 27/09 : *« ça c'était clair, et tu me le
-> réponds à chaque prochaine session, parce qu'avec ça je comprends bien et je me souviens bien. »*
+> **À relire à chaque ouverture de session** — demande du dev, 27/09 : _« ça c'était clair, et tu me le
+> réponds à chaque prochaine session, parce qu'avec ça je comprends bien et je me souviens bien. »_
 > L'ordre est dicté par les dépendances, pas par une préférence.
 
-| | c'est quoi | ça livre quoi | on sait que ça marche comment |
-| --- | --- | --- | --- |
-| **1** ✅ | Les **types** des trois fichiers + trois **lecteurs** écrits à la main, dans `packages/core/src/data/` à côté de `heightmap.ts` et `landMask.ts`, derrière `assetError.ts`. Plus l'**adaptateur** vers `RegionPayload` | **L'atlas lit une année écrite à la main et l'affiche.** Zéro ligne de `src/` modifiée | on écrit un dossier `1100/` à la main, `pnpm dev`, la carte s'affiche |
-| **2** ✅ | Le **modèle de document** : les ancres une fois, les anneaux en index, et les opérations — poser, déplacer, supprimer, **dupliquer un tracé**, fermer un anneau. Plus la **dérivation des frontières** | Un document qu'on manipule dans des tests, sans écran | un aller-retour sauvegarde/chargement **conserve le partage** : on bouge une ancre après, les deux contours suivent |
-| **3** ✅ | L'**historique** : un instantané par geste, plus la ligne que `{History}` lit et les **jalons** | `ctrl+z`, et cliquer un rang | même piège : restaurer doit restaurer le **partage**, pas les coordonnées |
-| **4** ✅ | Le **canevas 2D**, coupé en deux : l'**arithmétique** (hit-test, marquise, élastique, écran↔monde) qui est pure, et le **dessin**, une coquille sans logique | On dessine à l'écran | l'arithmétique se teste avec des littéraux — et c'est cette coupe qui la rend testable du tout |
-| **5** ◀ | Le **chrome** : `{Polities}` en arbre, les formulaires, `{Overrides}`, les trois marques d'année dérivée | L'application | les valeurs viennent de `files/plans/cartographer/design/chrome.css`, jamais son markup |
+|          | c'est quoi                                                                                                                                                                                                             | ça livre quoi                                                                          | on sait que ça marche comment                                                                                       |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **1** ✅ | Les **types** des trois fichiers + trois **lecteurs** écrits à la main, dans `packages/core/src/data/` à côté de `heightmap.ts` et `landMask.ts`, derrière `assetError.ts`. Plus l'**adaptateur** vers `RegionPayload` | **L'atlas lit une année écrite à la main et l'affiche.** Zéro ligne de `src/` modifiée | on écrit un dossier `1100/` à la main, `pnpm dev`, la carte s'affiche                                               |
+| **2** ✅ | Le **modèle de document** : les ancres une fois, les anneaux en index, et les opérations — poser, déplacer, supprimer, **dupliquer un tracé**, fermer un anneau. Plus la **dérivation des frontières**                 | Un document qu'on manipule dans des tests, sans écran                                  | un aller-retour sauvegarde/chargement **conserve le partage** : on bouge une ancre après, les deux contours suivent |
+| **3** ✅ | L'**historique** : un instantané par geste, plus la ligne que `{History}` lit et les **jalons**                                                                                                                        | `ctrl+z`, et cliquer un rang                                                           | même piège : restaurer doit restaurer le **partage**, pas les coordonnées                                           |
+| **4** ✅ | Le **canevas 2D**, coupé en deux : l'**arithmétique** (hit-test, marquise, élastique, écran↔monde) qui est pure, et le **dessin**, une coquille sans logique                                                           | On dessine à l'écran                                                                   | l'arithmétique se teste avec des littéraux — et c'est cette coupe qui la rend testable du tout                      |
+| **5** ◀  | Le **chrome** : `{Polities}` en arbre, les formulaires, `{Overrides}`, les trois marques d'année dérivée                                                                                                               | L'application                                                                          | les valeurs viennent de `files/plans/cartographer/design/chrome.css`, jamais son markup                             |
 
 Les étapes **4 et 5 ont créé `packages/cartographer/`** — une application, comme la taxonomie du dev
 dans `architecture.md` : Payload est une app, l'atlas est une app, `core` est une ressource.
@@ -179,7 +181,7 @@ cassant exprès**. Gate à chaque fois : `pnpm type-check && pnpm lint && pnpm t
 `/commit`.
 
 **La vulnérabilité bloquante est fermée** (27/09, étape 2). Une seule invariante y suffit : **le tableau
-d'ancres ne perd jamais rien pendant l'édition.** Donc `removePolity` retire une *revendication*, jamais un
+d'ancres ne perd jamais rien pendant l'édition.** Donc `removePolity` retire une _revendication_, jamais un
 point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui n'est plus référencé disparaît
 à l'enregistrement, par une seule renumération. Vérifié en la cassant : 3 tests tombent.
 
@@ -192,7 +194,7 @@ point — les ancres de côte d'un pays sont aussi celles de son voisin. Ce qui 
 - **Lire les `scripts` du `package.json` avant de mesurer le comportement d'un outil** : c'est eux qui disent comment il
   est lancé.
 - **Quand il a tranché, exécuter** — pas argumenter la mesure.
-- **Pas de question sans arbitrage** : son test, *« c'est quoi la décision qu'il y a à prendre là ? »*
+- **Pas de question sans arbitrage** : son test, _« c'est quoi la décision qu'il y a à prendre là ? »_
 - **Tout problème arrive avec son remède et sa criticité.** Jamais une liste de risques sans décision.
 - **Ne jamais inscrire une déduction de moi comme une décision du dev.** Le tableau de `plan.md` porte
   une colonne `by` pour ça.

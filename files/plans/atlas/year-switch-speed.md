@@ -97,7 +97,7 @@ parts, all three asked for:
 into a principle if we see it will break, but take the best out of it — next, previous, a bit like a video player's
 buffer"_). It replaces the memory budget in bytes: WebGL does not tell how much GPU memory is free, so no budget could be
 set safely for every machine, and the atlas must run on as many as it can. A year weighs ~55–70 MB on the GPU (an
-estimate from the buffers' sizes, after the shared vertices of `bdbca85`): three maps, ~200 MB at worst. **Many maps are
+estimate from the buffers' sizes, after the shared vertices of `43fb59a`): three maps, ~200 MB at worst. **Many maps are
 meant** — centuries, emblematic years between them (814, 843, 1066, 1492…), the sequences of a country's focus — so the
 window is counted in maps, never in years. Comparing two years to load only what differs was weighed and refused by
 him: each year stays independent.
@@ -138,7 +138,24 @@ relief: **the bare relief is never shown alone, and there is one bar, never two.
 **Open, the dev's to decide when the frieze reaches it**: a date before the first map (no map yet drawn there) — the
 bare relief, or the first map. Not reachable today: the year switch offers drawn years only.
 
-## Where we stopped — 2026-11-08, afternoon (the resume point of this work)
+## Where we stopped — 2026-11-08, evening (the resume point of this work)
+
+**ATLAS-333 is done, merged into `main` and pushed** (the branch `atlas-baked-years` rebased onto `0e2aec6`, the
+historian's day included; one conflict, an import in `core/editor/retrace.ts`). Tried by the dev on the built site:
+_"nothing to say"_. On top of the afternoon's state below: the splash and its one bar measured from the first byte
+(`de7ac41`, `1f74274`), the twelve read-only year modules moved from `editor/` to `data/` (`ec336a8`), the year settled in
+the worker (`fed5b59`), a name's letter four corners (`05f26bc`), the page's copy of a layer's buffers let go once uploaded
+(`b418d5c`), the fills' vertices shared (`43fb59a`), **the window of three maps** (`ba3a8aa`).
+
+**Measured on the built site** (Chrome, 2026-11-08 evening): a map not prepared, 0.3–0.4 s; a neighbour prepared in the
+background, one frame of 43 ms on its first showing (its buffers sent to the GPU), 8 ms after; a return, 1 ms of ours; the
+page's heap ~250 MB with three maps.
+
+**Next — ATLAS-396**, in À faire: the 43 ms (a prepared map drawn once off screen during its preparation), the fills' and
+borders' buffers built in the worker (~50 ms each when a map is not prepared), and the map of a date by his rule
+(`data/mapOfDate`, written, not wired; `centuryOf` still rounds to the nearest century).
+
+## Where we stopped — 2026-11-08, afternoon
 
 **Branch `atlas-baked-years`, rebased onto main (CMS-391, CARTO-393), not merged**: `addad3a` (the cuts in the worker,
 review of seven readers), `dccf1a6` (the year buttons below the edge-scroll band), `83c0e3f` (the fills' and tribes'
