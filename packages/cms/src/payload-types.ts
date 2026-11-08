@@ -386,6 +386,10 @@ export interface PlacePeriod {
    */
   importance: 'capital' | 'large-city' | 'city';
   /**
+   * Cochée, la ville apparaît dans l’atlas publié. Décochée, elle reste dans la contribution et dans le Cartographe, qui s’en sert pour placer les frontières.
+   */
+  showInAtlas?: boolean | null;
+  /**
    * Pourquoi elle a cette importance : pouvoir, religion, commerce… Facultatif. La liste se complète dans « Raisons d’importance ».
    */
   reasons?: (number | ImportanceReason)[] | null;
@@ -814,6 +818,7 @@ export interface PlacePeriodsSelect<T extends boolean = true> {
             };
       };
   importance?: T;
+  showInAtlas?: T;
   reasons?: T;
   holderName?: T;
   holderQid?: T;
