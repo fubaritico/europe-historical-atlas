@@ -25,6 +25,10 @@ catalog:
   # Forms — the CMS's contribution screens first, the Cartographer's dialogues may follow
   formik: ^2.4.9
 
+  # Fonts — the atlas's build reads the names' face to place them ahead of the visit (ATLAS-333); never shipped
+  fontkit: ^2.0.4
+  '@types/fontkit': ^2.0.9
+
   # Design system — fubaritico-ds, from GitHub Packages; the Cartographer and the CMS on one version
   '@fubaritico/behaviors': ^0.9.0
   '@fubaritico/react': ^0.9.0

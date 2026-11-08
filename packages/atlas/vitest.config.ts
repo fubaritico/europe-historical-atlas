@@ -13,12 +13,13 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   test: {
     environment: 'jsdom',
-    include: ['src/**/*.test.ts'],
+    // `bake/` is what the site's build computes ahead (ATLAS-333): its tests run in node, each file saying so.
+    include: ['src/**/*.test.ts', 'bake/**/*.test.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
       reportsDirectory: 'coverage',
-      include: ['src/**/*.ts'],
+      include: ['src/**/*.ts', 'bake/**/*.ts'],
       exclude: ['**/*.test.ts', '**/testing/**', '**/computeWorker.ts'],
     },
   },

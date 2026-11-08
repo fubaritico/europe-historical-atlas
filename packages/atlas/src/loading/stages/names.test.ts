@@ -6,7 +6,7 @@ import { createLatestOnly } from '@europe-historical-atlas/core/utils/latestOnly
 import { createMapSources } from '../../sources/mapSources'
 import { createDevState } from '../../tunables/devState'
 import { namePlacement } from '../../tunables/params'
-import { createNameCache } from '../nameCache'
+import { createNameCache, namesKey } from '../nameCache'
 import { stubNameFace } from '../testing/nameFaceStubs'
 import { AUTHORED_FILES, AUTHORED_YEAR, META, YEAR } from '../testing/yearFixtures'
 
@@ -14,6 +14,7 @@ import { rebuildYearNames, unplacedNote, unshortenedNote } from './names'
 
 import type { MapLayers } from '../../scene/layers/mapLayers'
 import type { MapSources } from '../../sources/mapSources'
+import type { BakedNamesSource } from '../bakedNamesSource'
 import type { PipelineContext } from '../pipelineContext'
 import type { Heightmap } from '@europe-historical-atlas/core/data/heightmap'
 import type { YearNames } from '@europe-historical-atlas/core/pipeline/yearNames'
@@ -32,9 +33,13 @@ interface Stage {
 /**
  * The world the stage runs in.
  * @param answer - what the names' compute does
+ * @param baked - what the site's baked names answer — none by default, as on the dev server
  * @returns the context and its spies
  */
-function stage(answer: () => Promise<YearNames> = () => Promise.resolve(PLACED)): Stage {
+function stage(
+  answer: () => Promise<YearNames> = () => Promise.resolve(PLACED),
+  baked: BakedNamesSource['load'] = () => Promise.resolve(null)
+): Stage {
   const sources = createMapSources()
   sources.heightmap = { meta: META } as unknown as Heightmap
   const rebuildNames = vi.fn()
@@ -45,6 +50,7 @@ function stage(answer: () => Promise<YearNames> = () => Promise.resolve(PLACED))
     dev: createDevState(),
     isDisposed: () => false,
     box: { names: { placeYearNames } },
+    assets: { bakedNames: { load: baked } },
     nameFace: null,
     namesGate: createLatestOnly(),
     nameCache: createNameCache(),
@@ -397,4 +403,91 @@ describe('rebuildYearNames, the countries named nowhere', () => {
       1
     )
   })
+})
+
+/**
+ * The page's key for the test year, as the stage computes it.
+ * @returns the key
+ */
+function keyOfTestYear(): string {
+  const authored = AUTHORED_YEAR.authored
+  if (authored === undefined) throw new Error('fixture: not an authored year')
+  return namesKey(authored.year, { names: createDevState().names, bbox: authored.bbox, grid: META })
+}
+
+/** Names the build placed, one level, one polity too small to name. */
+const BUILT: YearNames = {
+  levels: [{ placed: [], tooSmall: ['byz'] }],
+  gridWidth: NAME_GRID_WIDTH,
+  gridHeight: 1,
+  unnamed: [],
+}
+
+/**
+ * Whether the console warned with a text holding these words.
+ * @param warn - the spy on `console.warn`
+ * @param words - the words
+ * @returns `true` when one warning held them
+ */
+function warned(warn: { mock: { calls: unknown[][] } }, words: string): boolean {
+  return warn.mock.calls.some(([text]) => String(text).includes(words))
+}
+
+// ATLAS-333: the names placed at the build, laid when their key is the page's; placed here otherwise, and said.
+describe('rebuildYearNames, the names placed at the build', () => {
+  describe('happy path', () => {
+    it('lays the build’s names under the page’s key, without asking for a placement', async () => {
+      const { context, sources, placeYearNames } = stage(undefined, () =>
+        Promise.resolve({ version: 1, key: keyOfTestYear(), names: BUILT })
+      )
+      await rebuildYearNames(context, AUTHORED_YEAR)
+      expect(placeYearNames).not.toHaveBeenCalled()
+      expect(sources.yearNames).toBe(BUILT)
+    })
+  })
+
+  describe('variants', () => {
+    it('places the names here, and says so, when the site has none for the year', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { context, sources, placeYearNames } = stage()
+      await rebuildYearNames(context, AUTHORED_YEAR)
+      expect(placeYearNames).toHaveBeenCalledTimes(1)
+      expect(sources.yearNames).toBe(PLACED)
+      expect(warned(warn, 'no names placed at the build')).toBe(true)
+    })
+
+    it('places the names here when the build placed them for another version of the year', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { context, sources } = stage(undefined, () =>
+        Promise.resolve({ version: 1, key: 'an older year', names: BUILT })
+      )
+      await rebuildYearNames(context, AUTHORED_YEAR)
+      expect(sources.yearNames).toBe(PLACED)
+      expect(warned(warn, 'another version of the year')).toBe(true)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('places the names here when the build’s file cannot be read', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { context, sources } = stage(undefined, () => Promise.reject(new Error('HTTP 500')))
+      await rebuildYearNames(context, AUTHORED_YEAR)
+      expect(sources.yearNames).toBe(PLACED)
+      expect(warned(warn, 'cannot be read')).toBe(true)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('keeps the build’s names, so the year comes back from the cache', async () => {
+      const load = vi.fn(() =>
+        Promise.resolve({ version: 1 as const, key: keyOfTestYear(), names: BUILT })
+      )
+      const { context } = stage(undefined, load)
+      await rebuildYearNames(context, AUTHORED_YEAR)
+      await rebuildYearNames(context, AUTHORED_YEAR)
+      expect(load).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  // L4: N/A — a failed read is handled above; nothing else is asked of the build's file.
 })

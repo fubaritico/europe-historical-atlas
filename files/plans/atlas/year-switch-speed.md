@@ -35,6 +35,28 @@ browser**: the absolute numbers will differ in Chrome; the ranking is what this 
    authored year already (`mapPipeline.retraceBorders`). The grid path stays for the dev panel's *exact fills* off.
 3. What is left on a change of year is ~0.5 s of main thread (read, lines, fills, borders), then the names.
 
+## Measured again, 2026-11-08 — the Cliopatria 1100, 44,150 anchors, 107 polities
+
+The dev's target, the same night: **under a second, and lower still**. Node, the real files, the relief at its 1280
+segments:
+
+| step of a change of year | time |
+| --- | --- |
+| exact borders (`settleYearBorders`) | 0.19 s |
+| border lines | 0.25 s |
+| the fills' cut (`fillTriangles`) | 0.36 s warm, ~1 s cold (the first year) |
+| the fills' buffers and the tribes | 0.30 s |
+| **the names** | **~2.5 s** (29/10) |
+
+**Baking the fills at the build does not pay**: the cut's output is 870,000 triangles, 21 MB raw, 3.3 MB gzipped — as
+long to download as to compute. **Baking the names does**: 2.5 s of placement for a 216 kB file (82 kB gzipped).
+
+**Done the same night** — the names baked at the build: `bake/namesBake.ts` (a Vite plugin, `vite build` only) places
+every year of the manifest and writes `years/<year>/names.json` into the site; the page lays them when their key is its
+own (`namesKey`), places them live otherwise, said in the console. The letters measured from the `.woff2` by `fontkit`,
+checked against Chrome's `measureText` on the 57 characters of 1100: advances and ascents identical, the descent of « K »,
+« A », « h » off by ≤ 0.028 em — 3 names of 197 (Antioch twice, Arles) 2 % larger, at the same place.
+
 ## The order of work
 
 | # | what | expected | ticket |
@@ -45,6 +67,11 @@ browser**: the absolute numbers will differ in Chrome; the ranking is what this 
 | 4 | the startup: **the bare terrain baked at build time** (an image shipped) instead of 4 s at each visit; the relief mesh off the main thread | the relief in well under 2 s | ATLAS-333, ATLAS-166 (the sheet, same move) |
 | 5 | the fills and the lines cut in the worker — the 0.4 s freeze left on a change of year | no freeze | ATLAS-146 |
 | 6 | the neighbouring year read ahead, while the reader looks at this one | a change of year with no wait for the files | ATLAS-333 |
+| 7 | **the names baked at the build** (2026-11-08) — done; step 4's bake of the terrain is the same move | the names with the map, not 2.5 s after | ATLAS-333 |
+
+**After 2026-11-08's measures, the order is 7 (done), then 5 with a faster cut** (typed arrays instead of growing lists;
+the fills and lines off the main thread, ~0.5 s and no freeze), **then 6** (the neighbouring year prepared ahead: a change
+under 0.2 s when it is ready).
 
 Steps 1 and 2 need no decision of the dev's beyond this order: nothing visible changes, only what is computed twice.
 Step 4 ships a baked image: what it weighs on the wire against 4 s of CPU is measured at step 3 before it is chosen.

@@ -4,61 +4,16 @@
  * placing every level takes seconds — and the progress bar does not carry them.
  */
 
-import { fullNameOf, shortNameOf } from '@europe-historical-atlas/core/data/shortName'
-import { homageLevels } from '@europe-historical-atlas/core/editor/homageLevels'
-import { bearersByLevel } from '@europe-historical-atlas/core/editor/regionBearers'
-import { LEADER_DOT } from '@europe-historical-atlas/core/pipeline/nameOffset'
-import { NAME_GRID_WIDTH } from '@europe-historical-atlas/core/pipeline/yearNames'
-
-import { charactersOf, drawNameSheet } from '../../scene/political/names/glyphSheet'
+import { drawNameSheet } from '../../scene/political/names/glyphSheet'
 import { NAME_FACE_URL, NAME_FAMILY } from '../../scene/political/names/nameFace'
-import { namePlacement } from '../../tunables/params'
 import { namesKey } from '../nameCache'
+import { charactersToMeasure, writtenNames, yearNamesRequest } from '../namesRequest'
 
-import type { NameDevParams } from '../../tunables/params'
 import type { CachedNames } from '../nameCache'
+import type { NamedPolity, WrittenNames } from '../namesRequest'
 import type { PipelineContext } from '../pipelineContext'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { YearNames } from '@europe-historical-atlas/core/pipeline/yearNames'
-
-/** A year's names as the map writes them, every form, by polity id. */
-interface WrittenNames {
-  /** The short names — the registry's own, or the formal one without its title where it has none (CARTO-307). */
-  readonly short: Record<string, string>
-  /** The full names — the registry's own; none for a polity whose short name is forced. */
-  readonly full: Record<string, string>
-}
-
-/** What a polity gives the names: its id, its formal name, and the short one its author entered, if any. */
-interface NamedPolity {
-  /** Its id. */
-  readonly id: string
-  /** Its formal name, the registry's. */
-  readonly name: string
-  /** The name the map writes where the full one does not fit (CARTO-307); absent when none was entered. */
-  readonly shortName?: string
-  /** Whether its short name is written everywhere, even where the full one fits; absent when not. */
-  readonly forceShortName?: true
-}
-
-/**
- * Each polity's name as the map writes it, short and full, as it is written — in capitals only when the panel says so.
- * @param polities - the year's polities
- * @param params - the names' settings
- * @returns the names, by polity id
- */
-function writtenNames(polities: readonly NamedPolity[], params: NameDevParams): WrittenNames {
-  const written = (text: string): string => (params.capitals ? text.toLocaleUpperCase('en') : text)
-  return {
-    short: Object.fromEntries(polities.map((polity) => [polity.id, written(shortNameOf(polity))])),
-    full: Object.fromEntries(
-      polities.flatMap((polity) => {
-        const full = fullNameOf(polity)
-        return full === null ? [] : [[polity.id, written(full)]]
-      })
-    ),
-  }
-}
 
 /**
  * What the console says of the polities with no short name entered (CARTO-307, the dev, 2026-10-29: *« un pays sans
@@ -127,26 +82,12 @@ function nameFace(context: PipelineContext): Promise<void> {
 }
 
 /**
- * Each region's polity id, in the regions' order.
- * @param loaded - the year
- * @returns the ids
- * @throws when an authored region carries none — the adapter gives every one its id, so a miss is a defect
- */
-function regionPolities(loaded: RegionSet): string[] {
-  return loaded.regions.map(({ polityId }) => {
-    if (polityId === undefined) throw new Error('[atlas] an authored region carries no polity id')
-    return polityId
-  })
-}
-
-/**
  * The sheet every form's letters are cut from, and their measures — the leader's dot with them (ATLAS-315).
  * @param names - the names, every form
  * @returns the sheet and the measured characters
  */
 function sheetOf(names: WrittenNames): ReturnType<typeof drawNameSheet> {
-  const texts = [names.short, names.full].flatMap((form) => Object.values(form)).concat(LEADER_DOT)
-  return drawNameSheet(charactersOf(texts), NAME_FAMILY, {
+  return drawNameSheet(charactersToMeasure(names), NAME_FAMILY, {
     letters: document.createElement('canvas'),
     halo: document.createElement('canvas'),
   })
@@ -189,7 +130,45 @@ interface Placement {
 }
 
 /**
+ * A year's names as the build placed them (ATLAS-333), when they are the ones the page would place now: the build's
+ * key is the page's for this year and these settings. Otherwise `null`, and the page places them itself — the names
+ * come seconds later, never wrong — said once in the console: none baked (the dev server, a year added since the
+ * build), baked for another version of the year or other settings, or a file that cannot be read.
+ * @param context - the pipeline's world
+ * @param year - the year
+ * @param key - the page's key for its names
+ * @returns the names, or `null` to place them here
+ */
+async function bakedNamesFor(
+  context: PipelineContext,
+  year: number,
+  key: string
+): Promise<YearNames | null> {
+  try {
+    const baked = await context.assets.bakedNames.load(year)
+    if (baked === null) {
+      console.warn(`[atlas] ${String(year)}: no names placed at the build — placed here.`)
+      return null
+    }
+    if (baked.key !== key) {
+      console.warn(
+        `[atlas] ${String(year)}: the names placed at the build are for another version of the year or other settings — placed here.`
+      )
+      return null
+    }
+    return baked.names
+  } catch (error: unknown) {
+    console.warn(
+      `[atlas] ${String(year)}: the names placed at the build cannot be read — placed here.`,
+      error
+    )
+    return null
+  }
+}
+
+/**
  * Place a year's names in their worker, keep them, and lay them on the map unless a newer request came meanwhile.
+ * The names the build placed are laid instead when they are this year's (`bakedNamesFor`), read while the face loads.
  * @param context - the pipeline's world
  * @param loaded - the year
  * @param placement - the authored year, its key, the relief, the gate
@@ -203,24 +182,22 @@ async function placeNames(
   const { dev } = context
   const { authored, key, heightmap, isCurrent } = placement
   try {
+    const fromBuild = bakedNamesFor(context, loaded.year, key)
     await nameFace(context)
     if (context.isDisposed() || !isCurrent()) return
     const names = writtenNames(authored.year.registry.polities, dev.names)
     const { sheet, glyphs } = sheetOf(names)
-    const gridHeight = Math.round((NAME_GRID_WIDTH * heightmap.meta.height) / heightmap.meta.width)
-    const placed = await context.box.names.placeYearNames({
-      regions: loaded.regions,
-      bearersByLevel: bearersByLevel(
-        regionPolities(loaded),
-        homageLevels(authored.year.registry.polities)
-      ),
-      names: names.short,
-      fullNames: names.full,
-      glyphs,
-      gridWidth: NAME_GRID_WIDTH,
-      gridHeight,
-      options: namePlacement(dev.names),
-    })
+    const placed =
+      (await fromBuild) ??
+      (await context.box.names.placeYearNames(
+        yearNamesRequest({
+          loaded: { ...loaded, authored },
+          names,
+          glyphs,
+          meta: heightmap.meta,
+          params: dev.names,
+        })
+      ))
     // Kept even when overtaken: the placement is right for its key, and the reader may come back to that year.
     context.nameCache.set(key, { placed, sheet })
     if (context.isDisposed() || !isCurrent()) return

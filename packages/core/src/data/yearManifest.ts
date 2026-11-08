@@ -122,11 +122,25 @@ export function createAuthoredYearSource(deps: AuthoredYearSourceDeps): RegionSo
       if (!list.years.includes(year)) return deps.unauthored.load(year)
       const folder = `${deps.yearsBase.replace(/\/$/, '')}/${String(year)}`
       const files = await fetchYearFiles(yearPaths(deps.yearsBase, year))
-      const authored = assembleAuthoredYear(files, folder)
-      return {
-        ...projectRegions(toRegionPayload(authored, list.bbox)),
-        authored: { year: authored, bbox: list.bbox },
-      }
+      return authoredYearRegions(files, folder, list.bbox)
     },
   }
+}
+
+/**
+ * An authored year's three files, read, as the map's regions — the one chain the page loads a year by and the site's
+ * build bakes its names from (ATLAS-333), so the two read the same regions.
+ * @param files - the year's registry, polities and borders, each read
+ * @param folder - the year's folder, for the messages
+ * @param bbox - the frame the years are projected in, the manifest's
+ * @returns the regions, with the authored year they came from
+ * @throws when the three files do not agree with each other
+ */
+export function authoredYearRegions(
+  files: Parameters<typeof assembleAuthoredYear>[0],
+  folder: string,
+  bbox: GeoBounds
+): RegionSet & Required<Pick<RegionSet, 'authored'>> {
+  const authored = assembleAuthoredYear(files, folder)
+  return { ...projectRegions(toRegionPayload(authored, bbox)), authored: { year: authored, bbox } }
 }
