@@ -98,9 +98,9 @@ describe('citiesSlice', () => {
     })
 
     it('gives the canvas the shown cities of the year open only, longitude first', () => {
-      expect(shownCityPoints([LYON, ZADAR, PARIS_1200], new Set(['lyon', 'paris']), 1100)).toEqual([
-        { id: 'lyon', name: 'Lyon', lonLat: [4.83, 45.76], holder: null },
-      ])
+      expect(
+        shownCityPoints([LYON, ZADAR, PARIS_1200], new Set(['lyon', 'paris']), 1100, null)
+      ).toEqual([{ id: 'lyon', name: 'Lyon', lonLat: [4.83, 45.76], holder: null }])
     })
 
     it('draws the cities as points, or as a dot and its name', () => {
@@ -260,6 +260,47 @@ describe('citiesSlice — the city chosen and the city opened', () => {
       const version = store.getState().version
       store.getState().openCity('lyon')
       expect(store.getState().version).toBe(version)
+    })
+  })
+})
+
+// CARTO-390, the dev, 2026-11-08: the map shows only the cities the list keeps under its filters.
+describe('citiesSlice — the cities listed', () => {
+  describe('happy path', () => {
+    it('draws only Lyon of Lyon and Zadar, both shown, once the list keeps Lyon alone', () => {
+      expect(
+        shownCityPoints([LYON, ZADAR], new Set(['lyon', 'zadar']), 1100, new Set(['lyon'])).map(
+          ({ id }) => id
+        )
+      ).toEqual(['lyon'])
+    })
+  })
+
+  describe('variants', () => {
+    it('draws every city shown when no list is mounted', () => {
+      expect(
+        shownCityPoints([LYON, ZADAR], new Set(['lyon', 'zadar']), 1100, null).map(({ id }) => id)
+      ).toEqual(['lyon', 'zadar'])
+    })
+
+    it('keeps the ids the list hands over, and forgets them when it is withdrawn', () => {
+      const store = testStore()
+      store.getState().setListedCities(['lyon'])
+      const kept = [...(store.getState().listedCities ?? [])]
+      store.getState().setListedCities(null)
+      expect([kept, store.getState().listedCities]).toEqual([['lyon'], null])
+    })
+  })
+
+  // L3–L4: N/A — plain values.
+
+  describe('edge cases', () => {
+    it('draws no city listed but not shown: a filter never shows a city', () => {
+      expect(shownCityPoints([LYON], new Set(), 1100, new Set(['lyon']))).toEqual([])
+    })
+
+    it('draws nothing when the list keeps nothing', () => {
+      expect(shownCityPoints([LYON], new Set(['lyon']), 1100, new Set())).toEqual([])
     })
   })
 })

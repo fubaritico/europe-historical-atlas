@@ -85,6 +85,12 @@ export interface CitiesState {
   selectedCity: string | null
   /** The city whose information box is open — a double-click on its point or its name (CARTO-384) — or `null`. */
   openedCity: string | null
+  /**
+   * The ids of the cities `{Cities}` lists under its filters — the name typed and the advanced filters (CARTO-390, the
+   * dev, 2026-11-08: *"when I filter in the Cities panel, the map must be filtered too"*). Written by the list, the one
+   * place that decides what its filters keep; `null` while no list is mounted, and then nothing is filtered.
+   */
+  listedCities: ReadonlySet<string> | null
 }
 
 /** What may be done to the cities. */
@@ -159,6 +165,11 @@ export interface CitiesActions {
   openCity: (id: string) => void
   /** Close the information box; the city stays chosen. */
   closeCity: () => void
+  /**
+   * Say which cities the list shows under its filters, or that no list is mounted.
+   * @param ids - the ids listed, or `null`
+   */
+  setListedCities: (ids: readonly string[] | null) => void
 }
 
 /** The slice: the cities, which are shown, and the ways to change it. */
@@ -208,19 +219,22 @@ export function citiesOfYear(cities: readonly CityMark[], year: number): CityMar
 }
 
 /**
- * The cities the canvas draws: those of the year open that `{Cities}` has shown, with their positions.
+ * The cities the canvas draws: those of the year open that `{Cities}` has shown **and still lists under its filters**
+ * (CARTO-390) — a city a filter leaves out is off the map until the filter is lifted — with their positions.
  * @param cities - every city
  * @param shown - the ids shown
  * @param year - the year open
+ * @param listed - the ids the list shows under its filters, or `null` with no list mounted: no filter
  * @returns each shown city's name, position — longitude first — and its holder's Wikidata id by the sources
  */
 export function shownCityPoints(
   cities: readonly CityMark[],
   shown: ReadonlySet<string>,
-  year: number
+  year: number,
+  listed: ReadonlySet<string> | null
 ): ShownCity[] {
   return citiesOfYear(cities, year)
-    .filter(({ id }) => shown.has(id))
+    .filter(({ id }) => shown.has(id) && (listed === null || listed.has(id)))
     .map(({ id, name, lon, lat, holder }) => ({
       id,
       name,
@@ -308,6 +322,10 @@ export const createCitiesSlice: StateCreator<
   cityHolders: new Set(),
   selectedCity: null,
   openedCity: null,
+  listedCities: null,
+  setListedCities: (ids): void => {
+    set({ listedCities: ids === null ? null : new Set(ids) })
+  },
   selectCity: (id): void => {
     set({ selectedCity: id })
   },

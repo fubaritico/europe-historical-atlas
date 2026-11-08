@@ -7,15 +7,21 @@ import type { Point } from '../../viewport/viewport'
 
 /**
  * Which city's point is under the pointer (CARTO-384): a click of the white arrow on it chooses the city in
- * `{Cities}`, a double-click opens its information box. **Only the cities shown** — an eye off draws no point, and
- * a point not drawn is not there to be clicked. The nearest within the handles' radius wins, as for an anchor.
+ * `{Cities}`, a double-click opens its information box. **Only the cities shown and listed** — an eye off draws no
+ * point, nor does a city the Cities panel's filters leave out (CARTO-390), and a point not drawn is not there to be
+ * clicked. The nearest within the handles' radius wins, as for an anchor.
  * @param context - the store, the frame and the handles' radius
  * @param at - the pointer, in screen pixels
  * @returns the city's id, or `null` when no shown city is within reach
  */
 export function cityUnder(context: FrameSnapContext, at: Point): string | null {
   const state = context.store.getState()
-  const shown = shownCityPoints(state.cities, state.shownCities, state.document.year)
+  const shown = shownCityPoints(
+    state.cities,
+    state.shownCities,
+    state.document.year,
+    state.listedCities
+  )
   const points = shown.map(({ lonLat }) => lonLatToScreen(lonLat, context.frame, state.viewport))
   const index = nearestPoint(points, at, context.radius)
   if (index === null) return null

@@ -111,6 +111,7 @@ function state(asPoints: boolean) {
     cities: [PARIS],
     shownCities: new Set(['paris']),
     citiesAsPoints: asPoints,
+    listedCities: null,
   }
 }
 

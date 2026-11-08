@@ -407,3 +407,37 @@ Scenario: named cities keep their look
 
 > **Built 2026-11-08 (CARTO-389) — not walked yet.** Nothing for a city with nothing to compare by (its holder has no
 > Wikidata id), as the list marks nothing.
+
+## The map filtered as the list (CARTO-390, the dev, 2026-11-08)
+
+> *"When I filter in the Cities panel, the map must be filtered too."* **Proposed by Claude, built**: the list hands the
+> store the ids it keeps under all its filters — the name typed and the advanced filters — and the canvas draws, and
+> lets the white arrow click, only the cities both shown and listed. The list stays the one place that decides what its
+> filters keep; with no list mounted, nothing is filtered.
+
+```gherkin
+Scenario: a holder ticked narrows the map
+  Given every city of 1100 is shown
+  When I tick « Sacrum Imperium » in the advanced filters
+  Then the map shows only the cities the sources give to the Empire
+
+Scenario: the name filter narrows the map
+  When I type « par » in the list's filter
+  Then the map shows only Paris among the cities shown
+
+Scenario: the filters lifted
+  When I clear the filter and untick the boxes
+  Then every city shown is on the map again
+
+Scenario: a city filtered out is not there to be clicked
+  Given Metz is shown but the filters leave it out
+  When I click where Metz is with the white arrow
+  Then no city is chosen
+
+Scenario: no list, no filter
+  Given the Cities panel is closed
+  Then every city shown is on the map
+```
+
+> **Built 2026-11-08 (CARTO-390) — not walked yet.** A filter never shows a city: one listed but not shown stays off the
+> map.

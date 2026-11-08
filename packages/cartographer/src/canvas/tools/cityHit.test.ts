@@ -224,6 +224,14 @@ describe('cityHit', () => {
       expect(cityUnder(context, [250, 250])).toBeNull()
     })
 
+    // CARTO-390: a city the list's filters leave out is not drawn, so not there to be clicked.
+    it('takes no city the list leaves out, even shown', () => {
+      const { store, context } = openFrance()
+      store.getState().setListedCities(['reims'])
+
+      expect(cityUnder(context, [200, 200])).toBeNull()
+    })
+
     it('takes no city when none is read', () => {
       const store = testStore()
       const { context } = testGestureContext(store)

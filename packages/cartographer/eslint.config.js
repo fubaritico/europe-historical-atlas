@@ -187,6 +187,7 @@ export default tseslint.config(
             useHolderDots: 'derived',
             useInsideWindow: 'ref',
             useListCursor: 'state',
+            useListedCities: 'effect',
             useMenuBar: 'state',
             useLocale: 'context',
             useLocaleStore: 'context',

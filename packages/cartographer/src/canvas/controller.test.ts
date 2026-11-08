@@ -3244,6 +3244,20 @@ describe('the cities shown', () => {
     dispose()
   })
 
+  // CARTO-390: a city the list's filters leave out is off the map.
+  it('writes Lyon no more once the list leaves it out, and again once it lists it', () => {
+    const { store, written, settle, dispose } = attachWritingNames()
+    store.getState().setCities([LYON])
+    store.getState().setCityShown('lyon', true)
+    store.getState().setListedCities([])
+    settle()
+    expect(written).toEqual([])
+    store.getState().setListedCities(['lyon'])
+    settle()
+    expect(written).toEqual(['Lyon'])
+    dispose()
+  })
+
   it('paints no red ink for Lyon written by its name', () => {
     const { store, fills, settle, dispose } = attachWritingNames()
     store.getState().setCities([LYON])

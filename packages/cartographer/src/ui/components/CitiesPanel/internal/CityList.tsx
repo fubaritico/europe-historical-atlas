@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from '../../../hooks/useTranslation'
 import { showRow } from '../../../utils/showRow'
 import { ListFilter } from '../../ListFilter'
+import { useListedCities } from '../hooks/useListedCities'
 import { CITIES_PANEL_MESSAGES } from '../i18n'
 import { citiesListed } from '../utils/citiesListed'
 import { cityRowId } from '../utils/cityRowId'
@@ -25,6 +26,8 @@ type CityListWithFiltersProps = CityListProps & { year: number; filters: CityFil
  * What is typed is the list's own — one writer, one reader, no slice. The holders and the states ticked in the advanced
  * filters (CARTO-370, CARTO-369) are the store's, so they outlive the panel docked or floated; they narrow the list
  * together with the name.
+ * **What it lists is the map's too** (CARTO-390): the ids found are handed to the store at each change of the list, and
+ * withdrawn when the list goes, so the canvas draws only the cities the filters keep.
  * **The city chosen is scrolled to** (CARTO-384) — on the map with the white arrow, as `{Polities}` scrolls to the
  * polity chosen there; a city the filters hide has no row, and nothing scrolls.
  * @param props - the cities, which are shown and opened, the advanced filters, and the callbacks
@@ -42,15 +45,13 @@ export function CityList({ year, cities, filters, ...props }: CityListWithFilter
 
   // Derived
   const found = citiesListed(cities, query, filters, props.verdicts)
+  const ids = found.map(({ id }) => id)
   const filtered = found.length < cities.length
   const allShown = found.length > 0 && found.every(({ id }) => props.shown.has(id))
 
   // Handlers
   const handleAll = () => {
-    props.onAllShown(
-      found.map(({ id }) => id),
-      !allShown
-    )
+    props.onAllShown(ids, !allShown)
   }
   const handleAsPoints = (event: ChangeEvent<HTMLInputElement>) => {
     props.onAsPoints(event.target.checked)
@@ -60,6 +61,7 @@ export function CityList({ year, cities, filters, ...props }: CityListWithFilter
   useEffect(() => {
     if (props.selected !== null) showRow(cityRowId(props.selected))
   }, [props.selected])
+  useListedCities(ids, filters.onListed)
 
   // Render
   return (

@@ -77,6 +77,7 @@ function mount(cities: readonly CityMark[] | null = [PARIS, METZ, LATER]) {
   return {
     store,
     user: userEvent.setup(),
+    unmount,
     /** Unmount the panel and mount it again over the same store — a panel docked or floated (CARTO-342). */
     remount: () => {
       unmount()
@@ -440,12 +441,12 @@ async function openFilters(user: ReturnType<typeof userEvent.setup>): Promise<HT
  * The names of the cities in the panel's list, read from the page even while the dialogue makes it inert.
  * @returns their names
  */
-function listedBehind(): (string | null)[] {
+function namesInTheListBehindTheDialogue(): (string | null)[] {
   return [...document.querySelectorAll('.city-list > li')].map((row) => row.textContent)
 }
 
 /** The names of the cities listed — in the panel's list, never the dialogue's boxes. */
-function listed(): (string | null)[] {
+function namesInTheList(): (string | null)[] {
   return within(screen.getByRole('list', { name: 'Cities' }))
     .getAllByRole('listitem')
     .map((row) => row.textContent)
@@ -474,7 +475,7 @@ describe('CitiesPanel — the advanced filters (CARTO-370)', () => {
       await user.click(within(dialogue).getByRole('checkbox', { name: 'Sacrum Imperium (1)' }))
       expect([...store.getState().cityHolders]).toEqual(['wd:Q12548'])
       await user.click(within(dialogue).getByRole('button', { name: 'Close' }))
-      expect(listed()).toEqual(['Metz'])
+      expect(namesInTheList()).toEqual(['Metz'])
       expect(screen.getByRole('checkbox', { name: 'Show the city found' })).toBeTruthy()
     })
   })
@@ -503,14 +504,14 @@ describe('CitiesPanel — the advanced filters (CARTO-370)', () => {
         within(dialogue).getByRole('checkbox', { name: 'Repubblica di Venezia (1)' })
       )
       await user.click(within(dialogue).getByRole('button', { name: 'Close' }))
-      expect(listed()).toEqual(['Metz', 'Treviso'])
+      expect(namesInTheList()).toEqual(['Metz', 'Treviso'])
     })
 
     it('applies a box at once, the dialogue still open: Metz alone behind it', async () => {
       const { user } = mount([PARIS, METZ, TREVISO])
       const dialogue = await openFilters(user)
       await user.click(within(dialogue).getByRole('checkbox', { name: 'Sacrum Imperium (1)' }))
-      expect(listedBehind()).toEqual(['Metz'])
+      expect(namesInTheListBehindTheDialogue()).toEqual(['Metz'])
     })
 
     it('counts the cities found by the holders on the box heading the list: the 2 of the Empire', () => {
@@ -538,7 +539,7 @@ describe('CitiesPanel — the advanced filters (CARTO-370)', () => {
         store.getState().setCityHolderTicked('wd:Q12548', true)
       })
       remount()
-      expect(listed()).toEqual(['Metz'])
+      expect(namesInTheList()).toEqual(['Metz'])
       expect(screen.getByRole('button', { name: 'Advanced filters: 1 filter ticked' })).toBeTruthy()
     })
 
@@ -573,7 +574,7 @@ describe('CitiesPanel — the advanced filters (CARTO-370)', () => {
       const dialogue = await openFilters(user)
       await user.click(within(dialogue).getByRole('checkbox', { name: 'No holder (1)' }))
       await user.click(within(dialogue).getByRole('button', { name: 'Close' }))
-      expect(listed()).toEqual(['Paris'])
+      expect(namesInTheList()).toEqual(['Paris'])
     })
 
     it('applies the name filter with the holders: « tre » under the Empire and Venice keeps Treviso', async () => {
@@ -583,7 +584,7 @@ describe('CitiesPanel — the advanced filters (CARTO-370)', () => {
         store.getState().setCityHolderTicked('wd:Q4948', true)
       })
       await user.type(filter(), 'tre')
-      expect(listed()).toEqual(['Treviso'])
+      expect(namesInTheList()).toEqual(['Treviso'])
     })
 
     it('names the funnel with the count of holders ticked, and unticks them all', async () => {
@@ -598,7 +599,7 @@ describe('CitiesPanel — the advanced filters (CARTO-370)', () => {
       await user.click(screen.getByRole('button', { name: 'Advanced filters: 2 filters ticked' }))
       await user.click(screen.getByRole('button', { name: 'Untick all' }))
       expect(store.getState().cityHolders.size).toBe(0)
-      expect(listed()).toEqual(['Paris', 'Metz', 'Treviso'])
+      expect(namesInTheList()).toEqual(['Paris', 'Metz', 'Treviso'])
     })
   })
 
@@ -633,7 +634,7 @@ describe('CitiesPanel — the advanced filters (CARTO-370)', () => {
       act(() => {
         store.getState().setCityHolderTicked('wd:Q4948', true)
       })
-      expect(listed()).toEqual(['Paris', 'Metz'])
+      expect(namesInTheList()).toEqual(['Paris', 'Metz'])
       expect(screen.getByRole('button', { name: 'Advanced filters' })).toBeTruthy()
     })
   })
@@ -666,7 +667,7 @@ describe('CitiesPanel — the advanced filters by state (CARTO-369)', () => {
       )
       expect([...store.getState().cityStates]).toEqual(['misplaced'])
       await user.click(within(dialogue).getByRole('button', { name: 'Close' }))
-      expect(listed()).toEqual(['Westmetz'])
+      expect(namesInTheList()).toEqual(['Westmetz'])
     })
   })
 
@@ -680,7 +681,7 @@ describe('CitiesPanel — the advanced filters by state (CARTO-369)', () => {
       await user.click(
         within(dialogue).getByRole('checkbox', { name: 'Holder not on the map yet (1)' })
       )
-      expect(listedBehind()).toEqual(['Treviso', 'Westmetz'])
+      expect(namesInTheListBehindTheDialogue()).toEqual(['Treviso', 'Westmetz'])
     })
 
     it('applies a state and a holder together: the Empire at the right place keeps Metz alone', async () => {
@@ -688,7 +689,7 @@ describe('CitiesPanel — the advanced filters by state (CARTO-369)', () => {
       const dialogue = await openFilters(user)
       await user.click(within(dialogue).getByRole('checkbox', { name: 'Sacrum Imperium (2)' }))
       await user.click(within(dialogue).getByRole('checkbox', { name: 'At the right place (1)' }))
-      expect(listedBehind()).toEqual(['Metz'])
+      expect(namesInTheListBehindTheDialogue()).toEqual(['Metz'])
     })
 
     it('counts the states and the holders ticked together on the funnel', async () => {
@@ -712,7 +713,7 @@ describe('CitiesPanel — the advanced filters by state (CARTO-369)', () => {
       )
       await user.click(within(dialogue).getByRole('button', { name: 'Untick all' }))
       expect(store.getState().cityStates.size).toBe(0)
-      expect(listedBehind()).toEqual(['Paris', 'Metz', 'Treviso', 'Westmetz'])
+      expect(namesInTheListBehindTheDialogue()).toEqual(['Paris', 'Metz', 'Treviso', 'Westmetz'])
     })
   })
 
@@ -748,7 +749,7 @@ describe('CitiesPanel — the sort (CARTO-382)', () => {
       await user.click(screen.getByRole('button', { name: 'Sort the cities: The export’s order' }))
       await user.click(screen.getByRole('option', { name: 'By name' }))
       expect(store.getState().citySort).toBe('name')
-      expect(listed()).toEqual(['Metz', 'Paris', 'Treviso', 'Westmetz'])
+      expect(namesInTheList()).toEqual(['Metz', 'Paris', 'Treviso', 'Westmetz'])
     })
   })
 
@@ -758,7 +759,7 @@ describe('CitiesPanel — the sort (CARTO-382)', () => {
       act(() => {
         store.getState().setCitySort('verification')
       })
-      expect(listed()).toEqual(['Westmetz', 'Treviso', 'Paris', 'Metz'])
+      expect(namesInTheList()).toEqual(['Westmetz', 'Treviso', 'Paris', 'Metz'])
     })
 
     it('sorts the cities found, under a filter', () => {
@@ -767,7 +768,7 @@ describe('CitiesPanel — the sort (CARTO-382)', () => {
         store.getState().setCityHolderTicked('wd:Q12548', true)
         store.getState().setCitySort('name')
       })
-      expect(listed()).toEqual(['Metz', 'Westmetz'])
+      expect(namesInTheList()).toEqual(['Metz', 'Westmetz'])
     })
   })
 
@@ -828,7 +829,7 @@ describe('CitiesPanel — a suzerain ticks its descent (CARTO-388)', () => {
       const dialogue = await openFilters(user)
       await user.click(box(dialogue, 'Reaume de France (1)'))
       expect(box(dialogue, 'Duché d’Aquitaine (1)').checked).toBe(true)
-      expect(listedBehind()).toEqual(['Rouen', 'Bordeaux'])
+      expect(namesInTheListBehindTheDialogue()).toEqual(['Rouen', 'Bordeaux'])
     })
   })
 
@@ -841,7 +842,7 @@ describe('CitiesPanel — a suzerain ticks its descent (CARTO-388)', () => {
       const france = box(dialogue, 'Reaume de France (1)')
       expect(france.indeterminate).toBe(true)
       expect(france.checked).toBe(false)
-      expect(listedBehind()).toEqual(['Rouen'])
+      expect(namesInTheListBehindTheDialogue()).toEqual(['Rouen'])
     })
 
     it('ticks the whole descent again from the mixed state', async () => {
@@ -851,7 +852,7 @@ describe('CitiesPanel — a suzerain ticks its descent (CARTO-388)', () => {
       await user.click(box(dialogue, 'Duché d’Aquitaine (1)'))
       await user.click(box(dialogue, 'Reaume de France (1)'))
       expect(box(dialogue, 'Reaume de France (1)').checked).toBe(true)
-      expect(listedBehind()).toEqual(['Rouen', 'Bordeaux'])
+      expect(namesInTheListBehindTheDialogue()).toEqual(['Rouen', 'Bordeaux'])
     })
   })
 
@@ -884,7 +885,7 @@ describe('CitiesPanel — a suzerain ticks its descent (CARTO-388)', () => {
       await user.click(box(dialogue, 'Reaume de France (1)'))
       await user.click(box(dialogue, 'Reaume de France (1)'))
       expect(store.getState().cityHolders.size).toBe(0)
-      expect(listedBehind()).toEqual(['Rouen', 'Bordeaux', 'Metz'])
+      expect(namesInTheListBehindTheDialogue()).toEqual(['Rouen', 'Bordeaux', 'Metz'])
     })
 
     it('ticks a vassal alone, its suzerain shown mixed', async () => {
@@ -892,7 +893,7 @@ describe('CitiesPanel — a suzerain ticks its descent (CARTO-388)', () => {
       const dialogue = await openFilters(user)
       await user.click(box(dialogue, 'Duché d’Aquitaine (1)'))
       expect(box(dialogue, 'Reaume de France (1)').indeterminate).toBe(true)
-      expect(listedBehind()).toEqual(['Bordeaux'])
+      expect(namesInTheListBehindTheDialogue()).toEqual(['Bordeaux'])
     })
   })
 
@@ -965,6 +966,91 @@ describe('CitiesPanel — the city chosen and its box (CARTO-384)', () => {
       remount()
       expect(screen.getByRole('dialog', { name: 'Metz' })).toBeDefined()
       expect(rowOf('Metz').getAttribute('data-selected')).toBe('true')
+    })
+  })
+})
+
+/**
+ * The ids the list hands the map, sorted, or `null`.
+ * @param store - the store
+ * @returns the ids listed
+ */
+function idsHandedToTheMap(store: ReturnType<typeof mount>['store']): string[] | null {
+  const ids = store.getState().listedCities
+  return ids === null ? null : [...ids].sort()
+}
+
+// CARTO-390, the dev, 2026-11-08: when I filter in the Cities panel, the map is filtered too.
+describe('CitiesPanel — the map filtered as the list (CARTO-390)', () => {
+  describe('happy path', () => {
+    it('hands the map Paris alone once « par » is typed', async () => {
+      const { store, user } = mount()
+      expect(idsHandedToTheMap(store)).toEqual(['metz', 'paris'])
+      await user.type(filter(), 'par')
+      expect(idsHandedToTheMap(store)).toEqual(['paris'])
+    })
+  })
+
+  describe('variants', () => {
+    it('hands the map Metz alone once its holder is ticked in the advanced filters', () => {
+      const { store } = mount()
+      act(() => {
+        store.getState().setCityHolderTicked('wd:Q12548', true)
+      })
+      expect(idsHandedToTheMap(store)).toEqual(['metz'])
+    })
+
+    it('hands the map every city again once the filter is cleared', async () => {
+      const { store, user } = mount()
+      await user.type(filter(), 'par')
+      await user.clear(filter())
+      expect(idsHandedToTheMap(store)).toEqual(['metz', 'paris'])
+    })
+  })
+
+  // L3–L4: N/A — the list hands over what it shows.
+
+  describe('edge cases', () => {
+    it('hands the map an empty list when nothing answers the filter, so no city is drawn', async () => {
+      const { store, user } = mount()
+      await user.type(filter(), 'zzz')
+      expect(idsHandedToTheMap(store)).toEqual([])
+    })
+
+    it("lets the dialogue's own filter narrow its boxes, never the map", async () => {
+      const { store, user } = mount()
+      const dialogue = await openFilters(user)
+      await user.type(
+        within(dialogue).getByRole('searchbox', { name: 'Filter the countries' }),
+        'sac'
+      )
+      expect(idsHandedToTheMap(store)).toEqual(['metz', 'paris'])
+    })
+
+    it('hands the map nothing new when the list only changes its order, or the panel renders again', async () => {
+      const { store, user } = mount()
+      const handed = vi.fn()
+      const stop = store.subscribe((state) => state.listedCities, handed)
+      act(() => {
+        store.getState().setCitySort('name')
+        store.getState().selectCity('metz')
+      })
+      await user.click(screen.getByRole('button', { name: 'Paris' }))
+      stop()
+      expect(handed).not.toHaveBeenCalled()
+    })
+
+    it('hands the map the same cities again once the panel is docked or floated', async () => {
+      const { store, user, remount } = mount()
+      await user.type(filter(), 'par')
+      remount()
+      expect(idsHandedToTheMap(store)).toEqual(['metz', 'paris'])
+    })
+
+    it('withdraws the list once the panel is gone: the map filters nothing', () => {
+      const { store, unmount } = mount()
+      unmount()
+      expect(idsHandedToTheMap(store)).toBeNull()
     })
   })
 })

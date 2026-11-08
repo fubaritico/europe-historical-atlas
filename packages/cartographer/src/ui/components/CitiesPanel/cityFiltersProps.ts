@@ -24,6 +24,8 @@ export interface CityFiltersProps {
   onTickState: (state: string, ticked: boolean) => void
   /** « Tout décocher » was clicked: every holder and every state unticked. */
   onUntickAll: () => void
+  /** The cities the filters keep, by id, or `null` once the list is gone: the map shows only those (CARTO-390). */
+  onListed: (ids: readonly string[] | null) => void
   /** The order of the list (CARTO-382) — it lives with the filters, and is kept at a refresh with them. */
   sort: CitySort
   /** An order was chosen in the sort menu. */

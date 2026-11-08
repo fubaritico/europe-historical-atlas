@@ -74,7 +74,7 @@ const NO_ALERTS: ReadonlyMap<string, CityAlert> = new Map()
  * @returns the cities shown, longitude first, each with its alert or `null`
  */
 export function citiesToPaint(
-  state: Pick<CitiesState, 'cities' | 'shownCities' | 'citiesAsPoints'> & {
+  state: Pick<CitiesState, 'cities' | 'shownCities' | 'citiesAsPoints' | 'listedCities'> & {
     document: YearDocument
     version: number
   },
@@ -84,7 +84,12 @@ export function citiesToPaint(
     state.citiesAsPoints && state.shownCities.size > 0
       ? cache.alertsOf(state.document, state.version, state.cities)
       : NO_ALERTS
-  return shownCityPoints(state.cities, state.shownCities, state.document.year).map((city) => ({
+  return shownCityPoints(
+    state.cities,
+    state.shownCities,
+    state.document.year,
+    state.listedCities
+  ).map((city) => ({
     ...city,
     alert: alerts.get(city.id) ?? null,
   }))

@@ -39,6 +39,7 @@ export function useCityFilters(
   const onTickState = store((state) => state.setCityStateTicked)
   const onUntickAll = store((state) => state.untickCityFilters)
   const onSort = store((state) => state.setCitySort)
+  const onListed = store((state) => state.setListedCities)
 
   // Derived
   const choices = holderChoices(polityRows(document, colours.coloursOf(document, version)), cities)
@@ -58,5 +59,6 @@ export function useCityFilters(
     onUntickAll,
     sort,
     onSort,
+    onListed,
   }
 }

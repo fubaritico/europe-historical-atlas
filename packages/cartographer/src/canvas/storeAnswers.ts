@@ -89,6 +89,8 @@ export function paintOnGuides(
   return [
     it.deps.store.subscribe((state) => state.layers, paint),
     it.deps.store.subscribe((state) => state.shownCities, paint),
+    // The list's filters narrow the map too (CARTO-390).
+    it.deps.store.subscribe((state) => state.listedCities, paint),
     it.deps.store.subscribe((state) => state.cities, paint),
     it.deps.store.subscribe((state) => state.citiesAsPoints, paint),
   ]
