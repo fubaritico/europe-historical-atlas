@@ -353,21 +353,28 @@ describe('CitySheetForm', () => {
       ])
     })
 
+    // The free text is pasted, not typed key by key: this test is about what is saved, and seventy keystrokes, each one
+    // re-rendering the form, took it past its 5 s on the CI's loaded runner (REPO-260, 2026-11-06 run 114510149255) —
+    // whose cleanup then left its line in the next tests' page. The source's search is still typed: that is its gesture.
     it('adds a quoted line naming the holder, enters the holder, and saves both', async () => {
       const fetcher = serverWithSources()
       renderForm(rome, 1)
       const user = userEvent.setup()
+      const paste = async (field: HTMLElement, text: string) => {
+        await user.click(field)
+        await user.paste(text)
+      }
       const holder = screen.getByRole('group', { name: 'Tenue par' })
-      await user.type(within(holder).getByLabelText('Pays'), 'Papal States')
-      await user.type(within(holder).getByLabelText('Identifiant Wikidata du pays'), 'Q170174')
+      await paste(within(holder).getByLabelText('Pays'), 'Papal States')
+      await paste(within(holder).getByLabelText('Identifiant Wikidata du pays'), 'Q170174')
       await user.click(screen.getByRole('button', { name: 'Ajouter une source' }))
       const line = screen.getByRole('group', { name: 'Source 1' })
       await user.type(within(line).getByRole('combobox', { name: 'Source' }), 'Bur')
       await user.click(await screen.findByRole('option', { name: 'Buringh 2021' }))
       await user.click(within(line).getByRole('button', { name: 'Sur quoi : Choisir' }))
       await user.click(await screen.findByRole('option', { name: 'Le pays qui la tient' }))
-      await user.type(within(line).getByLabelText('Pays'), 'Papal States')
-      await user.type(within(line).getByLabelText('Citation'), 'the Patrimony of Peter')
+      await paste(within(line).getByLabelText('Pays'), 'Papal States')
+      await paste(within(line).getByLabelText('Citation'), 'the Patrimony of Peter')
       await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
       await waitFor(() => {
         expect(toast.success).toHaveBeenCalled()

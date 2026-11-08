@@ -42,7 +42,10 @@ jobs:
       # One Vitest per package, and their environments differ on purpose: `core` runs under **node**,
       # so a module reaching for a `document` fails here instead of in the worker; the atlas and the
       # Cartographer run under jsdom, where the DOM is genuinely the subject.
-      - run: pnpm test
+      # One package at a time (REPO-260): five Vitests at once, each with a worker per core, saturated the runner and
+      # pushed correct tests past their 5 s — the CMS's city sheet at 5.1 s on 2026-11-06 (run 114510149255) against
+      # 0.6 s locally. The coverage job paid the same on 2026-10-21 and has been green since `--concurrency=1`.
+      - run: pnpm exec turbo test --concurrency=1
 
   format:
     runs-on: ubuntu-latest

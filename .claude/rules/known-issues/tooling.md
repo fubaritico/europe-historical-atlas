@@ -43,6 +43,10 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
   gate rouge sur du code juste, dès que tout tourne en même temps).
   **En CI, réglé le 21/10** (`d950e48`) : le job Sonar fait sa couverture paquet par paquet
   (`turbo coverage --concurrency=1`) — deux tests y dépassaient leur délai. Reste la gate locale.
+  **Revenu le 06/11 au job `test` de la CI** (run 114510149255) : la fiche de ville du CMS à 5,1 s contre 0,6 s en local, et
+  les deux tests suivants tombés avec elle — la frappe du test interrompu continuait dans leur page. **Réglé le 08/11** : le job
+  `test` de `validate.yml` lance les paquets un par un (`turbo test --concurrency=1`), comme Sonar ; et le test du CMS colle
+  son texte libre au lieu de le taper touche par touche.
   **Revenu le 29/10 au contrôle avant commit** (`.husky/pre-commit` lance `pnpm run test`, les cinq suites ensemble) : des
   tests du Cartographe au-delà de 5 s, verts seuls ; le même commit relancé une fois est passé (Turbo rejoue de son cache les
   paquets déjà verts). Relancer **une** fois, jamais `--no-verify`.
