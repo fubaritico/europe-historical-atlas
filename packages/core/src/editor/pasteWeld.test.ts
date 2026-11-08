@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
+import { createYearDocument } from '../data/yearDocument'
+
 import { addAnchor, closeRing } from './documentEdits'
 import { AQUITAINE_IDENTITY, sharedBorderDocument } from './documentFixtures'
 import { PASTE_WELD_KM, weldPastedRings } from './pasteWeld'
-import { createYearDocument } from './yearDocument'
 
 import type { ClipboardPoint } from './clipboard'
 import type { WeldedRing } from './pasteWeld'
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 
 // s22-copy-paste.md, « paste a polity onto free ground »: « where its edge comes within the weld distance of a
 // neighbour's or of the coast, it takes their points ». At 48° north, 0.01° of longitude is about 0.75 km.

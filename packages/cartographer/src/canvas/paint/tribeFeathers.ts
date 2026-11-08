@@ -1,10 +1,10 @@
+import { tribeIds } from '@europe-historical-atlas/core/data/tribes'
 import {
   CLAIM_CUT_REACH_KM,
   featherReachKm,
   featherShiftKm,
   tribeOpacityAt,
 } from '@europe-historical-atlas/core/editor/tribeFeather'
-import { tribeIds } from '@europe-historical-atlas/core/editor/tribes'
 import {
   latitudeToMercatorY,
   longitudeToHorizontal,
@@ -22,8 +22,8 @@ import { claimsInPaintOrder } from './scene'
 import type { Rect } from '../../geometry/marquee'
 import type { BackdropFrame } from '../../viewport/projection'
 import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { TribeFeather } from '@europe-historical-atlas/core/editor/tribeFeather'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import type {
   GridBox,
   GridPoint,

@@ -11,7 +11,7 @@ import { createYearSession, describeYearContents } from './yearSession'
 import type { ConfirmationTimers } from './awaitConfirmation'
 import type { YearArchive } from './yearArchive'
 import type { OverwriteQuestion, SessionStore } from './yearSession'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /** What the year on disk says, in English — the language these suites were written against. */
 const EN_WORDS = persistenceWords('en')

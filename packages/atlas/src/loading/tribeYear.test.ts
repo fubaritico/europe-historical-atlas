@@ -7,15 +7,15 @@ import { createElevationLandMask } from '@europe-historical-atlas/core/data/land
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { projectRegions } from '@europe-historical-atlas/core/data/regionSource'
 import { toRegionPayload } from '@europe-historical-atlas/core/data/toRegionPayload'
+import { tribeIds } from '@europe-historical-atlas/core/data/tribes'
 import { assembleAuthoredYear } from '@europe-historical-atlas/core/data/yearConsistency'
+import { saveYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import {
   parseYearBorders,
   parseYearPolities,
   parseYearRegistry,
 } from '@europe-historical-atlas/core/data/yearSource'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
-import { tribeIds } from '@europe-historical-atlas/core/editor/tribes'
-import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import BORDERS from '../../public/years/1100/borders.json?raw'
 import POLITIES from '../../public/years/1100/polities.json?raw'

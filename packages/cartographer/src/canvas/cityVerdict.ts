@@ -5,7 +5,7 @@ import { projectedTerritories } from './paint/scene'
 import type { CityAlert } from './paint/cityPainter'
 import type { PolityRings } from '../geometry/fillHit'
 import type { CityHolder, CityMark } from '../state/citiesSlice'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * Who holds a city, by the map and by the sources, and whether they agree (CARTO-193, the dev, 2026-11-02: *"if it is

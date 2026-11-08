@@ -1,5 +1,5 @@
+import { referencedAnchors } from '@europe-historical-atlas/core/data/yearDocument'
 import { pathsHolding } from '@europe-historical-atlas/core/editor/documentEdits'
-import { referencedAnchors } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { nearestAmong } from '../../geometry/hitTest'
 import { shortestRunBetween } from '../../geometry/lineSnap'

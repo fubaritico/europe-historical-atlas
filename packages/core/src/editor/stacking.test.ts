@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
 import { paintOrder } from '../data/paintOrder'
+import { createYearDocument } from '../data/yearDocument'
 
 import { FIXTURE_SOURCES } from './documentFixtures'
 import { availableMoves, restack } from './stacking'
-import { createYearDocument } from './yearDocument'
 
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 import type { YearPolity } from '../data/yearFormat'
 
 /**

@@ -2,7 +2,7 @@
  * A change of year: its polities fetched, computed into tints and lines, baked into the texture, laid on the relief.
  */
 
-import { authoredRegionColours } from '@europe-historical-atlas/core/editor/polityColours'
+import { authoredRegionColours } from '@europe-historical-atlas/core/data/polityColours'
 import { scaleProgress } from '@europe-historical-atlas/core/pipeline/inlineCompute'
 import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
 

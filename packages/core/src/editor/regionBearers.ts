@@ -7,7 +7,7 @@
  * document's homage itself, so the page hands it these lists.
  */
 
-import type { HomageLevels } from './homageLevels'
+import type { HomageLevels } from '../data/homageLevels'
 
 /**
  * The polity each region's colour belongs to at one display level.

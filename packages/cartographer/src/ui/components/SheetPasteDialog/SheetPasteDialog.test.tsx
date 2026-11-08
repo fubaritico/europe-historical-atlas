@@ -2,9 +2,9 @@ import { act, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
+import { cloneYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import { copySheet } from '@europe-historical-atlas/core/editor/clipboard'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
-import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { createHeldClipboard } from '../../../state/heldClipboard'
 import { createCartographerStore } from '../../../state/store'

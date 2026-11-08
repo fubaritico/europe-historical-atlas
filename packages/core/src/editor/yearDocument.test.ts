@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
 import { assembleAuthoredYear } from '../data/yearConsistency'
+import {
+  cloneYearDocument,
+  createYearDocument,
+  openYearDocument,
+  referencedAnchors,
+  saveYearDocument,
+} from '../data/yearDocument'
 
 import { addAnchor, closeRing, moveAnchor } from './documentEdits'
 import {
@@ -10,15 +17,8 @@ import {
   sharedAnchorsBetween,
   sharedBorderDocument,
 } from './documentFixtures'
-import {
-  cloneYearDocument,
-  createYearDocument,
-  openYearDocument,
-  referencedAnchors,
-  saveYearDocument,
-} from './yearDocument'
 
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 
 const source = FIXTURE_SOURCES
 

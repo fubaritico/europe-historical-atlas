@@ -22,21 +22,21 @@
  * confirm with the dev).
  */
 
+import { isRingOpen, setRingOpen } from '../data/outlines'
+import { MIN_RING_ANCHORS } from '../data/yearDocument'
 import { groundKm } from '../geo/groundDistance'
 import { smallerSide } from '../geo/retraceSide'
 
 import { carveOutOfSuzerain, openSuzerainOf } from './carve'
 import { addOutline, anchorsFor } from './documentEdits'
-import { isRingOpen, setRingOpen } from './outlines'
 import { weldPastedRings } from './pasteWeld'
 import { isRetraceRefusal, retraceArcs, retraceStretch } from './retrace'
-import { MIN_RING_ANCHORS } from './yearDocument'
 
 import type { Carving, CarvingFault, CarvingHeld } from './carve'
 import type { CopiedPiece, CopiedPoints } from './clipboard'
 import type { OutlinePoint } from './documentEdits'
 import type { RetraceRefusal } from './retrace'
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 import type { YearClaim } from '../data/yearFormat'
 
 /** What pasting points did, for the status bar. */

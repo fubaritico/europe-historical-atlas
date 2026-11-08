@@ -1,4 +1,4 @@
-import { MIN_RING_ANCHORS } from '@europe-historical-atlas/core/editor/yearDocument'
+import { MIN_RING_ANCHORS } from '@europe-historical-atlas/core/data/yearDocument'
 
 import { distanceSquared, squaredRadius } from './hitTest'
 

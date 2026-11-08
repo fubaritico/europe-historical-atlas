@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { assetError } from '@europe-historical-atlas/core/data/assetError'
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
-import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import { cloneYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 import { createHistoryRelay } from '../../../canvas/history/historyRelay'
 import { CHROME_PAINT_STYLE } from '../../../canvas/paint/style'

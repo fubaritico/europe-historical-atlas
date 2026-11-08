@@ -5,7 +5,7 @@ import { citiesOfYear } from '../../../../state/citiesSlice'
 
 import type { CityVerdict } from '../../../../canvas/cityVerdict'
 import type { CityMark } from '../../../../state/citiesSlice'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /** What `{Cities}` shows of the year open: its cities, each one's verdict, and the one whose detail is open. */
 export interface CitiesView {

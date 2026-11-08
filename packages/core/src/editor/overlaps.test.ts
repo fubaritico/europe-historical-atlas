@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
+import { createYearDocument } from '../data/yearDocument'
+
 import { AQUITAINE_IDENTITY } from './documentFixtures'
 import { addOverlap, overlapCandidates, pairOverlap, polityShape, suzerainsOf } from './overlaps'
-import { createYearDocument } from './yearDocument'
 
 import type { Overlap, PolityShape } from './overlaps'
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 import type { MultiPolygon } from 'polygon-clipping'
 
 // CARTO-364 — the dev, 2026-11-06: an outline spilling over another's makes a hatched zone in the colours of both;

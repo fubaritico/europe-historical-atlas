@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
+import { createYearDocument } from '../data/yearDocument'
 import { pointInRings } from '../geo/pointInRing'
 
 import { carveOutOfSuzerain } from './carve'
 import { addAnchor, addPolity, closeRing } from './documentEdits'
-import { createYearDocument } from './yearDocument'
 
 import type { Carving, CarvingFault, CarvingHeld } from './carve'
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 import type { YearPolity } from '../data/yearFormat'
 
 const source = [{ id: 0, name: 'reported by eye', licence: 'fact' }]

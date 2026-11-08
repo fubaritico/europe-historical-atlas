@@ -4,8 +4,8 @@ import { nearestStretch } from '../geometry/stretchHit'
 import type { CanvasWords } from './canvasWords'
 import type { PolityRings } from '../geometry/fillHit'
 import type { Point } from '../viewport/viewport'
-import type { DerivedBorder } from '@europe-historical-atlas/core/editor/derivedBorders'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { DerivedBorder } from '@europe-historical-atlas/core/data/derivedBorders'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * What the status bar says is under the pointer (2026-10-13, after the mockup's bar: *"Holy Roman Empire ·

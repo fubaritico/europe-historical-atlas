@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
+import { cloneYearDocument } from '../data/yearDocument'
+
 import { addAnchor } from './documentEdits'
 import { AQUITAINE_IDENTITY, ringOf, sharedBorderDocument } from './documentFixtures'
 import { isPointsPasteRefusal, pastePoints } from './pastePoints'
 import { PASTE_WELD_KM } from './pasteWeld'
-import { cloneYearDocument } from './yearDocument'
 
 import type { CopiedPiece, CopiedPoints } from './clipboard'
 import type { PointsPasted } from './pastePoints'

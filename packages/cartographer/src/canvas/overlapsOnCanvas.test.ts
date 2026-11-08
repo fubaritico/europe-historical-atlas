@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   cloneYearDocument,
   createYearDocument,
-} from '@europe-historical-atlas/core/editor/yearDocument'
+} from '@europe-historical-atlas/core/data/yearDocument'
 
 import { createCartographerStore } from '../state/store'
 import { UNFRAMED } from '../viewport/viewport'
@@ -12,7 +12,7 @@ import { canvasWords } from './canvasWords'
 import { overlapsToPaint, refusalText, sayRefusals } from './overlapsOnCanvas'
 
 import type { OverlapAnswer, OverlapCache } from './overlapCache'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 // CARTO-364 — the dev, 2026-11-06: a refused overlap is said in the console *and* in an error dialogue, from the
 // author's side: the polities by their names, what to do.

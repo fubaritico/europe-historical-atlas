@@ -2,7 +2,7 @@ import { holderColour, polityCarrying } from '../../../../canvas/paint/scene'
 
 import type { CityHolder } from '../../../../state/citiesSlice'
 import type { CitiesPanelMessageKey } from '../i18n'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * The dot of a city's row in `{Cities}` (CARTO-367, the dev, 2026-11-07): the colour of the polity holding it by the

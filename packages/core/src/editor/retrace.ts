@@ -1,9 +1,10 @@
+import { everyOutline, isRingOpen, outlineFloor } from '../data/outlines'
+
 import { addAnchor, declareSource } from './documentEdits'
-import { everyOutline, isRingOpen, outlineFloor } from './outlines'
 import { signedDoubleArea, withoutStrayLoops } from './strayLoops'
 
 import type { OutlinePoint } from './documentEdits'
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 
 /**
  * Retracing a stretch of a ring — `H-46`, the first correction tool (the dev, 2026-10-14): two anchors of

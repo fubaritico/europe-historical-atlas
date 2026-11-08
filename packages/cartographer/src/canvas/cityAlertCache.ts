@@ -4,7 +4,7 @@ import { cityAlert, cityVerdicts } from './cityVerdict'
 
 import type { CityAlert } from './paint/cityPainter'
 import type { CitiesState, CityMark, ShownCity } from '../state/citiesSlice'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * Each city's alert on the map (CARTO-389), kept for one document version — a pan repaints on every pointer move, and

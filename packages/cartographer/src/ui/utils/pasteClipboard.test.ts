@@ -1,15 +1,15 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { MAX_HOMAGE_DEPTH } from '@europe-historical-atlas/core/data/paintOrder'
+import {
+  cloneYearDocument,
+  createYearDocument,
+} from '@europe-historical-atlas/core/data/yearDocument'
 import { copyPolities, copySheet } from '@europe-historical-atlas/core/editor/clipboard'
 import {
   AQUITAINE_IDENTITY,
   sharedBorderDocument,
 } from '@europe-historical-atlas/core/editor/documentFixtures'
-import {
-  cloneYearDocument,
-  createYearDocument,
-} from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { createCartographerStore } from '../../state/store'
 import { UNFRAMED } from '../../viewport/viewport'
@@ -17,12 +17,12 @@ import { UNFRAMED } from '../../viewport/viewport'
 import { clipboardWords } from './copySelection'
 import { pasteClipboard } from './pasteClipboard'
 
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type {
   ClipboardContent,
   ClipboardPoint,
   CopiedPoints,
 } from '@europe-historical-atlas/core/editor/clipboard'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 // s22-copy-paste.md, « # 1 — a whole polity ».
 

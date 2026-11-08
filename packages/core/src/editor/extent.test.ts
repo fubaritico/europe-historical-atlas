@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
+import { createYearDocument } from '../data/yearDocument'
+
 import { addAnchor, addPolity, closeRing } from './documentEdits'
 import { extentMembers, extentOutline, hasExtent } from './extent'
-import { createYearDocument } from './yearDocument'
 
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 import type { YearPolity } from '../data/yearFormat'
 
 const source = [{ id: 0, name: 'reported by eye', licence: 'fact' }]

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { cloneYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
-import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { createCartographerStore } from '../../state/store'
 import { screenToLonLatOnBackdrop } from '../../viewport/projection'

@@ -1,4 +1,4 @@
-import { isRingOpen } from '@europe-historical-atlas/core/editor/outlines'
+import { isRingOpen } from '@europe-historical-atlas/core/data/outlines'
 
 import { describeDrawingTarget } from '../../state/drawingTarget'
 

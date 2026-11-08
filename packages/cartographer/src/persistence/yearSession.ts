@@ -9,7 +9,7 @@ import type { ConfirmationTimers } from './awaitConfirmation'
 import type { Notice, Report } from './notice'
 import type { PersistenceWords } from './persistenceWords'
 import type { SavedYearSummary, YearArchive } from './yearArchive'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * The editor's relation to its year on disk: open it when the editor starts, save it on ‹ctrl+s›.

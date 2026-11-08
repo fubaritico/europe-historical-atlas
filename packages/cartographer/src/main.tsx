@@ -8,7 +8,7 @@ import { createFetchHeightmapSource } from '@europe-historical-atlas/core/data/h
 import { createFetchLandMaskSource } from '@europe-historical-atlas/core/data/landMask'
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { createFetchRiverSource } from '@europe-historical-atlas/core/data/riverSource'
-import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import { cloneYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
 import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?worker'
 import { DEFAULT_TERRAIN_OPTIONS } from '@europe-historical-atlas/core/pipeline/terrainOptions'

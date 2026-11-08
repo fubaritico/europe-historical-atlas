@@ -1,7 +1,7 @@
 import { projectToBackdrop } from '../viewport/projection'
 
 import type { BackdropFrame } from '../viewport/projection'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * The anchor table in backdrop pixels, recomputed only when the anchors change.

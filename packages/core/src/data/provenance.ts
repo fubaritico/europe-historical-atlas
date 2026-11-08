@@ -1,4 +1,11 @@
-import type { Provenance } from './documentEdits'
+import type { YearProvenance } from './yearFormat'
+
+/**
+ * Where geometry was taken from and under what terms — a {@link YearProvenance} before the document has
+ * given it an id. What the tools carry with every point until the outline enters the document. Here beside its
+ * reader since the year's derivations moved to `data/` (ATLAS-333); `editor/documentEdits` re-exports it.
+ */
+export type Provenance = Omit<YearProvenance, 'id'>
 
 /**
  * Split a source declared as `"<name> (<licence>)"` into the provenance a year records.

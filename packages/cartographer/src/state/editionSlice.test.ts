@@ -1,6 +1,10 @@
 import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
+import {
+  cloneYearDocument,
+  createYearDocument,
+} from '@europe-historical-atlas/core/data/yearDocument'
 import { moveAnchor } from '@europe-historical-atlas/core/editor/documentEdits'
 import {
   AQUITAINE_IDENTITY,
@@ -9,18 +13,14 @@ import {
   sharedAnchorsBetween,
   sharedBorderDocument,
 } from '@europe-historical-atlas/core/editor/documentFixtures'
-import {
-  cloneYearDocument,
-  createYearDocument,
-} from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { UNFRAMED } from '../viewport/viewport'
 
 import { FREE_POINT_PROVENANCE, editionActions, snapshot } from './editionSlice'
 import { createCartographerStore } from './store'
 
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { History, HistoryStep } from '@europe-historical-atlas/core/editor/history'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /** A gesture to record, named so an assertion on a label reads. */
 const MOVE: HistoryStep = { kind: 'move-anchor', label: 'move anchor' }

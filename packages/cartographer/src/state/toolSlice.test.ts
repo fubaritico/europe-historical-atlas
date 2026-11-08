@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import {
+  cloneYearDocument,
+  createYearDocument,
+} from '@europe-historical-atlas/core/data/yearDocument'
+import {
   AQUITAINE_IDENTITY,
   sharedBorderDocument,
 } from '@europe-historical-atlas/core/editor/documentFixtures'
-import {
-  cloneYearDocument,
-  createYearDocument,
-} from '@europe-historical-atlas/core/editor/yearDocument'
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 
 import { TOOL_MESSAGES } from '../i18n/tools'

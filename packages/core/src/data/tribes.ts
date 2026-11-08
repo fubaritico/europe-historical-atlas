@@ -1,5 +1,5 @@
 import type { DerivedBorder } from './derivedBorders'
-import type { YearPolity } from '../data/yearFormat'
+import type { YearPolity } from './yearFormat'
 
 /**
  * A **tribe** is a people not yet sovereign — the Prussians, the Cumans, the Obotrites — and it is drawn as

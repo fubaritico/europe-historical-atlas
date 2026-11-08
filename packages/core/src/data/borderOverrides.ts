@@ -1,5 +1,5 @@
 import type { YearDocument } from './yearDocument'
-import type { RunBorder } from '../data/yearFormat'
+import type { RunBorder } from './yearFormat'
 
 /**
  * The author's hand on the borders (`s13`): which segments a run override covers, and the edits that set,

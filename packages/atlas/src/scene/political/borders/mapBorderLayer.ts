@@ -3,8 +3,8 @@
  * the layer that holds them.
  */
 
+import { pairKey } from '@europe-historical-atlas/core/data/atlasBorders'
 import { borderPatternFor } from '@europe-historical-atlas/core/data/borderStyles'
-import { pairKey } from '@europe-historical-atlas/core/editor/atlasBorders'
 
 import { disposeHandle } from '../../layers/disposeHandle'
 import { DRAPED_DEPTH_BIAS } from '../../lines/lineLayer'

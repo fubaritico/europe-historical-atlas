@@ -3,7 +3,7 @@
  * relief is built, and again whenever the relief is — every letter's vertex sits at the ground's height.
  */
 
-import { tribeIds } from '@europe-historical-atlas/core/editor/tribes'
+import { tribeIds } from '@europe-historical-atlas/core/data/tribes'
 
 import { disposeHandle } from '../../layers/disposeHandle'
 

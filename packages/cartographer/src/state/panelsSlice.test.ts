@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import { cloneYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 import { UNFRAMED } from '../viewport/viewport'
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { MAX_HOMAGE_DEPTH } from '../data/paintOrder'
+import { cloneYearDocument, createYearDocument } from '../data/yearDocument'
 
 import { copyPolities, readClipboard } from './clipboard'
 import {
@@ -11,10 +12,9 @@ import {
 } from './documentFixtures'
 import { isPolityPasteRefusal, pastePolity } from './paste'
 import { PASTE_WELD_KM } from './pasteWeld'
-import { cloneYearDocument, createYearDocument } from './yearDocument'
 
 import type { CopiedPolity } from './clipboard'
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 import type { YearPolity } from '../data/yearFormat'
 
 // s22-copy-paste.md, « # 1 — a whole polity ».

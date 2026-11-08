@@ -8,14 +8,14 @@
  * hardest case for the fit; the short name per language is step 4.
  */
 
+import { homageLevels } from '@europe-historical-atlas/core/data/homageLevels'
+import { polityColours } from '@europe-historical-atlas/core/data/polityColours'
 import { AUTOMATIC_PALETTE } from '@europe-historical-atlas/core/data/regionPalette'
 import { rasteriseRegions } from '@europe-historical-atlas/core/data/regionRaster'
 import { fullNameOf, shortNameOf } from '@europe-historical-atlas/core/data/shortName'
+import { openYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import { createAuthoredYearSource } from '@europe-historical-atlas/core/data/yearManifest'
-import { homageLevels } from '@europe-historical-atlas/core/editor/homageLevels'
-import { polityColours } from '@europe-historical-atlas/core/editor/polityColours'
 import { regionBearers } from '@europe-historical-atlas/core/editor/regionBearers'
-import { openYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import { latitudeToMercatorY } from '@europe-historical-atlas/core/geo/mercator'
 import { createOccupancy } from '@europe-historical-atlas/core/pipeline/nameOccupancy'
 import { placeNames } from '@europe-historical-atlas/core/pipeline/namePlacement'
@@ -27,10 +27,10 @@ import { DEFAULT_NAME_PARAMS, namePlacement } from '../tunables/params'
 import { START_SETTINGS, controls, cycleFacesWithArrows } from './nameBenchControls'
 
 import type { Settings } from './nameBenchControls'
+import type { HomageLevels } from '@europe-historical-atlas/core/data/homageLevels'
 import type { RegionRaster } from '@europe-historical-atlas/core/data/regionRaster'
 import type { Region } from '@europe-historical-atlas/core/data/regionSource'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
-import type { HomageLevels } from '@europe-historical-atlas/core/editor/homageLevels'
 import type {
   MeasureName,
   NamePlacement,

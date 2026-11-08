@@ -25,9 +25,9 @@ import { relationBetween } from './borderRelation'
 import { parseProvenance } from './provenance'
 
 import type { BorderRelation } from './borderRelation'
+import type { LandMask } from './landMask'
 import type { YearDocument } from './yearDocument'
-import type { LandMask } from '../data/landMask'
-import type { YearPolity } from '../data/yearFormat'
+import type { YearPolity } from './yearFormat'
 import type { GeoBounds } from '../geo/mercator'
 import type { RingIndex } from '../geo/pointInRing'
 

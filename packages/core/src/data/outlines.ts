@@ -10,9 +10,9 @@
  * {@link keepRings} or {@link setRingOpen}; `documentFaults` says a position that names no ring.
  */
 
-import { CLOSED_RING_FLOOR, OPEN_RING_FLOOR } from '../data/ringFloors'
+import { CLOSED_RING_FLOOR, OPEN_RING_FLOOR } from './ringFloors'
 
-import type { YearClaim } from '../data/yearFormat'
+import type { YearClaim } from './yearFormat'
 
 /**
  * Whether one of a claim's rings is open.

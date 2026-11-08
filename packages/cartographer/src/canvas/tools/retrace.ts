@@ -16,13 +16,13 @@ import { waterVertexOf } from './waterVertex'
 import type { CanvasMessageKey } from '../i18n'
 import type { GestureContext } from './toolGestures'
 import type { Point } from '../../viewport/viewport'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { OutlinePoint } from '@europe-historical-atlas/core/editor/documentEdits'
 import type {
   RetraceArcs,
   RetraceDone,
   RetraceRefusal,
 } from '@europe-historical-atlas/core/editor/retrace'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 
 /**

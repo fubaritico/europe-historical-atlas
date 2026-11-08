@@ -2,7 +2,7 @@ import { createGridProjection, sameSignature, tribeFeatherPlans } from './paint/
 
 import type { FeatherGround, FeatherSignature, TribeFeatherRaster } from './paint/tribeFeathers'
 import type { Rect } from '../geometry/marquee'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * The tribes' fading colour as images, each made again only when what it reads changed (ATLAS-258).

@@ -13,7 +13,7 @@
 
 import { effectiveSuzerains } from '../data/paintOrder'
 
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 
 /** Illustrator's four Arrange commands, front first. */
 export const STACKING_MOVES = ['front', 'forward', 'backward', 'back'] as const

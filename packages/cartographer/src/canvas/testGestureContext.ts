@@ -1,4 +1,4 @@
-import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import { cloneYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 import { FREE_POINT_PROVENANCE } from '../state/editionSlice'
 import { openEmptyYear } from '../state/openEmptyYear'
@@ -15,8 +15,8 @@ import type { RiverLine } from './tools/snapLayers'
 import type { GestureContext } from './tools/toolGestures'
 import type { SnapLine } from '../geometry/lineSnap'
 import type { CartographerStoreHook } from '../state/store'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /**
  * **A test fixture** — the gesture context the tool tests drive, written once so the copies cannot

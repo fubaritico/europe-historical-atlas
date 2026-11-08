@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 
 import { projectRegions } from '@europe-historical-atlas/core/data/regionSource'
 import { toRegionPayload } from '@europe-historical-atlas/core/data/toRegionPayload'
+import { saveYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
-import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { createDevState } from '../../tunables/devState'
 import { AUTHORED_YEAR, META, YEAR } from '../testing/yearFixtures'

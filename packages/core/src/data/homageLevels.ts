@@ -21,7 +21,7 @@
  * colour.
  */
 
-import type { YearPolity } from '../data/yearFormat'
+import type { YearPolity } from './yearFormat'
 
 /** A year's homage, read once, answering by polity id. */
 export interface HomageLevels {

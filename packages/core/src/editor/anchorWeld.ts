@@ -1,8 +1,9 @@
+import { openRings, outlineFloor, setRingOpen } from '../data/outlines'
+
 import { edgeAt, everyRing, runStepAt } from './anchorEdits'
 import { moveAnchor } from './documentEdits'
-import { openRings, outlineFloor, setRingOpen } from './outlines'
 
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 
 /*
  * Welding — making two outlines that only coincide **share** their points (`H-37`, the dev, 2026-10-14:

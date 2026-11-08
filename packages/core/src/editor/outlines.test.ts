@@ -1,13 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { yearClaimSchema } from '../data/yearFormat'
-
-import { insertAnchorOnStretch, removeAnchors } from './anchorEdits'
-import { weldAnchor } from './anchorWeld'
-import { collectBorderEdges } from './borderGraph'
-import { replaceOutline } from './documentEdits'
-import { documentFaults } from './documentFaults'
-import { ringOf, sharedBorderDocument } from './documentFixtures'
+import { collectBorderEdges } from '../data/borderGraph'
 import {
   everyOutline,
   isOpenRing,
@@ -16,10 +9,17 @@ import {
   outlineFloor,
   segmentCount,
   setRingOpen,
-} from './outlines'
+} from '../data/outlines'
+import { cloneYearDocument, saveYearDocument } from '../data/yearDocument'
+import { yearClaimSchema } from '../data/yearFormat'
+
+import { insertAnchorOnStretch, removeAnchors } from './anchorEdits'
+import { weldAnchor } from './anchorWeld'
+import { replaceOutline } from './documentEdits'
+import { documentFaults } from './documentFaults'
+import { ringOf, sharedBorderDocument } from './documentFixtures'
 import { PASTE_WELD_KM, weldPastedRings } from './pasteWeld'
 import { checkRetrace, retraceArcs, retraceStretch } from './retrace'
-import { cloneYearDocument, saveYearDocument } from './yearDocument'
 
 import type { YearClaim } from '../data/yearFormat'
 

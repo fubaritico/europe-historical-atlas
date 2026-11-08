@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
+import { cloneYearDocument } from '../data/yearDocument'
+
 import { copyPolities } from './clipboard'
 import { AQUITAINE_IDENTITY, sharedBorderDocument } from './documentFixtures'
 import { pasteSheet, sheetDifferences } from './pasteSheet'
-import { cloneYearDocument } from './yearDocument'
 
 import type { CopiedPolity } from './clipboard'
 

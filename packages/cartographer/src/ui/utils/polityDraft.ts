@@ -1,6 +1,6 @@
 import { vassalsOf, wouldExceedHomageDepth } from '@europe-historical-atlas/core/data/paintOrder'
+import { TRIBE_RANK } from '@europe-historical-atlas/core/data/tribes'
 import { proposePolityId } from '@europe-historical-atlas/core/editor/polityId'
-import { TRIBE_RANK } from '@europe-historical-atlas/core/editor/tribes'
 
 import { pickedColour, toFileColour } from './polityColourValue'
 

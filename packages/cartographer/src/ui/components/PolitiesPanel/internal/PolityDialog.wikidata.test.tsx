@@ -2,7 +2,7 @@ import { act, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import { cloneYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 import { openEmptyYear } from '../../../../state/openEmptyYear'
 import { createCartographerStore } from '../../../../state/store'

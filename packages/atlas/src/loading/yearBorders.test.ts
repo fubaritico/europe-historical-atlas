@@ -1,14 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 import {
   authoredRegionColours,
   polityColours,
-} from '@europe-historical-atlas/core/editor/polityColours'
-import {
-  openYearDocument,
-  saveYearDocument,
-} from '@europe-historical-atlas/core/editor/yearDocument'
+} from '@europe-historical-atlas/core/data/polityColours'
+import { openYearDocument, saveYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
+import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
 
 import { createMapSources } from '../sources/mapSources'

@@ -19,14 +19,14 @@
  *    out as a hole by itself.
  */
 
+import { MIN_RING_ANCHORS } from '../data/yearDocument'
 import { pointInRing, pointInRings } from '../geo/pointInRing'
 
 import { edgeAt, everyRing, runStepAt } from './anchorEdits'
 import { addAnchor, addOutline } from './documentEdits'
-import { MIN_RING_ANCHORS } from './yearDocument'
 
 import type { OutlinePoint } from './documentEdits'
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 import type { YearClaim } from '../data/yearFormat'
 
 /** What a carving did — for the status bar, and for a test to read. */

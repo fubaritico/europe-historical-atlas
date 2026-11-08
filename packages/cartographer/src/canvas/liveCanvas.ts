@@ -1,7 +1,7 @@
 import {
   deriveBorders,
   maskDerivationDeps,
-} from '@europe-historical-atlas/core/editor/derivedBorders'
+} from '@europe-historical-atlas/core/data/derivedBorders'
 import { extentOutline } from '@europe-historical-atlas/core/editor/extent'
 
 import { polityAt } from '../geometry/fillHit'
@@ -53,7 +53,7 @@ import type { GestureContext } from './tools/toolGestures'
 import type { SnapLayer, ToolSession, WaterWords } from './tools/toolSession'
 import type { TribeFeatherCache } from './tribeFeatherCache'
 import type { PixelSize, Point } from '../viewport/viewport'
-import type { DerivedBorder } from '@europe-historical-atlas/core/editor/derivedBorders'
+import type { DerivedBorder } from '@europe-historical-atlas/core/data/derivedBorders'
 
 /**
  * One live canvas, and everything that reads it without listening to anything.

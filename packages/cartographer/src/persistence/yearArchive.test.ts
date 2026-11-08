@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { saveYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import { ABSENT_YEAR, yearStamp } from '@europe-historical-atlas/core/data/yearStamp'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
-import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { YearChangedOnDisk, createDevServerYearArchive } from './yearArchive'
 

@@ -8,8 +8,8 @@ import { TEST_BACKDROP_FRAME } from '../viewport/testFrame'
 import { createTribeFeatherCache } from './tribeFeatherCache'
 
 import type { RasterToImage } from './tribeFeatherCache'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { TribeFeather } from '@europe-historical-atlas/core/editor/tribeFeather'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /** The Empire made a tribe, beside the kingdom of France. */
 const withTribe = (): YearDocument => {

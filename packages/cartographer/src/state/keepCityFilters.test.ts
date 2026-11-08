@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { cloneYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import { cloneYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 import { CITY_FILTERS_KEY, CITY_SORT_KEY } from '../persistence/cityFiltersStorage'
 import { UNFRAMED } from '../viewport/viewport'

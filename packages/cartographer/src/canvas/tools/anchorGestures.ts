@@ -1,4 +1,4 @@
-import { isRingOpen, segmentCount } from '@europe-historical-atlas/core/editor/outlines'
+import { isRingOpen, segmentCount } from '@europe-historical-atlas/core/data/outlines'
 
 import { nearestStretch } from '../../geometry/stretchHit'
 import { describeDrawingTarget } from '../../state/drawingTarget'
@@ -11,8 +11,8 @@ import { targetHandles } from './toolSession'
 import type { BorderSnapContext } from './borderSnap'
 import type { FrameSnapContext } from './frameSnap'
 import type { StretchHit } from '../../geometry/stretchHit'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { AnchorRemoval } from '@europe-historical-atlas/core/editor/anchorEdits'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /**
  * The two edits of the anchors themselves (`s03`): the idle Pen's click on a stretch inserts one, and

@@ -1,14 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { exactBordersOf, pairKey } from '../data/atlasBorders'
 import { createLandMask } from '../data/landMask'
+import { createYearDocument, saveYearDocument } from '../data/yearDocument'
 import { latitudeToVertical, longitudeToHorizontal } from '../geo/mercator'
 
-import { exactBordersOf, pairKey } from './atlasBorders'
 import { addAnchor, addPolity, closeRing } from './documentEdits'
-import { createYearDocument, saveYearDocument } from './yearDocument'
 
-import type { YearDocument } from './yearDocument'
 import type { LandMask } from '../data/landMask'
+import type { YearDocument } from '../data/yearDocument'
 import type { AuthoredYear, YearPolity } from '../data/yearFormat'
 
 const bbox = { west: -50, south: -20, east: 150, north: 80 }

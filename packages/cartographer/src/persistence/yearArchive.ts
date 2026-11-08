@@ -1,5 +1,6 @@
 import { assetError } from '@europe-historical-atlas/core/data/assetError'
 import { assembleAuthoredYear } from '@europe-historical-atlas/core/data/yearConsistency'
+import { openYearDocument, saveYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import {
   parseYearBorders,
   parseYearPolities,
@@ -7,13 +8,9 @@ import {
   yearPaths,
 } from '@europe-historical-atlas/core/data/yearSource'
 import { ABSENT_YEAR, yearStamp } from '@europe-historical-atlas/core/data/yearStamp'
-import {
-  openYearDocument,
-  saveYearDocument,
-} from '@europe-historical-atlas/core/editor/yearDocument'
 
 import type { AssetKind } from '@europe-historical-atlas/core/data/assetError'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * Where the Cartographer's maps are kept, seen from the browser — open one, save one, list them. A map is a folder of

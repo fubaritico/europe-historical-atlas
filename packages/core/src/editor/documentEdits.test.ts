@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { MAX_HOMAGE_DEPTH } from '../data/paintOrder'
+import { createYearDocument } from '../data/yearDocument'
 
 import {
   addAnchor,
@@ -17,7 +18,6 @@ import {
   wouldLoopHomage,
 } from './documentEdits'
 import { FIXTURE_SOURCES, sharedBorderDocument } from './documentFixtures'
-import { createYearDocument } from './yearDocument'
 
 import type { YearPolity } from '../data/yearFormat'
 

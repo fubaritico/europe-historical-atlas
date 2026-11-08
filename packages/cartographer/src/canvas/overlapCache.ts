@@ -5,8 +5,8 @@ import {
   polityShape,
 } from '@europe-historical-atlas/core/editor/overlaps'
 
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { Overlap, PolityShape } from '@europe-historical-atlas/core/editor/overlaps'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /** A ground, in longitude and latitude — the geometry's own shape, read through core. */
 type MultiPolygon = Overlap['area']

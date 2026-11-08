@@ -18,16 +18,16 @@
  * **The map it welds onto is the map before the paste**: the pasted polity's rings do not weld onto one another.
  */
 
+import { openRings, outlineFloor, segmentCount } from '../data/outlines'
+import { referencedAnchors } from '../data/yearDocument'
 import { footOnSegment, groundKm } from '../geo/groundDistance'
 import { SpatialCells, inGeoBox, paddedBox } from '../geo/spatialCells'
 
 import { everyRing, insertAnchorOnStretch } from './anchorEdits'
-import { openRings, outlineFloor, segmentCount } from './outlines'
-import { referencedAnchors } from './yearDocument'
 
 import type { ClipboardPoint } from './clipboard'
 import type { OutlinePoint, Provenance } from './documentEdits'
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 import type { GeoBox } from '../geo/spatialCells'
 
 /**

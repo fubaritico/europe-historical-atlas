@@ -3,6 +3,7 @@ import { isPointsPasteRefusal, pastePoints } from '@europe-historical-atlas/core
 import { pasteSheet } from '@europe-historical-atlas/core/editor/pasteSheet'
 import { PASTE_WELD_KM } from '@europe-historical-atlas/core/editor/pasteWeld'
 
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { CopiedPoints, CopiedPolity } from '@europe-historical-atlas/core/editor/clipboard'
 import type { HistoryStep } from '@europe-historical-atlas/core/editor/history'
 import type { PolityPasteRefusal, PolityPasted } from '@europe-historical-atlas/core/editor/paste'
@@ -11,7 +12,6 @@ import type {
   PointsPasted,
 } from '@europe-historical-atlas/core/editor/pastePoints'
 import type { SheetField, SheetPasteRefusal } from '@europe-historical-atlas/core/editor/pasteSheet'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /** Pasting from the clipboard — polities, points, a sheet — each one recorded step. */
 export interface PasteActions {

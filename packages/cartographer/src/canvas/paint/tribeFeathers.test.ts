@@ -15,7 +15,7 @@ import { TEST_BACKDROP_FRAME } from '../../viewport/testFrame'
 import { createGridProjection, tribeFeatherRasters } from './tribeFeathers'
 
 import type { FeatherGround, TribeFeatherRaster } from './tribeFeathers'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /** The Empire (2°E–4°E, 46°N–48°N) made a tribe, beside the kingdom of France (0°–2°E). */
 const withTribe = (): YearDocument => {

@@ -6,7 +6,7 @@ import { holderChoices } from './holderChoices'
 
 import type { CityHolder, CityMark } from '../../../../state/citiesSlice'
 import type { PolityRow } from '../../../utils/polityRows'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 const EMPIRE: CityHolder = { name: 'Sacrum Imperium', wikidata: 'Q12548' }
 const VENICE: CityHolder = { name: 'Repubblica di Venezia', wikidata: 'Q4948' }

@@ -7,6 +7,7 @@ import { firstName } from './copySelection'
 
 import type { ClipboardWords } from './copySelection'
 import type { EditionActions } from '../../state/editionSlice'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { Carving, CarvingHeld } from '@europe-historical-atlas/core/editor/carve'
 import type {
   ClipboardContent,
@@ -15,7 +16,6 @@ import type {
 } from '@europe-historical-atlas/core/editor/clipboard'
 import type { PolityPasteRefusal, PolityPasted } from '@europe-historical-atlas/core/editor/paste'
 import type { PointsPasted } from '@europe-historical-atlas/core/editor/pastePoints'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /**
  * ‹cmd+V› — Édition › Coller les entités (CARTO-345, `s22`): the polities the clipboard holds are pasted into the map

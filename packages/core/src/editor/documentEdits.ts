@@ -7,13 +7,13 @@
  * happens once at save.
  */
 
+import { outlineFloor, pushRing, setRingOpen } from '../data/outlines'
 import { effectiveSuzerains, vassalsOf, wouldExceedHomageDepth } from '../data/paintOrder'
+import { MIN_RING_ANCHORS, referencedAnchors } from '../data/yearDocument'
 
-import { outlineFloor, pushRing, setRingOpen } from './outlines'
-import { MIN_RING_ANCHORS, referencedAnchors } from './yearDocument'
-
-import type { YearDocument } from './yearDocument'
-import type { YearPolity, YearProvenance } from '../data/yearFormat'
+import type { Provenance } from '../data/provenance'
+import type { YearDocument } from '../data/yearDocument'
+import type { YearPolity } from '../data/yearFormat'
 
 /** What removing a polity touched, in the terms the status bar reports. */
 export interface RemovalReport {
@@ -231,11 +231,8 @@ export function declareSource(doc: YearDocument, provenance: Provenance): number
   return id
 }
 
-/**
- * Where geometry was taken from and under what terms — a {@link YearProvenance} before the document has
- * given it an id. What the tools carry with every point until the outline enters the document.
- */
-export type Provenance = Omit<YearProvenance, 'id'>
+/** Where geometry was taken from and under what terms — defined beside its reader, `data/provenance`. */
+export type { Provenance }
 
 /** One point of an outline drawn by hand, with where it was taken from. */
 export interface OutlinePoint {

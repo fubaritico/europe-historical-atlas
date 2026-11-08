@@ -9,10 +9,11 @@
  * Imported by tests only, so it never reaches a bundle.
  */
 
-import { addAnchor, closeRing } from './documentEdits'
-import { createYearDocument } from './yearDocument'
+import { createYearDocument } from '../data/yearDocument'
 
-import type { YearDocument } from './yearDocument'
+import { addAnchor, closeRing } from './documentEdits'
+
+import type { YearDocument } from '../data/yearDocument'
 import type { YearPolity } from '../data/yearFormat'
 
 /** One declared provenance, enough for anchors to point at something. */

@@ -1,4 +1,4 @@
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * What the automatic save writes at each pause (the dev, 2026-11-02: *"you keep everything — as in any software, as in

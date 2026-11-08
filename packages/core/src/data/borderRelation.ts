@@ -15,7 +15,7 @@
  * nothing here could derive it without inventing. It stays an explicit pair override.
  */
 
-import type { YearPolity } from '../data/yearFormat'
+import type { YearPolity } from './yearFormat'
 
 /** What a derived border is, before anyone dresses it. */
 export type BorderRelation = 'sovereign' | 'vassal' | 'co-vassal' | 'unclaimed' | 'coastline'

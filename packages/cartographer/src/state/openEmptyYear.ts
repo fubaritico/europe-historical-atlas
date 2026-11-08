@@ -1,6 +1,6 @@
-import { createYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import { createYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * A year with nothing drawn in it yet — what authoring from scratch starts from.

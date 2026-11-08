@@ -1,11 +1,11 @@
+import { handFor } from '@europe-historical-atlas/core/data/borderHands'
+import { isRingOpen } from '@europe-historical-atlas/core/data/outlines'
 import { paintRanks } from '@europe-historical-atlas/core/data/paintOrder'
-import { handFor } from '@europe-historical-atlas/core/editor/borderHands'
-import { isRingOpen } from '@europe-historical-atlas/core/editor/outlines'
 import {
   asSeenAcrossTribes,
   isTribeEdge,
   tribeIds,
-} from '@europe-historical-atlas/core/editor/tribes'
+} from '@europe-historical-atlas/core/data/tribes'
 
 import { lonLatToBackdrop, remapToScreen } from '../../viewport/projection'
 import { backdropToScreen } from '../../viewport/viewport'
@@ -19,8 +19,8 @@ import type { LayerSettings } from '../../state/layersSlice'
 import type { BackdropFrame } from '../../viewport/projection'
 import type { Point, Viewport } from '../../viewport/viewport'
 import type { OverlapPiece } from '../overlapCache'
-import type { DerivedBorder } from '@europe-historical-atlas/core/editor/derivedBorders'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { DerivedBorder } from '@europe-historical-atlas/core/data/derivedBorders'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * The adapter from the document to what gets painted.

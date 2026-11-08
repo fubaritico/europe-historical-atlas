@@ -11,7 +11,7 @@
 import { updatePolity } from './documentEdits'
 
 import type { CopiedPolity } from './clipboard'
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 import type { YearPolity } from '../data/yearFormat'
 
 /** A sheet to paste: a polity's, with its suzerain's name — a copied polity's, or a sheet copied alone. */

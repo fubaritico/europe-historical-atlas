@@ -17,11 +17,10 @@
  * command that knows how to undo itself corrupts the history silently when it is wrong.
  */
 
-import { CLOSED_RING_FLOOR, OPEN_RING_FLOOR } from '../data/ringFloors'
-
 import { keepRings, outlineFloor } from './outlines'
+import { CLOSED_RING_FLOOR, OPEN_RING_FLOOR } from './ringFloors'
 
-import type { YearFiles } from '../data/yearConsistency'
+import type { YearFiles } from './yearConsistency'
 import type {
   AuthoredYear,
   DeliberateGap,
@@ -30,7 +29,7 @@ import type {
   YearClaim,
   YearPolity,
   YearProvenance,
-} from '../data/yearFormat'
+} from './yearFormat'
 
 /**
  * The fewest anchors a ring can have — closure implied, so a triangle.

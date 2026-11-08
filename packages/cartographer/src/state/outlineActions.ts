@@ -1,10 +1,10 @@
 import { addOutlineCarving, carveOutOfSuzerain } from '@europe-historical-atlas/core/editor/carve'
 import { addOutline, replaceOutline } from '@europe-historical-atlas/core/editor/documentEdits'
 
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { Carving, CarvingFault, CarvingHeld } from '@europe-historical-atlas/core/editor/carve'
 import type { OutlinePoint } from '@europe-historical-atlas/core/editor/documentEdits'
 import type { HistoryStep } from '@europe-historical-atlas/core/editor/history'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /** An outline the Pen took up to resume it (`open-outlines.md`): where it sits, and what it held then. */
 export interface ResumedOutline {

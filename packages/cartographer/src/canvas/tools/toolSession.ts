@@ -1,5 +1,5 @@
+import { isRingOpen, ringNeighboursAt } from '@europe-historical-atlas/core/data/outlines'
 import { extentMembers } from '@europe-historical-atlas/core/editor/extent'
-import { isRingOpen, ringNeighboursAt } from '@europe-historical-atlas/core/editor/outlines'
 
 import { normaliseRect } from '../../geometry/marquee'
 import { isClosingOffered } from '../../geometry/ringClosure'
@@ -11,8 +11,8 @@ import type { ResumedOutline } from '../../state/outlineActions'
 import type { EditorTool } from '../../state/toolSlice'
 import type { Point } from '../../viewport/viewport'
 import type { CanvasMessageKey } from '../i18n'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { Provenance } from '@europe-historical-atlas/core/editor/documentEdits'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 /** A point of the outline in progress: where, and what it was taken from. */
 export interface SessionPoint {

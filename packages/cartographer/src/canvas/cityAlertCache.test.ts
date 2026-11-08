@@ -6,7 +6,7 @@ import { citiesToPaint, createCityAlertCache } from './cityAlertCache'
 import { testStore } from './testGestureContext'
 
 import type { CityMark } from '../state/citiesSlice'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 const in1100 = {
   kind: 'instant',

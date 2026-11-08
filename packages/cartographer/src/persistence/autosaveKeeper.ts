@@ -5,7 +5,7 @@ import { awaitConfirmation } from './awaitConfirmation'
 
 import type { Report } from './notice'
 import type { PersistenceWords } from './persistenceWords'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * The automatic save (the dev, 2026-11-02: *"the autosaves are named <name of the current map>.autosave.<date +

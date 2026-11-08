@@ -1,7 +1,7 @@
+import { polityColours } from '@europe-historical-atlas/core/data/polityColours'
 import { documentFaults } from '@europe-historical-atlas/core/editor/documentFaults'
-import { polityColours } from '@europe-historical-atlas/core/editor/polityColours'
 
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * The one place the editor's polity colours come from — the canvas's fills, `{Polities}`' swatches and

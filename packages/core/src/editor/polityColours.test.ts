@@ -1,19 +1,19 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { hexToRgb } from '../utils/color'
-
-import { addAnchor, addPolity, closeRing } from './documentEdits'
-import { sharedBorderDocument } from './documentFixtures'
-import { homageLevels } from './homageLevels'
+import { homageLevels } from '../data/homageLevels'
 import {
   authoredRegionColours,
   authoredTintLevels,
   polityColours,
   polityNeighbours,
-} from './polityColours'
-import { createYearDocument, openYearDocument, saveYearDocument } from './yearDocument'
+} from '../data/polityColours'
+import { createYearDocument, openYearDocument, saveYearDocument } from '../data/yearDocument'
+import { hexToRgb } from '../utils/color'
 
-import type { HomageLevels } from './homageLevels'
+import { addAnchor, addPolity, closeRing } from './documentEdits'
+import { sharedBorderDocument } from './documentFixtures'
+
+import type { HomageLevels } from '../data/homageLevels'
 import type { Region } from '../data/regionSource'
 import type { AuthoredYear } from '../data/yearFormat'
 

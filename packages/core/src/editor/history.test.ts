@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import { cloneYearDocument } from '../data/yearDocument'
+
 import { moveAnchor } from './documentEdits'
 import { firstSharedAnchor, ringOf, sharedBorderDocument } from './documentFixtures'
 import { DEFAULT_HISTORY_LIMIT, createHistory } from './history'
-import { cloneYearDocument } from './yearDocument'
 
 import type { HistoryStep } from './history'
 

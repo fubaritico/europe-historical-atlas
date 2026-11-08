@@ -1,6 +1,6 @@
 import type { PolitiesPanelMessageKey } from '../i18n'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { RemovalReport } from '@europe-historical-atlas/core/editor/documentEdits'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 
 /**

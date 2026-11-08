@@ -4,8 +4,8 @@
  * regions, bearers, written names and settings. Pure: no page, no font, no worker; the letters' measures are handed in.
  */
 
+import { homageLevels } from '@europe-historical-atlas/core/data/homageLevels'
 import { fullNameOf, shortNameOf } from '@europe-historical-atlas/core/data/shortName'
-import { homageLevels } from '@europe-historical-atlas/core/editor/homageLevels'
 import { bearersByLevel } from '@europe-historical-atlas/core/editor/regionBearers'
 import { LEADER_DOT } from '@europe-historical-atlas/core/pipeline/nameOffset'
 import { NAME_GRID_WIDTH } from '@europe-historical-atlas/core/pipeline/yearNames'

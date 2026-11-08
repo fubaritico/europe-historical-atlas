@@ -16,7 +16,7 @@ import { showRow } from '../../utils/showRow'
 import { CitiesPanel } from './CitiesPanel'
 
 import type { CityMark } from '../../../state/citiesSlice'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 // The scroll is jsdom's blind spot (nothing is laid out): what is checked is which row it is asked for.
 vi.mock('../../utils/showRow', () => ({ showRow: vi.fn() }))

@@ -7,7 +7,7 @@ import {
 
 import { holderDot } from './holderDot'
 
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /** France and the Empire with their Wikidata ids, and Aquitaine, France's vassal, with its own. */
 function document1100(): YearDocument {

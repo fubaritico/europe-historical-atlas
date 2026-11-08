@@ -16,14 +16,13 @@
 
 import { z } from 'zod/mini'
 
+import { everyOutline, isRingOpen, outlineFloor } from '../data/outlines'
+import { MIN_OPEN_ANCHORS } from '../data/yearDocument'
 import { yearPolitySchema } from '../data/yearFormat'
 
-import { everyOutline, isRingOpen, outlineFloor } from './outlines'
-import { MIN_OPEN_ANCHORS } from './yearDocument'
-
 import type { Provenance } from './documentEdits'
-import type { OutlineOf } from './outlines'
-import type { YearDocument } from './yearDocument'
+import type { OutlineOf } from '../data/outlines'
+import type { YearDocument } from '../data/yearDocument'
 import type { YearPolity } from '../data/yearFormat'
 
 /** One copied point: where it is, and what it was taken from. */

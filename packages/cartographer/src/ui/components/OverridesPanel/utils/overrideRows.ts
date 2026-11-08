@@ -1,8 +1,8 @@
-import { segmentKey } from '@europe-historical-atlas/core/editor/borderOverrides'
-import { isRingOpen, ringSegments } from '@europe-historical-atlas/core/editor/outlines'
+import { segmentKey } from '@europe-historical-atlas/core/data/borderOverrides'
+import { isRingOpen, ringSegments } from '@europe-historical-atlas/core/data/outlines'
 
 import type { BorderMessageKey } from '../../../i18n/border'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 
 /**

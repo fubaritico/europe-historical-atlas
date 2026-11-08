@@ -1,4 +1,4 @@
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * Who the Pen is drawing for, resolved against the document — the one place that question is asked.

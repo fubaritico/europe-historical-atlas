@@ -6,7 +6,8 @@ import {
   coveringRun,
   dressPair,
   dressSegments,
-} from './borderOverrides'
+} from '../data/borderOverrides'
+
 import { sharedBorderDocument } from './documentFixtures'
 
 describe('chainSegments', () => {

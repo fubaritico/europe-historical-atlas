@@ -7,14 +7,13 @@
  * allowed while the author corrects by hand, so nothing here assumes the members are disjoint.
  */
 
+import { chainBorderRuns } from '../data/borderGraph'
 import { vassalsOf } from '../data/paintOrder'
+import { MIN_RING_ANCHORS } from '../data/yearDocument'
 import { indexRings, pointInIndexedRings } from '../geo/pointInRing'
 
-import { chainBorderRuns } from './borderGraph'
-import { MIN_RING_ANCHORS } from './yearDocument'
-
-import type { BorderEdge } from './borderGraph'
-import type { YearDocument } from './yearDocument'
+import type { BorderEdge } from '../data/borderGraph'
+import type { YearDocument } from '../data/yearDocument'
 
 /**
  * The polities whose drawn domain makes up a polity's extent: itself, then its vassals at any depth.

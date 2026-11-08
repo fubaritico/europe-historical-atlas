@@ -1,12 +1,8 @@
-import { coveringRun, segmentKey } from '@europe-historical-atlas/core/editor/borderOverrides'
-import {
-  isRingOpen,
-  ringSegments,
-  segmentCount,
-} from '@europe-historical-atlas/core/editor/outlines'
+import { coveringRun, segmentKey } from '@europe-historical-atlas/core/data/borderOverrides'
+import { isRingOpen, ringSegments, segmentCount } from '@europe-historical-atlas/core/data/outlines'
 
-import type { Segment } from '@europe-historical-atlas/core/editor/borderOverrides'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { Segment } from '@europe-historical-atlas/core/data/borderOverrides'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * What `{Line}` reads of a selection (`s13`, *one marquee, two things to do with it*): the segments

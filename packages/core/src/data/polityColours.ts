@@ -1,13 +1,13 @@
-import { chooseColorSlots } from '../data/regionRaster'
 import { hexToRgb } from '../utils/color'
 
 import { collectBorderEdges } from './borderGraph'
+import { chooseColorSlots } from './regionRaster'
 import { openYearDocument } from './yearDocument'
 
 import type { HomageLevels } from './homageLevels'
+import type { Region } from './regionSource'
 import type { YearDocument } from './yearDocument'
-import type { Region } from '../data/regionSource'
-import type { AuthoredYear } from '../data/yearFormat'
+import type { AuthoredYear } from './yearFormat'
 import type { RgbColor } from '../utils/color'
 
 /**

@@ -21,20 +21,17 @@
  * Kept apart from the pipeline because it takes data and returns data: the composition root only wires it.
  */
 
-import { exactBordersOf } from '@europe-historical-atlas/core/editor/atlasBorders'
-import { homageLevels } from '@europe-historical-atlas/core/editor/homageLevels'
-import {
-  authoredTintLevels,
-  polityColours,
-} from '@europe-historical-atlas/core/editor/polityColours'
-import { tribeIds } from '@europe-historical-atlas/core/editor/tribes'
-import { openYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import { exactBordersOf } from '@europe-historical-atlas/core/data/atlasBorders'
+import { homageLevels } from '@europe-historical-atlas/core/data/homageLevels'
+import { authoredTintLevels, polityColours } from '@europe-historical-atlas/core/data/polityColours'
+import { tribeIds } from '@europe-historical-atlas/core/data/tribes'
+import { openYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 import type { MapSources } from '../sources/mapSources'
+import type { HomageLevels } from '@europe-historical-atlas/core/data/homageLevels'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { AuthoredYear } from '@europe-historical-atlas/core/data/yearFormat'
-import type { HomageLevels } from '@europe-historical-atlas/core/editor/homageLevels'
 import type { RgbColor } from '@europe-historical-atlas/core/utils/color'
 
 /** What the compute settled for the year: its traced lines and each region's tint. */

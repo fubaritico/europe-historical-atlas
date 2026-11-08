@@ -1,6 +1,6 @@
+import { everyOutline, segmentCount } from '@europe-historical-atlas/core/data/outlines'
+import { MIN_RING_ANCHORS } from '@europe-historical-atlas/core/data/yearDocument'
 import { isWeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
-import { everyOutline, segmentCount } from '@europe-historical-atlas/core/editor/outlines'
-import { MIN_RING_ANCHORS } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { nearestAmong } from '../../geometry/hitTest'
 import { nearestStretch } from '../../geometry/stretchHit'
@@ -13,9 +13,9 @@ import type { BorderSnapContext } from './borderSnap'
 import type { FrameSnapContext } from './frameSnap'
 import type { WeldOffer } from './toolSession'
 import type { Point } from '../../viewport/viewport'
+import type { OutlineOf } from '@europe-historical-atlas/core/data/outlines'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { WeldDone, WeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
-import type { OutlineOf } from '@europe-historical-atlas/core/editor/outlines'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /*
  * Welding with the white arrow (`H-37`, the dev, 2026-10-14): an anchor of the target dragged alone near

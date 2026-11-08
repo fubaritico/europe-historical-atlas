@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { MAX_HOMAGE_DEPTH } from '@europe-historical-atlas/core/data/paintOrder'
+import { createYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import { addPolity, updatePolity } from '@europe-historical-atlas/core/editor/documentEdits'
-import { createYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import {
   EMPTY_DRAFT,

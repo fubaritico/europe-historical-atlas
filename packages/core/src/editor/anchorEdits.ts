@@ -1,8 +1,9 @@
+import { keepRings, openRings, outlineFloor, segmentCount } from '../data/outlines'
+
 import { addAnchor, declareSource } from './documentEdits'
-import { keepRings, openRings, outlineFloor, segmentCount } from './outlines'
 
 import type { Provenance } from './documentEdits'
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 
 /**
  * Inserting and removing one anchor — `s03`'s *"insert an anchor"* and *"delete an anchor"*, the white

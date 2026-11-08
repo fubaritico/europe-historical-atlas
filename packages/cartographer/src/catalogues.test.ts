@@ -15,9 +15,9 @@ import type {
   WikidataField,
   WikidataSuggestion,
 } from './wikidata/wikidataFacts'
+import type { HandPattern } from '@europe-historical-atlas/core/data/borderHands'
+import type { BorderRelation } from '@europe-historical-atlas/core/data/borderRelation'
 import type { WeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
-import type { HandPattern } from '@europe-historical-atlas/core/editor/borderHands'
-import type { BorderRelation } from '@europe-historical-atlas/core/editor/borderRelation'
 import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
 import type { MessageNode } from '@europe-historical-atlas/core/i18n/messageFormat'
 

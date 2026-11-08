@@ -5,8 +5,8 @@
 
 import { projectRegions } from '@europe-historical-atlas/core/data/regionSource'
 import { toRegionPayload } from '@europe-historical-atlas/core/data/toRegionPayload'
+import { saveYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
-import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'

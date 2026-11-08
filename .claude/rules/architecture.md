@@ -1,11 +1,12 @@
 ---
 paths:
-  - "packages/**"
-  - "turbo.json"
-  - "pnpm-workspace.yaml"
-  - "package.json"
-  - "eslint.config.js"
+  - 'packages/**'
+  - 'turbo.json'
+  - 'pnpm-workspace.yaml'
+  - 'package.json'
+  - 'eslint.config.js'
 ---
+
 # Architecture — europe-map
 
 > Interactive 3D historical atlas of Europe. WebGL rendering, camera navigation, per-polygon picking.
@@ -27,7 +28,7 @@ paths:
 > refused**: it publishes, and we publish nothing.
 
 > **One declared version per dependency**, in `pnpm-workspace.yaml`'s `catalog:`, referenced as `catalog:`
-> from every `package.json`. The bar for an entry is *shared* **and** *dangerous to mismatch*, not merely
+> from every `package.json`. The bar for an entry is _shared_ **and** _dangerous to mismatch_, not merely
 > shared: React is in there because the Payload admin will want it next and two Reacts in one workspace
 > give hook errors that read like application bugs; `three` is catalogued too.
 
@@ -52,7 +53,9 @@ packages/
 │   └── src/
 │       ├── utils/      # leaf: small pure helpers, importing nothing
 │       ├── geo/        # leaf: projection maths
-│       ├── data/       # domain + ports (heightmap, land mask, regions, rivers); reads geo/ + utils/
+│       ├── data/       # domain + ports (heightmap, land mask, regions, rivers), and what a year says — opened,
+│       │               #   its outlines, borders and their hands, homage, colours, tribes (moved from editor/ on
+│       │               #   2026-11-08, the dev's call: shared by both apps, read by the worker); reads geo/ + utils/
 │       ├── pipeline/   # the CPU work, worker-safe; reads data/, geo/, utils/
 │       ├── time/       # the historical date type
 │       ├── i18n/       # the translators (ICU)
@@ -117,20 +120,20 @@ rule at all: green over code nothing had checked.
 
 **Components: a folder each, a barrel each — and no barrel of barrels** (the dev's call, 2026-10-18, his
 convention in `vite-mf-monorepo`, `nextjs-multizone-tmdb` and `date-time-picker`). **One file, one component, and
-everything a component needs scoped to its folder** (the dev, 2026-10-22: *« les choses qui concernent des
-composants doivent être scopées par rapport aux composants »*). **Everything React is under `src/ui/`** (the dev,
-2026-10-22: *« tout ce qui concerne React, en fait, c'est de l'interface utilisateur »*), so the package root holds
+everything a component needs scoped to its folder** (the dev, 2026-10-22: _« les choses qui concernent des
+composants doivent être scopées par rapport aux composants »_). **Everything React is under `src/ui/`** (the dev,
+2026-10-22: _« tout ce qui concerne React, en fait, c'est de l'interface utilisateur »_), so the package root holds
 the layers and not fifty folders. `ui/components/<Name>/` holds:
 
-| where | what |
-| --- | --- |
-| `<Name>.tsx`, `<Name>.test.tsx` | the component and its test, at the root |
-| `hooks/` | its own hooks, one per file |
-| `internal/` | its own children — **does not nest**: a child with children gets its own top-level folder |
-| `utils/` | its own functions, one per file — never beside the component in its `.tsx` |
-| `i18n/` | its own texts: `fr.json`, `en.json`, and an `index.ts` typing them (`Catalogue<keyof typeof en>`) |
-| a types file at the root | the shapes its parts share (`polityFieldsProps.ts`, `layerListProps.ts`) |
-| `index.ts` | what the rest of the application uses — the folder's only door |
+| where                           | what                                                                                              |
+| ------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `<Name>.tsx`, `<Name>.test.tsx` | the component and its test, at the root                                                           |
+| `hooks/`                        | its own hooks, one per file                                                                       |
+| `internal/`                     | its own children — **does not nest**: a child with children gets its own top-level folder         |
+| `utils/`                        | its own functions, one per file — never beside the component in its `.tsx`                        |
+| `i18n/`                         | its own texts: `fr.json`, `en.json`, and an `index.ts` typing them (`Catalogue<keyof typeof en>`) |
+| a types file at the root        | the shapes its parts share (`polityFieldsProps.ts`, `layerListProps.ts`)                          |
+| `index.ts`                      | what the rest of the application uses — the folder's only door                                    |
 
 **What several components use goes up one level, beside `components/` in `ui/`**: `ui/hooks/` (`useTranslation`,
 `useLocale`…), `ui/utils/` (`polityDraft`, `arrange`, `statusBar`…), `ui/i18n/` (the language's React context, and
@@ -139,7 +142,7 @@ shares with the rest stays at the package root**: `src/i18n/` keeps the language
 canvas and the store read (`tools`, `polity`). **A layer stays whole** — `canvas/`, `viewport/`, `geometry/`,
 `state/`… keep their files even where only the chrome imports one (the controller, `zoomLabel`): the chrome reads
 the layers, never the reverse, and `loaders/`, `persistence/`, `devServer/`, `wikidata/` are forbidden `ui/` by
-lint. A shared *component* gets its own folder like any other (`ToolIcon/`, `Panel/`, `LocaleProvider/`). **There
+lint. A shared _component_ gets its own folder like any other (`ToolIcon/`, `Panel/`, `LocaleProvider/`). **There
 is no `components/shared/` any more** (removed 2026-10-22: it held no component). A stylesheet stays in
 `ui/styles/`, the one module that orders the cascade. Four rules hold it: `react/no-multi-comp`, `eha/one-hook-per-file`,
 `eha/component-folder-layout` (what sits where), and `eha/no-reach-into-component` — over all of `src/` — so
@@ -160,12 +163,12 @@ rest — which is exactly what would smuggle three.js into the worker chunk.
 The dev's own taxonomy, 2026-09-24: **Payload is an app, the atlas is an app, core is a resource.**
 Three applications will live here, not two, and they do not all render the same way:
 
-|                     | what it is                                                                                            | renders with                     | state today              |
-| ------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------- | ------------------------ |
-| **atlas**           | the 3D map — the thing that gets published                                                            | three.js on a WebGL canvas       | built                    |
-| **cartographer**    | the territory editor — anchors, rings, borders                                                        | **2D canvas** + React/Zustand chrome | built |
-| **places & events** | the content the map shows: cities with icons and 3D models, events with their consequences and actors | **Payload** (headless Next CMS)  | built, local (`packages/cms`) |
-| **core**            | the format, the readers, the compositor, the maths                                                    | —                                | built, three-free        |
+|                     | what it is                                                                                            | renders with                         | state today                   |
+| ------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------ | ----------------------------- |
+| **atlas**           | the 3D map — the thing that gets published                                                            | three.js on a WebGL canvas           | built                         |
+| **cartographer**    | the territory editor — anchors, rings, borders                                                        | **2D canvas** + React/Zustand chrome | built                         |
+| **places & events** | the content the map shows: cities with icons and 3D models, events with their consequences and actors | **Payload** (headless Next CMS)      | built, local (`packages/cms`) |
+| **core**            | the format, the readers, the compositor, the maths                                                    | —                                    | built, three-free             |
 
 **All three ship in this repository** — committed, never git-ignored. **Two of them go online now**:
 the atlas and, later, the cartographer, both static bundles. **Payload stays local for the moment** —
@@ -174,7 +177,7 @@ and a security layer, and the editor has to be proven first. Until then it keeps
 and the atlas reads what it produces over a **relative URL**, like every other asset it loads.
 
 The day it does go online: Payload is a Next application, so a server runtime plus a database reachable
-from it — a SQLite *file* does not survive a serverless filesystem, so network SQLite (libSQL / Turso,
+from it — a SQLite _file_ does not survive a serverless filesystem, so network SQLite (libSQL / Turso,
 spoken by the same adapter) or Postgres, and the auth layer with it.
 
 **A trap worth stating once**: a browser cannot query a SQLite file over a relative URL. Either Payload
@@ -191,13 +194,13 @@ component base today, a Stencil/web-component variant planned, Angular and Vue p
 **Published on GitHub Packages since 2026-10-09** (`0.2.0`), under the `@fubaritico` scope, all five
 packages at one version. Read from its `INTEGRATION.md`, not assumed:
 
-| package | what it ships | framework runtime |
-|---|---|---|
-| `@fubaritico/tokens` | `./css` → `variables.css` (custom properties) + a TS token object | **none** |
-| `@fubaritico/styles` | one `styles.css`, inside `@layer ui.components` | **none** |
-| `@fubaritico/variants` | class-string builders over `class-variance-authority` | **none** (a couple of kB) |
-| `@fubaritico/behaviors` | behaviour services (`TabsService`, colour conversions) | **none** |
-| `@fubaritico/react` | the React components — what the Cartographer installs | React |
+| package                 | what it ships                                                     | framework runtime         |
+| ----------------------- | ----------------------------------------------------------------- | ------------------------- |
+| `@fubaritico/tokens`    | `./css` → `variables.css` (custom properties) + a TS token object | **none**                  |
+| `@fubaritico/styles`    | one `styles.css`, inside `@layer ui.components`                   | **none**                  |
+| `@fubaritico/variants`  | class-string builders over `class-variance-authority`             | **none** (a couple of kB) |
+| `@fubaritico/behaviors` | behaviour services (`TabsService`, colour conversions)            | **none**                  |
+| `@fubaritico/react`     | the React components — what the Cartographer installs             | React                     |
 
 **What this repository installs** (checked in each `package.json`, 2026-11-01), four of the five, at the one version of
 `pnpm-workspace.yaml`'s catalogue: the **Cartographer** — `tokens`, `styles`, `behaviors`, `react`; the **CMS** — `tokens`,
@@ -212,17 +215,17 @@ the packages are public — see `rules/known-issues/tooling.md`.
 
 - **Decided**: the atlas will have a flat interface over the canvas — panels, buttons, menus, in HTML —
   built with the design system. **Nothing is wired yet**: the atlas installs none of its packages. Its
-  interface elements *inside* the map, in 3D, are drawn by three.js, not by the design system.
+  interface elements _inside_ the map, in 3D, are drawn by three.js, not by the design system.
 - **Decided**: the canvas is never a React component, unlike the Cartographer's.
-- **Decided, 2026-11-08: React** (the dev: *"the interface will be in React — the elements laid over the
-  relief map will be in React"*). A root mounted beside the canvas, never around it. **Still undecided**:
+- **Decided, 2026-11-08: React** (the dev: _"the interface will be in React — the elements laid over the
+  relief map will be in React"_). A root mounted beside the canvas, never around it. **Still undecided**:
   Zustand or not, and **how the relief map and the interface talk to each other, both ways** (the dev, same
   day — ATLAS-392) — to be read from the interface's scenarios (ATLAS-329). Whatever the store, the map and the
   interface share state through one that lives outside React (Zustand's `createStore` from `zustand/vanilla`,
   read in React by `useStore(store, selector)`). Until that root exists, a message to the reader goes through
   the plain-DOM notices (`ui/notice.ts`, `ui/errorNet.ts`), which move into it then.
-- **Undecided**: whether the 3D elements share the design system's redefined tokens (*"I don't want to
-  commit to that yet"*).
+- **Undecided**: whether the 3D elements share the design system's redefined tokens (_"I don't want to
+  commit to that yet"_).
 - **To measure, not assumed**: whether the React root delays the map's first display. Mounted after the
   first frame it should not — a hypothesis, to measure when it lands.
 
@@ -265,25 +268,25 @@ pattern is not available by default — which is worth keeping, but it is not th
 
 **Shared — one implementation in `core`, read by both:**
 
-| what | how |
-| --- | --- |
-| the terrain backdrop | the same bake (`pipeline/terrainCompose`), in the same worker chunk, same hash; the Cartographer bakes it with no political tint |
-| the land mask and the coast | the same asset (`data/landMask`); each traces its coastline from it (`data/coastlineSource`, chained by `data/coastlineChain` in the editor) |
-| the borders | one derivation from the outlines (`editor/derivedBorders`); the atlas receives it through `editor/atlasBorders`, so **the line is the same geometry in both** |
-| the paint order | `data/paintOrder`, through `data/toRegionPayload` on the atlas side |
-| the polity colours | `editor/polityColours` and `data/regionPalette` |
-| a tribe's look | **the inner band** since 2026-11-02 — half its colour from its limit to an undulating inner offset, its full colour deeper, no stroke (ATLAS-258, ATLAS-344); the fade before it stays a choice: one signed distance (`geo/signedDistance`), one rule and one default (`editor/tribeFeather`: `tribeOpacity`, `bandWidthKm`, `TRIBE_FEATHER`), the outset spill cut over other polities and the sea by the same rule; across a tribe a state shows its frontier stroke, never a border between two states, and a tribe's own edge is dropped (`editor/tribes`: `asSeenAcrossTribes`, `isTribeEdge`). The atlas evaluates the ramp in its shader per fragment (`scene/political/tribes/tribeShader`, GLSL's `smoothstep` + core's `featherShiftKm`); the Cartographer per backdrop pixel into an image cached per document version (`canvas/paint/tribeFeathers`, `canvas/tribeFeatherCache`) |
-| the rivers | the same data and base style (`data/riverSource`, `data/riverDisplay`) |
-| a polity's short name | one rule (`data/shortName.shortNameOf`, CARTO-307): the short name entered, else the formal name without its title — the atlas writes it, the Cartographer's form shows it greyed while the field is empty |
+| what                        | how                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| the terrain backdrop        | the same bake (`pipeline/terrainCompose`), in the same worker chunk, same hash; the Cartographer bakes it with no political tint                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| the land mask and the coast | the same asset (`data/landMask`); each traces its coastline from it (`data/coastlineSource`, chained by `data/coastlineChain` in the editor)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| the borders                 | one derivation from the outlines (`data/derivedBorders`); the atlas receives it through `data/atlasBorders`, so **the line is the same geometry in both**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| the paint order             | `data/paintOrder`, through `data/toRegionPayload` on the atlas side                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| the polity colours          | `data/polityColours` and `data/regionPalette`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| a tribe's look              | **the inner band** since 2026-11-02 — half its colour from its limit to an undulating inner offset, its full colour deeper, no stroke (ATLAS-258, ATLAS-344); the fade before it stays a choice: one signed distance (`geo/signedDistance`), one rule and one default (`editor/tribeFeather`: `tribeOpacity`, `bandWidthKm`, `TRIBE_FEATHER`), the outset spill cut over other polities and the sea by the same rule; across a tribe a state shows its frontier stroke, never a border between two states, and a tribe's own edge is dropped (`data/tribes`: `asSeenAcrossTribes`, `isTribeEdge`). The atlas evaluates the ramp in its shader per fragment (`scene/political/tribes/tribeShader`, GLSL's `smoothstep` + core's `featherShiftKm`); the Cartographer per backdrop pixel into an image cached per document version (`canvas/paint/tribeFeathers`, `canvas/tribeFeatherCache`) |
+| the rivers                  | the same data and base style (`data/riverSource`, `data/riverDisplay`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| a polity's short name       | one rule (`data/shortName.shortNameOf`, CARTO-307): the short name entered, else the formal name without its title — the atlas writes it, the Cartographer's form shows it greyed while the field is empty                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 **Different — each application does it its own way:**
 
-| what | Cartographer | atlas |
-| --- | --- | --- |
-| a polity's fill | a vector path from the outline, composited `overlay` on the backdrop (`canvas/paint/painter.ts`): the edge is exact | cut from the same outline into triangles on the relief's planes (`pipeline/fillTriangles`, atlas `scene/political/fills/`), blended in a shader: the edge is exact too since 2026-10-16 |
-| the relief | a flat image | a 3D mesh, with the shore ramp (`data/shoreRamp`) |
-| how a border is stroked | canvas strokes, every hand | three.js lines from `editor/borderHands`' table, minus weight and a dotted pattern (`rules/known-issues/atlas.md`) |
-| a vassal | every polity in its own colour, with every border | from afar a vassal wears its suzerain's colour and no border parts them; its own colour and its border fade in by zoom (ATLAS-253) — levels from `editor/homageLevels`, the zoom read by `scene/political/homageReveal`, one line layer per split level (`scene/political/borders/levelledBorderLayer`), the fills mixed across tint levels (`scene/political/fills/fillShader`) |
+| what                    | Cartographer                                                                                                        | atlas                                                                                                                                                                                                                                                                                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| a polity's fill         | a vector path from the outline, composited `overlay` on the backdrop (`canvas/paint/painter.ts`): the edge is exact | cut from the same outline into triangles on the relief's planes (`pipeline/fillTriangles`, atlas `scene/political/fills/`), blended in a shader: the edge is exact too since 2026-10-16                                                                                                                                                                                        |
+| the relief              | a flat image                                                                                                        | a 3D mesh, with the shore ramp (`data/shoreRamp`)                                                                                                                                                                                                                                                                                                                              |
+| how a border is stroked | canvas strokes, every hand                                                                                          | three.js lines from `data/borderHands`' table, minus weight and a dotted pattern (`rules/known-issues/atlas.md`)                                                                                                                                                                                                                                                               |
+| a vassal                | every polity in its own colour, with every border                                                                   | from afar a vassal wears its suzerain's colour and no border parts them; its own colour and its border fade in by zoom (ATLAS-253) — levels from `data/homageLevels`, the zoom read by `scene/political/homageReveal`, one line layer per split level (`scene/political/borders/levelledBorderLayer`), the fills mixed across tint levels (`scene/political/fills/fillShader`) |
 
 **The direction**: geometry and decisions live in `core`; only the drawing — a 2D canvas on one side, the
 GPU on the other — belongs to each application. A difference in the second table is either a rendering
@@ -310,7 +313,7 @@ pnpm coverage           # turbo coverage, then merge every package's lcov report
 rather than a service. Each app is named explicitly.
 
 **`coverage` merges rather than produces.** Each package writes its own `lcov.info` with paths relative to
-*itself* (`SF:src/…`), and Sonar resolves them against the repository root — so pointed at them directly it
+_itself_ (`SF:src/…`), and Sonar resolves them against the repository root — so pointed at them directly it
 would find nothing and report **0 % with no error**. `scripts/merge-coverage.mjs` rewrites every path and
 concatenates, so `sonar-project.properties` still reads one report. Verified: 98 paths, all resolving.
 

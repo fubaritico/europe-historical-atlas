@@ -1,8 +1,8 @@
 import { effectiveSuzerains } from '@europe-historical-atlas/core/data/paintOrder'
 import { hasExtent } from '@europe-historical-atlas/core/editor/extent'
 
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /** One row of `{Polities}`, as the list shows it. */
 export interface PolityRow {

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { relationBetween } from './borderRelation'
 
-import type { YearPolity } from '../data/yearFormat'
+import type { YearPolity } from './yearFormat'
 
 /** An identity with nothing filled in beyond its homage. */
 function polity(id: string, suzerain: string | null = null): YearPolity {

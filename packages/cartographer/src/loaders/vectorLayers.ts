@@ -1,13 +1,13 @@
 import { boundsDisagreement } from '@europe-historical-atlas/core/data/assetError'
 import { chainSegments } from '@europe-historical-atlas/core/data/coastlineChain'
 import { createMaskCoastlineSource } from '@europe-historical-atlas/core/data/coastlineSource'
+import { provenanceOf } from '@europe-historical-atlas/core/data/provenance'
 import { mendRivers } from '@europe-historical-atlas/core/data/riverChain'
 import { RIVER_DISPLAY, isDrawnRiver } from '@europe-historical-atlas/core/data/riverDisplay'
 import {
   DEFAULT_RIVER_EXTENSION,
   extendRiversToSea,
 } from '@europe-historical-atlas/core/data/riverSource'
-import { provenanceOf } from '@europe-historical-atlas/core/editor/provenance'
 
 import { boundsOf } from '../viewport/culling'
 

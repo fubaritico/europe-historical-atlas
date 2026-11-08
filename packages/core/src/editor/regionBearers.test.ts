@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { homageLevels } from './homageLevels'
+import { homageLevels } from '../data/homageLevels'
+
 import { bearersByLevel, regionBearers } from './regionBearers'
 
 /** A kingdom, its duke, and the duke's count. */

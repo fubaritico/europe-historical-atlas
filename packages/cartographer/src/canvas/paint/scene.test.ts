@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
+import { tribeIds } from '@europe-historical-atlas/core/data/tribes'
 import { moveAnchor } from '@europe-historical-atlas/core/editor/documentEdits'
 import {
   firstSharedAnchor,
   sharedBorderDocument,
 } from '@europe-historical-atlas/core/editor/documentFixtures'
-import { tribeIds } from '@europe-historical-atlas/core/editor/tribes'
 
 import { DEFAULT_LAYERS } from '../../state/layersSlice'
 import { lonLatToScreen, projectAnchors, projectToBackdrop } from '../../viewport/projection'
@@ -27,8 +27,8 @@ import {
 import type { SceneInputs } from './scene'
 import type { BackdropFrame } from '../../viewport/projection'
 import type { Viewport } from '../../viewport/viewport'
-import type { DerivedBorder } from '@europe-historical-atlas/core/editor/derivedBorders'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { DerivedBorder } from '@europe-historical-atlas/core/data/derivedBorders'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /**
  * The real backdrop, imported rather than re-declared.

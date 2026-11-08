@@ -7,7 +7,7 @@ import type { CanvasMessageKey } from './i18n'
 import type { OverlapAnswer, OverlapCache } from './overlapCache'
 import type { CartographerStoreHook } from '../state/store'
 import type { BackdropFrame } from '../viewport/projection'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 
 /**

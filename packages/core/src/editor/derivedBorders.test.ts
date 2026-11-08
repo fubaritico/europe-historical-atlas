@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
+import { borderRunsOf, collectBorderEdges } from '../data/borderGraph'
+import { coastSourceIds, deriveBorders, maskDerivationDeps } from '../data/derivedBorders'
 import { createLandMask } from '../data/landMask'
+import { createYearDocument } from '../data/yearDocument'
 
-import { borderRunsOf, collectBorderEdges } from './borderGraph'
-import { coastSourceIds, deriveBorders, maskDerivationDeps } from './derivedBorders'
 import { addAnchor, addPolity, closeRing } from './documentEdits'
-import { createYearDocument } from './yearDocument'
 
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 import type { YearPolity } from '../data/yearFormat'
 
 const source = [{ id: 0, name: 'reported by eye — Duby (reference)', licence: 'fact' }]

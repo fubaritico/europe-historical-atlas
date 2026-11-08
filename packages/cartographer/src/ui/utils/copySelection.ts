@@ -6,8 +6,8 @@ import { CLIPBOARD_MESSAGES } from '../i18n/clipboard'
 
 import type { CanvasMessageKey } from '../../canvas/i18n'
 import type { ClipboardMessageKey } from '../i18n/clipboard'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { ClipboardContent, CopiedPolity } from '@europe-historical-atlas/core/editor/clipboard'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 import type { Locale } from '@europe-historical-atlas/core/i18n/locale'
 

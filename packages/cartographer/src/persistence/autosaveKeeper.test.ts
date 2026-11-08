@@ -4,7 +4,7 @@ import { createAutosaveKeeper } from './autosaveKeeper'
 import { persistenceWords } from './persistenceWords'
 
 import type { AutosaveKeeperDeps } from './autosaveKeeper'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /** A store whose version a test bumps by hand, as a gesture would. */
 function fakeStore() {

@@ -8,12 +8,13 @@
  * snapshot around the call.
  */
 
+import { isRingOpen, outlineFloor } from '../data/outlines'
+
 import { addOutline, addPolity } from './documentEdits'
-import { isRingOpen, outlineFloor } from './outlines'
 import { weldPastedRings } from './pasteWeld'
 
 import type { CopiedPolity } from './clipboard'
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 
 /** What pasting a polity did, in the terms the status bar reports. */
 export interface PolityPasted {

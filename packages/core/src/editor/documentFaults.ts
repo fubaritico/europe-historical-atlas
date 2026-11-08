@@ -1,7 +1,7 @@
 import { paintOrder } from '../data/paintOrder'
 import { claimHoldsTogether } from '../data/yearFormat'
 
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 
 /**
  * What is wrong with a document that no operation should have produced — said, never skipped.

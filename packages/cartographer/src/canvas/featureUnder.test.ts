@@ -7,7 +7,7 @@ import { featureUnder } from './featureUnder'
 
 import type { FeatureInputs } from './featureUnder'
 import type { Point } from '../viewport/viewport'
-import type { DerivedBorder } from '@europe-historical-atlas/core/editor/derivedBorders'
+import type { DerivedBorder } from '@europe-historical-atlas/core/data/derivedBorders'
 
 // France holds 0 1 2 3, the Empire 1 4 5 2. On screen: France the left square, the Empire the right one,
 // the shared edge 1–2 at x = 100.

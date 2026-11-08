@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import { saveYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
-import { saveYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { planYearWrite } from './yearWritePlan'
 

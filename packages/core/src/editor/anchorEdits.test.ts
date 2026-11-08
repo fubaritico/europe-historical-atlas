@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
+import { MIN_RING_ANCHORS } from '../data/yearDocument'
+
 import { insertAnchorOnStretch, removeAnchor, removeAnchors } from './anchorEdits'
 import { sharedBorderDocument } from './documentFixtures'
-import { MIN_RING_ANCHORS } from './yearDocument'
 
 const BY_EYE = { name: 'reported by eye', licence: 'fact' }
 

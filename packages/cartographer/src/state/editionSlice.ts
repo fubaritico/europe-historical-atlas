@@ -1,4 +1,9 @@
 import {
+  clearOverride,
+  dressPair,
+  dressSegments,
+} from '@europe-historical-atlas/core/data/borderOverrides'
+import {
   insertAnchorOnStretch,
   removeAnchors,
 } from '@europe-historical-atlas/core/editor/anchorEdits'
@@ -7,11 +12,6 @@ import {
   threadAnchor,
   weldAnchor,
 } from '@europe-historical-atlas/core/editor/anchorWeld'
-import {
-  clearOverride,
-  dressPair,
-  dressSegments,
-} from '@europe-historical-atlas/core/editor/borderOverrides'
 import {
   addPolity,
   moveAnchors,
@@ -27,10 +27,11 @@ import { pasteActions } from './pasteActions'
 
 import type { OutlineActions } from './outlineActions'
 import type { PasteActions } from './pasteActions'
+import type { Segment } from '@europe-historical-atlas/core/data/borderOverrides'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { AnchorRemoval } from '@europe-historical-atlas/core/editor/anchorEdits'
 import type { WeldDone, WeldRefusal } from '@europe-historical-atlas/core/editor/anchorWeld'
-import type { Segment } from '@europe-historical-atlas/core/editor/borderOverrides'
 import type {
   AnchorMove,
   OutlinePoint,
@@ -45,7 +46,6 @@ import type {
 } from '@europe-historical-atlas/core/editor/history'
 import type { RetraceDone, RetraceRefusal } from '@europe-historical-atlas/core/editor/retrace'
 import type { StackingMove } from '@europe-historical-atlas/core/editor/stacking'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 import type { StateCreator } from 'zustand'
 
 /**

@@ -1,9 +1,9 @@
 import { sheetDifferences } from '@europe-historical-atlas/core/editor/pasteSheet'
 
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import type { YearPolity } from '@europe-historical-atlas/core/data/yearFormat'
 import type { ClipboardContent, CopiedSheet } from '@europe-historical-atlas/core/editor/clipboard'
 import type { SheetLine } from '@europe-historical-atlas/core/editor/pasteSheet'
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /** What the sheet's paste shows, or why it shows nothing. */
 export type SheetPasteView =

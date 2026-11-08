@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { createYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import * as overlaps from '@europe-historical-atlas/core/editor/overlaps'
-import { createYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { createOverlapCache } from './overlapCache'
 
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 // CARTO-364 — the overlaps hatched, computed again only where a gesture moved something; a refusal of the geometry
 // skipped and said (the dev, 2026-11-06).

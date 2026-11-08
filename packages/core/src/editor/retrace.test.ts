@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
+import { cloneYearDocument } from '../data/yearDocument'
+
 import { insertAnchorOnStretch } from './anchorEdits'
 import { sharedBorderDocument } from './documentFixtures'
 import { checkRetrace, isRetraceRefusal, retraceArcs, retraceStretch } from './retrace'
-import { cloneYearDocument } from './yearDocument'
 
 import type { OutlinePoint } from './documentEdits'
-import type { YearDocument } from './yearDocument'
+import type { YearDocument } from '../data/yearDocument'
 
 const BY_EYE = { name: 'reported by eye', licence: 'fact' }
 

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { MIN_RING_ANCHORS } from '@europe-historical-atlas/core/editor/yearDocument'
+import { MIN_RING_ANCHORS } from '@europe-historical-atlas/core/data/yearDocument'
 
 import { screenToLonLatOnBackdrop } from '../../viewport/projection'
 import { TEST_BACKDROP_FRAME } from '../../viewport/testFrame'

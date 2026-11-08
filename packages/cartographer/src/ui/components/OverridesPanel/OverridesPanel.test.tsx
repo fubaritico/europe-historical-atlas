@@ -9,7 +9,7 @@ import { renderInEnglish } from '../../testing/renderInEnglish'
 
 import { OverridesPanel } from './OverridesPanel'
 
-import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
+import type { YearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 
 /*
  * The binding, not the view: `internal/OverridesList.test.tsx` proves [Clear] reports its row with a spy;

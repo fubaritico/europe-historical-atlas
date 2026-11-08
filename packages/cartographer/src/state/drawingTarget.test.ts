@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
+import { createYearDocument } from '@europe-historical-atlas/core/data/yearDocument'
 import { addPolity } from '@europe-historical-atlas/core/editor/documentEdits'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
-import { createYearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 import { describeDrawingTarget } from './drawingTarget'
 

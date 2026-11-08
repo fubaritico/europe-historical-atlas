@@ -224,7 +224,7 @@ target.z)` would be coherent with the navigation that already exists.
   a dead slider, on a dev tool. **Remedy if it bites**: grey the controls while the installed year is
   authored — which needs the year's kind to reach the panel after it is built. **Severity: cosmetic.**
 - **What the atlas does not yet draw of an authored year's borders** (2026-10-13, declared in
-  `core/editor/atlasBorders.ts` and pinned by its tests): a hand's **weight** (a limit between two vassals of
+  `core/data/atlasBorders.ts` and pinned by its tests): a hand's **weight** (a limit between two vassals of
   one lord is drawn as heavy as a sovereign one), a **dotted** hand (drawn dashed — no dot pattern yet), and
   an authored style on a **frontier** against unclaimed land (drawn in the frontier stroke, warned once per
   derivation). **Trigger**: the border-style session the dev announced on 2026-10-13. **Severity: worth knowing.**
