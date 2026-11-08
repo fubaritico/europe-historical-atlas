@@ -252,6 +252,68 @@ Scenario: delete several at once
 > ‹backspace› takes back the last anchor placed ([s02](s02-create-france-1100.md)): the two tools never
 > have a selection and an outline in progress at the same time.
 
+## Erasing an edge — CARTO-397
+
+```gherkin
+Scenario: select an edge
+  Given ⟨edit⟩ is active and France is the target
+  When I click the line between two of France's anchors
+  Then that edge is drawn in selection blue, as wide as a handle
+  And the bar reads "edge selected — Reaume de France · ‹delete› erases it"
+  And no anchor stays selected — a selection is points or an edge, never both
+```
+
+```gherkin
+Scenario: erase an edge two polities share
+  Given the edge selected lies on the border France shares with the Empire
+  When I press ‹delete› or ‹backspace›
+  Then the edge is erased from both outlines, and no anchor is removed
+  And each closed outline becomes an open outline from one end of the edge round to the other
+  And the bar reads "edge erased — Reaume de France, Sacrum Imperium: 2 outlines opened"
+  And one ‹ctrl+Z› puts the edge back in both
+```
+
+```gherkin
+Scenario: erase an edge of an open outline
+  Given France's outline is already open
+  When I select one of its edges and press ‹delete›
+  Then the outline is cut in two open outlines, and a piece left with a single anchor goes
+  And the bar reads "edge erased — Reaume de France · an outline cut in two"
+```
+
+```gherkin
+Scenario: an outline of two points, or a piece of one
+  Given France holds an open outline cut down to a piece of one point and the rest
+  When I erase the edge that leaves an anchor alone
+  Then that anchor is left out, and the bar adds " · a piece of one point left out"
+  When I erase the only edge of an open outline of two points
+  Then the outline goes whole, and the bar adds " · an outline of two points removed"
+```
+
+```gherkin
+Scenario: the selected edge goes
+  Given an edge is selected
+  When I take a handle, draw a marquee, click off every edge, or press ‹escape›
+  Then no edge is selected any more
+  When an undo or an edit takes the edge away
+  Then its line is no longer drawn as selected
+```
+
+```gherkin
+Scenario: from afar, no edge
+  Given the view is zoomed out too far for the tools to act
+  When I click on the target's outline
+  Then no edge is selected — the click chooses the polity under it, as from afar it always did
+  When an edge was selected before zooming out and I press ‹delete›
+  Then it is refused, as for anchors: "too far to edit — zoom in (…)"
+```
+
+> **Built 2026-11-08 (CARTO-397), not walked yet.** The dev's call, same evening: *"il faudrait qu'on puisse enlever
+> un trait entre deux points"* — and, for a shared edge, *"les deux pays à la fois … c'est spécialement pour les lacs"*:
+> a lake a border crosses is opened on both shores at once, each polity then closing its own. **Only the target's
+> edges are selected**, as only its anchors are: a neighbour's edge is reached by aiming the neighbour. An edge an undo
+> took away since the click is declined at ‹delete›, said in the console.
+
 ## Moving more than a point
 
 > **H-09 is closed, by deletion.** "Drag a whole stretch" was written as a hole — rigid, or bent? The dev

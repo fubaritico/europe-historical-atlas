@@ -33,6 +33,7 @@ import { buildScene } from './paint/scene'
 import { inDevicePixels } from './paint/style'
 import { answerOutlinesAndSelection, paintOnGuides } from './storeAnswers'
 import { arrowDoubleClick } from './tools/arrowDoubleClick'
+import { keptEdge } from './tools/edgeGestures'
 import { pencilCancel, pencilDrag, pencilEnd, pencilStart } from './tools/pencil'
 import { arrowDrag, arrowPress, resolvedTarget, toolKey } from './tools/toolGestures'
 import {
@@ -118,6 +119,7 @@ function repaint(it: LiveCanvas): void {
     frame: it.deps.frame,
     viewport: state.viewport,
     selected: new Set(it.session.selected),
+    selectedEdge: it.session.edge,
     // Under the white arrow the extent outline's anchors are handles too; the Pen and ⟨retrace⟩ act on
     // the target's own rings only.
     handles:
@@ -583,6 +585,7 @@ function watchStore(it: LiveCanvas, paint: () => void): () => void {
       const handles = new Set(editHandlesIn(it))
       it.session.selected = it.session.selected.filter((index) => handles.has(index))
     }
+    it.session.edge = keptEdge(it.session.edge, it.deps.store.getState().document)
     refreshTools(it)
   }
   const stops = [

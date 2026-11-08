@@ -19,13 +19,13 @@ import type { Catalogue } from '@europe-historical-atlas/core/i18n/catalogue'
  *   `retracingCannotEnd`, `retracingMovesStart`, `retracingReplaces` — The action under the pointer
  * - `tooFar`, `reachWould`, `notFramed`, `insertedFromWater`, `followedBorder`, `closedAlongWater`,
  *   `carved`, `removedAnchors`, `removedRings`, `pointsTakenFrom`, `keptPoints`, `notWelded`, `welded`,
- *   `retraceStartPrompt`, `retraceStartMoved`, `notRetraced`, `retraced`, `follows`, `keepsPoints`, `resumedOutline`, `keptOutline`, `carveHeld`, `closeOverOpenSuzerain`, `pasteOverOpenSuzerain`, `overlapPair`, `overlapRefused` — What
+ *   `retraceStartPrompt`, `retraceStartMoved`, `notRetraced`, `retraced`, `follows`, `keepsPoints`, `resumedOutline`, `keptOutline`, `carveHeld`, `closeOverOpenSuzerain`, `pasteOverOpenSuzerain`, `overlapPair`, `overlapRefused`, `edgeSelected`, `erasedEdge` — What
  *   a gesture did
  * - `refusedNoRing`, `refusedDressedRun`, `refusedTooShort`, `refusedDisagree`,
  *   `deliberateGap` — Why a retrace is refused
  * - `borderUnder`, `polityUnder` — What is under the pointer
  * - `stepInsertAnchor`, `stepDeleteAnchors`, `stepMoveAnchors`, `stepWeldAnchor`, `stepDrawOutline`,
- *   `stepRetrace`, `stepKeepOutline` — The history's names
+ *   `stepRetrace`, `stepKeepOutline`, `stepEraseEdge` — The history's names
  */
 export type CanvasMessageKey = keyof typeof en
 

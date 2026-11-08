@@ -52,6 +52,8 @@ export interface SceneInputs {
   viewport: Viewport
   /** Which anchors are selected, by index into the document's table. */
   selected: ReadonlySet<number>
+  /** The edge the white arrow selected, by its two anchors' indices (CARTO-397); absent when none is. */
+  selectedEdge?: readonly [number, number] | null
   /** Which anchors get a handle, by index — see {@link CanvasScene.handles}. */
   handles: readonly number[]
   /** Which anchors get a snap dot, by index — see {@link CanvasScene.snapAnchors}. */
@@ -377,6 +379,7 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
       })
     ),
     selected: inputs.selected,
+    selectedEdge: inputs.selectedEdge ?? null,
     cities: inputs.cities.map(({ name, lonLat, holder, alert }) => ({
       name,
       at: backdropToScreen(inputs.viewport, lonLatToBackdrop(lonLat, inputs.frame)),

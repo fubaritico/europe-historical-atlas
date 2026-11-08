@@ -127,6 +127,15 @@ describe('scene', () => {
 
       expect(scene.selected).toBe(selected)
     })
+
+    it('carries the selected edge through, and none when the inputs name none (CARTO-397)', () => {
+      const document = sharedBorderDocument()
+
+      expect(buildScene(document, inputs(document, { selectedEdge: [1, 2] })).selectedEdge).toEqual(
+        [1, 2]
+      )
+      expect(buildScene(document, inputs(document)).selectedEdge).toBeNull()
+    })
   })
 
   describe('variants', () => {

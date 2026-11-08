@@ -1200,3 +1200,72 @@ describe('paintCanvas — the overlaps hatched', () => {
     expect(ctx.globalAlpha).toBe(1)
   })
 })
+
+// CARTO-397 — the edge the white arrow selected: the line between its two anchors, in the selection blue, as wide as a
+// handle, under the handles.
+describe('painter — the selected edge', () => {
+  const anchors: Point[] = [
+    [10, 20],
+    [110, 20],
+    [110, 80],
+  ]
+
+  describe('happy path', () => {
+    it('strokes the line between its two anchors, in the selection blue and a handle wide', () => {
+      const { ctx, calls } = recordingContext()
+
+      paintCanvas(ctx, SIZE, scene({ anchors, selectedEdge: [0, 1] }), STYLE)
+
+      const from = calls.findIndex(
+        (call) => call.op === 'moveTo' && call.args[0] === 10 && call.args[1] === 20
+      )
+      expect(calls[from + 1]).toMatchObject({ op: 'lineTo', args: [110, 20] })
+      const stroke = calls.slice(from).find((call) => call.op === 'stroke')
+      expect(stroke).toMatchObject({
+        strokeStyle: STYLE.anchorStroke,
+        lineWidth: STYLE.anchorRadius,
+      })
+    })
+  })
+
+  describe('variants', () => {
+    it('draws it before the handles, so they sit over it', () => {
+      const { ctx, calls } = recordingContext()
+
+      paintCanvas(ctx, SIZE, scene({ anchors, selectedEdge: [1, 2] }), STYLE)
+
+      const edgeAt = calls.findIndex(
+        (call) => call.op === 'moveTo' && call.args[0] === 110 && call.args[1] === 20
+      )
+      const firstHandle = calls.findIndex((call) => call.op === 'arc')
+      expect(edgeAt).toBeGreaterThan(-1)
+      expect(firstHandle).toBeGreaterThan(edgeAt)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('draws nothing for an edge naming an anchor the table lacks', () => {
+      const { ctx, calls } = recordingContext()
+
+      paintCanvas(ctx, SIZE, scene({ anchors, selectedEdge: [1, 9] }), STYLE)
+
+      expect(
+        calls.some((call) => call.op === 'lineTo' && call.args[0] === 110 && call.args[1] === 20)
+      ).toBe(false)
+    })
+  })
+
+  // L4: N/A — two indices into the table the scene projected; the missing one is the managed case above.
+
+  describe('edge cases', () => {
+    it('draws no edge line with none selected', () => {
+      const { ctx, calls } = recordingContext()
+
+      paintCanvas(ctx, SIZE, scene({ anchors, selectedEdge: null }), STYLE)
+
+      expect(
+        calls.some((call) => call.op === 'moveTo' && call.args[0] === 10 && call.args[1] === 20)
+      ).toBe(false)
+    })
+  })
+})

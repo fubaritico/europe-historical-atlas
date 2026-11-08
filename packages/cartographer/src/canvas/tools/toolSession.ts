@@ -47,6 +47,11 @@ export interface ToolSession {
    */
   selected: number[]
   /**
+   * The edge the white arrow selected — the line between two anchors of the target's outline, clicked (CARTO-397) —
+   * which ‹delete› erases. `null` when none is; a handle or a marquee taken drops it, as ‹escape› does.
+   */
+  edge: [number, number] | null
+  /**
    * A press of the white arrow off any handle and any stretch, not yet decided (the dev, 2026-10-12):
    * released where it began, it is a click — choose the polity under it, or deselect; dragged, it is a
    * marquee. Deciding on release is what lets a marquee start on the sea without deselecting first.
@@ -150,6 +155,7 @@ export function idleSession(): ToolSession {
   return {
     outline: [],
     selected: [],
+    edge: null,
     pending: null,
     marquee: null,
     grabbed: null,

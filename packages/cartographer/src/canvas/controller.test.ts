@@ -1161,6 +1161,44 @@ describe('the tools from too far out (H-34)', () => {
       dispose()
     })
 
+    // CARTO-397, review ARCH-001: an edge selected survives a zoom out as anchors do, and does not go from afar either.
+    it('refuses Delete on an edge selected from afar, keeping the outline closed, and says so', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { node, store, resulted, dispose } = attach(TEN_KM)
+      aimAtFrance(store)
+      viewAtScale(store, 8)
+      for (const at of CANVAS_TRIANGLE) click(node, at)
+      click(node, [301, 201])
+      node.dispatchEvent(keyEvent('a'))
+      click(node, [400, 200])
+      viewAtScale(store, 1)
+      node.dispatchEvent(keyEvent('Delete'))
+
+      expect(store.getState().document.claims[0]?.open).toBeUndefined()
+      expect(resulted).toHaveBeenLastCalledWith(expect.stringContaining('too far to edit'))
+      warn.mockRestore()
+      dispose()
+    })
+
+    // CARTO-397, review ARCH-002: an undo that takes the selected edge away drops it from the selection.
+    it('drops an edge selected once an undo takes its outline away', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const { node, store, dispose } = attach(TEN_KM)
+      aimAtFrance(store)
+      viewAtScale(store, 8)
+      for (const at of CANVAS_TRIANGLE) click(node, at)
+      click(node, [301, 201])
+      node.dispatchEvent(keyEvent('a'))
+      click(node, [400, 200])
+      store.getState().undo()
+      node.dispatchEvent(keyEvent('Delete'))
+
+      // Kept, the edge would reach ‹delete› and be declined in the console as no longer drawn.
+      expect(warn).not.toHaveBeenCalledWith(expect.stringContaining('no edge erased'))
+      warn.mockRestore()
+      dispose()
+    })
+
     // open-outlines.md, the dev, 2026-11-05: ‹escape› leaves the outline, and leaving it keeps it, open.
     it('refuses Enter on an outline in hand from afar, and keeps it open on Escape', () => {
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)

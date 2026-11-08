@@ -176,6 +176,7 @@ export function gestureOf(it: LiveCanvas): GestureContext {
       projectedTerritories(it.deps.store.getState().document, anchorsOnScreen(it)),
     radius: HANDLE_HIT_RADIUS * it.ratio,
     editHandles: () => editHandlesIn(it),
+    fromAfar: () => tooFarToEdit(it),
     layers: snapLayersOf(it.deps.vectorLayers),
     report: joinedReports(it.deps.onResult),
     words: it.deps.words(),

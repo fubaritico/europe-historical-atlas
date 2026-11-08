@@ -7,11 +7,13 @@ import { FREE_POINT_PROVENANCE } from '../../state/editionSlice'
 import { isPenTool } from '../../state/toolSlice'
 import { lonLatToScreen, screenToLonLatOnBackdrop } from '../../viewport/projection'
 
-import { deleteSelected, editHandlesOf, insertOnStretch, penInsertHit } from './anchorGestures'
+import { editHandlesOf, insertOnStretch, penInsertHit } from './anchorGestures'
 import { anchorClick, waterTaking } from './borderSnap'
 import { carvingAnswer, refusedOverOpenSuzerain } from './carving'
-import { chooseCityAt, openChosenCity } from './cityHit'
+import { chooseCityAt } from './cityHit'
 import { TAG } from './consoleTag'
+import { selectEdgeAt } from './edgeGestures'
+import { editKey } from './editKeys'
 import { freeLonLatAt, repeatsLast } from './frameSnap'
 import { followedLayer, layerLines, snapHit, waterOf } from './layerHits'
 import { leaveLayer, reachLayer } from './layerSwitch'
@@ -356,6 +358,8 @@ export function arrowPress(context: GestureContext, at: Point, shift: boolean): 
   // A press starts clean: nothing a previous press left undecided may steer this one (ARCH-001).
   dropDrag(session)
   if (hit !== null) {
+    // A selection is points or an edge, never both (CARTO-397).
+    session.edge = null
     const held = session.selected.includes(hit)
     if (shift) {
       session.selected = held
@@ -509,7 +513,10 @@ export function selectionMoves(
  */
 function arrowClick(context: GestureContext, at: Point, shift: boolean): void {
   if (shift || chooseCityAt(context, at)) return
+  // On one of the target's edges, the click selects it — ‹delete› will erase it (CARTO-397).
+  if (selectEdgeAt(context, at)) return
   context.session.selected = []
+  context.session.edge = null
   const target = resolvedTarget(context)
   const under = polityAt(context.territoriesOnScreen(), at)
   if (under !== (target?.id ?? null)) context.store.getState().chooseTarget(under)
@@ -543,27 +550,8 @@ function marqueeSelect(
     normaliseRect(marquee.from, marquee.to)
   ).filter((index) => handles.has(index))
   const kept = shift ? context.session.selected : []
+  context.session.edge = null
   context.session.selected = [...kept, ...caught.filter((index) => !kept.includes(index))]
-}
-
-/**
- * The white arrow's keys: ‹escape› drops the selection, ‹delete› or ‹backspace› removes the anchor, ‹enter› opens
- * the box of the city chosen (CARTO-384).
- * @param context - the session and the store
- * @param key - the key, as `KeyboardEvent.key`
- * @returns whether the key was taken
- */
-function editKey(context: GestureContext, key: string): boolean {
-  if (key === 'Escape') {
-    // A marquee or a move in progress goes first; the selection on the next press of ‹escape›.
-    const session = context.session
-    const drawing = session.marquee !== null || session.moving !== null
-    dropDrag(session)
-    if (!drawing) session.selected = []
-    return true
-  }
-  if (key === 'Enter') return openChosenCity(context)
-  return key === 'Delete' || key === 'Backspace' ? deleteSelected(context) : false
 }
 
 /**

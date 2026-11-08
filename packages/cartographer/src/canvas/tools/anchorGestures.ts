@@ -33,6 +33,12 @@ export interface AnchorGestureContext extends BorderSnapContext, FrameSnapContex
    * anchors only (`targetHandles`), which is what a gesture test with no vassal needs.
    */
   editHandles?: () => readonly number[]
+  /**
+   * Whether the view is zoomed too far out for the tools to act (`s17`) — the canvas's `tooFarToEdit`. **Optional by
+   * contract**: a context without it is near enough, which is what a gesture test needs. From afar the white arrow's
+   * click only chooses a polity (H-34), so it selects no edge (CARTO-397, review ARCH-001).
+   */
+  fromAfar?: () => boolean
 }
 
 /** The step kind an inserted anchor is recorded under. */

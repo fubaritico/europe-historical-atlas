@@ -18,6 +18,7 @@ import {
   removePolity,
   updatePolity,
 } from '@europe-historical-atlas/core/editor/documentEdits'
+import { eraseEdge } from '@europe-historical-atlas/core/editor/eraseEdge'
 import { createHistory } from '@europe-historical-atlas/core/editor/history'
 import { isRetraceRefusal, retraceStretch } from '@europe-historical-atlas/core/editor/retrace'
 import { restack } from '@europe-historical-atlas/core/editor/stacking'
@@ -38,6 +39,7 @@ import type {
   Provenance,
   RemovalReport,
 } from '@europe-historical-atlas/core/editor/documentEdits'
+import type { EdgeErasure } from '@europe-historical-atlas/core/editor/eraseEdge'
 import type {
   History,
   HistoryMarker,
@@ -218,6 +220,16 @@ export interface EditionActions extends OutlineActions, PasteActions {
     step: HistoryStep,
     owner?: string
   ) => AnchorRemoval | null
+  /**
+   * Erase the edge between two anchors from every outline drawing it, as one undoable step — ‹delete› on an edge the
+   * white arrow selected (CARTO-397). A closed outline opens there, an open one is cut in two; no anchor goes, and an
+   * edge two polities share leaves both (the dev, 2026-11-08: *"c'est spécialement pour les lacs"*).
+   * @param a - one anchor of the edge
+   * @param b - the other
+   * @param step - how the gesture is named
+   * @returns what it opened and cut, or `null` when no outline draws that edge — and nothing was recorded
+   */
+  eraseEdge: (a: number, b: number, step: HistoryStep) => EdgeErasure | null
   /**
    * Weld an anchor onto another, as one undoable step — the white arrow dropping a point on a
    * neighbour's (`H-37`): every ring holding `from` holds `into` instead, so the two share it.
@@ -477,11 +489,11 @@ function backToTheLine(
  * The edits of the anchors — insert one on a stretch, remove some — each answering with what it
  * did, which `recorder`'s boolean cannot carry.
  * @param record - the runner every recorded action goes through
- * @returns `insertAnchor`, `deleteAnchors` and `retraceStretch`
+ * @returns `insertAnchor`, `deleteAnchors`, `retraceStretch` and `eraseEdge`
  */
 function anchorActions(
   record: (edit: (document: YearDocument) => boolean, step: HistoryStep) => boolean
-): Pick<EditionActions, 'insertAnchor' | 'deleteAnchors' | 'retraceStretch'> {
+): Pick<EditionActions, 'insertAnchor' | 'deleteAnchors' | 'retraceStretch' | 'eraseEdge'> {
   return {
     retraceStretch: (polityId, from, to, replaced, points, step): RetraceDone | RetraceRefusal => {
       // Overwritten at once: `record` runs the edit synchronously, and the answer comes back out of it.
@@ -507,6 +519,14 @@ function anchorActions(
         return removal !== null
       }, step)
       return removal
+    },
+    eraseEdge: (a, b, step): EdgeErasure | null => {
+      let erasure: EdgeErasure | null = null
+      record((document) => {
+        erasure = eraseEdge(document, a, b)
+        return erasure !== null
+      }, step)
+      return erasure
     },
   }
 }

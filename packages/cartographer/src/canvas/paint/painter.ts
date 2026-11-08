@@ -254,6 +254,8 @@ export interface CanvasScene {
   extentOutline: readonly (readonly Point[])[]
   /** Which anchors are selected, by the same index. */
   selected: ReadonlySet<number>
+  /** The edge the white arrow selected, by its two anchors' indices (CARTO-397); absent or `null` when none is. */
+  selectedEdge?: readonly [number, number] | null
   /** The cities `{Cities}` shows, each at its point on screen, with its name — guides for the borders (CARTO-193). */
   cities: readonly CityOnScreen[]
   /** Whether the cities are drawn as points in their holder's colour, rather than as a dot and its name. */
@@ -464,6 +466,27 @@ function paintSnapAnchors(
 }
 
 /**
+ * Draw the edge the white arrow selected (CARTO-397): the line between its two anchors, in the selection blue and as
+ * wide as a handle, under the handles — so it reads as chosen, as a selected anchor does.
+ * @param ctx - the context to draw into
+ * @param scene - what to draw
+ * @param style - the colours and sizes
+ */
+function paintSelectedEdge(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): void {
+  const edge = scene.selectedEdge
+  if (edge === undefined || edge === null) return
+  const from = scene.anchors[edge[0]]
+  const to = scene.anchors[edge[1]]
+  if (from === undefined || to === undefined) return
+  ctx.lineWidth = style.anchorRadius
+  ctx.strokeStyle = style.anchorStroke
+  ctx.beginPath()
+  ctx.moveTo(from[0], from[1])
+  ctx.lineTo(to[0], to[1])
+  ctx.stroke()
+}
+
+/**
  * Draw the handles.
  *
  * **White with a blue outline, solid blue when selected** — the dev's own words, 2026-09-22, and `s02`
@@ -474,6 +497,7 @@ function paintSnapAnchors(
  * @param style - the colours and sizes
  */
 function paintAnchors(ctx: Painter2D, scene: CanvasScene, style: PaintStyle): void {
+  paintSelectedEdge(ctx, scene, style)
   ctx.lineWidth = 1
   ctx.strokeStyle = style.anchorStroke
   for (const index of scene.handles) {

@@ -60,7 +60,9 @@ export function keyRefusedFromAfar(it: LiveCanvas, key: string): boolean {
   const tool = it.deps.store.getState().tool
   const deletes = tool === 'edit' && (key === 'Delete' || key === 'Backspace')
   const closes = tool === 'draw' && key === 'Enter' && it.session.outline.length > 0
-  if (deletes && it.session.selected.length > 0) refuseFromAfar(it, 'edit')
+  // The selection is anchors or an edge (CARTO-397): either survives a zoom out, and neither goes from afar.
+  const selection = it.session.selected.length > 0 || it.session.edge !== null
+  if (deletes && selection) refuseFromAfar(it, 'edit')
   else if (closes) refuseFromAfar(it, 'draw')
   else return false
   return true
