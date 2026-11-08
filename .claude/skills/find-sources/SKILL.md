@@ -66,9 +66,14 @@ the reasoning goes in the year's file (`files/plans/sources/1100.md`). Concepts:
 5. **Read the passage, not the abstract.** Download the text into its own folder of the scratchpad (`<theme>/<lot>/`),
    search it for every name of the place, read the paragraphs around each hit, copy the sentence. A book read by OCR:
    look at the page image before keeping a quotation whose letters are doubtful.
-6. **When the sources stop short, climb** — the method is `/enter-in-cms` « When the sources stop short »: the polity
+6. **Climb from the books too, not only from Wikipedia** (the dev, 2026-11-08: *"there is always an index at the end of
+   books, which leads to other books, which lead to other books"*). Every book read has notes and a bibliography: the
+   works they cite are the next titles to look for — at the BnF by their exact title, then in the open libraries. On
+   08/11 the BnF searched by place names gave nothing; Reilly's note on Lisbon (Menéndez Pidal; P. David, *Études
+   historiques sur la Galice et le Portugal*) was the way in.
+7. **When the sources stop short, climb** — the method is `/enter-in-cms` « When the sources stop short »: the polity
    that ended before the date → who replaced it → who held the place; a neighbouring town of the same district.
-7. **Behind an account — the BnF in every lot** (the dev, 2026-11-08: *"I pay for that subscription. We have to use it,
+8. **Behind an account — the BnF in every lot** (the dev, 2026-11-08: *"I pay for that subscription. We have to use it,
    a lot"*; on 07/11 three lots were done with no BnF line): search `bdl.bnf.fr` for each lot, beside the open libraries,
    not only for what they lack; then JSTOR and the others the dev opened
    (`references/reading-accounts.md`). In **his** Chrome, where he is logged in, one article at a time, read on screen
