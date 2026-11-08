@@ -1,106 +1,81 @@
 ---
 name: use-cartographer
-description: Draw or retouch a map in the Cartographer through the dev's Chrome — a polity, a border, a vassal, an island, a coast — with the Pen and the white arrow, then check the result in the file and in the Cities panel. Use whenever asked to draw or change something on a map, in French or English, with or without the word Cartographe.
-when_to_use: « dessine », « dessine ceci dans le Cartographe », « dessine-moi la Navarre », « retouche », « retouche la frontière », « retouche ceci dans le Cartographe », « corrige la carte », « déplace la frontière », « fais passer la frontière entre … et … », « trace », « ajoute un pays / un vassal / une île », « ferme le contour », « mets cette ville du bon côté », « applique tes recherches à la carte », draw, retouch, trace, move a border, fix the map. For copying a plate of a historical atlas, /draw-from-plate first, then this.
+description: Draw or retouch a map in the Cartographer through Chrome — a polity, a border, a vassal, an island, a coast, an enclave — measuring first with the skill's scripts (who holds each witness city, rivers, spikes, enclaves), deciding by the table of upstream decisions, then drawing with the Pen, the retrace tool and the white arrow, and proving the result in the file. Use whenever asked to draw or change something on a map, in French or English, with or without the word Cartographe.
+when_to_use: « dessine », « dessine ceci dans le Cartographe », « dessine-moi la Navarre », « retouche », « retouche la frontière », « retouche ceci dans le Cartographe », « corrige la carte », « déplace la frontière », « fais passer la frontière entre … et … », « trace », « ajoute un pays / un vassal / une île », « enclave », « zone disputée », « ferme le contour », « mets cette ville du bon côté », « applique tes recherches à la carte », draw, retouch, trace, move a border, fix the map. For copying a plate of a historical atlas, /draw-from-plate first, then this.
 metadata:
   author: europe-map
-  version: '1.0'
+  version: '2.0'
 ---
 
 # Using the Cartographer, as an agent
 
 The Cartographer (`packages/cartographer`) is the dev's 2D editor of the maps the atlas publishes. An agent uses it as
-he does: **through his Chrome** (the `claude-in-chrome` tools), on **his** dev server — never by writing `polities.json`
-by hand, which would bypass the document model's shared anchors. The outcome of a session is a map changed exactly where
-asked, **nothing else moved**, proved in the file.
+he does, **through Chrome** — never by writing `polities.json`, which would bypass the shared anchors. The outcome is a
+map changed exactly where asked, **nothing else moved**, proved in the file.
 
-The detailed record of every session so far — what was tried, what failed, the numbers — is
-[`references/journal.md`](references/journal.md) — **local, never committed** (the dev, 2026-10-12; excluded in
-`.git/info/exclude`), so absent from a clone. **Read it before a first drawing session, and whenever a gesture
-below does not behave as written.** Add your own dated section to it at the end of each session.
+**The loop: measure → decide → draw → measure again.** The measures are scripts, the decisions a table taken upstream,
+the drawing a set of gestures. Velocity comes from the scripts (never re-write a measure by hand), precision from the
+table (never re-decide what is decided).
 
-## Before anything — the rules of the 14/10 night (they cost a page, a frame rate and drawings)
+| step | where |
+| --- | --- |
+| measure | `scripts/` below — run with `node`, Node 24 (`PATH=~/.nvm/versions/node/v24.22.1/bin:$PATH`) |
+| decide | [`references/decide.md`](references/decide.md) — the table: border move, enclave, disputed zone, river, straight line, spikes |
+| draw | [`references/gestures.md`](references/gestures.md) — the Pen's roles, retracing, moving, giving a territory |
+| record | [`references/journal.md`](references/journal.md) — local, never committed; a dated section per session |
 
-1. **One writer per map.** A map open in a tab **saves itself two seconds after every gesture** (`AUTOSAVE_DELAY_MS`,
-   `persistence/autosaveKeeper.ts`) — the map itself, plus a `<map>.autosave.<date>` copy. Two tabs on one map overwrite
-   each other. So **the dev closes his Cartographer tab before you draw** — ask him, and wait for his yes. Another agent
-   drawing (the historian, the code session) is the same: one session at a time on `years/<map>/`.
-2. **Never reload or drive the dev's tab.** Open your own (`tabs_create_mcp`), close it when done. Never two of your
-   own tabs on the Cartographer: a second one beside his killed his page once, and his frame rate (43 → 13 images/s).
-3. **Copy the map before touching it**: `cp -R packages/atlas/public/years/<map> packages/atlas/public/years/<map>.before-<who>-<date>`
-   (git-ignored). Every gesture lands on disk within two seconds; this copy is the only way back outside ‹⌘Z›.
-4. **Find his server, never start one**: read the page title on each port first —
-   `curl -s localhost:<port>/ | grep -o '<title>[^<]*</title>'` for 5173–5176; the Cartographer's is
-   « Cartographer — Europe Historical Atlas ». Its port moves with the launch order (REPO-383). The CMS is on 3100.
-5. **Drawing is facts, not tracings.** A plate in copyright (Euratlas, Duby) is read, never traced; a public-domain or
-   CC plate may be (`/draw-from-plate`). Every historical choice you make is said to the dev — it is his to settle.
+## Before anything
 
-## Plan outside the browser, then draw
+1. **One writer per map.** A map open in a tab saves itself two seconds after every gesture. Two tabs on one map
+   overwrite each other: **draw in your own worktree, on your own server** (`pnpm -C <worktree>/packages/cartographer
+   exec vite --port 5180 --strictPort`, after reading the page titles on the ports), or in the dev's server once he has
+   closed his tab and said yes. Never reload or drive his tab; one tab of yours, closed at the end.
+2. **Copy the map before touching it**: `cp -R years/<map> years/<map>.before-<who>-<date>` (git-ignored). It is the way
+   back, and the `--against` of every measure.
+3. **Drawing is facts, not tracings.** A plate in copyright is read, never traced (`/draw-from-plate`). Every historical
+   choice made without a source is said to the dev.
 
-A retouch is decided before the first click, in the file:
+## The measures — `scripts/`
 
-- **Where things are**: the towns' coordinates from the CMS base, read-only —
-  `sqlite3 "file:packages/cms/cms.db?mode=ro"` (`place_periods`, `places`). The map's polities and rings:
-  `years/<map>/polities.json` (rings are lists of anchor indices) and `anchors.json`.
-- **Who holds what now**: point-in-ring for each town on the saved file; the anchors of the shared border between the
-  two polities (the indices both rings hold, contiguous).
-- **Simulate the change on a scratch copy** and re-test every town before the first click. On 2026-11-07 the simulation
-  found a third town on the wrong side that the panel had not shown.
-- Scratch scripts go in the session's scratchpad, never in the repository.
+Each prints plain lines; `--help` gives its usage. `--map` is a folder of `years/` (`1100`, `1100.before-claude-…`).
 
-## Opening, aiming, saving
+| script | answers |
+| --- | --- |
+| `sides.mjs --map 1100 [--box=w,s,e,n] [--against <copy>] [--all]` | which polity holds each CMS city, against its sourced holder (`ok`, `wrong`, `absent`, `unsourced`); with `--against`, what changed |
+| `simulate.mjs --map 1100 --plan plan.json` | which cities a planned zone moves, and whether each lands right — **before the first click** |
+| `enclaves.mjs --map 1100 [--box=…]` | for each city still wrong: its nearest opposing witness, enclave (and its radius) or disputed zone |
+| `rivers.mjs --map 1100 --polity <id>` | the runs of a polity's borders near one river, sampled every 5 km |
+| `shape.mjs --map 1100 [--polity <id>] [--against <copy>] [--stiff]` | the spikes (at the anchors added) and the straight cuts |
+| `registry.mjs --map 1100` | every polity with a Wikidata id and no dates — the « Use » forgotten in its form |
+| `screen.mjs --a "x,y,<bar text>" --b "x,y,<bar text>" -- lon,lat …` | the pixel of each target, from two hovers |
 
-- **Open a map**: `http://localhost:<port>/?map=<map>` (a folder of `years/`, e.g. `1100`), or _Open…_ in the top bar.
-  **Wait for the backdrop** (« Préparation du fond de carte… », « Preparing the backdrop… » in English, ~10 s, and it only progresses in the tab in front):
-  a click or a wheel notch sent before is lost or lands elsewhere. Screenshot first, act after.
-- **Calibrate**: hover two far-apart points, read longitude/latitude in the status bar (whole minutes, ±1.4 km), and
-  check against border corners visible on screen. The projection is Mercator: x linear in longitude, y linear in
-  `ln(tan(π/4 + φ/2))`. The file's anchors, projected, are better targets than the eye.
-- **Zoom before acting** — the tools wait for a zoom where a snap is ~10 km; the wheel zooms by notches and **drifts**:
-  zoom, screenshot, find the place again, zoom. Pan with the arrow keys on the focused canvas (any tool in hand).
-- **Save**: the map saves itself (rule 1). ‹⌘S› / _Save_ writes it at once; _Save as…_ (‹⌘⇧S›) makes another map.
-  The file's date is the proof (`ls -la years/<map>/`) — the bar may say nothing.
+The CMS base is read **read-only**, from the main checkout when the worktree has none. The tests, from the checkout's
+root: `node --test ".claude/skills/use-cartographer/scripts/lib/*.test.mjs"`. The commands only parse, call a measure
+of `lib/` and print: a decision written in a command cannot be tested — put it in `lib/measures.mjs`. A measure that
+disagrees with the screen is a defect of the measure: fix it with a test. No ESLint reads these `.mjs` (REPO-125's
+gap); Prettier does when called with `--ignore-path /dev/null`.
 
-## The gestures that work
+## The order of work on a map (the dev, 2026-11-08)
 
-- **Tools**: ‹P› the Pen, ‹A› the white arrow (anchors), ‹R› ⟨retracer⟩; ‹space› held borrows the hand.
-- **Hover, wait a second, read the status bar, then click.** The bar names what a click will do, in the page's language (English shown here) — « Following the
-  coastline for X », « Following the Rhône », « Inserting a point into X », « Closing the outline of X »,
-  « Branching from a shared anchor ». A click sent with the pointer move arrives before the hover is computed.
-- **Insert, then move — never in one drag.** With the Pen: hover a stretch, wait for « Inserting a point into X »,
-  click. Then the white arrow: hover the new handle, drag it. A press-and-drag with the Pen inserts nothing.
-- **Moving a shared anchor moves it for both polities** — that is how a border is moved without a gap.
-- **Following**: two consecutive clicks on the same coast, river or neighbour's ring insert everything between them, the
-  shorter way. Water wins over an anchor at the click. Click along a long thin island, not round it.
-- **A neighbour is drawn on its neighbour's anchors** (blue dots with the Pen in hand), never beside its outline.
-- **‹Backspace›** takes back the last anchor under the Pen; **‹⌘Z›** undoes a gesture — fifty times is a safe way back,
-  and the automatic save then writes the undone state.
-- **A new polity**: `[+]` in the action bar at the foot of {Polities}; fill **rank, status, suzerain and colour** as you go — a polity without them is
-  not drawn as the dev expects. A polity's islands are part of it.
-- **After a doubtful click, move the pointer away and look for the rubber band** (the blue line from the last anchor):
-  « Branching from a shared anchor » on hover alone means nothing was started.
+1. **Clean** — an imported map first (`nettoyage`, in the glossary): coasts followed, lakes carved, borders softened,
+   crenellations and doubled points removed. Redrawing, not drawing: nothing historical changes, so nothing to source —
+   but every city is re-tested after it (`sides.mjs --against`), since a softened border can cross one.
+2. **Retouch the borders by the sources** — the loop below, zone by zone; a zone is finished before the next.
+3. **Add the polities** the sources attest and the map lacks — when the dev says they existed.
 
-## Verify — in the panel, then in the file
+`shape.mjs` gathers what the cleaning needs (spikes, stiff cuts, doubled points); every new kind of fault met while
+cleaning becomes a measure of `lib/measures.mjs` with its test — a crenellation detector is the next one to write.
 
-- **{Cities} is the live check**: a town's name leaves red the moment the border passes it. Its advanced filters (the
-  funnel) list the towns of one holder by the sources; « Pas encore sur la carte » lists the holders the map lacks.
-- **Diff the file against your copy**: the anchor count, the list of polities whose rings changed (only those asked),
-  the shared run still contiguous (`set(ringA) & set(ringB)`). Then re-run the point-in-ring test on every town.
-- **Close your tab**, and tell the dev in a few lines: what moved, which towns changed side, every historical choice, and
-  what was left (a point planned and not needed is a better border — say it).
+## Plan, then draw
+
+- `sides.mjs` with the cities shown on the map ({Cities}: « Show all the cities », « Show as points »).
+- Read `decide.md`; write the plan of each zone as a polygon of anchor indices and free points; `simulate.mjs` it.
+- Draw by `gestures.md`, reading the status bar before every click; after each gesture, the result zone.
+- **Finish the zone**: `sides.mjs --against`, `shape.mjs --against`, `registry.mjs`; fix spikes and dates; list what is left with its decision
+  row. Never propose the next map while the zone has wrong cities or stiff cuts left (the dev, 2026-11-08).
 
 ## After the session
 
-- Add a dated section to [`references/journal.md`](references/journal.md): what worked, what did not, the numbers.
-- A gesture walked goes into its scenario (`files/plans/cartographer/scenarii/sNN-…`), marked walked with the date; a
-  surprise into `s99-holes.md`. A gesture that failed is a ticket (`/trello`, Idées), never a silent workaround.
-- Never commit `years/` yourself: the dev decides what is published (`known-issues/data.md`).
-
-## Gotchas
-
-- **A hidden tab does not draw**: Chrome stops `requestAnimationFrame` in a tab not in front — every hover waits.
-- **River names are the dataset's**: `Schelde`, `Maas`, `Sane` (the Saône), not French.
-- **A coast click that inserts nothing is a straight line** across the cape it skipped: bisect the stretch — never
-  between two coast points far apart over land.
-- **The view does not stay under the pointer while zooming** — re-find the place after each notch.
-- **Key text**: `Backspace`, not `BackSpace`; ‹⌘› is `cmd` in the key tool.
+- A dated section in `references/journal.md`; a gesture walked into its scenario (`files/plans/cartographer/scenarii/`),
+  a surprise into `s99-holes.md`, a failing gesture into a ticket (`/trello`).
+- Never commit `years/`: the dev decides what is published (`known-issues/data.md`).
