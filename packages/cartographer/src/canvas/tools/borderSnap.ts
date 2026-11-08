@@ -6,7 +6,7 @@ import { shortestRunBetween } from '../../geometry/lineSnap'
 
 import { TAG } from './consoleTag'
 import { nearestLayer } from './layerHits'
-import { sessionPointOf } from './toolSession'
+import { sessionPointOf, targetHandles } from './toolSession'
 
 import type { CanvasWords } from '../canvasWords'
 import type { LayerHitContext } from './layerHits'
@@ -75,16 +75,15 @@ export function anchorHit(
 export const ANCHOR_AIM_SHARE = 3 / 8
 
 /**
- * An anchor the pointer is right on that the water under it would **not** reuse — one placed by eye, or
- * taken from another layer — so the click lands on it rather than on the water. An anchor that came from
- * that water stays behind it: the water click reuses it anyway, which keeps a neighbour's coast intact.
- *
- * A source the document does not declare cannot reach here: a year whose anchor names one is refused when
- * it is read.
+ * An anchor the pointer is right on, which the click lands on rather than on the water. The dev, 2026-11-08:
+ * *"tu bascules de mode au clic sur un point"* — what is under the pointer decides the mode, a point before the
+ * coast or the river it may lie on. **One exception, which is no mode**: while the run already follows a water,
+ * an anchor taken from that same water is reached along it — the click still lands on that anchor, reused by
+ * its index, and the stretch between follows the shore instead of cutting across it.
  * @param context - the document, the session, the projection and the layers
  * @param at - the pointer, in screen pixels
- * @param layer - the water the click would otherwise take
- * @returns the anchor's index, or `null` when the water should take the click
+ * @param layer - the water nearest the pointer
+ * @returns the anchor's index, or `null` when the water takes the click
  */
 export function anchorOverWater(
   context: BorderSnapContext,
@@ -93,7 +92,7 @@ export function anchorOverWater(
 ): number | null {
   const aim = context.radius * ANCHOR_AIM_SHARE
   const hit = nearestAmong(context.anchorsOnScreen(), landable(context), at, aim)
-  if (hit === null) return null
+  if (hit === null || context.session.snap?.layer !== layer) return hit
   const document = context.store.getState().document
   const source = document.sources.find((each) => each.id === document.anchorSource[hit])
   const water = context.layers[layer].provenance
@@ -102,7 +101,7 @@ export function anchorOverWater(
 
 /**
  * The water that takes a Pen click here, if any — the nearer coast or river within reach, unless an anchor
- * is aimed at that it would not reuse (`anchorOverWater`, `s99` H-36 as rectified 2026-10-13).
+ * is aimed at (`anchorOverWater`, the dev's rule of 2026-11-08).
  *
  * **The one place the order is decided**: the click (`penClick`) and the hover (`snapOffer`) both ask it, so
  * what the Pen announces is what it does.
@@ -146,15 +145,38 @@ function ringRunTo(context: BorderSnapContext, to: number): number[] | null {
   const from = context.session.outline.at(-1)?.anchor ?? null
   if (from === null) return null
   const { document, tool, target } = context.store.getState()
+  const own = tool === 'retrace' ? new Set(targetHandles(document, target)) : null
   for (const claim of document.claims) {
-    if (tool === 'retrace' && claim.polity === target) continue
+    if (own !== null && claim.polity === target) continue
     for (const ring of claim.rings) {
-      const start = ring.indexOf(from)
-      const end = ring.indexOf(to)
-      if (start >= 0 && end >= 0) return shortestRunBetween(ring, start, end)
+      const run = followableRun(ring, from, to, own)
+      if (run !== null) return run
     }
   }
   return null
+}
+
+/**
+ * A ring's run between two of its anchors, the shorter way — unless it lies wholly on the retraced polity's
+ * own border. The dev, 2026-11-08: *"ça m'autorise à le faire"* — such a run would lay the stretch being
+ * replaced back, so the click goes straight to the anchor instead.
+ * @param ring - the ring
+ * @param from - the anchor the run leaves
+ * @param to - the anchor it reaches
+ * @param own - the retraced polity's anchors, or `null` outside ⟨retrace⟩
+ * @returns the run, `from` included, or `null`
+ */
+function followableRun(
+  ring: readonly number[],
+  from: number,
+  to: number,
+  own: ReadonlySet<number> | null
+): number[] | null {
+  const start = ring.indexOf(from)
+  const end = ring.indexOf(to)
+  if (start < 0 || end < 0) return null
+  const run = shortestRunBetween(ring, start, end)
+  return own !== null && run.every((anchor) => own.has(anchor)) ? null : run
 }
 
 /**

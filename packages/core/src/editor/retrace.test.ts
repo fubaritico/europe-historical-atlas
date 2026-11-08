@@ -123,6 +123,36 @@ describe('retrace', () => {
       expect(from(ringOf(doc, 'fr-couronne'), 0)).toEqual([0, 5, 1, 2, 3])
     })
 
+    // The dev, 2026-11-08: "faut rien interdire" — a run along the neighbour's own border takes that land.
+    it('takes the land between the new run and the border it follows back, from the following neighbour', () => {
+      const { doc, middle } = borderWithMiddle()
+      // France pushes to the Empire's corner 4 and back: the triangle 1–4–2 is France's, 4–5–2 the Empire's.
+      const result = retraceStretch(doc, 'fr-couronne', 1, 2, [middle], [joined(doc, 4)])
+      expect(result).toEqual({ removed: 1, added: 1, neighbours: ['hre'], untouched: [] })
+      expect(from(ringOf(doc, 'fr-couronne'), 1)).toEqual([1, 4, 2, 3, 0])
+      expect(from(ringOf(doc, 'hre'), 4)).toEqual([4, 5, 2])
+    })
+
+    it('drops the coast walked out and back, the neighbour keeping the rest of its land', () => {
+      const doc = sharedBorderDocument()
+      // The Empire gets a coast 5–7–6–2 to the south; France runs out along it to 7 and back to 2.
+      doc.anchors.push([2.5, 45.5], [3.5, 45.5])
+      doc.anchorSource.push(0, 0)
+      const hre = doc.claims.find((claim) => claim.polity === 'hre')
+      if (hre === undefined) throw new Error('the fixture has no Empire')
+      hre.rings[0] = [1, 4, 5, 7, 6, 2]
+      retraceStretch(doc, 'fr-couronne', 1, 2, [], [free(3, 47), joined(doc, 7), joined(doc, 6)])
+      const added = doc.anchors.length - 1
+      expect(from(ringOf(doc, 'hre'), 1)).toEqual([1, 4, 5, 7, added])
+      expect(from(ringOf(doc, 'fr-couronne'), 1)).toEqual([1, added, 7, 6, 2, 3, 0])
+    })
+
+    it('keeps one visit of an anchor the new run lands on twice in a row', () => {
+      const doc = sharedBorderDocument()
+      retraceStretch(doc, 'fr-couronne', 0, 1, [], [joined(doc, 5), joined(doc, 5)])
+      expect(from(ringOf(doc, 'fr-couronne'), 0)).toEqual([0, 5, 1, 2, 3])
+    })
+
     it('carries the new run into a deliberate gap that runs over the stretch', () => {
       const { doc, middle } = borderWithMiddle()
       doc.deliberateGaps.push({ ring: [2, middle, 1, 7], reason: 'a march' })
@@ -140,24 +170,6 @@ describe('retrace', () => {
       doc.runs.push({ run: [1, middle], hand: 'dotted', source: null, note: null })
       expect(retraceStretch(doc, 'fr-couronne', 1, 2, [middle], [])).toEqual({
         kind: 'dressed-run',
-      })
-    })
-
-    it('refuses a new run through an anchor a following ring keeps', () => {
-      const { doc, middle } = borderWithMiddle()
-      // The Empire follows the stretch and already holds 4: it would visit it twice.
-      expect(retraceStretch(doc, 'fr-couronne', 1, 2, [middle], [joined(doc, 4)])).toEqual({
-        kind: 'loop',
-        polity: 'hre',
-      })
-    })
-
-    it('refuses a new run that lands twice on one anchor', () => {
-      const doc = sharedBorderDocument()
-      const twice = [joined(doc, 5), joined(doc, 5)]
-      expect(retraceStretch(doc, 'fr-couronne', 0, 1, [], twice)).toEqual({
-        kind: 'loop',
-        polity: 'fr-couronne',
       })
     })
 

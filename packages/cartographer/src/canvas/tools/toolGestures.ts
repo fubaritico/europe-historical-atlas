@@ -24,6 +24,7 @@ import {
   takeBackStroke,
 } from './toolSession'
 import { closingPoints, closingReport, freshStretch, layerPoints } from './waterClosing'
+import { leaveLayerAtAnchor } from './waterVertex'
 import { releaseWeld, weldOfferAt } from './weldGestures'
 
 import type { AnchorGestureContext } from './anchorGestures'
@@ -183,7 +184,8 @@ export function placeClick(context: GestureContext, at: Point): void {
     return
   }
   // Elsewhere an existing anchor wins over a free point: the border is already there.
-  if (anchorClick(context, at) || offLayerClick(context, at)) leaveLayer(context)
+  if (anchorClick(context, at)) leaveLayerAtAnchor(context)
+  else if (offLayerClick(context, at)) leaveLayer(context)
 }
 
 /**

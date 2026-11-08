@@ -106,6 +106,36 @@ describe('retrace', () => {
   })
 
   describe('variants', () => {
+    // The dev, 2026-11-08 (Barcelona against Tortosa): "ça m'autorise à le faire" — the neighbour's ring
+    // between the two ends is the very border replaced; following it would lay that stretch back.
+    it('goes straight to the end rather than follow a neighbour along the border it replaces', () => {
+      const store = testStore()
+      const state = store.getState()
+      state.createPolity(testPolity('fr', 'France'), { kind: 'create', label: 'fr' })
+      state.createPolity(testPolity('hre', 'Empire'), { kind: 'create', label: 'hre' })
+      const free = (at: Point) => ({ at: lonLat(store, at), provenance: FREE_POINT_PROVENANCE })
+      state.drawOutline('fr', HEXAGON.map(free), { kind: 'draw-outline', label: 'fr' })
+      const shared = (index: number) => ({ ...free(HEXAGON[index] ?? [0, 0]), anchor: index })
+      // The Empire shares France's 1–2–3.
+      state.drawOutline(
+        'hre',
+        [shared(1), free([450, 100]), free([450, 300]), shared(3), shared(2)],
+        {
+          kind: 'draw-outline',
+          label: 'hre',
+        }
+      )
+      state.chooseTarget('fr')
+      state.selectTool('retrace')
+      const { context } = testGestureContext(store)
+      retraceClick(context, [300, 100])
+      retraceClick(context, [300, 300])
+      // Nothing laid yet: the start moves to 3, the border between left as it is.
+      expect(context.session.outline.map((point) => point.anchor)).toEqual([3])
+      expect(from(france(store), 1)).toEqual([1, 2, 3, 4, 5, 0])
+      expect(from(empire(store), 1)).toContain(2)
+    })
+
     it('replaces the other side with ‹alt› held', () => {
       const { store, context } = openRetrace()
       // Without the Empire: the other side runs through 1, where it would meet France.
@@ -130,13 +160,19 @@ describe('retrace', () => {
       expect(reports.at(-1)).toBe('France: 0 anchors replaced by 1 · Empire follows')
     })
 
-    // The trap: following the target's own ring between two of its anchors would lay the stretch back.
-    it('lands straight on the end anchor rather than following the target’s own ring', () => {
+    // The dev, 2026-11-08: "ça ne prend pas tout le tracé de la frontière" — from the start, a click further
+    // along the target's border takes it as it is and moves the start there; the run then ends on an anchor
+    // reached after a point of the author's.
+    it('moves the start along the target’s border, then ends after a point laid', () => {
       const { store, context, reports } = openRetrace()
       retraceClick(context, [350, 200])
       retraceClick(context, [200, 300])
-      expect(from(france(store), 2)).toEqual([2, 4, 5, 0, 1])
-      expect(reports.at(-1)).toBe('France: 1 anchor replaced by 0')
+      expect(context.session.outline.map((point) => point.anchor)).toEqual([4])
+      retraceClick(context, [100, 250])
+      retraceClick(context, [200, 100])
+      // 5 is replaced by the point laid, the document's anchor 8 (France 0–5, the Empire 6–7).
+      expect(from(france(store), 4)).toEqual([4, 8, 0, 1, 2, 3])
+      expect(reports.at(-1)).toBe('France: 1 anchor replaced by 1')
     })
 
     // Formentor, the walk of 2026-10-14: an end placed by eye on the shore is reached along the shore,
@@ -196,9 +232,8 @@ describe('retrace', () => {
       retraceClick(context, [350, 200])
       expect(context.session.outline.map((point) => point.anchor)).toEqual([1, 6])
       expect(from(france(store), 0)).toEqual([0, 1, 2, 3, 4, 5])
-      expect(reports.at(-1)).toBe(
-        'not retraced: the new run passes again through an anchor Empire keeps'
-      )
+      // The end clicked on the Empire's ring follows it through 7: France would take the whole Empire.
+      expect(reports.at(-1)).toBe('not retraced: Empire would be left with fewer than 3 anchors')
     })
 
     // The dev, 2026-10-14: "c'est les Obotrites qui comptent" — the Empire meets France at 1, inside
@@ -246,9 +281,6 @@ describe('retrace', () => {
       const said = (refusal: RetraceRefusal) => refusalMessage(refusal, document, 'France', EN)
       expect(said({ kind: 'dressed-run' })).toBe(
         'not retraced: a border dressed by hand runs over this stretch — clear it in the Overrides panel first'
-      )
-      expect(said({ kind: 'loop', polity: 'hre' })).toBe(
-        'not retraced: the new run passes again through an anchor Empire keeps'
       )
       expect(said({ kind: 'too-short', polity: 'fr' })).toBe(
         'not retraced: France would be left with fewer than 3 anchors'
@@ -300,19 +332,35 @@ describe('retraceView', () => {
   it('names the neighbour that would follow', () => {
     const { context } = openRetrace()
     retraceClick(context, [300, 100])
+    retraceClick(context, [360, 120])
     expect(retraceView(context, FRANCE, [350, 200]).sentence).toBe(
       'Retracing France — replaces 0 anchors · Empire follows · ‹alt› the other side'
     )
   })
 
-  it('says why an end would be refused, and previews nothing', () => {
+  // The dev, 2026-11-08: "dès que je clique sur un autre point, ça se désactive" — the start's neighbour,
+  // nothing laid between, moves the start instead of ending a retrace that would change nothing.
+  it('moves the start onto the next anchor clicked with nothing laid, the run going on', () => {
+    const { store, context } = openRetrace()
+    const before = [...france(store)]
+    retraceClick(context, [300, 100])
+    expect(retraceView(context, FRANCE, [350, 200]).sentence).toBe(
+      'Retracing France — moves the start here, the run goes on'
+    )
+    retraceClick(context, [350, 200])
+    expect(context.session.outline.map((point) => point.anchor)).toEqual([2])
+    expect(france(store)).toEqual(before)
+  })
+
+  // The dev, 2026-11-08: "faut rien interdire" — a run through a neighbour's anchor is no longer refused.
+  it('previews a run through an anchor the following neighbour keeps', () => {
     const { context } = openRetrace()
     retraceClick(context, [300, 100])
     retraceClick(context, [400, 100])
     const view = retraceView(context, FRANCE, [350, 200])
-    expect(view.replaced).toBeNull()
+    expect(view.replaced).not.toBeNull()
     expect(view.sentence).toBe(
-      'Retracing France — cannot end here: the new run passes again through an anchor Empire keeps'
+      'Retracing France — replaces 0 anchors · Empire follows · ‹alt› the other side'
     )
   })
 

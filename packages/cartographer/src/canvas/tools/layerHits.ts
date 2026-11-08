@@ -25,7 +25,7 @@ export interface LayerHitContext {
 }
 
 /** The layers a click may snap to — the coast first, so an exact tie goes to the shore. */
-const SNAP_LAYERS: readonly SnapLayer[] = ['coast', 'river']
+export const SNAP_LAYERS: readonly SnapLayer[] = ['coast', 'river']
 
 /**
  * The layer the Pen follows in its current mode, or `null` for the free Pen.

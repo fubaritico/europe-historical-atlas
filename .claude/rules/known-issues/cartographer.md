@@ -204,3 +204,14 @@ Open issues of `packages/cartographer`, its tests and its tooling. Loaded by pat
   letters are French because the interface is"*), so the status bar and a city's box read « 0°25′O » under « Coordinates ».
   **Trigger**: the language switch, ATLAS-266 — the letters from the catalogue, both callers and their tests in one pass,
   the dev's call. **Severity: cosmétique.**
+- **Two ways of telling an anchor lies on a water** (2026-11-08, review ARCH-002 of the retrace that takes a neighbour's
+  land): `borderSnap.anchorOverWater` asks the anchor's **provenance** (taken from the coast), `waterVertex.waterVertexOf`
+  its **position** (exactly on a coast vertex). They disagree for a coast anchor moved off the line, or a hand-placed one
+  exactly on it. Left open by my decision: the provenance rule is the dev's of 2026-10-13 and changing it changes which
+  clicks follow the shore. **Remedy**: one criterion — `waterVertexOf` against `session.snap` — once the border snap's
+  context carries the backdrop's frame. **Severity: à savoir.**
+- **The retrace preview does not foresee a follow at the end click** (2026-11-08): a click ending on the target's
+  anchor after a neighbour's anchor of the same ring follows that ring (`borderRunTo`), which the preview
+  (`retraceView`) does not lay — it can promise a retrace the click then refuses as « too short » (France swallowing
+  the whole Empire, `retrace.test.ts`). Masked until that day by the loop refusal. **Remedy**: the preview lays the
+  same follow as the click. **Severity: cosmétique.**

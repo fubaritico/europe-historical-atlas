@@ -1,5 +1,6 @@
 import { addAnchor, declareSource } from './documentEdits'
 import { everyOutline, isRingOpen, outlineFloor } from './outlines'
+import { signedDoubleArea, withoutStrayLoops } from './strayLoops'
 
 import type { OutlinePoint } from './documentEdits'
 import type { YearDocument } from './yearDocument'
@@ -13,7 +14,9 @@ import type { YearDocument } from './yearDocument'
  * geometry. **A ring that only touches it keeps its points** (the dev, 2026-10-14: *"c'est les Obotrites
  * qui comptent"*): the retrace corrects the polity aimed at, and a neighbour meeting the stretch at one of
  * its anchors is not edited for it — what that leaves between the two is visible, said, and corrected by
- * retracing that neighbour. The stretch's own anchors stay in the table, as every anchor does while editing;
+ * retracing that neighbour. **A run that lands on anchors a following ring keeps is never refused** (the dev,
+ * 2026-11-08: *"faut rien interdire"*): that ring is rebuilt and the loops the run left in it — out along its own
+ * border and back — are cut (`strayLoops.ts`), so the land between goes to the polity retraced. The stretch's own anchors stay in the table, as every anchor does while editing;
  * nothing holding them any more, they leave the file at save.
  *
  * **Everything is checked before anything is written**, so a refused retrace leaves the document as it
@@ -92,8 +95,6 @@ export type RetraceRefusal =
   | { kind: 'bad-anchor' }
   /** A border dressed by hand runs over the stretch: replacing it would undo that stroke (`s13`). */
   | { kind: 'dressed-run' }
-  /** The new run passes again through an anchor the ring keeps — the ring would touch itself there. */
-  | { kind: 'loop'; polity: string | null }
   /** A ring would be left with fewer anchors than enclose an area. */
   | { kind: 'too-short'; polity: string | null }
 
@@ -262,7 +263,8 @@ export function isRetraceRefusal(
  *
  * The new run's points are those strictly between `from` and `to`, in that order; a point that names an
  * existing anchor (a neighbour's, met along its border) is that anchor, never a copy (`H-06`). An empty run
- * straightens the stretch into one segment.
+ * straightens the stretch into one segment — a case the Cartographer's tool no longer sends: there, a click with
+ * nothing laid moves the start along the border instead (`canvas/tools/retrace.movesStart`).
  * @param doc - the document to edit
  * @param polityId - whose ring is retraced
  * @param from - the anchor the retrace starts on
@@ -279,18 +281,20 @@ export function retraceStretch(
   replaced: readonly number[],
   points: readonly OutlinePoint[]
 ): RetraceDone | RetraceRefusal {
-  const check = checkRetraceRun(doc, polityId, from, to, replaced, points)
-  if (isRetraceRefusal(check)) return check
-  const laid = points.map((point) =>
-    typeof point.anchor === 'number'
-      ? point.anchor
-      : addAnchor(doc, [point.at[0], point.at[1]], declareSource(doc, point.provenance))
-  )
-  for (const follower of check.followers) {
-    const rebuilt = follower.open
-      ? splicedOpen(follower.ring, from, replaced.length, laid, follower.step)
-      : spliced(follower.ring, from, replaced.length, laid, follower.step)
-    follower.ring.splice(0, follower.ring.length, ...rebuilt)
+  const plan = plannedRun(doc, polityId, from, to, replaced, points)
+  if ('kind' in plan) return plan
+  const { check, laid, rebuilt } = plan
+  // The rings were rebuilt against the index each new point takes: the table only grows at its end.
+  for (const [k, point] of points.entries()) {
+    if (typeof point.anchor === 'number') continue
+    const index = addAnchor(doc, [point.at[0], point.at[1]], declareSource(doc, point.provenance))
+    if (index !== laid[k])
+      throw new Error('a new anchor did not take the index its run was built on')
+  }
+  for (const [at, follower] of check.followers.entries()) {
+    const ring = rebuilt[at]
+    if (ring === undefined) throw new Error('a following ring was not rebuilt')
+    follower.ring.splice(0, follower.ring.length, ...ring)
   }
   return {
     removed: replaced.length,
@@ -302,7 +306,7 @@ export function retraceStretch(
 
 /**
  * Check a retrace with its new run, without writing: the stretch ({@link checkRetrace}), then what the run
- * does to each ring taking it — an anchor visited twice, too few anchors left. What the tool's preview reads
+ * does to each ring taking it — too few anchors left. What the tool's preview reads
  * before the last click, so the bar never promises a replacement the click would refuse.
  * @param doc - the document to read
  * @param polityId - whose ring is retraced
@@ -320,39 +324,102 @@ export function checkRetraceRun(
   replaced: readonly number[],
   points: readonly OutlinePoint[]
 ): RetraceCheck | RetraceRefusal {
+  const plan = plannedRun(doc, polityId, from, to, replaced, points)
+  return 'kind' in plan ? plan : plan.check
+}
+
+/** A retrace checked and its rings rebuilt, before anything is written. */
+interface PlannedRun {
+  /** The stretch's check: the rings that follow, and those left untouched. */
+  check: RetraceCheck
+  /** The new run as anchor indices — a new point at the index it will take at the table's end. */
+  laid: number[]
+  /** Each follower's new ring, in the followers' order. */
+  rebuilt: number[][]
+}
+
+/**
+ * Check a retrace and rebuild every following ring, without writing — **the one computation** the preview and the
+ * edit share, so the edit writes exactly what the preview checked.
+ * @param doc - the document to read
+ * @param polityId - whose ring is retraced
+ * @param from - the anchor the retrace starts on
+ * @param to - the anchor it ends on
+ * @param replaced - the anchors strictly between them that go, from `from`
+ * @param points - the new run, strictly between `from` and `to`
+ * @returns the plan, or why the retrace is refused
+ */
+function plannedRun(
+  doc: YearDocument,
+  polityId: string,
+  from: number,
+  to: number,
+  replaced: readonly number[],
+  points: readonly OutlinePoint[]
+): PlannedRun | RetraceRefusal {
   const check = checkRetrace(doc, polityId, from, to, replaced)
   if (isRetraceRefusal(check)) return check
   const count = doc.anchors.length
   const reused = points.flatMap((point) => (typeof point.anchor === 'number' ? [point.anchor] : []))
   if (reused.some((index) => !(index >= 0 && index < count))) return { kind: 'bad-anchor' }
-  return refuseOnRings(check.followers, replaced, reused, points.length) ?? check
+  // The new points are not anchors yet: each is given the index it will take, past the table's end.
+  const fresh: [number, number][] = []
+  const laid = points.map((point) => {
+    if (typeof point.anchor === 'number') return point.anchor
+    fresh.push([point.at[0], point.at[1]])
+    return count + fresh.length - 1
+  })
+  const rebuilt = rebuiltRings(check.followers, from, replaced.length, laid, (index) =>
+    index < count ? anchorAt(doc, index) : (fresh[index - count] ?? anchorAt(doc, index))
+  )
+  return Array.isArray(rebuilt) ? { check, laid, rebuilt } : rebuilt
 }
 
 /**
- * What each ring taking the new run would refuse: an anchor visited twice, or too few anchors left.
+ * Every ring taking the new run, rebuilt: the stretch replaced, then — on a closed ring — the stray loops the run
+ * left cut out (`strayLoops.ts`), so a run along a neighbour's coast takes that land from it. Never refused for
+ * a loop (the dev, 2026-11-08: *"faut rien interdire"*); refused only for a ring left too short to enclose an area.
  * @param followers - the rings that take the run
- * @param replaced - the anchors that leave them
- * @param reused - the existing anchors the new run lands on
- * @param added - how many points the new run has
- * @returns the first refusal, or `null`
+ * @param from - where the stretch starts
+ * @param length - how many anchors the stretch holds between its ends
+ * @param laid - the new run, from `from` towards `to`, as anchor indices
+ * @param at - where each anchor lies, the new run's included
+ * @returns each follower's new ring, in the followers' order, or the refusal
  */
-function refuseOnRings(
+function rebuiltRings(
   followers: readonly Follower[],
-  replaced: readonly number[],
-  reused: readonly number[],
-  added: number
-): RetraceRefusal | null {
-  const gone = new Set(replaced)
-  const twice = new Set(reused).size !== reused.length
+  from: number,
+  length: number,
+  laid: readonly number[],
+  at: (index: number) => readonly [number, number]
+): number[][] | RetraceRefusal {
+  const rings: number[][] = []
   for (const follower of followers) {
-    const kept = follower.ring.filter((index) => !gone.has(index))
-    if (twice || reused.some((index) => kept.includes(index))) {
-      return { kind: 'loop', polity: follower.polity }
-    }
-    if (kept.length + added < outlineFloor(follower.open))
+    const ring = follower.open
+      ? splicedOpen(follower.ring, from, length, laid, follower.step)
+      : withoutStrayLoops(
+          spliced(follower.ring, from, length, laid, follower.step),
+          at,
+          signedDoubleArea(follower.ring, at)
+        )
+    if (ring.length < outlineFloor(follower.open))
       return { kind: 'too-short', polity: follower.polity }
+    rings.push(ring)
   }
-  return null
+  return rings
+}
+
+/**
+ * Where an anchor of the document lies.
+ * @param doc - the document
+ * @param index - the anchor
+ * @returns its position
+ * @throws when the document holds no such anchor — the run was checked against the table before
+ */
+function anchorAt(doc: YearDocument, index: number): readonly [number, number] {
+  const position = doc.anchors[index]
+  if (position === undefined) throw new Error(`anchor ${String(index)} is not in the document`)
+  return position
 }
 
 /**

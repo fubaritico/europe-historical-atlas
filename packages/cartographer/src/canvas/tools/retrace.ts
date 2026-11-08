@@ -7,16 +7,14 @@ import { smallerSide } from '@europe-historical-atlas/core/geo/retraceSide'
 
 import { nearestAmong } from '../../geometry/hitTest'
 import { MIN_RING_ANCHORS } from '../../geometry/ringClosure'
-import { backdropToLonLat } from '../../viewport/projection'
 
 import { TAG } from './consoleTag'
-import { layerLines, snapHit } from './layerHits'
 import { outlineOnScreen, placeClick, resolvedTarget, snapClick } from './toolGestures'
 import { clearOutline, sessionPointOf, targetHandles } from './toolSession'
+import { waterVertexOf } from './waterVertex'
 
 import type { CanvasMessageKey } from '../i18n'
 import type { GestureContext } from './toolGestures'
-import type { SnapLayer, SnapVertex } from './toolSession'
 import type { Point } from '../../viewport/viewport'
 import type { OutlinePoint } from '@europe-historical-atlas/core/editor/documentEdits'
 import type {
@@ -40,9 +38,6 @@ import type { Translate } from '@europe-historical-atlas/core/i18n/catalogue'
 
 /** The step kind a retrace is recorded under. */
 export const RETRACE_KIND = 'retrace'
-
-/** The layers a start anchor may sit on — the coast first, as the Pen's ties go to the shore. */
-const START_LAYERS: readonly SnapLayer[] = ['coast', 'river']
 
 /** A polity the tools act on: its id and its name. */
 interface Polity {
@@ -72,29 +67,6 @@ export function retraceAnchorUnder(
 }
 
 /**
- * The layer vertex an anchor sits exactly on — so the first click after the start follows the coast or the
- * river from it, as the Pen follows from a vertex it snapped onto. Exact equality, as `anchorsByPosition`
- * reads it: an anchor taken from the coast *is* the coast vertex.
- * @param context - the layers, the frame and the view
- * @param anchor - the start anchor
- * @returns the vertex, or `null` for an anchor placed by eye
- */
-function vertexUnder(context: GestureContext, anchor: number): SnapVertex | null {
-  const at = context.store.getState().document.anchors[anchor]
-  const onScreen = context.anchorsOnScreen()[anchor]
-  if (at === undefined || onScreen === undefined) return null
-  for (const layer of START_LAYERS) {
-    const hit = snapHit(context, layer, onScreen)
-    const vertex =
-      hit === null ? undefined : layerLines(context, layer)[hit.contour]?.points[hit.vertex]
-    if (hit === null || vertex === undefined) continue
-    const lonLat = backdropToLonLat(vertex, context.frame)
-    if (lonLat[0] === at[0] && lonLat[1] === at[1]) return hit
-  }
-  return null
-}
-
-/**
  * Start a retrace where the press is: it must land on one of the target's anchors, which becomes the run's
  * first point. **The one owner of that rule** (ARCH-001): the first click and a Pencil drag on an empty run
  * both start here, so a run can never begin on anything but an anchor of the outline it corrects — a run
@@ -119,7 +91,7 @@ function startRetrace(context: GestureContext, polity: Polity, at: Point): boole
     return false
   }
   context.session.outline = [point]
-  context.session.snap = vertexUnder(context, anchor)
+  context.session.snap = waterVertexOf(context, anchor)
   return true
 }
 
@@ -210,8 +182,6 @@ export function refusalReason(
       return t('refusedNoRing', { name: targetName })
     case 'dressed-run':
       return t('refusedDressedRun')
-    case 'loop':
-      return t('refusedLoop', { holder: nameOf(document, refusal.polity, t) })
     case 'too-short':
       return t('refusedTooShort', {
         holder: nameOf(document, refusal.polity, t),
@@ -357,8 +327,12 @@ function endRetrace(context: GestureContext, polity: Polity, before: number): vo
     )
     return
   }
-  const replaced = replacedSide(context, arcs, ends, outlineOnScreen(context))
   const points: OutlinePoint[] = context.session.outline.slice(1, -1)
+  if (movesStart(points)) {
+    slideStart(context)
+    return
+  }
+  const replaced = replacedSide(context, arcs, ends, outlineOnScreen(context))
   const step = { kind: RETRACE_KIND, label: context.words.t('stepRetrace', { name: polity.name }) }
   const answer = context.store
     .getState()
@@ -374,6 +348,31 @@ function endRetrace(context: GestureContext, polity: Polity, before: number): vo
     console.error(`${TAG} the document refused a retrace the tool had checked (${answer.kind}).`)
   }
   refuseEnd(context, before, refusalMessage(answer, document, polity.name, context.words.t))
+}
+
+/**
+ * Whether a click on another of the target's anchors moves the start rather than ends the run: nothing has been
+ * laid since the start. The dev, 2026-11-08: *"ça ne prend pas tout le tracé de la frontière"* — from the start,
+ * a click anywhere further along the border takes the border up to there, unchanged, and the run goes on from
+ * that anchor; the run ends on the target's anchor reached after a point of the author's own.
+ * @param points - the points laid between the ends
+ * @returns `true` when the click moves the start
+ */
+export function movesStart(points: readonly OutlinePoint[]): boolean {
+  return points.length === 0
+}
+
+/**
+ * Move the run's start onto the anchor just clicked, and say so.
+ * @param context - the session and the store
+ */
+function slideStart(context: GestureContext): void {
+  const last = context.session.outline.at(-1)
+  const anchor = last?.anchor
+  if (last === undefined || anchor === undefined || anchor === null) return
+  context.session.outline = [last]
+  context.session.snap = waterVertexOf(context, anchor)
+  context.report(context.words.t('retraceStartMoved'))
 }
 
 /**
@@ -501,8 +500,14 @@ function endView(
       sentence: context.words.t('retracingOtherOutline', { name: polity.name }),
     }
   }
-  const replaced = replacedSide(context, arcs, ends, [...outlineOnScreen(context), pointer])
   const run: OutlinePoint[] = context.session.outline.slice(1)
+  if (movesStart(run)) {
+    return {
+      replaced: null,
+      sentence: context.words.t('retracingMovesStart', { name: polity.name }),
+    }
+  }
+  const replaced = replacedSide(context, arcs, ends, [...outlineOnScreen(context), pointer])
   const check = checkRetraceRun(document, polity.id, ends.from, ends.to, replaced, run)
   if (isRetraceRefusal(check)) {
     return {

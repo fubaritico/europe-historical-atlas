@@ -1921,7 +1921,8 @@ describe('the Pen following the coast, on the canvas', () => {
   describe('a neighbour along the same shore', () => {
     // The dev's case, Spain then Portugal (2026-10-11): over the neighbour's coast anchor the Pen keeps
     // following the coast, rather than offering to branch.
-    it('says it follows the coastline over a neighbour’s coast anchor, not that it branches', () => {
+    // The dev, 2026-11-08: "tu bascules de mode au clic sur un point" — over a point, the point decides.
+    it('says it branches from a neighbour’s coast anchor under the pointer, the coast mode aside', () => {
       const { node, store, acted, dispose } = attachWithShore()
       click(node, [60, 218])
       click(node, [160, 218])
@@ -1937,7 +1938,7 @@ describe('the Pen following the coast, on the canvas', () => {
       store.getState().aimAt('pt')
       store.getState().choosePenMode('coast')
       node.dispatchEvent(pointerEvent('pointermove', { offsetX: 160, offsetY: 219 }))
-      expect(acted).toHaveBeenLastCalledWith('Following the coastline for Portucale')
+      expect(acted).toHaveBeenLastCalledWith('Branching from a shared anchor — held by 1 path')
       dispose()
     })
   })

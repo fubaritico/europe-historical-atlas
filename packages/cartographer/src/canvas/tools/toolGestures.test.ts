@@ -1001,8 +1001,9 @@ function shoreNeighbours() {
 }
 
 describe('two neighbours along one shore', () => {
-  // The dev's case, Spain then Portugal: the shared vertex is France's own anchor, and the Pen keeps
-  // following the coast from it rather than branching off it.
+  // The dev's case, Spain then Portugal: the shared vertex is France's own anchor, and the Pen follows the
+  // coast from it. Since 2026-11-08 the anchor is taken as a point first ("tu bascules de mode au clic sur un
+  // point"), the bar saying each change of mode.
   it('starts on the neighbour’s coast anchor by its index, and follows the shore from there', () => {
     const { context, reports } = shoreNeighbours()
 
@@ -1011,7 +1012,11 @@ describe('two neighbours along one shore', () => {
 
     expect(context.session.outline[0]?.anchor).toBe(15)
     expect(context.session.outline.slice(1).every((point) => point.anchor === null)).toBe(true)
-    expect(reports).toEqual(['inserted 15 vertices from the coastline'])
+    expect(reports).toEqual([
+      'Pen',
+      'inserted 15 vertices from the coastline',
+      'Pen — follow the coast',
+    ])
   })
 
   it('reuses every neighbour’s anchor a coast stretch runs over, and adds only the rest', () => {
@@ -1043,7 +1048,7 @@ describe('two neighbours along one shore', () => {
 
   // s02, "The Pen finds the coast by itself" (2026-10-12): the plain Pen snaps to the shore too, so the
   // neighbour's coast anchor is reused by its index — still shared — and the Pen now follows the coast.
-  it('reuses the neighbour’s coast anchor in free mode, and turns to following the coast', () => {
+  it('reuses the neighbour’s coast anchor in free mode, ready to follow the coast from it', () => {
     const { context, reports } = shoreNeighbours()
     context.store.getState().choosePenMode('free')
 
@@ -1051,8 +1056,8 @@ describe('two neighbours along one shore', () => {
 
     expect(context.session.outline[0]?.anchor).toBe(15)
     expect(context.session.snap).not.toBeNull()
-    expect(context.store.getState().penMode).toBe('coast')
-    expect(reports).toEqual(['Pen — follow the coast'])
+    expect(context.store.getState().penMode).toBe('free')
+    expect(reports).toEqual([])
   })
 
   it('places a free point next to the shore without capturing a neighbour’s anchor', () => {
@@ -1612,15 +1617,16 @@ describe('a neighbour’s anchor placed by eye beside a river', () => {
   })
 
   describe('managed errors', () => {
-    it('leaves the click to the river over an anchor recorded from that river', () => {
+    // The dev, 2026-11-08: "tu bascules de mode au clic sur un point" — the point first, whatever it lies on.
+    it('takes the anchor recorded from the river as a point, the river followable from it', () => {
       const { context } = anchorBesideRiver()
       const document = context.store.getState().document
       document.anchorSource[1] = declareSource(document, TEST_RIVER_PROVENANCE)
 
       penClick(context, [300, 100])
 
-      expect(context.session.outline[0]?.anchor).toBeNull()
-      expect(context.store.getState().penMode).toBe('river')
+      expect(context.session.outline[0]?.anchor).toBe(1)
+      expect(context.store.getState().penMode).toBe('free')
     })
   })
 

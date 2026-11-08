@@ -989,15 +989,9 @@ describe('editionSlice.retraceStretch (H-46)', () => {
   it('records nothing when the document refuses', () => {
     const { store } = openStore()
     const version = store.getState().version
-    // The Empire follows 1 → 2 and keeps 4: a run through 4 would visit it twice.
-    const through = {
-      at: [4, 48] as [number, number],
-      provenance: FREE_POINT_PROVENANCE,
-      anchor: 4,
-    }
-    expect(store.getState().retraceStretch('fr-couronne', 1, 2, [], [through], RETRACE)).toEqual({
-      kind: 'loop',
-      polity: 'hre',
+    // France holds 0 but not 4: no ring of it runs between them.
+    expect(store.getState().retraceStretch('fr-couronne', 0, 4, [], [], RETRACE)).toEqual({
+      kind: 'no-ring',
     })
     expect(store.getState().version).toBe(version)
     expect(store.getState().canUndo).toBe(false)
