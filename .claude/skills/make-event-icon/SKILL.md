@@ -32,7 +32,7 @@ camera; the tower stands on the ground, still (the dev, 2026-10-27).
 
 ## 2. Find his server — never start one
 
-His atlas server is his ([[one-dev-server]]): `lsof -iTCP -sTCP:LISTEN -P | grep node` (usually `localhost:5173`).
+His atlas server is his ([[one-dev-server]]): read the page title on 5173 to 5176 (`curl -s`) — `lsof` does not say which app, and the port moves (REPO-383).
 Give him the address of the bench page on **his** server. If none runs, ask him to start it (`pnpm dev`).
 
 ## 3. Put the candidates on the bench, beside the current one
@@ -69,7 +69,7 @@ bon », never before.
 ## What the swords taught (2026-10-26) — the starting point for any new icon
 
 - **Flat drawing**: flat, contrasting colours, **no thin outline** (it muddies at 20 px); the `viewBox` **cropped to
-  the drawing**, so no pixel goes to empty margin; a parchment-white rim (width 4 in a 64 field) to detach it from
+  the drawing**, so no pixel goes to empty margin; a parchment-white rim (width 4 in the 44 frame) to detach it from
   any country's colour; few shapes — « trop de détails » made the first ones unreadable; two parts never touch so they
   do not merge into another shape (the guards set below the crossing).
 - **A flat drawing is drawn in a 44 × 44 frame, the swords' own** (the dev, 2026-10-27: *« ça doit être 44 sur 44,

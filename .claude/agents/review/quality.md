@@ -121,7 +121,7 @@ If a finding depends on library/API behavior you are not 100% sure about, set `"
 
 ## 1. Review the blast radius, not the diff
 
-**The two worst defects of 2026-09-16 were both outside the diff.** One function tore down two layers it
+**Two of the worst defects this review met were both outside the diff.** One function tore down two layers it
 never rebuilt; a dispatch table routed half its keys to a no-op. Neither line had been touched.
 
 Before reporting, do this and say you did it in `blast_radius`:
@@ -140,8 +140,8 @@ Before reporting, do this and say you did it in `blast_radius`:
 | `medium` | correct today, will erode | the same lookup copied three times; pure logic trapped where no test can reach it |
 | `low` | readability, naming, documentation | an exported function missing `@param` |
 
-**A documentation or naming gap can never be `high`.** It cannot change what the program does. On
-2026-09-16 a missing JSDoc tag and a layer-destroying lifecycle bug were both filed `high`; that made the
+**A documentation or naming gap can never be `high`.** It cannot change what the program does. Once,
+a missing JSDoc tag and a layer-destroying lifecycle bug were both filed `high`; that made the
 whole report unreadable and the score meaningless.
 
 ## 3. State the finding. The remedy is optional, and carries its trap
@@ -149,7 +149,7 @@ whole report unreadable and the score meaningless.
 `problem` is required. `suggestion` is **optional and should be omitted unless you have thought it
 through** — a wrong remedy is worse than none, because it gets applied.
 
-**On 2026-09-16 two findings were right and both remedies were wrong.** One proposed dropping border
+**Once, two findings were right and both remedies were wrong.** One proposed dropping border
 edges to bound memory, which would have reintroduced the exact bug that code existed to abolish. One
 proposed picking a non-colliding hue, when no single hue can work.
 

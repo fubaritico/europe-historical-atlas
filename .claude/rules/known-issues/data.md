@@ -9,9 +9,9 @@ Open issues of the data on disk: `years/`, the relief, the spikes that write the
 
 - **`years/1100/` est la 1100 du dev refaite depuis Cliopatria (CC BY 4.0) depuis le 06/11** (`b02ce87`, poussé) : celle
   publiée depuis le 16/10 était partie du tracé du test Euratlas (nuit du 14/10, 137 pays), interdit par la licence
-  d'Euratlas — ATLAS-142, fait. **L'historique git garde l'ancienne** : pas réécrit, décision du dev du 06/11. Les
-  dossiers `1100-backup-2026-11-02/` et `1100.euratlas-137*` restent sur sa machine, ignorés par git, **jamais à
-  publier**. CARTO-237 (mesurer ce qui reste d'Euratlas) est sans objet. **Sévérité : à savoir.**
+  d'Euratlas — ATLAS-142, fait. **L'historique git garde l'ancienne** : pas réécrit, décision du dev du 06/11. Sa 1100
+  d'avant reste dans `1100-backup-2026-11-02/`, sur sa machine, ignorée par git, **jamais à publier** ; le dossier du test
+  Euratlas n'existe plus sur disque. CARTO-237 (mesurer ce qui reste d'Euratlas) est sans objet. **Sévérité : à savoir.**
 - **`files/spikes/fetch-dem/fetch-dem.mjs` écrit dans `public/heightmaps` à la racine**, un chemin d'avant le monorepo :
   le 18/10, il a fallu déplacer le résultat à la main dans `packages/atlas/public/heightmaps/` et retirer les dossiers vides.
   Remède : pointer `publicDir` sur `packages/atlas/public/heightmaps`. **Sévérité : cosmétique.**
@@ -22,11 +22,7 @@ Open issues of the data on disk: `years/`, the relief, the spikes that write the
   à montrer à quelques personnes, la carte va encore changer). `.gitignore` l'excepte, `.prettierignore` exclut
   `years/`, et `years/index.json` **n'est plus en `skip-worktree`** : chaque ‹ctrl+s› du dev sur 1100 apparaît
   désormais dans `git status`, à commiter comme du code.
-- **Since 2026-11-02, `years/1100/` on disk holds the Cliopatria import, not the dev's year** — uncommitted, on purpose: he
-  redraws its coasts in the Cartographer. **Re-exported at 15:29 the same day with Cliopatria's own coarse coasts** (5,489
-  anchors; Natural Earth's 57,229 were unplayable to retouch — the dev); the Natural Earth versions sit in
-  `years/1100.cliopatria-natural-earth-2026-11-02/` and `years/1200.cliopatria-natural-earth-2026-11-02/` (ignored). `years/1200/` (Cliopatria, ignored by git) and `years/index.json` (`[1100, 1200]`) likewise.
-  **His own 1100** is kept in `years/1100.dev-2026-11-01/` (ignored) and on his desktop
-  (`europe-historical-atlas-1100-backup-2026-11-02/`); the committed one is still his. **Never `git add` anything of `years/`
-  until he says so**; `git restore packages/atlas/public/years/1100/` brings his back. Built by `files/spikes/cliopatria-import/`.
-  **Severity: à savoir.**
+- **`years/1200/` (Cliopatria, built by `files/spikes/cliopatria-import/`) is ignored by git; `years/index.json`
+  announcing 1200 is his uncommitted « Save as »**, and his ‹ctrl+s› on 1100 shows in `git status` too. **Nothing of
+  `years/` is committed without his word** — committing publishes. The `*.autosave.*` and `*.before-claude-*` folders
+  beside them are the Cartographer's copies, ignored. **Severity: à savoir.**

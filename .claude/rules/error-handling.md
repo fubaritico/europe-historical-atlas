@@ -80,8 +80,8 @@ gesture is cancelled**. The model is the refusal of 2026-11-05 — a vassal laid
 - **What a boundary does not see**: it catches what is thrown while a component renders, never in an event
   handler, a `requestAnimationFrame` or a timer — where the canvas does nearly all its work, and where a label
   written after a click is built. In the atlas those reach its error net (ATLAS-42); **the Cartographer has no
-  such net yet** — ~~the dev's call, 2026-10-23: in red in the status bar~~ **replaced on 2026-11-06**: an error dialog
-  at the end of the gesture, the gesture cancelled (« An error reaches the screen », above). To be built — CARTO-273.
+  such net yet**: an error there is to open the error dialog at the end of the gesture and cancel it (« An error
+  reaches the screen », above). To be built — CARTO-273.
 - **In the atlas**, which has no React, the error net (ATLAS-42) shows any unexpected error on screen. Its own
   message takes no value, so it cannot fail this way.
 

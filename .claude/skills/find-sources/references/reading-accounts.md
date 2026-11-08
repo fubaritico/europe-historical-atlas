@@ -55,18 +55,17 @@ numérisée »), so the page and the quotation stay checkable in the printed boo
 
 | account | what it gives us | cost (read 06/11) | how to open it |
 | --- | --- | --- | --- |
-| **BnF — Pass Recherche annuel** | from home, through `bdl.bnf.fr`: **JSTOR's archives in full** (the institutional collection, not JPASS's subset), ~100 databases, most of 100 000 e-books. Cairn and Brepols are not named among the remote ones | **55 €** / year (35 € reduced) | buy at `inscriptionbilletterie.bnf.fr` or on site; **collected in person** at the François-Mitterrand information desk, Paris, with an ID; for personal research, **an interview at the « espace conseil »** with a list of documents to consult. Then a personal space (`gestioncompte.bnf.fr/creerCompte`) and log in at `bdl.bnf.fr`. Help: documentationelectronique@bnf.fr |
-| **JSTOR — free personal account** | read online up to **100 articles every 30 days**, no download; not every article is eligible | free | `jstor.org` → Register, an e-mail address |
+| **BnF — Pass Recherche annuel** | from home, through `bdl.bnf.fr`: **JSTOR's archives in full** (the institutional collection, not JPASS's subset), ~100 databases, most of 100 000 e-books. Cairn and Brepols are not named among the remote ones | **55 €** / year (35 € reduced) | bought online by the dev (06/11) and **active since 07/11**: the online resources open from his personal space; the card, collected in person, only adds the reading rooms. His personal space (`gestioncompte.bnf.fr/creerCompte`) and log in at `bdl.bnf.fr`. Help: documentationelectronique@bnf.fr |
+| **JSTOR — free personal account** | read online **10 articles a month** (measured 06/11; the help page says 100), no download; not every article is eligible | free | `jstor.org` → Register, an e-mail address |
 | **JSTOR — JPASS** | unlimited online reading of 2,000+ journals' archives, 10 PDF a month or 120 a year | **$19.50** / month or **$199** / year (support page; 50 % off through some learned societies) | `about.jstor.org/products/jpass/` |
 | **Cairn** | French journals and books of the human sciences | no general individual subscription found; **per article** or per journal (e.g. 4 € an article for one journal) | `cairn.info`; or a municipal or university library that subscribes |
 | **Brepolis** — International Medieval Bibliography, Library of Latin Texts | the bibliography of medieval studies; Latin texts | individual price on quotation (brepolis@brepols.net); the Medieval Academy of America gives the IMB to members for **$70** a year (membership itself $60 for an independent scholar) | `brepolis.net`; `medievalacademy.org` |
 
-## The order recommended to the dev
+## Where we stand (08/11)
 
-1. **The free JSTOR account** — at once, to measure how much JSTOR changes our answers.
-2. **The BnF Pass Recherche** — if he can go to Paris once: the whole of JSTOR for 55 € a year, more than JPASS at
-   $199. Without the trip, JPASS.
-3. **Cairn, Brepolis** — only if the lots show French journals or the medieval bibliography missing.
+**The BnF and the free JSTOR account are open**; the BnF is searched in every lot (the dev, 08/11). JPASS is not needed
+while the BnF gives JSTOR's archives. **Cairn, Brepolis** — only if the lots show French journals or the medieval
+bibliography missing.
 
 ## Sources
 

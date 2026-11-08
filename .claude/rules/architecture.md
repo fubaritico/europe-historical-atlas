@@ -35,7 +35,7 @@ paths:
 
 > Split into a pnpm workspace on **2026-09-24**. Five packages since, and the boundary that matters is a
 > contract, not a folder: **`core` contains no three.js**, enforced by ESLint and proved by breaking it.
-> That is what keeps the worker chunk at 13.5 kB with no renderer in it.
+> That is what keeps the worker chunk free of any renderer — the CI checks that both apps emit the same chunk, same hash.
 
 ```
 pnpm-workspace.yaml     # the packages, and the dependency catalogue
@@ -291,6 +291,10 @@ choice (the relief) or a debt to close (the border weights).
 ```bash
 pnpm dev                # Vite server + HMR — the atlas
 pnpm dev:cartographer   # Vite server + HMR — the Cartographer
+pnpm dev:cms            # the CMS (Payload + Next, port 3100) — the dev's server, never started by me
+pnpm export:content     # the CMS's places and events into the atlas's content file
+pnpm seed:cms           # seeds a CMS base — never on his (it ran on it once, 27/10)
+pnpm format:check       # prettier --check, a job of the CI
 pnpm build              # turbo build: every app, each waiting on its own type-check
 pnpm preview            # preview the atlas build
 pnpm type-check         # turbo type-check: one tsc per package
@@ -299,7 +303,7 @@ pnpm test               # turbo test: one vitest per package, environments diffe
 pnpm coverage           # turbo coverage, then merge every package's lcov report into one
 ```
 
-**`dev` is not `turbo dev`** on purpose: that would start both Vite servers at once, which is a surprise
+**`dev` is not `turbo dev`** on purpose: that would start every dev server at once, which is a surprise
 rather than a service. Each app is named explicitly.
 
 **`coverage` merges rather than produces.** Each package writes its own `lcov.info` with paths relative to

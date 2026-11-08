@@ -31,7 +31,7 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
   build verts sous la 24, sans cache (`turbo … --force`), le lockfile inchangé. **Le shell de Claude Code démarre sous la 22** (vu le 21/10, malgré `nvm alias default 24`) : préfixer chaque commande de
   `PATH=~/.nvm/versions/node/v24.22.1/bin:$PATH`, ou la gate tourne sous une version que la CI n'a pas. **Un terminal ou WebStorm ouvert
   avant le changement garde la 22** — le relancer ; si WebStorm pointe sur un interpréteur Node explicite, le changer
-  dans ses réglages. Node 24 est en maintenance depuis le 20/10, support jusqu'au 30/04/2028 ; **Node 26 devient LTS le
+  dans ses réglages. Node 24 est en maintenance depuis le 20/10, support jusqu'au 30/04/2028 ; **Node 26 est LTS depuis le
   28/10/2026** (support jusqu'au 30/04/2029) — à reconsidérer après quelques mois de LTS. Le seuil d'avant venait
   d'`eslint-plugin-jsdoc` 65 (`engines` ≥ 22.22.2), que la 24 couvre. **Sévérité : à savoir.**
 - **Sous `turbo … --force`, des tests dépassent les 5 s de Vitest : la machine est saturée, pas le code** — REPO-260 (18/10, cause
@@ -101,7 +101,7 @@ Open issues of the repository's tooling: install, lint, Turbo, CI, commits, igno
   `scripts/` demande un bloc de config qui désactive le lint typé, le fichier étant hors tsconfig.
   **Cosmétique**, et Prettier le couvre désormais au commit. À reprendre si `scripts/` grossit.
 - **Le cache de Turbo ne sert à rien en CI.** — REPO-126 Chaque job part d'un runner neuf et `.turbo` n'est jamais
-  restauré, donc les trois jobs de `validate.yml` sont toujours froids. Localement il marche (mesuré :
+  restauré, donc les quatre jobs de `validate.yml` sont toujours froids. Localement il marche (mesuré :
   8 ms, `FULL TURBO`, contre 8,4 s à froid). **Cosmétique** — le remède est un `actions/cache` sur `.turbo`
   ou le cache distant, et ça gagnerait des secondes sur une gate qui se compte en secondes. Écrit en tête
   de `validate.yml` pour que personne ne croie le contraire.

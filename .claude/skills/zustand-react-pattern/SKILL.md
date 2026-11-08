@@ -25,7 +25,11 @@ packages/cartographer/src/state/
 ├── toolSlice.ts      # the active tool — {Tools} alone writes it
 ├── layersSlice.ts    # the layers panel
 ├── viewportSlice.ts  # the view
-└── …                 # helpers: drawingTarget, openEmptyYear, polityColourSource
+├── citiesSlice.ts    # the {Cities} panel: the chosen city, its filters
+├── clipboardSlice.ts # what was copied, for the paste between maps
+├── panelsSlice.ts    # where each panel sits, docked or floating
+└── …                 # helpers: drawingTarget, openEmptyYear, polityColourSource, outlineActions, pasteActions,
+                      #   heldClipboard, keepCityFilters
 ```
 
 **One bound store, built from slices, one slice per *owner of a piece of state*.** The
@@ -64,17 +68,8 @@ export function createCartographerStore(deps: CartographerStoreDeps) {
 create((set, get) => ({ ... }))
 ```
 
-The empty `()` is a workaround for `microsoft/TypeScript#10571`: `T` sits in both a
-covariant and a contravariant position in `create`'s signature, so inference gives up.
-The v5 docs are explicit — *"instead of writing `create(...)`, you must explicitly
-provide the state type using `create<T>()(...)`"*.
-
-**v5 did not relax this.** Any note claiming v5 "improved type inference" so the plain
-form works is wrong.
-
-**The exception, from the same docs page**: with `combine`, `redux`, or any middleware
-that *creates* the state, the curried form is **not** recommended — the state can be
-inferred. We use neither.
+The empty `()` is required (`microsoft/TypeScript#10571`), still in v5; only `combine`, `redux` or a middleware
+that creates the state would infer it — we use none.
 
 ---
 
@@ -189,13 +184,6 @@ const version = store((s) => s.version)     // ✓
 **flat snapshot** of it plus a **version counter** at every action — including the actions
 that leave the document alone, since they change what the line *reads as*.
 
-**Confirmed from an independent source.** The archived `state-storage` skill, written for the design
-system long before any of this, names the same mechanism in one line: *"native `useSyncExternalStore`
-is zero-dep but a **derived** slice (new object each call) **loops**; use
-`useSyncExternalStoreWithSelector` or memoize. Whole/stable slice → native."* Zustand's React binding
-is that hook, which is why the rule lands on us unchanged — and why the remedy is to publish a stable
-value rather than to derive at read time.
-
 **The trap inside the trap, which cost a sabotage.** `Object.assign` and the object spread
 **evaluate getters and copy their values**. So putting getters in the state object works *by
 accident*, and a sabotage that does it fails **no test** — the flattening happens downstream
@@ -286,11 +274,6 @@ function openStore(limit?: number) {
   }
 }
 ```
-
-**If you ever do face a module-level store, reset it with `setState(initialState)` — without
-`replace`.** Read in v5.0.15 source: with `replace` truthy the state *becomes* the object
-passed, so a state literal wipes every action off the store and the next call throws.
-`replace: true` is only correct when the object passed carries the actions too.
 
 **Two test shapes worth copying** from `editionSlice.test.ts`:
 

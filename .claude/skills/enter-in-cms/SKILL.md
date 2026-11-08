@@ -25,8 +25,8 @@ connected (`/mcp`), and its tools are there. If not, **stop** and give the dev t
 
 1. **His CMS server runs** (`pnpm dev:cms`, port 3100) — his to start, never mine.
 2. **An API key** in the admin: menu **MCP › API Keys**, create; in the sidebar tick **find, create, update** for
-   `places`, `place-periods`, `sources`, and **find** for `importance-reasons`; save, copy the key. A key created before
-   2026-11-03 lacks the box for `importance-reasons`: he opens it and ticks it.
+   `places`, `place-periods`, `sources`, and **find** for `importance-reasons`; save, copy the key. If his key lacks
+   the box for `importance-reasons`, he opens it and ticks it.
 3. **The key in his own terminal**, never in the conversation: it sits in `.env.local` (ignored by git); he loads it
    into the shell, then, from the `europe-map` folder:
    `claude mcp add --transport http cms http://localhost:3100/api/mcp --header "Authorization: Bearer $<his variable>"`.
@@ -51,11 +51,11 @@ peut figer le serveur »). The same table is in `packages/cms/README.md`, for a 
 
 **The probe, without a key** (it changes nothing): a `POST` of an MCP `initialize` to `http://localhost:3100/api/mcp`
 answers **401 in milliseconds** when the server is healthy; no answer in 20 s means the server is stuck. The same for
-`/admin`: 200 healthy, nothing stuck. **His server is his**: I start it only when he asks, and say so.
+`/admin`: 200 healthy, nothing stuck. **His server is his**: I never start, stop or restart it — a stuck one, I tell him.
 
 ## The frame — never crossed
 
-- **Through the MCP only.** Never the seed (`pnpm cms:seed` once ran on his base), never SQL that writes, never the
+- **Through the MCP only.** Never the seed (`pnpm seed:cms` once ran on his base), never SQL that writes, never the
   REST API by `curl`, never a script. If the `cms` tools are absent or refused, **stop and tell the dev** — no other way in.
 - **Never delete.** The key does not allow it (`mcpAccess.ts`, `delete: false`) and it is not asked for: a wrong record
   is corrected by `update`, or reported to the dev, who deletes by hand in the admin.
@@ -85,7 +85,7 @@ answers **401 in milliseconds** when the server is healthy; no answer in 20 s me
   town of the same district whose holder is known at that date is a degree too. Lived on 06/11: the taifa of Tortosa
   ends in 1099 on Wikidata → who took Tortosa → so who held Siurana and Horta in 1100.
 - **Where to look, beyond Wikipedia**: `/find-sources` — the libraries in their order, archive.org among them, and the
-  reading accounts once the dev opens them (CMS-362).
+  reading accounts he opened — the BnF in every lot, JSTOR.
 - **Then decide.** When the search ends with no source naming the holder at the date, the most probable one is entered
   anyway, with its QID. **The line names the source it stands on** — the one that names the predecessor's or the
   neighbour's holder — with its quotation. The line does not announce a deduction; the reasoning is written in the
@@ -129,7 +129,7 @@ that exists is reused (its id), never created again.
    changed. The code instance reads the base **read-only** (`sqlite3 "file:packages/cms/cms.db?mode=ro"`) and reports
    any fault to the dev; the historian then corrects it by `update`.
 3. **The year's file stays the home of the questions** (`files/plans/sources/1100.md`, `1200.md`): the question, the
-   answer, its certainty, its sources — the base holds the facts, the file the reasoning (CMS-338, parked).
+   answer, its certainty, its sources — the base holds the facts, the file the reasoning (CMS-338).
 
 ## Gotchas
 

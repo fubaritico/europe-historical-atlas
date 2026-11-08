@@ -205,7 +205,7 @@ worker chunk.
 - **No explicit `any`**; `exactOptionalPropertyTypes` and `noUncheckedIndexedAccess` are on.
 - **JSDoc on every exported component, prop interface and notable constant.**
 - **A component is not done without tests.** `@testing-library/react` and `user-event` are declared;
-  `jest-dom` is **not**, deliberately — it does not type under Vitest 5 (`known-issues.md`), so
+  `jest-dom` is **not**, deliberately — it does not type under Vitest 5 (`rules/known-issues/cartographer.md`), so
   assertions go through the DOM (`getAttribute`, `textContent`).
 - **Every new React package needs its own `vitest.setup.ts` calling `cleanup()`** — testing-library
   only registers its own `afterEach` when the runner's hooks are global, and ours are imported. This

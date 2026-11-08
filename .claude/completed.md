@@ -19,6 +19,13 @@ moi, historien puis code. **Sur `main`, poussé jusqu'à `bfe560a`.** **Non comm
   quand même pour cet abonnement »*) ; remonter des notes et des index d'un livre aux suivants (`/find-sources`).
 - **CARTO-393, la barre d'ouverture** (à valider) : mesurée d'abord — le calcul, pas le téléchargement, fait l'attente,
   donc pas de flux ; quatre étapes pesées, le relief dit ses lignes. Revue : deux constats corrigés.
+- **ATLAS-333** (l'instance du code, worktree `baked-years`) : les noms des pays cuits au build (`1dbb65e`) ; une année
+  quittée mise de côté entière et revenue en une image (`d24b9e0`, essayé par lui : *« le cache fonctionne mieux, aucun
+  problème »*) ; non commité : les découpes dans le worker et les mesures — une première visite de 1200 fige encore la page
+  1 à 1,4 s, un retour coûte ~1 ms plus une image. Sa règle de la réglette : *une carte reste tant qu'on n'a pas atteint une
+  autre date* ; ATLAS-392 créé (comment l'interface React et la carte se parlent).
+- **L'audit des instructions du 08/11** : ses constats appliqués avec son accord (les tables de `/scenarii-to-code`, `years/1100`
+  tel qu'il est, `next.md` sans copie du tableau, la règle des serveurs, une vingtaine de faits d'une ligne).
 - **Mes fautes** : des métadonnées de sources écrites de mémoire (l'éditeur de l'*Alexiade*, un titre de Crnčić), des URL de
   Reilly non lues, un éditeur déduit d'un domaine — toutes corrigées depuis les textes ; un sabotage resté en place après
   une commande interrompue ; CMS-391 livré d'abord sans le formulaire maison de la fiche (vu par la revue) ; annoncé 11 s

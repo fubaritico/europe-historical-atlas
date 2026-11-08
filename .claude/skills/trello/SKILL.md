@@ -294,7 +294,6 @@ labels were renamed (`rename-column`, `relabel`); the 19/10 word « initiative �
 pieces build an epic:
 
 1. **The `Épiques` column**, leftmost, outside the flow Idées → Fait: the epic's card lives there for its whole life.
-   It does not count in En cours' one-or-two.
 2. **Its checklist names the tickets**, one item each, with the ticket's number once it exists. A rung with no ticket
    yet is plain text; when its ticket is created, the item gets the number in the same breath.
 3. **Every ticket of the epic carries its `épique · …` label**, so one click on the label filters the whole of it. A

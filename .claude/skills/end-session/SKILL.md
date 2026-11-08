@@ -55,4 +55,5 @@ Update the session-state files CLAUDE.md imports — completed.md, next.md and t
 7. **Scenarios** — if user-facing code shipped this session, run `/scenarii-to-code` §7d (the code → scenario audit)
    and include its table in the proposal.
 8. A decision of this project goes in its plan or `.claude/*.md`; a lesson about working with the dev in the file memory; a lesson that holds in other repositories in Basic Memory (`main/patterns/`).
-9. Propose all changes to the user before writing — do not write without confirmation
+9. Propose all changes to the user before writing — do not write without confirmation. The board is the exception: it
+   follows `/trello`'s own latitude (a comment, a column a test settled).

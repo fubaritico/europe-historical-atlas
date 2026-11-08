@@ -1,6 +1,6 @@
 ---
 name: scenarii-to-code
-description: Keep scenarios and code in step, both ways. Scenario → code — load the scenario that governs the work, make every Then line either an assertion or a declared gap, say what the rung deliberately does not do yet. Code → scenario — a gesture shipped, changed or walked is written back into its scenario in the same commit, and an audit finds what shipped without one. Use before writing any code a scenario specifies, after shipping a gesture, at end-session, and when asked whether the scenarios are up to date. Triggers on "scenario", "scenarii", "gherkin", "sNN" (s01…s18), "code to scenario", "synchronise les scénarios", a P4 step, "what does this stage not do", "degraded on purpose".
+description: Keep scenarios and code in step, both ways. Scenario → code — load the scenario that governs the work, make every Then line either an assertion or a declared gap, say what the rung deliberately does not do yet. Code → scenario — a gesture shipped, changed or walked is written back into its scenario in the same commit, and an audit finds what shipped without one. Use before writing any code a scenario specifies, after shipping a gesture, at end-session, and when asked whether the scenarios are up to date. Triggers on "scenario", "scenarii", "gherkin", "sNN" (s01…s22), "code to scenario", "synchronise les scénarios", a P4 step, "what does this stage not do", "degraded on purpose".
 argument-hint: '[step or scenario, e.g. 4d-2 or s02]'
 metadata:
   author: europe-map
@@ -133,8 +133,10 @@ Three honest answers, and picking the wrong one is how specification gets invent
 
 ## 6. The sets that exist today
 
-**The Cartographer** — `files/plans/cartographer/scenarii/`, 20 files, **18 of them holding Gherkin**
-(`s00` and `s99` hold none, being the background and the holes).
+**`ls` the folder before trusting the tables below** — a scenario written since may not be in them yet; one missing
+here is added in the commit that writes it. `s00` and `s99` hold no Gherkin (the background and the holes).
+
+**The Cartographer** — `files/plans/cartographer/scenarii/`, s01 to s22 on 2026-11-08.
 
 | scenario | what it specifies | the step that owes it |
 | --- | --- | --- |
@@ -156,10 +158,14 @@ Three honest answers, and picking the wrong one is how specification gets invent
 | `s16-stacking-order` | stacking by groups of homage, the menu and its shortcuts | 5 (done) |
 | `s17-tools-wait-for-the-zoom` | the tools' reach against the zoom | 5 (done) |
 | `s18-autosave` | the draft on disk, the snapshots | 5 (step 1 done) |
+| `s19-maps-as-folders` | a map is a folder: Open…, Save, Save as…, Save a copy | 5 (CARTO-340) |
+| `s20-cities-panel` | `{Cities}`: the contribution's cities as guides for the borders, their filters, a city's point | 5 (CARTO-193, epic CARTO-363) |
+| `s21-panels-moved-and-docked` | panels moved, resized, magnetised to the right column | 5 (CARTO-342) |
+| `s22-copy-paste` | copy and paste between maps | 5 (CARTO-345) |
 
 **The atlas** — `files/plans/atlas/scenarii/`, written 2026-11-01 (ATLAS-324) **from the code**, then checked
-against what the dev saw: each says when it was built and whether it was walked. 12 files, 10 holding Gherkin; its
-holes are `A-NN`, never to meet the Cartographer's `H-NN`. The chapters (`01-foundations.md` … `07-robustness.md`,
+against what the dev saw: each says when it was built and whether it was walked. s01 to s17 on 2026-11-08 — s11 on,
+the interface over the map (ATLAS-329), mostly not built yet; its holes are `A-NN`, never to meet the Cartographer's `H-NN`. The chapters (`01-foundations.md` … `07-robustness.md`,
 `focus-mode.md`, `detail-levels.md`…) keep the reasons; a chapter line the code contradicted is struck there.
 
 | scenario | what it specifies |
@@ -174,6 +180,13 @@ holes are `A-NN`, never to meet the Cartographer's `H-NN`. The chapters (`01-fou
 | `s08-the-sheet-and-its-decor` | the sheet, frame, title, relief, coast, rhumbs, rose, rivers |
 | `s09-when-something-is-missing` | the notices, blocking or degraded |
 | `s10-language-and-accessibility` | the language, reduced motion, keyboard, screen reader |
+| `s11-the-language-button` | the language button |
+| `s12-the-help-button` | the help button |
+| `s13-the-navigation-pad` | the navigation pad |
+| `s14-the-snapshot` | the snapshot |
+| `s15-the-century` | choosing the century |
+| `s16-the-share-link` | the share link |
+| `s17-the-map-as-a-list` | the map as a list |
 
 **Places & events (Payload)** — nothing yet, and it is an application too (see
 `rules/architecture.md`, "apps and resources").

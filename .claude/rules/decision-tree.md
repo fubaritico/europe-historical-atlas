@@ -28,6 +28,9 @@
 | **Make an event icon, or change how one looks** — its 3D model or its flat drawing                           | **`/make-event-icon`**     |
 | Write or review a Cartographer component                                                                     | `/react-canvas-and-panels` |
 | **Draw or retouch a map in the Cartographer** — « dessine », « retouche », move a border, a polity, a vassal | **`/use-cartographer`**    |
+| Copy a plate of a historical atlas into the Cartographer (then `/use-cartographer`)                          | `/draw-from-plate`         |
+| Write or review a Zustand store, slice, selector or subscription                                             | `/zustand-react-pattern`   |
+| Audit the whole codebase's security (OWASP Top 10)                                                           | `/audit-owasp`             |
 
 ## Skills to create (as we go)
 

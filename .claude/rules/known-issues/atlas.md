@@ -13,7 +13,7 @@ Open issues specific to `packages/atlas`: its render, its pipeline wiring, its d
   vertex data. 60 fps on the dev's machine at both ends; the coasts are only sharp at the top. **Two
   consequences to plan for**: (1) a weak machine (a phone) may not hold the frame rate — remedy, the one
   already written for `rasterScale` below: time the first build and step the `segments` tunable down
-  (768 halves the vertices of 1024); (2) **M1.4 picking** will raycast ~3 M triangles — brute force is
+  (768 halves the vertices of 1024); (2) **region picking** will raycast ~3 M triangles — brute force is
   tens of milliseconds a click, so give the relief a spatial index (a BVH) when picking lands, not
   before. **Severity: worth knowing.**
 - **`terrainOptions.ts`'s comment on `politicalMode` contradicts its value.** The comment argues for
@@ -137,7 +137,7 @@ target.z)` would be coherent with the navigation that already exists.
     today. Adapting that means generating tiers of each asset, which does not exist — `fetch-dem` takes a
     zoom, so it is possible, but it is a data-pipeline job, not a runtime toggle.
 - **The political grid no longer leaves the worker, and picking should keep it that way.** A
-  `PoliticalResult` carries the colours and the border lines, nothing else. When **M1.4 picking** lands,
+  `PoliticalResult` carries the colours and the border lines, nothing else. When **region picking** lands,
   the reflex will be to ask for the grid back so a click can be answered here — resist it: a click is one
   query, a query is a message, and a round trip costs a millisecond against 45 MB held for the session.
   The port should grow a `regionAt(u, v)` rather than a getter for the cells, which also fits the design
@@ -146,7 +146,7 @@ target.z)` would be coherent with the navigation that already exists.
   land only, and BFS cannot cross the sea to reach them.
 - **Only the newest call may write back, and it must be checked after _every_ `await`.** Once the compute
   went async, two overlapping rebuilds could resolve out of order and settle the map on a position the
-  reader had already left — silently, with no error. `utils/latestOnly` gates both rebuilds. The subtlety
+  reader had already left — silently, with no error. `core/utils/latestOnly` gates both rebuilds. The subtlety
   that cost a review finding: guarding only the final state write is not enough, because a stale call
   goes on to rebuild the texture and the border layer afterwards. **One gate per result** — sharing one
   would have a bake needlessly cancel a year.
@@ -167,7 +167,7 @@ target.z)` would be coherent with the navigation that already exists.
   WebGL2 only guarantees 2048. Fine on desktop, not guaranteed everywhere; clamp from
   `renderer.capabilities.maxTextureSize` if it ever bites. **Since 2026-10-16 the dev slider reaches supersample 4** (5120 px), past the 4096 of many mobile and integrated GPUs; the default stays 2. Whether to clamp, refuse or warn is an error-handling decision to take with the dev the day the default rises.
 - **The ESLint boundary glob `**/controls` is too broad** — it matched `utils/controls` as if it were the
-  camera-controls layer. Worked around by renaming to `utils/controlSpec`; the config flaw remains and
+  camera-controls layer. Worked around by renaming to `core/utils/controlSpec`; the config flaw remains and
   will catch the next `something/controls`. **Same shape since 2026-10-27** (ATLAS-291): `app`, `loading`,
   `sources`, `tunables`, `devPanel` are generic words too — the Cartographer has a `ui/i18n/app`, the CMS a
   `src/app`. Harmless while only atlas rows name them (said in `eslint.config.js`). **Severity: worth knowing.**
@@ -200,12 +200,10 @@ target.z)` would be coherent with the navigation that already exists.
 - **Compass rose loads async** (SVG → Image → texture via `TextureLoader`): it appears a frame or two after
   the relief. No `onError` wired yet; if it silently fails to show, check the data-URL / SVG validity.
 - **Texture regen is a full pixel pass** (~1.5M px): heavy dev-panel tweaks (`terrainTexture`) fire on
-  release. Kept snappy by a trig-free integer hash (`utils/hash`); a supersample option was considered
+  release. Kept snappy by a trig-free integer hash (`core/utils/hash`); a supersample option was considered
   and declined (memory [[portolan-decor-and-line-rendering]] — baked lines hit the same resolution ceiling).
 - **DEM assets committed** (`europe-dem-z6-1920.bin` read by the atlas, `europe-dem-z5.bin` by the Cartographer) so the
   app runs after a clone; their generator `files/spikes/fetch-dem` is committed too.
-- **Camera reframing after the DEM widening**: the extent changed (bbox now W−45…E78.75), so a persisted
-  camera pose can be off-frame → `sessionStorage.clear()` (map camera key `europe-map:map-camera`) for the framed default.
 - **Bundle > 500 KB** (three.js) — Vite warns at build; not optimized yet (code-split later if needed).
 - **Camera persistence is scene-agnostic**: after a big scene change the restored pose can be off-frame →
   `sessionStorage.clear()` (map camera key `europe-map:map-camera`) for the framed default.
@@ -255,7 +253,7 @@ target.z)` would be coherent with the navigation that already exists.
   **Sévérité : à savoir — non branché par décision du dev (06/11, ATLAS-143 archivé)** : le Cartographe et l'atlas
   dessinent sur le même relief, donc un décalage ne vient que d'un **fichier de relief remplacé par un autre qui couvre
   une autre zone** (arrivé une fois, en septembre). **Déclencheur** : un changement du fichier du relief — rejouer alors
-  `boundsMatch` à la main. **Et une dette, à retirer, ATLAS-373** : la ligne 70 va encore
+  `boundsMatch` à la main. **Et une dette, à retirer, ATLAS-373** : `loading/assets.ts:70` (`unauthored`) va encore
   chercher les frontières GPL (`/borders/europe-<année>.json`) pour une année non dessinée — code mort, le sélecteur
   n'offre que les années dessinées.
 - **The icons' shadows are rasterised on the CPU, up to fifteen times a second, for every icon** (2026-10-27, ATLAS-298,
@@ -276,8 +274,9 @@ target.z)` would be coherent with the navigation that already exists.
   worker, so the map never waits. **Next if it bites**: the three levels share most realms — cache by realm.
   **Severity: worth knowing.**
 - **At the closest zoom the names' contrast is about 1.7:1** (review A11Y-005, 2026-10-29, computed, not measured on
-  screen): the watermark (`watermarkShare` 0.4 on `NAME_OPACITY` 0.75, so the ink at 0.3) multiplied on the fills, the
-  halo gone by then. From afar it is 3 to 4.7:1. **The dev's choice** (A11Y-001: the cities read over the names close up);
+  screen): the watermark multiplied on the fills, the halo gone by then. Computed with the ink at 0.3; since, the share is
+  `watermark` per level in `scene/detail/detailLevels.ts` — 0.25 at the two closest, on `NAME_OPACITY` 0.75, so the ink at
+  about 0.19 and the contrast lower still (not recomputed, 08/11). From afar it is 3 to 4.7:1. **The dev's choice** (A11Y-001: the cities read over the names close up);
   the remedy if it is reopened, a share of about 0.8 (0.6 effective, ~3:1). **Severity: worth knowing.**
 - **The names are drawn over the relief** (`depthTest` off, `scene/political/names/nameLayer`): a flat sheet at the ground's
   median height would otherwise be cut by the hills under it. Consequence: under a steep camera, a name behind a ridge shows

@@ -18,8 +18,7 @@ versions write to `~/.opensrc/`, outside the project.
 ```bash
 npx opensrc@0.6 three                          # npm: the version installed, read from pnpm-lock.yaml
 npx opensrc@0.6 three zustand                  # several at once
-npx opensrc@0.6 zod@3.22.0                     # a given version
-npx opensrc@0.6 pypi:requests crates:serde     # other registries, latest or @version
+npx opensrc@0.6 three@0.186.0                  # a given version
 npx opensrc@0.6 payloadcms/payload@v3.92.0     # a GitHub repository at a tag
 npx opensrc@0.6 list                           # what is fetched, with versions
 ```

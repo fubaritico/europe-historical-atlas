@@ -619,3 +619,13 @@ Sections moved out of `next.md` once the step they prepared had shipped. Newest 
 - **Un geste = un pas d'historique** (H-10), posté à la **fin** du geste. Deux clics avec ⟨snap to
   coast⟩ posent 412 ancres et `ctrl+z` les reprend toutes.
 
+
+## Moved from next.md on 2026-11-08 (the audit; each trap has its memory or rule)
+
+**Pièges, à ne pas refaire** : empiler des règles visuelles — quand il est perdu, **s'arrêter et lui donner la règle en trois
+lignes** ; deviner un chiffre dans un test ; une demande répétée après un refus d'outil est **la même** demande ; « flou » =
+flou d'image ; parler franglais ; deux sondes dans un même onglet ; `delete` d'une propriété de `window`. **Et ceux du
+29/10 jour** : **relire le code avant de proposer un remède** (le nom court ne s'écrit que là où le complet ne tient pas) ;
+**jamais de `cd`**, même pour revenir à la racine ; quand sa phrase peut désigner deux options, dire celle que je comprends
+avant d'agir.
+

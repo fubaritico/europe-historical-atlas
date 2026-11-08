@@ -8,8 +8,8 @@ paths:
 
 ### Le design system est branché — ce qu'il faut savoir pour s'en servir
 
-**Les quatre paquets `@fubaritico/*`** (tokens, styles, behaviors, react), à la version unique du catalogue de `pnpm-workspace.yaml` (`0.7.0` le 21/10, CARTO-117), depuis GitHub Packages (token en
-local dans `~/.npmrc`, `github.token` en CI). **La 0.7.0 nomme chaque jeton de couleur d'après ce qu'il peint**
+**Les quatre paquets `@fubaritico/*`** (tokens, styles, behaviors, react), à la version unique du catalogue de `pnpm-workspace.yaml` , depuis GitHub Packages (token en
+local dans `~/.npmrc`, `github.token` en CI). **Chaque jeton de couleur est nommé d'après ce qu'il peint**
 (`--color-surface-raised`, `--color-text-secondary`…) : un rôle que `theme.css` ne pose pas reste au gris clair du
 DS, sans erreur, et `theme.test.ts` refuse une surcharge qui nomme un rôle disparu. Le plan
 (`files/plans/cartographer/design-system-integration.md`) est **fait jusqu'au pas 4**.
@@ -19,7 +19,7 @@ DS, sans erreur, et `theme.test.ts` refuse une surcharge qui nomme un rôle disp
    import de feuille ailleurs. **Une règle hors layer bat tout layer** : c'est ce qui fait gagner nos
    surcharges, et c'est ce qui aurait fait perdre le DS contre un reset hors layer.
 2. **Les couleurs : la palette dans `theme.css`, une fois**, et les tokens du DS pointés dessus. Aucune
-   couleur en dur ailleurs — vérifié le 09/10. **Les tailles viennent de `design/chrome.css`.**
+   couleur en dur ailleurs — vérifié le 09/10. **Les tailles viennent de `files/plans/cartographer/design/chrome.css`.**
 3. **Régler le style dans l'établi** (`pnpm dev:cartographer` → `/workbench.html`), et **prouver par le
    style calculé dans un vrai navigateur** : jsdom n'a pas de cascade de layers.
 4. **Pièges déjà payés** : jamais de `display` sur `Modal`/`Drawer` · `autoFocus` de React n'écrit pas

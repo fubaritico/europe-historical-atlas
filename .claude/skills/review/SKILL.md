@@ -46,7 +46,8 @@ Every framing you add is a place the review cannot look.
 
 Launch all 4 **custom subagents** simultaneously using the Agent tool. Each is defined in
 `.claude/agents/review/` with its own domain-specific system prompt. Pass each the list of files in
-scope (paths + content).
+scope (paths + content). **Past ~15 files, split them**: several agents of a dimension, ≤15 files each, every file
+named — an agent handed fifty reads one.
 
 Subagents (by `name` / `agent_type`):
 

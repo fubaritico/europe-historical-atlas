@@ -116,8 +116,8 @@ The 3D Europe map is the proving ground for this rule:
   in-memory mock in tests, `sessionStorage` in prod.
 - **Controls injected** (arrow-key navigation) — swappable implementation (keyboard, orbit, custom)
   without touching the rest of the scene.
-- **Historical-regions layer injected** behind a date-versioned port (M2+) — a minimal GeoJSON mock to
-  test the "click → region at time T" binding without the 20 real maps.
+- **Historical-regions layer injected** behind a date-versioned port (M2+) — a minimal year folder as the
+  mock, to test the "click → region at time T" binding without the real years.
 - **Assemble freely**: pick a heightmap port, a camera store, controls, a regions layer — and run the
   scene standalone (test/harness) with mocks, without a full app.
 
