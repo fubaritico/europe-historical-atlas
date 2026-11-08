@@ -1,5 +1,5 @@
-import type { CityVerdict } from './utils/cityVerdict'
 import type { HolderDot } from './utils/holderDot'
+import type { CityVerdict } from '../../../canvas/cityVerdict'
 import type { CityMark } from '../../../state/citiesSlice'
 
 /*

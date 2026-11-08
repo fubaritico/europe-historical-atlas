@@ -129,7 +129,8 @@ Scenario: nothing answers
 
 > **What this rung does not do** (CARTO-193, the ticket's next rungs):
 >
-> - **the city in red on the canvas** — the alert is in the list and the detail only;
+> - ~~**the city in red on the canvas** — the alert is in the list and the detail only;~~ — built 2026-11-08 by
+>   CARTO-389: as points, the status ring (« The city's status on its point », below);
 > - **the comparison is by Wikidata id**: a wrong id in the map's registry reads as a misplaced city — which is how it is
 >   found (`files/plans/sources/wikidata-1100.md`, 11 wrong in 1100);
 > - ~~**a double-click on the canvas**: the white arrow's double-click there opens the polity's form (CARTO-246), so a
@@ -369,3 +370,40 @@ Scenario: a city west of Greenwich
 
 > **Built 2026-11-07 (CARTO-368). Walked by the dev the same evening** on Huesca: *"we do have the coordinates in the
 > little modal"*. **What it does not do**: the hemisphere letters stay French in English (`known-issues/cartographer.md`).
+
+## The city's status on its point (CARTO-389, the dev, 2026-11-08)
+
+> *"To see at first glance the cities that should have a source, and to prioritise the search for sources by zone."*
+> **Decided by the dev**: as points, a city with an alert reads its status as the list does. ~~The colour, a white ring, a
+> ring of the status's colour, red or yellow, and a white ring again around~~ — tried the same night, *"not very
+> readable"*; replaced by **the colour, a white stroke, a thick status stroke, a black stroke**: the edge of a city where
+> all is well, the status ring slipped in before it. **A city where all is well does not change its look.**
+>
+> **Proposed by Claude**: the status ring three strokes wide; the light ring the points' own cream (`cityHalo`), the
+> black their dark ink (`cityInk`); the alerts computed once per document version, as the hatches are, not on every pan.
+
+```gherkin
+Scenario: a city with no holder entered
+  Given the cities are shown as points
+  And nobody has entered Caspe's holder
+  Then Caspe's point is a hollow ring inside a light ring, a thick red ring and a dark ring
+
+Scenario: a city to correct
+  Given the sources give Metz to France and the map has it in the Empire, or the map lacks its holder
+  Then Metz's point is its colour inside a light ring, a thick yellow ring and a dark ring
+
+Scenario: a city where all is well keeps its look
+  Given the map has Toledo's holder under it
+  Then Toledo's point is its colour inside a light ring and a dark one, as before
+
+Scenario: the ring follows the border
+  When I move a border so that Metz falls in France
+  Then its yellow ring goes, as its name leaves the yellow in the list
+
+Scenario: named cities keep their look
+  Given the cities are shown as a dot and its name
+  Then no city carries a status ring
+```
+
+> **Built 2026-11-08 (CARTO-389) — not walked yet.** Nothing for a city with nothing to compare by (its holder has no
+> Wikidata id), as the list marks nothing.

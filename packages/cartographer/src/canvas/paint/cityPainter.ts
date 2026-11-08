@@ -29,12 +29,24 @@ export interface CityCanvas {
   strokeStyle: string | CanvasGradient | CanvasPattern
 }
 
+/**
+ * What a city's point says on the map (CARTO-389, the dev, 2026-11-08: *"to see at first glance the cities that should
+ * have a source, and to prioritise the search for sources by zone"*): **`missing`**, red — nobody has entered its
+ * holder; **`toCorrect`**, yellow — the map puts it elsewhere, or lacks its holder. The same two levels as the list's
+ * names (CARTO-386); `canvas/cityVerdict`'s `cityAlert` reads them from a verdict.
+ */
+export type CityAlert = 'missing' | 'toCorrect'
+
 /** The cities' colours and sizes, in device pixels. */
 export interface CityStyle {
   /** The dot's and the name's ink. */
   cityInk: string
   /** The dot's ring and the name's halo. */
   cityHalo: string
+  /** The ring of a city with no holder entered — the theme's `--warn` (CARTO-389). */
+  cityMissing: string
+  /** The ring of a city to correct on the map — the theme's `--caution` (CARTO-389). */
+  cityToCorrect: string
   /** The dot's radius. */
   cityRadius: number
   /** The name's size. */
@@ -49,6 +61,8 @@ export interface CityOnScreen {
   readonly at: readonly [number, number]
   /** The colour of the polity holding it by the sources, or `null` when none is entered or the map lacks it. */
   readonly colour: string | null
+  /** What its point says (CARTO-389), or `null` when all is well — and always `null` for a named city. */
+  readonly alert: CityAlert | null
 }
 
 /** A full turn, for an arc. */
@@ -94,31 +108,58 @@ export function paintCities(
 const RING_SCALE = 1 / 3
 
 /**
+ * Fill a disc.
+ * @param ctx - the context
+ * @param at - its centre, in screen pixels
+ * @param radius - its radius, in screen pixels
+ * @param ink - its colour
+ */
+function disc(ctx: CityCanvas, at: readonly [number, number], radius: number, ink: string): void {
+  ctx.beginPath()
+  ctx.arc(at[0], at[1], radius, 0, FULL_TURN)
+  ctx.fillStyle = ink
+  ctx.fill()
+}
+
+/**
+ * The rings round a point (CARTO-389). **All well**: a dark ring outside a light one, so a point reads on light ground
+ * and on dark alike — the look of 2026-11-05, unchanged. **With an alert** (the dev, 2026-11-08, after trying a status
+ * ring between two light ones, *"not very readable"*: *"the colour, a white stroke, a thick status stroke, a black
+ * stroke"*): the light ring, the status ring — red for no holder, yellow to correct, three strokes wide — and the dark
+ * ring outside, the same edge as a city where all is well.
+ * @param ctx - the context
+ * @param city - the city on screen
+ * @param style - the colours and sizes, in device pixels
+ */
+function paintRings(ctx: CityCanvas, city: CityOnScreen, style: CityStyle): void {
+  const radius = style.cityRadius
+  const ring = style.cityRadius * RING_SCALE
+  if (city.alert === null) {
+    disc(ctx, city.at, radius + 2 * ring, style.cityInk)
+    disc(ctx, city.at, radius + ring, style.cityHalo)
+    return
+  }
+  const status = city.alert === 'missing' ? style.cityMissing : style.cityToCorrect
+  disc(ctx, city.at, radius + 5 * ring, style.cityInk)
+  disc(ctx, city.at, radius + 4 * ring, status)
+  disc(ctx, city.at, radius + ring, style.cityHalo)
+}
+
+/**
  * One city as a point (the dev, 2026-11-05: *"a coloured dot ringed, painted normally, not in overlay"*): a dot in the
- * colour of the polity holding it by the sources, inside a light ring and a dark one, so an orange dot on blue ground
- * stands out wherever it falls. A city whose holder is not entered, or not in the map, is a hollow ring: nothing is
- * coloured that the sources do not say.
+ * colour of the polity holding it by the sources, inside its rings ({@link paintRings}). A city whose holder is not
+ * entered, or not in the map, is a hollow ring: nothing is coloured that the sources do not say.
  * @param ctx - the context — its compositing the painter's ordinary one at this point of the scene
  * @param city - the city on screen
  * @param style - the colours and sizes, in device pixels
  */
 function paintPoint(ctx: CityCanvas, city: CityOnScreen, style: CityStyle): void {
+  paintRings(ctx, city, style)
   const [x, y] = city.at
-  const radius = style.cityRadius
-  const ring = style.cityRadius * RING_SCALE
-  // The dark ring outside, the light one inside it: a point reads on light ground and on dark alike.
   ctx.beginPath()
-  ctx.arc(x, y, radius + 2 * ring, 0, FULL_TURN)
-  ctx.fillStyle = style.cityInk
-  ctx.fill()
-  ctx.beginPath()
-  ctx.arc(x, y, radius + ring, 0, FULL_TURN)
-  ctx.fillStyle = style.cityHalo
-  ctx.fill()
-  ctx.beginPath()
-  ctx.arc(x, y, radius, 0, FULL_TURN)
+  ctx.arc(x, y, style.cityRadius, 0, FULL_TURN)
   if (city.colour === null) {
-    ctx.lineWidth = ring
+    ctx.lineWidth = style.cityRadius * RING_SCALE
     ctx.strokeStyle = style.cityInk
     ctx.stroke()
     return

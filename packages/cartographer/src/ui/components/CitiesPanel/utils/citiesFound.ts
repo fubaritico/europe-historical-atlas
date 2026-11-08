@@ -1,7 +1,7 @@
 import { holderKey } from '../../../../state/citiesSlice'
 import { matchesFilter } from '../../../utils/matchesFilter'
 
-import type { CityVerdict } from './cityVerdict'
+import type { CityVerdict } from '../../../../canvas/cityVerdict'
 import type { CityMark } from '../../../../state/citiesSlice'
 import type { CityFiltersProps } from '../cityFiltersProps'
 

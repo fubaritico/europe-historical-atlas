@@ -168,6 +168,10 @@ export interface PaintStyle {
   cityInk: string
   /** The light ring round a city's dot and the halo round its name, so both read over any fill. */
   cityHalo: string
+  /** The ring of a city with no holder entered, on its point (CARTO-389). */
+  cityMissing: string
+  /** The ring of a city to correct on the map, on its point (CARTO-389). */
+  cityToCorrect: string
   /** A city's dot's radius, in screen pixels. */
   cityRadius: number
   /** A city's name's size, in screen pixels. */

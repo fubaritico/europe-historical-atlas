@@ -141,6 +141,8 @@ const STYLE: PaintStyle = {
   riverWidthMinor: 0.95,
   cityInk: '#5c3a2e',
   cityHalo: '#f3e7cd',
+  cityMissing: '#c86a52',
+  cityToCorrect: '#d9b44a',
   cityRadius: 3,
   cityFontSize: 11,
   hatchWidth: 6,

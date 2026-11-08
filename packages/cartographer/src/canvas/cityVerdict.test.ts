@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest'
 import { addAnchor, closeRing } from '@europe-historical-atlas/core/editor/documentEdits'
 import { sharedBorderDocument } from '@europe-historical-atlas/core/editor/documentFixtures'
 
-import { cityVerdicts } from './cityVerdict'
+import { cityAlert, cityVerdicts } from './cityVerdict'
 
-import type { CityMark } from '../../../../state/citiesSlice'
+import type { CityMark } from '../state/citiesSlice'
 
 const in1100 = {
   kind: 'instant',
@@ -78,6 +78,33 @@ describe('cityVerdicts', () => {
       expect(cityVerdicts(withDuchy(), [{ ...CITY, lon: 0.2 }]).get('c')?.onMap?.name).toBe(
         'Reaume de France'
       )
+    })
+  })
+})
+
+// CARTO-389, the dev, 2026-11-08: the point says which cities need a source (red) or the map to change (yellow).
+describe('cityAlert', () => {
+  describe('happy path', () => {
+    it('raises « missing » for a city nobody has entered a holder for', () => {
+      expect(cityAlert('notEntered')).toBe('missing')
+    })
+  })
+
+  describe('variants', () => {
+    it('raises « toCorrect » for a city on the wrong side and for a holder the map lacks', () => {
+      expect([cityAlert('misplaced'), cityAlert('toDeclare')]).toEqual(['toCorrect', 'toCorrect'])
+    })
+
+    it('raises nothing for a city where all is well', () => {
+      expect(cityAlert('agrees')).toBeNull()
+    })
+  })
+
+  // L3–L4: N/A — a total mapping of a closed union.
+
+  describe('edge cases', () => {
+    it('raises nothing when there is nothing to compare by, as the list marks nothing', () => {
+      expect(cityAlert('cannotCompare')).toBeNull()
     })
   })
 })

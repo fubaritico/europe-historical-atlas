@@ -1,4 +1,4 @@
-import type { CityVerdict, CityVerdictKind } from './cityVerdict'
+import type { CityVerdict, CityVerdictKind } from '../../../../canvas/cityVerdict'
 import type { CityMark, CitySort } from '../../../../state/citiesSlice'
 
 /**

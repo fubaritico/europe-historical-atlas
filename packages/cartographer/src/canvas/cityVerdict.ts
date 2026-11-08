@@ -1,8 +1,10 @@
-import { projectedTerritories } from '../../../../canvas/paint/scene'
-import { polityAt } from '../../../../geometry/fillHit'
+import { polityAt } from '../geometry/fillHit'
 
-import type { PolityRings } from '../../../../geometry/fillHit'
-import type { CityHolder, CityMark } from '../../../../state/citiesSlice'
+import { projectedTerritories } from './paint/scene'
+
+import type { CityAlert } from './paint/cityPainter'
+import type { PolityRings } from '../geometry/fillHit'
+import type { CityHolder, CityMark } from '../state/citiesSlice'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /**
@@ -96,4 +98,15 @@ export function cityVerdicts(
       return verdict(onMap?.wikidata === bySources.wikidata ? 'agrees' : 'misplaced')
     })
   )
+}
+
+/**
+ * The alert a verdict raises, or none — a city where all is well, or one with nothing to compare by, keeps its look.
+ * @param kind - the verdict
+ * @returns the alert, or `null`
+ */
+export function cityAlert(kind: CityVerdictKind): CityAlert | null {
+  if (kind === 'notEntered') return 'missing'
+  if (kind === 'misplaced' || kind === 'toDeclare') return 'toCorrect'
+  return null
 }

@@ -44,6 +44,7 @@ import { closingStretch } from './tools/waterClosing'
 import { weldTargetOnScreen } from './tools/weldGestures'
 
 import type { AnchorCache } from './anchorCache'
+import type { CityAlertCache } from './cityAlertCache'
 import type { CanvasControllerDeps } from './controllerDeps'
 import type { CanvasOverlaps } from './overlapsOnCanvas'
 import type { Painter2D } from './paint/painter'
@@ -90,6 +91,8 @@ export interface LiveCanvas {
   tribeFeathers: TribeFeatherCache
   /** Where the outlines overlap, and the last refusals said (CARTO-364). */
   overlaps: CanvasOverlaps
+  /** Each city's alert on the map, recomputed only when the document or the cities change (CARTO-389). */
+  cityAlerts: CityAlertCache
   /** The overlay canvas and its context. */
   overlay: { node: HTMLCanvasElement; ctx: Painter2D }
   /** What the tools hold between two clicks — never the document's. */

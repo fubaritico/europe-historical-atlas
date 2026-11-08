@@ -1,7 +1,7 @@
 import { citiesFound } from './citiesFound'
 import { citiesSorted } from './citiesSorted'
 
-import type { CityVerdict } from './cityVerdict'
+import type { CityVerdict } from '../../../../canvas/cityVerdict'
 import type { CityMark } from '../../../../state/citiesSlice'
 import type { CityFiltersProps } from '../cityFiltersProps'
 

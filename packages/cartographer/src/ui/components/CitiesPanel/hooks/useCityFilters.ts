@@ -3,11 +3,11 @@ import { holderChoices } from '../utils/holderChoices'
 import { isOfferedState, stateChoices } from '../utils/stateChoices'
 import { tickedHolders } from '../utils/tickedHolders'
 
+import type { CityVerdict } from '../../../../canvas/cityVerdict'
 import type { CityMark } from '../../../../state/citiesSlice'
 import type { PolityColourSource } from '../../../../state/polityColourSource'
 import type { CartographerStoreHook } from '../../../../state/store'
 import type { CityFiltersProps } from '../cityFiltersProps'
-import type { CityVerdict } from '../utils/cityVerdict'
 
 /**
  * The advanced filters bound to the store (CARTO-370, CARTO-369): what they offer for the year open — the holders and

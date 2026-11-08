@@ -10,6 +10,7 @@ import {
 import { lonLatToBackdrop, remapToScreen } from '../../viewport/projection'
 import { backdropToScreen } from '../../viewport/viewport'
 
+import type { CityAlert } from './cityPainter'
 import type { CanvasScene } from './painter'
 import type { PolityRings } from '../../geometry/fillHit'
 import type { Rect } from '../../geometry/marquee'
@@ -86,6 +87,8 @@ export interface SceneInputs {
     readonly name: string
     readonly lonLat: Point
     readonly holder: string | null
+    /** What its point says: a holder to enter, the map to correct, or `null` when all is well (CARTO-389). */
+    readonly alert: CityAlert | null
   }[]
   /** Whether the cities are drawn as points in their holder's colour, rather than as a dot and its name. */
   citiesAsPoints: boolean
@@ -374,11 +377,12 @@ export function buildScene(document: YearDocument, inputs: SceneInputs): CanvasS
       })
     ),
     selected: inputs.selected,
-    cities: inputs.cities.map(({ name, lonLat, holder }) => ({
+    cities: inputs.cities.map(({ name, lonLat, holder, alert }) => ({
       name,
       at: backdropToScreen(inputs.viewport, lonLatToBackdrop(lonLat, inputs.frame)),
       // Read only as points: a named city's dot keeps its ink.
       colour: inputs.citiesAsPoints ? holderColour(document, inputs.colours, holder) : null,
+      alert: inputs.citiesAsPoints ? alert : null,
     })),
     citiesAsPoints: inputs.citiesAsPoints,
     hatches: projectedHatches(inputs.overlaps, inputs.colours, inputs.viewport),

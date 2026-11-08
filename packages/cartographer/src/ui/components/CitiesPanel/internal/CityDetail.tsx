@@ -2,9 +2,9 @@ import { formatLonLat } from '../../../../viewport/coordinateLabel'
 import { useTranslation } from '../../../hooks/useTranslation'
 import { CITIES_PANEL_MESSAGES } from '../i18n'
 
+import type { CityVerdict } from '../../../../canvas/cityVerdict'
 import type { HolderSource } from '../../../../state/citiesSlice'
 import type { LonLat } from '../../../../viewport/coordinateLabel'
-import type { CityVerdict } from '../utils/cityVerdict'
 
 /**
  * Where a city is, and who holds it: by the sources, with the lines saying so, and on the map — and whether they agree.

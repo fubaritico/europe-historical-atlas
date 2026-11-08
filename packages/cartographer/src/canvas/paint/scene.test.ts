@@ -78,9 +78,14 @@ describe('scene', () => {
       const viewport: Viewport = { scale: 3, originX: 40, originY: -25 }
       const built = buildScene(
         document,
-        inputs(document, { viewport, cities: [{ name: 'Corner', lonLat: [2, 46], holder: null }] })
+        inputs(document, {
+          viewport,
+          cities: [{ name: 'Corner', lonLat: [2, 46], holder: null, alert: null }],
+        })
       )
-      expect(built.cities).toEqual([{ name: 'Corner', at: built.anchors[2], colour: null }])
+      expect(built.cities).toEqual([
+        { name: 'Corner', at: built.anchors[2], colour: null, alert: null },
+      ])
     })
 
     it('projects every anchor once, in document order', () => {
@@ -564,13 +569,26 @@ describe('holderColour', () => {
     if (hre !== undefined) hre.wikidata = 'Q12548'
     const held = inputs(document, {
       colours: new Map([['hre', '#3355aa']]),
-      cities: [{ name: 'Aachen', lonLat: [6, 50], holder: 'Q12548' }],
+      cities: [{ name: 'Aachen', lonLat: [6, 50], holder: 'Q12548', alert: null }],
     })
 
     expect(buildScene(document, { ...held, citiesAsPoints: true }).cities[0]?.colour).toBe(
       '#3355aa'
     )
     expect(buildScene(document, held).cities[0]?.colour).toBeNull()
+  })
+
+  // CARTO-389: the status rides on the point only — a named city keeps its look.
+  it("hands a city's alert to the painter only when the cities are drawn as points", () => {
+    const document = sharedBorderDocument()
+    const missing = inputs(document, {
+      cities: [{ name: 'Caspe', lonLat: [1, 47], holder: null, alert: 'missing' }],
+    })
+
+    expect(buildScene(document, { ...missing, citiesAsPoints: true }).cities[0]?.alert).toBe(
+      'missing'
+    )
+    expect(buildScene(document, missing).cities[0]?.alert).toBeNull()
   })
 })
 

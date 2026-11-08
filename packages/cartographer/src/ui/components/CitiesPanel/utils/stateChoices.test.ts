@@ -2,7 +2,7 @@ import { describe, expect, expectTypeOf, it } from 'vitest'
 
 import { STATE_ORDER, isOfferedState, stateChoices } from './stateChoices'
 
-import type { CityVerdict, CityVerdictKind } from './cityVerdict'
+import type { CityVerdict, CityVerdictKind } from '../../../../canvas/cityVerdict'
 import type { CityMark } from '../../../../state/citiesSlice'
 
 /**

@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
 
+import { cityVerdicts } from '../../../../canvas/cityVerdict'
 import { citiesOfYear } from '../../../../state/citiesSlice'
-import { cityVerdicts } from '../utils/cityVerdict'
 
+import type { CityVerdict } from '../../../../canvas/cityVerdict'
 import type { CityMark } from '../../../../state/citiesSlice'
-import type { CityVerdict } from '../utils/cityVerdict'
 import type { YearDocument } from '@europe-historical-atlas/core/editor/yearDocument'
 
 /** What `{Cities}` shows of the year open: its cities, each one's verdict, and the one whose detail is open. */

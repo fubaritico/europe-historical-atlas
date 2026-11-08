@@ -3147,8 +3147,8 @@ describe('the tribes’ fade on the canvas', () => {
 })
 
 /**
- * A canvas over the two-polity fixture, its static context recording every name written.
- * @returns the store, the names written, the frames and the teardown
+ * A canvas over the two-polity fixture, its static context recording every name written and every fill colour set.
+ * @returns the store, the names written, the fill colours set, the frames and the teardown
  */
 function attachWritingNames() {
   const frames = frameControl()
@@ -3157,6 +3157,7 @@ function attachWritingNames() {
     viewport: { viewport: UNFRAMED },
   })
   const written: unknown[] = []
+  const fills: unknown[] = []
   const node = canvasWithBox()
   node.getContext = vi.fn(
     () =>
@@ -3166,7 +3167,10 @@ function attachWritingNames() {
           get: (_, op) => (text: unknown) => {
             if (op === 'fillText') written.push(text)
           },
-          set: () => true,
+          set: (_, field, value) => {
+            if (field === 'fillStyle') fills.push(value)
+            return true
+          },
         }
       )
   ) as unknown as typeof node.getContext
@@ -3196,7 +3200,7 @@ function attachWritingNames() {
   const settle = (): void => {
     while (frames.asked() > 0) frames.run()
   }
-  return { store, written, settle, dispose }
+  return { store, written, fills, settle, dispose }
 }
 
 // CARTO-193, the dev, 2026-11-02: a city's eye in `{Cities}` shows it on the canvas, at once.
@@ -3226,6 +3230,26 @@ describe('the cities shown', () => {
     store.getState().setCityShown('lyon', false)
     settle()
     expect(written).toEqual([])
+    dispose()
+  })
+
+  // CARTO-389, the dev, 2026-11-08: as points, a city with no holder entered is ringed in red on the canvas.
+  it('rings Lyon, with no holder entered, in the red ink once shown as a point', () => {
+    const { store, fills, settle, dispose } = attachWritingNames()
+    store.getState().setCities([LYON])
+    store.getState().setCityShown('lyon', true)
+    store.getState().setCitiesAsPoints(true)
+    settle()
+    expect(fills).toContain(CHROME_PAINT_STYLE.cityMissing)
+    dispose()
+  })
+
+  it('paints no red ink for Lyon written by its name', () => {
+    const { store, fills, settle, dispose } = attachWritingNames()
+    store.getState().setCities([LYON])
+    store.getState().setCityShown('lyon', true)
+    settle()
+    expect(fills).not.toContain(CHROME_PAINT_STYLE.cityMissing)
     dispose()
   })
 })

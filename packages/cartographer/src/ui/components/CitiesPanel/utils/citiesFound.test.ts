@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { citiesFound } from './citiesFound'
 
-import type { CityVerdict } from './cityVerdict'
+import type { CityVerdict } from '../../../../canvas/cityVerdict'
 import type { CityHolder, CityMark } from '../../../../state/citiesSlice'
 
 const EMPIRE: CityHolder = { name: 'Sacrum Imperium', wikidata: 'Q12548' }

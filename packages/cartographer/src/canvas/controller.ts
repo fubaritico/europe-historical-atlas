@@ -1,8 +1,8 @@
-import { shownCityPoints } from '../state/citiesSlice'
 import { clampToCover, openingView } from '../viewport/framing'
 import { screenToLonLatOnBackdrop } from '../viewport/projection'
 import { panBy, zoomAbout } from '../viewport/viewport'
 
+import { citiesToPaint } from './cityAlertCache'
 import { documentCaches } from './documentCaches'
 import { hearPageHistory, onModifiedKey } from './history/historyAnswer'
 import {
@@ -130,7 +130,7 @@ function repaint(it: LiveCanvas): void {
     // From the cache keyed on the edition's version: a pan repaints per pointer move, and never measures
     // a distance again.
     tribeFeathers: it.tribeFeathers.feathersOf(state.document, state.version, coloursOf(it)),
-    cities: shownCityPoints(state.cities, state.shownCities, state.document.year),
+    cities: citiesToPaint(state, it.cityAlerts),
     citiesAsPoints: state.citiesAsPoints,
     overlaps: overlapsToPaint(it),
   })

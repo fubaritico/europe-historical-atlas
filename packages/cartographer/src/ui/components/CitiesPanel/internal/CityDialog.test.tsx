@@ -6,8 +6,8 @@ import { renderInEnglish } from '../../../testing/renderInEnglish'
 
 import { CityDialog } from './CityDialog'
 
+import type { CityVerdict } from '../../../../canvas/cityVerdict'
 import type { CityMark } from '../../../../state/citiesSlice'
-import type { CityVerdict } from '../utils/cityVerdict'
 
 const EMPIRE = { name: 'Sacrum Imperium', wikidata: 'Q12548' }
 const METZ: CityMark = {
