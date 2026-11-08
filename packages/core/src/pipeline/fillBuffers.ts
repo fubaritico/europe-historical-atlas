@@ -1,16 +1,70 @@
 /**
  * The fills' geometry: every filled triangle placed on the relief, with its polity's tint at each level of homage — and
  * a vassal's band (ATLAS-398): its depth of homage and each vertex's distance to its outline.
+ *
+ * In core since ATLAS-396, so the worker builds it: on a change to a map not prepared, laying the countries' vertices on
+ * the relief held the page 156–243 ms (the built site, 2026-11-08); built in the worker, the page only wraps the arrays.
  */
 
-import { planeHeightIn } from '@europe-historical-atlas/core/pipeline/gridDrape'
+import { planeHeightIn } from './gridDrape'
+import { cutYearFills } from './vassalBands'
 
-import type { TintSurface } from '../tintOnRelief'
-import type { IndexedFill } from '@europe-historical-atlas/core/pipeline/indexFill'
-import type { RgbColor } from '@europe-historical-atlas/core/utils/color'
+import type { FillGrid } from './fillTriangles'
+import type { NodeHeights } from './gridDrape'
+import type { IndexedFill } from './indexFill'
+import type { FillBand, FillRegion } from './vassalBands'
+import type { RgbColor } from '../utils/color'
+
+/** The relief the fills are laid on. */
+export interface FillSurface {
+  /** The relief's subdivision — the one the triangles were cut against. */
+  grid: FillGrid
+  /** The relief's height at every grid node, in world units before the exaggeration. */
+  nodes: NodeHeights
+  /** World-space width of the map plane on X. */
+  worldWidth: number
+  /** World-space depth of the map plane on Z. */
+  worldDepth: number
+}
+
+/** What laying a year's fills on the relief takes, all of it carried by the request — what crosses to the worker. */
+export interface FillLayRequest {
+  /** The polities' outlines, in the order the fills are laid. */
+  readonly regions: readonly FillRegion[]
+  /** The relief's subdivision. */
+  readonly grid: FillGrid
+  /** Each display level's tints, one per polity — the year's settled `tintLevels`. */
+  readonly tintLevels: readonly (readonly (RgbColor | null)[])[]
+  /** Each polity's band depth, one per region — the year's settled `bandDepths`, `0` for one that wears none. */
+  readonly bandDepths: readonly number[]
+  /** The frame and the reach a banded region's vertices are measured with; `null` measures none. */
+  readonly band: FillBand | null
+  /** The relief's height at every grid node, one number a node, row by row from the north. */
+  readonly heights: Float32Array
+  /** World-space width of the map plane on X. */
+  readonly worldWidth: number
+  /** World-space depth of the map plane on Z. */
+  readonly worldDepth: number
+}
+
+/**
+ * Lay a year's fills on the relief: each polity cut into triangles on the relief's planes, its vertices shared, placed
+ * at the relief's height with its tints, a vassal's vertices with their distance to its outline — the whole of it, in
+ * the worker (ATLAS-396, ATLAS-398).
+ * @param request - the outlines, the grid, the tints, the band and the relief's heights
+ * @returns the fills' arrays, ready to be wrapped in buffers
+ * @throws what {@link fillBuffers} throws — tints or band depths the cut does not agree with, a defect
+ */
+export function layFills(request: FillLayRequest): FillArrays {
+  const { regions, grid, tintLevels, bandDepths, band, heights, worldWidth, worldDepth } = request
+  const fills = cutYearFills(regions, grid, band)
+  // One height a node: the heights are their own buffer, not a mesh's positions.
+  const nodes = { array: heights, stride: 1, offset: 0 }
+  return fillBuffers({ fills, tintLevels, bandDepths, grid, nodes, worldWidth, worldDepth })
+}
 
 /** What the fills' geometry is built from: the triangles, their tints by level, and the surface. */
-export interface FillGeometry extends TintSurface {
+export interface FillGeometry extends FillSurface {
   /** Each polity's triangles, their vertices shared — the cut's output (`indexFill`). */
   fills: readonly IndexedFill[]
   /**
@@ -26,8 +80,8 @@ export interface FillGeometry extends TintSurface {
   bandDepths: readonly number[]
 }
 
-/** The buffers of the fills' geometry. */
-export interface FillBufferSet {
+/** A fills' geometry, ready to be wrapped in buffers. */
+export interface FillArrays {
   /** Three floats per vertex, in world space. */
   positions: Float32Array
   /** Three bytes per vertex for each level of homage, level 0 first. */
@@ -53,7 +107,7 @@ export interface FillBufferSet {
  *   built from one registry, so either is a defect, and a guessed colour would paint a vassal in nobody's; and when a
  *   banded polity's fill was cut without its distances, or has no depth — the cut and the settling read one registry
  */
-export function fillBuffers(options: FillGeometry): FillBufferSet {
+export function fillBuffers(options: FillGeometry): FillArrays {
   // The deepest level decides which polities are filled at all.
   const levels = options.tintLevels
   const deepest = levels[levels.length - 1]
@@ -164,7 +218,7 @@ function writeFill(
   own: readonly RgbColor[],
   buffers: { positions: Float32Array; tints: readonly Uint8Array[] },
   at: number,
-  surface: TintSurface
+  surface: FillSurface
 ): number {
   const { positions, tints } = buffers
   const { grid, nodes, worldWidth, worldDepth } = surface

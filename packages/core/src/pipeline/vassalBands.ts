@@ -20,9 +20,25 @@ import { indexFill } from './indexFill'
 
 import type { FillGrid } from './fillTriangles'
 import type { IndexedFill } from './indexFill'
-import type { FillBand, FillRegion } from './mapCompute'
+import type { UvPoint } from '../data/coastlineSource'
 import type { YearPolity } from '../data/yearFormat'
 import type { GeoBounds } from '../geo/mercator'
+
+/** A polity's outline as the fills are cut from it — its rings in `(u, v)`, outer and holes alike. */
+export interface FillRegion {
+  /** The rings. */
+  readonly rings: readonly (readonly UvPoint[])[]
+  /** Whether it wears the vassals' band (`data/vassalBand`), its vertices then measured; absent, it does not. */
+  readonly banded?: boolean
+}
+
+/** What the vassals' band is measured with (ATLAS-398): the frame the rings were projected against, and the reach. */
+export interface FillBand {
+  /** The frame — the year's, which is the DEM's. */
+  readonly bounds: GeoBounds
+  /** How deep the distance is computed, km — `VASSAL_BAND_REACH_KM`, handed in. */
+  readonly reachKm: number
+}
 
 /** What a year's fills are cut from: its regions, each saying whether it wears the band, and how the vassals are measured. */
 export interface VassalBandCut {

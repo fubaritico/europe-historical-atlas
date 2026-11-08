@@ -11,6 +11,7 @@ import { createElevationLandMask } from '@europe-historical-atlas/core/data/land
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 
 import { ATLAS_MESSAGES } from '../../i18n'
+import { meshVertexGrid } from '../../scene/relief/reliefMesh'
 import { createMapSources } from '../../sources/mapSources'
 import { createDevState } from '../../tunables/devState'
 import { createMapPipeline } from '../mapPipeline'
@@ -31,6 +32,9 @@ export const DEM = createHeightmap(
   Int16Array.from([-9, -9, -9, -9, -9, 8, 8, -9, -9, 8, 8, -9, 0, 0, 0, 0])
 )
 export const MASK = createElevationLandMask(DEM, 0)
+
+/** The relief the stand-in layers read their heights from — one object, so a key built on it can be compared. */
+export const RELIEF = { name: 'test relief' }
 
 /**
  * Read a fake's call record. The fakes are typed as the contracts they stand in for, not as mocks.
@@ -71,7 +75,8 @@ export function fakeLayers(): MapLayers {
     'keepYears',
     'discardYear',
     'uploadYear',
-    'primeFillCut',
+    'primeFillArrays',
+    'reliefHeights',
     'primeTribeCut',
   ]
   return Object.fromEntries(names.map((n) => [n, vi.fn()])) as unknown as MapLayers
@@ -197,5 +202,11 @@ export function build(over: Partial<MapPipelineDeps> = {}): {
     assets: fakeAssets(),
     ...over,
   } as unknown as MapPipelineDeps
+  // The relief's heights, one a node of the grid the year is laid on: flat, as the test relief is small.
+  const { segX, segY } = meshVertexGrid(META, dev.relief.segments)
+  asMock(deps.layers.reliefHeights).mockImplementation(() => ({
+    relief: RELIEF,
+    heights: new Float32Array((segX + 1) * (segY + 1)),
+  }))
   return { deps, dev, pipeline: createMapPipeline(deps) }
 }

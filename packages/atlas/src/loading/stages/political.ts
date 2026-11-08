@@ -9,7 +9,8 @@ import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
 
 import { paintsExactFills, yearPaintsExactFills } from '../../scene/political/paintsExactFills'
 import { tribeCutSettings } from '../../scene/political/tribes/mapTribeLayer'
-import { meshVertexGrid } from '../../scene/relief/reliefMesh'
+import { meshVertexGrid, meshWorldDepth } from '../../scene/relief/reliefMesh'
+import { WORLD_WIDTH } from '../../scene/world'
 import { politicalPalette } from '../../tunables/params'
 import { COMPUTE_PHASE_MESSAGES } from '../computeLabels'
 import { installSettledYear, settleYearBorders } from '../yearBorders'
@@ -23,14 +24,15 @@ import type { DevState } from '../../tunables/devState'
 import type { PipelineContext } from '../pipelineContext'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
+import type { FillArrays } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import type { FillGrid } from '@europe-historical-atlas/core/pipeline/fillTriangles'
-import type { IndexedFill } from '@europe-historical-atlas/core/pipeline/indexFill'
 import type {
   MapCompute,
   PoliticalResult,
   ProgressReport,
 } from '@europe-historical-atlas/core/pipeline/mapCompute'
 import type { SettledYear } from '@europe-historical-atlas/core/pipeline/settleYear'
+import type { VassalBandCut } from '@europe-historical-atlas/core/pipeline/vassalBands'
 
 /**
  * How drawing a year divides the share of the bar it is given. Measured rather than chosen: the fetch is a local file,
@@ -141,11 +143,8 @@ async function installYear(
   // other's polities, or one kind of year's patterns against the other kind's lines.
   sources.regionSet = loaded
   settle()
-  // The worker's cuts, once the sources hold the year they were cut for: laying the fills and the tribes cuts nothing.
-  if (cut !== null) {
-    layers.primeFillCut(loaded.regions, cut.grid, cut.fills)
-    if (cut.tribes !== null) layers.primeTribeCut(cut.grid, cut.tribes)
-  }
+  // The worker's work, once the sources hold the year it was done for: laying the fills and the tribes does nothing here.
+  if (cut !== null) primeWorkerCut(context, loaded, cut)
   // The fills and the border lines.
   const endFills = startStep(context.clock, asked, 'fills')
   layers.rebuildFills()
@@ -192,12 +191,33 @@ function settlerOf(
   }
 }
 
-/** A year prepared in the worker: its fills cut, its tribes measured, the year settled, and the grid they lie on. */
+/**
+ * Hand the layers what the worker prepared for a year, once the sources hold it: its fills' arrays, keyed by the very
+ * polities, grid and tints the sources now hold, and its tribes' patches.
+ * @param context - the pipeline's world
+ * @param loaded - the year
+ * @param cut - what the worker prepared for it
+ */
+export function primeWorkerCut(context: PipelineContext, loaded: RegionSet, cut: WorkerCut): void {
+  const { layers } = context
+  const key = {
+    regions: loaded.regions,
+    grid: cut.grid,
+    tintLevels: cut.settled.tintLevels,
+    relief: cut.relief,
+  }
+  layers.primeFillArrays(key, cut.fillArrays)
+  if (cut.tribes !== null) layers.primeTribeCut(cut.grid, cut.tribes)
+}
+
+/** A year prepared in the worker: its fills laid, its tribes measured, the year settled, and the grid they lie on. */
 export interface WorkerCut {
   /** The relief's subdivision. */
   readonly grid: FillGrid
-  /** One fill per polity, its vertices shared and its triangles as indices. */
-  readonly fills: IndexedFill[]
+  /** Its fills laid on the relief, in the settled tints — arrays ready to be wrapped (ATLAS-396). */
+  readonly fillArrays: FillArrays
+  /** The relief they were laid on — read with its heights, before the wait (reviews QUAL-001, ARCH-001). */
+  readonly relief: object
   /** The tribes' patches, measured in the worker too, with their settings; `null` for a year with no tribe. */
   readonly tribes: MeasuredTribes | null
   /** Its colours, tints by level, exact lines and tribes. */
@@ -232,7 +252,9 @@ export async function prepareYear(
           scaleProgress(report, POLITICAL_SPLIT.compute, POLITICAL_SPLIT.bake)
         )
   const authored = loaded.authored
-  if (!exact || heightmap === null || authored === undefined) {
+  // The relief's heights, read now: the fills are laid on the relief on screen, a new one asks for new fills.
+  const read = context.layers.reliefHeights()
+  if (!exact || heightmap === null || authored === undefined || read === null) {
     await bake
     return null
   }
@@ -247,18 +269,57 @@ export async function prepareYear(
       palette: politicalPalette(dev.political),
     })
   )
-  const [, fills, settled, tribes] = await Promise.all([
+  const { heights } = read
+  const relief = { grid, heights, worldDepth: meshWorldDepth(heightmap.meta, WORLD_WIDTH) }
+  const [, fillArrays, settled, tribes] = await Promise.all([
     bake,
     // Each vassal measured for its band beside its cut (ATLAS-398), off this thread like it.
-    timedStep(context.clock, loaded.year, 'cut', () => {
-      const cut = vassalBandCut(loaded.regions, authored.year.registry.polities, bounds)
-      return context.box.compute.cutFills(cut.regions, grid, cut.band)
-    }),
+    settling.then((year) =>
+      layYearFills(
+        context,
+        loaded,
+        { year, cut: vassalBandCut(loaded.regions, authored.year.registry.polities, bounds) },
+        relief
+      )
+    ),
     settling,
     // The tribes the settling coloured, measured once it has.
     settling.then((year) => measureTribes(context, loaded, year.tribes, { bounds, grid })),
   ])
-  return { grid, fills, tribes, settled }
+  return { grid, fillArrays, relief: read.relief, tribes, settled }
+}
+
+/**
+ * A year's fills laid in the worker, in the tints its settling gave and each vassal measured for its band, so the page
+ * only wraps their arrays (ATLAS-396, ATLAS-398).
+ * @param context - the pipeline's world
+ * @param loaded - the authored year
+ * @param settled - the year as the worker settled it, and its regions as the band cuts them
+ * @param settled.year - the settled year: its tints and its band depths
+ * @param settled.cut - the regions flagged for the band, and the band's frame and reach
+ * @param relief - the relief they are laid on
+ * @param relief.grid - its subdivision
+ * @param relief.heights - its height at every node
+ * @param relief.worldDepth - the map plane's depth on Z
+ * @returns the fills' arrays
+ */
+function layYearFills(
+  context: PipelineContext,
+  loaded: RegionSet,
+  settled: { year: SettledYear; cut: VassalBandCut },
+  relief: { grid: FillGrid; heights: Float32Array; worldDepth: number }
+): Promise<FillArrays> {
+  const { year, cut } = settled
+  return timedStep(context.clock, loaded.year, 'cut', () =>
+    context.box.compute.layFills({
+      regions: cut.regions,
+      tintLevels: year.tintLevels,
+      bandDepths: year.bandDepths,
+      band: cut.band,
+      worldWidth: WORLD_WIDTH,
+      ...relief,
+    })
+  )
 }
 
 /**

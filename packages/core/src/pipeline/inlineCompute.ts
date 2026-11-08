@@ -13,18 +13,15 @@ import { extractRegionBorders } from '../data/regionBorders'
 import { pinnedRegionColor } from '../data/regionPalette'
 import { assignRegionColors, expandRegionsOverLand, rasteriseRegions } from '../data/regionRaster'
 
+import { layFills } from './fillBuffers'
 import { settleAuthoredYear } from './settleYear'
 import { composeTerrainRgba, terrainTextureSize } from './terrainCompose'
 import { tribePatches } from './tribePatches'
-import { cutYearFills } from './vassalBands'
 import { placeYearNames } from './yearNames'
 
-import type { FillGrid } from './fillTriangles'
-import type { IndexedFill } from './indexFill'
+import type { FillArrays, FillLayRequest } from './fillBuffers'
 import type {
   ComputeSources,
-  FillBand,
-  FillRegion,
   MapCompute,
   PoliticalRequest,
   PoliticalResult,
@@ -323,17 +320,14 @@ async function announcedNames(request: YearNamesRequest, announce: Announce): Pr
  */
 function statelessJobs(
   yieldControl: () => Promise<void>
-): Pick<MapCompute, 'placeYearNames' | 'cutFills'> {
+): Pick<MapCompute, 'placeYearNames' | 'layFills'> {
   return {
     placeYearNames(request: YearNamesRequest, onProgress?: ProgressReport): Promise<YearNames> {
       return announcedNames(request, announcer(onProgress, yieldControl))
     },
-    cutFills(
-      regions: readonly FillRegion[],
-      grid: FillGrid,
-      band: FillBand | null
-    ): Promise<IndexedFill[]> {
-      return Promise.resolve(cutYearFills(regions, grid, band))
+    layFills(request: FillLayRequest): Promise<FillArrays> {
+      // Inside the promise, so a defect rejects it as every other job's does (review ARCH-003).
+      return Promise.resolve().then(() => layFills(request))
     },
   }
 }

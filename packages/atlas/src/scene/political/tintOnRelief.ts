@@ -3,25 +3,15 @@
  * is blended with, the bake's blend in GLSL, the pull forward in depth, and the writing of a uniform.
  */
 
-import type { FillGrid } from '@europe-historical-atlas/core/pipeline/fillTriangles'
-import type { NodeHeights } from '@europe-historical-atlas/core/pipeline/gridDrape'
+import type { FillSurface } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import type { BlendMode } from '@europe-historical-atlas/core/pipeline/terrainOptions'
 import type { ShaderMaterial, Texture } from 'three'
 
-/** The relief a tint is laid on, as a layer reads it. */
-export interface TintSurface {
-  /** The relief's subdivision — the one the triangles were cut against. */
-  grid: FillGrid
-  /**
-   * The relief's height at every grid node, in world units before the exaggeration — the relief mesh's own
-   * positions, so the tint lies on the very surface drawn; read in place, with no call per node (ATLAS-333).
-   */
-  nodes: NodeHeights
-  /** World-space width of the map plane on X. */
-  worldWidth: number
-  /** World-space depth of the map plane on Z. */
-  worldDepth: number
-}
+/**
+ * The relief a tint is laid on, as a layer reads it — core's fill surface (ATLAS-396): its node heights are the relief
+ * mesh's own positions, read in place with no call per node (ATLAS-333), or a copy of their heights in the worker.
+ */
+export type TintSurface = FillSurface
 
 /** How a tint is blended over the terrain — the bake's own settings, so the two agree. */
 export interface TintLook {

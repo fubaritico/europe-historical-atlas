@@ -10,18 +10,15 @@
  * raster-derived borders were built to abolish.
  */
 
-import type { FillGrid } from './fillTriangles'
-import type { IndexedFill } from './indexFill'
+import type { FillArrays, FillLayRequest } from './fillBuffers'
 import type { SettleRequest, SettledYear } from './settleYear'
 import type { TerrainTextureOptions } from './terrainCompose'
 import type { TribeGround, TribeOutline, TribePatch } from './tribePatches'
 import type { YearNames, YearNamesRequest } from './yearNames'
-import type { UvPoint } from '../data/coastlineSource'
 import type { HeightmapMeta } from '../data/heightmap'
 import type { LandMaskMeta } from '../data/landMask'
 import type { RegionBorders } from '../data/regionBorders'
 import type { Region } from '../data/regionSource'
-import type { GeoBounds } from '../geo/mercator'
 import type { RgbColor } from '../utils/color'
 
 /**
@@ -154,39 +151,22 @@ export interface NameCompute {
   placeYearNames(request: YearNamesRequest, onProgress?: ProgressReport): Promise<YearNames>
 }
 
-/** A polity's outline as the fills are cut from it — its rings in `(u, v)`, outer and holes alike. */
-export interface FillRegion {
-  /** The rings. */
-  readonly rings: readonly (readonly UvPoint[])[]
-  /** Whether it wears the vassals' band (`data/vassalBand`), its vertices then measured; absent, it does not. */
-  readonly banded?: boolean
-}
-
-/** What the vassals' band is measured with (ATLAS-398): the frame the rings were projected against, and the reach. */
-export interface FillBand {
-  /** The frame — the year's, which is the DEM's. */
-  readonly bounds: GeoBounds
-  /** How deep the distance is computed, km — `VASSAL_BAND_REACH_KM`, handed in. */
-  readonly reachKm: number
-}
+/** A polity's outline as the fills are cut from it, and what laying them takes — `fillBuffers`', read here as before. */
+export type { FillLayRequest } from './fillBuffers'
+export type { FillBand, FillRegion } from './vassalBands'
 
 /**
- * Cut an authored year's polities into triangles lying on the relief's planes (ATLAS-333) — the cut that held the
- * main thread 0.36 s on a change of year, ~1 s the first time.
+ * Lay an authored year's polities on the relief (ATLAS-333, ATLAS-396): cut into triangles on the relief's planes, their
+ * vertices shared, placed at the relief's height with their tints — what held the page 0.36 s on a change of year when
+ * cut there (ATLAS-333), then 156–243 ms when only laid there (ATLAS-396, the built site, 2026-11-08).
  */
 export interface FillCompute {
   /**
-   * Cut every polity on the relief's grid. Reads none of the installed state.
-   * @param regions - the polities' outlines, in the order the fills are laid
-   * @param grid - the relief's subdivision
-   * @param band - the frame and reach a banded region's vertices are measured with; `null` measures none
-   * @returns each polity's triangles, their vertices shared (`indexFill`), a banded one with its distances
+   * Lay every polity's fill. Reads none of the installed state.
+   * @param request - the outlines, the grid, the tints and the relief's heights
+   * @returns the fills' arrays, ready to be wrapped in buffers
    */
-  cutFills(
-    regions: readonly FillRegion[],
-    grid: FillGrid,
-    band: FillBand | null
-  ): Promise<IndexedFill[]>
+  layFills(request: FillLayRequest): Promise<FillArrays>
 }
 
 /** What a year's tribes are measured against in the compute — {@link TribeGround} with the land left to it. */

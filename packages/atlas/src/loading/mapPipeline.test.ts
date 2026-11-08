@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { CONTENT_FORMAT_VERSION } from '@europe-historical-atlas/core/data/contentFormat'
 import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
+import * as fillBuffersModule from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import * as fillModule from '@europe-historical-atlas/core/pipeline/fillTriangles'
 import * as patchModule from '@europe-historical-atlas/core/pipeline/tribePatches'
 
@@ -13,6 +14,7 @@ import {
   DEM,
   FR,
   MASK,
+  RELIEF,
   asMock,
   build,
   deferred,
@@ -365,7 +367,7 @@ describe('createMapPipeline', () => {
       })
       shelvingLayers(deps.layers, deps.sources)
       await pipeline.start()
-      const primed = asMock(deps.layers.primeFillCut).mock.calls.length
+      const primed = asMock(deps.layers.primeFillArrays).mock.calls.length
       vi.spyOn(fillModule, 'fillTriangles').mockImplementation(() => {
         throw new Error('the cut said no')
       })
@@ -373,26 +375,55 @@ describe('createMapPipeline', () => {
       dev.political.year = 1200
       await pipeline.rebuildPolitical()
       expect(asMock(deps.layers.shelveYear)).not.toHaveBeenCalled()
-      expect(asMock(deps.layers.primeFillCut).mock.calls).toHaveLength(primed)
+      expect(asMock(deps.layers.primeFillArrays).mock.calls).toHaveLength(primed)
       expect(deps.sources.regionSet).toBe(AUTHORED_YEAR)
       expect(asMock(deps.ui.reportAssetFailure)).toHaveBeenCalledWith('regions', expect.any(Error))
     })
 
-    // ATLAS-333: the fills are cut by the compute before the year is laid, so laying them cuts nothing here.
-    it('hands the layers the cut of an authored year’s very polities, one triangle list each', async () => {
+    // Review QUAL-002: the heights the compute lays on are the relief's own, and the key carries the relief read.
+    it('lays the fills on the relief’s very heights, keyed by the relief they were read from', async () => {
+      const lay = vi.spyOn(fillBuffersModule, 'layFills')
+      const { deps, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
+      })
+      const read = { relief: RELIEF, heights: new Float32Array(4096).fill(7) }
+      asMock(deps.layers.reliefHeights).mockImplementation(() => read)
+      await pipeline.start()
+      expect(lay.mock.calls[0]?.[0].heights).toBe(read.heights)
+      const [key] = asMock(deps.layers.primeFillArrays).mock.calls[0] as [{ relief: unknown }]
+      expect(key.relief).toBe(RELIEF)
+    })
+
+    it('asks the compute to lay nothing before the relief is built: the page lays the fills once it is', async () => {
+      const lay = vi.spyOn(fillBuffersModule, 'layFills')
+      const { deps, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
+      })
+      asMock(deps.layers.reliefHeights).mockImplementation(() => null)
+      await pipeline.start()
+      expect([
+        lay.mock.calls.length,
+        asMock(deps.layers.primeFillArrays).mock.calls.length,
+      ]).toEqual([0, 0])
+    })
+
+    // ATLAS-333, ATLAS-396: the fills are laid by the compute before the year is laid, so building them lays nothing here.
+    it('hands the layers the fills laid for an authored year’s very polities and settled tints', async () => {
       const { deps, pipeline } = build({
         assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
       })
       await pipeline.start()
-      const [regions, grid, fills] = asMock(deps.layers.primeFillCut).mock.calls[0] as [
-        unknown,
-        { segX: number; segY: number },
-        Float32Array[],
+      const [key, arrays] = asMock(deps.layers.primeFillArrays).mock.calls[0] as [
+        { regions: unknown; grid: { segX: number }; tintLevels: unknown },
+        { positions: Float32Array; indices: Uint32Array },
       ]
-      expect(regions).toBe(AUTHORED_YEAR.regions)
-      expect(grid.segX).toBe(deps.dev.relief.segments)
-      expect(fills).toHaveLength(AUTHORED_YEAR.regions.length)
-      expect(firstCall(deps.layers.primeFillCut)).toBeLessThan(firstCall(deps.layers.rebuildFills))
+      expect(key.regions).toBe(AUTHORED_YEAR.regions)
+      expect(key.grid.segX).toBe(deps.dev.relief.segments)
+      expect(key.tintLevels).toBe(deps.sources.tintLevels)
+      expect([arrays.positions.length > 0, arrays.indices.length % 3]).toEqual([true, 0])
+      expect(firstCall(deps.layers.primeFillArrays)).toBeLessThan(
+        firstCall(deps.layers.rebuildFills)
+      )
     })
 
     it('measures each step of a change to an authored year, and only the return on a year set aside', async () => {
@@ -470,7 +501,7 @@ describe('createMapPipeline', () => {
     it('cuts nothing ahead for a year the texture carries', async () => {
       const { deps, pipeline } = build()
       await pipeline.start()
-      expect(asMock(deps.layers.primeFillCut)).not.toHaveBeenCalled()
+      expect(asMock(deps.layers.primeFillArrays)).not.toHaveBeenCalled()
     })
 
     it('sets nothing aside when the same year is drawn again', async () => {

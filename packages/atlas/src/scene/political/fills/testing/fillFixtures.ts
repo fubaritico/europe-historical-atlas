@@ -18,8 +18,9 @@ import {
   meshWorldDepth,
 } from '../../../relief/reliefMesh'
 
-import type { FillLayerOptions } from '../fillLayer'
+import type { TintLook } from '../../tintOnRelief'
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
+import type { FillGeometry } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 
 /** A nine-by-nine elevation frame. */
 export const META: HeightmapMeta = {
@@ -92,7 +93,7 @@ export const texture = (): DataTexture => new DataTexture(new Uint8Array(16), 2,
  * @param over - what to change
  * @returns the options
  */
-export const options = (over: Partial<FillLayerOptions> = {}): FillLayerOptions => {
+export const options = (over: Partial<FillGeometry & TintLook> = {}): FillGeometry & TintLook => {
   const fills =
     over.fills ??
     fillTriangles(
@@ -129,7 +130,7 @@ export const options = (over: Partial<FillLayerOptions> = {}): FillLayerOptions 
  * Two polities, one per triangle: a suzerain and its vassal.
  * @returns their triangles
  */
-export const twoPolities = (): FillLayerOptions['fills'] =>
+export const twoPolities = (): FillGeometry['fills'] =>
   fillTriangles(
     [
       {
@@ -165,7 +166,7 @@ export const VASSAL = { r: 200, g: 100, b: 50 }
  * (ATLAS-398) — over the elevation frame, the vassal's vertices carrying their distance to its outline.
  * @returns their triangles, the vassal's with its distances
  */
-export const bandedPolities = (): FillLayerOptions['fills'] => {
+export const bandedPolities = (): FillGeometry['fills'] => {
   const [lord, vassal] = twoPolities()
   if (lord === undefined || vassal === undefined) throw new Error('fixture: two polities')
   const [measured] = measureVassalBands(

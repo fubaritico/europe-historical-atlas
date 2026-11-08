@@ -17,6 +17,7 @@ import type { LayerContext } from '../../layers/layerContext'
 import type { Region } from '@europe-historical-atlas/core/data/regionSource'
 import type { AuthoredYear } from '@europe-historical-atlas/core/data/yearFormat'
 import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
+import type { FillArrays } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import type { IndexedFill } from '@europe-historical-atlas/core/pipeline/indexFill'
 
 /**
@@ -81,27 +82,68 @@ function cutFills(
   // Otherwise cut anew, and keep the cut for next time.
   const cut = vassalBandCut(regions, year.polities, year.bounds)
   const fills = cutYearFills(cut.regions, grid, cut.band)
-  primeFillCut(context, regions, grid, fills)
+  context.handles.fillCut = { regions, segX: grid.segX, segY: grid.segY, fills }
   return fills
 }
 
 /**
- * Keep a cut of the fills as the last one made — whether cut here or handed from the worker (ATLAS-333): laid as it
- * is while the year's polities and the grid stay the very ones it was cut for.
- * @param context - the layers, whose handles hold the cut
- * @param regions - the polities it was cut from — the very array the sources hold, which the reuse compares
- * @param grid - the relief's subdivision it was cut on
- * @param grid.segX - cells across
- * @param grid.segY - cells down
- * @param fills - each polity's triangles
+ * The relief's heights, one number a node, and the relief they were read from — taken in one step, so fills laid on
+ * them are known to be that relief's (reviews QUAL-001, ARCH-001).
  */
-export function primeFillCut(
+export interface ReliefHeights {
+  /** The relief mesh the heights were read from. */
+  readonly relief: object
+  /** Its height at every grid node, row by row from the north. */
+  readonly heights: Float32Array
+}
+
+/** What fills laid in the worker were laid from — compared by identity with what the next build reads. */
+export interface FillArraysKey {
+  /** The polities — the very array the sources hold. */
+  readonly regions: readonly Region[]
+  /** The relief's subdivision. */
+  readonly grid: { segX: number; segY: number }
+  /** The tints by level — the very array the sources hold once the year is settled. */
+  readonly tintLevels: object
+  /** The relief whose heights they were laid on — read with the heights, never when they come back. */
+  readonly relief: object
+}
+
+/**
+ * Hand the fills arrays laid in the worker (ATLAS-396), for the year about to be laid on the relief on screen: the next
+ * build takes them as they are when it reads the very same polities, grid, tints and relief — and lays nothing here.
+ * @param context - the layers, whose handles hold the arrays
+ * @param key - what they were laid from
+ * @param arrays - the fills' arrays
+ */
+export function primeFillArrays(
   context: LayerContext,
-  regions: readonly Region[],
-  grid: { segX: number; segY: number },
-  fills: IndexedFill[]
+  key: FillArraysKey,
+  arrays: FillArrays
 ): void {
-  context.handles.fillCut = { regions, segX: grid.segX, segY: grid.segY, fills }
+  const { grid, ...from } = key
+  context.handles.fillArrays = { ...from, ...grid, arrays }
+}
+
+/**
+ * The arrays laid in the worker, when they were laid from what this build reads.
+ * @param laid - the arrays handed, already let go by the handles — taken once, the GPU holds them after
+ * @param key - what this build reads
+ * @returns the arrays, or `null` to lay the fills here
+ */
+function laidArraysFor(
+  laid: LayerContext['handles']['fillArrays'],
+  key: FillArraysKey
+): FillArrays | null {
+  if (laid === null) return null
+  const { regions, grid, tintLevels, relief } = key
+  const same =
+    laid.regions === regions &&
+    laid.segX === grid.segX &&
+    laid.segY === grid.segY &&
+    laid.tintLevels === tintLevels &&
+    laid.relief === relief
+  return same ? laid.arrays : null
 }
 
 /**
@@ -116,6 +158,9 @@ export function primeFillCut(
 export function rebuildFills(context: LayerContext): void {
   // Clear the fills and the tribes on screen; the tribes are rebuilt with the fills, at the end.
   const { scene, dev, sources, handles } = context
+  // The arrays the worker laid, let go by the handles whatever this build does: used now, or never (review QUAL-003).
+  const laid = handles.fillArrays
+  handles.fillArrays = null
   disposeHandle(scene, handles.fills)
   handles.fills = null
   disposeHandle(scene, handles.tribes)
@@ -138,23 +183,32 @@ export function rebuildFills(context: LayerContext): void {
   // The relief's own subdivision, and its vertex heights read straight from its mesh.
   const { segX, segY } = meshVertexGrid(heightmap.meta, dev.relief.segments)
   const grid = { segX, segY }
-  // Build the layer, scale it with the relief's exaggeration, and add it to the scene.
-  handles.fills = createFillLayer({
-    fills: cutFills(
-      context,
-      { regions, polities: authored.year.registry.polities, bounds: authored.bbox },
-      grid
-    ),
-    tintLevels,
-    bandDepths,
-    grid,
-    nodes: meshNodeHeights(relief),
+  // Build the layer — from the arrays the worker laid when they are this very year's, laid here otherwise — scale it
+  // with the relief's exaggeration, and add it to the scene.
+  const look = {
     worldWidth: WORLD_WIDTH,
     worldDepth: meshWorldDepth(heightmap.meta, WORLD_WIDTH),
     map: texture,
     mode: dev.texture.politicalMode,
     strength: dev.texture.politicalStrength,
-  })
+  }
+  const arrays = laidArraysFor(laid, { regions, grid, tintLevels, relief })
+  handles.fills = createFillLayer(
+    arrays === null
+      ? {
+          ...look,
+          fills: cutFills(
+            context,
+            { regions, polities: authored.year.registry.polities, bounds: authored.bbox },
+            grid
+          ),
+          tintLevels,
+          bandDepths,
+          grid,
+          nodes: meshNodeHeights(relief),
+        }
+      : { ...look, arrays }
+  )
   handles.fills.object.scale.setY(relief.scale.y)
   scene.add(handles.fills.object)
   releaseAfterUpload(handles.fills.object)

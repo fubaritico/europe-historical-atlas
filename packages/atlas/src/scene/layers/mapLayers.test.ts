@@ -18,6 +18,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
 import { TRIBE_FEATHER } from '@europe-historical-atlas/core/editor/tribeFeather'
+import * as fillBuffersModule from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import * as fillModule from '@europe-historical-atlas/core/pipeline/fillTriangles'
 import * as patchModule from '@europe-historical-atlas/core/pipeline/tribePatches'
 
@@ -41,10 +42,12 @@ import { createMapLayers } from './mapLayers'
 import type { MapSources } from '../../sources/mapSources'
 import type { BlurMethod } from '../blur/blurMethod'
 import type { DrawCityLabel } from '../cities/cityLabel'
+import type { FillArraysKey } from '../political/fills/mapFillLayer'
 import type { ContentCity, ContentEvent } from '@europe-historical-atlas/core/data/contentFormat'
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
+import type { FillArrays } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import type { Material, Mesh, MeshLambertMaterial, Object3D } from 'three'
 import type { BufferAttribute, BufferGeometry, LineBasicMaterial, LineSegments } from 'three'
 import type { LineSegments2 } from 'three/addons/lines/LineSegments2.js'
@@ -1431,52 +1434,103 @@ describe('the page’s copy of a year’s buffers', () => {
   })
 })
 
-// ATLAS-333: a cut made in the worker is laid as it came, never cut again here.
-describe('primeFillCut', () => {
+/** Arrays the worker might have laid: one triangle, one tint level. */
+const LAID = (): FillArrays => ({
+  positions: new Float32Array(9),
+  tints: [new Uint8Array(9)],
+  bandDepth: new Uint8Array(3),
+  bandKm: new Float32Array(3),
+  indices: Uint32Array.of(0, 1, 2),
+})
+
+/**
+ * What a year on screen was laid from — its very polities, its grid and its tints — or throws in a test.
+ * @param built - the map
+ * @returns the key the fills' arrays are handed under
+ */
+function laidKey(built: ReturnType<typeof withTribe>): FillArraysKey {
+  const regions = built.sources.regionSet?.regions
+  const tintLevels = built.sources.tintLevels
+  const read = built.layers.reliefHeights()
+  if (regions === undefined || tintLevels === null || read === null)
+    throw new Error('test: no year')
+  const segX = built.dev.relief.segments
+  const segY = Math.max(1, Math.round(segX / (META.width / META.height)))
+  return { regions, grid: { segX, segY }, tintLevels, relief: read.relief }
+}
+
+// ATLAS-396: fills laid in the worker are wrapped as they came, never cut nor laid here.
+describe('primeFillArrays', () => {
   describe('happy path', () => {
-    it('lays the cut it was handed for the year’s very polities, cutting nothing', () => {
+    it('wraps the arrays it was handed for the year’s very polities, grid and tints, cutting nothing', () => {
       const built = withTribe()
-      const regions = built.sources.regionSet?.regions
-      if (regions === undefined) throw new Error('test: no year')
-      const segX = built.dev.relief.segments
-      const segY = Math.max(1, Math.round(segX / (META.width / META.height)))
-      const spy = vi.spyOn(fillModule, 'fillTriangles')
-      built.layers.primeFillCut(
-        regions,
-        { segX, segY },
-        regions.map(() => ({ vertices: new Float32Array(6), indices: Uint32Array.of(0, 1, 2) }))
-      )
+      const spy = vi.spyOn(fillBuffersModule, 'fillBuffers')
+      const arrays = LAID()
+      built.layers.primeFillArrays(laidKey(built), arrays)
       built.layers.rebuildFills()
       expect(spy).not.toHaveBeenCalled()
+      expect(built.scene.children).toContainEqual(expect.objectContaining({ renderOrder: 1 }))
     })
   })
 
   describe('variants', () => {
-    it('cuts again when the cut handed was for another grid', () => {
+    it('lays again when the arrays were for another grid', () => {
       const built = withTribe()
-      const regions = built.sources.regionSet?.regions
-      if (regions === undefined) throw new Error('test: no year')
-      const spy = vi.spyOn(fillModule, 'fillTriangles')
-      built.layers.primeFillCut(regions, { segX: 3, segY: 3 }, [])
+      const spy = vi.spyOn(fillBuffersModule, 'fillBuffers')
+      built.layers.primeFillArrays({ ...laidKey(built), grid: { segX: 3, segY: 3 } }, LAID())
       built.layers.rebuildFills()
       expect(spy).toHaveBeenCalledOnce()
     })
 
-    // Review R5: the reuse compares the very array the sources hold, so a cut for a copy is a cut for another year.
-    it('cuts again when the cut handed was for other polities', () => {
+    // Review R5: the reuse compares the very arrays the sources hold, so arrays for a copy are for another year.
+    it('lays again when the arrays were for other polities, or other tints', () => {
       const built = withTribe()
-      const regions = built.sources.regionSet?.regions
-      if (regions === undefined) throw new Error('test: no year')
-      const segX = built.dev.relief.segments
-      const segY = Math.max(1, Math.round(segX / (META.width / META.height)))
-      const spy = vi.spyOn(fillModule, 'fillTriangles')
-      built.layers.primeFillCut([...regions], { segX, segY }, [])
+      const spy = vi.spyOn(fillBuffersModule, 'fillBuffers')
+      const key = laidKey(built)
+      built.layers.primeFillArrays({ ...key, regions: [...key.regions] }, LAID())
+      built.layers.rebuildFills()
+      built.layers.primeFillArrays({ ...key, tintLevels: [] }, LAID())
+      built.layers.rebuildFills()
+      expect(spy).toHaveBeenCalledTimes(2)
+    })
+
+    // Reviews QUAL-001, ARCH-001: the relief rebuilt while the worker laid the fills on its old heights.
+    it('lays again when the relief was rebuilt between reading its heights and handing the arrays', () => {
+      const built = withTribe()
+      const key = laidKey(built)
+      built.layers.rebuildRelief()
+      const spy = vi.spyOn(fillBuffersModule, 'fillBuffers')
+      built.layers.primeFillArrays(key, LAID())
       built.layers.rebuildFills()
       expect(spy).toHaveBeenCalledOnce()
     })
   })
 
-  // L3, L4, L5: N/A — a handle written, read by the fills' own suite.
+  describe('edge cases', () => {
+    it('takes the arrays once: the next build lays its own', () => {
+      const built = withTribe()
+      const spy = vi.spyOn(fillBuffersModule, 'fillBuffers')
+      built.layers.primeFillArrays(laidKey(built), LAID())
+      built.layers.rebuildFills()
+      built.layers.rebuildFills()
+      expect(spy).toHaveBeenCalledOnce()
+    })
+  })
+
+  // L3, L4: N/A — a handle written and read; what the arrays hold is the worker's suite.
+})
+
+// ATLAS-396: the relief's heights, a copy of one number a node, for the worker.
+describe('reliefHeights', () => {
+  it('copies one height a node from the relief, with the relief read, none before it is built', () => {
+    const built = withTribe()
+    const read = built.layers.reliefHeights()
+    const segX = built.dev.relief.segments
+    const segY = Math.max(1, Math.round(segX / (META.width / META.height)))
+    expect(read?.heights.length).toBe((segX + 1) * (segY + 1))
+    expect(built.scene.children).toContain(read?.relief)
+    expect(build(false).layers.reliefHeights()).toBeNull()
+  })
 })
 
 // ATLAS-333: tribes measured in the worker are laid as they came — the key built on receipt is the layer's own.

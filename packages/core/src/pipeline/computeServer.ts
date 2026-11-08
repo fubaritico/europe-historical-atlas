@@ -21,8 +21,8 @@ function transferable(view: { buffer: ArrayBufferLike }): Transferable[] {
   return view.buffer instanceof ArrayBuffer ? [view.buffer] : []
 }
 
-/** The commands that prepare a year for the atlas (ATLAS-333): its fills and tribes cut, the year settled. */
-type YearCommand = Extract<ComputeCommand, { kind: 'cutFills' | 'cutTribes' | 'settleYear' }>
+/** The commands that prepare a year for the atlas (ATLAS-333): its fills laid, its tribes cut, the year settled. */
+type YearCommand = Extract<ComputeCommand, { kind: 'layFills' | 'cutTribes' | 'settleYear' }>
 
 /**
  * Whether a command prepares a year.
@@ -31,7 +31,7 @@ type YearCommand = Extract<ComputeCommand, { kind: 'cutFills' | 'cutTribes' | 's
  */
 function isYearCommand(command: ComputeCommand): command is YearCommand {
   return (
-    command.kind === 'cutFills' || command.kind === 'cutTribes' || command.kind === 'settleYear'
+    command.kind === 'layFills' || command.kind === 'cutTribes' || command.kind === 'settleYear'
   )
 }
 
@@ -46,16 +46,13 @@ async function runYearCommand(
   command: YearCommand
 ): Promise<{ payload: ComputePayload; transfer: Transferable[] }> {
   switch (command.kind) {
-    case 'cutFills': {
-      const fills = await compute.cutFills(command.regions, command.grid, command.band)
-      // Megabytes of triangles nobody here reads again — and a vassal's distances: handed over, not copied.
+    case 'layFills': {
+      const arrays = await compute.layFills(command.request)
+      // Megabytes of vertices nobody here reads again: handed over, not copied.
+      const { positions, tints, bandDepth, bandKm, indices } = arrays
       return {
-        payload: { kind: 'fills', fills },
-        transfer: fills.flatMap(({ vertices, indices, bandKm }) => [
-          ...transferable(vertices),
-          ...transferable(indices),
-          ...(bandKm === undefined ? [] : transferable(bandKm)),
-        ]),
+        payload: { kind: 'fills', arrays },
+        transfer: [positions, indices, bandDepth, bandKm, ...tints].flatMap(transferable),
       }
     }
     case 'cutTribes': {

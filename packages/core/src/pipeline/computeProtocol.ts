@@ -7,13 +7,11 @@
  * closure, a `Map`, or anything carrying a method.
  */
 
-import type { FillGrid } from './fillTriangles'
-import type { IndexedFill } from './indexFill'
+import type { FillArrays } from './fillBuffers'
 import type {
   ComputePhase,
   ComputeSources,
-  FillBand,
-  FillRegion,
+  FillLayRequest,
   PoliticalRequest,
   PoliticalResult,
   TerrainBakeResult,
@@ -33,13 +31,7 @@ export type ComputeCommand =
   | { kind: 'deriveBorders'; id: number; smoothing: number }
   | { kind: 'bakeTerrain'; id: number; options: TerrainTextureOptions }
   | { kind: 'placeNames'; id: number; request: YearNamesRequest }
-  | {
-      kind: 'cutFills'
-      id: number
-      regions: readonly FillRegion[]
-      grid: FillGrid
-      band: FillBand | null
-    }
+  | { kind: 'layFills'; id: number; request: FillLayRequest }
   | { kind: 'cutTribes'; id: number; tribes: readonly TribeOutline[]; request: TribeCutRequest }
   | { kind: 'settleYear'; id: number; request: SettleRequest }
   | { kind: 'dispose'; id: number }
@@ -54,7 +46,7 @@ export type ComputePayload =
   | { kind: 'borders'; borders: RegionBorders }
   | { kind: 'bake'; result: TerrainBakeResult }
   | { kind: 'names'; names: YearNames }
-  | { kind: 'fills'; fills: IndexedFill[] }
+  | { kind: 'fills'; arrays: FillArrays }
   | { kind: 'tribes'; patches: TribePatch[] }
   | { kind: 'settled'; settled: SettledYear }
 

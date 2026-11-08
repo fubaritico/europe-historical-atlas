@@ -8,12 +8,9 @@
  */
 
 import type { ComputeCommand, ComputeEvent, ComputePayload } from './computeProtocol'
-import type { FillGrid } from './fillTriangles'
-import type { IndexedFill } from './indexFill'
+import type { FillArrays, FillLayRequest } from './fillBuffers'
 import type {
   ComputeSources,
-  FillBand,
-  FillRegion,
   MapCompute,
   PoliticalRequest,
   PoliticalResult,
@@ -131,20 +128,16 @@ function isKind<K extends ComputePayload['kind']>(
  * @param send - post a command and wait for its answer
  * @returns that slice of the compute
  */
-function cutsOver(send: SendCommand): Pick<MapCompute, 'cutFills' | 'cutTribes' | 'settleYear'> {
+function cutsOver(send: SendCommand): Pick<MapCompute, 'layFills' | 'cutTribes' | 'settleYear'> {
   return {
-    async cutFills(
-      regions: readonly FillRegion[],
-      grid: FillGrid,
-      band: FillBand | null
-    ): Promise<IndexedFill[]> {
+    async layFills(request: FillLayRequest): Promise<FillArrays> {
       // The outlines and the band's flag alone cross over: a region's other fields are nothing the cut reads, and all
-      // copied.
-      const outlines = regions.map(({ rings, banded }) =>
+      // copied. The heights are copied too, not handed over: the page keeps them for the next year.
+      const regions = request.regions.map(({ rings, banded }) =>
         banded === true ? { rings, banded } : { rings }
       )
-      const event = await send((id) => ({ kind: 'cutFills', id, regions: outlines, grid, band }))
-      return answerOf(event, 'fills', 'fills').fills
+      const event = await send((id) => ({ kind: 'layFills', id, request: { ...request, regions } }))
+      return answerOf(event, 'fills', 'fills').arrays
     },
 
     async cutTribes(

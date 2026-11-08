@@ -370,3 +370,8 @@ target.z)` would be coherent with the navigation that already exists.
   most). **Remedy the day one appears**: one distance per level — at level `L`, measured against the union of the
   polities wearing the same colour (shared edges cancelled), mixed across levels as the tints are. **Severity: worth
   knowing.**
+- **After a year laid in the worker, the first fill rebuild from the dev panel cuts on the page** (review ARCH-002 of
+  2026-11-08, ATLAS-396, `scene/political/fills/mapFillLayer.ts`): the worker hands back the fills' arrays, not their
+  cut, so the page's cut cache (`fillCut`) is empty until a fill is laid here; a height-curve slider or a fill switch then
+  pays one cut (~0.45 s on 1100), the slides after it reuse it. **Only the dev panel reaches it.** **Remedy if it bites**:
+  the worker keeps the year's cut and lays it again on new heights. **Severity: cosmetic.**

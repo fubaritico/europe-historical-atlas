@@ -37,13 +37,14 @@ import {
   Uint8BufferAttribute,
 } from 'three'
 
+import { fillBuffers } from '@europe-historical-atlas/core/pipeline/fillBuffers'
+
 import { FILL_POLYGON_OFFSET, MODE_INDEX, setUniform } from '../tintOnRelief'
 
-import { fillBuffers } from './fillBuffers'
 import { FILL_FRAGMENT_SHADER, fillVertexShader, tintAttribute } from './fillShader'
 
 import type { TintLook } from '../tintOnRelief'
-import type { FillGeometry } from './fillBuffers'
+import type { FillArrays, FillGeometry } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import type { BlendMode } from '@europe-historical-atlas/core/pipeline/terrainOptions'
 import type { Texture } from 'three'
 
@@ -53,8 +54,19 @@ import type { Texture } from 'three'
  */
 export const FILL_RENDER_ORDER = 1
 
-/** What the fill layer is built from: its geometry, and the look it is blended with. */
-export interface FillLayerOptions extends FillGeometry, TintLook {}
+/** The look the fills are blended with, and the plane they lie on. */
+export interface FillLayerLook extends TintLook {
+  /** World-space width of the map plane on X. */
+  worldWidth: number
+  /** World-space depth of the map plane on Z. */
+  worldDepth: number
+}
+
+/**
+ * What the fill layer is built from: its arrays laid already — in the worker, on a change of year (ATLAS-396) — or its
+ * geometry, laid here; and the look it is blended with.
+ */
+export type FillLayerOptions = FillLayerLook & ({ arrays: FillArrays } | FillGeometry)
 
 /** The fill as one renderable, and what can change on it without a rebuild. */
 export interface FillLayer {
@@ -89,12 +101,14 @@ export interface FillLayer {
 
 /**
  * Build the fill layer.
- * @param options - the fills, their tints, the surface and the look
+ * @param options - the fills' arrays, or their geometry to lay; and the look
  * @returns the layer
  */
 export function createFillLayer(options: FillLayerOptions): FillLayer {
-  // The geometry: the positions, and one tint attribute per level of homage.
-  const { positions, tints, bandDepth, bandKm, indices } = fillBuffers(options)
+  // The geometry: the positions, one tint attribute per level of homage and the vassals' band — laid already, or laid
+  // now.
+  const { positions, tints, bandDepth, bandKm, indices } =
+    'arrays' in options ? options.arrays : fillBuffers(options)
   const geometry = new BufferGeometry()
   geometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
   geometry.setIndex(new Uint32BufferAttribute(indices, 1))

@@ -24,6 +24,7 @@ import type { GraticuleFrame } from '../sheet/graticuleFrame'
 import type { MapTitle } from '../sheet/mapTitle'
 import type { PaperSheet } from '../sheet/paperSheet'
 import type { RiverLayer } from '../waters/riverLayer'
+import type { FillArrays } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import type { IndexedFill } from '@europe-historical-atlas/core/pipeline/indexFill'
 import type { TribePatch } from '@europe-historical-atlas/core/pipeline/tribePatches'
 import type { DataTexture, Object3D, Scene } from 'three'
@@ -54,6 +55,19 @@ export interface LayerHandles {
    * height-curve slider re-lays the same triangles instead of cutting them again (~170 ms on 1100).
    */
   fillCut: { regions: object; segX: number; segY: number; fills: IndexedFill[] } | null
+  /**
+   * The fills laid in the worker for the year about to be laid (ATLAS-396), and what they were laid from — the year's
+   * polities, the grid, the tints and the relief, all compared by identity: used once, by the next build that matches,
+   * then let go, as the GPU holds them after.
+   */
+  fillArrays: {
+    regions: object
+    segX: number
+    segY: number
+    tintLevels: object
+    relief: object | null
+    arrays: FillArrays
+  } | null
   /** The tribes' colour fading at their limit (ATLAS-258), or `null` when there is none to draw. */
   tribes: TribeLayer | null
   /**

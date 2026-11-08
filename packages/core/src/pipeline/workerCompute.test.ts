@@ -6,8 +6,7 @@ import { franceAndAquitaine } from '../data/testing/authoredYearFixture'
 import { toRegionPayload } from '../data/toRegionPayload'
 
 import { serveCompute } from './computeServer'
-import { fillTriangles } from './fillTriangles'
-import { indexFill } from './indexFill'
+import { layFills } from './fillBuffers'
 import { createInlineMapCompute } from './inlineCompute'
 import { DEFAULT_TERRAIN_OPTIONS } from './terrainCompose'
 import { createWorkerMapCompute } from './workerCompute'
@@ -222,8 +221,8 @@ describe('createWorkerMapCompute', () => {
   })
 
   describe('variants', () => {
-    // ATLAS-333: the fills' cut leaves the main thread.
-    it('cuts a square polity across the wire as the main thread would, its vertices shared, and hands both buffers over', async () => {
+    // ATLAS-333, ATLAS-396: the fills cut and laid off the main thread.
+    it('lays a square polity across the wire as the main thread would, and hands its arrays over', async () => {
       const link = loopback(createInlineMapCompute())
       const client = createWorkerMapCompute({ spawn: () => link.handle })
       const square = [
@@ -232,18 +231,29 @@ describe('createWorkerMapCompute', () => {
         { u: 0.75, v: 0.75 },
         { u: 0.25, v: 0.75 },
       ]
-      const grid = { segX: 4, segY: 4 }
-      const fills = await client.cutFills([{ rings: [square] }], grid, null)
-      expect(fills).toEqual(
-        fillTriangles([{ rings: [square] }], grid).map((fill) => indexFill(fill))
-      )
-      expect(link.transfers.at(-1)).toEqual(
-        fills.flatMap((fill) => [fill.vertices.buffer, fill.indices.buffer])
-      )
+      const request = {
+        regions: [{ rings: [square] }],
+        grid: { segX: 4, segY: 4 },
+        tintLevels: [[{ r: 200, g: 40, b: 10 }]],
+        bandDepths: [0],
+        band: null,
+        heights: Float32Array.from({ length: 25 }, (_, node) => node / 10),
+        worldWidth: 10,
+        worldDepth: 10,
+      }
+      const arrays = await client.layFills(request)
+      expect(arrays).toEqual(layFills(request))
+      expect(link.transfers.at(-1)).toEqual([
+        arrays.positions.buffer,
+        arrays.indices.buffer,
+        arrays.bandDepth.buffer,
+        arrays.bandKm.buffer,
+        ...arrays.tints.map((tint) => tint.buffer),
+      ])
     })
 
     // ATLAS-398: a vassal's distances come back with its fill, handed over too; a sovereign's carry none.
-    it('cuts a vassal beside a sovereign across the wire, the vassal with its distances, all three buffers handed over', async () => {
+    it('lays a vassal beside a sovereign across the wire, the vassal’s vertices with their depth and distance', async () => {
       const link = loopback(createInlineMapCompute())
       const client = createWorkerMapCompute({ spawn: () => link.handle })
       const left = [
@@ -255,22 +265,35 @@ describe('createWorkerMapCompute', () => {
       const right = left.map(({ u, v }) => ({ u: u + 0.45, v }))
       const grid = { segX: 8, segY: 8 }
       const band = { bounds: { west: 0, south: 40, east: 10, north: 50 }, reachKm: 30 }
-      const [sovereign, vassal] = await client.cutFills(
-        [{ rings: [left] }, { rings: [right], banded: true }],
+      const request = {
+        regions: [{ rings: [left] }, { rings: [right], banded: true }],
         grid,
-        band
+        tintLevels: [
+          [
+            { r: 10, g: 20, b: 30 },
+            { r: 200, g: 100, b: 50 },
+          ],
+        ],
+        bandDepths: [0, 1],
+        band,
+        heights: new Float32Array(81),
+        worldWidth: 10,
+        worldDepth: 10,
+      }
+      const arrays = await client.layFills(request)
+      expect(arrays).toEqual(layFills(request))
+      // The sovereign's run carries no depth and no distance; the vassal's every vertex has its depth, and some lie
+      // inside its outline (a negative distance).
+      const depths = new Set(arrays.bandDepth)
+      expect(depths).toEqual(new Set([0, 1]))
+      const vassalKm = Array.from(arrays.bandKm).filter(
+        (_, vertex) => arrays.bandDepth[vertex] === 1
       )
-      if (sovereign === undefined || vassal?.bandKm === undefined)
-        throw new Error('test: a sovereign and a measured vassal')
-      expect(sovereign.bandKm).toBeUndefined()
-      expect(vassal.bandKm.length).toBe(vassal.vertices.length / 2)
-      expect(link.transfers.at(-1)).toEqual([
-        sovereign.vertices.buffer,
-        sovereign.indices.buffer,
-        vassal.vertices.buffer,
-        vassal.indices.buffer,
-        vassal.bandKm.buffer,
-      ])
+      expect(vassalKm.some((km) => km !== 0)).toBe(true)
+      const sovereignKm = Array.from(arrays.bandKm).filter(
+        (_, vertex) => arrays.bandDepth[vertex] === 0
+      )
+      expect(sovereignKm.every((km) => km === 0)).toBe(true)
     })
 
     // ATLAS-333: the year settled across the wire, as the main thread would settle it.

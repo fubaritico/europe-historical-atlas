@@ -21,7 +21,7 @@ import { yearPaintsExactFills } from '../../scene/political/paintsExactFills'
 import { installSettledYear } from '../yearBorders'
 
 import { layWarmNames, warmYearNames } from './names'
-import { prepareYear, setShownYearAside, shownYearToShelve } from './political'
+import { prepareYear, primeWorkerCut, setShownYearAside, shownYearToShelve } from './political'
 
 import type { PipelineContext } from '../pipelineContext'
 import type { WorkerCut } from './political'
@@ -75,8 +75,7 @@ function layAside(context: PipelineContext, year: number, loaded: RegionSet, cut
   try {
     sources.regionSet = loaded
     installSettledYear(sources, cut.settled)
-    layers.primeFillCut(loaded.regions, cut.grid, cut.fills)
-    if (cut.tribes !== null) layers.primeTribeCut(cut.grid, cut.tribes)
+    primeWorkerCut(context, loaded, cut)
     layers.rebuildFills()
     layers.rebuildBorders()
     // Its events are its own, pinned for its year.

@@ -15,10 +15,11 @@ import { rebuildRose } from '../decor/rose/mapRoseLayer'
 import { createDetailState } from '../detail/detailView'
 import { rebuildEvents } from '../events/mapEventLayer'
 import { rebuildBorders } from '../political/borders/mapBorderLayer'
-import { primeFillCut, rebuildFills } from '../political/fills/mapFillLayer'
+import { primeFillArrays, rebuildFills } from '../political/fills/mapFillLayer'
 import { rebuildNames } from '../political/names/mapNameLayer'
 import { primeTribeCut } from '../political/tribes/mapTribeLayer'
 import { disposeRelief, rebuildRelief, setTexture } from '../relief/mapReliefLayer'
+import { reliefHeights } from '../relief/reliefMesh'
 import { rebuildFrame } from '../sheet/mapFrameLayer'
 import { rebuildCoastline } from '../waters/mapCoastLayer'
 import { rebuildRivers } from '../waters/mapRiverLayer'
@@ -32,9 +33,9 @@ import { createObjectIds, createYearShelf, yearStamp } from './yearShelf'
 
 import type { LayerContext, MapLayersDeps } from './layerContext'
 import type { CameraPose } from '../events/markers'
+import type { FillArraysKey, ReliefHeights } from '../political/fills/mapFillLayer'
 import type { MeasuredTribes } from '../political/tribes/mapTribeLayer'
-import type { Region } from '@europe-historical-atlas/core/data/regionSource'
-import type { IndexedFill } from '@europe-historical-atlas/core/pipeline/indexFill'
+import type { FillArrays } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import type { DataTexture, Object3D } from 'three'
 
 /** Every layer drawn on the scene but the relief, which is freed on its own terms. */
@@ -194,20 +195,20 @@ export interface MapLayers {
    */
   restoreYear: (year: number) => boolean
   /**
-   * Hand the fills a cut made elsewhere — in the worker (ATLAS-333) — so laying them cuts nothing on this thread. Kept
-   * as the last cut is: for these very polities on this very grid, until either changes.
-   * @param regions - the polities it was cut from, the very array the year's sources hold
-   * @param grid - the relief's subdivision it was cut on
-   * @param grid.segX - cells across
-   * @param grid.segY - cells down
-   * @param fills - one triangle list per polity
+   * Hand the fills their arrays laid in the worker (ATLAS-396), so building them lays nothing on this thread: taken by
+   * the next build that reads the very same polities, grid, tints and relief.
+   * @param key - what they were laid from
+   * @param arrays - the fills' arrays
    * @returns nothing
    */
-  primeFillCut: (
-    regions: readonly Region[],
-    grid: { segX: number; segY: number },
-    fills: IndexedFill[]
-  ) => void
+  primeFillArrays: (key: FillArraysKey, arrays: FillArrays) => void
+  /**
+   * The relief's height at every grid node, one number a node — what the worker lays the fills on (ATLAS-396) — and the
+   * relief they were read from, taken in the same step: fills laid on these heights are this relief's, and no other's,
+   * whatever is rebuilt while the worker lays them (reviews QUAL-001, ARCH-001). A copy: the relief keeps its own.
+   * @returns the heights and their relief; `null` before the relief is built
+   */
+  reliefHeights: () => ReliefHeights | null
   /**
    * Hand the tribe layer patches measured elsewhere — in the worker (ATLAS-333) — for the year the sources hold now,
    * so laying them measures nothing on this thread; kept under the settings they were measured with, so a setting
@@ -364,7 +365,7 @@ function layerYears(
   | 'keepYears'
   | 'discardYear'
   | 'uploadYear'
-  | 'primeFillCut'
+  | 'primeFillArrays'
   | 'primeTribeCut'
 > & {
   disposeYears: () => void
@@ -393,8 +394,8 @@ function layerYears(
     uploadYear(year: number): void {
       context.uploadUnseen(shelf.objectsOf(year))
     },
-    primeFillCut(regions, grid, fills): void {
-      primeFillCut(context, regions, grid, fills)
+    primeFillArrays(key, arrays): void {
+      primeFillArrays(context, key, arrays)
     },
     primeTribeCut(grid, measured): void {
       primeTribeCut(context, grid, measured)
@@ -453,6 +454,16 @@ function layerLifecycle(
 }
 
 /**
+ * The relief's heights and the relief they are read from, in one step (ATLAS-396, reviews QUAL-001, ARCH-001).
+ * @param context - the layers, whose handles hold the relief
+ * @returns them; `null` before the relief is built
+ */
+function readReliefHeights(context: LayerContext): ReliefHeights | null {
+  const relief = context.handles.relief
+  return relief === null ? null : { relief, heights: reliefHeights(relief) }
+}
+
+/**
  * Build the map's overlays. Nothing is drawn until something is rebuilt.
  * @param deps - the scene to draw into, the live tunables and the loaded sources
  * @returns the layers
@@ -472,6 +483,7 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
       borders: null,
       fills: null,
       fillCut: null,
+      fillArrays: null,
       tribes: null,
       tribeCut: null,
       names: null,
@@ -504,6 +516,7 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
       rebuildNames(context)
     },
     ...layerSetters(context),
+    reliefHeights: () => readReliefHeights(context),
     ...years,
     ...layerLifecycle(context, viewport, disposeYears),
   }

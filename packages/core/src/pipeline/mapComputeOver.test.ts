@@ -151,33 +151,51 @@ describe('mapComputeOver', () => {
       )
     })
 
-    // ATLAS-333: only the outlines cross the wire, and an answer of another kind is refused.
-    it('sends the fills’ cut the outlines alone, returns the triangles, and refuses an answer of another kind', async () => {
-      const FILLS = [{ vertices: new Float32Array(6), indices: Uint32Array.of(0, 1, 2) }]
-      const cut = answering((id) => ({
+    // ATLAS-333, ATLAS-396: only the outlines of the regions cross the wire, and an answer of another kind is refused.
+    it('sends the fills’ laying the outlines alone, returns the arrays, and refuses an answer of another kind', async () => {
+      const ARRAYS = {
+        positions: new Float32Array(9),
+        tints: [new Uint8Array(9)],
+        bandDepth: new Uint8Array(3),
+        bandKm: new Float32Array(3),
+        indices: Uint32Array.of(0, 1, 2),
+      }
+      const laid = answering((id) => ({
         kind: 'done',
         id,
-        payload: { kind: 'fills', fills: FILLS },
+        payload: { kind: 'fills', arrays: ARRAYS },
       }))
       const region = { rings: [[{ u: 0, v: 0 }]], name: 'Aragon', colour: '#c00' }
-      // ATLAS-398: a vassal's flag crosses with its outline, and the band's frame and reach with the grid.
+      // ATLAS-398: a vassal's flag crosses with its outline, and the band's frame and reach with the request.
       const vassal = { rings: [[{ u: 1, v: 1 }]], name: 'Urgell', banded: true }
-      const grid = { segX: 2, segY: 2 }
-      const band = { bounds: { west: 0, south: 40, east: 10, north: 50 }, reachKm: 30 }
-      await expect(
-        mapComputeOver(cut.send, vi.fn()).cutFills([region, vassal], grid, band)
-      ).resolves.toBe(FILLS)
-      expect(cut.sent.mock.calls[0]?.[0]).toEqual({
-        kind: 'cutFills',
+      const request = {
+        regions: [region, vassal],
+        grid: { segX: 2, segY: 2 },
+        tintLevels: [
+          [
+            { r: 1, g: 2, b: 3 },
+            { r: 4, g: 5, b: 6 },
+          ],
+        ],
+        bandDepths: [0, 1],
+        band: { bounds: { west: 0, south: 40, east: 10, north: 50 }, reachKm: 30 },
+        heights: new Float32Array(9),
+        worldWidth: 10,
+        worldDepth: 5,
+      }
+      await expect(mapComputeOver(laid.send, vi.fn()).layFills(request)).resolves.toBe(ARRAYS)
+      expect(laid.sent.mock.calls[0]?.[0]).toEqual({
+        kind: 'layFills',
         id: 7,
-        regions: [{ rings: region.rings }, { rings: vassal.rings, banded: true }],
-        grid,
-        band,
+        request: {
+          ...request,
+          regions: [{ rings: region.rings }, { rings: vassal.rings, banded: true }],
+        },
       })
       const acked = answering((id) => ({ kind: 'done', id, payload: { kind: 'ack' } }))
-      await expect(
-        mapComputeOver(acked.send, vi.fn()).cutFills([region], grid, null)
-      ).rejects.toThrow(/answered a fills request with ack/)
+      await expect(mapComputeOver(acked.send, vi.fn()).layFills(request)).rejects.toThrow(
+        /answered a fills request with ack/
+      )
     })
 
     // ATLAS-333 (review): the ground's ids and outlines alone cross the wire, and an answer of another kind is refused.

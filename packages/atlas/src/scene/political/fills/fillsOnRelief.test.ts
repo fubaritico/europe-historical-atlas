@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest'
 
+import { fillBuffers } from '@europe-historical-atlas/core/pipeline/fillBuffers'
 import { planeHeight } from '@europe-historical-atlas/core/pipeline/gridDrape'
 
-import { fillBuffers } from './fillBuffers'
 import {
   DEPTH,
   GRID,

@@ -26,6 +26,7 @@ function emptyHandles(): LayerHandles {
     borders: null,
     fills: null,
     fillCut: null,
+    fillArrays: null,
     tribes: null,
     tribeCut: null,
     names: null,

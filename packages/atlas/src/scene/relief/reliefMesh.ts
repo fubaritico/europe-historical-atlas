@@ -179,3 +179,18 @@ export function meshNodeHeights(relief: Mesh<PlaneGeometry>): NodeHeights {
   const array = relief.geometry.getAttribute('position').array as Float32Array
   return { array, stride: 3, offset: 1 }
 }
+
+/**
+ * The relief's node heights as an array of their own, one number a node — what crosses to the worker to lay the fills
+ * on (ATLAS-396): a third of the positions, and never the relief's own buffer.
+ * @param relief - the relief mesh
+ * @returns a height a node, row by row from the north
+ */
+export function reliefHeights(relief: Mesh<PlaneGeometry>): Float32Array {
+  const { array, stride, offset } = meshNodeHeights(relief)
+  const heights = new Float32Array(Math.floor(array.length / stride))
+  // Indices the loop keeps in range (`noUncheckedIndexedAccess`): the `NaN` never stands in for anything.
+  for (let node = 0; node < heights.length; node++)
+    heights[node] = array[node * stride + offset] ?? Number.NaN
+  return heights
+}
