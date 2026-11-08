@@ -15,8 +15,9 @@ import { rebuildRose } from '../decor/rose/mapRoseLayer'
 import { createDetailState } from '../detail/detailView'
 import { rebuildEvents } from '../events/mapEventLayer'
 import { rebuildBorders } from '../political/borders/mapBorderLayer'
-import { rebuildFills } from '../political/fills/mapFillLayer'
+import { primeFillCut, rebuildFills } from '../political/fills/mapFillLayer'
 import { rebuildNames } from '../political/names/mapNameLayer'
+import { primeTribeCut } from '../political/tribes/mapTribeLayer'
 import { disposeRelief, rebuildRelief, setTexture } from '../relief/mapReliefLayer'
 import { rebuildFrame } from '../sheet/mapFrameLayer'
 import { rebuildCoastline } from '../waters/mapCoastLayer'
@@ -31,6 +32,8 @@ import { createObjectIds, createYearShelf, yearStamp } from './yearShelf'
 
 import type { LayerContext, MapLayersDeps } from './layerContext'
 import type { CameraPose } from '../events/markers'
+import type { MeasuredTribes } from '../political/tribes/mapTribeLayer'
+import type { Region } from '@europe-historical-atlas/core/data/regionSource'
 import type { DataTexture, Object3D } from 'three'
 
 /** Every layer drawn on the scene but the relief, which is freed on its own terms. */
@@ -190,6 +193,32 @@ export interface MapLayers {
    */
   restoreYear: (year: number) => boolean
   /**
+   * Hand the fills a cut made elsewhere — in the worker (ATLAS-333) — so laying them cuts nothing on this thread. Kept
+   * as the last cut is: for these very polities on this very grid, until either changes.
+   * @param regions - the polities it was cut from, the very array the year's sources hold
+   * @param grid - the relief's subdivision it was cut on
+   * @param grid.segX - cells across
+   * @param grid.segY - cells down
+   * @param fills - one triangle list per polity
+   * @returns nothing
+   */
+  primeFillCut: (
+    regions: readonly Region[],
+    grid: { segX: number; segY: number },
+    fills: Float32Array[]
+  ) => void
+  /**
+   * Hand the tribe layer patches measured elsewhere — in the worker (ATLAS-333) — for the year the sources hold now,
+   * so laying them measures nothing on this thread; kept under the settings they were measured with, so a setting
+   * moved during the measure has them measured again.
+   * @param grid - the relief's subdivision they were measured on
+   * @param grid.segX - cells across
+   * @param grid.segY - cells down
+   * @param measured - one patch per tribe, and the settings they were measured with
+   * @returns nothing
+   */
+  primeTribeCut: (grid: { segX: number; segY: number }, measured: MeasuredTribes) => void
+  /**
    * Whether a year is set aside under the settings and on the relief the map has now.
    * @param year - the year
    * @returns whether {@link MapLayers.restoreYear} would bring it back
@@ -308,7 +337,12 @@ interface ViewportSize {
 function layerYears(
   context: LayerContext,
   viewport: ViewportSize
-): Pick<MapLayers, 'shelveYear' | 'restoreYear' | 'holdsYear'> & { disposeYears: () => void } {
+): Pick<
+  MapLayers,
+  'shelveYear' | 'restoreYear' | 'holdsYear' | 'primeFillCut' | 'primeTribeCut'
+> & {
+  disposeYears: () => void
+} {
   const { scene, handles, dev, sources } = context
   const shelf = createYearShelf({ scene, sources, handles, capacity: YEAR_SHELF_CAPACITY })
   const objectIds = createObjectIds()
@@ -322,10 +356,19 @@ function layerYears(
       if (!shelf.restore(year, stamp())) return false
       const { size } = viewport
       if (size !== null) handles.borders?.setResolution(size.width, size.height)
+      // A year left before the contribution landed was set aside with no events, and the contribution pinned only the
+      // year then shown (`loadContent`): pinned now — only then, so a return keeps its frame (review R1).
+      if (handles.events === null) rebuildEvents(context)
       return true
     },
     holdsYear(year: number): boolean {
       return shelf.holds(year, stamp())
+    },
+    primeFillCut(regions, grid, fills): void {
+      primeFillCut(context, regions, grid, fills)
+    },
+    primeTribeCut(grid, measured): void {
+      primeTribeCut(context, grid, measured)
     },
     disposeYears(): void {
       shelf.dispose()
@@ -435,6 +478,8 @@ export function createMapLayers(deps: MapLayersDeps): MapLayers {
     shelveYear: years.shelveYear,
     restoreYear: years.restoreYear,
     holdsYear: years.holdsYear,
+    primeFillCut: years.primeFillCut,
+    primeTribeCut: years.primeTribeCut,
     ...layerLifecycle(context, viewport, years.disposeYears),
   }
 }

@@ -30,12 +30,17 @@ type YearSourceKey =
   | 'yearNames'
   | 'nameSheet'
 
-/** The layers a year draws — each one built for it alone. */
+/**
+ * The layers a year draws — each one built for it alone. The events with them (66 ms to build again on a return,
+ * measured 2026-11-08): they are the year's. The contribution they read — events, cities — lands beside the map, so a
+ * year left before it is set aside with none; the map pins them when that year comes back (`restoreYear`).
+ */
 const YEAR_LAYERS = [
   'fills',
   'tribes',
   'borders',
   'names',
+  'events',
 ] as const satisfies readonly (keyof LayerHandles)[]
 
 /** A year's own sources. */
@@ -196,6 +201,7 @@ function takeLayers(scene: Scene, handles: LayerHandles): YearLayers {
     tribes: handles.tribes,
     borders: handles.borders,
     names: handles.names,
+    events: handles.events,
   }
   for (const key of YEAR_LAYERS) {
     const layer: { object: Object3D } | null = layers[key]

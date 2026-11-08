@@ -151,6 +151,69 @@ describe('mapComputeOver', () => {
       )
     })
 
+    // ATLAS-333: only the outlines cross the wire, and an answer of another kind is refused.
+    it('sends the fills’ cut the outlines alone, returns the triangles, and refuses an answer of another kind', async () => {
+      const FILLS = [new Float32Array(6)]
+      const cut = answering((id) => ({
+        kind: 'done',
+        id,
+        payload: { kind: 'fills', fills: FILLS },
+      }))
+      const region = { rings: [[{ u: 0, v: 0 }]], name: 'Aragon', colour: '#c00' }
+      const grid = { segX: 2, segY: 2 }
+      await expect(mapComputeOver(cut.send, vi.fn()).cutFills([region], grid)).resolves.toBe(FILLS)
+      expect(cut.sent.mock.calls[0]?.[0]).toEqual({
+        kind: 'cutFills',
+        id: 7,
+        regions: [{ rings: region.rings }],
+        grid,
+      })
+      const acked = answering((id) => ({ kind: 'done', id, payload: { kind: 'ack' } }))
+      await expect(mapComputeOver(acked.send, vi.fn()).cutFills([region], grid)).rejects.toThrow(
+        /answered a fills request with ack/
+      )
+    })
+
+    // ATLAS-333 (review): the ground's ids and outlines alone cross the wire, and an answer of another kind is refused.
+    it('sends the tribes’ cut their outlines and the ground’s ids alone, and refuses an answer of another kind', async () => {
+      const PATCHES = [{ polity: 'Cumans' }] as unknown as Awaited<
+        ReturnType<ReturnType<typeof mapComputeOver>['cutTribes']>
+      >
+      const cut = answering((id) => ({
+        kind: 'done',
+        id,
+        payload: { kind: 'tribes', patches: PATCHES },
+      }))
+      const rings = [[{ u: 0, v: 0 }]]
+      const tribe = { polity: 'Cumans', colour: [1, 2, 3] as const, rings, name: 'Cumans' }
+      const claim = { polityId: 'Cumans', rings, name: 'Cumans', colour: '#c00' }
+      const request = {
+        claims: [claim],
+        bounds: { west: 0, south: 50, east: 10, north: 60 },
+        grid: { segX: 2, segY: 2 },
+        reachKm: 60,
+        claimReachKm: 20,
+        spill: true,
+        seaLevel: 0,
+      } as unknown as Parameters<ReturnType<typeof mapComputeOver>['cutTribes']>[1]
+      const tribes = [tribe] as unknown as Parameters<
+        ReturnType<typeof mapComputeOver>['cutTribes']
+      >[0]
+      await expect(mapComputeOver(cut.send, vi.fn()).cutTribes(tribes, request)).resolves.toBe(
+        PATCHES
+      )
+      expect(cut.sent.mock.calls[0]?.[0]).toEqual({
+        kind: 'cutTribes',
+        id: 7,
+        tribes: [{ polity: 'Cumans', colour: [1, 2, 3], rings }],
+        request: { ...request, claims: [{ polityId: 'Cumans', rings }] },
+      })
+      const acked = answering((id) => ({ kind: 'done', id, payload: { kind: 'ack' } }))
+      await expect(mapComputeOver(acked.send, vi.fn()).cutTribes(tribes, request)).rejects.toThrow(
+        /answered a tribes request with ack/
+      )
+    })
+
     it('hands disposal straight to the transport', () => {
       const dispose = vi.fn()
       mapComputeOver(vi.fn(), dispose).dispose()

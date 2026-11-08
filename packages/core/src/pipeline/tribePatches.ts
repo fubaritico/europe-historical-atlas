@@ -15,24 +15,30 @@
  * than an in-or-out flag, so the shader cuts where the interpolated distance crosses zero — on the
  * neighbour's outline — instead of fading over a cell of the neighbour's ground.
  *
- * Kept apart from the layer because it takes data and returns data: the layer only uploads it.
+ * Kept apart from the layer because it takes data and returns data: the layer only uploads it. In core since
+ * 2026-11-08 (ATLAS-333) so the compute's worker measures it: 559 ms of the main thread for 1100's four tribes.
  */
 
-import { CLAIM_CUT_REACH_KM } from '@europe-historical-atlas/core/editor/tribeFeather'
-import {
-  paddedBox,
-  signedDistanceField,
-  unionDistanceField,
-} from '@europe-historical-atlas/core/geo/signedDistance'
-import { fillTriangles } from '@europe-historical-atlas/core/pipeline/fillTriangles'
-import { hexToRgb } from '@europe-historical-atlas/core/utils/color'
+import { paddedBox, signedDistanceField, unionDistanceField } from '../geo/signedDistance'
+import { hexToRgb } from '../utils/color'
 
-import type { TribeArea } from '../../../sources/mapSources'
-import type { UvPoint } from '@europe-historical-atlas/core/data/coastlineSource'
-import type { LandMask } from '@europe-historical-atlas/core/data/landMask'
-import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
-import type { FillGrid } from '@europe-historical-atlas/core/pipeline/fillTriangles'
-import type { RgbColor } from '@europe-historical-atlas/core/utils/color'
+import { fillTriangles } from './fillTriangles'
+
+import type { FillGrid } from './fillTriangles'
+import type { UvPoint } from '../data/coastlineSource'
+import type { LandMask } from '../data/landMask'
+import type { GeoBounds } from '../geo/mercator'
+import type { RgbColor } from '../utils/color'
+
+/** A tribe as the patches are measured from: its id, its colour and its rings. */
+export interface TribeOutline {
+  /** The tribe's id — so its spill is cut over every polity's ground but its own. */
+  readonly polity: string
+  /** The `#rrggbb` the tribe would have been filled in. */
+  readonly colour: string
+  /** Its rings, outer and holes alike, in grid coordinates. */
+  readonly rings: readonly (readonly UvPoint[])[]
+}
 
 /** One tribe, ready to upload. */
 export interface TribePatch {
@@ -69,6 +75,11 @@ export interface TribeGround {
   /** How far past the outline the patch extends, and the outline's distance is computed to. */
   reachKm: number
   /**
+   * How far a neighbour's ground is measured past its outline, beyond which every point reads as free — the editor's
+   * `CLAIM_CUT_REACH_KM`, handed in: the compute knows nothing of the editor.
+   */
+  claimReachKm: number
+  /**
    * Whether the colour may spill past the outline — `outset` alone. Without it the patch is the tribe's own box and no
    * other polity's ground is measured: that measure cost 5 s for the Kimek-Kipchak on the dev's 1100 (2026-11-02).
    */
@@ -81,8 +92,8 @@ export interface TribeGround {
  * @param ground - everyone's ground, the land, the frame, the grid and the reach
  * @returns one patch per tribe with any ground; a tribe with no ring point has none
  */
-export function tribePatches(tribes: readonly TribeArea[], ground: TribeGround): TribePatch[] {
-  const { claims, land, bounds, grid, reachKm, spill } = ground
+export function tribePatches(tribes: readonly TribeOutline[], ground: TribeGround): TribePatch[] {
+  const { claims, land, bounds, grid, reachKm, claimReachKm, spill } = ground
   return tribes.flatMap(({ polity, colour, rings }) => {
     // The tribe's box, grown by the reach; a tribe with no ring point has none.
     const box = paddedBox(rings, bounds, spill ? reachKm : 0)
@@ -96,7 +107,8 @@ export function tribePatches(tribes: readonly TribeArea[], ground: TribeGround):
     ]
     const triangles = fillTriangles([{ rings: [ring] }], grid)[0]
     // `fillTriangles` hands back one list per region given: a missing one is a defect, said, not drawn empty.
-    if (triangles === undefined) throw new Error('[atlas] the tribe box was cut into nothing')
+    if (triangles === undefined)
+      throw new Error('tribe patches: the tribe box was cut into nothing')
     // The distance fields: to the tribe's own outline, and to every other polity's ground.
     const distance = signedDistanceField(rings, bounds, reachKm)
     // Nobody's ground is in the way of a colour that stays inside: every point reads as free, never measured.
@@ -104,10 +116,10 @@ export function tribePatches(tribes: readonly TribeArea[], ground: TribeGround):
       ? unionDistanceField(
           claims.filter((claim) => claim.polityId !== polity).map((claim) => claim.rings),
           bounds,
-          CLAIM_CUT_REACH_KM,
+          claimReachKm,
           box
         )
-      : (): number => CLAIM_CUT_REACH_KM
+      : (): number => claimReachKm
     // Sample both fields, and the land, at every vertex.
     const count = Math.floor(triangles.length / 2)
     const distances = new Float32Array(count)
@@ -122,34 +134,4 @@ export function tribePatches(tribes: readonly TribeArea[], ground: TribeGround):
     }
     return [{ tint: hexToRgb(colour), triangles, distances, claimed, land: dry }]
   })
-}
-
-/**
- * What the tribe patches were measured from (`mapTribeLayer`) — compared field by field before measuring again. Everything
- * `tribePatches` reads is in it: the tribes, every region whose ground cuts a spill, the frame, the grid and
- * the land (ARCH-003 / QUAL-007).
- *
- * **The land by what it is made of, not by the mask object**: with the land mask failed, `maskOrFallback`
- * derives a new threshold mask at every call, so its identity never repeats — the land is the mask asset
- * when there is one, else the elevation and the sea level it is thresholded at.
- */
-export interface TribeCutKey {
-  /** The tribes' rings and colours, by identity — replaced, never mutated, when a year is settled. */
-  tribes: object
-  /** Every region of the year, by identity. */
-  claims: object
-  /** The frame the rings were projected against, by value. */
-  bounds: GeoBounds
-  /** The relief's subdivision. */
-  segX: number
-  /** The relief's subdivision. */
-  segY: number
-  /** The land mask asset, or `null` when it failed. */
-  landMask: object | null
-  /** The elevation the fallback is thresholded over, or `null` before it loads. */
-  heightmap: object | null
-  /** The fallback's threshold — read only when there is no mask. */
-  seaLevel: number
-  /** Whether the colour spills past the outline (`outset`): the patch's box and its neighbours' measure follow. */
-  spill: boolean
 }

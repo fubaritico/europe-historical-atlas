@@ -5,6 +5,7 @@
 
 import type { MapAssetSources } from './assets'
 import type { NameCache } from './nameCache'
+import type { YearClock } from './yearTiming'
 import type { MapUi } from '../app/mapUi'
 import type { AtlasMessageKey } from '../i18n'
 import type { MapLayers } from '../scene/layers/mapLayers'
@@ -51,6 +52,10 @@ export interface MapPipelineDeps {
    * — which is the only way the two-stage startup and the freshness gates can be driven at all.
    */
   assets?: Partial<MapAssetSources>
+  /**
+   * Where a change of year's steps are measured (ATLAS-333) — the browser's `performance` unless a test hands its own.
+   */
+  clock?: YearClock
 }
 
 /** Everything a pipeline call reads, including the compute it may have had to replace. */
@@ -81,4 +86,6 @@ export interface PipelineContext extends MapPipelineDeps {
   held: { grid: boolean; bareTexture: boolean }
   /** The names already placed, by year content and settings — a year seen again comes back without its placement. */
   nameCache: NameCache
+  /** Where a change of year's steps are measured, the default filled in. */
+  clock: YearClock
 }

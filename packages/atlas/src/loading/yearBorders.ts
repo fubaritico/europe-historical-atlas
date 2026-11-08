@@ -106,6 +106,23 @@ export function settleYearBorders(
 }
 
 /**
+ * An authored year's tribes, each in its colour, as `settleYearBorders` will settle them — read ahead, so the worker
+ * measures their patches before the year is laid (ATLAS-333). The same rule on the same year: what it gives is what
+ * the sources will hold.
+ * @param loaded - the authored year
+ * @param palette - the automatic palette, the one the year's colours are chosen from
+ * @returns one area per region of a tribe; empty for a year with no tribe or not authored
+ */
+export function yearTribes(
+  loaded: RegionSet,
+  palette: readonly [string, ...string[]]
+): MapSources['tribes'] {
+  if (loaded.authored === undefined) return []
+  const { year } = loaded.authored
+  return colouredTribes(year, loaded.regions, polityColours(openYearDocument(year), palette))
+}
+
+/**
  * Each tribe's ground in its colour, from the regions the fills are cut from — so the tribe fades from the
  * very outline the borders and the fills are drawn on.
  * @param year - the year's three files, whose registry says who is a tribe

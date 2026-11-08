@@ -5,19 +5,114 @@
  * context.
  */
 
-import { TRIBE_FEATHER_REACH_KM } from '@europe-historical-atlas/core/editor/tribeFeather'
+import {
+  CLAIM_CUT_REACH_KM,
+  TRIBE_FEATHER_REACH_KM,
+} from '@europe-historical-atlas/core/editor/tribeFeather'
+import { tribePatches } from '@europe-historical-atlas/core/pipeline/tribePatches'
 
 import { maskOrFallback } from '../../landMask'
 import { meshWorldDepth } from '../../relief/reliefMesh'
 import { WORLD_WIDTH } from '../../world'
 
 import { createTribeLayer } from './tribeLayer'
-import { tribePatches } from './tribePatches'
 
-import type { TribeCutKey, TribePatch } from './tribePatches'
+import type { TribeCutKey } from './tribeCutKey'
 import type { LayerContext } from '../../layers/layerContext'
 import type { Region } from '@europe-historical-atlas/core/data/regionSource'
 import type { GeoBounds } from '@europe-historical-atlas/core/geo/mercator'
+import type { TribePatch } from '@europe-historical-atlas/core/pipeline/tribePatches'
+
+/** What a tribe's patch is measured with, besides the year's own rings — read from the settings in one place. */
+export interface TribeCutSettings {
+  /** How far a tribe's fade may reach past its outline, in kilometres. */
+  readonly reachKm: number
+  /** How far a polity's ground cuts a spill, in kilometres. */
+  readonly claimReachKm: number
+  /** Whether the colour spills past the outline — the `outset` mode alone. */
+  readonly spill: boolean
+  /** The sea level the land is thresholded at, when no mask says where it is. */
+  readonly seaLevel: number
+}
+
+/** Patches measured elsewhere, and the settings they were measured with. */
+export interface MeasuredTribes {
+  /** One patch per tribe. */
+  readonly patches: TribePatch[]
+  /** The settings read when the measure was asked — not those of when it lands. */
+  readonly settings: TribeCutSettings
+}
+
+/**
+ * The settings a tribe cut reads, now — the same for the worker's measure and this thread's (review R3).
+ * @param dev - the live settings
+ * @returns the reach, the spill and the sea level
+ */
+export function tribeCutSettings(dev: LayerContext['dev']): TribeCutSettings {
+  return {
+    reachKm: TRIBE_FEATHER_REACH_KM,
+    claimReachKm: CLAIM_CUT_REACH_KM,
+    spill: dev.tribes.mode === 'outset',
+    seaLevel: dev.texture.seaLevel,
+  }
+}
+
+/**
+ * The key of the patches measured with these settings, for these regions in this frame on this grid.
+ * @param context - the layers, whose sources the patches read
+ * @param ground - the frame and every region of the year
+ * @param ground.bounds - the frame
+ * @param ground.claims - the regions
+ * @param grid - the relief's subdivision
+ * @param grid.segX - cells across
+ * @param grid.segY - cells down
+ * @param settings - the settings they were, or would be, measured with
+ * @returns the key
+ */
+function tribeCutKey(
+  context: LayerContext,
+  ground: { bounds: GeoBounds; claims: readonly Region[] },
+  grid: { segX: number; segY: number },
+  settings: TribeCutSettings
+): TribeCutKey {
+  const { sources } = context
+  return {
+    tribes: sources.tribes,
+    claims: ground.claims,
+    bounds: { ...ground.bounds },
+    segX: grid.segX,
+    segY: grid.segY,
+    landMask: sources.landMask,
+    heightmap: sources.heightmap,
+    seaLevel: settings.seaLevel,
+    spill: settings.spill,
+  }
+}
+
+/**
+ * Hand the tribe layer patches measured elsewhere — in the worker (ATLAS-333) — for the year now in the sources, so
+ * laying them measures nothing on this thread. Kept under the settings they were measured with: a setting moved while
+ * they were measured makes the next lay measure them again, rather than pass them off as the new ones' (review R2).
+ * @param context - the layers, the year's sources already settled
+ * @param grid - the relief's subdivision the patches were measured on
+ * @param grid.segX - cells across
+ * @param grid.segY - cells down
+ * @param measured - one patch per tribe, measured from the same tribes, regions, frame and land, and its settings
+ * @returns nothing; nothing kept when the year in the sources has no frame
+ */
+export function primeTribeCut(
+  context: LayerContext,
+  grid: { segX: number; segY: number },
+  measured: MeasuredTribes
+): void {
+  const { sources } = context
+  const bounds = sources.regionSet?.authored?.bbox
+  const claims = sources.regionSet?.regions
+  // A year with no frame is not an authored year: `rebuildTribes` draws none for it, so none is kept.
+  if (bounds === undefined || claims === undefined) return
+  const key = tribeCutKey(context, { bounds, claims }, grid, measured.settings)
+  context.handles.tribeCut = { key, patches: measured.patches }
+}
 
 /**
  * Whether two frames are the same, by value.
@@ -77,18 +172,9 @@ function cutTribes(
   grid: { segX: number; segY: number }
 ): TribePatch[] {
   // Everything the patches depend on, to tell whether the last build still holds.
-  const { sources, dev } = context
-  const key: TribeCutKey = {
-    tribes: sources.tribes,
-    claims: ground.claims,
-    bounds: { ...ground.bounds },
-    segX: grid.segX,
-    segY: grid.segY,
-    landMask: sources.landMask,
-    heightmap: sources.heightmap,
-    seaLevel: dev.texture.seaLevel,
-    spill: dev.tribes.mode === 'outset',
-  }
+  const { sources } = context
+  const settings = tribeCutSettings(context.dev)
+  const key = tribeCutKey(context, ground, grid, settings)
   // Reuse the last build when nothing it read has changed.
   const last = context.handles.tribeCut
   if (last && sameTribeCut(last.key, key)) return last.patches
@@ -98,8 +184,9 @@ function cutTribes(
     land: maskOrFallback(context),
     bounds: ground.bounds,
     grid,
-    reachKm: TRIBE_FEATHER_REACH_KM,
-    spill: key.spill,
+    reachKm: settings.reachKm,
+    claimReachKm: settings.claimReachKm,
+    spill: settings.spill,
   })
   context.handles.tribeCut = { key, patches }
   return patches

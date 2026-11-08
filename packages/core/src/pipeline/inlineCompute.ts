@@ -13,18 +13,24 @@ import { extractRegionBorders } from '../data/regionBorders'
 import { pinnedRegionColor } from '../data/regionPalette'
 import { assignRegionColors, expandRegionsOverLand, rasteriseRegions } from '../data/regionRaster'
 
+import { fillTriangles } from './fillTriangles'
 import { composeTerrainRgba, terrainTextureSize } from './terrainCompose'
+import { tribePatches } from './tribePatches'
 import { placeYearNames } from './yearNames'
 
+import type { FillGrid } from './fillTriangles'
 import type {
   ComputeSources,
+  FillRegion,
   MapCompute,
   PoliticalRequest,
   PoliticalResult,
   ProgressReport,
   TerrainBakeResult,
+  TribeCutRequest,
 } from './mapCompute'
 import type { AreaTint, TerrainTextureOptions } from './terrainCompose'
+import type { TribeOutline, TribePatch } from './tribePatches'
 import type { YearNames, YearNamesRequest } from './yearNames'
 import type { Heightmap } from '../data/heightmap'
 import type { LandMask } from '../data/landMask'
@@ -307,6 +313,46 @@ async function announcedNames(request: YearNamesRequest, announce: Announce): Pr
 }
 
 /**
+ * The jobs that read none of the installed state: the names and the fills' cut, each carried whole by its request.
+ * @param yieldControl - lets the page breathe before a long job
+ * @returns that slice of the compute
+ */
+function statelessJobs(
+  yieldControl: () => Promise<void>
+): Pick<MapCompute, 'placeYearNames' | 'cutFills'> {
+  return {
+    placeYearNames(request: YearNamesRequest, onProgress?: ProgressReport): Promise<YearNames> {
+      return announcedNames(request, announcer(onProgress, yieldControl))
+    },
+    cutFills(regions: readonly FillRegion[], grid: FillGrid): Promise<Float32Array[]> {
+      return Promise.resolve(fillTriangles(regions, grid))
+    },
+  }
+}
+
+/**
+ * The jobs that read the installed land and nothing else: the tribes' patches (ATLAS-333).
+ * @param installed - the elevation and the land mask installed now, read at each call
+ * @returns that slice of the compute
+ */
+function landJobs(
+  installed: () => { heightmap: Heightmap | null; landMask: LandMask | null }
+): Pick<MapCompute, 'cutTribes'> {
+  return {
+    cutTribes(tribes: readonly TribeOutline[], request: TribeCutRequest): Promise<TribePatch[]> {
+      // Inside the promise, so a missing elevation rejects it as every other job's does, rather than throwing at the call.
+      return Promise.resolve().then(() => {
+        const { heightmap, landMask } = installed()
+        const { seaLevel, ...ground } = request
+        // The land as the map reads it (`shorelineMask`): the mask, or the elevation thresholded at the sea level.
+        const land = landMask ?? createElevationLandMask(requireHeightmap(heightmap), seaLevel)
+        return tribePatches(tribes, { ...ground, land })
+      })
+    },
+  }
+}
+
+/**
  * Build a {@link MapCompute} that runs on the calling thread.
  * @param options - collaborators to swap out; every one has a working default
  * @returns the compute
@@ -358,9 +404,8 @@ export function createInlineMapCompute(options: InlineComputeOptions = {}): MapC
       return bakeTerrainPixels(dem, landMask, textureOptions, political, bakeRows(onProgress))
     },
 
-    placeYearNames(request: YearNamesRequest, onProgress?: ProgressReport): Promise<YearNames> {
-      return announcedNames(request, announcer(onProgress, yieldControl))
-    },
+    ...statelessJobs(yieldControl),
+    ...landJobs(() => ({ heightmap, landMask })),
 
     dispose(): void {
       heightmap = null

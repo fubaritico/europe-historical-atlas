@@ -111,8 +111,49 @@ still through the 2 s of cut and borders on the main thread, and the splash befo
 
 Order: B first — without it the bar stays still whatever it measures — then D.
 
+**The sequence, decided by the dev on 2026-11-08** (*"the sequence must be exactly the one in the screens Claude Design
+made"* — `1b · Écran de chargement`, then `2 · L'atlas au repos`): **the splash stays until the first map — 1100 by
+default — is wholly laid** (countries, borders, names, cities and events), its bar counting the real progress from the
+first byte, the relief included; then it gives way straight to the atlas at rest. Today it is dismissed once the relief
+is built (`loading/stages/startup.ts`, `ui.dismissSplash()` before the year), and a second bar runs over the bare
+relief: **the bare relief is never shown alone, and there is one bar, never two.** This holds whatever the optimisations.
+
 **Open, the dev's to decide when the frieze reaches it**: a date before the first map (no map yet drawn there) — the
 bare relief, or the first map. Not reachable today: the year switch offers drawn years only.
+
+## Where we stopped — 2026-11-08, 05:00 (the resume point of this work)
+
+**Worktree** `.claude/worktrees/baked-years`, branch `atlas-baked-years`, based on main `04aed22`; committed there:
+`1dbb65e` (names baked at the build), `d24b9e0` (the shelf). **Not merged into main.** **Uncommitted, gate green**
+(atlas 1560 · core 1890 · Cartographer 2779 · CMS 372 · plugin 169; worker chunk 38.66 kB, no three.js):
+
+- **B, first step**: the countries' cut (`FillCompute.cutFills`) and the tribes' cut (`TribeCompute.cutTribes`, `tribePatches.ts`
+  moved to `core/pipeline/`) run in the worker, in parallel with the bake; their results primed into the layers
+  (`primeFillCut`, `primeTribeCut`) before the layers are built.
+- **C**: the events go aside with their year (`YEAR_LAYERS` includes `events`) — a return costs ~1 ms of ours, then one
+  frame of ~80 ms (the GPU drawing the layers put back).
+- **Measures**: `loading/yearTiming.ts`, `performance.measure` entries `atlas year <y> <step>`, readable in Chrome.
+
+**Never commit** the test copy `public/years/1200/` nor the modified `public/years/index.json` — publishing 1200 is the dev's.
+
+**Measured on the built site, first visit to 1200** (a loaded machine, ±30–70 % between runs): the page freezes 1–1.4 s
+in one block — the countries' buffers and objects 539–752 ms, the border lines 226–387 ms, the exact borders 80 ms, all
+on the main thread; the cut, 392–428 ms, already in the worker.
+
+**Next, in this order** (the dev's « Vas-y » on it):
+
+1. **commit this step on the branch** — the dev said yes, 2026-11-08 (*« c'est ce qu'on doit faire, oui »*), on the
+   measures as proof; before the commit, `/review` — many files since `d24b9e0`;
+2. the countries' buffers in the worker: send it the relief's heights once (~6 MB, at the relief's load), so it builds the
+   position and tint buffers itself;
+3. the border lines the same way;
+4. the years ahead prepared, in the slider's direction (`core/data/mapOfDate.ts`, `mapsToPrepare`, written, not wired);
+5. D, the measured bar — **CARTO-393** (the other instance, worktree `city-status-ring`) already makes the atlas's bar move
+   through the relief's composition: read it before starting D, build on it;
+6. wire `mapYearAt` in place of `centuryOf` once the dev decides what a date before the first map shows.
+
+**Before merging**: rebase onto main (CMS-391 since: `ContentCity.showInAtlas`, `CONTENT_FORMAT_VERSION` 7, and
+CARTO-393 if merged), gate again.
 
 Steps 1 and 2 need no decision of the dev's beyond this order: nothing visible changes, only what is computed twice.
 Step 4 ships a baked image: what it weighs on the wire against 4 s of CPU is measured at step 3 before it is chosen.

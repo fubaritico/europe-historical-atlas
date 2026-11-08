@@ -48,3 +48,22 @@ export const AUTHORED_YEAR: RegionSet = {
   ...projectRegions(toRegionPayload(AUTHORED_FILES, META.bbox)),
   authored: { year: AUTHORED_FILES, bbox: META.bbox },
 }
+
+/**
+ * The same year with the Empire a tribe — so its ground fades rather than fills (ATLAS-258).
+ * @returns the year, read as the atlas reads it
+ */
+function tribeYear(): RegionSet {
+  const doc = sharedBorderDocument()
+  const hre = doc.polities.find((polity) => polity.id === 'hre')
+  if (hre === undefined) throw new Error('fixture: no Empire in the shared-border document')
+  hre.rank = 'tribe'
+  const files = { year: 1100, ...saveYearDocument(doc) }
+  return {
+    ...projectRegions(toRegionPayload(files, META.bbox)),
+    authored: { year: files, bbox: META.bbox },
+  }
+}
+
+/** An authored year with one tribe, the Empire. */
+export const TRIBE_YEAR: RegionSet = tribeYear()

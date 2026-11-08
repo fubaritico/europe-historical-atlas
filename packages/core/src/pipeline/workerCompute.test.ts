@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { createLandMask } from '../data/landMask'
 
 import { serveCompute } from './computeServer'
+import { fillTriangles } from './fillTriangles'
 import { createInlineMapCompute } from './inlineCompute'
 import { DEFAULT_TERRAIN_OPTIONS } from './terrainCompose'
 import { createWorkerMapCompute } from './workerCompute'
@@ -217,6 +218,51 @@ describe('createWorkerMapCompute', () => {
   })
 
   describe('variants', () => {
+    // ATLAS-333: the fills' cut leaves the main thread.
+    it('cuts a square polity across the wire as the main thread would, and hands the triangles over', async () => {
+      const link = loopback(createInlineMapCompute())
+      const client = createWorkerMapCompute({ spawn: () => link.handle })
+      const square = [
+        { u: 0.25, v: 0.25 },
+        { u: 0.75, v: 0.25 },
+        { u: 0.75, v: 0.75 },
+        { u: 0.25, v: 0.75 },
+      ]
+      const grid = { segX: 4, segY: 4 }
+      const fills = await client.cutFills([{ rings: [square] }], grid)
+      expect(fills).toEqual(fillTriangles([{ rings: [square] }], grid))
+      expect(link.transfers.at(-1)).toEqual(fills.map((fill) => fill.buffer))
+    })
+
+    it('measures a tribe across the wire as the main thread would, on the land it holds', async () => {
+      const link = loopback(createInlineMapCompute())
+      const client = createWorkerMapCompute({ spawn: () => link.handle })
+      await client.setSources(sources())
+      const square = [
+        { u: 0.25, v: 0.25 },
+        { u: 0.75, v: 0.25 },
+        { u: 0.75, v: 0.75 },
+        { u: 0.25, v: 0.75 },
+      ]
+      const tribe = { polity: 'prussians', colour: '#41580b', rings: [square] }
+      const request = {
+        claims: [{ polityId: 'prussians', rings: [square] }],
+        bounds: { west: 0, south: 50, east: 10, north: 60 },
+        grid: { segX: 4, segY: 4 },
+        reachKm: 60,
+        claimReachKm: 20,
+        spill: true,
+        seaLevel: 0,
+      }
+      const across = await client.cutTribes([tribe], request)
+      const here = createInlineMapCompute()
+      await here.setSources(sources())
+      expect(across).toEqual(await here.cutTribes([tribe], request))
+      expect(across[0]?.triangles.length).toBeGreaterThan(0)
+      // Its four arrays handed over, not copied.
+      expect(link.transfers.at(-1)).toHaveLength(4)
+    })
+
     it('hands the baked pixels over instead of copying them', async () => {
       const link = loopback(createInlineMapCompute())
       const client = createWorkerMapCompute({ spawn: () => link.handle })

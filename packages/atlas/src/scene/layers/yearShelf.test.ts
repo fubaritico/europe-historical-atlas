@@ -52,12 +52,14 @@ function map(capacity = 2) {
   const draw = (year: number) => {
     const fills = fakeLayer()
     const borders = fakeLayer()
+    const events = fakeLayer()
     handles.fills = fills as unknown as LayerHandles['fills']
     handles.borders = borders as unknown as LayerHandles['borders']
-    scene.add(fills.object, borders.object)
+    handles.events = events as unknown as LayerHandles['events']
+    scene.add(fills.object, borders.object, events.object)
     sources.regionSet = { year, regions: [] }
     sources.homageDepth = 2
-    return { fills, borders }
+    return { fills, borders, events }
   }
   return { scene, sources, handles, shelf, draw }
 }
@@ -67,13 +69,13 @@ describe('createYearShelf', () => {
   describe('happy path', () => {
     it('sets 1100 aside off the scene, then puts it back whole', () => {
       const { scene, sources, handles, shelf, draw } = map()
-      const { fills, borders } = draw(1100)
+      const { fills, borders, events } = draw(1100)
       shelf.shelve(1100, 'same')
       expect(scene.children).toEqual([])
       expect([handles.fills, sources.regionSet, sources.homageDepth]).toEqual([null, null, 0])
 
       expect(shelf.restore(1100, 'same')).toBe(true)
-      expect(scene.children).toEqual([fills.object, borders.object])
+      expect(scene.children).toEqual([fills.object, borders.object, events.object])
       expect(sources.regionSet?.year).toBe(1100)
       expect(sources.homageDepth).toBe(2)
       expect(fills.dispose).not.toHaveBeenCalled()

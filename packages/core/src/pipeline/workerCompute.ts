@@ -8,15 +8,19 @@
  */
 
 import type { ComputeCommand, ComputeEvent, ComputePayload } from './computeProtocol'
+import type { FillGrid } from './fillTriangles'
 import type {
   ComputeSources,
+  FillRegion,
   MapCompute,
   PoliticalRequest,
   PoliticalResult,
   ProgressReport,
   TerrainBakeResult,
+  TribeCutRequest,
 } from './mapCompute'
 import type { TerrainTextureOptions } from './terrainCompose'
+import type { TribeOutline, TribePatch } from './tribePatches'
 import type { YearNames, YearNamesRequest } from './yearNames'
 import type { RegionBorders } from '../data/regionBorders'
 
@@ -119,6 +123,38 @@ function isKind<K extends ComputePayload['kind']>(
 }
 
 /**
+ * The cuts over a transport (ATLAS-333): the fills and the tribes, their outlines alone sent across.
+ * @param send - post a command and wait for its answer
+ * @returns that slice of the compute
+ */
+function cutsOver(send: SendCommand): Pick<MapCompute, 'cutFills' | 'cutTribes'> {
+  return {
+    async cutFills(regions: readonly FillRegion[], grid: FillGrid): Promise<Float32Array[]> {
+      // The outlines alone cross over: a region's other fields are nothing the cut reads, and all copied.
+      const outlines = regions.map(({ rings }) => ({ rings }))
+      const event = await send((id) => ({ kind: 'cutFills', id, regions: outlines, grid }))
+      return answerOf(event, 'fills', 'fills').fills
+    },
+
+    async cutTribes(
+      tribes: readonly TribeOutline[],
+      request: TribeCutRequest
+    ): Promise<TribePatch[]> {
+      // The ground's outlines and ids alone cross over, like the fills'.
+      const claims = request.claims.map(({ polityId, rings }) => ({ polityId, rings }))
+      const outlines = tribes.map(({ polity, colour, rings }) => ({ polity, colour, rings }))
+      const event = await send((id) => ({
+        kind: 'cutTribes',
+        id,
+        tribes: outlines,
+        request: { ...request, claims },
+      }))
+      return answerOf(event, 'tribes', 'tribes').patches
+    },
+  }
+}
+
+/**
  * The typed {@link MapCompute} surface, over any transport that can send a command and answer it.
  *
  * Separated from the worker wiring because the two fail for unrelated reasons and are read for
@@ -169,6 +205,8 @@ export function mapComputeOver(send: SendCommand, dispose: () => void): MapCompu
       const event = await send((id) => ({ kind: 'placeNames', id, request }), onProgress)
       return answerOf(event, 'names', 'names').names
     },
+
+    ...cutsOver(send),
 
     dispose,
   }

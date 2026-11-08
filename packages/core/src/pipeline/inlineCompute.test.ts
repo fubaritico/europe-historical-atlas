@@ -429,3 +429,61 @@ describe('createInlineMapCompute', () => {
     })
   })
 })
+
+// ATLAS-333: the tribes measured by the compute, on the land it holds.
+describe('cutTribes', () => {
+  const square = [
+    { u: 0.25, v: 0.25 },
+    { u: 0.75, v: 0.25 },
+    { u: 0.75, v: 0.75 },
+    { u: 0.25, v: 0.75 },
+  ]
+  const tribe = { polity: 'prussians', colour: '#41580b', rings: [square] }
+  const request = {
+    claims: [{ polityId: 'prussians', rings: [square] }],
+    bounds: { west: 0, south: 50, east: 10, north: 60 },
+    grid: { segX: 4, segY: 4 },
+    reachKm: 60,
+    claimReachKm: 20,
+    spill: false,
+    seaLevel: 0,
+  }
+
+  describe('happy path', () => {
+    it('measures the Prussians’ patch on the land mask installed, all of it dry', async () => {
+      const compute = createInlineMapCompute()
+      await compute.setSources(sources(ALL_LAND))
+      const [patch] = await compute.cutTribes([tribe], request)
+      expect(patch?.land.every((dry) => dry === 1)).toBe(true)
+    })
+  })
+
+  describe('variants', () => {
+    it('with the land mask failed, reads the elevation at the sea level given: 500 m under a 1000 m sea is wet', async () => {
+      const compute = createInlineMapCompute()
+      await compute.setSources(sources())
+      const [dry] = await compute.cutTribes([tribe], request)
+      const [wet] = await compute.cutTribes([tribe], { ...request, seaLevel: 1000 })
+      expect(dry?.land.every((value) => value === 1)).toBe(true)
+      expect(wet?.land.every((value) => value === 0)).toBe(true)
+    })
+  })
+
+  describe('managed errors', () => {
+    it('rejects, rather than throws at the call, with no elevation installed', async () => {
+      const compute = createInlineMapCompute()
+      const asked = compute.cutTribes([tribe], request)
+      await expect(asked).rejects.toThrow(/heightmap/)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('measures nothing for a year with no tribe', async () => {
+      const compute = createInlineMapCompute()
+      await compute.setSources(sources(ALL_LAND))
+      await expect(compute.cutTribes([], request)).resolves.toEqual([])
+    })
+  })
+
+  // L4: the patches' own suite (tribePatches.test.ts).
+})

@@ -10,8 +10,11 @@
  * raster-derived borders were built to abolish.
  */
 
+import type { FillGrid } from './fillTriangles'
 import type { TerrainTextureOptions } from './terrainCompose'
+import type { TribeGround, TribeOutline, TribePatch } from './tribePatches'
 import type { YearNames, YearNamesRequest } from './yearNames'
+import type { UvPoint } from '../data/coastlineSource'
 import type { HeightmapMeta } from '../data/heightmap'
 import type { LandMaskMeta } from '../data/landMask'
 import type { RegionBorders } from '../data/regionBorders'
@@ -148,13 +151,53 @@ export interface NameCompute {
   placeYearNames(request: YearNamesRequest, onProgress?: ProgressReport): Promise<YearNames>
 }
 
+/** A polity's outline as the fills are cut from it — its rings in `(u, v)`, outer and holes alike. */
+export interface FillRegion {
+  /** The rings. */
+  readonly rings: readonly (readonly UvPoint[])[]
+}
+
 /**
- * The three jobs, and the state two of them share — the names read none. Consumers should depend on the
+ * Cut an authored year's polities into triangles lying on the relief's planes (ATLAS-333) — the cut that held the
+ * main thread 0.36 s on a change of year, ~1 s the first time.
+ */
+export interface FillCompute {
+  /**
+   * Cut every polity on the relief's grid. Reads none of the installed state.
+   * @param regions - the polities' outlines, in the order the fills are laid
+   * @param grid - the relief's subdivision
+   * @returns one flat `u, v` list per polity, three vertices per triangle
+   */
+  cutFills(regions: readonly FillRegion[], grid: FillGrid): Promise<Float32Array[]>
+}
+
+/** What a year's tribes are measured against in the compute — {@link TribeGround} with the land left to it. */
+export interface TribeCutRequest extends Omit<TribeGround, 'land'> {
+  /** The elevation the land is thresholded at when the land mask failed — the compute holds the mask, or not. */
+  readonly seaLevel: number
+}
+
+/** Measure a year's tribes (ATLAS-333) — 559 ms of the main thread for 1100's four, before it moved. */
+export interface TribeCompute {
+  /**
+   * Measure each tribe's patch against the land the compute holds — its land mask, or the elevation thresholded at
+   * the sea level when the mask failed, as the map does.
+   * @param tribes - each tribe's rings and colour
+   * @param request - everyone's ground, the frame, the grid, the reach, the spill and the sea level
+   * @returns one patch per tribe with any ground
+   * @throws when no elevation is installed — the land cannot be read
+   */
+  cutTribes(tribes: readonly TribeOutline[], request: TribeCutRequest): Promise<TribePatch[]>
+}
+
+/**
+ * The jobs, and the state two of them share — the names and the fills read none. Consumers should depend on the
  * narrow slice they use
  * ({@link TerrainBake} for a texture tunable, {@link PoliticalCompute} for a change of year); this is
  * the handle the composition root holds, sets up and tears down.
  */
-export interface MapCompute extends PoliticalCompute, TerrainBake, NameCompute {
+export interface MapCompute
+  extends PoliticalCompute, TerrainBake, NameCompute, FillCompute, TribeCompute {
   /**
    * Install the sources both jobs read. Safe to call again when one of them arrives late — the relief
    * and the mask load independently, and whichever lands second must not discard the first.

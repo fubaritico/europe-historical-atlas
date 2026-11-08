@@ -122,6 +122,8 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
     pendingRivers: { set: null },
     held: { grid: false, bareTexture: false },
     nameCache: createNameCache(),
+    // The browser's own clock and measures: a change of year's steps are read in its Performance panel.
+    clock: deps.clock ?? performance,
   }
   installComputes(context)
 

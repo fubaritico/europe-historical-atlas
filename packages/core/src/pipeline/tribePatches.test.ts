@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { signedDistanceField } from '@europe-historical-atlas/core/geo/signedDistance'
+import { signedDistanceField } from '../geo/signedDistance'
 
 import { tribePatches } from './tribePatches'
 
-import type { TribeGround, TribePatch } from './tribePatches'
-import type { TribeArea } from '../../../sources/mapSources'
+import type { TribeGround, TribeOutline, TribePatch } from './tribePatches'
 
 const BOUNDS = { west: 0, south: 50, east: 10, north: 60 }
 const GRID = { segX: 64, segY: 64 }
@@ -17,7 +16,7 @@ const SQUARE = [
   { u: 0.4, v: 0.6 },
 ]
 
-const TRIBE: TribeArea = { polity: 'prussians', colour: '#41580b', rings: [SQUARE] }
+const TRIBE: TribeOutline = { polity: 'prussians', colour: '#41580b', rings: [SQUARE] }
 
 /** A kingdom east of the tribe, sharing its eastern edge. */
 const KINGDOM = [
@@ -45,6 +44,8 @@ const ground = (over: Partial<TribeGround> = {}): TribeGround => ({
   grid: GRID,
   spill: true,
   reachKm: 60,
+  // The editor's `CLAIM_CUT_REACH_KM` — written out: the pipeline may not read the editor.
+  claimReachKm: 20,
   ...over,
 })
 

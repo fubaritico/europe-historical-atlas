@@ -5,6 +5,8 @@ import { CONTENT_FORMAT_VERSION } from '@europe-historical-atlas/core/data/conte
 import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
 import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
+import * as fillModule from '@europe-historical-atlas/core/pipeline/fillTriangles'
+import * as patchModule from '@europe-historical-atlas/core/pipeline/tribePatches'
 
 import { ATLAS_MESSAGES } from '../i18n'
 import { createMapSources } from '../sources/mapSources'
@@ -12,12 +14,13 @@ import { createDevState } from '../tunables/devState'
 
 import { createMapPipeline } from './mapPipeline'
 import { stubNameFace } from './testing/nameFaceStubs'
-import { AUTHORED_YEAR, META, YEAR } from './testing/yearFixtures'
+import { AUTHORED_YEAR, META, TRIBE_YEAR, YEAR } from './testing/yearFixtures'
 
 import type { MapAssetSources } from './assets'
 import type { MapPipelineDeps } from './pipelineContext'
 import type { MapUi } from '../app/mapUi'
 import type { MapLayers } from '../scene/layers/mapLayers'
+import type { MeasuredTribes } from '../scene/political/tribes/mapTribeLayer'
 import type { DevState } from '../tunables/devState'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { RiverSet } from '@europe-historical-atlas/core/data/riverSource'
@@ -59,6 +62,8 @@ function fakeLayers(): MapLayers {
     'shelveYear',
     'restoreYear',
     'holdsYear',
+    'primeFillCut',
+    'primeTribeCut',
   ]
   return Object.fromEntries(names.map((n) => [n, vi.fn()])) as unknown as MapLayers
 }
@@ -405,11 +410,24 @@ describe('createMapPipeline', () => {
       dev.political.year = 1200
       await pipeline.rebuildPolitical()
       expect(asMock(deps.layers.shelveYear)).toHaveBeenCalledWith(1100)
+      const eventsBefore = asMock(deps.layers.rebuildEvents).mock.calls.length
 
+      // The layers pin the events of a year left before they landed, for the year asked: it is the one asked by then.
+      const askedOnReturn: (number | null)[] = []
+      const restore = asMock(deps.layers.restoreYear).getMockImplementation() as
+        MapLayers['restoreYear'] | undefined
+      if (restore === undefined) throw new Error('test: the shelf is not wired')
+      asMock(deps.layers.restoreYear).mockImplementation((year: number) => {
+        askedOnReturn.push(deps.sources.askedYear)
+        return restore(year)
+      })
       dev.political.year = 1100
       await pipeline.rebuildPolitical()
       expect(loads).toEqual([1100, 1200])
       expect(asMock(deps.layers.restoreYear)).toHaveBeenCalledWith(1100)
+      expect(askedOnReturn).toEqual([1100])
+      // Its events came back with it (66 ms to pin again, measured 2026-11-08).
+      expect(asMock(deps.layers.rebuildEvents).mock.calls).toHaveLength(eventsBefore)
       expect(asMock(deps.layers.rebuildFills)).toHaveBeenCalledTimes(2)
       expect(deps.sources.askedYear).toBe(1100)
       expect(deps.sources.regionSet?.year).toBe(1100)
@@ -469,6 +487,122 @@ describe('createMapPipeline', () => {
       expect(asMock(deps.layers.shelveYear)).not.toHaveBeenCalled()
       expect(deps.sources.regionSet).toBe(AUTHORED_YEAR)
       expect(deps.sources.askedYear).toBe(1100)
+    })
+
+    // Review R5: the cut runs beside the bake, before anything of the year on screen is touched.
+    it('sets nothing aside and hands no cut when the next year’s cut fails, the year on screen left whole', async () => {
+      let year: RegionSet = AUTHORED_YEAR
+      const { deps, dev, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(year) } }),
+      })
+      shelvingLayers(deps.layers, deps.sources)
+      await pipeline.start()
+      const primed = asMock(deps.layers.primeFillCut).mock.calls.length
+      vi.spyOn(fillModule, 'fillTriangles').mockImplementation(() => {
+        throw new Error('the cut said no')
+      })
+      year = { ...AUTHORED_YEAR, year: 1200 }
+      dev.political.year = 1200
+      await pipeline.rebuildPolitical()
+      expect(asMock(deps.layers.shelveYear)).not.toHaveBeenCalled()
+      expect(asMock(deps.layers.primeFillCut).mock.calls).toHaveLength(primed)
+      expect(deps.sources.regionSet).toBe(AUTHORED_YEAR)
+      expect(asMock(deps.ui.reportAssetFailure)).toHaveBeenCalledWith('regions', expect.any(Error))
+    })
+
+    // ATLAS-333: the fills are cut by the compute before the year is laid, so laying them cuts nothing here.
+    it('hands the layers the cut of an authored year’s very polities, one triangle list each', async () => {
+      const { deps, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
+      })
+      await pipeline.start()
+      const [regions, grid, fills] = asMock(deps.layers.primeFillCut).mock.calls[0] as [
+        unknown,
+        { segX: number; segY: number },
+        Float32Array[],
+      ]
+      expect(regions).toBe(AUTHORED_YEAR.regions)
+      expect(grid.segX).toBe(deps.dev.relief.segments)
+      expect(fills).toHaveLength(AUTHORED_YEAR.regions.length)
+      expect(firstCall(deps.layers.primeFillCut)).toBeLessThan(firstCall(deps.layers.rebuildFills))
+    })
+
+    it('measures each step of a change to an authored year, and only the return on a year set aside', async () => {
+      const names: string[] = []
+      let now = 0
+      const { deps, dev, pipeline } = build({
+        assets: fakeAssets({
+          regions: { load: (year: number) => Promise.resolve({ ...AUTHORED_YEAR, year }) },
+        }),
+        clock: { now: () => (now += 1), measure: (name: string) => names.push(name) },
+      })
+      shelvingLayers(deps.layers, deps.sources)
+      await pipeline.start()
+      dev.political.year = 1200
+      names.length = 0
+      await pipeline.rebuildPolitical()
+      expect(names).toEqual(
+        expect.arrayContaining(
+          ['fetch', 'cut', 'prepare', 'settle', 'fills', 'borders', 'total'].map(
+            (step) => `atlas year 1200 ${step}`
+          )
+        )
+      )
+      dev.political.year = 1100
+      names.length = 0
+      await pipeline.rebuildPolitical()
+      expect(names.filter((name) => !name.endsWith('names'))).toEqual([
+        'atlas year 1100 restore',
+        'atlas year 1100 total',
+      ])
+    })
+
+    // ATLAS-333: 559 ms of the main thread for 1100's four tribes, measured in the worker instead.
+    it('hands the layers a year’s tribes measured by the compute, after its sources are settled', async () => {
+      const { deps, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(TRIBE_YEAR) } }),
+      })
+      await pipeline.start()
+      const [grid, measured] = asMock(deps.layers.primeTribeCut).mock.calls[0] as [
+        { segX: number },
+        MeasuredTribes,
+      ]
+      expect(grid.segX).toBe(deps.dev.relief.segments)
+      expect(measured.patches).toHaveLength(deps.sources.tribes.length)
+      expect(firstCall(deps.layers.primeTribeCut)).toBeLessThan(firstCall(deps.layers.rebuildFills))
+    })
+
+    // Review R2: the tribes' mode lays the fills again, not the year — so it can move while the year is measured.
+    it('hands the tribes over with the spill read before the measure, not the one of when they land', async () => {
+      const { deps, dev, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(TRIBE_YEAR) } }),
+      })
+      dev.tribes.mode = 'outset'
+      const real = patchModule.tribePatches
+      vi.spyOn(patchModule, 'tribePatches').mockImplementation((...args) => {
+        dev.tribes.mode = 'band'
+        return real(...args)
+      })
+      await pipeline.start()
+      const [, measured] = asMock(deps.layers.primeTribeCut).mock.calls[0] as [
+        unknown,
+        MeasuredTribes,
+      ]
+      expect(measured.settings.spill).toBe(true)
+    })
+
+    it('measures no tribe for a year with none', async () => {
+      const { deps, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
+      })
+      await pipeline.start()
+      expect(asMock(deps.layers.primeTribeCut)).not.toHaveBeenCalled()
+    })
+
+    it('cuts nothing ahead for a year the texture carries', async () => {
+      const { deps, pipeline } = build()
+      await pipeline.start()
+      expect(asMock(deps.layers.primeFillCut)).not.toHaveBeenCalled()
     })
 
     it('sets nothing aside when the same year is drawn again', async () => {

@@ -7,14 +7,18 @@
  * closure, a `Map`, or anything carrying a method.
  */
 
+import type { FillGrid } from './fillTriangles'
 import type {
   ComputePhase,
   ComputeSources,
+  FillRegion,
   PoliticalRequest,
   PoliticalResult,
   TerrainBakeResult,
+  TribeCutRequest,
 } from './mapCompute'
 import type { TerrainTextureOptions } from './terrainCompose'
+import type { TribeOutline, TribePatch } from './tribePatches'
 import type { YearNames, YearNamesRequest } from './yearNames'
 import type { RegionBorders } from '../data/regionBorders'
 
@@ -26,6 +30,8 @@ export type ComputeCommand =
   | { kind: 'deriveBorders'; id: number; smoothing: number }
   | { kind: 'bakeTerrain'; id: number; options: TerrainTextureOptions }
   | { kind: 'placeNames'; id: number; request: YearNamesRequest }
+  | { kind: 'cutFills'; id: number; regions: readonly FillRegion[]; grid: FillGrid }
+  | { kind: 'cutTribes'; id: number; tribes: readonly TribeOutline[]; request: TribeCutRequest }
   | { kind: 'dispose'; id: number }
 
 /**
@@ -38,6 +44,8 @@ export type ComputePayload =
   | { kind: 'borders'; borders: RegionBorders }
   | { kind: 'bake'; result: TerrainBakeResult }
   | { kind: 'names'; names: YearNames }
+  | { kind: 'fills'; fills: Float32Array[] }
+  | { kind: 'tribes'; patches: TribePatch[] }
 
 /** What the worker sends back. */
 export type ComputeEvent =

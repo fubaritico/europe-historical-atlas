@@ -6,7 +6,7 @@
 import { planeHeight } from '@europe-historical-atlas/core/pipeline/gridDrape'
 
 import type { TintSurface } from '../tintOnRelief'
-import type { TribePatch } from './tribePatches'
+import type { TribePatch } from '@europe-historical-atlas/core/pipeline/tribePatches'
 
 /** What the tribes' geometry is built from: the patches, and the surface they are laid on. */
 export interface TribeGeometry extends TintSurface {

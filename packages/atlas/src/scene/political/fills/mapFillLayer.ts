@@ -46,8 +46,27 @@ function cutFills(
     return last.fills
   // Otherwise cut anew, and keep the cut for next time.
   const fills = fillTriangles(regions, grid)
-  context.handles.fillCut = { regions, segX: grid.segX, segY: grid.segY, fills }
+  primeFillCut(context, regions, grid, fills)
   return fills
+}
+
+/**
+ * Keep a cut of the fills as the last one made — whether cut here or handed from the worker (ATLAS-333): laid as it
+ * is while the year's polities and the grid stay the very ones it was cut for.
+ * @param context - the layers, whose handles hold the cut
+ * @param regions - the polities it was cut from — the very array the sources hold, which the reuse compares
+ * @param grid - the relief's subdivision it was cut on
+ * @param grid.segX - cells across
+ * @param grid.segY - cells down
+ * @param fills - each polity's triangles
+ */
+export function primeFillCut(
+  context: LayerContext,
+  regions: readonly Region[],
+  grid: { segX: number; segY: number },
+  fills: Float32Array[]
+): void {
+  context.handles.fillCut = { regions, segX: grid.segX, segY: grid.segY, fills }
 }
 
 /**

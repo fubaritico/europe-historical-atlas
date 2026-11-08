@@ -324,3 +324,13 @@ target.z)` would be coherent with the navigation that already exists.
   coasts cut into many pieces. That test is **skipped by the dev's call** while `years/1100/` holds the import; to reopen on
   a fixed fixture, not the published file. **Remedy to measure first**: drop the crumbs under a threshold in the import, or
   merge them; then see what `fillTriangles` costs per ring. **Severity: gênant** — it is the speed chantier's first signal.
+- **"The land mask, else the elevation at sea level" is written three times** (review of 2026-11-08, ATLAS-333):
+  `sources/mapSources.shorelineMask`, the bake in `core/pipeline/inlineCompute`, and the tribes' cut in the same file. If
+  the fallback changes in one, the tribes' land and the map's coast disagree with no test to say so. Not merged: the
+  first returns `null` with no elevation, the compute refuses — one shared function in `core/data/landMask` must keep
+  both contracts. **Severity: worth knowing** — it only bites in a session whose land mask failed to load.
+- **A cut that fails lets the bake started beside it finish** (review of 2026-11-08, ATLAS-333, `loading/stages/political.ts`
+  `prepareYear`): `Promise.all` rejects on the cut, the year is told as failed, but `rebuildTexture` — under its own gate —
+  still hangs its texture. For an authored year that texture is the bare terrain, so the map only changes when the year
+  on screen was drawn through the grid (the dev panel's *exact fills* off) **and** the worker failed. **Remedy if it
+  bites**: `Promise.allSettled`, then rethrow the first failure, the bake's winning when both fail. **Severity: cosmetic.**

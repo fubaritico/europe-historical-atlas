@@ -19,6 +19,7 @@ import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { createElevationLandMask } from '@europe-historical-atlas/core/data/landMask'
 import { TRIBE_FEATHER } from '@europe-historical-atlas/core/editor/tribeFeather'
 import * as fillModule from '@europe-historical-atlas/core/pipeline/fillTriangles'
+import * as patchModule from '@europe-historical-atlas/core/pipeline/tribePatches'
 
 import { createMapSources, refreshReliefSource } from '../../sources/mapSources'
 import { createDevState } from '../../tunables/devState'
@@ -28,8 +29,8 @@ import { DEPTH_BIAS_UNIFORM } from '../depthBias'
 import { DETAIL_FADE_SECONDS } from '../detail/detailView'
 import { DRAPED_DEPTH_BIAS } from '../lines/lineLayer'
 import { FILL_RENDER_ORDER } from '../political/fills/fillLayer'
+import { tribeCutSettings } from '../political/tribes/mapTribeLayer'
 import { TRIBE_RENDER_ORDER } from '../political/tribes/tribeLayer'
-import * as patchModule from '../political/tribes/tribePatches'
 import { MAP_TITLE_OBJECT } from '../sheet/mapTitle'
 import { PAPER_SHEET_RENDER_ORDER } from '../sheet/paperSheet'
 import { compileHook } from '../testing/compileHook'
@@ -1345,7 +1346,153 @@ describe('the years set aside', () => {
         .filter((resolution) => resolution.x === 800 && resolution.y === 600)
       expect(resolutions.length).toBeGreaterThan(0)
     })
+
+    // Review R1: the contribution lands beside the map, and pins only the year then shown.
+    it('pins the events of a year set aside before they landed, when it comes back', () => {
+      const { scene, sources, layers } = shown()
+      sources.askedYear = 1100
+      sources.mapDrawn = true
+      const whole = scene.children.length
+      layers.shelveYear(1100)
+      sources.events = [BATTLE]
+      layers.restoreYear(1100)
+      // The year's own layers back, and its events beside them.
+      expect(scene.children).toHaveLength(whole + 1)
+    })
+
+    it('pins nothing again for a year set aside with its events', () => {
+      const { scene, sources, layers } = shown()
+      sources.events = [BATTLE]
+      sources.askedYear = 1100
+      sources.mapDrawn = true
+      layers.rebuildEvents()
+      const before = [...scene.children]
+      layers.shelveYear(1100)
+      layers.restoreYear(1100)
+      // The very layers that left, events included — none built a second time.
+      expect(scene.children).toHaveLength(before.length)
+      expect(scene.children).toEqual(expect.arrayContaining(before))
+    })
   })
 
   // L3, L4, L5: the shelf's own suite (yearShelf.test.ts).
+})
+
+// ATLAS-333: a cut made in the worker is laid as it came, never cut again here.
+describe('primeFillCut', () => {
+  describe('happy path', () => {
+    it('lays the cut it was handed for the year’s very polities, cutting nothing', () => {
+      const built = withTribe()
+      const regions = built.sources.regionSet?.regions
+      if (regions === undefined) throw new Error('test: no year')
+      const segX = built.dev.relief.segments
+      const segY = Math.max(1, Math.round(segX / (META.width / META.height)))
+      const spy = vi.spyOn(fillModule, 'fillTriangles')
+      built.layers.primeFillCut(
+        regions,
+        { segX, segY },
+        regions.map(() => new Float32Array(6))
+      )
+      built.layers.rebuildFills()
+      expect(spy).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('variants', () => {
+    it('cuts again when the cut handed was for another grid', () => {
+      const built = withTribe()
+      const regions = built.sources.regionSet?.regions
+      if (regions === undefined) throw new Error('test: no year')
+      const spy = vi.spyOn(fillModule, 'fillTriangles')
+      built.layers.primeFillCut(regions, { segX: 3, segY: 3 }, [])
+      built.layers.rebuildFills()
+      expect(spy).toHaveBeenCalledOnce()
+    })
+
+    // Review R5: the reuse compares the very array the sources hold, so a cut for a copy is a cut for another year.
+    it('cuts again when the cut handed was for other polities', () => {
+      const built = withTribe()
+      const regions = built.sources.regionSet?.regions
+      if (regions === undefined) throw new Error('test: no year')
+      const segX = built.dev.relief.segments
+      const segY = Math.max(1, Math.round(segX / (META.width / META.height)))
+      const spy = vi.spyOn(fillModule, 'fillTriangles')
+      built.layers.primeFillCut([...regions], { segX, segY }, [])
+      built.layers.rebuildFills()
+      expect(spy).toHaveBeenCalledOnce()
+    })
+  })
+
+  // L3, L4, L5: N/A — a handle written, read by the fills' own suite.
+})
+
+// ATLAS-333: tribes measured in the worker are laid as they came — the key built on receipt is the layer's own.
+describe('primeTribeCut', () => {
+  describe('happy path', () => {
+    it('lays the patches it was handed for the year in the sources, measuring nothing', () => {
+      const built = withTribe()
+      const segX = built.dev.relief.segments
+      const segY = Math.max(1, Math.round(segX / (META.width / META.height)))
+      const measured = vi.spyOn(patchModule, 'tribePatches')
+      built.layers.primeTribeCut(
+        { segX, segY },
+        { patches: [], settings: tribeCutSettings(built.dev) }
+      )
+      built.layers.rebuildFills()
+      expect(measured).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('variants', () => {
+    it('measures again once the tribes it was handed for are no longer the sources’', () => {
+      const built = withTribe()
+      const segX = built.dev.relief.segments
+      const segY = Math.max(1, Math.round(segX / (META.width / META.height)))
+      built.layers.primeTribeCut(
+        { segX, segY },
+        { patches: [], settings: tribeCutSettings(built.dev) }
+      )
+      built.sources.tribes = [...built.sources.tribes]
+      const measured = vi.spyOn(patchModule, 'tribePatches')
+      built.layers.rebuildFills()
+      expect(measured).toHaveBeenCalledOnce()
+    })
+
+    // Review R2: the mode lays the fills again, not the year — it can move while the worker measures.
+    it('measures again when the spill they were measured with is no longer the panel’s', () => {
+      const built = withTribe()
+      const segX = built.dev.relief.segments
+      const segY = Math.max(1, Math.round(segX / (META.width / META.height)))
+      built.dev.tribes.mode = 'outset'
+      const settings = tribeCutSettings(built.dev)
+      built.dev.tribes.mode = 'band'
+      built.layers.primeTribeCut({ segX, segY }, { patches: [], settings })
+      const measured = vi.spyOn(patchModule, 'tribePatches')
+      built.layers.rebuildFills()
+      expect(measured).toHaveBeenCalledOnce()
+    })
+  })
+
+  describe('edge cases', () => {
+    // Review R5: a year with no frame draws no tribe, so nothing handed is kept for it.
+    it('keeps nothing handed for a year with no frame', () => {
+      const built = withTribe()
+      const segX = built.dev.relief.segments
+      const segY = Math.max(1, Math.round(segX / (META.width / META.height)))
+      const year = built.sources.regionSet
+      // New tribes, so the build made by `withTribe` no longer holds and only a prime could spare the measure.
+      built.sources.tribes = [...built.sources.tribes]
+      built.sources.regionSet = REGIONS
+      built.layers.primeTribeCut(
+        { segX, segY },
+        { patches: [], settings: tribeCutSettings(built.dev) }
+      )
+      built.sources.regionSet = year
+      const measured = vi.spyOn(patchModule, 'tribePatches')
+      built.layers.rebuildFills()
+      expect(measured).toHaveBeenCalledOnce()
+    })
+  })
+
+  // L3, L4: N/A — a handle written, read by the tribes' own suite.
 })
