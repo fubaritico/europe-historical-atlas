@@ -121,7 +121,22 @@ relief: **the bare relief is never shown alone, and there is one bar, never two.
 **Open, the dev's to decide when the frieze reaches it**: a date before the first map (no map yet drawn there) — the
 bare relief, or the first map. Not reachable today: the year switch offers drawn years only.
 
-## Where we stopped — 2026-11-08, 05:00 (the resume point of this work)
+## Where we stopped — 2026-11-08, afternoon (the resume point of this work)
+
+**Branch `atlas-baked-years`, rebased onto main (CMS-391, CARTO-393), not merged**: `addad3a` (the cuts in the worker,
+review of seven readers), `dccf1a6` (the year buttons below the edge-scroll band), `83c0e3f` (the fills' and tribes'
+vertices read the relief's heights in place). All three tested by the dev on the built site.
+
+**Measured in Chrome, built site, after `83c0e3f`** — the main thread on a change of year: the fills step 186 ms (1200)
+and 233 ms (1100 with its tribes), down from 433–836 ms; the borders 45–250 ms; settling the borders 75–385 ms; a change
+1100 → 1200, 0.96 s in all, down from 1.2–1.7 s. **The night's 540–750 ms were not the main thread being the main
+thread**: a call per node and an array per tribe vertex — Chrome ran the same loop five times slower than Node.
+
+**Next, to be ordered by the dev**: D, the splash he decided (one measured bar until the first map is wholly laid) —
+the main thread's blocks are now short enough for the bar to step between them; the borders and their settling; the
+fills' buffers in the worker; the years ahead prepared.
+
+## Where we stopped — 2026-11-08, 05:00
 
 **Worktree** `.claude/worktrees/baked-years`, branch `atlas-baked-years`, based on main `04aed22`; committed there:
 `1dbb65e` (names baked at the build), `d24b9e0` (the shelf). **Not merged into main.** **Uncommitted, gate green**
