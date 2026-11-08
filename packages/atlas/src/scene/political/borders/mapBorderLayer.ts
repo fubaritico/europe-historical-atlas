@@ -7,6 +7,7 @@ import { pairKey } from '@europe-historical-atlas/core/data/atlasBorders'
 import { borderPatternFor } from '@europe-historical-atlas/core/data/borderStyles'
 
 import { disposeHandle } from '../../layers/disposeHandle'
+import { releaseAfterUpload } from '../../layers/releaseAfterUpload'
 import { DRAPED_DEPTH_BIAS } from '../../lines/lineLayer'
 
 import { buildBorderStrokes } from './borderStrokes'
@@ -111,6 +112,7 @@ export function rebuildBorders(context: LayerContext): void {
   // Fat lines are sized in screen pixels, so give them the viewport before showing the layer.
   handles.borders.setResolution(window.innerWidth, window.innerHeight)
   scene.add(handles.borders.object)
+  releaseAfterUpload(handles.borders.object)
 }
 
 /**

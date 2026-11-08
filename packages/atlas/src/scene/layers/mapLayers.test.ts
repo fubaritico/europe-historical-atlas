@@ -46,7 +46,7 @@ import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap
 import type { RegionBorders } from '@europe-historical-atlas/core/data/regionBorders'
 import type { RegionSet } from '@europe-historical-atlas/core/data/regionSource'
 import type { Material, Mesh, MeshLambertMaterial, Object3D } from 'three'
-import type { BufferGeometry, LineBasicMaterial, LineSegments } from 'three'
+import type { BufferAttribute, BufferGeometry, LineBasicMaterial, LineSegments } from 'three'
 import type { LineSegments2 } from 'three/addons/lines/LineSegments2.js'
 
 // The vellum's bake stands in as a blank sheet of the right size: these tests check how the layers are laid,
@@ -1376,6 +1376,29 @@ describe('the years set aside', () => {
   })
 
   // L3, L4, L5: the shelf's own suite (yearShelf.test.ts).
+})
+
+// ATLAS-333: a year's layers keep their buffers on the GPU only, once uploaded.
+describe('the page’s copy of a year’s buffers', () => {
+  it('is let go once the fills and the tribe are uploaded', () => {
+    const { scene } = withTribe()
+    const fill = scene.children.find((child) => child.renderOrder === FILL_RENDER_ORDER) as
+      Mesh | undefined
+    const tribe = tribeMesh(scene)
+    const [fillPositions, tribePositions] = [
+      fill?.geometry.getAttribute('position') as BufferAttribute | undefined,
+      tribe?.geometry.getAttribute('position') as BufferAttribute | undefined,
+    ]
+    // What three's WebGLAttributes calls right after gl.bufferData.
+    fillPositions?.onUploadCallback()
+    tribePositions?.onUploadCallback()
+    expect([fillPositions?.array, tribePositions?.array]).toEqual([null, null])
+  })
+
+  it('is kept while not uploaded', () => {
+    const { scene } = withTribe()
+    expect(tribeMesh(scene)?.geometry.getAttribute('position').array).not.toBeNull()
+  })
 })
 
 // ATLAS-333: a cut made in the worker is laid as it came, never cut again here.

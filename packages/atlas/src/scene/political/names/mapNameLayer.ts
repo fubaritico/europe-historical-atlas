@@ -6,6 +6,7 @@
 import { tribeIds } from '@europe-historical-atlas/core/data/tribes'
 
 import { disposeHandle } from '../../layers/disposeHandle'
+import { releaseAfterUpload } from '../../layers/releaseAfterUpload'
 
 import { createNameLayer } from './nameLayer'
 
@@ -71,5 +72,6 @@ export function rebuildNames(context: LayerContext): void {
   })
   handles.names.object.scale.setY(relief.scale.y)
   scene.add(handles.names.object)
+  releaseAfterUpload(handles.names.object)
   tellTheCities(context, yearNames)
 }

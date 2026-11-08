@@ -5,6 +5,7 @@
 import { fillTriangles } from '@europe-historical-atlas/core/pipeline/fillTriangles'
 
 import { disposeHandle } from '../../layers/disposeHandle'
+import { releaseAfterUpload } from '../../layers/releaseAfterUpload'
 import { meshNodeHeights, meshVertexGrid, meshWorldDepth } from '../../relief/reliefMesh'
 import { WORLD_WIDTH } from '../../world'
 import { paintsExactFills } from '../paintsExactFills'
@@ -117,6 +118,7 @@ export function rebuildFills(context: LayerContext): void {
   })
   handles.fills.object.scale.setY(relief.scale.y)
   scene.add(handles.fills.object)
+  releaseAfterUpload(handles.fills.object)
   // The tribes are laid on the same grid, over the same regions.
   rebuildTribes(context, grid, regions)
 }

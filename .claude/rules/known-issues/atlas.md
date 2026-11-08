@@ -341,6 +341,13 @@ target.z)` would be coherent with the navigation that already exists.
   claim naming none). Both ran on the page before; now they show in the worker's own console, never in the dialog an
   error owes the reader (`rules/error-handling.md`). **Remedy, with ATLAS-394**: the settling returns its faults as data,
   the page says them. **Severity: worth knowing.**
+- **A year's countries, tribes, borders and names keep their buffers on the GPU only** (2026-11-08, ATLAS-333,
+  `scene/layers/releaseAfterUpload.ts`): the page's copy is let go once uploaded — a year weighs 54 to 84 MB, and the
+  years set aside keep theirs (the page's heap 1.14 GB → 0.62 GB with 1100 shown, measured in Chrome). **What it costs**:
+  should the browser lose the WebGL context, three cannot upload those buffers again, and the year's layers would
+  vanish until rebuilt — the atlas does not handle a lost context today in any case. **Remedy if it bites**: on
+  `webglcontextrestored`, rebuild the year's layers from the sources (`rebuildFills`, `rebuildBorders`,
+  `rebuildNames`) and empty the shelf. **Severity: worth knowing.**
 - **A cut that fails lets the bake started beside it finish** (review of 2026-11-08, ATLAS-333, `loading/stages/political.ts`
   `prepareYear`): `Promise.all` rejects on the cut, the year is told as failed, but `rebuildTexture` — under its own gate —
   still hangs its texture. For an authored year that texture is the bare terrain, so the map only changes when the year

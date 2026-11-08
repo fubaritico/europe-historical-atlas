@@ -12,6 +12,7 @@ import {
 import { tribePatches } from '@europe-historical-atlas/core/pipeline/tribePatches'
 
 import { maskOrFallback } from '../../landMask'
+import { releaseAfterUpload } from '../../layers/releaseAfterUpload'
 import { meshNodeHeights, meshWorldDepth } from '../../relief/reliefMesh'
 import { WORLD_WIDTH } from '../../world'
 
@@ -228,4 +229,5 @@ export function rebuildTribes(
   })
   handles.tribes.object.scale.setY(relief.scale.y)
   scene.add(handles.tribes.object)
+  releaseAfterUpload(handles.tribes.object)
 }
