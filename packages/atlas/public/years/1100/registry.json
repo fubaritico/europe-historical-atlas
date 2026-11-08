@@ -47,6 +47,18 @@
       "wikidata": "Q33061"
     },
     {
+      "id": "taifa-of-lerida",
+      "name": "Taifa of Lérida",
+      "shortName": "Lleida",
+      "rank": "kingdom",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": 1039,
+      "existsTo": 1110,
+      "colour": null,
+      "wikidata": "Q2166417"
+    },
+    {
       "id": "sultanate-of-rum",
       "name": "Sultanate of Rum",
       "rank": "sultanate",
@@ -100,6 +112,18 @@
       "existsTo": null,
       "colour": "#1e9802",
       "wikidata": "Q75613"
+    },
+    {
+      "id": "lordship-of-valencia",
+      "name": "Lordship of Valencia",
+      "shortName": "Valencia",
+      "rank": "principality",
+      "status": "country",
+      "suzerain": null,
+      "existsFrom": 1094,
+      "existsTo": 1102,
+      "colour": null,
+      "wikidata": "Q15714699"
     },
     {
       "id": "taifa-of-albarracin",
@@ -181,25 +205,27 @@
     },
     {
       "id": "county-of-osona",
-      "name": "County of Osona",
+      "name": "County of Besalú",
+      "shortName": "Besalú",
       "rank": "county",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 988,
+      "existsTo": 1111,
       "colour": "#8bc059",
-      "wikidata": "Q1541779"
+      "wikidata": "Q1541642"
     },
     {
       "id": "county-of-berga",
-      "name": "County of Berga",
+      "name": "County of Cerdanya",
+      "shortName": "Cerdanya",
       "rank": "county",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 798,
+      "existsTo": 1118,
       "colour": "#8c59c0",
-      "wikidata": "Q15487"
+      "wikidata": "Q652275"
     },
     {
       "id": "kingdom-of-aragon",
@@ -647,10 +673,10 @@
       "rank": "county",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 801,
+      "existsTo": 1164,
       "colour": "#59c066",
-      "wikidata": "Q7038"
+      "wikidata": "Q1233672"
     },
     {
       "id": "county-of-blois",
@@ -808,14 +834,14 @@
     },
     {
       "id": "county-of-rosellon",
-      "name": "County of Rosellón",
+      "name": "County of Roussillon",
       "rank": "county",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 812,
+      "existsTo": 1172,
       "colour": "#8b59c0",
-      "wikidata": "Q13522657"
+      "wikidata": "Q1541813"
     },
     {
       "id": "zirid-dynasty",
@@ -988,10 +1014,10 @@
       "rank": "county",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1011,
+      "existsTo": 1192,
       "colour": "#c06c59",
-      "wikidata": "Q12723"
+      "wikidata": "Q2068891"
     },
     {
       "id": "county-of-pallars-sobira",
@@ -999,10 +1025,10 @@
       "rank": "county",
       "status": "country",
       "suzerain": null,
-      "existsFrom": null,
-      "existsTo": null,
+      "existsFrom": 1011,
+      "existsTo": 1491,
       "colour": "#598bc0",
-      "wikidata": "Q12719"
+      "wikidata": "Q2069303"
     },
     {
       "id": "kievan-rus",
@@ -1180,6 +1206,18 @@
       "existsTo": null,
       "colour": "#5d1939",
       "wikidata": null
+    },
+    {
+      "id": "viscounty-of-fenouilledes",
+      "name": "Viscounty of Fenouillèdes",
+      "shortName": "Fenouillèdes",
+      "rank": "county",
+      "status": "country",
+      "suzerain": "county-of-osona",
+      "existsFrom": null,
+      "existsTo": null,
+      "colour": null,
+      "wikidata": "Q3556991"
     }
   ]
 }

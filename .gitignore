@@ -38,13 +38,14 @@ files/spikes/*/out/
 # payloads were committed as a result. `**/` matches at any depth and survives the next move.
 **/public/borders/
 
-# Years saved by the Cartographer in local mode — the dev's working copies, never committed (his call,
-# 2026-10-12: "ils sont pour nous pour travailler"). A year folder is ignored; `years/index.json` stays
-# tracked, committed with `"years": []`, and is marked skip-worktree on the dev's machine so a local save
-# listing a year does not show as a change (see known-issues.md). `*.tmp` covers a save cut off half-way.
+# Years saved by the Cartographer: a year folder is ignored unless published below, so its copies — the
+# `*.autosave.*` and `*.before-claude-*` folders, the backups — never leave the machine. `years/index.json` is
+# tracked and lists the published years. `*.tmp` covers a save cut off half-way.
 **/public/years/*/
-# Published by the dev's call, 2026-10-16: 1100 goes online as it stands, to show to a few people.
+# Published by the dev's call: 1100 on 2026-10-16, 1200 on 2026-11-08 (« il n'y a rien de bloquant dans le fait
+# d'ajouter des années »). A new year is published by adding its line here and its year to the index.
 !**/public/years/1100/
+!**/public/years/1200/
 **/public/years/*.tmp
 
 # Turbo task cache
