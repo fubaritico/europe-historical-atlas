@@ -12,7 +12,7 @@ import {
 import { tribePatches } from '@europe-historical-atlas/core/pipeline/tribePatches'
 
 import { maskOrFallback } from '../../landMask'
-import { meshWorldDepth } from '../../relief/reliefMesh'
+import { meshNodeHeights, meshWorldDepth } from '../../relief/reliefMesh'
 import { WORLD_WIDTH } from '../../world'
 
 import { createTribeLayer } from './tribeLayer'
@@ -215,11 +215,10 @@ export function rebuildTribes(
   // An authored year with no tribe draws none — the common case, not a refusal.
   if (sources.tribes.length === 0 || !bounds || !relief || !texture || !sources.heightmap) return
   // Build the layer on the relief's vertex heights, scale it like the relief, add it to the scene.
-  const heights = relief.geometry.getAttribute('position')
   handles.tribes = createTribeLayer({
     patches: cutTribes(context, { bounds, claims: regions }, grid),
     grid,
-    nodeY: (ix, iy) => heights.getY(iy * (grid.segX + 1) + ix),
+    nodes: meshNodeHeights(relief),
     worldWidth: WORLD_WIDTH,
     worldDepth: meshWorldDepth(sources.heightmap.meta, WORLD_WIDTH),
     map: texture,

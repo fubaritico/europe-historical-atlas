@@ -19,6 +19,13 @@ export const GRID = { segX: 4, segY: 4 }
  */
 export const nodeY = (ix: number, iy: number): number => ix + 10 * iy
 
+/** The same relief as a buffer, one number a node, row by row from the north. */
+export const NODES = {
+  array: Float32Array.from({ length: 25 }, (_, i) => nodeY(i % 5, Math.floor(i / 5))),
+  stride: 1,
+  offset: 0,
+}
+
 /** Two triangles, six vertices, with a distance each: inside, on the outline, outside. */
 export const PATCH = {
   tint: { r: 65, g: 88, b: 11 },
@@ -36,7 +43,7 @@ export const PATCH = {
 export const options = (over: Partial<TribeLayerOptions> = {}): TribeLayerOptions => ({
   patches: [PATCH],
   grid: GRID,
-  nodeY,
+  nodes: NODES,
   worldWidth: 4,
   worldDepth: 2,
   map: new DataTexture(new Uint8Array(16), 2, 2),

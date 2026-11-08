@@ -2,7 +2,7 @@
  * The fills' geometry: every filled triangle placed on the relief, with its polity's tint at each level of homage.
  */
 
-import { planeHeight } from '@europe-historical-atlas/core/pipeline/gridDrape'
+import { planeHeightIn } from '@europe-historical-atlas/core/pipeline/gridDrape'
 
 import type { TintSurface } from '../tintOnRelief'
 import type { RgbColor } from '@europe-historical-atlas/core/utils/color'
@@ -73,7 +73,11 @@ function polityTints(levels: FillGeometry['tintLevels'], polity: number): RgbCol
 }
 
 /**
- * Write one polity's vertices: each placed on the relief, and its tint at every level beside it.
+ * Write one polity's vertices: each placed on the relief, then its tint at every level over the whole run.
+ *
+ * One tight loop per buffer, no call per vertex but the plane's (ATLAS-333): the 2.17 million vertices of 1100 took
+ * ~420 ms of the page in Chrome when each read its four nodes through a reader and wrote its tints through a
+ * `forEach` (measured 2026-11-08).
  * @param fill - the polity's triangles, flat `u, v`
  * @param own - its tint at every level
  * @param buffers - the buffers, written in place
@@ -91,24 +95,40 @@ function writeFill(
   surface: TintSurface
 ): number {
   const { positions, tints } = buffers
-  let vertex = at
-  // `k + 1 < length`: a trailing lone float would be half a vertex, and is skipped.
-  for (let k = 0; k + 1 < fill.length; k += 2) {
-    const u = fill[k] ?? 0
-    const v = fill[k + 1] ?? 0
+  const { grid, nodes, worldWidth, worldDepth } = surface
+  // Whole vertices only: a trailing lone float would be half a vertex, and is skipped.
+  const count = Math.floor(fill.length / 2)
+  for (let i = 0; i < count; i++) {
+    // Indices the loop keeps in range (`noUncheckedIndexedAccess`): the `NaN` never stands in for anything.
+    const u = fill[2 * i] ?? Number.NaN
+    const v = fill[2 * i + 1] ?? Number.NaN
     // Place the vertex in world space, its height read from the plane of the relief cell under it.
-    positions[3 * vertex] = (u - 0.5) * surface.worldWidth
-    positions[3 * vertex + 1] = planeHeight(u, v, surface.grid, surface.nodeY)
-    positions[3 * vertex + 2] = (v - 0.5) * surface.worldDepth
-    // Beside it, its polity's tint at every level.
-    own.forEach((tint, level) => {
-      const bytes = tints[level]
-      if (!bytes) return
-      bytes[3 * vertex] = tint.r
-      bytes[3 * vertex + 1] = tint.g
-      bytes[3 * vertex + 2] = tint.b
-    })
-    vertex += 1
+    const p = 3 * (at + i)
+    positions[p] = (u - 0.5) * worldWidth
+    positions[p + 1] = planeHeightIn(u, v, grid, nodes)
+    positions[p + 2] = (v - 0.5) * worldDepth
   }
-  return vertex
+  // Its polity's tint at every level, over the whole run.
+  own.forEach((tint, level) => {
+    const bytes = tints[level]
+    if (bytes) paintRun(bytes, tint, at, count)
+  })
+  return at + count
+}
+
+/**
+ * One colour over a run of vertices, three bytes each.
+ * @param bytes - the tint buffer
+ * @param tint - the colour
+ * @param from - the first vertex
+ * @param count - how many vertices
+ */
+function paintRun(bytes: Uint8Array, tint: RgbColor, from: number, count: number): void {
+  const { r, g, b } = tint
+  const end = 3 * (from + count)
+  for (let p = 3 * from; p < end; p += 3) {
+    bytes[p] = r
+    bytes[p + 1] = g
+    bytes[p + 2] = b
+  }
 }

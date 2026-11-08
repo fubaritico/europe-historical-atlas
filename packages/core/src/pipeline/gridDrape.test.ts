@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { planeHeight, splitAtGrid } from './gridDrape'
+import { planeHeight, planeHeightIn, splitAtGrid } from './gridDrape'
 
-import type { UvPair } from './gridDrape'
+import type { NodeHeights, UvPair } from './gridDrape'
 
 const GRID = { segX: 4, segY: 4 }
 
@@ -170,4 +170,68 @@ describe('planeHeight', () => {
   it('clamps a point past the far edge onto the last node', () => {
     expect(planeHeight(1.3, 1.3, GRID, nodeY)).toBeCloseTo(nodeY(4, 4), 9)
   })
+})
+
+/**
+ * The heights of {@link nodeY} as a mesh holds them: `x, y, z` per node, the height second, row by row from the north.
+ * @returns the buffer
+ */
+function meshNodes(): NodeHeights {
+  const width = GRID.segX + 1
+  const array = new Float32Array(width * (GRID.segY + 1) * 3)
+  for (let iy = 0; iy <= GRID.segY; iy++)
+    for (let ix = 0; ix <= GRID.segX; ix++) {
+      array[(iy * width + ix) * 3] = 99
+      array[(iy * width + ix) * 3 + 1] = nodeY(ix, iy)
+      array[(iy * width + ix) * 3 + 2] = -99
+    }
+  return { array, stride: 3, offset: 1 }
+}
+
+// ATLAS-333: the same plane as planeHeight, read from the mesh's buffer with no call per node.
+describe('planeHeightIn', () => {
+  describe('happy path', () => {
+    it('gives planeHeight’s height over the whole grid, both halves of every cell', () => {
+      const nodes = meshNodes()
+      for (let k = 0; k <= 40; k++)
+        for (let m = 0; m <= 40; m++) {
+          const u = k / 40
+          const v = m / 40 + 0.0123
+          expect(planeHeightIn(u, v, GRID, nodes)).toBeCloseTo(planeHeight(u, v, GRID, nodeY), 5)
+        }
+    })
+  })
+
+  describe('variants', () => {
+    it('reads the height at its offset, never the x or the z beside it', () => {
+      expect(planeHeightIn(0.25, 0.5, GRID, meshNodes())).toBeCloseTo(nodeY(1, 2), 5)
+    })
+
+    it('reads one number a node with a stride of one', () => {
+      const width = GRID.segX + 1
+      const array = Float32Array.from({ length: width * (GRID.segY + 1) }, (_, i) =>
+        nodeY(i % width, Math.floor(i / width))
+      )
+      const nodes = { array, stride: 1, offset: 0 }
+      expect(planeHeightIn(0.61, 0.37, GRID, nodes)).toBeCloseTo(
+        planeHeight(0.61, 0.37, GRID, nodeY),
+        5
+      )
+    })
+  })
+
+  describe('unmanaged errors', () => {
+    it('carries a NaN through for a buffer shorter than its grid, never a plausible height', () => {
+      const nodes = { array: new Float32Array(3), stride: 3, offset: 1 }
+      expect(planeHeightIn(0.9, 0.9, GRID, nodes)).toBeNaN()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('clamps a point past the far edge onto the last node', () => {
+      expect(planeHeightIn(1.3, 1.3, GRID, meshNodes())).toBeCloseTo(nodeY(4, 4), 5)
+    })
+  })
+
+  // L3: N/A — nothing is refused; a short buffer is carried through as a NaN (L4).
 })

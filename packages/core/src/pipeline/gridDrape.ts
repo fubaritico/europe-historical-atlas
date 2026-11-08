@@ -55,6 +55,51 @@ export function planeHeight(
 }
 
 /**
+ * The relief's node heights as they lie in a buffer — the relief mesh's own positions, read where they are: node
+ * `(ix, iy)` at `array[(iy · (segX + 1) + ix) · stride + offset]`.
+ */
+export interface NodeHeights {
+  /** The buffer — the mesh's positions, `x, y, z` per node. */
+  readonly array: Float32Array
+  /** How many numbers per node — 3 for a position. */
+  readonly stride: number
+  /** Where the height sits within a node — 1, the `y` of a position. */
+  readonly offset: number
+}
+
+/**
+ * {@link planeHeight} read straight from a buffer (ATLAS-333): the same plane, with no call per node — laying the
+ * 2.17 million vertices of 1100's fills through `planeHeight` and a reader took ~420 ms of the page in Chrome, three
+ * times what reading the buffer takes (measured 2026-11-08).
+ * @param u - west→east, 0..1
+ * @param v - north→south, 0..1
+ * @param grid - the relief's subdivision
+ * @param nodes - the relief's node heights
+ * @returns the height
+ */
+export function planeHeightIn(u: number, v: number, grid: FillGrid, nodes: NodeHeights): number {
+  const { array, stride, offset } = nodes
+  const x = Math.min(grid.segX, Math.max(0, u * grid.segX))
+  const y = Math.min(grid.segY, Math.max(0, v * grid.segY))
+  const ix = Math.min(grid.segX - 1, Math.floor(x))
+  const iy = Math.min(grid.segY - 1, Math.floor(y))
+  const s = x - ix
+  const t = y - iy
+  const width = grid.segX + 1
+  const node = iy * width + ix
+  // A read past the buffer — one shorter than its grid — is a `NaN`, carried into the height: a vertex that visibly
+  // goes nowhere, as the mesh's own `getY` did, never a plausible height in its place (rules/error-handling.md).
+  const b = array[(node + width) * stride + offset] ?? Number.NaN
+  const d = array[(node + 1) * stride + offset] ?? Number.NaN
+  if (s + t <= 1) {
+    const a = array[node * stride + offset] ?? Number.NaN
+    return a + s * (d - a) + t * (b - a)
+  }
+  const c = array[(node + width + 1) * stride + offset] ?? Number.NaN
+  return c + (1 - s) * (b - c) + (1 - t) * (d - c)
+}
+
+/**
  * Where a linear quantity going from `p` to `q` crosses a whole number, as segment parameters in `(0, 1)`.
  * @param p - its value at the start
  * @param q - its value at the end

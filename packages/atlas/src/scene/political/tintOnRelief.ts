@@ -4,6 +4,7 @@
  */
 
 import type { FillGrid } from '@europe-historical-atlas/core/pipeline/fillTriangles'
+import type { NodeHeights } from '@europe-historical-atlas/core/pipeline/gridDrape'
 import type { BlendMode } from '@europe-historical-atlas/core/pipeline/terrainOptions'
 import type { ShaderMaterial, Texture } from 'three'
 
@@ -12,13 +13,10 @@ export interface TintSurface {
   /** The relief's subdivision — the one the triangles were cut against. */
   grid: FillGrid
   /**
-   * The relief's height at grid node `(ix, iy)`, in world units before the exaggeration — read off the
-   * relief mesh itself, so the tint lies on the very surface drawn.
-   * @param ix - the node's column, `0..segX`
-   * @param iy - the node's row, `0..segY`, north→south
-   * @returns the height
+   * The relief's height at every grid node, in world units before the exaggeration — the relief mesh's own
+   * positions, so the tint lies on the very surface drawn; read in place, with no call per node (ATLAS-333).
    */
-  nodeY: (ix: number, iy: number) => number
+  nodes: NodeHeights
   /** World-space width of the map plane on X. */
   worldWidth: number
   /** World-space depth of the map plane on Z. */

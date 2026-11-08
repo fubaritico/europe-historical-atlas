@@ -8,7 +8,12 @@ import { DataTexture, Raycaster, Vector3 } from 'three'
 import { createHeightmap } from '@europe-historical-atlas/core/data/heightmap'
 import { fillTriangles } from '@europe-historical-atlas/core/pipeline/fillTriangles'
 
-import { createReliefMesh, meshVertexGrid, meshWorldDepth } from '../../../relief/reliefMesh'
+import {
+  createReliefMesh,
+  meshNodeHeights,
+  meshVertexGrid,
+  meshWorldDepth,
+} from '../../../relief/reliefMesh'
 
 import type { FillLayerOptions } from '../fillLayer'
 import type { HeightmapMeta } from '@europe-historical-atlas/core/data/heightmap'
@@ -101,7 +106,7 @@ export const options = (over: Partial<FillLayerOptions> = {}): FillLayerOptions 
   ),
   tintLevels: [[{ r: 200, g: 40, b: 10 }]],
   grid: GRID,
-  nodeY,
+  nodes: meshNodeHeights(relief),
   worldWidth: WORLD_WIDTH,
   worldDepth: DEPTH,
   map: texture(),

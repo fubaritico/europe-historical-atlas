@@ -5,7 +5,7 @@
 import { fillTriangles } from '@europe-historical-atlas/core/pipeline/fillTriangles'
 
 import { disposeHandle } from '../../layers/disposeHandle'
-import { meshVertexGrid, meshWorldDepth } from '../../relief/reliefMesh'
+import { meshNodeHeights, meshVertexGrid, meshWorldDepth } from '../../relief/reliefMesh'
 import { WORLD_WIDTH } from '../../world'
 import { paintsExactFills } from '../paintsExactFills'
 import { rebuildTribes } from '../tribes/mapTribeLayer'
@@ -103,13 +103,12 @@ export function rebuildFills(context: LayerContext): void {
   // The relief's own subdivision, and its vertex heights read straight from its mesh.
   const { segX, segY } = meshVertexGrid(sources.heightmap.meta, dev.relief.segments)
   const grid = { segX, segY }
-  const heights = relief.geometry.getAttribute('position')
   // Build the layer, scale it with the relief's exaggeration, and add it to the scene.
   handles.fills = createFillLayer({
     fills: cutFills(context, regions, grid),
     tintLevels,
     grid,
-    nodeY: (ix, iy) => heights.getY(iy * (segX + 1) + ix),
+    nodes: meshNodeHeights(relief),
     worldWidth: WORLD_WIDTH,
     worldDepth: meshWorldDepth(sources.heightmap.meta, WORLD_WIDTH),
     map: texture,

@@ -1,6 +1,7 @@
 import { Mesh, MeshBasicMaterial, PlaneGeometry } from 'three'
 
 import type { Heightmap } from '@europe-historical-atlas/core/data/heightmap'
+import type { NodeHeights } from '@europe-historical-atlas/core/pipeline/gridDrape'
 import type { BufferAttribute, Texture } from 'three'
 
 /**
@@ -165,3 +166,16 @@ export function createReliefMesh(
 
 /** The relief mesh, whose material carries the baked terrain texture. */
 export type ReliefMesh = Mesh<PlaneGeometry, MeshBasicMaterial>
+
+/**
+ * The relief's node heights where they lie — the `y` of its own positions, so what is laid on it lies on the very
+ * surface drawn, read with no call per node (ATLAS-333).
+ * @param relief - the relief mesh
+ * @returns its positions' buffer, three numbers a node, the height second
+ */
+export function meshNodeHeights(relief: Mesh<PlaneGeometry>): NodeHeights {
+  // A `PlaneGeometry`'s positions are a `Float32BufferAttribute` (three's `PlaneGeometry.js`), turned in place by
+  // `rotateX` — a `Float32Array`, whatever the attribute's wider type says.
+  const array = relief.geometry.getAttribute('position').array as Float32Array
+  return { array, stride: 3, offset: 1 }
+}

@@ -3,7 +3,7 @@
  * distance to the tribe's outline and to the others' ground, and whether it is dry.
  */
 
-import { planeHeight } from '@europe-historical-atlas/core/pipeline/gridDrape'
+import { planeHeightIn } from '@europe-historical-atlas/core/pipeline/gridDrape'
 
 import type { TintSurface } from '../tintOnRelief'
 import type { TribePatch } from '@europe-historical-atlas/core/pipeline/tribePatches'
@@ -61,28 +61,29 @@ function writePatch(
   surface: TintSurface
 ): number {
   const { triangles, tint } = patch
-  let vertex = at
-  // The `?? 0` read indices the loop keeps in range (`noUncheckedIndexedAccess`); none stands in for a value
-  // that failed to arrive — `vertexCount` checked every length.
-  for (let k = 0; k < patch.distances.length; k++) {
-    const u = triangles[2 * k] ?? 0
-    const v = triangles[2 * k + 1] ?? 0
-    // Lay the vertex on the relief, then copy its colour, distances and land beside it.
-    out.positions.set(
-      [
-        (u - 0.5) * surface.worldWidth,
-        planeHeight(u, v, surface.grid, surface.nodeY),
-        (v - 0.5) * surface.worldDepth,
-      ],
-      3 * vertex
-    )
-    out.tints.set([tint.r, tint.g, tint.b], 3 * vertex)
-    out.distances[vertex] = patch.distances[k] ?? 0
-    out.claimed[vertex] = patch.claimed[k] ?? 0
-    out.land[vertex] = patch.land[k] ?? 0
-    vertex += 1
+  const { grid, nodes, worldWidth, worldDepth } = surface
+  const { positions, tints } = out
+  const count = patch.distances.length
+  // No array made per vertex and no call but the plane's (ATLAS-333): 343 ms of the page in Chrome for 1100's four
+  // tribes when each vertex was written through two `set([…])` (measured 2026-11-08). Indices the loop keeps in range
+  // (`noUncheckedIndexedAccess`) — `vertexCount` checked every length: the `NaN` never stands in for anything.
+  for (let k = 0; k < count; k++) {
+    const u = triangles[2 * k] ?? Number.NaN
+    const v = triangles[2 * k + 1] ?? Number.NaN
+    // Lay the vertex on the relief, then its colour beside it.
+    const p = 3 * (at + k)
+    positions[p] = (u - 0.5) * worldWidth
+    positions[p + 1] = planeHeightIn(u, v, grid, nodes)
+    positions[p + 2] = (v - 0.5) * worldDepth
+    tints[p] = tint.r
+    tints[p + 1] = tint.g
+    tints[p + 2] = tint.b
   }
-  return vertex
+  // Its distances, ground and land, copied as they came.
+  out.distances.set(patch.distances, at)
+  out.claimed.set(patch.claimed, at)
+  out.land.set(patch.land, at)
+  return at + count
 }
 
 /**
