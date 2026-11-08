@@ -15,7 +15,8 @@ export interface PaintClock {
 }
 
 /**
- * Wait for the page to paint what was last written to it (CARTO-393).
+ * Wait for the page to paint what was last written to it (CARTO-393; shared with the atlas's opening since ATLAS-333 —
+ * pure, the page's clock injected, so it lives in core with no DOM in it).
  *
  * A frame's callback runs before its paint, so a task queued from it runs after: the bar's last step is on screen
  * before the canvas's start holds the thread. **A hidden tab resolves at once** (review QUAL-001): a browser runs no

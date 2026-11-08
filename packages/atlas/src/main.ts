@@ -12,10 +12,10 @@ import { createTranslator } from '@europe-historical-atlas/core/i18n/catalogue'
 import { pickLocale } from '@europe-historical-atlas/core/i18n/locale'
 import ComputeWorker from '@europe-historical-atlas/core/pipeline/computeWorker?worker'
 
-import { pageFadeIn } from './app/fadeIn'
 import { startFrameLoop } from './app/frameLoop'
 import { createMapInteraction } from './app/mapInteraction'
 import { createMapUi } from './app/mapUi'
+import { pageAfterPaint } from './app/pageAfterPaint'
 import { createViewport } from './app/viewport'
 import { panelDepsFor } from './devPanel/devPanelCallbacks'
 import { NO_DEV_TOOLS, mountDevTools } from './devPanel/devTools'
@@ -140,7 +140,7 @@ function bootstrap(): () => void {
     ui,
     translate,
     spawn: () => new ComputeWorker(),
-    fadeIn: pageFadeIn,
+    afterPaint: pageAfterPaint,
     isDisposed,
   })
   const interaction = createMapInteraction({

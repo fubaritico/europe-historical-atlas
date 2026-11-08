@@ -329,6 +329,12 @@ target.z)` would be coherent with the navigation that already exists.
   the fallback changes in one, the tribes' land and the map's coast disagree with no test to say so. Not merged: the
   first returns `null` with no elevation, the compute refuses — one shared function in `core/data/landMask` must keep
   both contracts. **Severity: worth knowing** — it only bites in a session whose land mask failed to load.
+- **The year's layers' reveal is kept and no longer moved** (2026-11-08, ATLAS-333): the startup used to hide the
+  countries, borders, names and events (`MapLayers.setReveal(0)`) and fade them in over the relief; since the splash stays
+  until the first map is wholly laid, its own fade is the reveal, and `app/fadeIn` is gone. The `reveal` value stays at 1,
+  still multiplied into every year layer's opacity each frame (`scene/layers/frameLayers.ts`, the names', the events',
+  the cities' `setReveal`). **Trigger**: a fade wanted on a change of year — it is the seam for it; otherwise, the next
+  change to `frameLayers.ts`, remove it whole. **Severity: cosmetic.**
 - **A cut that fails lets the bake started beside it finish** (review of 2026-11-08, ATLAS-333, `loading/stages/political.ts`
   `prepareYear`): `Promise.all` rejects on the cut, the year is told as failed, but `rebuildTexture` — under its own gate —
   still hangs its texture. For an authored year that texture is the bare terrain, so the map only changes when the year

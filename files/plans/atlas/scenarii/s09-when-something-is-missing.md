@@ -8,6 +8,13 @@
 > **Built** in September (roadmap 07), the words in French and English with ATLAS-159, the error net for anything no one
 > caught with ATLAS-42. **Walked**: not by the dev on purpose — a failure is provoked by hand, and none was for these
 > scenarios. The code: `atlas/src/app/assetMessages.ts`, `ui/notice.ts`, `ui/errorNet.ts`, `i18n/fr.json`.
+>
+> **To be replaced — the dev, 2026-11-08** (`rules/error-handling.md`, « The atlas shows a whole map or an error
+> screen »): the toast at the bottom over the relief came from the setting-up time, before the screens of Claude Design.
+> **Before the first map is shown**, any failure — the degraded ones too — turns the splash into an error screen saying
+> where it broke, never a half-made map (**ATLAS-394**); **after it**, a later map's failure is told in a modal over a
+> veil, with « Réessayer » when it is recoverable (**ATLAS-395**). The scenarios below describe the code as it is until
+> then; they are rewritten with those tickets.
 
 ## A notice says what failed, then what is lost
 

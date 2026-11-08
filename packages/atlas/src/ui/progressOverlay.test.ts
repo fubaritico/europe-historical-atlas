@@ -52,6 +52,24 @@ describe('progressOverlay', () => {
       expect((track.firstElementChild as HTMLElement).style.width).toBe('42%')
     })
 
+    // ATLAS-333: the percentage under the bar, as the screens of Claude Design show it — hidden from a screen reader,
+    // which hears the bar's own value.
+    it('writes the percentage under the bar, unread by a screen reader', () => {
+      const { overlay } = mount()
+      overlay.begin('start')
+      overlay.report(0.58)
+      const percentage = overlay.element.lastElementChild as HTMLElement
+      expect([percentage.textContent, percentage.getAttribute('aria-hidden')]).toEqual([
+        '58 %',
+        'true',
+      ])
+    })
+
+    it('stands above the splash, so the bar shows on it from the first byte', () => {
+      const { overlay } = mount()
+      expect(Number(overlay.element.style.zIndex)).toBeGreaterThan(20)
+    })
+
     it('hides again when the run ends', () => {
       const { overlay } = mount()
       overlay.begin('start')
@@ -67,6 +85,16 @@ describe('progressOverlay', () => {
       overlay.report(0.5, 'second')
       expect(overlay.element.textContent).toContain('second')
       expect(bar(overlay).getAttribute('aria-valuenow')).toBe('50')
+    })
+
+    // Review A11Y-001: a live region rewritten with the same words is read again.
+    it('leaves the caption untouched when told the step it already shows', () => {
+      const { overlay } = mount()
+      overlay.begin('start')
+      overlay.report(0.1, 'Composition de la texture…')
+      const words = overlay.element.firstChild?.firstChild
+      overlay.report(0.2, 'Composition de la texture…')
+      expect(overlay.element.firstChild?.firstChild).toBe(words)
     })
 
     it('keeps the label when none is given', () => {

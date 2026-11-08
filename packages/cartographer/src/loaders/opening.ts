@@ -1,3 +1,5 @@
+import { createSlicedProgress } from '@europe-historical-atlas/core/utils/slicedProgress'
+
 import type { ProgressReport } from '@europe-historical-atlas/core/pipeline/mapCompute'
 
 /**
@@ -50,12 +52,7 @@ export interface OpeningBar {
  * @returns the bar to drive
  */
 export function createOpeningBar(report: OpeningProgress): OpeningBar {
-  let reached = 0
-  const step = (running: OpeningStep, within = 0): void => {
-    const [from, to] = OPENING_SLICES[running]
-    reached = Math.max(reached, from + (to - from) * Math.min(1, Math.max(0, within)))
-    report(reached, running)
-  }
+  const step = createSlicedProgress(OPENING_SLICES, report)
   return {
     step,
     bake: (fraction) => {

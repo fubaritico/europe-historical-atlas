@@ -38,6 +38,12 @@ import type {
 const POLITICAL_SPLIT = { fetch: 0.1, compute: 0.65, bake: 0.95 }
 
 /**
+ * The same for a year the fills paint — no grid, no bake: read, cut in the worker, laid here. Measured in Chrome on the
+ * built site, 2026-11-08, on 1100 at the startup: read 0.3–0.4 s, cut 0.7 s, settled and laid 0.15 s.
+ */
+const EXACT_SPLIT = { fetch: 0.29, cut: 0.87 }
+
+/**
  * The year chosen in the panel, snapped to its century.
  * @param context - the pipeline's world
  * @returns the year
@@ -77,8 +83,11 @@ async function drawYear(
   // 1. Fetch the year's polities; drop out if torn down or overtaken by a newer year.
   const loaded = await timedStep(clock, asked, 'fetch', () => context.assets.regions.load(asked))
   if (context.isDisposed() || !isCurrent()) return null
-  // 2. The year's tints and traced lines: from the compute's grid, or — for a year the fills paint — straight from it.
-  const result = yearPaintsExactFills(context.dev, loaded)
+  // 2. The year's tints and traced lines: from the compute's grid, or — for a year the fills paint — straight from it,
+  //    its polities then cut in the worker (said on the bar before the wait).
+  const exact = yearPaintsExactFills(context.dev, loaded)
+  if (exact) report(EXACT_SPLIT.fetch, 'cut')
+  const result = exact
     ? await exactYearResult(context, loaded)
     : await gridYearResult(
         context,
@@ -115,6 +124,10 @@ async function installYear(
     prepareYear(context, loaded, report)
   )
   if (context.isDisposed() || !isCurrent()) return null
+  // 4. Lay the year — this thread's own work, held in one block: its step is said and painted first (ATLAS-333).
+  report(yearPaintsExactFills(dev, loaded) ? EXACT_SPLIT.cut : POLITICAL_SPLIT.bake, 'borders')
+  await context.afterPaint()
+  if (context.isDisposed() || !isCurrent()) return null
   // From here to the end, no wait: the year on screen is set aside and the new one laid in one go, so a year overtaken
   // or failing leaves the map — and the years set aside — as they were (reviews QUAL-001, ARCH-001).
   if (asked !== sources.askedYear) setShownYearAside(context)
@@ -129,8 +142,7 @@ async function installYear(
     layers.primeFillCut(loaded.regions, cut.grid, cut.fills)
     if (cut.tribes !== null) layers.primeTribeCut(cut.grid, cut.tribes)
   }
-  // 4. Lay the fills and the border lines — this thread's own work, said before it holds the page still.
-  report(POLITICAL_SPLIT.bake, 'borders')
+  // The fills and the border lines.
   const endFills = startStep(context.clock, asked, 'fills')
   layers.rebuildFills()
   endFills()

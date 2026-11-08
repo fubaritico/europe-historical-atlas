@@ -6,8 +6,14 @@
  * plan) will weigh its steps by these.
  */
 
-/** The steps of a change of year that are measured. */
+/**
+ * The steps of a change of year that are measured — and, at the startup, the three before the year: the relief and the
+ * mask downloaded (`terrain`), the bare terrain baked (`texture`), the sheet, relief and decor built (`scene`).
+ */
 export type YearStep =
+  | 'terrain'
+  | 'texture'
+  | 'scene'
   | 'fetch'
   | 'prepare'
   | 'cut'

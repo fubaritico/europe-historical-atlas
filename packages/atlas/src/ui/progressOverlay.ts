@@ -89,7 +89,8 @@ export function buildProgressPanel(ink: string, background: string): HTMLElement
     'font:0.8125rem/1.4 ui-serif, Georgia, serif',
     'box-shadow:0 1px 8px rgba(0,0,0,0.12)',
     'pointer-events:none',
-    'z-index:10',
+    // Above the splash, which it shares from the first byte to the first map wholly laid (ATLAS-333); under a notice.
+    'z-index:25',
   ].join(';')
   return element
 }
@@ -135,33 +136,47 @@ export function createProgressOverlay(options: ProgressOverlayOptions): Progress
   const caption = document.createElement('div')
   caption.style.cssText = 'margin-bottom:0.5rem;letter-spacing:0.02em'
   const { track, fill } = buildProgressBar(ink, !prefersReducedMotion())
-  element.append(caption, track)
+  // The percentage under the bar, as the screens of Claude Design show it (ATLAS-333); the bar's own value already
+  // says it to a screen reader, so it is not said twice.
+  const percentage = document.createElement('div')
+  percentage.setAttribute('aria-hidden', 'true')
+  percentage.style.cssText = 'margin-top:0.375rem;text-align:center;letter-spacing:0.12em'
+  element.append(caption, track, percentage)
   options.host.append(element)
 
   /**
-   * Write a fraction onto the bar and its accessible value together, so the two cannot drift.
+   * Write a fraction onto the bar, its percentage and its accessible value together, so the three cannot drift.
    * @param fraction - progress in `[0, 1]`
    * @returns nothing
    */
   const paint = (fraction: number): void => {
     const percent = progressPercent(fraction)
     fill.style.width = `${String(percent)}%`
+    percentage.textContent = `${String(percent)} %`
     track.setAttribute('aria-valuenow', String(percent))
+  }
+
+  /**
+   * Name the step running, on the caption and the bar together.
+   * @param label - the step's words
+   * @returns nothing
+   */
+  const name = (label: string): void => {
+    caption.textContent = label
+    track.setAttribute('aria-label', label)
   }
 
   return {
     element,
     begin(label: string): void {
-      caption.textContent = label
-      track.setAttribute('aria-label', label)
+      name(label)
       paint(0)
       element.hidden = false
     },
     report(fraction: number, label?: string): void {
-      if (label !== undefined) {
-        caption.textContent = label
-        track.setAttribute('aria-label', label)
-      }
+      // Rewritten only when the step changes: the panel is a live region, and the same words written again at each row
+      // of a bake would have a screen reader read them again (review A11Y-001, ATLAS-333).
+      if (label !== undefined && label !== caption.textContent) name(label)
       paint(fraction)
     },
     end(): void {

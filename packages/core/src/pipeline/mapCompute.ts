@@ -25,7 +25,7 @@ import type { RgbColor } from '../utils/color'
  * The phases a computation announces, in the order they run. Identifiers rather than sentences: a
  * compute module has no business holding the wording of a user-facing panel, let alone its language.
  */
-export type ComputePhase = 'rasterise' | 'expand' | 'colours' | 'bake' | 'borders' | 'names'
+export type ComputePhase = 'rasterise' | 'expand' | 'colours' | 'cut' | 'bake' | 'borders' | 'names'
 
 /**
  * Announce what a computation is *about to* spend time on. Announced before the phase, never after —

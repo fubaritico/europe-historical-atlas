@@ -59,6 +59,29 @@ status bar of CARTO-273): the dialog opens **at the end of the gesture**, *« po
 gesture is cancelled**. The model is the refusal of 2026-11-05 — a vassal laid on a suzerain whose outline is open:
 `ui/components/AlarmDialog` with its warning icon, through `persistence/notice.ts` (`49b115a`).
 
+## The atlas shows a whole map or an error screen, never a half-made map — decided by the dev, 2026-11-08
+
+> *"Always out of a will for quality and to stand apart from the competitors: give the greatest care to the
+> presentation, and never show the wings and the machinery of the application."* — and the screens of Claude Design are
+> the reference, for how things are shown when they work and when they do not.
+
+**This replaces, in the atlas, the toast at the bottom over the relief** (`ui/notice.ts`, the *degraded* severity of
+`app/assetMessages.ts`): it came from a time of setting up and research, before the screens were designed — waiting for
+the relief and then telling a problem was convenient for us, not for the reader. Two cases, each with a human-friendly
+message saying **where** it broke:
+
+| when | what the reader sees |
+| --- | --- |
+| **before the first map is shown** — the splash and its bar are up | the splash gives way to **an error screen**, of the same kind, saying intelligibly at which step the loading failed. **Never the map as far as it got**, even when the failure would once have been a degraded mode (the land mask, the rivers, the events, the year's file) |
+| **after the first map is shown** — the atlas and its interface are up, the relief in cache, a later map fails to load | **a modal over a veil**, the cause in plain words, and **« Réessayer »** when the failure is recoverable |
+
+**Every point where the loading can break is listed, each with its message and whether it is recoverable** — a network
+failure is, a file the code cannot read is not — and the two cases are built from that list. The `console.error` stays
+(the rule above). Tickets: **ATLAS-394**, the error screen before the first map, and its inventory; **ATLAS-395**, the
+modal after it. Until they are built, the atlas still tells a failure as before — the toast, the splash kept on a
+blocking one — and an unexpected throw after the relief keeps the splash with the relief's message (review ARCH-001 of
+2026-11-08, left to ATLAS-394).
+
 ## A label that cannot be built throws, and a boundary keeps the screen — decided by the dev, 2026-10-21
 
 > *« On traduit en phase de développement, et en production il y aura toujours un label »* — so the code is

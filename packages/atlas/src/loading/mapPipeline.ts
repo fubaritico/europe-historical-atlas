@@ -129,13 +129,14 @@ export function createMapPipeline(deps: MapPipelineDeps): MapPipeline {
 
   return {
     async start(): Promise<void> {
-      // The rivers and the events load on their own, beside the startup; the startup waits for the events before it
-      // fades the year in, the rivers never.
+      // The rivers and the events load on their own, beside the startup; the startup waits for the events before the
+      // splash goes, the rivers never.
       loadRivers(context)
       const content = loadContent(context, context.assets.content)
       await startup(context, content).catch((error: unknown) => {
-        // Anything escaping `startup` got past the mask's own catch, so it is the relief — the one asset
-        // the map cannot do without. The splash stays up underneath the message.
+        // Told as the relief, the splash kept under the message — true of a relief that failed; since the splash stays
+        // until the whole map (ATLAS-333), an unexpected throw after the relief is told the same way, wrongly. The error
+        // screen of ATLAS-394 replaces this (rules/error-handling.md, « a whole map or an error screen »).
         deps.ui.reportAssetFailure('heightmap', error)
       })
     },

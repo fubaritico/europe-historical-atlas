@@ -13,6 +13,7 @@ import { createMapSources } from '../sources/mapSources'
 import { createDevState } from '../tunables/devState'
 
 import { createMapPipeline } from './mapPipeline'
+import { STARTUP_SLICES } from './startupBar'
 import { stubNameFace } from './testing/nameFaceStubs'
 import { AUTHORED_YEAR, META, TRIBE_YEAR, YEAR } from './testing/yearFixtures'
 
@@ -167,11 +168,8 @@ function build(over: Partial<MapPipelineDeps> = {}): {
     spawn: (): never => {
       throw new Error('no worker here')
     },
-    // The year's layers whole at once: the fade's own frames are `app/fadeIn`'s to test.
-    fadeIn: (set: (share: number) => void) => {
-      set(1)
-      return Promise.resolve()
-    },
+    // The page painted at once: the wait's own frames are core's `afterPaint`'s to test.
+    afterPaint: vi.fn(() => Promise.resolve()),
     isDisposed: () => false,
     assets: fakeAssets(),
     ...over,
@@ -214,10 +212,15 @@ describe('createMapPipeline', () => {
       expect(deps.sources.reliefSource).not.toBeNull()
     })
 
-    it('takes the splash down once there is a map to look at', async () => {
+    // ATLAS-333, the dev, 2026-11-08: the splash stays until the first map is wholly laid.
+    it('takes the splash down once, after the year, its names and the events are laid', async () => {
       const { deps, pipeline } = build()
       await pipeline.start()
       expect(asMock(deps.ui.dismissSplash)).toHaveBeenCalledTimes(1)
+      expect(Math.max(...asMock(deps.layers.rebuildEvents).mock.invocationCallOrder)).toBeLessThan(
+        firstCall(deps.ui.dismissSplash)
+      )
+      expect(firstCall(deps.layers.rebuildRelief)).toBeLessThan(firstCall(deps.ui.dismissSplash))
     })
   })
 
@@ -248,48 +251,68 @@ describe('createMapPipeline', () => {
       expect(Math.max(...events)).toBeGreaterThan(Math.max(...fills))
     })
 
-    // The dev, 2026-10-29: « la carte en relief, c'est bien qu'on l'ait d'abord. Et ensuite, tout apparaît d'un seul
-    // coup en fondu, avec la barre de chargement qui indique bien tout ce qui se passe ».
-    it('hides the year’s layers before it draws them, and fades them in once the events are in', async () => {
-      const fadeIn = vi.fn((set: (share: number) => void) => {
-        set(1)
-        return Promise.resolve()
-      })
-      const { deps, pipeline } = build({ fadeIn })
-      await pipeline.start()
-      const hidden = asMock(deps.layers.setReveal).mock.calls[0]
-      expect(hidden).toEqual([0])
-      expect(firstCall(deps.layers.setReveal)).toBeLessThan(firstCall(deps.layers.rebuildFills))
-      expect(Math.max(...asMock(deps.layers.rebuildEvents).mock.invocationCallOrder)).toBeLessThan(
-        firstCall(fadeIn)
-      )
-      expect(asMock(deps.layers.setReveal).mock.calls.at(-1)).toEqual([1])
-    })
-
-    it('keeps one bar open over the year, its names and the events, closed before the fade', async () => {
-      const fadeIn = vi.fn((set: (share: number) => void) => {
-        set(1)
-        return Promise.resolve()
-      })
-      const { deps, pipeline } = build({ fadeIn })
+    // ATLAS-333, the dev, 2026-11-08: one bar on the splash, from the first byte to the first map wholly laid.
+    it('keeps one bar open from the relief to the events, closed before the splash goes', async () => {
+      const { deps, pipeline } = build()
       await pipeline.start()
       const ended = Math.min(...asMock(deps.ui.progress.end).mock.invocationCallOrder)
       expect(asMock(deps.ui.progress.begin)).toHaveBeenCalledTimes(1)
-      expect(asMock(deps.ui.progress.report)).toHaveBeenCalledWith(
-        expect.any(Number),
-        FR('phaseEvents')
-      )
+      expect(asMock(deps.ui.progress.begin)).toHaveBeenCalledWith(FR('phaseTerrain'))
+      expect(firstCall(deps.ui.progress.begin)).toBeLessThan(firstCall(deps.layers.setTexture))
       expect(Math.max(...asMock(deps.layers.rebuildEvents).mock.invocationCallOrder)).toBeLessThan(
         ended
       )
-      expect(ended).toBeLessThan(Math.min(...fadeIn.mock.invocationCallOrder))
+      expect(ended).toBeLessThan(firstCall(deps.ui.dismissSplash))
     })
 
-    it('waits for the events before it fades the year in', async () => {
-      const content = deferred<{ version: number; events: []; cities: [] }>()
-      const fadeIn = vi.fn(() => Promise.resolve())
+    it('tells every step of an authored year’s opening in turn, the bar never going back', async () => {
+      stubNameFace()
       const { deps, pipeline } = build({
-        fadeIn,
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
+      })
+      await pipeline.start()
+      const calls = asMock(deps.ui.progress.report).mock.calls as [number, string][]
+      const steps = calls.map(([, label]) => label).filter((label, i, all) => label !== all[i - 1])
+      expect(steps).toEqual([
+        FR('phaseTerrain'),
+        FR('phaseBake'),
+        FR('phaseRelief'),
+        FR('loadingYear', { year: '1100' }),
+        FR('phaseCut'),
+        FR('phaseBorders'),
+        FR('phaseNames'),
+        FR('phaseEvents'),
+      ])
+      const fractions = calls.map(([fraction]) => fraction)
+      expect(fractions).toEqual([...fractions].sort((a, b) => a - b))
+      expect(fractions.at(-1)).toBe(1)
+    })
+
+    it('paints the relief’s step and the borders’ before each holds the page', async () => {
+      const { deps, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
+      })
+      await pipeline.start()
+      const paints = asMock(deps.afterPaint).mock.invocationCallOrder
+      const told = (label: string): number =>
+        asMock(deps.ui.progress.report).mock.invocationCallOrder[
+          (asMock(deps.ui.progress.report).mock.calls as [number, string][]).findIndex(
+            ([, said]) => said === label
+          )
+        ] ?? Infinity
+      const paintedAfter = (order: number): number =>
+        paints.find((paint) => paint > order) ?? Infinity
+      expect(paintedAfter(told(FR('phaseRelief')))).toBeLessThan(
+        firstCall(deps.layers.rebuildRelief)
+      )
+      expect(paintedAfter(told(FR('phaseBorders')))).toBeLessThan(
+        firstCall(deps.layers.rebuildFills)
+      )
+    })
+
+    it('waits for the events before the splash goes', async () => {
+      const content = deferred<{ version: number; events: []; cities: [] }>()
+      const { deps, pipeline } = build({
         assets: fakeAssets({ content: { load: () => content.promise } }),
       })
       const started = pipeline.start()
@@ -301,24 +324,22 @@ describe('createMapPipeline', () => {
         )
       })
       await flush()
-      expect(fadeIn).not.toHaveBeenCalled()
+      expect(asMock(deps.ui.dismissSplash)).not.toHaveBeenCalled()
       content.resolve({ version: CONTENT_FORMAT_VERSION, events: [], cities: [] })
       await started
-      expect(fadeIn).toHaveBeenCalledTimes(1)
+      expect(asMock(deps.ui.dismissSplash)).toHaveBeenCalledTimes(1)
     })
 
-    it('places the year’s names before it fades the year in', async () => {
+    it('places the year’s names before the splash goes', async () => {
       stubNameFace()
-      const fadeIn = vi.fn(() => Promise.resolve())
       const { deps, pipeline } = build({
-        fadeIn,
         assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
       })
       await pipeline.start()
-      // The names laid on the map: their layer rebuilt once taken off, once placed — both before the fade.
+      // The names laid on the map: their layer rebuilt once taken off, once placed — both before the splash goes.
       const names = asMock(deps.layers.rebuildNames).mock.invocationCallOrder
       expect([deps.sources.yearNames === null, names.length]).toEqual([false, 2])
-      expect(Math.max(...names)).toBeLessThan(firstCall(fadeIn))
+      expect(Math.max(...names)).toBeLessThan(firstCall(deps.ui.dismissSplash))
     })
 
     it('pins the events of the year drawn once a change of year has landed', async () => {
@@ -332,19 +353,14 @@ describe('createMapPipeline', () => {
       )
     })
 
-    it('draws a year changed later at once, under its own bar, with no fade', async () => {
-      const fadeIn = vi.fn((set: (share: number) => void) => {
-        set(1)
-        return Promise.resolve()
-      })
-      const { deps, pipeline } = build({ fadeIn })
+    it('draws a year changed later under its own bar, the splash long gone and not brought back', async () => {
+      const { deps, pipeline } = build()
       await pipeline.start()
-      const reveals = asMock(deps.layers.setReveal).mock.calls.length
       await pipeline.rebuildPolitical()
-      expect([fadeIn.mock.calls.length, asMock(deps.layers.setReveal).mock.calls.length]).toEqual([
-        1,
-        reveals,
-      ])
+      expect(asMock(deps.ui.progress.begin)).toHaveBeenLastCalledWith(
+        FR('loadingYear', { year: '1100' })
+      )
+      expect(asMock(deps.ui.dismissSplash)).toHaveBeenCalledTimes(1)
     })
 
     it('draws the rivers when they land', async () => {
@@ -706,7 +722,8 @@ describe('createMapPipeline', () => {
       const { deps, dev, pipeline } = build()
       dev.political.year = 1100
       await pipeline.start()
-      expect(asMock(deps.ui.progress.begin)).toHaveBeenCalledWith(
+      expect(asMock(deps.ui.progress.report)).toHaveBeenCalledWith(
+        expect.any(Number),
         FR('loadingYear', { year: '1100' })
       )
     })
@@ -767,6 +784,8 @@ describe('createMapPipeline', () => {
       await pipeline.start()
       expect(asMock(deps.ui.reportAssetFailure)).toHaveBeenCalledWith('regions', expect.anything())
       expect(asMock(deps.ui.progress.end)).toHaveBeenCalled()
+      // A degraded failure: the splash goes on the relief, the failure told over it (review QUAL-002, ATLAS-333).
+      expect(asMock(deps.ui.dismissSplash)).toHaveBeenCalledTimes(1)
     })
 
     it('still stands the events when the year cannot be fetched, under its failure', async () => {
@@ -802,6 +821,20 @@ describe('createMapPipeline', () => {
         expect.anything()
       )
       expect(asMock(deps.layers.rebuildRelief)).not.toHaveBeenCalled()
+      // Nothing behind it: the splash stays under the message, the bar closed (review QUAL-002, ATLAS-333).
+      expect(asMock(deps.ui.dismissSplash)).not.toHaveBeenCalled()
+      expect(asMock(deps.ui.progress.end)).toHaveBeenCalled()
+    })
+
+    // Review QUAL-002: s01's « the composition of the texture moves the bar row by row ».
+    it('moves the bar inside the texture’s composition, not only at its ends', async () => {
+      const { deps, pipeline } = build()
+      await pipeline.start()
+      const [from, to] = STARTUP_SLICES.texture
+      const inside = (asMock(deps.ui.progress.report).mock.calls as [number, string][]).filter(
+        ([fraction, label]) => label === FR('phaseBake') && fraction > from && fraction < to
+      )
+      expect(inside.length).toBeGreaterThan(0)
     })
 
     // The same check as the land mask: rivers cropped to other ground would slide off their valleys.
