@@ -18,11 +18,8 @@ import type { PlacedYearName } from '@europe-historical-atlas/core/pipeline/year
 /** One cell, the whole sheet, half an em wide. */
 const CELL: GlyphCell = { u0: 0, u1: 1, v0: 0, v1: 1, advance: 0.5 }
 
-/** The steps of a tile of the names below, all of size 2. */
-const STEPS = tileSteps(2)
-
-/** Vertices per tile. */
-const VERTICES = (STEPS + 1) ** 2
+/** Vertices per tile: its four corners, the ground under it sampled finer (ATLAS-333). */
+const VERTICES = 4
 
 /**
  * A name of one letter, straight, at a place of the grid.
@@ -64,7 +61,7 @@ function input(names: PlacedYearName[]): NameGeometryInput {
 }
 
 describe('tileSteps', () => {
-  it('cuts a large letter finer than a small one, about one vertex per cell of the relief', () => {
+  it('samples the ground under a large letter finer than under a small one, about once per cell of the relief', () => {
     expect(tileSteps(4)).toBeLessThan(tileSteps(20))
     expect(tileSteps(20)).toBe(30)
   })
@@ -76,10 +73,28 @@ describe('tileSteps', () => {
 
 describe('nameGeometry', () => {
   describe('happy path', () => {
-    it('lays one tile per letter, cut in steps', () => {
+    it('lays one tile per letter, its four corners and two triangles', () => {
       const geometry = nameGeometry(input([name('AA')]))
       expect(geometry.getAttribute('position').count).toBe(2 * VERTICES)
-      expect(geometry.getIndex()?.count).toBe(2 * STEPS * STEPS * 6)
+      expect(geometry.getIndex()?.count).toBe(2 * 6)
+    })
+
+    // Review QUAL-002: each tile's two triangles cover its own four corners — the second tile's offset included.
+    it('ties each tile’s two triangles to its own corners: foot-left, foot-right, top-left, top-right', () => {
+      const index = nameGeometry(input([name('AA')])).getIndex()
+      expect(Array.from(index?.array ?? [])).toEqual([0, 1, 2, 1, 3, 2, 4, 5, 6, 5, 7, 6])
+    })
+
+    it('cuts each corner from its own corner of the cell', () => {
+      const uv = nameGeometry(input([name('A')])).getAttribute('uv')
+      const corners = Array.from({ length: 4 }, (_, at) => [uv.getX(at), uv.getY(at)])
+      // Foot-left, foot-right, top-left, top-right; the sheet flipped on upload, its top at the texture's top.
+      expect(corners).toEqual([
+        [0, 0],
+        [1, 0],
+        [0, 1],
+        [1, 1],
+      ])
     })
 
     // Positions are stored as Float32: five decimals, far below a cell.
@@ -113,6 +128,24 @@ describe('nameGeometry', () => {
       expect(new Set(second).size).toBe(1)
       // The first name stands further east than the second, on higher ground.
       expect(first[0]).toBeGreaterThan(second[0] ?? Number.NaN)
+    })
+
+    // ATLAS-333: four corners, but the median of the ground sampled finely under the letter, as the grid gave it.
+    it('lays a name at the median of the ground sampled finely under it, not of its four corners', () => {
+      // A letter of size 4, sampled on a grid of 6 steps a side: 49 samples, 25 inside the tile, on a plateau of 10;
+      // its edge, its four corners with it, on ground at 0.
+      const half = (CELL.advance / 2 + SHEET_PAD) * 4
+      const big = { ...name('A'), size: 4 }
+      const position = nameGeometry({
+        ...input([big]),
+        draped: (u, v) => {
+          const [x, z] = [u * 20, v * 20]
+          const inside = Math.abs(x - 10) < half - 0.01 && z > 10 - 3 + 0.01 && z < 10 + 1 - 0.01
+          return [x, inside ? 10 : 0, z]
+        },
+      }).getAttribute('position')
+      expect(tileSteps(4)).toBe(6)
+      expect(position.getY(0)).toBe(10)
     })
 
     it('gives every vertex the edge’s width in ems of its own name, the same on the map for all', () => {

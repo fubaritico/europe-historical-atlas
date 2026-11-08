@@ -21,22 +21,23 @@ import type { NameSheet } from '../../../sources/mapSources'
 import type { WorldPoint } from '../../relief/drapeProjection'
 import type { PlacedYearName } from '@europe-historical-atlas/core/pipeline/yearNames'
 
-/** The fewest steps a tile is cut into on each side — a small letter's. */
+/** The fewest steps the ground under a tile is sampled at on each side — a small letter's. */
 export const MIN_TILE_STEPS = 3
 
-/** The most — a letter of the largest names, kept to a few thousand vertices. */
+/** The most — a letter of the largest names, kept to a few thousand samples. */
 export const MAX_TILE_STEPS = 48
 
 /**
- * Steps a tile is cut into per unit of the name's size, on each side: about one vertex per cell of the relief, which
- * has some 1.07 cells per cell of the names' grid (1280 segments to 1200 cells) and a tile some 1.4 sizes tall.
- * Cut coarser, the relief rises between a tile's vertices and covers its lower part: the tails of Fondamento's « g »
- * and « y » vanished under the plain of Hungary at three steps a tile (seen on the atlas, 2026-10-28).
+ * Steps the ground under a tile is sampled at per unit of the name's size, on each side: about one sample per cell of
+ * the relief, which has some 1.07 cells per cell of the names' grid (1280 segments to 1200 cells) and a tile some 1.4
+ * sizes tall. They were the tile's own vertices until 2026-11-08 (ATLAS-333) — from when a name followed the relief,
+ * and its letters' tails vanished under the plain of Hungary at three steps (2026-10-28); since names lie flat, they
+ * only sample the ground for its median, which they keep as it was.
  */
 const STEPS_PER_SIZE = 1.5
 
 /**
- * How many steps a letter's tile is cut into on each side, so its vertices follow the ground as the relief's do.
+ * How many steps the ground under a letter's tile is sampled at on each side, for its name's median height.
  * @param size - the name's size, in cells of the names' grid
  * @returns the steps
  */
@@ -78,6 +79,8 @@ interface Buffers {
   /** Each vertex's edge width, in ems of its own name: the map's fixed width over the name's size. */
   readonly halos: number[]
   readonly indices: number[]
+  /** The ground's heights sampled under the name being written, for its median — emptied at each name. */
+  readonly ground: number[]
 }
 
 /** One letter's tile: where it stands, how it is turned, how large, and its cell on the sheet. */
@@ -95,8 +98,13 @@ interface Tile {
 }
 
 /**
- * Write one letter's tile: a grid of {@link tileSteps} steps a side, from its foot to its top across its line,
- * from its left pad to its right along it.
+ * Write one letter's tile: **four corners**, from its foot to its top across its line, from its left pad to its right
+ * along it — and the ground under it sampled on a grid of {@link tileSteps} steps a side, for its name's median.
+ *
+ * Four corners draw the very tile the grid drew (ATLAS-333): its name is laid flat at one height (`flatten`), and its
+ * corners' `x`, `z` and texture coordinates are linear across it, so the grid's inner vertices lay on its plane and
+ * changed nothing on screen. They were 574,000 for 1200's names, ~180 ms of the page in Chrome on a change of year
+ * (measured 2026-11-08); the samples alone keep the median the grid gave.
  * @param tile - the letter
  * @param input - the sheet's reach, the grid and the projection
  * @param out - the buffers, extended
@@ -111,40 +119,40 @@ function writeTile(tile: Tile, input: NameGeometryInput, out: Buffers): void {
   const [ux, uy] = [Math.sin(angle), -Math.cos(angle)]
   const first = out.positions.length / 3
   const steps = tileSteps(size)
+  const halo = Math.min(HALO_MAX_EM, input.haloCells / size)
   for (let row = 0; row <= steps; row += 1) {
     const t = row / steps
     const across = foot + (top - foot) * t
+    const edgeRow = row === 0 || row === steps
     for (let column = 0; column <= steps; column += 1) {
       const s = column / steps
       const along = -half + 2 * half * s
       const gx = x + along * dx + across * ux
       const gy = y + along * dy + across * uy
-      out.positions.push(...input.draped(gx / (input.grid.width - 1), gy / (input.grid.height - 1)))
+      const [wx, wy, wz] = input.draped(gx / (input.grid.width - 1), gy / (input.grid.height - 1))
+      out.ground.push(wy)
+      if (!edgeRow || (column !== 0 && column !== steps)) continue
+      // A corner: foot-left, foot-right, top-left, top-right, in that order.
+      out.positions.push(wx, wy, wz)
       // The sheet is uploaded flipped (three's default): its top row is at the texture's top, `1`.
       out.uvs.push(cell.u0 + (cell.u1 - cell.u0) * s, 1 - (cell.v1 + (cell.v0 - cell.v1) * t))
-      out.halos.push(Math.min(HALO_MAX_EM, input.haloCells / size))
+      out.halos.push(halo)
     }
   }
-  const side = steps + 1
-  for (let row = 0; row < steps; row += 1)
-    for (let column = 0; column < steps; column += 1) {
-      const at = first + row * side + column
-      out.indices.push(at, at + 1, at + side, at + 1, at + side + 1, at + side)
-    }
+  out.indices.push(first, first + 1, first + 2, first + 1, first + 3, first + 2)
 }
 
 /**
- * Lay a name's vertices flat at the median of their heights — the ground's, where its tiles were sampled densely
- * enough to follow it.
+ * Lay a name's vertices flat at the median of the ground sampled under it (`writeTile`'s grid of samples).
  * @param positions - every vertex's `x, y, z`, the name's from `first` on — changed in place
  * @param first - where the name's vertices start, in the array
+ * @param ground - the heights sampled under the name, emptied once read
  */
-function flatten(positions: number[], first: number): void {
-  const heights: number[] = []
-  for (let at = first + 1; at < positions.length; at += 3) heights.push(positions[at] ?? Number.NaN)
-  heights.sort((a, b) => a - b)
-  const median = heights[Math.floor(heights.length / 2)] ?? Number.NaN
+function flatten(positions: number[], first: number, ground: number[]): void {
+  ground.sort((a, b) => a - b)
+  const median = ground[Math.floor(ground.length / 2)] ?? Number.NaN
   for (let at = first + 1; at < positions.length; at += 3) positions[at] = median
+  ground.length = 0
 }
 
 /**
@@ -155,7 +163,7 @@ function flatten(positions: number[], first: number): void {
  *   defect, and a tile cut from the wrong cell would write another letter
  */
 export function nameGeometry(input: NameGeometryInput): BufferGeometry {
-  const out: Buffers = { positions: [], uvs: [], halos: [], indices: [] }
+  const out: Buffers = { positions: [], uvs: [], halos: [], indices: [], ground: [] }
   for (const name of input.names) {
     const first = out.positions.length
     Array.from(name.text).forEach((character, at) => {
@@ -178,7 +186,7 @@ export function nameGeometry(input: NameGeometryInput): BufferGeometry {
       for (const place of name.leader)
         writeTile({ ...place, size: name.size, cell: dot }, input, out)
     }
-    flatten(out.positions, first)
+    flatten(out.positions, first, out.ground)
   }
   const geometry = new BufferGeometry()
   geometry.setAttribute('position', new Float32BufferAttribute(out.positions, 3))
