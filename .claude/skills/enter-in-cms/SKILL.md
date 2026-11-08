@@ -141,4 +141,7 @@ that exists is reused (its id), never created again.
   say it to the dev, who adds it. One is misspelt in his data (« pelrinage »): use its id, never re-type the name.
 - **A change the dev made by hand in the admin is his**: an `update` over it is said to him before it is made.
 - **He dictates by voice**: a garbled name is a dictation error — say what you understood before entering it.
+- **A city entered is not shown in the atlas** (CMS-391, 2026-11-08): « Afficher la ville dans l'atlas » (`showInAtlas`)
+  is unticked by default, and only the dev ticks it — the historian's cities serve the Cartographer's borders. The MCP
+  refuses the box (`Invalid input at showInAtlas`, measured 08/11): never try to tick it that way, say it to the dev.
 - **Reply in French**, the records' French fields in French, never franglais.
