@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "events": [
     {
       "id": "11",
@@ -783,6 +783,75 @@
   ],
   "cities": [
     {
+      "id": "341",
+      "place": {
+        "id": "349",
+        "name": {
+          "fr": "Médine",
+          "en": null
+        },
+        "lon": 39.61,
+        "lat": 24.47,
+        "wikidata": "Q35484",
+        "existsFrom": {
+          "year": -850,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": true,
+          "margin": 50
+        },
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "city",
+      "reasons": [],
+      "testimonies": [],
+      "holder": null,
+      "showInAtlas": false
+    },
+    {
+      "id": "340",
+      "place": {
+        "id": "348",
+        "name": {
+          "fr": "La mecque",
+          "en": null
+        },
+        "lon": 39.826111111111,
+        "lat": 21.4225,
+        "wikidata": "Q5806",
+        "existsFrom": null,
+        "existsTo": null
+      },
+      "date": {
+        "kind": "instant",
+        "at": {
+          "year": 1100,
+          "month": null,
+          "day": null,
+          "calendar": null,
+          "circa": false,
+          "margin": null
+        }
+      },
+      "importance": "capital",
+      "reasons": [],
+      "testimonies": [],
+      "holder": null,
+      "showInAtlas": false
+    },
+    {
       "id": "339",
       "place": {
         "id": "347",
@@ -844,7 +913,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "338",
@@ -901,6 +971,36 @@
           "subject": "holder",
           "holder": {
             "name": "Almoravides — Raymond échoue à la reprendre en novembre 1094",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "306",
+            "title": "España Sagrada, t. XX — Historia Compostelana",
+            "author": "Enrique Flórez (éd.) ; écrite par trois chanoines de Saint-Jacques",
+            "url": "https://archive.org/details/espaasagradath20fluoft"
+          },
+          "where": "livre II, ch. 53, p. 360 — l'expédition du comte Raymond, avant l'épiscopat de Diego Gelmírez (date de la marge illisible dans l'OCR)",
+          "quotation": "Sarraceni colle&is undique viribus, Chrifticolarum Caftra prope Olisbonam circumdantes",
+          "subject": "holder",
+          "holder": {
+            "name": "Musulmane — les Sarrasins encerclent le camp chrétien près de Lisbonne",
+            "wikidata": "Q75613"
+          }
+        },
+        {
+          "source": {
+            "id": "306",
+            "title": "España Sagrada, t. XX — Historia Compostelana",
+            "author": "Enrique Flórez (éd.) ; écrite par trois chanoines de Saint-Jacques",
+            "url": "https://archive.org/details/espaasagradath20fluoft"
+          },
+          "where": "livre II, ch. 21, p. 301 (marge : 1120)",
+          "quotation": "ATemporibus A. Regís bonac memoria Sarraceni ab Wfpali , ab Almario, , Olisbona, & á ceteris locis mari finitimis navigio in Galkcciam venire confueverant",
+          "subject": "holder",
+          "holder": {
+            "name": "Musulmane du temps d'Alphonse VI — ses Sarrasins pillent la Galice par la mer",
             "wikidata": "Q75613"
           }
         },
@@ -968,7 +1068,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "337",
@@ -1092,7 +1193,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "336",
@@ -1171,7 +1273,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "335",
@@ -1235,7 +1338,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "334",
@@ -1299,7 +1403,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "333",
@@ -1393,7 +1498,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "332",
@@ -1457,7 +1563,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "331",
@@ -1551,7 +1658,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "330",
@@ -1660,7 +1768,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "329",
@@ -1709,7 +1818,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "328",
@@ -1788,7 +1898,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "327",
@@ -1882,7 +1993,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "326",
@@ -1961,7 +2073,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "325",
@@ -2040,7 +2153,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "324",
@@ -2149,7 +2263,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "323",
@@ -2243,7 +2358,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "322",
@@ -2307,7 +2423,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "321",
@@ -2386,7 +2503,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "320",
@@ -2450,7 +2568,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "319",
@@ -2529,7 +2648,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "318",
@@ -2593,7 +2713,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "317",
@@ -2702,7 +2823,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "316",
@@ -2781,7 +2903,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "315",
@@ -2890,7 +3013,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "314",
@@ -2969,7 +3093,8 @@
       "holder": {
         "name": "Zachlumie",
         "wikidata": "Q1311704"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "313",
@@ -3018,7 +3143,8 @@
       "holder": {
         "name": "Royaume de Dioclée",
         "wikidata": "Q1252942"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "312",
@@ -3097,7 +3223,8 @@
       "holder": {
         "name": "Empire byzantin",
         "wikidata": "Q12544"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "311",
@@ -3176,7 +3303,8 @@
       "holder": {
         "name": "Royaume de Dioclée",
         "wikidata": "Q1252942"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "310",
@@ -3225,7 +3353,8 @@
       "holder": {
         "name": "Royaume de Dioclée",
         "wikidata": "Q1252942"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "309",
@@ -3289,7 +3418,8 @@
       "holder": {
         "name": "Royaume de Dioclée",
         "wikidata": "Q1252942"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "308",
@@ -3383,7 +3513,8 @@
       "holder": {
         "name": "Royaume de Dioclée",
         "wikidata": "Q1252942"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "307",
@@ -3462,7 +3593,8 @@
       "holder": {
         "name": "Royaume de Hongrie",
         "wikidata": "Q171150"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "306",
@@ -3526,7 +3658,8 @@
       "holder": {
         "name": "Empire byzantin",
         "wikidata": "Q12544"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "305",
@@ -3590,7 +3723,8 @@
       "holder": {
         "name": "Empire byzantin",
         "wikidata": "Q12544"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "304",
@@ -3654,7 +3788,8 @@
       "holder": {
         "name": "Empire byzantin",
         "wikidata": "Q12544"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "303",
@@ -3733,7 +3868,8 @@
       "holder": {
         "name": "Empire byzantin",
         "wikidata": "Q12544"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "302",
@@ -3812,7 +3948,8 @@
       "holder": {
         "name": "Empire byzantin",
         "wikidata": "Q12544"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "301",
@@ -3861,7 +3998,8 @@
       "holder": {
         "name": "Empire byzantin",
         "wikidata": "Q12544"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "300",
@@ -3940,7 +4078,8 @@
       "holder": {
         "name": "Empire byzantin",
         "wikidata": "Q12544"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "299",
@@ -4004,7 +4143,8 @@
       "holder": {
         "name": "Grande principauté de Serbie (Rascie)",
         "wikidata": "Q1311990"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "298",
@@ -4098,7 +4238,8 @@
       "holder": {
         "name": "Grande principauté de Serbie (Rascie)",
         "wikidata": "Q1311990"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "297",
@@ -4162,7 +4303,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "296",
@@ -4226,7 +4368,8 @@
       "holder": {
         "name": "Seigneurie de Valence",
         "wikidata": "Q15714699"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "295",
@@ -4275,7 +4418,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "294",
@@ -4339,7 +4483,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "293",
@@ -4403,7 +4548,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "292",
@@ -4452,7 +4598,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "291",
@@ -4501,7 +4648,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "290",
@@ -4565,7 +4713,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "289",
@@ -4644,7 +4793,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "288",
@@ -4723,7 +4873,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "287",
@@ -4772,7 +4923,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "286",
@@ -4821,7 +4973,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "285",
@@ -4870,7 +5023,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "284",
@@ -4934,7 +5088,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "283",
@@ -5013,7 +5168,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "282",
@@ -5077,7 +5233,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "281",
@@ -5156,7 +5313,8 @@
       "holder": {
         "name": "Taïfa de Tortosa",
         "wikidata": "Q605930"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "280",
@@ -5205,7 +5363,8 @@
       "holder": {
         "name": "Taïfa d'Albarracín",
         "wikidata": "Q2060937"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "279",
@@ -5299,7 +5458,8 @@
       "holder": {
         "name": "Taïfa de Molina",
         "wikidata": "Q2232777"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "278",
@@ -5348,7 +5508,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "277",
@@ -5397,7 +5558,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "276",
@@ -5476,7 +5638,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "275",
@@ -5555,7 +5718,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "274",
@@ -5694,7 +5858,8 @@
       "holder": {
         "name": "Taïfa de Tortosa",
         "wikidata": "Q605930"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "273",
@@ -5773,7 +5938,8 @@
       "holder": {
         "name": "Taïfa de Tortosa",
         "wikidata": "Q605930"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "272",
@@ -5867,7 +6033,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "271",
@@ -5931,7 +6098,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "270",
@@ -5995,7 +6163,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "269",
@@ -6059,7 +6228,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "268",
@@ -6138,7 +6308,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "267",
@@ -6202,7 +6373,8 @@
       "holder": {
         "name": "Taïfa de Lérida",
         "wikidata": "Q2166417"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "266",
@@ -6251,7 +6423,8 @@
       "holder": {
         "name": "Taïfa de Lérida",
         "wikidata": "Q2166417"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "265",
@@ -6315,7 +6488,8 @@
       "holder": {
         "name": "Taïfa de Lérida",
         "wikidata": "Q2166417"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "264",
@@ -6379,7 +6553,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "263",
@@ -6443,7 +6618,8 @@
       "holder": {
         "name": "Taïfa de Lérida",
         "wikidata": "Q2166417"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "262",
@@ -6507,7 +6683,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "261",
@@ -6586,7 +6763,8 @@
       "holder": {
         "name": "Comté de Pallars Jussà",
         "wikidata": "Q2068891"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "260",
@@ -6665,7 +6843,8 @@
       "holder": {
         "name": "Comté d'Urgell",
         "wikidata": "Q1514510"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "259",
@@ -6729,7 +6908,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "258",
@@ -6808,7 +6988,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "257",
@@ -6884,7 +7065,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "256",
@@ -6948,7 +7130,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "255",
@@ -7012,7 +7195,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "254",
@@ -7076,7 +7260,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "253",
@@ -7170,7 +7355,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "252",
@@ -7249,7 +7435,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "251",
@@ -7328,7 +7515,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "250",
@@ -7407,7 +7595,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "249",
@@ -7495,7 +7684,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "248",
@@ -7589,7 +7779,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "247",
@@ -7683,7 +7874,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "246",
@@ -7762,7 +7954,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "245",
@@ -7856,7 +8049,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "244",
@@ -7920,7 +8114,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "243",
@@ -7984,7 +8179,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "242",
@@ -8063,7 +8259,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "241",
@@ -8127,7 +8324,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "240",
@@ -8206,7 +8404,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "239",
@@ -8270,7 +8469,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "238",
@@ -8319,7 +8519,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "237",
@@ -8398,7 +8599,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "236",
@@ -8462,7 +8664,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "235",
@@ -8541,7 +8744,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "234",
@@ -8620,7 +8824,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "233",
@@ -8699,7 +8904,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "232",
@@ -8793,7 +8999,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "231",
@@ -8857,7 +9064,8 @@
       "holder": {
         "name": "Royaume de Castille (Alphonse VI)",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "230",
@@ -8921,7 +9129,8 @@
       "holder": {
         "name": "Royaume de Castille (Alphonse VI)",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "229",
@@ -9015,7 +9224,8 @@
       "holder": {
         "name": "Royaume de Castille (Alphonse VI)",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "228",
@@ -9094,7 +9304,8 @@
       "holder": {
         "name": "Royaume de Castille (Alphonse VI)",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "227",
@@ -9158,7 +9369,8 @@
       "holder": {
         "name": "Royaume de Castille (Alphonse VI)",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "226",
@@ -9237,7 +9449,8 @@
       "holder": {
         "name": "Royaume de Castille (Alphonse VI)",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "225",
@@ -9316,7 +9529,8 @@
       "holder": {
         "name": "Royaume de Castille (Alphonse VI)",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "224",
@@ -9425,7 +9639,8 @@
       "holder": {
         "name": "Royaume de Pampelune (Pierre Ier d'Aragon)",
         "wikidata": "Q3446210"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "223",
@@ -9489,7 +9704,8 @@
       "holder": {
         "name": "Royaume de Pampelune (Pierre Ier d'Aragon)",
         "wikidata": "Q3446210"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "222",
@@ -9553,7 +9769,8 @@
       "holder": {
         "name": "Royaume de Pampelune (Pierre Ier d'Aragon)",
         "wikidata": "Q3446210"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "221",
@@ -9632,7 +9849,8 @@
       "holder": {
         "name": "Royaume de Pampelune (Pierre Ier d'Aragon)",
         "wikidata": "Q3446210"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "220",
@@ -9711,7 +9929,8 @@
       "holder": {
         "name": "Royaume de Pampelune (Pierre Ier d'Aragon)",
         "wikidata": "Q3446210"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "219",
@@ -9790,7 +10009,8 @@
       "holder": {
         "name": "Royaume de Pampelune (Pierre Ier d'Aragon)",
         "wikidata": "Q3446210"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "218",
@@ -9869,7 +10089,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "217",
@@ -9933,7 +10154,8 @@
       "holder": {
         "name": "Royaume d'Aragon (Pierre Ier)",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "216",
@@ -10012,7 +10234,8 @@
       "holder": {
         "name": "Royaume de Pampelune (Pierre Ier d'Aragon)",
         "wikidata": "Q3446210"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "215",
@@ -10076,7 +10299,8 @@
       "holder": {
         "name": "Royaume de Pampelune (Pierre Ier d'Aragon)",
         "wikidata": "Q3446210"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "214",
@@ -10140,7 +10364,8 @@
       "holder": {
         "name": "Royaume de Pampelune (Pierre Ier d'Aragon)",
         "wikidata": "Q3446210"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "213",
@@ -10249,7 +10474,8 @@
       "holder": {
         "name": "Royaume de Pampelune (Pierre Ier d'Aragon)",
         "wikidata": "Q3446210"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "212",
@@ -10313,7 +10539,8 @@
       "holder": {
         "name": "Comté de Cerdagne",
         "wikidata": "Q652275"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "211",
@@ -10377,7 +10604,8 @@
       "holder": {
         "name": "Comté de Cerdagne",
         "wikidata": "Q652275"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "210",
@@ -10456,7 +10684,8 @@
       "holder": {
         "name": "Comté de Cerdagne",
         "wikidata": "Q652275"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "209",
@@ -10535,7 +10764,8 @@
       "holder": {
         "name": "Vicomté de Fenouillèdes (sous le comté de Besalú)",
         "wikidata": "Q3556991"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "208",
@@ -10599,7 +10829,8 @@
       "holder": {
         "name": "Comté de Besalú",
         "wikidata": "Q1541642"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "207",
@@ -10663,7 +10894,8 @@
       "holder": {
         "name": "Comté de Comminges",
         "wikidata": "Q13406636"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "206",
@@ -10742,7 +10974,8 @@
       "holder": {
         "name": "Comté de Foix (le Couserans)",
         "wikidata": "Q1481436"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "205",
@@ -10791,7 +11024,8 @@
       "holder": {
         "name": "Comté de Barcelone",
         "wikidata": "Q1233672"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "204",
@@ -10870,7 +11104,8 @@
       "holder": {
         "name": "Taïfa de Tortosa",
         "wikidata": "Q605930"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "203",
@@ -10934,7 +11169,8 @@
       "holder": {
         "name": "Comté de Barcelone",
         "wikidata": "Q1233672"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "202",
@@ -10983,7 +11219,8 @@
       "holder": {
         "name": "Comté de Barcelone",
         "wikidata": "Q1233672"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "201",
@@ -11032,7 +11269,8 @@
       "holder": {
         "name": "Comté de Barcelone",
         "wikidata": "Q1233672"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "200",
@@ -11096,7 +11334,8 @@
       "holder": {
         "name": "Comté de Barcelone",
         "wikidata": "Q1233672"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "199",
@@ -11145,7 +11384,8 @@
       "holder": {
         "name": "Comté d'Urgell",
         "wikidata": "Q1514510"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "198",
@@ -11224,7 +11464,8 @@
       "holder": {
         "name": "Taïfa de Lérida",
         "wikidata": "Q2166417"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "197",
@@ -11288,7 +11529,8 @@
       "holder": {
         "name": "Royaume d'Aragon",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "196",
@@ -11397,7 +11639,8 @@
       "holder": {
         "name": "Royaume d'Aragon",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "195",
@@ -11461,7 +11704,8 @@
       "holder": {
         "name": "Royaume d'Aragon",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "194",
@@ -11555,7 +11799,8 @@
       "holder": {
         "name": "Taïfa de Lérida",
         "wikidata": "Q2166417"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "193",
@@ -11709,7 +11954,8 @@
       "holder": {
         "name": "Taïfa de Lérida",
         "wikidata": "Q2166417"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "192",
@@ -11773,7 +12019,8 @@
       "holder": {
         "name": "Taïfa de Lérida",
         "wikidata": "Q2166417"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "191",
@@ -11867,7 +12114,8 @@
       "holder": {
         "name": "Taïfa de Lérida",
         "wikidata": "Q2166417"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "190",
@@ -11961,7 +12209,8 @@
       "holder": {
         "name": "Comté de Barcelone",
         "wikidata": "Q1233672"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "189",
@@ -12040,7 +12289,8 @@
       "holder": {
         "name": "Royaume d'Aragon",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "188",
@@ -12104,7 +12354,8 @@
       "holder": {
         "name": "Royaume d'Aragon",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "187",
@@ -12213,7 +12464,8 @@
       "holder": {
         "name": "Royaume d'Aragon",
         "wikidata": "Q199442"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "186",
@@ -12307,7 +12559,8 @@
       "holder": {
         "name": "Comté de Pallars Jussà",
         "wikidata": "Q2068891"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "185",
@@ -12401,7 +12654,8 @@
       "holder": {
         "name": "Comté de Pallars Sobirà",
         "wikidata": "Q2069303"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "184",
@@ -12495,7 +12749,8 @@
       "holder": {
         "name": "Comté d'Urgell",
         "wikidata": "Q1514510"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "183",
@@ -12604,7 +12859,8 @@
       "holder": {
         "name": "Aucun — ville abandonnée, entre chrétiens et musulmans",
         "wikidata": null
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "182",
@@ -12653,7 +12909,8 @@
       "holder": {
         "name": "Comté de Barcelone",
         "wikidata": "Q1233672"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "181",
@@ -12702,7 +12959,8 @@
       "holder": {
         "name": "Comté de Barcelone",
         "wikidata": "Q1233672"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "180",
@@ -12766,7 +13024,8 @@
       "holder": {
         "name": "Comté d'Urgell",
         "wikidata": "Q1514510"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "179",
@@ -12842,7 +13101,8 @@
       "holder": {
         "name": "Vicomté de Cardona",
         "wikidata": "Q4110986"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "178",
@@ -12951,7 +13211,8 @@
       "holder": {
         "name": "Comté de Cerdagne",
         "wikidata": "Q652275"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "177",
@@ -13027,7 +13288,8 @@
       "holder": {
         "name": "Comté de Barcelone",
         "wikidata": "Q1233672"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "176",
@@ -13151,7 +13413,8 @@
       "holder": {
         "name": "Comté de Barcelone",
         "wikidata": "Q1233672"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "175",
@@ -13260,7 +13523,8 @@
       "holder": {
         "name": "Comté de Cerdagne",
         "wikidata": "Q652275"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "174",
@@ -13378,7 +13642,8 @@
       "holder": {
         "name": "Comté de Barcelone",
         "wikidata": "Q1233672"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "173",
@@ -13457,7 +13722,8 @@
       "holder": {
         "name": "Comté de Besalú",
         "wikidata": "Q1541642"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "172",
@@ -13566,7 +13832,8 @@
       "holder": {
         "name": "Comté de Barcelone",
         "wikidata": "Q1233672"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "171",
@@ -13687,7 +13954,8 @@
       "holder": {
         "name": "Comté de Besalú",
         "wikidata": "Q1541642"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "170",
@@ -13751,7 +14019,8 @@
       "holder": {
         "name": "Comté d'Empúries",
         "wikidata": "Q1541699"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "169",
@@ -13857,7 +14126,8 @@
       "holder": {
         "name": "Comté d'Empúries",
         "wikidata": "Q1541699"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "168",
@@ -13921,7 +14191,8 @@
       "holder": {
         "name": "Comté d'Empúries",
         "wikidata": "Q1541699"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "167",
@@ -14012,7 +14283,8 @@
       "holder": {
         "name": "Comté de Roussillon",
         "wikidata": "Q1541813"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "166",
@@ -14121,7 +14393,8 @@
       "holder": {
         "name": "Comté de Roussillon",
         "wikidata": "Q1541813"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "165",
@@ -14170,7 +14443,8 @@
       "holder": {
         "name": "Comté de Flandre",
         "wikidata": "Q157070"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "164",
@@ -14234,7 +14508,8 @@
       "holder": {
         "name": "Famille d'Avesnes",
         "wikidata": "Q574503"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "163",
@@ -14298,7 +14573,8 @@
       "holder": {
         "name": "Famille d'Avesnes",
         "wikidata": "Q574503"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "162",
@@ -14362,7 +14638,8 @@
       "holder": {
         "name": "Comté de Flandre",
         "wikidata": "Q157070"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "161",
@@ -14426,7 +14703,8 @@
       "holder": {
         "name": "Comté de Champagne",
         "wikidata": "Q546266"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "160",
@@ -14490,7 +14768,8 @@
       "holder": {
         "name": "Maison de Grandpré",
         "wikidata": "Q109037396"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "159",
@@ -14539,7 +14818,8 @@
       "holder": {
         "name": "Comté de Bourgogne",
         "wikidata": "Q642314"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "158",
@@ -14603,7 +14883,8 @@
       "holder": {
         "name": "Maison de Vienne",
         "wikidata": "Q22683444"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "157",
@@ -14667,7 +14948,8 @@
       "holder": {
         "name": "Abbaye Saint-Philibert de Tournus",
         "wikidata": "Q456181"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "156",
@@ -14716,7 +14998,8 @@
       "holder": {
         "name": "Sires de Bâgé",
         "wikidata": "Q136540431"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "155",
@@ -14780,7 +15063,8 @@
       "holder": {
         "name": "Sires de Bâgé",
         "wikidata": "Q136540431"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "154",
@@ -14829,7 +15113,8 @@
       "holder": {
         "name": "Groenland norrois",
         "wikidata": "Q16488964"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "153",
@@ -14878,7 +15163,8 @@
       "holder": {
         "name": "Groenland norrois",
         "wikidata": "Q16488964"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "152",
@@ -14927,7 +15213,8 @@
       "holder": {
         "name": "Comté de Provence",
         "wikidata": "Q2991382"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "151",
@@ -14991,7 +15278,8 @@
       "holder": {
         "name": "Comté de Provence",
         "wikidata": "Q2991382"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "150",
@@ -15040,7 +15328,8 @@
       "holder": {
         "name": "Comté de Provence",
         "wikidata": "Q2991382"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "149",
@@ -15089,7 +15378,8 @@
       "holder": {
         "name": "Comté de Provence",
         "wikidata": "Q2991382"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "148",
@@ -15138,7 +15428,8 @@
       "holder": {
         "name": "Comté de Provence",
         "wikidata": "Q2991382"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "147",
@@ -15187,7 +15478,8 @@
       "holder": {
         "name": "Uzège",
         "wikidata": null
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "146",
@@ -15236,7 +15528,8 @@
       "holder": {
         "name": "Comté de Provence",
         "wikidata": "Q2991382"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "145",
@@ -15285,7 +15578,8 @@
       "holder": {
         "name": "Saint-Empire romain germanique",
         "wikidata": "Q12548"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "144",
@@ -15334,7 +15628,8 @@
       "holder": {
         "name": "Royaume de France",
         "wikidata": "Q70972"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "143",
@@ -15383,7 +15678,8 @@
       "holder": {
         "name": "Saint-Empire romain germanique",
         "wikidata": "Q12548"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "142",
@@ -15432,7 +15728,8 @@
       "holder": {
         "name": "Saint-Empire romain germanique",
         "wikidata": "Q12548"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "141",
@@ -15496,7 +15793,8 @@
       "holder": {
         "name": "Saint-Empire romain germanique",
         "wikidata": "Q12548"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "140",
@@ -15545,7 +15843,8 @@
       "holder": {
         "name": "Uzège",
         "wikidata": null
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "139",
@@ -15594,7 +15893,8 @@
       "holder": {
         "name": "Vicomtes Trencavel",
         "wikidata": null
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "138",
@@ -15643,7 +15943,8 @@
       "holder": {
         "name": "Comté de Forez",
         "wikidata": "Q16543131"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "137",
@@ -15692,7 +15993,8 @@
       "holder": {
         "name": "Duché de Bourgogne",
         "wikidata": "Q4712"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "136",
@@ -15741,7 +16043,8 @@
       "holder": {
         "name": "Comté de Bourgogne",
         "wikidata": "Q642314"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "135",
@@ -15771,7 +16074,8 @@
       "importance": "city",
       "reasons": [],
       "testimonies": [],
-      "holder": null
+      "holder": null,
+      "showInAtlas": false
     },
     {
       "id": "134",
@@ -15820,7 +16124,8 @@
       "holder": {
         "name": "Seigneurie de Joinville",
         "wikidata": null
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "133",
@@ -15869,7 +16174,8 @@
       "holder": {
         "name": "Comté de Champagne",
         "wikidata": "Q546266"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "132",
@@ -15918,7 +16224,8 @@
       "holder": {
         "name": "Comté de Clermont-en-Argonne",
         "wikidata": "Q28407226"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "131",
@@ -15997,7 +16304,8 @@
       "holder": {
         "name": "Comté de Rethel",
         "wikidata": null
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "130",
@@ -16061,7 +16369,8 @@
       "holder": {
         "name": "Comté de Rethel",
         "wikidata": null
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "129",
@@ -16122,7 +16431,8 @@
       "holder": {
         "name": "Comté de Vermandois",
         "wikidata": "Q26385"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "128",
@@ -16171,7 +16481,8 @@
       "holder": {
         "name": "Principauté épiscopale de Cambrai",
         "wikidata": "Q558311"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "127",
@@ -16220,7 +16531,8 @@
       "holder": {
         "name": "Comté de Hainaut",
         "wikidata": "Q309460"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "126",
@@ -16284,7 +16596,8 @@
       "holder": {
         "name": "Seigneurie de Termonde",
         "wikidata": null
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "125",
@@ -16333,7 +16646,8 @@
       "holder": {
         "name": "Comté de Flandre",
         "wikidata": "Q157070"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "124",
@@ -16397,7 +16711,8 @@
       "holder": {
         "name": "Comté de Toulouse",
         "wikidata": "Q1334322"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "123",
@@ -16491,7 +16806,8 @@
       "holder": {
         "name": "Comté de Provence",
         "wikidata": "Q2991382"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "122",
@@ -16570,7 +16886,8 @@
       "holder": {
         "name": "Abbaye Saint-Philibert de Tournus",
         "wikidata": "Q456181"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "121",
@@ -16649,7 +16966,8 @@
       "holder": {
         "name": "Comté de Mâcon",
         "wikidata": "Q115801604"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "120",
@@ -16743,7 +17061,8 @@
       "holder": {
         "name": "Comté de Chalon",
         "wikidata": "Q1541653"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "119",
@@ -16807,7 +17126,8 @@
       "holder": {
         "name": "Principauté épiscopale de Verdun",
         "wikidata": "Q17015016"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "118",
@@ -16871,7 +17191,8 @@
       "holder": {
         "name": "Comté de Bar",
         "wikidata": "Q706679"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "117",
@@ -16920,7 +17241,8 @@
       "holder": {
         "name": "Comté de Hainaut",
         "wikidata": "Q309460"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "116",
@@ -16996,7 +17318,8 @@
       "holder": {
         "name": "Principauté épiscopale de Cambrai",
         "wikidata": "Q558311"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "115",
@@ -17087,7 +17410,8 @@
       "holder": {
         "name": "Évêque et chapitre de Tournai",
         "wikidata": null
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "114",
@@ -17196,7 +17520,8 @@
       "holder": {
         "name": "Comté de Flandre",
         "wikidata": "Q157070"
-      }
+      },
+      "showInAtlas": false
     },
     {
       "id": "113",
@@ -17249,7 +17574,8 @@
       "holder": {
         "name": "Kievan Rus'",
         "wikidata": "Q1108445"
-      }
+      },
+      "showInAtlas": true
     },
     {
       "id": "112",
@@ -17306,7 +17632,8 @@
           "importance": "city"
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "111",
@@ -17349,7 +17676,8 @@
           "importance": "capital"
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "110",
@@ -17392,7 +17720,8 @@
           "importance": "capital"
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "109",
@@ -17442,7 +17771,8 @@
           "importance": "city"
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "108",
@@ -17485,7 +17815,8 @@
           "importance": "capital"
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "107",
@@ -17540,7 +17871,8 @@
           "population": 2000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "106",
@@ -17590,7 +17922,8 @@
           "population": 1000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "105",
@@ -17633,7 +17966,8 @@
           "population": 1000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "104",
@@ -17676,7 +18010,8 @@
           "population": 1000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "103",
@@ -17726,7 +18061,8 @@
           "population": 2000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "102",
@@ -17769,7 +18105,8 @@
           "population": 2000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "101",
@@ -17819,7 +18156,8 @@
           "population": 3000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "100",
@@ -17862,7 +18200,8 @@
           "population": 2000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "99",
@@ -17912,7 +18251,8 @@
           "population": 2000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "98",
@@ -17955,7 +18295,8 @@
           "population": 2000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "97",
@@ -17998,7 +18339,8 @@
           "population": 3000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "96",
@@ -18041,7 +18383,8 @@
           "population": 3000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "95",
@@ -18084,7 +18427,8 @@
           "population": 3000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "94",
@@ -18134,7 +18478,8 @@
           "population": 6000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "93",
@@ -18177,7 +18522,8 @@
           "population": 100000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "92",
@@ -18220,7 +18566,8 @@
           "population": 100000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "91",
@@ -18263,7 +18610,8 @@
           "population": 30000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "90",
@@ -18333,7 +18681,8 @@
           "population": 35000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "89",
@@ -18388,7 +18737,8 @@
           "population": 42000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "88",
@@ -18470,7 +18820,8 @@
           "population": 60000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "87",
@@ -18513,7 +18864,8 @@
           "population": 85000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "86",
@@ -18563,7 +18915,8 @@
           "population": 2000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "85",
@@ -18613,7 +18966,8 @@
           "population": 8000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "84",
@@ -18663,7 +19017,8 @@
           "population": 2000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "83",
@@ -18713,7 +19068,8 @@
           "population": 2000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "82",
@@ -18763,7 +19119,8 @@
           "population": 3000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "81",
@@ -18813,7 +19170,8 @@
           "population": 4000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "80",
@@ -18863,7 +19221,8 @@
           "population": 2000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "79",
@@ -18913,7 +19272,8 @@
           "population": 1000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "78",
@@ -18963,7 +19323,8 @@
           "population": 1000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "77",
@@ -19006,7 +19367,8 @@
           "population": 7000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "76",
@@ -19068,7 +19430,8 @@
           "population": 9000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "75",
@@ -19123,7 +19486,8 @@
           "population": 10000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "74",
@@ -19185,7 +19549,8 @@
           "population": 4000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "73",
@@ -19247,7 +19612,8 @@
           "population": 6000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "72",
@@ -19302,7 +19668,8 @@
           "population": 22000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "71",
@@ -19364,7 +19731,8 @@
           "population": 25000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "70",
@@ -19438,7 +19806,8 @@
           "population": 50000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "69",
@@ -19488,7 +19857,8 @@
           "population": 2000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "68",
@@ -19531,7 +19901,8 @@
           "population": 2000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "67",
@@ -19593,7 +19964,8 @@
           "population": 2000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "66",
@@ -19636,7 +20008,8 @@
           "population": 3000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "65",
@@ -19679,7 +20052,8 @@
           "population": 5000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "64",
@@ -19729,7 +20103,8 @@
           "population": 2000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "63",
@@ -19779,7 +20154,8 @@
           "population": 2000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "62",
@@ -19822,7 +20198,8 @@
           "population": 3000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "61",
@@ -19884,7 +20261,8 @@
           "population": 3000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "60",
@@ -19939,7 +20317,8 @@
           "population": 5000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "59",
@@ -20014,7 +20393,8 @@
           "population": 10000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "58",
@@ -20167,7 +20547,8 @@
       "holder": {
         "name": "Empire byzantin",
         "wikidata": "Q12544"
-      }
+      },
+      "showInAtlas": true
     },
     {
       "id": "57",
@@ -20254,7 +20635,8 @@
           "population": 3000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "56",
@@ -20317,7 +20699,8 @@
           "population": 10000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "55",
@@ -20425,7 +20808,8 @@
       "holder": {
         "name": "Comté de Provence",
         "wikidata": "Q2991382"
-      }
+      },
+      "showInAtlas": true
     },
     {
       "id": "54",
@@ -20519,7 +20903,8 @@
           "population": 10000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "53",
@@ -20601,7 +20986,8 @@
           "population": 8000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "52",
@@ -20676,7 +21062,8 @@
           "population": 9000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "51",
@@ -20751,7 +21138,8 @@
           "population": 15000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "50",
@@ -20821,7 +21209,8 @@
           "population": 15000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "49",
@@ -20884,7 +21273,8 @@
           "population": 15000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "48",
@@ -21006,7 +21396,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": true
     },
     {
       "id": "47",
@@ -21088,7 +21479,8 @@
           "population": 8000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "46",
@@ -21253,7 +21645,8 @@
       "holder": {
         "name": "Comté de Toulouse",
         "wikidata": "Q1334322"
-      }
+      },
+      "showInAtlas": true
     },
     {
       "id": "45",
@@ -21340,7 +21733,8 @@
           "population": 18000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "44",
@@ -21415,7 +21809,8 @@
           "population": 9000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "43",
@@ -21485,7 +21880,8 @@
           "population": 20000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "42",
@@ -21567,7 +21963,8 @@
           "population": 3000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "41",
@@ -21682,7 +22079,8 @@
       "holder": {
         "name": "Taïfa de Saragosse",
         "wikidata": "Q33061"
-      }
+      },
+      "showInAtlas": true
     },
     {
       "id": "40",
@@ -21849,7 +22247,8 @@
       "holder": {
         "name": "Seigneurie de Valence",
         "wikidata": "Q15714699"
-      }
+      },
+      "showInAtlas": true
     },
     {
       "id": "39",
@@ -21936,7 +22335,8 @@
           "population": 20000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "38",
@@ -22023,7 +22423,8 @@
           "population": 20000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "37",
@@ -22110,7 +22511,8 @@
           "population": 21000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "36",
@@ -22185,7 +22587,8 @@
           "population": 9000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "35",
@@ -22267,7 +22670,8 @@
           "population": 11000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "34",
@@ -22390,7 +22794,8 @@
       "holder": {
         "name": "Vicomté de Narbonne",
         "wikidata": "Q58701851"
-      }
+      },
+      "showInAtlas": true
     },
     {
       "id": "33",
@@ -22472,7 +22877,8 @@
           "population": 24000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "32",
@@ -22535,7 +22941,8 @@
           "population": 25000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "31",
@@ -22598,7 +23005,8 @@
           "population": 25000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "30",
@@ -22692,7 +23100,8 @@
           "population": 24000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "29",
@@ -22807,7 +23216,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": true
     },
     {
       "id": "28",
@@ -22874,7 +23284,8 @@
           "population": 27000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "27",
@@ -22956,7 +23367,8 @@
           "population": 7000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "26",
@@ -23026,7 +23438,8 @@
           "population": 30000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "25",
@@ -23108,7 +23521,8 @@
           "population": 30000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "24",
@@ -23183,7 +23597,8 @@
           "population": 22000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "23",
@@ -23277,7 +23692,8 @@
           "population": 15000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "22",
@@ -23427,7 +23843,8 @@
       "holder": {
         "name": "Royaume de Castille",
         "wikidata": "Q179293"
-      }
+      },
+      "showInAtlas": true
     },
     {
       "id": "21",
@@ -23502,7 +23919,8 @@
           "population": 20000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "20",
@@ -23572,7 +23990,8 @@
           "population": 40000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "19",
@@ -23659,7 +24078,8 @@
           "population": 41000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "18",
@@ -23753,7 +24173,8 @@
           "population": 30000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "17",
@@ -23828,7 +24249,8 @@
           "population": 45000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "16",
@@ -23898,7 +24320,8 @@
           "population": 45000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "15",
@@ -23992,7 +24415,8 @@
           "population": 42000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "14",
@@ -24086,7 +24510,8 @@
           "population": 50000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "13",
@@ -24192,7 +24617,8 @@
           "population": 50000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "12",
@@ -24316,7 +24742,8 @@
       "holder": {
         "name": "République de Venise",
         "wikidata": "Q4948"
-      }
+      },
+      "showInAtlas": true
     },
     {
       "id": "11",
@@ -24461,7 +24888,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": true
     },
     {
       "id": "10",
@@ -24555,7 +24983,8 @@
           "population": 25000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "9",
@@ -24622,7 +25051,8 @@
           "population": 50000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "8",
@@ -24752,7 +25182,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": true
     },
     {
       "id": "7",
@@ -24867,7 +25298,8 @@
       "holder": {
         "name": "Empire almoravide",
         "wikidata": "Q75613"
-      }
+      },
+      "showInAtlas": true
     },
     {
       "id": "6",
@@ -24966,7 +25398,8 @@
           "population": 90000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "5",
@@ -25040,7 +25473,8 @@
           "population": 150000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "4",
@@ -25160,7 +25594,8 @@
           "population": 150000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "3",
@@ -25292,7 +25727,8 @@
           "population": 200000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "2",
@@ -25386,7 +25822,8 @@
           "population": 150000
         }
       ],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     },
     {
       "id": "1",
@@ -25440,7 +25877,8 @@
         }
       ],
       "testimonies": [],
-      "holder": null
+      "holder": null,
+      "showInAtlas": true
     }
   ]
 }
