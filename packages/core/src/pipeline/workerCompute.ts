@@ -19,6 +19,7 @@ import type {
   TerrainBakeResult,
   TribeCutRequest,
 } from './mapCompute'
+import type { SettleRequest, SettledYear } from './settleYear'
 import type { TerrainTextureOptions } from './terrainCompose'
 import type { TribeOutline, TribePatch } from './tribePatches'
 import type { YearNames, YearNamesRequest } from './yearNames'
@@ -123,11 +124,12 @@ function isKind<K extends ComputePayload['kind']>(
 }
 
 /**
- * The cuts over a transport (ATLAS-333): the fills and the tribes, their outlines alone sent across.
+ * The year's preparation over a transport (ATLAS-333): the fills and the tribes cut, the year settled — the outlines
+ * and ids alone sent across.
  * @param send - post a command and wait for its answer
  * @returns that slice of the compute
  */
-function cutsOver(send: SendCommand): Pick<MapCompute, 'cutFills' | 'cutTribes'> {
+function cutsOver(send: SendCommand): Pick<MapCompute, 'cutFills' | 'cutTribes' | 'settleYear'> {
   return {
     async cutFills(regions: readonly FillRegion[], grid: FillGrid): Promise<Float32Array[]> {
       // The outlines alone cross over: a region's other fields are nothing the cut reads, and all copied.
@@ -150,6 +152,19 @@ function cutsOver(send: SendCommand): Pick<MapCompute, 'cutFills' | 'cutTribes'>
         request: { ...request, claims },
       }))
       return answerOf(event, 'tribes', 'tribes').patches
+    },
+
+    async settleYear(request: SettleRequest): Promise<SettledYear> {
+      // The regions' ids and outlines alone cross over, like the cuts'.
+      const regions = request.regions.map(({ polityId, rings }) =>
+        polityId === undefined ? { rings } : { polityId, rings }
+      )
+      const event = await send((id) => ({
+        kind: 'settleYear',
+        id,
+        request: { ...request, regions },
+      }))
+      return answerOf(event, 'settled', 'settled').settled
     },
   }
 }

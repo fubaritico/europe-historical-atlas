@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { createLandMask } from '../data/landMask'
+import { projectRegions } from '../data/regionSource'
+import { franceAndAquitaine } from '../data/testing/authoredYearFixture'
+import { toRegionPayload } from '../data/toRegionPayload'
 
 import { serveCompute } from './computeServer'
 import { fillTriangles } from './fillTriangles'
@@ -232,6 +235,26 @@ describe('createWorkerMapCompute', () => {
       const fills = await client.cutFills([{ rings: [square] }], grid)
       expect(fills).toEqual(fillTriangles([{ rings: [square] }], grid))
       expect(link.transfers.at(-1)).toEqual(fills.map((fill) => fill.buffer))
+    })
+
+    // ATLAS-333: the year settled across the wire, as the main thread would settle it.
+    it('settles an authored year across the wire as the main thread would', async () => {
+      const link = loopback(createInlineMapCompute())
+      const client = createWorkerMapCompute({ spawn: () => link.handle })
+      await client.setSources(sources())
+      const year = franceAndAquitaine()
+      const bbox = { west: -10, south: 35, east: 10, north: 60 }
+      const request = {
+        year,
+        bbox,
+        regions: projectRegions(toRegionPayload(year, bbox)).regions,
+        palette: ['#aa0000', '#00aa00'] as [string, ...string[]],
+      }
+      const across = await client.settleYear(request)
+      const here = createInlineMapCompute()
+      await here.setSources(sources())
+      expect(across).toEqual(await here.settleYear(request))
+      expect(across.borders.between.length).toBeGreaterThan(0)
     })
 
     it('measures a tribe across the wire as the main thread would, on the land it holds', async () => {

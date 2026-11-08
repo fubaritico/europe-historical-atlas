@@ -17,6 +17,7 @@ import type {
   TerrainBakeResult,
   TribeCutRequest,
 } from './mapCompute'
+import type { SettleRequest, SettledYear } from './settleYear'
 import type { TerrainTextureOptions } from './terrainCompose'
 import type { TribeOutline, TribePatch } from './tribePatches'
 import type { YearNames, YearNamesRequest } from './yearNames'
@@ -32,6 +33,7 @@ export type ComputeCommand =
   | { kind: 'placeNames'; id: number; request: YearNamesRequest }
   | { kind: 'cutFills'; id: number; regions: readonly FillRegion[]; grid: FillGrid }
   | { kind: 'cutTribes'; id: number; tribes: readonly TribeOutline[]; request: TribeCutRequest }
+  | { kind: 'settleYear'; id: number; request: SettleRequest }
   | { kind: 'dispose'; id: number }
 
 /**
@@ -46,6 +48,7 @@ export type ComputePayload =
   | { kind: 'names'; names: YearNames }
   | { kind: 'fills'; fills: Float32Array[] }
   | { kind: 'tribes'; patches: TribePatch[] }
+  | { kind: 'settled'; settled: SettledYear }
 
 /** What the worker sends back. */
 export type ComputeEvent =

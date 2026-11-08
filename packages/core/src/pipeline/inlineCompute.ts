@@ -14,6 +14,7 @@ import { pinnedRegionColor } from '../data/regionPalette'
 import { assignRegionColors, expandRegionsOverLand, rasteriseRegions } from '../data/regionRaster'
 
 import { fillTriangles } from './fillTriangles'
+import { settleAuthoredYear } from './settleYear'
 import { composeTerrainRgba, terrainTextureSize } from './terrainCompose'
 import { tribePatches } from './tribePatches'
 import { placeYearNames } from './yearNames'
@@ -29,6 +30,7 @@ import type {
   TerrainBakeResult,
   TribeCutRequest,
 } from './mapCompute'
+import type { SettleRequest, SettledYear } from './settleYear'
 import type { AreaTint, TerrainTextureOptions } from './terrainCompose'
 import type { TribeOutline, TribePatch } from './tribePatches'
 import type { YearNames, YearNamesRequest } from './yearNames'
@@ -331,14 +333,19 @@ function statelessJobs(
 }
 
 /**
- * The jobs that read the installed land and nothing else: the tribes' patches (ATLAS-333).
+ * The jobs that read the installed land and nothing else: the tribes' patches, and an authored year settled — its
+ * coastline borders cut against the mask (ATLAS-333).
  * @param installed - the elevation and the land mask installed now, read at each call
  * @returns that slice of the compute
  */
 function landJobs(
   installed: () => { heightmap: Heightmap | null; landMask: LandMask | null }
-): Pick<MapCompute, 'cutTribes'> {
+): Pick<MapCompute, 'cutTribes' | 'settleYear'> {
   return {
+    settleYear(request: SettleRequest): Promise<SettledYear> {
+      // Inside the promise, so a year that cannot be settled rejects it as every other job's does.
+      return Promise.resolve().then(() => settleAuthoredYear(request, installed().landMask))
+    },
     cutTribes(tribes: readonly TribeOutline[], request: TribeCutRequest): Promise<TribePatch[]> {
       // Inside the promise, so a missing elevation rejects it as every other job's does, rather than throwing at the call.
       return Promise.resolve().then(() => {

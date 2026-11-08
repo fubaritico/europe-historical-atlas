@@ -42,6 +42,16 @@ const RED = { r: 200, g: 0, b: 0 }
 const BLUE = { r: 0, g: 0, b: 200 }
 
 /**
+ * Each region's own colour in an authored year — what the settling paints it at the deepest level (ATLAS-333: the
+ * settling is core's and reads no compute's tints; the compute was asked for these very colours).
+ * @param year - the authored year
+ * @returns one colour per region
+ */
+function own(year: RegionSet): ReturnType<typeof authoredRegionColours> {
+  return authoredRegionColours(year.authored?.year ?? fail(), year.regions, PALETTE)
+}
+
+/**
  * Fail a test whose fixture is missing what it was built with.
  * @returns never
  */
@@ -111,10 +121,11 @@ describe('settleYearBorders', () => {
   describe('tribes', () => {
     it('leaves a tribe unfilled, the kingdom’s frontier drawn against it, and its ground in its colour', () => {
       const sources = createMapSources()
+      const year = withTribe()
 
-      settleYearBorders(sources, withTribe(), { borders: TRACED, tints: [RED, BLUE] }, PALETTE)
+      settleYearBorders(sources, year, { borders: TRACED, tints: [RED, BLUE] }, PALETTE)
 
-      expect(sources.regionTints).toEqual([RED, null])
+      expect(sources.regionTints).toEqual([own(year)[0], null])
       // Across a tribe the kingdom shows its frontier, never a border between two states (the dev, 2026-10-18).
       expect(sources.derivedBorders?.between).toEqual([])
       expect(sources.derivedBorders?.frontier).toHaveLength(1)
@@ -130,7 +141,7 @@ describe('settleYearBorders', () => {
 
       settleYearBorders(sources, year, { borders: TRACED, tints: [RED, BLUE] }, PALETTE)
 
-      expect(sources.regionTints).toEqual([RED, BLUE])
+      expect(sources.regionTints).toEqual(own(year))
       expect(sources.tribes).toEqual([])
     })
 
@@ -157,10 +168,7 @@ describe('settleYearBorders', () => {
 
       const lord = hexToRgb(france ?? '')
       expect(sources.homageDepth).toBe(1)
-      expect(sources.tintLevels).toEqual([
-        [lord, lord],
-        [RED, BLUE],
-      ])
+      expect(sources.tintLevels).toEqual([[lord, lord], own(year)])
       expect(sources.borderLevels?.get('0:0')).toBe(1)
     })
 
@@ -187,7 +195,7 @@ describe('settleYearBorders', () => {
       settleYearBorders(sources, year, { borders: TRACED, tints: [RED, BLUE] }, PALETTE)
 
       expect(sources.homageDepth).toBe(0)
-      expect(sources.tintLevels).toEqual([[RED, BLUE]])
+      expect(sources.tintLevels).toEqual([own(year)])
       expect(sources.borderLevels?.get('0:0')).toBe(0)
     })
 

@@ -16,6 +16,7 @@ import { createMapPipeline } from './mapPipeline'
 import { STARTUP_SLICES } from './startupBar'
 import { stubNameFace } from './testing/nameFaceStubs'
 import { AUTHORED_YEAR, META, TRIBE_YEAR, YEAR } from './testing/yearFixtures'
+import * as yearBordersModule from './yearBorders'
 
 import type { MapAssetSources } from './assets'
 import type { MapPipelineDeps } from './pipelineContext'
@@ -824,6 +825,27 @@ describe('createMapPipeline', () => {
       // Nothing behind it: the splash stays under the message, the bar closed (review QUAL-002, ATLAS-333).
       expect(asMock(deps.ui.dismissSplash)).not.toHaveBeenCalled()
       expect(asMock(deps.ui.progress.end)).toHaveBeenCalled()
+    })
+
+    // ATLAS-333, review QUAL-001: which path settles a year.
+    it('settles an authored year the fills paint in the compute, never on this thread', async () => {
+      const onThisThread = vi.spyOn(yearBordersModule, 'settleYearBorders')
+      const { deps, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
+      })
+      await pipeline.start()
+      expect(onThisThread).not.toHaveBeenCalled()
+      expect(deps.sources.borderPatterns?.get('0:0')).toBe('solid')
+    })
+
+    it('settles an authored year drawn through the grid on this thread', async () => {
+      const onThisThread = vi.spyOn(yearBordersModule, 'settleYearBorders')
+      const { dev, pipeline } = build({
+        assets: fakeAssets({ regions: { load: () => Promise.resolve(AUTHORED_YEAR) } }),
+      })
+      dev.political.exactFills = false
+      await pipeline.start()
+      expect(onThisThread).toHaveBeenCalledOnce()
     })
 
     // ATLAS-333: the downloads' bytes counted, the bar never still through them.

@@ -1,8 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { createLandMask } from '../data/landMask'
+import { projectRegions } from '../data/regionSource'
+import { franceAndAquitaine } from '../data/testing/authoredYearFixture'
+import { toRegionPayload } from '../data/toRegionPayload'
 
 import { createInlineMapCompute, scaleProgress } from './inlineCompute'
+import { settleAuthoredYear } from './settleYear'
 import { DEFAULT_TERRAIN_OPTIONS } from './terrainCompose'
 
 import type { ComputePhase, ComputeSources, PoliticalRequest, ProgressReport } from './mapCompute'
@@ -428,6 +432,35 @@ describe('createInlineMapCompute', () => {
       await expect(compute.bakeTerrain(OPTIONS)).rejects.toThrow(/heightmap/)
     })
   })
+})
+
+// ATLAS-333: an authored year settled by the compute, against the land mask it holds.
+describe('settleYear', () => {
+  const year = franceAndAquitaine()
+  const bbox = { west: -10, south: 35, east: 10, north: 60 }
+  const request = {
+    year,
+    bbox,
+    regions: projectRegions(toRegionPayload(year, bbox)).regions,
+    palette: ['#aa0000', '#00aa00'] as [string, ...string[]],
+  }
+
+  describe('happy path', () => {
+    it('settles the year as core’s settling does, the land mask failed', async () => {
+      const compute = createInlineMapCompute()
+      await compute.setSources(sources())
+      expect(await compute.settleYear(request)).toEqual(settleAuthoredYear(request, null))
+    })
+  })
+
+  describe('edge cases', () => {
+    it('settles a year with no source installed: the settling reads no elevation', async () => {
+      const compute = createInlineMapCompute()
+      await expect(compute.settleYear(request)).resolves.toEqual(settleAuthoredYear(request, null))
+    })
+  })
+
+  // L2, L3, L4: the settling's own suite (settleYear.test.ts).
 })
 
 // ATLAS-333: the tribes measured by the compute, on the land it holds.

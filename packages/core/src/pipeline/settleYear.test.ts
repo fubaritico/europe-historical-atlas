@@ -1,0 +1,104 @@
+import { describe, expect, it, vi } from 'vitest'
+
+import { authoredRegionColours } from '../data/polityColours'
+import { projectRegions } from '../data/regionSource'
+import { franceAndAquitaine } from '../data/testing/authoredYearFixture'
+import { toRegionPayload } from '../data/toRegionPayload'
+
+import { settleAuthoredYear } from './settleYear'
+
+import type { SettleRequest } from './settleYear'
+import type { AuthoredYear } from '../data/yearFormat'
+
+const BBOX = { west: -10, south: 35, east: 10, north: 60 }
+const PALETTE: [string, ...string[]] = ['#aa0000', '#00aa00', '#0000aa']
+
+/**
+ * The request for a year, its regions read as the atlas reads them.
+ * @param year - the year
+ * @returns the request
+ */
+function requestFor(year: AuthoredYear): SettleRequest {
+  const regions = projectRegions(toRegionPayload(year, BBOX)).regions
+  return { year, bbox: BBOX, regions, palette: PALETTE }
+}
+
+/**
+ * France and Aquitaine, Aquitaine made a tribe.
+ * @returns the year
+ */
+function withTribe(): AuthoredYear {
+  const year = franceAndAquitaine()
+  const aquitaine = year.registry.polities.find((polity) => polity.id === 'aquitaine')
+  if (aquitaine) {
+    aquitaine.rank = 'tribe'
+    aquitaine.suzerain = null
+  }
+  return year
+}
+
+// ATLAS-333: the settling moved from the atlas's loading/yearBorders to core, so the worker can run it. The atlas's
+// suite (yearBorders.test.ts) still walks its cases through settleYearBorders; this one holds what the worker returns.
+describe('settleAuthoredYear', () => {
+  describe('happy path', () => {
+    it('ends on each region’s own colour, the vassal in its suzerain’s from afar', () => {
+      const request = requestFor(franceAndAquitaine())
+      const settled = settleAuthoredYear(request, null)
+      const own = authoredRegionColours(request.year, request.regions, PALETTE)
+      const france = request.regions.findIndex((region) => region.polityId === 'fr-couronne')
+      expect(settled.homageDepth).toBe(1)
+      expect(settled.tints).toEqual(own)
+      expect(settled.tintLevels).toEqual([own.map(() => own[france]), own])
+    })
+
+    it('draws the borders from the anchors, each group with its pattern and level', () => {
+      const settled = settleAuthoredYear(requestFor(franceAndAquitaine()), null)
+      expect(settled.borders.between.length).toBeGreaterThan(0)
+      for (const group of settled.borders.between) {
+        const key = `${String(group.pair[0])}:${String(group.pair[1])}`
+        expect([settled.patterns.has(key), settled.levels.has(key)]).toEqual([true, true])
+      }
+    })
+  })
+
+  describe('variants', () => {
+    it('leaves a tribe unfilled at every level, its ground apart in its colour', () => {
+      const request = requestFor(withTribe())
+      const settled = settleAuthoredYear(request, null)
+      const tribe = request.regions.findIndex((region) => region.polityId === 'aquitaine')
+      expect(settled.tintLevels.map((level) => level[tribe])).toEqual(
+        settled.tintLevels.map(() => null)
+      )
+      expect(settled.tribes.map(({ polity }) => polity)).toEqual(['aquitaine'])
+      expect(settled.tribes[0]?.colour).toMatch(/^#[0-9a-f]{6}$/i)
+    })
+
+    it('has no tribe in a year without one', () => {
+      expect(settleAuthoredYear(requestFor(franceAndAquitaine()), null).tribes).toEqual([])
+    })
+  })
+
+  describe('managed errors', () => {
+    it('says a border it cannot draw yet where it is told, never on its own', () => {
+      const warn = vi.fn()
+      settleAuthoredYear(requestFor(franceAndAquitaine()), null, warn)
+      // Nothing undrawable in this year: the report goes nowhere else either.
+      expect(warn).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('edge cases', () => {
+    it('settles a year with no claim to no line and no tint', () => {
+      const year = franceAndAquitaine()
+      year.polities.claims = []
+      const settled = settleAuthoredYear({ ...requestFor(year), regions: [] }, null)
+      expect([settled.borders, settled.tints, settled.tribes]).toEqual([
+        { between: [], frontier: [] },
+        [],
+        [],
+      ])
+    })
+  })
+
+  // L4: N/A — nothing is awaited or caught; a malformed year was refused when it was read.
+})

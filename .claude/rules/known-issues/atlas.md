@@ -287,8 +287,8 @@ target.z)` would be coherent with the navigation that already exists.
   it, blurs it across then down, resolves it again and lays it as a full-screen quad; the icons' draws the whole scene
   filtered to its layer, for the markers' lights. **They switch on as soon as the zoom leaves 0** (`frameLayers`:
   `closeness = zoom / borderInlayZoom`), not only close up. At 4.0 Mpx: one blur alone ≈ 1 ms of GPU, **the three together
-  9 ms at zoom 0.12 and 18 ms at zoom 0.5** — not additive, and growing with the pixels: 60 → 40 fps there. With *borders
-  over the relief* off the borders' blur is set to nought (the image holds no relief). **R1 built 29/10 and kept dormant**: the
+  9 ms at zoom 0.12 and 18 ms at zoom 0.5** — not additive, and growing with the pixels: 60 → 40 fps there. With _borders
+  over the relief_ off the borders' blur is set to nought (the image holds no relief). **R1 built 29/10 and kept dormant**: the
   blur is a method injected into the layers (`scene/blur/`); the standard, in service, is the code of 28/10
   (`separateImages`); `sharedImages` — one target set, one colour-only resolve, a 0.25 px threshold, 40 → 54–55 fps at
   4 Mpx — waits for the quality levels (ATLAS-305). **His 13 fps were not this**: reproduced the same day, they were my measuring tab running beside his on one GPU
@@ -306,7 +306,7 @@ target.z)` would be coherent with the navigation that already exists.
   **Severity: worth knowing.**
 - **The tribes' white ink is not blurred close up** (2026-10-29, `scene/political/names/nameLayer`): the blur's members are the
   ordinary names' inks only; the inverted names are laid in the ordinary blend and stay crisp, on their thin brown edge, while
-  the other names soften. Not seen by the dev as a fault (*« là c'est parfait »*). **Remedy if it shows**: an inverted ink drawn
+  the other names soften. Not seen by the dev as a fault (_« là c'est parfait »_). **Remedy if it shows**: an inverted ink drawn
   into a blur image of its own, laid in the ordinary blend — the multiplied quad cannot carry a white. **Severity: cosmetic.**
 - **`reliefWorldY` reads an invalid elevation (`NaN`) as sea level, silently** (`scene/relief/reliefMesh.ts:52`; found by a
   test on 2026-09-17, the first case `rules/error-handling.md` was written for). Both of its `>` comparisons fail for
@@ -335,8 +335,14 @@ target.z)` would be coherent with the navigation that already exists.
   still multiplied into every year layer's opacity each frame (`scene/layers/frameLayers.ts`, the names', the events',
   the cities' `setReveal`). **Trigger**: a fade wanted on a change of year — it is the seam for it; otherwise, the next
   change to `frameLayers.ts`, remove it whole. **Severity: cosmetic.**
+- **An authored year is settled in the worker, so what the settling says lands in the worker's console** (2026-11-08,
+  ATLAS-333, review ARCH-001): `core/pipeline/settleYear` warns of a border hand the atlas cannot draw yet, and writes a
+  `console.error` for a tribe with no colour — a branch no year reaches (every polity is coloured, the reader refuses a
+  claim naming none). Both ran on the page before; now they show in the worker's own console, never in the dialog an
+  error owes the reader (`rules/error-handling.md`). **Remedy, with ATLAS-394**: the settling returns its faults as data,
+  the page says them. **Severity: worth knowing.**
 - **A cut that fails lets the bake started beside it finish** (review of 2026-11-08, ATLAS-333, `loading/stages/political.ts`
   `prepareYear`): `Promise.all` rejects on the cut, the year is told as failed, but `rebuildTexture` — under its own gate —
   still hangs its texture. For an authored year that texture is the bare terrain, so the map only changes when the year
-  on screen was drawn through the grid (the dev panel's *exact fills* off) **and** the worker failed. **Remedy if it
+  on screen was drawn through the grid (the dev panel's _exact fills_ off) **and** the worker failed. **Remedy if it
   bites**: `Promise.allSettled`, then rethrow the first failure, the bake's winning when both fail. **Severity: cosmetic.**

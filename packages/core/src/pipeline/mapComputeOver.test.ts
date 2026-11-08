@@ -214,6 +214,38 @@ describe('mapComputeOver', () => {
       )
     })
 
+    // ATLAS-333: the year settled in the worker — the regions' ids and outlines alone cross the wire.
+    it('sends the settling the regions’ ids and outlines alone, and refuses an answer of another kind', async () => {
+      const SETTLED = { tints: [] } as unknown as Awaited<
+        ReturnType<ReturnType<typeof mapComputeOver>['settleYear']>
+      >
+      const settle = answering((id) => ({
+        kind: 'done',
+        id,
+        payload: { kind: 'settled', settled: SETTLED },
+      }))
+      const rings = [[{ u: 0, v: 0 }]]
+      const request = {
+        year: { year: 1100 },
+        bbox: { west: 0, south: 50, east: 10, north: 60 },
+        regions: [
+          { polityId: 'aragon', rings, name: 'Aragon', subjectTo: null },
+          { rings, name: 'nobody' },
+        ],
+        palette: ['#c00'],
+      } as unknown as Parameters<ReturnType<typeof mapComputeOver>['settleYear']>[0]
+      await expect(mapComputeOver(settle.send, vi.fn()).settleYear(request)).resolves.toBe(SETTLED)
+      expect(settle.sent.mock.calls[0]?.[0]).toEqual({
+        kind: 'settleYear',
+        id: 7,
+        request: { ...request, regions: [{ polityId: 'aragon', rings }, { rings }] },
+      })
+      const acked = answering((id) => ({ kind: 'done', id, payload: { kind: 'ack' } }))
+      await expect(mapComputeOver(acked.send, vi.fn()).settleYear(request)).rejects.toThrow(
+        /answered a settled request with ack/
+      )
+    })
+
     it('hands disposal straight to the transport', () => {
       const dispose = vi.fn()
       mapComputeOver(vi.fn(), dispose).dispose()

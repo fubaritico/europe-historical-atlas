@@ -11,13 +11,12 @@ import { tribeCutSettings } from '../../scene/political/tribes/mapTribeLayer'
 import { meshVertexGrid } from '../../scene/relief/reliefMesh'
 import { politicalPalette } from '../../tunables/params'
 import { COMPUTE_PHASE_MESSAGES } from '../computeLabels'
-import { settleYearBorders, yearTribes } from '../yearBorders'
+import { installSettledYear, settleYearBorders } from '../yearBorders'
 import { startStep, timedStep } from '../yearTiming'
 
 import { rebuildYearNames } from './names'
 import { rebuildTexture } from './texture'
 
-import type { AuthoredSet } from '../../scene/political/paintsExactFills'
 import type { MeasuredTribes } from '../../scene/political/tribes/mapTribeLayer'
 import type { DevState } from '../../tunables/devState'
 import type { PipelineContext } from '../pipelineContext'
@@ -29,6 +28,7 @@ import type {
   PoliticalResult,
   ProgressReport,
 } from '@europe-historical-atlas/core/pipeline/mapCompute'
+import type { SettledYear } from '@europe-historical-atlas/core/pipeline/settleYear'
 
 /**
  * How drawing a year divides the share of the bar it is given. Measured rather than chosen: the fetch is a local file,
@@ -87,8 +87,9 @@ async function drawYear(
   //    its polities then cut in the worker (said on the bar before the wait).
   const exact = yearPaintsExactFills(context.dev, loaded)
   if (exact) report(EXACT_SPLIT.fetch, 'cut')
+  // A year the fills paint traces nothing: its lines and tints are settled from its anchors, in the worker.
   const result = exact
-    ? await exactYearResult(context, loaded)
+    ? await releaseGrid(context)
     : await gridYearResult(
         context,
         loaded,
@@ -105,20 +106,21 @@ async function drawYear(
  * @param year - the year asked, its polities and what the compute settled
  * @param year.asked - the year asked for
  * @param year.loaded - its polities
- * @param year.result - its tints and traced lines
+ * @param year.result - its tints and traced lines from the grid; `null` for a year the fills paint, settled in the
+ *   worker
  * @param isCurrent - whether this year is still the newest asked for
  * @param report - where its progress goes
  * @returns the year drawn; `null` when torn down or overtaken during the bake
  */
 async function installYear(
   context: PipelineContext,
-  year: { asked: number; loaded: RegionSet; result: PoliticalResult },
+  year: { asked: number; loaded: RegionSet; result: PoliticalResult | null },
   isCurrent: () => boolean,
   report: ProgressReport
 ): Promise<DrawnYear | null> {
   const { dev, sources, layers } = context
   const { asked, loaded, result } = year
-  // 3. The bake and the fills' cut, both off this thread, side by side — the last wait: neither reads the year on
+  // 3. The bake, the cuts and the settling, all off this thread, side by side — the last wait: none reads the year on
   //    screen, so nothing of it is touched before them.
   const cut = await timedStep(context.clock, asked, 'prepare', () =>
     prepareYear(context, loaded, report)
@@ -128,15 +130,15 @@ async function installYear(
   report(yearPaintsExactFills(dev, loaded) ? EXACT_SPLIT.cut : POLITICAL_SPLIT.bake, 'borders')
   await context.afterPaint()
   if (context.isDisposed() || !isCurrent()) return null
+  // How the year is settled, decided before anything moves: a defect here leaves the map as it was (review QUAL-002).
+  const settle = settlerOf(context, loaded, cut, result)
   // From here to the end, no wait: the year on screen is set aside and the new one laid in one go, so a year overtaken
   // or failing leaves the map — and the years set aside — as they were (reviews QUAL-001, ARCH-001).
   if (asked !== sources.askedYear) setShownYearAside(context)
   // The year and its lines change together: a redraw between the two would read one year's pairs against the
   // other's polities, or one kind of year's patterns against the other kind's lines.
   sources.regionSet = loaded
-  const endSettle = startStep(context.clock, asked, 'settle')
-  settleYearBorders(sources, loaded, result, politicalPalette(dev.political))
-  endSettle()
+  settle()
   // The worker's cuts, once the sources hold the year they were cut for: laying the fills and the tribes cuts nothing.
   if (cut !== null) {
     layers.primeFillCut(loaded.regions, cut.grid, cut.fills)
@@ -158,7 +160,37 @@ async function installYear(
   return { loaded, restored: false }
 }
 
-/** The fills of a year cut in the worker, and the grid they were cut on. */
+/**
+ * How a year is settled into the sources: as the worker settled it, or here — a payload year from the lines its grid
+ * traced, or an authored one drawn through the grid (the dev panel's *exact fills* off).
+ * @param context - the pipeline's world
+ * @param loaded - the year
+ * @param cut - what the worker prepared, the year settled with it; `null` when it prepared nothing
+ * @param result - what its grid traced; `null` for a year the fills paint
+ * @returns the settling, to run once the year is laid
+ * @throws when there is neither — a year the fills paint is settled in the worker whenever a relief is in, and none
+ *   is drawn without one: a defect, said before anything of the map has moved
+ */
+function settlerOf(
+  context: PipelineContext,
+  loaded: RegionSet,
+  cut: WorkerCut | null,
+  result: PoliticalResult | null
+): () => void {
+  if (cut !== null)
+    return () => {
+      installSettledYear(context.sources, cut.settled)
+    }
+  if (result === null)
+    throw new Error(`[atlas] ${String(loaded.year)} was neither traced nor settled in the worker`)
+  return () => {
+    const endSettle = startStep(context.clock, loaded.year, 'settle')
+    settleYearBorders(context.sources, loaded, result, politicalPalette(context.dev.political))
+    endSettle()
+  }
+}
+
+/** A year prepared in the worker: its fills cut, its tribes measured, the year settled, and the grid they lie on. */
 interface WorkerCut {
   /** The relief's subdivision. */
   readonly grid: FillGrid
@@ -166,6 +198,8 @@ interface WorkerCut {
   readonly fills: Float32Array[]
   /** The tribes' patches, measured in the worker too, with their settings; `null` for a year with no tribe. */
   readonly tribes: MeasuredTribes | null
+  /** Its colours, tints by level, exact lines and tribes. */
+  readonly settled: SettledYear
 }
 
 /**
@@ -195,26 +229,39 @@ async function prepareYear(
           context,
           scaleProgress(report, POLITICAL_SPLIT.compute, POLITICAL_SPLIT.bake)
         )
-  const bounds = loaded.authored?.bbox
-  if (!exact || heightmap === null || bounds === undefined) {
+  const authored = loaded.authored
+  if (!exact || heightmap === null || authored === undefined) {
     await bake
     return null
   }
+  const bounds = authored.bbox
   const grid = meshVertexGrid(heightmap.meta, dev.relief.segments)
-  const [, fills, tribes] = await Promise.all([
+  // The palette read now: a change of it starts a newer year, which this one gives way to.
+  const settling = timedStep(context.clock, loaded.year, 'settle', () =>
+    context.box.compute.settleYear({
+      year: authored.year,
+      bbox: bounds,
+      regions: loaded.regions,
+      palette: politicalPalette(dev.political),
+    })
+  )
+  const [, fills, settled, tribes] = await Promise.all([
     bake,
     timedStep(context.clock, loaded.year, 'cut', () =>
       context.box.compute.cutFills(loaded.regions, grid)
     ),
-    measureTribes(context, loaded, { bounds, grid }),
+    settling,
+    // The tribes the settling coloured, measured once it has.
+    settling.then((year) => measureTribes(context, loaded, year.tribes, { bounds, grid })),
   ])
-  return { grid, fills, tribes }
+  return { grid, fills, tribes, settled }
 }
 
 /**
  * A year's tribes measured in the worker, as `rebuildTribes` would measure them here (ATLAS-333).
  * @param context - the pipeline's world
  * @param loaded - the authored year
+ * @param tribes - its tribes in their colours, as the settling gave them
  * @param ground - its frame and the relief's grid
  * @param ground.bounds - the frame
  * @param ground.grid - the relief's subdivision
@@ -223,10 +270,10 @@ async function prepareYear(
 async function measureTribes(
   context: PipelineContext,
   loaded: RegionSet,
+  tribes: SettledYear['tribes'],
   ground: { bounds: GeoBounds; grid: FillGrid }
 ): Promise<MeasuredTribes | null> {
   const { dev } = context
-  const tribes = yearTribes(loaded, politicalPalette(dev.political))
   if (tribes.length === 0) return null
   // Read once, before the wait: the patches are kept under these, not under what the settings are when they land.
   const settings = tribeCutSettings(dev)
@@ -315,18 +362,13 @@ async function gridYearResult(
 }
 
 /**
- * A year the fills paint, with no grid (ATLAS-333): its tints are the Cartographer's colours — what the compute would
- * have handed back from the request (`politicalRequest`) — and its lines are drawn from its anchors by
- * `settleYearBorders`, so none are traced. Measured on 1100, 02/11: 1.6 s of rasterising saved per change of year. The
- * grid a previous year left in the compute is taken off, so no later bake tints the terrain with it.
+ * A year the fills paint, with no grid (ATLAS-333): nothing is traced — its lines, colours and tints are settled from
+ * its anchors in the worker (`prepareYear`). Measured on 1100, 02/11: 1.6 s of rasterising saved per change of year.
+ * The grid a previous year left in the compute is taken off, so no later bake tints the terrain with it.
  * @param context - the pipeline's world
- * @param loaded - the authored year
- * @returns the tints, and no traced lines
+ * @returns nothing traced — `null`, the year's result being its settling
  */
-async function exactYearResult(
-  context: PipelineContext,
-  loaded: AuthoredSet
-): Promise<PoliticalResult> {
+async function releaseGrid(context: PipelineContext): Promise<null> {
   if (context.held.grid) {
     // Written before the await, in the order the messages go to the compute: a newer year that sends its grid while
     // this clear is on its way sets the flag back after this line, as the compute will hold its grid after the clear.
@@ -340,9 +382,7 @@ async function exactYearResult(
       throw error
     }
   }
-  const palette = politicalPalette(context.dev.political)
-  const tints = authoredRegionColours(loaded.authored.year, loaded.regions, palette)
-  return { tints, borders: { between: [], frontier: [] } }
+  return null
 }
 
 /**

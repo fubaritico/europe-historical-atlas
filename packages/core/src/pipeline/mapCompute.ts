@@ -11,6 +11,7 @@
  */
 
 import type { FillGrid } from './fillTriangles'
+import type { SettleRequest, SettledYear } from './settleYear'
 import type { TerrainTextureOptions } from './terrainCompose'
 import type { TribeGround, TribeOutline, TribePatch } from './tribePatches'
 import type { YearNames, YearNamesRequest } from './yearNames'
@@ -191,13 +192,26 @@ export interface TribeCompute {
 }
 
 /**
+ * Settle an authored year (ATLAS-333) — its colours, tints by level, exact border lines and tribes, 60 to 385 ms of the
+ * page in Chrome before it moved.
+ */
+export interface SettleCompute {
+  /**
+   * Settle the year against the land mask the compute holds — or none, when it failed, as the map does.
+   * @param request - the year, its frame, its regions and the palette
+   * @returns the year settled
+   */
+  settleYear(request: SettleRequest): Promise<SettledYear>
+}
+
+/**
  * The jobs, and the state two of them share — the names and the fills read none. Consumers should depend on the
  * narrow slice they use
  * ({@link TerrainBake} for a texture tunable, {@link PoliticalCompute} for a change of year); this is
  * the handle the composition root holds, sets up and tears down.
  */
 export interface MapCompute
-  extends PoliticalCompute, TerrainBake, NameCompute, FillCompute, TribeCompute {
+  extends PoliticalCompute, TerrainBake, NameCompute, FillCompute, TribeCompute, SettleCompute {
   /**
    * Install the sources both jobs read. Safe to call again when one of them arrives late — the relief
    * and the mask load independently, and whichever lands second must not discard the first.

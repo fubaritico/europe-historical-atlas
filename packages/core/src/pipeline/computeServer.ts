@@ -21,6 +21,52 @@ function transferable(view: { buffer: ArrayBufferLike }): Transferable[] {
   return view.buffer instanceof ArrayBuffer ? [view.buffer] : []
 }
 
+/** The commands that prepare a year for the atlas (ATLAS-333): its fills and tribes cut, the year settled. */
+type YearCommand = Extract<ComputeCommand, { kind: 'cutFills' | 'cutTribes' | 'settleYear' }>
+
+/**
+ * Whether a command prepares a year.
+ * @param command - the command
+ * @returns `true` for a cut or a settling
+ */
+function isYearCommand(command: ComputeCommand): command is YearCommand {
+  return (
+    command.kind === 'cutFills' || command.kind === 'cutTribes' || command.kind === 'settleYear'
+  )
+}
+
+/**
+ * Run one command that prepares a year.
+ * @param compute - the implementation doing the actual work
+ * @param command - the command
+ * @returns the answer, and the buffers to hand over rather than copy
+ */
+async function runYearCommand(
+  compute: MapCompute,
+  command: YearCommand
+): Promise<{ payload: ComputePayload; transfer: Transferable[] }> {
+  switch (command.kind) {
+    case 'cutFills': {
+      const fills = await compute.cutFills(command.regions, command.grid)
+      // Megabytes of triangles nobody here reads again: handed over, not copied.
+      return { payload: { kind: 'fills', fills }, transfer: fills.flatMap(transferable) }
+    }
+    case 'cutTribes': {
+      const patches = await compute.cutTribes(command.tribes, command.request)
+      // Each patch's four arrays, handed over like the fills.
+      const transfer = patches.flatMap((patch) =>
+        [patch.triangles, patch.distances, patch.claimed, patch.land].flatMap(transferable)
+      )
+      return { payload: { kind: 'tribes', patches }, transfer }
+    }
+    case 'settleYear': {
+      // Lines and colours, small beside the cuts: copied back, nothing to hand over.
+      const settled = await compute.settleYear(command.request)
+      return { payload: { kind: 'settled', settled }, transfer: [] }
+    }
+  }
+}
+
 /**
  * Run one command on the compute.
  * @param compute - the implementation doing the actual work
@@ -37,6 +83,7 @@ async function runCommand(
   // Captured before the switch narrows it away: in the unreachable tail below, `command` is `never`,
   // which is precisely the type that has nothing left to name in an error message.
   const kind: string = command.kind
+  if (isYearCommand(command)) return runYearCommand(compute, command)
   switch (command.kind) {
     case 'setSources':
       await compute.setSources(command.sources)
@@ -61,19 +108,6 @@ async function runCommand(
     case 'placeNames': {
       const names = await compute.placeYearNames(command.request, onProgress)
       return { payload: { kind: 'names', names }, transfer: [] }
-    }
-    case 'cutFills': {
-      const fills = await compute.cutFills(command.regions, command.grid)
-      // Megabytes of triangles nobody here reads again: handed over, not copied.
-      return { payload: { kind: 'fills', fills }, transfer: fills.flatMap(transferable) }
-    }
-    case 'cutTribes': {
-      const patches = await compute.cutTribes(command.tribes, command.request)
-      // Each patch's four arrays, handed over like the fills.
-      const transfer = patches.flatMap((patch) =>
-        [patch.triangles, patch.distances, patch.claimed, patch.land].flatMap(transferable)
-      )
-      return { payload: { kind: 'tribes', patches }, transfer }
     }
     case 'dispose':
       compute.dispose()
