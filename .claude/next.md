@@ -17,8 +17,9 @@ changement d'année pour la réglette de la frise** — worktree **`.claude/work
 une étape **non commitée, gate verte** (les découpes des pays et des tribus dans le worker, les événements gardés avec leur
 année, les mesures). **Le point de reprise exact** : section « Where we stopped » de `files/plans/atlas/year-switch-speed.md`
 **du worktree**. D'abord la question laissée au dev — *commiter cette étape sur la branche, sur la foi des mesures, et passer
-aux tampons des pays dans le worker ?* — puis `/review` avant le commit. **Jamais commiter** `years/1200/` ni
-`years/index.json` de ce worktree (publier 1200 est à lui). La barre mesurée d'ATLAS-333 (partie D) partira de celle de
+aux tampons des pays dans le worker ?* — puis `/review` avant le commit. **1200 est publiée dans `main` depuis le 08/11 au
+soir** (décision du dev) : ne pas commiter la copie de `years/1200/` ni l'`index.json` de ce worktree par-dessus — fusionner
+`main` d'abord. La barre mesurée d'ATLAS-333 (partie D) partira de celle de
 CARTO-393, qui fait déjà avancer celle de l'atlas pendant la composition du relief.
 
 **Son essai de CARTO-393** (À valider), quand il le voudra — **dans le worktree `.claude/worktrees/city-status-ring`, branche
@@ -35,10 +36,9 @@ montre dans l'atlas les seules villes cochées. **Ouverts, à sa décision** : u
 reste choisie (revue QUAL-004 de CARTO-390) ; CARTO-387, la boîte de la ville en panneau flottant. **Puis son plan** :
 reprendre la retouche des frontières dans le Cartographe.
 
-**À lui, dans l'arbre de travail, non commité — sa décision** : la retouche de 1100 par l'historien (Almudévar, Bolea,
-Gurrea passés à Saragosse : `years/1100/polities.json`, et le scénario `s03` qu'il a écrit) ; `years/index.json` qui annonce
-**1200** (son « Enregistrer sous » ; le dossier `years/1200/` existe) — commiter l'un ou l'autre le publie. **Les numéros des
-ports fixes** (REPO-383 ; ma proposition : l'atlas 5173, le Cartographe 5174).
+**Publier une année n'est plus bloqué** (le dev, 08/11 : *« il n'y a rien de bloquant dans le fait d'ajouter des
+années, des cartes »*) : 1100 retouchée par l'historien (la Catalogne) et 1200 sont commitées et poussées le 08/11 au soir.
+**Les numéros des ports fixes** (REPO-383 ; ma proposition : l'atlas 5173, le Cartographe 5174).
 
 **Dessiner dans le Cartographe** (un agent, lui ou moi) : la skill **`/use-cartographer`** (07/11) ; son journal est
 `references/journal.md`, local. **Un seul agent par carte** : une carte s'enregistre seule deux secondes après chaque geste.

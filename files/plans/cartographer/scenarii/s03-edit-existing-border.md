@@ -195,6 +195,14 @@ Scenario: delete an anchor
   Then the neighbour keeps those points, and the result names it — "… kept its points"
 ```
 
+> **Walked by me, 2026-11-07** (Aragon–Zaragoza in 1100, from the sources): a shared anchor moved with the white arrow
+> moved for both polities, the fill of each following at once; two clicks of the Pen on the shared stretch, after
+> *"Inserting a point into Kingdom of Aragon"* showed in the bar, each inserted one anchor into both rings, then dragged
+> with the white arrow — saved, 13 shared anchors, contiguous, only those two polities changed. **Not observed**: the
+> insert-then-drag in one press the first rung describes — a press-and-drag of the Pen on the stretch inserted nothing,
+> driven by the browser extension, whose press comes in the same instant as its move. Not yet tried by hand; if the dev
+> sees the same, it belongs in `s99`.
+
 > **Nothing refuses a deletion — the dev, 2026-10-14**: *« Je devrais pouvoir enlever ce que je veux comme
 > point. Y'a rien qui doit m'empêcher d'enlever des points. Rien. »* The refusal below it is superseded: a
 > ring under three anchors still never stays in the document (it would vanish on the next open), but the

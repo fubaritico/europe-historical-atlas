@@ -78,4 +78,5 @@ cleaning becomes a measure of `lib/measures.mjs` with its test — a crenellatio
 
 - A dated section in `references/journal.md`; a gesture walked into its scenario (`files/plans/cartographer/scenarii/`),
   a surprise into `s99-holes.md`, a failing gesture into a ticket (`/trello`).
-- Never commit `years/`: the dev decides what is published (`known-issues/data.md`).
+- A map retouched in a worktree comes back to `main` and is committed like code — publishing a year is not blocked
+  (the dev, 2026-11-08); never commit its `*.before-*` or `*.autosave.*` copies (`known-issues/data.md`).
