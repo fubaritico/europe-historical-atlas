@@ -1,4 +1,5 @@
 import { fetchWithin } from '../utils/fetchWithin'
+import { readBytes } from '../utils/readBytes'
 
 import {
   assetError,
@@ -7,10 +8,12 @@ import {
   expectString,
   field,
   parseAsset,
+  parseFileBytes,
 } from './assetError'
 
 import type { Heightmap } from './heightmap'
 import type { GeoBounds } from '../geo/mercator'
+import type { ByteReport } from '../utils/readBytes'
 
 /**
  * Metadata sidecar for a land/water mask (matches the `.json` emitted by `files/spikes/fetch-land`).
@@ -80,9 +83,10 @@ export interface LandMask {
 export interface LandMaskSource {
   /**
    * Load the mask.
+   * @param onBytes - where the mask's download tells its bytes received, when a bar counts them (ATLAS-333)
    * @returns the loaded mask
    */
-  load(): Promise<LandMask>
+  load(onBytes?: ByteReport): Promise<LandMask>
 }
 
 /**
@@ -178,18 +182,24 @@ export function createElevationLandMask(heightmap: Heightmap, seaLevel: number):
  */
 export function createFetchLandMaskSource(basePath: string): LandMaskSource {
   return {
-    async load(): Promise<LandMask> {
+    async load(onBytes?: ByteReport): Promise<LandMask> {
       const metaPath = `${basePath}.json`
       const metaResponse = await fetchWithin(metaPath)
       if (!metaResponse.ok)
         throw assetError('landMask', 'transport', metaPath, `HTTP ${String(metaResponse.status)}`)
-      const meta = parseLandMaskMeta(await metaResponse.json(), metaPath)
+      const json: unknown = await metaResponse.json()
+      const meta = parseLandMaskMeta(json, metaPath)
+      // The size is read only when the download is counted (review ARCH-001).
+      const counted =
+        onBytes === undefined
+          ? undefined
+          : { total: parseFileBytes('landMask', json, metaPath), report: onBytes }
 
       const binPath = `${basePath}.bin`
       const binResponse = await fetchWithin(binPath)
       if (!binResponse.ok)
         throw assetError('landMask', 'transport', binPath, `HTTP ${String(binResponse.status)}`)
-      const bits = new Uint8Array(await binResponse.arrayBuffer())
+      const bits = new Uint8Array(await readBytes(binResponse, counted))
 
       const expected = Math.ceil((meta.width * meta.height) / 8)
       if (bits.byteLength < expected)

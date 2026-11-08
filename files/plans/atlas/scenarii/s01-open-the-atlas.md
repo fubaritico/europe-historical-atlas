@@ -66,9 +66,16 @@ Scenario: one bar on the splash tells every step of the opening
 > are a file already loaded by then. In English for an English reader (« Loading the relief… », « Raising the relief… »,
 > « Cutting the territories… »…). A screen reader hears the step as a status, the bar as a progress bar with its value.
 >
-> **Declared gap**: the download's bytes are not counted — its step ends at once at its end. Served locally it is a
-> tenth of a second; online it may be the longest wait. Counting them needs the relief's and the mask's readers to report
-> their bytes (core's data ports) — the next rung, ATLAS-333.
+> ~~**Declared gap**: the download's bytes are not counted.~~ **Counted since 2026-11-08** (ATLAS-333): the relief's and
+> the mask's bytes received, both together, over the sizes **their sidecars state** (`bytes`) — the dev's call, a size of
+> ours and never the server's, which a host compressing in transit would give wrong; a test checks each sidecar against
+> its file.
+
+```gherkin
+Scenario: the bar moves through the download
+  Given the relief and the land mask downloading — 9.7 MB online
+  Then the bar moves inside « Chargement du relief… » as their bytes arrive, never still until the end
+```
 
 ## All of it at once
 

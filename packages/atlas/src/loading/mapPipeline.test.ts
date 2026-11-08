@@ -826,6 +826,34 @@ describe('createMapPipeline', () => {
       expect(asMock(deps.ui.progress.end)).toHaveBeenCalled()
     })
 
+    // ATLAS-333: the downloads' bytes counted, the bar never still through them.
+    it('moves the bar inside the relief’s download as its bytes arrive', async () => {
+      const { deps, pipeline } = build({
+        assets: fakeAssets({
+          // Each tells its size first, as core's readBytes does; the relief then half in.
+          landMask: {
+            load: (onBytes) => {
+              onBytes?.(0, 1000)
+              return Promise.resolve(MASK)
+            },
+          },
+          heightmap: {
+            load: (onBytes) => {
+              onBytes?.(0, 1000)
+              onBytes?.(500, 1000)
+              return Promise.resolve(DEM)
+            },
+          },
+        }),
+      })
+      await pipeline.start()
+      const [from, to] = STARTUP_SLICES.terrain
+      const inside = (asMock(deps.ui.progress.report).mock.calls as [number, string][]).filter(
+        ([fraction, label]) => label === FR('phaseTerrain') && fraction > from && fraction < to
+      )
+      expect(inside.length).toBeGreaterThan(0)
+    })
+
     // Review QUAL-002: s01's « the composition of the texture moves the bar row by row ».
     it('moves the bar inside the texture’s composition, not only at its ends', async () => {
       const { deps, pipeline } = build()

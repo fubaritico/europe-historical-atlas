@@ -18,6 +18,16 @@ function meta(width: number, height: number): LandMaskMeta {
   return { width, height, scale: 1, bbox: BBOX, source: 'test' }
 }
 
+/**
+ * The sidecar a fetched mask comes with: its metadata, and its `.bin`'s size (ATLAS-333).
+ * @param width - cells across
+ * @param height - cells down
+ * @returns the parsed JSON the source reads
+ */
+function sidecar(width: number, height: number): LandMaskMeta & { bytes: number } {
+  return { ...meta(width, height), bytes: Math.ceil((width * height) / 8) }
+}
+
 /** A 2×1 mask: water to the west, land to the east. */
 function shore(): ReturnType<typeof createLandMask> {
   return createLandMask(meta(2, 1), (col) => col === 1)
@@ -90,7 +100,7 @@ describe('landMask', () => {
     it('fetches and decodes through the source port', async () => {
       const fetchMock = vi
         .fn()
-        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(meta(8, 1)) })
+        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(sidecar(8, 1)) })
         .mockResolvedValueOnce({
           ok: true,
           arrayBuffer: () => Promise.resolve(new Uint8Array([0b1111_0000]).buffer),
@@ -102,11 +112,35 @@ describe('landMask', () => {
       vi.unstubAllGlobals()
     })
 
+    // ATLAS-333: the bar moves through the download, against the size the sidecar states.
+    it('tells the bitfield’s bytes as they arrive, against the size its sidecar states', async () => {
+      const body = new Response(Uint8Array.from([0b1111_0000]))
+      vi.stubGlobal(
+        'fetch',
+        vi
+          .fn()
+          .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(sidecar(8, 1)) })
+          .mockResolvedValueOnce(body)
+      )
+      const told: [number, number][] = []
+      const mask = await createFetchLandMaskSource('/masks/x').load((received, total) =>
+        told.push([received, total])
+      )
+      expect([told, mask.isLand(0, 0)]).toEqual([
+        [
+          [0, 1],
+          [1, 1],
+        ],
+        true,
+      ])
+      vi.unstubAllGlobals()
+    })
+
     // The source travels with the data: the Cartographer records it on every anchor traced from it.
     it('keeps what the mask was rasterised from', async () => {
       const fetchMock = vi
         .fn()
-        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(meta(8, 1)) })
+        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(sidecar(8, 1)) })
         .mockResolvedValueOnce({
           ok: true,
           arrayBuffer: () => Promise.resolve(new Uint8Array([0]).buffer),
@@ -119,8 +153,20 @@ describe('landMask', () => {
 
   describe('managed errors', () => {
     // A mask that does not say where it comes from is refused, never given a plausible source.
+    // ATLAS-333: the loading bar counts the download against the size the sidecar states.
+    it('refuses a sidecar that does not state its bitfield’s size when the download is counted', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(meta(8, 1)) })
+      )
+      await expect(createFetchLandMaskSource('/masks/x').load(() => undefined)).rejects.toThrow(
+        /landMask \(schema\).*meta\.bytes/
+      )
+      vi.unstubAllGlobals()
+    })
+
     it('refuses a sidecar that declares no source', async () => {
-      const { source: _dropped, ...unsourced } = meta(8, 1)
+      const { source: _dropped, ...unsourced } = sidecar(8, 1)
       vi.stubGlobal(
         'fetch',
         vi.fn().mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(unsourced) })
@@ -142,7 +188,7 @@ describe('landMask', () => {
         'fetch',
         vi
           .fn()
-          .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(meta(8, 1)) })
+          .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(sidecar(8, 1)) })
           .mockResolvedValueOnce({ ok: false, status: 500 })
       )
       await expect(createFetchLandMaskSource('/masks/x').load()).rejects.toThrow(
@@ -157,7 +203,7 @@ describe('landMask', () => {
         'fetch',
         vi
           .fn()
-          .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(meta(64, 64)) })
+          .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(sidecar(64, 64)) })
           .mockResolvedValueOnce({
             ok: true,
             arrayBuffer: () => Promise.resolve(new Uint8Array(4).buffer),

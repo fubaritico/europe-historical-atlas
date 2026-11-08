@@ -180,6 +180,8 @@ writeFileSync(
     scale,
     bbox,
     encoding: 'packed-bits-msb-first, 1 = land',
+    // The .bin's size, read by the atlas's loading bar to count the bytes received (ATLAS-333).
+    bytes: packed.byteLength,
   })
 )
 

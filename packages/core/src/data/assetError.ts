@@ -312,3 +312,21 @@ export function boundsDisagreement(
     `covers ${box(other)} while the relief covers ${box(relief)} — the two must share one coordinate space`
   )
 }
+
+/**
+ * The size of a grid's `.bin`, as its metadata states it — what the loading bar counts its download against
+ * (ATLAS-333). Written by the file's generator, checked against the file by the atlas's tests. **Read only when a bar
+ * counts the download** (review ARCH-001): a caller that counts nothing — the Cartographer — never needs it; one that
+ * counts has it refused like any field missing, or when it states no byte at all (review QUAL-001: a total of nought
+ * would divide the bar into `NaN`).
+ * @param asset - which asset family the metadata is of
+ * @param value - the metadata, as parsed JSON
+ * @param source - where it was loaded from
+ * @returns the bytes the `.bin` holds, at least one
+ * @throws a schema error when the field is missing or not a whole number of at least one
+ */
+export function parseFileBytes(asset: AssetKind, value: unknown, source: string): number {
+  return parseAsset(asset, source, () =>
+    expectInteger(field(value, 'meta')('bytes'), 'meta.bytes', 1)
+  )
+}

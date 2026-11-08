@@ -10,5 +10,6 @@
   },
   "min": -7328,
   "max": 6368,
-  "encoding": "int16-le-metres"
+  "encoding": "int16-le-metres",
+  "bytes": 2979840
 }

@@ -61,8 +61,13 @@ async function bringTheRelief(
   year: number
 ): Promise<boolean> {
   const { dev, sources, layers, translate } = context
-  // Load the relief and the mask; without a relief there is nothing to draw.
-  await timedStep(context.clock, year, 'terrain', () => loadTerrain(context))
+  // Load the relief and the mask, their bytes counted on the bar; without a relief there is nothing to draw.
+  const loading = translate('phaseTerrain')
+  await timedStep(context.clock, year, 'terrain', () =>
+    loadTerrain(context, (fraction) => {
+      bar.step('terrain', fraction, loading)
+    })
+  )
   if (context.isDisposed() || !sources.heightmap) return false
   refreshReliefSource(sources, dev.relief, dev.texture.seaLevel) // draping is correct from here on, mesh or no mesh
   settleRivers(context) // when the rivers came first, they waited for the relief to drape on

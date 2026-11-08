@@ -267,6 +267,8 @@ async function main() {
         min,
         max,
         encoding: 'int16-le-metres',
+        // The .bin's size, read by the atlas's loading bar to count the bytes received (ATLAS-333).
+        bytes: int16.byteLength,
       },
       null,
       2,

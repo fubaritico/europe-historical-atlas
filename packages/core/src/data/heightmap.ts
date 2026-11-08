@@ -1,4 +1,5 @@
 import { fetchWithin } from '../utils/fetchWithin'
+import { readBytes } from '../utils/readBytes'
 
 import {
   assetError,
@@ -8,7 +9,10 @@ import {
   expectString,
   field,
   parseAsset,
+  parseFileBytes,
 } from './assetError'
+
+import type { ByteReport } from '../utils/readBytes'
 
 /**
  * Metadata sidecar for a raw elevation grid (matches the `.json` emitted by `files/spikes/fetch-dem`).
@@ -53,9 +57,10 @@ export interface Heightmap {
 export interface HeightmapSource {
   /**
    * Load the heightmap.
+   * @param onBytes - where the grid's download tells its bytes received, when a bar counts them (ATLAS-333)
    * @returns the loaded grid
    */
-  load(): Promise<Heightmap>
+  load(onBytes?: ByteReport): Promise<Heightmap>
 }
 
 /**
@@ -93,18 +98,24 @@ export function createHeightmap(meta: HeightmapMeta, data: Int16Array | Float32A
  */
 export function createFetchHeightmapSource(basePath: string): HeightmapSource {
   return {
-    async load(): Promise<Heightmap> {
+    async load(onBytes?: ByteReport): Promise<Heightmap> {
       const metaPath = `${basePath}.json`
       const metaRes = await fetchWithin(metaPath)
       if (!metaRes.ok)
         throw assetError('heightmap', 'transport', metaPath, `HTTP ${String(metaRes.status)}`)
-      const meta = parseHeightmapMeta(await metaRes.json(), metaPath)
+      const json: unknown = await metaRes.json()
+      const meta = parseHeightmapMeta(json, metaPath)
+      // The size is read only when the download is counted (review ARCH-001).
+      const counted =
+        onBytes === undefined
+          ? undefined
+          : { total: parseFileBytes('heightmap', json, metaPath), report: onBytes }
 
       const binPath = `${basePath}.bin`
       const binRes = await fetchWithin(binPath)
       if (!binRes.ok)
         throw assetError('heightmap', 'transport', binPath, `HTTP ${String(binRes.status)}`)
-      const data = new Int16Array(await binRes.arrayBuffer())
+      const data = new Int16Array(await readBytes(binRes, counted))
 
       // The grid says how many samples it holds; the file has to hold that many. Short of it, the map
       // renders as a plain with a cliff where the data ran out — and says nothing.
