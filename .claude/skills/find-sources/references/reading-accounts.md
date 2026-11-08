@@ -31,6 +31,16 @@ opened is written here, in « Opened », as he opens them.
   offer** (the title search finds nothing). What the Publication Finder does list, remote with the Pass: **JSTOR Public
   Library Collection 1**, Brill Online Journals, Cairn books, the ISTEX national licences, Gale and ProQuest archives —
   find a journal there by title, then read the article. Gallica stays free without it.
+  **Measured on the second trial (08/11)**, lots Castile–Almoravids and Serbia:
+  - **The route that works**: the search box of `bdl.bnf.fr`. Going straight to an EBSCO address bypasses the BnF and EBSCO
+    asks for its own sign-in.
+  - **The dev signs in himself**: the BnF page « Espace personnel » opens with his saved credentials filled in. I never
+    click « Me connecter ».
+  - **JSTOR in full, through the proxy**: `https://www-jstor-org.bnf.idm.oclc.org/action/doBasicSearch?Query=<words>`. An
+    article opens with « Access provided by Bibliothèque nationale de France »; its reader shows page images.
+  - **Searching by place-name keywords gives mostly noise**: « Medinaceli 1104 » found 66 results, none on the town;
+    « Duklja » found 84 but none on 1100. Search by a precise work or journal instead.
+  - **Not in the remote offer**: Menéndez Pidal, *La España del Cid* (the Publication Finder has 0 results).
 
 ## A copy found online — read it, never link it (the dev, 2026-11-07)
 

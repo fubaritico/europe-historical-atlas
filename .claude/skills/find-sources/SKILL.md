@@ -68,7 +68,9 @@ the reasoning goes in the year's file (`files/plans/sources/1100.md`). Concepts:
    look at the page image before keeping a quotation whose letters are doubtful.
 6. **When the sources stop short, climb** — the method is `/enter-in-cms` « When the sources stop short »: the polity
    that ended before the date → who replaced it → who held the place; a neighbouring town of the same district.
-7. **Behind an account**, only for what the open libraries lack: JSTOR, then the others the dev opened
+7. **Behind an account — the BnF in every lot** (the dev, 2026-11-08: *"I pay for that subscription. We have to use it,
+   a lot"*; on 07/11 three lots were done with no BnF line): search `bdl.bnf.fr` for each lot, beside the open libraries,
+   not only for what they lack; then JSTOR and the others the dev opened
    (`references/reading-accounts.md`). In **his** Chrome, where he is logged in, one article at a time, read on screen
    (`get_page_text`, or the page image); the quotation and its page noted as for any other text. Never while he tests
    the Cartographer in the same browser.
