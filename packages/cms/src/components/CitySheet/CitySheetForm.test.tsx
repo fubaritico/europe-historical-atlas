@@ -296,6 +296,13 @@ describe('CitySheetForm', () => {
     })
 
     // CMS-391, the dev, 2026-11-08: a box, unticked by default, says whether the atlas shows the city.
+    it('puts « Afficher la ville dans l’atlas » first, before the place, where it is seen', () => {
+      renderForm(empty)
+      const box = screen.getByRole('checkbox', { name: 'Afficher la ville dans l’atlas' })
+      const place = screen.getByRole('combobox', { name: 'Lieu' })
+      expect(box.compareDocumentPosition(place) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
+
     it('saves Rome ticked « Afficher la ville dans l’atlas » once its box is ticked', async () => {
       const fetcher = serverWithSources()
       renderForm(rome, 1)
