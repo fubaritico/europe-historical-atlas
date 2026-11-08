@@ -2,6 +2,32 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-07 — les filtres avancés des villes, la skill pour dessiner, les lots de l'historien vérifiés
+
+Une plage, **07/11 18:57 → 20:19** (1 h 22) ; le chantier ouvert le 05/10 totalise **218 h 19 sur 39 plages**. **Sur `main`,
+non poussé** : `c6096fe` (CARTO-370), `b6d0a2a` (la skill), et le commit de clôture ; l'historien a commité `a070c03` et
+`d7b6276` (ses notes de sources).
+
+- **CARTO-370 fait, essayé et validé par lui** (*« c'est beaucoup plus pratique comme ça »*, *« je valide le 370 »*) :
+  l'entonnoir (son dessin, de son projet React Native) ouvre « Filtres avancés » ; à ma proposition, prise par lui
+  (*« plus on peut visualiser les choses mieux, c'est tout l'intérêt de ce panneau »*), la rubrique « Pas encore sur la
+  carte » et « Sans détenteur » ; après son essai, **le filtre en tête de la fenêtre** (*« il nous faut le quick filter
+  pour les listes longues »*). Revue à cinq relecteurs, constats corrigés ; essayé par moi sur 1100 (le comté de Barcelone,
+  12 villes, toutes à déclarer).
+- **La skill `/use-cartographer`** (`b6d0a2a`), à sa demande (*« une skill »*, des mots déclencheurs « dessine »,
+  « retouche ») : le mode d'emploi vérifié contre le code — une carte s'enregistre seule deux secondes après chaque geste,
+  d'où un seul agent par carte et une copie avant d'y toucher ; le journal `drawing-as-claude.md` déplacé dans
+  `references/journal.md`, **toujours local** (sa décision du 12/10).
+- **Ses décisions** : l'historien **peut lire une copie en ligne** d'un livre sous droits (*« peu importe la manière, on a
+  besoin de références »*), jamais liée dans la base (`/find-sources`) ; la bulle du détenteur et de son suzerain au survol
+  du point (CARTO-367). Nouveaux tickets : CARTO-381 (panneau flottant hors de la fenêtre), CARTO-382 (le tri, dans
+  l'épique), REPO-383 (des ports fixes).
+- **L'historien** : les lots « Navarre et Aragon » et la source 286 (Monsalvo Antón) vérifiés en lecture seule ; Horta
+  corrigée ; il a retouché la frontière Aragon–Saragosse dans le Cartographe (non commité, à lui).
+- **Mes fautes** : un `cd` dans une commande ; tout fait dans son dépôt **au lieu d'un worktree** pendant que son
+  Cartographe tournait (il l'a relevé) ; ‹échap› écrit « vérifié dans l'appli » sans l'avoir essayé — corrigé avant le
+  commit.
+
 ### 2026-11-06 — le tableau remis d'aplomb, 1100 refaite depuis Cliopatria publiée
 
 Deux plages, **06/11 11:26 → 15:24 et 17:30 → 18:22** (4 h 49) ; le chantier ouvert le 05/10 totalise **216 h 48 sur 38

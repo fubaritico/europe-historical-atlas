@@ -2,6 +2,33 @@
 
 The two latest sessions' account; older ones in `archive/completed-history.md`.
 
+### 2026-11-08 — l'historien au laboratoire : la Catalogne de 1100 finie et publiée, le retracé libéré, 1200 en ligne
+
+Une plage, **08/11 14:03 → 19:13** (5 h 09) ; le chantier ouvert le 05/10 totalise **231 h 56 sur 40 plages**. Instance
+historien, worktree `historian` (branche `historian-1108`, synchronisée sur `main`). **Sur `main`, poussé, CI verte, site
+vérifié** (`196eed5`).
+
+- **La Catalogne de 1100, finie** : Lérida creusée autour d'Almenar, la lame de Pilzán soudée, Balaguer à Lérida ; **lui** a
+  passé Sidamon, Torregrossa, L'Espluga et Barberà à Barcelone, puis Camarasa en enclave (son arbitrage, `sources/1100.md`).
+  Restent Tamarit (dans la mer, une source) et Tarragone (vide) : rien dessiné, par la règle. Publiée (`3a33012`).
+- **Sa méthode, après une heure à se battre avec l'outil** : *le pays qui subit d'abord, puis le pays visé, sur les mêmes
+  points* — un seul pays par geste (skill `gestures.md`, mémoire `collateral-polity-first`).
+- **Le retracé libéré** (`5b8c0c0`), à sa demande (*« faut rien interdire »*, *« tu bascules de mode au clic sur un point »*) :
+  plus de refus « repasse par une ancre que garde… » (les boucles parasites coupées, `core/editor/strayLoops.ts`) ; le point
+  sous le pointeur prime sur la côte ; un clic sur la frontière du pays visé fait avancer le départ. Revue : 10 constats, 8
+  corrigés, 2 ouverts (`known-issues/cartographer.md`).
+- **`/use-cartographer` 2.0** (`11f7267`) : mesurer → décider → dessiner, sept scripts `.mjs` (74 tests), la table des
+  décisions ; glossaire, plan des frontières.
+- **1200 publiée** (`196eed5`, sa décision : *« rien de bloquant dans le fait d'ajouter des années »*) ; les règles qui
+  l'interdisaient réécrites, `.gitignore` dit comment publier une année.
+- **Le pilote par script** (à sa question *« qu'est-ce qui t'empêche d'aller vite ? »*) : les clics envoyés au canevas depuis
+  la page, la barre lue après chacun — l'Islande (1 170 points) et Bornholm redessinées en secondes. **Puis ma série
+  automatique a abîmé 1200** (Skye : toute la Grande-Bretagne donnée à Mann ; restes de contours aux Lofoten ; Samsø effacée) —
+  stoppée par moi, puis par lui ; rien de commité, la copie d'avant intacte.
+- **Ce qu'il a vu en arrêtant** : 1200 superpose des pays de plusieurs années (Mann, Alba, Norvège) — à nettoyer d'abord.
+- **Mes fautes** : neuf corrections au coup par coup qui déplaçaient le piège au lieu de l'ôter ; la barre de statut
+  proposée comme signal alors qu'il ne la lit jamais ; une série lancée sans vérifier « closed » ni l'emprise de l'île.
+
 ### 2026-11-07 → 08 nuit — l'historien : Castille, Almoravides et Serbie ; les villes sur la carte ; la barre d'ouverture
 
 La même plage que l'entrée suivante, prolongée : **07/11 18:57 → 08/11 04:29** (9 h 32) ; le chantier ouvert le 05/10 totalise
@@ -31,30 +58,5 @@ moi, historien puis code. **Sur `main`, poussé jusqu'à `bfe560a`.** **Non comm
   une commande interrompue ; CMS-391 livré d'abord sans le formulaire maison de la fiche (vu par la revue) ; annoncé 11 s
   d'ouverture sur une machine chargée avant de mesurer 3,4 s au calme ; ma page de mesure prise par lui pour l'appli cassée.
 
-### 2026-11-07 — les filtres avancés des villes, la skill pour dessiner, les lots de l'historien vérifiés
 
-Une plage, **07/11 18:57 → 20:19** (1 h 22) ; le chantier ouvert le 05/10 totalise **218 h 19 sur 39 plages**. **Sur `main`,
-non poussé** : `c6096fe` (CARTO-370), `b6d0a2a` (la skill), et le commit de clôture ; l'historien a commité `a070c03` et
-`d7b6276` (ses notes de sources).
-
-- **CARTO-370 fait, essayé et validé par lui** (*« c'est beaucoup plus pratique comme ça »*, *« je valide le 370 »*) :
-  l'entonnoir (son dessin, de son projet React Native) ouvre « Filtres avancés » ; à ma proposition, prise par lui
-  (*« plus on peut visualiser les choses mieux, c'est tout l'intérêt de ce panneau »*), la rubrique « Pas encore sur la
-  carte » et « Sans détenteur » ; après son essai, **le filtre en tête de la fenêtre** (*« il nous faut le quick filter
-  pour les listes longues »*). Revue à cinq relecteurs, constats corrigés ; essayé par moi sur 1100 (le comté de Barcelone,
-  12 villes, toutes à déclarer).
-- **La skill `/use-cartographer`** (`b6d0a2a`), à sa demande (*« une skill »*, des mots déclencheurs « dessine »,
-  « retouche ») : le mode d'emploi vérifié contre le code — une carte s'enregistre seule deux secondes après chaque geste,
-  d'où un seul agent par carte et une copie avant d'y toucher ; le journal `drawing-as-claude.md` déplacé dans
-  `references/journal.md`, **toujours local** (sa décision du 12/10).
-- **Ses décisions** : l'historien **peut lire une copie en ligne** d'un livre sous droits (*« peu importe la manière, on a
-  besoin de références »*), jamais liée dans la base (`/find-sources`) ; la bulle du détenteur et de son suzerain au survol
-  du point (CARTO-367). Nouveaux tickets : CARTO-381 (panneau flottant hors de la fenêtre), CARTO-382 (le tri, dans
-  l'épique), REPO-383 (des ports fixes).
-- **L'historien** : les lots « Navarre et Aragon » et la source 286 (Monsalvo Antón) vérifiés en lecture seule ; Horta
-  corrigée ; il a retouché la frontière Aragon–Saragosse dans le Cartographe (non commité, à lui).
-- **Mes fautes** : un `cd` dans une commande ; tout fait dans son dépôt **au lieu d'un worktree** pendant que son
-  Cartographe tournait (il l'a relevé) ; ‹échap› écrit « vérifié dans l'appli » sans l'avoir essayé — corrigé avant le
-  commit.
-
-> Older sessions (2026-09-12 → 2026-11-06) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.
+> Older sessions (2026-09-12 → 2026-11-07) are archived in `archive/completed-history.md` — not auto-loaded, read on demand.

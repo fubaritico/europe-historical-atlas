@@ -5,10 +5,23 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — après la nuit du 07 au 08/11 : l'historien, et son essai de CARTO-393
+## ▶ ON REPREND ICI — tout de suite après le 08/11 au soir : nettoyer 1200 à sa date, puis le pré-nettoyage
 
-**La prochaine session, j'ai le rôle de l'historien** (sa décision, 08/11 au matin) : `/find-sources` puis `/enter-in-cms`,
-*« racler les fonds de tiroir »* (ci-dessous).
+**Je suis l'historien, dans le worktree `.claude/worktrees/historian`** (branche `historian-1108`, sur `main` à `196eed5`).
+**Son programme, dans l'ordre** (dicté le 08/11 au soir) :
+1. **Restaurer 1200** dans le worktree : `years/1200/` y est abîmée par ma série automatique (Skye → toute la Grande-Bretagne
+   donnée à Mann, restes de contours aux Lofoten, Samsø effacée) ; la copie d'avant est `years/1200.before-claude-2026-11-08`
+   — la recopier par-dessus, **mon serveur coupé**, puis vérifier avec `shape.mjs`. Rien de cela n'est commité ; `main` a la bonne.
+2. **Trouver le script qui ne garde que les pays d'une année** — 1200 superpose des pays de plusieurs années (vu par lui :
+   Kingdom of Mann, Kingdom of Alba, Old Kingdom of Norway), alors qu'il la croyait déjà nettoyée. **Demander à l'instance
+   principale** (`europe-map-e1`), qui l'a fait avec lui ; piste : `files/spikes/cliopatria-import/` (`resolve.py`, `convert.ts`).
+   Comprendre comment il a été lancé et pourquoi des superpositions restent.
+3. **Nettoyer 1200 à la date fixe 1200**, puis la publier comme 1100 (commit dans `main`, poussé).
+4. **Reprendre le pré-nettoyage** sur la carte nettoyée : **détourer les îles, les côtes de chaque pays, les lacs** — une île
+   se refait en effaçant son contour et trois clics (côte, côte, fermer), son conseil. Avec **le pilote par script** (les clics
+   envoyés au canevas depuis la page) **corrigé avant toute série** : vérifier « closed » après la fermeture ; ne jamais garder
+   un suivi de côte qui sort de l'emprise de l'île (Skye) ; effacer par contour, jamais par un cadre qui en prend une partie ;
+   une île à la fois avec une capture, avant de lancer une série. Le ranger dans la skill comme script réutilisable.
 
 **L'instance principale (le code), la prochaine session** (sa décision, 08/11, transmise par elle) : elle travaille avec
 l'historien, qui tient l'entretien du contexte, et peut lui déléguer des tickets. **Son fil : ATLAS-333, la vitesse du
@@ -22,15 +35,6 @@ soir** (décision du dev) : ne pas commiter la copie de `years/1200/` ni l'`inde
 `main` d'abord. La barre mesurée d'ATLAS-333 (partie D) partira de celle de
 CARTO-393, qui fait déjà avancer celle de l'atlas pendant la composition du relief.
 
-**Son essai de CARTO-393** (À valider), quand il le voudra — **dans le worktree `.claude/worktrees/city-status-ring`, branche
-`carto-393-opening-progress`, non commité**. Mon serveur est mort avec la session : le relancer depuis ce worktree
-(`pnpm -C <worktree> dev:cartographer`, lire le titre des ports d'abord — la règle des serveurs, plus bas), ou lui le sien
-après la fusion. Ce qu'il doit voir
-(ses valeurs, sur le ticket) : sous la barre, « downloading the relief… », « compositing the relief » de 5 à 73 % qui avance
-ligne à ligne, « tracing the coast… » à 73 %, « drawing the map » à 92 % ; jamais en arrière. **Après son « c'est bon »** :
-`/commit` (scopes `core` et `cartographer` ; le scénario `s01` est dans le même lot), fusion dans `main`, ticket en Fait.
-**À lui dire** : la barre de l'atlas avance aussi pendant la composition du relief (le même calcul).
-
 **L'épique des villes, CARTO-363** : tout ce qui était dans À faire est fait et validé (367 à 371, 382, 384 à 391) ; CMS-391
 montre dans l'atlas les seules villes cochées. **Ouverts, à sa décision** : une ville choisie puis écartée par un filtre
 reste choisie (revue QUAL-004 de CARTO-390) ; CARTO-387, la boîte de la ville en panneau flottant. **Puis son plan** :
@@ -43,8 +47,7 @@ années, des cartes »*) : 1100 retouchée par l'historien (la Catalogne) et 120
 **Dessiner dans le Cartographe** (un agent, lui ou moi) : la skill **`/use-cartographer`** (07/11) ; son journal est
 `references/journal.md`, local. **Un seul agent par carte** : une carte s'enregistre seule deux secondes après chaque geste.
 
-**L'historien** : `/find-sources` (BnF dans chaque lot, copies en ligne lisibles jamais liées), `/enter-in-cms` ; **dimanche
-08/11** *« racler les fonds de tiroir »* (sa décision du 06/11). Après son export, **je commite `content/events.json`**.
+**L'historien** : `/find-sources` (BnF dans chaque lot), `/enter-in-cms` ; après son export, **je commite `content/events.json`**.
 
 **À lui, en attente** : la carte de 1100 montre-t-elle le 1ᵉʳ janvier ou le 31 décembre (Barbastro, prise le 18/10/1100) ?
 `pnpm export:content` ; son icône `error.svg` à la place de la mienne ; **à arbitrer** : le suzerain du royaume d'Arles et
