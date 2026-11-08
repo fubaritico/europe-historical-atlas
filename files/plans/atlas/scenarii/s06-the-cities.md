@@ -11,6 +11,20 @@
 > `9af17e1` a point yielding to a name, `6c23c15` the names larger and sharp). **Walked by the dev** on 31/10 and 01/11 —
 > ATLAS-322, 323 and 325 tested by him and passed to *Fait*. The code: `atlas/src/scene/cities/`.
 
+## Which cities the atlas shows
+
+> **Built 2026-11-08** (`038f607`, `ec526a2`, CMS-391), the dev's ask: the historian enters every city a source attests,
+> for the Cartographer's borders, and the atlas must not show them all. **Walked by the dev** on 08/11: *"the atlas shows
+> the right cities"*. The code: `atlas/src/loading/mapContent.ts`.
+
+```gherkin
+Scenario: only the cities whose sheet is ticked
+  Given the export holds 341 cities of 1100, 113 of them ticked « Afficher la ville dans l'atlas »
+  When the atlas draws 1100
+  Then it draws the 113 ticked cities, and none of the others
+  And a city entered since is not drawn until its box is ticked in the CMS and the content exported again
+```
+
 ## The marks
 
 ```gherkin

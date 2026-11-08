@@ -2,6 +2,24 @@
 
 Sessions moved out of `completed.md` so the auto-loaded context stays under its size limit. Newest first.
 
+### 2026-11-06 — le tableau remis d'aplomb, 1100 refaite depuis Cliopatria publiée
+
+Deux plages, **06/11 11:26 → 15:24 et 17:30 → 18:22** (4 h 49) ; le chantier ouvert le 05/10 totalise **216 h 48 sur 38
+plages**. **Sur `main`, poussé** : `b02ce87` (1100 depuis Cliopatria) et le commit de clôture.
+
+- **Le tableau relu ticket par ticket avec lui** (*« le board est ta mémoire »*) : une quinzaine de tickets archivés — sans
+  objet (CARTO-182, 183, 185, 186, 187, CORE-211, ATLAS-143…), doublons, faux problèmes au regard du couplage lâche
+  (CARTO-173, 175, 177, 178) ; réécrits avec leurs scénarios (CARTO-188, 189, 192) ; des tickets de correction
+  (ATLAS-373, CARTO-375, 377, 380, CARTO-180) ; de nouvelles épiques (ATLAS-329, ATLAS-153 « les trois couches »).
+- **Ses règles du jour** : une erreur s'affiche dans une fenêtre, la console gardée (`rules/error-handling.md`) ; la fiche
+  porte le détenteur le plus probable avec son QID ; la recherche continue jusqu'au nom (*« insister, insister »*,
+  `/enter-in-cms`, et `/find-sources` de l'historien) ; la vérification d'une année ne bloque jamais, même la CI ;
+  `/trello` compare le tableau au code et aux commits à chaque début et fin de session.
+- **1100 refaite depuis Cliopatria, publiée** (`b02ce87`) — celle partie d'Euratlas reste dans l'historique, son choix.
+  L'historien : lots « Catalogne » et « Navarre et Aragon » vérifiés ; JSTOR ouvert, le Pass de la BnF commandé (CMS-362).
+- **Mes fautes** : CARTO-180 dit « vrai blocage » sur une mauvaise lecture de son « non » ; une explication de « moitié »
+  qu'il n'a pas comprise (ATLAS-143) ; lui avoir prêté un refus d'outil ; « à toi de le passer dans Fait » pour un doublon.
+
 ### 2026-11-05 soir → 06/11 nuit — CARTO-345 fermé, les villes en points, les hachures, les épiques
 
 La même plage que les deux entrées du 05/11, **05/11 12:48 → 06/11 01:15** (12 h 26) ; le chantier ouvert le 05/10 totalise

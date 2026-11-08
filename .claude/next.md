@@ -5,17 +5,20 @@
 > file holds only where we stopped, what is mid-flight, and the context that is not a task. Its former
 > content, task lists included, is in `archive/next-history.md`, verbatim.
 
-## ▶ ON REPREND ICI — après le 07/11 : CARTO-367, le point de couleur du détenteur, dans un worktree
+## ▶ ON REPREND ICI — après la nuit du 07 au 08/11 : son essai de CARTO-393, la barre d'ouverture
 
-**Le sujet** : l'épique **CARTO-363, « Saisir les villes vite et juste »** (_l'appartenance des villes donne la topographie_).
-**CARTO-370 est fait** (`c6096fe`, validé par lui le 07/11). **Ensuite : CARTO-367** — entre l'œil et le nom de chaque ligne de
-{Cities}, le point de la couleur du détenteur selon les sources, cerné de blanc, le même que sur la carte (`holderColour`,
-`canvas/paint/scene.ts`) ; un cercle vide sans détenteur ou hors de la carte ; **au survol, une bulle** (`Tooltip` du design
-system) : « Comté de Champagne, vassal du Royaume de France » (le suzerain direct, lu dans le registre), « Comté de Barcelone
-— pas encore sur la carte », « Détenteur pas encore renseigné » — tout est sur le ticket. **Dans un worktree** tant que son
-Cartographe tourne (je l'ai oublié le 07/11 : `EnterWorktree`, lui dire où). Puis les autres tickets de l'épique dans À faire
-(368, 369, 371, 372, et CARTO-382, le tri, dont l'icône est la sienne — `ui/icons/listIcons.tsx` `sort`, le `Dropdown` du
-design system). **CARTO-371 attend sa décision** sur le stockage du navigateur refusé — la lui poser quand on y arrive.
+**D'abord, son essai de CARTO-393** (À valider) — **dans le worktree `.claude/worktrees/city-status-ring`, branche
+`carto-393-opening-progress`, non commité**. Mon serveur est mort avec la session : le relancer depuis ce worktree
+(`pnpm -C <worktree> dev:cartographer`, lire le titre du port d'abord), ou lui le sien après la fusion. Ce qu'il doit voir
+(ses valeurs, sur le ticket) : sous la barre, « downloading the relief… », « compositing the relief » de 5 à 73 % qui avance
+ligne à ligne, « tracing the coast… » à 73 %, « drawing the map » à 92 % ; jamais en arrière. **Après son « c'est bon »** :
+`/commit` (scopes `core` et `cartographer` ; le scénario `s01` est dans le même lot), fusion dans `main`, ticket en Fait.
+**À lui dire** : la barre de l'atlas avance aussi pendant la composition du relief (le même calcul).
+
+**L'épique des villes, CARTO-363** : tout ce qui était dans À faire est fait et validé (367 à 371, 382, 384 à 391) ; CMS-391
+montre dans l'atlas les seules villes cochées. **Ouverts, à sa décision** : une ville choisie puis écartée par un filtre
+reste choisie (revue QUAL-004 de CARTO-390) ; CARTO-387, la boîte de la ville en panneau flottant. **Puis son plan** :
+reprendre la retouche des frontières dans le Cartographe.
 
 **À lui, dans l'arbre de travail, non commité — sa décision** : la retouche de 1100 par l'historien (Almudévar, Bolea,
 Gurrea passés à Saragosse : `years/1100/polities.json`, et le scénario `s03` qu'il a écrit) ; `years/index.json` qui annonce
@@ -25,10 +28,8 @@ ports fixes** (REPO-383 ; ma proposition : l'atlas 5173, le Cartographe 5174).
 **Dessiner dans le Cartographe** (un agent, lui ou moi) : la skill **`/use-cartographer`** (07/11) ; son journal est
 `references/journal.md`, local. **Un seul agent par carte** : une carte s'enregistre seule deux secondes après chaque geste.
 
-**L'historien** (`europe-map-e6`) : ses lots se vérifient en lecture seule dans la base, et je lui réponds ; il peut lire une
-copie en ligne d'un livre sous droits, jamais liée dans la base (sa décision du 07/11, `/find-sources`). **Dimanche 08/11**
-(sa décision du 06/11) : *« racler les fonds de tiroir »* — toutes les bibliothèques gratuites de `/find-sources`, les
-confrontations ; JSTOR gratuit, 9 lectures restantes en novembre. Après son export, **je commite `content/events.json`**.
+**L'historien** : `/find-sources` (BnF dans chaque lot, copies en ligne lisibles jamais liées), `/enter-in-cms` ; **dimanche
+08/11** *« racler les fonds de tiroir »* (sa décision du 06/11). Après son export, **je commite `content/events.json`**.
 
 **À lui, en attente** : la carte de 1100 montre-t-elle le 1ᵉʳ janvier ou le 31 décembre (Barbastro, prise le 18/10/1100) ?
 `pnpm export:content` ; son icône `error.svg` à la place de la mienne ; **à arbitrer** : le suzerain du royaume d'Arles et
